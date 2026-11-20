@@ -93,9 +93,10 @@ test("#5128C: Cloudflare worker upload sends an accepted script Content-Type", a
       // embedded part header instead of reading FormData.get().
       const headers = new Headers(init.headers);
       requestContentType = headers.get("content-type") ?? undefined;
-      const bodyText = Buffer.isBuffer(init.body)
-        ? (init.body as Buffer).toString("utf8")
-        : String(init.body);
+      const bodyText =
+        init.body instanceof Uint8Array
+          ? Buffer.from(init.body).toString("utf8")
+          : String(init.body);
       const match = bodyText.match(/name="index\.js"[^]*?Content-Type: ([^\r\n]+)/);
       scriptPartContentType = match?.[1];
       // Simulate the CF API rejecting the upload so the route short-circuits
@@ -147,9 +148,10 @@ test("#6416: Cloudflare worker script body is Service Worker syntax (no top-leve
   globalThis.fetch = (async (input: unknown, init: RequestInit = {}) => {
     const url = String(input);
     if (init.method === "PUT" && url.includes("/workers/scripts/") && !url.includes("/subdomain")) {
-      const bodyText = Buffer.isBuffer(init.body)
-        ? (init.body as Buffer).toString("utf8")
-        : String(init.body);
+      const bodyText =
+        init.body instanceof Uint8Array
+          ? Buffer.from(init.body).toString("utf8")
+          : String(init.body);
       const scriptMatch = bodyText.match(
         /name="index\.js"[^]*?Content-Type: [^\r\n]+\r\n\r\n([^]*?)\r\n--/
       );

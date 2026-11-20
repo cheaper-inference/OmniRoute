@@ -1,3 +1,4 @@
+import { isSelectedProviderCredentials } from "@/sse/services/credentialSentinel";
 import { handleRerank } from "@omniroute/open-sse/handlers/rerank.ts";
 import { recordModalCallCost } from "@/domain/costRules";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
@@ -305,6 +306,9 @@ export async function handleValidatedRerankRequestBody(
         return rateLimitedProviderResponse(prefix, credentials);
       }
 
+      if (!isSelectedProviderCredentials(credentials)) {
+        return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Provider credentials unavailable");
+      }
       const token = credentials?.apiKey || credentials?.accessToken;
       const startTime = Date.now();
       // One body serves every known local server: Cohere/OpenAI spelling (`documents`,

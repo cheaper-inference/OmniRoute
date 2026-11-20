@@ -173,7 +173,10 @@ export async function POST(request) {
     const testOne = async (conn: Record<string, unknown>) => {
       try {
         const result = await Promise.race([
-          testSingleConnection(conn.id, undefined, { allowLocalRuntimeProbe, allowLocalSpawn }),
+          testSingleConnection(String(conn.id), undefined, {
+            allowLocalRuntimeProbe,
+            allowLocalSpawn,
+          }),
           new Promise((_, reject) =>
             setTimeout(
               () => reject(new Error("Connection test timed out after 30s")),
@@ -257,7 +260,7 @@ export async function POST(request) {
       summary: {
         total: results.length,
         passed: results.filter((r) => r.valid).length,
-        failed: results.filter((r) => !r.valid).length,
+        failed: results.filter((r) => r.valid === false).length,
       },
     });
   } catch (error) {

@@ -49,7 +49,7 @@ export default async function handler(req) {
   }
   const relayPath = req.headers.get("x-relay-path") || "/";
   const resolved = resolveRelayTarget(target, relayPath);
-  if (!resolved.ok) {
+  if (resolved.ok === false) {
     return new Response(resolved.reason, { status: resolved.status });
   }
   const headers = new Headers(req.headers);
@@ -234,7 +234,7 @@ export async function POST(request: Request) {
       }),
     });
 
-    if (!deployRes.ok) {
+    if (deployRes.ok === false) {
       // Avoid forwarding raw Vercel error text — it may contain project IDs,
       // team slugs, deployment hashes or internal Vercel error strings.
       return buildDeployErrorResponse(deployRes);

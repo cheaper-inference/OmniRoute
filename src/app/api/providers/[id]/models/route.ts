@@ -457,7 +457,7 @@ export async function GET(
         return buildDiscoveryFallbackResponse({ ...warnings, failure });
       }
       const status = getSafeOutboundFetchErrorStatus(error);
-      if (status === 400 || status === 503 || status === 504) return null;
+      if (status === 503 || status === 504) return null;
       return buildDiscoveryFallbackResponse({ ...warnings, failure });
     };
 
@@ -1660,7 +1660,7 @@ export async function GET(
           // separately left this request running under the default "none".
           { headers: innerAiHeaders, guard: getProviderOutboundGuard() }
         );
-        if (!modelsResp.ok) {
+        if (modelsResp.ok === false) {
           throw new Error(`Inner.ai models API returned HTTP ${modelsResp.status}`);
         }
 

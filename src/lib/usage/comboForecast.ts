@@ -275,7 +275,20 @@ async function buildComboForecast(
   const comboName = typeof combo.name === "string" ? combo.name : "";
   if (!comboId || !comboName) return null;
 
-  const targets = resolveNestedComboTargets(combo, allCombos) as ResolvedComboTargetView[];
+  const targets = resolveNestedComboTargets(
+    {
+      ...combo,
+      name: comboName,
+      models: combo.models ?? [],
+      config: toRecord(combo.config),
+      autoConfig: toRecord(combo.autoConfig),
+    },
+    allCombos.map((item) => ({
+      ...item,
+      name: typeof item.name === "string" ? item.name : "",
+      models: item.models ?? [],
+    }))
+  ) as ResolvedComboTargetView[];
   const rowsByTarget = groupRowsByExecutionKey(rows);
   const totalRequests = rows.reduce((sum, row) => sum + row.requests, 0);
   const totalCostUsd = rows.reduce((sum, row) => sum + row.costUsd, 0);

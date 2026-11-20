@@ -51,7 +51,7 @@ function proxyResponseHeaders(upstream: Response): Headers {
 export async function proxyElevenLabsRequest(
   request: Request,
   pathname: string,
-  init: Omit<RequestInit, "headers"> = {},
+  init: Omit<RequestInit, "headers"> & { duplex?: "half" } = {},
   options: {
     model?: string;
     contentType?: string;

@@ -159,7 +159,7 @@ async function executeWithFallback(
     return { result, provider, poolExhausted: false };
   }
 
-  while (!result.success && isRetryableWebFetchStatus(provider, result.status)) {
+  while (result.success === false && isRetryableWebFetchStatus(provider, result.status)) {
     const next = await findNextFallbackProvider(triedProviders, allowedConnections);
     if (!next) {
       return { result, provider, poolExhausted: true };
@@ -346,7 +346,7 @@ async function executeWebFetchBody(
 ): Promise<Response> {
   // Resolve provider + credentials (explicit provider never falls back; #8297)
   const target = await resolveWebFetchTarget(body.provider, allowedConnections);
-  if (!target.ok) return target.response;
+  if (target.ok === false) return target.response;
 
   log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);
 
@@ -376,7 +376,7 @@ async function executeWebFetchBody(
     );
   }
 
-  if (!result.success) {
+  if (result.success === false) {
     return new Response(
       JSON.stringify({
         error: { message: result.error ?? "Web fetch failed", type: "web_fetch_error" },

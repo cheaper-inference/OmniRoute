@@ -234,7 +234,9 @@ interface BuildHealthPayloadOptions {
   circuitBreakers: CircuitBreakerStatus[];
   rateLimitStatus: JsonRecord;
   learnedLimits: JsonRecord;
-  lockouts: JsonRecord;
+  lockouts: ReturnType<
+    typeof import("@omniroute/open-sse/services/accountFallback").getAllModelLockouts
+  >;
   localProviders: JsonRecord;
   inflightRequests: number;
   quotaMonitorSummary: QuotaMonitorSummary;

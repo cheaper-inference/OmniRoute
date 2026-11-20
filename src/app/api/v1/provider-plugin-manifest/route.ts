@@ -20,9 +20,8 @@ const SERVICE_BACKEND_EXPOSURE_REQUIRED = new Set(SERVICE_BACKEND_PLUGIN_IDS);
 const SERVICE_BACKEND_PLUGIN_ID_SET = new Set<string>(SERVICE_BACKEND_PLUGIN_IDS);
 
 function createServiceManifestTemplate(providerId: string): ProviderPluginManifestEntry | null {
-  const entry = SERVICE_BACKEND_MANIFEST_TEMPLATE[
-    providerId as keyof typeof SERVICE_BACKEND_MANIFEST_TEMPLATE
-  ];
+  const entry =
+    SERVICE_BACKEND_MANIFEST_TEMPLATE[providerId as keyof typeof SERVICE_BACKEND_MANIFEST_TEMPLATE];
   if (!entry) return null;
 
   return {
@@ -78,7 +77,10 @@ function toProviderPluginModel(tool: string, model: ServiceModel): ProviderPlugi
   };
 }
 
-function pickServiceModels(tool: string, reader: (toolName: string) => ServiceModel[]): ProviderPluginModel[] {
+function pickServiceModels(
+  tool: string,
+  reader: (toolName: string) => ServiceModel[]
+): ProviderPluginModel[] {
   const models = reader(tool).filter(isValidServiceModelEntry);
 
   const unique = new Map<string, ProviderPluginModel>();
@@ -93,7 +95,7 @@ function pickServiceModels(tool: string, reader: (toolName: string) => ServiceMo
 }
 
 async function shouldExposeServiceModels(toolName: string): Promise<boolean> {
-  if (!SERVICE_BACKEND_EXPOSURE_REQUIRED.has(toolName)) return true;
+  if (![...SERVICE_BACKEND_EXPOSURE_REQUIRED].some((id) => id === toolName)) return true;
 
   const serviceTool = getServiceToolFromPluginId(toolName) ?? toolName;
   const row = await getServiceRow(serviceTool);
@@ -145,7 +147,7 @@ export async function injectServiceModelsIntoManifest(
       } catch {
         return provider;
       }
-    }),
+    })
   );
 
   return {

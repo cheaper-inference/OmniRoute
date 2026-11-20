@@ -44,7 +44,7 @@ export async function readServiceInstallVersion(request: Request): Promise<
   }
 
   const parsed = installBodySchema.safeParse(body);
-  if (!parsed.success) {
+  if (parsed.success === false) {
     return {
       ok: false,
       response: createErrorResponse({ status: 400, message: parsed.error.message }),
@@ -59,7 +59,7 @@ export async function handleServiceInstall(
   install: ServiceInstaller
 ): Promise<Response> {
   const parsed = await readServiceInstallVersion(request);
-  if (!parsed.ok) {
+  if (parsed.ok === false) {
     return parsed.response;
   }
 

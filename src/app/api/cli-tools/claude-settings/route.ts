@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
@@ -54,7 +55,10 @@ export async function GET(request: Request) {
     }
 
     const settings = await readSettings();
-    const hasOmniRoute = !!settings?.env?.ANTHROPIC_BASE_URL;
+    const parsedSettings = z
+      .object({ env: z.record(z.string(), z.unknown()).optional() })
+      .safeParse(settings);
+    const hasOmniRoute = parsedSettings.success && !!parsedSettings.data.env?.ANTHROPIC_BASE_URL;
 
     return NextResponse.json({
       installed: runtime.installed,

@@ -1,0 +1,1 @@
+- **fix(api):** Resolve inherited API-route TypeScript diagnostics without weakening compiler settings, tighten the error baseline to zero, reject non-credential selection results, and fix routing-preview candidate dispatch and invalid models-dev action responses.

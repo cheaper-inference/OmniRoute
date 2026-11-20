@@ -100,7 +100,7 @@ export function getQuotaAnalyticsSummary(): QuotaAnalyticsSummary {
       connections,
     };
   } catch (error) {
-    log.error("Failed to compute quota analytics summary", error);
+    log.error({ err: error }, "Failed to compute quota analytics summary");
     return {
       totalConnectionsTracked: 0,
       exhaustedConnections: 0,

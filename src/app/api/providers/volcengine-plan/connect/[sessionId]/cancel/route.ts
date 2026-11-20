@@ -8,7 +8,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ sessionId: string }> }
-): Promise<NextResponse> {
+): Promise<Response> {
   const auth = await requireManagementAuth(request);
   if (auth) return auth;
 

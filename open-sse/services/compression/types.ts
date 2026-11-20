@@ -188,7 +188,8 @@ export interface LiteConfig {
 
 export interface CompressionPipelineStep {
   engine: CompressionEngineId;
-  intensity?: CavemanIntensity | RtkIntensity;
+  /** Structural engines use free-form levels; API schemas enforce named-engine enums. */
+  intensity?: string;
   config?: Record<string, unknown>;
 }
 

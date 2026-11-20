@@ -114,7 +114,7 @@ function normalizeImportedModel(model: JsonRecord): ManagedImportedModel {
 function normalizeImportedModels(
   discoveredModels: readonly SyncedAvailableModel[]
 ): ManagedImportedModel[] {
-  return discoveredModels.map((model) => normalizeImportedModel(model as JsonRecord));
+  return discoveredModels.map((model) => normalizeImportedModel({ ...model }));
 }
 
 /**
@@ -496,12 +496,12 @@ export async function importManagedModels({
   }
 
   const importedChanges = summarizeImportedChanges(
-    previousSyncedAvailableModels as JsonRecord[],
-    discoveredModels as JsonRecord[],
+    previousSyncedAvailableModels.map((model) => ({ ...model })),
+    discoveredModels.map((model) => ({ ...model })),
     importedIds
   );
   const importedModels = collectAddedImportedModels(
-    previousSyncedAvailableModels as JsonRecord[],
+    previousSyncedAvailableModels.map((model) => ({ ...model })),
     candidateImportedModels
   );
 

@@ -118,7 +118,7 @@ function adobeFireflySuccessResponse(data: {
 async function loginAdobeFirefly(
   connectionId: string,
   body: { timeout?: unknown; freshSession?: unknown }
-): Promise<NextResponse> {
+): Promise<Response> {
   const timeout = typeof body.timeout === "number" ? body.timeout : undefined;
   const freshSession = typeof body.freshSession === "boolean" ? body.freshSession : true;
 
@@ -172,11 +172,10 @@ async function loginMaxaiEmail(
   connectionId: string,
   connection: Record<string, unknown>,
   body: { step?: unknown; email?: unknown; code?: unknown }
-): Promise<NextResponse> {
+): Promise<Response> {
   const { randomUUID } = await import("node:crypto");
-  const { requestMaxaiEmailCode, verifyMaxaiEmailCode } = await import(
-    "@omniroute/open-sse/executors/maxai/emailLogin.ts"
-  );
+  const { requestMaxaiEmailCode, verifyMaxaiEmailCode } =
+    await import("@omniroute/open-sse/executors/maxai/emailLogin.ts");
 
   const psd = (connection.providerSpecificData ?? {}) as Record<string, unknown>;
   const step = String(body.step || "request");
@@ -207,7 +206,7 @@ async function loginMaxaiEmail(
     }
 
     const result = await requestMaxaiEmailCode({ email, deviceId });
-    if (!result.ok) {
+    if (result.ok === false) {
       return NextResponse.json(
         { success: false, error: result.error || "Failed to send the sign-in code." },
         { status: result.status && result.status >= 400 ? result.status : 400 }
@@ -239,7 +238,7 @@ async function loginMaxaiEmail(
     }
 
     const result = await verifyMaxaiEmailCode({ email, code, deviceId, clientUserId });
-    if (!result.ok || !result.credential) {
+    if (result.ok === false || !result.credential) {
       return NextResponse.json(
         { success: false, error: result.error || "Code verification failed." },
         { status: result.status && result.status >= 400 ? result.status : 400 }
@@ -289,7 +288,7 @@ async function loginMaxaiEmail(
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse> {
+): Promise<Response> {
   const auth = await requireManagementAuth(req);
   if (auth) return auth;
 
@@ -309,11 +308,15 @@ export async function POST(
   // {step:"request",email} emails a code; {step:"verify",code} mints + persists.
   if (providerSlug === "maxai" || providerSlug === "mx") {
     try {
-      return await loginMaxaiEmail(id, provider as Record<string, unknown>, body as {
-        step?: unknown;
-        email?: unknown;
-        code?: unknown;
-      });
+      return await loginMaxaiEmail(
+        id,
+        provider as Record<string, unknown>,
+        body as {
+          step?: unknown;
+          email?: unknown;
+          code?: unknown;
+        }
+      );
     } catch (err) {
       const msg = sanitizeErrorMessage(err instanceof Error ? err.message : err);
       return NextResponse.json(
@@ -346,7 +349,7 @@ export async function POST(
       const result = await startConolBrowserLogin(
         typeof body.timeout === "number" ? body.timeout : undefined
       );
-      if (!result.success || !result.credentials) {
+      if (result.success === false || !result.credentials) {
         return NextResponse.json(result, { status: 400 });
       }
       try {

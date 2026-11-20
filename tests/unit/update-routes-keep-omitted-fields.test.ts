@@ -120,6 +120,39 @@ test("re-importing a proxy without a family keeps its family", async () => {
   assert.equal(stored?.family, "ipv4");
 });
 
+test("re-importing a proxy without a type keeps its stored type", async () => {
+  const proxy = await proxiesDb.createProxy({
+    name: "socks import",
+    type: "socks5",
+    host: "10.2.0.4",
+    port: 1080,
+  });
+
+  const response = await bulkImportRoute.POST(
+    jsonRequest("POST", { items: [{ name: "socks import again", host: "10.2.0.4", port: 1080 }] })
+  );
+
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.updated, 1);
+  const stored = await proxiesDb.getProxyById(proxy.id);
+  assert.equal(stored?.name, "socks import again");
+  assert.equal(stored?.type, "socks5");
+});
+
+test("importing a new proxy without a type stores http", async () => {
+  const response = await bulkImportRoute.POST(
+    jsonRequest("POST", { items: [{ name: "typeless new", host: "10.2.0.5", port: 3128 }] })
+  );
+
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.created, 1);
+  const id = body.results[0]?.id;
+  assert.ok(id, "the created row id is reported");
+  assert.equal((await proxiesDb.getProxyById(id))?.type, "http");
+});
+
 test("creating a proxy without a family still stores auto", async () => {
   const proxy = await proxiesDb.createProxy({
     name: "fresh",

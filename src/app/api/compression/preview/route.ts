@@ -84,7 +84,7 @@ function quantumExtras(quantumLock?: { enabled: boolean }) {
     : { configPatch: {}, applyOpts: {} };
 }
 
-function messagesToText(messages: Array<{ role: string; content: unknown }>): string {
+function messagesToText(messages: Array<{ role: string; content?: unknown }>): string {
   return messages
     .map((m) => {
       const content = typeof m.content === "string" ? m.content : JSON.stringify(m.content);
@@ -228,7 +228,7 @@ export async function POST(req: Request) {
   }
 
   const parsed = PreviewRequestSchema.safeParse(body);
-  if (!parsed.success) {
+  if (parsed.success === false) {
     return NextResponse.json(
       { error: "Invalid request", details: parsed.error.issues },
       { status: 400 }

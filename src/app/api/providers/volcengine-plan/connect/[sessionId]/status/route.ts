@@ -11,7 +11,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ sessionId: string }> }
-): Promise<NextResponse> {
+): Promise<Response> {
   const auth = await requireManagementAuth(request);
   if (auth) return auth;
 

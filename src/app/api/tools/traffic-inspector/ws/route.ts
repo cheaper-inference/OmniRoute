@@ -85,7 +85,7 @@ export async function GET(request: Request): Promise<Response> {
     });
   }
 
-  // @ts-expect-error — Next.js standalone server exposes the raw socket via
+  // Next.js standalone server exposes the raw socket via
   // `request.socket` but the Request type does not declare it.
   const socket = (request as unknown as { socket?: import("node:net").Socket }).socket;
   if (!socket) {

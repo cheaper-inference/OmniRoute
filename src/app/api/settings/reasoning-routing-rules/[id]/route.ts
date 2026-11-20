@@ -31,10 +31,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const existing = await getReasoningRoutingRuleById(id);
   if (!existing) return errorResponse(404, "Rule not found");
   const parsed = await validatedJsonBody(request, updateReasoningRoutingRuleSchema);
-  if (!parsed.success) return parsed.response;
+  if (parsed.success === false) return parsed.response;
   const merged = { ...existing, ...parsed.data };
   const validated = createReasoningRoutingRuleSchema.safeParse(merged);
-  if (!validated.success) {
+  if (validated.success === false) {
     return errorResponse(400, "Reasoning routing rule validation failed");
   }
   try {

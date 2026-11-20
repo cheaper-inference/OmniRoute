@@ -146,7 +146,7 @@ async function runSyntxMusicJob(options: {
   const url = firstMediaUrl(result, "audio") || result.media[0]?.url;
   if (!url) {
     return {
-      success: false,
+      success: false as const,
       status: 502,
       error: "SYNTX music generation completed without an audio URL",
     };
@@ -165,7 +165,7 @@ async function runSyntxMusicJob(options: {
     duration: Date.now() - options.startTime,
   }).catch(() => {});
   options.log?.info?.("MUSIC", `SYNTX generated music via ${options.model}`);
-  return { success: true, data: { created: Math.floor(Date.now() / 1000), data: [item] } };
+  return { success: true as const, data: { created: Math.floor(Date.now() / 1000), data: [item] } };
 }
 
 async function musicItemFromUrl(
@@ -200,12 +200,16 @@ export async function handleSyntxMusicGeneration({
   const startTime = Date.now();
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
   if (!prompt) {
-    return { success: false, status: 400, error: "Prompt is required for SYNTX music generation" };
+    return {
+      success: false as const,
+      status: 400,
+      error: "Prompt is required for SYNTX music generation",
+    };
   }
   const token = tokenFrom(credentials);
   if (!looksLikeJwt(token)) {
     return {
-      success: false,
+      success: false as const,
       status: 401,
       error: "Missing SYNTX JWT — paste the Authorization Bearer token from syntx.ai",
     };
@@ -227,6 +231,6 @@ export async function handleSyntxMusicGeneration({
     const status = error instanceof SyntxMediaError ? error.status : 502;
     const message = sanitizeErrorMessage(error instanceof Error ? error.message : error);
     log?.error?.("MUSIC", `SYNTX music generation failed: ${message}`);
-    return { success: false, status, error: message || "SYNTX music generation failed" };
+    return { success: false as const, status, error: message || "SYNTX music generation failed" };
   }
 }

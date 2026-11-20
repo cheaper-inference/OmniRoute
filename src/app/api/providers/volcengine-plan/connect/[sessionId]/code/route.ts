@@ -14,7 +14,7 @@ import { volcenginePlanCodeSchema } from "@/shared/validation/schemas/volcengine
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ sessionId: string }> }
-): Promise<NextResponse> {
+): Promise<Response> {
   const auth = await requireManagementAuth(request);
   if (auth) return auth;
 
@@ -33,9 +33,8 @@ export async function POST(
   const { code, captcha, timeout } = validation.data;
 
   try {
-    const { volcengineConsoleAutoLoginService } = await import(
-      "@omniroute/open-sse/services/volcengineConsoleAutoLogin.ts"
-    );
+    const { volcengineConsoleAutoLoginService } =
+      await import("@omniroute/open-sse/services/volcengineConsoleAutoLogin.ts");
 
     if (!volcengineConsoleAutoLoginService.getStatus(sessionId)) {
       return NextResponse.json(

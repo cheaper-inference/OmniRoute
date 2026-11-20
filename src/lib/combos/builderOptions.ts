@@ -68,7 +68,7 @@ type ProviderConnectionLike = {
   priority?: number;
   isActive?: boolean;
   defaultModel?: string;
-  rateLimitedUntil?: number | null;
+  rateLimitedUntil?: string | number | null;
   lastError?: string | null;
   lastTested?: string | null;
   updatedAt?: string | null;
@@ -104,7 +104,7 @@ export interface ComboBuilderConnectionOption {
   priority: number;
   isActive: boolean;
   defaultModel?: string | null;
-  rateLimitedUntil?: number | null;
+  rateLimitedUntil?: string | number | null;
   lastError?: string | null;
   lastTested?: string | null;
 }

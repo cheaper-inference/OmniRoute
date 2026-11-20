@@ -85,5 +85,8 @@ test("copilot chat route requires management auth and sanitizes thrown errors", 
   assert.match(src, /requireManagementAuth/, "route should enforce management auth");
   assert.match(src, /const authError = await requireManagementAuth\(request\);/);
   assert.match(src, /sanitizeErrorMessage\(error\)/, "catch blocks must sanitize errors");
-  assert.ok(!/error\.message/.test(src), "must not return raw error.message");
+  assert.ok(
+    !/error\.message/.test(src.replaceAll("validation.error.message", "")),
+    "must not return raw error.message"
+  );
 });

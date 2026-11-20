@@ -26,7 +26,7 @@ import {
 import { getModelInfo } from "@/sse/services/model";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 
-const action = <T extends string>(name: T, shape: z.ZodRawShape) =>
+const action = <T extends string, S extends z.ZodRawShape>(name: T, shape: S) =>
   z.object({ action: z.literal(name), ...shape });
 const generation = z.number().int().positive().safe();
 const actionSchema = z.discriminatedUnion("action", [
@@ -83,7 +83,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const parsed = actionSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return error(400, "LEASE_ACTION_INVALID", "Invalid lease lifecycle action");
+  if (parsed.success === false)
+    return error(400, "LEASE_ACTION_INVALID", "Invalid lease lifecycle action");
 
   let acquisitionModelInfo: Awaited<ReturnType<typeof getModelInfo>> | null = null;
   if (parsed.data.action === "acquire") {
@@ -159,7 +160,19 @@ export async function POST(request: Request): Promise<Response> {
         "No eligible connection satisfies the managed key policy"
       );
     }
-    const failure = buildManagedLeaseSelectionErrorResponse(selection);
+    const failure = buildManagedLeaseSelectionErrorResponse({
+      ...("eligibleCount" in selection ? { eligibleCount: selection.eligibleCount } : {}),
+      ...("freeCount" in selection ? { freeCount: selection.freeCount } : {}),
+      ...("allRateLimited" in selection ? { allRateLimited: !!selection.allRateLimited } : {}),
+      ...("leaseConnectionMismatch" in selection
+        ? { leaseConnectionMismatch: !!selection.leaseConnectionMismatch }
+        : {}),
+      ...("leaseFenceStale" in selection ? { leaseFenceStale: !!selection.leaseFenceStale } : {}),
+      ...("leaseRequired" in selection ? { leaseRequired: !!selection.leaseRequired } : {}),
+      ...("waitingForCapacity" in selection
+        ? { waitingForCapacity: !!selection.waitingForCapacity, retryAfter: selection.retryAfter }
+        : {}),
+    });
     if (failure) {
       for (const [name, value] of Object.entries(CORS_HEADERS)) failure.headers.set(name, value);
       return failure;

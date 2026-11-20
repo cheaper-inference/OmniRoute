@@ -5,7 +5,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { formatValidationMessage, validateBody } from "@/shared/validation/helpers";
 import { volcenginePlanConnectSchema } from "@/shared/validation/schemas/volcenginePlan";
 
-export async function POST(request: Request): Promise<NextResponse> {
+export async function POST(request: Request): Promise<Response> {
   const auth = await requireManagementAuth(request);
   if (auth) return auth;
 
@@ -22,9 +22,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   // Auto flow: phone present → start a session-based headless phone/SMS login.
   if (phone) {
     try {
-      const { volcengineConsoleAutoLoginService } = await import(
-        "@omniroute/open-sse/services/volcengineConsoleAutoLogin.ts"
-      );
+      const { volcengineConsoleAutoLoginService } =
+        await import("@omniroute/open-sse/services/volcengineConsoleAutoLogin.ts");
       const started = await volcengineConsoleAutoLoginService.startLogin(phone, { timeout });
       if (started.ok === false) {
         return NextResponse.json({ success: false, error: started.error }, { status: 400 });
@@ -43,7 +42,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const { inAppLoginService } = await import("@omniroute/open-sse/services/inAppLoginService.ts");
     const login = await inAppLoginService.startLogin("volcengine-console", { timeout });
-    if (!login.success || !login.credentials) {
+    if (login.success === false || !login.credentials) {
       return NextResponse.json(
         { success: false, error: login.error || "Volcano console login failed" },
         { status: 400 }

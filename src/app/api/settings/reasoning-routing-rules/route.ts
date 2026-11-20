@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
   const parsed = await validatedJsonBody(request, createReasoningRoutingRuleSchema);
-  if (!parsed.success) return parsed.response;
+  if (parsed.success === false) return parsed.response;
   try {
     const rule = await createReasoningRoutingRule(reasoningRuleDataToInput(parsed.data));
     return NextResponse.json({ rule }, { status: 201 });

@@ -53,8 +53,7 @@ function previewCorruptedValue(value: unknown): string {
 export function loadTierConfigFromDb(): TierConfig | null {
   const db = getDbInstance();
   const row = db.prepare(`SELECT value FROM ${TABLE} WHERE key = 'tier_config'`).get() as
-    | { value: string }
-    | undefined;
+    { value: string } | undefined;
   if (!row) return null;
 
   const raw = row.value;
@@ -62,10 +61,10 @@ export function loadTierConfigFromDb(): TierConfig | null {
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
-    log.warn(
-      { err: err instanceof Error ? err.message : String(err), value: previewCorruptedValue(raw) },
-      "tier_config JSON.parse failed; falling back to DEFAULT_TIER_CONFIG"
-    );
+    log.warn("TIER_CONFIG", "tier_config JSON.parse failed; falling back to DEFAULT_TIER_CONFIG", {
+      err: err instanceof Error ? err.message : String(err),
+      value: previewCorruptedValue(raw),
+    });
     return null;
   }
 
@@ -73,11 +72,12 @@ export function loadTierConfigFromDb(): TierConfig | null {
     return validateTierConfig(parsed);
   } catch (err) {
     log.warn(
+      "TIER_CONFIG",
+      "tier_config Zod validation failed; falling back to DEFAULT_TIER_CONFIG",
       {
         err: err instanceof Error ? err.message : String(err),
         value: previewCorruptedValue(raw),
-      },
-      "tier_config Zod validation failed; falling back to DEFAULT_TIER_CONFIG"
+      }
     );
     return null;
   }

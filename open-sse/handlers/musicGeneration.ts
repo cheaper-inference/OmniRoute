@@ -102,7 +102,7 @@ export async function handleMusicGeneration({
 
   if (!provider) {
     return {
-      success: false,
+      success: false as const,
       status: 400,
       error: `Invalid music model: ${body.model}. Use format: provider/model`,
     };
@@ -111,7 +111,7 @@ export async function handleMusicGeneration({
   const providerConfig = getMusicProvider(provider);
   if (!providerConfig) {
     return {
-      success: false,
+      success: false as const,
       status: 400,
       error: `Unknown music provider: ${provider}`,
     };
@@ -127,13 +127,13 @@ export async function handleMusicGeneration({
         seed: typeof body.seed === "number" ? body.seed : undefined,
       });
       return {
-        success: true,
+        success: true as const,
         data: { created: Math.floor(Date.now() / 1000), data: [{ b64_json: base64, format }] },
       };
     } catch (err: any) {
       log?.error?.("MUSIC", `Vertex Lyria generation failed: ${err?.message}`);
       return {
-        success: false,
+        success: false as const,
         status: typeof err?.status === "number" ? err.status : 502,
         error: sanitizeErrorMessage(err?.message || "Vertex Lyria generation failed"),
       };
@@ -214,7 +214,7 @@ export async function handleMusicGeneration({
   }
 
   return {
-    success: false,
+    success: false as const,
     status: 400,
     error: `Unsupported music format: ${providerConfig.format}`,
   };
@@ -310,7 +310,7 @@ async function handleComfyUIMusicGeneration({ model, provider, providerConfig, b
     }).catch(() => {});
 
     return {
-      success: true,
+      success: true as const,
       data: { created: Math.floor(Date.now() / 1000), data: audioFiles },
     };
   } catch (err) {
@@ -325,7 +325,7 @@ async function handleComfyUIMusicGeneration({ model, provider, providerConfig, b
       error: err.message,
     }).catch(() => {});
     return {
-      success: false,
+      success: false as const,
       status: 502,
       error: sanitizeErrorMessage(err) || "Music provider error",
     };
@@ -368,7 +368,7 @@ async function handleKieMusicGeneration({
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
 
   if (!token) {
-    return { success: false, status: 401, error: "KIE API key is required" };
+    return { success: false as const, status: 401, error: "KIE API key is required" };
   }
 
   // Check if model is a Market model
@@ -421,7 +421,7 @@ async function handleKieMusicGeneration({
       if (log) {
         log.error("MUSIC", `KIE createTask failed: ${JSON.stringify(createData)}`);
       }
-      return { success: false, status: 502, error: errorMessage };
+      return { success: false as const, status: 502, error: errorMessage };
     }
 
     const statusUrl = isMarket
@@ -465,7 +465,7 @@ async function handleKieMusicGeneration({
       }).catch(() => {});
 
       return {
-        success: true,
+        success: true as const,
         data: { created: Math.floor(Date.now() / 1000), data: audioFiles },
       };
     }
@@ -473,10 +473,10 @@ async function handleKieMusicGeneration({
     const record = isJsonObject(recordData) ? recordData : {};
     const data = isJsonObject(record.data) ? record.data : {};
     const errorMessage = data.errorMessage || data.failMsg || record.msg || "KIE music task failed";
-    return { success: false, status: 502, error: String(errorMessage) };
+    return { success: false as const, status: 502, error: String(errorMessage) };
   } catch (err: unknown) {
     return {
-      success: false,
+      success: false as const,
       status: isJsonObject(err) && Number.isFinite(Number(err.status)) ? Number(err.status) : 502,
       error: sanitizeErrorMessage(err) || "Music provider error",
     };
@@ -495,7 +495,7 @@ async function handleUdioMusicGeneration({
   const startTime = Date.now();
   const cookie = credentials?.apiKey || credentials?.providerSpecificData?.cookie || "";
   if (!cookie) {
-    return { success: false, status: 401, error: "Udio session cookie is required" };
+    return { success: false as const, status: 401, error: "Udio session cookie is required" };
   }
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
   if (log) {
@@ -518,7 +518,7 @@ async function handleUdioMusicGeneration({
         duration: Date.now() - startTime,
         error: errorText.slice(0, 500),
       }).catch(() => {});
-      return { success: false, status: res.status, error: errorText };
+      return { success: false as const, status: res.status, error: errorText };
     }
     const data = await res.json();
     const trackIds = data.track_ids || [];
@@ -532,7 +532,7 @@ async function handleUdioMusicGeneration({
         duration: Date.now() - startTime,
         error: "No tracks returned from Udio",
       }).catch(() => {});
-      return { success: false, status: 502, error: "No tracks returned from Udio" };
+      return { success: false as const, status: 502, error: "No tracks returned from Udio" };
     }
     const deadline = Date.now() + 300000;
     while (Date.now() < deadline) {
@@ -552,7 +552,7 @@ async function handleUdioMusicGeneration({
           }));
         } catch (err) {
           return {
-            success: false,
+            success: false as const,
             status: 502,
             error: `Failed to download audio: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
           };
@@ -566,7 +566,7 @@ async function handleUdioMusicGeneration({
           duration: Date.now() - startTime,
         }).catch(() => {});
         return {
-          success: true,
+          success: true as const,
           data: {
             created: Math.floor(Date.now() / 1000),
             data: [{ b64_json: buf.toString("base64"), format: "mp3" }],
@@ -583,7 +583,7 @@ async function handleUdioMusicGeneration({
       duration: Date.now() - startTime,
       error: "Udio music generation timed out",
     }).catch(() => {});
-    return { success: false, status: 504, error: "Udio music generation timed out" };
+    return { success: false as const, status: 504, error: "Udio music generation timed out" };
   } catch (err) {
     if (log) log.error("MUSIC", `${provider} udio error: ${err.message}`);
     saveCallLog({
@@ -596,7 +596,7 @@ async function handleUdioMusicGeneration({
       error: err.message,
     }).catch(() => {});
     return {
-      success: false,
+      success: false as const,
       status: 502,
       error: sanitizeErrorMessage(err) || "Music provider error",
     };

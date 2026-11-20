@@ -8,8 +8,8 @@ import {
 import {
   AUTO_SUFFIX_VARIANTS,
   AUTO_TEMPLATE_VARIANTS,
-  AUTO_FAMILY_IDS,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
+import { MODEL_FAMILIES } from "@omniroute/open-sse/services/autoCombo/modelFamily";
 import { parseAutoSuffix } from "@omniroute/open-sse/services/autoCombo/suffixComposition";
 
 const ALL_VARIANTS: Array<{ variant: AutoVariant | undefined; name: string }> = [
@@ -136,7 +136,7 @@ export async function GET(request: Request) {
       if (seenIds.has(modelStr)) continue;
       const suffix = modelStr.slice("auto/".length);
       const parsed = parseAutoSuffix(suffix);
-      if (!parsed.valid) continue;
+      if (parsed.valid === false) continue;
 
       await pushVariant(modelStr, async () => {
         const virtual = await createVirtualAutoComboFromPrepared(prepared, undefined, {
@@ -177,9 +177,9 @@ export async function GET(request: Request) {
     // Phase D: enumerate family variants (auto/glm, auto/llama,
     // auto/gemini, etc.) that the backend already supports via modelFamily.ts
     // but were not exposed by this endpoint.
-    for (const modelStr of AUTO_FAMILY_IDS) {
+    for (const suffix of MODEL_FAMILIES) {
+      const modelStr = `auto/${suffix}`;
       if (seenIds.has(modelStr)) continue;
-      const suffix = modelStr.slice("auto/".length);
       await pushVariant(modelStr, async () => {
         const virtual = await createVirtualAutoComboFromPrepared(prepared, undefined, {
           family: suffix,

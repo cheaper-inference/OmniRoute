@@ -195,6 +195,12 @@ async function refreshOAuthToken(connection: any) {
     // update.
     const result = await getAccessToken(provider, credentials, console, null, async (refreshed) => {
       if (!refreshed?.accessToken) return;
+      // Some token endpoints send expires_in as a numeric string ("600"); normalize it so
+      // the real lifetime wins over the 30-minute fallback below.
+      const lifetimeSeconds =
+        typeof refreshed.expiresIn === "string" && refreshed.expiresIn.trim() !== ""
+          ? Number(refreshed.expiresIn)
+          : refreshed.expiresIn;
       const update: any = {
         accessToken: refreshed.accessToken,
       };
@@ -202,8 +208,8 @@ async function refreshOAuthToken(connection: any) {
       if (refreshed.expiresAt) {
         update.expiresAt = refreshed.expiresAt;
         update.tokenExpiresAt = refreshed.expiresAt;
-      } else if (refreshed.expiresIn) {
-        const expiresAt = new Date(Date.now() + refreshed.expiresIn * 1000).toISOString();
+      } else if (typeof lifetimeSeconds === "number" && Number.isFinite(lifetimeSeconds)) {
+        const expiresAt = new Date(Date.now() + lifetimeSeconds * 1000).toISOString();
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
       } else if (provider === "muse-code" && refreshed.expiresAt === null) {
@@ -219,7 +225,11 @@ async function refreshOAuthToken(connection: any) {
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
       }
-      if (refreshed.providerSpecificData) {
+      if (
+        refreshed.providerSpecificData &&
+        typeof refreshed.providerSpecificData === "object" &&
+        !Array.isArray(refreshed.providerSpecificData)
+      ) {
         update.providerSpecificData = {
           ...(connection.providerSpecificData || {}),
           ...refreshed.providerSpecificData,

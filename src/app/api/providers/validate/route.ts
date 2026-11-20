@@ -123,7 +123,8 @@ export async function POST(request) {
     }
 
     const registryProxy = await resolveProxyForProvider(provider);
-    let proxyToUse = registryProxy;
+    let proxyToUse: Awaited<ReturnType<typeof getProxyForLevel>> | typeof registryProxy =
+      registryProxy;
 
     if (!proxyToUse) {
       const providerProxy = await getProxyForLevel("provider", provider);
@@ -155,7 +156,7 @@ export async function POST(request) {
       );
     }
 
-    if (!result.valid && typeof result.statusCode === "number") {
+    if (result.valid === false && typeof result.statusCode === "number") {
       if (result.securityBlocked) {
         logAuditEvent({
           action: "provider.validation.ssrf_blocked",

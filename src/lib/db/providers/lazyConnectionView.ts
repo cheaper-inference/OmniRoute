@@ -184,7 +184,28 @@ const CREDENTIAL_FIELDS = new Set(["apiKey", "accessToken", "refreshToken", "idT
  * without any caller changes. The typed createLazyConnectionView remains
  * available for new code that wants a structured view.
  */
-export function createLazyRowProxy(row: Record<string, unknown>): Record<string, unknown> {
+/** Schema-backed row; projections may omit fields, so metadata stays optional. */
+export interface ProviderConnectionRecord extends Record<string, unknown> {
+  id: string;
+  provider: string;
+  apiKey?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  idToken?: string;
+  name?: string;
+  email?: string;
+  authType?: string;
+  projectId?: string;
+  defaultModel?: string;
+  expiresAt?: string;
+  tokenExpiresAt?: string;
+  isActive?: boolean;
+  testStatus?: string;
+  rateLimitedUntil?: string;
+  providerSpecificData?: Record<string, unknown>;
+}
+
+export function createLazyRowProxy(row: Record<string, unknown>): ProviderConnectionRecord {
   let decrypted: Record<string, string | null | undefined> | undefined;
   let providerData: unknown;
   let providerDataLoaded = false;
@@ -247,7 +268,7 @@ export function createLazyRowProxy(row: Record<string, unknown>): Record<string,
     getOwnPropertyDescriptor(target, prop) {
       return Reflect.getOwnPropertyDescriptor(target, prop);
     },
-  });
+  }) as ProviderConnectionRecord;
 }
 
 function lazyDecrypt(
