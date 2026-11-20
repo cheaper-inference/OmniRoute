@@ -295,6 +295,9 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
   dashboard session passes that policy and gets the route's own answer. The flag resolves like
   every other flag (dashboard or REST override, then the environment variable of the same name);
   see [`FEATURE_FLAGS.md`](../reference/FEATURE_FLAGS.md).
+- Each pool's display name and each schedule's label are returned to the pool's key holders
+  exactly as the administrator wrote them. Before turning the flag on, check that they are fit to
+  be read by those key holders.
 - The key is read from headers only: `Authorization: Bearer <key>` or `x-api-key: <key>`. When
   both are sent, the first one that validates is used. A key in the query string or a cookie is
   ignored. The server's environment key is refused (401).
@@ -313,10 +316,21 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 - `sharedQuotaProviders` is a per-key setting (`PUT /api/keys/[id]/self-service`): `null`, the
   default, means every provider the key reaches; `[]` means none. Each pool's `accountVisible`
   says which visibility applied to it.
-- A pool is named only by `ref`, an opaque value bound to the calling key. Accounts are listed
-  as `Account 1`, `Account 2`, … in pool order. No pool id, connection id, account e-mail or
-  account name is returned, and the response goes through the contract schema, which drops any
-  field outside it.
+- Account bars and model windows are shown only for accounts whose connection the key may use.
+  When the key has a list of allowed connections, an account outside it keeps its `Account N`
+  entry without `account` or `modelWindows`. An empty list means no restriction, as for
+  `/v1/me/status`. The pool total (`dimensions[].total`) does not depend on that list.
+- Two figures shown with `self:usage` alone come from other keys' use. A schedule budget's
+  `exhausted` reflects the consumption of every key under that schedule. In a pool whose weights
+  are all zero, the key's `weight` is `100 / number of members`. Both match what enforcement
+  already tells the key.
+- A pool is identified only by `ref`, an opaque value bound to the calling key. Its display name
+  (`name`) is included as the administrator wrote it. A `ref` is derived from the key and the
+  pool with the server's API-key secret (`API_KEY_SECRET`). Clients must not persist it: it
+  changes if that secret is rotated.
+- Accounts are listed as `Account 1`, `Account 2`, … in pool order. No pool id, connection id,
+  account e-mail or account name is returned, and the response goes through the contract schema,
+  which drops any field outside it.
 - Countable units (`requests`, `tokens`, `usd`) are reported as the pool bucket the quota gate
   enforces: `limit` = plan limit × accounts in the pool, `fairShare` = weight / 100 × `limit`
   (equal split when every weight is 0), `consumed` = the key's own counter in the quota store,
@@ -331,11 +345,11 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 
 ### `status` and `reason`
 
-| `status`      | Meaning                                                                                                        |
-| ------------- | -------------------------------------------------------------------------------------------------------------- |
-| `ok`          | A current reading.                                                                                             |
-| `stale`       | A cached account reading marked stale, or one whose reset time has passed since it was read. Numbers are kept. |
-| `unavailable` | No reading; the numbers are `null`, never `0`. `reason` says why.                                              |
+| `status`      | Meaning                                                                                                                                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ok`          | A current reading.                                                                                                                                                                                        |
+| `stale`       | A cached account reading marked stale, or one whose reset time has passed since it was read. Numbers are kept. One model window whose reset time has passed marks the whole `modelWindows` group `stale`. |
+| `unavailable` | No reading; the numbers are `null`, never `0`. `reason` says why.                                                                                                                                         |
 
 | `reason`                          | When                                                                        |
 | --------------------------------- | --------------------------------------------------------------------------- |
@@ -352,16 +366,21 @@ When the quota store cannot be read, the store-backed fields of `blocks` (a sche
 
 ### Errors
 
-Every response, success or error, carries `Cache-Control: no-store`. Errors use the standard
-error body with a fixed message: 400 (invalid provider), 401 (missing or invalid key), 403
-(missing `self:usage`), 404 (flag off) and 500 (`Failed to build quota view`). The 500 covers
-any failure once the request reaches the route, including the key lookup itself; its cause is
-logged on the server and never returned.
+Every response of this route, success or error, carries `Cache-Control: no-store`. A refusal
+that happens before the route runs does not carry it: the client API policy's 401 and the IP
+filter's 403. Errors of the route use the standard error body with a fixed message: 400 (invalid
+provider), 401 (missing or invalid key), 403 (missing `self:usage`), 404 (flag off) and 500
+(`Failed to build quota view`). The 500 covers any failure once the request reaches the route,
+including the key lookup itself; its cause is logged on the server and never returned.
 
 ### Limitations
 
-- Under the default borrow behavior, a key's `remaining` is its guaranteed share. A key may still
-  be served beyond it while the account has room.
+- `remaining` is the part of the key's fair share it has not used. It is not a guarantee. A key
+  may still be served beyond it while the pool has room. Once the pool's total reaches `limit`,
+  every key of the pool is refused, whatever its own `remaining`, and a key without
+  `self:account-quota` cannot see that total.
+- `remaining` does not take the allocation's absolute `cap` into account. Enforcement refuses the
+  key once its own consumption in a window of the cap's unit reaches the cap's value.
 - The account-level bar comes from the provider-limits cache and can lag the enforcement
   decision by a few minutes. A reading whose reset time has passed is reported as `stale`.
 - Per-model windows (`modelWindows`) are reported only for providers that have a plan-window
@@ -373,10 +392,11 @@ logged on the server and never returned.
   while a request is refused with reason `schedule-reserve`.
 - When two pools of the same key share a connection, enforcement applies one of them, and the
   view lists both.
-- There is no per-address limit on failed key attempts: behind a reverse proxy every caller
-  shares one address, so a lockout would deny the route to every key holder. With
-  `REQUIRE_API_KEY=true`, an invalid key is refused by the client API policy before the route
-  runs, with that policy's 401 body instead of this route's.
+- There is no per-address limit on failed key attempts: behind a reverse proxy callers can share
+  one address (it depends on whether forwarded client addresses are trusted), so a lockout could
+  deny the route to every key holder. With `REQUIRE_API_KEY=true`, an invalid key is refused by
+  the client API policy before the route runs, with that policy's 401 body instead of this
+  route's.
 
 ---
 

@@ -8,7 +8,8 @@
  *
  * Any failure after the gate is reached (the gate itself, the settings lookup, the server secret,
  * the builder, the final parse) is one fixed 500 message; the real error is logged here, once,
- * and never reaches the body or a header. Every response carries `Cache-Control: no-store`.
+ * and never reaches the body or a header. Every response of this handler carries
+ * `Cache-Control: no-store`.
  */
 import { z } from "zod";
 

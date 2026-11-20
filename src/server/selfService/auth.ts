@@ -3,8 +3,9 @@
  * a fixed order: feature flag, header credentials, key validation, key metadata, scope. Callers
  * can replace only the key store the gate reads; the checks themselves are not injectable.
  *
- * There is no per-address attempt limit here: behind a reverse proxy every caller shares one
- * address, so a lockout would let any client deny the API to every key holder.
+ * There is no per-address attempt limit here: behind a reverse proxy callers can share one
+ * address (it depends on whether forwarded client addresses are trusted), so a lockout could let
+ * any client deny the API to every key holder.
  */
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 

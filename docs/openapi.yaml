@@ -16012,9 +16012,13 @@ paths:
         the key is never read from the query string or a cookie. Requires scope `self:usage`.
         Account-level readings (`total`, `accounts[].dimensions[].account`, `modelWindows`) are
         included only with scope `self:account-quota` and only for providers in the key's
-        `sharedQuotaProviders` setting. Pools are named by an opaque per-key `ref`; no pool id,
-        connection id or account identity is returned. A key outside every pool of the provider
-        gets 200 with `pools: []`. Every response carries `Cache-Control: no-store`.
+        `sharedQuotaProviders` setting. Account bars and model windows are further limited to
+        the connections the key may use when it has a list of allowed connections. Pools are
+        identified by an opaque per-key `ref`. The pool's display name and schedule labels are
+        returned as the administrator wrote them. No pool id, connection id or account identity
+        is returned. A key outside every pool of the provider gets 200 with `pools: []`. Every
+        response of this route carries `Cache-Control: no-store`; a refusal by the client API
+        policy or the IP filter, before the route runs, does not.
       security:
         - BearerAuth: []
         - XApiKeyAuth: []
@@ -19543,6 +19547,9 @@ components:
           type: [number, "null"]
         remaining:
           type: [number, "null"]
+          description: >-
+            The part of `fairShare` the key has not used, floored at 0. Not a guarantee: the
+            pool can be exhausted first, and the allocation's `cap` is not taken into account.
         status:
           $ref: "#/components/schemas/SelfQuotaStatus"
         reason:
@@ -19626,9 +19633,12 @@ components:
       properties:
         ref:
           type: string
-          description: Opaque reference to the pool, bound to the calling key.
+          description: >-
+            Opaque reference to the pool, bound to the calling key and derived with the server's
+            API-key secret. Do not persist it: it changes if that secret is rotated.
         name:
           type: string
+          description: The pool's display name, as the administrator wrote it.
         provider:
           type: string
         borrowMode:
@@ -19683,6 +19693,7 @@ components:
                 enum: [blackout, outside-window, null]
               label:
                 type: [string, "null"]
+                description: The schedule's label, as the administrator wrote it.
               retryAfterSeconds:
                 type: [number, "null"]
               reserves:

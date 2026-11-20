@@ -19,7 +19,8 @@
  * both fail open); the error is logged here.
  *
  * Every entry names its pool only by the opaque `ref`. The schedule label (text the pool
- * administrator wrote for key holders) and the cap's model name are the only free text copied.
+ * administrator wrote, shown to key holders as written) and the cap's model name are the only
+ * free text copied.
  */
 
 import { createLogger } from "@/shared/utils/logger";
