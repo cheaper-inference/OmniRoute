@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Limit müsbət tam ədəd olmalıdır.",
     "error": "Xəta: {message}",
     "serverOffline": "OmniRoute serveri oflayndır. Başladın: omniroute serve",
     "authRequired": "Autentifikasiya tələb olunur. OMNIROUTE_API_KEY təyin edin və ya işə salın: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simulyasiya] ediləcəkdi: {action}",
     "cancelled": "Ləğv edildi.",
     "jsonOpt": "JSON formatında çıxış",
-    "yesOpt": "Təsdiq sorğusunu keç"
+    "yesOpt": "Təsdiq sorğusunu keç",
+    "positiveIntegerRequired": "Limit müsbət tam ədəd olmalıdır."
   },
   "setup": {
     "title": "OmniRoute Quraşdırılması",

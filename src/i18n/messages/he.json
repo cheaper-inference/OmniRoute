@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "שמור על הודעות מערכת באמצע השיחה במקום",
     "requireUserLastMessageDescription": "במעלה הזרמים שדוחים מילוי מראש של עוזר: שחרר פניות של עוזר נגרר (ללא כלי_שימוש) לפני השליחה. המודל עשוי לשחזר את התשובה הקודמת שלו.",
     "requireUserLastMessageLabel": "דרוש שהשיחה תסתיים בהודעת משתמש",
+    "strictChatHistoryDescription": "מתקן רצפים שנקטעו של קריאות לכלים וממזג הודעות עוקבות של העוזר לפני השליחה לספקים התואמים ל־OpenAI ואוכפים כללים מחמירים.",
+    "strictChatHistoryLabel": "תיקון היסטוריית שיחה לספקים מחמירים",
     "bulkPasteAdded": "{count, plural, one {נוסף מפתח אחד} other {נוספו # מפתחות}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {דילוג על כפילות אחת} other {דילוג על # כפילויות}}",
     "bulkPasteHint": "יש להדביק מפתח API אחד בכל שורה. המערכת מתעלמת משורות ריקות ומדלגת על מפתחות כפולים.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "הסרת מפתח"
   },
   "plugins": {
-    "privilegesWarningTitle": "תוספים פועלים עם הרשאות מלאות",
-    "privilegesWarningBody": "תוסף פועל כתהליך Node.js רגיל עם אותה גישה כמו OmniRoute: הוא יכול לקרוא קבצים, להריץ תוכניות ולהשתמש ברשת, כל הרשאות שהמניפסט שלו מצהיר. התקן רק תוספים שאתה סומך עליהם.",
     "title": "תוספים",
     "description": "התקנה וניהול של תוספים להרחבת הפונקציונליות של OmniRoute",
     "loading": "התוספים נטענים...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "סריקה לאיתור תוספים",
     "noPlugins": "לא מותקנים תוספים",
     "noPluginsDescription": "יש למקם תיקיות של תוספים בתוך ~/.omniroute/plugins/ וללחוץ על סריקה.",
+    "privilegesWarningTitle": "תוספים פועלים עם הרשאות מלאות",
+    "privilegesWarningBody": "תוסף פועל כתהליך Node.js רגיל עם אותה גישה כמו OmniRoute: הוא יכול לקרוא קבצים, להריץ תוכניות ולהשתמש ברשת, כל הרשאות שהמניפסט שלו מצהיר. התקן רק תוספים שאתה סומך עליהם.",
     "activate": "הפעלה",
     "deactivate": "השבתה",
     "uninstall": "הסרת התקנה",

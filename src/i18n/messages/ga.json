@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Coinnigh teachtaireachtaí córais lárchomhrá i bhfeidhm",
     "requireUserLastMessageDescription": "Maidir le sruthanna in aghaidh srutha a dhiúltaíonn réamhlíonadh an chúntóra: buail amach casadh an chúntóra rianaigh (gan tool_use) roimh é a sheoladh. Féadfaidh an tsamhail an freagra a bhí air roimhe seo a athghiniúint.",
     "requireUserLastMessageLabel": "Éilíonn an comhrá chun deireadh a chur le teachtaireacht úsáideora",
+    "strictChatHistoryDescription": "Deisíonn sé seichimh glaonna ar uirlisí a briseadh agus cumascann sé teachtaireachtaí comhleanúnacha an chúntóra sula seoltar chuig soláthraithe atá comhoiriúnach le OpenAI agus a chuireann rialacha dochta i bhfeidhm iad.",
+    "strictChatHistoryLabel": "Deisiú stair an chomhrá do sholáthraithe dochta",
     "bulkPasteAdded": "{count, plural, one {1 eochair curtha leis} other {# eochracha curtha leis}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dúblach scipeáilte} other {# dúblacha scipeáilte}}",
     "bulkPasteHint": "Greamaigh eochair API amháin in aghaidh an líne. Déantar neamhaird ar línte folmha agus scipeáiltear eochracha dúblacha.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Bain eochair"
   },
   "plugins": {
-    "privilegesWarningTitle": "Ritheann forlíontáin le pribhléidí iomlána",
-    "privilegesWarningBody": "Ritheann breiseán mar phróiseas Node.js rialta leis an rochtain chéanna agus OmniRoute: is féidir leis comhaid a léamh, cláir a rith agus an líonra a úsáid, cibé ceadanna a dhearbhaíonn a fhorléiriú. Suiteáil breiseán a bhfuil muinín agat astu.",
     "title": "Breiseáin",
     "description": "Suiteáil agus bainistigh breiseáin chun feidhmiúlacht OmniRoute a leathnú",
     "loading": "Breiseáin á lódáil...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Déan Scanadh le haghaidh Breiseán",
     "noPlugins": "Níl aon bhreiseán suiteáilte",
     "noPluginsDescription": "Cuir eolairí breiseán in ~/.omniroute/plugins/ agus cliceáil Scan.",
+    "privilegesWarningTitle": "Ritheann forlíontáin le pribhléidí iomlána",
+    "privilegesWarningBody": "Ritheann breiseán mar phróiseas Node.js rialta leis an rochtain chéanna agus OmniRoute: is féidir leis comhaid a léamh, cláir a rith agus an líonra a úsáid, cibé ceadanna a dhearbhaíonn a fhorléiriú. Suiteáil breiseán a bhfuil muinín agat astu.",
     "activate": "Gníomhachtaigh",
     "deactivate": "Díghníomhachtaigh",
     "uninstall": "Díshuiteáil",

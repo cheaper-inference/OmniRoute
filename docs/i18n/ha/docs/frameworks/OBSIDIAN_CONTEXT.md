@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Tsaro & Sufuri
+
+Tabbatar da WebDAV yana tilasta bin diddigin gazawar kowane-IP da kullewa (yunƙurin gazawar 10 a cikin taga na daƙiƙa 60 yana haifar da kullewar minti 5 tare da `429 Too Many Requests` da `Retry-After`). Saboda WebDAV yana watsa ainihin shaidar shaidar, ƙare TLS (ko kewayawa a kan amintaccen rami kamar Tailscale ko Cloudflare Tunnel) ana bada shawarar sosai lokacin samun damar ƙarshen WebDAV a waje da madauki.
+
 ### Tushen mahalli na kowane API key (na zaɓi)
 
 Ana iya keɓance saitin Obsidian **ga kowane API key** ta hanyar teburin `api_key_context_sources`

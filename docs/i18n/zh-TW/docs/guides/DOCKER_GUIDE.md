@@ -27,13 +27,9 @@
 
 ---
 
-## 快速執行
+## 快速奔跑
 
-> **想用一個指令自行託管嗎？** 請參閱
-> [自行託管指南](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d`（已發布的映像檔 +
-> Redis、僅限回送介面，無須選擇設定檔）。下方的快速執行是供已在其他位置
-> 執行 Redis 的使用者採用的單一容器方式。
+> **透過一個指令自行託管？**請參閱[自架指南](../getting-started/SELF_HOST_GUIDE.md)— `docker compose -f docker-compose.selfhost.yml up -d` （已發佈的映像+ Redis，僅環回，無設定檔選擇）。下面的快速運行是已在其他地方運行Redis的用戶的單容器路徑。
 
 ```bash
 docker run -d \
@@ -42,7 +38,7 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## 附環境文件
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -238,16 +234,16 @@ docker compose -f docker-compose.prod.yml down
 
 ## Dockerfile 階段
 
-此儲存庫提供多階段 Dockerfile（`Dockerfile`）。共有四個可用階段；請依據使用情境選擇正確的 `target`。
+該儲存庫附帶了一個多階段 Dockerfile (`Dockerfile`)。暴露了四個階段；為您的用例選擇正確的`target` 。
 
-| 階段          | 基礎映像檔            | 用途                                                                                                                                                                                                                                              |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | 安裝相依套件（`npm ci --legacy-peer-deps`）並執行 `npm run build`（預設使用 Turbopack——請參閱下方的建置階段資源）                                                                                                                                 |
-| `runner-base` | `node:26-trixie-slim` | 包含 Next.js standalone 輸出的正式環境執行階段。**不包含任何提供者 CLI。**                                                                                                                                                                        |
-| `runner-cli`  | `runner-base`         | 加入 `git`、`docker.io`、`docker-compose`，以及全域 CLI：`@openai/codex`、`@anthropic-ai/claude-code`、`droid`、`openclaw`。**代理型工作流程請選擇此階段。**                                                                                      |
-| `runner-web`  | `runner-base`         | 加入 Playwright 與 Chromium 瀏覽器（`--with-deps`），供網頁工作階段提供者使用：`gemini-web`、`claude-web`、`claude-turnstile`。**使用這些提供者時請選擇此階段**——一般映像檔若未包含這些元件，會在請求時失敗（請參閱發布管道下方的 `-web` 說明）。 |
+| 階段          | 基礎鏡像              | 目的                                                                                                                                                                                                                      |
+| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | 安裝 deps (`npm ci --legacy-peer-deps`) 並執行`npm run build` （預設為Turbopack —請參閱下面的建置時資源）                                                                                                                 |
+| `runner-base` | `node:26-trixie-slim` | 具有Next.js獨立輸出的生產運作時。**沒有捆綁提供者CLIs 。**                                                                                                                                                                |
+| `runner-cli`  | `runner-base`         | 加入`git`、 `docker.io`、 `docker-compose`和全域CLIs： `@openai/codex`、 `@anthropic-ai/claude-code`、 `droid`、 `openclaw`。**選擇此選項用於代理工作流程。**                                                             |
+| `runner-web`  | `runner-base`         | 為 Web 會話提供者新增Playwright + Chromium 瀏覽器 (`--with-deps`)： `gemini-web`、 `claude-web`、 `claude-turnstile`。**當您使用這些提供者時選擇此項**—如果沒有它，純圖像在請求時會失敗（請參閱發布通道下的`-web`註釋）。 |
 
-手動建置特定 target：
+手動建立特定目標：
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -255,41 +251,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### 建置階段資源
+### 建置時資源
 
-有三個建置引數可控制 `builder` 階段的資源成本。它們僅適用於建置階段——
-`OMNIROUTE_MEMORY_MB`（見下文）是另一個獨立的執行階段調整項目。
+三個建構參數控制`builder`階段的成本。它們只是建造時的— `OMNIROUTE_MEMORY_MB` （如下）是一個單獨的運行時旋鈕。
 
-| 建置引數                    | 預設值 | 效果                                                                          |
-| --------------------------- | ------ | ----------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` 使用 webpack 建置：尖峰記憶體較低，但速度較慢。`1` 則啟用 Turbopack。     |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | 產生的 `next build` 所使用的 V8 堆積上限（`--max-old-space-size`）。          |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | 傳入 `CIRCLE_NODE_TOTAL`；Next 會推導出 `workers = N - 1`，用於收集頁面資料。 |
+| 建構參數                    | 預設   | 影響                                                                    |
+| --------------------------- | ------ | ----------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0`使用 webpack 建構：峰值記憶體較低，速度較慢。 `1`選擇加入Turbopack。 |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | 產生的`next build`的 V8 堆上限 (`--max-old-space-size`)。               |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | 飼料`CIRCLE_NODE_TOTAL`;接下來導出`workers = N - 1`用於頁面資料收集。   |
 
-`OMNIROUTE_BUILD_WORKERS` 是在大型建置主機上應調高的項目，也是資源受限的建置在
-`✓ Compiled successfully` **之後**終止時應優先懷疑的項目。每個
-頁面資料 worker 都是獨立處理程序，父層 `next build` 本身也是；
-在實際 VPS 上重現（issue #7518）時，測得每個處理程序的 RSS 尖峰約為
-4.5 GB，且不受 `NODE_OPTIONS` 堆積旗標影響（Turbopack 會在
-V8 堆積以外使用原生/Rust 記憶體）。預設值 `2`（→ 1 個 worker，共 2 個
-處理程序）是針對發布管線所使用的 16 GB / 4 vCPU GitHub 託管 runner
-而設定。設為 `8`（→ 7 個 worker）時，該 runner 會耗盡記憶體，且
-buildkit 會以 `ResourceExhausted: ... cannot allocate memory` 使該步驟失敗；
-在直接測量各處理程序的 RSS，而非加以推估後，`3`（→ 2 個 worker）仍無法容納。
-`tests/unit/docker-build-memory-budget.test.ts`
-會根據實測數值進行計算，並在任一調整項目超出 runner 容量時失敗。
+`OMNIROUTE_BUILD_WORKERS`是向大型構建器籌集資金的人，也是在受限構建死亡時懷疑的人**後**`✓ Compiled successfully`.每個頁面資料工作者都是它自己的進程，父`next build`本身也是如此；實時VPS複製（問題#7518）在~ 4.5 GB處測量每個進程的峰值RSS與`NODE_OPTIONS`堆標誌無關（Turbopack在 V8 堆外的native/Rust記憶體中編譯）。 `2`的預設值（→ 1 個工作線程，總共 2 個進程）的大小適合發佈管道使用的 16 個GB / 4 vCPU GitHub 託管的運行程序。在`8` （→ 7 工作人員），運行程式記憶體不足，buildkit 失敗了`ResourceExhausted: ... cannot allocate memory`的步驟；一旦直接測量而不是推斷每個進程的RSS `3` （→ 2工人）仍然不適合。 `tests/unit/docker-build-memory-budget.test.ts`根據測量的數字進行算術，如果任一旋鈕超出了轉輪，則算術失敗。
 
-Turbopack 會使用位於 V8 堆積**以外**的原生 Rust 記憶體進行編譯，因此
-`OMNIROUTE_BUILD_MEMORY_MB` 無法限制它。在設有記憶體上限的主機上，
-建置程序接著會遭 OOM killer 以 SIGKILL 終止，且完全沒有錯誤文字——它只會在
-`Creating an optimized production build` 期間停止，使其看起來像是停止回應，
-而不是記憶體不足。因此，`Dockerfile` 預設使用 webpack
-（`OMNIROUTE_USE_TURBOPACK=0`），這與 `npm run dev` / `npm run build`
-不同，後兩者的程式碼預設值為 Turbopack：未提供任何建置引數的純
-`docker build .`（Railway 與其他一鍵式主機所執行的方式）不得在有記憶體限制的
-建置主機上無聲終止。已發布的映像檔也已在 `docker-publish.yml` 中明確傳入
-`OMNIROUTE_USE_TURBOPACK=0`。若建置主機有充足 RAM，可選擇啟用 Turbopack
-以加快建置速度：
+Turbopack在本機 Rust 記憶體中進行編譯**外部**V8堆，所以`OMNIROUTE_BUILD_MEMORY_MB`不綁定它。在具有記憶體上限的主機上，建構由OOM殺手進行SIGKILLed ，根本沒有錯誤文字—它只是停止在`Creating an optimized production build`中，讀起來像是掛起而不是記憶體不足。這就是為什麼`Dockerfile`預設為 webpack (`OMNIROUTE_USE_TURBOPACK=0`)，與`npm run dev` / `npm run build`不同，其中Turbopack是代碼預設值：沒有建構參數的裸`docker build .` （Railway 和其他一鍵式主機運行的內容）不得在記憶體上限的建構器上悄無聲息地死亡。發布的圖像已在`docker-publish.yml`中明確通過`OMNIROUTE_USE_TURBOPACK=0` 。在具有大量RAM的建構器上，選擇Turbopack以獲得更快的建置：
 
 ```bash
 docker build --target runner-base \
@@ -297,48 +271,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` 已啟用，因此 `next build` 會執行一個父層處理程序**以及**一個
-worker 處理程序，而且兩者會分別遵循 `OMNIROUTE_BUILD_MEMORY_MB`。容器的上限應設定為
-約略超過該值的兩倍，而不是一倍。
+`webpackBuildWorker`已啟用，因此`next build`運行父級**和**一個工作進程，每個進程分別尊重`OMNIROUTE_BUILD_MEMORY_MB` 。將容器上限的大小設定為大約兩倍於該值，而不是一次。
 
-在此程式碼樹上測得（`--target runner-base`、`OMNIROUTE_BUILD_MEMORY_MB=6144`）：
+在這棵樹上測量（`--target runner-base`， `OMNIROUTE_BUILD_MEMORY_MB=6144`）：
 
-| 打包工具  | 容器上限       | 結果                        |
-| --------- | -------------- | --------------------------- |
-| Turbopack | 8 GiB / 16 GiB | 兩者皆遭 OOM 終止，且無訊息 |
-| webpack   | 8 GiB          | 建置 worker 遭 SIGKILL 終止 |
-| webpack   | 12 GiB         | 成功，尖峰為 11.1 GiB       |
+| 捆綁器    | 貨櫃頂棚       | 結果                      |
+| --------- | -------------- | ------------------------- |
+| Turbopack | 8 GiB / 16 GiB | 兩個都被 OOM 殺死，默默地 |
+| 網路封包  | 8 GiB          | 建築工人SIGKILLed         |
+| 網路封包  | 12 GiB         | 成功，最高達 11.1 GiB     |
 
-### 執行階段預設值
+### 運行時預設值
 
-`runner-base` 匯出的預設值：`PORT=20128`、`HOSTNAME=0.0.0.0`、`OMNIROUTE_MEMORY_MB=1024`、`NODE_OPTIONS=--max-old-space-size=1024`、`DATA_DIR=/app/data`、`OMNIROUTE_MIGRATIONS_DIR=/app/migrations`。
+`runner-base`導出的預設值： `PORT=20128`、 `HOSTNAME=0.0.0.0`、 `OMNIROUTE_MEMORY_MB=1024`、 `NODE_OPTIONS=--max-old-space-size=1024`、 `DATA_DIR=/app/data`、 `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`。
 
-Docker 中的記憶體行為：
+Docker中的記憶體行為：
 
-- 此映像檔會設定 `OMNIROUTE_MEMORY_MB=1024`，並據此衍生出 `NODE_OPTIONS=--max-old-space-size=1024`。
-- 實際的伺服器處理由獨立啟動器啟動；該啟動器會讀取 `OMNIROUTE_MEMORY_MB`，並附加 `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`。
-- Node 會使用最後一個重複指定的 `--max-old-space-size` 值，因此設定 `OMNIROUTE_MEMORY_MB` 即可控制 Docker 中實際生效的堆積記憶體上限。
-- 由於映像檔一律會設定此值，因此在 Docker 環境下，啟動器本身根據 RAM 校準的後備機制永遠不會生效。請依工作負載明確提高此值（見下表）。對程式設計代理的 `/v1/responses` 而言，`2048` 仍然太小。
+- 該圖像設定`OMNIROUTE_MEMORY_MB=1024`並從中導出`NODE_OPTIONS=--max-old-space-size=1024` 。
+- 實際的伺服器程序由獨立啟動器啟動，它讀取`OMNIROUTE_MEMORY_MB`並附加`--max-old-space-size=<OMNIROUTE_MEMORY_MB>`。
+- 節點使用最後重複的`--max-old-space-size`值，因此設定`OMNIROUTE_MEMORY_MB`控制有效的Docker堆限制。
+- 因為影像總是設定它，所以啟動器自己的 RAM 校準後備在Docker下永遠不會應用。針對工作負載明確提高它（下表）。 `2048`對於編碼代理`/v1/responses`來說仍然太小。
 
-### 程式設計代理的執行階段 RAM
+### 編碼代理的運行時RAM
 
-Docker 預設的 1 GiB 僅是儀表板／輕量聊天的最低需求，並非正式環境的建議配置。較長的 `POST /v1/responses` 主體（數百則訊息、數十個工具）會在壓縮期間於記憶體中保留多個圖形結構。兩個重疊、各約 3 MiB／約 75 萬 token 的請求，在 **12 GiB** 的 old-space 下曾導致 V8 中止（`FATAL ERROR: Reached heap limit`），也曾觸發 16 GiB cgroup OOM。詳見 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)。
+1 GiB Docker預設是dashboard/light-chat底板，而不是生產尺寸。長`POST /v1/responses`主體（數百個訊息、數十種工具）在壓縮期間保留多個記憶體中圖。兩個重疊的~ 3 MiB / ~ 750k 令牌請求已中止 V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) 也擊中了 16 GiB cgroup OOM。參見[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 。
 
-請將 **cgroup `--memory` 設定為高於堆積記憶體的容量**——原生緩衝區、SQLite 與壓縮中間資料皆位於 V8 之外。
+尺寸**堆上方的 cgroup `--memory`** —本機緩衝區、 SQLite和壓縮中間體位於 V8 之外。
 
-| 工作負載                              | `OMNIROUTE_MEMORY_MB`    | 容器／cgroup     | 備註                                                                             |
-| ------------------------------------- | ------------------------ | ---------------- | -------------------------------------------------------------------------------- |
-| 儀表板、單一輕量聊天                  | `1024`（映像檔預設值）   | ≥2 GiB           |                                                                                  |
-| 單一程式設計代理（Claude/Codex/Grok） | `8192`                   | ≥10 GiB          | 典型的單一工作階段 `/v1/responses`                                               |
-| 兩個並行的長篇 `/v1/responses`        | `10240`–`12288`          | ≥12–16 GiB       | 實測在約 12 GiB 堆積記憶體時發生 V8 中止                                         |
-| 三個以上並行的長上下文                | 請勿在單一處理程序上執行 | 序列化／更多 RAM | 預設重量級准入限制為 1 個進行中請求；若沒有增加 RAM 就提高此限制，將再次引發中止 |
+| 工作量                          | `OMNIROUTE_MEMORY_MB` | 容器/cgroup      | 筆記                                                           |
+| ------------------------------- | --------------------- | ---------------- | -------------------------------------------------------------- |
+| 儀表板，一鍵聊天                | `1024` （圖片預設）   | ≥2 GiB           |                                                                |
+| 一種編碼劑（Claude/Codex/Grok） | `8192`                | ≥10 GiB          | 典型的單一會話`/v1/responses`                                  |
+| 兩個並髮長`/v1/responses`       | `10240`–`12288`       | ≥12–16 GiB       | 測量到 V8 在~ 12 GiB堆處中止                                   |
+| 三個+並發長上下文               | 不要在一個進程上      | 序列化 / 更多RAM | 預設重量級入場次數為機上 1 次；在沒有RAM下提升它會重新引入中止 |
 
-在裸機上執行 `omniroute serve` 時，若未設定 `OMNIROUTE_MEMORY_MB`，會校準為 RAM 的約 35%（限制在 `[512, 4096]` 範圍內）。Docker 一律會設定 `1024`，因此官方映像檔中永遠不會執行此校準。
+`omniroute serve` on bare metal calibrates ~35% of RAM (clamped `[512, 4096]`) when `OMNIROUTE_MEMORY_MB` is **unset**. Docker always sets `1024`, so that calibration never runs in the official image.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## 關鍵環境變數
@@ -364,11 +336,11 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 ## 子路徑上的反向代理（Traefik / nginx）
 
-Next.js 的 `basePath` 會被編譯進獨立套件中。OmniRoute 會將建置時寫入的值記錄在應用程式根目錄的哨兵檔案中（於 `npm run build` 期間寫入；由 `scripts/docker/ensure-docker-base-path.mjs` 讀取），並在容器啟動時將其與 `OMNIROUTE_BASE_PATH` 比較。當兩者不同，且映像是針對網域根目錄建置時，進入點會在 `node dev/run-standalone.mjs` 執行前，重寫獨立套件資訊清單、內嵌的 `basePath`/`assetPrefix` 常值（Next 16 僅從 `assetPrefix` 產生 SSR 資產 URL，因此修補程式會將子路徑同步至其中）、建置時寫入的 `/_next/static` 資產 URL（用戶端參照資訊清單、媒體匯入、預先算繪的錯誤頁面），以及用戶端的 `process.env` 墊片。
+Next.js `basePath`被編譯到獨立包。 OmniRoute將烘焙值記錄在應用程式根目錄的哨兵檔案中（在`npm run build`期間寫入；由`scripts/docker/ensure-docker-base-path.mjs`讀取），並在容器啟動時與`OMNIROUTE_BASE_PATH`進行比較。當它們不同並且為域根建立映像時，入口點會重寫獨立清單、嵌入的`basePath`/`assetPrefix`文字（Next 16 僅從`assetPrefix`渲染SSR資產URLs —修補程式將子路徑鏡像到其中）、烘焙的`/_next/static` （客戶端引用錯誤清單、媒體、預渲染錯誤清單、媒體、預渲染錯誤）清單、媒體、媒體、媒體、 `node dev/run-standalone.mjs` `process.env` URLs 、媒體
 
-### Compose 建置（建議）
+### 撰寫建構（推薦）
 
-在 `.env` 中設定這兩個變數，然後重新建置，使映像與執行階段設定一致：
+在`.env`中設定兩個變量，然後重建以使影像和運行時一致：
 
 ```bash
 # .env
@@ -380,53 +352,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` 會將 `OMNIROUTE_BASE_PATH` 同時轉送為 Docker 建置引數及執行階段環境變數。
+`docker-compose.yml`將`OMNIROUTE_BASE_PATH`作為Docker建置參數和運行時環境變數轉發。
 
-### 預先建置的根目錄映像 + 執行階段子路徑
+### 預先建置根鏡像+運行時子路徑
 
-已發布的 `diegosouzapw/omniroute:*` 映像是針對網域根目錄建置的。您仍可在執行階段設定 `OMNIROUTE_BASE_PATH`；容器會在啟動時修補套件一次。請搭配相符的公開來源：
+已發布的`cheaperinference/omniroute:*`映像是為域根而建置的。您仍然可以在運行時設定`OMNIROUTE_BASE_PATH` ；容器在啟動時修補一次包。將其與匹配的公共來源配對：
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-設定反向代理以轉送**完整的**外部路徑（請勿移除前綴）。Traefik 應將 `PathPrefix(`/omniroute`)` 路由至容器，且不要使用 `StripPrefix`，如此 Next.js 才會接收到 `/omniroute/...`，並從 `/omniroute/_next/...` 提供資產。
+配置反向代理轉發**滿的**外部路徑（不要去掉前綴）。 Traefik 應該將`PathPrefix(`/omniroute `)`路由到沒有`StripPrefix`容器，因此Next.js接收`/omniroute/...`並從`/omniroute/_next/...`提供資產。
 
-Docker 健康檢查會探測輕量級的 `/healthz` 生命週期端點，並加上目前作用中的 `OMNIROUTE_BASE_PATH` 前綴。`/api/monitoring/health` 仍可用於人工或儀表板診斷；若要讓容器的 HEALTHCHECK 改回指向該端點（例如用於強制執行深度健康檢查），請設定 `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`。此路徑屬於**深度**檢查（DB + 監控摘要），若您選擇重新啟用，適合用於 Docker 低頻率的 `HEALTHCHECK`，但**不適合**用於 Kubernetes `livenessProbe` 的檢查間隔。
+Docker healthcheck 偵測以活動`OMNIROUTE_BASE_PATH`為前綴的輕量級`/healthz`生命週期端點。 `/api/monitoring/health`仍然可用於human/dashboard診斷；若要將容器HEALTHCHECK指向它（例如為了深度健康強制執行），請設定`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`。這條路徑是一條**深的**如果您選擇重新加入，請檢查（DB +監控摘要） —是否適合Docker的不常見`HEALTHCHECK` ，但是**不是**對於 Kubernetes `livenessProbe`間隔。
 
 對於協調器（Kubernetes、Nomad 等）：
 
-| 探測類型   | 建議                                                            | 避免                                         |
-| ---------- | --------------------------------------------------------------- | -------------------------------------------- |
-| 存活狀態   | HTTP `GET /livez`，或主連接埠上的 TCP（`PORT`，預設為 `20128`） | 將 `/api/monitoring/health` 用作存活狀態探測 |
-| 就緒狀態   | HTTP `GET /healthz`                                             | 使用過短的逾時，將事件迴圈忙碌視為程序已停止 |
-| 深度／黑箱 | `/api/monitoring/health`                                        | —                                            |
+| 探測      | 更喜歡                                                     | 避免                               |
+| --------- | ---------------------------------------------------------- | ---------------------------------- |
+| 活力      | 主連接埠上的HTTP `GET /livez`或TCP （`PORT`，預設`20128`） | `/api/monitoring/health`作為活躍度 |
+| 準備狀態  | HTTP `GET /healthz`                                        | 嚴格的超時將事件循環繁忙視為已死   |
+| 深/黑盒子 | `/api/monitoring/health`                                   | —                                  |
 
-`/healthz` 會回報程序生命週期（`ok` / `starting` / `stopping`）。`/livez` 僅檢查程序是否存活（只要處理常式能夠執行便回傳 200；它不會等待就緒狀態）。兩者仍與請求處理共用同一個 Node 事件迴圈，因此受 CPU 限制的目錄或壓縮工作可能會延遲回應——忙碌 ≠ 已停止。若 HTTP 探測逾時，建議使用 TCP 存活狀態探測。完整的探測指南：
-[監控指南 — Kubernetes 探測建議](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
+`/healthz`回報流程生命週期（`ok` / `starting` / `stopping`）。 `/livez`僅是進程活動的（每當處理程序可以運行時為 200；它不等待準備就緒）。兩者仍然在與請求處理相同的 Node 事件循環上運行，因此 CPU 密集的目錄或壓縮工作可能會延遲它們— busy ≠ dead。如果HTTP探測逾時，則首選TCP liveness。完整探針指導：[監控指南— Kubernetes 探針建議](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
 
-## 搭配 Caddy 使用 Docker Compose（HTTPS 自動 TLS）
+## Docker使用 Caddy 撰寫（HTTPS自動 TLS）
 
-OmniRoute 可透過 Caddy 的自動 SSL 配置安全地對外提供服務。請確保您網域的 DNS A 紀錄指向伺服器的 IP。
+使用 Caddy 的自動SSL配置可以安全地公開OmniRoute 。確保您網域的DNS A 記錄指向您伺服器的IP。
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # 用於 OAuth 回呼、儀表板連結及產生公開 URL 的瀏覽器端來源。
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # 用於排程工作／自行擷取的內部伺服器對伺服器 URL。
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -443,11 +414,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy 會為上游容器設定標準轉送標頭。OmniRoute 使用
-`NEXT_PUBLIC_BASE_URL` 作為 OAuth 回呼及所產生公開連結的標準公開來源；
-經驗證的儀表板寫入操作會使用同源請求，並搭配與工作階段綁定的 CSRF
-保護。僅應在進階部署中啟用 `OMNIROUTE_TRUST_PROXY`，亦即您有意讓
-OmniRoute 從受信任的轉送標頭推導公開來源，而不是使用明確設定。
+Caddy 為上游容器設定標準轉送標頭。 OmniRoute使用`NEXT_PUBLIC_BASE_URL`作為OAuth回調和產生公共連結的規範公共來源；經過驗證的儀表板寫入使用同源請求以及會話綁定的CSRF保護。僅在您有意希望OmniRoute從受信任的轉送標頭而不是明確配置中派生公共來源的高階部署中啟用`OMNIROUTE_TRUST_PROXY` 。
 
 ## Cloudflare Quick Tunnel
 
@@ -464,49 +431,51 @@ Docker 部署的儀表板支援在 `Dashboard → Endpoints` 上一鍵啟用 **C
 - Docker 映像檔內含系統 CA 根憑證，並將其傳遞給受管理的 `cloudflared`，以避免通道在容器內啟動時發生 TLS 信任失敗。
 - 如果您希望 OmniRoute 使用現有的二進位檔，而不是下載新的二進位檔，請設定 `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`。
 
-## 映像檔標籤
+## 圖片標籤
 
-| 映像檔                   | 標籤     | 大小   | 說明                                           |
-| ------------------------ | -------- | ------ | ---------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | 已**發布**的最高穩定 SemVer（不是 git `main`） |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | 在 GitOps 中固定使用此類標籤                   |
+| 影像                         | 標籤     | 尺寸 | 描述                                         |
+| ---------------------------- | -------- | ---- | -------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~    | 最高**發表**穩定的SemVer （不是 git `main`） |
+| `cheaperinference/omniroute` | `3.8.54` | ~    | 為GitOps固定此類標籤                         |
 
-多平台資訊清單：原生支援 `linux/amd64` + `linux/arm64`（Apple Silicon、AWS Graviton、Raspberry Pi）。Docker 會自動選取相符的架構；如果您需要在 ARM 主機上強制使用 AMD64 模擬，請傳入 `--platform linux/amd64`。
+相同的影像發佈到三個儲存庫，具有相同的每個架構摘要： `cheaperinference/omniroute` （Docker Hub，廉價推理組織，從 3.8.53 開始）、 `ghcr.io/cheaper-inference/omniroute`和舊版`diegosouzapw/omniroute`，它保留其拉取歷史記錄並仍然接收每個版本。現有的`diegosouzapw/omniroute`部署不斷更新；切換映像名稱是可選的。下面的`:next` / `:next-web`預發佈頻道僅發佈到`diegosouzapw/omniroute`和GHCR 。
+
+多平台清單： `linux/amd64` + `linux/arm64`本機（Apple Silicon、 AWS Graviton、Raspberry Pi）。 Docker自動選擇符合的架構；如果需要在ARM主機上強制進行AMD64模擬，請傳遞`--platform linux/amd64` 。
 
 ### 發布管道
 
-OmniRoute 針對穩定版本、作用中發布分支測試及開發組建，分別發布不同的 Docker 管道。
+OmniRoute為穩定版本、主動版本分支測試和開發建置發佈單獨的Docker通道。
 
-| 管道                            | 來源                         | 可變性           | 建議用途                                                                                     |
-| ------------------------------- | ---------------------------- | ---------------- | -------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | 已簽署／具版本編號的發行版本 | 不可變           | 固定使用特定發行版本的正式環境部署                                                           |
-| `:latest` / `:latest-web`       | 已**發布**的最高穩定 SemVer  | 可變的穩定指標   | 在 SemVer 發布工作完成**後**跟隨穩定版本——**不會**追蹤 `main` 或尚未發布的 `release/v*` 提交 |
-| `:next` / `:next-web`           | 目前預設的 `release/v*` 分支 | 可變的預發布指標 | 測試已合併至作用中發布分支、但尚未納入穩定版本的修正                                         |
-| `:main` / `:main-web`           | `main` 分支                  | 可變的開發指標   | 僅供開發及整合測試                                                                           |
+| 頻道                            | 來源                     | 變動性         | 推薦用途                                                                                |
+| ------------------------------- | ------------------------ | -------------- | --------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned發布     | 不可變的       | 固定確切版本的生產部署                                                                  |
+| `:latest` / `:latest-web`       | 最高**發表**穩定的SemVer | 可變穩定指針   | 遵循穩定版本**後**SemVer發布作業—執行的操作**不是**追蹤`main`或未發布的`release/v*`提交 |
+| `:next` / `:next-web`           | 當前預設`release/v*`分支 | 可變預發布指針 | 測試已登陸活動版本分支但尚未進入穩定版本的修復程序                                      |
+| `:main` / `:main-web`           | `main`分行               | 可變開發指針   | 僅開發和整合測試                                                                        |
 
-#### Web 工作階段提供者：`-web` 映像檔
+#### 網路會話提供者： `-web`圖像
 
-上述每個管道都另有對應的 `-web` 標籤（`:latest-web`、`:<version>-web`、`:next-web`、`:main-web`），這些映像檔是從 `runner-web` 階段建置而成，也就是相同的映像檔加上 Playwright 和 Chromium 瀏覽器。一般映像檔**不含** Chromium；`gemini-web`、`claude-web` 和 `claude-turnstile` 需要它。
+上面的每個頻道都兼作`-web`標籤（`:latest-web`、 `:<version>-web`、 `:next-web`、 `:main-web`），從`runner-web`階段—相同的圖像加上Playwright和 Chromium 瀏覽器構建。簡單的圖像船**沒有**鉻; `gemini-web`、 `claude-web`和`claude-turnstile`需要它。
 
-此錯誤會延後發生，而不是在啟動時發生：這些提供者會列出其模型，並在儀表板中顯示為已連線，直到第一次請求時才會失敗，錯誤如下：
+失敗是延遲的，而不是啟動時間：這些提供者列出了他們的模型並在儀表板中顯示為已連接，並且只有第一個請求失敗並顯示
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-如果您使用這些提供者，請拉取目前所在管道的 `-web` 標籤，其他設定皆無須變更。如果透過 npm/CLI 安裝（未使用 Docker 映像檔），缺少的對應項目是瀏覽器二進位檔：請在主機上執行 `npx playwright install chromium`。
+如果您使用這些提供者，請拉取您已經在—上的頻道的`-web`標籤，沒有其他變更。在npm/CLI安裝（無Docker映像）上，等效的缺失部分是瀏覽器二進位檔案：在主機上執行`npx playwright install chromium` 。
 
-#### 使用預發布管道
+#### 使用預發布通道
 
-`next` 通道會在每次推送至目前預設的 `release/v*` 分支時重新建置，並針對 AMD64 與 ARM64 發佈。較舊的維護分支無法覆寫此通道。此通道提供可供拉取的映像，包含已合併至作用中發行分支、但尚未建立下一個穩定標籤的修正。
+`next`通道會在每次推送到目前預設`release/v*`分支時重建，並針對AMD64和ARM64發布。較舊的維護分支無法覆蓋它。該通道為在下一個穩定標籤被刪除之前已合併到活動發布分支中的修復程序提供了可拉取的圖像。
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-若使用 Docker Compose，請覆寫所選設定檔使用的映像標籤，然後拉取映像並重新建立服務：
+對於Docker Compose，覆蓋所選設定檔使用的鏡像標籤，然後拉取並重新建立服務：
 
 ```yaml
 services:
@@ -519,32 +488,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### 安全性與復原
+#### 安全與回滾
 
-`next` 是浮動的預發行通道。每次推送至作用中發行分支時，它都可能變更，且**不支援用於正式環境**。評估特定建置版本時，請固定映像摘要：
+`next`是一个浮动预发布通道。它可能會在任何推送到活動發布分支時發生變化，並且是**不支援生產用途**。在评估特定构建时固定图像摘要：
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-測試之前，請備份 OmniRoute 資料磁碟區或以繫結方式掛載的資料目錄。若要復原，請還原先前使用的穩定版本或摘要，並重新建立容器：
+測試前，請備份OmniRoute資料卷或綁定掛載的資料目錄。若要回滾，請還原先前使用的穩定版本或摘要並重新建立容器：
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-發行分支的建置絕不會移動 `latest`；只有符合資格的穩定語意化版本才能更新穩定版本指標。`next` 映像仍會執行發行映像檢查，並保留會阻擋 CRITICAL 嚴重性漏洞的閘道。
+發布分支建置永遠無法移動`latest`；只有符合條件的穩定語意版本才能提升穩定指針。 `next`鏡像保留發布鏡像檢查並阻止關鍵漏洞門。
 
-**`latest` 並不保證與 git 保持同步。** 合併至 `main` 或作用中 `release/v*` 分支的修正，必須等到穩定的 SemVer 映像發佈，且發佈作業將 `:latest` 更新至該 SemVer 的相同摘要後，才會包含在 `:latest` 中。如果 GitHub 已顯示修正，但 `latest` 看起來仍未更新，請拉取 `:next` 以測試發行分支，或等待 SemVer 標籤。
+**`latest`不是 git 的貨幣保證。** `main`或活動`release/v*`分支上的合併修復是**不是**在`:latest`中，直到發布穩定的SemVer映像，並且發布作業會提升`:latest` （與SemVer相同的摘要）。如果`latest`看起來凍結，而GitHub已經顯示修復，請拉`:next`來測試發布分支或等待SemVer標籤。
 
-| 您的需求                                           | 使用方式                        |
-| -------------------------------------------------- | ------------------------------- |
-| 不得發生版本漂移的 GitOps／正式環境                | 固定使用 `:X.Y.Z`（或映像摘要） |
-| 跟隨已發佈的穩定版本，並接受每次發行時重新建立容器 | `:latest`                       |
-| 測試尚未發行的 `release/v*` 提交                   | `:next`（非正式環境）           |
-| 測試 `main`                                        | `:main`（非正式環境）           |
+| 你想要                                       | 使用                        |
+| -------------------------------------------- | --------------------------- |
+| GitOps / 生產不能漂移                        | Pin `:X.Y.Z` （或圖片摘要） |
+| 關注已發布的穩定版本並接受每個版本的重新創建 | `:latest`                   |
+| 測試未發布的`release/v*`提交                 | `:next` （非生產）          |
+| 測試`main`                                   | `:main` （非生產）          |
 
 ## Docker 中的儀表板更新
 
@@ -718,50 +687,30 @@ volumes:
 
 進程內密度（ HTTP隔離壓縮）為[#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) 。共享持久狀態上的一個邏輯集群是[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。
 
-## Docker 內的 Gemini 區域錯誤
+## Docker內的 Gemini 區域錯誤
 
-Google AI Studio / Gemini API 可能會傳回 HTTP 400、FAILED_PRECONDITION，以及
-`API 使用不支援使用者所在位置。` 主機上的請求成功，
-並不代表容器會使用相同的對外路由。DNS 排序、
-IPv4/IPv6 連線能力、VPN 路由及已設定的代理伺服器都可能不同。請檢查
-[Google 支援的區域](https://ai.google.dev/gemini-api/docs/available-regions)
-以及實際的連線路由；僅憑此錯誤無法判定 API 金鑰有問題。
+Google AI Studio / Gemini API可以用FAILED_PRECONDITION和`User location is not supported for the API use.`回傳HTTP 400 主機上的成功請求並不能證明容器使用相同的出站路由。 DNS排序、 IPv4/IPv6連線、 VPN路由和設定的代理程式可能有所不同。查看[Google支援的地區](https://ai.google.dev/gemini-api/docs/available-regions)以及實際連接路由；僅此錯誤並不能辨識出錯誤的API金鑰。
 
-### 優先使用連線專屬代理伺服器
+### 首選特定於連接的代理
 
-針對受影響的 Gemini 連線，使用 OmniRoute 的[個別連線代理伺服器設定](../ops/PROXY_GUIDE.md#4-level-proxy-system)，
-然後使用相同模型再次執行**測試連線**和一個小型請求。
-這可將路由變更限制在該連線的範圍內。請確認容器可連線至代理伺服器，
-且該連線確實選用了它。變更路由並不保證符合上游的區域資格。
+對受影響的 Gemini 連線使用OmniRoute的[每連線代理配置](../ops/PROXY_GUIDE.md#4-level-proxy-system)，然後重複**測試連接**以及同型號的小要求。這會使路由變更的範圍保持在該連線範圍內。驗證代理是否可以從容器訪問，並且連接確實選擇了它。更改路線並不能保證上游區域的資格。
 
-### 比較主機與容器的網路
+### 比較主機和容器網絡
 
-比較經驗證的結果時，請保持金鑰、模型和請求完全相同；切勿將憑證、
-代理伺服器密碼或完整的授權標頭貼到議題中。
-首先使用相同命令在主機及容器內檢查作業系統解析器提供哪些位址家族：
+比較認證結果時，請保持金鑰、模型和請求相同；切勿將憑證、代理密碼或完整授權標頭貼到問題中。首先在主機和容器內使用相同的指令檢查OS解析器提供的位址系列：
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-請將 `omniroute` 替換為您執行的服務（例如 `omniroute-web`）。這些
-命令會列印位址家族，而不會顯示憑證或 IP 位址。傳回 `6`
-只表示有 IPv6 DNS 結果：這**不能**證明有可用的 IPv6 路由或 API 存取能力。
-若已安裝 `curl`，請在兩個環境中比較 `curl -4 -I https://generativelanguage.googleapis.com`
-與 `curl -6 -I https://generativelanguage.googleapis.com`。
-HTTP 回應即表示該探測具有連線能力，即使回應是未經驗證的錯誤亦然；
-只有經驗證的模型請求才能測試 Gemini 的使用資格。
+將`omniroute`替換為您正在執行的服務（例如`omniroute-web`）。這些指令會列印沒有憑證或IP位址的位址族。傳回的`6`僅顯示IPv6 DNS結果：它確實**不是**證明可用的IPv6路由或API存取。在安裝了`curl`情況下，比較兩個環境中的`curl -4 -I https://generativelanguage.googleapis.com`和`curl -6 -I https://generativelanguage.googleapis.com` 。 HTTP回應證明該探測的連接性，即使它是未經身份驗證的錯誤；只有經過身份驗證的模型請求才能測試 Gemini 的資格。
 
-### 主機層級的替代方案：可運作的 IPv6 與解析器原則
+### 主機級替代方案：工作IPv6和解析器策略
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) 的回報者透過啟用容器 IPv6 並變更 glibc 位址選擇，
-在其環境中恢復了存取。請將此視為特定環境的替代方案。調整解析器偏好設定前，
-請先確認主機 IPv6 可正常運作、容器的對外連線／路由，以及防火牆規則。
-僅有私有 ULA 位址並不代表具備公用 IPv6 連線能力。
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)的記者透過啟用容器IPv6並更改 glibc 位址選擇來恢復其環境中的存取。將其視為特定於環境的替代方案。在調整解析器首選項之前確認工作主機IPv6、容器egress/routing和防火牆規則。私有ULA位址本身不會建立公用IPv6連線。
 
-對於已連接至 Compose 預設網路的服務，以下片段會在該網路上啟用
-IPv6；請保留服務、連接埠、磁碟區和組態的其餘內容：
+對於已附加到 Compose 預設網路的服務，此片段會在該網路上啟用IPv6 ；保留其餘的服務、連接埠、磁碟區和設定：
 
 ```yaml
 networks:
@@ -769,30 +718,13 @@ networks:
     enable_ipv6: true
 ```
 
-若使用具名網路，請在服務實際加入的網路上啟用 IPv6。Docker 可以
-配置 ULA 子網路；只有在您的網路有此需求時，才選用明確且不重疊的子網路。
-請參閱 [Docker IPv6 網路](https://docs.docker.com/engine/daemon/ipv6/)
-和 [Compose 網路選項](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)。
+對於命名網絡，在服務實際加入的網路上啟用它。 Docker可以分配ULA網路；只有當您的網路需要時才選擇明確的、不重疊的子網路。請參閱[Docker IPv6網路](https://docs.docker.com/engine/daemon/ipv6/)和[Compose 網路選項](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)。
 
-在**以 glibc 為基礎的映像檔**上，`/etc/gai.conf` 可以變更位址選擇。目前的
-儲存庫 Dockerfile 使用 Debian；自訂且以 musl 為基礎的映像檔不適用此機制。
-回報的調整會將 ULA 標籤從 `label fc00::/7 6` 變更為
-`label fc00::/7 1`。請從映像檔的完整原則表開始，並保留其他
-項目：新增 `label` 或 `precedence` 項目會取代該預設表，因此只包含
-變更行的檔案並不足夠。
-[glibc 組態參考](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-記載了這些語意。請將審查過的檔案以唯讀方式繫結掛載至 `/etc/gai.conf`，
-並重新建立服務以套用變更。
+上一個**基於 glibc 的圖像**, `/etc/gai.conf` can change address selection. The current repository Dockerfile uses Debian; custom musl-based images do not share this mechanism. The reported adjustment changes the ULA label from `label fc00::/7 6` to `label fc00::/7 1`. Start from the image's complete policy table and preserve its other entries: adding a `label` or `precedence` entry replaces that default table, so a file containing only the changed line is insufficient. The [glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf) documents those semantics. Bind-mount the reviewed file read-only at `/etc/gai.conf` and recreate the service to apply it.
 
-此操作會變更**該容器中所有對外流量**的作業系統位址選擇。
-它不會強制每個應用程式選擇 IPv6：Node 的 DNS 排序和連線
-選擇也會造成影響。尤其是，`--dns-result-order=ipv4first` 會優先使用 IPv4，
-並不是 IPv4 專屬失敗的解決方法。請參閱 [Node DNS 排序](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)。
+This changes OS address selection for**該容器中的所有出站流量**。它并不强制每个应用程序选择IPv6：节点的DNS顺序和连接选择也很重要。特别是， `--dns-result-order=ipv4first`更喜欢IPv4 ，并且不是IPv4-only失败的补救措施。请参阅[节点DNS排序](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)。
 
-進行任何主機層級變更後，請重新測試 Gemini 和其他提供者。若要復原，
-請移除自訂的 `gai.conf` 掛載、還原先前的網路組態，並在維護時段內
-重新建立受影響的服務／網路。重新建立網路可能會中斷連接至該網路的其他容器；
-請勿刪除永久資料磁碟區。
+在任何主機層級更改後重新測試 Gemini 和您的其他提供者。若要回滾，請刪除自訂`gai.conf`掛載，恢復先前的網路設定並在維護時段內重新建立受影響的service/network 。重新建立網路可能會中斷連接到該網路的其他容器；不要刪除持久性資料卷。
 
 ## 重要注意事項
 

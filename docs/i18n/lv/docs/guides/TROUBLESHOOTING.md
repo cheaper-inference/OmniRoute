@@ -475,7 +475,7 @@ skatiet failā [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Pastāvīgs risinājums:** Veiciet tiešu piesaisti IPv4, savā `docker run` komandā izmantojot `-p 127.0.0.1:20128:20128`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Tas piespiedu kārtā izmanto IPv4 piesaisti un arī novērš starpniekservera pieejamību visās resursdatora saskarnēs.
 
