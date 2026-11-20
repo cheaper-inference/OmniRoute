@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "حد باید یک عدد صحیح مثبت باشد.",
     "error": "خطا: {message}",
     "serverOffline": "سرور OmniRoute آفلاین است. با این دستور راه‌اندازی کنید: omniroute serve",
     "authRequired": "احراز هویت لازم است. OMNIROUTE_API_KEY را تنظیم کنید یا اجرا کنید: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[شبیه‌سازی] اقدام می‌شد: {action}",
     "cancelled": "لغو شد.",
     "jsonOpt": "خروجی به صورت JSON",
-    "yesOpt": "رد کردن تأیید"
+    "yesOpt": "رد کردن تأیید",
+    "positiveIntegerRequired": "حد باید یک عدد صحیح مثبت باشد."
   },
   "setup": {
     "title": "راهاندازی OmniRoute",

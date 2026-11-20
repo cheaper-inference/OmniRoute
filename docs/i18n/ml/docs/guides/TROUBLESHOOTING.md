@@ -460,7 +460,7 @@ v3.8.0-ന് _മുമ്പ്_ ഇംപോർട്ട് ചെയ്ത �
 2. **സ്ഥിരമായ പരിഹാരം:** നിങ്ങളുടെ `docker run` കമാൻഡിൽ `-p 127.0.0.1:20128:20128` ഉപയോഗിച്ച് IPv4-ലേക്ക് വ്യക്തമായി ബൈൻഡ് ചെയ്യുക:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ഇത് IPv4 ബൈൻഡ് നിർബന്ധമാക്കുകയും എല്ലാ ഹോസ്റ്റ് ഇന്റർഫേസുകളിലും പ്രോക്സി തുറന്നുകാട്ടുന്നത് ഒഴിവാക്കുകയും ചെയ്യുന്നു.
 

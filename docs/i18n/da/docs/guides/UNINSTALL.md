@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Valgfrit) Fjern imaget
+docker rmi cheaperinference/omniroute:latest
+# Ældre installationer trak det gamle navn:
 docker rmi diegosouzapw/omniroute:latest
 ```
 
