@@ -239,6 +239,14 @@ test("catalog key: the regular extraction wins, a bare x-api-key is the last res
     extractCatalogApiKey(req({ "x-goog-api-key": "sk-g", "x-api-key": "sk-a" })),
     "sk-g"
   );
+  const pathScoped = new Request("http://localhost/vscode/sk-p/models", {
+    headers: { "x-api-key": "sk-a" },
+  });
+  assert.equal(extractCatalogApiKey(pathScoped), "sk-p");
+  assert.equal(
+    extractCatalogApiKey(req({ Authorization: "Bearer ", "x-api-key": "sk-a" })),
+    "sk-a"
+  );
   assert.equal(extractCatalogApiKey(req({ "x-api-key": "   " })), null);
   assert.equal(extractCatalogApiKey(req({})), null);
 });

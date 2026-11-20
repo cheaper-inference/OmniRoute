@@ -98,8 +98,8 @@ export async function getModelCatalogAuthRejection(
  * user agent, so a client that discovers models with a bare `x-api-key` used to be
  * listed as anonymous. Scoping never rejects (an unknown key resolves to no
  * metadata and the listing is returned unfiltered), so the bare header is accepted
- * here, but only when the regular extraction found nothing: the key that scopes is
- * then always the key that would authenticate.
+ * here, but only when the regular extraction found nothing, so it never overrides a
+ * key the regular extraction found.
  *
  * Never use this to accept or reject a request; `getModelCatalogAuthRejection`
  * keeps the stricter `extractApiKey`.
