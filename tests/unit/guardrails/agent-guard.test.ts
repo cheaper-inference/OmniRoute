@@ -5,6 +5,12 @@ const { classifyClientAgent } =
   await import("../../../src/lib/guardrails/agentGuard/classifier.ts");
 const { providerFromModelString, evaluateAgentPolicy } =
   await import("../../../src/lib/guardrails/agentGuard/policy.ts");
+const { FEATURE_FLAG_DEFINITIONS } =
+  await import("../../../src/shared/constants/featureFlagDefinitions.ts");
+const core = await import("../../../src/lib/db/core.ts");
+const flagsDb = await import("../../../src/lib/db/featureFlags.ts");
+const { AgentGuardGuardrail } = await import("../../../src/lib/guardrails/agentGuard/guardrail.ts");
+const { GuardrailRegistry } = await import("../../../src/lib/guardrails/registry.ts");
 
 const kind = (h: Parameters<typeof classifyClientAgent>[0]) => {
   const c = classifyClientAgent(h);
@@ -50,6 +56,10 @@ test("classifier: known third-party agents by user-agent, X-Title or referer", (
     [{ "x-title": "Roo Code" }, "roo-code"],
     [{ "user-agent": "opencode/0.3.1" }, "opencode"],
     [{ "user-agent": "Aider/0.82.0" }, "aider"],
+    [{ "user-agent": "cline-proxy/1.0" }, "cline"], // "-" is a word boundary
+    [{ "user-agent": "x cline" }, "cline"],
+    [{ "user-agent": "foo aider" }, "aider"], // token at the very end
+    [{ "user-agent": "mycline cline" }, "cline"], // rejected first hit, valid second
     [{ "user-agent": "Anthropic/JS 0.122.0", "x-title": "Kilo Code" }, "kilocode"], // a token beats SDK markers
   ];
   for (const [h, agent] of cases)
@@ -102,6 +112,7 @@ test("providerFromModelString: prefixed, alias, quota-share and bare forms", () 
     ["qtSd/teamx/cc/claude-opus-4-8", "claude"],
     ["openai/gpt-5", "openai"],
     ["gpt-5", null],
+    ["/foo", null],
     ["", null],
     [null, null],
   ];
@@ -122,7 +133,10 @@ const kilo = { agent: "kilocode", official: false, thirdParty: true, signals } a
 const unknown = { agent: "unknown", official: false, thirdParty: false, signals } as const;
 
 test("policy: official allowed; third-party and unknown flagged with distinct reasons", () => {
-  assert.equal(evaluateAgentPolicy(official, "claude").action, "allow");
+  assert.deepEqual(evaluateAgentPolicy(official, "claude"), {
+    action: "allow",
+    reason: "official agent claude-code on claude",
+  });
   assert.deepEqual(evaluateAgentPolicy(kilo, "claude"), {
     action: "flag",
     reason: "third-party agent kilocode on claude",
@@ -134,12 +148,12 @@ test("policy: official allowed; third-party and unknown flagged with distinct re
 });
 
 test("policy: only claude and anthropic are observed", () => {
-  assert.equal(evaluateAgentPolicy(kilo, "glm").action, "allow");
+  assert.deepEqual(evaluateAgentPolicy(kilo, "glm"), {
+    action: "allow",
+    reason: "provider not observed",
+  });
   assert.equal(evaluateAgentPolicy(kilo, null).action, "allow");
 });
-
-const { FEATURE_FLAG_DEFINITIONS } =
-  await import("../../../src/shared/constants/featureFlagDefinitions.ts");
 
 test("AGENT_GUARD_MODE is a security enum flag, off by default, with no block value", () => {
   const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "AGENT_GUARD_MODE");
@@ -152,4 +166,139 @@ test("AGENT_GUARD_MODE is a security enum flag, off by default, with no block va
     FEATURE_FLAG_DEFINITIONS.some((d) => d.key === "AGENT_GUARD_STRICT"),
     false
   );
+});
+
+const MODEL = "claude/claude-sonnet-5";
+const KILO = { "user-agent": "Kilo-Code/4.2.1", "x-title": "Kilo Code" };
+const monitor = () => new AgentGuardGuardrail({ mode: "monitor" });
+function capture() {
+  const calls: unknown[][] = [];
+  const push =
+    (level: string) =>
+    (...args: unknown[]) =>
+      void calls.push([level, ...args]);
+  return { calls, log: { debug() {}, error() {}, info: push("info"), warn: push("warn") } };
+}
+test.after(() => {
+  delete process.env.AGENT_GUARD_MODE;
+  flagsDb.clearAllFeatureFlagOverrides();
+  core.resetDbInstance();
+});
+test("guardrail: agent-guard, priority 1; off reads no header and writes no log", async () => {
+  const g = new AgentGuardGuardrail({ mode: "off" });
+  assert.deepEqual([g.name, g.priority, g.enabled], ["agent-guard", 1, true]);
+  let reads = 0;
+  const headers = { get: () => (reads++, "Kilo-Code/4.2.1") } as unknown as Headers;
+  const { calls, log } = capture();
+  assert.deepEqual(
+    [await g.preCall({}, { model: MODEL, headers, log }), reads, calls.length],
+    [{ block: false }, 0, 0]
+  );
+});
+test("guardrail: monitor logs third-party at warn and unknown at info, never blocks", async () => {
+  const { calls, log } = capture();
+  const apiKeyInfo = { id: "key-1", key: "sk-SECRET" };
+  assert.deepEqual(await monitor().preCall({}, { model: MODEL, headers: KILO, log, apiKeyInfo }), {
+    block: false,
+  });
+  assert.deepEqual(
+    await monitor().preCall({}, { model: MODEL, headers: { "user-agent": "curl/8.5.0" }, log }),
+    { block: false }
+  );
+  assert.deepEqual(calls[0].slice(0, 3), [
+    "warn",
+    "AGENT_GUARD",
+    "third-party agent kilocode on claude",
+  ]);
+  assert.deepEqual(calls[0][3], {
+    agent: "kilocode",
+    thirdParty: true,
+    provider: "claude",
+    model: MODEL,
+    apiKeyId: "key-1",
+    userAgent: "Kilo-Code/4.2.1",
+    xApp: "",
+    anthropicBeta: "",
+    xTitle: "Kilo Code",
+    referer: "",
+    stainless: false,
+  });
+  assert.deepEqual(calls[1].slice(0, 3), ["info", "AGENT_GUARD", "unidentified agent on claude"]);
+});
+test("guardrail: observes the cc alias and quota-share ids; silent for official agents, other providers, bare ids", async () => {
+  const { calls, log } = capture();
+  await monitor().preCall({}, { model: "cc/claude-sonnet-5", headers: KILO, log });
+  await monitor().preCall({}, { model: "qtSd/teamx/claude/claude-opus-4-8", headers: KILO, log });
+  assert.deepEqual(
+    calls.map((c) => (c[3] as { provider: string }).provider),
+    ["claude", "claude"]
+  );
+  await monitor().preCall(
+    {},
+    {
+      model: MODEL,
+      headers: { "user-agent": "claude-cli/2.1.80 (external, cli)", "x-app": "cli" },
+      log,
+    }
+  );
+  await monitor().preCall({}, { model: "glm/glm-5", headers: KILO, log });
+  await monitor().preCall({}, { model: "claude-sonnet-5", headers: KILO, log }); // documented limit
+  assert.equal(calls.length, 2);
+});
+test("guardrail: the log never carries the API key, authorization or cookies", async () => {
+  const { calls, log } = capture();
+  const headers = new Headers({
+    ...KILO,
+    authorization: "Bearer sk-SECRET",
+    "x-api-key": "sk-ant-SECRET",
+    cookie: "s=SECRET",
+  });
+  await monitor().preCall(
+    {},
+    { model: MODEL, headers, log, apiKeyInfo: { id: "key-1", key: "sk-SECRET" } }
+  );
+  assert.equal(calls.length, 1);
+  assert.doesNotMatch(JSON.stringify(calls), /SECRET|authorization|x-api-key|cookie/i);
+});
+test("guardrail: fails open when headers or the logger throw, and without log or model", async () => {
+  const boom = () => {
+    throw new Error("boom");
+  };
+  const badHeaders = { get: boom } as unknown as Headers;
+  assert.deepEqual(await monitor().preCall({}, { model: MODEL, headers: badHeaders }), {
+    block: false,
+  });
+  assert.deepEqual(
+    await monitor().preCall({}, { model: MODEL, headers: KILO, log: { warn: boom, info: boom } }),
+    { block: false }
+  );
+  assert.deepEqual(await monitor().preCall({}, { model: MODEL, headers: KILO }), { block: false });
+  assert.deepEqual(await monitor().preCall({}, {}), { block: false });
+});
+test("guardrail: mode follows AGENT_GUARD_MODE (default off, env, DB override wins, other values off)", async () => {
+  const g = new AgentGuardGuardrail();
+  const logged = async () => {
+    const { calls, log } = capture();
+    await g.preCall({}, { model: MODEL, headers: KILO, log });
+    return calls.length;
+  };
+  delete process.env.AGENT_GUARD_MODE;
+  assert.equal(await logged(), 0);
+  process.env.AGENT_GUARD_MODE = " Monitor ";
+  assert.equal(await logged(), 1);
+  flagsDb.setFeatureFlagOverride("AGENT_GUARD_MODE", "off");
+  assert.equal(await logged(), 0);
+  flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
+  process.env.AGENT_GUARD_MODE = "block";
+  assert.equal(await logged(), 0);
+});
+test("guardrail: a request that disables agent-guard is skipped by the registry (known limit)", async () => {
+  const registry = new GuardrailRegistry();
+  registry.register(monitor());
+  const { calls, log } = capture();
+  const out = await registry.runPreCallHooks(
+    {},
+    { model: MODEL, headers: KILO, log, disabledGuardrails: ["agent-guard"] }
+  );
+  assert.deepEqual([out.blocked, out.results[0].skipped, calls.length], [false, true, 0]);
 });
