@@ -1,0 +1,1 @@
+- **fix(translators):** Honor fixed Gemini 4 model tiers by default and preserve native `xhigh` where supported, without overriding explicit reasoning controls.
