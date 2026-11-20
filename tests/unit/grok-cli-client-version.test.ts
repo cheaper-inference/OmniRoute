@@ -13,13 +13,19 @@ import { GrokCliExecutor } from "../../open-sse/executors/grok-cli.ts";
 
 function assertVersion(expected: string): void {
   assert.equal(getGrokBuildClientVersion(), expected);
-  assert.ok(getGrokBuildUserAgent().startsWith(`grok-shell/${expected} (`));
+  // Chat face advertises the dual pager UA; the models/OAuth faces the shell UA.
+  assert.ok(getGrokBuildUserAgent().startsWith(`grok-pager/${expected} grok-shell/${expected} (`));
   for (const headers of [
     getGrokBuildSessionHeaders(),
+    new GrokCliExecutor().buildHeaders({}, false),
+  ]) {
+    assert.equal(headers["x-grok-client-version"], expected);
+    assert.ok(headers["User-Agent"].startsWith(`grok-pager/${expected} grok-shell/${expected} (`));
+  }
+  for (const headers of [
     getGrokBuildModelsHeaders({}),
     getGrokBuildOAuthHeaders("ui"),
     getGrokBuildOAuthHeaders("cli"),
-    new GrokCliExecutor().buildHeaders({}, false),
   ]) {
     assert.equal(headers["x-grok-client-version"], expected);
     if (headers["User-Agent"]) {

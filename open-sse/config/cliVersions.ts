@@ -1,17 +1,18 @@
-// Operator-set CLI client-version overrides, shared by the Claude Code and Codex
-// identity presets.
+// Operator-set CLI client-version overrides, shared by the Claude Code, Codex
+// and Grok Build (grok-cli) identity presets.
 //
-// Both upstreams gate newer models on the advertised CLI version ("The
-// 'gpt-6-astra' model requires a newer version of Codex"; Anthropic does the same
-// for new Opus/Sonnet tiers). The captured pins therefore rot as the operators'
-// real CLIs move on. This store holds the dashboard-set override that sits on top
-// of the env var and the pin.
+// Upstreams gate newer models on the advertised CLI version ("The 'gpt-6-astra'
+// model requires a newer version of Codex"; Anthropic does the same for new
+// Opus/Sonnet tiers), and Grok Build reads the advertised grok-pager/grok-shell
+// version the same way. The captured pins therefore rot as the operators' real
+// CLIs move on. This store holds the dashboard-set override that sits on top of
+// the env var and the pin.
 //
 // Keep this module dependency-free: it is imported by src/shared/constants/
 // leaves that server executors, compatibility bridges and client-facing identity
 // presets all share.
 
-export const CLI_VERSION_KEYS = ["claude", "codex"] as const;
+export const CLI_VERSION_KEYS = ["claude", "codex", "grok-cli"] as const;
 export type CliVersionKey = (typeof CLI_VERSION_KEYS)[number];
 export type CliVersionOverrides = Partial<Record<CliVersionKey, string>>;
 

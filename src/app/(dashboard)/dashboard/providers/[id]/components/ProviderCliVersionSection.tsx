@@ -2,16 +2,18 @@
 
 /**
  * ProviderCliVersionSection — operator control for the CLI client version
- * OmniRoute advertises for the Claude Code and Codex identity presets.
+ * OmniRoute advertises for the Claude Code, Codex and Grok Build identity
+ * presets.
  *
- * Both upstreams gate new models on the client version they see ("The
+ * Upstreams gate new models on the client version they see ("The
  * 'gpt-6-astra' model requires a newer version of Codex"; Anthropic does the
- * same for new Opus/Sonnet tiers), and the captured pins rot as the real CLIs
- * move on. This card sets one GLOBAL override per provider kind (the same value
- * on every connection) on top of the env var and the captured pin.
+ * same for new Opus/Sonnet tiers; Grok Build reads the grok-pager/grok-shell
+ * version), and the captured pins rot as the real CLIs move on. This card sets
+ * one GLOBAL override per provider kind (the same value on every connection) on
+ * top of the env var and the captured pin.
  *
- * Rendered only for `claude` and `codex`: those are the only two kinds wired
- * into the override store (open-sse/config/cliVersions.ts).
+ * Rendered only for `claude`, `codex` and `grok-cli`: those are the only kinds
+ * wired into the override store (open-sse/config/cliVersions.ts).
  */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -26,7 +28,7 @@ interface ProviderCliVersionSectionProps {
   providerId: string;
 }
 
-const SUPPORTED_PROVIDER_IDS = new Set(["claude", "codex"]);
+const SUPPORTED_PROVIDER_IDS = new Set(["claude", "codex", "grok-cli"]);
 
 const SOURCE_LABELS: Record<CliVersionSource, { key: string; fallback: string }> = {
   settings: { key: "cliVersionSourceSettings", fallback: "dashboard override" },
@@ -63,6 +65,19 @@ const KIND_COPY: Partial<Record<string, KindCopy>> = {
       "Inference caveat: a version your own caller reports still beats the " +
       "CODEX_CLIENT_VERSION env var, but this override beats both, because it is " +
       "explicit operator intent.",
+  },
+  "grok-cli": {
+    hintKey: "cliVersionHintGrokCli",
+    hint:
+      "Grok Build reads the grok-pager/grok-shell client version OmniRoute " +
+      "advertises on cli-chat-proxy turns. The captured pin is 1.0.89 and is " +
+      "auto-discovered from x.ai/cli/stable; GROK_CLI_CLIENT_VERSION and " +
+      "GROK_CLI_CHANNEL (stable|alpha|enterprise) sit below this override.",
+    caveatKey: "cliVersionCaveatGrokCli",
+    caveat:
+      "Channel caveat: GROK_CLI_CHANNEL selects which x.ai/cli/<channel> pointer " +
+      "feeds the auto-discovery, but this override beats both it and the env var, " +
+      "because it is explicit operator intent.",
   },
 };
 

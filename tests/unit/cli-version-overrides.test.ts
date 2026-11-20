@@ -112,7 +112,7 @@ test("setCliVersionOverrides replaces the whole map and ignores unknown keys", (
   setCliVersionOverrides({ claude: "2.1.260", codex: "0.156.0" });
   setCliVersionOverrides({ codex: "0.157.0", grok: "1.0.0" });
   assert.deepEqual(getCliVersionOverrides(), { codex: "0.157.0" });
-  assert.deepEqual([...CLI_VERSION_KEYS], ["claude", "codex"]);
+  assert.deepEqual([...CLI_VERSION_KEYS], ["claude", "codex", "grok-cli"]);
 });
 
 test("Claude precedence: falls to the captured pin when nothing is set", async () => {
