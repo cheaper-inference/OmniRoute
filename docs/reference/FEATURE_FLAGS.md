@@ -46,17 +46,18 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-127 flags across 6 categories. **Default** is the definition default — the value
+128 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
-### Security (13)
+### Security (14)
 
 | Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                   |
 | --------------------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `REQUIRE_API_KEY`                       | boolean | `false`  | Require an API key for all incoming requests.                                                                                                                                                                                                                                 |
 | `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | Enable input sanitization for all requests.                                                                                                                                                                                                                                   |
 | `INJECTION_GUARD_MODE`                  | enum    | `off`    | Prompt injection guard mode. Values: `off`, `warn`, `block`, `redact`.                                                                                                                                                                                                        |
-| `AGENT_GUARD_MODE`                      | enum    | `off`    | Client-agent observation for `claude`/`anthropic`. Values: `off`, `monitor`. `monitor` logs non-official clients, never blocks; headers can be forged. Only prefixed model ids (`cc/…`, `claude/…`, `anthropic/…`, quota-share ids) are observed, not bare ids or combos.     |
+| `AGENT_GUARD_MODE`                      | enum    | `off`    | Client-agent policy for `claude`/`anthropic`. Values: `off`, `monitor`, `block`. `monitor` logs non-official clients; `block` refuses known third-party agents on the resolved provider. Headers can be forged: deterrence, not access control.                               |
+| `AGENT_GUARD_STRICT`                    | boolean | `false`  | With `AGENT_GUARD_MODE=block`, also refuse clients that cannot be identified. No effect in other modes.                                                                                                                                                                       |
 | `PII_REDACTION_ENABLED`                 | boolean | `false`  | Redact PII from requests (independent of `INPUT_SANITIZER_MODE`).                                                                                                                                                                                                             |
 | `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | Sanitize PII from provider responses.                                                                                                                                                                                                                                         |
 | `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | Mode for PII response sanitization. Values: `redact`, `warn`, `block`, `off`.                                                                                                                                                                                                 |

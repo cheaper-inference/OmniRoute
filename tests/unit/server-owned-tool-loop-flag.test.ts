@@ -83,7 +83,8 @@ describe("feature-flags-settings count update", () => {
     // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED and
     // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 126.
     // AGENT_GUARD_MODE (client-agent observation mode, default off) takes it to 127.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 127);
+    // AGENT_GUARD_STRICT (agent guard strict mode, default off) takes it to 128.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 128);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

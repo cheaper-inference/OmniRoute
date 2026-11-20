@@ -10,6 +10,8 @@ const { FEATURE_FLAG_DEFINITIONS } =
 const core = await import("../../../src/lib/db/core.ts");
 const flagsDb = await import("../../../src/lib/db/featureFlags.ts");
 const { AgentGuardGuardrail } = await import("../../../src/lib/guardrails/agentGuard/guardrail.ts");
+const { resolveAgentGuardMode, isAgentGuardStrict } =
+  await import("../../../src/lib/guardrails/agentGuard/settings.ts");
 const { GuardrailRegistry } = await import("../../../src/lib/guardrails/registry.ts");
 
 const kind = (h: Parameters<typeof classifyClientAgent>[0]) => {
@@ -165,17 +167,60 @@ test("policy: only claude and anthropic are observed", () => {
   assert.equal(evaluateAgentPolicy(kilo, null).action, "allow");
 });
 
-test("AGENT_GUARD_MODE is a security enum flag, off by default, with no block value", () => {
-  const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "AGENT_GUARD_MODE");
-  assert.ok(def);
+test("agent guard flags: MODE gains block, STRICT is a boolean, both default to today's behavior", () => {
+  const byKey = (key: string) => FEATURE_FLAG_DEFINITIONS.find((d) => d.key === key);
+  const mode = byKey("AGENT_GUARD_MODE");
+  const strict = byKey("AGENT_GUARD_STRICT");
+  assert.ok(mode && strict);
   assert.deepEqual(
-    [def.category, def.type, def.defaultValue, def.enumValues, def.requiresRestart],
-    ["security", "enum", "off", ["off", "monitor"], false]
+    [mode.category, mode.type, mode.defaultValue, mode.enumValues, mode.requiresRestart],
+    ["security", "enum", "off", ["off", "monitor", "block"], false]
   );
-  assert.equal(
-    FEATURE_FLAG_DEFINITIONS.some((d) => d.key === "AGENT_GUARD_STRICT"),
-    false
+  assert.deepEqual(
+    [strict.category, strict.type, strict.defaultValue, strict.requiresRestart],
+    ["security", "boolean", "false", false]
   );
+});
+test("settings: mode and strict follow the flags (DB override > env > default; other values are off/false)", () => {
+  delete process.env.AGENT_GUARD_MODE;
+  delete process.env.AGENT_GUARD_STRICT;
+  assert.deepEqual([resolveAgentGuardMode(), isAgentGuardStrict()], ["off", false]);
+  process.env.AGENT_GUARD_MODE = " Block ";
+  process.env.AGENT_GUARD_STRICT = " TRUE ";
+  assert.deepEqual([resolveAgentGuardMode(), isAgentGuardStrict()], ["block", true]);
+  flagsDb.setFeatureFlagOverride("AGENT_GUARD_MODE", "monitor");
+  flagsDb.setFeatureFlagOverride("AGENT_GUARD_STRICT", "false");
+  assert.deepEqual([resolveAgentGuardMode(), isAgentGuardStrict()], ["monitor", false]);
+  flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
+  flagsDb.removeFeatureFlagOverride("AGENT_GUARD_STRICT");
+  process.env.AGENT_GUARD_MODE = "enforce";
+  process.env.AGENT_GUARD_STRICT = "maybe";
+  assert.deepEqual([resolveAgentGuardMode(), isAgentGuardStrict()], ["off", false]);
+});
+test("policy: block refuses a known third-party agent; an unidentified client only with strict", () => {
+  const block = { block: true, strict: false };
+  const strict = { block: true, strict: true };
+  assert.deepEqual(evaluateAgentPolicy(kilo, "claude", block), {
+    action: "block",
+    reason: "blocked third-party agent kilocode on claude",
+  });
+  assert.deepEqual(evaluateAgentPolicy(unknown, "claude", block), {
+    action: "flag",
+    reason: "unidentified agent on claude",
+  });
+  assert.deepEqual(evaluateAgentPolicy(unknown, "anthropic", strict), {
+    action: "block",
+    reason: "blocked unidentified agent on anthropic",
+  });
+  for (const enforcement of [block, strict]) {
+    assert.equal(evaluateAgentPolicy(official, "claude", enforcement).action, "allow");
+    assert.equal(evaluateAgentPolicy(kilo, "glm", enforcement).action, "allow");
+  }
+  assert.deepEqual(evaluateAgentPolicy(kilo, "cc", block), {
+    action: "block",
+    reason: "blocked third-party agent kilocode on claude",
+  });
+  assert.equal(evaluateAgentPolicy(kilo, "claude").action, "flag"); // two-argument form is unchanged
 });
 
 const MODEL = "claude/claude-sonnet-5";
@@ -191,8 +236,19 @@ function capture() {
 }
 test.after(() => {
   delete process.env.AGENT_GUARD_MODE;
+  delete process.env.AGENT_GUARD_STRICT;
   flagsDb.clearAllFeatureFlagOverrides();
   core.resetDbInstance();
+});
+test("guardrail: block mode is inert at pre-call (the dispatch gate owns it)", async () => {
+  const g = new AgentGuardGuardrail({ mode: "block" });
+  let reads = 0;
+  const headers = { get: () => (reads++, "Kilo-Code/4.2.1") } as unknown as Headers;
+  const { calls, log } = capture();
+  assert.deepEqual(
+    [await g.preCall({}, { model: MODEL, headers, log }), reads, calls.length],
+    [{ block: false }, 0, 0]
+  );
 });
 test("guardrail: agent-guard, priority 1; off reads no header and writes no log", async () => {
   const g = new AgentGuardGuardrail({ mode: "off" });
@@ -320,7 +376,7 @@ test("guardrail: mode follows AGENT_GUARD_MODE (default off, env, DB override wi
     flagsDb.setFeatureFlagOverride("AGENT_GUARD_MODE", "off");
     assert.equal(await logged(), 0);
     flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
-    process.env.AGENT_GUARD_MODE = "block";
+    process.env.AGENT_GUARD_MODE = "enforce";
     assert.equal(await logged(), 0);
   } finally {
     flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
