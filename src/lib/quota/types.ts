@@ -1,4 +1,4 @@
-import type { DimensionKey, Policy, QuotaDimension } from "./dimensions";
+import type { DimensionKey, Policy, QuotaDimension, QuotaWindow } from "./dimensions";
 
 export interface PoolUsagePerKey {
   apiKeyId: string;
@@ -116,4 +116,45 @@ export interface PlanWindowReading {
   resetAt: number | null;
   /** When this process built the cached saturation entry, epoch ms. */
   fetchedAt: number;
+}
+
+/** One attribution book: a pool connection (account) and one plan window. */
+export interface LedgerKey {
+  poolId: string;
+  connectionId: string;
+  window: QuotaWindow;
+}
+
+export interface LedgerKeyState {
+  /** Part of the account bar attributed to this API key, fraction 0..1. */
+  attributed: number;
+  /** Counter value of this key already consumed by the book (watermark). */
+  seenTokens: number;
+}
+
+export interface LedgerState {
+  /** 1 on the first write; every write stores the previous rev + 1. */
+  rev: number;
+  /** Last applied reading, 0..1. */
+  last: number;
+  /** Part of `last` nobody routed, 0..1. */
+  external: number;
+  /** Provider reset of the last applied reading that carried one, epoch ms. */
+  resetAt: number | null;
+  /** fetchedAt of the last applied reading, epoch ms. */
+  readAt: number;
+  /** When this state was produced, epoch ms. */
+  updatedAt: number;
+  keys: Record<string, LedgerKeyState>;
+}
+
+/** Cumulative tokens routed by one API key, and the time of its last write. */
+export interface LedgerCounter {
+  tokens: number;
+  updatedAt: number;
+}
+
+export interface LedgerSnapshot {
+  state: LedgerState | null;
+  counters: Record<string, LedgerCounter>;
 }
