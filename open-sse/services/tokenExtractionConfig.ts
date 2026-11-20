@@ -127,7 +127,7 @@ const RAW_CONFIGS: TokenExtractionConfig[] = [
     [
       { type: "cookie", name: "__Secure-1PSID", domain: ".google.com" },
       { type: "cookie", name: "__Secure-1PSIDTS", domain: ".google.com" },
-      { type: "cookie", name: "OSID", domain: "flow.google.com" },
+      { type: "cookie", name: "OSID", domain: ".flow.google.com" },
     ],
     "Log in to your Google account at flow.google.com. Cookies will be extracted.",
     { cookieDomain: ".google.com" }

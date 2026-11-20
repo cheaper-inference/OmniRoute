@@ -71,7 +71,7 @@ export const WEB_COOKIE_PROVIDERS = {
     serviceKinds: ["video", "image"],
     alias: "gflow",
     name: "Google Flow (Veo & Imagen)",
-    icon: "movie_filter",
+    icon: "movie",
     color: "#EA4335",
     textIcon: "GFlow",
     website: "https://flow.google.com",
