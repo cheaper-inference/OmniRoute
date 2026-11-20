@@ -219,6 +219,30 @@ export function getLastSessionModel(sessionId: string, comboName: string): strin
 }
 
 /**
+ * Like {@link getLastSessionModel}, plus when that model last served the session (epoch ms,
+ * null when the stored timestamp cannot be parsed).
+ */
+export function getLastSessionModelUsage(
+  sessionId: string,
+  comboName: string
+): { modelStr: string; usedAtMs: number | null } | null {
+  const db = getDbInstance() as unknown as DbLike;
+  const row = db
+    .prepare(
+      `SELECT model_str, used_at
+       FROM session_model_history
+       WHERE session_id = ? AND combo_name = ?
+       ORDER BY used_at DESC, id DESC
+       LIMIT 1`
+    )
+    .get(sessionId, comboName) as { model_str: string; used_at: string | null } | undefined;
+  if (!row?.model_str) return null;
+  // used_at is SQLite datetime('now'): "YYYY-MM-DD HH:MM:SS" in UTC.
+  const usedAtMs = row.used_at ? Date.parse(`${row.used_at.replace(" ", "T")}Z`) : NaN;
+  return { modelStr: row.model_str, usedAtMs: Number.isFinite(usedAtMs) ? usedAtMs : null };
+}
+
+/**
  * Clear all session model history entries for a given combo name.
  * Called when a combo's model targets are changed to invalidate stale context-cache pins.
  *

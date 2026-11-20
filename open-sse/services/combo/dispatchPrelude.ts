@@ -14,6 +14,8 @@
  */
 import { cloneForQuality } from "./preContentTransportFailure.ts";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
+import { isModelLocked } from "../accountFallback.ts";
+import { normalizeRoutingStrategy } from "../../../src/shared/constants/routingStrategies.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { fisherYatesShuffle, getNextFromDeck } from "../../../src/shared/utils/shuffleDeck";
 import { handleFusionChat, type FusionTuning } from "../fusion.ts";
@@ -216,6 +218,100 @@ async function isPinnedModelDurablyUnhealthy(
   } catch {
     return false;
   }
+}
+
+const ORDERED_PIN_STRATEGIES = new Set(["priority", "fill-first"]);
+
+// OpenAI in-memory prompt caching keeps a prefix for 5-10 minutes of inactivity; requests can
+// opt into 24h retention with `prompt_cache_retention`. Anthropic's default (5 minutes) is shorter.
+const PIN_CACHE_IDLE_RETENTION_MS = 10 * 60_000;
+const PIN_CACHE_EXTENDED_RETENTION_MS = 24 * 60 * 60_000;
+
+/**
+ * Pure decision: has the provider-side prompt cache behind a pin expired? An unknown last-use
+ * time counts as warm, so the cache is never given up on a guess.
+ */
+export function pinCacheExpired(
+  body: Record<string, unknown> | null | undefined,
+  pinnedModelUsedAtMs: number | null | undefined,
+  now: number
+): boolean {
+  if (typeof pinnedModelUsedAtMs !== "number" || !Number.isFinite(pinnedModelUsedAtMs)) {
+    return false;
+  }
+  const retentionMs =
+    body?.prompt_cache_retention === "24h"
+      ? PIN_CACHE_EXTENDED_RETENTION_MS
+      : PIN_CACHE_IDLE_RETENTION_MS;
+  return now - pinnedModelUsedAtMs > retentionMs;
+}
+
+/**
+ * Pure decision: can this pool serve a request right now? Stricter than
+ * {@link pinIsDurablyUnhealthy}: any active cooldown or backoff counts as not ready, so a
+ * pin is only moved off a fallback when the higher-priority target is fully recovered.
+ */
+export function connectionsReadyNow(
+  circuitState: string | undefined,
+  connections: Array<{
+    testStatus?: string | null;
+    backoffLevel?: number | null;
+    rateLimitedUntil?: string | null;
+  }>,
+  now: number
+): boolean {
+  if (circuitState === "OPEN") return false;
+  return connections.some((c) => {
+    const status = typeof c.testStatus === "string" ? c.testStatus : "";
+    if (TERMINAL_PIN_STATUSES.has(status)) return false;
+    if (Number(c.backoffLevel ?? 0) > 0) return false;
+    const rl = c.rateLimitedUntil ? new Date(String(c.rateLimitedUntil)).getTime() : 0;
+    return !(Number.isFinite(rl) && rl > now);
+  });
+}
+
+/**
+ * In an operator-ordered combo the pin records whichever target served the last turn. When
+ * that was a fallback (the primary was rate limited for one turn), honoring the pin keeps the
+ * session on the fallback for good, even after the primary recovers. Returns the first
+ * higher-priority target that is ready again, or null when the pin should stand.
+ */
+async function findReadyHigherPriorityTarget(
+  comboTargets: ReadonlyArray<
+    Pick<ResolvedComboTarget, "modelStr" | "connectionId" | "allowedConnectionIds">
+  >,
+  pinnedModel: string
+): Promise<string | null> {
+  const pinIndex = comboTargets.findIndex((t) => t.modelStr === pinnedModel);
+  if (pinIndex <= 0) return null;
+  for (const target of comboTargets.slice(0, pinIndex)) {
+    try {
+      const { provider, model } = parseModel(target.modelStr);
+      if (!provider) continue;
+      const { allowedConnectionIds } = resolvePinnedConnectionBinding([target], target.modelStr);
+      let connections = (await getCachedProviderPoolConnections({
+        provider,
+        isActive: true,
+      })) as Array<{
+        id?: string | null;
+        testStatus?: string | null;
+        backoffLevel?: number | null;
+        rateLimitedUntil?: string | null;
+      }>;
+      if (Array.isArray(allowedConnectionIds) && allowedConnectionIds.length > 0) {
+        const bound = new Set(allowedConnectionIds);
+        connections = connections.filter((c) => typeof c.id === "string" && bound.has(c.id));
+      }
+      connections = (connections || []).filter(
+        (c) => !(typeof c.id === "string" && isModelLocked(provider, c.id, model))
+      );
+      const circuitState = getCircuitBreaker(provider)?.getStatus?.()?.state;
+      if (connectionsReadyNow(circuitState, connections, Date.now())) return target.modelStr;
+    } catch {
+      continue;
+    }
+  }
+  return null;
 }
 
 export function normalizeNestedComboMode(value: unknown): NestedComboMode {
@@ -450,6 +546,8 @@ export async function tryPinnedModelDispatch(args: {
   body: Record<string, unknown>;
   combo: ComboLike;
   pinnedModel: string;
+  /** When the pinned model last served this session (epoch ms). */
+  pinnedModelUsedAtMs?: number | null;
   allCombos?: ComboCollectionLike;
   config: ComboSetupConfig;
   clientRequestedStream: boolean;
@@ -463,6 +561,7 @@ export async function tryPinnedModelDispatch(args: {
     body,
     combo,
     pinnedModel,
+    pinnedModelUsedAtMs,
     allCombos,
     config,
     clientRequestedStream,
@@ -518,6 +617,23 @@ export async function tryPinnedModelDispatch(args: {
       log.warn(
         "COMBO",
         "Context pin cannot read the current media; falling through to compatible targets"
+      );
+      return null;
+    }
+  }
+  // A pin on a fallback outlives the failover that created it. Once its prompt cache has
+  // expired there is nothing left to protect, so an ordered combo goes back to its order.
+  if (
+    pinInCombo &&
+    haveFullCombos &&
+    ORDERED_PIN_STRATEGIES.has(normalizeRoutingStrategy(combo.strategy || "priority")) &&
+    pinCacheExpired(body, pinnedModelUsedAtMs, Date.now())
+  ) {
+    const preferred = await findReadyHigherPriorityTarget(comboTargets, pinnedModel);
+    if (preferred) {
+      log.info(
+        "COMBO",
+        `Context pin ${pinnedModel} is a fallback whose prompt cache has expired and ${preferred} is ready; following the combo order`
       );
       return null;
     }
