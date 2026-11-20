@@ -22,6 +22,7 @@ function runFixture(
     migration = [],
     atomic = [],
     native = [],
+    profile = [],
     runtime = [],
     envExample = "",
     envDoc = "",
@@ -37,6 +38,7 @@ function runFixture(
     ["scripts/check/migration-commutation.ts", migration],
     ["scripts/ci/atomic-tsx-cache.mjs", atomic],
     ["scripts/ci/native-worker-v8-layout.mjs", native],
+    ["scripts/perf/messages-route-memory-profile.ts", profile],
     ["src/runtimeFixture.ts", runtime],
   ]) {
     const target = join(root, path);
@@ -65,6 +67,7 @@ test("coverage inputs are scoped to their own producer helpers", (t) => {
     atomic: ATOMIC_COVERAGE_INPUTS,
     native: NATIVE_COVERAGE_INPUTS,
     migration: MIGRATION_COVERAGE_INPUTS,
+    profile: NATIVE_COVERAGE_INPUTS,
   });
   assert.equal(result.status, 0, result.stdout);
 });
@@ -75,6 +78,7 @@ for (const location of ["ci", "runtime"]) {
       atomic: ATOMIC_COVERAGE_INPUTS,
       native: NATIVE_COVERAGE_INPUTS,
       migration: MIGRATION_COVERAGE_INPUTS,
+      profile: NATIVE_COVERAGE_INPUTS,
       [location]: COVERAGE_INPUTS,
     });
     assert.equal(result.status, 1);
@@ -90,9 +94,11 @@ test("a coverage helper still reports unclassified inputs and keys owned by anot
     atomic: [...ATOMIC_COVERAGE_INPUTS, ...NATIVE_COVERAGE_INPUTS],
     native: [...NATIVE_COVERAGE_INPUTS, unknown],
     migration: [...MIGRATION_COVERAGE_INPUTS, "TMPDIR"],
+    profile: [...NATIVE_COVERAGE_INPUTS, "OMNIROUTE_CI_SYNC_TSX_CACHE"],
   });
   assert.equal(result.status, 1);
   assert.match(result.stdout, /- NODE_V8_COVERAGE(?:\r?\n|$)/);
   assert.match(result.stdout, /- TMPDIR(?:\r?\n|$)/);
+  assert.match(result.stdout, /- OMNIROUTE_CI_SYNC_TSX_CACHE(?:\r?\n|$)/);
   assert.match(result.stdout, new RegExp(`- ${unknown}(?:\\r?\\n|$)`));
 });
