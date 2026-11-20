@@ -172,9 +172,8 @@ export function applySyntxProviderRules(
   settings: JsonRecord,
   ctx: { modelType: string; fileCount?: number }
 ): void {
-  const handler = PROVIDER_RULES[aiName];
-  if (!handler) return;
-  handler(ctx.modelType || "", ctx.fileCount ?? 0, settings);
+  if (!Object.hasOwn(PROVIDER_RULES, aiName)) return;
+  PROVIDER_RULES[aiName](ctx.modelType || "", ctx.fileCount ?? 0, settings);
 }
 
 const RESOLUTION_TOKEN = /^(?:\d+x\d+|\d+K|[1-9]\d{1,3}p)$/i;

@@ -3,14 +3,18 @@ import assert from "node:assert/strict";
 
 const catalog = await import("../../open-sse/services/syntxMediaCatalog.ts");
 const media = await import("../../open-sse/services/syntxMedia.ts");
-const { IMAGE_PROVIDERS, parseImageModel, getImageModelEntry } = await import(
-  "../../open-sse/config/imageRegistry.ts"
-);
+const { IMAGE_PROVIDERS, parseImageModel, getImageModelEntry } =
+  await import("../../open-sse/config/imageRegistry.ts");
 const { VIDEO_PROVIDERS, parseVideoModel } = await import("../../open-sse/config/videoRegistry.ts");
-const { AUDIO_SPEECH_PROVIDERS, AUDIO_TRANSCRIPTION_PROVIDERS, parseSpeechModel, parseTranscriptionModel } =
-  await import("../../open-sse/config/audioRegistry.ts");
+const {
+  AUDIO_SPEECH_PROVIDERS,
+  AUDIO_TRANSCRIPTION_PROVIDERS,
+  parseSpeechModel,
+  parseTranscriptionModel,
+} = await import("../../open-sse/config/audioRegistry.ts");
 const { MUSIC_PROVIDERS, parseMusicModel } = await import("../../open-sse/config/musicRegistry.ts");
-const { UPSCALE_PROVIDERS, parseUpscaleModel } = await import("../../open-sse/config/upscaleRegistry.ts");
+const { UPSCALE_PROVIDERS, parseUpscaleModel } =
+  await import("../../open-sse/config/upscaleRegistry.ts");
 const { mapSyntxModel } = await import("../../open-sse/services/syntxModels.ts");
 
 function fakeJwt(): string {
@@ -173,9 +177,15 @@ describe("SYNTX media catalog", () => {
   });
 
   it("exposes per-model selectable params instead of one generic size list", () => {
-    const gptImage = IMAGE_PROVIDERS.syntx.models.find((row) => row.id === "sora-images/gpt-image-2");
-    const midjourney = IMAGE_PROVIDERS.syntx.models.find((row) => row.id === "midjourney/midjourney");
-    const seedreamRow = IMAGE_PROVIDERS.syntx.models.find((row) => row.id === "seedream/seedream-4.5");
+    const gptImage = IMAGE_PROVIDERS.syntx.models.find(
+      (row) => row.id === "sora-images/gpt-image-2"
+    );
+    const midjourney = IMAGE_PROVIDERS.syntx.models.find(
+      (row) => row.id === "midjourney/midjourney"
+    );
+    const seedreamRow = IMAGE_PROVIDERS.syntx.models.find(
+      (row) => row.id === "seedream/seedream-4.5"
+    );
     const grokI2v = VIDEO_PROVIDERS.syntx.models.find((row) => row.id === "grok_video/grok_i2v");
     const gptSizes = gptImage?.mediaCapabilities?.supported_sizes;
     const mjRatios = midjourney?.mediaCapabilities?.supported_aspect_ratios;
@@ -189,7 +199,9 @@ describe("SYNTX media catalog", () => {
     assert.equal(Array.isArray(grokRefs) && grokRefs[0]?.min_items, 1);
     assert.deepEqual(IMAGE_PROVIDERS.syntx.supportedSizes, []);
 
-    const grokI2iPro = IMAGE_PROVIDERS.syntx.models.find((row) => row.id === "grok_image/grok_i2i_pro");
+    const grokI2iPro = IMAGE_PROVIDERS.syntx.models.find(
+      (row) => row.id === "grok_image/grok_i2i_pro"
+    );
     assert.equal(grokI2iPro?.mediaCapabilities?.supported_aspect_ratios, undefined);
     const suno = MUSIC_PROVIDERS.syntx.models.find((row) => row.id === "suno/chirp-v4");
     assert.deepEqual(suno?.mediaCapabilities?.supported_durations, [30, 60, 120]);
@@ -223,6 +235,14 @@ describe("SYNTX media provider rules", () => {
     media.applySyntxProviderRules("suno", settings, { modelType: "chirp-v4" });
     assert.equal(settings.audio_url, undefined);
     assert.equal(settings.source_clip_id, undefined);
+  });
+
+  it("leaves settings intact for a provider without a registered rule", () => {
+    const settings = { style: "cinematic", aspect_ratio: "16:9" };
+    media.applySyntxProviderRules("runway-frames-preview", settings, {
+      modelType: "runway-frames-v2",
+    });
+    assert.deepEqual(settings, { style: "cinematic", aspect_ratio: "16:9" });
   });
 
   it("maps Media-page size/quality onto the SPA settings each ai_name expects", () => {
@@ -289,9 +309,7 @@ describe("SYNTX media poll projection", () => {
   it("waits while any object is still incomplete", () => {
     const projection = media.collectSyntxCompletedMedia({
       author_id: -1,
-      message_object: [
-        { object_type: "video", object_url: null, completed: false },
-      ],
+      message_object: [{ object_type: "video", object_url: null, completed: false }],
     });
     assert.equal(projection.ready, false);
   });
@@ -389,7 +407,11 @@ describe("SYNTX media generate flow", () => {
             {
               author_id: -1,
               message_object: [
-                { object_type: "video", object_url: "https://r2.syntx.ai/out.mp4", completed: true },
+                {
+                  object_type: "video",
+                  object_url: "https://r2.syntx.ai/out.mp4",
+                  completed: true,
+                },
               ],
             },
           ],
