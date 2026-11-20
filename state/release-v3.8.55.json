@@ -3,23 +3,79 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b11",
+    "batchId": "b12",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b11-b6dd0a169668",
-    "candidateSha": "b6dd0a1696681bfca5062552030831a38ea263e7",
-    "baseSha": "8f56803041779d3e501001f2cdec37b37f43d456",
-    "treeSha": "068b1d7cdcf4ea0b746c764262b64a4946baef9d",
+    "candidateRef": "omni-queue/release-v3.8.55/b12-cd001e51a8a9",
+    "candidateSha": "cd001e51a8a9611ca0543b75b200965a6350c3b1",
+    "baseSha": "760357c44ace5f68e61429b78441b80b1077a48c",
+    "treeSha": "e205afec279d2d1de28277428dc2f9e489f800da",
     "prs": [
       {
-        "n": 18591,
-        "head": "5d23f3635bb810b7375582baf8c394e26d8ef462",
-        "title": "feat(dashboard): add the Grok Bot console",
-        "author": "HouMinXi",
-        "labeledAt": "2026-11-20T13:12:50Z"
+        "n": 18626,
+        "head": "41c6c724064ddbd37f71179e6fc61de794f13934",
+        "title": "test(batch): isolate rate-limit E2E worker startup",
+        "author": "ahmedgo17390",
+        "labeledAt": "2026-11-20T13:25:47Z"
+      },
+      {
+        "n": 18631,
+        "head": "b4c81c43ab34e725d9473882f72c0195a57f858b",
+        "title": "feat(dashboard): opt-in quota window and expiring reset credit alerts",
+        "author": "Junior-HJ",
+        "labeledAt": "2026-11-20T13:25:55Z"
+      },
+      {
+        "n": 18674,
+        "head": "9aa9b27457da70954b74a8212d1f2ebc1493b9b6",
+        "title": "feat(images): support Leonardo reference-image edits on /v1/images/edits",
+        "author": "yourspraveen",
+        "labeledAt": "2026-11-20T13:26:03Z"
+      },
+      {
+        "n": 19807,
+        "head": "8761f1c70d72315ff49383d6c5935d5f208a4126",
+        "title": "fix(providers): preserve multi-key JSON and solitary thought objects in Gemini leak filter",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-20T14:27:20Z"
+      },
+      {
+        "n": 19812,
+        "head": "a2ecc1011417f2250dbbac5eabe40b19bfef6b00",
+        "title": "fix(translator): translate compaction items with content to Chat messages",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-20T14:27:24Z"
+      },
+      {
+        "n": 19916,
+        "head": "36c01108d876b0d6cae868ac2557e7f78f59ce39",
+        "title": "fix(auto-combo): eliminate quadratic backtracking in specificity regexes (#19881)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-20T14:27:27Z"
+      },
+      {
+        "n": 20248,
+        "head": "63407581f7f667ee82f67e99e3839297e174ab7b",
+        "title": "fix(cursor): preserve Grok 4.7 standard speed across all non-fast variants (#20077)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-20T14:27:30Z"
+      },
+      {
+        "n": 20255,
+        "head": "a05328b926be449f4a3ad3d824cbbcc855701309",
+        "title": "fix(backend): skip long-context tier on per-key USD usage limit window sums (#20153)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-20T14:27:34Z"
+      },
+      {
+        "n": 20272,
+        "head": "3d4ab0b2ca7ddae937cc94007bc1d86729975fa3",
+        "title": "fix(providers): remove deprecated --quiet flag from Auggie CLI invocation (#20250)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-20T14:27:37Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-20T13:24:16.513Z",
+    "startedAt": "2026-11-20T14:35:16.672Z",
     "attempts": 0,
     "bisect": null
   },
@@ -48,12 +104,13 @@
       "18544": "039bfcf2b12d1e31d4b285b3154da3f12bafb19b",
       "18551": "be28b2f4df97483112595236e4cdc4d24f9cded1",
       "18575": "56b53709d86f9c7db277dce2068f3f15cbdb02a7",
-      "18587": "ce43a725ca9e43375f7bd44dcd5fa9568cf58e9c"
+      "18587": "ce43a725ca9e43375f7bd44dcd5fa9568cf58e9c",
+      "18591": "5d23f3635bb810b7375582baf8c394e26d8ef462"
     }
   },
   "counters": {
-    "batchSeq": 11,
-    "ciRuns": 12,
+    "batchSeq": 12,
+    "ciRuns": 13,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 4,
@@ -890,8 +947,59 @@
         "18591": "2026-11-20T13:12:50Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44743913685"
+    },
+    {
+      "at": "2026-11-20T14:34:07.620Z",
+      "type": "checks-green",
+      "batchId": "b11",
+      "prs": [
+        18591
+      ],
+      "sha": "b6dd0a1696681bfca5062552030831a38ea263e7",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44754637911"
+    },
+    {
+      "at": "2026-11-20T14:34:17.875Z",
+      "type": "would-land",
+      "batchId": "b11",
+      "prs": [
+        18591
+      ],
+      "sha": "b6dd0a1696681bfca5062552030831a38ea263e7",
+      "detail": "shadow mode: would merge-ff onto 8f5680304177",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44754637911"
+    },
+    {
+      "at": "2026-11-20T14:35:58.467Z",
+      "type": "batch-started",
+      "batchId": "b12",
+      "prs": [
+        18626,
+        18631,
+        18674,
+        19807,
+        19812,
+        19916,
+        20248,
+        20255,
+        20272
+      ],
+      "sha": "cd001e51a8a9611ca0543b75b200965a6350c3b1",
+      "detail": "9 PR(s) on 760357c44ace; window 9",
+      "labeledAt": {
+        "18626": "2026-11-20T13:25:47Z",
+        "18631": "2026-11-20T13:25:55Z",
+        "18674": "2026-11-20T13:26:03Z",
+        "19807": "2026-11-20T14:27:20Z",
+        "19812": "2026-11-20T14:27:24Z",
+        "19916": "2026-11-20T14:27:27Z",
+        "20248": "2026-11-20T14:27:30Z",
+        "20255": "2026-11-20T14:27:34Z",
+        "20272": "2026-11-20T14:27:37Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44754637911"
     }
   ],
-  "updatedAt": "2026-11-20T14:24:45.696Z",
+  "updatedAt": "2026-11-20T14:36:01.122Z",
   "batchWindow": 9
 }
