@@ -53,6 +53,9 @@ consumed        = current rolling value for this key (from QuotaStore.peek)
 remaining       = fairShareAllowed - consumed
 ```
 
+For `percent` dimensions, `consumed` comes from the attribution book instead (see
+[Percent dimensions: per-key attribution](#percent-dimensions-per-key-attribution)).
+
 Then:
 
 - **`policy = hard`**: if `consumed > fairShareAllowed` and mode is strict → **block**.
@@ -63,6 +66,7 @@ Then:
 
 `capValue` + `capUnit` on an allocation is a hard ceiling independent of mode or
 policy. Any dimension where `consumed >= capValue` always **blocks** the request.
+For a `percent` cap, `consumed` is only the part attributed to the key.
 
 ### Multi-dimension check
 
@@ -174,31 +178,141 @@ A request must satisfy all dimensions to be allowed.
 
 ### Percent dimensions: per-key attribution
 
-Percent plans (Claude, Codex, Bailian) report a single utilisation figure per
-account, so the provider gives no per-key counter for these dimensions.
+A percent plan reports one usage figure per account and plan window. The provider gives no
+counter per API key.
 
-To give each key a part of that figure, the tokens each key routes are recorded
-in a per-key shadow bucket for the same window. `src/lib/quota/percentAttribution.ts`
-then splits the account usage in two:
+To give each key a part of that figure, each pool keeps an attribution book per account and
+plan window. `src/lib/quota/percentLedger.ts` holds the book's rules.
+`src/lib/quota/percentAttribution.ts` turns the book into the numbers that enforcement uses. The
+result is an estimate. It is built from the tokens each key routes and from the observed changes
+of one number.
 
-- **Internal part:** `min(account usage, pool tokens / DEFAULT_MIN_TOKENS_PER_PCT)`,
-  shared among the keys by the tokens each one routed.
-- **External part:** the rest of the account usage. It first consumes the
-  unallocated capacity (`100 − sum of the allocation weights`); only the excess
-  is shared among the keys by weight. Usage made outside OmniRoute on its own
-  therefore cannot bring a key to its fair share before the account is full.
+#### Readings that move the book
 
-`GET /api/quota/pools/{id}/usage` reports the same per-key numbers, with one
-entry per account in `accounts`.
+The book moves only on the provider's own figure for the requested plan window. These connections
+report one:
 
-An absolute cap in `percent` counts only the usage the key routed itself (its
-internal part). Usage made outside OmniRoute never counts toward the cap; it
-counts toward the fair share.
+| Provider                            | Plan windows              |
+| ----------------------------------- | ------------------------- |
+| Claude, through an OAuth connection | `5h`, `weekly`            |
+| Codex                               | `5h`, `weekly`            |
+| Bailian                             | `5h`, `weekly`, `monthly` |
 
-**Known limitation:** once the pool's routed volume in a window reaches
-`account usage × DEFAULT_MIN_TOKENS_PER_PCT` tokens, the whole account figure
-is treated as internal, so subscription usage made outside OmniRoute is charged
-to the most active keys. Separating the two exactly is a follow-up step.
+These do not count as a reading:
+
+- a response the provider client marks as stale;
+- a window whose figure the provider did not report, or a Bailian window without a reported total;
+- another window's figure, or the worst case across windows;
+- the rate-limit header fallback;
+- a failed read.
+
+Other providers, including Claude with an API key, have no book. Each key is charged 0 on their
+percent dimensions, as before this change.
+
+A reading shares the 30-second cache of the saturation signal. A Claude reading is dated by when
+the figure was observed in response headers or read from the usage endpoint. A Codex or Bailian
+reading is dated by when that cache entry was built.
+
+#### How a reading changes the book
+
+The book stores the last applied figure, the part attributed to each key and an external part.
+Each transition keeps these parts adding up to the last applied figure.
+
+Each recorded request adds its tokens, once, to a counter per pool, account and key. The book is
+updated when enforcement or the usage route computes the attribution. The first matching rule
+applies:
+
+- **First reading:** it is a baseline and counts as external. Tokens already on the counters are
+  marked as seen, so they explain no later rise.
+- **Older reading:** a reading dated before the last applied one is ignored.
+- **Older window:** a reading whose reset time is more than 30 minutes earlier than the stored one
+  is ignored.
+- **New provider window:** a reset time that moves forward by more than 30 minutes starts a new
+  window. Every part returns to 0, keys without a counter leave the book, and the new figure is
+  applied as a rise.
+- **Rise:** it is shared among the keys in proportion to their pending tokens, the tokens the book
+  has not used yet. Together they explain at most one point per `DEFAULT_MIN_TOKENS_PER_PCT`
+  tokens (1,000). The rest of the rise is external.
+- **Same figure:** nothing changes and nothing is written.
+- **Drop:** it is applied only from a reading at least two minutes newer than the last applied
+  one. Any drop rescales every part when three things hold: both reset times are known, they are
+  within 30 minutes of each other, and the stored one is still ahead of the reading. Otherwise a
+  drop of up to one point rescales, and a larger drop starts a new window.
+
+At a rise, a key whose last token write is more than 15 minutes old explains nothing. Its pending
+tokens are marked as seen. A rescale multiplies every part by the ratio of the new figure to the
+old one, and pending tokens stay pending. A token counter that cannot be read is ignored for that
+observation, and the key keeps its place in the book.
+
+The attributed part of a key added to a pool in the middle of a window counts only the tokens it
+routes after joining. Writes are compare-and-set on a revision number. A writer that loses retries
+once on a fresh read.
+
+#### Without a usable reading
+
+Without a usable reading, the stored book is used only while it can still be the current
+window's book. That holds in two cases:
+
+- its reset time is known and still ahead;
+- it has no reset time, and the last reading that changed it is at most 15 minutes old.
+
+Otherwise nothing is attributed, as when there is no book.
+
+#### Enforcement
+
+A key's consumption on a percent dimension is its attributed part plus a share of the external
+part. The external part first uses the capacity no allocation claims (100 minus the sum of the
+weights). Only the excess is shared among the keys by weight.
+
+That consumption is compared with the key's fair share as for any other dimension. Strict mode
+still starts when the saturation signal reaches `QUOTA_SATURATION_THRESHOLD` (default 0.5).
+Every number is scaled by the effective limit: the per-account limit times the number of
+accounts in the pool.
+
+An absolute cap with `capUnit: "percent"` counts only the part attributed to the key, scaled the
+same way. With a per-account limit of 100 and k accounts, a cap of N is reached when the key's
+part of the serving account's figure reaches N/k points. Each account is checked against its own
+book. For example, with two accounts, a cap of 10 is reached at 5 points of one account's figure.
+
+When the store cannot be read, nothing is attributed and every key is charged 0 on that
+dimension. When a book write fails, that attribution uses the book as it was read. A failed token
+write can leave that request's tokens out of the book.
+
+#### Usage route
+
+`GET /api/quota/pools/{id}/usage` reports the same numbers through the same function. A percent
+dimension has one entry per pool connection in `accounts`. Its top-level `consumedTotal` and
+`perKey` mirror the first entry.
+
+The route applies the current reading too, so it can advance the book as a request does.
+`internal + external` can differ from `consumedTotal` when there is no usable reading, or when a
+drop is not confirmed yet.
+
+#### Storage and retention
+
+Both quota stores keep the book. On SQLite, the automatic database cleanup, when enabled, removes
+rows not updated for 60 days. On Redis, the books and counters of a pool connection share one key.
+It expires 60 days after its last token write or book change. A book that does not change is not
+rewritten, so the cutoff is set above the longest plan window.
+
+#### Limitations
+
+- Usage made elsewhere on the account, in an interval in which a key routed real volume, is
+  attributed to that key as far as its tokens cover it. The floor of 1,000 tokens per point
+  protects only against small volume.
+- "Elsewhere" includes traffic on the same account from keys outside the pool.
+- A rise first seen more than 15 minutes after the key's last token write counts as external. The
+  book observes the figure only when a request or the usage route computes the attribution.
+- Tokens routed shortly before a provider reset can be charged against the first figure of the
+  new window.
+- A stream that does not complete records no tokens. Its usage shows up as external.
+- In a pool with several accounts, the serving account's figure is applied to the summed budget.
+  This is unchanged by the book.
+- When no usable reading arrives after the stored reset time, per-key percent shares and percent
+  caps are not enforced until a reading returns. Without a reset time, this starts 15 minutes
+  after the last reading that changed the book.
+- On the Redis store, a book idle for 60 days can expire between a writer's check and its write.
+  It is then re-created at a revision above 1, which is a valid state.
 
 ---
 
@@ -396,3 +510,7 @@ Three tables added by migrations `078`, `079` and `085`:
 - `provider_plans` — manual provider plan overrides (dimensions JSON per connectionId).
 
 All tables added via idempotent `CREATE TABLE IF NOT EXISTS` migrations.
+
+The percent attribution book adds `quota_percent_ledger` (one row per pool, account and plan
+window) and `quota_percent_ledger_tokens` (one token counter per pool, account and API key).
+`src/lib/db/quotaPercentLedger.ts` reads and writes them.
