@@ -142,10 +142,28 @@ export const gheCopilot = {
         "User-Agent": getGitHubCopilotChatUserAgent(),
       },
     };
-    const copilotToken = await optionalJson(
+    let copilotToken = await optionalJson(
       `${gheUrl}/api/v3/copilot_internal/v2/token`,
       lookupInit
     );
+    // GHE Cloud with data residency (*.ghe.com) does not expose
+    // /api/v3/copilot_internal/v2/token (returns 404). Instead, it exposes
+    // endpoints via /api/v3/copilot_internal/user and accepts the GitHub OAuth
+    // access_token directly as a Bearer token on endpoints.api.
+    if (!copilotToken?.token && !copilotToken?.endpoints?.api) {
+      const copilotUser = await optionalJson(
+        `${gheUrl}/api/v3/copilot_internal/user`,
+        lookupInit
+      );
+      if (copilotUser?.endpoints?.api || copilotUser?.endpoints?.proxy) {
+        copilotToken = {
+          ...copilotToken,
+          token: tokens.access_token,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          endpoints: copilotUser.endpoints,
+        };
+      }
+    }
     const userInfo = await optionalJson(`${gheUrl}/api/v3/user`, lookupInit);
     return {
       copilotToken,

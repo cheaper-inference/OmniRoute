@@ -202,7 +202,36 @@ export class GheCopilotExecutor extends GithubExecutor {
         credentials
       );
 
-      if (!response.ok) return null;
+      if (!response.ok) {
+        if (response.status === 404) {
+          const userUrl = `${baseUrl}/api/v3/copilot_internal/user`;
+          this.assertOutboundUrlAllowed(userUrl);
+          const userResponse = await dispatchGuarded(
+            this.provider,
+            userUrl,
+            {
+              headers: {
+                Authorization: `Bearer ${githubAccessToken}`,
+                Accept: "application/json",
+              },
+            },
+            credentials
+          );
+          if (userResponse.ok) {
+            const userData = await userResponse.json().catch(() => ({}));
+            log?.info?.("TOKEN", "GHE Copilot token resolved via copilot_internal/user");
+            const endpoints = userData?.endpoints
+              ? { proxy: userData.endpoints.proxy, api: userData.endpoints.api }
+              : undefined;
+            return {
+              token: githubAccessToken,
+              expiresAt: Math.floor(Date.now() / 1000) + 3600,
+              ...(endpoints ? { endpoints } : {}),
+            };
+          }
+        }
+        return null;
+      }
       const data = await response.json();
       log?.info?.("TOKEN", "GHE Copilot token refreshed");
       // GHE returns a dynamic `endpoints` object; the chat/responses proxy host
@@ -291,8 +320,10 @@ export class GheCopilotExecutor extends GithubExecutor {
       ...credentials?.providerSpecificData,
       copilotToken: copilotResult.token,
       copilotTokenExpiresAt: copilotResult.expiresAt,
-      copilotApiUrl: copilotResult.endpoints?.api,
-      copilotProxyUrl: copilotResult.endpoints?.proxy,
+      copilotApiUrl:
+        copilotResult.endpoints?.api ?? credentials?.providerSpecificData?.copilotApiUrl,
+      copilotProxyUrl:
+        copilotResult.endpoints?.proxy ?? credentials?.providerSpecificData?.copilotProxyUrl,
       gheUrl: credentials?.providerSpecificData?.gheUrl,
     };
   }
