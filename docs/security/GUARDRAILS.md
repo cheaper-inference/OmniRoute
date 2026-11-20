@@ -963,8 +963,9 @@ With `APP_LOG_LEVEL=warn` only the known third-party lines remain.
 
 Log fields: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`,
 `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Header
-values and the model string are capped at 200 characters. The API key,
-`Authorization`, `x-api-key` and cookies are never read.
+values and the model string are capped at 200 characters. The referer is logged
+without its query string, fragment and userinfo. The API key, `Authorization`,
+`x-api-key` and cookies are never read.
 
 Files: `src/lib/guardrails/agentGuard/classifier.ts`,
 `src/lib/guardrails/agentGuard/policy.ts`,

@@ -270,6 +270,25 @@ test("guardrail: the log never carries the API key, authorization or cookies", a
   assert.equal(calls.length, 1);
   assert.doesNotMatch(JSON.stringify(calls), /SECRET|authorization|x-api-key|cookie/i);
 });
+test("guardrail: the referer is logged without its query, fragment and userinfo", async () => {
+  const { calls, log } = capture();
+  const referer = "https://user:SECRETU@client.example/chat?access_token=SECRETQ#id_token=SECRETF";
+  await monitor().preCall({}, { model: MODEL, headers: { ...KILO, "http-referer": referer }, log });
+  assert.equal((calls[0][3] as { referer: string }).referer, "https://client.example/chat");
+  assert.doesNotMatch(JSON.stringify(calls), /SECRET|access_token|id_token/);
+  // A known agent named only in the referer's host is still recognised.
+  const byHost = classifyClientAgent({
+    "user-agent": "axios/1.7.2",
+    referer: "https://kilocode.ai/app?session=SECRETS",
+  });
+  assert.deepEqual([byHost.agent, byHost.signals.referer], ["kilocode", "https://kilocode.ai/app"]);
+  // A token that appears only in the query no longer classifies the client.
+  const byQuery = classifyClientAgent({
+    "user-agent": "axios/1.7.2",
+    referer: "https://client.example/?from=kilocode",
+  });
+  assert.equal(byQuery.agent, "unknown");
+});
 test("guardrail: fails open when headers or the logger throw, and without log or model", async () => {
   const boom = () => {
     throw new Error("boom");

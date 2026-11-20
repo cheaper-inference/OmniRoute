@@ -4,6 +4,7 @@
  * Names the client agent that sent a request from a fixed list of HTTP headers.
  * Pure: no I/O, no state. Only the headers listed in `readSignals` are read, so
  * credentials (`authorization`, `x-api-key`, `cookie`) never reach the result.
+ * The referer is kept without its query, fragment and userinfo.
  *
  * "unknown" is not "third-party": a bare curl or an unrecognized client is
  * `unknown`, with `thirdParty: false`. The `x-stainless-*` fingerprint is
@@ -79,13 +80,26 @@ function readSignal(headers: HeadersLike, name: string): string {
   return readHeader(headers, name).slice(0, MAX_SIGNAL_LENGTH);
 }
 
+/**
+ * A referer can carry a token in its query, its fragment or its userinfo. Only the part that
+ * identifies the client page is kept: scheme, host and path.
+ */
+function refererOrigin(headers: HeadersLike): string {
+  const raw = readHeader(headers, "http-referer") || readHeader(headers, "referer");
+  const cut = raw.search(/[?#]/);
+  const withoutQuery = cut === -1 ? raw : raw.slice(0, cut);
+  return withoutQuery
+    .replace(/^([a-z][a-z0-9+.-]*:\/\/)[^/@]*@/i, "$1")
+    .slice(0, MAX_SIGNAL_LENGTH);
+}
+
 function readSignals(headers: HeadersLike): Signals {
   return {
     userAgent: readSignal(headers, "user-agent"),
     xApp: readSignal(headers, "x-app"),
     anthropicBeta: readSignal(headers, "anthropic-beta"),
     xTitle: readSignal(headers, "x-title"),
-    referer: readSignal(headers, "http-referer") || readSignal(headers, "referer"),
+    referer: refererOrigin(headers),
     stainless: STAINLESS_HEADERS.some((name) => readHeader(headers, name) !== ""),
   };
 }
