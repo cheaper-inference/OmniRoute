@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Справочник API
+## Ссылка API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Фабричная функция, создающая объект Plugin со значениями по умолчанию.
+Фабричная функция, которая создает объект Plugin со значениями по умолчанию.
 
 **Параметры:**
 
-- `name` (string, обязательный) — имя плагина в kebab-case
-- `priority` (number, необязательный, по умолчанию: 100) — меньшее значение выполняется первым
-- `enabled` (boolean, необязательный, по умолчанию: true) — запускать включённым?
-- `onRequest` (function, необязательный) — выполняется перед обработчиком чата
-- `onResponse` (function, необязательный) — выполняется после обработчика чата
-- `onError` (function, необязательный) — выполняется при ошибке обработчика
+- `name` (строка, обязательная) — Имя плагина в кебаб-кебабе
+- `priority` (число, необязательно, по умолчанию: 100) — Нижний запускается первым
+- `enabled` (логическое значение, необязательно, по умолчанию: true) — Запуск включен?
+- `onRequest` (функция, необязательно) — Запускается перед обработчиком чата
+- `onResponse` (функция, необязательно) — Запускается после обработчика чата
+- `onError` (функция, необязательно) — Запускается при ошибке обработчика
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Заблокировать запрос и при необходимости вернуть пользовательский ответ.
+Заблокируйте запрос и при необходимости верните специальный ответ.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Изменить тело запроса до того, как он попадёт к провайдеру.
+Измените тело запроса до того, как оно достигнет поставщика.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Добавить метаданные в контекст запроса.
+Прикрепите метаданные к контексту запроса.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Контекст плагина (`PluginContext`)
 
-| Поле        | Тип                       | Описание                          |
-| ----------- | ------------------------- | --------------------------------- |
-| `requestId` | `string`                  | Уникальный идентификатор запроса  |
-| `model`     | `string`                  | Имя запрошенной модели            |
-| `provider`  | `string`                  | Идентификатор целевого провайдера |
-| `body`      | `Record<string, unknown>` | Тело запроса                      |
-| `headers`   | `Record<string, string>`  | Заголовки запроса                 |
-| `metadata`  | `Record<string, unknown>` | Изменяемые метаданные             |
-| `timestamp` | `number`                  | Временная метка запроса           |
+| Поле         | Тип                       | Описание                              |
+| ------------ | ------------------------- | ------------------------------------- |
+| `requestId`  | `string`                  | Уникальный идентификатор запроса      |
+| `model`      | `string`                  | Запрошенное название модели           |
+| `provider`   | `string`                  | Целевой поставщик ID                  |
+| `body`       | `Record<string, unknown>` | Тело запроса                          |
+| `headers`    | `Record<string, string>`  | Заголовки запросов (см. примечание)   |
+| `metadata`   | `Record<string, unknown>` | Изменяемые метаданные                 |
+| `timestamp`  | `number`                  | Временная метка запроса               |
+| `apiKeyInfo` | `object` (необязательно)  | Метаданные ключа API (см. примечание) |
+
+Контекст никогда не содержит учетные данные клиента: заголовки `authorization`, `x-api-key`, `proxy-authorization` и `cookie` удаляются (любой регистр), а `apiKeyInfo` сохраняет метаданные ключа (такие как `id`, `name` и `scopes`), но не значение ключа или его отпечаток (`redactPluginContext()` в `src/lib/plugins/hooks.ts`). Это относится к `onRequest`, `onResponse` и `onError`.
 
 ## Манифест (`plugin.json`)
 
@@ -140,17 +143,16 @@ onRequest: (ctx) => {
 
 ## Система разрешений
 
-Плагины выполняются в изолированном контексте виртуальной машины. Для доступа к внешним ресурсам требуются явные разрешения:
+Плагины** не изолирован в песочнице** . Каждый активный плагин запускается как отдельный обычный дочерний процесс Node.js (`loadPlugin()` в `src/lib/plugins/loader.ts`) под тем же пользователем операционной системы, что и OmniRoute, без контекста VM и флагов разрешений Node.js. Код плагина может использовать `node:fs`, `node:child_process`, `fetch` и любой другой Node.js API: он может читать и записывать любой файл, который может использовать пользователь OmniRoute (включая каталог данных), запускать программы и подключаться к сети.
 
-| Разрешение   | Предоставляет доступ                                         |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Доступный только для чтения прокси `process.env`             |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` манифеста принимает `network`, `file-read`, `file-write`, `env` и `exec`, но сегодня только `env` имеет эффект во время выполнения:
 
-Без соответствующего разрешения связанные с ним глобальные объекты просто недоступны в изолированной среде.
+| Разрешение                                   | Эффект сегодня                                                                                                                                                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Процесс плагина также получает `PORT`, `HOSTNAME`, `TZ` и `TMPDIR`. Без него он получает только `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` и `PLUGIN_NAME` (плюс `SystemRoot` и `windir` на Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Никто. Это всего лишь объявления: при их отсутствии ничего не блокируется.                                                                                                                                                      |
+
+Установка плагина аналогична установке любой другой программы на хост. Устанавливайте только те плагины, источнику которых вы доверяете.
 
 ## Схема конфигурации
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## Примеры
 
-### Журналирование запросов
+### Регистратор запросов
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Ограничитель частоты запросов
+### Ограничитель скорости
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 минута
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Преобразователь ответов
+### Ответный трансформатор
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

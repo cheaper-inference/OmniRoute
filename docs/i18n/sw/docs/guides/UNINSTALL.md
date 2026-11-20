@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Si lazima) Ondoa taswira
+docker rmi cheaperinference/omniroute:latest
+# Usakinishaji wa zamani ulivuta jina la urithi:
 docker rmi diegosouzapw/omniroute:latest
 ```
 
