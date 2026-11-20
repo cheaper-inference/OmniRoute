@@ -75,11 +75,15 @@ async function probe(t, tsx, usePreload) {
   }
   const find = (reports, path) => {
     const url = new URL(path, root).href;
+    const filename = fileURLToPath(url);
     return reports.flatMap((report) =>
       report.result
-        .filter((script) => script.url === url)
+        .filter((script) => script.url === url || script.url === filename)
         .map((script) => ({
-          mapped: Boolean(report["source-map-cache"]?.[url]),
+          url: script.url,
+          mapped: Boolean(
+            report["source-map-cache"]?.[url] ?? report["source-map-cache"]?.[filename]
+          ),
           functions: script.functions,
         }))
     );
@@ -104,11 +108,11 @@ for (const tsx of ["tsx/esm", "tsx"]) {
       assert.equal(parent.length, 1, url);
       assert.equal(parent[0].mapped, false, url);
       const sourceLength = (await readFile(new URL(url), "utf8")).length;
-      const runtimeLength = sourceLength + `\n\n//# sourceURL=${url}`.length;
-      for (const sample of [functions, parent[0].functions]) {
-        const [{ startOffset, endOffset }] = sample[0].ranges;
-        assert.deepEqual([startOffset, endOffset], [0, runtimeLength], url);
-        for (const fn of sample.slice(1)) {
+      for (const sample of [{ url, functions }, parent[0]]) {
+        const runtimeLength = sourceLength + `\n\n//# sourceURL=${sample.url}`.length;
+        const [{ startOffset, endOffset }] = sample.functions[0].ranges;
+        assert.deepEqual([startOffset, endOffset], [0, runtimeLength], sample.url);
+        for (const fn of sample.functions.slice(1)) {
           assert.ok(
             fn.ranges.every((range) => range.endOffset <= sourceLength),
             url
