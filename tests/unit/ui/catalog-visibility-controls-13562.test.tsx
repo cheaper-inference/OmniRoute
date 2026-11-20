@@ -35,6 +35,9 @@ vi.mock("@/app/(dashboard)/dashboard/settings/components/RoutingTab", () => ({
 vi.mock("@/app/(dashboard)/dashboard/settings/components/BackgroundDegradationTab", () => ({
   default: () => null,
 }));
+vi.mock("@/app/(dashboard)/dashboard/settings/components/TaskAwareRoutingCard", () => ({
+  default: () => null,
+}));
 vi.mock("@/shared/components/ModelRoutingSection", () => ({ default: () => null }));
 vi.mock("@/shared/components/routing/RoutingEntryLink", () => ({ default: () => null }));
 

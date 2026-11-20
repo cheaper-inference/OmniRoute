@@ -105,6 +105,7 @@ test("Global Routing page renders top-level modules in the requested order", () 
     "<ModelRoutingSection",
     "<RoutingTab",
     "<BackgroundDegradationTab",
+    "<TaskAwareRoutingCard",
   ]);
 
   assertInOrder(routingTab, [
