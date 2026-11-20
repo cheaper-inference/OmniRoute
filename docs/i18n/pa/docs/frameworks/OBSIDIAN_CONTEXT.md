@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### ਸੁਰੱਖਿਆ ਅਤੇ ਆਵਾਜਾਈ
+
+WebDAV ਪ੍ਰਮਾਣਿਕਤਾ ਪ੍ਰਤੀ-IP ਅਸਫਲਤਾ ਟਰੈਕਿੰਗ ਅਤੇ ਤਾਲਾਬੰਦੀ ਨੂੰ ਲਾਗੂ ਕਰਦੀ ਹੈ (60-ਸਕਿੰਟ ਵਿੰਡੋ ਦੇ ਅੰਦਰ 10 ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ `429 Too Many Requests` ਅਤੇ `Retry-After` ਨਾਲ 5-ਮਿੰਟ ਦੇ ਤਾਲਾਬੰਦੀ ਨੂੰ ਚਾਲੂ ਕਰਦੀਆਂ ਹਨ)। ਕਿਉਂਕਿ WebDAV ਮੂਲ ਪ੍ਰਮਾਣੀਕਰਨ ਪ੍ਰਮਾਣ ਪੱਤਰਾਂ ਨੂੰ ਪ੍ਰਸਾਰਿਤ ਕਰਦਾ ਹੈ, ਲੂਪਬੈਕ ਤੋਂ ਬਾਹਰ WebDAV ਐਂਡਪੁਆਇੰਟ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਵੇਲੇ TLS (ਜਾਂ ਇੱਕ ਸੁਰੱਖਿਅਤ ਸੁਰੰਗ ਜਿਵੇਂ ਕਿ Tailscale ਜਾਂ Cloudflare Tunnel ਉੱਤੇ ਰੂਟਿੰਗ) ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਜ਼ੋਰਦਾਰ ਸਿਫਾਰਸ਼ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+
 ### ਪ੍ਰਤੀ-API-key context source (ਵਿਕਲਪਿਕ)
 
 Obsidian config ਨੂੰ `api_key_context_sources` ਟੇਬਲ ਰਾਹੀਂ **ਹਰੇਕ API key ਮੁਤਾਬਕ**

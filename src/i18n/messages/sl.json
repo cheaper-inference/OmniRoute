@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Ohranite sistemska sporočila med pogovorom",
     "requireUserLastMessageDescription": "Za navzgor, ki zavrnejo vnaprejšnje izpolnjevanje pomočnika: pred pošiljanjem spustite zaostanek pomočnika (brez tool_use). Model lahko regenerira svoj prejšnji odgovor.",
     "requireUserLastMessageLabel": "Zahtevaj, da se pogovor konča z uporabniškim sporočilom",
+    "strictChatHistoryDescription": "Popravi prekinjena zaporedja klicev orodij in združi zaporedna sporočila pomočnika, preden jih pošlje ponudnikom, združljivim z OpenAI, ki uveljavljajo stroga pravila.",
+    "strictChatHistoryLabel": "Popravljanje zgodovine klepeta za stroge ponudnike",
     "bulkPasteAdded": "{count, plural, one {Dodan 1 ključ} two {Dodana # ključa} few {Dodani # ključi} other {Dodanih # ključev}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Preskočen 1 podvojen ključ} two {Preskočena # podvojena ključa} few {Preskočeni # podvojeni ključi} other {Preskočenih # podvojenih ključev}}",
     "bulkPasteHint": "Prilepite en ključ API na vrstico. Prazne vrstice bodo prezrte, podvojeni ključi pa preskočeni.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Odstrani ključ"
   },
   "plugins": {
-    "privilegesWarningTitle": "Vtičniki delujejo s polnimi pravicami",
-    "privilegesWarningBody": "Vtičnik deluje kot običajni proces Node.js z enakim dostopom kot OmniRoute: lahko bere datoteke, izvaja programe in uporablja omrežje, ne glede na dovoljenja, ki jih deklarira njegov manifest. Namestite samo vtičnike, ki jim zaupate.",
     "title": "Vtičniki",
     "description": "Namestite in upravljajte vtičnike za razširitev funkcionalnosti OmniRoute",
     "loading": "Nalaganje vtičnikov ...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Poišči vtičnike",
     "noPlugins": "Ni nameščenih vtičnikov",
     "noPluginsDescription": "Mape vtičnikov postavite v ~/.omniroute/plugins/ in kliknite »Poišči«.",
+    "privilegesWarningTitle": "Vtičniki delujejo s polnimi pravicami",
+    "privilegesWarningBody": "Vtičnik deluje kot običajni proces Node.js z enakim dostopom kot OmniRoute: lahko bere datoteke, izvaja programe in uporablja omrežje, ne glede na dovoljenja, ki jih deklarira njegov manifest. Namestite samo vtičnike, ki jim zaupate.",
     "activate": "Aktiviraj",
     "deactivate": "Deaktiviraj",
     "uninstall": "Odstrani",

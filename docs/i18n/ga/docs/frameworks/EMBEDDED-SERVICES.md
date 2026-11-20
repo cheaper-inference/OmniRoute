@@ -559,6 +559,8 @@ an seachfhreastalaí seo:
 
 láimhseálann freastalaí compánach uasghráduithe WebSocket don deais leabaithe ar phort tiomnaithe (féach `src/lib/services/embedWsProxy.ts`).
 
+Tá gach uasghrádú údaraithe sula n-osclaíonn an tollán, leis na rialacha céanna leis an mbealach leabaithe HTTP : ní mór don phiaraí a bheith loopback gan aon cheanntásc seoltaí droim ar aghaidh seachfhreastalaí, ní mór do bhrabhsálaí `Origin` a bheith ina bhunadh an deais (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` na mainneachtainí loopback a leathnú), agus tá seisiún deais nó eochair API scóip bhainistíochta ag teastáil ón nglaoiteoir mura bhfuil logáil isteach ar an painéal díchumasaithe.
+
 **Slándáil:** Aicmítear na bealaí seachfhreastalaí leabaithe faoi `LOCAL_ONLY_API_PREFIXES` agus ní féidir iad a bhaint amach ach ó loopback. Ní féidir le hionsaí a fhaigheann JWT trí thollán Cloudflare/Ngrok seachfhreastalaí isteach i seirbhísí leabaithe.
 
 ---

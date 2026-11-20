@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Aabo & Transport
+
+ìfàṣẹsí WebDAV fi ipa mu ipasẹ ipasẹ ikuna fun-IP ati titiipa (awọn igbiyanju 10 ti o kuna laarin ferese iṣẹju-aaya 60 nfa titiipa iṣẹju 5 pẹlu `429 Too Many Requests` ati `Retry-After`). Nitori WebDAV n gbejade awọn iwe-ẹri Ipilẹ Ipilẹ, ipari TLS (tabi ipa ọna oju eefin to ni aabo gẹgẹbi Tailscale tabi Cloudflare Tunnel) ni a gbaniyanju gidigidi nigbati o ba wọle si aaye ipari WebDAV ni ita loopback.
+
 ### Orísun àyíká fún kọ́kọ́rọ́ API kọ̀ọ̀kan (àṣàyàn)
 
 A lè fi ààlà sí ìṣètò Obsidian **fún kọ́kọ́rọ́ API kọ̀ọ̀kan** nípasẹ̀ tábìlì
