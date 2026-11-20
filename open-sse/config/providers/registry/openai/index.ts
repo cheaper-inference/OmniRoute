@@ -14,6 +14,14 @@ export const openaiProvider: RegistryEntry = {
   toolNameMaxLength: 64,
   defaultContextLength: 128000,
   models: [
+    // Same API surface as 6.1 Sol: Chat Completions rejects function tools with
+    // reasoning_effort, so tools require Responses.
+    {
+      id: "gpt-6.2-sol",
+      name: "GPT-6.2 Sol",
+      ...GPT_5_6_API_CAPABILITIES,
+      unsupportedParams: ["temperature", "top_p", "top_logprobs", "logprobs"],
+    },
     // https://developers.openai.com/api/docs/models/gpt-6.1-sol
     // API: 1.05M context, low..max (no none/minimal); tools require Responses.
     {

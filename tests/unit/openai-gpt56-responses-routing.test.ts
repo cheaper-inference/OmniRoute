@@ -39,6 +39,20 @@ test("gpt-6-astra and its effort suffix stay on Responses", () => {
   assert.equal(getModelTargetFormat("openai", "gpt-5.6-sol-xhigh"), "openai-responses");
 });
 
+test("gpt-6.2-sol and its effort suffix stay on Responses", () => {
+  assert.equal(getModelTargetFormat("openai", "gpt-6.2-sol"), "openai-responses");
+  assert.equal(getModelTargetFormat("openai", "openai/gpt-6.2-sol"), "openai-responses");
+  assert.equal(getModelTargetFormat("openai", "gpt-6.2-sol-high"), "openai-responses");
+});
+
+test("DefaultExecutor builds the /v1/responses URL for gpt-6.2-sol", () => {
+  const executor = new DefaultExecutor("openai");
+  assert.equal(
+    executor.buildUrl("gpt-6.2-sol", true, 0, null),
+    "https://api.openai.com/v1/responses"
+  );
+});
+
 test("DefaultExecutor builds the /v1/responses URL for gpt-5.6-sol", () => {
   const executor = new DefaultExecutor("openai");
   const url = executor.buildUrl("gpt-5.6-sol", true, 0, null);
