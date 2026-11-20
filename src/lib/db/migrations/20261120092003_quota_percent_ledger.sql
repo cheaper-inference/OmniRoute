@@ -14,7 +14,8 @@
 --   * Before opening the PR run: npm run test:migrations:fresh
 --     and npm run check:migration-numbering
 
--- Percent attribution book for quota-share pools on percent plans (Claude, Codex, Bailian).
+-- Percent attribution book for quota-share pools on percent plans with a plan-window reading
+-- (Claude through an OAuth connection, and Codex).
 --
 -- quota_percent_ledger holds one book per (pool, connection, plan window): the last applied
 -- account reading, the reading when the book opened or the provider window last turned
@@ -27,7 +28,8 @@
 -- apart from the book row so the per-request write never contends with the state write.
 --
 -- Times are epoch ms. Both tables keep a rowid and an updated_at index: the scheduled quota
--- cleanup deletes rows idle for two monthly windows by rowid batches.
+-- cleanup deletes rows idle for two monthly windows by rowid batches. The manual usage-history
+-- reset clears them too.
 
 CREATE TABLE IF NOT EXISTS quota_percent_ledger (
   pool_id TEXT NOT NULL,

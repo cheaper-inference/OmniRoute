@@ -321,27 +321,57 @@ lower figure is not applied.
 Both quota stores keep the book. On SQLite, the automatic database cleanup, when enabled, removes
 rows not updated for 60 days. On Redis, the books and counters of a pool connection share one key.
 It expires 60 days after its last token write or book change. A book that does not change is not
-rewritten, so the cutoff is set above the longest plan window.
+rewritten, so the cutoff is set above the longest plan window. The manual usage-history reset also
+clears the books on SQLite (see Limitations).
 
 #### Limitations
 
-- Usage made outside OmniRoute while keys route traffic is split between those keys by their
-  tokens, up to the floor. With the default floor, a key that routes 60,000 tokens while outside
-  use raises the account 60 points is charged all 60. With the floor at 50,000, it is charged
-  1.2 points. Set `QUOTA_PERCENT_MIN_TOKENS_PER_POINT` close to what one point costs on your plan.
-- Outside use includes traffic on the same account from keys outside the pool.
+- All growth of the account figure since the baseline is split by the tokens each key routed since
+  then. When that growth happened does not matter.
+- So usage made outside OmniRoute is charged to the keys up to what their tokens allow. That
+  includes usage made before a key's first request of the window.
+- For example, outside use raises the account 60 points while no key routes. A key then routes
+  30,000 tokens and the figure reaches 60.6.
+- If the book was open before that use, the key's part is 30 points. It also carries 7.65 of
+  external usage, with four keys of weight 25.
+- If the book opened after that use, the 60 points are baseline. The key's part is 0.6 points, and
+  it carries 15 of external usage.
+- A request or a visit to the usage route opens the book. So whether such usage counts as baseline
+  depends on when the book opened.
+- With the default floor, a key that routes 60,000 tokens while outside use raises the account 60
+  points gets all 60 as its own part.
+- With the floor at 50,000, its own part is 1.2 points. The other 58.8 are external and charged by
+  weight, like any external usage.
+- Set `QUOTA_PERCENT_MIN_TOKENS_PER_POINT` close to what one point costs on your plan. Outside use
+  includes traffic on the same account from keys outside the pool.
+- A percent cap applies in every mode. A capped key can be refused while the account is far below
+  the saturation threshold.
+- For example, with a cap of 10 and 12 points of outside use earlier in the window, a key that
+  routes 20,000 tokens is refused at an account figure of 12.4%.
 - The split is an estimate by token volume. A request counts as its prompt tokens plus its
   completion tokens. Cache discounts and model prices do not change that count.
-- The usage of a request in flight or just finished can show up briefly in another active key's
-  part. It moves back once that request's tokens are recorded.
+- A request that does not end with status 200 records no tokens. Examples are a stream the client
+  disconnects and an upstream error after usage was consumed.
+- The usage such a request caused is split among the keys that did record tokens. It does not move
+  back. A response that reports no token usage records no tokens either.
+- The usage of a request in progress can show up in another active key's part for the whole
+  request. It moves back only when the request ends with status 200.
 - Usage already on the account when a book opens counts as external. This covers an upgrade, a new
   pool and a new account. Usage in a new window before its first reading counts as external too.
-- That external usage reduces every key's room by weight until the window turns. With one account
-  at 85% and five keys of weight 20, each key starts with 17 of its 20 used.
-- A request whose response reports no token usage records no tokens. Its usage is split like
-  usage made outside OmniRoute.
+- Each key starts with its weight share of that usage, after the capacity no allocation claims.
+  With one account at 85% and five keys of weight 20, each starts with 17 of its 20 used.
 - In a pool with several accounts, the serving account's figure is applied to the summed budget.
   This is unchanged by the book.
+- A lower figure inside a window the provider reports as open is not applied. A reset time that
+  moves back by more than 30 minutes is treated as an old reading.
+- In both cases the book keeps its state until the stored reset time passes. After that, the book
+  is not charged until a reading turns it.
+- The remedy is the manual usage-history reset (`POST /api/settings/purge-usage-history`). It
+  clears the attribution books and their token counters in the SQLite database.
+- The `all` period clears every book. A shorter period clears only the books and counters not
+  written within it. The next reading then opens a fresh book at the current figure.
+- The reset does not touch a Redis quota store. There a book ends with its window, or expires 60
+  days after its last write.
 - When the provider sends no reset time, a window that resets and refills above the old figure
   between two readings looks like a higher figure. The book keeps the old baseline and marks.
 - Readings are dated by the local clock. When it runs ahead of the provider's, or a source reports
