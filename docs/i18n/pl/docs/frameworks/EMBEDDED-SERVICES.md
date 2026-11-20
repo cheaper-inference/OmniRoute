@@ -557,6 +557,8 @@ To proxy:
 
 aktualizacje WebSocket dla wbudowanego dashboardu są obsługiwane przez serwer towarzyszący na dedykowanym porcie (zobacz `src/lib/services/embedWsProxy.ts`).
 
+Każde uaktualnienie jest autoryzowane przed otwarciem tunelu, zgodnie z tymi samymi zasadami, co trasa osadzania HTTP : peer musi być sprzężony zwrotnie bez nagłówka przekazywania zwrotnego proxy, przeglądarka `Origin` musi być początkiem pulpitu nawigacyjnego (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozszerzają domyślne ustawienia pętli zwrotnej), a wywołujący potrzebuje sesji pulpitu nawigacyjnego lub klucza API o zakresie zarządzania, chyba że logowanie do pulpitu nawigacyjnego jest wyłączone.
+
 **Bezpieczeństwo:** Osadzone trasy proxy są klasyfikowane w `LOCAL_ONLY_API_PREFIXES` i można do nich dotrzeć tylko za pomocą pętli zwrotnej. Osoba atakująca, która uzyska JWT poprzez tunel Cloudflare/Ngrok nie może skorzystać z serwera proxy do usług wbudowanych.
 
 ---

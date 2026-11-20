@@ -67,7 +67,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 បន្ទាប់ពីចាប់ផ្តើមឡើងវិញ ផ្ទាំងគ្រប់គ្រងនឹងបង្ហាញជម្រើស **បន្ថែមអ្នកផ្តល់សេវាដែលត្រូវគ្នាជាមួយ Claude Code**

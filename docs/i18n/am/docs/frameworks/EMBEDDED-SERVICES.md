@@ -558,6 +558,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 ለተከተተው ዳሽቦርድ WebSocket ማሻሻያዎች የሚስተናገዱት በአንድ የተወሰነ ወደብ ላይ ባለው ተጓዳኝ አገልጋይ ነው ( `src/lib/services/embedWsProxy.ts` ይመልከቱ)።
 
+እያንዳንዱ ማሻሻያ ዋሻው ከመከፈቱ በፊት የተፈቀደ ነው፣ እንደ HTTP የተከተተ መንገድ ተመሳሳይ ህጎች አሉት፡ እኩያው ምንም የተገላቢጦሽ ተኪ ማስተላለፊያ ራስጌ የሌለው መሆን አለበት፣ አሳሽ `Origin` የዳሽቦርድ መነሻ መሆን አለበት (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` የ loopback ነባሪዎችን ያራዝማል) እና ደዋዩ የዳሽቦርድ ክፍለ ጊዜ ወይም የአስተዳደር-scope API ቁልፍ የዳሽቦርድ መግቢያ ካልሆነ በስተቀር ያስፈልገዋል።
+
 **ደህንነት፡** የተከተቱት ተኪ መንገዶች በ `LOCAL_ONLY_API_PREFIXES` ስር የተከፋፈሉ ሲሆኑ ከ loopback ብቻ ሊገኙ ይችላሉ። በ Cloudflare/Ngrok መሿለኪያ በኩል JWT ያገኘ አጥቂ ለተከተቱ አገልግሎቶች ፕሮክሲ ማድረግ አይችልም።
 
 ---

@@ -21,10 +21,10 @@ npm install -g omniroute
 ### ရွေးချယ်မှု B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` သည် **ထုတ်ဝေထားသော** stable SemVer များအနက် အမြင့်ဆုံးဖြစ်သည်။ ၎င်းသည် git `main` ကို လိုက်လံညှိပေးခြင်း **မရှိပါ**။ GitOps အတွက် `diegosouzapw/omniroute:X.Y.Z` ကို သတ်မှတ်အသုံးပြုပါ။ [Image Tags / Release Channels](../guides/DOCKER_GUIDE.md#release-channels) ကို ကြည့်ပါ။
+`:latest` သည် **ထုတ်ဝေထားသော** stable SemVer များအနက် အမြင့်ဆုံးဖြစ်သည်။ ၎င်းသည် git `main` ကို လိုက်လံညှိပေးခြင်း **မရှိပါ**။ GitOps အတွက် `cheaperinference/omniroute:X.Y.Z` ကို သတ်မှတ်အသုံးပြုပါ။ [Image Tags / Release Channels](../guides/DOCKER_GUIDE.md#release-channels) ကို ကြည့်ပါ။
 
 ### ရွေးချယ်မှု C: Source မှ
 

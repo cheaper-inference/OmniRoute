@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### 보안 및 운송
+
+WebDAV 인증은 IP별 실패 추적 및 잠금을 시행합니다(60초 내에 10번의 시도 실패는 `429 Too Many Requests` 및 `Retry-After` 사용하여 5분 잠금을 트리거함). WebDAV 기본 인증 자격 증명을 전송하기 때문에 루프백 외부에서 WebDAV 엔드포인트에 액세스할 때 TLS 종료하거나 Tailscale 또는 Cloudflare Tunnel 와 같은 보안 터널을 통해 라우팅하는 것이 좋습니다.
+
 ### API 키별 컨텍스트 소스(선택 사항)
 
 Obsidian 구성은 `api_key_context_sources` 테이블
