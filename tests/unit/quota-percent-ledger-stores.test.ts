@@ -40,8 +40,25 @@ test.after(() => {
 
 const hashes = new Map<string, Map<string, string>>();
 const calls: Array<{ method: string; args: unknown[] }> = [];
-/** One-shot hook run inside the next hgetall, before it answers (to interleave another writer). */
-let beforeNextHgetall: (() => void) | null = null;
+/**
+ * One-shot hooks run inside the next hgetall / hincrbyfloat, before it acts (to interleave another
+ * writer). A hook that returns a promise is awaited first; one that returns nothing is not, so a
+ * microtask it queues runs after the command answered.
+ */
+type Hook = () => void | Promise<void>;
+let beforeNextHgetall: Hook | null = null;
+let beforeNextHincrbyfloat: Hook | null = null;
+
+/** Run a hook; returns its promise only when it has one, so a plain hook adds no await. */
+function runHook(hook: Hook | null): Promise<void> | undefined {
+  const result = hook?.();
+  return result instanceof Promise ? result : undefined;
+}
+
+/** Install `fn` as the hook of the n-th next hgetall (1 = the very next one). */
+function atHgetall(n: number, fn: Hook): void {
+  beforeNextHgetall = n <= 1 ? fn : () => atHgetall(n - 1, fn);
+}
 
 function hashOf(key: string): Map<string, string> {
   let hash = hashes.get(key);
@@ -57,7 +74,8 @@ const fake = {
     calls.push({ method: "hgetall", args: [key] });
     const hook = beforeNextHgetall;
     beforeNextHgetall = null;
-    hook?.();
+    const pending = runHook(hook);
+    if (pending) await pending;
     return Object.fromEntries(hashes.get(key) ?? []);
   },
   async hset(key: string, field: string, value: string): Promise<number> {
@@ -76,6 +94,10 @@ const fake = {
   },
   async hincrbyfloat(key: string, field: string, increment: number): Promise<string> {
     calls.push({ method: "hincrbyfloat", args: [key, field, increment] });
+    const hook = beforeNextHincrbyfloat;
+    beforeNextHincrbyfloat = null;
+    const pending = runHook(hook);
+    if (pending) await pending;
     const hash = hashOf(key);
     const next = Number(hash.get(field) ?? "0") + increment;
     hash.set(field, String(next));
@@ -428,6 +450,8 @@ for (const [name, make] of STORES) {
       { rev: Infinity },
       { keys: { a: { attributed: Infinity, seenTokens: 10 } } },
       { keys: { a: { attributed: 0.1, seenTokens: Number.NaN } } },
+      { keys: { a: { attributed: -0.1, seenTokens: 10 } } },
+      { keys: { a: { attributed: 0.1, seenTokens: -1 } } },
     ]) {
       assert.equal(await store.ledgerCommit(K8, { ...ok, ...over }), false, Object.keys(over)[0]);
     }
@@ -576,6 +600,68 @@ test("redis: a revision field removed after the check cannot be won a second tim
     [...hashOf(hashKey).keys()].filter((f) => f.startsWith("s:")),
     ["s:5h:3"]
   );
+});
+
+test("redis: a commit overtaken before its confirmation is re-read, never attributed twice", async () => {
+  const redis = redisWithFakeClient();
+  const K = keyOf("p-redis-spurious-loss");
+  const at = (m: number) => T0 + m * MIN;
+  await obs(redis, K, 0.1, 0);
+  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 50_000, at(1));
+  // Writer A's commit of rev 2: its read, the compare, then the HSETNX wins, then the confirm.
+  // Before the confirm answers, writer B reads A's rev 2 and stores rev 3 on top of it.
+  atHgetall(3, async () => {
+    await redis.ledgerRecordTokens(K.poolId, K.connectionId, "b", 30_000, at(3));
+    const fromB = await obs(redis, K, 0.25, 3);
+    assert.equal(fromB?.rev, 3, "writer B builds rev 3 on writer A's rev 2");
+  });
+  const commits: boolean[] = [];
+  const writerA: LedgerStore = {
+    ledgerRead: (k) => redis.ledgerRead(k),
+    ledgerCommit: async (k, s) => {
+      const won = await redis.ledgerCommit(k, s);
+      commits.push(won);
+      return won;
+    },
+  };
+  const out = await obs(writerA, K, 0.2, 2);
+  assert.deepEqual(commits, [false], "A's HSETNX won, but the confirm saw rev 3");
+  assert.equal(beforeNextHgetall, null, "the interleaving ran");
+  assert.ok(out);
+  // A re-read rev 3; its own reading is older than rev 3's, so nothing changes.
+  assert.deepEqual(out, (await redis.ledgerRead(K)).state);
+  assert.deepEqual([out.rev, out.last, out.readAt], [3, 0.25, at(3)]);
+  near(out.keys.a.attributed, 0.1, "a.attributed (once)");
+  near(out.keys.b.attributed, 0.05, "b.attributed");
+  near(out.external, 0.1, "external");
+  assert.deepEqual([out.keys.a.seenTokens, out.keys.b.seenTokens], [50_000, 30_000]);
+});
+
+test("redis: a read between the two commands of a token write leaves the tokens pending", async () => {
+  const redis = redisWithFakeClient();
+  const K = keyOf("p-redis-split-token-write");
+  const at = (m: number) => T0 + m * MIN;
+  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 10_000, T0);
+  await obs(redis, K, 0.1, 0);
+  // The write stores the last-write time, then increments the tokens: observe in between.
+  const seen: { mid: LedgerState | null } = { mid: null };
+  beforeNextHincrbyfloat = async () => {
+    const snap = await redis.ledgerRead(K);
+    assert.deepEqual(snap.counters.a, { tokens: 10_000, updatedAt: at(1) });
+    seen.mid = await obs(redis, K, 0.15, 2);
+  };
+  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 50_000, at(1));
+  const between = seen.mid;
+  assert.ok(between, "the interleaving ran");
+  near(between.keys.a.attributed, 0, "nothing to explain the rise yet");
+  near(between.external, 0.15, "external");
+  assert.equal(between.keys.a.seenTokens, 10_000, "the watermark did not move past the new tokens");
+
+  const after = await obs(redis, K, 0.2, 3);
+  assert.ok(after);
+  near(after.keys.a.attributed, 0.05, "the next rise is explained by the pending tokens");
+  near(after.external, 0.15, "external");
+  assert.equal(after.keys.a.seenTokens, 60_000);
 });
 
 test("redis: a stored field that is not a usable book is skipped and removed", async () => {

@@ -140,6 +140,9 @@ test("a state with a number that is not finite is never stored", () => {
     { resetAt: Infinity },
     { keys: { a: { attributed: Number.NaN, seenTokens: 4_000 } } },
     { keys: { a: { attributed: 0.48, seenTokens: Infinity } } },
+    // The write guard and the read filter are one rule: a negative key entry is not stored.
+    { keys: { a: { attributed: -0.01, seenTokens: 4_000 } } },
+    { keys: { a: { attributed: 0.48, seenTokens: -1 } } },
   ];
   for (const over of unusable) {
     assert.equal(

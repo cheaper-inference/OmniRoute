@@ -268,16 +268,18 @@ function isKeyState(value: unknown): value is LedgerKeyState {
 }
 
 /**
- * Every number of the state is finite: the only kind of state a store writes. An Infinity or a
- * NaN would survive every later transition.
+ * Every number of the state is finite and every key entry passes the same check as a stored one
+ * (`attributed` and `seenTokens` finite and >= 0): the only kind of state a store writes. An
+ * Infinity or a NaN would survive every later transition, and a key entry the read filter drops
+ * must not be written in the first place.
  */
 export function isStorableLedgerState(state: LedgerState): boolean {
   const numbers = [state.rev, state.last, state.external, state.readAt, state.updatedAt];
   if (state.resetAt !== null) numbers.push(state.resetAt);
-  for (const keyState of Object.values(state.keys)) {
-    numbers.push(keyState.attributed, keyState.seenTokens);
-  }
-  return numbers.every((n) => typeof n === "number" && Number.isFinite(n));
+  return (
+    numbers.every((n) => typeof n === "number" && Number.isFinite(n)) &&
+    Object.values(state.keys).every(isKeyState)
+  );
 }
 
 /**

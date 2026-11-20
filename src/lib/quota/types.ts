@@ -91,7 +91,11 @@ export interface QuotaStore {
   /**
    * Compare-and-set on the revision: stores `next` only when the stored book is at revision
    * next.rev - 1 (a missing book counts as 0). False when another writer already stored next.rev,
-   * when the stored book is at another revision, or when a number of `next` is not finite.
+   * when the stored book is at another revision, or when `next` is not storable (a number that is
+   * not finite, or a key entry with a negative part or watermark).
+   * On the Redis store `false` does not guarantee that `next` was not stored: a commit can win its
+   * revision and still answer `false` when another writer stores the next revision on top of it
+   * before the confirmation. Callers must re-read the book rather than assume `next` is absent.
    */
   ledgerCommit(key: LedgerKey, next: LedgerState): Promise<boolean>;
 }
