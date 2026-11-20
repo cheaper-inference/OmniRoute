@@ -276,31 +276,37 @@ await test("quota-percent-external-usage", async (t) => {
   await t.test(
     "a failed usage read or a rate-limit-header value never reaches the book",
     async () => {
-      const C9 = "conn-ext-9";
-      makePool(C9, "5h", hard(K4, 25));
-      mockUsage({ [C9]: { fiveHour: 0 } });
-      await ask(C9, "k1"); // opens the book at 0
-      await burn(C9, "k1", 40_000);
-      mockUsage({ [C9]: { fiveHour: 60 } });
-      assert.equal((await ask(C9, "k1")).kind, "block"); // k1 = 40 + 5, external 20
-
-      failUsage();
-      sat.storeRateLimitHeaders(C9, "anthropic", {
-        "anthropic-ratelimit-requests-limit": "100",
-        "anthropic-ratelimit-requests-remaining": "10",
-      });
+      mock.timers.enable({ apis: ["Date"], now: Date.now() });
       try {
-        const viaHeaders = await attribute(C9);
-        near(viaHeaders.globalUsedPercent, 0.9);
-        near(viaHeaders.internalByKey.k1, 40);
-        near(viaHeaders.external, 20);
+        const C9 = "conn-ext-9";
+        const t0 = Date.now();
+        makePool(C9, "5h", hard(K4, 25));
+        mockUsage({ [C9]: { fiveHour: 0 } });
+        await ask(C9, "k1"); // opens the book at 0
+        await burn(C9, "k1", 40_000);
+        mockUsage({ [C9]: { fiveHour: 60 } });
+        assert.equal((await ask(C9, "k1")).kind, "block"); // k1 = 40 + 5, external 20
+        const stored = await storedBook(C9);
+
+        // Three minutes later: a 0 that reached the book now would be a confirmed drop and turn it.
+        mock.timers.setTime(t0 + 3 * MIN);
+        failUsageWithHeaders(C9);
+        try {
+          const viaHeaders = await attribute(C9);
+          near(viaHeaders.globalUsedPercent, 0.9);
+          near(viaHeaders.internalByKey.k1, 40);
+          near(viaHeaders.external, 20);
+        } finally {
+          sat._clearRateLimitHeaders();
+        }
+        sat._clearSaturationCache();
+        assert.equal((await ask(C9, "k1")).kind, "allow"); // read failed → 0 → generous mode
+        assert.deepEqual(await storedBook(C9), stored); // neither the 90% nor the 0 was applied
+        mockUsage({ [C9]: { fiveHour: 60 } });
+        assert.equal((await ask(C9, "k1")).kind, "block"); // the book survived the 0: still 45 ≥ 25
       } finally {
-        sat._clearRateLimitHeaders();
+        mock.timers.reset();
       }
-      sat._clearSaturationCache();
-      assert.equal((await ask(C9, "k1")).kind, "allow"); // read failed → 0 → generous mode
-      mockUsage({ [C9]: { fiveHour: 60 } });
-      assert.equal((await ask(C9, "k1")).kind, "block"); // the book survived the 0: still 45 ≥ 25
     }
   );
 
@@ -418,6 +424,47 @@ await test("quota-percent-external-usage", async (t) => {
         sat._clearRateLimitHeaders();
         mock.timers.reset();
       }
+    }
+  );
+
+  await t.test(
+    "a percent cap in a pool of two accounts counts against the summed limit, per account",
+    async () => {
+      // Pool over [X, Y] with a manual plan of 100 on X: the effective limit is 200. The cap is
+      // compared with the key's attributed part of the SERVING account's bar × 200, so a cap of
+      // 10 is reached at 5 points of that account's bar (not at 2.5, not at 10), and each account
+      // is checked against its own book.
+      const X = "conn-ext-15x";
+      const Y = "conn-ext-15y";
+      providerPlans.upsertPlan(X, PROV, [{ unit: "percent", window: "5h", limit: 100 }], "manual");
+      quotaPools.createPool({
+        connectionId: X,
+        connectionIds: [X, Y],
+        name: X,
+        allocations: [
+          { apiKeyId: "k1", weight: 50, policy: "hard", capValue: 10, capUnit: "percent" },
+          { apiKeyId: "k2", weight: 50, policy: "hard" },
+        ],
+      });
+      const bar: Record<string, number> = { [X]: 0, [Y]: 0 };
+      const setBars = () => mockUsage({ [X]: { fiveHour: bar[X] }, [Y]: { fiveHour: bar[Y] } });
+      /** k1 routes 5k tokens on `conn` (enough for 5 points), the bar moves to `pct`, then k1 asks. */
+      const step = async (conn: string, pct: number) => {
+        await burn(conn, "k1", 5_000);
+        bar[conn] = pct;
+        setBars();
+        return ask(conn, "k1");
+      };
+      setBars();
+      await ask(X, "k1"); // opens the book of X at 0
+      await ask(Y, "k1"); // opens the book of Y at 0
+
+      assert.equal((await step(X, 2.5)).kind, "allow"); // 2.5 points × 2 = 5 < 10 (half the cap)
+      assert.equal((await step(X, 4.9)).kind, "allow"); // 9.8 < 10
+      assert.match(reason(await step(X, 5.1)), /Absolute quota cap reached/); // 10.2 ≥ 10
+      // Account Y keeps its own book: the same key starts from 0 there and stops at 5 points too.
+      assert.equal((await step(Y, 4.9)).kind, "allow");
+      assert.match(reason(await step(Y, 5.1)), /Absolute quota cap reached/);
     }
   );
 
