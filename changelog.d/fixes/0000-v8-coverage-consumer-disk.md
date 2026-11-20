@@ -1,0 +1,1 @@
+- Merge verified coverage shards in their original reporting order and write a single aggregate for c8, reducing temporary disk use on CI runners.
