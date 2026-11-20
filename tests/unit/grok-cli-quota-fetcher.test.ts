@@ -9,9 +9,11 @@ import {
 } from "../../open-sse/services/grokCliQuotaFetcher.ts";
 import { preflightQuota } from "../../open-sse/services/quotaPreflight.ts";
 import { clearQuotaMonitors } from "../../open-sse/services/quotaMonitor.ts";
+import { connectionProxyTestOverride } from "../../open-sse/services/connectionProxyFetch.ts";
 
 interface FetchCall {
   url: string;
+  method: string;
   headers: Record<string, string>;
   body: unknown;
 }
@@ -20,7 +22,14 @@ const originalFetch = globalThis.fetch;
 
 test.afterEach(() => {
   globalThis.fetch = originalFetch;
+  connectionProxyTestOverride.resolveProxyForConnection = null;
   clearQuotaMonitors();
+});
+
+test.beforeEach(() => {
+  // No proxy assigned in this unit test: resolve to null so the mocked
+  // globalThis.fetch runs unchanged (fetchWithConnectionProxy path).
+  connectionProxyTestOverride.resolveProxyForConnection = async () => null;
 });
 
 /**
@@ -82,8 +91,20 @@ function buildCreditsResponseBuffer(usageRatio: number): ArrayBuffer {
   return framed.buffer.slice(framed.byteOffset, framed.byteOffset + framed.byteLength);
 }
 
+/** Build a JSON `/v1/billing?format=credits` response for a given usage percent (0..100). */
+function buildBillingJsonResponse(creditUsagePercent: number, resetAt?: string): Response {
+  return new Response(
+    JSON.stringify({
+      config: {
+        creditUsagePercent,
+        currentPeriod: { end: resetAt ?? "2026-08-03T00:00:00.000Z" },
+      },
+    }),
+    { status: 200, headers: { "content-type": "application/json" } }
+  );
+}
+
 const PERCENT_TOLERANCE = 1e-4; // fixed32 (float) round-trip precision, not fixed64 (double)
-const EMPTY_GRPC_WEB_FRAME = [0, 0, 0, 0, 0];
 
 test("fetchGrokCliQuota returns null when credentials.accessToken is missing", async () => {
   const quota = await fetchGrokCliQuota(`missing-${Date.now()}`);
@@ -95,40 +116,40 @@ test("fetchGrokCliQuota returns null when connection has no nested credentials o
   assert.equal(quota, null);
 });
 
-test("fetchGrokCliQuota sends Authorization + X-Grpc-Web headers and a non-empty gRPC-web request frame to the billing endpoint", async () => {
+test("fetchGrokCliQuota reads the CLI 1.0.89 JSON billing endpoint (GET /v1/billing?format=credits, models face headers)", async () => {
   const connectionId = `grok-cli-${Date.now()}`;
   const calls: FetchCall[] = [];
 
   globalThis.fetch = (async (url: string, init: RequestInit) => {
-    calls.push({ url, headers: init.headers as Record<string, string>, body: init.body });
-    return new Response(buildCreditsResponseBuffer(0.3), {
-      status: 200,
-      headers: { "content-type": "application/grpc-web+proto" },
+    calls.push({
+      url,
+      method: init.method ?? "GET",
+      headers: init.headers as Record<string, string>,
+      body: init.body,
     });
+    return buildBillingJsonResponse(30);
   }) as typeof fetch;
 
   const quota = (await fetchGrokCliQuota(connectionId, {
     credentials: { accessToken: "grok-token" },
+    providerSpecificData: { userId: "user-123" },
   })) as GrokCliQuota | null;
 
   assert.equal(calls.length, 1);
-  assert.equal(
-    calls[0].url,
-    "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig"
-  );
+  assert.equal(calls[0].method, "GET");
+  assert.equal(calls[0].url, "https://cli-chat-proxy.grok.com/v1/billing?format=credits");
   assert.equal(calls[0].headers["Authorization"], "Bearer grok-token");
-  assert.equal(calls[0].headers["X-Grpc-Web"], "1");
-  assert.equal(calls[0].headers["Content-Type"], "application/grpc-web+proto");
-
-  // Defect 1: gRPC-web requires SOME request frame — without one the upstream
-  // responds `grpc-status: 13 "Missing request message"` with a 0-byte body.
-  assert.ok(calls[0].body, "fetch() must be called with a non-empty body");
-  assert.deepEqual(Array.from(calls[0].body as Uint8Array), EMPTY_GRPC_WEB_FRAME);
+  assert.equal(calls[0].headers["X-XAI-Token-Auth"], "xai-grok-cli");
+  assert.equal(calls[0].headers["x-grok-client-identifier"], "grok-shell");
+  assert.equal(calls[0].headers["x-grok-client-mode"], "headless");
+  assert.equal(calls[0].headers["x-userid"], "user-123");
+  assert.equal(calls[0].body, undefined, "JSON read is a GET with no body");
 
   assert.ok(quota);
-  assert.ok(Math.abs(quota.percentUsed - 0.3) < PERCENT_TOLERANCE);
+  assert.equal(quota.percentUsed, 0.3);
   assert.equal(quota.used, 30);
   assert.equal(quota.limitReached, false);
+  assert.equal(quota.resetAt, "2026-08-03T00:00:00.000Z");
 
   invalidateGrokCliQuotaCache(connectionId);
 });
@@ -136,8 +157,7 @@ test("fetchGrokCliQuota sends Authorization + X-Grpc-Web headers and a non-empty
 test("fetchGrokCliQuota marks limitReached when the pool is fully used", async () => {
   const connectionId = `grok-cli-full-${Date.now()}`;
 
-  globalThis.fetch = (async () =>
-    new Response(buildCreditsResponseBuffer(1), { status: 200 })) as typeof fetch;
+  globalThis.fetch = (async () => buildBillingJsonResponse(100)) as typeof fetch;
 
   const quota = (await fetchGrokCliQuota(connectionId, {
     credentials: { accessToken: "grok-token" },
@@ -151,23 +171,79 @@ test("fetchGrokCliQuota marks limitReached when the pool is fully used", async (
   invalidateGrokCliQuotaCache(connectionId);
 });
 
-test("fetchGrokCliQuota fails open (returns null) on upstream 401/5xx without throwing", async () => {
+test("fetchGrokCliQuota fails open (returns null) on JSON 401/403 without hitting the gRPC fallback", async () => {
   const connectionId401 = `grok-cli-401-${Date.now()}`;
-  globalThis.fetch = (async () => new Response(null, { status: 401 })) as typeof fetch;
+  let callCount = 0;
+  globalThis.fetch = (async () => {
+    callCount += 1;
+    return new Response(null, { status: 401 });
+  }) as typeof fetch;
   const quota401 = await fetchGrokCliQuota(connectionId401, {
     credentials: { accessToken: "bad-token" },
   });
   assert.equal(quota401, null);
+  assert.equal(callCount, 1, "401/403 must not trigger the gRPC fallback");
 
+  const connectionId403 = `grok-cli-403-${Date.now()}`;
+  globalThis.fetch = (async () => new Response(null, { status: 403 })) as typeof fetch;
+  const quota403 = await fetchGrokCliQuota(connectionId403, {
+    credentials: { accessToken: "bad-token" },
+  });
+  assert.equal(quota403, null);
+
+  invalidateGrokCliQuotaCache(connectionId401);
+  invalidateGrokCliQuotaCache(connectionId403);
+});
+
+test("fetchGrokCliQuota fails open (returns null) when both the JSON read and the gRPC fallback return 5xx", async () => {
   const connectionId500 = `grok-cli-500-${Date.now()}`;
   globalThis.fetch = (async () => new Response(null, { status: 500 })) as typeof fetch;
   const quota500 = await fetchGrokCliQuota(connectionId500, {
     credentials: { accessToken: "some-token" },
   });
   assert.equal(quota500, null);
+  invalidateGrokCliQuotaCache(connectionId500);
 });
 
-test("fetchGrokCliQuota returns null (does not throw) when the response has no body (matches the pre-fix no-request-frame response)", async () => {
+test("fetchGrokCliQuota falls back to the gRPC-web credits endpoint when the JSON read is unavailable (5xx)", async () => {
+  const connectionId = `grok-cli-fallback-${Date.now()}`;
+  const calls: FetchCall[] = [];
+
+  globalThis.fetch = (async (url: string, init: RequestInit) => {
+    calls.push({
+      url,
+      method: init.method ?? "GET",
+      headers: init.headers as Record<string, string>,
+      body: init.body,
+    });
+    if (String(url).includes("cli-chat-proxy.grok.com")) {
+      return new Response(null, { status: 500 });
+    }
+    return new Response(buildCreditsResponseBuffer(0.25), {
+      status: 200,
+      headers: { "content-type": "application/grpc-web+proto" },
+    });
+  }) as typeof fetch;
+
+  const quota = (await fetchGrokCliQuota(connectionId, {
+    credentials: { accessToken: "grok-token" },
+  })) as GrokCliQuota | null;
+
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].method, "GET");
+  assert.ok(calls[0].url.includes("cli-chat-proxy.grok.com/v1/billing"));
+  assert.equal(calls[1].method, "POST");
+  assert.equal(calls[1].url, "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig");
+
+  assert.ok(quota);
+  assert.ok(Math.abs(quota.percentUsed - 0.25) < PERCENT_TOLERANCE);
+  assert.equal(quota.used, 25);
+  assert.equal(quota.limitReached, false);
+
+  invalidateGrokCliQuotaCache(connectionId);
+});
+
+test("fetchGrokCliQuota returns null (does not throw) when the JSON body is empty", async () => {
   const connectionId = `grok-cli-nobody-${Date.now()}`;
 
   globalThis.fetch = (async () => new Response(null, { status: 200 })) as typeof fetch;
@@ -196,7 +272,7 @@ test("fetchGrokCliQuota caches results within the TTL window", async () => {
 
   globalThis.fetch = (async () => {
     callCount += 1;
-    return new Response(buildCreditsResponseBuffer(0.2), { status: 200 });
+    return buildBillingJsonResponse(20);
   }) as typeof fetch;
 
   const connection = { credentials: { accessToken: "grok-token" } };
@@ -213,7 +289,7 @@ test("invalidateGrokCliQuotaCache forces a re-fetch on the next call", async () 
 
   globalThis.fetch = (async () => {
     callCount += 1;
-    return new Response(buildCreditsResponseBuffer(0.1), { status: 200 });
+    return buildBillingJsonResponse(10);
   }) as typeof fetch;
 
   const connection = { credentials: { accessToken: "grok-token" } };
@@ -230,8 +306,7 @@ test("registerGrokCliQuotaFetcher wires grok-cli into preflightQuota", async () 
 
   const connectionId = `grok-cli-preflight-${Date.now()}`;
 
-  globalThis.fetch = (async () =>
-    new Response(buildCreditsResponseBuffer(1), { status: 200 })) as typeof fetch;
+  globalThis.fetch = (async () => buildBillingJsonResponse(100)) as typeof fetch;
 
   const result = await preflightQuota("grok-cli", connectionId, {
     credentials: { accessToken: "grok-token" },

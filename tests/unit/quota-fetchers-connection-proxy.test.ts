@@ -481,57 +481,6 @@ test("firecrawl quota reads inside the proxy context", async () => {
   }
 });
 
-function encodeVarint(value: number): Buffer {
-  const bytes: number[] = [];
-  let v = BigInt(value);
-  do {
-    let byte = Number(v & 0x7fn);
-    v >>= 7n;
-    if (v !== 0n) byte |= 0x80;
-    bytes.push(byte);
-  } while (v !== 0n);
-  return Buffer.from(bytes);
-}
-
-function encodeTag(fieldNumber: number, wireType: number): Buffer {
-  return encodeVarint((fieldNumber << 3) | wireType);
-}
-
-function encodeFixed32Field(fieldNumber: number, value: number): Buffer {
-  const body = Buffer.alloc(4);
-  body.writeFloatLE(value, 0);
-  return Buffer.concat([encodeTag(fieldNumber, 5), body]);
-}
-
-function encodeLengthDelimited(fieldNumber: number, body: Buffer): Buffer {
-  return Buffer.concat([encodeTag(fieldNumber, 2), encodeVarint(body.length), body]);
-}
-
-function encodeTimestampField(fieldNumber: number, seconds: number, nanos: number): Buffer {
-  const parts: Buffer[] = [];
-  if (seconds !== 0) {
-    parts.push(Buffer.concat([encodeTag(1, 0), encodeVarint(seconds)]));
-  }
-  if (nanos !== 0) {
-    parts.push(Buffer.concat([encodeTag(2, 0), encodeVarint(nanos)]));
-  }
-  return encodeLengthDelimited(fieldNumber, Buffer.concat(parts));
-}
-
-/** Framed gRPC-web GetGrokCreditsConfig response (same wire shape as the grok-cli test). */
-function grokCreditsFrame(usageRatio: number): ArrayBuffer {
-  const creditsInfo = Buffer.concat([
-    encodeFixed32Field(1, usageRatio),
-    encodeTimestampField(5, 1784825940, 867850000),
-  ]);
-  const topMessage = encodeLengthDelimited(1, creditsInfo);
-  const header = Buffer.alloc(5);
-  header[0] = 0x00;
-  header.writeUInt32BE(topMessage.length, 1);
-  const framed = Buffer.concat([header, topMessage]);
-  return framed.buffer.slice(framed.byteOffset, framed.byteOffset + framed.byteLength);
-}
-
 test("grok cli quota reads inside the proxy context", async () => {
   useAssignedProxy();
   const connectionId = `grok-cli-proxy-${Date.now()}`;
@@ -539,7 +488,7 @@ test("grok cli quota reads inside the proxy context", async () => {
   const wrappedFetch = globalThis.fetch;
   globalThis.fetch = (async () => {
     observed = hasAmbientProxyContext();
-    return new Response(grokCreditsFrame(0.3), { status: 200 });
+    return new Response(JSON.stringify({ config: { creditUsagePercent: 30 } }), { status: 200 });
   }) as typeof globalThis.fetch;
   try {
     const quota = await fetchGrokCliQuota(connectionId, {
