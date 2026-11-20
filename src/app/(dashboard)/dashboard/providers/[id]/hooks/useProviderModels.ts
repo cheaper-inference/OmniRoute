@@ -16,6 +16,7 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
+import { readLiveCatalogGate, type LiveCatalogGate } from "@/lib/providers/liveCatalogAdmission";
 import { providerText, type CompatModelRow } from "../providerPageHelpers";
 
 // ──── types ─────────────────────────────────────────────────────────────────
@@ -30,6 +31,8 @@ export interface UseProviderModelsReturn {
   modelMeta: ModelMeta;
   syncedAvailableModels: any[];
   syncedCatalogAuthoritative: boolean;
+  /** The runtime live-catalog gate (custom rows included), for the missing-model flag. */
+  liveCatalog: LiveCatalogGate | undefined;
   modelAliases: Record<string, string>;
   fetchProviderModelMeta: () => Promise<void>;
   fetchAliases: () => Promise<void>;
@@ -53,10 +56,13 @@ export function useProviderModels(
     providerId: "",
     models: [] as any[],
     authoritative: false,
+    liveCatalog: undefined as LiveCatalogGate | undefined,
   });
   const syncedAvailableModels = syncedCatalog.providerId === providerId ? syncedCatalog.models : [];
   const syncedCatalogAuthoritative =
     syncedCatalog.providerId === providerId && syncedCatalog.authoritative;
+  const liveCatalog =
+    syncedCatalog.providerId === providerId ? syncedCatalog.liveCatalog : undefined;
   const [modelAliases, setModelAliases] = useState<Record<string, string>>({});
 
   const fetchAliases = useCallback(async () => {
@@ -149,6 +155,7 @@ export function useProviderModels(
               providerId,
               models: syncData.models,
               authoritative: syncData.authoritative === true,
+              liveCatalog: readLiveCatalogGate(syncData.liveCatalog),
             });
           }
         }
@@ -164,6 +171,7 @@ export function useProviderModels(
     modelMeta,
     syncedAvailableModels,
     syncedCatalogAuthoritative,
+    liveCatalog,
     modelAliases,
     fetchProviderModelMeta,
     fetchAliases,
