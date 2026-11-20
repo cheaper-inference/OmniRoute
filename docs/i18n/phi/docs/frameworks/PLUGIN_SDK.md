@@ -4,7 +4,7 @@
 
 ---
 
-## Mabilisang Pagsisimula
+## Mabilis na Pagsisimula
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Sanggunian ng API
+## API Sanggunian
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Factory function na gumagawa ng Plugin object na may mga default na halaga.
+Factory function na lumilikha ng isang Plugin object na may mga default.
 
 **Mga Parameter:**
 
-- `name` (string, kinakailangan) — Pangalan ng plugin sa kebab-case
-- `priority` (number, opsyonal, default: 100) — Nauunang tumakbo ang mas mababang halaga
-- `enabled` (boolean, opsyonal, default: true) — Magsisimula bang naka-enable?
-- `onRequest` (function, opsyonal) — Tumatakbo bago ang chat handler
-- `onResponse` (function, opsyonal) — Tumatakbo pagkatapos ng chat handler
-- `onError` (function, opsyonal) — Tumatakbo kapag may error ang handler
+- `name` (string, kinakailangan) — Plugin name sa kebab-case
+- `priority` (numero, opsyonal, default: 100) — Lower ay unang tumatakbo
+- `enabled` (boolean, opsyonal, default: true) — Start enabled?
+- `onRequest` (function, opsyonal) — Tumatakbo bago ang handler ng chat
+- `onResponse` (function, opsyonal) — Tumatakbo pagkatapos ng handler ng chat
+- `onError` (function, opsyonal) — Tumatakbo sa error sa handler
 
 ### `blockRequest(response?): BlockingHookResult`
 
-I-block ang request at opsyonal na magbalik ng custom na response.
+I-block ang kahilingan at opsyonal na magbalik ng custom na tugon.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Baguhin ang request body bago ito makarating sa provider.
+Baguhin ang katawan ng kahilingan bago ito makarating sa provider.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Maglakip ng metadata sa request context.
+Maglakip ng metadata sa konteksto ng kahilingan.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Context ng Plugin (`PluginContext`)
+## Konteksto ng Plugin (`PluginContext`)
 
-| Field       | Uri                       | Paglalarawan                      |
-| ----------- | ------------------------- | --------------------------------- |
-| `requestId` | `string`                  | Natatanging identifier ng request |
-| `model`     | `string`                  | Pangalan ng hiniling na model     |
-| `provider`  | `string`                  | ID ng target na provider          |
-| `body`      | `Record<string, unknown>` | Body ng request                   |
-| `headers`   | `Record<string, string>`  | Mga header ng request             |
-| `metadata`  | `Record<string, unknown>` | Nababagong metadata               |
-| `timestamp` | `number`                  | Timestamp ng request              |
+| Patlang      | Uri                       | Paglalarawan                              |
+| ------------ | ------------------------- | ----------------------------------------- |
+| `requestId`  | `string`                  | Natatanging identifier ng kahilingan      |
+| `model`      | `string`                  | Hiniling na pangalan ng modelo            |
+| `provider`   | `string`                  | Target na provider ID                     |
+| `body`       | `Record<string, unknown>` | Humiling ng katawan                       |
+| `headers`    | `Record<string, string>`  | Humiling ng mga header (tingnan ang tala) |
+| `metadata`   | `Record<string, unknown>` | Nababagong metadata                       |
+| `timestamp`  | `number`                  | Humiling ng timestamp                     |
+| `apiKeyInfo` | `object` (opsyonal)       | API key metadata (tingnan ang tala)       |
+
+Ang konteksto ay hindi kailanman nagdadala ng mga kredensyal ng kliyente: ang `authorization`, `x-api-key`, `proxy-authorization` at `cookie` na mga header ay tinanggal (anumang casing), at pinapanatili `apiKeyInfo` ang metadata ng key (gaya ng `id`, `name` at `scopes`) ngunit hindi ang key value o ang fingerprint nito (`redactPluginContext()` sa `src/lib/plugins/hooks.ts`). Nalalapat ito sa `onRequest`, `onResponse` at `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ O bilang mga simpleng boolean (default na priority na 100):
 
 ## Sistema ng Pahintulot
 
-Tumatakbo ang mga plugin sa isang naka-sandbox na konteksto ng VM. Nangangailangan ng tahasang mga pahintulot ang pag-access sa mga panlabas na resource:
+Ang mga plugin ay** hindi naka-sandbox** . Ang bawat aktibong plugin ay tumatakbo bilang isang hiwalay, ordinaryong Node.js child na proseso (`loadPlugin()` sa `src/lib/plugins/loader.ts`) sa ilalim ng parehong operating-system user bilang OmniRoute, na walang VM context at walang Node.js na mga flag ng pahintulot. Maaaring gamitin ng plugin code `node:fs`, `node:child_process`, `fetch` at lahat ng iba pang Node.js API: maaari itong magbasa at magsulat ng anumang file na magagawa ng OmniRoute user (kabilang ang direktoryo ng data), magpatakbo ng mga programa at maabot ang network.
 
-| Pahintulot   | Ipinagkakaloob                                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Read-only na `process.env` proxy                             |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Ang `requires.permissions` ng manifest ay tumatanggap `network`, `file-read`, `file-write`, `env` at `exec`, ngunit ngayon ay `env` lang ang may epekto sa runtime:
 
-Kung walang pahintulot, hindi magagamit sa sandbox ang kaukulang mga global.
+| Pahintulot                                   | Epekto ngayon                                                                                                                                                                                                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Ang proseso ng plugin ay tumatanggap din `PORT`, `HOSTNAME`, `TZ` at `TMPDIR`. Kung wala ito, tumatanggap lang ito `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` at `PLUGIN_NAME` (plus `SystemRoot` at `windir` sa Windows). |
+| `network`, `file-read`, `file-write`, `exec` | wala. Ang mga ito ay mga deklarasyon lamang: walang naharang kapag sila ay nawawala.                                                                                                                                                                 |
+
+Ang pag-install ng plugin ay tulad ng pag-install ng anumang iba pang program sa host. Mag-install lamang ng mga plugin na pinagkakatiwalaan mo ang pinagmulan.
 
 ## Schema ng Config
 
@@ -192,9 +194,9 @@ Iniimbak sa database ang mga value ng config at maa-access ang mga ito sa pamama
 | `onDeactivate`    | Na-deactivate ang plugin                            | `{ name, version, manifest }` |
 | `onUninstall`     | Na-uninstall ang plugin (bago burahin ang mga file) | `{ name, version, manifest }` |
 
-## Mga Halimbawa
+## Mga halimbawa
 
-### Logger ng Request
+### Humiling ng Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Rate Limiter
+### Limitasyon ng Rate
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuto
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Transformer ng Response
+### Transpormer ng Tugon
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

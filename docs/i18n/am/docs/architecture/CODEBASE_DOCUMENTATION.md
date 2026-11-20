@@ -481,7 +481,7 @@ Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeader
 
 ### 4.8 `open-sse/utils/`
 
-የዥረት `thinkTagParser.ts` `kieTask.ts` `cursorAgentProtobuf.ts` ረዳቶች `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts` `ollamaTransform.ts` `proxyDispatcher.ts` `sleep.ts` `tlsClient.ts` `networkProxy.ts` `awsSigV4.ts` `cacheControlPolicy.ts` `error.ts` `cursorChecksum.ts` `requestLogger.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `progressTracker.ts` `bypassHandler.ts` `cors.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `usageTracking.ts`
+የዥረት `thinkTagParser.ts` `kieTask.ts` `cursorAgentProtobuf.ts` ረዳቶች `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts` `ollamaTransform.ts` `proxyDispatcher.ts` `sleep.ts` `tlsClient.ts` `networkProxy.ts` `awsSigV4.ts` `cacheControlPolicy.ts` `error.ts` `requestLogger.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `progressTracker.ts` `bypassHandler.ts` `cors.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `usageTracking.ts`
 
 ---
 
@@ -591,10 +591,10 @@ bin/
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
 - **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
   `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`, `i18n_autotranslate.py`,
+  `validate_translation.py`, `check_translations.py`,
   `untranslatable-keys.json`.
 - **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `migrate-env.mjs`, `dbsetup.js`.
+  `dbsetup.js`.
 
 ---
 

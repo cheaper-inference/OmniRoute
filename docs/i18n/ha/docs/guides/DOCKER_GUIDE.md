@@ -27,13 +27,9 @@
 
 ---
 
-## Gudanarwa Cikin Sauri
+## Saurin Gudu
 
-> **Kana son ɗaukar nauyin sabis ɗin da kanka da umarni guda ɗaya?** Duba
-> [Jagorar Self-Host](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (image da aka wallafa +
-> Redis, loopback kawai, babu zaɓin profile). Gudanarwa Cikin Sauri da ke ƙasa ita ce
-> hanyar container guda ɗaya ga masu amfani waɗanda suka riga suka gudanar da Redis a wani wuri.
+> **Mai ɗaukar nauyin kai a cikin umarni ɗaya?** Dubi [Jagorar Mai watsa shiri](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (hoton da aka buga + Redis, loopback-kawai, babu zaɓin bayanin martaba). Gudun Saurin da ke ƙasa shine hanyar kwantena ɗaya don masu amfani waɗanda suka riga sun gudanar Redis a wani wuri.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## Tare da Fayil ɗin Muhalli
+## Tare da Fayil na Muhalli
 
 ```bash
-# Da farko, kwafi sannan ka gyara .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,16 +235,16 @@ Stack na prod yana gudana a layi ɗaya da compose na dev (sunayen containers, po
 
 ## Matakan Dockerfile
 
-Ma'ajiyar tana zuwa da Dockerfile mai matakai da yawa (`Dockerfile`). An samar da matakai huɗu; zaɓi `target` da ya dace da yanayin amfaninka.
+Wurin ajiya yana jigilar Dockerfile mai matakai da yawa (`Dockerfile`). An fallasa matakai huɗu; zaɓi `target` ɗin da ya dace don akwati na amfanin ku.
 
-| Mataki        | Hoton tushe           | Manufa                                                                                                                                                                                                                                                                                                                      |
+| Mataki        | Hoton tushe           | Manufar                                                                                                                                                                                                                                                                                                                     |
 | ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Yana shigar da abubuwan dogaro (`npm ci --legacy-peer-deps`) sannan yana gudanar da `npm run build` (Turbopack ne ta tsohuwa — duba Albarkatun lokacin gini a ƙasa)                                                                                                                                                         |
-| `runner-base` | `node:26-trixie-slim` | Muhallin gudanar da samarwa tare da fitarwar standalone ta Next.js. **Ba a haɗa CLI na masu samarwa ba.**                                                                                                                                                                                                                   |
-| `runner-cli`  | `runner-base`         | Yana ƙara `git`, `docker.io`, `docker-compose` da CLI na gabaɗaya: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Zaɓi wannan don tsarin aiki na wakilai.**                                                                                                                                           |
-| `runner-web`  | `runner-base`         | Yana ƙara Playwright + burauzar Chromium (`--with-deps`) don masu samar da zaman yanar gizo: `gemini-web`, `claude-web`, `claude-turnstile`. **Zaɓi wannan idan kana amfani da waɗannan masu samarwa** — hoto na yau da kullum zai gaza a lokacin buƙata idan babu shi (duba bayanin `-web` a ƙarƙashin Tashoshin Fitarwa). |
+| `builder`     | `node:26-trixie-slim` | Yana shigar da deps (`npm ci --legacy-peer-deps`) kuma yana gudanar da `npm run build` (Turbopack ta tsohuwar — duba albarkatun Gina-lokaci a ƙasa)                                                                                                                                                                         |
+| `runner-base` | `node:26-trixie-slim` | Lokacin aikin samarwa tare da fitowar Next.js kadai.** Babu mai bada CLIs da aka haɗa.**                                                                                                                                                                                                                                    |
+| `runner-cli`  | `runner-base`         | Yana ƙara `git`, `docker.io`, `docker-compose` da CLIs na duniya : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Zaɓi wannan don hanyoyin aiki na wakili.**                                                                                                                                          |
+| `runner-web`  | `runner-base`         | Yana ƙara Playwright + a Chromium browser (`--with-deps`) don masu samar da zaman yanar gizo: `gemini-web`, `claude-web`, `claude-turnstile`.** Zaɓi wannan lokacin da kuke amfani da waɗannan masu samarwa** — a sarari hoton yana kasa a lokacin buƙata ba tare da shi ba (duba bayanin `-web` ƙarƙashin Tashoshin Saki). |
 
-Gina takamaiman target da hannu:
+Gina takamaiman manufa da hannu:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Albarkatun lokacin gini
+### Gina-lokaci albarkatun
 
-Build args guda uku ne ke sarrafa kuɗin albarkatun matakin `builder`. Na lokacin gini ne kawai —
-`OMNIROUTE_MEMORY_MB` (a ƙasa) wani saitin lokacin gudanarwa ne dabam.
+Uku gina args suna sarrafa abin da darajar matakin `builder`. Suna lokacin ginawa ne kawai — `OMNIROUTE_MEMORY_MB` (a ƙasa) keɓantacce, kullin lokacin gudu.
 
-| Build arg                   | Tsoho  | Tasiri                                                                                                         |
-| --------------------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` yana ginawa da webpack: ƙarancin iyakar amfani da ƙwaƙwalwa, amma ya fi jinkiri. `1` yana kunna Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | Iyakar heap ta V8 (`--max-old-space-size`) don `next build` da aka ƙaddamar.                                   |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | Yana ciyar da `CIRCLE_NODE_TOTAL`; Next yana samo `workers = N - 1` don tattara bayanan shafi.                 |
+| Gina arg                    | Default | Tasiri                                                                                                               |
+| --------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`     | `0` yana ginawa tare da fakitin gidan yanar gizo: ƙananan ƙwaƙwalwar ajiya, a hankali. `1` ya shiga cikin Turbopack. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`  | V8 heap rufi (`--max-old-space-size`) don `next build` da aka haɗe.                                                  |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`     | Ciyar da `CIRCLE_NODE_TOTAL`; Na gaba yana samun `workers = N - 1` don tarin bayanan shafi.                          |
 
-`OMNIROUTE_BUILD_WORKERS` shi ne abin da za a ƙara a kan babban builder, kuma shi ne
-abin da za a fara zargi idan gini mai ƙarancin albarkatu ya mutu **bayan** `✓ Compiled successfully`. Kowane
-worker na bayanan shafi tsari ne mai zaman kansa, haka ma uwar tsarin `next build`;
-gwaji kai tsaye a VPS (issue #7518) ya auna iyakar RSS na kowane tsari zuwa
-~4.5 GB ba tare da la'akari da tutar heap ta `NODE_OPTIONS` ba (Turbopack yana tarawa a
-ƙwaƙwalwar native/Rust da ke wajen heap ta V8). Tsohon ƙimar `2` (→ worker 1, jimillar
-tsarurruka 2) an daidaita shi don GitHub-hosted runners masu 16 GB / 4 vCPU da
-pipeline ɗin wallafawa ke amfani da su. A `8` (→ workers 7), wannan runner ɗin ya ƙare da ƙwaƙwalwa kuma
-buildkit ya gaza matakin da `ResourceExhausted: ... cannot allocate memory`;
-`3` (→ workers 2) har yanzu bai isa ba bayan an auna RSS na kowane tsari
-kai tsaye maimakon ƙiyastawa. `tests/unit/docker-build-memory-budget.test.ts`
-yana yin lissafin da adadin da aka auna kuma zai gaza idan ɗaya daga cikin saitunan
-ya zarce ƙarfin runner.
+`OMNIROUTE_BUILD_WORKERS` ita ce wadda za ta ɗaga a kan babban magini kuma wanda ake tuhuma idan ginin takura ya mutu** bayan** `✓ Compiled successfully`. Kowane ma'aikacin bayanan shafi shine tsarin kansa, haka ma iyaye `next build` kanta; Haihuwar VPS mai rai (fitilar #7518) ya auna RSS kowane tsari a ~ 4.5 GB mai zaman kansa daga tutocin `NODE_OPTIONS` (Turbopack yana tattarawa a ƙwaƙwalwar native/Rust a wajen tulin V8). Tsohuwar `2` (ma'aikacin → 1, jimillar matakai 2) yana da girma don masu gudu 16 GB /4 vCPU GitHub da aka karɓa waɗanda bututun bututun ke amfani da su. A `8` ( ma'aikatan → 7) wannan mai gudu ya ƙare da ƙwaƙwalwar ajiya kuma buildkit ya gaza matakin tare da `ResourceExhausted: ... cannot allocate memory`; `3` (ma'aikatan → 2) har yanzu basu dace ba da zarar an auna RSS na kowane-tsari kai tsaye maimakon tantancewa. `tests/unit/docker-build-memory-budget.test.ts` yayi lissafin akan siffa da aka auna kuma ya kasa idan ko dai kulli ya fi mai gudu girma.
 
-Turbopack yana tarawa a ƙwaƙwalwar Rust ta native wadda take **a wajen** heap ta V8, don haka
-`OMNIROUTE_BUILD_MEMORY_MB` ba ya iyakance ta. A kan host mai iyakar ƙwaƙwalwa,
-OOM killer zai kashe ginin da SIGKILL ba tare da wani saƙon kuskure ba — kawai zai
-tsaya a tsakiyar `Creating an optimized production build`, wanda zai yi kama da ratayewa
-maimakon ƙarancin ƙwaƙwalwa. Wannan ne ya sa `Dockerfile` ke amfani da webpack a matsayin tsoho
-(`OMNIROUTE_USE_TURBOPACK=0`), sabanin `npm run dev` / `npm run build`, inda
-Turbopack yake zama tsohon zaɓin lamba: `docker build .` kai tsaye ba tare da build args ba (wanda
-Railway da sauran hosts na dannawa ɗaya ke gudanarwa) kada ya mutu a ɓoye a kan
-builder mai iyakantacciyar ƙwaƙwalwa. Hotunan da aka wallafa tuni suna miƙa `OMNIROUTE_USE_TURBOPACK=0`
-a sarari cikin `docker-publish.yml`. A kan builder mai yalwar RAM, kunna
-Turbopack don gini mafi sauri:
+Turbopack tana tattarawa a cikin ƙwaƙwalwar ajiyar tsatsa da ke rayuwa** waje** tulin V8, don haka `OMNIROUTE_BUILD_MEMORY_MB` ba ya ɗaure shi. A kan rundunar da ke da silin ƙwaƙwalwar ajiya ginin yana yin SIGKILLed ta mai kashe OOM ba tare da kuskuren rubutu ba kwata-kwata — kawai yana tsayawa tsakiyar `Creating an optimized production build`, wanda ke karantawa kamar rataye maimakon abin tunawa. Abin da ya sa `Dockerfile` ya ɓace zuwa fakitin yanar gizon (`OMNIROUTE_USE_TURBOPACK=0`), sabanin `npm run dev` / `npm run build`, inda Turbopack shine lambar tsoho: `docker build .` bare ba tare da gina args ba (abin da Railway da sauran rundunonin dannawa ɗaya ke gudana) dole ne kada su mutu shiru a kan maginin ƙwaƙwalwar ajiya. Hotunan da aka buga sun riga sun wuce `OMNIROUTE_USE_TURBOPACK=0` a sarari a cikin `docker-publish.yml`. A kan maginin da ke da yawan RAM, shiga cikin Turbopack don ginawa cikin sauri:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-An kunna `webpackBuildWorker`, saboda haka `next build` yana gudanar da uwar tsari **da** tsarin worker,
-kuma kowannensu yana mutunta `OMNIROUTE_BUILD_MEMORY_MB` daban. Saita iyakar container
-ta wuce kusan ninki biyu na wannan ƙimar, ba sau ɗaya ba.
+An kunna `webpackBuildWorker`, don haka `next build` yana gudanar da iyaye** kuma** tsarin ma'aikaci kuma kowanne yana girmama `OMNIROUTE_BUILD_MEMORY_MB` daban. Girman rufin kwandon sama kusan ninki biyu waccan ƙimar, ba sau ɗaya ba.
 
-An auna a wannan bishiyar (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+An auna akan wannan bishiyar (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Iyakar container | Sakamako                                          |
-| --------- | ---------------- | ------------------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB   | OOM ya kashe shi a duka biyun, ba tare da saƙo ba |
-| webpack   | 8 GiB            | An kashe build worker da SIGKILL                  |
-| webpack   | 12 GiB           | Ya yi nasara, ya kai kololuwar 11.1 GiB           |
+| Bundler          | Rufin kwantena | Sakamako                      |
+| ---------------- | -------------- | ----------------------------- |
+| Turbopack        | 8 GiB / 16 GiB | OOM-kashe duka, shiru         |
+| jakar yanar gizo | 8 GiB          | gina ma'aikaci SIGKILLed      |
+| jakar yanar gizo | 12 GiB         | ya yi nasara, ya kai 11.1 GiB |
 
-### Saitunan tsoho na lokacin gudanarwa
+### Matsalolin lokacin aiki
 
-Saitunan tsoho da `runner-base` ke fitarwa: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Tsoffin abubuwan da `runner-base` ke fitarwa : `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Halayen ƙwaƙwalwa a cikin Docker:
+Halin ƙwaƙwalwar ajiya a cikin Docker:
 
-- Hoton yana saita `OMNIROUTE_MEMORY_MB=1024` kuma yana samo `NODE_OPTIONS=--max-old-space-size=1024` daga gare shi.
-- Ana fara ainihin aikin uwar garken ta hanyar standalone launcher, wanda ke karanta `OMNIROUTE_MEMORY_MB` sannan ya ƙara `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node yana amfani da ƙimar `--max-old-space-size` ta ƙarshe idan an maimaita ta, saboda haka saita `OMNIROUTE_MEMORY_MB` yana sarrafa ainihin iyakar heap ta Docker.
-- Saboda hoton koyaushe yana saita shi, madadin da launcher ɗin yake ƙididdigewa bisa RAM ba ya aiki a ƙarƙashin Docker. Ƙara shi kai tsaye gwargwadon nauyin aikin (teburin da ke ƙasa). `2048` har yanzu bai isa ga `/v1/responses` na coding-agent ba.
+- Hoton yana saita `OMNIROUTE_MEMORY_MB=1024` kuma ya samo `NODE_OPTIONS=--max-old-space-size=1024` daga gare ta.
+- Haƙiƙanin tsarin uwar garken yana farawa ta mai ƙaddamarwa mai tsaye, wanda ke karanta `OMNIROUTE_MEMORY_MB` kuma yana ƙara `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Node yana amfani da ƙimar `--max-old-space-size` mai maimaita ta ƙarshe, don haka saitin `OMNIROUTE_MEMORY_MB` yana sarrafa ingantaccen iyakar tsibin Docker.
+- Saboda hoton ko da yaushe yana saita shi, mai ƙaddamarwa na RAM-calibrated fallback ba zai taɓa aiki a ƙarƙashin Docker. Tada shi a sarari don nauyin aikin (tebur a ƙasa). `2048` har yanzu ya yi ƙanƙanta don wakilin-codeing `/v1/responses`.
 
-### RAM na lokacin aiki don coding agents
+### Runtime RAM don coding agents
 
-Tsohuwar ƙimar Docker ta 1 GiB ita ce mafi ƙarancin abin da dashboard/light-chat ke buƙata, ba girman da ya dace da tsarin production ba. Dogayen jikin buƙatun `POST /v1/responses` (ɗaruruwan saƙonni, kayan aiki goma-goma) suna riƙe da graphs da yawa a ƙwaƙwalwar ajiya yayin compression. Buƙatu biyu masu cin karo, kowannensu kusan ~3 MiB / ~750k-token, sun sa V8 ya tsaya a old-space na **12 GiB** (`FATAL ERROR: Reached heap limit`) sannan kuma suka kai ga cgroup OOM na 16 GiB. Duba [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Tsohuwar 1 GiB Docker bene ne na dashboard/light-chat, ba girman samarwa ba. Dogayen jikin `POST /v1/responses` (daruruwan saƙonni, dubun kayan aikin) suna riƙe da jadawalin ƙwaƙwalwar ajiya da yawa yayin matsawa. Buƙatun alamar alama guda biyu ~ 3 MiB / ~ 750k sun soke V8 a wata** 12 GiB** tsohon sarari (`FATAL ERROR: Reached heap limit`) da kuma buga 16 GiB cgroup OOM. Duba [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Saita girman **cgroup `--memory` fiye da heap** — native buffers, SQLite, da matsaka itan compression suna wajen V8.
+Girman** tara `--memory` sama da tudun** — masu buffer na asali, SQLite, da matsakaitan matsawa suna zaune a wajen V8.
 
-| Nauyin aiki                                     | `OMNIROUTE_MEMORY_MB`        | Container / cgroup | Bayani                                                                                                            |
-| ----------------------------------------------- | ---------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Dashboard, light chat guda ɗaya                 | `1024` (tsohuwar ƙimar hoto) | ≥2 GiB             |                                                                                                                   |
-| Coding agent guda ɗaya (Claude/Codex/Grok)      | `8192`                       | ≥10 GiB            | Zaman guda na `/v1/responses` da aka saba samu                                                                    |
-| Dogayen `/v1/responses` guda biyu a lokaci guda | `10240`–`12288`              | ≥12–16 GiB         | An auna tsayawar V8 a heap na kusan ~12 GiB                                                                       |
-| Dogayen contexts uku ko fiye a lokaci guda      | kada a yi a process guda     | jera su / ƙara RAM | Tsohuwar heavyweight admission ita ce buƙata 1 mai gudana; ɗaga ta ba tare da RAM ba yana sake haifar da tsayawar |
+| Nauyin aiki                                    | `OMNIROUTE_MEMORY_MB` | Kwantena / rukuni    | Bayanan kula                                                                                              |
+| ---------------------------------------------- | --------------------- | -------------------- | --------------------------------------------------------------------------------------------------------- |
+| Dashboard, hira mai haske ɗaya                 | `1024` (hoton tsoho)  | ≥2 GiB               |                                                                                                           |
+| Wakilin coding ɗaya (Claude/Codex/Grok)        | `8192`                | ≥10 GiB              | Yawan zama `/v1/responses` guda ɗaya                                                                      |
+| Dogon `/v1/responses` guda biyu masu juna biyu | `10240`–`12288`       | ≥12–16 GiB           | Auna V8 zubar da ciki a ~ 12 GiB heap                                                                     |
+| + guda uku masu tsayi masu tsayi iri ɗaya      | kar a kan tsari ɗaya  | serialize / more RAM | Shigar da tsoho mai nauyi shine 1 a cikin jirgin; tayar da shi ba tare da RAM ta dawo da zubar da ciki ba |
 
-`omniroute serve` a kan bare metal yana daidaita kusan ~35% na RAM (an iyakance shi zuwa `[512, 4096]`) idan ba a saita `OMNIROUTE_MEMORY_MB` **ba**. Docker koyaushe yana saita `1024`, saboda haka wannan daidaitawar ba ta taɓa aiki a cikin hoton hukuma.
+`omniroute serve` akan karafa ba tare da izni ba ~ 35% na RAM (clamped `[512, 4096]`) lokacin da `OMNIROUTE_MEMORY_MB` ke** rashin daidaitawa** . Docker koyaushe yana saita `1024`, ta yadda daidaitawar ba ta gudana a cikin hoton hukuma.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Muhimman Canje-canjen Muhalli
@@ -364,22 +335,13 @@ Baya ga tsoffin ƙimomin da aka rubuta a [ENVIRONMENT.md](../reference/ENVIRONME
 | `PROD_DASHBOARD_PORT`         | Port na dashboard a ɓangaren host don `docker-compose.prod.yml`                                                                                                                                                                                                       | `20130`                      |
 | `CLIPROXYAPI_PORT`            | Port na ɓangaren host don sidecar na `cliproxyapi`                                                                                                                                                                                                                    | `8317`                       |
 
-## Reverse Proxy a kan Ƙaramin Hanya (Traefik / nginx)
+## Maida Wakilci akan Tafarki Mai Raɗaɗi (Traefik / nginx)
 
-Ana haɗa `basePath` na Next.js cikin kunshin standalone yayin ginawa. OmniRoute yana rubuta
-ƙimar da aka haɗa a cikin fayil ɗin sentinel da ke tushen manhajar (ana rubuta shi yayin `npm run build`; ana karanta shi ta
-`scripts/docker/ensure-docker-base-path.mjs`) sannan yana kwatanta shi da
-`OMNIROUTE_BASE_PATH` lokacin da container ya fara aiki. Idan ƙimomin suka bambanta kuma an
-gina image ɗin don tushen domain, entrypoint ɗin zai sake rubuta manifests na standalone,
-ƙimomin `basePath`/`assetPrefix` da aka saka a ciki (Next 16 yana samar da URLs na kadarorin SSR daga
-`assetPrefix` kaɗai — patcher yana kwafin ƙaramin hanyar zuwa cikinsa), URLs na kadarorin
-`/_next/static` da aka haɗa (client-reference manifests, shigo da media, shafukan kuskure da aka
-riga aka render) da kuma shim na `process.env` na client kafin `node dev/run-standalone.mjs`
-ya gudana.
+Next.js `basePath` is compiled into the standalone bundle. OmniRoute records the baked value in a sentinel file at the app root (written during `npm run build`; read by `scripts/docker/ensure-docker-base-path.mjs`) and compares it with `OMNIROUTE_BASE_PATH` when the container starts. When they differ and the image was built for the domain root, the entrypoint rewrites the standalone manifests, the embedded `basePath`/`assetPrefix` literals (Next 16 renders SSR asset URLs from `assetPrefix` alone — the patcher mirrors the subpath into it), the baked `/_next/static` asset URLs (client-reference manifests, media imports, prerendered error pages) and the client `process.env` shim before `node dev/run-standalone.mjs` runs.
 
-### Ginawa da Compose (ana ba da shawara)
+### Ƙirƙirar gini (an bada shawarar)
 
-Saita duka variables ɗin a cikin `.env`, sannan a sake ginawa domin image da runtime su dace:
+Saita mabambanta biyu a cikin `.env`, sannan a sake ginawa don haka hoton da lokacin gudu suka yarda:
 
 ```bash
 # .env
@@ -391,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` yana tura `OMNIROUTE_BASE_PATH` a matsayin Docker build-arg da kuma
-runtime environment variable.
+`docker-compose.yml` yana gaba da `OMNIROUTE_BASE_PATH` azaman Docker gini-arg kuma azaman canjin yanayi na lokaci-lokaci.
 
-### Root image da aka riga aka gina + ƙaramin hanyar runtime
+### Tushen hoton da aka riga aka gina + runtime subpath
 
-Ana gina images na `diegosouzapw/omniroute:*` da aka wallafa don tushen domain. Har yanzu za ka iya
-saita `OMNIROUTE_BASE_PATH` a runtime; container zai gyara kunshin sau ɗaya yayin farawa.
-Haɗa shi da public origin da ya dace:
+An gina hotunan `cheaperinference/omniroute:*` da aka buga don tushen yankin. Kuna iya saita `OMNIROUTE_BASE_PATH` a lokacin aiki; kwandon yana faci gunkin sau ɗaya a farawa. Haɗa shi tare da madaidaicin asalin jama'a:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Saita reverse proxy ya tura **cikakkiyar** hanyar waje (kada a cire
-prefix). Ya kamata Traefik ya tura `PathPrefix(`/omniroute`)` zuwa container ba tare da
-`StripPrefix` ba, domin Next.js ya karɓi `/omniroute/...` kuma ya samar da kadarori daga
-`/omniroute/_next/...`.
+Sanya wakili na baya don turawa** cika** hanyar waje (kada ku tube prefix). Traefik ya kamata ya bi `PathPrefix(`/omniroute `)` zuwa akwati ba tare da `StripPrefix`, don haka Next.js yana karɓar `/omniroute/...` kuma yana ba da kadarori daga `/omniroute/_next/...`.
 
-Docker healthcheck yana gwada endpoint na lifecycle mai sauƙi `/healthz` wanda aka saka masa
-`OMNIROUTE_BASE_PATH` mai aiki a gaba. `/api/monitoring/health` zai ci gaba da kasancewa don
-binciken matsaloli na mutum/dashboard; domin mayar da HEALTHCHECK na container zuwa gare shi (misali
-don tilasta cikakken binciken lafiya), saita `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Wannan hanyar bincike ce mai **zurfi** (DB + taƙaitaccen monitoring) — ta dace da
-`HEALTHCHECK` na Docker da ba ya yawan gudana idan ka zaɓi komawa gare shi, amma **ba** ta dace da tazarar
-`livenessProbe` ta Kubernetes ba.
+Binciken lafiyar lafiyar Docker yana bincika ƙarshen ƙarshen zagayowar rayuwa mai nauyi `/healthz` wanda aka sa gaba tare da `OMNIROUTE_BASE_PATH` mai aiki. `/api/monitoring/health` ya rage don binciken human/dashboard ; don nuna kwandon HEALTHCHECK baya zuwa gare shi (misali don aiwatar da lafiya mai zurfi), saita `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Wannan hanyar ita ce a** zurfi** — `HEALTHCHECK` Docker bayanin DB + )** ba** don Kubernetes `livenessProbe` tazara.
 
-Ga orchestrators (Kubernetes, Nomad, da sauransu):
+Ga mawaƙa (Kubernetes, Nomad, da sauransu):
 
-| Probe           | Abin da ya fi dacewa                                            | Abin da za a guje wa                                                |
-| --------------- | --------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Liveness        | HTTP `GET /livez`, ko TCP a babban port (`PORT`, tsoho `20128`) | `/api/monitoring/health` a matsayin liveness                        |
-| Readiness       | HTTP `GET /healthz`                                             | Gajerun timeouts da ke ɗaukar cunkoson event-loop a matsayin mutuwa |
-| Deep / blackbox | `/api/monitoring/health`                                        | —                                                                   |
+| Bincike         | Fi son                                                                            | Guji                                                                         |
+| --------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Rayuwa          | HTTP `GET /livez`, ko TCP akan babban tashar jiragen ruwa (`PORT`, tsoho `20128`) | `/api/monitoring/health` as liveness                                         |
+| Shiri           | HTTP `GET /healthz`                                                               | Matsakaicin lokacin ƙarewa waɗanda ke ɗaukar madaidaicin taron kamar matattu |
+| Deep / blackbox | `/api/monitoring/health`                                                          | —                                                                            |
 
-`/healthz` yana bayar da rahoton lifecycle na process (`ok` / `starting` / `stopping`). `/livez`
-yana duba ko process yana raye ne kawai (200 a duk lokacin da handler zai iya gudana; ba ya jiran
-readiness). Dukansu har yanzu suna gudana a kan Node event loop ɗaya da sarrafa requests, saboda haka
-ayyukan catalog ko compression masu cin CPU na iya jinkirta su — cunkoso ≠ mutuwa. Fi son TCP
-liveness idan HTTP probes suna ƙarewar lokaci. Cikakken jagorar probes:
-[Jagorar monitoring — shawarwarin probes na Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` ya ba da rahoton tsarin tsarin rayuwa (`ok` / `starting` / `stopping`). `/livez` yana aiwatarwa-mai rai kawai (200 a duk lokacin da mai sarrafa zai iya gudu; baya jiran shiri). Dukansu har yanzu suna gudana akan madauki na Node iri ɗaya azaman sarrafa buƙatun, don haka kasida ta ɗaure CPU ko aikin matsawa na iya jinkirta su — aiki ≠ mutu. Fi son rayuwar TCP idan HTTP ya bincika lokaci. Cikakken jagorar bincike: [Jagorar sa ido — Kubernetes shawarwarin bincike](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose tare da Caddy (HTTPS Auto-TLS)
+## Docker Rubuta tare da Caddy (HTTPS Auto-TLS)
 
-Ana iya fallasa OmniRoute cikin tsaro ta amfani da samar da SSL ta atomatik na Caddy. Tabbatar cewa rikodin DNS A na domain ɗinka yana nuni zuwa IP na sabarka.
+Za a iya fallasa OmniRoute amintacce ta amfani da tanadin SSL na Caddy ta atomatik. Tabbatar cewa yankinku na DNS A rikodin maki zuwa IP na uwar garken ku.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Asalin adireshin da burauza ke gani don kiran-komawar OAuth, hanyoyin dashboard, da URL na jama'a da aka samar.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # URL na ciki tsakanin sabobi don ayyukan da aka tsara / buƙatun kai-tsaye.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -470,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy yana saita daidaitattun taken turawa don container na upstream. OmniRoute yana amfani da
-`NEXT_PUBLIC_BASE_URL` a matsayin tabbataccen asalin adireshin jama'a don kiran-komawar OAuth da hanyoyin
-jama'a da aka samar; rubuce-rubucen dashboard masu buƙatar tantancewa suna amfani da buƙatun asali ɗaya tare da kariyar CSRF
-da ke daure da zaman. Kunna `OMNIROUTE_TRUST_PROXY` kawai don turawar matakin-gaba inda da gangan kake
-son OmniRoute ya samo asalin adireshin jama'a daga amintattun taken da aka tura maimakon takamaiman
-saiti.
+Caddy yana saita daidaitattun masu kai masu kai don babban akwati. OmniRoute yana amfani da `NEXT_PUBLIC_BASE_URL` azaman asalin jama'a na canonical don sake kiran OAuth da hanyoyin haɗin jama'a; ingantaccen dashboard ya rubuta amfani da buƙatun asali iri ɗaya tare da kariyar CSRF mai ɗaure. Ba da damar `OMNIROUTE_TRUST_PROXY` kawai don ƙaddamar da ci-gaba inda da gangan kuke son OmniRoute ya samo asalin jama'a daga amintattun kanun labarai da aka tura maimakon ƙayyadaddun tsari.
 
 ## Cloudflare Quick Tunnel
 
@@ -492,49 +432,51 @@ Ana iya nuna ko ɓoye bangarorin tunnel na endpoint (Cloudflare, Tailscale, ngro
 - Images na Docker sun haɗa da tushen CA na tsarin kuma suna miƙa su ga `cloudflared` da ake sarrafawa, wanda ke hana gazawar amincewar TLS lokacin da tunnel yake fara aiki a cikin container.
 - Saita `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` idan kana son OmniRoute ya yi amfani da binary da ke akwai maimakon sauke sabo.
 
-## Tags na Image
+## Tags Hotuna
 
-| Image                    | Tag      | Girma  | Bayani                                                             |
-| ------------------------ | -------- | ------ | ------------------------------------------------------------------ |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | SemVer tabbatacce mafi girma da aka **wallafa** (ba git `main` ba) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Ɗaure wannan nau'in tag don GitOps                                 |
+| Hoto                         | Tag      | Girman  | Bayani                                               |
+| ---------------------------- | -------- | ------- | ---------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | Mafi girma** aka buga** barga SemVer (ba git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | Sanya wannan ajin tag don GitOps                     |
 
-Manifest na dandamali da yawa: `linux/amd64` + `linux/arm64` na asali (Apple Silicon, AWS Graviton, Raspberry Pi). Docker yana zaɓar architecture mai dacewa ta atomatik; miƙa `--platform linux/amd64` idan kana buƙatar tilasta kwaikwayon AMD64 a kan hosts na ARM.
+Ana buga hotuna iri ɗaya zuwa ɗakunan ajiya guda uku, tare da nau'ikan tsarin gine-gine iri ɗaya: `cheaperinference/omniroute` (Docker Hub, Ƙungiyar Ƙwararrun Ƙwararru, daga 3.8.53 a kan), `ghcr.io/cheaper-inference/omniroute` da kuma gadon `diegosouzapw/omniroute`, wanda ke kiyaye tarihin ja kuma har yanzu yana karɓar kowane saki. Zazzage ayyukan `diegosouzapw/omniroute` na ci gaba da sabuntawa; canza sunan hoton zaɓi ne. Ana buga tashar pre-saki `:next` / `:next-web` da ke ƙasa zuwa `diegosouzapw/omniroute` da GHCR kawai.
 
-### Tashoshin Release
+Bayyanar dandali da yawa: `linux/amd64` + `linux/arm64` na asali (Apple Silicon, AWS Graviton, Rasberi Pi). Docker yana zaɓar ƙirar da ta dace ta atomatik; wuce `--platform linux/amd64` idan kuna buƙatar tilasta yin koyi da AMD64 akan rundunonin ARM.
 
-OmniRoute yana wallafa tashoshin Docker daban-daban don fitowar tabbatattu, gwajin reshen release mai aiki, da builds na ci gaba.
+### Sakin Tashoshi
 
-| Tasha                           | Tushe                                           | Sauyawa                         | Amfani da aka ba da shawara                                                                                                   |
-| ------------------------------- | ----------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Release mai sa hannu/mai sigar                  | Ba ya sauyawa                   | Turawar production da ke ɗaure takamaiman release                                                                             |
-| `:latest` / `:latest-web`       | SemVer tabbatacce mafi girma da aka **wallafa** | Alamar tabbatacciya mai sauyawa | Yana bin fitowar tabbatattu **bayan** aikin wallafa SemVer — **ba ya** bin `main` ko commits na `release/v*` da ba a fitar ba |
-| `:next` / `:next-web`           | Reshen `release/v*` na tsohuwa na yanzu         | Alamar pre-release mai sauyawa  | Gwajin gyare-gyaren da suka shiga reshen release mai aiki amma ba su shiga tabbataccen release ba tukuna                      |
-| `:main` / `:main-web`           | Reshen `main`                                   | Alamar ci gaba mai sauyawa      | Don gwajin ci gaba da haɗa tsare-tsare kawai                                                                                  |
+OmniRoute tana buga tashoshi daban-daban Docker don ingantaccen sakewa, gwajin reshe mai aiki, da haɓaka haɓakawa.
 
-#### Masu samar da web-session: images na `-web`
+| Tashoshi                        | Source                                           | Sauye-sauye                  | An shawarar amfani                                                                                                         |
+| ------------------------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned saki                            | Mai iya canzawa              | Ƙirƙirar ƙira wanda ke nuna ainihin fitarwa                                                                                |
+| `:latest` / `:latest-web`       | Mafi girma** aka buga** kwanciyar hankali SemVer | Maɓallin barga mai canzawa   | Yana bin tabbataccen sakewa** bayan** a SemVer buga aikin — yayi** ba** waƙa `main` ko `release/v*` wanda ba a sake shi ba |
+| `:next` / `:next-web`           | Tsohuwar reshen `release/v*` na yanzu            | Maɓallin sakewa mai canzawa  | gyare-gyaren gwaji waɗanda suka sauka akan reshen sakin aiki amma har yanzu basu kasance cikin ingantaccen saki ba         |
+| `:main` / `:main-web`           | `main` reshe                                     | Mai nuna ci gaba mai canzawa | Gwajin haɓakawa da haɗin kai kawai                                                                                         |
 
-Kowane tasha da ke sama yana kuma da tag na `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), wanda aka gina daga matakin `runner-web` — image iri ɗaya tare da Playwright da burauzar Chromium. Image na yau da kullum yana zuwa **ba tare da** Chromium ba; `gemini-web`, `claude-web` da `claude-turnstile` suna buƙatarsa.
+#### Masu samar da zaman yanar gizo: hotunan `-web`
 
-Ana jinkirta gazawar ne, ba ta faruwa lokacin farawa: waɗannan providers suna jera models ɗinsu kuma suna bayyana a matsayin haɗe a dashboard, sai dai buƙata ta farko ce kawai ke gazawa da
+Kowane tashar da ke sama tana ninka azaman alamar `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), wanda aka gina daga matakin `runner-web` — hoto iri ɗaya da Playwright da Chromium browser. Hoton bayyane yana jigilar kaya** ba tare da** Chromium; `gemini-web`, `claude-web` da `claude-turnstile` suna bukata.
+
+An jinkirta gazawar, ba lokacin farawa ba: waɗannan masu samarwa suna jera samfuran su kuma suna nunawa kamar yadda aka haɗa a cikin dashboard, kuma buƙatun farko kawai ta gaza tare da
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Idan kana amfani da waɗannan providers, ja tag na `-web` na tashar da kake kai a halin yanzu — babu wani abu da zai canza. A shigarwar npm/CLI (ba tare da Docker image ba), abin da ya yi daidai da ɓangaren da ya ɓace shi ne browser binary: gudanar da `npx playwright install chromium` a kan host.
+Idan kuna amfani da waɗancan masu ba da sabis, ja alamar `-web` ta tashar da kuke kan — babu wani abin da zai canza. A kan shigar npm/CLI (babu hoton Docker ), daidaitaccen gunkin da ya ɓace shine binary na burauza: gudanar da `npx playwright install chromium` akan mai watsa shiri.
 
-#### Amfani da tashar pre-release
+#### Amfani da tashar riga-kafi
 
-Ana sake gina tashar `next` a duk lokacin da aka yi push zuwa reshen tsoho na yanzu na `release/v*`, kuma ana wallafa ta don AMD64 da ARM64. Tsofaffin rassan kulawa ba za su iya maye gurbinta ba. Tashar tana samar da image da za a iya pull mai ɗauke da gyare-gyaren da aka riga aka haɗa cikin reshen sakin da ke aiki kafin a ƙirƙiri stable tag na gaba.
+Ana sake gina tashar `next` akan kowane tura zuwa reshen `release/v*` na yanzu kuma ana buga shi duka biyun AMD64 da ARM64. Tsofaffin rassan kulawa ba za su iya sake rubuta shi ba. Tashar tana ba da hoto mai yuwuwa don gyare-gyaren da suka haɗa cikin reshen sakin aiki kafin a yanke alamar ta gaba.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Don Docker Compose, maye gurbin image tag da profile ɗin da aka zaɓa yake amfani da shi, sannan a yi pull kuma a sake ƙirƙirar service ɗin:
+Don rubuta Docker, soke alamar hoton da aka zaɓa ta hanyar bayanin martaba, sannan ja da sake ƙirƙirar sabis ɗin:
 
 ```yaml
 services:
@@ -547,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Tsaro da komawa baya
+#### Aminci da sake dawowa
 
-`next` tasha ce ta pre-release mai canzawa. Tana iya canzawa a duk wani push zuwa reshen sakin da ke aiki, kuma **ba a tallafa mata don amfani a production**. A tsayar da image digest yayin tantance takamaiman build:
+`next` tashar farko ce mai iyo. Yana iya canzawa akan kowane turawa zuwa reshen sakin aiki kuma shine** ba a tallafawa don amfanin samarwa** . Sanya narke hoton yayin da ake kimanta takamaiman gini:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Kafin gwaji, a yi madadin ajiya na OmniRoute data volume ko data directory da aka bind-mount. Don komawa baya, a dawo da stable version ko digest da aka yi amfani da shi a baya sannan a sake ƙirƙirar container:
+Kafin gwaji, yi tanadin ƙarar bayanan OmniRoute ko kundin bayanan da aka ɗaure. Don mirgine baya, mayar da sigar da aka yi amfani da ita a baya ko narkar da kuma sake ƙirƙirar akwati:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Build na release-branch ba zai taɓa iya matsar da `latest` ba; stable semantic version da ya cancanta ne kawai zai iya ɗaukaka stable pointer. Images na `next` suna ci gaba da amfani da binciken release image da shingen raunin tsaro na CRITICAL.
+Ginin reshen saki ba zai taɓa motsa `latest`; sigar tatsuniyoyi tabbatacciya ce kawai zata iya haɓaka ma'anar barga. Hotunan `next` suna riƙe da duban hoton sakin da kuma toshe Ƙofar rashin lahani mai mahimmanci.
 
-**`latest` ba garantin kasancewa na baya-bayan nan ga git ba ne.** Gyare-gyaren da aka haɗa a `main` ko a reshen `release/v*` da ke aiki **ba sa cikin** `:latest` har sai an wallafa stable SemVer image kuma publish job ya ɗaukaka `:latest` (digest iri ɗaya da na wannan SemVer). Idan `latest` yana kama da ya tsaya yayin da GitHub ya riga ya nuna gyaran, a yi pull na `:next` don gwada reshen sakin ko kuma a jira SemVer tag.
+**`latest` ba garantin kuɗi ba ne don git.** Haɗaɗɗen gyare-gyare akan `main` ko akan reshen `release/v*` mai aiki suna** ba** a cikin `:latest` har sai an buga hoton SemVer tsayayye kuma aikin buga yana inganta `:latest` (narke ɗaya kamar wancan SemVer). Idan `latest` yayi kama da sanyi yayin da GitHub ya riga ya nuna gyara, ja `:next` don gwada reshen sakin ko jira alamar SemVer.
 
-| Abin da kake so                                                                   | Yi amfani da                         |
-| --------------------------------------------------------------------------------- | ------------------------------------ |
-| GitOps / production wanda dole kada ya kauce                                      | Tsayar da `:X.Y.Z` (ko image digest) |
-| Bin stable releases da aka wallafa da amincewa da sake ƙirƙirawa a kowane release | `:latest`                            |
-| Gwada commits na `release/v*` da ba a saki ba                                     | `:next` (ba production ba)           |
-| Gwada `main`                                                                      | `:main` (ba production ba)           |
+| Kuna so                                                       | Amfani                        |
+| ------------------------------------------------------------- | ----------------------------- |
+| GitOps / samarwa wanda ba dole ba ne ya yi nisa               | Pin `:X.Y.Z` (ko hoton narke) |
+| Bi barga da aka buga kuma karɓi sake ƙirƙira akan kowane saki | `:latest`                     |
+| Gwajin `release/v*` da ba a saki ba                           | `:next` (ba samarwa)          |
+| Gwajin `main`                                                 | `:main` (ba samarwa)          |
 
 ## Sabuntawar dashboard a cikin Docker
 
@@ -657,15 +599,15 @@ Stock Docker / Kubernetes OmniRoute ne** Node tsari guda ɗaya + ɗaya SQLite ma
 
 **Binciken matrix** (Dubi kuma [shawarwarin binciken Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Bincike       | manufa                                                  | Kada ku yi amfani                                                            |
-| ------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Rayuwa        | TCP akan `PORT` (tsoho `20128`), ko zqd HTTP `/healthz` | `/api/monitoring/health`                                                     |
-| Shiri         | HTTP `GET /healthz`                                     | Matsakaicin lokacin ƙarewa waɗanda ke ɗaukar madaidaicin taron kamar matattu |
-| Deep / mutane | `/api/monitoring/health`                                | Kubelet rayuwa mai sarrafa kansa                                             |
+| Bincike       | manufa                                                   | Kada ku yi amfani                                                            |
+| ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Rayuwa        | TCP on `PORT` (default `20128`), or soft HTTP `/healthz` | `/api/monitoring/health`                                                     |
+| Shiri         | HTTP `GET /healthz`                                      | Matsakaicin lokacin ƙarewa waɗanda ke ɗaukar madaidaicin taron kamar matattu |
+| Deep / mutane | `/api/monitoring/health`                                 | Kubelet rayuwa mai sarrafa kansa                                             |
 
-**Haɓakawa:** sa ran kowane zaman ya ragu. Zuba abokan ciniki idan za ku iya; babu sabuntawa akan tsoho SQLite. Ƙirƙirar `restart: unless-stopped` da Docker `HEALTHCHECK` kuma za su maye gurbin tsarin kawai lokacin da akwati ba shi da lafiya - radius iri ɗaya.
+**Haɓakawa:** sa ran kowane zaman ya ragu. Zuba abokan ciniki idan za ku iya; babu sabuntawa akan tsoho SQLite. Ƙirƙirar `restart: unless-stopped` da Docker `HEALTHCHECK` kuma za su maye gurbin tsari ɗaya kawai lokacin da kwantena mara lafiya — radius ɗin fashewa ɗaya.
 
-Shirye-shiryen da aka shirya da taswirar Helm suna rayuwa a cikin `deploy/kubernetes/` da `deploy/helm/omniroute/` - duba [jagorar tura Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Shirye-shiryen da aka shirya da taswirar Helm suna rayuwa a cikin `deploy/kubernetes/` da `deploy/helm/omniroute/` — duba [jagorar tura Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Kubernetes snippet don a** kwafi guda ɗaya** (ana buƙatar sake ƙirƙira; kar a ɗaga `replicas` akan fayil ɗin SQLite ɗaya):
 
@@ -694,9 +636,9 @@ spec:
             periodSeconds: 20
 ```
 
-barci `preStop` yana barin kube sauke wuraren ƙarshen sabis kafin SIGTERM haka** sabo** zirga-zirga yana tsayawa yana bugun tsarin mutuwa. A cikin jirgin `/v1/responses` SSE ana zubar da shi har zuwa `SHUTDOWN_TIMEOUT_MS` (tsohon 30s) ta hanyar hayar shigar da nauyi (#11015). Sabbin buƙatun da har yanzu suka kai ga tsari suna samun `503` + `Retry-After: 5`. Sake ƙirƙira tazarar fanko-ƙarshen ƙarshen har sai an shirya wanda zai maye gurbin ya kasance mai wahala - wato SQLite topology, ba kuskuren bincike ba.
+barci `preStop` yana barin kube sauke wuraren ƙarshen sabis kafin SIGTERM haka** sabuwa** zirga-zirga yana tsayawa yana bugun tsarin mutuwa. A cikin jirgin `/v1/responses` SSE ana zubar da shi har zuwa `SHUTDOWN_TIMEOUT_MS` (tsoho na 30s) ta hanyar haya mai nauyi (#11015). Sabbin buƙatun da har yanzu suka kai ga aiwatar da samun `503` + `Retry-After: 5`. Sake ƙirƙira tazarar ƙarshen ƙarshen fanko har sai an shirya wanda zai maye gurbin ya kasance mai wuyar ƙarancin — wanda shine SQLite topology, ba kuskuren bincike ba.
 
-Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana rayuwa a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Har sai wannan jirgi, hanya ɗaya da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan juzu'i ɗaya ba.
+Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana zaune a cikin [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Har sai wannan jirgi, hanya ɗaya da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan ƙarar ɗaya ba.
 
 ## Sikeli-fita: N matakai masu zaman kansu
 
@@ -755,53 +697,30 @@ volumes:
 
 Yawan aiki (matsi daga keɓewar HTTP ) shine [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ɗayan tari mai ma'ana akan yanayi mai dorewa da aka raba shine [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
-## Kurakuran yanki na Gemini a cikin Docker
+## Kuskuren yanki na Gemini a cikin Docker
 
-Google AI Studio / Gemini API na iya mayar da HTTP 400 tare da FAILED_PRECONDITION da
-`Ba a tallafa wa wurin mai amfani don amfani da API ba.` Nasarar wata buƙata a kan host
-ba ta tabbatar da cewa container yana amfani da hanyar fita iri ɗaya ba. Tsarin DNS,
-haɗin IPv4/IPv6, hanyar VPN da proxies da aka saita na iya bambanta. Duba
-[yankunan da Google ke tallafawa](https://ai.google.dev/gemini-api/docs/available-regions)
-da kuma ainihin hanyar haɗin; wannan kuskuren shi kaɗai ba ya nuna cewa API key ba shi da kyau.
+Google AI Studio / Gemini API na iya dawo da HTTP 400 tare da FAILED_PRECONDITION da `User location is not supported for the API use.` Buƙatar nasara akan mai masaukin ba ta tabbatar da cewa kwandon yana amfani da hanyar fita ɗaya ɗaya ba. odar DNS, haɗin IPv4/IPv6, hanyar VPN da kuma ƙayyadaddun proxies na iya bambanta. Bincika [yankuna masu goyan bayan Google](https://ai.google.dev/gemini-api/docs/available-regions) da kuma ainihin hanyar haɗin gwiwa; wannan kuskuren kadai baya gano maɓalli mara kyau API.
 
-### Fi son proxy na takamaiman haɗi
+### Fi son takamaiman wakili na haɗi
 
-Yi amfani da [daidaitawar proxy ta kowane haɗi](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-na OmniRoute don haɗin Gemini da abin ya shafa, sannan ka sake yin **Gwada Haɗi** da ƙaramar buƙata
-ta amfani da model iri ɗaya. Wannan yana taƙaita canjin hanya ga wannan haɗin kawai. Tabbatar
-cewa ana iya isa ga proxy daga container, kuma cewa haɗin yana zaɓar sa da gaske.
-Canza hanyar ba ya tabbatar da cancantar yanki a bangaren sabis na sama.
+Yi amfani da [saitin wakili na kowane haɗin haɗin](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute don haɗin Gemini da abin ya shafa, sannan maimaita** Gwaji Haɗin** da ƙaramar buƙata tare da samfurin iri ɗaya. Wannan yana kiyaye canjin kwatance zuwa wannan haɗin. Tabbatar cewa ana iya samun wakili daga akwati, kuma haɗin yana zaɓe ta da gaske. Canza hanya baya bada garantin cancantar yanki.
 
-### Kwatanta hanyar sadarwar host da container
+### Kwatanta mai masaukin baki da sadarwar kwantena
 
-Ka bar key, model da buƙata iri ɗaya yayin kwatanta sakamakon da aka tantance; kada ka taɓa
-liƙa credentials, kalmomin sirrin proxy ko cikakkun authorization headers a cikin issue.
-Da farko, bincika rukunin adireshin da OS resolver ke bayarwa, ta amfani da umarni iri ɗaya
-a kan host da kuma cikin container:
+Kiyaye maɓalli, samfuri da buƙatun daidai lokacin da ake kwatanta ingantattun sakamako; kar a taɓa manna takaddun shaida, kalmomin shiga na wakili ko cikakken kanun izini a cikin matsala. Da farko duba wanne adireshin iyalai mai warware OS ke bayarwa, ta amfani da umarni iri ɗaya akan mai gida da cikin akwati:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Maye gurbin `omniroute` da service ɗin da kake gudanarwa (misali, `omniroute-web`). Waɗannan
-umarni suna buga rukunin adireshi ba tare da credentials ko IP addresses ba. Samun `6`
-yana nuna sakamakon IPv6 DNS ne kawai: **ba ya** tabbatar da cewa akwai hanyar IPv6 mai aiki ko damar shiga API.
-Inda aka shigar da `curl`, kwatanta `curl -4 -I https://generativelanguage.googleapis.com`
-da `curl -6 -I https://generativelanguage.googleapis.com` a duka muhallan.
-Amsar HTTP tana tabbatar da haɗi don wannan gwajin, ko da kuskure ne da ba a tantance ba;
-buƙatar model da aka tantance ce kawai ke gwada cancantar Gemini.
+Sauya `omniroute` tare da sabis ɗin da kuke gudanarwa (misali, `omniroute-web`). Waɗannan umarni suna buga iyalai na adireshi ba tare da takaddun shaida ko adiresoshin IP. `6` da aka dawo kawai yana nuna DNS IPv6 yana aikatawa** ba** tabbatar da hanyar IPv6 mai amfani ko hanyar API. Inda aka shigar da `curl`, kwatanta `curl -4 -I https://generativelanguage.googleapis.com` da `curl -6 -I https://generativelanguage.googleapis.com` a cikin mahalli biyu. Martanin HTTP yana tabbatar da haɗin kai don wannan binciken, koda kuwa kuskure ne mara tabbas; buƙatun ƙirar ƙira kawai yana gwada cancantar Gemini.
 
-### Madadin matakin host: IPv6 mai aiki da manufofin resolver
+### Madadin matakin mai watsa shiri: IPv6 aiki da manufofin warwarewa
 
-Mai bayar da rahoton [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ya dawo
-da damar shiga a muhallinsa ta hanyar kunna IPv6 na container da canza zaɓin adireshin glibc.
-Ɗauki wannan a matsayin madadin da ya keɓanta ga muhalli. Tabbatar da cewa IPv6 na host yana aiki,
-egress/routing na container da kuma dokokin firewall kafin daidaita fifikon resolver.
-Adireshin ULA na sirri shi kaɗai ba ya tabbatar da haɗin IPv6 na jama'a.
+Mai ba da rahoto na [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ya dawo da damar shiga cikin muhallinsu ta hanyar ba da damar IPv6 kwantena da canza zaɓin adireshin glibc. Bi da wannan azaman madadin takamaiman yanayi. Tabbatar da IPv6 mai aiki, kwantena egress/routing da dokokin Tacewar zaɓi kafin daidaita abubuwan zaɓi. Adireshin ULA mai zaman kansa da kansa baya kafa haɗin IPv6 na jama'a.
 
-Ga services da aka riga aka haɗa da tsohuwar network ta Compose, wannan sashe yana kunna
-IPv6 a wannan network; ka riƙe sauran service, ports, volumes da configuration ɗinka:
+Don ayyukan da aka riga aka haɗe zuwa tsohuwar hanyar sadarwa ta Compose, wannan guntu yana ba da damar IPv6 akan wannan hanyar sadarwa; Riƙe sauran sabis ɗinku, tashar jiragen ruwa, kundin girma da daidaitawa:
 
 ```yaml
 networks:
@@ -809,30 +728,13 @@ networks:
     enable_ipv6: true
 ```
 
-Don network mai suna, kunna shi a kan network ɗin da service ke shiga da gaske. Docker na iya
-ware ULA subnet; zaɓi takamaiman subnet da ba ya cin karo da wani kawai idan network ɗinka
-yana buƙatar hakan. Duba [hanyar sadarwar IPv6 ta Docker](https://docs.docker.com/engine/daemon/ipv6/)
-da [zaɓuɓɓukan network na Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Don cibiyar sadarwa mai suna, kunna ta akan hanyar sadarwar da sabis ɗin ke haɗawa. Docker na iya kasafta wani yanki na ULA ; zaži fayyace, cibiyar sadarwa mara sa6owa kawai lokacin da hanyar sadarwarka ta bukace ta. Duba [Docker IPv6 sadarwar](https://docs.docker.com/engine/daemon/ipv6/) kuma [Rubuta zaɓuɓɓukan cibiyar sadarwa](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-A kan **image mai tushen glibc**, `/etc/gai.conf` na iya canza zaɓin adireshi. Dockerfile na
-repository na yanzu yana amfani da Debian; custom images masu tushen musl ba sa amfani da wannan tsari.
-Daidaitawar da aka bayar da rahoto tana canza label na ULA daga `label fc00::/7 6` zuwa
-`label fc00::/7 1`. Fara daga cikakken teburin manufofin image ɗin kuma ka kiyaye sauran
-entries ɗinsa: ƙara entry na `label` ko `precedence` yana maye gurbin tsohon teburin, don haka file
-mai ɗauke da layin da aka canza kawai bai isa ba.
-[Manazartar configuration ta glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-ta bayyana waɗannan ƙa'idoji. Yi bind-mount na file ɗin da aka duba a matsayin read-only a `/etc/gai.conf`
-sannan ka sake ƙirƙirar service ɗin don aiwatar da shi.
+Na a** Hoton tushen glibc** , `/etc/gai.conf` na iya canza zaɓin adireshin. Dockerfile na yanzu yana amfani da Debian; Hotunan tushen musl na al'ada ba sa raba wannan tsarin. Daidaiton da aka ruwaito yana canza alamar ULA daga `label fc00::/7 6` zuwa `label fc00::/7 1`. Fara daga cikakken teburin manufofin hoton kuma adana sauran shigarwar sa: ƙara `label` ko shigarwar `precedence` ya maye gurbin wancan tsohuwar tebur, don haka fayil ɗin da ke ɗauke da layin da aka canza kawai bai isa ba. [Ƙa'idar daidaitawar glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) ta rubuta waɗannan ilimin tarukan. Haɗa fayil ɗin da aka sake dubawa kawai a `/etc/gai.conf` kuma sake ƙirƙira sabis don amfani da shi.
 
-Wannan yana canza zaɓin adireshin OS don **duk zirga-zirgar da ke fita daga wannan container**.
-Ba ya tilasta wa kowane application zaɓar IPv6: tsarin DNS na Node da zaɓin haɗi
-su ma suna da tasiri. Musamman, `--dns-result-order=ipv4first` yana fifita IPv4 kuma
-ba magani ba ne ga gazawar da ta shafi IPv4 kaɗai. Duba [tsarin DNS na Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Wannan yana canza zaɓin adireshin OS don** duk zirga-zirga mai fita a cikin wannan akwati** . Ba ya tilasta kowane aikace-aikace don zaɓar IPv6: Node's DNS order da zaɓin haɗin suna da mahimmanci. Musamman `--dns-result-order=ipv4first` ya fi son IPv4 kuma ba magani bane ga gazawar IPv4-only. Duba [Node DNS yana oda](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Sake gwada Gemini da sauran providers ɗinka bayan kowane canji na matakin host. Don komawa baya,
-cire custom mount na `gai.conf`, dawo da configuration na network na baya sannan ka sake
-ƙirƙirar service/network da abin ya shafa a lokacin maintenance window. Sake ƙirƙirar network
-na iya katse sauran containers da ke haɗe da shi; kada ka goge persistent data volume.
+Sake gwada Gemini da sauran masu samar da ku bayan kowane canjin matakin runduna. Don jujjuya baya, cire dutsen `gai.conf` na al'ada, maido da saitunan cibiyar sadarwar da ta gabata kuma sake ƙirƙirar service/network ɗin da abin ya shafa yayin taga gyarawa. Sake ƙirƙira hanyar sadarwa na iya katse sauran kwantena da ke makale da ita; kar a share ƙarar bayanan dagewa.
 
 ## Muhimman Bayanan Kula
 

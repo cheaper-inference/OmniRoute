@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Kikomo lazima kiwe nambari kamili chanya.",
     "error": "Hitilafu: {message}",
     "serverOffline": "Seva ya OmniRoute haiko mtandaoni. Ianzishe kwa: omniroute serve",
     "authRequired": "Uthibitishaji unahitajika. Weka OMNIROUTE_API_KEY au endesha: omniroute setup",

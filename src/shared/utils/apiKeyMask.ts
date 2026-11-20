@@ -16,6 +16,35 @@ export function maskStoredApiKey(key: unknown): string | null {
   return key.slice(0, 8) + MASK + key.slice(-4);
 }
 
+const LAST4_BULLETS = "••••••••";
+/** Below this many characters the last 4 would give most of the key away. */
+const MIN_KEY_LENGTH_FOR_LAST4 = 8;
+
+/**
+ * Length of the key behind `value`. A stored mask keeps at most the first 8
+ * characters, so a shorter head is the whole key; a full head means "8 or more".
+ */
+function keyLengthBehind(value: string): number {
+  return looksLikeMaskedApiKey(value) ? value.indexOf(MASK) : value.length;
+}
+
+/**
+ * Format an API key (plaintext or already stored mask) to display only its prefix
+ * and the last 4 characters, with bullet masking in between.
+ * Example: `sk-••••••••a82f`. A key shorter than 8 characters stays wholly masked.
+ *
+ * Safe for display on the dashboard: never exposes the secret body.
+ */
+export function formatApiKeyLast4(key: unknown): string | null {
+  if (typeof key !== "string") return null;
+  const trimmed = key.trim();
+  if (!trimmed) return null;
+  if (keyLengthBehind(trimmed) < MIN_KEY_LENGTH_FOR_LAST4) return LAST4_BULLETS;
+  const match = trimmed.match(/^([a-zA-Z0-9]+[_-])/);
+  const prefix = match ? match[1] : "";
+  return `${prefix}${LAST4_BULLETS}${trimmed.slice(-4)}`;
+}
+
 /** True when `value` has the shape of a mask produced by `maskStoredApiKey`. */
 export function looksLikeMaskedApiKey(value: unknown): boolean {
   return typeof value === "string" && MASKED_SHAPE.test(value);

@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Eemalda võti"
   },
   "plugins": {
+    "privilegesWarningTitle": "Pluginad töötavad täielike õigustega",
+    "privilegesWarningBody": "Pistikprogramm töötab tavalise Node.js protsessina, millel on sama juurdepääs kui OmniRoute: see võib lugeda faile, käivitada programme ja kasutada võrku olenemata sellest, mis õigused selle manifest deklareerib. Installige ainult usaldusväärsed pistikprogrammid.",
     "title": "Pistikprogrammid",
     "description": "Installi ja halda pistikprogramme OmniRoute'i funktsionaalsuse laiendamiseks",
     "loading": "Pistikprogrammide laadimine...",

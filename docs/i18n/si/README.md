@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -778,7 +778,7 @@ omniroute configure codex          # මෙයද: claude opencode qwen aider go
   <tr><th align="left">වේදිකාව</th><th align="left">ස්ථාපනය</th><th align="left">විශේෂාංග</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (ගෝලීය)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">එක් විධානයකින්, ඕනෑම OS එකක</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (ගෝලීය)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">එකම registry tarball, වේගවත් ස්ථාපනයන්</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">ස්වදේශීය කවුළුව + පද්ධති tray — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">සේවාදායකය අධීක්ෂණය කරයි සහ ස්වයංක්රීයව යාවත්කාලීන කරයි — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>ස්වදේශීය <code>arm64</code></td><td align="left">Raspberry Pi, ARM සේවාදායක, Apple Silicon</td></tr>
@@ -1100,7 +1100,7 @@ Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` ඉහළම **ප්රකාශිත** ස්ථාවර SemVer අනුව අනුගමනය කරයි. එය git `main` අනුගමනය නොකරයි. GitOps සඳහා `:X.Y.Z` pin කරන්න. [Docker නිකුතු නාලිකා](docs/guides/DOCKER_GUIDE.md#release-channels) බලන්න. Image එක **`OMNIROUTE_MEMORY_MB=1024`** ලෙස සකසා ඇත. එය dashboard සහ සැහැල්ලු chat එකක් සඳහා ප්රමාණවත් වේ. **කේතකරණ agents** (Claude Code, Codex, Grok, … වෙතින් `POST /v1/responses`) සඳහා වඩා විශාල V8 heap එකක් අවශ්ය වේ; එසේ නොමැතිනම් දිගු context දෙකක් අතිච්ඡාදනය වන විට ~12 GiB දී ක්රියාවලිය `FATAL ERROR` වේ. ස්වදේශීය buffers V8 වෙතින් පිටත පවතින බැවින්, container එක heap එකට වඩා විශාල ලෙස ප්රමාණගත කරන්න:
@@ -1114,7 +1114,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 සම්පූර්ණ වගුව: [Docker මාර්ගෝපදේශය — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1320,7 +1320,7 @@ dashboard-රහිත, headless runtime එකක් සඳහා Docker `base`
   <tr><td nowrap><b>ධාවන පරිසරය</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>භාෂාව</b></td><td>TypeScript 6.0 — <code>src/</code> සහ <code>open-sse/</code> පුරා <b>100% TypeScript</b> (v2.0 සිට core තුළ <code>any</code> ශුන්යයි)</td></tr>
   <tr><td nowrap><b>ෆ්රේම්වර්ක්</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — domain modules 147ක්, migrations 240ක්</td></tr>
+  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — domain modules 147ක්, migrations 244ක්</td></tr>
   <tr><td nowrap><b>මතකය</b></td><td>SQLite FTS5 පූර්ණ-පෙළ + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>ස්කීමා</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
   <tr><td nowrap><b>ප්රොටෝකෝල</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1333,7 +1333,7 @@ dashboard-රහිත, headless runtime එකක් සඳහා Docker `base`
   <tr><td nowrap><b>පරීක්ෂා කිරීම</b></td><td>Node.js test runner + Vitest — පසු විපරම් කරන ලද test files 8,400+ක් පුරා <b>ස්ථිතික test declarations 60,000+</b>ක් (unit, integration, E2E, security, ecosystem)</td></tr>
   <tr><td nowrap><b>වේදිකා</b></td><td>Desktop (Electron) · Android (Termux) · PWA (ඕනෑම browser එකක්)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — release එකකදී ස්වයංක්රීය npm publish + Docker Hub</td></tr>
-  <tr><td nowrap><b>සබැඳි</b></td><td><a href="https://omniroute.online">වෙබ් අඩවිය</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>සබැඳි</b></td><td><a href="https://omniroute.online">වෙබ් අඩවිය</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

@@ -41,7 +41,11 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   if (!page) notFound();
 
   const locale = await getDocsLocale();
-  const translated = await loadTranslatedDoc(params.slug, locale, page.data.toc);
+  // `page.path` (e.g. `getting-started/QUICK-START.md`) names the mirror file to fetch when the
+  // install has no bundled docs/i18n tree; the slug alone lost the file name's case.
+  const translated = await loadTranslatedDoc(params.slug, locale, page.data.toc, undefined, {
+    sourcePath: page.path,
+  });
 
   if (translated) {
     // Render translated markdown (non-English locale with available translation)
@@ -57,7 +61,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   // Default: English MDX rendered natively by Fumadocs with resolved links
   const MDX = page.data.body;
-  const docPath = page.file?.path || `${params.slug.join("/")}.md`;
+  // Relative links resolve against the page's file (`page.path`, relative to `docs/`), not the
+  // slug: an `index.md` page's slugs drop the `index` segment (#20642).
+  const docPath = page.path;
   const DocsLink = (linkProps: React.ComponentProps<typeof defaultMdxComponents.a>) => {
     const resolved = linkProps.href ? resolveDocHref(linkProps.href, docPath) : linkProps.href;
     return <defaultMdxComponents.a {...linkProps} href={resolved} />;

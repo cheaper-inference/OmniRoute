@@ -24,6 +24,8 @@
 // "Require PR on default branch" on ~DEFAULT_BRANCH) that would reject the landing push because
 // the landing actor is not one of their bypass actors (the App, or for `landing.actor: owner` the
 // repository admin role / organization admins): a warning on --dry-run, exit 1 on a real apply.
+// A non-strict required_status_checks rule that only requires checks of config.requiredChecks from
+// GitHub Actions is already satisfied by the candidate pushed: printed as info, never counted.
 //
 // Production lock: a real apply (no --dry-run, either kind) against cheaper-inference/OmniRoute
 // (or its old name diegosouzapw/OmniRoute, which redirects) is refused unless
@@ -461,6 +463,66 @@ export const LANDING_BLOCKING_RULE_TYPES = Object.freeze([
 /** Rule types that never affect a fast-forward push to an existing branch. */
 const LANDING_SAFE_RULE_TYPES = new Set(["deletion", "non_fast_forward", "creation"]);
 
+/**
+ * App id of GitHub Actions: the integration_id GitHub gives the check runs of workflow jobs. The
+ * candidate's checks come from its push run on omni-queue/**, and the queue's verdict
+ * (checks.mjs, REQUIRED_CHECK_APP "github-actions") only counts a required check green when a run
+ * of this app reported it.
+ */
+export const GITHUB_ACTIONS_APP_ID = 15368;
+
+/** The parameters a required_status_checks rule may carry and still be satisfied by the candidate. */
+const SATISFIED_STATUS_RULE_PARAMETER_KEYS = new Set([
+  "strict_required_status_checks_policy",
+  // only relaxes the rule when a branch is created; the landing push updates an existing branch
+  "do_not_enforce_on_create",
+  "required_status_checks",
+]);
+
+/**
+ * A required_status_checks rule of another ruleset does not reject the landing push when the
+ * commit pushed already carries those checks green. GitHub: commits "must first be pushed to
+ * another branch, then merged or pushed directly to a branch that matches the rule after status
+ * checks have passed". merge-ff pushes exactly the candidate, and the queue blesses a candidate
+ * only after its verdict saw every config.requiredChecks green on it from GitHub Actions. So the
+ * rule is satisfied when: it is not strict (strict would also need the candidate up to date with
+ * the branch at push time: kept blocking, conservatively), it has no other parameter, it lists at
+ * least one check, and every check is {context, integration_id?} with a context the queue
+ * requires (compared exactly) and integration_id absent, null or GITHUB_ACTIONS_APP_ID.
+ * @param {object} rule  one entry of GET /rules/branches/{base}
+ * @param {string[]} requiredChecks  config.requiredChecks
+ * @returns {string[]|null} the contexts of the rule when it is satisfied, else null
+ */
+function satisfiedStatusRule(rule, requiredChecks) {
+  if (rule?.type !== "required_status_checks") return null;
+  const parameters = rule.parameters;
+  if (!isRecord(parameters)) return null;
+  if (Object.keys(parameters).some((key) => !SATISFIED_STATUS_RULE_PARAMETER_KEYS.has(key)))
+    return null;
+  if (parameters.strict_required_status_checks_policy !== false) return null;
+  const doNotEnforceOnCreate = parameters.do_not_enforce_on_create;
+  if (doNotEnforceOnCreate !== undefined && typeof doNotEnforceOnCreate !== "boolean") return null;
+  const checks = parameters.required_status_checks;
+  if (!Array.isArray(checks) || checks.length === 0) return null;
+  const queueChecks = new Set(Array.isArray(requiredChecks) ? requiredChecks : []);
+  const contexts = [];
+  for (const check of checks) {
+    if (!isRecord(check)) return null;
+    if (Object.keys(check).some((key) => key !== "context" && key !== "integration_id"))
+      return null;
+    if (typeof check.context !== "string" || !queueChecks.has(check.context)) return null;
+    const integrationId = check.integration_id;
+    if (
+      integrationId !== undefined &&
+      integrationId !== null &&
+      integrationId !== GITHUB_ACTIONS_APP_ID
+    )
+      return null;
+    contexts.push(check.context);
+  }
+  return contexts;
+}
+
 /** Bypass modes that also cover direct pushes ("pull_request" only covers PR merges). */
 const PUSH_BYPASS_MODES = new Set(["always", "exempt"]);
 
@@ -483,13 +545,25 @@ const isOwnerBypass = (actor) =>
  * OrganizationAdmin).
  * Example: "Require PR on default branch" (~DEFAULT_BRANCH, pull_request, no bypass) also
  * applies to whichever release branch is the default one.
+ * One exception, whoever lands: a required_status_checks rule the candidate already satisfies
+ * (see satisfiedStatusRule; needs `requiredChecks`, the queue's config.requiredChecks) does not
+ * block and is reported in `info` instead.
  * @param {{gh: object, repo: string, base: string, ownRulesetId: number|null,
- *          appId: number|null, actor?: "app"|"owner"}} input   actor defaults to "app"
- * @returns {Promise<{blockers: string[], warnings: string[]}>} blockers: rule types in
- *          LANDING_BLOCKING_RULE_TYPES not bypassed by the landing actor; warnings: other types
+ *          appId: number|null, actor?: "app"|"owner", requiredChecks?: string[]}} input
+ *          actor defaults to "app"; requiredChecks to [] (no status rule is then accepted)
+ * @returns {Promise<{blockers: string[], warnings: string[], info: string[]}>} blockers: rule
+ *          types in LANDING_BLOCKING_RULE_TYPES not bypassed by the landing actor; warnings: other
+ *          types; info: required_status_checks rules accepted because the candidate satisfies them
  */
 export async function checkLandingPath(input) {
-  const { gh, repo, ownRulesetId = null, appId = null, actor = "app" } = input ?? {};
+  const {
+    gh,
+    repo,
+    ownRulesetId = null,
+    appId = null,
+    actor = "app",
+    requiredChecks = [],
+  } = input ?? {};
   if (!LANDING_ACTORS.includes(actor))
     throw new Error(`invalid landing actor: ${JSON.stringify(actor)}`);
   const base = assertBranchName(input?.base);
@@ -514,12 +588,23 @@ export async function checkLandingPath(input) {
 
   const blockers = [];
   const warnings = [];
+  const info = [];
   for (const rule of rules) {
     const type = String(rule?.type);
     const rulesetId = rule?.ruleset_id ?? null;
     if (ownRulesetId !== null && rulesetId === ownRulesetId) continue;
     if (LANDING_SAFE_RULE_TYPES.has(type)) continue;
     const source = `ruleset ${rulesetId} (${rule?.ruleset_source_type ?? "?"} ${rule?.ruleset_source ?? "?"})`;
+    const satisfied = satisfiedStatusRule(rule, requiredChecks);
+    if (satisfied) {
+      info.push(
+        `rule ${type} from ${source} on ${base}: does not block the landing push: it is not ` +
+          `strict and requires only ${satisfied.map((c) => JSON.stringify(c)).join(", ")}, ` +
+          "which the queue's verdict (requiredChecks) already saw green from GitHub Actions on " +
+          "the candidate it pushes"
+      );
+      continue;
+    }
     let reason;
     if (actor === "app" && appId === null) {
       reason = "cannot tell whether the omni-queue App bypasses it without --app-id";
@@ -550,7 +635,7 @@ export async function checkLandingPath(input) {
     if (LANDING_BLOCKING_RULE_TYPES.includes(type)) blockers.push(line);
     else warnings.push(line);
   }
-  return { blockers, warnings };
+  return { blockers, warnings, info };
 }
 
 // ───────────────────────────── CLI ─────────────────────────────
@@ -742,11 +827,13 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
         ownRulesetId: result.id,
         appId,
         actor,
+        requiredChecks: config.requiredChecks ?? [],
       });
     } catch (error) {
       const why = error?.message ?? String(error);
       landing = { blockers: [`could not read the rules enforced on ${values.base}: ${why}`] };
     }
+    for (const line of landing.info ?? []) out(`apply-ruleset: info: ${line}`);
     for (const line of landing.warnings ?? []) err(`apply-ruleset: warning: ${line}`);
     for (const line of landing.blockers) {
       err(

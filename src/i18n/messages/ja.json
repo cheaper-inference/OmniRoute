@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "キーを削除"
   },
   "plugins": {
+    "privilegesWarningTitle": "プラグインは完全な権限で実行されます",
+    "privilegesWarningBody": "プラグインは、 OmniRouteと同じアクセス権を持つ通常のNode.jsプロセスとして実行されます。マニフェストで宣言されている権限に関係なく、ファイルの読み取り、プログラムの実行、ネットワークの使用が可能です。信頼できるプラグインのみをインストールしてください。",
     "title": "プラグイン",
     "description": "OmniRoute の機能を拡張するプラグインをインストール・管理します",
     "loading": "プラグインを読み込み中...",
