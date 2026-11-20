@@ -309,6 +309,7 @@ Voľne používajte klauzuly `IF NOT EXISTS`, `IF EXISTS` a `OR IGNORE` / `OR RE
 3. **Údaje doplňte opatrne** : použite `UPDATE ... WHERE ...` na spracovanie existujúcich riadkov
 4. **Skontrolujte poradie a pomenovanie** : `npm run test:migrations:fresh` (všetky migrácie na prázdnu databázu) a `npm run check:migration-numbering`
 5. **Test na kópii** : nikdy nespúšťajte netestované migrácie na produkciu
+6. **Tabuľka vytvorená z kódu tiež potrebuje migráciu** : ak modul tiež vytvorí tabuľku lenivo (`CREATE TABLE IF NOT EXISTS`, udržiavaná ako cesta samoliečenia), migrácia ju musí vytvoriť s rovnakým DDL. V opačnom prípade čistá inštalácia a inovovaná inštalácia skončia s rôznymi schémami v závislosti od toho, či cesta kódu prebehla. `tests/unit/db/lazy-table-migration-guard.test.ts` skenuje `src/` a `open-sse/` a zlyhá na lenivom `CREATE` bez migrácie (#20557). Príklad: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Príklad:
 

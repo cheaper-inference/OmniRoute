@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] ingefanya {action}",
     "cancelled": "Imeghairiwa.",
     "jsonOpt": "Toa matokeo kama JSON",
-    "yesOpt": "Ruka kidokezo cha uthibitishaji"
+    "yesOpt": "Ruka kidokezo cha uthibitishaji",
+    "positiveIntegerRequired": "Kikomo lazima kiwe nambari kamili chanya."
   },
   "setup": {
     "title": "Usanidi wa OmniRoute",

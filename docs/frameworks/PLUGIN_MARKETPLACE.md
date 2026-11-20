@@ -50,8 +50,9 @@ Dashboard (/dashboard/plugins)
   `plugin.json`.
 - **Scanner** — `src/lib/plugins/scanner.ts`: discovers plugins on disk under
   the plugin directory.
-- **Loader** — `src/lib/plugins/loader.ts`: spawns each plugin in an isolated
-  child process and brokers hook calls over IPC.
+- **Loader** — `src/lib/plugins/loader.ts`: spawns each plugin in a separate
+  Node.js child process and brokers hook calls over IPC. The child is not a
+  sandbox (see "Plugin execution isolation" below).
 
 ## Marketplace Catalog
 
@@ -252,6 +253,14 @@ silently falls back to the built-in seed registry and logs a warning.
 
 ### Plugin execution isolation
 
+> **Plugins are not sandboxed.** The child is an ordinary Node.js process running
+> as the OmniRoute user, with no VM context and no Node.js permission flags, so
+> plugin code can read and write any file that user can, run programs and reach
+> the network. `requires.permissions` only decides which environment variables
+> the child receives; the other permissions are not enforced. Install only
+> plugins you trust. The process boundary below contains crashes and hangs; it
+> is not a security boundary.
+
 - **Process isolation** — `loadPlugin()` (`src/lib/plugins/loader.ts`) spawns
   each plugin in a separate Node.js child process and communicates over IPC.
   Hook calls have a timeout with `SIGTERM` → `SIGKILL` escalation.
@@ -271,8 +280,12 @@ silently falls back to the built-in seed registry and logs a warning.
 - **Optional integrity pin** — a manifest may declare an `integrity`
   (`sha256-<base64>`, SRI format) field. When present, the loader verifies the
   entry file hash at load time and refuses to activate on mismatch. It is
-  opt-in tamper-detection, **not** a security boundary — loopback-only routing
-  and the permission model are the real boundaries.
+  opt-in tamper-detection, **not** a security boundary: it does not limit what
+  a loaded plugin can do.
+- **No client credentials in hooks** — the context passed to `onRequest`,
+  `onResponse` and `onError` has the `authorization`, `x-api-key`,
+  `proxy-authorization` and `cookie` headers removed, and the API key record carries no key
+  value (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
@@ -296,7 +309,9 @@ Validated by `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 | `integrity`        | string?   | Optional `sha256-<base64>` entry-file pin                   |
 
 Permissions are drawn from the enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+`network` / `file-read` / `file-write` / `env` / `exec`. Only `env` has a
+runtime effect (a slightly larger environment-variable allowlist for the
+child); the others are declarations and are not enforced.
 
 ## Lifecycle Flow
 
@@ -364,6 +379,9 @@ The dashboard page at `/dashboard/plugins`
   action (`POST /api/plugins/scan`).
 - **Marketplace** — shows the catalog from `GET /api/plugins/marketplace` with a
   field to set the custom registry URL.
+
+The page always shows a warning that plugins run with the full privileges of
+the OmniRoute process.
 
 A per-plugin config page lives at `/dashboard/plugins/[name]/config`
 (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
