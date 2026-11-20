@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "限制必须是正整数。",
     "error": "错误：{message}",
     "serverOffline": "OmniRoute 服务器已离线。请启动：omniroute serve",
     "authRequired": "需要认证。请设置 OMNIROUTE_API_KEY 或运行：omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "【模拟】将执行：{action}",
     "cancelled": "已取消。",
     "jsonOpt": "以 JSON 格式输出",
-    "yesOpt": "跳过确认"
+    "yesOpt": "跳过确认",
+    "positiveIntegerRequired": "限制必须是正整数。"
   },
   "setup": {
     "title": "OmniRoute 设置",

@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Przechowuj wiadomości systemowe w trakcie rozmowy na swoim miejscu",
     "requireUserLastMessageDescription": "W przypadku upstreamów, które odrzucają wstępne wypełnienie asystenta: upuść końcowe zwroty asystenta (bez użycia narzędzia) przed wysłaniem. Model może zregenerować swoją poprzednią odpowiedź.",
     "requireUserLastMessageLabel": "Wymagaj, aby rozmowa kończyła się wiadomością dla użytkownika",
+    "strictChatHistoryDescription": "Naprawia przerwane sekwencje wywołań narzędzi i scala kolejne wiadomości asystenta przed wysłaniem ich do dostawców zgodnych z OpenAI, którzy stosują ścisłe reguły.",
+    "strictChatHistoryLabel": "Naprawa historii czatu dla dostawców o ścisłych wymaganiach",
     "bulkPasteAdded": "{count, plural, one {Dodano 1 klucz} other {Dodano # kluczy}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Pominięto 1 duplikat} other {Pominięto # duplikatów}}",
     "bulkPasteHint": "Wklej jeden klucz API w wierszu. Puste linie są ignorowane, a zduplikowane klucze są pomijane.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Usuń klucz"
   },
   "plugins": {
-    "privilegesWarningTitle": "Wtyczki działają z pełnymi uprawnieniami",
-    "privilegesWarningBody": "Wtyczka działa jak zwykły proces Node.js z takimi samymi uprawnieniami jak OmniRoute: może czytać pliki, uruchamiać programy i korzystać z sieci, niezależnie od uprawnień deklarowanych w jej manifeście. Instaluj tylko wtyczki, którym ufasz.",
     "title": "Wtyczki",
     "description": "Instalowanie i zarządzanie wtyczkami w celu rozszerzenia funkcjonalności OmniRoute",
     "loading": "Ładowanie wtyczek...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Skanuj w poszukiwaniu wtyczek",
     "noPlugins": "Brak zainstalowanych wtyczek",
     "noPluginsDescription": "Umieść katalogi wtyczek w ~/.omniroute/plugins/ i kliknij Skanuj.",
+    "privilegesWarningTitle": "Wtyczki działają z pełnymi uprawnieniami",
+    "privilegesWarningBody": "Wtyczka działa jak zwykły proces Node.js z takimi samymi uprawnieniami jak OmniRoute: może czytać pliki, uruchamiać programy i korzystać z sieci, niezależnie od uprawnień deklarowanych w jej manifeście. Instaluj tylko wtyczki, którym ufasz.",
     "activate": "Aktywuj",
     "deactivate": "Dezaktywuj",
     "uninstall": "Odinstaluj",

@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "将对话中的系统消息保留在适当的位置",
     "requireUserLastMessageDescription": "对于拒绝辅助预填充的上游：在发送之前删除尾随辅助轮（无工具使用）。该模型可能会重新生成其先前的答案。",
     "requireUserLastMessageLabel": "要求对话以用户消息结束",
+    "strictChatHistoryDescription": "在发送给执行严格规则的 OpenAI 兼容上游服务前，修复中断的工具调用序列，并合并连续的助手消息。",
+    "strictChatHistoryLabel": "为严格的上游服务修复聊天记录",
     "bulkPasteAdded": "{count, plural, one {已添加 1 个 key} other {已添加 # 个 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳过 1 个重复项} other {已跳过 # 个重复项}}",
     "bulkPasteHint": "每行粘贴一个 API 密钥。空行会被忽略，重复密钥会被跳过。",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "移除键"
   },
   "plugins": {
-    "privilegesWarningTitle": "插件以完全权限运行",
-    "privilegesWarningBody": "插件作为常规Node.js进程运行，具有与OmniRoute相同的访问权限：它可以读取文件、运行程序和使用网络，无论其清单声明什么权限。仅安装您信任的插件。",
     "title": "插件",
     "description": "安装和管理插件以扩展 OmniRoute 功能",
     "loading": "加载插件中…",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "扫描插件",
     "noPlugins": "未安装插件",
     "noPluginsDescription": "将插件目录放入 ~/.omniroute/plugins/ 并点击扫描。",
+    "privilegesWarningTitle": "插件以完全权限运行",
+    "privilegesWarningBody": "插件作为常规Node.js进程运行，具有与OmniRoute相同的访问权限：它可以读取文件、运行程序和使用网络，无论其清单声明什么权限。仅安装您信任的插件。",
     "activate": "激活",
     "deactivate": "停用",
     "uninstall": "卸载",

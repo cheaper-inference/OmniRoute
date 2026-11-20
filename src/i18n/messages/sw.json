@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Weka ujumbe wa mfumo wa mazungumzo katikati",
     "requireUserLastMessageDescription": "Kwa mitiririko ya juu inayokataa ujazaji awali wa mratibu: dondosha zamu za msaidizi (hakuna_use) kabla ya kutuma. Mfano unaweza kuunda tena jibu lake la hapo awali.",
     "requireUserLastMessageLabel": "Inahitaji mazungumzo ili kumalizika kwa ujumbe wa mtumiaji",
+    "strictChatHistoryDescription": "Hurekebisha mifuatano iliyokatizwa ya miito ya zana na kuunganisha ujumbe mfululizo wa msaidizi kabla ya kuutuma kwa watoa huduma wanaooana na OpenAI na wanaotumia masharti makali.",
+    "strictChatHistoryLabel": "Kurekebisha historia ya gumzo kwa watoa huduma wenye masharti makali",
     "bulkPasteAdded": "{count, plural, one {Ufunguo 1 umeongezwa} other {Funguo # zimeongezwa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Nakala rudufu 1 imerukwa} other {Nakala rudufu # zimerukwa}}",
     "bulkPasteHint": "Bandika ufunguo mmoja wa API kwa kila mstari. Mistari tupu hupuuzwa na funguo zilizorudiwa hurukwa.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Ondoa ufunguo"
   },
   "plugins": {
-    "privilegesWarningTitle": "Programu-jalizi huendeshwa na upendeleo kamili",
-    "privilegesWarningBody": "Programu-jalizi huendesha kama mchakato wa Node.js wa kawaida na ufikiaji sawa na OmniRoute: inaweza kusoma faili, kuendesha programu na kutumia mtandao, ruhusa yoyote ambayo faili yake ya maelezo itatangaza. Sakinisha programu-jalizi unazoziamini pekee.",
     "title": "Programu-jalizi",
     "description": "Sakinisha na udhibiti programu-jalizi ili kupanua utendaji wa OmniRoute",
     "loading": "Inapakia programu-jalizi...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Changanua Programu-jalizi",
     "noPlugins": "Hakuna programu-jalizi zilizosakinishwa",
     "noPluginsDescription": "Weka saraka za programu-jalizi katika ~/.omniroute/plugins/ kisha ubofye Changanua.",
+    "privilegesWarningTitle": "Programu-jalizi huendeshwa na upendeleo kamili",
+    "privilegesWarningBody": "Programu-jalizi huendesha kama mchakato wa Node.js wa kawaida na ufikiaji sawa na OmniRoute: inaweza kusoma faili, kuendesha programu na kutumia mtandao, ruhusa yoyote ambayo faili yake ya maelezo itatangaza. Sakinisha programu-jalizi unazoziamini pekee.",
     "activate": "Washa",
     "deactivate": "Zima",
     "uninstall": "Sanidua",

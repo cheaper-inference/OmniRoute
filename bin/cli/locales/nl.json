@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Limiet moet een positief geheel getal zijn.",
     "error": "Fout: {message}",
     "serverOffline": "OmniRoute-server is offline. Start met: omniroute serve",
     "authRequired": "Authenticatie vereist. Stel OMNIROUTE_API_KEY in of voer uit: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simulatie] zou: {action}",
     "cancelled": "Geannuleerd.",
     "jsonOpt": "Uitvoer als JSON",
-    "yesOpt": "Bevestiging overslaan"
+    "yesOpt": "Bevestiging overslaan",
+    "positiveIntegerRequired": "Limiet moet een positief geheel getal zijn."
   },
   "setup": {
     "title": "OmniRoute-installatie",

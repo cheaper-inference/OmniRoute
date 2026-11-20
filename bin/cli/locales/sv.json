@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Gränsen måste vara ett positivt heltal.",
     "error": "Fel: {message}",
     "serverOffline": "OmniRoute-servern är offline. Starta med: omniroute serve",
     "authRequired": "Autentisering krävs. Ange OMNIROUTE_API_KEY eller kör: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simulering] skulle: {action}",
     "cancelled": "Avbruten.",
     "jsonOpt": "Utdata som JSON",
-    "yesOpt": "Hoppa över bekräftelse"
+    "yesOpt": "Hoppa över bekräftelse",
+    "positiveIntegerRequired": "Gränsen måste vara ett positivt heltal."
   },
   "setup": {
     "title": "OmniRoute-konfiguration",
