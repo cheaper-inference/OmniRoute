@@ -40,7 +40,7 @@ import {
   contextRequirementsForTarget,
   exceedsKnownOutputLimit,
   hasKnownCompatibleContextLimit,
-  shouldClampOutputOnlyExhaustion,
+  getAutomaticOutputCapFallback,
   type CompatFilterOptions,
 } from "./outputLimitPolicy.ts";
 import {
@@ -789,13 +789,47 @@ function preferConfirmedVisionTargets(
   return partitionConfirmedVisionTargets(targets, requirements).targets;
 }
 
+type RequestCompatibilityDetails = {
+  contextRequirementsByTarget: Map<ResolvedComboTarget, RequestCompatibilityRequirements>;
+  usedAutomaticOutputCapFallback: boolean;
+};
+
 /** Filter incompatible targets without restoring unsupported media through fail-open routing. */
 export function filterTargetsByRequestCompatibility(
   targets: ResolvedComboTarget[],
   body: Record<string, unknown>,
   log: ComboLogger,
-  label = "Context-aware fallback",
+  label?: string,
   options?: CompatFilterOptions
+): ResolvedComboTarget[] {
+  return filterTargetsWithCompatibilityDetails(targets, body, log, label, options);
+}
+
+/** Keep the per-target reservation and any automatic fallback decision with the pool. */
+export function resolveTargetRequestCompatibility(
+  targets: ResolvedComboTarget[],
+  body: Record<string, unknown>,
+  log: ComboLogger,
+  label?: string,
+  options?: CompatFilterOptions
+) {
+  const details: RequestCompatibilityDetails = {
+    contextRequirementsByTarget: new Map(),
+    usedAutomaticOutputCapFallback: false,
+  };
+  return {
+    targets: filterTargetsWithCompatibilityDetails(targets, body, log, label, options, details),
+    ...details,
+  };
+}
+
+function filterTargetsWithCompatibilityDetails(
+  targets: ResolvedComboTarget[],
+  body: Record<string, unknown>,
+  log: ComboLogger,
+  label = "Context-aware fallback",
+  options?: CompatFilterOptions,
+  details?: RequestCompatibilityDetails
 ): ResolvedComboTarget[] {
   if (targets.length === 0) return targets;
   const outputLimitAdvisory = options?.outputLimitAdvisory === true;
@@ -811,16 +845,13 @@ export function filterTargetsByRequestCompatibility(
 
   const rejected: Array<{ target: ResolvedComboTarget; reasons: string[] }> = [];
   const targetReasons = new Map<ResolvedComboTarget, string[]>();
-  const targetRequirements = new Map(
-    targets.map((target) => [
-      target,
-      contextRequirementsForTarget(target, requirements, outputLimitAdvisory),
-    ])
-  );
+  const targetRequirements = details?.contextRequirementsByTarget ?? new Map();
   const requirementsFor = (target: ResolvedComboTarget) =>
     targetRequirements.get(target) ?? requirements;
   for (const target of targets) {
-    const reasons = getTargetCompatibilityFailures(target, requirementsFor(target));
+    const adjusted = contextRequirementsForTarget(target, requirements, outputLimitAdvisory);
+    if (adjusted !== requirements) targetRequirements.set(target, adjusted);
+    const reasons = getTargetCompatibilityFailures(target, adjusted);
     targetReasons.set(target, reasons);
     if (reasons.length > 0) rejected.push({ target, reasons });
   }
@@ -889,13 +920,20 @@ export function filterTargetsByRequestCompatibility(
     return preferConfirmedVisionTargets(compatible, requirements);
   }
   if (compatible.length === 0) {
-    if (shouldClampOutputOnlyExhaustion(body, targets.length, rejected, requirements, options)) {
+    const capFallback = getAutomaticOutputCapFallback(body, rejected, requirements, options);
+    if (capFallback?.size) {
+      if (details) {
+        details.usedAutomaticOutputCapFallback = true;
+        for (const [target, adjusted] of capFallback) targetRequirements.set(target, adjusted);
+      }
       log.debug?.(
         "COMBO",
-        `${label}: using model output caps for the Anthropic max_tokens ceiling`
+        `${label}: using model output caps for the Anthropic max_tokens ceiling (${capFallback.size}/${targets.length} targets)`
       );
-      return preferConfirmedVisionTargets(targets, requirements);
+      return preferConfirmedVisionTargets([...capFallback.keys()], requirements);
     }
+    // Do not let the legacy media-only recovery undo a failed safe-cap check.
+    if (capFallback !== null) return [];
     const hardRejected = rejected.some((entry) => hasHardCapabilityFailure(entry.reasons));
     const failOpen = options?.failOpen === true;
 

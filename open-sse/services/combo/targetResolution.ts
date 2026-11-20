@@ -48,7 +48,7 @@ import { clampComboDepth } from "./comboPredicates.ts";
 import {
   computeCompatRejectedTargets,
   describeCapabilityFilterExhaustion,
-  filterTargetsByRequestCompatibility,
+  resolveTargetRequestCompatibility,
   resolveComboTargets,
   resolveWeightedStepGroups,
   resolveWeightedTargets,
@@ -715,26 +715,19 @@ async function applyContinuityFilters(
   // #8488 / #8494: fail closed when hard capability filters empty the pool.
   // Opt-in escape hatch: combo.config.compatFilterFailOpen OR settings.compatFilterFailOpen.
   const preCompatTargets = orderedTargets;
-  const compatibleTargets = filterTargetsByRequestCompatibility(
-    orderedTargets,
-    body,
-    log,
-    undefined,
-    {
-      failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
-      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
-      sourceFormat: deps.sourceFormat,
-    }
-  );
-  orderedTargets = applyTargetFilter(orderedTargets, compatibleTargets, jevOwnsOrder);
+  const compatibility = resolveTargetRequestCompatibility(orderedTargets, body, log, undefined, {
+    failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
+    outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
+    sourceFormat: deps.sourceFormat,
+  });
+  orderedTargets = applyTargetFilter(orderedTargets, compatibility.targets, jevOwnsOrder);
   // #6238: keep the targets the compat pre-filter rejected so the dispatch loop
   // can probe them as a last-resort fallback tier when every compat-kept target
   // later turns out runtime-unavailable (mirrors the round-robin path).
-  const compatRejectedTargets = computeCompatRejectedTargets(
-    preCompatTargets,
-    orderedTargets,
-    body
-  );
+  // Automatic cap fallback is intentionally restricted to its safe subset.
+  const compatRejectedTargets = compatibility.usedAutomaticOutputCapFallback
+    ? []
+    : computeCompatRejectedTargets(preCompatTargets, orderedTargets, body);
   if (orderedTargets.length === 0 && preCompatTargets.length > 0) {
     const earlyResponse = buildCapabilityExhaustionResponse(deps, preCompatTargets);
     if (earlyResponse) return { earlyResponse };

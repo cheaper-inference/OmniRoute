@@ -23,7 +23,8 @@ const { updateSettingsSchema } = await import("../../src/shared/validation/setti
 const { getSettings, updateSettings } = await import("../../src/lib/db/settings.ts");
 const { saveModelsDevCapabilities, clearModelsDevCapabilities } =
   await import("../../src/lib/modelsDevSync.ts");
-const { handleComboChat, resolveComboTargets } = await import("../../open-sse/services/combo.ts");
+const { filterTargetsByRequestCompatibility, handleComboChat, resolveComboTargets } =
+  await import("../../open-sse/services/combo.ts");
 const { partitionJevTargetsForAsk } =
   await import("../../open-sse/services/combo/jevBlockChecker.ts");
 const { resolveResilienceSettings } = await import("../../src/lib/resilience/settings.ts");
@@ -44,14 +45,19 @@ test.after(() => {
 
 const noopLog = { info() {}, warn() {}, error() {}, debug() {} };
 
-function capabilityEntry(limitOutput: number, limitContext = 128_000, toolCall = true) {
+function capabilityEntry(
+  limitOutput: number,
+  limitContext = 128_000,
+  toolCall = true,
+  vision = false
+) {
   return {
     tool_call: toolCall,
     reasoning: false,
     attachment: false,
     structured_output: true,
     temperature: true,
-    modalities_input: JSON.stringify(["text"]),
+    modalities_input: JSON.stringify(vision ? ["text", "image"] : ["text"]),
     modalities_output: JSON.stringify(["text"]),
     knowledge_cutoff: null,
     release_date: null,
@@ -90,6 +96,9 @@ function saveCeilingFixtures() {
   saveModelsDevCapabilities({
     "unit-ceiling-a": { normal: capabilityEntry(65_536, 100_000) },
     "unit-ceiling-b": { normal: capabilityEntry(65_536, 100_000) },
+    "unit-ceiling-wide": { normal: capabilityEntry(65_536, 200_000) },
+    "unit-ceiling-vision": { normal: capabilityEntry(65_536, 100_000, true, true) },
+    "unit-ceiling-vision-overflow": { normal: capabilityEntry(65_536, 65_536, true, true) },
     "unit-ceiling-full": { normal: capabilityEntry(128_000, 200_000) },
     "unit-ceiling-overflow": { normal: capabilityEntry(65_536, 65_536) },
     "unit-ceiling-no-tools": { normal: capabilityEntry(65_536, 100_000, false) },
@@ -102,7 +111,8 @@ async function runCeilingCombo(
   body: Record<string, unknown> = ceilingBody,
   settings: Record<string, unknown> = {},
   config: Record<string, unknown> = {},
-  sourceFormat = "claude"
+  sourceFormat = "claude",
+  isModelAvailable?: (model: string) => Promise<boolean>
 ) {
   const calls: Array<{ model: string; maxTokens: unknown }> = [];
   const response = await handleComboChat({
@@ -110,6 +120,7 @@ async function runCeilingCombo(
     combo: { name: `unit-ceiling-${strategy}`, strategy, models, config },
     sourceFormat,
     settings,
+    isModelAvailable,
     handleSingleModel: async (input, model) => {
       const output = enforceOutputTokenBudget(
         input,
@@ -197,23 +208,133 @@ test("Jev preflight keeps safe output-limited targets without undoing explicit s
   assert.deepEqual(strict.eligible, []);
 });
 
-test("automatic fallback does not override genuine context or tool incompatibilities", async () => {
+test("automatic fallback finds an explicit output cap in the target's provider scope", () => {
   saveCeilingFixtures();
-  for (const [models, body] of [
-    [["unit-ceiling-a/normal", "unit-ceiling-overflow/normal"], ceilingBody],
-    [
-      ["unit-ceiling-a/normal", "unit-ceiling-no-tools/normal"],
-      {
-        ...ceilingBody,
-        tools: [{ name: "noop", input_schema: { type: "object" } }],
-      },
-    ],
-  ] as const) {
-    const { response, calls } = await runCeilingCombo("priority", [...models], body);
-    assert.equal(response.status, 400);
-    assert.deepEqual(calls, []);
-  }
+  const [target] = resolveComboTargets(
+    { name: "unit-scoped", models: ["unit-ceiling-a/normal"] },
+    []
+  );
+  const scoped = { ...target, providerId: "unit-ceiling-a", modelStr: "normal" };
+  assert.equal(getExplicitModelOutputCap(scoped.modelStr), null);
+  assert.equal(
+    getExplicitModelOutputCap({ provider: scoped.providerId, model: scoped.modelStr }),
+    65_536
+  );
+  assert.deepEqual(
+    filterTargetsByRequestCompatibility([scoped], ceilingBody, noopLog, undefined, {
+      sourceFormat: "claude",
+    }),
+    [scoped]
+  );
 });
+
+test("Jev applies the effective cap only to targets admitted by compatibility", async () => {
+  saveCeilingFixtures();
+  const combo = { name: "unit-jev-mixed-window" };
+  const tight = "unit-ceiling-a/normal";
+  const wide = "unit-ceiling-wide/normal";
+  const full = "unit-ceiling-full/normal";
+  const tooSmall = "unit-ceiling-overflow/normal";
+  const deps = {
+    body: { ...ceilingBody, messages: [{ role: "user", content: "x".repeat(40_000) }] },
+    comboName: combo.name,
+    config: {},
+    sourceFormat: "claude",
+    resilienceSettings: resolveResilienceSettings({}),
+    log: noopLog,
+  };
+  const automatic = await partitionJevTargetsForAsk(
+    resolveComboTargets({ ...combo, models: [tight, wide, tooSmall] }, []),
+    deps
+  );
+  assert.deepEqual(
+    automatic.eligible.map((target) => target.modelStr),
+    [tight, wide]
+  );
+
+  const withFull = resolveComboTargets({ ...combo, models: [tight, full, tooSmall] }, []);
+  const defaultPolicy = await partitionJevTargetsForAsk(withFull, deps);
+  assert.deepEqual(
+    defaultPolicy.eligible.map((target) => target.modelStr),
+    [full]
+  );
+  const advisory = await partitionJevTargetsForAsk(withFull, {
+    ...deps,
+    settings: { outputLimitAdvisory: true },
+  });
+  assert.deepEqual(
+    advisory.eligible.map((target) => target.modelStr),
+    [tight, full]
+  );
+  assert.ok(
+    advisory.blocked.some(
+      (block) => block.target.modelStr === tooSmall && block.reason === "context_window"
+    )
+  );
+});
+
+const withTools = {
+  ...ceilingBody,
+  tools: [{ name: "noop", input_schema: { type: "object" } }],
+};
+const withVision = {
+  ...ceilingBody,
+  messages: [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: "hello" },
+        { type: "image", source: { type: "base64", media_type: "image/png", data: "aGVsbG8=" } },
+      ],
+    },
+  ],
+};
+
+for (const strategy of ["priority", "round-robin"] as const) {
+  test(`${strategy}: automatic fallback admits only the safely clampable mixed targets`, async () => {
+    saveCeilingFixtures();
+    for (const [good, bad, body] of [
+      ["unit-ceiling-a/normal", "unit-ceiling-overflow/normal", ceilingBody],
+      ["unit-ceiling-a/normal", "unit-ceiling-no-tools/normal", withTools],
+      ["unit-ceiling-vision/normal", "unit-ceiling-a/normal", withVision],
+    ] as const) {
+      const { response, calls } = await runCeilingCombo(strategy, [bad, good], body);
+      assert.equal(response.status, 200);
+      assert.deepEqual(calls, [{ model: good, maxTokens: 65_536 }]);
+    }
+  });
+
+  test(`${strategy}: automatic fallback cannot dispatch a mixed reject if its safe target is unavailable`, async () => {
+    saveCeilingFixtures();
+    const good = "unit-ceiling-a/normal";
+    const bad = "unit-ceiling-no-tools/normal";
+    const { response, calls } = await runCeilingCombo(
+      strategy,
+      [bad, good],
+      withTools,
+      {},
+      {},
+      "claude",
+      async (model) => model !== good
+    );
+    assert.notEqual(response.status, 200);
+    assert.deepEqual(calls, []);
+  });
+
+  test(`${strategy}: automatic fallback fails closed when no capped fit is safe`, async () => {
+    saveCeilingFixtures();
+    for (const [models, body] of [
+      [["unit-ceiling-overflow/normal", "unit-ceiling-no-tools/normal"], withTools],
+      [["unit-ceiling-vision-overflow/normal", "unit-ceiling-a/normal"], withVision],
+    ] as const) {
+      for (const config of [{}, { compatFilterFailOpen: true }]) {
+        const { response, calls } = await runCeilingCombo(strategy, [...models], body, {}, config);
+        assert.equal(response.status, 400);
+        assert.deepEqual(calls, []);
+      }
+    }
+  });
+}
 
 test("a non-Anthropic request keeps the strict output budget check", async () => {
   saveCeilingFixtures();

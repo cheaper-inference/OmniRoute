@@ -149,7 +149,7 @@ import {
   computeCompatRejectedTargets,
   deriveRequestCompatibilityRequirements,
   describeCapabilityFilterExhaustion,
-  filterTargetsByRequestCompatibility,
+  resolveTargetRequestCompatibility,
   partitionConfirmedVisionTargets,
   resolveComboTargets,
 } from "./comboStructure.ts";
@@ -272,7 +272,7 @@ export async function handleRoundRobinCombo({
     (config as { compatFilterFailOpen?: unknown }).compatFilterFailOpen === true ||
     (settings as { compatFilterFailOpen?: unknown } | null | undefined)?.compatFilterFailOpen ===
       true;
-  let filteredTargets = filterTargetsByRequestCompatibility(
+  const compatibility = resolveTargetRequestCompatibility(
     evalRankedTargets,
     body,
     log,
@@ -288,11 +288,11 @@ export async function handleRoundRobinCombo({
   // BEFORE availability is known; if every compat-kept target then turns out to be
   // runtime-unavailable, we must reconsider these before returning 503, instead of
   // permanently dropping a compat-rejected-but-healthy provider.
-  const compatRejectedTargets = computeCompatRejectedTargets(
-    evalRankedTargets,
-    filteredTargets,
-    body
-  );
+  // Automatic cap fallback is intentionally restricted to its safe subset.
+  let filteredTargets = compatibility.targets;
+  const compatRejectedTargets = compatibility.usedAutomaticOutputCapFallback
+    ? []
+    : computeCompatRejectedTargets(evalRankedTargets, filteredTargets, body);
   let modelCount = filteredTargets.length;
   if (modelCount === 0) {
     const exhaustion = describeCapabilityFilterExhaustion(
