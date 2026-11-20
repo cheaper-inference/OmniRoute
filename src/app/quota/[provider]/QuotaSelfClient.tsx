@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { selfQuotaResponseSchema, type SelfQuotaResponse } from "@/shared/schemas/selfQuota";
 import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
 
+import ExpiryBadge from "./components/ExpiryBadge";
 import KeyForm from "./components/KeyForm";
 import PoolSection from "./components/PoolSection";
 import QuotaHeader from "./components/QuotaHeader";
@@ -72,8 +73,7 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
         <QuotaHeader
           providerName={providerName}
           generatedAt={view?.generatedAt ?? null}
-          // Task 8 slot: the key expiry badge for `view?.expiresAt`.
-          expiry={null}
+          expiry={view ? <ExpiryBadge expiresAt={view.expiresAt} now={view.generatedAt} /> : null}
           refreshing={status === "loading"}
           onRefresh={view ? reload : null}
         />

@@ -209,6 +209,21 @@ describe("self-service quota page", () => {
     expect(await screen.findByText("No shared quota for Claude Code")).toBeTruthy();
   });
 
+  it("the header says when the key expires, counted from the answer's own time", async () => {
+    stubFetch({
+      [QUOTA]: () => jsonResponse(quotaView({ expiresAt: "2026-05-29T15:30:00.000Z" })),
+    });
+    renderPage();
+    enterKey(KEY);
+    const badge = await screen.findByText("Key expires in 2 days");
+    expect(badge.closest("[title]")?.getAttribute("title")).toMatch(/^Expires on /);
+    cleanup();
+
+    stubFetch({ [QUOTA]: () => jsonResponse(quotaView({ expiresAt: null })) });
+    renderPage();
+    expect(await screen.findByText("Key does not expire")).toBeTruthy();
+  });
+
   it("an accepted key stays for the tab; remember moves it to the device", async () => {
     stubFetch({ [QUOTA]: () => jsonResponse(quotaView()) });
     renderPage();
