@@ -1607,7 +1607,7 @@
       "checking": "Checking URL...",
       "ok": "URL is valid",
       "blockedPrivate": "URL is a blocked private address",
-      "invalidUrl": "Invalid URL format"
+      "invalidUrl": "Enter a valid URL that starts with https:// or http://"
     },
     "custom": {
       "endpointUrl": "Endpoint URL",

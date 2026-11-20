@@ -2,7 +2,9 @@
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
+import { webhookUrlFieldError, webhookUrlProblem } from "../../../webhookFieldValidation";
 
 export interface DiscordConfig {
   webhookUrl: string;
@@ -12,19 +14,23 @@ interface DiscordConfigFormProps {
   value: DiscordConfig;
   onChange: (v: DiscordConfig) => void;
   t: (key: string) => string;
+  /** Set by a refused Next: an untouched form is not flagged for being empty. */
+  showRequired?: boolean;
 }
 
 type UrlState = "idle" | "checking" | "ok" | "blocked" | "invalid";
 
-export function DiscordConfigForm({ value, onChange, t }: DiscordConfigFormProps) {
+export function DiscordConfigForm({ value, onChange, t, showRequired }: DiscordConfigFormProps) {
+  const tv = useTranslations("formValidation");
   const [urlState, setUrlState] = useState<UrlState>("idle");
 
   useEffect(() => {
     const url = value.webhookUrl.trim();
     const controller = new AbortController();
-    const delay = url ? 600 : 0;
+    const askServer = webhookUrlProblem(value.webhookUrl) === null;
+    const delay = askServer ? 600 : 0;
     const timer = setTimeout(async () => {
-      if (!url) {
+      if (!askServer) {
         setUrlState("idle");
         return;
       }
@@ -59,6 +65,14 @@ export function DiscordConfigForm({ value, onChange, t }: DiscordConfigFormProps
             ? t("validateUrl.invalidUrl")
             : "";
 
+  const urlError =
+    webhookUrlFieldError(value.webhookUrl, {
+      label: t("discord.webhookUrl"),
+      showRequired,
+      t,
+      tv,
+    }) ?? (urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined);
+
   return (
     <div className="space-y-4">
       <Input
@@ -66,7 +80,8 @@ export function DiscordConfigForm({ value, onChange, t }: DiscordConfigFormProps
         value={value.webhookUrl}
         onChange={(e) => onChange({ webhookUrl: e.target.value })}
         placeholder={t("discord.webhookUrlPlaceholder")}
-        error={urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined}
+        required
+        error={urlError}
         hint={
           <>
             {urlHint && (urlState === "ok" || urlState === "checking") && (

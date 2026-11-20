@@ -6,3 +6,9 @@
 
 /** `name` of POST /api/cli/tokens (Settings › Access tokens). */
 export const ACCESS_TOKEN_NAME_MAX_LENGTH = 100;
+
+/** `url` of POST/PUT /api/webhooks and POST /api/webhooks/validate-url. */
+export const WEBHOOK_URL_MAX_LENGTH = 2000;
+
+/** `secret` of POST/PUT /api/webhooks (the HMAC signing key of a custom webhook). */
+export const WEBHOOK_SECRET_MAX_LENGTH = 500;

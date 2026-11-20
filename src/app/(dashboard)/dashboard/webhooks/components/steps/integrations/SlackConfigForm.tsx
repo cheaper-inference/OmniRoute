@@ -2,7 +2,9 @@
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
+import { webhookUrlFieldError, webhookUrlProblem } from "../../../webhookFieldValidation";
 
 export interface SlackConfig {
   webhookUrl: string;
@@ -12,19 +14,23 @@ interface SlackConfigFormProps {
   value: SlackConfig;
   onChange: (v: SlackConfig) => void;
   t: (key: string) => string;
+  /** Set by a refused Next: an untouched form is not flagged for being empty. */
+  showRequired?: boolean;
 }
 
 type UrlState = "idle" | "checking" | "ok" | "blocked" | "invalid";
 
-export function SlackConfigForm({ value, onChange, t }: SlackConfigFormProps) {
+export function SlackConfigForm({ value, onChange, t, showRequired }: SlackConfigFormProps) {
+  const tv = useTranslations("formValidation");
   const [urlState, setUrlState] = useState<UrlState>("idle");
 
   useEffect(() => {
     const url = value.webhookUrl.trim();
     const controller = new AbortController();
-    const delay = url ? 600 : 0;
+    const askServer = webhookUrlProblem(value.webhookUrl) === null;
+    const delay = askServer ? 600 : 0;
     const timer = setTimeout(async () => {
-      if (!url) {
+      if (!askServer) {
         setUrlState("idle");
         return;
       }
@@ -59,6 +65,14 @@ export function SlackConfigForm({ value, onChange, t }: SlackConfigFormProps) {
             ? t("validateUrl.invalidUrl")
             : "";
 
+  const urlError =
+    webhookUrlFieldError(value.webhookUrl, {
+      label: t("slack.webhookUrl"),
+      showRequired,
+      t,
+      tv,
+    }) ?? (urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined);
+
   return (
     <div className="space-y-4">
       <Input
@@ -66,7 +80,8 @@ export function SlackConfigForm({ value, onChange, t }: SlackConfigFormProps) {
         value={value.webhookUrl}
         onChange={(e) => onChange({ webhookUrl: e.target.value })}
         placeholder={t("slack.webhookUrlPlaceholder")}
-        error={urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined}
+        required
+        error={urlError}
         hint={
           <>
             {urlHint && (urlState === "ok" || urlState === "checking") && (

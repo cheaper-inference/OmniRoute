@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
+import { WEBHOOK_SECRET_MAX_LENGTH } from "@/shared/constants/formLimits";
 import { HmacRecipeBlock } from "../../shared/HmacRecipeBlock";
+import {
+  webhookSecretTooLong,
+  webhookUrlFieldError,
+  webhookUrlProblem,
+} from "../../../webhookFieldValidation";
 
 export interface CustomConfig {
   endpointUrl: string;
@@ -14,19 +21,29 @@ interface CustomConfigFormProps {
   onChange: (v: CustomConfig) => void;
   t: (key: string) => string;
   isEditing?: boolean;
+  /** Set by a refused Next: an untouched form is not flagged for being empty. */
+  showRequired?: boolean;
 }
 
 type UrlState = "idle" | "checking" | "ok" | "blocked" | "invalid";
 
-export function CustomConfigForm({ value, onChange, t, isEditing }: CustomConfigFormProps) {
+export function CustomConfigForm({
+  value,
+  onChange,
+  t,
+  isEditing,
+  showRequired,
+}: CustomConfigFormProps) {
+  const tv = useTranslations("formValidation");
   const [urlState, setUrlState] = useState<UrlState>("idle");
 
   useEffect(() => {
     const url = value.endpointUrl.trim();
     const controller = new AbortController();
-    const delay = url ? 600 : 0;
+    const askServer = webhookUrlProblem(value.endpointUrl) === null;
+    const delay = askServer ? 600 : 0;
     const timer = setTimeout(async () => {
-      if (!url) {
+      if (!askServer) {
         setUrlState("idle");
         return;
       }
@@ -61,6 +78,25 @@ export function CustomConfigForm({ value, onChange, t, isEditing }: CustomConfig
             ? t("validateUrl.invalidUrl")
             : "";
 
+  // Empty, over the limit or not an http(s) URL is said at once, without a round trip; the
+  // server's verdict (blocked private address) follows for a value that passes.
+  const urlError =
+    webhookUrlFieldError(value.endpointUrl, {
+      label: t("custom.endpointUrl"),
+      showRequired,
+      t,
+      tv,
+    }) ?? (urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined);
+  // Over the route's limit the key is flagged, never cut: a truncated signing key would sign
+  // payloads the receiver cannot verify.
+  const secretError = webhookSecretTooLong(value.secretKey)
+    ? tv("maxLength", {
+        field: t("custom.secretKey"),
+        max: WEBHOOK_SECRET_MAX_LENGTH,
+        count: value.secretKey.trim().length,
+      })
+    : undefined;
+
   return (
     <div className="space-y-4">
       <Input
@@ -68,7 +104,8 @@ export function CustomConfigForm({ value, onChange, t, isEditing }: CustomConfig
         value={value.endpointUrl}
         onChange={(e) => onChange({ ...value, endpointUrl: e.target.value })}
         placeholder={t("custom.endpointUrlPlaceholder")}
-        error={urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined}
+        required
+        error={urlError}
         hint={
           <>
             {urlHint && (urlState === "ok" || urlState === "checking") && (
@@ -84,6 +121,7 @@ export function CustomConfigForm({ value, onChange, t, isEditing }: CustomConfig
         onChange={(e) => onChange({ ...value, secretKey: e.target.value })}
         placeholder={isEditing ? t("secretEditPlaceholder") : t("custom.secretKeyPlaceholder")}
         autoComplete="new-password"
+        error={secretError}
         hint={t("custom.secretKeyHint")}
       />
       <HmacRecipeBlock
