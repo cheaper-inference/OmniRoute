@@ -31,6 +31,8 @@
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { stripSensitiveResponseHeaders } from "@omniroute/open-sse/utils/upstreamResponseHeaders";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
+import { wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
+import * as log from "@/sse/utils/logger";
 import { getRelayTokenByHash, checkRateLimit, recordRelayUsage } from "@/lib/db/relayProxies";
 import {
   buildErrorBody,
@@ -157,6 +159,25 @@ export async function POST(request: Request) {
         status: 401,
         headers: JSON_CORS_HEADERS,
       });
+    }
+
+    if (wouldRefuseAgent({ headers: request.headers, log })) {
+      // The TS path decides on the provider the request resolves to.
+      return new Response(
+        JSON.stringify(
+          buildErrorBody(
+            503,
+            "This request is served by the TS path. Use /api/v1/relay/chat/completions."
+          )
+        ),
+        {
+          status: 503,
+          headers: {
+            ...JSON_CORS_HEADERS,
+            "X-Bifrost-Fallback": "/api/v1/relay/chat/completions",
+          },
+        }
+      );
     }
 
     // 2a. Per-(token,IP) gate — mirrors the TypeScript relay fallback so the

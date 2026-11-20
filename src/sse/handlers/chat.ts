@@ -115,6 +115,11 @@ import { resolveInternalUpstreamStartTimeoutMs } from "../services/internalUpstr
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { resolvePreferredConnectionUpstreamStartTimeoutMs } from "../services/preferredConnectionFailover";
 import { evaluateComboTargetPreflight } from "./chat/comboTargetKeyPolicy.ts";
+import {
+  agentGuardFusionJudgeRefusal,
+  agentGuardRefusal,
+  settleAgentGuardCombo,
+} from "./chat/agentGuardGate.ts";
 import * as resolvedPolicy from "./chat/resolvedModelPolicy.ts";
 import { recordGateRejection, recordQuotaParkedSkip } from "./quotaParkedSkipUsage";
 import { getCombos } from "@/lib/db/combos";
@@ -1127,6 +1132,16 @@ async function handleChatImplementation(
     ]);
     if (managedLease && isManagedComboUnsupported(combo, settings, allCombos))
       return managedComboRejection();
+    // A configured fusion judge the agent guard refuses fails before the panel fans out.
+    const judgeRefusal = agentGuardFusionJudgeRefusal({
+      request,
+      combo,
+      settings,
+      apiKeyInfo,
+      sourceFormat,
+      trustedLiveTest: isComboLiveTest,
+    });
+    if (judgeRefusal) return judgeRefusal;
     log.info(
       "CHAT",
       `Combo "${modelStr}" [${combo.strategy || "priority"}] with ${combo.models.length} models`
@@ -1177,7 +1192,12 @@ async function handleChatImplementation(
         throw error;
       }
       if (modelInfo?.errorType === "model_not_found") return "model_not_in_catalog";
-      const provider = comboCheckProvider(modelString, modelInfo, target?.providerId);
+      const provider = comboCheckProvider(
+        modelString,
+        modelInfo,
+        comboTargetCredentialProviderId(target)
+      );
+      if (agentGuardRefusal({ request, provider, modelStr: modelString, apiKeyInfo })) return false;
       const resolvedModel = modelInfo.model || modelString;
       const githubGate = await ghComboGate(comboPreselectedCredentials, provider, resolvedModel);
       if (githubGate !== null) return githubGate;
@@ -1247,7 +1267,7 @@ async function handleChatImplementation(
       await resolveComboContextOverflowDeferral(log, apiKeyInfo);
     // Accounts this combo request's per-target timeout abandoned; later targets prefer others.
     const comboStalledConnections: ComboStalledConnections = new Map();
-    const response = await (handleComboChat as any)({
+    let response = await (handleComboChat as any)({
       body,
       combo,
       deferContextOverflowWhenCompressible,
@@ -1419,6 +1439,9 @@ async function handleChatImplementation(
       }
     }
     // ─────────────────────────────────────────────────────────────────────────
+
+    // A combo whose every guarded target the agent guard refused answers the policy error.
+    response = settleAgentGuardCombo(request, response, sourceFormat, combo);
 
     // Record telemetry
     recordTelemetry(telemetry);
@@ -1646,7 +1669,16 @@ async function handleSingleModelChat(
     // A combo target redirected here keeps sharing its outer combo request's record.
     const sNetStalledConnections: ComboStalledConnections =
       runtimeOptions.comboStalledConnections ?? new Map();
-    return handleComboChat({
+    // Same judge pre-check as the main combo path; this combo runs with `settings: {}`.
+    const sNetJudgeRefusal = agentGuardFusionJudgeRefusal({
+      request,
+      combo: redirectCombo,
+      settings: {},
+      apiKeyInfo,
+      sourceFormat: sNetSourceFormat,
+    });
+    if (sNetJudgeRefusal) return sNetJudgeRefusal;
+    const sNetResponse = await handleComboChat({
       body,
       combo: redirectCombo,
       deferContextOverflowWhenCompressible: sNetDefer,
@@ -1710,6 +1742,7 @@ async function handleSingleModelChat(
         signal: clientRawRequest?.signal ?? request?.signal ?? null,
       }),
     });
+    return settleAgentGuardCombo(request, sNetResponse, sNetSourceFormat, redirectCombo);
   }
 
   const {
@@ -1741,6 +1774,17 @@ async function handleSingleModelChat(
   const modelPolicyRejection = await resolvedModelGate([`${provider}/${model}`]);
   if (modelPolicyRejection) return modelPolicyRejection;
   const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
+  // Agent guard (block mode), on the provider this target resolved to: after the key's own
+  // model policy, before any breaker, cooldown or credential is touched.
+  const agentRefusal = agentGuardRefusal({
+    request,
+    provider,
+    modelStr,
+    apiKeyInfo,
+    sourceFormat,
+    trustedLiveTest: forceLiveComboTest,
+  });
+  if (agentRefusal) return agentRefusal;
   // #14780: a probe must not leave a conversation on a signed-in account. Decided here,
   // once the target's provider is final, so every probe path and combo target is covered.
   const probeRefusal = runtimeOptions.automatedProbe
