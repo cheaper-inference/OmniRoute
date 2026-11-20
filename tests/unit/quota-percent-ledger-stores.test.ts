@@ -29,7 +29,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const { SqliteQuotaStore } = await import("../../src/lib/quota/sqliteQuotaStore.ts");
 const { RedisQuotaStore } = await import("../../src/lib/quota/redisQuotaStore.ts");
-const { observeLedger } = await import("../../src/lib/quota/percentLedger.ts");
+const { observeLedger, isLedgerCurrentWithoutReading } =
+  await import("../../src/lib/quota/percentLedger.ts");
 
 test.after(() => {
   core.resetDbInstance();
@@ -495,6 +496,51 @@ test("both stores end every generated sequence with the same book and a valid in
     assert.deepEqual(await redis.ledgerRead(key), await sqlite.ledgerRead(key), `seed ${seed}`);
   }
 });
+
+test("without a reading, a book counts as current only until its reset time or for 15 minutes", () => {
+  const book = (resetAt: number | null): LedgerState => ({
+    rev: 1,
+    last: 0.4,
+    external: 0.1,
+    resetAt,
+    readAt: T0,
+    updatedAt: T0,
+    keys: { a: { attributed: 0.3, seenTokens: 30_000 } },
+  });
+  const R = T0 + H;
+  // A known reset time decides alone: current strictly before it, whatever the reading's age.
+  assert.equal(isLedgerCurrentWithoutReading(book(R), R - 1), true);
+  assert.equal(isLedgerCurrentWithoutReading(book(R), R), false);
+  assert.equal(isLedgerCurrentWithoutReading(book(R), R + 3 * H), false);
+  assert.equal(isLedgerCurrentWithoutReading(book(T0 + MIN), T0 + 2 * MIN), false);
+  // No reset time: current for 15 minutes after the last applied reading, inclusive.
+  assert.equal(isLedgerCurrentWithoutReading(book(null), T0 + 15 * MIN), true);
+  assert.equal(isLedgerCurrentWithoutReading(book(null), T0 + 15 * MIN + 1), false);
+  // An unusable time is never current.
+  assert.equal(isLedgerCurrentWithoutReading(book(Number.NaN), T0), false);
+  assert.equal(isLedgerCurrentWithoutReading({ ...book(null), readAt: Number.NaN }, T0), false);
+});
+
+for (const [name, make] of STORES) {
+  test(`${name}: without a reading, a book that may belong to a past window is not returned`, async () => {
+    const store = make();
+    const timed = keyOf(`p-current-timed-${name}`);
+    const untimed = keyOf(`p-current-untimed-${name}`);
+    const R = T0 + H;
+    await observeLedger(store, timed, rd(0.3, 0, R), T0, 1000);
+    await obs(store, untimed, 0.3, 0);
+    const storedTimed = (await store.ledgerRead(timed)).state;
+    const storedUntimed = (await store.ledgerRead(untimed)).state;
+
+    assert.deepEqual(await observeLedger(store, timed, null, R - 1, 1000), storedTimed);
+    assert.equal(await observeLedger(store, timed, null, R, 1000), null);
+    assert.deepEqual(await observeLedger(store, untimed, null, T0 + 14 * MIN, 1000), storedUntimed);
+    assert.equal(await observeLedger(store, untimed, null, T0 + 16 * MIN, 1000), null);
+    // The stored books are left as they were.
+    assert.deepEqual((await store.ledgerRead(timed)).state, storedTimed);
+    assert.deepEqual((await store.ledgerRead(untimed)).state, storedUntimed);
+  });
+}
 
 test("a store failure never throws", async () => {
   const sqlite = new SqliteQuotaStore();

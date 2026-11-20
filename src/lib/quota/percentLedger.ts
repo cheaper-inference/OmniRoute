@@ -41,6 +41,11 @@ const RESET_JITTER_MS = 30 * 60_000;
 const DROP_CONFIRM_MS = 2 * 60_000;
 /** Without a reset time that says "same window", a drop up to this rescales. */
 const SMALL_DROP = 0.01;
+/**
+ * A book whose provider sent no reset time can still be the current window's book for this long
+ * after its last applied reading; past it, without a fresh reading, it is not charged.
+ */
+const UNTIMED_BOOK_CURRENT_MS = 15 * 60_000;
 
 type Transition = "keep" | "rise" | "rescale" | "turn";
 
@@ -252,6 +257,16 @@ export function applyReading(
   };
 }
 
+/**
+ * Whether a stored book can still be the current provider window's book when no fresh reading is
+ * available: its reset time is known and still ahead of `nowMs`, or it has no reset time and its
+ * last applied reading is at most 15 minutes old. Pure; an unusable time is never current.
+ */
+export function isLedgerCurrentWithoutReading(state: LedgerState, nowMs: number): boolean {
+  if (state.resetAt !== null) return state.resetAt > nowMs;
+  return nowMs - state.readAt <= UNTIMED_BOOK_CURRENT_MS;
+}
+
 // ---------------------------------------------------------------------------
 // Storage boundary, shared by both stores
 // ---------------------------------------------------------------------------
@@ -317,6 +332,11 @@ export function storedLedgerBook(
 
 export type LedgerStore = Pick<QuotaStore, "ledgerRead" | "ledgerCommit">;
 
+/** The stored state when it can be charged without a fresh reading, else null. */
+function currentOrNull(state: LedgerState | null, nowMs: number): LedgerState | null {
+  return state && isLedgerCurrentWithoutReading(state, nowMs) ? state : null;
+}
+
 async function readOrNull(store: LedgerStore, key: LedgerKey): Promise<LedgerSnapshot | null> {
   try {
     return await store.ledgerRead(key);
@@ -348,10 +368,15 @@ async function applyAndCommit(
 /**
  * Read the book, apply the reading, store the result when it changed. Never throws.
  *
- * Returns the state after this observation; the stored state when the reading changes nothing,
- * when there is no reading, or when nothing could be written; null when there is no book or the
- * first read fails. A commit lost to another writer gets one more round on a fresh read; when that
- * one is lost too, the state of the second read is returned.
+ * Returns the state after this observation; the stored state when the reading changes nothing
+ * or when nothing could be written; null when there is no book or the first read fails. A commit
+ * lost to another writer gets one more round on a fresh read; when that one is lost too, the state
+ * of the second read is returned.
+ *
+ * Without a reading, the stored state is returned only while it can still be the current window's
+ * book (isLedgerCurrentWithoutReading); otherwise null, so a book that may belong to a provider
+ * window that already ended is never charged. The stored state is left as it is either way: the
+ * next reading turns or updates it through the transition.
  */
 export async function observeLedger(
   store: LedgerStore,
@@ -362,7 +387,8 @@ export async function observeLedger(
 ): Promise<LedgerState | null> {
   try {
     const first = await readOrNull(store, key);
-    if (!first || !reading) return first?.state ?? null;
+    if (!first) return null;
+    if (!reading) return currentOrNull(first.state, nowMs);
     const round = await applyAndCommit(store, key, first, reading, nowMs, minTokensPerPct);
     if (!round.lost) return round.state;
     const second = await readOrNull(store, key);

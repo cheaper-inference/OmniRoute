@@ -126,6 +126,24 @@ const near = (a: number | undefined, b: number) =>
 const K4 = ["k1", "k2", "k3", "k4"];
 const KEYS5 = ["k1", "k2", "k3", "k4", "k5"];
 const MIN = 60_000;
+const H = 60 * MIN;
+
+/** The stored book of this connection's pool (SQLite store). */
+async function storedBook(conn: string) {
+  const entry = pools.get(conn);
+  assert.ok(entry, `pool of ${conn}`);
+  const key = { poolId: entry.pool.id, connectionId: conn, window: entry.window };
+  return (await new SqliteQuotaStore().ledgerRead(key)).state;
+}
+
+/** Usage read fails and the request headers say the account is 90% used. */
+function failUsageWithHeaders(conn: string) {
+  failUsage();
+  sat.storeRateLimitHeaders(conn, "anthropic", {
+    "anthropic-ratelimit-requests-limit": "100",
+    "anthropic-ratelimit-requests-remaining": "10",
+  });
+}
 
 await test("quota-percent-external-usage", async (t) => {
   await t.test("usage already on the bar when the book opens is nobody's", async () => {
@@ -302,6 +320,102 @@ await test("quota-percent-external-usage", async (t) => {
         near(att.internalByKey.k1, 0);
         near(att.external, 70);
       } finally {
+        mock.timers.reset();
+      }
+    }
+  );
+
+  await t.test(
+    "without a reading, a percent cap stops counting once the book's reset time has passed",
+    async () => {
+      mock.timers.enable({ apis: ["Date"], now: Date.now() });
+      try {
+        const C12 = "conn-ext-12";
+        const R1 = Date.now() + H;
+        makePool(C12, "5h", [
+          { apiKeyId: "k1", weight: 50, policy: "hard", capValue: 10, capUnit: "percent" },
+          { apiKeyId: "k2", weight: 50, policy: "hard" },
+        ]);
+        mockUsage({ [C12]: { fiveHour: 0, reset: R1 } });
+        await ask(C12, "k1"); // opens the book at 0, reset at R1
+        await burn(C12, "k1", 12_000);
+        mockUsage({ [C12]: { fiveHour: 12, reset: R1 } });
+        assert.match(reason(await ask(C12, "k1")), /Absolute quota cap reached/); // 12 ≥ 10
+        const stored = await storedBook(C12);
+
+        mock.timers.setTime(R1 - 10 * MIN);
+        failUsage();
+        // Still before the reset time: the book can be the current window's.
+        assert.match(reason(await ask(C12, "k1")), /Absolute quota cap reached/);
+
+        mock.timers.setTime(R1 + 3 * H);
+        failUsage();
+        // The window the book describes is over: nothing is charged without a reading.
+        assert.equal((await ask(C12, "k1")).kind, "allow");
+        assert.deepEqual(await storedBook(C12), stored);
+      } finally {
+        mock.timers.reset();
+      }
+    }
+  );
+
+  await t.test(
+    "without a reading, a heavy key is not held to a book whose reset time has passed",
+    async () => {
+      mock.timers.enable({ apis: ["Date"], now: Date.now() });
+      try {
+        const C13 = "conn-ext-13";
+        const R1 = Date.now() + H;
+        makePool(C13, "5h", hard(K4, 25));
+        mockUsage({ [C13]: { fiveHour: 0, reset: R1 } });
+        await ask(C13, "k1"); // opens the book at 0, reset at R1
+        await burn(C13, "k1", 40_000);
+        mockUsage({ [C13]: { fiveHour: 60, reset: R1 } });
+        assert.equal((await ask(C13, "k1")).kind, "block"); // 40 + 5 ≥ 25
+        const stored = await storedBook(C13);
+
+        mock.timers.setTime(R1 - 10 * MIN);
+        failUsageWithHeaders(C13); // saturation 90% from the request headers
+        assert.match(reason(await ask(C13, "k1")), /Quota share limit reached/);
+        assert.equal((await ask(C13, "k2")).kind, "allow"); // 5
+
+        mock.timers.setTime(R1 + 3 * H);
+        failUsageWithHeaders(C13);
+        assert.equal((await ask(C13, "k1")).kind, "allow");
+        assert.equal((await ask(C13, "k2")).kind, "allow");
+        assert.deepEqual(await storedBook(C13), stored);
+      } finally {
+        sat._clearRateLimitHeaders();
+        mock.timers.reset();
+      }
+    }
+  );
+
+  await t.test(
+    "without a reading, a book without a reset time is used for 15 minutes after its last reading",
+    async () => {
+      mock.timers.enable({ apis: ["Date"], now: Date.now() });
+      try {
+        const C14 = "conn-ext-14";
+        const t0 = Date.now();
+        makePool(C14, "5h", hard(K4, 25));
+        mockUsage({ [C14]: { fiveHour: 0 } });
+        await ask(C14, "k1"); // opens the book at 0, no reset time
+        await burn(C14, "k1", 40_000);
+        mockUsage({ [C14]: { fiveHour: 60 } });
+        assert.equal((await ask(C14, "k1")).kind, "block"); // last reading at t0
+        const stored = await storedBook(C14);
+
+        mock.timers.setTime(t0 + 14 * MIN);
+        failUsageWithHeaders(C14);
+        assert.equal((await ask(C14, "k1")).kind, "block");
+
+        mock.timers.setTime(t0 + 16 * MIN);
+        failUsageWithHeaders(C14);
+        assert.equal((await ask(C14, "k1")).kind, "allow");
+        assert.deepEqual(await storedBook(C14), stored);
+      } finally {
+        sat._clearRateLimitHeaders();
         mock.timers.reset();
       }
     }
