@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Riferimento API
+## API Riferimento
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Funzione factory che crea un oggetto Plugin con valori predefiniti.
+Funzione di fabbrica che crea un oggetto Plugin con valori predefiniti.
 
-**Parametri:**
+**parametri:**
 
-- `name` (string, obbligatorio) — Nome del plugin in kebab-case
-- `priority` (number, facoltativo, valore predefinito: 100) — I valori più bassi vengono eseguiti per primi
-- `enabled` (boolean, facoltativo, valore predefinito: true) — Deve essere inizialmente abilitato?
-- `onRequest` (function, facoltativo) — Viene eseguita prima del gestore della chat
-- `onResponse` (function, facoltativo) — Viene eseguita dopo il gestore della chat
-- `onError` (function, facoltativo) — Viene eseguita in caso di errore del gestore
+- `name` (stringa, richiesto) — Nome del plugin in kebab-case
+- `priority` (numero, opzionale, predefinito: 100) — Il comando inferiore viene eseguito per primo
+- `enabled` (booleano, opzionale, predefinito: true) — Avvio abilitato?
+- `onRequest` (funzione, opzionale) — Viene eseguito prima del gestore della chat
+- `onResponse` (funzione, opzionale) — Viene eseguito dopo il gestore della chat
+- `onError` (funzione, opzionale) — Viene eseguito in caso di errore del gestore
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blocca la richiesta e, facoltativamente, restituisce una risposta personalizzata.
+Blocca la richiesta e facoltativamente restituisce una risposta personalizzata.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Modifica il corpo della richiesta prima che raggiunga il provider.
+Modificare il corpo della richiesta prima che raggiunga il provider.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Associa metadati al contesto della richiesta.
+Allega metadati al contesto della richiesta.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Contesto del plugin (`PluginContext`)
 
-| Campo       | Tipo                      | Descrizione                            |
-| ----------- | ------------------------- | -------------------------------------- |
-| `requestId` | `string`                  | Identificatore univoco della richiesta |
-| `model`     | `string`                  | Nome del modello richiesto             |
-| `provider`  | `string`                  | ID del provider di destinazione        |
-| `body`      | `Record<string, unknown>` | Corpo della richiesta                  |
-| `headers`   | `Record<string, string>`  | Intestazioni della richiesta           |
-| `metadata`  | `Record<string, unknown>` | Metadati modificabili                  |
-| `timestamp` | `number`                  | Timestamp della richiesta              |
+| Campo        | Tipo                      | Descrizione                              |
+| ------------ | ------------------------- | ---------------------------------------- |
+| `requestId`  | `string`                  | Identificatore univoco della richiesta   |
+| `model`      | `string`                  | Nome del modello richiesto               |
+| `provider`   | `string`                  | Fornitore di destinazione ID             |
+| `body`       | `Record<string, unknown>` | Richiedi corpo                           |
+| `headers`    | `Record<string, string>`  | Intestazioni della richiesta (vedi nota) |
+| `metadata`   | `Record<string, unknown>` | Metadati mutabili                        |
+| `timestamp`  | `number`                  | Richiedi la data e l'ora                 |
+| `apiKeyInfo` | `object` (facoltativo)    | metadati chiave API (vedi nota)          |
+
+Il contesto non porta mai le credenziali del client: le intestazioni `authorization`, `x-api-key`, `proxy-authorization` e `cookie` vengono rimosse (qualsiasi maiuscolo e minuscolo) e `apiKeyInfo` conserva i metadati della chiave (come `id`, `name` e `scopes`) ma non il valore della chiave o la sua impronta digitale (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). Questo vale per `onRequest`, `onResponse` e `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Oppure come semplici valori booleani (priorità predefinita 100):
 }
 ```
 
-## Sistema di autorizzazioni
+## Sistema di autorizzazione
 
-I plugin vengono eseguiti nel contesto di una VM con sandbox. L'accesso alle risorse esterne richiede autorizzazioni esplicite:
+I plugin lo sono** non sandbox** . Ogni plugin attivo viene eseguito come un normale processo figlio Node.js separato (`loadPlugin()` in `src/lib/plugins/loader.ts`) sotto lo stesso utente del sistema operativo di OmniRoute, senza contesto VM e senza flag di autorizzazione Node.js. Il codice del plugin può utilizzare `node:fs`, `node:child_process`, `fetch` e ogni altro Node.js API: può leggere e scrivere qualsiasi file che l'utente OmniRoute può (inclusa la directory dei dati), eseguire programmi e raggiungere la rete.
 
-| Autorizzazione | Concede                                                      |
-| -------------- | ------------------------------------------------------------ |
-| `network`      | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`    | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write`   | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`          | Proxy `process.env` di sola lettura                          |
-| `exec`         | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` del manifest accetta `network`, `file-read`, `file-write`, `env` e `exec`, ma oggi solo `env` ha effetto in fase di runtime:
 
-Senza un'autorizzazione, le variabili globali corrispondenti semplicemente non sono disponibili nella sandbox.
+| Autorizzazione                               | Effetto oggi                                                                                                                                                                                                                       |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Il processo del plugin riceve anche `PORT`, `HOSTNAME`, `TZ` e `TMPDIR`. Senza di esso, riceve solo `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` e `PLUGIN_NAME` (più `SystemRoot` e `windir` su Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nessuno. Sono solo dichiarazioni: quando mancano, nulla viene bloccato.                                                                                                                                                            |
+
+Installare un plugin è come installare qualsiasi altro programma sull'host. Installa solo plugin di cui ti fidi.
 
 ## Schema di configurazione
 
@@ -194,7 +196,7 @@ I valori di configurazione vengono memorizzati nel database e sono accessibili t
 
 ## Esempi
 
-### Registratore delle richieste
+### Richiedi registratore
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Limitatore di frequenza
+### Limitatore di velocità
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuto
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Trasformatore delle risposte
+### Trasformatore di risposta
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

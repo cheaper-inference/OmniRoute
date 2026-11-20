@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Лимит должен быть положительным целым числом.",
     "error": "Ошибка: {message}",
     "serverOffline": "Сервер OmniRoute отключён. Запустите: omniroute serve",
     "authRequired": "Требуется аутентификация. Установите OMNIROUTE_API_KEY или выполните: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[симуляция] выполнит: {action}",
     "cancelled": "Отменено.",
     "jsonOpt": "Вывод в формате JSON",
-    "yesOpt": "Пропустить подтверждение"
+    "yesOpt": "Пропустить подтверждение",
+    "positiveIntegerRequired": "Лимит должен быть положительным целым числом."
   },
   "setup": {
     "title": "Настройка OmniRoute",

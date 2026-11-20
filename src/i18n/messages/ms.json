@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Simpan mesej sistem pertengahan perbualan di tempatnya",
     "requireUserLastMessageDescription": "Untuk huluan yang menolak praisi pembantu: lepaskan selekoh pembantu mengekor (tiada tool_use) sebelum menghantar. Model itu boleh menjana semula jawapan sebelumnya.",
     "requireUserLastMessageLabel": "Memerlukan perbualan untuk diakhiri dengan mesej pengguna",
+    "strictChatHistoryDescription": "Membaiki urutan panggilan alat yang terputus dan menggabungkan mesej pembantu yang berturutan sebelum dihantar kepada penyedia yang serasi dengan OpenAI dan menguatkuasakan peraturan ketat.",
+    "strictChatHistoryLabel": "Pembaikan sejarah sembang untuk penyedia yang ketat",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambah} other {# kunci ditambah}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 pendua dilangkau} other {# pendua dilangkau}}",
     "bulkPasteHint": "Tampal satu kunci API bagi setiap baris. Baris kosong akan diabaikan dan kunci pendua akan dilangkau.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Alih keluar kunci"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pemalam dijalankan dengan keistimewaan penuh",
-    "privilegesWarningBody": "Pemalam berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: ia boleh membaca fail, menjalankan program dan menggunakan rangkaian, apa sahaja kebenaran yang diisytiharkan oleh manifesnya. Pasang hanya pemalam yang anda percayai.",
     "title": "Pemalam",
     "description": "Pasang dan urus pemalam untuk memperluas fungsi OmniRoute",
     "loading": "Memuatkan pemalam...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Imbas Pemalam",
     "noPlugins": "Tiada pemalam dipasang",
     "noPluginsDescription": "Letakkan direktori pemalam dalam ~/.omniroute/plugins/ dan klik Imbas.",
+    "privilegesWarningTitle": "Pemalam dijalankan dengan keistimewaan penuh",
+    "privilegesWarningBody": "Pemalam berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: ia boleh membaca fail, menjalankan program dan menggunakan rangkaian, apa sahaja kebenaran yang diisytiharkan oleh manifesnya. Pasang hanya pemalam yang anda percayai.",
     "activate": "Aktifkan",
     "deactivate": "Nyahaktifkan",
     "uninstall": "Nyahpasang",

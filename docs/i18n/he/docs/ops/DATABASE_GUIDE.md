@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **מילוי חוזר של נתונים בזהירות** : השתמש `UPDATE ... WHERE ...` כדי לטפל בשורות קיימות
 4. **בדוק סדר ושם** : `npm run test:migrations:fresh` (כל ההגירות במסד נתונים ריק) ו- `npm run check:migration-numbering`
 5. **מבחן על עותק** : לעולם אל תפעיל העברות לא בדוקות בייצור
+6. **טבלה שנוצרה מקוד זקוקה גם להעברה** : אם מודול גם יוצר את הטבלה בעצלתיים (`CREATE TABLE IF NOT EXISTS`, שמור כנתיב לריפוי עצמי), הגירה חייבת ליצור אותו עם אותו DDL. אחרת התקנה נקייה והתקנה משודרגת יסתיימו עם סכמות שונות, תלוי אם נתיב הקוד הזה רץ. `tests/unit/db/lazy-table-migration-guard.test.ts` סורק `src/` ו- `open-sse/` ונכשל ב- `CREATE` עצלן ללא הגירה (#20557). דוגמה: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 דוּגמָה:
 

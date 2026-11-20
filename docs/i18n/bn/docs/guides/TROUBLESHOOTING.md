@@ -462,7 +462,7 @@ v3.8.0-এর _আগে_ ইমপোর্ট করা সংযোগগু�
 2. **স্থায়ী সমাধান:** আপনার `docker run` কমান্ডে `-p 127.0.0.1:20128:20128` ব্যবহার করে স্পষ্টভাবে IPv4-এ বাইন্ড করুন:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    এটি IPv4 বাইন্ড বাধ্যতামূলক করে এবং হোস্টের সব ইন্টারফেসে প্রক্সি প্রকাশ করাও এড়ায়।
 
