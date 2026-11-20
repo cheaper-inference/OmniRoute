@@ -210,8 +210,8 @@ Other providers, including Claude with an API key, have no book. Each key is cha
 percent dimensions, as before this change.
 
 A reading shares the 30-second cache of the saturation signal. A Claude reading is dated by when
-the figure was observed in response headers or read from the usage endpoint. A Codex or Bailian
-reading is dated by when that cache entry was built.
+the figure was observed in response headers or read from the usage endpoint, when that time is
+known. Other readings are dated by when that cache entry was built.
 
 #### How a reading changes the book
 
