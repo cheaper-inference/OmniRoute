@@ -640,6 +640,17 @@ export const testComboSchema = z.object({
   comboName: z.string().trim().min(1, "comboName is required"),
 });
 
+// POST /api/combos/decision-preview - Menu descriptions and an optional test decision for an
+// unsaved `decision` auto-router combo (dashboard combo builder).
+export const decisionPreviewSchema = z
+  .object({
+    decision: decisionRoutingConfigSchema.optional(),
+    // Combo step model strings (`provider/model`); combo refs and wildcards are not sent.
+    models: z.array(z.string().trim().min(1).max(300)).max(200),
+    prompt: z.string().trim().min(1).max(8_000).optional(),
+  })
+  .strict();
+
 // POST /api/combos/duplicate - Resolve an auto-combo template (e.g. "auto/best-coding")
 // into a static, editable combo snapshot.
 export const duplicateAutoComboSchema = z.object({
