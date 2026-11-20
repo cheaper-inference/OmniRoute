@@ -176,7 +176,7 @@ test("signing: every merge commit is signed, verifies with the key, and is the u
     assert.equal(s.parents[1], u.parents[1], `second parent ${i} (the PR head)`);
     assert.equal(s.author, u.author, `author ${i}`);
     assert.equal(s.committer, u.committer, `committer ${i}`);
-    assert.match(s.committer, new RegExp(`^${BOT.name.replace(/[[\]]/g, "\\$&")} <`));
+    assert.ok(s.committer.startsWith(`${BOT.name} <`), `committer ${i} is the queue identity`);
     assert.equal(s.message, u.message, `message ${i}`);
     assert.equal(verify(git, keys, s.id, publicKey).code, 0, `verify-commit ${i}`);
     assert.notEqual(verify(git, keys, u.id, publicKey).code, 0, `unsigned ${i} does not verify`);
