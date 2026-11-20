@@ -79,6 +79,34 @@ describe("getModelPreserveVideoUrl", () => {
     }
   });
 
+  it("translateRequest keeps video_url for gemini-web, which uploads it as an attachment", async () => {
+    const { translateRequest } = await import("@omniroute/open-sse/translator/index.ts");
+    const translated = translateRequest(
+      "openai",
+      "openai",
+      "gemini-4-hydrogen",
+      {
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Describe this video" },
+              { type: "video_url", video_url: { url: "data:video/mp4;base64,AAAA" } },
+            ],
+          },
+        ],
+      },
+      false,
+      null,
+      "gemini-web"
+    ) as { messages: Array<{ content: Array<{ type: string }> }> };
+
+    deepEqual(
+      translated.messages[0].content.map((part) => part.type),
+      ["text", "video_url"]
+    );
+  });
+
   it("deepMergeCompatByProtocol accepts preserveVideoUrl under openai protocol", async () => {
     const { deepMergeCompatByProtocol } = await import("@/lib/db/models/compat");
     const result = deepMergeCompatByProtocol(

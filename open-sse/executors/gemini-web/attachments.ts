@@ -393,14 +393,15 @@ export async function writeGeminiWebAttachmentFiles(
 // same component signed in). The composer's "Upload & tools" menu button (aria-label is
 // localized, so the container class is matched first) renders hidden file inputs only while
 // the menu is open: one with accept="image/*,video/*" for media, others for documents.
-// Setting files on them starts Gemini's own resumable upload to push.clients6.google.com.
+// Setting files on them starts Gemini's own resumable upload (contribution-*.usercontent.google.com).
 const UPLOAD_MENU_SELECTOR = [
   '.simplified-input-menu-container button[aria-haspopup="menu"]',
   'button[aria-label*="upload" i]',
 ].join(", ");
 const MEDIA_INPUT_SELECTOR = 'input[type="file"][accept*="image"]';
 const DOCUMENT_INPUT_SELECTOR = 'input[type="file"]:not([accept*="image"])';
-const UPLOAD_HOST = /(?:^|\.)(?:push\.clients6\.google\.com|content-push\.googleapis\.com)$/;
+const UPLOAD_HOST =
+  /(?:^|\.)(?:push\.clients6\.google\.com|content-push\.googleapis\.com|usercontent\.google\.com)$/;
 
 interface UploadResponse {
   url(): string;

@@ -371,7 +371,9 @@ export function parseStreamResponse(raw: string): string {
       // Skip unparseable lines
     }
   }
-  return lastText;
+  // Gemini marks text grounded in attachments with "[cite_start]" / "[cite: 1, 2]"; the web UI
+  // renders them as chips, a raw API answer should not carry them.
+  return lastText.replace(/ ?\[cite(?:_start|_end|: ?[\d, ]+)\]/g, "");
 }
 
 function readCredentialString(value: unknown): string {
@@ -397,6 +399,19 @@ function readProviderSpecificString(
     if (value) return value;
   }
   return "";
+}
+
+/**
+ * Cookies a browser keeps host-only on gemini.google.com. Spread to `.google.com`, the
+ * gemini OSID reached Gemini's upload host (contribution-*.usercontent.google.com), which
+ * answered 401 and broke every attachment upload (checked live 2026-11-20).
+ */
+const GEMINI_HOST_ONLY_COOKIES = new Set(["OSID", "__Secure-OSID", "COMPASS", "__Secure-BUCKET"]);
+
+export function toGeminiBrowserCookie({ name, value }: { name: string; value: string }) {
+  return GEMINI_HOST_ONLY_COOKIES.has(name)
+    ? { name, value, url: "https://gemini.google.com" }
+    : { name, value, domain: ".google.com", path: "/", secure: true };
 }
 
 /**
@@ -682,15 +697,7 @@ export class GeminiWebExecutor extends BaseExecutor {
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
-      await context.addCookies(
-        cookiePairs.map(({ name, value }) => ({
-          name,
-          value,
-          domain: ".google.com",
-          path: "/",
-          secure: true,
-        }))
-      );
+      await context.addCookies(cookiePairs.map(toGeminiBrowserCookie));
 
       const page = await context.newPage();
 

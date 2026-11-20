@@ -380,6 +380,16 @@ test("upload: only Gemini upload hosts count as confirmations", () => {
     ),
     true
   );
+  // Live upload host as of 2026-11-20 (resumable start, then "upload, finalize").
+  const live = "https://contribution-qw.usercontent.google.com/upload?upload_schema=upload_gg";
+  assert.equal(isGeminiUploadResponse(uploadResponse(200, "upload, finalize", live)), true);
+  assert.equal(isGeminiUploadResponse(uploadResponse(200, "start", live)), false);
+  assert.equal(
+    isGeminiUploadResponse(
+      uploadResponse(200, "upload", "https://usercontent.google.com.evil.example/upload")
+    ),
+    false
+  );
   assert.equal(isGeminiUploadResponse(uploadResponse(200, "start")), false);
   assert.equal(
     isGeminiUploadResponse(uploadResponse(200, "upload", "https://evil.example/upload/")),
