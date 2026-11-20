@@ -10,7 +10,9 @@
 
 const JSON_NUMBER_RE = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
 const NUMERIC_LIKE_RE = /^[+-]\.?\d|^\.\d|^0\d/;
-const INLINE_ARRAY_RE = /\[[^\]]*\]\s*:/;
+// `[` excluded from the bracket body keeps the scan linear on runs of `[` (CodeQL #1301).
+// Same verdict for .test(): any match can restart at the last `[` before its `]`.
+const INLINE_ARRAY_RE = /\[[^[\]]*\]\s*:/;
 
 /** Check if a string value must be quoted per Section 2.4. */
 export function needsQuote(s: string): boolean {

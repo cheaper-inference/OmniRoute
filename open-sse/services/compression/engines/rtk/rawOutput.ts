@@ -106,7 +106,10 @@ export function maybePersistRtkRawOutput(
   const maxBytes = Math.max(1024, Math.floor(options.maxBytes ?? 1_048_576));
   const redaction = redactRtkRawOutput(safeUtf8Slice(raw, maxBytes));
   const now = Date.now();
+  // Bound the client-supplied command before the regex passes (CodeQL #1302): the slug
+  // keeps at most 48 chars, so 256 raw chars leave the result unchanged for real commands.
   const commandSlug = (options.command || "tool-output")
+    .slice(0, 256)
     .replace(/[^A-Za-z0-9_-]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .slice(0, 48);
