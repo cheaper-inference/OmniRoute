@@ -15,6 +15,11 @@
  * are asked for only when the pool's `accountVisible` is true, only for the pool's own non-empty
  * connection ids, and never with an empty list (which would mean every active connection).
  *
+ * `blocks` (selfViewBlocks.ts) lists the schedule windows and per-model caps the key is under,
+ * each naming its pool only by `ref`. `availableModels` is the list of `qtSd/` model ids the key
+ * would see in /v1/models (listQuotaKeyModels; a failed lookup is an empty list) and `expiresAt`
+ * is the key's own expiry, passed in by the caller.
+ *
  * A failed quota-store read is reported as `status: "unavailable"` with `consumed`/`remaining`
  * null, never as zero. Database reads of allocations and pools are not caught: a failure there
  * propagates to the caller instead of being reported as "no pools". The connection-provider and
@@ -44,6 +49,7 @@ import type { PoolAllocation, QuotaPool } from "@/lib/db/quotaPools";
 import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
+import { buildSelfViewBlocks } from "./selfViewBlocks";
 import type {
   AccountQuotaEntryLike,
   QuotaSelfViewDeps,
@@ -66,6 +72,9 @@ type CoreDeps = Required<
     | "resolvePlan"
     | "getQuotaStore"
     | "resolveAccountQuotaEntries"
+    | "listEnabledSchedules"
+    | "listModelCapsForApiKey"
+    | "listQuotaKeyModels"
   >
 > & { secret: string };
 
@@ -125,6 +134,25 @@ const DEFAULT_DEPS_LOADERS: Array<{
             quotaRefreshTracker: defaultQuotaRefreshTracker,
           }),
       };
+    },
+  },
+  {
+    keys: ["listEnabledSchedules"],
+    load: async () => ({
+      listEnabledSchedules: (await import("@/lib/db/quotaSchedules")).listEnabledSchedules,
+    }),
+  },
+  {
+    keys: ["listModelCapsForApiKey"],
+    load: async () => ({
+      listModelCapsForApiKey: (await import("@/lib/db/quotaModelCaps")).listModelCapsForApiKey,
+    }),
+  },
+  {
+    keys: ["listQuotaKeyModels"],
+    load: async () => {
+      const { listQuotaKeyModels } = await import("./quotaKeyModels");
+      return { listQuotaKeyModels: (allowedQuotas) => listQuotaKeyModels(allowedQuotas) };
     },
   },
 ];
@@ -344,6 +372,22 @@ async function buildPoolView(
   };
 }
 
+/** The key's `qtSd/` model ids; a failed lookup is an empty list and a server-side warning. */
+async function resolveAvailableModels(
+  input: QuotaSelfViewInput,
+  deps: CoreDeps
+): Promise<string[]> {
+  try {
+    return await deps.listQuotaKeyModels(input.allowedQuotas);
+  } catch (err) {
+    log.warn(
+      { err: (err as Error)?.message },
+      "self-service quota view: available models lookup failed"
+    );
+    return [];
+  }
+}
+
 /**
  * Build the self-service quota view of `input.apiKeyId` for `input.provider`.
  * Throws `missing_self_usage_scope` when the key lacks self:usage and `missing_pool_ref_secret`
@@ -367,9 +411,9 @@ export async function buildQuotaSelfView(
     provider: input.provider,
     generatedAt: new Date(deps.now()).toISOString(),
     pools,
-    availableModels: [],
+    availableModels: await resolveAvailableModels(input, deps),
     expiresAt: input.expiresAt,
     apiBaseUrl: null,
-    blocks: { schedules: [], modelCaps: [] },
+    blocks: await buildSelfViewBlocks(input.apiKeyId, contexts, deps),
   });
 }

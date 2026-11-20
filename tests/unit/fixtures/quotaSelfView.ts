@@ -110,6 +110,10 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
     getQuotaStore: async () => store,
     // No account data by default, so no test reaches the real provider-limits modules.
     resolveAccountQuotaEntries: async () => [],
+    // No schedules, caps or models by default, so no test opens the database through them.
+    listEnabledSchedules: () => [],
+    listModelCapsForApiKey: () => [],
+    listQuotaKeyModels: async () => [],
     ...rest,
   };
 }
