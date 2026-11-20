@@ -7,9 +7,8 @@ import assert from "node:assert/strict";
 // under the RSC prefetch storm, or a stalled connection) left `loading` true
 // forever. loadProviderPageData bounds each request with an AbortSignal timeout
 // so the loader ALWAYS resolves (degrading to defaults) and the page paints.
-const { loadProviderPageData } = await import(
-  "@/app/(dashboard)/dashboard/providers/providerPageUtils"
-);
+const { loadProviderPageData, loadOpenRouterProviderStats } =
+  await import("@/app/(dashboard)/dashboard/providers/providerPageUtils");
 
 // A fetch mock that honors AbortSignal the way the real fetch does: it never
 // resolves on its own, but rejects with an AbortError once the signal fires.
@@ -22,11 +21,9 @@ function hangingFetch(): typeof fetch {
           reject(new DOMException("Aborted", "AbortError"));
           return;
         }
-        signal.addEventListener(
-          "abort",
-          () => reject(new DOMException("Aborted", "AbortError")),
-          { once: true }
-        );
+        signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), {
+          once: true,
+        });
       }
     })) as unknown as typeof fetch;
 }
@@ -78,9 +75,54 @@ describe("loadProviderPageData — never freezes the dashboard skeleton", () => 
   });
 
   test("a rejecting fetch degrades to defaults instead of throwing", async () => {
-    const rejectFetch = (() => Promise.reject(new Error("network down"))) as unknown as typeof fetch;
+    const rejectFetch = (() =>
+      Promise.reject(new Error("network down"))) as unknown as typeof fetch;
     const data = await loadProviderPageData(rejectFetch, 1000);
     assert.deepEqual(data.connections, []);
     assert.equal(data.settings, null);
+  });
+});
+
+// KEA-9368 (slow first-load skeleton on Providers): /api/providers/openrouter-stats
+// answers from a 24h disk cache, but on a cold or unwritable cache the route calls
+// three openrouter.ai endpoints (15s timeout each) before it responds. It only feeds
+// the popularity chip on each card, so it must not be part of the first-paint gate.
+describe("loadProviderPageData — first paint does not wait for OpenRouter enrichment", () => {
+  const STATS_URL = "/api/providers/openrouter-stats";
+
+  /** Every endpoint answers at once except the stats one, which never settles on its own. */
+  function slowStatsFetch(calls: string[]): typeof fetch {
+    const fast = jsonFetch({ "/api/providers": { connections: [{ id: "c1" }] } });
+    const hanging = hangingFetch();
+    return ((url: string | URL, init?: RequestInit) => {
+      calls.push(String(url));
+      return String(url) === STATS_URL ? hanging(url, init) : fast(url, init);
+    }) as unknown as typeof fetch;
+  }
+
+  test("resolves as soon as the essential requests do, without requesting the stats", async () => {
+    const calls: string[] = [];
+    const start = Date.now();
+    const data = await loadProviderPageData(slowStatsFetch(calls), 5000);
+    const elapsed = Date.now() - start;
+
+    assert.deepEqual(data.connections, [{ id: "c1" }]);
+    assert.ok(!calls.includes(STATS_URL), "the first-paint loader must not request the stats");
+    // Waiting for the stats would take the full 5000ms timeout.
+    assert.ok(elapsed < 4000, `first paint waited ${elapsed}ms for a non-essential request`);
+  });
+
+  test("loadOpenRouterProviderStats returns the entries the route lists", async () => {
+    const entries = [{ slug: "openai", displayName: "OpenAI", popularityRank: 1 }];
+    const data = await loadOpenRouterProviderStats(jsonFetch({ [STATS_URL]: { data: entries } }));
+    assert.deepEqual(data, entries);
+  });
+
+  test("loadOpenRouterProviderStats degrades to an empty list, never throws or hangs", async () => {
+    assert.deepEqual(await loadOpenRouterProviderStats(hangingFetch(), 50), []);
+    const rejectFetch = (() =>
+      Promise.reject(new Error("network down"))) as unknown as typeof fetch;
+    assert.deepEqual(await loadOpenRouterProviderStats(rejectFetch, 1000), []);
+    assert.deepEqual(await loadOpenRouterProviderStats(jsonFetch({ [STATS_URL]: {} }), 1000), []);
   });
 });

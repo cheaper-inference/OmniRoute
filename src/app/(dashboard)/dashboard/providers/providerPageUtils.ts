@@ -680,8 +680,6 @@ export interface ProviderPageData {
   expirations: any | null;
   blockedProviders: string[] | null;
   settings: any | null;
-  /** OpenRouter-sourced popularity/identity enrichment, keyed by provider slug. Empty if the sync hasn't run yet or the fetch failed. */
-  openRouterProviderStats: OpenRouterProviderStatsEntry[];
 }
 
 /** Mirrors ProviderPopularityEntry from src/lib/catalog/openrouterProviderStats.ts (kept local to avoid a server-only import from a client component). */
@@ -709,6 +707,23 @@ export interface OpenRouterProviderStatsEntry {
 // still guaranteeing the skeleton clears in bounded time.
 const PROVIDER_PAGE_FETCH_TIMEOUT_MS = 20_000;
 
+/** One time-bounded JSON read; an HTTP error, timeout, abort or network error is `null`. */
+async function fetchProviderPageJson(
+  url: string,
+  fetchImpl: typeof fetch,
+  timeoutMs: number,
+  init?: RequestInit
+): Promise<any | null> {
+  try {
+    const res = await fetchWithTimeout(url, { ...init, timeoutMs, fetchFn: fetchImpl });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    // Timeout/abort/network error → degrade to the default; never hang.
+    return null;
+  }
+}
+
 /**
  * Load the four data sources the providers dashboard renders from, each bounded
  * by an AbortSignal timeout and independently degrading to a default.
@@ -728,25 +743,16 @@ export async function loadProviderPageData(
   fetchImpl: typeof fetch = globalThis.fetch as typeof fetch,
   timeoutMs: number = PROVIDER_PAGE_FETCH_TIMEOUT_MS
 ): Promise<ProviderPageData> {
-  const safeJson = async (url: string, init?: RequestInit): Promise<any | null> => {
-    try {
-      const res = await fetchWithTimeout(url, { ...init, timeoutMs, fetchFn: fetchImpl });
-      if (!res.ok) return null;
-      return await res.json();
-    } catch {
-      // Timeout/abort/network error → degrade to the default; never hang.
-      return null;
-    }
-  };
+  const safeJson = (url: string, init?: RequestInit) =>
+    fetchProviderPageJson(url, fetchImpl, timeoutMs, init);
 
-  const [connectionsData, nodesData, expirationsData, settingsData, openRouterStatsData] =
-    await Promise.all([
-      safeJson("/api/providers"),
-      safeJson("/api/provider-nodes"),
-      safeJson("/api/providers/expiration"),
-      safeJson("/api/settings", { cache: "no-store" }),
-      safeJson("/api/providers/openrouter-stats"),
-    ]);
+  // The OpenRouter enrichment is deliberately NOT in this gate: see loadOpenRouterProviderStats.
+  const [connectionsData, nodesData, expirationsData, settingsData] = await Promise.all([
+    safeJson("/api/providers"),
+    safeJson("/api/provider-nodes"),
+    safeJson("/api/providers/expiration"),
+    safeJson("/api/settings", { cache: "no-store" }),
+  ]);
 
   return {
     connections: Array.isArray(connectionsData?.connections) ? connectionsData.connections : [],
@@ -757,8 +763,26 @@ export async function loadProviderPageData(
       ? settingsData.blockedProviders
       : null,
     settings: settingsData ?? null,
-    openRouterProviderStats: Array.isArray(openRouterStatsData?.data)
-      ? openRouterStatsData.data
-      : [],
   };
+}
+
+/**
+ * OpenRouter-sourced popularity/identity enrichment for the provider cards (the usage-rank
+ * chip and its tooltip). Empty if the sync has not run yet or the request failed.
+ *
+ * Loaded beside the first paint, never as part of it: the route answers from a 24h disk
+ * cache, but with a cold, expired or unwritable cache it calls three openrouter.ai endpoints
+ * (15s timeout each) before it responds, and the page used to keep its skeleton up for all of
+ * that. The cards render without the chip and gain it when this resolves.
+ */
+export async function loadOpenRouterProviderStats(
+  fetchImpl: typeof fetch = globalThis.fetch as typeof fetch,
+  timeoutMs: number = PROVIDER_PAGE_FETCH_TIMEOUT_MS
+): Promise<OpenRouterProviderStatsEntry[]> {
+  const stats = await fetchProviderPageJson(
+    "/api/providers/openrouter-stats",
+    fetchImpl,
+    timeoutMs
+  );
+  return Array.isArray(stats?.data) ? stats.data : [];
 }
