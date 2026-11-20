@@ -83,6 +83,12 @@ test("alwaysPreserveClientCache set via cache-config reaches the runtime read pa
             body: JSON.stringify({ geminiPromptCacheMode: value }),
           })
         );
+      const initial = await getSettings();
+      assert.equal(initial.geminiPromptCacheMode, "implicit");
+      const optedOut = await patch("off");
+      assert.equal(optedOut.status, 200);
+      core.resetDbInstance();
+      assert.equal((await getSettings()).geminiPromptCacheMode, "off");
       const valid = await patch("implicit");
       assert.notEqual(valid.status, 400);
       assert.equal((await getSettings()).geminiPromptCacheMode, "implicit");

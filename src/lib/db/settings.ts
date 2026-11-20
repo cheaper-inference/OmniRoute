@@ -207,7 +207,7 @@ export async function getSettings() {
     // mismatch; the upstream then applies its own ceiling.
     outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
-    geminiPromptCacheMode: "off",
+    geminiPromptCacheMode: "implicit",
     comboStrategy: "fallback",
     comboStickyRoundRobinLimit: null, // null = inherit stickyRoundRobinLimit (a literal default here shadows the documented batched-rotation default of 3 — #6678 regression caught by the v3.8.47 release CI)
     providerStrategies: {},

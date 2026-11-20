@@ -34,3 +34,46 @@ test("explicit marker modes and opt-out override built-in automatic behavior", (
     false
   );
 });
+
+test("Antigravity automatic prefix eligibility follows Gemini mode and the connection policy", () => {
+  const gemini = "gemini-4-hydrogen-high";
+  assert.equal(providerUsesAutomaticPrefixCaching("antigravity", null, gemini, "implicit"), true);
+  assert.equal(providerUsesAutomaticPrefixCaching("agy", null, gemini, "off"), false);
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "agy",
+      { supportsPromptCaching: true, cacheControlPassthrough: "strip" },
+      gemini,
+      "off"
+    ),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "antigravity",
+      { supportsPromptCaching: false },
+      gemini,
+      "implicit"
+    ),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "antigravity",
+      { cacheControlPassthrough: "claude-format" },
+      gemini,
+      "implicit"
+    ),
+    false
+  );
+  assert.equal(providerUsesAutomaticPrefixCaching("agy", null, "claude-sonnet-4-6"), false);
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "agy",
+      { supportsPromptCaching: true, cacheControlPassthrough: "strip" },
+      "claude-sonnet-4-6",
+      "implicit"
+    ),
+    true
+  );
+});

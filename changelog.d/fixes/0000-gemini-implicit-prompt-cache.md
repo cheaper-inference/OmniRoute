@@ -1,0 +1,1 @@
+- **fix(compression):** Default to implicit cache-aware protection of Antigravity Gemini system prompts and add a dashboard opt-out.
