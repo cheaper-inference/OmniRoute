@@ -3164,7 +3164,8 @@ export async function markAccountUnavailable(
       return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
     }
     if (
-      (hasPerModelFailureScope(provider, model, connectionPassthroughModels, status, errorText) ||
+      (isModelGone ||
+        hasPerModelFailureScope(provider, model, connectionPassthroughModels, status, errorText) ||
         isModelScopedClaudeQuota) &&
       provider &&
       provider !== "codex" &&

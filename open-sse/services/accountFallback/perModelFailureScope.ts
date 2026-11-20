@@ -41,6 +41,20 @@ export function isModelNotFound404(status: number | undefined, errorText: unknow
   return MODEL_NOT_FOUND_404_REGEX.test(text);
 }
 
+/**
+ * #17472 / #20686: a 410 whose model the provider retired (e.g. OpenCode family,
+ * NVIDIA) is model-scoped: the key/connection is healthy, so lock that model and
+ * leave sibling models active — never cool the entire connection for 24h.
+ */
+export function isModelGone410(status: number | undefined, provider: string | null | undefined): boolean {
+  if (status !== 410 || !provider) return false;
+  const canonicalId = resolveProviderId(provider);
+  return (
+    canonicalId === "nvidia" ||
+    (typeof canonicalId === "string" && canonicalId.toLowerCase().startsWith("opencode"))
+  );
+}
+
 /** Anthropic names a missing model without the generic "not found" wording. */
 function isAnthropicModelNotFound(
   provider: string | null | undefined,
@@ -122,7 +136,8 @@ export function hasPerModelFailureScope(
     isModelNotFound404(status, errorText) ||
     isAnthropicModelNotFound(provider, model, status, errorText) ||
     isModelUnsupported401(status, errorText) ||
-    isExplicitModelCapacityFailure(status, errorText, model)
+    isExplicitModelCapacityFailure(status, errorText, model) ||
+    isModelGone410(status, provider)
   )
     return true;
   if (status === 429) return hasPerModelQuota(provider, model, connectionPassthroughModels);
