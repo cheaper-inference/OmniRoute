@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (वैकल्पिक) इमेज हटाउनुहोस्
+docker rmi cheaperinference/omniroute:latest
+# पुरानो स्थापनाहरूले लिगेसी नाम तान्यो:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

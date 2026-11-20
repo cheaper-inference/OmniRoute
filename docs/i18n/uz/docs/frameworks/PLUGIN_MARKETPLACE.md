@@ -29,33 +29,26 @@ manbalardan kirib boʻlmaydi.
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) fayliga
 qarang.
 
-## Tizim qismlarining oʻzaro ishlashi
+## Bu Together qanday mos keladi
 
 ```
-Boshqaruv paneli (/dashboard/plugins)
-  ├─ "Oʻrnatilgan" varagʻi → GET /api/plugins            (listPlugins)
-  │                          POST /api/plugins/scan      (pluginManager.scan)
-  │                          POST /api/plugins/{name}/activate|deactivate
-  │                          DELETE /api/plugins/{name}   (oʻchirish)
-  └─ "Marketpleys" varagʻi → GET /api/plugins/marketplace
-                               → listMarketplacePlugins()
-                                 ├─ maxsus URL yoʻq → ichki SEED_REGISTRY
-                                 └─ maxsus URL → isSafeMarketplaceUrl() SSRF himoyasi
-                                               → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Reyestr qatlami** — `src/lib/plugins/marketplace.ts`: katalogni roʻyxatlaydi /
-  qidiradi va har qanday xatolikda boshlangʻich reyestrga qaytadi.
-- **Hayotiy sikl qatlami** — `src/lib/plugins/manager.ts` (`pluginManager`
-  singletoni): oʻrnatish, yangilash, faollashtirish, faolsizlantirish, oʻchirish,
-  skanerlash va ishga tushishda yuklash.
-- **Manifest qatlami** — `src/lib/plugins/manifest.ts`: `plugin.json` uchun Zod
-  sxemasi va standart qiymatlar.
-- **Skaner** — `src/lib/plugins/scanner.ts`: plagin katalogi ostidagi diskda
-  joylashgan plaginlarni aniqlaydi.
-- **Yuklagich** — `src/lib/plugins/loader.ts`: har bir plaginni izolyatsiya qilingan
-  yordamchi jarayonda ishga tushiradi va IPC orqali ilgak chaqiruvlarini
-  muvofiqlashtiradi.
+- **Ro'yxatga olish kitobi qatlami** — `src/lib/plugins/marketplace.ts`: Katalogni ro'yxatlaydi / qidiradi, har qanday nosozlik bo'lsa urug'lar reestriga qaytadi.
+- **Hayotiy tsikl qatlami** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): o'rnatish, yangilash, faollashtirish, o'chirish, o'chirish, skanerlash, ishga tushirish.
+- **Manifest qatlami** — `src/lib/plugins/manifest.ts`: Zod sxemasi `plugin.json` uchun standart +.
+- **Skaner** — `src/lib/plugins/scanner.ts`: plaginlar katalogi ostidagi diskdagi plaginlarni topadi.
+- **Yuklagich** — `src/lib/plugins/loader.ts`: har bir plaginni alohida Node.js bola jarayonida hosil qiladi va IPC orqali qo'ng'iroqlarni bog'laydi. Bola qum qutisi emas (quyida "Plugin ijrosini izolyatsiya qilish" ga qarang).
 
 ## Marketpleys katalogi
 
@@ -93,34 +86,31 @@ jurnalga yozadi va boshlangʻich roʻyxatga qaytadi.
 
 ## REST API
 
-Barcha soʻnggi nuqtalar boshqaruv autentifikatsiyasini (`requireManagementAuth`) talab qiladi **va**
-faqat loopback orqali foydalanish mumkin — `/api/plugins` hamda `/api/plugins/`
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) roʻyxatiga kiritilgan.
+Barcha so'nggi nuqtalar boshqaruv autentsiyasini talab qiladi (`requireManagementAuth`)** va** — `/api/plugins` va `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) da keltirilgan.
 
-| Soʻnggi nuqta                    | Metod  | Tavsif                                                                             |
-| -------------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Oʻrnatilgan plaginlarni roʻyxatlash (ixtiyoriy `?status=` filtri)                  |
-| `/api/plugins`                   | POST   | Mutlaq lokal yoʻldan plaginni oʻrnatish                                            |
-| `/api/plugins/scan`              | POST   | Plagin katalogini skanerlash va yangi plaginlarni roʻyxatdan oʻtkazish             |
-| `/api/plugins/marketplace`       | GET    | Marketplace katalogi yozuvlarini roʻyxatlash                                       |
-| `/api/plugins/[name]`            | GET    | Oʻrnatilgan plagin tafsilotlarini olish                                            |
-| `/api/plugins/[name]`            | DELETE | Plaginni oʻchirish                                                                 |
-| `/api/plugins/[name]/activate`   | POST   | Faollashtirish (yuklash + huklarni roʻyxatdan oʻtkazish)                           |
-| `/api/plugins/[name]/deactivate` | POST   | Faolsizlantirish (`onDeactivate`ni ishga tushirish, huklarni roʻyxatdan chiqarish) |
-| `/api/plugins/[name]/config`     | GET    | Plagin konfiguratsiyasi va konfiguratsiya sxemasini olish                          |
-| `/api/plugins/[name]/config`     | PUT    | Plagin konfiguratsiyasini yangilash (sxema asosida tekshiriladi)                   |
+| Yakuniy nuqta                    | Usul   | Tavsif                                                                 |
+| -------------------------------- | ------ | ---------------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | O'rnatilgan plaginlar ro'yxati (ixtiyoriy `?status=` filtri)           |
+| `/api/plugins`                   | POST   | Plagin manbalari katalogidan plaginni o'rnating                        |
+| `/api/plugins/scan`              | POST   | Plagin katalogini skanerlang va yangi plaginlarni ro'yxatdan o'tkazing |
+| `/api/plugins/marketplace`       | GET    | Bozor katalogidagi yozuvlarni ro'yxatlash                              |
+| `/api/plugins/[name]`            | GET    | O'rnatilgan plagin tafsilotlarini oling                                |
+| `/api/plugins/[name]`            | DELETE | Plaginni o'chirib tashlang                                             |
+| `/api/plugins/[name]/activate`   | POST   | Faollashtirish ( + registrlari ilgaklarini yuklash)                    |
+| `/api/plugins/[name]/deactivate` | POST   | O'chirish (o'chirish `onDeactivate`, ilgaklarni ro'yxatdan o'chirish)  |
+| `/api/plugins/[name]/config`     | GET    | Plagin konfiguratsiyasi + konfiguratsiya sxemasini oling               |
+| `/api/plugins/[name]/config`     | PUT    | Plagin konfiguratsiyasini yangilash (sxemaga muvofiq tasdiqlangan)     |
 
-`GET /api/plugins` soʻrovidagi `status` filtri
-`installed` / `active` / `inactive` / `error` qiymatlaridan birini qabul qiladi. Yaroqsiz qiymat `400` javobini qaytaradi.
+`GET /api/plugins` `status` filtri `installed` / `active` / `inactive` / `error` dan birini qabul qiladi. Yaroqsiz qiymat `400` qaytaradi.
 
-### Oʻrnatilgan plaginlarni roʻyxatlash
+### O'rnatilgan plaginlar ro'yxati
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Lokal yoʻldan oʻrnatish
+### Mahalliy yo'ldan o'rnating
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -129,19 +119,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` **mutlaq** boʻlishi va tarkibida `..` orqali oʻtish segmentlari yoki
-null baytlar boʻlmasligi kerak (Zod tomonidan taʼminlanadi). Manba katalogida yaroqli
-`plugin.json` boʻlishi kerak (yoki katalog uning ota katalogi boʻlishi kerak). Muvaffaqiyatli bajarilganda javob `201` kodi va
-oʻrnatilgan plagin qatorini qaytaradi.
+`path` an bo'lishi kerak** mutlaq** katalogga yo'l** plagin manbalari katalogida** : plagin ildizi yonida `plugin-sources`, shuning uchun sukut bo'yicha `~/.omniroute/plugin-sources/` yoki bu o'zgaruvchi o'rnatilganda `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ( `src/lib/plugins/installSource.ts` da `getPluginSourcesDir()` ). Avval u erda plaginni nusxalash yoki klonlash. Agar yo'lda `..` yoki null bayt bo'lsa, ushbu katalogdan tashqarida bo'lsa, uning tashqarisida symlink orqali hal qilinsa, maqsadi undan tashqarida bo'lgan simli havola bo'lsa yoki katalog mavjud bo'lmasa, o'rnatish `400` bilan rad etiladi. Manba katalogida to'g'ri `plugin.json` bo'lishi kerak (yoki uning ota-onasi bo'lishi kerak). Muvaffaqiyatli javob o'rnatilgan plagin qatori bilan `201` bo'ladi.
 
-### Marketplace katalogini koʻrib chiqish
+Boshqa plagin marshrutlaridan farqli o'laroq, bu tizimga kirish o'chirilgan bo'lsa ham (`requireLogin=false`) boshqaruv hisob ma'lumotlarini (boshqaruv paneli seansi yoki boshqarish miqyosidagi API kaliti) talab qiladi: kodni o'rnatish hech qachon anonim harakat emas.
+
+### Bozorni ko'rib chiqing
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Plagin konfiguratsiyasini yangilash
+### Plagin konfiguratsiyasini yangilang
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -150,10 +139,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` har bir taqdim etilgan qiymatni plaginning
-`configSchema` sxemasi (manifestda eʼlon qilingan) asosida tekshiradi: `number` maydonlari `min`/`max`
-chegaralariga amal qiladi, `select` maydonlari esa eʼlon qilingan `enum`ga mos kelishi kerak. Sxemada mavjud boʻlmagan kalitlarga
-ruxsat beriladi.
+`PUT .../config` har bir taqdim etilgan qiymatni plagin `configSchema` (manifestda e'lon qilingan) bilan tasdiqlaydi: `number` maydonlari `min`/`max` hurmati, `select` maydonlari e'lon qilingan `enum` bilan mos kelishi kerak. Sxemada mavjud bo'lmagan kalitlarga ruxsat beriladi.
 
 ## Konfiguratsiya
 
@@ -213,83 +199,58 @@ Boshqaruv panelidagi "Marketplace" ichki varagʻi ushbu URL manzili uchun maydon
 
 ## Xavfsizlik
 
-### Marshrut darajasi — faqat loopback
+### Faqat marshrut darajasi — orqaga qaytish
 
-Plaginlar kodni ishga tushirilgan yordamchi jarayonlarda bajaradi, shuning uchun butun `/api/plugins`
-yuzasi `LOCAL_ONLY` (1-daraja) sifatida tasniflanadi. Loopback cheklovi
-har qanday autentifikatsiya tekshiruvidan **oldin** soʻzsiz qoʻllanadi, shu sababli
-tunnel orqali qurilmaga yetib kelgan, sizib chiqqan boshqaruv tokeni ham plaginni
-oʻrnata, faollashtira yoki oʻchira olmaydi.
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) va
-Qatʼiy qoidalar #15 / #17 ga qarang.
+Plaginlar tug'ilgan bola jarayonlarida kodni bajaradi, shuning uchun butun `/api/plugins` yuzasi `LOCAL_ONLY` (1-darajali) tasniflanadi. Orqaga aylanishni amalga oshirish shartsiz ishlaydi** oldin** Har qanday autentifikatsiya tekshiruvi, shuning uchun tunnel orqali qutiga etib boradigan sizib ketgan boshqaruv tokeni hali ham plaginni o'rnatolmaydi, faollashtira olmaydi yoki o'chira olmaydi. [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) va qattiq qoidalarga qarang #15 / #17.
 
-### Marketplace reyestri uchun SSRF himoyasi
+### Bozor ro'yxatga olish kitobi SSRF qo'riqchisi
 
-Maxsus reyestr URL manzili tajovuzkor taʼsir qilishi mumkin boʻlgan konfiguratsiyadir, shuning uchun
-uni olishdan oldin `listMarketplacePlugins()` uni ikki qatlamli tekshiruvdan oʻtkazadi:
+Maxsus ro'yxatga olish kitobi URL tajovuzkor tomonidan ta'sirlanadigan konfiguratsiyadir, shuning uchun uni olishdan oldin `listMarketplacePlugins()` uni ikki qatlamdan o'tkazadi:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - `http:` / `https:` boʻlmagan barcha manzillarni rad etadi.
-   - Kanonik `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) orqali literal xususiy/loopback/link-local/ULA xostlarni (IPv4 **va** IPv6,
-     jumladan IPv4 bilan xaritalangan manzillarni) rad etadi.
-   - **Har ikkala** `A` va `AAAA` yozuvlarini aniqlaydi va aniqlangan manzillardan **birortasi**
-     xususiy boʻlsa, rad etadi — shu orqali ommaviy xost nomi → xususiy IP chetlab oʻtish yoʻli yopiladi.
-   - **Xavfsiz tarzda rad etadi**: DNS aniqlashdagi xatolik URL manzilining rad etilishiga olib keladi.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): yuklab olish vaqtida faqat ommaviy URL
-   himoyasini qayta qoʻllaydi va **qayta yoʻnaltirishlarni bloklaydi** (ommaviy → xususiy `30x`
-   burilishiga yoʻl qoʻymaydi).
+   - `http:` / `https:` bo'lmagan har qanday narsani rad etadi.
+   - Literal private/loopback/link-local/ULA xostlarini rad etadi (IPv4** va** IPv6, shu jumladan IPv4-mapped) kanonik `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) orqali.
+   - Yechiladi** ikkalasi ham** `A` va `AAAA` agar ni qayd qiladi va rad etadi** har qanday** hal qilingan manzil xususiy — umumiy xost nomi → xususiy IP aylanib o'tishni yopadi.
+   - **Muvaffaqiyatsiz yopildi** : DNS rezolyutsiyasi xatosi URL ni rad etadi.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): faqat ommaviy URL qo'riqchisini yuklash vaqtida qayta qo'llaydi va** qayta yo'naltirishni bloklaydi** (ommaviy → xususiy `30x` pivot yo'q).
 
-Ikkala qatlamdan birida tekshiruvdan oʻtmagan URL soʻrovni bekor qilmaydi — marketplace
-sezdirmasdan ichki boshlangʻich reyestrga qaytadi va ogohlantirishni jurnalga yozadi.
+Ikkala qatlamda ham muvaffaqiyatsiz bo'lgan URL so'rovni bekor qilmaydi — bozor indamay o'rnatilgan urug'lar reestriga qaytadi va ogohlantirishni qayd qiladi.
 
-> Ushbu himoya PR #3774 da aynan A + AAAA yozuvlarini aniqlash va
-> faqat IPv4 tekshiruvi oʻrniga kanonik `isPrivateHost` dan foydalanish uchun kuchaytirilgan.
+> Bu qo'riqchi A + AAAA hal qilish va IPv4-only tekshiruvi o'rniga kanonik `isPrivateHost` foydalanish uchun PR #3774 da qattiqlashtirilgan.
 
-### Plagin bajarilishini izolyatsiyalash
+### Plaginni bajarish izolyatsiyasi
 
-- **Jarayon izolyatsiyasi** — `loadPlugin()` (`src/lib/plugins/loader.ts`) har bir
-  plaginni alohida Node.js yordamchi jarayonida ishga tushiradi va IPC orqali aloqa qiladi.
-  Hook chaqiruvlarida `SIGTERM` → `SIGKILL` eskalatsiyasiga ega vaqt cheklovi mavjud.
-- **Muhit uchun ruxsat etilganlar roʻyxati** — yordamchi jarayon faqat ruxsat etilganlar roʻyxatidagi
-  muhit oʻzgaruvchilarini oladi; kengroq toʻplam faqat manifest `env`
-  ruxsatini soʻraganda beriladi.
-- **Yoʻlni chegaralash** — oʻrnatish/yangilash/oʻchirish amallari har qanday nusxalash yoki
-  rekursiv oʻchirishdan oldin plagin katalogi va `manifest.main` boshqariladigan plagin ildizi
-  **ichida** aniqlanishini tekshiradi (buzib oʻzgartirilgan MB yoʻllari va
-  `manifest.main` ichidagi `../` orqali oʻtishdan himoya qiladi). Faollashtirish simvolik havolalarni
-  `realpath` orqali aniqlaydi va plagin katalogidan tashqariga chiqadigan kirish nuqtasini
-  yuklashni rad etadi.
-- **Ixtiyoriy yaxlitlik qaydi** — manifest `integrity`
-  (`sha256-<base64>`, SRI formati) maydonini eʼlon qilishi mumkin. U mavjud boʻlsa, yuklagich
-  yuklash vaqtida kirish fayli xeshini tekshiradi va mos kelmasa faollashtirishni
-  rad etadi. Bu ixtiyoriy buzib oʻzgartirishni aniqlash vositasi, **xavfsizlik chegarasi emas** —
-  faqat loopback marshrutlash va ruxsatlar modeli haqiqiy chegaralardir.
+> **Plaginlar sinov muhitiga kiritilmagan.** Bola OmniRoute foydalanuvchisi sifatida ishlaydigan oddiy Node.js jarayoni bo'lib, VM konteksti va Node.js ruxsati bayroqlari yo'q, shuning uchun plagin kodi foydalanuvchi har qanday faylni o'qishi va yozishi, dasturlarni ishga tushirishi va tarmoqqa kirishi mumkin. `requires.permissions` faqat bolaning qaysi muhit o'zgaruvchilarini olishini hal qiladi; boshqa ruxsatlar bajarilmaydi. Faqat o'zingiz ishonadigan plaginlarni o'rnating. Quyidagi jarayon chegarasida buzilishlar va osilib qolishlar mavjud; bu xavfsizlik chegarasi emas.
+
+- **Jarayonni izolyatsiya qilish** — `loadPlugin()` (`src/lib/plugins/loader.ts`) har bir plaginni alohida Node.js bola jarayonida hosil qiladi va IPC orqali muloqot qiladi. Hook qo'ng'iroqlari `SIGTERM` → `SIGKILL` eskalatsiyasi bilan vaqt tugashiga ega.
+- **Env ruxsat etilgan ro'yxat** — bola faqat ruxsat etilgan ro'yxatdagi muhit o'zgaruvchilari to'plamini oladi; kengroq to'plam faqat manifest `env` ruxsatini so'raganda beriladi.
+- **Manba muhofazasini o'rnating** — `POST /api/plugins` faqat plagin manbalari katalogidan oʻqiydi (“Mahalliy yoʻldan oʻrnatish” boʻlimiga qarang): yoʻl `realpath` bilan kanoniklashtiriladi, qatʼiy ravishda shu katalog ichida boʻlishi kerak va undan qochib ketadigan simli havolani olib yuruvchi manba daraxti hech narsa nusxa koʻchirilishidan oldin rad etiladi.
+- **Yo'lni ushlab turish** — install/upgrade/uninstall plagin katalogi va `manifest.main` hal qilishini tasdiqlaydi** ichida** boshqariladigan plagin ildizini har qanday nusxa ko'chirish yoki rekursiv o'chirishdan oldin ( `manifest.main` da o'zgartirilgan DB yo'llari va `../` traversalidan himoya qiladi). Faollashtirish `realpath` orqali simli havolalarni hal qiladi va plagin katalogidan qochadigan kirish nuqtasini yuklashni rad etadi.
+- **Ixtiyoriy yaxlitlik pin** — manifest `integrity` (`sha256-<base64>`, SRI formati) maydonini e'lon qilishi mumkin. Mavjud bo'lsa, yuklovchi yuklash vaqtida kirish fayli xeshini tekshiradi va mos kelmasligi sababli faollashtirishni rad etadi. Bu o'zgartirishni aniqlash imkoniyati,** emas** xavfsizlik chegarasi: yuklangan plagin nima qila olishini cheklamaydi.
+- **Hooklarda mijoz hisob ma'lumotlari yo'q** — `onRequest`, `onResponse` va `onError` ga uzatilgan kontekstda `authorization`, `x-api-key`, `proxy-authorization` va `cookie` sarlavhalari olib tashlangan va API kalit yozuvi kalit qiymatiga ega emas (`redactPluginContext()` da `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) orqali tekshiriladi:
+`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) tomonidan tasdiqlangan:
 
-| Maydon             | Tur       | Izohlar                                                                   |
+| Maydon             | Turi      | Eslatmalar                                                                |
 | ------------------ | --------- | ------------------------------------------------------------------------- |
-| `name`             | string    | Majburiy; kebab-case (`^[a-z0-9-]+$`), 1–100 ta belgi                     |
-| `version`          | string    | Majburiy; semver (`MAJOR.MINOR.PATCH`)                                    |
-| `description`      | string?   | ≤ 500 ta belgi                                                            |
-| `author`           | string?   | ≤ 200 ta belgi                                                            |
-| `license`          | string?   | Standart qiymati `MIT`                                                    |
-| `main`             | string?   | Kirish fayli; standart qiymati `index.js`                                 |
-| `source`           | enum?     | `local` \| `marketplace` (standart qiymati `local`)                       |
-| `tags`             | string[]? | Qidiruv teglari                                                           |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                           |
-| `hooks`            | object?   | Plagin qaysi hooklarni amalga oshirishini bildiruvchi mantiqiy qiymatlar  |
-| `skills`           | object[]? | Ixtiyoriy koʻnikma taʼriflari                                             |
-| `enabledByDefault` | boolean?  | Oʻrnatilganda avtomatik faollashtirish                                    |
-| `configSchema`     | object?   | Konfiguratsiya maydonlari xaritasi (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Ixtiyoriy `sha256-<base64>` kirish fayli qaydi                            |
+| `name`             | ip        | Majburiy; kabob qutisi (`^[a-z0-9-]+$`), 1–100 belgi                      |
+| `version`          | ip        | Majburiy; semver (`MAJOR.MINOR.PATCH`)                                    |
+| `description`      | string?   | ≤ 500 belgi                                                               |
+| `author`           | string?   | ≤ 200 belgi                                                               |
+| `license`          | string?   | Standart `MIT`                                                            |
+| `main`             | string?   | Kirish fayli; sukut bo'yicha `index.js`                                   |
+| `source`           | enum?     | `local` \| `marketplace` (standart `local`)                               |
+| `tags`             | string[]? | Teglarni qidirish                                                         |
+| `requires`         | ob'ekt?   | `{ omniroute?, permissions[] }`                                           |
+| `hooks`            | ob'ekt?   | Plagin qaysi ilgaklarni amalga oshirishini e'lon qiluvchi mantiqiylar     |
+| `skills`           | ob'ekt[]? | Ixtiyoriy malaka ta'riflari                                               |
+| `enabledByDefault` | mantiqiy? | O'rnatish paytida avtomatik faollashtirish                                |
+| `configSchema`     | ob'ekt?   | Konfiguratsiya maydonlari xaritasi (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | string?   | Ixtiyoriy `sha256-<base64>` kirish fayli PIN                              |
 
-Ruxsatlar quyidagi enum qiymatlaridan olinadi:
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Ruxsatlar enum `network` / `file-read` / `file-write` / `env` / `exec` dan olinadi. Faqat `env` ish vaqti effektiga ega (bola uchun bir oz kattaroq muhit o'zgaruvchilarining ruxsat etilgan ro'yxati); qolganlari deklaratsiya bo'lib, ular ijro etilmaydi.
 
 ## Hayotiy sikl jarayoni
 
@@ -350,18 +311,14 @@ Plugin metrikalari/tahlillari qoʻshimcha jadvallarda kuzatib boriladi
 
 ## Boshqaruv paneli
 
-`/dashboard/plugins` manzilidagi boshqaruv paneli sahifasi
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) ikkita ichki oynani taqdim etadi:
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) da boshqaruv paneli sahifasida ikkita yorliq mavjud:
 
-- **Oʻrnatilganlar** — oʻrnatilgan pluginlarni ularning eʼlon qilingan hook’lari,
-  faollashtirish/faolsizlantirish almashtirgichi, oʻchirish tugmasi va
-  "Pluginlarni skanerlash" amali (`POST /api/plugins/scan`) bilan koʻrsatadi.
-- **Marketplace** — maxsus registr URL manzilini belgilash maydoni bilan birga
-  `GET /api/plugins/marketplace` dan olingan katalogni koʻrsatadi.
+- **Oʻrnatilgan** — o'rnatilgan plaginlarni ularning e'lon qilingan ilgaklari, activate/deactivate tugmasi, o'chirish tugmasi va "Plaginlarni skanerlash" (`POST /api/plugins/scan`) bilan ro'yxatga oladi.
+- **Bozor** — maxsus ro'yxatga olish kitobini o'rnatish uchun maydon bilan `GET /api/plugins/marketplace` dan katalogni ko'rsatadi URL.
 
-Har bir plugin uchun konfiguratsiya sahifasi `/dashboard/plugins/[name]/config`
-manzilida joylashgan
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Sahifada har doim plaginlar OmniRoute jarayonining to'liq imtiyozlari bilan ishlashi haqida ogohlantirish ko'rsatiladi.
+
+Har bir plagin konfiguratsiya sahifasi `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) da yashaydi.
 
 ## Shuningdek qarang
 

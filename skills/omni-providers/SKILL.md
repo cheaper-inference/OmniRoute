@@ -35,7 +35,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/providers/agy-auth/apply-local`](references/endpoints.md#post-apiprovidersagy-authapply-local)
 - [`GET /api/provider-nodes`](references/endpoints.md#get-apiprovider-nodes)
 - [`POST /api/provider-nodes`](references/endpoints.md#post-apiprovider-nodes)
-- [`PATCH /api/provider-nodes/{id}`](references/endpoints.md#patch-apiprovider-nodesid)
+- [`PUT /api/provider-nodes/{id}`](references/endpoints.md#put-apiprovider-nodesid)
 - [`DELETE /api/provider-nodes/{id}`](references/endpoints.md#delete-apiprovider-nodesid)
 - [`POST /api/provider-nodes/validate`](references/endpoints.md#post-apiprovider-nodesvalidate)
 - [`GET /api/provider-models`](references/endpoints.md#get-apiprovider-models)

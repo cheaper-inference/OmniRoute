@@ -559,6 +559,8 @@ Bu proxy:
 
 Daxil edilmiş idarə paneli üçün WebSocket təkmilləşdirmələri xüsusi portdakı köməkçi server tərəfindən idarə olunur (bax: `src/lib/services/embedWsProxy.ts`).
 
+Tunel açılmazdan əvvəl hər bir təkmilləşdirməyə HTTP yerləşdirmə marşrutu ilə eyni qaydalarla icazə verilir: həmyaşıd reverse-proxy yönləndirmə başlığı olmadan geri dönmə olmalıdır, `Origin` brauzeri idarə paneli mənşəli olmalıdır (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` geri dönmə defoltlarını genişləndirir) və zəng edənin panel seansına ehtiyacı var və ya idarəetmənin əhatə API silinə bilməz.
+
 **Təhlükəsizlik:** Yerləşdirmə proksi marşrutları `LOCAL_ONLY_API_PREFIXES` altında təsnif edilir və yalnız geri dönmədən əldə edilə bilər. Cloudflare/Ngrok tuneli vasitəsilə JWT əldə edən təcavüzkar daxili xidmətlərə proxy edə bilməz.
 
 ---

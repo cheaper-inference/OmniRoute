@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "ਸੀਮਾ ਇੱਕ ਸਕਾਰਾਤਮਕ ਪੂਰਨ ਅੰਕ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।",
     "error": "ਗਲਤੀ: {message}",
     "serverOffline": "OmniRoute ਸਰਵਰ ਆਫ਼ਲਾਈਨ ਹੈ। ਇਸਨੂੰ ਇਸ ਕਮਾਂਡ ਨਾਲ ਚਾਲੂ ਕਰੋ: omniroute serve",
     "authRequired": "ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ। OMNIROUTE_API_KEY ਸੈੱਟ ਕਰੋ ਜਾਂ ਇਹ ਚਲਾਓ: omniroute setup",

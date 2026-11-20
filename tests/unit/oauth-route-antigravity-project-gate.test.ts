@@ -32,7 +32,17 @@ test("degrade gate is wired into the exchange, poll-callback and import-token br
 test("connects are SAVED with degraded status, not rejected", () => {
   // No 422 rejection in the antigravity project path: the upsert proceeds and
   // the degraded fields flow into both the update and create payloads.
-  assert.match(routeSource, /\.\.\.antigravityPersistStatus\(degradedProject\)/);
+  // Re-auth updates spread the degraded markers only when the project is degraded,
+  // so a healthy re-auth cannot wipe the cooldown evidence that
+  // buildOAuthTokenUpdate() preserves during an active quota window (#20067).
+  const degradedOnlySpread =
+    /\.\.\.\(degradedProject \? antigravityPersistStatus\(degradedProject\) : \{\}\)/;
+  assert.equal(
+    (routeSource.match(new RegExp(degradedOnlySpread.source, "g")) || []).length,
+    3,
+    "exchange, poll-callback AND import-token updates must carry the degraded markers"
+  );
+  assert.match(persistenceSource, degradedOnlySpread);
   assert.match(persistenceSource, /\.\.\.antigravityPersistStatus\(degradedProject\)/);
   assert.match(routeSource, /warning: degradedProject\.warning/);
   // paste-credentials / device-complete used to hardcode testStatus:"active".

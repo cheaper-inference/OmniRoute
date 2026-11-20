@@ -1,0 +1,1 @@
+- **fix(security):** Web search keeps a caller-supplied SearXNG base URL on the public-only path, sends the stored connection token only to the operator's base URL, and reads search provider responses under a 4 MiB cap ([#20553](https://github.com/cheaper-inference/OmniRoute/pull/20553)) — thanks @serenity-X

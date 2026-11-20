@@ -117,3 +117,35 @@ export async function runQuotaSharePreHook({
   }
   return null;
 }
+
+/**
+ * Quota Share admission for an in-request account rotation. The pre-hook checks only the
+ * first selected connection; a rotated-to connection can sit in a pool the key has used up.
+ * Same fail-open rule as the pre-hook (B16): an enforcement error admits the rotation.
+ */
+export async function admitQuotaShareRotation({
+  apiKeyInfo,
+  connectionId,
+  provider,
+  model,
+}: {
+  apiKeyInfo: { id?: string } | null | undefined;
+  connectionId: string;
+  provider: string;
+  model: string;
+}): Promise<boolean> {
+  if (!apiKeyInfo?.id || !connectionId) return true;
+  try {
+    const { enforceQuotaShare } = await import("@/lib/quota/enforce");
+    const decision = await enforceQuotaShare({
+      apiKeyId: apiKeyInfo.id,
+      connectionId,
+      provider: provider ?? "unknown",
+      model: model || undefined,
+      estimatedCost: {},
+    });
+    return decision.kind !== "block";
+  } catch {
+    return true;
+  }
+}

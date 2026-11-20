@@ -235,6 +235,12 @@ async function executeSearchBody(
     if (!explicitProvider) {
       return errorResponse(HTTP_STATUS.BAD_REQUEST, `Unknown search provider: ${body.provider}`);
     }
+    if (isProviderBlockedByIdOrAlias(explicitProvider.id, blockedProviders)) {
+      return errorResponse(
+        HTTP_STATUS.FORBIDDEN,
+        `Search provider ${body.provider} is blocked by security policy`
+      );
+    }
     if (!supportsSearchType(explicitProvider, body.search_type)) {
       return errorResponse(
         HTTP_STATUS.BAD_REQUEST,
