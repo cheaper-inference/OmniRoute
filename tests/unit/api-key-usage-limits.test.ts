@@ -437,6 +437,106 @@ test("calendar weekly window uses the process timezone when no timezone is confi
   assert.equal(status.weeklySpentUsd, 3);
 });
 
+test("long-context tier is decided per request, not on the window's summed tokens (#20153)", async () => {
+  await localDb.updatePricing({
+    codex: {
+      "gpt-long-test": {
+        input: 1,
+        output: 1,
+        long_context: { threshold: 100_000, input: 5, output: 5 },
+      },
+    },
+  });
+  const created = await apiKeysDb.createApiKey("long-context", "machine-long-context");
+  await apiKeysDb.updateApiKeyPermissions(created.id, {
+    usageLimitEnabled: true,
+    weeklyUsageLimitUsd: 100,
+  });
+  const save = (input: number, timestamp: string) =>
+    usageHistory.saveRequestUsage({
+      provider: "codex",
+      model: "gpt-long-test",
+      apiKeyId: created.id,
+      apiKeyName: "long-context",
+      tokens: { input, output: 1_000 },
+      success: true,
+      timestamp,
+    });
+  // 20 small requests: 120K input in total, each far below the 100K threshold.
+  for (let i = 0; i < 20; i++) {
+    await save(i % 2 === 0 ? 5_000 : 7_000, `2026-09-22T${String(i).padStart(2, "0")}:00:00.000Z`);
+  }
+  // One request that really crosses the threshold keeps its long-context price.
+  await save(150_000, "2026-09-22T21:00:00.000Z");
+  const metadata = await apiKeysDb.getApiKeyMetadata(created.key);
+  assert.ok(metadata);
+
+  const status = await withWeeklyWindowEnv({}, () =>
+    usageLimits.getApiKeyUsageLimitStatus(metadata, sharedPoolDeps(POOL_NOW))
+  );
+
+  // Small: 120K in + 20K out at $1/M = $0.14. Large: 150K in + 1K out at $5/M = $0.755.
+  // Window-summed pricing put all 270K in + 21K out on the $5 tier: $1.455.
+  assert.equal(status.weeklySpentUsd, 0.895);
+});
+
+async function weeklySpendFor(name: string, rows: Array<Record<string, unknown>>) {
+  const created = await apiKeysDb.createApiKey(name, `machine-${name}`);
+  await apiKeysDb.updateApiKeyPermissions(created.id, {
+    usageLimitEnabled: true,
+    weeklyUsageLimitUsd: 100,
+  });
+  for (const [i, row] of rows.entries()) {
+    await usageHistory.saveRequestUsage({
+      apiKeyId: created.id,
+      apiKeyName: name,
+      success: true,
+      timestamp: `2026-09-22T${String(i).padStart(2, "0")}:00:00.000Z`,
+      ...row,
+    });
+  }
+  const metadata = await apiKeysDb.getApiKeyMetadata(created.key);
+  assert.ok(metadata);
+  const status = await withWeeklyWindowEnv({}, () =>
+    usageLimits.getApiKeyUsageLimitStatus(metadata, sharedPoolDeps(POOL_NOW))
+  );
+  return status.weeklySpentUsd;
+}
+
+test("a token vector shared by stored-cost and unmetered rows is charged once each (#20153)", async () => {
+  await localDb.updatePricing({ xai: { "grok-mixed": { input: 1, output: 0 } } });
+  const row = (tokens: Record<string, number>) => ({
+    provider: "xai",
+    model: "grok-mixed",
+    tokens,
+  });
+
+  const spent = await weeklySpendFor("mixed", [
+    row({ prompt_tokens: 100_000, cost_in_usd_ticks: 100_000_000 }),
+    row({ prompt_tokens: 100_000 }),
+    row({ prompt_tokens: 100_000 }),
+  ]);
+
+  // $0.01 reported, plus two unmetered 100K-input requests at $1/M; the reported
+  // row's tokens are not priced again.
+  assert.equal(spent, 0.21);
+});
+
+test("cache-read clipping stays per request (#20153)", async () => {
+  await localDb.updatePricing({ codex: { "gpt-cache-test": { input: 1, cached: 0, output: 0 } } });
+  const row = (input: number, cacheRead: number) => ({
+    provider: "codex",
+    model: "gpt-cache-test",
+    tokens: { input, cacheRead },
+  });
+
+  // Cache reads beyond a request's own input clip that request to $0; summed,
+  // they would also erase 1M input from the other request ($0.10 instead of $1).
+  const spent = await weeklySpendFor("cache-clip", [row(100_000, 1_000_000), row(1_000_000, 0)]);
+
+  assert.equal(spent, 1);
+});
+
 test("invalid weekly window values fall back instead of failing requests", () => {
   assert.deepEqual(
     usageLimits.getApiKeyWeeklyWindowSetting({

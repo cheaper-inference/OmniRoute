@@ -3,7 +3,7 @@ import { getApiKeySpendRows } from "@/lib/db/apiKeySpend";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
 import { getOldestSearchLedgerSpendSince, sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
-import { calculateCostDetailed } from "./costCalculator";
+import { computeCostFromPricing, resolvePricingRow } from "./costCalculator";
 import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
 
 import {
@@ -511,6 +511,75 @@ function getOldestCountedUsageIso(rows: ReturnType<typeof getApiKeySpendRows>): 
   return oldestTimes.length > 0 ? new Date(Math.min(...oldestTimes)).toISOString() : null;
 }
 
+type SpendRow = ReturnType<typeof getApiKeySpendRows>[number];
+type PricingLookup = Record<string, unknown> | null | "failed";
+
+/**
+ * A model's pricing row, resolved once per spend scan (it does not depend on
+ * service tier). "failed" sticks for the label, so a broken lookup is tried and
+ * logged once.
+ */
+async function resolvePricingCached(
+  cache: Map<string, PricingLookup>,
+  label: string,
+  provider: string,
+  model: string
+): Promise<PricingLookup> {
+  const cached = cache.get(label);
+  if (cached !== undefined) return cached;
+  let pricing: PricingLookup;
+  try {
+    const found = await resolvePricingRow(provider, model);
+    if (!found) pricing = null;
+    else if (typeof found === "object" && !Array.isArray(found)) {
+      pricing = found as Record<string, unknown>;
+    } else pricing = {};
+  } catch (error) {
+    console.error("Error calculating cost:", error);
+    pricing = "failed";
+  }
+  cache.set(label, pricing);
+  return pricing;
+}
+
+/**
+ * Every row in a group has the same token vector: price ONE request so
+ * long-context thresholds see a request, not the window (#20153).
+ */
+function pricePerRequest(
+  pricing: PricingLookup,
+  row: SpendRow,
+  provider: string,
+  model: string,
+  requests: number
+): { costUsd: number; failed: boolean } {
+  if (pricing === "failed") return { costUsd: 0, failed: true };
+  if (!pricing) return { costUsd: 0, failed: false };
+  try {
+    const costUsd = computeCostFromPricing(
+      pricing,
+      {
+        input: toNumber(row.promptTokens) / requests,
+        output: toNumber(row.completionTokens) / requests,
+        cacheRead: toNumber(row.cacheReadTokens) / requests,
+        cacheCreation: toNumber(row.cacheCreationTokens) / requests,
+        reasoning: toNumber(row.reasoningTokens) / requests,
+      },
+      { provider, model, serviceTier: row.serviceTier || "standard" }
+    );
+    return { costUsd, failed: false };
+  } catch (error) {
+    console.error("Error calculating cost:", error);
+    return { costUsd: 0, failed: true };
+  }
+}
+
+function warnOnce(warned: Set<string>, key: string, message: string): void {
+  if (warned.has(key)) return;
+  warned.add(key);
+  console.warn(message);
+}
+
 async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promise<ApiKeyUsdSpend> {
   if (!apiKeyId) return EMPTY_SPEND;
   const rows = getApiKeySpendRows(apiKeyId, sinceIso);
@@ -518,6 +587,9 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
   let total = 0;
   const unpriced = new Set<string>();
   let hasPricingFailure = false;
+  // A model now spans one group per token vector (#20153): warn once per model and kind.
+  const warned = new Set<string>();
+  const pricingByLabel = new Map<string, PricingLookup>();
   for (const row of rows) {
     const provider = typeof row.provider === "string" ? row.provider : "";
     const model = typeof row.model === "string" ? row.model : "";
@@ -527,38 +599,31 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     // above, avoiding a second charge. A known stored cost never makes the group
     // unpriced: only rows without a stored cost are priced from tokens.
     total += toNumber(row.storedCost);
-    if (toNumber(row.unpricedUnitRequests) > 0) unpriced.add(`${provider}/${model}`);
-    if (toNumber(row.unmeteredRequests) === 0) continue;
+    const label = `${provider}/${model}`;
+    if (toNumber(row.unpricedUnitRequests) > 0) unpriced.add(label);
+    const requests = toNumber(row.unmeteredRequests);
+    if (requests === 0) continue;
 
-    const { costUsd, priced, failed } = await calculateCostDetailed(
-      provider,
-      model,
-      {
-        input: toNumber(row.promptTokens),
-        output: toNumber(row.completionTokens),
-        cacheRead: toNumber(row.cacheReadTokens),
-        cacheCreation: toNumber(row.cacheCreationTokens),
-        reasoning: toNumber(row.reasoningTokens),
-      },
-      {
-        provider,
-        model,
-        serviceTier: row.serviceTier || "standard",
-      }
-    );
+    const pricing = await resolvePricingCached(pricingByLabel, label, provider, model);
+    const { costUsd, failed } = pricePerRequest(pricing, row, provider, model, requests);
     if (failed) {
+      pricingByLabel.set(label, "failed");
       hasPricingFailure = true;
-      console.warn(
+      warnOnce(
+        warned,
+        `failed:${label}`,
         `[apiKeyUsageLimits] cost lookup failed for ${provider}/${model} — failing closed (#12341)`
       );
-    } else if (!priced) {
-      unpriced.add(`${provider}/${model}`);
-      console.warn(
+    } else if (pricing === null) {
+      unpriced.add(label);
+      warnOnce(
+        warned,
+        `unpriced:${label}`,
         `[apiKeyUsageLimits] no pricing found for ${provider}/${model} — usage counted as $0; ` +
           "a configured USD quota fails closed unless the unpriced-usage policy opts out (#12341)"
       );
     }
-    total += costUsd;
+    total += costUsd * requests;
   }
 
   // Web search spend is not in usage_history; it lives in request_cost_ledger

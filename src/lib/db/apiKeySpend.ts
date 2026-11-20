@@ -15,7 +15,11 @@ interface UsageCostRow {
   oldestTimestamp: string | null;
 }
 
-/** Cost snapshots take precedence over token repricing, without double charging. */
+/**
+ * Cost snapshots take precedence over token repricing, without double charging.
+ * Groups also split on the per-request token vector: long-context tiers and cache
+ * clipping are request-local, so the caller prices one request and multiplies (#20153).
+ */
 export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCostRow[] {
   const db = getDbInstance();
   return db
@@ -38,7 +42,15 @@ export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCos
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
         AND (success = 1 OR COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL)
-      GROUP BY LOWER(provider), LOWER(model), serviceTier
+      GROUP BY
+        LOWER(provider),
+        LOWER(model),
+        serviceTier,
+        COALESCE(tokens_input, 0),
+        COALESCE(tokens_output, 0),
+        COALESCE(tokens_cache_read, 0),
+        COALESCE(tokens_cache_creation, 0),
+        COALESCE(tokens_reasoning, 0)
     `
     )
     .all({ apiKeyId, sinceIso }) as UsageCostRow[];

@@ -1,0 +1,1 @@
+- **fix(usage):** per-key daily, weekly and 5 h USD limits price each request on its own, so many small requests no longer push the whole window onto a model's long-context price tier and overcount spend (about 5x for Claude Haiku) ([#20153](https://github.com/cheaper-inference/OmniRoute/issues/20153))
