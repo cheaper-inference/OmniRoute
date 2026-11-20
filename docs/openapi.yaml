@@ -16211,13 +16211,14 @@ paths:
         is on (a request that reaches the route gets 404 otherwise). Authenticate with
         `Authorization: Bearer <key>` or `x-api-key: <key>`; the key is never read from the query
         string or a cookie. Requires scope `self:usage`. The key is checked before `range`.
-        Provider and model are returned as recorded. For a request refused before it reached a
-        provider, for example a combo whose every target was refused, the provider is the
-        routing label (the combo name, `auto` or `combo`) and the model is the string the client
-        sent. `costUsd` is the billed cost, where flat-rate subscription providers count $0.
-        `listPriceUsd` prices the same usage at list price, subscriptions included. A model with
-        no price row counts 0 in both, with no marker, so a total can be partial. A built series
-        is reused for 60 seconds per key and range; `generatedAt` gives its age. Every response
+        Provider and model are returned as recorded. A combo request whose every target was
+        refused is recorded with the routing label as provider (the combo name, `auto` or
+        `combo`) and the model string the client sent. `costUsd` is the billed cost, where
+        flat-rate subscription providers count $0. `listPriceUsd` prices the same usage at list
+        price, subscriptions included. A request whose model has no price row counts its stored
+        cost (reported by the provider or calculated when recorded); only a request with neither
+        counts 0, with no marker, so a total can be partial. A built series is reused for 60
+        seconds per key and range; `generatedAt` gives its age. Every response
         of this route carries `Cache-Control: no-store`; a refusal before the route runs, for
         example by the client API policy or the IP filter, does not.
       security:
@@ -19858,7 +19859,8 @@ components:
         Usage and cost series of one API key. Days are UTC days. Every cost is summed row by row
         and rounded to 6 decimals. `costUsd` is the billed cost, where flat-rate subscription
         providers count $0. `listPriceUsd` is the same usage priced at list price,
-        subscriptions included. A model with no price row counts 0 in both, with no marker.
+        subscriptions included. A request whose model has no price row counts its stored cost,
+        and only a request with neither counts 0, with no marker.
       additionalProperties: false
       required: [range, generatedAt, coverage, summary, daily, dailyByModel, byModel, byProvider]
       properties:
@@ -19950,8 +19952,8 @@ components:
         byModel:
           type: array
           description: >-
-            The 50 models with the most requests. With more models the entries do not add up to
-            `summary`.
+            The 50 provider-and-model pairs with the most requests. With more pairs the entries
+            do not add up to `summary`.
           items:
             type: object
             additionalProperties: false

@@ -12,10 +12,11 @@
  *   subscription providers (see flatRateProviders.ts, e.g. the Claude Code plan) count $0, so
  *   a pool on such an account shows no billed cost.
  * - `listPriceUsd`: the same usage priced at list price, subscriptions included.
- * A model with no price row counts 0 in both, with no marker, so a total can be partial.
+ * A row whose model has no price row counts its stored cost (reported by the provider or
+ * calculated when recorded). Only a row with neither counts 0, with no marker.
  *
- * Provider and model are returned as recorded for the key's own requests (a request refused
- * before it reached a provider carries the routing label as provider and the client's model
+ * Provider and model are returned as recorded for the key's own requests (a combo request whose
+ * every target was refused carries the routing label as provider and the client's model
  * string). `retentionDays` is the operator's raw usage-history retention setting
  * (`retention.usageHistory`). The reused queries also return `uniqueAccounts`, `uniqueApiKeys`,
  * `serviceTier` and the raw cost inputs; they are read here and never copied into the result.
@@ -215,7 +216,7 @@ function buildDaily(rows: DailyUsageRow[], costByDate: Map<string, Money>) {
   }));
 }
 
-/** Merges the per-day model rows by provider and model name, top 50 by requests. */
+/** Merges the per-day model rows by provider and model name: the 50 pairs with most requests. */
 function buildByModel(rows: ModelUsageRow[], priceRow: PriceRow) {
   type Entry = Money & {
     model: string;

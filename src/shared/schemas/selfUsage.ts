@@ -4,19 +4,20 @@
  * The response always goes through `selfUsageResponseSchema.parse()`, which drops any key
  * outside this contract. It carries the provider and model of the calling key's own requests as
  * recorded, counts, costs, average latency, success rates, dates and the retention setting. No
- * connection, account, other key or request id is part of it. For a request refused before it
- * reached a provider (a combo whose every target was refused, for example), the recorded
- * provider is the routing label (the combo name, `auto` or `combo`) and the model is the string
- * the client sent.
+ * connection, account, other key or request id is part of it. A combo request whose every target
+ * was refused is recorded with the routing label as provider (the combo name, `auto` or `combo`)
+ * and the model string the client sent. Other refused requests (open circuit breaker, model
+ * cooldown, quota-parked skip) keep the target provider and model.
  *
  * `costUsd` is the billed cost, where flat-rate subscription providers count $0. `listPriceUsd`
- * is the same usage priced at list price, subscriptions included. A model with no price row
- * counts 0 in both, with no marker, so a total can be partial.
+ * is the same usage priced at list price, subscriptions included. A request whose model has no
+ * price row counts its stored cost (reported by the provider or calculated when recorded). Only
+ * a request with neither counts 0, with no marker, so a total can be partial.
  *
  * `coverage.retentionDays` is the operator's raw usage-history retention setting.
  * `truncatedByRetention` compares the requested range with it and does not check whether rows
- * are actually missing. `byModel` keeps the 50 models with the most requests, so with more models
- * it does not add up to `summary`. `summary.uniqueModels` counts every recorded model spelling.
+ * are actually missing. `byModel` keeps the 50 provider-and-model pairs with the most requests,
+ * so with more pairs it does not add up to `summary`. `summary.uniqueModels` counts every recorded model spelling.
  */
 
 import { z } from "zod";
@@ -63,7 +64,7 @@ export const selfUsageResponseSchema = z.object({
   dailyByModel: z.array(
     z.object({ date: z.string(), model: z.string(), totalTokens: z.number(), ...money })
   ),
-  // The 50 models with the most requests.
+  // The 50 provider-and-model pairs with the most requests.
   byModel: z.array(
     z.object({
       model: z.string(),

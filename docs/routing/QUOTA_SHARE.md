@@ -411,26 +411,31 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
   reads raw usage history only, never the daily summaries, which carry no key.
 - Rows are selected by the calling key's id. The key name column is never matched, and rows
   recorded without a key id are never counted.
-- A call runs five grouped queries over the key's rows in the window. The built series is reused
-  for 60 seconds per key and range, and its `generatedAt` gives its age.
+- Building a series runs five grouped queries over the key's rows in the window. The built
+  series is reused for 60 seconds per key and range, and a reused call runs none. Its
+  `generatedAt` gives its age.
 - The window ends when the series is built. A row stamped later, for example by clock skew, is
   not counted.
 - `coverage.retentionDays` is the operator's raw usage-history retention setting
   (`retention.usageHistory` in the database settings). `coverage.truncatedByRetention` is true
   when the requested range is longer than that setting. It compares the two numbers and does not
   check whether rows are actually missing.
-- Provider and model are returned as recorded for the key's own requests. For a request refused
-  before it reached a provider, for example a combo whose every target was refused, the provider
-  is the routing label (the combo name, `auto` or `combo`) and the model is the string the client
-  sent.
+- Provider and model are returned as recorded for the key's own requests. A combo request whose
+  every target was refused is recorded with the routing label as provider (the combo name, `auto`
+  or `combo`) and the model string the client sent. Other refused requests, for example by an
+  open circuit breaker, a model cooldown or a quota-parked skip, keep the target provider and
+  model.
 - Besides counts and costs, the response carries average latency, success rates and the times of
   the first and last request.
-- `byModel` lists the 50 models with the most requests. With more models its entries do not add
-  up to `summary`, and `summary.uniqueModels` counts every recorded model spelling.
+- `byModel` lists the 50 provider-and-model pairs with the most requests. With more pairs its
+  entries do not add up to `summary`, and `summary.uniqueModels` counts every recorded model
+  spelling.
 - Two costs are reported. `costUsd` is the billed cost, as the usage analytics show it.
   Flat-rate subscription providers, such as the Claude Code plan, count $0 there. `listPriceUsd`
-  is the same usage priced at list price, subscriptions included. A model with no price row
-  counts 0 in both, with no marker, so a total can be partial.
+  is the same usage priced at list price, subscriptions included. A request whose model has no
+  price row counts its stored cost: a cost the provider reported, or one calculated when the
+  request was recorded. Only a request with neither counts 0, with no marker, so a total can be
+  partial.
 - The response contract is `src/shared/schemas/selfUsage.ts` (`SelfUsageSeries` in
   `docs/openapi.yaml`).
 
