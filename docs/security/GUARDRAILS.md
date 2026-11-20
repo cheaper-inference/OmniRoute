@@ -942,13 +942,10 @@ Regression guard: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ### Agent Guard (`agentGuard/`)
 
-With `AGENT_GUARD_MODE=monitor`, requests whose model string names the `claude`
-or `anthropic` provider are classified by their client headers; when the client
-is not an official agent, one log line with `tag: "AGENT_GUARD"` is written
-(`warn` for a known third-party agent, `info` for an unidentified client).
-Default `off`: no header is read and nothing is logged. Priority `1`: it only
-reads headers and never changes the payload, so it runs before the media
-bridges.
+The agent guard classifies the client behind a request to the `claude` or
+`anthropic` provider from its headers. `AGENT_GUARD_MODE` takes three values:
+`off` (default), `monitor` and `block`. With `off`, no header is read and
+nothing is logged.
 
 Official agents are recognised by these headers (compared case-insensitively):
 
@@ -969,34 +966,127 @@ without its query string, fragment and userinfo. The API key, `Authorization`,
 
 Files: `src/lib/guardrails/agentGuard/classifier.ts`,
 `src/lib/guardrails/agentGuard/policy.ts`,
-`src/lib/guardrails/agentGuard/guardrail.ts`.
+`src/lib/guardrails/agentGuard/guardrail.ts`,
+`src/lib/guardrails/agentGuard/settings.ts`,
+`src/lib/guardrails/agentGuard/logLine.ts`,
+`src/lib/guardrails/agentGuard/enforcement.ts`,
+`src/sse/handlers/chat/agentGuardGate.ts`.
 
-**Limits:**
+**Classification limits (both modes):**
 
-- Every signal is a client-controlled header. A client that sends
-  `User-Agent: claude-cli/…` is classified as Claude Code. This is observation
-  and deterrence, not access control.
-- It never blocks. There is no `block` mode.
-- The provider is read from the model string before the model is resolved:
-  `provider/model`, a provider alias such as `cc/…`, and quota-share ids
-  (`qtSd/<group>/<provider>/<model>`). Bare model ids, model aliases, combos
-  and later routing normalization are not followed, so those requests are not
-  observed.
-- A caller can skip it per request through the registry disable channels (see
-  [Disabling Guardrails Per-Request](#disabling-guardrails-per-request));
-  skipped requests are not observed.
-- It runs only where `runPreCallHooks` runs (see
-  [Coverage and limits](#coverage-and-limits)).
 - An agent built on an official SDK that sends no `X-Title`, `HTTP-Referer` or
-  own `User-Agent` looks like the SDK; `x-stainless-*` headers alone do not make
-  a client official.
+  own `User-Agent` looks like the SDK. `x-stainless-*` headers alone do not
+  make a client official.
 - Third-party agents are matched by whole-word tokens in `User-Agent`,
-  `X-Title` and `HTTP-Referer` (or `Referer`); unlisted clients show up as
+  `X-Title` and `HTTP-Referer` (or `Referer`). Unlisted clients show up as
   `unknown`.
 - Requests from browser-based clients carry the browser's own `User-Agent` and
   show up as unidentified, unless `X-Title` or the referer carries a known
   third-party token.
 - One log line per observed request: expect volume on busy instances.
+
+#### Monitor
+
+With `AGENT_GUARD_MODE=monitor`, requests whose model string names the `claude`
+or `anthropic` provider are classified by their client headers. When the client
+is not an official agent, one log line with `tag: "AGENT_GUARD"` is written. It
+is `warn` for a known third-party agent and `info` for an unidentified client.
+Priority `1`: the guardrail only reads headers and never changes the payload,
+so it runs before the media bridges. `monitor` never blocks.
+
+**Limits of `monitor`:**
+
+- Every signal is a client-controlled header. This is observation, not access
+  control.
+- The provider is read from the model string before the model is resolved:
+  `provider/model`, a provider alias such as `cc/…`, and quota-share ids
+  (`qtSd/<group>/<provider>/<model>`). Bare model ids, model aliases, combos
+  and later routing normalization are not followed. Those requests are not
+  observed.
+- A caller can skip it per request through the registry disable channels (see
+  [Disabling Guardrails Per-Request](#disabling-guardrails-per-request)).
+  Skipped requests are not observed.
+- It runs only where `runPreCallHooks` runs (see
+  [Coverage and limits](#coverage-and-limits)).
+
+#### Block
+
+With `AGENT_GUARD_MODE=block`, the pre-call guardrail does nothing. The chat
+handler makes the decision instead:
+
+1. The decision is made when a target is about to be dispatched, on the
+   provider the request resolved to. Provider aliases, bare model ids,
+   quota-share ids and every combo target are covered.
+2. It does not run in the guardrail registry, so the per-request disable
+   channels do not apply to it.
+3. A known third-party agent is refused. An unidentified client is logged as in
+   `monitor`, and refused only with `AGENT_GUARD_STRICT=true`. Claude Code and
+   the official Anthropic SDKs are never refused.
+4. The refusal is HTTP 403 with `error.type` `permission_error` and
+   `error.code` `client_agent_not_allowed`. The body is an OpenAI-style error.
+   On Anthropic-format requests it also carries `type: "error"` at the top
+   level. There is no `Retry-After` header, and the refusal is returned before
+   any stream starts.
+5. A refusal is not a provider failure. It does not touch the provider circuit
+   breaker, connection cooldowns or model lockouts.
+6. In a combo, a refused target is skipped and the remaining targets run. The
+   request fails with the policy error when at least one target was refused and
+   no target got past the guard. The combo keeps its own error when a top-level
+   entry names another known provider with an explicit prefix.
+7. A `fusion` combo fails before the panel runs when the judge the fusion
+   service will use would be refused. That judge comes from the combo's
+   configuration or from the global combo defaults. The same check runs when a
+   fusion combo is reached through the safety-net redirect.
+8. One log line per request and provider, with `tag: "AGENT_GUARD"`, `warn`
+   for a refusal, and the same fields as `monitor`.
+9. On an internal error the guard fails open. The request proceeds and one
+   `warn` line `agent guard failed open` is logged.
+
+**Limits of `block`:**
+
+- Every signal is a client-controlled header. A client that sends
+  `User-Agent: claude-cli/…` is treated as Claude Code. `block` deters
+  unmodified third-party agents. It is not access control.
+- A proxy that strips the identifying headers turns any client into an
+  unidentified one. Such a client is served without `AGENT_GUARD_STRICT` and
+  refused with it. Run the guard on the instance that faces the clients. A
+  second OmniRoute instance behind the first sees the first one's headers.
+- `AGENT_GUARD_STRICT` refuses every client on those providers that is not
+  Claude Code or an official SDK. That includes browser-based clients and the
+  dashboard playground. The dashboard combo live test is exempt.
+- With `AGENT_GUARD_STRICT`, callers inside OmniRoute that build their own chat
+  request without identifying headers are refused on those providers too. The
+  Telegram chat proxy (`src/lib/telegram/chatProxy.ts`) is one of them.
+- Only requests that go through the chat handler are gated. Model validation
+  (`src/lib/modelValidation/runner.ts`) calls the request core directly and is
+  not gated.
+- Only the `claude` and `anthropic` providers are covered. Claude models served
+  by another provider are not covered, and neither is the `claude-web`
+  provider.
+- Some combos name their remaining targets without a provider prefix, as bare
+  model ids or nested combos. When those targets are unavailable for an
+  unrelated reason (open breaker, cooldown, lockout), the request fails with
+  the policy error.
+- A skipped combo target clears that target's last-known-good pin, as any
+  skipped target does.
+- A fusion judge named with a guarded provider prefix is refused before the
+  panel runs. That covers `anthropic/…`, `claude/…`, an alias such as `cc/…`,
+  a context suffix such as `[1m]`, and quota-share names on those providers.
+- A fusion judge written as a bare model id, or as a model alias that resolves
+  to a guarded provider, is refused only when it is dispatched. The panel has
+  already run by then. Naming the judge with its provider prefix avoids that.
+  No judge spelling reaches a guarded provider unrefused.
+- The pre-check refuses a configured Claude judge even when the fusion service
+  would drop that judge at run time. The service drops a judge the operator
+  hid, and a judge that cannot take the request's media. The second case covers
+  unconfirmed vision support and other media the judge does not accept. Both
+  combo paths behave this way.
+- On the safety-net redirect, the combo service receives empty settings. A
+  judge set only in the global combo defaults is never used there.
+- While `block` is on, requests the guard would refuse do not use the sidecar
+  fast path, for any model. `POST /v1/messages/count_tokens` answers them with
+  the local estimate.
+- There is no per-key exemption.
 
 ## Base Contract (`base.ts`)
 
@@ -1183,17 +1273,18 @@ execution → post-call guardrails → post-call block exit → semantic-cache s
 
 Environment variables read by the built-in guardrails:
 
-| Variable                              | Used by                    | Effect                                                                                              |
-| ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Set `false` to disable detection entirely.                                                          |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Injection policy: `warn`, `block`, or `log`. Legacy value `redact` does not rewrite injection text. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mode for the injection guard; also a DB feature flag that **overrides** the env vars (DB > ENV).    |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`.                   |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                 |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | When `true`, request PII is redacted (independent of injection mode).                               |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | With `PII_REDACTION_ENABLED`, mint reversible tokens and restore them in 2xx responses.             |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Controls response-side masker behavior.                                                             |
-| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` (default) or `monitor`. Also a DB feature flag (DB > ENV).                                    |
+| Variable                              | Used by                    | Effect                                                                                                           |
+| ------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Set `false` to disable detection entirely.                                                                       |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Injection policy: `warn`, `block`, or `log`. Legacy value `redact` does not rewrite injection text.              |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mode for the injection guard; also a DB feature flag that **overrides** the env vars (DB > ENV).                 |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Minimum severity that `MODE=block` rejects: `high` (default), `medium`, or `low`.                                |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                              |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | When `true`, request PII is redacted (independent of injection mode).                                            |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | With `PII_REDACTION_ENABLED`, mint reversible tokens and restore them in 2xx responses.                          |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Controls response-side masker behavior.                                                                          |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` (default), `monitor` or `block`. Also a DB feature flag (DB > ENV).                                        |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`              | `false` (default) or `true`. With `block`, also refuses unidentified clients. Also a DB feature flag (DB > ENV). |
 
 The Modality Bridge guardrails read runtime config from the DB-backed settings
 store (`getSettings()`), not env vars. Vision's primary keys are

@@ -5,7 +5,7 @@ const AGENT_GUARD_MODE_FLAG: FeatureFlagDefinition = {
   key: "AGENT_GUARD_MODE",
   label: "Agent Guard Mode",
   description:
-    "Client-agent policy for the claude and anthropic providers. monitor logs requests whose client is not an official agent (Claude Code or an official Anthropic SDK). block refuses known third-party agents on the provider the request resolved to; unidentified clients are refused only with AGENT_GUARD_STRICT. Client headers can be forged, so this is deterrence, not access control.",
+    "Client-agent policy for the claude and anthropic providers. monitor logs requests whose client is not an official agent (Claude Code or an official Anthropic SDK). block refuses known third-party agents on the provider the request resolved to. Unidentified clients are refused only with AGENT_GUARD_STRICT. monitor observes only model ids with the provider prefix (cc/, claude/, anthropic/ or a quota-share id), not bare model ids or combos. Client headers can be forged, so this is deterrence, not access control.",
   descriptionI18nKey: "featureFlagAgentGuardModeDescription",
   category: "security",
   defaultValue: "off",
