@@ -1,0 +1,1 @@
+- **fix(i18n):** Translate accidental Portuguese, German and Chinese UI copy in the PWA manifest, translator Advanced accordions, provider connection modals, Qdrant card, free-budget counter, proxy subscription errors and OpenRouter free-model display label into English
