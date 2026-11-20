@@ -46,6 +46,18 @@
       "landed": [],
       "steps": 1,
       "hang": false
+    },
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b16-7bca1e353169",
+      "requestedAt": "2026-11-20T23:42:20.264Z",
+      "afterMs": 1795218114000,
+      "runIds": [
+        44821771451
+      ],
+      "jobs": [
+        "Gate / Quality",
+        "Fast Quality Gates"
+      ]
     }
   },
   "baseChecks": [
@@ -109,7 +121,7 @@
     "ciRuns": 18,
     "landedPrs": 0,
     "landedBatches": 0,
-    "redBatches": 6,
+    "redBatches": 7,
     "bisections": 1,
     "culprits": 1
   },
@@ -1254,8 +1266,30 @@
         "19149": "2026-11-20T15:49:56Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44821672881"
+    },
+    {
+      "at": "2026-11-20T23:42:20.265Z",
+      "type": "checks-red",
+      "batchId": "b16",
+      "prs": [
+        19149
+      ],
+      "sha": "7bca1e353169686029e8beb28165df6007d80470",
+      "detail": "Gate / Quality, Fast Quality Gates",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44838687116"
+    },
+    {
+      "at": "2026-11-20T23:42:20.265Z",
+      "type": "flaky-rerun",
+      "batchId": "b16",
+      "prs": [
+        19149
+      ],
+      "sha": "7bca1e353169686029e8beb28165df6007d80470",
+      "detail": "re-running the failed jobs of b16 once (Gate / Quality, Fast Quality Gates) before a base check",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44838687116"
     }
   ],
-  "updatedAt": "2026-11-20T22:48:30.989Z",
+  "updatedAt": "2026-11-20T23:43:06.413Z",
   "batchWindow": 5
 }
