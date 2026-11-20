@@ -94,6 +94,7 @@
 [![bersyon ng npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![Buwanang NPM](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Lisensya: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 ![Mga Docker Pull](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Mga Download ng Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
@@ -777,7 +778,7 @@ mula sa iyong shell history. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS
   <tr><th align="left">Platform</th><th align="left">Pag-install</th><th align="left">Mga Tampok</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Isang command, anumang OS</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Parehong registry tarball, mas mabilis na pag-install</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Native window + system tray — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Sinusubaybayan at awtomatikong ina-update ang server — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>native <code>arm64</code></td><td align="left">Raspberry Pi, mga ARM server, Apple Silicon</td></tr>
@@ -1101,7 +1102,7 @@ Gamitin lamang ang mga ito para sa mga client na hindi makapag-attach ng `Author
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Ang `:latest` ay sumusunod sa pinakamataas na **na-publish** na stable SemVer. Hindi nito sinusubaybayan ang git `main`. Gamitin ang `:X.Y.Z` bilang pin para sa GitOps. Tingnan ang [Mga Channel ng Release ng Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Ang image ay nagse-set ng **`OMNIROUTE_MEMORY_MB=1024`**. Sapat ito para sa dashboard at magaan na chat. Ang mga **coding agent** (`POST /v1/responses` mula sa Claude Code, Codex, Grok, …) ay nangangailangan ng mas malaking V8 heap; kung hindi, magkakaroon ang proseso ng `FATAL ERROR` sa humigit-kumulang 12 GiB kapag may dalawang magkasanib na mahabang context. Ilaan ang container nang mas malaki kaysa sa heap (ang mga native buffer ay nasa labas ng V8):
@@ -1115,7 +1116,7 @@ Ang `:latest` ay sumusunod sa pinakamataas na **na-publish** na stable SemVer. H
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Buong talahanayan: [Gabay sa Docker — RAM sa runtime](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1321,7 +1322,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Wika</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> sa buong <code>src/</code> at <code>open-sse/</code> (walang <code>any</code> sa core mula noong v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, journaling na WAL) + LowDB (legacy na JSON) — 147 module ng domain, 240 migration</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, journaling na WAL) + LowDB (legacy na JSON) — 147 module ng domain, 244 migration</td></tr>
   <tr><td nowrap><b>Memorya</b></td><td>Full-text na SQLite FTS5 + mga vector embedding na may int8 quantization, typed decay</td></tr>
   <tr><td nowrap><b>Mga schema</b></td><td>Zod 4 — pagpapatunay ng I/O ng MCP tool + mga kontrata ng API</td></tr>
   <tr><td nowrap><b>Mga protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1334,7 +1335,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b>Pagsubok</b></td><td>Node.js test runner + Vitest — <b>mahigit 60,000 static test declaration</b> sa mahigit 8,400 sinusubaybayang test file (unit, integration, E2E, seguridad, ecosystem)</td></tr>
   <tr><td nowrap><b>Mga platform</b></td><td>Desktop (Electron) · Android (Termux) · PWA (anumang browser)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — awtomatikong pag-publish sa npm + Docker Hub kapag may release</td></tr>
-  <tr><td nowrap><b>Mga link</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Mga link</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

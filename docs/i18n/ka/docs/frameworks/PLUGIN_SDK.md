@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API-ის ცნობარი
+## API მითითება
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ფაბრიკული ფუნქცია, რომელიც ნაგულისხმევი პარამეტრებით ქმნის Plugin ობიექტს.
+Factory ფუნქცია, რომელიც ქმნის Plugin ობიექტს ნაგულისხმევი პარამეტრებით.
 
 **პარამეტრები:**
 
-- `name` (string, სავალდებულო) — პლაგინის სახელი kebab-case ფორმატში
-- `priority` (number, არასავალდებულო, ნაგულისხმევი: 100) — უფრო დაბალი მნიშვნელობის მქონე პირველი გაეშვება
-- `enabled` (boolean, არასავალდებულო, ნაგულისხმევი: true) — ჩაირთოს გაშვებისას?
-- `onRequest` (function, არასავალდებულო) — სრულდება ჩატის დამმუშავებლამდე
-- `onResponse` (function, არასავალდებულო) — სრულდება ჩატის დამმუშავებლის შემდეგ
-- `onError` (function, არასავალდებულო) — სრულდება დამმუშავებლის შეცდომისას
+- `name` (სტრიქონი, საჭირო) — მოდულის სახელი ქაბაბ-ქეისში
+- `priority` (ნომერი, სურვილისამებრ, ნაგულისხმევი: 100) — ქვედა გადის პირველი
+- `enabled` (ლოგიკური, სურვილისამებრ, ნაგულისხმევი: true) — დაწყება ჩართულია?
+- `onRequest` (ფუნქცია, სურვილისამებრ) — მუშაობს ჩეთის დამმუშავებლის წინ
+- `onResponse` (ფუნქცია, სურვილისამებრ) — მუშაობს ჩეთის დამმუშავებლის შემდეგ
+- `onError` (ფუნქცია, სურვილისამებრ) — მუშაობს დამმუშავებლის შეცდომით
 
 ### `blockRequest(response?): BlockingHookResult`
 
-დაბლოკეთ მოთხოვნა და, სურვილისამებრ, დააბრუნეთ მორგებული პასუხი.
+დაბლოკეთ მოთხოვნა და სურვილისამებრ დააბრუნეთ მორგებული პასუხი.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-შეცვალეთ მოთხოვნის სხეული პროვაიდერამდე მისვლამდე.
+შეცვალეთ მოთხოვნის ორგანო, სანამ ის მიაღწევს პროვაიდერს.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-მოთხოვნის კონტექსტს დაურთეთ მეტამონაცემები.
+მიამაგრეთ მეტამონაცემები მოთხოვნის კონტექსტს.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## პლაგინის კონტექსტი (`PluginContext`)
+## მოდულის კონტექსტი (`PluginContext`)
 
-| ველი        | ტიპი                      | აღწერა                             |
-| ----------- | ------------------------- | ---------------------------------- |
-| `requestId` | `string`                  | მოთხოვნის უნიკალური იდენტიფიკატორი |
-| `model`     | `string`                  | მოთხოვნილი მოდელის სახელი          |
-| `provider`  | `string`                  | სამიზნე პროვაიდერის ID             |
-| `body`      | `Record<string, unknown>` | მოთხოვნის სხეული                   |
-| `headers`   | `Record<string, string>`  | მოთხოვნის სათაურები                |
-| `metadata`  | `Record<string, unknown>` | ცვალებადი მეტამონაცემები           |
-| `timestamp` | `number`                  | მოთხოვნის დროის ნიშნული            |
+| ველი         | ტიპი                      | აღწერა                                     |
+| ------------ | ------------------------- | ------------------------------------------ |
+| `requestId`  | `string`                  | მოთხოვნის უნიკალური იდენტიფიკატორი         |
+| `model`      | `string`                  | მოთხოვნილი მოდელის სახელი                  |
+| `provider`   | `string`                  | სამიზნე პროვაიდერი ID                      |
+| `body`       | `Record<string, unknown>` | მოითხოვეთ სხეული                           |
+| `headers`    | `Record<string, string>`  | მოითხოვეთ სათაურები (იხილეთ შენიშვნა)      |
+| `metadata`   | `Record<string, unknown>` | ცვალებადი მეტამონაცემები                   |
+| `timestamp`  | `number`                  | დროის ანაბეჭდის მოთხოვნა                   |
+| `apiKeyInfo` | `object` (სურვილისამებრ)  | API გასაღები მეტამონაცემები (იხ. შენიშვნა) |
+
+კონტექსტი არასოდეს შეიცავს კლიენტის სერთიფიკატებს: `authorization`, `x-api-key`, `proxy-authorization` და `cookie` სათაურები ამოღებულია (ნებისმიერი გარსი) და `apiKeyInfo` ინახავს გასაღების მეტამონაცემებს (როგორიცაა `id`, `name` და `scopes`), მაგრამ არა გასაღების მნიშვნელობას ან მის თითის ანაბეჭდს (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). ეს ეხება `onRequest`, `onResponse` და `onError`.
 
 ## მანიფესტი (`plugin.json`)
 
@@ -140,17 +143,16 @@ onRequest: (ctx) => {
 
 ## ნებართვების სისტემა
 
-პლაგინები იზოლირებულ VM კონტექსტში მუშაობენ. გარე რესურსებზე წვდომა მკაფიოდ განსაზღვრულ ნებართვებს მოითხოვს:
+დანამატები არის** არ არის ქვიშის ყუთი** . თითოეული აქტიური დანამატი მუშაობს როგორც ცალკე, ჩვეულებრივი Node.js შვილი პროცესი (`loadPlugin()` in `src/lib/plugins/loader.ts`) იმავე ოპერაციული სისტემის მომხმარებლის ქვეშ, როგორც OmniRoute, VM კონტექსტის და Node.js ნებართვის დროშების გარეშე. მოდულის კოდს შეუძლია გამოიყენოს `node:fs`, `node:child_process`, `fetch` და ყველა სხვა Node.js API: მას შეუძლია წაიკითხოს და დაწეროს ნებისმიერი ფაილი, რომელსაც შეუძლია OmniRoute მომხმარებელს (მონაცემთა დირექტორიაში), გაუშვას პროგრამები და მიაღწიოს ქსელს.
 
-| ნებართვა     | მინიჭებული შესაძლებლობები                                    |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | მხოლოდ წაკითხვადი `process.env` პროქსი                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+მანიფესტის `requires.permissions` იღებს `network`, `file-read`, `file-write`, `env` და `exec`, მაგრამ დღეს მხოლოდ `env` აქვს ეფექტი გაშვების დროს:
 
-ნებართვის გარეშე შესაბამისი გლობალური ობიექტები sandbox-ში უბრალოდ მიუწვდომელია.
+| ნებართვა                                     | ეფექტი დღეს                                                                                                                                                                                                                      |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | დანამატის პროცესი ასევე იღებს `PORT`, `HOSTNAME`, `TZ` და `TMPDIR`. მის გარეშე ის იღებს მხოლოდ `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` და `PLUGIN_NAME` (პლუს `SystemRoot` და `windir` Windows ზე). |
+| `network`, `file-read`, `file-write`, `exec` | არცერთი. ისინი მხოლოდ დეკლარაციებია: არაფერი იბლოკება, როცა ისინი აკლიათ.                                                                                                                                                        |
+
+მოდულის ინსტალაცია ჰგავს სხვა პროგრამის დაინსტალირებას ჰოსტზე. დააინსტალირეთ მხოლოდ დანამატები, რომელთა წყაროსაც ენდობით.
 
 ## კონფიგურაციის სქემა
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## მაგალითები
 
-### მოთხოვნების ჟურნალის მწარმოებელი
+### მოითხოვეთ ლოგერი
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### სიხშირის შემზღუდველი
+### რეიტინგის შემზღუდველი
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 წუთი
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### პასუხის გარდამქმნელი
+### საპასუხო ტრანსფორმატორი
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

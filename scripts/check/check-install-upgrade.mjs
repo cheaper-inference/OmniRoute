@@ -556,11 +556,13 @@ async function main() {
     if (failures.length) {
       console.error(`[install-upgrade] FAIL — ${failures.length} problem(s):`);
       for (const f of failures) console.error(`  ✗ ${f}`);
-      process.exit(1);
+      return 1;
     }
     log("PASS — clean install and upgrade path both boot; schema converges.");
-    process.exit(0);
+    return 0;
   } finally {
+    // Return the verdict instead of exiting here: `process.exit()` inside the `try` skipped
+    // this cleanup and left both install trees behind on every run (#20643).
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 }
@@ -571,8 +573,11 @@ if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)
 ) {
-  main().catch((err) => {
-    console.error(`[install-upgrade] crashed: ${err?.message ?? err}`);
-    process.exit(1);
-  });
+  main().then(
+    (code) => process.exit(code),
+    (err) => {
+      console.error(`[install-upgrade] crashed: ${err?.message ?? err}`);
+      process.exit(1);
+    }
+  );
 }
