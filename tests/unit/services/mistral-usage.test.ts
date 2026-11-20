@@ -79,6 +79,28 @@ test("known non-CHAT/API plan types select both budgets", async () => {
   assert.deepEqual(Object.keys(usage.quotas ?? {}), ["Vibe Budget", "API Budget"]);
 });
 
+test("plan parsing preserves normalization, labels, and fallback behavior", async (t) => {
+  const cases = [
+    { whoami: { plan_type: " aPi ", plan_name: "FREE" }, plan: "Studio", keys: ["API Budget"] },
+    { whoami: { plan_type: " cHaT ", plan_name: "edu" }, plan: "Student", keys: ["Vibe Budget"] },
+    { whoami: { plan_type: "CHAT", plan_name: "custom" }, plan: "CUSTOM", keys: ["Vibe Budget"] },
+    { whoami: { plan_type: "CHAT" }, plan: null, keys: ["Vibe Budget"] },
+    { whoami: { plan_type: 42, plan_name: 42 }, plan: null, keys: [] },
+    { whoami: null, plan: null, keys: [] },
+  ];
+
+  for (const { whoami, plan, keys } of cases) {
+    await t.test(JSON.stringify(whoami), async () => {
+      mockMistralFetch(whoami, { vibe_budget: vibeBudget, api_budget: apiBudget });
+
+      const usage = await getMistralUsage("secret-key");
+
+      assert.equal(usage.plan, plan);
+      assert.deepEqual(Object.keys(usage.quotas ?? {}), keys);
+    });
+  }
+});
+
 test("failed whoami lookup creates no enforceable budget windows", async () => {
   globalThis.fetch = async (input: string | URL | Request) => {
     if (String(input).includes("whoami")) throw new Error("network failure");

@@ -62,6 +62,14 @@ function buildQuota(label: string, raw: unknown): UsageQuota | null {
   };
 }
 
+function parsePlan(whoami: Record<string, unknown> | null) {
+  const planType =
+    typeof whoami?.plan_type === "string" ? whoami.plan_type.trim().toLowerCase() : "";
+  const planName = typeof whoami?.plan_name === "string" ? whoami.plan_name.toUpperCase() : "";
+  const plan = planType === "api" ? PLAN_LABELS.API : (PLAN_LABELS[planName] ?? (planName || null));
+  return { planType, plan };
+}
+
 export async function getMistralUsage(apiKey: string) {
   if (!apiKey) {
     return { message: "Mistral API key not available. Add a key to view usage." };
@@ -76,10 +84,7 @@ export async function getMistralUsage(apiKey: string) {
     return { message: "Mistral connected. Unable to fetch budget from /v1/billing/budget." };
   }
 
-  const planType =
-    typeof whoami?.plan_type === "string" ? whoami.plan_type.trim().toLowerCase() : "";
-  const planName = typeof whoami?.plan_name === "string" ? whoami.plan_name.toUpperCase() : "";
-  const plan = planType === "api" ? PLAN_LABELS.API : (PLAN_LABELS[planName] ?? (planName || null));
+  const { planType, plan } = parsePlan(whoami);
 
   const showVibe = planType.length > 0 && planType !== "api";
   const showApi = planType.length > 0 && planType !== "chat";
