@@ -1,0 +1,1 @@
+- **fix(i18n):** unknown options and untranslated translation output are now rejected ([#20784](https://github.com/cheaper-inference/OmniRoute/pull/20784)) — thanks @maxmad64bis
