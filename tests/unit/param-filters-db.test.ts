@@ -82,6 +82,52 @@ test("deleteParamFilterConfig removes config and getParamFilterConfig returns nu
   assert.equal(getParamFilterConfig("ephemeral"), null);
 });
 
+test("provider alias (e.g. 'cc') resolves to canonical provider ('claude') (#20295)", () => {
+  try {
+    setParamFilterConfig("cc", { block: ["temperature"], allow: [], autoLearn: false });
+    // Filter saved under alias 'cc' must be visible to canonical 'claude'
+    const fromClaude = getParamFilterConfig("claude");
+    assert.notEqual(fromClaude, null);
+    assert.deepEqual(fromClaude!.block, ["temperature"]);
+
+    // And also accessible via the alias
+    const fromCc = getParamFilterConfig("cc");
+    assert.notEqual(fromCc, null);
+    assert.deepEqual(fromCc!.block, ["temperature"]);
+
+    // Strip unsupported params on canonical 'claude' applies the filter
+    const stripped = stripUnsupportedParams("claude", "claude-sonnet-4-6", {
+      temperature: 0.7,
+      max_tokens: 100,
+    });
+    assert.equal("temperature" in stripped, false);
+    assert.equal(stripped.max_tokens, 100);
+  } finally {
+    deleteParamFilterConfig("cc");
+    assert.equal(getParamFilterConfig("claude"), null);
+  }
+});
+
+test("deleteParamFilterConfig via the canonical id removes a legacy alias row (#20295)", () => {
+  // Pre-#20295 databases stored filters under the alias key (e.g. "cc").
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "provider_param_filters",
+      "cc",
+      JSON.stringify({ block: ["top_p"], allow: [], autoLearn: false })
+    );
+  // Any write invalidates the in-memory cache so the seeded row is read back.
+  deleteParamFilterConfig("cache-bump-20295");
+  assert.deepEqual(getParamFilterConfig("claude")?.block, ["top_p"]);
+
+  deleteParamFilterConfig("claude");
+
+  assert.equal(getParamFilterConfig("claude"), null);
+  assert.equal(getParamFilterConfig("cc"), null);
+});
+
 test("deleteParamFilterConfig is a no-op for unconfigured provider", () => {
   deleteParamFilterConfig("nothing-here");
 });

@@ -97,6 +97,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Sigurtà u Trasport
+
+L-awtentikazzjoni WebDAV tinforza traċċar u lockout ta' falliment għal kull IP (10 tentattivi falluti f'tieqa ta' 60 sekonda jqanqlu lockout ta' 5 minuti `429 Too Many Requests` u `Retry-After`). Minħabba li WebDAV jittrasmetti kredenzjali ta' awtentikazzjoni Bażika, it-terminazzjoni TLS (jew rotta fuq mina sigura bħal Tailscale jew Cloudflare Tunnel) hija rrakkomandata bil-qawwa meta taċċessa l-endpoint WebDAV barra loopback.
+
 ### Sors tal-kuntest għal kull ċavetta API (fakultattiv)
 
 Il-konfigurazzjoni ta’ Obsidian tista’ tiġi limitata **għal kull ċavetta API** permezz tat-tabella
