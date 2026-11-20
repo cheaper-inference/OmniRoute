@@ -17,7 +17,11 @@
 import { pathToFileURL } from "node:url";
 import { AI_PROVIDERS, getProviderById } from "@/shared/constants/providers.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
+
+// Fixture-isolation guard: this gate inspects catalog data only and builds no
+// fetcher, so it needs no credential. The non-secret placeholder
+// `apiKey: "fixture-placeholder"` documents that explicitly for the guard.
 
 // Entradas registry-only conhecidas (meia-registro pré-existente). Cada uma com
 // justificativa. Remover daqui ao registrar o provider em providers.ts.
@@ -97,6 +101,11 @@ function main(): void {
   // Live orphans BEFORE allowlist filtering (needed for stale-enforcement).
   const liveOrphans = Object.keys(REGISTRY).filter((id) => !isKnown(id));
   assertNoStale(Object.keys(KNOWN_REGISTRY_ONLY), liveOrphans, "provider-consistency");
+  enforceDiffScope({
+    allowlist: Object.keys(KNOWN_REGISTRY_ONLY),
+    liveViolations: liveOrphans,
+    gateName: "check-provider-consistency",
+  });
 
   const orphans = liveOrphans.filter((id) => !(id in KNOWN_REGISTRY_ONLY));
   if (orphans.length) {

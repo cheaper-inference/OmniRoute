@@ -1,0 +1,1 @@
+- **test(quality):** Runtime exemptions now declare a named red proof and flag entries due for review. ([#20694](https://github.com/cheaper-inference/OmniRoute/pull/20694)) — thanks @maxmad64bis

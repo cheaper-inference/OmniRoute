@@ -27,6 +27,10 @@
     {
       "alias": "check:pr-derived-paths",
       "reason": "Judges a pull request's own diff against its base (pr mode); release mode prints SKIP by design."
+    },
+    {
+      "alias": "check:gate-exemptions",
+      "reason": "PR-only exemption registry gate; depends on the verified PR base and is not a release static gate."
     }
   ],
   "gates": [

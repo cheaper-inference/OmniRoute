@@ -44,7 +44,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
 import {
   APPLIED_AGAIN_PHRASE,
   classifyRemovals,
@@ -601,6 +601,14 @@ function main() {
   const liveDupVersions = raw.duplicates.map((d) => d.version);
   assertNoStale(KNOWN_GAPS, raw.gaps, "check-migration-numbering:gaps");
   assertNoStale(KNOWN_DUPLICATE_VERSIONS, liveDupVersions, "check-migration-numbering:duplicates");
+  enforceDiffScope({
+    allowlist: [...KNOWN_GAPS, ...KNOWN_DUPLICATE_VERSIONS],
+    liveViolations: [...raw.gaps, ...liveDupVersions],
+    gateName: "check-migration-numbering",
+    // Same explicit base as compareWithBase: a CLI --base must drive both checks.
+    cliBase: args.base,
+    latestTag: args.baseLatestTag,
+  });
 
   const {
     duplicates,

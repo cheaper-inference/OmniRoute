@@ -26,7 +26,10 @@ function main() {
   if (docs.ok) console.log(docs.message);
   else console.error(docs.message);
 
-  process.exit(openapi.ok && docs.ok ? 0 : 1);
+  // A refused base (exit code 2) must survive the combined result: each sub-check
+  // caps its own code with Math.max(1, scope.exitCode), so propagate the highest
+  // one instead of collapsing every failure to 1.
+  process.exit(Math.max(openapi.exitCode ?? 0, docs.exitCode ?? 0, process.exitCode ?? 0));
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
