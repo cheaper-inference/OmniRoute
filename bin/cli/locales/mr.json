@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "मर्यादा सकारात्मक पूर्णांक असणे आवश्यक आहे.",
     "error": "त्रुटी: {message}",
     "serverOffline": "OmniRoute सर्व्हर ऑफलाइन आहे. तो सुरू करण्यासाठी चालवा: omniroute serve",
     "authRequired": "प्रमाणीकरण आवश्यक आहे. OMNIROUTE_API_KEY सेट करा किंवा हे चालवा: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} केले असते",
     "cancelled": "रद्द केले.",
     "jsonOpt": "JSON स्वरूपात आउटपुट द्या",
-    "yesOpt": "पुष्टीकरण प्रॉम्प्ट वगळा"
+    "yesOpt": "पुष्टीकरण प्रॉम्प्ट वगळा",
+    "positiveIntegerRequired": "मर्यादा सकारात्मक पूर्णांक असणे आवश्यक आहे."
   },
   "setup": {
     "title": "OmniRoute सेटअप",

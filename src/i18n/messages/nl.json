@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Houd de berichten in het midden van het gesprekssysteem op hun plaats",
     "requireUserLastMessageDescription": "Voor upstreams die het vooraf invullen van de assistent afwijzen: laat de achterliggende assistent-beurten vallen (geen tool_use) voordat u deze verzendt. Het model kan het eerdere antwoord regenereren.",
     "requireUserLastMessageLabel": "Vereisen dat het gesprek eindigt met een gebruikersbericht",
+    "strictChatHistoryDescription": "Herstelt onderbroken reeksen toolaanroepen en voegt opeenvolgende assistentberichten samen voordat ze naar OpenAI-compatibele providers met strikte regels worden verzonden.",
+    "strictChatHistoryLabel": "Chathistorie herstellen voor strikte providers",
     "bulkPasteAdded": "{count, plural, one {1 sleutel toegevoegd} other {# sleutels toegevoegd}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicaat overgeslagen} other {# duplicaten overgeslagen}}",
     "bulkPasteHint": "Plak één API-sleutel per regel. Lege regels worden genegeerd en dubbele sleutels worden overgeslagen.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Sleutel verwijderen"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plug-ins worden uitgevoerd met volledige rechten",
-    "privilegesWarningBody": "Een plug-in draait als een gewoon Node.js -proces met dezelfde toegang als OmniRoute: het kan bestanden lezen, programma's uitvoeren en het netwerk gebruiken, ongeacht de machtigingen die het manifest aangeeft. Installeer alleen plug-ins die u vertrouwt.",
     "title": "Plug-ins",
     "description": "Installeer en beheer plug-ins om de functionaliteit van OmniRoute uit te breiden",
     "loading": "Plug-ins laden...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Scannen naar plug-ins",
     "noPlugins": "Geen plug-ins geïnstalleerd",
     "noPluginsDescription": "Plaats plug-inmappen in ~/.omniroute/plugins/ en klik op Scannen.",
+    "privilegesWarningTitle": "Plug-ins worden uitgevoerd met volledige rechten",
+    "privilegesWarningBody": "Een plug-in draait als een gewoon Node.js -proces met dezelfde toegang als OmniRoute: het kan bestanden lezen, programma's uitvoeren en het netwerk gebruiken, ongeacht de machtigingen die het manifest aangeeft. Installeer alleen plug-ins die u vertrouwt.",
     "activate": "Activeren",
     "deactivate": "Deactiveren",
     "uninstall": "Verwijderen",

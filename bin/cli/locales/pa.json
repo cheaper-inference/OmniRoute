@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ਸੀਮਾ ਇੱਕ ਸਕਾਰਾਤਮਕ ਪੂਰਨ ਅੰਕ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।",
     "error": "ਗਲਤੀ: {message}",
     "serverOffline": "OmniRoute ਸਰਵਰ ਆਫ਼ਲਾਈਨ ਹੈ। ਇਸਨੂੰ ਇਸ ਕਮਾਂਡ ਨਾਲ ਚਾਲੂ ਕਰੋ: omniroute serve",
     "authRequired": "ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ। OMNIROUTE_API_KEY ਸੈੱਟ ਕਰੋ ਜਾਂ ਇਹ ਚਲਾਓ: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} ਕੀਤਾ ਜਾਵੇਗਾ",
     "cancelled": "ਰੱਦ ਕੀਤਾ ਗਿਆ।",
     "jsonOpt": "ਆਉਟਪੁੱਟ JSON ਵਜੋਂ ਦਿਓ",
-    "yesOpt": "ਪੁਸ਼ਟੀਕਰਨ ਪ੍ਰੌਂਪਟ ਛੱਡੋ"
+    "yesOpt": "ਪੁਸ਼ਟੀਕਰਨ ਪ੍ਰੌਂਪਟ ਛੱਡੋ",
+    "positiveIntegerRequired": "ਸੀਮਾ ਇੱਕ ਸਕਾਰਾਤਮਕ ਪੂਰਨ ਅੰਕ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।"
   },
   "setup": {
     "title": "OmniRoute ਸੈੱਟਅੱਪ",
