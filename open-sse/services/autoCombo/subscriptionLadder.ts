@@ -307,17 +307,83 @@ function evaluateConnections(
 }
 
 /** Rewrite a candidate's connection allowlist to the verified subset, keeping
- * the identity-when-nothing-changed contract the sibling filters hold. */
-function withVerifiedConnections<T extends LadderCandidate>(
-  candidate: T,
-  connectionIds: string[]
-): { candidate: T; changed: boolean } {
+ * the identity-when-nothing-changed contract the sibling filters hold. */ function withVerifiedConnections<
+  T extends LadderCandidate,
+>(candidate: T, connectionIds: string[]): { candidate: T; changed: boolean } {
   if (candidate.connectionId !== null) return { candidate, changed: false };
   const original = candidate.allowedConnectionIds ?? [];
   const isSameSet =
     original.length === connectionIds.length && connectionIds.every((id) => original.includes(id));
   if (isSameSet) return { candidate, changed: false };
   return { candidate: { ...candidate, allowedConnectionIds: connectionIds }, changed: true };
+}
+
+/**
+ * The rung a candidate would actually be served from right now, or `null` when
+ * none of its connections is usable.
+ *
+ * `orderPoolByRung` sorts by this internally but only returns the pool; callers
+ * that need the rung itself (newest-generation promotion buckets by it, so a
+ * newer generation can never cross a rung boundary) read it here instead of
+ * re-deriving the billing classification.
+ */
+export function resolveCandidateRung(
+  candidate: LadderCandidate,
+  options: LadderOptions
+): LadderRung | null {
+  if (!options.enabled) return null;
+  return evaluateConnections(candidate, options, () => true)?.rung ?? null;
+}
+
+/**
+ * Partition a `LadderCandidate` by the exact rung of each usable connection so
+ * a single candidate spanning mixed billing classes (e.g. a subscription OAuth
+ * account and a metered API key on the same provider/model) cannot dispatch a
+ * metered connection inside a `subscription` bucket.
+ */
+export function partitionCandidateByRung<T extends LadderCandidate>(
+  candidate: T,
+  options: LadderOptions
+): Array<{ candidate: T; rung: LadderRung }> {
+  if (!options.enabled) return [];
+  const connectionIds = candidate.connectionId
+    ? [candidate.connectionId]
+    : (candidate.allowedConnectionIds ?? []);
+  if (connectionIds.length === 0) return [];
+
+  const byRung = new Map<LadderRung, string[]>();
+  for (const connectionId of connectionIds) {
+    const rung = assignRung(
+      candidate,
+      {
+        provider: candidate.provider,
+        authType: options.resolveAuthType(connectionId),
+        connectionId,
+      },
+      options
+    );
+    if (QUOTA_BEARING_RUNGS.has(rung)) {
+      const state = options.resolveFreeAccessState(candidate.provider, connectionId);
+      if (!isQuotaUsable(state, options)) continue;
+    } else if (isRungBudgetExhausted(rung, options)) {
+      continue;
+    }
+    const existing = byRung.get(rung);
+    if (existing) existing.push(connectionId);
+    else byRung.set(rung, [connectionId]);
+  }
+
+  const entries = [...byRung.entries()].sort(([a], [b]) => rungIndex(a) - rungIndex(b));
+  if (entries.length === 0) return [];
+  if (entries.length === 1) {
+    const [rung, ids] = entries[0];
+    return [{ candidate: withVerifiedConnections(candidate, ids).candidate, rung }];
+  }
+  return entries.map(([rung, ids]) => ({
+    candidate:
+      candidate.connectionId !== null ? candidate : { ...candidate, allowedConnectionIds: ids },
+    rung,
+  }));
 }
 
 /**

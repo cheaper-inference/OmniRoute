@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   OUTPUT_TOKEN_RATIO,
   resolvePoolCosts,
+  resolveRawPoolCosts,
 } from "../../open-sse/services/combo/candidateCost.ts";
 
 type Pricing = { input?: number; output?: number } | null;
@@ -64,4 +65,47 @@ test("a throwing lookup is treated as unpriced", async () => {
     throw new Error("db down");
   });
   assert.equal(costs.get("a/b"), 1);
+});
+
+// ── resolveRawPoolCosts: the price-jump guard needs the UNPADDED number ──
+// `resolvePoolCosts` replaces an unpriced model with the pool median, which is
+// right for scoring and wrong for a spend guard: "unpriced" must fail closed, not
+// read as "about average". These pin the raw variant the guard consumes.
+
+test("resolveRawPoolCosts keeps null for an unpriced model instead of the median", async () => {
+  const costs = await resolveRawPoolCosts(
+    [
+      { provider: "anthropic", model: "claude-opus-4-1" },
+      { provider: "mystery", model: "unknown-x" },
+    ],
+    lookup
+  );
+  assert.equal(costs.get("mystery/unknown-x"), null);
+  assert.equal(
+    costs.get("anthropic/claude-opus-4-1"),
+    15 * (1 - OUTPUT_TOKEN_RATIO) + 75 * OUTPUT_TOKEN_RATIO
+  );
+});
+
+test("resolveRawPoolCosts returns null for every model when nothing is priced", async () => {
+  const costs = await resolveRawPoolCosts(
+    [
+      { provider: "mystery", model: "a" },
+      { provider: "mystery", model: "b" },
+    ],
+    lookup
+  );
+  assert.equal(costs.get("mystery/a"), null);
+  assert.equal(costs.get("mystery/b"), null);
+});
+
+test("resolveRawPoolCosts falls back to the bare id for namespaced models", async () => {
+  const costs = await resolveRawPoolCosts(
+    [{ provider: "openai", model: "openai/gpt-4o-mini" }],
+    lookup
+  );
+  assert.equal(
+    costs.get("openai/openai/gpt-4o-mini"),
+    0.15 * (1 - OUTPUT_TOKEN_RATIO) + 0.6 * OUTPUT_TOKEN_RATIO
+  );
 });

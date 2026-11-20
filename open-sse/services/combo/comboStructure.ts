@@ -109,6 +109,21 @@ function buildExecutionKey(path: string[], stepId: string): string {
   return [...path, stepId].join(">");
 }
 
+/**
+ * Optional flags that only a `model` step carries. `ladderRung` is transient built-in-auto
+ * routing metadata: preserved so newest-generation promotion can bucket by ladder rung,
+ * never persisted.
+ */
+function modelStepOptionalFlags(
+  step: NonNullable<ReturnType<typeof normalizeComboStep>>
+): Partial<Pick<ResolvedComboTarget, "fallbackOnlyOnQuotaExhaustion" | "ladderRung">> {
+  if (step.kind !== "model") return {};
+  return {
+    ...(step.fallbackOnlyOnQuotaExhaustion ? { fallbackOnlyOnQuotaExhaustion: true } : {}),
+    ...(step.ladderRung ? { ladderRung: step.ladderRung } : {}),
+  };
+}
+
 function normalizeRuntimeStep(
   entry: unknown,
   comboName: string,
@@ -163,9 +178,7 @@ function normalizeRuntimeStep(
     // `prompt` is a per-step pipeline input and only exists on a model step —
     // #8894 widened the union with ComboProviderWildcardStep, which has no prompt.
     prompt: (step.kind === "model" ? step.prompt : null) || null,
-    ...(step.kind === "model" && step.fallbackOnlyOnQuotaExhaustion
-      ? { fallbackOnlyOnQuotaExhaustion: true }
-      : {}),
+    ...modelStepOptionalFlags(step),
   } satisfies ResolvedComboTarget;
 }
 

@@ -229,6 +229,18 @@ export const updateSettingsSchema = z.object({
   blockedProviders: z.array(z.string().max(100)).optional(),
   noAuthFallbackDisabledProviders: z.array(z.string().max(100)).optional(),
   hidePaidModels: z.boolean().optional(),
+  // Newest-generation preference for built-in `auto` / `auto/*` routes (opt-in,
+  // default OFF). When enabled, the newest eligible healthy generation inside each
+  // `(ladder rung, health group, tier-scoped family)` bucket is promoted ahead of
+  // older generations of that same bucket, which stay in the fallback chain.
+  // Explicit model ids and user-created combos are never rewritten. See
+  // open-sse/services/autoCombo/modelGeneration.ts.
+  autoPreferNewestInFamily: z.boolean().optional(),
+  // Price-jump ceiling for that promotion, as a multiple of the top-ranked older
+  // candidate's raw blended $/1M cost. Unset falls back to the fail-safe 1.0
+  // (equal-or-cheaper only), so enabling the preference alone can never escalate
+  // spend; `:thrifty` pools clamp it to <= 1.0 regardless of this value.
+  autoNewestMaxPriceMultiplier: z.number().positive().max(100).optional(),
   // #9418/#13562: catalog/auto-combo already consume both flags (open-sse
   // autoCombo + /v1/models catalog), but neither was ever added here — Zod
   // silently strips unknown keys on a plain z.object, so PATCH /api/settings

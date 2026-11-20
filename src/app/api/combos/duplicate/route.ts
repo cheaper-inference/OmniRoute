@@ -12,6 +12,7 @@ import {
 import { AutoVariant } from "@omniroute/open-sse/services/autoCombo/autoPrefix";
 import { AutoComboSpec } from "@omniroute/open-sse/services/autoCombo/virtualFactory";
 import { MODEL_FAMILIES, ModelFamily } from "@omniroute/open-sse/services/autoCombo/modelFamily";
+import { stripTransientAutoFlags } from "@omniroute/open-sse/services/autoCombo/transientAutoFlags";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
 // POST /api/combos/duplicate - Resolve an auto-combo into a static combo snapshot.
@@ -61,8 +62,11 @@ export async function POST(request: Request) {
         ...(resolved.tier ? { tier: resolved.tier } : {}),
       };
     } else if ("family" in resolved) {
-      // Family path (e.g. auto/glm, auto/claude-opus → { family })
-      spec = { family: resolved.family };
+      // Family path (e.g. auto/glm, auto/claude-opus, auto/gpt-sol:subscription)
+      spec = {
+        family: resolved.family,
+        ...(resolved.tier ? { tier: resolved.tier } : {}),
+      };
     } else if (resolved.variant !== undefined) {
       // Variant path (e.g. auto/best-coding → variant "coding")
       variant = resolved.variant ?? undefined;
@@ -149,14 +153,20 @@ export async function POST(request: Request) {
     // Create the static combo using the template's strategy.
     const comboStrategy = strategy || "priority";
     const snapshotDate = new Date().toISOString();
-    const comboData = await createCombo({
-      name: newName,
-      models: normalizedModels,
-      strategy: comboStrategy,
-      description: `${name} @ ${snapshotDate}`,
-      config: { sourceAutoCombo: name, weightPack },
-      version: 2,
-    });
+    // A duplicate is a STATIC snapshot: it must not inherit the virtual combo's
+    // transient routing flags (`autoConfig.isBuiltinAuto`, per-step `ladderRung`),
+    // or the copy would keep routing under built-in-auto semantics — including the
+    // opt-in newest-generation overlay — with a frozen, already-stale ladder rung.
+    const comboData = await createCombo(
+      stripTransientAutoFlags({
+        name: newName,
+        models: normalizedModels,
+        strategy: comboStrategy,
+        description: `${name} @ ${snapshotDate}`,
+        config: { sourceAutoCombo: name, weightPack },
+        version: 2,
+      })
+    );
 
     return NextResponse.json(comboData, { status: 201 });
   } catch (error) {

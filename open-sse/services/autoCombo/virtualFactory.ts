@@ -46,7 +46,9 @@ import { failClosedAutoConfig } from "./failClosedPool";
 import {
   filterSubscriptionOnlyCandidates,
   orderPoolByRung,
+  partitionCandidateByRung,
   type LadderOptions,
+  type LadderRung,
 } from "./subscriptionLadder";
 import {
   classifyStrictZeroCostCandidate,
@@ -145,6 +147,13 @@ export interface VirtualAutoComboCandidate {
    * do no extra work.
    */
   freeAccessExclusion?: import("./strictZeroCostFilter").StrictZeroCostExclusionReason | null;
+  /**
+   * Subscription-ladder rung this candidate was placed on, set only for the
+   * rung-ordered ids (`auto/subscription`, `auto/thrifty`, `auto/<family>:thrifty`).
+   * Newest-generation promotion buckets by it so a newer generation can never
+   * jump across a rung boundary.
+   */
+  ladderRung?: LadderRung;
 }
 
 type VirtualAutoCombo = AutoComboConfig & {
@@ -162,6 +171,8 @@ type VirtualAutoCombo = AutoComboConfig & {
     /** Carried through from the candidate for the read-only inspector; absent
      * on every dispatch build. */
     freeAccessExclusion?: import("./strictZeroCostFilter").StrictZeroCostExclusionReason | null;
+    /** Subscription-ladder rung, present only on rung-ordered pools. */
+    ladderRung?: LadderRung;
   }>;
   /** MAX of candidates' context windows — safe to advertise because the
    * auto-combo context pre-filter routes oversized requests to large-window
@@ -173,6 +184,13 @@ type VirtualAutoCombo = AutoComboConfig & {
     weights: ScoringWeights;
     explorationRate: number;
     routerStrategy: string;
+    /**
+     * Marks a combo materialized from the built-in `auto` / `auto/*` catalog, as
+     * opposed to a user-created combo that merely uses the `auto` strategy.
+     * Opt-in routing overlays (newest-generation preference) apply ONLY to these.
+     * Transient: stripped before a virtual combo is persisted or duplicated.
+     */
+    isBuiltinAuto?: boolean;
   };
   config: {
     auto: {
@@ -983,6 +1001,31 @@ function isFullPoolFallbackEnabled(spec: AutoComboSpec | undefined): boolean {
 }
 
 /**
+ * `auto/<family>:<tier>` composes BOTH overlays: the family narrows the pool to
+ * one model family, the tier then applies its own candidate filter (free/pro
+ * model tier, vision/reasoning capability). A family-only spec keeps the
+ * historical family-only behavior because `buildAutoCandidateFilter` returns
+ * null for an undefined category+tier.
+ */
+function buildOverlayCandidateFilter(
+  spec: AutoComboSpec | undefined
+): ((candidate: VirtualAutoComboCandidate) => boolean) | null {
+  const filters: Array<(candidate: VirtualAutoComboCandidate) => boolean> = [];
+  if (spec?.family) filters.push(buildFamilyCandidateFilter(spec.family));
+  const tierFilter = spec ? buildAutoCandidateFilter(spec.category, spec.tier) : null;
+  if (tierFilter) filters.push(tierFilter);
+  if (filters.length === 0) return null;
+  return (candidate) => filters.every((filter) => filter(candidate));
+}
+
+function describeAutoSpecLabel(spec: AutoComboSpec | undefined): string {
+  const tierSuffix = spec?.tier ? `:${spec.tier}` : "";
+  return spec?.family
+    ? `auto/${spec.family}${tierSuffix}`
+    : `auto/${spec?.category ?? ""}${tierSuffix}`;
+}
+
+/**
  * #4235 Phase B: narrow the pool by the `auto/<category>:<tier>` overlay
  * (vision/reasoning capability, free/premium model tier).
  *
@@ -1002,11 +1045,7 @@ function narrowPoolByCategoryTier(
   spec: AutoComboSpec | undefined,
   traceInvocationId?: string
 ): VirtualAutoComboCandidate[] {
-  const candidateFilter = spec?.family
-    ? buildFamilyCandidateFilter(spec.family)
-    : spec
-      ? buildAutoCandidateFilter(spec.category, spec.tier)
-      : null;
+  const candidateFilter = buildOverlayCandidateFilter(spec);
   if (!candidateFilter) return candidatePool;
 
   const narrowed = candidatePool.filter((candidate) => candidateFilter(candidate));
@@ -1019,9 +1058,7 @@ function narrowPoolByCategoryTier(
   );
   if (narrowed.length > 0) return narrowed;
 
-  const label = spec?.family
-    ? `auto/${spec.family}`
-    : `auto/${spec?.category ?? ""}${spec?.tier ? `:${spec.tier}` : ""}`;
+  const label = describeAutoSpecLabel(spec);
   if (isFullPoolFallbackEnabled(spec)) {
     // Opt-in legacy behavior (category/tier only): warn loudly, then keep the full pool.
     log.warn(
@@ -1059,14 +1096,38 @@ function applySubscriptionLadder(
     tier === "subscription"
       ? filterSubscriptionOnlyCandidates(effectivePool, ladderOptions)
       : orderPoolByRung(effectivePool, ladderOptions);
+  // Annotate each surviving candidate with the rung it landed on (splitting any
+  // multi-connection candidate that spans multiple billing classes). Newest-
+  // generation promotion buckets by rung, so a newer generation on a paid rung
+  // can never jump ahead of an older generation the operator already pays for.
+  const rungAnnotated: VirtualAutoComboCandidate[] =
+    tier === "subscription"
+      ? ordered.map((candidate) => ({ ...candidate, ladderRung: "subscription" }))
+      : ordered.flatMap((candidate) => {
+          const partitions = partitionCandidateByRung(candidate, ladderOptions);
+          if (partitions.length === 0) return [];
+          return partitions.map(({ candidate: partitioned, rung }) => ({
+            ...partitioned,
+            ladderRung: rung,
+          }));
+        });
+  if (tier === "thrifty") {
+    rungAnnotated.sort((a, b) => {
+      const aRung = a.ladderRung;
+      const bRung = b.ladderRung;
+      if (!aRung || !bRung || aRung === bRung) return 0;
+      const order = ["subscription", "keyless", "free", "cheap", "premium"] as const;
+      return order.indexOf(aRung) - order.indexOf(bRung);
+    });
+  }
   recordAutoDroppedCandidates(
     tier === "subscription" ? traceInvocationId : undefined,
     effectivePool,
-    ordered,
+    rungAnnotated,
     "subscription_ladder",
     "subscription-ladder"
   );
-  if (tier === "subscription" && ordered.length === 0 && beforeCount > 0) {
+  if (tier === "subscription" && rungAnnotated.length === 0 && beforeCount > 0) {
     // Intended, not a defect: the operator asked for plan-included capacity
     // only, and right now there is none with verified headroom. Failing
     // closed here is the entire promise of the id — the caller's existing
@@ -1078,7 +1139,7 @@ function applySubscriptionLadder(
         "returning an empty pool rather than falling back to paid capacity."
     );
   }
-  return ordered;
+  return rungAnnotated;
 }
 
 export async function selectVirtualAutoCandidatePool(
@@ -1127,6 +1188,7 @@ export async function createVirtualAutoComboFromPrepared(
       weights: { ...DEFAULT_WEIGHTS },
       explorationRate: 0.05,
       routerStrategy: "lkgp",
+      isBuiltinAuto: true,
       ...failClosedAutoConfig(spec),
     };
     return {
@@ -1217,12 +1279,14 @@ export async function createVirtualAutoComboFromPrepared(
     ...(candidate.freeAccessExclusion === undefined
       ? {}
       : { freeAccessExclusion: candidate.freeAccessExclusion }),
+    ...(candidate.ladderRung ? { ladderRung: candidate.ladderRung } : {}),
   }));
   const autoConfig = {
     candidatePool: providerPool,
     weights,
     explorationRate,
     routerStrategy,
+    isBuiltinAuto: true,
     ...failClosedAutoConfig(spec),
   };
   // Chaos mode fans out to the top-N most stable models in parallel. Panel size

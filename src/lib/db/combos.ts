@@ -7,6 +7,7 @@
  */
 
 import type { ComboRecord } from "@/domain/persistence/comboRepositories";
+import { stripTransientAutoFlags } from "@omniroute/open-sse/services/autoCombo/transientAutoFlags";
 import { backupDbFile, backupDbFileAwaited } from "./backup";
 import { pruneDeletedComboConnectionRefs } from "./comboConnectionRefs";
 import { clearSessionModelHistoryForCombo } from "./contextHandoffs";
@@ -39,14 +40,14 @@ export function getComboByNameInsensitive(name: string): Promise<ComboRecord | n
 }
 
 export async function createCombo(data: ComboRecord): Promise<ComboRecord> {
-  const combo = await repository.create(data);
+  const combo = await repository.create(stripTransientAutoFlags(data));
   invalidateDbCache("combos");
   backupDbFile("pre-write");
   return combo;
 }
 
 export async function updateCombo(id: string, data: ComboRecord): Promise<ComboRecord | null> {
-  const result = await repository.update(id, data);
+  const result = await repository.update(id, stripTransientAutoFlags(data));
   if (!result) return null;
 
   if (result.modelsFieldProvided) {
