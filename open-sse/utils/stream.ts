@@ -68,6 +68,7 @@ import {
 } from "./responsesCommentaryDrop.ts";
 import { buildErrorBody } from "./error.ts";
 import { parseTextualToolCallCandidate, isValidToolCallHeaderPrefix } from "./textualToolCall.ts";
+import { pickResponsesTextPart, type ResponsesTextPart } from "./responsesTextPart.ts";
 import { stripObfuscationZeroWidth } from "./zeroWidth.ts";
 import {
   formatTranslatedStreamError,
@@ -1037,6 +1038,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
   let passthroughBufferedTextualToolCallContent = "";
+  let passthroughBufferedTextPart: ResponsesTextPart = {}; // #20257: identity of the buffered part
   /** Passthrough: whether a usage block was already forwarded to the client (prevents double). */
   let passthroughForwardedUsage = false;
   let passthroughForwardedUsageSummary = false;
@@ -1945,6 +1947,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                         parsed.delta = "";
                         if (collectedToolCall) continue;
                       } else if (parsedCandidate?.kind === "partial") {
+                        if (!passthroughBufferedTextualToolCallContent)
+                          passthroughBufferedTextPart = pickResponsesTextPart(parsed);
                         passthroughBufferedTextualToolCallContent = appendBoundedText(
                           passthroughBufferedTextualToolCallContent,
                           incomingDelta
@@ -3223,6 +3227,10 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (clientExpectsResponsesStream) {
                 const syntheticChunk = {
                   type: "response.output_text.delta",
+                  item_id: passthroughResponsesId ? `msg_${passthroughResponsesId}_0` : "msg_0",
+                  output_index: 0,
+                  content_index: 0,
+                  ...passthroughBufferedTextPart,
                   delta: passthroughBufferedTextualToolCallContent,
                 };
                 flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;

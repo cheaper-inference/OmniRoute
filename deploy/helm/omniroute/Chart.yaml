@@ -3,7 +3,7 @@ name: omniroute
 description: OmniRoute — unified AI proxy/router. One endpoint, many LLM providers, auto-fallback.
 type: application
 # Chart version — bump on every chart change.
-version: 0.1.1
+version: 0.1.2
 # Default image tag. Overridable with image.tag.
 appVersion: "latest"
 home: https://github.com/cheaper-inference/OmniRoute

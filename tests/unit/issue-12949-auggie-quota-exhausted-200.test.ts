@@ -7,15 +7,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { writeNodeCliFixture } from "../helpers/nodeCliFixture.ts";
 
 const { AuggieExecutor } = await import("@omniroute/open-sse/executors/auggie");
 
 const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-auggie-quota-test-"));
 
 function writeFakeBin(name: string, script: string): string {
-  const p = path.join(TMP_DIR, name);
-  fs.writeFileSync(p, `#!/bin/sh\n${script}\n`, { mode: 0o755 });
-  return p;
+  return writeNodeCliFixture(TMP_DIR, name, script);
 }
 
 test.after(() => {
@@ -28,8 +27,8 @@ test("issue #12949: auggie quota-exhausted stdout with exit 0 must NOT surface a
   // portable across shells, e.g. dash's printf does not interpret `\xHH`) — the
   // detector matches on the plain-English phrase, so the emoji is irrelevant to it.
   const bin = writeFakeBin(
-    "fake-auggie-quota.sh",
-    `printf '%s\\n' 'You have run out of usage for ursoambra@gmail.com. Please visit https://app.augmentcode.com/account to upgrade.'\nprintf '%s\\n' 'Request ID: f8f864e4-4559-4595-8514-678d1ff1aa09'\nexit 0`
+    "fake-auggie-quota",
+    `process.stdout.write("You have run out of usage for ursoambra@gmail.com. Please visit https://app.augmentcode.com/account to upgrade.\\nRequest ID: f8f864e4-4559-4595-8514-678d1ff1aa09\\n"); process.exit(0);`
   );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
@@ -59,8 +58,8 @@ test("issue #12949: auggie quota-exhausted stdout with exit 0 must NOT surface a
 
 test("issue #12949: auggie quota-exhausted stdout with exit 0 must NOT surface as a normal completion (streaming)", async () => {
   const bin = writeFakeBin(
-    "fake-auggie-quota-stream.sh",
-    `printf '%s\\n' 'You have run out of usage for ursoambra@gmail.com. Please visit https://app.augmentcode.com/account to upgrade.'\nprintf '%s\\n' 'Request ID: f8f864e4-4559-4595-8514-678d1ff1aa09'\nexit 0`
+    "fake-auggie-quota-stream",
+    `process.stdout.write("You have run out of usage for ursoambra@gmail.com. Please visit https://app.augmentcode.com/account to upgrade.\\nRequest ID: f8f864e4-4559-4595-8514-678d1ff1aa09\\n"); process.exit(0);`
   );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
@@ -101,8 +100,8 @@ test("issue #12949: auggie quota-exhausted stdout with exit 0 must NOT surface a
 
 test("issue #12949: a normal reply that merely mentions usage/quota in passing is NOT misclassified as quota-exhausted", async () => {
   const bin = writeFakeBin(
-    "fake-auggie-normal.sh",
-    `printf 'Sure — here is how you can check your API usage and quota dashboard in the settings page.'\nexit 0`
+    "fake-auggie-normal",
+    `process.stdout.write("Sure — here is how you can check your API usage and quota dashboard in the settings page.\\n"); process.exit(0);`
   );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
