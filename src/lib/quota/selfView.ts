@@ -9,6 +9,12 @@
  *   consumed  = store.peek(apiKeyId, { poolId, unit, window })
  * Placeholder dimensions (limit not above Number.EPSILON) are skipped, as the gate skips them.
  *
+ * `accounts[]` (selfViewAccounts.ts) lists one neutral entry per pool connection with the
+ * `percent` dimensions. Account-level readings come from resolveAccountQuotaEntries (the cached
+ * provider-limits snapshot behind /v1/me/status, sharing its refresh tracker and 60 s floor), and
+ * are asked for only when the pool's `accountVisible` is true, only for the pool's own non-empty
+ * connection ids, and never with an empty list (which would mean every active connection).
+ *
  * A failed quota-store read is reported as `status: "unavailable"` with `consumed`/`remaining`
  * null, never as zero. Database reads of allocations and pools are not caught: a failure there
  * propagates to the caller instead of being reported as "no pools". The connection-provider and
@@ -28,11 +34,21 @@ import {
   type SelfQuotaShare,
   type SelfQuotaSharedDimension,
 } from "@/shared/schemas/selfQuota";
-import { isProviderShared } from "@/lib/usage/apiKeySelfServiceAccounts";
+import {
+  defaultQuotaRefreshTracker,
+  isProviderShared,
+  resolveAccountQuotaEntries,
+} from "@/lib/usage/apiKeySelfServiceAccounts";
 import type { PoolAllocation, QuotaPool } from "@/lib/db/quotaPools";
 import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
-import type { QuotaSelfViewDeps, QuotaSelfViewInput, SelfViewPoolContext } from "./selfViewTypes";
+import { buildSelfViewAccounts } from "./selfViewAccounts";
+import type {
+  AccountQuotaEntryLike,
+  QuotaSelfViewDeps,
+  QuotaSelfViewInput,
+  SelfViewPoolContext,
+} from "./selfViewTypes";
 import type { QuotaStore } from "./types";
 
 type ViewStore = Pick<QuotaStore, "peek" | "poolConsumedTotal">;
@@ -48,6 +64,7 @@ type CoreDeps = Required<
     | "resolveConnectionProvider"
     | "resolvePlan"
     | "getQuotaStore"
+    | "resolveAccountQuotaEntries"
   >
 > & { secret: string };
 
@@ -83,6 +100,29 @@ const DEFAULT_DEPS_LOADERS: Array<{
   {
     keys: ["getQuotaStore"],
     load: async () => ({ getQuotaStore: (await import("./QuotaStore")).getQuotaStore }),
+  },
+  {
+    // Same sources and process-wide refresh tracker as /v1/me/status, so the 60 s refresh
+    // floor per connection holds across both routes.
+    keys: ["resolveAccountQuotaEntries"],
+    load: async () => {
+      const [providers, limitsCache, limits] = await Promise.all([
+        import("@/lib/db/providers"),
+        import("@/lib/db/providerLimits"),
+        import("@/lib/usage/providerLimits"),
+      ]);
+      return {
+        resolveAccountQuotaEntries: (metadata) =>
+          resolveAccountQuotaEntries(metadata, {
+            now: Date.now,
+            getProviderConnectionById: providers.getProviderConnectionById,
+            getProviderConnections: providers.getProviderConnections,
+            getProviderLimitsCache: limitsCache.getProviderLimitsCache,
+            fetchAndPersistProviderLimits: limits.fetchAndPersistProviderLimits,
+            quotaRefreshTracker: defaultQuotaRefreshTracker,
+          }),
+      };
+    },
   },
 ];
 
@@ -244,15 +284,39 @@ function allocationCap(allocation: PoolAllocation): SelfQuotaPool["cap"] {
   return { unit: capUnit, value: capValue };
 }
 
+/**
+ * Account entries for the pool's own connections, or null when the key may not see them.
+ * A failed lookup is an empty list (every account reported unavailable). Never called with an
+ * empty id list: resolveAccountQuotaEntries would read every active connection.
+ */
+async function resolvePoolAccountEntries(
+  ctx: SelfViewPoolContext,
+  input: QuotaSelfViewInput,
+  deps: CoreDeps
+): Promise<AccountQuotaEntryLike[] | null> {
+  if (!ctx.accountVisible) return null;
+  const allowedConnections = ctx.connectionIds.filter((id) => typeof id === "string" && id);
+  if (allowedConnections.length === 0) return [];
+  try {
+    return await deps.resolveAccountQuotaEntries({
+      allowedConnections,
+      sharedQuotaProviders: input.sharedQuotaProviders,
+    });
+  } catch {
+    return [];
+  }
+}
+
 async function buildPoolView(
   ctx: SelfViewPoolContext,
   store: ViewStore | null,
-  apiKeyId: string
+  input: QuotaSelfViewInput,
+  deps: CoreDeps
 ): Promise<SelfQuotaPool> {
   const dimensions: SelfQuotaSharedDimension[] = [];
   for (const dim of ctx.plan.dimensions ?? []) {
     if (!isCountableDimension(dim)) continue;
-    dimensions.push(await buildSharedDimension(ctx, dim, store, apiKeyId));
+    dimensions.push(await buildSharedDimension(ctx, dim, store, input.apiKeyId));
   }
   return {
     ref: ctx.ref,
@@ -264,7 +328,7 @@ async function buildPoolView(
     cap: allocationCap(ctx.allocation),
     accountVisible: ctx.accountVisible,
     dimensions,
-    accounts: [],
+    accounts: buildSelfViewAccounts(ctx, await resolvePoolAccountEntries(ctx, input, deps)),
   };
 }
 
@@ -284,7 +348,7 @@ export async function buildQuotaSelfView(
   const store = contexts.length > 0 ? await loadStore(deps) : null;
   const pools: SelfQuotaPool[] = [];
   for (const ctx of contexts) {
-    pools.push(await buildPoolView(ctx, store, input.apiKeyId));
+    pools.push(await buildPoolView(ctx, store, input, deps));
   }
 
   return selfQuotaResponseSchema.parse({

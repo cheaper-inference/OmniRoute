@@ -108,6 +108,8 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
         ...planOver,
       }) as ProviderPlan,
     getQuotaStore: async () => store,
+    // No account data by default, so no test reaches the real provider-limits modules.
+    resolveAccountQuotaEntries: async () => [],
     ...rest,
   };
 }
