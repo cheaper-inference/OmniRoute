@@ -3,7 +3,8 @@
  * `block` (dispatch gate) so both write the same eleven keys.
  *
  * Only the classifier's allowlisted signals are logged, never a credential.
- * Does not catch: the caller decides what a failed write means.
+ * `writeAgentGuardLog` does not catch: the caller decides what a failed write
+ * means.
  */
 
 import type { AgentClassification } from "./classifier";
@@ -37,4 +38,22 @@ export function writeAgentGuardLog(
     ...classification.signals,
   };
   log?.[level]?.call(log, LOG_TAG, reason, meta);
+}
+
+/**
+ * The `warn` line a fail-open path writes. Carries only the error's class name,
+ * never its message (which could quote a header value). Unlike the decision
+ * line it catches: a failed write must not turn a fail-open into a failure.
+ */
+export function writeAgentGuardFailOpen(
+  log: AgentGuardLogger | null | undefined,
+  error: unknown
+): void {
+  try {
+    log?.warn?.call(log, LOG_TAG, "agent guard failed open", {
+      error: error instanceof Error ? error.name : typeof error,
+    });
+  } catch {
+    // Logging is best effort; the fail-open stands.
+  }
 }

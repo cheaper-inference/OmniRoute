@@ -23,6 +23,8 @@ function capture() {
       void calls.push([level, ...args]);
   return { calls, log: { debug() {}, error() {}, info: push("info"), warn: push("warn") } };
 }
+// Every gate call gets a capture logger: a call without one writes to the process logger.
+const quiet = () => capture().log;
 const req = (headers: Record<string, string>) =>
   new Request("http://localhost/v1/chat/completions", { method: "POST", headers });
 const setMode = (mode: string, strict = "false") => {
@@ -52,8 +54,12 @@ test("off and monitor: no header is read, nothing is refused, nothing is logged"
 test("block: a third-party agent is refused on claude, anthropic and the cc alias; never on another provider", () => {
   setMode("block");
   for (const provider of ["claude", "anthropic", "cc"])
-    assert.equal(gate.agentGuardRefusal({ request: req(KILO), provider })?.status, 403, provider);
-  assert.equal(gate.agentGuardRefusal({ request: req(KILO), provider: "glm" }), null);
+    assert.equal(
+      gate.agentGuardRefusal({ request: req(KILO), provider, log: quiet() })?.status,
+      403,
+      provider
+    );
+  assert.equal(gate.agentGuardRefusal({ request: req(KILO), provider: "glm", log: quiet() }), null);
   assert.deepEqual(
     [
       wouldRefuseAgent({ headers: KILO }),
@@ -66,11 +72,15 @@ test("block: a third-party agent is refused on claude, anthropic and the cc alia
 test("block: an official client is never refused, with or without strict", () => {
   for (const strict of ["false", "true"]) {
     setMode("block", strict);
-    assert.equal(gate.agentGuardRefusal({ request: req(CLI), provider: "claude" }), null);
+    assert.equal(
+      gate.agentGuardRefusal({ request: req(CLI), provider: "claude", log: quiet() }),
+      null
+    );
     assert.equal(
       gate.agentGuardRefusal({
         request: req({ "user-agent": "Anthropic/JS 0.122.0" }),
         provider: "anthropic",
+        log: quiet(),
       }),
       null
     );
@@ -88,7 +98,7 @@ test("block: x-stainless-* alone is unidentified: logged without strict, refused
   assert.deepEqual(calls[0].slice(0, 3), ["info", "AGENT_GUARD", "unidentified agent on claude"]);
   setMode("block", "true");
   assert.equal(
-    gate.agentGuardRefusal({ request: req(stainless), provider: "claude" })?.status,
+    gate.agentGuardRefusal({ request: req(stainless), provider: "claude", log: quiet() })?.status,
     403
   );
 });
@@ -98,6 +108,7 @@ test("refusal: 403, stable code, neutral message, local-policy mark, no retry hi
     request: req({ ...KILO, authorization: "Bearer sk-SECRET" }),
     provider: "claude",
     modelStr: "cc/claude-opus-5",
+    log: quiet(),
   });
   assert.ok(res);
   const body = await res.json();
@@ -128,7 +139,12 @@ test("refusal: 403, stable code, neutral message, local-policy mark, no retry hi
 test("refusal: Anthropic envelope when the request came in Anthropic format", async () => {
   setMode("block");
   const body = await gate
-    .agentGuardRefusal({ request: req(KILO), provider: "anthropic", sourceFormat: "claude" })
+    .agentGuardRefusal({
+      request: req(KILO),
+      provider: "anthropic",
+      sourceFormat: "claude",
+      log: quiet(),
+    })
     ?.json();
   assert.deepEqual(
     [body.type, body.error.type, body.error.code, body.error.message],
@@ -178,18 +194,27 @@ test("not client-disableable: no disable channel reaches the gate, including the
     "x-disabled-guardrails": "agent-guard",
   });
   const apiKeyInfo = { id: "key-1", disabledGuardrails: ["agent-guard"] };
-  assert.equal(gate.agentGuardRefusal({ request, provider: "claude", apiKeyInfo })?.status, 403);
+  assert.equal(
+    gate.agentGuardRefusal({ request, provider: "claude", apiKeyInfo, log: quiet() })?.status,
+    403
+  );
 });
 test("strict: the trusted live test is exempt; a client that only sends the test header is not", () => {
   setMode("block", "true");
   assert.equal(
-    gate.agentGuardRefusal({ request: req(CURL), provider: "claude", trustedLiveTest: true }),
+    gate.agentGuardRefusal({
+      request: req(CURL),
+      provider: "claude",
+      trustedLiveTest: true,
+      log: quiet(),
+    }),
     null
   );
   assert.equal(
     gate.agentGuardRefusal({
       request: req({ ...CURL, "x-internal-test": "combo-health-check" }),
       provider: "claude",
+      log: quiet(),
     })?.status,
     403
   );
@@ -201,22 +226,45 @@ test("a proxy that rewrites User-Agent: Claude Code stays official by x-app and 
     gate.agentGuardRefusal({
       request: req({ ...stripped, "x-app": "cli", "anthropic-beta": "oauth-2025-04-20" }),
       provider: "claude",
+      log: quiet(),
     }),
     null
   );
-  assert.equal(gate.agentGuardRefusal({ request: req(stripped), provider: "claude" })?.status, 403);
+  assert.equal(
+    gate.agentGuardRefusal({ request: req(stripped), provider: "claude", log: quiet() })?.status,
+    403
+  );
   setMode("block");
-  assert.equal(gate.agentGuardRefusal({ request: req(stripped), provider: "claude" }), null);
+  assert.equal(
+    gate.agentGuardRefusal({ request: req(stripped), provider: "claude", log: quiet() }),
+    null
+  );
 });
-test("fails open: an exception while deciding never refuses; a broken logger does not change a decision", () => {
+test("fails open: an exception while deciding never refuses and writes exactly one warn line; a broken logger does not change a decision", () => {
   setMode("block", "true");
   const boom = () => {
     throw new Error("boom");
   };
   const broken = { headers: { get: boom } };
-  assert.equal(gate.agentGuardRefusal({ request: broken, provider: "claude" }), null);
-  assert.equal(wouldRefuseAgent({ headers: broken.headers, provider: "claude" }), false);
-  assert.equal(gate.agentGuardRefusal({ request: null, provider: "claude" }), null);
+  const failOpenLine = ["warn", "AGENT_GUARD", "agent guard failed open", { error: "Error" }];
+  const gateLog = capture();
+  assert.equal(
+    gate.agentGuardRefusal({ request: broken, provider: "claude", log: gateLog.log }),
+    null
+  );
+  assert.deepEqual(gateLog.calls, [failOpenLine]);
+  const probeLog = capture();
+  assert.equal(
+    wouldRefuseAgent({ headers: broken.headers, provider: "claude", log: probeLog.log }),
+    false
+  );
+  assert.deepEqual(probeLog.calls, [failOpenLine]);
+  const nullLog = capture();
+  assert.equal(
+    gate.agentGuardRefusal({ request: null, provider: "claude", log: nullLog.log }),
+    null
+  );
+  assert.deepEqual(nullLog.calls, []);
   assert.equal(
     gate.agentGuardRefusal({
       request: req(KILO),
@@ -228,11 +276,57 @@ test("fails open: an exception while deciding never refuses; a broken logger doe
   const upstream = new Response("{}", { status: 502 });
   assert.equal(gate.settleAgentGuardCombo(broken, upstream), upstream);
 });
+test("fails open: a target let through by a failure counts as admitted, so the combo keeps its real error", () => {
+  setMode("block");
+  let failing = false;
+  const request = {
+    headers: {
+      get: (name: string) => {
+        if (failing) throw new Error("boom");
+        return (KILO as Record<string, string>)[name.toLowerCase()] ?? null;
+      },
+    },
+  };
+  const { calls, log } = capture();
+  assert.equal(gate.agentGuardRefusal({ request, provider: "claude", log })?.status, 403);
+  failing = true;
+  assert.equal(gate.agentGuardRefusal({ request, provider: "anthropic", log }), null);
+  assert.deepEqual(
+    calls.map((call) => call.slice(0, 3)),
+    [
+      ["warn", "AGENT_GUARD", "blocked third-party agent kilocode on claude"],
+      ["warn", "AGENT_GUARD", "agent guard failed open"],
+    ]
+  );
+  const upstream = Response.json({ error: { message: "upstream down" } }, { status: 502 });
+  assert.equal(gate.settleAgentGuardCombo(request, upstream, "openai"), upstream);
+});
+test("the decision follows the provider it is given, not the model string", () => {
+  setMode("block");
+  assert.equal(
+    gate.agentGuardRefusal({
+      request: req(KILO),
+      provider: "glm",
+      modelStr: "cc/claude-opus-5",
+      log: quiet(),
+    }),
+    null
+  );
+  assert.equal(
+    gate.agentGuardRefusal({
+      request: req(KILO),
+      provider: "claude",
+      modelStr: "glm/glm-5",
+      log: quiet(),
+    })?.status,
+    403
+  );
+});
 test("combo: the policy error replaces the combo's own error only when a target was refused and none was admitted", async () => {
   setMode("block");
   const allRefused = req(KILO);
-  gate.agentGuardRefusal({ request: allRefused, provider: "claude" });
-  gate.agentGuardRefusal({ request: allRefused, provider: "anthropic" });
+  gate.agentGuardRefusal({ request: allRefused, provider: "claude", log: quiet() });
+  gate.agentGuardRefusal({ request: allRefused, provider: "anthropic", log: quiet() });
   const settled = gate.settleAgentGuardCombo(
     allRefused,
     Response.json({ error: { message: "all targets were skipped" } }, { status: 503 }),
@@ -243,8 +337,8 @@ test("combo: the policy error replaces the combo's own error only when a target 
     [403, "client_agent_not_allowed", null]
   );
   const mixed = req(KILO);
-  gate.agentGuardRefusal({ request: mixed, provider: "claude" });
-  gate.agentGuardRefusal({ request: mixed, provider: "glm" }); // admitted
+  gate.agentGuardRefusal({ request: mixed, provider: "claude", log: quiet() });
+  gate.agentGuardRefusal({ request: mixed, provider: "glm", log: quiet() }); // admitted
   const upstream = Response.json({ error: { message: "upstream down" } }, { status: 502 });
   assert.equal(gate.settleAgentGuardCombo(mixed, upstream, "openai"), upstream);
   const ok = new Response("{}", { status: 200 });
@@ -297,7 +391,15 @@ test("combo: the policy error replaces the combo's own error only when a target 
     },
   };
   const outage = new Response("{}", { status: 503 });
-  assert.equal(gate.settleAgentGuardCombo(onlyClaudeRefused(), outage, "openai", hostile), outage);
+  const settleLog = capture();
+  assert.equal(
+    gate.settleAgentGuardCombo(onlyClaudeRefused(), outage, "openai", hostile, settleLog.log),
+    outage
+  );
+  assert.deepEqual(
+    settleLog.calls.map((call) => call.slice(0, 3)),
+    [["warn", "AGENT_GUARD", "agent guard failed open"]]
+  );
 });
 test("fusion: a judge the guard would refuse fails the request before the panel fans out", () => {
   setMode("block");
@@ -308,20 +410,30 @@ test("fusion: a judge the guard would refuse fails the request before the panel 
     config: judgeModel ? { judgeModel } : {},
   });
   assert.equal(
-    gate.agentGuardFusionJudgeRefusal({ request: req(KILO), combo: combo("cc/claude-opus-5") })
-      ?.status,
+    gate.agentGuardFusionJudgeRefusal({
+      request: req(KILO),
+      combo: combo("cc/claude-opus-5"),
+      log: quiet(),
+    })?.status,
     403
   );
   for (const c of [combo("glm/glm-5"), combo(), combo("cc/claude-opus-5", "priority")])
-    assert.equal(gate.agentGuardFusionJudgeRefusal({ request: req(KILO), combo: c }), null);
+    assert.equal(
+      gate.agentGuardFusionJudgeRefusal({ request: req(KILO), combo: c, log: quiet() }),
+      null
+    );
   assert.equal(
-    gate.agentGuardFusionJudgeRefusal({ request: req(CLI), combo: combo("cc/claude-opus-5") }),
+    gate.agentGuardFusionJudgeRefusal({
+      request: req(CLI),
+      combo: combo("cc/claude-opus-5"),
+      log: quiet(),
+    }),
     null
   );
   // a judge that is not refused must not count as an admitted target
   const request = req(KILO);
-  gate.agentGuardFusionJudgeRefusal({ request, combo: combo("glm/glm-5") });
-  gate.agentGuardRefusal({ request, provider: "claude" });
+  gate.agentGuardFusionJudgeRefusal({ request, combo: combo("glm/glm-5"), log: quiet() });
+  gate.agentGuardRefusal({ request, provider: "claude", log: quiet() });
   assert.equal(
     gate.settleAgentGuardCombo(request, new Response("{}", { status: 503 })).status,
     403

@@ -31,8 +31,16 @@ import {
   resolveProviderId,
 } from "@/shared/constants/providers";
 import { markLocalModelPolicyResponse } from "@/shared/utils/resolvedModelAccess";
-import { decideAgentEnforcement, wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
-import { writeAgentGuardLog, type AgentGuardLogger } from "@/lib/guardrails/agentGuard/logLine";
+import {
+  decideAgentEnforcement,
+  wouldRefuseAgent,
+  type AgentEnforcementDecision,
+} from "@/lib/guardrails/agentGuard/enforcement";
+import {
+  writeAgentGuardFailOpen,
+  writeAgentGuardLog,
+  type AgentGuardLogger,
+} from "@/lib/guardrails/agentGuard/logLine";
 import { isGuardedProvider, providerFromModelString } from "@/lib/guardrails/agentGuard/policy";
 import { resolveAgentGuardMode } from "@/lib/guardrails/agentGuard/settings";
 import * as defaultLog from "../../utils/logger";
@@ -48,7 +56,6 @@ type GateTarget = {
 };
 
 type GateState = { refused: boolean; admitted: boolean; logged: Set<string> };
-type Decision = NonNullable<ReturnType<typeof decideAgentEnforcement>>;
 type HeadersArg = Parameters<typeof decideAgentEnforcement>[0];
 
 const REFUSAL_MESSAGE =
@@ -77,18 +84,24 @@ function loggerOf(log: AgentGuardLogger | undefined): AgentGuardLogger {
 }
 
 function reportFailOpen(log: AgentGuardLogger | undefined, error: unknown): void {
-  try {
-    const logger = loggerOf(log);
-    logger.warn?.call(logger, "AGENT_GUARD", "agent guard failed open", {
-      error: error instanceof Error ? error.name : typeof error,
-    });
-  } catch {
-    // A failed log write must not turn a fail-open into a failure.
-  }
+  writeAgentGuardFailOpen(loggerOf(log), error);
+}
+
+/**
+ * A target let through by a fail-open was dispatched, so it counts as admitted:
+ * its real error must not be replaced by the refusal of another target.
+ */
+function markAdmittedIfTracked(request: unknown): void {
+  const state = request && typeof request === "object" ? requestStates.get(request) : undefined;
+  if (state) state.admitted = true;
 }
 
 /** One line per request and provider; a failed write never undoes the decision. */
-function recordDecision(target: GateTarget, state: GateState, decision: Decision): void {
+function recordDecision(
+  target: GateTarget,
+  state: GateState,
+  decision: AgentEnforcementDecision
+): void {
   if (state.logged.has(decision.provider)) return;
   state.logged.add(decision.provider);
   try {
@@ -149,6 +162,7 @@ export function agentGuardRefusal(target: GateTarget): Response | null {
     return buildRefusal(target.sourceFormat);
   } catch (error) {
     reportFailOpen(target.log, error);
+    markAdmittedIfTracked(target.request);
     return null;
   }
 }
@@ -205,7 +219,8 @@ export function settleAgentGuardCombo(
   request: object | null | undefined,
   response: Response,
   sourceFormat?: string | null,
-  combo?: { models?: unknown[] | null } | null
+  combo?: { models?: unknown[] | null } | null,
+  log?: AgentGuardLogger
 ): Response {
   try {
     if (response.ok || !request) return response;
@@ -215,7 +230,7 @@ export function settleAgentGuardCombo(
     response.body?.cancel().catch(() => {});
     return buildRefusal(sourceFormat);
   } catch (error) {
-    reportFailOpen(undefined, error);
+    reportFailOpen(log, error);
     return response;
   }
 }
@@ -245,7 +260,8 @@ export function agentGuardFusionJudgeRefusal(
     const judge = fusionJudgeModel(ctx.combo);
     const provider = judge ? providerFromModelString(judge) : null;
     if (!provider || !ctx.request) return null;
-    if (!wouldRefuseAgent({ headers: headersOf(ctx.request), provider })) return null;
+    const headers = headersOf(ctx.request);
+    if (!wouldRefuseAgent({ headers, provider, log: loggerOf(ctx.log) })) return null;
     return agentGuardRefusal({
       request: ctx.request,
       provider,

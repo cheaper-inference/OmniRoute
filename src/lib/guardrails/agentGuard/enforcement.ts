@@ -5,11 +5,14 @@
  * `decideAgentEnforcement` assumes the caller already checked that the mode is
  * `block`; it reads no header for a provider the guard does not cover, and
  * reads `AGENT_GUARD_STRICT` only for an unidentified client.
- * `wouldRefuseAgent` checks the mode itself, never throws and keeps no state.
+ * `wouldRefuseAgent` checks the mode itself, never throws and keeps no state;
+ * an internal error answers `false` and writes one `warn` line to the logger it
+ * is given.
  */
 
 import { resolveProviderId } from "@/shared/constants/providers";
 import { classifyClientAgent, type AgentClassification } from "./classifier";
+import { writeAgentGuardFailOpen, type AgentGuardLogger } from "./logLine";
 import { evaluateAgentPolicy, isGuardedProvider } from "./policy";
 import { isAgentGuardStrict, resolveAgentGuardMode } from "./settings";
 
@@ -44,17 +47,20 @@ export function decideAgentEnforcement(
 
 /**
  * True when `block` mode would refuse this client on `provider`. Without a
- * provider, asks about the guarded providers (`claude`). Any error is `false`.
+ * provider, asks about the guarded providers (`claude`). Any error is `false`,
+ * reported as one `warn` line to `log` when one is given.
  */
 export function wouldRefuseAgent(input: {
   headers: HeadersLike;
   provider?: string | null;
+  log?: AgentGuardLogger;
 }): boolean {
   try {
     if (resolveAgentGuardMode() !== "block") return false;
     const provider = input.provider === undefined ? "claude" : input.provider;
     return decideAgentEnforcement(input.headers, provider)?.action === "block";
-  } catch {
+  } catch (error) {
+    writeAgentGuardFailOpen(input.log, error);
     return false;
   }
 }
