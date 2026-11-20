@@ -16687,5 +16687,9 @@
     "recoveryHelp": "Recovery reuses the original payload and key. After reload, restore the exact endpoint, connection, transport and input. New generation starts a separate billable request. Up to 20 receipts are kept in this tab.",
     "streamIncomplete": "The stream ended without a complete final event. Upstream completion is unknown.",
     "streamError": "The upstream stream reported an error. Received files remain available."
+  },
+  "formValidation": {
+    "required": "{field} is required",
+    "maxLength": "{field} can have at most {max, number} characters (currently {count, number})"
   }
 }
