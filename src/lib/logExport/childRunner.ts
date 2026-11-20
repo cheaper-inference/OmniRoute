@@ -37,7 +37,7 @@ export function resolveLogExportChild(context: ResolutionContext = {}) {
   return { childFile: entryJs ?? cwdJs, execArgv: [] as string[] };
 }
 interface TestOptions {
-  modulePath: string;
+  modulePath?: string;
   coveragePreload?: string;
   beforeAck?: () => Promise<void>;
   onSpawn?: (child: ChildProcess) => void;
