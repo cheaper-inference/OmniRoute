@@ -54,34 +54,64 @@ export function resolveOutputLimitAdvisory(
   return typeof global === "boolean" ? global : undefined;
 }
 
-function canClampOutputOnlyExhaustion(
+function contextRequirementsWithOutputCap(
+  requirements: RequestCompatibilityRequirements,
+  cap: number
+): RequestCompatibilityRequirements {
+  return { ...requirements, requiredContextTokens: requirements.estimatedInputTokens + cap };
+}
+
+/**
+ * null means the automatic policy does not apply. An empty map means it applies
+ * but no target can use a dispatchable cap without another incompatibility.
+ */
+export function getAutomaticOutputCapFallback(
+  body: Record<string, unknown>,
   rejected: Array<{ target: ResolvedComboTarget; reasons: string[] }>,
-  requirements: RequestCompatibilityRequirements
-): boolean {
-  return rejected.every(({ target, reasons }) => {
+  requirements: RequestCompatibilityRequirements,
+  options?: CompatFilterOptions
+): ReadonlyMap<ResolvedComboTarget, RequestCompatibilityRequirements> | null {
+  if (
+    options?.sourceFormat !== "claude" ||
+    options.outputLimitAdvisory !== undefined ||
+    typeof body.max_tokens !== "number" ||
+    !Number.isSafeInteger(body.max_tokens) ||
+    body.max_tokens <= 0 ||
+    body.max_completion_tokens !== undefined ||
+    body.max_output_tokens !== undefined ||
+    !rejected.some(({ reasons }) => reasons.includes("output_tokens"))
+  ) {
+    return null;
+  }
+
+  const clampable = new Map<ResolvedComboTarget, RequestCompatibilityRequirements>();
+  for (const { target, reasons } of rejected) {
     if (
       !reasons.includes("output_tokens") ||
       reasons.some((reason) => reason !== "output_tokens" && reason !== "context_window")
     ) {
-      return false;
+      continue;
     }
-    // Use the explicit ceiling dispatch enforces, not an inferred capacity.
-    const cap = getExplicitModelOutputCap(target.modelStr);
+    // Use the provider-scoped explicit ceiling dispatch enforces, not an
+    // inferred capacity or a ceiling advertised by another provider.
+    const cap = getExplicitModelOutputCap({
+      provider: target.providerId || target.provider || null,
+      model: target.modelStr,
+    });
     if (
       cap === null ||
       !Number.isInteger(cap) ||
       cap <= 0 ||
       cap >= requirements.requestedOutputTokens
     ) {
-      return false;
+      continue;
     }
-    // A window mismatch caused solely by the un-clamped reservation isn't an
-    // independent incompatibility. Input and total window must still fit.
-    return hasKnownCompatibleContextLimit(target, {
-      ...requirements,
-      requiredContextTokens: requirements.estimatedInputTokens + cap,
-    });
-  });
+    // A window mismatch caused solely by the unclamped reservation is not an
+    // independent incompatibility. Input and the adjusted total must still fit.
+    const adjusted = contextRequirementsWithOutputCap(requirements, cap);
+    if (hasKnownCompatibleContextLimit(target, adjusted)) clampable.set(target, adjusted);
+  }
+  return clampable;
 }
 
 /**
@@ -110,29 +140,5 @@ export function contextRequirementsForTarget(
   ) {
     return requirements;
   }
-  return {
-    ...requirements,
-    requiredContextTokens: requirements.estimatedInputTokens + maxOutputTokens,
-  };
-}
-
-export function shouldClampOutputOnlyExhaustion(
-  body: Record<string, unknown>,
-  candidateCount: number,
-  rejected: Array<{ target: ResolvedComboTarget; reasons: string[] }>,
-  requirements: RequestCompatibilityRequirements,
-  options?: CompatFilterOptions
-): boolean {
-  return (
-    options?.sourceFormat === "claude" &&
-    options.outputLimitAdvisory === undefined &&
-    typeof body.max_tokens === "number" &&
-    Number.isSafeInteger(body.max_tokens) &&
-    body.max_tokens > 0 &&
-    body.max_completion_tokens === undefined &&
-    body.max_output_tokens === undefined &&
-    candidateCount > 0 &&
-    rejected.length === candidateCount &&
-    canClampOutputOnlyExhaustion(rejected, requirements)
-  );
+  return contextRequirementsWithOutputCap(requirements, maxOutputTokens);
 }
