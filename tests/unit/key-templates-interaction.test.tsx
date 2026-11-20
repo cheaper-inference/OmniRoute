@@ -172,6 +172,7 @@ const template: KeyTemplate = {
 };
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -610,6 +611,9 @@ describe("template loading and draft validation", () => {
     );
     render(<ApiManagerPageClient />);
     await openCreate();
+    // Pin only Date (waitFor still needs real timers) so the test cannot straddle local midnight.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 10, 19, 15, 30));
     fireEvent.click(preset7());
     const end = new Date();
     end.setDate(end.getDate() + 7);
