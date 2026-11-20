@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, Toggle, InfoTooltip } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import type { WakeupProvider } from "@/shared/validation/codexWakeupSchemas";
 import CodexWakeupsSection from "./CodexWakeupsSection";
 
 type CodexConnection = {
@@ -20,7 +21,8 @@ function connectionLabel(conn: CodexConnection): string {
   return conn.displayName || conn.name || conn.email || conn.id;
 }
 
-function useCodexAutoPingSettings() {
+function useCodexAutoPingSettings(provider: WakeupProvider) {
+  const settingsKey = provider === "claude" ? "claudeQuotaAutoPing" : "codexAutoPing";
   const [connections, setConnections] = useState<CodexConnection[]>([]);
   const [enabledMap, setEnabledMap] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -36,10 +38,10 @@ function useCodexAutoPingSettings() {
       .then(([settingsData, providersData]) => {
         if (cancelled) return;
         const codexOAuthConnections: CodexConnection[] = (providersData?.connections || []).filter(
-          (c: CodexConnection) => c.provider === "codex" && c.authType === "oauth"
+          (c: CodexConnection) => c.provider === provider && c.authType === "oauth"
         );
         setConnections(codexOAuthConnections);
-        setEnabledMap(settingsData?.codexAutoPing?.connections || {});
+        setEnabledMap(settingsData?.[settingsKey]?.connections || {});
         setLoading(false);
       })
       .catch(() => {
@@ -48,7 +50,7 @@ function useCodexAutoPingSettings() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [provider, settingsKey]);
 
   const toggleConnection = async (connectionId: string, checked: boolean) => {
     if (savingId) return;
@@ -61,7 +63,7 @@ function useCodexAutoPingSettings() {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codexAutoPing: { connections: next } }),
+        body: JSON.stringify({ [settingsKey]: { connections: next } }),
       });
       if (res.ok) {
         setStatus("saved");
@@ -81,7 +83,13 @@ function useCodexAutoPingSettings() {
   return { connections, enabledMap, loading, savingId, status, toggleConnection };
 }
 
-function CodexAutoPingStatus({ status }: { status: "" | "saved" | "error" }) {
+function CodexAutoPingStatus({
+  status,
+  provider,
+}: {
+  provider: WakeupProvider;
+  status: "" | "saved" | "error";
+}) {
   const t = useTranslations("settings");
   if (status === "saved") {
     return (
@@ -93,7 +101,8 @@ function CodexAutoPingStatus({ status }: { status: "" | "saved" | "error" }) {
   if (status === "error") {
     return (
       <span role="alert" className="text-xs font-medium text-error flex items-center gap-1">
-        <Icon name="error" size={14} /> {t("codexAutoPingSaveError")}
+        <Icon name="error" size={14} />{" "}
+        {t(provider === "claude" ? "claudeAutoPingSaveError" : "codexAutoPingSaveError")}
       </span>
     );
   }
@@ -101,11 +110,13 @@ function CodexAutoPingStatus({ status }: { status: "" | "saved" | "error" }) {
 }
 
 function CodexAutoPingConnectionList({
+  provider,
   connections,
   enabledMap,
   savingId,
   onToggle,
 }: {
+  provider: WakeupProvider;
   connections: CodexConnection[];
   enabledMap: Record<string, boolean>;
   savingId: string | null;
@@ -121,7 +132,10 @@ function CodexAutoPingConnectionList({
             checked={enabledMap[conn.id] === true}
             onChange={(value) => onToggle(conn.id, value)}
             disabled={savingId === conn.id}
-            ariaLabel={t("codexAutoPingToggleAria", { connection: connectionLabel(conn) })}
+            ariaLabel={t(
+              provider === "claude" ? "claudeAutoPingToggleAria" : "codexAutoPingToggleAria",
+              { connection: connectionLabel(conn) }
+            )}
           />
         </div>
       ))}
@@ -129,10 +143,10 @@ function CodexAutoPingConnectionList({
   );
 }
 
-export default function CodexAutoPingTab() {
+export default function CodexAutoPingTab({ provider = "codex" }: { provider?: WakeupProvider }) {
   const t = useTranslations("settings");
   const { connections, enabledMap, loading, savingId, status, toggleConnection } =
-    useCodexAutoPingSettings();
+    useCodexAutoPingSettings(provider);
 
   if (!loading && connections.length === 0) return null;
 
@@ -141,12 +155,14 @@ export default function CodexAutoPingTab() {
       icon="bolt"
       title={
         <span className="flex items-center gap-1.5">
-          {t("codexAutoPingTitle")}
-          <InfoTooltip text={t("codexAutoPingWarning")} />
+          {t(provider === "claude" ? "claudeAutoPingTitle" : "codexAutoPingTitle")}
+          <InfoTooltip
+            text={t(provider === "claude" ? "claudeAutoPingWarning" : "codexAutoPingWarning")}
+          />
         </span>
       }
-      subtitle={t("codexAutoPingDesc")}
-      action={<CodexAutoPingStatus status={status} />}
+      subtitle={t(provider === "claude" ? "claudeAutoPingDesc" : "codexAutoPingDesc")}
+      action={<CodexAutoPingStatus status={status} provider={provider} />}
     >
       {loading ? (
         <p className="text-sm text-text-muted" role="status">
@@ -155,12 +171,14 @@ export default function CodexAutoPingTab() {
       ) : (
         <>
           <CodexAutoPingConnectionList
+            provider={provider}
             connections={connections}
             enabledMap={enabledMap}
             savingId={savingId}
             onToggle={toggleConnection}
           />
           <CodexWakeupsSection
+            provider={provider}
             accounts={connections.map((conn) => ({
               id: conn.id,
               label: connectionLabel(conn),

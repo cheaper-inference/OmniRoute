@@ -15,6 +15,8 @@ import { findUnsupportedWakeupAccounts, runCodexWakeupTaskNow } from "@/lib/serv
 import {
   codexWakeupActionSchema,
   type CodexWakeupTaskInput,
+  wakeupProviderSchema,
+  type WakeupProvider,
 } from "@/shared/validation/codexWakeupSchemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
@@ -41,21 +43,35 @@ function invalid(message: string) {
   return createErrorResponse({ status: 400, message, type: "invalid_request" });
 }
 
+function readProvider(request: Request) {
+  return wakeupProviderSchema.safeParse(
+    new URL(request.url).searchParams.get("provider") ?? "codex"
+  );
+}
+
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
   try {
-    return NextResponse.json({ tasks: listCodexWakeupTasks(), runs: listCodexWakeupRuns(20) });
+    const provider = readProvider(request);
+    if (!provider.success) return invalid("Unsupported wakeup provider");
+    return NextResponse.json({
+      tasks: listCodexWakeupTasks(provider.data),
+      runs: listCodexWakeupRuns(20, provider.data),
+    });
   } catch {
     return createErrorResponse({ status: 500, message: "Failed to load wakeup tasks" });
   }
 }
 
-async function saveTask(task: CodexWakeupTaskInput, id: string | null) {
+async function saveTask(task: CodexWakeupTaskInput, id: string | null, provider: WakeupProvider) {
   // Disabling a task never needs its accounts to still be usable.
   if (task.enabled || !id) {
-    const unusable = await findUnsupportedWakeupAccounts(task.connectionIds);
-    if (unusable.length > 0) return invalid("Choose Codex OAuth accounts");
+    const unusable = await findUnsupportedWakeupAccounts(task.connectionIds, undefined, provider);
+    if (unusable.length > 0)
+      return invalid(
+        provider === "claude" ? "Choose Claude OAuth accounts" : "Choose Codex OAuth accounts"
+      );
   }
   const nowMs = Date.now();
   const previous = id ? getCodexWakeupTask(id) : null;
@@ -68,7 +84,7 @@ async function saveTask(task: CodexWakeupTaskInput, id: string | null) {
     : null;
   const saved = id
     ? updateCodexWakeupTask(id, task, nextRunAt, nowMs)
-    : createCodexWakeupTask(task, nextRunAt, nowMs);
+    : createCodexWakeupTask(task, nextRunAt, nowMs, provider);
   return NextResponse.json({ task: saved }, { status: id ? 200 : 201 });
 }
 
@@ -87,13 +103,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
   const body = validation.data;
+  const provider = readProvider(request);
+  if (!provider.success) return invalid("Unsupported wakeup provider");
 
   try {
+    if (body.action !== "create" && getCodexWakeupTask(body.id)?.provider !== provider.data) {
+      throw new CodexWakeupStoreError("not_found");
+    }
     switch (body.action) {
       case "create":
-        return await saveTask(body.task, null);
+        return await saveTask(body.task, null, provider.data);
       case "update":
-        return await saveTask(body.task, body.id);
+        return await saveTask(body.task, body.id, provider.data);
       case "delete":
         deleteCodexWakeupTask(body.id);
         return NextResponse.json({ ok: true });

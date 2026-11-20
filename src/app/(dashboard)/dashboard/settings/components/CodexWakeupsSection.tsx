@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import type { WakeupProvider } from "@/shared/validation/codexWakeupSchemas";
 import { Button, Checkbox, Input, Select, Toggle } from "@/shared/components";
 
 type Schedule =
@@ -44,9 +45,9 @@ function browserTimeZone(): string {
 
 type WakeupState = { tasks: WakeupTask[]; runs: WakeupRun[] };
 
-async function loadWakeups(): Promise<WakeupState | null> {
+async function loadWakeups(api: string): Promise<WakeupState | null> {
   try {
-    const res = await fetch(API);
+    const res = await fetch(api);
     if (!res.ok) return null;
     const data = await res.json();
     return {
@@ -59,35 +60,39 @@ async function loadWakeups(): Promise<WakeupState | null> {
   }
 }
 
-function useCodexWakeups() {
+function useCodexWakeups(provider: WakeupProvider) {
+  const api = provider === "claude" ? API + "?provider=claude" : API;
   const [state, setState] = useState<WakeupState>({ tasks: [], runs: [] });
 
   useEffect(() => {
     let cancelled = false;
-    loadWakeups().then((next) => {
+    loadWakeups(api).then((next) => {
       if (!cancelled && next) setState(next);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [api]);
 
-  const send = useCallback(async (body: Record<string, unknown>): Promise<boolean> => {
-    let ok = false;
-    try {
-      const res = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      ok = res.ok;
-    } catch {
-      ok = false;
-    }
-    const next = await loadWakeups();
-    if (next) setState(next);
-    return ok;
-  }, []);
+  const send = useCallback(
+    async (body: Record<string, unknown>): Promise<boolean> => {
+      let ok = false;
+      try {
+        const res = await fetch(api, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        ok = res.ok;
+      } catch {
+        ok = false;
+      }
+      const next = await loadWakeups(api);
+      if (next) setState(next);
+      return ok;
+    },
+    [api]
+  );
 
   return { tasks: state.tasks, runs: state.runs, send };
 }
@@ -357,9 +362,15 @@ function WakeupRow({
  * Each run sends one tiny request per selected account at the chosen time so the
  * account's quota window starts then. Consumes real quota; off until a task exists.
  */
-export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAccount[] }) {
+export default function CodexWakeupsSection({
+  accounts,
+  provider = "codex",
+}: {
+  accounts: WakeupAccount[];
+  provider?: WakeupProvider;
+}) {
   const t = useTranslations("settings");
-  const { tasks, runs, send } = useCodexWakeups();
+  const { tasks, runs, send } = useCodexWakeups(provider);
   const [notice, setNotice] = useState<Notice>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const accountsById = new Map(accounts.map((account) => [account.id, account]));
@@ -383,13 +394,15 @@ export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAcco
   return (
     <section
       className="flex flex-col gap-3 border-t border-border pt-3 mt-3"
-      aria-labelledby="codex-wakeups-title"
+      aria-labelledby={`${provider}-wakeups-title`}
     >
       <div>
-        <h4 id="codex-wakeups-title" className="text-sm">
+        <h4 id={`${provider}-wakeups-title`} className="text-sm">
           {t("codexWakeups.title")}
         </h4>
-        <p className="text-xs text-text-muted">{t("codexWakeups.desc")}</p>
+        <p className="text-xs text-text-muted">
+          {t(provider === "claude" ? "claudeWakeupsDesc" : "codexWakeups.desc")}
+        </p>
       </div>
       {tasks.map((task) => (
         <div key={task.id} className="flex flex-col gap-2">
