@@ -2,7 +2,7 @@
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS } from "../../../config/constants.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { buildExternalIdpRefreshParams, isExternalIdpAuthMethod } from "../../kiroExternalIdp.ts";
 import { safeAwsRegion } from "../../kiroRegion.ts";
 
@@ -38,7 +38,7 @@ export async function refreshKiroToken(
         return null;
       }
 
-      const response = await runWithProxyContext(proxyConfig, () =>
+      const response = await runCommittedWithProxyContext(proxyConfig, () =>
         fetch(refreshRequest.tokenEndpoint, {
           method: "POST",
           headers: {
@@ -104,7 +104,7 @@ export async function refreshKiroToken(
       }
       const endpoint = `https://oidc.${oidcRegion}.amazonaws.com/token`;
 
-      const response = await runWithProxyContext(proxyConfig, () =>
+      const response = await runCommittedWithProxyContext(proxyConfig, () =>
         fetch(endpoint, {
           method: "POST",
           headers: {
@@ -156,7 +156,7 @@ export async function refreshKiroToken(
 
         try {
           const regEndpoint = `https://oidc.${oidcRegion}.amazonaws.com/client/register`;
-          const regRes = await runWithProxyContext(proxyConfig, () =>
+          const regRes = await runCommittedWithProxyContext(proxyConfig, () =>
             fetch(regEndpoint, {
               method: "POST",
               headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -176,7 +176,7 @@ export async function refreshKiroToken(
 
           if (regRes.ok) {
             const newClient = await regRes.json();
-            const retryRes = await runWithProxyContext(proxyConfig, () =>
+            const retryRes = await runCommittedWithProxyContext(proxyConfig, () =>
               fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -238,7 +238,7 @@ export async function refreshKiroToken(
       log?.error?.("TOKEN_REFRESH", "Missing Kiro token endpoint");
       return null;
     }
-    const response = await runWithProxyContext(proxyConfig, () =>
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(tokenUrl, {
         method: "POST",
         headers: {

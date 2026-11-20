@@ -2,7 +2,7 @@
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { getGitHubCopilotRefreshHeaders } from "../../../config/providerHeaderProfiles.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 
 /**
  * Refresh GitHub Copilot token using a GitHub access token.
@@ -21,7 +21,7 @@ export async function refreshCopilotToken(
 ) {
   try {
     const tokenUrl = `${baseUrl.replace(/\/+$/, "")}/copilot_internal/v2/token`;
-    const response = await runWithProxyContext(proxyConfig, () =>
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(tokenUrl, {
         headers: getGitHubCopilotRefreshHeaders(`token ${githubAccessToken}`),
       })
