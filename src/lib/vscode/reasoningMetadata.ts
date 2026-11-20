@@ -191,7 +191,7 @@ function getCodexGpt56DefaultReasoningEffort(model: VscodeCatalogModel) {
     .trim()
     .toLowerCase();
   const match = providerModelId.match(
-    /^gpt-(?:5\.6-(sol|terra|luna)|6(?:\.1)?-(?:astra|sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/
+    /^gpt-(?:5\.6-(sol|terra|luna)|6(?:\.1)?-(astra|sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/
   );
   if (!match) return undefined;
   // The live catalog defaults GPT-5.6 Sol to low and every other model here to medium.

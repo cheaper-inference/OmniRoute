@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Pašalinti raktą"
   },
   "plugins": {
+    "privilegesWarningTitle": "Papildiniai veikia su visomis privilegijomis",
+    "privilegesWarningBody": "Papildinys veikia kaip įprastas Node.js procesas su tokia pačia prieiga kaip OmniRoute: jis gali skaityti failus, paleisti programas ir naudoti tinklą, nesvarbu, kokius leidimus deklaruoja jo aprašas. Įdiekite tik tuos papildinius, kuriais pasitikite.",
     "title": "Įskiepiai",
     "description": "Įdiekite ir tvarkykite įskiepius, išplečiančius OmniRoute funkcionalumą",
     "loading": "Įkeliami įskiepiai...",

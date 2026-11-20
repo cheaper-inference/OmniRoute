@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "يجب أن يكون الحد عددًا صحيحًا موجبًا.",
     "error": "خطأ: {message}",
     "serverOffline": "خادم OmniRoute غير متصل. ابدأ بالأمر: omniroute serve",
     "authRequired": "المصادقة مطلوبة. عيّن OMNIROUTE_API_KEY أو شغّل: omniroute setup",

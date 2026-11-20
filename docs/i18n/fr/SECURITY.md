@@ -6,11 +6,11 @@
 
 ## Signalement des vulnérabilités
 
-Si vous découvrez une vulnérabilité de sécurité dans OmniRoute, veuillez la signaler de manière responsable :
+Si vous découvrez une vulnérabilité de sécurité dans OmniRoute, veuillez la signaler de manière responsable :
 
-1. **N’OUVREZ PAS** de ticket GitHub public
-2. Utilisez les [avis de sécurité GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Incluez : une description, les étapes de reproduction et l’impact potentiel
+1. **DO NOT** ouvrir un problème public GitHub
+2. Utiliser [les avis de sécurité GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Inclure : description, étapes de reproduction et impact potentiel
 
 ## Délai de réponse
 
@@ -29,25 +29,14 @@ Si vous découvrez une vulnérabilité de sécurité dans OmniRoute, veuillez la
 | 3.7.x   | ✅ Sécurité                                            |
 | < 3.7.0 | ❌ Non prise en charge                                 |
 
-## Fenêtre de support LTS (v3.9.x)
+## fenêtre de support LTS (v3.9.x)
 
-Après la version 3.8.59, la prochaine version est **3.9.0**. Elle inaugure la branche de support à long terme sur
-`stable/v3` (voir [`ROADMAP.md`](ROADMAP.md) → « Phase 3 — v3.9.0 LTS »).
+Après la 3.8.59, la prochaine version est** 3.9.0** , qui ouvre la ligne de support à long terme sur la branche `stable/v3` (voir [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
 
-- **Ce que reçoit `stable/v3` :** des corrections de bogues, des correctifs de sécurité et des mises à jour de fournisseurs. Les nouvelles
-  fonctionnalités sont destinées au canal v4 ; la stabilité est la priorité de la branche LTS. `npm install omniroute`
-  (le dist-tag `latest`) reste sur la v3 pendant tout le cycle de la v4.
-- **Durée de la fenêtre :** `stable/v3` reçoit **des correctifs de sécurité et des corrections de régressions critiques pendant
-  12 mois après la publication de la version 3.9.0, ou jusqu’à 90 jours après la publication de v4.0.0 avec le dist-tag `latest` —
-  selon l’échéance la plus tardive**. La date de fin qui en résulte est consignée dans les notes de publication de la version 3.9.0 et dans
-  [`ROADMAP.md`](ROADMAP.md) au moment de sa publication.
-- **Signaler une vulnérabilité dans la branche LTS :** utilisez le même canal que pour toute autre version —
-  un [avis de sécurité GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privé,
-  jamais un ticket public. Indiquez la version que vous avez testée (par exemple `3.9.2`) ; les correctifs sont intégrés à
-  `stable/v3`, puis reportés en aval vers la v4.
-- **Référence de sécurité lors de la publication LTS :** l’état mesuré par l’analyseur, les preuves relatives à la protection des routes et
-  aux identifiants publics sont consignés dans
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Ce que `stable/v3` reçoit :** corrections de bogues, correctifs de sécurité et mises à jour du fournisseur. Les nouvelles fonctionnalités vont au canal v4 ; la ligne LTS est axée sur la stabilité avant tout. `npm install omniroute` (la balise de distribution `latest` ) reste sur la v3 pendant tout le cycle de la v4.
+- **Durée de la fenêtre :** `stable/v3` reçoit** correctifs de sécurité et régressions critiques pendant 12 mois après la version 3.9.0, ou jusqu'à 90 jours après la publication de la v4.0.0 sous le nom `latest` — selon la date la plus tardive** . La date de fin résultante est enregistrée dans les notes de version 3.9.0 et dans [`ROADMAP.md`](ROADMAP.md) lorsque la coupe a lieu.
+- **Signaler une vulnérabilité dans la ligne LTS :** même canal que toute autre version — un [avis de sécurité GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privé, jamais un problème public. Dites quelle version vous avez testée (par exemple `3.9.2`) ; les correctifs atterrissent sur `stable/v3` et sont portés vers la v4.
+- **Base de sécurité au niveau de la coupe LTS :** L'état mesuré du scanner, les preuves de garde de route et d'accréditation publique sont enregistrées dans [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

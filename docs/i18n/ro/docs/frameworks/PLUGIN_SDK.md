@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Referință API
+## API Referință
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Funcție de tip factory care creează un obiect Plugin cu valori implicite.
+Funcție de fabrică care creează un obiect Plugin cu valori implicite.
 
 **Parametri:**
 
-- `name` (string, obligatoriu) — Numele pluginului în format kebab-case
-- `priority` (number, opțional, implicit: 100) — Valorile mai mici rulează primele
-- `enabled` (boolean, opțional, implicit: true) — Pornește activat?
-- `onRequest` (function, opțional) — Rulează înaintea handlerului de chat
-- `onResponse` (function, opțional) — Rulează după handlerul de chat
-- `onError` (function, opțional) — Rulează la apariția unei erori în handler
+- `name` (șir, necesar) — Numele pluginului în cazul kebab
+- `priority` (număr, opțional, implicit: 100) — Lower rulează mai întâi
+- `enabled` (boolean, opțional, implicit: adevărat) — Start activat?
+- `onRequest` (funcție, opțional) — Se execută înainte de gestionarea chatului
+- `onResponse` (funcție, opțional) — Se execută după gestionarea chatului
+- `onError` (funcție, opțional) — Se execută pe o eroare de gestionare
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blochează cererea și, opțional, returnează un răspuns personalizat.
+Blocați cererea și, opțional, returnați un răspuns personalizat.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Modifică corpul cererii înainte ca aceasta să ajungă la furnizor.
+Modificați corpul cererii înainte ca acesta să ajungă la furnizor.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Atașează metadate la contextul cererii.
+Atașați metadate la contextul solicitării.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Contextul pluginului (`PluginContext`)
 
-| Câmp        | Tip                       | Descriere                     |
-| ----------- | ------------------------- | ----------------------------- |
-| `requestId` | `string`                  | Identificator unic al cererii |
-| `model`     | `string`                  | Numele modelului solicitat    |
-| `provider`  | `string`                  | ID-ul furnizorului țintă      |
-| `body`      | `Record<string, unknown>` | Corpul cererii                |
-| `headers`   | `Record<string, string>`  | Anteturile cererii            |
-| `metadata`  | `Record<string, unknown>` | Metadate modificabile         |
-| `timestamp` | `number`                  | Marcajul temporal al cererii  |
+| Domeniu      | Tip                       | Descriere                        |
+| ------------ | ------------------------- | -------------------------------- |
+| `requestId`  | `string`                  | Identificator unic al cererii    |
+| `model`      | `string`                  | Numele modelului solicitat       |
+| `provider`   | `string`                  | Furnizorul țintă ID              |
+| `body`       | `Record<string, unknown>` | Corpul cererii                   |
+| `headers`    | `Record<string, string>`  | Antetele cererii (vezi nota)     |
+| `metadata`   | `Record<string, unknown>` | Metadate modificabile            |
+| `timestamp`  | `number`                  | Solicitați marca temporală       |
+| `apiKeyInfo` | `object` (opțional)       | metadatele cheii API (vezi nota) |
+
+Contextul nu poartă niciodată acreditările clientului: anteturile `authorization`, `x-api-key`, `proxy-authorization` și `cookie` sunt eliminate (orice carcasă), iar `apiKeyInfo` păstrează metadatele cheii (cum ar fi `id`, `name` și `scopes`), dar nu și valoarea cheii sau amprenta acesteia (`redactPluginContext()` în `src/lib/plugins/hooks.ts`). Acest lucru se aplică pentru `onRequest`, `onResponse` și `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Sau ca valori booleene simple (prioritate implicită 100):
 }
 ```
 
-## Sistemul de permisiuni
+## Sistem de permisiuni
 
-Pluginurile rulează într-un context VM izolat. Accesul la resurse externe necesită permisiuni explicite:
+Pluginurile sunt** nu cu nisip** . Fiecare plugin activ rulează ca un proces copil Node.js separat, obișnuit (`loadPlugin()` în `src/lib/plugins/loader.ts`) sub același utilizator de sistem de operare ca OmniRoute, fără context VM și fără steaguri de permisiune Node.js. Codul de plugin poate folosi `node:fs`, `node:child_process`, `fetch` și orice alt Node.js API: poate citi și scrie orice fișier pe care utilizatorul OmniRoute îl poate (inclusiv directorul de date), rula programe și poate ajunge în rețea.
 
-| Permisiune   | Oferă acces la                                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy `process.env` doar în citire                           |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` al manifestului acceptă `network`, `file-read`, `file-write`, `env` și `exec`, dar astăzi doar `env` are efect în timpul execuției:
 
-Fără o permisiune, variabilele globale corespunzătoare pur și simplu nu sunt disponibile în mediul izolat.
+| Permisiune                                   | Efect astăzi                                                                                                                                                                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Procesul de plugin primește, de asemenea, `PORT`, `HOSTNAME`, `TZ` și `TMPDIR`. Fără el, primește doar `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` și `PLUGIN_NAME` (plus `SystemRoot` și `windir` pe Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nici unul. Sunt doar declarații: nimic nu este blocat atunci când lipsesc.                                                                                                                                                               |
+
+Instalarea unui plugin este ca și instalarea oricărui alt program pe gazdă. Instalați numai pluginuri în a căror sursă aveți încredere.
 
 ## Schema de configurare
 
@@ -194,7 +196,7 @@ Valorile de configurare sunt stocate în baza de date și sunt accesibile prin p
 
 ## Exemple
 
-### Jurnalizator de cereri
+### Solicitați Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Limitator de frecvență
+### Limitator de rată
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minut
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,16 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({
-        error: "Limita de frecvență a fost depășită",
-        status: 429,
-      });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### Transformator de răspunsuri
+### Transformator de răspuns
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

@@ -569,5 +569,3 @@ jobs:
     with:
       version: ${{ needs.validate.outputs.version }}
       tag: latest
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

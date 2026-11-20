@@ -27,7 +27,11 @@
 //                      carried to docs/i18n mirrors (scripts/release/lib/derived-mirrors.mjs)
 //   readme-diagrams    every docs/diagrams/*.svg generator, rendered from the new facts
 //   skills             skills/*/SKILL.md (scripts/skills/generate-agent-skills.mjs)
-//   ui-keys            missing UI + CLI locale keys (scripts/i18n/sync-ui-keys.mjs)
+//   ui-keys            missing UI + CLI locale keys (scripts/i18n/sync-ui-keys.mjs), translated in
+//                      the same run (OMNIROUTE_TRANSLATION_* from the environment or .env, or the
+//                      Google engine). Without a backend it never writes __MISSING__ markers: the
+//                      release profile fails, the nightly skips the keys (--allow-untranslated
+//                      writes them on purpose)
 //   llm-mirrors        docs/i18n/*/llm.txt copies of llm.txt (scripts/i18n/sync-llm-mirrors.mjs)
 //   verify-generated   after a write, every generated artifact must equal its generator:
 //                      check:generated-artifacts (README SVGs, e2e-timings.json) and
@@ -91,6 +95,10 @@ const HELP = `Usage: npm run release:refresh-derived [-- options]
   --rewritten-since=<ref>
                        UI keys whose English value changed since <ref> go back to translation
                        (default origin/main — the last shipped release; skipped if unresolvable)
+  --allow-untranslated write __MISSING__ markers for UI values that need translation when no
+                       translation backend is configured (otherwise the release profile fails and
+                       the nightly skips the UI keys; markers reach users as English and fail
+                       i18n-vi-completeness and the ratio gate until translated)
   --with-changelog     also aggregate changelog.d/ into CHANGELOG.md (release profile only).
                        At release the canonical path stays \`npm run release:reconcile\`
                        (/generate-release phase 0a); do not run both.
@@ -115,6 +123,7 @@ export function parseRefreshArgs(argv) {
     json: false,
     withChangelog: false,
     rewrittenSince: "origin/main",
+    allowUntranslated: false,
     help: false,
     error: null,
   };
@@ -122,6 +131,7 @@ export function parseRefreshArgs(argv) {
     if (a === "--check") opts.check = true;
     else if (a === "--json") opts.json = true;
     else if (a === "--with-changelog") opts.withChangelog = true;
+    else if (a === "--allow-untranslated") opts.allowUntranslated = true;
     else if (a === "-h" || a === "--help") opts.help = true;
     else if (a.startsWith("--profile=")) opts.profile = a.slice("--profile=".length);
     else if (a.startsWith("--rewritten-since="))
@@ -622,6 +632,25 @@ function resolvableRef(root, ref) {
 const translationBackendConfigured = () =>
   Object.entries(process.env).some(([k, v]) => k.startsWith("OMNIROUTE_TRANSLATION_") && v);
 
+// The translation backend settings usually live in the operator's .env. Importing
+// sync-ui-keys.mjs no longer loads that file (its API must not leak the .env into importers), so
+// the refresh reads ONLY the OMNIROUTE_TRANSLATION_* keys from it, and only those the environment
+// does not set already. Without this the v3.8.55 cut (2026-11-16) saw no backend and wrote 1,782
+// __MISSING__ markers instead of translations. Returns the names it loaded (never the values).
+function loadTranslationEnv(root, loadDotEnv) {
+  if (typeof loadDotEnv !== "function") return [];
+  const fromFile = {};
+  loadDotEnv(path.join(root, ".env"), fromFile);
+  const loaded = [];
+  for (const [key, value] of Object.entries(fromFile)) {
+    if (!key.startsWith("OMNIROUTE_TRANSLATION_") || !value || process.env[key] !== undefined)
+      continue;
+    process.env[key] = value;
+    loaded.push(key);
+  }
+  return loaded.sort();
+}
+
 // Phase 5 (generated files and baselines): the e2e shard timings are refreshed here when the
 // tree ships `syncE2eTimings`; until then the step is skipped.
 async function stepE2eTimings(ctx) {
@@ -646,26 +675,46 @@ async function stepUiKeys(ctx) {
   const scriptAbs = path.join(ctx.root, "scripts", "i18n", "sync-ui-keys.mjs");
   const details = [];
   let changed = false;
+  let untranslatedSkipped = false;
   if (sourceExports(scriptAbs, "syncUiKeys")) {
     // Session-4 API: called per catalog; any of changedFiles / added / changed signals a diff.
     const mod = await import(pathToFileURL(scriptAbs).href);
     const rewrittenSinceRef = resolvableRef(ctx.root, ctx.rewrittenSince);
     if (ctx.rewrittenSince && !rewrittenSinceRef)
       details.push(`rewritten-since ${ctx.rewrittenSince} not resolvable — skipped`);
+    if (!ctx.check && loadTranslationEnv(ctx.root, mod.loadDotEnv).length)
+      details.push("translation backend read from .env");
+    const canTranslate = !ctx.check && translationBackendConfigured();
     for (const catalog of Object.keys(UI_CATALOG_DIRS)) {
-      const before = ctx.check ? null : snapshotDir(ctx.root, UI_CATALOG_DIRS[catalog]);
       // Keys the English catalog dropped are pruned from the other locales, and English values
-      // rewritten since the last release go back to translation; the backend translates only
-      // when it is configured (never in --check).
+      // rewritten since the last release go back to translation (never translated in --check).
+      const request = {
+        root: ctx.root,
+        catalog,
+        pruneExtra: true,
+        ...(rewrittenSinceRef ? { rewrittenSinceRef } : {}),
+      };
+      if (!ctx.check && !canTranslate) {
+        // Never write __MISSING__ markers by accident: they reach users as English and fail
+        // i18n-vi-completeness and the ratio gate on the base until someone translates them.
+        const preview = (await mod.syncUiKeys({ ...request, dryRun: true })) ?? {};
+        const pending = Number(preview.added || 0) + Number(preview.markedRewritten || 0);
+        if (pending > 0 && !ctx.allowUntranslated) {
+          if (ctx.profile === "nightly") {
+            details.push(
+              `${catalog}: ${pending} value(s) need translation — skipped (no translation backend; the nightly never writes __MISSING__ markers)`
+            );
+            untranslatedSkipped = true;
+            continue;
+          }
+          throw new StepFailure(
+            `${catalog}: ${pending} UI value(s) need translation and no translation backend is configured (OMNIROUTE_TRANSLATION_* in the environment or in .env, or OMNIROUTE_TRANSLATION_ENGINE=google). Configure it, or pass --allow-untranslated to write __MISSING__ markers on purpose.`
+          );
+        }
+      }
+      const before = ctx.check ? null : snapshotDir(ctx.root, UI_CATALOG_DIRS[catalog]);
       const r =
-        (await mod.syncUiKeys({
-          root: ctx.root,
-          catalog,
-          dryRun: ctx.check,
-          pruneExtra: true,
-          ...(rewrittenSinceRef ? { rewrittenSinceRef } : {}),
-          translate: !ctx.check && translationBackendConfigured(),
-        })) ?? {};
+        (await mod.syncUiKeys({ ...request, dryRun: ctx.check, translate: canTranslate })) ?? {};
       const files = Array.isArray(r.changedFiles) ? r.changedFiles : [];
       const n = files.length || Number(r.added) || (r.changed ? 1 : 0);
       if (n) changed = true;
@@ -674,6 +723,11 @@ async function stepUiKeys(ctx) {
       );
       if (ctx.check) ctx.extraChanged.push(...files);
       else for (const [rel, b] of before) ctx.vfs.noteExternal(rel, b);
+      if (canTranslate && Number(r.failed || 0) > 0) {
+        throw new StepFailure(
+          `${catalog}: ${r.failed} value(s) failed to translate and were left as __MISSING__ markers — rerun bash scripts/i18n/translate-new-keys.sh${catalog === "cli" ? " --catalog=cli" : ""}`
+        );
+      }
     }
   } else {
     const flagOk = supportsFlag(scriptAbs, "--dry-run");
@@ -714,7 +768,8 @@ async function stepUiKeys(ctx) {
       }
     }
   }
-  return { status: changed ? "changed" : "clean", detail: details.join("; ") };
+  const status = changed ? "changed" : untranslatedSkipped ? "skipped" : "clean";
+  return { status, detail: details.join("; ") };
 }
 
 async function stepLlmMirrors(ctx) {
@@ -814,6 +869,7 @@ const STEP_IMPL = {
  *   root?: string, check?: boolean, profile?: "release"|"nightly", only?: string[]|null,
  *   withChangelog?: boolean,
  *   rewrittenSince?: string|null,        // ref for the UI keys' rewritten-English pass
+ *   allowUntranslated?: boolean,         // write __MISSING__ markers when no backend is configured
  *   facts?: object,                      // inject instead of collecting (tests)
  *   collectFacts?: Function,             // replace the collector (tests)
  *   planDerivedRewrites?: Function,      // inject instead of the gate's export (tests)
@@ -838,6 +894,7 @@ export async function refreshDerived(opts = {}) {
     profile,
     withChangelog: Boolean(opts.withChangelog),
     rewrittenSince: opts.rewrittenSince === undefined ? "origin/main" : opts.rewrittenSince,
+    allowUntranslated: Boolean(opts.allowUntranslated),
     vfs: createVfs(root, check),
     manual: [],
     extraChanged: [],
@@ -901,6 +958,7 @@ async function main() {
     only: opts.only,
     withChangelog: opts.withChangelog,
     rewrittenSince: opts.rewrittenSince,
+    allowUntranslated: opts.allowUntranslated,
     log: (line) => console.error(line),
   });
   const exitCode = refreshExitCode(result, { check: opts.check });
