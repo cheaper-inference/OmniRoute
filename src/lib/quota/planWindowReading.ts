@@ -70,7 +70,8 @@ function fractionReading(
   entry: Record<string, unknown> | null,
   fetchedAt: number
 ): PlanWindowReading | null {
-  const used = entry?.percentUsed;
+  if (!entry) return null;
+  const used = entry.percentUsed;
   if (typeof used !== "number" || !Number.isFinite(used)) return null;
   return { used: clamp01(used), resetAt: resetMs(entry.resetAt), fetchedAt };
 }
