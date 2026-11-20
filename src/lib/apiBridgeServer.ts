@@ -55,9 +55,17 @@ export function hasDotSegment(pathname: string): boolean {
   return current.split(/[/\\]/).some((segment) => segment === "." || segment === "..");
 }
 
-/** A request is relayed only when its path is free of dot segments and on the allowlist. */
+/**
+ * A request is relayed only when its path is free of dot segments and on the allowlist.
+ *
+ * A path that carries a fragment marker is refused as well. A request target has no
+ * fragment, and parsers disagree on where such a path ends, so the path this function
+ * validated would not be the path the server behind the bridge resolves. A marker after
+ * the `?` belongs to the query for every parser and is left alone.
+ */
 export function isRelayablePath(rawUrl: string): boolean {
   const pathname = rawUrl.split("?")[0] || "/";
+  if (pathname.includes("#")) return false;
   return !hasDotSegment(pathname) && isOpenAiCompatiblePath(pathname);
 }
 

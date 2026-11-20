@@ -138,6 +138,47 @@ test("paths that only look like dot segments are still relayed", async () => {
   });
 });
 
+test("a path with a fragment marker is refused", async () => {
+  await withBridge(async (apiPort, relayed) => {
+    // A request target has no fragment, and parsers disagree on where a path with "#" ends:
+    // one reads "/v1/..#" as "/v1/..", another reads "/v1/x#/../../api/keys" as "/api/keys".
+    const refused = [
+      "/v1/..#",
+      "/v1/..#x",
+      "/v1/%2e%2e#",
+      "/v1beta/.#",
+      "/codex/..#",
+      "/api/oauth/..#/keys",
+      "/v1/models/..#?x=1",
+      "/v1/x#/../../api/keys",
+      "/v1/models#section",
+    ];
+    for (const path of refused) {
+      const res = await get(apiPort, path);
+      assert.equal(res.status, 404, `${path} should be refused`);
+    }
+    assert.deepEqual(relayed, []);
+
+    // After the "?" the marker is part of the query for every parser, so it changes nothing.
+    const allowed = ["/v1/chat/completions?next=1#../y"];
+    for (const path of allowed) {
+      const res = await get(apiPort, path);
+      assert.equal(res.status, 200, `${path} should be relayed`);
+    }
+    assert.deepEqual(relayed, allowed);
+  });
+});
+
+test("isRelayablePath refuses a fragment marker in the path and ignores one in the query", () => {
+  assert.equal(bridge.isRelayablePath("/v1/..#"), false);
+  assert.equal(bridge.isRelayablePath("/v1/models#"), false);
+  assert.equal(bridge.isRelayablePath("/v1/x#/../../api/keys"), false);
+  assert.equal(bridge.isRelayablePath("/api/keys#/v1/"), false);
+  assert.equal(bridge.isRelayablePath("/v1/..?x"), false);
+  assert.equal(bridge.isRelayablePath("/v1/x?a=1#/../api/keys"), true);
+  assert.equal(bridge.isRelayablePath("/v1/models"), true);
+});
+
 test("hasDotSegment unwraps nested encodings and never throws", () => {
   assert.equal(bridge.hasDotSegment("/v1/%25252e%25252e/x"), true);
   assert.equal(bridge.hasDotSegment("/v1/%zz/x"), false);
