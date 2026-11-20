@@ -3,36 +3,27 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b15",
+    "batchId": "b16",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b15-07bdafc69c99",
-    "candidateSha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
-    "baseSha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
-    "treeSha": "58b38c5a74025fed6f6fd082f4451d4b15b9f16e",
+    "candidateRef": "omni-queue/release-v3.8.55/b16-7bca1e353169",
+    "candidateSha": "7bca1e353169686029e8beb28165df6007d80470",
+    "baseSha": "a61261846f87bfbc5bb63a01c7d2a26a6d06831d",
+    "treeSha": "808c569c248a0aabaa7b1d9792a57917020b2c03",
     "prs": [
       {
-        "n": 19132,
-        "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
-        "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
-        "author": "Bl0ck154",
-        "labeledAt": "2026-11-20T15:49:45Z"
+        "n": 19149,
+        "head": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
+        "title": "feat(dashboard): allow multiple quota provider filters",
+        "author": "JxnLexn",
+        "labeledAt": "2026-11-20T15:49:56Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-20T20:19:33.473Z",
+    "startedAt": "2026-11-20T21:36:00.705Z",
     "attempts": 0,
     "bisect": {
       "rootBatchId": "b14",
       "segments": [
-        [
-          {
-            "n": 19132,
-            "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
-            "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
-            "author": "Bl0ck154",
-            "labeledAt": "2026-11-20T15:49:45Z"
-          }
-        ],
         [
           {
             "n": 19149,
@@ -43,22 +34,18 @@
           }
         ]
       ],
-      "culprits": [],
-      "landed": [],
-      "steps": 0,
-      "hang": false
-    },
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b15-07bdafc69c99",
-      "requestedAt": "2026-11-20T21:24:59.417Z",
-      "afterMs": 1795209867000,
-      "runIds": [
-        44810337159
+      "culprits": [
+        {
+          "n": 19132,
+          "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
+          "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
+          "author": "Bl0ck154",
+          "labeledAt": "2026-11-20T15:49:45Z"
+        }
       ],
-      "jobs": [
-        "Gate / CI",
-        "Integration Tests (2/2)"
-      ]
+      "landed": [],
+      "steps": 1,
+      "hang": false
     }
   },
   "baseChecks": [
@@ -114,6 +101,7 @@
       "18738": "01781da04c16d5cf4adac8b1fd0a5dccbddde046",
       "18786": "267b99c512dbac09b2fe8876c9a9ec9b7913ab9f",
       "18804": "a140f9b78053705ef57686e6fc4b484d380c1776",
+      "19132": "beed91198d6f1f34a82955166724b2f61fa22ff0",
       "19807": "8761f1c70d72315ff49383d6c5935d5f208a4126",
       "19812": "a2ecc1011417f2250dbbac5eabe40b19bfef6b00",
       "19851": "10e1d1be773bc19015c112cfbf5dc1ef751cde91",
@@ -127,13 +115,13 @@
     }
   },
   "counters": {
-    "batchSeq": 15,
-    "ciRuns": 17,
+    "batchSeq": 16,
+    "ciRuns": 18,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 6,
     "bisections": 1,
-    "culprits": 0
+    "culprits": 1
   },
   "history": [
     {
@@ -1240,8 +1228,44 @@
       "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
       "detail": "re-running the failed jobs of b15 once (Gate / CI, Integration Tests (2/2)) before dequeuing #19132",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44820048996"
+    },
+    {
+      "at": "2026-11-20T21:35:52.968Z",
+      "type": "checks-red",
+      "batchId": "b15",
+      "prs": [
+        19132
+      ],
+      "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
+      "detail": "Gate / CI, Integration Tests (2/2)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44821672881"
+    },
+    {
+      "at": "2026-11-20T21:35:53.537Z",
+      "type": "culprit-found",
+      "batchId": "b15",
+      "prs": [
+        19132
+      ],
+      "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
+      "detail": "Gate / CI, Integration Tests (2/2); shadow mode: label kept, no comment",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44821672881"
+    },
+    {
+      "at": "2026-11-20T21:36:04.411Z",
+      "type": "batch-started",
+      "batchId": "b16",
+      "prs": [
+        19149
+      ],
+      "sha": "7bca1e353169686029e8beb28165df6007d80470",
+      "detail": "bisect of b14: 1 PR(s) on a61261846f87",
+      "labeledAt": {
+        "19149": "2026-11-20T15:49:56Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44821672881"
     }
   ],
-  "updatedAt": "2026-11-20T21:26:16.894Z",
+  "updatedAt": "2026-11-20T21:37:03.531Z",
   "batchWindow": 5
 }
