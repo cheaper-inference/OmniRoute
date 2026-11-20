@@ -1135,7 +1135,7 @@ async function handleChatImplementation(
     // A configured fusion judge the agent guard refuses fails before the panel fans out.
     const judgeRefusal =
       !isComboLiveTest &&
-      agentGuardFusionJudgeRefusal({ request, combo, apiKeyInfo, sourceFormat });
+      agentGuardFusionJudgeRefusal({ request, combo, settings, apiKeyInfo, sourceFormat });
     if (judgeRefusal) return judgeRefusal;
     log.info(
       "CHAT",
@@ -1660,6 +1660,15 @@ async function handleSingleModelChat(
     // A combo target redirected here keeps sharing its outer combo request's record.
     const sNetStalledConnections: ComboStalledConnections =
       runtimeOptions.comboStalledConnections ?? new Map();
+    // Same judge pre-check as the main combo path; this combo runs with `settings: {}`.
+    const sNetJudgeRefusal = agentGuardFusionJudgeRefusal({
+      request,
+      combo: redirectCombo,
+      settings: {},
+      apiKeyInfo,
+      sourceFormat: sNetSourceFormat,
+    });
+    if (sNetJudgeRefusal) return sNetJudgeRefusal;
     const sNetResponse = await handleComboChat({
       body,
       combo: redirectCombo,

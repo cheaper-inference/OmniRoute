@@ -22,6 +22,7 @@
  */
 
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { resolveComboSetupConfig } from "@omniroute/open-sse/services/comboConfig.ts";
 import { FORMATS } from "@omniroute/open-sse/translator/formats.ts";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import {
@@ -235,29 +236,47 @@ export function settleAgentGuardCombo(
   }
 }
 
-function fusionJudgeModel(
-  combo: { strategy?: unknown; config?: unknown } | null | undefined
-): string | null {
+type FusionComboLike = { strategy?: unknown; config?: unknown } | null | undefined;
+type ComboSetupArgs = Parameters<typeof resolveComboSetupConfig>;
+
+/**
+ * The judge the fusion service will run: read through the service's own config
+ * cascade, `resolveComboSetupConfig(combo, settings)`, so a judge set only in
+ * `settings.comboDefaults` counts. The service passes no provider to it, so no
+ * provider override applies to the judge.
+ */
+function fusionJudgeModel(combo: FusionComboLike, settings: unknown): string | null {
   if (!combo || combo.strategy !== "fusion") return null;
-  const config = combo.config;
-  if (!config || typeof config !== "object") return null;
+  const config = resolveComboSetupConfig(
+    combo as ComboSetupArgs[0],
+    (settings ?? null) as ComboSetupArgs[1]
+  );
   const judge = (config as { judgeModel?: unknown }).judgeModel;
   return typeof judge === "string" && judge.trim() ? judge.trim() : null;
 }
 
 /**
- * For a `fusion` combo whose configured judge the guard would refuse: the
- * refusal, so the request fails before the panel fans out. A judge that would
- * not be refused leaves the request state untouched.
+ * For a `fusion` combo whose judge the guard would refuse: the refusal, so the
+ * request fails before the panel fans out. A judge that would not be refused
+ * leaves the request state untouched.
+ *
+ * The judge's provider is its prefix, read like a dispatched target's: dispatch
+ * strips no prefix from a target either, so a `no-think/…` judge resolves to the
+ * `no-think` provider there and never reaches Claude. A bare judge id names no
+ * provider here: resolving it takes the dispatch resolver's database reads
+ * (provider inference over the active connections), so it is left to the
+ * dispatch gate, which refuses the judge call after the panel has run.
  */
 export function agentGuardFusionJudgeRefusal(
   ctx: Omit<GateTarget, "provider" | "modelStr" | "trustedLiveTest"> & {
-    combo: { strategy?: unknown; config?: unknown } | null | undefined;
+    combo: FusionComboLike;
+    /** The settings the combo service receives for this combo (its `comboDefaults`). */
+    settings?: unknown;
   }
 ): Response | null {
   try {
     if (resolveAgentGuardMode() !== "block") return null;
-    const judge = fusionJudgeModel(ctx.combo);
+    const judge = fusionJudgeModel(ctx.combo, ctx.settings);
     const provider = judge ? providerFromModelString(judge) : null;
     if (!provider || !ctx.request) return null;
     const headers = headersOf(ctx.request);

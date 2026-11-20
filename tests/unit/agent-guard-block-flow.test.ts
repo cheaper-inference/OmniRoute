@@ -47,9 +47,20 @@ const OTHER2 = "openai/gpt-4.1-mini";
 
 const originalFetch = globalThis.fetch;
 const calls: string[] = [];
+// The model of every OpenAI call, and one OpenAI model that answers 503 (null: none).
+const openaiModels: string[] = [];
+let failingOpenAIModel: string | null = null;
+function requestedModel(init?: RequestInit): string {
+  try {
+    return String(JSON.parse(String(init?.body)).model);
+  } catch {
+    return "";
+  }
+}
 function stubUpstreams() {
   calls.length = 0;
-  globalThis.fetch = (async (url: unknown) => {
+  openaiModels.length = 0;
+  globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
     const target = String(url);
     if (target.includes("anthropic.com")) {
       calls.push("anthropic");
@@ -57,6 +68,13 @@ function stubUpstreams() {
     }
     if (target.includes("openai.com")) {
       calls.push("openai");
+      const model = requestedModel(init);
+      openaiModels.push(model);
+      if (model === failingOpenAIModel)
+        return Response.json(
+          { error: { message: "Service unavailable", type: "server_error" } },
+          { status: 503 }
+        );
       return buildOpenAIResponse("from-openai", "gpt-4.1");
     }
     return Response.json({ data: [] });
@@ -104,6 +122,7 @@ test.beforeEach(async () => {
 test.afterEach(async () => {
   delete process.env.AGENT_GUARD_MODE;
   delete process.env.AGENT_GUARD_STRICT;
+  failingOpenAIModel = null;
   globalThis.fetch = originalFetch;
   BaseExecutor.RETRY_CONFIG.delayMs = harness.originalRetryDelayMs;
   await resetStorage();
@@ -307,6 +326,68 @@ test("block: fusion drops a refused panel member, and a refused judge stops the 
   assert.deepEqual([panel.status, tried()], [200, ["openai"]]);
   const judge = await chat("guard-fusion-judge", KILO);
   assert.deepEqual([judge.status, await codeOf(judge), tried()], REFUSED);
+});
+
+test("block: a judge set only in comboDefaults is refused before any panel member is dispatched", async () => {
+  await settingsDb.updateSettings({ comboDefaults: { judgeModel: CLAUDE } });
+  await combosDb.createCombo({
+    name: "guard-fusion-default-judge",
+    strategy: "fusion",
+    models: [OTHER, OTHER2],
+  });
+  block();
+  const res = await chat("guard-fusion-default-judge", KILO);
+  assert.deepEqual(
+    [res.status, await codeOf(res), calls.length],
+    [403, "client_agent_not_allowed", 0]
+  );
+});
+
+test("block: judge spellings left to dispatch: a no-think judge never reaches Claude, a bare one is refused after the panel", async () => {
+  await combosDb.createCombo({
+    name: "guard-fusion-no-think-judge",
+    strategy: "fusion",
+    models: [OTHER, OTHER2],
+    config: { judgeModel: `no-think/${CLAUDE}` },
+  });
+  await combosDb.createCombo({
+    name: "guard-fusion-bare-judge",
+    strategy: "fusion",
+    models: [OTHER, OTHER2],
+    config: { judgeModel: BARE },
+  });
+  block();
+  await chat("guard-fusion-no-think-judge", KILO);
+  assert.deepEqual(tried(), ["openai"]);
+  const bare = await chat("guard-fusion-bare-judge", KILO);
+  assert.deepEqual(
+    [bare.status, await codeOf(bare), tried()],
+    [403, "client_agent_not_allowed", ["openai"]]
+  );
+});
+
+test("block: a fusion combo reached through the safety-net redirect has its judge checked before the fan-out", async () => {
+  // The global fallback model names an `auto/…` combo: resolveModelOrError hands it to the
+  // safety-net redirect in handleSingleModelChat, which runs it as a combo of its own.
+  await combosDb.createCombo({
+    name: "auto/guard-net-fusion",
+    strategy: "fusion",
+    models: [OTHER],
+    config: { judgeModel: CLAUDE },
+  });
+  await combosDb.createCombo({ name: "guard-net-outer", strategy: "priority", models: [OTHER2] });
+  await settingsDb.updateSettings({ globalFallbackModel: "auto/guard-net-fusion" });
+  failingOpenAIModel = "gpt-4.1-mini";
+  block();
+  const res = await chat("guard-net-outer", KILO);
+  // Claude never called, and no panel member of the fallback fusion combo dispatched.
+  assert.deepEqual(
+    [calls.includes("anthropic"), openaiModels.filter((model) => model !== "gpt-4.1-mini")],
+    [false, []],
+    JSON.stringify([res.status, calls, openaiModels])
+  );
+  assert.ok(openaiModels.includes("gpt-4.1-mini"), JSON.stringify(openaiModels)); // outer ran
+  assert.equal(res.ok, false);
 });
 
 test("block + strict: the trusted live test still reaches a Claude target and judge; the forged test header does not", async () => {

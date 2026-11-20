@@ -6,6 +6,8 @@ const { wouldRefuseAgent } = await import("../../../src/lib/guardrails/agentGuar
 const gate = await import("../../../src/sse/handlers/chat/agentGuardGate.ts");
 const { isLocalModelPolicyResponse } =
   await import("../../../open-sse/services/resolvedModelAccess.ts");
+const { parseModel } = await import("../../../open-sse/services/model.ts");
+const { isGuardedProvider } = await import("../../../src/lib/guardrails/agentGuard/policy.ts");
 const MESSAGE =
   "This request was refused because the selected model is restricted to official Anthropic clients on this server.";
 const KILO = { "user-agent": "Kilo-Code/4.2.1", "x-title": "Kilo Code" };
@@ -438,4 +440,46 @@ test("fusion: a judge the guard would refuse fails the request before the panel 
     gate.settleAgentGuardCombo(request, new Response("{}", { status: 503 })).status,
     403
   );
+});
+test("fusion: the judge is the one the service resolves, combo config over settings.comboDefaults", () => {
+  setMode("block");
+  const fusion = (config: Record<string, unknown> = {}) => ({
+    name: "f",
+    strategy: "fusion",
+    models: ["glm/glm-5"],
+    config,
+  });
+  const judge = (combo: object, settings?: unknown) =>
+    gate.agentGuardFusionJudgeRefusal({ request: req(KILO), combo, settings, log: quiet() })
+      ?.status ?? null;
+  const claudeDefault = { comboDefaults: { judgeModel: "cc/claude-opus-5" } };
+  assert.equal(judge(fusion(), claudeDefault), 403); // judge only in comboDefaults
+  assert.equal(judge(fusion({ judgeModel: "glm/glm-5" }), claudeDefault), null); // combo wins
+  assert.equal(
+    judge(fusion({ judgeModel: "cc/claude-opus-5" }), {
+      comboDefaults: { judgeModel: "glm/glm-5" },
+    }),
+    403
+  );
+  assert.equal(judge(fusion(), {}), null); // no judge anywhere
+  assert.equal(judge(fusion(), undefined), null);
+  // The service resolves the setup config without a provider: overrides never reach the judge.
+  const override = { providerOverrides: { glm: { judgeModel: "cc/claude-opus-5" } } };
+  assert.equal(judge(fusion(), override), null);
+});
+test("fusion: a judge's provider is read the way dispatch parses a target's model string", () => {
+  setMode("block");
+  for (const judgeModel of [
+    "anthropic/claude-opus-5",
+    "cc/claude-opus-5",
+    "claude/claude-opus-5",
+    "anthropic/claude-opus-5[1m]",
+    "no-think/anthropic/claude-opus-5", // dispatch resolves the `no-think` provider: not Claude
+    "claude-opus-5", // bare: dispatch needs provider inference, left to the dispatch gate
+    "glm/glm-5",
+  ]) {
+    const combo = { name: "f", strategy: "fusion", models: ["glm/glm-5"], config: { judgeModel } };
+    const refused = gate.agentGuardFusionJudgeRefusal({ request: req(KILO), combo, log: quiet() });
+    assert.equal(refused !== null, isGuardedProvider(parseModel(judgeModel).provider), judgeModel);
+  }
 });
