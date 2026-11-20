@@ -29,4 +29,27 @@ test("values are reduced to scheme, host and port; an invalid API origin yields 
   );
   for (const bad of ["not a url", "ftp://api.example.com", "javascript:alert(1)"])
     assert.equal(r({ ...APP, OMNIROUTE_PUBLIC_API_BASE_URL: bad }), null);
+  assert.equal(
+    r({ OMNIROUTE_PUBLIC_API_BASE_URL: "https://u:p@api.example.com/x" }),
+    "https://api.example.com"
+  );
+});
+
+test("an invalid API origin is warned about once, by name, without its value", () => {
+  const warnings: Array<[Record<string, unknown>, string]> = [];
+  const notice = {
+    warned: false,
+    log: { warn: (f: Record<string, unknown>, m: string) => warnings.push([f, m]) },
+  };
+  const env = { ...APP, OMNIROUTE_PUBLIC_API_BASE_URL: "ftp://secret-host.example.com" };
+  assert.equal(resolvePublicApiBaseUrl(env, notice), null);
+  assert.equal(resolvePublicApiBaseUrl(env, notice), null);
+  assert.equal(warnings.length, 1);
+  assert.deepEqual(warnings[0][0], { variable: "OMNIROUTE_PUBLIC_API_BASE_URL" });
+  assert.ok(!JSON.stringify(warnings).includes("secret-host"));
+  // A valid or unset API origin never warns.
+  const quiet = { warned: false, log: notice.log };
+  resolvePublicApiBaseUrl(APP, quiet);
+  resolvePublicApiBaseUrl({ OMNIROUTE_PUBLIC_API_BASE_URL: "https://api.example.com" }, quiet);
+  assert.equal(warnings.length, 1);
 });
