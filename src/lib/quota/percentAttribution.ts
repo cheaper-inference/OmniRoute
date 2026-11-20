@@ -12,12 +12,9 @@
  *     capacity no allocation claims, and only the excess is shared by weight.
  */
 
-import { createLogger } from "@/shared/utils/logger";
 import type { DimensionKey, QuotaWindow } from "./dimensions";
 import { getSaturation } from "./saturationSignals";
 import type { QuotaStore, RecordConsumptionInput } from "./types";
-
-const log = createLogger("quota:percent-attribution");
 
 /** Floor: tokens needed to explain one unit (one percent point) of the dimension. */
 export const DEFAULT_MIN_TOKENS_PER_PCT = 1000;
@@ -149,11 +146,9 @@ async function readShadowTokens(
       store.poolConsumedTotal(poolId, proxyKey),
     ]);
     return { tokensByKey: new Map(requestedKeys.map((k, i) => [k, perKey[i]])), poolTokens };
-  } catch (err) {
-    log.warn(
-      { err: (err as Error)?.message, poolId },
-      "percent shadow-bucket read failed — attributing external usage only"
-    );
+  } catch {
+    // Fail-open, silently: this runs on every request, and a store outage
+    // would otherwise log once per call. No tokens → external-only split.
     return { tokensByKey: new Map(), poolTokens: 0 };
   }
 }
@@ -226,10 +221,8 @@ export async function recordPercentProxy(
   if (tokens === 0) return;
   try {
     await store.consume(apiKeyId, percentProxyDimKey(dimKey), tokens);
-  } catch (err) {
-    log.warn(
-      { err: (err as Error)?.message, apiKeyId },
-      "percent shadow-bucket write failed — skipping"
-    );
+  } catch {
+    // Fail-open, silently: a missed shadow write only under-attributes this
+    // request, and logging it per request would flood the log during an outage.
   }
 }

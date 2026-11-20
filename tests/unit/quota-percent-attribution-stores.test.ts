@@ -139,14 +139,33 @@ for (const [name, make] of [
     near(att.consumedByKey[b], 6);
     near(att.internalByKey[a], 54); // no external part here
     near(att.internalByKey[b], 6);
+
+    // Only b requested: its 6 needs the 1M pool total. Were the total read with
+    // any id other than the real pool id, Redis would return 0, T would fall to
+    // b's own 100k and b would be charged the whole 60.
+    const onlyB = await attributePercentDimension({
+      store,
+      pool,
+      connectionId: conn,
+      provider: "claude",
+      dimension: dim,
+      apiKeyIds: [b],
+    });
+    assert.deepEqual(Object.keys(onlyB.consumedByKey), [b]);
+    near(onlyB.consumedByKey[b], 6);
   });
 }
 
 test("one requested key costs exactly one peek and one pool total", async () => {
   const reads = { peek: 0, total: 0 };
+  const totalPoolIds: string[] = [];
   const counting: PercentAttributionStore = {
     peek: (k, d) => (reads.peek++, real.peek(k, d)),
-    poolConsumedTotal: (p, d) => (reads.total++, real.poolConsumedTotal(p, d)),
+    poolConsumedTotal: (p, d) => (
+      reads.total++,
+      totalPoolIds.push(p),
+      real.poolConsumedTotal(p, d)
+    ),
   };
   const att = await attributePercentDimension({
     store: counting,
@@ -157,7 +176,28 @@ test("one requested key costs exactly one peek and one pool total", async () => 
     apiKeyIds: ["ab-a"],
   });
   assert.deepEqual(reads, { peek: 1, total: 1 });
+  assert.deepEqual(totalPoolIds, [poolAB.id]);
   assert.deepEqual(Object.keys(att.consumedByKey), ["ab-a"]);
+  near(att.consumedByKey["ab-a"], 54);
+});
+
+test("a requested key outside the pool is neither read nor reported", async () => {
+  const peeked: string[] = [];
+  const counting: PercentAttributionStore = {
+    peek: (k, d) => (peeked.push(k), real.peek(k, d)),
+    poolConsumedTotal: (p, d) => real.poolConsumedTotal(p, d),
+  };
+  const att = await attributePercentDimension({
+    store: counting,
+    pool: poolAB,
+    connectionId: connAB,
+    provider: "claude",
+    dimension: dim,
+    apiKeyIds: ["ab-a", "not-in-pool"],
+  });
+  assert.deepEqual(peeked, ["ab-a"]);
+  assert.deepEqual(Object.keys(att.consumedByKey), ["ab-a"]);
+  assert.deepEqual(Object.keys(att.internalByKey), ["ab-a"]);
 });
 
 test("a rejected store read falls back to the external split and never throws", async () => {
