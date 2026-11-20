@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { createRequire, registerHooks } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isInternalThread } from "node:worker_threads";
@@ -28,16 +28,17 @@ const nativeSources = new Set(
 function isCliEntry(parentURL) {
   if (parentURL === cliEntry.href) return true;
   const entry = process.argv[1];
-  if (
-    !entry ||
-    parentURL !== pathToFileURL(entry).href ||
-    !parentURL.endsWith("/bin/omniroute.mjs")
-  ) {
-    return false;
-  }
+  if (!entry || !parentURL?.endsWith("/bin/omniroute.mjs")) return false;
   // The installed-layout fixture copies the executable and shares the CLI modules.
   // Check the bytes before substituting the bridge for a CLI outside the checkout.
   try {
+    // Node can resolve symlinks for the module while argv keeps the supplied path.
+    if (
+      parentURL !== pathToFileURL(entry).href &&
+      parentURL !== pathToFileURL(realpathSync(entry)).href
+    ) {
+      return false;
+    }
     return readFileSync(entry).equals(readFileSync(cliEntry));
   } catch {
     return false;
