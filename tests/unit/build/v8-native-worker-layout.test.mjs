@@ -251,6 +251,46 @@ test("the real CLI keeps native coverage through the clean-environment launcher"
   assert.equal(launches, 1);
 });
 
+test("the installed-layout CLI records native coverage for checkout-backed modules", async (t) => {
+  const fixture = await mkdtemp(join(tmpdir(), "installed-cli-coverage-"));
+  t.after(() => rm(fixture, { recursive: true, force: true }));
+  const coverage = join(fixture, "coverage");
+  await mkdir(coverage);
+  const env = {
+    ...process.env,
+    TMPDIR: fixture,
+    NODE_OPTIONS: `--import=${preload.href}`,
+    NODE_V8_COVERAGE: coverage,
+  };
+  delete env.NODE_TEST_CONTEXT;
+  execFileSync(
+    process.execPath,
+    ["--import", "tsx/esm", "--test", "tests/unit/cli-installed-default-env-16763.test.ts"],
+    {
+      cwd: root,
+      env,
+      stdio: "pipe",
+      timeout: 120_000,
+    }
+  );
+
+  const token = new URL("bin/cli/utils/cliToken.mjs", root);
+  const tokenSourceLength = (await readFile(token, "utf8")).length;
+  const installedEntry = "/node_modules/omniroute/bin/omniroute.mjs";
+  let invocations = 0;
+  for (const file of await readdir(coverage)) {
+    if (!file.endsWith(".json")) continue;
+    const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+    if (!report.result.some(({ url }) => url.endsWith(installedEntry))) continue;
+    invocations++;
+    const sample = report.result.find(({ url }) => url === token.href);
+    assert.ok(sample, "the installed CLI loaded the checkout-backed token module");
+    assert.equal(Boolean(report["source-map-cache"]?.[token.href]), false, token.href);
+    assert.equal(sample.functions[0].ranges[0].endOffset, tokenSourceLength);
+  }
+  assert.equal(invocations, 2, "include the default and edited installed .env launches");
+});
+
 test("the standalone media MCP and tsx share native coverage coordinates", async (t) => {
   const fixture = await mkdtemp(join(tmpdir(), "media-mcp-native-coverage-"));
   t.after(() => rm(fixture, { recursive: true, force: true }));
