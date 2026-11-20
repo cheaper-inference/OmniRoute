@@ -7,7 +7,7 @@ lastUpdated: 2026-07-22
 
 OmniRoute uses a **parallel-cycle** release model: a dedicated `release/vX.Y.Z`
 branch for the active cycle, `main` for the published line, and an immutable
-`vX.Y.Z` tag when that cycle ships. Seeing commits land on `release/*` *and* on
+`vX.Y.Z` tag when that cycle ships. Seeing commits land on `release/*` _and_ on
 `main` is expected — not a mix-up.
 
 Maintainer detail lives in `CLAUDE.md` (Hard Rule #21) and
@@ -16,11 +16,11 @@ contributor-facing summary.
 
 ## At a glance
 
-| Ref | Role |
-| --- | --- |
-| `release/vX.Y.Z` | **Active cycle** — day-to-day development and PR merges for that version |
-| `main` | **Published line** — receives the cycle via squash-merge when the release ships |
-| `vX.Y.Z` (tag) | **Ship marker** — immutable “what shipped” pointer cut at release time |
+| Ref              | Role                                                                            |
+| ---------------- | ------------------------------------------------------------------------------- |
+| `release/vX.Y.Z` | **Active cycle** — day-to-day development and PR merges for that version        |
+| `main`           | **Published line** — receives the cycle via squash-merge when the release ships |
+| `vX.Y.Z` (tag)   | **Ship marker** — immutable “what shipped” pointer cut at release time          |
 
 ```mermaid
 flowchart LR
@@ -63,12 +63,18 @@ gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 Merge mechanics (owner `queue` label → Mergify) are documented in
 [MERGE_TRAIN.md](./MERGE_TRAIN.md).
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
+> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
+> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
+> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
+> omni-queue after that ([OMNI_QUEUE.md](./OMNI_QUEUE.md)). The `queue` label no longer merges anything.
+
 ## Why both a branch and a tag?
 
-| Artifact | Lifetime | Purpose |
-| -------- | -------- | ------- |
-| `release/vX.Y.Z` | In-flight cycle | Collects reviewed PRs, stays CI-green, is the PR base |
-| Tag `vX.Y.Z` | Forever | Marks the exact bits that shipped to npm / GitHub Releases |
+| Artifact         | Lifetime        | Purpose                                                    |
+| ---------------- | --------------- | ---------------------------------------------------------- |
+| `release/vX.Y.Z` | In-flight cycle | Collects reviewed PRs, stays CI-green, is the PR base      |
+| Tag `vX.Y.Z`     | Forever         | Marks the exact bits that shipped to npm / GitHub Releases |
 
 The branch is the workshop; the tag is the sealed package. After squash-merge to
 `main`, the next cycle continues on `release/vX+1` without waiting for the prior
