@@ -309,6 +309,7 @@ Gunakan klausa `IF NOT EXISTS`, `IF EXISTS`, dan `OR IGNORE` / `OR REPLACE` seca
 3. **Isi ulang data dengan hati-hati** : gunakan `UPDATE ... WHERE ...` untuk menangani baris yang ada
 4. **Periksa pesanan dan penamaan** : `npm run test:migrations:fresh` (semua migrasi pada database kosong) dan `npm run check:migration-numbering`
 5. **Uji pada salinan** : jangan pernah menjalankan migrasi yang belum teruji pada produksi
+6. **Tabel yang dibuat dari kode juga memerlukan migrasi** : jika sebuah modul juga membuat tabel dengan malas (`CREATE TABLE IF NOT EXISTS`, disimpan sebagai jalur penyembuhan mandiri), migrasi harus membuatnya dengan DDL yang sama. Jika tidak, instalasi bersih dan instalasi yang ditingkatkan akan berakhir dengan skema yang berbeda, bergantung pada apakah jalur kode tersebut dijalankan. `tests/unit/db/lazy-table-migration-guard.test.ts` memindai `src/` dan `open-sse/` dan gagal pada `CREATE` yang malas tanpa migrasi (#20557). Contoh: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Contoh:
 

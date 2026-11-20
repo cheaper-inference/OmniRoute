@@ -470,7 +470,7 @@ v3.8.0 _પહેલાં_ ઇમ્પોર્ટ કરાયેલા ક�
 2. **કાયમી ઉકેલ:** તમારા `docker run` કમાન્ડમાં `-p 127.0.0.1:20128:20128` વાપરીને સ્પષ્ટપણે IPv4 સાથે બાઇન્ડ કરો:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    આ IPv4 બાઇન્ડને ફરજિયાત બનાવે છે અને પ્રૉક્સીને હોસ્ટનાં તમામ ઇન્ટરફેસ પર ખુલ્લું મૂકવાનું પણ ટાળે છે.
 
