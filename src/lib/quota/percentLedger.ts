@@ -98,9 +98,23 @@ function classify(state: LedgerState, reading: PlanWindowReading, g: number): Tr
   return classifyDrop(state, reading, g, shift);
 }
 
-/** A counter's tokens; anything but a finite number >= 0 counts as 0, everywhere. */
+/** A counter whose tokens are a finite number >= 0. */
+function isReadableCounter(counter: LedgerCounter): boolean {
+  return Number.isFinite(counter.tokens) && counter.tokens >= 0;
+}
+
+/** A counter's tokens; an unreadable counter counts as 0 (explains nothing). */
 function counterTokens(counter: LedgerCounter): number {
-  return Number.isFinite(counter.tokens) && counter.tokens >= 0 ? counter.tokens : 0;
+  return isReadableCounter(counter) ? counter.tokens : 0;
+}
+
+/**
+ * The watermark a key keeps after its counter was consumed. A counter that cannot be read
+ * is ignored for this observation: the key keeps its stored watermark (0 when it has none),
+ * so its tokens are not counted again once the counter reads normally.
+ */
+function nextWatermark(keyState: LedgerKeyState | undefined, counter: LedgerCounter): number {
+  return isReadableCounter(counter) ? counter.tokens : (keyState?.seenTokens ?? 0);
 }
 
 /** Tokens a key routed since the book last consumed its counter; a counter below its watermark restarted. */
@@ -174,7 +188,7 @@ function risenBook(
     const share = total > 0 ? (internal * eligible[key]) / total : 0;
     keys[key] = {
       attributed: (book.keys[key]?.attributed ?? 0) + share,
-      seenTokens: counterTokens(counter),
+      seenTokens: nextWatermark(book.keys[key], counter),
     };
   }
   return { last: g, external: book.external + rise - internal, keys };

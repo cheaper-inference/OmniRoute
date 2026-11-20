@@ -255,7 +255,7 @@ function assertBookValid(state: LedgerState): void {
   }
 }
 
-test("a negative counter counts as zero tokens and gets a zero watermark", () => {
+test("a negative counter explains nothing and keeps the stored watermark (none here: 0)", () => {
   const before = st({ last: 0.1, external: 0.1, keys: {} });
   const { state } = run(before, { a: c(-1000, 1), b: c(5000, 1) }, rd(0.2, 1));
   assert.equal(state.keys.a.attributed, 0);
@@ -265,7 +265,7 @@ test("a negative counter counts as zero tokens and gets a zero watermark", () =>
   assertBookValid(state);
 });
 
-test("a counter that is not a number leaves the other keys unaffected and stores a zero watermark", () => {
+test("a counter that is not a number leaves the other keys unaffected and keeps the stored watermark (none here: 0)", () => {
   const before = st({ last: 0.1, external: 0.1, keys: {} });
   for (const odd of [c(Number.NaN, 1), c(Number.POSITIVE_INFINITY, 1)]) {
     const { state } = run(before, { a: odd, b: c(5000, 1) }, rd(0.2, 1));
@@ -277,6 +277,39 @@ test("a counter that is not a number leaves the other keys unaffected and stores
   const opened = run(null, { a: c(Number.NaN), b: c(5000) }, rd(0.1, 0)).state;
   assert.equal(opened.keys.a.seenTokens, 0);
   assertBookValid(opened);
+});
+
+test("an unreadable counter keeps the key's watermark, so its tokens are not counted twice", () => {
+  for (const odd of [Number.NaN, -1000, Number.POSITIVE_INFINITY]) {
+    const before = st({
+      last: 0.1,
+      external: 0.1,
+      keys: { a: { attributed: 0, seenTokens: 5_000 } },
+    });
+    const unread = run(before, { a: c(odd, 1) }, rd(0.2, 1)).state;
+    assert.deepEqual(unread.keys.a, { attributed: 0, seenTokens: 5_000 });
+    near(unread.external, 0.2);
+    assertBookValid(unread);
+
+    const back = run(unread, { a: c(6_000, 2) }, rd(0.3, 2)).state;
+    near(back.keys.a.attributed, 0.01); // 1000 pending tokens, not 6000
+    assert.equal(back.keys.a.seenTokens, 6_000);
+    near(back.external, 0.29);
+    assertBookValid(back);
+  }
+});
+
+test("an unreadable counter at a turn keeps the key and its watermark", () => {
+  const before = st({ keys: { a: { attributed: 0.48, seenTokens: 5_000 } } });
+  const turned = run(before, { a: c(Number.NaN, 5) }, rd(0.2, 5, R + 5 * H)).state;
+  assert.deepEqual(turned.keys, { a: { attributed: 0, seenTokens: 5_000 } });
+  near(turned.external, 0.2);
+  assertBookValid(turned);
+
+  const back = run(turned, { a: c(6_000, 6) }, rd(0.3, 6, R + 5 * H)).state;
+  near(back.keys.a.attributed, 0.01);
+  assert.equal(back.keys.a.seenTokens, 6_000);
+  assertBookValid(back);
 });
 
 test("a counter whose write time is not a number is never eligible", () => {
