@@ -25,32 +25,26 @@ pluginy načítavajú a spúšťajú kód v podriadených procesoch, takže tras
 ohľadu na autentifikáciu nedostupné z akéhokoľvek zdroja mimo loopbacku. Pozrite si
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Ako to funguje spolu
+## Ako sa to hodí Together
 
 ```
-Ovládací panel (/dashboard/plugins)
-  ├─ Karta „Nainštalované“ → GET /api/plugins            (listPlugins)
-  │                          POST /api/plugins/scan      (pluginManager.scan)
-  │                          POST /api/plugins/{name}/activate|deactivate
-  │                          DELETE /api/plugins/{name}   (odinštalovanie)
-  └─ Karta „Trhovisko“     → GET /api/plugins/marketplace
-                               → listMarketplacePlugins()
-                                 ├─ bez vlastnej adresy URL → vstavaný SEED_REGISTRY
-                                 └─ vlastná adresa URL → ochrana SSRF isSafeMarketplaceUrl()
-                                                       → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Vrstva registra** — `src/lib/plugins/marketplace.ts`: zobrazuje a prehľadáva
-  katalóg, pričom pri akomkoľvek zlyhaní použije počiatočný register.
-- **Vrstva životného cyklu** — `src/lib/plugins/manager.ts` (singleton
-  `pluginManager`): inštalácia, aktualizácia, aktivácia, deaktivácia,
-  odinštalovanie, skenovanie a načítanie pri spustení.
-- **Vrstva manifestu** — `src/lib/plugins/manifest.ts`: schéma Zod a predvolené
-  hodnoty pre `plugin.json`.
-- **Skener** — `src/lib/plugins/scanner.ts`: vyhľadáva pluginy na disku v adresári
-  pluginov.
-- **Načítavač** — `src/lib/plugins/loader.ts`: spúšťa každý plugin v izolovanom
-  podriadenom procese a sprostredkúva volania hookov cez IPC.
+- **Vrstva registra** — `src/lib/plugins/marketplace.ts`: vypíše/vyhľadá katalóg a pri akomkoľvek zlyhaní sa vráti do registra semien.
+- **Vrstva životného cyklu** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): inštalácia, aktualizácia, aktivácia, deaktivácia, odinštalovanie, skenovanie, zaťaženie pri spustení.
+- **Zjavná vrstva** — `src/lib/plugins/manifest.ts`: predvolená hodnota schémy Zod + pre `plugin.json`.
+- **Skener** — `src/lib/plugins/scanner.ts`: nájde pluginy na disku v adresári pluginov.
+- **Nakladač** — `src/lib/plugins/loader.ts`: vytvorí každý plugin v samostatnom Node.js podriadenom procese a sprostredkuje hovory cez IPC. Dieťa nie je pieskovisko (pozri „Izolácia spúšťania zásuvných modulov“ nižšie).
 
 ## Katalóg trhoviska
 
@@ -88,27 +82,24 @@ upozornenie a použije počiatočný zoznam.
 
 ## REST API
 
-Všetky koncové body vyžadujú autentifikáciu správy (`requireManagementAuth`) **a zároveň** sú
-dostupné iba cez loopback — `/api/plugins` a `/api/plugins/` sú uvedené v
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Všetky koncové body vyžadujú autorizáciu správy (`requireManagementAuth`)** a** sú len pre spätnú slučku — `/api/plugins` a `/api/plugins/` sú uvedené v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Koncový bod                      | Metóda | Popis                                                               |
-| -------------------------------- | ------ | ------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Zoznam nainštalovaných pluginov (voliteľný filter `?status=`)       |
-| `/api/plugins`                   | POST   | Inštalácia pluginu z absolútnej lokálnej cesty                      |
-| `/api/plugins/scan`              | POST   | Prehľadanie adresára pluginov a registrácia nových pluginov         |
-| `/api/plugins/marketplace`       | GET    | Zoznam položiek katalógu trhoviska                                  |
-| `/api/plugins/[name]`            | GET    | Získanie podrobností o nainštalovanom plugine                       |
-| `/api/plugins/[name]`            | DELETE | Odinštalovanie pluginu                                              |
-| `/api/plugins/[name]/activate`   | POST   | Aktivácia (načítanie + registrácia hookov)                          |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivácia (spustenie `onDeactivate`, zrušenie registrácie hookov) |
-| `/api/plugins/[name]/config`     | GET    | Získanie konfigurácie pluginu + konfiguračnej schémy                |
-| `/api/plugins/[name]/config`     | PUT    | Aktualizácia konfigurácie pluginu (overená voči schéme)             |
+| Koncový bod                      | Metóda | Popis                                                            |
+| -------------------------------- | ------ | ---------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Zoznam nainštalovaných doplnkov (voliteľný filter `?status=` )   |
+| `/api/plugins`                   | POST   | Nainštalujte doplnok z adresára zdrojov doplnkov                 |
+| `/api/plugins/scan`              | POST   | Naskenujte adresár doplnkov a zaregistrujte nové doplnky         |
+| `/api/plugins/marketplace`       | GET    | Zoznam položiek katalógu trhovísk                                |
+| `/api/plugins/[name]`            | GET    | Získajte podrobnosti o nainštalovanom doplnku                    |
+| `/api/plugins/[name]`            | DELETE | Odinštalujte doplnok                                             |
+| `/api/plugins/[name]/activate`   | POST   | Aktivovať (načítať háčiky registra + )                           |
+| `/api/plugins/[name]/deactivate` | POST   | Deaktivovať (vystreliť `onDeactivate`, zrušiť registráciu hákov) |
+| `/api/plugins/[name]/config`     | GET    | Získajte schému konfigurácie pluginu +                           |
+| `/api/plugins/[name]/config`     | PUT    | Aktualizujte konfiguráciu doplnku (overené podľa schémy)         |
 
-Filter `status` pre `GET /api/plugins` akceptuje jednu z hodnôt
-`installed` / `active` / `inactive` / `error`. Neplatná hodnota vráti `400`.
+Filter `GET /api/plugins` `status` akceptuje jednu z možností `installed` / `active` / `inactive` / `error`. Neplatná hodnota vráti `400`.
 
-### Zoznam nainštalovaných pluginov
+### Zoznam nainštalovaných doplnkov
 
 ```bash
 curl http://localhost:20128/api/plugins \
@@ -124,19 +115,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-Hodnota `path` musí byť **absolútna** a nesmie obsahovať prechodové segmenty `..` ani
-nulové bajty (vynucuje to Zod). Zdrojový adresár musí obsahovať platný
-`plugin.json` (alebo musí byť jeho nadradeným adresárom). Pri úspechu má odpoveď stav `201` a obsahuje
-záznam nainštalovaného pluginu.
+`path` musí byť an** absolútne** cestu k adresáru** v adresári zdrojov doplnku** : `plugin-sources` vedľa koreňa pluginu, takže `~/.omniroute/plugin-sources/` predvolene, alebo `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` keď je táto premenná nastavená (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Najprv tam skopírujte alebo naklonujte doplnok. Inštalácia je odmietnutá pomocou `400`, keď cesta obsahuje `..` alebo nulový bajt, leží mimo tohto adresára, rieši sa mimo neho prostredníctvom symbolického odkazu, obsahuje symbolický odkaz, ktorého cieľ je mimo neho, alebo ak adresár neexistuje. Zdrojový adresár musí obsahovať platné `plugin.json` (alebo byť rodičom jedného). Po úspechu je odpoveď `201` s riadkom nainštalovaného pluginu.
 
-### Prehliadanie trhoviska
+Na rozdiel od iných trás doplnkov, táto vyžaduje poverenie na správu (reláciu dashboardu alebo kľúč API v rozsahu správy), aj keď je prihlásenie zakázané (`requireLogin=false`): inštalácia kódu nikdy nie je anonymná akcia.
+
+### Prehľadávať trhovisko
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Aktualizácia konfigurácie pluginu
+### Aktualizujte konfiguráciu pluginu
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -145,10 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` overuje každú poskytnutú hodnotu voči
-`configSchema` pluginu (deklarovanej v manifeste): polia typu `number` rešpektujú `min`/`max`,
-polia typu `select` sa musia zhodovať s deklarovaným `enum`. Kľúče, ktoré sa v schéme
-nenachádzajú, sú povolené.
+`PUT .../config` overí každú poskytnutú hodnotu oproti `configSchema` doplnku (deklarovanému v manifeste): polia `number` rešpektujú `min`/`max`, polia `select` sa musia zhodovať s deklarovaným `enum`. Kľúče, ktoré sa nenachádzajú v schéme, sú povolené.
 
 ## Konfigurácia
 
@@ -204,90 +191,60 @@ Karta „Trhovisko“ na paneli poskytuje pole pre túto URL (spätne sa načít
 > `listMarketplacePlugins()`) tento kľúč rešpektuje, keď sa už nachádza v úložisku
 > nastavení.
 
-## Zabezpečenie
+## Bezpečnosť
 
-### Úroveň trasy — iba loopback
+### Iba slučka — úrovne trasy
 
-Pluginy spúšťajú kód v podriadených procesoch, preto je celé rozhranie
-`/api/plugins` klasifikované ako `LOCAL_ONLY` (úroveň 1). Kontrola loopbacku
-sa vykonáva bezpodmienečne **pred** akoukoľvek kontrolou autentifikácie, takže
-ani uniknutý token na správu, ktorý sa dostane do zariadenia cez tunel, nemôže
-nainštalovať, aktivovať ani odinštalovať plugin. Pozrite si
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) a
-Pevné pravidlá č. 15 / č. 17.
+Doplnky spúšťajú kód v vytvorených podriadených procesoch, takže celý povrch `/api/plugins` je klasifikovaný `LOCAL_ONLY` (Tier 1). Vynucovanie spätnej slučky prebieha bezpodmienečne** predtým** akúkoľvek kontrolu overenia, takže uniknutý token správy, ktorý sa dostane do krabice cez tunel, stále nemôže nainštalovať, aktivovať alebo odinštalovať doplnok. Pozrite si [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) a tvrdé pravidlá #15 / #17.
 
-### Ochrana registra marketplace pred SSRF
+### Strážca registra SSRF na trhovisku
 
-Vlastná URL registra je konfigurácia, ktorú môže ovplyvniť útočník, preto ju
-`listMarketplacePlugins()` pred načítaním spracuje v dvoch vrstvách:
+Vlastný register URL je konfigurácia ovplyvniteľná útočníkom, takže pred jeho načítaním ho `listMarketplacePlugins()` spustí cez dve vrstvy:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Odmietne všetko, čo nepoužíva `http:` / `https:`.
-   - Odmietne explicitné privátne/loopback/link-local/ULA hostitele (IPv4 **aj**
-     IPv6 vrátane IPv4-mapped) prostredníctvom kanonickej funkcie
-     `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
-   - Preloží záznamy **`A` aj `AAAA`** a odmietne URL, ak je **ktorákoľvek**
-     preložená adresa privátna — tým sa eliminuje obídenie typu verejný názov
-     hostiteľa → privátna IP adresa.
-   - **Pri zlyhaní odmietne prístup**: zlyhanie prekladu DNS spôsobí odmietnutie
-     URL.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): pri načítaní znova aplikuje
-   ochranu URL povoľujúcu iba verejné adresy a **blokuje presmerovania** (žiadny
-   prechod z verejnej adresy na privátnu cez `30x`).
+   - Odmietne všetko, čo nie je `http:` / `https:`.
+   - Odmietne doslovných hostiteľov private/loopback/link-local/ULA (IPv4** a** IPv6 vrátane IPv4-mapped) prostredníctvom kanonického `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Vyrieši** oboje** `A` a `AAAA` zaznamenáva a odmieta ak** akékoľvek** vyriešená adresa je súkromná — čím sa zatvára verejný názov hostiteľa → premostenie súkromnej adresy IP.
+   - **Zlyhanie zatvorené** : zlyhanie rozlíšenia DNS odmietne URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): znovu použije ochranu URL určenú len pre verejnosť v čase načítania a** blokuje presmerovania** (žiadny verejný → súkromný `30x` pivot).
 
-URL, ktorá neprejde ktoroukoľvek z týchto vrstiev, požiadavku nepreruší —
-marketplace sa bez upozornenia prepne na vstavaný počiatočný register a zapíše
-upozornenie do protokolu.
+URL ktorá zlyhá na niektorej z vrstiev, nezruší požiadavku — trh sa ticho vráti do vstavaného registra semien a zaznamená varovanie.
 
-> Táto ochrana bola sprísnená v PR č. 3774 konkrétne tak, aby prekladala A +
-> AAAA a používala kanonickú funkciu `isPrivateHost` namiesto kontroly
-> obmedzenej iba na IPv4.
+> Tento kryt bol zosilnený v PR #3774 špeciálne na rozlíšenie A + AAAA a použitie kanonického `isPrivateHost` namiesto kontroly IPv4-only.
 
-### Izolácia vykonávania pluginov
+### Izolácia spustenia pluginu
 
-- **Izolácia procesov** — `loadPlugin()` (`src/lib/plugins/loader.ts`) spúšťa
-  každý plugin v samostatnom podriadenom procese Node.js a komunikuje cez IPC.
-  Volania hookov majú časový limit s eskaláciou `SIGTERM` → `SIGKILL`.
-- **Zoznam povolených premenných prostredia** — podriadený proces dostane iba
-  povolenú množinu premenných prostredia; širšia množina sa poskytne iba vtedy,
-  keď manifest požaduje oprávnenie `env`.
-- **Obmedzenie ciest** — inštalácia/aktualizácia/odinštalovanie overujú, že
-  adresár pluginu a `manifest.main` sa preložia na cestu **v rámci**
-  spravovaného koreňového adresára pluginov ešte pred akýmkoľvek kopírovaním
-  alebo rekurzívnym odstránením (ochrana pred pozmenenými cestami v databáze a
-  prechádzaním cez `../` v `manifest.main`). Aktivácia prekladá symbolické
-  odkazy pomocou `realpath` a odmietne načítať vstupný bod, ktorý sa nachádza
-  mimo adresára pluginu.
-- **Voliteľné pripnutie integrity** — manifest môže deklarovať pole `integrity`
-  (`sha256-<base64>`, formát SRI). Ak je uvedené, loader pri načítaní overí hash
-  vstupného súboru a pri nezhode odmietne aktiváciu. Ide o voliteľnú detekciu
-  pozmenenia, **nie** o bezpečnostnú hranicu — skutočnými hranicami sú smerovanie
-  obmedzené na loopback a model oprávnení.
+> **Doplnky nie sú v karanténe.** Dieťa je obyčajný proces Node.js ktorý beží ako používateľ OmniRoute, bez kontextu VM a bez príznakov povolenia Node.js, takže kód zásuvného modulu môže čítať a zapisovať akýkoľvek súbor, ktorý môže používateľ, spúšťať programy a dostať sa do siete. `requires.permissions` rozhoduje len o tom, ktoré premenné prostredia dieťa dostane; ostatné povolenia sa nevynucujú. Inštalujte iba doplnky, ktorým dôverujete. Nižšie uvedená hranica procesu obsahuje zlyhania a zamrznutia; nie je to hranica bezpečnosti.
+
+- **Procesná izolácia** — `loadPlugin()` (`src/lib/plugins/loader.ts`) vytvorí každý doplnok v samostatnom podradenom procese Node.js a komunikuje cez IPC. Hook hovory majú časový limit s eskaláciou `SIGTERM` → `SIGKILL`.
+- **Env zoznam povolených** — dieťa dostane iba povolenú množinu premenných prostredia; širšia množina je udelená iba vtedy, keď manifest vyžaduje povolenie `env`.
+- **Nainštalujte zdrojový obal** — `POST /api/plugins` číta iba z adresára zdrojov pluginov (pozri "Inštalácia z lokálnej cesty"): cesta je kanonizovaná pomocou `realpath`, musí zostať striktne v tomto adresári a zdrojový strom nesúci symbolický odkaz, ktorý z neho uniká, je odmietnutý skôr, ako sa čokoľvek skopíruje.
+- **Obmedzenie cesty** — install/upgrade/uninstall tvrdí, že adresár pluginu a `manifest.main` sa vyriešia** v rámci** spravovaný koreň pluginu pred akoukoľvek kópiou alebo rekurzívnym odstránením (chráni pred narušenými cestami DB a prechodom `../` v `manifest.main`). Aktivácia vyrieši symbolické odkazy cez `realpath` a odmietne načítať vstupný bod, ktorý unikne z adresára pluginu.
+- **Voliteľný kolík integrity** — manifest môže deklarovať pole `integrity` (formát `sha256-<base64>`, SRI ). Ak je prítomný, zavádzač overí hodnotu hash súboru záznamu v čase načítania a odmietne sa aktivovať v prípade nesúladu. Ide o voliteľnú detekciu manipulácie,** nie** bezpečnostná hranica: neobmedzuje to, čo dokáže načítaný doplnok.
+- **Žiadne prihlasovacie údaje klienta v hákoch** — kontext odovzdaný do `onRequest`, `onResponse` a `onError` má odstránené hlavičky `authorization`, `x-api-key`, `proxy-authorization` a `cookie` a záznam kľúča API nenesie žiadnu kľúčovú hodnotu (`redactPluginContext()` v `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
-Overuje ho `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Overené `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Pole               | Typ       | Poznámky                                                        |
-| ------------------ | --------- | --------------------------------------------------------------- |
-| `name`             | string    | Povinné; kebab-case (`^[a-z0-9-]+$`), 1–100 znakov              |
-| `version`          | string    | Povinné; semver (`MAJOR.MINOR.PATCH`)                           |
-| `description`      | string?   | ≤ 500 znakov                                                    |
-| `author`           | string?   | ≤ 200 znakov                                                    |
-| `license`          | string?   | Predvolená hodnota je `MIT`                                     |
-| `main`             | string?   | Vstupný súbor; predvolená hodnota je `index.js`                 |
-| `source`           | enum?     | `local` \| `marketplace` (predvolená hodnota je `local`)        |
-| `tags`             | string[]? | Vyhľadávacie značky                                             |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                 |
-| `hooks`            | object?   | Booleovské hodnoty určujúce, ktoré hooky plugin implementuje    |
-| `skills`           | object[]? | Voliteľné definície schopností                                  |
-| `enabledByDefault` | boolean?  | Automaticky aktivovať pri inštalácii                            |
-| `configSchema`     | object?   | Mapa konfiguračných polí (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Voliteľné pripnutie vstupného súboru `sha256-<base64>`          |
+| Pole               | Typ                | Poznámky                                                        |
+| ------------------ | ------------------ | --------------------------------------------------------------- |
+| `name`             | reťazec            | Povinné; kufrík na kebab (`^[a-z0-9-]+$`), 1–100 znakov         |
+| `version`          | reťazec            | Povinné; semver (`MAJOR.MINOR.PATCH`)                           |
+| `description`      | reťazec?           | ≤ 500 znakov                                                    |
+| `author`           | reťazec?           | ≤ 200 znakov                                                    |
+| `license`          | reťazec?           | Predvolená hodnota je `MIT`                                     |
+| `main`             | reťazec?           | Vstupný súbor; predvolená hodnota je `index.js`                 |
+| `source`           | enum?              | `local` \| `marketplace` (predvolená hodnota je `local`)        |
+| `tags`             | reťazec[]?         | Hľadať značky                                                   |
+| `requires`         | objekt?            | `{ omniroute?, permissions[] }`                                 |
+| `hooks`            | objekt?            | Booleans deklarujúce, ktoré háčiky implementuje doplnok         |
+| `skills`           | objekt[]?          | Voliteľné definície zručností                                   |
+| `enabledByDefault` | boolovská hodnota? | Automatická aktivácia pri inštalácii                            |
+| `configSchema`     | objekt?            | Mapa konfiguračných polí (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | reťazec?           | Voliteľný kolík vstupného súboru `sha256-<base64>`              |
 
-Oprávnenia sa vyberajú z enumu
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Povolenia sa získavajú z výčtu `network` / `file-read` / `file-write` / `env` / `exec`. Iba `env` má runtime efekt (trochu väčší zoznam povolených premenných prostredia pre dieťa); ostatné sú vyhlásenia a nevykonávajú sa.
 
 ## Tok životného cyklu
 
@@ -345,19 +302,16 @@ Tabuľka `plugins` (migrácia `076_create_plugins.sql`):
 Metriky a analytické údaje pluginov sa sledujú v ďalších tabuľkách
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Ovládací panel
+## Dashboard
 
-Stránka ovládacieho panela na adrese `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) obsahuje dve karty:
+Stránka informačného panela na `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) obsahuje dve karty:
 
-- **Nainštalované** — uvádza nainštalované pluginy s ich deklarovanými hookmi,
-  prepínačom aktivácie/deaktivácie, tlačidlom na odinštalovanie a akciou „Vyhľadať
-  pluginy“ (`POST /api/plugins/scan`).
-- **Marketplace** — zobrazuje katalóg z `GET /api/plugins/marketplace` s poľom
-  na nastavenie vlastnej URL registra.
+- **Nainštalované** — uvádza zoznam nainštalovaných doplnkov s ich deklarovanými háčikmi, prepínačom activate/deactivate, tlačidlom na odinštalovanie a akciou „Vyhľadať doplnky“ (`POST /api/plugins/scan`).
+- **Trhovisko** — zobrazuje katalóg z `GET /api/plugins/marketplace` s poľom na nastavenie vlastného registra URL.
 
-Konfiguračná stránka jednotlivého pluginu sa nachádza na adrese `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Stránka vždy zobrazuje varovanie, že doplnky bežia s plnými oprávneniami procesu OmniRoute.
+
+Konfiguračná stránka pre jednotlivé doplnky žije na `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Pozri tiež
 

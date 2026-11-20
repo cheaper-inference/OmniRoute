@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ବିକଳ୍ପ) ଇମେଜ୍ ଅପସାରଣ କରନ୍ତୁ
+docker rmi cheaperinference/omniroute:latest
+# ପୁରୁଣା ସଂସ୍ଥାଗୁଡ଼ିକ ଉତ୍ତରାଧିକାରୀ ନାମ ଟାଣିଲା:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

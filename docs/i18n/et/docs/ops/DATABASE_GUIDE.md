@@ -309,6 +309,7 @@ Kasutage `IF NOT EXISTS`, `IF EXISTS` ja `OR IGNORE` / `OR REPLACE` klausleid.
 3. **Täitke andmed hoolikalt** : kasutage `UPDATE ... WHERE ...` olemasolevate ridade käsitlemiseks
 4. **Kontrolli järjekorda ja nimesid** : `npm run test:migrations:fresh` (kõik migratsioonid tühjas andmebaasis) ja `npm run check:migration-numbering`
 5. **Test koopia peal** : ärge kunagi käivitage tootmises testimata migratsioone
+6. **Ka koodist loodud tabel vajab migreerimist** : kui moodul loob tabeli ka laisalt (`CREATE TABLE IF NOT EXISTS`, hoitakse eneseparandusteena), peab migratsioon selle looma sama DDL. Vastasel juhul lõpeb puhas installimine ja täiendatud installimine erinevate skeemidega, olenevalt sellest, kas see kooditee jooksis. `tests/unit/db/lazy-table-migration-guard.test.ts` skannib `src/` ja `open-sse/` ning ebaõnnestub laisal `CREATE` ilma migratsioonita (#20557). Näide: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Näide:
 

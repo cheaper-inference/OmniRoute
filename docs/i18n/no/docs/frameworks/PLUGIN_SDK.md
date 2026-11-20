@@ -4,7 +4,7 @@
 
 ---
 
-## Hurtigstart
+## Rask start
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API-referanse
+## API Referanse
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Fabrikkfunksjon som oppretter et Plugin-objekt med standardverdier.
+Fabrikkfunksjon som lager et plugin-objekt med standardinnstillinger.
 
 **Parametere:**
 
-- `name` (string, obligatorisk) — Navnet på programtillegget i kebab-case
-- `priority` (number, valgfritt, standardverdi: 100) — Lavere verdi kjøres først
-- `enabled` (boolean, valgfritt, standardverdi: true) — Skal det være aktivert ved oppstart?
-- `onRequest` (function, valgfritt) — Kjøres før chat-behandleren
-- `onResponse` (function, valgfritt) — Kjøres etter chat-behandleren
-- `onError` (function, valgfritt) — Kjøres ved feil i behandleren
+- `name` (streng, påkrevd) — Pluginnavn i kebab-case
+- `priority` (nummer, valgfritt, standard: 100) — Lower kjøres først
+- `enabled` (boolsk, valgfritt, standard: sant) — Start aktivert?
+- `onRequest` (funksjon, valgfritt) — Kjører før chatbehandler
+- `onResponse` (funksjon, valgfritt) — Kjører etter chatbehandler
+- `onError` (funksjon, valgfritt) — Kjører på behandlerfeil
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blokker forespørselen og returner eventuelt et egendefinert svar.
+Blokker forespørselen og returner eventuelt et tilpasset svar.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Endre forespørselskroppen før den når leverandøren.
+Endre forespørselsteksten før den når leverandøren.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Knytt metadata til forespørselskonteksten.
+Legg ved metadata til forespørselskonteksten.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Programtilleggskontekst (`PluginContext`)
+## Plugin-kontekst (`PluginContext`)
 
-| Felt        | Type                      | Beskrivelse                       |
-| ----------- | ------------------------- | --------------------------------- |
-| `requestId` | `string`                  | Unik forespørselsidentifikator    |
-| `model`     | `string`                  | Navnet på den forespurte modellen |
-| `provider`  | `string`                  | ID-en til målleverandøren         |
-| `body`      | `Record<string, unknown>` | Forespørselskropp                 |
-| `headers`   | `Record<string, string>`  | Forespørselshoder                 |
-| `metadata`  | `Record<string, unknown>` | Endringsbare metadata             |
-| `timestamp` | `number`                  | Tidsstempel for forespørselen     |
+| Felt         | Type                      | Beskrivelse                      |
+| ------------ | ------------------------- | -------------------------------- |
+| `requestId`  | `string`                  | Unik forespørselsidentifikator   |
+| `model`      | `string`                  | Forespurt modellnavn             |
+| `provider`   | `string`                  | Målleverandør ID                 |
+| `body`       | `Record<string, unknown>` | Forespørselsinstans              |
+| `headers`    | `Record<string, string>`  | Forespørselshoder (se merknad)   |
+| `metadata`   | `Record<string, unknown>` | Mulig metadata                   |
+| `timestamp`  | `number`                  | Be om tidsstempel                |
+| `apiKeyInfo` | `object` (valgfritt)      | API -nøkkelmetadata (se merknad) |
+
+Konteksten har aldri klientens legitimasjon: `authorization`, `x-api-key`, `proxy-authorization` og `cookie` -overskriftene fjernes (hvilket som helst), og `apiKeyInfo` beholder nøkkelens metadata (som `id`, `name` og `scopes`), men ikke nøkkelverdien eller fingeravtrykket (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). Dette gjelder for `onRequest`, `onResponse` og `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Eller som enkle boolske verdier (standardprioritet 100):
 
 ## Tillatelsessystem
 
-Programtillegg kjører i en sandkasseisolert VM-kontekst. Tilgang til eksterne ressurser krever eksplisitte tillatelser:
+Plugins er** ikke sandkasse** . Hvert aktive plugin kjører som en separat, vanlig Node.js underordnet prosess (`loadPlugin()` in `src/lib/plugins/loader.ts`) under samme operativsystembruker som OmniRoute, uten VM kontekst og ingen Node.js tillatelsesflagg. Plugin-kode kan bruke `node:fs`, `node:child_process`, `fetch` og annenhver Node.js API: den kan lese og skrive hvilken som helst fil OmniRoute brukeren kan (inkludert datakatalogen), kjøre programmer og nå nettverket.
 
-| Tillatelse   | Gir tilgang til                                              |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Skrivebeskyttet `process.env`-proxy                          |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifestets `requires.permissions` aksepterer `network`, `file-read`, `file-write`, `env` og `exec`, men i dag har bare `env` en effekt ved kjøretid:
 
-Uten en tillatelse er de tilhørende globalene ganske enkelt ikke tilgjengelige i sandkassen.
+| Tillatelse                                   | Effekt i dag                                                                                                                                                                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | Plugin-prosessen mottar også `PORT`, `HOSTNAME`, `TZ` og `TMPDIR`. Uten den mottar den bare `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` og `PLUGIN_NAME` (pluss `SystemRoot` og `windir` på Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Ingen. De er kun erklæringer: ingenting er blokkert når de mangler.                                                                                                                                                            |
+
+Å installere en plugin er som å installere et hvilket som helst annet program på verten. Installer bare plugins hvis kilde du stoler på.
 
 ## Konfigurasjonsskjema
 
@@ -194,7 +196,7 @@ Konfigurasjonsverdier lagres i databasen og er tilgjengelige via konfigurasjonss
 
 ## Eksempler
 
-### Forespørselslogger
+### Be om Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Frekvensbegrenser
+### Satsbegrenser
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minutt
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Responstransformator
+### Respons transformator
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

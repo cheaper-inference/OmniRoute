@@ -1110,8 +1110,16 @@ test("landing path, actor owner: a pull_request rule of another ruleset blocks u
   assert.deepEqual(blocked.warnings, []);
 
   const always = (actor_type, actor_id) => [{ actor_type, actor_id, bypass_mode: "always" }];
-  assert.deepEqual(await check(always("RepositoryRole", 5)), { blockers: [], warnings: [] });
-  assert.deepEqual(await check(always("OrganizationAdmin", 1)), { blockers: [], warnings: [] });
+  assert.deepEqual(await check(always("RepositoryRole", 5)), {
+    blockers: [],
+    warnings: [],
+    info: [],
+  });
+  assert.deepEqual(await check(always("OrganizationAdmin", 1)), {
+    blockers: [],
+    warnings: [],
+    info: [],
+  });
   // the App bypassing is irrelevant when the owner lands
   assert.equal((await check(always("Integration", APP_ID), { appId: APP_ID })).blockers.length, 1);
   // other roles, and bypass modes that do not cover a direct push
@@ -1185,8 +1193,8 @@ test("checkLandingPath accepts an always/exempt App bypass, not a pull_request-o
     const gh = fakeGh([foreign], { branchRules: branchRulesWithForeignPullRequest(42) });
     return checkLandingPath({ gh, repo: "acme/sandbox", base: BASE, ownRulesetId: 42, appId });
   };
-  assert.deepEqual(await check("always"), { blockers: [], warnings: [] });
-  assert.deepEqual(await check("exempt"), { blockers: [], warnings: [] });
+  assert.deepEqual(await check("always"), { blockers: [], warnings: [], info: [] });
+  assert.deepEqual(await check("exempt"), { blockers: [], warnings: [], info: [] });
   assert.equal((await check("pull_request")).blockers.length, 1, "PR-only bypass misses pushes");
   assert.equal((await check("always", 999)).blockers.length, 1, "another App id is not ours");
   const noAppId = await check("always", null);
@@ -1217,6 +1225,231 @@ test("checkLandingPath: unreadable bypass list blocks, unknown rule types only w
   assert.match(report.blockers[0], /ruleset 555 \(Organization acme\).*not readable/);
   assert.equal(report.warnings.length, 1);
   assert.match(report.warnings[0], /^rule max_file_size from ruleset 21899981/);
+});
+
+// ─────────── landing path: a foreign required_status_checks rule the candidate satisfies ───────────
+
+/** config.requiredChecks of the repository config (what the queue's verdict needs green). */
+const QUEUE_REQUIRED_CHECKS = Object.freeze([
+  "Gate / CI",
+  "Gate / Quality",
+  "Merge integrity (changelog + generated skills)",
+]);
+
+/** GitHub Actions' app id: the integration_id GitHub gives check runs of workflow jobs. */
+const ACTIONS_APP_ID = 15368;
+
+/**
+ * The live "Require green gates on the active release" ruleset (2026-11-19, GET
+ * /repos/cheaper-inference/OmniRoute/rulesets/27616259): no bypass actor at all.
+ */
+const REQUIRE_GREEN_GATES = Object.freeze({
+  id: 27616259,
+  name: "Require green gates on the active release",
+  target: "branch",
+  source_type: "Repository",
+  source: "cheaper-inference/OmniRoute",
+  enforcement: "active",
+  conditions: { ref_name: { exclude: [], include: ["~DEFAULT_BRANCH"] } },
+  rules: [],
+  bypass_actors: [],
+});
+
+/** Its rule as GET /rules/branches/<base> returns it; `change` edits the parameters. */
+function greenGatesRule(change = (p) => p) {
+  const parameters = change({
+    strict_required_status_checks_policy: false,
+    do_not_enforce_on_create: true,
+    required_status_checks: [
+      { context: "Gate / CI", integration_id: ACTIONS_APP_ID },
+      { context: "Gate / Quality", integration_id: ACTIONS_APP_ID },
+    ],
+  });
+  return {
+    type: "required_status_checks",
+    parameters,
+    ruleset_source_type: "Repository",
+    ruleset_source: "cheaper-inference/OmniRoute",
+    ruleset_id: 27616259,
+  };
+}
+
+const landingWith = (rules, extra = {}) =>
+  checkLandingPath({
+    gh: fakeGh([REQUIRE_PR_ON_DEFAULT, REQUIRE_GREEN_GATES], { branchRules: rules }),
+    repo: "acme/sandbox",
+    base: BASE,
+    ownRulesetId: 42,
+    appId: APP_ID,
+    actor: "owner",
+    requiredChecks: QUEUE_REQUIRED_CHECKS,
+    ...extra,
+  });
+
+test("landing path: the production green-gates rule does not block, and is reported as info", async () => {
+  const safe = branchRulesWithForeignPullRequest(42).filter((r) => r.ruleset_id === 15605329);
+  for (const actor of ["owner", "app"]) {
+    const report = await landingWith([...safe, greenGatesRule()], { actor });
+    assert.deepEqual(report.blockers, [], `${actor}: ${JSON.stringify(report)}`);
+    assert.deepEqual(report.warnings, []);
+    assert.equal(report.info.length, 1, JSON.stringify(report));
+    assert.match(
+      report.info[0],
+      /^rule required_status_checks from ruleset 27616259 \(Repository cheaper-inference\/OmniRoute\) on release\/v3\.8\.55: does not block the landing push: /
+    );
+    assert.match(report.info[0], /"Gate \/ CI", "Gate \/ Quality"/);
+    assert.match(report.info[0], /requiredChecks/);
+  }
+  // no integration_id pin is the same: the queue's verdict only counts GitHub Actions runs
+  const unpinned = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: p.required_status_checks.map(({ context }) => ({ context })),
+    })),
+  ]);
+  assert.deepEqual(unpinned.blockers, [], JSON.stringify(unpinned));
+  assert.equal(unpinned.info.length, 1);
+  const nullPin = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: p.required_status_checks.map(({ context }) => ({
+        context,
+        integration_id: null,
+      })),
+    })),
+  ]);
+  assert.deepEqual(nullPin.blockers, [], JSON.stringify(nullPin));
+});
+
+test("landing path: a strict required_status_checks rule still blocks", async () => {
+  const report = await landingWith([
+    greenGatesRule((p) => ({ ...p, strict_required_status_checks_policy: true })),
+  ]);
+  assert.equal(report.blockers.length, 1, JSON.stringify(report));
+  assert.match(
+    report.blockers[0],
+    /^rule required_status_checks from ruleset 27616259 .*the repository owner is not an "always" bypass actor/
+  );
+  assert.deepEqual(report.info, []);
+});
+
+test("landing path: a required check the queue does not require green still blocks", async () => {
+  const codeql = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: [
+        ...p.required_status_checks,
+        { context: "CodeQL", integration_id: ACTIONS_APP_ID },
+      ],
+    })),
+  ]);
+  assert.equal(codeql.blockers.length, 1, JSON.stringify(codeql));
+  assert.match(codeql.blockers[0], /^rule required_status_checks from ruleset 27616259 /);
+  assert.deepEqual(codeql.info, []);
+  // compared exactly: case and spacing matter
+  const lower = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: [{ context: "gate / ci", integration_id: ACTIONS_APP_ID }],
+    })),
+  ]);
+  assert.equal(lower.blockers.length, 1, JSON.stringify(lower));
+  // without the queue's list (a caller that does not pass it) nothing is accepted
+  const unknown = await landingWith([greenGatesRule()], { requiredChecks: undefined });
+  assert.equal(unknown.blockers.length, 1, JSON.stringify(unknown));
+  assert.deepEqual(unknown.info, []);
+  // an empty list of checks is not something the candidate "already has": still blocking
+  const empty = await landingWith([greenGatesRule((p) => ({ ...p, required_status_checks: [] }))]);
+  assert.equal(empty.blockers.length, 1, JSON.stringify(empty));
+});
+
+test("landing path: a required check pinned to another app still blocks", async () => {
+  const report = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: [
+        { context: "Gate / CI", integration_id: ACTIONS_APP_ID },
+        { context: "Gate / Quality", integration_id: 999 },
+      ],
+    })),
+  ]);
+  assert.equal(report.blockers.length, 1, JSON.stringify(report));
+  assert.deepEqual(report.info, []);
+  // the omni-queue App is not GitHub Actions either
+  const ours = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: [{ context: "Gate / CI", integration_id: APP_ID }],
+    })),
+  ]);
+  assert.equal(ours.blockers.length, 1, JSON.stringify(ours));
+});
+
+test("landing path: a required_status_checks rule with any other parameter still blocks", async () => {
+  const extraParam = await landingWith([
+    greenGatesRule((p) => ({ ...p, required_merge_queue: true })),
+  ]);
+  assert.equal(extraParam.blockers.length, 1, JSON.stringify(extraParam));
+  assert.deepEqual(extraParam.info, []);
+  const extraCheckKey = await landingWith([
+    greenGatesRule((p) => ({
+      ...p,
+      required_status_checks: [
+        { context: "Gate / CI", integration_id: ACTIONS_APP_ID, app_slug: "x" },
+      ],
+    })),
+  ]);
+  assert.equal(extraCheckKey.blockers.length, 1, JSON.stringify(extraCheckKey));
+  const noParams = await landingWith([{ ...greenGatesRule(), parameters: undefined }]);
+  assert.equal(noParams.blockers.length, 1, JSON.stringify(noParams));
+});
+
+test("landing path: a pull_request rule still blocks next to an accepted status rule", async () => {
+  const report = await landingWith([...branchRulesWithForeignPullRequest(42), greenGatesRule()]);
+  assert.equal(report.blockers.length, 1, JSON.stringify(report));
+  assert.match(report.blockers[0], /^rule pull_request from ruleset 21899981 /);
+  assert.equal(report.info.length, 1);
+  assert.match(report.info[0], /ruleset 27616259/);
+});
+
+test("main: an accepted status rule prints one info line and does not count; pull_request still exits 1", async () => {
+  const sandbox = { GITHUB_REPOSITORY: "acme/sandbox" };
+  const rulesFor = (ownId) => [...branchRulesWithForeignPullRequest(ownId), greenGatesRule()];
+  // the repository config (loadConfig): landing.actor "owner", requiredChecks as committed
+  const mixed = fakeGh([REQUIRE_PR_ON_DEFAULT, REQUIRE_GREEN_GATES], {
+    branchRules: rulesFor(999),
+  });
+  const io = capture();
+  assert.equal(
+    await main(["--base", BASE, "--app-id", String(APP_ID)], sandbox, { gh: mixed, ...io }),
+    1
+  );
+  const all = [...io.lines.out, ...io.lines.err].join("\n");
+  const rejected = io.lines.err.filter((l) => /landing push would be rejected/.test(l));
+  assert.equal(rejected.length, 1, all);
+  assert.match(
+    rejected[0],
+    /error: landing push would be rejected: rule pull_request from ruleset 21899981/
+  );
+  const info = [...io.lines.out, ...io.lines.err].filter((l) => /ruleset 27616259/.test(l));
+  assert.equal(info.length, 1, all);
+  assert.match(
+    info[0],
+    /^apply-ruleset: info: rule required_status_checks from ruleset 27616259 .*does not block the landing push/
+  );
+
+  // only the status rule left: a real apply exits 0, still printing the info line
+  const onlyGates = fakeGh([REQUIRE_GREEN_GATES], {
+    branchRules: rulesFor(999).filter((r) => r.type !== "pull_request"),
+  });
+  const io2 = capture();
+  assert.equal(
+    await main(["--base", BASE, "--app-id", String(APP_ID)], sandbox, { gh: onlyGates, ...io2 }),
+    0,
+    [...io2.lines.out, ...io2.lines.err].join("\n")
+  );
+  assert.ok(io2.lines.out.some((l) => /^apply-ruleset: info: .*ruleset 27616259/.test(l)));
+  assert.ok(!io2.lines.err.some((l) => /would be rejected|remove those rulesets/.test(l)));
 });
 
 test("main: a real apply exits 1 when another ruleset would reject the landing push", async () => {

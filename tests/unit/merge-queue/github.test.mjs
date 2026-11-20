@@ -1,5 +1,6 @@
 // omni-queue REST client (scripts/merge-queue/github.mjs) against the in-process fake GitHub.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { commentMarker } from "../../../scripts/merge-queue/contracts.mjs";
 import {
@@ -16,6 +17,11 @@ import {
   retryDelayMs,
 } from "../../../scripts/merge-queue/github.mjs";
 import { sha, startFakeGitHub } from "./helpers/fake-github.mjs";
+
+/** GET …/actions/runs/{id}/jobs payloads captured on real GitHub (see the fixture's _source). */
+const JOB_PAYLOADS = JSON.parse(
+  readFileSync(new URL("./fixtures/workflow-jobs-api-check-run.json", import.meta.url), "utf8")
+);
 
 const TOKEN = "ghs_SuperSecretInstallationToken0123456789";
 
@@ -1089,8 +1095,14 @@ test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) wi
   for (let i = 0; i < 45; i++) {
     runs.push(fake.addCheckRun(sha("cand"), { name: `Job ${i}`, suiteId: 4242 }));
   }
-  // POST /check-runs with a workflow token: in the same suite, no job of the run.
-  const planted = fake.addCheckRun(sha("cand"), { name: "Gate / CI", suiteId: 4242, job: false });
+  // POST /check-runs with a workflow token: in the same suite, no job of the run, and (here) left
+  // out of the listing (the listing GitHub really gives is the next test's).
+  const planted = fake.addCheckRun(sha("cand"), {
+    name: "Gate / CI",
+    suiteId: 4242,
+    job: false,
+    listedInJobs: false,
+  });
   const run = fake.addWorkflowRun({
     headSha: sha("cand"),
     headBranch: "omni-queue/x",
@@ -1108,10 +1120,12 @@ test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) wi
   assert.deepEqual(Object.keys(jobs[0]).sort(), [
     "checkRunId",
     "conclusion",
+    "htmlUrl",
     "id",
     "name",
     "runAttempt",
     "runId",
+    "runnerId",
     "status",
   ]);
   const pages = fake.requests.slice(from).filter((r) => r.path === `/actions/runs/${run.id}/jobs`);
@@ -1119,6 +1133,58 @@ test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) wi
   assert.equal(pages[0].query.filter, "all", "every attempt");
   await assert.rejects(gh.listWorkflowRunJobs(0), /invalid workflow run id/);
   await assert.rejects(gh.listWorkflowRunJobs(987654), /404/);
+});
+
+test("listWorkflowRunJobs: a check run created through POST /check-runs in the run's suite is listed as GitHub lists it (…/runs/<id>, no runner)", async (t) => {
+  const { fake, gh } = await setup(t);
+  const real = fake.addCheckRun(sha("cand"), { name: "Gate / CI", conclusion: "failure" });
+  const suiteId = real.check_suite.id;
+  const skipped = fake.addCheckRun(sha("cand"), { name: "Docs", conclusion: "skipped", suiteId });
+  const planted = fake.addCheckRun(sha("cand"), { name: "Gate / CI", suiteId, job: false });
+  const run = fake.addWorkflowRun({
+    headSha: sha("cand"),
+    headBranch: "omni-queue/x",
+    checkSuiteId: suiteId,
+  });
+  const jobs = await gh.listWorkflowRunJobs(run.id);
+  const byId = new Map(jobs.map((j) => [j.checkRunId, j]));
+  assert.equal(jobs.length, 3, "GitHub lists the API-created check run among the run's jobs");
+  const base = `https://github.com/${fake.repository}`;
+  assert.deepEqual(
+    [byId.get(real.id).htmlUrl, byId.get(real.id).runId, byId.get(real.id).id],
+    [`${base}/actions/runs/${run.id}/job/${real.id}`, run.id, real.id]
+  );
+  assert.ok(byId.get(real.id).runnerId > 0, "a job that ran has a runner");
+  assert.equal(byId.get(skipped.id).runnerId, null, "a skipped job never had a runner");
+  assert.equal(byId.get(skipped.id).htmlUrl, `${base}/actions/runs/${run.id}/job/${skipped.id}`);
+  assert.equal(byId.get(planted.id).htmlUrl, `${base}/runs/${planted.id}`);
+  assert.equal(byId.get(planted.id).runnerId, null);
+  assert.equal(byId.get(planted.id).runId, run.id, "it even carries the run's id");
+});
+
+test("normalizeWorkflowJob keeps html_url and runner_id of the payloads GitHub served (captured 2026-11-19)", () => {
+  const { variantA, variantB } = JOB_PAYLOADS;
+  const a = variantA.jobs.map(normalizeWorkflowJob);
+  assert.deepEqual(
+    a.map((j) => [j.htmlUrl, j.runnerId]),
+    variantA.jobs.map((raw) => [raw.html_url, raw.runner_id])
+  );
+  const forged = a.at(-1);
+  assert.equal(forged.name, "Gate / CI");
+  assert.equal(forged.conclusion, "failure");
+  assert.equal(forged.runId, variantA.jobs[0].run_id, "listed with the real run's id");
+  assert.equal(forged.checkRunId, forged.id);
+  assert.match(forged.htmlUrl, /\/runs\/\d+$/);
+  assert.equal(forged.runnerId, null);
+  for (const job of a.slice(0, -1)) {
+    assert.ok(Number.isSafeInteger(job.runnerId) && job.runnerId > 0, job.name);
+    assert.ok(job.htmlUrl.endsWith(`/actions/runs/${job.runId}/job/${job.id}`), job.name);
+  }
+  const b = variantB.jobs.map(normalizeWorkflowJob).at(-1);
+  assert.deepEqual([b.name, b.conclusion, b.runnerId], ["Gate / CI", "success", null]);
+  // Absent or malformed fields read as null.
+  const bare = normalizeWorkflowJob({ id: 1, run_id: 2, html_url: 7, runner_id: "12" });
+  assert.deepEqual([bare.htmlUrl, bare.runnerId], [null, null]);
 });
 
 test("normalizeWorkflowJob reads the check run id from check_run_url, null when there is none", () => {

@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Opção B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` é a versão SemVer estável **publicada** mais recente. Ela **não** acompanha a branch `main` do git. Fixe `diegosouzapw/omniroute:X.Y.Z` para GitOps. Consulte [Tags de imagem / Canais de lançamento](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` é a versão SemVer estável **publicada** mais recente. Ela **não** acompanha a branch `main` do git. Fixe `cheaperinference/omniroute:X.Y.Z` para GitOps. Consulte [Tags de imagem / Canais de lançamento](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Opção C: A partir do código-fonte
 
