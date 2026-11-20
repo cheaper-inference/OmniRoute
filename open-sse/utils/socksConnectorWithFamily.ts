@@ -29,6 +29,31 @@ export function buildSocksFamilySocketOptions(family: 4 | 6 | null): Record<stri
   return {};
 }
 
+export const SOCKS_CREDENTIAL_TOO_LONG = "SOCKS_CREDENTIAL_TOO_LONG";
+
+// RFC 1929 writes each SOCKS5 credential field behind a one-byte length prefix,
+// and the socks client performs that write from inside a socket data handler. A
+// longer value therefore throws where no caller can catch it and takes the
+// process down, so every SOCKS5 entry point refuses it before dialing. SOCKS4
+// has no length prefix (the user id is NUL-terminated and the password unused),
+// so the limit does not apply there.
+export function assertSocksCredentialFits(
+  credential: { userId?: string; password?: string },
+  proxyType?: number
+): void {
+  if (proxyType === 4) return;
+  const userBytes = Buffer.byteLength(credential.userId ?? "", "utf8");
+  const passwordBytes = Buffer.byteLength(credential.password ?? "", "utf8");
+  if (userBytes > 255 || passwordBytes > 255) {
+    const error = new Error(
+      "SOCKS5 credential exceeds the 255-byte length prefix; refusing the proxy"
+    ) as Error & { code?: string };
+    // Lets the fetch path name the cause instead of only "fetch failed".
+    error.code = SOCKS_CREDENTIAL_TOO_LONG;
+    throw error;
+  }
+}
+
 function resolvePort(protocol: string, port: string): number {
   return port ? Number.parseInt(port, 10) : protocol === "http:" ? 80 : 443;
 }
@@ -71,6 +96,7 @@ export function socksConnectorWithFamily(
       httpSocket?: unknown;
     };
     try {
+      assertSocksCredentialFits(proxy, proxy.type);
       const r = await SocksClient.createConnection({
         command: "connect",
         proxy,

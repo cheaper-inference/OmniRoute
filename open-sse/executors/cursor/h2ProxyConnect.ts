@@ -22,6 +22,8 @@ import tls from "node:tls";
 import type { EventEmitter } from "node:events";
 
 import { hasAmbientProxyContext, resolveProxyForRequest } from "../../utils/proxyFetch.ts";
+import { assertSocksCredentialFits } from "../../utils/socksConnectorWithFamily.ts";
+import { decodeUserinfo } from "../../../src/shared/utils/decodeUserinfo.ts";
 
 const DEFAULT_TUNNEL_TIMEOUT_MS = 15_000;
 const HEADER_TERMINATOR = "\r\n\r\n";
@@ -107,8 +109,8 @@ export function buildConnectRequest(host: string, port: number, proxy: URL): Buf
 
   if (proxy.username || proxy.password) {
     // URL components arrive percent-encoded; the wire value must be the raw pair.
-    const user = decodeURIComponent(proxy.username);
-    const pass = decodeURIComponent(proxy.password);
+    const user = decodeUserinfo(proxy.username);
+    const pass = decodeUserinfo(proxy.password);
     const token = Buffer.from(`${user}:${pass}`, "utf8").toString("base64");
     lines.push(`Proxy-Authorization: Basic ${token}`);
   }
@@ -152,9 +154,14 @@ export function isSocksProxyProtocol(protocol: string): boolean {
 
 async function createSocksTunnel(options: ProxyTunnelOptions, proxy: URL): Promise<net.Socket> {
   if (options.signal?.aborted) throw new Error("aborted");
+  const userId = proxy.username ? decodeUserinfo(proxy.username) : undefined;
+  const password = proxy.password ? decodeUserinfo(proxy.password) : undefined;
+  const type = proxy.protocol === "socks4:" || proxy.protocol === "socks4a:" ? 4 : 5;
+  // Before the dial: an over-long SOCKS5 credential would otherwise throw
+  // inside the socks client's socket handler and kill the process.
+  assertSocksCredentialFits({ userId, password }, type);
   const { SocksClient } = await import("socks");
   if (options.signal?.aborted) throw new Error("aborted");
-  const type = proxy.protocol === "socks4:" || proxy.protocol === "socks4a:" ? 4 : 5;
   const socket = net.connect({ host: proxy.hostname, port: Number(proxy.port) || 1080 });
   let onAbort: (() => void) | undefined;
   const aborted = new Promise<never>((_, reject) => {
@@ -180,8 +187,8 @@ async function createSocksTunnel(options: ProxyTunnelOptions, proxy: URL): Promi
           host: proxy.hostname,
           port: Number(proxy.port) || 1080,
           type,
-          ...(proxy.username ? { userId: decodeURIComponent(proxy.username) } : {}),
-          ...(proxy.password ? { password: decodeURIComponent(proxy.password) } : {}),
+          ...(userId ? { userId } : {}),
+          ...(password ? { password } : {}),
         },
         command: "connect",
         destination: { host: options.targetHost, port: options.targetPort },
