@@ -17,9 +17,11 @@
 -- Percent attribution book for quota-share pools on percent plans (Claude, Codex, Bailian).
 --
 -- quota_percent_ledger holds one book per (pool, connection, plan window): the last applied
--- account reading, the part nobody routed (external), and the part charged to each API key
--- (keys_json, a map of { attributed, seenTokens }). The whole state lives in one row so a write
--- is one compare-and-set statement on `rev`. `quota_window` because WINDOW is a reserved word.
+-- account reading, the reading when the book opened or the provider window last turned
+-- (baseline), and each API key's token counter at that moment (keys_json, a map of
+-- { startTokens }). Each key's part is computed when the book is read. The whole state lives in
+-- one row so a write is one compare-and-set statement on `rev`. `quota_window` because WINDOW is
+-- a reserved word.
 --
 -- quota_percent_ledger_tokens holds one cumulative token counter per (pool, connection, key),
 -- apart from the book row so the per-request write never contends with the state write.
@@ -33,7 +35,7 @@ CREATE TABLE IF NOT EXISTS quota_percent_ledger (
   quota_window TEXT NOT NULL,
   rev INTEGER NOT NULL,
   last_used REAL NOT NULL,
-  external REAL NOT NULL,
+  baseline REAL NOT NULL,
   reset_at INTEGER,
   read_at INTEGER NOT NULL,
   keys_json TEXT NOT NULL,

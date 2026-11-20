@@ -92,7 +92,7 @@ export interface QuotaStore {
    * Compare-and-set on the revision: stores `next` only when the stored book is at revision
    * next.rev - 1 (a missing book counts as 0). False when another writer already stored next.rev,
    * when the stored book is at another revision, or when `next` is not storable (a number that is
-   * not finite, or a key entry with a negative part or watermark).
+   * not finite, a negative baseline, or a key entry whose mark is not a finite number >= 0).
    * On the Redis store `false` does not guarantee that `next` was not stored: a commit can win its
    * revision and still answer `false` when another writer stores the next revision on top of it
    * before the confirmation. Callers must re-read the book rather than assume `next` is absent.
@@ -154,10 +154,8 @@ export interface LedgerKey {
 }
 
 export interface LedgerKeyState {
-  /** Part of the account bar attributed to this API key, fraction 0..1. */
-  attributed: number;
-  /** Counter value of this key already consumed by the book (watermark). */
-  seenTokens: number;
+  /** This key's token counter when the book opened or last turned (its mark). */
+  startTokens: number;
 }
 
 export interface LedgerState {
@@ -165,8 +163,8 @@ export interface LedgerState {
   rev: number;
   /** Last applied reading, 0..1. */
   last: number;
-  /** Part of `last` nobody routed, 0..1. */
-  external: number;
+  /** The reading when the book opened or last turned, 0..1. */
+  baseline: number;
   /** Provider reset of the last applied reading that carried one, epoch ms. */
   resetAt: number | null;
   /** fetchedAt of the last applied reading, epoch ms. */

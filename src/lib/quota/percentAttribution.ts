@@ -3,9 +3,10 @@
  *
  * Percent plans (Claude, Codex, Bailian) only report how full the whole
  * account is. Each (pool, connection, plan window) keeps an attribution book
- * (percentLedger.ts) that follows the observed changes of that figure: a rise
- * is charged to the keys whose recorded tokens can explain it, and the rest is
- * external (usage nobody routed through this pool). Every attribution applies
+ * (percentLedger.ts) aligned with the provider's window: the growth of that
+ * figure since the window started is split between the keys by the tokens each
+ * one routed since then, capped by what those tokens can explain, and the rest
+ * is external (usage nobody routed through this pool). Every attribution applies
  * the current plan-window reading to the book, then reports:
  *
  *   - internal: the parts the book attributes to API keys;
@@ -16,12 +17,10 @@
  */
 
 import type { QuotaUnit, QuotaWindow } from "./dimensions";
-import { observeLedger } from "./percentLedger";
+import { DEFAULT_MIN_TOKENS_PER_PCT, attributeBook, observeLedger } from "./percentLedger";
+import type { BookAttribution } from "./percentLedger";
 import { getPlanWindowReading, getSaturation } from "./saturationSignals";
-import type { LedgerState, PlanWindowReading, QuotaStore, RecordConsumptionInput } from "./types";
-
-/** Floor: tokens needed to explain one unit (one percent point) of the dimension. */
-export const DEFAULT_MIN_TOKENS_PER_PCT = 1000;
+import type { PlanWindowReading, QuotaStore, RecordConsumptionInput } from "./types";
 
 /** Non-finite or non-positive values count as 0. */
 function positiveOrZero(value: number | undefined): number {
@@ -117,19 +116,24 @@ async function readPlanWindow(
   }
 }
 
-/** Apply the reading to the book; null when there is no book. Fail-open, silently. */
+/**
+ * Apply the reading to the book and split it from the same store read; null when there is no
+ * usable book. Fail-open, silently.
+ */
 async function observeBook(
   input: AttributePercentDimensionInput,
   reading: PlanWindowReading | null
-): Promise<LedgerState | null> {
+): Promise<BookAttribution | null> {
   try {
-    return await observeLedger(
+    const snapshot = await observeLedger(
       input.store,
       { poolId: input.pool.id, connectionId: input.connectionId, window: input.dimension.window },
       reading,
-      Date.now(),
-      positiveOrZero(input.minTokensPerPct) || DEFAULT_MIN_TOKENS_PER_PCT
+      Date.now()
     );
+    return snapshot
+      ? attributeBook(snapshot, input.minTokensPerPct ?? DEFAULT_MIN_TOKENS_PER_PCT)
+      : null;
   } catch {
     return null;
   }
@@ -149,12 +153,11 @@ export async function attributePercentDimension(
     readAccountSaturation(connectionId, provider, dimension.window),
     readPlanWindow(connectionId, provider, dimension.window),
   ]);
-  const state = await observeBook(input, reading);
+  const book = await observeBook(input, reading);
 
   const limit = positiveOrZero(dimension.limit);
-  const keys = state?.keys ?? {};
-  const internal = Object.values(keys).reduce((sum, k) => sum + k.attributed, 0) * limit;
-  const external = (state?.external ?? 0) * limit;
+  const internal = (book?.internal ?? 0) * limit;
+  const external = (book?.external ?? 0) * limit;
   const split = splitExternalUsage({
     external,
     limit,
@@ -166,7 +169,7 @@ export async function attributePercentDimension(
   const internalByKey: Record<string, number> = {};
   pool.allocations.forEach((a, i) => {
     if (!wanted.has(a.apiKeyId)) return;
-    const own = (keys[a.apiKeyId]?.attributed ?? 0) * limit;
+    const own = (book?.internalByKey[a.apiKeyId] ?? 0) * limit;
     internalByKey[a.apiKeyId] = own;
     consumedByKey[a.apiKeyId] = own + split.perKey[i];
   });

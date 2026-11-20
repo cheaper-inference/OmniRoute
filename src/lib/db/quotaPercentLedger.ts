@@ -8,7 +8,7 @@
  * of that connection. The state transition itself lives in `@/lib/quota/percentLedger`.
  */
 
-import { isStorableLedgerState, storedLedgerBook } from "@/lib/quota/percentLedger";
+import { isStorableLedgerState, storedLedgerKeys } from "@/lib/quota/percentLedger";
 import type { LedgerCounter, LedgerKey, LedgerSnapshot, LedgerState } from "@/lib/quota/types";
 import { getDbInstance } from "./core";
 
@@ -29,7 +29,7 @@ function getDb(): DbLike {
 interface LedgerRow {
   rev: number;
   last_used: number;
-  external: number;
+  baseline: number;
   reset_at: number | null;
   read_at: number;
   keys_json: string;
@@ -45,7 +45,7 @@ interface CounterRow {
 /**
  * UPSERT: tokens += delta, updated_at = nowMs. No read. An amount that is not a finite number
  * above zero changes nothing: a stored Infinity would poison the counter for good, and a negative
- * amount would drop it below the key's watermark so the book would charge the whole counter again.
+ * amount would drop it below the key's mark so the book would count the whole counter again.
  */
 export function addPercentLedgerTokens(
   poolId: string,
@@ -75,20 +75,16 @@ function parseKeysJson(json: string): unknown {
   }
 }
 
+/** An unreadable keys_json gives no key entry; every other column is returned as stored. */
 function rowToState(row: LedgerRow): LedgerState {
-  const { keys, external } = storedLedgerBook(
-    parseKeysJson(row.keys_json),
-    row.last_used,
-    row.external
-  );
   return {
     rev: row.rev,
     last: row.last_used,
-    external,
+    baseline: row.baseline,
     resetAt: row.reset_at,
     readAt: row.read_at,
     updatedAt: row.updated_at,
-    keys,
+    keys: storedLedgerKeys(parseKeysJson(row.keys_json)),
   };
 }
 
@@ -97,7 +93,7 @@ export function readPercentLedger(key: LedgerKey): LedgerSnapshot {
   const db = getDb();
   const row = db
     .prepare<LedgerRow>(
-      `SELECT rev, last_used, external, reset_at, read_at, keys_json, updated_at
+      `SELECT rev, last_used, baseline, reset_at, read_at, keys_json, updated_at
        FROM quota_percent_ledger
        WHERE pool_id = ? AND connection_id = ? AND quota_window = ?`
     )
@@ -118,7 +114,7 @@ export function readPercentLedger(key: LedgerKey): LedgerSnapshot {
 
 /**
  * Compare-and-set: stores `next` only when the stored revision is next.rev - 1 (no row counts as 0).
- * A state with a number that is not finite is never stored (false, nothing written).
+ * A state isStorableLedgerState rejects is never stored (false, nothing written).
  */
 export function commitPercentLedger(key: LedgerKey, next: LedgerState): boolean {
   if (!isStorableLedgerState(next)) return false;
@@ -128,9 +124,9 @@ export function commitPercentLedger(key: LedgerKey, next: LedgerState): boolean 
   const { changes } = getDb()
     .prepare(
       `INSERT INTO quota_percent_ledger
-         (pool_id, connection_id, quota_window, rev, last_used, external, reset_at, read_at,
+         (pool_id, connection_id, quota_window, rev, last_used, baseline, reset_at, read_at,
           keys_json, updated_at)
-       SELECT @poolId, @connectionId, @window, @rev, @last, @external, @resetAt, @readAt,
+       SELECT @poolId, @connectionId, @window, @rev, @last, @baseline, @resetAt, @readAt,
               @keysJson, @updatedAt
        WHERE @rev = 1 OR EXISTS (
          SELECT 1 FROM quota_percent_ledger
@@ -139,7 +135,7 @@ export function commitPercentLedger(key: LedgerKey, next: LedgerState): boolean 
        ON CONFLICT(pool_id, connection_id, quota_window) DO UPDATE SET
          rev = excluded.rev,
          last_used = excluded.last_used,
-         external = excluded.external,
+         baseline = excluded.baseline,
          reset_at = excluded.reset_at,
          read_at = excluded.read_at,
          keys_json = excluded.keys_json,
@@ -152,7 +148,7 @@ export function commitPercentLedger(key: LedgerKey, next: LedgerState): boolean 
       window: key.window,
       rev: next.rev,
       last: next.last,
-      external: next.external,
+      baseline: next.baseline,
       resetAt: next.resetAt,
       readAt: next.readAt,
       keysJson: JSON.stringify(next.keys),

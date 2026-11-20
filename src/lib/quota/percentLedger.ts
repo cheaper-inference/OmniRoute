@@ -2,18 +2,21 @@
  * percentLedger.ts — the attribution book of a percent plan window.
  *
  * A percent dimension has no per-key meter: the provider only reports how much
- * of the account's plan window is used. The book splits that figure into a part
- * per API key and an external part (usage nobody routed through this pool) by
- * following the observed changes of the figure:
+ * of the account's plan window is used, and a request's usage can show up in
+ * that figure only some responses later. The book therefore does not hand out
+ * each change of the figure. It keeps only what aligns it with the provider's
+ * window:
  *
- *   - the first reading is a baseline: all of it is external;
- *   - a rise is explained by the tokens each key routed since the last
- *     observation (pending, at most 15 minutes old), up to `minTokensPerPct`
- *     tokens per percentage point; the rest of the rise is external;
- *   - a drop of one point or less, or any drop inside a window the provider
- *     still reports as open, rescales every part;
- *   - a provider window turn (reset time moved forward, or a larger drop)
- *     starts over and applies the new figure as a rise from 0.
+ *   - `baseline`: the figure when the book opened or the window last turned;
+ *   - `last`: the last applied figure;
+ *   - per API key, `startTokens`: its token counter at that same moment.
+ *
+ * Each key's part is computed when it is read (attributeBook): the growth of
+ * the figure since the baseline is split between keys in proportion to the
+ * tokens each one routed since then, capped by what those tokens can explain
+ * (`minTokensPerPct` tokens per percentage point); the rest is external (usage
+ * nobody routed through this pool). A late figure then causes a small error
+ * that passes at the next reading instead of one that accumulates.
  *
  * applyReading is pure: no clock, no I/O, no mutation of its input. It is the
  * only implementation of the transition: a store keeps the book through three
@@ -32,14 +35,15 @@ import type {
   QuotaStore,
 } from "./types";
 
+/** Floor: tokens that explain at most one percentage point of the account bar. */
+export const DEFAULT_MIN_TOKENS_PER_PCT = 1000;
+
 const EPSILON = 1e-9;
-/** Tokens recorded longer ago than this explain nothing at an observation. */
-const PENDING_TTL_MS = 15 * 60_000;
 /** A reset time that moves by more than this is another provider window. */
 const RESET_JITTER_MS = 30 * 60_000;
-/** A drop is applied only from a reading at least this much newer than the last one. */
+/** A drop is considered only from a reading at least this much newer than the last one. */
 const DROP_CONFIRM_MS = 2 * 60_000;
-/** Without a reset time that says "same window", a drop up to this rescales. */
+/** Without a reset time that says "same window", a drop up to this is not a turn. */
 const SMALL_DROP = 0.01;
 /**
  * A book whose provider sent no reset time can still be the current window's book for this long
@@ -47,24 +51,46 @@ const SMALL_DROP = 0.01;
  */
 const UNTIMED_BOOK_CURRENT_MS = 15 * 60_000;
 
-type Transition = "keep" | "rise" | "rescale" | "turn";
+type Transition = "keep" | "rise" | "turn";
 
 /** The part of the state a transition rewrites. */
-interface Book {
-  last: number;
-  external: number;
-  keys: Record<string, LedgerKeyState>;
-}
+type Book = Pick<LedgerState, "last" | "baseline" | "resetAt" | "keys">;
+
+/** A snapshot that holds a book. */
+type BookSnapshot = LedgerSnapshot & { state: LedgerState };
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
+
+/** A finite number >= 0. */
+function isUsableNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+/** A counter's tokens; an unusable counter (not finite, or negative) counts as 0. */
+function usableTokens(counter: LedgerCounter): number {
+  return isUsableNumber(counter.tokens) ? counter.tokens : 0;
+}
+
+// ---------------------------------------------------------------------------
+// Transition
+// ---------------------------------------------------------------------------
 
 /** reading.resetAt − state.resetAt when both are known, else null. */
 function resetShift(state: LedgerState, reading: PlanWindowReading): number | null {
   return state.resetAt !== null && reading.resetAt !== null
     ? reading.resetAt - state.resetAt
     : null;
+}
+
+/** Row 2: older than the last applied reading, or from the previous provider window. */
+function isOldReading(
+  state: LedgerState,
+  reading: PlanWindowReading,
+  shift: number | null
+): boolean {
+  return reading.fetchedAt < state.readAt || (shift !== null && -shift > RESET_JITTER_MS);
 }
 
 /** The provider says the stored window is the reading's window and it has not ended yet. */
@@ -81,6 +107,7 @@ function isSameOpenWindow(
   );
 }
 
+/** Rows 6 to 9: a lower figure turns the window only when nothing says it is the same one. */
 function classifyDrop(
   state: LedgerState,
   reading: PlanWindowReading,
@@ -88,173 +115,134 @@ function classifyDrop(
   shift: number | null
 ): Transition {
   if (reading.fetchedAt - state.readAt < DROP_CONFIRM_MS) return "keep";
-  if (isSameOpenWindow(state, reading, shift)) return "rescale";
-  return state.last - g <= SMALL_DROP + EPSILON ? "rescale" : "turn";
+  if (isSameOpenWindow(state, reading, shift)) return "keep";
+  if (state.last - g <= SMALL_DROP + EPSILON) return "keep";
+  return "turn";
 }
 
-/** The decision table: the first matching row decides. */
+/** Rows 2 to 9 of the decision table (row 1, no state, opens the book): the first match decides. */
 function classify(state: LedgerState, reading: PlanWindowReading, g: number): Transition {
   const shift = resetShift(state, reading);
-  if (reading.fetchedAt < state.readAt) return "keep";
-  if (shift !== null && -shift > RESET_JITTER_MS) return "keep";
+  if (isOldReading(state, reading, shift)) return "keep";
   if (shift !== null && shift > RESET_JITTER_MS) return "turn";
   if (g - state.last > EPSILON) return "rise";
-  if (Math.abs(g - state.last) <= EPSILON) return "keep";
+  if (g >= state.last - EPSILON) return "keep";
   return classifyDrop(state, reading, g, shift);
 }
 
-/** A counter whose tokens are a finite number >= 0. */
-function isReadableCounter(counter: LedgerCounter): boolean {
-  return Number.isFinite(counter.tokens) && counter.tokens >= 0;
-}
-
-/** A counter's tokens; an unreadable counter counts as 0 (explains nothing). */
-function counterTokens(counter: LedgerCounter): number {
-  return isReadableCounter(counter) ? counter.tokens : 0;
+/** The book of a window that starts now: the figure is the baseline and every counter is marked. */
+function startedBook(
+  counters: Record<string, LedgerCounter>,
+  reading: PlanWindowReading,
+  g: number
+): Book {
+  const keys: Record<string, LedgerKeyState> = {};
+  for (const [key, counter] of Object.entries(counters)) {
+    keys[key] = { startTokens: usableTokens(counter) };
+  }
+  return { last: g, baseline: g, resetAt: reading.resetAt, keys };
 }
 
 /**
- * The watermark a key keeps after its counter was consumed. A counter that cannot be read
- * is ignored for this observation: the key keeps its stored watermark (0 when it has none),
- * so its tokens are not counted again once the counter reads normally.
+ * A rise moves the last figure only. Without a reset time in the reading, the stored one is kept
+ * while it is still ahead of the reading and forgotten once it passed.
  */
-function nextWatermark(keyState: LedgerKeyState | undefined, counter: LedgerCounter): number {
-  return isReadableCounter(counter) ? counter.tokens : (keyState?.seenTokens ?? 0);
-}
-
-/** Tokens a key routed since the book last consumed its counter; a counter below its watermark restarted. */
-function pendingTokens(keyState: LedgerKeyState | undefined, counter: LedgerCounter): number {
-  const tokens = counterTokens(counter);
-  const seen = keyState?.seenTokens ?? 0;
-  return tokens >= seen ? tokens - seen : tokens;
-}
-
-/** Recorded at most 15 minutes before the observation; an unusable time is never fresh. */
-function isFresh(counter: LedgerCounter, nowMs: number): boolean {
-  return Number.isFinite(counter.updatedAt) && nowMs - counter.updatedAt <= PENDING_TTL_MS;
-}
-
-function eligibleTokens(
-  keys: Record<string, LedgerKeyState>,
-  counters: Record<string, LedgerCounter>,
-  nowMs: number
-): Record<string, number> {
-  const eligible: Record<string, number> = {};
-  for (const [key, counter] of Object.entries(counters)) {
-    eligible[key] = isFresh(counter, nowMs) ? pendingTokens(keys[key], counter) : 0;
-  }
-  return eligible;
-}
-
-function openState(
-  counters: Record<string, LedgerCounter>,
-  reading: PlanWindowReading,
-  g: number,
-  nowMs: number
-): LedgerState {
-  const keys: Record<string, LedgerKeyState> = {};
-  for (const [key, counter] of Object.entries(counters)) {
-    keys[key] = { attributed: 0, seenTokens: counterTokens(counter) };
-  }
+function risenBook(state: LedgerState, reading: PlanWindowReading, g: number): Book {
+  const keptReset =
+    state.resetAt !== null && state.resetAt > reading.fetchedAt ? state.resetAt : null;
   return {
-    rev: 1,
     last: g,
-    external: g,
-    resetAt: reading.resetAt,
-    readAt: reading.fetchedAt,
-    updatedAt: nowMs,
-    keys,
+    baseline: state.baseline,
+    resetAt: reading.resetAt ?? keptReset,
+    keys: state.keys,
   };
 }
 
-/** A new provider window: nothing attributed yet; keys without a counter leave the book. */
-function turnedBook(state: LedgerState, counters: Record<string, LedgerCounter>): Book {
-  const keys: Record<string, LedgerKeyState> = {};
-  for (const [key, keyState] of Object.entries(state.keys)) {
-    if (counters[key]) keys[key] = { attributed: 0, seenTokens: keyState.seenTokens };
-  }
-  return { last: 0, external: 0, keys };
-}
-
-/** Explain the rise from `book.last` to `g` by pending tokens; the unexplained rest is external. */
-function risenBook(
-  book: Book,
-  counters: Record<string, LedgerCounter>,
-  g: number,
-  nowMs: number,
-  minTokensPerPct: number
-): Book {
-  const rise = g - book.last;
-  const eligible = eligibleTokens(book.keys, counters, nowMs);
-  const total = Object.values(eligible).reduce((sum, tokens) => sum + tokens, 0);
-  const internal = total > 0 ? Math.min(rise, total / minTokensPerPct / 100) : 0;
-  const keys = { ...book.keys };
-  for (const [key, counter] of Object.entries(counters)) {
-    const share = total > 0 ? (internal * eligible[key]) / total : 0;
-    keys[key] = {
-      attributed: (book.keys[key]?.attributed ?? 0) + share,
-      seenTokens: nextWatermark(book.keys[key], counter),
-    };
-  }
-  return { last: g, external: book.external + rise - internal, keys };
-}
-
-/** Same window, corrected figure: every part scales by g / last; watermarks stay. */
-function rescaledBook(state: LedgerState, g: number): Book {
-  const factor = state.last > 0 ? g / state.last : 0;
-  const keys: Record<string, LedgerKeyState> = {};
-  for (const [key, keyState] of Object.entries(state.keys)) {
-    keys[key] = { attributed: keyState.attributed * factor, seenTokens: keyState.seenTokens };
-  }
-  return { last: g, external: state.external * factor, keys };
-}
-
-function nextBook(
-  transition: Exclude<Transition, "keep">,
-  snapshot: { state: LedgerState; counters: Record<string, LedgerCounter> },
-  g: number,
-  nowMs: number,
-  minTokensPerPct: number
-): Book {
-  const { state, counters } = snapshot;
-  if (transition === "rescale") return rescaledBook(state, g);
-  const base = transition === "turn" ? turnedBook(state, counters) : state;
-  return risenBook(base, counters, g, nowMs, minTokensPerPct);
-}
-
 /**
- * Apply one plan-window reading to the book. Returns the same `snapshot.state`
- * object with `changed: false` when the reading changes nothing (stale, equal,
- * or an unconfirmed drop).
- * The returned state may share key entries with the input state: callers must not
- * edit a state in place.
+ * Apply one plan-window reading to the book. Returns the same `snapshot.state` object with
+ * `changed: false` when the reading changes nothing (old, equal, or a drop that is not a turn).
+ * The returned state may share its key map with the input state: callers must not edit a state
+ * in place.
  */
 export function applyReading(
   snapshot: LedgerSnapshot,
   reading: PlanWindowReading,
-  nowMs: number,
-  minTokensPerPct: number
+  nowMs: number
 ): { state: LedgerState; changed: boolean } {
   const g = clamp01(reading.used);
   const { state, counters } = snapshot;
-  if (!state) return { state: openState(counters, reading, g, nowMs), changed: true };
+  const transition = state ? classify(state, reading, g) : "turn";
+  if (state && transition === "keep") return { state, changed: false };
 
-  const transition = classify(state, reading, g);
-  if (transition === "keep") return { state, changed: false };
-
-  const book = nextBook(transition, { state, counters }, g, nowMs, minTokensPerPct);
+  const book =
+    state && transition === "rise"
+      ? risenBook(state, reading, g)
+      : startedBook(counters, reading, g);
   return {
     state: {
-      rev: state.rev + 1,
+      rev: (state?.rev ?? 0) + 1,
       last: book.last,
-      external: book.external,
-      resetAt: transition === "turn" ? reading.resetAt : (reading.resetAt ?? state.resetAt),
+      baseline: book.baseline,
+      resetAt: book.resetAt,
       readAt: reading.fetchedAt,
       updatedAt: nowMs,
       keys: book.keys,
     },
     changed: true,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Attribution, computed when the book is read
+// ---------------------------------------------------------------------------
+
+export interface BookAttribution {
+  /** Fraction of the account bar, per key with tokens since the book started. */
+  internalByKey: Record<string, number>;
+  /** Sum of internalByKey. */
+  internal: number;
+  /** last − internal. */
+  external: number;
+}
+
+/** Tokens each key routed since the book started; a counter below its key's mark restarted. */
+function tokensSinceStart(
+  keys: Record<string, LedgerKeyState>,
+  counters: Record<string, LedgerCounter>
+): Record<string, number> {
+  const routed: Record<string, number> = {};
+  for (const [key, counter] of Object.entries(counters)) {
+    const tokens = usableTokens(counter);
+    const start = isUsableNumber(keys[key]?.startTokens) ? keys[key].startTokens : 0;
+    routed[key] = tokens >= start ? tokens - start : tokens;
+  }
+  return routed;
+}
+
+/**
+ * Split the book's figure into a part per key and an external part. Pure and total: every number
+ * returned is finite and >= 0, and internal + external equals `state.last` for any state the
+ * transition produces (a figure outside 0..1 is clamped first). A key of the book without a counter
+ * has no part; a key with a counter but no mark counts from zero. A floor that is not a finite
+ * number >= 1 is DEFAULT_MIN_TOKENS_PER_PCT.
+ */
+export function attributeBook(snapshot: BookSnapshot, minTokensPerPct: number): BookAttribution {
+  const floor =
+    Number.isFinite(minTokensPerPct) && minTokensPerPct >= 1
+      ? minTokensPerPct
+      : DEFAULT_MIN_TOKENS_PER_PCT;
+  const last = clamp01(Number.isFinite(snapshot.state.last) ? snapshot.state.last : 0);
+  const baseline = clamp01(Number.isFinite(snapshot.state.baseline) ? snapshot.state.baseline : 0);
+  const routed = tokensSinceStart(snapshot.state.keys, snapshot.counters);
+  const total = Object.values(routed).reduce((sum, tokens) => sum + tokens, 0);
+  const growth = Math.max(0, last - baseline);
+  const internal = total > 0 ? Math.min(growth, total / floor / 100) : 0;
+
+  const internalByKey: Record<string, number> = {};
+  for (const [key, tokens] of Object.entries(routed)) {
+    if (tokens > 0) internalByKey[key] = (internal * tokens) / total;
+  }
+  return { internalByKey, internal, external: Math.max(0, last - internal) };
 }
 
 /**
@@ -271,59 +259,39 @@ export function isLedgerCurrentWithoutReading(state: LedgerState, nowMs: number)
 // Storage boundary, shared by both stores
 // ---------------------------------------------------------------------------
 
-/** A finite number >= 0. */
-function isUsableNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0;
-}
-
 function isKeyState(value: unknown): value is LedgerKeyState {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-  const { attributed, seenTokens } = value as Record<string, unknown>;
-  return isUsableNumber(attributed) && isUsableNumber(seenTokens);
+  return isUsableNumber((value as Record<string, unknown>).startTokens);
 }
 
 /**
- * Every number of the state is finite and every key entry passes the same check as a stored one
- * (`attributed` and `seenTokens` finite and >= 0): the only kind of state a store writes. An
+ * Every number of the state is finite, the baseline is >= 0, and every key entry passes the same
+ * check as a stored one (`startTokens` finite and >= 0): the only kind of state a store writes. An
  * Infinity or a NaN would survive every later transition, and a key entry the read filter drops
  * must not be written in the first place.
  */
 export function isStorableLedgerState(state: LedgerState): boolean {
-  const numbers = [state.rev, state.last, state.external, state.readAt, state.updatedAt];
+  const numbers = [state.rev, state.last, state.baseline, state.readAt, state.updatedAt];
   if (state.resetAt !== null) numbers.push(state.resetAt);
   return (
     numbers.every((n) => typeof n === "number" && Number.isFinite(n)) &&
+    state.baseline >= 0 &&
     Object.values(state.keys).every(isKeyState)
   );
 }
 
 /**
- * The key map and external part of a stored book, as fresh objects. An entry that is not
- * `{ attributed, seenTokens }` with both finite and >= 0 is dropped, and a value that is not a
- * plain object loses every entry; the external part is then all that is not attributed, so a
- * damaged book degrades instead of failing the request.
+ * The key map of a stored book, as fresh objects. An entry that is not `{ startTokens }` with a
+ * finite number >= 0 is dropped (the key then counts from zero), and a value that is not a plain
+ * object gives no entry, so a damaged book degrades instead of failing the request.
  */
-export function storedLedgerBook(
-  rawKeys: unknown,
-  last: number,
-  external: number
-): { keys: Record<string, LedgerKeyState>; external: number } {
-  const entries =
-    typeof rawKeys === "object" && rawKeys !== null && !Array.isArray(rawKeys)
-      ? Object.entries(rawKeys)
-      : null;
+export function storedLedgerKeys(rawKeys: unknown): Record<string, LedgerKeyState> {
   const keys: Record<string, LedgerKeyState> = {};
-  let complete = entries !== null;
-  for (const [apiKeyId, value] of entries ?? []) {
-    if (isKeyState(value)) {
-      keys[apiKeyId] = { attributed: value.attributed, seenTokens: value.seenTokens };
-    } else {
-      complete = false;
-    }
+  if (typeof rawKeys !== "object" || rawKeys === null || Array.isArray(rawKeys)) return keys;
+  for (const [apiKeyId, value] of Object.entries(rawKeys)) {
+    if (isKeyState(value)) keys[apiKeyId] = { startTokens: value.startTokens };
   }
-  if (complete) return { keys, external };
-  const attributed = Object.values(keys).reduce((sum, k) => sum + k.attributed, 0);
-  return { keys, external: Math.max(0, last - attributed) };
+  return keys;
 }
 
 // ---------------------------------------------------------------------------
@@ -331,11 +299,6 @@ export function storedLedgerBook(
 // ---------------------------------------------------------------------------
 
 export type LedgerStore = Pick<QuotaStore, "ledgerRead" | "ledgerCommit">;
-
-/** The stored state when it can be charged without a fresh reading, else null. */
-function currentOrNull(state: LedgerState | null, nowMs: number): LedgerState | null {
-  return state && isLedgerCurrentWithoutReading(state, nowMs) ? state : null;
-}
 
 async function readOrNull(store: LedgerStore, key: LedgerKey): Promise<LedgerSnapshot | null> {
   try {
@@ -345,55 +308,85 @@ async function readOrNull(store: LedgerStore, key: LedgerKey): Promise<LedgerSna
   }
 }
 
-/** One apply-and-commit round on `snapshot`: the state to return, and whether the commit lost. */
+/**
+ * One apply-and-commit round on `snapshot`: the snapshot to return (the new state with the
+ * counters of the same read, or the snapshot read when nothing was written), and whether the
+ * commit lost.
+ */
 async function applyAndCommit(
   store: LedgerStore,
   key: LedgerKey,
   snapshot: LedgerSnapshot,
   reading: PlanWindowReading,
-  nowMs: number,
-  minTokensPerPct: number
-): Promise<{ state: LedgerState | null; lost: boolean }> {
-  const { state, changed } = applyReading(snapshot, reading, nowMs, minTokensPerPct);
-  if (!changed) return { state, lost: false };
+  nowMs: number
+): Promise<{ snapshot: LedgerSnapshot; lost: boolean }> {
+  const { state, changed } = applyReading(snapshot, reading, nowMs);
+  if (!changed) return { snapshot, lost: false };
   let won: boolean;
   try {
     won = (await store.ledgerCommit(key, state)) === true;
   } catch {
-    return { state: snapshot.state, lost: false };
+    return { snapshot, lost: false };
   }
-  return won ? { state, lost: false } : { state: snapshot.state, lost: true };
+  return won
+    ? { snapshot: { state, counters: snapshot.counters }, lost: false }
+    : { snapshot, lost: true };
+}
+
+/** Apply the reading; a commit lost to another writer gets one more round on a fresh read. */
+async function observeWithReading(
+  store: LedgerStore,
+  key: LedgerKey,
+  first: LedgerSnapshot,
+  reading: PlanWindowReading,
+  nowMs: number
+): Promise<LedgerSnapshot> {
+  const round = await applyAndCommit(store, key, first, reading, nowMs);
+  if (!round.lost) return round.snapshot;
+  const second = await readOrNull(store, key);
+  if (!second) return first;
+  return (await applyAndCommit(store, key, second, reading, nowMs)).snapshot;
+}
+
+/** After a reading: a book is usable unless its stored reset time already passed. */
+function usableAfterReading(snapshot: LedgerSnapshot, nowMs: number): BookSnapshot | null {
+  const { state } = snapshot;
+  return state && (state.resetAt === null || state.resetAt > nowMs)
+    ? (snapshot as BookSnapshot)
+    : null;
+}
+
+/** Without a reading: the stored book while it can still be the current window's book. */
+function usableWithoutReading(snapshot: LedgerSnapshot, nowMs: number): BookSnapshot | null {
+  const { state } = snapshot;
+  return state && isLedgerCurrentWithoutReading(state, nowMs) ? (snapshot as BookSnapshot) : null;
 }
 
 /**
  * Read the book, apply the reading, store the result when it changed. Never throws.
  *
- * Returns the state after this observation; the stored state when the reading changes nothing
- * or when nothing could be written; null when there is no book or the first read fails. A commit
- * lost to another writer gets one more round on a fresh read; when that one is lost too, the state
- * of the second read is returned.
+ * Returns the state after this observation together with the counters of the same store read
+ * that produced it, so the caller attributes from one consistent read; the snapshot read when the
+ * reading changes nothing or when nothing could be written. A commit lost to another writer gets
+ * one more round on a fresh read; when that one is lost too, the snapshot of the second read is
+ * returned.
  *
- * Without a reading, the stored state is returned only while it can still be the current window's
- * book (isLedgerCurrentWithoutReading); otherwise null, so a book that may belong to a provider
- * window that already ended is never charged. The stored state is left as it is either way: the
- * next reading turns or updates it through the transition.
+ * Null when there is no usable book: no book, a failed first read, a book whose stored reset time
+ * already passed (even when the reading was kept), or, without a reading, a book that may belong
+ * to a provider window that already ended (isLedgerCurrentWithoutReading). The stored state is
+ * left as it is either way: the next reading turns or updates it through the transition.
  */
 export async function observeLedger(
   store: LedgerStore,
   key: LedgerKey,
   reading: PlanWindowReading | null,
-  nowMs: number,
-  minTokensPerPct: number
-): Promise<LedgerState | null> {
+  nowMs: number
+): Promise<BookSnapshot | null> {
   try {
     const first = await readOrNull(store, key);
     if (!first) return null;
-    if (!reading) return currentOrNull(first.state, nowMs);
-    const round = await applyAndCommit(store, key, first, reading, nowMs, minTokensPerPct);
-    if (!round.lost) return round.state;
-    const second = await readOrNull(store, key);
-    if (!second) return first.state;
-    return (await applyAndCommit(store, key, second, reading, nowMs, minTokensPerPct)).state;
+    if (!reading) return usableWithoutReading(first, nowMs);
+    return usableAfterReading(await observeWithReading(store, key, first, reading, nowMs), nowMs);
   } catch {
     // A snapshot applyReading cannot use (a store returning something that is not a snapshot).
     return null;

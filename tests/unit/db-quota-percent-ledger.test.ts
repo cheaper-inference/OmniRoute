@@ -1,6 +1,6 @@
-// The percent attribution book keeps, per (pool, connection, plan window), the part of the
-// account bar each API key is charged with, and per (pool, connection, key) a cumulative token
-// counter. The book row is written by compare-and-set on its revision, so two writers that read
+// The percent attribution book keeps, per (pool, connection, plan window), the last account
+// figure, the figure when the book opened or turned (baseline) and each API key's token counter at
+// that moment, and per (pool, connection, key) a cumulative token counter. The book row is written by compare-and-set on its revision, so two writers that read
 // the same revision cannot both win; the scheduled quota cleanup ages out idle rows.
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -25,11 +25,11 @@ function state(rev: number, over: Partial<LedgerState> = {}): LedgerState {
   return {
     rev,
     last: 0.6,
-    external: 0.12,
+    baseline: 0.12,
     resetAt: null,
     readAt: NOW,
     updatedAt: NOW,
-    keys: { a: { attributed: 0.48, seenTokens: 4_000 } },
+    keys: { a: { startTokens: 4_000 } },
     ...over,
   };
 }
@@ -61,13 +61,15 @@ test("commit is compare-and-set on the revision", () => {
   assert.equal(readPercentLedger({ ...K, window: "weekly" }).state, null);
 });
 
-test("an unreadable key map degrades to an all-external book", () => {
+test("an unreadable key map degrades to no key entry and leaves the rest as stored", () => {
   core
     .getDbInstance()
     .prepare("UPDATE quota_percent_ledger SET keys_json = '{' WHERE pool_id = 'p1'")
     .run();
-  const { state: s } = readPercentLedger(K);
-  assert.deepEqual([s?.rev, s?.keys, s?.external], [2, {}, 0.7]);
+  assert.deepEqual(
+    readPercentLedger(K).state,
+    state(2, { last: 0.7, resetAt: NOW + DAY, keys: {} })
+  );
 });
 
 test("a missing book counts as revision 0: only revision 1 creates it", () => {
@@ -77,44 +79,44 @@ test("a missing book counts as revision 0: only revision 1 creates it", () => {
   assert.equal(commitPercentLedger(fresh, state(1)), true);
 });
 
-test("a malformed key entry is dropped and its part of the bar becomes external", () => {
+test("a malformed key entry is dropped; baseline and last come back exactly as stored", () => {
   const mixed = { ...K, poolId: "mixed" };
-  commitPercentLedger(mixed, state(1, { last: 0.1 + 0.2, external: 0 }));
+  commitPercentLedger(mixed, state(1, { last: 0.1 + 0.2, baseline: 0.1 }));
   core
     .getDbInstance()
     .prepare(
       `UPDATE quota_percent_ledger
-       SET keys_json = '{"a":{"attributed":0.1,"seenTokens":7},"b":{"attributed":"x"},"c":5}'
+       SET keys_json = '{"a":{"startTokens":7,"extra":1},"b":{"startTokens":"x"},"c":5,"d":{}}'
        WHERE pool_id = 'mixed'`
     )
     .run();
   const { state: s } = readPercentLedger(mixed);
-  assert.deepEqual(s?.keys, { a: { attributed: 0.1, seenTokens: 7 } });
-  assert.equal(s?.external, 0.1 + 0.2 - 0.1);
+  assert.deepEqual(s?.keys, { a: { startTokens: 7 } });
+  assert.deepEqual([s?.last, s?.baseline], [0.1 + 0.2, 0.1]);
   for (const json of ["[]", "null", "3"]) {
     core
       .getDbInstance()
       .prepare("UPDATE quota_percent_ledger SET keys_json = ? WHERE pool_id = 'mixed'")
       .run(json);
     const degraded = readPercentLedger(mixed).state;
-    assert.deepEqual([degraded?.keys, degraded?.external], [{}, 0.1 + 0.2]);
+    assert.deepEqual([degraded?.keys, degraded?.last, degraded?.baseline], [{}, 0.1 + 0.2, 0.1]);
   }
 });
 
-test("a stored key entry with a negative number is dropped and its part becomes external", () => {
+test("a stored key entry with a negative or non-finite mark is dropped", () => {
   const negative = { ...K, poolId: "negative" };
-  commitPercentLedger(negative, state(1, { last: 0.25, external: 0 }));
+  commitPercentLedger(negative, state(1, { last: 0.25, baseline: 0.05 }));
   core
     .getDbInstance()
     .prepare(
       `UPDATE quota_percent_ledger
-       SET keys_json = '{"a":{"attributed":-0.1,"seenTokens":7},"b":{"attributed":0.1,"seenTokens":-1},"c":{"attributed":0.05,"seenTokens":3}}'
+       SET keys_json = '{"a":{"startTokens":-7},"b":{"startTokens":1e999},"c":{"startTokens":3}}'
        WHERE pool_id = 'negative'`
     )
     .run();
   const { state: s } = readPercentLedger(negative);
-  assert.deepEqual(s?.keys, { c: { attributed: 0.05, seenTokens: 3 } });
-  assert.equal(s?.external, 0.25 - 0.05);
+  assert.deepEqual(s?.keys, { c: { startTokens: 3 } });
+  assert.deepEqual([s?.last, s?.baseline], [0.25, 0.05]);
 });
 
 test("a token amount that is not a finite number above zero changes nothing", () => {
@@ -134,15 +136,15 @@ test("a state with a number that is not finite is never stored", () => {
     { rev: Number.NaN },
     { rev: Infinity },
     { last: Number.NaN },
-    { external: Infinity },
+    { baseline: Infinity },
+    { baseline: -0.01 },
     { readAt: Number.NaN },
     { updatedAt: Infinity },
     { resetAt: Infinity },
-    { keys: { a: { attributed: Number.NaN, seenTokens: 4_000 } } },
-    { keys: { a: { attributed: 0.48, seenTokens: Infinity } } },
+    { keys: { a: { startTokens: Number.NaN } } },
+    { keys: { a: { startTokens: Infinity } } },
     // The write guard and the read filter are one rule: a negative key entry is not stored.
-    { keys: { a: { attributed: -0.01, seenTokens: 4_000 } } },
-    { keys: { a: { attributed: 0.48, seenTokens: -1 } } },
+    { keys: { a: { startTokens: -1 } } },
   ];
   for (const over of unusable) {
     assert.equal(

@@ -29,7 +29,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const { SqliteQuotaStore } = await import("../../src/lib/quota/sqliteQuotaStore.ts");
 const { RedisQuotaStore } = await import("../../src/lib/quota/redisQuotaStore.ts");
-const { observeLedger, isLedgerCurrentWithoutReading } =
+const { attributeBook, observeLedger, isLedgerCurrentWithoutReading } =
   await import("../../src/lib/quota/percentLedger.ts");
 
 test.after(() => {
@@ -152,9 +152,12 @@ const rd = (used: number, atMin: number, resetAt: number | null = null): PlanWin
   fetchedAt: T0 + atMin * MIN,
 });
 const obs = (store: LedgerStore, key: LedgerKey, used: number, atMin: number) =>
-  observeLedger(store, key, rd(used, atMin), T0 + atMin * MIN, 1000);
-const sum = (s: LedgerState) =>
-  Object.values(s.keys).reduce((a, k) => a + k.attributed, 0) + s.external;
+  observeLedger(store, key, rd(used, atMin), T0 + atMin * MIN);
+/** The book's parts at the default floor; the snapshot must hold a book. */
+const parts = (snap: LedgerSnapshot | null) => {
+  assert.ok(snap?.state, "a book");
+  return attributeBook({ state: snap.state, counters: snap.counters }, 1000);
+};
 const keyOf = (poolId: string): LedgerKey => ({ poolId, connectionId: "c", window: "5h" });
 
 function near(actual: number | undefined, expected: number, label: string): void {
@@ -164,27 +167,36 @@ function near(actual: number | undefined, expected: number, label: string): void
   );
 }
 
-/** Integers and times compare exactly, fractions of the bar within 1e-9. */
+/** Integers, times and marks compare exactly, fractions of the bar within 1e-9. */
 function assertState(actual: LedgerState | null, expected: LedgerState, step: string): void {
   assert.ok(actual, `${step}: a book`);
-  const { rev, resetAt, readAt, updatedAt } = actual;
+  const { rev, resetAt, readAt, updatedAt, keys } = actual;
   assert.deepEqual(
-    { rev, resetAt, readAt, updatedAt },
+    { rev, resetAt, readAt, updatedAt, keys },
     {
       rev: expected.rev,
       resetAt: expected.resetAt,
       readAt: expected.readAt,
       updatedAt: expected.updatedAt,
+      keys: expected.keys,
     },
     step
   );
   near(actual.last, expected.last, `${step} last`);
-  near(actual.external, expected.external, `${step} external`);
-  assert.deepEqual(Object.keys(actual.keys).sort(), Object.keys(expected.keys).sort(), step);
-  for (const [k, ks] of Object.entries(expected.keys)) {
-    near(actual.keys[k].attributed, ks.attributed, `${step} ${k}.attributed`);
-    assert.equal(actual.keys[k].seenTokens, ks.seenTokens, `${step} ${k}.seenTokens`);
-  }
+  near(actual.baseline, expected.baseline, `${step} baseline`);
+}
+
+/** Parts per key and external, each within 1e-9. */
+function assertParts(
+  snap: LedgerSnapshot | null,
+  byKey: Record<string, number>,
+  external: number,
+  step: string
+): void {
+  const out = parts(snap);
+  assert.deepEqual(Object.keys(out.internalByKey).sort(), Object.keys(byKey).sort(), step);
+  for (const [k, v] of Object.entries(byKey)) near(out.internalByKey[k], v, `${step} ${k}`);
+  near(out.external, external, `${step} external`);
 }
 
 function counting(store: LedgerStore) {
@@ -202,10 +214,10 @@ function counting(store: LedgerStore) {
   return { wrapped, n };
 }
 
-/** The fixed five-step script; each step checks the state that ledgerRead returns. */
+/** The fixed five-step script; each step checks the state and the parts of what ledgerRead returns. */
 async function runScriptedScenario(store: QuotaStore, K: LedgerKey): Promise<void> {
   const at = (m: number) => T0 + m * MIN;
-  const read = async () => (await store.ledgerRead(K)).state;
+  const read = () => store.ledgerRead(K);
 
   await store.ledgerRecordTokens(K.poolId, K.connectionId, "a", 900_000, T0);
   await store.ledgerRecordTokens(K.poolId, K.connectionId, "b", 100_000, T0);
@@ -213,71 +225,47 @@ async function runScriptedScenario(store: QuotaStore, K: LedgerKey): Promise<voi
   const step1: LedgerState = {
     rev: 1,
     last: 0.1,
-    external: 0.1,
+    baseline: 0.1,
     resetAt: null,
     readAt: T0,
     updatedAt: T0,
-    keys: { a: { attributed: 0, seenTokens: 900_000 }, b: { attributed: 0, seenTokens: 100_000 } },
+    keys: { a: { startTokens: 900_000 }, b: { startTokens: 100_000 } },
   };
-  assertState(await read(), step1, "step 1");
+  assertState((await read()).state, step1, "step 1");
+  assertParts(await read(), {}, 0.1, "step 1");
 
   await store.ledgerRecordTokens(K.poolId, K.connectionId, "a", 30_000, at(1));
   await store.ledgerRecordTokens(K.poolId, K.connectionId, "b", 10_000, at(1));
   await obs(store, K, 0.14, 1);
-  const step2: LedgerState = {
-    rev: 2,
-    last: 0.14,
-    external: 0.1,
-    resetAt: null,
-    readAt: at(1),
-    updatedAt: at(1),
-    keys: {
-      a: { attributed: 0.03, seenTokens: 930_000 },
-      b: { attributed: 0.01, seenTokens: 110_000 },
-    },
-  };
-  assertState(await read(), step2, "step 2");
+  const step2: LedgerState = { ...step1, rev: 2, last: 0.14, readAt: at(1), updatedAt: at(1) };
+  assertState((await read()).state, step2, "step 2");
+  assertParts(await read(), { a: 0.03, b: 0.01 }, 0.1, "step 2");
 
-  await obs(store, K, 0.14, 2);
-  assertState(await read(), step2, "step 3");
+  const { wrapped, n } = counting(store);
+  await obs(wrapped, K, 0.14, 2);
+  assert.deepEqual([n.reads, n.commits], [1, 0], "step 3: one read, no write");
+  assertState((await read()).state, step2, "step 3");
 
-  await obs(store, K, 0.135, 5);
-  const f = 0.135 / 0.14;
-  assertState(
-    await read(),
-    {
-      ...step2,
-      rev: 3,
-      last: 0.135,
-      external: 0.1 * f,
-      readAt: at(5),
-      updatedAt: at(5),
-      keys: {
-        a: { attributed: 0.03 * f, seenTokens: 930_000 },
-        b: { attributed: 0.01 * f, seenTokens: 110_000 },
-      },
-    },
-    "step 4"
-  );
+  await obs(store, K, 0.135, 5); // a drop of at most one point is not applied
+  assertState((await read()).state, step2, "step 4");
+  assertParts(await read(), { a: 0.03, b: 0.01 }, 0.1, "step 4");
 
   await store.ledgerRecordTokens(K.poolId, K.connectionId, "a", 5_000, at(6));
   await obs(store, K, 0.02, 10);
   assertState(
-    await read(),
+    (await read()).state,
     {
-      rev: 4,
+      rev: 3,
       last: 0.02,
-      external: 0,
+      baseline: 0.02,
       resetAt: null,
       readAt: at(10),
       updatedAt: at(10),
-      keys: {
-        a: { attributed: 0.02, seenTokens: 935_000 },
-        b: { attributed: 0, seenTokens: 110_000 },
-      },
+      keys: { a: { startTokens: 935_000 }, b: { startTokens: 110_000 } },
     },
     "step 5"
   );
+  assertParts(await read(), {}, 0.02, "step 5");
 }
 
 /** The usual 32-bit mulberry32 generator, so the generated sequences are deterministic. */
@@ -305,17 +293,17 @@ for (const [name, make] of STORES) {
     await obs(store, K2, 0.1, 0);
     const { wrapped, n } = counting(store);
     const out = await obs(wrapped, K2, 0.1, 3);
-    assert.deepEqual([n.reads, n.commits, out?.rev, out?.updatedAt], [1, 0, 1, T0]);
+    assert.deepEqual([n.reads, n.commits, out?.state.rev, out?.state.updatedAt], [1, 0, 1, T0]);
   });
 
-  test(`${name}: no reading means one read and the stored state`, async () => {
+  test(`${name}: no reading means one read and the stored snapshot`, async () => {
     const store = make();
     const K2 = keyOf(`p2-none-${name}`);
     const { wrapped, n } = counting(store);
-    assert.equal(await observeLedger(wrapped, K2, null, T0, 1000), null);
+    assert.equal(await observeLedger(wrapped, K2, null, T0), null);
     await obs(store, K2, 0.1, 0);
-    const out = await observeLedger(wrapped, K2, null, T0 + 9 * MIN, 1000);
-    assert.deepEqual(out, (await store.ledgerRead(K2)).state);
+    const out = await observeLedger(wrapped, K2, null, T0 + 9 * MIN);
+    assert.deepEqual(out, await store.ledgerRead(K2));
     assert.deepEqual([n.reads, n.commits], [2, 0]);
   });
 
@@ -327,27 +315,23 @@ for (const [name, make] of STORES) {
         store.ledgerRecordTokens(K3.poolId, K3.connectionId, i % 2 ? "a" : "b", 1_000, T0)
       ),
       ...Array.from({ length: 20 }, (_, i) =>
-        observeLedger(
-          store,
-          K3,
-          { used: 0.01 * (i + 1), resetAt: null, fetchedAt: T0 + i },
-          T0,
-          1000
-        )
+        observeLedger(store, K3, { used: 0.01 * (i + 1), resetAt: null, fetchedAt: T0 + i }, T0)
       ),
     ]);
     const snap = await store.ledgerRead(K3);
     assert.deepEqual([snap.counters.a.tokens, snap.counters.b.tokens], [100_000, 100_000]);
-    assert.ok(Math.abs(sum(snap.state!) - snap.state!.last) < 1e-9);
+    const mid = parts(snap);
+    near(mid.internal + mid.external, snap.state!.last, "internal + external");
     const end = await observeLedger(
       store,
       K3,
       { used: 0.5, resetAt: null, fetchedAt: T0 + 1_000 },
-      T0,
-      1000
+      T0
     );
-    assert.ok(Math.abs(sum(end!) - 0.5) < 1e-9);
-    assert.deepEqual([end!.keys.a.seenTokens, end!.keys.b.seenTokens], [100_000, 100_000]);
+    assert.deepEqual(end?.counters, (await store.ledgerRead(K3)).counters);
+    near(end?.state.last, 0.5, "last");
+    const out = parts(end);
+    near(out.internal + out.external, 0.5, "internal + external");
   });
 
   test(`${name}: a lost commit is retried on the fresh state and attributes once`, async () => {
@@ -369,10 +353,10 @@ for (const [name, make] of STORES) {
       ledgerCommit: (k, s) => store.ledgerCommit(k, s),
     };
     const out = await obs(racing, K4, 0.3, 2);
-    assert.deepEqual([out?.rev, out?.last], [3, 0.3]);
-    near(out?.keys.a.attributed, 0.1, "a.attributed");
-    near(out?.external, 0.2, "external");
-    assert.deepEqual(out, (await store.ledgerRead(K4)).state);
+    assert.deepEqual([out?.state.rev, out?.state.last, out?.state.baseline], [3, 0.3, 0.1]);
+    // The book opened before a routed anything: a counts from zero and explains the whole growth.
+    assertParts(out, { a: 0.2 }, 0.1, "after the retry");
+    assert.deepEqual(out, await store.ledgerRead(K4));
   });
 
   test(`${name}: out-of-order readings keep the newest state`, async () => {
@@ -380,9 +364,10 @@ for (const [name, make] of STORES) {
     const K5 = keyOf(`p5-${name}`);
     await obs(store, K5, 0.1, 0);
     await obs(store, K5, 0.7, 10);
-    assert.equal((await obs(store, K5, 0.6, 9))?.last, 0.7); // older reading
-    assert.equal((await obs(store, K5, 0.6, 11))?.last, 0.7); // drop not yet confirmed
-    assert.equal((await obs(store, K5, 0.6, 12))?.last, 0.6); // two minutes newer: the window turned
+    assert.equal((await obs(store, K5, 0.6, 9))?.state.last, 0.7); // older reading
+    assert.equal((await obs(store, K5, 0.6, 11))?.state.last, 0.7); // drop not yet confirmed
+    const turned = (await obs(store, K5, 0.6, 12))?.state; // two minutes newer: the window turned
+    assert.deepEqual([turned?.last, turned?.baseline, turned?.rev], [0.6, 0.6, 3]);
   });
 
   test(`${name}: a missing book counts as revision 0: only revision 1 creates it`, async () => {
@@ -391,7 +376,7 @@ for (const [name, make] of STORES) {
     const s = (rev: number): LedgerState => ({
       rev,
       last: 0.2,
-      external: 0.2,
+      baseline: 0.2,
       resetAt: null,
       readAt: T0,
       updatedAt: T0,
@@ -413,9 +398,7 @@ for (const [name, make] of STORES) {
     await obs(store, K7, 0.1, 0);
     const base = (await store.ledgerRead(K7)).state!;
     const results = await Promise.all(
-      [0.2, 0.3].map((last) =>
-        store.ledgerCommit(K7, { ...base, rev: 2, last, external: last, readAt: T0 + MIN })
-      )
+      [0.2, 0.3].map((last) => store.ledgerCommit(K7, { ...base, rev: 2, last, readAt: T0 + MIN }))
     );
     assert.deepEqual(results.filter(Boolean).length, 1);
     const stored = (await store.ledgerRead(K7)).state!;
@@ -436,23 +419,23 @@ for (const [name, make] of STORES) {
     const ok: LedgerState = {
       rev: 1,
       last: 0.2,
-      external: 0.1,
+      baseline: 0.1,
       resetAt: null,
       readAt: T0,
       updatedAt: T0,
-      keys: { a: { attributed: 0.1, seenTokens: 10 } },
+      keys: { a: { startTokens: 10 } },
     };
     for (const over of [
       { last: Number.NaN },
-      { external: Infinity },
+      { baseline: Infinity },
+      { baseline: -0.1 },
       { readAt: Number.NaN },
       { updatedAt: Infinity },
       { resetAt: Number.NaN },
       { rev: Infinity },
-      { keys: { a: { attributed: Infinity, seenTokens: 10 } } },
-      { keys: { a: { attributed: 0.1, seenTokens: Number.NaN } } },
-      { keys: { a: { attributed: -0.1, seenTokens: 10 } } },
-      { keys: { a: { attributed: 0.1, seenTokens: -1 } } },
+      { keys: { a: { startTokens: Infinity } } },
+      { keys: { a: { startTokens: Number.NaN } } },
+      { keys: { a: { startTokens: -1 } } },
     ]) {
       assert.equal(await store.ledgerCommit(K8, { ...ok, ...over }), false, Object.keys(over)[0]);
     }
@@ -485,13 +468,15 @@ test("both stores end every generated sequence with the same book and a valid in
         resetAt: [null, R, R + 5 * H][Math.floor(rand() * 3)],
         fetchedAt: now,
       };
-      const fromSqlite = await observeLedger(sqlite, key, reading, now, 1000);
-      const fromRedis = await observeLedger(redis, key, reading, now, 1000);
-      for (const state of [fromSqlite, fromRedis]) {
-        assert.ok(state, `seed ${seed} step ${i}: a book`);
-        assert.ok(Math.abs(sum(state) - state.last) < 1e-9, `seed ${seed} step ${i}`);
-      }
-      assert.deepEqual(fromRedis, fromSqlite, `seed ${seed} step ${i}`);
+      const label = `seed ${seed} step ${i}`;
+      const fromSqlite = await observeLedger(sqlite, key, reading, now);
+      const fromRedis = await observeLedger(redis, key, reading, now);
+      assert.deepEqual(fromRedis, fromSqlite, label);
+      const [readSqlite, readRedis] = [await sqlite.ledgerRead(key), await redis.ledgerRead(key)];
+      assert.deepEqual(readRedis, readSqlite, label);
+      const [partsSqlite, partsRedis] = [parts(readSqlite), parts(readRedis)];
+      assert.deepEqual(partsRedis, partsSqlite, label);
+      near(partsSqlite.internal + partsSqlite.external, readSqlite.state!.last, label);
     }
     assert.deepEqual(await redis.ledgerRead(key), await sqlite.ledgerRead(key), `seed ${seed}`);
   }
@@ -501,11 +486,11 @@ test("without a reading, a book counts as current only until its reset time or f
   const book = (resetAt: number | null): LedgerState => ({
     rev: 1,
     last: 0.4,
-    external: 0.1,
+    baseline: 0.1,
     resetAt,
     readAt: T0,
     updatedAt: T0,
-    keys: { a: { attributed: 0.3, seenTokens: 30_000 } },
+    keys: { a: { startTokens: 30_000 } },
   });
   const R = T0 + H;
   // A known reset time decides alone: current strictly before it, whatever the reading's age.
@@ -527,18 +512,18 @@ for (const [name, make] of STORES) {
     const timed = keyOf(`p-current-timed-${name}`);
     const untimed = keyOf(`p-current-untimed-${name}`);
     const R = T0 + H;
-    await observeLedger(store, timed, rd(0.3, 0, R), T0, 1000);
+    await observeLedger(store, timed, rd(0.3, 0, R), T0);
     await obs(store, untimed, 0.3, 0);
-    const storedTimed = (await store.ledgerRead(timed)).state;
-    const storedUntimed = (await store.ledgerRead(untimed)).state;
+    const storedTimed = await store.ledgerRead(timed);
+    const storedUntimed = await store.ledgerRead(untimed);
 
-    assert.deepEqual(await observeLedger(store, timed, null, R - 1, 1000), storedTimed);
-    assert.equal(await observeLedger(store, timed, null, R, 1000), null);
-    assert.deepEqual(await observeLedger(store, untimed, null, T0 + 14 * MIN, 1000), storedUntimed);
-    assert.equal(await observeLedger(store, untimed, null, T0 + 16 * MIN, 1000), null);
+    assert.deepEqual(await observeLedger(store, timed, null, R - 1), storedTimed);
+    assert.equal(await observeLedger(store, timed, null, R), null);
+    assert.deepEqual(await observeLedger(store, untimed, null, T0 + 14 * MIN), storedUntimed);
+    assert.equal(await observeLedger(store, untimed, null, T0 + 16 * MIN), null);
     // The stored books are left as they were.
-    assert.deepEqual((await store.ledgerRead(timed)).state, storedTimed);
-    assert.deepEqual((await store.ledgerRead(untimed)).state, storedUntimed);
+    assert.deepEqual(await store.ledgerRead(timed), storedTimed);
+    assert.deepEqual(await store.ledgerRead(untimed), storedUntimed);
   });
 }
 
@@ -551,14 +536,14 @@ test("a store failure never throws", async () => {
   assert.equal(await obs({ ledgerRead: boom, ledgerCommit: boom }, K, 0.9, 20), null);
 
   await obs(sqlite, K, 0.1, 0);
-  const before = (await sqlite.ledgerRead(K)).state;
-  assert.ok(before);
-  // The commit rejects: the state read before it.
+  const before = await sqlite.ledgerRead(K);
+  assert.ok(before.state);
+  // The commit rejects: the snapshot read before it.
   assert.deepEqual(
     await obs({ ledgerRead: (k) => sqlite.ledgerRead(k), ledgerCommit: boom }, K, 0.9, 20),
     before
   );
-  // The commit loses and the second read rejects: the state of the first read.
+  // The commit loses and the second read rejects: the snapshot of the first read.
   let reads = 0;
   const flaky: LedgerStore = {
     ledgerRead: async (k) => (reads++ === 0 ? sqlite.ledgerRead(k) : boom()),
@@ -568,7 +553,7 @@ test("a store failure never throws", async () => {
   // A snapshot the transition cannot use.
   const broken = { state: null, counters: null } as unknown as LedgerSnapshot;
   assert.equal(await obs({ ledgerRead: async () => broken, ledgerCommit: boom }, K, 0.9, 20), null);
-  assert.deepEqual((await sqlite.ledgerRead(K)).state, before);
+  assert.deepEqual(await sqlite.ledgerRead(K), before);
 });
 
 test("redis: one hash per pool connection, old revisions removed, 60-day TTL", async () => {
@@ -583,7 +568,7 @@ test("redis: one hash per pool connection, old revisions removed, 60-day TTL", a
   assert.ok(hash, "the book lives in one hash per pool connection");
   assert.deepEqual(
     [...hash.keys()].filter((f) => f.startsWith("s:")),
-    ["s:5h:4"]
+    ["s:5h:3"]
   );
   assert.deepEqual([...hash.keys()].filter((f) => !f.startsWith("s:")).sort(), [
     "t:a",
@@ -604,10 +589,10 @@ test("redis: one hash per pool connection, old revisions removed, 60-day TTL", a
     ]
   );
 
-  hash.set("s:5h:1", hash.get("s:5h:4")!.replace('"rev":4', '"rev":1'));
+  hash.set("s:5h:1", hash.get("s:5h:3")!.replace('"rev":3', '"rev":1'));
   calls.length = 0;
   const snap = await redis.ledgerRead(K);
-  assert.equal(snap.state?.rev, 4);
+  assert.equal(snap.state?.rev, 3);
   assert.deepEqual(
     calls.filter((c) => c.method === "hdel").map((c) => c.args),
     [[hashKey, "s:5h:1"]]
@@ -624,7 +609,6 @@ test("redis: a revision field removed after the check cannot be won a second tim
     ...base,
     rev,
     last,
-    external: last,
     readAt: T0 + rev * MIN,
   });
   // Between this writer's check (book at rev 1) and its HSETNX of rev 2, another writer stores
@@ -648,7 +632,7 @@ test("redis: a revision field removed after the check cannot be won a second tim
   );
 });
 
-test("redis: a commit overtaken before its confirmation is re-read, never attributed twice", async () => {
+test("redis: a commit overtaken before its confirmation is re-read, never applied twice", async () => {
   const redis = redisWithFakeClient();
   const K = keyOf("p-redis-spurious-loss");
   const at = (m: number) => T0 + m * MIN;
@@ -659,7 +643,7 @@ test("redis: a commit overtaken before its confirmation is re-read, never attrib
   atHgetall(3, async () => {
     await redis.ledgerRecordTokens(K.poolId, K.connectionId, "b", 30_000, at(3));
     const fromB = await obs(redis, K, 0.25, 3);
-    assert.equal(fromB?.rev, 3, "writer B builds rev 3 on writer A's rev 2");
+    assert.equal(fromB?.state.rev, 3, "writer B builds rev 3 on writer A's rev 2");
   });
   const commits: boolean[] = [];
   const writerA: LedgerStore = {
@@ -675,22 +659,23 @@ test("redis: a commit overtaken before its confirmation is re-read, never attrib
   assert.equal(beforeNextHgetall, null, "the interleaving ran");
   assert.ok(out);
   // A re-read rev 3; its own reading is older than rev 3's, so nothing changes.
-  assert.deepEqual(out, (await redis.ledgerRead(K)).state);
-  assert.deepEqual([out.rev, out.last, out.readAt], [3, 0.25, at(3)]);
-  near(out.keys.a.attributed, 0.1, "a.attributed (once)");
-  near(out.keys.b.attributed, 0.05, "b.attributed");
-  near(out.external, 0.1, "external");
-  assert.deepEqual([out.keys.a.seenTokens, out.keys.b.seenTokens], [50_000, 30_000]);
+  assert.deepEqual(out, await redis.ledgerRead(K));
+  assert.deepEqual(
+    [out.state.rev, out.state.last, out.state.baseline, out.state.readAt],
+    [3, 0.25, 0.1, at(3)]
+  );
+  // Both keys routed after the book opened: the growth of 0.15 is split 50_000 : 30_000.
+  assertParts(out, { a: 0.09375, b: 0.05625 }, 0.1, "after the spurious loss");
 });
 
-test("redis: a read between the two commands of a token write leaves the tokens pending", async () => {
+test("redis: a read between the two commands of a token write counts the tokens at the next one", async () => {
   const redis = redisWithFakeClient();
   const K = keyOf("p-redis-split-token-write");
   const at = (m: number) => T0 + m * MIN;
   await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 10_000, T0);
   await obs(redis, K, 0.1, 0);
   // The write stores the last-write time, then increments the tokens: observe in between.
-  const seen: { mid: LedgerState | null } = { mid: null };
+  const seen: { mid: LedgerSnapshot | null } = { mid: null };
   beforeNextHincrbyfloat = async () => {
     const snap = await redis.ledgerRead(K);
     assert.deepEqual(snap.counters.a, { tokens: 10_000, updatedAt: at(1) });
@@ -699,15 +684,12 @@ test("redis: a read between the two commands of a token write leaves the tokens 
   await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 50_000, at(1));
   const between = seen.mid;
   assert.ok(between, "the interleaving ran");
-  near(between.keys.a.attributed, 0, "nothing to explain the rise yet");
-  near(between.external, 0.15, "external");
-  assert.equal(between.keys.a.seenTokens, 10_000, "the watermark did not move past the new tokens");
+  assertParts(between, {}, 0.15, "nothing to explain the rise yet");
+  assert.deepEqual(between.state.keys, { a: { startTokens: 10_000 } });
 
   const after = await obs(redis, K, 0.2, 3);
-  assert.ok(after);
-  near(after.keys.a.attributed, 0.05, "the next rise is explained by the pending tokens");
-  near(after.external, 0.15, "external");
-  assert.equal(after.keys.a.seenTokens, 60_000);
+  assertParts(after, { a: 0.1 }, 0.1, "the new tokens explain the growth since the baseline");
+  assert.deepEqual(after?.state.keys, { a: { startTokens: 10_000 } }, "the mark did not move");
 });
 
 test("redis: a stored field that is not a usable book is skipped and removed", async () => {
@@ -721,12 +703,16 @@ test("redis: a stored field that is not a usable book is skipped and removed", a
   hash.set("s:5h:x", "{}");
   hash.set(
     "s:5h:2",
-    hash.get("s:5h:2")!.replace(/"keys":\{.*\}\}$/, '"keys":{"a":{"attributed":-1}}}')
+    hash.get("s:5h:2")!.replace(/"keys":\{.*\}\}$/, '"keys":{"a":{"startTokens":-1}}}')
   );
+  assert.match(hash.get("s:5h:2")!, /"startTokens":-1/, "the stored entry was damaged");
   const snap = await redis.ledgerRead(K);
-  assert.deepEqual([snap.state?.rev, snap.state?.keys, snap.state?.external], [2, {}, 0.3]);
+  assert.deepEqual(
+    [snap.state?.rev, snap.state?.keys, snap.state?.last, snap.state?.baseline],
+    [2, {}, 0.3, 0.1]
+  );
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual([...hash.keys()].filter((f) => f.startsWith("s:")).sort(), ["s:5h:2", "s:5h:x"]);
   // The book moves on from the usable revision.
-  assert.equal((await obs(redis, K, 0.4, 2))?.rev, 3);
+  assert.equal((await obs(redis, K, 0.4, 2))?.state.rev, 3);
 });

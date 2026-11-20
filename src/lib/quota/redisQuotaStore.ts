@@ -33,7 +33,7 @@ import type {
   QuotaStore,
 } from "./types";
 import { buildPoolUsageSnapshot } from "./poolUsageSnapshot";
-import { isStorableLedgerState, storedLedgerBook } from "./percentLedger";
+import { isStorableLedgerState, storedLedgerKeys } from "./percentLedger";
 
 // ---------------------------------------------------------------------------
 // Redis connection singleton
@@ -143,13 +143,12 @@ function parseStoredState(json: string, rev: number): LedgerState | null {
     return null;
   }
   if (typeof raw !== "object" || raw === null) return null;
-  const { last, external, resetAt, readAt, updatedAt, keys } = raw as Record<string, unknown>;
-  if (!isFiniteNumber(last) || !isFiniteNumber(external)) return null;
+  const { last, baseline, resetAt, readAt, updatedAt, keys } = raw as Record<string, unknown>;
+  if (!isFiniteNumber(last) || !isFiniteNumber(baseline)) return null;
   if (!isFiniteNumber(readAt) || !isFiniteNumber(updatedAt)) return null;
   const reset = isFiniteNumber(resetAt) ? resetAt : null;
   if (resetAt !== null && reset === null) return null;
-  const book = storedLedgerBook(keys, last, external);
-  return { rev, last, external: book.external, resetAt: reset, readAt, updatedAt, keys: book.keys };
+  return { rev, last, baseline, resetAt: reset, readAt, updatedAt, keys: storedLedgerKeys(keys) };
 }
 
 /**
@@ -171,7 +170,7 @@ function latestState(
   return { state, obsolete };
 }
 
-/** Every key counter of the hash; a counter without a write time is never fresh. */
+/** Every key counter of the hash; a counter without a write time reads its time as NaN. */
 function readCounters(hash: Record<string, string>): Record<string, LedgerCounter> {
   const counters: Record<string, LedgerCounter> = {};
   for (const [field, value] of Object.entries(hash)) {
