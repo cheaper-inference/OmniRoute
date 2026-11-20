@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "મધ્ય-વાતચીત સિસ્ટમ સંદેશાઓને સ્થાને રાખો",
     "requireUserLastMessageDescription": "સહાયક પ્રીફિલને નકારતા અપસ્ટ્રીમ્સ માટે: મોકલતા પહેલા પાછળના સહાયક વળાંક છોડો (કોઈ સાધન_ઉપયોગ નથી). મોડેલ તેના પહેલાના જવાબને ફરીથી બનાવી શકે છે.",
     "requireUserLastMessageLabel": "વાતચીતને વપરાશકર્તા સંદેશ સાથે સમાપ્ત કરવાની જરૂર છે",
+    "strictChatHistoryDescription": "કડક નિયમો લાગુ કરતી OpenAI-સુસંગત સેવાઓને મોકલતાં પહેલાં વિક્ષેપિત ટૂલ કૉલનો ક્રમ સુધારે છે અને સહાયકના સળંગ સંદેશાઓને જોડે છે.",
+    "strictChatHistoryLabel": "કડક નિયમો માટે ચેટ ઇતિહાસની મરામત",
     "bulkPasteAdded": "{count, plural, one {1 કી ઉમેરાઈ} other {# કીઓ ઉમેરાઈ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ડુપ્લિકેટ અવગણાયું} other {# ડુપ્લિકેટ્સ અવગણાયા}}",
     "bulkPasteHint": "દરેક લાઇનમાં એક API કી પેસ્ટ કરો. ખાલી લાઇનો અવગણવામાં આવે છે અને ડુપ્લિકેટ કીઓ છોડવામાં આવે છે.",

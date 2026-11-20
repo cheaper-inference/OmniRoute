@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "將對話中的系統訊息保留在適當的位置",
     "requireUserLastMessageDescription": "對於拒絕輔助預填充的上游：在發送之前刪除尾隨輔助輪（無工具使用）。該模型可能會重新生成其先前的答案。",
     "requireUserLastMessageLabel": "要求對話以用戶訊息結束",
+    "strictChatHistoryDescription": "傳送給執行嚴格規則的 OpenAI 相容上游服務前，修復中斷的工具呼叫序列，並合併連續的助理訊息。",
+    "strictChatHistoryLabel": "為嚴格的上游服務修復聊天記錄",
     "bulkPasteAdded": "{count, plural, one {已新增 1 個 key} other {已新增 # 個 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳過 1 個重複項} other {已跳過 # 個重複項}}",
     "bulkPasteHint": "每行貼上一個 API 金鑰。空行會被忽略，重複金鑰會被跳過。",

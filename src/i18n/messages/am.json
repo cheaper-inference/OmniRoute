@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "የመሃል የውይይት ስርዓት መልዕክቶችን በቦታቸው ያቆዩ",
     "requireUserLastMessageDescription": "ለላይ ዥረቶች የረዳት ቅድመ ሙሌትን አይቀበሉም፡ ከመላክዎ በፊት ተከታይ ረዳት ተራዎችን ጣል (የመሳሪያ_አጠቃቀም የለም)። ሞዴሉ የቀደመውን መልስ ሊያድስ ይችላል።",
     "requireUserLastMessageLabel": "በተጠቃሚ መልእክት ለመጨረስ ውይይት ጠይቅ",
+    "strictChatHistoryDescription": "ወደ OpenAI ጋር ተኳሃኝ ጥብቅ አገልግሎቶች ከመላክዎ በፊት የተቋረጡ የመሣሪያ ጥሪ ቅደም ተከተሎችን ያስተካክሉ እና ተከታታይ የረዳት መልዕክቶችን ያዋህዱ።",
+    "strictChatHistoryLabel": "የውይይት ታሪክ ጥገና ለጥብቅ አገልግሎቶች",
     "bulkPasteAdded": "{count, plural, one {1 ቁልፍ ታክሏል} other {# ቁልፎች ታክለዋል}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 የተደገመ ቁልፍ ታልፏል} other {# የተደገሙ ቁልፎች ታልፈዋል}}",
     "bulkPasteHint": "በእያንዳንዱ መስመር አንድ API ቁልፍ ይለጥፉ። ባዶ መስመሮች ችላ ይባላሉ፣ የተደገሙ ቁልፎችም ይዘለላሉ።",

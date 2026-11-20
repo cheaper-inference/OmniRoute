@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversa em vigor",
     "requireUserLastMessageDescription": "Para upstreams que rejeitam o pré-preenchimento do assistente: elimine as voltas finais do assistente (sem tool_use) antes de enviar. O modelo pode regenerar sua resposta anterior.",
     "requireUserLastMessageLabel": "Exigir que a conversa termine com uma mensagem do usuário",
+    "strictChatHistoryDescription": "Corrige sequências interrompidas de chamadas a ferramentas e une mensagens consecutivas do assistente antes de enviá-las a provedores compatíveis com OpenAI que aplicam regras rigorosas.",
+    "strictChatHistoryLabel": "Reparo do histórico de chat para provedores rigorosos",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicata ignorada} other {# duplicatas ignoradas}}",
     "bulkPasteHint": "Cole uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são puladas.",

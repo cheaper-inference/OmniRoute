@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Pertahankan pesan sistem di tengah percakapan",
     "requireUserLastMessageDescription": "Untuk upstream yang menolak pra-pengisian asisten: hilangkan putaran asisten di akhir (tanpa penggunaan_alat) sebelum mengirim. Model tersebut mungkin menghasilkan kembali jawaban sebelumnya.",
     "requireUserLastMessageLabel": "Mengharuskan percakapan diakhiri dengan pesan pengguna",
+    "strictChatHistoryDescription": "Memperbaiki urutan panggilan alat yang terputus dan menggabungkan pesan asisten yang berurutan sebelum mengirimnya ke penyedia yang kompatibel dengan OpenAI dan menerapkan aturan ketat.",
+    "strictChatHistoryLabel": "Perbaikan riwayat chat untuk penyedia yang ketat",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambahkan} other {# kunci ditambahkan}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikat dilewati} other {# duplikat dilewati}}",
     "bulkPasteHint": "Tempelkan satu kunci API per baris. Baris kosong akan diabaikan dan kunci duplikat akan dilewati.",

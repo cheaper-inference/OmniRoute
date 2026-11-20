@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Suhbat o'rtasida tizim xabarlarini joyida saqlang",
     "requireUserLastMessageDescription": "Yordamchini oldindan toʻldirishni rad etuvchi yuqori oqimlar uchun: joʻnatishdan oldin keyingi yordamchi burilishni tashlab qoʻying (asbobdan foydalanishsiz). Model avvalgi javobini qayta tiklashi mumkin.",
     "requireUserLastMessageLabel": "Suhbatni foydalanuvchi xabari bilan yakunlashni talab qiling",
+    "strictChatHistoryDescription": "Qat’iy qoidalarni qo‘llaydigan OpenAI bilan mos provayderlarga yuborishdan oldin uzilgan vosita chaqiruvlari ketma-ketligini tuzatadi va assistentning ketma-ket xabarlarini birlashtiradi.",
+    "strictChatHistoryLabel": "Qat’iy qoidalar uchun chat tarixini tuzatish",
     "bulkPasteAdded": "{count, plural, one {1 ta kalit qo‘shildi} other {# ta kalit qo‘shildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ta takroriy kalit o‘tkazib yuborildi} other {# ta takroriy kalit o‘tkazib yuborildi}}",
     "bulkPasteHint": "Har bir qatorga bittadan API kalitini joylang. Bo‘sh qatorlar e’tiborga olinmaydi va takroriy kalitlar o‘tkazib yuboriladi.",

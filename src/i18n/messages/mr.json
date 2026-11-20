@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "मध्य-संभाषण प्रणाली संदेश जागी ठेवा",
     "requireUserLastMessageDescription": "सहाय्यक प्रीफिल नाकारणाऱ्या अपस्ट्रीमसाठी: पाठवण्यापूर्वी सहाय्यक वळण मागे टाका (tool_use नाही). मॉडेल त्याचे पूर्वीचे उत्तर पुन्हा निर्माण करू शकते.",
     "requireUserLastMessageLabel": "वापरकर्ता संदेशासह संभाषण समाप्त करणे आवश्यक आहे",
+    "strictChatHistoryDescription": "कठोर नियम लागू करणाऱ्या OpenAI-सुसंगत प्रदात्यांकडे पाठवण्यापूर्वी खंडित टूल कॉलचा क्रम दुरुस्त करते आणि सहाय्यकाचे सलग संदेश एकत्र करते.",
+    "strictChatHistoryLabel": "कठोर नियमांसाठी चॅट इतिहासाची दुरुस्ती",
     "bulkPasteAdded": "{count, plural, one {1 key जोडली} other {# keys जोडल्या}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 डुप्लिकेट key वगळली} other {# डुप्लिकेट keys वगळल्या}}",
     "bulkPasteHint": "प्रत्येक ओळीत एक API key पेस्ट करा. रिकाम्या ओळींकडे दुर्लक्ष केले जाते आणि डुप्लिकेट keys वगळल्या जातात.",

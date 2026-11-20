@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Behalten Sie die Systemnachrichten während des Gesprächs bei",
     "requireUserLastMessageDescription": "Für Upstreams, die das Vorausfüllen des Assistenten ablehnen: Löschen Sie nachgestellte Assistentenumdrehungen (kein Tool_Use) vor dem Senden. Das Modell generiert möglicherweise seine vorherige Antwort neu.",
     "requireUserLastMessageLabel": "Konversation muss mit einer Benutzernachricht enden",
+    "strictChatHistoryDescription": "Repariert unterbrochene Folgen von Toolaufrufen und führt aufeinanderfolgende Assistentennachrichten zusammen, bevor sie an OpenAI-kompatible Anbieter mit strikten Vorgaben gesendet werden.",
+    "strictChatHistoryLabel": "Chatverlauf für strikte Anbieter reparieren",
     "bulkPasteAdded": "{count, plural, one {1 Schlüssel hinzugefügt} other {# Schlüssel hinzugefügt}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 Duplikat übersprungen} other {# Duplikate übersprungen}}",
     "bulkPasteHint": "Fügen Sie pro Zeile einen API-Schlüssel ein. Leere Zeilen werden ignoriert und doppelte Schlüssel übersprungen.",
