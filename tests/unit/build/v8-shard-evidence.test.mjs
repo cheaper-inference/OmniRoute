@@ -382,26 +382,41 @@ test("a truncated producer input identifies the raw file and leaves no admitted 
   assert.equal(await readFile(join(inputDirectory, rawName), "utf8"), raw);
 });
 
-test("incompatible producer layouts identify both raw observations", async (t) => {
+test("incompatible producer layouts identify each source and leave no admitted aggregate", async (t) => {
   const { prepareCoverageShards } = await helpers();
+  const firstSource = "scripts/quality/audit-dependencies.mjs";
+  const secondSource = "scripts/quality/check-skill-contract.mjs";
   const options = await matrixArtifacts(t, {
     input(index, sourceRoot) {
       const raw = rawCoverage(index, sourceRoot);
+      const secondUrl = pathToFileURL(join(sourceRoot, secondSource)).href;
+      raw.result.push({ ...raw.result[0], scriptId: "2", url: secondUrl });
       raw["source-map-cache"] = {
         [raw.result[0].url]: { data: null, lineLengths: [index === 1 ? 80 : 81] },
+        [secondUrl]: { data: null, lineLengths: [index <= 2 ? 80 : 81] },
       };
       return raw;
     },
   });
-  const prefix = "V8_EVIDENCE_INCOMPLETE:source-map-layout-generated-evidence-missing ";
+  const reason = "V8_EVIDENCE_INCOMPLETE:source-map-layout-generated-evidence-missing";
+  const firstObservation = { shard: 1, rawInput: rawName, producerProofs: 0 };
+  const firstConflict = {
+    source: firstSource,
+    shard: 2,
+    rawInput: rawName,
+    producerProofs: 0,
+    firstObservation,
+  };
   await assert.rejects(prepareCoverageShards(options), (error) => {
+    const prefix = reason + " ";
     assert.ok(error.message.startsWith(prefix));
-    assert.deepEqual(JSON.parse(error.message.slice(prefix.length)), {
-      source: "scripts/quality/audit-dependencies.mjs",
-      shard: 2,
-      rawInput: rawName,
-      producerProofs: 0,
-      firstObservation: { shard: 1, rawInput: rawName, producerProofs: 0 },
+    assert.deepEqual(JSON.parse(error.message.slice(prefix.length)), firstConflict);
+    assert.deepEqual(error.layoutDiagnostics, {
+      sourceCount: 2,
+      sources: [
+        { ...firstConflict, reason, occurrences: total - 1 },
+        { ...firstConflict, source: secondSource, shard: 3, reason, occurrences: total - 2 },
+      ],
     });
     return true;
   });

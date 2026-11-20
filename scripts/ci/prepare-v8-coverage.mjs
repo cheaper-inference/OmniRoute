@@ -26,6 +26,7 @@ const compress = promisify(gzip);
 const decompress = promisify(gunzip);
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const PATH_POLICY = "git-tracked-file-urls-v1";
+const MAX_REPORTED_LAYOUT_SOURCES = 32;
 const RAW_NAME = /^[a-zA-Z0-9_.-]+\.json$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const SHA = /^[a-f0-9]{40}$/;
@@ -496,6 +497,8 @@ export async function prepareCoverageShards(options) {
   let relocatedFiles = 0;
   let projectedFiles = 0;
   let ignoredNodeTestMockScripts = 0;
+  let firstLayoutError;
+  const incompatibleLayouts = new Map();
   try {
     for (const item of inputs) {
       await regular(item.file);
@@ -576,16 +579,28 @@ export async function prepareCoverageShards(options) {
           if (lineLengths) cacheUpdates.set(path, lineLengths);
         } catch (error) {
           if (!error.message?.startsWith("V8_EVIDENCE_INCOMPLETE:source-map-layout-")) throw error;
-          const detail = JSON.stringify({
+          const previous = incompatibleLayouts.get(path);
+          if (previous) {
+            previous.occurrences++;
+            continue;
+          }
+          const detail = {
             source: path,
             shard: item.index,
             rawInput: item.name,
             producerProofs: originals[index].generatedProofs.length,
             firstObservation: layouts.firstObservation(path),
+          };
+          firstLayoutError ??= new Error(`${error.message} ${JSON.stringify(detail)}`, {
+            cause: error,
           });
-          throw new Error(`${error.message} ${detail}`, { cause: error });
+          incompatibleLayouts.set(path, { ...detail, reason: error.message, occurrences: 1 });
         }
       }
+      // Keep checking authenticated inputs for independent layout failures.
+      // An incompatible sample makes the aggregate inadmissible.
+      if (firstLayoutError) continue;
+
       // All aliases read the original layout before every equivalent cache
       // receives the projection. c8 may retain any one of those aliases.
       for (const [path, lineLengths] of cacheUpdates)
@@ -615,6 +630,13 @@ export async function prepareCoverageShards(options) {
       const sample = { result: scripts };
       merged = mergeProcessCovs(merged ? [merged, sample] : [sample]);
       mergeOrder.update(JSON.stringify([item.name, item.index, item.sha256]) + "\n");
+    }
+    if (firstLayoutError) {
+      firstLayoutError.layoutDiagnostics = {
+        sourceCount: incompatibleLayouts.size,
+        sources: [...incompatibleLayouts.values()].slice(0, MAX_REPORTED_LAYOUT_SOURCES),
+      };
+      throw firstLayoutError;
     }
     if (instrumentedShards.size !== total)
       throw new Error("A shard has no instrumented candidate coverage");
@@ -742,6 +764,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       console.log(JSON.stringify(summary)),
     (error) => {
       console.error(`[coverage-evidence] ${error.message}`);
+      if (error.layoutDiagnostics)
+        console.error(
+          `[coverage-evidence] Incompatible source layouts: ${JSON.stringify(error.layoutDiagnostics)}`
+        );
       process.exitCode = 1;
     }
   );
