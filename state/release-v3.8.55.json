@@ -560,11 +560,17 @@
       "type": "error",
       "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44666048576"
+    },
+    {
+      "at": "2026-11-20T03:25:33.426Z",
+      "type": "error",
+      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44667466066"
     }
   ],
-  "updatedAt": "2026-11-20T03:13:15.457Z",
+  "updatedAt": "2026-11-20T03:25:33.427Z",
   "batchWindow": 8,
-  "failedTicks": 17,
+  "failedTicks": 18,
   "failedSince": "2026-11-19T23:57:50.934Z",
   "stalled": {
     "since": "2026-11-19T23:57:50.934Z",
