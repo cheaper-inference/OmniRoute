@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ლიმიტი უნდა იყოს დადებითი მთელი რიცხვი.",
     "error": "შეცდომა: {message}",
     "serverOffline": "OmniRoute სერვერი გამორთულია. გაუშვით ბრძანებით: omniroute serve",
     "authRequired": "საჭიროა ავთენტიფიკაცია. დააყენეთ OMNIROUTE_API_KEY ან გაუშვით: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] შესრულდებოდა: {action}",
     "cancelled": "გაუქმებულია.",
     "jsonOpt": "გამოტანა JSON ფორმატში",
-    "yesOpt": "დადასტურების მოთხოვნის გამოტოვება"
+    "yesOpt": "დადასტურების მოთხოვნის გამოტოვება",
+    "positiveIntegerRequired": "ლიმიტი უნდა იყოს დადებითი მთელი რიცხვი."
   },
   "setup": {
     "title": "OmniRoute-ის დაყენება",

@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Debe ozi sistemụ mkparịta ụka n'etiti ebe",
     "requireUserLastMessageDescription": "Maka elu mmiri na-ajụ prefill inyeaka: dobe trailing assistant turns (enweghị tool_use) tupu izipu. Ụdị ahụ nwere ike megharịa azịza ya gara aga.",
     "requireUserLastMessageLabel": "Chọrọ ka mkparịta ụka kwụsị na ozi onye ọrụ",
+    "strictChatHistoryDescription": "Ọ na-edozi usoro ịkpọ ngwa ọrụ ndị kwụsịrị ma jikọta ozi ndị enyemaka zigara n’usoro tupu eziga ha n’aka ndị na-eweta ọrụ kwekọrọ na OpenAI ma na-agbaso iwu siri ike.",
+    "strictChatHistoryLabel": "Mmezi akụkọ mkparịta ụka maka ndị na-eweta ọrụ nwere iwu siri ike",
     "bulkPasteAdded": "{count, plural, one {Agbakwunyere igodo 1} other {Agbakwunyere igodo #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Amafere oyiri 1} other {Amafere oyiri #}}",
     "bulkPasteHint": "Tapawa otu igodo API n'ahịrị ọ bụla. A na-eleghara ahịrị efu anya ma na-amafe igodo ndị bụ oyiri.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Wepụ igodo"
   },
   "plugins": {
-    "privilegesWarningTitle": "Ngwa mgbakwunye na-eji ihe ùgwù zuru oke",
-    "privilegesWarningBody": "Ngwa mgbakwunye na-agba ọsọ dị ka usoro Node.js oge niile yana ohere dị ka OmniRoute: ọ nwere ike ịgụ faịlụ, mee mmemme ma jiri netwọk, ikike ọ bụla gosipụtara ya. Wụnye naanị plugins ị tụkwasịrị obi.",
     "title": "Ngwa mgbakwunye",
     "description": "Wụnye ma jikwaa ngwa mgbakwunye iji gbasaa ọrụ OmniRoute",
     "loading": "Na-ebunye ngwa mgbakwunye...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Nyochaa maka ngwa mgbakwunye",
     "noPlugins": "Enweghị ngwa mgbakwunye arụnyere",
     "noPluginsDescription": "Debe ndekọ ngwa mgbakwunye na ~/.omniroute/plugins/ wee pịa Nyochaa.",
+    "privilegesWarningTitle": "Ngwa mgbakwunye na-eji ihe ùgwù zuru oke",
+    "privilegesWarningBody": "Ngwa mgbakwunye na-agba ọsọ dị ka usoro Node.js oge niile yana ohere dị ka OmniRoute: ọ nwere ike ịgụ faịlụ, mee mmemme ma jiri netwọk, ikike ọ bụla gosipụtara ya. Wụnye naanị plugins ị tụkwasịrị obi.",
     "activate": "Mee ka ọ rụọ ọrụ",
     "deactivate": "Kwụsị ya ịrụ ọrụ",
     "uninstall": "Wepụ",

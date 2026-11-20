@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Rajan on oltava positiivinen kokonaisluku.",
     "error": "Virhe: {message}",
     "serverOffline": "OmniRoute-palvelin on offline. Käynnistä komennolla: omniroute serve",
     "authRequired": "Todennus vaaditaan. Aseta OMNIROUTE_API_KEY tai suorita: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simulointi] tekisi: {action}",
     "cancelled": "Peruutettu.",
     "jsonOpt": "Tulosta JSON-muodossa",
-    "yesOpt": "Ohita vahvistuspyyntö"
+    "yesOpt": "Ohita vahvistuspyyntö",
+    "positiveIntegerRequired": "Rajan on oltava positiivinen kokonaisluku."
   },
   "setup": {
     "title": "OmniRoute-asennus",
