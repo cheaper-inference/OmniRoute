@@ -9,6 +9,7 @@ const coverageHelpers = {
   "scripts/ci/atomic-tsx-cache.mjs": ["OMNIROUTE_CI_SYNC_TSX_CACHE", "TMPDIR"],
   "scripts/ci/native-worker-v8-layout.mjs": ["NODE_V8_COVERAGE"],
   "scripts/check/migration-commutation.ts": ["NODE_V8_COVERAGE", "OMNIROUTE_CI_SYNC_TSX_CACHE"],
+  "scripts/perf/messages-route-memory-profile.ts": ["NODE_V8_COVERAGE"],
 };
 
 function scanFixture(t, inputs) {
@@ -22,7 +23,7 @@ function scanFixture(t, inputs) {
   return scanCodeVars({ cwd });
 }
 
-test("coverage protocol inputs are scoped to their producer and migration boot scripts", (t) => {
+test("coverage protocol inputs are scoped to the helper that uses them", (t) => {
   assert.deepEqual(scanFixture(t, coverageHelpers), new Set());
 });
 
@@ -40,11 +41,13 @@ test("the same coverage protocol names remain visible in other code", (t) => {
 
 test("coverage helpers still report unknown inputs and names scoped to another helper", (t) => {
   const native = "scripts/ci/native-worker-v8-layout.mjs";
+  const profile = "scripts/perf/messages-route-memory-profile.ts";
   assert.deepEqual(
     scanFixture(t, {
       ...coverageHelpers,
       [native]: [...coverageHelpers[native], "TMPDIR", "UNKNOWN_COVERAGE_HELPER_INPUT"],
+      [profile]: [...coverageHelpers[profile], "OMNIROUTE_CI_SYNC_TSX_CACHE"],
     }),
-    new Set(["TMPDIR", "UNKNOWN_COVERAGE_HELPER_INPUT"])
+    new Set(["TMPDIR", "UNKNOWN_COVERAGE_HELPER_INPUT", "OMNIROUTE_CI_SYNC_TSX_CACHE"])
   );
 });

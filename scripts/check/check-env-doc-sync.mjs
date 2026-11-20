@@ -394,6 +394,7 @@ const CI_COVERAGE_INPUTS = new Map([
     path.join("scripts", "check", "migration-commutation.ts"),
     new Set(["NODE_V8_COVERAGE", "OMNIROUTE_CI_SYNC_TSX_CACHE"]),
   ],
+  [path.join("scripts", "perf", "messages-route-memory-profile.ts"), new Set(["NODE_V8_COVERAGE"])],
 ]);
 
 /**
