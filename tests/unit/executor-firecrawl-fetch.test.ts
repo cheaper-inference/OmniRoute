@@ -90,6 +90,34 @@ test("firecrawlFetch allows missing apiKey when FIRECRAWL_BASE_URL is custom", a
   });
 });
 
+test("firecrawlFetch forwards depth and selector to a self-hosted v1 endpoint", async () => {
+  await withEnv({ FIRECRAWL_BASE_URL: "http://127.0.0.1:3002" }, async () => {
+    const originalFetch = globalThis.fetch;
+    let capturedBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (_url, init = {}) => {
+      capturedBody = JSON.parse(String((init as RequestInit).body ?? "{}"));
+      return new Response(JSON.stringify({ data: { markdown: "" } }), { status: 200 });
+    };
+
+    try {
+      await firecrawlFetch({
+        url: "https://example.com",
+        format: "markdown",
+        depth: 1,
+        waitForSelector: "article",
+        includeMetadata: false,
+        credentials: { apiKey: "any-key" },
+      });
+
+      assert.equal(capturedBody.maxDepth, 1);
+      assert.equal(capturedBody.waitFor, "article");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+
 test("firecrawlFetch still requires apiKey against the default cloud base URL", async () => {
   await withEnv({ FIRECRAWL_BASE_URL: undefined }, async () => {
     const result = await firecrawlFetch({

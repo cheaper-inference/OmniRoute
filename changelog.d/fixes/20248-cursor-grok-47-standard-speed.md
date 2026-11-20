@@ -1,0 +1,1 @@
+- Allow standard-speed Grok 4.7 variants (`medium`, `low`, `xhigh`) and bare effort aliases to use standard speed by omitting `ModelDetails` and setting `reasoning_effort`, preventing Cursor from falling back to `grok-4.7-high-fast` (#20077).
