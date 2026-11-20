@@ -4,8 +4,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { isInternalThread } from "node:worker_threads";
 
 const cliEntry = new URL("../../bin/omniroute.mjs", import.meta.url);
-const cliRoot = fileURLToPath(new URL("../../bin/cli/", import.meta.url));
 const cliTsxBridge = new URL("native-cli-v8-tsx.mjs", import.meta.url).href;
+const nativeModuleRoots = ["bin", "scripts"].map((directory) =>
+  fileURLToPath(new URL(`../../${directory}/`, import.meta.url))
+);
 // Node loads these modules natively in workers, CLI diagnostics, MCP and catalog checks.
 const nativeSources = new Set(
   [
@@ -57,7 +59,9 @@ function loadNativeCoverageSource(url, context, nextLoad) {
         shortCircuit: true,
       };
     }
-    if (filename.startsWith(cliRoot) && filename.endsWith(".mjs")) {
+    // tsx rewrites dynamic imports even in JavaScript, giving these Node entry
+    // points different V8 coordinates than their bare CLI or gate invocations.
+    if (filename.endsWith(".mjs") && nativeModuleRoots.some((root) => filename.startsWith(root))) {
       return { format: "module", source: readFileSync(filename), shortCircuit: true };
     }
   }
