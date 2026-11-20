@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { announceMirrorPlan, planMirrorAssertions } from "../_helpers/mirrorFreshness.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (relative: string) => fs.readFileSync(path.join(root, relative), "utf8");
@@ -37,20 +38,37 @@ test("published English sources contain CLI and CodeBuddy variables and the cold
   assert(read(qualityDoc).includes(qualityPath));
 });
 
-test("every documentation locale covers the CLI, CodeBuddy and cold-start contracts", () => {
+// Content of the translated mirrors: every locale in release mode; in PR mode only the mirrors whose
+// anchored English section is unchanged since their translation (tests/_helpers/mirrorFreshness.ts).
+// A PR that rewrites the English contract leaves its mirrors to the translation wave. The target
+// hash (provenance) is still checked for every locale in both modes.
+test("every documentation locale covers the CLI, CodeBuddy and cold-start contracts", (t) => {
+  const envPlan = planMirrorAssertions({ root, source: envDoc, locales, state, anchors: names });
+  const qualityPlan = planMirrorAssertions({
+    root,
+    source: qualityDoc,
+    locales,
+    state,
+    anchors: [qualityPath],
+  });
+  announceMirrorPlan(t, envPlan, qualityPlan);
   const missing: string[] = [];
-  for (const locale of locales) {
+  for (const locale of envPlan.assert) {
     const env = read(`docs/i18n/${locale}/${envDoc}`);
     for (const name of names) if (!env.includes(name)) missing.push(`${locale}: ${name}`);
+  }
+  for (const locale of qualityPlan.assert) {
     const quality = read(`docs/i18n/${locale}/${qualityDoc}`);
     if (!quality.includes(qualityPath)) missing.push(`${locale}: quality tracker`);
   }
   assert.equal(missing.length, 0, missing.slice(0, 8).join(", "));
 });
 
-test("CodeBuddy rows preserve the opt-in cap and replacement provenance in every locale", () => {
+test("CodeBuddy rows preserve the opt-in cap and replacement provenance in every locale", (t) => {
   const variable = "`CODEBUDDY_SYSTEM_PROMPT_MAX_LEN`";
-  for (const locale of locales) {
+  const plan = planMirrorAssertions({ root, source: envDoc, locales, state, anchors: [variable] });
+  announceMirrorPlan(t, plan);
+  for (const locale of plan.assert) {
     const rows = read(`docs/i18n/${locale}/${envDoc}`)
       .split("\n")
       .filter((line) => line.includes(variable));

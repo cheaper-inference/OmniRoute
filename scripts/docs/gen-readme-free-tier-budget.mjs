@@ -1,27 +1,29 @@
 // README free-tier budget card in the Cheaper Inference UI Kit style (KEA-6307). Every figure
-// comes from the live catalog through computeFreeModelTotals() — the same loader the counts
-// gate, the dashboard and scripts/research/gen-budget-card-svg.mjs use — so the picture cannot
-// rot by hand again (controller ruling R4). Provider names come from AI_PROVIDERS. Output is
-// committed as docs/diagrams/free-tier-budget.svg; tests/unit/docs/readme-free-tier-budget-svg.test.ts
-// fails when the committed file no longer matches this generator, and runs the counts gate's own
-// validators on it (catalog entries, recurring pools, canonical numbers).
+// comes from the catalog through computeFreeModelTotals() — the same loader the counts gate, the
+// dashboard and scripts/research/gen-budget-card-svg.mjs use — so the picture cannot rot by hand
+// again (controller ruling R4). Provider names come from AI_PROVIDERS. The catalog is read at
+// RELEASE time, not here: the facts probe reduces it to the rows this card draws
+// (scripts/docs/readmeFactsFreeTier.mjs) and stores them in the facts snapshot as
+// `code.freeTierBudget`; this generator draws from the snapshot (scripts/docs/readmeFacts.mjs), so
+// regenerating on any branch reproduces the committed card and only `npm run
+// release:refresh-derived` moves it. Output is committed as docs/diagrams/free-tier-budget.svg;
+// tests/unit/docs/readme-free-tier-budget-svg.test.ts fails when the committed file no longer
+// matches this generator, and runs the counts gate's own validators on it (catalog entries,
+// recurring pools, canonical numbers).
 //
-// The loader is TypeScript, so regenerate with:
-//   node --import tsx/esm scripts/docs/gen-readme-free-tier-budget.mjs [--out path.svg]
+//   node scripts/docs/gen-readme-free-tier-budget.mjs [--out path.svg]
 //
 // buildFreeTierBudgetCopy() returns every string the card draws, formatted exactly as drawn: it is
 // both the drawn text and what the outlining step shapes. Numbers stay in <text> nodes
 // because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { computeFreeModelTotals } from "../../open-sse/config/freeModelCatalog.ts";
-import { AI_PROVIDERS } from "../../src/shared/constants/providers.ts";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
+import { README_FACTS } from "./readmeFacts.mjs";
 
 const W = 1200;
 const H = 842;
-const STEADY_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
 const NUMBER_WORDS = [
   "zero",
   "one",
@@ -64,10 +66,6 @@ export function fmtWords(n) {
   return s.m != null ? `${s.m} million` : `${s.k} thousand`;
 }
 
-// Live display name, parentheticals stripped as the card does.
-const providerName = (id) =>
-  (AI_PROVIDERS[id]?.name || id).replace(/\s*\(.*$/, "").replace(/ —.*$/, "");
-
 // A pool grid cell: 280 px column, a 12 px dot gutter and a gap to the next column. A row that does
 // not fit fails loudly here (and in the stale test) instead of colliding silently.
 const POOL_CELL_W = 256;
@@ -90,29 +88,20 @@ function fitChips(labels, startX, maxX, gap) {
   return { shown, overflow, ellipsisX: x };
 }
 
-export function buildFreeTierBudgetModel() {
-  const t = computeFreeModelTotals();
-
-  // Steady pools: a shared pool (poolKey) counts once at its largest member; per-model caps
-  // without a pool key (Groq's five) add up within their provider and draw as one segment.
-  const poolMap = new Map();
-  for (const r of t.perModel) {
-    if (!STEADY_TYPES.has(r.freeType) || r.eligibilityGate || !(r.monthlyTokens > 0)) continue;
-    if (r.poolKey) {
-      const cur = poolMap.get(r.poolKey);
-      if (!cur) poolMap.set(r.poolKey, { provider: r.provider, tokens: r.monthlyTokens, caps: 0 });
-      else cur.tokens = Math.max(cur.tokens, r.monthlyTokens);
-    } else {
-      const k = `provider:${r.provider}`;
-      const cur = poolMap.get(k) || { provider: r.provider, tokens: 0, caps: 0 };
-      cur.tokens += r.monthlyTokens;
-      cur.caps += 1;
-      poolMap.set(k, cur);
-    }
+// The card's data from the facts snapshot (see scripts/docs/readmeFactsFreeTier.mjs).
+function freeTierBudgetFacts() {
+  const b = README_FACTS.code?.freeTierBudget;
+  if (!b || !Array.isArray(b.pools)) {
+    throw new Error(
+      "free-tier-budget: the facts snapshot has no code.freeTierBudget — run `npm run release:refresh-derived`"
+    );
   }
-  const pools = [...poolMap.values()]
-    .map((p) => ({ ...p, name: providerName(p.provider) }))
-    .sort((a, b) => b.tokens - a.tokens || b.caps - a.caps || a.provider.localeCompare(b.provider));
+  return b;
+}
+
+export function buildFreeTierBudgetModel() {
+  const t = freeTierBudgetFacts();
+  const pools = t.pools;
   const quantified = pools.filter((p) => p.caps === 0);
   const capped = pools.filter((p) => p.caps > 0);
   const poolTokens = pools.reduce((s, p) => s + p.tokens, 0);
@@ -125,27 +114,17 @@ export function buildFreeTierBudgetModel() {
     }
   }
 
-  // One-time signup credits, gated rows excluded like firstMonthRealisticTokens.
-  const otMap = new Map();
-  for (const r of t.perModel) {
-    if (r.freeType !== "one-time-initial" || !(r.creditTokens > 0) || r.eligibilityGate) continue;
-    const k = r.poolKey || r.provider;
-    otMap.set(k, { provider: r.provider, v: Math.max(otMap.get(k)?.v || 0, r.creditTokens) });
-  }
-  const oneTime = [...otMap.values()].sort(
-    (a, b) => b.v - a.v || a.provider.localeCompare(b.provider)
-  );
+  const oneTime = t.oneTime;
   const oneTimeSum = oneTime.reduce((s, r) => s + r.v, 0);
 
-  const avoidProviders = new Set(t.perModel.filter((r) => r.tos === "avoid").map((r) => r.provider))
-    .size;
-  const discontinued = t.perModel.filter((r) => r.freeType === "discontinued").length;
-  const uncappedNames = [...new Set(t.uncappedProviders.map(providerName))];
+  const avoidProviders = t.avoidProviders;
+  const discontinued = t.discontinued;
+  const uncappedNames = t.uncappedNames;
 
-  const steady = t.steadyRecurringTokens;
-  const first = t.firstMonthRealisticTokens;
-  const boost = t.boostMonthlyTokens;
-  const gated = t.gatedRecurringTokens;
+  const steady = t.steady;
+  const first = t.first;
+  const boost = t.boost;
+  const gated = t.gated;
   const numberWord = (n) => NUMBER_WORDS[n] ?? String(n);
 
   // Layout rows derived from the data.
@@ -233,7 +212,7 @@ export function buildFreeTierBudgetModel() {
       .join(", ")}. ` +
     `One-time signup credits add about ${fmtWords(oneTimeSum)}. Uncapped providers and the OpenRouter top-up boost are shown separately so they do not inflate the headline.` +
     (gated > 0
-      ? ` A further ${fmtWords(gated)} behind regional identity verification (${t.gatedProviders.map(providerName).join(", ")}) is also shown apart.`
+      ? ` A further ${fmtWords(gated)} behind regional identity verification (${t.gatedProviderNames.join(", ")}) is also shown apart.`
       : "") +
     ` Live usage remains available at /dashboard/free-tiers.`;
   const desc = `Pool-deduplicated chart of the ${quantified.length} recurring free-token pools with positive published budgets${capped.length ? ` (plus ${capped.map((p) => `${p.name}'s ${numberWord(p.caps)} per-model caps as one segment`).join(" and ")})` : ""}, plus signup credits and uncapped providers shown separately.`;

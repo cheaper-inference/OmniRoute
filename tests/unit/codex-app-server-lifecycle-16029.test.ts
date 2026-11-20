@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 test("Codex app-server lifecycle survives retries and settles disconnects (#16029)", () => {
   const scratch = mkdtempSync(join(tmpdir(), "codex-lifecycle-16029-"));
@@ -12,6 +13,7 @@ test("Codex app-server lifecycle survives retries and settles disconnects (#1602
     const result = spawnSync(
       process.execPath,
       [
+        ...nativeCoverageArgs(),
         "--import",
         "tsx/esm",
         "--import",

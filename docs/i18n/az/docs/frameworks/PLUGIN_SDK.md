@@ -4,7 +4,7 @@
 
 ---
 
-## Sürətli başlanğıc
+## Tez Başlanğıc
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API arayışı
+## API İstinad
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Standart dəyərlərlə Plugin obyekti yaradan fabrik funksiyası.
+Defoltlarla Plugin obyekti yaradan zavod funksiyası.
 
 **Parametrlər:**
 
-- `name` (string, tələb olunur) — kebab-case formatında plagin adı
-- `priority` (number, istəyə bağlı, standart: 100) — Daha aşağı dəyərə malik olan əvvəl icra olunur
-- `enabled` (boolean, istəyə bağlı, standart: true) — Aktiv vəziyyətdə başlasın?
-- `onRequest` (function, istəyə bağlı) — Söhbət emalçısından əvvəl icra olunur
-- `onResponse` (function, istəyə bağlı) — Söhbət emalçısından sonra icra olunur
-- `onError` (function, istəyə bağlı) — Emalçı xətası zamanı icra olunur
+- `name` (string, tələb olunur) — Kabab qutusunda plagin adı
+- `priority` (nömrə, isteğe bağlı, defolt: 100) — Aşağı birinci çalışır
+- `enabled` (boolean, isteğe bağlı, defolt: doğru) — Start aktivdir?
+- `onRequest` (funksiya, isteğe bağlı) — Çat işləyicisindən əvvəl işləyir
+- `onResponse` (funksiya, isteğe bağlı) — Söhbət idarəedicisindən sonra işləyir
+- `onError` (funksiya, isteğe bağlı) — İşləyici xətası üzərində işləyir
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Sorğunu bloklayın və istəyə bağlı olaraq fərdi cavab qaytarın.
+Sorğunu bloklayın və istəyə görə fərdi cavab qaytarın.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Sorğu provayderə çatmazdan əvvəl onun gövdəsini dəyişdirin.
+Sorğu orqanını provayderə çatmazdan əvvəl dəyişdirin.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plagin konteksti (`PluginContext`)
+## Plugin konteksti (`PluginContext`)
 
-| Sahə        | Tip                       | Təsvir                      |
-| ----------- | ------------------------- | --------------------------- |
-| `requestId` | `string`                  | Unikal sorğu identifikatoru |
-| `model`     | `string`                  | Tələb olunan modelin adı    |
-| `provider`  | `string`                  | Hədəf provayder ID-si       |
-| `body`      | `Record<string, unknown>` | Sorğu gövdəsi               |
-| `headers`   | `Record<string, string>`  | Sorğu başlıqları            |
-| `metadata`  | `Record<string, unknown>` | Dəyişdirilə bilən metadata  |
-| `timestamp` | `number`                  | Sorğunun zaman damğası      |
+| Sahə         | Növ                       | Təsvir                              |
+| ------------ | ------------------------- | ----------------------------------- |
+| `requestId`  | `string`                  | Unikal sorğu identifikatoru         |
+| `model`      | `string`                  | İstənilən model adı                 |
+| `provider`   | `string`                  | Hədəf provayder ID                  |
+| `body`       | `Record<string, unknown>` | Sorğu orqanı                        |
+| `headers`    | `Record<string, string>`  | Başlıqları tələb edin (qeydə baxın) |
+| `metadata`   | `Record<string, unknown>` | Dəyişən metadata                    |
+| `timestamp`  | `number`                  | Vaxt möhürü tələb edin              |
+| `apiKeyInfo` | `object` (isteğe bağlı)   | API açar metadata (qeydə baxın)     |
+
+Kontekst heç vaxt müştərinin etimadnaməsini daşımır: `authorization`, `x-api-key`, `proxy-authorization` və `cookie` başlıqları silinir (istənilən korpus) və `apiKeyInfo` açarın metadatasını ( `id`, `name` və `scopes` kimi) saxlayır, lakin açar dəyərini və ya onun barmaq izini (`redactPluginContext()` -də `src/lib/plugins/hooks.ts`) deyil. Bu `onRequest`, `onResponse` və `onError` ə aiddir .
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Yaxud sadə boolean dəyərləri kimi (standart prioritet 100):
 }
 ```
 
-## İcazə Sistemi
+## İcazə sistemi
 
-Plaginlər təcrid olunmuş VM kontekstində işləyir. Xarici resurslara giriş üçün açıq icazələr tələb olunur:
+Pluginlərdir** sandboxed deyil** . Hər bir aktiv plagin ayrıca, adi Node.js uşaq prosesi ( `src/lib/plugins/loader.ts`-də `loadPlugin()` ) kimi OmniRoute ilə eyni əməliyyat sistemi istifadəçisi altında, VM konteksti və Node.js icazə bayraqları olmadan işləyir. Plugin kodu `node:fs`, `node:child_process`, `fetch` və hər hansı digər Node.js API istifadə edə bilər: o, OmniRoute istifadəçisinin (məlumat kataloqu daxil olmaqla) edə biləcəyi istənilən faylı oxuya və yaza bilər, proqramları işlədə və şəbəkəyə daxil ola bilər.
 
-| İcazə        | Təqdim etdiyi imkanlar                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Yalnız oxuma üçün `process.env` proksisi                     |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifestin `requires.permissions` `network`, `file-read`, `file-write`, `env` və `exec` qəbul edir, lakin bu gün yalnız `env` icra müddətində təsir göstərir:
 
-İcazə olmadıqda müvafiq qlobal obyektlər sadəcə olaraq təcrid olunmuş mühitdə əlçatan olmur.
+| İcazə                                        | Bu gün təsiri                                                                                                                                                                                                                       |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Plugin prosesi həmçinin `PORT`, `HOSTNAME`, `TZ` və `TMPDIR` qəbul edir . Onsuz o, yalnız `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` və `PLUGIN_NAME` ( Windows üzərində `SystemRoot` və `windir` ) alır. |
+| `network`, `file-read`, `file-write`, `exec` | Heç biri. Onlar yalnız bəyannamələrdir: onlar əskik olduqda heç bir şey bloklanmır.                                                                                                                                                 |
+
+Plugin quraşdırmaq hostda hər hansı digər proqramı quraşdırmaq kimidir. Yalnız mənbəsinə etibar etdiyiniz plaginləri quraşdırın.
 
 ## Konfiqurasiya Sxemi
 
@@ -194,7 +196,7 @@ Konfiqurasiya dəyərləri verilənlər bazasında saxlanılır və idarəetmə 
 
 ## Nümunələr
 
-### Sorğu Jurnalı
+### Sorğu Qeydiyyatçısı
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Tezlik Məhdudlaşdırıcısı
+### Məzənnə Limiteri
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 dəqiqə
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,13 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({ error: "Tezlik limiti aşılıb", status: 429 });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### Cavab Transformatoru
+### Cavab transformatoru
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

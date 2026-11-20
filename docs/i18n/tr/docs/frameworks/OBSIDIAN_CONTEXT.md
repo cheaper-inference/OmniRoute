@@ -94,6 +94,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Güvenlik ve Taşıma
+
+WebDAV kimlik doğrulaması, IP başına arıza izlemeyi ve kilitlemeyi zorunlu kılar (60 saniyelik bir pencere içinde 10 başarısız deneme, `429 Too Many Requests` ve `Retry-After` ile 5 dakikalık bir kilitlemeyi tetikler). WebDAV Temel kimlik doğrulama bilgilerini ilettiğinden, geridöngü dışındaki WebDAV uç noktasına erişirken TLS sonlandırılması (veya Tailscale veya Cloudflare Tunnel gibi güvenli bir tünel üzerinden yönlendirme) önemle tavsiye edilir.
+
 ### API anahtarı başına bağlam kaynağı (isteğe bağlı)
 
 Obsidian yapılandırması, `api_key_context_sources` tablosu

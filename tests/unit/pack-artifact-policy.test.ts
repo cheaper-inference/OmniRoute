@@ -8,7 +8,9 @@ import {
   PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
   PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
   PACK_ARTIFACT_REQUIRED_PATHS,
+  findDuplicatedLocaleCatalogChunks,
   findMissingArtifactPaths,
+  localeCatalogChunkLocale,
   findUnexpectedArtifactPaths,
   normalizeArtifactPath,
   parseJsonArrayOutput,
@@ -342,8 +344,6 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "config/release/wreq-js-native-manifest.json",
     "config/release/wreq-js-rust-license-inventory.json",
     "config/release/wreq-js-rust-notices.md",
-    // 2026-11-03: one translated docs mirror, so losing the mirrors fails the pack gate.
-    "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
     "dist/h2c-upgrade-guard.cjs",
     "dist/head-response-guard.cjs",
     "dist/http-method-guard.cjs",
@@ -387,4 +387,34 @@ test("every shipped @omniroute workspace package is covered by an artifact prefi
     (prefix) => !PACK_ARTIFACT_ALLOWED_PATH_PREFIXES.includes(prefix)
   );
   assert.deepEqual(uncovered, []);
+});
+
+// #20439: npm 3.8.54 carried every full locale catalog twice — once per Turbopack server
+// chunking context (pages under chunks/ssr/, the /authorize route handler under chunks/).
+test("findDuplicatedLocaleCatalogChunks flags a locale catalog bundled into two server chunks", () => {
+  const server = "dist/.build/next/server/chunks";
+  const npm3854 = [
+    `${server}/ssr/src_i18n_messages_my_json_[json]_cjs_1ap5wabmv6a_s._.js`,
+    `${server}/src_i18n_messages_my_json_[json]_cjs_0bhhk0zicqmb6._.js`,
+    `${server}/ssr/src_i18n_messages_pt-BR_json_[json]_cjs_0aaa._.js`,
+    `${server}/src_i18n_messages_pt-BR_json_[json]_cjs_0bbb._.js`,
+    `${server}/ssr/src_i18n_messages_zh-CN_json_[json]_cjs_0ccc._.js`,
+    // The import()-context map chunk is not a catalog.
+    `${server}/ssr/src_i18n_messages_05i1c2n_vi448._.js`,
+    `${server}/ssr/src_i18n_global-error-messages_my_json_0ddd._.js`,
+  ];
+  assert.equal(localeCatalogChunkLocale(npm3854[0]), "my");
+  assert.equal(localeCatalogChunkLocale(npm3854[3]), "pt-BR");
+  assert.equal(localeCatalogChunkLocale(npm3854[5]), null);
+  assert.equal(localeCatalogChunkLocale(npm3854[6]), null);
+  assert.deepEqual(findDuplicatedLocaleCatalogChunks(npm3854), [
+    `${server}/src_i18n_messages_my_json_[json]_cjs_0bhhk0zicqmb6._.js`,
+    `${server}/src_i18n_messages_pt-BR_json_[json]_cjs_0bbb._.js`,
+    `${server}/ssr/src_i18n_messages_my_json_[json]_cjs_1ap5wabmv6a_s._.js`,
+    `${server}/ssr/src_i18n_messages_pt-BR_json_[json]_cjs_0aaa._.js`,
+  ]);
+  assert.deepEqual(
+    findDuplicatedLocaleCatalogChunks(npm3854.filter((path) => path.includes("/ssr/"))),
+    []
+  );
 });

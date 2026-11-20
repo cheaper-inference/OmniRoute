@@ -4,13 +4,13 @@
 
 ---
 
-## Pelaporan Kerentanan
+## Melaporkan Kerentanan
 
 Jika Anda menemukan kerentanan keamanan di OmniRoute, harap laporkan secara bertanggung jawab:
 
-1. **JANGAN** membuka issue GitHub publik
-2. Gunakan [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Sertakan: deskripsi, langkah-langkah reproduksi, dan potensi dampak
+1. **DO NOT** buka masalah GitHub publik
+2. Gunakan [Penasihat Keamanan GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Meliputi: deskripsi, langkah-langkah reproduksi, dan potensi dampak
 
 ## Linimasa Respons
 
@@ -29,25 +29,14 @@ Jika Anda menemukan kerentanan keamanan di OmniRoute, harap laporkan secara bert
 | 3.7.x   | ✅ Keamanan                                              |
 | < 3.7.0 | ❌ Tidak didukung                                        |
 
-## Jangka waktu dukungan LTS (v3.9.x)
+## jendela dukungan LTS (v3.9.x)
 
-Setelah 3.8.59, versi berikutnya adalah **3.9.0**, yang membuka jalur dukungan jangka panjang pada cabang
-`stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — LTS v3.9.0").
+Setelah 3.8.59 versi berikutnya adalah** 3.9.0** , yang membuka garis dukungan jangka panjang di cabang `stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
-- **Yang diterima `stable/v3`:** perbaikan bug, patch keamanan, dan pembaruan penyedia. Fitur
-  baru masuk ke kanal v4; jalur LTS mengutamakan stabilitas. `npm install omniroute`
-  (`latest` dist-tag) tetap berada di v3 selama seluruh siklus v4.
-- **Durasi jangka waktu:** `stable/v3` menerima **perbaikan keamanan dan regresi kritis selama
-  12 bulan setelah rilis 3.9.0, atau hingga 90 hari setelah v4.0.0 dipublikasikan sebagai `latest` —
-  mana pun yang lebih akhir**. Tanggal berakhir yang dihasilkan dicatat dalam catatan rilis 3.9.0 dan di
-  [`ROADMAP.md`](ROADMAP.md) saat rilis dilakukan.
-- **Melaporkan kerentanan di jalur LTS:** gunakan kanal yang sama seperti versi lainnya —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
-  jangan pernah menggunakan issue publik. Sebutkan versi yang Anda uji (misalnya `3.9.2`); perbaikan diterapkan pada
-  `stable/v3` dan di-porting ke depan ke v4.
-- **Baseline keamanan saat rilis LTS:** status pemindai yang diukur, bukti penjaga rute, dan
-  bukti kredensial publik dicatat di
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Apa yang diterima `stable/v3` :** perbaikan bug, patch keamanan, dan pembaruan penyedia. Fitur baru masuk ke saluran v4; garis LTS mengutamakan stabilitas. `npm install omniroute` (tag dist `latest` ) tetap di v3 selama keseluruhan siklus v4.
+- **Durasi jendela:** `stable/v3` menerima** perbaikan keamanan dan regresi kritis selama 12 bulan setelah pemotongan 3.9.0, atau hingga 90 hari setelah v4.0.0 diterbitkan sebagai `latest` — mana saja yang lebih lama** . Tanggal akhir yang dihasilkan dicatat dalam catatan rilis 3.9.0 dan dalam [`ROADMAP.md`](ROADMAP.md) saat pemotongan terjadi.
+- **Melaporkan kerentanan di baris LTS :** saluran yang sama dengan versi lainnya — [Penasihat Keamanan GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) pribadi, tidak pernah menjadi masalah publik. Sebutkan versi mana yang Anda uji (misalnya `3.9.2`); perbaikan mendarat di `stable/v3` dan diteruskan ke v4.
+- **Garis dasar keamanan di pemotongan LTS :** status pemindai terukur, penjaga rute, dan bukti kredensial publik dicatat dalam [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

@@ -7,30 +7,33 @@
 // Everything the hero draws lives in HERO_COPY: it is both the drawn text and what the
 // outlining step shapes (scripts/docs/readme-outline.mjs). Numbers stay in
 // <text> nodes because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
+// The derived numbers (provider total, routing strategies, steady free tokens) come from the
+// facts snapshot through ./readmeFacts.mjs; 150+, 15–95% and $0 are copy, not facts.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { RF } from "./readmeFacts.mjs";
 
 export const HERO_COPY = {
   kicker: ["OMNIROUTE — THE FREE AI GATEWAY"],
   headline: ["Never stop coding."],
-  sub: ["Every AI tool → 394 providers — 150+ free —", "through one endpoint."],
+  sub: [`Every AI tool → ${RF.providers} providers — 150+ free —`, "through one endpoint."],
   tools: [
     "Claude Code · Codex · Cursor · Cline · Copilot · Antigravity  →  FREE Claude / GPT / Gemini · auto-fallback",
   ],
   cmd: ["$ npm i -g omniroute"],
   foot: ["RTK + CAVEMAN · STACKED COMPRESSION · ONE ENDPOINT · /v1"],
   stats: [
-    "394",
+    String(RF.providers),
     "AI PROVIDERS",
     "150+",
     "FREE TIERS",
-    "~1.62B",
+    `~${RF.freeSteadyBillions}B`,
     "FREE TOKENS / MO",
     "15–95%",
     "TOKEN SAVINGS",
-    "22",
+    String(RF.routingStrategies),
     "ROUTING STRATEGIES",
     "$0",
     "TO START",
@@ -59,9 +62,8 @@ export async function renderReadmeHero() {
   return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 548",
-      title:
-        "OmniRoute — Never stop coding. Every AI tool to 394 providers, 150+ free, through one endpoint.",
-      desc: "Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: 394 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 22 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
+      title: `OmniRoute — Never stop coding. Every AI tool to ${RF.providers} providers, 150+ free, through one endpoint.`,
+      desc: `Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: ${RF.providers} AI providers, 150+ free tiers, ~${RF.freeSteadyBillions}B free tokens per month, 15–95% token savings, ${RF.routingStrategies} routing strategies, $0 to start. Light and dark follow the viewer's color scheme.`,
     }) +
       gridDefs("heroGrid") +
       `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +

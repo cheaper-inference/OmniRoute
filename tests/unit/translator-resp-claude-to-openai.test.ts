@@ -161,6 +161,12 @@ test("usage filtering preserves Claude thinking details and OpenAI aliases", () 
     input_tokens: 22,
     output_tokens: 267,
     output_tokens_details: { thinking_tokens: 85 },
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
   });
   assert.deepEqual(filterUsageForFormat(usage, FORMATS.OPENAI), {
     prompt_tokens: 22,
@@ -168,6 +174,12 @@ test("usage filtering preserves Claude thinking details and OpenAI aliases", () 
     total_tokens: 289,
     reasoning_tokens: 85,
     completion_tokens_details: { reasoning_tokens: 85 },
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 

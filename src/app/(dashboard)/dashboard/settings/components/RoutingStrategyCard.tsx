@@ -269,7 +269,7 @@ export default function RoutingStrategyCard() {
           <Icon name="route" size={20} />
         </div>
         <div>
-          <h3 className="text-base sm:text-lg font-semibold">{t("routingStrategyTitle")}</h3>
+          <h3 className="text-base sm:text-lg">{t("routingStrategyTitle")}</h3>
           <p className="text-xs text-text-muted">{t("routingStrategySubtitle")}</p>
         </div>
       </div>

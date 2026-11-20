@@ -560,6 +560,8 @@ Bu vekil:
 
 Gömülü kontrol paneli için WebSocket yükseltmeleri, özel bir bağlantı noktasındaki yardımcı bir sunucu tarafından gerçekleştirilir (bkz. `src/lib/services/embedWsProxy.ts`).
 
+Her yükseltme, HTTP yerleştirme rotasıyla aynı kurallarla tünel açılmadan önce yetkilendirilir: eş, ters proxy yönlendirme başlığı olmadan geridöngü olmalıdır, bir tarayıcı `Origin` bir kontrol paneli kaynağı olmalıdır (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS`, geridöngü varsayılanlarını genişletir) ve kontrol panelinde oturum açma devre dışı bırakılmadığı sürece arayan kişinin bir kontrol paneli oturumuna veya yönetim kapsamı API anahtarına ihtiyacı vardır.
+
 **Güvenlik:** Gömülü proxy yolları `LOCAL_ONLY_API_PREFIXES` altında sınıflandırılır ve yalnızca geridöngüden erişilebilir. Cloudflare/Ngrok tüneli aracılığıyla JWT elde eden bir saldırgan, yerleşik hizmetlere proxy olarak erişemez.
 
 ---

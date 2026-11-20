@@ -49,7 +49,10 @@ export function buildClaudeEnv(baseEnv, baseUrlOrPort, authToken, opts = {}) {
   // stays stripped (above) so it can't shadow the Bearer token.
   env.ANTHROPIC_AUTH_TOKEN = (authToken && String(authToken).trim()) || "omniroute-no-auth";
   env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1";
-  // Window sizing for a model with a known real window: see claudeWindowEnv.
+  // Window sizing for a model with a known real window: see claudeWindowEnv. It owns both
+  // keys, including when it omits one, so an inherited value (--inherit-env) must not survive.
+  delete env.CLAUDE_CODE_AUTO_COMPACT_WINDOW;
+  delete env.CLAUDE_CODE_MAX_CONTEXT_TOKENS;
   Object.assign(env, claudeWindowEnv(opts.contextWindow));
   // Profile isolation (Claude Code has no native profiles — CLAUDE_CONFIG_DIR is
   // the idiomatic mechanism: separate settings/credentials/history/cache per dir).
