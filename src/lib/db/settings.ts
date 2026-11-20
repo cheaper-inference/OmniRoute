@@ -46,6 +46,9 @@ type ProxyResolutionResult = {
   level: string;
   levelId: string | null;
   source?: string;
+  // Set when "direct" is a decision rather than the absence of a proxy, so a
+  // consumer that has a fallback scope knows not to override the decision.
+  directBy?: "global-disabled" | "connection-disabled";
 };
 // State observed when a resolution started; an entry is stored only if it still holds.
 type ProxyResolutionStamp = {
@@ -717,7 +720,12 @@ export async function resolveProxyForConnection(
   }
 
   if (!globalProxyEnabled) {
-    const result: ProxyResolutionResult = { proxy: null, level: "direct", levelId: null };
+    const result: ProxyResolutionResult = {
+      proxy: null,
+      level: "direct",
+      levelId: null,
+      directBy: "global-disabled",
+    };
     // Do not cache the "direct" result when global toggle is off so that
     // toggling it back on takes effect immediately without a generation bump.
     return result;
@@ -745,7 +753,12 @@ export async function resolveProxyForConnection(
   // source for this connection, including account, provider, global, and automatic
   // fallback candidates from the proxy pool.
   if (connectionRecord && !connectionProxyEnabled) {
-    const result: ProxyResolutionResult = { proxy: null, level: "direct", levelId: null };
+    const result: ProxyResolutionResult = {
+      proxy: null,
+      level: "direct",
+      levelId: null,
+      directBy: "connection-disabled",
+    };
     cacheProxyResolution(cacheKey, stamp, result);
     return result;
   }

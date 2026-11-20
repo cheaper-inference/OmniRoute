@@ -595,6 +595,7 @@ export class GeminiWebExecutor extends BaseExecutor {
 
     let browser: any = null;
     let context: import("playwright").BrowserContext | null = null;
+    let bridge: import("../utils/socksBridge.ts").SocksBridge | null = null;
     let abortBrowser: (() => void) | null = null;
     try {
       if (signal?.aborted) {
@@ -609,14 +610,16 @@ export class GeminiWebExecutor extends BaseExecutor {
       };
       signal?.addEventListener("abort", abortBrowser, { once: true });
 
-      // #15076: apply the proxy configured for gemini-web (provider/global scope). Resolved per
-      // context so the shared leased browser needs no invalidation when the proxy changes.
-      const { resolvePlaywrightProxy } = await import("../services/browserPool.ts");
-      const proxy = await resolvePlaywrightProxy("gemini-web");
-      context = await browser.newContext({
-        userAgent: GEMINI_USER_AGENT,
-        ...(proxy ? { proxy } : {}),
-      });
+      // Proxy setup and the bridge handoff live in proxyContext, so the failure
+      // path is testable without launching Chromium.
+      const { openGeminiContext } = await import("./gemini-web/proxyContext.ts");
+      const opened = await openGeminiContext(
+        browser,
+        { userAgent: GEMINI_USER_AGENT },
+        credentials.connectionId
+      );
+      context = opened.context;
+      bridge = opened.bridge;
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
@@ -926,6 +929,9 @@ export class GeminiWebExecutor extends BaseExecutor {
       } catch {
         /* ignore close errors */
       }
+      // If closing the context threw before its close event fired, release the
+      // bridge here; the handle ignores a second release.
+      await bridge?.close().catch(() => {});
       if (browser) {
         const { releaseGeminiBrowser } = await import("./gemini-web/browserLease.ts");
         await releaseGeminiBrowser(browser);

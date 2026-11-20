@@ -28,6 +28,7 @@ import { Buffer } from "node:buffer";
 
 import { connectObscuraBrowser } from "./obscura.ts";
 import { ensureVirtualDisplay, stopVirtualDisplay } from "./virtualDisplay.ts";
+import { toPlaywrightProxy, isRelayProxyRecord } from "../utils/playwrightProxy.ts";
 
 type Browser = import("playwright").Browser;
 type BrowserContext = import("playwright").BrowserContext;
@@ -243,17 +244,15 @@ export async function resolvePlaywrightProxy(
         return resolveProxyForProvider(id);
       });
     const p = await resolver(providerKey);
-    if (!p?.host) return undefined;
-    const scheme = p.type === "socks5" ? "socks5" : "http";
-    // Build explicitly instead of a conditional object spread: the spread form
-    // widens username/password to `{}` under the LaunchOptions["proxy"] type,
-    // tripping typecheck once browserPool.ts is pulled into typecheck-core scope.
-    const proxy: NonNullable<import("playwright").LaunchOptions["proxy"]> = {
-      server: `${scheme}://${p.host}:${p.port}`,
-    };
-    if (p.username) {
-      proxy.username = String(p.username);
-      proxy.password = p.password == null ? "" : String(p.password);
+    // No record at all means no proxy; a record that carries one but cannot be
+    // used throws below instead of falling through to a direct connection.
+    if (!p) return undefined;
+    if (isRelayProxyRecord(p)) {
+      throw new Error("proxy is an edge relay and cannot carry a browser connection");
+    }
+    const proxy = toPlaywrightProxy(p);
+    if (!proxy) {
+      throw new Error("proxy has no usable host and port");
     }
     return proxy;
   } catch (err) {
@@ -519,10 +518,11 @@ export async function acquireBrowserContext(
   if (pending) return pending.promise;
 
   const createPromise = (async (): Promise<PooledContext> => {
-    const [browser, proxy] = await Promise.all([
-      launchBrowser(options),
-      resolveBrowserContextProxy(key, options),
-    ]);
+    // Resolve the proxy first: a record that cannot be used must fail before a
+    // browser is launched, or the launch would finish ownerless with no idle
+    // timer scheduled for it.
+    const proxy = await resolveBrowserContextProxy(key, options);
+    const browser = await launchBrowser(options);
     const isStealth = headless && (state.engine === "obscura" || state.cloakLaunch !== null);
     const context = await browser.newContext({
       userAgent: options.userAgent || DEFAULT_USER_AGENT,
@@ -633,6 +633,9 @@ export async function shutdownPool(reason: string): Promise<void> {
   state.launching = null;
   state.headedLaunching = null;
   stopVirtualDisplay();
+  // A SOCKS bridge belongs to the executor that acquired it, not to this pool:
+  // gemini-web keeps its own browser lease, so a pool shutdown triggered by an
+  // unrelated context must not tear its loopback listener down.
   // #12274: the shared Obscura server is owned by ./obscura.ts and reused by
   // executors (cloudflare-playground), so closing the pool's CDP connection is
   // enough — never kill the server here.
