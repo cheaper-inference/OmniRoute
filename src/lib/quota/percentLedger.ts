@@ -92,10 +92,21 @@ function classify(state: LedgerState, reading: PlanWindowReading, g: number): Tr
   return classifyDrop(state, reading, g, shift);
 }
 
+/** A counter's tokens; anything but a finite number >= 0 counts as 0, everywhere. */
+function counterTokens(counter: LedgerCounter): number {
+  return Number.isFinite(counter.tokens) && counter.tokens >= 0 ? counter.tokens : 0;
+}
+
 /** Tokens a key routed since the book last consumed its counter; a counter below its watermark restarted. */
 function pendingTokens(keyState: LedgerKeyState | undefined, counter: LedgerCounter): number {
+  const tokens = counterTokens(counter);
   const seen = keyState?.seenTokens ?? 0;
-  return counter.tokens >= seen ? counter.tokens - seen : counter.tokens;
+  return tokens >= seen ? tokens - seen : tokens;
+}
+
+/** Recorded at most 15 minutes before the observation; an unusable time is never fresh. */
+function isFresh(counter: LedgerCounter, nowMs: number): boolean {
+  return Number.isFinite(counter.updatedAt) && nowMs - counter.updatedAt <= PENDING_TTL_MS;
 }
 
 function eligibleTokens(
@@ -105,8 +116,7 @@ function eligibleTokens(
 ): Record<string, number> {
   const eligible: Record<string, number> = {};
   for (const [key, counter] of Object.entries(counters)) {
-    const fresh = nowMs - counter.updatedAt <= PENDING_TTL_MS;
-    eligible[key] = fresh ? pendingTokens(keys[key], counter) : 0;
+    eligible[key] = isFresh(counter, nowMs) ? pendingTokens(keys[key], counter) : 0;
   }
   return eligible;
 }
@@ -119,7 +129,7 @@ function openState(
 ): LedgerState {
   const keys: Record<string, LedgerKeyState> = {};
   for (const [key, counter] of Object.entries(counters)) {
-    keys[key] = { attributed: 0, seenTokens: counter.tokens };
+    keys[key] = { attributed: 0, seenTokens: counterTokens(counter) };
   }
   return {
     rev: 1,
@@ -158,7 +168,7 @@ function risenBook(
     const share = total > 0 ? (internal * eligible[key]) / total : 0;
     keys[key] = {
       attributed: (book.keys[key]?.attributed ?? 0) + share,
-      seenTokens: counter.tokens,
+      seenTokens: counterTokens(counter),
     };
   }
   return { last: g, external: book.external + rise - internal, keys };
@@ -191,6 +201,8 @@ function nextBook(
  * Apply one plan-window reading to the book. Returns the same `snapshot.state`
  * object with `changed: false` when the reading changes nothing (stale, equal,
  * or an unconfirmed drop).
+ * The returned state may share key entries with the input state: callers must not
+ * edit a state in place.
  */
 export function applyReading(
   snapshot: LedgerSnapshot,

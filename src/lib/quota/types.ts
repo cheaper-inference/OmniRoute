@@ -150,12 +150,14 @@ export interface LedgerState {
   readAt: number;
   /** When this state was produced, epoch ms. */
   updatedAt: number;
+  /** API key id → that key's state. */
   keys: Record<string, LedgerKeyState>;
 }
 
 /** Cumulative tokens routed by one API key, and the time of its last write. */
 export interface LedgerCounter {
   tokens: number;
+  /** Time of the last write, epoch ms. */
   updatedAt: number;
 }
 

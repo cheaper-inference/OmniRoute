@@ -243,3 +243,96 @@ test("attributed parts plus external always equal the last reading", () => {
     }
   }
 });
+
+/** Sum of the parts equals the last reading and no part is negative. */
+function assertBookValid(state: LedgerState): void {
+  const sum = Object.values(state.keys).reduce((a, k) => a + k.attributed, 0) + state.external;
+  near(sum, state.last);
+  assert.ok(state.external >= -1e-12);
+  for (const k of Object.values(state.keys)) {
+    assert.ok(Number.isFinite(k.attributed) && k.attributed >= -1e-12);
+    assert.ok(Number.isFinite(k.seenTokens) && k.seenTokens >= 0);
+  }
+}
+
+test("a negative counter counts as zero tokens and gets a zero watermark", () => {
+  const before = st({ last: 0.1, external: 0.1, keys: {} });
+  const { state } = run(before, { a: c(-1000, 1), b: c(5000, 1) }, rd(0.2, 1));
+  assert.equal(state.keys.a.attributed, 0);
+  assert.equal(state.keys.a.seenTokens, 0);
+  near(state.keys.b.attributed, 0.05);
+  near(state.external - before.external, 0.05); // the rise not explained by b's 5000 tokens
+  assertBookValid(state);
+});
+
+test("a counter that is not a number leaves the other keys unaffected and stores a zero watermark", () => {
+  const before = st({ last: 0.1, external: 0.1, keys: {} });
+  for (const odd of [c(Number.NaN, 1), c(Number.POSITIVE_INFINITY, 1)]) {
+    const { state } = run(before, { a: odd, b: c(5000, 1) }, rd(0.2, 1));
+    assert.equal(state.keys.a.attributed, 0);
+    assert.equal(state.keys.a.seenTokens, 0);
+    near(state.keys.b.attributed, 0.05);
+    assertBookValid(state);
+  }
+  const opened = run(null, { a: c(Number.NaN), b: c(5000) }, rd(0.1, 0)).state;
+  assert.equal(opened.keys.a.seenTokens, 0);
+  assertBookValid(opened);
+});
+
+test("a counter whose write time is not a number is never eligible", () => {
+  const before = st({ last: 0.1, external: 0.1, keys: {} });
+  for (const updatedAt of [Number.NaN, Number.POSITIVE_INFINITY]) {
+    const { state } = run(before, { a: { tokens: 5000, updatedAt } }, rd(0.2, 1));
+    assert.equal(state.keys.a.attributed, 0);
+    assert.equal(state.keys.a.seenTokens, 5000);
+    near(state.external, 0.2);
+    assertBookValid(state);
+  }
+});
+
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === "object") {
+    for (const inner of Object.values(value)) deepFreeze(inner);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+test("applyReading never mutates its input", () => {
+  const cases: Array<[string, LedgerState | null, PlanWindowReading]> = [
+    ["open", null, rd(0.4, 5)],
+    ["rise", st(), rd(0.7, 5)],
+    ["rescale", st(), rd(0.59, 5)],
+    ["turn", st(), rd(0.5, 5, R + 5 * H)],
+  ];
+  for (const [row, state, reading] of cases) {
+    const snapshot = deepFreeze({ state, counters: { k1: c(10_000, 4), k2: c(2_000, 5) } });
+    const copy = structuredClone(snapshot);
+    const out = applyReading(snapshot, reading, T0 + 5 * MIN, 1000);
+    assert.equal(out.changed, true, row);
+    assert.deepEqual(snapshot, copy, row);
+    assertBookValid(out.state);
+  }
+});
+
+test("an ignored reading returns the very same state object", () => {
+  const before = st();
+  for (const reading of [rd(0.9, 5, R - 5 * H), rd(0.3, 1)]) {
+    const out = run(before, { k1: c(10_000, 0) }, reading); // row 2 (previous window), row 6 (unconfirmed drop)
+    assert.equal(out.changed, false);
+    assert.equal(out.state, before);
+  }
+  const older = st({ readAt: T0 + 10 * MIN });
+  assert.equal(run(older, {}, rd(0.9, 5)).state, older); // row 2 (older reading)
+});
+
+test("boundaries: a 30-minute backward reset is not old, and a reset equal to the reading time is not open", () => {
+  const back = run(st(), {}, rd(0.65, 5, R - 30 * MIN));
+  assert.equal(back.changed, true);
+  near(back.state.last, 0.65);
+  near(back.state.keys.k1.attributed, 0.48);
+
+  const atReading = run(st({ resetAt: T0 + 5 * MIN }), {}, rd(0.3, 5, T0 + 5 * MIN));
+  assert.deepEqual(atReading.state.keys, {}); // row 6a does not hold: the large drop turns the window
+  near(atReading.state.external, 0.3);
+});
