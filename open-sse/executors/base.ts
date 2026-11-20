@@ -241,7 +241,7 @@ export type ExecuteInput = {
   ) => Promise<void> | void;
   /** When true, skip the intra-URL 429 retry in execute() so the caller handles fallback. */
   skipUpstreamRetry?: boolean;
-  /** Custom-provider POST may have been accepted; transport recovery must not replay it. */
+  /** Custom OpenAI-compatible node: transport recovery resends only a pre-send failure. */
   nonReplayableRequest?: boolean;
   /** In-process capability; never accepted from an HTTP body or client header. */
   validationDispatch?: StrictValidationDispatch;

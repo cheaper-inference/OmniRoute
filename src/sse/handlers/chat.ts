@@ -168,6 +168,10 @@ import {
   isNoReplayResponse,
   markCustomJsonNoReplay,
 } from "./chat/responsePolicies.ts";
+import {
+  isCustomOpenAICompatibleProvider,
+  markAmbiguousCustomNodeFailure,
+} from "./chat/customNodeReplayPolicy.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -1729,10 +1733,9 @@ async function handleSingleModelChat(
     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
     return runtimeOptions.providerId;
   })();
-  // A custom OpenAI-compatible node is one operator-selected endpoint. A transport or
-  // response failure can follow an accepted POST, so replaying it may duplicate inference.
-  const customProviderNoReplay = provider.startsWith("openai-compatible-");
-  const skipUpstreamRetry = runtimeOptions.skipUpstreamRetry === true || customProviderNoReplay;
+  // Custom OpenAI-compatible node: a POST with an ambiguous outcome is never replayed
+  // (see chat/customNodeReplayPolicy.ts); definite rejections keep normal fallback.
+  const customProviderNoReplay = isCustomOpenAICompatibleProvider(provider);
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
     request,
@@ -1835,8 +1838,7 @@ async function handleSingleModelChat(
     resolveResilienceSettings(cachedRuntimeSettings).preferredAccountFailover;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
-    runtimeOptions.skipUpstreamRetry === true ||
-      provider === "claude-web" ||
+    provider === "claude-web" ||
       isCombo ||
       forceLiveComboTest ||
       runtimeOptions.emergencyFallbackTried === true ||
@@ -1847,7 +1849,6 @@ async function handleSingleModelChat(
   // combo.ts's comboCooldownBudgetLeftMs. Declared outside requestAttemptLoop so
   // it persists (and only decreases) across `continue requestAttemptLoop` retries.
   let requestRetryBudgetLeftMs = retrySettings.budgetMs;
-  let upstreamDispatchMayHaveOccurred = false;
 
   if (Array.isArray(effectiveAllowedConnections) && effectiveAllowedConnections.length === 0) {
     log.debug("AUTH", `${provider}/${model} filtered out by connection-level routing constraints`);
@@ -2038,13 +2039,9 @@ async function handleSingleModelChat(
         if (!credentials?.allRateLimited && agy.earliestRetryHintAtMs !== null)
           return agyLease.buildAntigravityPoolBusyResponse(agy.earliestRetryHintAtMs);
         if (credentials?.allRateLimited) {
-          const cooldownSettings =
-            customProviderNoReplay && upstreamDispatchMayHaveOccurred
-              ? disableCooldownAwareRetry(baseRetrySettings, true)
-              : retrySettings;
           const retryDecision = getCooldownAwareRetryDecision({
             retryAfter: credentials.retryAfter,
-            settings: cooldownSettings,
+            settings: retrySettings,
             attempt: requestRetryAttempt,
             budgetLeftMs: requestRetryBudgetLeftMs,
             lastErrorCode: credentials.lastErrorCode,
@@ -2340,7 +2337,6 @@ async function handleSingleModelChat(
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
       try {
-        upstreamDispatchMayHaveOccurred = true;
         execution = await dispatchChatWithAffinityEviction(
           {
             bypassCircuitBreaker: forceLiveComboTest || hasForcedConnection,
@@ -2373,7 +2369,7 @@ async function handleSingleModelChat(
             runtimeModelInfo: resolved.modelInfo,
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
-            skipUpstreamRetry,
+            skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,
             nonReplayableRequest: customProviderNoReplay,
             correlationId: runtimeOptions?.correlationId ?? null,
             conversationId: runtimeOptions?.conversationId ?? null,
@@ -2405,6 +2401,7 @@ async function handleSingleModelChat(
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
       markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
+      markAmbiguousCustomNodeFailure(provider, result);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
@@ -2506,7 +2503,6 @@ async function handleSingleModelChat(
       if (result.errorCode === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE) {
         if (
           preferredDeadline.mayRotateOnRequestTimeout &&
-          !customProviderNoReplay &&
           !preferredFailoverUsed &&
           requestSignal?.aborted !== true
         ) {
@@ -2610,7 +2606,6 @@ async function handleSingleModelChat(
           isCombo,
           requestSignal?.aborted === true
         ) &&
-        !customProviderNoReplay &&
         !hasForcedConnection
       ) {
         streamReadinessTimeoutRetries += 1;
@@ -2636,7 +2631,6 @@ async function handleSingleModelChat(
         // the account unavailable for the early close.
         if (
           shouldRetryStreamEarlyEof(result.errorCode, streamEarlyEofRetries) &&
-          !customProviderNoReplay &&
           !hasForcedConnection &&
           // #16438 (flag-gated): never spend a retry on a client that already left, and
           // let the combo own empty_content recovery so the two layers never stack.
@@ -2681,7 +2675,6 @@ async function handleSingleModelChat(
         // not an account/quota failure. Do NOT mark the account unavailable here.
         if (
           isTerminalStreamEarlyEof &&
-          !customProviderNoReplay &&
           !hasForcedConnection &&
           !earlyEofOriginal &&
           isEarlyEofSiblingFailoverOn()
@@ -2821,8 +2814,7 @@ async function handleSingleModelChat(
       // Combo targets never emergency-hop: the combo is the operator's fallback policy
       // (target-level orchestration plus the global fallback #689 after it), and a
       // per-target hop burns extra upstream calls against exhausted providers (#1731).
-      const emergencyHopAllowed =
-        !customProviderNoReplay && !runtimeOptions.providerFailoverPending && !comboName;
+      const emergencyHopAllowed = !runtimeOptions.providerFailoverPending && !comboName;
       if (!runtimeOptions.emergencyFallbackTried && emergencyHopAllowed) {
         const fallbackDecision = await resolveEmergencyFallbackDecision(
           Number(result.status || 0),
@@ -2970,7 +2962,6 @@ async function handleSingleModelChat(
       if (
         !runtimeOptions.emergencyFallbackTried &&
         !runtimeOptions.providerFailoverPending &&
-        !customProviderNoReplay &&
         !comboName &&
         !forceLiveComboTest &&
         shouldRetrySameAccountTransport({
@@ -3065,7 +3056,7 @@ async function handleSingleModelChat(
       // to the next target — with ITS own pin. Same rule the antigravity
       // stream-readiness / pre-response-timeout and account-semaphore paths above
       // already apply.
-      if (shouldFallback && !hasForcedConnection && !customProviderNoReplay) {
+      if (shouldFallback && !hasForcedConnection) {
         if (Number.isFinite(cooldownMs) && cooldownMs > 0) {
           lastCooldownMs = cooldownMs;
           requestRetryLastCooldownMs = cooldownMs;

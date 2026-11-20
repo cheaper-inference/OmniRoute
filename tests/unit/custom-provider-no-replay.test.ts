@@ -264,17 +264,18 @@ test("custom OpenAI-compatible malformed response is not replayed", async () => 
   assert.ok(result.responseStatus >= 400, "malformed provider response must not become success");
 });
 
-test("custom OpenAI-compatible rate limit is surfaced without another POST", async () => {
+// A 429 is a definite rejection (the upstream did not accept the request), so it keeps the
+// normal retry chain; only ambiguous outcomes above are withheld from replay.
+test("custom OpenAI-compatible rate limit keeps the normal retry", async () => {
   const result = await runCustomProviderRequest((_, response) => {
     response.statusCode = 429;
     response.setHeader("content-type", "application/json");
     response.setHeader("retry-after", "1");
     response.end(JSON.stringify({ error: { message: "fixture rate limit" } }));
   });
-  assert.equal(
-    result.upstreamPosts,
-    1,
-    `rate-limit response must not trigger another upstream POST; observed ${result.upstreamPosts}`
+  assert.ok(
+    result.upstreamPosts > 1,
+    `a rejected (429) request must keep its normal retry; observed ${result.upstreamPosts} POSTs`
   );
   assert.equal(result.responseStatus, 429);
 });
