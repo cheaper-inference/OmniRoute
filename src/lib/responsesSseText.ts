@@ -23,10 +23,10 @@ export interface ResponsesSseTextOptions {
    */
   classify?: (key: string) => FieldCategory | null;
   /**
-   * Windowed redaction for the metadata keys that can carry a credential, keyed by path, so a
-   * value split across frames still redacts. Absent, those keys are masked per frame.
+   * Windowed redaction, in place, for the metadata keys that can carry a credential, keyed by
+   * path, so a value split across frames still redacts. Absent, those keys are masked per frame.
    */
-  metadata?: (text: string, path: string) => string;
+  metadata?: (holder: JsonObject, key: string, path: string) => void;
 }
 
 const DELTA_FIELDS: Record<string, [string, FieldCategory]> = {
@@ -268,23 +268,21 @@ class ResponsesLaneRouter {
       const childPath = path ? `${path}/${key}` : key;
       const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
       if (typeof field !== "string") this.redactMetadata(field, childPath, metadata);
-      else obj[key] = this.redactMetadataString(field, key, childPath, metadata, classify);
+      else if (metadata && this.options.metadata) this.options.metadata(obj, key, childPath);
+      else obj[key] = this.redactMetadataString(field, key, metadata, classify);
     }
   }
 
   /**
-   * A metadata string goes through the path-keyed window when one is wired in. Without one it
-   * is masked in place, except a label `classify` excludes (provider, model, id), which passes
-   * through untouched as it did before the window existed.
+   * Without a metadata window a string is masked in place, except a label `classify` excludes
+   * (provider, model, id), which passes through untouched as it did before the window existed.
    */
   private redactMetadataString(
     field: string,
     key: string,
-    childPath: string,
     metadata: boolean,
     classify: (key: string) => FieldCategory | null
   ): string {
-    if (metadata && this.options.metadata) return this.options.metadata(field, childPath);
     if (classify(key) !== null || (metadata && IN_PLACE_METADATA_KEYS.has(key)))
       return this.processor(field, "content", false, "responses:snapshot", true);
     return field;
