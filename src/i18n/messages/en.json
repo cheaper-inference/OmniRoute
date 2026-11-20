@@ -12793,6 +12793,8 @@
     "httpError": "Error {status}",
     "requestCancelled": "Request cancelled",
     "networkError": "Network error",
+    "streamFailed": "The provider returned an error before replying. Check that the selected model's provider is connected, or try another model.",
+    "emptyResponse": "The model returned an empty response. Check that the selected model's provider is connected, or try another model.",
     "regenerateLastResponse": "Regenerate last response",
     "regenerate": "Regenerate",
     "startConversation": "Start a conversation — type a message below",
