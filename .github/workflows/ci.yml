@@ -1369,16 +1369,20 @@ jobs:
         # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
         # keeps the V8 coverage merge incremental instead of loading every raw
         # JSON blob into one in-memory merge, which avoids Node heap OOMs.
-        # lcov only outside pull_request (2026-10-26): its sole consumer on a PR was the
-        # informational Codecov upload below (SonarQube is off: vars.SONARQUBE_ENABLED is
-        # unset), and the PR gate only needs the json/text summaries. The step took ~21 min
-        # on a measured PR against the org's 20-job hosted cap.
+        # lcov on a PR only when SonarQube runs (#20725). #18336 (2026-10-26) dropped it on
+        # pull_request because its only PR consumer was the informational Codecov upload while
+        # SonarQube was off; once vars.SONARQUBE_ENABLED came back the `sonarqube` job scanned
+        # with no coverage/lcov.info and every PR showed 0.0% coverage on new code. Without
+        # Sonar the PR gate still only needs the json/text summaries, so lcov stays skipped.
         env:
           NODE_OPTIONS: --max-old-space-size=8192
           EVENT_NAME: ${{ github.event_name }}
+          SONARQUBE_ENABLED: ${{ vars.SONARQUBE_ENABLED }}
         run: |
           LCOV_REPORTER=()
-          if [ "$EVENT_NAME" != "pull_request" ]; then LCOV_REPORTER=(--reporter=lcov); fi
+          if [ "$EVENT_NAME" != "pull_request" ] || [ "$SONARQUBE_ENABLED" = "true" ]; then
+            LCOV_REPORTER=(--reporter=lcov)
+          fi
           mkdir -p coverage
           first_coverage_file=""
           if [ -d coverage-shards ]; then
@@ -1484,6 +1488,17 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
+      # Without lcov.info the scan still "succeeds" and publishes 0.0% coverage on new code
+      # (#20725): fail here, naming the cause, instead of letting the quality gate blame the PR.
+      - name: Require coverage/lcov.info for the scan
+        if: ${{ github.event_name == 'pull_request' && env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
+        run: |
+          if [ ! -s coverage/lcov.info ]; then
+            echo "::error::coverage/lcov.info is missing or empty after downloading coverage-report; SonarQube would report 0% coverage on new code. Check the lcov reporter in the test-coverage job's merge step (#20725)."
+            ls -la coverage || true
+            exit 1
+          fi
+          echo "coverage/lcov.info: $(wc -l < coverage/lcov.info) lines"
       - name: Explain SonarQube skip
         if: ${{ github.event_name != 'pull_request' || env.SONAR_TOKEN == '' || env.SONAR_HOST_URL == '' }}
         run: |
