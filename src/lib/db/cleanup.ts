@@ -894,6 +894,9 @@ export interface ResetUsageHistoryResult extends CleanupResult {
   deletedCompressionRunTelemetry: number;
   deletedRoutingDecisions: number;
   deletedQuotaConsumption: number;
+  /** Percent attribution books and their token counters (quota share on percent plans). */
+  deletedQuotaPercentLedger: number;
+  deletedQuotaPercentLedgerTokens: number;
   /**
    * Always 0. `token_ledger` is the transfer record behind token balances and
    * idempotency keys, not usage analytics, so a usage reset never deletes it.
@@ -989,6 +992,18 @@ const RESET_TARGETS: Array<
     resultKey: "deletedQuotaConsumption",
   },
   {
+    table: "quota_percent_ledger",
+    column: "updated_at",
+    cutoff: "epochMs",
+    resultKey: "deletedQuotaPercentLedger",
+  },
+  {
+    table: "quota_percent_ledger_tokens",
+    column: "updated_at",
+    cutoff: "epochMs",
+    resultKey: "deletedQuotaPercentLedgerTokens",
+  },
+  {
     table: "conversation_turn_nodes",
     column: "last_seen_at",
     cutoff: "iso",
@@ -1027,6 +1042,8 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deletedCompressionRunTelemetry: 0,
     deletedRoutingDecisions: 0,
     deletedQuotaConsumption: 0,
+    deletedQuotaPercentLedger: 0,
+    deletedQuotaPercentLedgerTokens: 0,
     deletedTokenLedger: 0,
     deletedConversationTurnNodes: 0,
     deletedAgenticConversations: 0,

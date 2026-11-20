@@ -16,6 +16,7 @@ const core = await import("../../src/lib/db/core.ts");
 const cleanup = await import("../../src/lib/db/cleanup.ts");
 const { addPercentLedgerTokens, readPercentLedger, commitPercentLedger } =
   await import("../../src/lib/db/quotaPercentLedger.ts");
+const { attributeBook, observeLedger } = await import("../../src/lib/quota/percentLedger.ts");
 
 const K = { poolId: "p1", connectionId: "c1", window: "5h" } as const;
 const NOW = Date.now();
@@ -176,4 +177,53 @@ test("the migration is idempotent", () => {
   core.resetDbInstance();
   core.getDbInstance();
   assert.equal(readPercentLedger({ ...K, poolId: "live" }).state?.rev, 1);
+});
+
+// ─── Manual usage-history reset ─────────────────────────────────────────────
+
+const ledgerStore = {
+  ledgerRead: async (key: typeof K) => readPercentLedger(key),
+  ledgerCommit: async (key: typeof K, next: LedgerState) => commitPercentLedger(key, next),
+};
+
+test("the usage-history reset clears every book and counter; the next reading opens a fresh book", async () => {
+  const R = { poolId: "p-reset", connectionId: "c-reset", window: "5h" } as const;
+  const H = 3_600_000;
+  const reading = (used: number, atMs: number) => ({ used, resetAt: NOW + 4 * H, fetchedAt: atMs });
+  await observeLedger(ledgerStore, R, reading(0.2, NOW), NOW); // opens at 0.2
+  addPercentLedgerTokens(R.poolId, R.connectionId, "a", 30_000, NOW + 1_000);
+  const risen = await observeLedger(ledgerStore, R, reading(0.5, NOW + 60_000), NOW + 60_000);
+  assert.ok(risen);
+  assert.ok(Math.abs(attributeBook(risen, 1000).internalByKey.a - 0.3) < 1e-9); // 30 points
+
+  const result = await cleanup.resetUsageHistory("all");
+  assert.ok(result.deletedQuotaPercentLedger >= 1);
+  assert.ok(result.deletedQuotaPercentLedgerTokens >= 1);
+  assert.deepEqual(readPercentLedger(R), { state: null, counters: {} });
+  // No book: nothing is attributed to any key.
+  assert.equal(await observeLedger(ledgerStore, R, null, NOW + 120_000), null);
+
+  // The next reading opens a fresh book whose baseline is the current figure: all external.
+  const fresh = await observeLedger(ledgerStore, R, reading(0.5, NOW + 180_000), NOW + 180_000);
+  assert.deepEqual([fresh?.state.rev, fresh?.state.baseline, fresh?.state.last], [1, 0.5, 0.5]);
+  const att = attributeBook(fresh!, 1000);
+  assert.deepEqual([att.internal, att.external, att.internalByKey], [0, 0.5, {}]);
+});
+
+test("a period reset clears only the books and counters not written within that period", async () => {
+  const idle = { poolId: "p-idle", connectionId: "c-idle", window: "weekly" } as const;
+  const live = { poolId: "p-live", connectionId: "c-live", window: "weekly" } as const;
+  assert.equal(commitPercentLedger(idle, state(1, { updatedAt: NOW - 2 * DAY })), true);
+  assert.equal(commitPercentLedger(live, state(1)), true);
+  addPercentLedgerTokens(idle.poolId, idle.connectionId, "a", 10, NOW - 2 * DAY);
+  addPercentLedgerTokens(live.poolId, live.connectionId, "a", 10, NOW);
+
+  const result = await cleanup.resetUsageHistory("1d");
+  assert.deepEqual(
+    [result.deletedQuotaPercentLedger, result.deletedQuotaPercentLedgerTokens],
+    [1, 1]
+  );
+  assert.deepEqual(readPercentLedger(idle), { state: null, counters: {} });
+  assert.deepEqual(readPercentLedger(live).state, state(1));
+  assert.equal(readPercentLedger(live).counters.a.tokens, 10);
 });
