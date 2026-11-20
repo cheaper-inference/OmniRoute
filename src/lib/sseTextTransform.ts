@@ -2,6 +2,7 @@ import { transformStreamWithCancel } from "../../open-sse/utils/cancelableTransf
 import { resolveStreamIndices } from "./streamIndices";
 import { createResponsesSseText } from "./responsesSseText";
 import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
+import { createMetadataHold, type MetadataHold, type MetadataWindow } from "./sseMetadataHold";
 export type FieldCategory = "content" | "reasoning" | "toolArgs" | "partialJson";
 
 // Keys that always map to a fixed category, regardless of where they appear in the chunk.
@@ -127,7 +128,7 @@ const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 function redactClaudeFrameStrings(
   obj: any,
   streamed: ClaudeStreamedPath[],
-  redact: (text: string, path: string, metadata: boolean, key: string) => string,
+  redact: (holder: any, key: string, path: string, metadata: boolean) => void,
   path = "",
   inMetadata = false
 ): void {
@@ -141,8 +142,7 @@ function redactClaudeFrameStrings(
     const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
     if (typeof obj[key] !== "string")
       redactClaudeFrameStrings(obj[key], streamed, redact, childPath, metadata);
-    else if (metadata) obj[key] = redact(obj[key], childPath, true, key);
-    else if (classifyField(key) !== null) obj[key] = redact(obj[key], childPath, false, key);
+    else if (metadata || classifyField(key) !== null) redact(obj, key, childPath, metadata);
   }
 }
 
@@ -212,6 +212,21 @@ export function checkIfStopSignal(json: any): boolean {
   return false;
 }
 
+// Events after which the client reads nothing more from the stream (`[DONE]` is a line, not
+// JSON, and is handled where it is parsed).
+const TERMINAL_EVENT_TYPES = new Set([
+  "message_stop",
+  "response.completed",
+  "response.done",
+  "response.incomplete",
+  "response.failed",
+  "response.cancelled",
+]);
+
+export function isTerminalEvent(json: any): boolean {
+  return !!json && typeof json.type === "string" && TERMINAL_EVENT_TYPES.has(json.type);
+}
+
 export function checkIfSnapshot(json: any): boolean {
   if (!json || typeof json !== "object") return false;
   if (typeof json.type === "string") {
@@ -243,10 +258,11 @@ export function createSseTextTransform(
     processToolArgs?: boolean;
     releaseResponsesLane?: (index: string) => void;
     // Metadata strings carry their own sliding window, keyed by path, so a credential split
-    // across frames still redacts without ever entering the answer buffers. The held tail is
-    // emitted once, as its own frame, at the end of the stream.
-    metadataProcessor?: (text: string, path: string, isStopSignal?: boolean) => string;
-    metadataTailFrame?: () => Record<string, unknown> | null;
+    // across frames still redacts without ever entering the answer buffers. A frame whose
+    // value is partly held waits, in order, until the tail resolves; terminal events fold the
+    // tail back into that frame (sseMetadataHold), so it never leaves its envelope.
+    metadataWindow?: MetadataWindow;
+    maxDeferredBytes?: number;
   }
 ): TransformStream {
   const encoder = new TextEncoder();
@@ -261,23 +277,40 @@ export function createSseTextTransform(
   let currentEventLine = "";
   let lastEventLine = "";
   let pendingEventLine = "";
+  const hold: MetadataHold | null = opts?.metadataWindow
+    ? createMetadataHold(opts.metadataWindow, opts.maxDeferredBytes ?? Number.POSITIVE_INFINITY)
+    : null;
+  // The frame being transformed: the hold records it as the owner of any tail it leaves.
+  let frame = { json: null as object | null, stop: false, snapshot: false };
   const responses = createResponsesSseText(processor, {
     processToolArgs: opts?.processToolArgs,
     release: opts?.releaseResponsesLane,
     classify: classifyField,
-    metadata: opts?.metadataProcessor
-      ? (text, path) => opts.metadataProcessor!(text, path, false)
+    metadata: hold
+      ? (holder, key, path) => hold.redact(holder, key, path, frame.json!, frame)
       : undefined,
   });
+  // Every write goes through the hold, so nothing overtakes a frame that is still waiting.
+  const write = (controller: TransformStreamDefaultController, text: string) => {
+    if (hold) hold.write(text, (out) => controller.enqueue(encoder.encode(out)));
+    else controller.enqueue(encoder.encode(text));
+  };
+  const writeFrame = (controller: TransformStreamDefaultController, json: object, text: string) => {
+    const render = () => text + JSON.stringify(json) + "\n";
+    if (hold) hold.writeFrame(json, render, (out) => controller.enqueue(encoder.encode(out)));
+    else controller.enqueue(encoder.encode(render()));
+  };
+  // Before a terminal event goes out, every held tail returns to its own frame.
+  const releaseHeld = (controller: TransformStreamDefaultController) => {
+    hold?.releaseAll((out) => controller.enqueue(encoder.encode(out)));
+  };
   let responsesStream = false;
   const emitResponses = (
     events: Record<string, unknown>[],
     controller: TransformStreamDefaultController
   ) => {
     for (const event of events) {
-      controller.enqueue(
-        encoder.encode(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`)
-      );
+      write(controller, `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
     }
   };
   let sawEventLine = false;
@@ -299,20 +332,9 @@ export function createSseTextTransform(
       if (!value) continue;
       const prefix = lastPrefix || "data: ";
       const payload = typeof value === "string" ? value : JSON.stringify(value);
-      if (eventLine) {
-        controller.enqueue(encoder.encode(eventLine + "\n"));
-      }
-      controller.enqueue(encoder.encode(prefix + payload + "\n\n"));
+      if (eventLine) write(controller, eventLine + "\n");
+      write(controller, prefix + payload + "\n\n");
     }
-  };
-
-  // A metadata tail held back past the window belongs to its own field, not to the answer.
-  // Emit it once, as its own frame, after the answer flush: the live frames already carry the
-  // part sent earlier, and rewriting them would land the tail on the wrong frame.
-  const emitMetadataTailFrame = (controller: TransformStreamDefaultController) => {
-    const frame = opts?.metadataTailFrame?.();
-    if (!frame) return;
-    controller.enqueue(encoder.encode((lastPrefix || "data: ") + JSON.stringify(frame) + "\n\n"));
   };
 
   const handleLine = (line: string, controller: TransformStreamDefaultController) => {
@@ -323,10 +345,10 @@ export function createSseTextTransform(
         currentEventLine = "";
       }
       if (pendingEventLine) {
-        controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+        write(controller, pendingEventLine + "\n");
         pendingEventLine = "";
       }
-      controller.enqueue(encoder.encode(line + "\n"));
+      write(controller, line + "\n");
       return;
     }
 
@@ -343,16 +365,14 @@ export function createSseTextTransform(
             isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
             isClaudeStreamEvent(lastJson)
           );
-          emitMetadataTailFrame(controller);
           flushed = true;
-        } else {
-          emitMetadataTailFrame(controller);
         }
+        releaseHeld(controller);
         if (pendingEventLine) {
-          controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+          write(controller, pendingEventLine + "\n");
           pendingEventLine = "";
         }
-        controller.enqueue(encoder.encode(line + "\n"));
+        write(controller, line + "\n");
         return;
       }
 
@@ -367,6 +387,7 @@ export function createSseTextTransform(
 
           const isStopSignal = checkIfStopSignal(json);
           const isSnapshot = checkIfSnapshot(json);
+          frame = { json, stop: isStopSignal, snapshot: isSnapshot };
 
           // Recursively sanitize string properties, skipping recognized system metadata
           // (`classifyField` returns null for METADATA_KEYS — `provider`,
@@ -382,18 +403,16 @@ export function createSseTextTransform(
           // a label `classifyField` excludes (provider, model, id) passes through untouched,
           // as it did before the window existed.
           const redactMetadataString = (
-            val: string,
-            childPath: string,
+            holder: any,
             key: string,
+            childPath: string,
             parentKey: string,
             compositeKey: string
-          ): string => {
+          ): void => {
             metadataTouched = true;
-            if (opts?.metadataProcessor)
-              return opts.metadataProcessor(val, childPath, isStopSignal);
-            if (!IN_PLACE_METADATA_KEYS.has(key) && classifyField(key, parentKey) === null)
-              return val;
-            return processor(val, "content", false, compositeKey, true);
+            if (hold) hold.redact(holder, key, childPath, json, frame);
+            else if (IN_PLACE_METADATA_KEYS.has(key) || classifyField(key, parentKey) !== null)
+              holder[key] = processor(holder[key], "content", false, compositeKey, true);
           };
 
           const sanitizeObject = (
@@ -422,7 +441,7 @@ export function createSseTextTransform(
               if (inMetadata) {
                 const value = obj[key];
                 if (typeof value === "string")
-                  obj[key] = redactMetadataString(value, childPath, key, parentKey, compositeKey);
+                  redactMetadataString(obj, key, childPath, parentKey, compositeKey);
                 else if (typeof value === "object")
                   sanitizeObject(value, choiceIdx, toolIdx, key, true, childPath);
                 continue;
@@ -440,7 +459,7 @@ export function createSseTextTransform(
                   // and cost keys can carry a credential. They take their own window, keyed by
                   // path, so a value split across frames still redacts without joining the reply.
                   if (IN_PLACE_METADATA_KEYS.has(key))
-                    obj[key] = redactMetadataString(val, childPath, key, parentKey, compositeKey);
+                    redactMetadataString(obj, key, childPath, parentKey, compositeKey);
                   continue;
                 }
                 if (field === "toolArgs" || field === "partialJson") {
@@ -512,10 +531,10 @@ export function createSseTextTransform(
             redactClaudeFrameStrings(
               json,
               streamed,
-              (text, childPath, metadata, key) =>
-                metadata
-                  ? redactMetadataString(text, childPath, key, "", compositeKey)
-                  : processor(text, "content", false, compositeKey, true),
+              (holder, key, childPath, metadata) => {
+                if (metadata) redactMetadataString(holder, key, childPath, "", compositeKey);
+                else holder[key] = processor(holder[key], "content", false, compositeKey, true);
+              },
               typeof json.index === "number" ? `block/${json.index}` : ""
             );
             return touched;
@@ -571,11 +590,14 @@ export function createSseTextTransform(
           }
 
           lastJson = json;
+          // `message_stop` / `response.completed` end the stream for the client: what is still
+          // held goes back into its own frame first (this one included), never after them.
+          if (isTerminalEvent(json)) releaseHeld(controller);
           if (pendingEventLine) {
-            controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+            write(controller, pendingEventLine + "\n");
             pendingEventLine = "";
           }
-          controller.enqueue(encoder.encode(prefix + JSON.stringify(json) + "\n"));
+          writeFrame(controller, json, prefix);
         } catch (err: any) {
           if (err?.message?.startsWith("[PII]")) {
             throw err;
@@ -590,12 +612,12 @@ export function createSseTextTransform(
               pendingEventLine = "";
             } else {
               if (pendingEventLine) {
-                controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+                write(controller, pendingEventLine + "\n");
                 pendingEventLine = "";
               }
               // Treat segment as raw text delta (fail-open)
               const processed = processor(segment, "content");
-              controller.enqueue(encoder.encode(prefix + processed + "\n"));
+              write(controller, prefix + processed + "\n");
             }
           } else {
             throw err;
@@ -606,26 +628,24 @@ export function createSseTextTransform(
         lastEventLine = currentEventLine;
         const processed = processor(segment, "content");
         if (pendingEventLine) {
-          controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+          write(controller, pendingEventLine + "\n");
           pendingEventLine = "";
         }
-        controller.enqueue(encoder.encode(prefix + processed + "\n"));
+        write(controller, prefix + processed + "\n");
       }
     } else {
       // Non-data line, pass through (e.g. event: content_block_delta)
       if (line.startsWith("event:")) {
-        if (pendingEventLine) {
-          controller.enqueue(encoder.encode(pendingEventLine + "\n"));
-        }
+        if (pendingEventLine) write(controller, pendingEventLine + "\n");
         sawEventLine = true;
         currentEventLine = line;
         pendingEventLine = line;
       } else {
         if (pendingEventLine) {
-          controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+          write(controller, pendingEventLine + "\n");
           pendingEventLine = "";
         }
-        controller.enqueue(encoder.encode(line + "\n"));
+        write(controller, line + "\n");
       }
     }
   };
@@ -653,6 +673,7 @@ export function createSseTextTransform(
         console.error("[SSE-TRANSFORM] Error in transform:", err, "chunk:", context);
         lineBuffer = "";
         errored = true;
+        hold?.clear();
         controller.error(err);
       }
     },
@@ -664,7 +685,7 @@ export function createSseTextTransform(
           handleLine(remaining, controller);
         }
         if (pendingEventLine) {
-          controller.enqueue(encoder.encode(pendingEventLine + "\n"));
+          write(controller, pendingEventLine + "\n");
           pendingEventLine = "";
         }
         if (responsesStream) emitResponses(responses.drain(), controller);
@@ -675,16 +696,17 @@ export function createSseTextTransform(
             isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
             isClaudeStreamEvent(lastJson)
           );
-          emitMetadataTailFrame(controller);
-        } else {
-          emitMetadataTailFrame(controller);
         }
+        // End of stream without a terminal event: still hand every held tail back in place.
+        releaseHeld(controller);
       } catch (err) {
         console.error("[SSE-TRANSFORM] Error in flush:", err);
+        hold?.clear();
         controller.error(err);
       }
     },
     cancel(reason: any) {
+      hold?.clear();
       if (onCancel) {
         onCancel();
       }

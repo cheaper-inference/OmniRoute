@@ -42,6 +42,9 @@ test.after(() => {
 
 const frame = (value: unknown) => `data: ${JSON.stringify(value)}\n\n`;
 
+// An SSE event payload: a `type` plus whatever fields the protocol frame carries.
+type Typed = { type: string; [field: string]: unknown };
+
 type ParsedChunk = {
   choices?: Array<{ delta?: Record<string, unknown> } | null>;
   [field: string]: unknown;
@@ -60,6 +63,69 @@ function parsedChunks(output: string): ParsedChunk[] {
     }
   }
   return chunks;
+}
+
+type JsonObject = Record<string, unknown>;
+type SseEvent = { event: string; data: string; json: JsonObject | null };
+
+// Read a dotted path of a parsed frame ("usage.usage_evidence.note"); undefined when absent.
+function at(value: unknown, path: string): unknown {
+  let current = value;
+  for (const key of path.split(".")) {
+    if (!current || typeof current !== "object") return undefined;
+    current = (current as JsonObject)[key];
+  }
+  return current;
+}
+
+// The string at a dotted path, or "" when it is missing or not a string.
+function textAt(value: unknown, path: string): string {
+  const found = at(value, path);
+  return typeof found === "string" ? found : "";
+}
+
+// Logical SSE events (blank-line separated), parsed after the whole output is collected so
+// transport chunking never decides what counts as one event.
+function sseEvents(output: string): SseEvent[] {
+  const events: SseEvent[] = [];
+  for (const block of output.split(/\n\n+/)) {
+    let event = "";
+    const data: string[] = [];
+    for (const line of block.split("\n")) {
+      if (line.startsWith("event:")) event = line.slice(6).trim();
+      else if (line.startsWith("data:")) data.push(line.slice(5).trim());
+    }
+    if (!data.length) continue;
+    const payload = data.join("\n");
+    let json: JsonObject | null = null;
+    try {
+      json = payload === "[DONE]" ? null : JSON.parse(payload);
+    } catch {
+      json = null;
+    }
+    events.push({ event, data: payload, json });
+  }
+  return events;
+}
+
+// Every string value under any `usage_evidence` key of a frame, wherever it sits.
+function evidenceValues(value: unknown, inEvidence = false): string[] {
+  if (typeof value === "string") return inEvidence ? [value] : [];
+  if (!value || typeof value !== "object") return [];
+  const found: string[] = [];
+  for (const [key, child] of Object.entries(value)) {
+    found.push(...evidenceValues(child, inEvidence || key === "usage_evidence"));
+  }
+  return found;
+}
+
+function assertNoBarePathMap(events: SseEvent[]): void {
+  for (const { json } of events) {
+    if (!json) continue;
+    for (const key of Object.keys(json)) {
+      assert.ok(!key.includes("/"), `a bare metadata path map reached the client: ${key}`);
+    }
+  }
 }
 
 function contentOf(output: string): string {
@@ -118,6 +184,11 @@ async function runWithCredentialRedaction(chunks: string[]): Promise<string> {
       handleDisconnect: () => {},
       handleComplete: () => {},
       markClientTerminalSeen: () => {},
+      clearPendingRequest: () => {},
+      markCompletedToolHandoffSeen: () => {},
+      registerCompletedToolHandoffDrain: () => {},
+      shouldDeferCompletedToolHandoff: () => false,
+      clientDisconnectGracePeriodMs: 0,
       handleError: () => {},
       abort: () => abort.abort(),
       clientResponseFormat: "openai",
@@ -216,6 +287,26 @@ test("a credential split across two metadata frames is still masked", async () =
   assert.ok(!text.includes(key), "a credential split across metadata frames leaked");
   assert.ok(text.includes("[REDACTED"), "the split credential should be masked");
   assert.equal(contentOf(text), "SMOKE", "metadata leaked into the answer");
+
+  // Field level: no single emitted value may carry either half of the key, and the masked
+  // value must sit in a chat chunk (with its `choices` envelope) before `[DONE]`.
+  const events = sseEvents(text);
+  assertNoBarePathMap(events);
+  for (const value of events.flatMap((e) => evidenceValues(e.json))) {
+    assert.ok(!value.includes(key.slice(0, 6)), `a key fragment was emitted: ${value}`);
+    assert.ok(!value.includes(key.slice(6, 30)), `a key fragment was emitted: ${value}`);
+  }
+  const masked = events.findIndex((e) =>
+    evidenceValues(e.json).some((value) => value.includes("[REDACTED"))
+  );
+  const done = events.findIndex((e) => e.data === "[DONE]");
+  assert.ok(masked !== -1, "the masked metadata never reached a usage_evidence field");
+  assert.ok(
+    Array.isArray(at(events[masked].json, "choices")),
+    "masked metadata left its chunk envelope"
+  );
+  assert.ok(masked < done, "masked metadata was emitted after [DONE]");
+  assert.equal(done, events.length - 1, "[DONE] must stay the last event");
 });
 
 test("a credential inside usage metadata is masked and the rest of the metadata survives", async () => {
@@ -372,6 +463,35 @@ test("a credential split across two Claude frames is still masked", async () => 
   assert.ok(!text.includes(key), "a credential split across Claude frames leaked");
   assert.ok(text.includes("[REDACTED"), "the split Claude credential should be masked");
   assert.ok(text.includes("hello"), "the Claude block text should survive");
+
+  // The client reads Claude events by name: the masked value must ride a named Claude event
+  // whose name matches its type, before `message_stop`, which has to stay the final event.
+  const events = sseEvents(text);
+  assertNoBarePathMap(events);
+  const stop = events.findIndex((e) => at(e.json, "type") === "message_stop");
+  const masked = events.findIndex((e) => textAt(e.json, "usage_evidence").includes("[REDACTED"));
+  assert.ok(masked !== -1, "the masked metadata never reached a usage_evidence field");
+  assert.equal(
+    events[masked].event,
+    at(events[masked].json, "type"),
+    "masked frame lost its event name"
+  );
+  assert.ok(masked < stop, "masked metadata was emitted after message_stop");
+  for (const later of events.slice(stop + 1)) {
+    assert.equal(later.data, "[DONE]", `an event followed message_stop: ${later.data}`);
+  }
+  for (const value of events.flatMap((e) => evidenceValues(e.json))) {
+    assert.ok(!value.includes(key.slice(0, 6)), `a key fragment was emitted: ${value}`);
+    assert.ok(!value.includes(key.slice(6, 30)), `a key fragment was emitted: ${value}`);
+  }
+  const answer = events
+    .filter(
+      (e) =>
+        at(e.json, "type") === "content_block_delta" && at(e.json, "delta.type") === "text_delta"
+    )
+    .map((e) => textAt(e.json, "delta.text"))
+    .join("");
+  assert.equal(answer, "hello world");
 });
 
 test("an oversized metadata value hits the same byte limit as answer text", async () => {
@@ -518,7 +638,7 @@ test("stop-frame metadata emitted at once is not charged against the byte ceilin
 test("interleaved Responses items keep separate metadata windows", async () => {
   const { createCredentialSseTransform } =
     await import("../../src/lib/streamingCredentialTransform.ts");
-  const responses = (obj: { type: string }) => `event: ${obj.type}\n` + frame(obj);
+  const responses = (obj: Typed) => `event: ${obj.type}\n` + frame(obj);
   const out = await runTransform(createCredentialSseTransform() as TransformStream, [
     responses({
       type: "response.output_text.delta",
@@ -541,4 +661,232 @@ test("interleaved Responses items keep separate metadata windows", async () => {
     (chunk) => chunk.item_id === "msg_b" && chunk.type === "response.output_text.delta"
   );
   assert.equal(itemB?.usage_evidence, "label");
+});
+
+// ── held metadata is released inside its protocol envelope, before the terminal event ──────
+
+const SECRET = "sk-" + "ABCD".repeat(12);
+
+function maskedEventIndex(events: SseEvent[]): number {
+  return events.findIndex((e) =>
+    evidenceValues(e.json).some((value) => value.includes("[REDACTED"))
+  );
+}
+
+test("OpenAI: held usage metadata is released in its own chunk before [DONE]", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    frame({
+      id: "c1",
+      object: "chat.completion.chunk",
+      choices: [{ index: 0, delta: { content: "SMOKE" } }],
+    }),
+    // The include_usage chunk: no finish_reason, so its metadata goes through the window.
+    frame({
+      id: "c1",
+      object: "chat.completion.chunk",
+      choices: [],
+      usage: { prompt_tokens: 1, usage_evidence: { note: `seen ${SECRET}` } },
+    }),
+    "data: [DONE]\n\n",
+  ]);
+  const events = sseEvents(out);
+  assertNoBarePathMap(events);
+  assert.ok(!out.includes(SECRET), "the credential leaked");
+  const masked = maskedEventIndex(events);
+  const done = events.findIndex((e) => e.data === "[DONE]");
+  assert.ok(masked !== -1, "the masked metadata never reached its usage_evidence field");
+  const chunk = events[masked].json;
+  assert.equal(at(chunk, "object"), "chat.completion.chunk", "masked metadata left its envelope");
+  assert.ok(Array.isArray(at(chunk, "choices")), "masked metadata left its chunk envelope");
+  assert.equal(at(chunk, "usage.prompt_tokens"), 1, "the usage object around the value was lost");
+  assert.match(textAt(chunk, "usage.usage_evidence.note"), /^seen \[REDACTED/);
+  assert.ok(masked < done, "masked metadata was emitted after [DONE]");
+  assert.equal(done, events.length - 1, "[DONE] must stay the last event");
+  for (const { json } of events) {
+    if (json) assert.ok(Array.isArray(json.choices), "a non-chunk frame reached the client");
+  }
+  assert.equal(contentOf(out), "SMOKE");
+});
+
+test("Claude: held metadata is released on a named event before message_stop", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const claude = (obj: Typed) => `event: ${obj.type}\n` + frame(obj);
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    claude({
+      type: "message_start",
+      message: { id: "msg_1", type: "message", role: "assistant", content: [], usage: {} },
+    }),
+    claude({ type: "content_block_start", index: 0, content_block: { type: "text", text: "" } }),
+    claude({
+      type: "content_block_delta",
+      index: 0,
+      delta: { type: "text_delta", text: "hello" },
+      usage_evidence: `seen ${SECRET}`,
+    }),
+    claude({
+      type: "content_block_delta",
+      index: 0,
+      delta: { type: "text_delta", text: " world" },
+    }),
+    claude({ type: "content_block_stop", index: 0 }),
+    claude({
+      type: "message_delta",
+      delta: { stop_reason: "end_turn", stop_sequence: null },
+      usage: { output_tokens: 2 },
+    }),
+    claude({ type: "message_stop" }),
+  ]);
+  const events = sseEvents(out);
+  assertNoBarePathMap(events);
+  assert.ok(!out.includes(SECRET), "the credential leaked");
+  for (const e of events)
+    assert.equal(e.event, at(e.json, "type"), `unnamed or misnamed event: ${e.data}`);
+  const masked = maskedEventIndex(events);
+  const stop = events.findIndex((e) => at(e.json, "type") === "message_stop");
+  assert.ok(masked !== -1, "the masked metadata never reached its usage_evidence field");
+  assert.equal(
+    at(events[masked].json, "type"),
+    "content_block_delta",
+    "the value moved to another event"
+  );
+  assert.match(textAt(events[masked].json, "usage_evidence"), /^seen \[REDACTED/);
+  assert.ok(masked < stop, "masked metadata was emitted after message_stop");
+  assert.equal(stop, events.length - 1, "message_stop must stay the final event");
+  const answer = events
+    .filter(
+      (e) =>
+        at(e.json, "type") === "content_block_delta" && at(e.json, "delta.type") === "text_delta"
+    )
+    .map((e) => textAt(e.json, "delta.text"))
+    .join("");
+  assert.equal(answer, "hello world");
+});
+
+test("Responses: held metadata is released on its own event before response.completed", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const responses = (obj: Typed) => `event: ${obj.type}\n` + frame(obj);
+  const lane = { item_id: "msg_a", output_index: 0, content_index: 0 };
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    responses({ type: "response.created", response: { id: "resp_1", status: "in_progress" } }),
+    responses({
+      type: "response.output_text.delta",
+      ...lane,
+      delta: "hello",
+      usage_evidence: `seen ${SECRET}`,
+    }),
+    responses({ type: "response.output_text.delta", ...lane, delta: " world" }),
+    responses({ type: "response.output_text.done", ...lane, text: "hello world" }),
+    responses({
+      type: "response.completed",
+      response: { id: "resp_1", status: "completed", output: [] },
+    }),
+  ]);
+  const events = sseEvents(out);
+  assertNoBarePathMap(events);
+  assert.ok(!out.includes(SECRET), "the credential leaked");
+  for (const e of events)
+    assert.equal(e.event, at(e.json, "type"), `unnamed or misnamed event: ${e.data}`);
+  const masked = maskedEventIndex(events);
+  const completed = events.findIndex((e) => at(e.json, "type") === "response.completed");
+  assert.ok(masked !== -1, "the masked metadata never reached its usage_evidence field");
+  assert.equal(at(events[masked].json, "type"), "response.output_text.delta");
+  assert.match(textAt(events[masked].json, "usage_evidence"), /^seen \[REDACTED/);
+  assert.ok(masked < completed, "masked metadata was emitted after response.completed");
+  assert.equal(completed, events.length - 1, "response.completed must stay the final event");
+  const answer = events
+    .filter((e) => at(e.json, "type") === "response.output_text.delta")
+    .map((e) => textAt(e.json, "delta"))
+    .join("");
+  assert.equal(answer, "hello world");
+});
+
+// ── a trailing fragment that can still grow into a credential prefix is held ────────────────
+
+async function splitEvidence(first: string, second: string): Promise<string> {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  return runTransform(createCredentialSseTransform() as TransformStream, [
+    frame({ choices: [{ index: 0, delta: { content: "SMOKE" } }], usage_evidence: first }),
+    frame({ choices: [{ index: 0, delta: {} }], usage_evidence: second }),
+    "data: [DONE]\n\n",
+  ]);
+}
+
+test("a short value ending in 'sk-an' is not emitted before its continuation is known", async () => {
+  const body = "C".repeat(30);
+  const out = await splitEvidence("note sk-an", `t-api03-${body}`);
+  const events = sseEvents(out);
+  assertNoBarePathMap(events);
+  assert.ok(!out.includes(body), "the credential body leaked");
+  assert.ok(!out.includes("sk-an"), "the prefix fragment was emitted unmasked");
+  const masked = maskedEventIndex(events);
+  assert.ok(masked !== -1, "the joined credential was not masked in a usage_evidence field");
+  assert.ok(Array.isArray(at(events[masked].json, "choices")), "masked metadata left its chunk");
+  assert.equal(contentOf(out), "SMOKE");
+});
+
+test("a one-letter prefix fragment ('s') is held until the next frame resolves it", async () => {
+  const body = "B".repeat(30);
+  const out = await splitEvidence("note s", `k-ant-api03-${body}`);
+  assert.ok(!out.includes(body), "the credential body leaked past a split 's' + 'k-ant-…'");
+  const values = sseEvents(out).flatMap((e) => evidenceValues(e.json));
+  assert.ok(!values.includes("note s"), "the fragment was emitted before it was resolved");
+  assert.ok(
+    values.some((value) => value.includes("[REDACTED")),
+    "the joined key was not masked"
+  );
+  assert.equal(contentOf(out), "SMOKE");
+});
+
+test("a fragment still held at the end of the stream is released whole in its own chunk", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const out = await runTransform(createCredentialSseTransform() as TransformStream, [
+    frame({ choices: [{ index: 0, delta: { content: "SMOKE" } }], usage_evidence: "note sk-an" }),
+    "data: [DONE]\n\n",
+  ]);
+  const events = sseEvents(out);
+  assertNoBarePathMap(events);
+  assert.equal(
+    at(events[0].json, "usage_evidence"),
+    "note sk-an",
+    "the dangling value was not restored"
+  );
+  assert.equal(events.at(-1)?.data, "[DONE]");
+  assert.equal(contentOf(out), "SMOKE");
+});
+
+test("frames held behind unresolved metadata are bounded by the deferral limit", async () => {
+  const { createCredentialSseTransform } =
+    await import("../../src/lib/streamingCredentialTransform.ts");
+  const transform = createCredentialSseTransform({ maxDeferredBytes: 1024 }) as TransformStream;
+  const chunks = [
+    frame({ choices: [{ index: 0, delta: { content: "a" } }], usage_evidence: "sk-proj-" }),
+  ];
+  for (let i = 0; i < 40; i++) {
+    chunks.push(frame({ choices: [{ index: 0, delta: { content: "b".repeat(64) } }] }));
+  }
+  const writer = transform.writable.getWriter();
+  const reader = transform.readable.getReader();
+  // Consume to the end: the limit errors the stream and rejects a read; a stream that keeps
+  // queueing completes instead, which fails the assertion below.
+  const consumed = (async () => {
+    for (;;) {
+      const r = await reader.read();
+      if (r.done) return "completed";
+    }
+  })();
+  for (const chunk of chunks) {
+    await writer.write(new TextEncoder().encode(chunk)).catch(() => {
+      /* the limit error rejects the write; the assertion is on the stream error */
+    });
+  }
+  await writer.close().catch(() => {
+    /* already errored by the limit */
+  });
+  await assert.rejects(consumed, /buffer limit exceeded/);
 });
