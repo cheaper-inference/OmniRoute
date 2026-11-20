@@ -10,6 +10,11 @@
  */
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { attachOmniRouteMetaHeaders as defaultAttachMeta } from "@/domain/omnirouteResponseMeta";
+import { FORMATS } from "../../translator/formats.ts";
+import {
+  pickForwardableAnthropicAccountHeaders,
+  type AnthropicAccountHeaderPolicyKeyInfo,
+} from "./upstreamAccountHeaders.ts";
 
 export function buildNonStreamingResponseHeaders(
   args: {
@@ -22,6 +27,13 @@ export function buildNonStreamingResponseHeaders(
     compressionResponseMeta?: string | null | undefined;
     comboStrategy?: string | null | undefined;
     fallbackAttempts?: number;
+    // #20345: a Claude-format client (/v1/messages) also gets the upstream
+    // anthropic-ratelimit-* / anthropic-organization-id headers, under the
+    // requesting key's policy (upstreamAccountHeaders.ts) — the same set the
+    // streaming path forwards. Other client formats get none, as before.
+    sourceFormat?: string | null;
+    providerHeaders?: Record<string, string> | null;
+    apiKeyInfo?: AnthropicAccountHeaderPolicyKeyInfo | null;
   },
   deps: { attachOmniRouteMetaHeaders: typeof defaultAttachMeta; now: () => number } = {
     attachOmniRouteMetaHeaders: defaultAttachMeta,
@@ -29,6 +41,9 @@ export function buildNonStreamingResponseHeaders(
   }
 ): Record<string, string> {
   const responseHeaders: Record<string, string> = {
+    ...(args.sourceFormat === FORMATS.CLAUDE
+      ? pickForwardableAnthropicAccountHeaders(args.providerHeaders, args.apiKeyInfo, args.provider)
+      : {}),
     "Content-Type": "application/json",
     [OMNIROUTE_RESPONSE_HEADERS.cache]: "MISS",
   };

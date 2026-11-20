@@ -4,10 +4,11 @@
 // - Streaming: upstream headers are forwarded by assembleStreamingResponseHeaders
 //   (chatCore/streamingTail.ts), so the key's policy has to be passed there.
 // - Non-streaming: the client response headers are rebuilt from scratch by
-//   buildNonStreamingResponseHeaders (no upstream header is forwarded), so nothing
-//   leaks and nothing is stripped from the upstream Response. Stripping it would
-//   only blind the internal consumers that read the upstream headers (rate-limit
-//   learning, call logs).
+//   buildNonStreamingResponseHeaders. For a Claude-format client (/v1/messages) it
+//   copies the upstream Anthropic account headers under the same per-key policy
+//   (#20345); other client formats get none. The upstream Response itself is never
+//   stripped: that would only blind the internal consumers that read its headers
+//   (rate-limit learning, call logs).
 // - In both cases the rate-limit learner still sees the anthropic-ratelimit-*
 //   headers for a `strip` key.
 import assert from "node:assert/strict";
@@ -107,10 +108,12 @@ async function invoke({
   stream,
   connectionId,
   apiKeyInfo,
+  endpoint = "/v1/messages",
 }: {
   stream: boolean;
   connectionId: string;
   apiKeyInfo: Record<string, unknown> | null;
+  endpoint?: string;
 }) {
   globalThis.fetch = async () => {
     // Opt the connection into limit learning here: handleChatCore syncs the
@@ -136,7 +139,7 @@ async function invoke({
     credentials: { apiKey: "sk-ant-test", connectionId, providerSpecificData: {} },
     log: noopLog(),
     clientRawRequest: {
-      endpoint: "/v1/messages",
+      endpoint,
       body: structuredClone(body),
       headers: new Headers({
         accept: stream ? "text/event-stream" : "application/json",
@@ -182,13 +185,42 @@ test("streaming: a `forward` key (the default) keeps receiving them", async () =
   assert.equal(headers.get("anthropic-organization-id"), "org-anthropic-wiring");
 });
 
-test("non-streaming: the client response never carries upstream Anthropic account headers", async () => {
-  for (const [connectionId, apiKeyInfo] of [
-    ["conn-ns-strip", STRIP_KEY],
-    ["conn-ns-forward", FORWARD_KEY],
-  ] as const) {
-    const headers = await invoke({ stream: false, connectionId, apiKeyInfo });
-    assert.equal(headers.get("anthropic-ratelimit-requests-limit"), null, connectionId);
-    assert.equal(headers.get("anthropic-organization-id"), null, connectionId);
-  }
+test("non-streaming /v1/messages: a `strip` key does not receive the upstream Anthropic account headers", async () => {
+  const headers = await invoke({
+    stream: false,
+    connectionId: "conn-ns-strip",
+    apiKeyInfo: STRIP_KEY,
+  });
+  assert.equal(headers.get("anthropic-ratelimit-requests-limit"), null);
+  assert.equal(headers.get("anthropic-ratelimit-unified-5h-utilization"), null);
+  assert.equal(headers.get("anthropic-organization-id"), null);
+});
+
+test("non-streaming /v1/messages: a `forward` key receives them, like the streaming path (#20345)", async () => {
+  const headers = await invoke({
+    stream: false,
+    connectionId: "conn-ns-forward",
+    apiKeyInfo: FORWARD_KEY,
+  });
+  assert.equal(headers.get("anthropic-ratelimit-requests-limit"), "100");
+  assert.equal(headers.get("anthropic-ratelimit-requests-remaining"), "90");
+  assert.equal(headers.get("anthropic-ratelimit-unified-5h-utilization"), "42");
+  assert.equal(headers.get("anthropic-organization-id"), "org-anthropic-wiring");
+  assert.match(headers.get("content-type") || "", /application\/json/);
+});
+
+test("non-streaming /v1/messages without an API key forwards them (no-key default, as streaming)", async () => {
+  const headers = await invoke({ stream: false, connectionId: "conn-ns-nokey", apiKeyInfo: null });
+  assert.equal(headers.get("anthropic-ratelimit-requests-limit"), "100");
+});
+
+test("non-streaming non-Claude client format (/v1/chat/completions) never carries them", async () => {
+  const headers = await invoke({
+    stream: false,
+    connectionId: "conn-ns-openai",
+    apiKeyInfo: FORWARD_KEY,
+    endpoint: "/v1/chat/completions",
+  });
+  assert.equal(headers.get("anthropic-ratelimit-requests-limit"), null);
+  assert.equal(headers.get("anthropic-organization-id"), null);
 });

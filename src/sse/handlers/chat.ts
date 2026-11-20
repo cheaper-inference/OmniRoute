@@ -146,7 +146,6 @@ import {
   withModalityBridgeHeader,
   withConversationId,
 } from "./chatHelpers";
-import { forwardUpstreamRateLimitHeaders } from "./chat/upstreamRateLimitHeaders.ts";
 import { buildModalityBridgeResponseHeaders } from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
 import { type VideoBridgeLog, deriveVideoBridgeLog } from "./chat/videoBridgeLog.ts";
 import {
@@ -2469,14 +2468,9 @@ async function handleSingleModelChat(
         }
         if (telemetry) telemetry.startPhase("finalize");
         if (telemetry) telemetry.endPhase();
-        // Opt-in (CLAUDE_FORWARD_RATELIMIT_HEADERS): surface the answered
-        // provider's anthropic-ratelimit-* headers to Claude-format clients.
-        const successResponse = forwardUpstreamRateLimitHeaders(
-          withRoutingTelemetry(
-            museOwner ? muse.museRecordOutput(museOwner, result.response) : result.response,
-            credentials?.connectionId
-          ),
-          result.carry?.providerHeaders
+        const successResponse = withRoutingTelemetry(
+          museOwner ? muse.museRecordOutput(museOwner, result.response) : result.response,
+          credentials?.connectionId
         );
         if (requestBody.stream === true) {
           return inheritResponsePolicies(
