@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Drošība un transports
+
+WebDAV autentifikācija nodrošina katra IP kļūmju izsekošanu un bloķēšanu (10 neveiksmīgi mēģinājumi 60 sekunžu logā aktivizē 5 minūšu bloķēšanu ar `429 Too Many Requests` un `Retry-After`). Tā kā WebDAV pārsūta pamata autentifikācijas akreditācijas datus, ir ļoti ieteicams pārtraukt TLS (vai maršrutēšanu pa drošu tuneli, piemēram, Tailscale vai Cloudflare Tunnel), piekļūstot WebDAV galapunktam ārpus atpakaļcilpas.
+
 ### Katras API atslēgas konteksta avots (neobligāts)
 
 Obsidian konfigurācijas tvērumu var noteikt **katrai API atslēgai** atsevišķi, izmantojot tabulu `api_key_context_sources`

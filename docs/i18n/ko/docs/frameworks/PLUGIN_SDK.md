@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API 레퍼런스
+## API 참조
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-기본값이 적용된 Plugin 객체를 생성하는 팩토리 함수입니다.
+기본값으로 플러그인 객체를 생성하는 팩토리 함수입니다.
 
 **매개변수:**
 
-- `name` (string, 필수) — kebab-case 형식의 플러그인 이름
-- `priority` (number, 선택 사항, 기본값: 100) — 값이 낮을수록 먼저 실행
-- `enabled` (boolean, 선택 사항, 기본값: true) — 활성화된 상태로 시작할지 여부
-- `onRequest` (function, 선택 사항) — 채팅 핸들러 전에 실행
-- `onResponse` (function, 선택 사항) — 채팅 핸들러 후에 실행
-- `onError` (function, 선택 사항) — 핸들러 오류 발생 시 실행
+- `name` (문자열, 필수) — kebab-case의 플러그인 이름
+- `priority` (숫자, 선택 사항, 기본값: 100) — Lower가 먼저 실행됩니다.
+- `enabled` (부울, 선택 사항, 기본값: true) — 시작이 활성화됩니까?
+- `onRequest` (함수, 선택 사항) — 채팅 핸들러 이전에 실행됩니다.
+- `onResponse` (함수, 선택 사항) — 채팅 핸들러 이후에 실행됩니다.
+- `onError` (함수, 선택 사항) — 핸들러 오류 시 실행
 
 ### `blockRequest(response?): BlockingHookResult`
 
-요청을 차단하고 선택적으로 사용자 지정 응답을 반환합니다.
+요청을 차단하고 선택적으로 사용자 정의 응답을 반환합니다.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-프로바이더에 도달하기 전에 요청 본문을 수정합니다.
+공급자에게 도달하기 전에 요청 본문을 수정합니다.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-요청 컨텍스트에 메타데이터를 추가합니다.
+요청 컨텍스트에 메타데이터를 첨부합니다.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## 플러그인 컨텍스트 (`PluginContext`)
+## 플러그인 컨텍스트(`PluginContext`)
 
-| 필드        | 타입                      | 설명                   |
-| ----------- | ------------------------- | ---------------------- |
-| `requestId` | `string`                  | 고유한 요청 식별자     |
-| `model`     | `string`                  | 요청된 모델 이름       |
-| `provider`  | `string`                  | 대상 프로바이더 ID     |
-| `body`      | `Record<string, unknown>` | 요청 본문              |
-| `headers`   | `Record<string, string>`  | 요청 헤더              |
-| `metadata`  | `Record<string, unknown>` | 변경 가능한 메타데이터 |
-| `timestamp` | `number`                  | 요청 타임스탬프        |
+| 필드         | 유형                      | 설명                         |
+| ------------ | ------------------------- | ---------------------------- |
+| `requestId`  | `string`                  | 고유 요청 식별자             |
+| `model`      | `string`                  | 요청하신 모델명              |
+| `provider`   | `string`                  | 대상 제공자 ID               |
+| `body`       | `Record<string, unknown>` | 요청 본문                    |
+| `headers`    | `Record<string, string>`  | 요청 헤더(참고 참조)         |
+| `metadata`   | `Record<string, unknown>` | 변경 가능한 메타데이터       |
+| `timestamp`  | `number`                  | 요청 타임스탬프              |
+| `apiKeyInfo` | `object` (선택사항)       | API 키 메타데이터(참고 참조) |
+
+컨텍스트는 클라이언트의 자격 증명을 전달하지 않습니다. `authorization`, `x-api-key`, `proxy-authorization` 및 `cookie` 헤더는 제거되고(대소문자 관계 없음) `apiKeyInfo` 키의 메타데이터(예: `id`, `name` 및 `scopes`)를 유지하지만 키 값이나 해당 지문( `src/lib/plugins/hooks.ts` 의 `redactPluginContext()` )은 유지하지 않습니다. 이는 `onRequest`, `onResponse` 및 `onError` 에 적용됩니다.
 
 ## 매니페스트 (`plugin.json`)
 
@@ -138,19 +141,18 @@ onRequest: (ctx) => {
 }
 ```
 
-## 권한 시스템
+## 허가 시스템
 
-플러그인은 샌드박스 VM 컨텍스트에서 실행됩니다. 외부 리소스에 접근하려면 명시적인 권한이 필요합니다.
+플러그인은** 샌드박스 처리되지 않음** . 각 활성 플러그인은 VM 컨텍스트 및 Node.js 권한 플래그 없이 OmniRoute 와 동일한 운영 체제 사용자 하에서 별도의 일반 Node.js 하위 프로세스( `src/lib/plugins/loader.ts` 의 `loadPlugin()` )로 실행됩니다. 플러그인 코드는 `node:fs`, `node:child_process`, `fetch` 및 기타 모든 Node.js API 사용할 수 있습니다. OmniRoute 사용자가 할 수 있는 모든 파일(데이터 디렉토리 포함)을 읽고 쓸 수 있으며, 프로그램을 실행하고 네트워크에 연결할 수 있습니다.
 
-| 권한         | 허용 항목                                                    |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | 읽기 전용 `process.env` 프록시                               |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+매니페스트의 `requires.permissions` `network`, `file-read`, `file-write`, `env` 및 `exec` 허용하지만 현재는 `env` 만이 런타임에 영향을 미칩니다.
 
-권한이 없으면 해당 전역 항목을 샌드박스에서 사용할 수 없습니다.
+| 허가                                         | 오늘부터 적용                                                                                                                                                                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | 플러그인 프로세스는 `PORT`, `HOSTNAME`, `TZ` 및 `TMPDIR` 도 수신합니다. 이것이 없으면 `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` 및 `PLUGIN_NAME` ( Windows 의 `SystemRoot` 및 `windir` 포함)만 수신합니다. |
+| `network`, `file-read`, `file-write`, `exec` | 없음. 이는 단지 선언일 뿐입니다. 누락되면 아무것도 차단되지 않습니다.                                                                                                                                                                 |
+
+플러그인 설치는 호스트에 다른 프로그램을 설치하는 것과 같습니다. 소스를 신뢰하는 플러그인만 설치하세요.
 
 ## 구성 스키마
 
@@ -192,7 +194,7 @@ onRequest: (ctx) => {
 | `onDeactivate`    | 플러그인이 비활성화되었을 때           | `{ name, version, manifest }` |
 | `onUninstall`     | 플러그인이 제거되었을 때(파일 삭제 전) | `{ name, version, manifest }` |
 
-## 예제
+## 예
 
 ### 요청 로거
 
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### 요청 속도 제한기
+### 속도 제한기
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1분
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### 응답 변환기
+### 응답 변압기
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

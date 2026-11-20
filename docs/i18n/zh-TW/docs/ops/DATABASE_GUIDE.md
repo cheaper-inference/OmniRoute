@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **仔細回填數據**：使用`UPDATE ... WHERE ...`處理現有行
 4. **檢查順序和命名**： `npm run test:migrations:fresh` （空資料庫上的所有遷移）和`npm run check:migration-numbering`
 5. **在副本上測試**：永遠不要在生產環境中執行未經測試的遷移
+6. **從程式碼建立的表也需要遷移**：如果模組也延遲建立表（`CREATE TABLE IF NOT EXISTS`，保留為自我修復路徑），則遷移必須使用相同的DDL來建立它。否則，全新安裝和升級安裝最終會產生不同的架構，這取決於該程式碼路徑是否運作。 `tests/unit/db/lazy-table-migration-guard.test.ts`掃描`src/`和`open-sse/`並在沒有遷移的惰性`CREATE`上失敗 (#20557)。範例： `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`。
 
 例子：
 

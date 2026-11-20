@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API-referencia
+## API Referencia
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Gyári függvény, amely az alapértelmezett értékekkel létrehoz egy Plugin objektumot.
+Gyári függvény, amely létrehoz egy Plugin objektumot az alapértelmezett beállításokkal.
 
 **Paraméterek:**
 
-- `name` (string, kötelező) — A bővítmény neve kebab-case formátumban
-- `priority` (number, opcionális, alapértelmezett: 100) — Az alacsonyabb értékű fut le előbb
-- `enabled` (boolean, opcionális, alapértelmezett: true) — Engedélyezve induljon?
-- `onRequest` (function, opcionális) — A csevegéskezelő előtt fut le
-- `onResponse` (function, opcionális) — A csevegéskezelő után fut le
-- `onError` (function, opcionális) — Kezelési hiba esetén fut le
+- `name` (karakterlánc, kötelező) — Beépülő modul neve kebab-esetben
+- `priority` (szám, nem kötelező, alapértelmezett: 100) — Az alsó fut először
+- `enabled` (logikai, opcionális, alapértelmezett: igaz) — Indítás engedélyezve?
+- `onRequest` (függvény, opcionális) — A chatkezelő előtt fut
+- `onResponse` (függvény, opcionális) — A chatkezelő után fut
+- `onError` (függvény, opcionális) — Kezelő hibája esetén fut
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blokkolja a kérést, és opcionálisan egyéni választ ad vissza.
+Blokkolja a kérést, és opcionálisan küldjön vissza egyéni választ.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Módosítja a kérés törzsét, mielőtt az elérné a szolgáltatót.
+Módosítsa a kérés törzsét, mielőtt az elérné a szolgáltatót.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Metaadatokat csatol a kérés kontextusához.
+Csatolja metaadatokat a kéréskörnyezethez.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Bővítménykontextus (`PluginContext`)
+## Beépülő modul kontextusa (`PluginContext`)
 
-| Mező        | Típus                     | Leírás                       |
-| ----------- | ------------------------- | ---------------------------- |
-| `requestId` | `string`                  | A kérés egyedi azonosítója   |
-| `model`     | `string`                  | A kért modell neve           |
-| `provider`  | `string`                  | A célszolgáltató azonosítója |
-| `body`      | `Record<string, unknown>` | A kérés törzse               |
-| `headers`   | `Record<string, string>`  | A kérés fejlécei             |
-| `metadata`  | `Record<string, unknown>` | Módosítható metaadatok       |
-| `timestamp` | `number`                  | A kérés időbélyege           |
+| Mező         | Írja be                   | Leírás                                    |
+| ------------ | ------------------------- | ----------------------------------------- |
+| `requestId`  | `string`                  | Egyedi kérelemazonosító                   |
+| `model`      | `string`                  | Kért modellnév                            |
+| `provider`   | `string`                  | Célszolgáltató ID                         |
+| `body`       | `Record<string, unknown>` | Kérelem szerve                            |
+| `headers`    | `Record<string, string>`  | Kérelem fejlécek (lásd a megjegyzést)     |
+| `metadata`   | `Record<string, unknown>` | Változtatható metaadatok                  |
+| `timestamp`  | `number`                  | Időbélyeg kérése                          |
+| `apiKeyInfo` | `object` (opcionális)     | API kulcs metaadatai (lásd a megjegyzést) |
+
+A kontextus soha nem hordozza az ügyfél hitelesítő adatait: a `authorization`, `x-api-key`, `proxy-authorization` és `cookie` fejléceket eltávolítják (bármilyen kis- és nagybetűs), és `apiKeyInfo` megtartja a kulcs metaadatait (például `id`, `name` és `scopes`), de a kulcs értékét vagy ujjlenyomatát `src/lib/plugins/hooks.ts` `redactPluginContext()` nem. Ez vonatkozik `onRequest`, `onResponse` és `onError`.
 
 ## Jegyzékfájl (`plugin.json`)
 
@@ -138,19 +141,18 @@ Vagy egyszerű logikai értékekként (az alapértelmezett prioritás 100):
 }
 ```
 
-## Jogosultsági rendszer
+## Engedélyrendszer
 
-A beépülő modulok elkülönített virtuálisgép-környezetben futnak. A külső erőforrásokhoz való hozzáféréshez kifejezett jogosultságok szükségesek:
+A bővítmények azok** nem homokozó** . Minden aktív beépülő modul különálló, közönséges Node.js gyermekfolyamatként fut (`loadPlugin()` `src/lib/plugins/loader.ts`-ben) ugyanazon operációs rendszer-felhasználó alatt, mint OmniRoute, VM kontextus és Node.js engedélyjelzők nélkül. A beépülő modul használhatja `node:fs`, `node:child_process`, `fetch` és minden más Node.js API: képes olvasni és írni bármilyen fájlt, amit a OmniRoute felhasználó tud (beleértve az adatkönyvtárat is), programokat futtathat és elérheti a hálózatot.
 
-| Jogosultság  | Engedélyezett hozzáférés                                     |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Csak olvasható `process.env` proxy                           |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+A jegyzék `requires.permissions` elfogadja `network`, `file-read`, `file-write`, `env` és `exec`, de ma már csak `env` van hatása futásidőben:
 
-Jogosultság hiányában a megfelelő globális változók egyszerűen nem érhetők el az elkülönített környezetben.
+| Engedély                                     | Hatás ma                                                                                                                                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | A beépülő modul `PORT`, `HOSTNAME`, `TZ` és `TMPDIR` fájlokat is megkapja . Enélkül csak `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` és `PLUGIN_NAME` fogadja (plusz `SystemRoot` és `windir` a Windows-n). |
+| `network`, `file-read`, `file-write`, `exec` | Egyik sem. Ezek csak nyilatkozatok: semmi sincs blokkolva, ha hiányoznak.                                                                                                                                                            |
+
+A beépülő modul telepítése olyan, mint bármely más program telepítése a gazdagépen. Csak olyan bővítményeket telepítsen, amelyek forrásában megbízik.
 
 ## Konfigurációs séma
 
@@ -194,7 +196,7 @@ A konfigurációs értékek az adatbázisban maradandóan tárolódnak, és az i
 
 ## Példák
 
-### Kérésnaplózó
+### Kérjen Loggert
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Sebességkorlátozó
+### Rate Limiter
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 perc
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Válaszátalakító
+### Response Transformer
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

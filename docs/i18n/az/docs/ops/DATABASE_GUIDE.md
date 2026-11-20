@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **Məlumatları diqqətlə doldurun** : mövcud sətirləri idarə etmək üçün `UPDATE ... WHERE ...` istifadə edin
 4. **Sifarişi və adını yoxlayın** : `npm run test:migrations:fresh` (boş verilənlər bazasında bütün köçürmələr) və `npm run check:migration-numbering`
 5. **Bir nüsxədə sınaq** : istehsalda heç vaxt sınaqdan keçirilməmiş miqrasiyaları həyata keçirməyin
+6. **Koddan yaradılmış cədvəlin də miqrasiyaya ehtiyacı var** : modul da cədvəli tənbəl şəkildə yaradırsa (`CREATE TABLE IF NOT EXISTS`, özünü sağaltma yolu kimi saxlanılır), köçürmə onu eyni DDL ilə yaratmalıdır. Əks halda, təmiz quraşdırma və təkmilləşdirilmiş quraşdırma, həmin kod yolunun keçib-keçməməsindən asılı olaraq müxtəlif sxemlərlə başa çatır. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` və `open-sse/` skan edir və köçürmə olmadan tənbəl `CREATE` də uğursuz olur (#20557). Misal: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Misal:
 

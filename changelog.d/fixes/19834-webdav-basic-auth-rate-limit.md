@@ -1,0 +1,1 @@
+- **fix(webdav):** add per-IP Basic authentication failure tracking, rate limiting, and lockout (10 attempts in 60s triggers a 5-minute lockout answering 429 with `Retry-After`), along with audit failure logging and transport security guidance ([#19834](https://github.com/cheaper-inference/OmniRoute/issues/19834)).

@@ -436,7 +436,7 @@ v3.8.0 க்கு _முன்_ இறக்குமதி செய்ய�
 2. **நிரந்தரத் தீர்வு:** உங்கள் `docker run` கட்டளையில் `-p 127.0.0.1:20128:20128`-ஐப் பயன்படுத்தி IPv4-க்கு வெளிப்படையாகப் பிணைக்கவும்:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    இது IPv4 பிணைப்பைக் கட்டாயப்படுத்துவதுடன், அனைத்து ஹோஸ்ட் இடைமுகங்களிலும் ப்ராக்ஸி வெளிப்படுத்தப்படுவதையும் தவிர்க்கிறது.
 
