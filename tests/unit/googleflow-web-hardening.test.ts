@@ -15,14 +15,19 @@ import {
 import {
   generateFlowImage,
   generateFlowVideo,
+} from "../../open-sse/executors/googleflow-web/flowClient.ts";
+import {
+  flowErrorStatus,
   isFlowImageMediaUrl,
   isFlowSignedOutUrl,
   isFlowVideoMediaUrl,
   isSignedFlowVideoMediaUrl,
   mergeRotatedFlowCookies,
   persistRotatedFlowCookies,
+  readFlowAspectRatio,
   setFlowPlaywrightLoaderForTests,
-} from "../../open-sse/executors/googleflow-web/flowClient.ts";
+  toFlowCredentials,
+} from "../../open-sse/executors/googleflow-web/flowPage.ts";
 import { fetchFlowCredits } from "../../open-sse/services/usage/googleflow.ts";
 
 type FakeBrowser = FlowBrowser & { closed: number };
@@ -356,4 +361,26 @@ test("generateFlowVideo clears its generation timer when the page fails early", 
     rejections.stop();
     globalThis.fetch = originalFetch;
   }
+});
+
+// ─── Handler request helpers ────────────────────────────────────────────────
+
+test("handler helpers read the aspect ratio, cookie credentials and error status", () => {
+  assert.equal(readFlowAspectRatio({ aspect_ratio: "9:16", size: "1:1" }), "9:16");
+  assert.equal(readFlowAspectRatio({ aspectRatio: "4:3" }), "4:3");
+  assert.equal(readFlowAspectRatio({ size: "1:1" }), "1:1");
+  assert.equal(readFlowAspectRatio({ aspect_ratio: 16 }), undefined);
+
+  assert.deepEqual(toFlowCredentials({ apiKey: "__Secure-1PSID=sid", accessToken: 1 }), {
+    apiKey: "__Secure-1PSID=sid",
+    accessToken: undefined,
+  });
+  assert.deepEqual(toFlowCredentials(null), { apiKey: undefined, accessToken: undefined });
+
+  assert.equal(flowErrorStatus("Google Flow quota exhausted (3 Veo credits remaining)"), 429);
+  assert.equal(
+    flowErrorStatus("Google Flow session is expired or requires re-authentication"),
+    401
+  );
+  assert.equal(flowErrorStatus("Polling loop finished without finding video asset"), 502);
 });

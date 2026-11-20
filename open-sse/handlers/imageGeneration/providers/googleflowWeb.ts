@@ -6,6 +6,11 @@ import {
   generateFlowImage,
   normalizeImageAspectRatio,
 } from "../../../executors/googleflow-web/flowClient.ts";
+import {
+  flowErrorStatus,
+  readFlowAspectRatio,
+  toFlowCredentials,
+} from "../../../executors/googleflow-web/flowPage.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
 export interface GoogleFlowWebImageHandlerArgs {
@@ -37,22 +42,7 @@ export async function handleGoogleFlowWebImageGeneration({
       return { success: false, status: 400, error: "Prompt is required for image generation" };
     }
 
-    const rawAspect =
-      typeof body.aspect_ratio === "string"
-        ? body.aspect_ratio
-        : typeof body.aspectRatio === "string"
-          ? body.aspectRatio
-          : typeof body.size === "string"
-            ? body.size
-            : undefined;
-
-    const aspectRatio = normalizeImageAspectRatio(rawAspect);
-
-    const creds = {
-      apiKey: typeof credentials?.apiKey === "string" ? credentials.apiKey : undefined,
-      accessToken:
-        typeof credentials?.accessToken === "string" ? credentials.accessToken : undefined,
-    };
+    const aspectRatio = normalizeImageAspectRatio(readFlowAspectRatio(body));
 
     log?.info?.(
       "IMAGE",
@@ -63,36 +53,21 @@ export async function handleGoogleFlowWebImageGeneration({
       prompt,
       model,
       aspectRatio,
-      credentials: creds,
+      credentials: toFlowCredentials(credentials),
       onSessionCookieRotated,
     });
 
-    const item: Record<string, unknown> = {
-      url: result.url,
-    };
-    if (result.b64_json) {
-      item.b64_json = result.b64_json;
-    }
+    const item: Record<string, unknown> = { url: result.url };
+    if (result.b64_json) item.b64_json = result.b64_json;
 
     return {
       success: true,
-      data: {
-        created: Math.floor(Date.now() / 1000),
-        data: [item],
-      },
+      data: { created: Math.floor(Date.now() / 1000), data: [item] },
     };
   } catch (err) {
     const raw = err instanceof Error ? err.message : "";
     const message = sanitizeErrorMessage(raw || "Google Flow image generation failed");
     log?.error?.("IMAGE", `Google Flow image generation error: ${message}`);
-
-    const status =
-      message.includes("session is expired") || message.includes("re-authentication") ? 401 : 502;
-
-    return {
-      success: false,
-      status,
-      error: message,
-    };
+    return { success: false, status: flowErrorStatus(message), error: message };
   }
 }

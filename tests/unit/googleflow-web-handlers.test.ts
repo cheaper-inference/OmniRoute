@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { handleGoogleFlowWebVideoGeneration } from "../../../open-sse/handlers/videoGeneration/googleflowWebHandler.ts";
-import { handleGoogleFlowWebImageGeneration } from "../../../open-sse/handlers/imageGeneration/providers/googleflowWeb.ts";
-import { getVideoProvider, parseVideoModel } from "../../../open-sse/config/videoRegistry.ts";
+import { handleGoogleFlowWebVideoGeneration } from "../../open-sse/handlers/videoGeneration/googleflowWebHandler.ts";
+import { handleGoogleFlowWebImageGeneration } from "../../open-sse/handlers/imageGeneration/providers/googleflowWeb.ts";
+import { getVideoProvider, parseVideoModel } from "../../open-sse/config/videoRegistry.ts";
 
 test("videoRegistry: registers googleflow-web provider and its active models", () => {
   const provider = getVideoProvider("googleflow-web");

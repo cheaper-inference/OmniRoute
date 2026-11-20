@@ -68,44 +68,45 @@ export function normalizeFlowCookies(input: string): string {
   return `__Secure-1PSID=${trimmed}`;
 }
 
+/** Credits from one `["wrb.fr","nzlxg","[<balance>,...]",...]` envelope item, if it is one. */
+function creditsFromEnvelopeItem(item: unknown): GoogleFlowCreditsResult | null {
+  if (!Array.isArray(item)) return null;
+  const [marker, rpcid, payloadJson] = item;
+  if (marker !== "wrb.fr" || rpcid !== "nzlxg" || typeof payloadJson !== "string") return null;
+  const innerPayload = JSON.parse(payloadJson);
+  if (!Array.isArray(innerPayload) || typeof innerPayload[0] !== "number") return null;
+  return { credits: Math.max(0, Math.floor(innerPayload[0])), rawPayload: innerPayload };
+}
+
+/** Credits from one JSON chunk line of the batchexecute body; null for any other line. */
+function creditsFromChunkLine(line: string): GoogleFlowCreditsResult | null {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) return null;
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (!Array.isArray(parsed)) return null;
+    for (const item of parsed) {
+      const credits = creditsFromEnvelopeItem(item);
+      if (credits) return credits;
+    }
+  } catch {
+    // Ignore unparseable chunk lines
+  }
+  return null;
+}
+
 /**
  * Parses the raw batchexecute response body for the `nzlxg` RPC reply.
  */
 export function parseFlowCreditsReply(responseText: string): GoogleFlowCreditsResult {
-  let cleaned = responseText;
-  if (cleaned.startsWith(XSSI_PREFIX)) {
-    cleaned = cleaned.slice(XSSI_PREFIX.length).trim();
-  }
+  const cleaned = responseText.startsWith(XSSI_PREFIX)
+    ? responseText.slice(XSSI_PREFIX.length).trim()
+    : responseText;
 
   // Split lines / chunk markers to find JSON arrays
-  const lines = cleaned.split("\n");
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
-      continue;
-    }
-
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (!Array.isArray(parsed)) continue;
-
-      // Scan for the nzlxg response wrapper: ["wrb.fr", "nzlxg", "[...]", ...]
-      for (const item of parsed) {
-        if (!Array.isArray(item)) continue;
-        const [marker, rpcid, payloadJson] = item;
-        if (marker === "wrb.fr" && rpcid === "nzlxg" && typeof payloadJson === "string") {
-          const innerPayload = JSON.parse(payloadJson);
-          if (Array.isArray(innerPayload) && typeof innerPayload[0] === "number") {
-            return {
-              credits: Math.max(0, Math.floor(innerPayload[0])),
-              rawPayload: innerPayload,
-            };
-          }
-        }
-      }
-    } catch {
-      // Ignore unparseable chunk lines
-    }
+  for (const line of cleaned.split("\n")) {
+    const credits = creditsFromChunkLine(line);
+    if (credits) return credits;
   }
 
   // Fallback: look for regex match on balance pattern inside nzlxg block
