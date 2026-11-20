@@ -2642,7 +2642,7 @@
     "keyValidityDesc": "How long the key works. This is the expiration policy of the full policy editor.",
     "keyExpiryPresetDays": "{days} days",
     "keyExpiryEndOfDay": "Until end of day",
-    "keyExpiryEndOfDayDesc": "Whole-day validity is calculated on this device so the key ends at about 23:59 of that day in this device's time zone.",
+    "keyExpiryEndOfDayDesc": "Whole-day validity ends at about 23:59 on its last day, in this browser's time zone. Off: exactly N×24 hours after creation.",
     "managementAccess": "Management Access",
     "allowedConnections": "Allowed Connections",
     "searchPlaceholder": "Search by name or token...",

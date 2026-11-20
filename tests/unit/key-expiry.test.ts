@@ -71,6 +71,14 @@ test("alignTtlSecondsToEndOfLocalDay: whole days reach 23:59 local; anything els
   assert.equal(alignTtlSecondsToEndOfLocalDay(DAY * 1e9, now), DAY * 1e9); // aligned value is not a finite number
 });
 
+test("alignTtlSecondsToEndOfLocalDay rounds up: a sub-second clock never lands before 23:59:00", () => {
+  const now = new Date(local(2026, 11, 19, 15, 30, 20).getTime() + 400);
+  const end = endOfLocalDayAfterDays(7, now).getTime();
+  const expiresAt = now.getTime() + alignTtlSecondsToEndOfLocalDay(7 * DAY, now) * 1000;
+  assert.ok(expiresAt >= end, `expiry ${expiresAt - end} ms from 23:59:00`);
+  assert.ok(expiresAt < end + 1000, `expiry ${expiresAt - end} ms from 23:59:00`);
+});
+
 test("the validity strings exist in the English catalog", () => {
   const { apiManager } = JSON.parse(
     readFileSync(new URL("../../src/i18n/messages/en.json", import.meta.url), "utf8")

@@ -38,6 +38,6 @@ export function alignTtlSecondsToEndOfLocalDay(ttlSeconds: number, now: Date): n
   const days = wholeDaysFromTtlSeconds(ttlSeconds);
   if (days === null) return ttlSeconds;
   const end = endOfLocalDayAfterDays(days, now);
-  const aligned = Math.floor((end.getTime() - now.getTime()) / 1000);
+  const aligned = Math.ceil((end.getTime() - now.getTime()) / 1000);
   return !Number.isFinite(aligned) || aligned > MAX_TTL_SECONDS ? ttlSeconds : aligned;
 }
