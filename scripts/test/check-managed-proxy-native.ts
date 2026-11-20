@@ -9,7 +9,10 @@ import {
   type ManagedCore,
 } from "../../src/lib/services/managedProxy/config.ts";
 import { installManagedCore } from "../../src/lib/services/managedProxy/install.ts";
-import { createManagedNativeFixture } from "./managed-proxy-native-fixture.ts";
+import {
+  createManagedNativeFixture,
+  withManagedNativeFixtureCleanup,
+} from "./managed-proxy-native-fixture.ts";
 
 // CI-only official binary check; never serves an upstream or starts a core listener.
 const root = createManagedNativeFixture();
@@ -37,7 +40,7 @@ const shared = [
   "ss://YWVzLTEyOC1nY206c3ludGhldGljLXBhc3N3b3Jk@127.0.0.1:9",
   vmess,
 ];
-try {
+async function verifyNativeConfigs() {
   for (const core of ["singbox", "xray"] as ManagedCore[]) {
     const executable = await installManagedCore(core, root);
     const sources =
@@ -69,6 +72,6 @@ try {
       console.log(`Native ${core} fixture ${i + 1}/${sources.length} accepted`);
     }
   }
-} finally {
-  fs.rmSync(root, { recursive: true, force: true });
 }
+
+await withManagedNativeFixtureCleanup(root, verifyNativeConfigs);
