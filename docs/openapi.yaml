@@ -16008,7 +16008,7 @@ paths:
         Self-service quota view for the calling API key (also served at /v1/me/quota/{provider}):
         the key's position in the Quota Share pools of one provider, plus the schedule windows
         and per-model caps it is under. Off unless the `QUOTA_SELF_PANEL` feature flag is on
-        (404 otherwise). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`;
+        (a request that reaches the route gets 404 otherwise). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`;
         the key is never read from the query string or a cookie. Requires scope `self:usage`.
         Account-level readings (`total`, `accounts[].dimensions[].account`, `modelWindows`) are
         included only with scope `self:account-quota` and only for providers in the key's
@@ -16017,8 +16017,8 @@ paths:
         identified by an opaque per-key `ref`. The pool's display name and schedule labels are
         returned as the administrator wrote them. No pool id, connection id or account identity
         is returned. A key outside every pool of the provider gets 200 with `pools: []`. Every
-        response of this route carries `Cache-Control: no-store`; a refusal by the client API
-        policy or the IP filter, before the route runs, does not.
+        response of this route carries `Cache-Control: no-store`; a refusal before the route runs,
+        for example by the client API policy or the IP filter, does not.
       security:
         - BearerAuth: []
         - XApiKeyAuth: []

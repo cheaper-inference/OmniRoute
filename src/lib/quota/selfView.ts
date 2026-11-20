@@ -332,10 +332,10 @@ function allocationCap(allocation: PoolAllocation): SelfQuotaPool["cap"] {
 }
 
 /**
- * Account entries for the pool connections the key may see (`accountConnectionIds`), or null
- * when it may see none of the pool's accounts. A failed lookup is an empty list (those accounts
- * reported unavailable) and a server-side warning (the error stays in the log, never in the
- * view). Never called with an empty id list: resolveAccountQuotaEntries would read every active
+ * Account entries for the pool connections the key may see (`accountConnectionIds`). Null when
+ * the key has no account visibility for the pool. An empty list when its allowed connections
+ * exclude every pool connection, or when the lookup fails (those accounts are reported
+ * unavailable, with a server-side warning: the error stays in the log, never in the view). Never called with an empty id list: resolveAccountQuotaEntries would read every active
  * connection.
  */
 async function resolvePoolAccountEntries(

@@ -322,8 +322,8 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
   `/v1/me/status`. The pool total (`dimensions[].total`) does not depend on that list.
 - Two figures shown with `self:usage` alone come from other keys' use. A schedule budget's
   `exhausted` reflects the consumption of every key under that schedule. In a pool whose weights
-  are all zero, the key's `weight` is `100 / number of members`. Both match what enforcement
-  already tells the key.
+  are all zero, the key's `weight` is `100 / number of members`. Both are what enforcement
+  applies to the key.
 - A pool is identified only by `ref`, an opaque value bound to the calling key. Its display name
   (`name`) is included as the administrator wrote it. A `ref` is derived from the key and the
   pool with the server's API-key secret (`API_KEY_SECRET`). Clients must not persist it: it
@@ -367,8 +367,8 @@ When the quota store cannot be read, the store-backed fields of `blocks` (a sche
 ### Errors
 
 Every response of this route, success or error, carries `Cache-Control: no-store`. A refusal
-that happens before the route runs does not carry it: the client API policy's 401 and the IP
-filter's 403. Errors of the route use the standard error body with a fixed message: 400 (invalid
+that happens before the route runs does not carry it, for example the client API policy's 401
+or the IP filter's 403. Errors of the route use the standard error body with a fixed message: 400 (invalid
 provider), 401 (missing or invalid key), 403 (missing `self:usage`), 404 (flag off) and 500
 (`Failed to build quota view`). The 500 covers any failure once the request reaches the route,
 including the key lookup itself; its cause is logged on the server and never returned.

@@ -201,7 +201,11 @@ test("a key with the account scope gets the cached account bar and still no inte
   assert.deepEqual(view.dimensions[0].total, { used: 420, status: "ok" });
   const [account] = view.accounts;
   assert.equal(account.label, "Account 1");
-  assert.equal(account.dimensions[0].account.used, 37);
+  // "ok", not "stale": the seeded reading is fresh, so the lookup made no upstream refresh.
+  assert.deepEqual(
+    [account.dimensions[0].account.used, account.dimensions[0].account.status],
+    [37, "ok"]
+  );
   assertNoLeak(text, [
     pool.id,
     conn.id,

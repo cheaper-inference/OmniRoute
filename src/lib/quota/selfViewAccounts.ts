@@ -13,8 +13,8 @@
  * Account-level data (the `account` bar and `modelWindows`) comes only from the cached
  * provider-limits entries the caller passes in (`entries`); `entries === null` means the key may
  * not see account data, and those fields are omitted. They are also omitted for a pool
- * connection outside `ctx.accountConnectionIds` (one the key may not use); its entry stays. A window the cache does not report is
- * `unavailable` / `window_not_reported`, never 0. A stale cached reading, or one whose `resetAt`
+ * connection outside `ctx.accountConnectionIds` (one the key may not use); its entry stays.
+ * A window the cache does not report is `unavailable` / `window_not_reported`, never 0. A stale cached reading, or one whose `resetAt`
  * is already before `now` (the window reset since it was read), is `stale` with its numbers kept.
  *
  * Model windows are listed only for providers in PLAN_WINDOW_CACHE_KEYS, whose other cache keys
