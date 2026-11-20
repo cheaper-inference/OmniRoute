@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import type { RequestFailedPayload } from "../../src/lib/events/types.ts";
 import { DEFAULT_CODEX_CLIENT_VERSION } from "../../src/shared/constants/codexClient.ts";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const RESULT_PREFIX = "DASHBOARD_FAILURE_PROBE_RESULT=";
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
@@ -26,7 +27,7 @@ function runProbe(env: NodeJS.ProcessEnv): Promise<{ stdout: string; stderr: str
   return new Promise((resolve, reject) => {
     execFile(
       process.execPath,
-      ["--import", "tsx/esm", probePath],
+      [...nativeCoverageArgs(), "--import", "tsx/esm", probePath],
       {
         cwd: repoRoot,
         env,
