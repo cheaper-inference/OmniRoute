@@ -128,10 +128,11 @@ async function attributeAccount(
 
 /**
  * Fill the percent dimensions of a usage snapshot with the per-key numbers the
- * quota-share gate uses. The attributed number depends on the account serving
- * the request, so each percent dimension gets one `accounts` entry per pool
- * connection; its top-level `consumedTotal` and `perKey` mirror the primary
- * account (`accounts[0]`). Other dimensions pass through untouched.
+ * quota-share gate uses. Each account keeps its own attribution book, so the
+ * attributed number depends on the account serving the request: each percent
+ * dimension gets one `accounts` entry per pool connection; its top-level
+ * `consumedTotal` and `perKey` mirror the primary account (`accounts[0]`).
+ * Other dimensions pass through untouched.
  *
  * Returns a new snapshot and never throws: the attribution itself fails open.
  * `snapshot` limits must already be the effective (summed) limits.

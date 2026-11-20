@@ -5,7 +5,8 @@
  * limit by the pool's member-connection count (the same summed budget
  * enforce.ts applies), then calls poolUsageWithDimensions on the QuotaStore
  * interface. Percent dimensions are then filled with the per-key attribution
- * the quota-share gate uses, one entry per pool connection.
+ * the quota-share gate uses (each account's attribution book), one entry per
+ * pool connection.
  *
  * Auth: requireManagementAuth
  * Sanitization: all error responses via buildErrorBody (Hard Rule #12, B25)
@@ -74,7 +75,7 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
     }
 
     // 5. Percent dimensions: report, per pool connection, the per-key numbers
-    //    the quota-share gate uses (the account bar split by routed tokens).
+    //    the quota-share gate uses (the account bar split by its attribution book).
     snapshot = await withPercentAttribution(snapshot, pool, provider, store);
 
     return NextResponse.json({ usage: snapshot });

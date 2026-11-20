@@ -17,7 +17,7 @@ import type { EnforceDecision, EnforceInput, QuotaStore, RecordConsumptionInput 
 import type { ProviderPlan, QuotaUnit } from "./dimensions";
 import { dimensionKeyToString } from "./dimensions";
 import { decideFairShare } from "./fairShare";
-import { attributePercentDimension, recordPercentProxy } from "./percentAttribution";
+import { attributePercentDimension, recordPercentTokens } from "./percentAttribution";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
 import { getQuotaStore } from "./QuotaStore";
@@ -196,8 +196,8 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     globalUsedPercent: number;
   }> = [];
   const consumedByThisKey: Record<string, number> = {};
-  // Percent dimensions only: the absolute cap counts the key's own routed
-  // (internal) part, never usage made outside this proxy.
+  // Percent dimensions only: the absolute cap counts the part the attribution
+  // book charges to the key (internal), never the book's external part.
   const capConsumedByThisKey: Record<string, number> = {};
 
   for (const dim of plan.dimensions) {
@@ -213,9 +213,10 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
 
     if (dim.unit === "percent") {
       // percent (account-quota window): the saturation signal is the account
-      // consumption; this key's part of it comes from the tokens it routed
-      // (shadow bucket), and usage made outside the proxy is charged by weight
-      // only once it exceeds the capacity no allocation claims. Never throws.
+      // consumption; this key's part of it comes from the account's attribution
+      // book (rises of the figure explained by the tokens each key routed), and
+      // the book's external part is charged by weight only once it exceeds the
+      // capacity no allocation claims. Never throws.
       const effectiveLimit = dim.limit * accountCount;
       const attribution = await attributePercentDimension({
         store,
@@ -369,10 +370,12 @@ export async function recordConsumption(input: RecordConsumptionInput): Promise<
         // Fail-open per B29 — drift expected; teto global do fetcher corrige
       });
     }
-    // percent: the account bar is read upstream, so record this key's routed
-    // tokens in the shadow bucket that attributes that bar per key.
-    if (dim.unit === "percent") await recordPercentProxy(store, input.apiKeyId, dimKey, input.cost);
   }
+  // percent: the account bar is read upstream, so record this key's routed
+  // tokens once per request for the attribution books of the plan's percent
+  // dimensions on this connection. Never throws.
+  const ledgerTarget = { poolId, connectionId: input.connectionId, apiKeyId: input.apiKeyId };
+  await recordPercentTokens(store, ledgerTarget, plan.dimensions, input.cost);
 
   // Per-(key, model) consumption tracking (Fase 3 #7).
   // When the caller provides a model name, increment the model-scoped bucket so

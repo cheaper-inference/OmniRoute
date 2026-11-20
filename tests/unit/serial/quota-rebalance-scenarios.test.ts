@@ -3,19 +3,22 @@
  *
  * Characterization of how a percent-plan pool behaves when its shares change:
  *   1. Rebalancing mid-window is retroactive: the new weights apply to the
- *      tokens already routed in the window.
+ *      parts already attributed in the window.
  *   2. Integer weights that do not sum to 100 strand the remainder; all-zero
  *      weights are normalized to an equal split that sums to 100.
- *   3. Usage made before the pool existed has no routed tokens behind it, so
- *      it is split by weight; a full account bar still blocks as saturated.
+ *   3. Usage made before the pool existed is on the bar when the book opens,
+ *      so it is external and split by weight; a full account bar still blocks
+ *      as saturated.
+ *   4. A key removed mid-window keeps its attributed part until the provider
+ *      window turns; nobody else is charged for it.
  */
 
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { PoolAllocation } from "../../../src/lib/db/quotaPools.ts";
+import type { PoolAllocation, QuotaPool } from "../../../src/lib/db/quotaPools.ts";
 import type { EnforceDecision } from "../../../src/lib/quota/types.ts";
 
 // ── Set DATA_DIR BEFORE any DB import (resolved as module-level constant) ───
@@ -26,10 +29,13 @@ const providerPlans = await import("../../../src/lib/db/providerPlans.ts");
 const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
 const { enforceQuotaShare, recordConsumption } = await import("../../../src/lib/quota/enforce.ts");
 const { decideFairShare } = await import("../../../src/lib/quota/fairShare.ts");
+const { attributePercentDimension } = await import("../../../src/lib/quota/percentAttribution.ts");
+const { SqliteQuotaStore } = await import("../../../src/lib/quota/sqliteQuotaStore.ts");
 const sat = await import("../../../src/lib/quota/saturationSignals.ts");
 const core = await import("../../../src/lib/db/core.ts");
 
 test.after(() => {
+  mock.timers.reset();
   sat.__setAnthropicSaturationDepsForTests(null);
   sat._clearSaturationCache();
   core.resetDbInstance();
@@ -75,6 +81,21 @@ const ask = (conn: string, key: string) =>
   enforceQuotaShare({ apiKeyId: key, connectionId: conn, provider: PROV });
 
 const reason = (d: EnforceDecision) => (d.kind === "block" ? d.reason : "");
+const near = (a: number | undefined, b: number) =>
+  assert.ok(a !== undefined && Math.abs(a - b) < 1e-6, `${a} ≈ ${b}`);
+
+/** The attribution the gate uses on this pool's connection (SQLite store, 5h, limit 100). */
+function attribute(conn: string, poolId: string) {
+  const pool: QuotaPool | null = quotaPools.getPool(poolId);
+  assert.ok(pool, `pool ${poolId}`);
+  return attributePercentDimension({
+    store: new SqliteQuotaStore(),
+    pool,
+    connectionId: conn,
+    provider: PROV,
+    dimension: { window: "5h", limit: 100 },
+  });
+}
 
 await test("quota-rebalance-scenarios", async (t) => {
   await t.test("rebalancing mid-window is retroactive", async () => {
@@ -84,10 +105,12 @@ await test("quota-rebalance-scenarios", async (t) => {
       { apiKeyId: "b", weight: 25, policy: "hard" },
       { apiKeyId: "c", weight: 25, policy: "hard" },
     ]);
-    mockUsage({ [S1]: { fiveHour: 60 } });
+    mockUsage({ [S1]: { fiveHour: 0 } });
+    await ask(S1, "a"); // opens the book at 0
     await burn(S1, "a", 700_000);
     await burn(S1, "b", 200_000);
     await burn(S1, "c", 100_000);
+    mockUsage({ [S1]: { fiveHour: 60 } });
 
     assert.equal((await ask(S1, "a")).kind, "allow"); // 42 < 50
     quotaPools.upsertAllocations(pool.id, hard(["a", "b", "c", "d"], 25));
@@ -133,10 +156,46 @@ await test("quota-rebalance-scenarios", async (t) => {
     const S3 = "conn-rebalance-3";
     makePool(S3, "5h", hard(["a", "b"], 50));
     mockUsage({ [S3]: { fiveHour: 80 } });
-    for (const k of ["a", "b"]) assert.equal((await ask(S3, k)).kind, "allow"); // 40 < 50
+    for (const k of ["a", "b"]) assert.equal((await ask(S3, k)).kind, "allow"); // 40 < 50 (external)
     mockUsage({ [S3]: { fiveHour: 100 } });
     const full = await ask(S3, "a");
     assert.equal(full.kind, "block");
     assert.match(reason(full), /saturated/i);
+  });
+
+  await t.test("a key removed mid-window keeps its part and nobody else pays for it", async () => {
+    mock.timers.enable({ apis: ["Date"], now: Date.now() });
+    try {
+      const S4 = "conn-rebalance-4";
+      const pool = makePool(S4, "5h", [
+        { apiKeyId: "a", weight: 40, policy: "hard" },
+        { apiKeyId: "b", weight: 30, policy: "hard" },
+        { apiKeyId: "c", weight: 30, policy: "hard" },
+      ]);
+      mockUsage({ [S4]: { fiveHour: 0 } });
+      await ask(S4, "a"); // opens the book at 0
+      await burn(S4, "a", 420_000);
+      await burn(S4, "b", 120_000);
+      await burn(S4, "c", 60_000);
+      mockUsage({ [S4]: { fiveHour: 60 } });
+      quotaPools.upsertAllocations(pool.id, [
+        { apiKeyId: "b", weight: 30, policy: "hard" },
+        { apiKeyId: "c", weight: 30, policy: "hard" },
+      ]);
+      let att = await attribute(S4, pool.id);
+      near(att.internal, 60); // a's 42 stays in the book
+      assert.deepEqual(Object.keys(att.consumedByKey).sort(), ["b", "c"]);
+      near(att.consumedByKey.b, 12);
+      near(att.consumedByKey.c, 6);
+      assert.equal((await ask(S4, "b")).kind, "allow");
+
+      mock.timers.tick(3 * 60_000);
+      mockUsage({ [S4]: { fiveHour: 5 } });
+      att = await attribute(S4, pool.id); // the window turned and the removed key's part is gone
+      near(att.internal, 0);
+      near(att.external, 5);
+    } finally {
+      mock.timers.reset();
+    }
   });
 });

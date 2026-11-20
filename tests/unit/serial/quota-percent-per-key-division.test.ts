@@ -2,11 +2,13 @@
  * tests/unit/serial/quota-percent-per-key-division.test.ts
  *
  * Percent plans report only how full the whole account is. The quota-share
- * gate must still give each pool member its own share of that number: the
- * account consumption is split by the tokens each key routed through the proxy.
+ * gate must still give each pool member its own share of that number: a rise
+ * of the account figure is charged to the keys by the tokens each one routed
+ * through the proxy since the book last saw the figure.
  *
- * Scenario: 5h window, two hard keys at 50/50, account at 60%, key a routed
- * 900k tokens and key b 100k. Attributed: a = 54, b = 6 (strict mode, 60 ≥ 50).
+ * Scenario: 5h window, two hard keys at 50/50, the book opened at 0, key a
+ * routed 900k tokens and key b 100k, then the account at 60%. Attributed:
+ * a = 54, b = 6 (strict mode, 60 ≥ 50).
  */
 
 import test from "node:test";
@@ -75,9 +77,11 @@ await test("quota-percent-per-key-division", async (t) => {
   await t.test("a 50/50 pool blocks the heavy key and keeps the light key open", async () => {
     const C = "conn-percent-division";
     makePool(C, "5h", hard(["a", "b"], 50));
-    mockUsage({ [C]: { fiveHour: 60 } });
+    mockUsage({ [C]: { fiveHour: 0 } });
+    assert.equal((await ask(C, "a")).kind, "allow"); // opens the book at 0
     await burn(C, "a", 900_000);
     await burn(C, "b", 100_000);
+    mockUsage({ [C]: { fiveHour: 60 } });
 
     assert.equal((await ask(C, "a")).kind, "block"); // 54 ≥ 50
     assert.equal((await ask(C, "b")).kind, "allow"); // 6 < 50

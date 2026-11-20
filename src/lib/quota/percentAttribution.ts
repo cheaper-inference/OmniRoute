@@ -2,93 +2,61 @@
  * percentAttribution.ts — per-key attribution for percent-plan dimensions.
  *
  * Percent plans (Claude, Codex, Bailian) only report how full the whole
- * account is. To give each pool member a share of that number, the tokens
- * every key routes are recorded in a per-key shadow bucket
- * (`<poolId>:percent-proxy`, unit `tokens`, same window), and the account
- * consumption is split in two:
+ * account is. Each (pool, connection, plan window) keeps an attribution book
+ * (percentLedger.ts) that follows the observed changes of that figure: a rise
+ * is charged to the keys whose recorded tokens can explain it, and the rest is
+ * external (usage nobody routed through this pool). Every attribution applies
+ * the current plan-window reading to the book, then reports:
  *
- *   - internal: the part the routed tokens can explain, shared by token volume;
- *   - external: the rest (usage made outside this proxy). It first uses the
- *     capacity no allocation claims, and only the excess is shared by weight.
+ *   - internal: the parts the book attributes to API keys;
+ *   - external: the book's external part. It first uses the capacity no
+ *     allocation claims, and only the excess is shared by weight.
+ *
+ * A provider without a plan-window reading has no book: nothing is attributed.
  */
 
-import type { DimensionKey, QuotaWindow } from "./dimensions";
-import { getSaturation } from "./saturationSignals";
-import type { QuotaStore, RecordConsumptionInput } from "./types";
+import type { QuotaUnit, QuotaWindow } from "./dimensions";
+import { observeLedger } from "./percentLedger";
+import { getPlanWindowReading, getSaturation } from "./saturationSignals";
+import type { LedgerState, PlanWindowReading, QuotaStore, RecordConsumptionInput } from "./types";
 
 /** Floor: tokens needed to explain one unit (one percent point) of the dimension. */
 export const DEFAULT_MIN_TOKENS_PER_PCT = 1000;
-
-const PROXY_SUFFIX = ":percent-proxy";
-
-/** Shadow bucket that holds the tokens each key routed for a percent dimension. */
-export function percentProxyDimKey(dim: DimensionKey): DimensionKey {
-  return { poolId: `${dim.poolId}${PROXY_SUFFIX}`, unit: "tokens", window: dim.window };
-}
-
-export interface SplitAccountPercentInput {
-  /** Shadow-bucket tokens per member, in allocation order. */
-  perKeyTokens: number[];
-  /** Account consumption, in the dimension's units. */
-  accountConsumed: number;
-  /** Effective limit of the dimension. */
-  limit: number;
-  /** Same order as perKeyTokens; absent, empty or all-zero → 100/n each. */
-  weights?: number[];
-  /** Pool token total read from the store; defaults to (and is floored at) Σ perKeyTokens. */
-  poolTokens?: number;
-  /** Defaults to DEFAULT_MIN_TOKENS_PER_PCT. */
-  minTokensPerPct?: number;
-}
-
-/** perKey = internal part + external charge; perKeyInternal = only each member's internal part. */
-export interface SplitAccountPercentResult {
-  perKey: number[];
-  perKeyInternal: number[];
-  internal: number;
-  external: number;
-  externalCharged: number;
-}
 
 /** Non-finite or non-positive values count as 0. */
 function positiveOrZero(value: number | undefined): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
 }
 
-function resolveWeights(n: number, weights: number[] | undefined): number[] {
-  const sanitized = Array.from({ length: n }, (_, i) => positiveOrZero(weights?.[i]));
+/** Sanitized weights; when none is positive, every member counts as 100 / n. */
+function resolveWeights(weights: number[]): number[] {
+  const sanitized = weights.map(positiveOrZero);
   const total = sanitized.reduce((a, b) => a + b, 0);
-  return total > 0 ? sanitized : sanitized.map(() => 100 / n);
+  return total > 0 ? sanitized : sanitized.map(() => 100 / weights.length);
 }
 
-export function splitAccountPercent(input: SplitAccountPercentInput): SplitAccountPercentResult {
-  const tokens = input.perKeyTokens.map(positiveOrZero);
-  const n = tokens.length;
-  const sumTokens = tokens.reduce((a, b) => a + b, 0);
-  const poolTokens = Math.max(positiveOrZero(input.poolTokens), sumTokens);
-  const weights = resolveWeights(n, input.weights);
+/**
+ * External-usage rule: unallocated capacity first, the excess by normalized weight; all-zero
+ * weights split equally. `external` and `limit` are in the dimension's units; `perKey` follows
+ * the order of `weights`.
+ */
+export function splitExternalUsage(input: { external: number; limit: number; weights: number[] }): {
+  externalCharged: number;
+  perKey: number[];
+} {
+  const weights = resolveWeights(input.weights);
   const totalWeight = weights.reduce((a, b) => a + b, 0);
-  const accountConsumed = positiveOrZero(input.accountConsumed);
-  const limit = positiveOrZero(input.limit);
-  const minTokensPerPct = positiveOrZero(input.minTokensPerPct) || DEFAULT_MIN_TOKENS_PER_PCT;
-
-  const internal = Math.min(accountConsumed, poolTokens / minTokensPerPct);
-  const external = accountConsumed - internal;
-  const unallocated = (Math.max(0, 100 - totalWeight) / 100) * limit;
-  const externalCharged = Math.max(0, external - unallocated);
-
-  const perKeyInternal = tokens.map((t) => (poolTokens > 0 ? (internal * t) / poolTokens : 0));
-  const perKey = perKeyInternal.map(
-    (part, i) => part + (totalWeight > 0 ? (externalCharged * weights[i]) / totalWeight : 0)
-  );
-  return { perKey, perKeyInternal, internal, external, externalCharged };
+  const unallocated = (Math.max(0, 100 - totalWeight) / 100) * positiveOrZero(input.limit);
+  const externalCharged = Math.max(0, positiveOrZero(input.external) - unallocated);
+  const perKey = weights.map((w) => (totalWeight > 0 ? (externalCharged * w) / totalWeight : 0));
+  return { externalCharged, perKey };
 }
 
 // ---------------------------------------------------------------------------
 // Store-facing wrapper
 // ---------------------------------------------------------------------------
 
-export type PercentAttributionStore = Pick<QuotaStore, "peek" | "poolConsumedTotal">;
+export type PercentAttributionStore = Pick<QuotaStore, "ledgerRead" | "ledgerCommit">;
 
 export interface AttributePercentDimensionInput {
   store: PercentAttributionStore;
@@ -104,15 +72,23 @@ export interface AttributePercentDimensionInput {
 }
 
 export interface PercentAttribution {
+  /** Account usage of the window, 0..1, as getSaturation reports it. */
   globalUsedPercent: number;
   limit: number;
+  /** globalUsedPercent × limit. */
   accountConsumed: number;
+  /** Parts the book attributes to API keys (including keys that left the pool) × limit. */
   internal: number;
+  /**
+   * The book's external part × limit. The book stays at its last applied reading when there is
+   * no usable one, so internal + external can differ from accountConsumed.
+   */
   external: number;
+  /** The part of `external` left once the unallocated capacity is used. */
   externalCharged: number;
-  /** Only the requested keys that belong to the pool. */
+  /** Only the requested keys that belong to the pool: internal part + external charge. */
   consumedByKey: Record<string, number>;
-  /** Same keys; only the internal part (the base of the absolute cap). */
+  /** Same keys; only the part the book attributes to the key (the base of the absolute cap). */
   internalByKey: Record<string, number>;
 }
 
@@ -129,77 +105,78 @@ async function readAccountSaturation(
   }
 }
 
-/**
- * Read the shadow tokens of the requested keys and the pool token total in a
- * single batch. Any rejected read zeroes the whole batch, so the split falls
- * back to external-only (weight) attribution for this call.
- */
-async function readShadowTokens(
-  store: PercentAttributionStore,
-  poolId: string,
-  proxyKey: DimensionKey,
-  requestedKeys: string[]
-): Promise<{ tokensByKey: Map<string, number>; poolTokens: number }> {
+async function readPlanWindow(
+  connectionId: string,
+  provider: string,
+  window: QuotaWindow
+): Promise<PlanWindowReading | null> {
   try {
-    const [perKey, poolTokens] = await Promise.all([
-      Promise.all(requestedKeys.map((k) => store.peek(k, proxyKey))),
-      store.poolConsumedTotal(poolId, proxyKey),
-    ]);
-    return { tokensByKey: new Map(requestedKeys.map((k, i) => [k, perKey[i]])), poolTokens };
+    return await getPlanWindowReading(connectionId, provider, { unit: "percent", window });
   } catch {
-    // Fail-open, silently: this runs on every request, and a store outage
-    // would otherwise log once per call. No tokens → external-only split.
-    return { tokensByKey: new Map(), poolTokens: 0 };
+    return null;
+  }
+}
+
+/** Apply the reading to the book; null when there is no book. Fail-open, silently. */
+async function observeBook(
+  input: AttributePercentDimensionInput,
+  reading: PlanWindowReading | null
+): Promise<LedgerState | null> {
+  try {
+    return await observeLedger(
+      input.store,
+      { poolId: input.pool.id, connectionId: input.connectionId, window: input.dimension.window },
+      reading,
+      Date.now(),
+      positiveOrZero(input.minTokensPerPct) || DEFAULT_MIN_TOKENS_PER_PCT
+    );
+  } catch {
+    return null;
   }
 }
 
 /**
  * Attribute a percent dimension of one account across the pool's keys. Never
- * throws: a failed saturation signal reads as 0 and a failed store read as no
- * tokens.
+ * throws: a failed saturation signal reads as 0, a missing plan-window reading
+ * leaves the book as it is, and a failed store read attributes nothing.
  */
 export async function attributePercentDimension(
   input: AttributePercentDimensionInput
 ): Promise<PercentAttribution> {
-  const { store, pool, dimension } = input;
-  const proxyKey = percentProxyDimKey({
-    poolId: pool.id,
-    unit: "percent",
-    window: dimension.window,
-  });
-  const wanted = new Set(input.apiKeyIds ?? pool.allocations.map((a) => a.apiKeyId));
-  const requested = pool.allocations.filter((a) => wanted.has(a.apiKeyId)).map((a) => a.apiKeyId);
-
-  const [globalUsedPercent, shadow] = await Promise.all([
-    readAccountSaturation(input.connectionId, input.provider, dimension.window),
-    readShadowTokens(store, pool.id, proxyKey, requested),
+  const { pool, dimension, connectionId, provider } = input;
+  // Same cache entry: one provider read serves both.
+  const [globalUsedPercent, reading] = await Promise.all([
+    readAccountSaturation(connectionId, provider, dimension.window),
+    readPlanWindow(connectionId, provider, dimension.window),
   ]);
-  const limit = positiveOrZero(dimension.limit);
-  const accountConsumed = globalUsedPercent * limit;
+  const state = await observeBook(input, reading);
 
-  const split = splitAccountPercent({
-    perKeyTokens: pool.allocations.map((a) => shadow.tokensByKey.get(a.apiKeyId) ?? 0),
-    weights: pool.allocations.map((a) => a.weight),
-    accountConsumed,
+  const limit = positiveOrZero(dimension.limit);
+  const keys = state?.keys ?? {};
+  const internal = Object.values(keys).reduce((sum, k) => sum + k.attributed, 0) * limit;
+  const external = (state?.external ?? 0) * limit;
+  const split = splitExternalUsage({
+    external,
     limit,
-    poolTokens: shadow.poolTokens,
-    minTokensPerPct: input.minTokensPerPct,
+    weights: pool.allocations.map((a) => a.weight),
   });
 
+  const wanted = new Set(input.apiKeyIds ?? pool.allocations.map((a) => a.apiKeyId));
   const consumedByKey: Record<string, number> = {};
   const internalByKey: Record<string, number> = {};
   pool.allocations.forEach((a, i) => {
     if (!wanted.has(a.apiKeyId)) return;
-    consumedByKey[a.apiKeyId] = split.perKey[i];
-    internalByKey[a.apiKeyId] = split.perKeyInternal[i];
+    const own = (keys[a.apiKeyId]?.attributed ?? 0) * limit;
+    internalByKey[a.apiKeyId] = own;
+    consumedByKey[a.apiKeyId] = own + split.perKey[i];
   });
 
   return {
     globalUsedPercent,
     limit,
-    accountConsumed,
-    internal: split.internal,
-    external: split.external,
+    accountConsumed: globalUsedPercent * limit,
+    internal,
+    external,
     externalCharged: split.externalCharged,
     consumedByKey,
     internalByKey,
@@ -207,22 +184,30 @@ export async function attributePercentDimension(
 }
 
 /**
- * Record the tokens a request routed into the key's shadow bucket for a
- * percent dimension. Costs without usable tokens write nothing; store errors
- * are swallowed (attribution never blocks the request path).
+ * Record the tokens a request routed on one pool connection, once per request,
+ * for the attribution books of its percent dimensions. Costs without usable
+ * tokens, and plans without a usable percent dimension, write nothing; store
+ * errors are swallowed (attribution never blocks the request path).
  */
-export async function recordPercentProxy(
-  store: Pick<QuotaStore, "consume">,
-  apiKeyId: string,
-  dimKey: DimensionKey,
+export async function recordPercentTokens(
+  store: Pick<QuotaStore, "ledgerRecordTokens">,
+  target: { poolId: string; connectionId: string; apiKeyId: string },
+  dimensions: Array<{ unit: QuotaUnit; limit: number }>,
   cost: RecordConsumptionInput["cost"]
 ): Promise<void> {
   const tokens = positiveOrZero(cost?.tokens);
   if (tokens === 0) return;
+  if (!dimensions.some((d) => d.unit === "percent" && d.limit > Number.EPSILON)) return;
   try {
-    await store.consume(apiKeyId, percentProxyDimKey(dimKey), tokens);
+    await store.ledgerRecordTokens(
+      target.poolId,
+      target.connectionId,
+      target.apiKeyId,
+      tokens,
+      Date.now()
+    );
   } catch {
-    // Fail-open, silently: a missed shadow write only under-attributes this
-    // request, and logging it per request would flood the log during an outage.
+    // Fail-open, silently: a missed write only under-attributes this request,
+    // and logging it per request would flood the log during an outage.
   }
 }

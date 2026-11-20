@@ -1,5 +1,10 @@
 /**
  * #19904 — Quota Share must attribute `percent` plans (Claude/Codex) per API key.
+ *
+ * Five keys of weight 20 on the default Claude plan (5h and weekly percent windows). The book of
+ * each window opens on the first quota-share check; a later rise of the account figure is charged
+ * to the keys whose routed tokens explain it, so the heavy key reaches its share and the light
+ * keys stay free.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -28,6 +33,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
+/** The account's 5h figure (percent); the weekly window stays at 10. */
 function setSaturation(connId: string, fiveHourUsed: number) {
   sat.__setAnthropicSaturationDepsForTests({
     loadConnection: async () => ({ id: connId, accessToken: "tok", authType: "oauth" }),
@@ -41,7 +47,7 @@ function setSaturation(connId: string, fiveHourUsed: number) {
   sat._clearSaturationCache();
 }
 
-async function setup(conn: string, policy: "hard" | "soft") {
+function setup(conn: string, policy: "hard" | "soft") {
   assert.ok(
     resolvePlan(conn, PROVIDER).dimensions.every((d) => d.unit === "percent"),
     "precondition: percent-only plan"
@@ -51,7 +57,6 @@ async function setup(conn: string, policy: "hard" | "soft") {
     name: `19904-${conn}`,
     allocations: KEYS.map((k) => ({ apiKeyId: k, weight: 20, policy })),
   });
-  setSaturation(conn, 80);
 }
 
 async function burn(conn: string, key: string, n: number) {
@@ -68,38 +73,45 @@ async function burn(conn: string, key: string, n: number) {
 const ask = (conn: string, key: string) =>
   enforceQuotaShare({ apiKeyId: key, connectionId: conn, provider: PROVIDER, estimatedCost: {} });
 
-test("hard: heavy key above its share is blocked at >50% saturation; light key stays allowed", async () => {
-  const conn = "conn-19904-hard";
-  await setup(conn, "hard");
+/** Open both books at an empty 5h window, route 1M tokens on k1 and 50k on k2, then 80%. */
+async function heavyKeyScenario(conn: string, policy: "hard" | "soft") {
+  setup(conn, policy);
+  setSaturation(conn, 0);
+  assert.equal((await ask(conn, "k1")).kind, "allow"); // opens both books
   await burn(conn, "k1", 20);
   await burn(conn, "k2", 1);
-  const heavy = await ask(conn, "k1");
-  assert.equal(heavy.kind, "block");
-  const light = await ask(conn, "k3");
-  assert.equal(light.kind, "allow");
+  setSaturation(conn, 80);
+}
+
+test("hard: heavy key above its share is blocked at >50% saturation; light key stays allowed", async () => {
+  const conn = "conn-19904-hard";
+  await heavyKeyScenario(conn, "hard");
+  assert.equal((await ask(conn, "k1")).kind, "block"); // 80 × 1_000_000/1_050_000 = 76.2 ≥ 20
+  assert.equal((await ask(conn, "k3")).kind, "allow"); // 0
+  assert.equal((await ask(conn, "k2")).kind, "allow"); // 3.8
 });
 
 test("soft: heavy key is deprioritized, not blocked", async () => {
   const conn = "conn-19904-soft";
-  await setup(conn, "soft");
-  await burn(conn, "k1", 20);
+  await heavyKeyScenario(conn, "soft");
   const d = await ask(conn, "k1");
   assert.equal(d.kind, "allow");
   assert.equal((d as { deprioritize?: boolean }).deprioritize, true);
 });
 
-test("no proxy data yet: behaviour unchanged (allow)", async () => {
+test("usage already on the bar when the pool starts blocks nobody", async () => {
   const conn = "conn-19904-empty";
-  await setup(conn, "hard");
-  const d = await ask(conn, "k1");
-  assert.equal(d.kind, "allow");
+  setup(conn, "hard");
+  setSaturation(conn, 80);
+  for (const k of KEYS) assert.equal((await ask(conn, k)).kind, "allow"); // 16 < 20 each
 });
 
 test("below saturation threshold the heavy key is not blocked", async () => {
   const conn = "conn-19904-low";
-  await setup(conn, "hard");
-  setSaturation(conn, 20);
+  setup(conn, "hard");
+  setSaturation(conn, 0);
+  await ask(conn, "k1"); // opens both books
   await burn(conn, "k1", 20);
-  const d = await ask(conn, "k1");
-  assert.equal(d.kind, "allow");
+  setSaturation(conn, 20);
+  assert.equal((await ask(conn, "k1")).kind, "allow"); // 20 attributed, generous mode
 });

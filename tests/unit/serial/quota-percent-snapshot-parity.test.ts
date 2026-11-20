@@ -8,9 +8,10 @@
  * that connection.
  *
  * Scenario: 5h window, manual plan of 100 on the primary connection X, a pool
- * over [X, Y] (effective limit 200), two hard keys at 50/50 (fair share 100),
- * X at 60% (120), Y at 50% (100), key a routed 900k tokens and key b 100k.
- * Attributed: a = 108 on X and 90 on Y; b = 12 on X and 10 on Y.
+ * over [X, Y] (effective limit 200), two hard keys at 50/50 (fair share 100).
+ * Each account has its own book, opened at 0. On X key a routed 900k tokens and
+ * key b 100k; on Y only key b routed, 300k. Both accounts then at 60% (120).
+ * Attributed: a = 108 on X and 0 on Y; b = 12 on X and 120 on Y.
  */
 
 import test from "node:test";
@@ -20,6 +21,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PoolAllocation } from "../../../src/lib/db/quotaPools.ts";
+import type { PoolUsageAccount, PoolUsagePerKey } from "../../../src/lib/quota/types.ts";
 
 // ── Set DATA_DIR BEFORE any DB import (resolved as module-level constant) ───
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-snapshot-"));
@@ -80,7 +82,16 @@ const burn = (conn: string, key: string, tokens: number) =>
 const ask = (conn: string, key: string) =>
   enforceQuotaShare({ apiKeyId: key, connectionId: conn, provider: PROV });
 
+const kind = async (conn: string, key: string) => (await ask(conn, key)).kind;
+
 const near = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-6, `${a} ≈ ${b}`);
+
+/** The per-key entry of one account. */
+function key(account: PoolUsageAccount, id: string): PoolUsagePerKey {
+  const entry = account.perKey.find((k) => k.apiKeyId === id);
+  assert.ok(entry, `${account.connectionId}/${id}`);
+  return entry;
+}
 
 // ── Scenario setup (all top-level awaits stay above the first test()) ───────
 const X = "conn-parity-x";
@@ -92,9 +103,13 @@ const pool = quotaPools.createPool({
   name: "parity",
   allocations: hard(["a", "b"], 50),
 });
-mockUsage({ [X]: { fiveHour: 60 }, [Y]: { fiveHour: 50 } });
+mockUsage({ [X]: { fiveHour: 0 }, [Y]: { fiveHour: 0 } });
+await ask(X, "a"); // opens the book of account X at 0
+await ask(Y, "a"); // opens the book of account Y at 0
 await burn(X, "a", 900_000);
 await burn(X, "b", 100_000);
+await burn(Y, "b", 300_000);
+mockUsage({ [X]: { fiveHour: 60 }, [Y]: { fiveHour: 60 } });
 
 test("the usage snapshot shows, per account, the number enforcement uses", async () => {
   const store = new SqliteQuotaStore();
@@ -105,17 +120,20 @@ test("the usage snapshot shows, per account, the number enforcement uses", async
   const [x, y] = snap.dimensions[0].accounts ?? [];
   assert.deepEqual([x.connectionId, y.connectionId], [X, Y]);
   near(x.consumedTotal, 120);
-  near(y.consumedTotal, 100);
-  const aOnX = x.perKey.find((k) => k.apiKeyId === "a")!;
-  const aOnY = y.perKey.find((k) => k.apiKeyId === "a")!;
-  near(aOnX.consumed, 108);
-  assert.equal(aOnX.fairShare, 100);
-  assert.equal(aOnX.borrowing, true);
-  near(aOnY.consumed, 90);
-  assert.equal(aOnY.borrowing, false);
-  assert.equal((await ask(X, "a")).kind, "block"); // 108 ≥ 100 on account X
-  assert.equal((await ask(Y, "a")).kind, "allow"); // 90 < 100 on account Y
-  assert.equal((await ask(X, "b")).kind, "allow"); // 12
+  near(y.consumedTotal, 120);
+  near(key(x, "a").consumed, 108);
+  assert.equal(key(x, "a").fairShare, 100);
+  assert.equal(key(x, "a").borrowing, true);
+  near(key(x, "b").consumed, 12);
+  near(key(y, "a").consumed, 0);
+  assert.equal(key(y, "a").borrowing, false);
+  near(key(y, "b").consumed, 120);
+  assert.equal(key(y, "b").borrowing, true);
+  // One book per connection: the gate on each account agrees with that account's entry.
+  assert.deepEqual(
+    [await kind(X, "a"), await kind(Y, "a"), await kind(X, "b"), await kind(Y, "b")],
+    ["block", "allow", "allow", "block"]
+  );
   assert.deepEqual(snap.dimensions[0].perKey, x.perKey);
   near(snap.dimensions[0].consumedTotal, 120);
 });
