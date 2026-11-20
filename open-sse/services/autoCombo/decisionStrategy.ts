@@ -24,7 +24,12 @@ import {
 } from "../decision/menu.ts";
 import type { DecisionRoutingConfig } from "../decision/schema.ts";
 import { decisionDepth } from "../decision/scope.ts";
-import type { Decider, DecisionChoiceFailure } from "../decision/types.ts";
+import type {
+  Decider,
+  DecisionChoiceFailure,
+  DecisionChoiceResult,
+  DecisionChoiceSuccess,
+} from "../decision/types.ts";
 import type { ProviderCandidate } from "./scoring.ts";
 import type { RouterStrategy, RoutingContext, RoutingDecision } from "./routerStrategy.ts";
 
@@ -36,6 +41,30 @@ export interface DecisionStrategyOptions {
   isEnabled?: () => boolean;
   /** Decider seam (tests). */
   createDecider?: (config: DecisionRoutingConfig, context: DecisionRoutingContext) => Decider;
+}
+
+type Prepared =
+  | { skip: string; kind?: string }
+  | {
+      config: DecisionRoutingConfig;
+      decision: DecisionRoutingContext;
+      options: Record<string, string>;
+      state: string;
+      menuSize: number;
+    };
+
+/** Why a decider answer cannot route, or `null` when it can. */
+function rejectionReason(
+  result: DecisionChoiceResult,
+  options: Record<string, string>,
+  minConfidence: number | undefined
+): string | null {
+  // `strict: false` does not narrow the `ok` union, so name each variant.
+  if (!result.ok) return (result as DecisionChoiceFailure).reason;
+  const chosen = result as DecisionChoiceSuccess;
+  if (!Object.prototype.hasOwnProperty.call(options, chosen.choice)) return "out_of_menu";
+  if (minConfidence !== undefined && chosen.confidence < minConfidence) return "low_confidence";
+  return null;
 }
 
 /** Score rounded to four decimals for the log. */
@@ -67,25 +96,12 @@ export class DecisionStrategyImpl implements RouterStrategy {
     const healthy = pool.filter((item) => item.circuitBreakerState !== "OPEN");
     const candidates = healthy.length ? healthy : pool;
     if (!candidates.length) throw new Error(`[${this.name}] No candidates available`);
-    // The flag is checked before anything else: off means no credential read and no fetch.
-    if (!this.isEnabled()) return this.fallbackDecision(candidates, context, "disabled");
-    if (decisionDepth() > 0) return this.fallbackDecision(candidates, context, "recursion");
-
-    const decision = context.decision;
-    const resolved = decision?.config;
-    if (!decision || !resolved?.valid) {
-      return this.fallbackDecision(candidates, context, "not_configured");
+    const prepared = this.prepare(candidates, context);
+    if ("skip" in prepared) {
+      return this.fallbackDecision(candidates, context, prepared.skip, prepared.kind);
     }
-    const { config } = resolved;
+    const { config, decision, options, state, menuSize } = prepared;
     const kind = config.decider;
-    const menu = buildDecisionMenu(candidates);
-    if (menu.length < 2) {
-      return this.fallbackDecision(candidates, context, "single_option", kind);
-    }
-    const state = extractDecisionUserText(decision.body ?? { messages: context.messages });
-    if (!state) return this.fallbackDecision(candidates, context, "no_user_text", kind);
-
-    const options = describeDecisionMenu(menu, candidates, config.descriptions);
     const result = await this.createDecider(
       config,
       decision
@@ -94,31 +110,40 @@ export class DecisionStrategyImpl implements RouterStrategy {
       options,
       signal: decision.signal,
     });
-    if (!result.ok) {
-      // `strict: false` does not narrow the `ok` union, so name the failure variant.
-      const failure = result as DecisionChoiceFailure;
-      return this.fallbackDecision(candidates, context, failure.reason, kind);
-    }
-    if (!Object.prototype.hasOwnProperty.call(options, result.choice)) {
-      return this.fallbackDecision(candidates, context, "out_of_menu", kind);
-    }
-    if (config.minConfidence !== undefined && result.confidence < config.minConfidence) {
-      return this.fallbackDecision(candidates, context, "low_confidence", kind);
-    }
+    const rejected = rejectionReason(result, options, config.minConfidence);
+    if (rejected) return this.fallbackDecision(candidates, context, rejected, kind);
+    const chosen = result as DecisionChoiceSuccess;
 
-    const matching = candidates.filter((item) => item.model === result.choice);
+    const matching = candidates.filter((item) => item.model === chosen.choice);
     const picked = this.fallback.select(matching, context);
-    const model = result.backendModel
-      ? `; decision model ${JSON.stringify(result.backendModel)}`
+    const model = chosen.backendModel
+      ? `; decision model ${JSON.stringify(chosen.backendModel)}`
       : "";
     return {
       ...picked,
       strategy: this.name,
       candidatesConsidered: candidates.length,
-      reason: `decision(${kind}): selected ${result.choice} from ${menu.length}; confidence ${formatScore(
-        result.confidence
+      reason: `decision(${kind}): selected ${chosen.choice} from ${menuSize}; confidence ${formatScore(
+        chosen.confidence
       )}${model} (${picked.reason})`,
     };
+  }
+
+  /** Every check that happens before a decider is built; the flag comes first. */
+  private prepare(candidates: ProviderCandidate[], context: RoutingContext): Prepared {
+    // Off means no credential read and no fetch: nothing below runs.
+    if (!this.isEnabled()) return { skip: "disabled" };
+    if (decisionDepth() > 0) return { skip: "recursion" };
+    const decision = context.decision;
+    const resolved = decision?.config;
+    if (!decision || !resolved?.valid) return { skip: "not_configured" };
+    const { config } = resolved;
+    const menu = buildDecisionMenu(candidates);
+    if (menu.length < 2) return { skip: "single_option", kind: config.decider };
+    const state = extractDecisionUserText(decision.body ?? { messages: context.messages });
+    if (!state) return { skip: "no_user_text", kind: config.decider };
+    const options = describeDecisionMenu(menu, candidates, config.descriptions);
+    return { config, decision, options, state, menuSize: menu.length };
   }
 
   private fallbackDecision(

@@ -47,24 +47,32 @@ function readApiKey(credentials: unknown): string | null {
   return typeof apiKey === "string" && apiKey.trim() ? apiKey.trim() : null;
 }
 
+/** Key of one referenced connection, only inside the allowlist; never an env fallback. */
+async function keyFromReferencedConnection(
+  connectionId: string,
+  args: DecisionCredentialArgs,
+  allowlist: string[] | null,
+  deps: DecisionCredentialDeps
+): Promise<string | null> {
+  if (allowlist && !allowlist.includes(connectionId)) return null;
+  const provider =
+    args.provider ??
+    (await (deps.getConnectionProvider ?? defaultGetConnectionProvider)(connectionId));
+  if (!provider) return null;
+  const getCredentials = deps.getCredentials ?? defaultGetCredentials;
+  return readApiKey(await getCredentials(provider, [connectionId]));
+}
+
 export async function resolveDecisionApiKey(
   args: DecisionCredentialArgs,
   deps: DecisionCredentialDeps = {}
 ): Promise<string | null> {
-  const getCredentials = deps.getCredentials ?? defaultGetCredentials;
   const allowlist = args.apiKeyAllowedConnections?.length ? args.apiKeyAllowedConnections : null;
   const connectionId = args.connectionId?.trim();
-
-  if (connectionId) {
-    if (allowlist && !allowlist.includes(connectionId)) return null;
-    const provider =
-      args.provider ??
-      (await (deps.getConnectionProvider ?? defaultGetConnectionProvider)(connectionId));
-    if (!provider) return null;
-    return readApiKey(await getCredentials(provider, [connectionId]));
-  }
+  if (connectionId) return keyFromReferencedConnection(connectionId, args, allowlist, deps);
 
   if (args.provider) {
+    const getCredentials = deps.getCredentials ?? defaultGetCredentials;
     const stored = readApiKey(await getCredentials(args.provider, allowlist));
     if (stored) return stored;
   }

@@ -14,7 +14,12 @@ import type { ComboCollectionLike, HandleSingleModel } from "../combo/types.ts";
 import { clampDecisionTimeout } from "./config.ts";
 import { decisionDepth, runInDecisionScope } from "./scope.ts";
 import { readBoundedJson } from "./transport.ts";
-import { decisionFailure, type Decider, type DecisionChoiceRequest } from "./types.ts";
+import {
+  decisionFailure,
+  type Decider,
+  type DecisionChoiceRequest,
+  type DecisionFailureReason,
+} from "./types.ts";
 import {
   DECISION_MAX_OUTPUT_TOKENS,
   OPENAI_DECISION_SYSTEM_PROMPT,
@@ -83,22 +88,52 @@ function buildBody(model: string, request: DecisionChoiceRequest, clientBody: un
   };
 }
 
+/** Why the in-process call must not run, or `null` when it may. */
+function preconditionFailure(
+  options: ComboModelDeciderOptions,
+  model: string | undefined,
+  request: DecisionChoiceRequest
+): DecisionFailureReason | null {
+  if (!model || !options.dispatch) return "not_configured";
+  if (isDecisionComboRef(model, options.allCombos)) return "recursion";
+  if (decisionDepth() > 0) return "recursion";
+  if (request.signal?.aborted) return "timeout";
+  return null;
+}
+
+type DispatchOutcome = { status: number } | { json: unknown };
+
+/** Dispatch inside the decision scope; non-2xx keeps the status only, the body is never read. */
+function dispatchInScope(
+  dispatch: HandleSingleModel,
+  model: string,
+  body: Record<string, unknown>,
+  signal: AbortSignal
+): Promise<DispatchOutcome> {
+  return runInDecisionScope(async () => {
+    const response = await dispatch(body, model, { modelAbortSignal: signal });
+    if (!response.ok) {
+      await response.body?.cancel().catch(() => {});
+      return { status: response.status };
+    }
+    return { json: await readBoundedJson(response) };
+  });
+}
+
 export function createComboModelDecider(options: ComboModelDeciderOptions): Decider {
   const now = options.now ?? Date.now;
   const timeoutMs = clampDecisionTimeout(options.timeoutMs);
 
   return async (request) => {
     const model = options.model?.trim();
-    if (!model || !options.dispatch) return decisionFailure("not_configured");
-    if (isDecisionComboRef(model, options.allCombos)) return decisionFailure("recursion");
-    if (decisionDepth() > 0) return decisionFailure("recursion");
-    if (request.signal?.aborted) return decisionFailure("timeout");
+    const blocked = preconditionFailure(options, model, request);
+    if (blocked) return decisionFailure(blocked);
 
-    const dispatch = options.dispatch;
     const controller = new AbortController();
     const onCallerAbort = () => controller.abort();
     request.signal?.addEventListener("abort", onCallerAbort, { once: true });
     const startedAt = now();
+    const elapsed = () => Math.max(0, now() - startedAt);
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timedOut = new Promise<"timeout">((resolve) => {
       timer = setTimeout(() => {
@@ -106,33 +141,29 @@ export function createComboModelDecider(options: ComboModelDeciderOptions): Deci
         resolve("timeout");
       }, timeoutMs);
     });
-    const call = runInDecisionScope(async () => {
-      const response = await dispatch(buildBody(model, request, options.clientBody), model, {
-        modelAbortSignal: controller.signal,
-      });
-      if (!response.ok) {
-        await response.body?.cancel().catch(() => {});
-        return { status: response.status } as const;
-      }
-      return { json: await readBoundedJson(response) } as const;
-    });
+    const body = buildBody(model as string, request, options.clientBody);
+    const call = dispatchInScope(
+      options.dispatch as HandleSingleModel,
+      model as string,
+      body,
+      controller.signal
+    );
     call.catch(() => {});
 
     try {
       const outcome = await Promise.race([call, timedOut]);
-      const latencyMs = Math.max(0, now() - startedAt);
       if (outcome === "timeout" || controller.signal.aborted) {
-        return decisionFailure("timeout", { latencyMs });
+        return decisionFailure("timeout", { latencyMs: elapsed() });
       }
       if ("status" in outcome) {
-        return decisionFailure("http_error", { status: outcome.status, latencyMs });
+        return decisionFailure("http_error", { status: outcome.status, latencyMs: elapsed() });
       }
       const json = outcome.json as { model?: unknown } | null;
       const answer = parseDecisionAnswerText(extractPanelText(json), json?.model ?? model);
-      return toDecisionChoiceResult(answer, request, latencyMs);
+      return toDecisionChoiceResult(answer, request, elapsed());
     } catch {
       return decisionFailure(controller.signal.aborted ? "timeout" : "invalid_response", {
-        latencyMs: Math.max(0, now() - startedAt),
+        latencyMs: elapsed(),
       });
     } finally {
       clearTimeout(timer);
