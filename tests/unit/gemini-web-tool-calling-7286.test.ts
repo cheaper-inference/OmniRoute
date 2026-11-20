@@ -209,7 +209,10 @@ async function withMockedGeminiBrowser<T>(
           },
           goto: async () => {},
           waitForTimeout: async () => {},
-          waitForSelector: async () => ({ click: async () => {} }),
+          waitForSelector: async () => ({
+            click: async () => {},
+            getAttribute: async () => "true",
+          }),
           keyboard: {
             type: async (text: string) => {
               calls.push("type");
@@ -219,7 +222,9 @@ async function withMockedGeminiBrowser<T>(
               calls.push("insertText");
               typedPrompt.value = text;
             },
-            press: async () => {
+            press: async (key: string) => {
+              // Escape only closes the model menu (modeSelection.ts); it is not a send.
+              if (key === "Escape") return;
               calls.push("press");
               if (respHandler) {
                 await respHandler({

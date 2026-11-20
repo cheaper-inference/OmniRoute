@@ -188,9 +188,12 @@ test(
           on: () => {},
           goto: async () => {},
           waitForTimeout: async () => {},
-          // No Extended Thinking control exists in this fake page — every
-          // selector lookup reports "not found", proving the fail-closed path.
-          waitForSelector: async () => null,
+          // The model menu confirms the requested model; no Extended Thinking control
+          // exists in this fake page, proving the fail-closed path.
+          waitForSelector: async (selector: string) =>
+            /bard-mode-menu-button|menuitemradio/.test(selector)
+              ? { click: async () => {}, getAttribute: async () => "true" }
+              : null,
           keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
         }),
       }),

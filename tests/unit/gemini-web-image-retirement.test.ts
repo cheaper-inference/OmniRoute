@@ -67,7 +67,10 @@ test("Gemini Web executor treats the retired image-mode extension as ordinary ch
           waitForTimeout: async (duration: number) => {
             waitDurations.push(duration);
           },
-          waitForSelector: async () => ({ click: async () => {} }),
+          waitForSelector: async () => ({
+            click: async () => {},
+            getAttribute: async () => "true",
+          }),
           keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
         }),
       }),
@@ -117,7 +120,13 @@ test("Gemini Web chat and legitimate Gemini image providers remain available", a
   assert.equal(REGISTRY["gemini-web"]?.executor, "gemini-web");
   assert.deepEqual(
     REGISTRY["gemini-web"]?.models.map(({ id }) => id),
-    ["gemini-3.1-pro", "gemini-3.7-flash", "gemini-3.1-flash-lite"]
+    [
+      "gemini-4-hydrogen",
+      "gemini-4-hydrogen-thinking",
+      "gemini-3.1-pro",
+      "gemini-3.7-flash",
+      "gemini-3.1-flash-lite",
+    ]
   );
 
   assert.deepEqual(parseImageModel("nano-banana"), {

@@ -335,7 +335,7 @@ function fakePage(opts: {
     },
     goto: async () => {},
     waitForTimeout: async () => new Promise((r) => setTimeout(r, 1)),
-    waitForSelector: async () => ({ click: async () => {} }),
+    waitForSelector: async () => ({ click: async () => {}, getAttribute: async () => "true" }),
     keyboard: {
       insertText: async (text: string) => void state.typed.push(text),
       press: async (key: string) => {

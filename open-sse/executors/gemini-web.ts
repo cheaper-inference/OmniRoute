@@ -34,6 +34,7 @@ import {
 } from "./gemini-web/capabilities.ts";
 import {
   describeModeSelectionFailure,
+  isGeminiModelActive,
   selectGeminiExtendedThinking,
   selectGeminiModel,
 } from "./gemini-web/modeSelection.ts";
@@ -750,12 +751,10 @@ export class GeminiWebExecutor extends BaseExecutor {
       await page.waitForSelector(".ql-editor, [contenteditable='true']", { timeout: 10000 });
 
       // #13381 (Option B): verify the requested Gemini UI mode is actually active
-      // BEFORE anything is typed. `gemini-3.1-pro` is the mode gemini.google.com/app
-      // already opens to (no interaction attempted); every other advertised model is
-      // switched to and its active-mode indicator is read back — a confirmed match is
-      // required, or the request is rejected instead of silently running the account
-      // default under the requested model's label. See ./gemini-web/modeSelection.ts
-      // for why the selectors involved are UNVALIDATED and why that is safe here.
+      // BEFORE anything is typed. The model is picked from Gemini's model menu and read
+      // back from the menu (the choice persists on the account, so none is assumed
+      // active). Unconfirmed → the request is rejected instead of silently running
+      // another model under the requested label. See ./gemini-web/modeSelection.ts.
       if (model) {
         const modelSelection = await selectGeminiModel(page, modelId);
         if (!modelSelection.confirmed) {
@@ -880,6 +879,37 @@ export class GeminiWebExecutor extends BaseExecutor {
       }
 
       await this.persistRotatedCookies(context, cookie, credentials, onCredentialsRefreshed, log);
+
+      // Under heavy demand Gemini answers with another model and switches the menu to it.
+      // That answer must not go out under the requested label.
+      // ponytail: the cooldown is connection-wide (it also pauses this account's other
+      // models); switch to a model-only lockout if that matters.
+      if (model && !(await isGeminiModelActive(page, modelId))) {
+        log?.warn?.("GEMINI-WEB", `"${modelId}" was replaced by Gemini (high demand)`);
+        return {
+          response: new Response(
+            JSON.stringify(
+              buildErrorBody(
+                503,
+                `Gemini answered with a different model because "${modelId}" is under high ` +
+                  "demand right now. The answer was discarded; retry later or use another model.",
+                null,
+                { type: "server_error", code: "server_is_overloaded" }
+              )
+            ),
+            {
+              status: 503,
+              headers: {
+                "Content-Type": "application/json",
+                "X-Omni-Fallback-Hint": "connection_cooldown",
+              },
+            }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
 
       if (hasTools) {
         const cid = `chatcmpl-gwe-${crypto.randomUUID().slice(0, 12)}`;

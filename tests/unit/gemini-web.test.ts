@@ -118,6 +118,7 @@ test("Normalizes a bare __Secure-1PSID value before adding browser cookies", asy
           waitForTimeout: async () => {},
           waitForSelector: async () => ({
             click: async () => {},
+            getAttribute: async () => "true",
           }),
           keyboard: {
             type: async () => {},
@@ -171,6 +172,8 @@ test("Provider: gemini-web has correct models", async () => {
   assert.deepEqual(
     models.map((m: any) => [m.id, m.name]),
     [
+      ["gemini-4-hydrogen", "Gemini 4 Hydrogen"],
+      ["gemini-4-hydrogen-thinking", "Gemini 4 Hydrogen Thinking"],
       ["gemini-3.1-pro", "Gemini 3.1 Pro"],
       ["gemini-3.7-flash", "Gemini 3.7 Flash"],
       ["gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite"],
@@ -189,6 +192,8 @@ test("Provider: gemini-web lists gemini-4-argon only with its opt-in switch on",
     assert.deepEqual(
       on.gemini_webProvider.models.map((m: { id: string; name: string }) => [m.id, m.name]),
       [
+        ["gemini-4-hydrogen", "Gemini 4 Hydrogen"],
+        ["gemini-4-hydrogen-thinking", "Gemini 4 Hydrogen Thinking"],
         ["gemini-3.1-pro", "Gemini 3.1 Pro"],
         ["gemini-4-argon", "Gemini 4 Argon"],
         ["gemini-3.7-flash", "Gemini 3.7 Flash"],

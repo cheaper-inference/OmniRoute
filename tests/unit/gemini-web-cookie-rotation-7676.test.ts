@@ -52,7 +52,10 @@ test("#7676: GeminiWebExecutor persists rotated __Secure-1PSIDTS/__Secure-1PSIDC
           },
           goto: async () => {},
           waitForTimeout: async () => {},
-          waitForSelector: async () => ({ click: async () => {} }),
+          waitForSelector: async () => ({
+            click: async () => {},
+            getAttribute: async () => "true",
+          }),
           keyboard: { type: async () => {}, insertText: async () => {}, press: async () => {} },
         }),
       }),

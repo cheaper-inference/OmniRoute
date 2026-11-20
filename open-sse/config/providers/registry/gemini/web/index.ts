@@ -1,8 +1,8 @@
 import type { RegistryEntry, RegistryModel } from "../../../shared.ts";
 
 /**
- * Opt-in switch for `gweb/gemini-4-argon` (#16573). Its mode-selection
- * selectors (open-sse/executors/gemini-web/modeSelection.ts) have not been
+ * Opt-in switch for `gweb/gemini-4-argon` (#16573). Its model-menu label
+ * (open-sse/executors/gemini-web/modeSelection.ts) has not been
  * checked against a live Gemini Web account yet, so the model stays out of the
  * catalog and the executor treats it as an unknown model unless the operator
  * sets OMNIROUTE_GEMINI_WEB_ARGON_ENABLED=1 (or true/yes). The catalog reads it
@@ -44,6 +44,22 @@ export const gemini_webProvider: RegistryEntry = {
   // `supportsVision` / `supportsVideo`: image, video and document parts are uploaded
   // through the composer's file chooser (open-sse/executors/gemini-web/attachments.ts).
   models: [
+    {
+      id: "gemini-4-hydrogen",
+      name: "Gemini 4 Hydrogen",
+      toolCalling: false,
+      supportsReasoning: false,
+      supportsVision: true,
+      supportsVideo: true,
+    },
+    {
+      id: "gemini-4-hydrogen-thinking",
+      name: "Gemini 4 Hydrogen Thinking",
+      toolCalling: false,
+      supportsReasoning: false,
+      supportsVision: true,
+      supportsVideo: true,
+    },
     {
       id: "gemini-3.1-pro",
       name: "Gemini 3.1 Pro",
