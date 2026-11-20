@@ -17,7 +17,15 @@ import ConnectionTestButton from "@/shared/components/ConnectionTestButton";
 import { readCookieExpiresAt } from "@/shared/utils/webCookieExpiry";
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Badge, Button, Checkbox, ReorderControl, Select, Toggle } from "@/shared/components";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  InlineCode,
+  ReorderControl,
+  Select,
+  Toggle,
+} from "@/shared/components";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
@@ -334,12 +342,12 @@ export default function ConnectionRow({
           <p className="text-sm font-medium break-words sm:truncate flex items-center gap-2 flex-wrap">
             <span>{displayName}</span>
             {maskedApiKey && (
-              <span
-                className="font-mono text-xs font-normal text-text-muted bg-bg-subtle px-1.5 py-0.5 rounded border border-border shrink-0 select-all"
+              <InlineCode
+                className="text-xs font-normal text-text-muted shrink-0 select-all"
                 title={maskedApiKey}
               >
                 {maskedApiKey}
-              </span>
+              </InlineCode>
             )}
             {codexAccount && (
               <span
