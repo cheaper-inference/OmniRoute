@@ -116,7 +116,7 @@ async function registerSidePathTests() {
    * and returns the agent guard lines it wrote. The thrown message carries a value
    * that must never reach the log.
    */
-  async function withThrowingModeRead<T>(fn: () => Promise<T>) {
+  async function withThrowingModeRead<T>(fn: () => T | Promise<T>) {
     const realEnv = process.env;
     process.env = new Proxy(realEnv, {
       get(target, key) {
