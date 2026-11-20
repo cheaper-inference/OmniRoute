@@ -184,6 +184,54 @@ test("firecrawlFetch keeps depth and selector off the v2 cloud scrape body", asy
   }
 });
 
+async function captureCloudScrapeBody(waitForSelector: string) {
+  const originalFetch = globalThis.fetch;
+  let capturedBody: Record<string, unknown> = {};
+
+  globalThis.fetch = async (_url, init = {}) => {
+    capturedBody = JSON.parse(String((init as RequestInit).body ?? "{}"));
+    return new Response(JSON.stringify({ data: { markdown: "" } }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    await firecrawlFetch({
+      url: "https://example.com",
+      format: "markdown",
+      depth: 0,
+      waitForSelector,
+      includeMetadata: false,
+      credentials: { apiKey: "fc-key" },
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  return capturedBody;
+}
+
+test("firecrawlFetch sends a numeric wait_for_selector as v2 waitFor milliseconds", async () => {
+  const body = await captureCloudScrapeBody("1500");
+
+  assert.equal(body.waitFor, 1500, "should set numeric waitFor ms");
+  assert.equal(body.actions, undefined, "should not set actions for a numeric delay");
+});
+
+test("firecrawlFetch clamps a numeric wait_for_selector to the v2 limit of 60000 ms", async () => {
+  const body = await captureCloudScrapeBody("90000");
+
+  assert.equal(body.waitFor, 60000, "v2 waitFor accepts at most 60000 ms");
+  assert.equal(body.actions, undefined);
+});
+
+test("firecrawlFetch keeps a non-integer wait_for_selector off the v2 waitFor field", async () => {
+  const body = await captureCloudScrapeBody("1.5");
+
+  assert.equal(body.waitFor, undefined, "v2 waitFor must be an integer");
+  assert.deepEqual(body.actions, [{ type: "wait", selector: "1.5" }]);
+});
+
 // ── #4692 regression: includeMetadata must NOT send invalid includeTags ────────
 // Firecrawl returns metadata automatically in response.data.metadata. Sending
 // includeTags with non-CSS-selector values ("og:title", "description") crashed

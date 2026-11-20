@@ -24,7 +24,8 @@ function getFirecrawlBaseUrl(credentials?: WebFetchCredentials): string {
   const envBase = process.env.FIRECRAWL_BASE_URL?.trim();
   if (envBase) return envBase.replace(/\/+$/, "");
   const providerData = credentials?.providerSpecificData;
-  const credBase = typeof credentials?.baseUrl === "string" ? credentials.baseUrl : providerData?.baseUrl;
+  const credBase =
+    typeof credentials?.baseUrl === "string" ? credentials.baseUrl : providerData?.baseUrl;
   if (typeof credBase === "string" && credBase.trim()) {
     return credBase.trim().replace(/\/+$/, "");
   }
@@ -56,6 +57,34 @@ function mapFormat(format: WebFetchFormat): string {
     default:
       return "markdown";
   }
+}
+
+/** Firecrawl v2 scrape rejects a `waitFor` delay above this many milliseconds. */
+const FIRECRAWL_V2_MAX_WAIT_MS = 60_000;
+
+/**
+ * Map `wait_for_selector` onto the scrape body.
+ *
+ * v2 `waitFor` is an integer millisecond delay, not a selector: a plain
+ * non-negative integer becomes that delay (clamped to the v2 limit), anything
+ * else goes through the actions list, which waits until the element is visible.
+ * A self-hosted base URL still speaks v1, which takes the string in `waitFor`.
+ */
+function applyWaitForSelector(
+  requestBody: Record<string, unknown>,
+  waitForSelector: string,
+  isDefaultBaseUrl: boolean
+): void {
+  if (!isDefaultBaseUrl) {
+    requestBody.waitFor = waitForSelector;
+    return;
+  }
+  const trimmed = waitForSelector.trim();
+  if (/^\d+$/.test(trimmed)) {
+    requestBody.waitFor = Math.min(Number(trimmed), FIRECRAWL_V2_MAX_WAIT_MS);
+    return;
+  }
+  requestBody.actions = [{ type: "wait", selector: waitForSelector }];
 }
 
 interface FirecrawlScrapeOptions {
@@ -104,15 +133,8 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
     requestBody.maxDepth = depth;
   }
 
-  // v2 waitFor is a millisecond delay, not a selector. A selector goes through
-  // the actions list, which waits until the element is visible. v1 takes the
-  // selector string directly in waitFor.
   if (waitForSelector) {
-    if (isDefaultBaseUrl) {
-      requestBody.actions = [{ type: "wait", selector: waitForSelector }];
-    } else {
-      requestBody.waitFor = waitForSelector;
-    }
+    applyWaitForSelector(requestBody, waitForSelector, isDefaultBaseUrl);
   }
 
   const controller = new AbortController();
