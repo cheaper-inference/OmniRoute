@@ -246,41 +246,70 @@ test("the view carries the key's models and expiry", async () => {
   assert.deepEqual(failed.availableModels, []);
 });
 
-test("the view's default lookups read the key's caps from the database, by pool ref only", async () => {
-  setModelCap({
-    poolId: "pool-a-id",
-    apiKeyId: "key-a",
-    model: "claude-fable-5",
-    capValue: 200,
-    capUnit: "requests",
-  });
-  setModelCap({
-    poolId: "pool-a-id",
-    apiKeyId: "key-b",
-    model: "claude-other-key-model",
-    capValue: 7,
-    capUnit: "requests",
-  });
+test("the view loads the quota store once and the blocks reuse it", async () => {
+  let loads = 0;
+  const store = { peek: async () => 7, poolConsumedTotal: async () => 0 };
+  const view = await buildQuotaSelfView(
+    input(),
+    makeDeps({
+      getQuotaStore: async () => {
+        loads += 1;
+        return store;
+      },
+      listModelCapsForApiKey: (poolId) =>
+        poolId === "pool-a-id" ? [cap("m-x", 10, "tokens")] : [],
+    })
+  );
+  assert.equal(loads, 1);
+  assert.deepEqual(
+    [view.pools[0].dimensions[0].yourShare.consumed, view.blocks.modelCaps[0].consumed],
+    [7, 7]
+  );
+});
+
+test("the view's default lookups read each pool's caps of this key only, under that pool's own ref", async () => {
+  // Rows this test needs, with model names no other test uses.
+  const rows: Array<[string, string, string, number]> = [
+    ["pool-a-id", "key-a", "e2e-model-in-a", 200],
+    ["pool-b-id", "key-a", "e2e-model-in-b", 300],
+    ["pool-a-id", "key-b", "e2e-other-key-model", 7],
+    ["pool-codex-id", "key-a", "e2e-other-provider-model", 9],
+    ["pool-unallocated-id", "key-a", "e2e-unallocated-pool-model", 11],
+  ];
+  for (const [poolId, apiKeyId, model, capValue] of rows)
+    setModelCap({ poolId, apiKeyId, model, capValue, capUnit: "requests" });
+
   const view = await buildQuotaSelfView(
     input(),
     makeDeps({ listEnabledSchedules: undefined, listModelCapsForApiKey: undefined })
   );
-  const poolA = view.pools.find((p) => p.name === "Pool A");
+  const refOf = (name: string) => view.pools.find((p) => p.name === name)?.ref;
+  assert.ok(refOf("Pool A") && refOf("Pool B") && refOf("Pool A") !== refOf("Pool B"));
+  const entry = (pool: string | undefined, model: string, capValue: number) => ({
+    pool,
+    model,
+    unit: "requests",
+    window: "hourly",
+    cap: capValue,
+    consumed: 120,
+    reached: capValue <= 120,
+  });
+  // Pools in view order (Pool A, then Pool B); each cap only under its own pool's ref.
   assert.deepEqual(view.blocks, {
     schedules: [],
     modelCaps: [
-      {
-        pool: poolA?.ref,
-        model: "claude-fable-5",
-        unit: "requests",
-        window: "hourly",
-        cap: 200,
-        consumed: 120,
-        reached: false,
-      },
+      entry(refOf("Pool A"), "e2e-model-in-a", 200),
+      entry(refOf("Pool B"), "e2e-model-in-b", 300),
     ],
   });
   const json = JSON.stringify(view);
-  for (const secret of ["pool-a-id", "key-b", "claude-other-key-model"])
-    assert.ok(!json.includes(secret));
+  for (const secret of [
+    "pool-a-id",
+    "pool-b-id",
+    "key-b",
+    "e2e-other-key-model",
+    "e2e-other-provider-model",
+    "e2e-unallocated-pool-model",
+  ])
+    assert.ok(!json.includes(secret), secret);
 });

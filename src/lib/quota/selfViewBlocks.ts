@@ -12,9 +12,11 @@
  * Number.EPSILON are skipped, as the gate skips them), with the key's consumption in the
  * per-model bucket the gate reads ("<poolId>:model:<model>", hourly).
  *
- * A failed or non-finite store read is `null` (never zero, never "not reached"). A failed
- * schedule or cap lookup leaves that pool without those entries, which is also what the gate
- * does with it (listSchedules and the gate's cap read both fail open); the error is logged here.
+ * A store that fails to load and a failed or non-finite store read are `null` (never zero, never
+ * "not reached"; selfViewStore.ts). Inside a view build the store comes from selfView.ts, which
+ * loads it once for both builders. A failed schedule or cap lookup leaves that pool without
+ * those entries, which is also what the gate does with it (listSchedules and the gate's cap read
+ * both fail open); the error is logged here.
  *
  * Every entry names its pool only by the opaque `ref`. The schedule label (text the pool
  * administrator wrote for key holders) and the cap's model name are the only free text copied.
@@ -24,10 +26,9 @@ import { createLogger } from "@/shared/utils/logger";
 import type { SelfQuotaBlocks } from "@/shared/schemas/selfQuota";
 import type { ModelCap } from "@/lib/db/quotaModelCaps";
 import { resolveActiveSchedule, scheduleBucketPoolId, type QuotaSchedule } from "./schedules";
+import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type { SelfViewPoolContext } from "./selfViewTypes";
-import type { QuotaStore } from "./types";
 
-type BlocksStore = Pick<QuotaStore, "peek" | "poolConsumedTotal">;
 type ScheduleBlock = SelfQuotaBlocks["schedules"][number];
 type ModelCapBlock = SelfQuotaBlocks["modelCaps"][number];
 
@@ -35,29 +36,11 @@ interface SelfViewBlocksDeps {
   now: () => number;
   listEnabledSchedules: (poolId: string) => QuotaSchedule[];
   listModelCapsForApiKey: (poolId: string, apiKeyId: string) => ModelCap[];
-  getQuotaStore: () => Promise<BlocksStore>;
+  /** May answer null: selfView.ts hands over the store it already loaded, or null if it failed. */
+  getQuotaStore: () => Promise<ViewStore | null>;
 }
 
 const log = createLogger("quota:self-view");
-
-async function loadStore(deps: SelfViewBlocksDeps): Promise<BlocksStore | null> {
-  try {
-    return await deps.getQuotaStore();
-  } catch {
-    return null;
-  }
-}
-
-/** A store read as a number, or null when the store is missing, throws or returns non-finite. */
-async function readStore(read: (() => Promise<number>) | null): Promise<number | null> {
-  if (!read) return null;
-  try {
-    const value = await read();
-    return Number.isFinite(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
 
 /** A lookup's rows, or [] (with a server-side warning) when it throws. */
 function readRows<T>(ctx: SelfViewPoolContext, what: string, read: () => T[]): T[] {
@@ -76,7 +59,7 @@ function readRows<T>(ctx: SelfViewPoolContext, what: string, read: () => T[]): T
 async function scheduleBudget(
   ctx: SelfViewPoolContext,
   schedule: QuotaSchedule,
-  store: BlocksStore | null
+  store: ViewStore | null
 ): Promise<ScheduleBlock["budget"]> {
   const { budgetValue, budgetUnit, budgetWindow } = schedule;
   if (budgetValue === undefined || budgetUnit === undefined) return null;
@@ -85,7 +68,9 @@ async function scheduleBudget(
     unit: budgetUnit,
     window: budgetWindow,
   };
-  const consumed = await readStore(store ? () => store.poolConsumedTotal(ctx.pool.id, key) : null);
+  const consumed = await readViewStore(
+    store ? () => store.poolConsumedTotal(ctx.pool.id, key) : null
+  );
   return {
     unit: budgetUnit,
     window: budgetWindow,
@@ -96,7 +81,7 @@ async function scheduleBudget(
 async function scheduleBlock(
   ctx: SelfViewPoolContext,
   deps: SelfViewBlocksDeps,
-  store: BlocksStore | null
+  store: ViewStore | null
 ): Promise<ScheduleBlock | null> {
   const schedules = readRows(ctx, "schedule", () => deps.listEnabledSchedules(ctx.pool.id));
   const verdict = resolveActiveSchedule(schedules, deps.now());
@@ -128,7 +113,7 @@ async function modelCapBlocks(
   apiKeyId: string,
   ctx: SelfViewPoolContext,
   deps: SelfViewBlocksDeps,
-  store: BlocksStore | null
+  store: ViewStore | null
 ): Promise<ModelCapBlock[]> {
   const caps = readRows(ctx, "model cap", () => deps.listModelCapsForApiKey(ctx.pool.id, apiKeyId));
   const blocks: ModelCapBlock[] = [];
@@ -141,7 +126,7 @@ async function modelCapBlocks(
       unit: cap.capUnit,
       window: "hourly" as const,
     };
-    const consumed = await readStore(store ? () => store.peek(apiKeyId, key) : null);
+    const consumed = await readViewStore(store ? () => store.peek(apiKeyId, key) : null);
     blocks.push({
       pool: ctx.ref,
       model: cap.model,
@@ -163,7 +148,7 @@ export async function buildSelfViewBlocks(
 ): Promise<SelfQuotaBlocks> {
   const blocks: SelfQuotaBlocks = { schedules: [], modelCaps: [] };
   if (pools.length === 0) return blocks;
-  const store = await loadStore(deps);
+  const store = await loadViewStore(deps.getQuotaStore);
   for (const ctx of pools) {
     const schedule = await scheduleBlock(ctx, deps, store);
     if (schedule) blocks.schedules.push(schedule);

@@ -52,15 +52,14 @@ import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
 import { buildSelfViewBlocks } from "./selfViewBlocks";
+import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type {
   AccountQuotaEntryLike,
   QuotaSelfViewDeps,
   QuotaSelfViewInput,
   SelfViewPoolContext,
 } from "./selfViewTypes";
-import type { QuotaStore } from "./types";
 
-type ViewStore = Pick<QuotaStore, "peek" | "poolConsumedTotal">;
 type CountableUnit = SelfQuotaSharedDimension["unit"];
 type CountableDimension = QuotaDimension & { unit: CountableUnit };
 
@@ -253,25 +252,6 @@ function compareText(a: string | undefined, b: string | undefined): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-async function loadStore(deps: CoreDeps): Promise<ViewStore | null> {
-  try {
-    return await deps.getQuotaStore();
-  } catch {
-    return null;
-  }
-}
-
-/** A store read as a number, or null when the store is missing, throws or returns non-finite. */
-async function readStore(read: (() => Promise<number>) | null): Promise<number | null> {
-  if (!read) return null;
-  try {
-    const value = await read();
-    return Number.isFinite(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
-
 function isCountableDimension(dim: QuotaDimension): dim is CountableDimension {
   return COUNTABLE_UNITS.has(dim.unit) && dim.limit > Number.EPSILON;
 }
@@ -286,7 +266,7 @@ async function buildSharedDimension(
   const fairShare = (ctx.effectiveWeight / 100) * limit;
   const key = { poolId: ctx.pool.id, unit: dim.unit, window: dim.window };
 
-  const consumed = await readStore(store ? () => store.peek(apiKeyId, key) : null);
+  const consumed = await readViewStore(store ? () => store.peek(apiKeyId, key) : null);
   const yourShare: SelfQuotaShare =
     consumed === null
       ? {
@@ -305,7 +285,9 @@ async function buildSharedDimension(
     yourShare,
   };
   if (ctx.accountVisible) {
-    const used = await readStore(store ? () => store.poolConsumedTotal(ctx.pool.id, key) : null);
+    const used = await readViewStore(
+      store ? () => store.poolConsumedTotal(ctx.pool.id, key) : null
+    );
     dimension.total =
       used === null
         ? { used: null, status: "unavailable", reason: STORE_UNAVAILABLE }
@@ -411,7 +393,8 @@ export async function buildQuotaSelfView(
   const deps = await normalizeDeps(rawDeps);
 
   const contexts = await resolvePoolContexts(input, deps);
-  const store = contexts.length > 0 ? await loadStore(deps) : null;
+  // Loaded once per view: the blocks builder gets this same instance (or null).
+  const store = contexts.length > 0 ? await loadViewStore(deps.getQuotaStore) : null;
   const pools: SelfQuotaPool[] = [];
   for (const ctx of contexts) {
     pools.push(await buildPoolView(ctx, store, input, deps));
@@ -424,6 +407,9 @@ export async function buildQuotaSelfView(
     availableModels: await resolveAvailableModels(input, deps),
     expiresAt: input.expiresAt,
     apiBaseUrl: deps.resolvePublicApiBaseUrl(),
-    blocks: await buildSelfViewBlocks(input.apiKeyId, contexts, deps),
+    blocks: await buildSelfViewBlocks(input.apiKeyId, contexts, {
+      ...deps,
+      getQuotaStore: async () => store,
+    }),
   });
 }
