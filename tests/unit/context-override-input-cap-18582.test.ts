@@ -1,8 +1,32 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Worker } from "node:worker_threads";
+import { once } from "node:events";
+
+// Rotation has no cancellation API; keep ownership of only its scheduled timers.
+const rotationTimers: NodeJS.Timeout[] = [];
+const rotationImmediates: NodeJS.Immediate[] = [];
+const nativeSetImmediate = globalThis.setImmediate;
+globalThis.setImmediate = ((callback: (...args: unknown[]) => void, ...args: unknown[]) => {
+  const immediate = nativeSetImmediate(callback, ...args);
+  if (new Error().stack?.includes("/src/lib/usage/callLogRotation.ts")) {
+    rotationImmediates.push(immediate);
+  }
+  return immediate;
+}) as typeof setImmediate;
+const nativeSetTimeout = globalThis.setTimeout;
+globalThis.setTimeout = ((
+  callback: (...args: unknown[]) => void,
+  delay?: number,
+  ...args: unknown[]
+) => {
+  const timer = nativeSetTimeout(callback, delay, ...args);
+  if (new Error().stack?.includes("/src/lib/usage/callLogRotation.ts")) rotationTimers.push(timer);
+  return timer;
+}) as typeof setTimeout;
 
 const dataDir = mkdtempSync(join(tmpdir(), "omni-context-18582-"));
 process.env.DATA_DIR = dataDir;
@@ -15,14 +39,65 @@ const { createModelCapabilityResolutionSnapshot } =
   await import("../../src/lib/modelCapabilityResolutionSnapshot.ts");
 const { enrichCatalogModelEntry } = await import("../../src/lib/modelMetadataRegistry.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+const callLogs = await import("../../src/lib/usage/callLogs.ts");
+const rateLimits = await import("../../open-sse/services/rateLimitManager.ts");
+
+// Hold the real worker dispatch across the teardown boundary, then release it unchanged.
+const workers: Worker[] = [];
+let releaseArtifact: (() => void) | undefined;
+const originalPostMessage = Worker.prototype.postMessage;
+Worker.prototype.postMessage = function (...args: Parameters<Worker["postMessage"]>) {
+  const message = args[0] as { artifact?: unknown; environment?: unknown } | null;
+  if (!releaseArtifact && message?.artifact && message.environment) {
+    workers.push(this);
+    releaseArtifact = () => originalPostMessage.apply(this, args);
+    return;
+  }
+  return originalPostMessage.apply(this, args);
+};
 
 const provider = "openai-compatible-chat-18582";
 const model = "gemma-4-E2B-it-GGUF";
 const input = { provider, model };
 
-test.after(() => {
-  core.resetDbInstance();
-  rmSync(dataDir, { recursive: true, force: true });
+test.after(async () => {
+  try {
+    assert.ok(releaseArtifact, "chat must queue a call-log artifact");
+    assert.equal(workers.length, 1);
+    let drained = false;
+    const drain = callLogs.waitForCallLogSaves(30_000).then((result) => {
+      drained = true;
+      return result;
+    });
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.equal(drained, false, "a queued artifact must keep teardown waiting");
+    assert.equal(existsSync(dataDir), true);
+    releaseArtifact();
+    assert.equal(await drain, true);
+    const row = core
+      .getDbInstance()
+      .prepare(
+        "SELECT detail_state, artifact_relpath FROM call_logs WHERE provider = ? AND status = 200"
+      )
+      .get(provider) as { detail_state: string; artifact_relpath: string } | undefined;
+    assert.equal(row?.detail_state, "ready");
+    assert.ok(row?.artifact_relpath);
+    assert.equal(existsSync(join(dataDir, "call_logs", row.artifact_relpath)), true);
+    const workerExits = workers.map((worker) => once(worker, "exit"));
+    await callLogs.closeCallLogSaves(30_000);
+    await Promise.all(workerExits);
+    assert.ok(rotationTimers.length > 0, "the real call-log rotation must be scheduled");
+    for (const timer of rotationTimers) clearTimeout(timer);
+    for (const immediate of rotationImmediates) clearImmediate(immediate);
+    await rateLimits.__resetRateLimitManagerForTests();
+    core.resetDbInstance();
+    rmSync(dataDir, { recursive: true, force: true });
+    assert.equal(existsSync(dataDir), false);
+  } finally {
+    Worker.prototype.postMessage = originalPostMessage;
+    globalThis.setTimeout = nativeSetTimeout;
+    globalThis.setImmediate = nativeSetImmediate;
+  }
 });
 
 test("#18582 context override replaces stale synced input limits in the gate and catalog", () => {
