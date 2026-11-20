@@ -12,7 +12,9 @@
  * Next.js / DOM setup, while providing strong structural coverage of:
  *   - Auth guard pattern (requireManagementAuth, 401 gate)
  *   - Error sanitization (buildErrorBody, no raw err.stack / err.message leaks)
- *   - Quota model resolution imports (resolveQuotaKeyScope, filterModelsToQuotaPools)
+ *   - Quota model resolution delegated to listQuotaKeyModels
+ *     (src/lib/quota/quotaKeyModels.ts), whose source carries the
+ *     resolveQuotaKeyScope / filterModelsToQuotaPools / getCombos assertions
  *   - Response shape ({ models })
  *   - 404 on missing key (buildErrorBody(404, ...))
  *   - force-dynamic export
@@ -40,6 +42,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const ROUTE_PATH = join(ROOT, "src/app/api/quota/keys/[id]/models/route.ts");
 
 const src = readFileSync(ROUTE_PATH, "utf8");
+
+// The quota model listing lives in a shared helper the route calls.
+const HELPER_PATH = join(ROOT, "src/lib/quota/quotaKeyModels.ts");
+
+const helperSrc = readFileSync(HELPER_PATH, "utf8");
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
 
@@ -93,32 +100,43 @@ test("quota/keys/[id]/models: does NOT leak raw err.message outside buildErrorBo
 
 // ── Quota resolution imports ──────────────────────────────────────────────────
 
-test("quota/keys/[id]/models: imports resolveQuotaKeyScope from @/lib/quota/quotaKey", () => {
+test("quota/keys/[id]/models: imports listQuotaKeyModels from @/lib/quota/quotaKeyModels", () => {
   assert.ok(
-    src.includes("resolveQuotaKeyScope"),
-    "route must call resolveQuotaKeyScope to compute pool scope"
+    src.includes("listQuotaKeyModels"),
+    "route must call listQuotaKeyModels to compute the key's models"
   );
   assert.ok(
-    src.includes("@/lib/quota/quotaKey"),
-    "route must import resolveQuotaKeyScope from @/lib/quota/quotaKey"
-  );
-});
-
-test("quota/keys/[id]/models: imports filterModelsToQuotaPools from @/lib/quota/quotaCombos", () => {
-  assert.ok(
-    src.includes("filterModelsToQuotaPools"),
-    "route must call filterModelsToQuotaPools to filter combo candidates"
-  );
-  assert.ok(
-    src.includes("@/lib/quota/quotaCombos"),
-    "route must import filterModelsToQuotaPools from @/lib/quota/quotaCombos"
+    src.includes("@/lib/quota/quotaKeyModels"),
+    "route must import listQuotaKeyModels from @/lib/quota/quotaKeyModels"
   );
 });
 
-test("quota/keys/[id]/models: passes scope.poolSlugs to filterModelsToQuotaPools", () => {
+test("quota/keys/[id]/models: helper imports resolveQuotaKeyScope from @/lib/quota/quotaKey", () => {
   assert.ok(
-    src.includes("scope.poolSlugs"),
-    "route must pass scope.poolSlugs to filterModelsToQuotaPools (same as catalog.ts approach)"
+    helperSrc.includes("resolveQuotaKeyScope"),
+    "helper must call resolveQuotaKeyScope to compute pool scope"
+  );
+  assert.ok(
+    helperSrc.includes("@/lib/quota/quotaKey"),
+    "helper must import resolveQuotaKeyScope from @/lib/quota/quotaKey"
+  );
+});
+
+test("quota/keys/[id]/models: helper imports filterModelsToQuotaPools from @/lib/quota/quotaCombos", () => {
+  assert.ok(
+    helperSrc.includes("filterModelsToQuotaPools"),
+    "helper must call filterModelsToQuotaPools to filter combo candidates"
+  );
+  assert.ok(
+    helperSrc.includes("@/lib/quota/quotaCombos"),
+    "helper must import filterModelsToQuotaPools from @/lib/quota/quotaCombos"
+  );
+});
+
+test("quota/keys/[id]/models: helper passes scope.poolSlugs to filterModelsToQuotaPools", () => {
+  assert.ok(
+    helperSrc.includes("scope.poolSlugs"),
+    "helper must pass scope.poolSlugs to filterModelsToQuotaPools (same as catalog.ts approach)"
   );
 });
 
@@ -132,8 +150,11 @@ test("quota/keys/[id]/models: imports getApiKeyById from @/lib/db/apiKeys", () =
   );
 });
 
-test("quota/keys/[id]/models: imports getCombos from @/lib/db/combos", () => {
-  assert.ok(src.includes("getCombos"), "route must call getCombos to build combo candidates");
+test("quota/keys/[id]/models: helper imports getCombos from @/lib/db/combos", () => {
+  assert.ok(
+    helperSrc.includes("getCombos"),
+    "helper must call getCombos to build combo candidates"
+  );
 });
 
 // ── Response shape ────────────────────────────────────────────────────────────
@@ -145,10 +166,10 @@ test("quota/keys/[id]/models: GET returns { models } shape", () => {
   );
 });
 
-test("quota/keys/[id]/models: maps filtered combos to model id strings (.map(m => m.id))", () => {
+test("quota/keys/[id]/models: helper maps filtered combos to model id strings (.map(m => m.id))", () => {
   assert.ok(
-    src.includes(".map(") && src.includes("m.id"),
-    "route must map filtered combo entries to their id strings"
+    helperSrc.includes(".map(") && helperSrc.includes("m.id"),
+    "helper must map filtered combo entries to their id strings"
   );
 });
 
