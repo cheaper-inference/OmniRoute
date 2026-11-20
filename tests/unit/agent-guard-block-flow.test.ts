@@ -57,16 +57,24 @@ function requestedModel(init?: RequestInit): string {
     return "";
   }
 }
+/** Host of an upstream call, so each stub answers one provider and nothing that merely contains its name. */
+function upstreamHost(url: unknown): string {
+  try {
+    return new URL(String(url)).hostname;
+  } catch {
+    return "";
+  }
+}
 function stubUpstreams() {
   calls.length = 0;
   openaiModels.length = 0;
   globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
-    const target = String(url);
-    if (target.includes("anthropic.com")) {
+    const host = upstreamHost(url);
+    if (host === "api.anthropic.com") {
       calls.push("anthropic");
       return buildClaudeResponse("from-anthropic", "claude-opus-5");
     }
-    if (target.includes("openai.com")) {
+    if (host === "api.openai.com") {
       calls.push("openai");
       const model = requestedModel(init);
       openaiModels.push(model);
