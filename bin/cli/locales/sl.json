@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Omejitev mora biti pozitivno celo število.",
     "error": "Napaka: {message}",
     "serverOffline": "Strežnik OmniRoute ne deluje. Zaženite ga z ukazom: omniroute serve",
     "authRequired": "Zahtevano je preverjanje pristnosti. Nastavite OMNIROUTE_API_KEY ali zaženite: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[poskusni zagon] izvedlo bi se dejanje: {action}",
     "cancelled": "Preklicano.",
     "jsonOpt": "Izpis v obliki JSON",
-    "yesOpt": "Preskoči poziv za potrditev"
+    "yesOpt": "Preskoči poziv za potrditev",
+    "positiveIntegerRequired": "Omejitev mora biti pozitivno celo število."
   },
   "setup": {
     "title": "Nastavitev OmniRoute",

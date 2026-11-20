@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 পুনরায় চালু করার পর, বিদ্যমান OpenAI-সামঞ্জস্যপূর্ণ এবং Anthropic-সামঞ্জস্যপূর্ণ প্রবাহগুলোর পাশাপাশি ড্যাশবোর্ডে একটি **Claude Code-সামঞ্জস্যপূর্ণ প্রোভাইডার যোগ করুন** অপশন দেখা যাবে।

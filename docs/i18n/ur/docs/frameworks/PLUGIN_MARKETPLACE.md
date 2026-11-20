@@ -27,31 +27,26 @@ child processes میں کوڈ لوڈ اور execute کرتے ہیں، اس لی�
 کسی non-loopback origin سے قابلِ رسائی نہیں ہوتے۔ دیکھیے
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)۔
 
-## یہ سب مل کر کیسے کام کرتا ہے
+## یہ کس طرح Together فٹ بیٹھتا ہے۔
 
 ```
-ڈیش بورڈ (/dashboard/plugins)
-  ├─ "انسٹال شدہ" ٹیب  → GET /api/plugins            (listPlugins)
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
   │                     POST /api/plugins/scan      (pluginManager.scan)
   │                     POST /api/plugins/{name}/activate|deactivate
-  │                     DELETE /api/plugins/{name}   (اَن انسٹال)
-  └─ "مارکیٹ پلیس" ٹیب → GET /api/plugins/marketplace
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ کوئی حسبِ ضرورت URL نہیں → بلٹ اِن SEED_REGISTRY
-                            └─ حسبِ ضرورت URL → isSafeMarketplaceUrl() SSRF گارڈ
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
                                           → safeOutboundFetch(guard:"public-only")
 ```
 
-- **رجسٹری کی تہہ** — `src/lib/plugins/marketplace.ts`: کیٹلاگ کی فہرست سازی /
-  تلاش کرتی ہے اور کسی بھی ناکامی کی صورت میں سیڈ رجسٹری پر واپس آ جاتی ہے۔
-- **لائف سائیکل کی تہہ** — `src/lib/plugins/manager.ts` (`pluginManager` singleton):
-  انسٹال، اپ گریڈ، فعال، غیر فعال، اَن انسٹال، اسکین، اسٹارٹ اَپ لوڈ۔
-- **مینی فیسٹ کی تہہ** — `src/lib/plugins/manifest.ts`: `plugin.json` کے لیے
-  Zod اسکیما + ڈیفالٹس۔
-- **اسکینر** — `src/lib/plugins/scanner.ts`: پلگ اِن ڈائریکٹری کے تحت
-  ڈسک پر موجود پلگ اِنز دریافت کرتا ہے۔
-- **لوڈر** — `src/lib/plugins/loader.ts`: ہر پلگ اِن کو ایک الگ تھلگ
-  child process میں شروع کرتا ہے اور IPC کے ذریعے hook calls کی بروکری کرتا ہے۔
+- **رجسٹری پرت** — `src/lib/plugins/marketplace.ts`: کیٹلاگ کی فہرستیں / تلاش کرتا ہے، کسی بھی ناکامی پر بیج رجسٹری میں واپس آتا ہے۔
+- **لائف سائیکل پرت** — `src/lib/plugins/manager.ts` (`pluginManager` سنگلٹن): انسٹال کریں، اپ گریڈ کریں، ایکٹیویٹ کریں، غیر فعال کریں، ان انسٹال کریں، اسکین کریں، اسٹارٹ اپ لوڈ کریں۔
+- **مینی فیسٹ پرت** — `src/lib/plugins/manifest.ts`: Zod اسکیما + ڈیفالٹس `plugin.json` کے لیے۔
+- **سکینر** — `src/lib/plugins/scanner.ts`: پلگ ان ڈائرکٹری کے تحت ڈسک پر پلگ ان دریافت کرتا ہے۔
+- **لوڈر** — `src/lib/plugins/loader.ts`: ہر پلگ ان کو ایک علیحدہ Node.js چائلڈ پروسیس میں پھیلاتا ہے اور بروکرز IPC پر کالز ہک کرتے ہیں۔ بچہ سینڈ باکس نہیں ہے (نیچے "پلگ ان ایگزیکیوشن آئسولیشن" دیکھیں)۔
 
 ## مارکیٹ پلیس کیٹلاگ
 
@@ -87,34 +82,31 @@ body لوٹائے، تو `listMarketplacePlugins()` ایک انتباہ لاگ �
 
 ## REST API
 
-تمام endpoints کے لیے management auth (`requireManagementAuth`) درکار ہے **اور** یہ
-صرف loopback تک محدود ہیں — `/api/plugins` اور `/api/plugins/` کو
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) میں درج کیا گیا ہے۔
+تمام اینڈ پوائنٹس کے لیے انتظامی توثیق کی ضرورت ہوتی ہے (`requireManagementAuth`)** اور** صرف لوپ بیک ہیں — `/api/plugins` اور `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) میں درج ہیں۔
 
-| Endpoint                         | طریقہ  | تفصیل                                                       |
-| -------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/plugins`                   | GET    | نصب شدہ plugins کی فہرست (اختیاری `?status=` فلٹر)          |
-| `/api/plugins`                   | POST   | کسی absolute مقامی path سے plugin نصب کریں                  |
-| `/api/plugins/scan`              | POST   | plugin ڈائریکٹری اسکین کر کے نئے plugins رجسٹر کریں         |
-| `/api/plugins/marketplace`       | GET    | marketplace catalog entries کی فہرست                        |
-| `/api/plugins/[name]`            | GET    | نصب شدہ plugin کی تفصیلات حاصل کریں                         |
-| `/api/plugins/[name]`            | DELETE | plugin اَن انسٹال کریں                                      |
-| `/api/plugins/[name]/activate`   | POST   | فعال کریں (لوڈ کریں + hooks رجسٹر کریں)                     |
-| `/api/plugins/[name]/deactivate` | POST   | غیر فعال کریں (`onDeactivate` چلائیں، hooks اَن رجسٹر کریں) |
-| `/api/plugins/[name]/config`     | GET    | plugin config + config schema حاصل کریں                     |
-| `/api/plugins/[name]/config`     | PUT    | plugin config اپ ڈیٹ کریں (schema کے مطابق توثیق شدہ)       |
+| اختتامی نقطہ                     | طریقہ  | تفصیل                                                        |
+| -------------------------------- | ------ | ------------------------------------------------------------ |
+| `/api/plugins`                   | GET    | انسٹال کردہ پلگ ان کی فہرست بنائیں (اختیاری `?status=` فلٹر) |
+| `/api/plugins`                   | POST   | پلگ ان سورس ڈائرکٹری سے پلگ ان انسٹال کریں۔                  |
+| `/api/plugins/scan`              | POST   | پلگ ان ڈائرکٹری کو اسکین کریں اور نئے پلگ ان رجسٹر کریں۔     |
+| `/api/plugins/marketplace`       | GET    | مارکیٹ پلیس کیٹلاگ اندراجات کی فہرست بنائیں                  |
+| `/api/plugins/[name]`            | GET    | انسٹال شدہ پلگ ان کی تفصیلات حاصل کریں۔                      |
+| `/api/plugins/[name]`            | DELETE | ایک پلگ ان ان انسٹال کریں۔                                   |
+| `/api/plugins/[name]/activate`   | POST   | چالو کریں ( + رجسٹر ہکس لوڈ کریں)                            |
+| `/api/plugins/[name]/deactivate` | POST   | غیر فعال کریں (فائر `onDeactivate`، غیر رجسٹر ہکس)           |
+| `/api/plugins/[name]/config`     | GET    | پلگ ان config + config اسکیما حاصل کریں۔                     |
+| `/api/plugins/[name]/config`     | PUT    | پلگ ان کی تشکیل کو اپ ڈیٹ کریں (اسکیما کے خلاف توثیق شدہ)    |
 
-`GET /api/plugins` کا `status` فلٹر ان میں سے ایک قدر قبول کرتا ہے:
-`installed` / `active` / `inactive` / `error`۔ کوئی غیر درست قدر `400` واپس کرتی ہے۔
+`GET /api/plugins` `status` فلٹر `installed` / `active` / `inactive` / `error` میں سے ایک کو قبول کرتا ہے۔ ایک غلط قدر `400` لوٹاتی ہے۔
 
-### نصب شدہ plugins کی فہرست
+### انسٹال کردہ پلگ ان کی فہرست بنائیں
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### مقامی path سے انسٹال کرنا
+### مقامی راستے سے انسٹال کریں۔
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -123,19 +115,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` کا **absolute** ہونا ضروری ہے اور اس میں `..` traversal segments یا
-null bytes شامل نہیں ہو سکتے (Zod کے ذریعے نافذ کردہ)۔ source ڈائریکٹری میں ایک درست
-`plugin.json` موجود ہونا چاہیے (یا یہ ایسی ڈائریکٹری کی parent ہو)۔ کامیابی پر response
-نصب شدہ plugin row کے ساتھ `201` ہوتا ہے۔
+`path` ایک ہونا ضروری ہے۔** مطلق** ڈائریکٹری کا راستہ** پلگ ان سورس ڈائرکٹری کے اندر** : `plugin-sources` پلگ ان روٹ کے آگے، لہذا `~/.omniroute/plugin-sources/` بطور ڈیفالٹ، یا `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` جب وہ متغیر سیٹ ہو (`getPluginSourcesDir()` میں `src/lib/plugins/installSource.ts`)۔ پہلے وہاں پلگ ان کو کاپی یا کلون کریں۔ `400` کے ساتھ انسٹال سے انکار کر دیا جاتا ہے جب پاتھ میں `..` یا null بائٹ ہوتا ہے، اس ڈائرکٹری سے باہر ہوتا ہے، اس کے باہر symlink کے ذریعے حل ہوتا ہے، ایک Symlink پر مشتمل ہوتا ہے جس کا ہدف اس سے باہر ہوتا ہے، یا جب ڈائریکٹری موجود نہیں ہوتی ہے۔ سورس ڈائرکٹری میں ایک درست `plugin.json` ہونا چاہیے (یا ایک کا والدین ہونا)۔ کامیابی پر جواب نصب شدہ پلگ ان قطار کے ساتھ `201` ہے۔
 
-### marketplace براؤز کرنا
+دوسرے پلگ ان روٹس کے برعکس، اس کے لیے انتظامی اسناد (ڈیش بورڈ سیشن یا مینیج اسکوپڈ API کلید) کی ضرورت ہوتی ہے یہاں تک کہ جب لاگ ان غیر فعال ہو (`requireLogin=false`): کوڈ انسٹال کرنا کبھی بھی گمنام عمل نہیں ہوتا ہے۔
+
+### بازار کو براؤز کریں۔
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### plugin config اپ ڈیٹ کرنا
+### پلگ ان کی ترتیب کو اپ ڈیٹ کریں۔
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -144,10 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` فراہم کردہ ہر قدر کو plugin کے
-`configSchema` (manifest میں اعلان کردہ) کے مطابق validate کرتا ہے: `number` fields
-`min`/`max` کی پابندی کرتے ہیں، جبکہ `select` fields کو اعلان کردہ `enum` سے مطابقت
-رکھنا ضروری ہے۔ schema میں غیر موجود keys کو گزرنے کی اجازت ہے۔
+`PUT .../config` پلگ ان کے `configSchema` (مینی فیسٹ میں اعلان کردہ) کے خلاف ہر فراہم کردہ قدر کی توثیق کرتا ہے: `number` فیلڈز honour `min`/`max`، `select` فیلڈز کا اعلان کردہ `enum` سے مماثل ہونا چاہیے۔ اسکیما میں موجود کلیدوں کے ذریعے اجازت نہیں ہے۔
 
 ## Configuration
 
@@ -205,84 +193,60 @@ dashboard کا "Marketplace" tab اس URL کے لیے ایک field فراہم ک
 > (`getSettings()` → `listMarketplacePlugins()`) settings store میں key موجود ہونے
 > کے بعد اسے استعمال کرتا ہے۔
 
-## سیکیورٹی
+## سیکورٹی
 
-### روٹ درجہ — صرف لوپ بیک
+### روٹ ٹائر — لوپ بیک صرف
 
-پلگ اِنز الگ سے شروع کیے گئے چائلڈ پراسیسز میں کوڈ چلاتے ہیں، اس لیے مکمل `/api/plugins`
-سطح کو `LOCAL_ONLY` (درجہ 1) کے طور پر درجہ بند کیا گیا ہے۔ لوپ بیک کا نفاذ
-ہر توثیقی جانچ سے **پہلے** غیر مشروط طور پر ہوتا ہے، اس لیے کسی ٹنل کے ذریعے
-مشین تک پہنچنے والا افشا شدہ مینجمنٹ ٹوکن بھی کسی پلگ اِن کو انسٹال، فعال یا اَن انسٹال نہیں کر سکتا۔
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) اور
-سخت قواعد #15 / #17 دیکھیں۔
+پلگ ان بچوں کے پیدا کردہ عمل میں کوڈ پر عمل درآمد کرتے ہیں، لہذا پوری `/api/plugins` سطح کو `LOCAL_ONLY` (ٹائر 1) کی درجہ بندی کیا جاتا ہے۔ لوپ بیک نفاذ غیر مشروط طور پر چلتا ہے۔** پہلے** کسی بھی تصدیق کی جانچ پڑتال، لہذا سرنگ کے اوپر باکس تک پہنچنے والا ایک لیک شدہ مینجمنٹ ٹوکن پھر بھی پلگ ان کو انسٹال، چالو یا ان انسٹال نہیں کر سکتا۔ دیکھیں [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) اور سخت اصول #15 / #17۔
 
 ### مارکیٹ پلیس رجسٹری SSRF گارڈ
 
-حسبِ ضرورت رجسٹری URL ایک ایسی کنفیگریشن ہے جس پر حملہ آور اثر انداز ہو سکتا ہے، اس لیے
-اسے حاصل کرنے سے پہلے `listMarketplacePlugins()` اسے دو حفاظتی تہوں سے گزارتا ہے:
+ایک حسب ضرورت رجسٹری URL حملہ آور سے متاثر کن کنفیگریشن ہے، لہذا اسے لانے سے پہلے `listMarketplacePlugins()` اسے دو پرتوں سے چلاتا ہے:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - `http:` / `https:` کے علاوہ ہر چیز کو مسترد کرتا ہے۔
-   - کینونیکل `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) کے ذریعے صریح نجی/لوپ بیک/لنک-لوکل/ULA ہوسٹس (IPv4 **اور** IPv6،
-     بشمول IPv4-mapped) کو مسترد کرتا ہے۔
-   - `A` اور `AAAA` **دونوں** ریکارڈز کو ریزولو کرتا ہے اور اگر ریزولو شدہ پتوں میں سے **کوئی بھی**
-     نجی ہو تو مسترد کر دیتا ہے — یوں عوامی ہوسٹ نام → نجی IP بائی پاس بند ہو جاتا ہے۔
-   - **ناکامی کی صورت میں بند رہتا ہے**: DNS ریزولیوشن کی ناکامی URL کو مسترد کر دیتی ہے۔
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): فیچ کے وقت صرف عوامی URL
-   گارڈ کو دوبارہ لاگو کرتا ہے اور **ری ڈائریکٹس کو بلاک کرتا ہے** (عوامی → نجی `30x`
-   منتقلی نہیں ہوتی)۔
+   - کسی بھی چیز کو رد کرتا ہے جو `http:` / `https:` نہیں ہے۔
+   - لفظی private/loopback/link-local/ULA میزبانوں کو مسترد کرتا ہے (IPv4** اور** IPv6، بشمول IPv4-mapped) کیننیکل `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) کے ذریعے۔
+   - حل کرتا ہے۔** دونوں** `A` اور `AAAA` ریکارڈ کرتا ہے اور اگر مسترد کرتا ہے۔** کوئی بھی** حل شدہ پتہ نجی — ہے عوامی میزبان نام → نجی-IP بائی پاس کو بند کر رہا ہے۔
+   - **فیل بند** : ایک DNS قرارداد کی ناکامی URL کو مسترد کرتی ہے۔
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): لانے کے وقت اور صرف عوامی URL گارڈ کو دوبارہ لاگو کرتا ہے۔** بلاکس ری ڈائریکٹ** (کوئی عوامی → نجی `30x` محور نہیں)۔
 
-اگر کوئی URL کسی بھی تہہ میں ناکام ہو جائے تو درخواست منسوخ نہیں ہوتی — مارکیٹ پلیس
-خاموشی سے پہلے سے موجود سیڈ رجسٹری استعمال کرتا ہے اور ایک تنبیہ لاگ کرتا ہے۔
+ایک URL جو کسی بھی پرت میں ناکام ہوجاتا ہے وہ درخواست کو منسوخ نہیں کرتا ہے — مارکیٹ پلیس خاموشی سے بلٹ ان سیڈ رجسٹری پر واپس آجاتی ہے اور ایک انتباہ لاگ ان کرتا ہے۔
 
-> اس گارڈ کو PR #3774 میں خاص طور پر اس لیے مزید مضبوط بنایا گیا تھا کہ A + AAAA دونوں کو ریزولو کیا جائے اور
-> صرف IPv4 کی جانچ کے بجائے کینونیکل `isPrivateHost` استعمال کیا جائے۔
+> اس گارڈ کو PR #3774 میں خاص طور پر A + AAAA حل کرنے اور IPv4-only چیک کے بجائے کینونیکل `isPrivateHost` استعمال کرنے کے لیے سخت کیا گیا تھا۔
 
-### پلگ اِن عمل درآمد کی علیحدگی
+### پلگ ان پر عمل درآمد تنہائی
 
-- **پراسیس کی علیحدگی** — `loadPlugin()` (`src/lib/plugins/loader.ts`)
-  ہر پلگ اِن کو ایک الگ Node.js چائلڈ پراسیس میں شروع کرتا ہے اور IPC کے ذریعے مواصلت کرتا ہے۔
-  ہُک کالز کے لیے ٹائم آؤٹ ہوتا ہے، جس میں `SIGTERM` → `SIGKILL` تک شدت بڑھائی جاتی ہے۔
-- **ماحولیاتی متغیرات کی اجازت یافتہ فہرست** — چائلڈ کو صرف اجازت یافتہ فہرست میں شامل ماحولیاتی
-  متغیرات ملتے ہیں؛ زیادہ وسیع مجموعہ صرف اس وقت دیا جاتا ہے جب مینی فیسٹ
-  `env` اجازت طلب کرے۔
-- **پاتھ کی حد بندی** — انسٹال/اپ گریڈ/اَن انسٹال کے عمل اس بات کی تصدیق کرتے ہیں کہ پلگ اِن
-  ڈائریکٹری اور `manifest.main` کسی بھی نقل یا تکراری حذف سے پہلے
-  منظم پلگ اِن روٹ کے **اندر** ریزولو ہوں (یہ تبدیل شدہ DB پاتھز اور
-  `manifest.main` میں `../` ٹریورسل سے تحفظ دیتا ہے)۔ فعال کرنے کا عمل
-  `realpath` کے ذریعے علامتی روابط کو ریزولو کرتا ہے اور ایسے انٹری پوائنٹ کو لوڈ کرنے سے انکار کرتا ہے جو پلگ اِن
-  ڈائریکٹری سے باہر نکلتا ہو۔
-- **اختیاری سالمیت پِن** — مینی فیسٹ ایک `integrity`
-  (`sha256-<base64>`، SRI فارمیٹ) فیلڈ کا اعلان کر سکتا ہے۔ موجود ہونے پر لوڈر
-  لوڈ کے وقت انٹری فائل کے ہیش کی تصدیق کرتا ہے اور عدم مطابقت کی صورت میں فعال کرنے سے انکار کر دیتا ہے۔ یہ
-  اختیاری چھیڑ چھاڑ کی شناخت ہے، سیکیورٹی کی **حد نہیں** — صرف لوپ بیک روٹنگ
-  اور اجازتوں کا ماڈل ہی حقیقی حدود ہیں۔
+> **پلگ ان سینڈ باکس نہیں ہوتے ہیں۔** بچہ ایک عام Node.js عمل ہے جو OmniRoute صارف کے طور پر چل رہا ہے، جس میں VM سیاق و سباق اور Node.js اجازت کے جھنڈے نہیں ہیں، لہذا پلگ ان کوڈ کسی بھی فائل کو پڑھ اور لکھ سکتا ہے جو صارف کر سکتا ہے، پروگرام چلا سکتا ہے اور نیٹ ورک تک پہنچ سکتا ہے۔ `requires.permissions` صرف فیصلہ کرتا ہے کہ بچے کو کون سے ماحول کے متغیرات حاصل ہوں گے۔ دوسری اجازتیں نافذ نہیں ہیں۔ صرف پلگ ان انسٹال کریں جن پر آپ بھروسہ کریں۔ عمل کی باؤنڈری ذیل میں کریش اور ہینگ پر مشتمل ہے۔ یہ سیکورٹی کی حد نہیں ہے۔
 
-## مینی فیسٹ (`plugin.json`)
+- **عمل تنہائی** — `loadPlugin()` (`src/lib/plugins/loader.ts`) ہر پلگ ان کو ایک علیحدہ Node.js چائلڈ پروسیس میں پھیلاتا ہے اور IPC پر بات چیت کرتا ہے۔ ہک کالز کا ٹائم آؤٹ `SIGTERM` → `SIGKILL` اضافہ کے ساتھ ہوتا ہے۔
+- **Env کی اجازت کی فہرست** — بچے کو ماحولیاتی متغیرات کا صرف ایک اجازت یافتہ سیٹ ملتا ہے۔ وسیع تر سیٹ صرف اس وقت دیا جاتا ہے جب مینی فیسٹ `env` کی اجازت کی درخواست کرتا ہے۔
+- **سورس کنٹینمنٹ انسٹال کریں۔** — `POST /api/plugins` صرف پلگ ان سورس ڈائرکٹری سے پڑھتا ہے (دیکھیں "مقامی راستے سے انسٹال کریں"): راستہ `realpath` کے ساتھ کینونیکلائز کیا جاتا ہے، اس ڈائرکٹری کے اندر سختی سے رہنا چاہیے، اور ایک سورس ٹری جس میں ایک سملنک ہوتا ہے جو اس سے بچ جاتا ہے اسے کسی بھی چیز کی کاپی کرنے سے پہلے انکار کر دیا جاتا ہے۔
+- **راستے پر قابو پانا** — install/upgrade/uninstall زور دیتے ہیں کہ پلگ ان ڈائرکٹری اور `manifest.main` حل کرتے ہیں۔** کے اندر** کسی بھی کاپی یا تکراری حذف کرنے سے پہلے منظم پلگ ان کی جڑ ( `manifest.main` میں چھیڑ چھاڑ DB راستوں اور `../` traversal کے خلاف محافظ)۔ ایکٹیویشن symlinks کو `realpath` کے ذریعے حل کرتی ہے اور ایک انٹری پوائنٹ لوڈ کرنے سے انکار کرتی ہے جو پلگ ان ڈائرکٹری سے بچ جاتا ہے۔
+- **اختیاری سالمیت پن** — ایک مینی فیسٹ `integrity` (`sha256-<base64>`، SRI فارمیٹ) فیلڈ کا اعلان کر سکتا ہے۔ موجود ہونے پر، لوڈر لوڈ کے وقت انٹری فائل ہیش کی تصدیق کرتا ہے اور مماثلت نہ ہونے پر چالو کرنے سے انکار کرتا ہے۔ یہ چھیڑ چھاڑ کا آپٹ ان ہے،** نہیں** ایک حفاظتی حد: یہ اس بات کو محدود نہیں کرتا کہ بھری ہوئی پلگ ان کیا کر سکتی ہے۔
+- **ہکس میں کلائنٹ کی کوئی اسناد نہیں ہیں۔** — سیاق و سباق `onRequest`، `onResponse` اور `onError` کو دیا گیا ہے اس سے `authorization`، `x-api-key`، `proxy-authorization` اور `cookie` ہیڈرز کو ہٹا دیا گیا ہے، اور API کلیدی ریکارڈ میں کوئی کلیدی قدر نہیں ہے (`redactPluginContext()` in `src/lib/plugins/hooks.ts`)۔
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) کے ذریعے توثیق شدہ:
+## ظاہر (`plugin.json`)
 
-| فیلڈ               | قسم       | نوٹس                                                           |
-| ------------------ | --------- | -------------------------------------------------------------- |
-| `name`             | string    | لازمی؛ kebab-case (`^[a-z0-9-]+$`)، 1–100 حروف                 |
-| `version`          | string    | لازمی؛ semver (`MAJOR.MINOR.PATCH`)                            |
-| `description`      | string?   | ≤ 500 حروف                                                     |
-| `author`           | string?   | ≤ 200 حروف                                                     |
-| `license`          | string?   | ڈیفالٹ `MIT` ہے                                                |
-| `main`             | string?   | انٹری فائل؛ ڈیفالٹ `index.js` ہے                               |
-| `source`           | enum?     | `local` \| `marketplace` (ڈیفالٹ `local` ہے)                   |
-| `tags`             | string[]? | تلاش کے ٹیگز                                                   |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                |
-| `hooks`            | object?   | بولین قدریں جو بتاتی ہیں کہ پلگ اِن کون سے ہُکس نافذ کرتا ہے   |
-| `skills`           | object[]? | اختیاری مہارت کی تعریفیں                                       |
-| `enabledByDefault` | boolean?  | انسٹال ہونے پر خودکار طور پر فعال کریں                         |
-| `configSchema`     | object?   | کنفیگریشن فیلڈز کا نقشہ (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | اختیاری `sha256-<base64>` انٹری فائل پِن                       |
+`PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-اجازتیں درج ذیل enum سے لی جاتی ہیں:
-`network` / `file-read` / `file-write` / `env` / `exec`۔
+| میدان              | قسم        | نوٹس                                                           |
+| ------------------ | ---------- | -------------------------------------------------------------- |
+| `name`             | تار        | مطلوبہ؛ کباب کیس (`^[a-z0-9-]+$`)، 1-100 حروف                  |
+| `version`          | تار        | مطلوبہ؛ سمور (`MAJOR.MINOR.PATCH`)                             |
+| `description`      | تار؟       | ≤ 500 حروف                                                     |
+| `author`           | تار؟       | ≤ 200 حروف                                                     |
+| `license`          | تار؟       | `MIT` سے پہلے سے طے شدہ                                        |
+| `main`             | تار؟       | اندراج فائل؛ `index.js` کے لیے ڈیفالٹس                         |
+| `source`           | enum       | `local` \| `marketplace` ( `local` سے پہلے سے طے شدہ)          |
+| `tags`             | تار []؟    | ٹیگز تلاش کریں۔                                                |
+| `requires`         | اعتراض؟    | `{ omniroute?, permissions[] }`                                |
+| `hooks`            | اعتراض؟    | بولین یہ اعلان کرتے ہوئے کہ کون سا ہکس پلگ ان کو لاگو کرتا ہے۔ |
+| `skills`           | اعتراض []؟ | اختیاری مہارت کی تعریفیں                                       |
+| `enabledByDefault` | بولین      | انسٹال کرنے پر آٹو ایکٹیویٹ                                    |
+| `configSchema`     | اعتراض؟    | کنفگ فیلڈز کا نقشہ (`string`/`number`/`boolean`/`select`)      |
+| `integrity`        | تار؟       | اختیاری `sha256-<base64>` انٹری فائل پن                        |
+
+اجازتیں enum `network` / `file-read` / `file-write` / `env` / `exec` سے حاصل کی گئی ہیں۔ صرف `env` رن ٹائم اثر ہوتا ہے (بچے کے لیے قدرے بڑی ماحولیاتی متغیر اجازت فہرست)؛ دوسرے اعلانات ہیں اور نافذ نہیں ہوتے ہیں۔
 
 ## لائف سائیکل کا بہاؤ
 
@@ -342,17 +306,14 @@ Plugin کی metrics/analytics اضافی ٹیبلز میں ٹریک کی جات�
 
 ## ڈیش بورڈ
 
-`/dashboard/plugins` پر موجود ڈیش بورڈ صفحہ
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) دو ٹیب فراہم کرتا ہے:
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) پر ڈیش بورڈ صفحہ دو ٹیبز فراہم کرتا ہے:
 
-- **نصب شدہ** — نصب شدہ plugins کو ان کے اعلان کردہ hooks، activate/deactivate
-  toggle، uninstall بٹن، اور "Plugins اسکین کریں" کارروائی
-  (`POST /api/plugins/scan`) کے ساتھ فہرست میں دکھاتا ہے۔
-- **مارکیٹ پلیس** — `GET /api/plugins/marketplace` سے حاصل شدہ catalog دکھاتا ہے، اور
-  حسبِ ضرورت registry URL سیٹ کرنے کے لیے ایک فیلڈ فراہم کرتا ہے۔
+- **انسٹال** — ان کے اعلان کردہ ہکس، ایک activate/deactivate ٹوگل، ایک ان انسٹال بٹن، اور "پلگ ان کے لیے اسکین" ایکشن (`POST /api/plugins/scan`) کے ساتھ انسٹال کردہ پلگ انز کی فہرست بناتا ہے۔
+- **بازار** — اپنی مرضی کی رجسٹری URL کو سیٹ کرنے کے لیے `GET /api/plugins/marketplace` سے کیٹلاگ کو فیلڈ کے ساتھ دکھاتا ہے۔
 
-ہر plugin کا config صفحہ `/dashboard/plugins/[name]/config` پر موجود ہے
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`)۔
+صفحہ ہمیشہ ایک انتباہ دکھاتا ہے کہ پلگ انز OmniRoute عمل کے مکمل مراعات کے ساتھ چلتے ہیں۔
+
+فی پلگ ان تشکیل صفحہ `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) پر رہتا ہے۔
 
 ## مزید دیکھیں
 

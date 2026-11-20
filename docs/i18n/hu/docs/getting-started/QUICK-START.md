@@ -21,10 +21,10 @@ npm install -g omniroute
 ### B lehetőség: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-A `:latest` a legmagasabb **közzétett**, stabil SemVer-verzió. Nem követi a git `main` ágát. GitOps használata esetén rögzítsd a `diegosouzapw/omniroute:X.Y.Z` verziót. Lásd: [Képcímkék / Kiadási csatornák](../guides/DOCKER_GUIDE.md#release-channels).
+A `:latest` a legmagasabb **közzétett**, stabil SemVer-verzió. Nem követi a git `main` ágát. GitOps használata esetén rögzítsd a `cheaperinference/omniroute:X.Y.Z` verziót. Lásd: [Képcímkék / Kiadási csatornák](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### C lehetőség: Forráskódból
 

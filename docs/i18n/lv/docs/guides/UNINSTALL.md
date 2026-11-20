@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Pēc izvēles) Noņemt attēlu
+docker rmi cheaperinference/omniroute:latest
+# Vecākiem instalēšanas gadījumiem tika izmantots mantotais nosaukums:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

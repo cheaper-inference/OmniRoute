@@ -27,14 +27,9 @@
 
 ---
 
-## အမြန် လုပ်ဆောင်ခြင်း
+## အမြန်ပြေးပါ။
 
-> **Command တစ်ခုတည်းဖြင့် ကိုယ်တိုင် Host လုပ်မည်လား။**
-> [ကိုယ်တိုင် Host လုပ်ခြင်း လမ်းညွှန်](../getting-started/SELF_HOST_GUIDE.md) ကို ကြည့်ပါ —
-> `docker compose -f docker-compose.selfhost.yml up -d` (ထုတ်ဝေထားသော Image +
-> Redis၊ Loopback သီးသန့်၊ Profile ရွေးချယ်စရာ မရှိပါ)။ အောက်ပါ အမြန်လုပ်ဆောင်နည်းသည်
-> အခြားနေရာတွင် Redis ကို လုပ်ဆောင်ထားပြီးသား အသုံးပြုသူများအတွက်
-> Container တစ်ခုတည်း အသုံးပြုသည့် နည်းလမ်းဖြစ်သည်။
+> **အမိန့်တစ်ခုတည်းတွင် ကိုယ်ပိုင်အိမ်ရှင်ရှိပါသလား။** [Self-Host လမ်းညွှန်](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (ထုတ်ဝေထားသော ပုံ + Redis၊ အလှည့်ကျသီးသန့်၊ ပရိုဖိုင်ရွေးချယ်စရာမရှိ) ကိုကြည့်ပါ။ အောက်ဖော်ပြပါ Quick Run သည် အခြားနေရာမှ Redis သုံးထားပြီး အသုံးပြုသူများအတွက် ကွန်တိန်နာတစ်ခုတည်းလမ်းကြောင်းဖြစ်သည်။
 
 ```bash
 docker run -d \
@@ -43,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Environment File ဖြင့်
 
 ```bash
-# ဦးစွာ .env ကို မိတ္တူကူးပြီး တည်းဖြတ်ပါ
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -59,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -240,16 +235,16 @@ Prod stack သည် dev compose နှင့် တစ်ပြိုင်န�
 
 ## Dockerfile အဆင့်များ
 
-Repository တွင် multi-stage Dockerfile (`Dockerfile`) တစ်ခု ပါဝင်သည်။ အဆင့်လေးခုကို အသုံးပြုနိုင်ပြီး မိမိအသုံးပြုမည့်အခြေအနေနှင့် ကိုက်ညီသော `target` ကို ရွေးချယ်ပါ။
+repository သည် multi-stage Dockerfile (`Dockerfile`) ကို ပေးပို့သည်။ အဆင့် လေးဆင့်ကို ဖော်ထုတ်ထားသည်။ သင့်အသုံးပြုမှုအတွက် မှန်ကန်သော `target` ရွေးချယ်ပါ။
 
-| အဆင့်         | Base image            | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                                                  |
+| ဇာတ်ခုံ       | အခြေခံပုံ             | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                                                  |
 | ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `builder`     | `node:26-trixie-slim` | Dependencies များကို ထည့်သွင်းပြီး (`npm ci --legacy-peer-deps`) `npm run build` ကို လုပ်ဆောင်သည် (ပုံသေအားဖြင့် Turbopack — အောက်ရှိ Build-time resources ကို ကြည့်ပါ)                                                                                                                                                                                      |
 | `runner-base` | `node:26-trixie-slim` | Next.js standalone output ပါဝင်သော production runtime ဖြစ်သည်။ **မည်သည့် provider CLI မျှ ထည့်သွင်းပေးထားခြင်း မရှိပါ။**                                                                                                                                                                                                                                     |
 | `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` နှင့် global CLI များဖြစ်သော `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw` တို့ကို ထည့်သွင်းပေးသည်။ **Agentic workflow များအတွက် ၎င်းကို ရွေးချယ်ပါ။**                                                                                                                                              |
 | `runner-web`  | `runner-base`         | Web-session provider များဖြစ်သော `gemini-web`, `claude-web`, `claude-turnstile` အတွက် Playwright နှင့် Chromium browser (`--with-deps`) ကို ထည့်သွင်းပေးသည်။ **အဆိုပါ provider များကို အသုံးပြုသည့်အခါ ၎င်းကို ရွေးချယ်ပါ** — ၎င်းမပါဝင်သော ရိုးရိုး image သည် request ပြုလုပ်ချိန်တွင် အလုပ်မလုပ်ပါ (Release Channels အောက်ရှိ `-web` မှတ်ချက်ကို ကြည့်ပါ)။ |
 
-သတ်မှတ်ထားသော target တစ်ခုကို ကိုယ်တိုင် build လုပ်ရန်-
+တိကျသောပစ်မှတ်ကို ကိုယ်တိုင်ဖန်တီးပါ-
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -257,10 +252,9 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Build လုပ်ချိန် အရင်းအမြစ်များ
+### အချိန်အရင်းအမြစ်များတည်ဆောက်ခြင်း။
 
-Build arg သုံးခုက `builder` အဆင့်အတွက် လိုအပ်သော resource ပမာဏကို ထိန်းချုပ်သည်။ ၎င်းတို့သည် build လုပ်ချိန်အတွက်သာ ဖြစ်သည် —
-`OMNIROUTE_MEMORY_MB` (အောက်တွင်ဖော်ပြထားသည်) သည် runtime အတွက် သီးခြားထိန်းချုပ်မှုတစ်ခု ဖြစ်သည်။
+တည်ဆောက်မှု args သုံးခုသည် `builder` အဆင့်ကုန်ကျစရိတ်ကို ထိန်းချုပ်သည်။ ၎င်းတို့သည် build-time only — `OMNIROUTE_MEMORY_MB` (အောက်တွင်) သီးခြား runtime knob ဖြစ်သည်။
 
 | Build arg                   | ပုံသေတန်ဖိုး | သက်ရောက်မှု                                                                                                                 |
 | --------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
@@ -278,46 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` ကို ဖွင့်ထားသောကြောင့် `next build` သည် parent process **နှင့်** worker process နှစ်ခုလုံးကို လုပ်ဆောင်ပြီး process တစ်ခုစီက `OMNIROUTE_BUILD_MEMORY_MB` ကို သီးခြားလိုက်နာသည်။ ထို့ကြောင့် container ၏ အများဆုံးကန့်သတ်ပမာဏကို ထိုတန်ဖိုး၏ တစ်ဆမဟုတ်ဘဲ အကြမ်းဖျင်း နှစ်ဆထက်ပို၍ သတ်မှတ်ပါ။
+`webpackBuildWorker` ကို ဖွင့်ထားသောကြောင့် `next build` သည် မိဘကို လုပ်ဆောင်သည်။** နှင့်** အလုပ်သမားလုပ်ငန်းစဉ်တစ်ခုနှင့် တစ်ခုစီသည် `OMNIROUTE_BUILD_MEMORY_MB` သီးခြားစီ ဂုဏ်ပြုပါသည်။ အပေါ်က ကွန်တိန်နာမျက်နှာကျက်ကို အကြမ်းဖျင်းအားဖြင့် တစ်ကြိမ်မဟုတ်ဘဲ အဲဒီတန်ဖိုးထက် နှစ်ဆလောက် အရွယ်အစားပေးပါ။
 
-ဤ tree ပေါ်တွင် တိုင်းတာထားသော ရလဒ်များ (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`)-
+ဤသစ်ပင်ပေါ်တွင် တိုင်းတာခြင်း (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Container အများဆုံးကန့်သတ်ပမာဏ | ရလဒ်                                                      |
-| --------- | ------------------------------ | --------------------------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB                 | နှစ်မျိုးလုံးတွင် အကြောင်းကြားချက်မရှိဘဲ OOM-kill ဖြစ်သည် |
-| webpack   | 8 GiB                          | Build worker ကို SIGKILL လုပ်ခံရသည်                       |
-| webpack   | 12 GiB                         | အောင်မြင်ပြီး peak ပမာဏသည် 11.1 GiB ရှိသည်                |
+| Bundler   | ကွန်တိန်နာ မျက်နှာကျက် | ရလဒ်                                                  |
+| --------- | ---------------------- | ----------------------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB         | OOM - နှစ်ယောက်စလုံးကို တိတ်တဆိတ် သတ်ပစ်လိုက်တယ်။     |
+| ဝဘ်အိတ်   | 8 GiB                  | ဆောက်လုပ်ရေးလုပ်သား SIGKILLed                         |
+| ဝဘ်အိတ်   | 12 GiB                 | အောင်မြင်ခဲ့ပြီး 11.1 GiB တွင် အထွတ်အထိပ်ရောက်ခဲ့သည်။ |
 
-### Runtime ပုံသေတန်ဖိုးများ
+### Runtime မူရင်းများ
 
-`runner-base` က export လုပ်ထားသော ပုံသေတန်ဖိုးများ- `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`။
+`runner-base` ဖြင့် တင်ပို့သော ပုံသေများ : `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Docker အတွင်းရှိ memory အပြုအမူ-
+Docker ရှိ မှတ်ဉာဏ်အပြုအမူ
 
-- Image သည် `OMNIROUTE_MEMORY_MB=1024` ကို သတ်မှတ်ပြီး ၎င်းမှ `NODE_OPTIONS=--max-old-space-size=1024` ကို ရယူသတ်မှတ်သည်။
-- အမှန်တကယ် server process ကို standalone launcher က စတင်ပေးပြီး၊ ၎င်းသည် `OMNIROUTE_MEMORY_MB` ကို ဖတ်ကာ `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ကို ထပ်ပေါင်းသည်။
-- Node သည် ထပ်တလဲလဲပါရှိသော `--max-old-space-size` တန်ဖိုးများအနက် နောက်ဆုံးတန်ဖိုးကို အသုံးပြုသောကြောင့် `OMNIROUTE_MEMORY_MB` ကို သတ်မှတ်ခြင်းဖြင့် အမှန်တကယ်သက်ရောက်မည့် Docker heap ကန့်သတ်ချက်ကို ထိန်းချုပ်နိုင်သည်။
-- Image က ၎င်းကို အမြဲသတ်မှတ်ထားသောကြောင့် launcher ၏ RAM ပမာဏအလိုက် ချိန်ညှိသည့် မူလ fallback သည် Docker အောက်တွင် မည်သည့်အခါမျှ အသုံးမဝင်ပါ။ Workload အတွက် ၎င်းကို တိတိကျကျ မြှင့်သတ်မှတ်ပါ (အောက်ပါဇယားကို ကြည့်ပါ)။ Coding-agent `/v1/responses` အတွက် `2048` သည်ပင် မလုံလောက်သေးပါ။
+- ပုံသည် `OMNIROUTE_MEMORY_MB=1024` သတ်မှတ်ပြီး ၎င်းမှ `NODE_OPTIONS=--max-old-space-size=1024` ဆင်းသက်သည်။
+- အမှန်တကယ်ဆာဗာလုပ်ငန်းစဉ်ကို `OMNIROUTE_MEMORY_MB` ဖတ်ပြီး `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ကိုထည့်သွင်းပေးသော standalone launcher မှစတင်ပါသည်။
+- Node သည် နောက်ဆုံးအကြိမ် `--max-old-space-size` တန်ဖိုးကို အသုံးပြုသည်၊ ထို့ကြောင့် `OMNIROUTE_MEMORY_MB` ဆက်တင်သည် ထိရောက်သော Docker heap ကန့်သတ်ချက်ကို ထိန်းချုပ်သည်။
+- ပုံသည် ၎င်းကို အမြဲတမ်း သတ်မှတ်ပေးသောကြောင့်၊ launcher ၏ ကိုယ်ပိုင် RAM-ချိန်ကိုက်နိုင်သော လှည့်ကွက်သည် Docker အောက်တွင် မည်သည့်အခါမှ သက်ရောက်မှုမရှိပါ။ အလုပ်တာဝန်အတွက် အထူးတလည် မြှင့်တင်ပါ (အောက်ပါဇယား)။ `2048` သည် coding-agent `/v1/responses` အတွက် အလွန်သေးငယ်ပါသည်။
 
-### Coding agent များအတွက် runtime RAM
+### coding အေးဂျင့်များအတွက် runtime RAM
 
-Docker ၏ မူလ 1 GiB သတ်မှတ်ချက်သည် dashboard/ပေါ့ပါးသော chat အတွက် အနိမ့်ဆုံးပမာဏသာဖြစ်ပြီး production အတွက် သင့်တော်သောပမာဏ မဟုတ်ပါ။ ရှည်လျားသော `POST /v1/responses` body များ (message ရာပေါင်းများစွာ၊ tool ဆယ်ဂဏန်းများစွာ) သည် compression လုပ်နေစဉ်အတွင်း in-memory graph အများအပြားကို ဆက်လက်ထိန်းသိမ်းထားသည်။ တစ်ခုလျှင် ~3 MiB / ~750k-token ခန့်ရှိပြီး တစ်စိတ်တစ်ပိုင်း အချိန်ထပ်နေသော request နှစ်ခုသည် **12 GiB** old-space တွင် V8 ကို ရပ်တန့်စေခဲ့သည် (`FATAL ERROR: Reached heap limit`)။ ထို့အပြင် 16 GiB cgroup OOM ကိုလည်း ကြုံတွေ့ခဲ့သည်။ [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ကို ကြည့်ပါ။
+1 GiB Docker မူရင်းသည် ထုတ်လုပ်မှုအရွယ်အစားမဟုတ်ဘဲ dashboard/light-chat ကြမ်းခင်းဖြစ်သည်။ ရှည်လျားသော `POST /v1/responses` ကောင်များ (မက်ဆေ့ချ် ရာနှင့်ချီ၊ ကိရိယာ ဆယ်ဂဏန်း) သည် ချုံ့နေစဉ်အတွင်း မမ်မိုရီဂရပ်အများအပြားကို ထိန်းသိမ်းထားသည်။ ထပ်နေသော ~ 3 MiB / ~ 750k-တိုကင် တောင်းဆိုချက်နှစ်ခုသည် V8 ကို ဖျက်သိမ်းလိုက်သည်** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) နှင့် 16 GiB cgroup OOM ကို လည်း ရိုက်သည် ။ [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ကြည့်ပါ။
 
-**cgroup `--memory` ကို heap ထက် ပိုများအောင်** သတ်မှတ်ပါ — native buffer များ၊ SQLite နှင့် compression intermediate များသည် V8 ပြင်ပတွင် ရှိနေသည်။
+အရွယ်အစား** အမှိုက်ပုံအထက် cgroup `--memory`** — ဇာတိ buffers၊ SQLite နှင့် compression ကြားခံများသည် V8 အပြင်ဘက်တွင် ထိုင်သည်။
 
-| Workload                                                           | `OMNIROUTE_MEMORY_MB`              | Container / cgroup                   | မှတ်ချက်များ                                                                                                                       |
-| ------------------------------------------------------------------ | ---------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard၊ ပေါ့ပါးသော chat တစ်ခု                                   | `1024` (image မူလတန်ဖိုး)          | ≥2 GiB                               |                                                                                                                                    |
-| Coding agent တစ်ခု (Claude/Codex/Grok)                             | `8192`                             | ≥10 GiB                              | ပုံမှန် single-session `/v1/responses`                                                                                             |
-| တစ်ပြိုင်နက်တည်း လုပ်ဆောင်သော ရှည်လျားသည့် `/v1/responses` နှစ်ခု  | `10240`–`12288`                    | ≥12–16 GiB                           | ~12 GiB heap တွင် V8 ရပ်တန့်မှုကို တိုင်းတာတွေ့ရှိခဲ့သည်                                                                           |
-| တစ်ပြိုင်နက်တည်း လုပ်ဆောင်သော ရှည်လျားသည့် context သုံးခုနှင့်အထက် | process တစ်ခုတည်းတွင် မလုပ်ပါနှင့် | အစဉ်လိုက်လုပ်ဆောင်ပါ / RAM ပိုထည့်ပါ | မူလ heavyweight admission တွင် in-flight 1 ခုသာ ခွင့်ပြုသည်။ RAM မတိုးဘဲ ၎င်းကို မြှင့်ခြင်းသည် ရပ်တန့်မှုကို ပြန်လည်ဖြစ်ပေါ်စေသည် |
+| အလုပ်ဝန်                                           | `OMNIROUTE_MEMORY_MB`                 | ကွန်တိန်နာ / cgroup  | မှတ်စုများ                                                                                                     |
+| -------------------------------------------------- | ------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| ဒက်ရှ်ဘုတ်၊ အလင်းစကားပြောခန်းတစ်ခု                 | `1024` (ပုံသေပုံသေ)                   | ≥2 GiB               |                                                                                                                |
+| ကုဒ်နံပါတ် အေးဂျင့်တစ်ခု (Claude/Codex/Grok)       | `8192`                                | ≥10 GiB              | ရိုးရိုးတစ်ဆက်ရှင် `/v1/responses`                                                                             |
+| နှစ်ခုပြိုင်တူ `/v1/responses` အရှည်               | `10240`–`12288`                       | ≥12–16 GiB           | ~ 12 GiB အမှိုက်ပုံတွင် တိုင်းတာထားသော V8 ကို ဖျက်သိမ်းသည်။                                                    |
+| + သုံးခု တစ်ပြိုင်တည်း ရှည်လျားသော အကြောင်းအရာများ | လုပ်ငန်းစဉ်တစ်ခုတည်းတွင် မလုပ်ပါနှင့် | serialize / more RAM | မူရင်း ဟဲဗီးဝိတ် ဝင်ခွင့်သည် 1 in-flight; RAM မပါဘဲ မွေးမြူခြင်းသည် ကိုယ်ဝန်ဖျက်ခြင်းကို ပြန်လည်မိတ်ဆက်ပေးသည်။ |
 
-Bare metal ပေါ်ရှိ `omniroute serve` သည် `OMNIROUTE_MEMORY_MB` ကို **မသတ်မှတ်ထားသည့်အခါ** RAM ၏ ~35% ခန့်ကို ချိန်ညှိအသုံးပြုသည် (`[512, 4096]` အတွင်း ကန့်သတ်ထားသည်)။ Docker သည် `1024` ကို အမြဲသတ်မှတ်ထားသောကြောင့် တရားဝင် image တွင် အဆိုပါ ချိန်ညှိမှုသည် မည်သည့်အခါမျှ အလုပ်မလုပ်ပါ။
+သတ္တုဗလာရှိ`omniroute serve` ~၏ 35% RAM ( `[512, 4096]`) ကို `OMNIROUTE_MEMORY_MB` ဖြစ်သောအခါ ချိန်ညှိသည်** သတ်မှတ်မထားပါ။** . Docker `1024` အမြဲတမ်း သတ်မှတ်ပေးသည်၊ ထို့ကြောင့် ချိန်ညှိခြင်းကို တရားဝင်ပုံတွင် ဘယ်တော့မှ မလည်ပတ်ပါ။
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## အရေးကြီးသော Environment Variable များ
@@ -341,13 +335,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml` အတွက် host ဘက်ခြမ်း dashboard port                                                                                                                                                                                                                                             | `20130`                          |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` sidecar အတွက် host ဘက်ခြမ်း port                                                                                                                                                                                                                                                           | `8317`                           |
 
-## လမ်းကြောင်းခွဲတစ်ခုပေါ်ရှိ Reverse Proxy (Traefik / nginx)
+## Subpath (Traefik / nginx) ပေါ်ရှိ Reverse Proxy
 
-Next.js `basePath` ကို standalone bundle အတွင်းသို့ compile လုပ်ထားသည်။ OmniRoute သည် ထည့်သွင်းထားသော တန်ဖိုးကို app root ရှိ sentinel file တစ်ခုတွင် မှတ်တမ်းတင်ပြီး (`npm run build` ပြုလုပ်စဉ် ရေးသားကာ `scripts/docker/ensure-docker-base-path.mjs` က ဖတ်သည်) container စတင်ချိန်တွင် ၎င်းကို `OMNIROUTE_BASE_PATH` နှင့် နှိုင်းယှဉ်သည်။ တန်ဖိုးများ မတူညီဘဲ image ကို domain root အတွက် build လုပ်ထားပါက entrypoint သည် `node dev/run-standalone.mjs` မလုပ်ဆောင်မီ standalone manifests များ၊ ထည့်သွင်းထားသော `basePath`/`assetPrefix` literals များ (Next 16 သည် SSR asset URL များကို `assetPrefix` တစ်ခုတည်းမှ render လုပ်သောကြောင့် patcher က လမ်းကြောင်းခွဲကို ၎င်းထဲသို့ပါ တူညီစွာ ထည့်ပေးသည်)၊ ထည့်သွင်းထားသော `/_next/static` asset URL များ (client-reference manifests၊ media imports၊ ကြိုတင် render လုပ်ထားသော error pages) နှင့် client `process.env` shim တို့ကို ပြန်လည်ရေးသားသည်။
+Next.js `basePath` ကို သီးခြားအစုအဝေးတွင် စုစည်းထားသည်။ OmniRoute app root ရှိ sentinel ဖိုင်တွင် ဖုတ်ထားသောတန်ဖိုးကို မှတ်တမ်းတင်သည် ( `npm run build` တွင် ; `scripts/docker/ensure-docker-base-path.mjs` ဖြင့်ဖတ်သည် ) နှင့် ကွန်တိန်နာစတင်သည့်အခါ `OMNIROUTE_BASE_PATH` နှင့် နှိုင်းယှဉ်သည်။ ၎င်းတို့ ကွဲပြားပြီး ပုံအား domain root အတွက် တည်ဆောက်သောအခါ၊ entrypoint သည် standalone manifests များကို ပြန်လည်ရေးသားသည်၊ မြှုပ်ထားသော `basePath`/`assetPrefix` literals (Next 16 သည် SSR asset URLs `assetPrefix` တစ်ခုတည်းမှ — မှ patcher သည် subpath အတွင်းသို့ mirror လုပ်ထားသည်)၊ဖုတ်ထားသော `/_next/static` asset- URLs (တင်သွင်းသည်)၊ အမှားစာမျက်နှာများ) နှင့် `node dev/run-standalone.mjs` မလည်ပတ်မီ client `process.env` shim ။
 
-### Compose ဖြင့် build လုပ်ခြင်း (အကြံပြုထားသည်)
+### တည်ဆောက်ရေးရေးပါ (အကြံပြုထားသည်)
 
-Image နှင့် runtime တို့ ကိုက်ညီစေရန် variable နှစ်ခုလုံးကို `.env` တွင် သတ်မှတ်ပြီးနောက် ပြန်လည် build လုပ်ပါ-
+`.env` တွင် variable နှစ်ခုလုံးကို သတ်မှတ်ပါ၊ ထို့နောက် image နှင့် runtime ကသဘောတူသည်-
 
 ```bash
 # .env
@@ -359,53 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` သည် `OMNIROUTE_BASE_PATH` ကို Docker build-arg အဖြစ်နှင့် runtime environment variable အဖြစ် လွှဲပို့ပေးသည်။
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` Docker build-arg အဖြစ်နှင့် runtime environment variable အဖြစ် ပေးပို့သည်။
 
-### ကြိုတင် build လုပ်ထားသော root image + runtime လမ်းကြောင်းခွဲ
+### ကြိုတင်တည်ဆောက်ထားသော root image + runtime subpath
 
-ဖြန့်ချိထားသော `diegosouzapw/omniroute:*` image များကို domain root အတွက် build လုပ်ထားသည်။ Runtime တွင် `OMNIROUTE_BASE_PATH` ကို သတ်မှတ်နိုင်ဆဲဖြစ်ပြီး container စတင်ချိန်တွင် bundle ကို တစ်ကြိမ် patch လုပ်ပေးမည်။ ၎င်းကို ကိုက်ညီသော public origin နှင့် တွဲဖက်သတ်မှတ်ပါ-
+ထုတ်ဝေထားသော `cheaperinference/omniroute:*` ပုံများကို domain root အတွက် တည်ဆောက်ထားသည်။ သင် runtime တွင် `OMNIROUTE_BASE_PATH` သတ်မှတ်နိုင်သေးသည်။ ကွန်တိန်နာသည် စတင်ချိန်တွင် အစုအစည်းကို ဖာထေးပေးသည်။ ၎င်းကို ကိုက်ညီသော အများသူငှာ မူရင်းနှင့် တွဲချိတ်ပါ-
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Reverse proxy ကို ပြင်ပလမ်းကြောင်း **အပြည့်အစုံ** လွှဲပို့ရန် စီစဉ်သတ်မှတ်ပါ (prefix ကို မဖြုတ်ပါနှင့်)။ Traefik သည် `StripPrefix` မသုံးဘဲ `PathPrefix(`/omniroute`)` ကို container သို့ route လုပ်သင့်သည်။ သို့မှသာ Next.js က `/omniroute/...` ကို လက်ခံရရှိပြီး asset များကို `/omniroute/_next/...` မှ ပေးပို့မည်ဖြစ်သည်။
+ပေးပို့ရန် reverse proxy ကို configure လုပ်ပါ။** အပြည့်** ပြင်ပလမ်းကြောင်း (ရှေ့ဆက်ကို မချွတ်ပါနှင့်)။ Traefik သည် `PathPrefix(`/omniroute `)` `StripPrefix` မပါဘဲ ကွန်တိန်နာသို့ လမ်းကြောင်းပေးသင့်သည်၊ ထို့ကြောင့် Next.js `/omniroute/...` လက်ခံပြီး `/omniroute/_next/...` မှ ပိုင်ဆိုင်မှုများကို ဆောင်ရွက်ပေးပါသည်။
 
-Docker healthcheck သည် အသုံးပြုနေသော `OMNIROUTE_BASE_PATH` prefix ထည့်ထားသည့် ပေါ့ပါးသော `/healthz` lifecycle endpoint ကို စစ်ဆေးသည်။ လူကိုယ်တိုင်/ဒက်ရှ်ဘုတ်မှ ရောဂါရှာဖွေစစ်ဆေးရန် `/api/monitoring/health` ကို ဆက်လက်အသုံးပြုနိုင်သည်။ Container HEALTHCHECK ကို ထို endpoint သို့ ပြန်ညွှန်လိုပါက (ဥပမာ နက်ရှိုင်းသော ကျန်းမာရေးစစ်ဆေးမှုကို တင်းကျပ်စွာ အသုံးချရန်) `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` ဟု သတ်မှတ်ပါ။ ထိုလမ်းကြောင်းသည် **နက်ရှိုင်းသော** စစ်ဆေးမှု (DB + monitoring အနှစ်ချုပ်) ဖြစ်သည်။ ပြန်လည်အသုံးပြုရန် ရွေးချယ်ပါက မကြာခဏ မလုပ်ဆောင်သော Docker `HEALTHCHECK` အတွက် သင့်လျော်သော်လည်း Kubernetes `livenessProbe` interval များအတွက်မူ **မသင့်လျော်ပါ**။
+Docker ကျန်းမာရေးစစ်ဆေးမှုသည် တက်ကြွသော `OMNIROUTE_BASE_PATH` နှင့် ရှေ့ဆက်ထားသော ပေါ့ပါးသော `/healthz` ဘဝသံသရာအဆုံးမှတ်ကို စစ်ဆေးသည်။ `/api/monitoring/health` human/dashboard ရောဂါရှာဖွေခြင်းအတွက် ရနိုင်သေးသည်။ ကွန်တိန်နာ HEALTHCHECK ၎င်းကို ပြန်ညွှန်ရန် (ဥပမာ နက်ရှိုင်းသော ကျန်းမာရေး ထိန်းသိမ်းရေးအတွက်) `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` ကို သတ်မှတ်ပါ။ အဲဒီလမ်းက တစ်ကြောင်း** နက်နဲသည်။** check (DB + စောင့်ကြည့်ရေးအကျဉ်းချုပ်) — သင်ပြန်ရွေးချယ်ပါက Docker's ခဏခဏ `HEALTHCHECK` အတွက်သင့်လျော်သော်လည်း၊** မဟုတ်ဘူး** Kubernetes `livenessProbe` ကြားကာလများအတွက်။
 
-Orchestrator များ (Kubernetes၊ Nomad စသည်) အတွက်-
+သံစုံတီးဝိုင်းများအတွက် (Kubernetes၊ Nomad စသည်ဖြင့်)။
 
-| Probe           | ဦးစားပေးရန်                                                                    | ရှောင်ရန်                                                                                     |
-| --------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Liveness        | HTTP `GET /livez` သို့မဟုတ် ပင်မ port (`PORT`၊ မူလတန်ဖိုး `20128`) ပေါ်ရှိ TCP | `/api/monitoring/health` ကို liveness အဖြစ် အသုံးပြုခြင်း                                     |
-| Readiness       | HTTP `GET /healthz`                                                            | event loop အလုပ်များနေခြင်းကို process သေသွားသည်ဟု သတ်မှတ်သော အလွန်တိုတောင်းသည့် timeout များ |
-| Deep / blackbox | `/api/monitoring/health`                                                       | —                                                                                             |
+| ထိုးဆွ                   | ဦးစားပေး                                                                | ရှောင်ပါ။                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| ရှင်သန်မှု               | HTTP `GET /livez` သို့မဟုတ် ပင်မပို့တ်တွင် TCP (`PORT`၊ မူရင်း `20128`) | `/api/monitoring/health` အသက်ရှင်ခြင်းအဖြစ်                                                        |
+| စေတနာ                    | HTTP `GET /healthz`                                                     | အဖြစ်အပျက်-ကွင်းဆက် အလုပ်ရှုပ်ခြင်းကို သေသည်အဖြစ် သတ်မှတ်ပေးသည့် တင်းကျပ်သော အချိန်ကုန်ဆုံးမှုများ |
+| နက်ရှိုင်းသော / blackbox | `/api/monitoring/health`                                                | —                                                                                                  |
 
-`/healthz` သည် process lifecycle (`ok` / `starting` / `stopping`) ကို အစီရင်ခံသည်။ `/livez` သည် process အသက်ရှင်နေခြင်းကိုသာ စစ်ဆေးသည် (handler အလုပ်လုပ်နိုင်သည့်အခါတိုင်း 200 ပြန်ပေးပြီး readiness ကို မစောင့်ပါ)။ နှစ်ခုလုံးသည် request handling နှင့် တူညီသော Node event loop ပေါ်တွင် ဆက်လက်အလုပ်လုပ်သောကြောင့် CPU အဓိကအသုံးပြုသည့် catalog သို့မဟုတ် compression အလုပ်များက ၎င်းတို့ကို နှောင့်နှေးစေနိုင်သည် — အလုပ်များနေခြင်း ≠ သေဆုံးနေခြင်း။ HTTP probe များ timeout ဖြစ်ပါက TCP liveness ကို ဦးစားပေးပါ။ Probe ဆိုင်ရာ လမ်းညွှန်ချက်အပြည့်အစုံ-
-[Monitoring လမ်းညွှန် — Kubernetes probe အကြံပြုချက်များ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)။
+`/healthz` အစီရင်ခံစာသည် လုပ်ငန်းစဉ်ဘဝသံသရာ (`ok` / `starting` / `stopping`)။ `/livez` သည် process-alive သာဖြစ်သည် (ကိုင်တွယ်သူသည် run သည့်အခါတိုင်း 200; အဆင်သင့်မစောင့်ဘဲ)။ နှစ်ခုစလုံးသည် တောင်းဆိုမှုကိုင်တွယ်ခြင်းကဲ့သို့ တူညီသော Node event loop တွင်လည်ပတ်နေသေးသည်၊ ထို့ကြောင့် CPU-bound catalog သို့မဟုတ် compression အလုပ်သည် ၎င်းတို့အား — busy ≠ dead ဖြင့်နှောင့်နှေးစေနိုင်သည်။ HTTP စစ်ဆေးမှုများ အချိန်ကုန်သွားပါက TCP အသက်ရှင်မှုကို ဦးစားပေးပါ။ စုံစမ်းစစ်ဆေးရေးလမ်းညွှန်ချက် အပြည့်အစုံ- [စောင့်ကြည့်ရေးလမ်းညွှန် — Kubernetes စုံစမ်းစစ်ဆေးရေး အကြံပြုချက်များ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ။
 
-## Caddy ဖြင့် Docker Compose (HTTPS Auto-TLS)
+## Docker Caddy ဖြင့်ရေးပါ (HTTPS Auto-TLS)
 
-Caddy ၏ အလိုအလျောက် SSL စီစဉ်ပေးမှုကို အသုံးပြု၍ OmniRoute ကို လုံခြုံစွာ ပြင်ပသို့ ဖွင့်ပေးနိုင်သည်။ သင့်ဒိုမိန်း၏ DNS A record သည် သင့်ဆာဗာ၏ IP ကို ညွှန်ထားကြောင်း သေချာပါစေ။
+OmniRoute Caddy ၏ အလိုအလျောက် SSL စီမံဆောင်ရွက်ပေးမှုကို အသုံးပြု၍ လုံခြုံစွာ ဖော်ထုတ်နိုင်သည်။ သင့်ဒိုမိန်း၏ DNS A မှတ်တမ်းအမှတ်သည် သင့်ဆာဗာ၏ IP သို့ သေချာပါစေ။
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth callback များ၊ dashboard လင့်ခ်များနှင့် ထုတ်လုပ်ထားသော အများသုံး URL များအတွက် browser တွင် အသုံးပြုမည့် origin။
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # အချိန်ဇယားသတ်မှတ်ထားသော job များ / self-fetch များအတွက် ဆာဗာအချင်းချင်း အသုံးပြုမည့် အတွင်းပိုင်း URL။
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -443,18 +436,20 @@ Endpoint tunnel panel များကို (Cloudflare၊ Tailscale၊ ngrok) �
 - Docker image များတွင် system CA root များ ပါဝင်ပြီး managed `cloudflared` သို့ လွှဲပေးထားသောကြောင့် container အတွင်း tunnel စတင်ချိန်၌ TLS ယုံကြည်မှုဆိုင်ရာ ချို့ယွင်းချက်များကို ရှောင်ရှားနိုင်သည်။
 - OmniRoute အား ဒေါင်းလုဒ်လုပ်မည့်အစား ရှိပြီးသား binary ကို အသုံးပြုစေလိုပါက `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` ဟု သတ်မှတ်ပါ။
 
-## Image Tag များ
+## ပုံတဂ်များ
 
-| Image                    | Tag      | အရွယ်အစား | ဖော်ပြချက်                                                         |
-| ------------------------ | -------- | --------- | ------------------------------------------------------------------ |
-| `diegosouzapw/omniroute` | `latest` | ~250MB    | **ထုတ်ဝေထားပြီးသော** အမြင့်ဆုံး stable SemVer (git `main` မဟုတ်ပါ) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB    | GitOps အတွက် ဤ tag အမျိုးအစားကို ပုံသေသတ်မှတ်ပါ                    |
+| ပုံ                          | တက်ဂ်    | အရွယ်အစား | ဖော်ပြချက်                                                           |
+| ---------------------------- | -------- | --------- | -------------------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB   | အမြင့်ဆုံး** ထုတ်ဝေခဲ့သည်။** တည်ငြိမ်သော SemVer (git `main` မဟုတ်ပါ) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB   | GitOps အတွက် ဤတက်ဂ်အတန်းအစားကို ပင်ထိုးပါ။                           |
 
-Multi-platform manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon၊ AWS Graviton၊ Raspberry Pi)။ Docker သည် ကိုက်ညီသော architecture ကို အလိုအလျောက် ရွေးချယ်သည်။ ARM host များတွင် AMD64 emulation ကို အတင်းအကျပ် အသုံးပြုရန် လိုအပ်ပါက `--platform linux/amd64` ကို ထည့်သွင်းပါ။
+တူညီသောပုံများကို တူညီသော တစ်ခုချင်းစီအလိုက် ဗိသုကာဆိုင်ရာ အချေအတင်များဖြင့် သိုလှောင်မှု သုံးခုသို့ လွှင့်တင်သည်- `cheaperinference/omniroute` (Docker Hub၊ စျေးသက်သာသော Inference organization ၊ 3.8.53 မှစတင်၍) `ghcr.io/cheaper-inference/omniroute` နှင့် legacy `diegosouzapw/omniroute`၊ ၎င်း၏ဆွဲယူမှုမှတ်တမ်းကို ထိန်းသိမ်းထားပြီး ထုတ်ဝေမှုတိုင်းကို ဆက်လက်ရရှိနေပါသည်။ လက်ရှိ `diegosouzapw/omniroute` ဖြန့်ကျက်မှုများကို ဆက်လက်မွမ်းမံနေပါသည်။ ပုံအမည်ကို ပြောင်းခြင်းသည် စိတ်ကြိုက်ရွေးချယ်နိုင်သည်။ အောက်ပါ `:next` / `:next-web` အကြိုထုတ်ချန်နယ်ကို `diegosouzapw/omniroute` နှင့် GHCR တို့အတွက်သာ ထုတ်ဝေထားပါသည်။
 
-### Release Channel များ
+Multi-platform manifest- `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi)။ Docker လိုက်ဖက်သော ဗိသုကာလက်ရာကို အလိုအလျောက် ရွေးချယ်သည်။ ARM hosts တွင် AMD64 emulation ကို အတင်းအကြပ်လုပ်ရန် လိုအပ်ပါက `--platform linux/amd64` ဖြတ်ပါ။
 
-OmniRoute သည် stable release များ၊ အသုံးပြုနေသော release branch စမ်းသပ်မှုများနှင့် development build များအတွက် သီးခြား Docker channel များကို ထုတ်ဝေသည်။
+### ချန်နယ်များကို ထုတ်ဝေပါ။
+
+OmniRoute တည်ငြိမ်သော ထုတ်ဝေမှုများ၊ တက်ကြွသော ထုတ်ဝေမှု-ဌာနခွဲ စမ်းသပ်ခြင်းနှင့် ဖွံ့ဖြိုးတိုးတက်မှု တည်ဆောက်ခြင်းများအတွက် သီးခြား Docker ချန်နယ်များကို ထုတ်ဝေသည်။
 
 | Channel                         | ရင်းမြစ်                                         | ပြောင်းလဲနိုင်မှု                     | အကြံပြုထားသော အသုံးပြုပုံ                                                                                                                            |
 | ------------------------------- | ------------------------------------------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -463,29 +458,29 @@ OmniRoute သည် stable release များ၊ အသုံးပြုန�
 | `:next` / `:next-web`           | လက်ရှိ မူလ `release/v*` branch                   | ပြောင်းလဲနိုင်သော pre-release pointer | အသုံးပြုနေသော release branch သို့ ထည့်သွင်းပြီးသော်လည်း stable release တွင် မပါဝင်သေးသည့် ပြင်ဆင်ချက်များကို စမ်းသပ်ရန်                              |
 | `:main` / `:main-web`           | `main` branch                                    | ပြောင်းလဲနိုင်သော development pointer | Development နှင့် integration စမ်းသပ်မှုအတွက်သာ                                                                                                      |
 
-#### Web-session provider များ: `-web` image များ
+#### ဝဘ်-စက်ရှင်ဝန်ဆောင်မှုပေးသူများ- `-web` ပုံများ
 
-အထက်ပါ channel တစ်ခုစီတွင် `runner-web` stage မှ တည်ဆောက်ထားသော `-web` tag (`:latest-web`၊ `:<version>-web`၊ `:next-web`၊ `:main-web`) လည်း ရှိသည် — ၎င်းသည် တူညီသော image တွင် Playwright နှင့် Chromium browser ကို ထည့်သွင်းထားခြင်းဖြစ်သည်။ ပုံမှန် image တွင် Chromium **မပါဝင်ပါ**။ `gemini-web`၊ `claude-web` နှင့် `claude-turnstile` တို့သည် ၎င်းကို လိုအပ်သည်။
+အထက်တွင်ရှိသောချန်နယ်တိုင်းသည် `-web` tag (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) အဖြစ် `runner-web` အဆင့်မှ တည်ဆောက်ထားသော — တူညီသောပုံပေါင်း Playwright နှင့် Chromium ဘရောက်ဆာတစ်ခုဖြစ်သည်။ မြေပြန့်ပုံသဏ္ဍာန် သင်္ဘောများ** မပါဘဲ** ခရိုမီယမ်၊ `gemini-web`၊ `claude-web` နှင့် `claude-turnstile` လိုအပ်သည်။
 
-ချို့ယွင်းချက်သည် startup အချိန်တွင် မဖြစ်ဘဲ နောက်ပိုင်းမှ ဖြစ်ပေါ်သည်။ အဆိုပါ provider များသည် ၎င်းတို့၏ model များကို စာရင်းပြုစုပြီး dashboard တွင် ချိတ်ဆက်ထားသည့်အဖြစ် ပြသသော်လည်း ပထမဆုံး request တွင်သာ အောက်ပါအမှားဖြင့် မအောင်မြင်ပါ။
+ပျက်ကွက်မှုကို ရွှေ့ဆိုင်းထားသည်၊ စတင်ချိန်မဟုတ်ပါ- ထိုဝန်ဆောင်မှုပေးသူများသည် ၎င်းတို့၏မော်ဒယ်များကို စာရင်းပြုစုပြီး ဒက်ရှ်ဘုတ်တွင် ချိတ်ဆက်ထားသည့်အတိုင်း ပြသကာ ပထမတောင်းဆိုချက်တစ်ခုတည်းသာ ပျက်ကွက်သည်
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-အဆိုပါ provider များကို အသုံးပြုပါက သင်လက်ရှိအသုံးပြုနေသော channel ၏ `-web` tag ကို pull လုပ်ပါ — အခြားမည်သည့်အရာမျှ ပြောင်းလဲမည်မဟုတ်ပါ။ npm/CLI install တစ်ခုတွင် (Docker image မပါဘဲ) အလားတူ ပျောက်နေသောအစိတ်အပိုင်းမှာ browser binary ဖြစ်သည်။ host ပေါ်တွင် `npx playwright install chromium` ကို လုပ်ဆောင်ပါ။
+အကယ်၍ သင်သည် အဆိုပါဝန်ဆောင်မှုပေးသူများကိုအသုံးပြုပါက၊ သင် — တွင်ရှိပြီးသားချန်နယ်၏ `-web` tag ကိုဆွဲယူပါ။ npm/CLI ထည့်သွင်းမှုတွင် ( Docker ပုံမရှိ) နှင့်ညီမျှသော ပျောက်ဆုံးနေသောအပိုင်းသည် ဘရောက်ဆာ binary ဖြစ်သည်- host ပေါ်တွင် `npx playwright install chromium` run သည်။
 
-#### Pre-release channel ကို အသုံးပြုခြင်း
+#### အကြိုထုတ်လွှင့်မှုချန်နယ်ကို အသုံးပြုခြင်း။
 
-`next` ချန်နယ်ကို လက်ရှိ မူလ `release/v*` branch သို့ push ပြုလုပ်တိုင်း ပြန်လည်တည်ဆောက်ပြီး AMD64 နှင့် ARM64 နှစ်မျိုးလုံးအတွက် ထုတ်ဝေသည်။ အဟောင်း maintenance branch များက ၎င်းကို overwrite မလုပ်နိုင်ပါ။ နောက်ထပ် stable tag မထုတ်မီ လက်ရှိအသုံးပြုနေသော release branch သို့ merge လုပ်ပြီးသည့် ပြင်ဆင်ချက်များပါဝင်သော pull လုပ်နိုင်သည့် image ကို ဤချန်နယ်က ပံ့ပိုးပေးသည်။
+`next` ချန်နယ်ကို လက်ရှိမူလ `release/v*` ဌာနခွဲသို့ တွန်းအားပေးမှုတိုင်းတွင် ပြန်လည်တည်ဆောက်ထားပြီး AMD64 နှင့် ARM64 နှစ်မျိုးလုံးအတွက် ထုတ်ဝေထားသည်။ ပြုပြင်ထိန်းသိမ်းမှု အကိုင်းအခက်ဟောင်းများက ၎င်းကို ထပ်မရေးနိုင်ပါ။ ချန်နယ်သည် နောက်တည်ငြိမ်သောတက်ဂ်ကို မဖြတ်မီ တက်ကြွသောထုတ်လွှတ်မှုဌာနခွဲသို့ ပေါင်းစည်းထားသည့် ပြုပြင်မှုများအတွက် ဆွဲနိုင်သောရုပ်ပုံတစ်ပုံကို ထောက်ပံ့ပေးသည်။
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose အတွက် ရွေးချယ်ထားသော profile က အသုံးပြုသည့် image tag ကို override လုပ်ပြီးနောက် service ကို pull လုပ်၍ ပြန်လည်ဖန်တီးပါ။
+Docker Compose အတွက်၊ ရွေးထားသော ပရိုဖိုင်မှအသုံးပြုသော ပုံတဂ်ကို အစားထိုးပြီးနောက် ဝန်ဆောင်မှုကို ဆွဲထုတ်ပြီး ပြန်လည်ဖန်တီးပါ-
 
 ```yaml
 services:
@@ -498,32 +493,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### ဘေးကင်းလုံခြုံမှုနှင့် ပြန်လည်နောက်ဆုတ်ခြင်း
+#### ဘေးကင်းရေးနှင့် နောက်ပြန်ဆုတ်ခြင်း။
 
-`next` သည် ပြောင်းလဲနေသော pre-release ချန်နယ်တစ်ခုဖြစ်သည်။ လက်ရှိအသုံးပြုနေသော release branch သို့ push ပြုလုပ်သည့်အခါတိုင်း ပြောင်းလဲနိုင်ပြီး **production တွင် အသုံးပြုရန် ပံ့ပိုးမထားပါ**။ သတ်မှတ်ထားသော build တစ်ခုကို အကဲဖြတ်နေစဉ် image digest ကို pin လုပ်ထားပါ။
+`next` သည် ရေပေါ်ကြိုတင်ဖြန့်ချိသည့်ချန်နယ်တစ်ခုဖြစ်သည်။ ၎င်းသည် တက်ကြွသော ဖြန့်ချိရေးဌာနခွဲသို့ တွန်းအားပေးမှုအပေါ် ပြောင်းလဲနိုင်သည်။** ထုတ်လုပ်မှုအတွက် အသုံးမပြုပါ။** . သတ်မှတ်ထားသော တည်ဆောက်မှုကို အကဲဖြတ်နေစဉ် ပုံ၏ အနှစ်ချုပ်ကို ပင်ထိုးပါ-
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-စမ်းသပ်ခြင်းမပြုမီ OmniRoute data volume သို့မဟုတ် bind-mounted data directory ကို backup ပြုလုပ်ထားပါ။ နောက်သို့ပြန်သွားရန် ယခင်အသုံးပြုခဲ့သော stable version သို့မဟုတ် digest ကို ပြန်လည်အသုံးပြုပြီး container ကို ပြန်လည်ဖန်တီးပါ။
+စမ်းသပ်ခြင်းမပြုမီ၊ OmniRoute ဒေတာပမာဏ သို့မဟုတ် bind-mounted data directory ကို အရန်ကူးပါ။ ပြန်လှည့်ရန်၊ ယခင်အသုံးပြုထားသော တည်ငြိမ်သောဗားရှင်းကို ပြန်ယူပါ သို့မဟုတ် ချေဖျက်ပြီး ကွန်တိန်နာကို ပြန်လည်ဖန်တီးပါ-
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-release-branch build တစ်ခုသည် `latest` ကို မည်သည့်အခါမျှ ရွှေ့ပြောင်းနိုင်မည်မဟုတ်ပါ။ သတ်မှတ်ချက်နှင့် ကိုက်ညီသော stable semantic version တစ်ခုသာ stable pointer ကို မြှင့်တင်နိုင်သည်။ `next` image များတွင် release image စစ်ဆေးခြင်းနှင့် CRITICAL အဆင့် အားနည်းချက်များကို တားဆီးသည့် gate ကို ဆက်လက်ထားရှိသည်။
+လွတ်မြောက်ရေးဌာနခွဲတည်ဆောက်မှုတစ်ခုသည် `latest` ဘယ်တော့မှမရွှေ့နိုင်ပါ။ အရည်အချင်းပြည့်မီသော တည်ငြိမ်သော အခေါ်အဝေါ်ဗားရှင်းတစ်ခုသာလျှင် တည်ငြိမ်သောညွှန်ပြချက်ကို မြှင့်တင်နိုင်သည်။ `next` ပုံများသည် ထွက်ရှိလာသော ပုံစစ်ဆေးခြင်းကို ထိန်းသိမ်းထားပြီး CRITICAL-vulnerability gate ကို ပိတ်ဆို့ထားသည်။
 
-**`latest` သည် git အတွက် နောက်ဆုံးပေါ်ဖြစ်ကြောင်း အာမခံချက်မဟုတ်ပါ။** `main` သို့မဟုတ် လက်ရှိအသုံးပြုနေသော `release/v*` branch တွင် merge လုပ်ထားသော ပြင်ဆင်ချက်များသည် stable SemVer image ကို ထုတ်ဝေပြီး publish job က `:latest` ကို မြှင့်တင်သည်အထိ `:latest` တွင် **မပါဝင်ပါ** (ထို SemVer နှင့် digest တူညီသည်)။ GitHub တွင် ပြင်ဆင်ချက်ကို ပြသထားပြီးဖြစ်သော်လည်း `latest` က မပြောင်းလဲဘဲ ရှိနေပါက release branch ကို စမ်းသပ်ရန် `:next` ကို pull လုပ်ပါ၊ သို့မဟုတ် SemVer tag ကို စောင့်ပါ။
+**`latest` သည် git အတွက်ငွေကြေးအာမခံချက်မဟုတ်ပါ။** `main` တွင် သို့မဟုတ် တက်ကြွသော `release/v*` ဌာနခွဲတွင် ပေါင်းစပ်ပြင်ဆင်မှုများ** မဟုတ်ဘူး** `:latest` တွင် တည်ငြိမ်သော SemVer ပုံတစ်ပုံကို လွှင့်တင်ပြီး ထုတ်ဝေခြင်းအလုပ်သည် `:latest` အားပေးသည် (ထို SemVer နှင့် တူညီသော အနှစ်ချုပ် )။ `latest` သည် fix ကိုပြသပြီးဖြစ်သော်လည်း GitHub သည်အေးခဲနေပါက၊ ထုတ်ဝေမှုဌာနခွဲကိုစမ်းသပ်ရန် `:next` ဆွဲထုတ်ပါ သို့မဟုတ် SemVer tag ကိုစောင့်ပါ။
 
-| သင်လိုချင်သည့်အရာ                                                                          | အသုံးပြုရန်                                      |
-| ------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| ပြောင်းလဲမှုမဖြစ်ရမည့် GitOps / production                                                 | `:X.Y.Z` (သို့မဟုတ် image digest) ကို pin လုပ်ပါ |
-| ထုတ်ဝေထားသော stable များကို လိုက်နာပြီး release တစ်ခုစီတွင် ပြန်လည်ဖန်တီးခြင်းကို လက်ခံရန် | `:latest`                                        |
-| မထုတ်ဝေရသေးသော `release/v*` commit များကို စမ်းသပ်ရန်                                      | `:next` (production မဟုတ်ပါ)                     |
-| `main` ကို စမ်းသပ်ရန်                                                                      | `:main` (production မဟုတ်ပါ)                     |
+| လိုချင်တယ်။                                                                          | သုံးပါ။                                      |
+| ------------------------------------------------------------------------------------ | -------------------------------------------- |
+| GitOps / production က မပျံ့ရဘူး။                                                     | `:X.Y.Z` ပင်ထိုးပါ (သို့မဟုတ် ပုံအနှစ်ချုပ်) |
+| ထုတ်ဝေထားသော တဲများကို လိုက်နာပြီး ထုတ်ဝေမှုတစ်ခုစီတွင် ပြန်လည်ဖန်တီးမှုကို လက်ခံပါ။ | `:latest`                                    |
+| မထုတ်ဝေရသေးသော `release/v*` ကတိကဝတ်များကို စမ်းသပ်သည်။                               | `:next` (ထုတ်လုပ်မှုမဟုတ်ပါ)                 |
+| စမ်းသပ် `main`                                                                       | `:main` (ထုတ်လုပ်မှုမဟုတ်ပါ)                 |
 
 ## Docker ရှိ Dashboard အပ်ဒိတ်များ
 

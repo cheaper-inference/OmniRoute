@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ಡೀಫಾಲ್ಟ್ ಮೌಲ್ಯಗಳೊಂದಿಗೆ Plugin ಆಬ್ಜೆಕ್ಟ್ ಅನ್ನು ರಚಿಸುವ ಫ್ಯಾಕ್ಟರಿ ಫಂಕ್ಷನ್.
+ಡೀಫಾಲ್ಟ್ಗಳೊಂದಿಗೆ ಪ್ಲಗಿನ್ ವಸ್ತುವನ್ನು ರಚಿಸುವ ಫ್ಯಾಕ್ಟರಿ ಕಾರ್ಯ.
 
-**ಪ್ಯಾರಾಮೀಟರ್ಗಳು:**
+**ನಿಯತಾಂಕಗಳು:**
 
-- `name` (string, ಕಡ್ಡಾಯ) — kebab-caseನಲ್ಲಿರುವ Plugin ಹೆಸರು
-- `priority` (number, ಐಚ್ಛಿಕ, ಡೀಫಾಲ್ಟ್: 100) — ಕಡಿಮೆ ಮೌಲ್ಯವು ಮೊದಲು ರನ್ ಆಗುತ್ತದೆ
-- `enabled` (boolean, ಐಚ್ಛಿಕ, ಡೀಫಾಲ್ಟ್: true) — ಸಕ್ರಿಯಗೊಳಿಸಿ ಪ್ರಾರಂಭಿಸಬೇಕೇ?
-- `onRequest` (function, ಐಚ್ಛಿಕ) — ಚಾಟ್ ಹ್ಯಾಂಡ್ಲರ್ಗಿಂತ ಮೊದಲು ರನ್ ಆಗುತ್ತದೆ
-- `onResponse` (function, ಐಚ್ಛಿಕ) — ಚಾಟ್ ಹ್ಯಾಂಡ್ಲರ್ನ ನಂತರ ರನ್ ಆಗುತ್ತದೆ
-- `onError` (function, ಐಚ್ಛಿಕ) — ಹ್ಯಾಂಡ್ಲರ್ ದೋಷ ಸಂಭವಿಸಿದಾಗ ರನ್ ಆಗುತ್ತದೆ
+- `name` (ಸ್ಟ್ರಿಂಗ್, ಅಗತ್ಯವಿದೆ) — ಕಬಾಬ್-ಕೇಸ್ನಲ್ಲಿ ಪ್ಲಗಿನ್ ಹೆಸರು
+- `priority` (ಸಂಖ್ಯೆ, ಐಚ್ಛಿಕ, ಡೀಫಾಲ್ಟ್: 100) — ಲೋವರ್ ಮೊದಲು ರನ್ ಮಾಡುತ್ತದೆ
+- `enabled` (ಬೂಲಿಯನ್, ಐಚ್ಛಿಕ, ಡೀಫಾಲ್ಟ್: ನಿಜ) — ಪ್ರಾರಂಭವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆಯೇ?
+- `onRequest` (ಕಾರ್ಯ, ಐಚ್ಛಿಕ) — ಚಾಟ್ ಹ್ಯಾಂಡ್ಲರ್ ಮೊದಲು ರನ್ ಆಗುತ್ತದೆ
+- `onResponse` (ಕಾರ್ಯ, ಐಚ್ಛಿಕ) — ಚಾಟ್ ಹ್ಯಾಂಡ್ಲರ್ ನಂತರ ರನ್ ಆಗುತ್ತದೆ
+- `onError` (ಕಾರ್ಯ, ಐಚ್ಛಿಕ) — ಹ್ಯಾಂಡ್ಲರ್ ದೋಷದಲ್ಲಿ ರನ್ ಆಗುತ್ತದೆ
 
 ### `blockRequest(response?): BlockingHookResult`
 
-ವಿನಂತಿಯನ್ನು ನಿರ್ಬಂಧಿಸಿ ಮತ್ತು ಐಚ್ಛಿಕವಾಗಿ ಕಸ್ಟಮ್ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಹಿಂತಿರುಗಿಸಿ.
+ವಿನಂತಿಯನ್ನು ನಿರ್ಬಂಧಿಸಿ ಮತ್ತು ಐಚ್ಛಿಕವಾಗಿ ಕಸ್ಟಮ್ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಹಿಂತಿರುಗಿ.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-ವಿನಂತಿಯ ಬಾಡಿ ಪ್ರೊವೈಡರ್ ಅನ್ನು ತಲುಪುವ ಮೊದಲು ಅದನ್ನು ಮಾರ್ಪಡಿಸಿ.
+ಪೂರೈಕೆದಾರರನ್ನು ತಲುಪುವ ಮೊದಲು ವಿನಂತಿಯ ದೇಹವನ್ನು ಮಾರ್ಪಡಿಸಿ.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-ವಿನಂತಿಯ ಕಾಂಟೆಕ್ಸ್ಟ್ಗೆ ಮೆಟಾಡೇಟಾವನ್ನು ಲಗತ್ತಿಸಿ.
+ವಿನಂತಿಯ ಸಂದರ್ಭಕ್ಕೆ ಮೆಟಾಡೇಟಾವನ್ನು ಲಗತ್ತಿಸಿ.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin ಕಾಂಟೆಕ್ಸ್ಟ್ (`PluginContext`)
+## ಪ್ಲಗಿನ್ ಸಂದರ್ಭ (`PluginContext`)
 
-| ಫೀಲ್ಡ್      | ಪ್ರಕಾರ                    | ವಿವರಣೆ                    |
-| ----------- | ------------------------- | ------------------------- |
-| `requestId` | `string`                  | ಅನನ್ಯ ವಿನಂತಿ ಗುರುತಿಸುವಿಕೆ |
-| `model`     | `string`                  | ವಿನಂತಿಸಿದ ಮಾಡೆಲ್ ಹೆಸರು    |
-| `provider`  | `string`                  | ಗುರಿ ಪ್ರೊವೈಡರ್ ID         |
-| `body`      | `Record<string, unknown>` | ವಿನಂತಿಯ ಬಾಡಿ              |
-| `headers`   | `Record<string, string>`  | ವಿನಂತಿಯ ಹೆಡರ್ಗಳು          |
-| `metadata`  | `Record<string, unknown>` | ಮಾರ್ಪಡಿಸಬಹುದಾದ ಮೆಟಾಡೇಟಾ   |
-| `timestamp` | `number`                  | ವಿನಂತಿಯ ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್     |
+| ಕ್ಷೇತ್ರ      | ಟೈಪ್ ಮಾಡಿ                 | ವಿವರಣೆ                         |
+| ------------ | ------------------------- | ------------------------------ |
+| `requestId`  | `string`                  | ಅನನ್ಯ ವಿನಂತಿ ಗುರುತಿಸುವಿಕೆ      |
+| `model`      | `string`                  | ಮಾದರಿ ಹೆಸರನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ   |
+| `provider`   | `string`                  | ಟಾರ್ಗೆಟ್ ಪ್ರೊವೈಡರ್ ID          |
+| `body`       | `Record<string, unknown>` | ದೇಹವನ್ನು ವಿನಂತಿಸಿ              |
+| `headers`    | `Record<string, string>`  | ವಿನಂತಿ ಶಿರೋನಾಮೆ (ಟಿಪ್ಪಣಿ ನೋಡಿ) |
+| `metadata`   | `Record<string, unknown>` | ಬದಲಾಯಿಸಬಹುದಾದ ಮೆಟಾಡೇಟಾ         |
+| `timestamp`  | `number`                  | ಸಮಯಸ್ಟ್ಯಾಂಪ್ ಅನ್ನು ವಿನಂತಿಸಿ    |
+| `apiKeyInfo` | `object` (ಐಚ್ಛಿಕ)         | API ಕೀ ಮೆಟಾಡೇಟಾ (ಟಿಪ್ಪಣಿ ನೋಡಿ) |
+
+ಸಂದರ್ಭವು ಕ್ಲೈಂಟ್ನ ರುಜುವಾತುಗಳನ್ನು ಎಂದಿಗೂ ಒಯ್ಯುವುದಿಲ್ಲ: `authorization`, `x-api-key`, `proxy-authorization` ಮತ್ತು `cookie` ಹೆಡರ್ಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ (ಯಾವುದೇ ಕೇಸಿಂಗ್), ಮತ್ತು `apiKeyInfo` ಕೀಲಿಯ ಮೆಟಾಡೇಟಾವನ್ನು ( `id`, `name` ಮತ್ತು `scopes` ನಂತಹ) ಇರಿಸುತ್ತದೆ ಆದರೆ ಕೀ ಮೌಲ್ಯ ಅಥವಾ ಅದರ ಫಿಂಗರ್ಪ್ರಿಂಟ್ ಅಲ್ಲ (`redactPluginContext()` `src/lib/plugins/hooks.ts`). ಇದು `onRequest`, `onResponse` ಮತ್ತು `onError` ಗೆ ಅನ್ವಯಿಸುತ್ತದೆ.
 
 ## ಮ್ಯಾನಿಫೆಸ್ಟ್ (`plugin.json`)
 
@@ -140,17 +143,16 @@ Hookಗಳನ್ನು ಆದ್ಯತೆಯೊಂದಿಗೆ ಕಾನ್ಫ�
 
 ## ಅನುಮತಿ ವ್ಯವಸ್ಥೆ
 
-ಪ್ಲಗಿನ್ಗಳು ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ ಮಾಡಿದ VM ಸಂದರ್ಭದೊಳಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ. ಬಾಹ್ಯ ಸಂಪನ್ಮೂಲಗಳಿಗೆ ಪ್ರವೇಶಿಸಲು ಸ್ಪಷ್ಟ ಅನುಮತಿಗಳು ಅಗತ್ಯವಿವೆ:
+ಪ್ಲಗಿನ್ಗಳು** ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ ಮಾಡಲಾಗಿಲ್ಲ** . ಪ್ರತಿಯೊಂದು ಸಕ್ರಿಯ ಪ್ಲಗಿನ್ ಪ್ರತ್ಯೇಕವಾದ, ಸಾಮಾನ್ಯವಾದ Node.js ಚೈಲ್ಡ್ ಪ್ರಕ್ರಿಯೆಯಾಗಿ ( `src/lib/plugins/loader.ts` ನಲ್ಲಿ`loadPlugin()` ) OmniRoute ನಂತೆ ಅದೇ ಆಪರೇಟಿಂಗ್-ಸಿಸ್ಟಮ್ ಬಳಕೆದಾರರ ಅಡಿಯಲ್ಲಿ ಚಲಿಸುತ್ತದೆ, ಯಾವುದೇ VM ಸಂದರ್ಭ ಮತ್ತು ಯಾವುದೇ Node.js ಅನುಮತಿ ಫ್ಲ್ಯಾಗ್ಗಳಿಲ್ಲ. ಪ್ಲಗಿನ್ ಕೋಡ್ `node:fs`, `node:child_process`, `fetch` ಮತ್ತು ಇತರ ಪ್ರತಿಯೊಂದು Node.js API ಬಳಸಬಹುದು: ಇದು OmniRoute ಬಳಕೆದಾರರು (ಡೇಟಾ ಡೈರೆಕ್ಟರಿ ಸೇರಿದಂತೆ) ಯಾವುದೇ ಫೈಲ್ ಅನ್ನು ಓದಬಹುದು ಮತ್ತು ಬರೆಯಬಹುದು (ಡೇಟಾ ಡೈರೆಕ್ಟರಿಯನ್ನು ಒಳಗೊಂಡಂತೆ), ಪ್ರೋಗ್ರಾಂಗಳನ್ನು ರನ್ ಮಾಡಬಹುದು ಮತ್ತು ನೆಟ್ವರ್ಕ್ ಅನ್ನು ತಲುಪಬಹುದು.
 
-| ಅನುಮತಿ       | ಒದಗಿಸುವ ಪ್ರವೇಶ                                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | ಓದಲು-ಮಾತ್ರದ `process.env` ಪ್ರಾಕ್ಸಿ                           |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+ಮ್ಯಾನಿಫೆಸ್ಟ್ನ `requires.permissions` `network`, `file-read`, `file-write`, `env` ಮತ್ತು `exec` ಸ್ವೀಕರಿಸುತ್ತದೆ, ಆದರೆ ಇಂದು ರನ್ಟೈಮ್ನಲ್ಲಿ `env` ಮಾತ್ರ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ:
 
-ಅನುಮತಿ ಇಲ್ಲದಿದ್ದರೆ, ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಗ್ಲೋಬಲ್ಗಳು ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ನಲ್ಲಿ ಲಭ್ಯವಿರುವುದಿಲ್ಲ.
+| ಅನುಮತಿ                                       | ಇಂದು ಪರಿಣಾಮ                                                                                                                                                                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | ಪ್ಲಗಿನ್ ಪ್ರಕ್ರಿಯೆಯು `PORT`, `HOSTNAME`, `TZ` ಮತ್ತು `TMPDIR` ಸಹ ಪಡೆಯುತ್ತದೆ. ಅದು ಇಲ್ಲದೆ, ಇದು `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ಮತ್ತು `PLUGIN_NAME` ಮಾತ್ರ ಪಡೆಯುತ್ತದೆ (ಜೊತೆಗೆ Windows ನಲ್ಲಿ `SystemRoot` ಮತ್ತು `windir` ). |
+| `network`, `file-read`, `file-write`, `exec` | ಯಾವುದೂ ಇಲ್ಲ. ಅವು ಘೋಷಣೆಗಳು ಮಾತ್ರ: ಅವು ಕಾಣೆಯಾದಾಗ ಯಾವುದನ್ನೂ ನಿರ್ಬಂಧಿಸಲಾಗುವುದಿಲ್ಲ.                                                                                                                                                                            |
+
+ಪ್ಲಗಿನ್ ಅನ್ನು ಸ್ಥಾಪಿಸುವುದು ಹೋಸ್ಟ್ನಲ್ಲಿ ಯಾವುದೇ ಇತರ ಪ್ರೋಗ್ರಾಂ ಅನ್ನು ಸ್ಥಾಪಿಸಿದಂತೆ. ನೀವು ನಂಬುವ ಮೂಲ ಪ್ಲಗಿನ್ಗಳನ್ನು ಮಾತ್ರ ಸ್ಥಾಪಿಸಿ.
 
 ## ಕಾನ್ಫಿಗ್ ಸ್ಕೀಮಾ
 
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### ದರ ಮಿತಿಗೊಳಿಸುವಿಕೆ
+### ದರ ಮಿತಿ
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 ನಿಮಿಷ
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);

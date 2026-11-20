@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Had mestilah integer positif.",
     "error": "Ralat: {message}",
     "serverOffline": "Pelayan OmniRoute di luar talian. Mulakannya dengan: omniroute serve",
     "authRequired": "Pengesahan diperlukan. Tetapkan OMNIROUTE_API_KEY atau jalankan: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] akan {action}",
     "cancelled": "Dibatalkan.",
     "jsonOpt": "Output sebagai JSON",
-    "yesOpt": "Langkau gesaan pengesahan"
+    "yesOpt": "Langkau gesaan pengesahan",
+    "positiveIntegerRequired": "Had mestilah integer positif."
   },
   "setup": {
     "title": "Persediaan OmniRoute",

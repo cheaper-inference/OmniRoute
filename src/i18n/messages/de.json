@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Behalten Sie die Systemnachrichten während des Gesprächs bei",
     "requireUserLastMessageDescription": "Für Upstreams, die das Vorausfüllen des Assistenten ablehnen: Löschen Sie nachgestellte Assistentenumdrehungen (kein Tool_Use) vor dem Senden. Das Modell generiert möglicherweise seine vorherige Antwort neu.",
     "requireUserLastMessageLabel": "Konversation muss mit einer Benutzernachricht enden",
+    "strictChatHistoryDescription": "Repariert unterbrochene Folgen von Toolaufrufen und führt aufeinanderfolgende Assistentennachrichten zusammen, bevor sie an OpenAI-kompatible Anbieter mit strikten Vorgaben gesendet werden.",
+    "strictChatHistoryLabel": "Chatverlauf für strikte Anbieter reparieren",
     "bulkPasteAdded": "{count, plural, one {1 Schlüssel hinzugefügt} other {# Schlüssel hinzugefügt}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 Duplikat übersprungen} other {# Duplikate übersprungen}}",
     "bulkPasteHint": "Fügen Sie pro Zeile einen API-Schlüssel ein. Leere Zeilen werden ignoriert und doppelte Schlüssel übersprungen.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Schlüssel entfernen"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugins laufen mit vollen Berechtigungen",
-    "privilegesWarningBody": "Ein Plugin wird als regulärer Node.js Prozess mit demselben Zugriff wie OmniRoute ausgeführt: Es kann Dateien lesen, Programme ausführen und das Netzwerk verwenden, unabhängig von den Berechtigungen, die sein Manifest deklariert. Installieren Sie nur Plugins, denen Sie vertrauen.",
     "title": "Plug-ins",
     "description": "Plugins installieren und verwalten, um die Funktionalität von OmniRoute zu erweitern",
     "loading": "Plugins werden geladen...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Nach Plugins suchen",
     "noPlugins": "Keine Plugins installiert",
     "noPluginsDescription": "Legen Sie Plugin-Verzeichnisse unter ~/.omniroute/plugins/ ab und klicken Sie auf „Suchen“.",
+    "privilegesWarningTitle": "Plugins laufen mit vollen Berechtigungen",
+    "privilegesWarningBody": "Ein Plugin wird als regulärer Node.js Prozess mit demselben Zugriff wie OmniRoute ausgeführt: Es kann Dateien lesen, Programme ausführen und das Netzwerk verwenden, unabhängig von den Berechtigungen, die sein Manifest deklariert. Installieren Sie nur Plugins, denen Sie vertrauen.",
     "activate": "Aktivieren",
     "deactivate": "Deaktivieren",
     "uninstall": "Deinstallieren",
