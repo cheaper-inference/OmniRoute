@@ -1,7 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Card from "@/shared/components/Card";
 import type { SelfQuotaPool } from "@/shared/schemas/selfQuota";
+
+import { hasAccountReading } from "../lib/quotaText";
+import AccountRow from "./AccountRow";
+import PoolFacts from "./PoolFacts";
+import SharedWindowCard from "./SharedWindowCard";
 
 interface PoolSectionProps {
   pool: SelfQuotaPool;
@@ -9,11 +16,39 @@ interface PoolSectionProps {
 
 /** One Quota Share pool the key belongs to. */
 export default function PoolSection({ pool }: PoolSectionProps) {
+  const t = useTranslations("quotaSelf");
+  const { accounts, dimensions } = pool;
+  const lagNote = pool.accountVisible && accounts.some(hasAccountReading);
+  const noWindows =
+    dimensions.length === 0 && accounts.every((account) => account.dimensions.length === 0);
+
   return (
     <Card padding="md">
       <section className="min-w-0 space-y-4">
         <h2 className="ci-heading break-words">{pool.name}</h2>
-        {/* Task 9 slot: share, policy, cap, shared window cards and account rows of `pool`. */}
+        <PoolFacts pool={pool} />
+        {dimensions.length > 0 ? (
+          <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+            {dimensions.map((dimension) => (
+              <SharedWindowCard
+                key={`${dimension.unit}:${dimension.window}`}
+                dimension={dimension}
+                policy={pool.policy}
+              />
+            ))}
+          </div>
+        ) : null}
+        {accounts.map((account) => (
+          <AccountRow
+            key={account.slot}
+            account={account}
+            policy={pool.policy}
+            showLabel={accounts.length > 1}
+            accountVisible={pool.accountVisible}
+          />
+        ))}
+        {lagNote ? <p className="text-xs text-text-muted">{t("accountLagNote")}</p> : null}
+        {noWindows ? <p className="text-sm text-text-muted">{t("noWindows")}</p> : null}
       </section>
     </Card>
   );

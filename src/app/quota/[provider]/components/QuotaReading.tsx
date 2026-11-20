@@ -1,0 +1,72 @@
+"use client";
+
+import { useFormatter, useTranslations } from "next-intl";
+
+import Badge from "@/shared/components/Badge";
+import QuotaBar from "@/shared/components/quota/QuotaBar";
+import type { QuotaUnit } from "@/lib/quota/dimensions";
+import type { SelfQuotaStatus } from "@/shared/schemas/selfQuota";
+
+import { amountText, percentLabel, reasonKey, type FormatNumber } from "../lib/quotaText";
+import ReadingCaption from "./ReadingCaption";
+
+interface QuotaReadingProps {
+  label: string;
+  unit: QuotaUnit;
+  limit: number;
+  used: number | null;
+  status: SelfQuotaStatus;
+  reason?: string;
+  resetAt?: string | null;
+  footnote?: string;
+}
+
+/**
+ * One reading: a bar when it was read, otherwise its label, a "not available" badge and the
+ * reason. An unread value is never drawn as zero.
+ */
+export default function QuotaReading(props: QuotaReadingProps) {
+  const { label, unit, limit, used, status, reason, resetAt, footnote } = props;
+  const t = useTranslations("quotaSelf");
+  const format = useFormatter();
+  const number: FormatNumber = (value, options) => format.number(value, options);
+
+  if (status === "unavailable" || used === null) {
+    return (
+      <div className="flex min-w-0 flex-col gap-1 text-xs text-text-muted">
+        <span className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="min-w-0 break-words font-semibold uppercase tracking-wide">{label}</span>
+          <Badge size="sm">{t("unavailableBadge")}</Badge>
+        </span>
+        <p className="min-w-0 break-words">{t(reasonKey(reason))}</p>
+      </div>
+    );
+  }
+
+  const percent = limit > 0 ? (used / limit) * 100 : 0;
+  const usedText =
+    unit === "usd"
+      ? amountText("usd", used, t, number)
+      : number(used, { maximumFractionDigits: 0 });
+  const valueText =
+    unit === "percent"
+      ? t("usedPercent", { percent: Math.round(percent) })
+      : t("usedOf", { used: usedText, limit: amountText(unit, limit, t, number) });
+
+  const stale = status === "stale";
+  return (
+    <QuotaBar
+      size="md"
+      tone={stale ? "muted" : "auto"}
+      label={label}
+      percent={percent}
+      valueLabel={percentLabel(percent, t)}
+      valueText={valueText}
+      caption={
+        stale || resetAt || footnote ? (
+          <ReadingCaption stale={stale} resetAt={resetAt} footnote={footnote} />
+        ) : undefined
+      }
+    />
+  );
+}

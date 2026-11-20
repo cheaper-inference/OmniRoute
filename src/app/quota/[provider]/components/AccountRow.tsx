@@ -1,0 +1,56 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
+import type { Policy } from "@/lib/quota/dimensions";
+import type { SelfQuotaAccount } from "@/shared/schemas/selfQuota";
+
+import { hasAccountReading } from "../lib/quotaText";
+import AccountWindowCard from "./AccountWindowCard";
+
+interface AccountRowProps {
+  account: SelfQuotaAccount;
+  policy: Policy;
+  /** The API's label ("Account 1") is shown only when the pool has several accounts. */
+  showLabel: boolean;
+  /** The pool lets the key see account readings; an account that still has none says why. */
+  accountVisible: boolean;
+}
+
+/** One account of the pool: its windows and the key's part of each. */
+export default function AccountRow({
+  account,
+  policy,
+  showLabel,
+  accountVisible,
+}: AccountRowProps) {
+  const t = useTranslations("quotaSelf");
+  // Windows but no account reading: the key's allowed connections leave this account out.
+  const withoutReadings =
+    accountVisible &&
+    account.dimensions.length > 0 &&
+    !hasAccountReading(account) &&
+    !account.modelWindows;
+
+  return (
+    <section className="min-w-0 space-y-3">
+      {showLabel ? <h3 className="break-words text-sm font-semibold">{account.label}</h3> : null}
+      {withoutReadings ? (
+        <p className="min-w-0 break-words text-sm text-text-muted">{t("accountHidden")}</p>
+      ) : null}
+      {account.dimensions.length > 0 ? (
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+          {account.dimensions.map((dimension) => (
+            <AccountWindowCard
+              key={`${dimension.unit}:${dimension.window}`}
+              dimension={dimension}
+              policy={policy}
+            />
+          ))}
+        </div>
+      ) : null}
+      {/* Task 10 slot: ModelWindowList for `account.modelWindows`, skipped when
+          `modelWindowsRepeatReason(account)` (lib/quotaText) is true. */}
+    </section>
+  );
+}

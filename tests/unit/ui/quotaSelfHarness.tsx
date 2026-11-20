@@ -8,12 +8,13 @@ import { render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { vi } from "vitest";
 
-import type {
-  SelfQuotaAccount,
-  SelfQuotaAccountDimension,
-  SelfQuotaPool,
-  SelfQuotaResponse,
-  SelfQuotaSharedDimension,
+import {
+  selfQuotaResponseSchema,
+  type SelfQuotaAccount,
+  type SelfQuotaAccountDimension,
+  type SelfQuotaPool,
+  type SelfQuotaResponse,
+  type SelfQuotaSharedDimension,
 } from "@/shared/schemas/selfQuota";
 import messages from "../../../src/i18n/messages/en.json";
 
@@ -88,6 +89,12 @@ export function quotaView(over: Partial<SelfQuotaResponse> = {}): SelfQuotaRespo
     blocks: { schedules: [], modelCaps: [] },
     ...over,
   };
+}
+
+/** A pool as the page receives it: parsed through the real response schema, so a fixture that
+ * breaks the contract throws instead of testing nothing. */
+export function parsedPool(over: Partial<SelfQuotaPool> = {}): SelfQuotaPool {
+  return selfQuotaResponseSchema.parse(quotaView({ pools: [pool(over)] })).pools[0];
 }
 
 export function jsonResponse(body: unknown, status = 200): Response {
