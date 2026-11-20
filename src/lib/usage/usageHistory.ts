@@ -38,6 +38,7 @@ import {
   getCompletedDetails,
 } from "./completedRequestDetails";
 import * as sessions from "./usageHistory/agentSessionUsage";
+import { loggableSessionTurn } from "./usageHistory/sessionTurn";
 import { shouldPersistToDisk } from "./migrations";
 import {
   attemptWrite,
@@ -983,7 +984,9 @@ export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUs
         frozenEntry.timestamp,
         serviceTier
       );
-      writeOptions = { ...options, agentSession };
+      // The turn transcript is stored on the session, so it only matters when there is one.
+      const sessionTurn = agentSession ? await loggableSessionTurn(frozenEntry) : null;
+      writeOptions = { ...options, agentSession, sessionTurn };
     }
     attemptWrite(frozenEntry, writeOptions);
   } catch (error) {

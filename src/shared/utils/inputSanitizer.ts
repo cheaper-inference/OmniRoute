@@ -11,6 +11,7 @@ import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
+import type { CompiledPiiRule } from "@/shared/utils/piiCustomPatterns";
 import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
@@ -254,7 +255,7 @@ function collectPartText(part, contents) {
 }
 
 function extractMessageContents(body) {
-  const contents = [];
+  const contents: string[] = [];
 
   const messageSource = body.messages !== undefined ? body.messages : body.input;
   const messages = Array.isArray(messageSource)
@@ -331,7 +332,7 @@ function buildInjectionScanText(text) {
  * @returns {Array<{pattern: string, severity: string, match: string}>}
  */
 function detectInjection(text) {
-  const detections = [];
+  const detections: Array<{ pattern: string; severity: string; match: string }> = [];
   const scanText = buildInjectionScanText(text);
   for (const rule of INJECTION_PATTERNS) {
     const match = scanText.match(rule.pattern);
@@ -364,6 +365,13 @@ function resolvePiiRules(options) {
   return custom.length > 0 ? [...builtins, ...custom] : builtins;
 }
 
+/** Per-type selection, pre-compiled custom rules and the optional reversible-vault minter. */
+type PiiRuleOptions = {
+  enabledTypes?: ReadonlySet<string> | null;
+  customRules?: CompiledPiiRule[];
+  tokenize?: (type: string, value: string) => string | null;
+};
+
 // Surrogate tokens of the reversible PII vault (src/lib/pii/tokenVault.ts). While minting,
 // a later rule must not rewrite part of a token an earlier rule wrote.
 const PII_VAULT_TOKEN = /<<PII_[A-Z0-9_]{1,40}>>/g;
@@ -387,7 +395,7 @@ function piiSubstitute(rule, match, tokenize) {
 
 /** @param {string} text */
 function vaultTokenSpans(text) {
-  const spans = [];
+  const spans: Array<[number, number]> = [];
   if (!text.includes("<<PII_")) return spans;
   for (const match of text.matchAll(PII_VAULT_TOKEN)) {
     const start = match.index ?? 0;
@@ -422,8 +430,8 @@ function tokenizeMatches(text, rule, tokenize) {
  * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}>, tokenize?: (type: string, value: string) => string | null }} [options] - per-type selection, custom rules, and the reversible-vault minter (only the pii-masker passes one)
  * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
  */
-function processPII(text, redact = false, options = undefined) {
-  const detections = [];
+function processPII(text, redact = false, options?: PiiRuleOptions) {
+  const detections: Array<{ type: string; count: number }> = [];
   let processed = text;
   const tokenize = redact && typeof options?.tokenize === "function" ? options.tokenize : undefined;
 
@@ -466,7 +474,12 @@ function redactRuleMatches(text, rule, tokenize) {
  * @param {((type: string, value: string) => string | null) | undefined} [tokenize]
  * @returns {{ text: string, count: number }}
  */
-function redactValidatedMatches(text, rule, redact, tokenize = undefined) {
+function redactValidatedMatches(
+  text,
+  rule,
+  redact,
+  tokenize: ((type: string, value: string) => string | null) | undefined = undefined
+) {
   let count = 0;
   let output = "";
   let cursor = 0;
@@ -492,7 +505,13 @@ function redactValidatedMatches(text, rule, redact, tokenize = undefined) {
 export function sanitizeRequest(body, logger = console) {
   const config = getConfig();
 
-  const result = {
+  const result: {
+    blocked: boolean;
+    modified: boolean;
+    detections: Array<{ pattern: string; severity: string; match: string }>;
+    piiDetections: Array<{ type: string; count: number }>;
+    sanitizedBody: Record<string, unknown> | null;
+  } = {
     blocked: false,
     modified: false,
     detections: [],

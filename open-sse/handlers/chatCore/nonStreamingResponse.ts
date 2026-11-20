@@ -75,6 +75,7 @@ import {
   toAntigravityDiagnosticPayload,
 } from "../../executors/antigravityUpstreamError.ts";
 import { routingFinishReason } from "../chatCore/routingFinishReason.ts";
+import { resolveSessionTurn } from "./agentContext.ts";
 import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import {
   getProviderCredentials,
@@ -780,6 +781,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
       agentContext,
+      sessionTurn: resolveSessionTurn({
+        clientRawRequest,
+        body,
+        responses: [okLeg.response],
+        agentContext,
+        apiKeyInfo,
+      }),
     });
 
     // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
