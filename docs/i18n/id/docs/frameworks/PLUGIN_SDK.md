@@ -29,16 +29,16 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Fungsi factory yang membuat objek Plugin dengan nilai default.
+Fungsi pabrik yang membuat objek Plugin dengan default.
 
 **Parameter:**
 
-- `name` (string, wajib) — Nama plugin dalam kebab-case
-- `priority` (number, opsional, default: 100) — Nilai yang lebih rendah dijalankan lebih dahulu
-- `enabled` (boolean, opsional, default: true) — Mulai dalam keadaan aktif?
-- `onRequest` (function, opsional) — Dijalankan sebelum handler chat
-- `onResponse` (function, opsional) — Dijalankan setelah handler chat
-- `onError` (function, opsional) — Dijalankan saat terjadi kesalahan pada handler
+- `name` (string, wajib) Nama plugin — dalam case kebab
+- `priority` (angka, opsional, default: 100) — Yang lebih rendah dijalankan terlebih dahulu
+- `enabled` (boolean, opsional, default: true) — Mulai diaktifkan?
+- `onRequest` (fungsi, opsional) — Berjalan sebelum pengendali obrolan
+- `onResponse` (fungsi, opsional) — Berjalan setelah pengendali obrolan
+- `onError` (fungsi, opsional) — Berjalan pada kesalahan pengendali
 
 ### `blockRequest(response?): BlockingHookResult`
 
@@ -46,8 +46,8 @@ Blokir permintaan dan secara opsional kembalikan respons khusus.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Konteks Plugin (`PluginContext`)
 
-| Bidang      | Tipe                      | Deskripsi                        |
-| ----------- | ------------------------- | -------------------------------- |
-| `requestId` | `string`                  | Pengidentifikasi unik permintaan |
-| `model`     | `string`                  | Nama model yang diminta          |
-| `provider`  | `string`                  | ID penyedia target               |
-| `body`      | `Record<string, unknown>` | Isi permintaan                   |
-| `headers`   | `Record<string, string>`  | Header permintaan                |
-| `metadata`  | `Record<string, unknown>` | Metadata yang dapat diubah       |
-| `timestamp` | `number`                  | Stempel waktu permintaan         |
+| Bidang       | Jenis                     | Keterangan                         |
+| ------------ | ------------------------- | ---------------------------------- |
+| `requestId`  | `string`                  | Pengidentifikasi permintaan unik   |
+| `model`      | `string`                  | Nama model yang diminta            |
+| `provider`   | `string`                  | Penyedia target ID                 |
+| `body`       | `Record<string, unknown>` | Permintaan tubuh                   |
+| `headers`    | `Record<string, string>`  | Header permintaan (lihat catatan)  |
+| `metadata`   | `Record<string, unknown>` | Metadata yang bisa berubah         |
+| `timestamp`  | `number`                  | Minta stempel waktu                |
+| `apiKeyInfo` | `object` (opsional)       | metadata kunci API (lihat catatan) |
+
+Konteksnya tidak pernah membawa kredensial klien: header `authorization`, `x-api-key`, `proxy-authorization` dan `cookie` dihapus (casing apa pun), dan `apiKeyInfo` menyimpan metadata kunci (seperti `id`, `name` dan `scopes`) tetapi tidak menyimpan nilai kunci atau sidik jarinya (`redactPluginContext()` di `src/lib/plugins/hooks.ts`). Ini berlaku untuk `onRequest`, `onResponse` dan `onError`.
 
 ## Manifes (`plugin.json`)
 
@@ -140,17 +143,16 @@ Atau sebagai nilai boolean sederhana (prioritas default 100):
 
 ## Sistem Izin
 
-Plugin berjalan dalam konteks VM yang terisolasi. Akses ke sumber daya eksternal memerlukan izin eksplisit:
+Plugin adalah** tidak dikotak pasir** . Setiap plugin aktif berjalan sebagai proses anak Node.js biasa yang terpisah (`loadPlugin()` di `src/lib/plugins/loader.ts`) di bawah pengguna sistem operasi yang sama dengan OmniRoute, tanpa konteks VM dan tanpa tanda izin Node.js. Kode plugin dapat menggunakan `node:fs`, `node:child_process`, `fetch` dan Node.js API lainnya : dapat membaca dan menulis file apa pun yang dapat dilakukan pengguna OmniRoute (termasuk direktori data), menjalankan program, dan menjangkau jaringan.
 
-| Izin         | Memberikan Akses                                             |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proksi `process.env` hanya-baca                              |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` manifes menerima `network`, `file-read`, `file-write`, `env` dan `exec`, namun saat ini hanya `env` yang memiliki efek saat runtime:
 
-Tanpa izin, global terkait sama sekali tidak tersedia di sandbox.
+| Izin                                         | Efek hari ini                                                                                                                                                                                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Proses plugin juga menerima `PORT`, `HOSTNAME`, `TZ` dan `TMPDIR`. Tanpanya, ia hanya menerima `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` dan `PLUGIN_NAME` (ditambah `SystemRoot` dan `windir` di Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Tidak ada. Itu hanyalah deklarasi: tidak ada yang diblokir jika tidak ada.                                                                                                                                                             |
+
+Memasang plugin sama seperti memasang program lain di host. Instal hanya plugin yang sumbernya Anda percayai.
 
 ## Skema Konfigurasi
 
@@ -194,7 +196,7 @@ Nilai konfigurasi disimpan secara persisten dalam basis data dan dapat diakses m
 
 ## Contoh
 
-### Pencatat Permintaan
+### Minta Pencatat
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Pembatas Laju
+### Pembatas Nilai
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 menit
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Transformator Respons
+### Transformator Respon
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

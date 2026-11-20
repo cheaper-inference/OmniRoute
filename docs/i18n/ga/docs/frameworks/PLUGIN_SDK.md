@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Feidhm monarchan a chruthaíonn réad Plugin le luachanna réamhshocraithe.
+Feidhm mhonarcha a chruthaíonn réad Breiseán le réamhshocruithe.
 
 **Paraiméadair:**
 
-- `name` (string, riachtanach) — Ainm an bhreiseáin i kebab-case
-- `priority` (number, roghnach, réamhshocrú: 100) — Ritheann luach níos ísle ar dtús
-- `enabled` (boolean, roghnach, réamhshocrú: true) — An dtosófar cumasaithe?
-- `onRequest` (function, roghnach) — Ritheann sé roimh an láimhseálaí comhrá
-- `onResponse` (function, roghnach) — Ritheann sé tar éis an láimhseálaí comhrá
-- `onError` (function, roghnach) — Ritheann sé nuair a tharlaíonn earráid sa láimhseálaí
+- `name` (teaghrán, riachtanach) — Ainm an bhreiseáin sa chás ceibeab
+- `priority` (uimhir, roghnach, réamhshocraithe: 100) — Ritheann níos ísle ar dtús
+- `enabled` (boolean, roghnach, réamhshocraithe: fíor) — Tosaigh cumasaithe?
+- `onRequest` (feidhm, roghnach) — Ritheann sé roimh an láimhseálaí comhrá
+- `onResponse` (feidhm, roghnach) — Ritheann tar éis an láimhseálaí comhrá
+- `onError` (feidhm, roghnach) — Ritheann sé ar earráid láimhseálaí
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Cuir bac ar an iarratas agus, más mian leat, seol freagra saincheaptha ar ais.
+Cuir bac ar an iarratas agus seol freagra saincheaptha ar ais go roghnach.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Athraigh corp an iarratais sula sroicheann sé an soláthraí.
+Déan an comhlacht iarratais a mhodhnú sula sroicheann sé an soláthraí.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Comhthéacs an Bhreiseáin (`PluginContext`)
 
-| Réimse      | Cineál                    | Cur Síos                      |
-| ----------- | ------------------------- | ----------------------------- |
-| `requestId` | `string`                  | Aitheantóir uathúil iarratais |
-| `model`     | `string`                  | Ainm na samhla iarrtha        |
-| `provider`  | `string`                  | ID an tsoláthraí sprice       |
-| `body`      | `Record<string, unknown>` | Corp an iarratais             |
-| `headers`   | `Record<string, string>`  | Ceanntásca an iarratais       |
-| `metadata`  | `Record<string, unknown>` | Meiteashonraí inathraithe     |
-| `timestamp` | `number`                  | Stampa ama an iarratais       |
+| Réimse       | Cineál                    | Cur síos                               |
+| ------------ | ------------------------- | -------------------------------------- |
+| `requestId`  | `string`                  | Aitheantóir iarratais uathúil          |
+| `model`      | `string`                  | Ainm múnla iarrtha                     |
+| `provider`   | `string`                  | Soláthraí sprice ID                    |
+| `body`       | `Record<string, unknown>` | Comhlacht iarratais                    |
+| `headers`    | `Record<string, string>`  | Ceanntásca iarratais (féach nóta)      |
+| `metadata`   | `Record<string, unknown>` | Meiteashonraí mutable                  |
+| `timestamp`  | `number`                  | Stampa ama iarratais                   |
+| `apiKeyInfo` | `object` (roghnach)       | meiteashonraí eochair API (féach nóta) |
+
+Ní iompraíonn an comhthéacs dintiúir an chliaint riamh: baintear na ceanntásca `authorization`, `x-api-key`, `proxy-authorization` agus `cookie` (aon chásáil), agus coinníonn `apiKeyInfo` meiteashonraí na heochrach (ar nós `id`, `name` agus `scopes`) ach ní an eochairluach ná a méarlorg (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). Baineann sé seo le `onRequest`, `onResponse` agus `onError`.
 
 ## Lastliosta (`plugin.json`)
 
@@ -138,19 +141,18 @@ Nó mar luachanna simplí boolean (tosaíocht réamhshocraithe 100):
 }
 ```
 
-## Córas Ceadanna
+## Córas Ceada
 
-Ritheann breiseáin i gcomhthéacs VM bosca gainimh. Teastaíonn ceadanna sainráite chun rochtain a fháil ar acmhainní seachtracha:
+Tá breiseáin** ní sandboxed** . Ritheann gach breiseán gníomhach mar ghnáthphróiseas linbh Node.js ar leith (`loadPlugin()` in `src/lib/plugins/loader.ts`) faoin úsáideoir córais oibriúcháin céanna le OmniRoute, gan comhthéacs VM agus gan aon bhratacha cead Node.js. Is féidir le cód breiseán `node:fs`, `node:child_process`, `fetch` agus gach ceann eile Node.js API a úsáid : is féidir leis aon chomhad a léamh agus a scríobh is féidir leis an úsáideoir OmniRoute (lena n-áirítear an t-eolaire sonraí), cláir a reáchtáil agus an líonra a bhaint amach.
 
-| Cead         | Rochtain a dheonaítear                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Seachfhreastalaí inléite amháin `process.env`                |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Glacann `requires.permissions` an fhoriomláin `network`, `file-read`, `file-write`, `env` agus `exec`, ach inniu níl ach éifeacht ag `env` ag am rite:
 
-Gan cead, níl na hathróga domhanda comhfhreagracha ar fáil sa bhosca gainimh.
+| Cead                                         | Éifeacht inniu                                                                                                                                                                                                                                     |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Faigheann an próiseas breiseán freisin `PORT`, `HOSTNAME`, `TZ` agus `TMPDIR`. Gan é, ní fhaigheann sé ach `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` agus `PLUGIN_NAME` ( móide `SystemRoot` agus `windir` ar Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Dada. Is dearbhuithe amháin iad: ní chuirtear bac ar aon rud nuair a bhíonn siad in easnamh.                                                                                                                                                       |
+
+Is ionann breiseán a shuiteáil agus aon chlár eile a shuiteáil ar an óstach. Suiteáil forlíontáin a bhfuil muinín agat as a bhfoinse amháin.
 
 ## Scéimre Cumraíochta
 
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Teorantóir Ráta
+### Teorantóir Rátaí
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 nóiméad
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Claochladán Freagraí
+### Trasfhoirmeoir Freagra
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

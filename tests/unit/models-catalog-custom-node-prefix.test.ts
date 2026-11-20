@@ -3,6 +3,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { installOfflineCatalogNetwork } from "../_helpers/offlineCatalogNetwork.ts";
+
+const network = installOfflineCatalogNetwork();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-custom-node-prefix-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -11,8 +14,11 @@ const aliasesDb = await import("../../src/lib/db/models/aliases.ts");
 const core = await import("../../src/lib/db/core.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const modelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const modelsRoute = await import("../../src/app/api/v1/models/route.ts");
+
+network.activate();
 
 const NODE_ID = "openai-compatible-chat-550e8400-e29b-41d4-a716-446655440000";
 const PREFIX = "infrex";
@@ -27,6 +33,8 @@ async function resetStorage(): Promise<void> {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   modelsCatalog.__resetCatalogBuilderRunsForTest();
+  // Prefix semantics do not depend on synthesized auto/* models or live quota APIs.
+  await settingsDb.updateSettings({ hideAutoCombos: true });
 }
 
 async function seedCustomNode(): Promise<void> {
@@ -67,8 +75,8 @@ async function getCatalogIds(mode: "alias" | "canonical" | "dual"): Promise<stri
   const response = await modelsRoute.GET(
     new Request(`http://localhost/api/v1/models?prefix=${mode}`)
   );
-  assert.equal(response.status, 200);
   const body = (await response.json()) as { data: Array<{ id: string }> };
+  assert.equal(response.status, 200, JSON.stringify(body));
   return body.data.map((model) => model.id);
 }
 
@@ -91,9 +99,18 @@ test.beforeEach(async () => {
   await seedCustomNode();
 });
 
-test.after(() => {
-  core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+test.after(async () => {
+  try {
+    await modelsCatalog.__flushCatalogBackgroundRefreshForTest();
+    assert.deepEqual(network.unexpectedRequests, [], "catalog contracts must stay offline");
+  } finally {
+    try {
+      core.resetDbInstance();
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    } finally {
+      await network.restore();
+    }
+  }
 });
 
 test("alias mode exposes every custom node model under its configured prefix", async () => {

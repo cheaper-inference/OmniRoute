@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Referencia API
+## API Referencia
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Továrenská funkcia, ktorá vytvorí objekt Plugin s predvolenými hodnotami.
+Továrenská funkcia, ktorá vytvára objekt Plugin s predvolenými hodnotami.
 
 **Parametre:**
 
-- `name` (string, povinné) — Názov pluginu vo formáte kebab-case
-- `priority` (number, voliteľné, predvolená hodnota: 100) — Nižšia hodnota sa spustí ako prvá
-- `enabled` (boolean, voliteľné, predvolená hodnota: true) — Má byť na začiatku povolený?
-- `onRequest` (function, voliteľné) — Spustí sa pred obslužnou rutinou chatu
-- `onResponse` (function, voliteľné) — Spustí sa po obslužnej rutine chatu
-- `onError` (function, voliteľné) — Spustí sa pri chybe obslužnej rutiny
+- `name` (reťazec, povinné) — Názov doplnku v kebab-case
+- `priority` (číslo, voliteľné, predvolená hodnota: 100) — Nižšia beží ako prvá
+- `enabled` (boolovská hodnota, voliteľné, predvolená hodnota: true) — Štart je povolený?
+- `onRequest` (funkcia, voliteľná) — Spustí sa pred obsluhou chatu
+- `onResponse` (funkcia, voliteľná) — Spustí sa po obsluhe chatu
+- `onError` (funkcia, voliteľná) — Spustí sa pri chybe obsluhy
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Zablokuje požiadavku a voliteľne vráti vlastnú odpoveď.
+Zablokujte požiadavku a prípadne vráťte vlastnú odpoveď.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Upraví telo požiadavky predtým, ako sa dostane k poskytovateľovi.
+Upravte telo žiadosti skôr, ako sa dostane k poskytovateľovi.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Pripojí metadáta ku kontextu požiadavky.
+Pripojte metadáta ku kontextu požiadavky.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Kontext pluginu (`PluginContext`)
+## Kontext doplnku (`PluginContext`)
 
-| Pole        | Typ                       | Popis                              |
-| ----------- | ------------------------- | ---------------------------------- |
-| `requestId` | `string`                  | Jedinečný identifikátor požiadavky |
-| `model`     | `string`                  | Názov požadovaného modelu          |
-| `provider`  | `string`                  | ID cieľového poskytovateľa         |
-| `body`      | `Record<string, unknown>` | Telo požiadavky                    |
-| `headers`   | `Record<string, string>`  | Hlavičky požiadavky                |
-| `metadata`  | `Record<string, unknown>` | Meniteľné metadáta                 |
-| `timestamp` | `number`                  | Časová pečiatka požiadavky         |
+| Pole         | Typ                       | Popis                               |
+| ------------ | ------------------------- | ----------------------------------- |
+| `requestId`  | `string`                  | Jedinečný identifikátor požiadavky  |
+| `model`      | `string`                  | Požadovaný názov modelu             |
+| `provider`   | `string`                  | Cieľový poskytovateľ ID             |
+| `body`       | `Record<string, unknown>` | Telo žiadosti                       |
+| `headers`    | `Record<string, string>`  | Hlavičky žiadostí (pozri poznámku)  |
+| `metadata`   | `Record<string, unknown>` | Meniteľné metadáta                  |
+| `timestamp`  | `number`                  | Žiadosť o časovú pečiatku           |
+| `apiKeyInfo` | `object` (voliteľné)      | metadáta kľúča API (pozri poznámku) |
+
+Kontext nikdy nenesie prihlasovacie údaje klienta: hlavičky `authorization`, `x-api-key`, `proxy-authorization` a `cookie` sú odstránené (akékoľvek veľké a malé písmená) a `apiKeyInfo` uchováva metadáta kľúča (napríklad `id`, `name` a `scopes`), ale nie hodnotu kľúča ani jeho odtlačok (`redactPluginContext()` v `src/lib/plugins/hooks.ts`). Platí to pre `onRequest`, `onResponse` a `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Alebo ako jednoduché booleovské hodnoty (predvolená priorita je 100):
 }
 ```
 
-## Systém oprávnení
+## Systém povolení
 
-Pluginy sa spúšťajú v kontexte izolovaného virtuálneho stroja. Prístup k externým zdrojom vyžaduje explicitné oprávnenia:
+Pluginy sú** nie v pieskovisku** . Každý aktívny doplnok beží ako samostatný, obyčajný podradený proces Node.js (`loadPlugin()` v `src/lib/plugins/loader.ts`) pod tým istým používateľom operačného systému ako OmniRoute, bez kontextu VM a bez príznakov povolenia Node.js. Kód zásuvného modulu môže používať `node:fs`, `node:child_process`, `fetch` a každý iný Node.js API: môže čítať a zapisovať akýkoľvek súbor, ktorý môže používateľ OmniRoute (vrátane adresára s údajmi), spúšťať programy a dostať sa do siete.
 
-| Oprávnenie   | Udeľuje prístup                                              |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy `process.env` iba na čítanie                           |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` manifestu akceptuje `network`, `file-read`, `file-write`, `env` a `exec`, ale dnes má za behu vplyv iba `env` :
 
-Bez príslušného oprávnenia zodpovedajúce globálne objekty jednoducho nie sú v izolovanom prostredí dostupné.
+| Povolenie                                    | Účinok dnes                                                                                                                                                                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Proces pluginu tiež prijíma `PORT`, `HOSTNAME`, `TZ` a `TMPDIR`. Bez nej dostane len `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` a `PLUGIN_NAME` (plus `SystemRoot` a `windir` na Windows). |
+| `network`, `file-read`, `file-write`, `exec` | žiadne. Sú to len vyhlásenia: ak chýbajú, nič nie je blokované.                                                                                                                                                      |
+
+Inštalácia doplnku je ako inštalácia akéhokoľvek iného programu na hostiteľa. Inštalujte iba doplnky, ktorým dôverujete.
 
 ## Schéma konfigurácie
 
@@ -194,7 +196,7 @@ Hodnoty konfigurácie sa ukladajú v databáze a sú dostupné prostredníctvom 
 
 ## Príklady
 
-### Zaznamenávanie požiadaviek
+### Vyžiadajte si Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Obmedzovanie počtu požiadaviek
+### Obmedzovač rýchlosti
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minúta
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Transformácia odpovede
+### Transformátor odozvy
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

@@ -126,8 +126,8 @@ test("OCR records provider-reported pages, price, cost, key and connection witho
   assert.deepEqual(row.tokens, {
     input: 0,
     output: 0,
-    cacheRead: 0,
-    cacheCreation: 0,
+    cacheRead: null,
+    cacheCreation: null,
     reasoning: 0,
   });
   const ledger = await settledLedger(key.id);
