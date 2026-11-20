@@ -49,6 +49,7 @@ describe("Header on the kit shell", () => {
       const desktopQuickNav = screen.getByRole("button", { name: /^Quick nav\s*Ctrl\s*K$/ });
       const mobileQuickNav = screen.getByRole("button", { name: "Open quick navigation" });
       fireEvent.click(desktopQuickNav);
+      expect(open).toHaveBeenCalledTimes(1);
       fireEvent.click(mobileQuickNav);
       expect(open).toHaveBeenCalledTimes(2);
       expect(screen.getByRole("button", { name: "Logout" }).className).toContain(

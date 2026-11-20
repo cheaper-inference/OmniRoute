@@ -300,10 +300,12 @@ describe("Sidebar hierarchy, keyboard navigation and ARIA contract (#12869)", ()
     const search = within(aside).getByRole("searchbox", { name: "Search" });
     const navigation = within(aside).getByRole("navigation", { name: "Main navigation" });
     const home = within(navigation).getByRole("link", { name: /^Home\s*Dashboard overview$/ });
-    for (const stop of [brand, search, home]) {
-      await user.tab();
-      expect(document.activeElement).toBe(stop);
-    }
+    await user.tab();
+    expect(document.activeElement).toBe(brand);
+    await user.tab();
+    expect(document.activeElement).toBe(search);
+    await user.tab();
+    expect(document.activeElement).toBe(home);
   });
 
   it("gives every expandable control state + a resolvable panel, and every control a name", async () => {
