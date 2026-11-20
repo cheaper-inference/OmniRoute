@@ -18,18 +18,19 @@ export type SelfServiceQuery<T> =
 // 60 s is the floor of the account readings cache: an earlier reload would show nothing new.
 const REFRESH_ON_RETURN_MIN_AGE_MS = 60_000;
 
-type Request = { path: string; apiKey: string; attempt: number };
+/**
+ * `epoch` moves on every change of path or key, `attempt` on every reload. An outcome is shown
+ * only for the exact request it answers, and last good data only within the same epoch.
+ */
+type Request = { epoch: number; attempt: number };
 type Settled<T> = Exclude<SelfServiceQuery<T>, { status: "idle" } | { status: "loading" }>;
-/** The last outcome, kept with the request it answers, and the last good data. */
 type QueryState<T> = {
   request: Request;
   outcome: Settled<T>;
-  good: { path: string; apiKey: string; data: T } | null;
+  good: { epoch: number; data: T } | null;
 };
 
-function sameRequest(a: Request, b: Request): boolean {
-  return a.path === b.path && a.apiKey === b.apiKey && a.attempt === b.attempt;
-}
+const SERVER_FAILURE = { ok: false, failure: "server" } as const;
 
 function settle<T>(result: SelfServiceResult<T>, receivedAt: number): Settled<T> | null {
   // `in` narrows the union with or without strictNullChecks.
@@ -52,24 +53,30 @@ function nextState<T>(
   outcome: Settled<T>
 ): QueryState<T> {
   if (outcome.status === "ready") {
-    return {
-      request,
-      outcome,
-      good: { path: request.path, apiKey: request.apiKey, data: outcome.data },
-    };
+    return { request, outcome, good: { epoch: request.epoch, data: outcome.data } };
   }
   const good = previous?.good;
-  const keep = good && good.path === request.path && good.apiKey === request.apiKey;
-  return { request, outcome, good: keep ? good : null };
+  return { request, outcome, good: good && good.epoch === request.epoch ? good : null };
 }
 
 /** "Loading" is the gap between the current request and the one the state answers. */
 function deriveQuery<T>(state: QueryState<T> | null, request: Request | null): SelfServiceQuery<T> {
   if (!request) return { status: "idle" };
-  if (state && sameRequest(state.request, request)) return state.outcome;
+  const answered = state?.request;
+  if (answered && answered.epoch === request.epoch && answered.attempt === request.attempt) {
+    return state.outcome;
+  }
   const good = state?.good;
-  const keep = good && good.path === request.path && good.apiKey === request.apiKey;
-  return { status: "loading", data: keep ? good.data : null };
+  return { status: "loading", data: good && good.epoch === request.epoch ? good.data : null };
+}
+
+/** Moves the epoch during render when the path or the key changes (previous-props pattern). */
+function useEpoch(path: string, apiKey: string | null): number {
+  const [tracked, setTracked] = useState({ path, apiKey, epoch: 0 });
+  if (tracked.path === path && tracked.apiKey === apiKey) return tracked.epoch;
+  const epoch = tracked.epoch + 1;
+  setTracked({ path, apiKey, epoch });
+  return epoch;
 }
 
 /**
@@ -83,6 +90,7 @@ export function useSelfServiceQuery<T>(input: {
   refetchOnReturn?: boolean;
 }): { query: SelfServiceQuery<T>; reload: () => void } {
   const { path, apiKey, schema, refetchOnReturn = false } = input;
+  const epoch = useEpoch(path, apiKey);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<QueryState<T> | null>(null);
   const reload = useCallback(() => setAttempt((value) => value + 1), []);
@@ -90,16 +98,19 @@ export function useSelfServiceQuery<T>(input: {
   useEffect(() => {
     if (!apiKey) return;
     const controller = new AbortController();
-    const request: Request = { path, apiKey, attempt };
-    void requestSelfService({ path, apiKey, schema, signal: controller.signal }).then((result) => {
-      if (controller.signal.aborted) return;
-      const outcome = settle(result, Date.now());
-      if (outcome) setState((previous) => nextState(previous, request, outcome));
-    });
+    const request: Request = { epoch, attempt };
+    void requestSelfService({ path, apiKey, schema, signal: controller.signal })
+      // Anything thrown after the fetch (a throwing schema, for example) is a server failure.
+      .catch((): SelfServiceResult<T> => SERVER_FAILURE)
+      .then((result) => {
+        if (controller.signal.aborted) return;
+        const outcome = settle(result, Date.now());
+        if (outcome) setState((previous) => nextState(previous, request, outcome));
+      });
     return () => controller.abort();
-  }, [path, apiKey, schema, attempt]);
+  }, [path, apiKey, schema, epoch, attempt]);
 
-  const query = deriveQuery(state, apiKey ? { path, apiKey, attempt } : null);
+  const query = deriveQuery(state, apiKey ? { epoch, attempt } : null);
   const readyAt = query.status === "ready" ? query.receivedAt : null;
 
   useEffect(() => {

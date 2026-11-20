@@ -66,31 +66,46 @@ function storageAccess(areas: KeyStorageAreas) {
     }
   };
 
-  /** A stored value that is not a usable key is removed and ignored. */
-  const read = (name: StorageArea): StoredKey | null => {
-    let raw: string | null = null;
+  const readRaw = (name: StorageArea): string | null => {
     try {
-      raw = area(name)?.getItem(STORAGE_ENTRY) ?? null;
+      return area(name)?.getItem(STORAGE_ENTRY) ?? null;
     } catch {
       return null;
     }
+  };
+
+  // Areas holding a value that is not a usable key, removed later by sweep(), outside render.
+  const unusable = new Set<StorageArea>();
+
+  /** A stored value that is not a usable key reads as absent. Reading never writes. */
+  const read = (name: StorageArea): StoredKey | null => {
+    const raw = readRaw(name);
     if (raw === null) return null;
     const parsed = parseApiKeyInput(raw);
     if (!parsed.ok) {
-      remove(name);
+      unusable.add(name);
       return null;
     }
     return { key: parsed.key, persistence: name, confirmed: true };
   };
 
+  /** Removes the unusable values found by earlier reads, unless another tab replaced them. */
+  const sweep = (): void => {
+    for (const name of unusable) {
+      const raw = readRaw(name);
+      if (raw !== null && !parseApiKeyInput(raw).ok) remove(name);
+    }
+    unusable.clear();
+  };
+
   const readStorage = (): StoredKey | null => read("device") ?? read("session");
 
-  return { remove, write, readStorage };
+  return { remove, write, read, readStorage, sweep };
 }
 
 /** Keeps the API key of the self-service page in memory, and in browser storage once accepted. */
 export function createKeyStore(areas: KeyStorageAreas): KeyStore {
-  const { remove, write, readStorage } = storageAccess(areas);
+  const { remove, write, read, readStorage, sweep } = storageAccess(areas);
   const listeners = new Set<() => void>();
   let snapshot: StoredKey | null = null;
   let loaded = false;
@@ -113,6 +128,9 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
 
   return {
     subscribe(listener) {
+      // Subscribing runs outside render: the first read may have found values to clean up.
+      current();
+      sweep();
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
@@ -120,6 +138,8 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
     },
     getSnapshot: current,
     hold(key, keep) {
+      current();
+      sweep();
       remember = keep;
       commit({ key, persistence: "memory", confirmed: false });
     },
@@ -144,11 +164,15 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
       remove("session");
       remember = false;
       commit(null);
+      sweep();
     },
     reload() {
-      // A key that lives only in this page's memory is not another tab's to change.
-      if (current()?.persistence === "memory") return;
-      commit(readStorage());
+      const held = current();
+      // A key kept only in memory or in this tab's session is not another tab's to change.
+      if (held && held.persistence !== "device") return;
+      // A device key follows the device entry; a tab without a key picks one up from it.
+      commit(read("device"));
+      sweep();
     },
   };
 }

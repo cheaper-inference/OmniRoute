@@ -208,6 +208,81 @@ describe("createKeyStore", () => {
     assert.equal(notifications(), 2);
   });
 
+  test("a tab keeping its key in memory or session ignores what other tabs save", () => {
+    const sessionTab = setup({ session: { [ENTRY]: "k1" } });
+    assert.deepEqual(brief(sessionTab.store), { key: "k1", persistence: "session" });
+    sessionTab.device.setItem(ENTRY, "k2");
+    sessionTab.store.reload();
+    assert.deepEqual(sessionTab.store.getSnapshot(), {
+      key: "k1",
+      persistence: "session",
+      confirmed: true,
+    });
+
+    const memoryTab = setup();
+    memoryTab.store.hold("k1", false);
+    memoryTab.device.setItem(ENTRY, "k2");
+    memoryTab.store.reload();
+    assert.deepEqual(memoryTab.store.getSnapshot(), {
+      key: "k1",
+      persistence: "memory",
+      confirmed: false,
+    });
+    assert.equal(sessionTab.notifications() + memoryTab.notifications(), 1);
+  });
+
+  test("a tab keeping its key on the device follows the device entry", () => {
+    const { device, store } = setup();
+    store.hold("k1", true);
+    store.confirm();
+    assert.deepEqual(brief(store), { key: "k1", persistence: "device" });
+
+    device.setItem(ENTRY, "k2");
+    store.reload();
+    assert.deepEqual(store.getSnapshot(), { key: "k2", persistence: "device", confirmed: true });
+
+    device.removeItem(ENTRY);
+    store.reload();
+    assert.equal(store.getSnapshot(), null);
+  });
+
+  test("a tab without a key picks up a key another tab saves on the device", () => {
+    const { device, store, notifications } = setup();
+    assert.equal(store.getSnapshot(), null);
+    device.setItem(ENTRY, "k2");
+    store.reload();
+    assert.deepEqual(store.getSnapshot(), { key: "k2", persistence: "device", confirmed: true });
+    assert.equal(notifications(), 1);
+  });
+
+  test("reading the snapshot never writes to storage", () => {
+    const session = memoryStorage({ [ENTRY]: "not a key" });
+    let removals = 0;
+    const removeItem = session.removeItem.bind(session);
+    session.removeItem = (name: string) => {
+      removals += 1;
+      removeItem(name);
+    };
+    const store = createKeyStore(areas({ session, device: memoryStorage() }));
+    assert.equal(store.getSnapshot(), null);
+    assert.equal(store.getSnapshot(), null);
+    assert.equal(removals, 0);
+    assert.equal(session.getItem(ENTRY), "not a key");
+
+    store.subscribe(() => {});
+    assert.equal(removals, 1);
+    assert.equal(session.getItem(ENTRY), null);
+  });
+
+  test("an unusable value replaced by a real key before the cleanup is kept", () => {
+    const session = memoryStorage({ [ENTRY]: "not a key" });
+    const store = createKeyStore(areas({ session, device: memoryStorage() }));
+    assert.equal(store.getSnapshot(), null);
+    session.setItem(ENTRY, "k1");
+    store.subscribe(() => {});
+    assert.equal(session.getItem(ENTRY), "k1");
+  });
+
   test("the store never logs", () => {
     const methods = ["log", "info", "warn", "error", "debug"] as const;
     const originals = methods.map((name) => console[name]);

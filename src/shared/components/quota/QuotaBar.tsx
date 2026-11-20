@@ -65,7 +65,7 @@ export default function QuotaBar({
         className={`flex items-center justify-between${sizes.header} ${sizes.text} text-text-muted`}
       >
         <span className="min-w-0 break-words font-semibold uppercase tracking-wide">{label}</span>
-        <span className={`tabular-nums font-semibold ${valueColor}`}>{valueLabel}</span>
+        <span className={`shrink-0 tabular-nums font-semibold ${valueColor}`}>{valueLabel}</span>
       </div>
       <div
         role="progressbar"

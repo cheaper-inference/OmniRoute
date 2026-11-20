@@ -82,7 +82,7 @@ describe("QuotaBar", () => {
     expect(screen.getByText("95% muted").className).not.toMatch(/text-(error|warning)/);
   });
 
-  it("lets a long label wrap at both sizes", () => {
+  it("lets a long label wrap at both sizes without squeezing the value", () => {
     const label = "A label long enough to need more than one line on a narrow phone screen";
     for (const size of ["sm", "md"] as const) {
       const { unmount } = render(
@@ -91,6 +91,7 @@ describe("QuotaBar", () => {
       const classes = screen.getByText(label).className;
       expect(classes).toContain("min-w-0");
       expect(classes).toContain("break-words");
+      expect(screen.getByText("10%").className).toContain("shrink-0");
       unmount();
     }
   });

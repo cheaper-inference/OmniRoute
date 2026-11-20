@@ -154,6 +154,62 @@ describe("useSelfServiceQuery", () => {
     expect(result.current.query).toEqual({ status: "loading", data: null });
   });
 
+  it("a key entered again starts over instead of showing its earlier answer", async () => {
+    const fetches = stubFetch();
+    const forKey = (key: string) =>
+      fetches.pending.filter(
+        (entry) =>
+          entry.url.startsWith(QUOTA) &&
+          (entry.init.headers as Record<string, string>).Authorization === `Bearer ${key}`
+      ).length;
+    const { result, rerender } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("Pool A"));
+    expect(result.current.query.status).toBe("ready");
+
+    rerender({ path: `${QUOTA}claude`, apiKey: null });
+    expect(result.current.query).toEqual({ status: "idle" });
+    rerender({ path: `${QUOTA}claude`, apiKey: KEY });
+    expect(result.current.query).toEqual({ status: "loading", data: null });
+    expect(forKey(KEY)).toBe(2);
+
+    await fetches.answer(1, quota("Pool A again"));
+    expect(result.current.query.status).toBe("ready");
+  });
+
+  it("switching to another key and back starts over while the other key is pending", async () => {
+    const fetches = stubFetch();
+    const OTHER = "sk-other-0987654321";
+    const forKey = (key: string) =>
+      fetches.pending.filter(
+        (entry) =>
+          entry.url.startsWith(QUOTA) &&
+          (entry.init.headers as Record<string, string>).Authorization === `Bearer ${key}`
+      ).length;
+    const { result, rerender } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("Pool A"));
+
+    rerender({ path: `${QUOTA}claude`, apiKey: OTHER });
+    rerender({ path: `${QUOTA}claude`, apiKey: KEY });
+    expect(result.current.query).toEqual({ status: "loading", data: null });
+    expect(forKey(KEY)).toBe(2);
+    expect(forKey(OTHER)).toBe(1);
+    expect(fetches.pending[1].init.signal?.aborted).toBe(true);
+  });
+
+  it("a request that throws after the fetch is a server failure", async () => {
+    const fetches = stubFetch();
+    const throwing = {
+      safeParse: (): { success: true; data: unknown } | { success: false } => {
+        throw new Error("schema exploded");
+      },
+    };
+    const { result } = renderHook(() =>
+      useSelfServiceQuery({ path: `${QUOTA}claude`, apiKey: KEY, schema: throwing })
+    );
+    await fetches.answer(0, quota("Pool A"));
+    expect(result.current.query).toEqual({ status: "failed", reason: "server" });
+  });
+
   it("unmount aborts the request", () => {
     const fetches = stubFetch();
     const { unmount } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
