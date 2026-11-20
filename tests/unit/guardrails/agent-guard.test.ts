@@ -137,3 +137,19 @@ test("policy: only claude and anthropic are observed", () => {
   assert.equal(evaluateAgentPolicy(kilo, "glm").action, "allow");
   assert.equal(evaluateAgentPolicy(kilo, null).action, "allow");
 });
+
+const { FEATURE_FLAG_DEFINITIONS } =
+  await import("../../../src/shared/constants/featureFlagDefinitions.ts");
+
+test("AGENT_GUARD_MODE is a security enum flag, off by default, with no block value", () => {
+  const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "AGENT_GUARD_MODE");
+  assert.ok(def);
+  assert.deepEqual(
+    [def.category, def.type, def.defaultValue, def.enumValues, def.requiresRestart],
+    ["security", "enum", "off", ["off", "monitor"], false]
+  );
+  assert.equal(
+    FEATURE_FLAG_DEFINITIONS.some((d) => d.key === "AGENT_GUARD_STRICT"),
+    false
+  );
+});
