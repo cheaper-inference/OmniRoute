@@ -90,8 +90,12 @@ test("the gate rewrites only a /quota/<segment> that must not exist", async () =
   await withFlag("true", () => {
     for (const p of [
       "/quota/claude",
+      "/quota/claude/",
       "/quota/cc",
+      "/quota/cl%61ude",
       "/quota",
+      // Other casing has no route: the gate passes it to the framework's own 404.
+      "/QUOTA/nope",
       "/quota/claude/extra",
       "/dashboard",
       "/api/v1/me/quota/claude",
@@ -102,10 +106,37 @@ test("the gate rewrites only a /quota/<segment> that must not exist", async () =
       const target = rewrittenTo(gate(p));
       assert.ok(target?.endsWith("/_not-found"), `${p} → ${target}`);
     }
+    // NextURL keeps the request's trailing slash on the cloned URL. With the default
+    // trailingSlash: false the framework redirects /quota/nope/ before the proxy runs.
+    assert.equal(rewrittenTo(gate("/quota/nope/")), "http://localhost/_not-found/");
   });
   await withFlag(undefined, () => {
     assert.equal(rewrittenTo(gate("/quota/claude?key=abc")), "http://localhost/_not-found");
   });
+});
+
+test("a flag read that throws counts as off: the page answers 404", async () => {
+  const originalEnv = process.env;
+  const originalConsoleError = console.error;
+  process.env = new Proxy(originalEnv, {
+    get(target, key, receiver) {
+      if (key === "QUOTA_SELF_PANEL") throw new Error("flag store unavailable");
+      return Reflect.get(target, key, receiver);
+    },
+  });
+  const logged: unknown[][] = [];
+  console.error = (...args: unknown[]) => {
+    logged.push(args);
+  };
+  try {
+    assert.equal(resolveQuotaPanelPage("claude"), null);
+    const target = rewrittenTo(gate("/quota/claude"));
+    assert.ok(target?.endsWith("/_not-found"), `rewrite target: ${target}`);
+    assert.equal(logged.length, 2, "each failed flag read is logged");
+  } finally {
+    process.env = originalEnv;
+    console.error = originalConsoleError;
+  }
 });
 
 test("proxy() answers a disabled panel like a missing route, never with a login redirect", async () => {

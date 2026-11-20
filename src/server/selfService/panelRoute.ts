@@ -63,14 +63,13 @@ export function quotaPanelGateResponse(request: NextRequest): NextResponse | nul
   const match = QUOTA_PANEL_PATH.exec(request.nextUrl.pathname);
   if (!match) return null;
 
-  let page: QuotaPanelPage | null = null;
+  let segment: string | null = null;
   try {
-    page = resolveQuotaPanelPage(decodeURIComponent(match[1]));
+    segment = decodeURIComponent(match[1]);
   } catch {
     // Malformed percent-encoding: there is no such page.
-    page = null;
   }
-  if (page) return null;
+  if (segment !== null && resolveQuotaPanelPage(segment)) return null;
 
   const url = request.nextUrl.clone();
   url.pathname = QUOTA_PANEL_NOT_FOUND_PATH;

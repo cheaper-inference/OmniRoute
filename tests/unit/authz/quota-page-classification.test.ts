@@ -46,17 +46,23 @@ test("the proxy matcher covers /quota in any casing and nothing next to it", () 
   for (const p of ["/quota", "/quota/", "/quota/claude", "/QUOTA/claude", "/Quota/cc"]) {
     assert.equal(isMatchedByProxy(p), true, `proxy matcher must match ${p}`);
   }
-  for (const p of ["/quotafoo", "/quota-share", "/quotas/claude"]) {
+  for (const p of ["/quotafoo", "/quota-share", "/quotas", "/quotas/claude", "/quota%2Fx"]) {
     assert.equal(isMatchedByProxy(p), false, `proxy matcher must not match ${p}`);
   }
 });
 
 test("/quota is a public page; its neighbours keep their class", () => {
-  for (const p of ["/quota", "/quota/claude"]) {
+  const pages: ReadonlyArray<[string, string]> = [
+    ["/quota", "/quota"],
+    ["/quota/", "/quota"],
+    ["/quota/claude", "/quota/claude"],
+    ["/quota/claude/extra", "/quota/claude/extra"],
+  ];
+  for (const [p, normalizedPath] of pages) {
     const result = classifyRoute(p, "GET");
     assert.equal(result.routeClass, "PUBLIC", p);
     assert.equal(result.reason, "public_quota_page", p);
-    assert.equal(result.normalizedPath, p, p);
+    assert.equal(result.normalizedPath, normalizedPath, p);
   }
 
   const upper = classifyRoute("/QUOTA/Claude", "GET");
@@ -69,6 +75,8 @@ test("/quota is a public page; its neighbours keep their class", () => {
     ["/quotas", "MANAGEMENT", "fallback_management"],
     ["/quotas/claude", "MANAGEMENT", "fallback_management"],
     ["/quota-share", "MANAGEMENT", "fallback_management"],
+    ["/quot%61/x", "MANAGEMENT", "fallback_management"],
+    ["/quota%2Fx", "MANAGEMENT", "fallback_management"],
     ["/api/quota/pools", "MANAGEMENT", "management_api"],
     ["/api/v1/me/quota/claude", "CLIENT_API", "client_api_v1"],
     ["/v1/me/quota/claude", "CLIENT_API", "client_api_alias"],
