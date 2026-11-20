@@ -1,5 +1,5 @@
-// ABOUTME: Guard test — the 4 dashboard files translated in #6761/#6768 must stay free of
-// ABOUTME: hardcoded Portuguese UI strings (regression guard for the i18n cleanup).
+// ABOUTME: Guard test — dashboard files translated in #6761/#6768 and the i18n UI cleanup must
+// ABOUTME: stay free of hardcoded Portuguese UI strings (regression guard).
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -14,6 +14,10 @@ const FILES = [
   "src/app/(dashboard)/dashboard/compression/studio/PlaygroundInput.tsx",
   "src/app/(dashboard)/dashboard/context/combos/CompressionHub.tsx",
   "src/app/(dashboard)/dashboard/translator/components/advanced/CompressionPreviewAccordion.tsx",
+  "src/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection.tsx",
+  "src/app/(dashboard)/dashboard/translator/components/advanced/PipelineView.tsx",
+  "src/app/(dashboard)/dashboard/translator/components/advanced/RawJsonPanel.tsx",
+  "src/app/(dashboard)/dashboard/memory/components/QdrantConfigCard.tsx",
 ];
 
 // Portuguese-only words that appeared as hardcoded UI copy before the fix.
@@ -29,6 +33,18 @@ const PT_MARKERS = [
   "Técnicas:",
   "Não afeta",
   "reescrevemos",
+  // Translator advanced accordions.
+  "ferramentas técnicas",
+  "Tudo aqui é igual às tabs antigas",
+  "Pipeline OpenAI intermediário",
+  "Visualize cada passo da tradução",
+  "Envie um request pelo Chat Tester",
+  "auto-detecção",
+  "Cole um request JSON",
+  // Qdrant memory card.
+  "Execute um teste de busca",
+  "Coleção compatível com vetores",
+  "A coleção ainda não existe",
 ];
 
 for (const rel of FILES) {

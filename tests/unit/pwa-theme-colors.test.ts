@@ -49,7 +49,8 @@ test("the Editions mirror is not the Classic kit background it replaced", async 
 
 /** One declaration of a block of ci-tokens.css (the Classic base), following var() to the hex. */
 function classicDecl(blockStart: string, token: string): string {
-  const css = read("packages/ui-kit/src/ci-tokens.css");
+  // Normalize CRLF so the "\n"-based block markers below match on any checkout.
+  const css = read("packages/ui-kit/src/ci-tokens.css").replace(/\r\n/g, "\n");
   const declIn = (from: string, name: string) => {
     const start = css.indexOf(from);
     assert.ok(start >= 0, `ci-tokens.css has a block starting with ${from}`);
@@ -147,6 +148,19 @@ test("the web manifest uses the Editions background, not the pre-kit #0b0f1a", a
   const m = manifest();
   assert.equal(m.background_color, "#f3f1e9");
   assert.equal(m.theme_color, "#f3f1e9");
+});
+
+test("the web manifest name and description are English (lang=en, no CJK)", async () => {
+  const { default: manifest } = await import("../../src/app/manifest.ts");
+  const m = manifest();
+  assert.equal(m.lang, "en");
+  assert.equal(m.name, "OmniRoute AI Gateway");
+  assert.equal(
+    m.description,
+    "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint connects all your AI providers."
+  );
+  assert.doesNotMatch(m.name, /[^\x00-\x7F]/, "manifest name must be ASCII (no CJK)");
+  assert.doesNotMatch(m.description ?? "", /[^\x00-\x7F]/, "manifest description must be ASCII");
 });
 
 test("viewport.themeColor has one Editions colour per prefers-color-scheme", () => {

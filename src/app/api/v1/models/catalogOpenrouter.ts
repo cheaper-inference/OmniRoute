@@ -45,7 +45,7 @@ export function getOpenRouterDisplayName(model: {
   pricing?: { prompt?: string; completion?: string };
 }) {
   const name = model.name || model.id || "OpenRouter model";
-  return isOpenRouterFreeModel(model) && !/\bgr[aá]tis\b/i.test(name) ? `${name} (Grátis)` : name;
+  return isOpenRouterFreeModel(model) && !/\bgr[aá]tis\b/i.test(name) ? `${name} (Free)` : name;
 }
 
 export function openRouterCapabilityEntry(

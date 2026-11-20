@@ -1149,29 +1149,27 @@ export default function EditConnectionModal({
                     {[
                       ["Browser", doctorStatus.browser?.ready],
                       ["Storage-State", doctorStatus.storageState?.ready],
-                      ["ChatGPT-Anmeldung", doctorStatus.login?.ready],
+                      ["ChatGPT login", doctorStatus.login?.ready],
                       ["Temporary Chat", doctorStatus.temporaryChats?.ready],
                       ["Tunnel-Binary", doctorStatus.tunnelBinary?.ready],
                       ["Tunnel", doctorStatus.tunnel?.ready],
                       ["Connector", doctorStatus.connector?.ready],
                       ["Tool-Roundtrip", doctorStatus.toolRoundtrip?.ready],
-                      ["Aktive Turns", doctorStatus.runtime?.activeTurns],
-                      ["Wartende Turns", doctorStatus.runtime?.waitingTurns],
+                      ["Active turns", doctorStatus.runtime?.activeTurns],
+                      ["Waiting turns", doctorStatus.runtime?.waitingTurns],
                     ].map(([label, ready]) => (
                       <div key={String(label)}>
-                        {label}:{" "}
-                        {typeof ready === "number" ? ready : ready ? "bereit" : "nicht bereit"}
+                        {label}: {typeof ready === "number" ? ready : ready ? "ready" : "not ready"}
                       </div>
                     ))}
                     {doctorStatus.recovery?.interactiveLoginRequired && (
                       <div className="col-span-2 text-warning">
-                        Interaktive Anmeldung erforderlich. Nutze den geschützten
-                        Browser-/VNC-Recovery-Pfad.
+                        Interactive login required. Use the protected browser/VNC recovery path.
                       </div>
                     )}
                     {doctorStatus.lastError && (
                       <div className="col-span-2 break-words text-error">
-                        Letzter Fehler: {String(doctorStatus.lastError)}
+                        Last error: {String(doctorStatus.lastError)}
                       </div>
                     )}
                   </div>
