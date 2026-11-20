@@ -309,6 +309,7 @@ Jiri nkeji okwu `IF NOT EXISTS`, `IF EXISTS`, na `OR IGNORE` / `OR REPLACE` mee 
 3. **Mejupụta data nke ọma** : jiri `UPDATE ... WHERE ...` jikwaa ahịrị ndị dị adị
 4. **Lelee usoro na ịkpọ aha** : `npm run test:migrations:fresh` (mbugharị niile na nchekwa data efu) na `npm run check:migration-numbering`
 5. **Nwalee na otu** : ọ dịghị mgbe ọ bụla na-agba ọsọ na-anwaleghị migrations na mmepụta
+6. **Tebụl emepụtara na koodu chọkwara mbugharị** : ma ọ bụrụ na modul na-emepụtakwa tebụl dị umengwụ (`CREATE TABLE IF NOT EXISTS`, debe ya dị ka ụzọ ọgwụgwọ onwe ya), njem ga-eji otu DDL mepụta ya. Ma ọ bụghị ya, nrụnye dị ọcha na nrụnye kwalitere na-ejedebe na atụmatụ dị iche iche, dabere ma ụzọ koodu ahụ na-aga. `tests/unit/db/lazy-table-migration-guard.test.ts` na-enyocha `src/` na `open-sse/` wee daa na `CREATE` umengwụ na-enweghị mbugharị (#20557). Ọmụmaatụ: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Ọmụmaatụ:
 
