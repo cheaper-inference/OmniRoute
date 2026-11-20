@@ -1054,14 +1054,17 @@ handler makes the decision instead:
 - `AGENT_GUARD_STRICT` refuses every client on those providers that is not
   Claude Code or an official SDK. That includes browser-based clients and the
   dashboard playground. The dashboard combo live test is exempt.
-- Some features send their own request back through OmniRoute's `/v1/...`
-  routes. They are batch jobs (`src/lib/batches/dispatch.ts`), the MCP inference
-  tools (`open-sse/mcp-server/tools/inferenceTools.ts`), A2A smart routing
-  (`src/lib/a2a/skills/smartRouting.ts`), the vision bridge when it describes an
-  image through OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`) and the
-  Telegram chat proxy (`src/lib/telegram/chatProxy.ts`). Those inner requests
-  carry OmniRoute's own headers, not the headers of the client that started
-  them. The guard classifies them as unidentified clients.
+- Some features build their own chat request instead of passing the client's
+  request on. Four of them send it back through OmniRoute's `/v1/...` routes:
+  - batch jobs (`src/lib/batches/dispatch.ts`)
+  - the MCP inference tools (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A smart routing (`src/lib/a2a/skills/smartRouting.ts`)
+  - the vision bridge when it describes an image through OmniRoute
+    (`src/lib/guardrails/visionBridgeHelpers.ts`)
+- The Telegram chat proxy (`src/lib/telegram/chatProxy.ts`) builds its request
+  in process and calls the chat handler directly.
+- Those inner requests carry OmniRoute's own headers, not the headers of the
+  client that started them. The guard classifies them as unidentified clients.
 - Without `AGENT_GUARD_STRICT`, those inner requests are served on the guarded
   providers whoever the original client was. A third-party agent that reaches
   Claude through them is not refused.
