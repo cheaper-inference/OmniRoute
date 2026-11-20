@@ -47,4 +47,5 @@ test("normalizeCodexBaseUrl uses the bridge-compatible v1 path for chat", () => 
 
 test("normalizeCodexBaseUrl keeps relative fallback URLs on v1", () => {
   assert.equal(normalizeCodexBaseUrl("/proxy/api/v1", "chat"), "/proxy/v1");
+  assert.equal(normalizeCodexBaseUrl("/proxy/api/v1//", "chat"), "/proxy/v1");
 });

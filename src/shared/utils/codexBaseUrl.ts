@@ -1,3 +1,5 @@
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+
 export type CodexWireApi = "chat" | "responses";
 
 function normalizeUrlPath(pathname: string, wireApi: CodexWireApi): string {
@@ -13,7 +15,7 @@ function normalizeUrlPath(pathname: string, wireApi: CodexWireApi): string {
 }
 
 export function normalizeCodexBaseUrl(baseUrl: string, wireApi: CodexWireApi = "chat"): string {
-  const trimmed = baseUrl.trim().replace(/\/+$/g, "");
+  const trimmed = stripTrailingSlashes(baseUrl.trim());
   if (!trimmed) return trimmed;
 
   try {

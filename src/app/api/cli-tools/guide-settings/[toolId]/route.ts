@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import * as yaml from "js-yaml";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { getCliPrimaryConfigPath, getOpenCodeConfigPath } from "@/shared/services/cliRuntime";
@@ -149,9 +150,7 @@ async function saveContinueConfig({ baseUrl, apiKey, model }) {
     (await readExistingConfig(configPath, parseContinueConfig)) ?? {};
 
   // Build the OmniRoute model entry
-  const normalizedBaseUrl = String(baseUrl || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const normalizedBaseUrl = stripTrailingSlashes(String(baseUrl || "").trim());
   const routerModel = {
     apiBase: normalizedBaseUrl,
     title: model,
@@ -218,9 +217,7 @@ async function saveOpenCodeConfig({ baseUrl, apiKey, model, models, modelLabels,
   // Ensure config directory exists
   await fs.mkdir(configDir, { recursive: true });
 
-  const normalizedBaseUrl = String(baseUrl || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const normalizedBaseUrl = stripTrailingSlashes(String(baseUrl || "").trim());
 
   // Read existing JSONC/JSON text to preserve unrelated config formatting and fields.
   let existingConfigText = "";
@@ -262,9 +259,7 @@ async function saveHermesConfig({ baseUrl, apiKey, model }) {
 
   await fs.mkdir(configDir, { recursive: true });
 
-  const normalizedBaseUrl = String(baseUrl || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const normalizedBaseUrl = stripTrailingSlashes(String(baseUrl || "").trim());
   const providerBaseUrl = normalizedBaseUrl.endsWith("/v1")
     ? normalizedBaseUrl
     : `${normalizedBaseUrl}/v1`;

@@ -15,6 +15,7 @@
  *
  * Kept free of server imports so the dashboard can read the toggle state from connections.
  */
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import {
   ANTHROPIC_COMPATIBLE_PREFIX,
   isAnthropicCompatibleProvider,
@@ -67,7 +68,7 @@ export function buildStandardCreditsQuotaEndpoint(
   return {
     preset: STANDARD_CREDITS_QUOTA_PRESET,
     quotaPath: path,
-    url: `${baseUrl.trim().replace(/\/+$/, "")}${path}`,
+    url: `${stripTrailingSlashes(baseUrl.trim())}${path}`,
     method: "GET",
     auth,
     quotas: {

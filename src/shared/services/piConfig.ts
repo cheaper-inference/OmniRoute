@@ -22,6 +22,7 @@ import fs from "fs/promises";
 import os from "os";
 import path from "path";
 import process from "process";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 
 /** Tool id used for backups + last-configured bookkeeping. */
 export const PI_TOOL_ID = "pi";
@@ -225,9 +226,7 @@ export function readOmniRoutePiProvider(config: ModelsJson | null): ProviderEntr
  * Idempotent, trims whitespace and collapses a trailing slash before `/v1`.
  */
 export function ensurePiV1BaseUrl(baseUrl: string): string {
-  const trimmed = String(baseUrl || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const trimmed = stripTrailingSlashes(String(baseUrl || "").trim());
   return trimmed.endsWith("/v1") ? trimmed : `${trimmed}/v1`;
 }
 
