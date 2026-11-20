@@ -54,3 +54,35 @@ export function flushOpenAiTextBuffers(
   for (const choice of choices) drainChoice(store, choice);
   return { ...finalJson, choices };
 }
+
+/** Item id for a replayed Responses text tail: the event's own, its item's, else positional. */
+function responsesTailItemId(lastJson: Record<string, unknown>, idx: number): string {
+  if (typeof lastJson.item_id === "string") return lastJson.item_id;
+  const item = lastJson.item as { id?: unknown } | undefined;
+  return typeof item?.id === "string" ? item.id : `msg_${idx}`;
+}
+
+/**
+ * A fresh `output_text.delta` carrying held-back text after a non-delta frame. Strict
+ * Responses clients reject a delta without `item_id`/`content_index` (#20257).
+ */
+export function responsesTextTailDelta(
+  lastJson: Record<string, unknown>,
+  idx: number,
+  delta: string
+): Record<string, unknown> {
+  return {
+    type: "response.output_text.delta",
+    item_id: responsesTailItemId(lastJson, idx),
+    output_index: idx,
+    content_index: typeof lastJson.content_index === "number" ? lastJson.content_index : 0,
+    delta,
+  };
+}
+
+/** Fill the ids a strict Responses client requires on an `output_text.delta` (#20257). */
+export function ensureResponsesTextDeltaIds(json: Record<string, unknown>, idx: number): void {
+  if (json.type !== "response.output_text.delta") return;
+  if (json.item_id === undefined) json.item_id = `msg_${idx}`;
+  if (json.content_index === undefined) json.content_index = 0;
+}

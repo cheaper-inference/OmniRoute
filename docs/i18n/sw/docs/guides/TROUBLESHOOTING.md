@@ -461,7 +461,7 @@ angalia [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Suluhisho la kudumu:** Fanya bind kwa IPv4 moja kwa moja kwa kutumia `-p 127.0.0.1:20128:20128` kwenye amri yako ya `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Hii hulazimisha bind ya IPv4 na pia huepuka kufichua proxy kwenye interface zote za host.
 

@@ -27,13 +27,9 @@
 
 ---
 
-## クイック実行
+## クイックラン
 
-> **1 つのコマンドでセルフホストしますか？**  
-> [セルフホストガイド](../getting-started/SELF_HOST_GUIDE.md)を参照してください —
-> `docker compose -f docker-compose.selfhost.yml up -d`（公開済みイメージ +
-> Redis、ループバックのみに限定、プロファイル選択なし）。以下のクイック実行は、
-> すでに別の場所で Redis を実行しているユーザー向けの単一コンテナ方式です。
+> **1 つのコマンドでセルフホストしますか?**[セルフホスト ガイド](../getting-started/SELF_HOST_GUIDE.md)— `docker compose -f docker-compose.selfhost.yml up -d` (公開イメージ+ Redis、ループバックのみ、プロファイルの選択なし) を参照してください。以下のクイック実行は、すでに他の場所でRedis実行しているユーザーのための単一コンテナーのパスです。
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## 環境ファイルを使用する
+## 環境ファイルあり
 
 ```bash
-# 最初に .env をコピーして編集します
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -240,16 +236,16 @@ docker compose -f docker-compose.prod.yml down
 
 ## Dockerfile のステージ
 
-このリポジトリには、マルチステージ Dockerfile（`Dockerfile`）が含まれています。4 つのステージが公開されているため、用途に適した `target` を選択してください。
+リポジトリには、複数ステージの Dockerfile (`Dockerfile`) が同梱されています。 4 つのステージが公開されます。ユースケースに適した`target`を選択してください。
 
-| ステージ      | ベースイメージ        | 用途                                                                                                                                                                                                                                                                                                                               |
-| ------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | 依存関係をインストール（`npm ci --legacy-peer-deps`）し、`npm run build` を実行します（デフォルトでは Turbopack — 下記の「ビルド時のリソース」を参照）。                                                                                                                                                                           |
-| `runner-base` | `node:26-trixie-slim` | Next.js のスタンドアロン出力を含む本番ランタイムです。**プロバイダーの CLI は同梱されていません。**                                                                                                                                                                                                                                |
-| `runner-cli`  | `runner-base`         | `git`、`docker.io`、`docker-compose`、およびグローバル CLI の `@openai/codex`、`@anthropic-ai/claude-code`、`droid`、`openclaw` を追加します。**エージェント型ワークフローにはこれを選択してください。**                                                                                                                           |
-| `runner-web`  | `runner-base`         | Web セッションプロバイダー `gemini-web`、`claude-web`、`claude-turnstile` 向けに Playwright と Chromium ブラウザー（`--with-deps`）を追加します。**これらのプロバイダーを使用する場合は、これを選択してください** — 通常のイメージでは、これがないとリクエスト時に失敗します（「リリースチャネル」の `-web` に関する注記を参照）。 |
+| ステージ      | ベースイメージ        | 目的                                                                                                                                                                                                                                                                                                      |
+| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Installs deps (`npm ci --legacy-peer-deps`) and runs `npm run build` (Turbopack by default — see Build-time resources below)                                                                                                                                                                              |
+| `runner-base` | `node:26-trixie-slim` | Next.jsスタンドアロン出力を使用した運用ランタイム。**プロバイダーCLIsはバンドルされていません。**                                                                                                                                                                                                         |
+| `runner-cli`  | `runner-base`         | `git`、 `docker.io`、 `docker-compose`およびグローバルCLIs: `@openai/codex`、 `@anthropic-ai/claude-code`、 `droid`、 `openclaw`を追加します。**エージェント ワークフローの場合はこれを選択します。**                                                                                                     |
+| `runner-web`  | `runner-base`         | Web セッションプロバイダー`gemini-web`、 `claude-web`、 `claude-turnstile`) 用の Chromium ブラウザー (`--with-deps`) にPlaywright +追加します。**これらのプロバイダーを使用する場合はこれを選択してください**—プレーン イメージがないと、リクエスト時に失敗します (リリース チャネルの`-web`メモを参照)。 |
 
-特定のターゲットを手動でビルドするには、次を実行します。
+特定のターゲットを手動でビルドします。
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -259,18 +255,17 @@ docker build --target runner-web  -t omniroute:web  .
 
 ### ビルド時のリソース
 
-3 つのビルド引数で、`builder` ステージのリソース消費量を制御します。これらはビルド時にのみ使用されます —
-`OMNIROUTE_MEMORY_MB`（後述）は、これとは別のランタイム設定です。
+3 つのビルド引数は、 `builder`ステージのコストを制御します。これらはビルド時のみです— `OMNIROUTE_MEMORY_MB` (下記) は別個の実行時ノブです。
 
-| ビルド引数                  | デフォルト | 効果                                                                                                                           |
-| --------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`        | `0` では webpack を使用してビルドします。ピークメモリは低くなりますが、速度は遅くなります。`1` では Turbopack を有効にします。 |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`     | 起動される `next build` の V8 ヒープ上限（`--max-old-space-size`）です。                                                       |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`        | `CIRCLE_NODE_TOTAL` に値を渡します。Next はページデータ収集用に `workers = N - 1` を算出します。                               |
+| 引数を構築する              | デフォルト | 効果                                                                                                                 |
+| --------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`        | `0` webpack を使用してビルドします。ピーク時のメモリが少なく、速度が遅くなります。 `1` Turbopackにオプトインします。 |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`     | 生成された`next build`の V8 ヒープ上限 (`--max-old-space-size`)。                                                    |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`        | フィード`CIRCLE_NODE_TOTAL`;次に、ページデータ収集用の`workers = N - 1`を導出します。                                |
 
-`OMNIROUTE_BUILD_WORKERS` は、大規模なビルダーでは増やすべき設定であり、リソースが制限された環境で `✓ Compiled successfully` の**後に**ビルドが停止する場合に、最初に疑うべき設定でもあります。各ページデータワーカーは個別のプロセスであり、親の `next build` 自体も別プロセスです。実際の VPS での再現（issue #7518）では、各プロセスのピーク RSS が `NODE_OPTIONS` のヒープフラグとは無関係に約 4.5 GB と測定されました（Turbopack は V8 ヒープ外のネイティブ/Rust メモリでコンパイルします）。デフォルト値の `2`（→ 1 ワーカー、合計 2 プロセス）は、公開パイプラインで使用される 16 GB / 4 vCPU の GitHub ホステッドランナーに合わせて設定されています。`8`（→ 7 ワーカー）では、そのランナーはメモリ不足になり、buildkit は `ResourceExhausted: ... cannot allocate memory` でステップを失敗させました。プロセスごとの RSS を推測ではなく直接測定したところ、`3`（→ 2 ワーカー）でも収まりませんでした。`tests/unit/docker-build-memory-budget.test.ts` は、測定値に基づいて計算を行い、いずれかの設定値がランナーの容量を超えると失敗します。
+`OMNIROUTE_BUILD_WORKERS` 、大きなビルダーに対して発生させるべきものであり、制約されたビルドが停止したときに疑うべきものです**後**`✓ Compiled successfully`。各ページ データ ワーカーは独自のプロセスであり、親`next build`自体も同様です。ライブVPS再現 ( #7518の問題) では、 `NODE_OPTIONS`ヒープ フラグとは関係なく、 ~ 4.5 GBで各プロセスのピークRSSが測定されました (Turbopack V8 ヒープの外のnative/Rustメモリでコンパイルされます)。 `2`のデフォルト (→ 1 ワーカー、合計 2 プロセス) は、パブリッシュ パイプラインが使用する 16 GB / 4 vCPU GitHub ホスト ランナーに合わせてサイズ設定されています。 `8` (→ 7 ワーカー) では、ランナーがメモリを使い果たし、ビルドキットは`ResourceExhausted: ... cannot allocate memory`のステップに失敗しました。プロセスごとのRSSが推測ではなく直接測定されると、 `3` (→ 2 ワーカー) は依然として適合しませんでした。 `tests/unit/docker-build-memory-budget.test.ts`測定された数値に対して演算を実行し、いずれかのノブがランナーを超えると失敗します。
 
-Turbopack は V8 ヒープの**外部**に存在するネイティブ Rust メモリでコンパイルするため、`OMNIROUTE_BUILD_MEMORY_MB` ではその使用量を制限できません。メモリ上限のあるホストでは、ビルドが OOM killer によって SIGKILL されてもエラーテキストはまったく表示されません。単に `Creating an optimized production build` の途中で停止するため、メモリ不足ではなくハングしたように見えます。このため、`npm run dev` / `npm run build` ではコード上のデフォルトが Turbopack であるのに対し、`Dockerfile` では webpack（`OMNIROUTE_USE_TURBOPACK=0`）がデフォルトになっています。ビルド引数なしの単純な `docker build .`（Railway などのワンクリックホストが実行するコマンド）が、メモリ制限のあるビルダー上で何の通知もなく停止してはならないためです。公開イメージでは、`docker-publish.yml` 内ですでに `OMNIROUTE_USE_TURBOPACK=0` を明示的に渡しています。RAM に十分な余裕があるビルダーでは、ビルドを高速化するために Turbopack を有効にできます。
+Turbopackネイティブの Rust メモリ内でコンパイルされます。**外**V8 ヒープなので、 `OMNIROUTE_BUILD_MEMORY_MB`それをバインドしません。メモリ上限のあるホストでは、ビルドはOOMキラーによってSIGKILLedれ、エラー テキストはまったく表示されません—は単に`Creating an optimized production build`の途中で停止します。これは、メモリ不足ではなくハングしているように見えます。 Turbopackコードのデフォルトである`npm run dev` / `npm run build`とは異なり、 `Dockerfile`デフォルトが webpack (`OMNIROUTE_USE_TURBOPACK=0`) になるのはこのためです。ビルド引数のない裸の`docker build .` (Railway やその他のワンクリック ホストが実行するもの) は、メモリ制限のあるビルダー上でサイレントに終了してはなりません。パブリッシュされたイメージは、 `docker-publish.yml`で明示的に`OMNIROUTE_USE_TURBOPACK=0`すでに渡しています。 RAMが豊富にあるビルダーでは、ビルドを高速化するためにTurbopackを選択します。
 
 ```bash
 docker build --target runner-base \
@@ -278,46 +273,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` が有効になっているため、`next build` は親プロセス**と**ワーカープロセスを実行し、それぞれが個別に `OMNIROUTE_BUILD_MEMORY_MB` に従います。コンテナの上限は、その値の約 1 倍ではなく 2 倍を上回るように設定してください。
+`webpackBuildWorker`が有効になっているため、 `next build`親を実行します**そして**ワーカー プロセスとそれぞれが個別に`OMNIROUTE_BUILD_MEMORY_MB`尊重します。コンテナの天井のサイズは、その値の 1 倍ではなく、およそ 2 倍以上に設定します。
 
-このソースツリーでの測定結果（`--target runner-base`、`OMNIROUTE_BUILD_MEMORY_MB=6144`）：
+このツリー (`--target runner-base`、 `OMNIROUTE_BUILD_MEMORY_MB=6144`) で測定されます:
 
-| バンドラー | コンテナ上限   | 結果                                    |
-| ---------- | -------------- | --------------------------------------- |
-| Turbopack  | 8 GiB / 16 GiB | どちらも通知なく OOM により kill された |
-| webpack    | 8 GiB          | ビルドワーカーが SIGKILL された         |
-| webpack    | 12 GiB         | 成功、ピークは 11.1 GiB                 |
+| バンドラー   | コンテナ天井   | 結果                            |
+| ------------ | -------------- | ------------------------------- |
+| Turbopack    | 8 GiB / 16 GiB | 両方とも黙って OOM で殺害された |
+| ウェブパック | 8 GiB          | ビルドワーカーSIGKILLed         |
+| ウェブパック | 12 GiB         | 成功、ピークはGiB               |
 
-### ランタイムのデフォルト
+### 実行時のデフォルト
 
-`runner-base` によってエクスポートされるデフォルト値：`PORT=20128`、`HOSTNAME=0.0.0.0`、`OMNIROUTE_MEMORY_MB=1024`、`NODE_OPTIONS=--max-old-space-size=1024`、`DATA_DIR=/app/data`、`OMNIROUTE_MIGRATIONS_DIR=/app/migrations`。
+`runner-base`によってエクスポートされるデフォルト: `PORT=20128`、 `HOSTNAME=0.0.0.0`、 `OMNIROUTE_MEMORY_MB=1024`、 `NODE_OPTIONS=--max-old-space-size=1024`、 `DATA_DIR=/app/data`、 `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`。
 
-Docker でのメモリ動作：
+Dockerでのメモリの動作:
 
-- このイメージでは `OMNIROUTE_MEMORY_MB=1024` が設定され、そこから `NODE_OPTIONS=--max-old-space-size=1024` が導出されます。
-- 実際のサーバープロセスはスタンドアロンランチャーによって起動されます。このランチャーは `OMNIROUTE_MEMORY_MB` を読み取り、`--max-old-space-size=<OMNIROUTE_MEMORY_MB>` を追加します。
-- Node は繰り返し指定された最後の `--max-old-space-size` の値を使用するため、`OMNIROUTE_MEMORY_MB` を設定することで、Docker における実効ヒープ上限を制御できます。
-- イメージでは常にこの値が設定されるため、ランチャー独自の RAM 容量に応じたフォールバックは Docker 環境では適用されません。ワークロードに合わせて明示的に引き上げてください（下表を参照）。コーディングエージェントの `/v1/responses` には `2048` でも小さすぎます。
+- 画像は`OMNIROUTE_MEMORY_MB=1024`を設定し、そこから`NODE_OPTIONS=--max-old-space-size=1024`を導出します。
+- 実際のサーバー プロセスは、 `OMNIROUTE_MEMORY_MB`読み取り、 `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`を追加するスタンドアロン ランチャーによって開始されます。
+- ノードは最後に繰り返された`--max-old-space-size`値を使用するため、 `OMNIROUTE_MEMORY_MB`を設定すると、有効なDockerヒープ制限が制御されます。
+- イメージによって常に設定されるため、ランチャー自身の RAM 調整されたフォールバックはDockerでは決して適用されません。ワークロードに対して明示的に値を上げます (以下の表)。 `2048`はコーディング エージェント`/v1/responses`にはまだ小さすぎます。
 
-### コーディングエージェント向けの実行時 RAM
+### コーディングエージェント用のランタイムRAM
 
-Docker のデフォルトである 1 GiB は、ダッシュボードや軽量チャット向けの最低ラインであり、本番環境向けの容量ではありません。長大な `POST /v1/responses` のボディ（数百件のメッセージ、数十個のツール）は、圧縮中に複数のインメモリグラフを保持します。約 3 MiB / 約 750k トークンのリクエストが 2 件重なると、old-space が **12 GiB** でも V8 が異常終了し（`FATAL ERROR: Reached heap limit`）、16 GiB の cgroup でも OOM が発生しています。[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) を参照してください。
+1 GiB Dockerデフォルトは、実稼働サイズではなく、 dashboard/light-chatフロアです。長い`POST /v1/responses`本体 (数百のメッセージ、数十のツール) は、圧縮中に複数のメモリ内グラフを保持します。 2 つの重複する~ 3 MiB / ~ 750k トークン要求により、V8 が一度に中止されました。** GiB** old-space (`FATAL ERROR: Reached heap limit`) と 16 GiB cgroup OOMもヒットしました。 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)参照してください。
 
-**cgroup の `--memory` はヒープより大きく設定してください** — ネイティブバッファ、SQLite、および圧縮処理の中間データは V8 の外部に配置されます。
+サイズ**ヒープ上の cgroup `--memory`** —ネイティブ バッファー、 SQLite、および圧縮中間バッファーは V8 の外部にあります。
 
-| ワークロード                                       | `OMNIROUTE_MEMORY_MB`          | コンテナ / cgroup   | 注記                                                                                                            |
-| -------------------------------------------------- | ------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| ダッシュボード、軽量チャット 1 件                  | `1024`（イメージのデフォルト） | ≥2 GiB              |                                                                                                                 |
-| コーディングエージェント 1 件（Claude/Codex/Grok） | `8192`                         | ≥10 GiB             | 一般的な単一セッションの `/v1/responses`                                                                        |
-| 長大な `/v1/responses` を 2 件同時実行             | `10240`–`12288`                | ≥12–16 GiB          | 約 12 GiB のヒープで V8 の異常終了を確認                                                                        |
-| 長大なコンテキストを 3 件以上同時実行              | 1 プロセスでは実行しない       | 直列化 / RAM を増設 | デフォルトでは高負荷リクエストの実行中上限は 1 件です。RAM を増やさずに上限を引き上げると、異常終了が再発します |
+| ワークロード                                        | `OMNIROUTE_MEMORY_MB`                | コンテナ/cgroup        | 注意事項                                                                                      |
+| --------------------------------------------------- | ------------------------------------ | ---------------------- | --------------------------------------------------------------------------------------------- |
+| ダッシュボード、軽いチャット 1 つ                   | `1024` (画像のデフォルト)            | ≥2 GiB                 |                                                                                               |
+| 1 つのコーディング エージェント (Claude/Codex/Grok) | `8192`                               | ≥10 GiB                | 一般的な単一セッションの`/v1/responses`                                                       |
+| 2 つの同時ロング`/v1/responses`                     | `10240`–`12288`                      | ≥12–16 GiB             | ~ 12 GiBヒープでの V8 アボートの測定                                                          |
+| 3 つの+同時の長いコンテキスト                       | 1 つのプロセスでは行わないでください | シリアル化 / もっとRAM | デフォルトの重量級入場は機内で 1 回です。 RAM使用せずにそれを起動すると、中断が再導入されます |
 
-ベアメタル上の `omniroute serve` は、`OMNIROUTE_MEMORY_MB` が**未設定**の場合、RAM の約 35%（`[512, 4096]` の範囲に制限）に調整します。Docker では常に `1024` が設定されるため、公式イメージではこの調整処理は実行されません。
+ベアメタル上の`omniroute serve` ~ `[512, 4096]` RAM `OMNIROUTE_MEMORY_MB`**設定を解除する**。 Docker常に`1024`を設定するため、公式イメージではキャリブレーションが実行されません。
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## 重要な環境変数
@@ -341,13 +336,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml` 用のホスト側ダッシュボードポート                                                                                                                                                                                                                                                     | `20130`                   |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` サイドカーのホスト側ポート                                                                                                                                                                                                                                                                       | `8317`                    |
 
-## サブパス上のリバースプロキシ（Traefik / nginx）
+## サブパス上のリバース プロキシ (Traefik / nginx)
 
-Next.js の `basePath` はスタンドアロンバンドルにコンパイルされます。OmniRoute は、ビルド時に組み込まれた値をアプリケーションルートのセンチネルファイルに記録し（`npm run build` の実行中に書き込まれ、`scripts/docker/ensure-docker-base-path.mjs` によって読み込まれます）、コンテナの起動時に `OMNIROUTE_BASE_PATH` と比較します。値が異なり、イメージがドメインルート向けにビルドされている場合、エントリーポイントは `node dev/run-standalone.mjs` が実行される前に、スタンドアロンマニフェスト、埋め込まれた `basePath`/`assetPrefix` リテラル（Next 16 は SSR アセット URL を `assetPrefix` のみから生成するため、パッチャーはサブパスをそこにも反映します）、ビルド時に組み込まれた `/_next/static` アセット URL（クライアント参照マニフェスト、メディアインポート、プリレンダリングされたエラーページ）、およびクライアント側の `process.env` シムを書き換えます。
+Next.js `basePath`はスタンドアロン バンドルにコンパイルされます。 OmniRouteアプリのルートにあるセンチネル ファイルにベイクされた値を記録し ( `npm run build`中に書き込まれ、 `scripts/docker/ensure-docker-base-path.mjs`によって読み取られます)、コンテナーの起動時にそれを`OMNIROUTE_BASE_PATH`と比較します。これらが異なり、イメージがドメイン ルート用に構築された場合、エントリポイントはスタンドアロン マニフェスト、埋め込み`basePath`/`assetPrefix`リテラル (次の 16 は`assetPrefix`のみからSSRアセットURLsレンダリングします—パッチャーはサブパスをミラーリングします)、ベイクされた`/_next/static`アセットURLs (クライアント参照マニフェスト、メディア インポート、事前レンダリングされたエラー ページ)、およびクライアント`process.env`書き換えます。 `node dev/run-standalone.mjs`を実行する前に shim を実行します。
 
-### Compose によるビルド（推奨）
+### Compose ビルド (推奨)
 
-`.env` に両方の変数を設定し、イメージとランタイムの設定が一致するように再ビルドします。
+`.env`で両方の変数を設定し、イメージとランタイムが一致するように再構築します。
 
 ```bash
 # .env
@@ -359,53 +354,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` は `OMNIROUTE_BASE_PATH` を Docker のビルド引数およびランタイム環境変数として渡します。
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` Dockerビルド引数およびランタイム環境変数として転送します。
 
-### ビルド済みルートイメージ + ランタイムサブパス
+### 事前に構築されたルート イメージ+ランタイム サブパス
 
-公開されている `diegosouzapw/omniroute:*` イメージは、ドメインルート向けにビルドされています。それでも、ランタイムに `OMNIROUTE_BASE_PATH` を設定できます。コンテナは起動時にバンドルへ一度だけパッチを適用します。対応する公開オリジンも併せて設定してください。
+公開された`cheaperinference/omniroute:*`イメージは、ドメイン ルート用に構築されます。実行時に`OMNIROUTE_BASE_PATH`を設定することもできます。コンテナーは起動時にバンドルにパッチを 1 回適用します。一致するパブリックオリジンとペアリングします。
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-リバースプロキシは、外部パスを**完全な形のまま**転送するように設定してください（プレフィックスを削除しないでください）。Traefik は `StripPrefix` を使用せずに `PathPrefix(`/omniroute`)` をコンテナへルーティングする必要があります。これにより、Next.js は `/omniroute/...` を受け取り、`/omniroute/_next/...` からアセットを配信します。
+リバースプロキシを転送するように設定します。**満杯**外部パス (プレフィックスを削除しないでください)。 Traefik は、 `StripPrefix`を使用せずに`PathPrefix(`/omniroute `)`コンテナにルーティングする必要があるため、 Next.js `/omniroute/...`受け取り、 `/omniroute/_next/...`からアセットを提供します。
 
-Docker ヘルスチェックは、有効な `OMNIROUTE_BASE_PATH` が先頭に付加された軽量な `/healthz` ライフサイクルエンドポイントを検査します。`/api/monitoring/health` は、人による診断やダッシュボードでの診断用として引き続き利用できます。コンテナの HEALTHCHECK をこのエンドポイントへ戻す場合（たとえば、詳細なヘルスチェックを強制する場合）は、`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` を設定してください。このパスは**詳細**チェック（DB + モニタリング概要）です。明示的に再設定する場合、実行頻度の低い Docker の `HEALTHCHECK` には適していますが、Kubernetes の `livenessProbe` 間隔での使用には**適していません**。
+Docker healthcheck は、アクティブな`OMNIROUTE_BASE_PATH`がプレフィックスとして付けられた軽量`/healthz`ライフサイクル エンドポイントを調査します。 `/api/monitoring/health`は引き続きhuman/dashboard診断に使用できます。コンテナーHEALTHCHECKそのコンテナーに戻すようにするには (たとえば、ディープ・ヘルスの強制のため)、 `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`を設定します。その道は、**深い**チェック (DB +監視概要) — Dockerの頻度の低い`HEALTHCHECK`に適しています (オプトインした場合)。**ない**Kubernetes `livenessProbe`間隔の場合。
 
-オーケストレーター（Kubernetes、Nomad など）の場合：
+オーケストレーターの場合 (Kubernetes、Nomad など):
 
-| プローブ                | 推奨                                                                          | 非推奨                                                   |
-| ----------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Liveness                | HTTP `GET /livez`、またはメインポート（`PORT`、デフォルトは `20128`）への TCP | liveness としての `/api/monitoring/health`               |
-| Readiness               | HTTP `GET /healthz`                                                           | イベントループのビジー状態を停止と見なす短いタイムアウト |
-| 詳細 / ブラックボックス | `/api/monitoring/health`                                                      | —                                                        |
+| プローブ                  | 好む                                                                     | 避ける                                                   |
+| ------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------- |
+| 活気                      | メインポート上のHTTP `GET /livez`、またはTCP (`PORT`、デフォルト`20128`) | ライブネスとしての`/api/monitoring/health`               |
+| 準備完了                  | HTTP `GET /healthz`                                                      | イベントループビジーをデッドとして扱う厳しいタイムアウト |
+| ディープ/ブラックボックス | `/api/monitoring/health`                                                 | —                                                        |
 
-`/healthz` はプロセスのライフサイクル（`ok` / `starting` / `stopping`）を報告します。`/livez` はプロセスが稼働しているかどうかのみを示します（ハンドラーを実行できる場合は常に 200 を返し、readiness を待機しません）。どちらもリクエスト処理と同じ Node イベントループ上で実行されるため、CPU 負荷の高いカタログ処理や圧縮処理によって応答が遅延する可能性があります。ビジー ≠ 停止です。HTTP プローブがタイムアウトする場合は、TCP liveness を推奨します。プローブに関する完全なガイダンス：
-[モニタリングガイド — Kubernetes プローブの推奨事項](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
+`/healthz`プロセスのライフサイクル (`ok` / `starting` / `stopping`) をレポートします。 `/livez`はプロセスアライブのみです (ハンドラーが実行できるときは常に 200、準備完了を待機しません)。どちらもリクエスト処理として同じ Node イベント ループで実行されるため、CPU に依存するカタログや圧縮作業≠ —が発生する可能性があります。 HTTPプローブがタイムアウトした場合は、 TCP liveness を優先します。完全なプローブ ガイダンス:[モニタリング ガイド— Kubernetes プローブの推奨事項](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
 
-## Caddy を使用した Docker Compose（HTTPS Auto-TLS）
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-Caddy の自動 SSL プロビジョニングを使用して、OmniRoute を安全に公開できます。ドメインの DNS A レコードがサーバーの IP を指していることを確認してください。
+Caddy の自動SSLプロビジョニングを使用して、OmniRoute安全に公開できます。ドメインのDNS A レコードがサーバーのIPを指していることを確認してください。
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth コールバック、ダッシュボードのリンク、生成される公開 URL に使用するブラウザー向けオリジン。
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # スケジュール済みジョブ／自己フェッチに使用する内部サーバー間 URL。
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -422,11 +416,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy は、アップストリームコンテナ用の標準転送ヘッダーを設定します。OmniRoute は、
-OAuth コールバックおよび生成される公開リンクの正規公開オリジンとして
-`NEXT_PUBLIC_BASE_URL` を使用します。認証済みのダッシュボード書き込みでは、同一オリジンのリクエストとセッションに紐付けられた CSRF
-保護を使用します。明示的な設定ではなく、信頼された転送ヘッダーから OmniRoute に公開オリジンを
-導出させたい高度なデプロイメントの場合にのみ、`OMNIROUTE_TRUST_PROXY` を有効にしてください。
+Caddy は、上流コンテナの標準転送ヘッダーを設定します。 OmniRoute OAuthコールバックおよび生成されたパブリック リンクの正規のパブリック オリジンとして`NEXT_PUBLIC_BASE_URL`使用します。認証されたダッシュボードの書き込みでは、同一オリジンのリクエストとセッション バインドのCSRF保護が使用されます。 OmniRoute明示的な構成ではなく、信頼できる転送ヘッダーからパブリック オリジンを意図的に取得するようにする高度な展開の場合にのみ、 `OMNIROUTE_TRUST_PROXY`有効にします。
 
 ## Cloudflare Quick Tunnel
 
@@ -443,49 +433,51 @@ Docker デプロイメント向けのダッシュボードでは、`Dashboard �
 - Docker イメージにはシステム CA ルートが同梱されており、それらがマネージド `cloudflared` に渡されます。これにより、コンテナ内でトンネルをブートストラップするときの TLS 信頼エラーを回避できます。
 - OmniRoute にダウンロードしたバイナリではなく既存のバイナリを使用させる場合は、`CLOUDFLARED_BIN=/absolute/path/to/cloudflared` を設定してください。
 
-## イメージタグ
+## 画像タグ
 
-| イメージ                 | タグ     | サイズ | 説明                                                                      |
-| ------------------------ | -------- | ------ | ------------------------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | **公開済み**の安定版 SemVer のうち最高のもの（git `main` ではありません） |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps ではこの種類のタグに固定してください                               |
+| 画像                         | タグ     | サイズ  | 説明                                                       |
+| ---------------------------- | -------- | ------- | ---------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | 最高**出版された**安定版SemVer ( git `main`ではありません) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | このクラスのタグをGitOpsに固定します                       |
 
-マルチプラットフォームマニフェスト：`linux/amd64` + `linux/arm64` ネイティブ（Apple Silicon、AWS Graviton、Raspberry Pi）。Docker は一致するアーキテクチャを自動的に選択します。ARM ホスト上で AMD64 エミュレーションを強制する必要がある場合は、`--platform linux/amd64` を渡してください。
+The same images are published to three repositories, with the same per-architecture digests: `cheaperinference/omniroute` (Docker Hub, the Cheaper Inference organization, from 3.8.53 on), `ghcr.io/cheaper-inference/omniroute` and the legacy `diegosouzapw/omniroute`, which keeps its pull history and still receives every release. Existing `diegosouzapw/omniroute` deployments keep updating; switching the image name is optional. The `:next` / `:next-web` pre-release channel below is published to `diegosouzapw/omniroute` and GHCR only.
 
-### リリースチャネル
+マルチプラットフォーム マニフェスト: `linux/amd64` + `linux/arm64`ネイティブ (Apple Silicon、 AWS Graviton、Raspberry Pi)。 Docker一致するアーキテクチャを自動的に選択します。 ARMホスト上でAMD64エミュレーションを強制する必要がある場合は、 `--platform linux/amd64`を渡します。
 
-OmniRoute は、安定版リリース、アクティブなリリースブランチのテスト、開発ビルド向けに、それぞれ独立した Docker チャネルを公開しています。
+### リリースチャンネル
 
-| チャネル                        | ソース                                       | 変更可能性                       | 推奨用途                                                                                                             |
-| ------------------------------- | -------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | 署名済み／バージョン管理済みリリース         | 不変                             | 正確なリリースに固定する本番デプロイメント                                                                           |
-| `:latest` / `:latest-web`       | **公開済み**の安定版 SemVer のうち最高のもの | 変更可能な安定版ポインター       | SemVer 公開ジョブの**後に**安定版リリースを追跡します。`main` や未リリースの `release/v*` コミットは追跡**しません** |
-| `:next` / `:next-web`           | 現在のデフォルト `release/v*` ブランチ       | 変更可能なプレリリースポインター | アクティブなリリースブランチには取り込まれているものの、まだ安定版リリースには含まれていない修正のテスト             |
-| `:main` / `:main-web`           | `main` ブランチ                              | 変更可能な開発版ポインター       | 開発および統合テスト専用                                                                                             |
+OmniRoute 、安定リリース、アクティブなリリース ブランチ テスト、および開発ビルド用に個別のDockerチャネルを公開します。
 
-#### Web セッションプロバイダー：`-web` イメージ
+| チャネル                        | ソース                                 | 可変性                          | 推奨用途                                                                                                                     |
+| ------------------------------- | -------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versionedリリース               | 不変                            | 正確なリリースを固定する運用環境の展開                                                                                       |
+| `:latest` / `:latest-web`       | 最高**出版された**安定したSemVer       | 可変の安定したポインタ          | 安定版リリースに従う**後**SemVerパブリッシュ ジョブ—が実行する**ない**`main`または未リリースの`release/v*`コミットを追跡する |
+| `:next` / `:next-web`           | 現在のデフォルトの`release/v*`ブランチ | 変更可能なプレリリース ポインタ | アクティブなリリース ブランチには到達したが、まだ安定リリースにはなっていない修正のテスト                                    |
+| `:main` / `:main-web`           | `main`支店                             | 可変開発ポインター              | 開発および統合テストのみ                                                                                                     |
 
-上記の各チャネルには、`runner-web` ステージからビルドされた `-web` タグ（`:latest-web`、`:<version>-web`、`:next-web`、`:main-web`）も用意されています。これは同じイメージに Playwright と Chromium ブラウザーを追加したものです。通常のイメージには Chromium が**含まれていません**。`gemini-web`、`claude-web`、`claude-turnstile` には Chromium が必要です。
+#### Web セッションプロバイダー: `-web`イメージ
 
-エラーは起動時ではなく、実際に使用するまで保留されます。これらのプロバイダーはモデル一覧を表示し、ダッシュボード上では接続済みと表示されますが、最初のリクエスト時にのみ次のエラーが発生します。
+上記のすべてのチャネルは、 `-web`タグ (`:latest-web`、 `:<version>-web`、 `:next-web`、 `:main-web`) としても機能し、 `runner-web`ステージ—から同じイメージにPlaywrightと Chromium ブラウザを加えて構築されます。プレーンな画像が出荷されます**それなし**クロム; `gemini-web`、 `claude-web` 、 `claude-turnstile`にはそれが必要です。
+
+失敗は起動時ではなく延期されます。これらのプロバイダーはモデルをリストし、ダッシュボードに接続済みとして表示され、最初のリクエストのみが失敗します。
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-これらのプロバイダーを使用する場合は、現在使用しているチャネルの `-web` タグを取得してください。それ以外の変更は不要です。npm/CLI インストール（Docker イメージを使用しない場合）では、不足する同等の要素はブラウザーのバイナリです。ホスト上で `npx playwright install chromium` を実行してください。
+これらのプロバイダーを使用する場合は、既に—に接続しているチャネルの`-web`タグをプルします。他には何も変更されません。 npm/CLIインストール ( Dockerイメージなし) では、同等の欠落部分はブラウザー バイナリです。ホスト上で`npx playwright install chromium`実行します。
 
-#### プレリリースチャネルの使用
+#### プレリリースチャンネルの使用
 
-`next` チャネルは、現在のデフォルトの `release/v*` ブランチへプッシュされるたびに再ビルドされ、AMD64 と ARM64 の両方で公開されます。古いメンテナンスブランチがこれを上書きすることはできません。このチャネルでは、次の安定版タグが作成される前に、アクティブなリリースブランチへマージされた修正を含む、pull 可能なイメージが提供されます。
+`next`チャネルは、現在のデフォルトの`release/v*`ブランチにプッシュされるたびに再構築され、 AMD64とARM64両方に対して公開されます。古いメンテナンス ブランチはこれを上書きできません。このチャネルは、次の安定したタグがカットされる前に、アクティブなリリース ブランチにマージされた修正のプル可能なイメージを提供します。
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose では、選択したプロファイルで使用されるイメージタグを上書きしてから、サービスを pull して再作成します。
+Docker Compose の場合、選択したプロファイルで使用されるイメージ タグをオーバーライドし、サービスをプルして再作成します。
 
 ```yaml
 services:
@@ -500,30 +492,30 @@ docker compose up -d
 
 #### 安全性とロールバック
 
-`next` は変動するプレリリースチャネルです。アクティブなリリースブランチへのプッシュのたびに変更される可能性があり、**本番環境での使用はサポートされていません**。特定のビルドを評価する間は、イメージダイジェストを固定してください。
+`next`は、フローティングのプレリリース チャネルです。アクティブなリリース ブランチにプッシュすると変更される可能性があり、**運用環境での使用はサポートされていません**。特定のビルドを評価するときにイメージ ダイジェストをピン留めします。
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-テストする前に、OmniRoute のデータボリュームまたはバインドマウントされたデータディレクトリをバックアップしてください。ロールバックするには、以前使用していた安定版またはダイジェストへ戻し、コンテナを再作成します。
+テストする前に、 OmniRouteデータ ボリュームまたはバインド マウントされたデータ ディレクトリをバックアップします。ロールバックするには、以前に使用した安定バージョンまたはダイジェストを復元し、コンテナーを再作成します。
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-リリースブランチのビルドによって `latest` が更新されることはありません。安定版のポインターを更新できるのは、条件を満たす安定版のセマンティックバージョンのみです。`next` イメージでは、リリースイメージの検査と、CRITICAL 脆弱性がある場合にブロックするゲートが維持されます。
+リリース ブランチ ビルドでは`latest`移動することはできません。適格な安定したセマンティック バージョンのみが安定したポインタを昇格できます。 `next`イメージには、リリース イメージ検査とクリティカル脆弱性ゲートのブロックが保持されます。
 
-**`latest` は git における最新性を保証するものではありません。** `main` またはアクティブな `release/v*` ブランチにマージされた修正は、安定版の SemVer イメージが公開され、公開ジョブによって `:latest` が更新されるまで（その SemVer と同じダイジェストになるまで）、`:latest` には含まれません。GitHub ではすでに修正を確認できるのに `latest` が更新されていないように見える場合は、`:next` を pull してリリースブランチをテストするか、SemVer タグを待ってください。
+**`latest`は git の通貨保証ではありません。** `main`またはアクティブな`release/v*`ブランチ上でマージされた修正は次のとおりです。**ない**安定したSemVerイメージが公開され、公開ジョブが`:latest` (そのSemVerと同じダイジェスト) をプロモートするまで、 `:latest`内で実行されます。 GitHubすでに修正を示しているのに`latest`フリーズしているように見える場合は、 `:next`をプルしてリリース ブランチをテストするか、 SemVerタグを待ちます。
 
-| 目的                                                     | 使用するもの                                 |
-| -------------------------------------------------------- | -------------------------------------------- |
-| 変更が発生してはならない GitOps / 本番環境               | `:X.Y.Z`（またはイメージダイジェスト）を固定 |
-| 公開された安定版を追跡し、リリースごとの再作成を許容する | `:latest`                                    |
-| 未リリースの `release/v*` コミットをテストする           | `:next`（本番環境では使用不可）              |
-| `main` をテストする                                      | `:main`（本番環境では使用不可）              |
+| あなたが欲しいのは                                         | 使用                                  |
+| ---------------------------------------------------------- | ------------------------------------- |
+| GitOps / 流れてはいけない制作                              | ピン`:X.Y.Z` (または画像ダイジェスト) |
+| 公開された安定版に従い、リリースごとに再作成を受け入れます | `:latest`                             |
+| 未リリースの`release/v*`コミットをテストする               | `:next` (実稼働ではない)              |
+| `main`をテストする                                         | `:main` (実稼働ではない)              |
 
 ## Docker でのダッシュボード更新
 

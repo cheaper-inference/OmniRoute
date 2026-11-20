@@ -142,6 +142,22 @@ export function isGlmFamilyModel(modelId: string, displayName = ""): boolean {
   return glmFamilyPattern.test(modelId) || glmFamilyPattern.test(displayName);
 }
 
+const ANTIGRAVITY_PROVIDER_IDS = new Set(["antigravity", "agy"]);
+const ANTIGRAVITY_TIER_SUFFIX_PATTERN = /-(?:low|medium|high)$/i;
+
+export function isAntigravityTierSuffixedModel(
+  provider: string | null | undefined,
+  modelId: string
+): boolean {
+  const normalizedProvider = (provider ?? "").trim().toLowerCase();
+  const normalizedModel = modelId.trim();
+  if (!normalizedModel) return false;
+  const isAntigravityProvider =
+    ANTIGRAVITY_PROVIDER_IDS.has(normalizedProvider) ||
+    (!normalizedProvider && /^(?:antigravity|agy)\//i.test(normalizedModel));
+  return isAntigravityProvider && ANTIGRAVITY_TIER_SUFFIX_PATTERN.test(normalizedModel);
+}
+
 function toQualifiedId(
   providerAlias: string | null,
   provider: string | null,
@@ -513,16 +529,21 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
         ? declaredEffortTiers
         : sourceDeclaresThinking
           ? undefined
-          : // #10963: GLM-family models never inherit generic OpenAI tiers — an
-            // explicit empty list is authoritative unless a provider-declared
-            // contract exists (handled by declaredEffortTiers above).
-            isGlmFamilyModel(metadata.model, metadata.displayName)
-            ? []
-            : extendCodexGpt56EffortValues(
-                metadata.provider,
-                metadata.model,
-                CANONICAL_EFFORT_VALUES
-              );
+          : // Antigravity tier-suffixed IDs encode a fixed thinking tier in the model
+            // name and drop client-supplied reasoning_effort, so do not synthesize
+            // generic OpenAI effort_tiers when no explicit/provider tiers exist.
+            isAntigravityTierSuffixedModel(metadata.provider, metadata.model)
+            ? undefined
+            : // #10963: GLM-family models never inherit generic OpenAI tiers — an
+              // explicit empty list is authoritative unless a provider-declared
+              // contract exists (handled by declaredEffortTiers above).
+              isGlmFamilyModel(metadata.model, metadata.displayName)
+              ? []
+              : extendCodexGpt56EffortValues(
+                  metadata.provider,
+                  metadata.model,
+                  CANONICAL_EFFORT_VALUES
+                );
   const capabilityFields = {
     ...(typeof metadata.capabilities.vision === "boolean"
       ? { vision: metadata.capabilities.vision }

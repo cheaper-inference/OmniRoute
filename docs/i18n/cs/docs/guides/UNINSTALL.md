@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Volitelné) Odebrání obrazu
+docker rmi cheaperinference/omniroute:latest
+# Starší instalace stáhly starší název:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

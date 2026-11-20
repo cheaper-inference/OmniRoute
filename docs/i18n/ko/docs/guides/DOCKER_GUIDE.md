@@ -29,11 +29,7 @@
 
 ## 빠른 실행
 
-> **명령 하나로 셀프 호스팅하시겠습니까?**  
-> [셀프 호스팅 가이드](../getting-started/SELF_HOST_GUIDE.md)를 참조하세요 —
-> `docker compose -f docker-compose.selfhost.yml up -d`(게시된 이미지 +
-> Redis, 루프백 전용, 프로필 선택 불필요). 아래의 빠른 실행 방법은
-> 이미 다른 곳에서 Redis를 실행 중인 사용자를 위한 단일 컨테이너 방식입니다.
+> **하나의 명령으로 자체 호스트를 하시겠습니까?** [셀프 호스트 가이드](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (게시된 이미지 + Redis, 루프백 전용, 프로필 선택 없음)를 참조하세요. 아래 Quick Run은 이미 다른 곳에서 Redis 실행한 사용자를 위한 단일 컨테이너 경로입니다.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## 환경 파일 사용
+## 환경 파일 포함
 
 ```bash
-# 먼저 .env를 복사하고 편집합니다
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 프로덕션 스택은 개발용 compose와 병렬로 실행됩니다(컨테이너 이름, 포트 및 볼륨이 서로 다름). 따라서 프로덕션을 계속 실행한 상태로 로컬에서 작업을 이어갈 수 있습니다.
 
-## Dockerfile 스테이지
+## Dockerfile 단계
 
-이 저장소는 멀티 스테이지 Dockerfile(`Dockerfile`)을 제공합니다. 네 개의 스테이지가 노출되어 있으므로 사용 사례에 적합한 `target`을 선택하세요.
+저장소는 다단계 Dockerfile(`Dockerfile`)을 제공합니다. 4단계가 노출됩니다. 귀하의 사용 사례에 적합한 `target` 선택하십시오.
 
-| 스테이지      | 베이스 이미지         | 용도                                                                                                                                                                                                                                                                                    |
-| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | 의존성을 설치하고(`npm ci --legacy-peer-deps`) `npm run build`를 실행합니다(기본적으로 Turbopack 사용 — 아래의 빌드 시점 리소스 참조).                                                                                                                                                  |
-| `runner-base` | `node:26-trixie-slim` | Next.js 독립 실행형 출력이 포함된 프로덕션 런타임입니다. **프로바이더 CLI는 포함되지 않습니다.**                                                                                                                                                                                        |
-| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` 및 전역 CLI인 `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`을 추가합니다. **에이전트형 워크플로에는 이것을 선택하세요.**                                                                                                       |
-| `runner-web`  | `runner-base`         | 웹 세션 프로바이더인 `gemini-web`, `claude-web`, `claude-turnstile`을 위해 Playwright와 Chromium 브라우저(`--with-deps`)를 추가합니다. **이 프로바이더들을 사용할 때 이것을 선택하세요.** 일반 이미지는 이것이 없으면 요청 시점에 실패합니다(릴리스 채널 아래의 `-web` 참고 사항 참조). |
+| 단계          | 기본 이미지           | 목적                                                                                                                                                                                                                                                                         |
+| ------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | deps(`npm ci --legacy-peer-deps`)를 설치하고 `npm run build` 실행합니다( 기본적으로 Turbopack — 아래 빌드 시간 리소스 참조).                                                                                                                                                 |
+| `runner-base` | `node:26-trixie-slim` | Next.js 독립형 출력을 사용한 프로덕션 런타임.** 제공업체 CLIs 가 번들로 제공되지 않습니다.**                                                                                                                                                                                 |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` 및 전역 CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw` 를 추가합니다.** 에이전트 워크플로의 경우 이 옵션을 선택하세요.**                                                                                       |
+| `runner-web`  | `runner-base`         | 웹 세션 제공자용 Playwright + a Chromium 브라우저(`--with-deps`)를 추가합니다: `gemini-web`, `claude-web`, `claude-turnstile`.** 해당 공급자를 사용할 때 이것을 선택하십시오** — 일반 이미지가 없으면 요청 시 일반 이미지가 실패합니다(릴리스 채널 아래의 `-web` 참고 참조). |
 
-특정 대상을 수동으로 빌드하려면 다음을 실행하세요.
+특정 대상을 수동으로 빌드합니다.
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,41 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### 빌드 시점 리소스
+### 빌드타임 리소스
 
-세 가지 빌드 인수가 `builder` 스테이지의 리소스 비용을 제어합니다. 이 인수들은 빌드 시점에만 사용되며,
-`OMNIROUTE_MEMORY_MB`(아래 참조)는 별도의 런타임 조정 옵션입니다.
+세 개의 빌드 인수가 `builder` 단계 비용을 제어합니다. 이는 빌드 타임에만 해당됩니다. — `OMNIROUTE_MEMORY_MB` (아래)는 별도의 런타임 손잡이입니다.
 
-| 빌드 인수                   | 기본값 | 효과                                                                                                      |
-| --------------------------- | ------ | --------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0`은 webpack으로 빌드합니다. 최대 메모리 사용량은 더 낮지만 느립니다. `1`은 Turbopack을 사용합니다.      |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | 생성된 `next build`에 적용되는 V8 힙 상한(`--max-old-space-size`)입니다.                                  |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | `CIRCLE_NODE_TOTAL`에 값을 전달합니다. Next는 페이지 데이터 수집에 사용할 `workers = N - 1`을 도출합니다. |
+| 빌드 인수                   | 기본   | 효과                                                                                         |
+| --------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` webpack으로 빌드됩니다. 최대 메모리가 낮고 속도가 느립니다. `1` Turbopack 를 선택합니다. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | 생성된 `next build` 에 대한 V8 힙 한도(`--max-old-space-size`)입니다.                        |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | `CIRCLE_NODE_TOTAL` 피드; 다음으로 페이지 데이터 수집을 위해 `workers = N - 1` 파생합니다.   |
 
-`OMNIROUTE_BUILD_WORKERS`는 사양이 높은 빌더에서 늘려야 하는 값이자, 리소스가 제한된 빌드가
-`✓ Compiled successfully` **이후** 종료될 때 의심해야 하는 값입니다. 각
-페이지 데이터 워커는 별도의 프로세스이며, 상위 `next build` 자체도 별도의 프로세스입니다.
-실제 VPS에서 재현한 결과(이슈 #7518), `NODE_OPTIONS` 힙 플래그와 무관하게 각 프로세스의 최대 RSS가
-약 4.5 GB로 측정되었습니다(Turbopack은 V8 힙 외부의 네이티브/Rust 메모리에서 컴파일합니다).
-기본값 `2`(→ 워커 1개, 총 프로세스 2개)는 게시 파이프라인에서 사용하는
-16 GB / 4 vCPU GitHub 호스팅 러너에 맞춰 설정되었습니다. `8`(→ 워커 7개)에서는 해당 러너의
-메모리가 부족해졌고 buildkit은 `ResourceExhausted: ... cannot allocate memory` 오류와 함께
-해당 단계를 실패 처리했습니다. 추정 대신 프로세스별 RSS를 직접 측정했을 때
-`3`(→ 워커 2개)도 여전히 메모리 한도에 맞지 않았습니다.
-`tests/unit/docker-build-memory-budget.test.ts`는 측정값을 기준으로 계산을 수행하며,
-어느 조정값이든 러너의 용량을 초과하면 실패합니다.
+`OMNIROUTE_BUILD_WORKERS` 큰 빌더에 대해 레이즈하는 것이고 제한된 빌드가 죽을 때 의심하는 것입니다.** ~ 후에** `✓ Compiled successfully`. 각 페이지 데이터 작업자는 자체 프로세스이며 상위 `next build` 자체도 마찬가지입니다. 라이브 VPS 재현(문제 #7518)은 `NODE_OPTIONS` 힙 플래그(Turbopack V8 힙 외부의 native/Rust 메모리에서 컴파일)와 관계없이 ~ 4.5 GB 에서 각 프로세스의 피크 RSS 측정했습니다. `2` 의 기본값(→ 1 작업자, 총 2 프로세스)은 게시 파이프라인이 사용하는 16 GB / 4 vCPU GitHub 호스팅 실행기에 맞게 크기가 지정됩니다. `8` (→ 7 작업자)에서 러너의 메모리가 부족하고 빌드킷이 `ResourceExhausted: ... cannot allocate memory` 단계에 실패했습니다. 프로세스 RSS 추론하는 대신 직접 측정한 후에도 `3` (→ 2 작업자)는 여전히 적합하지 않았습니다. `tests/unit/docker-build-memory-budget.test.ts` 측정된 수치에 대해 산술을 수행하고 손잡이 중 하나가 러너보다 커지면 실패합니다.
 
-Turbopack은 V8 힙 **외부**에 존재하는 네이티브 Rust 메모리에서 컴파일하므로
-`OMNIROUTE_BUILD_MEMORY_MB`로 사용량을 제한할 수 없습니다. 메모리 상한이 있는 호스트에서는
-오류 메시지 없이 OOM 킬러가 빌드를 SIGKILL합니다. 즉, 빌드가
-`Creating an optimized production build` 도중에 그냥 멈추므로 메모리 부족이 아니라
-중단된 것처럼 보입니다. 이러한 이유로 `Dockerfile`은 webpack
-(`OMNIROUTE_USE_TURBOPACK=0`)을 기본값으로 사용합니다. 이는 Turbopack이 코드상 기본값인
-`npm run dev` / `npm run build`와 다릅니다. Railway 및 기타 원클릭 호스트가 실행하는 것처럼
-빌드 인수 없이 단순히 `docker build .`을 실행해도 메모리가 제한된 빌더에서 아무 메시지 없이
-종료되어서는 안 되기 때문입니다. 게시된 이미지에서는 이미 `docker-publish.yml`에서
-`OMNIROUTE_USE_TURBOPACK=0`을 명시적으로 전달합니다. RAM이 충분한 빌더에서는 더 빠른 빌드를 위해
-Turbopack을 사용하도록 설정하세요.
+Turbopack 살아있는 기본 Rust 메모리에서 컴파일됩니다.** 밖의** V8 힙이므로 `OMNIROUTE_BUILD_MEMORY_MB` 이를 바인딩하지 않습니다. 메모리 한도가 있는 호스트에서 빌드는 오류 텍스트가 전혀 없는 OOM 킬러에 의해 SIGKILLed 됩니다. — 는 단순히 `Creating an optimized production build` 중간에 중지됩니다. 이는 메모리 부족이 아닌 정지처럼 읽혀집니다. 이것이 바로 `Dockerfile` 기본 코드인 `npm run dev` / `npm run build` 와 달리 웹팩(`OMNIROUTE_USE_TURBOPACK=0`)을 기본값으로 사용하는 이유입니다. 여기서 Turbopack 코드 기본값입니다. 빌드 인수(철도 및 기타 원클릭 호스트가 실행하는 것)가 없는 베어 `docker build .` 메모리가 제한된 빌더에서 자동으로 종료되어서는 안 됩니다. 게시된 이미지는 이미 `docker-publish.yml` 에서 명시적으로 `OMNIROUTE_USE_TURBOPACK=0` 전달합니다. RAM 가 많은 빌더에서는 더 빠른 빌드를 위해 Turbopack 선택하세요.
 
 ```bash
 docker build --target runner-base \
@@ -298,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker`가 활성화되어 있으므로 `next build`는 상위 프로세스와 **별도의** 워커
-프로세스를 실행하며, 각 프로세스에 `OMNIROUTE_BUILD_MEMORY_MB`가 개별적으로 적용됩니다. 컨테이너의
-메모리 상한은 이 값의 한 배가 아니라 대략 두 배보다 높게 설정하세요.
+`webpackBuildWorker` 활성화되었으므로 `next build` 상위를 실행합니다.** 그리고** 작업자 프로세스이며 각각은 `OMNIROUTE_BUILD_MEMORY_MB` 개별적으로 존중합니다. 컨테이너 한도의 크기를 한 번이 아니라 대략 해당 값의 두 배 이상으로 조정합니다.
 
-이 트리에서 측정한 결과(`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`)는 다음과 같습니다.
+이 트리에서 측정됨(`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| 번들러    | 컨테이너 상한  | 결과                              |
-| --------- | -------------- | --------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | 두 경우 모두 메시지 없이 OOM 종료 |
-| webpack   | 8 GiB          | 빌드 워커가 SIGKILL됨             |
-| webpack   | 12 GiB         | 성공, 최대 11.1 GiB 사용          |
+| 번들러    | 컨테이너 천장  | 결과                             |
+| --------- | -------------- | -------------------------------- |
+| Turbopack | 8 GiB / 16 GiB | 조용히 둘 다 OOM으로 죽임을 당함 |
+| 웹팩      | 8 GiB          | 워커 SIGKILLed 빌드              |
+| 웹팩      | 12 GiB         | 성공, 최고 11.1 GiB              |
 
 ### 런타임 기본값
 
-`runner-base`가 내보내는 기본값은 `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`입니다.
+`runner-base` 에서 내보낸 기본값: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Docker에서의 메모리 동작:
+Docker 의 메모리 동작:
 
-- 이미지는 `OMNIROUTE_MEMORY_MB=1024`를 설정하고 이 값에서 `NODE_OPTIONS=--max-old-space-size=1024`를 도출합니다.
-- 실제 서버 프로세스는 독립 실행형 런처에 의해 시작되며, 이 런처는 `OMNIROUTE_MEMORY_MB`를 읽고 `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`를 추가합니다.
-- Node는 반복해서 지정된 `--max-old-space-size` 값 중 마지막 값을 사용하므로, `OMNIROUTE_MEMORY_MB`를 설정하면 Docker의 실질적인 힙 제한을 제어할 수 있습니다.
-- 이미지에서 이 값을 항상 설정하므로 Docker에서는 런처 자체의 RAM 기반 보정 폴백이 적용되지 않습니다. 워크로드에 맞게 이 값을 명시적으로 높이세요(아래 표 참조). 코딩 에이전트의 `/v1/responses`에는 `2048`도 여전히 너무 작습니다.
+- 이미지는 `OMNIROUTE_MEMORY_MB=1024` 설정하고 여기에서 `NODE_OPTIONS=--max-old-space-size=1024` 파생시킵니다.
+- 실제 서버 프로세스는 `OMNIROUTE_MEMORY_MB` 읽고 `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` 추가하는 독립 실행형 실행 프로그램에 의해 시작됩니다.
+- 노드는 마지막으로 반복된 `--max-old-space-size` 값을 사용하므로 `OMNIROUTE_MEMORY_MB` 설정하면 효과적인 Docker 힙 제한이 제어됩니다.
+- 이미지가 항상 설정하기 때문에 런처의 자체 RAM 보정 폴백은 Docker 아래에는 적용되지 않습니다. 워크로드에 대해 명시적으로 올립니다(아래 표). `2048` 는 코딩 에이전트 `/v1/responses` 에 비해 여전히 너무 작습니다.
 
-### 코딩 에이전트용 런타임 RAM
+### 코딩 에이전트를 위한 런타임 RAM
 
-Docker 기본값인 1 GiB는 대시보드/가벼운 채팅을 위한 최저 기준이지, 프로덕션용 크기가 아닙니다. 긴 `POST /v1/responses` 본문(수백 개의 메시지, 수십 개의 도구)은 압축 중에 여러 인메모리 그래프를 유지합니다. 서로 겹치는 약 3 MiB/약 750k 토큰 요청 두 건은 **12 GiB** old-space에서 V8을 중단시켰고(`FATAL ERROR: Reached heap limit`), 16 GiB cgroup OOM도 유발했습니다. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)를 참조하세요.
+1 GiB Docker 기본값은 생산 규모가 아닌 dashboard/light-chat 층입니다. 긴 `POST /v1/responses` 본문(수백 개의 메시지, 수십 개의 도구)은 압축 중에 여러 개의 인메모리 그래프를 유지합니다. 두 개의 중복되는 ~ 3 MiB / ~ 750k-token 요청으로 인해 V8이 중단되었습니다.** GiB** old-space (`FATAL ERROR: Reached heap limit`) 또한 16 GiB cgroup OOM 에 도달했습니다. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 참조하세요.
 
-**cgroup `--memory`는 힙보다 크게 설정하세요** — 네이티브 버퍼, SQLite 및 압축 중간 데이터는 V8 외부에 위치합니다.
+크기** 힙 위의 cgroup `--memory`** — 기본 버퍼, SQLite 및 압축 중간 버퍼는 V8 외부에 있습니다.
 
-| 워크로드                                 | `OMNIROUTE_MEMORY_MB`             | 컨테이너/cgroup    | 참고                                                                                                      |
-| ---------------------------------------- | --------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------- |
-| 대시보드, 가벼운 채팅 하나               | `1024` (이미지 기본값)            | ≥2 GiB             |                                                                                                           |
-| 코딩 에이전트 하나(Claude/Codex/Grok)    | `8192`                            | ≥10 GiB            | 일반적인 단일 세션 `/v1/responses`                                                                        |
-| 동시에 실행되는 긴 `/v1/responses` 두 건 | `10240`–`12288`                   | ≥12–16 GiB         | 약 12 GiB 힙에서 V8 중단 측정                                                                             |
-| 동시에 실행되는 긴 컨텍스트 세 개 이상   | 단일 프로세스에서 실행하지 마세요 | 직렬화/더 많은 RAM | 기본적으로 헤비급 요청은 1개만 실행이 허용되며, RAM을 늘리지 않고 이 제한을 높이면 중단이 다시 발생합니다 |
+| 작업량                               | `OMNIROUTE_MEMORY_MB`               | 컨테이너/cgroup   | 메모                                                                       |
+| ------------------------------------ | ----------------------------------- | ----------------- | -------------------------------------------------------------------------- |
+| 대시보드, 가벼운 채팅 하나로         | `1024` (이미지 기본값)              | ≥2 GiB            |                                                                            |
+| 코딩 에이전트 1개(Claude/Codex/Grok) | `8192`                              | ≥10 GiB           | 일반적인 단일 세션 `/v1/responses`                                         |
+| 두 개의 동시 긴 `/v1/responses`      | `10240`–`12288`                     | ≥12–16 GiB        | ~ 12 GiB 힙에서 측정된 V8 중단                                             |
+| 3개의 + 동시 긴 컨텍스트             | 하나의 프로세스를 사용하지 마십시오 | 직렬화 / more RAM | 기본 헤비급 입장은 기내 1회입니다. RAM 없이 올리면 중단이 다시 발생합니다. |
 
-베어 메탈에서 `omniroute serve`는 `OMNIROUTE_MEMORY_MB`가 **설정되지 않은** 경우 RAM의 약 35%로 보정합니다(`[512, 4096]` 범위로 제한). Docker는 항상 `1024`를 설정하므로 공식 이미지에서는 이 보정이 실행되지 않습니다.
+`omniroute serve` on bare metal calibrates ~35% of RAM (clamped `[512, 4096]`) when `OMNIROUTE_MEMORY_MB` is **unset**. Docker always sets `1024`, so that calibration never runs in the official image.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## 중요한 환경 변수
@@ -363,21 +335,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml`의 호스트 측 대시보드 포트                                                                                                                                                                                                              | `20130`                  |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` 사이드카의 호스트 측 포트                                                                                                                                                                                                                          | `8317`                   |
 
-## 하위 경로에서의 리버스 프록시 (Traefik / nginx)
+## 하위 경로의 역방향 프록시(Trafik / nginx)
 
-Next.js `basePath`는 standalone 번들에 컴파일됩니다. OmniRoute는 앱 루트의 센티널 파일에 빌드 시점의
-값을 기록하고(`npm run build` 중에 작성되고
-`scripts/docker/ensure-docker-base-path.mjs`에서 읽음), 컨테이너가 시작될 때
-`OMNIROUTE_BASE_PATH`와 비교합니다. 값이 서로 다르고 이미지가 도메인 루트용으로
-빌드된 경우, 엔트리포인트는 `node dev/run-standalone.mjs`가 실행되기 전에 standalone 매니페스트,
-포함된 `basePath`/`assetPrefix` 리터럴(Next 16은 `assetPrefix`만으로 SSR 애셋 URL을
-렌더링하므로 패처가 하위 경로를 해당 값에도 반영함), 빌드 시 포함된
-`/_next/static` 애셋 URL(클라이언트 참조 매니페스트, 미디어 가져오기, 사전 렌더링된
-오류 페이지), 그리고 클라이언트 `process.env` shim을 다시 작성합니다.
+Next.js `basePath` 는 독립형 번들로 컴파일됩니다. OmniRoute 앱 루트( `npm run build` 중에 작성되고 `scripts/docker/ensure-docker-base-path.mjs` 에서 읽음)의 센티넬 파일에 구운 값을 기록하고 컨테이너가 시작될 때 이를 `OMNIROUTE_BASE_PATH` 와 비교합니다. 서로 다르고 도메인 루트에 대해 이미지가 빌드되면 진입점은 독립 실행형 매니페스트, 내장된 `basePath`/`assetPrefix` 리터럴(다음 16은 `assetPrefix` 에서 SSR 자산 URLs 렌더링합니다 — 패치 프로그램은 하위 경로를 미러링합니다), 구운 `/_next/static` 자산 URLs (클라이언트 참조 매니페스트, 미디어 가져오기, 사전 렌더링된 오류 페이지) 및 클라이언트 `process.env` shim을 `node dev/run-standalone.mjs` 실행되기 전에 다시 작성합니다.
 
 ### Compose 빌드(권장)
 
-`.env`에 두 변수를 모두 설정한 다음, 이미지와 런타임 설정이 일치하도록 다시 빌드합니다.
+`.env` 에서 두 변수를 모두 설정한 다음 이미지와 런타임이 일치하도록 다시 빌드합니다.
 
 ```bash
 # .env
@@ -389,71 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml`은 `OMNIROUTE_BASE_PATH`를 Docker 빌드 인수 및
-런타임 환경 변수로 전달합니다.
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` Docker 빌드 인수 및 런타임 환경 변수로 전달합니다.
 
 ### 사전 빌드된 루트 이미지 + 런타임 하위 경로
 
-게시된 `diegosouzapw/omniroute:*` 이미지는 도메인 루트용으로 빌드됩니다. 런타임에
-`OMNIROUTE_BASE_PATH`를 설정할 수도 있으며, 컨테이너는 시작 시 번들을 한 번 패치합니다.
-이에 맞는 공개 오리진을 함께 설정하세요.
+게시된 `cheaperinference/omniroute:*` 이미지는 도메인 루트용으로 구축되었습니다. 런타임에 `OMNIROUTE_BASE_PATH` 설정할 수 있습니다. 컨테이너는 시작 시 번들을 한 번 패치합니다. 일치하는 공개 원본과 페어링합니다.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-리버스 프록시가 **전체** 외부 경로를 전달하도록 구성하세요(접두사를 제거하지 마세요).
-Traefik은 `StripPrefix` 없이 `PathPrefix(`/omniroute`)`를 컨테이너로 라우팅해야 하며,
-그래야 Next.js가 `/omniroute/...`를 수신하고 `/omniroute/_next/...`에서
-애셋을 제공합니다.
+다음을 전달하도록 역방향 프록시를 구성합니다.** 가득한** 외부 경로(접두사를 제거하지 않음) Traefik은 `PathPrefix(`/omniroute `)` `StripPrefix` 없이 컨테이너로 라우팅해야 하므로 Next.js `/omniroute/...` 수신하고 `/omniroute/_next/...` 에서 자산을 제공합니다.
 
-Docker 헬스 체크는 활성 `OMNIROUTE_BASE_PATH`가 접두사로 붙은 경량
-`/healthz` 수명 주기 엔드포인트를 점검합니다. `/api/monitoring/health`는 사용자/대시보드
-진단용으로 계속 사용할 수 있습니다. 컨테이너 HEALTHCHECK가 다시 이 엔드포인트를
-사용하도록 하려면(예: 심층 상태 검사를 적용하려는 경우)
-`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`를 설정하세요.
-이 경로는 **심층** 검사(DB + 모니터링 요약)입니다. 다시 사용하도록 선택했다면
-실행 빈도가 낮은 Docker `HEALTHCHECK`에는 적합하지만, Kubernetes `livenessProbe`
-주기에는 **적합하지 않습니다**.
+Docker 상태 확인은 활성 `/healthz` 접두사가 붙은 경량 `OMNIROUTE_BASE_PATH` 수명 주기 엔드포인트를 조사합니다. `/api/monitoring/health` human/dashboard 진단에 계속 사용할 수 있습니다. 컨테이너 HEALTHCHECK 다시 이를 가리키도록 하려면(예를 들어 심층 건강 강화를 위해) `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` 설정하세요. 그 길은** 깊은** (DB + 모니터링 요약) 다시 선택하면 Docker 의 드물게 발생하는 `HEALTHCHECK` 에 적합한 — 확인하세요. 하지만** ~ 아니다** Kubernetes `livenessProbe` 간격의 경우.
 
 오케스트레이터(Kubernetes, Nomad 등)의 경우:
 
-| 프로브          | 권장                                                           | 피해야 할 항목                                                     |
-| --------------- | -------------------------------------------------------------- | ------------------------------------------------------------------ |
-| 라이브니스      | HTTP `GET /livez` 또는 기본 포트(`PORT`, 기본값 `20128`)의 TCP | 라이브니스 검사에 `/api/monitoring/health` 사용                    |
-| 레디니스        | HTTP `GET /healthz`                                            | 이벤트 루프가 바쁜 상태를 프로세스 중단으로 간주하는 짧은 타임아웃 |
-| 심층 / 블랙박스 | `/api/monitoring/health`                                       | —                                                                  |
+| 조사        | 선호하다                                                        | 피하다                                                   |
+| ----------- | --------------------------------------------------------------- | -------------------------------------------------------- |
+| 활성        | HTTP `GET /livez` 또는 기본 포트의 TCP (`PORT`, 기본값 `20128`) | 활성 상태로서의 `/api/monitoring/health`                 |
+| 준비        | HTTP `GET /healthz`                                             | 바쁜 이벤트 루프를 죽은 것으로 처리하는 엄격한 시간 초과 |
+| 딥/블랙박스 | `/api/monitoring/health`                                        | —                                                        |
 
-`/healthz`는 프로세스 수명 주기(`ok` / `starting` / `stopping`)를 보고합니다. `/livez`는
-프로세스의 생존 여부만 확인합니다(핸들러를 실행할 수 있으면 항상 200을 반환하며
-준비 상태를 기다리지 않음). 두 엔드포인트 모두 요청 처리와 동일한 Node 이벤트 루프에서
-실행되므로 CPU 집약적인 카탈로그 또는 압축 작업으로 응답이 지연될 수 있습니다.
-바쁨 ≠ 중단입니다. HTTP 프로브 시간이 초과되면 TCP 라이브니스를 우선 사용하세요.
-전체 프로브 지침:
-[모니터링 가이드 — Kubernetes 프로브 권장 사항](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` 프로세스 수명주기(`ok` / `starting` / `stopping`)를 보고합니다. `/livez` 는 프로세스 활성 상태입니다(핸들러가 실행될 수 있을 때마다 200개, 준비 상태를 기다리지 않음). 둘 다 여전히 요청 처리와 동일한 노드 이벤트 루프에서 실행되므로 CPU 바인딩 카탈로그 또는 압축 작업으로 인해 — busy ≠ dead가 지연될 수 있습니다. HTTP 프로브가 시간 초과되면 TCP 활성을 선호합니다. 전체 프로브 지침: [모니터링 가이드 — Kubernetes 프로브 권장 사항](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Caddy를 사용한 Docker Compose (HTTPS Auto-TLS)
+## 캐디를 사용한 Docker Compose(HTTPS Auto-TLS)
 
-Caddy의 자동 SSL 프로비저닝을 사용하여 OmniRoute를 안전하게 외부에 공개할 수 있습니다. 도메인의 DNS A 레코드가 서버의 IP를 가리키는지 확인하세요.
+OmniRoute Caddy의 자동 SSL 프로비저닝을 사용하여 안전하게 노출될 수 있습니다. 도메인의 DNS A 레코드가 서버의 IP 가리키는지 확인하세요.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth 콜백, 대시보드 링크 및 생성된 공개 URL에 사용되는 브라우저 측 오리진입니다.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # 예약 작업 및 자체 요청에 사용되는 내부 서버 간 URL입니다.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -470,11 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy는 업스트림 컨테이너에 표준 전달 헤더를 설정합니다. OmniRoute는
-OAuth 콜백 및 생성된 공개 링크의 정식 공개 오리진으로 `NEXT_PUBLIC_BASE_URL`을
-사용하며, 인증된 대시보드 쓰기 작업에는 동일 오리진 요청과 세션 기반 CSRF
-보호를 사용합니다. 명시적 구성 대신 신뢰할 수 있는 전달 헤더에서 공개 오리진을
-파생하도록 OmniRoute를 의도적으로 설정하는 고급 배포에서만 `OMNIROUTE_TRUST_PROXY`를 활성화하세요.
+캐디는 업스트림 컨테이너에 대한 표준 전달 헤더를 설정합니다. OmniRoute OAuth 콜백 및 생성된 공개 링크에 대한 정식 공개 출처로 `NEXT_PUBLIC_BASE_URL` 사용합니다. 인증된 대시보드 쓰기는 동일 출처 요청과 세션 바인딩 CSRF 보호를 사용합니다. OmniRoute 명시적 구성 대신 신뢰할 수 있는 전달 헤더에서 공개 원본을 의도적으로 파생하도록 하려는 고급 배포에 대해서만 `OMNIROUTE_TRUST_PROXY` 활성화하십시오.
 
 ## Cloudflare Quick Tunnel
 
@@ -493,47 +434,49 @@ Docker 배포용 대시보드는 `Dashboard → Endpoints`에서 한 번의 클�
 
 ## 이미지 태그
 
-| 이미지                   | 태그     | 크기   | 설명                                                 |
-| ------------------------ | -------- | ------ | ---------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | 가장 높은 **게시된** 안정 SemVer (git `main`이 아님) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps에서는 이 유형의 태그를 고정하여 사용          |
+| 영상                         | 꼬리표   | 크기    | 설명                                                    |
+| ---------------------------- | -------- | ------- | ------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | 제일 높은** 출판됨** 안정적인 SemVer ( git `main` 아님) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | GitOps 에 대해 이 태그 클래스를 고정하세요.             |
 
-다중 플랫폼 매니페스트: `linux/amd64` + `linux/arm64` 네이티브(Apple Silicon, AWS Graviton, Raspberry Pi). Docker는 일치하는 아키텍처를 자동으로 선택합니다. ARM 호스트에서 AMD64 에뮬레이션을 강제해야 하는 경우 `--platform linux/amd64`를 전달하세요.
+동일한 이미지가 동일한 아키텍처별 다이제스트를 사용하여 3개의 저장소에 게시됩니다. `cheaperinference/omniroute` (3.8.53부터 더 저렴한 추론 조직인 Docker Hub), `ghcr.io/cheaper-inference/omniroute` 및 레거시 `diegosouzapw/omniroute` 는 풀 기록을 유지하고 여전히 모든 릴리스를 수신합니다. 기존 `diegosouzapw/omniroute` 배포는 계속 업데이트됩니다. 이미지 이름을 전환하는 것은 선택 사항입니다. 아래 `:next` / `:next-web` 사전 출시 채널은 `diegosouzapw/omniroute` 및 GHCR 에만 게시됩니다.
 
-### 릴리스 채널
+다중 플랫폼 매니페스트: `linux/amd64` + `linux/arm64` 기본(Apple Silicon, AWS Graviton, Raspberry Pi). Docker 일치하는 아키텍처를 자동으로 선택합니다. ARM 호스트에서 AMD64 에뮬레이션을 강제해야 하는 경우 `--platform linux/amd64` 전달하십시오.
 
-OmniRoute는 안정 릴리스, 활성 릴리스 브랜치 테스트 및 개발 빌드를 위해 별도의 Docker 채널을 게시합니다.
+### 출시 채널
 
-| 채널                            | 소스                             | 변경 가능 여부                 | 권장 용도                                                                                                      |
-| ------------------------------- | -------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | 서명되고 버전이 지정된 릴리스    | 변경 불가                      | 정확한 릴리스를 고정하는 프로덕션 배포                                                                         |
-| `:latest` / `:latest-web`       | 가장 높은 **게시된** 안정 SemVer | 변경 가능한 안정 포인터        | SemVer 게시 작업 **후** 안정 릴리스를 따름 — `main` 또는 릴리스되지 않은 `release/v*` 커밋은 추적하지 **않음** |
-| `:next` / `:next-web`           | 현재 기본 `release/v*` 브랜치    | 변경 가능한 사전 릴리스 포인터 | 활성 릴리스 브랜치에 반영되었지만 아직 안정 릴리스에는 포함되지 않은 수정 사항 테스트                          |
-| `:main` / `:main-web`           | `main` 브랜치                    | 변경 가능한 개발 포인터        | 개발 및 통합 테스트 전용                                                                                       |
+OmniRoute 안정적인 릴리스, 활성 릴리스 브랜치 테스트 및 개발 빌드를 위해 별도의 Docker 채널을 게시합니다.
+
+| 채널                            | 원천                               | 가변성                         | 권장 용도                                                                                                                                      |
+| ------------------------------- | ---------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned 릴리스            | 불변                           | 정확한 릴리스를 고정하는 프로덕션 배포                                                                                                         |
+| `:latest` / `:latest-web`       | 제일 높은** 출판됨** 안정된 SemVer | 가변 안정 포인터               | 안정적인 릴리스를 따릅니다.** ~ 후에** SemVer 게시 작업 — 수행하는 작업** ~ 아니다** `main` 또는 출시되지 않은 `release/v*` 커밋을 추적합니다. |
+| `:next` / `:next-web`           | 현재 기본 `release/v*` 분기        | 변경 가능한 사전 릴리스 포인터 | 활성 릴리스 브랜치에 도착했지만 아직 안정적인 릴리스에 포함되지 않은 수정 사항 테스트                                                          |
+| `:main` / `:main-web`           | `main` 지점                        | 가변 개발 포인터               | 개발 및 통합 테스트만 해당                                                                                                                     |
 
 #### 웹 세션 제공자: `-web` 이미지
 
-위의 모든 채널은 `runner-web` 단계에서 빌드된 `-web` 태그(`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`)로도 제공됩니다. 이는 동일한 이미지에 Playwright와 Chromium 브라우저가 추가된 것입니다. 일반 이미지에는 Chromium이 **포함되지 않으며**, `gemini-web`, `claude-web`, `claude-turnstile`에는 Chromium이 필요합니다.
+위의 모든 채널은 `runner-web` 단계 — 에서 동일한 이미지와 Playwright 및 Chromium 브라우저로 구축된 `-web` 태그(`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`)로도 두 배가 됩니다. 일반 이미지 배송** 없이** 크롬; `gemini-web`, `claude-web` 및 `claude-turnstile` 필요합니다.
 
-오류는 시작 시점이 아니라 나중에 발생합니다. 이러한 제공자는 모델 목록을 표시하고 대시보드에서 연결된 것으로 나타나지만, 첫 번째 요청에서만 다음 오류가 발생합니다.
+실패는 시작 시간이 아닌 지연됩니다. 해당 공급자는 모델을 나열하고 대시보드에 연결된 것으로 표시하며 첫 번째 요청만 실패합니다.
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-이러한 제공자를 사용하는 경우 현재 사용 중인 채널의 `-web` 태그를 가져오세요. 그 외에는 아무것도 변경되지 않습니다. npm/CLI 설치(Docker 이미지 미사용)에서 이에 해당하는 누락 항목은 브라우저 바이너리입니다. 호스트에서 `npx playwright install chromium`을 실행하세요.
+해당 공급자를 사용하는 경우 이미 — 에 있는 채널의 `-web` 태그를 가져오면 다른 변경 사항은 없습니다. npm/CLI 설치( Docker 이미지 없음)에서 누락된 해당 부분은 브라우저 바이너리입니다. 호스트에서 `npx playwright install chromium` 실행하세요.
 
-#### 사전 릴리스 채널 사용하기
+#### 시험판 채널 사용
 
-`next` 채널은 현재 기본 `release/v*` 브랜치에 푸시될 때마다 다시 빌드되며, AMD64와 ARM64 모두에 대해 게시됩니다. 이전 유지보수 브랜치는 이 채널을 덮어쓸 수 없습니다. 이 채널은 다음 안정 태그가 생성되기 전에 활성 릴리스 브랜치에 병합된 수정 사항을 가져올 수 있는 이미지를 제공합니다.
+`next` 채널은 현재 기본 `release/v*` 분기에 푸시할 때마다 재구축되며 AMD64 및 ARM64 모두에 대해 게시됩니다. 이전 유지 관리 분기에서는 덮어쓸 수 없습니다. 채널은 다음 안정 태그가 절단되기 전에 활성 릴리스 분기에 병합된 수정 사항에 대해 풀 가능한 이미지를 제공합니다.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose에서는 선택한 프로필이 사용하는 이미지 태그를 재정의한 다음, 서비스를 가져와 다시 생성합니다.
+Docker Compose의 경우 선택한 프로필에서 사용되는 이미지 태그를 재정의한 다음 서비스를 가져와서 다시 만듭니다.
 
 ```yaml
 services:
@@ -548,30 +491,30 @@ docker compose up -d
 
 #### 안전 및 롤백
 
-`next`는 유동적인 사전 릴리스 채널입니다. 활성 릴리스 브랜치에 푸시될 때마다 변경될 수 있으며 **프로덕션 용도로는 지원되지 않습니다**. 특정 빌드를 평가하는 동안에는 이미지 다이제스트를 고정하세요.
+`next` 는 플로팅 사전 출시 채널입니다. 활성 릴리스 분기에 푸시할 때 변경될 수 있으며** 프로덕션 용도로는 지원되지 않습니다.** . 특정 빌드를 평가하는 동안 이미지 다이제스트를 고정합니다.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-테스트하기 전에 OmniRoute 데이터 볼륨이나 바인드 마운트된 데이터 디렉터리를 백업하세요. 롤백하려면 이전에 사용하던 안정 버전 또는 다이제스트를 복원하고 컨테이너를 다시 생성합니다.
+테스트하기 전에 OmniRoute 데이터 볼륨이나 바인드 마운트된 데이터 디렉터리를 백업하세요. 롤백하려면 이전에 사용된 안정적인 버전이나 다이제스트를 복원하고 컨테이너를 다시 생성하세요.
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-릴리스 브랜치 빌드는 절대로 `latest`를 이동시킬 수 없습니다. 적격한 안정 시맨틱 버전만 안정 포인터를 승격할 수 있습니다. `next` 이미지는 릴리스 이미지 검사와 CRITICAL 취약점 차단 게이트를 그대로 유지합니다.
+릴리스 브랜치 빌드는 절대 `latest` 이동할 수 없습니다. 적합한 안정 의미 체계 버전만이 안정 포인터를 승격할 수 있습니다. `next` 이미지는 릴리스 이미지 검사 및 CRITICAL-취약성 게이트 차단 기능을 유지합니다.
 
-**`latest`는 git의 최신 상태를 보장하지 않습니다.** `main` 또는 활성 `release/v*` 브랜치에 병합된 수정 사항은 안정 SemVer 이미지가 게시되고 게시 작업이 `:latest`를 승격할 때까지 **`:latest`에 포함되지 않습니다**. 이때 `:latest`는 해당 SemVer와 동일한 다이제스트를 가집니다. GitHub에는 이미 수정 사항이 표시되는데 `latest`가 변경되지 않은 것처럼 보이면, `:next`를 가져와 릴리스 브랜치를 테스트하거나 SemVer 태그를 기다리세요.
+**`latest` git에 대한 통화 보장이 아닙니다.** `main` 또는 활성 `release/v*` 분기의 병합된 수정 사항은 다음과 같습니다.** ~ 아니다** 안정적인 SemVer 이미지가 게시되고 게시 작업이 `:latest` ( SemVer 와 동일한 다이제스트)를 승격할 때까지 `:latest` 에서. GitHub 이미 수정 사항을 표시하는 동안 `latest` 정지된 것처럼 보이면 `:next` 당겨 릴리스 분기를 테스트하거나 SemVer 태그를 기다리세요.
 
-| 원하는 작업                                             | 사용할 항목                          |
-| ------------------------------------------------------- | ------------------------------------ |
-| 변경되어서는 안 되는 GitOps / 프로덕션                  | `:X.Y.Z` 또는 이미지 다이제스트 고정 |
-| 게시된 안정 릴리스를 따르고 각 릴리스마다 재생성을 허용 | `:latest`                            |
-| 미출시 `release/v*` 커밋 테스트                         | `:next` (프로덕션용 아님)            |
-| `main` 테스트                                           | `:main` (프로덕션용 아님)            |
+| 당신이 원하는                                                | 사용                                  |
+| ------------------------------------------------------------ | ------------------------------------- |
+| GitOps / 드리프트해서는 안되는 프로덕션                      | `:X.Y.Z` 고정(또는 이미지 다이제스트) |
+| 게시된 마구간을 따르고 각 릴리스에 대한 재생성을 허용합니다. | `:latest`                             |
+| 출시되지 않은 `release/v*` 커밋 테스트                       | `:next` (프로덕션 아님)               |
+| `main` 테스트                                                | `:main` (프로덕션 아님)               |
 
 ## Docker의 대시보드 업데이트
 
@@ -744,54 +687,28 @@ volumes:
 
 ## Docker 내부의 Gemini 지역 오류
 
-Google AI Studio / Gemini API는 HTTP 400과 FAILED_PRECONDITION을 반환하면서
-`사용자 위치에서는 API 사용이 지원되지 않습니다.`라고 표시할 수 있습니다. 호스트에서 요청이 성공하더라도
-컨테이너가 동일한 아웃바운드 경로를 사용한다는 의미는 아닙니다. DNS 순서,
-IPv4/IPv6 연결, VPN 라우팅 및 구성된 프록시는 서로 다를 수 있습니다.
-[Google의 지원 지역](https://ai.google.dev/gemini-api/docs/available-regions)과
-실제 연결 경로를 모두 확인하세요. 이 오류만으로는 API 키가 잘못되었다고 판단할 수 없습니다.
+Google AI Studio / Gemini API FAILED_PRECONDITION 및 `User location is not supported for the API use.` 사용하여 HTTP 400을 반환할 수 있습니다. 호스트에서 성공적인 요청이 컨테이너가 동일한 아웃바운드 경로를 사용한다는 것을 증명하지는 않습니다. DNS 순서, IPv4/IPv6 연결, VPN 라우팅 및 구성된 프록시는 다를 수 있습니다. [Google 가 지원하는 지역](https://ai.google.dev/gemini-api/docs/available-regions) 과 실제 연결 경로를 확인하세요. 이 오류만으로는 잘못된 API 키를 식별할 수 없습니다.
 
-### 연결별 프록시 우선 사용
+### 연결별 프록시를 선호하세요
 
-문제가 발생한 Gemini 연결에 OmniRoute의 [연결별 프록시 구성](../ops/PROXY_GUIDE.md#4-level-proxy-system)을
-사용한 다음, 동일한 모델로 **연결 테스트**와 간단한 요청을 다시 실행하세요.
-이렇게 하면 라우팅 변경의 범위가 해당 연결로 제한됩니다. 컨테이너에서 프록시에
-접근할 수 있는지, 그리고 연결이 실제로 해당 프록시를 선택하는지 확인하세요.
-경로를 변경하더라도 업스트림의 지역별 사용 자격이 보장되는 것은 아닙니다.
+영향을 받는 Gemini 연결에 대해 OmniRoute 의 [연결별 프록시 구성을](../ops/PROXY_GUIDE.md#4-level-proxy-system) 사용한 다음 반복하세요.** 연결 테스트** 동일한 모델에 대한 작은 요청입니다. 이렇게 하면 라우팅 변경 범위가 해당 연결로 유지됩니다. 컨테이너에서 프록시에 연결할 수 있는지, 연결이 실제로 프록시를 선택하는지 확인하세요. 경로를 변경한다고 해서 업스트림 지역 자격이 보장되는 것은 아닙니다.
 
-### 호스트와 컨테이너 네트워킹 비교
+### 호스트 및 컨테이너 네트워킹 비교
 
-인증된 결과를 비교할 때는 키, 모델 및 요청을 동일하게 유지하세요. 자격 증명,
-프록시 비밀번호 또는 전체 인증 헤더를 이슈에 붙여 넣지 마세요.
-먼저 호스트와 컨테이너 내부에서 동일한 명령을 사용해 OS 리졸버가 제공하는
-주소 패밀리를 확인하세요.
+인증된 결과를 비교할 때 키, 모델 및 요청을 동일하게 유지하십시오. 자격 증명, 프록시 비밀번호 또는 전체 인증 헤더를 이슈에 붙여넣지 마십시오. 먼저 호스트와 컨테이너 내부에서 동일한 명령을 사용하여 OS 확인자가 제공하는 주소 계열을 검사합니다.
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute`를 실행 중인 서비스(예: `omniroute-web`)로 바꾸세요. 이 명령은
-자격 증명이나 IP 주소 없이 주소 패밀리를 출력합니다. `6`이 반환되었다는 것은
-IPv6 DNS 결과가 있다는 의미일 뿐이며, 사용 가능한 IPv6 경로나 API 접근을
-입증하지는 **않습니다**. `curl`이 설치되어 있다면 두 환경 모두에서
-`curl -4 -I https://generativelanguage.googleapis.com`과
-`curl -6 -I https://generativelanguage.googleapis.com`을 비교하세요.
-인증되지 않은 오류 응답이더라도 HTTP 응답이 반환되면 해당 프로브의 연결성은
-입증됩니다. Gemini 사용 자격은 인증된 모델 요청으로만 테스트할 수 있습니다.
+`omniroute` 실행하는 서비스(예: `omniroute-web`)로 바꿉니다. 이 명령은 자격 증명이나 IP 주소 없이 주소 계열을 인쇄합니다. 반환된 `6` IPv6 DNS 결과만 표시합니다.** ~ 아니다** 사용 가능한 IPv6 경로 또는 API 액세스를 증명합니다. `curl` 설치된 경우 두 환경 모두에서 `curl -4 -I https://generativelanguage.googleapis.com` 와 `curl -6 -I https://generativelanguage.googleapis.com` 비교하십시오. HTTP 응답은 인증되지 않은 오류인 경우에도 해당 프로브에 대한 연결을 증명합니다. 인증된 모델 요청만이 Gemini 적격성을 테스트합니다.
 
-### 호스트 수준 대안: 정상적으로 작동하는 IPv6 및 리졸버 정책
+### 호스트 수준 대안: IPv6 및 확인자 정책 작동
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)의 보고자는
-컨테이너 IPv6를 활성화하고 glibc 주소 선택을 변경하여 자신의 환경에서
-접근을 복구했습니다. 이는 환경별 대안으로 간주하세요. 리졸버 기본 설정을
-조정하기 전에 호스트 IPv6가 정상적으로 작동하는지, 컨테이너 이그레스/라우팅 및
-방화벽 규칙이 올바른지 확인하세요. 비공개 ULA 주소만으로는 공용 IPv6 연결이
-확립되지 않습니다.
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) 의 보고자는 컨테이너 IPv6 활성화하고 glibc 주소 선택을 변경하여 해당 환경에서 액세스를 복원했습니다. 이를 환경별 대안으로 취급하십시오. 확인자 기본 설정을 조정하기 전에 작업 호스트 IPv6, 컨테이너 egress/routing 및 방화벽 규칙을 확인하세요. 비공개 ULA 주소 자체로는 공개 IPv6 연결을 설정하지 않습니다.
 
-이미 Compose의 기본 네트워크에 연결된 서비스의 경우 다음 구성 조각을 사용하면
-해당 네트워크에서 IPv6가 활성화됩니다. 나머지 서비스, 포트, 볼륨 및 구성은
-그대로 유지하세요.
+Compose의 기본 네트워크에 이미 연결된 서비스의 경우 이 조각은 해당 네트워크에서 IPv6 활성화합니다. 나머지 서비스, 포트, 볼륨 및 구성을 유지합니다.
 
 ```yaml
 networks:
@@ -799,34 +716,13 @@ networks:
     enable_ipv6: true
 ```
 
-명명된 네트워크의 경우 서비스가 실제로 연결되는 네트워크에서 활성화하세요.
-Docker는 ULA 서브넷을 할당할 수 있습니다. 네트워크에서 필요한 경우에만
-명시적이면서 중복되지 않는 서브넷을 선택하세요.
-[Docker IPv6 네트워킹](https://docs.docker.com/engine/daemon/ipv6/) 및
-[Compose 네트워크 옵션](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)을 참조하세요.
+명명된 네트워크의 경우 서비스가 실제로 참여하는 네트워크에서 이를 활성화합니다. Docker ULA 서브넷을 할당할 수 있습니다. 네트워크에서 요구하는 경우에만 명시적이고 겹치지 않는 서브넷을 선택하십시오. [Docker IPv6 네트워킹](https://docs.docker.com/engine/daemon/ipv6/) 및 [네트워크 옵션 작성을](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6) 참조하세요.
 
-**glibc 기반 이미지**에서는 `/etc/gai.conf`를 통해 주소 선택을 변경할 수 있습니다.
-현재 저장소의 Dockerfile은 Debian을 사용하며, 사용자 지정 musl 기반 이미지는
-이 메커니즘을 공유하지 않습니다. 보고된 조정에서는 ULA 레이블을
-`label fc00::/7 6`에서 `label fc00::/7 1`로 변경합니다. 이미지의 전체 정책
-테이블을 기준으로 시작하고 다른 항목은 그대로 유지하세요. `label` 또는
-`precedence` 항목을 추가하면 해당 기본 테이블이 대체되므로, 변경된 줄만
-포함하는 파일로는 충분하지 않습니다.
-[glibc 구성 참조](https://github.com/bminor/glibc/blob/master/posix/gai.conf)에
-이러한 동작 방식이 설명되어 있습니다. 검토한 파일을 `/etc/gai.conf`에 읽기 전용으로
-바인드 마운트하고 서비스를 다시 생성하여 적용하세요.
+에** glibc 기반 이미지** , `/etc/gai.conf` 주소 선택을 변경할 수 있습니다. 현재 저장소 Dockerfile은 Debian을 사용합니다. 사용자 정의 musl 기반 이미지는 이 메커니즘을 공유하지 않습니다. 보고된 조정은 ULA 레이블을 `label fc00::/7 6` 에서 `label fc00::/7 1` 로 변경합니다. 이미지의 전체 정책 테이블에서 시작하여 다른 항목을 보존합니다. `label` 또는 `precedence` 항목을 추가하면 해당 기본 테이블이 대체되므로 변경된 줄만 포함하는 파일로는 충분하지 않습니다. [glibc 구성 참조에는](https://github.com/bminor/glibc/blob/master/posix/gai.conf) 이러한 의미가 문서화되어 있습니다. 검토된 파일을 `/etc/gai.conf` 에서 읽기 전용으로 바인드 마운트하고 서비스를 다시 생성하여 적용합니다.
 
-이 변경은 **해당 컨테이너의 모든 아웃바운드 트래픽**에 대한 OS 주소 선택을
-변경합니다. 모든 애플리케이션이 IPv6를 선택하도록 강제하지는 않습니다.
-Node의 DNS 순서와 연결 선택도 영향을 미칩니다. 특히
-`--dns-result-order=ipv4first`는 IPv4를 우선하므로 IPv4 전용 실패에 대한
-해결책이 아닙니다. [Node DNS 순서](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)를 참조하세요.
+이는 다음에 대한 OS 주소 선택을 변경합니다.** 해당 컨테이너의 모든 아웃바운드 트래픽** . 모든 애플리케이션이 IPv6 선택하도록 강요하지는 않습니다. 노드의 DNS 순서와 연결 선택도 중요합니다. 특히, `--dns-result-order=ipv4first` IPv4 선호하며 IPv4-only 실패에 대한 해결책은 아닙니다. [노드 DNS 순서를](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) 참조하세요.
 
-호스트 수준 변경 후에는 Gemini와 다른 공급자를 다시 테스트하세요.
-롤백하려면 사용자 지정 `gai.conf` 마운트를 제거하고 이전 네트워크 구성을
-복원한 다음, 유지보수 시간 중에 영향을 받는 서비스/네트워크를 다시 생성하세요.
-네트워크를 다시 생성하면 해당 네트워크에 연결된 다른 컨테이너가 중단될 수
-있습니다. 영구 데이터 볼륨은 삭제하지 마세요.
+호스트 수준 변경 후 Gemini와 다른 공급자를 다시 테스트하십시오. 롤백하려면 사용자 정의 `gai.conf` 마운트를 제거하고 이전 네트워크 구성을 복원한 후 유지 관리 기간 동안 영향을 받은 service/network 다시 생성하십시오. 네트워크를 다시 생성하면 네트워크에 연결된 다른 컨테이너가 중단될 수 있습니다. 영구 데이터 볼륨을 삭제하지 마십시오.
 
 ## 중요 참고 사항
 

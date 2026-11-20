@@ -96,6 +96,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Slándáil & Iompar
+
+forfheidhmíonn fíordheimhniú WebDAV rianú teip in aghaidh an IP agus frithdhúnadh (spreagann 10 n-iarracht theip laistigh d'fhuinneog 60 soicind frithdhúnadh 5 nóiméad le `429 Too Many Requests` agus `Retry-After`). Toisc go dtarchuireann WebDAV dintiúirí fíordheimhnithe Bunúsacha, moltar go láidir deireadh a chur le TLS (nó ródú thar thollán slán mar Tailscale nó Cloudflare Tunnel) agus rochtain á fháil ar an gcríochphointe WebDAV lasmuigh de loopback.
+
 ### Foinse chomhthéacs de réir eochair API (roghnach)
 
 Is féidir cumraíocht Obsidian a scóipeáil **de réir eochair API** tríd an tábla `api_key_context_sources`

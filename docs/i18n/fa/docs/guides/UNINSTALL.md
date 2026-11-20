@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (اختیاری) حذف image
+docker rmi cheaperinference/omniroute:latest
+# نصبهای قدیمیتر نام قدیمی را انتخاب کردند:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

@@ -27,13 +27,9 @@
 
 ---
 
-## Rychlé spuštění
+## Rychlý běh
 
-> **Vlastní hosting jediným příkazem?** Viz
-> [Průvodce vlastním hostingem](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (publikovaný obraz +
-> Redis, pouze přes rozhraní loopback, bez volby profilu). Níže uvedené rychlé spuštění
-> představuje variantu s jedním kontejnerem pro uživatele, kteří již Redis provozují jinde.
+> **Vlastní hostitel v jednom příkazu?** Viz [Průvodce vlastním hostitelem](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (publikovaný obrázek + Redis, pouze zpětná smyčka, bez volby profilu). Níže uvedené Rychlé spuštění je cesta s jedním kontejnerem pro uživatele, kteří již spouštějí Redis jinde.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Se souborem prostředí
 
 ```bash
-# Nejprve zkopírujte a upravte .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 Produkční stack běží souběžně s vývojovým prostředím compose (používá jiné názvy kontejnerů, porty a svazky), takže můžete pokračovat v lokálním vývoji, zatímco produkční prostředí zůstane spuštěné.
 
-## Fáze Dockerfile
+## Fáze dockerfile
 
-Repozitář obsahuje vícefázový Dockerfile (`Dockerfile`). K dispozici jsou čtyři fáze; vyberte správný `target` pro svůj případ použití.
+Úložiště dodává vícestupňový soubor Dockerfile (`Dockerfile`). Jsou vystaveny čtyři stupně; vyberte ten správný `target` pro váš případ použití.
 
-| Fáze          | Základní image        | Účel                                                                                                                                                                                                                                                                                                    |
+| Fáze          | Základní obrázek      | Účel                                                                                                                                                                                                                                                                                                    |
 | ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Nainstaluje závislosti (`npm ci --legacy-peer-deps`) a spustí `npm run build` (ve výchozím nastavení Turbopack — viz níže Prostředky při sestavení)                                                                                                                                                     |
-| `runner-base` | `node:26-trixie-slim` | Produkční běhové prostředí se samostatným výstupem Next.js. **Neobsahuje žádné CLI poskytovatelů.**                                                                                                                                                                                                     |
-| `runner-cli`  | `runner-base`         | Přidává `git`, `docker.io`, `docker-compose` a globální CLI: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Tuto fázi zvolte pro agentní pracovní postupy.**                                                                                                                      |
-| `runner-web`  | `runner-base`         | Přidává Playwright + prohlížeč Chromium (`--with-deps`) pro poskytovatele webových relací: `gemini-web`, `claude-web`, `claude-turnstile`. **Tuto fázi zvolte, pokud tyto poskytovatele používáte** — prostý image bez ní selže při zpracování požadavku (viz poznámka k `-web` v části Kanály vydání). |
+| `builder`     | `node:26-trixie-slim` | Nainstaluje deps (`npm ci --legacy-peer-deps`) a spustí `npm run build` (Turbopack ve výchozím nastavení — viz zdroje v době sestavení níže)                                                                                                                                                            |
+| `runner-base` | `node:26-trixie-slim` | Produkční běh se samostatným výstupem Next.js.** Žádný poskytovatel CLIs není součástí balíčku.**                                                                                                                                                                                                       |
+| `runner-cli`  | `runner-base`         | Přidá `git`, `docker.io`, `docker-compose` a globální CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Vyberte toto pro agentní pracovní postupy.**                                                                                                                           |
+| `runner-web`  | `runner-base`         | Přidává Playwright + prohlížeč Chromium (`--with-deps`) pro poskytovatele webových relací: `gemini-web`, `claude-web`, `claude-turnstile`.** Tuto možnost vyberte, když tyto poskytovatele používáte** — prostý obrázek selže v okamžiku požadavku bez něj (viz poznámka `-web` v části Kanály vydání). |
 
-Ruční sestavení konkrétního cíle:
+Ručně vytvořte konkrétní cíl:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Prostředky při sestavení
+### Sestavte-time zdroje
 
-Nároky fáze `builder` řídí tři argumenty sestavení. Platí pouze při sestavení —
-`OMNIROUTE_MEMORY_MB` (níže) je samostatné nastavení běhového prostředí.
+Tři sestavovací argumenty řídí, kolik stojí fáze `builder`. Jsou pouze v době sestavení — `OMNIROUTE_MEMORY_MB` (níže) je samostatný, runtime knoflík.
 
-| Argument sestavení          | Výchozí hodnota | Účinek                                                                                            |
-| --------------------------- | --------------- | ------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`             | `0` sestavuje pomocí webpacku: nižší špičková spotřeba paměti, ale pomaleji. `1` zapne Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`          | Limit haldy V8 (`--max-old-space-size`) pro spuštěný proces `next build`.                         |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`             | Nastavuje `CIRCLE_NODE_TOTAL`; Next odvodí `workers = N - 1` pro sběr dat stránek.                |
+| Sestavte arg                | Výchozí | Účinek                                                                          |
+| --------------------------- | ------- | ------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`     | `0` se staví s webpackem: nižší špičková paměť, pomalejší. `1` volí Turbopack.  |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`  | Strop haldy V8 (`--max-old-space-size`) pro vytvořený `next build`.             |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`     | Zdroje `CIRCLE_NODE_TOTAL`; Dále odvodí `workers = N - 1` pro sběr dat stránky. |
 
-`OMNIROUTE_BUILD_WORKERS` je parametr, který je vhodné zvýšit na výkonném sestavovacím stroji, a zároveň parametr,
-který je třeba podezírat, když sestavení s omezenými prostředky selže **po** hlášení `✓ Compiled successfully`. Každý
-pracovní proces pro data stránek je samostatný proces, stejně jako samotný nadřazený proces `next build`;
-živá reprodukce na VPS (issue #7518) naměřila špičkovou hodnotu RSS každého procesu
-na ~4.5 GB bez ohledu na příznak haldy `NODE_OPTIONS` (Turbopack kompiluje v
-nativní paměti Rustu mimo haldu V8). Výchozí hodnota `2` (→ 1 pracovní proces, celkem 2
-procesy) je nastavena pro runnery hostované na GitHubu s 16 GB / 4 vCPU, které
-používá publikační pipeline. Při hodnotě `8` (→ 7 pracovních procesů) tomuto runneru došla paměť a
-buildkit ukončil krok chybou `ResourceExhausted: ... cannot allocate memory`;
-ani hodnota `3` (→ 2 pracovní procesy) se nevešla poté, co byla hodnota RSS jednotlivých procesů změřena
-přímo namísto odvození. `tests/unit/docker-build-memory-budget.test.ts`
-provádí výpočet na základě naměřené hodnoty a selže, pokud kterýkoli z těchto parametrů
-překročí možnosti runneru.
+`OMNIROUTE_BUILD_WORKERS` je ta, která se má zvýšit na velkém staviteli a ta, kterou podezříváte, když omezená stavba zemře** po** `✓ Compiled successfully`. Každý pracovník s daty stránek je svým vlastním procesem, stejně jako samotný nadřazený `next build` ; živá reprodukce VPS (vydání #7518) měřila vrchol RSS každého procesu při ~ 4,5 GB nezávisle na příznaku haldy `NODE_OPTIONS` (Turbopack se kompiluje v paměti native/Rust mimo haldu V8). Výchozí hodnota `2` (→ 1 pracovník, celkem 2 procesy) je dimenzována pro 16 GB / 4 vCPU hostované běhy GitHub, které používá kanál publikování. Při `8` (→ 7 pracovníků) tomuto běžci došla paměť a sestava selhala v kroku s `ResourceExhausted: ... cannot allocate memory`; `3` (pracovníci → 2) stále neseděli, jakmile bylo RSS pro jednotlivé procesy měřeno přímo namísto odvození. `tests/unit/docker-build-memory-budget.test.ts` provede aritmetiku s naměřeným číslem a selže, pokud některý z knoflíků přeroste běžec.
 
-Turbopack kompiluje v nativní paměti Rustu, která se nachází **mimo** haldu V8, takže
-`OMNIROUTE_BUILD_MEMORY_MB` ji neomezuje. Na hostiteli s paměťovým limitem je pak
-sestavení ukončeno signálem SIGKILL od OOM killeru zcela bez chybové zprávy — jednoduše
-se zastaví uprostřed kroku `Creating an optimized production build`, což vypadá spíše jako zamrznutí
-než jako nedostatek paměti. Proto `Dockerfile` ve výchozím nastavení používá webpack
-(`OMNIROUTE_USE_TURBOPACK=0`), na rozdíl od `npm run dev` / `npm run build`, kde
-je v kódu výchozí Turbopack: prosté `docker build .` bez argumentů sestavení (což
-spouští Railway a další platformy s nasazením na jedno kliknutí) nesmí na sestavovacím stroji s omezenou pamětí
-selhat bez jakéhokoli hlášení. Publikované image již v souboru `docker-publish.yml` explicitně předávají
-`OMNIROUTE_USE_TURBOPACK=0`. Na sestavovacím stroji s dostatkem RAM zapněte
-Turbopack pro rychlejší sestavení:
+Turbopack se zkompiluje v nativní paměti Rust, která žije** mimo** haldu V8, takže ji `OMNIROUTE_BUILD_MEMORY_MB` nesvazuje. Na hostiteli se stropem paměti je pak sestavení SIGKILLed zabijákem OOM bez vůbec žádného chybového textu — se jednoduše zastaví uprostřed `Creating an optimized production build`, což se čte spíše jako zablokování než jako nedostatek paměti. To je důvod, proč je `Dockerfile` výchozím nastavením webpack (`OMNIROUTE_USE_TURBOPACK=0`), na rozdíl od `npm run dev` / `npm run build`, kde Turbopack je výchozí kód: holý `docker build .` bez sestavení arg (to, co provozují Railway a další hostitelé na jedno kliknutí) nesmí tiše zemřít na staviteli s omezenou pamětí. Publikované obrázky již procházejí `OMNIROUTE_USE_TURBOPACK=0` explicitně v `docker-publish.yml`. Na staviteli s velkým množstvím RAM se přihlaste do Turbopack pro rychlejší sestavení:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` je zapnutý, takže `next build` spouští nadřazený **i** pracovní
-proces a každý z nich samostatně respektuje `OMNIROUTE_BUILD_MEMORY_MB`. Nastavte limit
-kontejneru přibližně nad dvojnásobek této hodnoty, nikoli pouze nad její jednonásobek.
+`webpackBuildWorker` je povoleno, takže `next build` spouští rodiče** a** pracovní proces a každý vyznamenává `OMNIROUTE_BUILD_MEMORY_MB` samostatně. Velikost stropu kontejneru je zhruba nad dvojnásobkem této hodnoty, nikoli jednou.
 
-Naměřeno v tomto stromu (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Naměřeno na tomto stromě (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Limit kontejneru | Výsledek                                           |
-| --------- | ---------------- | -------------------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB   | v obou případech ukončeno OOM, bez hlášení         |
-| webpack   | 8 GiB            | pracovní proces sestavení ukončen signálem SIGKILL |
-| webpack   | 12 GiB           | úspěšné, špička 11.1 GiB                           |
+| Bundler   | Strop kontejneru | Výsledek                          |
+| --------- | ---------------- | --------------------------------- |
+| Turbopack | 8 GiB / 16 GiB   | OOM-zabit na obou, tiše           |
+| webpack   | 8 GiB            | stavební dělník SIGKILLed         |
+| webpack   | 12 GiB           | uspěl, dosáhl vrcholu na 11,1 GiB |
 
-### Výchozí nastavení běhového prostředí
+### Výchozí nastavení za běhu
 
-Výchozí hodnoty exportované fází `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Výchozí hodnoty exportované `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Chování paměti v Dockeru:
+Chování paměti v Docker:
 
-- Image nastavuje `OMNIROUTE_MEMORY_MB=1024` a odvozuje z něj `NODE_OPTIONS=--max-old-space-size=1024`.
-- Skutečný serverový proces spouští samostatný spouštěč, který načte `OMNIROUTE_MEMORY_MB` a připojí `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node použije poslední opakovanou hodnotu `--max-old-space-size`, takže nastavení `OMNIROUTE_MEMORY_MB` určuje efektivní limit haldy v Dockeru.
-- Protože jej image vždy nastavuje, vlastní záložní hodnota spouštěče kalibrovaná podle RAM se v Dockeru nikdy nepoužije. Pro danou zátěž ji explicitně zvyšte (viz tabulka níže). `2048` je pro požadavky coding agentů na `/v1/responses` stále příliš málo.
+- Obrázek nastavuje `OMNIROUTE_MEMORY_MB=1024` a odvozuje z něj `NODE_OPTIONS=--max-old-space-size=1024`.
+- Vlastní proces serveru je spuštěn samostatným spouštěčem, který přečte `OMNIROUTE_MEMORY_MB` a připojí `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Uzel používá poslední opakovanou hodnotu `--max-old-space-size`, takže nastavení `OMNIROUTE_MEMORY_MB` řídí efektivní limit haldy Docker.
+- Vzhledem k tomu, že to vždy nastavuje obrázek, vlastní spouštěcí nástroj kalibrovaný RAM se nikdy nepoužije pod Docker. Zvyšte ji explicitně pro pracovní zátěž (tabulka níže). `2048` je stále příliš malý pro kódovací agent `/v1/responses`.
 
-### Operační paměť pro coding agenty
+### Runtime RAM pro kódovací agenty
 
-Výchozí hodnota 1 GiB v Dockeru představuje minimum pro dashboard a nenáročný chat, nikoli velikost vhodnou pro produkční nasazení. Dlouhá těla požadavků `POST /v1/responses` (stovky zpráv, desítky nástrojů) během komprese uchovávají v paměti několik grafů. Dva překrývající se požadavky o velikosti přibližně 3 MiB / 750 tisíc tokenů způsobily ukončení V8 při **12 GiB** old-space (`FATAL ERROR: Reached heap limit`) a také OOM v cgroup s limitem 16 GiB. Viz [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Výchozí hodnota 1 GiB Docker je podlaha dashboard/light-chat, nikoli produkční velikost. Dlouhá těla `POST /v1/responses` (stovky zpráv, desítky nástrojů) uchovávají během komprese více grafů v paměti. Dva překrývající se požadavky ~ 3 MiB / ~ 750k-tokenů přerušily V8 v** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) a také zasáhl 16 GiB cgroup OOM. Viz [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Nastavte **cgroup `--memory` na hodnotu vyšší, než je velikost haldy** — nativní buffery, SQLite a mezivýsledky komprese se nacházejí mimo V8.
+Velikost** cgroup `--memory` nad haldou** Nativní vyrovnávací paměti —, SQLite a kompresní meziprodukty jsou umístěny mimo V8.
 
-| Zátěž                                   | `OMNIROUTE_MEMORY_MB`       | Kontejner / cgroup      | Poznámky                                                                                                        |
-| --------------------------------------- | --------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Dashboard, jeden nenáročný chat         | `1024` (výchozí pro image)  | ≥2 GiB                  |                                                                                                                 |
-| Jeden coding agent (Claude/Codex/Grok)  | `8192`                      | ≥10 GiB                 | Typická jedna relace `/v1/responses`                                                                            |
-| Dva souběžné dlouhé `/v1/responses`     | `10240`–`12288`             | ≥12–16 GiB              | Naměřené ukončení V8 při haldě o velikosti přibližně 12 GiB                                                     |
-| Tři a více souběžných dlouhých kontextů | nepoužívat v jednom procesu | serializovat / více RAM | Výchozí limit náročných požadavků je 1 zpracovávaný požadavek; jeho zvýšení bez další RAM opět způsobí ukončení |
+| Pracovní zátěž                           | `OMNIROUTE_MEMORY_MB`    | Kontejner / cgroup      | Poznámky                                                                          |
+| ---------------------------------------- | ------------------------ | ----------------------- | --------------------------------------------------------------------------------- |
+| Dashboard, jeden lehký chat              | `1024` (výchozí obrázek) | ≥2 GiB                  |                                                                                   |
+| Jeden kódovací agent (Claude/Codex/Grok) | `8192`                   | ≥10 GiB                 | Typické jednosezení `/v1/responses`                                               |
+| Dvě souběžné dlouhé `/v1/responses`      | `10240`–`12288`          | ≥12–16 GiB              | Naměřeno přerušení V8 na ~ 12 GiB                                                 |
+| Tři + souběžné dlouhé kontexty           | ne na jeden proces       | serializovat / více RAM | Výchozí vstupné pro těžkou váhu je 1 za letu; zvýšení bez RAM znovu zavede potrat |
 
-`omniroute serve` na fyzickém systému kalibruje přibližně 35 % RAM (omezeno na rozsah `[512, 4096]`), pokud `OMNIROUTE_MEMORY_MB` **není nastaveno**. Docker vždy nastavuje `1024`, takže se tato kalibrace v oficiálním image nikdy nespustí.
+`omniroute serve` na holém kovu kalibruje ~ 35 % RAM (upnuté `[512, 4096]`), když je `OMNIROUTE_MEMORY_MB`** odstaveno** . Docker vždy nastaví `1024`, takže kalibrace nikdy neproběhne v oficiálním obrázku.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Kritické proměnné prostředí
@@ -364,21 +335,13 @@ Kromě výchozích hodnot zdokumentovaných v [ENVIRONMENT.md](../reference/ENVI
 | `PROD_DASHBOARD_PORT`         | Port řídicího panelu na hostiteli pro `docker-compose.prod.yml`                                                                                                                                                                                                              | `20130`                      |
 | `CLIPROXYAPI_PORT`            | Port na hostiteli pro sidecar `cliproxyapi`                                                                                                                                                                                                                                  | `8317`                       |
 
-## Reverzní proxy na podcestě (Traefik / nginx)
+## Reverzní proxy na dílčí cestě (Traefik / nginx)
 
-Hodnota `basePath` systému Next.js je zkompilována do samostatného balíčku. OmniRoute ukládá vloženou
-hodnotu do kontrolního souboru v kořenovém adresáři aplikace (zapsaného během `npm run build`; načítaného
-skriptem `scripts/docker/ensure-docker-base-path.mjs`) a při spuštění kontejneru ji porovnává
-s proměnnou `OMNIROUTE_BASE_PATH`. Pokud se hodnoty liší a obraz byl sestaven
-pro kořen domény, vstupní bod přepíše manifesty samostatného balíčku,
-vložené literály `basePath`/`assetPrefix` (Next 16 generuje adresy URL prostředků SSR pouze
-z `assetPrefix` — opravný skript do něj zkopíruje podcestu), vložené
-adresy URL prostředků `/_next/static` (manifesty klientských referencí, importy médií, předgenerované
-chybové stránky) a klientskou náhradu `process.env` před spuštěním `node dev/run-standalone.mjs`.
+Next.js `basePath` je zkompilován do samostatného balíčku. OmniRoute zaznamená pečenou hodnotu do souboru sentinelu v kořenovém adresáři aplikace (zapsaného během `npm run build`; čte `scripts/docker/ensure-docker-base-path.mjs`) a porovnává ji se `OMNIROUTE_BASE_PATH` při spuštění kontejneru. Když se liší a obraz byl vytvořen pro kořen domény, vstupní bod přepíše samostatné manifesty, vložené literály `basePath`/`assetPrefix` (Dalších 16 vykreslí SSR asset URLs ze samotného `assetPrefix` — patcher do něj zrcadlí podcestu), upečený `/_next/static` majetek URLs (klient-reference, manifesty předběžného vykreslení a import médií `process.env` ) před `node dev/run-standalone.mjs` běží.
 
-### Sestavení pomocí Compose (doporučeno)
+### Vytvořit sestavení (doporučeno)
 
-Nastavte obě proměnné v `.env` a poté obraz znovu sestavte, aby se nastavení obrazu a běhového prostředí shodovalo:
+Nastavte obě proměnné v `.env` a poté znovu sestavte tak, aby obraz a runtime souhlasily:
 
 ```bash
 # .env
@@ -390,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-Soubor `docker-compose.yml` předává `OMNIROUTE_BASE_PATH` jako argument sestavení Dockeru i jako
-proměnnou běhového prostředí.
+`docker-compose.yml` předává `OMNIROUTE_BASE_PATH` jako Docker build-arg a jako proměnnou běhového prostředí.
 
-### Předem sestavený kořenový obraz + podcesta za běhu
+### Předem vytvořený kořenový obraz + runtime subpath
 
-Publikované obrazy `diegosouzapw/omniroute:*` jsou sestaveny pro kořen domény. Proměnnou
-`OMNIROUTE_BASE_PATH` můžete přesto nastavit za běhu; kontejner při spuštění balíček jednorázově upraví.
-Použijte ji společně s odpovídajícím veřejným počátkem adresy URL:
+Publikované obrázky `cheaperinference/omniroute:*` jsou vytvořeny pro kořen domény. Stále můžete nastavit `OMNIROUTE_BASE_PATH` za běhu; kontejner opraví balíček jednou při spuštění. Spárujte jej s odpovídajícím veřejným původem:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Nakonfigurujte reverzní proxy tak, aby předávala **celou** externí cestu (neodstraňujte
-prefix). Traefik by měl směrovat `PathPrefix(`/omniroute`)` do kontejneru bez
-`StripPrefix`, aby Next.js přijímal `/omniroute/...` a poskytoval prostředky z
-`/omniroute/_next/...`.
+Nakonfigurujte reverzní proxy pro předávání** plný** vnější cesta (neodstraňujte předponu). Traefik by měl směrovat `PathPrefix(`/omniroute `)` do kontejneru bez `StripPrefix`, takže Next.js přijímá `/omniroute/...` a obsluhuje aktiva z `/omniroute/_next/...`.
 
-Kontrola stavu Dockeru testuje odlehčený koncový bod životního cyklu `/healthz` opatřený prefixem
-aktivní hodnoty `OMNIROUTE_BASE_PATH`. Koncový bod `/api/monitoring/health` zůstává dostupný pro
-diagnostiku prováděnou uživateli či dashboardy; chcete-li na něj znovu nasměrovat kontrolu HEALTHCHECK kontejneru (například
-za účelem důkladné kontroly stavu), nastavte `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Tato cesta provádí **důkladnou** kontrolu (databáze + souhrn monitorování) — je vhodná pro málo častý
-`HEALTHCHECK` Dockeru, pokud se ji rozhodnete znovu použít, ale **není** vhodná pro intervaly
-`livenessProbe` v Kubernetes.
+Kontrola stavu Docker zkoumá odlehčený koncový bod životního cyklu `/healthz` s předponou aktivní `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` zůstává k dispozici pro diagnostiku human/dashboard ; chcete-li kontejner HEALTHCHECK nasměrovat zpět na něj (například pro hluboké vynucení zdraví), nastavte `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Ta cesta je a** hluboký** check (DB + monitoring Summary) — vhodné pro Docker's občasné `HEALTHCHECK` pokud se znovu přihlásíte, ale** ne** pro intervaly Kubernetes `livenessProbe`.
 
 Pro orchestrátory (Kubernetes, Nomad atd.):
 
-| Sonda               | Preferujte                                                            | Vyhněte se                                                                       |
-| ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Životnost           | HTTP `GET /livez` nebo TCP na hlavním portu (`PORT`, výchozí `20128`) | `/api/monitoring/health` jako kontrolu životnosti                                |
-| Připravenost        | HTTP `GET /healthz`                                                   | Krátkým časovým limitům, které považují zaneprázdněnou smyčku událostí za mrtvou |
-| Důkladná / blackbox | `/api/monitoring/health`                                              | —                                                                                |
+| Sonda           | Preferuji                                                             | Vyhněte se                                                                         |
+| --------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Živost          | HTTP `GET /livez` nebo TCP na hlavním portu (`PORT`, výchozí `20128`) | `/api/monitoring/health` jako živost                                               |
+| Připravenost    | HTTP `GET /healthz`                                                   | Krátké časové limity, které považují smyčku událostí za zaneprázdněnou jako mrtvou |
+| Deep / blackbox | `/api/monitoring/health`                                              | —                                                                                  |
 
-`/healthz` hlásí stav životního cyklu procesu (`ok` / `starting` / `stopping`). `/livez` pouze
-ověřuje, zda proces běží (vrací 200 vždy, když lze obslužnou rutinu spustit; nečeká na
-připravenost). Oba koncové body stále běží ve stejné smyčce událostí Node jako obsluha požadavků, takže
-výpočetně náročné zpracování katalogu nebo komprese je mohou zpozdit — zaneprázdněný ≠ mrtvý. Pokud vyprší
-časový limit sond HTTP, upřednostněte kontrolu životnosti přes TCP. Úplné pokyny pro sondy:
-[Průvodce monitorováním — doporučení pro sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` hlásí životní cyklus procesu (`ok` / `starting` / `stopping`). `/livez` je aktivní pouze v procesu (200, kdykoli může handler spustit; nečeká na připravenost). Oba stále běží na stejné smyčce událostí Node jako zpracování požadavků, takže katalog nebo komprimační práce vázané na CPU je mohou zpozdit — busy ≠ dead. Upřednostněte živost TCP pokud vyprší časový limit sond HTTP. Úplný návod k sondě: [Průvodce monitorováním — Doporučení sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose s Caddy (automatické TLS pro HTTPS)
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-OmniRoute lze bezpečně zpřístupnit pomocí automatického zajišťování certifikátů SSL v Caddy. Ujistěte se, že DNS záznam typu A vaší domény odkazuje na IP adresu vašeho serveru.
+OmniRoute lze bezpečně vystavit pomocí automatického SSL provizorního systému Caddy. Ujistěte se, že záznam DNS A vaší domény ukazuje na IP vašeho serveru.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Veřejný origin pro zpětná volání OAuth, odkazy řídicího panelu a generované veřejné adresy URL.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Interní adresa URL mezi servery pro naplánované úlohy / požadavky na sebe sama.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -469,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy nastavuje standardní hlavičky pro předávání požadavků upstream kontejneru. OmniRoute používá
-`NEXT_PUBLIC_BASE_URL` jako kanonický veřejný origin pro zpětná volání OAuth a generované veřejné
-odkazy; ověřené zápisy z řídicího panelu používají požadavky se stejným originem spolu s ochranou CSRF
-vázanou na relaci. `OMNIROUTE_TRUST_PROXY` povolte pouze pro pokročilá nasazení, ve kterých záměrně
-chcete, aby OmniRoute odvozoval veřejný origin z důvěryhodných předávaných hlaviček namísto explicitní
-konfigurace.
+Caddy nastavuje standardní předávací hlavičky pro upstream kontejner. OmniRoute používá `NEXT_PUBLIC_BASE_URL` jako kanonický veřejný původ pro zpětná volání OAuth a generované veřejné odkazy; ověřené zápisy na dashboard používají požadavky stejného původu plus ochranu CSRF vázanou na relaci. `OMNIROUTE_TRUST_PROXY` povolte pouze pro pokročilá nasazení, kde záměrně chcete, aby OmniRoute odvozoval veřejný původ z důvěryhodných předávaných hlaviček namísto explicitní konfigurace.
 
 ## Rychlý tunel Cloudflare
 
@@ -491,49 +432,51 @@ Panely tunelů endpointů (Cloudflare, Tailscale, ngrok) lze zobrazit nebo skrý
 - Obrazy Dockeru obsahují systémové kořenové certifikáty CA a předávají je spravovanému nástroji `cloudflared`, čímž se předejde selháním důvěryhodnosti TLS při inicializaci tunelu uvnitř kontejneru.
 - Pokud chcete, aby OmniRoute namísto stažení použil existující binární soubor, nastavte `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`.
 
-## Značky obrazů
+## Značky obrázků
 
-| Obraz                    | Značka   | Velikost | Popis                                                              |
-| ------------------------ | -------- | -------- | ------------------------------------------------------------------ |
-| `diegosouzapw/omniroute` | `latest` | ~250MB   | Nejvyšší **publikovaná** stabilní verze SemVer (nikoli git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB   | Pro GitOps připněte tuto třídu značky                              |
+| Obraz                        | Štítek   | Velikost | Popis                                                       |
+| ---------------------------- | -------- | -------- | ----------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB | Nejvyšší** zveřejněno** stabilní SemVer (nikoli git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB | Připněte tuto třídu značky pro GitOps                       |
 
-Multiplatformní manifest: nativní `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker automaticky vybere odpovídající architekturu; pokud potřebujete na hostitelích ARM vynutit emulaci AMD64, předejte `--platform linux/amd64`.
+Stejné obrázky jsou publikovány do tří úložišť se stejnými přehledy podle architektury: `cheaperinference/omniroute` (Docker Hub, organizace Cheaper Inference, od 3.8.53 dále), `ghcr.io/cheaper-inference/omniroute` a starší verze `diegosouzapw/omniroute`, která uchovává svou historii stahování a stále přijímá každé vydání. Stávající nasazení `diegosouzapw/omniroute` se neustále aktualizují; přepnutí názvu obrázku je volitelné. Níže uvedený kanál předběžné verze `:next` / `:next-web` je publikován pouze pro `diegosouzapw/omniroute` a GHCR.
 
-### Kanály vydání
+Multiplatformní manifest: `linux/amd64` + `linux/arm64` nativní (Apple Silicon, AWS Graviton, Raspberry Pi). Docker vybere odpovídající architekturu automaticky; předejte `--platform linux/amd64` pokud potřebujete vynutit emulaci AMD64 na hostitelích ARM.
 
-OmniRoute publikuje samostatné kanály Dockeru pro stabilní vydání, testování aktivní větve vydání a vývojová sestavení.
+### Uvolňovací kanály
 
-| Kanál                           | Zdroj                                          | Proměnlivost                  | Doporučené použití                                                                                               |
-| ------------------------------- | ---------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Podepsané/verzované vydání                     | Neměnný                       | Produkční nasazení připínající přesné vydání                                                                     |
-| `:latest` / `:latest-web`       | Nejvyšší **publikovaná** stabilní verze SemVer | Proměnlivý stabilní ukazatel  | Sleduje stabilní vydání **po** úloze publikování SemVer — **nesleduje** `main` ani nevydané commity `release/v*` |
-| `:next` / `:next-web`           | Aktuální výchozí větev `release/v*`            | Proměnlivý předběžný ukazatel | Testování oprav, které byly začleněny do aktivní větve vydání, ale dosud nejsou součástí stabilního vydání       |
-| `:main` / `:main-web`           | Větev `main`                                   | Proměnlivý vývojový ukazatel  | Pouze pro vývojové a integrační testování                                                                        |
+OmniRoute publikuje samostatné kanály Docker pro stabilní verze, testování aktivních verzí a vývojové sestavení.
 
-#### Poskytovatelé webových relací: obrazy `-web`
+| Kanál                           | Zdroj                                   | Proměnlivost                   | Doporučené použití                                                                                                     |
+| ------------------------------- | --------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned vydání                 | Neměnný                        | Produkční nasazení, které připíná přesné vydání                                                                        |
+| `:latest` / `:latest-web`       | Nejvyšší** zveřejněno** stabilní SemVer | Proměnlivý stabilní ukazatel   | Následuje stabilní vydání** po** SemVer publikovat práci — dělá** ne** track `main` nebo nevydané `release/v*` commity |
+| `:next` / `:next-web`           | Aktuální výchozí větev `release/v*`     | Proměnný ukazatel před vydáním | Testování oprav, které přistály ve větvi aktivního vydání, ale zatím nejsou ve stabilní verzi                          |
+| `:main` / `:main-web`           | pobočka `main`                          | Proměnlivý vývojový ukazatel   | Pouze vývoj a testování integrace                                                                                      |
 
-Každý výše uvedený kanál má také odpovídající značku `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), sestavenou z fáze `runner-web` — jde o stejný obraz doplněný o Playwright a prohlížeč Chromium. Běžný obraz se dodává **bez** Chromia; `gemini-web`, `claude-web` a `claude-turnstile` jej vyžadují.
+#### Poskytovatelé webových relací: obrázky `-web`
 
-K selhání nedojde při spuštění, ale až později: tito poskytovatelé uvádějí své modely a v řídicím panelu se zobrazují jako připojení, přičemž až první požadavek selže s chybou
+Každý kanál výše funguje jako značka `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), vytvořená z fáze `runner-web` — stejným obrázkem plus Playwright a prohlížečem Chromium. Prostý obrázek se odešle** bez** Chrom; `gemini-web`, `claude-web` a `claude-turnstile` to potřebují.
+
+Selhání je odloženo, nikoli čas spuštění: tito poskytovatelé uvádějí své modely a zobrazují se jako připojené na řídicím panelu a pouze první požadavek selže s
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Pokud tyto poskytovatele používáte, stáhněte značku `-web` kanálu, který již používáte — nic dalšího se nemění. Při instalaci pomocí npm/CLI (bez obrazu Dockeru) je ekvivalentní chybějící součástí binární soubor prohlížeče: na hostiteli spusťte `npx playwright install chromium`.
+Pokud tyto poskytovatele používáte, vytáhněte značku `-web` kanálu, na kterém již jste, — se nic jiného nemění. Při instalaci npm/CLI (bez obrazu Docker ) je ekvivalentní chybějící část binární soubor prohlížeče: spusťte `npx playwright install chromium` na hostiteli.
 
-#### Použití kanálu předběžných vydání
+#### Pomocí kanálu předběžné verze
 
-Kanál `next` se znovu sestavuje při každém pushi do aktuální výchozí větve `release/v*` a publikuje se pro AMD64 i ARM64. Starší větve údržby jej nemohou přepsat. Kanál poskytuje image, který lze stáhnout a který obsahuje opravy sloučené do aktivní větve vydání ještě před vytvořením dalšího stabilního tagu.
+Kanál `next` je přestavěn při každém push na aktuální výchozí větev `release/v*` a je publikován pro AMD64 i ARM64. Starší větve údržby jej nemohou přepsat. Kanál poskytuje stahovatelný obraz pro opravy, které se sloučily do větve aktivního vydání před tím, než bude vyříznut další stabilní tag.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Pro Docker Compose přepište tag image používaný vybraným profilem a poté službu stáhněte a znovu vytvořte:
+Pro Docker Compose přepište značku obrázku používanou vybraným profilem, poté vytáhněte a znovu vytvořte službu:
 
 ```yaml
 services:
@@ -546,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Bezpečnost a návrat k předchozí verzi
+#### Bezpečnost a návrat zpět
 
-`next` je průběžně aktualizovaný kanál předběžných vydání. Může se změnit při každém pushi do aktivní větve vydání a **není podporován pro produkční použití**. Při vyhodnocování konkrétního sestavení připněte digest image:
+`next` je plovoucí kanál předběžné verze. Může se změnit při každém stisknutí na větev aktivního uvolnění a je** není podporováno pro produkční použití** . Připněte přehled obrázku při vyhodnocování konkrétního sestavení:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Před testováním zálohujte datový svazek OmniRoute nebo připojený datový adresář. Chcete-li se vrátit k předchozí verzi, obnovte dříve používanou stabilní verzi nebo digest a znovu vytvořte kontejner:
+Před testováním zálohujte datový svazek OmniRoute nebo datový adresář připojený k vazbě. Chcete-li se vrátit zpět, obnovte dříve používanou stabilní verzi nebo výtah a znovu vytvořte kontejner:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Sestavení z větve vydání nikdy nemůže změnit `latest`; stabilní ukazatel může aktualizovat pouze způsobilá stabilní sémantická verze. Image `next` nadále podléhají kontrole image vydání a blokující kontrole zranitelností se závažností CRITICAL.
+Sestavení větve vydání nemůže nikdy přesunout `latest`; pouze vhodná stabilní sémantická verze může podporovat stabilní ukazatel. Obrázky `next` si uchovávají inspekci obrazu uvolnění a blokování brány kritické zranitelnosti.
 
-**`latest` není zárukou aktuálnosti vůči gitu.** Sloučené opravy ve větvi `main` nebo v aktivní větvi `release/v*` **nejsou** součástí `:latest`, dokud není publikován image se stabilní verzí SemVer a publikační úloha nepovýší `:latest` (se stejným digestem jako daná verze SemVer). Pokud se zdá, že `latest` zůstává beze změny, přestože GitHub již opravu zobrazuje, stáhněte `:next` a otestujte větev vydání, nebo počkejte na tag SemVer.
+**`latest` není měnová záruka pro git.** Sloučené opravy na `main` nebo na aktivní větvi `release/v*` jsou** ne** v `:latest` dokud není publikován stabilní obrázek SemVer a úloha publikování propaguje `:latest` (stejný výtah jako SemVer). Pokud `latest` vypadá jako zamrzlé, zatímco GitHub již zobrazuje opravu, vytáhněte `:next` a otestujte větev vydání nebo počkejte na značku SemVer.
 
-| Požadavek                                                                         | Použijte                              |
-| --------------------------------------------------------------------------------- | ------------------------------------- |
-| GitOps / produkční prostředí, které se nesmí samovolně měnit                      | Připněte `:X.Y.Z` (nebo digest image) |
-| Sledování publikovaných stabilních verzí s opětovným vytvořením při každém vydání | `:latest`                             |
-| Testování dosud nevydaných commitů `release/v*`                                   | `:next` (ne pro produkci)             |
-| Testování větve `main`                                                            | `:main` (ne pro produkci)             |
+| chcete                                                                | Použití                             |
+| --------------------------------------------------------------------- | ----------------------------------- |
+| GitOps / produkce, která nesmí driftovat                              | Pin `:X.Y.Z` (nebo přehled obrázku) |
+| Sledujte publikované stáje a přijměte znovuvytvoření u každého vydání | `:latest`                           |
+| Testovat nevydané `release/v*` commity                                | `:next` (ne výroba)                 |
+| Test `main`                                                           | `:main` (ne výroba)                 |
 
 ## Aktualizace řídicího panelu v Dockeru
 
