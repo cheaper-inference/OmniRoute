@@ -192,51 +192,27 @@ function useCreateDraftValues() {
   };
 }
 
-function useCreatePolicyDraft() {
-  const values = useCreateDraftValues();
+type CreateDraftValues = ReturnType<typeof useCreateDraftValues>;
+
+function useResetCreateKeyModal(
+  values: CreateDraftValues,
+  syncCreateKeyFormState: (nextFormState: PolicyEditorFormState) => void
+) {
   const {
     setNewKeyName,
-    setNewKeyManageEnabled,
-    setNewKeySelfUsageEnabled,
-    setNewKeyAccountQuotaEnabled,
-    setNewKeyAllowUsageCommand,
     setNewKeyExpiryEndOfDay,
     setNameError,
     setCreateError,
     setSelectedTemplateId,
     setSelectedTemplateRef,
-    createKeyFormState,
-    setCreateKeyFormState,
-    createKeyBaselineFormJson,
     setCreateKeyBaselineFormJson,
-    createKeyRefIssues,
     setCreateKeyRefIssues,
     setLoadingTemplatePolicy,
-    editorBlockingRefs,
     setEditorBlockingRefs,
     setShowFullPolicyEditor,
     templateLoadGenerationRef,
   } = values;
-  const syncCreateKeyFormState = useCallback(
-    (nextFormState: PolicyEditorFormState) => {
-      setCreateKeyRefIssues(clearFieldValidationIssues);
-      setCreateKeyFormState(nextFormState);
-      setNewKeyManageEnabled(nextFormState.manageEnabled);
-      setNewKeySelfUsageEnabled(nextFormState.selfUsageEnabled);
-      setNewKeyAccountQuotaEnabled(nextFormState.selfAccountQuotaEnabled);
-      setNewKeyAllowUsageCommand(nextFormState.allowUsageCommand);
-    },
-    [
-      setCreateKeyFormState,
-      setCreateKeyRefIssues,
-      setNewKeyAccountQuotaEnabled,
-      setNewKeyAllowUsageCommand,
-      setNewKeyManageEnabled,
-      setNewKeySelfUsageEnabled,
-    ]
-  );
-
-  const resetCreateKeyModalState = useCallback(() => {
+  return useCallback(() => {
     templateLoadGenerationRef.current++;
     setEditorBlockingRefs(null);
     const defaultForm = createDefaultPolicyEditorFormState();
@@ -266,6 +242,42 @@ function useCreatePolicyDraft() {
     setShowFullPolicyEditor,
     templateLoadGenerationRef,
   ]);
+}
+
+function useCreatePolicyDraft() {
+  const values = useCreateDraftValues();
+  const {
+    setNewKeyManageEnabled,
+    setNewKeySelfUsageEnabled,
+    setNewKeyAccountQuotaEnabled,
+    setNewKeyAllowUsageCommand,
+    createKeyFormState,
+    setCreateKeyFormState,
+    createKeyBaselineFormJson,
+    createKeyRefIssues,
+    setCreateKeyRefIssues,
+    editorBlockingRefs,
+  } = values;
+  const syncCreateKeyFormState = useCallback(
+    (nextFormState: PolicyEditorFormState) => {
+      setCreateKeyRefIssues(clearFieldValidationIssues);
+      setCreateKeyFormState(nextFormState);
+      setNewKeyManageEnabled(nextFormState.manageEnabled);
+      setNewKeySelfUsageEnabled(nextFormState.selfUsageEnabled);
+      setNewKeyAccountQuotaEnabled(nextFormState.selfAccountQuotaEnabled);
+      setNewKeyAllowUsageCommand(nextFormState.allowUsageCommand);
+    },
+    [
+      setCreateKeyFormState,
+      setCreateKeyRefIssues,
+      setNewKeyAccountQuotaEnabled,
+      setNewKeyAllowUsageCommand,
+      setNewKeyManageEnabled,
+      setNewKeySelfUsageEnabled,
+    ]
+  );
+
+  const resetCreateKeyModalState = useResetCreateKeyModal(values, syncCreateKeyFormState);
 
   const validation = useCreatePolicyValidation(
     createKeyFormState,
