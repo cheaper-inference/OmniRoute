@@ -464,10 +464,32 @@
       "type": "error",
       "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 47cde8918e8268e4c1c64430e2b6239b1455b4df\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44641898212"
+    },
+    {
+      "at": "2026-11-20T00:33:07.064Z",
+      "type": "error",
+      "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 47cde8918e8268e4c1c64430e2b6239b1455b4df\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44646501430"
+    },
+    {
+      "at": "2026-11-20T00:33:07.064Z",
+      "type": "queue-stalled",
+      "detail": "3 ticks in a row failed, the first at 2026-11-19 23:57Z: ticks are failing",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44646501430"
     }
   ],
-  "updatedAt": "2026-11-19T23:59:48.344Z",
+  "updatedAt": "2026-11-20T00:33:07.065Z",
   "batchWindow": 8,
-  "failedTicks": 2,
-  "failedSince": "2026-11-19T23:57:50.934Z"
+  "failedTicks": 3,
+  "failedSince": "2026-11-19T23:57:50.934Z",
+  "stalled": {
+    "since": "2026-11-19T23:57:50.934Z",
+    "reasons": [
+      "3 ticks in a row failed, the first at 2026-11-19 23:57Z: ticks are failing"
+    ],
+    "openedAt": "2026-11-20T00:33:07.064Z",
+    "kinds": [
+      "failed-ticks"
+    ]
+  }
 }
