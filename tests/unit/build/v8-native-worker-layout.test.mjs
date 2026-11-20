@@ -136,18 +136,31 @@ test("without the preload, tsx and the worker still exhibit distinct layouts", a
   assert.notEqual(parent.functions[0].ranges[0].endOffset, native.functions[0].ranges[0].endOffset);
 });
 
-test("CLI and tray coverage keep the Node layout before and after tsx registration", async (t) => {
+test("CLI and maintenance scripts keep the Node coverage layout through tsx registration", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "native-cli-coverage-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const entry = new URL("bin/cli/utils/cliToken.mjs", root).href;
+  const aliasResolver = new URL("bin/aliasResolver.mjs", root).href;
+  const translation = new URL("scripts/i18n/run-translation.mjs", root).href;
+  const lifecycle = new URL("scripts/check/check-model-lifecycle.mjs", root).href;
   const dependency = new URL("bin/cli/data-dir.mjs", root).href;
   const tray = new URL("bin/cli/runtime/trayRuntime.ts", root).href;
   const trayEntry = new URL("bin/cli/tray/traySystray.mjs", root).href;
   const windows = new URL("src/shared/platform/windowsProcess.ts", root).href;
   const cliTsx = new URL("scripts/ci/native-cli-v8-tsx.mjs", root).href;
   const query = `${entry}?coverage-fixture=1`;
-  const required = new Set([entry, query, dependency, tray, trayEntry, windows]);
-  const imports = [entry, query, tray, trayEntry]
+  const required = new Set([
+    entry,
+    query,
+    dependency,
+    tray,
+    trayEntry,
+    windows,
+    aliasResolver,
+    translation,
+    lifecycle,
+  ]);
+  const imports = [entry, query, tray, trayEntry, aliasResolver, translation, lifecycle]
     .map((url) => `await import(${JSON.stringify(url)});`)
     .join("\n");
 
@@ -192,6 +205,46 @@ test("CLI and tray coverage keep the Node layout before and after tsx registrati
     await record("late", [], `await import(${JSON.stringify(cliTsx)});\n${imports}`),
     native
   );
+});
+
+test("the global-install alias fixtures keep native coverage after late tsx registration", async (t) => {
+  const coverage = await mkdtemp(join(tmpdir(), "late-tsx-alias-coverage-"));
+  t.after(() => rm(coverage, { recursive: true, force: true }));
+  const driver = "tests/unit/cli/alias-resolver-12073.test.ts";
+  const source = new URL("bin/aliasResolver.mjs", root);
+  const sourceLength = (await readFile(source, "utf8")).length;
+  const env = {
+    ...process.env,
+    NODE_OPTIONS: `--import=${preload.href}`,
+    NODE_V8_COVERAGE: coverage,
+    OMNIROUTE_CI_SYNC_TSX_CACHE: coverage,
+  };
+  delete env.NODE_TEST_CONTEXT;
+  execFileSync(
+    process.execPath,
+    [
+      "--import",
+      "tsx/esm",
+      "--test",
+      "--test-name-pattern",
+      "keeps global-install-style alias imports working|retains module.register",
+      driver,
+    ],
+    { cwd: root, env, stdio: "pipe", timeout: 60_000 }
+  );
+
+  let evaluated = 0;
+  for (const file of await readdir(coverage)) {
+    if (!file.endsWith(".json")) continue;
+    const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+    const sample = report.result.find(({ url }) => url === source.href);
+    if (!sample || !report.result.some(({ url }) => url.endsWith("/[eval1]"))) continue;
+    evaluated++;
+    assert.equal(Boolean(report["source-map-cache"]?.[source.href]), false, source.href);
+    const [{ startOffset, endOffset }] = sample.functions[0].ranges;
+    assert.deepEqual([startOffset, endOffset], [0, sourceLength]);
+  }
+  assert.equal(evaluated, 2, "both actual late-TSX launchers must emit coverage");
 });
 
 test("the CLI doctor and native tray diagnostic share coverage coordinates", async (t) => {
