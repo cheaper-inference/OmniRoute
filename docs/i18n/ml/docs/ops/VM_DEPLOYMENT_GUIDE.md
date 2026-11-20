@@ -133,7 +133,7 @@ EOF
 ### 2.3 കണ്ടെയ്നർ ആരംഭിക്കുക
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 
 docker run -d \
   --name omniroute \
@@ -141,7 +141,7 @@ docker run -d \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### 2.4 ഇത് പ്രവർത്തിക്കുന്നുണ്ടെന്ന് സ്ഥിരീകരിക്കുക
@@ -294,13 +294,13 @@ curl -sI https://llms.seudominio.com/health
 ### പുതിയ പതിപ്പിലേക്ക് അപ്ഗ്രേഡ് ചെയ്യുക
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 docker stop omniroute && docker rm omniroute
 docker run -d --name omniroute --restart unless-stopped \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### ലോഗുകൾ കാണുക

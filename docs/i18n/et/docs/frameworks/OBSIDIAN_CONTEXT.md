@@ -98,6 +98,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Turvalisus ja transport
+
+WebDAV autentimine jõustab IP-põhise rikete jälgimise ja lukustamise (10 ebaõnnestunud katset 60-sekundilise akna jooksul käivitavad 5-minutilise lukustuse `429 Too Many Requests` ja `Retry-After` abil). Kuna WebDAV edastab põhiautentimismandaadid, on WebDAV lõpp-punktile juurdepääsul väljaspool tagasisilmust tungivalt soovitatav TLS lõpetamine (või marsruutimine üle turvalise tunneli, näiteks Tailscale või Cloudflare Tunnel).
+
 ### API-võtmepõhine kontekstiallikas (valikuline)
 
 Obsidiani konfiguratsiooni saab tabeli `api_key_context_sources`

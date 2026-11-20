@@ -68,7 +68,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 Mgbe ịmalitechara ya ọzọ, dashboard ga-egosi nhọrọ **Add Claude Code Compatible**
