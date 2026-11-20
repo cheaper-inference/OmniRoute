@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **データを慎重に埋め戻します**: `UPDATE ... WHERE ...`を使用して既存の行を処理します
 4. **順番と名前を確認する**: `npm run test:migrations:fresh` (空のデータベース上のすべての移行) および`npm run check:migration-numbering`
 5. **コピーでテストする**: 本番環境ではテストされていない移行を決して実行しないでください
+6. **コードから作成されたテーブルも移行が必要です**: モジュールがテーブルを遅延的に作成する場合 (`CREATE TABLE IF NOT EXISTS`、自己修復パスとして保持される)、移行では同じDDLを使用してテーブルを作成する必要があります。そうしないと、コード パスが実行されたかどうかに応じて、クリーン インストールとアップグレード インストールで異なるスキーマが使用されます。 `tests/unit/db/lazy-table-migration-guard.test.ts` `src/`と`open-sse/`をスキャンし、移行なしの遅延`CREATE`では失敗します (#20557)。例: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`。
 
 例：
 

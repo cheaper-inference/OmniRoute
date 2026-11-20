@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Hold systemmeldinger midt i samtalen på plass",
     "requireUserLastMessageDescription": "For oppstrøms som avviser assistent-prefill: slipp etterfølgende assistentsvinger (ingen tool_use) før sending. Modellen kan gjenskape sitt tidligere svar.",
     "requireUserLastMessageLabel": "Krev at samtalen avsluttes med en brukermelding",
+    "strictChatHistoryDescription": "Reparerer avbrutte sekvenser med verktøykall og slår sammen påfølgende meldinger fra assistenten før de sendes til OpenAI-kompatible leverandører med strenge regler.",
+    "strictChatHistoryLabel": "Reparasjon av chattehistorikk for strenge leverandører",
     "bulkPasteAdded": "{count, plural, one {1 nøkkel lagt til} other {# nøkler lagt til}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikat hoppet over} other {# duplikater hoppet over}}",
     "bulkPasteHint": "Lim inn én API-nøkkel per linje. Tomme linjer ignoreres, og duplikatnøkler hoppes over.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Fjern nøkkel"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugins kjører med fulle rettigheter",
-    "privilegesWarningBody": "En plugin kjører som en vanlig Node.js prosess med samme tilgang som OmniRoute: den kan lese filer, kjøre programmer og bruke nettverket, uansett hvilke tillatelser manifestet erklærer. Installer kun plugins du stoler på.",
     "title": "Programtillegg",
     "description": "Installer og administrer programtillegg som utvider funksjonaliteten i OmniRoute",
     "loading": "Laster inn programtillegg...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Søk etter programtillegg",
     "noPlugins": "Ingen programtillegg installert",
     "noPluginsDescription": "Plasser programtilleggsmapper i ~/.omniroute/plugins/ og klikk på «Søk etter programtillegg».",
+    "privilegesWarningTitle": "Plugins kjører med fulle rettigheter",
+    "privilegesWarningBody": "En plugin kjører som en vanlig Node.js prosess med samme tilgang som OmniRoute: den kan lese filer, kjøre programmer og bruke nettverket, uansett hvilke tillatelser manifestet erklærer. Installer kun plugins du stoler på.",
     "activate": "Aktiver",
     "deactivate": "Deaktiver",
     "uninstall": "Avinstaller",

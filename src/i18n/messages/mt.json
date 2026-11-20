@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Żomm il-messaġġi tas-sistema ta’ nofs il-konversazzjoni f’posthom",
     "requireUserLastMessageDescription": "Għal upstreams li jirrifjutaw il-mili minn qabel tal-assistent: waqqa' dawriet tal-assistent ta' wara (l-ebda tool_use) qabel ma tibgħat. Il-mudell jista' jirriġenera t-tweġiba preċedenti tiegħu.",
     "requireUserLastMessageLabel": "Jeħtieġ li l-konversazzjoni tintemm b'messaġġ tal-utent",
+    "strictChatHistoryDescription": "Isewwi sekwenzi interrotti ta’ sejħiet ta’ għodod u jgħaqqad messaġġi konsekuttivi tal-assistent qabel ma jibgħathom lil fornituri kompatibbli ma’ OpenAI li japplikaw regoli stretti.",
+    "strictChatHistoryLabel": "Tiswija tal-istorja taċ-chat għal fornituri stretti",
     "bulkPasteAdded": "{count, plural, one {Żdiedet ċavetta waħda} other {Żdiedu # ċwievet}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Inqabeż duplikat wieħed} other {Inqabżu # duplikati}}",
     "bulkPasteHint": "Waħħal ċavetta tal-API waħda f’kull linja. Il-linji vojta jiġu injorati u ċ-ċwievet duplikati jinqabżu.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Neħħi ċ-ċavetta"
   },
   "plugins": {
-    "privilegesWarningTitle": "Il-plugins jaħdmu bi privileġġi sħaħ",
-    "privilegesWarningBody": "Plugin jaħdem bħala proċess Node.js regolari bl-istess aċċess bħal OmniRoute: jista’ jaqra fajls, iħaddem programmi u juża n-netwerk, ikunu xi jkunu l-permessi li jiddikjara l-manifest tiegħu. Installa biss plugins li tafda.",
     "title": "Plugins",
     "description": "Installa u mmaniġġja plugins biex testendi l-funzjonalità ta’ OmniRoute",
     "loading": "Qed jitgħabbew il-plugins...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Skennja għal Plugins",
     "noPlugins": "M’hemm l-ebda plugin installat",
     "noPluginsDescription": "Poġġi d-direttorji tal-plugins f’~/.omniroute/plugins/ u kklikkja Skennja.",
+    "privilegesWarningTitle": "Il-plugins jaħdmu bi privileġġi sħaħ",
+    "privilegesWarningBody": "Plugin jaħdem bħala proċess Node.js regolari bl-istess aċċess bħal OmniRoute: jista’ jaqra fajls, iħaddem programmi u juża n-netwerk, ikunu xi jkunu l-permessi li jiddikjara l-manifest tiegħu. Installa biss plugins li tafda.",
     "activate": "Attiva",
     "deactivate": "Iddiżattiva",
     "uninstall": "Iddiżinstalla",
