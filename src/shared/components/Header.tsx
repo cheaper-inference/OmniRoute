@@ -298,7 +298,6 @@ export default function Header({ onOpenCommandPalette }: HeaderProps) {
             icon="search"
             onClick={onOpenCommandPalette}
             title={t("quickNavigationTitle")}
-            aria-label={t("openQuickNavigation")}
             className="hidden md:inline-flex"
           >
             <span className="text-xs">{t("quickNavigation")}</span>
