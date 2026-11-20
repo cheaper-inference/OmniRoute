@@ -3,72 +3,37 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b6",
+    "batchId": "b7",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b6-7a768a02ac40",
-    "candidateSha": "7a768a02ac40fcef60af1f5e3c9032bab8a8e450",
-    "baseSha": "fbd339668384803bc3a9d42370fc413a55e013d5",
-    "treeSha": "6d7a1c25835ab412cd2aa14949b21b64a410d5ef",
+    "candidateRef": "omni-queue/release-v3.8.55/b7-aec6487361b1",
+    "candidateSha": "aec6487361b1805a78d97be12c6e0e6f6de3fac1",
+    "baseSha": "6a5dadd172195d2e1b39c6904f8f12af32192c91",
+    "treeSha": "b68a4769fee69aa70f61cf62acd5f5062fccb213",
     "prs": [
       {
-        "n": 20275,
-        "head": "2684763dd5f5ba74b1fb62d7a9a80edf7fe99671",
-        "title": "fix(responses): ensure streaming response.output_text.delta carries item_id (#20257)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:38Z"
+        "n": 14667,
+        "head": "431849af6effb01d2518483171e6fa28d13ed22f",
+        "title": "feat(api): list System One decision models on GET /v1/systemone/models",
+        "author": "PixmaNts",
+        "labeledAt": "2026-11-19T20:20:22Z"
       },
       {
-        "n": 20286,
-        "head": "a9729042983ab5f9401399ca20fc7082bb1652ef",
-        "title": "feat(providers): enable strictChatHistory repair for custom OpenAI-compatible nodes (#20262)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:44Z"
+        "n": 14860,
+        "head": "537a2a9dd38dcfeb936fb37fa2ec26becd8d1925",
+        "title": "feat(dashboard): team reports for agent sessions by member and project",
+        "author": "fouadSalkini",
+        "labeledAt": "2026-11-19T20:20:36Z"
       },
       {
-        "n": 20299,
-        "head": "7748a95d4699d405f4886f8f229a76838d753ca5",
-        "title": "fix(db): resolve provider alias for parameter filter storage and retrieval (#20295)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:50Z"
-      },
-      {
-        "n": 20320,
-        "head": "087c600d874ac9f5986bff2a65cba427758c1e7d",
-        "title": "feat(db): support persistent boolean model capability overrides",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:56Z"
-      },
-      {
-        "n": 20464,
-        "head": "71d1e05edfadcca39cede4873df7ed2da74a7eda",
-        "title": "fix(catalog): preserve Codex 872k context window for codex/gpt-6.1-sol (#20437)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:54:00Z"
-      },
-      {
-        "n": 20465,
-        "head": "e8d91215d6c8b7778fd94f98328aece1cf827412",
-        "title": "fix(catalog): declare accepted effort tiers for opencode-go/deepseek-v4.1-flash (#20436)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:54:03Z"
-      },
-      {
-        "n": 20467,
-        "head": "cea3b0e63d2bd02ec090c1f3666d6344c1af96e4",
-        "title": "fix(catalog): omit generic effort_tiers on Antigravity tier-suffixed models (#20435)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:54:06Z"
-      },
-      {
-        "n": 20468,
-        "head": "5fa146acebb374c1c4387fca40ff7e60c72a07e6",
-        "title": "fix(analytics): retain per-provider rows in byModel for shared model names (#20453)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:54:09Z"
+        "n": 20645,
+        "head": "a33d88de70de855992e820b1792827a9b80ed51c",
+        "title": "fix(release): sync-next-cycle opens a PR instead of pushing to the release branch",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-19T21:56:23Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-19T22:34:09.241Z",
+    "startedAt": "2026-11-20T06:36:08.766Z",
     "attempts": 0,
     "bisect": null
   },
@@ -89,16 +54,12 @@
   ],
   "shadow": {
     "processed": {
-      "19788": "78b7a2b34b564454a234e2b0fed15eee2ff5900d",
-      "19798": "ea246abe1c7b22dd5be931f58d3ddc78ec0a8667",
-      "20268": "085427318d7d9267e046826d943fa14de718dd37",
-      "20270": "b165c0fa0582453a3d7840cab31c45f3b974dc25",
       "20616": "97013f5becf14020c55b685c9d0d43d5ae93d0c3"
     }
   },
   "counters": {
-    "batchSeq": 6,
-    "ciRuns": 7,
+    "batchSeq": 7,
+    "ciRuns": 8,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 2,
@@ -662,12 +623,73 @@
       "type": "error",
       "detail": "git merge-tree failed (exit 128): fatal: remote error: upload-pack: not our ref 04847663e4aace8a9ba1947e2c1cf649aa36fafc\nfatal: could not fetch 123131e68fe6ee82d84899801105dfb4995bee8c from promisor remote",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44686682199"
+    },
+    {
+      "at": "2026-11-20T06:35:04.424Z",
+      "type": "checks-green",
+      "batchId": "b6",
+      "prs": [
+        20275,
+        20286,
+        20299,
+        20320,
+        20464,
+        20465,
+        20467,
+        20468
+      ],
+      "sha": "7a768a02ac40fcef60af1f5e3c9032bab8a8e450",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44688781323"
+    },
+    {
+      "at": "2026-11-20T06:35:26.547Z",
+      "type": "would-land",
+      "batchId": "b6",
+      "prs": [
+        20275,
+        20286,
+        20299,
+        20320,
+        20464,
+        20465,
+        20467,
+        20468
+      ],
+      "sha": "7a768a02ac40fcef60af1f5e3c9032bab8a8e450",
+      "detail": "shadow mode: would merge-ff onto fbd339668384; merged meanwhile by another path: #20275, #20286, #20299, #20320, #20464, #20465, #20467, #20468",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44688781323"
+    },
+    {
+      "at": "2026-11-20T06:36:08.766Z",
+      "type": "pr-skipped-conflict",
+      "batchId": "b7",
+      "prs": [
+        14863
+      ],
+      "detail": "conflicts with an earlier PR of the batch; stays queued",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44688781323"
+    },
+    {
+      "at": "2026-11-20T06:37:28.210Z",
+      "type": "batch-started",
+      "batchId": "b7",
+      "prs": [
+        14667,
+        14860,
+        20645
+      ],
+      "sha": "aec6487361b1805a78d97be12c6e0e6f6de3fac1",
+      "detail": "3 PR(s) on 6a5dadd17219; window 9; excluded #14863 batch-conflict",
+      "labeledAt": {
+        "14667": "2026-11-19T20:20:22Z",
+        "14860": "2026-11-19T20:20:36Z",
+        "20645": "2026-11-19T21:56:23Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44688781323"
     }
   ],
-  "updatedAt": "2026-11-20T06:18:30.027Z",
-  "batchWindow": 8,
-  "failedTicks": 34,
-  "failedSince": "2026-11-19T23:57:50.934Z",
+  "updatedAt": "2026-11-20T06:37:30.872Z",
+  "batchWindow": 9,
   "stalled": {
     "since": "2026-11-19T23:57:50.934Z",
     "reasons": [
@@ -677,6 +699,7 @@
     "kinds": [
       "failed-ticks"
     ],
-    "notified": true
+    "notified": true,
+    "quietTicks": 1
   }
 }
