@@ -1,11 +1,18 @@
 /**
  * Runs buildQuotaSelfView with its DEFAULT account lookup (the real provider and provider-limits
- * modules plus the shared refresh tracker), against the temporary DATA_DIR the test preamble
- * provides. A fresh cached reading must be served as is, without any refresh attempt.
+ * modules plus the shared refresh tracker), against a temporary DATA_DIR of its own (set before
+ * any module that can open the database is imported, so the file is safe to run on its own).
+ * A fresh cached reading must be served as is, without any refresh attempt.
  */
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-quota-self-view-loader-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const coreDb = await import("../../src/lib/db/core.ts");
 const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
@@ -38,6 +45,7 @@ setProviderLimitsCache(connectionId, {
 
 test.after(() => {
   coreDb.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("the default account lookup serves a fresh cached reading without a refresh", async () => {
