@@ -309,6 +309,7 @@ Gebruik royaal `IF NOT EXISTS`, `IF EXISTS` en `OR IGNORE` / `OR REPLACE` -claus
 3. **Vul de gegevens zorgvuldig in** : gebruik `UPDATE ... WHERE ...` om bestaande rijen te verwerken
 4. **Controleer volgorde en naamgeving** : `npm run test:migrations:fresh` (alle migraties op een lege database) en `npm run check:migration-numbering`
 5. **Test op een kopie** : voer nooit ongeteste migraties uit op productie
+6. **Een tabel die op basis van code is gemaakt, heeft ook een migratie nodig** : als een module de tabel ook lui aanmaakt (`CREATE TABLE IF NOT EXISTS`, bewaard als een zelfherstelpad), moet een migratie deze maken met dezelfde DDL. Anders krijgen een schone installatie en een geüpgradede installatie verschillende schema's, afhankelijk van of dat codepad is uitgevoerd. `tests/unit/db/lazy-table-migration-guard.test.ts` scant `src/` en `open-sse/` en faalt op een luie `CREATE` zonder migratie (#20557). Voorbeeld: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Voorbeeld:
 

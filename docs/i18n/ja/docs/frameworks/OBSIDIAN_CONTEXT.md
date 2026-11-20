@@ -95,6 +95,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### セキュリティとトランスポート
+
+WebDAV の認証では、IP アドレスごとに失敗を記録し、ロックアウトを適用します。60 秒以内に 10 回失敗すると、`429 Too Many Requests` と `Retry-After` を返し、5 分間ロックアウトします。WebDAV は Basic 認証の資格情報を送信するため、ループバック外から WebDAV エンドポイントにアクセスする場合は、TLS を終端するか、Tailscale や Cloudflare Tunnel などの安全なトンネルを経由することを強く推奨します。
+
 ### API キーごとのコンテキストソース（オプション）
 
 Obsidian の構成は、`api_key_context_sources` テーブル
