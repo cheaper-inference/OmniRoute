@@ -374,7 +374,7 @@ export function parseStreamResponse(raw: string): string {
   }
   // Gemini marks text grounded in attachments with "[cite_start]" / "[cite: 1, 2]"; the web UI
   // renders them as chips, a raw API answer should not carry them.
-  return lastText.replace(/ ?\[cite(?:_start|_end|: ?[\d, ]+)\]/g, "");
+  return lastText.replace(/\[cite_(?:start|end)\]| ?\[cite: ?[\d, ]+\]/g, "");
 }
 
 function readCredentialString(value: unknown): string {
@@ -611,12 +611,15 @@ export class GeminiWebExecutor extends BaseExecutor {
 
     // Tool mode sends only the LAST user turn as the current ask. If that turn is an array
     // with neither readable text nor an attachment, an earlier readable user turn must not
-    // let it through.
+    // let it through. In both modes, an unreadable last array must not upload its
+    // attachments under an earlier question.
     const lastUserContent = messages
       .filter((m: { role: string }) => m.role === "user")
       .pop()?.content;
     const unreadableLastUserArray =
-      hasTools && Array.isArray(lastUserContent) && !isReadableUserContent(lastUserContent);
+      Array.isArray(lastUserContent) &&
+      !isReadableUserContent(lastUserContent) &&
+      (hasTools || hasGeminiWebAttachmentParts(lastUserContent));
 
     const attachmentError = (error: GeminiWebAttachmentError) => {
       log?.warn?.("GEMINI-WEB", `Rejected attachment: ${error.message}`);
@@ -659,8 +662,20 @@ export class GeminiWebExecutor extends BaseExecutor {
     let attachments: GeminiWebAttachment[] = [];
     try {
       // Validate every attachment (type, size, video length) before the browser starts.
-      attachments = await resolveGeminiWebAttachments(attachmentSources);
+      attachments = await resolveGeminiWebAttachments(attachmentSources, { signal });
     } catch (error) {
+      const abortedStatus = abortStatus(signal);
+      if (abortedStatus) {
+        return {
+          response: new Response(JSON.stringify({ error: "Request aborted" }), {
+            status: abortedStatus,
+            headers: { "Content-Type": "application/json" },
+          }),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
       if (error instanceof GeminiWebAttachmentError) return attachmentError(error);
       throw error;
     }

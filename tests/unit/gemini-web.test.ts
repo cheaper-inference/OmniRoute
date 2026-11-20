@@ -341,6 +341,13 @@ test("parseStreamResponse drops the [cite: N] markers Gemini adds for attachment
   inner[4] = [[null, ["[cite_start]Blue background with 1, 2 and 3[cite: 1]. Done [cite: 1, 2]"]]];
   const raw = `)]}'\n10\n[["wrb.fr", null, ${JSON.stringify(JSON.stringify(inner))}]]`;
   assert.equal(parseStreamResponse(raw), "Blue background with 1, 2 and 3. Done");
+  inner[4] = [[null, ["The [cite_start]cat[cite_end] is black [cite: 1]."]]];
+  const mid = `)]}'\n10\n[["wrb.fr", null, ${JSON.stringify(JSON.stringify(inner))}]]`;
+  assert.equal(
+    parseStreamResponse(mid),
+    "The cat is black.",
+    "the word before a marker keeps its space"
+  );
 });
 
 test("parseStreamResponse ignores wrb.fr lines whose first entry is not an array", () => {
