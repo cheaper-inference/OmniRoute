@@ -26,6 +26,33 @@ test("a key without quota pools sees no models", async () => {
   assert.deepEqual(await listQuotaKeyModels([], deps([{ name: mine }], [])), []);
 });
 
+test("null or undefined allowedQuotas resolve an empty scope and yield no models", async () => {
+  for (const allowedQuotas of [null, undefined]) {
+    const seen: string[][] = [];
+    const models = await listQuotaKeyModels(allowedQuotas, {
+      resolveQuotaKeyScope: async (quotas) => {
+        seen.push(quotas);
+        return { poolSlugs: quotas.length ? [quotaGroupSlug("Team A")] : [] };
+      },
+      getCombos: async () => [{ name: mine }],
+    });
+    assert.deepEqual(models, []);
+    assert.deepEqual(seen, [[]]);
+  }
+});
+
+test("a scope resolution failure propagates to the caller", async () => {
+  await assert.rejects(
+    listQuotaKeyModels(["pool-1"], {
+      ...deps([{ name: mine }]),
+      resolveQuotaKeyScope: async () => {
+        throw new Error("scope lookup failed");
+      },
+    }),
+    /scope lookup failed/
+  );
+});
+
 test("a failed combo read yields an empty list instead of throwing", async () => {
   assert.deepEqual(
     await listQuotaKeyModels(["pool-1"], {
