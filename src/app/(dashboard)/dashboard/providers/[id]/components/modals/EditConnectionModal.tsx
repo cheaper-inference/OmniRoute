@@ -985,7 +985,11 @@ export default function EditConnectionModal({
               onChange={(e) =>
                 setFormData({ ...formData, antigravityClientProfile: e.target.value })
               }
-              hint={t("antigravityClientProfileHint")}
+              hint={t(
+                formData.antigravityClientProfile === "ide"
+                  ? "antigravityIdeModelAvailabilityHint"
+                  : "antigravityClientProfileHint"
+              )}
             />
             <Input
               label={t("antigravityProjectIdLabel")}

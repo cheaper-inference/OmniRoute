@@ -1,0 +1,1 @@
+- **fix(dashboard):** Antigravity connections using the IDE profile now show a model-availability hint without changing the saved or default profile.
