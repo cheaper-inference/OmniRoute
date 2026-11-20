@@ -609,14 +609,32 @@ export class GeminiWebExecutor extends BaseExecutor {
       };
       signal?.addEventListener("abort", abortBrowser, { once: true });
 
-      // #15076: apply the proxy configured for gemini-web (provider/global scope). Resolved per
-      // context so the shared leased browser needs no invalidation when the proxy changes.
-      const { resolvePlaywrightProxy } = await import("../services/browserPool.ts");
-      const proxy = await resolvePlaywrightProxy("gemini-web");
+      // #15076: apply the proxy configured for gemini-web. Resolved per context so the
+      // shared leased browser needs no invalidation when the proxy changes. The account's
+      // own assignment wins over the provider proxy, matching the non-browser path; a dead
+      // account pool fails closed instead of silently egressing from the host IP.
+      const { resolvePlaywrightProxyForConnection } = await import("../services/browserPool.ts");
+      const proxy = await resolvePlaywrightProxyForConnection(
+        "gemini-web",
+        credentials.connectionId
+      );
+      // Resolving the account proxy awaits the settings DB and the guard, so an abort can
+      // land between registering the listener and creating the context. Re-check rather
+      // than let newContext run against a browser the listener already released.
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
       context = await browser.newContext({
         userAgent: GEMINI_USER_AGENT,
         ...(proxy ? { proxy } : {}),
       });
+      // The listener above is once-only and closes an already-assigned context, so an
+      // abort that lands inside newContext() leaves the new context unowned. Close it
+      // here rather than handing back a context nobody will release.
+      if (signal?.aborted) {
+        await context.close().catch(() => undefined);
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
