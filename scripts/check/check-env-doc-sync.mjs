@@ -142,6 +142,18 @@ const IGNORE_FROM_CODE = new Set([
   // CI passes BASE_REF=${{ github.base_ref }} to the OpenAPI breaking-change gate
   // (scripts/check/check-openapi-breaking.mjs) — a build/check signal, not OmniRoute runtime config.
   "BASE_REF",
+  // Verified merge base passed at step level to the PR-only detectors
+  // (scripts/check/check-*.mjs, scripts/quality/ci-alert-volume.sh); a check signal, never
+  // an OmniRoute runtime setting, so it has no place in .env.example or ENVIRONMENT.md.
+  "BASE",
+  // Legacy alias of BASE read by the ported detectors; same CI-only class as BASE above.
+  "BINOME_BASE",
+  // Local worktree override consumed by the ported detectors' CLI; they fall back to
+  // process.cwd() when it is absent, so it is never an application .env setting.
+  "WORKTREE",
+  // Runner.temp path where the PR body is written before the diff-evidence gate reads it;
+  // a CI-only protocol path, analogous to PR_BODY above.
+  "PR_BODY_FILE",
   // Same class as BASE_REF above: the `changes` job passes these four to the
   // self-targeting-PR guard (scripts/check/check-pr-self-target.mjs) so it can compare a PR's
   // head against its base. CI-only signals from github.head_ref / github.base_ref /

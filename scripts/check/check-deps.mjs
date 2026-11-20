@@ -27,7 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
 
 const ROOT = process.cwd();
 const ALLOWLIST_PATH = path.join(ROOT, "config/quality/dependency-allowlist.json");
@@ -238,6 +238,11 @@ function main() {
   // but only transitively installed, so we check against what manifests declare.
   const liveDepSet = new Set(allDepNames);
   assertNoStale(allowlist, liveDepSet, "check-deps");
+  enforceDiffScope({
+    allowlist,
+    liveViolations: liveDepSet,
+    gateName: "check-deps",
+  });
 
   const unapproved = findUnapprovedDeps(allDepNames, allowlist);
   if (unapproved.length) {

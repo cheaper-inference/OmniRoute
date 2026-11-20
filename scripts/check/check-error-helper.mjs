@@ -26,10 +26,62 @@
 // client. See SANITIZED_CALL below for the replacement.
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { assertNoStale } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
+const EMPTY_ALLOWLIST = new Set();
+
+/**
+ * Diff-based scope. Targets = files changed versus the PR base plus untracked
+ * files. A bare `git diff "$BASE" --name-only` yields 0 targets on an already
+ * committed PR: always qualify by the base. No allowlist to extend, no raised
+ * threshold.
+ * @param {string} base
+ * @param {string} [cwdDir]
+ * @returns {string[]} relative paths (unix)
+ */
+export function scope_scan(base, cwdDir = cwd) {
+  const git = (args) =>
+    execFileSync("git", args, {
+      cwd: cwdDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  if (!base) return [];
+  // Same discipline as the base guard: an unresolved base yields 0 targets and
+  // silent checks. Refuse it explicitly instead of concluding "0 FAIL".
+  git(["rev-parse", "--verify", "-q", `${base}^{commit}`]);
+  const changed = git(["diff", "--name-only", base]).split("\n").filter(Boolean);
+  const untracked = git(["ls-files", "--others", "--exclude-standard"]).split("\n").filter(Boolean);
+  return [...new Set([...changed, ...untracked])].map((p) => p.replace(/\\/g, "/"));
+}
+
+/** A path in the scan scope (the 3 SCAN_DIRS plus the src/app/api routes). */
+function inScope(rel) {
+  return (
+    SCAN_DIRS.some((d) => {
+      const prefix = path.relative(cwd, d).replace(/\\/g, "/");
+      return rel === prefix || rel.startsWith(prefix + "/");
+    }) || IS_API_ROUTE.test(rel)
+  );
+}
+
+/** Baseline source of a violation: empty for a new/staged file. */
+function baselineSource(base, rel) {
+  if (!base) return "";
+  try {
+    execFileSync("git", ["cat-file", "-e", `${base}:${rel}`], { cwd, stdio: "ignore" });
+    return execFileSync("git", ["show", `${base}:${rel}`], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch {
+    return "";
+  }
+}
 
 // Directories to scan (Hard Rule #12 applies to ALL error-response-building surfaces).
 // 6A.8: expanded from executors+handlers to include MCP server tools and API route files.
@@ -252,6 +304,149 @@ const INTERNAL_SINK =
 const INTERNAL_SINK_CALL =
   /\b(?:saveCallLog|logToolCall|log\??\.\w+|console\.\w+|reqLogger\.\w+)\s*\(\s*(?:["'`][^"'`]*["'`]\s*,\s*)*\{?\s*$/;
 
+// --- LOG_SINK detector (DISTINCT from the suppression anchor above) ----------
+// The INTERNAL_SINK_CALL anchor removes false positives (audit rows). It is not
+// modified. LOG_SINK judges the MESSAGE ARGUMENT (2nd argument, optional `?.`
+// after the method): true = safe message, false = interpolated raw error -> REJECTED.
+// It runs BEFORE the `if (INTERNAL_SINK.test(line)) continue` checks: a log.*
+// line is an INTERNAL_SINK, so a check placed after those continue statements
+// would be dead code. It inspects the argument, not the whole line.
+const LOG_SINK_HEAD = /\b(?:log|logger)\s*\??\s*\.\s*\w+\s*\??\s*\.?\s*\(/;
+// Recognized sanitizers: neutralized before the raw-error test, otherwise
+// `sanitizeErrorMessage(err.message)` would be refused wrongly.
+const SANITIZE_IN_MESSAGE =
+  /\b(?:sanitizeErrorMessage|sanitizeUpstreamDetails|redactSensitiveErrorText|toSafeMcpErrorMessage|formatProviderError)\s*\([^)]*\)/g;
+// `err.message`, `proxyErr.message`, `String(err)` ... (the historical RAW_ERR has
+// a lookbehind that misses `proxyErr`: a dedicated pattern for any error name is needed).
+const LOG_RAW_ERR =
+  /\b\w*(?:err|error)\w*\.(?:message|stack)\b|\bString\s*\(\s*\w*(?:err|error)\w*\s*\)|\be\.(?:message|stack)\b|\bString\s*\(\s*e\s*\)/i;
+
+/** Top-level arguments of a log.* call, respecting strings and nesting. */
+function logSinkArgs(line) {
+  const head = line.match(LOG_SINK_HEAD);
+  if (!head) return null;
+  const open = head.index + head[0].lastIndexOf("(");
+  const args = [];
+  let depth = 0;
+  let quote = null;
+  let start = open + 1;
+  for (let i = open + 1; i < line.length; i++) {
+    const ch = line[i];
+    if (quote) {
+      if (quote === "`" && ch === "\\") {
+        i++;
+        continue;
+      }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      quote = ch;
+      continue;
+    }
+    if (ch === "(" || ch === "{" || ch === "[") depth++;
+    else if (ch === ")" || ch === "}" || ch === "]") {
+      if (ch === ")" && depth === 0) {
+        args.push(line.slice(start, i).trim());
+        return args;
+      }
+      depth--;
+    } else if (ch === "," && depth === 0) {
+      args.push(line.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  return args;
+}
+
+/** Complete log.* calls, including arguments spread over several lines. */
+function logCallBlocks(lines) {
+  const blocks = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!LOG_SINK_HEAD.test(lines[i])) continue;
+    let text = lines[i];
+    let depth = (text.match(/\(/g) || []).length - (text.match(/\)/g) || []).length;
+    let j = i;
+    while (depth > 0 && j + 1 < lines.length) {
+      j++;
+      text += "\n" + lines[j];
+      depth += (lines[j].match(/\(/g) || []).length - (lines[j].match(/\)/g) || []).length;
+    }
+    blocks.push(text);
+  }
+  return blocks;
+}
+
+/** True when the line carries a log.* call passing a message through a sanitizer. */
+function sanitizedMessage(line) {
+  const args = logSinkArgs(line);
+  if (!args) return SANITIZED_CALL.test(line);
+  return args.some((a) => SANITIZED_CALL.test(a));
+}
+
+/**
+ * @param {string} line
+ * @returns {boolean} true = safe message (green), false = raw error (REJECTED)
+ */
+export function LOG_SINK(line) {
+  if (typeof line !== "string") return true;
+  const args = logSinkArgs(line);
+  if (!args || args.length < 2) return true;
+  const message = args[1];
+  if (!message) return true;
+  // Object/array = structured audit data (e.g. `{ detail: err.message }`), not a
+  // message: the existing suppression anchor already covers them. Do not refuse them.
+  if (/^\s*[{\[]/.test(message)) return true;
+  const cleaned = message.replace(SANITIZE_IN_MESSAGE, "");
+  return !LOG_RAW_ERR.test(cleaned);
+}
+
+/**
+ * Signal when a refresh-loop `catch` neutralizes its result (`rows = null`)
+ * without logging it via `sanitizeErrorMessage`. Shared with LOG_SINK: same
+ * `logSinkArgs` parser, same message-argument reading; the log call must also
+ * explicitly name a sanitizer.
+ * @param {string} source
+ * @returns {boolean} true = signal (REJECTED), false = green
+ */
+/** Lines of the catch block opened on line i, up to its own closing brace. */
+function catchBody(lines, i) {
+  const body = [];
+  let depth = 0;
+  let opened = false;
+  for (let k = i; k < lines.length; k++) {
+    const line = lines[k];
+    body.push(line);
+    let text = line;
+    if (k === i) {
+      // The line may start with the `}` that closes the try block: count only
+      // from the catch's own opening brace.
+      const m = line.match(/\bcatch\s*\([^)]*\)\s*\{/);
+      if (m) text = line.slice(m.index + m[0].length - 1);
+    }
+    for (const ch of text) {
+      if (ch === "{") {
+        depth++;
+        opened = true;
+      } else if (ch === "}") depth--;
+    }
+    if (opened && depth <= 0) break;
+  }
+  return body;
+}
+
+export function unsanitized_error(source) {
+  const lines = String(source).split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (!/\bcatch\s*\(\s*\w+\s*\)/.test(lines[i])) continue;
+    const body = catchBody(lines, i);
+    if (!body.some((l) => /\b\w+\s*=\s*null\b/.test(l))) continue;
+    const logged = body.some((l) => LOG_SINK_HEAD.test(l) && sanitizedMessage(l));
+    if (!logged) return true;
+  }
+  return false;
+}
+
 // A line that is constructing a client-facing response/result body.
 const RESPONSE_LINE =
   /new\s+Response\s*\(|\bresponse\s*:|\berrResp\s*\(|\bmakeErrorResponse\s*\(|\berrorResponse\s*\(/;
@@ -423,8 +618,19 @@ function isTrustedLine(line, importedNames, localBuilders) {
   );
 }
 
-function forwardsRawError(source, isMcpServer = false) {
+function forwardsRawError(source, isMcpServer = false, newDetectors = false) {
   const lines = source.split("\n").map((l) => l.replace(/\/\/.*$/, ""));
+
+  // LOG_SINK runs BEFORE the INTERNAL_SINK suppressions below.
+  // A log.* line is an INTERNAL_SINK: checking its message AFTER those `continue`
+  // statements would be dead code. Only in diff-based scope_scan mode, so the
+  // historical backlog of already-logged calls is not reported as a false positive.
+  if (newDetectors) {
+    for (const call of logCallBlocks(lines)) {
+      if (!LOG_SINK(call)) return true;
+    }
+  }
+
   const importedNames = importedErrorHelperNames(source);
   const localBuilders = sanitizingLocalBuilders(source);
   const safeEnvelopes = locallySanitizedEnvelopes(source);
@@ -608,14 +814,23 @@ function enclosedByErrorResponseBody(lines, idx) {
   return false;
 }
 
-export function findErrorHelperViolations(files, allowlist) {
-  const violations = [];
+/** Stable per-violation diagnostics: one entry for each detected violation. */
+export function errorHelperDiagnostics(files, allowlist, opts = {}) {
+  const newDetectors = opts.newDetectors === true;
+  const diagnostics = [];
   for (const { path: rel, source } of files) {
     if (allowlist.has(rel)) continue;
     const isMcpServer = rel.startsWith("open-sse/mcp-server/");
-    if (forwardsRawError(source, isMcpServer)) violations.push(rel);
+    const kinds = [];
+    if (forwardsRawError(source, isMcpServer, newDetectors)) kinds.push("forwardsRawError");
+    if (newDetectors && unsanitized_error(source)) kinds.push("unsanitized_error");
+    kinds.forEach((detector, index) => diagnostics.push({ path: rel, detector, index }));
   }
-  return violations;
+  return diagnostics;
+}
+
+export function findErrorHelperViolations(files, allowlist, opts = {}) {
+  return [...new Set(errorHelperDiagnostics(files, allowlist, opts).map((v) => v.path))];
 }
 
 function collectFiles() {
@@ -640,7 +855,77 @@ function collectFiles() {
   return files;
 }
 
+/**
+ * Diff-based execution: only NEW violations fail. An empty baseline (new/staged
+ * file) makes any violation new. No allowlist to extend, no baseline to freeze,
+ * SCAN_DIRS unchanged (never open-sse/services/).
+ * @param {string} base
+ */
+function mainScope(base) {
+  let rawTargets;
+  try {
+    rawTargets = scope_scan(base);
+  } catch (err) {
+    console.error(
+      `REJECTED: base ${base} does not resolve (${err.message}) — checks would be silent`
+    );
+    process.exitCode = 1;
+    return;
+  }
+  // Base-guard discipline: 0 raw targets = silent detector, refuse instead of
+  // concluding green. Scan-scope filtering comes AFTER this guard.
+  if (!rawTargets.length) {
+    console.error(`REJECTED: ${base} yields 0 target — checks would be silent`);
+    process.exitCode = 1;
+    return;
+  }
+  const targets = rawTargets.filter(inScope);
+  if (!targets.length) {
+    console.log(
+      `[check-error-helper] OK — scope_scan ${base} : ${rawTargets.length} target(s), 0 evaluated`
+    );
+    return;
+  }
+
+  const newOnes = [];
+  for (const rel of targets) {
+    if (!fs.existsSync(path.join(cwd, rel))) continue; // deleted file
+    const working = fs.readFileSync(path.join(cwd, rel), "utf8");
+    const baseSrc = baselineSource(base, rel);
+    const opts = { newDetectors: true };
+    const before = errorHelperDiagnostics([{ path: rel, source: baseSrc }], EMPTY_ALLOWLIST, opts);
+    const after = errorHelperDiagnostics([{ path: rel, source: working }], EMPTY_ALLOWLIST, opts);
+    // Compare individual violations, not file-level arrays: a file already
+    // carrying a baseline violation must still report newly added ones.
+    const key = (v) => `${v.path}\u0000${v.detector}\u0000${v.index}`;
+    const seen = new Set(before.map(key));
+    const added = after.filter((v) => !seen.has(key(v)));
+    if (added.length) newOnes.push(`${rel} (${added.map((v) => v.detector).join(", ")})`);
+  }
+
+  if (newOnes.length) {
+    console.error(
+      `[check-error-helper] ${newOnes.length} new violation(s) vs ${base}:\n` +
+        newOnes.map((v) => "  ✗ " + v).join("\n")
+    );
+    process.exitCode = 1;
+    return;
+  }
+  console.log(
+    `[check-error-helper] OK — scope_scan ${base} : ${targets.length} target(s), 0 new violation`
+  );
+}
+
 function main() {
+  // BASE comes from the verified merge-base source (BINOME_BASE / upstream/<branch>).
+  // In CI without BASE, the historical allowlist behavior stays unchanged and green.
+  const base =
+    process.argv[2] || process.env.BASE || process.env.BASE_SHA || process.env.BINOME_BASE || "";
+  if (base) {
+    mainScope(base);
+    return;
+  }
+
   const files = collectFiles();
 
   // 6A.8: stale-allowlist enforcement.

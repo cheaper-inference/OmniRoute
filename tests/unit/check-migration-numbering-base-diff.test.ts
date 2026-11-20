@@ -62,6 +62,28 @@ async function loadPure(): Promise<FindBaseDiff> {
 
 const map = (entries: Array<[string, string]>) => new Map<string, string>(entries);
 
+// This assertion is the red-proof of the fixture change below: copying the queue
+// resolver into the throwaway repo only matters once the real gate imports the
+// shared diff-scope helper, which in turn reaches that resolver. Without the
+// production change the gate has no such import and this test fails.
+test("the migration gate wires the exemption diff scope declared in the registry", () => {
+  const source = fs.readFileSync(GATE, "utf8");
+  assert.match(
+    source,
+    /import\s*\{[^}]*enforceDiffScope[^}]*\}\s*from\s*["']\.\/lib\/allowlist\.mjs["']/,
+    "the migration gate must import the shared diff-scope helper"
+  );
+  assert.match(source, /enforceDiffScope\s*\(\s*\{/, "the migration gate must call the helper");
+
+  const registry = JSON.parse(
+    fs.readFileSync(path.join(ROOT, "config/quality/gate-exemptions.json"), "utf8")
+  ) as { exemptions: Array<{ gate: string; diffScope: boolean }> };
+  const wired = registry.exemptions.filter(
+    (entry) => entry.gate === "check:migration-numbering" && entry.diffScope === true
+  );
+  assert.ok(wired.length > 0, "the migration gate exemptions must carry the diff scope");
+});
+
 // --- Pure function --------------------------------------------------------------------
 
 test("pure: identical base and head have no anomalies", async () => {
@@ -807,6 +829,9 @@ function makeSelfContainedRepo(): { dir: string; mig: string; gatePath: string }
     "open-sse",
     "config",
     "scripts/check",
+    // The base resolver imported by the check reaches the queue candidate
+    // resolver here; a scratch checkout missing it fails at module load.
+    "scripts/merge-queue",
     "package.json",
     "tsconfig.json",
   ]) {

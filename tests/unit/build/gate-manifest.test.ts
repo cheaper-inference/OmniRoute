@@ -255,3 +255,25 @@ test("inventory CLI validates domains without node_modules before npm ci", (t) =
   assert.equal(invalid.status, 1, invalid.stderr);
   assert.match(invalid.stderr, /domains/);
 });
+
+test("validateManifest - a commented invocation does not satisfy a pr-dependent alias", () => {
+  const { manifest, scripts } = fixture();
+  const prManifest = {
+    ...manifest,
+    aliases: [
+      ...manifest.aliases,
+      { name: "check:pr", command: "node pr.mjs", disposition: "pr-dependent" as const },
+    ],
+  };
+  const prScripts = { ...scripts, "check:pr": "node pr.mjs" };
+  assert.deepEqual(
+    validateManifest(prManifest, prScripts, { workflowSources: ["# npm run --silent check:pr"] }),
+    ["pr-dependent alias not invoked by any workflow: check:pr"]
+  );
+  assert.deepEqual(
+    validateManifest(prManifest, prScripts, {
+      workflowSources: ["run: npm run --silent check:pr"],
+    }),
+    []
+  );
+});

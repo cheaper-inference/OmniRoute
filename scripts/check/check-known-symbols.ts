@@ -57,7 +57,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve as resolvePath, basename, extname } from "node:path";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolvePath(HERE, "..", "..");
@@ -534,6 +534,11 @@ async function main(): Promise<void> {
     liveImplicitNeeded,
     "known-symbols:combo"
   );
+  enforceDiffScope({
+    allowlist: Object.keys(IMPLICIT_DEFAULT_STRATEGIES),
+    liveViolations: liveImplicitNeeded,
+    gateName: "check-known-symbols",
+  });
 
   const { canonicalNotHandled, handledNotCanonical } = diffComboStrategies(
     canonical,
