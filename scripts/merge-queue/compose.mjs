@@ -213,6 +213,28 @@ export function fetchInputs({ git, base, prs, filter }) {
   return { baseSha, heads };
 }
 
+function canRetryPromisorMerge(git, result) {
+  if (
+    result.code !== 128 ||
+    !/^fatal: could not fetch [0-9a-f]{40} from promisor remote\r?$/m.test(result.stderr)
+  ) {
+    return false;
+  }
+  const rejected =
+    /^fatal: (?:remote error: )?(?:git )?upload-pack: not our ref ([0-9a-f]{40})\r?$/m.exec(
+      result.stderr
+    )?.[1];
+  if (!rejected) return false;
+
+  // A stale loose-object cache can make Git request a blob it just wrote.
+  // A new process can see it. Keep genuine remote misses as failures.
+  const local = git.run(["cat-file", "-t", rejected], {
+    allowFail: true,
+    env: { GIT_NO_LAZY_FETCH: "1" },
+  });
+  return local.code === 0 && local.stdout.trim() === "blob";
+}
+
 /**
  * `git merge-tree --write-tree ours theirs` → {clean: true, tree} | {clean: false}.
  * Exit 0 = clean (tree on line 1), exit 1 = conflict, anything else = error.
@@ -220,10 +242,11 @@ export function fetchInputs({ git, base, prs, filter }) {
  * exactly this call to check its tree.
  */
 export function mergeTree(git, ours, theirs) {
-  const res = scratchGit(git).run(
-    ["merge-tree", "--write-tree", "--no-messages", "--name-only", ours, theirs],
-    { allowFail: true }
-  );
+  const g = scratchGit(git);
+  const args = ["merge-tree", "--write-tree", "--no-messages", "--name-only", ours, theirs];
+  const opts = { allowFail: true };
+  let res = g.run(args, opts);
+  if (canRetryPromisorMerge(g, res)) res = g.run(args, opts);
   if (res.code === 0) {
     const tree = res.stdout.split("\n")[0].trim();
     if (!isSha(tree))
