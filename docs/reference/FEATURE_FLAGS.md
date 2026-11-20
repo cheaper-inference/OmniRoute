@@ -46,10 +46,10 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-126 flags across 6 categories. **Default** is the definition default — the value
+127 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
-### Security (12)
+### Security (13)
 
 | Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                   |
 | --------------------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -65,6 +65,7 @@ used when neither a DB override nor an environment variable is present.
 | `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | Include account prefix in AUTH log lines (e.g. "Using <provider> account: abc12345..."). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this.                |
 | `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | When OIDC is enabled, disable password login so users can only authenticate via OIDC Single Sign-On. When disabled (default), both password login and OIDC are available.                                                                                                     |
 | `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | Record the caller's IP address and user-agent on the `api_key.auth.touch` audit-log rows written for successful API-key metadata and discovery reads (#17982). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent. |
+| `QUOTA_SELF_PANEL`                      | boolean | `false`  | Let an API key read its own quota-share position and usage: enables `GET /v1/me/quota/{provider}` and `GET /v1/me/usage` for keys with the `self:usage` scope. Off by default: those routes answer 404.                                                                       |
 
 ### Network (32)
 
