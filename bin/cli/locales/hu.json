@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "A limitnek pozitív egész számnak kell lennie.",
     "error": "Hiba: {message}",
     "serverOffline": "Az OmniRoute szerver offline. Indítsa el: omniroute serve",
     "authRequired": "Hitelesítés szükséges. Állítsa be az OMNIROUTE_API_KEY-t vagy futtassa: omniroute setup",

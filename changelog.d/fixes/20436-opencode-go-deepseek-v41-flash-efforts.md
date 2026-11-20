@@ -1,0 +1,1 @@
+- **catalog:** Declare `supportsReasoning: true` and `supportedThinkingEfforts: ["low", "high", "max"]` for `opencode-go/deepseek-v4.1-flash` and its `opencode-go/deepseek-flash` alias so `/v1/models` advertises only the upstream-accepted effort tiers ([#20436](https://github.com/cheaper-inference/OmniRoute/issues/20436)).

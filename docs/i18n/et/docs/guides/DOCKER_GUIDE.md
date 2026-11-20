@@ -27,13 +27,9 @@
 
 ---
 
-## Kiirkäivitus
+## Kiire jooks
 
-> **Isehostimine ühe käsuga?** Vaadake
-> [isehostimise juhendit](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (avaldatud tõmmis +
-> Redis, ainult loopback-liides, profiili pole vaja valida). Allolev kiirkäivitus on
-> ühe konteineri lahendus kasutajatele, kes juba käitavad Redist mujal.
+> **Ise majutada ühes käsus?** Vaadake [isehosti juhendit](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (avaldatud pilt + Redis, ainult tagasisilmus, profiilivalikut pole). Allolev kiirkäivitus on ühe konteineri tee kasutajatele, kes juba käitavad Redis mujal.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Keskkonnafailiga
 
 ```bash
-# Esmalt kopeerige ja muutke faili .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,16 +235,16 @@ Tootmiskeskkonna pinu töötab arenduskeskkonna compose'i pinuga paralleelselt (
 
 ## Dockerfile'i etapid
 
-Hoidla sisaldab mitmeetapilist Dockerfile'i (`Dockerfile`). Saadaval on neli etappi; vali oma kasutusjuhu jaoks õige `target`.
+Hoidla tarnib mitmeastmelist Dockerfile'i (`Dockerfile`). Paljastatud on neli etappi; valige oma kasutusjuhtumi jaoks õige `target`.
 
-| Etapp         | Baastõmmis            | Otstarve                                                                                                                                                                                                                                                                            |
+| Lava          | Põhipilt              | Eesmärk                                                                                                                                                                                                                                                                             |
 | ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Installib sõltuvused (`npm ci --legacy-peer-deps`) ja käivitab `npm run build` (vaikimisi Turbopack — vaata allpool jaotist „Ehitusaegsed ressursid”)                                                                                                                               |
-| `runner-base` | `node:26-trixie-slim` | Tootmiskäituskeskkond Next.js-i autonoomse väljundiga. **Teenusepakkujate CLI-sid ei kaasata.**                                                                                                                                                                                     |
-| `runner-cli`  | `runner-base`         | Lisab `git`, `docker.io`, `docker-compose` ja globaalsed CLI-d: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Vali see agentpõhiste töövoogude jaoks.**                                                                                                      |
-| `runner-web`  | `runner-base`         | Lisab Playwrighti ja Chromiumi brauseri (`--with-deps`) veebiseansi pakkujate jaoks: `gemini-web`, `claude-web`, `claude-turnstile`. **Vali see nende pakkujate kasutamisel** — tavaline tõmmis nurjub ilma selleta päringu ajal (vaata väljalaskekanalite jaotise märkust `-web`). |
+| `builder`     | `node:26-trixie-slim` | Installib deps (`npm ci --legacy-peer-deps`) ja käivitab `npm run build` (Turbopack vaikimisi — vt allpool ehitusaja ressursse)                                                                                                                                                     |
+| `runner-base` | `node:26-trixie-slim` | Tootmisaeg koos Next.js eraldiseisva väljundiga.** Pakkuja CLIs komplekteeritud pole.**                                                                                                                                                                                             |
+| `runner-cli`  | `runner-base`         | Lisab `git`, `docker.io`, `docker-compose` ja globaalse CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Valige see agentide töövoogude jaoks.**                                                                                                          |
+| `runner-web`  | `runner-base`         | Lisab Playwright + Chromiumi brauseri (`--with-deps`) veebiseansi pakkujatele: `gemini-web`, `claude-web`, `claude-turnstile`.** Valige see, kui kasutate neid teenusepakkujaid** — tavaline pilt nurjub taotluse ajal ilma selleta (vt `-web` märkust jaotises Väljalaskekanalid). |
 
-Konkreetse sihtmärgi käsitsi ehitamine:
+Konkreetse sihtmärgi loomine käsitsi:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Ehitusaegsed ressursid
+### Ehitusaja ressursid
 
-Kolm ehitusargumenti määravad etapi `builder` ressursikulu. Need kehtivad ainult ehitamise ajal —
-`OMNIROUTE_MEMORY_MB` (allpool) on eraldiseisev käitusaegne seadistus.
+Kolm ehitusargumenti juhivad `builder` etapi maksumust. Need on ainult ehitusaegsed. — `OMNIROUTE_MEMORY_MB` (allpool) on eraldi käitusaegne nupp.
 
-| Ehitusargument              | Vaikeväärtus | Mõju                                                                                  |
-| --------------------------- | ------------ | ------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`          | `0` ehitab webpackiga: väiksem mälu tippkasutus, kuid aeglasem. `1` lubab Turbopacki. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`       | V8 kuhjamälu ülempiir (`--max-old-space-size`) käivitatud protsessile `next build`.   |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`          | Määrab `CIRCLE_NODE_TOTAL`; Next tuletab leheandmete kogumiseks `workers = N - 1`.    |
+| Ehita arg                   | Vaikimisi | Mõju                                                                                   |
+| --------------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`       | `0` ehitab veebipaketiga: väiksem tippmälu, aeglasem. `1` valib Turbopack.             |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`    | V8 kuhja lagi (`--max-old-space-size`) kudenud `next build` jaoks .                    |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`       | Toidab `CIRCLE_NODE_TOTAL`; Järgmine tuletab `workers = N - 1` leheandmete kogumiseks. |
 
-`OMNIROUTE_BUILD_WORKERS` on parameeter, mida võimsas ehituskeskkonnas suurendada ja mida
-kahtlustada, kui piiratud ressurssidega ehitus nurjub **pärast** teadet `✓ Compiled successfully`. Iga
-leheandmete tööprotsess on eraldi protsess, nagu ka emaprotsess `next build`;
-reaalses VPS-i reproduktsioonis (probleem #7518) mõõdeti iga protsessi RSS-i
-tippväärtuseks ~4,5 GB olenemata kuhjamälu lipust `NODE_OPTIONS` (Turbopack kompileerib
-V8 kuhjamälust väljaspool asuvas natiivses/Rusti mälus). Vaikeväärtus `2` (→ 1 tööprotsess, kokku 2
-protsessi) on kohandatud 16 GB / 4 vCPU-ga GitHubi hostitud käitajatele, mida
-avaldamiskonveier kasutab. Väärtusega `8` (→ 7 tööprotsessi) sai selle käitaja mälu otsa ja
-buildkit nurjas etapi veaga `ResourceExhausted: ... cannot allocate memory`;
-`3` (→ 2 tööprotsessi) ei mahtunud samuti, kui protsessipõhist RSS-i mõõdeti
-tuletamise asemel otse. `tests/unit/docker-build-memory-budget.test.ts`
-teeb mõõdetud väärtuse põhjal arvutused ja nurjub, kui kumbki seadistus
-ületab käitaja ressursid.
+`OMNIROUTE_BUILD_WORKERS` on see, kes kasvatab suure ehitaja peal ja keda kahtlustab, kui piiratud ehitus sureb** pärast** `✓ Compiled successfully`. Iga leheandmete töötaja on oma protsess, nagu ka ülem `next build` ise; reaalajas VPS reprodutseerimine (probleem #7518) mõõtis iga protsessi tippu RSS ~ 4,5 GB juures, sõltumata `NODE_OPTIONS` kuhja lipust (Turbopack kompileerib native/Rust mälus väljaspool V8 hunnikut). Vaikimisi `2` (→ 1 töötaja, kokku 2 protsessi) on määratud 16 GB / 4 vCPU GitHubi hostitud jooksja jaoks, mida avaldamise konveier kasutab. `8` (→ 7 töötajat) juures sai sellel jooksjal mälu otsa ja buildkit ebaõnnestus sammuga `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 töötajat) ei sobinud ikka veel, kui protsessi RSS mõõdeti tuletamise asemel otse. `tests/unit/docker-build-memory-budget.test.ts` teeb aritmeetika mõõdetud figuuri suhtes ja ebaõnnestub, kui kumbki nupp jooksjast välja kasvab.
 
-Turbopack kompileerib natiivses Rusti mälus, mis asub **väljaspool** V8 kuhjamälu, mistõttu
-`OMNIROUTE_BUILD_MEMORY_MB` seda ei piira. Mälu ülempiiriga hostis
-lõpetab OOM-i tõrjuja ehituse SIGKILLiga ilma ühegi veatekstita — see lihtsalt
-peatub poole tegevuse `Creating an optimized production build` pealt, mis näib pigem
-hangumise kui mälu lõppemisena. Seetõttu kasutab `Dockerfile` vaikimisi webpacki
-(`OMNIROUTE_USE_TURBOPACK=0`), erinevalt käskudest `npm run dev` / `npm run build`, kus
-Turbopack on koodi vaikevalik: ilma ehitusargumentideta käsk `docker build .` (mida
-käitavad Railway ja teised ühe klõpsuga hostid) ei tohi piiratud mäluga
-ehituskeskkonnas vaikselt nurjuda. Avaldatud tõmmised edastavad juba parameetri `OMNIROUTE_USE_TURBOPACK=0`
-failis `docker-publish.yml` selgesõnaliselt. Rohke muutmäluga ehituskeskkonnas luba
-kiiremaks ehitamiseks Turbopack:
+Turbopack koostab native Rust mälu, mis elab** väljaspool** V8 hunnik, nii et `OMNIROUTE_BUILD_MEMORY_MB` ei seo seda. Mälu ülemmääraga hosti puhul SIGKILLed OOM killer teeb konstruktsiooni ilma veatekstita. — see lihtsalt peatub `Creating an optimized production build` keskel, mis loeb pigem hangu kui mälu otsas. Sellepärast on `Dockerfile` vaikimisi veebipakett (`OMNIROUTE_USE_TURBOPACK=0`), erinevalt `npm run dev` / `npm run build`, kus Turbopack on koodi vaikeväärtus: tühi `docker build .`, millel puuduvad ehitusargid (mida Raudtee ja muud ühe klõpsuga hostid töötavad), ei tohi vaikselt surra mälupiiranguga ehitajal. Avaldatud pildid läbivad `OMNIROUTE_USE_TURBOPACK=0` juba selgesõnaliselt `docker-publish.yml`. Rohke RAM ga ehitaja puhul valige kiiremaks ehitamiseks Turbopack.
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` on lubatud, seega käivitab `next build` nii ema- **kui ka** tööprotsessi
-ning kumbki järgib `OMNIROUTE_BUILD_MEMORY_MB` väärtust eraldi. Määra konteineri
-ülempiir sellest väärtusest ligikaudu kaks korda suuremaks, mitte sellega võrdseks.
+`webpackBuildWorker` on lubatud, nii et `next build` käitab vanemat** ja** töötaja protsess ja igaüks austab `OMNIROUTE_BUILD_MEMORY_MB` eraldi. Suurendage konteineri ülemmäära umbes kaks korda, mitte üks kord.
 
-Selles lähtekoodipuus mõõdetud (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Sellel puul mõõdetuna (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Pakendaja | Konteineri ülempiir | Tulemus                            |
-| --------- | ------------------- | ---------------------------------- |
-| Turbopack | 8 GiB / 16 GiB      | OOM lõpetas mõlemad vaikselt       |
-| webpack   | 8 GiB               | tööprotsess lõpetati SIGKILLiga    |
-| webpack   | 12 GiB              | õnnestus, tippkasutus oli 11,1 GiB |
+| Bundler   | Konteinerite lagi | Tulemus                                |
+| --------- | ----------------- | -------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB    | OOM-tappis mõlema juures, vaikselt     |
+| veebipakk | 8 GiB             | ehitustööline SIGKILLed                |
+| veebipakk | 12 GiB            | õnnestus, saavutas haripunkti 11,1 GiB |
 
-### Käitusaja vaikeväärtused
+### Käitusaja vaikesätted
 
-Etapi `runner-base` eksporditavad vaikeväärtused: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+`runner-base` eksporditud vaikeväärtused: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Mälukäitumine Dockeris:
+Mälu käitumine Docker:
 
-- Tõmmis määrab `OMNIROUTE_MEMORY_MB=1024` ja tuletab sellest `NODE_OPTIONS=--max-old-space-size=1024`.
-- Tegeliku serveriprotsessi käivitab eraldiseisev käivitaja, mis loeb muutujat `OMNIROUTE_MEMORY_MB` ja lisab `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node kasutab viimast korduvat `--max-old-space-size` väärtust, seega juhib `OMNIROUTE_MEMORY_MB` Dockeris tegelikult kehtivat kuhjamälu piirangut.
-- Kuna tõmmis määrab selle alati, ei rakendu käivitaja enda RAM-i järgi kalibreeritud varuväärtus Dockeris kunagi. Suurendage seda töökoormuse jaoks sõnaselgelt (vt allolevat tabelit). `2048` on kodeerimisagendi `/v1/responses` jaoks endiselt liiga väike.
+- Pilt määrab `OMNIROUTE_MEMORY_MB=1024` ja tuletab sellest `NODE_OPTIONS=--max-old-space-size=1024`.
+- Tegeliku serveriprotsessi käivitab iseseisev käivitusprogramm, mis loeb `OMNIROUTE_MEMORY_MB` ja lisab `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Sõlm kasutab viimast korduvat `--max-old-space-size` väärtust, seega juhib `OMNIROUTE_MEMORY_MB` seadistus efektiivset Docker kuhja piirangut.
+- Kuna pilt määrab selle alati, ei kehti käivitusprogrammi enda RAM-kalibreeritud varufunktsioon kunagi Docker all. Tõstke seda selgelt töökoormuse jaoks (tabel allpool). `2048` on kodeerimisagendi `/v1/responses` jaoks endiselt liiga väike.
 
-### Kodeerimisagentide käitusaegne RAM
+### Kodeerivate ainete käitusaegne RAM
 
-Dockeri 1 GiB vaikeväärtus on juhtpaneeli ja kerge vestluse miinimum, mitte tootmiskeskkonnale sobiv maht. Pikad `POST /v1/responses` päringukehad (sajad sõnumid, kümned tööriistad) hoiavad tihendamise ajal mälus mitut graafi. Kaks kattuvat ~3 MiB / ~750k-tokenilist päringut on põhjustanud V8 töö katkemise **12 GiB** old-space'i juures (`FATAL ERROR: Reached heap limit`) ning tabanud ka 16 GiB cgroup'i OOM-i. Vt [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Vaikimisi 1 GiB Docker on dashboard/light-chat põrand, mitte tootmismaht. Pikad `POST /v1/responses` kehad (sadu teateid, kümneid tööriistu) säilitavad tihendamise ajal mitu mälus olevat graafikut. Kaks kattuvat ~ 3 MiB / ~ 750 000 märgi taotlust katkestasid V8** 12 GiB** vana tühik (`FATAL ERROR: Reached heap limit`) ja tabas ka 16 GiB cgruppi OOM. Vaadake [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Määrake **cgroup'i `--memory` kuhjamälust suuremaks** — omapuhvrid, SQLite ja tihendamise vahetulemused asuvad väljaspool V8-t.
+Suurus** cgroup `--memory` kuhja kohal** — loomulikud puhvrid, SQLite ja tihendamise vaheühendid asuvad väljaspool V8.
 
-| Töökoormus                                     | `OMNIROUTE_MEMORY_MB`         | Konteiner / cgroup       | Märkused                                                                                                                                     |
-| ---------------------------------------------- | ----------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Juhtpaneel, üks kerge vestlus                  | `1024` (tõmmise vaikeväärtus) | ≥2 GiB                   |                                                                                                                                              |
-| Üks kodeerimisagent (Claude/Codex/Grok)        | `8192`                        | ≥10 GiB                  | Tüüpiline ühe seansi `/v1/responses`                                                                                                         |
-| Kaks samaaegset pikka `/v1/responses` päringut | `10240`–`12288`               | ≥12–16 GiB               | Mõõdetud V8 katkestus ~12 GiB kuhjamälu juures                                                                                               |
-| Kolm või enam samaaegset pikka konteksti       | mitte ühes protsessis         | jadastage / rohkem RAM-i | Vaikimisi lubatakse korraga 1 ressursimahukas pooleliolev päring; selle arvu suurendamine ilma täiendava RAM-ita põhjustab katkestuse uuesti |
+| Töökoormus                             | `OMNIROUTE_MEMORY_MB`     | Konteiner / cgrupp   | Märkmed                                                                           |
+| -------------------------------------- | ------------------------- | -------------------- | --------------------------------------------------------------------------------- |
+| Armatuurlaud, üks kerge vestlus        | `1024` (pildi vaikeseade) | ≥2 GiB               |                                                                                   |
+| Üks kodeeriv agent (Claude/Codex/Grok) | `8192`                    | ≥10 GiB              | Tüüpiline ühe seansi `/v1/responses`                                              |
+| Kaks samaaegset pikka `/v1/responses`  | `10240`–`12288`           | ≥12–16 GiB           | Mõõdetud V8 katkestus ~ 12 GiB kuhja juures                                       |
+| Kolm + samaaegset pikka konteksti      | ärge tehke ühte protsessi | serialize / more RAM | Vaikimisi raskekaalu luba on 1 lennu ajal; selle ilma RAM tõstmine taastab abordi |
 
-Paljasmetallis töötav `omniroute serve` kalibreerib umbes 35% RAM-ist (piiratuna vahemikku `[512, 4096]`), kui `OMNIROUTE_MEMORY_MB` on **määramata**. Docker määrab alati väärtuse `1024`, mistõttu seda kalibreerimist ametlikus tõmmises kunagi ei käivitata.
+`omniroute serve` paljas metallil kalibreerib ~ 35% RAM (klambriga `[512, 4096]`), kui `OMNIROUTE_MEMORY_MB` on** määramata** . Docker määrab alati `1024`, nii et kalibreerimine ei toimu kunagi ametlikus pildis.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Kriitilised keskkonnamuutujad
@@ -364,23 +335,13 @@ Lisaks failis [ENVIRONMENT.md](../reference/ENVIRONMENT.md) dokumenteeritud vaik
 | `PROD_DASHBOARD_PORT`         | Faili `docker-compose.prod.yml` hostipoolne juhtpaneeli port                                                                                                                                                                                                                                                  | `20130`                   |
 | `CLIPROXYAPI_PORT`            | Kaaskonteineri `cliproxyapi` hostipoolne port                                                                                                                                                                                                                                                                 | `8317`                    |
 
-## Pöördproksi alamteel (Traefik / nginx)
+## Pöördpuhverserver alamteel (Traefik / nginx)
 
-Next.js-i `basePath` kompileeritakse autonoomsesse paketti. OmniRoute salvestab paketti
-lisatud väärtuse rakenduse juurkaustas asuvasse kontrollfaili (kirjutatakse käsu
-`npm run build` ajal; loetakse skriptiga `scripts/docker/ensure-docker-base-path.mjs`)
-ning võrdleb seda konteineri käivitumisel muutujaga `OMNIROUTE_BASE_PATH`. Kui väärtused
-erinevad ja tõmmis loodi domeeni juurtee jaoks, kirjutab sisenemispunkt enne
-`node dev/run-standalone.mjs` käivitamist ümber autonoomse paketi manifestid, manustatud
-`basePath`/`assetPrefix` literaalid (Next 16 renderdab SSR-i varade URL-id ainult
-`assetPrefix` põhjal — parandaja peegeldab alamtee ka sinna), paketti lisatud
-`/_next/static` varade URL-id (kliendiviidete manifestid, meediaimpordid, eelrenderdatud
-vealehed) ja kliendi `process.env` vahekihi.
+Next.js `basePath` on koostatud eraldiseisvaks kogumiks. OmniRoute salvestab küpsetatud väärtuse sentinel-faili rakenduse juurtes (kirjutatakse `npm run build` ajal; loeb `scripts/docker/ensure-docker-base-path.mjs`) ja võrdleb seda `OMNIROUTE_BASE_PATH` kui konteiner käivitub. Kui need erinevad ja pilt on loodud domeeni juure jaoks, kirjutab sisestuspunkt ümber eraldiseisvad manifestid, manustatud `basePath`/`assetPrefix` -literaalid (järgmised 16 renderdab SSR vara URLs ainult `assetPrefix` — plaaster peegeldab sellesse URLs ), küpsetatud `/_next/static` varade manifests preferenced, import leheküljed) ja klient `process.env` shim enne `node dev/run-standalone.mjs` käitamist.
 
-### Compose'i järguga loomine (soovitatav)
+### Koosta järg (soovitatav)
 
-Määrake mõlemad muutujad failis `.env` ja looge tõmmis seejärel uuesti, et tõmmise ning
-käituskeskkonna seadistus ühtiks:
+Määrake mõlemad muutujad `.env`, seejärel ehitage uuesti nii, et pilt ja käitusaeg ühtivad:
 
 ```bash
 # .env
@@ -392,71 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` edastab muutuja `OMNIROUTE_BASE_PATH` nii Dockeri järguargumendi
-kui ka käituskeskkonna muutujana.
+`docker-compose.yml` edastab `OMNIROUTE_BASE_PATH` d Docker build-arg-ina ja käituskeskkonna muutujana.
 
-### Eelvalmistatud juurtee tõmmis + käitusaegne alamtee
+### Eelehitatud juurkujutis + käitusaja alamtee
 
-Avaldatud `diegosouzapw/omniroute:*` tõmmised on loodud domeeni juurtee jaoks.
-`OMNIROUTE_BASE_PATH` saab siiski määrata käitusajal; konteiner parandab paketti
-käivitumisel ühe korra. Kasutage koos sellega vastavat avalikku lähteaadressi:
+Avaldatud `cheaperinference/omniroute:*` kujutised on loodud domeeni juure jaoks. `OMNIROUTE_BASE_PATH` saate siiski määrata käitusajal; konteiner paikab komplekti käivitamisel üks kord. Siduge see sobiva avaliku päritoluga:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Seadistage pöördproksi edastama **täielikku** välist teed (ärge eemaldage prefiksit).
-Traefik peab suunama `PathPrefix(`/omniroute`)` konteinerisse ilma `StripPrefix`-ita,
-et Next.js saaks päringud kujul `/omniroute/...` ja serveeriks varasid asukohast
-`/omniroute/_next/...`.
+Konfigureerige pöördpuhverserveri edastamiseks** täis** välistee (ära eemalda eesliidet). Traefik peaks suunama `PathPrefix(`/omniroute `)` konteinerisse ilma `StripPrefix`, nii et Next.js võtab vastu `/omniroute/...` ja teenindab `/omniroute/_next/...` i varasid.
 
-Dockeri tervisekontroll kontrollib kerget elutsükli lõpp-punkti `/healthz`, millele
-lisatakse aktiivne `OMNIROUTE_BASE_PATH` prefiks. `/api/monitoring/health` jääb
-inimestele ja juhtpaneelidele diagnostikaks kättesaadavaks; konteineri HEALTHCHECK-i
-sellele tagasi suunamiseks (näiteks põhjaliku tervisekontrolli jõustamiseks) määrake
-`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. See tee teeb **põhjaliku**
-kontrolli (andmebaas + seirekokkuvõte) — see sobib Dockeri harva käivitatava
-`HEALTHCHECK`-i jaoks, kui otsustate selle uuesti kasutusele võtta, kuid **mitte**
-Kubernetese `livenessProbe` intervallidega kasutamiseks.
+Docker tervisekontroll uurib kerge `/healthz` elutsükli lõpp-punkti, mille eesliide on aktiivne `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` jääb human/dashboard diagnostika jaoks kättesaadavaks; konteineri HEALTHCHECK sellele tagasi suunamiseks (näiteks sügavamaks tervisekontrolliks), määrake `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. See tee on a** sügav** kontrollige (DB + monitooringu kokkuvõte) — sobib Docker harvaesineva `HEALTHCHECK` jaoks, kui lubate uuesti, kuid** mitte** Kubernetes `livenessProbe` intervallidele.
 
-Orkestreerimisplatvormide (Kubernetes, Nomad jne) korral:
+Orkestritele (Kubernetes, Nomad jne):
 
-| Kontroll                 | Eelistage                                                        | Vältige                                                        |
-| ------------------------ | ---------------------------------------------------------------- | -------------------------------------------------------------- |
-| Elusolek                 | HTTP `GET /livez` või TCP põhipordil (`PORT`, vaikimisi `20128`) | `/api/monitoring/health` elusoleku kontrollina                 |
-| Valmisolek               | HTTP `GET /healthz`                                              | Lühikesi ajalõppe, mis peavad hõivatud sündmusetsüklit surnuks |
-| Põhjalik / väliskontroll | `/api/monitoring/health`                                         | —                                                              |
+| Sond             | Eelista                                                          | Vältida                                                              |
+| ---------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Elavdus          | HTTP `GET /livez` või TCP põhipordis (`PORT`, vaikimisi `20128`) | `/api/monitoring/health` kui elavus                                  |
+| Valmisolek       | HTTP `GET /healthz`                                              | Tihedad ajalõpud, mis käsitlevad sündmusetsüklit hõivatud kui surnud |
+| Sügav / blackbox | `/api/monitoring/health`                                         | —                                                                    |
 
-`/healthz` annab teada protsessi elutsükli olekust (`ok` / `starting` / `stopping`).
-`/livez` kontrollib ainult protsessi elusolekut (tagastab 200 alati, kui töötleja saab
-käivituda; see ei oota valmisolekut). Mõlemad töötavad siiski päringute töötlemisega
-samas Node'i sündmusetsüklis, mistõttu protsessorimahukas kataloogi- või pakkimistöö
-võib neid viivitada — hõivatud ≠ surnud. Kui HTTP-kontrollid aeguvad, eelistage TCP
-elusolekukontrolli. Täielikud kontrollijuhised:
-[Seirejuhend — Kubernetese kontrollide soovitused](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` teatab protsessi elutsüklist (`ok` / `starting` / `stopping`). `/livez` on ainult protsessi elus (200 alati, kui töötleja saab käivitada; see ei oota valmisolekut). Mõlemad töötavad endiselt samas sõlme sündmuste tsüklis nagu päringu käsitlemine, nii et CPU-ga seotud kataloog või tihendustööd võivad — hõivatud ≠ surnud edasi lükata. Kui HTTP sondid aeguvad, eelistage TCP elavust. Täielikud sondi juhised: [seirejuhend — Kubernetese sondi soovitused](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose koos Caddyga (HTTPS-i automaatne TLS)
+## Docker Loo koos Caddyga (HTTPS Auto-TLS)
 
-OmniRoute'i saab turvaliselt avalikustada Caddy automaatse SSL-i seadistamise abil. Veenduge, et teie domeeni DNS-i A-kirje osutaks teie serveri IP-aadressile.
+OmniRoute saab Caddy automaatse SSL varustamise abil turvaliselt paljastada. Veenduge, et teie domeeni DNS A kirje osutaks teie serveri IP.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Brauserile nähtav lähtekoht OAuth-i tagasikutsete, töölaua linkide ja genereeritud avalike URL-ide jaoks.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Serveritevaheline sisemine URL ajastatud tööde ja isepäringute jaoks.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -473,11 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy määrab ülesvoolu konteineri jaoks standardsed edastuspäised. OmniRoute kasutab
-`NEXT_PUBLIC_BASE_URL`-i OAuth-i tagasikutsete ja genereeritud avalike linkide kanoonilise avaliku
-lähtekohana; autenditud töölaua kirjutuspäringud kasutavad sama lähtekoha päringuid koos seansiga seotud CSRF-i
-kaitsega. Lubage `OMNIROUTE_TRUST_PROXY` ainult täiustatud juurutuste puhul, kus soovite tahtlikult,
-et OmniRoute tuletaks avaliku lähtekoha selgesõnalise konfiguratsiooni asemel usaldusväärsetest edastuspäistest.
+Caddy määrab ülesvoolu konteineri jaoks standardsed edasisaatmispäised. OmniRoute kasutab `NEXT_PUBLIC_BASE_URL` OAuth tagasihelistamiste ja loodud avalike linkide kanoonilise avaliku lähtekohana; Autenditud armatuurlaua kirjutised kasutavad sama päritolu päringuid pluss seansiga seotud CSRF kaitse. Lubage `OMNIROUTE_TRUST_PROXY` ainult täpsemate juurutuste jaoks, kui soovite, et OmniRoute tuletaks avaliku päritolu usaldusväärsetest edasisaadetud päistest selgesõnalise konfiguratsiooni asemel.
 
 ## Cloudflare Quick Tunnel
 
@@ -494,49 +432,51 @@ Lõpp-punktide tunnelipaneele (Cloudflare, Tailscale, ngrok) saab lehel `Setting
 - Dockeri tõmmised sisaldavad süsteemi CA-juursertifikaate ja edastavad need hallatud `cloudflared`-ile, mis väldib TLS-i usaldusvigu tunneli konteineris käivitamisel.
 - Kui soovite, et OmniRoute kasutaks allalaadimise asemel olemasolevat binaarfaili, määrake `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`.
 
-## Tõmmise sildid
+## Pildisildid
 
-| Tõmmis                   | Silt     | Suurus | Kirjeldus                                                 |
-| ------------------------ | -------- | ------ | --------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | Kõrgeim **avaldatud** stabiilne SemVer (mitte git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Kinnitage seda tüüpi silt GitOpsi jaoks                   |
+| Pilt                         | Tag      | Suurus   | Kirjeldus                                                 |
+| ---------------------------- | -------- | -------- | --------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB | Kõrgeim** avaldatud** stabiilne SemVer (mitte git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB | Kinnitage selle klassi silt GitOps jaoks                  |
 
-Mitme platvormi manifest: omapärased `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker valib sobiva arhitektuuri automaatselt; kui peate ARM-hostidel AMD64 emulatsiooni sundima, edastage `--platform linux/amd64`.
+Samad pildid avaldatakse kolmes hoidlas, samade arhitektuuripõhiste kokkuvõtetega: `cheaperinference/omniroute` (Docker Hub, organisatsioon Cheaper Inference, alates 3.8.53), `ghcr.io/cheaper-inference/omniroute` ja pärand `diegosouzapw/omniroute`, mis säilitab oma tõmbeajaloo ja saab endiselt kõik väljalasked. Olemasolevaid `diegosouzapw/omniroute` juurutusi uuendatakse pidevalt; pildi nime vahetamine on valikuline. Allolev `:next` / `:next-web` väljalaskeeelne kanal avaldatakse ainult `diegosouzapw/omniroute` ja GHCR jaoks.
+
+Mitme platvormi manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker valib sobiva arhitektuuri automaatselt; edastage `--platform linux/amd64`, kui peate ARM hostidel AMD64 emulatsiooni sundima.
 
 ### Väljalaskekanalid
 
-OmniRoute avaldab eraldi Dockeri kanalid stabiilsete väljalasete, aktiivse väljalaskeharu testimise ja arenduskoostude jaoks.
+OmniRoute avaldab eraldi Docker kanalid stabiilsete väljaannete, aktiivse väljalaskeharu testimise ja arendusversioonide jaoks.
 
-| Kanal                           | Allikas                                | Muudetavus                 | Soovitatav kasutus                                                                                                                          |
-| ------------------------------- | -------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Allkirjastatud/versioonitud väljalase  | Muutumatu                  | Tootmisjuurutused, mis on kinnitatud täpsele väljalaskele                                                                                   |
-| `:latest` / `:latest-web`       | Kõrgeim **avaldatud** stabiilne SemVer | Muudetav stabiilne viit    | Järgib stabiilseid väljalaskeid **pärast** SemVeri avaldamistööd — ei järgi **ei** haru `main` **ega** avaldamata `release/v*` sissekandeid |
-| `:next` / `:next-web`           | Praegune vaikimisi `release/v*` haru   | Muudetav eelväljalaskeviit | Paranduste testimine, mis on jõudnud aktiivsesse väljalaskeharusse, kuid pole veel stabiilses väljalaskes                                   |
-| `:main` / `:main-web`           | `main` haru                            | Muudetav arendusviit       | Ainult arendus- ja integratsioonitestimiseks                                                                                                |
+| Kanal                           | Allikas                                | Muutuvus                      | Soovitatav kasutamine                                                                                                                |
+| ------------------------------- | -------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `:<version>` / `:<version>-web` | Signed/versioned väljalase             | Muutumatu                     | Tootmisjuurutused, mis kinnitavad täpse versiooni                                                                                    |
+| `:latest` / `:latest-web`       | Kõrgeim** avaldatud** stabiilne SemVer | Muutuva stabiilne osuti       | Järgib stabiilseid väljalaseid** pärast** SemVer avaldamistöö, mida — teeb** mitte** rada `main` või avaldamata `release/v*` commits |
+| `:next` / `:next-web`           | Praegune vaikimisi `release/v*` haru   | Muutuva väljalaskeeelne osuti | Testitakse parandusi, mis on jõudnud aktiivse väljalaske harusse, kuid pole veel stabiilses versioonis                               |
+| `:main` / `:main-web`           | `main` filiaal                         | Muutuv arendusnäidik          | Ainult arendus- ja integratsioonitestid                                                                                              |
 
-#### Veebiseansi pakkujad: `-web` tõmmised
+#### Veebisessiooni pakkujad: `-web` pildid
 
-Kõik ülaltoodud kanalid on saadaval ka `-web` sildina (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), mis koostatakse etapist `runner-web` — sama tõmmis koos Playwrighti ja Chromiumi brauseriga. Tavaline tõmmis tarnitakse **ilma** Chromiumita; `gemini-web`, `claude-web` ja `claude-turnstile` vajavad seda.
+Iga ülaltoodud kanal toimib `-web` märgendina (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), mis on koostatud `runner-web` etapist — sama pildi pluss Playwright ja Chromiumi brauserist. Tavaline pilt saadetakse** ilma** kroom; `gemini-web`, `claude-web` ja `claude-turnstile` vajavad seda.
 
-Tõrge ilmneb hiljem, mitte käivitamisel: need pakkujad loetlevad oma mudelid ja kuvatakse töölaual ühendatuna ning alles esimene päring nurjub teatega
+Tõrge lükatakse edasi, mitte käivitusaeg: need pakkujad loetlevad oma mudelid ja kuvavad armatuurlaual ühendatuna ning ainult esimene taotlus ebaõnnestub
 
 ```
-[500]: Välise mooduli playwright laadimine nurjus: Viga: moodulit ei leitud
+[500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Kui kasutate neid pakkujaid, tõmmake kasutatava kanali `-web` silt — midagi muud ei muutu. npm-i/CLI installi korral (ilma Dockeri tõmmiseta) on samaväärne puuduv komponent brauseri binaarfail: käivitage hostis `npx playwright install chromium`.
+Kui kasutate neid teenusepakkujaid, tõmmake selle kanali `-web` silt, mida olete juba — midagi muud ei muutu. npm/CLI -installi puhul (ilma Docker kujutiseta) on samaväärne puuduv osa brauseri binaarfail: käivitage hostis `npx playwright install chromium`.
 
-#### Eelväljalaskekanali kasutamine
+#### Väljalaskeeelse kanali kasutamine
 
-Kanal `next` ehitatakse uuesti iga tõuke korral praegusesse vaikimisi `release/v*` harusse ning avaldatakse nii AMD64 kui ka ARM64 jaoks. Vanemad hooldusharud ei saa seda üle kirjutada. Kanal pakub allalaaditavat tõmmist parandustega, mis on enne järgmise stabiilse sildi loomist aktiivsesse väljalaskeharusse mestitud.
+`next` kanal ehitatakse igal tõukel ümber praegusele `release/v*` vaikeharule ja avaldatakse nii AMD64 kui ka ARM64 jaoks. Vanemad hooldusharud ei saa seda üle kirjutada. Kanal pakub tõmbatavat pilti paranduste jaoks, mis on enne järgmise stabiilse sildi lõikamist aktiivse väljalaskeharuga liidetud.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose'i puhul kirjuta valitud profiili kasutatav tõmmise silt üle, seejärel laadi tõmmis alla ja loo teenus uuesti:
+Rakenduse Docker Compose puhul alistage valitud profiilis kasutatav pildimärgend, seejärel tõmmake ja looge teenus uuesti:
 
 ```yaml
 services:
@@ -551,30 +491,30 @@ docker compose up -d
 
 #### Ohutus ja tagasipööramine
 
-`next` on ujuv eelväljalaskekanal. See võib aktiivsesse väljalaskeharusse tehtud iga tõuke korral muutuda ja **seda ei toetata tootmiskeskkonnas kasutamiseks**. Konkreetse järgu hindamise ajaks kinnista tõmmise räsi:
+`next` on ujuv eelväljalaskekanal. See võib muutuda igal vajutamisel aktiivse vabastusharule ja on** tootmist ei toetata** . Kinnitage pildi kokkuvõte konkreetse järgu hindamisel:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Enne testimist varunda OmniRoute'i andmeköide või bind-mount'iga ühendatud andmekataloog. Tagasipööramiseks taasta varem kasutatud stabiilne versioon või räsi ja loo konteiner uuesti:
+Enne testimist varundage OmniRoute andmemaht või sideühendusega andmekataloog. Tagasipööramiseks taastage varem kasutatud stabiilne versioon või seedige ja looge konteiner uuesti.
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Väljalaskeharu järk ei saa kunagi muuta silti `latest`; stabiilse viida saab edasi viia ainult sobiv stabiilne semantiline versioon. `next`-tõmmiste puhul säilivad väljalasketõmmise kontroll ja blokeeriv CRITICAL-taseme haavatavuste kontrollvärav.
+Vabastusharu ehitamine ei saa kunagi liigutada `latest`; stabiilset osutit võib edendada ainult sobiv stabiilne semantiline versioon. `next` pildid säilitavad väljalaskekujutise kontrolli ja blokeerivad KRIITILISE haavatavuse värava.
 
-**`latest` ei taga giti suhtes ajakohasust.** Harusse `main` või aktiivsesse `release/v*` harusse mestitud parandused **ei sisaldu** sildiga `:latest` tõmmises enne, kui avaldatakse stabiilne SemVer-tõmmis ja avaldamistöö viib sildi `:latest` edasi (sama räsi nagu sellel SemVer-il). Kui `latest` näib tardunud, kuigi GitHub juba kuvab parandust, laadi väljalaskeharu testimiseks alla `:next` või oota SemVer-silti.
+**`latest` ei ole giti valuutagarantii.** Ühendatud parandused `main` või aktiivses `release/v*` -harus on** mitte** `:latest` kuni avaldatakse stabiilne SemVer pilt ja avaldamistöö edendab `:latest` (sama kokkuvõte mis sellel SemVer). Kui `latest` näib olevat hangunud, samas kui GitHub juba näitab parandust, tõmmake väljalaskeharu testimiseks `:next` või oodake SemVer silti.
 
-| Soov                                                                                           | Kasuta                               |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------ |
-| GitOps/tootmiskeskkond, mis ei tohi triivida                                                   | Kinnista `:X.Y.Z` (või tõmmise räsi) |
-| Järgi avaldatud stabiilseid versioone ja aktsepteeri teenuse taasloomist iga väljalaske korral | `:latest`                            |
-| Testi avaldamata `release/v*` sissekandeid                                                     | `:next` (mitte tootmiskeskkonnas)    |
-| Testi haru `main`                                                                              | `:main` (mitte tootmiskeskkonnas)    |
+| Sa tahad                                                            | Kasutage                                 |
+| ------------------------------------------------------------------- | ---------------------------------------- |
+| GitOps / toodang, mis ei tohi triivida                              | Kinnitage `:X.Y.Z` (või pildi kokkuvõte) |
+| Järgige avaldatud stalle ja nõustuge iga versiooni uuesti loomisega | `:latest`                                |
+| Testige avaldamata `release/v*` toimeid                             | `:next` (mitte tootmine)                 |
+| Testi `main`                                                        | `:main` (mitte tootmine)                 |
 
 ## Juhtpaneeli uuendused Dockeris
 

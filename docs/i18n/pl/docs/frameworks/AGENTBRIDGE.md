@@ -20,7 +20,7 @@ Kiedy agent IDE (np. GitHub Copilot, Cursor, Claude Code) wykonuje wywołanie AP
 
 Oznacza to, że możesz:
 
-- **Przekieruj dowolnego agenta do dowolnego dostawcy** : Copilot rozmawia z OpenAI? Przekieruj go do Anthropic Claude, Gemini lub dowolnego z 381 dostawców OmniRoute.
+- **Przekieruj dowolnego agenta do dowolnego dostawcy** : Copilot rozmawia z OpenAI? Przekieruj go do Anthropic Claude, Gemini lub dowolnego z 394 dostawców OmniRoute.
 - **Zastosuj mapowania modelu** : `gemini-3-flash` → `claude-sonnet-4.7` w sposób przezroczysty na poziomie modułu obsługi.
 - **Obserwuj cały ruch agentów** : każde przechwycone żądanie jest publikowane dla [Inspektora Ruchu](./TRAFFIC_INSPECTOR.md).
 - **Zastosuj odporność OmniRoute** : routing kombinowany, wyłączniki automatyczne, rezerwy i śledzenie kosztów również dla ruchu agenta IDE.
@@ -70,37 +70,23 @@ src/mitm/server.cjs  (port 443, CJS child process)
     └── No match? → TCP passthrough (no decrypt)
 ```
 
-### 2.2 Serwer MITM (`src/mitm/server.cjs`)
+### Serwer 2.2 MITM (`src/mitm/server.cjs`)
 
-Rdzeniowy serwer MITM działa jako proces potomny Node.js CJS (aby uniknąć przepisywania istniejącej bazy kodu CJS). On:
+Podstawowy serwer MITM działa jako proces potomny Node.js CJS (aby uniknąć przepisywania istniejącej bazy kodu CJS ). To:
 
 - Nasłuchuje na porcie 443 (wymaga uprawnień lub `authbind`/`setcap`)
-- Odbiera tunele CONNECT z systemu operacyjnego (przez przekierowanie DNS w `/etc/hosts`)
-- Generuje certyfikaty TLS per-SNI podpisane przez CA AgentBridge (`DATA_DIR/mitm/ca.crt`)
-- Rozwiązuje docelowego agenta po nagłówku Host przez rejestr `targets/index.ts`
-- Przekazuje do warstwy handlerów TypeScript przez HTTP na `http://127.0.0.1:20128`
+- Odbiera tunele CONNECT z OS (poprzez przekierowanie `/etc/hosts` DNS )
+- Generuje certyfikaty TLS per-SNI podpisane przez AgentBridge CA (`DATA_DIR/mitm/ca.crt`)
+- Rozwiązuje agenta docelowego na podstawie nagłówka hosta za pośrednictwem rejestru `targets/index.ts`
+- Wysyłane do warstwy obsługi TypeScript poprzez HTTP do `http://127.0.0.1:20128`
 
-`TARGET_HOSTS` jest ładowany z `DATA_DIR/mitm/targets.json` (zapisywany przez `targets/index.ts` przy starcie), co umożliwia dynamiczne aktualizacje bez restartu serwera CJS.
+`TARGET_HOSTS` jest ładowany z `DATA_DIR/mitm/targets.json` (napisany przez `targets/index.ts` podczas rozruchu), umożliwiając dynamiczne aktualizacje bez ponownego uruchamiania serwera CJS.
 
-> **Model Root-CA (#6684).** Opisany powyżej model certyfikatu per-SNI podpisanego przez CA
-> to utrwalony model root-CA dodany w #6684 (`src/mitm/cert/rootCa.ts` +
-> `src/mitm/_internal/rootCaShim.cjs`, wykorzystujący kryptografię CA/leaf już
-> sprawdzoną dla TPROXY w `src/mitm/tproxy/dynamicCert.ts`) — zastępuje
-> starszy pojedynczy statyczny self-signed leaf (`src/mitm/cert/generate.ts`, nadal
-> ograniczony tylko do hostów antigravity), na który wskazuje sama para `server.crt`/`server.key`
-> na dysku. **Zachowanie migracji**: świeża instalacja (bez wcześniejszego
-> `server.crt`) automatycznie dostaje model root-CA; instalacja, która już
-> zaufała staremu statycznemu leafowi, nadal go używa, dopóki operator nie ustawi
-> `MITM_ROOT_CA_ENABLED=true` i nie zrestartuje bridge'a (`src/mitm/cert/migration.ts`
-> to czysta funkcja decyzyjna — zaufane CA MITM, które może podpisać leaf dla
-> **dowolnego** hosta, jest istotnie silniejsze niż stary leaf z fixed-SAN, więc
-> przełączenie nigdy nie jest ciche dla już zaufanej instalacji). Certyfikat CA instaluje się
-> w tym samym slocie trust-store `omniroute-mitm.crt`, którego używał stary leaf
-> (`cert/install.ts::installCaCert`) — nie jest potrzebne czyszczenie dual-trust.
+> **Model root-CA (#6684).** Powyższy opis per-SNI-cert-signed-by-a-CA to utrwalony model głównego urzędu certyfikacji dodany w #6684 (`src/mitm/cert/rootCa.ts` + `src/mitm/_internal/rootCaShim.cjs`, ponowne wykorzystanie kryptografii CA/leaf już sprawdzonej dla TPROXY w `src/mitm/tproxy/dynamicCert.ts`) — zastępuje starszy pojedynczy statyczny liść z podpisem własnym (`src/mitm/cert/generate.ts`, wciąż ograniczony tylko do hostów antygrawitacyjnych), który wskazuje naga para `server.crt`/`server.key` na dysku.** Zachowanie migracyjne** : nowa instalacja (bez wcześniejszej `server.crt`) automatycznie pobiera model głównego urzędu certyfikacji; instalacja, która już zaufała staremu statycznemu liściemu, będzie go używać, dopóki operator nie ustawi `MITM_ROOT_CA_ENABLED=true` i nie zrestartuje mostu (`src/mitm/cert/migration.ts` to czysta funkcja decyzyjna — zaufany MITM CA, który może podpisać liść dla** każdy** host jest znacznie potężniejszy niż stary liść SAN ze stałą siecią, więc przełącznik nigdy nie milczy w przypadku już zaufanej instalacji). Certyfikat CA instaluje się w tym samym gnieździe magazynu zaufanych certyfikatów `omniroute-mitm.crt`, którego używał stary liść (`cert/install.ts::installCaCert`) — Nie jest potrzebne czyszczenie podwójnego zaufania.
 
-### 2.3 Baza handlerów (`src/mitm/handlers/base.ts`)
+### 2.3 Podstawa obsługi (`src/mitm/handlers/base.ts`)
 
-Wszystkie handlery agentów rozszerzają `MitmHandlerBase`:
+Wszystkie procedury obsługi agentów rozszerzają `MitmHandlerBase`:
 
 ```ts
 export abstract class MitmHandlerBase {
@@ -117,11 +103,11 @@ export abstract class MitmHandlerBase {
 }
 ```
 
-Każdy handler wywołuje `hookBufferStart()` przed proxyowaniem i `hookBufferUpdate()` po zakończeniu. Te metody wrzucają wpisy `InterceptedRequest` do `globalTrafficBuffer` (zob. [Traffic Inspector](./TRAFFIC_INSPECTOR.md) §4).
+Każdy moduł obsługi wywołuje `hookBufferStart()` przed proxy i `hookBufferUpdate()` po zakończeniu. Wpychają one wpisy `InterceptedRequest` do `globalTrafficBuffer` (patrz [Inspektor ruchu drogowego](./TRAFFIC_INSPECTOR.md) §4).
 
-### 2.4 Rejestr targetów (`src/mitm/targets/`)
+### 2.4 Rejestr celów (`src/mitm/targets/`)
 
-Każdy agent ma deklaratywny plik targetu:
+Każdy agent ma deklaratywny plik docelowy:
 
 ```ts
 // src/mitm/targets/copilot.ts
@@ -137,44 +123,46 @@ export const COPILOT_TARGET: MitmTarget = {
 };
 ```
 
-Rejestr (`targets/index.ts`) eksportuje `ALL_TARGETS` i przy starcie emituje `DATA_DIR/mitm/targets.json`.
+Rejestr (`targets/index.ts`) eksportuje `ALL_TARGETS` i emituje `DATA_DIR/mitm/targets.json` podczas rozruchu.
 
-### 2.5 Passthrough i lista bypass (`src/mitm/passthrough.ts`)
+### 2.5 Lista przejść i obejść (`src/mitm/passthrough.ts`)
 
-**Lista bypass** (sprawdzana pierwsza, z pierwszeństwem nad dopasowaniem targetu):
+**Lista obejść** (zaznaczone jako pierwsze, z pierwszeństwem przed dopasowaniem docelowym):
 
-- Wzorce domyślne: hosty bankowe, `.gov.`, providery OAuth/SSO (Okta, Auth0) itd.
+- Domyślne wzorce: hosty bankowe, `.gov.`, dostawcy OAuth/SSO (Okta, Auth0) itp.
 - Wzorce użytkownika: przechowywane w tabeli DB `agent_bridge_bypass`
-- Hosty z bypassu dostają przezroczysty tunel TCP — TLS **nigdy nie jest deszyfrowany**
+- Ominięte hosty otrzymują przezroczysty tunel TCP — TLS is** nigdy nie odszyfrowany**
 
-**Domyślny passthrough** (brak dopasowania targetu i brak na liście bypass):
+**Domyślne przekazywanie** (brak dopasowania celu i brak obejścia):
 
-- Również dostaje tunel TCP — połączenia nigdy nie są zrywane
-- Zapobiega zakłócaniu przez AgentBridge ogólnego ruchu HTTPS systemu
+- Otrzymuje również tunel TCP połączenia — nigdy nie są zrywane
+- Zapobiega zakłócaniu przez AgentBridge ogólnego ruchu HTTPS w systemie
 
-Kolejność routingu:
+Pierwszeństwo routingu:
 
 ```
 bypass list → target match → passthrough
 ```
 
-### 2.6 Certyfikat CA upstream (`src/mitm/upstreamTrust.ts`)
+### 2.6 Certyfikat CA wyższego szczebla (`src/mitm/upstreamTrust.ts`)
 
-Dla środowisk sieci korporacyjnych z własnym CA:
+Dla środowisk sieci korporacyjnych z niestandardowym CA:
 
 ```bash
 AGENTBRIDGE_UPSTREAM_CA_CERT=/path/to/corporate-ca.pem
 ```
 
-Po ustawieniu konfiguruje globalny dispatcher `undici` o dodatkowy certyfikat CA, dzięki czemu AgentBridge może dotrzeć do upstreamowych providerów przez korporacyjne proxy terminujące TLS.
+Po ustawieniu konfiguruje globalnego dyspozytora `undici` z dodatkowym certyfikatem CA, umożliwiając AgentBridge dotarcie do dostawców wyższego szczebla za pośrednictwem korporacyjnych serwerów proxy zakończenia TLS.
 
-### 2.7 Maskowanie sekretów (`src/mitm/maskSecrets.ts`)
+### 2.7 Sekretne maskowanie (`src/mitm/maskSecrets.ts`)
 
-Stosowane do wszystkich ciał żądań i nagłówków **zanim** trafią do bufora Traffic Inspector lub jakiegokolwiek logu:
+Niezależny skaner pomieszczeń czystych jest stosowany do treści żądań i nagłówków poświadczeń** zanim** wchodzą do bufora Inspektora ruchu lub dowolnego dziennika. Wykonuje pojedynczy przebieg liniowy:
 
-- Tokeny z prefiksem `sk-` / `ak-` / `pk-` (styl OpenAI/Anthropic)
-- Nagłówki `Authorization: Bearer <token>`
-- Generyczne długie tokeny (≥40 znaków)
+- Tokeny z przedrostkiem `sk-` / `ak-` / `pk-` (OpenAI/Anthropic-style)
+- RFC 6750 poświadczenia `Authorization: Bearer <token>`, z pierwszeństwem całego tokenu
+- Ogólne, długie, nieprzezroczyste tokeny (≥ 40 znaków), w tym formy kropkowane i wyściełane
+
+`sanitizeHeaders()` zachowuje nazwy małymi literami, deterministycznie łączy wartości tablicy, usuwa współdzieloną listę odrzuconych hop-by-hop/framing (w tym uwierzytelnianie proxy), całkowicie redaguje `cookie` i `set-cookie` oraz deleguje wartości referencji do skanera.
 
 ---
 

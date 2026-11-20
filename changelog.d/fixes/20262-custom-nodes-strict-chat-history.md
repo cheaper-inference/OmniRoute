@@ -1,0 +1,1 @@
+- Enable `strictChatHistory` sequence repair for custom OpenAI-compatible nodes via `providerSpecificData` so interrupted tool turns and orphaned tool call results can be repaired automatically (#20262).

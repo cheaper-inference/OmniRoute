@@ -12,6 +12,7 @@ export interface ConnectionRowConnection {
   name?: string;
   email?: string;
   displayName?: string;
+  apiKey?: string;
   rateLimitedUntil?: string;
   rateLimitProtection?: boolean;
   rateLimitAutoProtected?: boolean;

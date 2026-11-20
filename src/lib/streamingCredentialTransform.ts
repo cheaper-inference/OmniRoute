@@ -1,7 +1,9 @@
 import { createSseTextTransform, type FieldCategory } from "./sseTextTransform";
 import {
   bufferField,
+  ensureResponsesTextDeltaIds,
   flushOpenAiTextBuffers,
+  responsesTextTailDelta,
   type BufferedField,
   type TextBuffers,
 } from "./sseTextBuffers";
@@ -287,6 +289,15 @@ function createChoiceBufferStore(maxBufferedChoices: number): ChoiceBufferStore 
   };
 }
 
+/** Bytes still held across every block's buffers (what the buffering limit charges). */
+function countBufferedBytes(store: ChoiceBufferStore): number {
+  let total = 0;
+  for (const buffers of store.buffers.values()) {
+    for (const value of Object.values(buffers)) total += value.length;
+  }
+  return total;
+}
+
 function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   for (const [, buffers] of store.takeAll()) {
     for (const key of Object.keys(buffers) as BufferedField[]) {
@@ -370,7 +381,7 @@ function flushResponsesFormat(
       buffers.reasoning = "";
     }
     if (!parts.length) return null;
-    return { type: "response.output_text.delta", output_index: idx, delta: parts.join("") };
+    return responsesTextTailDelta(lastJson, idx, parts.join(""));
   }
   const finalJson = JSON.parse(JSON.stringify(lastJson)) as Record<string, unknown>;
   if (buffers.content) {
@@ -385,6 +396,7 @@ function flushResponsesFormat(
     finalJson.reasoning = buffers.reasoning;
     buffers.reasoning = "";
   }
+  ensureResponsesTextDeltaIds(finalJson, idx);
   return finalJson;
 }
 
@@ -672,10 +684,7 @@ export function createCredentialSseTransform(
         ? flushEmptyStream(getBuffers, isJsonStream)
         : flushRemainingByShape(store, lastJson, lastContentJson);
     // A per-block flush leaves other tails in memory; keep them charged against the limit.
-    bufferedBytes = 0;
-    for (const buffers of store.buffers.values()) {
-      for (const value of Object.values(buffers)) bufferedBytes += value.length;
-    }
+    bufferedBytes = countBufferedBytes(store);
     return flushed;
   };
 

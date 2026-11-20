@@ -29,70 +29,61 @@ canji da aka saba yi da kwangilolinsa, takamaiman bincike, da ɗaukar nauyin CI.
 6. **Rubuta shaidu.** A cikin samfurin PR, jera umarnin da aka gudanar, kowane fayil ɗin gwaji da aka ƙara ko aka canja,
    ƙaura ko tutocin fasali, da duk wani ingantawa na CI kaɗai da har yanzu ake jira.
 
-## Hanyoyi mafi dacewa bisa nau'in canji
+## Hanyoyin zinare ta nau'in canji
 
-Umarnin da ke ƙasa su ne mafi ƙarancin takamaiman bincike, ba izinin tsallake gwajin da ke rufe
-halayen da ka canja kai tsaye ba.
+Umurnin da ke ƙasa sune mafi ƙarancin dubawar mayar da hankali, ba izini don tsallake gwajin da ya shafi halin da kuka canza kai tsaye ba.
 
-### Mai samarwa
+### Mai bayarwa
 
 **Kwangiloli**
 
-- Ma'anar mai samarwa a `src/shared/constants/providers/` da haɗuwarta a
-  `src/shared/constants/providers.ts`.
-- Samfura da iyawa a `open-sse/config/providerRegistry.ts` ko fayilolin rajistar da aka ware daga gare shi.
-- Zaɓin executor/translator, saitin OAuth ko API-key, kadarorin dashboard, da takardar
-  bayanin mai samarwa da aka samar idan ya dace.
-- Shaidun shiga na jama'a dole ne su yi amfani da `resolvePublicCred()`; amsoshin kuskure dole ne su yi amfani da mataimakan
-  kuskure da aka tsabtace na gama-gari. Duba `docs/security/PUBLIC_CREDS.md` (git; ba a haɗa shi cikin `/docs` ba) da
-  [Tsabtace Kuskure](../security/ERROR_SANITIZATION.md).
+- Ma'anar mai bayarwa a cikin `src/shared/constants/providers/` da abun da ke ciki a cikin `src/shared/constants/providers.ts`.
+- Samfura da iyakoki a cikin `open-sse/config/providerRegistry.ts` ko fayilolin rajista da aka fitar.
+- zaɓi Executor/translator, OAuth ko saitin maɓallin API da kadarorin dashboard. Kar a yi sabon zane-zane na `docs/reference/PROVIDER_REFERENCE.md` ko README : sakewar sakewa yana sake rubuta su (`check:pr-derived-paths` ya gaza fasalin PR wanda ke ɗauke da su).
+- Dole ne takardun shaidar jama'a su yi amfani da `resolvePublicCred()`; martanin kuskure dole ne su yi amfani da masu taimakon kuskuren da aka raba. Dubi `docs/security/PUBLIC_CREDS.md` (git; ba a haɗa cikin `/docs`) da [Tsabtace Kuskure](../security/ERROR_SANITIZATION.md) ba.
 
-**Takamaiman zagaye**
+**Madaidaicin madauki**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # idan katalog ya canja; yi commit na bambancin da aka samar
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Haka kuma gwada kowane rukunin buƙata da abin ya shafa: chat, Responses, hotuna, embeddings, sauti, ko bidiyo.
-Binciki bambance-bambancen katalog da golden da aka samar a matsayin canje-canjen kwangila; kada ka karɓe su ba tare da dubawa ba.
+Hakanan gwada kowane dangi da abin ya shafa: taɗi, Amsoshi, hotuna, sakawa, sauti, ko bidiyo. Bita kasida da aka samar da bambance-bambancen zinare yayin canje-canjen kwangila; kar ku karbe su a makance.
 
-### Jagorantar hanya
+### Hanyar hanya
 
 **Kwangiloli**
 
-- Ƙimomin dabarun jama'a da metadata na UI a `src/shared/constants/routingStrategies.ts`.
-- Aikawa da tsara jeri a ƙarƙashin `open-sse/services/combo.ts` da `open-sse/services/combo/`.
-- Combo schemas, adanawa, yanayin juriya, iyawar samfuri, da abubuwan sarrafawa na API/UI.
-- [Injin Auto-Combo](../routing/AUTO-COMBO.md) da takardun juriya idan hali ya canja.
+- Ƙimar dabarun jama'a da UI metadata a cikin `src/shared/constants/routingStrategies.ts`.
+- Aika da oda a ƙarƙashin `open-sse/services/combo.ts` da `open-sse/services/combo/`.
+- Shirye-shiryen haɗe-haɗe, dagewa, yanayin juriya, ƙarfin ƙira, da sarrafa API/UI.
+- [Injin Combo Auto](../routing/AUTO-COMBO.md) da takaddun juriya lokacin da hali ya canza.
 
-**Takamaiman zagaye**
+**Madaidaicin madauki**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # canje-canjen dabara ko aikawa
-npm run check:known-symbols      # canje-canjen rajistar dabara
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Yi amfani da gwaje-gwajen mocked-upstream masu tabbataccen sakamako a gida. Gwaje-gwajen combo na kai-tsaye suna buƙatar shaidun shiga kuma
-na hannu ne, ba madadin CI ba.
+Yi amfani da ƙayyadaddun gwaje-gwajen izgili na sama a cikin gida. Shan taba mai rai yana buƙatar takaddun shaida kuma jagora ne, ba maye gurbin CI ba.
 
 ### UI / UX
 
 **Kwangiloli**
 
-- Iyakar route/page na Next.js da shared component a ƙarƙashin `src/app/` da
-  `src/shared/components/`.
-- Tsarukan amsar API, yanayin lodawa/wofi/kuskure, halayen madannai da screen-reader,
-  tsarin shimfiɗa mai daidaitawa, jigo, da faɗaɗa locale.
-- Rubutun tushen UI na Turanci a `src/i18n/messages/en.json`; kada a saka sabon rubutun da mai amfani zai gani kai tsaye a cikin lamba.
+- Next.js route/page da iyakoki da aka raba a ƙarƙashin `src/app/` da `src/shared/components/`.
+- Siffofin amsa API, jihohin loading/empty/error, madannai da halayyar mai karanta allo, shimfidar amsawa, jigo, da faɗaɗa yanki.
+- Turanci UI tushen kirtani a cikin `src/i18n/messages/en.json`; kar a yi sabon kwafin mai fuskantar mai wuya-code.
 
-**Takamaiman zagaye**
+**Madaidaicin madauki**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Gudanar da manhajar don canje-canjen mu'amala ko gani sannan ka duba duka kunkuntar da faffadan faɗin allo. CI yana gudanar da
-ginin samarwa da faffadan rukunin gwaje-gwaje; har yanzu halayen gani suna buƙatar takamaiman gwajin component, Playwright,
-ko rubutaccen binciken hannu da ya dace da canjin.
+Gudun ƙa'idar don mu'amala ko canje-canje na gani kuma bincika duka kunkuntar wuraren kallo. CI tana gudanar da ginin samarwa da kuma manyan suites; Halayen gani har yanzu yana buƙatar abin da aka mayar da hankali, Playwright, ko rubuce-rubucen rajistan hannu wanda ya dace da canjin.
 
-### i18n
+### ina 18n
 
 **Kwangiloli**
 
-- `src/i18n/messages/en.json` shi ne tushen UI; `config/i18n.json` shi ne tushen locale.
-- Katalog na CLI suna zama daban a ƙarƙashin `bin/cli/locales/`.
-- Kiyaye ICU placeholders da tags daidai. Kada a fassara sunayen samfur/mai samarwa/model,
-  sunayen protocol da header, umarni, masu ganowa na code/JSON, URLs, environment variables, ko
-  keɓaɓɓun kalmomi kamar `OmniRoute`, `OAuth`, `MCP`, da `A2A`. Jerin tushen na yanzu yana
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` shine tushen UI ; `config/i18n.json` shine tushen gida.
+- CLI catalogs suna rayuwa daban a ƙarƙashin `bin/cli/locales/`.
+- Kiyaye masu riƙe ICU da alamar daidai. Kar a fassara sunayen product/provider/model, yarjejeniya da sunayen taken, umarni, masu gano code/JSON, URLs, masu canjin yanayi, ko sharuɗɗan da aka kare kamar `OmniRoute`, `OAuth`, `MCP`, da `A2A`. Jerin tushen yanzu shine `scripts/i18n/glossary/protected-terms.json`.
 
-**Takamaiman zagaye**
+Siffar PR tana gyara `src/i18n/messages/en.json` kawai (CLI: `bin/cli/locales/en.json`); sauran wuraren ana kammala sau ɗaya a kowace fitowa ta hanyar wartsakewa na sakin ko motsin fassarar (`docs/guides/I18N.md` → "Feature PRs touch `en.json` kawai"). `npm run check:pr-derived-paths` ya kasa fasalin PR wanda ke gyara wani katalojin yanki.
+
+**Madaidaicin madauki**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # idan rubutun/katalog na CLI suka canja
 npm run lint
 ```
 
-Wannan jagora ne ga tsarin da ake da shi, ba gayyata don faɗaɗa kayan aikinsa ko tsarin key ba.
-Kiyaye gyare-gyaren i18n su zama ƙanana kuma takamaimai yayin da ake tsara tsarin da zai maye gurbinsa. Kada a gudanar da umarnin fassara
-da ke kiran ayyukan waje sai idan aikin ya buƙaci fassarorin da aka samar a sarari kuma
-ka binciki bambancin da aka samu.
+Ba tare da `--mode=pr` waɗannan ƙofofin suna gudana cikin yanayin fitarwa a cikin gida kuma suna ba da rahoton kowane maɓalli da sake zagayowar da aka ƙara ko sake rubutawa a cikin `en.json`; wannan shine aikin wartsakewa, ba na PR na ku ba.
+
+Wannan jagora ce ga tsarin da ake da shi, ba gayyata don faɗaɗa kayan aiki ko ƙirar maɓalli ba. Rike i18n faci a yi aikin tiyata yayin da ake tsara tsarin maye gurbin. Kada ku gudanar da umarnin fassarar da ke kiran sabis na waje sai dai idan aikin yana buƙatar fassarori da aka ƙirƙira kai tsaye kuma kun sake duba sakamakon.
 
 ### CLI
 
 **Kwangiloli**
 
-- Umarnin jama'a da tutoci a cikin `bin/cli/`, umarnin API da aka samar, lambobin fita, stdout/stderr da
-  siffofin fitarwa na JSON, halayen saituna/muhalli, da fayilolin da aka kunshe.
-- Rubutun da masu amfani ke gani a CLI dole ne su yi amfani da tsarin i18n na CLI kuma a daidaita kundin `en`/`pt-BR`.
-- A kiyaye Node a matsayin runtime da ake tallafawa da kuma yarjejeniyar binary da aka wallafa.
+- Umarni na jama'a da tutoci a cikin `bin/cli/`, samar da umarnin API, lambobin fita, sifofin fitarwa stdout/stderr da JSON, halin config/environment, da fayilolin da aka tattara.
+- CLI da ke fuskantar mai amfani dole ne su yi amfani da layin CLI i18n ( maɓallan `t()` waɗanda ke cikin `bin/cli/locales/en.json`). Siffar PR tana gyara `en.json` kawai; `pt-BR` da sauran wuraren ana kammala su a lokacin fitarwa.
+- Kiyaye Node azaman lokacin aiki mai goyan baya da kwangilar binaryar da aka buga.
 
-**Zagayen da aka mayar da hankali a kai**
+**Madaidaicin madauki**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # sauye-sauyen CLI da aka samar/aka haɗa
-npm run check:pack-policy     # sauye-sauyen abin da package ke fallasawa
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Yi amfani da ainihin umarnin a cikin kundin bayanai na wucin gadi idan hali ya dogara da parsing, fayiloli, ko matsayin
-fita. CI yana aiwatar da ƙarin binciken artifact na package da na tsarin ecosystem.
+Yi amfani da madaidaicin umarni a cikin kundin bayanan bayanan wucin gadi lokacin da hali ya dogara da rarrabawa, fayiloli, ko matsayin fita. CI yana aiwatar da fakitin fakiti mafi fa'ida da duba yanayin muhalli.
 
-### Rumbun bayanai
+### Database
 
-**Yarjejeniyoyi**
+**Kwangiloli**
 
-- Module na domain a ƙarƙashin `src/lib/db/`; a shigo da takamaiman module kai tsaye (an cire tsohon matakin sake-fitarwa na `localDb.ts`).
-- Migrations na SQL masu lambobi kuma masu idempotent a ƙarƙashin `src/lib/db/migrations/`, amincin transaction, halayen
-  haɓakawa, indexes, da duk wani caller da schema ya shafa.
-- Routes da handlers ba sa taɓa aiwatar da raw SQL kai tsaye.
+- Domain modules karkashin `src/lib/db/`; shigo da takamaiman kayayyaki kai tsaye (an cire tsohon layin sake fitarwa `localDb.ts` ).
+- An ƙidaya, ƙauran SQL masu ƙarfi a ƙarƙashin `src/lib/db/migrations/`, amincin ciniki, haɓaka ɗabi'a, fihirisa, da kowane mai kira da tsarin ya shafa.
+- Hanyoyi da masu gudanarwa ba sa fitar da danyen SQL kai tsaye.
 
-**Zagayen da aka mayar da hankali a kai**
+**Madaidaicin madauki**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Gwada sabon rumbun bayanai da kuma haɓakawa daga schema na baya yayin ƙara migration. Gwaje-gwajen rumbun bayanai
-dole ne su rufe handles kuma su kira `resetDbInstance()` yayin tsaftacewa. Gudanar da `npm run test:bun:db` kawai idan
-hanyar adapter ta Bun mai best-effort ta sauya; Node ne har yanzu madogara ta hukuma.
+Gwada sabon bayanan bayanai da haɓakawa daga tsarin da ya gabata lokacin ƙara ƙaura. Gwajin bayanan bayanai dole ne su rufe hannaye kuma a kira `resetDbInstance()` yayin tsaftacewa. Gudun `npm run test:bun:db` kawai lokacin da mafi kyawun ƙoƙarin Bun hanyar adaftar ta canza; Node ya kasance mai iko.
 
-### Ginawa / turawa
+### Gina / turawa
 
-**Yarjejeniyoyi**
+**Kwangiloli**
 
-- Manifests/lockfile na root da workspace, `scripts/build/`, haɗa standalone na Next.js, abubuwan da ke cikin package na `dist/`,
-  metadata na dandamalin Electron, workflows na CI, da sentinels na turawa.
-- Ranges na Node da ake tallafawa da amfani da Bun da aka amince da shi a cikin `CLAUDE.md` dole ne su ci gaba da kasancewa yadda suke.
-- Kada a bibiyi artifacts na gini; manufofin dependencies, lasisi, workflow, da package suna aiki.
+- Tushen da sararin aiki manifests/lockfile, `scripts/build/`, taro na tsaye Next.js, abubuwan fakitin `dist/`, metadata dandamali na Electron, ayyukan aiki CI, da tura sakonni.
+- Matsakaicin Node masu goyan baya da kuma amfani da Bun da aka jera a cikin `CLAUDE.md` dole ne su kasance cikakke.
+- Gina kayan tarihi ba a gano su ba; dogara, lasisi, tafiyar aiki, da manufofin fakitin suna aiki.
 
-**Zagayen da aka mayar da hankali a kai**
+**Madaidaicin madauki**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # sauye-sauyen dependency ko lockfile
-npm run check:pack-policy      # sauye-sauyen abin da package da aka wallafa ke fallasawa
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Yi amfani da `npm run build` a gida kawai idan sauyin ya shafi compilation, haɗa standalone, assets,
-ko bundling na runtime. Yi amfani da `npm run build:release` kawai don tabbatar da release/turawa. Ginin CI shi ne
-sigina na ƙarshe na dandamali daban-daban; sauye-sauyen Electron na takamaiman dandamali suna buƙatar ginin da ya dace da aka mayar da hankali a kai
-ko shaidar smoke.
+Yi amfani da `npm run build` a cikin gida kawai lokacin da canjin ya shafi haɗawa, haɗin kai, kadarori, ko haɗa lokacin aiki. Yi amfani da `npm run build:release` kawai don tabbatar da release/deploy. Ginin CI shine siginar giciye na ƙarshe; ƙayyadaddun canje-canjen Electron na dandamali yana buƙatar madaidaicin ginin da aka mayar da hankali ko shaidar hayaki.
 
 ## Skriptocin masu haɓakawa don na’ura da ake rabawa
 
