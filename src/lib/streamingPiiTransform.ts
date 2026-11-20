@@ -3,7 +3,9 @@ import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextT
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 import {
   bufferField,
+  ensureResponsesTextDeltaIds,
   flushOpenAiTextBuffers,
+  responsesTextTailDelta,
   type BufferedField,
   type TextBuffers,
 } from "./sseTextBuffers";
@@ -207,7 +209,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
         if (!buffers.content) return null;
         const delta = buffers.content;
         buffers.content = "";
-        return { type: "response.output_text.delta", output_index: idx, delta };
+        return responsesTextTailDelta(lastJson, idx, delta);
       }
       const finalJson = JSON.parse(JSON.stringify(lastJson));
       if (buffers.content) {
@@ -220,6 +222,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
         };
         buffers.toolArgs = "";
       }
+      ensureResponsesTextDeltaIds(finalJson, idx);
       return finalJson;
     }
 
