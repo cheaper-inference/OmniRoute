@@ -345,6 +345,14 @@ export async function createProxy(payload: ProxyPayload) {
   return getProxyById(id, { includeSecrets: false });
 }
 
+function buildUpsertProxyUpdateChanges(payload: UpsertProxyPayload): Partial<ProxyPayload> {
+  const { status, type, ...rest } = payload;
+  const changes: Partial<ProxyPayload> = { ...rest };
+  if (type !== undefined) changes.type = type;
+  if (isProxyRegistryStatus(status)) changes.status = status;
+  return changes;
+}
+
 /**
  * Upsert a proxy by its identity tuple (host+port+username).
  * If a proxy with the same host, port, and username already exists, update it.
@@ -402,12 +410,7 @@ export async function upsertProxy(
     if (!claimOwnership && (ownerChanged || sourceChanged)) {
       return { proxy: null, action: "skipped" };
     }
-    const { status, type, ...rest } = payload;
-    const changes: Partial<ProxyPayload> = {
-      ...rest,
-      ...(type !== undefined ? { type } : {}),
-      ...(isProxyRegistryStatus(status) ? { status } : {}),
-    };
+    const changes = buildUpsertProxyUpdateChanges(payload);
     // Sync and import paths delegate here with an already-proven subscription
     // (sync checks the subscription once up front; import payloads never carry
     // one), so the existence check is skipped on this path. Route updates go
