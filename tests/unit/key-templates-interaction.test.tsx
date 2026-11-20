@@ -592,6 +592,58 @@ describe("template loading and draft validation", () => {
     });
   });
 
+  const openCreate = async () => {
+    fireEvent.click((await screen.findAllByRole("button", { name: "createKey" }))[0]);
+    fireEvent.change(screen.getByLabelText("keyName"), { target: { value: "Fresh" } });
+  };
+  const inDialog = (name: string) =>
+    within(screen.getByRole("dialog")).getByRole("button", { name });
+  const preset7 = () => screen.getAllByRole("button", { name: "keyExpiryPresetDays" })[0];
+  const endOfDay = () => screen.getByLabelText("keyExpiryEndOfDay") as HTMLInputElement;
+  const postedExpiry = (request: ReturnType<typeof installPageRequests>) =>
+    request.mock.calls
+      .filter(([url, init]) => url === "/api/keys" && init?.method === "POST")
+      .map(([, init]) => JSON.parse(init!.body as string).policy.expiry);
+  it("a validity preset is posted as a TTL that ends at 23:59 local", async () => {
+    const request = installPageRequests(async () =>
+      json({ template: second, referenceIssues: [] })
+    );
+    render(<ApiManagerPageClient />);
+    await openCreate();
+    fireEvent.click(preset7());
+    const end = new Date();
+    end.setDate(end.getDate() + 7);
+    end.setHours(23, 59, 0, 0);
+    fireEvent.click(inDialog("createKey"));
+    await waitFor(() => expect(postedExpiry(request).length).toBe(1));
+    const [expiry] = postedExpiry(request);
+    expect(expiry.mode).toBe("relative");
+    expect(
+      Math.abs(expiry.ttlSeconds - Math.floor((end.getTime() - Date.now()) / 1000))
+    ).toBeLessThanOrEqual(5);
+  });
+  it("closing resets end-of-day; non-day TTLs disable it; switched off it keeps the exact duration", async () => {
+    const request = installPageRequests(async () =>
+      json({ template: second, referenceIssues: [] })
+    );
+    render(<ApiManagerPageClient />);
+    await openCreate();
+    fireEvent.click(preset7());
+    expect(endOfDay().checked).toBe(true);
+    fireEvent.click(inDialog("dismiss-modal"));
+    await openCreate();
+    expect(endOfDay().checked).toBe(false);
+    fireEvent.click(inDialog("customizeFullPolicy"));
+    fireEvent.click(inDialog("Set exact TTL"));
+    expect(endOfDay().disabled).toBe(true);
+    fireEvent.click(preset7());
+    expect([endOfDay().disabled, endOfDay().checked]).toEqual([false, true]);
+    fireEvent.click(endOfDay());
+    fireEvent.click(inDialog("createKey"));
+    await waitFor(() => expect(postedExpiry(request).length).toBe(1));
+    expect(postedExpiry(request)[0]).toEqual({ mode: "relative", ttlSeconds: 604800 });
+  });
+
   it("does not change the edit target when an earlier template detail arrives late", async () => {
     let resolveOld!: (response: Response) => void;
     const old = new Promise<Response>((r) => {

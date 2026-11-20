@@ -1,6 +1,7 @@
 process.env.TZ = "America/New_York"; // a fixed zone with DST; set before any Date is created
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 const {
   KEY_EXPIRY_PRESET_DAYS,
@@ -67,4 +68,21 @@ test("alignTtlSecondsToEndOfLocalDay: whole days reach 23:59 local; anything els
   assert.equal(alignTtlSecondsToEndOfLocalDay(36 * 3600, now), 36 * 3600);
   assert.equal(alignTtlSecondsToEndOfLocalDay(DAY, local(2026, 11, 19, 23, 59, 30)), 86370);
   assert.equal(alignTtlSecondsToEndOfLocalDay(3650 * DAY, now), 3650 * DAY); // aligned value would pass the server maximum
+  assert.equal(alignTtlSecondsToEndOfLocalDay(DAY * 1e9, now), DAY * 1e9); // aligned value is not a finite number
+});
+
+test("the validity strings exist in the English catalog", () => {
+  const { apiManager } = JSON.parse(
+    readFileSync(new URL("../../src/i18n/messages/en.json", import.meta.url), "utf8")
+  );
+  const keys = [
+    "keyExpiryPresetPlusDays",
+    "keyExpiryPresetsHint",
+    "keyValidity",
+    "keyValidityDesc",
+    "keyExpiryPresetDays",
+    "keyExpiryEndOfDay",
+    "keyExpiryEndOfDayDesc",
+  ];
+  for (const key of keys) assert.equal(typeof apiManager[key], "string", key);
 });

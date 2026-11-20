@@ -31,12 +31,13 @@ export function endOfLocalDayAfterDays(days: number, now: Date): Date {
 
 /**
  * Stretches a whole-day TTL so it ends at 23:59 local time on its last day. Any other TTL, or one
- * whose aligned value would pass the server maximum, is returned unchanged.
+ * whose aligned value would pass the server maximum or is not a finite number, is returned
+ * unchanged.
  */
 export function alignTtlSecondsToEndOfLocalDay(ttlSeconds: number, now: Date): number {
   const days = wholeDaysFromTtlSeconds(ttlSeconds);
   if (days === null) return ttlSeconds;
   const end = endOfLocalDayAfterDays(days, now);
   const aligned = Math.floor((end.getTime() - now.getTime()) / 1000);
-  return aligned > MAX_TTL_SECONDS ? ttlSeconds : aligned;
+  return !Number.isFinite(aligned) || aligned > MAX_TTL_SECONDS ? ttlSeconds : aligned;
 }

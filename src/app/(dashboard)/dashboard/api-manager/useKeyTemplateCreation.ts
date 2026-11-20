@@ -122,6 +122,7 @@ function useCreateDraftValues() {
   const [newKeySelfUsageEnabled, setNewKeySelfUsageEnabled] = useState(true);
   const [newKeyAccountQuotaEnabled, setNewKeyAccountQuotaEnabled] = useState(false);
   const [newKeyAllowUsageCommand, setNewKeyAllowUsageCommand] = useState(false);
+  const [newKeyExpiryEndOfDay, setNewKeyExpiryEndOfDay] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
@@ -164,6 +165,8 @@ function useCreateDraftValues() {
     setNewKeyAccountQuotaEnabled,
     newKeyAllowUsageCommand,
     setNewKeyAllowUsageCommand,
+    newKeyExpiryEndOfDay,
+    setNewKeyExpiryEndOfDay,
     nameError,
     setNameError,
     createError,
@@ -197,6 +200,7 @@ function useCreatePolicyDraft() {
     setNewKeySelfUsageEnabled,
     setNewKeyAccountQuotaEnabled,
     setNewKeyAllowUsageCommand,
+    setNewKeyExpiryEndOfDay,
     setNameError,
     setCreateError,
     setSelectedTemplateId,
@@ -237,6 +241,7 @@ function useCreatePolicyDraft() {
     setEditorBlockingRefs(null);
     const defaultForm = createDefaultPolicyEditorFormState();
     setNewKeyName("");
+    setNewKeyExpiryEndOfDay(false);
     syncCreateKeyFormState(defaultForm);
     setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
     setSelectedTemplateId("");
@@ -254,6 +259,7 @@ function useCreatePolicyDraft() {
     setEditorBlockingRefs,
     setLoadingTemplatePolicy,
     setNameError,
+    setNewKeyExpiryEndOfDay,
     setNewKeyName,
     setSelectedTemplateId,
     setSelectedTemplateRef,
