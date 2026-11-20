@@ -563,14 +563,26 @@ queue deliberately reads none (see below):
   so without this rule that PR's author could cancel, fail or re-run checks on it at will. Check
   runs that come from no Actions workflow run (other apps) are not read either. Until GitHub
   lists a push run for the ref, the verdict stays pending;
-- inside those suites, only the check runs of the push runs' **jobs** count. The tick lists the
-  jobs of each push run of the ref (`listWorkflowRunJobs`:
+- inside those suites, only the check runs of the push runs' **real jobs** count. The tick lists
+  the jobs of each push run of the ref (`listWorkflowRunJobs`:
   `GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs?filter=all`, every attempt, so the jobs a
-  re-run adds still count) and keeps the check runs those jobs name (each job's `check_run_url`).
-  Any token with `checks: write` (the `GITHUB_TOKEN` of any workflow run in the repository) can
-  create a check run on the candidate SHA, and GitHub files it in one of the commit's Actions
-  suites. Such a run is no job: it is ignored for the verdict (neither green nor red), and the
-  first tick that meets it for a batch records one `error` event,
+  re-run adds still count) and keeps the check runs those jobs name (each job's `check_run_url`),
+  but only for a listed entry that is a real job of that run (`isRealWorkflowJob` in
+  `scripts/merge-queue/contracts.mjs`). Any token with `checks: write` (the `GITHUB_TOKEN` of any
+  workflow run in the repository) can create a check run, with any name and conclusion, on the
+  candidate SHA. Measured on 2026-11-19: GitHub files it in one of the commit's Actions suites
+  and **lists it among the jobs** of the workflow run that owns that suite, with that run's id and
+  workflow name, but with `html_url` `https://github.com/<owner>/<repo>/runs/<check run id>`, no
+  runner (`runner_id` null), no labels and no steps. A real job's `html_url` is
+  `https://github.com/<owner>/<repo>/actions/runs/<run id>/job/<job id>` (at a re-run's later
+  attempt too), and its job id is its check run's id. A real job that was skipped has no runner and
+  no steps either, so the runner alone does not tell them apart. The tick counts a listed entry as
+  a job only when its `html_url` path ends in `/actions/runs/<run id>/job/<job id>` for the run it
+  listed and the entry's own id, and the entry's check run is that id; a `success` also needs a
+  runner. Anything else, a missing or unreadable `html_url` included, is not a job. Such a check
+  run is ignored for the verdict (neither green nor red: a forged failure takes no PR out, a forged
+  success never stands in for a required job nor replaces a real failure as if it were its
+  re-run), and the first tick that meets it for a batch records one `error` event,
   ``check runs on the candidate that are not jobs of its push runs, ignored for the verdict: `<name>` (app `<slug>`), …``.
   A job listing that fails fails the tick: nothing is blessed. The listing costs one request per
   push run of the ref and tick (two today: `ci.yml` and `quality.yml`), one more per 100 jobs;
@@ -830,6 +842,15 @@ with `; re-run refused (<status>)`, and the batch is classified in the same tick
   the base (`npm run queue -- pause <base>`, a paused base does not check its batch), fix the
   cause, then `npm run queue -- resume <base>`. Removing the queue label from a pull request drops
   it from the batch at the next tick, and the rest is recomposed.
+- **Only the candidate's verdict tells a forged check run from a job.** A check run that a
+  workflow token creates through the Checks API is from the `github-actions` app, like a real job
+  (see [Accepting a candidate](#accepting-a-candidate)). The candidate's verdict ignores it, and
+  that verdict is the one that decides a landing. Two other readings cannot make the distinction:
+  the PR gates (`prChecksRequired`, read on the PR's head by name and app, see
+  [The PR's own gates](#the-prs-own-gates-prchecksrequired)), so a forged `success` there can let a
+  PR into a batch and a forged `failure` can keep it waiting; and GitHub's own required status
+  checks, which match a check by name and, at most, by the app that created it (`integration_id`).
+  A PR let in that way still lands only through a candidate whose real jobs are green.
 - **Test-level matching needs a key on both sides.** A failure of the batch matches the base's only
   when the same check fails there and either both failures carry a test-level key (the candidate's
   tests must all fail on the base) or neither does (a match on the check name alone, reported as
@@ -1612,13 +1633,14 @@ Two consequences:
   candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
   disabled first.
 
-Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Three
 existing repository rulesets also match release branches:
 
-| Ruleset (id)                              | Matches                | Rules                            | Effect on the landing push                                                                                                                                                 |
-| ----------------------------------------- | ---------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "Protect release branches" (15605329)     | `refs/heads/release/*` | `deletion`, `non_fast_forward`   | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                            |
-| "Require PR on default branch" (21899981) | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor. |
+| Ruleset (id)                                           | Matches                | Rules                                                                                                                                       | Effect on the landing push                                                                                                                                                                                                                  |
+| ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Protect release branches" (15605329)                  | `refs/heads/release/*` | `deletion`, `non_fast_forward`                                                                                                              | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                                                                                             |
+| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor.                                                                  |
+| "Require green gates on the active release" (27616259) | `~DEFAULT_BRANCH`      | `required_status_checks`: `Gate / CI` and `Gate / Quality`, pinned to GitHub Actions (`integration_id` 15368), not strict; no bypass actors | None: the landing push (`merge-ff`) pushes the candidate itself, and the queue lands a candidate only after its verdict saw both checks green on it from GitHub Actions. The landing-path check accepts it and prints it as an `info` line. |
 
 The status door replaces "Require PR on default branch", so the cut-over removes it (see
 [Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
@@ -1667,7 +1689,17 @@ node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs \
   (`RepositoryRole` 5) or `OrganizationAdmin` in mode `always`. On `--dry-run` this is a warning;
   on a real apply the script exits `1`, after writing its own ruleset, until those rulesets are
   fixed. Its hint is to remove them: the status door replaces them. Rules whose ruleset is not
-  readable with the token count as not bypassed.
+  readable with the token count as not bypassed. One exception, whoever lands: a
+  `required_status_checks` rule the candidate already satisfies does not block. GitHub lets a
+  commit reach a branch under such a rule when it was pushed to another branch first and its checks
+  passed there, and the landing pushes the candidate whose checks the queue's verdict saw green. The
+  rule is accepted only when `strict_required_status_checks_policy` is `false`, it has no parameter
+  other than that one, `do_not_enforce_on_create` and `required_status_checks`, and every required
+  check has only `context` and `integration_id`, with a context listed in `requiredChecks`
+  (compared exactly) and an `integration_id` that is absent, `null` or 15368 (GitHub Actions, the
+  only app whose run turns a required check green in the queue's verdict). Each accepted rule is
+  printed as an `info` line naming its ruleset, and it never changes the exit code. A strict rule,
+  a check outside `requiredChecks` or a check pinned to another app still blocks.
 - Exit codes: `0` ok, `1` failure (API error, or a foreign rule blocks the landing push), `2` usage
   error or refused.
 - Run `--kind release` once per new release branch, after the branch is cut and before it becomes
@@ -2056,7 +2088,7 @@ What still tells nobody (each shows on the dashboard or in the history only):
 
 - a labeled PR that waits on `pr-checks-not-green`, `approval-missing`, `label-not-by-approver` or
   any other eligibility reason: it is not eligible, so the waiting rule does not count it;
-- a check run on a candidate that is no job of its push runs: one `error` event, nothing more;
+- a check run on a candidate that is no real job of its push runs: one `error` event, nothing more;
 - a `would-land` event that says `live mode would pause: …` or `… could not run (…)` in shadow
   mode;
 - a `base-red` pause younger than 120 minutes, and a release freeze that holds a green batch;

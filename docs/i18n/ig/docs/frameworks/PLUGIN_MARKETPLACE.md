@@ -25,31 +25,26 @@ ma na-agba koodu n'ime child processes, ya mere enweghị ike iru ụzọ ndị 
 isi mmalite na-abụghị loopback n'agbanyeghị nkwenye njirimara. Lee
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Otu O Si Arụkọ Ọrụ
+## Ka o si dabara Together
 
 ```
 Dashboard (/dashboard/plugins)
-  ├─ Taabụ "Installed"  → GET /api/plugins            (listPlugins)
-  │                       POST /api/plugins/scan      (pluginManager.scan)
-  │                       POST /api/plugins/{name}/activate|deactivate
-  │                       DELETE /api/plugins/{name}   (iwepụ nrụnye)
-  └─ Taabụ "Marketplace" → GET /api/plugins/marketplace
-                            → listMarketplacePlugins()
-                              ├─ enweghị URL ahaziri iche → SEED_REGISTRY arụnyere n'ime ya
-                              └─ URL ahaziri iche → ihe nche SSRF isSafeMarketplaceUrl()
-                                                 → safeOutboundFetch(guard:"public-only")
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Oyi akwa ndekọ** — `src/lib/plugins/marketplace.ts`: na-edepụta / na-achọ
-  katalọgụ ahụ, ma laghachi na ndekọ mkpụrụ ma ọ bụrụ na ihe ọ bụla ada.
-- **Oyi akwa okirikiri ndụ** — `src/lib/plugins/manager.ts` (`pluginManager` singleton):
-  ịwụnye, imelite, ime ka ọ rụọ ọrụ, ịkwụsị ya, iwepụ nrụnye, nyocha, ibunye mgbe usoro malitere.
-- **Oyi akwa manifest** — `src/lib/plugins/manifest.ts`: schema Zod + ụkpụrụ ndabara maka
-  `plugin.json`.
-- **Ngwa nyocha** — `src/lib/plugins/scanner.ts`: na-achọpụta plugins dị na diski n'okpuru
-  ndekọ plugin.
-- **Ngwa mbunye** — `src/lib/plugins/loader.ts`: na-amalite plugin ọ bụla n'ime
-  child process e kewapụrụ iche ma na-ahazi oku hook site na IPC.
+- **oyi akwa ndekọ** — `src/lib/plugins/marketplace.ts`: depụtara / na-enyocha katalọgụ ahụ, na-adaghachi na ndekọ mkpụrụ na ọdịda ọ bụla.
+- **oyi akwa ndụ okirikiri** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): wụnye, kwalite, rụọ ọrụ, gbanyụọ, iwepụ, nyocha, ibu mmalite.
+- **Ngosipụta oyi akwa** — `src/lib/plugins/manifest.ts`: Zod schema + ndabara maka `plugin.json`.
+- **Ihe nyocha** — `src/lib/plugins/scanner.ts`: na-achọpụta plugins na diski n'okpuru ndekọ ndekọ plugins.
+- **Ibu Ibu** — `src/lib/plugins/loader.ts`: na-eme ka ngwa mgbakwunye ọ bụla na usoro Node.js dị iche iche na ndị na-ere ahịa na-akpọ oku IPC. Nwatakịrị ahụ abụghị igbe ájá (lee "Plugin execution iche" n'okpuru).
 
 ## Katalọgụ Ebe Ahịa
 
@@ -85,34 +80,31 @@ a na-amaghị, `listMarketplacePlugins()` na-edekọ ịdọ aka ná ntị ma la
 
 ## REST API
 
-Endpoint niile chọrọ njirimara njikwa (`requireManagementAuth`) **ma** bụrụkwa
-naanị maka loopback — e depụtara `/api/plugins` na `/api/plugins/` na
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Ebe njedebe niile chọrọ nyocha njikwa (`requireManagementAuth`)** na** bụ loopback-naanị — `/api/plugins` na `/api/plugins/` ka edepụtara na `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Method | Nkọwa                                               |
-| -------------------------------- | ------ | --------------------------------------------------- |
-| `/api/plugins`                   | GET    | Depụta plugin arụnyere (nzacha `?status=` bụ nhọrọ) |
-| `/api/plugins`                   | POST   | Wụnye plugin site n'ụzọ mpaghara zuru oke           |
-| `/api/plugins/scan`              | POST   | Nyochaa ndekọ plugin ma debanye plugin ọhụrụ        |
-| `/api/plugins/marketplace`       | GET    | Depụta ndenye katalọgụ marketplace                  |
-| `/api/plugins/[name]`            | GET    | Nweta nkọwa plugin arụnyere                         |
-| `/api/plugins/[name]`            | DELETE | Wepụ plugin                                         |
-| `/api/plugins/[name]/activate`   | POST   | Mee ka ọ rụọ ọrụ (bulite + debanye hooks)           |
-| `/api/plugins/[name]/deactivate` | POST   | Kwụsị ya (kpọọ `onDeactivate`, wepụ ndebanye hooks) |
-| `/api/plugins/[name]/config`     | GET    | Nweta nhazi plugin + schema nhazi                   |
-| `/api/plugins/[name]/config`     | PUT    | Melite nhazi plugin (a na-enyocha ya megide schema) |
+| Ebe njedebe                      | Usoro  | Nkọwa                                                      |
+| -------------------------------- | ------ | ---------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Ndepụta plugins arụnyere (nyocha `?status=` nhọrọ)         |
+| `/api/plugins`                   | POST   | Wụnye ngwa mgbakwunye sitere na ndekọ aha ngwa mgbakwunye  |
+| `/api/plugins/scan`              | POST   | Nyochaa ndekọ ihe mgbakwunye wee debanye aha plugins ọhụrụ |
+| `/api/plugins/marketplace`       | GET    | Depụta ndenye katalọgụ ahịa                                |
+| `/api/plugins/[name]`            | GET    | Nweta nkọwa ngwa mgbakwunye arụnyere                       |
+| `/api/plugins/[name]`            | DELETE | Wepu ngwa mgbakwunye                                       |
+| `/api/plugins/[name]/activate`   | POST   | Gbanyụọ (ịkwado ndebanye aha + )                           |
+| `/api/plugins/[name]/deactivate` | POST   | Gbanyụọ (ọkụ `onDeactivate`, nko na-edebanye aha)          |
+| `/api/plugins/[name]/config`     | GET    | Nweta ngwa mgbakwunye config + config schema               |
+| `/api/plugins/[name]/config`     | PUT    | Melite nhazi ngwa mgbakwunye (nke kwadoro megide schema)   |
 
-Nzacha `status` nke `GET /api/plugins` na-anabata otu n'ime
-`installed` / `active` / `inactive` / `error`. Uru na-adịghị irè na-eweghachi `400`.
+Ihe nzacha `GET /api/plugins` `status` na-anabata otu n'ime `installed` / `active` / `inactive` / `error`. Uru ezighi ezi na-eweghachi `400`.
 
-### Depụta plugin arụnyere
+### Depụta plugins arụnyere
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Wụnye site n'ụzọ mpaghara
+### Wụnye site na ụzọ mpaghara
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -121,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` ga-abụrịrị ụzọ **zuru oke**, ọ gaghịkwa enwe ngalaba ngafe `..` ma ọ bụ
-null bytes (Zod na-amanye nke a). Ndekọ isi mmalite ga-enwerịrị
-`plugin.json` ziri ezi (ma ọ bụ bụrụ ndekọ nne na nna nke nwere otu). Mgbe ọ gara nke ọma, nzaghachi bụ `201` yana
-ahịrị plugin arụnyere.
+`path` ga-abụrịrị otu** zuru oke** ụzọ na ndekọ** n'ime plugin isi mmalite ndekọ** : `plugin-sources` na-esote mgbọrọgwụ ngwa mgbakwunye, yabụ `~/.omniroute/plugin-sources/` na ndabara, ma ọ bụ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` mgbe edobere mgbanwe ahụ (`getPluginSourcesDir()` na `src/lib/plugins/installSource.ts`). Detuo ma ọ bụ mechie ngwa mgbakwunye ahụ nke mbụ. Ajụrụ ihe nrụnye na `400` mgbe ụzọ ahụ nwere `..` ma ọ bụ byte efu, dina n'èzí ndekọ ahụ, kpebie na mpụga ya site na symlink, nwere symlink nke ebumnuche ya dị na mpụga ya, ma ọ bụ mgbe ndekọ ahụ adịghị. Akwụkwọ ndekọ aha ga-enwerịrị `plugin.json` ziri ezi (ma ọ bụ bụrụ nne na nna nke otu). Na ịga nke ọma nzaghachi bụ `201` na ahịrị plugin arụnyere.
 
-### Chọgharịa marketplace
+N'adịghị ka ụzọ ngwa mgbakwunye ndị ọzọ, nke a chọrọ nzere njikwa (nnọkọ dashboard ma ọ bụ igodo API jikwaa) ọbụlagodi mgbe nbanye nwere nkwarụ (`requireLogin=false`): itinye koodu abụghị ihe a na-amaghị ama.
+
+### Chọgharịa n'ahịa
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Melite nhazi plugin
+### Melite nhazi ngwa mgbakwunye
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` na-enyocha uru ọ bụla enyere megide
-`configSchema` nke plugin (nke ekwupụtara na manifest): ngalaba `number` na-erube isi na `min`/`max`,
-ngalaba `select` ga-adabarịrị na `enum` ekwupụtara. A na-ahapụ igodo ndị na-adịghị na schema
-ka ha gafee.
+`PUT .../config` kwadoro uru ọ bụla enyere megide `configSchema` nke ngwa mgbakwunye (kwuru na ngosipụta): ubi `number` na-asọpụrụ `min`/`max`, mpaghara `select` ga-adabarịrị `enum` ekwuputara. A na-ahapụ igodo adịghị na schema.
 
 ## Nhazi
 
@@ -204,81 +192,58 @@ Taabụ "Marketplace" nke dashboard na-egosi field maka URL a (nke a na-agụgha
 
 ## Nchekwa
 
-### Ọkwa ụzọ — naanị loopback
+### Ụzọ tier — loopback naanị
 
-Plugins na-eme koodu n’ime child processes e mepụtara, ya mere a na-ahazi elu `/api/plugins`
-dum dịka `LOCAL_ONLY` (Ọkwa 1). Nkwado loopback na-arụ ọrụ
-n’enweghị ọnọdụ ọ bụla **tupu** nyocha auth ọ bụla, ya mere ọbụna management token e kpughere nke rutere
-igbe ahụ site na tunnel enweghị ike ịwụnye, ime ka ọ rụọ ọrụ, ma ọ bụ iwepụ plugin.
-Lee [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) na
-Iwu Siri Ike #15 / #17.
+Ngwa mgbakwunye na-arụ koodu n'ime usoro ụmụaka agbasapụtara, ya mere a na-ekewa elu `/api/plugins` dum `LOCAL_ONLY` (Tier 1). Mmanye loopback na-aga n'enweghị ihe ọ bụla** mbụ** nlele auth ọ bụla, yabụ akara njikwa leaked na-eru igbe n'elu ọwara enweghị ike ịwụnye, rụọ ọrụ, ma ọ bụ wepu ngwa mgbakwunye. Hụ [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) na Iwu siri ike #15 / #17.
 
-### Nchedo SSRF nke ndekọ marketplace
+### Ebe nchekwa ndekọ SSRF nche
 
-URL ndekọ ahaziri iche bụ nhazi onye mwakpo nwere ike imetụta, ya mere tupu
-e nweta ya, `listMarketplacePlugins()` na-ebufe ya n’usoro nchedo abụọ:
+Ndebanye aha URL omenala bụ nhazi nke na-emetụta onye na-awakpo, yabụ tupu ị nweta ya `listMarketplacePlugins()` na-agba ya n'ọkwa abụọ:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - Na-ajụ ihe ọ bụla na-abụghị `http:` / `https:`.
-   - Na-ajụ hosts nzuzo/loopback/link-local/ULA e dere kpọmkwem (IPv4 **na** IPv6,
-     gụnyere IPv4-mapped) site na `isPrivateHost` canonical
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Na-achọpụta ndekọ **abụọ ahụ** `A` na `AAAA`, ma jụ ma ọ bụrụ na adreesị
-     ọ bụla achọpụtara bụ nke nzuzo — nke a na-emechi ụzọ mgbapụ public-hostname → private-IP.
-   - **Na-ajụ mgbe ọdịda mere**: ọdịda DNS resolution na-eme ka a jụ URL ahụ.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): na-etinyeghachi nchedo URL nke public-only
-   n’oge fetch ma **na-egbochi redirects** (enweghị ntụgharị public → private `30x`
-   pivot).
+   - Na-ajụ ndị ọbịa private/loopback/link-local/ULA nkịtị (IPv4** na** IPv6, gụnyere IPv4-mapped) site na canonical `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Na-edozi** ha abụọ** `A` na `AAAA` ndekọ ma na-ajụ ma ọ bụrụ** nke ọ bụla** Adreesị edoziziri bụ — nkeonwe na-emechi aha ọha-onye ọbịa → nzuzo-IP uzo.
+   - **Emechiri emechi** : ọdịda mkpebi DNS jụrụ URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): na-etinyekwa onye nche URL naanị ọha na eze n'oge ewepụtara na** na-egbochi redirects** (enweghị → ọha `30x` pivot nzuzo).
 
-URL nke dara n’otu n’ime ọkwa abụọ ahụ anaghị akwụsị arịrịọ ahụ — marketplace ahụ
-na-alaghachi nwayọ na ndekọ seed dị n’ime ya ma dekọọ ịdọ aka ná ntị.
+URL nke na-ada n'ụdị ọ bụla anaghị ewepụ arịrịọ — ebe a na-ere ahịa na-adaba jụụ na ndekọ mkpụrụ nke arụnyere ma dekọọ ịdọ aka ná ntị.
 
-> E mere ka nchedo a sie ike na PR #3774 kpọmkwem iji chọpụta A + AAAA ma jiri
-> `isPrivateHost` canonical kama nyocha na-ele naanị IPv4.
+> Onye nche a gbasiri ike na PR #3774 kpọmkwem iji dozie A + AAAA wee jiri canonical `isPrivateHost` kama nlele IPv4-only.
 
-### Ikewapụ mmezu plugin
+### Mwepu ngwa mgbakwunye
 
-- **Ikewapụ process** — `loadPlugin()` (`src/lib/plugins/loader.ts`) na-emepụta
-  plugin ọ bụla n’ime Node.js child process dị iche ma na-ekwurịta okwu site na IPC.
-  Oku hook nwere timeout nke nwere mbuli `SIGTERM` → `SIGKILL`.
-- **Ndepụta env enyere ikike** — child ahụ na-enweta naanị otu environment
-  variables e nyere ikike; a na-enye naanị set sara mbara mgbe manifest rịọrọ
-  ikike `env`.
-- **Ijide path n’ókè** — install/upgrade/uninstall na-achọpụta na directory plugin
-  na `manifest.main` na-edobe ụzọ ha **n’ime** mgbọrọgwụ plugin a na-achịkwa
-  tupu copy ọ bụla ma ọ bụ recursive delete (na-echebe megide ụzọ DB e mebiri emebi na
-  njem `../` dị na `manifest.main`). Activation na-achọpụta symlinks site na
-  `realpath` ma jụ ibunye entry point nke gbapụrụ n’ime directory plugin.
-- **Integrity pin nhọrọ** — manifest nwere ike ikwupụta field `integrity`
-  (`sha256-<base64>`, usoro SRI). Mgbe ọ dị, loader na-enyocha hash nke
-  entry file n’oge load ma jụ activation ma ọ bụrụ na ha adabaghị. Ọ bụ
-  nchọpụta mmebi a na-ahọrọ iji, **ọ bụghị** ókè nchekwa — routing nke loopback-only
-  na permission model bụ ezigbo ókè.
+> **A naghị etinye ihe nrụnye n'ájá.** Nwatakịrị bụ usoro Node.js nkịtị na-agba ọsọ dị ka onye ọrụ OmniRoute, na-enweghị ọnọdụ VM na enweghị ọkọlọtọ ikike Node.js, yabụ ngwa mgbakwunye koodu nwere ike ịgụ ma dee faịlụ ọ bụla onye ọrụ nwere ike, mee mmemme wee rute netwọkụ. `requires.permissions` na-ekpebi naanị ụdị mgbanwe gburugburu ebe nwa na-enweta; A naghị etinye ikike ndị ọzọ. Wụnye naanị plugins ị tụkwasịrị obi. Oke usoro dị n'okpuru nwere mkpọka na kpọgidere; ọ bughi ókè-ala nche.
 
-## Manifest (`plugin.json`)
+- **Kewapụ usoro** — `loadPlugin()` (`src/lib/plugins/loader.ts`) na-ewepụta ngwa mgbakwunye ọ bụla na usoro Node.js nwa dị iche ma na-ekwurịta okwu n'elu IPC. Oku nko nwere oge nkwụsị na mmụba `SIGTERM` → `SIGKILL`.
+- **Ndepụta ikike Env** — nwa ahụ na-enweta naanị ndenye aha aha nke mgbanwe gburugburu ebe obibi; A na-enye ntọala sara mbara naanị mgbe ihe ngosi ahụ rịọrọ ikike `env`.
+- **Wụnye njide isi mmalite** — `POST /api/plugins` na-agụ naanị site na akwụkwọ ndekọ aha ngwa mgbakwunye (lee "Wụnye site na mpaghara mpaghara"): a na-ahazi ụzọ ahụ na `realpath`, ga-anọrịrị n'ime akwụkwọ ndekọ ahụ, na osisi isi iyi na-ebu symlink nke na-agbanarị a jụrụ tupu e depụtaghachi ihe ọ bụla.
+- **njide ụzọ** — install/upgrade/uninstall kwuputara na ndekọ ngwa mgbakwunye na `manifest.main` kpebiri** n'ime** mgbọrọgwụ ngwa mgbakwunye a na-achịkwa tupu mbipụta ma ọ bụ ihichapụ ọ bụla (na-eche nche megide ụzọ DB emejọ na `../` traversal na `manifest.main`). Mmalite na-edozi symlinks site na `realpath` wee jụ ịkwanye ebe ntinye na-agbanarị ndekọ ngwa mgbakwunye.
+- **Ntụtụ iguzosi ike n'ezi ihe nhọrọ** — ihe ngosi nwere ike kwupụta mpaghara `integrity` (`sha256-<base64>`, usoro SRI ). Mgbe ọ dị, onye na-ebu ibu na-enyocha hash faịlụ ntinye n'oge ibu ma jụ ịgbalite na enweghị nkwekọrịta. Ọ bụ Nwepu-nchọpụta mebie,** ọ bụghị** oke nchekwa: ọ naghị ejedebe ihe ngwa mgbakwunye eburu ibu nwere ike ime.
+- **Enweghị nzere ndị ahịa na nko** — ihe gbara ya gburugburu na `onRequest`, `onResponse` na `onError` ka ewepụrụ isi `authorization`, `x-api-key`, `proxy-authorization` na `cookie`, na ndekọ igodo API enweghị uru isi (`redactPluginContext()` na `src/lib/plugins/hooks.ts`).
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) na-enyocha ya:
+## Ngosipụta (`plugin.json`)
 
-| Field              | Type      | Nkọwa                                                        |
-| ------------------ | --------- | ------------------------------------------------------------ |
-| `name`             | string    | Achọrọ ya; kebab-case (`^[a-z0-9-]+$`), mkpụrụedemede 1–100  |
-| `version`          | string    | Achọrọ ya; semver (`MAJOR.MINOR.PATCH`)                      |
-| `description`      | string?   | ≤ mkpụrụedemede 500                                          |
-| `author`           | string?   | ≤ mkpụrụedemede 200                                          |
-| `license`          | string?   | Ndabara ya bụ `MIT`                                          |
-| `main`             | string?   | Entry file; ndabara ya bụ `index.js`                         |
-| `source`           | enum?     | `local` \| `marketplace` (ndabara ya bụ `local`)             |
-| `tags`             | string[]? | Tags ọchụchọ                                                 |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                              |
-| `hooks`            | object?   | Booleans na-ekwupụta hooks ndị plugin na-eme                 |
-| `skills`           | object[]? | Nkọwa skill nhọrọ                                            |
-| `enabledByDefault` | boolean?  | Mee activation n’onwe ya mgbe install gasịrị                 |
-| `configSchema`     | object?   | Map nke fields config (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Pin entry-file `sha256-<base64>` nhọrọ                       |
+kwadoro site na `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-A na-ewere permissions site na enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+| Ubi                | Ụdị      | Ihe ndetu                                                     |
+| ------------------ | -------- | ------------------------------------------------------------- |
+| `name`             | eriri    | Achọrọ; kebab-case (`^[a-z0-9-]+$`), 1-100 chars              |
+| `version`          | eriri    | Achọrọ; semver (`MAJOR.MINOR.PATCH`)                          |
+| `description`      | eriri?   | ≤ 500 cha cha                                                 |
+| `author`           | eriri?   | ≤ 200 cha cha                                                 |
+| `license`          | eriri?   | Ihe ndabara na `MIT`                                          |
+| `main`             | eriri?   | Ntinye faịlụ; ndabara na `index.js`                           |
+| `source`           | enum?    | `local` \| `marketplace` (ndabara na `local`)                 |
+| `tags`             | eriri[]? | Chọọ mkpado                                                   |
+| `requires`         | ihe?     | `{ omniroute?, permissions[] }`                               |
+| `hooks`            | ihe?     | Booleans na-ekwupụta nke nko na ngwa mgbakwunye na-arụ ọrụ    |
+| `skills`           | ihe[]?   | Nkọwa nka nhọrọ                                               |
+| `enabledByDefault` | boolean? | Tinyegharịa na akpaghị aka                                    |
+| `configSchema`     | ihe?     | Map nke mpaghara nhazi (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | eriri?   | Ntụtụ ntinye faịlụ `sha256-<base64>` nhọrọ                    |
+
+A na-enweta ikike site na enum `network` / `file-read` / `file-write` / `env` / `exec`. Naanị `env` nwere mmetụta oge ojiri gaa (ndepụta ohere mgbanwe gburugburu ebe obibi dị ntakịrị karịa maka nwa); ndị ọzọ bụ nkwupụta na anaghị etinye ya n'ọrụ.
 
 ## Usoro Lifecycle
 
@@ -338,17 +303,14 @@ A na-enyocha metrics/analytics nke plugin na tebụl ndị ọzọ
 
 ## Dashboard
 
-Ibe dashboard dị na `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) nwere taabụ abụọ:
+Ibe dashboard dị na `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) na-enye taabụ abụọ:
 
-- **Arụnyere** — na-edepụta plugins arụnyere tinyere hooks ha kwuputara, toggle
-  activate/deactivate, bọtịnụ uninstall, na omume "Nyochaa plugins"
-  (`POST /api/plugins/scan`).
-- **Marketplace** — na-egosi catalog sitere na `GET /api/plugins/marketplace` tinyere
-  field iji tọọ URL registry ahaziri iche.
+- **arụnyere** — depụtara plugins arụnyere na nko ha ekwuputara, ihe ngbanwe activate/deactivate, bọtịnụ iwepụ, na ihe omume "Nyocha maka plugins" (`POST /api/plugins/scan`).
+- **Ebe ahịa** — na-egosi katalọgụ si `GET /api/plugins/marketplace` nwere ubi iji tọọ ndekọ ahaziri URL.
 
-Ibe config nke plugin ọ bụla dị na `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Ibe ahụ na-egosi mgbe niile ịdọ aka ná ntị na plugins na-eji ikike zuru oke nke usoro OmniRoute.
+
+Ibe nhazi ngwa mgbakwunye kwa-ebi na `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Hụkwa
 

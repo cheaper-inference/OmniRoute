@@ -309,6 +309,7 @@ Använd satserna `IF NOT EXISTS`, `IF EXISTS` och `OR IGNORE` / `OR REPLACE` rik
 3. **Fyll i data noggrant** : använd `UPDATE ... WHERE ...` för att hantera befintliga rader
 4. **Kontrollera ordning och namn** : `npm run test:migrations:fresh` (alla migreringar på en tom databas) och `npm run check:migration-numbering`
 5. **Testa på en kopia** : kör aldrig oprövade migreringar på produktion
+6. **En tabell skapad från kod behöver också en migrering** : om en modul också skapar tabellen lätt (`CREATE TABLE IF NOT EXISTS`, hålls som en självläkningsväg), måste en migrering skapa den med samma DDL. Annars slutar en ren installation och en uppgraderad installation med olika scheman, beroende på om den kodsökvägen gick. `tests/unit/db/lazy-table-migration-guard.test.ts` skannar `src/` och `open-sse/` och misslyckas på en lat `CREATE` utan migrering (#20557). Exempel: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Exempel:
 

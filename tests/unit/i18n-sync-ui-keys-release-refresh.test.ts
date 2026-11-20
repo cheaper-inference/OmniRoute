@@ -289,6 +289,38 @@ test("a dashboard refresh that changed a catalog regenerates the compact global-
   }
 });
 
+test("a dashboard refresh that changed a catalog regenerates the route-handler catalog (#20439)", async () => {
+  const dir = makeRoot(["pt-BR", "es"]);
+  try {
+    const en = { auth: { traeAuthorizationSuccess: "Trae OK", returnToDashboard: "Back" } };
+    writeJson(dir, "src/i18n/messages/en.json", en);
+    writeJson(dir, "src/i18n/messages/pt-BR.json", {
+      auth: { traeAuthorizationSuccess: "Trae ok (pt)" },
+    });
+    writeJson(dir, "src/i18n/messages/es.json", {
+      auth: { traeAuthorizationSuccess: "Trae ok (es)", returnToDashboard: "Volver" },
+    });
+    const dry = await syncUiKeys({ root: dir, dryRun: true, log: quiet });
+    assert.deepEqual(dry.changedFiles, [
+      "src/i18n/messages/pt-BR.json",
+      "src/i18n/route-handler-messages.json",
+    ]);
+    assert.equal(fs.existsSync(path.join(dir, "src/i18n/route-handler-messages.json")), false);
+    const res = await syncUiKeys({ root: dir, log: quiet });
+    assert.deepEqual(res.changedFiles, dry.changedFiles);
+    // The `__MISSING__:` marker the sync wrote for pt-BR stays out: English wins at runtime.
+    assert.deepEqual(readJson(dir, "src/i18n/route-handler-messages.json"), {
+      en: { auth: { traeAuthorizationSuccess: "Trae OK", returnToDashboard: "Back" } },
+      "pt-BR": { auth: { traeAuthorizationSuccess: "Trae ok (pt)" } },
+      es: { auth: { traeAuthorizationSuccess: "Trae ok (es)", returnToDashboard: "Volver" } },
+    });
+    const again = await syncUiKeys({ root: dir, log: quiet });
+    assert.deepEqual(again.changedFiles, []);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("CLI flags: pruning stays the default, --keep-extra opts out, --rewritten-since marks", () => {
   assert.equal(parseArgs(["node", "s"]).pruneExtra, true);
   assert.equal(parseArgs(["node", "s", "--prune-extra"]).pruneExtra, true);

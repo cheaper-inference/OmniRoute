@@ -385,3 +385,26 @@ test("nightly refresh: a stale refresh PR whose bot commit was amended by hand i
   assert.equal(robot.status, 0, robot.stderr);
   assert.match(robot.gh, /^pr close 7 /m);
 });
+
+test("nightly refresh: the refresh step gets a translation engine, so it never writes __MISSING__ markers", () => {
+  const refresh = stepRunning("npm run release:refresh-derived -- --profile=nightly") as {
+    env?: Record<string, string>;
+    run: string;
+  };
+  assert.ok(refresh, "the refresh step exists");
+  for (const key of [
+    "OMNIROUTE_TRANSLATION_API_KEY",
+    "OMNIROUTE_TRANSLATION_API_URL",
+    "OMNIROUTE_TRANSLATION_MODEL",
+  ]) {
+    assert.ok(refresh.env?.[key], `${key} is passed to the refresh`);
+  }
+  // LLM chain when fully configured, else the Google engine (no endpoint needed on a hosted runner).
+  assert.match(refresh.run, /OMNIROUTE_TRANSLATION_ENGINE="llm"/);
+  assert.match(refresh.run, /OMNIROUTE_TRANSLATION_ENGINE="google"/);
+  assert.ok(
+    refresh.run.indexOf("OMNIROUTE_TRANSLATION_ENGINE") <
+      refresh.run.indexOf("release:refresh-derived"),
+    "the engine is chosen before the refresh runs"
+  );
+});

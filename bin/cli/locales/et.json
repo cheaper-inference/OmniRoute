@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Limiit peab olema positiivne täisarv.",
     "error": "Viga: {message}",
     "serverOffline": "OmniRoute server on offline. Käivita see käsuga: omniroute serve",
     "authRequired": "Autentimine on nõutav. Määra OMNIROUTE_API_KEY või käivita: omniroute setup",

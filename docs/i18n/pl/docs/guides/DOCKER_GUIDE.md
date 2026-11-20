@@ -27,14 +27,9 @@
 
 ---
 
-## Szybkie uruchomienie
+## Szybki bieg
 
-> **Chcesz samodzielnie hostować za pomocą jednego polecenia?** Zobacz
-> [przewodnik samodzielnego hostowania](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (opublikowany obraz +
-> Redis, dostęp wyłącznie przez interfejs loopback, bez wyboru profilu). Poniższa
-> sekcja szybkiego uruchomienia opisuje wariant z jednym kontenerem dla użytkowników,
-> którzy korzystają już z Redis uruchomionego w innym miejscu.
+> **Self-host w jednym poleceniu?** Zobacz [Przewodnik po Self-Hoście](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (opublikowany obraz + Redis, tylko pętla zwrotna, bez wyboru profilu). Poniższe Szybkie uruchomienie to ścieżka z jednym kontenerem dla użytkowników, którzy już korzystają Redis gdzie indziej.
 
 ```bash
 docker run -d \
@@ -43,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## Z plikiem środowiskowym
+## Z plikiem środowiska
 
 ```bash
-# Najpierw skopiuj i edytuj plik .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -59,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,18 +234,18 @@ docker compose -f docker-compose.prod.yml down
 
 Stos produkcyjny działa równolegle ze stosem deweloperskim compose (używa innych nazw kontenerów, portów i woluminów), dzięki czemu możesz kontynuować lokalne prace, podczas gdy środowisko produkcyjne pozostaje uruchomione.
 
-## Etapy Dockerfile
+## Etapy pliku Docker
 
-Repozytorium zawiera wieloetapowy Dockerfile (`Dockerfile`). Udostępnione są cztery etapy; wybierz odpowiedni `target` dla swojego zastosowania.
+Repozytorium dostarcza wieloetapowy plik Dockerfile (`Dockerfile`). Eksponowane są cztery etapy; wybierz odpowiedni `target` dla swojego przypadku użycia.
 
-| Etap          | Obraz bazowy          | Przeznaczenie                                                                                                                                                                                                                                                                                                                  |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `builder`     | `node:26-trixie-slim` | Instaluje zależności (`npm ci --legacy-peer-deps`) i uruchamia `npm run build` (domyślnie Turbopack — zobacz sekcję Zasoby podczas kompilacji poniżej)                                                                                                                                                                         |
-| `runner-base` | `node:26-trixie-slim` | Środowisko uruchomieniowe produkcyjne z autonomicznymi wynikami kompilacji Next.js. **Nie zawiera interfejsów CLI dostawców.**                                                                                                                                                                                                 |
-| `runner-cli`  | `runner-base`         | Dodaje `git`, `docker.io`, `docker-compose` oraz globalne interfejsy CLI: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Wybierz ten etap dla przepływów pracy wykorzystujących agentów.**                                                                                                               |
-| `runner-web`  | `runner-base`         | Dodaje Playwright oraz przeglądarkę Chromium (`--with-deps`) dla dostawców sesji internetowych: `gemini-web`, `claude-web`, `claude-turnstile`. **Wybierz ten etap, gdy korzystasz z tych dostawców** — bez niego podstawowy obraz zgłasza błąd podczas obsługi żądania (zobacz uwagę dotyczącą `-web` w sekcji Kanały wydań). |
+| Scena         | Obraz bazowy          | Zamiar                                                                                                                                                                                                                                                                                                                                   |
+| ------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Instaluje deps (`npm ci --legacy-peer-deps`) i uruchamia `npm run build` ( domyślnie Turbopack — patrz Zasoby kompilacji poniżej)                                                                                                                                                                                                        |
+| `runner-base` | `node:26-trixie-slim` | Środowisko produkcyjne z niezależnym wyjściem Next.js.** Brak dostawcy CLIs w pakiecie.**                                                                                                                                                                                                                                                |
+| `runner-cli`  | `runner-base`         | Dodaje `git`, `docker.io`, `docker-compose` i globalne CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Wybierz tę opcję dla przepływów pracy agenta.**                                                                                                                                                        |
+| `runner-web`  | `runner-base`         | Dodaje Playwright + przeglądarkę Chromium (`--with-deps`) dla dostawców sesji internetowych: `gemini-web`, `claude-web`, `claude-turnstile`.** Wybierz tę opcję, jeśli korzystasz z usług tych dostawców** — zwykły obraz kończy się niepowodzeniem w momencie żądania bez niego (patrz uwaga dotycząca `-web` w sekcji Kanały wydania). |
 
-Aby ręcznie zbudować określony etap:
+Zbuduj konkretny cel ręcznie:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -258,42 +253,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Zasoby podczas kompilacji
+### Zasoby czasu kompilacji
 
-Trzy argumenty kompilacji kontrolują zapotrzebowanie etapu `builder` na zasoby. Obowiązują one wyłącznie podczas kompilacji —
-`OMNIROUTE_MEMORY_MB` (poniżej) jest osobnym parametrem środowiska uruchomieniowego.
+Trzy argumenty kompilacji kontrolują koszty etapu `builder`. Są przeznaczone wyłącznie do czasu kompilacji. — `OMNIROUTE_MEMORY_MB` (poniżej) to oddzielne pokrętło służące do uruchamiania.
 
-| Argument kompilacji         | Wartość domyślna | Działanie                                                                                                |
-| --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`              | `0` kompiluje przy użyciu webpacka: niższe szczytowe zużycie pamięci, ale wolniej. `1` włącza Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`           | Limit sterty V8 (`--max-old-space-size`) dla uruchomionego procesu `next build`.                         |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`              | Ustawia `CIRCLE_NODE_TOTAL`; Next wyznacza `workers = N - 1` na potrzeby zbierania danych stron.         |
+| Zbuduj argument             | Domyślny | Efekt                                                                                                       |
+| --------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` buduje się z pakietem internetowym: niższa pamięć szczytowa, wolniejsza. `1` decyduje się na Turbopack. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Sufit sterty V8 (`--max-old-space-size`) dla spawnowanego `next build`.                                     |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Pasze `CIRCLE_NODE_TOTAL`; Następnie wyprowadzamy `workers = N - 1` do zbierania danych stron.              |
 
-`OMNIROUTE_BUILD_WORKERS` należy zwiększyć na wydajnej maszynie kompilującej i podejrzewać
-w pierwszej kolejności, gdy kompilacja przy ograniczonych zasobach przerywa się **po** komunikacie `✓ Compiled successfully`. Każdy
-proces roboczy zbierający dane stron jest osobnym procesem, podobnie jak nadrzędny proces `next build`;
-odtworzenie problemu na działającym VPS-ie (zgłoszenie #7518) wykazało szczytowe RSS każdego procesu
-na poziomie ~4,5 GB, niezależnie od flagi sterty `NODE_OPTIONS` (Turbopack kompiluje z użyciem
-natywnej pamięci/Rusta poza stertą V8). Domyślna wartość `2` (→ 1 proces roboczy, łącznie 2
-procesy) została dobrana pod kątem hostowanych przez GitHub maszyn wykonawczych z 16 GB pamięci i 4 vCPU, których
-używa potok publikowania. Przy wartości `8` (→ 7 procesów roboczych) na tej maszynie zabrakło pamięci, a
-buildkit przerwał krok z błędem `ResourceExhausted: ... cannot allocate memory`;
-wartość `3` (→ 2 procesy robocze) nadal się nie mieściła, gdy RSS poszczególnych procesów zmierzono
-bezpośrednio zamiast je szacować. `tests/unit/docker-build-memory-budget.test.ts`
-wykonuje obliczenia na podstawie zmierzonej wartości i kończy się niepowodzeniem, jeśli którykolwiek parametr
-przekracza możliwości maszyny wykonawczej.
+`OMNIROUTE_BUILD_WORKERS` to ten, który podnosi się na dużego konstruktora i ten, który podejrzewa, gdy ograniczona kompilacja umrze** Po** `✓ Compiled successfully`. Każdy proces roboczy danych strony jest własnym procesem, podobnie jak sam nadrzędny `next build` ; reprodukcja VPS na żywo (problem #7518) zmierzyła szczyt RSS każdego procesu przy ~ 4,5 GB niezależnie od flagi sterty `NODE_OPTIONS` (Turbopack kompiluje się w pamięci native/Rust poza stertą V8). Wartość domyślna `2` (→ 1 proces roboczy, łącznie 2 procesy) jest dostosowana do 16 GB / 4 vCPU hostowanych elementów uruchamiających GitHub, z których korzysta potok publikowania. W `8` (→ 7 pracowników) temu biegaczowi zabrakło pamięci i zestawowi kompilacji nie udało się wykonać kroku z `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 pracowników) nadal nie pasowało, gdy RSS na proces mierzono bezpośrednio, a nie wywnioskowano. `tests/unit/docker-build-memory-budget.test.ts` wykonuje arytmetykę na podstawie zmierzonej wartości i kończy się niepowodzeniem, jeśli któreś z pokręteł przekracza prowadnicę.
 
-Turbopack kompiluje z użyciem natywnej pamięci Rusta, która znajduje się **poza** stertą V8, dlatego
-`OMNIROUTE_BUILD_MEMORY_MB` jej nie ogranicza. Na hoście z limitem pamięci proces kompilacji
-zostaje wówczas zakończony sygnałem SIGKILL przez mechanizm OOM bez żadnego komunikatu o błędzie — po prostu
-zatrzymuje się w trakcie `Creating an optimized production build`, co wygląda raczej jak zawieszenie
-niż brak pamięci. Dlatego `Dockerfile` domyślnie używa webpacka
-(`OMNIROUTE_USE_TURBOPACK=0`), w przeciwieństwie do `npm run dev` / `npm run build`, gdzie
-Turbopack jest domyślnie ustawiony w kodzie: zwykłe `docker build .` bez argumentów kompilacji (uruchamiane
-przez Railway i inne platformy wdrożeniowe jednym kliknięciem) nie może po cichu kończyć się niepowodzeniem na maszynie
-z ograniczoną pamięcią. Opublikowane obrazy już jawnie przekazują `OMNIROUTE_USE_TURBOPACK=0`
-w pliku `docker-publish.yml`. Na maszynie kompilującej z dużą ilością pamięci RAM włącz
-Turbopack, aby przyspieszyć kompilację:
+Turbopack kompiluje się w natywnej pamięci Rusta, która żyje** poza** stertę V8, więc `OMNIROUTE_BUILD_MEMORY_MB` jej nie ogranicza. Na hoście z limitem pamięci kompilacja jest następnie SIGKILLed przez zabójcę OOM bez żadnego tekstu błędu. — po prostu zatrzymuje się w połowie `Creating an optimized production build`, co brzmi raczej jak zawieszenie, a nie brak pamięci. Dlatego właśnie `Dockerfile` domyślnie wybiera webpack (`OMNIROUTE_USE_TURBOPACK=0`), w przeciwieństwie do `npm run dev` / `npm run build`, gdzie Turbopack jest domyślnym kodem: gołe `docker build .` bez argumentów kompilacji (które uruchamiają Railway i inne hosty uruchamiane jednym kliknięciem) nie może po cichu umierać w kreatorze z ograniczoną pamięcią. Opublikowane obrazy już jawnie przekazują `OMNIROUTE_USE_TURBOPACK=0` w `docker-publish.yml`. W kreatorze z dużą ilością RAM wybierz Turbopack, aby przyspieszyć kompilację:
 
 ```bash
 docker build --target runner-base \
@@ -301,48 +273,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-Opcja `webpackBuildWorker` jest włączona, dlatego `next build` uruchamia proces nadrzędny **oraz** proces roboczy,
-a każdy z nich osobno respektuje `OMNIROUTE_BUILD_MEMORY_MB`. Limit pamięci kontenera należy ustawić
-na wartość w przybliżeniu ponad dwukrotnie większą, a nie jednokrotnie większą.
+`webpackBuildWorker` jest włączone, więc `next build` uruchamia rodzica** I** proces roboczy i każdy z nich honoruje `OMNIROUTE_BUILD_MEMORY_MB` osobno. Zwymiaruj sufit kontenera powyżej mniej więcej dwukrotnie większej wartości, a nie raz.
 
-Pomiary dla tego drzewa (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Zmierzone na tym drzewie (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Limit kontenera | Wynik                                                  |
-| --------- | --------------- | ------------------------------------------------------ |
-| Turbopack | 8 GiB / 16 GiB  | zakończony przez OOM przy obu limitach, bez komunikatu |
-| webpack   | 8 GiB           | proces roboczy kompilacji zakończony sygnałem SIGKILL  |
-| webpack   | 12 GiB          | powodzenie, szczytowe zużycie 11,1 GiB                 |
+| Pakieter           | Sufit kontenerowy | Wynik                                            |
+| ------------------ | ----------------- | ------------------------------------------------ |
+| Turbopack          | 8 GiB / 16 GiB    | OOM-zabity w obu przypadkach, po cichu           |
+| pakiet internetowy | 8 GiB             | pracownik budowlany SIGKILLed                    |
+| pakiet internetowy | 12 GiB            | udało się, osiągnęło szczyt na poziomie 11,1 GiB |
 
-### Domyślne ustawienia środowiska uruchomieniowego
+### Domyślne ustawienia środowiska wykonawczego
 
 Wartości domyślne eksportowane przez `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Zachowanie pamięci w Dockerze:
+Zachowanie pamięci w Docker:
 
-- Obraz ustawia `OMNIROUTE_MEMORY_MB=1024` i na tej podstawie wyznacza `NODE_OPTIONS=--max-old-space-size=1024`.
-- Właściwy proces serwera jest uruchamiany przez samodzielny program uruchamiający, który odczytuje `OMNIROUTE_MEMORY_MB` i dodaje `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node używa ostatniej powtórzonej wartości `--max-old-space-size`, dlatego ustawienie `OMNIROUTE_MEMORY_MB` kontroluje efektywny limit sterty w Dockerze.
-- Ponieważ obraz zawsze ustawia tę zmienną, własny mechanizm zapasowy programu uruchamiającego, kalibrowany na podstawie ilości pamięci RAM, nigdy nie ma zastosowania w Dockerze. Należy jawnie zwiększyć tę wartość stosownie do obciążenia (tabela poniżej). `2048` to nadal za mało dla `/v1/responses` agentów programistycznych.
+- Obraz ustawia `OMNIROUTE_MEMORY_MB=1024` i wyprowadza z niego `NODE_OPTIONS=--max-old-space-size=1024`.
+- Właściwy proces serwera jest uruchamiany przez samodzielny program uruchamiający, który odczytuje `OMNIROUTE_MEMORY_MB` i dołącza `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Węzeł wykorzystuje ostatnią powtórzoną wartość `--max-old-space-size`, więc ustawienie `OMNIROUTE_MEMORY_MB` kontroluje efektywny limit sterty Docker.
+- Ponieważ obraz zawsze to ustawia, kalibracja RAM programu uruchamiającego nigdy nie ma zastosowania w przypadku Docker. Podnieś go jawnie dla obciążenia (tabela poniżej). `2048` jest wciąż za mały dla agenta kodującego `/v1/responses`.
 
-### Pamięć RAM środowiska uruchomieniowego dla agentów programistycznych
+### Runtime RAM dla agentów kodujących
 
-Domyślna wartość 1 GiB w Dockerze to minimum dla panelu i prostych czatów, a nie rozmiar odpowiedni dla środowiska produkcyjnego. Długie treści żądań `POST /v1/responses` (setki wiadomości, dziesiątki narzędzi) podczas kompresji przechowują w pamięci wiele grafów. Dwa nakładające się żądania o rozmiarze około 3 MiB / 750 tys. tokenów spowodowały przerwanie V8 przy **12 GiB** przestrzeni old-space (`FATAL ERROR: Reached heap limit`), a także wywołały błąd OOM cgroup przy 16 GiB. Zobacz [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Wartość domyślna 1 GiB Docker to podłoga dashboard/light-chat, a nie wielkość produkcyjna. Długie treści `POST /v1/responses` (setki wiadomości, dziesiątki narzędzi) zachowują podczas kompresji wiele wykresów w pamięci. Dwa nakładające się żądania ~ 3 MiB / ~ 750 tys. tokenów przerwały V8 w pewnym momencie** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`), a także uderzył 16 GiB cgroup OOM. Zobacz [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Ustaw **`--memory` cgroup powyżej rozmiaru sterty** — natywne bufory, SQLite i pośrednie dane kompresji znajdują się poza V8.
+Rozmiar** cgroup `--memory` nad stertą** Bufory natywne —, SQLite i pośrednie kompresje znajdują się poza V8.
 
-| Obciążenie                                      | `OMNIROUTE_MEMORY_MB`            | Kontener / cgroup                    | Uwagi                                                                                                                                   |
-| ----------------------------------------------- | -------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Panel, jeden prosty czat                        | `1024` (domyślna wartość obrazu) | ≥2 GiB                               |                                                                                                                                         |
-| Jeden agent programistyczny (Claude/Codex/Grok) | `8192`                           | ≥10 GiB                              | Typowa pojedyncza sesja `/v1/responses`                                                                                                 |
-| Dwa równoczesne długie `/v1/responses`          | `10240`–`12288`                  | ≥12–16 GiB                           | Zaobserwowane przerwanie V8 przy stercie około 12 GiB                                                                                   |
-| Co najmniej trzy równoczesne długie konteksty   | nie uruchamiaj w jednym procesie | przetwarzanie szeregowe / więcej RAM | Domyślny limit obsługi ciężkich żądań wynosi 1 trwające żądanie; zwiększenie go bez dodatkowej pamięci RAM ponownie powoduje przerwanie |
+| Obciążenie pracą                         | `OMNIROUTE_MEMORY_MB`   | Kontener/grupa c          | Notatki                                                                                             |
+| ---------------------------------------- | ----------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
+| Pulpit nawigacyjny, jeden lekki czat     | `1024` (domyślny obraz) | ≥2 GiB                    |                                                                                                     |
+| Jeden agent kodujący (Claude/Codex/Grok) | `8192`                  | ≥10 GiB                   | Typowa jednosesyjna `/v1/responses`                                                                 |
+| Dwa jednoczesne długie `/v1/responses`   | `10240`–`12288`         | ≥12–16 GiB                | Zmierzono przerwanie pracy V8 na ~ 12 GiB                                                           |
+| Trzy równoczesne długie konteksty +      | nie w jednym procesie   | serializować / więcej RAM | Domyślny wstęp do wagi ciężkiej to 1 w locie; podniesienie go bez RAM ponownie wprowadza przerwanie |
 
-`omniroute serve` na systemie bezpośrednio zainstalowanym na sprzęcie kalibruje limit do około 35% pamięci RAM (ograniczonego do zakresu `[512, 4096]`), gdy `OMNIROUTE_MEMORY_MB` jest **nieustawione**. Docker zawsze ustawia `1024`, dlatego ta kalibracja nigdy nie jest wykonywana w oficjalnym obrazie.
+`omniroute serve` na gołym metalu kalibruje ~ 35% RAM (zaciśnięty `[512, 4096]`), gdy `OMNIROUTE_MEMORY_MB` jest** nieoprawny** . Docker zawsze ustawia `1024`, więc kalibracja nigdy nie przebiega na oficjalnym obrazie.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Krytyczne zmienne środowiskowe
@@ -366,22 +336,13 @@ Oprócz wartości domyślnych udokumentowanych w pliku [ENVIRONMENT.md](../refer
 | `PROD_DASHBOARD_PORT`         | Port hosta dla panelu w pliku `docker-compose.prod.yml`                                                                                                                                                                                                                     | `20130`                        |
 | `CLIPROXYAPI_PORT`            | Port hosta dla kontenera pomocniczego `cliproxyapi`                                                                                                                                                                                                                         | `8317`                         |
 
-## Reverse proxy w podścieżce (Traefik / nginx)
+## Odwrotne proxy na ścieżce podrzędnej (Traefik / nginx)
 
-Wartość `basePath` platformy Next.js jest kompilowana w autonomicznym pakiecie. OmniRoute zapisuje utrwaloną
-wartość w pliku kontrolnym w katalogu głównym aplikacji (zapisywanym podczas `npm run build`; odczytywanym przez
-`scripts/docker/ensure-docker-base-path.mjs`) i porównuje ją z
-`OMNIROUTE_BASE_PATH` podczas uruchamiania kontenera. Gdy wartości są różne, a obraz został
-zbudowany dla katalogu głównego domeny, skrypt wejściowy modyfikuje manifesty autonomicznego pakietu,
-osadzone literały `basePath`/`assetPrefix` (Next 16 generuje adresy URL zasobów SSR wyłącznie na podstawie
-`assetPrefix` — narzędzie modyfikujące odwzorowuje w nim podścieżkę), utrwalone
-adresy URL zasobów `/_next/static` (manifesty referencji klienta, importy multimediów, wstępnie renderowane
-strony błędów) oraz kliencki adapter `process.env`, zanim zostanie uruchomiony
-`node dev/run-standalone.mjs`.
+Next.js `basePath` jest kompilowany w samodzielny pakiet. OmniRoute zapisuje wypaloną wartość w pliku wartowniczym w katalogu głównym aplikacji (zapisywanym podczas `npm run build`; czytany przez `scripts/docker/ensure-docker-base-path.mjs`) i porównuje ją z `OMNIROUTE_BASE_PATH` podczas uruchamiania kontenera. Kiedy się różnią i obraz został zbudowany dla katalogu głównego domeny, punkt wejścia przepisuje samodzielne manifesty, osadzone literały `basePath`/`assetPrefix` (następne 16 renderuje zasób SSR URLs z samego `assetPrefix` — patcher odzwierciedla w nim podścieżkę), wypalony zasób `/_next/static` URLs (manifesty referencyjne klienta, importy multimediów, wstępnie renderowane strony błędów) i podkładka `process.env` klienta przed `node dev/run-standalone.mjs` biegnie.
 
-### Kompilacja za pomocą Compose (zalecane)
+### Kompilacja tworzenia kompozycji (zalecana)
 
-Ustaw obie zmienne w pliku `.env`, a następnie ponownie zbuduj obraz, aby konfiguracje obrazu i środowiska uruchomieniowego były zgodne:
+Ustaw obie zmienne w `.env`, a następnie przebuduj, aby obraz i środowisko wykonawcze były zgodne:
 
 ```bash
 # .env
@@ -393,69 +354,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-Plik `docker-compose.yml` przekazuje `OMNIROUTE_BASE_PATH` jako argument kompilacji Dockera oraz jako
-zmienną środowiskową środowiska uruchomieniowego.
+`docker-compose.yml` przekazuje `OMNIROUTE_BASE_PATH` jako argument kompilacji Docker i jako zmienną środowiskową środowiska wykonawczego.
 
-### Wstępnie zbudowany obraz dla katalogu głównego + podścieżka środowiska uruchomieniowego
+### Wstępnie zbudowana podścieżka środowiska wykonawczego + obrazu głównego
 
-Opublikowane obrazy `diegosouzapw/omniroute:*` są zbudowane dla katalogu głównego domeny. Nadal można
-ustawić `OMNIROUTE_BASE_PATH` w środowisku uruchomieniowym; kontener jednorazowo modyfikuje pakiet podczas uruchamiania.
-Należy użyć go wraz z pasującym publicznym adresem bazowym:
+Opublikowane obrazy `cheaperinference/omniroute:*` są tworzone dla katalogu głównego domeny. Nadal możesz ustawić `OMNIROUTE_BASE_PATH` w czasie wykonywania; kontener łata pakiet raz podczas uruchamiania. Połącz go z pasującym źródłem publicznym:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Skonfiguruj reverse proxy tak, aby przekazywało **pełną** ścieżkę zewnętrzną (nie usuwaj
-prefiksu). Traefik powinien kierować `PathPrefix(`/omniroute`)` do kontenera bez
-`StripPrefix`, dzięki czemu Next.js otrzyma `/omniroute/...` i będzie udostępniać zasoby z
-`/omniroute/_next/...`.
+Skonfiguruj odwrotne proxy, aby przesyłać dalej** pełny** ścieżka zewnętrzna (nie usuwaj przedrostka). Traefik powinien skierować `PathPrefix(`/omniroute `)` do kontenera bez `StripPrefix`, więc Next.js otrzyma `/omniroute/...` i udostępni zasoby z `/omniroute/_next/...`.
 
-Mechanizm kontroli kondycji Dockera odpytuje lekki punkt końcowy cyklu życia `/healthz`, poprzedzony
-aktywną wartością `OMNIROUTE_BASE_PATH`. Punkt `/api/monitoring/health` pozostaje dostępny na potrzeby
-diagnostyki wykonywanej przez człowieka lub pulpit; aby ponownie skierować na niego mechanizm HEALTHCHECK kontenera (na przykład
-w celu wymuszania szczegółowej kontroli kondycji), ustaw `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Ta ścieżka wykonuje **szczegółową** kontrolę (baza danych + podsumowanie monitorowania) — jest odpowiednia dla rzadko
-wykonywanego przez Dockera mechanizmu `HEALTHCHECK`, jeśli zdecydujesz się go ponownie włączyć, ale **nie** dla interwałów
-`livenessProbe` w Kubernetes.
+Kontrola kondycji Docker sprawdza lekki punkt końcowy cyklu życia `/healthz` poprzedzony aktywnym `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` pozostaje dostępny do diagnostyki human/dashboard ; aby skierować na niego kontener HEALTHCHECK (na przykład w celu głębokiego egzekwowania stanu zdrowia), ustaw `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Ta ścieżka to A** głęboko** sprawdź (podsumowanie monitorowania DB + ) — odpowiednie dla rzadkiego `HEALTHCHECK` Docker, jeśli zdecydujesz się ponownie, ale** nie** dla interwałów Kubernetes `livenessProbe`.
 
-W przypadku orkiestratorów (Kubernetes, Nomad itp.):
+Dla orkiestratorów (Kubernetes, Nomad itp.):
 
-| Sonda                  | Preferowane                                                             | Należy unikać                                                       |
-| ---------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Żywotność              | HTTP `GET /livez` lub TCP na głównym porcie (`PORT`, domyślnie `20128`) | `/api/monitoring/health` jako sondy żywotności                      |
-| Gotowość               | HTTP `GET /healthz`                                                     | Krótkich limitów czasu, które uznają zajętą pętlę zdarzeń za awarię |
-| Szczegółowa / blackbox | `/api/monitoring/health`                                                | —                                                                   |
+| Sonda                     | Woleć                                                                   | Unikać                                                               |
+| ------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Żywotność                 | HTTP `GET /livez` lub TCP na głównym porcie (`PORT`, domyślnie `20128`) | `/api/monitoring/health` jako żywotność                              |
+| Gotowość                  | HTTP `GET /healthz`                                                     | Małe limity czasu, które traktują zajętość pętli zdarzeń jako martwą |
+| Głęboka / czarna skrzynka | `/api/monitoring/health`                                                | —                                                                    |
 
-`/healthz` raportuje stan cyklu życia procesu (`ok` / `starting` / `stopping`). `/livez` sprawdza
-wyłącznie, czy proces działa (zwraca 200 zawsze, gdy procedura obsługi może zostać wykonana; nie czeka na
-gotowość). Oba punkty nadal działają w tej samej pętli zdarzeń Node co obsługa żądań, dlatego
-operacje na katalogu lub kompresji intensywnie wykorzystujące procesor mogą je opóźniać — zajęty ≠ niedziałający. Jeśli sondy HTTP
-przekraczają limit czasu, preferuj sprawdzanie żywotności za pomocą TCP. Pełne zalecenia dotyczące sond:
-[Przewodnik monitorowania — zalecenia dotyczące sond Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` raportuje cykl życia procesu (`ok` / `starting` / `stopping`). `/livez` jest aktywny tylko w procesie (200, ilekroć program obsługi może działać; nie czeka na gotowość). Obydwa w dalszym ciągu działają w tej samej pętli zdarzeń węzła co obsługa żądań, więc katalogowanie powiązane z procesorem lub kompresja mogą je opóźnić. — busy ≠ dead. Preferuj żywotność TCP jeśli przekroczono limit czasu sond HTTP. Pełne wskazówki dotyczące sondy: [Przewodnik dotyczący monitorowania — Zalecenia dotyczące sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose z Caddy (automatyczne TLS dla HTTPS)
+## Docker Komponuj za pomocą Caddy (HTTPS Auto-TLS)
 
-OmniRoute można bezpiecznie udostępnić za pomocą automatycznego konfigurowania certyfikatów SSL przez Caddy. Upewnij się, że rekord DNS typu A Twojej domeny wskazuje adres IP serwera.
+OmniRoute można bezpiecznie ujawnić za pomocą automatycznego udostępniania SSL Caddy. Upewnij się, że rekord DNS A Twojej domeny wskazuje na IP Twojego serwera.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Źródłowy adres widoczny dla przeglądarki, używany do wywołań zwrotnych OAuth, linków panelu i generowanych publicznych adresów URL.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Wewnętrzny adres URL między serwerami, używany przez zaplanowane zadania i wywołania do samej usługi.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -472,12 +416,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy ustawia standardowe nagłówki przekazywania dla kontenera nadrzędnego. OmniRoute używa
-`NEXT_PUBLIC_BASE_URL` jako kanonicznego publicznego źródła wywołań zwrotnych OAuth i generowanych
-linków publicznych; uwierzytelnione operacje zapisu w panelu używają żądań z tego samego źródła oraz
-ochrony CSRF powiązanej z sesją. Włączaj `OMNIROUTE_TRUST_PROXY` tylko w zaawansowanych wdrożeniach,
-w których celowo chcesz, aby OmniRoute ustalał publiczne źródło na podstawie zaufanych przekazanych
-nagłówków zamiast jawnej konfiguracji.
+Caddy ustawia standardowe nagłówki przesyłania dla kontenera nadrzędnego. OmniRoute używa `NEXT_PUBLIC_BASE_URL` jako kanonicznego źródła publicznego dla wywołań zwrotnych OAuth i generowanych łączy publicznych; uwierzytelnione zapisy na pulpicie nawigacyjnym wykorzystują żądania tego samego źródła oraz ochronę CSRF związaną z sesją. Włącz `OMNIROUTE_TRUST_PROXY` tylko w przypadku zaawansowanych wdrożeń, w których celowo chcesz, aby OmniRoute pobierał publiczne pochodzenie z zaufanych przekazywanych nagłówków zamiast jawnej konfiguracji.
 
 ## Szybki tunel Cloudflare
 
@@ -496,47 +435,49 @@ Panele tuneli punktów końcowych (Cloudflare, Tailscale, ngrok) można pokazywa
 
 ## Tagi obrazów
 
-| Obraz                    | Tag      | Rozmiar | Opis                                                               |
-| ------------------------ | -------- | ------- | ------------------------------------------------------------------ |
-| `diegosouzapw/omniroute` | `latest` | ~250MB  | Najwyższa **opublikowana** stabilna wersja SemVer (nie git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB  | Przypnij tę klasę tagów na potrzeby GitOps                         |
+| Obraz                        | Etykietka | Rozmiar | Opis                                                        |
+| ---------------------------- | --------- | ------- | ----------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest`  | ~ 250MB | Najwyższy** opublikowany** stabilny SemVer (nie git `main`) |
+| `cheaperinference/omniroute` | `3.8.54`  | ~ 250MB | Przypnij tę klasę tagu dla GitOps                           |
 
-Manifest wieloplatformowy: natywne `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker automatycznie wybiera pasującą architekturę; przekaż `--platform linux/amd64`, jeśli chcesz wymusić emulację AMD64 na hostach ARM.
+Te same obrazy są publikowane w trzech repozytoriach z tymi samymi skrótami dla poszczególnych architektur: `cheaperinference/omniroute` (Docker Hub, organizacja Cheaper Inference, od wersji 3.8.53), `ghcr.io/cheaper-inference/omniroute` i starsze `diegosouzapw/omniroute`, które przechowuje historię ściągania i nadal otrzymuje każdą wersję. Istniejące wdrożenia `diegosouzapw/omniroute` są stale aktualizowane; zmiana nazwy obrazu jest opcjonalna. Poniższy kanał przedpremierowy `:next` / `:next-web` jest opublikowany tylko dla `diegosouzapw/omniroute` i GHCR.
 
-### Kanały wydań
+Manifest wieloplatformowy: natywny `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker automatycznie wybiera pasującą architekturę; przekaż `--platform linux/amd64` jeśli chcesz wymusić emulację AMD64 na hostach ARM.
 
-OmniRoute publikuje oddzielne kanały Docker dla stabilnych wydań, testowania aktywnej gałęzi wydania oraz kompilacji rozwojowych.
+### Zwolnij kanały
 
-| Kanał                           | Źródło                                            | Zmienność                        | Zalecane użycie                                                                                                         |
-| ------------------------------- | ------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Podpisane/wersjonowane wydanie                    | Niezmienny                       | Wdrożenia produkcyjne przypinające dokładną wersję                                                                      |
-| `:latest` / `:latest-web`       | Najwyższa **opublikowana** stabilna wersja SemVer | Zmienny wskaźnik stabilny        | Śledzi stabilne wydania **po** zadaniu publikacji SemVer — **nie** śledzi `main` ani niewydanych commitów `release/v*`  |
-| `:next` / `:next-web`           | Bieżąca domyślna gałąź `release/v*`               | Zmienny wskaźnik wersji wstępnej | Testowanie poprawek, które trafiły do aktywnej gałęzi wydania, ale nie zostały jeszcze uwzględnione w stabilnym wydaniu |
-| `:main` / `:main-web`           | Gałąź `main`                                      | Zmienny wskaźnik rozwojowy       | Wyłącznie programowanie i testy integracyjne                                                                            |
+OmniRoute publikuje osobne kanały Docker dla wydań stabilnych, testowania aktywnych gałęzi wydań i kompilacji programistycznych.
+
+| Kanał                           | Źródło                                     | Zmienność                        | Zalecane użycie                                                                                                                                               |
+| ------------------------------- | ------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | wydanie Signed/versioned                   | Niezmienny                       | Wdrożenia produkcyjne, które przypinają dokładną wersję                                                                                                       |
+| `:latest` / `:latest-web`       | Najwyższy** opublikowany** stabilny SemVer | Zmienny stabilny wskaźnik        | Podąża za stabilnymi wydaniami** Po** zadanie publikowania SemVer wykonuje —** nie** śledź zatwierdzenia `main` lub niepublikowane zatwierdzenia `release/v*` |
+| `:next` / `:next-web`           | Bieżąca domyślna gałąź `release/v*`        | Zmienny wskaźnik wersji wstępnej | Testowanie poprawek, które wylądowały w gałęzi aktywnego wydania, ale nie są jeszcze w wydaniu stabilnym                                                      |
+| `:main` / `:main-web`           | oddział `main`                             | Zmienny wskaźnik rozwoju         | Tylko testy rozwojowe i integracyjne                                                                                                                          |
 
 #### Dostawcy sesji internetowych: obrazy `-web`
 
-Każdy powyższy kanał ma również odpowiedni tag `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), zbudowany z etapu `runner-web` — jest to ten sam obraz, ale dodatkowo zawiera Playwright i przeglądarkę Chromium. Zwykły obraz jest dostarczany **bez** Chromium; `gemini-web`, `claude-web` i `claude-turnstile` go wymagają.
+Każdy kanał powyżej pełni także funkcję tagu `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), zbudowanego ze etapu `runner-web` — tego samego obrazu plus Playwright i przeglądarka Chromium. Zwykły obraz jest dostarczany** bez** Chrom; `gemini-web`, `claude-web` i `claude-turnstile` tego potrzebują.
 
-Błąd jest odroczony i nie występuje podczas uruchamiania: ci dostawcy wyświetlają swoje modele i są widoczni w panelu jako połączeni, a dopiero pierwsze żądanie kończy się błędem
+Awaria jest odroczona, a nie czas uruchomienia: dostawcy ci wyświetlają swoje modele i wyświetlają się na pulpicie nawigacyjnym jako połączone, a tylko pierwsze żądanie kończy się niepowodzeniem
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Jeśli korzystasz z tych dostawców, pobierz tag `-web` kanału, którego już używasz — nic więcej się nie zmienia. W przypadku instalacji npm/CLI (bez obrazu Docker) brakującym odpowiednikiem jest plik wykonywalny przeglądarki: uruchom `npx playwright install chromium` na hoście.
+Jeśli korzystasz z usług tych dostawców, ściągnij tag `-web` kanału, na którym już jesteś — nic innego się nie zmieni. W przypadku instalacji npm/CLI (bez obrazu Docker ) równoważnym brakującym elementem jest plik binarny przeglądarki: uruchom `npx playwright install chromium` na hoście.
 
-#### Korzystanie z kanału wersji wstępnej
+#### Korzystanie z kanału przedpremierowego
 
-Kanał `next` jest przebudowywany przy każdym wypchnięciu zmian do bieżącej domyślnej gałęzi `release/v*` i publikowany zarówno dla architektury AMD64, jak i ARM64. Starsze gałęzie utrzymaniowe nie mogą go nadpisać. Kanał udostępnia obraz możliwy do pobrania, zawierający poprawki scalone z aktywną gałęzią wydania przed utworzeniem kolejnego stabilnego tagu.
+Kanał `next` jest przebudowywany przy każdym wypchnięciu do bieżącej domyślnej gałęzi `release/v*` i publikowany zarówno dla AMD64 jak i ARM64. Starsze gałęzie konserwacji nie mogą go zastąpić. Kanał udostępnia obraz do ściągnięcia dla poprawek, które zostały scalone z gałęzią aktywnego wydania przed wycięciem kolejnego stabilnego znacznika.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-W przypadku Docker Compose zastąp tag obrazu używany przez wybrany profil, a następnie pobierz obraz i utwórz usługę ponownie:
+W przypadku Docker Compose zastąp znacznik obrazu używany przez wybrany profil, a następnie pobierz i utwórz ponownie usługę:
 
 ```yaml
 services:
@@ -549,32 +490,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Bezpieczeństwo i wycofywanie zmian
+#### Bezpieczeństwo i wycofanie
 
-`next` jest ruchomym kanałem wersji przedpremierowych. Może zmienić się przy każdym wypchnięciu zmian do aktywnej gałęzi wydania i **nie jest przeznaczony do użytku produkcyjnego**. Podczas testowania określonej kompilacji przypnij skrót obrazu:
+`next` to pływający kanał przedpremierowy. Może się zmienić po każdym wypchnięciu do gałęzi aktywnego wydania i tak jest** nie jest obsługiwany do użytku produkcyjnego** . Przypnij podsumowanie obrazu podczas oceniania konkretnej kompilacji:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Przed rozpoczęciem testów wykonaj kopię zapasową woluminu danych OmniRoute lub katalogu danych zamontowanego przez bind mount. Aby wycofać zmiany, przywróć poprzednio używaną stabilną wersję lub skrót obrazu i utwórz kontener ponownie:
+Przed testowaniem wykonaj kopię zapasową woluminu danych OmniRoute lub katalogu danych zamontowanego przez bind. Aby cofnąć, przywróć poprzednio używaną wersję stabilną lub przeanalizuj i utwórz ponownie kontener:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Kompilacja z gałęzi wydania nigdy nie może zmienić `latest`; tylko kwalifikująca się stabilna wersja semantyczna może zaktualizować wskaźnik wersji stabilnej. Obrazy `next` zachowują kontrolę obrazu wydania oraz blokadę dotyczącą luk w zabezpieczeniach o poziomie CRITICAL.
+Kompilacja z gałęzi wydania nigdy nie może przenieść `latest`; tylko kwalifikująca się stabilna wersja semantyczna może promować stabilny wskaźnik. Obrazy `next` zachowują kontrolę obrazu wydania i blokowanie bramki krytycznej.
 
-**`latest` nie gwarantuje aktualności względem repozytorium git.** Poprawki scalone z `main` lub aktywną gałęzią `release/v*` **nie są** dostępne w `:latest`, dopóki nie zostanie opublikowany stabilny obraz SemVer, a zadanie publikowania nie zaktualizuje `:latest` (ten sam skrót co w przypadku tej wersji SemVer). Jeśli `latest` wydaje się nieaktualny, mimo że GitHub pokazuje już poprawkę, pobierz `:next`, aby przetestować gałąź wydania, lub poczekaj na tag SemVer.
+**`latest` nie jest gwarancją walutową dla gita.** Połączone poprawki w `main` lub aktywnej gałęzi `release/v*` to** nie** w `:latest` do czasu opublikowania stabilnego obrazu SemVer i zadanie publikowania promuje `:latest` (to samo podsumowanie co SemVer). Jeśli `latest` wygląda na zamrożone, podczas gdy GitHub już pokazuje poprawkę, pociągnij `:next`, aby przetestować gałąź wydania lub poczekaj na znacznik SemVer.
 
-| Cel                                                                                                  | Użyj                                  |
-| ---------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| GitOps / środowisko produkcyjne, które nie może ulegać zmianom                                       | Przypnij `:X.Y.Z` (lub skrót obrazu)  |
-| Korzystanie z publikowanych wersji stabilnych i akceptowanie ponownego tworzenia przy każdym wydaniu | `:latest`                             |
-| Testowanie niewydanych commitów z `release/v*`                                                       | `:next` (nie do użytku produkcyjnego) |
-| Testowanie `main`                                                                                    | `:main` (nie do użytku produkcyjnego) |
+| Chcesz                                                             | Używać                               |
+| ------------------------------------------------------------------ | ------------------------------------ |
+| GitOps / produkcja, która nie może dryfować                        | Przypnij `:X.Y.Z` (lub skrót obrazu) |
+| Śledź opublikowane stajnie i akceptuj odtworzenie w każdym wydaniu | `:latest`                            |
+| Przetestuj niewydane zatwierdzenia `release/v*`                    | `:next` (nie produkcja)              |
+| Przetestuj `main`                                                  | `:main` (nie produkcja)              |
 
 ## Aktualizacje panelu w Dockerze
 
@@ -651,11 +592,11 @@ Usługa usuwa żądanie przed pobraniem obrazu, aby nieudane uruchomienie nie po
 
 Stock Docker / Kubernetes OmniRoute jest** jeden proces węzłowy + jeden zapisujący SQLite** . Wysoka dostępność jest** nieobsługiwane** na tej topologii.
 
-| Ograniczenie                                  | Konsekwencja                                                                                                                                                                                                                                                                                                |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pojedynczy pisarz                             | Do** nie** uruchom wiele replik w tym samym pliku SQLite. To psuje DB.                                                                                                                                                                                                                                      |
-| Odtwórz / uruchom ponownie / HEALTHCHECK kill | **Pełna awaria** SSE w locie, sesje na desce rozdzielczej i stan w pamięci. Każdy podłączony klient odpada. Nowe żądania w oknie pustego punktu końcowego otrzymują odwrotne proxy**`502 Bad Gateway: Unknown error`** , a nie OmniRoute JSON — klienci nie mogą odróżnić tego od awarii dostawcy (#11015). |
-| Ta sama pętla zdarzeń co `/healthz`           | Zajęty katalog lub znacznik kompresji może opóźnić sondy; krótki limit czasu, a następnie uruchamia ponownie** tylko** replika.                                                                                                                                                                             |
+| Ograniczenie                                  | Konsekwencja                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pojedynczy pisarz                             | Do** nie** uruchom wiele replik w tym samym pliku SQLite. To psuje DB.                                                                                                                                                                                                                                        |
+| Odtwórz / uruchom ponownie / HEALTHCHECK kill | **Pełna awaria** SSE w locie, sesje na desce rozdzielczej i stan w pamięci. Każdy podłączony klient odpada. Nowe żądania w oknie pustego punktu końcowego otrzymują odwrotne proxy**`502 Bad Gateway: Unknown error`** , not OmniRoute JSON Klienci — nie potrafią odróżnić tego od awarii dostawcy (#11015). |
+| Ta sama pętla zdarzeń co `/healthz`           | Zajęty katalog lub znacznik kompresji może opóźnić sondy; krótki limit czasu, a następnie uruchamia ponownie** tylko** replika.                                                                                                                                                                               |
 
 **Matryca sondy** (zobacz także [zalecenia dotyczące sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -665,7 +606,7 @@ Stock Docker / Kubernetes OmniRoute jest** jeden proces węzłowy + jeden zapisu
 | Gotowość         | HTTP `GET /healthz`                                           | Małe limity czasu, które traktują zajętość pętli zdarzeń jako martwą |
 | Głęboko / ludzie | `/api/monitoring/health`                                      | Zautomatyzowana żywotność Kubelet                                    |
 
-**Ulepszenia:** spodziewać się spadku każdej sesji. Jeśli możesz, pozbądź się klientów; nie ma ciągłej aktualizacji domyślnego SQLite. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` zastąpi także jedyny proces, gdy kontener jest w złym stanie — ten sam promień wybuchu.
+**Ulepszenia:** spodziewać się spadku każdej sesji. Jeśli możesz, pozbądź się klientów; nie ma ciągłej aktualizacji domyślnego SQLite. Komponuj `restart: unless-stopped` plus Docker `HEALTHCHECK` zastąpi także jedyny proces, gdy kontener jest niezdrowy — tym samym promieniu wybuchu.
 
 Gotowe manifesty i wykres Helm działają w `deploy/kubernetes/` i `deploy/helm/omniroute/` — zobacz [przewodnik wdrażania Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
@@ -696,9 +637,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` Sleep pozwala Kube upuścić punkty końcowe usługi przed SIGTERM więc** nowy** ruch przestaje uderzać w proces umierania. W locie `/v1/responses` SSE jest zużywane do `SHUTDOWN_TIMEOUT_MS` (domyślnie 30 s) poprzez dzierżawę wstępu dla wagi ciężkiej (#11015). Nowe żądania, które nadal docierają do procesu, otrzymują `503` + `Retry-After: 5`. Opcja Odtwórz lukę w pustym punkcie końcowym do czasu, aż wymiana będzie gotowa, pozostaje poważną awarią — to jest topologia SQLite, a nie błędna konfiguracja sondy.
+`preStop` Sleep pozwala Kube upuszczać punkty końcowe usługi przed SIGTERM więc** nowy** ruch przestaje uderzać w proces umierania. W locie `/v1/responses` SSE jest zużywane do `SHUTDOWN_TIMEOUT_MS` (domyślnie 30 s) poprzez umowy najmu wstępu dla wagi ciężkiej (#11015). Nowe żądania, które nadal docierają do procesu, otrzymują `503` + `Retry-After: 5`. Opcja Odtwórz lukę pustego punktu końcowego do czasu, aż wymiana będzie gotowa, pozostaje poważną awarią — czyli topologią SQLite, a nie błędną konfiguracją sondy.
 
-Zewnętrzny Postgres / multi-writer HA to** nie** udokumentowana ścieżka zapasów. Jeśli potrzebujesz HA, zachowaj pojedynczą replikę lub uruchom topologię, którą projekt przetestował i udokumentował osobno. Praca Postgres/MySQL mieszka pod [numerem 8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Do tego czasu jest to jedyny obsługiwany sposób rozmnażania** duży** pojemność `/v1/responses` to N niezależnych procesów (następna sekcja), a nie `replicas > 1` na jednym woluminie.
+Zewnętrzny Postgres / multi-writer HA to** nie** udokumentowana ścieżka zapasów. Jeśli potrzebujesz HA, zachowaj pojedynczą replikę lub uruchom topologię, którą projekt przetestował i udokumentował osobno. Praca Postgres/MySQL mieszka w [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Do tego czasu jest to jedyny obsługiwany sposób rozmnażania** duży** pojemność `/v1/responses` to N niezależnych procesów (następna sekcja), a nie `replicas > 1` na jednym woluminie.
 
 ## Skalowanie w poziomie: N niezależnych procesów
 

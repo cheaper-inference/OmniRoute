@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Odstrani ključ"
   },
   "plugins": {
+    "privilegesWarningTitle": "Vtičniki delujejo s polnimi pravicami",
+    "privilegesWarningBody": "Vtičnik deluje kot običajni proces Node.js z enakim dostopom kot OmniRoute: lahko bere datoteke, izvaja programe in uporablja omrežje, ne glede na dovoljenja, ki jih deklarira njegov manifest. Namestite samo vtičnike, ki jim zaupate.",
     "title": "Vtičniki",
     "description": "Namestite in upravljajte vtičnike za razširitev funkcionalnosti OmniRoute",
     "loading": "Nalaganje vtičnikov ...",
