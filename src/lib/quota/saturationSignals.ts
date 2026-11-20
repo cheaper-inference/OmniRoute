@@ -27,7 +27,12 @@ import { createLogger } from "@/shared/utils/logger";
 import { boundedMap } from "./boundedMap";
 import { updateAccountBuckets, type ClaudeUsageResult } from "./accountBuckets";
 import type { QuotaUnit, QuotaWindow } from "./dimensions";
-import { bailianPlanReading, claudePlanReading, codexPlanReading } from "./planWindowReading";
+import {
+  bailianPlanReading,
+  claudePlanReading,
+  claudeUsageDataTime,
+  codexPlanReading,
+} from "./planWindowReading";
 import type { PlanWindowReading } from "./types";
 
 const log = createLogger("quota:saturation");
@@ -42,7 +47,7 @@ interface DimensionSpec {
 }
 
 // ---------------------------------------------------------------------------
-// In-memory cache (boundedMap<cacheKey, saturation 0..1>, 30s TTL). Caps are
+// In-memory cache (boundedMap<cacheKey, SaturationEntry>, 30s TTL). Caps are
 // generous (one entry per connection/provider/dimension or provider/connection):
 // an evicted entry only costs one extra read, and normal deployments never hit them.
 // ---------------------------------------------------------------------------
@@ -52,7 +57,8 @@ const CACHE_TTL_MS = 30_000; // 30 seconds
 /**
  * One cached read: the saturation value getSaturation returns, and the plan-window
  * reading of the same payload (null whenever the value is not that window's own
- * fresh figure). `plan.fetchedAt` is set once, when the entry is built.
+ * fresh figure). `plan.fetchedAt` is fixed when the entry is built, so every call
+ * served by one entry sees the same reading.
  */
 interface SaturationEntry {
   value: number;
@@ -385,6 +391,8 @@ interface AnthropicSaturationDeps {
   loadConnection: (connectionId: string) => Promise<Record<string, unknown> | null>;
   /** Fetch usage for the connection (delegates to getUsageForProvider). */
   fetchUsage: (conn: Record<string, unknown>) => Promise<unknown>;
+  /** Epoch ms of the usage endpoint read kept for the connection's credential, or null. */
+  endpointReadAt?: (conn: Record<string, unknown>) => number | null;
 }
 
 let _anthropicDepsOverride: AnthropicSaturationDeps | null = null;
@@ -407,7 +415,23 @@ async function defaultAnthropicDeps(): Promise<AnthropicSaturationDeps> {
       > | null>,
     fetchUsage: (conn) =>
       usageMod.getUsageForProvider(conn as Parameters<typeof usageMod.getUsageForProvider>[0]),
+    endpointReadAt: (conn) =>
+      usageMod.getClaudeUsageEndpointReadAt(
+        typeof conn.accessToken === "string" ? conn.accessToken : undefined
+      ),
   };
+}
+
+/** The endpoint read time from the seam; any failure is "unknown", never a saturation error. */
+function endpointReadAtOf(
+  deps: AnthropicSaturationDeps,
+  conn: Record<string, unknown>
+): number | null {
+  try {
+    return deps.endpointReadAt?.(conn) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -480,7 +504,9 @@ async function fetchAnthropicSaturation(
       }
       const util = planUtilizationFromUsage(usage, dim.window);
       if (util !== null) {
-        return { value: util, plan: claudePlanReading(usage, dim.window, Date.now()) };
+        const readAt = endpointReadAtOf(deps, conn as Record<string, unknown>);
+        const dataTime = claudeUsageDataTime(usage, readAt, Date.now());
+        return { value: util, plan: claudePlanReading(usage, dim.window, dataTime) };
       }
     }
   } catch (err) {

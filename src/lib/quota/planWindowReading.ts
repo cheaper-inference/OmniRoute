@@ -20,7 +20,7 @@ const CLAUDE_WINDOW_KEYS: Partial<Record<QuotaWindow, string>> = {
   weekly: "weekly (7d)",
 };
 
-/** fetchCodexQuota (codexQuotaParser.ts) `windows` keys per window. */
+/** fetchCodexQuota (codexQuotaFetcher.ts) `windows` keys per window. */
 const CODEX_WINDOW_KEYS: Partial<Record<QuotaWindow, string>> = {
   "5h": "session",
   weekly: "weekly",
@@ -62,7 +62,10 @@ function windowEntry(
   return key && map ? asRecord(map[key]) : null;
 }
 
-/** Shared shape of the Codex and Bailian quota: `windows[key] = { percentUsed, resetAt }`. */
+/**
+ * Shared shape of the Codex and Bailian quota: `windows[key] = { percentUsed, resetAt }`.
+ * A window marked `fractionReported: false` carries a placeholder, not a figure.
+ */
 function fractionWindowReading(
   quota: unknown,
   keys: Partial<Record<QuotaWindow, string>>,
@@ -72,9 +75,30 @@ function fractionWindowReading(
   const q = asRecord(quota);
   if (!q || q.stale === true) return null;
   const entry = windowEntry(q, "windows", keys, window);
-  const used = entry?.percentUsed;
+  if (!entry || entry.fractionReported === false) return null;
+  const used = entry.percentUsed;
   if (typeof used !== "number" || !Number.isFinite(used)) return null;
   return { used: clamp01(used), resetAt: resetMs(entry.resetAt), fetchedAt };
+}
+
+/**
+ * When the provider produced a Claude usage figure, as far as this process can tell: the
+ * `_observedAt` of a figure served from response headers, otherwise the time of the usage
+ * endpoint read behind it. Unknown or unparseable → `builtAt` (the moment the saturation
+ * cache entry is built); a time ahead of `builtAt` is clamped to it, so a clock ahead of
+ * ours never makes every later reading look old.
+ */
+export function claudeUsageDataTime(
+  usage: unknown,
+  endpointReadAt: number | null,
+  builtAt: number
+): number {
+  const u = asRecord(usage);
+  const dataTime =
+    u?._source === "response-headers" ? Date.parse(String(u._observedAt)) : endpointReadAt;
+  return typeof dataTime === "number" && Number.isFinite(dataTime)
+    ? Math.min(dataTime, builtAt)
+    : builtAt;
 }
 
 /**

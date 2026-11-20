@@ -14,30 +14,55 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import type { QuotaWindow } from "../../src/lib/quota/dimensions.ts";
+
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-plan-window-reading-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const sat = await import("../../src/lib/quota/saturationSignals.ts");
 const { claudePlanReading, codexPlanReading, bailianPlanReading } =
   await import("../../src/lib/quota/planWindowReading.ts");
+const bailianFetcher = await import("../../open-sse/services/bailianQuotaFetcher.ts");
+const { connectionProxyTestOverride } =
+  await import("../../open-sse/services/connectionProxyFetch.ts");
+const claudeUsage = await import("../../open-sse/services/usage/claude.ts");
+const { _resetClaudeOauthUsageCooldown } =
+  await import("../../open-sse/services/claudeUsageCooldown.ts");
 const { getSaturation, getPlanWindowReading } = sat;
 
-type QuotaWindow = "5h" | "hourly" | "daily" | "weekly" | "monthly";
+const originalFetch = globalThis.fetch;
 
 const AT = 1_800_000_000_000;
 const ISO = "2026-11-20T15:00:00.000Z";
 const RESET = Date.parse(ISO);
 const DIM = { unit: "percent", window: "5h" } as const;
 
-function oauthUsage(fetchUsage: (conn: Record<string, unknown>) => Promise<unknown>): void {
+function oauthUsage(
+  fetchUsage: (conn: Record<string, unknown>) => Promise<unknown>,
+  endpointReadAt?: (conn: Record<string, unknown>) => number | null
+): void {
   sat._clearSaturationCache();
   sat.__setAnthropicSaturationDepsForTests({
     loadConnection: async (id) => ({ id, accessToken: "tok", authType: "oauth" }),
     fetchUsage,
+    endpointReadAt,
   });
 }
 
+const SESSION_60 = { "session (5h)": { used: 60, total: 100, resetAt: ISO } };
+
+/** Read through getPlanWindowReading and the bounds of the local clock around the call. */
+async function timedReading(connectionId: string) {
+  const before = Date.now();
+  const reading = await getPlanWindowReading(connectionId, "claude", DIM);
+  return { reading, before, after: Date.now() };
+}
+
 test.after(() => {
+  globalThis.fetch = originalFetch;
+  connectionProxyTestOverride.resolveProxyForConnection = null;
+  claudeUsage._resetClaudeUsagePollingState();
+  _resetClaudeOauthUsageCooldown();
   sat.__setAnthropicSaturationDepsForTests(null);
   sat.__setGenericUsageFetcherForTests(null);
   sat._clearSaturationCache();
@@ -175,4 +200,156 @@ test("providers without a plan-window mapping yield no reading", async () => {
     [await getSaturation("c4", "openai", DIM), await getPlanWindowReading("c4", "openai", DIM)],
     [0.75, null]
   );
+});
+
+test("codex and bailian: a window marked as unreported gives no reading", () => {
+  const unreported = { percentUsed: 0, resetAt: ISO, fractionReported: false };
+  const bailian = {
+    windows: { window_5h: unreported, window_weekly: unreported, window_monthly: unreported },
+  };
+  for (const w of ["5h", "weekly", "monthly"] as const) {
+    assert.equal(bailianPlanReading(bailian, w, AT), null);
+  }
+  assert.equal(codexPlanReading({ windows: { session: unreported } }, "5h", AT), null);
+  assert.deepEqual(
+    bailianPlanReading({ windows: { window_5h: { percentUsed: 0, resetAt: ISO } } }, "5h", AT),
+    { used: 0, resetAt: RESET, fetchedAt: AT }
+  );
+});
+
+test("bailian fetcher marks a window without a positive total as unreported", async () => {
+  connectionProxyTestOverride.resolveProxyForConnection = async () => null;
+  globalThis.fetch = (async () =>
+    Response.json({
+      code: "Success",
+      data: {
+        codingPlanInstanceInfos: [
+          {
+            codingPlanQuotaInfo: {
+              per5HourUsedQuota: 10,
+              per5HourQuotaNextRefreshTime: 1_800_000_000,
+              perWeekUsedQuota: 30,
+              perWeekTotalQuota: 100,
+              perWeekQuotaNextRefreshTime: 1_800_000_000,
+              perBillMonthUsedQuota: 0,
+              perBillMonthTotalQuota: 0,
+            },
+          },
+        ],
+      },
+    })) as typeof fetch;
+  const connectionId = `bailian-unreported-${Date.now()}`;
+  try {
+    const quota = (await bailianFetcher.fetchBailianQuota(connectionId, {
+      apiKey: "test-key",
+    })) as unknown as {
+      windows: Record<string, { percentUsed: number; fractionReported?: false }>;
+    };
+    assert.deepEqual(
+      [quota.windows.window_5h.percentUsed, quota.windows.window_5h.fractionReported],
+      [0, false]
+    );
+    assert.equal(quota.windows.window_monthly.fractionReported, false);
+    assert.equal("fractionReported" in quota.windows.window_weekly, false);
+    assert.equal(bailianPlanReading(quota, "5h", AT), null);
+    assert.equal(bailianPlanReading(quota, "weekly", AT)?.used, 0.3);
+  } finally {
+    bailianFetcher.invalidateBailianQuotaCache(connectionId);
+    globalThis.fetch = originalFetch;
+    connectionProxyTestOverride.resolveProxyForConnection = null;
+  }
+});
+
+test("a figure served from response headers is dated by its observation time", async () => {
+  const observedAt = Date.now() - 5 * 60_000;
+  oauthUsage(
+    async () => ({
+      quotas: SESSION_60,
+      _source: "response-headers",
+      _observedAt: new Date(observedAt).toISOString(),
+    }),
+    () => observedAt - 10 * 60_000 // an older endpoint read never dates a header figure
+  );
+  assert.equal((await getPlanWindowReading("t1", "claude", DIM))?.fetchedAt, observedAt);
+});
+
+test("an endpoint figure is dated by the endpoint read, the same for every call on one entry", async () => {
+  const readAt = Date.now() - 12 * 60_000;
+  let fetches = 0;
+  oauthUsage(
+    async () => (fetches++, { quotas: SESSION_60 }),
+    () => readAt
+  );
+  const first = await getPlanWindowReading("t2", "claude", DIM);
+  assert.equal(first?.fetchedAt, readAt);
+  assert.deepEqual(await getPlanWindowReading("t2", "claude", DIM), first);
+  assert.equal(fetches, 1);
+});
+
+test("an unknown or unparseable data time falls back to the cache entry build time", async () => {
+  oauthUsage(async () => ({
+    quotas: SESSION_60,
+    _source: "response-headers",
+    _observedAt: "not a date",
+  }));
+  const headers = await timedReading("t3");
+  assert.ok(
+    headers.reading!.fetchedAt >= headers.before && headers.reading!.fetchedAt <= headers.after
+  );
+
+  oauthUsage(
+    async () => ({ quotas: SESSION_60 }),
+    () => null
+  );
+  const endpoint = await timedReading("t4");
+  assert.ok(endpoint.reading!.fetchedAt >= endpoint.before);
+  assert.ok(endpoint.reading!.fetchedAt <= endpoint.after);
+
+  oauthUsage(
+    async () => ({ quotas: SESSION_60 }),
+    () => {
+      throw new Error("cache unavailable");
+    }
+  );
+  assert.equal(await getSaturation("t5", "claude", DIM), 0.6); // the value never depends on the data time
+  const failed = await getPlanWindowReading("t5", "claude", DIM);
+  assert.ok(failed !== null && failed.fetchedAt <= Date.now());
+});
+
+test("a data time ahead of the local clock is clamped to the build time", async () => {
+  oauthUsage(
+    async () => ({ quotas: SESSION_60 }),
+    () => Date.now() + 60 * 60_000
+  );
+  const { reading, before, after } = await timedReading("t6");
+  assert.ok(reading!.fetchedAt >= before && reading!.fetchedAt <= after);
+});
+
+test("getClaudeUsageEndpointReadAt reports the kept endpoint read without fetching", async () => {
+  claudeUsage._resetClaudeUsagePollingState();
+  _resetClaudeOauthUsageCooldown();
+  let calls = 0;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    calls++;
+    if (String(input) === "https://api.anthropic.com/api/oauth/usage") {
+      return Response.json({ five_hour: { utilization: 42, resets_at: ISO } });
+    }
+    return new Response(null, { status: 404 });
+  }) as typeof fetch;
+  try {
+    assert.equal(claudeUsage.getClaudeUsageEndpointReadAt(undefined), null);
+    assert.equal(claudeUsage.getClaudeUsageEndpointReadAt("never-read"), null);
+    assert.equal(calls, 0);
+    const before = Date.now();
+    await claudeUsage.getClaudeUsage("read-token");
+    const after = Date.now();
+    const callsAfterRead = calls;
+    const readAt = claudeUsage.getClaudeUsageEndpointReadAt("read-token");
+    assert.ok(readAt !== null && readAt >= before && readAt <= after);
+    assert.equal(claudeUsage.getClaudeUsageEndpointReadAt("read-token"), readAt);
+    assert.equal(calls, callsAfterRead);
+  } finally {
+    globalThis.fetch = originalFetch;
+    claudeUsage._resetClaudeUsagePollingState();
+  }
 });

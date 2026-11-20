@@ -114,7 +114,12 @@ export interface PlanWindowReading {
   used: number;
   /** Provider reset of the window, epoch ms; null when the provider sent none. */
   resetAt: number | null;
-  /** When this process built the cached saturation entry, epoch ms. */
+  /**
+   * When the provider produced the figure, as far as this process can tell, epoch ms:
+   * the observation time of figures served from response headers, the usage endpoint
+   * read time otherwise, and the moment the cached saturation entry was built when
+   * neither is known. Never later than that moment.
+   */
   fetchedAt: number;
 }
 
