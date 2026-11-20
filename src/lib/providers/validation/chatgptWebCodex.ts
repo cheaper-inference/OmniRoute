@@ -40,7 +40,7 @@ export async function validateChatGptWebCodexProvider({
       return {
         valid: false,
         error:
-          "Für die Browserprüfung ist ein frischer ChatGPT-Cookie oder ein gespeicherter Browserzustand erforderlich.",
+          "A fresh ChatGPT cookie or a saved browser state is required for browser validation.",
       };
     }
     const runtimeKey =
@@ -58,14 +58,14 @@ export async function validateChatGptWebCodexProvider({
     if (!connectorName) {
       return {
         valid: false,
-        error: "Der ChatGPT-Custom-Connector ist erforderlich.",
+        error: "The ChatGPT custom connector is required.",
       };
     }
     const tunnelConfigured = Boolean(runtimeKey || tunnelId);
     if (tunnelConfigured && (!runtimeKey || !/^tunnel_[a-f0-9]{32}$/.test(tunnelId))) {
       return {
         valid: false,
-        error: "Tunnel-ID und Runtime-Key müssen gemeinsam gültig konfiguriert werden.",
+        error: "Tunnel ID and runtime key must both be configured with valid values.",
       };
     }
     const cdpEndpoint = process.env.CHATGPT_WEB_CODEX_CDP_URL?.trim();
@@ -89,7 +89,7 @@ export async function validateChatGptWebCodexProvider({
       return {
         valid: false,
         error:
-          "Kein unterstütztes Chrome oder Chromium gefunden. Installiere Chromium oder konfiguriere den Browserpfad.",
+          "No supported Chrome or Chromium was found. Install Chromium or configure the browser path.",
       };
     }
     const validationId = `validation-${randomBytes(12).toString("hex")}`;

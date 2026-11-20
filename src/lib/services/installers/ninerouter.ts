@@ -87,7 +87,7 @@ export async function install(version = "latest"): Promise<InstallResult> {
   if (!installedVersion) {
     throw new InstallError(
       "Could not read installed version from node_modules/9router/package.json",
-      "9router instalado mas versão não pôde ser lida.",
+      "9router is installed, but its version could not be read.",
       500
     );
   }

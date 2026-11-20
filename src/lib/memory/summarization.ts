@@ -172,7 +172,7 @@ export async function summarizeMemoriesOlderThan(
   const summaryLines = candidates.map(
     (m) => `[${m.type}] ${m.key ? m.key + ": " : ""}${generateSummary(m.content)}`
   );
-  const summaryContent = `Resumo de ${candidates.length} memórias (>${days} dias):\n${summaryLines.join("\n")}`;
+  const summaryContent = `Summary of ${candidates.length} memories (>${days} days):\n${summaryLines.join("\n")}`;
 
   // Create ONE new summary memory
   const summaryMemory = await createMemory({

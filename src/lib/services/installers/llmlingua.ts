@@ -205,7 +205,7 @@ export async function install(version = "latest"): Promise<InstallResult> {
   if (!installedVersion) {
     throw new InstallError(
       "Could not read installed version from node_modules/@atjsh/llmlingua-2/package.json",
-      "LLMLingua instalado mas versão não pôde ser lida.",
+      "LLMLingua is installed, but its version could not be read.",
       500
     );
   }

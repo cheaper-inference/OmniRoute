@@ -44,22 +44,22 @@ function classifyError(
   if (err.code === "EACCES") {
     return new InstallError(
       raw,
-      "Sem permissão para instalar. Verifique as permissões da pasta de dados.",
+      "Permission denied while installing. Check the permissions of the data folder.",
       403
     );
   }
   if (err.code === "ENOENT" && err.message.includes("npm")) {
     return new InstallError(
       raw,
-      "Node.js/npm não está disponível no PATH. Instale Node ≥22.22.2.",
+      "Node.js/npm is not available on PATH. Install Node ≥22.22.2.",
       500
     );
   }
   if (err.code === "ENOSPC" || stderr.includes("ENOSPC")) {
-    return new InstallError(raw, "Espaço em disco insuficiente.", 507);
+    return new InstallError(raw, "Insufficient disk space.", 507);
   }
   if (err.signal === "SIGTERM" || err.code === "ETIMEDOUT" || err.killed) {
-    return new InstallError(raw, "Instalação demorou demais. Tente novamente.", 504);
+    return new InstallError(raw, "Installation took too long. Please try again.", 504);
   }
   if (
     stderr.includes("ENOTFOUND") ||
@@ -69,12 +69,12 @@ function classifyError(
   ) {
     return new InstallError(
       raw,
-      "Falha de rede ao instalar. Verifique a conexão e tente novamente.",
+      "Network error while installing. Check your connection and try again.",
       503
     );
   }
 
-  return new InstallError(raw, `Falha na instalação: ${raw}`, 500);
+  return new InstallError(raw, `Installation failed: ${raw}`, 500);
 }
 
 /**
@@ -146,9 +146,8 @@ export function runNpm(
 ): Promise<NpmRunResult> {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const isBun = Boolean(process.versions.bun);
-  const npmBin = process.platform === "win32"
-    ? (isBun ? "bun.exe" : "npm.cmd")
-    : (isBun ? "bun" : "npm");
+  const npmBin =
+    process.platform === "win32" ? (isBun ? "bun.exe" : "npm.cmd") : isBun ? "bun" : "npm";
   const execArgs = isBun && args[0] === "install" ? ["add", ...args.slice(1)] : args;
 
   return new Promise((resolve, reject) => {

@@ -59,7 +59,7 @@ export async function GET(request: Request = new Request("http://localhost/")): 
         return createErrorResponse({ status: 404, message: "No API key found for 9router." });
       }
 
-      // Gravar no audit log (best-effort — falha silenciosa para não bloquear reveal)
+      // Write to the audit log (best-effort — fail silently so reveal is not blocked)
       try {
         logAuditEvent({
           action: "service.reveal_api_key",

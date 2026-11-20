@@ -10,7 +10,7 @@ export async function POST(): Promise<Response> {
     const row = await getServiceRow(TOOL);
 
     if (!row || row.status === "not_installed") {
-      return createErrorResponse({ status: 409, message: "9router não está instalado." });
+      return createErrorResponse({ status: 409, message: "9router is not installed." });
     }
 
     const sup = await getOrInitSupervisor();

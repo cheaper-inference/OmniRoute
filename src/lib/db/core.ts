@@ -194,17 +194,17 @@ function openSqliteDatabase(sqliteFile: string, options?: Record<string, unknown
     : "better-sqlite3 (failed), node:sqlite (unavailable)";
   if (preInitError) {
     throw new Error(
-      `[DB] Nenhum driver SQLite disponível para '${sqliteFile}'. ` +
-        `Drivers testados: ${syncDrivers}, ` +
-        `sql.js (falhou: ${preInitError}).`
+      `[DB] No SQLite driver available for '${sqliteFile}'. ` +
+        `Drivers tried: ${syncDrivers}, ` +
+        `sql.js (failed: ${preInitError}).`
     );
   }
 
   throw new Error(
-    `[DB] Nenhum driver SQLite disponível para '${sqliteFile}'. ` +
-      "Chame ensureDbInitialized() no startup. " +
-      `Drivers testados: ${syncDrivers}. ` +
-      "sql.js WASM ainda não foi pré-inicializado."
+    `[DB] No SQLite driver available for '${sqliteFile}'. ` +
+      "Call ensureDbInitialized() at startup. " +
+      `Drivers tried: ${syncDrivers}. ` +
+      "sql.js WASM has not been pre-initialized yet."
   );
 }
 
@@ -1572,16 +1572,16 @@ export function getDriverInfo(): DbDriverInfo | null {
 export async function ensureDbInitialized(): Promise<void> {
   if (getDb()) return;
 
-  // Cloud/build: getDbInstance() cria in-memory, sem necessidade de pré-init
+  // Cloud/build: getDbInstance() creates an in-memory database, no pre-init needed
   if (isCloud || isBuildPhase || !SQLITE_FILE) {
     getDbInstance();
     return;
   }
 
-  // Tenta drivers síncronos primeiro
+  // Try synchronous drivers first
   const sync = tryOpenSync(SQLITE_FILE);
   if (sync) {
-    // Drivers síncronos disponíveis — fechar o probe, getDbInstance() vai abrir com setup completo
+    // Synchronous drivers available — close the probe; getDbInstance() will open with full setup
     sync.close();
     getDbInstance();
     return;
@@ -1590,7 +1590,7 @@ export async function ensureDbInitialized(): Promise<void> {
   // No synchronous driver available — pre-initialize sql.js (WASM, async)
   console.warn("[DB] Pre-initializing sql.js WASM (synchronous drivers unavailable)...");
   await preInitSqlJs(SQLITE_FILE);
-  // Agora getSqlJsAdapter() retornará o adapter, e getDbInstance() vai usá-lo
+  // Now getSqlJsAdapter() will return the adapter, and getDbInstance() will use it
   getDbInstance();
 }
 

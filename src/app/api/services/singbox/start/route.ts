@@ -9,7 +9,7 @@ export async function POST(): Promise<Response> {
   try {
     const row = await getServiceRow(TOOL);
     if (!row || row.status === "not_installed") {
-      return createErrorResponse({ status: 409, message: "sing-box não está instalado." });
+      return createErrorResponse({ status: 409, message: "sing-box is not installed." });
     }
 
     const sup = await getOrInitSupervisor();
