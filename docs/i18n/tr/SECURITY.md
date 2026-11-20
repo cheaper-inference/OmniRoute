@@ -4,13 +4,13 @@
 
 ---
 
-## Güvenlik Açıklarını Bildirme
+## Güvenlik Açıklarını Raporlama
 
-OmniRoute'ta bir güvenlik açığı keşfederseniz lütfen bunu sorumlu bir şekilde bildirin:
+OmniRoute bir güvenlik açığı keşfederseniz lütfen bunu sorumlu bir şekilde bildirin:
 
-1. Herkese açık bir GitHub sorunu **AÇMAYIN**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) kullanın
-3. Şunları ekleyin: açıklama, yeniden oluşturma adımları ve olası etki
+1. **DO NOT** herkese açık bir GitHub sorunu açın
+2. [GitHub Güvenlik Önerilerini](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) Kullanın
+3. Şunları ekleyin: açıklama, çoğaltma adımları ve potansiyel etki
 
 ## Yanıt Zaman Çizelgesi
 
@@ -29,25 +29,14 @@ OmniRoute'ta bir güvenlik açığı keşfederseniz lütfen bunu sorumlu bir şe
 | 3.7.x   | ✅ Güvenlik                                           |
 | < 3.7.0 | ❌ Desteklenmiyor                                     |
 
-## LTS destek süresi (v3.9.x)
+## LTS destek penceresi (v3.9.x)
 
-3.8.59'dan sonraki sürüm, `stable/v3` dalında uzun vadeli destek hattını açan **3.9.0**'dır
-(bkz. [`ROADMAP.md`](ROADMAP.md) → "Aşama 3 — v3.9.0 LTS").
+3.8.59'dan sonraki sürüm** 3.9.0** `stable/v3` şubesinde uzun vadeli destek hattını açan (bkz. [`ROADMAP.md`](ROADMAP.md) → "Faz 3 — v3.9.0 LTS").
 
-- **`stable/v3` kapsamına girenler:** hata düzeltmeleri, güvenlik yamaları ve sağlayıcı güncellemeleri. Yeni
-  özellikler v4 kanalına eklenir; LTS hattında öncelik kararlılıktır. `npm install omniroute`
-  (`latest` dist-tag'i), tüm v4 döngüsü boyunca v3'te kalır.
-- **Destek süresi:** `stable/v3`, **3.9.0'ın yayınlanmasından sonraki 12 ay boyunca veya v4.0.0'ın `latest` olarak
-  yayınlanmasından sonraki 90 güne kadar — hangisi daha geçse — güvenlik düzeltmeleri ve kritik regresyon
-  düzeltmeleri** alır. Ortaya çıkan bitiş tarihi, sürüm yayınlandığında 3.9.0 sürüm notlarına ve
-  [`ROADMAP.md`](ROADMAP.md) dosyasına kaydedilir.
-- **LTS hattındaki bir güvenlik açığını bildirme:** diğer tüm sürümlerle aynı kanal kullanılmalıdır —
-  herkese açık bir issue yerine özel bir [GitHub Güvenlik Bildirimi](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-  gönderilmelidir. Test ettiğiniz sürümü belirtin (örneğin `3.9.2`); düzeltmeler `stable/v3` dalına eklenir
-  ve v4'e ileri taşınır.
-- **LTS yayınındaki güvenlik temeli:** ölçülen tarayıcı durumu, rota koruması ve
-  herkese açık kimlik bilgilerine ilişkin kanıtlar
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) dosyasına kaydedilir.
+- **`stable/v3` aldığı şeyler:** hata düzeltmeleri, güvenlik yamaları ve sağlayıcı güncellemeleri. Yeni özellikler v4 kanalına gidiyor; LTS çizgisi istikrar önceliklidir. `npm install omniroute` ( `latest` dağıtım etiketi), tüm v4 döngüsü boyunca v3'te kalır.
+- **Pencere süresi:** `stable/v3` alır** 3.9.0 kesintisinden sonraki 12 ay boyunca veya v4.0.0'ın `latest` — olarak yayınlanmasından 90 gün sonrasına (hangisi daha sonraysa) kadar güvenlik düzeltmeleri ve kritik gerilemeler** . Ortaya çıkan bitiş tarihi, kesinti gerçekleştiğinde 3.9.0 sürüm notlarına ve [`ROADMAP.md`](ROADMAP.md) kaydedilir.
+- **LTS hattındaki bir güvenlik açığını bildirme:** — diğer sürümleriyle aynı kanal, özel bir [GitHub Güvenlik Danışmanlığıdır](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ; asla kamuya açık bir sorun değildir. Hangi sürümü test ettiğinizi söyleyin (örneğin `3.9.2`); düzeltmeler `stable/v3` ulaşır ve v4'e iletilir.
+- **LTS kesiminde güvenlik temeli:** Ölçülen tarayıcı durumu, rota koruması ve kamuya açık kimlik bilgileri kanıtları [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) kaydedilir.
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

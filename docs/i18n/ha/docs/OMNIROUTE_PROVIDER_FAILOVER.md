@@ -4,10 +4,20 @@
 
 ---
 
-Ana rarraba gazawowi kafin a yanke shawarar sake gwadawa.
+Ana rarraba gazawar kafin a yanke shawara.
 
-Gazawowi na ɗan lokaci kamar ƙarewar lokaci, kurakuran hanyar sadarwa, iyakokin ƙimar buƙatu, da martanin 5xx daga mai samarwa na iya sa a koma ga wani mai samarwa. Ba a sake gwada kurakuran tantancewa, kurakuran izini, buƙatun da ba su inganta ba, samfuran da babu su, da gazawoyin da ba a san su ba ba tare da tantancewa ba.
+Rashin lalacewa na wucin gadi kamar ƙarewar lokaci, kurakuran cibiyar sadarwa, iyakan ƙima, da mai ba da amsa 5xx na iya gazawa. Ƙimar ƙididdiga ko ƙima (keɓaɓɓiyar keɓaɓɓiyar 429, ko 402 Biyan da ake buƙata) ba a taɓa gwadawa akan mai bayarwa ɗaya ba amma ya gaza ga wani, wanda keɓaɓɓen keɓaɓɓen keɓaɓɓen ke. Kurakurai masu inganci, kurakuran izini, buƙatun mara inganci, samfura marasa samuwa, da gazawar da ba a san su ba ba a sake gwada su a makance.
 
-Manufar tsoho ta sauyawa tsakanin masu samarwa tana ba da damar ƙoƙarin masu samarwa har sau uku, tana sake gwadawa idan an kai iyakar ƙimar buƙatu ko lokacin jira ya ƙare, kuma tana ware kashe sabis na gudanarwa daga yanayin da'ira na ɗan lokaci.
+Tsohuwar manufar mai ba da ƙetare tana ba da damar ƙoƙarce-ƙoƙarcen mai ba da sabis guda uku, sake gwada iyakokin ƙididdigewa da ƙarewar lokaci, ta gaza kan ƙaƙƙarfan ƙaƙƙarfan ƙaƙƙarfan ƙaƙƙarfan ƙaƙƙarfan ƙayyadaddun ƙayyadaddun gudanarwa, da kuma keɓance naƙasasshiyar gudanarwa daga jihar da'ira ta wucin gadi.
 
-Yanayin da'ira su ne `closed`, `open`, da `half_open`. Lokacin hucewa yana tsara gwaji mai iyaka; gwaji mai nasara yana rufe da'irar, yayin da gwajin da bai yi nasara ba yake sake buɗe ta.
+## Inda ya shafi
+
+- **Combos** sun gaza tsakanin maƙasudinsu bisa ga dabarun haɗin gwiwa da saitunan su.
+- **Model id** ( `provider/` prefix) wanda masu samarwa da yawa ke aiki, ba tare da haɗin ainihin sunan ba, ana fara aikawa zuwa zaɓin zaɓin mai bada. Idan wannan yunƙurin ya gaza ta hanyar manufofin ta gaza kan gaba, ana aika buƙatun iri ɗaya zuwa mai bada aiki na gaba wanda ke ba da id. Amsar tana ɗauke da `x-omniroute-fallback-attempts` tare da adadin masu samarwa da aka gwada kafin wanda ya amsa.
+  - Kowane madadin yana da izini daidai kamar yadda aka zaɓa. Maɓallin maɓalli API ko bai yarda da shi ba an tsallake shi ba tare da kiran sama ba, kuma abokin ciniki ya sami ainihin kuskuren sama, ba ƙin yarda da manufa don manufa da ba a taɓa ambata ba.
+  - Amsar da ta gaza ne kawai ke ci gaba: babu abin da ya gaza bayan byte na farko.
+  - Musanya samfurin faɗuwar gaggawa yana aiki ne kawai bayan kowane mai ba da samfurin da ake buƙata ya gaza.
+  - Buƙatun da aka liƙa zuwa haɗin (`x-omniroute-connection`) yana tsayawa akan sa.
+  - Ba a taɓa sake tura id ɗin da aka riga aka kafi (`provider/model`) zuwa wani mai badawa ba.
+
+Jihohin da'ira sune `closed`, `open`, da `half_open`. Wani sanyi yana tsara tsarin bincike mai iyaka; bincike mai nasara ya rufe da'irar kuma binciken da ya gaza sake buɗe shi.

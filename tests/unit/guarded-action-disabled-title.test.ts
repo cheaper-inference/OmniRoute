@@ -5,15 +5,21 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Owner decision 4 (2026-11-14, follow-up of #19620): the kit gives a disabled button
-// `pointer-events: none`, so a `title` on it never shows. A title that explains WHY the button
-// is disabled was therefore invisible exactly when it mattered. Those buttons now use
-// <GuardedAction reason={…}> (src/shared/components/GuardedAction.tsx), which keeps the button
-// focusable and shows the reason.
+// `pointer-events: none`, so a native `title` on it never shows. Two kinds of titles, two fixes:
+//
+// - A title that explains WHY the button is disabled is a reason. Those buttons use
+//   <GuardedAction reason={…}> (src/shared/components/GuardedAction.tsx), which keeps the button
+//   focusable, swallows the click and shows the reason.
+// - A title that is the button's NAME (Refresh, Move up, Test all…) stays a title. The Button
+//   adapter (src/shared/components/Button.tsx) now shows it through the Tooltip adapter while
+//   the button is disabled or loading, and keeps the native title while it is enabled
+//   (tests/unit/ui/adapters/button-disabled-title-tooltip.test.tsx).
 //
 // The guard: a <Button> that is `disabled` and carries a `title` fails when the title can only
 // be a reason — the button is always disabled, or the title changes with state (ternary, `&&`,
-// `||`, `undefined`). A constant title is the button's label/hint (visible while it is enabled;
-// `aria-label` carries it for assistive tech) and passes. Every kept exception says why.
+// `||`, `undefined`). A constant title is the button's name and passes: it now shows in both
+// states. A state-dependent title that is still a name (a label that follows the state) is
+// listed in LABEL_TITLES, each with why; the adapter shows it while disabled too.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -80,7 +86,8 @@ function attr(tag: string, name: string): string | null {
   return tag.slice(i, j + 1);
 }
 
-// Disabled buttons whose state-dependent title is still a label, not a reason.
+// Disabled buttons whose state-dependent title is still a name, not a reason. The Button
+// adapter shows it in a tooltip while the button is disabled, so it stays visible.
 const LABEL_TITLES: Array<{ file: string; marker: string; reason: string }> = [
   {
     file: "src/app/(dashboard)/dashboard/models/ModelCatalogTable.tsx",
@@ -163,7 +170,7 @@ test("a disabled Button never carries a reason-only title (use GuardedAction rea
   assert.deepEqual(
     offenders,
     [],
-    "a disabled button hides its title; move the explanation to <GuardedAction reason={…}>"
+    "a disabled Button's title is its name (shown in a tooltip while disabled); move a reason to <GuardedAction reason={…}>"
   );
   const stale = LABEL_TITLES.filter((_, i) => !used.has(i)).map((e) => `${e.file} (${e.marker})`);
   assert.deepEqual(stale, [], "stale LABEL_TITLES entries: remove them");

@@ -10,11 +10,11 @@
 // Regression guard: GET /api/v1/quotas/check stays a Bearer-key read (docs/reference/API_REFERENCE.md).
 import test from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import { syncBuiltinESMExports } from "node:module";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import crypto from "node:crypto";
-import { syncBuiltinESMExports } from "node:module";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(
@@ -62,56 +62,9 @@ test.after(() => {
 const BASE_URL = "http://localhost:20128/api/v1";
 const PROVIDER = "openai";
 const ACCOUNT = "account-a";
-// Distinct values make each configured cap recognizable in a refused response payload.
+// Unusual on purpose, so a body that leaks the seeded cap cannot match by accident.
 const OPERATOR_CAPS = { maxActiveKeys: 7919, dailyIssueLimit: 7907, hourlyIssueLimit: 7901 };
 const NEW_CAPS = { maxActiveKeys: 104729, dailyIssueLimit: 104723, hourlyIssueLimit: 104717 };
-
-/**
- * Reject seeded cap values anywhere in a refusal payload, including nested fields.
- * Validate the independently generated UUID v4 separately: coincidental cap digits in
- * that request metadata are not evidence that the configured limits were disclosed.
- */
-function assertNoConfiguredCaps(body: Record<string, unknown>): void {
-  const { requestId, ...payload } = body;
-  // createErrorResponse generates a random UUID independently of the configured caps.
-  // Its hex digits can contain a cap by chance; validate that metadata separately and
-  // inspect every other response field, including nested details, for all seeded caps.
-  assert.ok(typeof requestId === "string", "refusal has a request ID");
-  assert.match(requestId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-  const serialized = JSON.stringify(payload);
-  for (const cap of Object.values(OPERATOR_CAPS)) {
-    assert.ok(
-      !serialized.includes(String(cap)),
-      "a refused call must not disclose the configured caps"
-    );
-  }
-}
-
-test("the cap-leak guard does not mistake a random request ID for operator configuration", () => {
-  assertNoConfiguredCaps({
-    error: { message: "Authentication required", type: "invalid_request" },
-    requestId: "79197907-7901-4000-8000-000000000000",
-  });
-});
-
-test("the cap-leak guard rejects every configured cap in the response payload", () => {
-  for (const cap of Object.values(OPERATOR_CAPS)) {
-    for (const payload of [
-      { error: { message: `Configured cap: ${cap}`, type: "invalid_request" } },
-      { error: { message: "Authentication required", details: { cap } } },
-      { error: { message: "Authentication required" }, limits: { maxActiveKeys: cap } },
-    ]) {
-      assert.throws(
-        () =>
-          assertNoConfiguredCaps({
-            ...payload,
-            requestId: "00000000-0000-4000-8000-000000000000",
-          }),
-        /a refused call must not disclose the configured caps/
-      );
-    }
-  }
-});
 
 type RequestFactory = (
   url: string,
@@ -192,16 +145,12 @@ const SURFACES: Surface[] = [
   },
 ];
 
-/**
- * Exercise a limits endpoint with a refused credential and verify its status, sanitized
- * error body and unchanged stored caps. If supplied, the credential must not be echoed.
- */
 async function assertRefused(
   surface: Surface,
   make: RequestFactory,
   expectedStatus: 401 | 403,
   secret?: string
-): Promise<void> {
+): Promise<string> {
   seedOperatorCaps();
   const before = storedCaps();
 
@@ -213,13 +162,28 @@ async function assertRefused(
   const serialized = JSON.stringify(body);
 
   assert.equal(response.status, expectedStatus, `${surface.name}: ${serialized}`);
-  assert.equal(body.error?.type, "invalid_request");
-  assert.equal(typeof body.requestId, "string", "refusal goes through createErrorResponse()");
+  assert.deepEqual(Object.keys(body).sort(), ["error", "requestId"]);
+  assert.ok(body.error);
+  assert.deepEqual(Object.keys(body.error).sort(), ["message", "type"]);
+  assert.equal(body.error.type, "invalid_request");
+  assert.ok(typeof body.error.message === "string");
+  assert.ok(typeof body.requestId === "string", "refusal goes through createErrorResponse()");
+  assert.match(
+    body.requestId,
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  );
   assert.ok(!serialized.includes("at /"), "error body must not leak a stack trace");
-  if (expectedStatus === 403) assert.match(body.error?.message ?? "", /manage/i);
+  if (expectedStatus === 403) assert.match(body.error.message, /manage/i);
   if (secret) assert.ok(!serialized.includes(secret), "error body must not echo the credential");
-  assertNoConfiguredCaps(body);
+  const errorPayload = JSON.stringify(body.error);
+  for (const [capName, capValue] of Object.entries(OPERATOR_CAPS)) {
+    assert.ok(
+      !errorPayload.includes(String(capValue)),
+      `a refused call must not disclose ${capName}`
+    );
+  }
   assert.deepEqual(storedCaps(), before, "a refused call must not change the caps");
+  return body.requestId;
 }
 
 async function assertAllowed(surface: Surface, make: RequestFactory): Promise<void> {
@@ -282,13 +246,19 @@ for (const surface of SURFACES) {
 
   // The /api/v1/ public prefix must not count as "auth not required" here: with no password
   // configured yet, a caller with no credential still gets 401 once setup is complete.
-  test(`${surface.name}: with no password configured an anonymous caller gets 401`, async () => {
+  test(`${surface.name}: with no password configured an anonymous caller gets 401`, async (t) => {
     const initialPassword = process.env.INITIAL_PASSWORD;
     delete process.env.INITIAL_PASSWORD;
     await updateSettings({ setupComplete: true });
+    // A valid correlation ID can contain all three decimal cap values.
+    const requestId = "79197907-7901-4abc-8123-abcdef987654";
+    const uuid = t.mock.method(crypto, "randomUUID", () => requestId);
     try {
-      await assertRefused(surface, plainRequest(), 401);
+      syncBuiltinESMExports();
+      assert.equal(await assertRefused(surface, plainRequest(), 401), requestId);
     } finally {
+      uuid.mock.restore();
+      syncBuiltinESMExports();
       process.env.INITIAL_PASSWORD = initialPassword;
       await updateSettings({ setupComplete: false });
     }
@@ -311,17 +281,6 @@ test("PUT checks the credential before it reads the body", async () => {
     accountParams
   );
   assert.equal(invalid.status, 400, "an authorized caller still gets body validation");
-});
-
-test("anonymous limits refusals remain private when the generated UUID contains cap digits", async (t) => {
-  const uuid = t.mock.method(crypto, "randomUUID", () => "79197907-7901-4000-8000-000000000000");
-  syncBuiltinESMExports();
-  try {
-    for (const surface of SURFACES) await assertRefused(surface, plainRequest(), 401);
-  } finally {
-    uuid.mock.restore();
-    syncBuiltinESMExports();
-  }
 });
 
 test("regression guard: GET /api/v1/quotas/check still answers an inference key", async () => {

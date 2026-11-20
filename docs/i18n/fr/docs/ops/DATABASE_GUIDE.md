@@ -186,29 +186,92 @@ La liste complète des quelque 30 tables et plus se trouve dans `src/lib/db/migr
 
 ## Migrations
 
-OmniRoute utilise des **migrations versionnées et idempotentes** dans `src/lib/db/migrations/`. Chaque migration est un fichier SQL unique nommé `NNN_description.sql`.
+OmniRoute utilise** migrations versionnées et idempotentes** en `src/lib/db/migrations/`. Chaque migration est un seul fichier SQL. Deux formats de dénomination coexistent ; la version enregistrée dans `_omniroute_migrations` est le préfixe numérique.
 
-### Nommage des migrations
+### Dénomination des migrations
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                              | Exemple                              | Utilisé pour                                                                                                                                                                 |
+| --------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (exactement 3 chiffres)       | `241_seen_models.sql`                | L'ancienne série `001`–`241`. Gelé à l'arrivée du format d'horodatage (`240` et `241` ont été fusionnés juste avant) : aucun nouveau fichier ne reçoit de numéro séquentiel. |
+| `YYYYMMDDHHMMSS_description.sql` (14 chiffres, UTC) | `20261113120000_add_usage_index.sql` | Chaque migration créée à partir du 2026-11-13.                                                                                                                               |
 
-### Exécution des migrations
+Pourquoi ce changement : avec les nombres séquentiels, PRs parallèles sélectionnaient le même numéro suivant et tous sauf un devaient renuméroter avant de fusionner. Un horodatage UTC donne à chaque PR sa propre version.
 
-Au démarrage, `migrationRunner.ts` :
+Règles pour le format d'horodatage (appliquées par `npm run check:migration-numbering`, partagées avec le générateur dans `scripts/check/lib/migrationNaming.mjs`) :
 
-1. Crée la table `_omniroute_migrations` si elle n’existe pas
-2. Recherche les migrations déjà appliquées
-3. Applique toutes les nouvelles migrations dans l’ordre, chacune dans une transaction
-4. Enregistre chaque migration appliquée avec son horodatage
+- L'horodatage est une date et une heure UTC réelles, pas plus tôt que `20261113000000` et pas plus de 10 minutes dans le futur.
+- La description est `snake_case` minuscule commençant par une lettre (`a-z`, `0-9`, un seul `_` entre les mots), d'un maximum de 80 caractères.
+- Deux fichiers avec le même horodatage constituent un doublon.
+- La règle de non-espacement s'applique uniquement aux anciennes séries : chaque nombre de `001` à `241` doit exister, à l'exception des espaces connus `026`, `055` et `121`. La suppression de `241` (ou de tout ancien fichier) fait échouer la porte. `001` et `241` ne peuvent jamais être ajoutés à la liste autorisée `KNOWN_GAPS`. Les fichiers horodatés ne créent jamais d’espace.
+- Chaque entrée dans `src/lib/db/migrations/` doit être un fichier normal avec un nom `.sql` minuscule valide. Un répertoire, un lien symbolique, un fichier `.SQL` ou `.sql.bak`, un fichier caché ou un nom avec un espace échoue à la porte, car le coureur l'ignorerait silencieusement ou planterait au démarrage.
+
+**Appliquer la commande.** Le coureur trie par la valeur numérique du préfixe, pas par texte : les anciens fichiers `001`–`241` d'abord, puis les fichiers horodatés dans l'ordre d'horodatage, puis tous les répertoires avec espace de noms enregistrés avec `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versions telles que `ee-001`). Une migration en attente est tout fichier dont la version n'est pas dans `_omniroute_migrations`, donc une migration à partir d'une ancienne branche qui fusionne après une plus récente s'applique toujours aux bases de données existantes.
+
+**L'horodatage correspond à l'ordre de création et non à l'ordre de fusion.** Si votre migration dépend d'une table ou d'une colonne créée par une migration avec un** plus récent** horodatage (par exemple, celui d'un autre PR qui a fusionné en premier), une nouvelle base de données exécuterait la vôtre en premier et échouerait. Pendant que votre PR est toujours ouvert, régénérez le nom du fichier avec `npm run db:new-migration` afin qu'il obtienne un horodatage plus récent, ou rendez-le indépendant. `npm run test:migrations:fresh` applique chaque migration à une base de données vide et l'attrape.
+
+### Une migration fusionnée n'est jamais supprimée ni renommée
+
+Une fois qu'un fichier de migration se trouve sur une branche de version ou `main`, il a déjà été exécuté sur les bases de données homologues et de développement, sur les installations VPS et dans la synchronisation Enterprise. Dès lors :
+
+- **Ne le supprimez jamais.** Les nouvelles installations perdraient leur schéma tandis que les bases de données mises à niveau le conserveraient.
+- **Ne le renommez jamais.** La version dans `_omniroute_migrations` ne correspondrait plus à un fichier, donc chaque base de données qui l'appliquait déjà l'exécuterait à nouveau. SQL non idempotent duplique ensuite les données ou arrête le démarrage.
+- **Besoin d'un schéma différent ?** Créez une nouvelle migration avec `npm run db:new-migration`.
+
+Renommer n'est sûr que pour un fichier qui n'a pas encore été fusionné, ce à quoi font référence les indications de la porte. Une balise de version ne change rien ici : chaque poussée vers une branche `release/v*` publie l'image Docker `:next` et s'exécute sur l'homologue, les installations VPS et la synchronisation Enterprise, de sorte qu'une migration fusionnée s'est exécutée sur de vraies bases de données avant qu'une balise `vX.Y.Z` n'existe. La porte échoue à chaque suppression d'un fichier de base, balisé ou non.
+
+- **Annulation d'une migration fusionnée.** Un `git revert` qui supprime le fichier échoue à la porte. Conservez le fichier et annulez son schéma dans une nouvelle migration : `npm run db:new-migration -- <description>`, avec `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` et ainsi de suite. Les bases de données mises à niveau et fraîches se terminent alors par le même schéma.
+- **Le seul renom accepté : une entrée de compatibilité et un contenu identique.** Si un fichier fusionné doit être déplacé (par exemple, deux fichiers fusionnés partagent un horodatage et le runner s'arrête avec une collision de version), renommez le dernier sans toucher à son SQL et ajoutez `{ fromVersion, fromName, toVersion, toName }` à `RENAMED_MIGRATION_COMPATIBILITY` dans `src/lib/db/migrationRunner/constants.ts`. Les bases de données qui appliquaient l'ancienne version voient leur ligne `_omniroute_migrations` déplacée au lieu de réexécuter le fichier. La porte avertit d'un tel changement de nom et exécute toujours la vérification de commutation, quel que soit le nouvel horodatage : les nouvelles installations appliquent le fichier à sa nouvelle position, les bases de données mises à niveau ne le font pas, alors choisissez un nouvel horodatage proche de l'ancien. La porte échoue au changement de nom si le contenu a changé (un changement de schéma est toujours effectué dans une nouvelle migration) ou si le fichier cible de l'entrée n'est pas sur le disque.
+- **Ne renommez jamais dans le même horodatage.** Un changement de nom qui conserve l'horodatage et modifie uniquement la description échoue à la porte, avec ou sans entrée. Avec une entrée dont `toVersion` est égal à son `fromVersion`, le coureur supprime l'ancienne ligne `_omniroute_migrations` et applique à nouveau le fichier sur chaque base de données qui l'a déjà exécuté. Sans entrée, le runner ne suit que la version : il ignore le fichier dans ces bases de données (le nouveau contenu n'y est jamais exécuté) et enregistre une erreur de renumérotation à chaque démarrage. Utilisez un autre horodatage plus une entrée de compatibilité, ou conservez le nom.
+- **La porte vérifie que le fichier renommé ne s'exécute pas à nouveau.** Pour chaque changement de nom couvert, la porte transmet le nouveau nom de fichier au contrôle de commutation avec `--must-not-apply`. La vérification démarre la base de données mise à niveau avec le véritable exécuteur, et si l'exécuteur applique à nouveau ce fichier (par exemple, parce que l'entrée a une version ou un nom incorrect, ou parce que l'analyseur de texte de la porte lit `constants.ts` différemment de TypeScript), la porte échoue avec `migration renomeada rodaria de novo` et vous demande de vérifier les anciennes et nouvelles versions et noms de l'entrée.
+
+### Ce que la porte vérifie par rapport à la base
+
+Lors des exécutions de requêtes d'extraction et de file d'attente de fusion, `npm run check:migration-numbering` compare `src/lib/db/migrations/` sur le disque avec le même répertoire sur la branche de base. La base est, dans cet ordre : `--base-latest-tag`, `--base <ref>`, la variable `MIGRATION_BASE_REF` ou, lorsque `GITHUB_EVENT_NAME` est `pull_request`, `pull_request_target` ou `merge_group`, le premier parent de la validation de fusion, le `merge_group.base_sha` de la charge utile de l'événement, ou `git merge-base HEAD origin/$GITHUB_BASE_REF`. Dans une demande d'extraction ou une exécution de file d'attente de fusion sans base résoluble, la porte échoue. En dehors CI sans `--base`, il imprime `comparação com a base: pulada (sem --base)` et ignore ces règles.
+
+`--base-latest-tag` se compare à la balise de version la plus récente (`vX.Y.Z` dans l'ordre semver ; les balises suffixées telles que les nocturnes ne comptent pas) qui se trouve dans l'histoire de `HEAD`, avec les mêmes règles que `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) exécute la porte de cette façon, car les exécutions push et planifiées n'ont pas de base de demande d'extraction et une fusion peut atterrir sans une nouvelle exécution CI. Sans balise de version dans l'historique, la porte échoue ; exécutez `git fetch --tags` (dans CI, `actions/checkout` avec `fetch-depth: 0` apporte les balises).
+
+| Modification sur la pull request                                                                                        | Résultat                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Un fichier qui existe sur la base est renommé, avec une entrée `RENAMED_MIGRATION_COMPATIBILITY`                        | **Avertissement** si le contenu est identique, et que le contrôle de commutation s'exécute quel que soit le nouvel horodatage ; il échoue si la nouvelle position modifie le schéma final (annulez le changement de nom ou choisissez un autre nouvel horodatage là où il fait la navette) ou si le coureur applique à nouveau le fichier renommé sur une base de données mise à niveau.** Échec** si le contenu change. |
+| Un fichier qui existe sur la base est renommé en gardant son horodatage (seule la description change)                   | **Échec** , avec ou sans entrée : le coureur l'appliquerait à nouveau (avec l'entrée) ou l'ignorerait par version (sans une). Utilisez un autre horodatage plus une entrée de compatibilité, ou conservez le nom.                                                                                                                                                                                                        |
+| Un fichier existant sur la base est supprimé ou renommé sans entrée                                                     | **Échec** , que le fichier soit ou non dans une balise de version. Pour l'annuler, restaurez le fichier avec `git checkout <base> -- src/lib/db/migrations/<file>`; pour rétablir son schéma, ajoutez une nouvelle migration avec `DROP ... IF EXISTS`.                                                                                                                                                                  |
+| Un fichier qui existe sur la base a un contenu différent                                                                | **Avertissement** (une annotation `::warning` dans GitHub Actions) et la vérification de commutation s'exécute. Cela échoue si la modification modifie le schéma final, car les bases de données mises à niveau n'appliquent plus le fichier modifié : placez la modification dans une nouvelle migration. Une modification inoffensive (un commentaire, `IF NOT EXISTS`) ne fait qu'avertir.                            |
+| Un fichier horodaté est ajouté avec un horodatage pas plus récent que le plus récent de la base                         | Exécute le contrôle de commutation, décrit ci-dessous.                                                                                                                                                                                                                                                                                                                                                                   |
+| Un fichier `NNN_` ancien format est ajouté avec un numéro en dessous du fichier ancien format le plus récent de la base | **Échec** , même si `KNOWN_GAPS` est édité dans la même pull request : l'ancienne série est figée, créez la migration avec `npm run db:new-migration`. Les fichiers ancien format au-dessus du plus récent de la base (une pull request `release/v*` vers `main` ) sont acceptés.                                                                                                                                        |
+| Un fichier dans le désordre, modifié ou renommé contient des instructions `INSERT`, `UPDATE`, `DELETE` ou `REPLACE`     | **Avertissement** : le contrôle de commutation ne compare pas les données, vérifiez donc si l'ordre dans lequel les bases de données mises à niveau et fraîches l'appliquent modifie le résultat.                                                                                                                                                                                                                        |
+
+Une exécution du contrôle de commutation couvre ensemble les fichiers en panne, les fichiers modifiés et renommés.
+
+Le contrôle de commutation (`scripts/check/migration-commutation.ts`) crée deux bases de données temporaires avec le chemin d'installation réel : un** mis à niveau** un (démarrer avec les migrations de base, puis redémarrer sur le même fichier avec les migrations de la pull request) et un** frais** un (un démarrage avec les migrations de la pull request). Il compare les schémas résultants : tables et colonnes (en ignorant l'ordre des colonnes), les contraintes UNIQUE / PRIMARY KEY et FOREIGN KEY, le texte `CREATE TABLE` normalisé de chaque table (qui couvre les contraintes CHECK, les classements, les colonnes générées et les options de table), les index, les déclencheurs et les vues. Les données des lignes ne sont pas comparées. S'ils correspondent, la porte indique que le fichier est en panne mais fait la navette et passe. S'ils diffèrent, la porte échoue avec la différence et un indice pour le cas : pour un fichier dans le désordre, régénérez son nom avec `npm run db:new-migration`, ce qui est sûr car le fichier n'est pas encore fusionné ; pour un fichier de base modifié, restaurer le contenu de base et placer la modification dans une nouvelle migration ; pour un fichier renommé, annulez le changement de nom ou choisissez un autre nouvel horodatage là où il fait la navette, jamais le même horodatage avec un autre nom. Si la vérification elle-même ne peut pas s'exécuter, la porte échoue dans CI et n'avertit que localement. Pour un fichier de base modifié, la base de données mise à niveau est construite avec le contenu de base de ce fichier, et le deuxième démarrage l'ignore car sa version est déjà enregistrée. Pour un fichier renommé, la base de données mise à niveau est construite avec le fichier sous son ancien nom, et le deuxième démarrage déplace sa ligne `_omniroute_migrations` via l'entrée de compatibilité au lieu de l'exécuter à nouveau ; la porte transmet le nouveau nom avec `--must-not-apply`, donc la vérification échoue si le deuxième démarrage l'applique. Si une migration de demande d'extraction ne parvient pas à s'appliquer sur le chemin mis à niveau, c'est-à-dire après chaque migration de base (qu'elle échoue également ou non lors d'une nouvelle installation), la porte signale `migration do PR não aplica` et vous demande de corriger le SQL par rapport au schéma actuel de la base ; si le fichier dépend d'une autre migration de demande d'extraction avec un horodatage ultérieur, régénérez son nom avec `npm run db:new-migration`.
+
+Pour exécuter la même comparaison localement, transmettez explicitement la base, par exemple `npm run check:migration-numbering -- --base origin/<base-branch>` ou `npm run check:migration-numbering -- --base-latest-tag` pour comparer avec la dernière version.
+
+### Conversion d'une migration `NNN` d'un PR ouvert
+
+Une pull request ouverte avant le commutateur peut toujours contenir un fichier séquentiel tel que `242_add_widgets.sql`. Les anciens nombres au-dessus de `241` sont rejetés, alors convertissez-les avant de fusionner :
+
+1. **Renommez le fichier avec le générateur en conservant la description.** Exécutez `npm run db:new-migration -- <same description>` pour obtenir le nouveau nom, déplacez-y le SQL et supprimez l'ancien fichier `NNN_`. La description doit rester identique : l'entrée de compatibilité ci-dessous y correspond.
+2. **Ajoutez une entrée de compatibilité si une base de données persistante exécutait l'ancien numéro.** Si une base de données conservée (homologue, un VPS, la propre installation d'un contributeur) a exécuté une construction du PR avec le fichier `NNN_`, ajoutez `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` à `RENAMED_MIGRATION_COMPATIBILITY` dans `src/lib/db/migrationRunner/constants.ts`. C'est** requis pour `237` à `241`** : ces emplacements contiennent désormais les fichiers canoniques `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` et `241_seen_models.sql`, et sans l'entrée, une telle base de données ignore définitivement la migration canonique et exécute à nouveau la migration convertie. Cela fonctionne également pour un emplacement qui reste vide, comme `242`, lorsque la destination est un horodatage. En cas de doute, ajoutez l'entrée. L'endroit où vous l'ajoutez dans le tableau n'a pas d'importance : lorsque l'emplacement cible d'une entrée contient toujours une ligne qu'une autre entrée éloigne (par exemple `237` tenant une ligne PR pendant qu'une ligne `usage_history_calculated_cost` plus ancienne attend de se déplacer dans `237`), le coureur laisse cette entrée attendre que l'emplacement soit libre. Seul un conflit réel, tel qu'un emplacement détenu par une ligne sans mouvement d'entrée, ou deux entrées qui échangent des emplacements, arrête le démarrage avec `Cannot reconcile ...`.
+3. **Gardez le SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), car la migration convertie peut rencontrer une base de données où son schéma existe déjà.
+4. **Déplacez les cas spéciaux liés à la version.** Si le PR a ajouté une casse pour son ancien numéro dans `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) ou dans `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), remplacez la clé par le nouvel horodatage.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` est un exemple fonctionnel de test pour une migration renommée.
+
+### Rétroportages vers les branches avant le changement
+
+Ne sélectionnez jamais et ne rétroportez jamais un fichier `YYYYMMDDHHMMSS_` vers une branche antérieure au commutateur (par exemple une ancienne branche `release/v*` ). Le coureur y trie les noms de fichiers sous forme de texte, donc un fichier horodaté s'exécuterait entre `201_` et `202_` sur une nouvelle base de données, et l'ancienne porte ne comprend pas les préfixes à 14 chiffres. Sur une telle branche, écrivez la modification en tant que fichier `NNN_` suivant de cette branche, idempotent, donc ce n'est pas une opération lorsque la version horodatée arrive plus tard.
+
+### Comment fonctionnent les migrations
+
+Au démarrage, `migrationRunner.ts`:
+
+1. Crée une table `_omniroute_migrations` si elle n'existe pas
+2. Requêtes pour les migrations déjà appliquées
+3. Applique toutes les nouvelles migrations dans l'ordre, chacune dans une transaction
+4. Enregistre chaque migration appliquée avec horodatage
 
 ```ts
-// src/lib/db/migrationRunner.ts (version simplifiée)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotence
 
-Les migrations doivent être **idempotentes** — les exécuter deux fois ne doit produire aucun effet supplémentaire :
+Les migrations doivent être** idempotent** — les exécuter deux fois devrait être un échec :
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Utilisez largement les clauses `IF NOT EXISTS`, `IF EXISTS` et `OR IGNORE` / `OR REPLACE`.
+Utilisez généreusement les clauses `IF NOT EXISTS`, `IF EXISTS` et `OR IGNORE` / `OR REPLACE`.
 
-### Ajout d’une nouvelle migration
+### Ajouter une nouvelle migration
 
-1. **Identifiez le prochain numéro** : `ls src/lib/db/migrations/ | tail -1`
-2. **Créez le fichier** : `NNN_my_change.sql`
-3. **Utilisez un DDL sûr** : `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Renseignez prudemment les données existantes** : utilisez `UPDATE ... WHERE ...` pour traiter les lignes existantes
-5. **Testez sur une copie** : n’exécutez jamais de migrations non testées en production
+1. **Créez le fichier avec le générateur** : `npm run db:new-migration -- <description>` (par exemple `npm run db:new-migration -- add combo priority`). Il écrit `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` avec l'heure UTC actuelle et un en-tête de commentaire, avance d'une seconde si cet horodatage est pris et n'écrase jamais un fichier. Ne choisissez pas un numéro à la main.
+2. **Utilisez DDL en toute sécurité** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Remplissez soigneusement les données** : utilisez `UPDATE ... WHERE ...` pour gérer les lignes existantes
+4. **Vérifier l'ordre et le nom** : `npm run test:migrations:fresh` (toutes les migrations sur une base de données vide) et `npm run check:migration-numbering`
+5. **Test sur copie** : n'exécutez jamais de migrations non testées en production
+6. **Une table créée à partir de code nécessite également une migration** : si un module crée également la table paresseusement (`CREATE TABLE IF NOT EXISTS`, conservé comme chemin d'auto-réparation), une migration doit la créer avec le même DDL. Sinon, une nouvelle installation et une installation mise à niveau se retrouvent avec des schémas différents, selon que ce chemin de code a été exécuté ou non. `tests/unit/db/lazy-table-migration-guard.test.ts` analyse `src/` et `open-sse/` et échoue sur un `CREATE` paresseux sans migration (#20557). Exemple : `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
-Exemple :
+Exemple:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> Les **modifications non rétrocompatibles** (par exemple, la suppression de colonnes) sont délicates. OmniRoute ne prend PAS en charge les rétrogradations — une fois qu’une migration est appliquée, la modification du schéma est définitive. Planifiez en conséquence.
+> **Modifications rétrocompatibles** (par exemple, supprimer des colonnes) sont délicats. OmniRoute prend NOT il en charge la rétrogradation — une fois la migration appliquée, le changement de schéma est permanent. Planifiez en conséquence.
 
 ---
 
@@ -407,48 +471,49 @@ Cette commande utilise l’API de sauvegarde en ligne de SQLite — elle peut ê
 
 ### Mode WAL
 
-WAL est activé par défaut. Pour les charges de travail comportant beaucoup d’écritures, envisagez les réglages suivants :
+WAL est activé par défaut. Pour les charges de travail à écriture élevée, pensez à :
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Point de contrôle toutes les 1000 pages
-PRAGMA journal_size_limit = 67108864;  -- Limite WAL de 64 Mo
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ne définit pas `journal_size_limit`. Un point de contrôle déplace les images WAL dans le fichier principal, mais le fichier WAL conserve sa plus grande taille allouée. Le garde `OMNIROUTE_WAL_GUARD_MAX_MB` avertit et exécute uniquement `wal_checkpoint(RESTART)`; ce n'est pas un plafond de la taille d'un disque.
 
 ### Index
 
-Index clés pour les performances (créés automatiquement par les migrations) :
+Index clés de performance (créés automatiquement par les migrations) :
 
-- `idx_models_provider` — recherche de modèles par fournisseur
-- `idx_combo_targets_combo_id` — développement des cibles combinées
-- `idx_usage_history_api_key_timestamp` — analyse de l’utilisation
-- `idx_quota_snapshots_api_key_window` — suivi des quotas
-- `idx_call_logs_timestamp` — requêtes sur les journaux d’appels
+- Recherches de modèles `idx_models_provider` — par fournisseur
+- Extension de cible combinée `idx_combo_targets_combo_id` —
+- analyse d'utilisation de — `idx_usage_history_api_key_timestamp`
+- suivi des quotas `idx_quota_snapshots_api_key_window` —
+- `idx_call_logs_timestamp` — requêtes du journal des appels
 
-Pour ajouter un nouvel index, créez une migration :
+Pour ajouter un nouvel index, créez une migration :
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### E/S mappées en mémoire
+### I/O mappé en mémoire
 
-Pour les bases de données très volumineuses (>10 Go), le mappage en mémoire peut être ajusté via un pragma SQLite :
+Pour les très grandes bases de données (> 10 Go), le mappage de la mémoire peut être ajusté via SQLite pragma :
 
 ```sql
--- Définir via un pragma SQLite (à ajuster dans core.ts ou à l’exécution)
-PRAGMA mmap_size = 268435456;  -- 256 Mo
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Compactage
 
-Les instances OmniRoute fonctionnant sur de longues périodes bénéficient d’un `VACUUM` occasionnel :
+Les instances OmniRoute de longue durée bénéficient de `VACUUM` occasionnels :
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Exécutez-le chaque mois pendant les périodes de faible trafic. (Le mode WAL réduit ce besoin, mais ne l’élimine pas.)
+Exécutez-le mensuellement pendant les fenêtres à faible trafic. (le mode WAL réduit le besoin, mais ne l'élimine pas.)
 
 ---
 

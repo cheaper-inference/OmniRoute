@@ -4,593 +4,627 @@
 
 ---
 
-> **모든 디렉터리와 루트 파일에 대한 한 줄 설명.**
-> 마지막 업데이트: 2026-06-28 — OmniRoute v3.8.40
+> **어디에 사는지: 한 줄 목적으로 추적되는 모든 최상위 디렉터리 및 루트 파일.** 최종 업데이트 날짜: 2026-11-13 (OmniRoute v3.8.54)
 >
-> 이 맵을 사용하여 코드베이스를 빠르게 탐색하세요. 자세히 알아보려면 전용 문서 링크를 따라가세요.
+> 이 지도를 사용하여 코드베이스를 탐색한 다음 전용 문서 링크를 따라가세요. 파일 개수는 위 날짜에 `git ls-files` 로 측정되었습니다. 거의 모든 릴리스마다 변경되므로 크기 순서대로 처리하십시오.
 
 ## 최상위 트리
 
 ```
 OmniRoute/
-├── src/                  # Next.js 16 애플리케이션(UI + API 라우트 + 라이브러리 + 도메인 + 서버)
-├── open-sse/             # 스트리밍 엔진 워크스페이스(핸들러, 실행기, 변환기, MCP 서버)
-├── packages/            # npm 워크스페이스: ui-kit(벤더링된 Keak CI UI Kit) 및 browser-pool
-├── electron/             # 데스크톱 래퍼(Electron 41 + electron-builder 26.10)
-├── bin/                  # CLI 진입점 및 명령 핸들러
-├── scripts/              # 빌드, 검사, 동기화 및 일회성 스크립트
-├── docs/                 # 공개 문서(현재 위치)
-├── tests/                # 모든 테스트 스위트(단위, 통합, e2e, 프로토콜 클라이언트)
-├── public/               # Next.js 정적 애셋, PWA 매니페스트, 서비스 워커, 아이콘
-├── config/               # 정적 구성 + 품질 게이트 상태(i18n, payloadRules, quality/)
-├── images/               # 마케팅 / README 이미지 애셋
-├── @omniroute/           # 게시 가능한 연동 패키지(opencode-plugin, opencode-provider)
-├── skills/               # CLI/에이전트 스킬 팩(cli-* + omni-* + config-codex-cli)
-├── examples/             # 샘플 플러그인 + omniroute-cmd-hello 스타터
-├── contrib/              # 커뮤니티 기여(podman/)
-├── .source/              # Fumadocs 소스 구성(source.config.mjs + server/browser/dynamic)
-├── .github/              # GitHub Actions 워크플로 + 이슈 템플릿 + PR 템플릿
-├── .husky/               # Git 훅(pre-commit, pre-push)
-├── .claude/              # Claude Code 슬래시 명령(프로젝트 범위)
-├── .agents/              # Codex / 범용 에이전트 워크플로 + 스킬(.claude/의 미러)
-├── .vscode/              # VS Code 워크스페이스 설정
-├── _ideia/               # 계획 메모(비공식, 배포되지 않음)
-├── _mono_repo/           # 이전 하위 프로젝트(cloud, site, vscode-extension)
-├── _references/          # 관련 OSS 프로젝트의 읽기 전용 참조 클론
-├── _tasks/               # 릴리스별 작업 추적 파일(비공식)
-├── .build/ .worktrees/ dist/   # 로컬 빌드 / git-worktree / 빌드 출력용 임시 공간(gitignored)
-├── .issues/              # 로컬 이슈 캐시(gitignored)
-├── .playwright-mcp/      # Playwright MCP 테스트 산출물
-├── coverage/             # c8 커버리지 출력(gitignored)
-├── logs/                 # 런타임 로그(gitignored)
-├── node_modules/         # 종속성(gitignored)
-├── package/              # npm pack 스테이징 영역(빌드 산출물)
-├── .next/                # Next.js 빌드 출력(gitignored)
-└── (루트 파일 — 아래 참조)
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+로컬, 생성 또는 개인 경로(모두 gitignored, 커밋되지 않음, 추가 설명 없음):
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
 ## 루트 파일
 
-| 파일                                        | 용도                                                                              |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
-| **README.md**                               | 마케팅 랜딩 페이지 + 빠른 시작 + 기능 매트릭스(`llm.txt`도 참조)                  |
-| **CHANGELOG.md**                            | 릴리스별 변경 로그(`/version-bump-cc` 스킬로 자동 생성)                           |
-| **LICENSE**                                 | MIT 라이선스 텍스트                                                               |
-| **CLAUDE.md**                               | Claude Code 에이전트를 위한 프로젝트 규칙(필수 규칙, 규약, 시나리오)              |
-| **AGENTS.md**                               | 비 Claude AI 에이전트(Codex, Cursor 등)를 위한 CLAUDE.md와 동일한 문서            |
-| **GEMINI.md**                               | Gemini 기반 에이전트를 위한 간결한 규칙(CLAUDE.md의 일부)                         |
-| **CONTRIBUTING.md**                         | 기여자 가이드: 설정, 컨벤셔널 커밋, 테스트, PR 흐름                               |
-| **SECURITY.md**                             | 취약점 보고 정책, 지원 버전, 위협 모델                                            |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — 커뮤니티 행동 지침                                         |
-| **llm.txt**                                 | LLM 크롤러에 최적화된 일반 텍스트 랜딩 페이지(AI 어시스턴트용 SEO)                |
-| **package.json**                            | npm 매니페스트, 스크립트, 의존성, 엔진, c8 커버리지 기준                          |
-| **package-lock.json**                       | 잠긴 의존성 트리                                                                  |
-| **tsconfig.json**                           | 루트 TypeScript 설정                                                              |
-| **tsconfig.typecheck-core.json**            | `src/` 코어용 타입 검사 설정                                                      |
-| **tsconfig.typecheck-noimplicit-core.json** | 엄격한(`noImplicitAny`) 타입 검사                                                 |
-| **tsconfig.tsbuildinfo**                    | TS 증분 빌드 캐시(gitignored)                                                     |
-| **next.config.mjs**                         | Next.js 16 빌드 설정(독립 실행형 출력)                                            |
-| **next-env.d.ts**                           | Next.js가 자동 생성한 환경 타입                                                   |
-| **eslint.config.mjs**                       | ESLint 플랫 설정(프로젝트 영역별 규칙)                                            |
-| **prettier.config.mjs**                     | Prettier 서식 규칙                                                                |
-| **postcss.config.mjs**                      | Tailwind/CSS 파이프라인용 PostCSS 설정                                            |
-| **playwright.config.ts**                    | Playwright E2E 테스트 설정                                                        |
-| **vitest.config.ts**                        | Vitest 설정(기본 스위트)                                                          |
-| **vitest.mcp.config.ts**                    | MCP 서버 / autoCombo / 캐시 스위트용 Vitest 설정                                  |
-| **sonar-project.properties**                | SonarQube/SonarCloud 설정(코드 품질)                                              |
-| **Dockerfile**                              | 다단계 Docker 빌드(builder → runner-base → runner-cli)                            |
-| **docker-compose.yml**                      | 4개 프로필(base, cli, host, cliproxyapi) + redis 사이드카를 포함한 개발용 compose |
-| **docker-compose.prod.yml**                 | 프로덕션용 compose(포트 20130, redis, 명명된 볼륨)                                |
-| **.dockerignore**                           | Docker 컨텍스트에서 제외되는 파일                                                 |
-| **fly.toml**                                | Fly.io 배포 설정(리전 `sin`, 포트 20128, /data 볼륨)                              |
-| **.env.example**                            | 환경 파일 템플릿(첫 설치 시 `.env`로 자동 복사)                                   |
-| **.gitignore**                              | Git 무시 패턴                                                                     |
-| **.npmignore**                              | npm 게시 제외 목록                                                                |
-| **.npmrc**                                  | npm 설정(레지스트리, 잠금 파일 정책)                                              |
-| **.node-version**                           | Node 버전 고정(nvm 호환 도구에서 사용)                                            |
-| **.nvmrc**                                  | nvm용 Node 버전 고정                                                              |
-| **eslint.complexity.config.mjs**            | 복잡도 래칫용 ESLint 설정(`scripts/check/check-complexity.mjs --config`)          |
-| **eslint.sonarjs.config.mjs**               | SonarJS 규칙용 ESLint 설정(인지 복잡도 / 중복)                                    |
-| **source.config.ts**                        | Fumadocs `defineDocs` 소스 설정(`.source/`에 제공)                                |
-| **knip.json**                               | Knip 설정 — 미사용 파일/내보내기/의존성(데드 코드 게이트에 제공)                  |
-| **stryker.conf.json**                       | Stryker 변이 테스트 설정                                                          |
-| **.size-limit.json**                        | size-limit 번들 용량 예산 설정                                                    |
-| **promptfooconfig.yaml**                    | promptfoo 평가 설정                                                               |
-| **.gitleaks.toml**                          | gitleaks 비밀 정보 스캔 규칙 세트                                                 |
-| **.zizmor.yml**                             | zizmor GitHub Actions 보안 린트 설정                                              |
-| **socket.yml**                              | Socket.dev 공급망 설정                                                            |
-| **news.json**                               | 현지화된 v2 공지 피드; Radar 출시 항목은 비활성 상태로 제공                       |
-| **flake.nix** / **flake.lock**              | Nix 개발 셸 정의 + 잠금 파일                                                      |
-| **.env**                                    | 로컬 비밀 정보(git에서 무시됨 — `.env.example`에서 생성)                          |
+기능별로 그룹화된 저장소 루트(`git ls-files | grep -v /`)의 모든 추적 파일입니다.
 
-> **v3.8.26에서 루트 외부로 이동됨(정리):**
->
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json`(git에서 무시됨). [`## config/`](#config--static-configs--quality-gate-state)을 참조하세요.
+### 프로젝트 문서
+
+| 파일                     | 목적                                                           |
+| ------------------------ | -------------------------------------------------------------- |
+| `README.md`              | 랜딩 페이지: 기능 개요, 빠른 시작, 설치 방법                   |
+| `CHANGELOG.md`           | 릴리스별 변경 로그( `changelog.d/` 의 조각이 여기에 접혀 있음) |
+| `ROADMAP.md`             | 공개 로드맵                                                    |
+| `LICENSE`                | MIT 라이센스                                                   |
+| `THIRD_PARTY_NOTICES.md` | 번들로 제공되는 타사 코드(예: wreq-js 바인딩)에 대한 알림      |
+| `CONTRIBUTING.md`        | 기여자 가이드: 설정, 기존 커밋, 테스트 매트릭스, PR 흐름       |
+| `SECURITY.md`            | 취약점 보고 정책                                               |
+| `CODE_OF_CONDUCT.md`     | 커뮤니티 행동 기대치                                           |
+| `llm.txt`                | LLM 크롤러 및 보조자를 위한 일반 텍스트 프로젝트 요약          |
+
+### AI 보조 지침
+
+| 파일        | 목적                                                                     |
+| ----------- | ------------------------------------------------------------------------ |
+| `AGENTS.md` | 모든 AI 어시스턴트를 위한 단일 정보 소스: 규칙, 품질 게이트, 엄격한 규칙 |
+| `CLAUDE.md` | Claude Code 관련 델타; 수입 `AGENTS.md`                                  |
+| `GEMINI.md` | 쌍둥이자리 특정 델타; 다시 `AGENTS.md` 를 가리킨다                       |
+
+설명하는 코드 옆에는 중첩된 가이드 `open-sse/services/AGENTS.md` 및 `src/lib/db/AGENTS.md` 도 있습니다.
+
+### 패키지 매니페스트 및 노드 도구 모음
+
+| 파일                       | 목적                                                                      |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `package.json`             | npm 매니페스트: 스크립트, 종속성, `engines`, `workspaces`, 게시된 `files` |
+| `package-lock.json`        | 잠긴 종속성 트리                                                          |
+| `pnpm-workspace.yaml`      | pnpm 작업공간 목록(`packages/*`, `open-sse`) 및 기본 빌드 허용 목록       |
+| `.npmrc` / `.npmignore`    | npm 구성 및 게시 제외                                                     |
+| `.node-version` / `.nvmrc` | 버전 관리자를 위한 노드 버전 핀                                           |
+| `flake.nix` / `flake.lock` | Nix 개발 셸 및 잠금                                                       |
+| `Makefile`                 | npm 스크립트에 위임하는 `make` 단축키                                     |
+
+### TypeScript, Next.js 및 문서 빌드
+
+| 파일                                      | 목적                                                                    |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| `tsconfig.json`                           | 기본 TypeScript 구성 및 경로 별칭(`@/*`, `@omniroute/open-sse`)         |
+| `tsconfig.typecheck-core.json`            | `npm run typecheck:core` 슬라이스                                       |
+| `tsconfig.typecheck-noimplicit-core.json` | `npm run typecheck:noimplicit:core` (엄격한 `noImplicitAny`) 슬라이스   |
+| `tsconfig.typecheck-api.json`             | API 경로 유형 검사 슬라이스(`scripts/check/check-api-typecheck.mjs`)    |
+| `tsconfig.typecheck-dashboard.json`       | 대시보드 유형 검사 슬라이스(`npm run check:dashboard-typecheck`)        |
+| `tsconfig.build.json`                     | 생산 유형 확인(`npm run typecheck:build`, `check:build-typecheck`)      |
+| `tsconfig.mitm.json`                      | `scripts/build/buildMitm.mjs` 에서 사용하는 MITM 빌드 구성              |
+| `next.config.mjs`                         | Next.js 16 구성(독립형 출력, 빌드 프로필 별칭)                          |
+| `source.config.ts`                        | Fumadocs `defineDocs` 구성: 어떤 `docs/` 섹션이 `/docs` 로 컴파일되는지 |
+| `postcss.config.mjs`                      | PostCSS / Tailwind 파이프라인                                           |
+
+### 린트 및 서식 지정
+
+| 파일                                      | 목적                                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| `eslint.config.mjs`                       | 기본 ESLint 플랫 구성(`npm run lint`, `config/quality/eslint-suppressions.json` 포함) |
+| `eslint.complexity-ratchets.config.mjs`   | 하나의 ESLint 패스에서 복잡성 및 인지 복잡성 래칫이 사용하는 독립형 구성              |
+| `eslint.complexity.config.mjs`            | 코어 `complexity` + `max-lines-per-function` 만 있는 독립형 구성(테스트에 사용됨)     |
+| `prettier.config.mjs` / `.prettierignore` | Prettier 규칙 및 제외                                                                 |
+| `.editorconfig`                           | 편집기 기본값(공백 2칸 들여쓰기)                                                      |
+| `.markdownlint.json`                      | 권고 마크다운 린트(`npm run lint:md`)                                                 |
+| `.vale.ini`                               | 자문 산문 린트(`npm run lint:prose`), `.vale/` 의 어휘                                |
+
+### 테스트, 평가 및 적용 범위
+
+| 파일                          | 목적                                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| `vitest.config.ts`            | jsdom Vitest 제품군: `npm run test:vitest:ui` (대시보드 `.tsx`, 후크, memory/skills 테스트)    |
+| `vitest.mcp.config.ts`        | 노드 Vitest 제품군: `npm run test:vitest` (MCP 서버, autoCombo, 콤보, API `.spec.ts`)          |
+| `vitest.quarantine.config.ts` | `config/quality/vitest-exclusions.json` 에 나열된 격리된 파일을 실행합니다.                    |
+| `vitest.e2e-live.config.ts`   | 라이브 서버 Vitest 제품군(`tests/e2e/ecosystem.test.ts`, `tests/e2e/protocol-clients.test.ts`) |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                  |
+| `stryker.conf.mjs`            | Stryker 돌연변이 테스트(`npm run test:mutation`; `mutate` 에서 `tap.testFiles` 계산)           |
+| `stryker.disablebail.mjs`     | 테스트 중복 측정을 위한 보석금 없는 Stryker 변형                                               |
+| `promptfooconfig.yaml`        | Promptfoo LLM 보안 제품군                                                                      |
+| `codecov.yml`                 | Codecov 패치 적용 범위 설정                                                                    |
+
+### Docker 및 배포
+
+| 파일                              | 목적                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `Dockerfile`                      | 다단계 이미지(`builder` → `runner-base` → `runner-web` / `runner-cli*`)  |
+| `Dockerfile.bun`                  | Bun 런타임의 대체 이미지( `docker-publish.yml` 로 구축)                  |
+| `docker-compose.yml`              | 프로필(기본, 웹, cli, 호스트, 메모리, Cliproxyapi 등)을 사용한 기본 작성 |
+| `docker-compose.prod.yml`         | 포트 20130의 별도 프로덕션-스냅샷 인스턴스                               |
+| `docker-compose.selfhost.yml`     | 단일 명령 루프백 자체 호스트( `.env.selfhost.example` 와 쌍)             |
+| `docker-compose.ollama-local.yml` | 호스트 네이티브 Ollama 와 대화하는 Docker OmniRoute                      |
+| `.dockerignore`                   | Docker 빌드 컨텍스트 제외                                                |
+| `fly.toml`                        | Fly.io 앱 구성(포트 20128, `/data` 볼륨)                                 |
+
+### 보안, 공급망 및 저장소 봇
+
+| 파일                                         | 목적                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `.gitleaks.toml`                             | gitleaks 비밀 스캔 규칙 및 허용 목록                                                 |
+| `.trivyignore`                               | 컨테이너 이미지 스캔에 대한 허용된 위험 억제                                         |
+| `.zizmor.yml`                                | zizmor GitHub 작업 보안 감사 구성                                                    |
+| `socket.yml`                                 | Socket.dev 앱 구성(경로 무시, CI 게이트 아님)                                        |
+| `sonar-project.properties`                   | SonarQube/SonarCloud 프로젝트 구성                                                   |
+| `knip.json`                                  | 사용되지 않은 files/exports/deps 구성을 잘라냅니다( `npm run check:dead-code` 피드). |
+| `.size-limit.json`                           | 번들 규모 예산                                                                       |
+| `.mergify.yml`                               | 병합 대기열 구성 병합                                                                |
+| `.coderabbit.yaml`                           | CodeRabbit 검토 구성                                                                 |
+| `.cbmignore`                                 | codebase-memory-mcp 코드 인덱스에 대한 무시 목록                                     |
+| `.gitignore` / `.gitattributes` / `.mailmap` | 규칙 무시, 스크립트의 LF 줄 끝, 정식 작성자 신원                                     |
+
+### 환경 템플릿, 상태 및 피드
+
+| 파일                        | 목적                                                                  |
+| --------------------------- | --------------------------------------------------------------------- |
+| `.env.example`              | 처음 설치 시 템플릿이 `.env` 에 복사되었습니다. 환경 변수의 참조 목록 |
+| `.env.selfhost.example`     | `docker-compose.selfhost.yml` 용 템플릿                               |
+| `.env.homolog.example`      | 승인 실행자를 위한 템플릿(`npm run homolog`)                          |
+| `.env.devin-bridge.example` | Devin 브리지 설정을 위한 예제 env 파일                                |
+| `.i18n-state.json`          | 증분 번역 상태(문서 및 로캘별 소스 해시)                              |
+| `news.json`                 | 대시보드에서 읽은 현지화된 공지 피드(스키마 v2)                       |
 
 ---
 
 ## `src/` — Next.js 애플리케이션
 
+약 4,550개의 추적 파일. 경로 별칭 `@/*` → `src/*`.
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### `src/app/` — 앱 라우터(Next.js 16)
+### `src/app/` — 앱 라우터
 
-| 길                                                                           | 목적                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | 공개 OpenAI 호환 API (~ 25개 하위 경로: 채팅, 완성, 임베딩, 파일, 배치, 오디오, 이미지, 비디오, 음악, 순위 재지정, 중재, 검색, ws, 에이전트, 계정, 공급자 등)                                                                                                                                                |
-| `app/api/v1beta/`                                                            | Gemini 스타일 API 엔드포인트                                                                                                                                                                                                                                                                                 |
-| `app/api/playground/`                                                        | Playground Studio 경로: `improve-prompt/` (POST — LLM 프롬프트 리라이터), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                 |
-| `app/api/` (non-v1)                                                          | Management/admin 경로(~ 60개 디렉터리: 공급자, 콤보, 설정, mcp, a2a, 평가, 메모리, 기술, 웹후크, 규정 준수, 탄력성, 모니터링, 터널, CLI 도구 등)                                                                                                                                                             |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12개 경로(서버 제어, 에이전트 state/DNS/mappings, 우회, cert, 업스트림 CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` 참조하세요.                                                                                                                               |
-| `app/api/tools/traffic-inspector/`                                           | 트래픽 검사기 REST + WS API — 16 + 경로(요청, 세션, 호스트, 캡처 모드, 내보내기, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` 참조하세요.                                                                                                                                      |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 진입점(`POST /a2a`)                                                                                                                                                                                                                                                                         |
-| `app/.well-known/agent.json/`                                                | A2A 에이전트 카드(디스커버리)                                                                                                                                                                                                                                                                                |
-| `app/(dashboard)/dashboard/`                                                 | 대시보드 UI 페이지(50개의 + 섹션, ~ 118개의 page.tsx 파일: 공급자, 콤보, 설정, 메모리, 기술, 웹후크, 평가, 감사, 배치, 캐시, 비용, 상태, 시스템, 활동 등)                                                                                                                                                    |
-| `app/(dashboard)/dashboard/search-tools/`                                    | 검색 도구 Studio UI (탭 3개: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio(계획 21): `page.tsx` (3탭 셸), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge 대시보드 페이지 — 서버 카드, 9개의 에이전트 카드, 설정 마법사, 모델 매핑, 우회 목록. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` 참조하세요.                                                                                                                                               |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector 대시보드 페이지 — DevTools 분할, 세부정보 탭 7개, 캡처 모드 토글 4개, 세션 레코더, 컨텍스트 색상화. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` 참조하세요.                                                                                                                    |
-| `app/(dashboard)/dashboard/activity/`                                        | 활동 피드 페이지(그룹 B): `page.tsx` (서버) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | 할당량 공유 페이지(그룹 B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | 공급자 계획 구성 페이지(그룹 B): `page.tsx` + `ProviderPlanConfigClient.tsx` — 연결당 할당량 크기 재정의                                                                                                                                                                                                     |
-| `app/docs/`                                                                  | 내장된 문서 뷰어( `docs/*.md` 렌더링)                                                                                                                                                                                                                                                                        |
-| `app/landing/`                                                               | 마케팅 랜딩 페이지                                                                                                                                                                                                                                                                                           |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | 인증 관련 페이지                                                                                                                                                                                                                                                                                             |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP 오류 페이지                                                                                                                                                                                                                                                                                             |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status 페이지                                                                                                                                                                                                                                                                                         |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | 루트 레이아웃, 홈, PWA 매니페스트, 글로벌 CSS                                                                                                                                                                                                                                                                |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | 오류 경계                                                                                                                                                                                                                                                                                                    |
+| 길                                                                  | 목적                                                                                                                                   |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                       | 공개 OpenAI 호환 API: 채팅, 완료, 응답, 메시지, 임베딩, 이미지, 오디오, 비디오, 음악, 순위 재지정, 조정, 검색, 파일, 배치, ws, 모델, … |
+| `app/api/v1beta/`                                                   | Gemini 스타일 엔드포인트                                                                                                               |
+| `app/api/` (다른 폴더)                                              | 관리 및 관리 경로: 공급자, 콤보, 설정, 키, 사용법, 로그, mcp, a2a, acp, 메모리, 기술, 평가, 웹후크, 터널, 플러그인, 레이더, 도구, …    |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API — [AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                                  |
+| `app/api/tools/traffic-inspector/`                                  | 교통 검사기 REST API — [TRAFFIC_INSPECTOR.md 참조](../frameworks/TRAFFIC_INSPECTOR.md)                                                 |
+| `app/(dashboard)/dashboard/`                                        | 대시보드 섹션당 하나의 폴더(공급자, 콤보, 로그, 사용량, 비용, 캐시, 압축, 메모리, 플레이그라운드, 검색 도구, 설정, 도구 등)            |
+| `app/(dashboard)/home/`                                             | 홈 화면 및 위젯                                                                                                                        |
+| `app/docs/`                                                         | `source.config.ts` 에 나열된 Fumadocs 섹션을 렌더링하는 Docs 뷰어                                                                      |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | 루트 레이아웃, 루트 항목(리디렉션), PWA 매니페스트, 전역 CSS                                                                           |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | 오류 경계 및 대체                                                                                                                      |
 
-### `src/lib/` — 코어 라이브러리(~ 50 모듈)
+API 경로는 `Route → CORS → Zod validation → optional auth → policy → handler` 따릅니다. [ARCHITECTURE.md](ARCHITECTURE.md) 및 [API_REFERENCE.md를](../reference/API_REFERENCE.md) 참조하세요.
 
-| 기준 치수                                | 목적                                                                                                                                                                                                                                                                                                             |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A 프로토콜 작업 관리자, 기술(5), 스트리밍                                                                                                                                                                                                                                                                      |
-| `acp/`                                   | CLI 에이전트 레지스트리(로컬 CLI 검색 — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` 참조)                                                                                                                                                                                                                         |
-| `api/`                                   | 공유 API 도우미(`requireManagementAuth`, 검증)                                                                                                                                                                                                                                                                   |
-| `auth/`                                  | 세션, 비밀번호 해싱, 토큰 검증                                                                                                                                                                                                                                                                                   |
-| `batches/`                               | OpenAI 배치 API 핸들러                                                                                                                                                                                                                                                                                           |
-| `catalog/`                               | 공급자 카탈로그 Zod 검증 + 기능 확인                                                                                                                                                                                                                                                                             |
-| `cloudAgent/`                            | 클라우드 에이전트(Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` 참조                                                                                                                                                                                                                             |
-| `combos/`                                | 콤보 해상도 + 재정렬 도우미                                                                                                                                                                                                                                                                                      |
-| `audit/`                                 | 활동 피드 도우미: `highLevelActions.ts` (허용 목록 + `isHighLevelAction()`), `activityIcons.ts` (작업 → icon/verb 맵), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                      |
-| `compliance/`                            | 감사 로그 + 공급자 감사 — `docs/security/COMPLIANCE.md` 참조                                                                                                                                                                                                                                                     |
-| `compression/`                           | 압축 엔진 접착제(엔진은 `open-sse/services/compression/` 에 있음)                                                                                                                                                                                                                                                |
-| `config/`                                | 런타임 구성 도우미                                                                                                                                                                                                                                                                                               |
-| `db/`                                    | 120 + 도메인 DB 모듈 + 168 마이그레이션 ( SQLite 의 경우 항상 여기를 통과하세요)                                                                                                                                                                                                                                 |
-| `quota/`                                 | 할당량 공유 엔진: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore 인터페이스), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | 레이더 자유 모델 카탈로그 클라이언트: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` 참조                                                                                                                               |
-| `display/`                               | UI 형식 지정 도우미(비용, 대기 시간 등)                                                                                                                                                                                                                                                                          |
-| `embeddings/`                            | 임베딩 서비스 도우미                                                                                                                                                                                                                                                                                             |
-| `env/`                                   | Env 변수 구문 분석 + 검증                                                                                                                                                                                                                                                                                        |
-| `evals/`                                 | 평가 프레임워크(스위트, 실행기, 런타임) — `docs/frameworks/EVALS.md` 참조                                                                                                                                                                                                                                        |
-| `guardrails/`                            | PII 마스커, 프롬프트 주입, 비전 브릿지 — `docs/security/GUARDRAILS.md` 참조                                                                                                                                                                                                                                      |
-| `jobs/`                                  | 백그라운드 작업(cron 유사)                                                                                                                                                                                                                                                                                       |
-| `memory/`                                | 대화형 메모리(SQLite FTS5 + sqlite-vec 하이브리드 RRF + Qdrant 계층 2) — `docs/frameworks/MEMORY.md` 참조                                                                                                                                                                                                        |
-| `memory/embedding/`                      | 다중 소스 임베딩 레이어: `index.ts` (리졸버), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (계획 21)                                                                                                                                                                           |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 래퍼 — KNN 무차별 대입 + 하이브리드 RRF (FTS5 + 벡터, k = 60). Lazy-init는 sqlite-vec를 사용할 수 없을 때 정상적으로 성능이 저하됩니다. (계획 21)                                                                                                                                              |
-| `memory/reindex.ts`                      | `runReindexBatch()` — 는 백그라운드에서 `needs_reindex=1` 로 메모리를 처리합니다. `POST /api/memory/reindex` 및 지연 백필 경로에 의해 호출됩니다. (계획 21)                                                                                                                                                      |
-| `monitoring/`                            | 상태 확인, 지표 방출                                                                                                                                                                                                                                                                                             |
-| `oauth/`                                 | OAuth/import flows for 22 provider modules (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                           |
-| `plugins/`                               | 플러그인 레지스트리                                                                                                                                                                                                                                                                                              |
-| `promptCache/`                           | 인류 스타일 프롬프트 캐시 중단점                                                                                                                                                                                                                                                                                 |
-| `skills/`                                | 기술 프레임워크(내장 + 마켓플레이스 + SkillsSH) — `docs/frameworks/SKILLS.md` 참조                                                                                                                                                                                                                               |
-| `playground/`                            | Playground Studio 공유 도우미: `codeExport.ts` (curl/Python/TS 생성기), `promptImprover.ts` (메타 프롬프트 빌더), `streamMetrics.ts` (순수 TTFT/TPS), `types.ts` (가격표) — `docs/frameworks/PLAYGROUND_STUDIO.md` 참조                                                                                          |
-| `webhookDispatcher.ts`                   | HMAC 웹훅 전달 — `docs/frameworks/WEBHOOKS.md` 참조                                                                                                                                                                                                                                                              |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | 터널 관리자 — `docs/ops/TUNNELS_GUIDE.md` 참조                                                                                                                                                                                                                                                                   |
-| `cloudSync.ts`, `initCloudSync.ts`       | 상태의 선택적 클라우드 동기화                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | DB 모듈용 배럴 다시 내보내기(논리 없음 — 다시 내보내기만 가능)                                                                                                                                                                                                                                                   |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | 캐싱 + 멱등성 요청                                                                                                                                                                                                                                                                                               |
-| (~ 30개 이상의 최상위 파일)              | 전문 도우미(logEnv, modelsDevSync, piiSanitizer 등)                                                                                                                                                                                                                                                              |
+### `src/lib/` — 서버 라이브러리
 
-### `src/lib/db/` — 데이터베이스(147개 모듈 + 208 마이그레이션)
+대략 90개의 하위 폴더와 약 90개의 최상위 모듈. 주요 그룹:
 
-| 하위 디렉터리             | 목적                                                                                                                                                                  |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL 저널링을 사용하는 `getDbInstance()` 싱글톤                                                                                                                        |
-| `db/migrations/`          | 버전이 지정된 SQL 파일(멱등성, 트랜잭션용) `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` 열을 추가합니다(계획 21).                                         |
-| `db/playgroundPresets.ts` | Playground Studio 사전 설정용 CRUD 모듈(`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | CRUD `memory_vec_meta` active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` 등 (계획 21)                   |
-| `db/<domain>.ts`          | 도메인당 하나의 모듈: 공급자, 콤보, apiKeys, 사용자, 세션, 사용량, 감사 로그, 웹후크, 기술, memory_entries, cloud_agent_tasks, 평가* \* , Reasoning_cache 등          |
+| 영역                    | 폴더/파일                                                                                                           | 심층 분석                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 데이터 베이스           | `db/` — 도메인 모듈, `migrations/`, `adapters/`, `repositories/`, `migrationRunner/`                                | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md), [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md)                                            |
+| 사용량, 할당량 및 지출  | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE.md](../routing/QUOTA_SHARE.md), [COST_TRACKING.md](../guides/COST_TRACKING.md)                                                    |
+| 공급자 및 모델          | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                       |
+| OAuth 및 자격 증명      | `oauth/` (공급자/, 서비스/, 유틸리티/), `zed-oauth/`, `copilot/`, `cursor/`, `credentialHealth/`                    | `resolvePublicCred()` (운영자 문서, 공개적으로 제공되지 않음)                                                                                  |
+| 안전 및 거버넌스        | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                         |
+| 에이전트 기능           | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE.md](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| 플러그인 및 서비스      | `plugins/`, `services/` (내장형 서비스 설치 프로그램 및 감독자)                                                     | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                             |
+| 라우팅 및 복원력        | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE](RESILIENCE_GUIDE.md)                                                                                                        |
+| 프록시 및 네트워킹      | `proxyHealth/`, `proxySubscription/`, `proxyRelay/`, `proxyEvents/`, 터널 모듈                                      | [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md), [TUNNELS_GUIDE.md](../ops/TUNNELS_GUIDE.md)                                                           |
+| 작업 및 일정            | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                                |
+| 관찰 가능성 및 내보내기 | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                         |
+| CLI 및 IDE 통합         | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                    |
+| 컨텍스트 소스           | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                                  |
+| 기타 기능               | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md), [PLAYGROUND_STUDIO.md](../frameworks/PLAYGROUND_STUDIO.md)                                                 |
 
-### `src/domain/`
+알아야 할 최상위 모듈:
 
-| 기준 치수              | 목적                                 |
-| ---------------------- | ------------------------------------ |
-| `policy.ts`            | 정책 엔진                            |
-| `fallbackPolicy.ts`    | 대체 결정 트리                       |
-| `costRules.ts`         | 비용 계산 규칙                       |
-| `lockoutPolicy.ts`     | Model/connection 잠금 정책           |
-| `tagRouter.ts`         | 태그 기반 라우팅                     |
-| `comboResolver.ts`     | 콤보 해상도(콤보 엔진에서 사용)      |
-| `modelAvailability.ts` | 모델별 가용성 확인                   |
-| `assessment/`          | 모델 평가(RFC-AUTO-ASSESSMENT 1단계) |
+| 파일                                                           | 목적                                                  |
+| -------------------------------------------------------------- | ----------------------------------------------------- |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | 응답 캐싱 및 멱등성                                   |
+| `webhookDispatcher.ts`                                         | HMAC 서명된 웹훅 전달                                 |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | 터널 관리자                                           |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | 백그라운드 자격 증명 상태 확인 및 새로 고침 회로      |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | 스트리밍 응답 소독제                                  |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | 프로세스 수명주기                                     |
+| `*.stub.ts`                                                    | `next.config.mjs` 의 별칭으로 교체된 빌드 프로필 스텁 |
 
-### `src/server/`
+### `src/lib/db/` — 데이터베이스
 
-| 기준 치수 | 목적                                                                                           |
-| --------- | ---------------------------------------------------------------------------------------------- |
-| `authz/`  | 승인 파이프라인: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` 참조 |
-| `cors/`   | CORS 구성                                                                                      |
-| `auth/`   | 세션 미들웨어                                                                                  |
+| 길                    | 목적                                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`          | `getDbInstance()` 싱글턴(WAL 저널링)                                                                           |
+| `db/migrations/`      | 번호가 매겨진 멱등성 `.sql` 마이그레이션(작성 당시 파일 236개, `check-migration-numbering.mjs` 가드 번호 지정) |
+| `db/migrationRunner/` | 마이그레이션 실행기                                                                                            |
+| `db/adapters/`        | SQLite 드라이버 어댑터(better-sqlite3, node:sqlite, bun:sqlite, sql.js)                                        |
+| `db/repositories/`    | SQLite 저장소 구현(콤보, 놀이터 사전 설정, 라우팅 구성)                                                        |
+| `db/<domain>.ts`      | 약 175개의 도메인 모듈(공급자, 콤보, apiKeys, 설정, 사용법 등) — 항상 이러한 모듈을 직접 가져옵니다.           |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| 기준 치수                        | 목적                                                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | 대시보드 구성 요소 API: `packages/ui-kit` — 를 통한 어댑터는 `docs/architecture/DESIGN_SYSTEM.md` 참조하세요. |
-| `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용되는 아이콘 이름 → Lucide 구성 요소(`<Icon>`)                                        |
-| `constants/providers.ts`         | **381개 제공업체** Zod 검증 포함(진실의 출처)                                                                 |
-| `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                                      |
-| `constants/routingStrategies.ts` | **20가지 라우팅 전략** 우선순위가 있는                                                                        |
-| `constants/publicApiRoutes.ts`   | Bearer(관리 대비) 인증이 필요한 경로                                                                          |
-| `constants/upstreamHeaders.ts`   | 업스트림 요청에 대한 헤더 거부 목록                                                                           |
-| `validation/schemas.ts`          | ~ 80 Zod 스키마( API 계약에 대한 단일 진실 소스)                                                              |
-| `validation/helpers.ts`          | Zod 유효성 검사 도우미(`validateBody` 등)                                                                     |
-| `types/`                         | 공유 TS 유형                                                                                                  |
-| `contracts/`                     | 공개 API 계약( `package.json` 에서 `files:` 에 의해 사용됨)                                                   |
-| `utils/circuitBreaker.ts`        | 공급자 회로 차단기( `docs/architecture/RESILIENCE_GUIDE.md` 참조)                                             |
-| `utils/apiAuth.ts`               | API 키 검증, 범위 확인                                                                                        |
-| `utils/fetchTimeout.ts`          | 업스트림 가져오기를 위한 Timeout/abort 래퍼                                                                   |
-| `utils/releaseNotes.ts`          | 닫힌 v2/legacy 공지 파서, 현지화 및 ID 해제                                                                   |
+| 길                                                             | 목적                                                                                                                                            |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/policyEngine.ts`                                       | 정책 엔진                                                                                                                                       |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | 대체 결정, 잠금 정책, 비용 규칙                                                                                                                 |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | 할당량 캐시 및 스냅샷 지속성                                                                                                                    |
+| `domain/assessment/`                                           | 모델 평가(평가자, 분류기, 자가 치유기)                                                                                                          |
+| `server/authz/`                                                | 인증 파이프라인 및 경로 보호(`routeGuard.ts`) — [AUTHZ_GUIDE.md](AUTHZ_GUIDE.md), [ROUTE_GUARD_TIERS.md](../security/ROUTE_GUARD_TIERS.md) 참조 |
+| `server/origin/`, `server/cors/`                               | Public/MCP/WS 원점 해상도 및 CORS — [CORS.md](../security/CORS.md)                                                                              |
+| `server/ws/`                                                   | 라이브 대시보드 WebSocket 서버                                                                                                                  |
+| `shared/components/`                                           | `packages/ui-kit` — 를 통한 대시보드 구성 요소 및 어댑터는 [DESIGN_SYSTEM.md를](DESIGN_SYSTEM.md) 참조하세요.                                   |
+| `shared/constants/`                                            | 공급자 카탈로그(`providers.ts`), 라우팅 전략, CLI 도구, 아이콘 맵, 업스트림 헤더 거부 목록, …                                                   |
+| `shared/validation/`                                           | Zod 스키마 및 유효성 검사 도우미                                                                                                                |
+| `shared/utils/`                                                | 회로 차단기, API 키 인증, 가져오기 시간 초과, 기능 플래그 등                                                                                    |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | 채팅 허용 미들웨어, 네트워크 도우미, 클라이언트 서비스, React 후크                                                                              |
 
 ---
 
-## `open-sse/` — 스트리밍 엔진 워크스페이스
+## `open-sse/` — 스트리밍 엔진 작업 공간
 
-별도의 npm 워크스페이스(`@omniroute/open-sse`)입니다. 요청 처리 및 공급자 실행을 담당합니다.
+npm 작업 공간 `@omniroute/open-sse` (추적 파일 약 2,390개). 요청 처리 및 공급자 실행을 수행합니다. 개요: [OPEN_SSE_ARCHITECTURE.md](../frameworks/OPEN_SSE_ARCHITECTURE.md).
 
 ```
 open-sse/
-├── handlers/            # 16개 파일(핸들러 12개 + 헬퍼 4개): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search 등
-├── executors/           # 150개 실행기 모듈(BaseExecutor를 확장하는 클래스 + 공급자별 헬퍼)
-├── translator/          # 형식 변환기(요청 9개, 응답 9개, 헬퍼 9개)
-├── transformer/         # Responses API ↔ Chat Completions(TransformStream)
-├── services/            # 약 80개 이상의 서비스 모듈(combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM 등)
-├── mcp-server/          # MCP 서버(도구 110개, 전송 방식 3개, 범위 33개)
-├── config/              # 공급자/모델 레지스트리, 헤더 구성, 모델 별칭
-├── utils/               # TLS 클라이언트, 프록시 fetch/dispatcher, 네트워크 헬퍼
-├── index.ts             # 워크스페이스 진입점
-├── package.json         # 워크스페이스 매니페스트
-├── tsconfig.json        # 워크스페이스 TS 구성
-└── types.d.ts           # 워크스페이스 타입 선언
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| 길                                                                                             | 목적                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `combo.ts` + `combo/`                                                                          | 콤보 라우팅 전략 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) 참조                                                                             |
+| `autoCombo/`                                                                                   | 자동 콤보 채점 및 모드 팩                                                                                                                     |
+| `accountFallback.ts` + `accountFallback/`                                                      | 연결 쿨다운 및 모델 잠금 — [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md) 참조                                                                    |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | 속도 제한 추적 및 헤더 구문 분석                                                                                                              |
+| `compression/`                                                                                 | 압축 엔진(`engines/`), 규칙 팩(`rules/`), `eval/`, `harness/`, `riskGate/` — [COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) 참조 |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | 토큰 새로 고침, 사용량 계산, 캐싱, 허용 레인, 세션 풀, Codex 계정, 라우팅 도우미                                                              |
+| `__tests__/`                                                                                   | 공동 배치된 Vitest 제품군( Vitest 구성으로 수집)                                                                                              |
+| `AGENTS.md`                                                                                    | 이 폴더에 대한 에이전트 가이드                                                                                                                |
+
+패턴: `X/` 폴더 옆에 있는 큰 모듈 `X.ts` 모듈이 더 작은 파일(`handlers/chatCore.ts` + `handlers/chatCore/`, `services/combo.ts` + `services/combo/`)로 분할되었음을 의미합니다.
 
 ### `open-sse/mcp-server/`
 
-| 경로                        | 용도                                                                  |
-| --------------------------- | --------------------------------------------------------------------- |
-| `server.ts`                 | MCP 서버 수명 주기(stdio + HTTP 전송 방식)                            |
-| `httpTransport.ts`          | HTTP Streamable + SSE 전송 방식(`/api/mcp/sse`, `/api/mcp/stream`)    |
-| `audit.ts`                  | `mcp_tool_audit` 테이블에 감사 로그 기록                              |
-| `scopeEnforcement.ts`       | 도구별 범위 검증                                                      |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`에 상태 하트비트 기록            |
-| `descriptionCompressor.ts`  | 컨텍스트 절약을 위해 도구 설명 메타데이터 압축                        |
-| `schemas/tools.ts`          | 36개의 기본 도구 정의 + 범위                                          |
-| `tools/advancedTools.ts`    | 고급 도구 구현                                                        |
-| `tools/memoryTools.ts`      | 3개의 메모리 도구(검색/추가/지우기)                                   |
-| `tools/skillTools.ts`       | 4개의 스킬 도구(목록/활성화/실행/실행 기록)                           |
-| `tools/compressionTools.ts` | 5개의 압축 도구                                                       |
-| `README.md`                 | 내부 MCP 서버 README(`docs/frameworks/MCP-SERVER.md`에서 상호 링크됨) |
+| 길                    | 목적                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `server.ts`           | MCP 서버 수명주기                                                                               |
+| `httpTransport.ts`    | 스트리밍 가능한 HTTP 및 SSE 전송                                                                |
+| `scopeEnforcement.ts` | 도구별 범위 확인                                                                                |
+| `audit.ts`            | 도구 호출 감사 로깅                                                                             |
+| `schemas/`            | 도구 정의 및 범위                                                                               |
+| `tools/`              | 도구 구현(메모리, 기술, 압축 등)                                                                |
+| `toolSearch/`         | 도구 검색                                                                                       |
+| `README.md`           | 내부 아키텍처 참고사항 전체 카탈로그는 [MCP-SERVER.md](../frameworks/MCP-SERVER.md) 에 있습니다 |
 
 ---
 
-## `packages/` — 워크스페이스
+## `packages/` — npm 작업 공간
 
-| 경로                     | 용도                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — Keak CI UI Kit의 벤더링된 스냅샷(`private`, `UNLICENSED`)으로, 소스 형태로 사용됩니다(빌드 없음). `UPSTREAM.md`는 업스트림 커밋을 고정하고 라이선스 승인을 기록하며, `PATCHES.md`는 로컬 패치(없음)를 나열합니다. `src/`는 `scripts/dev/sync-ui-kit.sh`에 의해서만 동기화되며 `npm run check:ui-kit-snapshot`으로 보호됩니다. `docs/architecture/DESIGN_SYSTEM.md` 참조 |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — 선택적 브라우저 풀 서비스(CloakBrowser 및 Playwright 기반 채팅)                                                                                                                                                                                                                                                                                                   |
+| 길                       | 목적                                                                                                                                                                                                                                                                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`: 소스로 사용되는 Keak CI UI 키트의 공급업체 스냅샷입니다. `UPSTREAM.md` 업스트림 커밋을 고정하고, `PATCHES.md` 로컬 패치를 나열합니다. `src/` 는 `scripts/dev/sync-ui-kit.sh` 에 의해서만 동기화되고 `npm run check:ui-kit-snapshot` 에 의해 보호됩니다. [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) 참조 |
+| `packages/browser-pool/` | `@omniroute/browser-pool`: 브라우저 풀 인터페이스 및 구현(`packages/browser-pool/src/index.ts`, `packages/browser-pool/src/interfaces.ts`). `workspaces` 에 나열됨; 게이트웨이에서 사용하는 런타임 브라우저 풀은 `open-sse/services/` 에 있습니다.                                                                     |
 
----
+## `@omniroute/` — 별도로 게시된 패키지
 
-## `electron/` — 데스크톱 래퍼
+이는 npm 작업공간이 아닙니다. 각각에는 자체 `package.json` 및 잠금 파일이 있습니다. 폴더는 `omniroute` tarball(`files: ["@omniroute/"]`)에 포함되어 있습니다.
 
-| 파일             | 용도                                                                            |
-| ---------------- | ------------------------------------------------------------------------------- |
-| `main.js`        | Electron 메인 프로세스(BrowserWindow, 내장 Next.js 서버, 트레이, 자동 업데이트) |
-| `preload.js`     | IPC 브리지(contextBridge → `window.omniroute`)                                  |
-| `package.json`   | electron-builder 구성 + Electron 41 + electron-builder 26.10 종속성             |
-| `assets/`        | 앱 아이콘(Windows .ico, macOS .icns, Linux .png)                                |
-| `dist-electron/` | 빌드 출력(gitignored)                                                           |
-| `types.d.ts`     | 렌더러 브리지용 타입 선언                                                       |
-| `README.md`      | 내부 Electron README(`docs/guides/ELECTRON_GUIDE.md`도 참조)                    |
+| 길                               | 목적                                                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `@omniroute/opencode-plugin/`    | OpenCode 플러그인(모델 검색, `/connect` 인증); `omniroute setup-opencode` 에서 사용 — [OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | v2 Promise용 OpenCode 플러그인 API — [OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md) 참조                             |
+| `@omniroute/opencode-provider/`  | 정적 구성 생성기; `opencode-plugin` 를 위해 자체 `package.json` 에서는 더 이상 사용되지 않는 것으로 표시되었습니다.            |
 
 ---
 
-## `bin/` — CLI
+## `bin/` — CLI 및 ops 스크립트
 
-| 파일                                                                                                        | 용도                                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute.mjs`                                                                                             | 메인 CLI 진입점 — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos` 등 |
-| `reset-password.mjs`                                                                                        | 독립 실행형 비밀번호 재설정 CLI                                                                                          |
-| `cli/commands/setup.mjs`                                                                                    | 대화형 + 비대화형 설정 마법사                                                                                            |
-| `cli/commands/doctor.mjs`                                                                                   | 시스템 상태 진단(8개 이상의 검사)                                                                                        |
-| `cli/commands/providers.mjs`                                                                                | 제공자 목록/테스트/검증                                                                                                  |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | CLI 도우미 모듈                                                                                                          |
-| `cli/tray/tray.ts`                                                                                          | 시스템 트레이 통합(크로스 플랫폼: Windows에서는 NotifyIcon, macOS/Linux에서는 systray2)                                  |
-| `cli/tray/tray.ps1`                                                                                         | PowerShell NotifyIcon 백엔드(Windows, 새로운 바이너리 추가 없음)                                                         |
-| `cli/tray/autostart.ts`                                                                                     | 크로스 플랫폼 자동 시작(LaunchAgent / .desktop / 레지스트리)                                                             |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5단계 SQLite 드라이버 확인 체인(번들 → 런타임 → 지연 설치 → node:sqlite → sql.js)                                        |
-| `cli/runtime/magicBytes.mjs`                                                                                | 바이너리 매직 바이트 검증(ELF / Mach-O / Mach-O fat / PE)                                                                |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — postinstall/최초 시작 시 드라이버를 미리 확인                                                       |
-| `nodeRuntimeSupport.mjs`                                                                                    | 설치 시 지원되는 Node.js 버전 검증                                                                                       |
+| 길                                                                          | 목적                                                                                      |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | 기본 CLI 항목(`omniroute serve`, `setup`, `doctor`, `providers`, `combo`, …)              |
+| `reset-password.mjs`                                                        | `omniroute-reset-password` 바이너리                                                       |
+| `mcp-server.mjs`                                                            | MCP stdio 진입점                                                                          |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | 보조교 / MCP 진입점                                                                       |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | 전역 설치를 위해 tsconfig 경로 별칭을 매핑하는 ESM 해결 후크                              |
+| `nodeRuntimeSupport.mjs`                                                    | 지원되는 Node.js 버전 확인                                                                |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | 자체 호스트 사고 복구 스크립트( `_ops-common.sh` 공유)                                    |
+| `cold-start-bench.sh`                                                       | 콜드 스타트 벤치마크 — [PERF_BASELINE.md](../ops/PERF_BASELINE.md) 참조                   |
+| `cli/commands/`                                                             | CLI 명령당 하나의 모듈( `setup-*` 통합을 포함하여 약 100개)                               |
+| `cli/api-commands/`                                                         | `npm run build:cli-api` 에 의해 `docs/openapi.yaml` 에서 생성됨 — 편집하지 않음           |
+| `cli/locales/`                                                              | CLI 메시지 카탈로그(67개 로케일)                                                          |
+| `cli/tui/`, `cli/tui-components/`                                           | 터미널 UI                                                                                 |
+| `cli/tray/`                                                                 | 시스템 트레이 및 자동 시작(Windows PowerShell 백엔드, macOS/Linux 의 시스템 트레이)       |
+| `cli/runtime/`                                                              | 기본 런타임 해상도(`sqliteRuntime.mjs`, `magicBytes.mjs`), 프로세스 감독자                |
+| `cli/*.mjs`                                                                 | 공유 도우미(args, API 클라이언트, 데이터 디렉토리, 암호화, 공급자 저장소, 설정 저장소 등) |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | CLI 내부 및 규칙                                                                          |
 
----
+[CLI-TOOLS.md](../reference/CLI-TOOLS.md) 및 [CLI-COMPANION.md](../guides/CLI-COMPANION.md) 참조하세요.
 
-## `skills/` — 공개 에이전트 스킬
+## `electron/` — 데스크탑 앱
 
-| 파일                         | 용도                                                                                   |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | 외부 AI 에이전트(Claude Desktop, ChatGPT, Cursor, Cline)를 위한 10개의 스킬 매니페스트 |
+| 길                                                         | 목적                                                                   |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `main.js`                                                  | Electron 기본 프로세스(창, 내장 서버, 트레이, 업데이트)                |
+| `preload.js`                                               | 렌더러에 노출된 IPC 브리지                                             |
+| `lib/`                                                     | 창 수명 주기, 서버 준비 상태, 상태 감시, 원격 서버 기본 설정           |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | 원격 서버 프롬프트 창                                                  |
+| `processTree.js`, `sqlite-inspection.js`                   | 하위 프로세스 정리 및 SQLite 검사 도우미                               |
+| `package.json` / `package-lock.json`                       | 전자 빌더 구성 및 Electron 종속성                                      |
+| `assets/`                                                  | 앱 및 트레이 아이콘(`.ico`, `.icns`, `.png`)                           |
+| `README.md`                                                | 내부 참고 사항 — [ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md) 참조 |
 
----
+## `public/` — 정적 자산
 
-## `scripts/` — 빌드 및 검사 스크립트
+| 길                                          | 목적                                                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `providers/`                                | ID(`/providers/<id>.svg`)로 로드된 공급자 로고 `config/quality/provider-assets-provenance.jsonl` 의 출처 |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | 브라우저 및 PWA 아이콘                                                                                   |
+| `sw.js`                                     | 서비스 워커 — [PWA_GUIDE.md](../guides/PWA_GUIDE.md) 참조                                                |
+| `openapi.yaml`                              | `npm run gen:public-openapi` 에 의해 생성된 `docs/openapi.yaml` 복사본                                   |
+| `images/`, `sponsors/`, `deyin.svg`         | 계층 흐름 다이어그램, 스폰서 배너, README 아트워크                                                       |
 
-| 스크립트                            | 용도                                                                             |
-| ----------------------------------- | -------------------------------------------------------------------------------- |
-| `run-next.mjs`                      | 환경 변수 로드 기능을 포함한 개발/시작 실행기                                    |
-| `build-next-isolated.mjs`           | 독립 실행형 빌드(Next.js 16 독립 실행형)                                         |
-| `prepublish.ts`                     | `npm pack` 실행 전 패키지 준비                                                   |
-| `postinstall.mjs`                   | 최초 설치 시 `.env.example`에서 `.env` 자동 생성                                 |
-| `sync-env.mjs`                      | `.env` 키를 `.env.example`과 다시 동기화                                         |
-| `check-cycles.mjs`                  | 순환 종속성 감지                                                                 |
-| `check-route-validation.mjs`        | 모든 API 라우트에 Zod 유효성 검사가 있는지 검증                                  |
-| `check-t11-any-budget.mjs`          | 파일별 명시적 `any` 허용량 적용                                                  |
-| `check-docs-sync.mjs`               | 문서 버전 동기화 검증(기존 사전 커밋 검사)                                       |
-| **`check-env-doc-sync.mjs`**        | 신규: 코드, `.env.example`, `ENVIRONMENT.md` 간 환경 변수 교차 검사              |
-| **`check-docs-counts-sync.mjs`**    | 신규: 개수(실행기, 전략, OAuth, A2A 스킬)가 문서와 일치하는지 검증               |
-| **`check-deprecated-versions.mjs`** | 신규: 문서에서 오래된 버전/날짜 표시                                             |
-| `check-supported-node-runtime.ts`   | 현재 Node 버전의 지원 여부 검증                                                  |
-| `check-pr-test-policy.mjs`          | 프로덕션 코드 변경 시 "테스트 필수" 규칙 적용                                    |
-| **`gen-provider-reference.ts`**     | 신규: 카탈로그에서 `docs/reference/PROVIDER_REFERENCE.md` 자동 생성              |
-| `i18n/generate-multilang.mjs`       | Google Translate를 통해 UI 문자열 및 문서 번역                                   |
-| `i18n_autotranslate.py`             | LLM 기반 문서 번역 파이프라인                                                    |
-| `validate_translation.py`           | 로케일별 번역 검증                                                               |
-| `check_translations.py`             | 코드 측 i18n 키 검사                                                             |
-| `run-playwright-tests.mjs`          | Playwright E2E 실행기                                                            |
-| `run-protocol-clients-tests.mjs`    | MCP/A2A E2E 실행기                                                               |
-| `run-ecosystem-tests.mjs`           | 생태계(제공자 통합) 테스트                                                       |
-| `test-report-summary.mjs`           | 커버리지 요약 마크다운 생성                                                      |
-| `smoke-electron-packaged.mjs`       | 패키징된 Electron 빌드 스모크 테스트                                             |
-| `native-binary-compat.mjs`          | 네이티브 종속성(`better-sqlite3`)이 Electron의 Node와 일치하는지 검증            |
-| `validate-pack-artifact.ts`         | npm pack 출력 검증                                                               |
-| `responses-ws-proxy.mjs`            | Codex Responses API용 WebSocket 브리지                                           |
-| `v1-ws-bridge.mjs`                  | `/api/v1/ws` 엔드포인트용 WebSocket 브리지                                       |
-| `standalone-server-ws.mjs`          | 독립 실행형 WS 서버 실행기                                                       |
-| `system-info.mjs`                   | 지원을 위한 시스템/런타임 정보 출력                                              |
-| `healthcheck.mjs`                   | 일회성 상태 검사(Docker HEALTHCHECK에서 사용)                                    |
-| `uninstall.mjs`                     | 완전 제거 스크립트                                                               |
-| `dev/sync-ui-kit.sh`                | 고정된 커밋의 CI UI Kit `src/`를 `packages/ui-kit/src`로 복사                    |
-| `check/check-ui-kit-snapshot.mjs`   | 사전 커밋 게이트: `packages/ui-kit/src`가 고정된 업스트림 커밋과 일치하는지 검사 |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — 사용 중이지만 `ICON_MAP`에 매핑되지 않은 아이콘 이름    |
-| `dev/codemod-material-icons.mjs`    | 리터럴 Material Symbols span을 `<Icon>`으로 재작성(마이그레이션 도구)            |
+## `skills/` — 에이전트 기술
+
+46개 스킬, 각각 `SKILL.md` (`cli-*`, `omni-*`, `config-codex-cli`, `ponytail`)와 `skills/README.md` 포함된 폴더 1개. `src/lib/agentSkills/catalog.ts` 런타임에 이를 읽고 `/api/agent-skills`, MCP 및 A2A 통해 노출합니다. 대부분의 매니페스트는 `src/lib/agentSkills/generator.ts` (`scripts/skills/generate-agent-skills.mjs`, `npm run check:agent-skills-sync` 드리프트 확인)에 의해 생성됩니다. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) 참조하세요.
 
 ---
 
-## `docs/` — 공개 문서(7개 루트 파일 + 17개 하위 디렉터리)
+## `scripts/` — 빌드, 게이트 및 툴링
 
-### 최상위 가이드
+약 435개의 추적 파일. 새 스크립트는 `AGENTS.md` 에서 허용하는 하위 폴더 중 하나에 들어갑니다. 일회용 코드는 `scripts/ad-hoc/` 에 들어갑니다.
 
-| 의사                        | 목적                                                                          |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 하위 시스템 맵, 대시보드 표면                             |
-| `CODEBASE_DOCUMENTATION.md` | 엔지니어링 참조: 디렉토리, 모듈, 규칙                                         |
-| `FEATURES.md`               | v3.8 하이라이트가 포함된 기능 매트릭스                                        |
-| `USER_GUIDE.md`             | 최종 사용자 설명서(설정, 모델, 콤보, CLIs, 오디오 등)                         |
-| `API_REFERENCE.md`          | 인증 모델을 사용한 API 엔드포인트 참조                                        |
-| `openapi.yaml`              | OpenAPI 3.0 사양(121개 경로)                                                  |
-| `SETUP_GUIDE.md`            | 설치 방법(npm, npx, Docker, Electron, Termux, 소스)                           |
-| `ENVIRONMENT.md`            | 모든 환경 변수(~ 800 문서화, ~ 3,050 줄 `.env.example`)                       |
-| `TROUBLESHOOTING.md`        | 일반적인 오류 + v3.8.0 알려진 문제                                            |
-| `RELEASE_CHECKLIST.md`      | 전체 릴리스 흐름(기술, 허스키, 기존 커밋, 배포)                               |
-| `COVERAGE_PLAN.md`          | 보장 목표 및 현재 상태                                                        |
-| `FREE_TIERS.md`             | 엄선된 무료 계층 공급자(48 + 무료 + 11 OAuth)                                 |
-| `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                            |
-| `I18N.md`                   | i18n 아키텍처, 언어 추가, 67개 로케일                                         |
-| `UNINSTALL.md`              | 깔끔한 제거 단계                                                              |
-| `PROVIDER_REFERENCE.md`     | **자동 생성** 381개 공급자 카탈로그(재생성: `npm run gen:provider-reference`) |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
 
-### 하위 시스템 심층 분석
+자주 사용되는 진입점:
 
-| 의사                                        | 목적                                                                 |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP 서버: 도구 110개, 전송 3개, 범위 33개, REST 엔드포인트           |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6가지 기술, REST 도우미, 에이전트 카드           |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | 통합 가이드: A2A, ACP, 클라우드 에이전트                             |
-| `CLOUD_AGENT.md`                            | Codex 클라우드 / Devin / Jules 오케스트레이션                        |
-| `SKILLS.md`                                 | 기술 프레임워크(내장 + 마켓플레이스 + SkillsSH + 샌드박스)           |
-| `RADAR.md`                                  | 레이더 자유 모델 카탈로그 오버레이(`RADAR_ENABLED`, 기본적으로 꺼짐) |
-| `MEMORY.md`                                 | 메모리 시스템(SQLite FTS5 + Qdrant)                                  |
-| `EVALS.md`                                  | 평가 프레임워크(세트, 실행, 루브릭)                                  |
-| `GUARDRAILS.md`                             | PII 마스커, 신속한 주입, 비전 브릿지                                 |
-| `COMPLIANCE.md`                             | 감사 로그, 보존, noLog 옵트아웃                                      |
-| `WEBHOOKS.md`                               | HMAC 서명된 웹훅 전달                                                |
-| `REASONING_REPLAY.md`                       | `reasoning_content` 용 하이브리드 memory/SQLite 캐시                 |
-| `AUTHZ_GUIDE.md`                            | 승인 파이프라인(`classify` → `policies` → `enforce`)                 |
-| `RESILIENCE_GUIDE.md`                       | 회로 차단기 + 쿨다운 + 모델 잠금                                     |
-| `docs/security/STEALTH_GUIDE.md` (git 전용) | TLS 핑거프린팅(JA3/JA4), Claude 코드 CCH, MITM cert                  |
-| `AUTO-COMBO.md`                             | 자동 콤보 엔진(16요소 채점, 6개 모드 팩, 가상 공장)                  |
+| 스크립트                                                            | 목적                                                                                                     |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start` 러너                                                                         |
+| `build/build-next-isolated.mjs`                                     | `npm run build` (Next.js 독립형 빌드)                                                                    |
+| `build/prepublish.ts`                                               | `npm run build:cli`: npm `dist/` 어셈블합니다.                                                           |
+| `build/postinstall.mjs`                                             | npm `postinstall` 후크                                                                                   |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                                             |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` ( PROVIDER_REFERENCE.md 재생성)                                         |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` ( `src/app/docs/lib/openapi.generated.ts` 생성 )                                         |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` (문서 미러)                                                                           |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                                                |
+| `release/aggregate-changelog.mjs`                                   | `changelog.d/` 조각을 `CHANGELOG.md` 로 접습니다.                                                        |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` (문서 정확도 게이트)                                                     |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` (추적된 루트 `_*` 경로 차단)                                           |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` ( `config/quality/` 에 대한 미터법 래칫)                                       |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                                       |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                                                   |
+| `dev/new-worktree.sh`                                               | 격리된 개발 작업 트리 — 를 만듭니다. [WORKTREE_ISOLATION.md를](../ops/WORKTREE_ISOLATION.md) 참조하세요. |
+| `dev/sync-ui-kit.sh`                                                | `packages/ui-kit/src` 고정된 업스트림 커밋에 동기화합니다.                                               |
 
-### 압축
+게이트 인벤토리 및 정책: [QUALITY_GATES.md](QUALITY_GATES.md).
 
-| 의사                            | 목적                                |
-| ------------------------------- | ----------------------------------- |
-| `COMPRESSION_GUIDE.md`          | 압축 모드 개요 + 로드맵             |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK 엔진, 레지스트리 계약 |
-| `COMPRESSION_RULES_FORMAT.md`   | 원시인 규칙 팩 JSON 스키마          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | 언어별 규칙 팩 인벤토리             |
-| `RTK_COMPRESSION.md`            | RTK 선언적 파이프라인(56개 필터)    |
+## `config/` — 버전 구성 및 게이트 상태
 
-### 전개
+| 길                                       | 목적                                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `i18n.json` / `i18n-schema.json`         | 지원되는 로케일(로케일 수의 소스) 및 해당 스키마                                            |
+| `payloadRules.json`                      | 업스트림 페이로드 규칙(`open-sse/services/payloadRules.ts`)                                 |
+| `cli-tools-manifest.json`                | 통합 가능한 CLI 도구 매니페스트(`bin/cli/cli-manifest.mjs`)                                 |
+| `alibaba-free-tier-allowlist.json`       | Alibaba 무료 계층 모델 허용 목록                                                            |
+| `ci/toolchain.json`                      | CI 툴체인 버전                                                                              |
+| `quality/quality-baseline.json`          | 다중 측정 래칫 기준(적용 범위, 경고, 중복 등)                                               |
+| `quality/*-baseline.json`                | 개별 게이트에 대한 고정 기준선(복잡성, 중복, 파일 크기, 유형 검사 슬라이스, 테스트 검색 등) |
+| `quality/*-allowlist.json`               | 게이트 허용 목록(종속성, 라이선스, AI 속성, 잊혀진 형제 테스트 등)                          |
+| `quality/eslint-suppressions.json`       | `npm run lint` 에 의해 적용되는 고정된 ESLint 억제                                          |
+| `quality/gate-manifest.json`             | `scripts/quality/gate-manifest.mjs` 로 확인한 게이트 매니페스트                             |
+| `quality/vitest-exclusions.json`         | `vitest.quarantine.config.ts` 에 대한 격리 인벤토리                                         |
+| `quality/skill-templates/`               | `scripts/quality/check-skill-contract.mjs` 로 확인한 표준 SKILL.md 템플릿                   |
+| `quality/release-acceptance.schema.json` | 릴리스 승인 증거 스키마 — [QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md) 참조 |
+| `release/`                               | 변경 로그 조정 및 wreq-js 기본 매니페스트, 라이선스 인벤토리 및 알림                        |
 
-| 의사                         | 목적                                                           |
-| ---------------------------- | -------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker 빌드, 프로필(base/cli/host/cliproxyapi), Redis 사이드카 |
-| `VM_DEPLOYMENT_GUIDE.md`     | 일반 VM/VPS 배포(Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 배포(현재 중국어만 해당)                                |
-| `TERMUX_GUIDE.md`            | Termux를 통한 Android 헤드리스                                 |
-| `PWA_GUIDE.md`               | 프로그레시브 웹 앱 설치 + 서비스 워커                          |
-| `ELECTRON_GUIDE.md`          | 데스크탑 앱 빌드 + sign + 배포                                 |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale 경로                           |
-| `PROXY_GUIDE.md`             | 4단계 아웃바운드 프록시 + 1proxy 마켓플레이스                  |
+## `changelog.d/` — 변경 로그 조각
 
-### 하위 디렉터리
+PR `CHANGELOG.md` 편집하는 대신 `<PR-number>-<slug>.md` 라는 이름의 `features/`, `fixes/` 또는 `maintenance/` 조각 하나를 추가합니다. 릴리스 시간에 `scripts/release/aggregate-changelog.mjs` 이를 `CHANGELOG.md` 로 접고 삭제합니다. `npm run check:changelog-integrity` 이를 검증합니다. 자세한 내용은 `changelog.d/README.md` 에 있습니다.
 
-| 하위 디렉터리         | 목적                                                                                                                                                                          |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 현지화된 문서 번역(41개 로케일)                                                                                                                                               |
-| `docs/screenshots/`   | 가이드용 이미지 자산                                                                                                                                                          |
-| `_tasks/superpowers/` | 초강대국의 Plans/specs (`writing-plans`/`brainstorming`) + 연구 — 격리되고 별도 버전의 저장소이며 메인 트리에서 무시됩니다. CLAUDE.md → "계획 및 연구 아티팩트"를 참조하세요. |
+---
+
+## `docs/` — 공개 문서
+
+`source.config.ts` 에 나열된 섹션은 `/docs` 사이트로 컴파일됩니다(일부 운영자 전용 보안 페이지 제외). `docs/meta.json` 사이드바 순서를 설정합니다. [README.md](../README.md) 에서 시작하세요.
+
+| 길                 | 내용물                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getting-started/` | 빠른 시작, 셀프 호스트, 공급자, 무료 계층, 자동 콤보 및 웹 쿠키 가이드                                                                             |
+| `guides/`          | 운영자 및 개발자 가이드: 설정, Docker, Electron, PWA, Termux, CLIs, i18n, 문제 해결, 사용자 가이드                                                 |
+| `architecture/`    | 아키텍처, 코드베이스 참조, 수정 레시피, 인증, 탄력성, 품질 게이트, 디자인 시스템, 이 지도                                                          |
+| `reference/`       | API 참조, 환경 변수, 기능 플래그, CLI 도구, 무료 계층, 생성된 공급자 참조, 제거된 공급자                                                           |
+| `frameworks/`      | MCP, A2A, ACP, 기술, 메모리, 플러그인, 클라우드 에이전트, 웹후크, 평가, 로그 내보내기, 레이더, 플레이그라운드, …                                   |
+| `routing/`         | 자동 콤보, replay/routing 추론, 할당량 공유, 구독 사다리, 엄격한 제로 비용, …                                                                      |
+| `security/`        | 가드레일, 오류 삭제, CORS, SSO, 송신 정책, 경로 보호 계층, 공급망, …                                                                               |
+| `compression/`     | 압축 가이드, 엔진, RTK, 규칙 형식, 언어 팩, 컨텍스트 편집                                                                                          |
+| `ops/`             | 릴리스 흐름, 분기, 병합 트레인, 배포(VM, Fly.io, Kubernetes), 데이터베이스, 프록시, 작업 트리, 엄격한 규칙 세부 정보                               |
+| `providers/`       | 공급자별 가이드(Claude Code, ChatGPT Web, Cursor, GitHub Copilot, …)                                                                               |
+| `comparison/`      | OmniRoute 와 대안 비교                                                                                                                             |
+| `integrations/`    | 통합 참고사항(fal.ai 기본, MarkItDown MCP) `/docs` 로 컴파일되지 않음                                                                              |
+| `openapi.yaml`     | OpenAPI 소스; `src/app/docs/lib/openapi.generated.ts`, `public/openapi.yaml` 및 `bin/cli/api-commands/` 피드                                       |
+| `diagrams/`        | 인어 소스(`.mmd`), `scripts/docs/gen-readme-*` 에서 렌더링된 SVGs (`exported/`) 및 README SVGs                                                     |
+| `assets/`          | 언어 플래그 SVGs 및 기타 README 자산                                                                                                               |
+| `screenshots/`     | README 및 가이드에서 사용하는 스크린샷                                                                                                             |
+| `i18n/`            | 번역된 미러: 루트 문서와 `docs/` 하위 집합이 있는 로케일당 하나의 폴더(66개) `npm run i18n:run` 에 의해 생성됨 — [I18N.md](../guides/I18N.md) 참조 |
+| 최상위 `*.md`      | `README.md` (문서 색인), `DEVELOPER-ENVIRONMENT.md` 및 몇 가지 독립형 메모                                                                         |
+
+주요 진입점: [ARCHITECTURE.md](ARCHITECTURE.md), [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md), [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md), [ENVIRONMENT.md](../reference/ENVIRONMENT.md), [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) ( `npm run gen:provider-reference` 에서 생성).
 
 ---
 
 ## `tests/` — 테스트 스위트
 
-| 하위 디렉터리                        | 유형                                    | 실행 도구                                |
-| ------------------------------------ | --------------------------------------- | ---------------------------------------- |
-| `tests/unit/`                        | 단위 테스트(약 4,800개 파일, 가장 빠름) | Node 네이티브 테스트 실행 도구           |
-| `tests/integration/`                 | 다중 모듈 + DB 통합 테스트              | Node 네이티브 테스트 실행 도구(동시성 1) |
-| `tests/e2e/`                         | UI + 워크플로 E2E                       | Playwright                               |
-| `tests/e2e/protocol-clients.test.ts` | MCP + A2A 실제 클라이언트 E2E           | 커스텀 프로토콜 클라이언트               |
-| `tests/e2e/ecosystem.test.ts`        | 제공자 통합(네트워크 사용)              | Node 네이티브 테스트 실행 도구           |
+약 9,670개의 추적 파일. 테스트 파일은 프로젝트 루트가 아닌 여기에 속합니다. 예외: Vitest 구성이 수집하는 `src/` 및 `open-sse/` 에 함께 위치한 `__tests__/` 폴더.
+
+| 길                                                     | 내용물                                                                                                                                                                | 달리는 사람                                                                             |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | 단위 테스트(9,000개 이상의 파일): 최상위 수준의 다수 및 도메인 폴더(`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`, …) | 노드 테스트 실행기(`npm run test:unit`); `test:vitest:ui` 통한 `*.tsx`                  |
+| `tests/unit/serial/`                                   | 동시성 1로 실행되는 CPU 민감성 테스트                                                                                                                                 | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | 유닛 트리 내부의 Vitest 제품군                                                                                                                                        | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | 다중 모듈 및 DB 통합 테스트 `combo-matrix/`, `combo-live/`, `services/`                                                                                               | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` + 라이브 스위트 `ecosystem.test.ts`, `protocol-clients.test.ts`                                                                                | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | 실행 중인 인스턴스에 대한 `*.live.test.ts`                                                                                                                            | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | 승인 제품군(자체 Playwright 구성을 갖춘 `api/`, `ui/` )                                                                                                               | `npm run homolog` — see [HOMOLOGATION.md](../ops/HOMOLOGATION.md)                       |
+| `tests/load/`                                          | 스크립트 로드 및 흡수(k6)                                                                                                                                             | 야간 복원력 워크플로                                                                    |
+| `tests/_setup/`                                        | `--import` / 설정 파일(격리된 데이터 디렉토리, 송신 가드, Vitest UI 폴리필)                                                                                           | 주자들에 의해 로드됨                                                                    |
+| `tests/_helpers/`, `tests/helpers/`                    | 공유 테스트 도우미(골든 스냅샷, 관리 세션 등)                                                                                                                         | 테스트를 통해 가져옴                                                                    |
+| `tests/fixtures/`                                      | 픽스처 데이터 및 하위 프로세스 픽스처                                                                                                                                 | 테스트를 통해 가져옴                                                                    |
+| `tests/snapshots/`                                     | `tests/helpers/goldenSnapshot.ts` 용 골든 파일                                                                                                                        | 테스트를 통해 가져옴                                                                    |
+| `tests/manual/`                                        | 수동 REST 호출을 위한 `.http` 파일                                                                                                                                    | 수동                                                                                    |
+| `tests/security/`                                      | 보안 셸 스크립트                                                                                                                                                      | 수동/단위 테스트 설비                                                                   |
+| `tests/types/`                                         | 유형별 계약 체결                                                                                                                                                      | —                                                                                       |
+
+전체 행렬: `CONTRIBUTING.md` → "테스트 실행" 및 [COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md).
 
 ---
 
-## `public/` — 정적 자산
+## `deploy/` — 쿠버네티스
 
-| 경로                | 용도                                                       |
-| ------------------- | ---------------------------------------------------------- |
-| `public/` (루트)    | 파비콘, robots.txt, 매니페스트, 서비스 워커, 마케팅 이미지 |
-| `public/providers/` | 제공자 로고 PNG/SVG(대시보드에서 사용)                     |
+| 길                                                 | 목적                                                                                      |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `deploy/helm/omniroute/`                           | Helm 차트(`Chart.yaml`, `values.yaml`, 배포용 템플릿, 서비스, 수신, PVC, 비밀, configmap) |
+| `deploy/kubernetes/base/`                          | Kustomize 기반(네임스페이스, 배포, 서비스, PVC, configmap, `secret.example.yaml`)         |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | 클러스터별 오버레이(수신, 스토리지 클래스, 리소스, 프로브)                                |
 
----
+[KUBERNETES_DEPLOYMENT_GUIDE.md 를](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) 참조하세요.
 
-## `config/` — 정적 구성 + 품질 게이트 상태
+## `docker/` — 보조 이미지
 
-배포되는 구성 템플릿과 커밋된 품질 게이트 기준선입니다.
-(루트 구조를 간결하게 유지하기 위해 v3.8.26에서 저장소 루트로부터 이곳으로 이동했습니다.)
+| 길                                  | 목적                                                                                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `docker/chatgpt-web-codex-browser/` | ChatGPT 웹 실행기 zqc용 CDP 프록시가 포함된 헤드리스 브라우저 이미지 — [CHATGPT_WEB](../providers/CHATGPT_WEB.md) 참조 |
+| `docker/devin-bridge/`              | Devin 브리지 이미지, 파일 작성, 모의 및 네트워크 가드                                                                  |
+| `docker/vnc-browser/`               | 대화형 브라우저 세션을 위한 VNC 포함된 Chromium                                                                        |
 
-| 경로                                          | 용도                                                                 |
-| --------------------------------------------- | -------------------------------------------------------------------- |
-| `config/i18n.json`                            | 로케일 목록 + 메타데이터(42개 로케일 수의 표준 소스)                 |
-| `config/i18n-schema.json`                     | `i18n.json`의 유효성을 검사하는 JSON 스키마                          |
-| `config/payloadRules.json`                    | 업스트림 페이로드 정리 규칙                                          |
-| `config/quality/quality-baseline.json`        | 다중 메트릭 래칫 기준선(`scripts/quality/check-quality-ratchet.mjs`) |
-| `config/quality/complexity-baseline.json`     | 고정된 ESLint 복잡도 기준선(`check-complexity.mjs`)                  |
-| `config/quality/duplication-baseline.json`    | 고정된 jscpd 중복 기준선(`check-duplication.mjs`)                    |
-| `config/quality/file-size-baseline.json`      | 고정된 파일별 크기 기준선(`check-file-size.mjs`)                     |
-| `config/quality/test-discovery-baseline.json` | 고정된 고립 테스트 기준선(`check-test-discovery.mjs`)                |
-| `config/quality/dependency-allowlist.json`    | 승인된 종속성 허용 목록(`check-deps.mjs`)                            |
-| `config/quality/.license-allowlist.json`      | SPDX 라이선스 허용 목록(`check-licenses.mjs`)                        |
-| `config/quality/quality-metrics.json`         | 임시로 수집된 메트릭(`collect-metrics.mjs`에서 생성, **gitignored**) |
+기본 이미지는 루트 `Dockerfile` 입니다. [DOCKER_GUIDE.md를](../guides/DOCKER_GUIDE.md) 참조하세요.
+
+## `contrib/` — 커뮤니티 레시피(공식적으로 지원되지 않음)
+
+| 길                      | 목적                                                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `contrib/podman/`       | Podman 쿼드렛(컨테이너, 볼륨, 네트워크, Redis)                                                                       |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                  |
+| `contrib/windows/`      | Windows 체크아웃에서 실행하기 위한 `.bat` 실행기                                                                     |
+| `contrib/session-sync/` | 타사 세션 동기화 브라우저 확장을 위한 README — [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) 참조 |
+
+## `examples/`
+
+| 길                              | 목적                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| `examples/omniroute-cmd-hello/` | 최소 명령 플러그인 — [PLUGINS.md](../frameworks/PLUGINS.md) 참조       |
+| `examples/plugins/`             | 예제 플러그인: langfuse, request-logger, theme-manager, Welcome-banner |
+| `examples/quickstart/`          | 클라이언트 조각: 컬, Node.js (axios), PHP, Python                      |
 
 ---
 
 ## `.github/` — GitHub 통합
 
-| 경로                               | 용도                                                         |
-| ---------------------------------- | ------------------------------------------------------------ |
-| `.github/workflows/`               | GitHub Actions CI/CD 워크플로(lint, test, coverage, release) |
-| `.github/ISSUE_TEMPLATE/`          | 버그/기능 이슈 템플릿                                        |
-| `.github/pull_request_template.md` | PR 템플릿                                                    |
-| `.github/dependabot.yml`           | 의존성 업데이트 설정                                         |
+| 길                                                           | 목적                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml`, `quality.yml`, `build.yml`), 보안 검사(`codeql.yml`, `semgrep.yml`, `scorecard.yml`, `dast-smoke.yml`), 예약된 `nightly-*.yml` 제품군, 게시(`npm-publish.yml`, `docker-publish.yml`, `electron-release.yml`), 릴리스 및 유지 관리 워크플로 |
+| `.github/actions/npm-ci-retry/`                              | 복합 작업: 캐시 및 재시도가 포함된 `npm ci`                                                                                                                                                                                                              |
+| `.github/actions/prepare-unit-storage/`                      | 복합 작업: 러너 디스크 공간을 확보한 다음 종속성을 설치합니다.                                                                                                                                                                                           |
+| `.github/ISSUE_TEMPLATE/`                                    | 버그, 기능 및 테스트 범위 문제 양식                                                                                                                                                                                                                      |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | 기본 PR 템플릿과 bugfix/feature 변형                                                                                                                                                                                                                     |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | 코드 소유자, 후원 링크, 종속성 업데이트                                                                                                                                                                                                                  |
+| `.github/labels.yml`                                         | `npm run labels:sync` 가 적용한 라벨 정의                                                                                                                                                                                                                |
+| `.github/copilot-instructions.md`                            | GitHub Copilot 지침(에이전트 지침 표면)                                                                                                                                                                                                                  |
 
----
+CI 작업 맵: [QUALITY_GATES.md](QUALITY_GATES.md).
 
-## `.husky/` — Git 훅
+## `.husky/` — git 후크
 
-| 파일         | 용도                                                                     |
-| ------------ | ------------------------------------------------------------------------ |
-| `pre-commit` | `lint-staged + check-docs-sync + check:any-budget:t11` 실행              |
-| `pre-push`   | 현재 비활성화됨(주석 처리됨). `npm run test:unit`을 수동으로 실행하세요. |
-| `_/`         | Husky 내부 파일                                                          |
+| 파일         | 목적                                                                                                                         |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | Git 신원 확인, Lint-staged, 게이트 매니페스트, 문서 동기화, 모든 예산, 유형 규모 래칫, 추적된 아티팩트 및 ui-kit 스냅샷 확인 |
+| `commit-msg` | 커밋 메시지의 `scripts/check/check-ai-attribution.mjs`                                                                       |
+| `pre-push`   | 의도적으로 밝게: 0을 종료하는 PATH/npm 온전성 검사                                                                           |
 
----
-
-## `.claude/` — Claude Code 슬래시 명령어
-
-| 파일                                                | 용도                                                     |
-| --------------------------------------------------- | -------------------------------------------------------- |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — 버전 업데이트 + 변경 로그 자동 생성 |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — 전체 릴리스 워크플로            |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | VPS에 배포                                               |
-| `commands/capture-release-evidences-cc.md`          | 새로운 기능을 브라우저에서 WebP로 녹화                   |
-| `commands/review-{prs,discussions}-cc.md`           | GitHub PR/토론 분류 및 검토                              |
-| `commands/{review-issues,implement-features}-cc.md` | 이슈 워크플로                                            |
-| `settings.local.json`                               | 프로젝트별 Claude Code 설정                              |
-
----
-
-## `.agents/` — 범용 에이전트 워크플로(Codex / Cursor / 기타)
-
-| 경로                     | 용도                                             |
-| ------------------------ | ------------------------------------------------ |
-| `workflows/*-ag.md`      | 11개의 워크플로 정의(`.claude/commands/`의 미러) |
-| `skills/<name>/SKILL.md` | Codex 실행 참고 사항이 포함된 9개의 스킬 정의    |
-
-> **참고:** 현재 워크플로와 명령어는 바이트 단위로 동일합니다. `.agents/`가 다른 에이전트 런타임(Codex)을 대상으로 한다면 각 변형은 의미 있게 달라져야 합니다.
-
----
-
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — 트리 외부
-
-밑줄로 시작하는 다음 디렉터리에는 배포되지 않는 콘텐츠가 들어 있습니다.
-
-- **`_ideia/`** — 설계 참고 사항(defer / notfit / viable 범주)
-- **`_mono_repo/`** — 이전 하위 프로젝트(omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — 개발 중 상호 참조를 위한 관련 OSS 프로젝트(LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api 등)의 읽기 전용 클론
-- **`_tasks/`** — 릴리스별 작업 추적 파일(비공식)
-
-`npm pack` 출력에는 포함되지 않습니다. `.npmignore`를 참조하세요.
-
----
-
-## 생성됨 / Git에서 무시됨
-
-| 경로                   | 용도                           |
-| ---------------------- | ------------------------------ |
-| `node_modules/`        | npm 의존성                     |
-| `.next/`               | Next.js 빌드 출력              |
-| `coverage/`            | c8 커버리지 보고서             |
-| `logs/`                | 런타임 로그                    |
-| `package/`             | npm pack 스테이징              |
-| `.playwright-mcp/`     | Playwright MCP 테스트 아티팩트 |
-| `.issues/`             | 로컬 이슈 캐시                 |
-| `tsconfig.tsbuildinfo` | TS 증분 캐시                   |
+`.husky/_/` 의 후크 런타임은 설치 시 생성되며 추적되지 않습니다.
 
 ---
 
 ## 탐색 팁
 
-- **새로운 기여자인가요?** `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md` 순서로 읽으세요.
-- **프로바이더를 추가하나요?** `docs/architecture/ARCHITECTURE.md § Adding a New Provider`를 따르고 `docs/reference/PROVIDER_REFERENCE.md`와 교차 확인하세요.
-- **라우트를 추가하나요?** `docs/architecture/ARCHITECTURE.md § Adding a New API Route`와 `src/shared/validation/schemas.ts`를 참조하세요.
-- **MCP 도구를 추가하나요?** `docs/frameworks/MCP-SERVER.md § Adding a Tool`을 참조하세요.
-- **A2A 스킬을 추가하나요?** `docs/frameworks/A2A-SERVER.md § Adding a New Skill`을 참조하세요.
-- **로컬에서 실행하나요?** `docs/guides/SETUP_GUIDE.md`를 참조하세요.
-- **배포하나요?** `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`를 참조하세요.
-- **릴리스하나요?** `docs/ops/RELEASE_CHECKLIST.md`(및 `/generate-release-cc` Claude Code 스킬)를 참조하세요.
+- **새로운 기여자이신가요?** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md).
+- **일반적인 것을 바꾸다** (공급자, 경로, DB 모듈, MCP 도구, A2A 기술)? [MODIFICATION_SCENARIOS.md 를](MODIFICATION_SCENARIOS.md) 따르십시오.
+- **제공업체를 추가하시겠습니까?** [REMOVED_PROVIDERS.md 를](../reference/REMOVED_PROVIDERS.md) 먼저 확인한 다음 [PROVIDER_REFERENCE.md 를](../reference/PROVIDER_REFERENCE.md) 교차 확인하세요.
+- **로컬로 실행 중이신가요?** [SETUP_GUIDE](../guides/SETUP_GUIDE.md).
+- **배포 중이신가요?** [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md), [SELF_HOST_GUIDE.md](../getting-started/SELF_HOST_GUIDE.md), [VM_DEPLOYMENT_GUIDE.md](../ops/VM_DEPLOYMENT_GUIDE.md), [FLY_IO_DEPLOYMENT_GUIDE.md](../ops/FLY_IO_DEPLOYMENT_GUIDE.md), [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+- **출시?** [RELEASE_CHECKLIST](../ops/RELEASE_CHECKLIST.md).
+- **품질 게이트가 실패했나요?** [QUALITY_GATES.md](QUALITY_GATES.md) 및 [QUALITY_GATE_PLAYBOOK.md](../ops/QUALITY_GATE_PLAYBOOK.md).

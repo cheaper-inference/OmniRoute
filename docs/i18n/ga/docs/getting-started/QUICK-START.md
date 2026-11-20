@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Rogha B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-Is é `:latest` an leagan cobhsaí SemVer **foilsithe** is airde. Ní leanann sé `main` git. Pionnáil `diegosouzapw/omniroute:X.Y.Z` le haghaidh GitOps. Féach [Clibeanna Íomhá / Cainéil Eisiúna](../guides/DOCKER_GUIDE.md#release-channels).
+Is é `:latest` an leagan cobhsaí SemVer **foilsithe** is airde. Ní leanann sé `main` git. Pionnáil `cheaperinference/omniroute:X.Y.Z` le haghaidh GitOps. Féach [Clibeanna Íomhá / Cainéil Eisiúna](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Rogha C: Ón gCód Foinseach
 

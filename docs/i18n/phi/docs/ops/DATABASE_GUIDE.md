@@ -184,31 +184,94 @@ Ang buong listahan ng humigit-kumulang 30+ talahanayan ay nasa `src/lib/db/migra
 
 ---
 
-## Mga Migrasyon
+## Migrasyon
 
-Gumagamit ang OmniRoute ng **mga migrasyong may bersyon at idempotent** sa `src/lib/db/migrations/`. Ang bawat migrasyon ay isang SQL file na pinangalanang `NNN_description.sql`.
+ginagamit OmniRoute** bersyon, idempotent migration** sa `src/lib/db/migrations/`. Ang bawat paglipat ay isang solong SQL file. Dalawang format ng pagpapangalan ang magkakasamang umiiral; ang bersyon na naitala sa `_omniroute_migrations` ay ang numeric prefix.
 
-### Pagpapangalan sa Migrasyon
+### Pagpapangalan ng Migration
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                              | Halimbawa                            | Ginagamit para sa                                                                                                                                                            |
+| --------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (eksaktong 3 digit)           | `241_seen_models.sql`                | Ang lumang serye `001`–`241`. Na-freeze nang lumapag ang format ng timestamp (`240` at `241` ay pinagsama bago ito): walang bagong file ang nakakakuha ng sequential number. |
+| `YYYYMMDDHHMMSS_description.sql` (14 na digit, UTC) | `20261113120000_add_usage_index.sql` | Bawat paglilipat na ginawa mula 2026-11-13 sa.                                                                                                                               |
 
-### Paano Pinapatakbo ang Mga Migrasyon
+Bakit ang pagbabago: na may mga sunud-sunod na numero, ang parallel PRs ay pumili ng parehong susunod na numero at lahat maliban sa isa ay kailangang muling magnumero bago pagsamahin. Ang isang UTC timestamp ay nagbibigay sa bawat PR ng sarili nitong bersyon.
 
-Sa pagsisimula, ang `migrationRunner.ts` ay:
+Mga panuntunan para sa format ng timestamp (ipinatupad ng `npm run check:migration-numbering`, ibinahagi sa generator sa `scripts/check/lib/migrationNaming.mjs`):
 
-1. Gumagawa ng `_omniroute_migrations` table kung hindi pa ito umiiral
-2. Nagsusuri kung aling mga migrasyon ang nailapat na
-3. Inilalapat ang anumang bagong migrasyon ayon sa pagkakasunod-sunod, bawat isa sa loob ng isang transaksyon
-4. Itinatala ang bawat inilapat na migrasyon kasama ang timestamp
+- Ang timestamp ay isang tunay na petsa at oras UTC, hindi mas maaga kaysa sa `20261113000000` at hindi hihigit sa 10 minuto sa hinaharap.
+- Ang paglalarawan ay maliliit na `snake_case` na nagsisimula sa isang titik (`a-z`, `0-9`, solong `_` sa pagitan ng mga salita), hindi hihigit sa 80 character.
+- Dalawang file na may parehong timestamp ay isang duplicate.
+- Nalalapat lang ang panuntunang walang gap sa lumang serye: dapat umiral ang bawat numero mula `001` hanggang `241`, maliban sa mga kilalang gaps `026`, `055` at `121`. Ang pagtanggal ng `241` (o anumang lumang file) ay nabigo sa gate. `001` at `241` ay hindi kailanman maidaragdag sa `KNOWN_GAPS` allowlist. Ang mga timestamped na file ay hindi kailanman gumagawa ng gap.
+- Ang bawat entry sa `src/lib/db/migrations/` ay dapat na isang regular na file na may wastong lowercase `.sql` na pangalan. Ang isang direktoryo, isang symlink, isang `.SQL` o `.sql.bak` file, isang nakatagong file o isang pangalan na may puwang ay nabigo sa gate, dahil ang runner ay lalaktawan ito nang tahimik o mag-crash sa boot.
+
+**Mag-apply ng order.** Ang runner ay nag-uuri ayon sa numeric na halaga ng prefix, hindi sa pamamagitan ng text: ang lumang `001`–`241` file muna, pagkatapos ay ang timestamped file sa timestamp order, pagkatapos ay anumang namespaced na mga direktoryo na nakarehistro sa `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (mga bersyon tulad ng `ee-001`). Ang nakabinbing paglipat ay anumang file na ang bersyon ay wala sa `_omniroute_migrations`, kaya ang paglipat mula sa isang mas lumang sangay na nagsasama pagkatapos ng mas bago ay nalalapat pa rin sa mga kasalukuyang database.
+
+**Ang timestamp ay pagkakasunud-sunod ng paggawa, hindi pagkakasunud-sunod ng pagsasanib.** Kung ang iyong paglipat ay nakasalalay sa isang talahanayan o column na ginawa ng isang paglipat na may a** mas bago** timestamp (halimbawa, isa mula sa isa pang PR na unang pinagsama), isang bagong database ang unang tatakbo sa iyo at mabibigo. Habang bukas pa ang iyong PR, muling buuin ang pangalan ng file gamit ang `npm run db:new-migration` para makakuha ito ng mas bagong timestamp, o gawin itong independyente. Inilalapat `npm run test:migrations:fresh` ang bawat paglipat sa isang walang laman na database at nahuhuli ito.
+
+### Ang Pinagsamang Migration ay Hindi Tinatanggal o Pinalitan ng Pangalan
+
+Kapag ang isang migration file ay nasa isang release branch o `main`, ito ay tumatakbo na sa homolog at developer database, sa VPS install at sa Enterprise sync. Mula noon:
+
+- **Huwag kailanman tanggalin ito.** Mawawala ang schema ng mga bagong pag-install habang pinapanatili ito ng mga na-upgrade na database.
+- **Huwag kailanman palitan ang pangalan nito.** Ang bersyon sa `_omniroute_migrations` ay hindi na tutugma sa isang file, kaya bawat database na nakalapat na nito ay tatakbo muli nito. Hindi-idempotent SQL pagkatapos ay duplicate ang data o ihihinto ang boot.
+- **Kailangan ng ibang schema?** Gumawa ng bagong paglipat gamit ang `npm run db:new-migration`.
+
+Ang pagpapalit ng pangalan ay ligtas lamang para sa isang file na hindi pa pinagsama, na kung saan ay tinutukoy ng mga pahiwatig ng gate. Walang binago ang isang release tag dito: ang bawat push sa isang `release/v*` branch ay nagpa-publish ng Docker `:next` na imahe at tumatakbo sa homolog, VPS na pag-install at ang Enterprise sync, kaya ang isang pinagsamang migration ay tumakbo sa mga totoong database bago magkaroon ng anumang `vX.Y.Z` tag. Ang gate ay nabigo sa bawat pag-alis ng isang base file, na-tag o hindi.
+
+- **Pagbabalik ng pinagsamang paglipat.** Ang isang `git revert` na nagtatanggal ng file ay nabigo sa gate. Panatilihin ang file at i-undo ang schema nito sa isang bagong paglipat: `npm run db:new-migration -- <description>`, na may `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` at iba pa. Ang mga na-upgrade at bagong database ay nagtatapos sa parehong schema.
+- **Ang tinanggap na palitan ang pangalan: isang compatibility entry at magkaparehong content.** Kung ang isang pinagsamang file ay dapat ilipat (halimbawa, dalawang pinagsamang file ay nagbabahagi ng timestamp at ang runner ay huminto sa isang bersyon ng banggaan), palitan ang pangalan ng isa nang hindi hinahawakan SQL nito at idagdag `{ fromVersion, fromName, toVersion, toName }` sa `RENAMED_MIGRATION_COMPATIBILITY` sa `src/lib/db/migrationRunner/constants.ts`. Naililipat ng mga database na naglapat ng lumang bersyon ang kanilang `_omniroute_migrations` row sa halip na patakbuhin muli ang file. Nagbabala ang gate tungkol sa naturang pagpapalit ng pangalan at palaging nagpapatakbo ng commutation check dito, anuman ang bagong timestamp: inilalapat ng mga bagong pag-install ang file sa bagong posisyon nito, hindi ginagawa ng mga na-upgrade na database, kaya pumili ng bagong timestamp malapit sa luma. Ang gate ay nabigo sa pagpapalit ng pangalan kung ang nilalaman ay nagbago (isang pagbabago ng schema ay napupunta pa rin sa isang bagong paglipat), o kung ang target na file ng entry ay wala sa disk.
+- **Huwag kailanman palitan ang pangalan sa loob ng parehong timestamp.** Ang pagpapalit ng pangalan na nagpapanatili sa timestamp at nagpapalit lamang ng paglalarawan ay hindi pumapasok sa gate, mayroon man o walang entry. Sa isang entry na ang `toVersion` ay katumbas ng `fromVersion` nito, tatanggalin ng runner ang lumang row `_omniroute_migrations` at ilalapat muli ang file sa bawat database na nagpatakbo na nito. Kung walang entry, sinusubaybayan lang ng runner ang bersyon: nilalaktawan nito ang file sa mga database na iyon (hindi kailanman tatakbo ang bagong content doon) at nag-log ng error sa muling pagnumber sa bawat boot. Gumamit ng isa pang timestamp kasama ang isang compatibility entry, o panatilihin ang pangalan.
+- **Sinusuri ng gate na ang pinalitan ng pangalan na file ay hindi tatakbo muli.** Para sa bawat sakop na pagpapalit ng pangalan, ipinapasa ng gate ang bagong pangalan ng file sa commutation check gamit ang `--must-not-apply`. Bino-boot ng check ang na-upgrade na database gamit ang tunay na runner, at kung ilalapat muli ng runner ang file na iyon (halimbawa, dahil ang entry ay may maling bersyon o pangalan, o dahil ang text parser ng gate ay nagbabasa `constants.ts` na iba sa TypeScript), ang gate ay nabigo sa `migration renomeada rodaria de novo` at hinihiling sa iyong suriin ang luma at bagong mga bersyon at pangalan ng entry.
+
+### Ano ang Sinusuri ng Gate Laban sa Base
+
+Sa pull request at merge-queue runs, ikinukumpara ng `npm run check:migration-numbering` `src/lib/db/migrations/` sa disk na may parehong direktoryo sa base branch. Ang base ay, sa ganitong pagkakasunud-sunod: `--base-latest-tag`, `--base <ref>`, ang `MIGRATION_BASE_REF` variable, o, kapag `GITHUB_EVENT_NAME` ay `pull_request`, `pull_request_target` o `merge_group`, ang unang magulang ng merge commit, ang `merge_group.base_sha` ng event payload, o `git merge-base HEAD origin/$GITHUB_BASE_REF`. Sa isang pull request o merge-queue run na walang resolvable base nabigo ang gate. Sa labas CI nang walang `--base` nagpi-print ito `comparação com a base: pulada (sem --base)` at nilalaktawan ang mga panuntunang ito.
+
+`--base-latest-tag` ay nagkukumpara sa pinakabagong release tag (`vX.Y.Z` sa semver order; suffixed tags gaya ng nightlies ay hindi binibilang) na nasa kasaysayan ng `HEAD`, na may parehong mga panuntunan tulad ng `--base`. Ang Release-Green (`scripts/quality/validate-release-green.mjs`) ay nagpapatakbo ng gate sa ganitong paraan, dahil ang push at mga naka-iskedyul na pagtakbo ay walang pull request base at ang isang merge ay maaaring dumaong nang walang bagong CI run. Nang walang release tag sa kasaysayan, nabigo ang gate; patakbuhin `git fetch --tags` (sa CI, `actions/checkout` na may `fetch-depth: 0` ay nagdadala ng mga tag).
+
+| Baguhin ang kahilingan sa paghila                                                                                                        | Resulta                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ang isang file na umiiral sa base ay pinalitan ng pangalan, na may `RENAMED_MIGRATION_COMPATIBILITY` entry                               | **Babala** kung ang nilalaman ay magkapareho, at ang commutation check ay tumatakbo anuman ang bagong timestamp; mabibigo ito kung babaguhin ng bagong posisyon ang panghuling schema (i-undo ang pagpapalit ng pangalan, o pumili ng isa pang bagong timestamp kung saan ito magko-commute) o kung ilalapat muli ng runner ang pinalitan ng pangalan na file sa isang na-upgrade na database.** Nabigo** kung nagbago ang nilalaman. |
+| Ang isang file na umiiral sa base ay pinalitan ng pangalan nang pinapanatili ang timestamp nito (ang paglalarawan lang ang nagbabago)    | **Nabigo** , may entry o walang entry: ilalapat ito muli ng runner (kasama ang entry) o laktawan ito ayon sa bersyon (walang isa). Gumamit ng isa pang timestamp kasama ang isang compatibility entry, o panatilihin ang pangalan.                                                                                                                                                                                                    |
+| Ang isang file na umiiral sa base ay tinanggal, o pinapalitan ang pangalan nang walang entry                                             | **Nabigo** , nasa release tag man o wala ang file. Upang i-undo ito, ibalik ang file gamit ang `git checkout <base> -- src/lib/db/migrations/<file>`; upang ibalik ang schema nito, magdagdag ng bagong paglipat gamit ang `DROP ... IF EXISTS`.                                                                                                                                                                                      |
+| Ang isang file na umiiral sa base ay may iba't ibang nilalaman                                                                           | **Babala** (isang `::warning` annotation sa GitHub Actions), at tumatakbo ang commutation check. Mabibigo ito kung babaguhin ng pag-edit ang panghuling schema, dahil ang mga na-upgrade na database ay hindi muling inilalapat ang na-edit na file: ilagay ang pagbabago sa isang bagong paglipat. Ang isang hindi nakakapinsalang pag-edit (isang komento, `IF NOT EXISTS`) ay nagbabala lamang.                                    |
+| Ang isang timestamp na file ay idinagdag na may timestamp na hindi mas bago kaysa sa pinakabago ng base                                  | Pinapatakbo ang commutation check, na inilarawan sa ibaba.                                                                                                                                                                                                                                                                                                                                                                            |
+| Ang isang lumang-format `NNN_` file ay idinagdag na may isang numero sa ibaba ng pinakabagong lumang-format na file ng base              | **Nabigo** , kahit na na-edit ang `KNOWN_GAPS` sa parehong kahilingan sa paghila: ang lumang serye ay nagyelo, gawin ang paglipat gamit ang `npm run db:new-migration`. Ang mga lumang format na file sa itaas ng pinakabago ng base (isang `release/v*` hanggang `main` pull request) ay tinatanggap.                                                                                                                                |
+| Ang isang out-of-order, na-edit o pinalitan ng pangalan na file ay naglalaman ng mga pahayag na `INSERT`, `UPDATE`, `DELETE` o `REPLACE` | **Babala** : ang commutation check ay hindi naghahambing ng data, kaya suriin kung ang pagkakasunud-sunod kung saan inilapat ang mga na-upgrade at bagong database ay nagbabago sa resulta.                                                                                                                                                                                                                                           |
+
+Sinasaklaw ng isang run ng commutation check ang out-of-order, ang na-edit at ang pinalitan ng pangalan na mga file nang magkasama.
+
+Ang commutation check (`scripts/check/migration-commutation.ts`) ay bumubuo ng dalawang pansamantalang database na may totoong landas sa pag-install: an** na-upgrade** isa (mag-boot gamit ang mga base migration, pagkatapos ay mag-boot muli sa parehong file na may mga pull request ng paglilipat) at isang** sariwa** isa (isang boot na may mga paglipat ng pull request). Inihahambing nito ang mga nagresultang schema: mga talahanayan at column (hindi pinapansin ang pagkakasunud-sunod ng column), UNIQUE / PRIMARY KEY at FOREIGN KEY na mga hadlang, ang normalized na `CREATE TABLE` na teksto ng bawat talahanayan (na sumasaklaw sa mga hadlang CHECK, collation, nabuong mga column at mga opsyon sa talahanayan), mga index, trigger at view. Hindi inihambing ang data ng row. Kung magkatugma ang mga ito, ipi-print ng gate na wala sa ayos ang file ngunit nagko-commute, at pumasa. Kung magkaiba ang mga ito, nabigo ang gate na may pagkakaiba at isang pahiwatig para sa kaso: para sa isang out-of-order na file, muling buuin ang pangalan nito gamit ang `npm run db:new-migration`, na ligtas dahil hindi pa naka-merge ang file; para sa isang na-edit na base file, ibalik ang batayang nilalaman at ilagay ang pagbabago sa isang bagong paglipat; para sa isang pinalitan ng pangalan na file, i-undo ang pagpapalit ng pangalan o pumili ng isa pang bagong timestamp kung saan ito nagko-commute, hindi kailanman ang parehong timestamp na may ibang pangalan. Kung ang tseke mismo ay hindi maaaring tumakbo, ang gate ay nabigo sa CI at nagbabala lamang sa lokal. Para sa isang na-edit na base file, ang na-upgrade na database ay binuo gamit ang nilalaman ng base ng file na iyon, at nilalaktawan ito ng pangalawang boot dahil naitala na ang bersyon nito. Para sa pinalitan ng pangalan na file, ang na-upgrade na database ay binuo gamit ang file sa ilalim ng lumang pangalan nito, at ang pangalawang boot ay naglilipat ng `_omniroute_migrations` row nito sa compatibility entry sa halip na patakbuhin itong muli; ipinapasa ng gate ang bagong pangalan na may `--must-not-apply`, kaya nabigo ang tseke kung ilalapat ito ng pangalawang boot. Kung ang isang pull request migration ay hindi mailapat sa na-upgrade na landas, iyon ay, pagkatapos ng bawat base migration (mabigo man ito o hindi sa isang bagong pag-install), ang gate ay nag-uulat `migration do PR não aplica` at humihiling sa iyo na ayusin ang SQL laban sa kasalukuyang schema ng base; kung ang file ay nakasalalay sa isa pang pull request migration na may mas huling timestamp, muling buuin ang pangalan nito gamit ang `npm run db:new-migration`.
+
+Upang patakbuhin ang parehong paghahambing nang lokal, tahasang ipasa ang base, halimbawa `npm run check:migration-numbering -- --base origin/<base-branch>`, o `npm run check:migration-numbering -- --base-latest-tag` upang ihambing sa pinakabagong release.
+
+### Pag-convert ng isang Open PR's `NNN` Migration
+
+Ang isang pull request na binuksan bago ang switch ay maaari pa ring magdala ng sequential file gaya ng `242_add_widgets.sql`. Ang mga lumang numero sa itaas ng `241` ay tinanggihan, kaya i-convert ito bago pagsamahin:
+
+1. **Palitan ang pangalan ng file gamit ang generator, pinapanatili ang paglalarawan.** Patakbuhin ang `npm run db:new-migration -- <same description>` upang makuha ang bagong pangalan, ilipat ang SQL dito, at tanggalin ang lumang `NNN_` file. Ang paglalarawan ay dapat manatiling magkapareho: ang compatibility entry sa ibaba ay tumutugma dito.
+2. **Magdagdag ng compatibility entry kung ang isang persistent database ay nagpatakbo ng lumang numero.** Kung ang anumang database na pinapanatili (homolog, isang VPS, sariling pag-install ng isang contributor) ay nagpatakbo ng isang build ng PR gamit ang `NNN_` file, idagdag `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` sa `RENAMED_MIGRATION_COMPATIBILITY` sa `src/lib/db/migrationRunner/constants.ts`. Ito ay** kinakailangan para sa `237` hanggang `241`** : hawak na ngayon ng mga puwang na iyon ang canonical `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` at `241_seen_models.sql`, at kung wala ang entry ay nilalaktawan ng naturang database ang canonical migration magpakailanman at pinapatakbo muli ang na-convert. Gumagana rin ito para sa isang slot na nananatiling walang laman, gaya ng `242`, kapag ang destinasyon ay isang timestamp. Kapag may pagdududa, idagdag ang entry. Kung saan mo ito idaragdag sa array ay hindi mahalaga: kapag may hawak pa ring row ang target na slot ng entry na inilalayo ng isa pang entry (halimbawa `237` na may hawak na PR row habang naghihintay ang isang mas lumang `usage_history_calculated_cost` row na lumipat sa `237`), hinahayaan ng runner ang entry na iyon na maghintay hanggang sa libre ang slot. Tanging isang tunay na salungatan, tulad ng isang slot na hawak ng isang row na walang entry na gumagalaw, o dalawang entry na nagpapalitan ng mga slot, ang humihinto sa boot gamit ang `Cannot reconcile ...`.
+3. **Panatilihin ang SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), dahil maaaring matugunan ng na-convert na paglipat ang isang database kung saan umiiral na ang schema nito.
+4. **Ilipat ang mga espesyal na case na naka-key sa bersyon.** Kung nagdagdag ang PR ng case para sa lumang numero nito sa `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) o sa `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), baguhin ang key sa bagong timestamp.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` ay isang gumaganang halimbawa ng isang pagsubok para sa isang muling pinangalanang paglipat.
+
+### Mga Backport sa Mga Sangay Bago ang Paglipat
+
+Huwag kailanman mag-cherry-pick o mag-backport ng `YYYYMMDDHHMMSS_` file sa isang branch na nauna sa switch (halimbawa, isang mas lumang `release/v*` branch). Ang runner doon ay nag-uuri ng mga pangalan ng file bilang teksto, kaya ang isang timestamped na file ay tatakbo sa pagitan ng `201_` at `202_` sa isang bagong database, at ang lumang gate doon ay hindi nakakaintindi ng 14-digit na prefix. Sa naturang sangay, isulat ang pagbabago bilang sariling susunod na `NNN_` file ng sangay na iyon, idempotent, kaya ito ay isang no-op kapag dumating ang timestamped na bersyon sa ibang pagkakataon.
+
+### Paano Tumatakbo ang Migrations
+
+Sa pagsisimula, `migrationRunner.ts`:
+
+1. Lumilikha ng `_omniroute_migrations` table kung wala
+2. Mga query para sa na-apply na migration
+3. Inilalapat ang anumang mga bagong paglipat sa pagkakasunud-sunod, bawat isa sa isang transaksyon
+4. Itinatala ang bawat inilapat na paglipat gamit ang timestamp
 
 ```ts
-// src/lib/db/migrationRunner.ts (pinasimple)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Idempotency
+### Idepotency
 
-Dapat ay **idempotent** ang mga migrasyon — ang pagpapatakbo sa mga ito nang dalawang beses ay hindi dapat magkaroon ng anumang epekto:
+Ang mga migrasyon ay dapat** idempotent** — na nagpapatakbo sa kanila ng dalawang beses ay dapat na isang no-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Malayang gumamit ng mga clause na `IF NOT EXISTS`, `IF EXISTS`, at `OR IGNORE` / `OR REPLACE`.
+Gumamit `IF NOT EXISTS`, `IF EXISTS`, at `OR IGNORE` / `OR REPLACE` clause nang malaya.
 
-### Pagdaragdag ng Bagong Migrasyon
+### Pagdaragdag ng Bagong Migration
 
-1. **Tukuyin ang susunod na numero**: `ls src/lib/db/migrations/ | tail -1`
-2. **Gawin ang file**: `NNN_my_change.sql`
-3. **Gumamit ng ligtas na DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Maingat na mag-backfill ng data**: gamitin ang `UPDATE ... WHERE ...` upang mapangasiwaan ang mga umiiral na row
-5. **Subukan sa isang kopya**: huwag kailanman magpatakbo ng mga hindi pa nasusubukang migrasyon sa production
+1. **Lumikha ng file gamit ang generator** : `npm run db:new-migration -- <description>` (halimbawa `npm run db:new-migration -- add combo priority`). Nagsusulat ito ng `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` kasama ang kasalukuyang oras UTC at isang header ng komento, sumusulong ng isang segundo kung kinuha ang timestamp na iyon, at hindi kailanman na-overwrite ang isang file. Huwag pumili ng numero sa pamamagitan ng kamay.
+2. **Gumamit ng ligtas DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Maingat na i-backfill ang data** : gumamit `UPDATE ... WHERE ...` para pangasiwaan ang mga umiiral nang row
+4. **Suriin ang pagkakasunud-sunod at pagpapangalan** : `npm run test:migrations:fresh` (lahat ng paglilipat sa isang walang laman na database) at `npm run check:migration-numbering`
+5. **Subukan sa isang kopya** : hindi kailanman magpatakbo ng mga hindi pa nasusubukang paglilipat sa produksyon
+6. **Ang isang talahanayan na ginawa mula sa code ay nangangailangan din ng paglipat** : kung ang isang module ay lumilikha din ng talahanayan nang tamad (`CREATE TABLE IF NOT EXISTS`, pinananatili bilang isang self-heal path), dapat itong gawin ng isang migration na may parehong DDL. Kung hindi, ang isang malinis na pag-install at isang na-upgrade na pag-install ay magtatapos sa iba't ibang mga schema, depende sa kung tumakbo ang path ng code na iyon. Ini-scan ng `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` at `open-sse/` at nabigo sa isang tamad `CREATE` nang walang paglipat (#20557). Halimbawa: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Halimbawa:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Mahirap pangasiwaan ang mga pagbabagong hindi backward-compatible** (hal., pag-aalis ng mga column). HINDI sinusuportahan ng OmniRoute ang downgrade — kapag nailapat na ang isang migrasyon, permanente na ang pagbabago sa schema. Magplano nang naaayon.
+> **Paatras-hindi tugmang mga pagbabago** (hal., pag-drop ng mga column) ay nakakalito. Sinusuportahan ba NOT OmniRoute ang pag-downgrade — kapag nailapat ang paglipat, permanente ang pagbabago ng schema. Magplano nang naaayon.
 
 ---
 
@@ -403,26 +467,27 @@ Ginagamit nito ang online backup API ng SQLite — ligtas itong patakbuhin haban
 
 ---
 
-## Pag-tune ng Performance
+## Pag-tune ng Pagganap
 
 ### WAL Mode
 
-Naka-enable ang WAL bilang default. Para sa mga workload na maraming pagsusulat, isaalang-alang ang:
+WAL ay pinagana bilang default. Para sa mga high-write workload, isaalang-alang ang:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Mag-checkpoint bawat 1000 page
-PRAGMA journal_size_limit = 67108864;  -- 64MB na limitasyon ng WAL
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### Mga Index
+hindi itinatakda OmniRoute `journal_size_limit`. Ang isang checkpoint ay naglilipat ng mga WAL frame sa pangunahing file, ngunit pinapanatili ng WAL file ang pinakamalaking inilaan na laki nito. Ang `OMNIROUTE_WAL_GUARD_MAX_MB` guard ay nagbabala lamang at nagpapatakbo `wal_checkpoint(RESTART)`; hindi ito isang takip sa laki ng disk.
 
-Mahahalagang index para sa performance (awtomatikong ginagawa ng mga migration):
+### Mga index
 
-- `idx_models_provider` — paghahanap ng modelo ayon sa provider
-- `idx_combo_targets_combo_id` — pagpapalawak ng combo target
-- `idx_usage_history_api_key_timestamp` — analytics ng paggamit
+Mga pangunahing index para sa pagganap (awtomatikong ginawa ng mga paglilipat):
+
+- `idx_models_provider` — model lookup ng provider
+- `idx_combo_targets_combo_id` — combo na pagpapalawak ng target
+- pagsusuri ng paggamit `idx_usage_history_api_key_timestamp` —
 - `idx_quota_snapshots_api_key_window` — pagsubaybay sa quota
-- `idx_call_logs_timestamp` — mga query sa call log
+- `idx_call_logs_timestamp` — na mga query sa log ng tawag
 
 Para magdagdag ng bagong index, gumawa ng migration:
 
@@ -433,22 +498,22 @@ CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 
 ### Memory-Mapped I/O
 
-Para sa napakalalaking database (>10GB), maaaring isaayos ang memory mapping sa pamamagitan ng SQLite pragma:
+Para sa napakalaking database (> 10GB), ang memory mapping ay maaaring isaayos sa pamamagitan ng SQLite pragma:
 
 ```sql
--- Itakda sa pamamagitan ng SQLite pragma (isaayos sa core.ts o runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Compaction
 
-Nakikinabang ang matagal nang tumatakbong mga instance ng OmniRoute sa paminsan-minsang `VACUUM`:
+Nakikinabang ang mga matagal nang OmniRoute instance mula sa paminsan-minsang `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Patakbuhin buwan-buwan sa mga panahong mababa ang traffic. (Binabawasan ng WAL mode ang pangangailangan, ngunit hindi nito ganap na inaalis iyon.)
+Patakbuhin buwan-buwan sa mga window na mababa ang trapiko. ( Binabawasan WAL mode ang pangangailangan, ngunit hindi ito inaalis.)
 
 ---
 

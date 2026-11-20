@@ -116,33 +116,10 @@ Origin dipadankan tanpa mengira huruf besar atau kecil dan garis miring di hujun
 boleh ditetapkan pada masa jalan melalui **Dashboard → Security → CORS Allowed Origins** tanpa
 memulakan semula.
 
-## Kunci API berbanding sesi kuki
+## kunci API vs sesi kuki
 
-- **Bearer / `x-api-key` (permukaan inferens `/v1/*`):** pelayar tidak akan melampirkannya
-  secara automatik. CORS bukan penghalang yang bermakna di sini — kunci API ialah
-  penghalangnya — sebab itulah permukaan tersebut sengaja dibuat permisif supaya klien pelayar dan
-  Electron boleh membaca respons yang sememangnya mereka berhak terima.
-  Pantulan yang dilonggarkan mengikut kunci yang telah disahkan, bukan sekadar kehadiran
-  pengepala: apabila `REQUIRE_API_KEY=false` melayan permintaan secara tanpa nama,
-  respons yang berjaya mengekalkan senarai benar fail-closed. Penolakan pengesahan (401)
-  kekal boleh dibaca supaya klien dapat memaparkan kunci yang dibatalkan atau tersalah
-  taip (#5242): 401 milik saluran paip itu sendiri mengekalkan pantulan, dan laluan yang
-  menolak kunci itu sendiri selepas saluran paip melayannya sebagai tanpa nama
-  (`/v1/models` dan `/v1beta/models` apabila pengesahan pengurusan dikonfigurasi, laluan
-  berskop pemilik `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` dan
-  laluan calon auto-combo) menambah pantulan pada 401 tersebut melalui
-  `credentialRejectionHeaders()`. Pantulan ditentukan oleh sama ada permintaan membawa
-  pengepala bukti kelayakan (`Authorization`, `x-api-key`, `x-goog-api-key` atau kuki
-  `auth_token`), bukan oleh yang mana satu disemak oleh laluan, dan tidak pernah
-  dipasangkan dengan `Access-Control-Allow-Credentials`; badannya ialah sampul ralat
-  yang tetap. Laluan pengurusan di bawah `/api/v1/` yang dikawal oleh
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) tidak
-  menambah pantulan: dengan `REQUIRE_API_KEY=false`, 401/403 laluan tersebut tidak boleh
-  dibaca merentas origin.
-- **Sesi kuki (papan pemuka):** dilindungi oleh lalai tutup-jika-gagal **dan**
-  oleh ketiadaan `Access-Control-Allow-Credentials` pada laluan dikongsi. Jangan
-  masukkan origin pengurusan/papan pemuka dalam sebarang konfigurasi permisif; origin tersebut mesti kekal
-  tutup-jika-gagal sepenuhnya.
+- **Pembawa / `x-api-key` (permukaan inferens `/v1/*` ):** pelayar tidak pernah melampirkan ini secara automatik. CORS bukanlah penghalang yang bermakna di sini — kunci API ialah penghalang — itulah sebabnya permukaan itu sengaja permisif supaya pelayar dan pelanggan Electron boleh membaca respons yang mereka sudah berhak menerimanya. Gema santai mengikut kekunci yang disahkan, bukan kehadiran pengepala semata-mata: apabila `REQUIRE_API_KEY=false` menyampaikan permintaan tanpa nama, respons yang berjaya mengekalkan senarai dibenarkan yang gagal ditutup. Penolakan pengesahan (401) kekal boleh dibaca supaya pelanggan boleh memaparkan kunci yang dibatalkan atau tersilap taip (#5242): saluran paip itu sendiri 401 menyimpan gema, dan laluan yang menolak kunci itu sendiri selepas saluran paip menyampaikannya sebagai awanama (`/v1/models` dan `/v1beta/models` dengan pengesahan pengurusan dikonfigurasikan, laluan `/v1/files`, `/v1/session-leases` ) yang diskop pemilik, `/v1/batches`, `/v1/media` com , zbon skop pemilik bergema ke 401 itu melalui `credentialRejectionHeaders()`. Gema dikunci pada permintaan yang membawa pengepala bukti kelayakan (`Authorization`, `x-api-key`, `x-goog-api-key` atau kuki `auth_token` ), bukan pada laluan yang diperiksa dan tidak pernah digandingkan dengan `Access-Control-Allow-Credentials`; badan adalah sampul ralat tetap. Laluan pengurusan di bawah `/api/v1/` dikawal oleh `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) jangan tambah gema: dengan `REQUIRE_API_KEY=false` 401/403 mereka tidak boleh dibaca asal silang.
+- **Sesi kuki (papan pemuka):** dilindungi oleh lalai gagal tertutup** dan** dengan ketiadaan `Access-Control-Allow-Credentials` di jalan yang dikongsi. Jauhkan asal management/dashboard daripada sebarang konfigurasi permisif; mereka mesti kekal betul-betul tertutup.
 
 ## Jabat tangan WebSocket (`/v1/responses`, `/v1/ws`)
 

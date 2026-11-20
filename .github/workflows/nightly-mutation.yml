@@ -15,7 +15,7 @@ jobs:
     # Mutation testing is expensive. History of the budget:
     #   - Full 8-module set TIMED OUT at the 180min cap (run 27705123780 = exactly 180min).
     #     The two god-files chatCore.ts/combo.ts dominated ~2/3 of the mutants and were
-    #     removed from stryker.conf.json `mutate`.
+    #     removed from stryker.conf.mjs `mutate`.
     #   - The remaining 6 modules in 3 batches: auth.ts and accountFallback.ts are large; the
     #     a (auth+publicCreds) and b (accountFallback+error) batches still ran near the 180min
     #     cap (the perTest dry-run over ~130 covering test files is itself costly), so the two
@@ -29,7 +29,7 @@ jobs:
     #     tests (no mock.module — fetch-override + crafted inputs + temp-DATA_DIR) for telemetryHelpers
     #     + memorySkillsInjection + semanticCache (its cache-HIT block now has a setCachedResponse
     #     fixture) as batch i — ALL 15/15 chatCore leaves are now mutated. See
-    #     _mutate_godfiles_excluded_comment in stryker.conf.json.
+    #     the comment above MUTATE in stryker.conf.mjs.
     # 9 PARALLEL batches, each overriding the mutate set via `--mutate` (Stryker 9 CLI:
     # `-m, --mutate <comma-list>`; the conf's `mutate[]` remains the local-run default/union).
     #   - Cold-seeding budget (per-batch `timeout-minutes: ${{ matrix.batch.timeout || 180 }}`):
@@ -48,7 +48,7 @@ jobs:
     #     sub-batch's own incremental cache, after which nightlies re-test only changed mutants.
     # Full coverage every night in parallel; wall-clock = the slowest batch's cold run until seeded.
     # Runs at stryker concurrency=4 with per-process DATA_DIR isolation
-    # (tests/_setup/isolateDataDir.ts) — see _concurrency_comment in stryker.conf.json.
+    # (tests/_setup/isolateDataDir.ts) — see the concurrency comment in stryker.conf.mjs.
     strategy:
       fail-fast: false
       matrix:

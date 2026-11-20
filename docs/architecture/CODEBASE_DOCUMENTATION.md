@@ -591,7 +591,7 @@ Streaming primitives and provider helpers: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
+`cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
 `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
 `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
 `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
@@ -705,10 +705,10 @@ Organized into 6 subfolders by purpose.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
 - **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
   `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`, `i18n_autotranslate.py`,
+  `validate_translation.py`, `check_translations.py`,
   `untranslatable-keys.json`.
 - **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `migrate-env.mjs`, `dbsetup.js`.
+  `dbsetup.js`.
 
 ---
 
@@ -783,8 +783,9 @@ See [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) and the dedicated section in
 
 1. Create `src/lib/db/yourModule.ts` and import `getDbInstance()` from `./core.ts`.
 2. Export CRUD functions for your domain.
-3. If new tables: add a migration under `src/lib/db/migrations/`, numbered
-   sequentially, idempotent, transactional.
+3. If new tables: add a migration with `npm run db:new-migration -- <description>` (writes
+   `src/lib/db/migrations/YYYYMMDDHHMMSS_<description>.sql`, UTC; see
+   `docs/ops/DATABASE_GUIDE.md`), idempotent, transactional.
 4. Importers use direct imports from `@/lib/db/yourModule` (no barrel — the old `localDb.ts` re-export layer was removed).
 5. Add tests under `tests/unit/`.
 
