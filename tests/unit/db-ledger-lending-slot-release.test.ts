@@ -222,19 +222,21 @@ test(
 );
 
 test("existing generic TTL is kept when 124 replays late", { skip }, (t) => {
-  const { db } = boot(t, OLDEST, {}, (d) =>
+  const { db, applied } = boot(t, OLDEST, {}, (d) =>
     d.exec("INSERT INTO key_value VALUES ('settings','sessionAffinityTtlMs','60000')")
   );
+  assert.equal(applied, 4);
   assert.equal(ttl(db), "60000");
 });
 
 test("modern override wins when 135 replays late", { skip }, (t) => {
-  const { db } = boot(t, OLDEST, {}, (d) =>
+  const { db, applied } = boot(t, OLDEST, {}, (d) =>
     d.exec(
       "INSERT INTO model_capability_overrides (provider, model_id, override_key, override_value) " +
         "VALUES ('openai','gpt-x','max_output_tokens','8192')"
     )
   );
+  assert.equal(applied, 4);
   assert.deepEqual(
     db.prepare("SELECT override_key, override_value FROM model_capability_overrides").all(),
     [{ override_key: "max_output_tokens", override_value: "8192" }]
