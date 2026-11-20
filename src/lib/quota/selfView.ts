@@ -213,6 +213,10 @@ async function resolvePoolContext(
   if (!provider || provider === UNKNOWN_PROVIDER) return null;
   if (!sameProviderFamily(provider, input.provider)) return null;
 
+  const connectionIds = pool.connectionIds?.length ? pool.connectionIds : [pool.connectionId];
+  const accountVisible =
+    hasSelfAccountQuotaScope(input.scopes) &&
+    isProviderShared(provider, input.sharedQuotaProviders);
   return {
     pool,
     allocation,
@@ -220,11 +224,31 @@ async function resolvePoolContext(
     ref: buildPoolRef(input.apiKeyId, pool.id, deps.secret),
     plan,
     effectiveWeight: gateEffectiveWeight(pool, allocation),
-    connectionIds: pool.connectionIds?.length ? pool.connectionIds : [pool.connectionId],
-    accountVisible:
-      hasSelfAccountQuotaScope(input.scopes) &&
-      isProviderShared(provider, input.sharedQuotaProviders),
+    connectionIds,
+    accountVisible,
+    accountConnectionIds: accountConnectionIdsOf(
+      connectionIds,
+      accountVisible,
+      input.allowedConnections
+    ),
   };
+}
+
+/**
+ * The pool connections whose account data the key may see: none without account visibility,
+ * otherwise the pool's connections, limited to the key's allowed connections when it has any
+ * (an absent or empty list is no restriction, as in /v1/me/status).
+ */
+function accountConnectionIdsOf(
+  connectionIds: string[],
+  accountVisible: boolean,
+  allowedConnections: string[] | undefined
+): string[] {
+  if (!accountVisible) return [];
+  const allowed = (allowedConnections ?? []).filter((id) => typeof id === "string" && id);
+  if (allowed.length === 0) return connectionIds;
+  const allowedSet = new Set(allowed);
+  return connectionIds.filter((id) => allowedSet.has(id));
 }
 
 /** The key's pools for the provider, in creation order (then name). */
@@ -308,10 +332,11 @@ function allocationCap(allocation: PoolAllocation): SelfQuotaPool["cap"] {
 }
 
 /**
- * Account entries for the pool's own connections, or null when the key may not see them.
- * A failed lookup is an empty list (every account reported unavailable) and a server-side warning
- * (the error stays in the log, never in the view). Never called with an empty id list:
- * resolveAccountQuotaEntries would read every active connection.
+ * Account entries for the pool connections the key may see (`accountConnectionIds`), or null
+ * when it may see none of the pool's accounts. A failed lookup is an empty list (those accounts
+ * reported unavailable) and a server-side warning (the error stays in the log, never in the
+ * view). Never called with an empty id list: resolveAccountQuotaEntries would read every active
+ * connection.
  */
 async function resolvePoolAccountEntries(
   ctx: SelfViewPoolContext,
@@ -319,7 +344,7 @@ async function resolvePoolAccountEntries(
   deps: CoreDeps
 ): Promise<AccountQuotaEntryLike[] | null> {
   if (!ctx.accountVisible) return null;
-  const allowedConnections = ctx.connectionIds.filter((id) => typeof id === "string" && id);
+  const allowedConnections = ctx.accountConnectionIds.filter((id) => typeof id === "string" && id);
   if (allowedConnections.length === 0) return [];
   try {
     return await deps.resolveAccountQuotaEntries({

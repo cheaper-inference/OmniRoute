@@ -28,6 +28,11 @@ export interface QuotaSelfViewInput {
   allowedQuotas: string[];
   expiresAt: string | null;
   sharedQuotaProviders: string[] | null;
+  /**
+   * The connections the key may use, read as /v1/me/status reads them: an absent or empty list
+   * is no restriction, otherwise only these ids. Account data of other connections is not shown.
+   */
+  allowedConnections?: string[];
   /** Lowercased provider id from the request path. */
   provider: string;
 }
@@ -68,4 +73,6 @@ export interface SelfViewPoolContext {
   effectiveWeight: number;
   connectionIds: string[];
   accountVisible: boolean;
+  /** The pool connections whose account data this key may see (empty when none). */
+  accountConnectionIds: string[];
 }

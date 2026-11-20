@@ -50,6 +50,7 @@ function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput 
     apiKeyId: key.id,
     scopes: key.scopes,
     allowedQuotas: key.allowedQuotas,
+    allowedConnections: key.allowedConnections,
     expiresAt: key.expiresAt,
     sharedQuotaProviders: getApiKeySelfServiceSettings(key.id).sharedQuotaProviders,
     provider,

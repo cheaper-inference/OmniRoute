@@ -12,7 +12,8 @@
  *
  * Account-level data (the `account` bar and `modelWindows`) comes only from the cached
  * provider-limits entries the caller passes in (`entries`); `entries === null` means the key may
- * not see account data, and those fields are omitted. A window the cache does not report is
+ * not see account data, and those fields are omitted. They are also omitted for a pool
+ * connection outside `ctx.accountConnectionIds` (one the key may not use); its entry stays. A window the cache does not report is
  * `unavailable` / `window_not_reported`, never 0. A stale cached reading, or one whose `resetAt`
  * is already before `now` (the window reset since it was read), is `stale` with its numbers kept.
  *
@@ -155,17 +156,18 @@ export function buildSelfViewAccounts(
   entries: AccountQuotaEntryLike[] | null,
   now: number
 ): SelfQuotaAccount[] {
-  const poolConnections = new Set(ctx.connectionIds);
+  const visibleConnections = new Set(ctx.accountConnectionIds);
   const byConnection = new Map<string, AccountQuotaEntryLike>();
   for (const entry of entries ?? []) {
-    if (poolConnections.has(entry.connectionId) && !byConnection.has(entry.connectionId)) {
+    if (visibleConnections.has(entry.connectionId) && !byConnection.has(entry.connectionId)) {
       byConnection.set(entry.connectionId, entry);
     }
   }
   const percentDimensions = (ctx.plan.dimensions ?? []).filter(isPercentDimension);
 
   return ctx.connectionIds.map((connectionId, index) => {
-    const state = entries === null ? null : entryState(byConnection.get(connectionId));
+    const visible = entries !== null && visibleConnections.has(connectionId);
+    const state = visible ? entryState(byConnection.get(connectionId)) : null;
     const account: SelfQuotaAccount = {
       slot: index + 1,
       label: `Account ${index + 1}`,

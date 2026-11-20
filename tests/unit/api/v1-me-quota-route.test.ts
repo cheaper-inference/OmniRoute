@@ -49,10 +49,12 @@ let accountKey = { id: "", key: "" };
 test.before(async () => {
   const a = await apiKeysDb.createApiKey("self-quota-scoped", "test-machine", [SELF_USAGE_SCOPE]);
   const b = await apiKeysDb.createApiKey("self-quota-unscoped", "test-machine", []);
-  const c = await apiKeysDb.createApiKey("self-quota-account", "test-machine", [
-    SELF_USAGE_SCOPE,
-    SELF_ACCOUNT_QUOTA_SCOPE,
-  ]);
+  const c = await apiKeysDb.createApiKey(
+    "self-quota-account",
+    "test-machine",
+    [SELF_USAGE_SCOPE, SELF_ACCOUNT_QUOTA_SCOPE],
+    { allowedConnections: ["conn-allowed-1"] }
+  );
   scoped = { id: a.id, key: a.key };
   unscoped = { id: b.id, key: b.key };
   accountKey = { id: c.id, key: c.key };
@@ -177,7 +179,7 @@ test("the builder receives the calling key's identity and sharing settings", asy
   );
 });
 
-test("the builder receives the key's scopes, quotas, expiry, sharing list and the server secret", async () => {
+test("the builder receives the key's scopes, quotas, connections, expiry, sharing list and secret", async () => {
   updateApiKeySelfServiceSettings(accountKey.id, { sharedQuotaProviders: ["claude"] });
   const { seen, buildView } = recordingBuilder();
   const res = await call("  CC ", bearer(accountKey.key), { buildView });
@@ -186,6 +188,7 @@ test("the builder receives the key's scopes, quotas, expiry, sharing list and th
     apiKeyId: accountKey.id,
     scopes: [SELF_USAGE_SCOPE, SELF_ACCOUNT_QUOTA_SCOPE],
     allowedQuotas: [],
+    allowedConnections: ["conn-allowed-1"],
     expiresAt: null,
     sharedQuotaProviders: ["claude"],
     // Trimmed, lower-cased and alias-resolved (cc is the registry alias of claude).

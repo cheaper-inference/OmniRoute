@@ -303,3 +303,57 @@ test("two entries for the same connection: the first one wins", () => {
   );
   assert.deepEqual(account.dimensions[0].account, { used: 40, status: "ok", resetAt: R1 });
 });
+
+/** Two-account pools, an account lookup that records what it is asked for, both scopes. */
+async function viewWithAllowedConnections(allowedConnections: string[] | undefined) {
+  const asked: string[][] = [];
+  const deps = makeDeps({
+    pool: { connectionIds: ["conn-secret-1", "conn-secret-2"] },
+    plan: PERCENT_PLAN,
+    resolveAccountQuotaEntries: async (m) => {
+      asked.push(m.allowedConnections);
+      return m.allowedConnections.map((connectionId) => ({ connectionId, quotas: CACHE }));
+    },
+  });
+  const view = await buildQuotaSelfView(input({ scopes: BOTH, allowedConnections }), deps);
+  return { asked, accounts: view.pools[0].accounts };
+}
+
+const hasAccountData = (account: { dimensions: object[]; modelWindows?: object }) =>
+  "modelWindows" in account || account.dimensions.some((d) => "account" in d);
+
+test("a key's allowed connections limit its account bars; other accounts keep their entry", async () => {
+  const { asked, accounts } = await viewWithAllowedConnections(["conn-secret-2", "conn-other"]);
+  assert.deepEqual(asked, [["conn-secret-2"], ["conn-secret-2"]]);
+  assert.deepEqual(
+    accounts.map((a) => [a.label, hasAccountData(a)]),
+    [
+      ["Account 1", false],
+      ["Account 2", true],
+    ]
+  );
+  assert.equal(accounts[1].dimensions[0].account?.used, 40);
+});
+
+test("an absent or empty allowed-connections list is no restriction, as in /v1/me/status", async () => {
+  for (const allowed of [undefined, []]) {
+    const { asked, accounts } = await viewWithAllowedConnections(allowed);
+    assert.deepEqual(asked[0], ["conn-secret-1", "conn-secret-2"]);
+    assert.deepEqual(
+      accounts.map((a) => hasAccountData(a)),
+      [true, true]
+    );
+  }
+});
+
+test("allowed connections that exclude every pool account ask for nothing and show no bar", async () => {
+  const { asked, accounts } = await viewWithAllowedConnections(["conn-other"]);
+  assert.deepEqual(asked, []);
+  assert.deepEqual(
+    accounts.map((a) => [a.label, hasAccountData(a)]),
+    [
+      ["Account 1", false],
+      ["Account 2", false],
+    ]
+  );
+});

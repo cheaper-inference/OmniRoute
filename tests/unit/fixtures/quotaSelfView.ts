@@ -130,9 +130,10 @@ export const PERCENT_PLAN = {
   source: "auto",
 } as ProviderPlan;
 
+/** By default the key may see the account data of every pool connection when visible. */
 export function ctx(over: Partial<SelfViewPoolContext> = {}): SelfViewPoolContext {
   const pool = basePools().find((p) => p.id === "pool-a-id") as QuotaPool;
-  return {
+  const merged = {
     pool,
     allocation: pool.allocations[0],
     provider: "claude",
@@ -142,5 +143,10 @@ export function ctx(over: Partial<SelfViewPoolContext> = {}): SelfViewPoolContex
     connectionIds: ["conn-secret-1"],
     accountVisible: true,
     ...over,
+  };
+  return {
+    ...merged,
+    accountConnectionIds:
+      over.accountConnectionIds ?? (merged.accountVisible ? merged.connectionIds : []),
   };
 }

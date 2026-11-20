@@ -19,6 +19,8 @@ export interface SelfServiceKey {
   name: string;
   scopes: string[];
   allowedQuotas: string[];
+  /** As stored on the key: an empty list means no restriction. */
+  allowedConnections: string[];
   expiresAt: string | null;
 }
 
@@ -33,6 +35,7 @@ type KeyMetadata = {
   name: string;
   scopes?: string[] | null;
   allowedQuotas?: string[] | null;
+  allowedConnections?: string[] | null;
   expiresAt?: string | null;
 };
 
@@ -83,6 +86,9 @@ function toSelfServiceKey(metadata: KeyMetadata): SelfServiceKey {
     name: metadata.name,
     scopes: Array.isArray(metadata.scopes) ? [...metadata.scopes] : [],
     allowedQuotas: Array.isArray(metadata.allowedQuotas) ? [...metadata.allowedQuotas] : [],
+    allowedConnections: Array.isArray(metadata.allowedConnections)
+      ? [...metadata.allowedConnections]
+      : [],
     expiresAt: metadata.expiresAt ?? null,
   };
 }
