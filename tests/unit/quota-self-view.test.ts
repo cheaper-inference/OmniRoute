@@ -167,3 +167,9 @@ test("refuses a key without self:usage and never leaks internal ids", async () =
   for (const otherKey of ["key-b", "key-c"]) assert.ok(!json.includes(otherKey));
   assert.doesNotThrow(() => selfQuotaResponseSchema.parse(JSON.parse(json)));
 });
+
+test("the view reports the public API origin it is given, or null", async () => {
+  const deps = makeDeps({ resolvePublicApiBaseUrl: () => "https://api.example.com" });
+  assert.equal((await buildQuotaSelfView(input(), deps)).apiBaseUrl, "https://api.example.com");
+  assert.equal((await buildQuotaSelfView(input(), makeDeps())).apiBaseUrl, null);
+});

@@ -18,7 +18,8 @@
  * `blocks` (selfViewBlocks.ts) lists the schedule windows and per-model caps the key is under,
  * each naming its pool only by `ref`. `availableModels` is the list of `qtSd/` model ids the key
  * would see in /v1/models (listQuotaKeyModels; a failed lookup is an empty list) and `expiresAt`
- * is the key's own expiry, passed in by the caller.
+ * is the key's own expiry, passed in by the caller. `apiBaseUrl` is the configured public API
+ * origin (resolvePublicApiBaseUrl), never the request's origin.
  *
  * A failed quota-store read is reported as `status: "unavailable"` with `consumed`/`remaining`
  * null, never as zero. Database reads of allocations and pools are not caught: a failure there
@@ -27,8 +28,9 @@
  * resolved that way is left out of the answer.
  *
  * The result goes through selfQuotaResponseSchema.parse(), so no pool id, connection id or
- * account identity leaves this module. The builder reads no request, header or environment
- * variable: the pool-ref secret comes in through `deps.secret`.
+ * account identity leaves this module. The builder reads no request or header, and no
+ * environment variable itself: the pool-ref secret comes in through `deps.secret`, and the
+ * default `resolvePublicApiBaseUrl` reads only the two public-origin variables it documents.
  */
 
 import { hasSelfAccountQuotaScope, hasSelfUsageScope } from "@/shared/constants/selfServiceScopes";
@@ -75,6 +77,7 @@ type CoreDeps = Required<
     | "listEnabledSchedules"
     | "listModelCapsForApiKey"
     | "listQuotaKeyModels"
+    | "resolvePublicApiBaseUrl"
   >
 > & { secret: string };
 
@@ -153,6 +156,13 @@ const DEFAULT_DEPS_LOADERS: Array<{
     load: async () => {
       const { listQuotaKeyModels } = await import("./quotaKeyModels");
       return { listQuotaKeyModels: (allowedQuotas) => listQuotaKeyModels(allowedQuotas) };
+    },
+  },
+  {
+    keys: ["resolvePublicApiBaseUrl"],
+    load: async () => {
+      const { resolvePublicApiBaseUrl } = await import("@/server/origin/publicApiBaseUrl");
+      return { resolvePublicApiBaseUrl: () => resolvePublicApiBaseUrl() };
     },
   },
 ];
@@ -413,7 +423,7 @@ export async function buildQuotaSelfView(
     pools,
     availableModels: await resolveAvailableModels(input, deps),
     expiresAt: input.expiresAt,
-    apiBaseUrl: null,
+    apiBaseUrl: deps.resolvePublicApiBaseUrl(),
     blocks: await buildSelfViewBlocks(input.apiKeyId, contexts, deps),
   });
 }

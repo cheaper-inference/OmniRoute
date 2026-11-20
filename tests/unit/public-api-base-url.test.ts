@@ -1,0 +1,32 @@
+/**
+ * resolvePublicApiBaseUrl: the API origin reported to key holders. The environment is passed in,
+ * so these tests never touch process.env.
+ */
+
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import { resolvePublicApiBaseUrl } from "../../src/server/origin/publicApiBaseUrl.ts";
+
+const r = (env: Record<string, string>) => resolvePublicApiBaseUrl(env as NodeJS.ProcessEnv);
+const APP = { OMNIROUTE_PUBLIC_BASE_URL: "https://app.example.com" };
+
+test("the API-specific origin wins, then the public base URL, then null", () => {
+  assert.equal(
+    r({ ...APP, OMNIROUTE_PUBLIC_API_BASE_URL: "https://api.example.com" }),
+    "https://api.example.com"
+  );
+  assert.equal(r(APP), "https://app.example.com");
+  assert.equal(r({ ...APP, OMNIROUTE_PUBLIC_API_BASE_URL: "  " }), "https://app.example.com");
+  assert.equal(r({}), null);
+  assert.equal(r({ NEXT_PUBLIC_BASE_URL: "http://localhost:20128" }), null);
+});
+
+test("values are reduced to scheme, host and port; an invalid API origin yields null instead of falling back", () => {
+  assert.equal(
+    r({ OMNIROUTE_PUBLIC_API_BASE_URL: " HTTPS://API.Example.com:8443/v1/?x=1#f " }),
+    "https://api.example.com:8443"
+  );
+  for (const bad of ["not a url", "ftp://api.example.com", "javascript:alert(1)"])
+    assert.equal(r({ ...APP, OMNIROUTE_PUBLIC_API_BASE_URL: bad }), null);
+});

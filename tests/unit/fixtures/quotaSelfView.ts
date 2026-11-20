@@ -114,6 +114,8 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
     listEnabledSchedules: () => [],
     listModelCapsForApiKey: () => [],
     listQuotaKeyModels: async () => [],
+    // No public API origin by default, so no test depends on the environment.
+    resolvePublicApiBaseUrl: () => null,
     ...rest,
   };
 }
