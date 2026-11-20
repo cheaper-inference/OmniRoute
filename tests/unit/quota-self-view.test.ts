@@ -3,7 +3,25 @@ import assert from "node:assert/strict";
 
 import { buildQuotaSelfView } from "../../src/lib/quota/selfView.ts";
 import { selfQuotaResponseSchema } from "../../src/shared/schemas/selfQuota.ts";
+import type { QuotaSchedule } from "../../src/lib/quota/schedules.ts";
 import { BOTH, alloc, input, makeDeps } from "./fixtures/quotaSelfView.ts";
+
+/** Open every day, all day (UTC), with a token budget: its state never depends on the clock. */
+const BUDGET_SCHEDULE: QuotaSchedule = {
+  id: "s-budget",
+  poolId: "pool-a-id",
+  days: [0, 1, 2, 3, 4, 5, 6],
+  startMinute: 0,
+  endMinute: 1440,
+  timezone: "UTC",
+  mode: "allow",
+  reserves: [],
+  budgetValue: 5,
+  budgetUnit: "tokens",
+  budgetWindow: "daily",
+  priority: 0,
+  enabled: true,
+};
 
 test("returns every pool of the provider the key is allocated in, under either provider name", async () => {
   const view = await buildQuotaSelfView(input(), makeDeps());
@@ -106,16 +124,32 @@ test("a failed pool total or store load is unavailable too", async () => {
     .dimensions;
   assert.deepEqual(dim.total, unavailable);
   assert.equal(dim.yourShare.status, "ok");
+  // Pool A also carries an open schedule with a budget and a model cap: both read the same
+  // (failed) store load, so their store-backed fields must be unknown, never false or 0.
   const noStore = makeDeps({
     getQuotaStore: async () => {
       throw new Error("store init failed");
     },
+    listEnabledSchedules: (poolId) => (poolId === "pool-a-id" ? [BUDGET_SCHEDULE] : []),
+    listModelCapsForApiKey: (poolId, apiKeyId) =>
+      poolId === "pool-a-id"
+        ? [{ poolId, apiKeyId, model: "claude-fable-5", capValue: 50, capUnit: "requests" }]
+        : [],
   });
-  const [lost] = (await buildQuotaSelfView(input({ scopes: BOTH }), noStore)).pools[0].dimensions;
+  const view = await buildQuotaSelfView(input({ scopes: BOTH }), noStore);
+  const [lost] = view.pools[0].dimensions;
   assert.deepEqual(lost.total, unavailable);
   assert.deepEqual(
     [lost.yourShare.consumed, lost.yourShare.remaining, lost.yourShare.status],
     [null, null, "unavailable"]
+  );
+  assert.deepEqual(
+    view.blocks.schedules.map((s) => [s.state, s.budget]),
+    [["open", { unit: "tokens", window: "daily", exhausted: null }]]
+  );
+  assert.deepEqual(
+    view.blocks.modelCaps.map((c) => [c.model, c.consumed, c.reached]),
+    [["claude-fable-5", null, null]]
   );
 });
 
