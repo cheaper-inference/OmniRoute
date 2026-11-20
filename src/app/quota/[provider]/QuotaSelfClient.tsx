@@ -27,7 +27,6 @@ function deriveScreen(query: SelfServiceQuery<SelfQuotaResponse>, stored: Stored
   const { status } = query;
   return {
     status,
-    refusedReason: query.status === "refused" ? query.reason : null,
     keyFormMode:
       status === "idle" || status === "refused" ? ("enter" as const) : ("active" as const),
     // While a refresh is in flight the last answer for the same key stays on screen.
@@ -52,14 +51,15 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
     schema: selfQuotaResponseSchema,
     refetchOnReturn: true,
   });
-  const { status, refusedReason, keyFormMode, view, storageBlocked } = deriveScreen(query, stored);
+  const { status, keyFormMode, view, storageBlocked } = deriveScreen(query, stored);
 
   // Storage follows the server's verdict on the current key: kept once accepted, dropped once
   // rejected. Both are mutations of the external key store, not React state.
   useEffect(() => {
     if (status === "ready") confirm();
-    else if (refusedReason === "invalid-key") unpersist();
-  }, [status, refusedReason, confirm, unpersist]);
+    // Any refusal (401 or 403): a key that cannot read its quota is not kept for the next visit.
+    else if (status === "refused") unpersist();
+  }, [status, confirm, unpersist]);
 
   const submitKey = (key: string, remember: boolean) => {
     hold(key, remember);
@@ -78,13 +78,12 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
           onRefresh={view ? reload : null}
         />
         <KeyForm
-          // A fresh form each time it opens: no draft or "remember" left over from the last key.
+          // A fresh form each time it opens: no error or "remember" left over from the last key.
           key={keyFormMode}
           mode={keyFormMode}
           maskedKey={apiKey ? formatApiKeyLast4(apiKey) : null}
           persistence={stored?.persistence ?? null}
           storageBlocked={storageBlocked}
-          busy={status === "loading"}
           onSubmit={submitKey}
           onForget={forget}
         />

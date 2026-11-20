@@ -20,7 +20,10 @@ export interface KeyStore {
   hold(key: string, remember: boolean): void;
   /** The server accepted the held key: write it where requested. Idempotent. */
   confirm(): void;
-  /** The server rejected the key: remove it from both storages, keep it in memory. */
+  /**
+   * The server rejected the key: remove it from the storages that hold it, keep it in memory.
+   * A different key another tab stored is left in place.
+   */
   unpersist(): void;
   /** Remove the key everywhere. */
   forget(): void;
@@ -100,12 +103,20 @@ function storageAccess(areas: KeyStorageAreas) {
 
   const readStorage = (): StoredKey | null => read("device") ?? read("session");
 
-  return { remove, write, read, readStorage, sweep };
+  /** Removes the entry of `name` only when it holds `key`. */
+  const removeKey = (name: StorageArea, key: string): void => {
+    const raw = readRaw(name);
+    if (raw === null) return;
+    const parsed = parseApiKeyInput(raw);
+    if ("key" in parsed && parsed.key === key) remove(name);
+  };
+
+  return { remove, removeKey, write, read, readStorage, sweep };
 }
 
 /** Keeps the API key of the self-service page in memory, and in browser storage once accepted. */
 export function createKeyStore(areas: KeyStorageAreas): KeyStore {
-  const { remove, write, read, readStorage, sweep } = storageAccess(areas);
+  const { remove, removeKey, write, read, readStorage, sweep } = storageAccess(areas);
   const listeners = new Set<() => void>();
   let snapshot: StoredKey | null = null;
   let loaded = false;
@@ -154,10 +165,11 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
       commit({ key: held.key, persistence: saved ? target : "memory", confirmed: true });
     },
     unpersist() {
-      remove("device");
-      remove("session");
       const held = current();
-      if (held) commit({ key: held.key, persistence: "memory", confirmed: true });
+      if (!held) return;
+      removeKey("device", held.key);
+      removeKey("session", held.key);
+      commit({ key: held.key, persistence: "memory", confirmed: true });
     },
     forget() {
       remove("device");

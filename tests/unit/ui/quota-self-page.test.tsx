@@ -6,6 +6,7 @@
 import React from "react";
 import axe from "axe-core";
 import { act, cleanup, fireEvent, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { selfQuotaResponseSchema } from "@/shared/schemas/selfQuota";
@@ -54,6 +55,11 @@ function enterKey(value: string, remember = false) {
   fireEvent.change(screen.getByLabelText("API key"), { target: { value } });
   if (remember) fireEvent.click(screen.getByLabelText("Remember on this device"));
   fireEvent.click(screen.getByRole("button", { name: "Show my quota" }));
+}
+
+/** The page moves the key in an effect after the screen shows the verdict: let it run. */
+async function storageEffects() {
+  await act(async () => {});
 }
 
 function storedValues(storage: Storage): string[] {
@@ -147,6 +153,7 @@ describe("self-service quota page", () => {
     renderPage();
     enterKey(KEY, true);
     expect(await screen.findByText("This key was not accepted")).toBeTruthy();
+    await storageEffects();
     expect(screen.getByLabelText("API key")).toBeTruthy();
     expect(window.sessionStorage.length).toBe(0);
     expect(window.localStorage.length).toBe(0);
@@ -271,6 +278,7 @@ describe("self-service quota page", () => {
     const calls = stubFetch({ [QUOTA]: () => jsonResponse({ error: "revoked" }, 401) });
     renderPage();
     expect(await screen.findByText("This key was not accepted")).toBeTruthy();
+    await storageEffects();
     const sent = callsTo(calls, QUOTA);
     expect(sent).toHaveLength(1);
     expect(sent[0].headers.get("Authorization")).toBe(`Bearer ${KEY}`);
@@ -285,7 +293,7 @@ describe("self-service quota page", () => {
       enterKey(KEY, true);
       expect(await screen.findByRole("heading", { name: "Pool A" })).toBeTruthy();
       expect(
-        screen.getByText(
+        await screen.findByText(
           "This browser blocked saving the key. It will work until you leave this page."
         )
       ).toBeTruthy();
@@ -332,5 +340,78 @@ describe("self-service quota page", () => {
     expect(await screen.findByRole("heading", { name: "Pool A" })).toBeTruthy();
     const loaded = await axe.run(container, rules);
     expect(loaded.violations.map((violation) => violation.id)).toEqual([]);
+  });
+
+  it("the typed key never reaches a DOM attribute", async () => {
+    const calls = stubFetch({});
+    const user = userEvent.setup();
+    renderPage();
+    const field = screen.getByLabelText("API key") as HTMLInputElement;
+    await user.type(field, KEY);
+    expect(field.value).toBe(KEY);
+    expect(field.getAttribute("value")).toBeNull();
+    expect(document.body.innerHTML).not.toContain(KEY);
+    expect(callsTo(calls, QUOTA)).toHaveLength(0);
+  });
+
+  it("a key refused on the page stays editable, out of the DOM, and editing clears the error", async () => {
+    const calls = stubFetch({});
+    const user = userEvent.setup();
+    renderPage();
+    const field = screen.getByLabelText("API key") as HTMLInputElement;
+    await user.type(field, "sk live");
+    await user.click(screen.getByRole("button", { name: "Show my quota" }));
+    const malformed = "That does not look like an API key. Paste it exactly as you received it.";
+    expect(screen.getByText(malformed)).toBeTruthy();
+    expect(field.value).toBe("sk live");
+    expect(field.getAttribute("value")).toBeNull();
+    expect(document.body.innerHTML).not.toContain("sk live");
+
+    await user.type(field, "x");
+    expect(screen.queryByText(malformed)).toBeNull();
+    expect(callsTo(calls, QUOTA)).toHaveLength(0);
+  });
+
+  it("a remembered key that answers 403 leaves the device and the form comes back", async () => {
+    window.localStorage.setItem(STORAGE_ENTRY, KEY);
+    stubFetch({ [QUOTA]: () => jsonResponse({ error: "scope" }, 403) });
+    renderPage();
+    expect(await screen.findByText("This key cannot view its quota")).toBeTruthy();
+    await storageEffects();
+    expect(screen.getByLabelText("API key")).toBeTruthy();
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
+  });
+
+  it("refusing a key typed here leaves another tab's remembered key in place", async () => {
+    const other = "sk-other-0987654321";
+    stubFetch({ [QUOTA]: () => jsonResponse({ error: "nope" }, 401) });
+    renderPage();
+    // Another tab remembers a different key after this page has read storage.
+    window.localStorage.setItem(STORAGE_ENTRY, other);
+    enterKey(KEY);
+    expect(await screen.findByText("This key was not accepted")).toBeTruthy();
+    await storageEffects();
+    expect(storedValues(window.localStorage)).toEqual([other]);
+  });
+
+  it("an answer that arrives after Forget key does not repaint the pools", async () => {
+    let answer: (response: Response) => void = () => {};
+    stubFetch({
+      [QUOTA]: () =>
+        new Promise<Response>((resolve) => {
+          answer = resolve;
+        }),
+    });
+    renderPage();
+    enterKey(KEY);
+    expect(await screen.findByText("Loading your quota…")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Forget key" }));
+    await act(async () => answer(jsonResponse(quotaView())));
+    expect(screen.queryByRole("heading", { name: "Pool A" })).toBeNull();
+    expect(screen.getByText("Enter your API key to see your quota")).toBeTruthy();
+    expect(screen.getByLabelText("API key")).toBeTruthy();
+    expect(window.sessionStorage.length).toBe(0);
+    expect(window.localStorage.length).toBe(0);
   });
 });

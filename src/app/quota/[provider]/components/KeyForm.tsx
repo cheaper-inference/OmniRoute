@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 
 import Button from "@/shared/components/Button";
@@ -21,7 +21,6 @@ interface KeyFormProps {
   persistence: KeyPersistence | null;
   /** The key was accepted but the browser refused to save it. */
   storageBlocked: boolean;
-  busy: boolean;
   /** Receives a key that passed `parseApiKeyInput`. */
   onSubmit: (key: string, remember: boolean) => void;
   onForget: () => void;
@@ -41,13 +40,14 @@ export default function KeyForm({
   maskedKey,
   persistence,
   storageBlocked,
-  busy,
   onSubmit,
   onForget,
 }: KeyFormProps) {
   const t = useTranslations("quotaSelf");
   const rememberHintId = useId();
-  const [draft, setDraft] = useState("");
+  // The field is uncontrolled: a controlled value would be mirrored into its `value` attribute,
+  // and the typed key must never sit in the DOM or in React state. It is read only on submit.
+  const fieldRef = useRef<HTMLInputElement>(null);
   const [remember, setRemember] = useState(false);
   const [problem, setProblem] = useState<KeyProblem | null>(null);
 
@@ -71,14 +71,15 @@ export default function KeyForm({
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const parsed = parseApiKeyInput(draft);
+    const field = fieldRef.current;
+    const parsed = parseApiKeyInput(field?.value ?? "");
     // `in` narrows the union with or without strictNullChecks.
     if ("problem" in parsed) {
       setProblem(parsed.problem);
       return;
     }
     setProblem(null);
-    setDraft("");
+    if (field) field.value = "";
     onSubmit(parsed.key, remember);
   };
 
@@ -94,8 +95,9 @@ export default function KeyForm({
           autoComplete="off"
           spellCheck={false}
           autoCapitalize="none"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
+          ref={fieldRef}
+          // Editing clears the local error; the text itself is never stored.
+          onChange={() => setProblem(null)}
         />
         <div className="space-y-1">
           <Checkbox
@@ -108,9 +110,7 @@ export default function KeyForm({
             {t("keyRememberHint")}
           </p>
         </div>
-        <Button type="submit" loading={busy}>
-          {t("keySubmit")}
-        </Button>
+        <Button type="submit">{t("keySubmit")}</Button>
       </form>
     </Card>
   );
