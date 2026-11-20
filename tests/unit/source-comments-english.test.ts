@@ -30,6 +30,7 @@ const CHANGED_FILES = [
   "src/app/(dashboard)/dashboard/orchestration/edges/StatusEdge.tsx",
   "src/app/(dashboard)/dashboard/orchestration/model/orchestrationTypes.ts",
   "src/app/(dashboard)/dashboard/playground/hooks/useStreamMetrics.ts",
+  "src/app/(dashboard)/dashboard/providers/[id]/components/__tests__/customModelsAddContextWindow.test.tsx",
   "src/app/(dashboard)/dashboard/providers/providerPageUtils.ts",
   "src/app/(dashboard)/dashboard/radar/page.tsx",
   "src/app/(dashboard)/dashboard/search-tools/components/RerankPanel.tsx",
@@ -218,6 +219,10 @@ const LEGACY_MARKERS = [
   "novo flagship Google",
   "Context: 262.144 tokens",
   "Context: 204.800 tokens",
+  "o form de CADASTRO de modelo custom",
+  "quando preenchido",
+  "antes só a EDIÇÃO tinha o campo",
+  "lista vazia; POST → sucesso",
 ] as const;
 
 // Extract comment text only: line comments, JSX comments and /* */ blocks (including
