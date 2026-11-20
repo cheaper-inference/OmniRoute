@@ -3,7 +3,7 @@ import { getApiKeySpendRows } from "@/lib/db/apiKeySpend";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
 import { getOldestSearchLedgerSpendSince, sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
-import { calculateCostDetailed } from "./costCalculator";
+import { calculateCostDetailed, type CostCalculationResult } from "./costCalculator";
 import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
 
 import {
@@ -521,10 +521,10 @@ async function priceUnmeteredSpendRow(
   row: ReturnType<typeof getApiKeySpendRows>[number],
   provider: string,
   model: string
-): Promise<{ costUsd: number; priced: boolean; failed: boolean }> {
-  if (row.decisionEndpoint) return { costUsd: 0, priced: false, failed: false };
+): Promise<CostCalculationResult> {
+  if (row.decisionEndpoint) return { costUsd: 0, priced: false };
 
-  const { costUsd, priced, failed } = await calculateCostDetailed(
+  const result = await calculateCostDetailed(
     provider,
     model,
     {
@@ -540,17 +540,17 @@ async function priceUnmeteredSpendRow(
       serviceTier: row.serviceTier || "standard",
     }
   );
-  if (failed) {
+  if (result.failed) {
     console.warn(
       `[apiKeyUsageLimits] cost lookup failed for ${provider}/${model} — failing closed (#12341)`
     );
-  } else if (!priced) {
+  } else if (!result.priced) {
     console.warn(
       `[apiKeyUsageLimits] no pricing found for ${provider}/${model} — usage counted as $0; ` +
         "a configured USD quota fails closed unless the unpriced-usage policy opts out (#12341)"
     );
   }
-  return { costUsd, priced, failed };
+  return result;
 }
 
 async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promise<ApiKeyUsdSpend> {
