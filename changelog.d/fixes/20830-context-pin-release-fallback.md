@@ -1,0 +1,1 @@
+- **fix(combo):** in `priority` / `fill-first` combos with `context_cache_protection`, a session pinned to a fallback goes back to the higher-priority target once the fallback's prompt cache has expired and the higher-priority target is ready, instead of staying on the fallback for its lifetime ([#20830](https://github.com/diegosouzapw/OmniRoute/pull/20830)) — thanks @fidelix
