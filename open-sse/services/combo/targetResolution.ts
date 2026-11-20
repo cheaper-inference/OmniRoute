@@ -53,6 +53,7 @@ import {
   resolveWeightedStepGroups,
   resolveWeightedTargets,
 } from "./comboStructure.ts";
+import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { recordComboFailure } from "./failureTracker.ts";
 import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
@@ -116,6 +117,7 @@ export interface ResolveComboTargetPipelineDeps {
   signal?: AbortSignal | null;
   nativeTurnPin?: NativeTurnPin | null;
   deferContextOverflowWhenCompressible?: boolean;
+  sourceFormat?: string | null;
   apiKeyAllowedConnections: string[] | null;
   log: ComboLogger;
   resilienceSettings: ResilienceSettings;
@@ -492,6 +494,7 @@ async function orderByStrategy(
   if (getStrategyTraits(strategy).ordering === "auto") {
     const autoResult = await resolveAutoStrategyOrder({
       orderedTargets: initialOrderedTargets,
+      sourceFormat: deps.sourceFormat,
       body,
       combo,
       settings,
@@ -560,7 +563,7 @@ function applyTargetFilter(
 function isEnabledInConfigOrSettings(
   config: unknown,
   settings: unknown,
-  key: "compatFilterFailOpen" | "outputLimitAdvisory"
+  key: "compatFilterFailOpen"
 ): boolean {
   return (
     (config as Record<string, unknown> | null | undefined)?.[key] === true ||
@@ -719,7 +722,8 @@ async function applyContinuityFilters(
     undefined,
     {
       failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
-      outputLimitAdvisory: isEnabledInConfigOrSettings(config, settings, "outputLimitAdvisory"),
+      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
+      sourceFormat: deps.sourceFormat,
     }
   );
   orderedTargets = applyTargetFilter(orderedTargets, compatibleTargets, jevOwnsOrder);

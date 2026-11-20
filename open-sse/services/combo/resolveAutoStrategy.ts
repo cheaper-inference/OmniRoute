@@ -31,6 +31,7 @@ import {
   filterTargetsByRequestCompatibility,
   deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
+import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
 import { hasMediaRequirements } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
@@ -73,6 +74,7 @@ export interface ResolveAutoStrategyDeps {
   body: Record<string, unknown>;
   combo: ComboLike;
   settings: Record<string, unknown> | null | undefined;
+  sourceFormat?: string | null;
   // Index signature keeps this structurally assignable from the caller's much
   // wider `resolveComboSetupConfig()` return type — without it, TS2559 ("no
   // properties in common") fires now that `complexityAwareRouting` (the one
@@ -300,7 +302,10 @@ export async function resolveAutoStrategyOrder(
   // Recheck before scoring so unsupported transports cannot consume the retry
   // budget, and retain this pool even when candidate telemetry is unavailable.
   if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
-    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name);
+    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name, {
+      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
+      sourceFormat: deps.sourceFormat,
+    });
     if (eligibleTargets.length === 0) {
       return {
         earlyResponse: errorResponse(
