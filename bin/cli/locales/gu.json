@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] {action} કરાશે",
     "cancelled": "રદ કરવામાં આવ્યું.",
     "jsonOpt": "JSON તરીકે આઉટપુટ કરો",
-    "yesOpt": "પુષ્ટિકરણ પ્રોમ્પ્ટ છોડો"
+    "yesOpt": "પુષ્ટિકરણ પ્રોમ્પ્ટ છોડો",
+    "positiveIntegerRequired": "મર્યાદા સકારાત્મક પૂર્ણાંક હોવી જોઈએ."
   },
   "setup": {
     "title": "OmniRoute સેટઅપ",

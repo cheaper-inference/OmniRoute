@@ -594,8 +594,8 @@ export async function POST(
         const matchId = typeof match?.id === "string" ? match.id : null;
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
-            ...buildOAuthTokenUpdate(tokenData, expiresAt),
-            ...antigravityPersistStatus(degradedProject),
+            ...buildOAuthTokenUpdate(tokenData, expiresAt, match),
+            ...(degradedProject ? antigravityPersistStatus(degradedProject) : {}),
             isActive: true,
           });
         }
@@ -686,7 +686,7 @@ export async function POST(
           const matchId = typeof match?.id === "string" ? match.id : null;
           if (matchId) {
             connection = await updateProviderConnection(matchId, {
-              ...buildOAuthTokenUpdate(result.tokens, expiresAt),
+              ...buildOAuthTokenUpdate(result.tokens, expiresAt, match),
               testStatus: "active",
               isActive: true,
             });
@@ -824,8 +824,8 @@ export async function POST(
           const matchId = typeof match?.id === "string" ? match.id : null;
           if (matchId) {
             connection = await updateProviderConnection(matchId, {
-              ...buildOAuthTokenUpdate(tokenData, expiresAt),
-              ...antigravityPersistStatus(degradedProject),
+              ...buildOAuthTokenUpdate(tokenData, expiresAt, match),
+              ...(degradedProject ? antigravityPersistStatus(degradedProject) : {}),
               isActive: true,
             });
           }
@@ -909,8 +909,8 @@ export async function POST(
         const matchId = typeof match?.id === "string" ? match.id : null;
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
-            ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt),
-            ...antigravityPersistStatus(degradedProject),
+            ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt, match),
+            ...(degradedProject ? antigravityPersistStatus(degradedProject) : {}),
             isActive: true,
           });
         }

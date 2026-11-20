@@ -21,10 +21,10 @@ npm install -g omniroute
 ### 옵션 B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest`는 **게시된** 안정 SemVer 중 가장 높은 버전입니다. git `main`을 추적하지는 **않습니다**. GitOps에서는 `diegosouzapw/omniroute:X.Y.Z`로 버전을 고정하세요. [이미지 태그/릴리스 채널](../guides/DOCKER_GUIDE.md#release-channels)을 참조하세요.
+`:latest`는 **게시된** 안정 SemVer 중 가장 높은 버전입니다. git `main`을 추적하지는 **않습니다**. GitOps에서는 `cheaperinference/omniroute:X.Y.Z`로 버전을 고정하세요. [이미지 태그/릴리스 채널](../guides/DOCKER_GUIDE.md#release-channels)을 참조하세요.
 
 ### 옵션 C: 소스에서 설치
 

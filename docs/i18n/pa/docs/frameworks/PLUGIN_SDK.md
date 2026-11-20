@@ -4,7 +4,7 @@
 
 ---
 
-## ਤੁਰੰਤ ਸ਼ੁਰੂਆਤ
+## ਤੇਜ਼ ਸ਼ੁਰੂਆਤ
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -29,16 +29,16 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ਇੱਕ ਫੈਕਟਰੀ ਫੰਕਸ਼ਨ ਜੋ ਡਿਫਾਲਟ ਮੁੱਲਾਂ ਨਾਲ Plugin ਆਬਜੈਕਟ ਬਣਾਉਂਦਾ ਹੈ।
+ਫੈਕਟਰੀ ਫੰਕਸ਼ਨ ਜੋ ਡਿਫੌਲਟ ਨਾਲ ਇੱਕ ਪਲੱਗਇਨ ਆਬਜੈਕਟ ਬਣਾਉਂਦਾ ਹੈ।
 
 **ਪੈਰਾਮੀਟਰ:**
 
-- `name` (string, ਲਾਜ਼ਮੀ) — kebab-case ਵਿੱਚ Plugin ਦਾ ਨਾਮ
-- `priority` (number, ਵਿਕਲਪਿਕ, ਡਿਫਾਲਟ: 100) — ਘੱਟ ਮੁੱਲ ਵਾਲਾ ਪਹਿਲਾਂ ਚੱਲਦਾ ਹੈ
-- `enabled` (boolean, ਵਿਕਲਪਿਕ, ਡਿਫਾਲਟ: true) — ਕੀ ਸਮਰੱਥ ਸਥਿਤੀ ਵਿੱਚ ਸ਼ੁਰੂ ਕਰਨਾ ਹੈ?
-- `onRequest` (function, ਵਿਕਲਪਿਕ) — ਚੈਟ ਹੈਂਡਲਰ ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦਾ ਹੈ
-- `onResponse` (function, ਵਿਕਲਪਿਕ) — ਚੈਟ ਹੈਂਡਲਰ ਤੋਂ ਬਾਅਦ ਚੱਲਦਾ ਹੈ
-- `onError` (function, ਵਿਕਲਪਿਕ) — ਹੈਂਡਲਰ ਵਿੱਚ ਗਲਤੀ ਹੋਣ 'ਤੇ ਚੱਲਦਾ ਹੈ
+- ਕਬਾਬ-ਕੇਸ ਵਿੱਚ `name` (ਸਤਰ, ਲੋੜੀਂਦਾ) — ਪਲੱਗਇਨ ਨਾਮ
+- `priority` (ਨੰਬਰ, ਵਿਕਲਪਿਕ, ਡਿਫੌਲਟ: 100) — ਲੋਅਰ ਪਹਿਲਾਂ ਚੱਲਦਾ ਹੈ
+- `enabled` (ਬੁਲੀਅਨ, ਵਿਕਲਪਿਕ, ਡਿਫੌਲਟ: ਸਹੀ) — ਸਟਾਰਟ ਸਮਰੱਥ ਹੈ?
+- `onRequest` (ਫੰਕਸ਼ਨ, ਵਿਕਲਪਿਕ) — ਚੈਟ ਹੈਂਡਲਰ ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦਾ ਹੈ
+- `onResponse` (ਫੰਕਸ਼ਨ, ਵਿਕਲਪਿਕ) — ਚੈਟ ਹੈਂਡਲਰ ਤੋਂ ਬਾਅਦ ਚੱਲਦਾ ਹੈ
+- `onError` (ਫੰਕਸ਼ਨ, ਵਿਕਲਪਿਕ) — ਹੈਂਡਲਰ ਗਲਤੀ 'ਤੇ ਚੱਲਦਾ ਹੈ
 
 ### `blockRequest(response?): BlockingHookResult`
 
@@ -46,15 +46,15 @@ export default definePlugin({
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-ਪ੍ਰਦਾਤਾ ਤੱਕ ਪਹੁੰਚਣ ਤੋਂ ਪਹਿਲਾਂ ਬੇਨਤੀ ਦੀ ਬਾਡੀ ਨੂੰ ਸੋਧੋ।
+ਪ੍ਰਦਾਤਾ ਤੱਕ ਪਹੁੰਚਣ ਤੋਂ ਪਹਿਲਾਂ ਬੇਨਤੀ ਬਾਡੀ ਨੂੰ ਸੋਧੋ।
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-ਬੇਨਤੀ ਦੇ ਸੰਦਰਭ ਨਾਲ ਮੈਟਾਡੇਟਾ ਜੋੜੋ।
+ਬੇਨਤੀ ਸੰਦਰਭ ਵਿੱਚ ਮੈਟਾਡੇਟਾ ਨੱਥੀ ਕਰੋ।
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin ਸੰਦਰਭ (`PluginContext`)
+## ਪਲੱਗਇਨ ਸੰਦਰਭ (`PluginContext`)
 
-| ਫ਼ੀਲਡ       | ਕਿਸਮ                      | ਵੇਰਵਾ                  |
-| ----------- | ------------------------- | ---------------------- |
-| `requestId` | `string`                  | ਵਿਲੱਖਣ ਬੇਨਤੀ ਪਛਾਣਕਰਤਾ  |
-| `model`     | `string`                  | ਬੇਨਤੀ ਕੀਤੇ ਮਾਡਲ ਦਾ ਨਾਮ |
-| `provider`  | `string`                  | ਟੀਚਾ ਪ੍ਰਦਾਤਾ ID        |
-| `body`      | `Record<string, unknown>` | ਬੇਨਤੀ ਦੀ ਬਾਡੀ          |
-| `headers`   | `Record<string, string>`  | ਬੇਨਤੀ ਦੇ ਹੈਡਰ          |
-| `metadata`  | `Record<string, unknown>` | ਬਦਲਣਯੋਗ ਮੈਟਾਡੇਟਾ       |
-| `timestamp` | `number`                  | ਬੇਨਤੀ ਦਾ ਟਾਈਮਸਟੈਂਪ     |
+| ਖੇਤਰ         | ਟਾਈਪ ਕਰੋ                  | ਵਰਣਨ                          |
+| ------------ | ------------------------- | ----------------------------- |
+| `requestId`  | `string`                  | ਵਿਲੱਖਣ ਬੇਨਤੀ ਪਛਾਣਕਰਤਾ         |
+| `model`      | `string`                  | ਮਾਡਲ ਨਾਮ ਦੀ ਬੇਨਤੀ ਕੀਤੀ        |
+| `provider`   | `string`                  | ਟੀਚਾ ਪ੍ਰਦਾਤਾ ID               |
+| `body`       | `Record<string, unknown>` | ਸਰੀਰ ਨੂੰ ਬੇਨਤੀ ਕਰੋ            |
+| `headers`    | `Record<string, string>`  | ਬੇਨਤੀ ਹੈਡਰ (ਨੋਟ ਦੇਖੋ)         |
+| `metadata`   | `Record<string, unknown>` | ਪਰਿਵਰਤਨਸ਼ੀਲ ਮੈਟਾਡੇਟਾ          |
+| `timestamp`  | `number`                  | ਟਾਈਮਸਟੈਂਪ ਦੀ ਬੇਨਤੀ ਕਰੋ        |
+| `apiKeyInfo` | `object` (ਵਿਕਲਪਿਕ)        | API ਕੁੰਜੀ ਮੈਟਾਡੇਟਾ (ਨੋਟ ਦੇਖੋ) |
+
+ਸੰਦਰਭ ਕਦੇ ਵੀ ਕਲਾਇੰਟ ਦੇ ਪ੍ਰਮਾਣ ਪੱਤਰਾਂ ਨੂੰ ਨਹੀਂ ਰੱਖਦਾ: `authorization`, `x-api-key`, `proxy-authorization` ਅਤੇ `cookie` ਸਿਰਲੇਖਾਂ ਨੂੰ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ (ਕੋਈ ਵੀ ਕੇਸਿੰਗ), ਅਤੇ `apiKeyInfo` ਕੁੰਜੀ ਦਾ ਮੈਟਾਡੇਟਾ ਰੱਖਦਾ ਹੈ (ਜਿਵੇਂ ਕਿ `id`, `name` ਅਤੇ `scopes`) ਪਰ ਕੁੰਜੀ ਮੁੱਲ ਜਾਂ ਇਸਦੇ ਫਿੰਗਰਪ੍ਰਿੰਟ (`redactPluginContext()` ) `src/lib/plugins/hooks.ts` ਨਹੀਂ ਰੱਖਦਾ। ਇਹ `onRequest`, `onResponse` ਅਤੇ `onError`'ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।
 
 ## ਮੈਨੀਫੈਸਟ (`plugin.json`)
 
@@ -138,19 +141,18 @@ Hooks ਨੂੰ ਤਰਜੀਹ ਨਾਲ ਸੰਰਚਿਤ ਕੀਤਾ ਜਾ
 }
 ```
 
-## ਅਨੁਮਤੀ ਪ੍ਰਣਾਲੀ
+## ਇਜਾਜ਼ਤ ਸਿਸਟਮ
 
-ਪਲੱਗਇਨ ਇੱਕ ਸੈਂਡਬਾਕਸ ਕੀਤੇ VM ਸੰਦਰਭ ਵਿੱਚ ਚੱਲਦੇ ਹਨ। ਬਾਹਰੀ ਸਰੋਤਾਂ ਤੱਕ ਪਹੁੰਚ ਲਈ ਸਪਸ਼ਟ ਅਨੁਮਤੀਆਂ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ:
+ਪਲੱਗਇਨ ਹਨ** ਸੈਂਡਬਾਕਸਡ ਨਹੀਂ** . ਹਰੇਕ ਕਿਰਿਆਸ਼ੀਲ ਪਲੱਗਇਨ ਇੱਕ ਵੱਖਰੀ, ਆਮ Node.js ਚਾਈਲਡ ਪ੍ਰਕਿਰਿਆ ( `src/lib/plugins/loader.ts` ਵਿੱਚ `loadPlugin()` ) ਉਸੇ ਓਪਰੇਟਿੰਗ-ਸਿਸਟਮ ਉਪਭੋਗਤਾ OmniRoute ਦੇ ਅਧੀਨ ਚਲਦੀ ਹੈ, ਬਿਨਾਂ VM ਸੰਦਰਭ ਅਤੇ ਕੋਈ Node.js ਅਨੁਮਤੀ ਫਲੈਗ ਦੇ ਬਿਨਾਂ। ਪਲੱਗਇਨ ਕੋਡ `node:fs`, `node:child_process`, `fetch` ਅਤੇ ਹਰ ਦੂਜੇ Node.js API ਵਰਤੋਂ ਕਰ ਸਕਦਾ ਹੈ: ਇਹ ਕਿਸੇ ਵੀ ਫਾਈਲ ਨੂੰ ਪੜ੍ਹ ਅਤੇ ਲਿਖ ਸਕਦਾ ਹੈ ਜੋ OmniRoute ਉਪਭੋਗਤਾ (ਡਾਟਾ ਡਾਇਰੈਕਟਰੀ ਸਮੇਤ), ਪ੍ਰੋਗਰਾਮ ਚਲਾ ਸਕਦਾ ਹੈ ਅਤੇ ਨੈਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।
 
-| ਅਨੁਮਤੀ       | ਪ੍ਰਦਾਨ ਕੀਤੀ ਪਹੁੰਚ                                            |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | ਕੇਵਲ-ਪੜ੍ਹਨਯੋਗ `process.env` ਪ੍ਰੌਕਸੀ                          |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+ਮੈਨੀਫੈਸਟ ਦਾ `requires.permissions` `network`, `file-read`, `file-write`, `env` ਅਤੇ `exec` ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ, ਪਰ ਅੱਜ ਰਨਟਾਈਮ 'ਤੇ ਸਿਰਫ਼ `env` ਹੀ ਪ੍ਰਭਾਵ ਹੈ:
 
-ਕਿਸੇ ਅਨੁਮਤੀ ਤੋਂ ਬਿਨਾਂ, ਉਸ ਨਾਲ ਸੰਬੰਧਿਤ ਗਲੋਬਲ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਉਪਲਬਧ ਹੀ ਨਹੀਂ ਹੁੰਦੇ।
+| ਇਜਾਜ਼ਤ                                       | ਅੱਜ ਪ੍ਰਭਾਵ                                                                                                                                                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | The plugin process also receives `PORT`, `HOSTNAME`, `TZ` and `TMPDIR`. Without it, it receives only `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` and `PLUGIN_NAME` (plus `SystemRoot` and `windir` on Windows). |
+| `network`, `file-read`, `file-write`, `exec` | ਕੋਈ ਨਹੀਂ। ਉਹ ਸਿਰਫ ਘੋਸ਼ਣਾਵਾਂ ਹਨ: ਜਦੋਂ ਉਹ ਗੁੰਮ ਹੋਣ ਤਾਂ ਕੁਝ ਵੀ ਬਲੌਕ ਨਹੀਂ ਹੁੰਦਾ।                                                                                                                                                             |
+
+ਇੱਕ ਪਲੱਗਇਨ ਸਥਾਪਤ ਕਰਨਾ ਹੋਸਟ 'ਤੇ ਕੋਈ ਹੋਰ ਪ੍ਰੋਗਰਾਮ ਸਥਾਪਤ ਕਰਨ ਵਰਗਾ ਹੈ। ਸਿਰਫ਼ ਪਲੱਗਇਨ ਸਥਾਪਤ ਕਰੋ ਜਿਨ੍ਹਾਂ ਦੇ ਸਰੋਤ 'ਤੇ ਤੁਸੀਂ ਭਰੋਸਾ ਕਰਦੇ ਹੋ।
 
 ## ਕੌਂਫਿਗ ਸਕੀਮਾ
 
@@ -194,7 +196,7 @@ Hooks ਨੂੰ ਤਰਜੀਹ ਨਾਲ ਸੰਰਚਿਤ ਕੀਤਾ ਜਾ
 
 ## ਉਦਾਹਰਨਾਂ
 
-### ਬੇਨਤੀ ਲੌਗਰ
+### ਲੌਗਰ ਦੀ ਬੇਨਤੀ ਕਰੋ
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### ਦਰ ਸੀਮਾਕਾਰ
+### ਦਰ ਸੀਮਾ
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 ਮਿੰਟ
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### ਜਵਾਬ ਰੂਪਾਂਤਰਕ
+### ਜਵਾਬ ਟ੍ਰਾਂਸਫਾਰਮਰ
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

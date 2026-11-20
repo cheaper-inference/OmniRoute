@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Opcional) Eliminar la imagen
+docker rmi cheaperinference/omniroute:latest
+# Las instalaciones anteriores sacaron el nombre heredado:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

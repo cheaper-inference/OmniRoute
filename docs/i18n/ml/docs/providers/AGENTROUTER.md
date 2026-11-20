@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 പുനരാരംഭിച്ച ശേഷം, നിലവിലുള്ള OpenAI-ന് അനുയോജ്യമായതും Anthropic-ന് അനുയോജ്യമായതുമായ പ്രവാഹങ്ങൾക്ക് പുറമേ **Claude Code Compatible ചേർക്കുക** എന്ന ഓപ്ഷനും ഡാഷ്ബോർഡിൽ ലഭ്യമാകും.

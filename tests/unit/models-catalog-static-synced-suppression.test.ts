@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(
   path.join(os.tmpdir(), "omniroute-model-catalog-static-synced-suppression-")
@@ -45,9 +46,7 @@ async function seedConnection(provider: string, name: string) {
 }
 
 async function getCatalogIds(): Promise<Set<string>> {
-  const response = await catalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const response = await getSettledModelCatalogResponse(catalog);
   const body = (await response.json()) as { data: Array<{ id: string }> };
 
   assert.equal(response.status, 200);

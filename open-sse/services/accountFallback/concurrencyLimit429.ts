@@ -19,7 +19,7 @@ export const CONCURRENCY_LIMITED_REASON = "concurrency_limited";
 
 type RetryHint = {
   retryAfterMs: number;
-  provenance: "header" | "google_rpc_retry_info" | "body" | "body_structured";
+  provenance: "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_iso_reset";
 };
 
 export function buildConcurrencyLimitFallback(

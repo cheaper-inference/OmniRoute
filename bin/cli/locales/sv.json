@@ -12,7 +12,8 @@
     "dryRun": "[simulering] skulle: {action}",
     "cancelled": "Avbruten.",
     "jsonOpt": "Utdata som JSON",
-    "yesOpt": "Hoppa över bekräftelse"
+    "yesOpt": "Hoppa över bekräftelse",
+    "positiveIntegerRequired": "Gränsen måste vara ett positivt heltal."
   },
   "setup": {
     "title": "OmniRoute-konfiguration",

@@ -1,0 +1,1 @@
+- **fix(sse):** Quota Share caps are now checked again when a request rotates to another account after a Codex 429 or an Antigravity `gcp_project_required` 422; a key over its cap on the new account's pool keeps the original upstream error instead of being served by that account ([#20561](https://github.com/cheaper-inference/OmniRoute/pull/20561)) — thanks @serenity-X
