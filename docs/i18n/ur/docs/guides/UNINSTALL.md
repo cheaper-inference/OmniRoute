@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (اختیاری) امیج ہٹائیں
+docker rmi cheaperinference/omniroute:latest
+# پرانے انسٹالز نے میراثی نام کھینچ لیا:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

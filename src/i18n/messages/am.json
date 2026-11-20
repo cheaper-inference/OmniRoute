@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "የመሃል የውይይት ስርዓት መልዕክቶችን በቦታቸው ያቆዩ",
     "requireUserLastMessageDescription": "ለላይ ዥረቶች የረዳት ቅድመ ሙሌትን አይቀበሉም፡ ከመላክዎ በፊት ተከታይ ረዳት ተራዎችን ጣል (የመሳሪያ_አጠቃቀም የለም)። ሞዴሉ የቀደመውን መልስ ሊያድስ ይችላል።",
     "requireUserLastMessageLabel": "በተጠቃሚ መልእክት ለመጨረስ ውይይት ጠይቅ",
+    "strictChatHistoryDescription": "ወደ OpenAI ጋር ተኳሃኝ ጥብቅ አገልግሎቶች ከመላክዎ በፊት የተቋረጡ የመሣሪያ ጥሪ ቅደም ተከተሎችን ያስተካክሉ እና ተከታታይ የረዳት መልዕክቶችን ያዋህዱ።",
+    "strictChatHistoryLabel": "የውይይት ታሪክ ጥገና ለጥብቅ አገልግሎቶች",
     "bulkPasteAdded": "{count, plural, one {1 ቁልፍ ታክሏል} other {# ቁልፎች ታክለዋል}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 የተደገመ ቁልፍ ታልፏል} other {# የተደገሙ ቁልፎች ታልፈዋል}}",
     "bulkPasteHint": "በእያንዳንዱ መስመር አንድ API ቁልፍ ይለጥፉ። ባዶ መስመሮች ችላ ይባላሉ፣ የተደገሙ ቁልፎችም ይዘለላሉ።",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "ቁልፉን አስወግድ"
   },
   "plugins": {
-    "privilegesWarningTitle": "ፕለጊኖች ከሙሉ ልዩ መብቶች ጋር ይሰራሉ",
-    "privilegesWarningBody": "አንድ ፕለጊን እንደ መደበኛ Node.js ሂደት ከ OmniRoute ጋር ተመሳሳይ ነው የሚሰራው፡ ፋይሎችን ማንበብ፣ ፕሮግራሞችን ማስኬድ እና አውታረ መረቡን መጠቀም ይችላል፣ የፈለገውን ፍቃድ ያውጃል። የሚያምኗቸውን ፕለጊኖች ብቻ ይጫኑ።",
     "title": "ተሰኪዎች",
     "description": "የOmniRoute ተግባራትን ለማስፋት ተሰኪዎችን ይጫኑ እና ያስተዳድሩ",
     "loading": "ተሰኪዎች በመጫን ላይ...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "ተሰኪዎችን ቃኝ",
     "noPlugins": "ምንም ተሰኪ አልተጫነም",
     "noPluginsDescription": "የተሰኪ ማውጫዎችን በ ~/.omniroute/plugins/ ውስጥ ያስቀምጡና «ቃኝ»ን ጠቅ ያድርጉ።",
+    "privilegesWarningTitle": "ፕለጊኖች ከሙሉ ልዩ መብቶች ጋር ይሰራሉ",
+    "privilegesWarningBody": "አንድ ፕለጊን እንደ መደበኛ Node.js ሂደት ከ OmniRoute ጋር ተመሳሳይ ነው የሚሰራው፡ ፋይሎችን ማንበብ፣ ፕሮግራሞችን ማስኬድ እና አውታረ መረቡን መጠቀም ይችላል፣ የፈለገውን ፍቃድ ያውጃል። የሚያምኗቸውን ፕለጊኖች ብቻ ይጫኑ።",
     "activate": "አግብር",
     "deactivate": "አቦዝን",
     "uninstall": "አራግፍ",

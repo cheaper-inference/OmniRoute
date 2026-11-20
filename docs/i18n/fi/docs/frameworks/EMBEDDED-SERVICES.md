@@ -557,6 +557,8 @@ Tämä välityspalvelin:
 
 WebSocket päivitykset sulautettuun kojelautaan hoitaa kumppanipalvelin erillisessä portissa (katso `src/lib/services/embedWsProxy.ts`).
 
+Jokainen päivitys valtuutetaan ennen tunnelin avautumista samoilla säännöillä kuin HTTP -upotusreitillä: vertaissovelluksen on oltava takaisinkytkentä ilman käänteisen välityspalvelimen edelleenlähetysotsikkoa, selaimen `Origin` on oltava kojelaudan alkuperä (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` laajentaa takaisinsilmukan oletusarvoja) ja soittaja tarvitsee kojelautaistunnon tai API -näppäinvapaan.
+
 **Turvallisuus:** Upotetut välityspalvelimen reitit luokitellaan `LOCAL_ONLY_API_PREFIXES` kategoriaan, ja niihin pääsee vain silmukan kautta. Hyökkääjä, joka saa JWT Cloudflare/Ngrok tunnelin kautta, ei voi käyttää välityspalvelinta sulautettuihin palveluihin.
 
 ---

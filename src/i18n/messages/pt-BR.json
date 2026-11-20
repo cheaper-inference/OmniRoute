@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversa em vigor",
     "requireUserLastMessageDescription": "Para upstreams que rejeitam o pré-preenchimento do assistente: elimine as voltas finais do assistente (sem tool_use) antes de enviar. O modelo pode regenerar sua resposta anterior.",
     "requireUserLastMessageLabel": "Exigir que a conversa termine com uma mensagem do usuário",
+    "strictChatHistoryDescription": "Corrige sequências interrompidas de chamadas a ferramentas e une mensagens consecutivas do assistente antes de enviá-las a provedores compatíveis com OpenAI que aplicam regras rigorosas.",
+    "strictChatHistoryLabel": "Reparo do histórico de chat para provedores rigorosos",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicata ignorada} other {# duplicatas ignoradas}}",
     "bulkPasteHint": "Cole uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são puladas.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Remover chave"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugins são executados com privilégios totais",
-    "privilegesWarningBody": "Um plugin é executado como um processo Node.js regular com o mesmo acesso que OmniRoute: ele pode ler arquivos, executar programas e usar a rede, quaisquer que sejam as permissões declaradas em seu manifesto. Instale apenas plug-ins em que você confia.",
     "title": "Plugins",
     "description": "Instale e gerencie plugins para ampliar as funcionalidades do OmniRoute",
     "loading": "Carregando plugins...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Buscar plugins",
     "noPlugins": "Nenhum plugin instalado",
     "noPluginsDescription": "Coloque os diretórios dos plugins em ~/.omniroute/plugins/ e clique em Buscar.",
+    "privilegesWarningTitle": "Plugins são executados com privilégios totais",
+    "privilegesWarningBody": "Um plugin é executado como um processo Node.js regular com o mesmo acesso que OmniRoute: ele pode ler arquivos, executar programas e usar a rede, quaisquer que sejam as permissões declaradas em seu manifesto. Instale apenas plug-ins em que você confia.",
     "activate": "Ativar",
     "deactivate": "Desativar",
     "uninstall": "Desinstalar",

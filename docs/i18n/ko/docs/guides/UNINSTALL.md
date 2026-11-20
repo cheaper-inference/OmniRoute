@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (선택 사항) 이미지 제거
+docker rmi cheaperinference/omniroute:latest
+# 이전 설치에서는 레거시 이름을 가져왔습니다.
 docker rmi diegosouzapw/omniroute:latest
 ```
 

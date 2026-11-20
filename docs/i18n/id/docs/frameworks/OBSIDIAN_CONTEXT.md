@@ -96,6 +96,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Keamanan & Transportasi
+
+otentikasi WebDAV menerapkan pelacakan kegagalan dan penguncian per-IP (10 upaya gagal dalam jangka waktu 60 detik memicu penguncian 5 menit dengan `429 Too Many Requests` dan `Retry-After`). Karena WebDAV mengirimkan kredensial autentikasi dasar, mengakhiri TLS (atau merutekan melalui terowongan aman seperti Tailscale atau Cloudflare Tunnel) sangat disarankan saat mengakses titik akhir WebDAV di luar loopback.
+
 ### Sumber konteks per kunci API (opsional)
 
 Konfigurasi Obsidian dapat dicakup **per kunci API** melalui tabel

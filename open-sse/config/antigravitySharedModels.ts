@@ -136,6 +136,43 @@ export const ANTIGRAVITY_SHARED_MODELS = Object.freeze([
     supportsVision: true,
     toolCalling: true,
   },
+  // Gemini 4 Hydrogen tiers (advertised by live `:fetchAvailableModels` on CLI 1.3.4+)
+  {
+    id: "gemini-4-hydrogen-xhigh",
+    name: "Gemini 4 Hydrogen (XHigh)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
+  {
+    id: "gemini-4-hydrogen-high",
+    name: "Gemini 4 Hydrogen (High)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
+  {
+    id: "gemini-4-hydrogen-medium",
+    name: "Gemini 4 Hydrogen (Medium)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
+  {
+    id: "gemini-4-hydrogen-low",
+    name: "Gemini 4 Hydrogen (Low)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
   // Claude 5.5 tiers (advertised by live `:fetchAvailableModels` on CLI 1.3.4+)
   {
     id: "claude-opus-5-5-high",

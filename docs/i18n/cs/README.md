@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -786,7 +786,7 @@ mimo historii vašeho shellu. → [Integrace CLI](docs/guides/CLI-INTEGRATIONS.m
   <tr><th align="left">Platforma</th><th align="left">Instalace</th><th align="left">Hlavní přednosti</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globální)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Jeden příkaz, libovolný OS</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (globální)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Stejný tarball z registru, rychlejší instalace</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multiarchitektura <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multiarchitektura <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Nativní okno + systémová lišta — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Lišta nabídek (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Dohlíží na server a automaticky ho aktualizuje — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>nativní <code>arm64</code></td><td align="left">Raspberry Pi, ARM servery, Apple Silicon</td></tr>
@@ -1109,7 +1109,7 @@ Používejte je pouze pro klienty, kteří nemohou připojit `Authorization: Bea
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` sleduje nejvyšší **publikovanou** stabilní verzi SemVer. Nesleduje git `main`. Pro GitOps použijte `:X.Y.Z`. Viz [kanály vydání Dockeru](docs/guides/DOCKER_GUIDE.md#release-channels). Obraz nastavuje **`OMNIROUTE_MEMORY_MB=1024`**. To postačuje pro dashboard a nenáročný chat. **Agenti pro programování** (`POST /v1/responses` z Claude Code, Codex, Grok, …) potřebují mnohem větší haldu V8, jinak proces skončí chybou `FATAL ERROR` při přibližně 12 GiB pod dvěma překrývajícími se dlouhými kontexty. Velikost kontejneru nastavte větší než velikost haldy (nativní buffery se nacházejí mimo V8):
@@ -1123,7 +1123,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Úplná tabulka: [Průvodce Dockerem — RAM za běhu](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1331,7 +1331,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b>Běhové prostředí</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> v celém <code>src/</code> a <code>open-sse/</code> (žádné <code>any</code> v jádře od v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší JSON) — 147 doménových modulů, 240 migrací</td></tr>
+  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší JSON) — 147 doménových modulů, 244 migrací</td></tr>
   <tr><td nowrap><b>Paměť</b></td><td>fulltextové vyhledávání SQLite FTS5 + vektorové embeddingy s kvantizací int8, typovaný útlum</td></tr>
   <tr><td nowrap><b>Schémata</b></td><td>Zod 4 — validace I/O nástrojů MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1344,7 +1344,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b>Testování</b></td><td>testovací runner Node.js + Vitest — <b>60,000+ statických deklarací testů</b> ve více než 8,400 sledovaných testovacích souborech (jednotkové, integrační, E2E, bezpečnostní, ekosystémové)</td></tr>
   <tr><td nowrap><b>Platformy</b></td><td>Desktop (Electron) · Android (Termux) · PWA (libovolný prohlížeč)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatické publikování npm + Docker Hub při vydání</td></tr>
-  <tr><td nowrap><b>Odkazy</b></td><td><a href="https://omniroute.online">Web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Odkazy</b></td><td><a href="https://omniroute.online">Web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
