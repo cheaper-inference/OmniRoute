@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { createRequire, registerHooks } from "node:module";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { isInternalThread } from "node:worker_threads";
 
-const cliEntry = new URL("../../bin/omniroute.mjs", import.meta.url).href;
+const cliEntry = new URL("../../bin/omniroute.mjs", import.meta.url);
 const cliRoot = fileURLToPath(new URL("../../bin/cli/", import.meta.url));
 const cliTsxBridge = new URL("native-cli-v8-tsx.mjs", import.meta.url).href;
 // Node loads these worker, tray and standalone MCP modules as native TypeScript.
@@ -24,6 +24,25 @@ const nativeSources = new Set(
     "open-sse/utils/registeredFeatureFlag.ts",
   ].map((file) => fileURLToPath(new URL(`../../${file}`, import.meta.url)))
 );
+
+function isCliEntry(parentURL) {
+  if (parentURL === cliEntry.href) return true;
+  const entry = process.argv[1];
+  if (
+    !entry ||
+    parentURL !== pathToFileURL(entry).href ||
+    !parentURL.endsWith("/bin/omniroute.mjs")
+  ) {
+    return false;
+  }
+  // The installed-layout fixture copies the executable and shares the CLI modules.
+  // Check the bytes before substituting the bridge for a CLI outside the checkout.
+  try {
+    return readFileSync(entry).equals(readFileSync(cliEntry));
+  } catch {
+    return false;
+  }
+}
 
 function loadNativeCoverageSource(url, context, nextLoad) {
   if (url.startsWith("file:")) {
@@ -64,7 +83,7 @@ if (process.env.NODE_V8_COVERAGE && !isInternalThread) {
     resolve(specifier, context, nextResolve) {
       // The CLI installs tsx after it has configured stdout. Apply the native
       // loader again at that import so it takes precedence over tsx.
-      if (specifier === "tsx/esm" && context.parentURL === cliEntry) {
+      if (specifier === "tsx/esm" && isCliEntry(context.parentURL)) {
         return { url: cliTsxBridge, format: "module", shortCircuit: true };
       }
       return nextResolve(specifier, context);
