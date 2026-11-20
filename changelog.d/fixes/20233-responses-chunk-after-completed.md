@@ -1,0 +1,1 @@
+- **fix(responses):** a content or tool-call chunk that arrives after `response.completed` is dropped by the Chat to Responses stream translator instead of opening new items after the terminal event. ([#20233](https://github.com/cheaper-inference/OmniRoute/pull/20233))
