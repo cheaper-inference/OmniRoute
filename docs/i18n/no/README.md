@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -787,7 +787,7 @@ av shell-historikken din. → [CLI-integrasjoner](docs/guides/CLI-INTEGRATIONS.m
   <tr><th align="left">Plattform</th><th align="left">Installasjon</th><th align="left">Høydepunkter</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globalt)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Én kommando, alle operativsystemer</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (globalt)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Samme register-tarball, raskere installasjoner</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multiarkitektur <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multiarkitektur <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Skrivebord (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Opprinnelig vindu + systemstatusfelt — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Menyfelt (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Overvåker og oppdaterer serveren automatisk — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>native <code>arm64</code></td><td align="left">Raspberry Pi, ARM-servere, Apple Silicon</td></tr>
@@ -1110,7 +1110,7 @@ Bruk disse bare for klienter som ikke kan legge ved `Authorization: Bearer ...`.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` følger den høyeste **publiserte** stabile SemVer-versjonen. Den følger ikke git-`main`. Bruk `:X.Y.Z` for GitOps. Se [Docker-utgivelseskanaler](docs/guides/DOCKER_GUIDE.md#release-channels). Avbildningen låser **`OMNIROUTE_MEMORY_MB=1024`**. Det er tilstrekkelig for dashbordet og en lett chat. **Kodeagenter** (`POST /v1/responses` fra Claude Code, Codex, Grok, …) trenger en mye større V8-heap, ellers får prosessen `FATAL ERROR`s ved ~12 GiB under to overlappende lange kontekster. Dimensjoner containeren over heap-størrelsen (native buffere ligger utenfor V8):
@@ -1124,7 +1124,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Fullstendig tabell: [Docker-veiledning — RAM under kjøring](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1330,7 +1330,7 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><td nowrap><b>Kjøretid</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i <code>src/</code> og <code>open-sse/</code> (ingen <code>any</code> i kjernen siden v2.0)</td></tr>
   <tr><td nowrap><b>Rammeverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (eldre JSON) — 147 domenemoduler, 240 migreringer</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (eldre JSON) — 147 domenemoduler, 244 migreringer</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltekstsøk + int8-kvantisert vektorintegrering, typet henfall</td></tr>
   <tr><td nowrap><b>Skjemaer</b></td><td>Zod 4 — validering av MCP-verktøy-I/O + API-kontrakter</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1343,7 +1343,7 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><td nowrap><b>Testing</b></td><td>Node.js-testkjører + Vitest — <b>over 60 000 statiske testdeklarasjoner</b> i over 8 400 sporede testfiler (enhet, integrasjon, E2E, sikkerhet, økosystem)</td></tr>
   <tr><td nowrap><b>Plattformer</b></td><td>Skrivebord (Electron) · Android (Termux) · PWA (alle nettlesere)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-publisering + Docker Hub ved utgivelser</td></tr>
-  <tr><td nowrap><b>Lenker</b></td><td><a href="https://omniroute.online">Nettsted</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Lenker</b></td><td><a href="https://omniroute.online">Nettsted</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

@@ -471,7 +471,7 @@ vaadake faili [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Püsiv parandus:** siduge port sõnaselgelt IPv4-ga, kasutades käsus `docker run` väärtust `-p 127.0.0.1:20128:20128`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    See sunnib kasutama IPv4 sidumist ja väldib ühtlasi puhverserveri avaldamist hosti kõigil võrguliidestel.
 

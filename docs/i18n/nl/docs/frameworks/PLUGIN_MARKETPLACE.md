@@ -25,31 +25,26 @@ code en voeren deze uit in childprocessen, waardoor de routes niet bereikbaar zi
 niet-loopbackoorsprong, ongeacht de authenticatie. Zie
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Hoe alles samenwerkt
+## Hoe het past Together
 
 ```
 Dashboard (/dashboard/plugins)
-  ├─ Tabblad "Geïnstalleerd" → GET /api/plugins            (listPlugins)
-  │                            POST /api/plugins/scan      (pluginManager.scan)
-  │                            POST /api/plugins/{name}/activate|deactivate
-  │                            DELETE /api/plugins/{name}   (verwijderen)
-  └─ Tabblad "Marketplace"   → GET /api/plugins/marketplace
-                                 → listMarketplacePlugins()
-                                   ├─ geen aangepaste URL → ingebouwd SEED_REGISTRY
-                                   └─ aangepaste URL → isSafeMarketplaceUrl() SSRF-beveiliging
-                                                       → safeOutboundFetch(guard:"public-only")
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Registerlaag** — `src/lib/plugins/marketplace.ts`: geeft de
-  catalogus weer en doorzoekt deze, met terugval op het basisregister bij elke fout.
-- **Levenscycluslaag** — `src/lib/plugins/manager.ts` (`pluginManager`-singleton):
-  installeren, upgraden, activeren, deactiveren, verwijderen, scannen en laden bij het opstarten.
-- **Manifestlaag** — `src/lib/plugins/manifest.ts`: Zod-schema + standaardwaarden voor
-  `plugin.json`.
-- **Scanner** — `src/lib/plugins/scanner.ts`: detecteert plugins op schijf in
-  de pluginmap.
-- **Lader** — `src/lib/plugins/loader.ts`: start elke plugin in een geïsoleerd
-  childproces en bemiddelt hookaanroepen via IPC.
+- **Registerlaag** — `src/lib/plugins/marketplace.ts`: geeft een overzicht van/doorzoekt de catalogus en valt bij elke fout terug naar het zaadregister.
+- **Levenscycluslaag** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): installeren, upgraden, activeren, deactiveren, verwijderen, scannen, opstarten laden.
+- **Duidelijke laag** — `src/lib/plugins/manifest.ts`: Zod schema + standaardwaarden voor `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: ontdekt plug-ins op schijf onder de plug-inmap.
+- **Lader** — `src/lib/plugins/loader.ts`: brengt elke plug-in voort in een afzonderlijk Node.js onderliggend proces en makelaars haken oproepen af via IPC. Het onderliggende item is geen sandbox (zie "Isolatie van plug-inuitvoering" hieronder).
 
 ## Marketplace-catalogus
 
@@ -83,36 +78,33 @@ inhoud retourneert, registreert `listMarketplacePlugins()` een waarschuwing en v
 > melding dat deze functie "binnenkort beschikbaar" is. Installatie verloopt momenteel via de installatieprocedure
 > voor lokale paden (`POST /api/plugins`) en detectie op schijf (`POST /api/plugins/scan`).
 
-## REST-API
+## REST API
 
-Alle endpoints vereisen beheerauthenticatie (`requireManagementAuth`) **en** zijn
-alleen via loopback toegankelijk — `/api/plugins` en `/api/plugins/` zijn opgenomen in
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Voor alle eindpunten is beheerauthenticatie vereist (`requireManagementAuth`)** En** zijn alleen loopback — `/api/plugins` en `/api/plugins/` worden vermeld in `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Methode | Beschrijving                                                          |
-| -------------------------------- | ------- | --------------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | Geïnstalleerde plugins weergeven (optioneel `?status=`-filter)        |
-| `/api/plugins`                   | POST    | Een plugin installeren vanaf een absoluut lokaal pad                  |
-| `/api/plugins/scan`              | POST    | De pluginmap scannen en nieuwe plugins registreren                    |
-| `/api/plugins/marketplace`       | GET     | Items uit de marketplacecatalogus weergeven                           |
-| `/api/plugins/[name]`            | GET     | Details van een geïnstalleerde plugin ophalen                         |
-| `/api/plugins/[name]`            | DELETE  | Een plugin verwijderen                                                |
-| `/api/plugins/[name]/activate`   | POST    | Activeren (laden + hooks registreren)                                 |
-| `/api/plugins/[name]/deactivate` | POST    | Deactiveren (`onDeactivate` uitvoeren, hooks deregistreren)           |
-| `/api/plugins/[name]/config`     | GET     | Pluginconfiguratie + configuratieschema ophalen                       |
-| `/api/plugins/[name]/config`     | PUT     | Pluginconfiguratie bijwerken (gevalideerd aan de hand van het schema) |
+| Eindpunt                         | Methode | Beschrijving                                                    |
+| -------------------------------- | ------- | --------------------------------------------------------------- |
+| `/api/plugins`                   | GET     | Lijst met geïnstalleerde plug-ins (optioneel `?status=` filter) |
+| `/api/plugins`                   | POST    | Installeer een plug-in vanuit de map met plug-inbronnen         |
+| `/api/plugins/scan`              | POST    | Scan de map met plug-ins en registreer nieuwe plug-ins          |
+| `/api/plugins/marketplace`       | GET     | Lijst met marktplaatscatalogusitems                             |
+| `/api/plugins/[name]`            | GET     | Ontvang geïnstalleerde plug-indetails                           |
+| `/api/plugins/[name]`            | DELETE  | Een plug-in verwijderen                                         |
+| `/api/plugins/[name]/activate`   | POST    | Activeren ( + registerhaken laden)                              |
+| `/api/plugins/[name]/deactivate` | POST    | Deactiveren ( `onDeactivate` afvuren, hooks afmelden)           |
+| `/api/plugins/[name]/config`     | GET     | Haal plug-inconfiguratie + -configuratieschema op               |
+| `/api/plugins/[name]/config`     | PUT     | Update plug-inconfiguratie (gevalideerd volgens schema)         |
 
-Het `status`-filter van `GET /api/plugins` accepteert een van de volgende waarden:
-`installed` / `active` / `inactive` / `error`. Een ongeldige waarde retourneert `400`.
+Het `GET /api/plugins` `status` filter accepteert een van `installed` / `active` / `inactive` / `error`. Een ongeldige waarde retourneert `400`.
 
-### Geïnstalleerde plugins weergeven
+### Lijst met geïnstalleerde plug-ins
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Installeren vanaf een lokaal pad
+### Installeer vanaf een lokaal pad
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -121,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-Het `path` moet **absoluut** zijn en mag geen `..`-traversalsegmenten of
-nullbytes bevatten (afgedwongen door Zod). De bronmap moet een geldig
-`plugin.json` bevatten (of een bovenliggende map daarvan zijn). Bij succes is de
-respons `201`, met de rij van de geïnstalleerde plugin.
+De `path` moet een zijn** absoluut** pad naar een map** in de map met plug-inbronnen** : `plugin-sources` naast de root van de plug-in, dus standaard `~/.omniroute/plugin-sources/`, of `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` als die variabele is ingesteld (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopieer of kloon eerst de plug-in daar. De installatie wordt geweigerd met `400` als het pad `..` of een null-byte bevat, buiten die map ligt, daarbuiten wordt omgezet via een symlink, een symlink bevat waarvan het doel daarbuiten ligt, of als de map niet bestaat. De bronmap moet een geldige `plugin.json` bevatten (of een ouder ervan zijn). Bij succes is het antwoord `201` met de geïnstalleerde plug-inrij.
 
-### De marketplace bekijken
+In tegenstelling tot de andere plug-inroutes vereist deze de beheerreferentie (een dashboardsessie of een API -sleutel met beheerbereik), zelfs als inloggen is uitgeschakeld (`requireLogin=false`): het installeren van code is nooit een anonieme actie.
+
+### Blader door de marktplaats
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Pluginconfiguratie bijwerken
+### Update plug-inconfiguratie
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,11 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` valideert elke opgegeven waarde aan de hand van het
-`configSchema` van de plugin (gedeclareerd in het manifest): velden van het type
-`number` respecteren `min`/`max`, en velden van het type `select` moeten
-overeenkomen met de gedeclareerde `enum`. Sleutels die niet in het schema
-voorkomen, worden toegestaan.
+`PUT .../config` valideert elke opgegeven waarde tegen de `configSchema` van de plug-in (gedeclareerd in het manifest): `number` velden respecteren `min`/`max`, `select` -velden moeten overeenkomen met de gedeclareerde `enum`. Sleutels die niet in het schema aanwezig zijn, worden toegelaten.
 
 ## Configuratie
 
@@ -205,82 +192,58 @@ Het tabblad "Marketplace" van het dashboard bevat een veld voor deze URL (terugg
 
 ## Beveiliging
 
-### Routelaag — alleen loopback
+### Alleen routelaag — loopback
 
-Plugins voeren code uit in gestarte onderliggende processen. Daarom is het volledige oppervlak `/api/plugins`
-geclassificeerd als `LOCAL_ONLY` (laag 1). Loopback-handhaving vindt
-onvoorwaardelijk **vóór** elke authenticatiecontrole plaats. Daardoor kan een uitgelekt beheertoken dat
-via een tunnel de host bereikt nog steeds geen plugin installeren, activeren of verwijderen.
-Zie [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) en
-harde regels #15 / #17.
+Plug-ins voeren code uit in voortgebrachte onderliggende processen, zodat het gehele `/api/plugins` oppervlak `LOCAL_ONLY` wordt geclassificeerd (Tier 1). Loopback-handhaving is onvoorwaardelijk** voor** elke auth-controle, zodat een gelekt beheertoken dat de box via een tunnel bereikt, nog steeds geen plug-in kan installeren, activeren of verwijderen. Zie [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) en Harde regels #15 / #17.
 
-### SSRF-beveiliging voor het marketplace-register
+### Marktplaats register SSRF guard
 
-Een aangepaste register-URL is configuratie die door een aanvaller kan worden beïnvloed. Daarom
-voert `listMarketplacePlugins()` deze vóór het ophalen door twee lagen:
+Een aangepast register URL is een configuratie die door aanvallers kan worden beïnvloed, dus voordat `listMarketplacePlugins()` het ophaalt, doorloopt het twee lagen:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Weigert alles wat niet `http:` / `https:` is.
-   - Weigert letterlijke privé-, loopback-, link-local- en ULA-hosts (IPv4 **en** IPv6,
-     inclusief IPv4-mapped) via de canonieke `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Lost **zowel** `A`- als `AAAA`-records op en weigert de URL als **enig** opgelost
-     adres privé is — hiermee wordt de omzeiling via openbare hostnaam → privé-IP gedicht.
-   - **Faalt gesloten**: bij een DNS-resolutiefout wordt de URL geweigerd.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): past de URL-beveiliging voor alleen openbare adressen
-   tijdens het ophalen opnieuw toe en **blokkeert omleidingen** (geen
-   omschakeling van openbaar → privé via `30x`).
+   - Verwerpt alles dat niet `http:` / `https:` is.
+   - Verwerpt letterlijke private/loopback/link-local/ULA hosts (IPv4** En** IPv6, inclusief IPv4-mapped) via de canonieke `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Lost op** beide** `A` en `AAAA` registreren en weigeren if** elk** opgelost adres is private — en sluit de publieke-hostnaam → private-IP-bypass.
+   - **Mislukt gesloten** : een mislukte DNS -resolutie verwerpt de URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): past de publieke URL -beveiliging opnieuw toe tijdens het ophalen en** blokkeert omleidingen** (geen publieke → private `30x` -spil).
 
-Een URL die voor een van beide lagen faalt, breekt het verzoek niet af — de marketplace
-valt stilzwijgend terug op het ingebouwde initiële register en registreert een waarschuwing.
+Een URL die een van beide lagen faalt, breekt het verzoek niet af — De marktplaats valt stil terug naar het ingebouwde zaadregister en registreert een waarschuwing.
 
-> Deze beveiliging is in PR #3774 specifiek aangescherpt om A + AAAA op te lossen en
-> de canonieke `isPrivateHost` te gebruiken in plaats van een controle die alleen IPv4 ondersteunt.
+> Deze bewaker is specifiek versterkt in PR #3774 om A + AAAA op te lossen en de canonieke `isPrivateHost` te gebruiken in plaats van een IPv4-only -controle.
 
-### Isolatie van pluginuitvoering
+### Isolatie van plug-inuitvoering
 
-- **Procesisolatie** — `loadPlugin()` (`src/lib/plugins/loader.ts`) start
-  elke plugin in een afzonderlijk onderliggend Node.js-proces en communiceert via IPC.
-  Hook-aanroepen hebben een time-out met escalatie van `SIGTERM` → `SIGKILL`.
-- **Allowlist voor omgevingsvariabelen** — het onderliggende proces ontvangt alleen een toegestane set omgevingsvariabelen;
-  de bredere set wordt alleen toegekend wanneer het manifest om de
-  permissie `env` vraagt.
-- **Padinsluiting** — bij installatie/upgrade/verwijdering wordt gecontroleerd of de pluginmap
-  en `manifest.main` zich **binnen** de beheerde pluginhoofdmap bevinden
-  voordat er iets wordt gekopieerd of recursief verwijderd (beschermt tegen gemanipuleerde databasepaden en
-  `../`-traversal in `manifest.main`). Bij activering worden symlinks opgelost via
-  `realpath` en wordt geweigerd een ingangspunt te laden dat buiten de pluginmap
-  valt.
-- **Optionele integriteitspin** — een manifest kan een veld `integrity`
-  (`sha256-<base64>`, SRI-indeling) declareren. Indien aanwezig, verifieert de loader tijdens het laden de
-  hash van het invoerbestand en weigert deze activering bij een afwijking. Dit is
-  optionele detectie van manipulatie, **geen** beveiligingsgrens — routering die alleen loopback toestaat
-  en het permissiemodel vormen de daadwerkelijke grenzen.
+> **Plug-ins zijn niet in een sandbox geplaatst.** Het kind is een gewoon Node.js proces dat wordt uitgevoerd als de OmniRoute gebruiker, zonder VM context en zonder Node.js toestemmingsvlaggen, dus de plug-incode kan elk bestand lezen en schrijven dat de gebruiker kan, programma's uitvoeren en het netwerk bereiken. `requires.permissions` beslist alleen welke omgevingsvariabelen het kind krijgt; de overige machtigingen worden niet afgedwongen. Installeer alleen plug-ins die u vertrouwt. De onderstaande procesgrens bevat crashes en vastlopen; het is geen veiligheidsgrens.
+
+- **Procesisolatie** — `loadPlugin()` (`src/lib/plugins/loader.ts`) brengt elke plug-in voort in een apart Node.js onderliggend proces en communiceert via IPC. Hook-oproepen hebben een time-out met `SIGTERM` → `SIGKILL` escalatie.
+- **Env-toelatingslijst** — het kind ontvangt alleen een reeks omgevingsvariabelen die op de toelatingslijst staan; de bredere set wordt alleen verleend als het manifest de `env` toestemming vraagt.
+- **Installeer bronbeperking** — `POST /api/plugins` leest alleen vanuit de map met bronnen voor de plug-in (zie "Installeren vanaf een lokaal pad"): het pad wordt gecanoniseerd met `realpath`, moet strikt binnen die map blijven, en een bronboom met een symbolische link die eraan ontsnapt, wordt geweigerd voordat er iets wordt gekopieerd.
+- **Padinsluiting** — install/upgrade/uninstall beweert dat de plug-inmap en `manifest.main` worden opgelost** binnenin** de beheerde plug-in root vóór elke kopie of recursieve verwijdering (beveiligt tegen geknoeide DB paden en `../` -traversal in `manifest.main`). Activering lost symlinks op via `realpath` en weigert een toegangspunt te laden dat uit de plug-inmap ontsnapt.
+- **Optionele integriteitspin** — een manifest kan een `integrity` veld (`sha256-<base64>`, SRI -formaat) declareren. Indien aanwezig, verifieert de lader de hash van het invoerbestand tijdens het laden en weigert deze te activeren als deze niet overeenkomt. Het is opt-in-sabotagedetectie,** niet** een beveiligingsgrens: deze beperkt niet wat een geladen plug-in kan doen.
+- **Geen klantreferenties in hooks** — de context die wordt doorgegeven aan `onRequest`, `onResponse` en `onError` zijn de headers `authorization`, `x-api-key`, `proxy-authorization` en `cookie` verwijderd, en de API -sleutelrecord bevat geen sleutelwaarde (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
 Gevalideerd door `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Veld               | Type      | Opmerkingen                                                              |
-| ------------------ | --------- | ------------------------------------------------------------------------ |
-| `name`             | string    | Vereist; kebab-case (`^[a-z0-9-]+$`), 1–100 tekens                       |
-| `version`          | string    | Vereist; semver (`MAJOR.MINOR.PATCH`)                                    |
-| `description`      | string?   | ≤ 500 tekens                                                             |
-| `author`           | string?   | ≤ 200 tekens                                                             |
-| `license`          | string?   | Standaardwaarde is `MIT`                                                 |
-| `main`             | string?   | Invoerbestand; standaardwaarde is `index.js`                             |
-| `source`           | enum?     | `local` \| `marketplace` (standaardwaarde is `local`)                    |
-| `tags`             | string[]? | Zoektags                                                                 |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                          |
-| `hooks`            | object?   | Booleans die aangeven welke hooks de plugin implementeert                |
-| `skills`           | object[]? | Optionele vaardigheidsdefinities                                         |
-| `enabledByDefault` | boolean?  | Automatisch activeren bij installatie                                    |
-| `configSchema`     | object?   | Toewijzing van configuratievelden (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Optionele `sha256-<base64>`-pin voor het invoerbestand                   |
+| Veld               | Type        | Opmerkingen                                                         |
+| ------------------ | ----------- | ------------------------------------------------------------------- |
+| `name`             | snaar       | Vereist; kebabdoos (`^[a-z0-9-]+$`), 1–100 tekens                   |
+| `version`          | snaar       | Vereist; semver (`MAJOR.MINOR.PATCH`)                               |
+| `description`      | snaar?      | ≤ 500 tekens                                                        |
+| `author`           | snaar?      | ≤ 200 tekens                                                        |
+| `license`          | snaar?      | Standaard ingesteld op `MIT`                                        |
+| `main`             | snaar?      | Invoerbestand; standaard ingesteld op `index.js`                    |
+| `source`           | opsomming?  | `local` \| `marketplace` (standaard `local`)                        |
+| `tags`             | snaar[]?    | Tags zoeken                                                         |
+| `requires`         | voorwerp?   | `{ omniroute?, permissions[] }`                                     |
+| `hooks`            | voorwerp?   | Booleans die aangeven welke hooks de plug-in implementeert          |
+| `skills`           | voorwerp[]? | Optionele vaardigheidsdefinities                                    |
+| `enabledByDefault` | booleaans?  | Automatisch activeren bij installatie                               |
+| `configSchema`     | voorwerp?   | Kaart met configuratievelden (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | snaar?      | Optionele `sha256-<base64>` -invoerbestandspincode                  |
 
-Permissies zijn afkomstig uit de enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Machtigingen worden gehaald uit de enum `network` / `file-read` / `file-write` / `env` / `exec`. Alleen `env` heeft een runtime-effect (een iets grotere toelatingslijst met omgevingsvariabelen voor het kind); de andere zijn verklaringen en worden niet afgedwongen.
 
 ## Levenscyclus
 
@@ -341,17 +304,14 @@ Pluginmetrieken en -analyses worden bijgehouden in aanvullende tabellen
 
 ## Dashboard
 
-De dashboardpagina op `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) bevat twee tabbladen:
+De dashboardpagina op `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) biedt twee tabbladen:
 
-- **Geïnstalleerd** — toont geïnstalleerde plugins met hun gedeclareerde hooks,
-  een schakelaar voor activeren/deactiveren, een knop om de plugin te verwijderen
-  en een actie "Scannen naar plugins" (`POST /api/plugins/scan`).
-- **Marketplace** — toont de catalogus van `GET /api/plugins/marketplace` met een
-  veld om de aangepaste register-URL in te stellen.
+- **Geïnstalleerd** — geeft een overzicht van geïnstalleerde plug-ins met hun gedeclareerde hooks, een activate/deactivate -schakelaar, een verwijderknop en een actie "Scannen naar plug-ins" (`POST /api/plugins/scan`).
+- **Marktplaats** — toont de catalogus van `GET /api/plugins/marketplace` met een veld om het aangepaste register URL in te stellen.
 
-Een configuratiepagina per plugin bevindt zich op `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+De pagina toont altijd een waarschuwing dat plug-ins worden uitgevoerd met de volledige rechten van het OmniRoute -proces.
+
+Een configuratiepagina per plug-in bevindt zich op `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Zie ook
 
