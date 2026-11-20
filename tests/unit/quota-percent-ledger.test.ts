@@ -121,11 +121,9 @@ test("a rise moves only the last figure: baseline and marks stay", () => {
   assert.deepEqual(state.keys, before.keys);
 });
 
-test("a rise without a reset time keeps the stored one while it is ahead, and forgets it once passed", () => {
+test("a rise without a reset time keeps the stored one while it is ahead", () => {
   const kept = run(st(), {}, rd(0.65, 5, null)).state;
-  assert.deepEqual([kept.last, kept.resetAt, kept.rev], [0.65, R, 4]);
-  const forgotten = run(st({ resetAt: T0 + MIN }), {}, rd(0.65, 5, null)).state;
-  assert.deepEqual([forgotten.last, forgotten.resetAt, forgotten.rev], [0.65, null, 4]);
+  assert.deepEqual([kept.last, kept.baseline, kept.resetAt, kept.rev], [0.65, 0.1, R, 4]);
 });
 
 test("an equal figure changes nothing, even with a reset time moving 20 minutes", () => {
@@ -199,11 +197,11 @@ test("a drop inside a window the provider still reports as open changes nothing,
   }
 });
 
-test("a drop of one point or less changes nothing when a reset time is missing or already passed", () => {
+test("a drop of one point or less changes nothing when a reset time is missing", () => {
+  // With the stored reset time already passed the same reading turns the book (row 3b, below).
   for (const [before, reading] of [
     [st(), rd(0.59, 5, null)],
     [st({ resetAt: null }), rd(0.59, 5)],
-    [st({ resetAt: T0 + 2 * MIN }), rd(0.59, 5, T0 + 2 * MIN)],
   ] as const) {
     const out = run(before, { k1: c(10_000, 4) }, reading);
     assert.deepEqual([out.changed, out.state === before], [false, true]);
@@ -211,25 +209,32 @@ test("a drop of one point or less changes nothing when a reset time is missing o
 });
 
 test("a larger confirmed drop turns the window when no reset time says otherwise", () => {
-  for (const [before, reading] of [
-    [st({ keys: { k1: { startTokens: 4_000 }, gone: { startTokens: 7 } } }), rd(0.589, 5, null)],
+  for (const [before, reading, resetAt] of [
+    [
+      st({ keys: { k1: { startTokens: 4_000 }, gone: { startTokens: 7 } } }),
+      rd(0.589, 5, null),
+      null,
+    ],
     [
       st({ resetAt: null, keys: { k1: { startTokens: 4_000 }, gone: { startTokens: 7 } } }),
       rd(0.589, 5),
+      R,
     ],
     [
       st({ resetAt: T0 + 2 * MIN, keys: { k1: { startTokens: 4_000 }, gone: { startTokens: 7 } } }),
       rd(0.589, 5, T0 + 2 * MIN),
+      null,
     ],
   ] as const) {
     const { state, changed } = run(before, { k1: c(10_000, 4) }, reading);
     assert.equal(changed, true);
-    // The third pair: the stored reset time already passed. A key without a counter leaves the book.
+    // The third pair: the stored reset time already passed (row 3b), and the reading's own reset
+    // time is behind its data time, so it is not stored. A key without a counter leaves the book.
     assert.deepEqual(state, {
       rev: 4,
       last: 0.589,
       baseline: 0.589,
-      resetAt: reading.resetAt,
+      resetAt,
       readAt: T0 + 5 * MIN,
       updatedAt: T0 + 5 * MIN,
       keys: { k1: { startTokens: 10_000 } },
@@ -244,6 +249,120 @@ test("an unusable counter is marked at 0 when the book opens or turns", () => {
     const turned = run(st(), { k1: c(odd, 4) }, rd(0.2, 5, R + 5 * H)).state;
     assert.deepEqual(turned.keys, { k1: { startTokens: 0 } });
   }
+});
+
+// ─── Row 3b: the stored window has ended ────────────────────────────────────
+
+const COUNTERS = { k1: c(10_000, 4), k2: c(2_000, 4) };
+
+/** The state a turn of st() at minute `atMin` produces with COUNTERS. */
+function turnedAt(g: number, atMin: number, resetAt: number | null = null): LedgerState {
+  return {
+    rev: 4,
+    last: g,
+    baseline: g,
+    resetAt,
+    readAt: T0 + atMin * MIN,
+    updatedAt: T0 + atMin * MIN,
+    keys: { k1: { startTokens: 10_000 }, k2: { startTokens: 2_000 } },
+  };
+}
+
+test("a passed stored reset time turns the book on a reading without one, whatever the figure", () => {
+  for (const g of [0.65, 0.3, 0.6, 0.59]) {
+    const out = run(st({ resetAt: T0 + MIN }), COUNTERS, rd(g, 5, null));
+    assert.equal(out.changed, true, `figure ${g}`);
+    assert.deepEqual(out.state, turnedAt(g, 5), `figure ${g}`);
+  }
+});
+
+test("a reading carrying the passed reset time turns once; the next ones are ordinary rises", () => {
+  const turned = run(st({ resetAt: T0 + MIN }), COUNTERS, rd(0.5, 5, T0 + MIN)).state;
+  assert.deepEqual(turned, turnedAt(0.5, 5)); // the passed reset time is not stored
+  const risen = run(turned, COUNTERS, rd(0.55, 6, T0 + MIN)).state;
+  assert.deepEqual(risen, {
+    ...turnedAt(0.5, 5),
+    rev: 5,
+    last: 0.55,
+    readAt: T0 + 6 * MIN,
+    updatedAt: T0 + 6 * MIN,
+  });
+
+  // The new window's reset time arrives: a rise records it, the turn's baseline stays.
+  const timed = run(risen, COUNTERS, rd(0.6, 7, R)).state;
+  assert.deepEqual([timed.rev, timed.last, timed.baseline, timed.resetAt], [6, 0.6, 0.5, R]);
+  // With an equal figure nothing changes, so the new reset time is not recorded yet. Intended: a
+  // reset time is only stored when the state changes.
+  const equal = run(risen, COUNTERS, rd(0.55, 7, R));
+  assert.deepEqual([equal.changed, equal.state === risen], [false, true]);
+});
+
+test("row 3b boundary: a stored reset time equal to the data time turns; one millisecond later does not", () => {
+  assert.deepEqual(
+    run(st({ resetAt: T0 + 5 * MIN }), COUNTERS, rd(0.65, 5, null)).state,
+    turnedAt(0.65, 5)
+  );
+  const ahead = run(st({ resetAt: T0 + 5 * MIN + 1 }), COUNTERS, rd(0.65, 5, null)).state;
+  assert.deepEqual(
+    [ahead.last, ahead.baseline, ahead.resetAt, ahead.keys],
+    [0.65, 0.1, T0 + 5 * MIN + 1, { k1: { startTokens: 4_000 } }]
+  );
+});
+
+test("a reading older than the last applied one is ignored even when the stored reset time passed", () => {
+  const before = st({ resetAt: T0 + MIN, readAt: T0 + 10 * MIN });
+  const out = run(before, COUNTERS, rd(0.9, 5, null), 20);
+  assert.deepEqual([out.changed, out.state === before], [false, true]);
+});
+
+test("a rise does not store a reading's reset time that is already behind its data time", () => {
+  const untimed = run(st({ resetAt: null }), {}, rd(0.65, 5, T0 + 2 * MIN)).state;
+  assert.deepEqual([untimed.last, untimed.resetAt], [0.65, null]);
+  // Stored reset still ahead, the reading's own reset time behind its data time: the stored one stays.
+  const kept = run(st({ resetAt: T0 + 6 * MIN }), {}, rd(0.65, 5, T0 + 4 * MIN)).state;
+  assert.deepEqual([kept.last, kept.baseline, kept.resetAt], [0.65, 0.1, T0 + 6 * MIN]);
+});
+
+// ─── Boundaries of rows 2, 3, 4, 6 and 7 ────────────────────────────────────
+
+test("row 2 boundary: a reset time exactly 30 minutes back is not old; one millisecond more is", () => {
+  const notOld = run(st(), {}, rd(0.65, 5, R - 30 * MIN));
+  assert.deepEqual(
+    [notOld.changed, notOld.state.last, notOld.state.resetAt],
+    [true, 0.65, R - 30 * MIN]
+  );
+  const before = st();
+  const old = run(before, {}, rd(0.65, 5, R - 30 * MIN - 1));
+  assert.deepEqual([old.changed, old.state === before], [false, true]);
+});
+
+test("row 3 boundary: a reset time 30 minutes and one millisecond ahead turns", () => {
+  assert.deepEqual(
+    run(st(), COUNTERS, rd(0.65, 5, R + 30 * MIN + 1)).state,
+    turnedAt(0.65, 5, R + 30 * MIN + 1)
+  );
+});
+
+test("row 4 boundary: a rise of exactly 1e-9 changes nothing; just above it is a rise", () => {
+  const flat = st({ last: 0, baseline: 0 });
+  const tiny = run(flat, {}, rd(1e-9, 5));
+  assert.deepEqual([tiny.changed, tiny.state === flat], [false, true]);
+  const above = run(flat, {}, rd(2e-9, 5));
+  assert.deepEqual([above.changed, above.state.last], [true, 2e-9]);
+});
+
+test("row 6 boundary: a drop exactly two minutes newer is applied; one millisecond less is kept", () => {
+  const before = st({ resetAt: null });
+  const at = (fetchedAt: number): PlanWindowReading => ({ used: 0.3, resetAt: null, fetchedAt });
+  assert.deepEqual(run(before, COUNTERS, at(T0 + 2 * MIN)).state, turnedAt(0.3, 2));
+  const kept = run(before, COUNTERS, at(T0 + 2 * MIN - 1));
+  assert.deepEqual([kept.changed, kept.state === before], [false, true]);
+});
+
+test("row 7 boundary: a reset time exactly 30 minutes back still names the same open window", () => {
+  const before = st();
+  const out = run(before, COUNTERS, rd(0.3, 5, R - 30 * MIN));
+  assert.deepEqual([out.changed, out.state === before], [false, true]);
 });
 
 test("applyReading never mutates its input", () => {
@@ -389,9 +508,24 @@ test("over generated sequences, internal plus external equals the last figure an
         label
       );
       assert.ok(state.baseline <= state.last + 1e-9, label);
+      const byKeySum = Object.values(out.internalByKey).reduce((a, v) => a + v, 0);
+      near(byKeySum, out.internal, `${label} sum of internalByKey`);
+      assert.ok(out.internal <= Math.max(0, state.last - state.baseline) + 1e-9, label);
+      assert.ok(out.internal <= tokensSinceMarks(state, counters) / 1000 / 100 + 1e-9, label);
     }
   }
 });
+
+/** Tokens since each key's mark, computed independently of attributeBook. */
+function tokensSinceMarks(state: LedgerState, counters: Record<string, LedgerCounter>): number {
+  let total = 0;
+  for (const [k, counter] of Object.entries(counters)) {
+    const tokens = Number.isFinite(counter.tokens) && counter.tokens >= 0 ? counter.tokens : 0;
+    const mark = state.keys[k]?.startTokens ?? 0;
+    total += tokens >= mark ? tokens - mark : tokens;
+  }
+  return total;
+}
 
 // ─── observeLedger ──────────────────────────────────────────────────────────
 
@@ -477,16 +611,23 @@ test("observeLedger without a reading returns the stored book only while it is c
   assert.equal(await observeLedger(untimed, KEY, null, T0 + 16 * MIN), null);
 });
 
-test("observeLedger with a kept reading: a book whose stored reset time passed is not usable", async () => {
+test("observeLedger after the stored reset time: a newer reading turns the book; a kept one is not charged", async () => {
   const store = memoryStore();
   await observeLedger(store, KEY, rd(0.2, 0, T0 + H), T0);
   const ahead = await observeLedger(store, KEY, rd(0.2, 30, T0 + H), T0 + 30 * MIN);
   assert.deepEqual(ahead, await store.ledgerRead(KEY));
-  // The same figure after the stored reset time: the reading is kept (nothing to write) and the
-  // book of the ended window is not charged.
-  const before = store.n.commits;
-  assert.equal(await observeLedger(store, KEY, rd(0.2, 61, T0 + H), T0 + 61 * MIN), null);
-  assert.equal(store.n.commits, before);
+  // Safety net: a reading whose data time is before the stored reset time, served after it, is
+  // kept (nothing to write), and the book of the ended window is not charged.
+  const commits = store.n.commits;
+  assert.equal(await observeLedger(store, KEY, rd(0.2, 20, T0 + H), T0 + 61 * MIN), null);
+  assert.equal(store.n.commits, commits);
+  // A reading taken after the stored reset time turns the book (row 3b): usable again.
+  const turned = await observeLedger(store, KEY, rd(0.2, 61, T0 + H), T0 + 61 * MIN);
+  assert.deepEqual(
+    [turned?.state.rev, turned?.state.baseline, turned?.state.resetAt],
+    [2, 0.2, null]
+  );
+  assert.deepEqual(turned, await store.ledgerRead(KEY));
 });
 
 test("observeLedger never throws: a failed read gives null, a failed commit gives the snapshot read", async () => {

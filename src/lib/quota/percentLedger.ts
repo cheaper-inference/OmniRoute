@@ -120,17 +120,39 @@ function classifyDrop(
   return "turn";
 }
 
-/** Rows 2 to 9 of the decision table (row 1, no state, opens the book): the first match decides. */
+/** Row 3b: the stored window has ended (its reset time is not after the reading's data time). */
+function hasStoredWindowEnded(state: LedgerState, reading: PlanWindowReading): boolean {
+  return state.resetAt !== null && state.resetAt <= reading.fetchedAt;
+}
+
+/**
+ * Rows 2 to 9 of the decision table (row 1, no state, opens the book); the first match decides:
+ *   2. older than the last applied reading, or a reset time over 30 minutes behind: keep;
+ *   3. a reset time over 30 minutes ahead of the stored one: turn;
+ *   3b. the stored reset time is not after the reading's data time (that window ended): turn;
+ *   4. a higher figure: rise;
+ *   5. an equal figure: keep;
+ *   6 to 9. a lower figure: see classifyDrop.
+ */
 function classify(state: LedgerState, reading: PlanWindowReading, g: number): Transition {
   const shift = resetShift(state, reading);
   if (isOldReading(state, reading, shift)) return "keep";
   if (shift !== null && shift > RESET_JITTER_MS) return "turn";
+  if (hasStoredWindowEnded(state, reading)) return "turn";
   if (g - state.last > EPSILON) return "rise";
   if (g >= state.last - EPSILON) return "keep";
   return classifyDrop(state, reading, g, shift);
 }
 
-/** The book of a window that starts now: the figure is the baseline and every counter is marked. */
+/** The reading's reset time when it is still ahead of the reading's data time, else null. */
+function resetAhead(reading: PlanWindowReading): number | null {
+  return reading.resetAt !== null && reading.resetAt > reading.fetchedAt ? reading.resetAt : null;
+}
+
+/**
+ * The book of a window that starts now (open or turn): the figure is the baseline, every counter
+ * is marked, and the reading's reset time is stored only when it is still ahead.
+ */
 function startedBook(
   counters: Record<string, LedgerCounter>,
   reading: PlanWindowReading,
@@ -140,20 +162,18 @@ function startedBook(
   for (const [key, counter] of Object.entries(counters)) {
     keys[key] = { startTokens: usableTokens(counter) };
   }
-  return { last: g, baseline: g, resetAt: reading.resetAt, keys };
+  return { last: g, baseline: g, resetAt: resetAhead(reading), keys };
 }
 
 /**
- * A rise moves the last figure only. Without a reset time in the reading, the stored one is kept
- * while it is still ahead of the reading and forgotten once it passed.
+ * A rise moves the last figure only. The reading's reset time replaces the stored one when it is
+ * still ahead; otherwise the stored one stays (after row 3b it is null or still ahead).
  */
 function risenBook(state: LedgerState, reading: PlanWindowReading, g: number): Book {
-  const keptReset =
-    state.resetAt !== null && state.resetAt > reading.fetchedAt ? state.resetAt : null;
   return {
     last: g,
     baseline: state.baseline,
-    resetAt: reading.resetAt ?? keptReset,
+    resetAt: resetAhead(reading) ?? state.resetAt,
     keys: state.keys,
   };
 }
@@ -161,6 +181,9 @@ function risenBook(state: LedgerState, reading: PlanWindowReading, g: number): B
 /**
  * Apply one plan-window reading to the book. Returns the same `snapshot.state` object with
  * `changed: false` when the reading changes nothing (old, equal, or a drop that is not a turn).
+ * A stored reset time that is no longer ahead of the reading ends the window: that reading turns
+ * the book whatever its figure. A state only ever stores a reset time ahead of the reading that
+ * carried it, so a reset time is recorded only when the state changes.
  * The returned state may share its key map with the input state: callers must not edit a state
  * in place.
  */
@@ -372,7 +395,8 @@ function usableWithoutReading(snapshot: LedgerSnapshot, nowMs: number): BookSnap
  * returned.
  *
  * Null when there is no usable book: no book, a failed first read, a book whose stored reset time
- * already passed (even when the reading was kept), or, without a reading, a book that may belong
+ * already passed (a safety net: such a reading turns the book, so only a reading older than the
+ * last applied one can leave it in place), or, without a reading, a book that may belong
  * to a provider window that already ended (isLedgerCurrentWithoutReading). The stored state is
  * left as it is either way: the next reading turns or updates it through the transition.
  */
