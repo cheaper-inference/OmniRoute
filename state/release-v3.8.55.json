@@ -2,48 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b10",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b10-212063f00223",
-    "candidateSha": "212063f002231a4dbd53600d0e0ed3c3bf4221e6",
-    "baseSha": "632d84f569f72893ed148e5b19dd05e2fff1a52a",
-    "treeSha": "bdebc381d5eb0d99afc3c2adf753ee6a1ba70c90",
-    "prs": [
-      {
-        "n": 18544,
-        "head": "039bfcf2b12d1e31d4b285b3154da3f12bafb19b",
-        "title": "test: protect property runner reports",
-        "author": "ahmedgo17390",
-        "labeledAt": "2026-11-20T09:42:27Z"
-      },
-      {
-        "n": 18551,
-        "head": "be28b2f4df97483112595236e4cdc4d24f9cded1",
-        "title": "feat(api-manager): manage per-key token quotas from the dashboard",
-        "author": "alirezariahi",
-        "labeledAt": "2026-11-20T09:42:34Z"
-      },
-      {
-        "n": 18575,
-        "head": "56b53709d86f9c7db277dce2068f3f15cbdb02a7",
-        "title": "fix(translator): forward-port malformed tool argument classification",
-        "author": "ahmedgo17390",
-        "labeledAt": "2026-11-20T09:42:40Z"
-      },
-      {
-        "n": 18587,
-        "head": "ce43a725ca9e43375f7bd44dcd5fa9568cf58e9c",
-        "title": "feat(oauth): add Devin Auth email+password sign-in for devin-desktop",
-        "author": "Junior-HJ",
-        "labeledAt": "2026-11-20T09:42:47Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-20T10:56:38.120Z",
-    "attempts": 0,
-    "bisect": null
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
@@ -65,7 +24,11 @@
       "14860": "537a2a9dd38dcfeb936fb37fa2ec26becd8d1925",
       "14863": "009cc84a60dec564b1ee84cefebfad43464744ee",
       "14864": "70a8e2e02e39d3185ce4d80b49025664fa36ee85",
-      "18142": "a62a6abf6c29aea7e3c1b2f4a3f95947a1791d11"
+      "18142": "a62a6abf6c29aea7e3c1b2f4a3f95947a1791d11",
+      "18544": "039bfcf2b12d1e31d4b285b3154da3f12bafb19b",
+      "18551": "be28b2f4df97483112595236e4cdc4d24f9cded1",
+      "18575": "56b53709d86f9c7db277dce2068f3f15cbdb02a7",
+      "18587": "ce43a725ca9e43375f7bd44dcd5fa9568cf58e9c"
     }
   },
   "counters": {
@@ -866,8 +829,35 @@
         "18587": "2026-11-20T09:42:47Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44723214898"
+    },
+    {
+      "at": "2026-11-20T12:06:16.789Z",
+      "type": "checks-green",
+      "batchId": "b10",
+      "prs": [
+        18544,
+        18551,
+        18575,
+        18587
+      ],
+      "sha": "212063f002231a4dbd53600d0e0ed3c3bf4221e6",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44732907873"
+    },
+    {
+      "at": "2026-11-20T12:06:32.647Z",
+      "type": "would-land",
+      "batchId": "b10",
+      "prs": [
+        18544,
+        18551,
+        18575,
+        18587
+      ],
+      "sha": "212063f002231a4dbd53600d0e0ed3c3bf4221e6",
+      "detail": "shadow mode: would merge-ff onto 632d84f569f7",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44732907873"
     }
   ],
-  "updatedAt": "2026-11-20T12:01:03.462Z",
+  "updatedAt": "2026-11-20T12:06:53.746Z",
   "batchWindow": 9
 }
