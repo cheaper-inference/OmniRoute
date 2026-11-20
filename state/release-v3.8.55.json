@@ -47,6 +47,18 @@
       "landed": [],
       "steps": 0,
       "hang": false
+    },
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b15-07bdafc69c99",
+      "requestedAt": "2026-11-20T21:24:59.417Z",
+      "afterMs": 1795209867000,
+      "runIds": [
+        44810337159
+      ],
+      "jobs": [
+        "Gate / CI",
+        "Integration Tests (2/2)"
+      ]
     }
   },
   "baseChecks": [
@@ -119,7 +131,7 @@
     "ciRuns": 17,
     "landedPrs": 0,
     "landedBatches": 0,
-    "redBatches": 5,
+    "redBatches": 6,
     "bisections": 1,
     "culprits": 0
   },
@@ -1206,8 +1218,30 @@
         "19132": "2026-11-20T15:49:45Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44810166625"
+    },
+    {
+      "at": "2026-11-20T21:24:59.417Z",
+      "type": "checks-red",
+      "batchId": "b15",
+      "prs": [
+        19132
+      ],
+      "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
+      "detail": "Gate / CI, Integration Tests (2/2)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44820048996"
+    },
+    {
+      "at": "2026-11-20T21:24:59.418Z",
+      "type": "flaky-rerun",
+      "batchId": "b15",
+      "prs": [
+        19132
+      ],
+      "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
+      "detail": "re-running the failed jobs of b15 once (Gate / CI, Integration Tests (2/2)) before dequeuing #19132",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44820048996"
     }
   ],
-  "updatedAt": "2026-11-20T21:23:13.460Z",
+  "updatedAt": "2026-11-20T21:26:16.894Z",
   "batchWindow": 5
 }
