@@ -291,8 +291,8 @@ test("the installed-layout CLI records native coverage for checkout-backed modul
   assert.equal(invocations, 2, "include the default and edited installed .env launches");
 });
 
-test("the isolated Codex boundary child records native dataPaths coverage", async (t) => {
-  const coverage = await mkdtemp(join(tmpdir(), "codex-boundary-v8-coverage-"));
+async function assertIsolatedBoundaryCoverage(t, driver, fixturePath) {
+  const coverage = await mkdtemp(join(tmpdir(), "isolated-boundary-v8-coverage-"));
   t.after(() => rm(coverage, { recursive: true, force: true }));
   const env = {
     ...process.env,
@@ -302,13 +302,14 @@ test("the isolated Codex boundary child records native dataPaths coverage", asyn
     OMNIROUTE_CI_SYNC_TSX_CACHE: coverage,
   };
   delete env.NODE_TEST_CONTEXT;
-  execFileSync(
-    process.execPath,
-    ["--import", "tsx/esm", "--test", "tests/unit/codex-response-failed-boundary.test.ts"],
-    { cwd: root, env, stdio: "pipe", timeout: 120_000 }
-  );
+  execFileSync(process.execPath, ["--import", "tsx/esm", "--test", driver], {
+    cwd: root,
+    env,
+    stdio: "pipe",
+    timeout: 120_000,
+  });
 
-  const fixture = new URL("tests/fixtures/codex-response-failed-boundary.fixture.ts", root).href;
+  const fixture = new URL(fixturePath, root).href;
   const source = new URL("src/lib/dataPaths.ts", root);
   const sourceLength = (await readFile(source, "utf8")).length;
   let children = 0;
@@ -318,7 +319,7 @@ test("the isolated Codex boundary child records native dataPaths coverage", asyn
     if (!report.result.some(({ url }) => url === fixture)) continue;
     children++;
     const sample = report.result.find(({ url }) => url === source.href);
-    assert.ok(sample, "the Codex fixture must exercise dataPaths");
+    assert.ok(sample, "the boundary fixture must exercise dataPaths");
     assert.equal(Boolean(report["source-map-cache"]?.[source.href]), false, source.href);
     assert.ok(report.result.some(({ url }) => url === preload.href));
     assert.equal(
@@ -327,6 +328,22 @@ test("the isolated Codex boundary child records native dataPaths coverage", asyn
     );
   }
   assert.equal(children, 1, "check coverage emitted by the real isolated fixture subprocess");
+}
+
+test("the isolated Codex boundary child records native dataPaths coverage", async (t) => {
+  await assertIsolatedBoundaryCoverage(
+    t,
+    "tests/unit/codex-response-failed-boundary.test.ts",
+    "tests/fixtures/codex-response-failed-boundary.fixture.ts"
+  );
+});
+
+test("the shared error boundary child records native dataPaths coverage", async (t) => {
+  await assertIsolatedBoundaryCoverage(
+    t,
+    "tests/unit/provider-last-error-sanitization.test.ts",
+    "tests/unit/fixtures/provider-last-error-sanitization.fixture.ts"
+  );
 });
 
 test("the standalone media MCP and tsx share native coverage coordinates", async (t) => {

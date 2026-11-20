@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE = fileURLToPath(
@@ -43,7 +44,15 @@ function buildFixtureEnv(): NodeJS.ProcessEnv {
 test("generic stream public error boundaries pass in an isolated process", () => {
   const result = spawnSync(
     process.execPath,
-    ["--import", "tsx/esm", "--import", "./open-sse/utils/setupPolyfill.ts", "--test", FIXTURE],
+    [
+      ...nativeCoverageArgs(),
+      "--import",
+      "tsx/esm",
+      "--import",
+      "./open-sse/utils/setupPolyfill.ts",
+      "--test",
+      FIXTURE,
+    ],
     {
       cwd: REPO_ROOT,
       encoding: "utf8",
