@@ -153,6 +153,7 @@ import {
   partitionConfirmedVisionTargets,
   resolveComboTargets,
 } from "./comboStructure.ts";
+import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
 import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
@@ -185,7 +186,7 @@ export async function handleRoundRobinCombo({
   clientManagedResponsesContext: _clientManagedResponsesContext,
   deferContextOverflowWhenCompressible: _deferContextOverflowWhenCompressible = false,
   compressionExclusions: _compressionExclusions,
-  sourceFormat: _sourceFormat = null,
+  sourceFormat = null,
   endpointPath: _endpointPath = null,
   requestHeaders: _requestHeaders = null,
   relayOptions,
@@ -278,10 +279,8 @@ export async function handleRoundRobinCombo({
     "Context-aware round-robin fallback",
     {
       failOpen: rrCompatFailOpen,
-      outputLimitAdvisory:
-        (config as { outputLimitAdvisory?: unknown }).outputLimitAdvisory === true ||
-        (settings as { outputLimitAdvisory?: unknown } | null | undefined)?.outputLimitAdvisory ===
-          true,
+      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
+      sourceFormat,
     }
   );
   // #6238: keep the targets the compat pre-filter rejected so they can serve as a

@@ -21,6 +21,7 @@ import {
   deriveRequestCompatibilityRequirements,
   filterTargetsByRequestCompatibility,
 } from "./comboStructure.ts";
+import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { evaluateContextLimit } from "./contextOverrideGate.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
@@ -37,6 +38,8 @@ import { partitionJevTargets, type JevPartition } from "./jevEligibility.ts";
 export type JevBlockCheckerDeps = {
   body: Record<string, unknown>;
   config: Record<string, unknown> | null | undefined;
+  settings?: Record<string, unknown> | null;
+  sourceFormat?: string | null;
   resilienceSettings: ResilienceSettings;
   log: ComboLogger;
   isModelAvailable?: IsModelAvailable;
@@ -152,7 +155,11 @@ export async function partitionJevTargetsForAsk(
     deps.body,
     deps.log,
     "Jev pre-ask",
-    { failOpen: compatFailOpen }
+    {
+      failOpen: compatFailOpen,
+      outputLimitAdvisory: resolveOutputLimitAdvisory(deps.config, deps.settings),
+      sourceFormat: deps.sourceFormat,
+    }
   );
   const compatibilityOrdered = preserveInputOrder(perTarget.eligible, compatibility);
   const compatibilityBlocks = getRemovedTargets(perTarget.eligible, compatibilityOrdered);
