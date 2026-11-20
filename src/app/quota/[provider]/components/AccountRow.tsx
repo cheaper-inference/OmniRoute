@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import type { Policy } from "@/lib/quota/dimensions";
 import type { SelfQuotaAccount } from "@/shared/schemas/selfQuota";
 
-import { hasAccountReading } from "../lib/quotaText";
+import { hasAccountReading, modelWindowsRepeatReason } from "../lib/quotaText";
+import ModelWindowList from "./ModelWindowList";
 import WindowCard from "./WindowCard";
 
 interface AccountRowProps {
@@ -54,8 +55,10 @@ export default function AccountRow({
           ))}
         </div>
       ) : null}
-      {/* Task 10 slot: ModelWindowList for `account.modelWindows`, skipped when
-          `modelWindowsRepeatReason(account)` (lib/quotaText) is true. */}
+      {/* Skipped when an account bar of this row already prints the same reason. */}
+      {account.modelWindows && !modelWindowsRepeatReason(account) ? (
+        <ModelWindowList modelWindows={account.modelWindows} />
+      ) : null}
     </section>
   );
 }

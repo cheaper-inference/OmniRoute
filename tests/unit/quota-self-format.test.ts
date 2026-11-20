@@ -1,7 +1,10 @@
 import test, { describe } from "node:test";
 import assert from "node:assert/strict";
 
-import { describeExpiry } from "../../src/app/quota/[provider]/lib/quotaFormat.ts";
+import {
+  describeDuration,
+  describeExpiry,
+} from "../../src/app/quota/[provider]/lib/quotaFormat.ts";
 
 const NOW = "2026-05-27T15:30:00.000Z";
 const H = 60 * 60_000;
@@ -44,5 +47,17 @@ describe("describeExpiry", () => {
   test("the reference clock is the given instant, not the browser clock", () => {
     const later = new Date(Date.parse(NOW) + 10 * D).toISOString();
     assert.deepEqual(describeExpiry(at(11 * D), later), { kind: "days", days: 1, tone: "error" });
+  });
+});
+
+describe("describeDuration", () => {
+  test("under an hour counts whole minutes, never zero", () => {
+    assert.deepEqual(describeDuration(30), { unit: "minutes", value: 1 });
+    assert.deepEqual(describeDuration(1500), { unit: "minutes", value: 25 });
+  });
+
+  test("an hour or more rounds up to whole hours", () => {
+    assert.deepEqual(describeDuration(3600), { unit: "hours", value: 1 });
+    assert.deepEqual(describeDuration(5400), { unit: "hours", value: 2 });
   });
 });

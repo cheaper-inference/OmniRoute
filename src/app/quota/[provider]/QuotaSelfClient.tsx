@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { selfQuotaResponseSchema, type SelfQuotaResponse } from "@/shared/schemas/selfQuota";
 import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
 
+import BlockNotices from "./components/BlockNotices";
 import ExpiryBadge from "./components/ExpiryBadge";
 import KeyForm from "./components/KeyForm";
 import PoolSection from "./components/PoolSection";
@@ -88,7 +89,7 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
           onForget={forget}
         />
         <QuotaStatusPanel query={query} providerName={providerName} onRetry={reload} />
-        {/* Task 10 slot: BlockNotices for `view.blocks`. */}
+        {view ? <BlockNotices blocks={view.blocks} pools={view.pools} /> : null}
         {view?.pools.map((pool) => (
           <PoolSection key={pool.ref} pool={pool} />
         ))}

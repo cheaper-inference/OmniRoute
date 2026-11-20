@@ -7,7 +7,7 @@ import QuotaBar from "@/shared/components/quota/QuotaBar";
 import type { QuotaUnit } from "@/lib/quota/dimensions";
 import type { SelfQuotaStatus } from "@/shared/schemas/selfQuota";
 
-import { amountText, isDrawableReading, percentLabel, reasonKey } from "../lib/quotaText";
+import { amountText, isDrawableReading, percentLabel, reasonKey, usedText } from "../lib/quotaText";
 import { useFormatNumber } from "../lib/useFormatNumber";
 import ReadingCaption from "./ReadingCaption";
 
@@ -46,14 +46,13 @@ export default function QuotaReading(props: QuotaReadingProps) {
   }
 
   const percent = (used / limit) * 100;
-  const usedText =
-    unit === "usd"
-      ? amountText("usd", used, t, number)
-      : number(used, { maximumFractionDigits: 0 });
   const valueText =
     unit === "percent"
       ? t("usedPercent", { percent: Math.round(percent) })
-      : t("usedOf", { used: usedText, limit: amountText(unit, limit, t, number) });
+      : t("usedOf", {
+          used: usedText(unit, used, t, number),
+          limit: amountText(unit, limit, t, number),
+        });
 
   const stale = status === "stale";
   return (

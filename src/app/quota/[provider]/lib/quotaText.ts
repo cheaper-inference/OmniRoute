@@ -81,6 +81,18 @@ export function amountText(
   }
 }
 
+/** A used amount next to its limit: dollars as currency, any other unit as a whole number. */
+export function usedText(
+  unit: QuotaUnit,
+  used: number,
+  t: Translate,
+  number: FormatNumber
+): string {
+  return unit === "usd"
+    ? amountText("usd", used, t, number)
+    : number(used, { maximumFractionDigits: 0 });
+}
+
 /** The visible value of a bar: a whole percentage through the catalog, never a concatenated `%`. */
 export function percentLabel(percent: number, t: Translate): string {
   return t("amountPercent", { value: Math.round(percent) });

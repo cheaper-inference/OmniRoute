@@ -40,3 +40,12 @@ export function describeExpiry(expiresAt: string | null, nowIso: string): Expiry
   const tone = days <= 3 ? "error" : days <= 14 ? "warning" : "success";
   return { kind: "days", days, tone };
 }
+
+/**
+ * A wait in whole minutes under an hour (never 0), otherwise in whole hours, both rounded up so
+ * "about" never promises less time than the server said.
+ */
+export function describeDuration(seconds: number): { unit: "minutes" | "hours"; value: number } {
+  if (seconds < 3600) return { unit: "minutes", value: Math.max(1, Math.ceil(seconds / 60)) };
+  return { unit: "hours", value: Math.ceil(seconds / 3600) };
+}
