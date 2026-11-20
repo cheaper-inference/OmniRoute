@@ -16,7 +16,7 @@ test.after(() => {
   rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
-test("Gemini prompts flatten text parts and reject other content parts", () => {
+test("Gemini prompts flatten text parts, skip attachment parts and reject other parts", () => {
   assert.equal(
     buildGeminiPrompt([
       {
@@ -38,8 +38,21 @@ test("Gemini prompts flatten text parts and reject other content parts", () => {
       {
         role: "user",
         content: [
-          { type: "text", text: "do not send" },
+          { type: "text", text: "describe this" },
           { type: "image_url", image_url: { url: "data:image/png;base64,AA==" } },
+        ],
+      },
+    ]),
+    "describe this",
+    "the image is uploaded separately, its text is kept"
+  );
+  assert.equal(
+    buildGeminiPrompt([
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "do not send" },
+          { type: "input_audio", input_audio: { data: "AA==", format: "wav" } },
         ],
       },
     ]),
@@ -62,7 +75,7 @@ test("Gemini tool prompts keep text-part user questions", () => {
   assert.equal(prompt, "TOOL CONTRACT\n\nUse the weather tool");
 });
 
-test("Gemini user validation accepts text parts and rejects image parts", async () => {
+test("Gemini user validation accepts text and attachment parts, rejects unreadable parts", async () => {
   async function executeWithContent(content: unknown, withTools = false): Promise<number> {
     const controller = new AbortController();
     controller.abort(new Error("stop before browser launch"));
@@ -96,9 +109,14 @@ test("Gemini user validation accepts text parts and rejects image parts", async 
 
   assert.equal(await executeWithContent([{ type: "text", text: "Hello" }]), 499);
   assert.equal(await executeWithContent([{ type: "text", text: "Hello" }], true), 499);
+  // An image-only turn is now a valid ask: it passes validation and reaches the browser
+  // step (499 = the pre-aborted signal stopped it there).
   const imageContent = [{ type: "image_url", image_url: { url: "data:image/png;base64,AA==" } }];
-  assert.equal(await executeWithContent(imageContent), 400);
-  assert.equal(await executeWithContent(imageContent, true), 400);
+  assert.equal(await executeWithContent(imageContent), 499);
+  assert.equal(await executeWithContent(imageContent, true), 499);
+  const audioContent = [{ type: "input_audio", input_audio: { data: "AA==", format: "wav" } }];
+  assert.equal(await executeWithContent(audioContent), 400);
+  assert.equal(await executeWithContent(audioContent, true), 400);
 });
 
 test("Gemini tool mode rejects an unreadable last user array even after a readable user turn", async () => {
@@ -134,8 +152,10 @@ test("Gemini tool mode rejects an unreadable last user array even after a readab
     return result.response.status;
   }
 
+  const audio = [{ type: "input_audio", input_audio: { data: "AA==", format: "wav" } }];
+  assert.equal(await statusFor(audio), 400, "an unreadable last turn would send an empty ask");
   const image = [{ type: "image_url", image_url: { url: "data:image/png;base64,AA==" } }];
-  assert.equal(await statusFor(image), 400, "an image-only last turn would send an empty ask");
+  assert.equal(await statusFor(image), 499, "an image-only last turn is uploaded, not rejected");
   assert.equal(await statusFor([{ type: "text", text: "Paris" }]), 499, "readable text parts pass");
   assert.equal(await statusFor("Paris"), 499, "string input is unchanged");
   assert.equal(await statusFor(""), 499, "an empty string last turn keeps its old behavior");
