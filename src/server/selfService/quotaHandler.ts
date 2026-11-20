@@ -25,6 +25,7 @@ import {
   selfServiceError,
   selfServiceJson,
   type SelfServiceKey,
+  type SelfServiceKeyStore,
 } from "./auth";
 
 const log = createLogger("self-service:quota");
@@ -38,9 +39,10 @@ const providerSegmentSchema = z
   .toLowerCase()
   .regex(/^[a-z0-9][a-z0-9._-]{0,63}$/);
 
+/** The gate itself is fixed; only the key store it reads can be replaced. */
 export interface SelfQuotaHandlerDeps {
   buildView?: typeof buildQuotaSelfView;
-  authenticate?: typeof authenticateSelfServiceRequest;
+  keyStore?: SelfServiceKeyStore;
 }
 
 function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput {
@@ -70,10 +72,9 @@ export async function handleSelfQuotaGet(
   rawProvider: string,
   deps: SelfQuotaHandlerDeps = {}
 ): Promise<Response> {
-  const authenticate = deps.authenticate ?? authenticateSelfServiceRequest;
   const buildView = deps.buildView ?? buildQuotaSelfView;
   try {
-    const auth = await authenticate(request);
+    const auth = await authenticateSelfServiceRequest(request, deps.keyStore);
     if (!auth.ok) return auth.response;
 
     const segment = providerSegmentSchema.safeParse(rawProvider);

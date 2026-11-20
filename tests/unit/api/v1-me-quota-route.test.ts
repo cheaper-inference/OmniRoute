@@ -215,13 +215,26 @@ test("a view that breaks the contract is the same fixed 500", async () => {
   await assertFixed500(res, ["not-a-list", "ZodError", "invalid_type"]);
 });
 
-test("a failure inside the authentication gate is the same fixed 500", async () => {
-  const res = await call("claude", bearer(scoped.key), {
-    authenticate: async () => {
+test("a key store failure inside the real authentication gate is the same fixed 500", async () => {
+  const lookups: string[] = [];
+  const failingStore = {
+    validateApiKey: async (key: string) => {
+      lookups.push(key);
       throw new Error("SQLITE_CANTOPEN /data/storage.sqlite");
     },
-  });
+    getApiKeyMetadata: async () => {
+      throw new Error("SQLITE_CANTOPEN /data/storage.sqlite");
+    },
+  };
+  const res = await call("claude", bearer(scoped.key), { keyStore: failingStore });
   await assertFixed500(res, ["SQLITE_CANTOPEN", "storage.sqlite"]);
+  // The real gate read the header credential and reached the injected store.
+  assert.deepEqual(lookups, [scoped.key]);
+  // The flag check still runs before the store: with the flag off the store is never read.
+  delete process.env.QUOTA_SELF_PANEL;
+  const off = await call("claude", bearer(scoped.key), { keyStore: failingStore });
+  assert.equal(off.status, 404);
+  assert.deepEqual(lookups, [scoped.key]);
 });
 
 test("a missing server secret is the same fixed 500, without naming the secret", async () => {

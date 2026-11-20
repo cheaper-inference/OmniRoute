@@ -1,5 +1,5 @@
-// Unit tests for the self-service authentication gate shared by the /v1/me/quota and
-// /v1/me/usage routes: flag, header credentials, key validation, key metadata and scope.
+// Unit tests for the self-service authentication gate used by the /v1/me/quota route: flag,
+// header credentials, key validation, key metadata and scope.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -37,7 +37,7 @@ test.beforeEach(() => {
 
 const bearer = (k: string) => ({ Authorization: `Bearer ${k}` });
 const req = (headers: Record<string, string> = {}, ip = "203.0.113.9") =>
-  new Request("http://localhost/api/v1/me/usage", {
+  new Request("http://localhost/api/v1/me/quota/claude", {
     headers: { "x-forwarded-for": ip, ...headers },
   });
 const status = async (r: Request) => {
@@ -109,4 +109,30 @@ test("every refusal is a sanitized error body with Cache-Control: no-store", asy
   await assertRefusal(req(bearer(unscoped.key)), 403, "API key lacks the self:usage scope");
   delete process.env.QUOTA_SELF_PANEL;
   await assertRefusal(req(bearer("sk-bad")), 404, "Not found");
+});
+
+test("an injected key store cannot skip the flag, header, environment-key or scope checks", async () => {
+  const reads: string[] = [];
+  const storeAnswering = (metadata: { id: string; name: string; scopes: string[] }) => ({
+    validateApiKey: async (key: string) => {
+      reads.push(key);
+      return true;
+    },
+    getApiKeyMetadata: async () => metadata,
+  });
+  const envKeyStore = storeAnswering({ id: "env-key", name: "env", scopes: [SELF_USAGE_SCOPE] });
+  const unscopedStore = storeAnswering({ id: "k-1", name: "k", scopes: [] });
+
+  const withStore = async (r: Request, store: typeof envKeyStore) => {
+    const a = await authenticateSelfServiceRequest(r, store);
+    return a.ok ? 200 : a.response.status;
+  };
+  assert.equal(await withStore(req(bearer("any")), envKeyStore), 401);
+  assert.equal(await withStore(req(bearer("any")), unscopedStore), 403);
+  reads.length = 0;
+  const viaQuery = new Request("http://localhost/api/v1/me/quota/claude?apiKey=any");
+  assert.equal(await withStore(viaQuery, envKeyStore), 401);
+  delete process.env.QUOTA_SELF_PANEL;
+  assert.equal(await withStore(req(bearer("any")), envKeyStore), 404);
+  assert.deepEqual(reads, [], "the store is not read without a header key or with the flag off");
 });

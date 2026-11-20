@@ -1,7 +1,7 @@
 /**
- * Authentication gate shared by the self-service routes (`/v1/me/quota/{provider}` and
- * `/v1/me/usage`). Checks run in a fixed order: feature flag, header credentials, key
- * validation, key metadata, scope.
+ * Authentication gate of the self-service routes (today `/v1/me/quota/{provider}`). Checks run in
+ * a fixed order: feature flag, header credentials, key validation, key metadata, scope. Callers
+ * can replace only the key store the gate reads; the checks themselves are not injectable.
  *
  * There is no per-address attempt limit here: behind a reverse proxy every caller shares one
  * address, so a lockout would let any client deny the API to every key holder.
@@ -36,7 +36,10 @@ type KeyMetadata = {
   expiresAt?: string | null;
 };
 
-type ApiKeyStore = Pick<typeof import("@/lib/db/apiKeys"), "validateApiKey" | "getApiKeyMetadata">;
+export type SelfServiceKeyStore = Pick<
+  typeof import("@/lib/db/apiKeys"),
+  "validateApiKey" | "getApiKeyMetadata"
+>;
 
 export function selfServiceJson(
   body: unknown,
@@ -67,7 +70,7 @@ function readCredentialCandidates(request: Request): string[] {
 }
 
 /** The first candidate the key store accepts, or null when none validates. */
-async function findValidCandidate(store: ApiKeyStore, candidates: string[]) {
+async function findValidCandidate(store: SelfServiceKeyStore, candidates: string[]) {
   for (const candidate of candidates) {
     if (await store.validateApiKey(candidate)) return candidate;
   }
@@ -84,13 +87,17 @@ function toSelfServiceKey(metadata: KeyMetadata): SelfServiceKey {
   };
 }
 
-export async function authenticateSelfServiceRequest(request: Request): Promise<SelfServiceAuth> {
+/** `keyStore` defaults to the API key table in `src/lib/db/apiKeys.ts`. */
+export async function authenticateSelfServiceRequest(
+  request: Request,
+  keyStore?: SelfServiceKeyStore
+): Promise<SelfServiceAuth> {
   if (!isFeatureFlagEnabled(SELF_SERVICE_FLAG)) return refuse(404, "Not found");
 
   const candidates = readCredentialCandidates(request);
   if (candidates.length === 0) return refuse(401, INVALID_KEY_MESSAGE);
 
-  const store: ApiKeyStore = await import("@/lib/db/apiKeys");
+  const store: SelfServiceKeyStore = keyStore ?? (await import("@/lib/db/apiKeys"));
   const apiKey = await findValidCandidate(store, candidates);
   if (!apiKey) return refuse(401, INVALID_KEY_MESSAGE);
 
