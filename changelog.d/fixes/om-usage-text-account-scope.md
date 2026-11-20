@@ -1,0 +1,1 @@
+- Apply the same account rule to the text form of the usage command (`@@om-usage`): keys without `self:account-quota` or a management scope see only their personal quota, and the shared provider accounts are not read for them.
