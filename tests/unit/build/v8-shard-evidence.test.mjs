@@ -751,6 +751,104 @@ test(
   }
 );
 
+test(
+  "coverage keeps genuine queried imports and excludes Node's ESM mock wrappers",
+  posix,
+  async (t) => {
+    const { initializeCoverageTransformCache, packCoverageShard, prepareCoverageShards } =
+      await helpers();
+    const {
+      dir,
+      firstRoot: sourceRoot,
+      sha: candidateSha,
+    } = await portableFixture(t, { esm: true });
+    const inputDirectory = join(dir, "mock-coverage-raw");
+    const transformCacheDirectory = join(dir, "mock-transform-cache");
+    const sourceUrl = pathToFileURL(join(sourceRoot, "src/branch.ts")).href;
+    const binding = { candidateSha, runId, runAttempt, sourceRoot };
+    await mkdir(inputDirectory);
+    await initializeCoverageTransformCache({
+      ...binding,
+      shard: "1/1",
+      directory: transformCacheDirectory,
+    });
+    const env = {
+      ...process.env,
+      NODE_OPTIONS: "",
+      NODE_V8_COVERAGE: inputDirectory,
+      TMPDIR: transformCacheDirectory,
+    };
+    function execute(code, useTsx = true) {
+      command(
+        process.execPath,
+        [
+          "--experimental-test-module-mocks",
+          ...(useTsx ? ["--import", import.meta.resolve("tsx/esm")] : []),
+          "--input-type=module",
+          "--eval",
+          code,
+        ],
+        { cwd: sourceRoot, env }
+      );
+    }
+    async function prepare(label, mockScripts = 0) {
+      const directory = join(dir, `mock-artifacts-${label}`);
+      const outputDirectory = join(dir, `mock-merged-${label}`);
+      await packCoverageShard({
+        ...binding,
+        shard: "1/1",
+        inputDirectory,
+        transformCacheDirectory,
+        outputDirectory: join(directory, `coverage-shard-${runAttempt}-1`),
+      });
+      const outcome = await prepareCoverageShards({
+        ...binding,
+        total: 1,
+        directory,
+        outputDirectory,
+      });
+      assert.equal(outcome.ignoredNodeTestMockScripts, mockScripts);
+      const result = JSON.parse(
+        await readFile(join(outputDirectory, "coverage-merged.json"), "utf8")
+      );
+      const script = result.result.find(({ url }) => url === sourceUrl);
+      assert.ok(script, "the real source remains covered");
+      return { functions: script.functions, map: result["source-map-cache"][sourceUrl] };
+    }
+
+    execute(`
+    import assert from "node:assert/strict";
+    const canonical = await import("./src/branch.ts");
+    const ordinary = await import("./src/branch.ts?view=real#case");
+    const reserved = await import("./src/branch.ts?node-test-mock=991");
+    assert.equal(canonical.select(-1), "negative");
+    assert.equal(ordinary.select(1), "positive");
+    assert.equal(reserved.select(-1), "negative");
+  `);
+    const baseline = await prepare("genuine");
+    assert.ok(baseline.map?.data, "the genuine TypeScript layout has a source map");
+    assert.equal(
+      baseline.functions.find(({ functionName }) => functionName === "").ranges[0].count,
+      3
+    );
+
+    execute(`
+    import assert from "node:assert/strict";
+    import { mock } from "node:test";
+    mock.module("./src/branch.ts", { exports: { select: () => "mocked" } });
+    const mocked = await import("./src/branch.ts");
+    assert.equal(mocked.select(1), "mocked");
+  `);
+    assert.deepEqual(await prepare("with-mock", 1), baseline);
+
+    execute(`await import("./src/branch.ts?node-test-mock=992");`, false);
+    await assert.rejects(
+      prepare("unproved-genuine"),
+      /V8_EVIDENCE_INCOMPLETE:source-map-layout-generated-evidence-missing/
+    );
+  }
+);
+
 test("coverage rejects query aliases with incompatible layouts for one source", async (t) => {
   const { prepareCoverageShards } = await helpers();
   const options = await matrixArtifacts(t, {

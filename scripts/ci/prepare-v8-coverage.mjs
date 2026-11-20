@@ -187,6 +187,39 @@ function validateCoverage(data) {
     throw new Error("Invalid V8 source-map-cache");
 }
 
+function isNodeTestMockWrapper(script, maps) {
+  if (
+    !script.url.startsWith("file:") ||
+    !script.url.includes("?node-test-mock=") ||
+    Object.hasOwn(maps, script.url) ||
+    script.functions.length !== 1
+  )
+    return false;
+  const url = new URL(script.url);
+  if (url.hash || !/^\?node-test-mock=(?:0|[1-9][0-9]*)$/.test(url.search)) return false;
+  url.search = "";
+  const [fn] = script.functions;
+  if (fn.functionName !== "" || fn.isBlockCoverage !== true || fn.ranges.length !== 2) return false;
+
+  // Node's ESM mock loader emits a single wrapper with an unexecuted error
+  // branch. Its exact offsets depend on the base URL embedded twice by Node.
+  // The reserved query alone can also identify a genuine import.
+  const quoted = JSON.stringify(url.href);
+  const prefix = `import $__test from 'node:test';\nif (!$__test.mock._mockExports.has(${quoted})) `;
+  const missing = JSON.stringify(`mock exports not found for "${url.href}"`);
+  const branch = `{\n  throw new Error(${missing});\n}`;
+  const suffix = `\n\nconst $__exports = $__test.mock._mockExports.get(${quoted});\n\n\n`;
+  const [root, failure] = fn.ranges;
+  return (
+    root.startOffset === 0 &&
+    root.count === 1 &&
+    root.endOffset >= prefix.length + branch.length + suffix.length &&
+    failure.startOffset === prefix.length &&
+    failure.endOffset === prefix.length + branch.length &&
+    failure.count === 0
+  );
+}
+
 /** Only declared candidate paths move. Counters, ranges and mappings never change. */
 function visitPaths(data, origin, target, tree, visit) {
   const transform = (value, base, requireTracked = false) => {
@@ -462,6 +495,7 @@ export async function prepareCoverageShards(options) {
   let merged = null;
   let relocatedFiles = 0;
   let projectedFiles = 0;
+  let ignoredNodeTestMockScripts = 0;
   try {
     for (const item of inputs) {
       await regular(item.file);
@@ -492,7 +526,11 @@ export async function prepareCoverageShards(options) {
         }
         aliases.push(cache);
       }
-      const originals = data.result.map((script) => {
+      const actualScripts = data.result.filter(
+        (script) => !isNodeTestMockWrapper(script, data["source-map-cache"] || {})
+      );
+      ignoredNodeTestMockScripts += data.result.length - actualScripts.length;
+      const originals = actualScripts.map((script) => {
         const absolute = absolutePath(script.url);
         const path = absolute && inside(item.origin, absolute);
         return {
@@ -510,6 +548,7 @@ export async function prepareCoverageShards(options) {
         if (!item.declared.has(path)) throw new Error("Undeclared coverage source identity");
         if (item.origin !== sourceRoot) moved = true;
       });
+      data.result = actualScripts;
       const cacheUpdates = new Map();
       for (const [index, script] of data.result.entries()) {
         const absolute = absolutePath(script.url);
@@ -602,6 +641,7 @@ export async function prepareCoverageShards(options) {
       aggregateSha256: hash(aggregate),
       relocatedFiles,
       projectedFiles,
+      ignoredNodeTestMockScripts,
       layoutProjection: layouts.summary(),
       pathPolicy: PATH_POLICY,
       status: "COMPLETE",
