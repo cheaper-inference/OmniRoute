@@ -1,3 +1,4 @@
+import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import { isLocalOnlyBypassableByManageScope, isLocalOnlyPath } from "@/server/authz/routeGuard";
 import { getTrustProxyMode } from "@/server/origin/trustProxyMode";
 import {
@@ -30,6 +31,10 @@ export function resolveDashboardLocalAccess(headers: Headers): LocalOnlyAccessSn
 }
 
 function resolveLocality(headers: Headers): LocalAccessLocality {
+  // Only the pipeline's stamp on this very request says where the session comes from. If it
+  // did not reach the page, do not let the fail-closed default ("remote") hide features from
+  // a local operator: leave it undecided and let the first response settle it.
+  if (headers.get(AUTHZ_HEADER_PEER_LOCALITY) === null) return "unknown";
   if (getRequestPeerLocality({ headers }) !== "remote") return "local";
   // The stamped verdict calls every request relayed by a reverse proxy "remote", but with
   // OMNIROUTE_TRUST_PROXY=private the guard still serves a private-LAN client behind a

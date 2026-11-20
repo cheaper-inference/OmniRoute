@@ -95,6 +95,16 @@ describe("resolveDashboardLocalAccess (server)", () => {
     assert.equal(resolveDashboardLocalAccess(pageHeaders("remote")).locality, "unknown");
   });
 
+  test("without the pipeline's stamp on the page request the answer is unknown, never remote", () => {
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
+    delete process.env.OMNIROUTE_TRUST_PROXY;
+
+    // A local operator must not lose the feature because a header did not reach the page.
+    const access = resolveDashboardLocalAccess(new Headers({ host: "example.test" }));
+
+    assert.equal(access.locality, "unknown");
+  });
+
   test("every registered path is one the guard classifies as local-only", () => {
     for (const path of LOCAL_ONLY_DASHBOARD_PATHS) {
       assert.equal(isLocalOnlyPath(path), true, `${path} is not a LOCAL_ONLY route`);
