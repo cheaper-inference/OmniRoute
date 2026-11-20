@@ -3,9 +3,10 @@
  *
  * Token recording and the per-connection attribution wrapper against both quota
  * stores (real SQLite, Redis with an in-memory fake client): the book opens on
- * the first reading, a rise is charged to the keys whose tokens explain it, the
- * read budget, and the fail-open paths (book read or write rejected, no
- * plan-window reading, costs without usable tokens).
+ * the first reading, its growth is split by the tokens routed since then, the
+ * read budget, the floor from QUOTA_PERCENT_MIN_TOKENS_PER_POINT, and the
+ * fail-open paths (book read or write rejected, no plan-window reading, costs
+ * without usable tokens).
  */
 
 import test from "node:test";
@@ -286,4 +287,44 @@ test("no state and no reading: nothing is attributed", async () => {
     (await real.ledgerRead({ ...keyAB, poolId: pool.id, connectionId: "conn-none" })).state,
     null
   );
+});
+
+test("the floor comes from QUOTA_PERCENT_MIN_TOKENS_PER_POINT unless the caller gives one", async () => {
+  const saved = process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
+  const withFloor = async (value: string | undefined, minTokensPerPct?: number) => {
+    if (value === undefined) delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
+    else process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT = value;
+    return attributePercentDimension({
+      store: real,
+      pool: poolAB,
+      connectionId: connAB,
+      provider: "claude",
+      dimension: dim,
+      minTokensPerPct,
+    });
+  };
+  try {
+    usage(60); // the same figure as the stored book: nothing is written
+    // 1_000_000 tokens / 50_000 / 100 = 0.2 of a 0.6 growth: a 18, b 2, external 40 split 20/20.
+    let att = await withFloor("50000");
+    near(att.internal, 20);
+    near(att.external, 40);
+    near(att.internalByKey["ab-a"], 18);
+    near(att.internalByKey["ab-b"], 2);
+    near(att.consumedByKey["ab-a"], 38);
+    near(att.consumedByKey["ab-b"], 22);
+    // Read on every call: back to the default (1_000_000 / 1000 / 100 = 10 ≥ 0.6, all internal).
+    for (const value of [undefined, "", "0", "0.5", "-3", "abc", "Infinity", "NaN"]) {
+      att = await withFloor(value);
+      near(att.internalByKey["ab-a"], 54);
+      near(att.external, 0);
+    }
+    // An explicit floor wins: 1_000_000 / 100_000 / 100 = 0.1 → a 9, b 1.
+    att = await withFloor("50000", 100_000);
+    near(att.internalByKey["ab-a"], 9);
+    near(att.internalByKey["ab-b"], 1);
+  } finally {
+    if (saved === undefined) delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
+    else process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT = saved;
+  }
 });

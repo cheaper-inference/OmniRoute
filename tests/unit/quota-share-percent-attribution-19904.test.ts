@@ -2,9 +2,9 @@
  * #19904 — Quota Share must attribute `percent` plans (Claude/Codex) per API key.
  *
  * Five keys of weight 20 on the default Claude plan (5h and weekly percent windows). The book of
- * each window opens on the first quota-share check; a later rise of the account figure is charged
- * to the keys whose routed tokens explain it, so the heavy key reaches its share and the light
- * keys stay free.
+ * each window opens on the first quota-share check; the growth of the account figure since then is
+ * split between the keys by the tokens each one routed, so the heavy key reaches its share and the
+ * light keys stay free.
  */
 import test, { mock } from "node:test";
 import assert from "node:assert/strict";

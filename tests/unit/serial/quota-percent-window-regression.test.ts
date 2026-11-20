@@ -26,6 +26,8 @@ const providerPlans = await import("../../../src/lib/db/providerPlans.ts");
 const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
 const { enforceQuotaShare, recordConsumption } = await import("../../../src/lib/quota/enforce.ts");
 const sat = await import("../../../src/lib/quota/saturationSignals.ts");
+const { attributePercentDimension } = await import("../../../src/lib/quota/percentAttribution.ts");
+const { SqliteQuotaStore } = await import("../../../src/lib/quota/sqliteQuotaStore.ts");
 const core = await import("../../../src/lib/db/core.ts");
 
 test.after(() => {
@@ -82,6 +84,9 @@ const ask = (conn: string, key: string) =>
   enforceQuotaShare({ apiKeyId: key, connectionId: conn, provider: PROV });
 
 const kind = async (conn: string, key: string) => (await ask(conn, key)).kind;
+
+const near = (a: number | undefined, b: number) =>
+  assert.ok(a !== undefined && Math.abs(a - b) < 1e-6, `${a} ≈ ${b}`);
 
 await test("quota-percent-window-regression", async (t) => {
   // Next store slice boundary, from the real clock, before the clock is controlled.
@@ -146,7 +151,7 @@ await test("quota-percent-window-regression", async (t) => {
       mock.timers.setTime(b3);
       const R1 = b3 + 4 * H;
       const C3 = "conn-window-reset-time";
-      makePool(C3);
+      const pool = makePool(C3);
       usage(C3, 0, R1);
       await ask(C3, "A");
       await burn(C3, "A", 10_000_000);
@@ -154,9 +159,25 @@ await test("quota-percent-window-regression", async (t) => {
       assert.equal(await kind(C3, "A"), "block");
 
       mock.timers.setTime(R1 + 10 * 60_000); // the provider window turned at R1
-      await burn(C3, "B", 7_000_000);
+      await burn(C3, "B", 7_000_000); // routed before the first reading of the new window
       usage(C3, 65, R1 + 5 * H);
+      // The turn makes 65 the baseline and marks B's counter there: 65 external, 65 / 5 = 13 each.
+      assert.deepEqual([await kind(C3, "A"), await kind(C3, "B")], ["allow", "allow"]);
+      const attribute = () =>
+        attributePercentDimension({
+          store: new SqliteQuotaStore(),
+          pool,
+          connectionId: C3,
+          provider: PROV,
+          dimension: { window: "5h", limit: 100 },
+        });
+      near((await attribute()).external, 65);
+
+      await burn(C3, "B", 7_000_000);
+      usage(C3, 80, R1 + 5 * H);
+      // B: min(80 − 65 = 15, 7_000_000 / 1000 / 100) = 15, plus 65 / 5 = 13 → 28 ≥ 20; A: 13.
       assert.deepEqual([await kind(C3, "A"), await kind(C3, "B")], ["allow", "block"]);
+      near((await attribute()).internalByKey.B, 15);
     }
   );
 });

@@ -26,13 +26,6 @@ const CODEX_WINDOW_KEYS: Partial<Record<QuotaWindow, string>> = {
   weekly: "weekly",
 };
 
-/** fetchBailianQuota (bailianQuotaFetcher.ts) `windows` keys per window. */
-const BAILIAN_WINDOW_KEYS: Partial<Record<QuotaWindow, string>> = {
-  "5h": "window_5h",
-  weekly: "window_weekly",
-  monthly: "window_monthly",
-};
-
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -62,7 +55,7 @@ function windowEntry(
   return key && map ? asRecord(map[key]) : null;
 }
 
-/** Shared shape of the Codex and Bailian quota: `windows[key] = { percentUsed, resetAt }`. */
+/** Shape of the Codex quota: `windows[key] = { percentUsed, resetAt }`. */
 function fractionWindowEntry(
   quota: unknown,
   keys: Partial<Record<QuotaWindow, string>>,
@@ -128,17 +121,4 @@ export function codexPlanReading(
   fetchedAt: number
 ): PlanWindowReading | null {
   return fractionReading(fractionWindowEntry(quota, CODEX_WINDOW_KEYS, window), fetchedAt);
-}
-
-/**
- * Bailian quota (fetchBailianQuota): the 5h, weekly or monthly window. A window the fetcher
- * marks `totalReported: false` (no positive total) carries a placeholder, not a figure.
- */
-export function bailianPlanReading(
-  quota: unknown,
-  window: QuotaWindow,
-  fetchedAt: number
-): PlanWindowReading | null {
-  const entry = fractionWindowEntry(quota, BAILIAN_WINDOW_KEYS, window);
-  return entry?.totalReported === false ? null : fractionReading(entry, fetchedAt);
 }

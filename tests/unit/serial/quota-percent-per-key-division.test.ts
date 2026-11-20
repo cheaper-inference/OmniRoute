@@ -2,9 +2,9 @@
  * tests/unit/serial/quota-percent-per-key-division.test.ts
  *
  * Percent plans report only how full the whole account is. The quota-share
- * gate must still give each pool member its own share of that number: a rise
- * of the account figure is charged to the keys by the tokens each one routed
- * through the proxy since the book last saw the figure.
+ * gate must still give each pool member its own share of that number: the
+ * growth of the account figure since the book opened is split between the
+ * keys by the tokens each one routed through the proxy since then.
  *
  * Scenario: 5h window, two hard keys at 50/50, the book opened at 0, key a
  * routed 900k tokens and key b 100k, then the account at 60%. Attributed:

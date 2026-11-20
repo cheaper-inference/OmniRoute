@@ -1,19 +1,23 @@
 /**
  * percentAttribution.ts — per-key attribution for percent-plan dimensions.
  *
- * Percent plans (Claude, Codex, Bailian) only report how full the whole
- * account is. Each (pool, connection, plan window) keeps an attribution book
- * (percentLedger.ts) aligned with the provider's window: the growth of that
- * figure since the window started is split between the keys by the tokens each
- * one routed since then, capped by what those tokens can explain, and the rest
- * is external (usage nobody routed through this pool). Every attribution applies
- * the current plan-window reading to the book, then reports:
+ * Percent plans only report how full the whole account is. Each (pool,
+ * connection, plan window) keeps an attribution book (percentLedger.ts)
+ * aligned with the provider's window: the growth of that figure since the
+ * window started is split between the keys by the tokens each one routed since
+ * then, capped by what those tokens can explain, and the rest is external
+ * (usage nobody routed through this pool). Every attribution applies the
+ * current plan-window reading to the book, then reports:
  *
  *   - internal: the parts the book attributes to API keys;
  *   - external: the book's external part. It first uses the capacity no
  *     allocation claims, and only the excess is shared by weight.
  *
- * A provider without a plan-window reading has no book: nothing is attributed.
+ * Only Claude (OAuth) and Codex have a plan-window reading. Any other provider
+ * has no book: nothing is attributed.
+ *
+ * The floor (tokens that explain at most one percentage point of the account
+ * figure) is QUOTA_PERCENT_MIN_TOKENS_PER_POINT, read on every attribution.
  */
 
 import type { QuotaUnit, QuotaWindow } from "./dimensions";
@@ -67,6 +71,7 @@ export interface AttributePercentDimensionInput {
   dimension: { window: QuotaWindow; limit: number };
   /** Defaults to every allocation of the pool. */
   apiKeyIds?: string[];
+  /** Floor override; defaults to QUOTA_PERCENT_MIN_TOKENS_PER_POINT (else 1000). */
   minTokensPerPct?: number;
 }
 
@@ -117,6 +122,15 @@ async function readPlanWindow(
 }
 
 /**
+ * The floor from QUOTA_PERCENT_MIN_TOKENS_PER_POINT, read on each call so a changed environment
+ * applies without a restart. Anything but a finite number >= 1 is DEFAULT_MIN_TOKENS_PER_PCT.
+ */
+function resolveMinTokensPerPoint(): number {
+  const value = Number(process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT); // unset → NaN, "" → 0
+  return Number.isFinite(value) && value >= 1 ? value : DEFAULT_MIN_TOKENS_PER_PCT;
+}
+
+/**
  * Apply the reading to the book and split it from the same store read; null when there is no
  * usable book. Fail-open, silently.
  */
@@ -132,7 +146,7 @@ async function observeBook(
       Date.now()
     );
     return snapshot
-      ? attributeBook(snapshot, input.minTokensPerPct ?? DEFAULT_MIN_TOKENS_PER_PCT)
+      ? attributeBook(snapshot, input.minTokensPerPct ?? resolveMinTokensPerPoint())
       : null;
   } catch {
     return null;

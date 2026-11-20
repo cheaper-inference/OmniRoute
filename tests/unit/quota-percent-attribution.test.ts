@@ -9,10 +9,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  DEFAULT_MIN_TOKENS_PER_PCT,
-  splitExternalUsage,
-} from "../../src/lib/quota/percentAttribution.ts";
+import { splitExternalUsage } from "../../src/lib/quota/percentAttribution.ts";
+import { DEFAULT_MIN_TOKENS_PER_PCT } from "../../src/lib/quota/percentLedger.ts";
 
 const r = (xs: number[]) => xs.map((x) => +x.toFixed(9));
 

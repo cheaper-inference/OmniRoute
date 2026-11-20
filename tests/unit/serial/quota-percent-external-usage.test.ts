@@ -3,10 +3,12 @@
  *
  * Percent plans: the account figure also moves with usage made outside the
  * proxy. Each account keeps an attribution book per plan window:
- *   - the figure already on the bar when the book opens is external;
- *   - a rise is charged to the keys whose tokens, recorded at most 15 minutes
- *     earlier, explain it (floor: 1000 tokens per percent point); the rest of
- *     the rise is external;
+ *   - the figure already on the bar when the book opens (the baseline) is
+ *     external;
+ *   - the growth since the baseline is split between the keys by the tokens
+ *     each one routed since then, capped by what those tokens explain (floor:
+ *     QUOTA_PERCENT_MIN_TOKENS_PER_POINT, default 1000 tokens per percent
+ *     point); the rest of the growth is external;
  *   - the external part first uses the capacity no allocation claims; only the
  *     excess is shared by weight.
  *
@@ -123,6 +125,21 @@ const reason = (d: EnforceDecision) => (d.kind === "block" ? d.reason : "");
 const near = (a: number | undefined, b: number) =>
   assert.ok(a !== undefined && Math.abs(a - b) < 1e-6, `${a} ≈ ${b}`);
 
+const FLOOR_ENV = "QUOTA_PERCENT_MIN_TOKENS_PER_POINT";
+
+/** Run `body` with the floor variable set to `value` (undefined: unset), then restore it. */
+async function withFloorEnv(value: string | undefined, body: () => Promise<void>) {
+  const saved = process.env[FLOOR_ENV];
+  if (value === undefined) delete process.env[FLOOR_ENV];
+  else process.env[FLOOR_ENV] = value;
+  try {
+    await body();
+  } finally {
+    if (saved === undefined) delete process.env[FLOOR_ENV];
+    else process.env[FLOOR_ENV] = saved;
+  }
+}
+
 const K4 = ["k1", "k2", "k3", "k4"];
 const KEYS5 = ["k1", "k2", "k3", "k4", "k5"];
 const MIN = 60_000;
@@ -195,16 +212,37 @@ await test("quota-percent-external-usage", async (t) => {
   });
 
   await t.test(
-    "known limitation: outside usage in the same interval as real volume goes to the routing key",
-    async () => {
-      const C5 = "conn-ext-5";
-      makePool(C5, "weekly", hard(K4, 25));
-      mockUsage({ [C5]: { weekly: 0 } });
-      await ask(C5, "k1"); // opens the book at 0
-      await burn(C5, "k1", 60_000);
-      mockUsage({ [C5]: { weekly: 60 } });
-      assert.equal((await ask(C5, "k1")).kind, "block"); // 60 ≥ 25, even if part of the rise is external
-    }
+    "usage made elsewhere while a key is active is charged to that key at the default floor",
+    () =>
+      withFloorEnv(undefined, async () => {
+        const C5 = "conn-ext-5";
+        makePool(C5, "weekly", hard(K4, 25));
+        mockUsage({ [C5]: { weekly: 0 } });
+        await ask(C5, "k1"); // opens the book at 0
+        await burn(C5, "k1", 60_000);
+        mockUsage({ [C5]: { weekly: 60 } });
+        assert.equal((await ask(C5, "k1")).kind, "block"); // 60 ≥ 25, even if part of the rise is external
+        const att = await attribute(C5);
+        near(att.internalByKey.k1, 60); // min(60, 60_000 / 1000 / 100 = 0.6 of the bar) = 60 points
+        near(att.external, 0);
+      })
+  );
+
+  await t.test("...and only what its tokens explain at a floor set to the plan", () =>
+    withFloorEnv("50000", async () => {
+      const C5b = "conn-ext-5b";
+      makePool(C5b, "weekly", hard(K4, 25));
+      mockUsage({ [C5b]: { weekly: 0 } });
+      await ask(C5b, "k1"); // opens the book at 0
+      await burn(C5b, "k1", 60_000);
+      mockUsage({ [C5b]: { weekly: 60 } });
+      // 60_000 / 50_000 / 100 = 0.012 → k1 1.2; external 58.8 split by weight: 58.8 × 25 / 100 = 14.7.
+      assert.equal((await ask(C5b, "k1")).kind, "allow"); // 1.2 + 14.7 = 15.9 < 25
+      const att = await attribute(C5b);
+      near(att.internalByKey.k1, 1.2);
+      near(att.external, 58.8);
+      near(att.consumedByKey.k1, 15.9);
+    })
   );
 
   await t.test("a percent cap counts only the attributed part", async () => {
@@ -311,7 +349,7 @@ await test("quota-percent-external-usage", async (t) => {
   );
 
   await t.test(
-    "a rise first seen more than 15 minutes after the tokens were recorded is external",
+    "a rise first seen long after the tokens were recorded is still the key's",
     async () => {
       mock.timers.enable({ apis: ["Date"], now: Date.now() });
       try {
@@ -323,8 +361,8 @@ await test("quota-percent-external-usage", async (t) => {
         mock.timers.tick(16 * MIN);
         mockUsage({ [C10]: { fiveHour: 70 } });
         const att = await attribute(C10);
-        near(att.internalByKey.k1, 0);
-        near(att.external, 70);
+        near(att.internalByKey.k1, 20); // growth 70 − 50 = 20 ≤ 100_000 / 1000 / 100 = 1.0 of the bar
+        near(att.external, 50);
       } finally {
         mock.timers.reset();
       }

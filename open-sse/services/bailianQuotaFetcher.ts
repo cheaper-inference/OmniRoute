@@ -49,21 +49,10 @@ export const BAILIAN_WINDOW_MONTHLY = "window_monthly";
 // Triple-window quota info (richer than QuotaInfo — includes all 3 windows)
 // [Oracle CONDITIONAL] bailian-coding-plan only — do not reuse for other providers
 export interface BailianTripleWindowQuota extends QuotaInfo {
-  windows: Record<string, BailianQuotaWindow>;
-  window5h: BailianQuotaWindow;
-  windowWeekly: BailianQuotaWindow;
-  windowMonthly: BailianQuotaWindow;
-}
-
-/**
- * One Bailian window. `totalReported: false` marks a window whose total was absent or not
- * positive: its `percentUsed` of 0 is a placeholder, not a reported figure. The name is
- * deliberately not `fractionReported`, which combo scoring reads for every provider.
- */
-interface BailianQuotaWindow {
-  percentUsed: number;
-  resetAt: string | null;
-  totalReported?: false;
+  windows: Record<string, { percentUsed: number; resetAt: string | null }>;
+  window5h: { percentUsed: number; resetAt: string | null };
+  windowWeekly: { percentUsed: number; resetAt: string | null };
+  windowMonthly: { percentUsed: number; resetAt: string | null };
 }
 
 interface CacheEntry {
@@ -146,11 +135,6 @@ function buildHeaders(authKey: string): Record<string, string> {
 
 // ─── Response Parser ─────────────────────────────────────────────────────────
 
-/** The marker of a window without a positive total (absent when the total is positive). */
-function unreportedMarker(total: number): { totalReported?: false } {
-  return total > 0 ? {} : { totalReported: false };
-}
-
 function parseBailianQuotaResponse(data: unknown): BailianTripleWindowQuota | null {
   const obj = toRecord(data);
 
@@ -198,20 +182,17 @@ function parseBailianQuotaResponse(data: unknown): BailianTripleWindowQuota | nu
   // Most restrictive window = highest percentUsed
   const worstPercentUsed = Math.max(pct5h, pctWeekly, pctMonthly);
 
-  const window5h: BailianQuotaWindow = {
+  const window5h = {
     percentUsed: pct5h,
     resetAt: resetAt5h > 0 ? new Date(resetAt5h * 1000).toISOString() : null,
-    ...unreportedMarker(total5h),
   };
-  const windowWeekly: BailianQuotaWindow = {
+  const windowWeekly = {
     percentUsed: pctWeekly,
     resetAt: resetAtWeekly > 0 ? new Date(resetAtWeekly * 1000).toISOString() : null,
-    ...unreportedMarker(totalWeekly),
   };
-  const windowMonthly: BailianQuotaWindow = {
+  const windowMonthly = {
     percentUsed: pctMonthly,
     resetAt: resetAtMonthly > 0 ? new Date(resetAtMonthly * 1000).toISOString() : null,
-    ...unreportedMarker(totalMonthly),
   };
   const windows = {
     [BAILIAN_WINDOW_5H]: window5h,

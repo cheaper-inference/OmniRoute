@@ -27,12 +27,7 @@ import { createLogger } from "@/shared/utils/logger";
 import { boundedMap } from "./boundedMap";
 import { updateAccountBuckets, type ClaudeUsageResult } from "./accountBuckets";
 import type { QuotaUnit, QuotaWindow } from "./dimensions";
-import {
-  bailianPlanReading,
-  claudePlanReading,
-  claudeUsageDataTime,
-  codexPlanReading,
-} from "./planWindowReading";
+import { claudePlanReading, claudeUsageDataTime, codexPlanReading } from "./planWindowReading";
 import type { PlanWindowReading } from "./types";
 
 const log = createLogger("quota:saturation");
@@ -361,10 +356,8 @@ async function fetchBailianSaturation(
     default:
       pct = (q.percentUsed as number) ?? 0;
   }
-  return {
-    value: Math.min(1, Math.max(0, pct)),
-    plan: bailianPlanReading(quota, dim.window, Date.now()),
-  };
+  // No plan-window reading: Bailian's figure never drives an attribution book.
+  return { value: Math.min(1, Math.max(0, pct)), plan: null };
 }
 
 /**
