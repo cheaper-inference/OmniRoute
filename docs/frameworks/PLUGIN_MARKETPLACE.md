@@ -50,8 +50,9 @@ Dashboard (/dashboard/plugins)
   `plugin.json`.
 - **Scanner** — `src/lib/plugins/scanner.ts`: discovers plugins on disk under
   the plugin directory.
-- **Loader** — `src/lib/plugins/loader.ts`: spawns each plugin in an isolated
-  child process and brokers hook calls over IPC.
+- **Loader** — `src/lib/plugins/loader.ts`: spawns each plugin in a separate
+  Node.js child process and brokers hook calls over IPC. The child is not a
+  sandbox (see "Plugin execution isolation" below).
 
 ## Marketplace Catalog
 
@@ -94,7 +95,7 @@ loopback-only — `/api/plugins` and `/api/plugins/` are listed in
 | Endpoint                         | Method | Description                                         |
 | -------------------------------- | ------ | --------------------------------------------------- |
 | `/api/plugins`                   | GET    | List installed plugins (optional `?status=` filter) |
-| `/api/plugins`                   | POST   | Install a plugin from an absolute local path        |
+| `/api/plugins`                   | POST   | Install a plugin from the plugin sources directory  |
 | `/api/plugins/scan`              | POST   | Scan the plugin directory and register new plugins  |
 | `/api/plugins/marketplace`       | GET    | List marketplace catalog entries                    |
 | `/api/plugins/[name]`            | GET    | Get installed plugin details                        |
@@ -123,10 +124,20 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-The `path` must be **absolute** and may not contain `..` traversal segments or
-null bytes (enforced by Zod). The source directory must contain a valid
-`plugin.json` (or be a parent of one). On success the response is `201` with the
-installed plugin row.
+The `path` must be an **absolute** path to a directory **inside the plugin
+sources directory**: `plugin-sources` next to the plugin root, so
+`~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`
+when that variable is set (`getPluginSourcesDir()` in
+`src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The
+install is refused with `400` when the path contains `..` or a null byte, lies
+outside that directory, resolves outside it through a symlink, contains a symlink
+whose target is outside it, or when the directory does not exist. The source
+directory must contain a valid `plugin.json` (or be a parent of one). On success
+the response is `201` with the installed plugin row.
+
+Unlike the other plugin routes, this one requires the management credential (a
+dashboard session or a manage-scoped API key) even when login is disabled
+(`requireLogin=false`): installing code is never an anonymous action.
 
 ### Browse the marketplace
 
@@ -242,12 +253,24 @@ silently falls back to the built-in seed registry and logs a warning.
 
 ### Plugin execution isolation
 
+> **Plugins are not sandboxed.** The child is an ordinary Node.js process running
+> as the OmniRoute user, with no VM context and no Node.js permission flags, so
+> plugin code can read and write any file that user can, run programs and reach
+> the network. `requires.permissions` only decides which environment variables
+> the child receives; the other permissions are not enforced. Install only
+> plugins you trust. The process boundary below contains crashes and hangs; it
+> is not a security boundary.
+
 - **Process isolation** — `loadPlugin()` (`src/lib/plugins/loader.ts`) spawns
   each plugin in a separate Node.js child process and communicates over IPC.
   Hook calls have a timeout with `SIGTERM` → `SIGKILL` escalation.
 - **Env allowlist** — the child receives only an allowlisted set of environment
   variables; the broader set is only granted when the manifest requests the
   `env` permission.
+- **Install source containment** — `POST /api/plugins` only reads from the plugin
+  sources directory (see "Install from a local path"): the path is canonicalized
+  with `realpath`, must stay strictly inside that directory, and a source tree
+  carrying a symlink that escapes it is refused before anything is copied.
 - **Path containment** — install/upgrade/uninstall assert that the plugin
   directory and `manifest.main` resolve **within** the managed plugin root
   before any copy or recursive delete (guards against tampered DB paths and
@@ -257,8 +280,12 @@ silently falls back to the built-in seed registry and logs a warning.
 - **Optional integrity pin** — a manifest may declare an `integrity`
   (`sha256-<base64>`, SRI format) field. When present, the loader verifies the
   entry file hash at load time and refuses to activate on mismatch. It is
-  opt-in tamper-detection, **not** a security boundary — loopback-only routing
-  and the permission model are the real boundaries.
+  opt-in tamper-detection, **not** a security boundary: it does not limit what
+  a loaded plugin can do.
+- **No client credentials in hooks** — the context passed to `onRequest`,
+  `onResponse` and `onError` has the `authorization`, `x-api-key`,
+  `proxy-authorization` and `cookie` headers removed, and the API key record carries no key
+  value (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
@@ -282,7 +309,9 @@ Validated by `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 | `integrity`        | string?   | Optional `sha256-<base64>` entry-file pin                   |
 
 Permissions are drawn from the enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+`network` / `file-read` / `file-write` / `env` / `exec`. Only `env` has a
+runtime effect (a slightly larger environment-variable allowlist for the
+child); the others are declarations and are not enforced.
 
 ## Lifecycle Flow
 
@@ -350,6 +379,9 @@ The dashboard page at `/dashboard/plugins`
   action (`POST /api/plugins/scan`).
 - **Marketplace** — shows the catalog from `GET /api/plugins/marketplace` with a
   field to set the custom registry URL.
+
+The page always shows a warning that plugins run with the full privileges of
+the OmniRoute process.
 
 A per-plugin config page lives at `/dashboard/plugins/[name]/config`
 (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).

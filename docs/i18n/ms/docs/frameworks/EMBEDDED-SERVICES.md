@@ -557,6 +557,8 @@ Proksi ini:
 
 peningkatan WebSocket untuk papan pemuka terbenam dikendalikan oleh pelayan pendamping pada port khusus (lihat `src/lib/services/embedWsProxy.ts`).
 
+Setiap peningkatan dibenarkan sebelum terowong dibuka, dengan peraturan yang sama seperti laluan benam HTTP : rakan sebaya mestilah gelung balik tanpa pengepala pemajuan proksi terbalik, `Origin` penyemak imbas mestilah asal papan pemuka (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` lanjutkan lalai gelung balik), dan pemanggil memerlukan sesi papan pemuka atau kunci API skop pengurusan melainkan log masuk papan pemuka dilumpuhkan.
+
 **Keselamatan:** Laluan proksi benam diklasifikasikan di bawah `LOCAL_ONLY_API_PREFIXES` dan hanya boleh dicapai dari gelung balik. Penyerang yang memperoleh JWT melalui terowong Cloudflare/Ngrok tidak boleh proksi ke perkhidmatan terbenam.
 
 ---

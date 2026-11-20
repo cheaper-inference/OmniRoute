@@ -91,6 +91,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### אבטחה ותחבורה
+
+אימות WebDAV אוכף מעקב ונעילה של כשלים לכל IP (10 ניסיונות כושלים בתוך חלון של 60 שניות מפעילים נעילה של 5 דקות עם `429 Too Many Requests` ו- `Retry-After`). מכיוון ש- WebDAV משדר אישורי אימות בסיסיים, סיום TLS (או ניתוב דרך מנהרה מאובטחת כגון Tailscale או Cloudflare Tunnel) מומלץ מאוד בעת גישה לנקודת הקצה WebDAV מחוץ ללולאה.
+
 ### מקור הקשר לכל מפתח API (אופציונלי)
 
 ניתן להגדיר את תצורת Obsidian **לכל מפתח API בנפרד** באמצעות הטבלה `api_key_context_sources`

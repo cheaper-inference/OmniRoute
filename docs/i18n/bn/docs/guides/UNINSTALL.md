@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ঐচ্ছিক) ইমেজটি অপসারণ করুন
+docker rmi cheaperinference/omniroute:latest
+# পুরানো ইনস্টলগুলি উত্তরাধিকার নাম টানছে:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

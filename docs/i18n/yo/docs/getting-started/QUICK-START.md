@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Àṣàyàn B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` ni SemVer tó dúró ṣinṣin tó ga jù lọ tí a ti **tẹ̀ jáde**. Kò **tẹ̀lé** git `main`. Lo `diegosouzapw/omniroute:X.Y.Z` gẹ́gẹ́ bí ẹ̀yà pàtó fún GitOps. Wo [Àwọn Àmì Image / Àwọn Ikanni Ìtẹ̀jáde](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` ni SemVer tó dúró ṣinṣin tó ga jù lọ tí a ti **tẹ̀ jáde**. Kò **tẹ̀lé** git `main`. Lo `cheaperinference/omniroute:X.Y.Z` gẹ́gẹ́ bí ẹ̀yà pàtó fún GitOps. Wo [Àwọn Àmì Image / Àwọn Ikanni Ìtẹ̀jáde](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Àṣàyàn C: Láti Source
 

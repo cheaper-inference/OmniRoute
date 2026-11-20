@@ -1,8 +1,12 @@
 {
   "family": "translation",
-  "description": "Everything translated from an English source: the dashboard and CLI catalogs of the non-English locales, the docs/i18n mirrors with their hash ledger, and the real-translation ratchet measured on them. A feature PR edits only the English source (src/i18n/messages/en.json, bin/cli/locales/en.json, the English docs); these files are rewritten once per release by release:refresh-derived, by a translation wave, or by the scheduled mirror-refresh PR. The compact error-boundary catalogs (src/i18n/global-error-messages) are companions, not a category: they are regenerated from the catalogs on every build, a translation-only PR may carry them, and a feature PR that edits en.json publicSystem.globalError must still be able to regenerate them.",
+  "description": "Everything translated from an English source: the dashboard and CLI catalogs of the non-English locales, the docs/i18n mirrors with their hash ledger, and the real-translation ratchet measured on them. A feature PR edits only the English source (src/i18n/messages/en.json, bin/cli/locales/en.json, the English docs); these files are rewritten once per release by release:refresh-derived, by a translation wave, or by the scheduled mirror-refresh PR. The compact error-boundary catalogs (src/i18n/global-error-messages) and the route-handler catalog (src/i18n/route-handler-messages.json) are companions, not a category: they are regenerated from the catalogs on every build, a translation-only PR may carry them, and a feature PR that edits en.json publicSystem.globalError or a ROUTE_HANDLER_MESSAGE_KEYS string must still be able to regenerate them.",
   "writers": ["release/v*", "docs/i18n-*", "chore/i18n-*", "chore/derived-*"],
-  "companions": ["changelog.d/**", "src/i18n/global-error-messages/*.json"],
+  "companions": [
+    "changelog.d/**",
+    "src/i18n/global-error-messages/*.json",
+    "src/i18n/route-handler-messages.json"
+  ],
   "categories": [
     {
       "id": "ui-locale-catalogs",

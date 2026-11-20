@@ -27,13 +27,9 @@
 
 ---
 
-## הפעלה מהירה
+## ריצה מהירה
 
-> **אירוח עצמי בפקודה אחת?** ראו את
-> [המדריך לאירוח עצמי](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (Image שפורסם +
-> Redis, גישה מ-loopback בלבד, ללא בחירת פרופיל). ההפעלה המהירה שלהלן היא
-> מסלול המבוסס על קונטיינר יחיד עבור משתמשים שכבר מפעילים Redis במקום אחר.
+> **אירוח עצמי בפקודה אחת?** עיין [במדריך לארח עצמי](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (תמונה שפורסמה + Redis, לולאה-בחור בלבד, ללא בחירה בפרופיל). ההפעלה המהירה למטה היא הנתיב עם מיכל יחיד עבור משתמשים שכבר מריצים Redis במקום אחר.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## עם קובץ סביבה
 
 ```bash
-# תחילה העתיקו וערכו את .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 מערך הייצור פועל במקביל ל-Compose של סביבת הפיתוח (עם שמות קונטיינרים, פורטים ואמצעי אחסון שונים), כך שתוכלו להמשיך לעבוד מקומית בזמן שסביבת הייצור נשארת פעילה.
 
-## שלבי Dockerfile
+## Dockerfile Stages
 
-המאגר כולל Dockerfile רב-שלבי (`Dockerfile`). ארבעה שלבים חשופים; בחרו את ה-`target` המתאים לתרחיש השימוש שלכם.
+המאגר שולח Dockerfile רב-שלבי (`Dockerfile`). נחשפים ארבעה שלבים; בחר את `target` המתאים למקרה השימוש שלך.
 
-| שלב           | תמונת בסיס            | מטרה                                                                                                                                                                                                                                             |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `builder`     | `node:26-trixie-slim` | מתקין תלויות (`npm ci --legacy-peer-deps`) ומריץ `npm run build` (כברירת מחדל עם Turbopack — ראו משאבים בזמן הבנייה להלן)                                                                                                                        |
-| `runner-base` | `node:26-trixie-slim` | סביבת הרצה לייצור עם הפלט העצמאי של Next.js. **אינה כוללת ממשקי CLI של ספקים.**                                                                                                                                                                  |
-| `runner-cli`  | `runner-base`         | מוסיף את `git`,‏ `docker.io`,‏ `docker-compose` וממשקי CLI גלובליים: `@openai/codex`,‏ `@anthropic-ai/claude-code`,‏ `droid`,‏ `openclaw`. **בחרו בזה עבור תהליכי עבודה מבוססי סוכנים.**                                                         |
-| `runner-web`  | `runner-base`         | מוסיף Playwright ודפדפן Chromium (`--with-deps`) עבור ספקי סשנים באינטרנט: `gemini-web`,‏ `claude-web`,‏ `claude-turnstile`. **בחרו בזה בעת שימוש בספקים האלה** — התמונה הרגילה נכשלת בזמן הבקשה בלעדיו (ראו את ההערה על `-web` תחת ערוצי הפצה). |
+| שָׁלָב        | תמונת בסיס            | מַטָרָה                                                                                                                                                                                                                                            |
+| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | מתקין deps (`npm ci --legacy-peer-deps`) ומפעיל `npm run build` (Turbopack כברירת מחדל — ראה משאבים בזמן בנייה למטה)                                                                                                                               |
+| `runner-base` | `node:26-trixie-slim` | זמן ייצור עם פלט Next.js העצמאי.** אין ספק CLIs ארוז.**                                                                                                                                                                                            |
+| `runner-cli`  | `runner-base`         | מוסיף `git`, `docker.io`, `docker-compose` ו- CLIs גלובלי: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** בחר את זה עבור זרימות עבודה סוכניות.**                                                                             |
+| `runner-web`  | `runner-base`         | מוסיף Playwright + דפדפן Chromium (`--with-deps`) עבור ספקי הפעלה באינטרנט: `gemini-web`, `claude-web`, `claude-turnstile`.** בחר באפשרות זו כאשר אתה משתמש בספקים אלה** — התמונה הפשוטה נכשלת בזמן בקשה בלעדיה (ראה הערת `-web` תחת ערוצי שחרור). |
 
-בנו יעד מסוים באופן ידני:
+בנה יעד ספציפי באופן ידני:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### משאבים בזמן הבנייה
+### משאבים בזמן בנייה
 
-שלושה ארגומנטים של בנייה שולטים בעלות המשאבים של שלב ה-`builder`. הם חלים בזמן הבנייה בלבד —
-`OMNIROUTE_MEMORY_MB` (להלן) הוא פרמטר נפרד לזמן הריצה.
+שלושה ארג'ים לבנות שולטות בעלות שלב `builder`. הם בזמן בנייה רק — `OMNIROUTE_MEMORY_MB` (להלן) הוא כפתור נפרד, זמן ריצה.
 
-| ארגומנט בנייה               | ברירת מחדל | השפעה                                                                                          |
-| --------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`        | `0` בונה באמצעות webpack: צריכת זיכרון מרבית נמוכה יותר, אך איטי יותר. `1` מפעיל את Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`     | תקרת ערימת V8 (`--max-old-space-size`) עבור תהליך `next build` שנוצר.                          |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`        | מזין את `CIRCLE_NODE_TOTAL`;‏ Next גוזר `workers = N - 1` לאיסוף נתוני דפים.                   |
+| בנה ארג                     | בְּרִירַת מֶחדָל | אֵפֶקְט                                                                       |
+| --------------------------- | ---------------- | ----------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`              | `0` בונה עם webpack: זיכרון שיא נמוך יותר, איטי יותר. `1` מצטרף ל- Turbopack. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`           | תקרת ערימה V8 (`--max-old-space-size`) עבור `next build` שהולידה.             |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`              | מאכיל `CIRCLE_NODE_TOTAL`; Next מפיקה `workers = N - 1` לאיסוף נתוני עמוד.    |
 
-`OMNIROUTE_BUILD_WORKERS` הוא הפרמטר שיש להגדיל בסביבת בנייה חזקה, והפרמטר
-שיש לחשוד בו כאשר בנייה בסביבה מוגבלת נכשלת **לאחר** `✓ Compiled successfully`. כל
-תהליך עיבוד של נתוני דפים הוא תהליך נפרד, וכך גם תהליך האב `next build` עצמו;
-שחזור בסביבת VPS פעילה (בעיה #7518) מדד שיא RSS של
-~4.5 GB לכל תהליך, ללא תלות בדגל הערימה `NODE_OPTIONS` (‏Turbopack מבצע הידור
-בזיכרון מקורי/Rust מחוץ לערימת V8). ברירת המחדל `2` (← תהליך עיבוד אחד, 2
-תהליכים בסך הכול) מותאמת לסביבות הריצה המתארחות ב-GitHub עם 16 GB / 4 vCPU שבהן
-משתמש תהליך הפרסום. בערך `8` (← 7 תהליכי עיבוד) אזל הזיכרון בסביבת הריצה ו-
-buildkit הכשיל את השלב עם `ResourceExhausted: ... cannot allocate memory`;
-גם `3` (← 2 תהליכי עיבוד) לא התאים לאחר שה-RSS לכל תהליך נמדד
-ישירות במקום להיות מוסק. הקובץ `tests/unit/docker-build-memory-budget.test.ts`
-מבצע את החישוב מול הנתון שנמדד ונכשל אם אחד מהפרמטרים
-חורג מקיבולת סביבת הריצה.
+`OMNIROUTE_BUILD_WORKERS` הוא זה שיעלה על בנאי גדול וזה שחושד כשמבנה מוגבל מת** לְאַחַר** `✓ Compiled successfully`. כל עובד דפי נתונים הוא תהליך משלו, וכך גם האב `next build` עצמו; רפרודוקציה חיה VPS (בעיה #7518) מדדה את שיא RSS של כל תהליך ב- ~ 4.5 GB ללא תלות בדגל `NODE_OPTIONS` heap (Turbopack קומפילציה בזיכרון native/Rust מחוץ ל-V8 heap). ברירת המחדל של `2` (→ 1 עובד, 2 תהליכים בסך הכל) היא בגודל של 16 GB / 4 vCPU GitHub המתארחים בהם צינור הפרסום משתמש. ב- `8` (→ 7 עובדים) לאותו ראנר נגמר הזיכרון וה-buildkit נכשל בשלב עם `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 עובדים) עדיין לא התאימו ברגע שה- RSS לכל תהליך נמדד ישירות במקום להסיק. `tests/unit/docker-build-memory-budget.test.ts` עושה את החשבון מול הנתון הנמדד ונכשל אם אחד הכפתורים גדל מהרץ.
 
-Turbopack מבצע הידור בזיכרון Rust מקורי שנמצא **מחוץ** לערימת V8, ולכן
-`OMNIROUTE_BUILD_MEMORY_MB` אינו מגביל אותו. במארח עם תקרת זיכרון,
-תהליך הבנייה מומת ב-SIGKILL על ידי מנגנון ה-OOM ללא טקסט שגיאה כלל — הוא פשוט
-נעצר באמצע `Creating an optimized production build`, דבר שנראה כמו תקיעה ולא
-כמחסור בזיכרון. זו הסיבה שברירת המחדל של `Dockerfile` היא webpack
-(`OMNIROUTE_USE_TURBOPACK=0`), בשונה מ-`npm run dev` / `npm run build`, שבהם
-Turbopack הוא ברירת המחדל בקוד: הפעלה פשוטה של `docker build .` ללא ארגומנטים לבנייה (כפי
-ש-Railway ושירותי אירוח אחרים בלחיצה אחת מריצים) אינה יכולה להיכשל בשקט בסביבת בנייה
-עם מגבלת זיכרון. התמונות שפורסמו כבר מעבירות במפורש את
-`OMNIROUTE_USE_TURBOPACK=0` בתוך `docker-publish.yml`. בסביבת בנייה עם כמות גדולה של RAM, הפעילו את
-Turbopack לקבלת בנייה מהירה יותר:
+Turbopack מלקט בזיכרון חלודה מקורי שחי** בָּחוּץ** ערימת ה-V8, אז `OMNIROUTE_BUILD_MEMORY_MB` לא כובל אותה. במארח עם תקרת זיכרון ה-build אז הוא SIGKILLed על ידי ה- OOM killer ללא טקסט שגיאה בכלל — הוא פשוט מפסיק באמצע `Creating an optimized production build`, שנקרא כמו תלייה ולא מחוץ לזיכרון. זו הסיבה שה- `Dockerfile` הוא ברירת המחדל ל-webpack (`OMNIROUTE_USE_TURBOPACK=0`), שלא כמו `npm run dev` / `npm run build`, שבו Turbopack הוא ברירת המחדל של הקוד: `docker build .` חשוף ללא args build (מה ש-Railway ומארחים אחרים בלחיצה אחת מריצים) אסור למות בשקט על בונה עם מכסת זיכרון. התמונות שפורסמו כבר עוברות `OMNIROUTE_USE_TURBOPACK=0` במפורש ב- `docker-publish.yml`. בבונה עם הרבה RAM, הצטרף ל- Turbopack לבנייה מהירה יותר:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` מופעל, ולכן `next build` מריץ תהליך אב **וגם** תהליך עיבוד,
-וכל אחד מהם מכבד בנפרד את `OMNIROUTE_BUILD_MEMORY_MB`. הגדירו את תקרת הקונטיינר
-ליותר מכפליים מערך זה בקירוב, ולא לערך יחיד.
+`webpackBuildWorker` מופעל, אז `next build` מפעיל הורה** ו** תהליך עובד וכל אחד מכבד את `OMNIROUTE_BUILD_MEMORY_MB` בנפרד. גודל תקרת המיכל מעל בערך פי שניים מהערך הזה, לא פעם אחת.
 
-נמדד בעץ זה (`--target runner-base`,‏ `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+נמדד על העץ הזה (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| מאגד      | תקרת הקונטיינר | תוצאה                               |
-| --------- | -------------- | ----------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | הומת עקב OOM בשני המקרים, ללא הודעה |
-| webpack   | 8 GiB          | תהליך הבנייה הומת ב-SIGKILL         |
-| webpack   | 12 GiB         | הצליח, עם שיא של 11.1 GiB           |
+| באנדלר        | תקרת מיכל      | תוֹצָאָה                     |
+| ------------- | -------------- | ---------------------------- |
+| Turbopack     | 8 GiB / 16 GiB | OOM-הרוג בשניהם, בשקט        |
+| חבילת אינטרנט | 8 GiB          | לבנות עובד SIGKILLed         |
+| חבילת אינטרנט | 12 GiB         | הצליח, הגיע לשיא של 11.1 GiB |
 
-### ברירות מחדל בזמן הריצה
+### ברירת מחדל של זמן ריצה
 
-ברירות המחדל שמיוצאות על ידי `runner-base`:‏ `PORT=20128`,‏ `HOSTNAME=0.0.0.0`,‏ `OMNIROUTE_MEMORY_MB=1024`,‏ `NODE_OPTIONS=--max-old-space-size=1024`,‏ `DATA_DIR=/app/data`,‏ `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+ברירות מחדל מיוצאות על ידי `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-התנהגות הזיכרון ב-Docker:
+התנהגות זיכרון ב- Docker:
 
-- התמונה מגדירה `OMNIROUTE_MEMORY_MB=1024` וגוזרת ממנה את `NODE_OPTIONS=--max-old-space-size=1024`.
-- תהליך השרת בפועל מופעל על ידי המשגר העצמאי, שקורא את `OMNIROUTE_MEMORY_MB` ומוסיף `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node משתמש בערך האחרון של `--max-old-space-size` כאשר הדגל מופיע מספר פעמים, ולכן הגדרת `OMNIROUTE_MEMORY_MB` שולטת במגבלת ערימת הזיכרון האפקטיבית ב-Docker.
-- מכיוון שהתמונה תמיד מגדירה אותו, ברירת המחדל של המשגר עצמו, המכוילת לפי זיכרון ה-RAM, לעולם אינה חלה תחת Docker. הגדילו אותו במפורש בהתאם לעומס העבודה (בטבלה שלהלן). גם `2048` קטן מדי עבור `/v1/responses` של סוכני תכנות.
+- התמונה מגדירה `OMNIROUTE_MEMORY_MB=1024` ומפיקה ממנה `NODE_OPTIONS=--max-old-space-size=1024`.
+- תהליך השרת בפועל מופעל על ידי המשגר העצמאי, שקורא `OMNIROUTE_MEMORY_MB` ומוסיף `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- הצומת משתמש בערך `--max-old-space-size` החוזר האחרון, כך שהגדרת `OMNIROUTE_MEMORY_MB` שולטת במגבלת ה- Docker heap האפקטיבית.
+- מכיוון שהתמונה תמיד מגדירה את זה, ה-fallback מכויל RAM משלו של המשגר לעולם לא חל תחת Docker. הרם אותו במפורש עבור עומס העבודה (טבלה למטה). `2048` עדיין קטן מדי עבור סוכן הקידוד `/v1/responses`.
 
-### זיכרון RAM בזמן ריצה עבור סוכני תכנות
+### זמן ריצה RAM עבור סוכני קידוד
 
-ברירת המחדל של 1 GiB ב-Docker היא רף מינימלי ללוח מחוונים/צ'אט קל, ולא גודל המתאים לסביבת ייצור. גופי בקשה ארוכים של `POST /v1/responses` (מאות הודעות, עשרות כלים) שומרים מספר גרפים בזיכרון במהלך הדחיסה. שתי בקשות חופפות בגודל של כ-3 MiB / כ-750k טוקנים גרמו ל-V8 להפסיק לפעול עם מרחב אובייקטים ישנים של **12 GiB** (`FATAL ERROR: Reached heap limit`), וגם הגיעו למצב OOM של cgroup בנפח 16 GiB. ראו [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+ברירת המחדל של 1 GiB Docker היא רצפת dashboard/light-chat, לא גודל ייצור. גופי `POST /v1/responses` ארוכים (מאות הודעות, עשרות כלים) שומרים על גרפים מרובים בזיכרון במהלך הדחיסה. שתי בקשות חופפות ~ 3 MiB / ~ 750k-token ביטלו את V8 בשעה** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) וגם פגע ב-16 GiB cgroup OOM. ראה [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-הגדירו את **`--memory` של cgroup לערך גבוה מגודל הערימה** — מאגרים מקומיים, SQLite ותוצרי ביניים של דחיסה נמצאים מחוץ ל-V8.
+גוֹדֶל** cgroup `--memory` מעל הערימה** חוצצים מקוריים של —, SQLite וחומרי ביניים דחיסה יושבים מחוץ ל-V8.
 
-| עומס עבודה                              | `OMNIROUTE_MEMORY_MB`       | קונטיינר / cgroup      | הערות                                                                                           |
-| --------------------------------------- | --------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| לוח מחוונים, צ'אט קל אחד                | `1024` (ברירת המחדל בתמונה) | ≥2 GiB                 |                                                                                                 |
-| סוכן תכנות אחד (Claude/Codex/Grok)      | `8192`                      | ≥10 GiB                | הפעלה טיפוסית של `/v1/responses` בסשן יחיד                                                      |
-| שתי בקשות `/v1/responses` ארוכות במקביל | `10240`–`12288`             | ≥12–16 GiB             | נמדדה הפסקת פעולה של V8 בערימת זיכרון של כ-12 GiB                                               |
-| שלושה הקשרים ארוכים או יותר במקביל      | אין להריץ בתהליך יחיד       | עיבוד סדרתי / יותר RAM | ברירת המחדל לקבלת עומסים כבדים היא בקשה אחת בביצוע; הגדלתה ללא RAM נוסף תגרום שוב להפסקת הפעולה |
+| עומס עבודה                         | `OMNIROUTE_MEMORY_MB`        | מיכל / cgroup   | הערות                                                                         |
+| ---------------------------------- | ---------------------------- | --------------- | ----------------------------------------------------------------------------- |
+| לוח מחוונים, צ'אט קל אחד           | `1024` (ברירת מחדל של תמונה) | ≥2 GiB          |                                                                               |
+| סוכן קידוד אחד (Claude/Codex/Grok) | `8192`                       | ≥10 GiB         | `/v1/responses` אופייני למפגש בודד                                            |
+| שני `/v1/responses` ארוכים במקביל  | `10240`–`12288`              | ≥12–16 GiB      | נמדד V8 לבטל בערימת ~ 12 GiB                                                  |
+| שלושה + ארוכים במקביל              | לא על תהליך אחד              | סדרה / יותר RAM | ברירת המחדל של קבלה במשקל כבד היא 1 בטיסה; העלאתו ללא RAM מציגה מחדש את ההפלה |
 
-`omniroute serve` על חומרה פיזית מכייל כ-35% מזיכרון ה-RAM (מוגבל לטווח `[512, 4096]`) כאשר `OMNIROUTE_MEMORY_MB` **אינו מוגדר**. Docker תמיד מגדיר אותו כ-`1024`, ולכן הכיול הזה לעולם אינו מופעל בתמונה הרשמית.
+`omniroute serve` על מתכת חשופה מכייל ~ 35% מ- RAM (clamped `[512, 4096]`) כאשר `OMNIROUTE_MEMORY_MB` הוא** לא מוגדר** . Docker תמיד מגדיר `1024`, כך שהכיול לעולם אינו פועל בתמונה הרשמית.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## משתני סביבה קריטיים
@@ -364,23 +335,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | הפורט בצד המארח עבור לוח המחוונים של `docker-compose.prod.yml`                                                                                                                                                                                                     | `20130`                |
 | `CLIPROXYAPI_PORT`            | הפורט בצד המארח עבור ה-sidecar מסוג `cliproxyapi`                                                                                                                                                                                                                  | `8317`                 |
 
-## פרוקסי הפוך בתת-נתיב (Traefik / nginx)
+## פרוקסי הפוך על נתיב משנה (Traefik / nginx)
 
-הערך `basePath` של Next.js עובר הידור לתוך החבילה העצמאית. OmniRoute מתעד את הערך
-המוטמע בקובץ sentinel בשורש היישום (נכתב במהלך `npm run build`; נקרא על ידי
-`scripts/docker/ensure-docker-base-path.mjs`) ומשווה אותו מול
-`OMNIROUTE_BASE_PATH` כאשר הקונטיינר מופעל. כאשר הערכים שונים והתמונה נבנתה עבור
-שורש הדומיין, נקודת הכניסה משכתבת את המניפסטים העצמאיים, את הליטרלים המוטמעים של
-`basePath`/`assetPrefix` (Next 16 מרנדר כתובות URL של נכסי SSR מתוך
-`assetPrefix` בלבד — כלי התיקון משקף לתוכו את תת-הנתיב), את כתובות ה-URL המוטמעות
-של נכסי `/_next/static` (מניפסטים של הפניות לקוח, ייבואי מדיה, דפי שגיאה שעברו
-רינדור מראש) ואת ה-shim של `process.env` בצד הלקוח, לפני הרצת
-`node dev/run-standalone.mjs`.
+Next.js `basePath` מורכב לתוך החבילה העצמאית. OmniRoute מתעד את הערך האפוי בקובץ זקיף בשורש האפליקציה (נכתב במהלך `npm run build`; נקרא על ידי `scripts/docker/ensure-docker-base-path.mjs`) ומשווה אותו ל- `OMNIROUTE_BASE_PATH` כאשר המיכל מתחיל. כאשר הם שונים והתמונה נבנתה עבור שורש הדומיין, נקודת הכניסה משכתבת את המניפסטים העצמאיים, את ה- `basePath`/`assetPrefix` המשובצים (הבא 16 מעבד SSR asset URLs מ- `assetPrefix` בלבד — התיקון משקף את תת-הנתיב לתוכו), את ה- `/_next/static` asset אפוי URLs, rendered media preference (cl, rendered media; client `process.env` shim לפני `node dev/run-standalone.mjs` פועל.
 
-### בנייה באמצעות Compose (מומלץ)
+### מבנה חיבור (מומלץ)
 
-הגדירו את שני המשתנים בקובץ `.env`, ולאחר מכן בנו מחדש כדי שהתמונה וסביבת הריצה
-יהיו תואמות:
+הגדר את שני המשתנים ב- `.env` ולאחר מכן בנה מחדש כך שהתמונה וזמן הריצה יסכימו:
 
 ```bash
 # .env
@@ -392,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` מעביר את `OMNIROUTE_BASE_PATH` כארגומנט בנייה של Docker
-וכמשתנה סביבת ריצה.
+`docker-compose.yml` מעביר `OMNIROUTE_BASE_PATH` כ- Docker build-arg וכמשתנה סביבת זמן ריצה.
 
-### תמונת שורש שנבנתה מראש + תת-נתיב בזמן ריצה
+### תת נתיב זמן ריצה + תמונת שורש בנויה מראש
 
-התמונות המפורסמות `diegosouzapw/omniroute:*` נבנות עבור שורש הדומיין. עדיין ניתן
-להגדיר את `OMNIROUTE_BASE_PATH` בזמן ריצה; הקונטיינר מתקן את החבילה פעם אחת בעת
-ההפעלה. השתמשו בו יחד עם המקור הציבורי התואם:
+תמונות `cheaperinference/omniroute:*` שפורסמו בנויות עבור שורש הדומיין. אתה עדיין יכול להגדיר `OMNIROUTE_BASE_PATH` בזמן ריצה; המיכל מתקן את החבילה פעם אחת בעת ההפעלה. הצמד אותו למקור הציבורי התואם:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-הגדירו את הפרוקסי ההפוך כך שיעביר את הנתיב החיצוני **במלואו** (אין להסיר את
-הקידומת). על Traefik לנתב את `PathPrefix(`/omniroute`)` אל הקונטיינר ללא
-`StripPrefix`, כדי ש-Next.js יקבל את `/omniroute/...` ויגיש נכסים מתוך
-`/omniroute/_next/...`.
+הגדר את ה-proxy ההפוך כדי להעביר את** מָלֵא** נתיב חיצוני (אל תסיר את הקידומת). Traefik צריך לנתב את `PathPrefix(`/omniroute `)` לקונטיינר ללא `StripPrefix`, אז Next.js מקבל `/omniroute/...` ומשרת נכסים מ- `/omniroute/_next/...`.
 
-בדיקת התקינות של Docker בודקת את נקודת הקצה הקלה של מחזור החיים `/healthz`,
-בתוספת `OMNIROUTE_BASE_PATH` הפעיל כקידומת. הנתיב `/api/monitoring/health` נותר
-זמין לאבחון ידני או באמצעות לוח מחוונים; כדי להפנות אליו מחדש את ה-HEALTHCHECK
-של הקונטיינר (לדוגמה, לצורך אכיפת תקינות מעמיקה), הגדירו
-`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. נתיב זה מבצע בדיקה
-**מעמיקה** (מסד נתונים + סיכום ניטור) — מתאימה ל-`HEALTHCHECK` הלא-תכוף של Docker
-אם תבחרו להפעיל אותה מחדש, אך **לא** למרווחי `livenessProbe` של Kubernetes.
+בדיקת הבריאות Docker בודקת את נקודת הקצה הקלת משקל של מחזור החיים `/healthz` עם קידומת `OMNIROUTE_BASE_PATH` הפעיל. `/api/monitoring/health` נשאר זמין עבור אבחון human/dashboard ; כדי להפנות אליו את המכולה HEALTHCHECK (לדוגמה לאכיפת בריאות עמוקה), הגדר את `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. השביל הזה הוא א** עָמוֹק** בדוק ( תקציר ניטור DB + ) — מתאים ל- `HEALTHCHECK` נדיר של Docker אם תצטרף שוב, אבל** לֹא** עבור מרווחי Kubernetes `livenessProbe`.
 
-עבור מערכות תזמור (Kubernetes, Nomad וכדומה):
+עבור מתזמרים (Kubernetes, Nomad וכו'):
 
-| בדיקה                | העדפה                                                                | הימנעות                                                      |
-| -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
-| חיות                 | HTTP `GET /livez`, או TCP ביציאה הראשית (`PORT`, ברירת מחדל `20128`) | `/api/monitoring/health` כבדיקת חיות                         |
-| מוכנות               | HTTP `GET /healthz`                                                  | מרווחי זמן קצרים שמתייחסים ללולאת אירועים עמוסה כאל תהליך מת |
-| מעמיקה / קופסה שחורה | `/api/monitoring/health`                                             | —                                                            |
+| בְּדִיקָה       | לְהַעֲדִיף                                                           | לְהִמָנַע                                       |
+| --------------- | -------------------------------------------------------------------- | ----------------------------------------------- |
+| חיים            | HTTP `GET /livez`, או TCP ביציאה הראשית (`PORT`, ברירת מחדל `20128`) | `/api/monitoring/health` כחיות                  |
+| נְכוֹנוּת       | HTTP `GET /healthz`                                                  | פסקי זמן צמודים שמתייחסים לאירוע לולאה תפוס כמת |
+| Deep / Blackbox | `/api/monitoring/health`                                             | —                                               |
 
-`/healthz` מדווח על מחזור החיים של התהליך (`ok` / `starting` / `stopping`).
-`/livez` בודק רק שהתהליך חי (200 בכל פעם שהמטפל יכול לפעול; הוא אינו ממתין
-למוכנות). שניהם עדיין פועלים על אותה לולאת אירועים של Node המשמשת לטיפול בבקשות,
-ולכן עבודת קטלוג או דחיסה עתירת CPU עלולה לעכב אותם — עמוס ≠ מת. העדיפו בדיקת
-חיות באמצעות TCP אם הזמן המוקצב לבדיקות HTTP מסתיים. הנחיות מלאות לבדיקות:
-[מדריך ניטור — המלצות לבדיקות Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` מדווח על מחזור החיים של תהליך (`ok` / `starting` / `stopping`). `/livez` הוא תהליך חי בלבד (200 בכל פעם שהמטפל יכול לרוץ; הוא לא ממתין למוכנות). שניהם עדיין פועלים על אותה לולאת אירועי Node כטיפול בבקשות, כך שעבודת קטלוג או דחיסה קשורה ל-CPU יכולה לעכב את מותם — busy ≠. העדיפו חיוניות TCP אם פסק זמן של בדיקות HTTP. הנחיית בדיקה מלאה: [מדריך ניטור — Kubernetes המלצות בדיקה](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose עם Caddy ‏(HTTPS Auto-TLS)
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-ניתן לחשוף את OmniRoute באופן מאובטח באמצעות הקצאה אוטומטית של אישורי SSL על ידי Caddy. ודאו שרשומת ה-A ב-DNS של הדומיין שלכם מפנה לכתובת ה-IP של השרת.
+ניתן לחשוף OmniRoute בצורה מאובטחת באמצעות הקצאת SSL האוטומטית של Caddy. ודא שרשומה DNS A של הדומיין שלך מפנה ל- IP של השרת שלך.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # מקור הפונה לדפדפן עבור קריאות חוזרות של OAuth, קישורי לוח הבקרה וכתובות URL ציבוריות שנוצרו.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # כתובת URL פנימית לתקשורת בין שרתים עבור משימות מתוזמנות / בקשות עצמיות.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -471,11 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy מגדיר את כותרות ההעברה הסטנדרטיות עבור הקונטיינר שבמעלה הזרם. OmniRoute משתמש
-ב-`NEXT_PUBLIC_BASE_URL` כמקור הציבורי הקנוני עבור קריאות חוזרות של OAuth וקישורים ציבוריים
-שנוצרו; פעולות כתיבה מאומתות בלוח הבקרה משתמשות בבקשות מאותו מקור יחד עם הגנת CSRF
-הקשורה להפעלה. הפעילו את `OMNIROUTE_TRUST_PROXY` רק בפריסות מתקדמות שבהן ברצונכם
-ש-OmniRoute יגזור את המקור הציבורי מכותרות העברה מהימנות במקום מתצורה מפורשת.
+Caddy מגדיר את כותרות ההעברה הסטנדרטיות עבור המכולה במעלה הזרם. OmniRoute משתמש ב- `NEXT_PUBLIC_BASE_URL` כמקור הציבורי הקנוני להתקשרות חוזרת OAuth וקישורים ציבוריים שנוצרו; כתיבת לוח מחוונים מאומתת משתמשת בבקשות מאותו מקור בתוספת הגנת CSRF הקשורה להפעלה. אפשר `OMNIROUTE_TRUST_PROXY` רק עבור פריסות מתקדמות שבהן אתה רוצה בכוונה OmniRoute יגזור את המקור הציבורי מכותרות מועברות מהימנות במקום תצורה מפורשת.
 
 ## מנהרה מהירה של Cloudflare
 
@@ -494,47 +434,49 @@ Caddy מגדיר את כותרות ההעברה הסטנדרטיות עבור ה
 
 ## תגיות תמונה
 
-| תמונה                    | תגית     | גודל   | תיאור                                                       |
-| ------------------------ | -------- | ------ | ----------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | גרסת SemVer היציבה **שפורסמה** הגבוהה ביותר (לא git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | קבעו תגית מסוג זה עבור GitOps                               |
+| תְמוּנָה                     | תָג      | גוֹדֶל  | תֵאוּר                                              |
+| ---------------------------- | -------- | ------- | --------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | הֲכִי גָבוֹהַ** פורסם** SemVer יציב (לא git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | הצמד מחלקה זו של תג עבור GitOps                     |
 
-מניפסט מרובה פלטפורמות: `linux/amd64` + `linux/arm64` באופן מקורי (Apple Silicon, AWS Graviton, Raspberry Pi). ‏Docker בוחר אוטומטית את הארכיטקטורה המתאימה; העבירו `--platform linux/amd64` אם עליכם לכפות אמולציית AMD64 במארחי ARM.
+אותן תמונות מתפרסמות בשלושה מאגרים, עם אותם תקצירים לכל ארכיטקטורה: `cheaperinference/omniroute` (Docker Hub, ארגון Cheaper Inference, מ-3.8.53 ואילך), `ghcr.io/cheaper-inference/omniroute` וה- `diegosouzapw/omniroute` מדור קודם, ששומר על היסטוריית המשיכה שלו ועדיין מקבל כל מהדורה. פריסות `diegosouzapw/omniroute` קיימות ממשיכות להתעדכן; החלפת שם התמונה היא אופציונלית. ערוץ `:next` / `:next-web` לפני ההפצה למטה מפורסם ל- `diegosouzapw/omniroute` ו- GHCR בלבד.
 
-### ערוצי הפצה
+מניפסט ריבוי פלטפורמות: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker בוחר את הארכיטקטורה המתאימה באופן אוטומטי; העבר `--platform linux/amd64` אם אתה צריך לכפות אמולציית AMD64 על מארחי ARM.
 
-OmniRoute מפרסם ערוצי Docker נפרדים עבור גרסאות יציבות, בדיקות פעילות של ענף ההפצה וגרסאות פיתוח.
+### שחרור ערוצים
 
-| ערוץ                            | מקור                                        | יכולת שינוי                 | שימוש מומלץ                                                                                                             |
-| ------------------------------- | ------------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | הפצה חתומה/בעלת גרסה                        | בלתי ניתן לשינוי            | פריסות ייצור המקבעות גרסה מדויקת                                                                                        |
-| `:latest` / `:latest-web`       | גרסת SemVer היציבה **שפורסמה** הגבוהה ביותר | מצביע יציב הניתן לשינוי     | עוקב אחר גרסאות יציבות **לאחר** משימת פרסום SemVer — **אינו** עוקב אחר `main` או אחר קומיטים שטרם פורסמו ב-`release/v*` |
-| `:next` / `:next-web`           | ענף `release/v*` הנוכחי המוגדר כברירת מחדל  | מצביע קדם-הפצה הניתן לשינוי | בדיקת תיקונים שהוטמעו בענף ההפצה הפעיל אך עדיין אינם חלק מגרסה יציבה                                                    |
-| `:main` / `:main-web`           | ענף `main`                                  | מצביע פיתוח הניתן לשינוי    | לפיתוח ולבדיקות אינטגרציה בלבד                                                                                          |
+OmniRoute מפרסמת ערוצי Docker נפרדים עבור מהדורות יציבות, בדיקות סניף מהדורות אקטיביות ובניית פיתוחים.
+
+| עָרוּץ                          | מָקוֹר                                | השתנות                       | שימוש מומלץ                                                                                                              |
+| ------------------------------- | ------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `:<version>` / `:<version>-web` | שחרור Signed/versioned                | בלתי ניתן לשינוי             | פריסות ייצור שמצמידות גרסה מדויקת                                                                                        |
+| `:latest` / `:latest-web`       | הֲכִי גָבוֹהַ** פורסם** SemVer יציב   | מצביע יציב משתנה             | עוקב אחר מהדורות יציבות** לְאַחַר** עבודה SemVer לפרסם — עושה** לֹא** עקוב אחר `main` או commits `release/v*` שלא פורסמו |
+| `:next` / `:next-web`           | ברירת המחדל הנוכחית סניף `release/v*` | מצביע טרום שחרור ניתן לשינוי | תיקוני בדיקה שנחתו על ענף השחרור הפעיל אך עדיין אינם במהדורה יציבה                                                       |
+| `:main` / `:main-web`           | סניף `main`                           | מצביע פיתוח ניתן לשינוי      | בדיקות פיתוח ואינטגרציה בלבד                                                                                             |
 
 #### ספקי הפעלות אינטרנט: תמונות `-web`
 
-כל אחד מהערוצים לעיל זמין גם כתגית `-web`‏ (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), הנבנית מהשלב `runner-web` — אותה תמונה בתוספת Playwright ודפדפן Chromium. התמונה הרגילה מסופקת **ללא** Chromium; הספקים `gemini-web`, `claude-web` ו-`claude-turnstile` זקוקים לו.
+כל ערוץ למעלה משמש כתג `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), בנוי משלב `runner-web` — אותה תמונה בתוספת Playwright ודפדפן Chromium. התמונה הפשוטה נשלחת** לְלֹא** כְּרוֹם; `gemini-web`, `claude-web` ו- `claude-turnstile` צריכים את זה.
 
-הכשל נדחה ואינו מתרחש בזמן האתחול: ספקים אלה מציגים את המודלים שלהם ומופיעים כמחוברים בלוח הבקרה, ורק הבקשה הראשונה נכשלת עם
+הכשל נדחה, לא זמן ההפעלה: אותם ספקים מפרטים את הדגמים שלהם ומציגים כמחוברים בלוח המחוונים, ורק הבקשה הראשונה נכשלת עם
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-אם אתם משתמשים בספקים אלה, משכו את תגית `-web` של הערוץ שבו אתם כבר נמצאים — דבר אחר אינו משתנה. בהתקנת npm/CLI (ללא תמונת Docker), הרכיב החסר המקביל הוא הקובץ הבינארי של הדפדפן: הריצו `npx playwright install chromium` במארח.
+אם אתה משתמש בספקים האלה, משוך את תג `-web` של הערוץ שבו אתה כבר נמצא ב- — שום דבר אחר לא משתנה. בהתקנת npm/CLI (ללא תמונת Docker ), החלק החסר המקביל הוא הדפדפן הבינארי: הרץ `npx playwright install chromium` על המארח.
 
-#### שימוש בערוץ הקדם-הפצה
+#### שימוש בערוץ טרום-הפצה
 
-הערוץ `next` נבנה מחדש בכל דחיפה לענף ברירת המחדל הנוכחי `release/v*`, ומתפרסם הן עבור AMD64 והן עבור ARM64. ענפי תחזוקה ישנים יותר אינם יכולים לדרוס אותו. הערוץ מספק image שניתן למשוך, הכולל תיקונים שמוזגו לענף הגרסה הפעיל לפני יצירת תג הגרסה היציבה הבא.
+ערוץ `next` נבנה מחדש בכל דחיפה לסניף ברירת המחדל הנוכחי `release/v*` ומתפרסם הן עבור AMD64 והן ARM64. ענפי תחזוקה ישנים יותר אינם יכולים לדרוס אותו. הערוץ מספק תמונה ניתנת למשיכה עבור תיקונים שהתמזגו בענף השחרור הפעיל לפני חיתוך התג היציב הבא.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-עבור Docker Compose, החליפו את תג ה-image המשמש את הפרופיל שנבחר, ולאחר מכן משכו וצרו מחדש את השירות:
+עבור Docker Compose, עוקף את תג התמונה המשמש את הפרופיל הנבחר, ולאחר מכן משוך וצור מחדש את השירות:
 
 ```yaml
 services:
@@ -547,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### בטיחות וחזרה לגרסה קודמת
+#### בטיחות והחזרה לאחור
 
-`next` הוא ערוץ קדם-גרסה צף. הוא עשוי להשתנות בכל דחיפה לענף הגרסה הפעיל, ו**אינו נתמך לשימוש בסביבת ייצור**. קבעו את תקציר ה-image בזמן הערכת build מסוים:
+`next` הוא ערוץ טרום שחרור צף. זה עשוי להשתנות בכל דחיפה לסניף השחרור הפעיל והוא** לא נתמך לשימוש בייצור** . הצמד את תקציר התמונה בעת הערכת מבנה ספציפי:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-לפני הבדיקה, גבו את אמצעי האחסון של נתוני OmniRoute או את ספריית הנתונים המחוברת באמצעות bind mount. כדי לחזור לגרסה קודמת, שחזרו את הגרסה היציבה או את התקציר שבהם השתמשתם קודם, וצרו מחדש את הקונטיינר:
+לפני הבדיקה, גבה את נפח הנתונים OmniRoute או ספריית הנתונים המותאמים ל-bind. כדי לחזור אחורה, שחזר את הגרסה היציבה בעבר או עכל וצור מחדש את המיכל:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-build מענף גרסה לעולם אינו יכול להזיז את `latest`; רק גרסה סמנטית יציבה העומדת בתנאים יכולה לקדם את המצביע היציב. ה-images של `next` ממשיכים לכלול את בדיקת ה-image של הגרסה ואת שער החסימה עבור פגיעויות ברמת CRITICAL.
+מבנה ענף שחרור לעולם לא יכול להזיז `latest`; רק גרסה סמנטית יציבה מתאימה עשויה לקדם את המצביע היציב. תמונות `next` שומרות על בדיקת תמונת השחרור וחוסמות שער CRITICAL-vulnerability.
 
-**`latest` אינו מבטיח עדכניות ביחס ל-git.** תיקונים שמוזגו אל `main` או אל הענף הפעיל `release/v*` **אינם** כלולים ב-`:latest` עד לפרסום image יציב בגרסת SemVer ועד שמשימת הפרסום מקדמת את `:latest` (עם אותו תקציר כמו אותה גרסת SemVer). אם נראה ש-`latest` תקוע בזמן שהתיקון כבר מופיע ב-GitHub, משכו את `:next` כדי לבדוק את ענף הגרסה, או המתינו לתג ה-SemVer.
+**`latest` אינה ערובה למטבע עבור git.** תיקונים ממוזגים ב- `main` או בענף `release/v*` הפעיל הם** לֹא** ב- `:latest` עד שתתפרסם תמונת SemVer יציבה ועבודת הפרסום תקדם `:latest` (אותו תקציר כמו ה- SemVer הזה). אם `latest` נראה קפוא בזמן ש- GitHub כבר מציג את התיקון, משוך `:next` כדי לבדוק את ענף השחרור או המתן לתג SemVer.
 
-| מה ברצונכם לעשות                                           | במה להשתמש                          |
-| ---------------------------------------------------------- | ----------------------------------- |
-| GitOps / סביבת ייצור שאסור שתסטה                           | קבעו `:X.Y.Z` (או את תקציר ה-image) |
-| לעקוב אחר גרסאות יציבות שפורסמו ולאפשר יצירה מחדש בכל גרסה | `:latest`                           |
-| לבדוק commits של `release/v*` שטרם פורסמו                  | `:next` (לא לייצור)                 |
-| לבדוק את `main`                                            | `:main` (לא לייצור)                 |
+| אתה רוצה                                      | לְהִשְׁתַמֵשׁ                  |
+| --------------------------------------------- | ------------------------------ |
+| GitOps / הפקה שאסור להיסחף                    | Pin `:X.Y.Z` (או תקציר התמונה) |
+| עקוב אחר אורוות שפורסמו וקבל שחזור בכל מהדורה | `:latest`                      |
+| בדוק מתחייב `release/v*` שלא פורסם            | `:next` (לא ייצור)             |
+| בדוק `main`                                   | `:main` (לא ייצור)             |
 
 ## עדכוני לוח הבקרה ב-Docker
 
