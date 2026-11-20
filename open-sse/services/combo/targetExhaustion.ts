@@ -376,7 +376,7 @@ export function applyComboTargetExhaustion(
     // here a request-scoped 401/403 marked the connection exhausted and skipped every
     // remaining same-connection target of the request.
     !opts.requestScopedFailure &&
-    !isRequestScopedUpstreamFailure(structuredError) &&
+    !isRequestScopedUpstreamFailure({ ...structuredError, status: result.status }) &&
     provider &&
     provider !== "unknown"
   ) {
