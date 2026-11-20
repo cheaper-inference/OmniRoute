@@ -62,7 +62,7 @@ export async function POST(request) {
     if (
       !modelInfo?.provider ||
       !modelInfo?.model ||
-      wouldRefuseAgent({ headers: request.headers, provider: modelInfo.provider })
+      wouldRefuseAgent({ headers: request.headers, provider: modelInfo.provider, log })
     ) {
       return estimated;
     }

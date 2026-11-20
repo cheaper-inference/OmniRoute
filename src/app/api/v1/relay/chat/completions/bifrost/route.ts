@@ -32,6 +32,7 @@ import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { stripSensitiveResponseHeaders } from "@omniroute/open-sse/utils/upstreamResponseHeaders";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
+import * as log from "@/sse/utils/logger";
 import { getRelayTokenByHash, checkRateLimit, recordRelayUsage } from "@/lib/db/relayProxies";
 import {
   buildErrorBody,
@@ -123,7 +124,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (wouldRefuseAgent({ headers: request.headers })) {
+  if (wouldRefuseAgent({ headers: request.headers, log })) {
     // The TS path decides on the provider the request resolves to.
     return new Response(
       JSON.stringify(

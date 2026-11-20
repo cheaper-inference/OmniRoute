@@ -1,4 +1,5 @@
 import { wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
+import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { resolveApiKeyForcedModel } from "@/sse/handlers/apiKeyForcedModel";
 
@@ -34,7 +35,7 @@ export async function gateBifrostFastPath(
   request: Request,
   body: Record<string, unknown>
 ): Promise<BifrostFastPathGate> {
-  if (wouldRefuseAgent({ headers: request.headers })) {
+  if (wouldRefuseAgent({ headers: request.headers, log })) {
     return { rejection: null, allow: false };
   }
   if (request.headers.get("x-route-model")?.trim()) {
