@@ -1,4 +1,8 @@
-import { isFreeModel } from "@/shared/utils/freeModels";
+import {
+  isCompatibleFreeImportProvider,
+  isFreeForCompatibleImport,
+  isFreeModel,
+} from "@/shared/utils/freeModels";
 import { getRawProviderConnections } from "../providers";
 import type { SyncedAvailableModel } from "./synced";
 import { isSyncedAtFresh } from "./syncedCatalogFreshness";
@@ -61,7 +65,14 @@ export function admitConnectionModels(
   models: readonly SyncedAvailableModel[],
   freeOnly: boolean
 ): SyncedAvailableModel[] {
-  return freeOnly ? models.filter((model) => isFreeModel(providerId, model)) : [...models];
+  if (!freeOnly) return [...models];
+  // A compatible node's free tier is not in the shipped catalog: its rows were admitted at
+  // import time by payload evidence, so the read path must apply the same predicate or a
+  // free-only node loses every model it just imported (#20765).
+  if (isCompatibleFreeImportProvider(providerId)) {
+    return models.filter((model) => isFreeForCompatibleImport(model));
+  }
+  return models.filter((model) => isFreeModel(providerId, model));
 }
 
 /**
