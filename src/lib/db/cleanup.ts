@@ -514,20 +514,33 @@ export async function cleanupCcrBlocks(): Promise<CleanupResult> {
  * Delete closed quota-share buckets. The sliding window reads only the current and the
  * previous bucket, so a row not updated for two of the longest windows (monthly) is dead
  * for every window. No retention setting: the cutoff follows the window table.
+ *
+ * The percent attribution book (quota_percent_ledger and its token counters) ages out with
+ * the same cutoff. A book is not rewritten while the account bar does not move, so the cutoff
+ * must exceed the longest plan window; two monthly windows does.
  */
 export async function cleanupQuotaConsumption(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
+  const cutoffIso = new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString();
 
   try {
-    await deleteFromTableBeforeInBatches(
-      { table: "quota_consumption", column: "updated_at", cutoff: "epochMs" },
-      new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString(),
-      { progress: result }
+    for (const table of [
+      "quota_consumption",
+      "quota_percent_ledger",
+      "quota_percent_ledger_tokens",
+    ]) {
+      await deleteFromTableBeforeInBatches(
+        { table, column: "updated_at", cutoff: "epochMs" },
+        cutoffIso,
+        { progress: result }
+      );
+    }
+    console.log(
+      `[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets and idle percent ledger rows`
     );
-    console.log(`[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets`);
   } catch (err: unknown) {
     console.error(
-      `[Cleanup] Error cleaning quota_consumption (${result.deleted} rows deleted):`,
+      `[Cleanup] Error cleaning quota_consumption and percent ledger (${result.deleted} rows deleted):`,
       err
     );
     result.errors++;
