@@ -32,6 +32,35 @@ function isOpenAiCompatiblePath(pathname: string): boolean {
   return OPENAI_COMPAT_PATHS.some((pattern) => pattern.test(pathname));
 }
 
+/**
+ * True when the path carries a `.` or `..` segment, literal or percent-encoded.
+ *
+ * The allowlist is matched against the path as the client sent it, and that same
+ * path is relayed untouched, so a dot segment would let the server behind the
+ * bridge resolve the request to a route the allowlist never saw. Only the
+ * encodings that can hide a separator or a dot are unwrapped; the loop is bounded
+ * and cannot throw on malformed escapes.
+ */
+export function hasDotSegment(pathname: string): boolean {
+  let current = pathname;
+  for (let pass = 0; pass < 4; pass += 1) {
+    const next = current
+      .replace(/%25/gi, "%")
+      .replace(/%2e/gi, ".")
+      .replace(/%2f/gi, "/")
+      .replace(/%5c/gi, "\\");
+    if (next === current) break;
+    current = next;
+  }
+  return current.split(/[/\\]/).some((segment) => segment === "." || segment === "..");
+}
+
+/** A request is relayed only when its path is free of dot segments and on the allowlist. */
+export function isRelayablePath(rawUrl: string): boolean {
+  const pathname = rawUrl.split("?")[0] || "/";
+  return !hasDotSegment(pathname) && isOpenAiCompatiblePath(pathname);
+}
+
 function requestWantsStreaming(req: IncomingMessage): boolean {
   const accept = String(req.headers.accept || "").toLowerCase();
   if (accept.includes("text/event-stream")) return true;
@@ -260,10 +289,8 @@ export function createApiBridgeServer(dashboardPort: number): http.Server {
     // HMR/bfcache) on the request/response streams so they never surface as an
     // uncaughtException that kills the server (#fix-dev-server-aborted).
     attachRequestStreamGuards(req, res);
-    const rawUrl = req.url || "/";
-    const pathname = rawUrl.split("?")[0] || "/";
 
-    if (!isOpenAiCompatiblePath(pathname)) {
+    if (!isRelayablePath(req.url || "/")) {
       res.writeHead(404, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
@@ -281,10 +308,7 @@ export function createApiBridgeServer(dashboardPort: number): http.Server {
   server.keepAliveTimeout = API_BRIDGE_TIMEOUTS.serverKeepAliveTimeoutMs;
   server.setTimeout(API_BRIDGE_TIMEOUTS.serverSocketTimeoutMs);
   server.on("upgrade", (req, socket, head) => {
-    const rawUrl = req.url || "/";
-    const pathname = rawUrl.split("?")[0] || "/";
-
-    if (!isOpenAiCompatiblePath(pathname)) {
+    if (!isRelayablePath(req.url || "/")) {
       writeUpgradeProxyError(
         socket,
         404,
