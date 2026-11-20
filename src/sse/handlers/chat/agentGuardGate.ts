@@ -28,6 +28,7 @@ import {
   getProviderById,
   isAnthropicCompatibleProvider,
   isOpenAICompatibleProvider,
+  resolveProviderId,
 } from "@/shared/constants/providers";
 import { markLocalModelPolicyResponse } from "@/shared/utils/resolvedModelAccess";
 import { decideAgentEnforcement, wouldRefuseAgent } from "@/lib/guardrails/agentGuard/enforcement";
@@ -152,11 +153,23 @@ export function agentGuardRefusal(target: GateTarget): Response | null {
   }
 }
 
-function comboEntryModel(entry: unknown): string | null {
-  if (typeof entry === "string") return entry;
+function nonEmptyString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+/**
+ * Provider a top-level combo entry names: a step's own `providerId` (or the
+ * `provider` spelling the step normalizer also accepts), else the prefix of its
+ * `model` string, or of the entry itself when it is a string. A `combo-ref`
+ * step names no provider. Connection and account ids are not read.
+ */
+function comboEntryProvider(entry: unknown): string | null {
+  if (typeof entry === "string") return providerFromModelString(entry);
   if (!entry || typeof entry !== "object") return null;
-  const model = (entry as { model?: unknown }).model;
-  return typeof model === "string" ? model : null;
+  const step = entry as { providerId?: unknown; provider?: unknown; model?: unknown };
+  const named = nonEmptyString(step.providerId) ?? nonEmptyString(step.provider);
+  if (named) return resolveProviderId(named);
+  return typeof step.model === "string" ? providerFromModelString(step.model) : null;
 }
 
 /**
@@ -173,8 +186,7 @@ function isKnownProvider(provider: string): boolean {
 }
 
 function isEntryOutsideGuard(entry: unknown): boolean {
-  const model = comboEntryModel(entry);
-  const provider = model ? providerFromModelString(model) : null;
+  const provider = comboEntryProvider(entry);
   return provider !== null && isKnownProvider(provider) && !isGuardedProvider(provider);
 }
 

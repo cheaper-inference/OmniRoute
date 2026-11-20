@@ -279,6 +279,17 @@ test("combo: the policy error replaces the combo's own error only when a target 
   assert.equal(settle([CLAUDE, "no-think/claude-opus-5"]), 403);
   assert.equal(settle([CLAUDE, "team/fast-mix"]), 403);
   assert.equal(settle([CLAUDE, { kind: "combo-ref", comboName: "other" }, 7, null]), 403);
+  // Stored steps name their provider in `providerId` (an alias such as `cc` resolves), which
+  // wins over the model string; a non-string or unregistered providerId is unknown.
+  const anthropicStep = { providerId: "anthropic", model: "claude-opus-5" };
+  assert.equal(settle([anthropicStep, { providerId: "glm", model: "glm-5" }]), 503);
+  assert.equal(settle([anthropicStep, { providerId: "cc", model: "claude-opus-5" }]), 403);
+  assert.equal(settle([anthropicStep, { providerId: 7, model: "glm-5" }]), 403);
+  assert.equal(settle([anthropicStep, { providerId: "not-a-provider", model: "glm-5" }]), 403);
+  assert.equal(settle([anthropicStep, { providerId: "not-a-provider", model: OTHER }]), 403);
+  assert.equal(settle([anthropicStep, { providerId: "openrouter", model: "anthropic/x" }]), 503);
+  assert.equal(settle([anthropicStep, { kind: "provider-wildcard", providerId: "glm" }]), 503);
+  assert.equal(settle([anthropicStep, { provider: "glm", model: "glm-5" }]), 503);
   // Inspecting the combo fails open: an exception returns the response it was given.
   const hostile = {
     get models(): unknown[] {
