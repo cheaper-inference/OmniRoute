@@ -12,7 +12,16 @@ fs.mkdirSync(path.resolve("_artifacts"), { recursive: true });
 const fixture = fs.mkdtempSync(path.resolve("_artifacts/key-templates-migration-"));
 const originalEnv = { ...process.env };
 for (const key of Object.keys(process.env)) delete process.env[key];
-for (const key of ["PATH", "SystemRoot", "WINDIR", "COMSPEC", "PATHEXT", "NODE_TEST_CONTEXT"]) {
+// Keep Node source maps hydrated during coverage of the dynamic imports.
+for (const key of [
+  "PATH",
+  "SystemRoot",
+  "WINDIR",
+  "COMSPEC",
+  "PATHEXT",
+  "NODE_V8_COVERAGE",
+  "NODE_TEST_CONTEXT",
+]) {
   if (originalEnv[key]) process.env[key] = originalEnv[key];
 }
 for (const key of ["DATA_DIR", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"]) {
