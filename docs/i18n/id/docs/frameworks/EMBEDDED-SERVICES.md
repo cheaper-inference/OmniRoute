@@ -557,6 +557,8 @@ Proksi ini:
 
 pemutakhiran WebSocket untuk dasbor tertanam ditangani oleh server pendamping pada port khusus (lihat `src/lib/services/embedWsProxy.ts`).
 
+Setiap pemutakhiran diotorisasi sebelum terowongan dibuka, dengan aturan yang sama seperti rute penyematan HTTP : rekan harus berupa loopback tanpa header penerusan proxy terbalik, `Origin` browser harus merupakan asal dasbor (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` memperpanjang default loopback), dan pemanggil memerlukan sesi dasbor atau kunci API cakupan manajemen kecuali login dasbor dinonaktifkan.
+
 **Keamanan:** Rute proxy yang disematkan diklasifikasikan dalam `LOCAL_ONLY_API_PREFIXES` dan hanya dapat dijangkau dari loopback. Penyerang yang memperoleh JWT melalui terowongan Cloudflare/Ngrok tidak dapat melakukan proksi ke layanan tertanam.
 
 ---

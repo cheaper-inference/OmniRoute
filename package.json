@@ -607,14 +607,10 @@
     "socket.io-parser": "^4.2.7",
     "tar": "^7.5.21",
     "libxmljs2": {
-      "minimatch": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch": "^11.0.4"
     },
     "rimraf": {
-      "minimatch@9": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch@9": "^11.0.4"
     },
     "@apidevtools/json-schema-ref-parser": {
       "js-yaml": "^5.4.2"
@@ -638,6 +634,8 @@
     },
     "get-uri": {
       "basic-ftp": "^6.2.3"
-    }
+    },
+    "glob": "$glob",
+    "minimatch@>=9.0.0": "^11.0.4"
   }
 }

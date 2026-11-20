@@ -309,6 +309,7 @@ Tumia vifungu vya `IF NOT EXISTS`, `IF EXISTS`, na `OR IGNORE` / `OR REPLACE` kw
 3. **Jaza data kwa uangalifu** : tumia `UPDATE ... WHERE ...` kushughulikia safu mlalo zilizopo
 4. **Angalia utaratibu na jina** : `npm run test:migrations:fresh` (uhamiaji wote kwenye hifadhidata tupu) na `npm run check:migration-numbering`
 5. **Jaribu kwenye nakala** : usiwahi kuendesha uhamaji ambao haujajaribiwa kwenye uzalishaji
+6. **Jedwali lililoundwa kutoka kwa msimbo linahitaji uhamishaji pia** : ikiwa moduli pia inaunda meza kwa uvivu (`CREATE TABLE IF NOT EXISTS`, iliyohifadhiwa kama njia ya kujiponya), uhamiaji lazima uunde kwa DDL sawa. Vinginevyo usakinishaji safi na usakinishaji ulioboreshwa huishia na schemas tofauti, kulingana na ikiwa njia hiyo ya msimbo ilienda. `tests/unit/db/lazy-table-migration-guard.test.ts` huchanganua `src/` na `open-sse/` na kushindwa kwenye `CREATE` mvivu bila kuhama (#20557). Mfano: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Mfano:
 
