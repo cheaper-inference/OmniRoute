@@ -28,7 +28,20 @@
     "stage": "testing",
     "startedAt": "2026-11-20T17:04:57.765Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b14-4822c03e1525",
+      "requestedAt": "2026-11-20T18:32:01.365Z",
+      "afterMs": 1795199511000,
+      "runIds": [
+        44779808111
+      ],
+      "jobs": [
+        "Gate / CI",
+        "Package Artifact",
+        "Integration Tests (2/2)"
+      ]
+    }
   },
   "baseChecks": [
     {
@@ -82,7 +95,7 @@
     "ciRuns": 15,
     "landedPrs": 0,
     "landedBatches": 0,
-    "redBatches": 4,
+    "redBatches": 5,
     "bisections": 0,
     "culprits": 0
   },
@@ -1087,8 +1100,32 @@
         "19149": "2026-11-20T15:49:56Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44779446870"
+    },
+    {
+      "at": "2026-11-20T18:32:01.366Z",
+      "type": "checks-red",
+      "batchId": "b14",
+      "prs": [
+        19132,
+        19149
+      ],
+      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
+      "detail": "Gate / CI, Package Artifact, Integration Tests (2/2)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44793573082"
+    },
+    {
+      "at": "2026-11-20T18:32:01.366Z",
+      "type": "flaky-rerun",
+      "batchId": "b14",
+      "prs": [
+        19132,
+        19149
+      ],
+      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
+      "detail": "re-running the failed jobs of b14 once (Gate / CI, Package Artifact, Integration Tests (2/2)) before a base check",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44793573082"
     }
   ],
-  "updatedAt": "2026-11-20T18:11:22.354Z",
+  "updatedAt": "2026-11-20T18:33:03.155Z",
   "batchWindow": 10
 }
