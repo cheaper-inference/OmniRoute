@@ -43,6 +43,8 @@ let a = { id: "", key: "" };
 let b = { id: "", key: "" };
 let c = { id: "", key: "" };
 let unscoped = { id: "", key: "" };
+let future = { id: "", key: "" };
+let revoked = { id: "", key: "" };
 
 test.before(async () => {
   const created = await Promise.all([
@@ -50,8 +52,10 @@ test.before(async () => {
     apiKeysDb.createApiKey("Key B", "test-machine", [SELF_USAGE_SCOPE]),
     apiKeysDb.createApiKey("Key C", "test-machine", [SELF_USAGE_SCOPE]),
     apiKeysDb.createApiKey("Key unscoped", "test-machine", []),
+    apiKeysDb.createApiKey("Key future", "test-machine", [SELF_USAGE_SCOPE]),
+    apiKeysDb.createApiKey("Key losing scope", "test-machine", [SELF_USAGE_SCOPE]),
   ]);
-  [a, b, c, unscoped] = created.map((k) => ({ id: k.id, key: k.key }));
+  [a, b, c, unscoped, future, revoked] = created.map((k) => ({ id: k.id, key: k.key }));
 });
 
 test.beforeEach(() => {
@@ -212,6 +216,29 @@ test("a subscription request is $0 billed and priced at list price", async () =>
   assert.ok(body.summary.listPriceUsd > 0, "list price of a subscription request");
   assert.equal(body.byModel[0].listPriceUsd, body.summary.listPriceUsd);
   assert.equal(body.daily[0].listPriceUsd, body.summary.listPriceUsd);
+});
+
+test("a row stamped after now is not counted", async () => {
+  await seed({ apiKeyId: future.id, provider: "openai", model: "gpt-5" });
+  await seed({
+    apiKeyId: future.id,
+    provider: "openai",
+    model: "from-the-future",
+    timestamp: new Date(Date.now() + 3 * 86_400_000).toISOString(),
+  });
+  const text = await (await call("?range=1d", bearer(future.key))).text();
+  const body = JSON.parse(text);
+  assert.equal(body.summary.requests, 1);
+  assert.ok(body.summary.lastRequest <= body.coverage.to);
+  assert.ok(!text.includes("from-the-future"));
+});
+
+test("the gate runs before the reuse: a key that loses self:usage is refused at once", async () => {
+  const first = await call("?range=7d", bearer(revoked.key));
+  assert.equal(first.status, 200);
+  await apiKeysDb.updateApiKeyPermissions(revoked.id, { scopes: [] });
+  const after = await call("?range=7d", bearer(revoked.key));
+  assert.deepEqual([after.status, after.headers.get("Cache-Control")], [403, "no-store"]);
 });
 
 test("range is a closed set with a default", async () => {

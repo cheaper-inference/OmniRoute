@@ -2,15 +2,16 @@
  * GET /api/v1/me/usage: the usage and cost series of the calling API key.
  *
  * Flow: authenticate (flag, header key, self:usage) → validate `range` (closed set, default
- * `30d`) → build the series of the key's own rows → `selfUsageResponseSchema.parse()` as the
- * last step, so only contract fields reach the wire. Authentication runs first, so a caller
+ * `30d`) → read the series of the key's own rows (built, or reused for 60 seconds per key id
+ * and range by getApiKeySelfServiceUsage) → `selfUsageResponseSchema.parse()` as the last step,
+ * so only contract fields reach the wire. Authentication runs first, so a caller
  * without a valid key learns nothing from the range check.
  *
  * Any failure after the request reaches the handler (the gate itself, the builder, the final
  * parse) is one fixed 500 message; the real error is logged here, once, and never reaches the
  * body or a header. Every response of this handler carries `Cache-Control: no-store`.
  */
-import { buildApiKeySelfServiceUsage } from "@/lib/usage/apiKeySelfServiceUsage";
+import { getApiKeySelfServiceUsage } from "@/lib/usage/apiKeySelfServiceUsageCache";
 import { selfUsageQuerySchema, selfUsageResponseSchema } from "@/shared/schemas/selfUsage";
 import { createLogger } from "@/shared/utils/logger";
 
@@ -28,7 +29,7 @@ const MISSING_SCOPE_ERROR = "missing_self_usage_scope";
 
 /** The gate itself is fixed; only the key store it reads can be replaced. */
 export interface SelfUsageHandlerDeps {
-  buildUsage?: typeof buildApiKeySelfServiceUsage;
+  buildUsage?: typeof getApiKeySelfServiceUsage;
   keyStore?: SelfServiceKeyStore;
 }
 
@@ -53,7 +54,7 @@ export async function handleSelfUsageGet(
   request: Request,
   deps: SelfUsageHandlerDeps = {}
 ): Promise<Response> {
-  const buildUsage = deps.buildUsage ?? buildApiKeySelfServiceUsage;
+  const buildUsage = deps.buildUsage ?? getApiKeySelfServiceUsage;
   try {
     const auth = await authenticateSelfServiceRequest(request, deps.keyStore);
     if (!auth.ok) return auth.response;

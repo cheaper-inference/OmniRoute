@@ -15,6 +15,8 @@ const core = await import("../../src/lib/db/core.ts");
 const { buildApiKeyOwnedSource } = await import("../../src/lib/db/usageAnalytics/apiKeyScope.ts");
 const { buildApiKeySelfServiceUsage } =
   await import("../../src/lib/usage/apiKeySelfServiceUsage.ts");
+const { createSelfServiceUsageCache, getApiKeySelfServiceUsage } =
+  await import("../../src/lib/usage/apiKeySelfServiceUsageCache.ts");
 const { selfUsageResponseSchema } = await import("../../src/shared/schemas/selfUsage.ts");
 type SelfServiceUsageDeps =
   import("../../src/lib/usage/apiKeySelfServiceUsage.ts").SelfServiceUsageDeps;
@@ -172,6 +174,7 @@ test("the owned source filters by api_key_id only and never reads the daily summ
   const { unifiedSource, unifiedParams } = buildApiKeyOwnedSource({
     apiKeyId: "key-a",
     sinceIso: "2020-01-01T00:00:00.000Z",
+    untilIso: "2026-05-27T15:30:00.000Z",
     rawCutoffDate: "2026-04-27",
   });
   assert.match(unifiedSource, /api_key_id = @ownerApiKeyId/);
@@ -179,9 +182,10 @@ test("the owned source filters by api_key_id only and never reads the daily summ
   assert.doesNotMatch(unifiedSource, /api_key_name\s*(=|IN\b|LIKE\b)/i);
   assert.ok(!unifiedSource.includes("daily_usage_summary"));
   assert.deepEqual(
-    [unifiedParams.ownerApiKeyId, unifiedParams.since],
-    ["key-a", "2020-01-01T00:00:00.000Z"]
+    [unifiedParams.ownerApiKeyId, unifiedParams.since, unifiedParams.until],
+    ["key-a", "2020-01-01T00:00:00.000Z", "2026-05-27T15:30:00.000Z"]
   );
+  assert.match(unifiedSource, /timestamp <= @until/);
   // The key id is a bound parameter: it never appears in the SQL text.
   assert.ok(!unifiedSource.includes("key-a"));
 });
@@ -189,7 +193,12 @@ test("the owned source filters by api_key_id only and never reads the daily summ
 test("the owned source refuses an empty key id instead of matching legacy rows", () => {
   for (const apiKeyId of ["", "   "]) {
     assert.throws(() =>
-      buildApiKeyOwnedSource({ apiKeyId, sinceIso: null, rawCutoffDate: "2026-04-27" })
+      buildApiKeyOwnedSource({
+        apiKeyId,
+        sinceIso: null,
+        untilIso: null,
+        rawCutoffDate: "2026-04-27",
+      })
     );
   }
 });
@@ -234,7 +243,7 @@ test("totals, daily series and breakdowns add up, with billed cost next to list 
   assert.doesNotThrow(() => selfUsageResponseSchema.parse(out));
 });
 
-test("every query reads the same owned source, starting at the window's lower bound", async () => {
+test("every query reads the same owned source, bounded by the window's start and now", async () => {
   const seen: Array<[string, Record<string, string>]> = [];
   await buildApiKeySelfServiceUsage(KEY, "7d", deps({ seen }));
   assert.deepEqual(seen.map(([name]) => name).sort(), [
@@ -247,6 +256,7 @@ test("every query reads the same owned source, starting at the window's lower bo
   for (const [, params] of seen) {
     assert.deepEqual(params, {
       since: new Date(NOW - 7 * 86_400_000).toISOString(),
+      until: new Date(NOW).toISOString(),
       ownerApiKeyId: "key-a",
     });
   }
@@ -288,4 +298,126 @@ test("account and key columns of the reused queries never reach the result", asy
   for (const leak of ["uniqueAccounts", "uniqueApiKeys", "serviceTier", "storedCost", "key-a"]) {
     assert.ok(!text.includes(leak), `leaked: ${leak}`);
   }
+});
+
+// ---------------------------------------------------------------------------
+// Reuse of a built series (getApiKeySelfServiceUsage): 60 seconds per (key id, range).
+
+/** Deps whose summary depends on the queried key id, with a clock and a build counter. */
+function reuseDeps(options: { failFirst?: boolean; maxEntries?: number } = {}) {
+  const state = { t: NOW, builds: 0, failures: options.failFirst ? 1 : 0 };
+  const base = deps();
+  const queries: Queries = {
+    ...base.queries,
+    summary: (_source, params) => {
+      state.builds += 1;
+      if (state.failures > 0) {
+        state.failures -= 1;
+        throw new Error("summary failed");
+      }
+      return { ...SUMMARY, totalRequests: params.ownerApiKeyId === "key-a" ? 4 : 9 };
+    },
+  };
+  const cache = createSelfServiceUsageCache({ maxEntries: options.maxEntries });
+  return { state, deps: { ...base, now: () => state.t, queries, cache } };
+}
+
+const KEY_B = { id: "key-b", scopes: ["self:usage"] };
+
+test("a second call within 60 s reuses the built series; after 60 s it rebuilds", async () => {
+  const { state, deps: d } = reuseDeps();
+  const first = await getApiKeySelfServiceUsage(KEY, "7d", d);
+  state.t = NOW + 59_999;
+  const second = await getApiKeySelfServiceUsage(KEY, "7d", d);
+  assert.equal(state.builds, 1);
+  assert.equal(second, first);
+  assert.equal(second.generatedAt, new Date(NOW).toISOString());
+  state.t = NOW + 60_001;
+  const third = await getApiKeySelfServiceUsage(KEY, "7d", d);
+  assert.equal(state.builds, 2);
+  assert.equal(third.generatedAt, new Date(NOW + 60_001).toISOString());
+});
+
+test("concurrent calls for one key and range share one build", async () => {
+  const { state, deps: d } = reuseDeps();
+  const [x, y] = await Promise.all([
+    getApiKeySelfServiceUsage(KEY, "30d", d),
+    getApiKeySelfServiceUsage(KEY, "30d", d),
+  ]);
+  assert.equal(state.builds, 1);
+  assert.equal(x, y);
+});
+
+test("a build still in flight is shared, not started twice", async () => {
+  const cache = createSelfServiceUsageCache();
+  let starts = 0;
+  let finish: (value: unknown) => void = () => {};
+  const build = () => {
+    starts += 1;
+    return new Promise((resolve) => {
+      finish = resolve;
+    }) as ReturnType<typeof getApiKeySelfServiceUsage>;
+  };
+  const first = cache.memoize("k", NOW, build);
+  const second = cache.memoize("k", NOW + 1, build);
+  assert.equal(starts, 1);
+  const built = { range: "7d" };
+  finish(built);
+  assert.deepEqual([await first, await second], [built, built]);
+});
+
+test("a failed build is not kept; every waiter gets the same failure", async () => {
+  const { state, deps: d } = reuseDeps({ failFirst: true });
+  const results = await Promise.allSettled([
+    getApiKeySelfServiceUsage(KEY, "7d", d),
+    getApiKeySelfServiceUsage(KEY, "7d", d),
+  ]);
+  assert.deepEqual(
+    results.map((r) => r.status),
+    ["rejected", "rejected"]
+  );
+  const [r1, r2] = results as PromiseRejectedResult[];
+  assert.equal(r1.reason, r2.reason);
+  assert.equal(state.builds, 1);
+  const retry = await getApiKeySelfServiceUsage(KEY, "7d", d);
+  assert.equal(state.builds, 2);
+  assert.equal(retry.summary.requests, 4);
+});
+
+test("two keys never share an entry, even interleaved on the same range", async () => {
+  const { state, deps: d } = reuseDeps();
+  const seen: number[] = [];
+  for (const key of [KEY, KEY_B, KEY, KEY_B]) {
+    seen.push((await getApiKeySelfServiceUsage(key, "7d", d)).summary.requests);
+  }
+  assert.deepEqual(seen, [4, 9, 4, 9]);
+  assert.equal(state.builds, 2);
+});
+
+test("a different range is a different entry", async () => {
+  const { state, deps: d } = reuseDeps();
+  const week = await getApiKeySelfServiceUsage(KEY, "7d", d);
+  const month = await getApiKeySelfServiceUsage(KEY, "30d", d);
+  assert.equal(state.builds, 2);
+  assert.deepEqual([week.range, month.range], ["7d", "30d"]);
+});
+
+test("the scope check runs before the lookup: a cached series is never served without it", async () => {
+  const { state, deps: d } = reuseDeps();
+  await getApiKeySelfServiceUsage(KEY, "7d", d);
+  await assert.rejects(
+    getApiKeySelfServiceUsage({ id: KEY.id, scopes: [] }, "7d", d),
+    /missing_self_usage_scope/
+  );
+  assert.equal(state.builds, 1);
+});
+
+test("the reuse is bounded: past its cap the oldest entry is dropped", async () => {
+  const { state, deps: d } = reuseDeps({ maxEntries: 2 });
+  for (const range of ["1d", "7d", "30d"] as const) await getApiKeySelfServiceUsage(KEY, range, d);
+  assert.equal(state.builds, 3);
+  await getApiKeySelfServiceUsage(KEY, "1d", d);
+  assert.equal(state.builds, 4);
+  await getApiKeySelfServiceUsage(KEY, "30d", d);
+  assert.equal(state.builds, 4);
 });

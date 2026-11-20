@@ -18,6 +18,8 @@ export interface ApiKeyOwnedSourceOptions {
   apiKeyId: string;
   /** ISO-8601 lower bound of the window, or null for every stored row. */
   sinceIso: string | null;
+  /** ISO-8601 upper bound (inclusive), or null for no bound. Rows stamped later are left out. */
+  untilIso: string | null;
   /** YYYY-MM-DD raw-retention boundary, required by the source builder. */
   rawCutoffDate: string;
 }
@@ -28,7 +30,7 @@ export function buildApiKeyOwnedSource(opts: ApiKeyOwnedSourceOptions): UnifiedS
   }
   return buildUnifiedSource({
     sinceIso: opts.sinceIso,
-    untilIso: null,
+    untilIso: opts.untilIso,
     rawCutoffDate: opts.rawCutoffDate,
     apiKeyWhere: "api_key_id = @ownerApiKeyId",
     apiKeyParams: { ownerApiKeyId: opts.apiKeyId },

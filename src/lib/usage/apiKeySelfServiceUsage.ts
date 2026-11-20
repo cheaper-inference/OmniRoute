@@ -115,6 +115,7 @@ function resolveWindow(range: SelfUsageRange, nowMs: number, retentionDays: numb
   const to = new Date(nowMs).toISOString();
   return {
     sinceIso: from,
+    untilIso: to,
     rawCutoffDate: new Date(nowMs - retentionDays * DAY_MS).toISOString().slice(0, 10),
     coverage: { from, to, retentionDays, truncatedByRetention: days > retentionDays },
   };
@@ -298,6 +299,7 @@ export async function buildApiKeySelfServiceUsage(
   const { unifiedSource, unifiedParams } = buildApiKeyOwnedSource({
     apiKeyId: key.id,
     sinceIso: window.sinceIso,
+    untilIso: window.untilIso,
     rawCutoffDate: window.rawCutoffDate,
   });
   const queries = deps.queries ?? DEFAULT_QUERIES;
