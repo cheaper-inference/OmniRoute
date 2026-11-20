@@ -3,64 +3,62 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b16",
+    "batchId": "b17",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b16-7bca1e353169",
-    "candidateSha": "7bca1e353169686029e8beb28165df6007d80470",
-    "baseSha": "a61261846f87bfbc5bb63a01c7d2a26a6d06831d",
-    "treeSha": "808c569c248a0aabaa7b1d9792a57917020b2c03",
+    "candidateRef": "omni-queue/release-v3.8.55/b17-102a0a6818ff",
+    "candidateSha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
+    "baseSha": "186db2e375c76a7eeda8b56cd349246c201faede",
+    "treeSha": "0f634a9b07a09ea85a667a2d9e9ef4387a078e4a",
     "prs": [
       {
-        "n": 19149,
-        "head": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
-        "title": "feat(dashboard): allow multiple quota provider filters",
+        "n": 19167,
+        "head": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
+        "title": "feat(images): expose opt-in Codex quota snapshots from successful images",
+        "author": "Bl0ck154",
+        "labeledAt": "2026-11-20T17:09:35Z"
+      },
+      {
+        "n": 19305,
+        "head": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
+        "title": "feat(dashboard): show actual OpenAI costs without double counting",
         "author": "JxnLexn",
-        "labeledAt": "2026-11-20T15:49:56Z"
+        "labeledAt": "2026-11-20T17:10:31Z"
+      },
+      {
+        "n": 19306,
+        "head": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+        "title": "feat(dashboard): display request payload size in request logger details",
+        "author": "bufftop25",
+        "labeledAt": "2026-11-20T17:10:52Z"
+      },
+      {
+        "n": 20770,
+        "head": "f866adce299b632bcd8d62a1baf68dafb150965a",
+        "title": "fix(security): limit the usage command text to the personal quota for client keys",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-20T23:33:34Z"
+      },
+      {
+        "n": 20775,
+        "head": "492d650774c568895b3458c3a435d4bc838e2441",
+        "title": "fix(security): require credential for marketplace install and restrict plugin config keys",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-20T23:33:36Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-20T21:36:00.705Z",
+    "startedAt": "2026-11-20T23:56:41.672Z",
     "attempts": 0,
-    "bisect": {
-      "rootBatchId": "b14",
-      "segments": [
-        [
-          {
-            "n": 19149,
-            "head": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
-            "title": "feat(dashboard): allow multiple quota provider filters",
-            "author": "JxnLexn",
-            "labeledAt": "2026-11-20T15:49:56Z"
-          }
-        ]
-      ],
-      "culprits": [
-        {
-          "n": 19132,
-          "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
-          "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
-          "author": "Bl0ck154",
-          "labeledAt": "2026-11-20T15:49:45Z"
-        }
-      ],
-      "landed": [],
-      "steps": 1,
-      "hang": false
-    },
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b16-7bca1e353169",
-      "requestedAt": "2026-11-20T23:42:20.264Z",
-      "afterMs": 1795218114000,
-      "runIds": [
-        44821771451
-      ],
-      "jobs": [
-        "Gate / Quality",
-        "Fast Quality Gates"
-      ]
-    }
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "7bca1e353169686029e8beb28165df6007d80470",
+      "ref": "omni-queue/release-v3.8.55/b16-7bca1e353169",
+      "status": "green",
+      "startedAt": "2026-11-20T21:36:00.705Z",
+      "signatures": []
+    },
     {
       "baseSha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
       "ref": "omni-queue/release-v3.8.55/basecheck-07a790f5c158",
@@ -113,12 +111,13 @@
       "18738": "01781da04c16d5cf4adac8b1fd0a5dccbddde046",
       "18786": "267b99c512dbac09b2fe8876c9a9ec9b7913ab9f",
       "18804": "a140f9b78053705ef57686e6fc4b484d380c1776",
-      "19132": "beed91198d6f1f34a82955166724b2f61fa22ff0"
+      "19132": "beed91198d6f1f34a82955166724b2f61fa22ff0",
+      "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b"
     }
   },
   "counters": {
-    "batchSeq": 16,
-    "ciRuns": 18,
+    "batchSeq": 17,
+    "ciRuns": 19,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 7,
@@ -1288,8 +1287,52 @@
       "sha": "7bca1e353169686029e8beb28165df6007d80470",
       "detail": "re-running the failed jobs of b16 once (Gate / Quality, Fast Quality Gates) before a base check",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44838687116"
+    },
+    {
+      "at": "2026-11-20T23:55:42.052Z",
+      "type": "checks-green",
+      "batchId": "b16",
+      "prs": [
+        19149
+      ],
+      "sha": "7bca1e353169686029e8beb28165df6007d80470",
+      "detail": "green after re-running Gate / Quality, Fast Quality Gates (flaky)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
+    },
+    {
+      "at": "2026-11-20T23:55:50.715Z",
+      "type": "would-land",
+      "batchId": "b16",
+      "prs": [
+        19149
+      ],
+      "sha": "7bca1e353169686029e8beb28165df6007d80470",
+      "detail": "shadow mode: would merge-ff onto a61261846f87",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
+    },
+    {
+      "at": "2026-11-20T23:57:12.373Z",
+      "type": "batch-started",
+      "batchId": "b17",
+      "prs": [
+        19167,
+        19305,
+        19306,
+        20770,
+        20775
+      ],
+      "sha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
+      "detail": "5 PR(s) on 186db2e375c7; window 5",
+      "labeledAt": {
+        "19167": "2026-11-20T17:09:35Z",
+        "19305": "2026-11-20T17:10:31Z",
+        "19306": "2026-11-20T17:10:52Z",
+        "20770": "2026-11-20T23:33:34Z",
+        "20775": "2026-11-20T23:33:36Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
     }
   ],
-  "updatedAt": "2026-11-20T23:43:06.413Z",
+  "updatedAt": "2026-11-20T23:57:14.895Z",
   "batchWindow": 5
 }
