@@ -4,7 +4,8 @@
  *
  * Flow:
  *   1. Flatten the OpenAI-shaped `messages[]` into a single prompt string.
- *   2. Spawn `auggie --print --quiet --model <model>` and pipe the prompt on stdin.
+ *   2. Spawn `auggie --print --model <model> --` (plus `--quiet` on legacy 0.x CLIs)
+ *      and pipe the prompt on stdin.
  *   3. Relay stdout chunks as OpenAI-compatible SSE deltas (stream=true) or
  *      buffer them into a single chat.completion JSON body (stream=false).
  *   4. Kill the subprocess on abort / stream close.
@@ -70,6 +71,7 @@ const AUGGIE_MODEL_ALIASES: ReadonlyMap<string, string> = new Map([
  * - `Set`   = successfully fetched IDs (possibly empty)
  */
 let liveModelSet: Set<string> | null = null;
+let cachedCliVersion: string | null = null;
 
 /**
  * Spawn `auggie model list`, parse `[model-id]` entries, and merge them into
@@ -191,12 +193,39 @@ export function resolveAuggieModel(model: unknown): AuggieModelResolution {
 }
 
 /**
+ * Return true when a CLI version string belongs to the legacy 0.x line
+ * (e.g. "0.37.1", "0.36.0-fake", "auggie 0.37.1").
+ *
+ * Auggie 0.x printed section headers ("ASSISTANT") and tool/thinking output in
+ * `--print` mode unless `--quiet` was also passed. Auggie 1.2+ removed the
+ * `-q, --quiet` flag (exiting 1 with `Error: Unknown option: --quiet`) and its
+ * default `--print` (`--mode text`) already emits only the final assistant text.
+ */
+function isLegacyZeroMajorAuggieVersion(version?: string | null): boolean {
+  const raw = (version ?? "").trim();
+  if (!raw) return false;
+  const match = raw.match(/^(?:auggie\s+)?v?(\d+)\.\d+/i);
+  if (!match) return false;
+  return Number.parseInt(match[1], 10) < 1;
+}
+
+/**
  * Build the auggie argv. `model` MUST already be allowlist-validated via
  * resolveAuggieModel(). The trailing `--` marks the end of options so no
  * later positional value can be reinterpreted as a flag.
+ *
+ * `--quiet` was removed in `@augmentcode/auggie` 1.2.0 (#20250), so it is
+ * omitted by default and only included when a legacy 0.x CLI version is
+ * explicitly passed or cached from `checkAuggieCliVersion()`.
  */
-function buildAuggieArgs(model: string): string[] {
-  return ["--print", "--quiet", "--model", model, "--"];
+export function buildAuggieArgs(
+  model: string,
+  cliVersion: string | null | undefined = cachedCliVersion ?? process.env.AUGGIE_CLI_VERSION
+): string[] {
+  if (isLegacyZeroMajorAuggieVersion(cliVersion)) {
+    return ["--print", "--quiet", "--model", model, "--"];
+  }
+  return ["--print", "--model", model, "--"];
 }
 
 /**
@@ -404,7 +433,9 @@ export function checkAuggieCliVersion(timeoutMs = 5000): Promise<AuggieCliVersio
     child.on("close", (code) => {
       clearTimeout(timer);
       if (code === 0 && stdout.trim()) {
-        settle({ ok: true, version: stdout.trim().slice(0, 200) });
+        const version = stdout.trim().slice(0, 200);
+        cachedCliVersion = version;
+        settle({ ok: true, version });
       } else {
         settle({ ok: false, error: `Auggie CLI exited with code ${code}` });
       }
@@ -458,6 +489,10 @@ export class AuggieExecutor extends BaseExecutor {
     // On first execution, try to discover model IDs the local auggie recognises.
     // Best-effort: missing/inactive CLI falls through to the static list.
     await initAuggieModels(signal);
+    // Probe the CLI version after restart so `--quiet` matches the installed CLI.
+    if (cachedCliVersion === null && !process.env.AUGGIE_CLI_VERSION) {
+      await checkAuggieCliVersion();
+    }
     // Argument-injection defense: never forward an unvalidated model into the argv.
     const modelResolution = resolveAuggieModel(model);
     if (isAuggieModelFailure(modelResolution)) {
@@ -848,4 +883,5 @@ function buildAuggieSseError(message: string): Response {
  */
 export function __resetAuggieModels(): void {
   liveModelSet = null;
+  cachedCliVersion = null;
 }

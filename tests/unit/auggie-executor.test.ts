@@ -15,8 +15,13 @@ import os from "node:os";
 import path from "node:path";
 import { writeNodeCliFixture } from "../helpers/nodeCliFixture.ts";
 
-const { AuggieExecutor, buildAuggiePrompt, resolveAuggieBin, resolveAuggieModel } =
-  await import("@omniroute/open-sse/executors/auggie");
+const {
+  AuggieExecutor,
+  buildAuggieArgs,
+  buildAuggiePrompt,
+  resolveAuggieBin,
+  resolveAuggieModel,
+} = await import("@omniroute/open-sse/executors/auggie");
 
 const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-auggie-test-"));
 
@@ -396,7 +401,7 @@ test("execute() spawns with a valid allowlisted model and a '--' argv separator"
     const body = await response.json();
     assert.equal(body.choices[0].message.content, "ok");
     const argv = fs.readFileSync(argvFile, "utf8").trim().split("\n");
-    assert.deepEqual(argv, ["--print", "--quiet", "--model", "opus4.6", "--"]);
+    assert.deepEqual(argv, ["--print", "--model", "opus4.6", "--"]);
   } finally {
     if (prevBin === undefined) delete process.env.AUGGIE_BIN;
     else process.env.AUGGIE_BIN = prevBin;
@@ -537,6 +542,164 @@ test("initAuggieModels failure does not block execute() for a known model", asyn
   } finally {
     if (prevBin === undefined) delete process.env.AUGGIE_BIN;
     else process.env.AUGGIE_BIN = prevBin;
+    __resetAuggieModels();
+  }
+});
+
+// ─── Auggie 1.2 CLI flag contract (#20250) ─────────────────────────────────
+
+test("buildAuggieArgs omits removed --quiet flag by default and on 1.x CLI versions (#20250)", async () => {
+  const { __resetAuggieModels } = await import("@omniroute/open-sse/executors/auggie");
+  __resetAuggieModels();
+  const prevVersion = process.env.AUGGIE_CLI_VERSION;
+  delete process.env.AUGGIE_CLI_VERSION;
+  try {
+    assert.deepEqual(buildAuggieArgs("sonnet4.6"), ["--print", "--model", "sonnet4.6", "--"]);
+    assert.deepEqual(buildAuggieArgs("sonnet4.6", "1.2.1"), [
+      "--print",
+      "--model",
+      "sonnet4.6",
+      "--",
+    ]);
+    assert.deepEqual(buildAuggieArgs("sonnet4.6", "1.2.0 (commit 689704fb)"), [
+      "--print",
+      "--model",
+      "sonnet4.6",
+      "--",
+    ]);
+    assert.deepEqual(buildAuggieArgs("sonnet4.6", "auggie 1.2.3"), [
+      "--print",
+      "--model",
+      "sonnet4.6",
+      "--",
+    ]);
+  } finally {
+    if (prevVersion === undefined) delete process.env.AUGGIE_CLI_VERSION;
+    else process.env.AUGGIE_CLI_VERSION = prevVersion;
+  }
+});
+
+test("buildAuggieArgs preserves --quiet on legacy 0.x CLI versions (#20250)", () => {
+  assert.deepEqual(buildAuggieArgs("sonnet4.6", "0.37.1"), [
+    "--print",
+    "--quiet",
+    "--model",
+    "sonnet4.6",
+    "--",
+  ]);
+  assert.deepEqual(buildAuggieArgs("sonnet4.6", "0.36.0-fake"), [
+    "--print",
+    "--quiet",
+    "--model",
+    "sonnet4.6",
+    "--",
+  ]);
+  assert.deepEqual(buildAuggieArgs("sonnet4.6", "auggie 0.37.1"), [
+    "--print",
+    "--quiet",
+    "--model",
+    "sonnet4.6",
+    "--",
+  ]);
+});
+
+test("execute() succeeds against an Auggie 1.2 CLI that rejects --quiet with exit code 1 (#20250)", async () => {
+  const { __resetAuggieModels } = await import("@omniroute/open-sse/executors/auggie");
+  __resetAuggieModels();
+  const bin = writeFakeBin(
+    "fake-auggie-1-2.sh",
+    [
+      `if (process.argv[2] === "--version") {`,
+      `  process.stdout.write("1.2.0 (commit 689704fb)\\n");`,
+      `  process.exit(0);`,
+      `}`,
+      `if (process.argv[2] === "model" && process.argv[3] === "list") {`,
+      `  process.stdout.write("[sonnet4.6]");`,
+      `  process.exit(0);`,
+      `}`,
+      `if (process.argv.includes("--quiet") || process.argv.includes("-q")) {`,
+      `  process.stderr.write("error: unknown option '--quiet'\\n");`,
+      `  process.exit(1);`,
+      `}`,
+      `process.stdout.write("auggie-1-2-ok");`,
+    ].join("\n")
+  );
+  const prevBin = process.env.AUGGIE_BIN;
+  const prevVersion = process.env.AUGGIE_CLI_VERSION;
+  process.env.AUGGIE_BIN = bin;
+  delete process.env.AUGGIE_CLI_VERSION;
+  try {
+    const executor = new AuggieExecutor();
+    const nonStream = await executor.execute({
+      model: "sonnet4.6",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {} as never,
+    });
+    assert.equal(nonStream.response.status, 200);
+    const body = await nonStream.response.json();
+    assert.equal(body.choices[0].message.content, "auggie-1-2-ok");
+
+    const streamRes = await executor.execute({
+      model: "sonnet4.6",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: true,
+      credentials: {} as never,
+    });
+    const events = await readSseEvents(streamRes.response);
+    const deltas = events
+      .map((e) => (e as { choices?: Array<{ delta?: { content?: unknown } }> }).choices?.[0]?.delta?.content)
+      .filter((c) => typeof c === "string");
+    assert.equal(deltas.join(""), "auggie-1-2-ok");
+  } finally {
+    if (prevBin === undefined) delete process.env.AUGGIE_BIN;
+    else process.env.AUGGIE_BIN = prevBin;
+    if (prevVersion === undefined) delete process.env.AUGGIE_CLI_VERSION;
+    else process.env.AUGGIE_CLI_VERSION = prevVersion;
+    __resetAuggieModels();
+  }
+});
+
+test("execute() probes CLI version on first run and passes --quiet for a legacy 0.x CLI (#20250)", async () => {
+  const { __resetAuggieModels } = await import("@omniroute/open-sse/executors/auggie");
+  __resetAuggieModels();
+  const argvFile = path.join(TMP_DIR, "captured-argv-0x.txt");
+  const bin = writeFakeBin(
+    "fake-auggie-0-37.sh",
+    [
+      `if (process.argv[2] === "--version") {`,
+      `  process.stdout.write("0.37.1\\n");`,
+      `  process.exit(0);`,
+      `}`,
+      `if (process.argv[2] === "model" && process.argv[3] === "list") {`,
+      `  process.stdout.write("[sonnet4.6]");`,
+      `  process.exit(0);`,
+      `}`,
+      `require("node:fs").writeFileSync(${JSON.stringify(argvFile)}, process.argv.slice(2).join("\\n") + "\\n");`,
+      `process.stdout.write("auggie-0-37-ok");`,
+    ].join("\n")
+  );
+  const prevBin = process.env.AUGGIE_BIN;
+  const prevVersion = process.env.AUGGIE_CLI_VERSION;
+  process.env.AUGGIE_BIN = bin;
+  delete process.env.AUGGIE_CLI_VERSION;
+  try {
+    const executor = new AuggieExecutor();
+    const { response } = await executor.execute({
+      model: "sonnet4.6",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {} as never,
+    });
+    assert.equal(response.status, 200);
+    const argv = fs.readFileSync(argvFile, "utf8").trim().split("\n");
+    assert.deepEqual(argv, ["--print", "--quiet", "--model", "sonnet4.6", "--"]);
+  } finally {
+    if (prevBin === undefined) delete process.env.AUGGIE_BIN;
+    else process.env.AUGGIE_BIN = prevBin;
+    if (prevVersion === undefined) delete process.env.AUGGIE_CLI_VERSION;
+    else process.env.AUGGIE_CLI_VERSION = prevVersion;
+    fs.rmSync(argvFile, { force: true });
     __resetAuggieModels();
   }
 });
