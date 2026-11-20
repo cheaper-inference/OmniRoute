@@ -5,6 +5,7 @@ import {
   splitLeadingJsonObject,
   consumePlanningLeak,
   GeminiPlanningLeakFilter,
+  hasTopLevelComma,
 } from "../../open-sse/utils/geminiPlanningLeak.ts";
 import { geminiToOpenAIResponse } from "../../open-sse/translator/response/gemini-to-openai.ts";
 
@@ -162,5 +163,96 @@ describe("Part C - Antigravity Gemini planning-JSON leak stripping", () => {
       )
       .filter(Boolean);
     assert.equal(jsonTexts.join(""), '{"response":"hello"}');
+  });
+
+  describe("Regression #19805: multi-key JSON and solitary thought objects", () => {
+    it("hasTopLevelComma distinguishes top-level property commas from internal commas", () => {
+      // Commas inside string values do not indicate multiple properties
+      assert.equal(hasTopLevelComma('{"thought":"step 1, step 2"}'), false);
+      assert.equal(hasTopLevelComma('{"thought":"hello \\"world, inside\\""}'), false);
+
+      // Commas inside nested objects/arrays do not indicate multiple root properties
+      assert.equal(hasTopLevelComma('{"thought":{"sub1":"a","sub2":"b"}}'), false);
+      assert.equal(hasTopLevelComma('{"thought":["item1","item2"]}'), false);
+
+      // Commas at root object level indicate multiple properties
+      assert.equal(hasTopLevelComma('{"thought":"planning","summary":"done"}'), true);
+      assert.equal(hasTopLevelComma('  { "thought": "x" , "commit_message": "fix" }'), true);
+      assert.equal(hasTopLevelComma('{"thought":"x",'), true);
+    });
+
+    it("preserves multi-key JSON payloads containing a thought key as plain text", () => {
+      const multiKeyJson =
+        '{"thought":"I will fix this","summary":"Fixed bug","commit_message":"fix: test"}';
+      const result = consumePlanningLeak(multiKeyJson, false);
+      assert.deepEqual(result, { kind: "plain", visibleText: multiKeyJson });
+
+      const multiKeyWithFollowText =
+        '{"thought":"plan","summary":"done"}\n```ts\nexport const x = 1;\n```';
+      const resultWithFollow = consumePlanningLeak(multiKeyWithFollowText, false);
+      assert.deepEqual(resultWithFollow, { kind: "plain", visibleText: multiKeyWithFollowText });
+    });
+
+    it("emits multi-key JSON immediately across chunks without buffering or stripping", () => {
+      const filter = new GeminiPlanningLeakFilter();
+      // Chunk 1 introduces top-level comma after thought
+      const chunk1 = '{"thought":"planning",';
+      assert.equal(filter.feed(chunk1), chunk1);
+
+      // Subsequent chunks stream through unmodified
+      const chunk2 = '"summary":"done"}\n```ts\nconst a = 1;\n```';
+      assert.equal(filter.feed(chunk2), chunk2);
+      assert.equal(filter.flush(), "");
+    });
+
+    it("preserves solitary thought JSON when no subsequent text follows (prevents 0-char empty stream)", () => {
+      const filter = new GeminiPlanningLeakFilter();
+      // Feed solitary thought object with no trailing text
+      assert.equal(filter.feed('{"thought":"only thought"}'), "");
+
+      // On stream finish, flush must NOT wipe content to empty string
+      assert.equal(filter.flush(), '{"thought":"only thought"}');
+    });
+
+    it("still strips solitary thought leak when followed by visible response text", () => {
+      const filter = new GeminiPlanningLeakFilter();
+      assert.equal(filter.feed('{"thought":"only thought"}'), "");
+      assert.equal(filter.feed("\nHello! Here is the answer."), "\nHello! Here is the answer.");
+      assert.equal(filter.flush(), "");
+    });
+
+    it("geminiToOpenAIResponse preserves multi-key JSON on flash models (#19805)", () => {
+      const flashState: Record<string, unknown> = {
+        messageId: "test-msg-19805",
+        model: "gemini-3.8-flash-tiered",
+        toolCalls: new Map(),
+        functionIndex: 0,
+      };
+
+      const payload =
+        '{"thought":"analyzed","summary":"fixed issue","commit_message":"fix: test"}\n```ts\ncode\n```';
+      const chunk = {
+        candidates: [
+          {
+            content: {
+              parts: [{ text: payload }],
+            },
+          },
+        ],
+      };
+
+      const result = geminiToOpenAIResponse(
+        chunk,
+        flashState as unknown as Parameters<typeof geminiToOpenAIResponse>[1]
+      );
+      assert.ok(result);
+      const textDeltas = result
+        .map(
+          (r: { choices?: Array<{ delta?: { content?: string } }> }) =>
+            r.choices?.[0]?.delta?.content
+        )
+        .filter(Boolean);
+      assert.equal(textDeltas.join(""), payload);
+    });
   });
 });
