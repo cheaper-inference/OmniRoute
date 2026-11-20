@@ -133,6 +133,11 @@ export { MODEL_LOCKOUT_EVICTION_CAP } from "./accountFallback/lockoutEviction.ts
 export { hasPerModelFailureScope } from "./accountFallback/perModelFailureScope.ts";
 import { buildConcurrencyLimitFallback } from "./accountFallback/concurrencyLimit429.ts";
 export { CONCURRENCY_LIMIT_COOLDOWN_MS } from "./accountFallback/concurrencyLimit429.ts";
+import {
+  isFreebuffProvider,
+  isFreebuffQuotaExhausted,
+  resolveFreebuffFallbackDecision,
+} from "./accountFallback/freebuffPolicy.ts";
 import { capScaledCooldownMs } from "./accountFallback/cooldownCap.ts";
 import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUpstream.ts";
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
@@ -1089,6 +1094,7 @@ export function shouldMarkAccountExhaustedFrom429(
   // the long-window quota is exhausted; otherwise fallback should try another account
   // without making this one look quota-depleted for 5 minutes.
   if (failureKind === "rate_limit" || failureKind === "transient") return false;
+  if (isFreebuffProvider(provider)) return isFreebuffQuotaExhausted(429, errorText);
   // `errorText` is what lets an apikey-category provider opt back in: without the
   // upstream body, `shouldPreserveQuotaSignals` has nothing to match against
   // `looksLikeQuotaExhausted`, so every apikey 429 reads as plain rate limiting —
@@ -1944,6 +1950,15 @@ export function checkFallbackError(
   const rg = rot.gateFor(status, rotation?.account);
   if (rg) return rg;
   const errorStr = (errorText || "").toString();
+  if (isFreebuffProvider(provider)) {
+    const fbDecision = resolveFreebuffFallbackDecision({
+      status,
+      errorText: errorStr,
+      headers,
+      structuredError,
+    });
+    if (fbDecision) return fbDecision;
+  }
   const profile = profileOverride ?? (provider ? getProviderProfile(provider) : null);
   const maxBackoffSteps = profile?.maxBackoffSteps ?? BACKOFF_CONFIG.maxLevel;
   const retryableStatuses = new Set([

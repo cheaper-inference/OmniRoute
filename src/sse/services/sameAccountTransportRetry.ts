@@ -16,12 +16,41 @@
 
 import { UPSTREAM_RESPONDED_ERROR_TYPE } from "@omniroute/open-sse/utils/diagnostics.ts";
 import { LOCAL_CONFIGURATION_ERROR_CODES } from "@omniroute/open-sse/config/constants.ts";
+import { isContentPolicyRefusal } from "@omniroute/open-sse/utils/contentPolicyError.ts";
+import {
+  isFreebuffProvider,
+  isFreebuffQuotaExhausted,
+} from "@omniroute/open-sse/services/accountFallback/freebuffPolicy.ts";
 
 export const SAME_ACCOUNT_TRANSPORT_RETRY_MAX = 1;
 export const SAME_ACCOUNT_TRANSPORT_RETRY_MIN_DELAY_MS = 2000;
 export const SAME_ACCOUNT_TRANSPORT_RETRY_JITTER_MS = 1000;
 
+/**
+ * Per-provider override of the same-account retry budget.
+ *
+ * Freebuff bills a whole hour of quota on every session admission, so rotating
+ * to the next account to absorb a blip is strictly more expensive than retrying
+ * the account already in use. It therefore gets a larger budget than the
+ * global default. Any other provider keeps `SAME_ACCOUNT_TRANSPORT_RETRY_MAX`.
+ */
+export const SAME_ACCOUNT_RETRY_MAX_BY_PROVIDER: Readonly<Record<string, number>> = {
+  freebuff: 3,
+  fb: 3,
+};
+
+/** Retry budget for `provider`, falling back to the global default. */
+export function sameAccountRetryMaxFor(provider?: string | null): number {
+  if (!provider) return SAME_ACCOUNT_TRANSPORT_RETRY_MAX;
+  const override = SAME_ACCOUNT_RETRY_MAX_BY_PROVIDER[provider];
+  return typeof override === "number" && override > 0 ? override : SAME_ACCOUNT_TRANSPORT_RETRY_MAX;
+}
+
 const RETRYABLE_TRANSPORT_STATUSES = new Set([502, 503, 504, 507]);
+// Freebuff bills a whole hour on every new account's admission, so transient
+// 5xx, 408/425, 409, and non-exhausted 429 (overusage/throttle) must retry on
+// the active account instead of rotating.
+const FREEBUFF_RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504, 507]);
 
 const RETRYABLE_TRANSPORT_TEXT = [
   /upstream connect error/i,
@@ -108,7 +137,27 @@ export function shouldRetrySameAccountTransport(options: {
       (options.errorType === "upstream_timeout" || Number(options.status) === 504))
   )
     return false;
-  if (options.attempt >= SAME_ACCOUNT_TRANSPORT_RETRY_MAX) return false;
+  if (options.attempt >= sameAccountRetryMaxFor(options.provider)) return false;
+  if (isFreebuffProvider(options.provider)) {
+    if (options.errorType && NON_RETRYABLE_ERROR_TYPES.has(options.errorType)) return false;
+    if (isContentPolicyRefusal({ code: options.errorCode, type: options.errorType })) return false;
+    if (options.errorCode && String(options.errorCode).startsWith("LEASE_")) return false;
+    if (options.errorCode && LOCAL_CONFIGURATION_ERROR_CODES.has(String(options.errorCode))) {
+      return false;
+    }
+    const numericStatus = Number(options.status);
+    if (isFreebuffQuotaExhausted(numericStatus, options.errorText, options.errorCode)) {
+      return false;
+    }
+    if (
+      FREEBUFF_RETRYABLE_STATUSES.has(numericStatus) ||
+      (numericStatus === 409 &&
+        options.errorCode !== "purchase_claim_released" &&
+        options.errorCode !== "session_expired")
+    ) {
+      return true;
+    }
+  }
   return isRetryablePreOutputTransportError(
     options.status,
     options.errorText,

@@ -423,6 +423,43 @@ function buildCodebuddyIntlRules(): ProviderErrorRule[] {
   ];
 }
 
+// ─── Freebuff ───────────────────────────────────────────────────────────────
+// Freebuff meters a free account in "Freebucks": one admission reserves a whole
+// hour (probed live 2026-11-18). An exhausted account answers HTTP 429 with
+// `status: "rate_limited"`, `pool: "freebucks"`, `recentCount === limit` and a
+// `retryAfterMs` pointing at the pool reset. That is the SAME status a short
+// per-minute throttle uses, so without this rule the account is parked for a
+// few seconds and immediately retried against a budget that only resets at the
+// Pacific-day boundary - the request fails, and the next attempt bills another
+// account's hour for nothing.
+//
+// Scope is the CONNECTION, not the model: the Freebucks pool is per account, so
+// a different model on the same account is just as unavailable.
+const FREEBUFF_RULE_FAMILY = ["freebuff", "fb"];
+
+function buildFreebuffRules(): ProviderErrorRule[] {
+  return [
+    {
+      id: "freebuff-freebucks-exhausted",
+      match: ({ status, body }) => {
+        if (status !== 429 && status !== 402) return null;
+        const text = (typeof body === "string" ? body : JSON.stringify(body ?? "")).toLowerCase();
+        if (!text.includes("freebucks")) return null;
+        // A reported shortfall is unambiguous; so is a spent counter.
+        if (text.includes("freebucksshortfall")) {
+          return { reason: "quota_exhausted", scope: "connection" };
+        }
+        const recent = /"recentcount"\s*:\s*(\d+)/.exec(text);
+        const limit = /"limit"\s*:\s*(\d+)/.exec(text);
+        if (recent && limit && Number(recent[1]) >= Number(limit[1]) && Number(limit[1]) > 0) {
+          return { reason: "quota_exhausted", scope: "connection" };
+        }
+        return null;
+      },
+    },
+  ];
+}
+
 /** Providers sharing the opencode upstream envelope, hence the opencode catalog rules. */
 const OPENCODE_RULE_FAMILY = ["opencode-zen", "opencode-go", "opencode-cli"];
 
@@ -442,6 +479,7 @@ export const providerRuleRegistry = new Map<string, ProviderErrorRule[]>([
     id,
     buildCodebuddyIntlRules(),
   ]),
+  ...FREEBUFF_RULE_FAMILY.map((id): [string, ProviderErrorRule[]] => [id, buildFreebuffRules()]),
 ]);
 
 /**
