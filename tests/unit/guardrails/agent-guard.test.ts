@@ -28,6 +28,8 @@ test("classifier: Claude Code CLI and official SDK user-agents are official", ()
     "Anthropic/JS 0.122.0",
     "anthropic-typescript/0.39.0",
     "anthropic-python/0.40.0",
+    "Anthropic/Python 2.11.0",
+    "AsyncAnthropic/Python 2.11.0",
   ])
     assert.deepEqual(
       kind({ "user-agent": ua, "x-stainless-lang": "js" }),
@@ -69,6 +71,14 @@ test("classifier: known third-party agents by user-agent, X-Title or referer", (
 test("classifier: unknown is not third-party; tokens match whole words only", () => {
   for (const ua of ["curl/8.5.0", "decline-proxy/1.0", "raider/2.0", "mycline/1"])
     assert.deepEqual(kind({ "user-agent": ua }), ["unknown", false, false], ua);
+});
+
+test("classifier: a token never spans two header fields", () => {
+  assert.deepEqual(kind({ "user-agent": "my-tool kilo", "x-title": "code helper" }), [
+    "unknown",
+    false,
+    false,
+  ]);
 });
 
 test("classifier: Headers objects, capitalized keys, non-string values and null", () => {

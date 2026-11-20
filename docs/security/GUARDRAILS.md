@@ -944,11 +944,22 @@ Regression guard: `tests/unit/credential-masker-guardrail.test.ts`.
 
 With `AGENT_GUARD_MODE=monitor`, requests whose model string names the `claude`
 or `anthropic` provider are classified by their client headers; when the client
-is not Claude Code or an official Anthropic SDK, one log line with
-`tag: "AGENT_GUARD"` is written (`warn` for a known third-party agent, `info`
-for an unidentified client). Default `off`: no header is read and nothing is
-logged. Priority `1`: it only reads headers and never changes the payload, so
-it runs before the media bridges.
+is not an official agent, one log line with `tag: "AGENT_GUARD"` is written
+(`warn` for a known third-party agent, `info` for an unidentified client).
+Default `off`: no header is read and nothing is logged. Priority `1`: it only
+reads headers and never changes the payload, so it runs before the media
+bridges.
+
+Official agents are recognised by these headers (compared case-insensitively):
+
+- Claude Code: a `User-Agent` starting with `claude-cli/` or `claude-code/`, or
+  `x-app: cli` together with an `anthropic-beta` header or a `User-Agent` that
+  contains `claude`.
+- Anthropic SDKs: a `User-Agent` starting with `Anthropic/`, `AsyncAnthropic/`,
+  `anthropic-typescript/` or `anthropic-python/`.
+
+The logger's default level in production (`info`) shows both kinds of line.
+With `APP_LOG_LEVEL=warn` only the known third-party lines remain.
 
 Log fields: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`,
 `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Header
@@ -981,6 +992,9 @@ Files: `src/lib/guardrails/agentGuard/classifier.ts`,
 - Third-party agents are matched by whole-word tokens in `User-Agent`,
   `X-Title` and `HTTP-Referer` (or `Referer`); unlisted clients show up as
   `unknown`.
+- Requests from browser-based clients carry the browser's own `User-Agent` and
+  show up as unidentified, unless `X-Title` or the referer carries a known
+  third-party token.
 - One log line per observed request: expect volume on busy instances.
 
 ## Base Contract (`base.ts`)

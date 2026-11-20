@@ -57,7 +57,12 @@ const THIRD_PARTY_RULES: ReadonlyArray<{ agent: AgentName; tokens: readonly stri
   { agent: "aider", tokens: ["aider"] },
 ];
 
-const OFFICIAL_SDK_PREFIXES = ["anthropic/", "anthropic-typescript/", "anthropic-python/"];
+const OFFICIAL_SDK_PREFIXES = [
+  "anthropic/",
+  "asyncanthropic/",
+  "anthropic-typescript/",
+  "anthropic-python/",
+];
 
 function readHeader(headers: HeadersLike, name: string): string {
   if (!headers) return "";
@@ -103,7 +108,8 @@ function containsWord(haystack: string, token: string): boolean {
 }
 
 function matchThirdParty(signals: Signals): AgentName | null {
-  const haystack = `${signals.userAgent} ${signals.xTitle} ${signals.referer}`.toLowerCase();
+  // "\n" is a word boundary that no token contains, so a token never spans two fields.
+  const haystack = [signals.userAgent, signals.xTitle, signals.referer].join("\n").toLowerCase();
   for (const rule of THIRD_PARTY_RULES) {
     if (rule.tokens.some((token) => containsWord(haystack, token))) return rule.agent;
   }
