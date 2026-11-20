@@ -1,7 +1,7 @@
 "use client";
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
-import { useId, useState, useEffect } from "react";
+import { useId, useRef, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Alert } from "@omniroute/ui-kit/alert";
@@ -25,6 +25,13 @@ import {
   AUDIO_TRANSCRIPTION_PROVIDERS,
 } from "@omniroute/open-sse/config/audioRegistry.ts";
 import { toProviderModels, type ProviderModelGroup } from "./mediaProviderModels";
+import {
+  collectConnectedProviderIds,
+  pickPreferredMediaProvider,
+  resolveMediaProviderConnectionState,
+  type MediaProviderConnectionState,
+  type MediaProviderRegistry,
+} from "./mediaProviderConnection";
 
 type Modality = "image" | "video" | "music" | "speech" | "transcription";
 type GenerationResult = {
@@ -90,6 +97,30 @@ const PROVIDER_MODELS: Record<Modality, ProviderModelGroup[]> = {
 };
 const INITIAL_IMAGE_PROVIDER = PROVIDER_MODELS.image[0];
 const INITIAL_IMAGE_MODEL = INITIAL_IMAGE_PROVIDER?.models[0];
+
+// KEA-9390: the registry behind each tab says where a provider's credentials come from, so
+// the page can tell — before sending anything — that a provider has no connection to run on.
+const PROVIDER_REGISTRIES: Record<Modality, MediaProviderRegistry> = {
+  image: IMAGE_PROVIDERS,
+  video: VIDEO_PROVIDERS,
+  music: MUSIC_PROVIDERS,
+  speech: AUDIO_SPEECH_PROVIDERS,
+  transcription: AUDIO_TRANSCRIPTION_PROVIDERS,
+};
+
+function connectionStateFor(
+  tab: Modality,
+  providerId: string,
+  connectedProviders: ReadonlySet<string> | null
+): MediaProviderConnectionState {
+  return resolveMediaProviderConnectionState(
+    providerId,
+    PROVIDER_REGISTRIES[tab],
+    connectedProviders,
+    // Only /v1/audio/transcriptions retries a gateway that lists the same model.
+    { gatewayFallback: tab === "transcription" }
+  );
+}
 
 // Voice presets per TTS provider
 const VOICE_PRESETS: Record<string, { id: string; label: string }[]> = {
@@ -452,6 +483,7 @@ export default function MediaPageClient() {
   // Transcription-specific
   const MAX_TRANSCRIPTION_FILE_SIZE = 4 * 1024 * 1024 * 1024; // 4 GB
   const promptId = useId();
+  const connectionHintId = useId();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [imageInputFile, setImageInputFile] = useState<File | null>(null);
@@ -463,6 +495,16 @@ export default function MediaPageClient() {
   const [configuredLocalProviders, setConfiguredLocalProviders] = useState<Set<string>>(
     new Set(LOCAL_PROVIDERS) // Optimistic: show all until we know otherwise
   );
+  // KEA-9390: provider ids with a saved connection; `null` until the list has loaded (or when
+  // it could not be read — the page then blocks nothing).
+  const [connectedProviders, setConnectedProviders] = useState<Set<string> | null>(null);
+  // What the connection list is applied to once it arrives: the tab and provider on screen
+  // by then, and never a provider the user picked.
+  const providerPicked = useRef(false);
+  const selection = useRef<{ tab: Modality; provider: string }>({
+    tab: "image",
+    provider: INITIAL_IMAGE_PROVIDER?.id ?? "",
+  });
 
   useEffect(() => {
     const audioUrl = result?.audioUrl;
@@ -472,6 +514,20 @@ export default function MediaPageClient() {
       }
     };
   }, [result?.audioUrl]);
+
+  // Selects a provider with its first model (and, for speech, a voice and format it supports).
+  const applyProvider = (tab: Modality, providerId: string) => {
+    selection.current = { tab, provider: providerId };
+    setSelectedProvider(providerId);
+    const models = PROVIDER_MODELS[tab]?.find((p) => p.id === providerId)?.models ?? [];
+    const firstModel = models[0]?.id ?? "";
+    setSelectedModel(firstModel);
+    if (tab === "speech") {
+      setSpeechVoice(getVoiceList(providerId)[0]?.id ?? "alloy");
+      const formats = getSpeechFormats(providerId);
+      setSpeechFormat((current) => (formats.includes(current) ? current : (formats[0] ?? "mp3")));
+    }
+  };
 
   useEffect(() => {
     // Fetch configured provider connections to determine which local providers are set up
@@ -495,6 +551,20 @@ export default function MediaPageClient() {
           // No local providers configured — hide sdwebui/comfyui
           setConfiguredLocalProviders(new Set());
         }
+        // KEA-9390: open on a connected provider when the default one has no connection.
+        const connected = collectConnectedProviderIds(data);
+        setConnectedProviders(connected);
+        if (connected && !providerPicked.current) {
+          const { tab, provider } = selection.current;
+          const preferred = pickPreferredMediaProvider(
+            (PROVIDER_MODELS[tab] ?? []).filter(
+              (p) => !LOCAL_PROVIDERS.includes(p.id) || configured.has(p.id)
+            ),
+            provider,
+            (id) => connectionStateFor(tab, id, connected)
+          );
+          if (preferred && preferred !== provider) applyProvider(tab, preferred);
+        }
       })
       .catch(() => {
         // On error, keep showing all (fail-open)
@@ -517,9 +587,17 @@ export default function MediaPageClient() {
     setAudioFile(null);
     setImageInputFile(null);
     setImageMaskFile(null);
-    // Pick first provider and first model automatically
-    const providers = PROVIDER_MODELS[tab] ?? [];
-    const firstProvider = providers[0];
+    // Pick the first connected provider (else the first listed one) and its first model. Only
+    // providers the list shows: a local one that is not set up is not a choice.
+    const providers = (PROVIDER_MODELS[tab] ?? []).filter(
+      (p) => !LOCAL_PROVIDERS.includes(p.id) || configuredLocalProviders.has(p.id)
+    );
+    const preferredId = pickPreferredMediaProvider(providers, providers[0]?.id, (id) =>
+      connectionStateFor(tab, id, connectedProviders)
+    );
+    const firstProvider = providers.find((p) => p.id === preferredId);
+    providerPicked.current = false;
+    selection.current = { tab, provider: firstProvider?.id ?? "" };
     setSelectedProvider(firstProvider?.id ?? "");
     const firstModel = firstProvider?.models[0]?.id ?? "";
     setSelectedModel(firstModel);
@@ -530,15 +608,8 @@ export default function MediaPageClient() {
   };
 
   const handleProviderChange = (providerId: string) => {
-    setSelectedProvider(providerId);
-    const models = PROVIDER_MODELS[activeTab]?.find((p) => p.id === providerId)?.models ?? [];
-    const firstModel = models[0]?.id ?? "";
-    setSelectedModel(firstModel);
-    if (activeTab === "speech") {
-      setSpeechVoice(getVoiceList(providerId)[0]?.id ?? "alloy");
-      const formats = getSpeechFormats(providerId);
-      setSpeechFormat((current) => (formats.includes(current) ? current : (formats[0] ?? "mp3")));
-    }
+    providerPicked.current = true;
+    applyProvider(activeTab, providerId);
   };
 
   const handleGenerate = async () => {
@@ -692,8 +763,20 @@ export default function MediaPageClient() {
   const voiceList = getVoiceList(selectedProvider);
   const currentSpeechFormats = getSpeechFormats(selectedProvider);
   const isTopazImageFlow = activeTab === "image" && selectedProvider === "topaz";
+  // KEA-9390: a provider that needs a connection and has none cannot run — say so and keep
+  // the request from being sent, instead of waiting for the server's "No credentials" answer.
+  const connectionStateOf = (providerId: string) =>
+    connectionStateFor(activeTab, providerId, connectedProviders);
+  const selectedProviderName =
+    currentProviders.find((p) => p.id === selectedProvider)?.name ?? selectedProvider;
+  const isSelectedNotConnected =
+    Boolean(selectedProvider) && connectionStateOf(selectedProvider) === "not-connected";
+  const hasConnectedProvider = currentProviders.some(
+    (p) => connectionStateOf(p.id) === "connected"
+  );
   const isGenerateDisabled =
     loading ||
+    isSelectedNotConnected ||
     (activeTab === "transcription"
       ? !audioFile
       : activeTab === "image"
@@ -730,7 +813,15 @@ export default function MediaPageClient() {
               label={t("provider")}
               value={selectedProvider}
               onChange={(e) => handleProviderChange(e.target.value)}
-              options={currentProviders.map((p) => ({ value: p.id, label: p.name }))}
+              options={currentProviders.map((p) => ({
+                value: p.id,
+                // The list holds every provider that supports the type: mark the ones with no
+                // connection so a choice that cannot run is visible before it is made.
+                label:
+                  connectionStateOf(p.id) === "not-connected"
+                    ? t("providerNotConnectedOption", { name: p.name })
+                    : p.name,
+              }))}
             />
             <Select
               label={t("model")}
@@ -741,7 +832,24 @@ export default function MediaPageClient() {
           </div>
 
           {/* Credential hint */}
-          {selectedProvider && !["sdwebui", "comfyui", "qwen"].includes(selectedProvider) && (
+          {isSelectedNotConnected ? (
+            <p id={connectionHintId} className="text-xs text-text-muted flex items-center gap-1.5">
+              <Icon name="info" size={14} className="text-warning" />
+              <span>
+                {t.rich(hasConnectedProvider ? "providerNotConnected" : "noProviderConnected", {
+                  provider: () => <strong>{selectedProviderName}</strong>,
+                  connect: (chunks) => (
+                    <Link
+                      href="/dashboard/providers"
+                      className="text-primary underline underline-offset-2 hover:text-primary/80"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </span>
+            </p>
+          ) : selectedProvider && !["sdwebui", "comfyui", "qwen"].includes(selectedProvider) ? (
             <p className="text-xs text-text-muted flex items-center gap-1.5">
               <Icon name="info" size={14} className="text-warning" />
               {t.rich("credentialsRequired", {
@@ -756,7 +864,7 @@ export default function MediaPageClient() {
                 ),
               })}
             </p>
-          )}
+          ) : null}
 
           {/* Speech: voice + format */}
           {activeTab === "speech" && (
@@ -885,6 +993,7 @@ export default function MediaPageClient() {
             fullWidth
             onClick={handleGenerate}
             disabled={isGenerateDisabled}
+            aria-describedby={isSelectedNotConnected ? connectionHintId : undefined}
             loading={loading}
             icon={
               loading
