@@ -88,6 +88,21 @@ export function parseDayGranularityResetMs(
 }
 
 /**
+ * `Date.parse` rolls an impossible day over (2026-11-31 becomes 2026-12-01), so a
+ * malformed reset date would still yield a long wait. Accept only real calendar dates
+ * (#20281 review): an ISO reset can bypass the operator's maxCooldownMs cap.
+ */
+function isCalendarDate(stamp: string): boolean {
+  const [year, month, day] = stamp.slice(0, 10).split("-").map(Number);
+  const probe = new Date(Date.UTC(year, month - 1, day));
+  return (
+    probe.getUTCFullYear() === year &&
+    probe.getUTCMonth() === month - 1 &&
+    probe.getUTCDate() === day
+  );
+}
+
+/**
  * Z.AI (GLM) reports an exhausted weekly/monthly cap with a FULL absolute
  * datetime rather than a countdown:
  *
@@ -118,6 +133,7 @@ export function parseIsoDateTimeResetMs(
     );
   if (!match) return null;
   const stamp = match[1].replace(/[Tt ]/, "T");
+  if (!isCalendarDate(stamp)) return null;
   // Normalize "+0200" to "+02:00": the bare-offset form is not part of the ES Date.parse grammar.
   const rawZone = match[2] ? match[2].toUpperCase() : resolveNaiveResetZone(msg, providerOrZone);
   const zone = /^[+-]\d{4}$/.test(rawZone) ? `${rawZone.slice(0, 3)}:${rawZone.slice(3)}` : rawZone;

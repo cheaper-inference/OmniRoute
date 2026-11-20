@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] {action} করা হতো",
     "cancelled": "বাতিল করা হয়েছে।",
     "jsonOpt": "JSON হিসেবে আউটপুট দিন",
-    "yesOpt": "নিশ্চিতকরণের প্রম্পট এড়িয়ে যান"
+    "yesOpt": "নিশ্চিতকরণের প্রম্পট এড়িয়ে যান",
+    "positiveIntegerRequired": "সীমা একটি ধনাত্মক পূর্ণসংখ্যা হতে হবে।"
   },
   "setup": {
     "title": "OmniRoute সেটআপ",

@@ -122,6 +122,49 @@ test("doctor fails when encrypted credentials exist without storage key", async 
   });
 });
 
+test("doctor lists pending migrations in numeric order (legacy NNN before timestamps)", async () => {
+  await withDoctorEnv(async (dataDir) => {
+    const migrationsDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cli-doctor-mig-"));
+    const originalMigrationsDir = process.env.OMNIROUTE_MIGRATIONS_DIR;
+    try {
+      for (const file of [
+        "20261113120000_timestamped_b.sql",
+        "235_legacy_high.sql",
+        "001_initial_schema.sql",
+        "20261112000000_timestamped_a.sql",
+        "010_legacy_low.sql",
+      ]) {
+        fs.writeFileSync(path.join(migrationsDir, file), "SELECT 1;");
+      }
+      process.env.OMNIROUTE_MIGRATIONS_DIR = migrationsDir;
+
+      const db = new Database(path.join(dataDir, "storage.sqlite"));
+      db.exec(
+        "CREATE TABLE _omniroute_migrations (version TEXT PRIMARY KEY, name TEXT NOT NULL, " +
+          "applied_at TEXT NOT NULL DEFAULT (datetime('now')));" +
+          "INSERT INTO _omniroute_migrations (version, name) VALUES ('001', 'initial_schema');"
+      );
+      db.close();
+
+      const { collectDoctorChecks } = await import("../../bin/cli/commands/doctor.mjs");
+      const result = await collectDoctorChecks({ rootDir: ROOT_DIR }, { skipLiveness: true });
+      const check = getCheck(result, "Database");
+
+      assert.equal(check?.status, "warn");
+      assert.deepEqual(check?.details?.pending, [
+        "010_legacy_low.sql",
+        "235_legacy_high.sql",
+        "20261112000000_timestamped_a.sql",
+        "20261113120000_timestamped_b.sql",
+      ]);
+    } finally {
+      if (originalMigrationsDir === undefined) delete process.env.OMNIROUTE_MIGRATIONS_DIR;
+      else process.env.OMNIROUTE_MIGRATIONS_DIR = originalMigrationsDir;
+      fs.rmSync(migrationsDir, { recursive: true, force: true });
+    }
+  });
+});
+
 test("doctor probes the real machine-token endpoint without exposing the token", async () => {
   await withDoctorEnv(async () => {
     const originalFetch = globalThis.fetch;

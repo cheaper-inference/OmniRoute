@@ -24,13 +24,13 @@ Ale typowi klienci (Cursor, Cline, Roo Code, OpenAI SDK) usuwają `reasoning_con
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
@@ -38,7 +38,9 @@ Turn N+1 (client sends follow-up):
 
 Przechwytywanie odbywa się w `open-sse/handlers/chatCore.ts` (dwa miejsca, w dwóch miejscach wywołań `cacheReasoningFromAssistantMessage` ). Powtórka odbywa się w `open-sse/translator/index.ts` po wymuszeniu schematu, ale przed wysłaniem.
 
-Zwykłe (nie wymagające wywoływania narzędzi) tury asystenta są kluczowane inaczej: `buildAssistantMessageCacheKey()` trawi zakres sesji plus znormalizowany transkrypt w formacie OpenAI aż do tej tury, ponieważ DeepSeek wymaga rozumowania _każdej_ poprzedniej tury, gdy `tools` jest obecne. W przypadku celów Responses-API (na przykład `opencode-go/deepseek-v4-flash`, kierowanych do `/responses`) treść nadrzędna przenosi `input`, a nie `messages`, więc `translateRequest()` (`open-sse/translator/index.ts`) zgłasza transkrypt przestawny, który strawił za pomocą opcji wywołania zwrotnego, a miejsca przechwytywania trawią ten sam transkrypt. Przebieg odtwarzania odpowiedzi działa na osi OpenAI dla każdego formatu źródłowego, więc klienci Anthropic Messages (Claude → OpenAI → Responses) są również odtwarzani.
+Wpisy wywołań narzędzi są przechowywane w `buildToolCallCacheKey()`, podsumowaniu zakresu żądania i identyfikatorze wywołania narzędzia, więc ten sam identyfikator używany przez inny klucz API lub sesję nie wybiera wpisu. Zakres pochodzi z `buildReasoningCacheScope()`: identyfikator klucza API plus klucz sesji, jeśli żądanie go zawiera. Dlatego kolumna `tool_call_id` i pulpit nawigacyjny pokazują podsumowanie tych wpisów.
+
+Zwykłe (nie wymagające wywoływania narzędzi) tury asystenta są kluczowane inaczej: `buildAssistantMessageCacheKey()` trawi zakres sesji plus znormalizowany transkrypt w formacie OpenAI aż do tej tury, ponieważ DeepSeek wymaga rozumowania _każdej_ poprzedniej tury, gdy `tools` jest obecne. W przypadku celów Responses-API (na przykład `opencode-go/deepseek-v4-flash`, kierowanych do `/responses`) treść nadrzędna przenosi `input`, a nie `messages`, więc `translateRequest()` (`open-sse/translator/index.ts`) zgłasza transkrypt przestawny, który strawił za pomocą opcji wywołania zwrotnego, a miejsca przechwytywania trawią ten sam transkrypt. Przepustka odtwarzania odpowiedzi działa na osi OpenAI dla każdego formatu źródłowego, więc klienci Anthropic Messages (Claude → OpenAI → Responses) również są odtwarzani.
 
 ## Pamięć masowa — Pamięć hybrydowa + SQLite
 

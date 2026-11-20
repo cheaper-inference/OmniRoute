@@ -18,95 +18,97 @@
 
 ---
 
-## 安裝方式
+## 安裝方法
 
-### npm（建議）
+### npm（推薦）
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-儀表板會在 `http://localhost:20128` 開啟，API 基礎 URL 為 `http://localhost:20128/v1`。
+儀表板在`http://localhost:20128`和API處打開，基礎URL是`http://localhost:20128/v1`。
 
-### pnpm
+> **npm 用戶：**如果 npm 警告安裝腳本被封鎖（例如`omniroute`、 `better-sqlite3`），請參閱[排除— npm install-scripts 阻塞故障](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)。
+
+### PNPM
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **pnpm 使用者：**必須使用 `--allow-build` 旗標，才能啟用 `better-sqlite3` 和 `@swc/core` 的原生建置指令碼。pnpm v11 不支援對全域安裝使用 `pnpm approve-builds -g` 命令。
+> **PNPM 使用者：**需要`--allow-build`標誌才能啟用`better-sqlite3`和`@swc/core`的本機構建腳本。 pnpm v11 上的全域安裝不支援`pnpm approve-builds -g`指令。
 
-### Arch Linux（AUR）
+### 拱門Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR 套件](https://aur.archlinux.org/packages/omniroute-bin)會安裝 OmniRoute，並提供 systemd 使用者服務。
+[AUR軟體包](https://aur.archlinux.org/packages/omniroute-bin)安裝OmniRoute並提供 systemd 用戶服務。
 
-### 從原始碼安裝
+### 從源頭
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows 注意事項：**根據預設，若舊版 `%USERPROFILE%\.omniroute` 目錄不存在，OmniRoute 會使用 `%APPDATA%\omniroute`。設定 `DATA_DIR` 即可選擇不同的資料目錄位置。
+> **Windows註：**預設情況下，當舊的`%USERPROFILE%\.omniroute`目錄不存在時， OmniRoute使用`%APPDATA%\omniroute` 。設定`DATA_DIR`以選擇不同的資料目錄位置。
 
-> **注意：**首次執行時，`npm install` 會從 `.env.example` 自動產生 `.env`。後續安裝不會覆寫現有的 `.env`，因此自訂設定會獲得保留。如需重新建立，請先刪除 `.env`，再重新執行。
+> **筆記：** `npm install`在第一次運行時自動從`.env.example`產生`.env` 。後續安裝不會覆蓋現有的`.env`，因此自訂內容將被保留。若要重新播種，請在重新執行之前刪除`.env` 。
 
 ### Docker
 
-如需完整的 Docker 設定方式，包括 Compose 設定檔與 Caddy HTTPS，請參閱 [Docker 指南](./DOCKER_GUIDE.md)。
+請參閱[Docker指南](./DOCKER_GUIDE.md)，以了解完整的Docker設置，包括 Compose 設定檔和 Caddy HTTPS。
 
 ### 桌面應用程式（Electron）
 
-OmniRoute 隨附以 Electron 41 + electron-builder 26.10 建置的桌面包裝程式。可用的指令碼（工作區根目錄）：
+OmniRoute提供了一個基於Electron 41 + electro-builder 26.10 建構的桌麵包裝器。可用腳本（工作空間根目錄）：
 
 ```bash
-npm run electron:dev          # 使用熱重新載入執行桌面應用程式
-npm run electron:build        # 為目前的作業系統建置（自動偵測）
-npm run electron:build:win    # Windows 安裝程式（NSIS + 可攜版）
-npm run electron:build:mac    # macOS（dmg + zip、arm64+x64）
-npm run electron:build:linux  # Linux（AppImage + deb + rpm）
-npm run electron:smoke:packaged  # 對封裝後的建置執行冒煙測試
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
+npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
+npm run electron:build:linux  # Linux (AppImage + deb + rpm)
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-桌面安裝程式的發行版本會附加至 GitHub Releases。如需完整深入瞭解 Electron（簽署、IPC 橋接、發行版），請參閱 [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _（於後續階段建立）_。
+桌面安裝程式的版本附加到GitHub版本。有關完整的Electron深入研究（簽名、 IPC橋、發行版），請參閱[`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em faseterior)_。
 
-### 無介面伺服器（CI／自動化）
+### 無頭伺服器（CI/automation）
 
-對於無人值守的設定（Docker、Kubernetes、CI），請使用：
+對於無人值守設定（Docker、 Kubernetes 、 CI），請使用：
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-搭配環境變數（`INITIAL_PASSWORD`、`OMNIROUTE_WS_BRIDGE_SECRET` 等），即可完全透過指令碼啟動 OmniRoute 執行個體。
+與環境變數（`INITIAL_PASSWORD`、 `OMNIROUTE_WS_BRIDGE_SECRET`等）結合，這使您可以啟動完全可編寫腳本的OmniRoute實例。
 
-### CLI 選項
+### CLI選項
 
-| 命令                    | 說明                                                   |
+| 命令                    | 描述                                                   |
 | ----------------------- | ------------------------------------------------------ |
-| `omniroute`             | 啟動伺服器（`PORT=20128`，API 與儀表板使用相同連接埠） |
-| `omniroute setup`       | 透過引導式 CLI 完成密碼與第一個提供者的初始設定        |
-| `omniroute doctor`      | 在不啟動伺服器的情況下執行本機健康情況檢查             |
-| `omniroute providers`   | 從 CLI 探索、列出、驗證及測試提供者                    |
-| `omniroute config`      | CLI 工具設定——列出、取得、設定及驗證組態               |
-| `omniroute status`      | 離線狀態儀表板——版本、DB、工具及組態                   |
-| `omniroute logs`        | 從 API 串流使用情況記錄（支援 `--follow`）             |
-| `omniroute update`      | 檢查或套用 OmniRoute 更新                              |
-| `omniroute provider`    | 管理提供者連線——新增、列出、移除、測試及設為預設值     |
-| `omniroute --port 3000` | 將標準／API 連接埠設為 3000                            |
-| `omniroute --mcp`       | 啟動 MCP 伺服器（stdio 傳輸）                          |
-| `omniroute --no-open`   | 不自動開啟瀏覽器                                       |
-| `omniroute --help`      | 顯示說明                                               |
+| `omniroute`             | 啟動伺服器（`PORT=20128`、 API和儀表板位於同一連接埠） |
+| `omniroute setup`       | 指導CLI入門，了解密碼和第一個提供者                    |
+| `omniroute doctor`      | 無需啟動伺服器即可運行本地健康檢查                     |
+| `omniroute providers`   | 發現、列出、驗證和測試CLI的提供者                      |
+| `omniroute config`      | CLI工具配置—清單、取得、設定、驗證配置                 |
+| `omniroute status`      | 離線狀態儀表板—版本、 DB、工具、配置                   |
+| `omniroute logs`        | 來自API的流使用日誌（支援`--follow`）                  |
+| `omniroute update`      | 檢查或套用OmniRoute更新                                |
+| `omniroute provider`    | 管理提供者連接—新增、清單、刪除、測試、預設            |
+| `omniroute --port 3000` | 將canonical/API埠設定為3000                            |
+| `omniroute --mcp`       | 啟動MCP伺服器（stdio 傳輸）                            |
+| `omniroute --no-open`   | 不要自動開啟瀏覽器                                     |
+| `omniroute --help`      | 顯示幫助                                               |
 
-無介面設定可使用旗標或環境變數編寫成指令碼：
+無頭設定可以使用標誌或環境變數編寫腳本：
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-在不開啟儀表板的情況下執行本機診斷：
+無需打開儀表板即可運行本地診斷：
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-透過 SSH 或指令碼管理提供者，無須開啟儀表板：
+從SSH或腳本管理提供者，無需開啟儀表板：
 
 ```bash
 omniroute providers available
@@ -219,8 +221,12 @@ npm run test:protocols:e2e
 
 **Claude代碼：**
 
+Claude程式碼透過HTTP連接， `omniroute --mcp` (stdio) 不會啟動。 HTTP傳輸預設為關閉狀態：首先在正在運行的伺服器上啟用它。當啟用儀表板登入時，沒有憑證的請求會取得`401`，因此傳遞包含`mcp:connect` （或`manage`）的API鑰；沒有`manage`/`admin`金鑰也需要每個工具的範圍（請參閱[MCP伺服器→ MCP工具範圍](../frameworks/MCP-SERVER.md#mcp-tool-scopes)）。
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -268,46 +274,46 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## 逾時設定
+## 逾時配置
 
-### 基本逾時
+### 基本超時
 
-對大多數部署而言，您只需要這兩個變數：
+對於大多數部署，您只需要這兩個變數：
 
-| 變數                     | 預設值                    | 用途                                                                                          |
-| ------------------------ | ------------------------- | --------------------------------------------------------------------------------------------- |
-| `REQUEST_TIMEOUT_MS`     | `600000`                  | 上游開始回應逾時、隱藏的 Undici 逾時、TLS 指紋請求，以及 API 橋接請求／代理逾時所共用的基準值 |
-| `STREAM_IDLE_TIMEOUT_MS` | 繼承 `REQUEST_TIMEOUT_MS` | 串流區塊之間允許的最大間隔；超過後 OmniRoute 將中止 SSE 串流                                  |
+| 多變的                   | 預設                     | 目的                                                                               |
+| ------------------------ | ------------------------ | ---------------------------------------------------------------------------------- |
+| `REQUEST_TIMEOUT_MS`     | `600000`                 | 上游回應啟動逾時、隱藏 Undici 逾時、 TLS指紋請求和API橋request/proxy逾時的共用基線 |
+| `STREAM_IDLE_TIMEOUT_MS` | 繼承`REQUEST_TIMEOUT_MS` | OmniRoute中止SSE流之前流塊之間的最大間隙                                           |
 
-系統會維持向後相容性：現有的 `FETCH_TIMEOUT_MS`、`API_BRIDGE_PROXY_TIMEOUT_MS` 及其他各層級的逾時變數仍然有效，並會覆寫共用基準值。
+保留向後相容性：現有的`FETCH_TIMEOUT_MS`、 `API_BRIDGE_PROXY_TIMEOUT_MS`和其他每層逾時變數仍然有效並覆寫共用基線。
 
-### 提供者特定注意事項
+### 提供者特定註釋
 
-對於與 Claude Code 相容的上游（`anthropic-compatible-cc-*`），OmniRoute 會根據解析後的擷取逾時推導出站的 `X-Stainless-Timeout` 標頭，讓提供者端的讀取逾時與您的環境設定保持一致。
+For Claude Code-compatible upstreams (`anthropic-compatible-cc-*`), OmniRoute derives the outbound `X-Stainless-Timeout` header from the resolved fetch timeout so provider-side read timeouts stay aligned with your env configuration.
 
-對於第三方、與 Claude Code 相容的反向代理，OmniRoute 會維持較保守的預設 `anthropic-beta` 設定；當「用戶端快取控制」保留為「自動」時，只會轉送用戶端提供的 `cache_control` 標記。僅當上游明確要求經過遮蔽的 Claude 思考串流時，才啟用每個連線的「啟用 redact-thinking beta」切換選項。
+對於第三方Claude代碼相容的反向代理， OmniRoute保留預設的`anthropic-beta`設定保守，並且當`Client Cache Control`保留在`Auto`上時，僅轉送客戶端提供的`cache_control`標記。只有當上游特別需要編輯Claude思考流時，才啟用每個連線的「啟用編輯思考 beta」切換。
 
-### 進階逾時覆寫
+### 高級超時覆蓋
 
-| 變數                                     | 預設值                                     | 用途                                                  |
-| ---------------------------------------- | ------------------------------------------ | ----------------------------------------------------- |
-| `FETCH_TIMEOUT_MS`                       | 繼承 `REQUEST_TIMEOUT_MS`                  | 在收到回應標頭之前所使用的上游開始回應逾時            |
-| `FETCH_HEADERS_TIMEOUT_MS`               | 繼承 `FETCH_TIMEOUT_MS`                    | Undici 接收上游回應標頭的時間限制                     |
-| `FETCH_BODY_TIMEOUT_MS`                  | 繼承 `FETCH_TIMEOUT_MS`                    | Undici 接收上游本文區塊之間的時間限制（`0` 表示停用） |
-| `FETCH_CONNECT_TIMEOUT_MS`               | `30000`                                    | Undici TCP 連線逾時                                   |
-| `FETCH_KEEPALIVE_TIMEOUT_MS`             | `4000`                                     | Undici 閒置持續連線通訊端逾時                         |
-| `TLS_CLIENT_TIMEOUT_MS`                  | 繼承 `FETCH_TIMEOUT_MS`                    | 透過 `wreq-js` 發出的 TLS 指紋請求逾時                |
-| `API_BRIDGE_PROXY_TIMEOUT_MS`            | 繼承 `REQUEST_TIMEOUT_MS` 或 `600000`      | 從 API 連接埠將 `/v1` 代理轉送至儀表板連接埠的逾時    |
-| `API_BRIDGE_SERVER_REQUEST_TIMEOUT_MS`   | `max(API_BRIDGE_PROXY_TIMEOUT_MS, 300000)` | API 橋接伺服器上的傳入請求逾時                        |
-| `API_BRIDGE_SERVER_HEADERS_TIMEOUT_MS`   | `60000`                                    | API 橋接伺服器上的傳入標頭逾時                        |
-| `API_BRIDGE_SERVER_KEEPALIVE_TIMEOUT_MS` | `5000`                                     | API 橋接伺服器上的持續連線逾時                        |
-| `API_BRIDGE_SERVER_SOCKET_TIMEOUT_MS`    | `0`                                        | API 橋接伺服器上的通訊端非活動逾時（`0` 表示停用）    |
+| 多變的                                   | 預設                                       | 目的                                             |
+| ---------------------------------------- | ------------------------------------------ | ------------------------------------------------ |
+| `FETCH_TIMEOUT_MS`                       | 繼承`REQUEST_TIMEOUT_MS`                   | 在回應標頭到達之前使用上游回應啟動逾時           |
+| `FETCH_HEADERS_TIMEOUT_MS`               | 繼承`FETCH_TIMEOUT_MS`                     | Undici 接收上游回應標頭的時間限制                |
+| `FETCH_BODY_TIMEOUT_MS`                  | 繼承`FETCH_TIMEOUT_MS`                     | 上游主體區塊之間的 Undici 時間限制（`0`停用它）  |
+| `FETCH_CONNECT_TIMEOUT_MS`               | `30000`                                    | Undici TCP連接超時                               |
+| `FETCH_KEEPALIVE_TIMEOUT_MS`             | `4000`                                     | Undici 空閒保持活動套接字逾時                    |
+| `TLS_CLIENT_TIMEOUT_MS`                  | 繼承`FETCH_TIMEOUT_MS`                     | 透過`wreq-js`發出的TLS指紋請求逾時               |
+| `API_BRIDGE_PROXY_TIMEOUT_MS`            | 繼承`REQUEST_TIMEOUT_MS`或`600000`         | `/v1`代理從API連接埠轉送到儀表板連接埠的逾時     |
+| `API_BRIDGE_SERVER_REQUEST_TIMEOUT_MS`   | `max(API_BRIDGE_PROXY_TIMEOUT_MS, 300000)` | API橋接伺服器上的傳入請求逾時                    |
+| `API_BRIDGE_SERVER_HEADERS_TIMEOUT_MS`   | `60000`                                    | API橋接伺服器上的傳入標頭逾時                    |
+| `API_BRIDGE_SERVER_KEEPALIVE_TIMEOUT_MS` | `5000`                                     | API橋接伺服器上的保持活動逾時                    |
+| `API_BRIDGE_SERVER_SOCKET_TIMEOUT_MS`    | `0`                                        | API橋接伺服器上的套接字不會活動逾時（`0`禁用它） |
 
-> **注意：** 對於串流請求，`FETCH_TIMEOUT_MS` 僅涵蓋連線設定／等待第一個上游回應的時間。串流啟用後，OmniRoute 只會在實際停滯（`STREAM_IDLE_TIMEOUT_MS`）或 Undici 本文非活動（`FETCH_BODY_TIMEOUT_MS`）時中止串流。
+> **筆記：**對於串流請求， `FETCH_TIMEOUT_MS`僅涵蓋連線設定/等待第一個上游回應。一旦流處於活動狀態， OmniRoute將僅在實際停頓 (`STREAM_IDLE_TIMEOUT_MS`) 或 Undici 主體不活動 (`FETCH_BODY_TIMEOUT_MS`) 時中止。
 
 ### 反向代理相容性
 
-如果您在 Nginx、Caddy、Cloudflare 或其他反向代理後方執行 OmniRoute，請確保代理逾時也高於 OmniRoute 的串流／擷取逾時。
+如果您在 Nginx、Caddy、 Cloudflare或其他反向代理程式後面執行OmniRoute ，請確保代理程式逾時也高於OmniRoute stream/fetch逾時。
 
 ---
 

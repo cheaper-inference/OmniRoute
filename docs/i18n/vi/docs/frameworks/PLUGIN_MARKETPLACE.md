@@ -26,31 +26,26 @@ nạp và thực thi mã trong các tiến trình con, vì vậy các tuyến n�
 truy cập từ nguồn không phải loopback, bất kể cơ chế xác thực. Xem
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Cách Các Thành Phần Hoạt Động Cùng Nhau
+## Nó phù hợp như thế nào với Together
 
 ```
-Bảng điều khiển (/dashboard/plugins)
-  ├─ Tab "Đã cài đặt" → GET /api/plugins            (listPlugins)
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
   │                     POST /api/plugins/scan      (pluginManager.scan)
   │                     POST /api/plugins/{name}/activate|deactivate
-  │                     DELETE /api/plugins/{name}   (gỡ cài đặt)
-  └─ Tab "Kho Plugin" → GET /api/plugins/marketplace
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ không có URL tùy chỉnh → SEED_REGISTRY tích hợp
-                            └─ URL tùy chỉnh → cơ chế chống SSRF isSafeMarketplaceUrl()
-                                             → safeOutboundFetch(guard:"public-only")
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Lớp registry** — `src/lib/plugins/marketplace.ts`: liệt kê / tìm kiếm trong
-  danh mục, chuyển về registry khởi tạo khi xảy ra bất kỳ lỗi nào.
-- **Lớp vòng đời** — `src/lib/plugins/manager.ts` (singleton `pluginManager`):
-  cài đặt, nâng cấp, kích hoạt, vô hiệu hóa, gỡ cài đặt, quét, nạp khi khởi động.
-- **Lớp tệp kê khai** — `src/lib/plugins/manifest.ts`: lược đồ Zod + các giá trị
-  mặc định cho `plugin.json`.
-- **Trình quét** — `src/lib/plugins/scanner.ts`: phát hiện các plugin trên ổ đĩa
-  trong thư mục plugin.
-- **Trình nạp** — `src/lib/plugins/loader.ts`: khởi chạy từng plugin trong một
-  tiến trình con biệt lập và điều phối các lệnh gọi hook qua IPC.
+- **Lớp đăng ký** — `src/lib/plugins/marketplace.ts`: liệt kê / tìm kiếm danh mục, quay lại sổ đăng ký hạt giống nếu có bất kỳ lỗi nào.
+- **Lớp vòng đời** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): cài đặt, nâng cấp, kích hoạt, hủy kích hoạt, gỡ cài đặt, quét, tải khởi động.
+- **Lớp kê khai** — `src/lib/plugins/manifest.ts`: lược đồ Zod + mặc định cho `plugin.json`.
+- **Máy quét** — `src/lib/plugins/scanner.ts`: khám phá các plugin trên đĩa trong thư mục plugin.
+- **Trình tải** — `src/lib/plugins/loader.ts`: tạo ra mỗi plugin trong một quy trình con Node.js riêng biệt và các nhà môi giới thực hiện các cuộc gọi qua IPC. Phần mềm con không phải là hộp cát (xem phần "Cách ly thực thi plugin" bên dưới).
 
 ## Danh Mục Kho Plugin
 
@@ -88,25 +83,22 @@ chuyển về danh sách khởi tạo.
 
 ## REST API
 
-Tất cả endpoint đều yêu cầu xác thực quản trị (`requireManagementAuth`) **và**
-chỉ có thể truy cập qua loopback — `/api/plugins` và `/api/plugins/` được liệt kê
-trong `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Tất cả các điểm cuối đều yêu cầu xác thực quản lý (`requireManagementAuth`)** Và** là `/api/plugins` — chỉ loopback và `/api/plugins/` được liệt kê trong `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Phương thức | Mô tả                                                      |
+| Điểm cuối                        | Phương pháp | Sự miêu tả                                                 |
 | -------------------------------- | ----------- | ---------------------------------------------------------- |
 | `/api/plugins`                   | GET         | Liệt kê các plugin đã cài đặt (bộ lọc `?status=` tùy chọn) |
-| `/api/plugins`                   | POST        | Cài đặt plugin từ một đường dẫn cục bộ tuyệt đối           |
-| `/api/plugins/scan`              | POST        | Quét thư mục plugin và đăng ký các plugin mới              |
-| `/api/plugins/marketplace`       | GET         | Liệt kê các mục trong danh mục marketplace                 |
-| `/api/plugins/[name]`            | GET         | Lấy thông tin chi tiết về plugin đã cài đặt                |
+| `/api/plugins`                   | POST        | Cài đặt plugin từ thư mục nguồn plugin                     |
+| `/api/plugins/scan`              | POST        | Quét thư mục plugin và đăng ký plugin mới                  |
+| `/api/plugins/marketplace`       | GET         | Liệt kê các mục danh mục thị trường                        |
+| `/api/plugins/[name]`            | GET         | Nhận chi tiết plugin đã cài đặt                            |
 | `/api/plugins/[name]`            | DELETE      | Gỡ cài đặt plugin                                          |
-| `/api/plugins/[name]/activate`   | POST        | Kích hoạt (tải + đăng ký các hook)                         |
-| `/api/plugins/[name]/deactivate` | POST        | Vô hiệu hóa (gọi `onDeactivate`, hủy đăng ký các hook)     |
-| `/api/plugins/[name]/config`     | GET         | Lấy cấu hình plugin + schema cấu hình                      |
-| `/api/plugins/[name]/config`     | PUT         | Cập nhật cấu hình plugin (được xác thực theo schema)       |
+| `/api/plugins/[name]/activate`   | POST        | Kích hoạt (tải móc đăng ký + )                             |
+| `/api/plugins/[name]/deactivate` | POST        | Vô hiệu hóa (fire `onDeactivate`, hủy đăng ký hook)        |
+| `/api/plugins/[name]/config`     | GET         | Nhận cấu hình plugin + đồ cấu hình                         |
+| `/api/plugins/[name]/config`     | PUT         | Cập nhật cấu hình plugin (được xác thực dựa trên lược đồ)  |
 
-Bộ lọc `status` của `GET /api/plugins` chấp nhận một trong các giá trị
-`installed` / `active` / `inactive` / `error`. Giá trị không hợp lệ sẽ trả về `400`.
+Bộ lọc `GET /api/plugins` `status` nhận một trong các bộ lọc `installed` / `active` / `inactive` / `error`. Giá trị không hợp lệ trả về `400`.
 
 ### Liệt kê các plugin đã cài đặt
 
@@ -124,12 +116,11 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` phải là đường dẫn **tuyệt đối** và không được chứa các phân đoạn duyệt
-thư mục `..` hoặc byte null (được Zod thực thi). Thư mục nguồn phải chứa một
-`plugin.json` hợp lệ (hoặc là thư mục cha của thư mục chứa tệp đó). Khi thành
-công, phản hồi có mã `201` cùng với bản ghi plugin đã cài đặt.
+The `path` must be an **absolute** path to a directory **inside the plugin sources directory**: `plugin-sources` next to the plugin root, so `~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` when that variable is set (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The install is refused with `400` when the path contains `..` or a null byte, lies outside that directory, resolves outside it through a symlink, contains a symlink whose target is outside it, or when the directory does not exist. The source directory must contain a valid `plugin.json` (or be a parent of one). On success the response is `201` with the installed plugin row.
 
-### Duyệt marketplace
+Không giống như các tuyến plugin khác, tuyến này yêu cầu thông tin xác thực quản lý (phiên bảng điều khiển hoặc khóa API trong phạm vi quản lý) ngay cả khi đăng nhập bị vô hiệu hóa (`requireLogin=false`): cài đặt mã không bao giờ là một hành động ẩn danh.
+
+### Duyệt qua thị trường
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
@@ -145,10 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` xác thực từng giá trị được cung cấp theo `configSchema` của
-plugin (được khai báo trong manifest): các trường `number` tuân theo `min`/`max`,
-các trường `select` phải khớp với `enum` đã khai báo. Các khóa không có trong
-schema vẫn được cho phép.
+`PUT .../config` xác thực từng giá trị được cung cấp dựa trên `configSchema` của plugin (được khai báo trong tệp kê khai): các trường `number` tôn vinh `min`/`max`, các trường `select` phải khớp với `enum` đã khai báo. Các khóa không có trong lược đồ đều được phép thông qua.
 
 ## Cấu hình
 
@@ -205,83 +193,60 @@ lại từ `GET /api/settings`).
 > (`getSettings()` → `listMarketplacePlugins()`) sẽ sử dụng khóa này khi khóa đã
 > có trong kho cài đặt.
 
-## Bảo mật
+## Bảo vệ
 
-### Cấp độ tuyến — chỉ loopback
+### Chỉ tuyến đường vòng lặp — cấp
 
-Các plugin thực thi mã trong những tiến trình con được tạo riêng, vì vậy toàn bộ bề mặt `/api/plugins`
-được phân loại là `LOCAL_ONLY` (Cấp 1). Việc bắt buộc sử dụng loopback luôn được thực hiện
-**trước** mọi bước kiểm tra xác thực, nên ngay cả khi token quản lý bị rò rỉ và truy cập
-đến máy qua đường hầm, token đó vẫn không thể cài đặt, kích hoạt hoặc gỡ cài đặt plugin.
-Xem [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) và
-Quy tắc cứng #15 / #17.
+Các plugin thực thi mã trong các tiến trình con được sinh ra, do đó toàn bộ bề mặt `/api/plugins` được phân loại `LOCAL_ONLY` (Cấp 1). Thực thi vòng lặp chạy vô điều kiện** trước** bất kỳ kiểm tra xác thực nào, do đó, mã thông báo quản lý bị rò rỉ đến hộp qua đường hầm vẫn không thể cài đặt, kích hoạt hoặc gỡ cài đặt plugin. Xem [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) và Quy tắc cứng #15 / #17.
 
-### Cơ chế bảo vệ chống SSRF cho registry của marketplace
+### Đăng ký thị trường SSRF bảo vệ
 
-URL registry tùy chỉnh là cấu hình có thể bị kẻ tấn công chi phối, vì vậy trước khi
-tìm nạp URL này, `listMarketplacePlugins()` đưa URL qua hai lớp kiểm tra:
+Sổ đăng ký tùy chỉnh URL là cấu hình có thể bị ảnh hưởng bởi kẻ tấn công, vì vậy trước khi tìm nạp nó, `listMarketplacePlugins()` sẽ chạy nó qua hai lớp:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Từ chối mọi URL không sử dụng `http:` / `https:`.
-   - Từ chối các máy chủ riêng tư/loopback/link-local/ULA được chỉ định trực tiếp (cả IPv4 **và** IPv6,
-     bao gồm cả IPv4 được ánh xạ) thông qua `isPrivateHost` chuẩn
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Phân giải **cả hai** bản ghi `A` và `AAAA`, đồng thời từ chối nếu **bất kỳ** địa chỉ
-     được phân giải nào là địa chỉ riêng tư — ngăn chặn cách vượt qua bằng ánh xạ tên máy chủ công khai → IP riêng tư.
-   - **Từ chối khi có lỗi**: URL bị từ chối nếu quá trình phân giải DNS thất bại.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): áp dụng lại cơ chế bảo vệ URL chỉ-công-khai
-   tại thời điểm tìm nạp và **chặn chuyển hướng** (không cho phép chuyển hướng `30x`
-   từ công khai → riêng tư).
+   - Từ chối bất cứ thứ gì không phải là `http:` / `https:`.
+   - Từ chối máy chủ private/loopback/link-local/ULA theo nghĩa đen (IPv4** Và** IPv6, bao gồm IPv4-mapped) thông qua `isPrivateHost` chuẩn (`src/shared/network/outboundUrlGuard.ts`).
+   - giải quyết** cả hai** `A` và `AAAA` ghi lại và từ chối nếu** bất kì** địa chỉ đã giải quyết là riêng tư — đóng đường vòng bỏ qua IP riêng tư → tên máy chủ công cộng.
+   - **Thất bại đã đóng** : lỗi độ phân giải DNS sẽ từ chối URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): áp dụng lại bộ bảo vệ URL chỉ công khai tại thời điểm tìm nạp và** chặn chuyển hướng** (không có trục `30x` riêng tư → ).
 
-URL không vượt qua được một trong hai lớp sẽ không làm hủy bỏ yêu cầu — marketplace
-sẽ âm thầm quay về registry hạt giống tích hợp sẵn và ghi nhật ký cảnh báo.
+Một URL không thành công ở một trong hai lớp sẽ không hủy bỏ yêu cầu — thị trường sẽ âm thầm quay trở lại sổ đăng ký hạt giống tích hợp sẵn và ghi lại cảnh báo.
 
-> Cơ chế bảo vệ này đã được tăng cường trong PR #3774 để phân giải cụ thể cả A + AAAA và sử dụng
-> `isPrivateHost` chuẩn thay vì phép kiểm tra chỉ dành cho IPv4.
+> Phần bảo vệ này đã được tăng cường trong PR #3774 đặc biệt để giải quyết A + AAAA và sử dụng `isPrivateHost` chuẩn thay vì kiểm tra IPv4-only.
 
-### Cách ly quá trình thực thi plugin
+### Cách ly thực thi plugin
 
-- **Cách ly tiến trình** — `loadPlugin()` (`src/lib/plugins/loader.ts`) tạo
-  mỗi plugin trong một tiến trình con Node.js riêng biệt và giao tiếp qua IPC.
-  Các lệnh gọi hook có thời gian chờ với cơ chế leo thang từ `SIGTERM` → `SIGKILL`.
-- **Danh sách cho phép đối với biến môi trường** — tiến trình con chỉ nhận được một tập hợp biến môi trường
-  nằm trong danh sách cho phép; tập hợp rộng hơn chỉ được cấp khi manifest yêu cầu quyền
-  `env`.
-- **Giới hạn đường dẫn** — các thao tác cài đặt/nâng cấp/gỡ cài đặt xác nhận rằng thư mục plugin
-  và `manifest.main` được phân giải **bên trong** thư mục gốc plugin được quản lý
-  trước mọi thao tác sao chép hoặc xóa đệ quy (bảo vệ khỏi đường dẫn DB đã bị giả mạo và
-  việc duyệt `../` trong `manifest.main`). Quá trình kích hoạt phân giải các liên kết tượng trưng bằng
-  `realpath` và từ chối tải điểm vào thoát ra ngoài thư mục plugin.
-- **Ghim tính toàn vẹn tùy chọn** — manifest có thể khai báo trường `integrity`
-  (`sha256-<base64>`, định dạng SRI). Khi trường này xuất hiện, trình tải sẽ xác minh hàm băm
-  của tệp điểm vào tại thời điểm tải và từ chối kích hoạt nếu không khớp. Đây là cơ chế
-  phát hiện giả mạo tự nguyện, **không phải** ranh giới bảo mật — định tuyến chỉ-loopback
-  và mô hình quyền mới là các ranh giới thực sự.
+> **Các plugin không được đóng hộp cát.** Con là một quy trình Node.js thông thường chạy với tư cách là người dùng OmniRoute, không có ngữ cảnh VM và không có cờ cấp phép Node.js, vì vậy mã plugin có thể đọc và ghi bất kỳ tệp nào mà người dùng có thể, chạy chương trình và truy cập mạng. `requires.permissions` chỉ quyết định biến môi trường nào mà trẻ nhận được; các quyền khác không được thực thi. Chỉ cài đặt các plugin mà bạn tin tưởng. Ranh giới quy trình bên dưới chứa các sự cố và treo; nó không phải là ranh giới an ninh.
 
-## Manifest (`plugin.json`)
+- **Cách ly quy trình** — `loadPlugin()` (`src/lib/plugins/loader.ts`) sinh ra mỗi plugin trong một tiến trình con Node.js riêng biệt và giao tiếp qua IPC. Cuộc gọi hook có thời gian chờ với mức tăng `SIGTERM` → `SIGKILL`.
+- **Danh sách cho phép Env** — đứa trẻ chỉ nhận được một tập hợp các biến môi trường trong danh sách cho phép; tập hợp rộng hơn chỉ được cấp khi tệp kê khai yêu cầu quyền `env`.
+- **Cài đặt ngăn chặn nguồn** — `POST /api/plugins` chỉ đọc từ thư mục nguồn plugin (xem "Cài đặt từ đường dẫn cục bộ"): đường dẫn được chuẩn hóa bằng `realpath`, phải nằm nghiêm ngặt trong thư mục đó và cây nguồn mang liên kết tượng trưng thoát khỏi nó sẽ bị từ chối trước khi mọi thứ được sao chép.
+- **Ngăn chặn đường dẫn** — install/upgrade/uninstall khẳng định rằng thư mục plugin và `manifest.main` giải quyết** ở trong** gốc plugin được quản lý trước bất kỳ bản sao hoặc xóa đệ quy nào (bảo vệ chống lại các đường dẫn DB bị giả mạo và truyền tải `../` trong `manifest.main`). Kích hoạt giải quyết các liên kết tượng trưng thông qua `realpath` và từ chối tải điểm vào thoát khỏi thư mục plugin.
+- **Pin toàn vẹn tùy chọn** — một bảng kê khai có thể khai báo trường `integrity` ( định dạng `sha256-<base64>`, SRI ). Khi xuất hiện, trình tải sẽ xác minh hàm băm của tệp mục nhập tại thời điểm tải và từ chối kích hoạt khi không khớp. Đó là tùy chọn phát hiện giả mạo,** không** ranh giới bảo mật: nó không giới hạn những gì một plugin đã tải có thể làm.
+- **Không có thông tin xác thực của khách hàng trong hook** — bối cảnh được chuyển đến `onRequest`, `onResponse` và `onError` đã loại bỏ các tiêu đề `authorization`, `x-api-key`, `proxy-authorization` và `cookie` và bản ghi khóa API không mang giá trị khóa (`redactPluginContext()` trong `src/lib/plugins/hooks.ts`).
 
-Được xác thực bởi `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+## Bản kê khai (`plugin.json`)
 
-| Trường             | Kiểu      | Ghi chú                                                           |
-| ------------------ | --------- | ----------------------------------------------------------------- |
-| `name`             | string    | Bắt buộc; kebab-case (`^[a-z0-9-]+$`), 1–100 ký tự                |
-| `version`          | string    | Bắt buộc; semver (`MAJOR.MINOR.PATCH`)                            |
-| `description`      | string?   | ≤ 500 ký tự                                                       |
-| `author`           | string?   | ≤ 200 ký tự                                                       |
-| `license`          | string?   | Mặc định là `MIT`                                                 |
-| `main`             | string?   | Tệp điểm vào; mặc định là `index.js`                              |
-| `source`           | enum?     | `local` \| `marketplace` (mặc định là `local`)                    |
-| `tags`             | string[]? | Các thẻ tìm kiếm                                                  |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                   |
-| `hooks`            | object?   | Các giá trị Boolean khai báo những hook mà plugin triển khai      |
-| `skills`           | object[]? | Các định nghĩa kỹ năng tùy chọn                                   |
-| `enabledByDefault` | boolean?  | Tự động kích hoạt khi cài đặt                                     |
-| `configSchema`     | object?   | Ánh xạ các trường cấu hình (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Ghim tệp điểm vào bằng `sha256-<base64>` tùy chọn                 |
+Xác thực bởi `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-Các quyền được lấy từ enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+| Cánh đồng          | Kiểu       | Ghi chú                                                           |
+| ------------------ | ---------- | ----------------------------------------------------------------- |
+| `name`             | sợi dây    | Yêu cầu; kebab-case (`^[a-z0-9-]+$`), 1–100 ký tự                 |
+| `version`          | sợi dây    | Yêu cầu; học kỳ (`MAJOR.MINOR.PATCH`)                             |
+| `description`      | sợi dây?   | ≤ 500 ký tự                                                       |
+| `author`           | sợi dây?   | ≤ 200 ký tự                                                       |
+| `license`          | sợi dây?   | Mặc định là `MIT`                                                 |
+| `main`             | sợi dây?   | Hồ sơ nhập; mặc định là `index.js`                                |
+| `source`           | liệt kê?   | `local` \| `marketplace` (mặc định là `local`)                    |
+| `tags`             | sợi dây[]? | Tìm kiếm thẻ                                                      |
+| `requires`         | sự vật?    | `{ omniroute?, permissions[] }`                                   |
+| `hooks`            | sự vật?    | Booleans khai báo hook nào mà plugin triển khai                   |
+| `skills`           | sự vật[]?  | Định nghĩa kỹ năng tùy chọn                                       |
+| `enabledByDefault` | boolean?   | Tự động kích hoạt khi cài đặt                                     |
+| `configSchema`     | sự vật?    | Bản đồ các trường cấu hình (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | sợi dây?   | Ghim tệp nhập `sha256-<base64>` tùy chọn                          |
+
+Quyền được rút ra từ enum `network` / `file-read` / `file-write` / `env` / `exec`. Chỉ `env` có hiệu ứng thời gian chạy (danh sách cho phép biến môi trường lớn hơn một chút đối với trẻ); những cái khác là tuyên bố và không được thực thi.
 
 ## Luồng vòng đời
 
@@ -339,19 +304,16 @@ Bảng `plugins` (migration `076_create_plugins.sql`):
 Số liệu/hoạt động phân tích của plugin được theo dõi trong các bảng bổ sung
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Bảng điều khiển
+## Trang tổng quan
 
-Trang bảng điều khiển tại `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) cung cấp hai tab:
+Trang bảng điều khiển tại `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) cung cấp hai tab:
 
-- **Đã cài đặt** — liệt kê các plugin đã cài đặt cùng với các hook được khai báo,
-  nút chuyển đổi kích hoạt/vô hiệu hóa, nút gỡ cài đặt và thao tác "Quét tìm plugin"
-  (`POST /api/plugins/scan`).
-- **Marketplace** — hiển thị danh mục từ `GET /api/plugins/marketplace` cùng với
-  một trường để đặt URL registry tùy chỉnh.
+- **Đã cài đặt** — liệt kê các plugin đã cài đặt với các móc được khai báo của chúng, nút chuyển đổi activate/deactivate, nút gỡ cài đặt và hành động "Quét tìm plugin" (`POST /api/plugins/scan`).
+- **Thị trường** — hiển thị danh mục từ `GET /api/plugins/marketplace` với một trường để đặt sổ đăng ký tùy chỉnh URL.
 
-Trang cấu hình riêng cho từng plugin nằm tại `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Trang này luôn hiển thị cảnh báo rằng các plugin chạy với đầy đủ đặc quyền của quy trình OmniRoute.
+
+Trang cấu hình cho mỗi plugin nằm ở `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Xem thêm
 

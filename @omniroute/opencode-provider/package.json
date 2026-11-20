@@ -1,6 +1,6 @@
 {
   "name": "@omniroute/opencode-provider",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DEPRECATED — use @omniroute/opencode-plugin instead (it fetches the live OmniRoute /v1/models catalog at startup, so models never drift). This static-config generator still works but is no longer the recommended path. OpenCode provider helper for the OmniRoute AI Gateway.",
   "type": "module",
   "main": "./dist/index.cjs",

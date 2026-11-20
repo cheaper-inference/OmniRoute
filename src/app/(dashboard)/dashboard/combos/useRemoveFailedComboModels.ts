@@ -2,7 +2,12 @@ import { useState } from "react";
 
 import { removeFailedComboSteps } from "./removeFailedComboModels";
 
-type ComboRecordLike = { id: string; name: string; models?: unknown[] };
+type ComboRecordLike = {
+  id: string;
+  name: string;
+  models?: unknown[];
+  routes?: Record<string, { models?: unknown[]; strategy?: unknown; config?: unknown }>;
+};
 
 type Options = {
   /** The combo whose test results are open, if it is still loaded. */
@@ -43,7 +48,16 @@ export function useRemoveFailedComboModels({
     if (!(await requestConfirm(message))) return;
     setRemoving(true);
     try {
-      if (await updateCombo(combo.id, { ...combo, models })) {
+      const routes = combo.routes?.chat
+        ? {
+            ...combo.routes,
+            chat: {
+              ...combo.routes.chat,
+              models,
+            },
+          }
+        : combo.routes;
+      if (await updateCombo(combo.id, { ...combo, models, ...(routes ? { routes } : {}) })) {
         onRemoved();
         notify.success(t("errorModelsRemoved", { count: removedCount }));
       }

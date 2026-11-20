@@ -29,7 +29,11 @@ import type {
   HistoricalLatencyStatsEntry,
   ResolvedComboTarget,
 } from "./types.ts";
-import { extractSessionAffinityKey } from "@/sse/services/auth";
+import { extractSessionAffinityKey, getProviderCredentials } from "@/sse/services/auth";
+// Re-exported for the jev strategy's System One ask (jevAsk.ts): the strategy-ordering modules
+// share this file's existing auth import instead of each adding an open-sse → src edge
+// (boundary ratchet, quality-baseline.json).
+export { getProviderCredentials };
 import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/designerWebRetirement";
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";

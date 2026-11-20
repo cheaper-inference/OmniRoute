@@ -5,6 +5,7 @@ export type WebhookEvent =
   | "proxy.set_aside"
   | "proxy.pool.exhausted"
   | "provider.reset_redeemed"
+  | "provider.exhausted"
   | "test.ping";
 
 export const WEBHOOK_EVENT_VALUES = [
@@ -14,6 +15,7 @@ export const WEBHOOK_EVENT_VALUES = [
   "proxy.set_aside",
   "proxy.pool.exhausted",
   "provider.reset_redeemed",
+  "provider.exhausted",
   "test.ping",
 ] as const;
 
@@ -89,6 +91,17 @@ export const EVENT_DESCRIPTIONS: Record<WebhookEvent, EventDescription> = {
       creditType: "codexCredits",
       mode: "eager",
       trigger: "walled-session",
+    },
+  },
+  "provider.exhausted": {
+    label: "Provider Exhausted",
+    emoji: "🛑",
+    description:
+      "Triggered when every account of a provider is cooling down, so the provider cannot serve requests. At most once per provider every 10 minutes.",
+    exampleData: {
+      provider: "openai",
+      connectionsCount: 3,
+      retryAfter: "2026-11-08T12:40:00.000Z",
     },
   },
   "test.ping": {

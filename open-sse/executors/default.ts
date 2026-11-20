@@ -50,7 +50,6 @@ import {
 } from "../config/providers/registry/poe/index.ts";
 import { buildMaritalkChatUrl } from "../config/maritalk.ts";
 import { LOCAL_PROVIDERS } from "@/shared/constants/providers";
-import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
 import { applyClineAuthHeaders } from "@/shared/utils/clineAuth";
 import {
@@ -67,6 +66,9 @@ import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
 import { isForceStreamProvider } from "./default/forceStreamBody.ts";
 import { acquireNvidiaConcurrencySlot } from "./default/nvidiaConcurrencyGate.ts";
 import { normalizeOpenAIToolCallIds } from "./default/openaiToolCallIds.ts";
+import { applyCustomHeaders } from "./default/customHeaders.ts";
+import { executeCustomJson } from "./customJson.ts";
+import { isCustomJsonProviderData } from "../utils/customJson.ts";
 import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProviderRegions";
 import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
@@ -162,48 +164,6 @@ function normalizeNvidiaToolCallIds(body: unknown): void {
     if (record.tool_call_id !== null && record.tool_call_id !== undefined) {
       record.tool_call_id = normalizeNvidiaToolCallId(record.tool_call_id);
     }
-  }
-}
-
-/**
- * Apply operator-configured per-provider custom headers onto an outgoing header
- * map. Defense-in-depth on top of the Zod `customHeadersSchema`:
- *  - skip hop-by-hop/framing AND auth header names (canonical denylist, so a row
- *    written before the schema tightening still can't override credential auth);
- *  - skip control-char (CR/LF/NUL) names/values before they reach undici;
- *  - assign case-insensitively, replacing any existing same-named header (e.g.
- *    the executor's own Content-Type/Accept) instead of emitting a duplicate.
- * Used for every *-compatible node, INCLUDING anthropic-compatible-cc-* (whose
- * header builder returns early, so custom headers must be merged in explicitly).
- */
-function applyCustomHeaders(headers: Record<string, string>, rawCustomHeaders: unknown): void {
-  let customHeaders: Record<string, unknown> | null = null;
-  if (
-    rawCustomHeaders &&
-    typeof rawCustomHeaders === "object" &&
-    !Array.isArray(rawCustomHeaders)
-  ) {
-    customHeaders = rawCustomHeaders as Record<string, unknown>;
-  } else if (typeof rawCustomHeaders === "string") {
-    try {
-      const parsed = JSON.parse(rawCustomHeaders);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        customHeaders = parsed as Record<string, unknown>;
-      }
-    } catch {
-      /* ignore invalid JSON */
-    }
-  }
-  if (!customHeaders) return;
-  for (const [k, v] of Object.entries(customHeaders)) {
-    if (typeof k !== "string" || typeof v !== "string") continue;
-    if (isForbiddenCustomHeaderName(k)) continue;
-    if (/[\r\n\0]/.test(k) || /[\r\n]/.test(v)) continue;
-    const lower = k.toLowerCase();
-    for (const existing of Object.keys(headers)) {
-      if (existing.toLowerCase() === lower) delete headers[existing];
-    }
-    headers[k] = v;
   }
 }
 
@@ -1045,13 +1005,17 @@ export class DefaultExecutor extends BaseExecutor {
       this.ensureThinkingBudget(withDefaults as Record<string, unknown>, model);
     }
 
-    // 9router#1480: native Moonshot providers 400 when a prior assistant turn lacks
-    // reasoning_content. Scope to Moonshot ids, or a registry entry opting in via
-    // `requiresReasoningContentEcho` (e.g. `bai`'s DeepSeek resale, #13599).
+    // 9router#1480: native Moonshot and DeepSeek providers 400 when a prior assistant turn lacks
+    // reasoning_content (#20260). Scope to Moonshot/DeepSeek ids, or a registry entry opting in via
+    // `requiresReasoningContentEcho` (e.g. `bai`'s DeepSeek resale, #13599). The field is
+    // OpenAI-chat only: a Claude alternate (DeepSeek's /anthropic endpoint) carries thinking as
+    // content blocks, so the placeholder stays off that wire.
     const reasoningEcho =
-      this.provider === "kimi" ||
-      this.provider === "moonshot" ||
-      !!getRegistryEntry(this.provider)?.requiresReasoningContentEcho;
+      targetFormat !== "claude" &&
+      (this.provider === "kimi" ||
+        this.provider === "moonshot" ||
+        this.provider === "deepseek" ||
+        !!getRegistryEntry(this.provider)?.requiresReasoningContentEcho);
     if (reasoningEcho) {
       const outboundModel =
         typeof (withDefaults as Record<string, unknown>)?.model === "string"
@@ -1081,7 +1045,7 @@ export class DefaultExecutor extends BaseExecutor {
       if (aliases) attachMuseCodeToolNameMap(withDefaults, aliases);
     }
 
-    return applyRegistryBodyRepairs(this.provider, withDefaults);
+    return applyRegistryBodyRepairs(this.provider, withDefaults, credentials?.providerSpecificData);
   }
 
   // Reasoning models (ClinePass, OpenRouter, etc.) leave content empty when the reasoning
@@ -1165,6 +1129,14 @@ export class DefaultExecutor extends BaseExecutor {
   }
 
   async execute(input: ExecuteInput) {
+    // Custom JSON API nodes keep their immutable openai-compatible id; the stored apiType
+    // (copied from the node onto each connection) selects the business-endpoint executor.
+    if (
+      this.provider?.startsWith?.("openai-compatible-") &&
+      isCustomJsonProviderData(input.credentials?.providerSpecificData)
+    ) {
+      return executeCustomJson(input, this.provider);
+    }
     rejectStrictPool(input.validationDispatch, this.poolConfig);
     // #6846 Phase 1: per-connection nvidia concurrency cap — no-op for other providers.
     const releaseNvidiaSlot = await acquireNvidiaConcurrencySlot(

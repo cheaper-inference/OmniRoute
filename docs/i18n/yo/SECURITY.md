@@ -4,13 +4,13 @@
 
 ---
 
-## Ìjábọ̀ Àwọn Àìlera Aabo
+## Awọn ailagbara Iroyin
 
-Tí o bá ṣàwárí àìlera aabo kan nínú OmniRoute, jọ̀wọ́ jábọ̀ rẹ̀ lọ́nà tó bójú mu:
+Ti o ba ṣe awari ailagbara aabo ni OmniRoute, jọwọ jabo rẹ ni ifojusọna:
 
-1. **MÁ ṢE** ṣí ìṣòro GitHub kan síta fún gbogbo ènìyàn
-2. Lo [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Fi àwọn wọ̀nyí sínú rẹ̀: àpèjúwe, àwọn ìgbésẹ̀ láti tún un ṣe, àti ipa tó lè ní
+1. **DO NOT** ṣii ọrọ GitHub ti gbogbo eniyan
+2. Lo [GitHub Awọn imọran Aabo](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Pẹlu: apejuwe, awọn igbesẹ ẹda, ati ipa ti o pọju
 
 ## Àkókò Ìdáhùn
 
@@ -29,25 +29,14 @@ Tí o bá ṣàwárí àìlera aabo kan nínú OmniRoute, jọ̀wọ́ jábọ̀
 | 3.7.x   | ✅ Aabo                                             |
 | < 3.7.0 | ❌ Kò ní àtìlẹ́yìn                                   |
 
-## Àkókò atilẹyin LTS (v3.9.x)
+## window atilẹyin LTS (v3.9.x)
 
-Lẹ́yìn 3.8.59, ẹ̀yà tó kàn ni **3.9.0**, èyí tó ṣí ìlà atilẹyin ọlọ́jọ́-pípẹ́ lórí ẹ̀ka
-`stable/v3` (wo [`ROADMAP.md`](ROADMAP.md) → "Ìpele 3 — v3.9.0 LTS").
+Lẹhin 3.8.59 ti ikede atẹle jẹ** 3.9.0** , eyi ti o ṣii laini atilẹyin igba pipẹ lori ẹka `stable/v3` (wo [`ROADMAP.md`](ROADMAP.md) → "Alakoso 3 — v3.9.0 LTS").
 
-- **Ohun tí `stable/v3` ń gba:** àwọn àtúnṣe àṣìṣe, àwọn àlẹ̀mọ́ ààbò àti àwọn ìmúdójúìwọ̀n olùpèsè. Àwọn
-  ẹ̀ya tuntun máa ń lọ sí ikanni v4; ìdúróṣinṣin ni ìlà LTS fi ń ṣáájú. `npm install omniroute`
-  (`latest` dist-tag) máa dúró lórí v3 jálẹ̀ gbogbo ìyípo v4.
-- **Gígùn àkókò náà:** `stable/v3` máa gba **àwọn àtúnṣe ààbò àti àwọn ìpadàsẹ́yìn tó ṣe pàtàkì fún
-  oṣù 12 lẹ́yìn ìtújáde 3.9.0, tàbí títí di ọjọ́ 90 lẹ́yìn tí a bá tẹ̀jáde v4.0.0 gẹ́gẹ́ bí `latest` —
-  èyíkéyìí tó bá pẹ́ jù lọ**. A ó ṣe àkọsílẹ̀ ọjọ́ ìparí tó yọrí sí nínú àwọn àkọsílẹ̀ ìtújáde 3.9.0 àti nínú
-  [`ROADMAP.md`](ROADMAP.md) nígbà tí ìtújáde náà bá ṣẹlẹ̀.
-- **Jíjabọ̀ àléébù ààbò kan nínú ìlà LTS:** lo ikanni kan náà bíi ti ẹ̀yà míì —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) aládàáni,
-  kì í ṣe ọ̀ràn gbangba láé. Sọ ẹ̀yà tí o dánwò (fún àpẹẹrẹ `3.9.2`); a máa fi àwọn àtúnṣe sí
-  `stable/v3`, a sì máa gbé wọn lọ síwájú sí v4.
-- **Ìpìlẹ̀ ààbò nígbà ìtújáde LTS:** ipò skánà tí a wọn, ẹ̀rí ààbò ipa-ọ̀nà àti
-  ẹ̀rí ìwé-ẹ̀rí gbogbogbò ni a ṣe àkọsílẹ̀ wọn sínú
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Kini `stable/v3` gba:** awọn atunṣe kokoro, awọn abulẹ aabo ati awọn imudojuiwọn olupese. Awọn ẹya tuntun lọ si ikanni v4; ila LTS jẹ iduroṣinṣin-akọkọ. `npm install omniroute` (tag dist- `latest` ) duro lori v3 lakoko gbogbo iyipo v4.
+- **Iye akoko window:** `stable/v3` gba** awọn atunṣe aabo ati awọn atunṣe to ṣe pataki fun awọn oṣu 12 lẹhin gige 3.9.0, tabi titi di ọjọ 90 lẹhin ti v4.0.0 ti ṣejade bi `latest` — eyikeyi ti o ba jẹ nigbamii** . Ọjọ ipari abajade ti wa ni igbasilẹ ni awọn akọsilẹ itusilẹ 3.9.0 ati ni [`ROADMAP.md`](ROADMAP.md) nigbati gige ba ṣẹlẹ.
+- **Ijabọ ailagbara kan ninu laini LTS :** ikanni kanna bi eyikeyi miiran ti ikede — a ikọkọ [GitHub Aabo Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), ko kan àkọsílẹ oro. Sọ iru ẹya ti o ni idanwo (fun apẹẹrẹ `3.9.2`); ṣe atunṣe ilẹ lori `stable/v3` ati pe a firanṣẹ siwaju si v4.
+- **Ipilẹ aabo ni gige LTS :** ipinle scanner wiwọn, oluso ipa-ọna ati awọn ẹri-ẹri ti gbogbo eniyan ti wa ni igbasilẹ ni [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

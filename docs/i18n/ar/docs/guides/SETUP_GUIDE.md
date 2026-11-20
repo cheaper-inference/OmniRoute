@@ -20,32 +20,34 @@
 
 ## طرق التثبيت
 
-### npm (موصى به)
+### نبم (مستحسن)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-تُفتح لوحة المعلومات على `http://localhost:20128`، ويكون عنوان URL الأساسي لواجهة API هو `http://localhost:20128/v1`.
+تفتح لوحة المعلومات عند `http://localhost:20128` و API وقاعدة URL هي `http://localhost:20128/v1`.
 
-### pnpm
+> **مستخدمو npm:** إذا حذر npm من حظر البرامج النصية للتثبيت (على سبيل المثال، `omniroute` و `better-sqlite3`) ، فراجع استكشاف [أخطاء تثبيت البرامج النصية — npm وإصلاحها](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
+### com.pnpm
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **مستخدمو pnpm:** يلزم استخدام الخيار `--allow-build` لتمكين نصوص البناء الأصلية الخاصة بـ `better-sqlite3` و`@swc/core`. الأمر `pnpm approve-builds -g` غير مدعوم لعمليات التثبيت العامة على pnpm v11.
+> **مستخدمو pnpm:** علامة `--allow-build` مطلوبة لتمكين البرامج النصية للبناء الأصلي لـ `better-sqlite3` و `@swc/core`. الأمر `pnpm approve-builds -g` غير مدعوم لعمليات التثبيت العامة على pnpm v11.
 
-### Arch Linux ‏(AUR)
+### قوس Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-تُثبّت [حزمة AUR](https://aur.archlinux.org/packages/omniroute-bin) برنامج OmniRoute وتوفّر خدمة مستخدم systemd.
+تقوم [حزمة AUR](https://aur.archlinux.org/packages/omniroute-bin) بتثبيت OmniRoute وتوفر خدمة مستخدم systemd.
 
 ### من المصدر
 
@@ -54,59 +56,59 @@ npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **ملاحظة خاصة بـ Windows:** يستخدم OmniRoute افتراضيًا `%APPDATA%\omniroute` عندما لا يكون الدليل القديم `%USERPROFILE%\.omniroute` موجودًا. عيّن `DATA_DIR` لاختيار موقع مختلف لدليل البيانات.
+> **ملاحظة Windows :** بشكل افتراضي، يستخدم OmniRoute `%APPDATA%\omniroute` عندما لا يكون دليل `%USERPROFILE%\.omniroute` القديم موجودًا. قم بتعيين `DATA_DIR` لاختيار موقع مختلف لدليل البيانات.
 
-> **ملاحظة:** ينشئ `npm install` ملف `.env` تلقائيًا من `.env.example` عند التشغيل الأول. لن تستبدل عمليات التثبيت اللاحقة ملف `.env` موجودًا، ولذلك تُحفظ التخصيصات. لإعادة إنشائه من القالب، احذف `.env` قبل إعادة التشغيل.
+> **ملحوظة:** يقوم `npm install` بإنشاء `.env` تلقائيًا من `.env.example` عند التشغيل لأول مرة. لن تحل عمليات التثبيت اللاحقة محل `.env` الموجود، لذلك يتم الحفاظ على التخصيصات. لإعادة زرع البذور، قم بحذف `.env` قبل إعادة التشغيل.
 
 ### Docker
 
-راجع [دليل Docker](./DOCKER_GUIDE.md) للحصول على إعداد Docker الكامل، بما في ذلك ملفات تعريف Compose وHTTPS باستخدام Caddy.
+راجع [دليل Docker](./DOCKER_GUIDE.md) لإعداد Docker الكامل بما في ذلك ملفات تعريف الإنشاء وCaddy HTTPS.
 
 ### تطبيق سطح المكتب (Electron)
 
-يتضمن OmniRoute غلافًا لسطح المكتب مبنيًا باستخدام Electron 41 وelectron-builder 26.10. النصوص البرمجية المتاحة (في جذر مساحة العمل):
+تقوم OmniRoute بشحن غلاف سطح المكتب المبني على Electron 41 + Electro-Builder 26.10. البرامج النصية المتاحة (جذر مساحة العمل):
 
 ```bash
-npm run electron:dev          # تشغيل تطبيق سطح المكتب مع إعادة التحميل الفوري
-npm run electron:build        # البناء لنظام التشغيل الحالي (يُكتشف تلقائيًا)
-npm run electron:build:win    # مثبّت Windows ‏(NSIS + نسخة محمولة)
-npm run electron:build:mac    # macOS ‏(dmg + zip، ‏arm64+x64)
-npm run electron:build:linux  # Linux ‏(AppImage + deb + rpm)
-npm run electron:smoke:packaged  # اختبار تمهيدي سريع للحزمة المبنية
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
+npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
+npm run electron:build:linux  # Linux (AppImage + deb + rpm)
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-تُرفق إصدارات مثبّتات سطح المكتب بإصدارات GitHub. للاطلاع على شرح متعمق وكامل لـ Electron (التوقيع وجسر IPC والتوزيعات)، راجع [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(أُنشئ في مرحلة لاحقة)_.
+إصدارات مثبتات سطح المكتب مرفقة بإصدارات GitHub. للحصول على التعمق الكامل Electron (التوقيع، جسر IPC ، التوزيعات)، راجع [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### خادم دون واجهة رسومية (CI/الأتمتة)
+### خادم بدون رأس (CI/automation)
 
-للإعدادات غير الخاضعة للإشراف (Docker وKubernetes وCI)، استخدم:
+بالنسبة للإعدادات غير المراقبة (Docker، Kubernetes، CI)، استخدم:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-عند دمج ذلك مع متغيرات البيئة (`INITIAL_PASSWORD` و`OMNIROUTE_WS_BRIDGE_SECRET` وغيرها)، يمكنك تشغيل نسخة OmniRoute قابلة للبرمجة بالكامل.
+بالدمج مع env vars (`INITIAL_PASSWORD`، `OMNIROUTE_WS_BRIDGE_SECRET`، وما إلى ذلك)، يتيح لك ذلك تدوير مثيل OmniRoute قابل للبرمجة بالكامل.
 
 ### خيارات CLI
 
-| الأمر                   | الوصف                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `omniroute`             | بدء الخادم (`PORT=20128`، وAPI ولوحة المعلومات على المنفذ نفسه)                |
-| `omniroute setup`       | إعداد موجّه عبر CLI لكلمة المرور ومزوّد الخدمة الأول                           |
-| `omniroute doctor`      | تشغيل فحوصات السلامة المحلية دون بدء الخادم                                    |
-| `omniroute providers`   | اكتشاف المزوّدين وعرضهم والتحقق منهم واختبارهم من CLI                          |
-| `omniroute config`      | تهيئة أداة CLI — عرض الإعدادات والحصول عليها وتعيينها والتحقق منها             |
-| `omniroute status`      | لوحة حالة دون اتصال — الإصدار وقاعدة البيانات والأدوات والتهيئة                |
-| `omniroute logs`        | بث سجلات الاستخدام من API (يدعم `--follow`)                                    |
-| `omniroute update`      | التحقق من تحديثات OmniRoute أو تطبيقها                                         |
-| `omniroute provider`    | إدارة اتصالات المزوّدين — الإضافة والعرض والإزالة والاختبار والتعيين الافتراضي |
-| `omniroute --port 3000` | تعيين المنفذ الأساسي/منفذ API إلى 3000                                         |
-| `omniroute --mcp`       | بدء خادم MCP ‏(نقل stdio)                                                      |
-| `omniroute --no-open`   | عدم فتح المتصفح تلقائيًا                                                       |
-| `omniroute --help`      | عرض المساعدة                                                                   |
+| يأمر                    | وصف                                                                       |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `omniroute`             | بدء تشغيل الخادم (`PORT=20128` و API ولوحة المعلومات على نفس المنفذ)      |
+| `omniroute setup`       | إعداد CLI الموجه لكلمة المرور والمزود الأول                               |
+| `omniroute doctor`      | قم بإجراء فحوصات السلامة المحلية دون بدء تشغيل الخادم                     |
+| `omniroute providers`   | اكتشاف مقدمي الخدمات وإدراجهم والتحقق من صحتهم واختبارهم من CLI           |
+| `omniroute config`      | تكوين أداة CLI ، قائمة — ، الحصول على التكوينات وتعيينها والتحقق من صحتها |
+| `omniroute status`      | لوحة معلومات الحالة غير المتصلة بالإنترنت، إصدار — ، DB، الأدوات، التكوين |
+| `omniroute logs`        | دفق سجلات الاستخدام من API (يدعم `--follow`)                              |
+| `omniroute update`      | التحقق من وجود تحديثات OmniRoute أو تطبيقها                               |
+| `omniroute provider`    | إدارة اتصالات الموفر — إضافة، قائمة، إزالة، اختبار، افتراضي               |
+| `omniroute --port 3000` | اضبط منفذ canonical/API على 3000                                          |
+| `omniroute --mcp`       | بدء تشغيل خادم MCP (نقل stdio)                                            |
+| `omniroute --no-open`   | لا تفتح المتصفح تلقائيًا                                                  |
+| `omniroute --help`      | إظهار المساعدة                                                            |
 
-يمكن برمجة الإعداد دون واجهة رسومية باستخدام الخيارات أو متغيرات البيئة:
+يمكن كتابة الإعداد بدون رأس باستخدام العلامات أو متغيرات البيئة:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-شغّل عمليات التشخيص المحلية دون فتح لوحة المعلومات:
+قم بتشغيل التشخيصات المحلية دون فتح لوحة المعلومات:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-أدِر المزوّدين عبر SSH أو النصوص البرمجية دون فتح لوحة المعلومات:
+إدارة الموفرين من SSH أو البرامج النصية دون فتح لوحة المعلومات:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **كود Claude :**
 
+يتصل رمز Claude عبر HTTP، والذي لا يبدأ تشغيله `omniroute --mcp` (stdio). يتم إيقاف تشغيل نقل HTTP بشكل افتراضي: قم بتمكينه على الخادم قيد التشغيل أولاً. عند تمكين تسجيل الدخول إلى لوحة المعلومات، يحصل الطلب الذي لا يحتوي على بيانات اعتماد على `401`، لذا قم بتمرير مفتاح API الذي يحمل `mcp:connect` (أو `manage`) ؛ يحتاج المفتاح الذي لا يحتوي على `manage`/`admin` أيضًا إلى نطاق كل أداة (راجع [نطاقات أداة MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -249,7 +255,7 @@ claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 }
 ```
 
-أو، عندما يكون `mcpTransport` هو `streamable-http` (اضبطه على `/dashboard/mcp` أو مع `omniroute mcp enable --transport streamable-http`) ، قم بتوجيه إدخال خادم MCP البعيد للعميل إلى `http://localhost:20128/api/mcp/stream`.
+أو، عندما يكون `mcpTransport` هو `streamable-http` (اضبطه على `/dashboard/mcp` أو مع `omniroute mcp enable --transport streamable-http`) ، قم بتوجيه إدخال خادم MCP البعيد الخاص بالعميل إلى `http://localhost:20128/api/mcp/stream`.
 
 ينتقل المفتاح كـ `Authorization: Bearer <api-key>` (راجع [MCP Server → الوصول عن بعد](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) للمضيفين البعيدين؛ يحتاج المفتاح البعيد `mcp:connect` بالإضافة إلى نطاقات read/write الخاصة به).
 

@@ -159,7 +159,10 @@ describe("CompareColumn", () => {
     ) as HTMLButtonElement;
 
     expect(copyBtn).not.toBeNull();
-    expect(copyBtn.nextElementSibling).toBe(removeBtn);
+    // The copy button can be disabled and has a title, so the Button adapter wraps it in its
+    // tooltip trigger (the title stays visible while disabled): compare the whole control.
+    const copyControl = copyBtn.closest(".ci-tooltip") ?? copyBtn;
+    expect(copyControl.nextElementSibling).toBe(removeBtn);
 
     await act(async () => {
       copyBtn.click();

@@ -89,6 +89,17 @@ build while release notes talk about fixes that only exist on git. Compose
 quickstarts use `:latest`; GitOps should keep pinning `X.Y.Z`. See
 [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) and #10317.
 
+**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub cannot
+move a repository between namespaces, so `diegosouzapw/omniroute` keeps its pull history
+and every release, and the `mirror-org-dockerhub` job of `docker-publish` copies each
+released version (and `:latest` when promoted) from `ghcr.io/cheaper-inference/omniroute`
+to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` /
+`DOCKERHUB_ORG_TOKEN` secrets; without them the job stays green with a "Docker Hub org
+mirror skipped" warning and the other registries publish normally. To publish a released
+version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run
+workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it
+copies the existing images, no rebuild.
+
 ## Hotfix Fast-Lane (label `hotfix`)
 
 A PR labeled `hotfix` skips the heavy CI matrix (9-shard E2E, coverage ratchet,
@@ -148,7 +159,7 @@ matrix automatically, without any label.
 - [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
 - [ ] `npm run test:coverage` — gate 60/60/60/60 satisfied (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — pass (if changes touch DB / handlers)
-- [ ] `npm run test:combo:matrix` — pass (combo strategy matrix: proves all 19 public routing strategies' selection decisions deterministically; run when touching combo routing, strategy resolution, or fallback logic)
+- [ ] `npm run test:combo:matrix` — pass (combo strategy matrix: proves all 22 public routing strategies' selection decisions deterministically; run when touching combo routing, strategy resolution, or fallback logic)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **optional/manual** (gated real-upstream smoke; sources a read-only DB snapshot from VPS `root@192.168.0.15`; hits real providers, costs credits; never runs in CI; skips cleanly without the gate)
 - [ ] `npm run test:combo:live:vps` — **optional/manual** (Phase-3 VPS live smoke: 7 HTTP scenarios against the live `.15` server via plain Node ESM; requires `ssh root@192.168.0.15`; creates/deletes only `__live_test__*` combos; hits real providers; never runs in CI)
 - [ ] `npm run test:e2e` — pass (UI changes)
@@ -409,8 +420,8 @@ grafted parent, so cut from a full clone or `git fetch --unshallow origin` first
 tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open
 `Release branch not green` issue
 on an existing release branch — a branch that does not exist reports `?` unknown, never
-green — the Mergify `release` queue is configured (G11: `queue_rules`, `checks_timeout`,
-label `queue`), the `release/*` ruleset still blocks deletion and force-push, and
+green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its
+`bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and
 `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow
 triggers and `if:` conditions turn true (and which stay gated by a repository variable or
 pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and

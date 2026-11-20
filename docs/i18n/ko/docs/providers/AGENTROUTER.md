@@ -67,7 +67,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 재시작하면 대시보드에 기존 OpenAI 호환 및 Anthropic 호환 흐름과 함께

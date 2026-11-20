@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (વૈકલ્પિક) ઇમેજ દૂર કરો
+docker rmi cheaperinference/omniroute:latest
+# જૂના સ્થાપનોએ વારસાનું નામ ખેંચ્યું:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

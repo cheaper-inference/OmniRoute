@@ -199,140 +199,151 @@ deskritturi tal-oqsma li jintbagħtu lura, għalhekk destinazzjoni ġdida ma te�
 
 Ċwievet tal-konfigurazzjoni (`type: "bigquery"`):
 
-| Ċavetta              | Noti                                                                                   |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| `projectId`          | Il-proġett GCP li fih is-sett tad-data                                                 |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                        |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                        |
-| `location`           | Jintuża biss meta jrid jinħoloq is-sett tad-data (valur predefinit `EU`)               |
-| `serviceAccountJson` | Ċavetta tal-kont tas-servizz. Sigrieta: kriptata meta maħżuna, qatt ma tintbagħat lura |
-| `autoCreate`         | Oħloq is-sett tad-data u t-tabella mal-ewwel esportazzjoni (valur predefinit `true`)   |
+| Ċavetta              | Noti                                                                                                           |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Proġett GCP li fih jinżamm id-dataset                                                                          |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                |
+| `location`           | Jintuża biss meta d-dataset irid jinħoloq (default `EU`)                                                       |
+| `serviceAccountJson` | Ċavetta tal-kont tas-servizz. Sigriet: kriptat waqt il-ħażna, qatt ma jintbagħat lura                          |
+| `autoCreate`         | Joħloq dataset/table nieqsa; iżid b’mod kundizzjonali kolonni nullable għall-evidenza tal-użu (default `true`) |
 
-Il-kont tas-servizz jeħtieġ `bigquery.tables.updateData` fuq it-tabella fil-mira, kif ukoll
+Il-kont tas-servizz jeħtieġ `bigquery.tables.updateData` fuq it-tabella fil-mira, flimkien ma’
 `bigquery.datasets.create` / `bigquery.tables.create` meta `autoCreate` ikun attivat.
+L-aġġornament ta’ tabella eżistenti biex iżid iż-żewġ oqsma nullable tal-evidenza tal-użu jeħtieġ ukoll
+`bigquery.tables.update`. Permess nieqes ifalli l-esportazzjoni mingħajr ma javvanza l-cursor tagħha.
 
-Lott ikkonfigurat huwa unità ta’ **cursor**, mhux waħda HTTP: `send()` jaqsmu f’sejħiet insertAll
-ta’ mhux aktar minn 500 ringiela, sabiex `batch_size` kbir ma jkunx jista’ jaqbeż il-limitu ta’ 10 MB għal kull talba ta’ BigQuery.
-L-istati tranżitorji (408/429/500/502/503/504) jerġgħu jiġu ppruvati sa tliet darbiet b’intervall
-li jiżdied b’mod esponenzjali, bl-użu mill-ġdid tal-istess insertIds; il-fallimenti tal-awtentikazzjoni u tal-iskema jqajmu eċċezzjoni mal-ewwel tentattiv minflok
-ikomplu jaħlu l-eżekuzzjoni.
+Batch ikkonfigurat huwa unità ta’ **cursor**, mhux waħda HTTP: `send()` jaqsamha f’sejħiet
+insertAll ta’ mhux aktar minn 500 ringiela, għalhekk `batch_size` kbir ma jistax jaqbeż il-limitu ta’
+10 MB ta’ BigQuery għat-talbiet. L-istatusi temporanji (408/429/500/502/503/504) jerġgħu jiġu
+pproċessati sa tliet darbiet b’backoff esponenzjali, bl-użu mill-ġdid tal-istess insertIds; il-fallimenti
+tal-awtentikazzjoni u tal-iskema jarmu żball mal-ewwel tentattiv minflok ma jikkunsmaw ir-run.
 
-Tabella li tkun għadha kemm inħolqot ma tkunx għadha viżibbli għall-endpoint tal-istreaming, li jwieġeb
-404 għal ftit sekondi. Dak l-404 jerġa’ jiġi ppruvat, iżda **biss meta din l-eżekuzzjoni tkun ħolqot it-tabella** —
-tabella li tkun tassew nieqsa xorta twassal għal falliment immedjat. Innota li jekk terġa’ toħloq tabella b’isem li
-tħassar dan l-aħħar, BigQuery jirrifjuta inserzjonijiet bl-istreaming għal diversi minuti; din hija
-karatteristika tat-tħassir segwit mill-ħolqien mill-ġdid, għalhekk agħżel isem ġdid għat-tabella minflok tħassarha u terġa’ żżidha.
+Tabella maħluqa ftit mumenti ilu għadha mhijiex viżibbli għall-endpoint tal-istrimjar, li jwieġeb
+404 għal ftit sekondi. Dak l-404 jerġa’ jiġi ppruvat, iżda **biss meta dan ir-run ikun ħoloq it-tabella** —
+tabella verament nieqsa tibqa’ tfalli immedjatament. Innota li l-ħolqien mill-ġdid ta’ tabella bl-istess isem li
+tkun tħassret dan l-aħħar iwassal biex BigQuery jirrifjuta inserzjonijiet tal-istrimjar għal diversi minuti;
+din hija karatteristika tal-proċess ta’ tħassir u ħolqien mill-ġdid, għalhekk ippreferi isem ġdid tat-tabella
+minflok tħassar u terġa’ żżid waħda.
 
-**Falliment parzjali jasal bħala HTTP 200 b’`insertErrors[]` mhux vojt.** Dan jitqies bħala
-falliment u jqajjem eċċezzjoni, u huwa dan li jwaqqaf il-cursor milli javvanza lil hinn minn ringieli li BigQuery qatt ma
-aċċetta; `tests/unit/log-export-bigquery.test.ts` jivverifika din l-imġiba.
+**Falliment parzjali jasal bħala HTTP 200 b’`insertErrors[]` mhux vojt.** Dan jiġi ttrattat bħala
+falliment u jarmi żball, li huwa dak li jwaqqaf lill-cursor milli javvanza lil hinn mir-ringieli li BigQuery
+qatt ma aċċetta; `tests/unit/log-export-bigquery.test.ts` jiffissa din l-imġiba.
 
-It-trasport juża REST sempliċi — asserzjoni RS256 iffirmata minnha nnifisha tiġi skambjata għal token ta’ aċċess fuq
-`https://oauth2.googleapis.com/token`, imbagħad ir-ringieli jintbagħtu lil `tabledata.insertAll`. Ma jiddaħħal
-ebda SDK ta’ Google. It-tokens ta’ aċċess jinżammu fil-cache fi ħdan il-proċess għal kull par (kont tas-servizz, ambitu).
+It-trasport huwa REST sempliċi — assertion iffirmata RS256 u awtofirmata tinbidel għal token ta’
+aċċess fuq `https://oauth2.googleapis.com/token`, imbagħad ir-ringieli jintbagħtu lil
+`tabledata.insertAll`. Ma jiġi inkluż l-ebda Google SDK. It-tokens ta’ aċċess jinżammu fil-cache
+fil-proċess skont (kont tas-servizz, scope).
 
-It-tabella maħluqa jkollha kolonna waħda għal kull field tat-tab Logs flimkien ma’ `exported_at`, u tkun organizzata skont
-kif fil-fatt isiru l-mistoqsijiet fuq ir-reġistri tas-sejħiet:
+It-tabella maħluqa jkollha kolonna waħda għal kull qasam tat-tab Logs flimkien ma’
+`exported_at`, u tkun organizzata skont kif ir-reġistri tas-sejħiet jiġu attwalment mistoqsija:
 
-- **Maqsuma f’partizzjonijiet ta’ kuljum fuq `timestamp`**, sabiex mistoqsija limitata skont id-data tiskennja biss dawk il-jiem.
-- **Miġbura fi clusters skont `api_key_name`, `provider`, `model`, `status`** (f’dik l-ordni), sabiex l-iffiltrar skont
-  min wettaqha, fejn marret, jew jekk fallietx jeskludi blokok ġewwa kull partizzjoni. BigQuery
-  jippermetti mhux aktar minn erba’ kolonni ta’ clustering u l-ordni hija importanti: filtru fuq `api_key_name` biss
-  jeskludi blokok, filtru fuq `status` biss ma jagħmilx hekk.
+- **Maqsuma skont il-ġurnata fuq `timestamp`**, sabiex mistoqsija limitata skont id-data tiskennja biss dawk il-ġranet.
+- **Ikklerjata skont `api_key_name`, `provider`, `model`, `status`** (f’dik l-ordni), sabiex l-iffiltrar skont
+  min ħaddimha, fejn intbagħtet, jew jekk fallietx jaqbeż il-blokok ġewwa kull partizzjoni. BigQuery
+  jippermetti l-aktar erba’ kolonni ta’ clustering u l-ordni hija importanti: filtru fuq
+  `api_key_name` waħdu jaqbeż il-blokok, filtru fuq `status` waħdu ma jagħmilx dan.
 - **Żamma fakultattiva tal-partizzjonijiet** permezz ta’ `partitionExpirationDays` (0 iżomm kollox), applikata
   meta tinħoloq it-tabella.
 
-Iż-żewġ settings japplikaw fil-ħin tal-ħolqien. Tabella eżistenti żżomm l-organizzazzjoni li diġà għandha, għalhekk
-ipponta d-destinazzjoni lejn id ta’ tabella ġdida jekk trid tadottahom.
+Iż-żewġ settings japplikaw fil-ħin tal-ħolqien. Tabella eżistenti żżomm l-organizzazzjoni li diġà għandha,
+għalhekk ipponta d-destinazzjoni lejn table id ġdid jekk trid tadotta dawn is-settings.
 
-`tests/unit/log-export-bigquery.test.ts` jivverifika li l-mapper u l-iskema tat-tabella jibqgħu
-sinkronizzati, sabiex kolonna ġdida tar-reġistru tas-sejħiet ma tkunx tista’ titħalla barra fis-skiet waqt l-esportazzjoni.
+`tests/unit/log-export-bigquery.test.ts` jiċċekkja li l-mapper u l-iskema tat-tabella jibqgħu sinkronizzati,
+għalhekk kolonna ġdida tar-reġistru tas-sejħiet ma tistax titħalla barra bil-moħbi waqt l-esportazzjoni.
 
-Il-lottijiet jinqasmu f’biċċiet skont **kemm** l-għadd ta’ ringieli kif ukoll il-bytes serjalizzati. L-għadd ta’ ringieli waħdu mhuwiex biżżejjed
-ladarba jiġu esportati l-payloads: 500 ringiela li jkun fihom prompts jistgħu jammontaw għal għexieren ta’ megabytes, u insertAll
-jirrifjuta talba ta’ aktar minn 10 MB. Il-biċċiet jingħalqu meta jilħqu 500 ringiela jew 9 MB, skont liema jintlaħaq l-ewwel.
+Il-batches jinqasmu skont **kemm in-numru ta’ ringieli kif ukoll il-bytes serializzati**. In-numru ta’
+ringieli waħdu mhuwiex biżżejjed ladarba jiġu esportati payloads: 500 ringiela li jġorru prompts jistgħu
+jkunu għexieren ta’ megabytes, u insertAll jirrifjuta talba ta’ aktar minn 10 MB. Il-biċċiet jingħalqu
+f’500 ringiela jew 9 MB, skont liema jintlaħaq l-ewwel.
 
 ---
 
 ## 5. Destinazzjoni tat-traċċi OTLP/HTTP
 
-Il-konfigurazzjoni tuża `type: "otlp-http"`. Din hija esportazzjoni skedata, ibbażata fuq cursor, tar-reġistri
-persistenti tas-sejħiet, mhux id-destinazzjoni diretta tal-avvenimenti tar-routing li taħdem fuq bażi tal-aħjar sforz f’
-`open-sse/services/routing/otel.ts`. Ma taqrax jew tibdel il-varjabbli tal-ambjent,
-it-timers jew il-buffers ta’ dik id-destinazzjoni. Jekk tattiva t-tnejn, jistgħu jinħolqu żewġ tipi indipendenti ta’ spans;
-uża l-ambitu tal-istrumentazzjoni `omniroute.log-export` biex tiddistingwi dawn l-ispans tar-reġistri tas-sejħiet.
+Il-konfigurazzjoni tuża `type: "otlp-http"`. Din hija esportazzjoni skedulata, appoġġjata minn cursor, ta’ reġistri persistenti tas-sejħiet, u mhux is-sink tal-avvenimenti tar-routing live bl-aħjar sforz f’`open-sse/services/routing/otel.ts`. Ma taqrax u ma tbiddilx il-varjabbli tal-ambjent, it-tajmers jew il-buffers ta’ dak is-sink. L-attivazzjoni tat-tnejn tista’ tipproduċi żewġ tipi indipendenti ta’ spans; uża l-iskop tal-instrumentazzjoni `omniroute.log-export` biex tiddistingwi dawn l-ispans tar-reġistri tas-sejħiet.
 
-| Ċavetta                  | Valur predefinit / għan                                                                               |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `endpoint`               | URL HTTP(S) sħiħ għat-traċċi, obbligatorju; ma jiżdied ebda suffiss `/v1/traces`                      |
-| `headers`                | Linji `Name: value` jew oġġett JSON ta’ strings, fakultattivi; kriptati                               |
-| `requestHeaderAllowlist` | Vojta (diżattivata); ismijiet/prefissi tal-headers tal-klijent biex jinqabdu bħala attributi tal-span |
-| `serviceName`            | `omniroute`; riżorsa `service.name`                                                                   |
-| `langfuseMapping`        | `false`; iżid attributi ta’ ġenerazzjoni/sessjoni/utent ta’ Langfuse                                  |
-| `identity`               | `pseudonymous`, `keyName`, jew `none`                                                                 |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                               |
-| `timeoutMs`              | `30000` għal kull tentattiv HTTP                                                                      |
-| `environment`            | Mhux issettjat; `langfuse.environment` fakultattiv                                                    |
+| Key                      | Default / purpose                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `endpoint`               | URL sħiħa meħtieġa tat-traċċi HTTP(S); ma jiżdied l-ebda suffiss `/v1/traces`                              |
+| `headers`                | Linji `Name: value` fakultattivi jew oġġett JSON ta’ strings; ikkriptati                                   |
+| `requestHeaderAllowlist` | Vojta (mitfija); ismijiet/prefissi tal-headers tal-klijent li għandhom jinqabdu bħala attributi tal-ispans |
+| `serviceName`            | `omniroute`; ir-riżorsa `service.name`                                                                     |
+| `langfuseMapping`        | `false`; iżżid attributi ta’ ġenerazzjoni/sessjoni/utent ta’ Langfuse                                      |
+| `identity`               | `pseudonymous`, `keyName`, jew `none`                                                                      |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                                    |
+| `timeoutMs`              | `30000` għal kull tentattiv HTTP                                                                           |
+| `environment`            | Mhux issettjat; `langfuse.environment` fakultattiv                                                         |
 
-Id-dashboard ġeneriku juri dawn l-oqsma. `paths` jaċċetta array tal-API jew żona tat-test
-b’paths eżatti separati b’linji ġodda/virgoli. Embeddings, rerank u paths oħra
-jinqabżu sakemm ma jkunux permessi espliċitament. Ir-ringieli maqbuża xorta javvanzaw il-cursor; il-counters
-`exported`/`exportedTotal` tar-runner eżistenti jgħoddu r-ringieli tas-sors ipproċessati, inklużi r-ringieli
-ffiltrati, aktar milli l-ispans aċċettati. L-iffiltrar isir fil-proċess sekondarju, mingħajr ma jinbidel
-il-kuntratt IPC/cursor tiegħu.
+Id-dashboard ġeneriku tirrendi dawn l-oqsma. `paths` taċċetta array API jew textarea
+b’paths eżatti separati b’linji ġodda/virgoli. L-embeddings, ir-reranking u paths oħra
+jinqabżu sakemm ma jkunux permessi b’mod espliċitu. Ir-ringieli maqbuża xorta javvanzaw
+il-cursor; il-counters `exported`/`exportedTotal` tar-runner eżistenti jgħoddu r-ringieli
+tas-sors ipproċessati, inklużi r-ringieli ffiltrati, minflok l-ispans aċċettati. Il-filtrazzjoni
+ssir fil-child, mingħajr ma jinbidel il-kuntratt IPC/cursor tiegħu.
 
-Il-validazzjoni tal-URL tuża l-funzjoni awżiljarja `parseAndValidateNonMetadataUrl`, li ma tiddependix fuq DB, minn
-`src/shared/network/outboundUrlGuard.ts`: il-politika `block-metadata`. Għandha l-istess
-kontrolli inkondizzjonati tal-metadata/protokoll/kredenzjali inkorporati bħall-validatur tal-webhook
-b’URLs privati permessi, iżda tippermetti deliberatament destinazzjonijiet localhost/LAN mingħajr
-override globali permezz ta’ feature flag. Dan jippermetti endpoints ta’ Langfuse, Phoenix, Tempo u Collector
-ospitati lokalment, inklużi endpoints HTTP privati. Hosts tal-metadata tal-cloud huma dejjem imblukkati.
-Ir-ridirezzjonijiet ma jiġux segwiti, għalhekk collector ma jistax jirridirezzjona kredenzjali lejn host differenti.
-Bħall-protezzjoni lessikali eżistenti tal-URL, dan ma jiffissax ir-riżoluzzjoni DNS; ikkonfigura biss
-hosts ikkontrollati mill-operatur. Ippreferi HTTPS kull meta l-endpoint ma jkunx fuq network fdat.
+Il-validazzjoni tal-URL tuża l-helper `parseAndValidateNonMetadataUrl` mingħajr DB minn
+`src/shared/network/outboundUrlGuard.ts`: il-politika `block-metadata`. Din għandha l-istess
+kontrolli inkondizzjonati tal-metadata/protokoll/kredenzjali inkorporati bħall-validatur
+tal-webhooks, bil-URLs privati permessi, iżda intenzjonalment tippermetti destinazzjonijiet
+localhost/LAN mingħajr override globali tal-feature flag. Dan jippermetti endpoints ta’
+Langfuse, Phoenix, Tempo u Collector self-hosted, inklużi endpoints HTTP privati. Hosts
+tal-cloud metadata jiġu dejjem imblukkati. Ir-ridirezzjonarji ma jiġux segwiti, għalhekk
+collector ma jistax jidderieġi l-kredenzjali lejn host differenti. Bħall-gwardja lessikali
+eżistenti tal-URLs, din ma tissakkarx ir-riżoluzzjoni tad-DNS; ikkonfigura biss hosts
+ikkontrollati mill-operatur. Ippreferi HTTPS kull meta l-endpoint ma jkunx fuq netwerk
+ta’ fiduċja.
 
-### Payload u konsenja
+### Payload u twassil
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) iġorr span wieħed
-tat-tip CLIENT għal kull ringiela permessa, imsemmi skont il-path eżatt tat-talba tagħha. L-ismijiet ibbażati fuq il-path jiddistingwu
-Chat Completions, Responses u Messages mingħajr ma jinkorporaw data tal-mudell jew tal-identità
-fl-isem tal-span. L-attributi tar-riżorsa jinkludu `service.name` u `service.version` tal-pakkett.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) iġorr span
+wieħed CLIENT għal kull ringiela permessa, bl-isem ibbażat fuq il-path eżatt tat-talba.
+L-ismijiet tal-path jiddistingwu Chat Completions, Responses u Messages mingħajr ma
+jdaħħlu dejta dwar il-mudell jew l-identità fl-isem tal-ispan. L-attributi tar-riżorsa
+jinkludu `service.name` u `service.version` tal-package.
 
-Il-logger normali tat-tentattivi taċ-chat (`open-sse/handlers/chatCore/attemptLogging.ts`) jikteb
-`duration = Date.now() - startTime` mat-tlestija u ma jipprovdix timestamp;
-`saveCallLogOperation` f’`src/lib/usage/callLogs.ts` juża b’mod predefinit il-ħin tal-kitba
-(tlestija) bħala timestamp. Għalhekk l-esportazzjoni tissettja t-tmiem = timestamp tar-ringiela u l-bidu = tmiem − tul
-(millisekondi, konvertiti għal nanosekondi deċimali). Timestamps storiċi pprovduti minn min isejjaħ
-jinżammu wkoll bħala l-ħin tat-tmiem; ma hemm ebda indikatur għal kull ringiela li jiddistingwi l-bidu mit-tlestija.
-Tul null isir żero. Timestamps invalidi/neqsin ifallu l-lott minflok joħolqu
-spans mhux deterministiċi. `ttftMs` jista’ jkun null u jiġi mmappjat għal `omniroute.ttft_ms`.
+Il-logger normali tat-tentattivi taċ-chat (`open-sse/handlers/chatCore/attemptLogging.ts`)
+jikteb `duration = Date.now() - startTime` mat-tlestija u ma jipprovdix timestamp;
+`saveCallLogOperation` f’`src/lib/usage/callLogs.ts` jistabbilixxi t-timestamp bħala default
+għall-ħin tal-kitba (it-tlestija). Għalhekk l-esportazzjoni tistabbilixxi end bħala
+t-timestamp tar-ringiela u start bħala end − duration (millisekondi, ikkonvertiti għal
+nanosekondi deċimali). Timestamps storiċi pprovduti minn min iċempel jiġu ppreservati
+wkoll bħala l-ħin end; m’hemm l-ebda distinzjoni għal kull ringiela bejn start u tlestija.
+Duration null issir żero. Timestamps invalidi jew nieqsa jfallu l-batch minflok ma
+joħolqu spans mhux deterministiċi. `ttftMs` jista’ jkun null u jiġi mmappjat għal
+`omniroute.ttft_ms`.
 
-L-attributi jinkludu `gen_ai.operation.name="chat"`, il-fornitur, il-mudell mitlub/tar-rispons,
-tokens tad-dħul/ħruġ, tokens fakultattivi tal-qari mill-cache/ħolqien tal-cache/raġunament, l-istatus HTTP,
-combo, is-sors tal-cache, it-tikketta tas-sessjoni u l-id tal-korrelazzjoni. Il-valuri interi OTLP u t-timestamps
-huma strings deċimali; strings, valuri booleani u numri frazzjonali jużaw il-varjanti nattivi rispettivi tal-valuri OTLP.
-Spans ta’ żbalji għandhom status ERROR u messaġġ tal-istatus sanitizzat. Ir-rekord kanoniku
-m’għandux URL tal-host upstream, għalhekk `server.address` jitħalla barra minflok
-jidentifika ħażin il-collector bħala s-server tal-mudell. L-ispiża ma tiġix esportata.
+L-attributi jinkludu `gen_ai.operation.name="chat"`, il-provider, il-mudell mitlub/rispons,
+it-tokens tal-input/output, tokens fakultattivi tal-cache-read/cache-creation/reasoning,
+l-istatus HTTP, il-combo, is-sors tal-cache, it-tag tas-sessjoni u l-ID ta’
+korrelazzjoni. Il-valuri interi OTLP u t-timestamps huma strings deċimali; strings,
+booleans u numri frazzjonali jużaw il-varjanti nattivi tal-valur OTLP tagħhom. Spans bi
+żbalji għandhom status ERROR u messaġġ tal-istatus sanitizzat. Ir-rekord kanoniku ma
+għandux URL tal-host upstream, għalhekk `server.address` jitħalla barra minflok ma
+jidentifika b’mod żbaljat lill-collector bħala s-server tal-mudell. L-ispiża ma tiġix
+esportata.
 
-`includeBodies=true` biss jimla l-kontenut. B’`langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` iġorru l-JSON sanitizzat tal-body tat-talba/rispons
-kif maħżun minn OmniRoute (kanonikalizzat meta jista’ jiġi analizzat), mhux array ta’ messaġġi semconv
-ristrutturat. Bodies imqassra jew mhux JSON jibqgħu test mhux ipproċessat. B’`langfuseMapping=true`,
-il-bodies jintbagħtu biss bħala `langfuse.observation.input` / `langfuse.observation.output`;
-l-attributi `gen_ai.*.messages` jitħallew barra sabiex kull body jintbagħat darba. Iż-żewġ modi
-jirtu `maxBodyBytes` mill-mogħdija eżistenti tal-mili tal-kontenut;
-`omniroute.bodies_truncated=true` jindika tqassir.
-Din id-destinazzjoni ma żżid ebda snapshots addizzjonali tal-pipeline jew qari ta’ artefatti mhux sanitizzati;
-il-qbid fakultattiv tal-headers tat-talba juża s-snapshot eżistenti tal-klijent mimli bil-kontenut deskritt hawn taħt.
-Uża frekwenza fuq livell ta’ minuti bħal `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` meta tesporta
-l-bodies, minflok tħalli xogħol jakkumula għal siegħa.
+`includeBodies=true` biss jikkarga l-kontenut. B’`langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` iġorru l-JSON sanitizzat tal-body
+tat-talba/rispons kif maħżun minn OmniRoute (ikkannonizzat meta jkun jista’ jiġi parsed),
+mhux array ta’ messaġġi semconv ifformat mill-ġdid. Bodies maqtugħa/JSON mhux validu
+jibqgħu test mhux ipproċessat. B’`langfuseMapping=true`, il-bodies jinħarġu biss bħala
+`langfuse.observation.input` / `langfuse.observation.output`; l-attributi
+`gen_ai.*.messages` jitħallew barra sabiex kull body jintbagħat darba biss. Iż-żewġ modi
+jirtu `maxBodyBytes` mill-path eżistenti tal-hydration;
+`omniroute.bodies_truncated=true` jimmarka l-qtugħ.
+Ma jiżdiedu l-ebda snapshots addizzjonali tal-pipeline jew qari ta’ artifacts mhux
+sanitizzati minn din id-destinazzjoni; il-qbid fakultattiv tal-header tat-talba juża
+l-snapshot eżistenti u hydrated tal-klijent deskritt hawn taħt.
+Uża cadence ta’ livell ta’ minuta bħal `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` meta
+tesporta l-bodies, minflok takkumula backlog ta’ siegħa.
 
 ### Headers fakultattivi tat-talbiet tal-klijent
 
-Il-qbid tal-headers huwa **diżattivat b’mod predefinit**. Issettja `requestHeaderAllowlist` fil-konfigurazzjoni tad-destinazzjoni
-u attiva **Esporta l-prompts u r-risponsi** (`includeBodies: true` fid-destinazzjoni).
-Il-lista tal-permessi taċċetta array tal-API jew żona tat-test b’ismijiet separati b’linji ġodda/virgoli:
+Il-qbid tal-headers huwa **mitfi b’mod awtomatiku**. Issettja `requestHeaderAllowlist`
+fil-konfigurazzjoni tad-destinazzjoni u attiva **Export prompts and responses**
+(`includeBodies: true` fid-destinazzjoni).
+L-allowlist taċċetta array API jew textarea b’ismijiet separati b’linji ġodda/virgoli:
 
 ```json
 {
@@ -340,77 +351,36 @@ Il-lista tal-permessi taċċetta array tal-API jew żona tat-test b’ismijiet s
 }
 ```
 
-L-ismijiet jitqabblu eżattament mingħajr distinzjoni bejn ittri kbar u żgħar, sakemm `*` wieħed fit-tarf ma jagħżilx prefiss mhux vojt
-ta’ isem ta’ header. `*` waħdu, wildcards inkorporati u ismijiet invalidi ta’ headers HTTP jiġu rrifjutati.
-Hemm massimu ta’ 64 selettur, kull wieħed b’isem/prefiss ta’ mhux aktar minn 256 byte ASCII.
-Dan is-setting huwa separat minn `headers`, li jawtentika l-esportatur mal-kollettur.
+L-ismijiet jaqblu mingħajr ma jitqiesu l-ittri kbar u żgħar u b’mod eżatt, sakemm `*` wieħed fit-tarf ma jagħżilx prefiss mhux vojt ta’ isem ta’ header. `*` waħdu, wildcards inkorporati u ismijiet invalidi ta’ headers HTTP jiġu rrifjutati.
+Hemm l-iktar 64 selettur, kull wieħed b’isem/prefiss ta’ mhux aktar minn 256 byte ASCII.
+Dan l-issettjar huwa separat minn `headers`, li jawtentika lill-esportatur mal-kollettur.
 
-Il-qbid jaqra biss `pipeline_client_request`, li jimtela minn
-`clientRawRequest` (jew il-verżjoni l-antika `clientRequest`) tal-pipeline dettaljat issejvjat. Qatt ma juża l-headers tat-talba tal-fornitur bħala alternattiva.
-Il-logging dettaljat tal-pipeline irid ikun ġie attivat meta ġiet irreġistrata t-talba. Meta
-`includeBodies` ikun diżattivat, jew meta l-JSON tal-istantanja tal-klijent ikun nieqes, korrott jew maqtugħ, ma jinħarġu ebda
-attributi tal-headers. Iż-żieda ta’ `maxBodyBytes` tista’ tevita li l-istantanja tinqata’ waqt l-esportazzjoni;
-ma tistax tirrestawra dettalji li qatt ma ġew issejvjati. Istantanja ta’ aktar minn 1 MiB jew li fiha aktar minn
-256 entrata ta’ header tiġi injorata. L-esportazzjoni eżistenti tal-prompt/tweġiba tibqa’ attivata flimkien
-mal-qbid tal-headers; il-lista ta’ permessi ma tipprovdix modalità ta’ idratazzjoni għall-headers biss.
+Il-qbid jaqra biss `pipeline_client_request`, li jimtela minn `clientRawRequest` tal-pipeline dettaljat issejvjat (jew `clientRequest` legat). Qatt ma jaqa’ lura għall-headers tat-talba tal-provider.
+Ir-reġistrazzjoni tal-pipeline dettaljat trid tkun attivata meta t-talba tkun ġiet irreġistrata. Meta `includeBodies` ikun diżattivat, jew meta l-JSON tal-istampa tal-klijent ikun nieqes, korrott jew maqtugħ, ma jinħarġu l-ebda attributi tal-headers. Iż-żieda ta’ `maxBodyBytes` tista’ tevita t-tqattigħ tal-istampa fil-ħin tal-esportazzjoni; ma tistax tirkupra dettalji li qatt ma ġew issejvjati. Stampa ta’ aktar minn 1 MiB jew li fiha aktar minn 256 entrata ta’ header tiġi injorata. L-esportazzjoni eżistenti tal-prompt/tweġiba tibqa’ attivata flimkien mal-qbid tal-headers; l-allowlist ma tipprovdix modalità ta’ hydration għall-headers biss.
 
-Il-valuri magħżula jsiru arrays ta’ strings OTLP `http.request.header.<full lowercase header name>`,
-anke għal string wieħed. Pereżempju, `X-OmniRoute-Meta-Team: example-team` isir
-`http.request.header.x-omniroute-meta-team` bi
+Il-valuri magħżula jsiru arrays ta’ strings OTLP `http.request.header.<full lowercase header name>`, anki għal string waħda. Pereżempju, `X-OmniRoute-Meta-Team: example-team` isir
+`http.request.header.x-omniroute-meta-team` b’
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Il-prefiss kollu jinżamm: dawn huma headers ordinarji, mingħajr parsing ta’ oqsma tan-negozju jew
-konverżjoni għal `omniroute.metadata.*` / metadata ta’ Langfuse. `langfuseMapping` ma jbiddilx is-semantika
-tal-headers. `User-Agent` magħżul b’valur wieħed jistabbilixxi wkoll l-iskalar standard
-`user_agent.original`. Il-virgoli f’valur wieħed ma jintużawx biex jinqasam. Varjanti b’ittri kbar u żgħar jingħaqdu fl-ordni
-tal-entrati ssejvjati; kwalunkwe varjant invalidu jikkawża l-ommissjoni ta’ dak il-header kollu. L-attributi jiġu ordnati skont l-isem b’ittri żgħar.
+Il-prefiss sħiħ jinżamm: dawn huma headers ordinarji, mingħajr parsing ta’ oqsma tan-negozju jew konverżjoni għal `omniroute.metadata.*` / metadata ta’ Langfuse. `langfuseMapping` ma jbiddilx is-semantika tal-headers. `User-Agent` magħżul b’valur wieħed jistabbilixxi wkoll l-attribut skalari standard `user_agent.original`. Il-virgoli ġewwa valur wieħed ma jinqasmux. Varjanti li jvarjaw fil-kapitalizzazzjoni jingħaqdu fl-ordni tal-entrati ssejvjati; jekk ikun hemm kwalunkwe varjant invalidu, dak il-header kollu jitħalla barra. L-attributi jiġu ordnati skont l-isem b’ittri żgħar.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, headers ta’ API keys, ismijiet li fihom
-markaturi auth/token/secret/password/credential, u kredenzjali interni tal-gateway dejjem jiġu
-esklużi, anke jekk jintgħażlu jew ikunu parzjalment mgħottija fil-ħażna. Mudelli magħrufa ta’ kredenzjali jerġgħu jużaw
-id-ditekter kondiviż tal-kredenzjali; il-markaturi tar-redazzjoni jitħallew barra, mhux jiġu esportati bħala valuri sikuri.
-Jiġu aċċettati biss strings u arrays mhux vojta ta’ strings; l-ebda numru jew oġġett ma jiġi kkonvertit awtomatikament.
-Ismijiet invalidi, ċwievet tal-prototip, karattri ta’ kontroll (ħlief tab orizzontali) u Unicode malformat
-jiġu injorati mingħajr ma jfalli l-lott jew jiġi riprodott il-kontenut tagħhom fl-iżbalji.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, headers taċ-ċwievet API, ismijiet li fihom indikaturi ta’ auth/token/secret/password/credential, u kredenzjali interni tal-gateway dejjem jiġu esklużi, anki jekk magħżula jew parzjalment moħbija fil-ħażna. Il-mudelli magħrufa tal-kredenzjali jerġgħu jużaw id-detettur komuni tal-kredenzjali; il-markaturi ta’ redazzjoni jitħallew barra u ma jiġux esportati bħala valuri sikuri. Jiġu aċċettati biss strings u arrays mhux vojta ta’ strings; l-ebda numru jew oġġett ma jiġi kkonvertit. Ismijiet invalidi, ċwievet tal-prototip, karattri ta’ kontroll (minbarra t-tab orizzontali) u Unicode mhux iffurmat tajjeb jiġu injorati mingħajr ma jfalli l-lott jew il-kontenut tagħhom jidher fl-iżbalji.
 
-Kull span jaqbad massimu ta’ 32 header, 16-il valur għal kull header, 4096 byte UTF-8 għal kull valur,
-u total ta’ 16384 byte UTF-8 għall-ismijiet u l-valuri tal-headers maqbuda flimkien. Headers kbar wisq jew invalidi
-jitħallew barra kollha kemm huma, mhux jinqatgħu. L-għażla hija deċiżjoni tal-operatur dwar il-privatezza: ismijiet li jidhru sikuri
-xorta jistgħu jkun fihom data personali, u dawn il-limiti/ditekters mhumiex għodda ġenerali għat-tneħħija ta’ PII.
+Kull span jaqbad l-iktar 32 header, 16-il valur għal kull header, 4096 byte UTF-8 għal kull valur, u total ta’ 16384 byte UTF-8 madwar l-ismijiet u l-valuri tal-headers maqbuda. Headers kbar wisq jew invalidi jitħallew barra sħaħ, mhux maqtugħin. L-għażla hija deċiżjoni ta’ privatezza tal-operatur: ismijiet li jidhru sikuri xorta jista’ jkun fihom dejta personali, u dawn il-limiti/detetturi mhumiex għodda ġenerali għat-tindif tal-PII.
 
-### Limiti tal-kunsinna
+### Limiti tat-twassil
 
-It-talbiet huma limitati għal 500 span u 4 MiB ta’ JSON UTF-8, inkluż l-envelop.
-Id-daqs ta’ kull span permess jiġi ċċekkjat qabel l-ewwel talba ta’ lott tal-cursor. Span individwali
-akbar mil-limitu ma jibgħat ebda parti minn dak il-lott u jfalli bi gwida biex jitnaqqas
-`maxBodyBytes`; ma jitħalliex barra fis-skiet. Il-verifika preliminari żżomm biss referenzi għar-rekords u
-għadd tal-bytes, u tarmi kull span/JSON temporanju; l-ispans jerġgħu jinbnew għal biċċiet limitati
-minflok tinżamm it-tieni kopja serjalizzata tal-lott. HTTP 408/429/5xx, fallimenti tan-network u timeouts jingħataw massimu ta’
-tliet tentattivi, b’dewmien esponenzjali ta’ 250/500 ms. Sekondi jew dati HTTP f’`Retry-After`
-jistgħu jestendu d-dewmien sa 5 sekondi. Statuses oħra jfallu minnufih. Rifjut parzjali OTLP 2xx ukoll iqajjem żball minflok
-jikkonferma span mitluf; jiġu aċċettati konfermi vojta jew b’JSON validu, b’limitu
-ta’ 64 KiB għall-qari tat-tweġiba.
+It-talbiet huma limitati għal 500 span u 4 MiB ta’ JSON UTF-8, inkluż l-envelope.
+Kull span permess jiġi vverifikat mid-daqs qabel l-ewwel talba ta’ lott tal-cursor. Span individwali akbar mil-limitu ma jibgħat l-ebda parti minn dak il-lott u jfalli b’gwida biex jitnaqqas `maxBodyBytes`; ma jintremax b’mod sieket. Il-preflight iżomm biss referenzi għar-rekords u għadd ta’ bytes, u jarmi kull span/JSON temporanju; l-ispans jerġgħu jinbnew għal biċċiet limitati minflok ma tinżamm kopja serializzata oħra tal-lott. HTTP 408/429/5xx, fallimenti tan-netwerk u timeouts jiksbu l-iktar tliet tentattivi, b’backoff esponenzjali ta’ 250/500 ms. Sekondi `Retry-After` jew dati HTTP jistgħu jestendu dewmien sa 5 sekondi. Statusijiet oħra jfallu immedjatament. Rifjut parzjali OTLP 2xx iqajjem ukoll żball minflok ma jirrikonoxxi span mitluf; acknowledgements vojta jew JSON validu jiġu aċċettati, b’limitu ta’ 64 KiB għall-qari tat-tweġiba.
 
-L-iżbalji fihom biss fatti tal-esportatur: status HTTP, klassi ta’ tentattiv mill-ġdid, tentattivi u għadd
-ta’ spans mibgħuta, jew kliem fiss dwar falliment tal-konferma/network. Il-korpi tat-tweġibiet tal-kollettur,
-l-għadd ta’ suċċessi parzjali u l-headers tat-tweġibiet qatt ma jiġu kkupjati fl-iżbalji, fil-logs jew fid-
-dashboard. Lott li jfalli jew jiġi aċċettat parzjalment ma jiġix ikkonfermat: id-destinazzjoni turi
-Li qed ifalli b’dak l-istatus, il-cursor jibqa’ fl-aħħar lott ikkonfermat, u l-eżekuzzjoni li jmiss
-terġa’ tibgħat l-istess ringieli. Statuses permanenti jibqgħu jfallu sakemm il-kollettur jew il-konfigurazzjoni
-jiġu rranġati. Uża l-logs tal-kollettur stess għad-dettalji tat-tweġibiet. Is-sommarji tal-iżbalji fil-log tas-sejħiet iżommu
-r-redazzjoni separata tagħhom.
-`prepare()` ma jipproviżjona xejn; Test jibgħat eżattament `{"resourceSpans":[]}` u jirrapporta
-l-istatus HTTP mingħajr ma jikteb spans tal-log tas-sejħiet.
+L-iżbalji fihom biss fatti proprjetà tal-esportatur: l-istatus HTTP, il-klassi tat-tentattiv mill-ġdid, in-numru ta’ tentattivi u l-għadd ta’ spans mibgħuta, jew kliem fiss dwar falliment ta’ acknowledgement/netwerk. Il-kontenut tat-tweġibiet tal-kollettur, l-għadd ta’ rifjuti parzjali u l-headers tat-tweġiba qatt ma jiġu kkupjati fl-iżbalji, fil-logs jew fid-dashboard. Lott fallut jew parzjalment aċċettat ma jiġix rikonoxxut: id-destinazzjoni turi Failing b’dak l-istatus, il-cursor jibqa’ fl-aħħar lott rikonoxxut, u l-ġirja li jmiss terġa’ tibgħat l-istess ringieli. Statusijiet permanenti jibqgħu jfallu sakemm il-kollettur jew il-konfigurazzjoni jiġu rranġati. Uża l-logs tal-kollettur stess għad-dettalji tat-tweġiba. Is-sommarji tal-iżbalji tal-call-log iżommu r-redazzjoni separata tagħhom.
+`prepare()` ma jipprovdi xejn; Test jibgħat eżattament `{"resourceSpans":[]}` u jirrapporta l-istatus HTTP mingħajr ma jikteb spans fil-call-log.
 
-L-IDs tat-traċċi u l-IDs tal-ispans huma l-ewwel 32/16-il ċifra eżadeċimali ta’ SHA-256 fuq
-`"omniroute.trace\\0" + callLogId` u `"omniroute.span\\0" + callLogId`. Meta jerġgħu jintbagħtu, iġorru
-IDs identiċi. Din mhijiex garanzija ta’ deduplikazzjoni: xi backends, inkluża l-inġestjoni ta’ Langfuse
-v4, ma jneħħux spans duplikati bl-istess ID. Kraxx jew falliment parzjali ta’ biċċa jista’
-jerġa’ jibgħat, l-aktar, il-lott wieħed tal-cursor li ma ġiex ikkonfermat; dak il-lott kollu jista’ jiġi duplikat,
-mhux biss l-aħħar biċċa HTTP tiegħu. Agħżel id-daqs tal-lott tal-cursor b’dan il-kompromess f’moħħok.
+L-IDs tat-trace u l-IDs tal-span huma l-ewwel 32/16-il ċifra eżadeċimali ta’ SHA-256 fuq
+`"omniroute.trace\\0" + callLogId` u `"omniroute.span\\0" + callLogId`. L-ibgħat mill-ġdid iġorru IDs identiċi. Din mhijiex garanzija ta’ deduplikazzjoni: xi backends, inkluż l-ingestion ta’ Langfuse v4, ma jwettqux deduplikazzjoni ta’ spans bl-istess ID. Crash jew falliment parzjali ta’ biċċa jista’ jerġa’ jibgħat l-iktar il-lott wieħed tal-cursor li ma ġiex rikonoxxut; dak il-lott kollu jista’ jiġi duplikat, mhux biss l-aħħar biċċa HTTP tiegħu. Agħżel id-daqs tal-lott tal-cursor b’dan il-kompromess f’moħħok.
 
 ### Eżempju ta’ Langfuse
 
-Ikkonfigura dawn l-oqsma għal istanza ta’ Langfuse ospitata minnek stess:
+Ikkonfigura dawn l-oqsma għal istanza ta’ Langfuse self-hosted:
 
 ```json
 {
@@ -423,44 +393,31 @@ Ikkonfigura dawn l-oqsma għal istanza ta’ Langfuse ospitata minnek stess:
 }
 ```
 
-Ibni l-valur Authorization lokalment bħala Base64 tal-istring litterali `public-key:secret-key`
-(pereżempju b’`Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Tippejstjax kredenzjali reali fil-logs, fi screenshots jew f’issues. L-immappjar awtomatikament
-jistabbilixxi `x-langfuse-ingestion-version: 4`; Authorization xorta jingħata f’`headers`.
-Kemm il-headers kif ukoll is-salt tal-identità ġġenerat jużaw il-mekkaniżmu eżistenti ta’ oqsma sigrieti kriptati
-u l-placeholders tal-API; `STORAGE_ENCRYPTION_KEY` hija meħtieġa.
+Ibni l-valur ta’ Authorization lokalment bħala Base64 tas-stringa litterali `public-key:secret-key`
+(per eżempju b’`Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Twaħħalx kredenzjali reali fil-logs, screenshots jew issues. Il-mapping jistabbilixxi awtomatikament `x-langfuse-ingestion-version: 4`; Authorization xorta tiġi pprovduta f’`headers`.
+Kemm il-headers kif ukoll is-salt tal-identità ġġenerat jużaw il-mekkaniżmu eżistenti tal-oqsma sigrieti kriptati u l-placeholders tal-API; `STORAGE_ENCRYPTION_KEY` huwa meħtieġ.
 
-L-immappjar iżid it-tip/mudell tal-ġenerazzjoni, dettalji tal-użu f’JSON (input/output/total u ċ-ċwievet
-tal-cache disponibbli), snapshots tal-input/output f’JSON, livell ERROR/DEFAULT, messaġġ tal-istatus sanitizzat,
-isem tat-trace, id tas-sessjoni, ambjent fakultattiv u
-`langfuse.observation.metadata.<key>` li jista’ jiġi ffiltrat għall-fornitur, il-mudell mitlub, il-mogħdija, il-kombinazzjoni, is-sors
-tal-cache u l-istatus. `langfuse.observation.completion_start_time` ikun f’ISO 8601 fil-ħin
-tal-bidu + TTFT biss meta t-TTFT ikun magħruf u fil-limiti tat-tul ta’ żmien. Ma jintbagħtu ebda attributi tal-ispiża.
+Il-mapping iżid it-tip/il-mudell tal-ġenerazzjoni, id-dettalji tal-użu tal-JSON (input/output/total u ċ-ċwievet disponibbli tal-cache), snapshots tal-input/output tal-JSON, il-livell ERROR/DEFAULT, messaġġ tal-istatus sanitizzat, isem tat-trace, id tas-sessjoni, ambjent fakultattiv u
+`langfuse.observation.metadata.<key>` li jista’ jiġi ffiltrat għall-provider, il-mudell mitlub, il-path, il-combo, is-sors tal-cache u l-istatus. `langfuse.observation.completion_start_time` huwa f’format ISO 8601 fil-bidu + TTFT biss meta t-TTFT ikun magħruf u fi ħdan id-durata. L-ebda attributi tal-ispiża ma jintbagħtu.
 
 Il-modi tal-identità japplikaw għal `langfuse.user.id`:
 
-- `pseudonymous` (default): HMAC-SHA256 tal-id intern taċ-ċavetta tal-API b’salt każwali
-  ta’ 32 byte għal kull destinazzjoni. Is-salt jiġi ġġenerat waqt il-ħolqien jekk ikun nieqes, jiġi kriptat
-  bħala `identitySalt`, qatt ma jintbagħat lura, u jinżamm waqt il-modifiki. L-ids mhux ipproċessati taċ-ċwievet qatt ma
-  jitqiegħdu fl-attributi tal-ispan. Il-ħolqien mill-ġdid jew ir-rotazzjoni tas-salt ta’ destinazzjoni jibdel l-identitajiet.
-- `keyName`: l-isem konfigurat taċ-ċavetta tal-API, li intenzjonalment jiżvela dik it-tikketta tal-operatur.
-- `none`: ebda id tal-utent. It-tags tas-sessjoni xorta jiġu esportati meta jkunu preżenti; dawn il-modi ma
-  janonimizzawx kontenut arbitrarju tal-prompts jew tikketti tas-sessjoni/korrelazzjoni pprovduti mill-operatur.
+- `pseudonymous` (default): HMAC-SHA256 tal-id interna taċ-ċavetta API b’salt każwali ta’ 32 byte għal kull destinazzjoni. Is-salt jiġi ġġenerat fil-ħolqien jekk ma jkunx preżenti, jiġi kkodifikat bħala `identitySalt`, qatt ma jintbagħat lura, u jinżamm waqt l-editjar. L-ids mhux ipproċessati taċ-ċwievet qatt ma jitqiegħdu fl-attributi tal-span. Il-ħolqien mill-ġdid jew ir-rotazzjoni tas-salt ta’ destinazzjoni tibdel l-identitajiet.
+- `keyName`: l-isem ikkonfigurat taċ-ċavetta API, u b’hekk jiġi żvelat intenzjonalment dak it-tikketta tal-operatur.
+- `none`: l-ebda user id. It-tags tas-sessjoni xorta jiġu esportati meta jkunu preżenti; dawn il-modi ma janonimizzawx kontenut arbitrarju tal-prompt jew tikketti tas-sessjoni/korrelazzjoni pprovduti mill-operatur.
 
-### Bidu mingħajr mili retroattiv
+### Tibda mingħajr backfill
 
-Waqt il-ħolqien biss, attiva **Ibda mill-pożizzjoni attwali (aqbeż il-logs eżistenti)** jew għaddi
-`startFromCurrentPosition: true` fl-ogħla livell tal-payload tal-API tal-ħolqien. Dan jinizjalizza
-`cursor_row_id` għall-ogħla rowid attwali miżmum fil-log tas-sejħiet billi juża l-funzjonijiet awżiljarji eżistenti tal-cursor,
-mingħajr migrazzjoni. Il-valur default huwa false (cursor 0 u mili retroattiv tal-istorja miżmuma).
-Dan mhuwiex setting biex jiġi rrisettjat il-cursor waqt aġġornament.
+Fil-ħolqien biss, attiva **Ibda mill-pożizzjoni attwali (aqbeż il-logs eżistenti)** jew għaddi
+`startFromCurrentPosition: true` fil-livell ta’ fuq tal-payload tal-API tal-ħolqien. Dan jinizjalizza
+`cursor_row_id` għall-massimu attwali tar-rowid tal-call-log miżmum bl-użu tal-helpers eżistenti tal-cursor, mingħajr migrazzjoni. Id-default huwa false (cursor 0 u backfill tal-istorja miżmuma).
+Mhuwiex setting biex jiġi resetjat il-cursor waqt aġġornament.
 
-Iż-żieda kondiviża ta’ `ttftMs` iżżid ukoll kolonna `ttft_ms` li tista’ tkun null fil-mapper ta’ BigQuery
-u fl-iskema għal tabelli ġodda: it-test tal-iskema tiegħu jeħtieġ li kull field tar-rekord kanoniku jkollu
-kolonna. It-tabelli eżistenti jkomplu jiġu esportati mingħajr bidliet: `prepare()` jaqra l-iskema tat-tabella u
-jħalli barra biss `ttft_ms` meta dik il-kolonna tkun nieqsa. Żid il-kolonna INT64 li tista’ tkun null biex tikseb it-TTFT
-fl-eżekuzzjoni li jmiss, jew uża tabella ġdida. Ma huma meħtieġa ebda PATCH, tibdil awtomatiku tal-iskema jew permessi
-addizzjonali; il-fields l-oħra kollha tar-ringiela jibqgħu soġġetti għal verifika stretta tal-iskema.
+Iż-żieda kondiviża ta’ `ttftMs` iżżid ukoll kolonna nullable `ttft_ms` mal-mapper ta’ BigQuery
+u mal-iskema tat-tabella l-ġdida: it-test tal-iskema jeħtieġ li kull qasam kanoniku tar-rekord ikollu kolonna. It-tabelli eżistenti jkomplu jesportaw mingħajr tibdil: `prepare()` jaqra l-iskema tat-tabella u jneħħi biss `ttft_ms` meta dik il-kolonna ma tkunx preżenti. Żid il-kolonna nullable INT64 biex tikseb it-TTFT
+fir-run li jmiss, jew uża tabella ġdida. Il-kolonna fakultattiva tat-TTFT ma tiskattax aġġornament tal-iskema. Il-kolonni tal-evidenza tal-użu
+isegwu l-fluss ta’ kompatibbiltà kondizzjonali u opt-in hawn taħt; oqsma oħra tar-row iżommu verifika stretta tal-iskema.
 
 ---
 
@@ -485,15 +442,26 @@ formola tad-dashboard kollha jaqraw ir-reġistru.
 
 ---
 
-## 7. Kif tħaddmu
+## 7. Tħaddimha
 
-- **Dashboard**: Integrazzjonijiet → Esportazzjoni tar-reġistri. Żid destinazzjoni, ħaddem **Test** biex tiċċekkja l-kredenzjali
+- **Dashboard**: Integrazzjonijiet → Esportazzjoni tal-logs. Żid destinazzjoni, agħżel **Ittestja** biex tiċċekkja l-kredenzjali
   mingħajr ma tikteb ringieli, imbagħad attivaha.
-- **Ringieli pendenti**: kull kard ta’ destinazzjoni turi r-ringieli pendenti u l-cursor; `GET
-/api/log-export/status` jirritorna l-istess ċifri flimkien mal-aħħar 20 eżekuzzjoni tal-kompitu.
-- **Destinazzjoni li tfalli ma tikkawżax il-falliment tal-oħrajn** — is-sommarju tal-eżekuzzjoni jirreġistra l-istatus ta’ kull destinazzjoni
-  f’`last_status` / `last_error`, u l-istorja tal-eżekuzzjonijiet tal-kompitu żżomm ir-riżultat aggregat.
-- **It-tħassir ta’ destinazzjoni jħassar il-cursor tagħha.** Jekk terġa’ żżidha, tibda mill-eqdem
-  reġistru ta’ sejħa li jkun għadu miżmum, u dan jerġa’ jibgħat ringieli li d-destinazzjoni jaf diġà għandha. F’BigQuery, l-
-  `insertId` ta’ kull ringiela jassorbi dan biss fil-perjodu ta’ deduplikazzjoni ta’ BigQuery stess, għalhekk aħjar tiddiżattiva
-  destinazzjoni milli tħassarha.
+- **Backlog**: kull karta tad-destinazzjoni turi r-ringieli pendenti u l-cursor; `GET
+/api/log-export/status` jirritorna l-istess ċifri flimkien mal-aħħar 20 eżekuzzjoni tal-job.
+- **Destinazzjoni li tfalli ma tfallix lill-oħrajn** — is-sommarju tal-eżekuzzjoni jirreġistra l-istatus għal kull destinazzjoni
+  f’`last_status` / `last_error`, u l-istorja tal-eżekuzzjonijiet tal-job iżżomm l-aggregat.
+- **It-tħassir ta’ destinazzjoni jħassar il-cursor tagħha.** Meta terġa’ żżidha tibda mill-eqdem
+  log ta’ sejħiet miżmum, u b’hekk terġa’ tibgħat ringieli li d-destinazzjoni jista’ jkun diġà għandha. Fuq BigQuery l-`insertId` għal kull ringiela
+  jassorbi dan biss fit-tieqa ta’ deduplikazzjoni ta’ BigQuery stess, għalhekk ippreferi tiddiżattiva
+  destinazzjoni minflok tħassarha.
+
+### Kompatibbiltà tal-iskema tal-evidenza tal-użu
+
+It-tabelli l-ġodda ta’ BigQuery jinkludu `usage_evidence` li jista’ jkun null (STRING li fih JSON) u
+`usage_estimated` (BOOL). Meta `autoCreate` ikun attivat, tabella eżistenti tista’ tirċievi biss dawn il-kolonni nullabbli neqsin. L-esportatur iżomm l-iskema eżistenti sħiħa,
+inkluża l-metadata tal-oqsma, u jibgħat PATCH kondizzjonali billi juża l-etag ritornat. Bidla konkorrenti fl-iskema tfalli l-esportazzjoni minflok ma tissostitwiha;
+l-eżekuzzjoni li jmiss terġa’ taqra t-tabella.
+
+Meta `autoCreate` ikun diżattivat, żid dawn il-kolonni int stess qabel tesporta rekords
+b’evidenza tal-użu. Metadata nieqsa tal-iskema/etag jew aġġornament li falla jipprevjenu wkoll inserzjonijiet li fihom evidenza. Il-cursor tal-esportazzjoni ma javvanzax meta jseħħ dak il-falliment u
+l-evidenza qatt ma titħalla barra b’mod sieket. Iż-żamma lokali tal-logs tibqa’ tapplika waqt li esportazzjoni tkun imblukkata, għalhekk issolvi l-falliment qabel ma jiskadu r-ringieli tas-sors miżmuma.
