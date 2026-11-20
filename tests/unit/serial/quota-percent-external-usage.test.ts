@@ -511,6 +511,20 @@ await test("quota-percent-external-usage", async (t) => {
   // ─── Documented limits (docs/routing/QUOTA_SHARE.md → Limitations) ───────
 
   await t.test(
+    "each key starts with its weight share of the figure the book opens at",
+    async () => {
+      // An upgrade, a new pool or a new account: the account is at 85% when the book opens.
+      const C = "conn-ext-limit-0";
+      makePool(C, "5h", hard(KEYS5, 20));
+      mockUsage({ [C]: { fiveHour: 85 } });
+      for (const k of KEYS5) assert.equal((await ask(C, k)).kind, "allow"); // 17 < 20, strict mode
+      const att = await attribute(C);
+      near(att.external, 85);
+      for (const k of KEYS5) near(att.consumedByKey[k], 17);
+    }
+  );
+
+  await t.test(
     "usage made while the pool is idle is charged to the next key that routes, if the book is open",
     async () => {
       // The owner uses 60 points outside, no key routes, then k2 routes 30_000 tokens (0.6 point).
