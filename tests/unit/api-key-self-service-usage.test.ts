@@ -421,3 +421,33 @@ test("the reuse is bounded: past its cap the oldest entry is dropped", async () 
   await getApiKeySelfServiceUsage(KEY, "30d", d);
   assert.equal(state.builds, 4);
 });
+
+test("the default cap is 64 entries; past it the oldest is dropped", async () => {
+  const { state, deps: d } = reuseDeps();
+  const keyN = (n: number) => ({ id: `key-${n}`, scopes: ["self:usage"] });
+  for (let n = 0; n < 64; n += 1) await getApiKeySelfServiceUsage(keyN(n), "7d", d);
+  assert.equal(d.cache.size, 64);
+  await getApiKeySelfServiceUsage(keyN(0), "7d", d);
+  assert.equal(state.builds, 64, "64 entries fit");
+  for (let n = 64; n < 70; n += 1) await getApiKeySelfServiceUsage(keyN(n), "7d", d);
+  assert.equal(d.cache.size, 64);
+  await getApiKeySelfServiceUsage(keyN(69), "7d", d);
+  assert.equal(state.builds, 70);
+  await getApiKeySelfServiceUsage(keyN(0), "7d", d);
+  assert.equal(state.builds, 71, "the oldest entry was dropped");
+});
+
+test("storing a new entry drops an expired entry of another key", async () => {
+  const { state, deps: d } = reuseDeps();
+  await getApiKeySelfServiceUsage(KEY, "7d", d);
+  state.t = NOW + 30_000;
+  await getApiKeySelfServiceUsage(KEY_B, "30d", d);
+  assert.equal(d.cache.size, 2);
+  state.t = NOW + 60_001;
+  await getApiKeySelfServiceUsage(KEY_B, "1d", d);
+  // KEY's entry (written at NOW) has expired and is gone; KEY_B's 30d entry is still fresh.
+  assert.equal(d.cache.size, 2);
+  state.t = NOW + 90_001;
+  await getApiKeySelfServiceUsage(KEY_B, "90d", d);
+  assert.equal(d.cache.size, 2);
+});

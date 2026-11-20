@@ -48,6 +48,8 @@ let future = { id: "", key: "" };
 let revoked = { id: "", key: "" };
 let retention = { id: "", key: "" };
 let recorded = { id: "", key: "" };
+let reused = { id: "", key: "" };
+let revokedLater = { id: "", key: "" };
 
 test.before(async () => {
   const created = await Promise.all([
@@ -59,11 +61,15 @@ test.before(async () => {
     apiKeysDb.createApiKey("Key losing scope", "test-machine", [SELF_USAGE_SCOPE]),
     apiKeysDb.createApiKey("Key retention", "test-machine", [SELF_USAGE_SCOPE]),
     apiKeysDb.createApiKey("Key recorded", "test-machine", [SELF_USAGE_SCOPE]),
+    apiKeysDb.createApiKey("Key reused", "test-machine", [SELF_USAGE_SCOPE]),
+    apiKeysDb.createApiKey("Key revoked later", "test-machine", [SELF_USAGE_SCOPE]),
   ]);
-  [a, b, c, unscoped, future, revoked, retention, recorded] = created.map((k) => ({
-    id: k.id,
-    key: k.key,
-  }));
+  [a, b, c, unscoped, future, revoked, retention, recorded, reused, revokedLater] = created.map(
+    (k) => ({
+      id: k.id,
+      key: k.key,
+    })
+  );
 });
 
 test.beforeEach(() => {
@@ -292,6 +298,27 @@ test("provider and model are returned as recorded; an unpriced model counts 0", 
   assert.deepEqual([unpriced.costUsd, unpriced.listPriceUsd], [0, 0]);
   assert.deepEqual([body.summary.costUsd, body.summary.listPriceUsd], [0, 0]);
   assert.equal(body.summary.successRatePct, 50);
+});
+
+test("the default path reuses a built series within the reuse window", async () => {
+  // Key and range used by no other test, so the module's shared reuse cannot collide.
+  await seed({ apiKeyId: reused.id, provider: "openai", model: "gpt-5" });
+  const first = await (await call("?range=90d", bearer(reused.key))).json();
+  await seed({ apiKeyId: reused.id, provider: "openai", model: "recorded-in-between" });
+  const text = await (await call("?range=90d", bearer(reused.key))).text();
+  const second = JSON.parse(text);
+  assert.equal(first.summary.requests, 1);
+  assert.equal(second.generatedAt, first.generatedAt);
+  assert.equal(second.summary.requests, 1);
+  assert.ok(!text.includes("recorded-in-between"));
+});
+
+test("a key revoked after its series was cached is refused, not served", async () => {
+  const before = await call("?range=7d", bearer(revokedLater.key));
+  assert.equal(before.status, 200);
+  assert.equal(await apiKeysDb.revokeApiKey(revokedLater.id), true);
+  const after = await call("?range=7d", bearer(revokedLater.key));
+  assert.deepEqual([after.status, after.headers.get("Cache-Control")], [401, "no-store"]);
 });
 
 test("range is a closed set with a default", async () => {

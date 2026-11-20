@@ -13,6 +13,8 @@
  *   every request waiting on it gets the same failure, and the next request builds again.
  * - The reused object is exactly what the build returned, `generatedAt` included, so a client can
  *   see the age of the data.
+ * - Memory stays bounded: a series can take about a megabyte (50 models over 90 days), so at most
+ *   64 are kept, and storing a new one first drops every entry that has already expired.
  */
 
 import { boundedMap } from "@/lib/quota/boundedMap";
@@ -22,7 +24,7 @@ import type { SelfUsageRange, SelfUsageResponse } from "@/shared/schemas/selfUsa
 import { buildApiKeySelfServiceUsage, type SelfServiceUsageDeps } from "./apiKeySelfServiceUsage";
 
 const USAGE_CACHE_TTL_MS = 60_000;
-const USAGE_CACHE_MAX_ENTRIES = 500;
+const USAGE_CACHE_MAX_ENTRIES = 64;
 const MISSING_SCOPE_ERROR = "missing_self_usage_scope";
 
 export interface SelfServiceUsageCache {
@@ -35,9 +37,15 @@ export interface SelfServiceUsageCache {
     nowMs: number,
     build: () => Promise<SelfUsageResponse>
   ): Promise<SelfUsageResponse>;
+  /** Entries currently held, expired ones not yet dropped included (diagnostics). */
+  readonly size: number;
 }
 
-/** Bounded (`ttl` policy of boundedMap): past `maxEntries`, expired then oldest entries go. */
+/**
+ * Bounded (`ttl` policy of boundedMap): past `maxEntries`, expired then oldest entries go. Each
+ * store also drops every entry already expired at that moment, so stale series do not wait for
+ * a read of the same key or for the cap.
+ */
 export function createSelfServiceUsageCache({
   ttlMs = USAGE_CACHE_TTL_MS,
   maxEntries = USAGE_CACHE_MAX_ENTRIES,
@@ -48,16 +56,24 @@ export function createSelfServiceUsageCache({
     "ttl",
     ttlMs
   );
+  /** boundedMap.get drops an entry that has expired at `nowMs`; keys() lists expired ones too. */
+  function dropExpired(nowMs: number): void {
+    for (const stored of [...entries.keys()]) entries.get(stored, nowMs);
+  }
   return {
     memoize(key, nowMs, build) {
       const hit = entries.get(key, nowMs);
       if (hit) return hit;
+      dropExpired(nowMs);
       const value = (async () => build())();
       entries.set(key, value, nowMs);
       value.catch(() => {
         if (entries.get(key, nowMs) === value) entries.delete(key);
       });
       return value;
+    },
+    get size() {
+      return entries.size;
     },
   };
 }
