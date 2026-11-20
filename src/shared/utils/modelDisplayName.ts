@@ -46,8 +46,11 @@ const DASH_VERSION_BRANDS = new Set(["gpt"]);
 /** Release-date stamps at the end of ids ("claude-3-5-sonnet-20241022"). */
 const DATE_TOKEN = /^(19|20)\d{6}$/;
 
-/** "v4.1" / "V2.6" — an explicit version marker. */
-const VERSION_MARKER = /^v\d+([.\d]*)$/i;
+/**
+ * "v4.1" / "V2.6" — an explicit version marker. One leading digit, then digits and dots: the
+ * same language as /^v\d+[.\d]*$/ without the overlapping quantifiers that made it O(n^2).
+ */
+const VERSION_MARKER = /^v\d[.\d]*$/i;
 
 /** Digits left over after the brand prefix ("qwen3.8" -> "qwen" + "3.8"). */
 const BRANDED_VERSION = /^([A-Za-z]+)(\d[.\d]*)$/;

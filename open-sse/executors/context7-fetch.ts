@@ -48,7 +48,9 @@ export function isValidContext7LibraryId(id: string): id is string {
   // Each segment: starts with alphanumeric (GitHub owner/repo convention —
   // no leading '-'), path-safe chars, no trailing dot, no dot-run.
   const seg = /^[A-Za-z0-9][\w-]*(?:\.[\w-]+)*$/; // starts alnum, dots only interior, no dot-run
-  const m = /^\/(.+)\/(.+)$/.exec(id);
+  // Segments split on '/' with [^/]+ (linear). `seg` rejects '/' and line terminators, so this
+  // accepts the same ids as the former /^\/(.+)\/(.+)$/, which was O(n^2) on a run of slashes.
+  const m = /^\/([^/]+)\/([^/]+)$/.exec(id);
   return m !== null && seg.test(m[1]) && seg.test(m[2]);
 }
 
