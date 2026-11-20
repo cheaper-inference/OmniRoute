@@ -61,16 +61,19 @@ const entry = (i: number) => ({
 
 describe("semantic cache entries: no frame of their own", () => {
   it("renders the entries as a borderless kit table, with search and pagination kept", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () =>
-        Response.json({
-          entries: [entry(1), entry(2)],
-          pagination: { page: 1, limit: 20, total: 45, totalPages: 3 },
-        })
-      )
-    );
+    // Use the minimal fetch contract consumed by the component instead of relying on the
+    // environment's Response.json implementation in jsdom.
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        entries: [entry(1), entry(2)],
+        pagination: { page: 1, limit: 20, total: 45, totalPages: 3 },
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
     const { container } = render(<CacheEntriesTab />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(screen.getAllByRole("row")).toHaveLength(3));
 
     expectBorderlessTable(container);

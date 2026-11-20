@@ -44,10 +44,15 @@ test("CURSOR_GROK_47_DROP_MAX_EFFORT on: fallback aliases drop max and reuse GRO
 test("wire membership excludes synthetic aliases so a selected alias becomes a ModelParameter", () => {
   const wireIds = new Set(enrichCursorCatalog("cursor", base, false).map((model) => model.id));
   assert.equal(wireIds.has("grok-4.7-low"), false);
-  assert.deepEqual(resolveRequestedModel("grok-4.7-low", { liveCatalogIds: wireIds }), {
-    modelId: "grok-4.7",
-    parameters: [{ id: "effort", value: "low" }],
-  });
+  for (const tier of tiers) {
+    assert.deepEqual(resolveRequestedModel(`grok-4.7-${tier}`, { liveCatalogIds: wireIds }), {
+      modelId: "grok-4.7",
+      parameters: [
+        { id: "effort", value: tier },
+        { id: "fast", value: "false" },
+      ],
+    });
+  }
 });
 
 test("a provider-declared tier allowlist wins over fallback aliases and avoids duplicates", () => {

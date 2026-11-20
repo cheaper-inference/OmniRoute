@@ -1,0 +1,1 @@
+- **fix(cursor):** Grok 4.7 effort aliases now send the selected `reasoning_effort`, explicitly preserve standard speed unless `-fast` is requested, and omit the legacy model-details envelope that can make Cursor record the request as Fast.
