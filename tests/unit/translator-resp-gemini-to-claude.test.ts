@@ -305,3 +305,29 @@ test("Gemini -> Claude stream: input_tokens equals promptTokenCount when nothing
   assert.equal(delta.usage.input_tokens, 100);
   assert.equal(delta.usage.cache_read_input_tokens, undefined);
 });
+
+test("Gemini -> Claude stream: a re-sent functionCall snapshot with the same id is emitted once (#19183)", () => {
+  const state = {};
+  const call = (id, args) => ({
+    candidates: [
+      { content: { role: "model", parts: [{ functionCall: { id, name: "edit", args } }] } },
+    ],
+  });
+  const events = flatten([
+    geminiToClaudeResponse(call("call-edit-1", { filePath: "a.ts" }), state),
+    geminiToClaudeResponse(call("call-edit-1", { filePath: "a.ts", content: "x" }), state),
+    geminiToClaudeResponse(call("call-other", { filePath: "b.ts" }), state),
+    geminiToClaudeResponse({ candidates: [{ finishReason: "STOP" }] }, state),
+  ]);
+
+  const starts = events.filter(
+    (event) => event.type === "content_block_start" && event.content_block.type === "tool_use"
+  );
+  assert.deepEqual(
+    starts.map((event) => [event.index, event.content_block.id]),
+    [
+      [0, "call-edit-1"],
+      [1, "call-other"],
+    ]
+  );
+});
