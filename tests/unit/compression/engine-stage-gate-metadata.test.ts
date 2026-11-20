@@ -1,15 +1,15 @@
 /**
- * Gate de estágio × engine sem `metadata`.
+ * Stage × engine gate without `metadata`.
  *
- * `assertValidEngine()` (engines/registry.ts) valida `id`, `apply`, `compress`,
- * `getConfigSchema` e `validateConfig` — NÃO exige `metadata`. Uma engine sem
- * esse campo é, portanto, um registro legal. Mas `canRunAtCompressionStage`
- * lia `engine.metadata.executionStages` sem guarda, então essa engine legal
- * derrubava o pipeline inteiro com `TypeError: Cannot read properties of
- * undefined` — em vez de falhar aberto, que é o contrato da compressão.
+ * `assertValidEngine()` (engines/registry.ts) validates `id`, `apply`, `compress`,
+ * `getConfigSchema` and `validateConfig` — does NOT require `metadata`. An engine without
+ * this field is therefore a legal record. But `canRunAtCompressionStage`
+ * read `engine.metadata.executionStages` without guard, so this cool engine
+ * crashed the entire pipeline with `TypeError: Cannot read properties of
+ * undefined` — instead of failing open, which is the compression contract.
  *
- * O fallback documentado para quem não declara `executionStages` é "só
- * pre-translation". Metadata ausente é o mesmo caso de "não declarou", e tem de
+ * The documented fallback for those who do not declare `executionStages` is "just
+ * pre-translation". Missing metadata is the same case as "not declared", and must be
  * cair no mesmo fallback.
  */
 import { describe, it, beforeEach, afterEach } from "node:test";
@@ -28,7 +28,7 @@ const body = () => ({ messages: [{ role: "user", content: "hello world" }] });
 
 describe("stage gate — engine sem metadata", () => {
   beforeEach(() => {
-    // Registro deliberadamente sem `metadata`: é o que assertValidEngine aceita.
+    // Registration deliberately without `metadata`: this is what assertValidEngine accepts.
     registerCompressionEngine({
       id: ENGINE_ID,
       name: "metadata-less test engine",
@@ -51,19 +51,19 @@ describe("stage gate — engine sem metadata", () => {
 
   afterEach(() => unregisterCompressionEngine(ENGINE_ID));
 
-  it("não derruba o pipeline no estágio pré-tradução (default)", () => {
+  it("does not crash the pipeline at the pre-translation stage (default)", () => {
     const r = applyStackedCompression(body(), [{ engine: ENGINE_ID }]);
     assert.equal(r.compressed, false);
     assert.deepEqual(r.body, body());
   });
 
-  it("não derruba o pipeline no estágio pós-tradução — pula pelo fallback", () => {
+  it("does not drop the pipeline at the post-translation stage — skips fallback", () => {
     const r = applyStackedCompression(body(), [{ engine: ENGINE_ID }], {
       compressionStage: "post-translation",
     });
     assert.equal(r.compressed, false);
     assert.deepEqual(r.body, body());
-    // Fallback documentado: quem não declara estágio só roda pre-translation.
+    // Documented fallback: those who do not declare a stage only run pre-translation.
     assert.ok(
       r.stats?.validationWarnings?.some((w) => w.includes(ENGINE_ID) && w.includes("skipped")),
       `esperado aviso de skip por estágio, veio ${JSON.stringify(r.stats?.validationWarnings)}`

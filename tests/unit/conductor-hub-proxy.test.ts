@@ -72,7 +72,7 @@ test.after(() => {
   delete process.env.CONDUCTOR_HUB_TOKEN;
 });
 
-test("snapshot: runners e tasks sanitizados (whitelist — token do runner NUNCA passa)", async () => {
+test("snapshot: sanitized runners and tasks (whitelist — runner token NEVER passes)", async () => {
   const { impl, calls } = fakeHub({
     "/v1/runners": { status: 200, body: RUNNERS },
     "/v1/tasks": { status: 200, body: TASKS },
@@ -99,7 +99,7 @@ test("snapshot: runners e tasks sanitizados (whitelist — token do runner NUNCA
   assert.equal(calls.every((c) => c.auth === "Bearer tok-secreto"), true, "proxy autentica no hub");
 });
 
-test("snapshot: hub fora do ar → degradado {offline:true} sem lançar", async () => {
+test("snapshot: hub down → degraded {offline:true} not launching", async () => {
   const failing = (async () => {
     throw new Error("ECONNREFUSED");
   }) as unknown as typeof fetch;
@@ -107,7 +107,7 @@ test("snapshot: hub fora do ar → degradado {offline:true} sem lançar", async 
   assert.deepEqual(snap, { offline: true, runners: [], tasks: [] });
 });
 
-test("snapshot: env ausente → degradado sem fetch", async () => {
+test("snapshot: missing env → degraded without fetch", async () => {
   delete process.env.CONDUCTOR_HUB_URL;
   const { impl, calls } = fakeHub({});
   const snap = await getFleetSnapshot({ fetchImpl: impl });
@@ -115,7 +115,7 @@ test("snapshot: env ausente → degradado sem fetch", async () => {
   assert.equal(calls.length, 0);
 });
 
-test("detalhe: manifest e council passam; spec.prompt vem; campos fora da whitelist não", async () => {
+test("detail: manifest and council pass; spec.prompt comes; fields outside the whitelist do not", async () => {
   const { impl } = fakeHub({ "/v1/tasks/t_2": { status: 200, body: TASKS[1] } });
   const detail = await getConductorTaskDetail("t_2", { fetchImpl: impl });
   assert.ok(detail);
@@ -125,7 +125,7 @@ test("detalhe: manifest e council passam; spec.prompt vem; campos fora da whitel
   assert.equal(detail!.base_ref, "main");
 });
 
-test("detalhe: 404 do hub → null", async () => {
+test("detail: 404 from hub → null", async () => {
   const { impl } = fakeHub({});
   assert.equal(await getConductorTaskDetail("t_x", { fetchImpl: impl }), null);
 });

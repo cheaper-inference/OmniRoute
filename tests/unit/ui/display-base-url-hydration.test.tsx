@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * F4 (KEA-7886, lote 8 pendência): React #418 on /dashboard/relay. useDisplayBaseUrl's first
+ * F4 (KEA-7886, batch 8 pending): React
  * render fell back to `http://localhost:${process.env.PORT}` — PORT exists on the server but is
  * not inlined into the client bundle, so the SSR text (the relay curl example) and the client's
  * first render differed ("server rendered text didn't match the client"). The pre-mount value

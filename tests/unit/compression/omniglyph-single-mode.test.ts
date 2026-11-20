@@ -17,7 +17,7 @@ const body = () => ({
   messages: [{ role: "user", content: [{ type: "text", text: "oi" }] }],
 });
 
-test("modo omniglyph sozinho comprime (selecionar o modo é o enable)", async () => {
+test("omniglyph mode alone compresses (selecting the mode is enable)", async () => {
   registerBuiltinCompressionEngines();
   const r = await applyCompressionAsync(body(), "omniglyph", {
     model: "claude-fable-5",
@@ -29,7 +29,7 @@ test("modo omniglyph sozinho comprime (selecionar o modo é o enable)", async ()
   assert.ok(JSON.stringify(r.body).includes('"type":"image"'));
 });
 
-test("modo omniglyph em transporte agregador é no-op", async () => {
+test("omniglyph mode in aggregator transport is no-op", async () => {
   registerBuiltinCompressionEngines();
   const r = await applyCompressionAsync(body(), "omniglyph", {
     model: "claude-fable-5",

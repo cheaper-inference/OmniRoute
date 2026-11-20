@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// ── Env vars ANTES dos imports dinâmicos ─────────────────────────
+// ── Env vars BEFORE dynamic imports ─────────────────────────
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-t08-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "t08-test-secret-key";
@@ -38,21 +38,21 @@ test.after(async () => {
 // Bloco 1 — Schema Zod (updateKeyPermissionsSchema)
 // ══════════════════════════════════════════════════════════════════
 
-test("1.1 — allowedConnections com UUID válido é aceito", () => {
+test("1.1 — allowedConnections with valid UUID are accepted", () => {
   const result = schemas.validateBody(schemas.updateKeyPermissionsSchema, {
     allowedConnections: ["550e8400-e29b-41d4-a716-446655440000"],
   });
   assert.equal(result.success, true);
 });
 
-test("1.2 — allowedConnections com string não-UUID é rejeitado", () => {
+test("1.2 — allowedConnections with non-UUID string is rejected", () => {
   const result = schemas.validateBody(schemas.updateKeyPermissionsSchema, {
     allowedConnections: ["nao-e-uuid"],
   });
   assert.equal(result.success, false);
 });
 
-test("1.3 — allowedConnections + noLog combinados são aceitos", () => {
+test("1.3 — combined noLog allowedConnections are accepted", () => {
   const result = schemas.validateBody(schemas.updateKeyPermissionsSchema, {
     allowedConnections: ["550e8400-e29b-41d4-a716-446655440000"],
     noLog: true,
@@ -60,12 +60,12 @@ test("1.3 — allowedConnections + noLog combinados são aceitos", () => {
   assert.equal(result.success, true);
 });
 
-test("1.4 — payload vazio é rejeitado pelo superRefine", () => {
+test("1.4 — empty payload is rejected by superRefine", () => {
   const result = schemas.validateBody(schemas.updateKeyPermissionsSchema, {});
   assert.equal(result.success, false);
 });
 
-test("1.5 — allowedConnections array vazio é aceito (não é undefined, superRefine não dispara)", () => {
+test("1.5 — empty allowedConnections array is accepted (not undefined, superRefine does not fire)", () => {
   const result = schemas.validateBody(schemas.updateKeyPermissionsSchema, {
     allowedConnections: [],
   });
@@ -76,7 +76,7 @@ test("1.5 — allowedConnections array vazio é aceito (não é undefined, super
 // Bloco 2 — DB (apiKeys.ts)
 // ══════════════════════════════════════════════════════════════════
 
-test("2.1 — key criada tem allowedConnections: [] por padrão", async () => {
+test("2.1 — created key has allowedConnections: [] by default", async () => {
   const created = await apiKeysDb.createApiKey("test-key", "machine-t08");
   assert.deepEqual(created.allowedConnections, []);
 });
@@ -117,14 +117,14 @@ test("2.4 — getApiKeyMetadata retorna allowedConnections corretamente", async 
   assert.equal(meta?.allowedConnections[0], uuid);
 });
 
-test("2.5 — allowedConnections: [] persiste como array vazio (não null)", async () => {
+test("2.5 — allowedConnections: [] persists as empty array (not null)", async () => {
   const created = await apiKeysDb.createApiKey("empty-conn-key", "machine-t08");
   const uuid = "550e8400-e29b-41d4-a716-446655440000";
 
   // Primeiro adiciona um UUID
   await apiKeysDb.updateApiKeyPermissions(created.id, { allowedConnections: [uuid] });
 
-  // Reseta para array vazio
+  // Resets to empty array
   await apiKeysDb.updateApiKeyPermissions(created.id, { allowedConnections: [] });
 
   const row = await apiKeysDb.getApiKeyById(created.id);
@@ -132,18 +132,18 @@ test("2.5 — allowedConnections: [] persiste como array vazio (não null)", asy
   assert.deepEqual(row?.allowedConnections, []);
 });
 
-test("2.6 — cache é invalidado após update (2ª chamada ao metadata reflete novo valor)", async () => {
+test("2.6 — cache is invalidated after update (2nd call to metadata reflects new value)", async () => {
   const created = await apiKeysDb.createApiKey("cache-test-key", "machine-t08");
   const uuid = "550e8400-e29b-41d4-a716-446655440000";
 
-  // Primeira chamada popula cache (allowedConnections vazio)
+  // First call populates cache (allowedConnections empty)
   const before = await apiKeysDb.getApiKeyMetadata(created.key);
   assert.deepEqual(before?.allowedConnections, []);
 
-  // Atualiza — deve invalidar cache
+  // Update — should invalidate cache
   await apiKeysDb.updateApiKeyPermissions(created.id, { allowedConnections: [uuid] });
 
-  // Segunda chamada deve retornar novo valor (não o cache antigo)
+  // Second call should return new value (not old cache)
   const after = await apiKeysDb.getApiKeyMetadata(created.key);
   assert.deepEqual(after?.allowedConnections, [uuid]);
 });

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // scripts/quality/check-quality-ratchet.mjs
-// Catraca genérica multi-métrica. Clona o espírito de check-t11-any-budget.mjs:
-// um baseline congelado por métrica; falha em qualquer regressão; só anda num sentido.
+// Generic multi-metric ratchet. Clones the spirit of check-t11-any-budget.mjs:
+// a frozen baseline per metric; fails any regression; it only goes in one direction.
 //
-// v2 (6A.5): --require-tighten, eps por métrica, warning de métricas órfãs.
+// v2 (6A.5): --require-tighten, eps per metric, orphan metrics warning.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -22,21 +22,21 @@ const METRICS = path.resolve(
 );
 const SUMMARY = getArg("--summary", null);
 const UPDATE = process.argv.includes("--update");
-// --allow-missing: pula métricas do baseline ausentes do metrics (em vez de falhar).
-// Uso local: cobertura só existe no CI; localmente quality:gate roda com este flag.
-// No CI o job quality-gate roda SEM o flag (estrito — baixa o coverage mergeado antes).
+// --allow-missing: skip missing baseline metrics from metrics (instead of failing).
+// Local use: coverage only exists in CI; locally quality:gate runs with this flag.
+// In CI, the quality-gate job runs WITHOUT the flag (strict — lowers the coverage merged beforehand).
 const ALLOW_MISSING = process.argv.includes("--allow-missing");
-// --require-tighten: falha quando uma métrica melhorou além de tightenSlack sem que o
+// --require-tighten: fails when a metric has improved beyond TightSlack without the
 // baseline tenha sido apertado. Garante que melhorias permanentes sejam capturadas.
-// Sem esta flag, melhorias são apenas registradas (comportamento v1 — retrocompat).
+// Without this flag, improvements are only recorded (v1 behavior — retrocompat).
 const REQUIRE_TIGHTEN = process.argv.includes("--require-tighten");
 
-// Global fallback eps. Cada métrica pode sobrepor via `eps` no baseline.
+// Global fallback eps. Each metric can override via `eps` in the baseline.
 const GLOBAL_EPS = 0.01;
 
 function load(p) {
   if (!fs.existsSync(p)) {
-    console.error(`[quality-ratchet] arquivo ausente: ${p}`);
+    console.error(`[quality-ratchet] missing file: ${p}`);
     process.exit(2);
   }
   return JSON.parse(fs.readFileSync(p, "utf8"));
@@ -82,7 +82,7 @@ const rows = [];
 for (const [key, spec] of Object.entries(baseline.metrics)) {
   const current = metrics[key];
   const base = spec.value;
-  const dir = spec.direction; // "down" = menor-é-melhor | "up" = maior-é-melhor
+  const dir = spec.direction; // "down" = lower-is-better | "up" = bigger-is-better
 
   // Per-metric eps; falls back to global EPS if not specified in the spec.
   const eps = spec.eps !== undefined ? spec.eps : GLOBAL_EPS;
@@ -92,10 +92,10 @@ for (const [key, spec] of Object.entries(baseline.metrics)) {
 
   if (current === undefined) {
     if (ALLOW_MISSING || spec.dedicatedGate === true) {
-      const reason = spec.dedicatedGate === true ? "SKIP (dedicated gate)" : "SKIP (ausente)";
+      const reason = spec.dedicatedGate === true ? "SKIP (dedicated gate)" : "SKIP (absent)";
       rows.push([key, base, "—", reason]);
     } else {
-      failures.push(`métrica "${key}" ausente em ${path.basename(METRICS)}`);
+      failures.push(`missing metric "${key}" in ${path.basename(METRICS)}`);
       rows.push([key, base, "—", "MISSING"]);
     }
     continue;
@@ -103,8 +103,8 @@ for (const [key, spec] of Object.entries(baseline.metrics)) {
   let status = "ok";
   if (dir === "down") {
     if (current > base + eps) {
-      failures.push(`${key}: ${current} > baseline ${base} (não pode aumentar)`);
-      status = "REGRESSÃO";
+      failures.push(`${key}: ${current} > baseline ${base} (cannot increase)`);
+      status = "REGRESSION";
     } else if (current < base - eps) {
       improvements.push([key, current]);
       status = "↑ melhorou";
@@ -116,8 +116,8 @@ for (const [key, spec] of Object.entries(baseline.metrics)) {
     }
   } else {
     if (current < base - eps) {
-      failures.push(`${key}: ${current} < baseline ${base} (não pode cair)`);
-      status = "REGRESSÃO";
+      failures.push(`${key}: ${current} < baseline ${base} (cannot fall)`);
+      status = "REGRESSION";
     } else if (current > base + eps) {
       improvements.push([key, current]);
       status = "↑ melhorou";
@@ -136,10 +136,10 @@ const baselineKeys = new Set(Object.keys(baseline.metrics));
 const orphans = Object.keys(metrics).filter((k) => !baselineKeys.has(k));
 if (orphans.length > 0) {
   console.warn(
-    `[quality-ratchet] WARN: ${orphans.length} métrica(s) órfã(s) — presente(s) em ${path.basename(METRICS)} mas sem entrada no baseline: ${orphans.join(", ")}`
+    `[quality-ratchet] WARN: ${orphans.length} orphan metric(s) — present in ${path.basename(METRICS)} but no entry in baseline: ${orphans.join(", ")}`
   );
   console.warn(
-    `[quality-ratchet] WARN: adicione ${orphans.length === 1 ? "essa métrica" : "essas métricas"} ao baseline (com value/direction) para que sejam catraceadas.`
+    `[quality-ratchet] WARN: add ${orphans.length === 1 ? "this metric" : "these metrics"} to the baseline (with value/direction) so that they are traced.`
   );
 }
 
@@ -147,13 +147,13 @@ if (SUMMARY) {
   const md = [
     "# Quality Ratchet",
     "",
-    "| Métrica | Baseline | Atual | Status |",
+    "| Metric | Baseline | Current | Status |",
     "|---|---|---|---|",
     ...rows.map(([k, b, c, s]) => `| ${k} | ${b} | ${c} | ${s} |`),
     "",
     failures.length
-      ? `**${failures.length} regressão(ões) — gate BLOQUEADO.**`
-      : "**Sem regressões — gate OK.**",
+      ? `**${failures.length} regression(s) — gate BLOCKED.**`
+      : "**No regressions — gate OK.**",
   ].join("\n");
   fs.mkdirSync(path.dirname(SUMMARY), { recursive: true });
   fs.writeFileSync(SUMMARY, md + "\n");
@@ -165,18 +165,18 @@ if (SUMMARY) {
 if (UPDATE && failures.length === 0 && improvements.length) {
   for (const [key, val] of improvements) baseline.metrics[key].value = val;
   fs.writeFileSync(BASELINE, JSON.stringify(baseline, null, 2) + "\n");
-  console.log(`[quality-ratchet] baseline ratcheado: ${improvements.length} métrica(s) melhoraram`);
+  console.log(`[quality-ratchet] baseline ratcheado: ${improvements.length} metric(s) improved`);
 }
 
 if (failures.length) {
-  console.error("[quality-ratchet] FALHOU:\n" + failures.map((f) => "  ✗ " + f).join("\n"));
+  console.error("[quality-ratchet] FAILED:\n" + failures.map((f) => " ✗ " + f).join("\n"));
   process.exit(1);
 }
 
 // Behavior 1: --require-tighten gate (only triggers when there are no regressions and no --update).
 if (TIGHTEN_ENFORCED && !UPDATE && tightenFailures.length > 0) {
   console.error(
-    "[quality-ratchet] FALHOU (--require-tighten): métrica(s) melhoraram mas o baseline não foi apertado:\n" +
+    "[quality-ratchet] FAILED (--require-tighten): metric(s) improved but baseline was not tightened:\n" +
       tightenFailures.map((f) => "  ✗ " + f + TIGHTEN_HINT_RELEASE).join("\n")
   );
   process.exit(1);
@@ -184,9 +184,9 @@ if (TIGHTEN_ENFORCED && !UPDATE && tightenFailures.length > 0) {
 
 if (PR_ADVISORY && !UPDATE && tightenFailures.length > 0) {
   console.log(
-    "[quality-ratchet] melhoria(s) não bancada(s) — informativo em modo pr (o aperto é da release/noturno; este PR não edita o baseline):\n" +
+    "[quality-ratchet] non-bench improvement(s) — informative in PR mode (the squeeze is from release/nightly; this PR does not edit the baseline):\n" +
       tightenFailures.map((f) => "  · " + f + TIGHTEN_HINT_PR).join("\n")
   );
 }
 
-console.log(`[quality-ratchet] OK (${rows.length} métricas, ${improvements.length} melhoraram)`);
+console.log(`[quality-ratchet] OK (${rows.length} metrics, ${improvements.length} improved)`);

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { evaluateParity } from "../../scripts/homolog/lib/parity.mjs";
 
-test("parity OK quando health bate com a versão esperada", () => {
+test("parity OK when health matches expected version", () => {
   const r = evaluateParity(
     { status: "healthy", version: "3.8.49" },
     { expectedVersion: "3.8.49", httpStatus: 200 }
@@ -11,7 +11,7 @@ test("parity OK quando health bate com a versão esperada", () => {
   assert.deepEqual(r.failures, []);
 });
 
-test("parity falha listando cada divergência", () => {
+test("parity fails listing each divergence", () => {
   const r = evaluateParity(
     { status: "degraded", version: "3.8.47" },
     { expectedVersion: "3.8.49", httpStatus: 200 }
@@ -20,7 +20,7 @@ test("parity falha listando cada divergência", () => {
   assert.equal(r.failures.length, 2); // status!=healthy, version mismatch
 });
 
-test("parity falha em HTTP não-200 mesmo com body bom", () => {
+test("parity fails on non-200 HTTP even with good body", () => {
   const r = evaluateParity(
     { status: "healthy", version: "3.8.49" },
     { expectedVersion: "3.8.49", httpStatus: 503 }

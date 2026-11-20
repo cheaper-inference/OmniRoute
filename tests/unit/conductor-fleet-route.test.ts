@@ -91,7 +91,7 @@ test("GET /api/conductor/fleet devolve snapshot whitelisted; sem hub → degrada
   assert.equal((await down.json()).offline, true);
 });
 
-test("GET /api/conductor/tasks/[id] → 404 sanitizado quando o hub não conhece a task", async () => {
+test("GET /api/conductor/tasks/[id] → 404 sanitized when hub doesn't know task", async () => {
   process.env.CONDUCTOR_HUB_URL = await fakeHub({});
   const res = await detailRoute.GET(new Request("http://localhost/api/conductor/tasks/t_x"), {
     params: Promise.resolve({ id: "t_x" }),
@@ -101,7 +101,7 @@ test("GET /api/conductor/tasks/[id] → 404 sanitizado quando o hub não conhece
   assert.ok(!text.includes("segredo interno"), "corpo do hub NUNCA repassado");
 });
 
-test("POST cancel repassa recusa do hub com status, sem corpo upstream", async () => {
+test("POST cancel passes hub refusal with status, no upstream body", async () => {
   process.env.CONDUCTOR_HUB_URL = await fakeHub({
     "/v1/tasks/t_done/cancel": {
       status: 409,

@@ -1,4 +1,4 @@
-// Characterization tests — src/lib/oauth (rail 3.8.55, Task 12 "caracterização B").
+// Characterization tests — src/lib/oauth (rail 3.8.55, Task 12 "characterization B").
 //
 // src/lib/oauth is the subsystem most coupled to open-sse (~20 of its files import it). This
 // file pins its public facade (providers.ts), the provider registry (ids + flow types), the

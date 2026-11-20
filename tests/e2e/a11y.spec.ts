@@ -1,7 +1,7 @@
 /**
  * tests/e2e/a11y.spec.ts
  *
- * Accessibility gate using @axe-core/playwright (Task 13 — Fase 7).
+ * Accessibility gate using @axe-core/playwright (Task 13 — Phase 7).
  *
  * NIGHTLY advisory: this suite is scheduled in the NIGHTLY CI job, not in the
  * per-PR job, because axe analysis adds ~10–20 s per page and the results are

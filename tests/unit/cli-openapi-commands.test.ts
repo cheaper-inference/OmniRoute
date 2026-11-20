@@ -73,12 +73,12 @@ test("openapi endpoints filtra paths do spec", async () => {
   assert.ok(paths.includes("/v1/models"));
 });
 
-test("toYaml básico serializa objeto corretamente", async () => {
+test("basic toYaml serializes object correctly", async () => {
   const { registerOpenapi } = await import("../../bin/cli/commands/openapi.mjs");
   assert.equal(typeof registerOpenapi, "function");
 });
 
-test("openapi validate detecta spec inválido", async () => {
+test("openapi validate detects invalid spec", async () => {
   const invalidSpec = { info: {} };
   let hasOpenapi = "openapi" in invalidSpec || "swagger" in invalidSpec;
   assert.ok(!hasOpenapi);
@@ -90,7 +90,7 @@ test("openapi paths extrai e ordena paths do spec", async () => {
   assert.equal(paths[1], "/v1/models");
 });
 
-test("openapi.mjs pode ser importado sem erro", async () => {
+test("openapi.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/openapi.mjs");
   assert.equal(typeof mod.registerOpenapi, "function");
 });

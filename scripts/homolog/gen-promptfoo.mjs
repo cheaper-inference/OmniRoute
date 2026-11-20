@@ -23,30 +23,30 @@ const providers = picks
       apiKeyEnvar: "HOMOLOG_API_KEY",
       max_tokens: 5,
       temperature: 0,
-      // OmniRoute streama por default quando "stream" é omitido (streamDefaultMode
-      // legacy) — o parser JSON do promptfoo precisa da resposta non-stream.
+      // OmniRoute streams by default when "stream" is omitted (streamDefaultMode
+      // legacy) — promptfoo's JSON parser needs the non-stream response.
       passthrough: { stream: false, max_tokens: 5 },
     },
   }));
 
 const config = {
-  description: "OmniRoute homolog — smoke real 1 request/provider crítico",
+  description: "OmniRoute homolog — smoke real 1 critical request/provider",
   prompts: ["Reply with exactly: OK"],
   providers,
-  // O smoke valida o WIRING do provider (respondeu sem erro), não o comportamento
-  // do modelo: com max_tokens=5, modelos de reasoning podem gastar o budget antes
+  // Smoke validates the provider's WIRING (responded without error), not the behavior
+  // of the model: with max_tokens=5, reasoning models can spend the budget before
   // de emitir o "OK" literal — icontains seria falso-positivo de quebra.
   tests: [{ assert: [{ type: "javascript", value: "typeof output === 'string'" }] }],
 };
 fs.mkdirSync("homolog-report/raw", { recursive: true });
 fs.writeFileSync(
   path.join("homolog-report", "promptfooconfig.yaml"),
-  JSON.stringify(config, null, 2) // promptfoo aceita JSON como config YAML-compatível
+  JSON.stringify(config, null, 2) // promptfoo accepts JSON as YAML-compatible config
 );
 fs.writeFileSync(
   path.join("homolog-report", "raw", "provider-misses.json"),
   JSON.stringify(missing, null, 2)
 );
 console.log(
-  `[gen-promptfoo] ${providers.length} providers no smoke, ${missing.length} misses de catálogo`
+  `[gen-promptfoo] ${providers.length} providers no smoke, ${missing.length} catalog misses`
 );

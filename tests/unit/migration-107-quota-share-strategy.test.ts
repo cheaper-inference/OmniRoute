@@ -12,7 +12,7 @@
  * tests/unit/migration-107-quota-share-strategy.test.ts
  *
  * Migration 107 flips the routing strategy of the existing auto-minted qtSd/ combos
- * from the legacy "fill-first" to the dedicated "quota-share" engine (Fase 3 #9),
+ * from the legacy "fill-first" to the dedicated "quota-share" engine (Phase 3 #9),
  * WITHOUT touching combos already on quota-share or any user-authored combo.
  *
  * The migration is applied in isolation against an in-memory DB seeded with a mix

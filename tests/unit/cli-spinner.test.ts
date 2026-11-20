@@ -37,7 +37,7 @@ test("shouldUseSpinner retorna false quando CI=1", async () => {
   }
 });
 
-test("withSpinner executa fn e retorna resultado", async () => {
+test("withSpinner executes fn and returns result", async () => {
   const { withSpinner } = await import("../../bin/cli/spinner.mjs");
   const result = await withSpinner("test", async () => 42, { quiet: true });
   assert.equal(result, 42);
@@ -58,7 +58,7 @@ test("withSpinner propaga erros da fn", async () => {
   );
 });
 
-test("withSpinner aceita update callback sem erro", async () => {
+test("withSpinner accepts update callback without error", async () => {
   const { withSpinner } = await import("../../bin/cli/spinner.mjs");
   let updateCalled = false;
   await withSpinner(
@@ -72,7 +72,7 @@ test("withSpinner aceita update callback sem erro", async () => {
   assert.ok(updateCalled);
 });
 
-test("spinner.mjs pode ser importado sem erro", async () => {
+test("spinner.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/spinner.mjs");
   assert.equal(typeof mod.withSpinner, "function");
   assert.equal(typeof mod.shouldUseSpinner, "function");

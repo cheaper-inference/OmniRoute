@@ -15,7 +15,7 @@
 //   - "atualizado" (upgraded): one temporary DATA_DIR, booted with --base-dir, then booted
 //     again on the SAME file with --head-dir (an existing database: the mass-migration guard
 //     and the pre-migration snapshot run as in production);
-//   - "novo" (fresh): another temporary DATA_DIR, booted once with --head-dir.
+// - "new" (fresh): another temporary DATA_DIR, booted once with --head-dir.
 // Each boot is its own child process (scripts/check/lib/migrationSchemaBoot.ts) because the
 // migration runner resolves its directory when its module loads.
 //
@@ -107,17 +107,17 @@ export class MigrationBootError extends Error {
     /** Files applied before the failure; null when the child could not read them back. */
     readonly appliedMigrations: string[] | null = null
   ) {
-    super(`boot ${label}: a migration ${failure.file} falhou ao ser aplicada: ${failure.message}`);
+    super(`boot ${label}: migration ${failure.file} failed to be applied: ${failure.message}`);
   }
 }
 
 const PATH_LABEL: Record<PathName, string> = {
-  upgraded: "caminho atualizado (base, depois o PR)",
-  fresh: "caminho novo (tudo em ordem)",
+  upgraded: "updated path (base, then PR)",
+  fresh: "new path (everything in order)",
 };
 
 function describeColumn(column: ColumnShape): string {
-  const parts = [column.type || "sem tipo"];
+  const parts = [column.type || "no type"];
   if (column.notnull) parts.push("NOT NULL");
   if (column.dflt_value !== null) parts.push(`DEFAULT ${column.dflt_value}`);
   if (column.pk) parts.push(`pk=${column.pk}`);
@@ -158,7 +158,7 @@ function diffDefinitions(
         table,
         onlyIn,
         [onlyIn]: item,
-        message: `tabela ${table}: definição "${item}" só existe no ${PATH_LABEL[onlyIn]}`,
+        message: `table ${table}: definition "${item}" only exists in ${PATH_LABEL[onlyIn]}`,
       });
     }
   }
@@ -174,10 +174,10 @@ function diffDefinitions(
       fresh: fresh ?? null,
       message:
         upgradedOptions !== freshOptions
-          ? `tabela ${table}: definição difere nas opções — atualizado: "${upgradedOptions}"; ` +
-            `novo: "${freshOptions}"`
-          : `tabela ${table}: definição difere — atualizado: ${JSON.stringify(upgraded)}; ` +
-            `novo: ${JSON.stringify(fresh)}`,
+          ? `table ${table}: definition differs in options — updated: "${upgradedOptions}"; `
+            `new: "${freshOptions}"`
+          : `table ${table}: definition differs — updated: ${JSON.stringify(upgraded)}; `
+            `new: ${JSON.stringify(fresh)}`,
     });
   }
   // diffDefinitions only runs once the columns and constraints of the table agree. The
@@ -189,9 +189,9 @@ function diffDefinitions(
 
 export function definitionOnlyNote(table: string): string {
   return (
-    `tabela ${table}: colunas e constraints iguais; a diferença está no texto da definição ` +
-    "(CHECK, COLLATE, coluna gerada, AUTOINCREMENT, opções da tabela) ou só na forma de " +
-    "escrever a mesma tabela (ex.: FOREIGN KEY de coluna × de tabela)"
+    `table ${table}: equal columns and constraints; the difference is in the text of the definition ` +
+    "(CHECK, COLLATE, generated column, AUTOINCREMENT, table options) or just in the form of " +
+    "write the same table (e.g. FOREIGN KEY column × table)"
   );
 }
 
@@ -208,7 +208,7 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
         kind: "table",
         name: table,
         onlyIn,
-        message: `tabela ${table} só existe no ${PATH_LABEL[onlyIn]}`,
+        message: `table ${table} only exists in ${PATH_LABEL[onlyIn]}`,
       });
       continue;
     }
@@ -227,7 +227,7 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
           table,
           onlyIn,
           [onlyIn]: shape,
-          message: `tabela ${table}: coluna ${column} (${describeColumn(shape)}) só existe no ${PATH_LABEL[onlyIn]}`,
+          message: `table ${table}: column ${column} (${describeColumn(shape)}) only exists in ${PATH_LABEL[onlyIn]}`,
         });
       } else if (!sameJson(left, right)) {
         differences.push({
@@ -237,8 +237,8 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
           upgraded: left,
           fresh: right,
           message:
-            `tabela ${table}: coluna ${column} difere — atualizado: ${describeColumn(left)}; ` +
-            `novo: ${describeColumn(right)}`,
+            `table ${table}: column ${column} differs — updated: ${describeColumn(left)}; ` +
+            `new: ${describeColumn(right)}`,
         });
       }
     }
@@ -253,7 +253,7 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
         table,
         onlyIn,
         [onlyIn]: signature,
-        message: `tabela ${table}: restrição ${signature} só existe no ${PATH_LABEL[onlyIn]}`,
+        message: `table ${table}: restriction ${signature} only exists in ${PATH_LABEL[onlyIn]}`,
       });
     }
     // The CREATE TABLE text covers what no pragma shows (CHECK, COLLATE, generated columns,
@@ -278,7 +278,7 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
         table: shape.table,
         onlyIn,
         [onlyIn]: shape,
-        message: `índice ${name} (${describeIndex(shape)}) só existe no ${PATH_LABEL[onlyIn]}`,
+        message: `index ${name} (${describeIndex(shape)}) only exists in ${PATH_LABEL[onlyIn]}`,
       });
     } else if (!sameJson(left, right)) {
       differences.push({
@@ -288,8 +288,8 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
         upgraded: left,
         fresh: right,
         message:
-          `índice ${name} difere — atualizado: ${describeIndex(left)}; ` +
-          `novo: ${describeIndex(right)}`,
+          `index ${name} differs — updated: ${describeIndex(left)}; ` +
+          `new: ${describeIndex(right)}`,
       });
     }
   }
@@ -312,7 +312,7 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
           table: shape.table,
           onlyIn,
           [onlyIn]: shape,
-          message: `${label} ${name} só existe no ${PATH_LABEL[onlyIn]}`,
+          message: `${label} ${name} only exists in ${PATH_LABEL[onlyIn]}`,
         });
       } else if (!sameJson(left, right)) {
         differences.push({
@@ -321,7 +321,7 @@ export function diffSchemas(upgraded: NormalizedSchema, fresh: NormalizedSchema)
           table: left.table,
           upgraded: left,
           fresh: right,
-          message: `${label} ${name} difere — atualizado: ${left.sql}; novo: ${right.sql}`,
+          message: `${label} ${name} differs — updated: ${left.sql}; new: ${right.sql}`,
         });
       }
     }
@@ -340,7 +340,7 @@ type CliOptions = {
 
 const USAGE =
   "uso: migration-commutation.ts --base-dir <dir> --head-dir <dir> " +
-  "[--must-not-apply <arquivo.sql>]... [--merged-base] [--json]";
+  "[--must-not-apply <file.sql>]... [--merged-base] [--json]";
 
 /**
  * A bare migration file name the runner loads: no directory part, `<digits>_<name>.sql` (the
@@ -366,8 +366,8 @@ export function parseArgs(argv: readonly string[]): CliOptions {
       const value = inlineValue ?? argv[++index];
       if (!value || !SQL_FILE_NAME.test(value)) {
         throw new InfrastructureError(
-          `--must-not-apply exige o nome de um arquivo .sql de migration de --head-dir ` +
-            `(<dígitos>_<descrição>.sql, o formato que o runner carrega), sem diretório ` +
+          `--must-not-apply requires the name of a migration .sql file from --head-dir ` +
+            `(<digits>_<description>.sql, the format that the runner loads), no directory ` +
             `(recebido: ${value ?? "nada"})`
         );
       }
@@ -375,12 +375,12 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     } else if (flag === "--base-dir" || flag === "--head-dir") {
       const value = inlineValue ?? argv[++index];
       if (!value || value.startsWith("--")) {
-        throw new InfrastructureError(`${flag} exige um diretório`);
+        throw new InfrastructureError(`${flag} requires a directory`);
       }
       if (flag === "--base-dir") baseDir = value;
       else headDir = value;
     } else {
-      throw new InfrastructureError(`argumento desconhecido: ${arg}`);
+      throw new InfrastructureError(`unknown argument: ${arg}`);
     }
   }
   if (!baseDir || !headDir) {
@@ -400,9 +400,9 @@ function assertDirectory(label: string, dir: string): void {
   try {
     stat = fs.statSync(dir);
   } catch {
-    throw new InfrastructureError(`${label} não existe: ${dir}`);
+    throw new InfrastructureError(`${label} does not exist: ${dir}`);
   }
-  if (!stat.isDirectory()) throw new InfrastructureError(`${label} não é um diretório: ${dir}`);
+  if (!stat.isDirectory()) throw new InfrastructureError(`${label} is not a directory: ${dir}`);
 }
 
 /**
@@ -448,7 +448,7 @@ function bootOnce(
     child.stdout.on("data", (chunk: Buffer) => (output += chunk.toString()));
     child.stderr.on("data", (chunk: Buffer) => (output += chunk.toString()));
     child.on("error", (error) =>
-      reject(new InfrastructureError(`boot ${label}: não foi possível iniciar: ${error.message}`))
+      reject(new InfrastructureError(`boot ${label}: unable to start: ${error.message}`))
     );
     child.on("close", (code, signal) => {
       if (code === MIGRATION_FAILED_EXIT_CODE) {
@@ -474,10 +474,10 @@ function bootOnce(
         }
       }
       if (code !== 0) {
-        const how = signal ? `sinal ${signal}` : `código ${code}`;
+        const how = signal ? `sign ${signal}` : `code ${code}`;
         reject(
           new InfrastructureError(
-            `boot ${label} (OMNIROUTE_MIGRATIONS_DIR=${migrationsDir}) falhou com ${how}:\n` +
+            `boot ${label} (OMNIROUTE_MIGRATIONS_DIR=${migrationsDir}) failed with ${how}:\n` +
               tail(output)
           )
         );
@@ -488,7 +488,7 @@ function bootOnce(
         written = JSON.parse(fs.readFileSync(outputFile, "utf8")) as Partial<BootResult>;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        reject(new InfrastructureError(`boot ${label}: schema ilegível (${message})`));
+        reject(new InfrastructureError(`boot ${label}: unreadable schema (${message})`));
         return;
       }
       const applied = written.appliedMigrations;
@@ -500,7 +500,7 @@ function bootOnce(
       ) {
         reject(
           new InfrastructureError(
-            `boot ${label}: saída sem schema ou sem a lista de migrations aplicadas`
+            `boot ${label}: output without schema or without the list of applied migrations`
           )
         );
         return;
@@ -540,7 +540,7 @@ export function failsOnUpgradedPath(differences: readonly Difference[]): boolean
  * The exact phrase of contract C2 with scripts/check/check-migration-numbering.mjs, printed
  * with the file name for every --must-not-apply file the upgraded database applied again.
  */
-export const REAPPLIED_PHRASE = "aplicada de novo no banco atualizado";
+export const REAPPLIED_PHRASE = "applied again in the updated database";
 
 function reappliedDifference(file: string, attempted: boolean): Difference {
   return {
@@ -548,9 +548,9 @@ function reappliedDifference(file: string, attempted: boolean): Difference {
     name: file,
     ...(attempted ? { attempted: true } : {}),
     message:
-      `migration ${file} ${REAPPLIED_PHRASE}: o segundo boot do caminho atualizado ` +
-      (attempted ? "tentou aplicá-la outra vez (e ela falhou)" : "aplicou-a outra vez") +
-      ", quando devia só mover a linha dela no _omniroute_migrations",
+      `migration ${file} ${REAPPLIED_PHRASE}: the second boot from the updated path ` +
+      (attempted ? "tried to apply it again (and it failed)" : "applied it again") +
+      ", when I should just move its line in _omniroute_migrations",
   };
 }
 
@@ -573,8 +573,8 @@ function findReapplied(
   if (!(reason instanceof MigrationBootError)) return [];
   if (reason.appliedMigrations === null) {
     throw new InfrastructureError(
-      `boot ${reason.label}: não foi possível ler quais migrations ele aplicou antes de ` +
-        `${reason.failure.file} falhar, e há --must-not-apply a conferir`
+      `boot ${reason.label}: could not read which migrations it applied before ` +
+        `${reason.failure.file} fails, and there is --must-not-apply to check`
     );
   }
   const applied = reason.appliedMigrations;
@@ -594,13 +594,13 @@ export async function checkCommutation(
   for (const file of mustNotApply) {
     if (!SQL_FILE_NAME.test(file)) {
       throw new InfrastructureError(
-        `--must-not-apply exige o nome de um arquivo .sql de --head-dir, sem diretório ` +
+        `--must-not-apply requires the name of a .sql file from --head-dir, no directory ` +
           `(recebido: ${file})`
       );
     }
     if (!fs.existsSync(path.join(headDir, file))) {
       // A name the head does not have could never be applied: the check would pass blind.
-      throw new InfrastructureError(`--must-not-apply: ${file} não existe em --head-dir`);
+      throw new InfrastructureError(`--must-not-apply: ${file} does not exist in --head-dir`);
     }
   }
 
@@ -640,7 +640,7 @@ export async function checkCommutation(
       }
       try {
         const result = await bootOnce(
-          "atualizado 2/2 (head sobre o banco da base)",
+          "updated 2/2 (head over base bench)",
           dirs.upgradedData,
           dirs.upgradedHome,
           headDir,
@@ -654,7 +654,7 @@ export async function checkCommutation(
       }
     })();
     const freshPath = bootOnce(
-      "novo (head)",
+      "new (head)",
       dirs.freshData,
       dirs.freshHome,
       headDir,
@@ -668,8 +668,8 @@ export async function checkCommutation(
       const reason: unknown = upgradedResult.reason;
       if (reason instanceof MigrationBootError) {
         throw new InfrastructureError(
-          `boot ${reason.label}: a base não instala sozinha — a migration ` +
-            `${reason.failure.file} falhou ao ser aplicada: ${reason.failure.message}`
+          `boot ${reason.label}: the base does not install itself — the migration ` +
+            `${reason.failure.file} failed to apply: ${reason.failure.message}`
         );
       }
       throw reason;
@@ -688,7 +688,7 @@ export async function checkCommutation(
         name: failure.file,
         failedIn: pathName,
         message:
-          `migration ${failure.file} falhou ao ser aplicada no ${PATH_LABEL[pathName]}: ` +
+          `migration ${failure.file} failed to be applied to ${PATH_LABEL[pathName]}: ` +
           failure.message,
       });
     }
@@ -713,24 +713,24 @@ export async function checkCommutation(
  * only (pinned by tests/unit/db/migration-commutation.test.ts and the gate's e2e tests): the
  * gate keys on contract C1 (NOT_APPLIED_AFTER_BASE_PHRASE), which is always printed with it.
  */
-export const BROKEN_ON_BOTH_PATHS_PHRASE = "não aplica em nenhum dos dois caminhos";
+export const BROKEN_ON_BOTH_PATHS_PHRASE = "does not apply to either path";
 
 /**
  * Contract C1 with scripts/check/check-migration-numbering.mjs: printed whenever at least one
  * PR migration failed on the upgraded path (whether or not it also failed on the fresh one).
  * Keep it on one line.
  */
-export const NOT_APPLIED_AFTER_BASE_PHRASE = "não aplica depois de todas as migrations da base";
+export const NOT_APPLIED_AFTER_BASE_PHRASE = "does not apply after all base migrations";
 
 /** The three cases the gate runs this check for; the gate names the actual one below. */
 const CASE_BULLETS =
-  "    · migration nova fora de ordem → dê a ela um carimbo novo com\n" +
-  "      `npm run db:new-migration -- <descrição>` (depois de todas as da base) e apague o\n" +
-  "      arquivo antigo do PR;\n" +
-  "    · migration já mesclada e editada → devolva o conteúdo da base e faça a mudança numa\n" +
-  "      migration nova (bancos atualizados não reaplicam o que já está no ledger);\n" +
-  "    · migration renomeada → desfaça a renomeação (volte ao nome antigo) ou escolha outro\n" +
-  "      carimbo novo em que ela comute; nunca o mesmo carimbo com outro nome.";
+  " · new migration out of order → give it a new stamp with\n" +
+  " `npm run db:new-migration -- <description>` (after all the base ones) and delete the\n" +
+  "old PR file;\n" +
+  " · migration already merged and edited → return the contents of the base and make the change in one\n" +
+  "new migration (updated banks do not reapply what is already in the ledger);\n" +
+  " · migration renamed → undo the rename (go back to the old name) or choose another\n" +
+  " new stamp with which she commutes; never the same stamp with another name.";
 
 /**
  * --merged-base (the gate compares with a release tag, as Release-Green does): every compared
@@ -738,9 +738,9 @@ const CASE_BULLETS =
  * editing it is not a fix. Only a new migration is.
  */
 const MERGED_FIX_FORWARD =
-  "    · a base é uma tag de release e os arquivos comparados já estão mesclados na branch →\n" +
-  "      não renomeie nem edite: corrija para frente com uma migration nova\n" +
-  "      (`npm run db:new-migration -- <descrição>`) que leve os dois caminhos ao mesmo schema.";
+  " · the base is a release tag and the compared files are already merged into the branch →\n" +
+  "don't rename or edit: fix it forward with a new migration\n" +
+  " (`npm run db:new-migration -- <description>`) that takes both paths to the same schema.";
 
 const caseBullets = (mergedBase: boolean): string =>
   mergedBase ? MERGED_FIX_FORWARD : CASE_BULLETS;
@@ -753,8 +753,8 @@ const caseBullets = (mergedBase: boolean): string =>
  * produced a schema and they differ.
  */
 const HOW_TO_FIX_HEAD =
-  "  → aplicadas depois da base (banco já instalado), as migrations comparadas dão um schema\n" +
-  "    diferente do de uma instalação nova, que aplica tudo na ordem dos nomes. A correção\n" +
+  " → applied after the base (base already installed), the migrations compared give a schema\n" +
+  " different from a new installation, which applies everything in the order of names. The correction\n" +
   "    depende do caso (pelo gate, o caso vem indicado logo abaixo):\n";
 
 /**
@@ -764,15 +764,15 @@ const HOW_TO_FIX_HEAD =
  * a larger stamp, which a new stamp puts first.
  */
 const HOW_TO_FIX_FAILED_UPGRADED_HEAD =
-  `  → a migration do PR ${NOT_APPLIED_AFTER_BASE_PHRASE}, que é a ordem\n` +
-  "    de um banco já instalado (um carimbo novo sozinho não muda isso):\n";
+  ` → the PR migration ${NOT_APPPLIED_AFTER_BASE_PHRASE}, which is the order\n`
+  " from an already installed bank (a new stamp alone doesn't change this):\n";
 
 const HOW_TO_FIX_FAILED_UPGRADED_PR =
-  "    corrija o SQL contra o schema atual da base;\n" +
-  "    se ela depende de outra migration do PR com carimbo maior, dê a ela um carimbo novo com\n" +
-  "    `npm run db:new-migration -- <descrição>`.";
+  "correct the SQL against the current database schema;\n" +
+  "if it depends on another PR migration with a larger stamp, give it a new stamp with\n" +
+  " `npm run db:new-migration -- <description>`.";
 
-const BROKEN_ON_BOTH_PATHS_LINE = `  → a migration do PR ${BROKEN_ON_BOTH_PATHS_PHRASE} (banco atualizado e instalação nova).`;
+const BROKEN_ON_BOTH_PATHS_LINE = ` → PR migration ${BROKEN_ON_BOTH_PATHS_PHRASE} (updated database and new installation).`;
 
 /**
  * Failures on the fresh path only: the name order changes the outcome. Either the failing
@@ -780,16 +780,16 @@ const BROKEN_ON_BOTH_PATHS_LINE = `  → a migration do PR ${BROKEN_ON_BOTH_PATH
  * stamp already created (the failing file can then be a base one, not the PR's).
  */
 const HOW_TO_FIX_FAILED_FRESH_ONLY_HEAD =
-  "  → tudo aplica no banco atualizado, mas uma instalação nova, que aplica tudo na ordem dos\n" +
-  "    nomes, falha: a ordem muda o resultado (a migration que falhou depende de algo que vem\n" +
-  "    depois dela, ou colide com algo que uma migration de carimbo menor já criou). A correção\n" +
+  " → everything applies to the updated database, but a new installation, which applies everything in order of\n" +
+  " names, failure: the order changes the result (the failed migration depends on something that comes\n" +
+  " after it, or it collides with something that a minor stamp migration has already created). The fix\n" +
   "    depende do caso (pelo gate, o caso vem indicado logo abaixo):\n";
 
 const HOW_TO_FIX_REAPPLIED =
-  "  → bancos que já aplicaram essa migration com o nome antigo vão rodá-la outra vez. O runner\n" +
-  "    só move a linha do ledger quando reconhece a renomeação por uma entrada de\n" +
-  "    RENAMED_MIGRATION_COMPATIBILITY com carimbo diferente do antigo (no mesmo carimbo ele\n" +
-  "    apaga a linha antiga e reaplica o arquivo). Mantenha o nome antigo ou corrija a entrada.";
+  " → banks that have already applied this migration with the old name will run it again. The runner\n" +
+  "only moves the ledger line when it recognizes the renaming by an entry of\n" +
+  " RENAMED_MIGRATION_COMPATIBILITY with a stamp different from the old one (with the same stamp\n" +
+  " delete the old line and reapply the file). Keep the old name or correct the entry.";
 
 /**
  * The hints for a non-empty list of differences, most specific first. `mergedBase` (the base is
@@ -835,15 +835,15 @@ async function main(): Promise<number> {
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     } else if (result.equal) {
       console.log(
-        `${TAG} OK: o schema do banco atualizado (base, depois o PR) é igual ao de uma ` +
-          "instalação nova (tudo em ordem)." +
+        `${TAG} OK: the updated database schema (base, then the PR) is the same as that of a ` +
+          "new installation (everything in order)." +
           (options.mustNotApply.length > 0
-            ? ` Nenhuma destas foi aplicada de novo: ${options.mustNotApply.join(", ")}.`
+            ? ` None of these were applied again: ${options.mustNotApply.join(", ")}.`
             : "")
       );
     } else {
       console.error(
-        `${TAG} ✗ ${result.differences.length} diferença(s) entre o banco atualizado e o novo:`
+        `${TAG} ✗ ${result.differences.length} difference(s) between the updated database and the new one:`
       );
       for (const difference of result.differences) {
         console.error(`  - ${difference.message}`);

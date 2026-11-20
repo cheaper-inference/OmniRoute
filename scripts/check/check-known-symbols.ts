@@ -1,58 +1,58 @@
 #!/usr/bin/env node
 // scripts/check/check-known-symbols.ts
-// Gate anti-alucinação: known-symbol allow-lists. Mata o padrão "símbolo inventado
-// que silenciosamente vira no-op" em seis superfícies de despacho por-string/por-chave:
+// Anti-hallucination gate: known-symbol allow-lists. Kills the pattern "invented symbol
+// that silently becomes a no-op" across six string/key-based dispatch surfaces:
 //
-//   (1) EXECUTOR CONFORMANCE — toda entrada registrada no mapa de executores
-//       (open-sse/executors/index.ts) DEVE resolver, via getExecutor(), para uma
-//       instância de BaseExecutor que expõe execute() + getProvider(). Um alias que
-//       não resolve para um executor válido é um símbolo morto (roteia para fallback
-//       silencioso em vez de falhar).
+//   (1) EXECUTOR CONFORMANCE — every entry registered in the executor map
+//       (open-sse/executors/index.ts) MUST resolve, via getExecutor(), to a
+//       BaseExecutor instance exposing execute() + getProvider(). An alias that
+//       does not resolve to a valid executor is a dead symbol (routes to silent
+//       fallback instead of failing).
 //
-//   (2) COMBO STRATEGIES — o despacho DEVE tratar exatamente o conjunto canônico de
+//   (2) COMBO STRATEGIES — the dispatch MUST handle exactly the canonical set of
 //       ROUTING_STRATEGY_VALUES ∪ INTERNAL_ROUTING_STRATEGY_VALUES
-//       (src/shared/constants/routingStrategies.ts), exceto as estratégias-default
-//       implícitas documentadas em IMPLICIT_DEFAULT_STRATEGIES (estratégias canônicas
-//       sem ramo de despacho próprio; caem no ordenamento padrão). Em vez de casar
-//       literais `strategy === "..."` por regex sobre a fonte, o conjunto tratado
-//       (handled) vem de uma enumeração em runtime importada de
-//       open-sse/services/combo/strategyDispatch.ts — o módulo que importa as funções
-//       reais de ordenação/despacho e lista quais estratégias elas implementam. Adicionar
-//       um valor canônico sem fiá-lo no despacho/e na enumeração, ou fiar uma string de
-//       estratégia que não é canônica (inventada), falha aqui.
+//       (src/shared/constants/routingStrategies.ts), except the implicit default strategies
+//       documented in IMPLICIT_DEFAULT_STRATEGIES (canonical strategies
+//       with no dispatch branch of their own; they fall through to default ordering). Instead of matching
+//       `strategy === "..."` literals by regex over the source, the handled set
+//       (handled) comes from a runtime enumeration imported from
+//       open-sse/services/combo/strategyDispatch.ts — the module that imports the real
+//       ordering/dispatch functions and lists which strategies they implement. Adding
+//       a canonical value without wiring it into the dispatch/enumeration, or wiring a
+//       non-canonical (invented) strategy string, fails here.
 //
-//   (3) TRANSLATOR PAIRS — os pares from:to registrados em runtime no registry de
-//       tradutores (após bootstrap) são congelados em KNOWN_TRANSLATOR_PAIRS. Catraca:
-//       se um par registrado some, falha (regressão de cobertura de formato). Pares
-//       novos não falham — apenas são reportados — para não bloquear adições legítimas.
+//   (3) TRANSLATOR PAIRS — the from:to pairs registered at runtime in the translator
+//       registry (after bootstrap) are frozen in KNOWN_TRANSLATOR_PAIRS. Ratchet:
+//       if a registered pair disappears, fail (format coverage regression). New
+//       pairs do not fail — they are only reported — so legitimate additions are not blocked.
 //
-//   (4) MCP TOOLS — todos os tools registrados em createMcpServer() (base MCP_TOOLS +
+//   (4) MCP TOOLS — all tools registered in createMcpServer() (base MCP_TOOLS +
 //       memoryTools + skillTools + gamificationTools + pluginTools + notionTools +
-//       obsidianTools) DEVEM ter ao menos um escopo atribuído (scope-enforcement). Os
-//       nomes são congelados em KNOWN_MCP_TOOL_NAMES. Catraca: tool removido = fail.
-//       Tool novo = report (não bloqueia adições legítimas).
+//       obsidianTools) MUST have at least one assigned scope (scope-enforcement). The
+//       names are frozen in KNOWN_MCP_TOOL_NAMES. Ratchet: removed tool = fail.
+//       New tool = report (does not block legitimate additions).
 //
-//   (5) A2A SKILLS — chaves de A2A_SKILL_HANDLERS (src/lib/a2a/taskExecution.ts) DEVEM
+//   (5) A2A SKILLS — keys of A2A_SKILL_HANDLERS (src/lib/a2a/taskExecution.ts) MUST
 //       bater bidirecionalmente com skills[].id expostos no Agent Card
-//       (src/lib/a2a/agentCardMetadata.ts). Divergência em qualquer direção = fail.
+//       (src/lib/a2a/agentCardMetadata.ts). Mismatch in either direction = fail.
 //
-//   (6) CLOUD AGENTS — entradas de AGENTS em src/lib/cloudAgent/registry.ts DEVEM bater
-//       bidirecionalmente com os arquivos de classe em src/lib/cloudAgent/agents/
-//       (basename sem extensão). Divergência = fail.
+//   (6) CLOUD AGENTS — AGENTS entries in src/lib/cloudAgent/registry.ts MUST match
+//       bidirectionally with the class files in src/lib/cloudAgent/agents/
+//       (basename without extension). Mismatch = fail.
 //
-// Catraca: cada divergência pré-existente fica numa allowlist documentada e sai 0 hoje.
-// Padrão herdado de scripts/check/check-provider-consistency.ts (gate .ts via
-// `node --import tsx` que IMPORTA módulos reais + funções puras + main() guardado).
+// Ratchet: each pre-existing mismatch lives in a documented allowlist and is 0 today.
+// Pattern inherited from scripts/check/check-provider-consistency.ts (a .ts gate via
+// `node --import tsx` that IMPORTS real modules + pure functions + a guarded main()).
 //
-// Stale-enforcement (6A.3): a ÚNICA allowlist de SUPRESSÃO deste gate é
-// IMPLICIT_DEFAULT_STRATEGIES — cada entrada suprime uma violação `canonicalNotHandled`
-// (estratégia canônica sem branch de despacho). Uma entrada que não suprime mais
-// nenhuma violação real (porque a estratégia ganhou um branch `strategy === "..."`)
-// é obsoleta → o gate falha com instrução de remoção, fechando o furo de regressão
-// silenciosa. As demais listas (KNOWN_TRANSLATOR_PAIRS, KNOWN_MCP_TOOL_NAMES) NÃO são
-// allowlists de supressão e sim snapshots-catraca (falham na REMOÇÃO, não na presença):
-// uma entrada nelas exige que o par/tool continue VIVO no registry — o oposto de
-// supressão — então a semântica de stale-enforcement não se aplica a elas.
+// Stale-enforcement (6A.3): the ONLY suppression allowlist of this gate is
+// IMPLICIT_DEFAULT_STRATEGIES — each entry suppresses a `canonicalNotHandled` violation
+// (canonical strategy with no dispatch branch). An entry that no longer suppresses
+// any real violation (because the strategy gained a `strategy === "..."` branch)
+// is stale → the gate fails with removal instructions, closing the silent-regression
+// hole. The other lists (KNOWN_TRANSLATOR_PAIRS, KNOWN_MCP_TOOL_NAMES) are NOT
+// suppression allowlists but ratchet snapshots (they fail on REMOVAL, not presence):
+// an entry in them requires the pair/tool to stay ALIVE in the registry — the opposite of
+// suppression — so stale-enforcement semantics do not apply to them.
 
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -63,22 +63,22 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolvePath(HERE, "..", "..");
 
 // ───────────────────────────────────────────────────────────────────────────
-// (2) COMBO STRATEGIES — fonte canônica + defaults implícitos
+// (2) COMBO STRATEGIES — canonical source + implicit defaults
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
- * Estratégias canônicas que NÃO têm um branch `strategy === "..."` na cadeia de
- * despacho porque são o comportamento padrão (sem reordenamento explícito). Cada
- * uma documentada. Adicionar aqui se uma estratégia canônica não tiver NENHUMA
- * referência `strategy === "..."` em combo.ts (do contrário extractHandledStrategies
- * já a considera tratada e a entrada vira obsoleta — stale-enforcement abaixo falha).
+ * Canonical strategies that do NOT have a `strategy === "..."` branch in the
+ * dispatch chain because they are the default behavior (no explicit reordering). Each
+ * one documented. Add here if a canonical strategy has NO
+ * `strategy === "..."` reference in combo.ts (otherwise extractHandledStrategies
+ * already considers it handled and the entry becomes stale — stale-enforcement below fails).
  *
- * Atualmente vazio: a entrada `priority` foi removida porque combo.ts passou a
- * referenciar `strategy === "priority"` (pre-screen de latência em resolveComboTargets),
- * o que torna `priority` já-tratada por extractHandledStrategies — a supressão não
- * suprimia mais nenhuma violação `canonicalNotHandled` (era stale). Se o pre-screen
- * for removido no futuro, `priority` reaparecerá como `canonicalNotHandled` e o gate
- * pedirá para refiá-la no despacho OU redocumentá-la aqui.
+ * Currently empty: the `priority` entry was removed because combo.ts started
+ * referencing `strategy === "priority"` (latency pre-screen in resolveComboTargets),
+ * which makes `priority` already-handled by extractHandledStrategies — the suppression no
+ * longer suppressed any `canonicalNotHandled` violation (it was stale). If the pre-screen
+ * is removed in the future, `priority` will reappear as `canonicalNotHandled` and the gate
+ * will ask to wire it into the dispatch OR re-document it here.
  */
 export const IMPLICIT_DEFAULT_STRATEGIES: Record<string, string> = {};
 
@@ -86,12 +86,12 @@ export const IMPLICIT_DEFAULT_STRATEGIES: Record<string, string> = {};
  * Extrai todas as strings literais de `strategy === "..."` / `strategy !== "..."`
  * da fonte do combo.
  *
- * Ambas as formas contam como despacho fiado. A decomposição do god-file (#3501)
- * troca `if (strategy === "X") { ...corpo... }` por uma leaf `tryXDispatch()` cujo
- * guard de saída antecipada é `if (strategy !== "X") return null;` — mesma branch,
- * forma invertida. Reconhecer só `===` faria o gate acusar `canonicalNotHandled`
- * para uma estratégia que continua perfeitamente fiada, e pressionaria o código a
- * se contorcer para agradar a regex.
+ * Both forms count as wired dispatch. The god-file decomposition (#3501)
+ * swaps `if (strategy === "X") { ...body... }` for a leaf `tryXDispatch()` whose
+ * early-exit guard is `if (strategy !== "X") return null;` — same branch,
+ * inverted form. Recognizing only `===` would make the gate flag `canonicalNotHandled`
+ * for a strategy that is still perfectly wired, and would pressure the code to
+ * contort itself to please the regex.
  */
 export function extractHandledStrategies(comboSource: string): Set<string> {
   const handled = new Set<string>();
@@ -109,10 +109,10 @@ export type StrategyMismatch = {
 };
 
 /**
- * Compara o conjunto canônico (ROUTING_STRATEGY_VALUES) com o conjunto efetivamente
- * tratado (branches do despacho ∪ defaults implícitos).
- *   - canonicalNotHandled: estratégia canônica adicionada sem fiação no despacho.
- *   - handledNotCanonical: branch de despacho para uma string não-canônica (inventada).
+ * Compares the canonical set (ROUTING_STRATEGY_VALUES) with the effectively
+ * handled set (dispatch branches ∪ implicit defaults).
+ *   - canonicalNotHandled: canonical strategy added without dispatch wiring.
+ *   - handledNotCanonical: dispatch branch for a non-canonical (invented) string.
  */
 export function diffComboStrategies(
   canonical: readonly string[],
@@ -124,7 +124,7 @@ export function diffComboStrategies(
   for (const id of Object.keys(implicitDefaults)) effectivelyHandled.add(id);
 
   const canonicalNotHandled = [...canonicalSet].filter((s) => !effectivelyHandled.has(s));
-  // Strings tratadas que não são canônicas NEM defaults implícitos = inventadas.
+  // Handled strings that are neither canonical NOR implicit defaults = invented.
   const handledNotCanonical = [...handled].filter(
     (s) => !canonicalSet.has(s) && !(s in implicitDefaults)
   );
@@ -132,14 +132,14 @@ export function diffComboStrategies(
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// (1) EXECUTOR CONFORMANCE — parse do mapa + validação de conformidade
+// (1) EXECUTOR CONFORMANCE — map parse + conformance validation
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
- * Extrai as chaves (aliases) do objeto literal `const executors = { ... }` da fonte
- * de open-sse/executors/index.ts. O mapa não é exportado, então enumeramos pela fonte
- * (determinístico — é um literal simples). Cada chave é validada em runtime via
- * getExecutor() na função main().
+ * Extracts the keys (aliases) of the `const executors = { ... }` object literal from the source
+ * of open-sse/executors/index.ts. The map is not exported, so we enumerate from the source
+ * (deterministic — it is a simple literal). Each key is validated at runtime via
+ * getExecutor() in main().
  */
 export function extractExecutorAliases(indexSource: string): string[] {
   const start = indexSource.indexOf("const lazyExecutors");
@@ -156,23 +156,23 @@ export function extractExecutorAliases(indexSource: string): string[] {
   return keys;
 }
 
-/** Superfície pública mínima que todo executor registrado deve expor. */
+/** Minimal public surface that every registered executor must expose. */
 export type ExecutorLike = {
   execute?: unknown;
   getProvider?: unknown;
 };
 
 /**
- * Dada a lista de aliases e um resolvedor (getExecutor), retorna os aliases que NÃO
- * resolvem para um BaseExecutor válido (não é instância, ou falta execute/getProvider).
- * isInstance é injetado para manter a função pura/testável com inputs sintéticos.
+ * Given the list of aliases and a resolver (getExecutor), returns the aliases that do NOT
+ * resolve to a valid BaseExecutor (not an instance, or missing execute/getProvider).
+ * isInstance is injected to keep the function pure/testable with synthetic inputs.
  *
- * O resolvedor é aguardado: desde #11421 o registro é lazy e `getExecutor()` devolve
- * uma Promise (a classe só é importada e construída no primeiro uso). Sem o await,
- * TODO alias reprova — uma Promise nunca é `instanceof BaseExecutor` — e a checagem
- * deixa de proteger qualquer coisa. Uma rejeição também conta como não-conforme: com
- * carregamento lazy o import de um alias pode falhar em runtime, e esse é exatamente
- * o símbolo morto que esta sub-checagem existe para achar.
+ * The resolver is awaited: since #11421 registration is lazy and `getExecutor()` returns
+ * a Promise (the class is only imported and constructed on first use). Without the await,
+ * EVERY alias fails — a Promise is never `instanceof BaseExecutor` — and the check
+ * stops protecting anything. A rejection also counts as non-conformant: with
+ * lazy loading an alias's import may fail at runtime, and that is exactly the
+ * dead symbol this sub-check exists to find.
  */
 export async function findNonConformingExecutors(
   aliases: string[],
@@ -187,7 +187,7 @@ export async function findNonConformingExecutors(
       try {
         ex = await resolve(alias);
       } catch {
-        return true; // o alias não carrega — símbolo morto
+        return true; // the alias does not load — dead symbol
       }
       if (!ex || !isInstance(ex)) return true;
       return typeof ex.execute !== "function" || typeof ex.getProvider !== "function";
@@ -197,14 +197,14 @@ export async function findNonConformingExecutors(
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// (3) TRANSLATOR PAIRS — snapshot congelado (catraca: pares não somem)
+// (3) TRANSLATOR PAIRS — frozen snapshot (ratchet: pairs must not disappear)
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
- * Pares from:to congelados, registrados no registry de tradutores após bootstrap.
- * Snapshot real medido em 2026-06-09 (18 pares). Catraca: se um par some, falha.
- * Adicionar um par NÃO falha aqui (apenas reportado) — só remoções são regressões.
- * Para regravar após adicionar/remover legitimamente um adapter, atualize esta lista.
+ * Frozen from:to pairs, registered in the translator registry after bootstrap.
+ * Real snapshot measured on 2026-06-09 (18 pairs). Ratchet: if a pair disappears, fail.
+ * Adding a pair does NOT fail here (only reported) — only removals are regressions.
+ * To re-record after legitimately adding/removing an adapter, update this list.
  */
 export const KNOWN_TRANSLATOR_PAIRS: readonly string[] = [
   "antigravity:claude",
@@ -228,21 +228,21 @@ export const KNOWN_TRANSLATOR_PAIRS: readonly string[] = [
 ];
 
 /**
- * Pares frozen que sumiram do registry vivo (regressão). frozen = snapshot;
- * live = pares observados em runtime. Retorna os que estão no frozen mas não no live.
+ * Frozen pairs that disappeared from the live registry (regression). frozen = snapshot;
+ * live = pairs observed at runtime. Returns those in frozen but not in live.
  */
 export function findMissingTranslatorPairs(frozen: readonly string[], live: Set<string>): string[] {
   return frozen.filter((pair) => !live.has(pair));
 }
 
-/** Pares vivos que ainda não estão no snapshot frozen (informativo, não falha). */
+/** Live pairs not yet in the frozen snapshot (informational, does not fail). */
 export function findNewTranslatorPairs(frozen: readonly string[], live: Set<string>): string[] {
   const frozenSet = new Set(frozen);
   return [...live].filter((pair) => !frozenSet.has(pair)).sort();
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// (4) MCP TOOLS — scope check + snapshot catraca
+// (4) MCP TOOLS — scope check + ratchet snapshot
 // ───────────────────────────────────────────────────────────────────────────
 
 export type McpToolLike = {
@@ -472,7 +472,7 @@ export const AGENT_FILE_TO_REGISTRY_KEY: Record<string, string> = {
 };
 
 // ───────────────────────────────────────────────────────────────────────────
-// main() — importa módulos reais, lê fontes, roda as seis sub-checagens
+// main() — imports real modules, reads sources, runs the six sub-checks
 // ───────────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -490,16 +490,16 @@ async function main(): Promise<void> {
   const aliases = extractExecutorAliases(indexSource);
   if (aliases.length === 0) {
     failures.push(
-      "[executor] parse do mapa `executors` não encontrou nenhum alias (regex quebrada?)"
+      "[executor] parse of the `executors` map found no aliases (broken regex?)"
     );
   }
   const isExecutorInstance = (value: unknown) => value instanceof BaseExecutor;
   const badExecutors = await findNonConformingExecutors(aliases, getExecutor, isExecutorInstance);
   if (badExecutors.length) {
     failures.push(
-      `[executor] ${badExecutors.length} alias(es) registrado(s) não resolvem para um BaseExecutor válido (instância + execute() + getProvider()):\n` +
+      `[executor] ${badExecutors.length} registered alias(es) that do not resolve to a valid BaseExecutor (instance + execute() + getProvider()):\n` +
         badExecutors.map((a) => `    ✗ ${a}`).join("\n") +
-        `\n    → verifique a entrada em open-sse/executors/index.ts (classe importada/exportada e estende BaseExecutor).`
+        `\n    → check the entry in open-sse/executors/index.ts (class imported/exported and extends BaseExecutor).`
     );
   }
 
@@ -542,16 +542,16 @@ async function main(): Promise<void> {
   );
   if (canonicalNotHandled.length) {
     failures.push(
-      `[combo] ${canonicalNotHandled.length} estratégia(s) canônica(s) sem branch de despacho em combo.ts:\n` +
+      `[combo] ${canonicalNotHandled.length} canonical strategy(ies) with no dispatch branch in combo.ts:\n` +
         canonicalNotHandled.map((s) => `    ✗ ${s}`).join("\n") +
-        `\n    → fie no despacho (\`strategy === "${canonicalNotHandled[0]}"\`) ou documente em IMPLICIT_DEFAULT_STRATEGIES.`
+        `\n    → wire it into the dispatch (`strategy === "${canonicalNotHandled[0]}"`) or document it in IMPLICIT_DEFAULT_STRATEGIES.`
     );
   }
   if (handledNotCanonical.length) {
     failures.push(
-      `[combo] ${handledNotCanonical.length} string(s) de estratégia tratada(s) no despacho mas ausente(s) de ROUTING_STRATEGY_VALUES (inventada/órfã):\n` +
+      `[combo] ${handledNotCanonical.length} handled strategy string(s) in dispatch but absent from ROUTING_STRATEGY_VALUES (invented/orphaned):\n` +
         handledNotCanonical.map((s) => `    ✗ ${s}`).join("\n") +
-        `\n    → registre em src/shared/constants/routingStrategies.ts ou remova o branch morto.`
+        `\n    → register it in src/shared/constants/routingStrategies.ts or remove the dead branch.`
     );
   }
 
@@ -583,9 +583,9 @@ async function main(): Promise<void> {
   const missingPairs = findMissingTranslatorPairs(KNOWN_TRANSLATOR_PAIRS, livePairs);
   if (missingPairs.length) {
     failures.push(
-      `[translator] ${missingPairs.length} par(es) from:to congelado(s) sumiram do registry vivo (regressão):\n` +
+      `[translator] ${missingPairs.length} frozen from:to pair(s) disappeared from the live registry (regression):\n` +
         missingPairs.map((p) => `    ✗ ${p}`).join("\n") +
-        `\n    → restaure o adapter em open-sse/translator/ ou, se a remoção foi intencional, atualize KNOWN_TRANSLATOR_PAIRS.`
+        `\n    → restore the adapter in open-sse/translator/ or, if the removal was intentional, update KNOWN_TRANSLATOR_PAIRS.`
     );
   }
   const newPairs = findNewTranslatorPairs(KNOWN_TRANSLATOR_PAIRS, livePairs);
@@ -617,9 +617,9 @@ async function main(): Promise<void> {
   const toolsWithoutScopes = checkMcpToolsHaveScopes(liveMcpTools);
   if (toolsWithoutScopes.length) {
     failures.push(
-      `[mcp-tools] ${toolsWithoutScopes.length} tool(s) sem scope(s) atribuído(s) — todo tool registrado deve ter ao menos 1 scope para scope-enforcement:\n` +
+      `[mcp-tools] ${toolsWithoutScopes.length} tool(s) with no assigned scope(s) — every registered tool must have at least 1 scope for scope-enforcement:\n` +
         toolsWithoutScopes.map((n) => `    ✗ ${n}`).join("\n") +
-        `\n    → adicione o campo scopes: [...] na definição do tool.`
+        `\n    → add the scopes: [...] field to the tool definition.`
     );
   }
 
@@ -627,9 +627,9 @@ async function main(): Promise<void> {
   const missingMcpTools = findMissingMcpTools(KNOWN_MCP_TOOL_NAMES, liveMcpToolNames);
   if (missingMcpTools.length) {
     failures.push(
-      `[mcp-tools] ${missingMcpTools.length} tool(s) congelado(s) sumiram do registry vivo (regressão):\n` +
+      `[mcp-tools] ${missingMcpTools.length} frozen tool(s) disappeared from the live registry (regression):\n` +
         missingMcpTools.map((n) => `    ✗ ${n}`).join("\n") +
-        `\n    → restaure o tool ou, se a remoção foi intencional, atualize KNOWN_MCP_TOOL_NAMES.`
+        `\n    → restore the tool or, if the removal was intentional, update KNOWN_MCP_TOOL_NAMES.`
     );
   }
   const newMcpTools = findNewMcpTools(KNOWN_MCP_TOOL_NAMES, liveMcpToolNames);
@@ -652,23 +652,23 @@ async function main(): Promise<void> {
   }
   if (agentCardSkills.size === 0) {
     failures.push(
-      `[a2a-skills] parse do Agent Card não encontrou nenhum skill id (regex quebrada ou arquivo movido?)`
+      "[a2a-skills] parse of the Agent Card found no skill id (broken regex or file moved?)"
     );
   }
 
   const { inHandlersNotCard, inCardNotHandlers } = diffA2ASkills(handlerKeys, agentCardSkills);
   if (inHandlersNotCard.length) {
     failures.push(
-      `[a2a-skills] ${inHandlersNotCard.length} skill(s) em A2A_SKILL_HANDLERS mas ausente(s) do Agent Card (agentes não conseguem descobrir):\n` +
+      `[a2a-skills] ${inHandlersNotCard.length} skill(s) in A2A_SKILL_HANDLERS but absent from the Agent Card (agents cannot discover them):\n` +
         inHandlersNotCard.map((s) => `    ✗ ${s}`).join("\n") +
-        `\n    → adicione o skill em src/lib/a2a/agentCardMetadata.ts (skills array).`
+        `\n    → add the skill in src/lib/a2a/agentCardMetadata.ts (skills array).`
     );
   }
   if (inCardNotHandlers.length) {
     failures.push(
-      `[a2a-skills] ${inCardNotHandlers.length} skill(s) expostos no Agent Card mas ausente(s) de A2A_SKILL_HANDLERS (chamada silenciosamente falha):\n` +
+      `[a2a-skills] ${inCardNotHandlers.length} skill(s) exposed in the Agent Card but absent from A2A_SKILL_HANDLERS (call silently fails):\n` +
         inCardNotHandlers.map((s) => `    ✗ ${s}`).join("\n") +
-        `\n    → registre o handler em src/lib/a2a/taskExecution.ts (A2A_SKILL_HANDLERS).`
+        `\n    → register the handler in src/lib/a2a/taskExecution.ts (A2A_SKILL_HANDLERS).`
     );
   }
 
@@ -693,42 +693,42 @@ async function main(): Promise<void> {
   const { inRegistryNotFiles, inFilesNotRegistry } = diffCloudAgents(registryKeys, agentFileBases);
   if (inRegistryNotFiles.length) {
     failures.push(
-      `[cloud-agents] ${inRegistryNotFiles.length} chave(s) no registry sem arquivo de classe em agents/:\n` +
+      `[cloud-agents] ${inRegistryNotFiles.length} key(s) in the registry with no class file in agents/:\n` +
         inRegistryNotFiles.map((k) => `    ✗ ${k}`).join("\n") +
-        `\n    → crie o arquivo src/lib/cloudAgent/agents/<name>.ts ou atualize AGENT_FILE_TO_REGISTRY_KEY.`
+        `\n    → create the file src/lib/cloudAgent/agents/<name>.ts or update AGENT_FILE_TO_REGISTRY_KEY.`
     );
   }
   if (inFilesNotRegistry.length) {
     failures.push(
-      `[cloud-agents] ${inFilesNotRegistry.length} arquivo(s) em agents/ sem entrada no registry:\n` +
+      `[cloud-agents] ${inFilesNotRegistry.length} file(s) in agents/ with no registry entry:\n` +
         inFilesNotRegistry.map((f) => `    ✗ ${f}`).join("\n") +
-        `\n    → registre o agente em src/lib/cloudAgent/registry.ts ou adicione o alias em AGENT_FILE_TO_REGISTRY_KEY.`
+        `\n    → register the agent in src/lib/cloudAgent/registry.ts or add the alias in AGENT_FILE_TO_REGISTRY_KEY.`
     );
   }
 
-  // ── Resultado ─────────────────────────────────────────────────────────────
+  // ── Result ────────────────────────────────────────────────────────────────
   if (failures.length) {
     console.error(
       `[known-symbols] ${failures.length} sub-checagem(ns) falharam:\n\n${failures.join("\n\n")}`
     );
     process.exit(1);
   }
-  // assertNoStale (combo) seta process.exitCode=1 sem lançar — não imprima o OK
-  // enganoso; a mensagem de stale já foi logada no stderr pelo helper.
+  // assertNoStale (combo) sets process.exitCode=1 without throwing — do not print the OK
+  // misleading message; the stale message was already logged to stderr by the helper.
   if (process.exitCode === 1) return;
 
   const newPairsNote = newPairs.length
-    ? ` (${newPairs.length} par(es) novo(s) não-congelado(s): ${newPairs.join(", ")} — atualize KNOWN_TRANSLATOR_PAIRS se intencional)`
+    ? ` (${newPairs.length} new/unfrozen pair(s): ${newPairs.join(", ")} — update KNOWN_TRANSLATOR_PAIRS if intentional)`
     : "";
   const newMcpNote = newMcpTools.length
-    ? ` (${newMcpTools.length} tool(s) novo(s) não-congelado(s): ${newMcpTools.join(", ")} — atualize KNOWN_MCP_TOOL_NAMES se intencional)`
+    ? ` (${newMcpTools.length} new/unfrozen tool(s): ${newMcpTools.join(", ")} — update KNOWN_MCP_TOOL_NAMES if intentional)`
     : "";
   console.log(
     `[known-symbols] OK — ` +
-      `${aliases.length} executores conformes; ` +
-      `${canonical.length} estratégias canônicas (${handled.size} via despacho + ${Object.keys(IMPLICIT_DEFAULT_STRATEGIES).length} default(s) implícito(s)); ` +
-      `${livePairs.size} pares de tradutor vivos vs ${KNOWN_TRANSLATOR_PAIRS.length} congelados${newPairsNote}; ` +
-      `${liveMcpToolNames.size} tools MCP (${toolsWithoutScopes.length === 0 ? "todos com scope" : `${toolsWithoutScopes.length} sem scope`}) vs ${KNOWN_MCP_TOOL_NAMES.length} congelados${newMcpNote}; ` +
+      `${aliases.length} conformant executors; ` +
+      `${canonical.length} canonical strategies (${handled.size} via dispatch + ${Object.keys(IMPLICIT_DEFAULT_STRATEGIES).length} implicit default(s)); ` +
+      `${livePairs.size} live translator pairs vs ${KNOWN_TRANSLATOR_PAIRS.length} frozen${newPairsNote}; ` +
+      `${liveMcpToolNames.size} MCP tools (${toolsWithoutScopes.length === 0 ? "all with scope" : `${toolsWithoutScopes.length} without scope`}) vs ${KNOWN_MCP_TOOL_NAMES.length} frozen${newMcpNote}; ` +
       `${handlerKeys.size} A2A skills (handlers↔card OK); ` +
       `${registryKeys.size} cloud agents (registry↔files OK)`
   );

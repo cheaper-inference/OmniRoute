@@ -48,7 +48,7 @@ test.after(() => {
   } catch {}
 });
 
-test("tray/index.mjs pode ser importado sem erro", async () => {
+test("tray/index.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/tray/index.mjs");
   assert.equal(typeof mod.initTray, "function");
   assert.equal(typeof mod.killTray, "function");
@@ -61,12 +61,12 @@ test("isTraySupported retorna boolean", async () => {
   assert.equal(typeof isTraySupported(), "boolean");
 });
 
-test("isTrayActive retorna false antes de iniciar", async () => {
+test("isTrayActive returns false before starting", async () => {
   const { isTrayActive } = await import("../../bin/cli/tray/index.mjs");
   assert.equal(isTrayActive(), false);
 });
 
-test("tray/autostart.mjs pode ser importado sem erro", async () => {
+test("tray/autostart.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/tray/autostart.mjs");
   assert.equal(typeof mod.enable, "function");
   assert.equal(typeof mod.disable, "function");
@@ -98,12 +98,12 @@ test("autostart.enable registers Linux autostart (systemd and/or desktop)", asyn
   assert.equal(isAutostartEnabled(), false, "isAutostartEnabled deve ser false após disable");
 });
 
-test("commands/tray.mjs pode ser importado sem erro", async () => {
+test("commands/tray.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/tray.mjs");
   assert.equal(typeof mod.registerTray, "function");
 });
 
-test("commands/autostart.mjs pode ser importado sem erro", async () => {
+test("commands/autostart.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/autostart.mjs");
   assert.equal(typeof mod.registerAutostart, "function");
 });

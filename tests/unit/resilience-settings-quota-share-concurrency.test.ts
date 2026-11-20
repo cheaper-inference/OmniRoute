@@ -1,5 +1,5 @@
 /**
- * TDD — ResilienceSettings.quotaShareConcurrencyLimit (FASE 2.1, the
+ * TDD — ResilienceSettings.quotaShareConcurrencyLimit (PHASE 2.1, the
  * per-connection concurrency kill-switch for quota-share combos). Locks the
  * default, the resolve/merge round-trip, and the boolean normalization.
  */

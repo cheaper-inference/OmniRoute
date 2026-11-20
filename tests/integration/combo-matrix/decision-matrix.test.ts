@@ -1,6 +1,6 @@
 // tests/integration/combo-matrix/decision-matrix.test.ts
 //
-// KooshaPari's provider × status × envelope matrix from #8648 / #8251.
+// KooshaPari's provider × status × envelope matrix from
 // Diego closed #8648 in the v3.8.49 queue sweep and said the test-only
 // matrix was not rejected: mark it ready and it should land.
 //

@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — /api/tools/agent-bridge/tproxy route (decrypt 4b/N).
+ * Phase 3 / Epic A — /api/tools/agent-bridge/tproxy route (decrypt 4b/N).
  *
  * Drives the decrypt capture mode (start/stop/status). The route applies iptables
  * rules + installs a trust-store CA via child processes, so it MUST be local-only

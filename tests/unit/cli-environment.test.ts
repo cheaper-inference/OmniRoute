@@ -1,13 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-test("environment.mjs pode ser importado sem erro", async () => {
+test("environment.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/utils/environment.mjs");
   assert.equal(typeof mod.detectRestrictedEnvironment, "function");
   assert.equal(typeof mod.getEnvBanner, "function");
 });
 
-test("detectRestrictedEnvironment retorna objeto com type e flags", async () => {
+test("detectRestrictedEnvironment returns object with type and flags", async () => {
   const { detectRestrictedEnvironment } = await import("../../bin/cli/utils/environment.mjs");
   const result = detectRestrictedEnvironment();
   assert.ok(typeof result === "object" && result !== null);
@@ -33,7 +33,7 @@ test("detectRestrictedEnvironment detecta Codespaces via CODESPACES=true", async
 
 test("detectRestrictedEnvironment detecta WSL via WSL_DISTRO_NAME", async () => {
   const { detectRestrictedEnvironment } = await import("../../bin/cli/utils/environment.mjs");
-  // Skip se Codespaces (env pode estar setado no CI)
+  // Skip if Codespaces (env may be set in CI)
   if (process.env.CODESPACES === "true") return;
   const orig = process.env.WSL_DISTRO_NAME;
   process.env.WSL_DISTRO_NAME = "Ubuntu";
@@ -79,7 +79,7 @@ test("detectRestrictedEnvironment detecta Gitpod via GITPOD_WORKSPACE_ID", async
   }
 });
 
-test("getEnvBanner retorna null em ambiente desktop", async () => {
+test("getEnvBanner returns null in desktop environment", async () => {
   const { getEnvBanner, detectRestrictedEnvironment } =
     await import("../../bin/cli/utils/environment.mjs");
   const env = detectRestrictedEnvironment();
@@ -88,7 +88,7 @@ test("getEnvBanner retorna null em ambiente desktop", async () => {
   assert.equal(banner, null);
 });
 
-test("getEnvBanner retorna string em ambiente restrito (Gitpod)", async () => {
+test("getEnvBanner returns string in restricted environment (Gitpod)", async () => {
   const { getEnvBanner } = await import("../../bin/cli/utils/environment.mjs");
   if (process.env.CODESPACES === "true" || process.env.WSL_DISTRO_NAME) return;
   const orig = process.env.GITPOD_WORKSPACE_ID;

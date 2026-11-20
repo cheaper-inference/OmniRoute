@@ -182,7 +182,7 @@ test("refreshClaudeOAuthToken: 502 HTML gateway error stays null", async () => {
   );
 });
 
-// ── Previously-frágil refreshers that NEVER emitted a sentinel ──────────────
+// ── Previously-fragile refreshers that NEVER emitted a sentinel ──────────────
 // refreshClineToken / refreshQoderToken / refreshGitHubToken returned null on
 // ANY error → invalid_grant looked recoverable → HealthCheck refresh loop.
 

@@ -261,7 +261,7 @@ function checkI18nMirrorConsistency(fileName, sourcePath) {
  * Check i18n CHANGELOG mirrors by verifying that all version sections from the
  * root CHANGELOG exist in each translation. Unlike strict mirror files (llm.txt),
  * CHANGELOG translations have translated section headings (e.g. "Security" →
- * "Segurança"), so byte-for-byte comparison is intentionally skipped.
+ * "Security"), so byte-for-byte comparison is intentionally skipped.
  *
  * Validates:
  * 1. File exists in each locale

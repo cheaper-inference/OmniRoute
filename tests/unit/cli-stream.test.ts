@@ -64,7 +64,7 @@ test("runStreamCommand imprime deltas no stdout", async () => {
   assert.ok(out.includes("world"));
 });
 
-test("runStreamCommand --raw imprime linhas SSE brutas", async () => {
+test("runStreamCommand --raw prints raw SSE lines", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockStreamFetch([DELTA1]) as any;
 
@@ -78,7 +78,7 @@ test("runStreamCommand --raw imprime linhas SSE brutas", async () => {
   assert.ok(out.includes("data:"));
 });
 
-test("runStreamCommand --output json retorna chunks e métricas", async () => {
+test("runStreamCommand --output json returns chunks and metrics", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockStreamFetch([DELTA1, DELTA2]) as any;
 
@@ -94,7 +94,7 @@ test("runStreamCommand --output json retorna chunks e métricas", async () => {
   assert.ok(typeof parsed.metrics.totalMs === "number");
 });
 
-test("runStreamCommand --save grava eventos em arquivo", async () => {
+test("runStreamCommand --save writes events to file", async () => {
   const tmpDir = mkdtempSync(join(tmpdir(), "stream-test-"));
   const savePath = join(tmpDir, "events.jsonl");
   const origFetch = globalThis.fetch;

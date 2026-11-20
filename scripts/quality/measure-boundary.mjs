@@ -571,7 +571,7 @@ export function evaluateBoundaryRatchetRelative(measured, baseMeasured, ceiling)
   const drift = baseMeasured - ceiling;
   const warning =
     drift > 0
-      ? `[boundary] WARNING base drift herdado: ${drift} acima do teto — não é desta PR (the PR base already has ${baseMeasured} edges vs the baseline ceiling ${ceiling}; inherited, not blocking).`
+      ? `[boundary] WARNING base drift inherited: ${drift} above the ceiling — not from this PR (the PR base already has ${baseMeasured} edges vs the baseline ceiling ${ceiling}; inherited, not blocking).`
       : undefined;
   if (measured > effective) {
     return {

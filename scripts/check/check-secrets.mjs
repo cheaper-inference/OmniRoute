@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 // scripts/check/check-secrets.mjs
-// Catraca de secret scanning via gitleaks (Task 7.18 — Fase 7).
+// Secret scanning gate via gitleaks (Task 7.18 — Phase 7).
 //
-// Complementa `check-public-creds.mjs` (Fase 6, cobre credenciais OAuth públicas
-// conhecidas em 2 arquivos específicos): este gate pega a classe geral de secrets —
-// `const API_KEY = "sk-…"`, tokens em config/teste/docs, secrets em histórico.
+// Complements `check-public-creds.mjs` (Phase 6, covers known public OAuth credentials
+// known in 2 specific files): This gate takes the general class of secrets —
+// `const API_KEY = "sk-…"`, tokens in config/teste/docs, secrets in history.
 //
-// Saída (stdout):
-//   secretFindings=N      — número de findings do gitleaks
-//   secretFindings=SKIP reason=binary-absent   — gitleaks não está no PATH
+// Output (stdout):
+//   secretFindings=N      — number of gitleaks findings
+//   secretFindings=SKIP reason=binary-absent   — gitleaks is not in the PATH
 //
-// Por default é ADVISORY (sai 0 sempre). Passe --ratchet para tornar BLOQUEANTE:
-// lê metrics.secretFindings.value de config/quality/quality-baseline.json, compara
-// a contagem MEDIDA e SAI 1 SE — E SOMENTE SE — a medida for MAIOR que o baseline
-// (regressão real, direction:down). Qualquer SKIP gracioso (binário ausente, nenhum
-// dir de fonte) SAI 0 mesmo com --ratchet — falta de infraestrutura nunca bloqueia,
-// só uma regressão medida bloqueia.
+// By default, it is ADVISORY (always returns 0). Pass --ratchet to make it BLOCKING:
+// reads metrics.secretFindings.value from config/quality/quality-baseline.json, compares
+// the MEASURED count and EXITS 1 IF — AND ONLY IF — the measurement is GREATER than the baseline
+// (actual regression, direction:down). Any graceful SKIP (missing binary, no
+// source dir) EXITS 0 even with --ratchet — lack of infrastructure never blocks,
+// only a measured regression blocks.
 //
 // Uso:
 //   node scripts/check/check-secrets.mjs
 //   node scripts/check/check-secrets.mjs --json     # imprime JSON bruto do gitleaks
-//   node scripts/check/check-secrets.mjs --quiet    # suprime logs de diagnóstico
-//   node scripts/check/check-secrets.mjs --ratchet   # falha (exit 1) numa regressão
+// node scripts/check/check-secrets.mjs --quiet
+// node scripts/check/check-secrets.mjs --ratchet # fails (exit 1) in a regression
 
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -57,7 +57,7 @@ const SECRET_SCAN_DIRS = ["src", "open-sse", "bin", "electron", "scripts"];
 /**
  * Conta findings no JSON emitido por `gitleaks detect --report-format json`.
  *
- * O gitleaks emite um array de findings (ou array vazio / null quando limpo):
+ * Gitleaks outputs an array of findings (or empty/null array when cleared):
  * [
  *   {
  *     Description: string,
@@ -65,7 +65,7 @@ const SECRET_SCAN_DIRS = ["src", "open-sse", "bin", "electron", "scripts"];
  *     EndLine: number,
  *     Match: string,       // valor mascarado ou trecho
  *     Secret: string,      // valor mascarado
- *     File: string,        // caminho relativo
+ * File: string, // relative path
  *     Commit: string,
  *     Entropy: number,
  *     Author: string,
@@ -82,7 +82,7 @@ const SECRET_SCAN_DIRS = ["src", "open-sse", "bin", "electron", "scripts"];
  * @returns {{ findingCount: number, byRule: Record<string, number>, byFile: Record<string, number> }}
  */
 export function parseGitleaksJson(gitleaksJson) {
-  // null ou array vazio = nenhum finding
+  // null or empty array = no finding
   if (gitleaksJson === null || (Array.isArray(gitleaksJson) && gitleaksJson.length === 0)) {
     return { findingCount: 0, byRule: {}, byFile: {} };
   }
@@ -104,7 +104,7 @@ export function parseGitleaksJson(gitleaksJson) {
     const ruleId = finding.RuleID ?? finding.ruleId ?? "unknown";
     byRule[ruleId] = (byRule[ruleId] ?? 0) + 1;
 
-    // Agrupar por arquivo
+    // Group by file
     const file = finding.File ?? finding.file ?? "unknown";
     byFile[file] = (byFile[file] ?? 0) + 1;
   }
@@ -117,11 +117,11 @@ export function parseGitleaksJson(gitleaksJson) {
 // ---------------------------------------------------------------------------
 
 /**
- * Avalia a contagem MEDIDA de secrets contra o baseline.
- * Direction: down (a contagem só pode CAIR — mais secrets = regressão).
+ * Evaluates the MEASURED count of secrets against the baseline.
+ * Direction: down (the count can only DOWN — more secrets = regression).
  *
- * @param {number} current  - Contagem de findings medida agora.
- * @param {number} baseline - Contagem congelada em quality-baseline.json.
+ * @param {number} current - Count of findings measured now.
+ * @param {number} baseline - Frozen count in quality-baseline.json.
  * @returns {{ regressed: boolean, improved: boolean }}
  */
 export function evaluateSecretsRatchet(current, baseline) {
@@ -132,9 +132,9 @@ export function evaluateSecretsRatchet(current, baseline) {
 }
 
 /**
- * Lê metrics.secretFindings.value do quality-baseline.json.
- * Retorna null se o arquivo ou a métrica estiverem ausentes (sem baseline não há
- * ratchet possível — o caller trata como SKIP gracioso, exit 0).
+ * Reads metrics.secretFindings.value from quality-baseline.json.
+ * Returns null if the file or metric is missing (without baseline there is no
+ * ratchet possible — caller treats as graceful SKIP, exit 0).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -157,10 +157,10 @@ export function readBaselineSecretsValue(baselinePath = BASELINE_PATH) {
 // ---------------------------------------------------------------------------
 
 /**
- * Detecta se o binário `gitleaks` está disponível no PATH.
- * Usa `which` (Unix) sem interpolação de shell — Hard Rule #13.
+ * Detects whether the `gitleaks` binary is available in the PATH.
+ * Uses `which` (Unix) without shell interpolation — Hard Rule
  *
- * @returns {string|null} Caminho para o binário, ou null se ausente.
+ * @returns {string|null} Path to the binary, or null if absent.
  */
 export function findGitleaks() {
   try {
@@ -172,17 +172,17 @@ export function findGitleaks() {
       return result.stdout.trim();
     }
   } catch {
-    // which não disponível
+    // which not available
   }
 
-  // Fallback: tentar executar diretamente para verificar ENOENT
+  // Fallback: try to execute directly to check ENOENT
   try {
     const result = spawnSync("gitleaks", ["version"], {
       encoding: "utf8",
       timeout: 5_000,
     });
     if (result.error?.code === "ENOENT") return null;
-    if (result.status !== null) return "gitleaks"; // encontrado no PATH
+    if (result.status !== null) return "gitleaks"; // found in PATH
   } catch {
     // noop
   }
@@ -201,23 +201,23 @@ function main() {
     console.log("secretFindings=SKIP reason=binary-absent");
     if (!QUIET) {
       process.stderr.write(
-        "[check-secrets] SKIP — gitleaks não encontrado no PATH.\n" +
+        "[check-secrets] SKIP — gitleaks not found in PATH.\n" +
           "[check-secrets] Instale via: https://github.com/gitleaks/gitleaks\n" +
-          "[check-secrets] SKIP gracioso — sai 0 mesmo com --ratchet (binário ausente nunca bloqueia).\n"
+          "[check-secrets] graceful SKIP — returns 0 even with --ratchet (missing binary never blocks).\n"
       );
     }
     process.exitCode = 0;
     return;
   }
 
-  // Resolver os diretórios de fonte que realmente existem (robusto se um sumir).
+  
   const scanDirs = SECRET_SCAN_DIRS.filter((d) => fs.existsSync(path.join(ROOT, d)));
 
   if (scanDirs.length === 0) {
-    // Nenhum dir de fonte encontrado — nada a escanear (advisory, sai 0).
+    // No source dir found — nothing to scan (advisory, exits 0).
     console.log("secretFindings=0");
     if (!QUIET) {
-      process.stderr.write("[check-secrets] Nenhum diretório de fonte encontrado para escanear.\n");
+      process.stderr.write("[check-secrets] No font directory found to scan.\n");
     }
     process.exitCode = 0;
     return;
@@ -229,10 +229,10 @@ function main() {
     );
   }
 
-  // `gitleaks dir` aceita UM ÚNICO path posicional (uso: `gitleaks dir [flags]
+  // `gitleaks dir` accepts ONE SINGLE positional path (usage: `gitleaks dir [flags]
   // [path]`). Passar múltiplos paths faz o gitleaks ignorar os extras e cair para
-  // escanear o CWD inteiro (`.`) — o que re-traz node_modules/docs/tests e o
-  // timeout original. Por isso escaneamos CADA diretório de fonte em uma invocação
+  // scan the entire CWD (`.`) — which re-brings node_modules/docs/tests and the
+  // original timeout. That's why we scan EVERY source directory in one invocation
   // separada e concatenamos os findings.
   const gitleaksJson = [];
   for (const dir of scanDirs) {
@@ -258,7 +258,7 @@ function main() {
         timeout: 90_000, // 90s por dir — o scan escopado completa em ~10s; folga ampla
       });
     } catch (err) {
-      // exit 1 com stdout = findings encontrados (comportamento esperado do gitleaks)
+      // exit 1 with stdout = findings found (expected gitleaks behavior)
       stdout = err.stdout ? String(err.stdout) : "";
       const stderr = err.stderr ? String(err.stderr) : "";
 
@@ -266,7 +266,7 @@ function main() {
         // Normal: gitleaks achou findings neste dir e saiu com exit 1
       } else if (!stdout.trim()) {
         process.stderr.write(
-          `[check-secrets] ERRO ao executar gitleaks em '${dir}': ${err.message}\n`
+          `[check-secrets] ERROR when running gitleaks on '${dir}': ${err.message}\n`
         );
         if (stderr) process.stderr.write(`[check-secrets] stderr: ${stderr.slice(0, 500)}\n`);
         process.exit(2);
@@ -300,7 +300,7 @@ function main() {
 
   const { findingCount, byRule, byFile } = parseGitleaksJson(gitleaksJson);
 
-  // Emitir em formato KEY=VALUE para o coletor de métricas (collect-metrics.mjs)
+  // Send in KEY=VALUE format to the metrics collector (collect-metrics.mjs)
   console.log(`secretFindings=${findingCount}`);
 
   if (!QUIET) {
@@ -313,29 +313,29 @@ function main() {
       process.stderr.write(`[check-secrets] Findings: ${findingCount} (top rules: ${topRules})\n`);
       process.stderr.write(
         "[check-secrets] Para allowlistar findings legítimos (fixtures de teste, creds públicas),\n" +
-          "[check-secrets] adicione entradas em .gitleaks.toml [[allowlist]] com comentário.\n"
+          "[check-secrets] add entries in .gitleaks.toml [[allowlist]] with comment.\n"
       );
     } else {
-      process.stderr.write("[check-secrets] Nenhum finding detectado.\n");
+      process.stderr.write("[check-secrets] No findings detected.\n");
     }
   }
 
-  // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
+  // Measurement successful → applies ratchet (blocking only with --ratchet).
   applyRatchet(findingCount);
 }
 
 /**
- * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
- * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → SKIP gracioso (exit 0).
+ * Applies the ratchet (direction:down) on the measured count vs the baseline.
+ * Without --ratchet: advisory (exit 0). With --ratchet: exit 1 in a real regression
+ * (measurement > baseline). Missing baseline → Graceful SKIP (exit 0).
  *
- * @param {number} findingCount - Contagem MEDIDA (medição bem-sucedida).
+ * @param {number} findingCount - MEASURED count (successful measurement).
  */
 function applyRatchet(findingCount) {
   if (!RATCHET) {
     if (!QUIET) {
       process.stderr.write(
-        "[check-secrets] ADVISORY — não falha pela contagem (passe --ratchet para bloquear regressão).\n"
+        "[check-secrets] ADVISORY — does not fail by count (pass --ratchet to block regression).\n"
       );
     }
     process.exitCode = 0;
@@ -346,7 +346,7 @@ function applyRatchet(findingCount) {
   if (baselineValue === null) {
     if (!QUIET) {
       process.stderr.write(
-        "[check-secrets] baseline ausente (metrics.secretFindings) — SKIP gracioso, sai 0.\n"
+        "[check-secrets] missing baseline (metrics.secretFindings) — graceful SKIP, leaves 0.\n"
       );
     }
     process.exitCode = 0;
@@ -356,8 +356,8 @@ function applyRatchet(findingCount) {
   const { regressed } = evaluateSecretsRatchet(findingCount, baselineValue);
   if (regressed) {
     process.stderr.write(
-      `[check-secrets] REGRESSÃO — ${findingCount} secret findings > baseline ${baselineValue}\n` +
-        "  → Remova o novo secret (ou allowliste em .gitleaks.toml se for falso-positivo legítimo),\n" +
+      `[check-secrets] REGRESSION — ${findingCount} secret findings > baseline ${baselineValue}\n` +
+        " → Remove the new secret (or allowlist it in .gitleaks.toml if it is a legitimate false positive),\n" +
         "    depois re-baseline metrics.secretFindings em config/quality/quality-baseline.json.\n"
     );
     process.exitCode = 1;
@@ -366,7 +366,7 @@ function applyRatchet(findingCount) {
 
   if (!QUIET) {
     process.stderr.write(
-      `[check-secrets] OK — sem regressão (${findingCount} findings, baseline ${baselineValue}).\n`
+      `[check-secrets] OK — no regression (${findingCount} findings, baseline ${baselineValue}).\n`
     );
   }
   process.exitCode = 0;

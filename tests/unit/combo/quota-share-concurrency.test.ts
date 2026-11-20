@@ -1,7 +1,7 @@
 /**
  * tests/unit/combo/quota-share-concurrency.test.ts
  *
- * FASE 2.1: the per-connection concurrency slot for quota-share combos. These
+ * PHASE 2.1: the per-connection competition slot for quota-share combos. These
  * tests pin the contract of acquireQuotaShareConcurrencySlot against the real
  * semaphore module: no limit when there is no cap, a stable connection-scoped
  * key, genuine serialization (a second request WAITS until the first releases),

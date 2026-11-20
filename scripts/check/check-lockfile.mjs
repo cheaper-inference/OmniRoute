@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 // scripts/check/check-lockfile.mjs
-// Gate de política de lockfile (CLAUDE.md — extensão Hard Rule #1).
+// Lockfile policy gate (CLAUDE.md — Hard Rule #1 extension).
 //
-// Objetivo: detectar supply-chain poisoning no package-lock.json antes que código
+// Objective: Detect supply-chain poisoning in package-lock.json before code
 // malicioso entre no repo. Verifica:
-//   --validate-https       → toda URL "resolved" deve usar HTTPS (bloqueia http://)
-//   --validate-integrity   → todo pacote deve ter hash de integridade sha512
-//   --allowed-hosts npm    → apenas registry.npmjs.org é host permitido
+//   --validate-https       → Every "resolved" URL must use HTTPS (blocks http://)
+//   --validate-integrity   → Every package must have an sha512 integrity hash
+//   --allowed-hosts npm    → Only registry.npmjs.org is an allowed host
 //   npm ls --workspaces    → entradas do lockfile satisfazem cada workspace
 //
-// Complementa check-deps (Fase 2 / allowlist de nomes): aquele garante que só
+// Complements check-deps (Phase 2 / name allowlist): this ensures that only
 // nomes aprovados entram; este garante que os pacotes instalados vieram do registry
-// legítimo com integridade verificável.
+// legitimate with verifiable integrity.
 //
-// Referência: PLANO-QUALITY-GATES-FASE7.md, Task 7.7.
+// Reference: PLAN-QUALITY-GATES-PHASE7.md, Task 7.7.
 // Tool: lockfile-lint v5 (node_modules/.bin/lockfile-lint).
 
 import { execFileSync } from "node:child_process";

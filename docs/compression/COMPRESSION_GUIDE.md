@@ -513,11 +513,11 @@ together and are injected in catalog order.
 
 | Style                          | `id`            | What it does                                                                                                                                                                                                                           | Instruction languages                         |
 | ------------------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Terse prose                    | `terse-prose`   | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Less code                      | `less-code`     | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (lazy senior dev)     | `ponytail`      | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| I have ADHD (action-first)     | `i-have-adhd`   | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop UI filter             | `antislop-ui`   | Every visual technique must pass a purpose test (hierarchy, identity, readability); no default gradients/glass/glow, capped palette, no template layouts. Both antislop styles add a no-dead-controls / no-fabricated-claims boundary. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse prose | `terse-prose` | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Less code | `less-code` | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (lazy senior dev) | `ponytail` | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| I have ADHD (action-first) | `i-have-adhd` | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI filter | `antislop-ui` | Every visual technique must pass a purpose test (hierarchy, identity, readability); in the default gradients/glass/glow, capped palette, in the layouts template. Both antislop styles add a no-dead-controls / no-fabricated-claims boundary. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
 | Antislop copy and human filter | `antislop-copy` | Specific copy (no em dash, generic CTAs, buzzwords, chatbot closers, invented facts) plus people rules: WCAG AA contrast, visible focus, keyboard reach, empty/loading/error states, mobile reflow.                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
 | Terse CJK (文言)               | `terse-cjk`     | `full`/`ultra` answer in Classical Chinese (文言); `lite` only asks for brief answers without function words, pleasantries or embellishment.                                                                                           | zh (locale-gated, see below)                  |
 
@@ -612,7 +612,7 @@ latest user message in the request's `messages` array that has text (string cont
 the `text` of its content parts) and runs the Caveman engine's detector
 (`detectCompressionLanguage()`) on it. The detector returns `zh` for text with Han
 characters and no kana; otherwise it returns whichever of `it`, `pt-BR`, `es`, `de`,
-`fr`, `ru`, `ja`, `hu` and `id` has the most hint matches, and `en` when none match —
+`fr`, `ru`, `ja`, `hu` and `id` have the most hint matches, and `en` when none match —
 text it cannot classify gets English, never `defaultLanguage`, and `vi` is never
 detected although the styles ship `vi` text. A Responses API body keeps its turns in
 `input`, which is not sampled, so it gets `defaultLanguage`, then English. When no user
@@ -676,7 +676,7 @@ first enabled strategy whose check matches the content decides the result:
    last 3 repeat lines already kept).
 
 After a strategy matches, even one that saves nothing, the later strategies are not
-tried. When the matching strategy saves no estimated tokens (length ÷ 4, rounded up) —
+
 for example a code-like file of 25 lines or fewer, or a JSON array over 2,000
 characters with 7 items or fewer — the aggressive engine keeps the original tool
 result: both callers (`compressAggressive()` and `compressAnthropicToolResultBlock()`)

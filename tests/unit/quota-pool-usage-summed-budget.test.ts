@@ -75,7 +75,7 @@ test("usage endpoint still wraps the snapshot as { usage: snapshot }", () => {
 // Level B — logic: scaled limits correct fairShare and borrowing
 //
 // Replicates the per-key math from sqliteQuotaStore.poolUsageWithDimensions:
-//   fairShare = (weight / 100) × planDim.limit
+
 //   borrowing = consumed > fairShare
 // for a 27-connection pool where one key consumed more than its per-account
 // slice but far less than its share of the summed budget.
@@ -92,7 +92,7 @@ test("summed-budget snapshot: fairShare and borrowing describe the enforced budg
     return { fairShare, borrowing: CONSUMED > fairShare };
   };
 
-  // Unscaled (the bug): the key looks like a borrower at 27× the real threshold.
+  
   const unscaled = perKeySnapshot(PER_ACCOUNT_LIMIT);
   assert.ok(
     unscaled.borrowing,

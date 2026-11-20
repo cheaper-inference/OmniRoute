@@ -115,7 +115,7 @@ function assertNoStaleHashedNatives(baseDir, prefixes) {
 // Instead of compiling from source on every build (tens of seconds to minutes
 // per platform), we fail fast when the prebuild for the CURRENT build platform
 // is missing — a missing prebuild must kill the build here, not the app on a
-// user machine with "Nenhum driver SQLite disponível — better-sqlite3 (falhou)".
+// user machine with "No SQLite driver available — better-sqlite3 (failed)".
 
 function verifyBetterSqlite3Prebuilds(standaloneNodeModules) {
   const destMod = join(standaloneNodeModules, "better-sqlite3");

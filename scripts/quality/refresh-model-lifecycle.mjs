@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // scripts/quality/refresh-model-lifecycle.mjs
-// Regenera config/quality/model-lifecycle.json a partir das páginas de depreciação de
-// primeira mão listadas em `sources`. NÃO roda em CI (o gate check:model-lifecycle é
-// offline, por design): é uma ferramenta de manutenção, executada à mão quando um
-// fornecedor publica uma nova rodada de aposentadorias.
+// Regenerate config/quality/model-lifecycle.json from
+// first hand listed in `sources`. DOES NOT run on CI (the check:model-lifecycle gate is
+// offline, by design): is a maintenance tool, run by hand when a
+// supplier publishes a new round of retirements.
 //
-// Regra dura: o script NUNCA descarta uma entrada em silêncio. Fornecedor cuja página
-// não pôde ser parseada mantém as entradas atuais do snapshot e imprime
-// "manual review needed" — assim uma mudança de layout upstream vira um aviso, não uma
+// Hard rule: the script NEVER discards input silently. Supplier whose page
+// could not be parsed keeps the current snapshot entries and prints
+// "manual review needed" — so an upstream layout change becomes a warning, not a
 // perda de dados que abriria o gate.
 //
 // Uso:
@@ -31,9 +31,9 @@ const VENDOR_BY_HOST = {
 };
 
 /**
- * Parser da página da Anthropic: uma tabela markdown
+ * Anthropic page parser: a markdown table
  * `| API model name | Current state | Deprecated | Tentative retirement date |`.
- * Só linhas cujo estado contém "retired"/"deprecated" viram entradas.
+ * Only lines whose status contains "retired"/"deprecated" become entries.
  *
  * @returns {Record<string, {vendor: string, status: string, retiredOn: string|null, replacement: string|null}>}
  */
@@ -47,7 +47,7 @@ export function parseAnthropicTable(text) {
       .map((cell) => cell.trim());
     if (cells.length < 3) continue;
     const [model, state, deprecatedOn, retirementDate] = cells;
-    if (!/^[a-z0-9][a-z0-9.\-]*$/i.test(model)) continue; // pula cabeçalho e separadores
+    if (!/^[a-z0-9][a-z0-9.\-]*$/i.test(model)) continue; // skip header and separators
     const lowerState = String(state).toLowerCase();
     const status = lowerState.includes("retired")
       ? "retired"
@@ -59,8 +59,8 @@ export function parseAnthropicTable(text) {
       vendor: "anthropic",
       status,
       retiredOn: normalizeDate(retirementDate) ?? normalizeDate(deprecatedOn),
-      // A página lista o substituto em prosa, fora da tabela. Preencher aqui inventaria
-      // dado: o valor vigente do snapshot é preservado pelo merge.
+      // The page lists the substitute in prose, outside the table. Fill out inventory here
+      // given: the current value of the snapshot is preserved by the merge.
       replacement: null,
     };
   }
@@ -77,11 +77,11 @@ export function normalizeDate(value) {
 }
 
 /**
- * Funde entradas recém-parseadas sobre as atuais SEM perder nada:
- * - entrada nova → adicionada;
- * - entrada existente → status/retiredOn atualizados, `replacement` preservado quando o
- *   parser não trouxe um (o fornecedor nem sempre publica substituto);
- * - entrada que sumiu do parse → mantida (uma página pode paginar ou mudar de layout).
+ * Merges newly parsed entries over current ones WITHOUT losing anything:
+ * - new entry → added;
+ * - existing entry → status/retiredOn updated, `replacement` preserved when the
+ * parser didn't bring one (vendor doesn't always publish replacement);
+ * - entry that disappeared from parse → maintained (a page can page or change layout).
  *
  * @returns {{merged: Object, added: string[], updated: string[], kept: string[]}}
  */
@@ -139,8 +139,8 @@ async function main() {
     }
 
     if (vendor !== "anthropic") {
-      // Só a Anthropic publica a lista como tabela estável. Os demais são HTML/JS que
-      // mudam de forma; parsear por heurística arriscaria apagar dados corretos.
+      // Only Anthropic publishes the list as a stable table. The rest are HTML/JS which
+      // change shape; parsing by heuristics would risk deleting correct data.
       warnings.push(
         `${vendor}: no reliable parser — existing entries kept, manual review needed (${url})`
       );

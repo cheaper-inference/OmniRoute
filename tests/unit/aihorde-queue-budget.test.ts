@@ -10,18 +10,18 @@ import { handleAiHordeImageGeneration } from "../../open-sse/handlers/imageGener
 import { aiHordeImageCatalog } from "../../open-sse/services/aihordeImageCatalog.ts";
 
 /**
- * Очередь Horde известна с первого ответа — отказывать надо там же.
+ * The Horde queue is known from the first response - you must refuse there and then.
  *
- * `/v2/generate/check` возвращает `wait_time` и `queue_position` сразу. Пока
- * они не читались, запрос на модель с длинной очередью опрашивал Horde раз в
- * секунду весь бюджет и падал по таймауту, ничего не объяснив. Живая проверка
- * 2026-08-30: модель `Deliberate` (3 воркера) ответила `wait_time: 1478,
- * queue_position: 321` — 25 минут при бюджете в 10. Ждать было бессмысленно
- * ещё до первого опроса, а пользователь узнавал об этом через десять минут.
+ * `/v2/generate/check` returns `wait_time` and `queue_position` at once. Bye
+ * they were not read, a request for a model with a long queue polled Horde once every
+ * for a second the entire budget fell due to a timeout, without explaining anything. Live check
+ * 2026-08-30: model `Deliberate` (3 workers) responded with `wait_time: 1478,
+ * queue_position: 321` - 25 minutes with a budget of 10. There was no point in waiting
+ * even before the first survey, and the user found out about it ten minutes later.
  *
- * Для сравнения `stable_diffusion` (10 воркеров) в тот же момент отдал картинку
- * за 10.4 секунды — то есть отказ должен быть про эту модель и эту очередь, а
- * не про Horde вообще, и должен подсказывать, что делать.
+ * For comparison, `stable_diffusion` (10 workers) sent the image at the same moment
+ * in 10.4 seconds - that is, the failure must be about this model and this queue, and
+ * not about Horde at all, and should tell you what to do.
  */
 
 const HORDE_JOB_ID = "queue-budget-job";
@@ -93,7 +93,7 @@ test("refuses immediately when the queue cannot fit the remaining budget", async
 });
 
 test("keeps waiting when the queue fits the budget", async () => {
-  // Ожидание заведомо помещается в бюджет: 2 секунды очереди против 6.
+  // The wait is obviously included in the budget: 2 seconds of queue versus 6.
   const calls = stubHordeQueue({ waitTimeSeconds: 2 });
 
   const result = await handleAiHordeImageGeneration({
@@ -104,8 +104,8 @@ test("keeps waiting when the queue fits the budget", async () => {
     timeoutMs: 6_000,
   });
 
-  // Заглушка никогда не отвечает done, поэтому запрос доходит до собственного
-  // таймаута — важно, что он до него дошёл, а не был отбит по очереди.
+  // The stub never responds with done, so the request goes to its own
+  // timeout - it is important that it reached it and was not repulsed one by one.
   assert.equal(result.success, false);
   assert.ok(
     calls.filter((c) => c.includes("/v2/generate/check/")).length > 1,

@@ -79,7 +79,7 @@ test("files get busca por id", async () => {
   assert.ok(capturedUrl.includes("/v1/files/file-1"));
 });
 
-test("files content baixa com --out salva em arquivo", async () => {
+test("files content downloaded with --out saved to file", async () => {
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
@@ -122,7 +122,7 @@ test("fmtBytes formata bytes corretamente", async () => {
   assert.equal(fmtBytes(1.5 * 1024 * 1024), "1.5 MB");
 });
 
-test("files.mjs pode ser importado sem erro", async () => {
+test("files.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/files.mjs");
   assert.equal(typeof mod.registerFiles, "function");
 });

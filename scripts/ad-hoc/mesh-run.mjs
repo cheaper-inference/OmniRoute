@@ -1,8 +1,8 @@
-// Runner generico para a mesh. Recebe um arquivo JSON de plano:
+// Generic runner for the mesh. Receives a plan JSON file:
 // [
 //   { "bucket": "A"|"B"|"C", "match": "<substring e lowercase do texto>", "text": "<resposta>" }
 // ]
-// Fases: A=reply (answered), B=notice mode:note (fica pending), C=recusa note + mark ignored (por ultimo).
+// Phases: A=reply (answered), B=notice mode:note (remains pending), C=rejection note + mark ignored (last).
 // Envs: BOT_URL, BOT_TOKEN. Uso: node mesh-run.mjs <plano.json>
 import { readFileSync } from "node:fs";
 import { env } from "node:process";
@@ -35,7 +35,7 @@ async function main() {
 
   const out = { A: [], B: [], C: [], U: [] };
 
-  // fase 1-2: A (reply) e B (notice)
+  // phase 1-2: A (reply) and B (notice)
   for (const msg of pending) {
     const t = (msg.text || "").toLowerCase();
     const hit = plan.find((e) => t.includes(e.match.toLowerCase()));
@@ -61,7 +61,7 @@ async function main() {
     await sleep(1000);
   }
 
-  // fase 3: bucket C — nota de recusa + mark ignored (por último)
+  // Phase 3: Bucket C — refusal note + mark ignored (last)
   for (const id of out.C) {
     const msg = pending.find((m) => m.id === id);
     const t = (msg.text || "").toLowerCase();
@@ -83,8 +83,8 @@ async function main() {
   console.log("\n=== RESUMO ===");
   console.log("A (respondidas):", out.A);
   console.log("B (notices, pending):", out.B);
-  console.log("C (recusa+ignoradas):", out.C);
-  console.log("U (nao classif., relatar):", out.U);
+  console.log("C (rejection+ignored):", out.C);
+  console.log("U (unclassified, report):", out.U);
 }
 
 main().catch((e) => {

@@ -70,7 +70,7 @@ function openaiResponsesBody(): Record<string, unknown> {
   };
 }
 
-test("happy path: comprime corpo claude denso em blocos de imagem", async () => {
+test("happy path: compress dense claude body into image blocks", async () => {
   const r = await omniglyphEngine.applyAsync!(claudeBody(), OK);
   assert.equal(r.compressed, true);
   assert.ok(JSON.stringify(r.body).includes('"type":"image"'));
@@ -88,7 +88,7 @@ test("skip fail-closed: sem supportsVision / transporte agregador / undefined", 
   }
 });
 
-test("skip fail-closed: rota direta sem recibo de fidelidade de imagem", async () => {
+test("skip fail-closed: direct route without image fidelity receipt", async () => {
   const r = await omniglyphEngine.applyAsync!(claudeBody(), {
     ...OK,
     imageTransportFidelity: "unknown",
@@ -103,7 +103,7 @@ test("skip: modelo fora da allowlist medida", async () => {
   assert.equal(r.compressed, false);
 });
 
-test("skip: corpo em formato OpenAI (role system nas messages)", async () => {
+test("skip: body in OpenAI format (role system in messages)", async () => {
   const body = {
     model: "claude-fable-5",
     messages: [
@@ -115,7 +115,7 @@ test("skip: corpo em formato OpenAI (role system nas messages)", async () => {
   assert.equal(r.compressed, false);
 });
 
-test("cache_control do cliente sobrevive byte a byte", async () => {
+test("client cache_control survives byte by byte", async () => {
   const body = claudeBody();
   (body.messages as Array<Record<string, unknown>>).push({
     role: "user",
@@ -125,7 +125,7 @@ test("cache_control do cliente sobrevive byte a byte", async () => {
   assert.ok(JSON.stringify(r.body).includes('"cache_control"'));
 });
 
-test("preserveSystemPrompt mantém o sistema nativo e ainda pode comprimir tool_result", async () => {
+test("preserveSystemPrompt keeps the system native and can still compress tool_result", async () => {
   const body = {
     ...claudeBody(),
     messages: [
@@ -150,14 +150,14 @@ test("preserveSystemPrompt mantém o sistema nativo e ainda pode comprimir tool_
   assert.ok(JSON.stringify(r.body).includes('"type":"image"'));
 });
 
-test("apply síncrono é pass-through seguro (engine async-only)", () => {
+test("apply sync is a safe pass-through (async-only engine)", () => {
   const body = claudeBody();
   const r = omniglyphEngine.apply(body, OK);
   assert.equal(r.compressed, false);
   assert.deepEqual(r.body, body);
 });
 
-test("fail-open: erro no transform vira skip, nunca propaga", async () => {
+test("fail-open: error in transform becomes skip, never propagates", async () => {
   const body = claudeBody() as Record<string, unknown>;
   (body as { self?: unknown }).self = body; // referência circular → JSON.stringify lança
   const r = await omniglyphEngine.applyAsync!(body, OK);
@@ -165,13 +165,13 @@ test("fail-open: erro no transform vira skip, nunca propaga", async () => {
   assert.deepEqual(r.body, body); // corpo original devolvido intacto
 });
 
-test("versão atual: transforma Chat Completions OpenAI no wire pós-tradução", async () => {
+test("current version: transform Chat Completions OpenAI into post-translation wire", async () => {
   const r = await omniglyphEngine.applyAsync!(openaiChatBody(), GPT_OK);
   assert.equal(r.compressed, true);
   assert.ok(JSON.stringify(r.body).includes('"type":"image_url"'));
 });
 
-test("versão atual: transforma OpenAI Responses preservando input[]", async () => {
+test("current version: transforms OpenAI Responses while preserving input[]", async () => {
   const options = { ...GPT_OK, targetFormat: "openai-responses" as const };
   const r = await omniglyphEngine.applyAsync!(openaiResponsesBody(), options);
   assert.equal(r.compressed, true);
@@ -179,7 +179,7 @@ test("versão atual: transforma OpenAI Responses preservando input[]", async () 
   assert.ok(Array.isArray((r.body as { input?: unknown }).input));
 });
 
-test("OpenAI não roda no estágio pré-tradução", async () => {
+test("OpenAI does not run in the pre-translation stage", async () => {
   const r = await omniglyphEngine.applyAsync!(openaiChatBody(), {
     ...GPT_OK,
     compressionStage: "pre-translation",
@@ -188,13 +188,13 @@ test("OpenAI não roda no estágio pré-tradução", async () => {
   assert.ok(r.stats?.techniquesUsed.includes("skip:requires_post_translation"));
 });
 
-// OmniGlyph 1.4.0 introduziu escopos de segurança (`coding-safe`/`balanced`/
-// `aggressive`/`passthrough`) e passou a resolvê-los, dentro de
+// OmniGlyph 1.4.0 introduced security scopes (`coding-safe`/`balanced`/
+// `aggressive`/`passthrough`) and started resolving them inside
 // `isOmniGlyphSupportedModel()`, lendo `process.env.OMNIGLYPH_PROFILE`. Isso
-// transforma uma variável de ambiente do HOST num gate silencioso de TODO
+// transforms a HOST environment variable into a silent TODO gate
 // request do OmniRoute: um `OMNIGLYPH_PROFILE=passthrough` exportado no shell
-// do processo desligaria a engine sem que nenhuma configuração do OmniRoute
-// tivesse mudado — e sem nenhum sinal na UI. A política é do OmniRoute; o
+// of the process would shut down the engine without any OmniRoute configuration
+// had changed — and without any sign in the UI. The policy is from OmniRoute; the
 // adapter tem de passar o escopo explicitamente.
 async function withEnv<T>(key: string, value: string, fn: () => Promise<T>): Promise<T> {
   const had = Object.prototype.hasOwnProperty.call(process.env, key);
@@ -208,7 +208,7 @@ async function withEnv<T>(key: string, value: string, fn: () => Promise<T>): Pro
   }
 }
 
-test("OMNIGLYPH_PROFILE do host não decide o gate de modelo do OmniRoute", async () => {
+test("Host OMNIGLYPH_PROFILE does not decide OmniRoute model gate", async () => {
   const r = await withEnv("OMNIGLYPH_PROFILE", "passthrough", () =>
     omniglyphEngine.applyAsync!(claudeBody(), OK)
   );
@@ -219,7 +219,7 @@ test("OMNIGLYPH_PROFILE do host não decide o gate de modelo do OmniRoute", asyn
   );
 });
 
-test("OMNIGLYPH_PROFILE do host não amplia a allowlist de modelos do OmniRoute", async () => {
+test("host's OMNIGLYPH_PROFILE does not expand the OmniRoute model allowlist", async () => {
   const body = { ...claudeBody(), model: "claude-sonnet-5" };
   const r = await withEnv("OMNIGLYPH_PROFILE", "aggressive", () =>
     withEnv("OMNIGLYPH_MODELS", "claude-fable-5,claude-sonnet-5", () =>
@@ -231,15 +231,15 @@ test("OMNIGLYPH_PROFILE do host não amplia a allowlist de modelos do OmniRoute"
 });
 
 // ---------------------------------------------------------------------------
-// Perfis semânticos (OmniGlyph 1.4.0)
+// Semantic profiles (OmniGlyph 1.4.0)
 //
-// `transformAnthropicMessages()` resolve e mescla o perfil sozinho, mas os
-// transformadores OpenAI recebem `TransformOptions` cru e NÃO conhecem
-// `profile`. Sem o merge explícito do host, um perfil escolhido pelo operador
-// valeria no wire Claude e seria silenciosamente ignorado no wire OpenAI.
+// `transformAnthropicMessages()` resolves and merges the profile itself, but the
+// OpenAI transformers receive raw `TransformOptions` and DO NOT know
+// `profile`. Without explicit host merging, a profile chosen by the operator
+// would be valid in the Claude wire and would be silently ignored in the OpenAI wire.
 // ---------------------------------------------------------------------------
 
-/** Histórico longo o bastante para o colapso valer mesmo com o system nativo. */
+/** History long enough for the collapse to take effect even with the native system. */
 function claudeBodyWithHistory(): Record<string, unknown> {
   const messages: Array<Record<string, unknown>> = [];
   for (let i = 0; i < 40; i++) {
@@ -253,7 +253,7 @@ function claudeBodyWithHistory(): Record<string, unknown> {
   return { model: "claude-fable-5", max_tokens: 128, system: DENSE, messages };
 }
 
-test("perfil coding-safe chega ao wire OpenAI (não só ao wrapper Anthropic)", async () => {
+test("coding-safe profile arrives in the OpenAI wire (not just the Anthropic wrapper)", async () => {
   const aggressive = await omniglyphEngine.applyAsync!(openaiChatBody(), {
     ...GPT_OK,
     stepConfig: { profile: "aggressive" } as never,
@@ -275,7 +275,7 @@ test("perfil coding-safe chega ao wire OpenAI (não só ao wrapper Anthropic)", 
   );
 });
 
-test("perfil é TETO, não piso: coding-safe mantém o system nativo mesmo sem preserveSystemPrompt", async () => {
+test("profile is CEILING, not floor: coding-safe keeps the system native even without preserveSystemPrompt", async () => {
   const body = claudeBodyWithHistory();
   const r = await omniglyphEngine.applyAsync!(body, {
     ...OK,
@@ -289,7 +289,7 @@ test("perfil é TETO, não piso: coding-safe mantém o system nativo mesmo sem p
   );
 });
 
-test("perfil passthrough desliga a engine sem tocar no corpo", async () => {
+test("passthrough profile turns off the engine without touching the body", async () => {
   const body = claudeBodyWithHistory();
   const r = await omniglyphEngine.applyAsync!(body, {
     ...OK,
@@ -300,7 +300,7 @@ test("perfil passthrough desliga a engine sem tocar no corpo", async () => {
   assert.deepEqual(r.body, body);
 });
 
-test("perfil inválido falha fechado, não propaga exceção", async () => {
+test("invalid profile fails closed, does not propagate exception", async () => {
   const r = await omniglyphEngine.applyAsync!(claudeBody(), {
     ...OK,
     stepConfig: { profile: "turbo-max" } as never,
@@ -309,12 +309,12 @@ test("perfil inválido falha fechado, não propaga exceção", async () => {
   assert.ok(r.stats?.techniquesUsed.includes("skip:invalid_profile"));
 });
 
-test("preserveSystemPrompt: wire OpenAI pula, porque o pacote não sabe preservar system lá", async () => {
-  // O transform OpenAI do OmniGlyph 1.4.0 honra apenas compressTools, gptHistory,
-  // minCompressChars e reflow — não existe compressSystem nesse wire, e a
-  // instrução vira sempre um ponteiro para a imagem. Imagear assim queimaria o
-  // prefixo quente que a decisão cache-aware do OmniRoute mandou preservar, e o
-  // OmniRoute não teria como saber. Sem opção de honrar a política, pula.
+test("preserveSystemPrompt: wire OpenAI skips, because the package doesn't know how to preserve system there", async () => {
+  // OmniGlyph 1.4.0's OpenAI transform only honors compressTools, gptHistory,
+  // minCompressChars and reflow — there is no compressSystem in this wire, and the
+  // instruction always becomes a pointer to the image. Imaging like that would burn the
+  // hot prefix that OmniRoute's cache-aware decision ordered to preserve, and the
+  // OmniRoute would have no way of knowing. With no option to honor the policy, jump.
   const r = await omniglyphEngine.applyAsync!(openaiChatBody(), {
     ...GPT_OK,
     config: { preserveSystemPrompt: true } as never,

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Lista os nomes de ícone em uso (props icon=/iconRight=/emptyIcon=/leadingIcon=, `<Icon name>` e
-// `icon: "..."` em constantes) e imprime um esqueleto de ICON_MAP para os que ainda faltam.
-// O vocabulário é o dos nomes Material Symbols que as telas já usam, mas a fonte e o pacote
-// `material-symbols` saíram no F4 (KEA-7886): todo nome capturado precisa mapear para um ícone
+// List icon names in use (props icon=/iconRight=/emptyIcon=/leadingIcon=, `<Icon name>` and
+// `icon: "..."` in constants) and prints a skeleton of ICON_MAP for the missing ones.
+// The vocabulary is that of the Material Symbols names that the screens already use, but the font and package
+// `material-symbols` left in F4 (KEA-7886): every captured name needs to map to an icon
 // Lucide em src/shared/constants/iconMap.ts, exceto as strings de NOT_ICON_NAMES abaixo.
-//   node scripts/dev/gen-icon-map.mjs           # esqueleto TS com os nomes que faltam no mapa atual
-//   node scripts/dev/gen-icon-map.mjs --names   # só os nomes, um por linha (usado pelo teste de cobertura)
+// node scripts/dev/gen-icon-map.mjs # TS skeleton with the names missing from the current map
+// node scripts/dev/gen-icon-map.mjs --names # just the names, one per line (used by the coverage test)
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -18,7 +18,7 @@ const PATTERNS = [
   /\bicon:\s*\"([a-z][a-z0-9_]+)\"/g, // { icon: "name" } (sidebar sections, tabs)
   /<Icon\b[^>]*\bname=\"([a-z][a-z0-9_]+)\"/g, // <Icon name="name" />
 ];
-// Ternários (`cond ? "a" : "b"`) só contam quando estão num slot de ícone: a expressão de uma prop
+// Ternaries (`cond ? "a" : "b"`) only count when they are in an icon slot: the expression of a prop
 // icon=/iconRight=/emptyIcon=/leadingIcon={…} ou de <Icon name={…} />.
 const SLOT_PATTERNS = [
   /(?<![-\w])(?:icon|iconRight|emptyIcon|leadingIcon)=\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g, // icon={cond ? "a" : "b"}

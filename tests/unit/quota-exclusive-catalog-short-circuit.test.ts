@@ -75,7 +75,7 @@ test.after(async () => {
 await test("chave quota-exclusive não constrói o catálogo completo", async (t) => {
   installFetchCounter();
 
-  // Uma conexão OpenRouter ativa: é ela que faz o build completo ir à rede.
+  // An active OpenRouter connection: this is what makes the complete build go to the network.
   await providersDb.createProviderConnection({
     provider: "openrouter",
     authType: "apikey",
@@ -83,7 +83,7 @@ await test("chave quota-exclusive não constrói o catálogo completo", async (t
     apiKey: "sk-or-shortcircuit",
   });
 
-  // Pool de cota sobre uma conexão glm (lista estável no registry estático).
+  // Quota pool over a glm connection (stable list in static registry).
   const group = groupsDb.createGroup("Curto");
   const conn = await providersDb.createProviderConnection({
     provider: "glm",
@@ -111,7 +111,7 @@ await test("chave quota-exclusive não constrói o catálogo completo", async (t
     assert.equal(res.status, 200);
     const body = (await res.json()) as { data: Array<{ id: string }> };
 
-    // O contrato de conteúdo continua valendo: só os qtSd/* do pool.
+    // The content contract remains valid: only the qtSd/* in the pool.
     assert.ok(body.data.length > 0, "a chave de cota deve enxergar os modelos do pool");
     for (const m of body.data) {
       assert.ok(isQuotaModelName(m.id), `vazou modelo fora do pool: ${m.id}`);
@@ -126,14 +126,14 @@ await test("chave quota-exclusive não constrói o catálogo completo", async (t
   });
 
   await t.test("os espelhos de discovery continuam valendo no caminho de cota", async () => {
-    // A cadeia de pós-filtros (variantes de esforço, no-thinking, espelhos
-    // `claude/*` do discovery, dedupe) roda DEPOIS do filtro por chave, então o
-    // atalho da cota também a deve. Sem isso o Claude Code deixa de enxergar os
-    // modelos de um pool — que é justamente o fluxo-alvo.
+    // The chain of post-filters (effort variants, no-thinking, mirrors
+    // `claude/*` from discovery, dedupe) runs AFTER the filter by key, so the
+    // quota shortcut should also be used. Without this, Claude Code stops seeing the
+    // models of a pool — which is precisely the target flow.
     const prev = process.env.EXPOSE_CC_DISCOVERY_ALIASES;
     process.env.EXPOSE_CC_DISCOVERY_ALIASES = "1";
-    // A chave do cache é `prefix|isCodex|apiKey|configuredOnly` — um query param
-    // qualquer NÃO a invalida, então a resposta do subteste anterior seria servida.
+    // The cache key is `prefix|isCodex|apiKey|configuredOnly` — a query param
+    // any NO invalidates it, then the answer from the previous subtest would be served.
     // #9199 removed the injectable SWR window; age the entry past the fixed
     // 30 s constant instead so the next read rebuilds rather than serving stale.
     v1ModelsCatalog.__expireCatalogCacheForTest(
@@ -160,7 +160,7 @@ await test("chave quota-exclusive não constrói o catálogo completo", async (t
   });
 
   await t.test("uma chave normal continua construindo o catálogo completo", async () => {
-    // Prova que o observável funciona: sem a chave de cota, o build vai à rede.
+    // Proves that the observable works: without the quota key, the build goes to the network.
     const res = await v1ModelsCatalog.getUnifiedModelsResponse(
       new Request("http://localhost/api/v1/models", {
         headers: { Authorization: `Bearer ${normalKey.key}` },

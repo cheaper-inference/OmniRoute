@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-test("clipboard.mjs pode ser importado sem erro", async () => {
+test("clipboard.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/utils/clipboard.mjs");
   assert.equal(typeof mod.copyToClipboard, "function");
   assert.equal(typeof mod.isClipboardSupported, "function");
@@ -19,7 +19,7 @@ test("copyToClipboard retorna boolean (true em macOS/win, qualquer em Linux)", a
   assert.ok(typeof result === "boolean");
 });
 
-test("copyToClipboard não lança exceção mesmo sem xclip/xsel/wl-copy", async () => {
+test("copyToClipboard does not throw exception even without xclip/xsel/wl-copy", async () => {
   const { copyToClipboard } = await import("../../bin/cli/utils/clipboard.mjs");
   let threw = false;
   try {

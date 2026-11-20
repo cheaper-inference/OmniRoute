@@ -32,13 +32,13 @@ const responsesBody = () => ({
   input: [{ type: "message", role: "user", content: [{ type: "input_text", text: "oi" }] }],
 });
 
-// Agora que `estimateCompressionTokens` (stats.ts) é image-aware (Task 6), o guard
-// honesto de inflação agregada do stacked (`guardPipelineInflation` em
-// pipelineGuards.ts) não reverte mais a saída imageada do omniglyph: o estimador
-// conta o bloco de imagem pelo billing real (patches 28px + overhead), não pelo
+// Now that `estimateCompressionTokens` (stats.ts) is image-aware (Task 6), the guard
+// stacked aggregate inflation honest (`guardPipelineInflation` in
+// pipelineGuards.ts) no longer reverses the imaged output of omniglyph: the estimator
+// counts the image block by actual billing (28px patches + overhead), not by
 // char-count do base64. Este teste cobre tanto o plumbing de `providerTransport`
-// (Task 5) quanto a saída final ponta a ponta (Task 6).
-test("stacked com step omniglyph recebe providerTransport (engine roda, não é pulado por transporte)", async () => {
+// (Task 5) and the final end-to-end output (Task 6).
+test("stacked with step omniglyph receives providerTransport (engine runs, not skipped by transport)", async () => {
   registerBuiltinCompressionEngines();
   const r = await applyCompressionAsync(body(), "stacked", {
     model: "claude-fable-5",
@@ -67,7 +67,7 @@ test("stacked sem providerTransport 'direct' pula omniglyph (transport_not_direc
   const r = await applyCompressionAsync(body(), "stacked", {
     model: "claude-fable-5",
     supportsVision: true,
-    // providerTransport ausente → fail-closed, omniglyph deve pular
+    // providerTransport missing → fail-closed, omniglyph should skip
     config: { stackedPipeline: [{ engine: "rtk" }, { engine: "omniglyph" }] } as never,
   });
   const omniglyphStep = r.stats?.engineBreakdown?.find((e) => e.engine === "omniglyph");
@@ -75,7 +75,7 @@ test("stacked sem providerTransport 'direct' pula omniglyph (transport_not_direc
   assert.ok(omniglyphStep!.techniquesUsed.includes("skip:transport_not_direct"));
 });
 
-test("stacked pós-tradução preserva o wire OpenAI Chat e executa OmniGlyph nativo", async () => {
+test("stacked post-translation preserves the OpenAI Chat wire and runs native OmniGlyph", async () => {
   registerBuiltinCompressionEngines();
   const r = await applyCompressionAsync(openaiBody(), "stacked", {
     model: "gpt-5.6",
@@ -98,7 +98,7 @@ test("stacked pós-tradução preserva o wire OpenAI Chat e executa OmniGlyph na
   );
 });
 
-test("stacked pós-tradução não adapta input[] Responses para messages[] antes do OmniGlyph", async () => {
+test("stacked post-translation does not adapt input[] Responses to messages[] before OmniGlyph", async () => {
   registerBuiltinCompressionEngines();
   const r = await applyCompressionAsync(responsesBody(), "stacked", {
     model: "gpt-5.6",
@@ -115,7 +115,7 @@ test("stacked pós-tradução não adapta input[] Responses para messages[] ante
   assert.ok(Array.isArray((r.body as { input?: unknown }).input));
 });
 
-test("OpenAI→Claude usa o wire traduzido sem uma segunda tradução", async () => {
+test("OpenAI→Claude uses the translated wire without a second translation", async () => {
   registerBuiltinCompressionEngines();
   const translatedClaudeBody = body();
   const r = await applyCompressionAsync(translatedClaudeBody, "omniglyph", {
@@ -132,7 +132,7 @@ test("OpenAI→Claude usa o wire traduzido sem uma segunda tradução", async ()
   assert.ok(!JSON.stringify(r.body).includes('"type":"image_url"'));
 });
 
-test("Claude→OpenAI aguarda o wire alvo e não imageia o corpo fonte", async () => {
+test("Claude→OpenAI waits for the target wire and does not image the source body", async () => {
   registerBuiltinCompressionEngines();
   const pre = await applyCompressionAsync(body(), "omniglyph", {
     model: "claude-fable-5",
@@ -169,11 +169,11 @@ test("Claude→OpenAI aguarda o wire alvo e não imageia o corpo fonte", async (
   assert.ok(JSON.stringify(post.body).includes('"type":"image_url"'));
 });
 
-// O `provider` é threaded explicitamente por cada camada do selector (não é um
-// spread cego), então uma camada nova pode derrubá-lo em silêncio: a
-// contabilidade cairia para `unknown` e passaria a recusar a semântica de cache
+// The `provider` is explicitly threaded by each selector layer (it is not a
+// blind spread), then a fresh layer can knock it out silently: a
+// accounting would drop to `unknown` and start refusing cache semantics
 // sem nenhum erro aparecer.
-test("provider chega do selector até a contabilidade da engine", async () => {
+test("provider reaches from the selector to the engine accounting", async () => {
   registerBuiltinCompressionEngines();
   const r = await applyCompressionAsync(body(), "stacked", {
     model: "claude-fable-5",

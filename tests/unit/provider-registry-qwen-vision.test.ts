@@ -1,13 +1,13 @@
 /**
- * Issue #2822 — qwen3.7-max (opencode-go) retorna 500 em inputs com imagem.
+ * Issue #2822 — qwen3.7-max (opencode-go) returns 500 on image inputs.
  *
  * qwen3.7-max, qwen3.6-plus e qwen3.5-plus nos providers opencode-go e
- * opencode-zen não possuíam supportsVision: false. Isso fazia com que
- * blocos de imagem chegassem ao upstream (que não suporta visão),
- * gerando 500s que esgotavam todo o orçamento de retentativas.
+ * opencode-zen did not have supportsVision: false. This made
+ * image blocks reach upstream (which does not support vision),
+ * generating 500s that exhausted the entire retry budget.
  *
  * Este teste garante que todos os modelos afetados tenham
- * supportsVision !== true (i.e. false ou não definido como true).
+ * supportsVision !== true (i.e. false or not set to true).
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -33,7 +33,7 @@ function getModel(providerId: string, modelId: string): ModelEntry | undefined {
 
 // ── opencode-go ─────────────────────────────────────────────────────────────
 
-test("#2822 opencode-go/qwen3.7-max deve ter supportsVision !== true", () => {
+test("#2822 opencode-go/qwen3.7-max must have supportsVision !== true", () => {
   const model = getModel("opencode-go", "qwen3.7-max");
   assert.ok(model, "qwen3.7-max deve estar registrado em opencode-go");
   assert.notEqual(
@@ -48,7 +48,7 @@ test("#2822 opencode-go/qwen3.7-max deve ter supportsVision !== true", () => {
   );
 });
 
-test("#2822 opencode-go/qwen3.6-plus deve ter supportsVision !== true", () => {
+test("#2822 opencode-go/qwen3.6-plus must have supportsVision !== true", () => {
   const model = getModel("opencode-go", "qwen3.6-plus");
   assert.ok(model, "qwen3.6-plus deve estar registrado em opencode-go");
   assert.notEqual(
@@ -66,9 +66,9 @@ test("#2822 opencode-go/qwen3.6-plus deve ter supportsVision !== true", () => {
 // #3328 — o oposto do #2822: MiniMax M3 (opencode) era multimodal (verificado
 // empiricamente: descrevia imagens base64 via o upstream opencode). #6998:
 // minimax-m3-free foi deslistado do free tier da OpenCode Zen (401 "not
-// supported") em 2026-07-14 e removido do catálogo estático — este teste
-// agora confirma a remoção.
-test("#6998 opencode/minimax-m3-free não deve mais estar registrado (deslistado upstream)", () => {
+// supported") on 2026-07-14 and removed from the static catalog — this test
+// now confirm removal.
+test("#6998 opencode/minimax-m3-free should no longer be registered (unlisted upstream)", () => {
   const model = getModel("opencode", "minimax-m3-free");
   assert.equal(
     model,
@@ -77,7 +77,7 @@ test("#6998 opencode/minimax-m3-free não deve mais estar registrado (deslistado
   );
 });
 
-test("#2822 opencode-go/qwen3.5-plus deve ter supportsVision !== true", () => {
+test("#2822 opencode-go/qwen3.5-plus must have supportsVision !== true", () => {
   const model = getModel("opencode-go", "qwen3.5-plus");
   assert.ok(model, "qwen3.5-plus deve estar registrado em opencode-go");
   assert.notEqual(
@@ -94,7 +94,7 @@ test("#2822 opencode-go/qwen3.5-plus deve ter supportsVision !== true", () => {
 
 // ── opencode-zen ─────────────────────────────────────────────────────────────
 
-test("#2822 opencode-zen/qwen3.5-plus deve ter supportsVision !== true", () => {
+test("#2822 opencode-zen/qwen3.5-plus must have supportsVision !== true", () => {
   const model = getModel("opencode-zen", "qwen3.5-plus");
   assert.ok(model, "qwen3.5-plus deve estar registrado em opencode-zen");
   assert.notEqual(
@@ -109,7 +109,7 @@ test("#2822 opencode-zen/qwen3.5-plus deve ter supportsVision !== true", () => {
   );
 });
 
-test("#2822 opencode-zen/qwen3.6-plus deve ter supportsVision !== true", () => {
+test("#2822 opencode-zen/qwen3.6-plus must have supportsVision !== true", () => {
   const model = getModel("opencode-zen", "qwen3.6-plus");
   assert.ok(model, "qwen3.6-plus deve estar registrado em opencode-zen");
   assert.notEqual(

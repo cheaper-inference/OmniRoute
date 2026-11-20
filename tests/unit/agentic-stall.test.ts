@@ -6,7 +6,7 @@
  * fails over instead of returning the stall to the client. These tests pin:
  *  - the request-shape gate (tools + tool-result tail, both API shapes),
  *  - the narration heuristic (summary markers + short structureless prose),
- *  - full classification over OpenAI/Anthropic × JSON/SSE response shapes,
+ * - full classification over OpenAI/Anthropic × JSON/SSE response shapes,
  *  - the positive controls (no tools pending / real tool call / structured
  *    answer are NEVER classified),
  *  - the opt-in env flag,

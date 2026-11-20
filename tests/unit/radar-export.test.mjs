@@ -6,9 +6,9 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-// Gera o export estável do catálogo (scripts/release/radar-export.mjs) e valida
-// o contrato consumido pelo OmniRoute Radar + a proveniência (D16: desconhecido
-// permanece `null`, nunca inventado).
+// Generates the stable catalog export (scripts/release/radar-export.mjs) and validates
+// the contract consumed by OmniRoute Radar the provenance (D16: unknown
+// remains `null`, never invented).
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(DIR, "../.."); // …/OmniRoute
@@ -20,7 +20,7 @@ function runExport(extraEnv = {}) {
   execFileSync("node", ["--import", "tsx/esm", SCRIPT, outPath], {
     cwd: REPO,
     stdio: ["ignore", "ignore", "inherit"],
-    // Base limpa: sem herdar GITHUB_* do ambiente do CI que roda os testes.
+    // Clean base: without inheriting GITHUB_* from the CI environment that runs the tests.
     env: {
       PATH: process.env.PATH,
       HOME: process.env.HOME,
@@ -41,7 +41,7 @@ function runExport(extraEnv = {}) {
 
 test("radar export satisfies the Radar consumer contract with a fresh catalog", () => {
   const data = runExport();
-  // Contrato mínimo de src/feed/exportSource.ts: budgets[] não-vazio + geradoEm.
+  // Minimum contract from src/feed/exportSource.ts: budgets[] non-empty + generatedEm.
   assert.ok(Array.isArray(data.budgets) && data.budgets.length > 0, "budgets não-vazio");
   assert.ok(Array.isArray(data.registry) && data.registry.length > 0, "registry não-vazio");
   assert.ok(
@@ -63,7 +63,7 @@ test("radar export provenance never fabricates unknown fields", () => {
   assert.equal(p.generatedBy, "manual");
   assert.equal(p.sourceRef, null);
   assert.equal(p.runUrl, null);
-  // sourceCommit: SHA de 40 hex (via git no checkout) ou null se indisponível.
+  // sourceCommit: 40 hex SHA (via git at checkout) or null if unavailable.
   assert.ok(
     p.sourceCommit === null || /^[0-9a-f]{40}$/.test(p.sourceCommit),
     "sourceCommit sha|null"

@@ -47,8 +47,8 @@ export function assertNoStale(allowlist, liveViolations, gateName) {
   const stale = reportStaleEntries(allowlist, liveViolations, gateName);
   if (stale.length > 0) {
     console.error(
-      `[${gateName}] ${stale.length} entrada(s) obsoleta(s) na allowlist ` +
-        `— a violação foi corrigida; REMOVA a entrada para travar a correção:\n` +
+      `[${gateName}] ${stale.length} obsolete entry(s) in allowlist ` +
+        `—the violation has been corrected; REMOVE the entry to stop the fix:\n` +
         stale.map((e) => `  ✗ ${e}`).join("\n")
     );
     process.exitCode = 1;

@@ -1,19 +1,19 @@
 #!/usr/bin/env node
-// Gera o export estável do catálogo OmniRoute consumido pelo OmniRoute Radar
-// (`RADAR_EXPORT_URL` → `${DATA_DIR}/export-omniroute.json` no servidor privado).
+// Generates the stable export of the OmniRoute catalog consumed by OmniRoute Radar
+// (`RADAR_EXPORT_URL` → `${DATA_DIR}/export-omniroute.json` on private server).
 //
-// Por que existe: o servidor Radar (1 GB RAM na Akamai) NUNCA clona nem instala
-// o OmniRoute; ele só baixa este JSON de uma URL estável. Antes o export vinha
-// do snapshot gravado no deploy, preso à máquina do operador. Este script roda
-// no CI do OmniRoute (que tem os módulos de catálogo + tsx), emite o export com
-// PROVENIÊNCIA e o workflow o publica como asset de release de URL fixa.
+// Why it exists: Radar server (1 GB RAM on Akamai) NEVER clones or installs
+// o OmniRoute; it only downloads this JSON from a stable URL. Before export came
+// of the snapshot recorded in the deploy, attached to the operator's machine. This script runs
+// in the OmniRoute CI (which has the tsx catalog modules), issue the export with
+// PROVENANCE and the workflow publishes it as a fixed URL release asset.
 //
 // Contrato do consumidor (`src/feed/exportSource.ts` no radar-server): exige
-// `budgets[]` não-vazio e lê `geradoEm`; chaves extras são ignoradas, então
+// `budgets[]` non-empty and reads `generatedIn`; extra keys are ignored, so
 // `totais`, `registry` e `provenance` viajam junto sem quebrar retrocompat.
 //
-// Uso (precisa de tsx, pois lê .ts):
-//   node --import tsx/esm scripts/release/radar-export.mjs [saída.json]
+// Usage (needs tsx, as it reads .ts):
+// node --import tsx/esm scripts/release/radar-export.mjs [output.json]
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(DIR, "../.."); // …/OmniRoute
-const SAIDA = process.argv[2] || path.join(REPO, "export-omniroute.json");
+const OUTPUT = process.argv[2] || path.join(REPO, "export-omniroute.json");
 
 const { FREE_MODEL_BUDGETS } = await import(
   path.join(REPO, "open-sse/config/freeModelCatalog.data.ts")
@@ -33,10 +33,10 @@ const { computeFreeModelTotals } = await import(
 const { REGISTRY } = await import(path.join(REPO, "open-sse/config/providerRegistry.ts"));
 
 /**
- * Proveniência: quem/quando/de-qual-commit gerou o export. Cada campo é `null`
- * quando a origem é desconhecida — NUNCA inventamos um valor (D16: desconhecido
- * permanece `null`). No CI o GitHub popula as variáveis; localmente caímos no
- * `git` e, sem repositório, em `null`.
+ * Provenance: who/when/from-which-commit generated the export. Each field is `null`
+ * when the origin is unknown — we NEVER invent a value (D16: unknown
+ * remains `null`). In CI, GitHub populates the variables; locally we fall into
+ * `git` and, without repository, in `null`.
  */
 function firstEnv(...names) {
   for (const name of names) {
@@ -79,15 +79,15 @@ const dados = {
   geradoEm,
   budgets: FREE_MODEL_BUDGETS,
   totais: computeFreeModelTotals(),
-  // Só as chaves: o consumidor apenas pergunta "sabemos rotear este provider?".
+  // Just the keys: the consumer just asks "do we know how to route this provider?".
   registry: Object.keys(REGISTRY).sort(),
   provenance: buildProvenance(geradoEm),
 };
 
-fs.mkdirSync(path.dirname(path.resolve(SAIDA)), { recursive: true });
-fs.writeFileSync(SAIDA, JSON.stringify(dados));
+fs.mkdirSync(path.dirname(path.resolve(OUTPUT)), { recursive: true });
+fs.writeFileSync(OUTPUT, JSON.stringify(data));
 console.log(
-  `catálogo exportado → ${path.basename(SAIDA)}: ` +
+  `exported catalog → ${path.basename(OUTPUT)}: ` +
     `${dados.budgets.length} modelos, ${dados.registry.length} providers no registry` +
     ` (commit ${dados.provenance.sourceCommit ?? "desconhecido"})`
 );

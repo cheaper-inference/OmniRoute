@@ -18,7 +18,7 @@ import { resolveExecutionCredentials } from "../../open-sse/handlers/chatCore/ex
 // NOTE: the "custom model" id must stay ABSENT from the gh registry for these
 // tests to exercise the override path — #9050 (ea4bbdf7c0) promoted the original
 // gpt-5.6-terra/luna ids into the curated registry with
-// targetFormat:"openai-responses", so we use a fictional gpt-5.7-nova instead.
+// targetFormat:"openai-responses", so we use the fictional gpt-5.7-nova instead.
 test("BUG: GithubExecutor.buildUrl ignores a per-model targetFormat:'openai-responses' override and still returns the chat/completions URL", () => {
   const executor = new GithubExecutor();
   const credentialsWithoutOverride = { apiKey: "test-token" };

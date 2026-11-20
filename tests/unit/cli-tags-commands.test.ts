@@ -118,7 +118,7 @@ test("tags resources chama /api/tags?name=X&resources=true", async () => {
   assert.ok(capturedUrl.includes("resources=true"));
 });
 
-test("tags.mjs pode ser importado sem erro", async () => {
+test("tags.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/tags.mjs");
   assert.equal(typeof mod.registerTags, "function");
 });

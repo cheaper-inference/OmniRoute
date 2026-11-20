@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 // ═════════════════════════════════════════════════════
-//  FASE-01: Security Unit Tests
+// PHASE-01: Security Unit Tests
 //  Tests for secretsValidator.js and inputSanitizer.js
 // ═════════════════════════════════════════════════════
 

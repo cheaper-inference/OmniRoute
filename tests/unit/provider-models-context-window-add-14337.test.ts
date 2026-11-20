@@ -4,11 +4,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-// Contexto: modelo custom cadastrado num provedor genérico (openai/anthropic-compatible)
-// caía no DEFAULT_LIMITS.default (128k) porque o form de ADD não tinha como informar a
+// Context: custom model registered with a generic provider (openai/anthropic-compatible)
+// fell into DEFAULT_LIMITS.default (128k) because the ADD form had no way to inform the
 // janela real — o guard de chatCore devolvia 400 context_length_exceeded (caso real:
 // qwen-cloud-token-plan/qwen3.8-max, janela 1M). O POST passa a gravar o override na
-// tabela Feature-5004 `model_context_overrides` (mesmo caminho do PUT #4125).
+// Feature-5004 table `model_context_overrides` (same path as PUT #4125).
 
 const TEST_DATA_DIR = fs.mkdtempSync(
   path.join(os.tmpdir(), "omniroute-provider-model-context-add-")
@@ -68,8 +68,8 @@ test("POST with contextWindowOverride persists a manual override consumed by get
   assert.equal(record!.realContext, 1_000_000);
   assert.equal(record!.source, "manual");
 
-  // getTokenLimit é o que o guard de chatCore lê; sem override este provedor/modelo
-  // desconhecido cai em DEFAULT_LIMITS.default (128000) e o guard rejeita com 400.
+  // getTokenLimit is what the chatCore guard reads; no override this provider/model
+  // unknown falls into DEFAULT_LIMITS.default (128000) and the guard rejects with 400.
   assert.equal(contextManager.getTokenLimit("qwen-cloud-token-plan", "qwen3.8-max"), 1_000_000);
 });
 
@@ -86,8 +86,8 @@ test("POST without contextWindowOverride creates no override (default preserved)
 });
 
 test("POST on an already-existing model id still applies the override", async () => {
-  // addCustomModel devolve o row existente sem regravar; o override deve ser
-  // aplicado mesmo assim (intenção do operador ao re-submeter com a janela).
+  // addCustomModel returns the existing row without rewriting; the override must be
+  // applied anyway (operator's intention when re-submitting with the window).
   await providerModelsRoute.POST(buildRequest("POST", { provider: "p1", modelId: "m1" }));
   const res = await providerModelsRoute.POST(
     buildRequest("POST", { provider: "p1", modelId: "m1", contextWindowOverride: 256_000 })
@@ -99,7 +99,7 @@ test("POST on an already-existing model id still applies the override", async ()
 
 test("POST with a prefixed id on a compatible node keys the override by the stored bare id", async () => {
   // #17334 grava o row sob o id sem prefixo; o guard consulta esse mesmo id. Um override
-  // gravado sob o id colado (`strata/modelo`) nunca seria lido e o modelo cairia em 128k.
+  // written under the pasted id (`strata/model`) would never be read and the model would fall into 128k.
   const nodeId = "openai-compatible-chat-550e8400-e29b-41d4-a716-446655440001";
   await providersDb.createProviderNode({
     id: nodeId,

@@ -29,7 +29,7 @@ test.after(() => {
   delete process.env.CONDUCTOR_ORCHESTRATOR_TOKEN;
 });
 
-test("traduz a delegação A2A no POST /v1/tasks do hub (shape exato do contrato)", async () => {
+test("translates the A2A delegation into the hub's POST /v1/tasks (exact contract shape)", async () => {
   const { impl, calls } = fakeHub({ id: "t_novo", status: "submitted" });
   const r = await createConductorTask(
     { repoUrl: "https://git.x/repo", baseRef: "dev", prompt: "adicione um README", mode: "council-3", cli: "claude", model: "cc/claude-sonnet-5" },
@@ -46,13 +46,13 @@ test("traduz a delegação A2A no POST /v1/tasks do hub (shape exato do contrato
   });
 });
 
-test("defaults: base_ref main, mode solo, sem requirements quando cli/model ausentes", async () => {
+test("defaults: base_ref main, solo mode, no requirements when cli/model absent", async () => {
   const { impl, calls } = fakeHub({ id: "t_d", status: "submitted" });
   await createConductorTask({ repoUrl: "https://git.x/r", prompt: "p" }, { fetchImpl: impl });
   assert.deepEqual(calls[0].body, { repo: { url: "https://git.x/r", base_ref: "main" }, spec: { prompt: "p" }, mode: "solo" });
 });
 
-test("credencial: prefere CONDUCTOR_ORCHESTRATOR_TOKEN; fallback é o token do hub", async () => {
+test("credential: prefer CONDUCTOR_ORCHESTRATOR_TOKEN; fallback is hub token", async () => {
   const a = fakeHub({ id: "t_1" });
   await createConductorTask({ repoUrl: "https://x/r", prompt: "p" }, { fetchImpl: a.impl });
   assert.equal(a.calls[0].auth, "Bearer tok-hub");
@@ -62,7 +62,7 @@ test("credencial: prefere CONDUCTOR_ORCHESTRATOR_TOKEN; fallback é o token do h
   assert.equal(b.calls[0].auth, "Bearer tok-orch");
 });
 
-test("recusa do hub → {ok:false, status} sem lançar nem vazar corpo; env ausente → 503", async () => {
+test("hub refuse → {ok:false, status} without casting or leaking body; missing env → 503", async () => {
   const { impl } = fakeHub({ error: "segredo do hub" }, 422);
   const r = await createConductorTask({ repoUrl: "https://x/r", prompt: "p" }, { fetchImpl: impl });
   assert.deepEqual(r, { ok: false, status: 422 });

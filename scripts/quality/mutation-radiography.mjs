@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Mutation radiography (Quality Gate v2 / Fase 9 T5 — Onda 2, Task 1).
+ * Mutation radiography (Quality Gate v2 / Phase 9 T5 — Wave 2, Task 1).
  *
  * Classifies every COVERING test file by its mutation-kill contribution, using the
  * `killedBy` attribution that the Stryker tap-runner emits per mutant

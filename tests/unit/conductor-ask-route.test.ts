@@ -30,7 +30,7 @@ test.after(async () => {
   }
 });
 
-test("fonte: auth antes do proxy; token nunca manuseado na rota", () => {
+test("source: auth before proxy; token never handled in route", () => {
   const src = fs.readFileSync(
     path.join(process.cwd(), "src/app/api/conductor/ask/route.ts"),
     "utf8"
@@ -42,7 +42,7 @@ test("fonte: auth antes do proxy; token nunca manuseado na rota", () => {
   assert.ok(!src.includes("CONDUCTOR_HUB_TOKEN"), "token vive no faroProxy, não na rota");
 });
 
-test("POST valida o body (Zod) e repassa text+pending do Faro", async () => {
+test("POST validates the body (Zod) and forwards text+pending from Faro", async () => {
   await new Promise<void>((resolve) => {
     const server = createServer((req, res) => {
       res.writeHead(200, { "content-type": "application/json" });

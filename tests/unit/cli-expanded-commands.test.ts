@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-test("logs.mjs pode ser importado com novas flags", async () => {
+test("logs.mjs can be imported with new flags", async () => {
   const mod = await import("../../bin/cli/commands/logs.mjs");
   assert.equal(typeof mod.registerLogs, "function");
   assert.equal(typeof mod.runLogsCommand, "function");
@@ -20,7 +20,7 @@ test("update.mjs exporta runUpdateCommand", async () => {
   assert.equal(typeof mod.runUpdateCommand, "function");
 });
 
-test("keys.mjs exporta novos comandos", async () => {
+test("keys.mjs exports new commands", async () => {
   const mod = await import("../../bin/cli/commands/keys.mjs");
   assert.equal(typeof mod.registerKeys, "function");
   assert.equal(typeof mod.runKeysRegenerateCommand, "function");
@@ -69,7 +69,7 @@ test("backup.mjs exporta runBackupAutoEnableCommand/Disable/Status", async () =>
   assert.equal(typeof mod.runBackupAutoStatusCommand, "function");
 });
 
-test("backup auto status sem arquivo retorna 0", async () => {
+test("backup auto status without file returns 0", async () => {
   const { runBackupAutoStatusCommand } = await import("../../bin/cli/commands/backup.mjs");
   const { tmpdir } = await import("node:os");
   const orig = process.env.HOME;
@@ -82,12 +82,12 @@ test("backup auto status sem arquivo retorna 0", async () => {
   }
 });
 
-// Regressão #8512: `backup` re-declara os mesmos nomes de opção que `create`/
+// Regression #8512: `backup` re-declares the same option names as `create`/
 // `auto enable` no fallback legacy ("omniroute backup" sem subcomando) — o
-// Commander resolve a opção no ancestral mais próximo que a declara, então o
-// valor do subcomando é descartado silenciosamente e substituído pelo default
-// da própria opção do subcomando (null/false/[]).
-test("backup auto enable — nenhuma opção é sombreada pelo parent backup", async () => {
+// Commander resolves the option to the closest ancestor that declares it, then the
+// subcommand value is silently discarded and replaced by default
+// from the subcommand option itself (null/false/[]).
+test("backup auto enable — no options are shadowed by parent backup", async () => {
   const { registerBackup } = await import("../../bin/cli/commands/backup.mjs");
   const { Command } = await import("commander");
   const { mkdtempSync, readFileSync, rmSync } = await import("node:fs");
@@ -128,7 +128,7 @@ test("backup auto enable — nenhuma opção é sombreada pelo parent backup", a
   }
 });
 
-test("backup create — nenhuma opção é sombreada pelo parent backup", async () => {
+test("backup create — no options are shadowed by parent backup", async () => {
   const { registerBackup } = await import("../../bin/cli/commands/backup.mjs");
   const { Command } = await import("commander");
   const prog = new Command().exitOverride();
@@ -164,11 +164,11 @@ test("backup create — nenhuma opção é sombreada pelo parent backup", async 
   assert.deepEqual(capturedOpts.exclude, ["*.log"], "--exclude não deve ser sombreado");
 });
 
-// Regressão de documentação: `omniroute backup` sem subcomando é o uso
-// canônico documentado em USER_GUIDE.md / CLI-TOOLS.md / AGENT-SKILLS.md
+// Documentation regression: `omniroute backup` without subcommand is usage
+// canonical documented in USER_GUIDE.md/CLI-TOOLS.md/AGENT-SKILLS.md
 // ("omniroute backup # Snapshot config + DB"). Remover só as opções
-// duplicadas do parent (causa real do #8512) não pode remover essa ação.
-test("backup — sem subcomando ainda cria um backup (uso legado documentado)", async () => {
+// duplicates of parent (real cause of #8512) cannot remove this action.
+test("backup — no subcommand still creates a backup (documented legacy usage)", async () => {
   const { registerBackup } = await import("../../bin/cli/commands/backup.mjs");
   const { Command } = await import("commander");
   const { mkdtempSync, existsSync, rmSync } = await import("node:fs");
@@ -206,16 +206,16 @@ test("tunnel — registerTunnel registra list/create/stop/status/logs/info/rotat
   }
 });
 
-test("health components com alertsOnly=true não lança", async () => {
-  // Server não está rodando — função deve retornar 1 sem throw.
+test("health components with alertsOnly=true does not launch", async () => {
+  // Server is not running — function must return 1 without throw.
   const { runHealthComponentsCommand } = await import("../../bin/cli/commands/health.mjs");
   const code = await runHealthComponentsCommand({ alertsOnly: true });
   assert.ok(code === 0 || code === 1, "should return 0 or 1");
 });
 
-test("update --check com versão atual não lança", async () => {
+test("update --check with current version does not launch", async () => {
   const { runUpdateCommand } = await import("../../bin/cli/commands/update.mjs");
-  // Sem servidor npm disponível pode retornar erro — só garante que não throw.
+  // No npm server available may return error — just ensure no throw.
   let code = 0;
   try {
     code = await runUpdateCommand({ check: true, yes: true });
@@ -225,7 +225,7 @@ test("update --check com versão atual não lança", async () => {
   assert.ok(code === 0 || code === 1);
 });
 
-test("test-provider.mjs exporta runTestProviderCommand com novas flags", async () => {
+test("test-provider.mjs exports runTestProviderCommand with new flags", async () => {
   const mod = await import("../../bin/cli/commands/test-provider.mjs");
   assert.equal(typeof mod.registerTestProvider, "function");
   assert.equal(typeof mod.runTestProviderCommand, "function");
@@ -245,7 +245,7 @@ test("test-provider — registerTestProvider registra flags latency/repeat/compa
   assert.ok(optNames.includes("--save"), "--save deve existir");
 });
 
-test("OAuthFlow.jsx — arquivo existe e exporta startOAuthTui", async () => {
+test("OAuthFlow.jsx — file exists and exports startOAuthTui", async () => {
   const { readFileSync } = await import("node:fs");
   const { fileURLToPath } = await import("node:url");
   const path = new URL("../../bin/cli/tui/OAuthFlow.jsx", import.meta.url);
@@ -256,7 +256,7 @@ test("OAuthFlow.jsx — arquivo existe e exporta startOAuthTui", async () => {
   );
 });
 
-test("EvalWatch.jsx — arquivo existe e exporta startEvalWatchTui", async () => {
+test("EvalWatch.jsx — file exists and exports startEvalWatchTui", async () => {
   const { readFileSync } = await import("node:fs");
   const { fileURLToPath } = await import("node:url");
   const path = new URL("../../bin/cli/tui/EvalWatch.jsx", import.meta.url);
@@ -267,7 +267,7 @@ test("EvalWatch.jsx — arquivo existe e exporta startEvalWatchTui", async () =>
   );
 });
 
-test("ProvidersTestAll.jsx — arquivo existe e exporta startProvidersTestTui", async () => {
+test("ProvidersTestAll.jsx — file exists and exports startProvidersTestTui", async () => {
   const { readFileSync } = await import("node:fs");
   const { fileURLToPath } = await import("node:url");
   const path = new URL("../../bin/cli/tui/ProvidersTestAll.jsx", import.meta.url);
@@ -278,15 +278,15 @@ test("ProvidersTestAll.jsx — arquivo existe e exporta startProvidersTestTui", 
   );
 });
 
-test("backup matchesGlob — comportamento correto", async () => {
-  // Teste via leitura de arquivo para evitar efeitos colaterais de importação
+test("backup matchesGlob — correct behavior", async () => {
+  // Test via file reading to avoid import side effects
   const { readFileSync } = await import("node:fs");
   const { fileURLToPath } = await import("node:url");
   const src = readFileSync(
     fileURLToPath(new URL("../../bin/cli/commands/backup.mjs", import.meta.url)),
     "utf8"
   );
-  // Garante que a função usa lógica correta (sem startsWith na branch sem *)
+  // Ensures function uses correct logic (no startsWith in branch without *)
   assert.ok(src.includes("return fileName === pattern;"), "non-glob deve usar igualdade exata");
   assert.ok(!src.includes("fileName.startsWith(pattern)"), "não deve usar startsWith no non-glob");
   // Garante que suporta multi-wildcard (sem early return parts.length !== 2)

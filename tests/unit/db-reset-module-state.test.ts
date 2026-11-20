@@ -1,11 +1,11 @@
-// TDD — 6A.1 triagem do órfão compression-preview-auth.test.ts (503 em vez de 403).
-// Causa-raiz: resetDbInstance()/closeDbInstance() NÃO disparava os resetters do
-// registry stateReset.ts (só o restore de backup.ts disparava). Módulos com estado
-// amarrado à conexão (ex.: apiKeys.ts `_schemaChecked` + prepared statements)
-// ficavam apontando para o schema/conexão antiga: após um segundo reset com DB
-// recriado do zero, ensureApiKeysColumns era pulado (memo de processo) e o
+// TDD — 6A.1 triage of compression-preview-auth.test.ts orphan (503 instead of 403).
+// Root cause: resetDbInstance()/closeDbInstance() did NOT trigger the resetters
+// registry stateReset.ts (only backup.ts restore triggered). Stateful modules
+// tied to the connection (e.g.: apiKeys.ts `_schemaChecked` + prepared statements)
+// kept pointing to the old schema/connection: after a second reset with DB
+// recreated from scratch, ensureApiKeysColumns was skipped (process memo) and the
 // re-prepare explodia com "no such column: is_active" → 503 em vez de 403.
-// O mesmo caminho atinge produção via restore de DB antigo sem as colunas-fallback.
+// The same path reaches production via restore of old DB without fallback columns.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -32,8 +32,8 @@ test("api-key validation survives a second resetDbInstance with a recreated DB (
   await recreateDataDirFromScratch();
   assert.equal(await isValidApiKey("not-a-real-key"), false);
 
-  // Segundo ciclo: sem o wiring resetDbInstance→resetAllDbModuleState, o memo de
-  // schema de apiKeys.ts sobrevive ao reset e o prepare lança "no such column".
+  // Second cycle: without wiring resetDbInstance→resetAllDbModuleState, the memo
+  // apiKeys.ts schema survives reset and prepare throws "no such column".
   await recreateDataDirFromScratch();
   assert.equal(await isValidApiKey("not-a-real-key"), false);
 });

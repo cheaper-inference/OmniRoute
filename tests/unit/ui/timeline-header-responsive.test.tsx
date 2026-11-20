@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * F4 (KEA-7886, lote 6 pendência 17): the timeline header was a fixed-height single row
+ * F4 (KEA-7886, batch 6 backlog 17): the timeline header was a fixed-height single row
  * (style height = HEADER_HEIGHT) holding ~10 controls, so at 390 px the toolbar was clipped.
  * HEADER_HEIGHT only sized the header (no canvas maths reads it), so it becomes a minimum and
  * both the header and its control group wrap.

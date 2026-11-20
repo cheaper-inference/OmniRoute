@@ -1,7 +1,7 @@
 export function parseSseChunk(text) {
-  // Itera LINHAS dentro de cada bloco: a VPS emite comment-lines SSE
-  // (": x-omniroute-*") no mesmo bloco do "data: [DONE]", então olhar só o
-  // início do bloco perde o terminador.
+  // Iterates LINES within each block: the VPS emits SSE comment-lines
+  // (": x-omniroute-*") in the same block as "data: [DONE]", so just look at the
+  // beginning of block loses terminator.
   const events = [];
   for (const block of text.split(/\n\n/)) {
     for (const line of block.split("\n")) {
@@ -24,14 +24,14 @@ export function summarizeStream(events) {
       const j = JSON.parse(e);
       if (j.choices?.[0]?.delta?.content) contentDeltas++;
     } catch {
-      /* fragmento parcial — ignorado; o caller acumula buffer */
+      /* partial fragment — ignored; the caller accumulates buffer */
     }
   }
   const ok = contentDeltas >= 1 && done;
   return { ok, contentDeltas, done };
 }
 
-/** Faz 1 chat streaming real e valida o protocolo SSE ponta-a-ponta. */
+/** Performs 1 real streaming chat and validates the end-to-end SSE protocol. */
 export async function checkSse(baseUrl, apiKey, model, { retries = 1 } = {}) {
   try {
     const res = await fetch(`${baseUrl}/v1/chat/completions`, {
@@ -63,14 +63,14 @@ export async function checkSse(baseUrl, apiKey, model, { retries = 1 } = {}) {
         buffer = buffer.slice(lastSep + 2);
       }
     }
-    // flush do resto do buffer (último bloco pode chegar sem "\n\n" no read final)
+    // flush the rest of the buffer (last block may arrive without "\n\n" in the final read)
     if (buffer.trim()) events.push(...parseSseChunk(buffer));
     const s = summarizeStream(events);
     return { ok: s.ok, failures: s.ok ? [] : [`contentDeltas=${s.contentDeltas} done=${s.done}`] };
   } catch (err) {
-    // Socket keep-alive reciclado pelo servidor entre requests é transitório —
-    // 1 retry antes de reportar falha. Erro persistente é FALHA da camada,
-    // nunca crash do orquestrador.
+    // Socket keep-alive recycled by the server between requests is transient —
+    // 1 retry before reporting failure. Persistent error is layer FAILURE,
+    // never crash the orchestrator.
     if (retries > 0) {
       await new Promise((r) => setTimeout(r, 1_000));
       return checkSse(baseUrl, apiKey, model, { retries: retries - 1 });

@@ -61,7 +61,7 @@ function makeAlert(
 }
 
 // ---------------------------------------------------------------------------
-// parseCodeQLAlerts — input inválido
+// parseCodeQLAlerts — invalid input
 // ---------------------------------------------------------------------------
 
 test("parseCodeQLAlerts: null retorna alertCount=0", () => {
@@ -76,7 +76,7 @@ test("parseCodeQLAlerts: undefined retorna alertCount=0", () => {
   assert.equal(result.alertCount, 0);
 });
 
-test("parseCodeQLAlerts: objeto (não-array) retorna alertCount=0", () => {
+test("parseCodeQLAlerts: object (non-array) returns alertCount=0", () => {
   const result = parseCodeQLAlerts({ number: 1, state: "open" } as unknown as null);
   assert.equal(result.alertCount, 0);
 });
@@ -87,10 +87,10 @@ test("parseCodeQLAlerts: string retorna alertCount=0", () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseCodeQLAlerts — array vazio
+// parseCodeQLAlerts — empty array
 // ---------------------------------------------------------------------------
 
-test("parseCodeQLAlerts: array vazio retorna alertCount=0", () => {
+test("parseCodeQLAlerts: empty array returns alertCount=0", () => {
   const result = parseCodeQLAlerts([]);
   assert.equal(result.alertCount, 0);
 });
@@ -99,19 +99,19 @@ test("parseCodeQLAlerts: array vazio retorna alertCount=0", () => {
 // parseCodeQLAlerts — Hard Rule #14: dismissed alerts don't count
 // ---------------------------------------------------------------------------
 
-test("parseCodeQLAlerts: alerta dismissed NÃO conta (Hard Rule #14)", () => {
+test("parseCodeQLAlerts: alert dismissed DOES NOT count (Hard Rule #14)", () => {
   const alerts = [makeAlert({ state: "dismissed", dismissedReason: "false positive" })];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 0, "dismissed alert must not be counted");
 });
 
-test("parseCodeQLAlerts: alerta dismissed com razão 'used in tests' NÃO conta", () => {
+test("parseCodeQLAlerts: alert rightly dismissed 'used in tests' DOES NOT count", () => {
   const alerts = [makeAlert({ state: "dismissed", dismissedReason: "used in tests" })];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 0);
 });
 
-test("parseCodeQLAlerts: alerta dismissed independente da razão NÃO conta", () => {
+test("parseCodeQLAlerts: alert dismissed regardless of reason DOES NOT count", () => {
   const alerts = [
     makeAlert({ state: "dismissed", dismissedReason: "wont fix" }),
     makeAlert({ number: 2, state: "dismissed", dismissedReason: "false positive" }),
@@ -122,20 +122,20 @@ test("parseCodeQLAlerts: alerta dismissed independente da razão NÃO conta", ()
 });
 
 // ---------------------------------------------------------------------------
-// parseCodeQLAlerts — estado fixed não conta
+// parseCodeQLAlerts — fixed state does not count
 // ---------------------------------------------------------------------------
 
-test("parseCodeQLAlerts: alerta fixed NÃO conta", () => {
+test("parseCodeQLAlerts: fixed alert does NOT count", () => {
   const alerts = [makeAlert({ state: "fixed" as "open" | "dismissed" | "fixed" })];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 0, "fixed alerts are not open, must not count");
 });
 
 // ---------------------------------------------------------------------------
-// parseCodeQLAlerts — somente alertas CodeQL (filtra outras ferramentas)
+// parseCodeQLAlerts — CodeQL alerts only (filters other tools)
 // ---------------------------------------------------------------------------
 
-test("parseCodeQLAlerts: alertas de outras ferramentas são ignorados", () => {
+test("parseCodeQLAlerts: alerts from other tools are ignored", () => {
   const alerts = [
     makeAlert({ tool: "Semgrep", ruleId: "semgrep-rule-1" }),
     makeAlert({ number: 2, tool: "ESLint", ruleId: "eslint-rule-1" }),
@@ -144,26 +144,26 @@ test("parseCodeQLAlerts: alertas de outras ferramentas são ignorados", () => {
   assert.equal(result.alertCount, 0, "only CodeQL alerts should be counted");
 });
 
-test("parseCodeQLAlerts: tool 'CodeQL' (maiúsculas) conta", () => {
+test("parseCodeQLAlerts: tool 'CodeQL' (upper case) account", () => {
   const alerts = [makeAlert({ tool: "CodeQL" })];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 1);
 });
 
-test("parseCodeQLAlerts: tool 'codeql' (minúsculas) conta (case-insensitive)", () => {
+test("parseCodeQLAlerts: tool 'codeql' (lower case) account (case-insensitive)", () => {
   const alerts = [makeAlert({ tool: "codeql" })];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 1);
 });
 
-test("parseCodeQLAlerts: tool 'CodeQL Community' também conta (contém 'codeql')", () => {
+test("parseCodeQLAlerts: tool 'CodeQL Community' also counts (contains 'codeql')", () => {
   const alerts = [makeAlert({ tool: "CodeQL Community" })];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 1);
 });
 
 // ---------------------------------------------------------------------------
-// parseCodeQLAlerts — contagem de alertas open
+// parseCodeQLAlerts — alert count open
 // ---------------------------------------------------------------------------
 
 test("parseCodeQLAlerts: 1 alerta open CodeQL retorna alertCount=1", () => {
@@ -182,7 +182,7 @@ test("parseCodeQLAlerts: 3 alertas open retorna alertCount=3", () => {
   assert.equal(result.alertCount, 3);
 });
 
-test("parseCodeQLAlerts: mix de open, dismissed, fixed — conta só open", () => {
+test("parseCodeQLAlerts: mix of open, dismissed, fixed — account only open", () => {
   const alerts = [
     makeAlert({ number: 1, state: "open" }),
     makeAlert({ number: 2, state: "dismissed", dismissedReason: "false positive" }),
@@ -193,7 +193,7 @@ test("parseCodeQLAlerts: mix de open, dismissed, fixed — conta só open", () =
   assert.equal(result.alertCount, 2, "only 2 open, non-dismissed alerts");
 });
 
-test("parseCodeQLAlerts: mix de CodeQL e outras ferramentas — conta só CodeQL", () => {
+test("parseCodeQLAlerts: mix of CodeQL and other tools — only counts CodeQL", () => {
   const alerts = [
     makeAlert({ number: 1, tool: "CodeQL", state: "open" }),
     makeAlert({ number: 2, tool: "Semgrep", state: "open" }),
@@ -212,7 +212,7 @@ test("parseCodeQLAlerts: coleta bySeverity de security_severity_level", () => {
     makeAlert({ number: 1, securitySeverity: "critical" }),
     makeAlert({ number: 2, securitySeverity: "high" }),
     makeAlert({ number: 3, securitySeverity: "medium" }),
-    makeAlert({ number: 4, securitySeverity: "high" }), // segundo high
+    makeAlert({ number: 4, securitySeverity: "high" }), // second high
   ];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.alertCount, 4);
@@ -250,7 +250,7 @@ test("parseCodeQLAlerts: agrupa por rule.id em byRule", () => {
   const alerts = [
     makeAlert({ number: 1, ruleId: "js/sql-injection" }),
     makeAlert({ number: 2, ruleId: "js/xss" }),
-    makeAlert({ number: 3, ruleId: "js/sql-injection" }), // segundo do mesmo rule
+    makeAlert({ number: 3, ruleId: "js/sql-injection" }), // second of the same rule
   ];
   const result = parseCodeQLAlerts(alerts);
   assert.equal(result.byRule["js/sql-injection"], 2);
@@ -272,10 +272,10 @@ test("parseCodeQLAlerts: alerta sem rule retorna byRule com 'unknown'", () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseCodeQLAlerts — dismissed não contamina contagens
+// parseCodeQLAlerts — dismissed does not contaminate counts
 // ---------------------------------------------------------------------------
 
-test("parseCodeQLAlerts: dismissed com mesmo ruleId que open — dismissed não aparece em byRule", () => {
+test("parseCodeQLAlerts: dismissed with the same ruleId as open — dismissed does not appear in byRule", () => {
   const alerts = [
     makeAlert({ number: 1, state: "open", ruleId: "js/sql-injection" }),
     makeAlert({

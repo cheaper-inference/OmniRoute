@@ -248,33 +248,33 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
 export function parseCognitiveCount(out) {
   const s = String(out || "");
   // `check:complexity-ratchets` runs ONE shared ESLint walk and prints BOTH ratchets, with the
-  // cyclomatic "N violações" summary emitted FIRST — so a bare `\d+ violações` regex would grab
+  // cyclomatic "N violations" summary emitted FIRST — so a bare `\d violations` regex would grab
   // the cyclomatic count. Prefer the unambiguous machine-readable `cognitiveComplexity=N` line
   // (mirrors the cyclomatic `complexity=N` parse used for cycCurrent below).
   const machine = s.match(/(?:^|\n)cognitiveComplexity=(\d+)/);
   if (machine) return Number(machine[1]);
-  const m = s.match(/(\d+)\s+(?:function\(s\) exceed|violações|violations)/i);
+  const m = s.match(/(\d+)\s+(?:function\(s\) exceed|violations)/i);
   return m ? Number(m[1]) : null;
 }
 
 /** Translate the shared complexity walk into the two metric records. */
 export function evaluateComplexityRun({ code, out }, cogBase) {
   // The shared walk emits both machine counts followed by both ratchet verdicts.
-  // Do not use the legacy generic "N violações" fallback here: a partial walk
+  // Do not use the legacy generic "N violations" fallback here: a partial walk
   // containing only the cyclomatic summary would masquerade as cognitive data.
   const cogMatch = /^cognitiveComplexity=(\d+)\r?$/m.exec(out);
   const cycMatch = /^complexity=(\d+)\r?$/m.exec(out);
-  const cogSummary = /^\[cognitive-complexity\] (OK|REGRESSÃO) — (\d+) violações /m.exec(out);
-  const cycSummary = /^\[complexity\] (OK|REGRESSÃO) — (\d+) violações /m.exec(out);
+  const cogSummary = /^\[cognitive-complexity\] (OK|REGRESSION) — (\d+) violations /m.exec(out);
+  const cycSummary = /^\[complexity\] (OK|REGRESSION) — (\d+) violations /m.exec(out);
   const cogCurrent = cogMatch ? Number(cogMatch[1]) : null;
   const cycCurrent = cycMatch ? Number(cycMatch[1]) : null;
   const cogOver = isDrift(cogCurrent, cogBase);
-  const cycRegressed = cycSummary?.[1] === "REGRESSÃO";
+  const cycRegressed = cycSummary?.[1] === "REGRESSION";
   const measured =
     [cogCurrent, cycCurrent, cogBase].every((count) => Number.isSafeInteger(count) && count >= 0) &&
     Number(cogSummary?.[2]) === cogCurrent &&
     Number(cycSummary?.[2]) === cycCurrent &&
-    (cogSummary?.[1] === "REGRESSÃO") === cogOver;
+    (cogSummary?.[1] === "REGRESSION") === cogOver;
   // Exit 1 is expected only for a complete, measured ratchet regression. A
   // cancelled/crashed tool or missing metrics is execution failure, not drift.
   const measuredDrift = code === 1 && measured && (cogOver || cycRegressed);

@@ -64,7 +64,7 @@ class TestXiaomiExecutor extends BaseExecutor {
   }
 }
 
-test("getTargetFormat: override da conexao troca o formato quando declarado (xiaomi-mimo)", () => {
+test("getTargetFormat: connection override changes the format when declared (xiaomi-mimo)", () => {
   assert.equal(getTargetFormat("xiaomi-mimo", { targetFormat: "claude" }), "claude");
 });
 
@@ -82,7 +82,7 @@ test("DefaultExecutor.buildHeaders: targetFormat claude produz x-api-key + Anthr
   assert.equal(headers["Anthropic-Version"], "2023-06-01");
 });
 
-test("DefaultExecutor.buildHeaders: sem targetFormat mantem Authorization Bearer (nao-regressao)", () => {
+test("DefaultExecutor.buildHeaders: without targetFormat maintains Authorization Bearer (non-regression)", () => {
   const executor = new DefaultExecutor("xiaomi-mimo");
   const headers = executor.buildHeaders(
     {
@@ -104,13 +104,13 @@ test("resolveBaseUrl: targetFormat claude resolve para o endpoint /anthropic/v1/
   assert.equal(url, "https://api.xiaomimimo.com/anthropic/v1/messages");
 });
 
-test("resolveBaseUrl: sem targetFormat resolve para o /v1 padrao", () => {
+test("resolveBaseUrl: without targetFormat resolves to the default /v1", () => {
   const executor = new TestXiaomiExecutor();
   const url = executor.publicResolveBaseUrl({ apiKey: "sk-test", providerSpecificData: {} });
   assert.equal(url, "https://api.xiaomimimo.com/v1");
 });
 
-test("resolveBaseUrl: providerSpecificData.baseUrl manual vence a alternativa", () => {
+test("resolveBaseUrl: providerSpecificData.baseUrl manual beats alternative", () => {
   const executor = new TestXiaomiExecutor();
   const url = executor.publicResolveBaseUrl({
     apiKey: "sk-test",
@@ -134,7 +134,7 @@ test("buildUrl: targetFormat claude produz a URL do endpoint Anthropic, sem /cha
   assert.equal(url, "https://api.xiaomimimo.com/anthropic/v1/messages");
 });
 
-test("buildUrl: sem targetFormat mantem a URL OpenAI padrao (nao-regressao)", () => {
+test("buildUrl: without targetFormat keeps the default OpenAI URL (non-regression)", () => {
   const executor = new DefaultExecutor("xiaomi-mimo");
   const url = executor.buildUrl("mimo-v2.5-pro", true, 0, {
     apiKey: "sk-x",
@@ -143,7 +143,7 @@ test("buildUrl: sem targetFormat mantem a URL OpenAI padrao (nao-regressao)", ()
   assert.equal(url, "https://api.xiaomimimo.com/v1/chat/completions");
 });
 
-test("buildUrl: providerSpecificData.baseUrl manual continua vencendo e passa pelo caminho normal", () => {
+test("buildUrl: manual providerSpecificData.baseUrl keeps winning and goes through the normal path", () => {
   const executor = new DefaultExecutor("xiaomi-mimo");
   const url = executor.buildUrl("mimo-v2.5-pro", true, 0, {
     apiKey: "sk-x",
@@ -164,7 +164,7 @@ test("buildUrl: xiaomi-mimo-token-plan com targetFormat claude usa o host token-
   assert.equal(url, "https://token-plan-sgp.xiaomimimo.com/anthropic/v1/messages");
 });
 
-test("buildUrl: xiaomi-mimo-token-plan sem targetFormat mantem a URL OpenAI padrao do host token-plan-sgp", () => {
+test("buildUrl: xiaomi-mimo-token-plan without targetFormat maintains the default OpenAI URL of the host token-plan-sgp", () => {
   const executor = new DefaultExecutor("xiaomi-mimo-token-plan");
   const url = executor.buildUrl("mimo-v2.5-pro", true, 0, {
     apiKey: "sk-x",
@@ -195,7 +195,7 @@ test("xiaomi-mimo-token-plan declara a variante Anthropic no host token-plan", (
   assert.equal(alt.authHeader, "x-api-key");
 });
 
-test("xiaomi-mimo-token-plan esta registrado e nao colide de host com o normal", () => {
+test("xiaomi-mimo-token-plan is registered and does not collide with the normal host", () => {
   assert.ok(REGISTRY["xiaomi-mimo-token-plan"], "provedor nao registrado");
   assert.notEqual(
     REGISTRY["xiaomi-mimo-token-plan"].baseUrl,
@@ -211,7 +211,7 @@ test("xiaomi-mimo-token-plan expoe os modelos de chat", () => {
   assert.ok(ids.includes("mimo-v2.5"));
 });
 
-test("xiaomi-mimo-token-plan anuncia a janela de 1M e saida de 128K da geracao v2.6", () => {
+test("xiaomi-mimo-token-plan announces the 1M window and 128K output of the v2.6 generation", () => {
   for (const id of ["mimo-v2.6-pro", "mimo-v2.6-flash"]) {
     const model = xiaomi_mimo_token_planProvider.models.find((m) => m.id === id);
     assert.equal(model?.contextLength, 1048576, id);

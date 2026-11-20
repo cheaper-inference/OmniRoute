@@ -14,7 +14,7 @@ const { codexWakeupActionSchema, codexWakeupTaskInputSchema } =
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 test("daily schedule fires later today when the local time has not passed yet", () => {
-  // 2026-03-10 is a Tuesday. 09:00 UTC = 06:00 in São Paulo (UTC-3, no DST).
+  // 2026-03-10 is a Tuesday. 09:00 UTC = 06:00 in São Paulo (UTC-3, in DST).
   const after = Date.parse("2026-03-10T09:00:00.000Z");
   const next = nextWakeupAt(
     { kind: "daily", time: "08:30", timezone: "America/Sao_Paulo", days: ALL_DAYS },

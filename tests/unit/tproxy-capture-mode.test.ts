@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — TPROXY capture-mode listener.
+ * Phase 3 / Epic A — TPROXY capture-mode listener.
  *
  * Ties the validated primitives together: apply OUTPUT-based rules → open the
  * IP_TRANSPARENT listener → per connection, read the ORIGINAL destination

@@ -44,7 +44,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("a2a skills retorna lista de skills da agent card", async () => {
+test("a2a skills returns list of agent card skills", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((_url: string) => {
     return Promise.resolve(
@@ -71,7 +71,7 @@ test("a2a skills retorna lista de skills da agent card", async () => {
   assert.ok(parsed.some((s: any) => s.id === "smart-routing"));
 });
 
-test("a2a invoke envia JSON-RPC 2.0 com método tasks.create", async () => {
+test("a2a invoke sends JSON-RPC 2.0 with tasks.create method", async () => {
   let capturedBody: any = null;
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
@@ -140,7 +140,7 @@ test("a2a tasks get busca task por id", async () => {
   assert.equal(parsed.id, "a2a-task-001");
 });
 
-test("a2a tasks cancel chama endpoint correto", async () => {
+test("a2a tasks cancel calls correct endpoint", async () => {
   let capturedUrl = "";
   let capturedMethod = "";
   const origFetch = globalThis.fetch;
@@ -171,7 +171,7 @@ test("a2a tasks logs busca com include=messages,artifacts", async () => {
   assert.ok(capturedUrl.includes("include=messages"));
 });
 
-test("a2a.mjs pode ser importado sem erro", async () => {
+test("a2a.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/a2a.mjs");
   assert.equal(typeof mod.registerA2a, "function");
   assert.equal(typeof mod.runA2aStatusCommand, "function");

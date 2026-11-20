@@ -69,7 +69,7 @@ const WEAK_TRIGGERS = [
 //    (contains digit sequences, colons, path separators, or known status tokens).
 const FENCED_BLOCK_RE = /```[^\n]*\n([\s\S]*?)```/g;
 const OUTPUT_LINE_RE =
-  /(?:\d+\s+(?:pass(?:ing)?|fail(?:ing)?|pending)|[✓✗×•]\s|\bPASS\b|\bFAIL\b|\bok\b|\berror\b.*\d|\bwarning\b.*\d|\d+\s+(?:test|spec|suite)|exit\s+code\s*[0-9]|at\s+\S+:\d+|[A-Za-z]+:\s*\d+|^\s*\d+\s+\w)/im;
+  /(?:\d \s (?:pass(?:ing)?|fail(?:ing)?|pending)|[✓✗×•]\s|\bPASS\b|\bFAIL\b|\bok\b|\berror\b.*\d|\bwarning\b.*\d|\d \s (?:test|spec|suite)|exit\s code\s*[0-9]|at\s \S :\d |[A-Za-z] :\s*\d |^\s*\d \s \w)/im;
 
 // 2. An explicit evidence/validation section header followed by non-blank content.
 const EVIDENCE_SECTION_RE =

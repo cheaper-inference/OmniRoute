@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 const { createSqlJsAdapter } = await import("../../../src/lib/db/adapters/sqljsAdapter.ts");
 
 describe("sqljsAdapter", () => {
-  test("abre DB in-memory e executa CRUD básico", async () => {
+  test("open in-memory DB and perform basic CRUD", async () => {
     const adapter = await createSqlJsAdapter(":memory:");
 
     adapter.exec("CREATE TABLE test (id INTEGER PRIMARY KEY, val TEXT)");
@@ -22,7 +22,7 @@ describe("sqljsAdapter", () => {
     adapter.close();
   });
 
-  test("driver é 'sql.js'", async () => {
+  test("driver is 'sql.js'", async () => {
     const adapter = await createSqlJsAdapter(":memory:");
     assert.equal(adapter.driver, "sql.js");
     adapter.close();
@@ -35,7 +35,7 @@ describe("sqljsAdapter", () => {
     adapter.close();
   });
 
-  test("transaction é atômica — rollback em erro", async () => {
+  test("transaction is atomic — rollback on error", async () => {
     const adapter = await createSqlJsAdapter(":memory:");
     adapter.exec("CREATE TABLE tx_test (id INTEGER PRIMARY KEY, val TEXT NOT NULL)");
 
@@ -51,7 +51,7 @@ describe("sqljsAdapter", () => {
     adapter.close();
   });
 
-  test("transaction confirma quando não lança erro", async () => {
+  test("transaction confirms when no error is thrown", async () => {
     const adapter = await createSqlJsAdapter(":memory:");
     adapter.exec("CREATE TABLE commit_test (id INTEGER PRIMARY KEY, val TEXT)");
 
@@ -67,7 +67,7 @@ describe("sqljsAdapter", () => {
     adapter.close();
   });
 
-  test("escreve em arquivo e relê corretamente", async (t) => {
+  test("writes to file and rereads correctly", async (t) => {
     const os = await import("node:os");
     const path = await import("node:path");
     const fs = await import("node:fs");

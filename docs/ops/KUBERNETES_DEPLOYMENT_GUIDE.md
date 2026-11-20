@@ -295,7 +295,7 @@ The manifests follow
 
 | Probe     | Target                   | Why                                                   |
 | --------- | ------------------------ | ----------------------------------------------------- |
-| Startup   | `GET /healthz`, 120 × 5s | Cold start = migrations + WAL replay + file rebuild   |
+| Startup | `GET /healthz`, 120 × 5s | Cold start = migrations WAL replay file rebuild |
 | Readiness | `GET /healthz`           | Lifecycle state; 200 vs 503                           |
 | Liveness  | **tcpSocket** on `http`  | Process-alive only, and cannot be starved by the loop |
 

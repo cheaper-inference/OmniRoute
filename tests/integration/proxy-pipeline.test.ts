@@ -55,11 +55,11 @@ describe("Chat Pipeline — handleSingleModelChat decomposition", () => {
     assert.match(src, /checkPipelineGates\(provider/);
   });
 
-  // O breaker deixou de ser chamado direto por handleSingleModelChat: a chamada foi
+  // The breaker is no longer called directly by handleSingleModelChat: the call has been
   // extraida para o seam chatDispatch.ts (dispatchChatWithAffinityEviction). O
   // invariante que este teste protege continua o mesmo — todo dispatch de chat passa
-  // pelo circuit breaker — mas agora precisa ser verificado nos DOIS saltos, senao a
-  // extracao poderia remover o breaker do caminho sem nenhum teste reclamar.
+  // by the circuit breaker — but now it needs to be checked in BOTH hops, otherwise the
+  // extraction could remove the breaker from the path without any tests complaining.
   it("handleSingleModelChat should dispatch through the breaker seam", () => {
     assert.match(src, /dispatchChatWithAffinityEviction\(/);
     assert.ok(dispatchSrc, "src/sse/handlers/chatDispatch.ts should exist");

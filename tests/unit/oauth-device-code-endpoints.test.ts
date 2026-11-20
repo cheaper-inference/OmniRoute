@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-// Regression guard for the device-code provider that returned "ошибка сервера OmniRoute":
+// Regression guard for the device-code provider that returned "OmniRoute server error":
 //
 //   codebuddy-cn— the Tencent state endpoint reads `platform` from the QUERY string, not the JSON
 //                 body; body-only returned 400 "platform is empty" (verified live). The fix passes

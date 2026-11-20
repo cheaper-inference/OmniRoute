@@ -11,7 +11,7 @@
 // So the debt is not cosmetic: a stale allowlist entry blocks the queue. AGENTS.md
 // anticipates exactly this — "stale allowlist entries (suppressing a violation
 // that no longer exists) will be caught by the stale-enforcement added in
-// Fase 6A.3".
+// Phase 6A.3".
 //
 // FILE SHAPE: this file is keyed by FILE first, then rule, then count:
 //

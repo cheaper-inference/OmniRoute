@@ -2,7 +2,7 @@ import http from "k6/http";
 import { check } from "k6";
 
 // Soak contra um endpoint leve (sem custo de LLM) para medir liveness/leak do
-// servidor sob carga sustentada. Configurável por env: BASE_URL, SOAK_VUS, SOAK_DURATION.
+// server under sustained load. Configurable by env: BASE_URL, SOAK_VUS, SOAK_DURATION.
 export const options = {
   stages: [{ duration: __ENV.SOAK_DURATION || "3m", target: Number(__ENV.SOAK_VUS || 10) }],
   thresholds: {

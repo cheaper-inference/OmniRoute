@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // scripts/quality/run-all-gates.mjs
-// Agregador paralelo de quality gates determinísticos.
-// Roda os gates filesystem-only em paralelo (pool ~4), agrega resultados, e exibe
-// uma tabela consolidada com {gate, status, durationMs}. Sai com código 1 se
+// Parallel aggregator of deterministic quality gates.
+// Run the filesystem-only gates in parallel (pool ~4), aggregate results, and display
+// a consolidated table with {gate, status, durationMs}. Exits with code 1 if
 // qualquer gate falhar. Alvo: < 3 min no total.
 //
 // Usage:

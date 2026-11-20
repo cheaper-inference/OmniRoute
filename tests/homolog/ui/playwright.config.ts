@@ -9,15 +9,15 @@ export default defineConfig({
   testDir: ".",
   timeout: 60_000,
   retries: 1,
-  // Sem fullyParallel, os 98 testes de routes.spec.ts (mesmo arquivo) rodam
-  // SERIALIZADOS num único worker (~10min); com ele, distribuem entre os workers.
+  // Without fullyParallel, the 98 tests from routes.spec.ts (same file) run
+  // SERIALIZED in a single worker (~10min); with it, they distribute it among the workers.
   fullyParallel: true,
   workers: 8,
   reporter: [
     ["list"],
     [
       // outputDir ABSOLUTO: o reporter resolve paths relativos contra o CWD do
-      // processo (não contra o config) — um path relativo escapava do worktree.
+      // process (not against config) — a relative path escaped the worktree.
       "playwright-ctrf-json-reporter",
       {
         outputDir: path.resolve(HERE, "..", "..", "..", "homolog-report"),

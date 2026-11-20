@@ -643,7 +643,7 @@ test("evaluateModeConditionalSkips reports a net increase, never a decrease", ()
   assert.equal(lines.length, 1);
   assert.match(
     lines[0],
-    /tests\/unit\/docs\/readme-hero-svg\.test\.ts: 1 novo\(s\) skip\(s\) condicional/
+    /tests\/unit\/docs\/readme-hero-svg\.test\.ts: 1 new conditional skip\(s\)/
   );
 });
 
@@ -684,6 +684,6 @@ test("evaluateModeConditionalSkips names the helpers and skips the helpers' own 
     { file: "tests/unit/mirror-freshness-helper.test.ts", baseModeSkips: 0, headModeSkips: 4 },
   ]);
   assert.equal(lines.length, 1);
-  assert.match(lines[0], /^tests\/unit\/i18n-pt-br\.test\.ts: 1 novo/);
-  assert.match(lines[0], /localeParityOptions — paridade de chaves/);
+  assert.match(lines[0], /^tests\/unit\/i18n-pt-br\.test\.ts: 1 new/);
+  assert.match(lines[0], /localeParityOptions — key parity between languages/);
 });

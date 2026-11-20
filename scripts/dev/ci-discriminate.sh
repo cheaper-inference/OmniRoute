@@ -11,7 +11,7 @@
 # (override the directory with CI_DISC_DIR). Each line is then classified:
 #
 #   own        names a file of `gh pr diff <PR> --name-only`, or carries the complexity
-#              ratchet marker "REGRESSÃO (código novo)"
+# ratchet marker "REGRESSION (new code)"
 #   inherited  present in the reference set: the same extraction for --ref-pr (a near-empty
 #              PR on the same base), or the body + comments of the --base-red issue
 #   unknown    everything else — read the log before calling it flaky
@@ -248,7 +248,7 @@ DIFF_FILES="$WORK/diff.txt"
 while IFS= read -r line; do
   in_ref=0
   if in_reference "$line"; then in_ref=1; fi
-  if [[ "$line" == *"REGRESSÃO (código novo)"* ]] ||
+  if [[ "$line" == *"REGRESSION (new code)"* ]] ||
     { [ -s "$DIFF_FILES" ] && printf '%s\n' "$line" | grep -qF -f "$DIFF_FILES"; }; then
     if [ "$in_ref" = 1 ]; then
       printf '%s  [also in %s]\n' "$line" "$REF_LABEL" >>"$WORK/own.txt"

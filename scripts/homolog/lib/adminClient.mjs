@@ -1,5 +1,5 @@
 // Cookie confirmado em src/app/api/auth/login/route.ts (cookieStore.set("auth_token", ...))
-// e em src/shared/utils/apiAuth.ts (isDashboardSessionAuthenticated lê "auth_token").
+// and in src/shared/utils/apiAuth.ts (isDashboardSessionAuthenticated reads "auth_token").
 const TOKEN_COOKIE = "auth_token";
 
 export function extractJwtCookie(setCookies) {
@@ -15,8 +15,8 @@ export function extractApiKey(body) {
   return { key: body.key, id: body.id };
 }
 
-// fetch com 1 retry para erros de socket (keep-alive reciclado pelo servidor
-// entre requests espaçados derruba o 1º write com EPIPE/other side closed).
+// fetch with 1 retry for socket errors (keep-alive recycled by the server
+// between spaced requests drops the 1st write with EPIPE/other side closed).
 async function fetchRetry(url, init, retries = 1) {
   try {
     return await fetch(url, init);
@@ -29,25 +29,25 @@ async function fetchRetry(url, init, retries = 1) {
   }
 }
 
-/** Login admin → cria API key efêmera. Retorna {key, id, cookie, revoke()}. */
+/** Login admin → creates ephemeral API key. Returns {key, id, cookie, revoke()}. */
 export async function createEphemeralKey(baseUrl, password) {
   const login = await fetchRetry(`${baseUrl}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password }),
   });
-  if (!login.ok) throw new Error(`login falhou: HTTP ${login.status}`);
+  if (!login.ok) throw new Error(`login failed: HTTP ${login.status}`);
   const cookie = extractJwtCookie(login.headers.getSetCookie());
-  if (!cookie) throw new Error("login sem cookie de sessão");
+  if (!cookie) throw new Error("login without session cookie");
 
-  // sufixo único por run: dois runs paralelos (ou um cleanup por nome) nunca colidem
+  // single suffix per run: two parallel runs (or one cleanup per name) never collide
   const name = `homolog-${new Date().toISOString().slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}`;
   const create = await fetchRetry(`${baseUrl}/api/keys`, {
     method: "POST",
     headers: { "Content-Type": "application/json", cookie },
     body: JSON.stringify({ name }),
   });
-  if (!create.ok) throw new Error(`criação de key falhou: HTTP ${create.status}`);
+  if (!create.ok) throw new Error(`key creation failed: HTTP ${create.status}`);
   const { key, id } = extractApiKey(await create.json());
 
   return {
@@ -59,7 +59,7 @@ export async function createEphemeralKey(baseUrl, password) {
         method: "DELETE",
         headers: { cookie },
       });
-      if (!del.ok) throw new Error(`revogação da key ${id} falhou: HTTP ${del.status}`);
+      if (!del.ok) throw new Error(`revocation of key ${id} failed: HTTP ${del.status}`);
     },
   };
 }

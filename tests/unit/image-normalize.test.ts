@@ -14,7 +14,7 @@ test("normalizeDataUri never throws and preserves the uri on failure", async () 
   assert.equal(await normalizeDataUri(uri), uri);
 });
 
-// Só roda quando sharp estiver instalado (optionalDependency presente no devbox):
+// Only runs when sharp is installed (optionalDependency present in devbox):
 test("downscales a large PNG to the long-edge cap when sharp is available", async (t) => {
   let sharp: typeof import("sharp");
   try {

@@ -57,7 +57,7 @@ function makeFinding(
 }
 
 // ---------------------------------------------------------------------------
-// parseGitleaksJson — input inválido / vazio
+// parseGitleaksJson — invalid / empty input
 // ---------------------------------------------------------------------------
 
 test("parseGitleaksJson: null retorna findingCount=0", () => {
@@ -72,14 +72,14 @@ test("parseGitleaksJson: undefined retorna findingCount=0", () => {
   assert.equal(result.findingCount, 0);
 });
 
-test("parseGitleaksJson: array vazio retorna findingCount=0", () => {
+test("parseGitleaksJson: empty array returns findingCount=0", () => {
   const result = parseGitleaksJson([]);
   assert.equal(result.findingCount, 0);
   assert.deepEqual(result.byRule, {});
   assert.deepEqual(result.byFile, {});
 });
 
-test("parseGitleaksJson: objeto (não-array) retorna findingCount=0", () => {
+test("parseGitleaksJson: object (non-array) returns findingCount=0", () => {
   const result = parseGitleaksJson({ RuleID: "github-pat" } as unknown as null);
   assert.equal(result.findingCount, 0);
 });
@@ -89,13 +89,13 @@ test("parseGitleaksJson: string retorna findingCount=0", () => {
   assert.equal(result.findingCount, 0);
 });
 
-test("parseGitleaksJson: número retorna findingCount=0", () => {
+test("parseGitleaksJson: number returns findingCount=0", () => {
   const result = parseGitleaksJson(42 as unknown as null);
   assert.equal(result.findingCount, 0);
 });
 
 // ---------------------------------------------------------------------------
-// parseGitleaksJson — contagem básica
+// parseGitleaksJson — basic count
 // ---------------------------------------------------------------------------
 
 test("parseGitleaksJson: 1 finding retorna findingCount=1", () => {
@@ -121,14 +121,14 @@ test("parseGitleaksJson: agrupa por RuleID em byRule", () => {
   const findings = [
     makeFinding({ ruleId: "github-pat" }),
     makeFinding({ ruleId: "aws-access-key" }),
-    makeFinding({ ruleId: "github-pat" }), // segundo github-pat
+    makeFinding({ ruleId: "github-pat" }), // second github-pat
   ];
   const result = parseGitleaksJson(findings);
   assert.equal(result.byRule["github-pat"], 2);
   assert.equal(result.byRule["aws-access-key"], 1);
 });
 
-test("parseGitleaksJson: RuleID ausente usa 'unknown'", () => {
+test("parseGitleaksJson: Missing RuleID uses 'unknown'", () => {
   const finding = {
     Description: "Some secret",
     StartLine: 1,
@@ -151,13 +151,13 @@ test("parseGitleaksJson: suporta campo ruleId (camelCase) como fallback", () => 
 });
 
 // ---------------------------------------------------------------------------
-// parseGitleaksJson — agrupamento por arquivo
+// parseGitleaksJson — grouping by file
 // ---------------------------------------------------------------------------
 
 test("parseGitleaksJson: agrupa por File em byFile", () => {
   const findings = [
     makeFinding({ file: "src/config.ts", ruleId: "github-pat" }),
-    makeFinding({ file: "src/config.ts", ruleId: "aws-access-key" }), // mesmo arquivo
+    makeFinding({ file: "src/config.ts", ruleId: "aws-access-key" }), // same file
     makeFinding({ file: "tests/fixtures/token.ts", ruleId: "github-pat" }),
   ];
   const result = parseGitleaksJson(findings);
@@ -165,7 +165,7 @@ test("parseGitleaksJson: agrupa por File em byFile", () => {
   assert.equal(result.byFile["tests/fixtures/token.ts"], 1);
 });
 
-test("parseGitleaksJson: File ausente usa 'unknown' em byFile", () => {
+test("parseGitleaksJson: Missing file uses 'unknown' in byFile", () => {
   const finding = {
     RuleID: "github-pat",
     Description: "Token",
@@ -187,10 +187,10 @@ test("parseGitleaksJson: suporta campo file (camelCase) como fallback", () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseGitleaksJson — entradas inválidas dentro do array
+// parseGitleaksJson — invalid entries within the array
 // ---------------------------------------------------------------------------
 
-test("parseGitleaksJson: entradas null dentro do array são ignoradas", () => {
+test("parseGitleaksJson: null entries within the array are ignored", () => {
   const findings = [makeFinding(), null, makeFinding({ ruleId: "aws-access-key" })] as (ReturnType<
     typeof makeFinding
   > | null)[];
@@ -198,7 +198,7 @@ test("parseGitleaksJson: entradas null dentro do array são ignoradas", () => {
   assert.equal(result.findingCount, 2, "null entries should be skipped");
 });
 
-test("parseGitleaksJson: entradas primitivas dentro do array são ignoradas", () => {
+test("parseGitleaksJson: primitive entries within the array are ignored", () => {
   const findings = [
     makeFinding(),
     "string-entry",
@@ -229,7 +229,7 @@ test("parseGitleaksJson: RuleID PascalCase como emitido pelo gitleaks", () => {
 // parseGitleaksJson — invariantes estruturais
 // ---------------------------------------------------------------------------
 
-test("parseGitleaksJson: findingCount == soma de todos os byRule values", () => {
+test("parseGitleaksJson: findingCount == sum of all byRule values", () => {
   const findings = [
     makeFinding({ ruleId: "a" }),
     makeFinding({ ruleId: "b" }),
@@ -241,7 +241,7 @@ test("parseGitleaksJson: findingCount == soma de todos os byRule values", () => 
   assert.equal(result.findingCount, sumByRule, "findingCount must equal sum of byRule counts");
 });
 
-test("parseGitleaksJson: findingCount == soma de todos os byFile values", () => {
+test("parseGitleaksJson: findingCount == sum of all byFile values", () => {
   const findings = [
     makeFinding({ file: "src/a.ts" }),
     makeFinding({ file: "src/b.ts" }),
@@ -263,25 +263,25 @@ test("evaluateSecretsRatchet: medida == baseline passa (3 vs 3)", () => {
   assert.equal(r.improved, false);
 });
 
-test("evaluateSecretsRatchet: uma a mais que o baseline é regressão (4 vs 3)", () => {
+test("evaluateSecretsRatchet: one more than the baseline is regression (4 vs 3)", () => {
   const r = evaluate(4, 3);
   assert.equal(r.regressed, true, "a single new secret finding must block");
   assert.equal(r.improved, false);
 });
 
-test("evaluateSecretsRatchet: menos que o baseline é melhoria", () => {
+test("evaluateSecretsRatchet: less than the baseline is improvement", () => {
   const r = evaluate(1, 3);
   assert.equal(r.regressed, false);
   assert.equal(r.improved, true);
 });
 
-test("evaluateSecretsRatchet: zero contra baseline não-zero é melhoria máxima", () => {
+test("evaluateSecretsRatchet: zero against non-zero baseline is maximum improvement", () => {
   const r = evaluate(0, 5);
   assert.equal(r.regressed, false);
   assert.equal(r.improved, true);
 });
 
-test("evaluateSecretsRatchet: comparação inteira estrita — qualquer aumento regride", () => {
+test("evaluateSecretsRatchet: strict integer comparison — any increase regresses", () => {
   assert.equal(evaluate(6, 5).regressed, true);
   assert.equal(evaluate(5, 5).regressed, false);
   assert.equal(evaluate(4, 5).regressed, false);
@@ -302,29 +302,29 @@ function withTmpBaseline(content: string | null, fn: (p: string) => void) {
   }
 }
 
-test("readBaselineSecretsValue: lê metrics.secretFindings.value", () => {
+test("readBaselineSecretsValue: read metrics.secretFindings.value", () => {
   withTmpBaseline(JSON.stringify({ metrics: { secretFindings: { value: 3 } } }), (p) => {
     assert.equal(readBaseline(p), 3);
   });
 });
 
-test("readBaselineSecretsValue: arquivo ausente retorna null (SKIP gracioso)", () => {
+test("readBaselineSecretsValue: missing file returns null (graceful SKIP)", () => {
   assert.equal(readBaseline("/tmp/does-not-exist-99999/quality-baseline.json"), null);
 });
 
-test("readBaselineSecretsValue: métrica ausente retorna null", () => {
+test("readBaselineSecretsValue: missing metric returns null", () => {
   withTmpBaseline(JSON.stringify({ metrics: {} }), (p) => {
     assert.equal(readBaseline(p), null);
   });
 });
 
-test("readBaselineSecretsValue: value não-numérico retorna null", () => {
+test("readBaselineSecretsValue: non-numeric value returns null", () => {
   withTmpBaseline(JSON.stringify({ metrics: { secretFindings: { value: "3" } } }), (p) => {
     assert.equal(readBaseline(p), null);
   });
 });
 
-test("readBaselineSecretsValue: JSON inválido retorna null (não lança)", () => {
+test("readBaselineSecretsValue: Invalid JSON returns null (does not throw)", () => {
   withTmpBaseline("{ not valid json", (p) => {
     assert.equal(readBaseline(p), null);
   });

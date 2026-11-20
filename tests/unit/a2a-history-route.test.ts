@@ -1,5 +1,5 @@
 /**
- * Task C3 (Orchestration Canvas Fase 2, PR-B2): `GET /api/a2a/tasks/history` (persisted task
+ * Task C3 (Orchestration Canvas Phase 2, PR-B2): `GET /api/a2a/tasks/history` (persisted task
  * history, distinct from the in-memory `GET /api/a2a/tasks`) plus the `GET /api/a2a/tasks/[id]`
  * fallback to that same history when a task has already dropped out of the in-memory TTL window.
  *
@@ -261,7 +261,7 @@ test("GET /api/a2a/tasks/[id] still 404s when the task is absent from both memor
 });
 
 /**
- * Task C1 (Orchestration Canvas Fase 3, PR-C): the history fallback hydrates
+ * Task C1 (Orchestration Canvas Phase 3, PR-C): the history fallback hydrates
  * `metadata.memoryHits` from the persisted `memory_hits` event that `executeA2ATaskWithState`
  * writes (src/lib/a2a/taskExecution.ts), so the drawer's "Memory used" section survives a task
  * leaving the in-memory TTL window. `data_json` is persisted JSON — every read is defensive:

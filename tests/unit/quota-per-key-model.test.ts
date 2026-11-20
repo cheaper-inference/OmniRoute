@@ -1,7 +1,7 @@
 /**
  * tests/unit/quota-per-key-model.test.ts
  *
- * TDD for per-(key, model) budget/rate-limit cap (Fase 3 #7).
+ * TDD for per-(key, model) budget/rate-limit cap (Phase 3 #7).
  *
  * Scenarios:
  *   1. keyA has a cap of N requests for model M; after N uses → enforce blocks keyA on model M.
@@ -12,7 +12,7 @@
  * Uses real SQLite (same single-dir reset pattern as db-quota-pools.test.ts).
  * Live enforceQuotaShare + recordConsumption path ensures end-to-end correctness.
  *
- * Part of: Group B — Quota Sharing Engine, Fase 3 #7.
+ * Part of: Group B — Quota Sharing Engine, Phase 3 #7.
  */
 
 import test from "node:test";

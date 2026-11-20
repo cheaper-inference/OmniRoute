@@ -3,7 +3,7 @@
 //
 //   public/favicon.svg           → public/favicon.ico (16/32/48/64/96/128/256, PNG frames)
 //   public/favicon.svg           → public/icon-512.png
-//   public/apple-touch-icon.svg  → public/apple-touch-icon.png (180×180, as declared in layout.tsx)
+// public/apple-touch-icon.svg → public/apple-touch-icon.png (180×180, as declared in layout.tsx)
 //
 // Usage:
 //   npm i --no-save sharp
@@ -71,7 +71,7 @@ writeFileSync(join(publicDir, "favicon.ico"), buildIco(frames));
 writeFileSync(join(publicDir, "icon-512.png"), await renderPng(faviconSvg, 32, 512));
 
 // layout.tsx declares apple-touch-icon.png as 180×180; its SVG source is
-// authored on a 180×180 viewBox.
+//authored on a 180×180 viewBox.
 writeFileSync(join(publicDir, "apple-touch-icon.png"), await renderPng(appleSvg, 180, 180));
 
 console.log(`favicon.ico (${icoSizes.join("/")}), icon-512.png, apple-touch-icon.png regenerated`);

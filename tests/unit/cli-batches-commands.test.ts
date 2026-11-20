@@ -116,7 +116,7 @@ test("batches get busca por batchId", async () => {
   assert.ok(capturedUrl.includes("/v1/batches/batch-1"));
 });
 
-test("batches output verifica output_file_id antes de baixar", async () => {
+test("batches output checks output_file_id before downloading", async () => {
   let callCount = 0;
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
@@ -133,7 +133,7 @@ test("batches output verifica output_file_id antes de baixar", async () => {
     } as any);
   }) as any;
 
-  // Simula o fluxo: buscar batch, pegar output_file_id, baixar conteúdo
+  // Simulates the flow: fetch batch, get output_file_id, download content
   const batchRes = await (globalThis.fetch as any)("/v1/batches/batch-1");
   const batch = await batchRes.json();
   assert.equal(batch.output_file_id, "file-out-1");
@@ -141,7 +141,7 @@ test("batches output verifica output_file_id antes de baixar", async () => {
   globalThis.fetch = origFetch;
 });
 
-test("batches.mjs pode ser importado sem erro", async () => {
+test("batches.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/batches.mjs");
   assert.equal(typeof mod.registerBatches, "function");
 });

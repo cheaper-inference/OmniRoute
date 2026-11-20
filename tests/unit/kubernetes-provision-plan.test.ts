@@ -208,7 +208,7 @@ test("the context name never becomes part of a filesystem path", () => {
   assert.match(fetch.command, /cluster\/prod/);
 });
 
-test("the Kubernetes decimal thousand suffix is accepted", () => {
+test("the Kubernetes decimal thousand suffix is ​​accepted", () => {
   // Kubernetes spells it lowercase `k`; the first pattern accepted only `K`.
   const base = defaultSpec("local");
   for (const size of ["512k", "512K", "2Gi", "500m", "10G", "1Pi", "1Ei"]) {

@@ -46,7 +46,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("runPolicyList retorna lista de policies", async () => {
+test("runPolicyList returns list of policies", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
     assert.ok(url.includes("/api/policies"));
@@ -145,7 +145,7 @@ test("runPolicyEvaluate envia apiKey e action no body", async () => {
   assert.equal(exitCode, 0);
 });
 
-test("runPolicyEvaluate com resultado negado retorna exit 4", async () => {
+test("runPolicyEvaluate with result denied returns exit 4", async () => {
   const origFetch = globalThis.fetch;
   const origExit = process.exit;
   let exitCode: number | undefined;
@@ -167,7 +167,7 @@ test("runPolicyEvaluate com resultado negado retorna exit 4", async () => {
   assert.equal(exitCode, 4);
 });
 
-test("runPolicyExport grava arquivo com políticas", async () => {
+test("runPolicyExport writes file with policies", async () => {
   const { writeFileSync } = await import("node:fs");
   let writtenPath = "";
   let writtenContent = "";

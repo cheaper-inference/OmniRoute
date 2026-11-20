@@ -153,7 +153,7 @@ function observe({
         `  const result = spawnSync(process.execPath, [${JSON.stringify(scanner)}, "--ratchet", "--quiet"], { stdio: "inherit" });\n` +
         `  process.exit(result.status ?? 1);\n` +
         `}\n` +
-        `if (process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");\n`,
+        `if (process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violations (baseline 0)\\n[cognitive-complexity] OK — 0 violations (baseline 0)");\n`,
       { mode: 0o755 }
     );
     // ESLint is not under test here; emit one complete zero-count measurement record.

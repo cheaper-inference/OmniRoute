@@ -1,5 +1,5 @@
 /**
- * Task C1 (Orchestration Canvas Fase 2, PR-B2): DB module `a2aTasks` over the two tables
+ * Task C1 (Orchestration Canvas Phase 2, PR-B2): DB module `a2aTasks` over the two tables
  * already created by migration `002_mcp_a2a_tables.sql` (`a2a_tasks`, `a2a_task_events`).
  * Covers: upsert insert+update, event append/list ordering, history filtering + pagination +
  * total count, owner visibility parity with `A2ATaskManager.isVisibleTo`, and retention purge

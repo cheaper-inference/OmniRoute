@@ -35,12 +35,12 @@ test("timeout<=0: erro do upstream vira errorResponse 502", async () => {
   assert.equal(res.status, 502);
 });
 
-test("excede o limite: aborta e retorna 504 combo_target_timeout", async () => {
+test("exceeds limit: aborts and returns 504 combo_target_timeout", async () => {
   let aborted = false;
   const runner = buildTargetTimeoutRunner({
     handleSingleModel: (_b, _m, target) =>
       new Promise<Response>((resolve) => {
-        // resolve só se abortado (simula um upstream que respeita o signal)
+        // resolves only if aborted (simulates an upstream that respects the signal)
         const sig = target?.modelAbortSignal ?? undefined;
         sig?.addEventListener("abort", () => {
           aborted = true;
@@ -59,7 +59,7 @@ test("excede o limite: aborta e retorna 504 combo_target_timeout", async () => {
   assert.equal(body?.error?.type, "combo_target_timeout");
 });
 
-test("sucesso rápido vence a corrida do timeout", async () => {
+test("quick success wins the timeout race", async () => {
   const runner = buildTargetTimeoutRunner({
     handleSingleModel: async () => new Response("fast", { status: 200 }),
     comboTargetTimeoutMs: 1000,
@@ -70,7 +70,7 @@ test("sucesso rápido vence a corrida do timeout", async () => {
   assert.equal(await res.text(), "fast");
 });
 
-test("hedge do parent já abortado propaga o abort ao filho", async () => {
+test("hedge of the already aborted parent propagates the abort to the child", async () => {
   const parent = new AbortController();
   parent.abort(new Error("hedge-cancelled"));
   let sawAbort = false;

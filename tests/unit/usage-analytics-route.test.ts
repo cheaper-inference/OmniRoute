@@ -692,7 +692,7 @@ test("GET /api/usage/analytics?view=apiKeys returns only lifetime totals per API
   const used = totalsById.get(usedKey.id);
   assert.equal(used.apiKeyName, "Used Key");
   assert.equal(used.requests, 3);
-  // gpt-4o: 300 in × $2.50 + 150 out × $10; claude-sonnet: 300 in × $3 + 30 out × $15 (per 1M).
+  // gpt-4o: 300 in × $2.50 150 out × $10; claude-sonnet: 300 in × $3 30 out × $15 (per 1M).
   assertClose(used.cost, 0.0036);
   assert.equal(used.lastUsed, at(60_000));
   assert.deepEqual(totalsById.get(idleKey.id), {
@@ -963,7 +963,7 @@ test("GET /api/usage/analytics keeps measured and token-priced usage apart after
   );
   const body = await response.json();
   assert.equal(response.status, 200);
-  // xai: 0.01 reported + (100k × $1 + 50k × $2)/M = 0.21; openai: 100k × $2.5/M = 0.25.
+  // xai: 0.01 reported (100k × $1 50k × $2)/M = 0.21; openai: 100k × $2.5/M = 0.25.
   assertClose(body.summary.totalCost, 0.46);
   assertClose(
     body.byProvider.find((row: { provider: string }) => row.provider.toLowerCase().includes("xai"))

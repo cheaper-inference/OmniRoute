@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-// Regression guard for "qwen / codebuddy-cn device-code show 'ошибка сервера OmniRoute'".
+// Regression guard for "qwen/codebuddy-cn device-code show 'OmniRoute server error'".
 // The dynamic OAuth GET handler used to swallow EVERY thrown error into a generic
 // `{ error: "Internal server error" }` 500, so a device-code upstream failure (qwen.ai /
 // copilot.tencent.com — geo-block, outage, bad client) was indistinguishable from a real

@@ -1,7 +1,7 @@
 /**
  * tests/unit/radar-referrals-page-tab.test.ts
  *
- * Structural regression guard for the "Pegue seus créditos grátis" tab (D28)
+ * Structural regression guard for the "Get your free credits" tab (D28)
  * added to the existing /dashboard/radar page (no new dashboard route was
  * created — per spec, less i18n/routing surface). Verifies:
  *

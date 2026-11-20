@@ -1,6 +1,6 @@
 // tests/unit/check-openapi-breaking-ratchet.test.ts
 // TDD unit tests for the --ratchet mode added to scripts/check/check-openapi-breaking.mjs
-// (Fase 9 Onda 0 — flip the oasdiff breaking-change gate from advisory to blocking).
+// (Phase 9 Wave 0 — flip the oasdiff breaking-change gate from advisory to blocking).
 //
 // Strategy: test the exported pure evaluator without spawning oasdiff or touching
 // git. The evaluator is the load-bearing decision: regression iff a real breaking

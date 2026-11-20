@@ -24,7 +24,7 @@ test("tui/Repl.jsx existe e exporta runRepl", () => {
   assert.ok(hasExport(path, "runRepl"), "Repl.jsx deve exportar runRepl");
 });
 
-test("tui/session.mjs existe e exporta funções de persistência", () => {
+test("tui/session.mjs exists and exports persistence functions", () => {
   const path = join(TUI, "session.mjs");
   assert.ok(existsSync(path), "session.mjs deve existir");
   const src = readFileSync(path, "utf8");
@@ -39,7 +39,7 @@ test("commands/repl.mjs existe e exporta registerRepl", () => {
   assert.ok(hasExport(path, "registerRepl"), "deve exportar registerRepl");
 });
 
-test("commands/repl.mjs registra comando repl com --model, --combo, --system, --resume", async () => {
+test("commands/repl.mjs registers repl command with --model, --combo, --system, --resume", async () => {
   const { registerRepl } = await import("../../bin/cli/commands/repl.mjs");
   const { Command } = await import("commander");
   const prog = new Command().exitOverride();
@@ -85,9 +85,9 @@ test("Repl.jsx tem painel lateral (SidePanel) com tokens e custo", () => {
   assert.ok(src.includes("TokenCounter"), "deve usar TokenCounter");
 });
 
-// --- testes de persistência via session.mjs ---
+// --- persistence tests via session.mjs ---
 
-test("saveSession e loadSession persistem e restauram sessão", async () => {
+test("saveSession and loadSession persist and restore session", async () => {
   const tmpDir = join(tmpdir(), `omniroute-repl-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
   const origDataDir = process.env.DATA_DIR;
@@ -118,7 +118,7 @@ test("saveSession e loadSession persistem e restauram sessão", async () => {
   }
 });
 
-test("loadSession lança erro se sessão não existe", async () => {
+test("loadSession throws error if session does not exist", async () => {
   const tmpDir = join(tmpdir(), `omniroute-repl-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
   const origDataDir = process.env.DATA_DIR;
@@ -134,7 +134,7 @@ test("loadSession lança erro se sessão não existe", async () => {
   }
 });
 
-test("listSessions retorna array (vazio ou com sessões)", async () => {
+test("listSessions returns array (empty or with sessions)", async () => {
   const tmpDir = join(tmpdir(), `omniroute-repl-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
   const origDataDir = process.env.DATA_DIR;
@@ -159,7 +159,7 @@ test("listSessions retorna array (vazio ou com sessões)", async () => {
   }
 });
 
-test("autosave não lança erro em condições normais", async () => {
+test("autosave does not throw error under normal conditions", async () => {
   const tmpDir = join(tmpdir(), `omniroute-repl-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
   const origDataDir = process.env.DATA_DIR;

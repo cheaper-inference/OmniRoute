@@ -6,11 +6,11 @@ import { join } from "node:path";
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-ccr-mcp-"));
 
-// `resolveCcrPrincipal` dá precedência a `resolveMcpCallerApiKeyId()`, que cai em
+// `resolveCcrPrincipal` gives precedence to `resolveMcpCallerApiKeyId()`, which falls into
 // `OMNIROUTE_API_KEY`/`ROUTER_API_KEY` no transporte stdio. Estes testes gravam blocos
 // com um principal LITERAL ("tenant-a") e leem pelos handlers MCP: com a env presente no
 // shell, o handler resolve um principal diferente e todo bloco vira "not found" — red
-// fantasma que não reproduz no CI, onde a env não existe. A precondição era implícita;
+// fantasy that no CI is reproduced, but it does not exist. A precondição era implicit;
 // aqui ela passa a ser declarada. Mesmo idioma de api-key-lifecycle e cli-remote-mode.
 const ORIGINAL_OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY;
 const ORIGINAL_ROUTER_API_KEY = process.env.ROUTER_API_KEY;

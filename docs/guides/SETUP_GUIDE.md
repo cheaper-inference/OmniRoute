@@ -79,7 +79,7 @@ npm run electron:build:linux  # Linux (AppImage + deb + rpm)
 npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Releases of the desktop installers are attached to GitHub Releases. For the full Electron deep-dive (signing, IPC bridge, distros), see [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
+Releases of the desktop installers are attached to GitHub Releases. For the full Electron deep-dive (signing, IPC bridge, distros), see [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(created at a later stage)_.
 
 ### Headless server (CI/automation)
 

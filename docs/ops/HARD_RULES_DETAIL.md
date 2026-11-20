@@ -166,21 +166,21 @@ keep happening):
   in-flight PR; mid-flight merges race the owner and re-trigger the exact commit/CHANGELOG
   races Rule #19 and Rule #21 guard against. (Reinforces Rule #19.)
 
-## Rule 23 — `_tasks` é INTOCÁVEL (append/edit-only)
+## Rule 23 — `_tasks` is UNTOUCHABLE (append/edit-only)
 
-`_tasks/` é um repositório git SEPARADO (remote privado `diegosouzapw/_tasks_omniroute`)
-montado como diretório real na raiz do checkout principal. Regras absolutas:
+`_tasks/` is a SEPARATE git repository (private remote `diegosouzapw/_tasks_omniroute`)
+mounted as a real directory at the root of the main checkout. Absolute rules:
 
-- **(a)** NUNCA mover, renomear, deletar, esvaziar ou transformar `_tasks` em symlink; sessões
-  só podem CRIAR ou EDITAR arquivos dentro dele;
-- **(b)** NUNCA rastrear `_tasks` (nem como symlink) no repo principal — o blob rastreado foi a
-  causa-raiz de DOIS wipes (2026-08-08 e 2026-08-10: `git reset --hard` materializou o symlink
-  rastreado por cima do diretório real e o git apagou todo o conteúdo ignorado sem aviso);
-- **(c)** após qualquer escrita relevante, `git -C _tasks add -A && git -C _tasks commit &&
-git -C _tasks push` — o push frequente é o backup real;
-- **(d)** repetir esta proibição VERBATIM no prompt de todo subagente que toque git;
-- **(e)** se `_tasks` aparecer como symlink quebrado, NÃO commitar nada — restaurar do remote
-  e avisar o operador.
+- **(a)** NEVER move, rename, delete, empty or turn `_tasks` into a symlink; sessions
+  may only CREATE or EDIT files inside it;
+- **(b)** NEVER track `_tasks` (not even as a symlink) in the main repo — the tracked blob was the
+  root cause of TWO wipes (2026-08-08 and 2026-08-10: `git reset --hard` materialized the tracked
+  symlink over the real directory and git deleted all ignored content without warning);
+- **(c)** after any relevant write, `git -C _tasks add -A && git -C _tasks commit &&
+git -C _tasks push` — frequent pushes are the real backup;
+- **(d)** repeat this prohibition VERBATIM in the prompt of every subagent that touches git;
+- **(e)** if `_tasks` appears as a broken symlink, do NOT commit anything — restore from the remote
+  and notify the operator.
 
-O gate `check:tracked-artifacts` (pre-commit + CI) bloqueia `_tasks` rastreado em qualquer forma.
+The `check:tracked-artifacts` gate (pre-commit + CI) blocks `_tasks` from being tracked in any form.
 See also AGENTS.md → "Planning & Research Artifacts".

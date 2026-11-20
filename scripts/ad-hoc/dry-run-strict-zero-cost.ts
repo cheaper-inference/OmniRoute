@@ -95,7 +95,7 @@ function run(label: string, path: string): void {
   console.log(`DOPO  (STRICT_ZERO_COST on):  ${kept.length} candidati sopravvissuti`);
   console.log("Sopravvissuti:");
   for (const c of kept) console.log(`  OK   ${c.provider}/${c.model}`);
-  console.log("Esclusi (motivo):");
+  console.log("Excluded (reason):");
   for (const { candidate: c, reason } of excluded) {
     console.log(`  EXCL ${c.provider}/${c.model} — ${reason}`);
   }

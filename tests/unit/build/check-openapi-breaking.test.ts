@@ -1,5 +1,5 @@
 // tests/unit/build/check-openapi-breaking.test.ts
-// TDD unit tests for scripts/check/check-openapi-breaking.mjs — Fase 8 B.4 oasdiff.
+// TDD unit tests for scripts/check/check-openapi-breaking.mjs — Phase 8 B.4 oasdiff.
 //
 // Strategy:
 //   • parseOasdiffBreaking() — pure parser, tested with synthetic oasdiff JSON
@@ -63,14 +63,14 @@ test("parseOasdiffBreaking: undefined retorna count=0", () => {
   assert.equal(r.count, 0);
 });
 
-test("parseOasdiffBreaking: array vazio (sem breaking change) retorna count=0", () => {
+test("parseOasdiffBreaking: empty array (no breaking change) returns count=0", () => {
   const r = parseOasdiffBreaking([]);
   assert.equal(r.count, 0);
   assert.deepEqual(r.byId, {});
   assert.deepEqual(r.byPath, {});
 });
 
-test("parseOasdiffBreaking: objeto (não-array) retorna count=0", () => {
+test("parseOasdiffBreaking: object (non-array) returns count=0", () => {
   const r = parseOasdiffBreaking({ id: "x" } as unknown as null);
   assert.equal(r.count, 0);
 });
@@ -80,7 +80,7 @@ test("parseOasdiffBreaking: string retorna count=0", () => {
   assert.equal(r.count, 0);
 });
 
-test("parseOasdiffBreaking: número retorna count=0", () => {
+test("parseOasdiffBreaking: number returns count=0", () => {
   const r = parseOasdiffBreaking(42 as unknown as null);
   assert.equal(r.count, 0);
 });
@@ -104,7 +104,7 @@ test("parseOasdiffBreaking: 3 breaking changes retorna count=3", () => {
   assert.equal(r.count, 3);
 });
 
-test("parseOasdiffBreaking: ignora entradas null/não-objeto no array", () => {
+test("parseOasdiffBreaking: ignore null/non-object entries in array", () => {
   const r = parseOasdiffBreaking([makeBreaking(), null, 5, makeBreaking({ path: "/api/x" })]);
   assert.equal(r.count, 2);
 });
@@ -133,13 +133,13 @@ test("parseOasdiffBreaking: agrupa por path em byPath", () => {
   assert.equal(r.byPath["/api/models"], 1);
 });
 
-test("parseOasdiffBreaking: id ausente usa 'unknown'", () => {
+test("parseOasdiffBreaking: missing id uses 'unknown'", () => {
   const r = parseOasdiffBreaking([{ path: "/api/x", text: "weird" }]);
   assert.equal(r.count, 1);
   assert.equal(r.byId["unknown"], 1);
 });
 
-test("parseOasdiffBreaking: path ausente usa 'unknown'", () => {
+test("parseOasdiffBreaking: missing path uses 'unknown'", () => {
   const r = parseOasdiffBreaking([{ id: "some-rule", text: "weird" }]);
   assert.equal(r.count, 1);
   assert.equal(r.byPath["unknown"], 1);
@@ -153,7 +153,7 @@ test("parseOasdiffBreaking: path ausente usa 'unknown'", () => {
 // temp dir too so a user-local ~/.local/bin/oasdiff cannot leak into the lookup.
 // ---------------------------------------------------------------------------
 
-test("gate: SKIP graceful (exit 0) quando oasdiff ausente do PATH", () => {
+test("gate: SKIP graceful (exit 0) when oasdiff missing from PATH", () => {
   const res = spawnSync(process.execPath, [GATE, "--quiet"], {
     cwd: REPO_ROOT,
     encoding: "utf8",

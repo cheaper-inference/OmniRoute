@@ -56,13 +56,13 @@ for (const c of cases) {
   });
 }
 
-test("decodeToon aceita bloco sem fence", () => {
+test("decodeToon accepts unfenced block", () => {
   const arr = [{ a: 1 }, { a: 2 }];
   const inner = encodeToonBlock(arr) as string;
   assert.deepEqual(decodeToon(inner), arr);
 });
 
-test("encodeToonBlock é fail-open (não lança)", () => {
+test("encodeToonBlock is fail-open (does not launch)", () => {
   const a: Record<string, unknown> = { id: 1 };
   a["self"] = a;
   assert.doesNotThrow(() => {

@@ -1,11 +1,11 @@
 /**
- * Perfil semântico do OmniGlyph (pacote 1.4.0) — persistência ponta a ponta.
+ * OmniGlyph semantic profiling (1.4.0 package) — end-to-end persistence.
  *
  * Cobre:
- * 1. compressionSettingsUpdateSchema aceita omniglyph:{profile} e RECUSA nome inválido
- * 2. updateCompressionSettings / getCompressionSettings fazem round-trip do perfil
- * 3. o default persistido é `aggressive` (a política que os recibos mediram)
- * 4. um perfil desconhecido vindo do storage cai para o default, não vaza adiante
+ * 1. compressionSettingsUpdateSchema accepts omniglyph:{profile} and REFUSES invalid name
+ * 2. updateCompressionSettings / getCompressionSettings round-trip the profile
+ * 3. the persisted default is `aggressive` (the policy that the receipts measured)
+ * 4. an unknown profile coming from the storage drops to default, it does not leak further
  */
 import { describe, it, beforeEach, afterEach, after } from "node:test";
 import assert from "node:assert/strict";
@@ -42,14 +42,14 @@ after(() => {
 });
 
 describe("omniglyph profile config", () => {
-  it("o schema aceita os quatro perfis e recusa qualquer outro nome", () => {
+  it("the schema accepts the four profiles and refuses any other name", () => {
     for (const profile of ["coding-safe", "balanced", "aggressive", "passthrough"]) {
       const parsed = compressionSettingsUpdateSchema.safeParse({ omniglyph: { profile } });
       assert.equal(parsed.success, true, `perfil válido recusado: ${profile}`);
     }
-    // Um nome inválido tem de morrer no schema. Se passar, o adapter ainda falha
+    // An invalid name must die in the schema. If it passes, the adapter still fails
     // fechado (skip:invalid_profile), mas o operador veria a engine desligada
-    // sem nenhum erro na tela de configuração.
+    // without any errors on the configuration screen.
     assert.equal(
       compressionSettingsUpdateSchema.safeParse({ omniglyph: { profile: "turbo-max" } }).success,
       false
@@ -60,12 +60,12 @@ describe("omniglyph profile config", () => {
     );
   });
 
-  it("o default é aggressive — a política que os recibos publicados mediram", async () => {
+  it("default is aggressive — the policy that published receipts measured", async () => {
     assert.equal(DEFAULT_OMNIGLYPH_CONFIG.profile, "aggressive");
     assert.equal((await getCompressionSettings()).omniglyph?.profile, "aggressive");
   });
 
-  it("round-trip do perfil escolhido pelo operador", async () => {
+  it("round-trip of the profile chosen by the operator", async () => {
     await updateCompressionSettings({ omniglyph: { profile: "coding-safe" } });
     assert.equal((await getCompressionSettings()).omniglyph?.profile, "coding-safe");
 
@@ -73,9 +73,9 @@ describe("omniglyph profile config", () => {
     assert.equal((await getCompressionSettings()).omniglyph?.profile, "passthrough");
   });
 
-  it("perfil desconhecido no storage cai para o default em vez de vazar adiante", async () => {
+  it("unknown profile on storage drops to default instead of leaking forward", async () => {
     await updateCompressionSettings({ omniglyph: { profile: "coding-safe" } });
-    // Simula uma linha gravada por uma versão futura/adulterada, contornando o schema.
+    // Simulates a line written by a future/tampered version, bypassing the schema.
     await updateCompressionSettings({ omniglyph: { profile: "turbo-max" } } as never);
     assert.equal((await getCompressionSettings()).omniglyph?.profile, "aggressive");
   });

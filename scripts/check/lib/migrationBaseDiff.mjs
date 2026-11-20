@@ -1,56 +1,56 @@
 // scripts/check/lib/migrationBaseDiff.mjs
-// Comparação das migrations do HEAD com as da BASE (o branch que vai receber o merge, ou a
-// última tag de release com --base-latest-tag). Usada por
+// Comparison of the HEAD migrations with those of the BASE (the branch that will receive the merge, or the
+// latest release tag with --base-latest-tag). Used by
 // scripts/check/check-migration-numbering.mjs. JS puro: roda em node sem tsx.
 //
-// WHY: no formato por data o gate de numeração não enxerga mais buracos (o carimbo não é
-// sequencial). Apagar ou renomear uma migration JÁ MESCLADA passaria em silêncio:
-//   - apagada: instalação nova fica sem o schema, banco atualizado fica com ele (divergência);
-//   - renomeada: todo banco que já a aplicou roda de novo (DML duplicada, CREATE sem
-//     IF NOT EXISTS derruba o boot). Reprodução: revisão adversarial R3-1 de 2026-11-13.
-// Por isso o gate compara o disco com a base e:
-//   (a) arquivo da base que sumiu do disco → FALHA, tenha saído numa tag ou não: todo push
-//       numa release/v* publica o Docker :next e roda na homologação, nas VPS e no sync do
-//       Enterprise, então uma migration mesclada já rodou em bancos reais. Única exceção:
-//       renomeação coberta por entrada de RENAMED_MIGRATION_COMPATIBILITY (na cabeça) com
-//       conteúdo idêntico → aviso + checagem de comutação, qualquer que seja o carimbo novo
-//       (a renomeação muda a posição em instalações novas, não em bancos atualizados), com
-//       `--must-not-apply <alvo>`: o verificador falha se o runner real aplicar o alvo de
-//       novo no banco atualizado (entrada errada, ou um texto do constants.ts que o parser
-//       leu diferente do TypeScript); conteúdo diferente → FALHA; renomeação que mantém a
-//       versão (só a descrição muda) → FALHA, com ou sem entrada (o runner a aplicaria de
-//       novo com a entrada, ou a pularia pela versão sem ela);
-//   (b) arquivo da base com conteúdo diferente → aviso + checagem de comutação;
-//   (c) migration por data adicionada com carimbo ≤ maior carimbo da base → checagem de
-//       comutação (scripts/check/migration-commutation.ts), que monta o banco "atualizado"
-//       (base, depois HEAD) e o "novo" (HEAD de uma vez) e compara;
-//   (d) arquivo no formato antigo adicionado abaixo do maior número antigo da base → FALHA
-//       (a série antiga está congelada).
+// WHY: in the date format the numbering gate no longer sees gaps (the timestamp is not
+// sequential). Deleting or renaming an ALREADY MERGED migration would go unnoticed:
+//   - deleted: a new installation lacks the schema, an updated database has it (divergence);
+//   - renamed: every database that already applied it runs it again (duplicate DML, CREATE without
+//     IF NOT EXISTS breaks boot). Repro: adversarial review R3-1 of 2026-11-13.
+// So the gate compares the disk with the base and:
+//   (a) a base file that disappeared from disk → FAIL, whether or not it shipped in a tag: every push
+//       on a release/v* publishes Docker :next and runs in homologation, VPS and the sync of
+//       Enterprise, so a merged migration has already run in real databases. Only exception:
+//       a rename covered by a RENAMED_MIGRATION_COMPATIBILITY entry (in HEAD) with
+//       identical content → warning + commutation check, whatever the new timestamp is
+//       (the rename changes the position in new installations, not in updated databases), with
+//       `--must-not-apply <target>`: the checker fails if the real runner applies the target
+//       again to the updated database (wrong entry, or constants.ts text that the parser
+//       read differently from TypeScript); different content → FAIL; a rename that keeps the
+//       version (only the description changes) → FAIL, with or without an entry (the runner would apply it
+//       again with the entry, or skip it by version without it);
+//   (b) a base file with different content → warning + commutation check;
+//   (c) a date-based migration added with timestamp ≤ the largest timestamp in the base → check of
+//       commutation (scripts/check/migration-commutation.ts), which builds the "updated" database
+//       (base, then HEAD) and the "new" one (HEAD at once) and compares;
+//   (d) a legacy-format file added below the largest legacy number in the base → FAIL
+//       (the legacy series is frozen).
 //
-// Este arquivo tem a parte PURA (findBaseDiffAnomalies, classifyRemovals, parsers) separada
-// da orquestração (git e processo filho), para os testes cobrirem as regras sem repositório.
+// This file has the PURE part (findBaseDiffAnomalies, classifyRemovals, parsers) separated
+// from the orchestration (git and child process), so tests can cover the rules without a repository.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** Caminho do diretório de migrations relativo à raiz do repositório (formato do git). */
+/** Path of the migrations directory relative to the repository root (git format). */
 export const MIGRATIONS_REL_DIR = "src/lib/db/migrations";
 
-/** Eventos do GitHub Actions em que a base é obrigatória (PR e fila de merge). */
+/** GitHub Actions events in which the base is required (PR and merge queue). */
 export const BASE_REQUIRED_EVENTS = new Set(["pull_request", "pull_request_target", "merge_group"]);
 
-/** Tempo máximo do verificador de comutação (dois caminhos de boot com todas as migrations). */
+/** Maximum time for the commutation checker (two boot paths with all migrations). */
 export const COMMUTATION_TIMEOUT_MS = 10 * 60 * 1000;
 
 const LIB_DIR = path.dirname(fileURLToPath(import.meta.url));
-/** Raiz do repositório que contém este gate (cwd do verificador, para os aliases `@/`). */
+/** Root of the repository containing this gate (checker cwd, for `@/` aliases). */
 export const GATE_REPO_ROOT = path.resolve(LIB_DIR, "..", "..", "..");
-/** Verificador de comutação padrão; `MIGRATION_COMMUTATION_SCRIPT` troca (só testes). */
+/** Default commutation checker; `MIGRATION_COMMUTATION_SCRIPT` overrides (tests only). */
 export const DEFAULT_COMMUTATION_SCRIPT = path.resolve(LIB_DIR, "..", "migration-commutation.ts");
 
-/** Arquivo das tabelas de compatibilidade do runner, relativo à raiz do repositório. */
+/** File of the runner compatibility tables, relative to the repository root. */
 export const COMPAT_CONSTANTS_REL_PATH = "src/lib/db/migrationRunner/constants.ts";
 
 /**
@@ -60,8 +60,8 @@ export const COMPAT_CONSTANTS_REL_PATH = "src/lib/db/migrationRunner/constants.t
 export const RELEASE_TAG_RE = /^v(\d+)\.(\d+)\.(\d+)$/;
 
 /**
- * Tag de release do repositório Enterprise (`v3.8.54-ee.1`): ele nunca recebe as tags do CE,
- * então --base-latest-tag cai para ela quando não há nenhuma `vX.Y.Z` pura no histórico.
+ * Release tag of the Enterprise repository (`v3.8.54-ee.1`): it never receives the CE tags,
+ * so --base-latest-tag falls back to it when there is no pure `vX.Y.Z` in the history.
  */
 export const ENTERPRISE_RELEASE_TAG_RE = /^v(\d+)\.(\d+)\.(\d+)-ee\.(\d+)$/;
 
@@ -75,10 +75,10 @@ function descriptionOf(name) {
 }
 
 /**
- * Função pura — compara a lista de migrations da base com a do HEAD.
+ * Pure function — compares the list of migrations in the base with those in HEAD.
  *
  * @param {{ baseFiles: Map<string, string>, headFiles: Map<string, string> }} input
- *   nome do arquivo → id do blob (git) na base e no HEAD
+ *   file name → git blob id in the base and in HEAD
  * @returns {{
  *   removed: Array<{ name: string, renamedTo?: string }>,
  *   modified: string[],
@@ -86,14 +86,14 @@ function descriptionOf(name) {
  *   addedLegacyBelowBase: string[],
  *   baseMaxTimestamp: string | null,
  * }}
- *   `removed`: na base e fora do disco; `renamedTo` aponta o arquivo novo com o mesmo
- *   conteúdo ou a mesma descrição (renomeação provável). `modified`: mesmo nome, blob
- *   diferente. `addedOutOfOrder`: migrations por data que não estão na base e cujo carimbo
- *   é ≤ o maior carimbo da base (precisam da checagem de comutação).
- *   `addedLegacyBelowBase`: arquivos no formato antigo (3 dígitos) que não estão na base e
- *   cujo número é MENOR que o maior número antigo da base — preencher lacuna da série
- *   congelada, independente de KNOWN_GAPS. Acima do maior da base é legítimo (a PR
- *   release/vX → main traz as antigas que a main ainda não tem).
+ *   `removed`: in the base and not on disk; `renamedTo` points to the new file with the same
+ *   content or the same description (probable rename). `modified`: same name, different
+ *   blob. `addedOutOfOrder`: date-based migrations not in the base whose timestamp
+ *   is ≤ the largest timestamp in the base (they need the commutation check).
+ *   `addedLegacyBelowBase`: legacy-format files (3 digits) not in the base and
+ *   whose number is LOWER than the largest legacy number in the base — filling a gap in the
+ *   frozen series, regardless of KNOWN_GAPS. Above the largest in the base is legitimate (a PR
+ *   release/vX → main brings the legacy ones that main does not yet have).
  */
 export function findBaseDiffAnomalies({ baseFiles, headFiles }) {
   const added = [...headFiles.keys()].filter((name) => !baseFiles.has(name)).sort();
@@ -145,11 +145,11 @@ export function findBaseDiffAnomalies({ baseFiles, headFiles }) {
 }
 
 /**
- * Função pura — duas versões de um trecho TS com o MESMO comprimento e os mesmos offsets do
- * original: `code` troca comentários (`//`, `/* *\/`) por espaços e mantém as strings;
- * `masked` também troca por espaços o conteúdo de cada literal ('…', "…", `…`), mantendo as
- * aspas. Quebras de linha são preservadas nas duas (as âncoras `^` com flag m continuam
- * valendo). Procurar a declaração em `masked` impede que uma string que a imita conte.
+ * Pure function — two versions of a TS snippet with the SAME length and the same offsets as the
+ * original: `code` replaces comments (`//`, `/* *\/`) with spaces and keeps strings;
+ * `masked` also replaces the content of each literal ('…', "…", `…`) with spaces, keeping the
+ * quotes. Line breaks are preserved in both (the `^` anchors with the m flag still
+ * apply). Searching for the declaration in `masked` prevents an imitating string from counting.
  *
  * @param {string} source
  * @returns {{ code: string, masked: string }}
@@ -195,15 +195,15 @@ function blankTsCommentsAndLiterals(source) {
 const COMPAT_KEYS = ["fromVersion", "fromName", "toVersion", "toName"];
 
 /**
- * Função pura — extrai, por texto, as entradas de `RENAMED_MIGRATION_COMPATIBILITY` de
- * src/lib/db/migrationRunner/constants.ts (o gate é .mjs puro e não importa TS). Aceita
- * qualquer ordem de chaves, comentários, aspas simples ou duplas e vírgula final. A
- * declaração é procurada fora de comentários e literais, em começo de linha, e precisa
- * existir exatamente UMA vez (uma string que imita a declaração não conta). Formato
- * inesperado (nenhuma ou duas declarações, array sem fechamento, chave faltando, valor que
- * não é string literal) → erro: melhor falhar do que ignorar ou inventar uma entrada.
+ * Pure function — extracts, by text, the `RENAMED_MIGRATION_COMPATIBILITY` entries from
+ * src/lib/db/migrationRunner/constants.ts (the gate is pure .mjs and does not import TS). Accepts
+ * any key order, comments, single or double quotes and a trailing comma. The
+ * declaration is searched outside comments and literals, at the start of a line, and must
+ * exist exactly ONCE (a string imitating the declaration does not count). Unexpected
+ * format (none or two declarations, an unclosed array, a missing key, a value that is
+ * not a string literal) → error: better to fail than to ignore or invent an entry.
  *
- * @param {string} source conteúdo do constants.ts
+ * @param {string} source content of constants.ts
  * @returns {Array<{ fromVersion: string, fromName: string, toVersion: string, toName: string }>}
  */
 export function parseRenamedMigrationCompatibility(source) {
@@ -212,12 +212,12 @@ export function parseRenamedMigrationCompatibility(source) {
     ...masked.matchAll(/^export\s+const\s+RENAMED_MIGRATION_COMPATIBILITY\b[^=]*=\s*\[/gm),
   ];
   if (declarations.length === 0) {
-    throw new Error("RENAMED_MIGRATION_COMPATIBILITY não encontrado em constants.ts");
+    throw new Error("RENAMED_MIGRATION_COMPATIBILITY not found in constants.ts");
   }
   if (declarations.length > 1) {
     throw new Error(
-      `RENAMED_MIGRATION_COMPATIBILITY: ${declarations.length} declarações em constants.ts ` +
-        `(esperada exatamente uma, em começo de linha)`
+      `RENAMED_MIGRATION_COMPATIBILITY: ${declarations.length} declarations in constants.ts ` +
+        `(exactly one expected, at the start of a line)`
     );
   }
   const declaration = declarations[0];
@@ -250,7 +250,7 @@ export function parseRenamedMigrationCompatibility(source) {
     const missing = COMPAT_KEYS.filter((key) => typeof fields[key] !== "string");
     if (missing.length > 0) {
       throw new Error(
-        `RENAMED_MIGRATION_COMPATIBILITY: entrada sem ${missing.join(", ")} (string literal): ` +
+        `RENAMED_MIGRATION_COMPATIBILITY: entry missing ${missing.join(", ")} (string literal): ` +
           `{${match[1].replace(/\s+/g, " ").trim()}}`
       );
     }
@@ -263,24 +263,24 @@ export function parseRenamedMigrationCompatibility(source) {
   }
   const leftover = body.replace(objectRe, "").replace(/[\s,]/g, "");
   if (leftover) {
-    throw new Error(`RENAMED_MIGRATION_COMPATIBILITY: conteúdo inesperado no array: ${leftover}`);
+    throw new Error(`RENAMED_MIGRATION_COMPATIBILITY: unexpected content in array: ${leftover}`);
   }
   return entries;
 }
 
 /**
- * Função pura — decide o destino de cada arquivo da base que sumiu do disco. Regra estrita:
- * só a renomeação coberta por entrada de compatibilidade (alvo na cabeça e fora da base, com
- * OUTRA versão) é aceita, e só com conteúdo idêntico; todo o resto (apagar, renomear sem
- * entrada, entrada cujo alvo não está no disco) vai para `forbidden`, tenha o arquivo saído
- * numa tag ou não.
+ * Pure function — decides the fate of each base file that disappeared from disk. Strict rule:
+ * only a rename covered by a compatibility entry (target in HEAD and outside the base, with
+ * ANOTHER version) is accepted, and only with identical content; everything else (delete, rename without
+ * an entry, an entry whose target is not on disk) goes to `forbidden`, whether or not the file shipped
+ * in a tag.
  *
- * Renomeação que mantém a versão (só a descrição muda) vai para `renamedSameVersion`, com
- * ou sem entrada (`covered` diz se havia uma), e é sempre proibida: com a entrada, o runner
- * (reconcileRenumberedMigrations, caso isSameSlotReplacement em
- * src/lib/db/migrationRunner/schemaState.ts) apaga a linha do ledger e aplica o arquivo de
- * novo; sem ela, o runner rastreia só a versão, pula o arquivo nos bancos que já a rodaram e
- * acusa a renumeração a cada boot.
+ * A rename that keeps the version (only the description changes) goes to `renamedSameVersion`, with
+ * or without an entry (`covered` says whether there was one), and is always forbidden: with the entry, the runner
+ * (reconcileRenumberedMigrations, when isSameSlotReplacement in
+ * src/lib/db/migrationRunner/schemaState.ts) deletes the ledger line and applies the file
+ * again; without it, the runner tracks only the version, skips the file in databases that already ran it and
+ * flags the renumbering on every boot.
  *
  * @param {{
  *   removed: Array<{ name: string, renamedTo?: string }>,
@@ -318,8 +318,8 @@ export function classifyRemovals({ removed, baseFiles, headFiles, compat }) {
 }
 
 /**
- * Arquivo novo (na cabeça, fora da base) apontado por uma entrada `from` = `name` para OUTRA
- * versão. Uma entrada que mantém a versão nunca cobre (ver findSameVersionTarget).
+ * New file (in HEAD, outside the base) pointed to by a `from` = `name` entry with ANOTHER
+ * version. An entry that keeps the version never covers (see findSameVersionTarget).
  */
 function findCompatTarget(name, { baseFiles, headFiles, compat }) {
   const match = name.match(MIGRATION_NAME_RE);
@@ -334,9 +334,9 @@ function findCompatTarget(name, { baseFiles, headFiles, compat }) {
 }
 
 /**
- * Arquivo novo (na cabeça, fora da base) com a MESMA versão de `name` e outra descrição:
- * renomeação que mantém o carimbo. `covered` diz se uma entrada de compatibilidade aponta
- * de `name` para ele.
+ * New file (in HEAD, outside the base) with the SAME version as `name` and a different description:
+ * a rename that keeps the timestamp. `covered` says whether a compatibility entry points
+ * from `name` to it.
  *
  * @returns {{ to: string, covered: boolean } | null}
  */
@@ -365,11 +365,11 @@ function findSameVersionTarget(name, { baseFiles, headFiles, compat }) {
 const DML_KEYWORDS = new Set(["INSERT", "UPDATE", "DELETE", "REPLACE"]);
 
 /**
- * Função pura — o SQL tem DML? Um comando é DML quando começa com INSERT, UPDATE, DELETE ou
- * REPLACE, ou quando começa com WITH [RECURSIVE] e a primeira dessas palavras (ou SELECT)
- * fora de parênteses é DML (`WITH s AS (…) UPDATE …`). Ignora comentários, literais e o
+ * Pure function — does the SQL have DML? A command is DML when it starts with INSERT, UPDATE, DELETE or
+ * REPLACE, or when it starts with WITH [RECURSIVE] and the first of these words (or SELECT)
+ * outside parentheses is DML (`WITH s AS (…) UPDATE …`). Ignores comments, literals and the
  * corpo de CREATE TRIGGER … BEGIN … END; dentro do gatilho cada CASE fecha com o seu END, e
- * só o END que fecha o BEGIN termina o gatilho.
+ * only the END that closes the BEGIN ends the trigger.
  *
  * @param {string} sql
  * @returns {boolean}
@@ -482,8 +482,8 @@ function tokenizeSqlForDml(sql) {
 }
 
 /**
- * Função pura — ordena tags `vX.Y.Z` pela versão (maior primeiro). Tags fora do formato são
- * descartadas.
+ * Pure function — sorts `vX.Y.Z` tags by version (largest first). Tags outside the format are
+ * discarded.
  *
  * @param {string[]} tags
  * @returns {string[]}
@@ -504,7 +504,7 @@ export function sortReleaseTagsDescending(tags, pattern = RELEASE_TAG_RE) {
 }
 
 // ---------------------------------------------------------------------------------------
-// Orquestração (git, processo filho). Tudo abaixo recebe o cwd do repositório analisado.
+// Orchestration (git, child process). Everything below receives the cwd of the analyzed repository.
 // ---------------------------------------------------------------------------------------
 
 function git(cwd, args, options = {}) {
@@ -524,8 +524,8 @@ function revParseCommit(cwd, ref) {
 }
 
 /**
- * Lê `--base <ref>` / `--base=<ref>` e `--base-latest-tag` da linha de comando. Opção
- * desconhecida, ou as duas formas de base juntas → erro.
+ * Reads `--base <ref>` / `--base=<ref>` and `--base-latest-tag` from the command line. An unknown
+ * option, or both base forms together → error.
  *
  * @param {string[]} argv
  * @returns {{ base: string | null, baseLatestTag: boolean }}
@@ -537,29 +537,29 @@ export function parseGateArgs(argv) {
     const arg = argv[i];
     if (arg === "--base") {
       const value = argv[i + 1];
-      if (!value || value.startsWith("--")) throw new Error("--base precisa de uma ref git");
+      if (!value || value.startsWith("--")) throw new Error("--base needs a git ref");
       base = value;
       i += 1;
     } else if (arg.startsWith("--base=")) {
       base = arg.slice("--base=".length);
-      if (!base) throw new Error("--base precisa de uma ref git");
+      if (!base) throw new Error("--base needs a git ref");
     } else if (arg === "--base-latest-tag") {
       baseLatestTag = true;
     } else {
       throw new Error(
-        `opção desconhecida ${arg} (uso: check-migration-numbering [--base <ref> | --base-latest-tag])`
+        `unknown option ${arg} (usage: check-migration-numbering [--base <ref> | --base-latest-tag])`
       );
     }
   }
   if (base && baseLatestTag) {
-    throw new Error("use --base <ref> OU --base-latest-tag, não os dois");
+    throw new Error("use --base <ref> OR --base-latest-tag, not both");
   }
   return { base, baseLatestTag };
 }
 
 /**
- * Tags de release (`vX.Y.Z`) do repositório, maior versão primeiro. Com `mergedInto`, só as
- * alcançáveis a partir desse commit (`git tag --merged`).
+ * Release tags (`vX.Y.Z`) of the repository, largest version first. With `mergedInto`, only those
+ * reachable from that commit (`git tag --merged`).
  *
  * @param {string} cwd
  * @param {{ mergedInto?: string }} [options]
@@ -569,7 +569,7 @@ export function listReleaseTags(cwd, options = {}) {
   const args = ["tag", "--list", "v*"];
   if (options.mergedInto) args.push("--merged", options.mergedInto);
   const r = git(cwd, args);
-  if (r.status !== 0) throw new Error(`git tag falhou: ${r.stderr.trim()}`);
+  if (r.status !== 0) throw new Error(`git tag failed: ${r.stderr.trim()}`);
   return sortReleaseTagsDescending(
     r.stdout.split("\n").map((line) => line.trim()),
     options.pattern ?? RELEASE_TAG_RE
@@ -577,8 +577,8 @@ export function listReleaseTags(cwd, options = {}) {
 }
 
 /**
- * Lê RENAMED_MIGRATION_COMPATIBILITY do constants.ts da raiz do repositório analisado.
- * Arquivo ausente → lista vazia (nenhuma renomeação coberta).
+ * Reads RENAMED_MIGRATION_COMPATIBILITY from constants.ts at the root of the analyzed repository.
+ * Missing file → empty list (no covered renames).
  *
  * @param {string} repoRoot
  * @returns {Array<{ fromVersion: string, fromName: string, toVersion: string, toName: string }>}
@@ -590,17 +590,17 @@ export function readRenamedMigrationCompatibility(repoRoot) {
 }
 
 /**
- * Resolve a base da comparação, nesta ordem:
- *   0. `--base-latest-tag`: a maior tag de release `vX.Y.Z` (ordem semver) alcançável a
- *      partir do HEAD (uma tag local fora do histórico não conta); nenhuma → FALHA fechada;
+ * Solves the basis of comparison, in this order:
+ *   0. `--base-latest-tag`: the largest release tag `vX.Y.Z` (semver order) reachable from
+ *      HEAD (a local tag outside the history does not count); none → fail closed;
  *   1. `--base <ref>`; 2. env `MIGRATION_BASE_REF`;
  *   3. em evento de PR/fila (`GITHUB_EVENT_NAME` ∈ BASE_REQUIRED_EVENTS):
- *      a. HEAD é commit de merge → 1º pai (o merge ref do GitHub e o candidato da fila são
- *         merges cujo 1º pai é a base);
- *      b. `merge_group.base_sha` do payload (fila com squash: o candidato não é merge);
+ * a. HEAD is merge commit → 1st parent (GitHub merge ref and queue candidate are
+ *         merges whose 1st parent is the base);
+ *      b. `merge_group.base_sha` from the payload (squash queue: the candidate is not a merge);
  *      c. `git merge-base HEAD origin/$GITHUB_BASE_REF`;
- *      d. nada disso → FALHA fechada.
- *   Fora de PR/fila e sem base → pula a comparação.
+ *      d. none of this → fail closed.
+ *   Outside a PR/queue and with no base → skip the comparison.
  *
  * @param {{ cwd: string, cliBase: string | null, latestTag?: boolean,
  *   env: Record<string, string | undefined> }} input
@@ -624,13 +624,13 @@ export function resolveBaseRef({ cwd, cliBase, latestTag = false, env }) {
       return {
         status: "error",
         message:
-          "--base-latest-tag: nenhuma tag de release (vX.Y.Z, ou vX.Y.Z-ee.N no Enterprise) no " +
-          "histórico do HEAD, então não há com o que comparar. Rode git fetch --tags (no CI: " +
-          "actions/checkout com fetch-depth: 0).",
+          "--base-latest-tag: no release tag (vX.Y.Z, or vX.Y.Z-ee.N in Enterprise) in " +
+          "the HEAD history, so there is nothing to compare. Run git fetch --tags (in CI: " +
+          "actions/checkout with fetch-depth: 0).",
       };
     }
     const sha = revParseCommit(cwd, tags[0]);
-    if (!sha) return { status: "error", message: `--base-latest-tag: tag ${tags[0]} ilegível` };
+    if (!sha) return { status: "error", message: `--base-latest-tag: tag ${tags[0]} unreadable` };
     // kind "tag": every file between the tag and HEAD is already merged on the branch, so the
     // hints must say "fix forward", never "rename" (V3-2 of the final review).
     return { status: "resolved", sha, label: `tag ${tags[0]}`, kind: "tag" };
@@ -642,7 +642,7 @@ export function resolveBaseRef({ cwd, cliBase, latestTag = false, env }) {
     if (!sha) {
       return {
         status: "error",
-        message: `a base "${explicit}" não é um commit deste repositório (git rev-parse falhou)`,
+        message: `the base "${explicit}" is not a commit of this repository (git rev-parse failed)`,
       };
     }
     return { status: "resolved", sha, label: explicit };
@@ -679,14 +679,14 @@ export function resolveBaseRef({ cwd, cliBase, latestTag = false, env }) {
   return {
     status: "error",
     message:
-      `base não resolvida em evento ${event}: o HEAD não é commit de merge e nem ` +
-      `merge_group.base_sha nem origin/$GITHUB_BASE_REF estão disponíveis. Faça checkout ` +
+      `base unresolved in event ${event}: HEAD is not a merge commit and neither ` +
+      `merge_group.base_sha nor origin/$GITHUB_BASE_REF are available. Check out ` +
       `com fetch-depth: 0, ou passe --base <ref> / MIGRATION_BASE_REF.`,
   };
 }
 
 /**
- * Lista as migrations da base: nome → blob (`git ls-tree`). Só entradas do tipo blob.
+ * Lists the base migrations: name → blob (`git ls-tree`). Only blob-type entries.
  *
  * @param {string} cwd
  * @param {string} sha
@@ -694,7 +694,7 @@ export function resolveBaseRef({ cwd, cliBase, latestTag = false, env }) {
  */
 export function listBaseMigrations(cwd, sha) {
   const r = git(cwd, ["ls-tree", "-z", sha, "--", `${MIGRATIONS_REL_DIR}/`]);
-  if (r.status !== 0) throw new Error(`git ls-tree ${sha} falhou: ${r.stderr.trim()}`);
+  if (r.status !== 0) throw new Error(`git ls-tree ${sha} failed: ${r.stderr.trim()}`);
   const files = new Map();
   for (const record of r.stdout.split("\0")) {
     if (!record) continue;
@@ -707,10 +707,10 @@ export function listBaseMigrations(cwd, sha) {
 }
 
 /**
- * Lista as migrations do disco (arquivos regulares) com o blob que o git gravaria.
+ * Lists the disk migrations (regular files) with the blob that git would record.
  *
  * @param {string} cwd
- * @param {string[]} regularNames basenames dos arquivos regulares do diretório
+ * @param {string[]} regularNames basenames of the regular files in the directory
  * @returns {Map<string, string>}
  */
 export function listHeadMigrations(cwd, regularNames) {
@@ -718,14 +718,14 @@ export function listHeadMigrations(cwd, regularNames) {
   if (regularNames.length === 0) return files;
   const rel = regularNames.map((name) => `${MIGRATIONS_REL_DIR}/${name}`);
   const r = git(cwd, ["hash-object", "--stdin-paths"], { input: rel.join("\n") + "\n" });
-  if (r.status !== 0) throw new Error(`git hash-object falhou: ${r.stderr.trim()}`);
+  if (r.status !== 0) throw new Error(`git hash-object failed: ${r.stderr.trim()}`);
   const blobs = r.stdout.trim().split("\n");
   regularNames.forEach((name, i) => files.set(name, blobs[i]));
   return files;
 }
 
 /**
- * Grava em `targetDir` o conteúdo dos blobs da base (`git cat-file --batch`, um processo).
+ * Writes the content of the base blobs to `targetDir` (`git cat-file --batch`, one process).
  *
  * @param {string} cwd
  * @param {Map<string, string>} baseFiles nome → blob
@@ -738,13 +738,13 @@ export function extractBaseMigrations(cwd, baseFiles, targetDir) {
     input: entries.map(([, blob]) => blob).join("\n") + "\n",
     binary: true,
   });
-  if (r.status !== 0) throw new Error(`git cat-file falhou: ${String(r.stderr).trim()}`);
+  if (r.status !== 0) throw new Error(`git cat-file failed: ${String(r.stderr).trim()}`);
   const out = r.stdout;
   let offset = 0;
   for (const [name] of entries) {
     const headerEnd = out.indexOf(0x0a, offset);
     const header = out.subarray(offset, headerEnd).toString("utf-8").split(" ");
-    if (header[1] !== "blob") throw new Error(`blob da base ilegível para ${name}`);
+    if (header[1] !== "blob") throw new Error(`unreadable base blob for ${name}`);
     const size = Number(header[2]);
     const start = headerEnd + 1;
     fs.writeFileSync(path.join(targetDir, name), out.subarray(start, start + size));
@@ -753,29 +753,29 @@ export function extractBaseMigrations(cwd, baseFiles, targetDir) {
 }
 
 /**
- * Frase que o verificador de comutação imprime sempre que uma migration do PR falha ao ser
- * aplicada no caminho atualizado (com ou sem falha também no caminho novo). Contrato C1 com
+ * Phrase that the commutation checker prints whenever a PR migration fails to be
+ * applied on the updated path (with or without a failure on the new path too). Contract C1 with
  * scripts/check/migration-commutation.ts.
  */
-export const NOT_AFTER_BASE_PHRASE = "não aplica depois de todas as migrations da base";
+export const NOT_AFTER_BASE_PHRASE = "does not apply after all base migrations";
 
 /**
- * Frase que o verificador imprime (com exit 1) quando um arquivo passado em
- * `--must-not-apply` é aplicado no segundo boot do caminho atualizado. Contrato C2 com
+ * Phrase that the checker prints (with exit 1) when a file passed in
+ * `--must-not-apply` is applied on the second boot of the updated path. Contract C2 with
  * scripts/check/migration-commutation.ts.
  */
-export const APPLIED_AGAIN_PHRASE = "aplicada de novo no banco atualizado";
+export const APPLIED_AGAIN_PHRASE = "applied again on the updated database";
 
 /**
- * Roda o verificador de comutação (contrato em scripts/check/migration-commutation.ts):
- * base-dir = migrations da base extraídas do git; head-dir = cópia do diretório do disco.
- * `mergedBase` (base = tag de release) vira `--merged-base`: as dicas do verificador dizem
- * "corrija para frente", nunca "renomeie".
- * Cada nome de `mustNotApply` vira um `--must-not-apply <arquivo.sql>`: o alvo de uma
- * renomeação coberta não pode ser aplicado no banco atualizado (o runner só move a linha do
- * ledger), e o verificador confere isso pelo comportamento do runner real, não pelo texto
- * do constants.ts.
- * Exit 0 = schemas iguais, 1 = divergem, outro = erro de infraestrutura.
+ * Runs the commutation checker (contract in scripts/check/migration-commutation.ts):
+ * base-dir = base migrations extracted from git; head-dir = copy of the disk directory.
+ * `mergedBase` (base = release tag) becomes `--merged-base`: the checker's hints say
+ * "fix forward", never "rename".
+ * Each `mustNotApply` name becomes a `--must-not-apply <file.sql>`: the target of a
+ * covered rename must not be applied on the updated database (the runner only moves the ledger
+ * line), and the checker verifies this through the real runner's behavior, not the text
+ * of constants.ts.
+ * Exit 0 = identical schemas, 1 = they diverge, other = infrastructure error.
  *
  * @param {{ cwd: string, baseFiles: Map<string, string>, migrationsDir: string,
  *   headNames: string[], mustNotApply?: string[], mergedBase?: boolean,
@@ -793,7 +793,7 @@ export function runCommutationCheck({
 }) {
   const script = env.MIGRATION_COMMUTATION_SCRIPT || DEFAULT_COMMUTATION_SCRIPT;
   if (!fs.existsSync(script)) {
-    return { status: "error", output: `verificador de comutação ausente: ${script}` };
+    return { status: "error", output: `commutation checker missing: ${script}` };
   }
   let tsxLoader;
   try {
@@ -801,7 +801,7 @@ export function runCommutationCheck({
   } catch {
     return {
       status: "error",
-      output: "tsx indisponível (npm ci): não há como rodar o verificador",
+      output: "tsx unavailable (npm ci): no way to run the checker",
     };
   }
 

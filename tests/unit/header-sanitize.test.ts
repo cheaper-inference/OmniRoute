@@ -43,7 +43,7 @@ test("a value without invisible characters comes back identical (same string, sa
 });
 
 test("never alters valid characters: Latin-1, C1 range and visible non-Latin-1 are kept", () => {
-  // é (0xE9), NBSP (0xA0), soft hyphen (0xAD) and U+0085 are all legal header bytes.
+  // é (0xE9), NBSP (0xA0), soft hyphen (0xAD) and U 0085 are all legal header bytes.
   const latin1 = "café ­\u0085x";
   assert.equal(stripInvisibleHeaderChars(latin1), latin1);
   // A visible character above U+00FF is not invisible noise: left for the transport.

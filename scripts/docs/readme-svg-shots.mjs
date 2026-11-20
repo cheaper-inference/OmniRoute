@@ -5,7 +5,7 @@
 // many external font requests the page made (must be 0: camo blocks every external fetch).
 //
 //   node scripts/docs/readme-svg-shots.mjs <file.svg> <outdir> [--size WxH]
-//   (the frame defaults to the file's own viewBox — 1200×548 for the hero, 1200×842 for the
+// (the frame defaults to the file's own viewBox — 1200×548 for the hero, 1200×842 for the
 //    budget card — so --size is only an override)
 //
 // Companion to the studio's svg-shots.mjs (multi-timestamp frames prove animation runs).

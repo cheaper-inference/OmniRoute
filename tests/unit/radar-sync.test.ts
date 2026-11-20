@@ -769,7 +769,7 @@ test("syncRadar: missing signature header => invalid_signature", async () => {
 // syncRadar — served-tier header (x-omniroute-feed-tier)
 //
 // Regression guard for the defect where a FREE user on a stale/community
-// snapshot saw "Ao vivo (tempo real)" in the UI: the signed body always
+// snapshot saw "Ao vivo (realtime)" in the UI: the signed body always
 // carries tier:"live" by design (one signed artifact per version), so the
 // client MUST trust the `x-omniroute-feed-tier` response header — the
 // tier ACTUALLY served — rather than the body field.

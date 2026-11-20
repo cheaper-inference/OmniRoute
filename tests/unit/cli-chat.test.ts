@@ -36,7 +36,7 @@ const FAKE_RESPONSE = {
   usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
 };
 
-test("runChatCommand imprime texto da resposta no stdout", async () => {
+test("runChatCommand prints response text to stdout", async () => {
   const tmpDir = mkdtempSync(join(tmpdir(), "chat-test-"));
   process.env.DATA_DIR = tmpDir;
   const origFetch = globalThis.fetch;
@@ -53,7 +53,7 @@ test("runChatCommand imprime texto da resposta no stdout", async () => {
   assert.ok(out.includes("Hello!"));
 });
 
-test("runChatCommand com --output json emite body completo", async () => {
+test("runChatCommand with --output json outputs full body", async () => {
   const tmpDir = mkdtempSync(join(tmpdir(), "chat-test-"));
   process.env.DATA_DIR = tmpDir;
   const origFetch = globalThis.fetch;
@@ -70,7 +70,7 @@ test("runChatCommand com --output json emite body completo", async () => {
   assert.equal(JSON.parse(out).id, "chatcmpl-abc");
 });
 
-test("runChatCommand lê prompt de arquivo com --file", async () => {
+test("runChatCommand reads file prompt with --file", async () => {
   const tmpDir = mkdtempSync(join(tmpdir(), "chat-test-"));
   const promptFile = join(tmpDir, "prompt.txt");
   writeFileSync(promptFile, "file prompt content");
@@ -94,7 +94,7 @@ test("runChatCommand lê prompt de arquivo com --file", async () => {
   assert.equal(capturedBody.messages[0].content, "file prompt content");
 });
 
-test("runChatCommand salva histórico em cli-history.jsonl", async () => {
+test("runChatCommand saves history in cli-history.jsonl", async () => {
   const tmpDir = mkdtempSync(join(tmpdir(), "chat-hist-"));
   process.env.DATA_DIR = tmpDir;
   const origFetch = globalThis.fetch;

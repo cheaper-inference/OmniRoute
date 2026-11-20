@@ -277,7 +277,7 @@ test("emitGamificationEvent(request) on a fresh key: 1 XP + first-token badge (+
   assert.equal((await streaks.getStreak("fx-fresh")).currentStreak, 1);
 });
 
-test("emitGamificationEvent(request) extending a 2-day streak: streak bonus 2×3 + daily-user", async () => {
+test("emitGamificationEvent(request) extending a 2-day streak: streak bonus 2×3 daily-user", async () => {
   const db = core.getDbInstance();
   db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
     "gamification:streaks",
@@ -291,7 +291,7 @@ test("emitGamificationEvent(request) extending a 2-day streak: streak bonus 2×3
   );
   await events.emitGamificationEvent({ apiKeyId: "fx-streak", action: "request" });
 
-  // 1 (request) + 6 (streak_bonus 2×3) + 10 (daily-user) + 10 (first-token) = 27.
+  // 1 (request) 6 (streak_bonus 2×3) 10 (daily-user) 10 (first-token) = 27.
   assert.equal(gamificationDb.getXp("fx-streak")?.totalXp, 27);
   assert.equal(gamificationDb.hasBadge("fx-streak", "daily-user"), true);
   assert.equal(gamificationDb.hasBadge("fx-streak", "first-token"), true);

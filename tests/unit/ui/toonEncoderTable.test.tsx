@@ -44,7 +44,7 @@ describe("EncoderComparisonTable", () => {
     expect(container.querySelector('[data-testid="encoder-winner"]')?.textContent).toMatch(/gcf/i);
   });
 
-  it("mostra TOON como n/a quando indisponível", () => {
+  it("shows TOON as n/a when unavailable", () => {
     act(() => {
       root.render(
         <EncoderComparisonTable comparison={{ ...cmp, toonAvailable: false, winner: "gcf" }} />
@@ -53,7 +53,7 @@ describe("EncoderComparisonTable", () => {
     expect(container.querySelector('[data-testid="encoder-toon-na"]')).toBeTruthy();
   });
 
-  it("não renderiza nada quando não há array comparado", () => {
+  it("does not render anything when there is no array compared", () => {
     act(() => {
       root.render(<EncoderComparisonTable comparison={{ ...cmp, arraysCompared: 0 }} />);
     });

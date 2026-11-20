@@ -197,7 +197,7 @@ function makeLiteralClaimValidator(expected, opts) {
 }
 
 // The docs publish a rounded aggregate headline ("~1.4B"). Accept a claim that rounds to
-// the live value at one decimal place; reject a stale one. Tolerance is tight on purpose:
+// the live value to one decimal place; reject a stale one. Tolerance is tight on purpose:
 // this gate exists so the headline cannot drift upward unnoticed.
 //
 // Only the AGGREGATE headline is validated, via an explicit whitelist (see

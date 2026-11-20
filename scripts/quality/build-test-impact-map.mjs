@@ -104,7 +104,7 @@ export function buildTestImpactMap(root = ROOT) {
       "tests/unit/{api,auth,authz,build,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,ui,usage}/**/*.test.ts",
       "tests/unit/**/*.test.mjs",
       "tests/unit/dashboard/**/*.test.ts",
-      // Quarentena serial (P0.3): também são node:test — a TIA precisa mapeá-los.
+      // Serial quarantine (P0.3): these are also node:test — TIA needs to map them.
       "tests/unit/serial/**/*.test.ts",
     ],
     { cwd: root, absolute: true }

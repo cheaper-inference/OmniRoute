@@ -1,4 +1,4 @@
-// Repro for issue #11600 ("Detalhe adicional — supressao obsoleta derruba o job"):
+// Repro for issue #11600 ("Additional detail — obsolete deletion drops job"):
 //
 // scripts/quality/run-eslint-json.mjs is the script behind `npm run lint:json`,
 // which backs the CI `Lint` job's blocking ESLint pass (.github/workflows/ci.yml

@@ -49,7 +49,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("runProvidersMetrics --output json normaliza objeto de metrics", async () => {
+test("runProvidersMetrics --output json normalize metrics object", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = (() => Promise.resolve(makeResp(METRICS_OBJECT))) as any;
 
@@ -66,7 +66,7 @@ test("runProvidersMetrics --output json normaliza objeto de metrics", async () =
   assert.ok(parsed.some((r: any) => r.provider === "anthropic"));
 });
 
-test("runProvidersMetrics --output json aceita array de providers", async () => {
+test("runProvidersMetrics --output json accepts array of providers", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = (() => Promise.resolve(makeResp(METRICS_ARRAY))) as any;
 
@@ -82,7 +82,7 @@ test("runProvidersMetrics --output json aceita array de providers", async () => 
   assert.ok(parsed.some((r: any) => r.provider === "openai"));
 });
 
-test("runProvidersMetrics --limit trunca resultado", async () => {
+test("runProvidersMetrics --limit truncates result", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = (() => Promise.resolve(makeResp(METRICS_OBJECT))) as any;
 
@@ -128,7 +128,7 @@ test("runProvidersMetrics exibe tabela com success rate formatada", async () => 
   assert.ok(out.includes("%") || out.includes("Success"));
 });
 
-test("runProvidersMetrics retorna vazio quando endpoint retorna 404", async () => {
+test("runProvidersMetrics returns empty when endpoint returns 404", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = (() => Promise.resolve(makeResp({}, 404))) as any;
 

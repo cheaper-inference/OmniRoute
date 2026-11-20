@@ -70,7 +70,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("runSkillsList retorna lista de skills", async () => {
+test("runSkillsList returns list of skills", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = (() => Promise.resolve(makeResp({ items: SKILLS_DATA }))) as any;
 
@@ -206,7 +206,7 @@ test("runMarketplaceSearch retorna pacotes com query e filtros", async () => {
   assert.equal(parsed[0].id, "pkg_pdf");
 });
 
-test("runMarketplaceInstall --yes envia POST sem confirmação", async () => {
+test("runMarketplaceInstall --yes sends POST without confirmation", async () => {
   let capturedBody: unknown = null;
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((_url: string, init: unknown) => {

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // scripts/check/check-type-coverage.mjs
-// Type-coverage ratchet (Task 6 of Fase 7).
-// Fase 7 INT: promovido de ADVISORY para RATCHET bloqueante.
+// Type-coverage ratchet (Task 6 of Phase 7).
+// Phase 7 INT: promoted from ADVISORY to a blocking RATCHET.
 //
 // Measures the % of typed symbols across the codebase using the `type-coverage`
-// tool and prints `typeCoveragePct=<N>`. Lê o baseline de quality-baseline.json
-// (metrics.typeCoveragePct) e falha com exit 1 se a % CAIR além do eps.
+// tool and prints `typeCoveragePct=<N>`. Reads the baseline from quality-baseline.json
+// (metrics.typeCoveragePct) and fails with exit 1 if the % DROPS beyond eps.
 //
 // tsconfig used: open-sse/tsconfig.json
 //   - Rationale: the only tsconfig that covers the full open-sse workspace
@@ -68,8 +68,8 @@ export function parseTypeCoverageOutput(jsonText) {
 }
 
 /**
- * Avalia a % de type-coverage atual contra o baseline.
- * Direction: up (% só pode SUBIR; queda além de eps é regressão).
+ * Evaluates the current % of type-coverage against the baseline.
+ * Direction: up (% can only RISE; a drop beyond eps is a regression).
  *
  * Exported for unit testing.
  *
@@ -113,7 +113,7 @@ function runTypeCoverage() {
 
 function main() {
   if (!fs.existsSync(BASELINE_PATH)) {
-    process.stderr.write(`[type-coverage] FAIL — ${path.basename(BASELINE_PATH)} ausente.\n`);
+    process.stderr.write(`[type-coverage] FAIL — ${path.basename(BASELINE_PATH)} missing.\n`);
     process.exit(2);
   }
 
@@ -121,7 +121,7 @@ function main() {
   const baselineMetric = baselineJson.metrics && baselineJson.metrics.typeCoveragePct;
   if (!baselineMetric || typeof baselineMetric.value !== "number") {
     process.stderr.write(
-      "[type-coverage] FAIL — metrics.typeCoveragePct ausente em quality-baseline.json.\n"
+      "[type-coverage] FAIL — metrics.typeCoveragePct missing in quality-baseline.json.\n"
     );
     process.exit(2);
   }
@@ -147,14 +147,14 @@ function main() {
   if (UPDATE && improved) {
     baselineJson.metrics.typeCoveragePct.value = pct;
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(baselineJson, null, 2) + "\n");
-    console.log(`[type-coverage] baseline ratcheado: ${pct} (era ${baselineValue})`);
+    console.log(`[type-coverage] baseline ratcheted: ${pct} (was ${baselineValue})`);
   }
 
   if (regressed) {
     process.stderr.write(
-      `[type-coverage] REGRESSÃO — ${pct}% < baseline ${baselineValue}% (eps=${eps})\n` +
-        `  → Adicione anotações de tipo ou rode\n` +
-        `    'node scripts/check/check-type-coverage.mjs --update' se a % subiu legitimamente.\n`
+      `[type-coverage] REGRESSION — ${pct}% < baseline ${baselineValue}% (eps=${eps})\n` +
+        `  → Add type annotations or run\n` +
+        `    'node scripts/check/check-type-coverage.mjs --update' if the % rose legitimately.\n`
     );
     process.exit(1);
   }

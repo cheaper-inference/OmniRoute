@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // scripts/check/check-db-rules.mjs
-// Gate de convenções de banco (CLAUDE.md Hard Rules #2 e #5). Uma verificação:
+// Database conventions gate (CLAUDE.md Hard Rules #2 and #5). A check:
 //  (c) Nenhum SQL cru em src/app/api/**/route.ts ou open-sse/handlers/*.ts.
-//      SQL deve viver em src/lib/db/ (Hard Rule #5). Ofensores pré-existentes
-//      são congelados; QUALQUER novo SQL cru em rota/handler falha.
-// As antigas verificações (a) re-export completo via src/lib/localDb.ts e
-// (b) localDb.ts sem lógica foram REMOVIDAS: o barrel src/lib/localDb.ts foi
-// deletado (#11795) — consumidores importam módulos src/lib/db/* diretamente
-// (regra "never barrel-import", aplicada por eslint no-restricted-imports).
-// Stale-enforcement (6A.3): entradas em EXTERNAL_DB_ALLOWED que não suprimem
-// nenhuma violação real → gate falha com instrução de remoção.
+//      SQL must live in src/lib/db/ (Hard Rule #5). Pre-existing offenders
+//      are frozen; ANY new raw SQL in a route/handler fails.
+// The old checks (a) full re-export via src/lib/localDb.ts and
+// (b) localDb.ts without logic were REMOVED: the barrel src/lib/localDb.ts was
+// deleted (#11795) — consumers import src/lib/db/* modules directly
+// ("never barrel-import" rule, enforced by eslint no-restricted-imports).
+// Stale-enforcement (6A.3): entries in EXTERNAL_DB_ALLOWED that do not suppress
+// no actual violation → gate fails with removal instruction.
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -19,25 +19,25 @@ const cwd = process.cwd();
 const API_DIR = path.join(cwd, "src/app/api");
 const HANDLERS_DIR = path.join(cwd, "open-sse/handlers");
 
-// (c) Leituras de SQL contra bancos EXTERNOS, permitidas por design (#3500).
-// Esta rota NÃO consulta o DB do OmniRoute (getDbInstance) — ela abre o
+// (c) SQL reads against EXTERNAL databases, allowed by design (#3500).
+// This route DOES NOT query the OmniRoute DB (getDbInstance) — it opens the
 // SQLite de OUTRO aplicativo (Kiro) para auto-importar credenciais.
-// Por isso NÃO pode viver em src/lib/db/ (que é o domínio do DB do OmniRoute):
-// é uma leitura read-only de um arquivo externo, com caminho/escopo próprio.
-// Continua no allowlist como exceção DOCUMENTADA — o gate ainda bloqueia
-// QUALQUER novo SQL cru contra o DB do OmniRoute em rotas/handlers.
-// Toda a dívida real da Hard Rule #5 (15 rotas internas) foi migrada para
-// módulos src/lib/db/ nas slices do #3500; este set ficou só com as exceções.
-// O análogo do Cursor (src/app/api/oauth/cursor/auto-import/route.ts) NÃO
-// precisa de entrada aqui: o SQL contra o state.vscdb externo do Cursor vive
-// em src/lib/cursor/tokenExtractor.ts, fora do escopo desta checagem (que só
+// Therefore, it CANNOT reside in src/lib/db/ (which is the domain of the OmniRoute DB):
+// is a read-only operation of an external file, with its own path/scope.
+// It remains on the allowlist as a DOCUMENTED exception — the gate still blocks
+// ANY new raw SQL against the OmniRoute DB in routes/handlers.
+// All Hard Rule real debt
+// src/lib/db/ modules in the #3500 slices; this set only contains the exceptions.
+// The Cursor analog (src/app/api/oauth/cursor/auto-import/route.ts) DOES NOT
+// need to be entered here: the SQL against Cursor's external state.vscdb lives
+
 // varre src/app/api/**/route.ts e open-sse/handlers/*.ts).
 export const EXTERNAL_DB_ALLOWED = new Set([
   "src/app/api/oauth/kiro/auto-import/route.ts", // read-only no SQLite do Kiro (DB externo)
 ]);
 
 // Alias de retrocompatibilidade (testes/consumidores que importam KNOWN_RAW_SQL).
-// Comportamento do gate idêntico — só o nome e o enquadramento mudaram (#3500).
+
 export const KNOWN_RAW_SQL = EXTERNAL_DB_ALLOWED;
 
 function walk(dir, acc = []) {
@@ -50,25 +50,25 @@ function walk(dir, acc = []) {
   return acc;
 }
 
-// SQL cru é sempre uma STRING passada a db.prepare()/exec(): casamos os padrões
-// SÓ dentro de literais de string (não em código JS — `import … from`, `.set(`,
-// `new Set(`, `delete x` etc. são falsos positivos se varrermos o código todo).
+// Raw SQL is always a STRING passed to db.prepare()/exec(): we match the patterns
+// ONLY within string literals (not in JS code — `import … from`, `.set(`,
+// `new Set(`, `delete x` etc. are false positives if we scan the entire code).
 const SQL_PATTERNS = [
-  /\bSELECT\b[\s\S]*?\bFROM\b/i, // SELECT … FROM (multi-linha)
+  /\bSELECT\b[\s\S]*?\bFROM\b/i, // SELECT … FROM (multi-line)
   /\bINSERT\s+INTO\b/i,
-  /\bUPDATE\b[\s\S]*?\bSET\b/i, // UPDATE … SET (multi-linha)
+  /\bUPDATE\b[\s\S]*?\bSET\b/i, // UPDATE … SET (multi-line)
   /\bDELETE\s+FROM\b/i,
   /\bCREATE\s+TABLE\b/i,
 ];
 
-// Remove comentários (linha // … e blocos /* */) — SQL em comentário não conta.
+// Remove comments (line // … and blocks /* */) — SQL in comments doesn't count.
 function stripComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 }
 
-// Extrai o conteúdo de todos os literais de string (template, aspas duplas, aspas
-// simples) de um trecho de código já sem comentários. Retorna a concatenação dos
-// corpos — é nesse corpo que SQL cru vive.
+// Extracts the content of all string literals (template, double quotes, single quotes)
+// simple) of a code snippet that already has no comments. Returns the concatenation of the
+
 export function extractStringLiterals(code) {
   const re = /`(?:\\[\s\S]|[^\\`])*`|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
   const out = [];
@@ -77,10 +77,10 @@ export function extractStringLiterals(code) {
     // tira as aspas/crases delimitadoras
     out.push(m[0].slice(1, -1));
   }
-  return out.join("\n\u0000\n"); // separador que nenhum padrão SQL atravessa
+  return out.join("\n\u0000\n"); // separator that no SQL standard crosses
 }
 
-// (c) Arquivos com SQL cru dentro de literais de string (linhas não-comentário),
+// (c) Files with raw SQL inside string literals (non-comment lines),
 // fora do allowlist.
 export function findRawSql(files, allowlist = KNOWN_RAW_SQL) {
   const offenders = [];
@@ -104,7 +104,7 @@ export function findRawSql(files, allowlist = KNOWN_RAW_SQL) {
   return offenders;
 }
 
-// Coleta os arquivos sujeitos à checagem (c): rotas de API + handlers de stream.
+// Collects the files subject to check (c): API routes + stream handlers.
 export function collectSqlScanFiles(apiDir = API_DIR, handlersDir = HANDLERS_DIR) {
   const routes = walk(apiDir).filter((p) => /(^|\/)route\.tsx?$/.test(p.replace(/\\/g, "/")));
   const handlers = fs.existsSync(handlersDir)
@@ -128,20 +128,20 @@ function main() {
   const rawSql = findRawSql(scanFiles);
   if (rawSql.length) {
     failures.push(
-      `[#5 sql-cru] ${rawSql.length} arquivo(s) com SQL cru fora de src/lib/db/:\n` +
+      `[#5 raw-sql] ${rawSql.length} file(s) with raw SQL outside src/lib/db/:\n` +
         rawSql.map((f) => `  ✗ ${f}`).join("\n") +
-        `\n  → mova o SQL para um módulo src/lib/db/ (nunca SQL cru em rota/handler)` +
+        `\n  → move the SQL to a src/lib/db/ module (never raw SQL in route/handler)` +
         ` ou congele em KNOWN_RAW_SQL com justificativa.`
     );
   }
 
   if (failures.length) {
-    console.error(`[check-db-rules] FALHOU:\n\n` + failures.join("\n\n"));
+    console.error(`[check-db-rules] FAILED:\n\n` + failures.join("\n\n"));
     process.exitCode = 1;
   }
   if (!process.exitCode) {
     console.log(
-      `[check-db-rules] OK (${scanFiles.length} arquivos varridos; ` +
+      `[check-db-rules] OK (${scanFiles.length} files scanned; ` +
         `${EXTERNAL_DB_ALLOWED.size} leituras de DB externo permitidas (#3500))`
     );
   }

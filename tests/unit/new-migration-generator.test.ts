@@ -66,7 +66,7 @@ function nowAfterRealMigrations(): string {
 
 test("creates <timestamp>_<description>.sql with the header and prints its path", () => {
   const dir = freshDir();
-  const r = run(["add_usage_index", "--dir", dir, "--now", NOW]);
+  const r = run(["add_usage_índice", "--dir", dir, "--now", NOW]);
   assert.equal(r.status, 0, r.stderr);
   const expected = path.join(dir, "20261113120000_add_usage_index.sql");
   assert.equal(r.stdout.trim(), expected);
@@ -112,7 +112,7 @@ test("sub-second clocks truncate to the second", () => {
 
 test("free text is normalized to lowercase snake_case (multiple words, accents, symbols)", () => {
   const dir = freshDir();
-  const r = run(["Add", "Usage", "índice!", "--dir", dir, "--now", NOW]);
+  const r = run(["Add", "Usage", "index!", "--dir", dir, "--now", NOW]);
   assert.equal(r.status, 0, r.stderr);
   assert.equal(path.basename(r.stdout.trim()), "20261113120000_add_usage_indice.sql");
 
@@ -127,7 +127,7 @@ test("an empty or symbol-only description exits 1 without creating a file", () =
     const dir = freshDir();
     const r = run([...args, "--dir", dir, "--now", NOW]);
     assert.equal(r.status, 1, `args=${JSON.stringify(args)} stdout=${r.stdout}`);
-    assert.match(r.stderr, /vazia/);
+    assert.match(r.stderr, /empty/);
     assert.deepEqual(fs.readdirSync(dir), []);
   }
 });
@@ -136,7 +136,7 @@ test("a description starting with a digit exits 1", () => {
   const dir = freshDir();
   const r = run(["2fa", "table", "--dir", dir, "--now", NOW]);
   assert.equal(r.status, 1);
-  assert.match(r.stderr, /começar com letra/);
+  assert.match(r.stderr, /start with letter/);
   assert.deepEqual(fs.readdirSync(dir), []);
 });
 
@@ -144,7 +144,7 @@ test("a clock before the 2026-11-13 cut-over is refused with the gate's reason",
   const dir = freshDir();
   const r = run(["x", "--dir", dir, "--now", "2026-11-12T23:59:59Z"]);
   assert.equal(r.status, 1);
-  assert.match(r.stderr, /anterior ao corte/);
+  assert.match(r.stderr, /before cut/);
   assert.deepEqual(fs.readdirSync(dir), []);
 });
 

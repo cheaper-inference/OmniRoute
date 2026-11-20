@@ -42,7 +42,7 @@ const ROLLUP_TYPES = new Set(["chore", "ci", "test", "refactor", "build", "docs"
  *     v3.8.49..HEAD ............ 1361 commits
  *     cycle open..HEAD .........   22 commits
  *
- * 62× the real range. The report drowns in noise, which is exactly how a previous
+ * 62× the real range. The report drowns in noise, which is exactly like a previous
  * reconciliation let ~200 PRs through with no CHANGELOG bullet.
  *
  * Resolved by CONTENT, not by commit message: the cycle opens when package.json first

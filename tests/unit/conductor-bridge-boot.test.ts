@@ -17,7 +17,7 @@ test("no-op without CONDUCTOR_HUB_URL (bridge is opt-in)", () => {
 test("starts once with CONDUCTOR_HUB_URL set and is idempotent", () => {
   process.env.CONDUCTOR_HUB_URL = "http://127.0.0.1:1"; // porta inválida: conexão falha, mas o handle existe
   process.env.CONDUCTOR_HUB_TOKEN = "tok";
-  // cursor injetado em memória: o teste não toca o SQLite real
+  // memory injected cursor: test doesn't touch real SQLite
   const first = initConductorBridge({ cursor: { get: () => null, set: () => {} } });
   assert.ok(first, "bridge iniciada");
   const second = initConductorBridge({ cursor: { get: () => null, set: () => {} } });

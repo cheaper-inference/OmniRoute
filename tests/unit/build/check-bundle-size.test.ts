@@ -23,7 +23,7 @@ const readSizeBaseline = readBaselineBundleSizeValue as (p?: string) => number |
 // parseSizeLimitResults
 // ---------------------------------------------------------------------------
 
-test("parseSizeLimitResults: soma os campos size de cada entrada", () => {
+test("parseSizeLimitResults: sums the size fields of each input", () => {
   const results = [
     { name: "entry-a", size: 1024, passed: true },
     { name: "entry-b", size: 2048, passed: true },
@@ -39,29 +39,29 @@ test("parseSizeLimitResults: ignora entradas sem campo size", () => {
   assert.equal(parseSizeLimitResults(results), 500);
 });
 
-test("parseSizeLimitResults: lança TypeError para argumento não-array", () => {
+test("parseSizeLimitResults: throws TypeError for non-array argument", () => {
   assert.throws(
     () => parseSizeLimitResults({ name: "x", size: 100 } as unknown as never[]),
     TypeError
   );
 });
 
-test("parseSizeLimitResults: lança Error quando nenhuma entrada tem size", () => {
+test("parseSizeLimitResults: throws Error when no input has size", () => {
   const results = [{ name: "entry-a" }, { name: "entry-b" }];
   assert.throws(() => parseSizeLimitResults(results), Error);
 });
 
-test("parseSizeLimitResults: array vazio lança Error (sem medições)", () => {
+test("parseSizeLimitResults: empty array throws Error (no measurements)", () => {
   assert.throws(() => parseSizeLimitResults([]), Error);
 });
 
-test("parseSizeLimitResults: aceita size=0 como medição válida", () => {
+test("parseSizeLimitResults: accepts size=0 as valid measurement", () => {
   const results = [{ name: "empty-entry", size: 0 }];
   assert.equal(parseSizeLimitResults(results), 0);
 });
 
 // ---------------------------------------------------------------------------
-// measureViaFileStat (fallback de leitura direta de arquivo)
+// measureViaFileStat (direct file read fallback)
 // ---------------------------------------------------------------------------
 
 function makeTmpConfig(dir: string, entries: { name: string; path: string }[]): string {
@@ -76,7 +76,7 @@ function writeTmpFile(dir: string, name: string, content: string): string {
   return p;
 }
 
-test("measureViaFileStat: soma bytes de arquivos existentes", () => {
+test("measureViaFileStat: sum bytes of existing files", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bundle-size-test-"));
   const content = "hello world!"; // 12 bytes
   writeTmpFile(dir, "entry.mjs", content);
@@ -90,7 +90,7 @@ test("measureViaFileStat: soma bytes de arquivos existentes", () => {
   assert.equal(entries[0]!.size, Buffer.byteLength(content));
 });
 
-test("measureViaFileStat: arquivo ausente é registrado com size null sem lançar", () => {
+test("measureViaFileStat: missing file is registered with size null without throwing", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bundle-size-test-"));
   const configPath = makeTmpConfig(dir, [{ name: "Missing", path: "does-not-exist.mjs" }]);
 
@@ -101,7 +101,7 @@ test("measureViaFileStat: arquivo ausente é registrado com size null sem lança
   assert.equal(entries[0]!.size, null);
 });
 
-test("measureViaFileStat: allMissing=false quando pelo menos um arquivo existe", () => {
+test("measureViaFileStat: allMissing=false when at least one file exists", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bundle-size-test-"));
   writeTmpFile(dir, "present.mjs", "data");
   const configPath = makeTmpConfig(dir, [
@@ -115,7 +115,7 @@ test("measureViaFileStat: allMissing=false quando pelo menos um arquivo existe",
   assert.equal(entries.filter((e) => e.size !== null).length, 1);
 });
 
-test("measureViaFileStat: soma múltiplos arquivos existentes", () => {
+test("measureViaFileStat: sums multiple existing files", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bundle-size-test-"));
   const a = "AAA"; // 3 bytes
   const b = "BBBBB"; // 5 bytes
@@ -131,7 +131,7 @@ test("measureViaFileStat: soma múltiplos arquivos existentes", () => {
   assert.equal(total, Buffer.byteLength(a) + Buffer.byteLength(b));
 });
 
-test("measureViaFileStat: config ausente retorna allMissing=true e total=0", () => {
+test("measureViaFileStat: missing config returns allMissing=true and total=0", () => {
   const { total, entries, allMissing } = measureViaFileStat(
     "/tmp/nonexistent/.size-limit.json",
     "/tmp"
@@ -142,10 +142,10 @@ test("measureViaFileStat: config ausente retorna allMissing=true e total=0", () 
 });
 
 // ---------------------------------------------------------------------------
-// runSizeLimit — comportamento quando o binário não existe
+// runSizeLimit — behavior when binary does not exist
 // ---------------------------------------------------------------------------
 
-test("runSizeLimit: lança com code SL_NO_BIN quando size-limit não está instalado", () => {
+test("runSizeLimit: launches with code SL_NO_BIN when size-limit is not installed", () => {
   // The gate resolves node_modules/<pkg>/package.json → its bin entry (the .bin
   // shim is unusable on Windows — see G-04). A root with neither is "not installed".
   assert.throws(
@@ -169,19 +169,19 @@ test("evaluateBundleSizeRatchet: medido == baseline passa (5601 vs 5601)", () =>
   assert.equal(r.improved, false);
 });
 
-test("evaluateBundleSizeRatchet: um byte a mais que o baseline é regressão", () => {
+test("evaluateBundleSizeRatchet: one byte more than the baseline is regression", () => {
   const r = evaluateSize(5602, 5601);
   assert.equal(r.regressed, true, "any size increase must block");
   assert.equal(r.improved, false);
 });
 
-test("evaluateBundleSizeRatchet: menor que o baseline é melhoria", () => {
+test("evaluateBundleSizeRatchet: smaller than the baseline is an improvement", () => {
   const r = evaluateSize(5000, 5601);
   assert.equal(r.regressed, false);
   assert.equal(r.improved, true);
 });
 
-test("evaluateBundleSizeRatchet: comparação inteira estrita — qualquer aumento regride", () => {
+test("evaluateBundleSizeRatchet: strict integer comparison — any increase regresses", () => {
   assert.equal(evaluateSize(5602, 5601).regressed, true);
   assert.equal(evaluateSize(5601, 5601).regressed, false);
   assert.equal(evaluateSize(5600, 5601).regressed, false);
@@ -202,29 +202,29 @@ function withTmpBundleBaseline(content: string | null, fn: (p: string) => void) 
   }
 }
 
-test("readBaselineBundleSizeValue: lê metrics.bundleSize.value", () => {
+test("readBaselineBundleSizeValue: read metrics.bundleSize.value", () => {
   withTmpBundleBaseline(JSON.stringify({ metrics: { bundleSize: { value: 5601 } } }), (p) => {
     assert.equal(readSizeBaseline(p), 5601);
   });
 });
 
-test("readBaselineBundleSizeValue: arquivo ausente retorna null (SKIP gracioso)", () => {
+test("readBaselineBundleSizeValue: missing file returns null (graceful SKIP)", () => {
   assert.equal(readSizeBaseline("/tmp/does-not-exist-77777/quality-baseline.json"), null);
 });
 
-test("readBaselineBundleSizeValue: métrica ausente retorna null", () => {
+test("readBaselineBundleSizeValue: missing metric returns null", () => {
   withTmpBundleBaseline(JSON.stringify({ metrics: {} }), (p) => {
     assert.equal(readSizeBaseline(p), null);
   });
 });
 
-test("readBaselineBundleSizeValue: value não-numérico retorna null", () => {
+test("readBaselineBundleSizeValue: non-numeric value returns null", () => {
   withTmpBundleBaseline(JSON.stringify({ metrics: { bundleSize: { value: "5601" } } }), (p) => {
     assert.equal(readSizeBaseline(p), null);
   });
 });
 
-test("readBaselineBundleSizeValue: JSON inválido retorna null (não lança)", () => {
+test("readBaselineBundleSizeValue: Invalid JSON returns null (does not throw)", () => {
   withTmpBundleBaseline("not json at all", (p) => {
     assert.equal(readSizeBaseline(p), null);
   });

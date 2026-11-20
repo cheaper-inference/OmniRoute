@@ -56,7 +56,7 @@ test("getKnownPlan('unknown') returns null", () => {
   assert.equal(getKnownPlan("unknown"), null);
 });
 
-test("getKnownPlan('openai') returns null (manual obrigatório)", () => {
+test("getKnownPlan('openai') returns null (manual required)", () => {
   assert.equal(getKnownPlan("openai"), null);
 });
 

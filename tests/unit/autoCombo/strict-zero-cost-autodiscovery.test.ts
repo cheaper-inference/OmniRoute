@@ -1,5 +1,5 @@
 /**
- * STRICT_ZERO_COST — autodiscovery contract (Fase 5-8 of the design audit):
+ * STRICT_ZERO_COST — autodiscovery contract (Phase 5-8 of the design audit):
  * the filter must never hardcode a provider/model allowlist. It reads
  * whatever `catalog` (FREE_MODEL_BUDGETS-shaped) it's given, so a new SAFE
  * entry becomes usable the moment it appears, and a removed one disappears
@@ -131,7 +131,7 @@ test("a model removed from the catalog stops being usable, with no code change",
   );
 });
 
-// Case 2 of Fase 8: a quota-based model ships WITH a usage adapter and
+// Case 2 of Phase 8: a quota-based model ships WITH a usage adapter and
 // hardStopGuaranteed=true and a SAFE live state — passes automatically.
 test("a new quota-based model with hardStopGuaranteed + SAFE state is usable automatically", () => {
   const modelId = "synthetic-quota-model-safe";
@@ -152,7 +152,7 @@ test("a new quota-based model with hardStopGuaranteed + SAFE state is usable aut
   );
 });
 
-// Case 3 of Fase 8: metadata incomplete (no hardStopGuaranteed) → UNKNOWN → excluded automatically.
+// Case 3 of Phase 8: metadata incomplete (no hardStopGuaranteed) → UNKNOWN → excluded automatically.
 test("a new quota-based model WITHOUT hardStopGuaranteed is excluded automatically, even with a SAFE state", () => {
   const modelId = "synthetic-quota-model-unguaranteed";
   const candidate: StrictZeroCostCandidate = {

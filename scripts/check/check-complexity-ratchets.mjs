@@ -81,14 +81,14 @@ function mainNewCode() {
     console.log(`${metric}=${delta}`);
     if (regressions.length) {
       console.error(
-        `[${label}] REGRESSÃO (código novo) — ${head} violações nos arquivos tocados vs ${base} na base (+${delta}):\n` +
+        `[${label}] REGRESSION (new code) — ${head} violations in the files affected vs. ${base} in the base (+${delta}):\n` +
           regressions.map((r) => `  ✗ ${r.file}: ${r.base} → ${r.head}`).join("\n") +
-          "\n  → quebre a função em helpers menores; o total global do repo NÃO conta aqui, só o que esta PR adicionou."
+          "\n  → break the function down into smaller helpers; the overall total of the repo does NOT count here, only what this PR has added."
       );
       failed = true;
     } else {
       console.log(
-        `[${label}] OK (código novo) — ${head} violações nos arquivos tocados (base ${base})`
+        `[${label}] OK (new code) — ${head} violations in the files touched (baseline ${base})`
       );
     }
   }
@@ -108,11 +108,11 @@ const QUALITY_BASELINE = path.join(ROOT, "config/quality/quality-baseline.json")
 function main() {
   if (BASE_REF) return mainNewCode();
   if (!fs.existsSync(COMPLEXITY_BASELINE)) {
-    console.error(`[complexity-ratchets] FAIL — complexity-baseline.json ausente.`);
+    console.error(`[complexity-ratchets] FAIL — complexity-baseline.json missing.`);
     process.exit(2);
   }
   if (!fs.existsSync(QUALITY_BASELINE)) {
-    console.error(`[complexity-ratchets] FAIL — quality-baseline.json ausente.`);
+    console.error(`[complexity-ratchets] FAIL — quality-baseline.json missing.`);
     process.exit(2);
   }
 
@@ -129,7 +129,7 @@ function main() {
   const cognitiveMetric = qualityBaseline.metrics?.cognitiveComplexity;
   if (!cognitiveMetric || typeof cognitiveMetric.value !== "number") {
     console.error(
-      "[complexity-ratchets] FAIL — metrics.cognitiveComplexity ausente em quality-baseline.json."
+      "[complexity-ratchets] FAIL — metrics.cognitiveComplexity missing in quality-baseline.json."
     );
     process.exit(2);
   }
@@ -139,14 +139,14 @@ function main() {
 
   if (UPDATE && cyc.improved) {
     console.log(
-      `[complexity] baseline ratcheado: ${complexityCount} (era ${complexityBaseline.count})`
+      `[complexity] ratcheted baseline: ${complexityCount} (was ${complexityBaseline.count})`
     );
     complexityBaseline.count = complexityCount;
     fs.writeFileSync(COMPLEXITY_BASELINE, JSON.stringify(complexityBaseline, null, 2) + "\n");
   }
   if (UPDATE && cog.improved) {
     console.log(
-      `[cognitive-complexity] baseline ratcheado: ${cognitiveCount} (era ${cognitiveMetric.value})`
+      `[cognitive-complexity] ratcheted baseline: ${cognitiveCount} (was ${cognitiveMetric.value})`
     );
     qualityBaseline.metrics.cognitiveComplexity.value = cognitiveCount;
     fs.writeFileSync(QUALITY_BASELINE, JSON.stringify(qualityBaseline, null, 2) + "\n");
@@ -155,23 +155,23 @@ function main() {
   let failed = false;
   if (cyc.regressed) {
     console.error(
-      `[complexity] REGRESSÃO — ${complexityCount} violações > baseline ${complexityBaseline.count}`
+      `[complexity] REGRESSION — ${complexityCount} violations > baseline ${complexityBaseline.count}`
     );
     failed = true;
   } else {
     console.log(
-      `[complexity] OK — ${complexityCount} violações (baseline ${complexityBaseline.count})`
+      `[complexity] OK — ${complexityCount} violations (baseline ${complexityBaseline.count})`
     );
   }
 
   if (cog.regressed) {
     console.error(
-      `[cognitive-complexity] REGRESSÃO — ${cognitiveCount} violações > baseline ${cognitiveMetric.value}`
+      `[cognitive-complexity] REGRESSION — ${cognitiveCount} violations > baseline ${cognitiveMetric.value}`
     );
     failed = true;
   } else {
     console.log(
-      `[cognitive-complexity] OK — ${cognitiveCount} violações (baseline ${cognitiveMetric.value})`
+      `[cognitive-complexity] OK — ${cognitiveCount} violations (baseline ${cognitiveMetric.value})`
     );
   }
 

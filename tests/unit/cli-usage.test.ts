@@ -196,7 +196,7 @@ test("runUsageLogs exibe logs com mascaramento de API key", async () => {
   assert.ok(!out.includes("sk-test-key") || out.includes("***"));
 });
 
-test("runUsageLogs --output json retorna rows com campos esperados", async () => {
+test("runUsageLogs --output json returns rows with expected fields", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockFetch() as any;
 
@@ -212,7 +212,7 @@ test("runUsageLogs --output json retorna rows com campos esperados", async () =>
   assert.ok(typeof parsed[0].tokens === "number");
 });
 
-test("runUsageHistory exibe histórico", async () => {
+test("runUsageHistory displays history", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockFetch() as any;
 

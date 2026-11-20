@@ -37,8 +37,8 @@ function assertNoStaleEntries(
   const stale = keys.filter((k) => !liveSet.has(k));
   if (stale.length > 0) {
     console.error(
-      `[${gateName}] ${stale.length} entrada(s) obsoleta(s) na allowlist ` +
-        `— a violação foi corrigida; REMOVA a entrada para travar a correção:\n` +
+      `[${gateName}] ${stale.length} obsolete entry(ies) in the allowlist ` +
+        `— the violation has been fixed; REMOVE the entry to lock the fix:\n` +
         stale.map((e) => `  ✗ ${e}`).join("\n")
     );
     process.exitCode = 1;

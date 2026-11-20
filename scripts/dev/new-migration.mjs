@@ -48,7 +48,7 @@ function sleepSync(ms) {
 const pad3 = (n) => String(n).padStart(3, "0");
 
 const USAGE =
-  "Uso: npm run db:new-migration -- <descricao> [--dir <caminho>] [--now <ISO-8601>] [--dry-run]";
+  "Usage: npm run db:new-migration -- <description> [--dir <path>] [--now <ISO-8601>] [--dry-run]";
 
 /**
  * @param {string[]} argv
@@ -68,7 +68,7 @@ export function parseArgs(argv) {
       if (eq !== -1) return arg.slice(eq + 1);
       const value = argv[i + 1];
       if (value === undefined || value.startsWith("--")) {
-        throw new Error(`${flag} precisa de um valor`);
+        throw new Error(`${flag} needs a value`);
       }
       i += 1;
       return value;
@@ -82,14 +82,14 @@ export function parseArgs(argv) {
     else if (arg === "--dry-run") dryRun = true;
     else if (arg === "--dir" || arg.startsWith("--dir=")) dir = path.resolve(takeValue("--dir"));
     else if (arg === "--now" || arg.startsWith("--now=")) nowRaw = takeValue("--now");
-    else if (arg.startsWith("--")) throw new Error(`opção desconhecida ${arg}`);
+    else if (arg.startsWith("--")) throw new Error(`unknown option ${arg}`);
     else words.push(arg);
   }
 
   let now = new Date();
   if (nowRaw !== undefined) {
     now = new Date(nowRaw);
-    if (Number.isNaN(now.getTime())) throw new Error(`--now não é uma data válida: ${nowRaw}`);
+    if (Number.isNaN(now.getTime())) throw new Error(`--now is not a valid date: ${nowRaw}`);
   }
   return { words, dir, now, dryRun, help };
 }
@@ -142,7 +142,7 @@ export function pickMigrationFilename({ dir, description, now }) {
     current = new Date(current.getTime() + 1000);
   }
   throw new Error(
-    `nenhum carimbo livre em ${MAX_COLLISION_STEPS} s a partir de ${now.toISOString()}`
+    `no free stamps in ${MAX_COLLISION_STEPS} s from ${now.toISOString()}`
   );
 }
 
@@ -176,9 +176,9 @@ export function main(argv = process.argv.slice(2)) {
   const realNow = Date.now();
   if (args.now.getTime() > realNow + MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS) {
     console.error(
-      `[db:new-migration] --now ${args.now.toISOString()} está no futuro (relógio real ` +
-        `${new Date(realNow).toISOString()}, tolerância ` +
-        `${MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS / 60000} min): o gate recusaria o carimbo`
+      `[db:new-migration] --now ${args.now.toISOString()} is in the future (real clock `
+        `${new Date(realNow).toISOString()}, tolerance `
+        `${MIGRATION_TIMESTAMP_FUTURE_TOLERANCE_MS / 60000} min): the gate would refuse the stamp`
     );
     return 1;
   }
@@ -199,8 +199,8 @@ export function main(argv = process.argv.slice(2)) {
     // future by many collisions).
     const verdict = classifyMigrationFilename(filename);
     if (verdict.kind !== "timestamp") {
-      const reason = verdict.kind === "invalid" ? verdict.reason : "nome antigo inesperado";
-      console.error(`[db:new-migration] recusado ${filename}: ${reason}`);
+      const reason = verdict.kind === "invalid" ? verdict.reason : "unexpected old name";
+      console.error(`[db:new-migration] rejected ${filename}: ${reason}`);
       return 1;
     }
 
@@ -220,7 +220,7 @@ export function main(argv = process.argv.slice(2)) {
         start = nextSecond;
         continue;
       }
-      console.error(`[db:new-migration] não foi possível criar ${target}: ${err.message}`);
+      console.error(`[db:new-migration] could not create ${target}: ${err.message}`);
       return 1;
     }
 
@@ -240,7 +240,7 @@ export function main(argv = process.argv.slice(2)) {
     start = nextSecond;
   }
   console.error(
-    `[db:new-migration] nenhum carimbo livre em ${MAX_COLLISION_STEPS} tentativas a partir de ` +
+    `[db:new-migration] no free stamps on ${MAX_COLLISION_STEPS} attempts from ` +
       `${args.now.toISOString()}`
   );
   return 1;

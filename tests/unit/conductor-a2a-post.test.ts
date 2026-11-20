@@ -98,7 +98,7 @@ test("com OMNIROUTE_API_KEY configurada, bearer errado → 401 e bearer certo pa
   assert.equal(denied.status, 401);
 });
 
-test("delegação válida → 201 com o task_id do hub; requirements derivados da skill do card", async (t) => {
+test("valid delegation → 201 with the hub's task_id; requirements derived from the card's skill", async (t) => {
   await freshPosture(t);
   await enableA2A();
   const bodies: unknown[] = [];
@@ -136,7 +136,7 @@ test("delegação válida → 201 com o task_id do hub; requirements derivados d
   assert.equal(sent.requirements.model, "cc/claude-sonnet-5");
 });
 
-test("sem repo na metadata → 400 (delegação exige repo); skill não-conductor → 400", async (t) => {
+test("no repo in metadata → 400 (delegation requires repo); non-conductor skill → 400", async (t) => {
   await freshPosture(t);
   await enableA2A();
   const noRepo = await tasksRoute.POST(

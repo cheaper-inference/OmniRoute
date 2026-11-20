@@ -4,7 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE = "1";
-// Render budget, not an import budget. Measured in review: the kit Sidebar mounts about 1.3–2×
+// Render budget, not an import budget. Measured in review: the Sidebar kit mounts about 1.3–2×
 // slower than the legacy one (SidebarMenuButton asChild wrapping, a Radix tooltip per rail item);
 // under 5 s at host load 10–16, 9–16 s for the slowest cases at load 25–48. 30 s is headroom for
 // that load, not a mask for an eager-render bug.

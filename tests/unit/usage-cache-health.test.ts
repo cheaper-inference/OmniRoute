@@ -26,7 +26,7 @@ function row(
   return { model, cacheRead, cacheCreation, timestamp };
 }
 
-test("uma conversa saudável: escreve o prefixo uma vez e depois só o delta", () => {
+test("a healthy conversation: write the prefix once and then just the delta", () => {
   const rows = [
     row("claude-sonnet-5", 0, 11660),
     row("claude-sonnet-5", 11660, 14),
@@ -39,13 +39,13 @@ test("uma conversa saudável: escreve o prefixo uma vez e depois só o delta", (
   assert.equal(s.totalCalls, 4);
   assert.equal(s.cacheReadTotal, 35023);
   assert.equal(s.cacheWriteTotal, 11701);
-  // O write inicial é inevitável; o que importa é que os turnos seguintes leem.
+  // The initial write is inevitable; what matters is that the following turns read.
   assert.equal(s.warmCalls, 3);
   assert.equal(s.coldCalls, 1);
   assert.equal(s.verdict, "healthy");
 });
 
-test("thrash: repaga o prefixo a cada turno em vez de ler", () => {
+test("thrash: repays prefix every turn instead of reading", () => {
   const rows = [
     row("claude-opus-4-8", 0, 200000),
     row("claude-opus-4-8", 0, 205000),
@@ -59,8 +59,8 @@ test("thrash: repaga o prefixo a cada turno em vez de ler", () => {
   assert.equal(s.warmCalls, 0);
 });
 
-test("expõe a CONCENTRAÇÃO do write, que a média esconde", () => {
-  // 20 chamadas: 18 baratas + 2 caras. A média mente, a concentração não.
+test("exposes the CONCENTRATION of the write, which the average hides", () => {
+  // 20 calls: 18 cheap + 2 expensive. The average lies, concentration does not.
   const rows = [
     ...Array.from({ length: 18 }, () => row("claude-opus-4-8", 127000, 800)),
     row("claude-opus-4-8", 37509, 91878),
@@ -75,12 +75,12 @@ test("expõe a CONCENTRAÇÃO do write, que a média esconde", () => {
     s.heavyWriteTokenShare > 0.9,
     `essas 2 chamadas concentram >90% do write, não 10% (obtido: ${s.heavyWriteTokenShare})`
   );
-  // A mediana continua barata — é exatamente por isso que o p50 sozinho engana.
+  // The median remains cheap — this is exactly why the p50 alone is deceiving.
   assert.equal(s.writeP50, 800);
   assert.ok(s.writeP90 > 50000, "o p90 é onde a dor aparece");
 });
 
-test("quebra por modelo — Opus e Sonnet na mesma janela têm saúde diferente", () => {
+test("break by model — Opus and Sonnet in the same window have different health", () => {
   const rows = [
     ...Array.from({ length: 8 }, () => row("claude-sonnet-5", 100000, 1000)),
     ...Array.from({ length: 6 }, () => row("claude-opus-4-8", 100000, 1000)),
@@ -95,12 +95,12 @@ test("quebra por modelo — Opus e Sonnet na mesma janela têm saúde diferente"
     byModel["claude-opus-4-8"].writeReadRatio > byModel["claude-sonnet-5"].writeReadRatio,
     "o modelo problemático tem de se destacar no relatório"
   );
-  // Ordenado pelo pior primeiro: é o que o operador precisa ver de cara.
+  // Ordered by worst first: this is what the operator needs to see right away.
   assert.equal(s.byModel[0].model, "claude-opus-4-8");
 });
 
-test("chamadas sem cache nenhum são contadas à parte, não como thrash", () => {
-  // Um modelo/rota que não cacheia não é um cache doente — é ausência de cache.
+test("calls without any cache are counted separately, not as thrash", () => {
+  // A model/route that doesn't cache is not a sick cache — it's an absence of cache.
   const rows = [row("gpt-4o", 0, 0), row("gpt-4o", 0, 0), row("claude-sonnet-5", 9000, 20)];
 
   const s = summarizeCacheHealth(rows);
@@ -110,7 +110,7 @@ test("chamadas sem cache nenhum são contadas à parte, não como thrash", () =>
   assert.equal(s.verdict, "healthy", "ausência de cache não pode ser reportada como thrash");
 });
 
-test("janela vazia não divide por zero nem inventa veredicto", () => {
+test("empty window does not divide by zero or make up a verdict", () => {
   const s = summarizeCacheHealth([]);
 
   assert.equal(s.totalCalls, 0);
@@ -120,7 +120,7 @@ test("janela vazia não divide por zero nem inventa veredicto", () => {
   assert.deepEqual(s.byModel, []);
 });
 
-test("tolera linhas com null vindas do banco (colunas são nullable)", () => {
+test("tolerates rows with null coming from the database (columns are nullable)", () => {
   const rows = [
     { model: "claude-sonnet-5", cacheRead: null, cacheCreation: 5000, timestamp: "x" },
     { model: "claude-sonnet-5", cacheRead: 5000, cacheCreation: null, timestamp: "x" },
@@ -133,9 +133,9 @@ test("tolera linhas com null vindas do banco (colunas são nullable)", () => {
   assert.equal(s.totalCalls, 2);
 });
 
-test("o limiar de 'heavy' acompanha a janela em vez de ser um número mágico fixo", () => {
-  // Conversas pequenas (cache de ~2k) não podem ser julgadas pelo mesmo corte
-  // absoluto de uma conversa de 130k, senão nada é 'heavy' e o relatório cala.
+test("the 'heavy' threshold follows the window rather than being a fixed magic number", () => {
+  // Small conversations (~2k cache) cannot be judged by the same cut
+  // absolute of a 130k conversation, otherwise nothing is 'heavy' and the report is silent.
   const pequenas = [
     ...Array.from({ length: 9 }, () => row("m", 2000, 20)),
     row("m", 500, 1800),

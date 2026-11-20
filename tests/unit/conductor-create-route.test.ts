@@ -57,10 +57,10 @@ test.after(async () => {
   }
 });
 
-// A prova de fonte "requireManagementAuth antes do proxy ao hub" desta rota vive no array
-// `ROUTES` de `conductor-routes-auth.test.ts` (uma única implementação para as quatro rotas).
+// The "requireManagementAuth before proxy to hub" proof of source for this route lives in the
+// `ROUTES` from `conductor-routes-auth.test.ts` (a single implementation for all four routes).
 
-test("POST /api/conductor/tasks: body válido + hub ok → 201 {task_id}", async () => {
+test("POST /api/conductor/tasks: valid body + hub ok → 201 {task_id}", async () => {
   process.env.CONDUCTOR_HUB_URL = await fakeHub({
     "/v1/tasks": { status: 201, body: { id: "t_repeat_1" } },
   });
@@ -73,7 +73,7 @@ test("POST /api/conductor/tasks: body válido + hub ok → 201 {task_id}", async
   assert.deepEqual(await res.json(), { task_id: "t_repeat_1" });
 });
 
-test("POST /api/conductor/tasks: hub recusa (502) → status espelhado, sem corpo upstream", async () => {
+test("POST /api/conductor/tasks: hub refuses (502) → mirrored status, no upstream body", async () => {
   process.env.CONDUCTOR_HUB_URL = await fakeHub({
     "/v1/tasks": { status: 502, body: { error: "segredo interno que NÃO pode vazar" } },
   });
@@ -87,12 +87,12 @@ test("POST /api/conductor/tasks: hub recusa (502) → status espelhado, sem corp
   assert.ok(!text.includes("segredo interno"), "corpo do hub NUNCA repassado (HR#12)");
 });
 
-test("POST /api/conductor/tasks: body inválido (sem prompt) → 400", async () => {
+test("POST /api/conductor/tasks: invalid body (no prompt) → 400", async () => {
   const res = await createRoute.POST(postJson({ repoUrl: "https://git.x/repo" }));
   assert.equal(res.status, 400);
 });
 
-test("POST /api/conductor/tasks: body inválido (sem repoUrl) → 400", async () => {
+test("POST /api/conductor/tasks: invalid body (no repoUrl) → 400", async () => {
   const res = await createRoute.POST(postJson({ prompt: "refaça isso" }));
   assert.equal(res.status, 400);
 });
@@ -115,7 +115,7 @@ test("POST /api/conductor/tasks: JSON malformado → 400", async () => {
  * instead of an unhandled throw. A 302 with no `Location` is returned as-is by fetch (there
  * is nothing to follow), which reproduces the out-of-band status without a fake fetch impl.
  */
-test("POST /api/conductor/tasks: status fora de 400-599 vindo do hub é clampado para 502", async () => {
+test("POST /api/conductor/tasks: status outside 400-599 coming from hub is clamped to 502", async () => {
   process.env.CONDUCTOR_HUB_URL = await fakeHub({
     "/v1/tasks": { status: 302, body: { error: "segredo interno que NÃO pode vazar" } },
   });
@@ -129,7 +129,7 @@ test("POST /api/conductor/tasks: status fora de 400-599 vindo do hub é clampado
   assert.ok(!text.includes("segredo interno"), "corpo do hub NUNCA repassado (HR#12)");
 });
 
-test("POST /api/conductor/tasks: status 4xx/5xx legítimo do hub continua espelhado", async () => {
+test("POST /api/conductor/tasks: legitimate 4xx/5xx status from hub remains mirrored", async () => {
   process.env.CONDUCTOR_HUB_URL = await fakeHub({
     "/v1/tasks": { status: 429, body: { error: "rate limited" } },
   });

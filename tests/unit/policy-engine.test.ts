@@ -5,7 +5,7 @@ import path from "node:path";
 import os from "node:os";
 
 // ──────────────────────────────────────────────────────
-//  Policy Engine Tests — FASE-06
+// Policy Engine Tests — PHASE-06
 // ──────────────────────────────────────────────────────
 
 let tmpDir;

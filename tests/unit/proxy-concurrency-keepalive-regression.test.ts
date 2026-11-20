@@ -14,7 +14,7 @@ import { invalidateProxyHealth, isProxyReachable } from "../../src/lib/proxyHeal
 // Root cause: the proxy dispatcher forced keepAliveTimeout: 1 (1ms), destroying
 // the pooled socket right after every response. Each request then paid a fresh
 // TCP+TLS+CONNECT handshake, and a proxy that throttles connection churn
-// serialized 5 concurrent requests behind ~30s stalls (1 fast + 4× ~29.5s).
+// serialized 5 concurrent requests behind ~30s stalls (1 fast 4× ~29.5s).
 // The fix restores keep-alive on the proxy path (default 30s keepAliveTimeout,
 // keepAliveMaxTimeout 60s) so concurrent requests multiplex over ONE reused TCP
 // connection per proxy host.

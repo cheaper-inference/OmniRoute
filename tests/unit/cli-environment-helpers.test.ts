@@ -90,7 +90,7 @@ test("getEnvBanner retorna null para desktop", async () => {
   );
 });
 
-test("getEnvBanner retorna string com tipo para Codespaces", async () => {
+test("getEnvBanner returns string with type for Codespaces", async () => {
   const { getEnvBanner } = await import("../../bin/cli/utils/environment.mjs");
   withEnv({ CODESPACES: "true" }, () => {
     const banner = getEnvBanner();
@@ -99,7 +99,7 @@ test("getEnvBanner retorna string com tipo para Codespaces", async () => {
   });
 });
 
-test("environment.mjs pode ser importado sem erro", async () => {
+test("environment.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/utils/environment.mjs");
   assert.equal(typeof mod.detectRestrictedEnvironment, "function");
   assert.equal(typeof mod.getEnvBanner, "function");

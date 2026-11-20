@@ -33,7 +33,7 @@ test("finalizeTokens(codex) maps device-flow tokens and extracts email + workspa
   assert.equal(tokenData.idToken, idToken);
   assert.equal(tokenData.expiresIn, 3600);
   assert.equal(tokenData.email, "user@example.com");
-  // No organizations → workspace falls back to chatgpt_account_id (Ponto de atenção #1:
+  // No organizations → workspace falls back to chatgpt_account_id (Point of attention #1:
   // the deviceauth flow can't request id_token_add_organizations).
   assert.equal(tokenData.providerSpecificData.workspaceId, "acc-123");
   assert.equal(tokenData.providerSpecificData.workspacePlanType, "plus");

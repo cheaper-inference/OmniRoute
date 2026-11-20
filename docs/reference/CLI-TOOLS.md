@@ -126,7 +126,7 @@ Each entry has these fields (defined in `src/shared/schemas/cliCatalog.ts`):
 
 Entries with `baseUrlSupport: "none"` are **not shown** in the dashboard pages — they are registered in the MITM backlog for plan 11 (see `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
 
-### Capability tiers (cataloged × detectable × configurable × launchable)
+
 
 Not every cataloged tool is detectable, configurable or launchable. Each tier has one
 declaring source, and a drift test keeps them aligned:

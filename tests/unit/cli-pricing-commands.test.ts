@@ -75,7 +75,7 @@ test("runPricingList busca /api/pricing com filtros", async () => {
   assert.ok(capturedUrl.includes("model=claude-3"));
 });
 
-test("pricing get busca modelo específico", async () => {
+test("pricing get search specific model", async () => {
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
@@ -103,7 +103,7 @@ test("pricing defaults show busca /api/pricing/defaults", async () => {
   assert.ok(capturedUrl.includes("/api/pricing/defaults"));
 });
 
-test("pricing defaults set envia body correto", async () => {
+test("pricing defaults set sends correct body", async () => {
   let capturedBody: any = null;
   let capturedMethod = "";
   const origFetch = globalThis.fetch;
@@ -138,7 +138,7 @@ test("pricing diff passa diff=true na query", async () => {
   assert.ok(capturedUrl.includes("diff=true"));
 });
 
-test("pricing.mjs pode ser importado sem erro", async () => {
+test("pricing.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/pricing.mjs");
   assert.equal(typeof mod.registerPricing, "function");
   assert.equal(typeof mod.runPricingSync, "function");

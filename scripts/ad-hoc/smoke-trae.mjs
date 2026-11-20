@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.resolve(__dirname, "../../../trae_solo.env");
 if (!fs.existsSync(envPath)) {
-  console.error(`Не найден ${envPath}. Положи туда TRAE_TOKEN= и TRAE_WEB_ID= и т.д.`);
+  console.error(`Not found: ${envPath}. Put TRAE_TOKEN= and TRAE_WEB_ID= etc. there.`);
   process.exit(1);
 }
 const cfg = Object.fromEntries(
@@ -42,7 +42,7 @@ const credentials = {
 };
 
 const model = process.argv[2] || "auto";
-const prompt = process.argv.slice(3).join(" ") || "Ответь одним словом: столица Франции?";
+const prompt = process.argv.slice(3).join(" ") || "Answer in one word: what is the capital of France?";
 
 console.log(`[smoke] model=${model} prompt=${JSON.stringify(prompt)}`);
 const { response } = await ex.execute({

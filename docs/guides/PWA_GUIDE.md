@@ -76,10 +76,10 @@ OmniRoute provides icons optimized for each platform:
 
 | File                   | Size             | Used By                               |
 | ---------------------- | ---------------- | ------------------------------------- |
-| `icon-512.png`         | 512×512          | Android install prompt, splash screen |
-| `apple-touch-icon.png` | 180×180          | iOS home screen icon                  |
-| `icon-192.svg`         | 192×192 (vector) | Android adaptive icon                 |
-| `apple-touch-icon.svg` | 180×180 (vector) | Apple fallback                        |
+| `icon-512.png` | 512×512 | Android install prompt, splash screen |
+| `apple-touch-icon.png` | 180×180 | iOS home screen icon |
+| `icon-192.svg` | 192×192 (vector) | Android adaptive icon |
+| `apple-touch-icon.svg` | 180×180 (vector) | Apple fallback |
 | `favicon.svg`          | Vector           | Browser tabs                          |
 | `favicon.ico`          | Multi-size       | Legacy browsers                       |
 
@@ -186,7 +186,7 @@ If you upload a custom favicon via `Dashboard → Settings`, the PWA icon on des
 | `src/shared/components/PwaRegister.tsx` | Client component that registers the service worker               |
 | `src/app/offline/page.tsx`              | Offline fallback page with live status indicator                 |
 | `src/app/layout.tsx`                    | Root layout with PWA metadata (apple-web-app, theme-color, etc.) |
-| `public/icon-512.png`                   | 512×512 PNG icon (Android, splash screen)                        |
-| `public/apple-touch-icon.png`           | 180×180 PNG icon (iOS home screen)                               |
-| `public/icon-192.svg`                   | 192×192 SVG icon (Android adaptive)                              |
-| `public/apple-touch-icon.svg`           | 180×180 SVG icon (Apple fallback)                                |
+| `public/icon-512.png` | 512×512 PNG icon (Android, splash screen) |
+| `public/apple-touch-icon.png` | 180×180 PNG icon (iOS home screen) |
+| `public/icon-192.svg` | 192×192 SVG icon (Android adaptive) |
+| `public/apple-touch-icon.svg` | 180×180 SVG icon (Apple fallback) |

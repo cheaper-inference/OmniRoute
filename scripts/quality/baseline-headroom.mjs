@@ -215,7 +215,7 @@ export function buildManifest() {
       id: "complexity",
       direction: "down",
       baseline: () => readJson("complexity-baseline.json").count,
-      measure: () => runAndMatch("scripts/check/check-complexity.mjs", /(\d+) violaç/),
+      measure: () => runAndMatch("scripts/check/check-complexity.mjs", /(\d+) violation/),
     },
     {
       id: "duplicationPct",

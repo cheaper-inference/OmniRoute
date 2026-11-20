@@ -82,6 +82,6 @@ test("#6634: unrelated files still get flagged for genuinely new tautologies (gu
   const flags = evaluateMasking(perFile, new Set());
 
   assert.equal(flags.length, 2, "a non-fixture file must still trip both tautology signals");
-  assert.match(flags[0], /nova\(s\) 1 tautologia\(s\) assert\.ok\(true\)/);
-  assert.match(flags[1], /nova\(s\) 1 tautologia\(s\) estendida/);
+  assert.match(flags[0], /1 new assert\.ok\(true\) tautologies/);
+  assert.match(flags[1], /new\(s\) 1 extended tautology\(s\)/);
 });

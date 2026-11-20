@@ -91,9 +91,9 @@ function realScenario(renameInBase: Record<string, string>, dropFromBase: string
 }
 
 /** Contract C1 with the gate: a PR migration failed on the upgraded path. */
-const C1_PHRASE = "não aplica depois de todas as migrations da base";
+const C1_PHRASE = "does not apply after all base migrations";
 /** Contract C2 with the gate: a --must-not-apply file ran again on the upgraded database. */
-const C2_PHRASE = "aplicada de novo no banco atualizado";
+const C2_PHRASE = "applied again in the updated database";
 
 /** Every entry under `dir`, never following symlinks; `ignore` skips top-level names. */
 function listTree(dir: string, ignore: ReadonlySet<string> = new Set()): string[] {
@@ -188,17 +188,17 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     const { baseDir, headDir } = scenario(NON_COMMUTING.base, NON_COMMUTING.pr);
     const result = await runScript(["--base-dir", baseDir, "--head-dir", headDir]);
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
-    assert.match(result.stderr, /tabela adv_t: coluna d \(TEXT\) só existe no caminho atualizado/);
+    assert.match(result.stderr, /table adv_t: column d \(TEXT\) only exists in the updated path/);
     assert.match(result.stderr, /npm run db:new-migration/);
     // The hint is neutral: the gate also runs this check for edited and renamed migrations.
-    assert.match(result.stderr, /fora de ordem → dê a ela um carimbo novo/);
-    assert.match(result.stderr, /editada → devolva o conteúdo da base/);
+    assert.match(result.stderr, /out of order → give it a new stamp/);
+    assert.match(result.stderr, /edited → return the contents of the base/);
     // R3B-3: never "keep the old stamp", which reads as "same stamp, new description", and the
     // runner re-applies a file whose version stays while its name changes.
-    assert.match(result.stderr, /renomeada → desfaça a renomeação \(volte ao nome antigo\)/);
-    assert.match(result.stderr, /nunca o mesmo carimbo com outro nome/);
-    assert.doesNotMatch(result.stderr, /mantenha o carimbo antigo/);
-    assert.doesNotMatch(result.stderr, /não aplica em nenhum dos dois caminhos/);
+    assert.match(result.stderr, /renamed → undo the rename \(go back to the old name\)/);
+    assert.match(result.stderr, /never the same stamp with another name/);
+    assert.doesNotMatch(result.stderr, /keep the old stamp/);
+    assert.doesNotMatch(result.stderr, /does not apply in either path/);
     // The gate prints the case-specific hint; this one must not tell a rename to regenerate.
     assert.doesNotMatch(result.stderr, /regere o nome/);
   });
@@ -245,7 +245,7 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     );
     const result = await runScript(["--base-dir", baseDir, "--head-dir", headDir]);
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
-    assert.match(result.stderr, /índice idx_t1_c \(t1\(c\).*só existe no caminho atualizado/);
+    assert.match(result.stderr, /index idx_t1_c \(t1\(c\).*only exists in the updated path/);
   });
 
   test("(d2) a table constraint that exists on one path only (same columns) → exit 1", async () => {
@@ -297,11 +297,11 @@ describe("migration-commutation", { concurrency: 3 }, () => {
 
     const text = await runScript(["--base-dir", baseDir, "--head-dir", missing]);
     assert.equal(text.code, 2, `${text.stdout}\n${text.stderr}`);
-    assert.match(text.stderr, /erro de infraestrutura: --head-dir não existe/);
+    assert.match(text.stderr, /infrastructure error: --head-dir does not exist/);
 
     const json = await runScript(["--base-dir", missing, "--head-dir", baseDir, "--json"]);
     assert.equal(json.code, 2, `${json.stdout}\n${json.stderr}`);
-    assert.match(JSON.parse(json.stdout).error, /--base-dir não existe/);
+    assert.match(JSON.parse(json.stdout).error, /--base-dir does not exist/);
 
     const usage = await runScript(["--base-dir", baseDir]);
     assert.equal(usage.code, 2);
@@ -340,10 +340,10 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     const text = await runScript(["--base-dir", baseDir, "--head-dir", headDir]);
     assert.equal(text.code, 1, `${text.stdout}\n${text.stderr}`);
     assert.ok(
-      `${text.stdout}\n${text.stderr}`.includes("não aplica em nenhum dos dois caminhos"),
+      `${text.stdout}\n${text.stderr}`.includes("does not apply to either path"),
       text.stderr
     );
-    assert.match(text.stderr, /corrija o SQL/i);
+    assert.match(text.stderr, /correct SQL/i);
     assert.doesNotMatch(text.stderr, /regere o nome/);
     // Contract C1: it also fails on the upgraded path.
     assert.ok(text.stderr.includes(C1_PHRASE), text.stderr);
@@ -378,22 +378,22 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
     assert.match(
       result.stderr,
-      /migration 20261113150000_index_v\.sql falhou ao ser aplicada no caminho atualizado \(base, depois o PR\): .*no such column: v/
+      /migration 20261113150000_index_v\.sql failed to apply to the updated path \(base, then PR\): .*no such column: v/
     );
-    assert.doesNotMatch(result.stderr, /caminho novo/);
+    assert.doesNotMatch(result.stderr, /new path/);
     assert.doesNotMatch(result.stderr, /erro de infraestrutura/);
-    assert.doesNotMatch(result.stderr, /não aplica em nenhum dos dois caminhos/);
+    assert.doesNotMatch(result.stderr, /does not apply in either path/);
     // A-R1 of the third review: a new stamp does not help here (the upgraded path already
     // applies the PR migration after the whole base, and a fresh install with a new stamp would
     // do the same), so the hint is to fix the SQL against the base schema (contract C1).
     assert.ok(result.stderr.includes(C1_PHRASE), result.stderr);
-    assert.match(result.stderr, /corrija o SQL contra o schema atual da base/);
+    assert.match(result.stderr, /correct the SQL against the current database schema/);
     assert.match(
       result.stderr,
-      /se ela depende de outra migration do PR com carimbo maior, dê a ela um carimbo novo com\s+`?npm run db:new-migration/
+      /if it depends on another PR migration with a larger stamp, give it a new stamp with\s+`?npm run db:new-migration/
     );
-    assert.doesNotMatch(result.stderr, /fora de ordem → dê a ela um carimbo novo/);
-    assert.doesNotMatch(result.stderr, /dão um schema/);
+    assert.doesNotMatch(result.stderr, /out of order → give it a new stamp/);
+    assert.doesNotMatch(result.stderr, /does a schema/);
   });
 
   // The (i) migration with a stamp after the base: it now fails on both paths, which proves
@@ -410,15 +410,15 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
     assert.match(
       result.stderr,
-      /20261113190000_index_v\.sql falhou ao ser aplicada no caminho atualizado/
+      /20261113190000_index_v\.sql failed to apply to the updated path/
     );
     assert.match(
       result.stderr,
-      /20261113190000_index_v\.sql falhou ao ser aplicada no caminho novo/
+      /20261113190000_index_v\.sql failed to apply to new path/
     );
     assert.ok(result.stderr.includes(C1_PHRASE), result.stderr);
-    assert.ok(result.stderr.includes("não aplica em nenhum dos dois caminhos"), result.stderr);
-    assert.match(result.stderr, /corrija o SQL contra o schema atual da base/);
+    assert.ok(result.stderr.includes("does not apply in either path"), result.stderr);
+    assert.match(result.stderr, /correct the SQL against the current database schema/);
   });
 
   // R2B-3 of the third review: a PR migration that depends on ANOTHER migration of the same PR
@@ -435,18 +435,18 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
     assert.match(
       result.stderr,
-      /20261113000100_index_z\.sql falhou ao ser aplicada no caminho atualizado/
+      /20261113000100_index_z\.sql failed to apply to the updated path/
     );
     assert.match(
       result.stderr,
-      /20261113000100_index_z\.sql falhou ao ser aplicada no caminho novo/
+      /20261113000100_index_z\.sql failed to be applied to the new path/
     );
     assert.ok(result.stderr.includes(C1_PHRASE), result.stderr);
     assert.match(
       result.stderr,
-      /se ela depende de outra migration do PR com carimbo maior, dê a ela um carimbo novo com\s+`?npm run db:new-migration/
+      /if it depends on another PR migration with a larger stamp, give it a new stamp with\s+`?npm run db:new-migration/
     );
-    assert.doesNotMatch(result.stderr, /regerar o nome não resolve/);
+    assert.doesNotMatch(result.stderr, /regenerate the name does not resolve/);
   });
 
   // A PR migration dated before a base migration it depends on: the upgraded database has the
@@ -463,15 +463,15 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
     assert.match(
       result.stderr,
-      /migration 20261113150000_index_u\.sql falhou ao ser aplicada no caminho novo \(tudo em ordem\): .*no such table/
+      /migration 20261113150000_index_u\.sql failed to be applied to the new path \(all in order\): .*no such table/
     );
-    assert.doesNotMatch(result.stderr, /falhou ao ser aplicada no caminho atualizado/);
+    assert.doesNotMatch(result.stderr, /failed to be applied to the updated path/);
     assert.ok(!result.stderr.includes(C1_PHRASE), result.stderr);
-    assert.doesNotMatch(result.stderr, /não aplica em nenhum dos dois caminhos/);
-    assert.match(result.stderr, /fora de ordem → dê a ela um carimbo novo/);
+    assert.doesNotMatch(result.stderr, /does not apply in either path/);
+    assert.match(result.stderr, /out of order → give it a new stamp/);
     assert.match(result.stderr, /npm run db:new-migration/);
-    // Only failures: no schema was produced, so no "dão um schema diferente".
-    assert.doesNotMatch(result.stderr, /dão um schema/);
+    // Only failures: no schema was produced, only "give a different schema".
+    assert.doesNotMatch(result.stderr, /does a schema/);
   });
 
   // R2B-1 of the third review (contract C2): a rename the runner does not recognize as a
@@ -585,11 +585,11 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(missing.code, 2, `${missing.stdout}\n${missing.stderr}`);
     assert.match(
       missing.stderr,
-      /--must-not-apply: 20261113999999_nope\.sql não existe em --head-dir/
+      /--must-not-apply: 20261113999999_nope\.sql does not exist in --head-dir/
     );
     const withPath = await runScript([...args, "--must-not-apply", "sub/20261113100000_x.sql"]);
     assert.equal(withPath.code, 2, `${withPath.stdout}\n${withPath.stderr}`);
-    assert.match(withPath.stderr, /--must-not-apply exige o nome de um arquivo \.sql/);
+    assert.match(withPath.stderr, /--must-not-apply requires the name of a \.sql/ file);
     const noValue = await runScript([...args, "--must-not-apply"]);
     assert.equal(noValue.code, 2, `${noValue.stdout}\n${noValue.stderr}`);
     // R3A-3: a .sql the runner never loads (no numeric prefix) could never be applied, so the
@@ -599,7 +599,7 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(notMigration.code, 2, `${notMigration.stdout}\n${notMigration.stderr}`);
     assert.match(
       notMigration.stderr,
-      /--must-not-apply exige o nome de um arquivo \.sql de migration/
+      /--must-not-apply requires the name of a migration \.sql file/
     );
   });
 
@@ -647,7 +647,7 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     const text = await runScript(["--base-dir", baseDir, "--head-dir", headDir]);
     assert.equal(text.code, 1, `${text.stdout}\n${text.stderr}`);
     for (const table of ["v1_auto", "v1_chk", "v1_coll", "v1_gen"]) {
-      assert.match(text.stderr, new RegExp(`tabela ${table}: definição`));
+      assert.match(text.stderr, new RegExp(`table ${table}: definition`));
     }
   });
 
@@ -705,11 +705,11 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(result.code, 1, `${result.stdout}\n${result.stderr}`);
     assert.match(
       result.stderr,
-      /tabela dq_lit: coluna v difere — atualizado: TEXT DEFAULT 'ABC'; novo: TEXT DEFAULT 'abc'/
+      /table dq_lit: column v differs — updated: TEXT DEFAULT 'ABC'; new: TEXT DEFAULT 'abc'/
     );
     assert.match(
       result.stderr,
-      /gatilho dq_trg difere — atualizado: .*new\.v='A'.*; novo: .*new\.v='a'/
+      /trigger dq_trg differs — updated: .*new\.v='A'.*; new: .*new\.v='a'/
     );
   });
 
@@ -737,7 +737,7 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     );
     assert.match(
       payload.differences[0].message,
-      /coluna v difere — atualizado: TEXT DEFAULT 'ABC'; novo: TEXT DEFAULT 'abc'/
+      /column v differs — updated: TEXT DEFAULT 'ABC'; new: TEXT DEFAULT 'abc'/
     );
   });
 
@@ -784,9 +784,9 @@ describe("migration-commutation", { concurrency: 3 }, () => {
       assert.match(
         text.stderr,
         new RegExp(
-          `tabela ${table}: colunas e constraints iguais; a diferença está no texto da definição ` +
-            "\\(CHECK, COLLATE, coluna gerada, AUTOINCREMENT, opções da tabela\\) ou só na forma " +
-            "de escrever a mesma tabela \\(ex\\.: FOREIGN KEY de coluna × de tabela\\)"
+          `table ${table}: equal columns and constraints; the difference is in the text of the definition ` +
+            "\\(CHECK, COLLATE, generated column, AUTOINCREMENT, table options\\) or only in the form " +
+            "to write the same table \\(ex\\.: FOREIGN KEY column × table\\)"
         )
       );
     }
@@ -824,7 +824,7 @@ describe("migration-commutation", { concurrency: 3 }, () => {
     assert.equal(difference.name, "d");
     assert.equal(difference.onlyIn, "upgraded");
     assert.equal(difference.upgraded.type, "TEXT");
-    assert.match(difference.message, /coluna d/);
+    assert.match(difference.message, /column d/);
   });
 });
 
@@ -1040,16 +1040,16 @@ describe("migration-commutation hints (pure)", () => {
     for (const differences of [schema, freshOnly, upgraded] as never[]) {
       const pr = howToFix(differences).join("\n");
       const merged = howToFix(differences, { mergedBase: true }).join("\n");
-      assert.match(merged, /corrija para frente com uma migration nova/);
-      assert.doesNotMatch(merged, /dê a ela um carimbo novo/);
-      assert.doesNotMatch(merged, /apague o\s+arquivo antigo do PR/);
-      assert.doesNotMatch(merged, /devolva o conteúdo da base/);
-      assert.doesNotMatch(pr, /corrija para frente/);
+      assert.match(merged, /correct forward with a new migration/);
+      assert.doesNotMatch(merged, /give her a new stamp/);
+      assert.doesNotMatch(merged, /delete the\s+old PR file/);
+      assert.doesNotMatch(merged, /return the base content/);
+      assert.doesNotMatch(pr, /fix forward/);
     }
     // C1 stays in tag mode: the gate keys on it to title the failure.
     assert.match(
       howToFix(upgraded as never, { mergedBase: true }).join("\n"),
-      /não aplica depois de todas as migrations da base/
+      /does not apply after all base migrations/
     );
     assert.equal(parseArgs(["--base-dir", "a", "--head-dir", "b"]).mergedBase, false);
     assert.equal(

@@ -14,8 +14,8 @@
  * Covers:
  *  - the page wires the pure isValidSupporterKeyFormat() helper and submits
  *    { optIn: true, supporterKey } together (pasting a key both activates
- *    opt-in AND sets the key, per spec: "o campo vai na PRÓPRIA tela de
- *    ativação, para desbloqueá-la");
+ * opt-in AND sets the key, per spec: "the field goes on the OWN screen
+  *    activation, to unlock it");
  *  - the already-activated state shows the masked key (never the raw one)
  *    with a "change key" escape hatch;
  *  - the 4 new t("...") keys exist (non-empty, no price) in en.json and all

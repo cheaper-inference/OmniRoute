@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Lista (ou remove com --apply) worktrees port-* cuja branch já foi merged ao
-# main OU não tem commits à frente do origin/main. NUNCA toca worktrees com
-# trabalho não-commitado. Rodar a partir do checkout principal.
+# List (or remove with --apply) port-* worktrees whose branch has already been merged into
+# main OR has no commits ahead of origin/main. NEVER touch worktrees with
+# uncommitted work. Rotate from the main checkout.
 set -euo pipefail
 APPLY="${1:-}"
 git fetch origin main --quiet || true

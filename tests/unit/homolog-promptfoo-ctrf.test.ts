@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { promptfooToCtrf } from "../../scripts/homolog/lib/promptfooToCtrf.mjs";
 
-test("mapeia resultados do promptfoo para tests CTRF", () => {
+test("maps promptfoo results to CTRF tests", () => {
   const ctrf = promptfooToCtrf({
     results: {
       results: [

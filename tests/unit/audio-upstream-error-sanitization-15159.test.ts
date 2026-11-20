@@ -3,7 +3,7 @@
 // TWO byte-identical-in-spirit helpers echo a raw upstream body straight into
 // `error.message`:
 //
-//   open-sse/utils/audioResponse.ts:32        — 18 call sites (audioSpeech ×13,
+// open-sse/utils/audioResponse.ts:32 — 18 call sites (audioSpeech ×13,
 //                                               awsPollyTts, fishAudioTts, geminiTts)
 //   open-sse/handlers/audioTranscription.ts:39 — 17 call sites, re-exported and
 //                                               imported by openrouterTranscription.ts

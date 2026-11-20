@@ -55,7 +55,7 @@ test("compression status chama omniroute_compression_status via mcp", async () =
   assert.equal(body.params.name, "omniroute_compression_status");
 });
 
-test("compression configure envia configuração via mcp", async () => {
+test("compression configure sends configuration via mcp", async () => {
   const calls: unknown[] = [];
   const origFetch = globalThis.fetch;
   globalThis.fetch = makeMcpStreamFetch({ toolResult: { success: true } });
@@ -106,7 +106,7 @@ test("compression engine set chama omniroute_set_compression_engine", async () =
   assert.ok(out.includes("rtk"));
 });
 
-test("compression engine set rejeita engine inválido", async () => {
+test("compression engine set rejects invalid engine", async () => {
   const origExit = process.exit;
   let exitCode: number | undefined;
   process.exit = ((code: number) => {
@@ -184,7 +184,7 @@ test("compression rules add envia pattern e action", async () => {
   assert.equal(capturedBody.action, "drop");
 });
 
-test("compression language-packs busca endpoint correto", async () => {
+test("compression language-packs fetches correct endpoint", async () => {
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
@@ -198,7 +198,7 @@ test("compression language-packs busca endpoint correto", async () => {
   assert.ok(capturedUrl.includes("/api/compression/language-packs"));
 });
 
-test("compression.mjs pode ser importado sem erro", async () => {
+test("compression.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/compression.mjs");
   assert.equal(typeof mod.registerCompression, "function");
   assert.equal(typeof mod.runCompressionStatus, "function");

@@ -55,7 +55,7 @@ vi.mock("@xyflow/react", () => ({
 const ProviderTopology = (await import("../../../src/app/(dashboard)/home/ProviderTopology"))
   .default;
 
-// The flow palette is theme-aware CSS custom properties (Fase 3 D1). jsdom keeps
+// The flow palette is theme-aware CSS custom properties (Phase 3 D1). jsdom keeps
 // `var(...)` verbatim in inline styles, so compare against the token itself.
 const GREEN = FLOW_EDGE_COLORS.active;
 const AMBER = FLOW_EDGE_COLORS.last;

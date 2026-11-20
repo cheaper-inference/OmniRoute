@@ -2,22 +2,22 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 /**
- * `resolveVideoEndpoint` принимает запасной адрес и обязан им пользоваться.
+ * `resolveVideoEndpoint` accepts a fallback address and must use it.
  *
- * Функция объявлена как `(credentials, fallback)`, и вызывающий передаёт
- * `providerConfig.baseUrl` — адрес из реестра. Но пока адрес брался только из
- * учётных данных: у встроенного провайдера, где узел своего baseUrl не хранит,
- * получался `null.endsWith(...)` и маршрут отвечал 500 с пустым телом.
+ * The function is declared as `(credentials, fallback)` and the caller passes
+ * `providerConfig.baseUrl` - address from the registry. But so far the address was taken only from
+ * credentials: with a built-in provider, where the node does not store its baseUrl,
+ * the result was `null.endsWith(...)` and the route responded with 500 with an empty body.
  *
- * Дефект был не виден, потому что единственный встроенный провайдер формата
- * `openai-video` (nanogpt) до этой ветки не доходил — его формат в реестре был
- * записан как `openai`, и диспетчер отбрасывал его раньше (400 Unsupported
- * video format). Живая проверка 2026-08-30: как только имя формата исправили,
- * тот же запрос дал 500 и стек с `Cannot read properties of null`.
+ * The defect was not visible because the only built-in format provider
+ * `openai-video` (nanogpt) did not reach this branch - its format in the registry was
+ * written as `openai` and the dispatcher has dropped it before (400 Unsupported
+ * video format). Live check 2026-08-30: as soon as the format name was corrected,
+ * the same request returned 500 and a stack with `Cannot read properties of null`.
  *
- * Адрес из реестра — готовый endpoint, а не корень узла: у nanogpt это
- * `/api/v1/video/generations` (единственное число), и дописывать к нему
- * `/videos/generations` нельзя.
+ * The address from the registry is a ready endpoint, not the root of the node: for nanogpt this is
+ * `/api/v1/video/generations` (singular), and append to it
+ * `/videos/generations` is not allowed.
  */
 
 const { handleOpenAIVideoGeneration } =

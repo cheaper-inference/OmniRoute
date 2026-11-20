@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — TPROXY IP_TRANSPARENT socket wrapper.
+ * Phase 3 / Epic A — TPROXY IP_TRANSPARENT socket wrapper.
  *
  * Node's net module can't setsockopt(IP_TRANSPARENT), so the TPROXY listener
  * needs a tiny native addon (src/mitm/tproxy/native/transparent.c). Viability

@@ -11,7 +11,7 @@ export async function createChatPipelineHarness(prefix) {
   process.env.DASHBOARD_PASSWORD = "";
   process.env.INITIAL_PASSWORD = "";
   delete process.env.JWT_SECRET;
-  // FASE-01: API_KEY_SECRET is required for CRC operations (no hardcoded fallback)
+  // PHASE-01: API_KEY_SECRET is required for CRC operations (no hardcoded fallback)
   if (!process.env.API_KEY_SECRET) {
     process.env.API_KEY_SECRET = "test-harness-secret-" + Date.now();
   }

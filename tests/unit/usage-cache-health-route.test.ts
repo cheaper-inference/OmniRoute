@@ -42,19 +42,19 @@ function seed() {
   );
   const iso = (minsAgo: number) => new Date(NOW - minsAgo * 60_000).toISOString();
 
-  // dentro da janela de 1h: um write inicial + dois reads (padrão saudável)
+  // within 1h window: one initial write + two reads (healthy default)
   insert.run("a1", iso(10), 200, "claude-sonnet-5", "claude-sonnet-5", 0, 11660);
   insert.run("a2", iso(9), 200, "claude-sonnet-5", "claude-sonnet-5", 11660, 14);
   insert.run("a3", iso(8), 200, "claude-sonnet-5", "claude-sonnet-5", 11674, 15);
-  // uma chamada cara do mesmo período, modelo diferente
+  // an expensive call from the same period, different model
   insert.run("a4", iso(7), 200, "claude-opus-4-8", "claude-opus-4-8", 37509, 91878);
-  // ruído que NÃO pode entrar: erro, fora da janela, e linha sem contabilidade de cache
+  // noise that CANNOT enter: error, outside the window, and line without cache accounting
   insert.run("b1", iso(5), 500, "claude-sonnet-5", "claude-sonnet-5", 999999, 999999);
   insert.run("b2", iso(600), 200, "claude-sonnet-5", "claude-sonnet-5", 888888, 888888);
   insert.run("b3", iso(4), 200, "claude-sonnet-5", "claude-sonnet-5", null, null);
 }
 
-test("resume a janela ignorando erro, fora-da-janela e linhas sem contabilidade", () => {
+test("resumes the window ignoring error, out-of-window and unaccounted lines", () => {
   seed();
   const r = buildCacheHealthResponse({ range: "1h", now: NOW });
 
@@ -90,12 +90,12 @@ test("GET responde 200 com o resumo", async () => {
   assert.ok(["healthy", "degraded", "thrash", "no-data"].includes(body.verdict));
 });
 
-test("GET rejeita range inválido com 400", async () => {
+test("GET rejects invalid range with 400", async () => {
   const res = await GET(new Request("http://localhost/api/usage/cache-health?range=99y"));
   assert.equal(res.status, 400);
 });
 
-test("GET assume 24h quando o range é omitido", async () => {
+test("GET assumes 24h when range is omitted", async () => {
   seed();
   const res = await GET(new Request("http://localhost/api/usage/cache-health"));
   assert.equal(res.status, 200);
@@ -103,8 +103,8 @@ test("GET assume 24h quando o range é omitido", async () => {
 });
 
 test("erro interno responde 500 sem vazar stack trace nem SQL", async () => {
-  // Gatilho determinístico: sem a tabela, o prepare() lança SqliteError. Um
-  // DATA_DIR inválido NÃO serve — o driver fica preso tentando criar o arquivo
+  // Deterministic trigger: without the table, prepare() throws SqliteError. A
+  // Invalid DATA_DIR will NOT work — the driver gets stuck trying to create the file
   // em vez de falhar, e o teste passaria sem exercitar o catch.
   seed();
   const db = getDbInstance();

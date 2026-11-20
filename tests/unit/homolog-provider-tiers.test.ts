@@ -10,7 +10,7 @@ const CATALOG = [
   { id: "grok/grok-4-fast" },
 ];
 
-test("1 modelo por provider crítico (o primeiro do catálogo)", () => {
+test("1 model per critical provider (the first in the catalog)", () => {
   const picks = pickSmokeModels(CATALOG, ["openai", "anthropic", "grok"]);
   assert.deepEqual(
     picks.map((p) => p.model),
@@ -18,7 +18,7 @@ test("1 modelo por provider crítico (o primeiro do catálogo)", () => {
   );
 });
 
-test("provider crítico ausente do catálogo vira miss reportável", () => {
+test("critical provider missing from catalog becomes reportable miss", () => {
   const picks = pickSmokeModels(CATALOG, ["openai", "nvidia"]);
   assert.equal(picks.find((p) => p.provider === "nvidia").model, null);
 });

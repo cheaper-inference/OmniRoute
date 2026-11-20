@@ -197,7 +197,7 @@ test("catalogOpenrouter: free-model detection + display name", () => {
     getOpenRouterDisplayName({ id: "z/m:free", name: "Free Model" }),
     "Free Model (Grátis)"
   );
-  // Already labelled "grátis" is not double-tagged.
+  // Already labeled "free" is not double-tagged.
   assert.equal(
     getOpenRouterDisplayName({ id: "z/m:free", name: "Modelo Grátis" }),
     "Modelo Grátis"

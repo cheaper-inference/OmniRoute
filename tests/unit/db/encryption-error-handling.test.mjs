@@ -1,16 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert";
 
-// Chave determinística p/ exercitar o caminho real de auth-tag (sem ela o decrypt
-// curto-circuita no branch "no key"). Definida ANTES do import — a derivação de chave
-// é cacheada lazy no primeiro uso.
+// Deterministic key to exercise the real auth-tag path (without it the decrypt
+// short-circuit the "no key" branch). Defined BEFORE import — key derivation
+// is lazy cached on first use.
 process.env.STORAGE_ENCRYPTION_KEY = "unit-test-storage-encryption-key-0123456789";
 
 const { decrypt } = await import("../../../src/lib/db/encryption.ts");
 
-// Contrato atual (hardening): falha de decrypt → null + log, NUNCA o ciphertext cru
-// (devolver o blob criptografado vazaria o dado cifrado para UI/API). Este arquivo era
-// um órfão de glob (nunca rodou em CI) e codificava o contrato antigo pré-hardening —
+// Current contract (hardening): decrypt failure → null + log, NEVER the raw ciphertext
+// (returning the encrypted blob would leak the encrypted data to UI/API). This file was
+// a glob orphan (never run on CI) and encoded the old pre-hardening contract —
 // alinhado ao comportamento real/shipped em 2026-07 (plano mestre testes+CI, QW-c).
 test("decrypt() with invalid auth tag should not crash and return null", () => {
   const invalidCiphertext = "enc:v1:0000:0000:0000";

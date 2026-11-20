@@ -1,4 +1,4 @@
-// Characterization tests — src/lib/a2a (rail 3.8.55, Task 12 "caracterização B").
+// Characterization tests — src/lib/a2a (rail 3.8.55, Task 12 "characterization B").
 //
 // Pins the public surface of the A2A modules consumed outside src/lib/a2a, the Agent Card
 // served at /.well-known/agent.json (v0.3) and /.well-known/agent-card.json (v1.0), one

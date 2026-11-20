@@ -1,7 +1,7 @@
 /**
- * Diagnóstico NVIDIA NIM — `s.startsWith is not a function` (issue #2463 / report 3.8.5+)
+ * NVIDIA NIM diagnostics — `s.startsWith is not a function` (issue
  *
- * Como rodar (a chave NUNCA é commitada — vem por env):
+ * How to run (the key is NEVER committed — it comes via env):
  *   NVIDIA_API_KEY="nvapi-..." node --import tsx/esm scripts/ad-hoc/nvidia-startswith-diag.ts
  *
  * Opcional — apontar para outra base/model:
@@ -9,13 +9,13 @@
  *   NVIDIA_MODEL="openai/gpt-oss-120b"
  *
  * O que ele faz:
- *   Parte A — Validação real via validateProviderApiKey() (caminho do botão "testar conexão").
- *   Parte B — Sanidade do upstream: POST direto na NVIDIA (isola a chave/model do nosso pipeline).
- *   Parte C — Probes de type-crash SEM chave: alimenta model malformado em resolveModelAlias +
+ *   Part A — Actual validation via validateProviderApiKey() (path of the "Test Connection" button).
+ *   Part B — Upstream sanity: Direct POST to NVIDIA (isolates the key/model from our pipeline).
+ *   Part C — Type-crash probes WITHOUT a key: feeds a malformed model into resolveModelAlias +
  *             replica o strip de prefixo de chatCore.ts:3316 e parseModel(), capturando o stack
- *             NÃO-minificado (rodamos contra a fonte TS) para cravar a linha exata do startsWith.
+ *             NOT minified (we run it against the TS source) to pinpoint the exact line of startsWith.
  *
- * Parte C não precisa de chave — prova quais linhas são vulneráveis hoje.
+ * Part C does not require a key — it demonstrates which lines are vulnerable today.
  */
 
 const KEY = process.env.NVIDIA_API_KEY ?? "";
@@ -40,14 +40,14 @@ function show(label: string, value: unknown) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Parte A — validateProviderApiKey (caminho de validação/teste de conexão)
+// Part A — validateProviderApiKey (validation path/connection test)
 // ──────────────────────────────────────────────────────────────────────────
 async function partA() {
   hr();
   line("PARTE A — validateProviderApiKey({ provider: 'nvidia' })");
   hr();
   if (!KEY) {
-    line("  ⏭  pulada — defina NVIDIA_API_KEY para rodar.");
+    line("  ⏭  skipped — set NVIDIA_API_KEY to run.");
     return;
   }
   try {
@@ -59,31 +59,31 @@ async function partA() {
       providerSpecificData,
     });
     line("  ✅ validateProviderApiKey retornou (sem crash):");
-    show("resultado", result);
+    show("result", result);
     if (
       typeof (result as any)?.error === "string" &&
       (result as any).error.includes("startsWith")
     ) {
       line(
-        "  ⚠️  A mensagem de erro contém 'startsWith' → crash CAPTURADO dentro do try/catch da validação."
+        "  ⚠️  The error message contains 'startsWith' → crash CAPTURED within the validation try/catch."
       );
     }
   } catch (err: any) {
-    line("  ❌ validateProviderApiKey LANÇOU (crash não tratado):");
+    line("  ❌ validateProviderApiKey THREW (unhandled crash):");
     line(`     ${err?.message}`);
     line(err?.stack ?? String(err));
   }
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Parte B — sanidade do upstream NVIDIA (isola chave/model do nosso pipeline)
+// Part B — NVIDIA upstream sanity check (isolates key/model from our pipeline)
 // ──────────────────────────────────────────────────────────────────────────
 async function partB() {
   hr();
-  line("PARTE B — POST direto no upstream NVIDIA (sanidade da chave/model)");
+  line("PART B — Direct POST to NVIDIA upstream (key/model sanity check)");
   hr();
   if (!KEY) {
-    line("  ⏭  pulada — defina NVIDIA_API_KEY para rodar.");
+    line("  ⏭  skipped — set NVIDIA_API_KEY to run.");
     return;
   }
   const url = BASE_URL.endsWith("/chat/completions") ? BASE_URL : `${BASE_URL}/chat/completions`;
@@ -102,16 +102,16 @@ async function partB() {
     const text = await res.text();
     show("status", res.status);
     line(`  body (256): ${text.slice(0, 256)}`);
-    if (res.ok) line("  ✅ upstream OK — chave e model válidos.");
-    else if (res.status === 401 || res.status === 403) line("  ❌ chave inválida (401/403).");
-    else line("  ⚠️  não-OK não-auth — chave provavelmente válida, ver corpo.");
+    if (res.ok) line("  ✅ upstream OK — valid key and model.");
+    else if (res.status === 401 || res.status === 403) line("  ❌ invalid key (401/403).");
+    else line("  ⚠️  not OK, not auth — key probably valid, see body.");
   } catch (err: any) {
-    line(`  ❌ fetch falhou: ${err?.message}`);
+    line(`  ❌ fetch failed: ${err?.message}`);
   }
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Parte C — probes de type-crash (sem chave) — crava a linha do startsWith
+// Part C — Type-crash probes (no key) — locks the startsWith line
 // ──────────────────────────────────────────────────────────────────────────
 async function partC() {
   hr();
@@ -134,8 +134,8 @@ async function partC() {
 
   const inputs: Array<{ label: string; model: any }> = [
     { label: "string normal (multi-barra NVIDIA)", model: "nvidia/openai/gpt-oss-120b" },
-    { label: "objeto {} (UI bug / providerSpecificData mal salvo)", model: {} },
-    { label: "objeto {id: '...'}", model: { id: "openai/gpt-oss-120b" } },
+    { label: "object {} (UI bug / providerSpecificData not saved correctly)", model: {} },
+    { label: "object {id: '...'}", model: { id: "openai/gpt-oss-120b" } },
     { label: "number", model: 123 },
     { label: "array", model: ["openai/gpt-oss-120b"] },
     { label: "null", model: null },
@@ -146,7 +146,7 @@ async function partC() {
     line("");
     line(`  ▶ input: ${label}  (typeof=${typeof model})`);
 
-    // 1) resolveModelAlias — deixa não-string passar? (if (!modelId) return modelId)
+    // 1) resolveModelAlias — does it let non-strings pass? (if (!modelId) return modelId)
     let effective: any;
     try {
       effective = resolveModelAlias(model as any);
@@ -180,9 +180,9 @@ async function partC() {
 
 async function main() {
   line("");
-  line("NVIDIA NIM — diagnóstico `startsWith is not a function`");
+  line("NVIDIA NIM — diagnosis `startsWith is not a function`");
   // Never echo any portion of the key (js/clear-text-logging) — presence only.
-  show("NVIDIA_API_KEY presente", KEY ? "sim" : "não");
+  show("NVIDIA_API_KEY present", KEY ? "yes" : "no");
   show("BASE_URL", BASE_URL);
   show("MODEL", MODEL);
   line("");
@@ -194,6 +194,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("erro fatal no diagnóstico:", e);
+  console.error("fatal error in diagnosis:", e);
   process.exit(1);
 });

@@ -63,7 +63,7 @@ test("cloud task list envia agent e limit na query", async () => {
   assert.equal(data.items.length, 2);
 });
 
-test("runCloudTaskList codex envia parâmetros corretos", async () => {
+test("runCloudTaskList codex sends correct parameters", async () => {
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
@@ -85,7 +85,7 @@ test("runCloudTaskList codex envia parâmetros corretos", async () => {
   assert.ok(capturedUrl.includes("status=running"));
 });
 
-test("cloud task create envia agent + prompt + body correto", async () => {
+test("cloud task create sends agent + prompt + correct body", async () => {
   let capturedBody: any = null;
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
@@ -163,7 +163,7 @@ test("cloud sources busca endpoint com op=sources", async () => {
   assert.ok(capturedUrl.includes("task-001"));
 });
 
-test("registerCloud pode ser importado e é uma função", async () => {
+test("registerCloud can be imported and is a function", async () => {
   const mod = await import("../../bin/cli/commands/cloud.mjs");
   assert.equal(typeof mod.registerCloud, "function");
 });

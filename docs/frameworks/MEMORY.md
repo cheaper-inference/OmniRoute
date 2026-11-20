@@ -454,7 +454,7 @@ Six optional env vars tune the engine's runtime behaviour (documented in `.env.e
 | `MEMORY_STATIC_CACHE_DIR`       | `<DATA_DIR>/embeddings`    | Where to store downloaded models                                                                               |
 | `MEMORY_VEC_TOP_K`              | `20`                       | Default top-K for vector search                                                                                |
 | `MEMORY_RRF_K`                  | `60`                       | RRF k constant for hybrid search                                                                               |
-| `MEMORY_VEC_QUANTIZATION`       | `none`                     | Set to `int8` to store local sqlite-vec vectors quantized (~4× smaller; opt-in). Mode change forces a reindex. |
+| `MEMORY_VEC_QUANTIZATION` | `none` | Set to `int8` to store local sqlite-vec quantized vectors (~4× smaller; opt-in). Mode change forces a reindex. |
 
 ## Summarisation (`summarization.ts`)
 

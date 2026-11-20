@@ -25,7 +25,7 @@ function frames(events: Array<Record<string, unknown>>, newline = "\n"): string 
  * Upstream event sequence:
  *   message_start
  *   → content_block_start(type:"tool_use", id:"toolu_xxx", name:"get_weather")
- *   → ×3 content_block_delta(type:"input_json_delta", partial_json:"...")
+ * → ×3 content_block_delta(type:"input_json_delta", partial_json:"...")
  *   → content_block_stop
  *   → message_delta(stop_reason:"tool_use")
  *   → message_stop

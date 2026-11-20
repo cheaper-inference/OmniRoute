@@ -145,7 +145,7 @@ test("strict schemas reject arbitrary fields, empty patches, and control charact
   }
 });
 
-test("PATCH e PUT rejeitam o corpo pelo byte real antes de materializar JSON excessivo", async () => {
+test("PATCH and PUT reject the body by real byte before materializing excessive JSON", async () => {
   process.env.RADAR_ENABLED = "true";
   const headers = await authHeaders();
   const oversizedBody = JSON.stringify({

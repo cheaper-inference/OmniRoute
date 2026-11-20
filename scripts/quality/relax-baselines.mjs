@@ -9,7 +9,7 @@
 // docs/architecture/QUALITY_GATES.md → "Velocity phase").
 //
 // What it touches (all counts / caps / percentages, never allowlists):
-//   quality-baseline.json      metrics.*.value  (down: ×(1+pct); up: ÷(1+pct), floors kept)
+// quality-baseline.json metrics.*.value (down: ×(1 pct); up: ÷(1 pct), floors kept)
 //   complexity-baseline.json   count
 //   duplication-baseline.json  percentage
 //   file-size-baseline.json    cap, testCap, frozen[*], testFrozen[*]
@@ -20,7 +20,7 @@
 //   coverage.*            ≥ 60   (AGENTS.md Hard Rule #9 — absolute floor)
 //   eslintErrors          stays 0 (errors are defects, not debt)
 //   eslintWarnings at 0   becomes pct% of the frozen suppression count (a budget for
-//                         new warnings; 0 × 1.2 would be no relaxation at all)
+// new warnings; 0 × 1.2 would be no relaxation at all)
 //
 // Usage:
 //   node scripts/quality/relax-baselines.mjs --pct 20 --note velocity_2026_08_30 [--dry-run]
@@ -182,7 +182,7 @@ const suppressedCount = (() => {
       n++;
     }
   }
-  changes.push([f, "frozen+testFrozen entries", n, `×${FACTOR}`]);
+  changes.push([f, "frozen testFrozen entries", n, `×${FACTOR}`]);
   j[NOTE_KEY] =
     `${n} frozen line caps and cap/testCap raised by ${PCT}% (velocity phase; see quality-baseline.json _policy).`;
   write(f, j);

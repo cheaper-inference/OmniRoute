@@ -102,7 +102,7 @@ describe("shared Modal focus restoration", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  // F4 (F1 checkpoint pendência): a field with autoFocus takes focus during the commit, before
+  // F4 (F1 checkpoint pending): a field with autoFocus takes focus during the commit, before
   // Radix's FocusScope mounts; FocusScope then skips onOpenAutoFocus (focus is already inside),
   // so the opener was never captured and Escape dropped focus on <body> ("Create API Key").
   it("returns focus to the trigger when a field inside the dialog has autoFocus", async () => {

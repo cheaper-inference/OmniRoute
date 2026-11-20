@@ -1,7 +1,7 @@
 // TDD — gate 6A.1: check-test-discovery
-// Todo arquivo *.test.ts|tsx / *.spec.ts|tsx do repo deve ser COLETADO por pelo menos
+// Every *.test.ts|tsx / *.spec.ts|tsx file from the repo must be COLLECTED for at least
 // um runner declarado (node --test globs, vitest includes, playwright testDir).
-// Órfão novo → fail; entrada de baseline que deixou de ser órfã → fail (stale).
+// Orphan new → fail; baseline entry that is no longer orphaned → fail (stale).
 import { test } from "node:test";
 import assert from "node:assert";
 import {
@@ -11,13 +11,13 @@ import {
   findCollectorDrift,
 } from "../../scripts/check/check-test-discovery.mjs";
 
-test("globToRegExp: glob top-level NÃO casa subdiretório", () => {
+test("globToRegExp: top-level glob does NOT match subdirectory", () => {
   const re = globToRegExp("tests/unit/*.test.ts");
   assert.equal(re.test("tests/unit/foo.test.ts"), true);
   assert.equal(re.test("tests/unit/authz/routeGuard.test.ts"), false);
 });
 
-test("globToRegExp: glob recursivo ** casa subdiretórios em qualquer profundidade", () => {
+test("globToRegExp: recursive glob ** matches subdirectories at any depth", () => {
   const re = globToRegExp("tests/unit/**/*.test.ts");
   assert.equal(re.test("tests/unit/authz/routeGuard.test.ts"), true);
   assert.equal(re.test("tests/unit/a/b/c.test.ts"), true);
@@ -31,12 +31,12 @@ test("globToRegExp: braces {ts,tsx} expandem alternativas", () => {
   assert.equal(re.test("src/lib/bar.test.js"), false);
 });
 
-test("globToRegExp: * não atravessa separador de diretório", () => {
+test("globToRegExp: * does not cross directory separator", () => {
   const re = globToRegExp("tests/unit/*.test.ts");
   assert.equal(re.test("tests/unit/sub/deep.test.ts"), false);
 });
 
-test("findOrphans: arquivo em subdir é órfão sob glob top-level; coberto sob recursivo", () => {
+test("findOrphans: file in subdir is orphaned under top-level glob; covered under recursive", () => {
   const files = ["tests/unit/top.test.ts", "tests/unit/authz/routeGuard.test.ts"];
   assert.deepEqual(findOrphans(files, ["tests/unit/*.test.ts"]), [
     "tests/unit/authz/routeGuard.test.ts",
@@ -44,7 +44,7 @@ test("findOrphans: arquivo em subdir é órfão sob glob top-level; coberto sob 
   assert.deepEqual(findOrphans(files, ["tests/unit/**/*.test.ts"]), []);
 });
 
-test("findOrphans: múltiplos collectors — basta UM casar", () => {
+test("findOrphans: multiple collectors — just ONE match", () => {
   const files = ["tests/unit/autoCombo/scoring.test.ts"];
   const globs = ["tests/unit/*.test.ts", "tests/unit/autoCombo/**/*.test.ts"];
   assert.deepEqual(findOrphans(files, globs), []);
@@ -57,22 +57,22 @@ test("findOrphans: exclude wins within its collector, but not over another runne
   assert.deepEqual(findOrphans([file], [ui, { glob: file, exclude: [] }]), []);
 });
 
-test("evaluateAgainstBaseline: órfão novo é flagado; órfão congelado passa", () => {
+test("evaluateAgainstBaseline: new orphan is flagged; frozen orphan passes", () => {
   const { newOrphans, stale } = evaluateAgainstBaseline(
-    ["tests/unit/novo/a.test.ts", "tests/unit/velho/b.test.ts"],
+    ["tests/unit/new/a.test.ts", "tests/unit/old/b.test.ts"],
     ["tests/unit/velho/b.test.ts"]
   );
   assert.deepEqual(newOrphans, ["tests/unit/novo/a.test.ts"]);
   assert.deepEqual(stale, []);
 });
 
-test("evaluateAgainstBaseline: entrada congelada que deixou de ser órfã é STALE (remova)", () => {
+test("evaluateAgainstBaseline: frozen input no longer orphaned is STALE (remove)", () => {
   const { newOrphans, stale } = evaluateAgainstBaseline([], ["tests/unit/religado/c.test.ts"]);
   assert.deepEqual(newOrphans, []);
   assert.deepEqual(stale, ["tests/unit/religado/c.test.ts"]);
 });
 
-test("findCollectorDrift: glob declarado deve aparecer textualmente em TODAS as fontes dele", () => {
+test("findCollectorDrift: declared glob must appear verbatim in ALL its sources", () => {
   const collectors = [
     { glob: "tests/unit/*.test.ts", sources: ["package.json", ".github/workflows/ci.yml"] },
   ];

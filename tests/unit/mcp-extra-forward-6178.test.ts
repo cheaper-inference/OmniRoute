@@ -18,10 +18,10 @@ import assert from "node:assert/strict";
 // call. If `extra` is dropped, the caller resolves to "anonymous", the store key
 // misses, and retrieval errors out.
 
-// A precondição deste teste é que NÃO exista um principal de API key resolvível: ele
+// The precondition of this test is that there is NO resolvable API key: it
 // prova que o `extra` chega ao handler comparando o principal derivado de `clientId`. Com
 // `OMNIROUTE_API_KEY` no shell, `resolveMcpCallerApiKeyId()` resolve primeiro e mascara
-// exatamente o que o teste mede — red fantasma local que não reproduz no CI.
+// exactly what the test measures — local ghost red that doesn't reproduce on the CI.
 const ORIGINAL_OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY;
 const ORIGINAL_ROUTER_API_KEY = process.env.ROUTER_API_KEY;
 delete process.env.OMNIROUTE_API_KEY;

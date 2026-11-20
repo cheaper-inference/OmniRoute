@@ -311,7 +311,7 @@ test("pace draw: decimal mirror keeps the 5.1%-remaining account ahead of a 4% p
   assertOrder(await draw(targets, { quotaWeightedScoring: "pace" }, 0.5), targets);
 });
 
-test("pace window union: decimal mirror representative is stable across map order", async () => {
+test("pace window union: decimal representative mirror is stable across map order", async () => {
   const entries = [
     ["weekly (fraction)", { percentUsed: 0.949, resetAt: resetAt(24) }],
     ["weekly (percent)", { percentUsed: 94.9, resetAt: resetAt(24) }],

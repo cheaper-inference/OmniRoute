@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — dynamic per-SNI certificate authority for the TPROXY capture
+ * Phase 3 / Epic A — dynamic per-SNI certificate authority for the TPROXY capture
  * mode. The legacy MITM cert is a single static self-signed cert (DNS-spoof of
  * known hosts); TPROXY intercepts ARBITRARY hosts, so it needs a local CA that
  * issues a leaf cert per SNI hostname on demand (cached). Built on `selfsigned`

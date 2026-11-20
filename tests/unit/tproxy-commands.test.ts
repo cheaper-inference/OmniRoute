@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — TPROXY command builder (OUTPUT-based recipe).
+ * Phase 3 / Epic A — TPROXY command builder (OUTPUT-based recipe).
  *
  * The recipe was validated end-to-end on the VPS (kernel 6.8.0): a local
  * outbound connection to a test port was marked in OUTPUT, rerouted to local
@@ -7,7 +7,7 @@
  * listener (client CONNECTED, original destination preserved). These tests pin
  * the exact commands + the invariant that revert is the precise inverse of
  * apply, in reverse order (a leftover mangle rule after a crash is the failure
- * Fase 1 prevents). Commands are {bin, args[]} for execFile — never a shell
+ * Phase 1 prevents). Commands are {bin, args[]} ​​for execFile — never a shell
  * string (Hard Rule #13).
  */
 import test from "node:test";

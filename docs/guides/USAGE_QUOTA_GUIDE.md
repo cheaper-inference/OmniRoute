@@ -175,7 +175,7 @@ For any date range, the analytics layer computes:
 | ---------------------- | ------------------------------------------------------ |
 | **Summary cards**      | Total requests, total cost, total tokens, success rate |
 | **Daily trend chart**  | Cost + tokens per day, stacked by model                |
-| **Activity heatmap**   | Hour-of-day × day-of-week grid, color = request count  |
+| **Activity heatmap** | Hour-of-day × day-of-week grid, color = request count |
 | **Model breakdown**    | Pie chart of cost by model                             |
 | **Provider breakdown** | Bar chart of requests by provider                      |
 | **Top API keys**       | Table of top 10 keys by cost                           |

@@ -1,6 +1,6 @@
 /**
  * #5103 — Two startup log lines in the SQLite driver-fallback path were written in
- * pt-BR ("Pré-inicializando sql.js…", "Drivers síncronos indisponíveis…"), mixing
+ * pt-BR ("Pre-initializing sql.js…", "Synchronous drivers unavailable…"), mixing
  * languages in the server logs. All user-facing server log strings must be English.
  *
  * Guard: scan the DB driver-fallback files for `console.*("…")` string literals that
@@ -22,7 +22,7 @@ const DB_DRIVER_FILES = [
   "src/lib/db/adapters/driverFactory.ts",
 ];
 
-// Latin-1 Supplement accented letters used by pt-BR/es/etc. (á à â ã é ê í ó ô õ ú ç …).
+// Latin-1 Supplement accented letters used by pt-BR/es/etc. (á à ã é ê í ó ô õ ú ç …).
 const ACCENTED = /[À-ÿ]/;
 // Match the string argument(s) of a console.{warn,error,log,info} call (single line).
 const CONSOLE_CALL = /console\.(?:warn|error|log|info)\s*\(([^\n]*)\)/g;

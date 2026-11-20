@@ -58,7 +58,7 @@ test("derives one skill per unique online CLI profile + one per declared OASF sk
   assert.match(claude.description, /2 runner/);
   assert.match(claude.description, /claude-sonnet-5/);
   assert.ok(claude.tags.includes("conductor"));
-  // runner offline não anuncia nada (gemini/secret ausentes)
+  // offline runner doesn't announce anything (gemini/secret missing)
   assert.ok(!ids.some((i) => i.includes("gemini") || i.includes("secret")));
 });
 
@@ -73,7 +73,7 @@ test("caches for the TTL and refetches after it expires (injectable clock)", asy
   assert.equal(calls.length, 2, "TTL vencido: refetch");
 });
 
-test("hub offline/erro → [] (o card omite a seção, nunca quebra)", async () => {
+test("hub offline/error → [] (card omits section, never breaks)", async () => {
   const failing = (async () => {
     throw new Error("ECONNREFUSED");
   }) as unknown as typeof fetch;
@@ -89,7 +89,7 @@ test("sem CONDUCTOR_HUB_URL → [] sem nem tentar fetch", async () => {
   assert.equal(calls.length, 0);
 });
 
-test("shape inválido do hub → [] (input não confiável)", async () => {
+test("invalid hub shape → [] (untrusted input)", async () => {
   const { impl } = fakeFetch({ nao: "é array" });
   assert.deepEqual(await getFleetSkills({ fetchImpl: impl }), []);
 });

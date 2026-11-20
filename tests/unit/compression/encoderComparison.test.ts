@@ -21,14 +21,14 @@ test("agrega sizes e elege winner por tokens", () => {
   assert.equal(sizes[cmp.winner], min);
 });
 
-test("sem array compactável → zerado, sem winner espúrio", () => {
+test("no compressible array → zero, no spurious winner", () => {
   const cmp = summarizeEncoderCandidates([{ role: "user", content: "oi" }], 8, byteLen);
   assert.equal(cmp.arraysCompared, 0);
   assert.equal(cmp.json.bytes, 0);
   assert.equal(cmp.gcf.bytes, 0);
 });
 
-test("system messages são ignoradas (igual ao smartcrusher)", () => {
+test("system messages are ignored (same as smartcrusher)", () => {
   const arr = JSON.stringify(Array.from({ length: 20 }, (_, i) => ({ id: i })));
   const cmp = summarizeEncoderCandidates([{ role: "system", content: arr }], 8, byteLen);
   assert.equal(cmp.arraysCompared, 0);

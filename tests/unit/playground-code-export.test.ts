@@ -105,7 +105,7 @@ test("chat.completions: uses messages when provided", () => {
 
 // ── completions ────────────────────────────────────────────────────────────────
 
-test("completions × all languages: security + path", () => {
+test("completions × all languages: security path", () => {
   const state = {
     endpoint: "completions" as const,
     baseUrl: "http://localhost:20128",
@@ -120,7 +120,7 @@ test("completions × all languages: security + path", () => {
 
 // ── embeddings ─────────────────────────────────────────────────────────────────
 
-test("embeddings × all languages: security + path", () => {
+test("embeddings × all languages: security path", () => {
   const state = {
     endpoint: "embeddings" as const,
     baseUrl: "http://localhost:20128",
@@ -136,7 +136,7 @@ test("embeddings × all languages: security + path", () => {
 
 // ── images ─────────────────────────────────────────────────────────────────────
 
-test("images × all languages: security + path", () => {
+test("images × all languages: security path", () => {
   const state = {
     endpoint: "images" as const,
     baseUrl: "http://localhost:20128",
@@ -152,7 +152,7 @@ test("images × all languages: security + path", () => {
 
 // ── search ─────────────────────────────────────────────────────────────────────
 
-test("search × all languages: security + path + query", () => {
+test("search × all languages: security path query", () => {
   const state = {
     endpoint: "search" as const,
     baseUrl: "http://localhost:20128",
@@ -171,7 +171,7 @@ test("search × all languages: security + path + query", () => {
 
 // ── web.fetch ─────────────────────────────────────────────────────────────────
 
-test("web.fetch × all languages: security + path + url", () => {
+test("web.fetch × all languages: security path url", () => {
   const state = {
     endpoint: "web.fetch" as const,
     baseUrl: "http://localhost:20128",
@@ -189,7 +189,7 @@ test("web.fetch × all languages: security + path + url", () => {
 
 // ── rerank ─────────────────────────────────────────────────────────────────────
 
-test("rerank × all languages: security + path + query", () => {
+test("rerank × all languages: security path query", () => {
   const state = {
     endpoint: "rerank" as const,
     baseUrl: "http://localhost:20128",
@@ -206,7 +206,7 @@ test("rerank × all languages: security + path + query", () => {
 
 // ── audio.transcriptions ──────────────────────────────────────────────────────
 
-test("audio.transcriptions × all languages: security + path", () => {
+test("audio.transcriptions × all languages: security path", () => {
   const state = {
     endpoint: "audio.transcriptions" as const,
     baseUrl: "http://localhost:20128",
@@ -221,7 +221,7 @@ test("audio.transcriptions × all languages: security + path", () => {
 
 // ── audio.speech ──────────────────────────────────────────────────────────────
 
-test("audio.speech × all languages: security + path", () => {
+test("audio.speech × all languages: security path", () => {
   const state = {
     endpoint: "audio.speech" as const,
     baseUrl: "http://localhost:20128",
@@ -237,7 +237,7 @@ test("audio.speech × all languages: security + path", () => {
 
 // ── moderations ───────────────────────────────────────────────────────────────
 
-test("moderations × all languages: security + path", () => {
+test("moderations × all languages: security path", () => {
   const state = {
     endpoint: "moderations" as const,
     baseUrl: "http://localhost:20128",
@@ -408,7 +408,7 @@ test("audio.speech: defaults model and prompt when not provided", () => {
 
 // ── responses (D4-rev2) ───────────────────────────────────────────────────────
 
-test("responses × all languages: security + path", () => {
+test("responses × all languages: security path", () => {
   const state = {
     endpoint: "responses" as const,
     baseUrl: "http://localhost:20128",
@@ -440,7 +440,7 @@ test("responses: defaults model and input when not provided", () => {
 
 // ── video (D4-rev2) ───────────────────────────────────────────────────────────
 
-test("video × all languages: security + path", () => {
+test("video × all languages: security path", () => {
   const state = {
     endpoint: "video" as const,
     baseUrl: "http://localhost:20128",
@@ -469,7 +469,7 @@ test("video: defaults when no model/prompt provided", () => {
 
 // ── music (D4-rev2) ───────────────────────────────────────────────────────────
 
-test("music × all languages: security + path", () => {
+test("music × all languages: security path", () => {
   const state = {
     endpoint: "music" as const,
     baseUrl: "http://localhost:20128",

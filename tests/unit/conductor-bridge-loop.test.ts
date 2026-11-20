@@ -24,8 +24,8 @@ test.afterEach(async () => {
   }
 });
 
-// Formato REAL do SSE do hub (verificado ao vivo 2026-07-22): id/type nos campos do
-// frame; o `data:` carrega só {ts, payload}.
+// HUB SSE REAL format (verified live 2026-07-22): id/type in the hub fields
+//frame; `data:` only loads {ts, payload}.
 const sse = (id: number, type: string, payload: Record<string, unknown>) =>
   `id: ${id}\nevent: ${type}\ndata: ${JSON.stringify({ ts: "2026-07-22T00:00:00Z", payload })}\n\n`;
 
@@ -46,7 +46,7 @@ function fakeHub(script: { events: string[]; thenClose: boolean }[]): Promise<Fa
     res.writeHead(200, { "content-type": "text/event-stream" });
     for (const e of step.events) res.write(e);
     if (step.thenClose) res.end();
-    // senão: conexão fica aberta (o teste encerra via bridge.stop() + server.close())
+    // otherwise: connection remains open (test ends via bridge.stop() + server.close())
   });
   servers.push(server);
   return new Promise((resolve) => {

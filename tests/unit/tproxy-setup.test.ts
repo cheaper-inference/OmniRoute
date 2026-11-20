@@ -1,12 +1,12 @@
 /**
- * Fase 3 / Epic A — TPROXY setup layer (execFile wiring over the command builder).
+ * Phase 3 / Epic A — TPROXY setup layer (execFile wiring over the command builder).
  *
  * The builder (commands.ts) was validated against a real kernel on the VPS
  * (apply/revert accepted, exact-inverse, zero impact on non-targeted traffic —
  * see PR #4139). This layer adds the transactional runner: apply runs the
  * commands in order and, if any step fails mid-way, runs a best-effort full
  * revert so a partial apply never leaves firewall/routing state behind (the
- * Fase 1 / repairMitm crash-safe invariant). revert is itself idempotent /
+ * Phase 1 / repairMitm crash-safe invariant). revert is itself idempotent /
  * best-effort. The command runner is injected so this is unit-testable without
  * root; the real runner uses execFile (Hard Rule #13 — args array, no shell).
  */

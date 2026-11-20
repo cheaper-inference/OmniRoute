@@ -246,11 +246,11 @@ describe("expiry-first account rotation", () => {
     };
     const weighted = scoreExpiryFirstQuota(quota, config, NOW, metrics).score;
 
-    // Weekly sets the deadline (#18541): min(50% usable, 75% - 1%/h × 10h) × 2 / 10h = 0.1.
+    // Weekly sets the deadline (
     // The session only caps usable; its own reset is not where quota is lost.
     assert.ok(Math.abs(weighted - 0.1) < 1e-9, `expected 0.1, received ${weighted}`);
 
-    // With no weekly reset the session is the deadline: (50% - 10%/h × 1h) × 2 / 1h = 0.8.
+    
     const sessionOnlyDeadline = {
       windows: { ...quota.windows, weekly: { percentUsed: 0.25, resetAt: null } },
     };

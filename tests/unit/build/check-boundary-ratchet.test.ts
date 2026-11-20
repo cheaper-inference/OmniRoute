@@ -310,7 +310,7 @@ test("evaluateBoundaryRatchetRelative: ceiling is max(baseline, base); inherited
   assert.equal(inherited.status, "ok");
   assert.equal(inherited.exitCode, 0);
   assert.match(inherited.message, /head 776, base 776, baseline ceiling 774/);
-  assert.match(inherited.warning ?? "", /base drift herdado: 2 acima do teto — não é desta PR/);
+  assert.match(inherited.warning ?? "", /base drift inherited: 2 above the ceiling — not from this PR/);
 
   // (b) head > base → FAIL even though the base itself is already over the ceiling.
   const grew = evaluateBoundaryRatchetRelative(777, 776, 774);
@@ -396,7 +396,7 @@ test("--base-ref: head == base above the ceiling passes with the inherited-drift
       const out = res.stdout + res.stderr;
       assert.match(out, /\[boundary\] RATCHET OK/);
       assert.match(out, /head 2, base 2, baseline ceiling 1/);
-      assert.match(out, /base drift herdado: 1 acima do teto — não é desta PR/);
+      assert.match(out, /base drift inherited: 1 above the ceiling — not from this PR/);
     }
   );
 });

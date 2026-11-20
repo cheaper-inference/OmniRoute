@@ -15,7 +15,7 @@ const ORIGINAL_FETCH = globalThis.fetch;
 const cloudSyncModuleUrl = pathToFileURL(path.join(process.cwd(), "src/lib/cloudSync.ts")).href;
 
 process.env.DATA_DIR = TEST_DATA_DIR;
-// FASE-01: API_KEY_SECRET is required for CRC operations (no hardcoded fallback)
+// PHASE-01: API_KEY_SECRET is required for CRC operations (no hardcoded fallback)
 if (!process.env.API_KEY_SECRET) {
   process.env.API_KEY_SECRET = "test-cloud-sync-secret-" + Date.now();
 }

@@ -29,7 +29,7 @@ test.after(() => {
   } catch {}
 });
 
-test("contexts.mjs pode ser importado sem erro", async () => {
+test("contexts.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/contexts.mjs");
   assert.equal(typeof mod.loadContexts, "function");
   assert.equal(typeof mod.saveContexts, "function");
@@ -37,7 +37,7 @@ test("contexts.mjs pode ser importado sem erro", async () => {
   assert.equal(typeof mod.configPath, "function");
 });
 
-test("loadContexts retorna config padrão quando arquivo não existe", async () => {
+test("loadContexts returns default config when file does not exist", async () => {
   const { loadContexts } = await import("../../bin/cli/contexts.mjs");
   const cfg = loadContexts();
   assert.ok(cfg.contexts);
@@ -46,7 +46,7 @@ test("loadContexts retorna config padrão quando arquivo não existe", async () 
   assert.equal(cfg.currentContext, "default");
 });
 
-test("saveContexts persiste e loadContexts relê", async () => {
+test("saveContexts persist and loadContexts reread", async () => {
   const { loadContexts, saveContexts } = await import("../../bin/cli/contexts.mjs");
   const cfg = loadContexts();
   cfg.contexts.test = { baseUrl: "http://test:9999", apiKey: null };
@@ -87,7 +87,7 @@ test("resolveActiveContext retorna contexto ativo", async () => {
   assert.equal(ctx.baseUrl, "https://prod.example.com");
 });
 
-test("resolveActiveContext aceita override pontual", async () => {
+test("resolveActiveContext accepts occasional override", async () => {
   const { resolveActiveContext, loadContexts, saveContexts } =
     await import("../../bin/cli/contexts.mjs");
   const cfg = loadContexts();
@@ -97,7 +97,7 @@ test("resolveActiveContext aceita override pontual", async () => {
   assert.equal(ctx.baseUrl, "http://staging:20128");
 });
 
-test("saveContextsSecure guarda tokens no keychain e resolve pela referência", async () => {
+test("saveContextsSecure stores tokens in the keychain and resolves by reference", async () => {
   const {
     loadContexts,
     saveContextsSecure,
@@ -135,7 +135,7 @@ test("saveContextsSecure guarda tokens no keychain e resolve pela referência", 
   await setContextKeychainBackendForTests(null);
 });
 
-test("contexts.mjs (commands) pode ser importado sem erro", async () => {
+test("contexts.mjs (commands) can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/contexts.mjs");
   assert.equal(typeof mod.registerContexts, "function");
 });

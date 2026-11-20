@@ -329,7 +329,7 @@ describe("AgentSkillsPageClient", () => {
     expect(coverageBar).not.toBeNull();
 
     const progressBars = container.querySelectorAll("[role='progressbar']");
-    // A ordem de render em CoverageBar e api -> config -> cli, entao o indice do CLI
+    // The render order in CoverageBar and api -> config -> cli, then the CLI index
     // acompanha a barra de config; sem isso [1] passaria a apontar para config e a
     // assercao do CLI ficaria verde medindo a barra errada.
     expect(progressBars.length).toBe(3);
@@ -439,8 +439,8 @@ describe("CoverageBar", () => {
     });
 
     const bars = container.querySelectorAll("[role='progressbar']");
-    // api -> config -> cli. A barra de config entrou no MEIO, entao o indice do CLI
-    // desloca junto; conferir as tres aqui e o que impede um indice errado de passar
+    // api -> config -> cli. The config bar entered the MIDDLE, then the CLI index
+    // move along; check all three here and what prevents a wrong index from passing
     // despercebido medindo a barra vizinha.
     expect(bars.length).toBe(3);
 

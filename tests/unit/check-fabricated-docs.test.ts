@@ -129,7 +129,7 @@ test("formatHumanReport: groups findings by kind", () => {
   assert.match(out, /onFake/);
 });
 
-// ─── Hardening: precision fixes (QG v2 Fase 9 T9) ───────────────────────────
+// ─── Hardening: precision fixes (QG v2 Phase 9 T9) ───────────────────────────
 //
 // Each test runs the FULL pipeline (index + scan) over a fixture repo so it
 // exercises the real heuristic, not a stubbed index.

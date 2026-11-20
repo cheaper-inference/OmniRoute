@@ -1,5 +1,5 @@
 /**
- * Task B3 (Orchestration Canvas Fase 2): `getFleetSnapshot` mirrors Conductor fleet task
+ * Task B3 (Orchestration Canvas Phase 2): `getFleetSnapshot` mirrors Conductor fleet task
  * transitions into the `agents` WS channel by diffing each snapshot against a module-level
  * cache of the last known status per task — no new poller, piggybacking on the existing
  * dashboard poll that already calls `getFleetSnapshot`. Covers:
@@ -103,7 +103,7 @@ test("fleet mirror: status mudado emite exatamente 1 evento agent.task.updated",
   }
 });
 
-test("fleet mirror: foto idêntica à anterior não emite nada", async () => {
+test("fleet mirror: photo identical to the previous one emits nothing", async () => {
   await getFleetSnapshot({
     fetchImpl: snapshotWith([hubTask("t_1", "working"), hubTask("t_2", "queued")]),
   });
@@ -123,7 +123,7 @@ test("fleet mirror: foto idêntica à anterior não emite nada", async () => {
   }
 });
 
-test("fleet mirror: foto offline entre duas fotos não zera o cache — próxima foto só emite o delta real", async () => {
+test("fleet mirror: offline photo between two photos does not reset the cache — next photo only emits the real delta", async () => {
   // Seed.
   await getFleetSnapshot({
     fetchImpl: snapshotWith([hubTask("t_1", "working"), hubTask("t_2", "queued")]),

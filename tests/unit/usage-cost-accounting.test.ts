@@ -75,7 +75,7 @@ test("a reported USD cost persists for any provider while token-only usage stays
     { provider_cost_usd: 0.01, provider_credits: null },
     { provider_cost_usd: null, provider_credits: null },
   ]);
-  // 0.01 reported + 200k tokens × $1/M priced normally; the reported row's 100k
+  // 0.01 reported 200k tokens × $1/M priced normally; the reported row's 100k
   // tokens are not priced again.
   assert.equal((await getApiKeyUsageLimitStatus({ id: key.id })).dailySpentUsd, 0.21);
   assert.ok(Math.abs((await getUsageStats()).byApiKey[`id:${key.id}`].cost - 0.21) < 1e-9);

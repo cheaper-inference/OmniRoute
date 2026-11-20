@@ -183,7 +183,7 @@ describe("computeMetrics", () => {
   });
 
   describe("costUsd", () => {
-    it("computes cost: (tokensIn × inPer1k + tokensOut × outPer1k) / 1000", () => {
+    it("computes cost: (tokensIn × inPer1k tokensOut × outPer1k) / 1000", () => {
       const m = computeMetrics({
         startedAt: BASE_START,
         firstChunkAt: BASE_FIRST,

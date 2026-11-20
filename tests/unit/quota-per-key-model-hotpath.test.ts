@@ -2,7 +2,7 @@
  * tests/unit/quota-per-key-model-hotpath.test.ts
  *
  * Integration test for the per-(key, model) cap END-TO-END through the actual
- * hot-path hooks (Fase 3 #7 plumbing). Unlike quota-per-key-model.test.ts (which
+ * hot-path hooks (Phase 3 #7 plumbing). Unlike quota-per-key-model.test.ts (which
  * drives recordConsumption/enforceQuotaShare directly), this proves the `model`
  * field actually flows through:
  *
@@ -19,7 +19,7 @@
  * If the hot-path hook ever drops `model` again (feature goes inert), the block
  * assertion fails — guarding the plumbing this PR adds.
  *
- * Part of: Group B — Quota Sharing Engine, Fase 3 #7.
+ * Part of: Group B — Quota Sharing Engine, Phase 3 #7.
  */
 
 import test from "node:test";

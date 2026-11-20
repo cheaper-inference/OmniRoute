@@ -25,8 +25,8 @@ function completeOutput(cognitive = 80, cyclomatic = 20, cyclomaticDrift = false
   return [
     `complexity=${cyclomatic}`,
     `cognitiveComplexity=${cognitive}`,
-    `[complexity] ${cyclomaticDrift ? "REGRESSÃO" : "OK"} — ${cyclomatic} violações ${cyclomaticDrift ? "> baseline 10" : "(baseline 20)"}`,
-    `[cognitive-complexity] ${cognitive > 100 ? "REGRESSÃO" : "OK"} — ${cognitive} violações ${cognitive > 100 ? "> baseline 100" : "(baseline 100)"}`,
+    `[complexity] ${cyclomaticDrift ? "REGRESSION" : "OK"} — ${cyclomatic} violations ${cyclomaticDrift ? "> baseline 10" : "(baseline 20)"}`,
+    `[cognitive-complexity] ${cognitive > 100 ? "REGRESSION" : "OK"} — ${cognitive} violations ${cognitive > 100 ? "> baseline 100" : "(baseline 100)"}`,
   ].join("\n");
 }
 
@@ -44,8 +44,8 @@ for (const code of [1, 2, 42, 124, 130, 143]) {
 
 for (const out of [
   "",
-  "complexity=20\n[complexity] OK — 20 violações (baseline 20)",
-  "cognitiveComplexity=80\n[cognitive-complexity] OK — 80 violações (baseline 100)",
+  "complexity=20\n[complexity] OK — 20 violations (baseline 20)",
+  "cognitiveComplexity=80\n[cognitive-complexity] OK — 80 violations (baseline 100)",
   "complexity=20\ncognitiveComplexity=80",
   completeOutput().replace("cognitiveComplexity=80", "cognitiveComplexity=NaN"),
   completeOutput().replace("complexity=20", "complexity=20.5"),

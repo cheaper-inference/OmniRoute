@@ -3,18 +3,18 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-// Padrão budget-route-auth: prova pelo fonte que o gate de auth vem ANTES de qualquer uso do proxy.
+// Budget-route-auth pattern: proves from the source that the auth gate comes BEFORE any use of the proxy.
 const ROUTES = [
   "src/app/api/conductor/fleet/route.ts",
   "src/app/api/conductor/tasks/[id]/route.ts",
   "src/app/api/conductor/tasks/[id]/cancel/route.ts",
-  // Rota de criação (repeat do drawer): coberta aqui pelo mesmo padrão, em vez de
+  // Creation route (drawer repeat): covered here by the same pattern, instead of
   // duplicar o teste de fonte dentro de `conductor-create-route.test.ts`.
   "src/app/api/conductor/tasks/route.ts",
 ];
 
 for (const route of ROUTES) {
-  test(`${route}: requireManagementAuth antes do proxy ao hub`, () => {
+  test(`${route}: requireManagementAuth before proxy to hub`, () => {
     const src = fs.readFileSync(path.join(process.cwd(), route), "utf8");
     const authAt = src.indexOf("requireManagementAuth(");
     assert.ok(authAt > 0, "handler chama requireManagementAuth");

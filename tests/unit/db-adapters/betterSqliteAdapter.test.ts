@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 const { tryOpenSync } = await import("../../../src/lib/db/adapters/driverFactory.ts");
 
 describe("betterSqliteAdapter", () => {
-  test("abre DB in-memory e executa CRUD básico", () => {
+  test("open in-memory DB and perform basic CRUD", () => {
     const adapter = tryOpenSync(":memory:");
     if (!adapter || adapter.driver !== "better-sqlite3") {
       console.log("SKIP: better-sqlite3 não disponível");
@@ -37,7 +37,7 @@ describe("betterSqliteAdapter", () => {
     adapter.close();
   });
 
-  test("transaction envolve operações em bloco atômico", () => {
+  test("transaction involves atomic block operations", () => {
     const adapter = tryOpenSync(":memory:");
     if (!adapter || adapter.driver !== "better-sqlite3") return;
 
@@ -53,14 +53,14 @@ describe("betterSqliteAdapter", () => {
     adapter.close();
   });
 
-  test("driver é 'better-sqlite3'", () => {
+  test("driver is 'better-sqlite3'", () => {
     const adapter = tryOpenSync(":memory:");
     if (!adapter || adapter.driver !== "better-sqlite3") return;
     assert.equal(adapter.driver, "better-sqlite3");
     adapter.close();
   });
 
-  test("transaction com rollback em erro desfaz operações", () => {
+  test("transaction with rollback on error undoes operations", () => {
     const adapter = tryOpenSync(":memory:");
     if (!adapter || adapter.driver !== "better-sqlite3") return;
 
@@ -79,7 +79,7 @@ describe("betterSqliteAdapter", () => {
     adapter.close();
   });
 
-  test("expõe o estado da transação sem vazar o driver bruto", () => {
+  test("exposes the transaction state without leaking the raw driver", () => {
     const adapter = tryOpenSync(":memory:");
     if (!adapter || adapter.driver !== "better-sqlite3") return;
 

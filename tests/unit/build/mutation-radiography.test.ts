@@ -30,9 +30,9 @@ test("classifies unique / redundant / empty test files from killedBy (file-name 
   assert.equal(r["A.test.ts"].class, "unique"); // mata m1 sozinho
   assert.equal(r["A.test.ts"].uniqueKills, 1);
   assert.equal(r["A.test.ts"].sharedKills, 1);
-  assert.equal(r["B.test.ts"].class, "redundant"); // só m2 (compartilhado)
+  assert.equal(r["B.test.ts"].class, "redundant"); // only m2 (shared)
   assert.equal(r["B.test.ts"].uniqueKills, 0);
-  assert.equal(r["C.test.ts"].class, "empty"); // não mata nada
+  assert.equal(r["C.test.ts"].class, "empty"); // doesn't kill anything
 });
 
 // ── id resolution: real Stryker tap-runner reports use numeric test ids in
