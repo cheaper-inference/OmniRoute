@@ -58,6 +58,20 @@ const OLDEST: Row[] = [
   ["123", LEND],
   ["124", LEND_PCT],
 ];
+const INTERMEDIATE: Row[] = [
+  ...OLDEST,
+  ["125", "provider_connection_quota_visibility"],
+  ["126", "reasoning_routing_rules"],
+  ["127", "usage_history_account_identity"],
+  ["128", "auto_candidate_overrides"],
+  ["129", "usage_history_codex_strong_identity"],
+  ["130", "remove_unregistered_qwen_data"],
+  ["131", "proxy_subscriptions"],
+  ["132", "proxy_subscriptions_meta"],
+  ["133", "call_logs_session_tag"],
+  ["134", LEND],
+  ["135", LEND_PCT],
+];
 
 // The runner resolves OMNIROUTE_MIGRATIONS_DIR once, when the module loads, and
 // test:unit:fast shares one module cache across files. A fresh instance keeps this
@@ -129,7 +143,7 @@ function boot(
   const insert = db.prepare("INSERT INTO _omniroute_migrations (version, name) VALUES (?, ?)");
   for (const [version, name] of rows) insert.run(version, name);
   prepare?.(db);
-  return { db, applied: runMigrations(db) };
+  return { db, applied: runMigrations(db as never) };
 }
 
 function ledger(db: BetterSqlite3.Database): Map<string, string> {
@@ -183,4 +197,67 @@ test("oldest downstream ledger: 123/124 are released and the real files apply", 
   assert.equal(ledger(db).get(`legacy-123-${LEND}`), LEND);
   assert.equal(ledger(db).get(`legacy-124-${LEND_PCT}`), LEND_PCT);
   assert.equal(ttl(db), "900000");
+});
+
+test(
+  "intermediate ledger: all four slots release behind already-applied 125-133",
+  { skip },
+  (t) => {
+    const { db, applied } = boot(t, INTERMEDIATE);
+    assert.equal(applied, 4);
+    assertReleased(db);
+    assert.equal([...ledger(db).keys()].filter((v) => v.startsWith("legacy-")).length, 4);
+    assert.equal(ttl(db), "900000");
+  }
+);
+
+test(
+  "healed columns: a schema repaired before the runner does not abort the boot",
+  { skip },
+  (t) => {
+    const { db, applied } = boot(t, INTERMEDIATE, { pingColumns: true, egressColumn: true });
+    assert.equal(applied, 4);
+    assertReleased(db);
+  }
+);
+
+test("existing generic TTL is kept when 124 replays late", { skip }, (t) => {
+  const { db } = boot(t, OLDEST, {}, (d) =>
+    d.exec("INSERT INTO key_value VALUES ('settings','sessionAffinityTtlMs','60000')")
+  );
+  assert.equal(ttl(db), "60000");
+});
+
+test("modern override wins when 135 replays late", { skip }, (t) => {
+  const { db } = boot(t, OLDEST, {}, (d) =>
+    d.exec(
+      "INSERT INTO model_capability_overrides (provider, model_id, override_key, override_value) " +
+        "VALUES ('openai','gpt-x','max_output_tokens','8192')"
+    )
+  );
+  assert.deepEqual(
+    db.prepare("SELECT override_key, override_value FROM model_capability_overrides").all(),
+    [{ override_key: "max_output_tokens", override_value: "8192" }]
+  );
+});
+
+test("second boot applies nothing and moves nothing", { skip }, (t) => {
+  const { db } = boot(t, INTERMEDIATE);
+  const before = [...ledger(db)];
+  assert.equal(runMigrations(db as never), 0);
+  assert.deepEqual([...ledger(db)], before);
+});
+
+test("native ledger is left alone", { skip }, (t) => {
+  const { db, applied } = boot(t, NATIVE, { pingColumns: true, egressColumn: true });
+  assert.equal(applied, 0);
+  assert.deepEqual([...ledger(db)], NATIVE);
+  assert.equal(
+    db
+      .prepare("SELECT COUNT(*) FROM model_capability_overrides WHERE override_key = 'max_token'")
+      .pluck()
+      .get(),
+    1,
+    "135 is recorded as applied and must not replay"
+  );
 });
