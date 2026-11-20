@@ -1,0 +1,1 @@
+- **docs(skills):** Agent skills now name real routes, MCP tools, headers and error codes (web search/fetch, model discovery, quota, budget, combos, MCP memory/skills, compression opt-out) and link to the `cheaper-inference/OmniRoute` repository. ([#19635](https://github.com/cheaper-inference/OmniRoute/pull/19635))

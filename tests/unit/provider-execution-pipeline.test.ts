@@ -64,6 +64,7 @@ function makeInput(opts: {
   getCurrentConnectionId?: () => string | undefined;
   refreshCredentials?: PipelineConnectionContext["refreshCredentials"];
   onCredentialsRefreshed?: PipelineConnectionContext["onCredentialsRefreshed"];
+  admitRotation?: PipelineConnectionContext["admitRotation"];
   getNextFamilyFallback?: ProviderExecutionPipelineInput["getNextFamilyFallback"];
   state?: Partial<PipelineStateHooks>;
 }): ProviderExecutionPipelineInput {
@@ -101,6 +102,7 @@ function makeInput(opts: {
     onCredentialsRefreshed: opts.onCredentialsRefreshed ?? (() => {}),
     assertManagedLeaseFence: () => {},
     refreshCredentials: opts.refreshCredentials,
+    admitRotation: opts.admitRotation,
     getProviderCredentials:
       opts.getProviderCredentials ??
       (async () => {
@@ -200,6 +202,83 @@ test("initial Antigravity 422 gcp_project_required: rotation resolver>=1 and suc
   if (outcome.kind === "response") {
     assert.equal(outcome.connectionId, "agy-b");
     assert.equal(outcome.response.status, 200);
+  }
+});
+
+test("Codex 429 rotation is skipped when admitRotation refuses the next connection", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const admitted: string[] = [];
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: false },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      return makeAttempt({ error: { message: "rate limited", type: "rate_limit_error" } }, 429);
+    },
+    // Honors the exclusion list like the real selector, so the loop stays bounded.
+    getProviderCredentials: (async (_p, _s, _a, _m, options) =>
+      options?.excludeConnectionIds?.includes("conn-b")
+        ? null
+        : {
+            connectionId: "conn-b",
+            allRateLimited: false,
+          }) as PipelineConnectionContext["getProviderCredentials"],
+    admitRotation: async (nextConnectionId) => {
+      admitted.push(nextConnectionId);
+      return false;
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.deepEqual(admitted, ["conn-b"], "admission is asked for the rotation target");
+  assert.equal(sendCount, 1, "a refused rotation must not send on the next connection");
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    assert.equal(outcome.result.status, 429, "the original upstream error is returned");
+    assert.equal(outcome.connectionId, "conn-a");
+  }
+});
+
+test("Antigravity 422 rotation is skipped when admitRotation refuses the next connection", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const admitted: string[] = [];
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: false },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () => {
+      sendCount += 1;
+      return makeAttempt(
+        { error: { message: "gcp_project_required", type: "invalid_request" } },
+        422
+      );
+    },
+    // Honors the exclusion list like the real selector, so the loop stays bounded.
+    getProviderCredentials: (async (_p, _s, _a, _m, options) =>
+      options?.excludeConnectionIds?.includes("agy-b")
+        ? null
+        : {
+            connectionId: "agy-b",
+            allRateLimited: false,
+          }) as PipelineConnectionContext["getProviderCredentials"],
+    admitRotation: async (nextConnectionId) => {
+      admitted.push(nextConnectionId);
+      return false;
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.deepEqual(admitted, ["agy-b"], "admission is asked for the rotation target");
+  assert.equal(sendCount, 1, "a refused rotation must not send on the next connection");
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    assert.equal(outcome.result.status, 422, "the original upstream error is returned");
+    assert.equal(outcome.connectionId, "agy-a");
   }
 });
 

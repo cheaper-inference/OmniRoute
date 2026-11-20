@@ -26,31 +26,26 @@ registry URL එකක් වෙත යොමු කළ හැකි අතර, 
 මූලාශ්රයකින් මෙම මාර්ග වෙත ළඟා විය නොහැක. බලන්න
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## මෙය එක්ව ක්රියා කරන ආකාරය
+## එය Together ට ගැලපෙන ආකාරය
 
 ```
-උපකරණ පුවරුව (/dashboard/plugins)
-  ├─ "ස්ථාපිත" ටැබය    → GET /api/plugins            (listPlugins)
-  │                       POST /api/plugins/scan      (pluginManager.scan)
-  │                       POST /api/plugins/{name}/activate|deactivate
-  │                       DELETE /api/plugins/{name}   (අස්ථාපනය)
-  └─ "වෙළඳපොළ" ටැබය   → GET /api/plugins/marketplace
-                           → listMarketplacePlugins()
-                             ├─ අභිරුචි URL එකක් නැත → අන්තර්නිර්මිත SEED_REGISTRY
-                             └─ අභිරුචි URL → isSafeMarketplaceUrl() SSRF ආරක්ෂකය
-                                           → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Registry ස්තරය** — `src/lib/plugins/marketplace.ts`: නාමාවලිය ලැයිස්තුගත කරයි /
-  සොයයි; කිසියම් අසාර්ථකත්වයක් සිදු වුවහොත් seed registry එක භාවිත කරයි.
-- **ජීවන චක්ර ස්තරය** — `src/lib/plugins/manager.ts` (`pluginManager` singleton):
-  ස්ථාපනය, උත්ශ්රේණිගත කිරීම, සක්රිය කිරීම, අක්රිය කිරීම, අස්ථාපනය, ස්කෑන් කිරීම, ආරම්භක පූරණය.
-- **මැනිෆෙස්ට් ස්තරය** — `src/lib/plugins/manifest.ts`: `plugin.json` සඳහා
-  Zod schema + පෙරනිමි.
-- **ස්කෑනරය** — `src/lib/plugins/scanner.ts`: ප්ලගින නාමාවලිය යටතේ තැටියේ ඇති
-  ප්ලගින සොයාගනී.
-- **පූරකය** — `src/lib/plugins/loader.ts`: සෑම ප්ලගිනයක්ම හුදකලා
-  child process එකක ආරම්භ කර IPC හරහා hook ඇමතුම් අතරමැදි කරයි.
+- **රෙජිස්ට්රි ස්ථරය** — `src/lib/plugins/marketplace.ts`: කිසියම් අසාර්ථක වීමක් මත නැවත බීජ රෙජිස්ට්‍රිය වෙත වැටෙන නාමාවලිය ලැයිස්තුගත කරයි/සොයනවා.
+- **ජීවන චක්රය ස්ථරය** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): ස්ථාපනය, උත්ශ්‍රේණි කිරීම, සක්‍රිය කිරීම, අක්‍රිය කිරීම, අස්ථාපනය කිරීම, ස්කෑන් කිරීම, ආරම්භක භාරය.
+- **මැනිෆෙස්ට් ස්ථරය** — `src/lib/plugins/manifest.ts`: `plugin.json` සඳහා Zod schema + පෙරනිමිය.
+- **ස්කෑනර්** — `src/lib/plugins/scanner.ts`: ප්ලගින නාමාවලිය යටතේ තැටියේ ඇති ප්ලගීන සොයා ගනී.
+- **ලෝඩරය** — `src/lib/plugins/loader.ts`: සෑම ප්ලගිනයක්ම වෙනම Node.js ළමා ක්‍රියාවලියක් තුළ ඇති කරන අතර තැරැව්කරුවන් IPC හරහා ඇමතුම් ලබා ගනී. දරුවා වැලිපිල්ලක් නොවේ (පහත "ප්ලගින ක්‍රියාත්මක කිරීමේ හුදකලාව" බලන්න).
 
 ## වෙළඳපොළ නාමාවලිය
 
@@ -87,34 +82,31 @@ registry එක වෙත ළඟා විය නොහැකි නම්, `200
 
 ## REST API
 
-සියලුම endpoints සඳහා කළමනාකරණ සත්යාපනය (`requireManagementAuth`) අවශ්ය වන අතර ඒවා
-loopback සඳහා පමණක් සීමා වේ — `/api/plugins` සහ `/api/plugins/`
-`LOCAL_ONLY_API_PREFIXES` තුළ ලැයිස්තුගත කර ඇත (`src/server/authz/routeGuard.ts`).
+සියලුම අන්ත ලක්ෂ්‍ය සඳහා කළමනාකරණ සත්‍යාපනය අවශ්‍ය වේ (`requireManagementAuth`)** සහ** loopback-only — `/api/plugins` සහ `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) හි ලැයිස්තුගත කර ඇත.
 
-| Endpoint                         | ක්රමය  | විස්තරය                                                                   |
-| -------------------------------- | ------ | ------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | ස්ථාපිත plugins ලැයිස්තුගත කිරීම (විකල්ප `?status=` පෙරහන)                |
-| `/api/plugins`                   | POST   | නිරපේක්ෂ දේශීය path එකකින් plugin එකක් ස්ථාපනය කිරීම                      |
-| `/api/plugins/scan`              | POST   | plugin නාමාවලිය scan කර නව plugins ලියාපදිංචි කිරීම                       |
-| `/api/plugins/marketplace`       | GET    | marketplace නාමාවලි ඇතුළත් කිරීම් ලැයිස්තුගත කිරීම                        |
-| `/api/plugins/[name]`            | GET    | ස්ථාපිත plugin එකක විස්තර ලබාගැනීම                                        |
-| `/api/plugins/[name]`            | DELETE | plugin එකක් අස්ථාපනය කිරීම                                                |
-| `/api/plugins/[name]/activate`   | POST   | සක්රිය කිරීම (load කිරීම + hooks ලියාපදිංචි කිරීම)                        |
-| `/api/plugins/[name]/deactivate` | POST   | අක්රිය කිරීම (`onDeactivate` ක්රියාත්මක කර, hooks ලියාපදිංචිය ඉවත් කිරීම) |
-| `/api/plugins/[name]/config`     | GET    | plugin config + config schema ලබාගැනීම                                    |
-| `/api/plugins/[name]/config`     | PUT    | plugin config යාවත්කාලීන කිරීම (schema එකට එරෙහිව වලංගු කරනු ලැබේ)        |
+| අන්ත ලක්ෂ්‍යය                    | ක්රමය  | විස්තරය                                                         |
+| -------------------------------- | ------ | --------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | ස්ථාපිත ප්ලගීන ලැයිස්තුගත කරන්න (විකල්ප `?status=` පෙරහන)       |
+| `/api/plugins`                   | POST   | ප්ලගින මූලාශ්‍ර නාමාවලියෙන් ප්ලගිනයක් ස්ථාපනය කරන්න             |
+| `/api/plugins/scan`              | POST   | ප්ලගින නාමාවලිය පරිලෝකනය කර නව ප්ලගීන ලියාපදිංචි කරන්න          |
+| `/api/plugins/marketplace`       | GET    | වෙළඳපල නාමාවලි ඇතුළත් කිරීම් ලැයිස්තුගත කරන්න                   |
+| `/api/plugins/[name]`            | GET    | ස්ථාපිත ප්ලගින විස්තර ලබා ගන්න                                  |
+| `/api/plugins/[name]`            | DELETE | ප්ලගිනයක් අස්ථාපනය කරන්න                                        |
+| `/api/plugins/[name]/activate`   | POST   | සක්රිය කරන්න ( + රෙජිස්ටර් කොකු පටවන්න)                         |
+| `/api/plugins/[name]/deactivate` | POST   | අක්රිය කරන්න (ගිනි `onDeactivate`, කොකු ලියාපදිංචි නොකරන්න)     |
+| `/api/plugins/[name]/config`     | GET    | Plugin config + config schema ලබා ගන්න                          |
+| `/api/plugins/[name]/config`     | PUT    | ප්ලගින වින්‍යාසය යාවත්කාලීන කරන්න (ක්‍රමලේඛනයට එරෙහිව වලංගු වේ) |
 
-`GET /api/plugins` හි `status` පෙරහන
-`installed` / `active` / `inactive` / `error` යන අගයන්ගෙන් එකක් පිළිගනී. වලංගු නොවන අගයක් `400` ආපසු ලබාදෙයි.
+`GET /api/plugins` `status` පෙරහන `installed` / `active` / `inactive` / `error` වලින් එකක් පිළිගනී. වලංගු නොවන අගයක් `400` ලබා දෙයි.
 
-### ස්ථාපිත plugins ලැයිස්තුගත කිරීම
+### ස්ථාපිත ප්ලගීන ලැයිස්තුගත කරන්න
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### දේශීය path එකකින් ස්ථාපනය කිරීම
+### දේශීය මාර්ගයකින් ස්ථාපනය කරන්න
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -123,19 +115,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` එක **නිරපේක්ෂ** විය යුතු අතර එහි `..` traversal segments හෝ
-null bytes අඩංගු විය නොහැක (Zod මඟින් බලාත්මක කරනු ලැබේ). මූලාශ්ර නාමාවලියෙහි වලංගු
-`plugin.json` එකක් අඩංගු විය යුතුය (නැතහොත් එවැන්නක parent නාමාවලියක් විය යුතුය). සාර්ථක වූ විට ප්රතිචාරය
-ස්ථාපිත plugin row එක සමඟ `201` වේ.
+`path` an විය යුතුය** නිරපේක්ෂ** නාමාවලියකට මාර්ගය** ප්ලගින මූලාශ්‍ර නාමාවලිය ඇතුළත** : `plugin-sources` ප්ලගින මූලය අසල, එබැවින් පෙරනිමියෙන් `~/.omniroute/plugin-sources/`, හෝ එම විචල්‍යය සකසා ඇති විට `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` (`getPluginSourcesDir()` හි `src/lib/plugins/installSource.ts`). මුලින්ම එහි ඇති ප්ලගිනය පිටපත් කරන්න හෝ ක්ලෝන කරන්න. මාර්ගයෙහි `..` හෝ null byte අඩංගු වන විට, එම නාමාවලියෙන් පිටත පිහිටා ඇති විට, symlink එකක් හරහා ඉන් පිටත විසඳන විට, ඊට පිටතින් ඉලක්කය ඇති symlink එකක් අඩංගු වන විට, හෝ නාමාවලිය නොපවතින විට ස්ථාපනය `400` සමඟ ප්‍රතික්ෂේප වේ. මූලාශ්‍ර නාමාවලියෙහි වලංගු `plugin.json` අඩංගු විය යුතුය (හෝ එක් අයෙකුගේ මාපියෙකු විය යුතුය). සාර්ථක වූ විට ප්‍රතිචාරය ස්ථාපිත ප්ලගින පේළිය සමඟ `201` වේ.
 
-### marketplace එක පිරික්සීම
+අනෙකුත් ප්ලගින මාර්ග මෙන් නොව, මෙයට පුරනය වීම අක්‍රිය වූ විට පවා කළමනාකරණ අක්තපත්‍ර (උපකරණ පුවරුවේ සැසියක් හෝ කළමණාකරන-විප්ලවීය API යතුරක්) අවශ්‍ය වේ (`requireLogin=false`): කේතය ස්ථාපනය කිරීම කිසි විටෙක නිර්නාමික ක්‍රියාවක් නොවේ.
+
+### වෙළඳපල පිරික්සන්න
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### plugin config යාවත්කාලීන කිරීම
+### ප්ලගින වින්‍යාසය යාවත්කාලීන කරන්න
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -144,10 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` මඟින් සපයන ලද සෑම අගයක්ම plugin එකේ
-`configSchema` එකට එරෙහිව වලංගු කරයි (manifest එකෙහි ප්රකාශිත): `number` fields සඳහා `min`/`max`
-ගරු කරනු ලබන අතර, `select` fields ප්රකාශිත `enum` සමඟ ගැළපිය යුතුය. schema එකෙහි නොමැති keys
-අවසර දෙනු ලැබේ.
+`PUT .../config` ප්ලගිනයේ `configSchema` (මැනිෆෙස්ටයේ ප්‍රකාශ කර ඇත): `number` ක්ෂේත්‍ර ගෞරව `min`/`max`, `select` ක්ෂේත්‍ර ප්‍රකාශිත `enum` ට අනුරූප විය යුතුය. යෝජනා ක්‍රමයේ නොමැති යතුරු වලට ඉඩ දෙනු ලැබේ.
 
 ## වින්යාසය
 
@@ -206,83 +194,58 @@ dashboard එකේ "Marketplace" tab එක මෙම URL සඳහා field �
 
 ## ආරක්ෂාව
 
-### මාර්ග ස්තරය — loopback පමණි
+### මාර්ග ස්ථර — loopback පමණි
 
-Plugins විසින් spawned child processes තුළ කේතය ක්රියාත්මක කරන බැවින්, සම්පූර්ණ `/api/plugins`
-මතුපිටම `LOCAL_ONLY` (Tier 1) ලෙස වර්ගීකරණය කර ඇත. Loopback බලාත්මක කිරීම
-ඕනෑම සත්යාපන පරීක්ෂාවකට **පෙර** කොන්දේසි විරහිතව ක්රියාත්මක වන බැවින්, tunnel එකක් හරහා
-පරිගණකයට ළඟා වන කාන්දු වූ කළමනාකරණ token එකකට වුවද plugin එකක් ස්ථාපනය කිරීමට,
-සක්රිය කිරීමට හෝ අස්ථාපනය කිරීමට නොහැක.
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) සහ
-දැඩි නීති #15 / #17 බලන්න.
+ප්ලගීන බිහි වූ ළමා ක්‍රියාවලි තුළ කේතය ක්‍රියාත්මක කරයි, එබැවින් මුළු `/api/plugins` මතුපිටම `LOCAL_ONLY` (Tier 1) වර්ගීකරණය කර ඇත. ලූප්බැක් බලාත්මක කිරීම කොන්දේසි විරහිතව ක්‍රියාත්මක වේ** පෙර** ඕනෑම සත්‍යාපන පරීක්‍ෂණයක්, එම නිසා කාන්දු වූ කළමනාකරණ ටෝකනයකට උමගක් හරහා පෙට්ටිය වෙත ළඟා වීමට තවමත් ප්ලගිනයක් ස්ථාපනය කිරීමට, සක්‍රිය කිරීමට හෝ අස්ථාපනය කිරීමට නොහැකිය. [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) සහ Hard Rules #15 / #17 බලන්න.
 
-### Marketplace registry SSRF ආරක්ෂකය
+### වෙළඳපල රෙජිස්ට්රි SSRF ආරක්ෂකයා
 
-අභිරුචි registry URL එකක් ප්රහාරකයෙකුට බලපෑම් කළ හැකි වින්යාසයක් වන බැවින්, එය
-ලබාගැනීමට පෙර `listMarketplacePlugins()` එය ස්තර දෙකක් හරහා පරීක්ෂා කරයි:
+අභිරුචි රෙජිස්ට්‍රි URL යනු ප්‍රහාරකයාට බලපෑම් කළ හැකි වින්‍යාසයකි, එබැවින් එය ලබා ගැනීමට පෙර `listMarketplacePlugins()` එය ස්ථර දෙකක් හරහා ධාවනය කරයි:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - `http:` / `https:` නොවන සියල්ල ප්රතික්ෂේප කරයි.
-   - සම්මත `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) මඟින් literal private/loopback/link-local/ULA hosts
-     (IPv4-වෙත mapped ලිපින ඇතුළුව IPv4 **සහ** IPv6) ප්රතික්ෂේප කරයි.
-   - `A` සහ `AAAA` වාර්තා **දෙකම** resolve කර, resolve කළ ලිපිනවලින් **කිසියම් එකක් හෝ**
-     private නම් ප්රතික්ෂේප කරයි — එමඟින් public-hostname → private-IP මඟහැරීම වසා දමයි.
-   - **ආරක්ෂිත ලෙස අසමත් වේ**: DNS resolution අසමත් වුවහොත් URL එක ප්රතික්ෂේප කරයි.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): fetch කරන අවස්ථාවේ public-only URL
-   ආරක්ෂකය නැවත යොදන අතර **redirects අවහිර කරයි** (public → private `30x`
-   මාරුවකට ඉඩ නොදේ).
+   - `http:` / `https:` නොවන ඕනෑම දෙයක් ප්‍රතික්ෂේප කරයි.
+   - වචනාර්ථයෙන් private/loopback/link-local/ULA ධාරක ප්‍රතික්ෂේප කරයි (IPv4** සහ** IPv6, IPv4-mapped ඇතුළුව ) කැනොනිකල් `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) හරහා.
+   - විසඳයි** දෙකම** `A` සහ `AAAA` වාර්තා කර ඇත්නම් ප්‍රතික්ෂේප කරයි** ඕනෑම** විසඳන ලද ලිපිනය පුද්ගලික — පොදු-ධාරක නාමය වන → private-IP බයිපාස් වසා දමයි.
+   - **අසාර්ථකයි වසා ඇත** : DNS විභේදනය අසාර්ථක වීම URL ප්‍රතික්ෂේප කරයි.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): ගෙන්වන අවස්ථාවේ දී පොදු-පමණි URL ආරක්ෂකය නැවත යොදයි සහ** හරවා යැවීම් අවහිර කරයි** (පොදු → පුද්ගලික `30x` හැරීමක් නැත).
 
-ස්තර දෙකෙන් එකකින් හෝ අසමත් වන URL එකක් request එක අවලංගු නොකරයි — marketplace එක
-නිහඬව built-in seed registry එක වෙත ආපසු ගොස් අනතුරු ඇඟවීමක් log කරයි.
+URL එක් ස්ථරයක් අසමත් වන අතර ඉල්ලීම — නවත්වන්නේ නැත, වෙළඳපල නිශ්ශබ්දව බිල්ට්-ඉන් බීජ රෙජිස්ට්‍රිය වෙත ආපසු ගොස් අනතුරු ඇඟවීමක් ලොග් කරයි.
 
-> මෙම ආරක්ෂකය PR #3774 තුළ විශේෂයෙන් ශක්තිමත් කරන ලද්දේ A + AAAA resolve කිරීමට සහ
-> IPv4-only පරීක්ෂාවක් වෙනුවට සම්මත `isPrivateHost` භාවිත කිරීමටය.
+> A + AAAA විසඳීමට සහ IPv4-only චෙක්පතක් වෙනුවට කැනොනිකල් `isPrivateHost` භාවිතා කිරීමට මෙම ආරක්ෂකය PR #3774 හි දැඩි කරන ලදී.
 
-### Plugin ක්රියාත්මක කිරීමේ හුදකලාකරණය
+### ප්ලගින ක්රියාත්මක කිරීම හුදකලා කිරීම
 
-- **ක්රියාවලි හුදකලාකරණය** — `loadPlugin()` (`src/lib/plugins/loader.ts`) විසින්
-  සෑම plugin එකක්ම වෙනම Node.js child process එකක spawn කර IPC හරහා සන්නිවේදනය කරයි.
-  Hook calls සඳහා `SIGTERM` → `SIGKILL` දක්වා තීව්ර වන timeout එකක් ඇත.
-- **Env අවසර ලැයිස්තුව** — child වෙත ලැබෙන්නේ අවසර ලැයිස්තුවක ඇති environment
-  variables කට්ටලයක් පමණි; වඩා පුළුල් කට්ටලය ලබා දෙන්නේ manifest එක
-  `env` අවසරය ඉල්ලා සිටින විට පමණි.
-- **Path සීමාකරණය** — ඕනෑම පිටපත් කිරීමකට හෝ recursive delete කිරීමකට පෙර,
-  plugin directory එක සහ `manifest.main` යන දෙකම කළමනාකරණය කරන plugin root එක
-  **තුළම** resolve වන බව install/upgrade/uninstall ක්රියා තහවුරු කරයි (විකෘති කළ DB paths සහ
-  `manifest.main` තුළ `../` traversal වලින් ආරක්ෂා කරයි). Activation ක්රියාවලිය
-  `realpath` හරහා symlinks resolve කර, plugin directory එකෙන් පිටතට යන entry point එකක්
-  load කිරීම ප්රතික්ෂේප කරයි.
-- **විකල්ප integrity pin එක** — manifest එකකට `integrity`
-  (`sha256-<base64>`, SRI ආකෘතිය) field එකක් ප්රකාශ කළ හැක. එය ඇති විට, loader එක
-  load කරන අවස්ථාවේ entry file hash එක සත්යාපනය කර නොගැළපීමක් තිබේ නම් සක්රිය කිරීම
-  ප්රතික්ෂේප කරයි. මෙය තෝරා සක්රිය කළ යුතු විකෘති කිරීම් හඳුනාගැනීමේ ක්රමයක් මිස
-  ආරක්ෂක සීමාවක් **නොවේ** — loopback-only routing සහ permission model එක සැබෑ සීමාවන් වේ.
+> **ප්ලගීන වැලිපිල්ලට දමා නැත.** දරුවා යනු OmniRoute පරිශීලකයා ලෙස ක්‍රියාත්මක වන සාමාන්‍ය Node.js ක්‍රියාවලියකි, VM සන්දර්භය සහ Node.js අවසර ධජ නොමැතිව, එබැවින් ප්ලගින කේතයට පරිශීලකයාට හැකි ඕනෑම ගොනුවක් කියවීමට සහ ලිවීමට, වැඩසටහන් ක්‍රියාත්මක කිරීමට සහ ජාලයට ළඟා වීමට හැකිය. `requires.permissions` තීරණය කරන්නේ දරුවාට ලැබෙන පරිසර විචල්‍යයන් පමණි; අනෙකුත් අවසරයන් බලාත්මක නොවේ. ඔබ විශ්වාස කරන ප්ලගීන පමණක් ස්ථාපනය කරන්න. පහත ක්‍රියාවලි මායිමේ බිඳ වැටීම් සහ එල්ලීම් අඩංගු වේ; එය ආරක්ෂක මායිමක් නොවේ.
 
-## Manifest (`plugin.json`)
+- **ක්රියාවලිය හුදකලා කිරීම** — `loadPlugin()` (`src/lib/plugins/loader.ts`) එක් එක් ප්ලගිනය වෙනම Node.js ළමා ක්‍රියාවලියක් තුළ ඇති කර IPC හරහා සන්නිවේදනය කරයි. හූක් ඇමතුම් `SIGTERM` → `SIGKILL` උත්සන්න වීම සමඟ කල් ඉකුත්වීමක් ඇත.
+- **Env අවසර ලැයිස්තුව** — දරුවාට ලැබෙන්නේ අවසර ලත් පරිසර විචල්‍ය සමූහයක් පමණි; පුළුල් කට්ටලය ලබා දෙන්නේ මැනිෆෙස්ටය `env` අවසරය ඉල්ලා සිටින විට පමණි.
+- **මූලාශ්‍ර අන්තර්ගත ස්ථාපනය කරන්න** — `POST /api/plugins` කියවන්නේ ප්ලගින මූලාශ්‍ර නාමාවලියෙන් පමණි ("දේශීය මාර්ගයකින් ස්ථාපනය කරන්න" බලන්න): මාර්ගය `realpath` සමඟ කැනොනිකල් කර ඇත, එම නාමාවලිය තුළ දැඩි ලෙස රැඳී සිටිය යුතු අතර, එයින් ගැලවී යන symlink එකක් රැගෙන යන මූලාශ්‍ර ගසක් කිසිවක් පිටපත් කිරීමට පෙර ප්‍රතික්ෂේප කරනු ලැබේ.
+- **මාර්ගය සීමා කිරීම** — install/upgrade/uninstall ප්ලගින නාමාවලිය සහ `manifest.main` නිරාකරණය කරන බව ප්‍රකාශ කරයි** ඇතුළත** කිසියම් පිටපතක් හෝ පුනරාවර්තන මකාදැමීමකට පෙර කළමනාකරණය කරන ලද ප්ලගින මූලය ( DB පථ සහ `manifest.main` හි `../` traversal වලට එරෙහිව ආරක්ෂා කරයි). සක්‍රිය කිරීම `realpath` හරහා symlinks විසඳන අතර ප්ලගින නාමාවලියෙන් ගැලවී යන ඇතුල්වීමේ ලක්ෂ්‍යයක් පැටවීම ප්‍රතික්ෂේප කරයි.
+- **විකල්ප අඛණ්ඩතා පින්** — මැනිෆෙස්ටය `integrity` (`sha256-<base64>`, SRI ආකෘතිය) ක්ෂේත්‍රයක් ප්‍රකාශ කළ හැක. පවතින විට, පූරකය පැටවීමේ වේලාවේදී ඇතුල් කිරීමේ ගොනු හැෂ් සත්‍යාපනය කරන අතර නොගැලපීම මත සක්‍රිය කිරීම ප්‍රතික්ෂේප කරයි. එය විකෘති හඳුනාගැනීමයි,** නැත** ආරක්ෂක මායිම: එය පටවන ලද ප්ලගිනයකට කළ හැකි දේ සීමා නොකරයි.
+- **කොකු තුළ සේවාදායක අක්තපත්‍ර නොමැත** — `onRequest`, `onResponse` සහ `onError` වෙත යවන ලද සන්දර්භය `authorization`, `x-api-key`, `proxy-authorization` සහ `cookie` ශීර්ෂයන් ඉවත් කර ඇති අතර API යතුරු වාර්තාවේ කිසිදු ප්‍රධාන අගයක් නොමැත ( `src/lib/plugins/hooks.ts` හි`redactPluginContext()` ).
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) මඟින් වලංගු කරයි:
+## ප්රකාශනය (`plugin.json`)
 
-| Field              | Type      | සටහන්                                                       |
-| ------------------ | --------- | ----------------------------------------------------------- |
-| `name`             | string    | අවශ්යයි; kebab-case (`^[a-z0-9-]+$`), අක්ෂර 1–100           |
-| `version`          | string    | අවශ්යයි; semver (`MAJOR.MINOR.PATCH`)                       |
-| `description`      | string?   | අක්ෂර ≤ 500                                                 |
-| `author`           | string?   | අක්ෂර ≤ 200                                                 |
-| `license`          | string?   | පෙරනිමිය `MIT` වේ                                           |
-| `main`             | string?   | Entry file එක; පෙරනිමිය `index.js` වේ                       |
-| `source`           | enum?     | `local` \| `marketplace` (පෙරනිමිය `local`)                 |
-| `tags`             | string[]? | සෙවුම් tags                                                 |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                             |
-| `hooks`            | object?   | plugin එක ක්රියාත්මක කරන hooks මොනවාදැයි දක්වන Booleans     |
-| `skills`           | object[]? | විකල්ප skill අර්ථදැක්වීම්                                   |
-| `enabledByDefault` | boolean?  | ස්ථාපනයේදී ස්වයංක්රීයව සක්රිය කරයි                          |
-| `configSchema`     | object?   | config fields සිතියම (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | විකල්ප `sha256-<base64>` entry-file pin එක                  |
+`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) මගින් වලංගු වේ:
 
-අවසර ලබාගන්නේ පහත enum එකෙනි:
-`network` / `file-read` / `file-write` / `env` / `exec`.
+| ක්ෂේත්රය           | ටයිප් කරන්න | සටහන්                                                             |
+| ------------------ | ----------- | ----------------------------------------------------------------- |
+| `name`             | නූල්        | අවශ්ය; kebab-case (`^[a-z0-9-]+$`), අක්ෂර 1-100                   |
+| `version`          | නූල්        | අවශ්ය; semver (`MAJOR.MINOR.PATCH`)                               |
+| `description`      | string?     | ≤ 500 අක්ෂර                                                       |
+| `author`           | string?     | ≤ අක්ෂර 200                                                       |
+| `license`          | string?     | `MIT` වෙත පෙරනිමි                                                 |
+| `main`             | string?     | ඇතුල්වීමේ ගොනුව; `index.js` වෙත පෙරනිමි                           |
+| `source`           | enum?       | `local` \| `marketplace` ( `local` වෙත පෙරනිමි)                   |
+| `tags`             | තන්තුව[]?   | ටැග් සොයන්න                                                       |
+| `requires`         | වස්තුව?     | `{ omniroute?, permissions[] }`                                   |
+| `hooks`            | වස්තුව?     | ප්ලගිනය ක්‍රියාත්මක කරන්නේ කුමන කොකුද යන්න ප්‍රකාශ කරන බූලියන්    |
+| `skills`           | වස්තුව[]?   | විකල්ප කුසලතා අර්ථ දැක්වීම්                                       |
+| `enabledByDefault` | බූලියන්?    | ස්ථාපනයේදී ස්වයංක්‍රීයව සක්‍රිය කරන්න                             |
+| `configSchema`     | වස්තුව?     | වින්‍යාස ක්ෂේත්‍රවල සිතියම (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | string?     | විකල්ප `sha256-<base64>` ප්‍රවේශ-ගොනු පින්                        |
+
+`network` / `file-read` / `file-write` / `env` / `exec` enum වෙතින් අවසර ලබා ගනී. ධාවන කාල බලපෑමක් ඇත්තේ `env` පමණි (දරුවා සඳහා තරමක් විශාල පරිසර විචල්‍ය අවසර ලැයිස්තුවක්); අනෙක් ඒවා ප්‍රකාශයන් වන අතර ඒවා බලාත්මක නොවේ.
 
 ## ජීවන චක්ර ප්රවාහය
 
@@ -342,17 +305,14 @@ Plugin ප්රමිතික/විශ්ලේෂණ අමතර වගු�
 
 ## උපකරණ පුවරුව
 
-`/dashboard/plugins` හි ඇති උපකරණ පුවරු පිටුව
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) ටැබ් දෙකක් සපයයි:
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) හි ඇති උපකරණ පුවරුවේ පිටුව ටැබ් දෙකක් සපයයි:
 
-- **ස්ථාපිත** — ස්ථාපිත plugins, ඒවායේ ප්රකාශිත hooks, activate/deactivate
-  මාරුවක්, uninstall බොත්තමක් සහ "plugins සඳහා ස්කෑන් කරන්න"
-  ක්රියාවක් (`POST /api/plugins/scan`) ලැයිස්තුගත කරයි.
-- **වෙළඳපොළ** — අභිරුචි registry URL එක සැකසීමට ක්ෂේත්රයක් සමඟ
-  `GET /api/plugins/marketplace` වෙතින් ලැබෙන නාමාවලිය පෙන්වයි.
+- **ස්ථාපනය කර ඇත** — ස්ථාපිත ප්ලගීන ඒවායේ ප්‍රකාශිත කොකු, activate/deactivate ටොගල්, අස්ථාපනය කිරීමේ බොත්තම සහ "ප්ලගින සඳහා ස්කෑන්" ක්‍රියාව (`POST /api/plugins/scan`) සමඟ ලැයිස්තුගත කරයි.
+- **වෙළඳපොළ** — අභිරුචි රෙජිස්ට්‍රි URL සැකසීමට ක්ෂේත්‍රයක් සහිත `GET /api/plugins/marketplace` වෙතින් නාමාවලිය පෙන්වයි.
 
-එක් එක් plugin සඳහා වන වින්යාස පිටුව `/dashboard/plugins/[name]/config` හි
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) පිහිටා ඇත.
+OmniRoute ක්‍රියාවලියේ සම්පූර්ණ වරප්‍රසාද සහිතව ප්ලගීන ක්‍රියාත්මක වන බවට පිටුව සෑම විටම අනතුරු ඇඟවීමක් පෙන්වයි.
+
+එක් ප්ලගින වින්‍යාස පිටුවක් `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) හි ජීවත් වේ.
 
 ## මෙයද බලන්න
 

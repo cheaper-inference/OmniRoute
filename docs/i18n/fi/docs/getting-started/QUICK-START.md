@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Vaihtoehto B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` on uusin **julkaistu** vakaa SemVer-versio. Se **ei** seuraa git-haaraa `main`. Käytä GitOpsissa kiinteää tunnistetta `diegosouzapw/omniroute:X.Y.Z`. Katso [näköistiedostojen tunnisteet ja julkaisukanavat](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` on uusin **julkaistu** vakaa SemVer-versio. Se **ei** seuraa git-haaraa `main`. Käytä GitOpsissa kiinteää tunnistetta `cheaperinference/omniroute:X.Y.Z`. Katso [näköistiedostojen tunnisteet ja julkaisukanavat](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Vaihtoehto C: Lähdekoodista
 

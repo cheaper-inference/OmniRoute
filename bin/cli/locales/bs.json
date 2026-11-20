@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Limit mora biti pozitivan cijeli broj.",
     "error": "Greška: {message}",
     "serverOffline": "OmniRoute server nije dostupan. Pokrenite ga komandom: omniroute serve",
     "authRequired": "Potrebna je autentifikacija. Postavite OMNIROUTE_API_KEY ili pokrenite: omniroute setup",

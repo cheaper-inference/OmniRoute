@@ -557,6 +557,8 @@ Ovaj proxy:
 
 WebSocket nadogradnjom za ugrađenu kontrolnu tablu upravlja prateći server na namenskom portu (pogledajte `src/lib/services/embedWsProxy.ts`).
 
+Svaka nadogradnja je autorizirana prije otvaranja tunela, uz ista pravila kao i ruta za ugradnju HTTP : ravnopravni uređaj mora biti loopback bez zaglavlja za prosljeđivanje obrnutog proksija, pretraživač `Origin` mora biti izvorište kontrolne ploče (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` proširuju zadane vrijednosti povratne petlje), a pozivaocu je potrebna sesija na kontrolnoj tabli ili ključ za prijavu bez opsega dashdboard API.
+
 **sigurnost:** Ugrađene proxy rute su klasificirane pod `LOCAL_ONLY_API_PREFIXES` i do njih se može doći samo iz povratne petlje. Napadač koji dobije JWT putem Cloudflare/Ngrok tunela ne može proxy u ugrađene usluge.
 
 ---

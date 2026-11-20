@@ -309,6 +309,7 @@ Drąsiai naudokite sakinius `IF NOT EXISTS`, `IF EXISTS` ir `OR IGNORE` / `OR RE
 3. **Atidžiai užpildykite duomenis** : naudokite `UPDATE ... WHERE ...` esamoms eilutėms tvarkyti
 4. **Patikrinkite užsakymą ir pavadinimą** : `npm run test:migrations:fresh` (visos migracijos tuščioje duomenų bazėje) ir `npm run check:migration-numbering`
 5. **Bandymas ant kopijos** : niekada nevykdykite neišbandytų perkėlimo gamyboje
+6. **Iš kodo sukurtą lentelę taip pat reikia perkelti** : jei modulis taip pat tingiai sukuria lentelę (`CREATE TABLE IF NOT EXISTS`, saugomas kaip savaiminio gydymo kelias), perkėlimas turi sukurti ją su tuo pačiu DDL. Priešingu atveju švarus diegimas ir atnaujintas diegimas baigiasi skirtingomis schemomis, atsižvelgiant į tai, ar tas kodo kelias buvo paleistas. `tests/unit/db/lazy-table-migration-guard.test.ts` nuskaito `src/` ir `open-sse/` ir nepavyksta naudojant tingų `CREATE` be perkėlimo (#20557). Pavyzdys: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Pavyzdys:
 
