@@ -439,6 +439,26 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
 - The response contract is `src/shared/schemas/selfUsage.ts` (`SelfUsageSeries` in
   `docs/openapi.yaml`).
 
+### Self-service page
+
+With `QUOTA_SELF_PANEL` on, `/quota/{provider}` is a public page. A key holder types an API key
+there and sees that key's pools for the provider. Each pool shows one card per window, with the
+account bar (when the key may see account data) and the key's own share. The page also lists the
+per-model limits of each account, notices for a schedule block or a per-model cap, and the key's
+own usage. `{provider}` is a provider id or its alias (`/quota/claude`, `/quota/cc`). An unknown
+provider, and every `/quota/*` path while the flag is off, answer 404. Pools on a custom OpenAI-
+or Anthropic-compatible node have no page. The API still answers for them.
+
+The page has no session. The key is sent only in the `Authorization` header of
+`GET /api/v1/me/quota/{provider}` and `GET /api/v1/me/usage`, never in a URL. A key the server
+accepts is kept in the tab's `sessionStorage`. With "Remember on this device" it is kept in
+`localStorage` instead, and "Forget key" removes it from both. A key the server rejects is
+removed from storage.
+
+A reading the API marks `stale` is shown as possibly out of date. A reading it marks
+`unavailable` is shown with its reason, never as zero. On percentage plans the key's own share is
+not calculated yet, and the page says so.
+
 ---
 
 ## Environment Variables
