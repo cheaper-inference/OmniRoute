@@ -12,6 +12,7 @@ import { mergeUsageEvidence } from "./usageEvidence.ts";
  * normalizer clears `buffer` when it produces the tail).
  */
 import { parseSSELine } from "./streamHelpers.ts";
+import { markUpstreamDone, type DoneMarkerState } from "./streamTerminalHelpers.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import { extractUsage, sanitizeUsagePayloadForRequest } from "./usageTracking.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
@@ -24,7 +25,7 @@ export type TranslateFlushTailContext = {
   openaiFormat: string;
   openaiResponsesFormat: string;
   body: unknown;
-  state: { usage?: unknown } & JsonRecord;
+  state: { usage?: unknown } & DoneMarkerState & JsonRecord;
   sessionId: string | null;
   now: () => number;
   getLastToolCallChunkTime: () => number | null;
@@ -110,10 +111,7 @@ function isSkippedTailLine(parsed: unknown, context: TranslateFlushTailContext):
   }
   context.noteReasoning(parsed, context.now());
   if (context.shouldDropCommentary(record)) return true;
-  if (record.done !== true) return false;
-  // The translators read this at stream end: [DONE] means the upstream finished, not a cut.
-  context.state.doneMarkerSeen = true;
-  return true;
+  return record.done === true && markUpstreamDone(record, context.state);
 }
 
 function trackTailToolTiming(record: JsonRecord, context: TranslateFlushTailContext): void {

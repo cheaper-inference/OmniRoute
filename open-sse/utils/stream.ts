@@ -124,6 +124,7 @@ import { buildUsageOnlyChunk } from "./usageOnlyChunk.ts";
 import { createSSEOutputSink } from "./sseOutputSink.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { drainTranslateFlushTail } from "./translateFlushTail.ts";
+import { isTerminalStreamPayload, markUpstreamDone } from "./streamTerminalHelpers.ts";
 import { restoreResponsesToolNames } from "../translator/helpers/responsesToolNameRestore.ts";
 
 function isLateOutputProbeEnabled(): boolean {
@@ -295,34 +296,13 @@ type TranslateState = ReturnType<typeof initState> & {
     message: string;
     streamSnapshot?: import("./streamErrorFormat.ts").StreamFailureSnapshot;
   } | null;
-  /** The upstream sent `[DONE]`: its end of stream is a finish, not a cut. */
-  doneMarkerSeen?: boolean;
+  doneMarkerSeen?: boolean; // see DoneMarkerState (streamTerminalHelpers.ts)
 };
 
 type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-const TERMINAL_STREAM_EVENT_TYPES = new Set([
-  "message_stop",
-  "response.completed",
-  "response.incomplete",
-  "response.failed",
-  "response.done",
-  "response.cancelled",
-  "response.canceled",
-]);
-
-/** True for a parsed upstream payload that ends its turn: `[DONE]`, a finish reason or a terminal event. */
-function isTerminalStreamPayload(payload: unknown): boolean {
-  const record = asRecord(payload);
-  if (record.done === true) return true;
-  if (typeof record.type === "string" && TERMINAL_STREAM_EVENT_TYPES.has(record.type)) return true;
-  const finished = (list: unknown, key: string) =>
-    Array.isArray(list) && list.some((entry) => asRecord(entry)[key] != null);
-  return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
 }
 
 /** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
@@ -2719,11 +2699,7 @@ export function createSSEStream(options: StreamOptions = {}) {
 
           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
           observeProviderPayload(parsed);
-          if (parsed && parsed.done) {
-            // The translators flush at stream end; [DONE] tells them the upstream finished.
-            if (state) state.doneMarkerSeen = true;
-            continue;
-          }
+          if (markUpstreamDone(parsed, state)) continue;
           sanitizeUsagePayloadForRequest(parsed, body, targetFormat);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
@@ -3548,9 +3524,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             return;
           if (buffer.trim()) {
             const parsed = parseSSELine(buffer.trim());
-            // An unterminated final [DONE] is still the upstream's finish (see the main loop).
-            if (parsed?.done && state) state.doneMarkerSeen = true;
-            if (parsed && !parsed.done) {
+            if (parsed && !markUpstreamDone(parsed, state)) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
               observeProviderPayload(parsed);
