@@ -279,6 +279,7 @@ test("model window: an exhausted window in modelQuotas saturates that model only
   updateAccountBuckets("conn-mw", fableReading(), NOW);
   assert.equal(isModelWindowSaturated("conn-mw", FABLE, NOW), true);
   assert.equal(isModelWindowSaturated("conn-mw", "claude-fable-5-1", NOW), true, "bare model id");
+  assert.equal(isModelWindowSaturated("conn-mw", `${FABLE}[1m]`, NOW), true, "context suffix");
   assert.equal(isModelWindowSaturated("conn-mw", SONNET, NOW), false);
   assert.equal(isModelWindowSaturated("conn-other", FABLE, NOW), false);
   assert.equal(isBucketSaturated("conn-mw", "7d:fable", NOW), true);

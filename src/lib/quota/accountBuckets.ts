@@ -251,13 +251,15 @@ export function isModelWindowSaturated(
   if (!connectionId || !modelStr) return false;
   const base = storeKey(connectionId, "");
   const prefix = storeKey(connectionId, MODEL_WINDOW_PREFIX);
-  for (const [key, entry] of [..._buckets]) {
+  // Collect first: isBucketSaturated may delete or reorder entries, which must
+  // not happen while the store is being iterated.
+  const matched: string[] = [];
+  for (const [key, entry] of _buckets) {
     if (!key.startsWith(prefix) || !entry.claudeQuota) continue;
-    if (!claudeQuotaMatchesModel(entry.claudeQuota, modelStr)) continue;
-    // isBucketSaturated applies the lazy reset at the window's own reset time.
-    if (isBucketSaturated(connectionId, key.slice(base.length), nowMs)) return true;
+    if (claudeQuotaMatchesModel(entry.claudeQuota, modelStr)) matched.push(key);
   }
-  return false;
+  // isBucketSaturated applies the lazy reset at the window's own reset time.
+  return matched.some((key) => isBucketSaturated(connectionId, key.slice(base.length), nowMs));
 }
 
 // ---------------------------------------------------------------------------
