@@ -17,6 +17,7 @@ import type { EnforceDecision, EnforceInput, QuotaStore, RecordConsumptionInput 
 import type { ProviderPlan, QuotaUnit } from "./dimensions";
 import { dimensionKeyToString } from "./dimensions";
 import { decideFairShare } from "./fairShare";
+import { attributePercentDimension, recordPercentProxy } from "./percentAttribution";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
 import { getQuotaStore } from "./QuotaStore";
@@ -211,6 +212,9 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     globalUsedPercent: number;
   }> = [];
   const consumedByThisKey: Record<string, number> = {};
+  // Percent dimensions only: the absolute cap counts the key's own routed
+  // (internal) part, never usage made outside this proxy.
+  const capConsumedByThisKey: Record<string, number> = {};
 
   for (const dim of plan.dimensions) {
     // Skip placeholder dimensions whose limit is unknown (Number.EPSILON / 0 — the
@@ -222,6 +226,31 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     if (!(dim.limit > Number.EPSILON)) continue;
     const dimKey = { poolId: pool.id, unit: dim.unit, window: dim.window };
     const dimKeyStr = dimensionKeyToString(dimKey);
+
+    if (dim.unit === "percent") {
+      // percent (account-quota window): the saturation signal is the account
+      // consumption; this key's part of it comes from the tokens it routed
+      // (shadow bucket), and usage made outside the proxy is charged by weight
+      // only once it exceeds the capacity no allocation claims. Never throws.
+      const effectiveLimit = dim.limit * accountCount;
+      const attribution = await attributePercentDimension({
+        store,
+        pool,
+        connectionId: input.connectionId,
+        provider: input.provider,
+        dimension: { window: dim.window, limit: effectiveLimit },
+        apiKeyIds: [input.apiKeyId],
+      });
+      consumedByThisKey[dimKeyStr] = attribution.consumedByKey[input.apiKeyId] ?? 0;
+      capConsumedByThisKey[dimKeyStr] = attribution.internalByKey[input.apiKeyId] ?? 0;
+      dimensionsInfo.push({
+        key: dimKey,
+        limit: effectiveLimit,
+        consumedTotal: attribution.accountConsumed,
+        globalUsedPercent: attribution.globalUsedPercent,
+      });
+      continue;
+    }
 
     const consumedThisKey = await store.peek(input.apiKeyId, dimKey).catch(() => 0);
     consumedByThisKey[dimKeyStr] = consumedThisKey;
@@ -274,6 +303,7 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     dimensions: dimensionsInfo,
     allocation: { ...poolAllocation, weight: effectiveWeight },
     consumedByThisKey,
+    capConsumedByThisKey,
     saturationThreshold: SATURATION_THRESHOLD,
   });
 
@@ -368,6 +398,9 @@ export async function recordConsumption(input: RecordConsumptionInput): Promise<
         // Fail-open per B29 — drift expected; teto global do fetcher corrige
       });
     }
+    // percent: the account bar is read upstream, so record this key's routed
+    // tokens in the shadow bucket that attributes that bar per key.
+    if (dim.unit === "percent") await recordPercentProxy(store, input.apiKeyId, dimKey, input.cost);
   }
 
   // Per-(key, model) consumption tracking (Fase 3 #7).
