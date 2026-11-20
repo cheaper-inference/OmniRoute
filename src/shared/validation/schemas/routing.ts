@@ -107,6 +107,7 @@ export const updateTaskRoutingSchema = z
     taskModelMap: taskRoutingModelMapSchema.optional(),
     detectionEnabled: z.boolean().optional(),
     patternOverrides: taskPatternOverridesSchema.optional(),
+    detectionAnchor: z.enum(["latest-user", "first-user"]).optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -114,7 +115,8 @@ export const updateTaskRoutingSchema = z
       value.enabled === undefined &&
       value.taskModelMap === undefined &&
       value.detectionEnabled === undefined &&
-      value.patternOverrides === undefined
+      value.patternOverrides === undefined &&
+      value.detectionAnchor === undefined
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
