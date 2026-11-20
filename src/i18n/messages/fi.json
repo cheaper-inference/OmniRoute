@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Pidä keskustelun puolivälissä olevat järjestelmäviestit paikoillaan",
     "requireUserLastMessageDescription": "Vastavirtaan, joka hylkää avustajan esitäytön: pudota perässä olevat avustajan käännökset (ei työkalun käyttöä) ennen lähettämistä. Malli voi luoda uudelleen aiemman vastauksensa.",
     "requireUserLastMessageLabel": "Vaadi keskustelun päättymistä käyttäjäviestiin",
+    "strictChatHistoryDescription": "Korjaa katkenneet työkalukutsujen sarjat ja yhdistää peräkkäiset avustajan viestit ennen niiden lähettämistä tiukkoja sääntöjä noudattaville OpenAI-yhteensopiville palveluntarjoajille.",
+    "strictChatHistoryLabel": "Keskusteluhistorian korjaus tiukoille palveluntarjoajille",
     "bulkPasteAdded": "{count, plural, one {1 avain lisätty} other {# avainta lisätty}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 päällekkäinen avain ohitettu} other {# päällekkäistä avainta ohitettu}}",
     "bulkPasteHint": "Liitä yksi API-avain kullekin riville. Tyhjät rivit jätetään huomiotta ja päällekkäiset avaimet ohitetaan.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Poista avain"
   },
   "plugins": {
-    "privilegesWarningTitle": "Laajennukset toimivat kaikilla oikeuksilla",
-    "privilegesWarningBody": "Plugin toimii tavallisena Node.js prosessina, jolla on samat käyttöoikeudet kuin OmniRoute: se voi lukea tiedostoja, suorittaa ohjelmia ja käyttää verkkoa, riippumatta sen luettelon ilmoittamista luvista. Asenna vain laajennuksia, joihin luotat.",
     "title": "Lisäosat",
     "description": "Asenna ja hallitse OmniRouten toimintoja laajentavia lisäosia",
     "loading": "Ladataan lisäosia...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Etsi lisäosia",
     "noPlugins": "Lisäosia ei ole asennettu",
     "noPluginsDescription": "Sijoita lisäosahakemistot kansioon ~/.omniroute/plugins/ ja napsauta Etsi.",
+    "privilegesWarningTitle": "Laajennukset toimivat kaikilla oikeuksilla",
+    "privilegesWarningBody": "Plugin toimii tavallisena Node.js prosessina, jolla on samat käyttöoikeudet kuin OmniRoute: se voi lukea tiedostoja, suorittaa ohjelmia ja käyttää verkkoa, riippumatta sen luettelon ilmoittamista luvista. Asenna vain laajennuksia, joihin luotat.",
     "activate": "Ota käyttöön",
     "deactivate": "Poista käytöstä",
     "uninstall": "Poista asennus",

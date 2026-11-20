@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ขีดจำกัดต้องเป็นจำนวนเต็มบวก",
     "error": "ข้อผิดพลาด: {message}",
     "serverOffline": "เซิร์ฟเวอร์ OmniRoute ออฟไลน์ เริ่มด้วย: omniroute serve",
     "authRequired": "ต้องการการยืนยันตัวตน ตั้งค่า OMNIROUTE_API_KEY หรือรัน: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[จำลอง] จะทำ: {action}",
     "cancelled": "ยกเลิกแล้ว",
     "jsonOpt": "ส่งออกเป็น JSON",
-    "yesOpt": "ข้ามการยืนยัน"
+    "yesOpt": "ข้ามการยืนยัน",
+    "positiveIntegerRequired": "ขีดจำกัดต้องเป็นจำนวนเต็มบวก"
   },
   "setup": {
     "title": "ตั้งค่า OmniRoute",

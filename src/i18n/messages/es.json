@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Mantenga los mensajes del sistema a mitad de la conversación en su lugar",
     "requireUserLastMessageDescription": "Para flujos ascendentes que rechazan el llenado previo del asistente: elimine los giros finales del asistente (sin uso de herramientas) antes de enviar. El modelo puede regenerar su respuesta anterior.",
     "requireUserLastMessageLabel": "Requerir que la conversación termine con un mensaje de usuario",
+    "strictChatHistoryDescription": "Repara las secuencias interrumpidas de llamadas a herramientas y fusiona los mensajes consecutivos del asistente antes de enviarlos a proveedores compatibles con OpenAI que aplican reglas estrictas.",
+    "strictChatHistoryLabel": "Reparación del historial del chat para proveedores estrictos",
     "bulkPasteAdded": "{count, plural, one {1 clave añadida} other {# claves añadidas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicado omitido} other {# duplicados omitidos}}",
     "bulkPasteHint": "Pega una clave de API por línea. Las líneas vacías se ignoran y las claves duplicadas se omiten.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Eliminar clave"
   },
   "plugins": {
-    "privilegesWarningTitle": "Los complementos se ejecutan con todos los privilegios",
-    "privilegesWarningBody": "Un complemento se ejecuta como un proceso Node.js normal con el mismo acceso que OmniRoute: puede leer archivos, ejecutar programas y utilizar la red, independientemente de los permisos que declare su manifiesto. Instale solo complementos en los que confíe.",
     "title": "Complementos",
     "description": "Instala y gestiona plugins para ampliar la funcionalidad de OmniRoute",
     "loading": "Cargando plugins...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Buscar plugins",
     "noPlugins": "No hay plugins instalados",
     "noPluginsDescription": "Coloca los directorios de los plugins en ~/.omniroute/plugins/ y haz clic en «Buscar plugins».",
+    "privilegesWarningTitle": "Los complementos se ejecutan con todos los privilegios",
+    "privilegesWarningBody": "Un complemento se ejecuta como un proceso Node.js normal con el mismo acceso que OmniRoute: puede leer archivos, ejecutar programas y utilizar la red, independientemente de los permisos que declare su manifiesto. Instale solo complementos en los que confíe.",
     "activate": "Activar",
     "deactivate": "Desactivar",
     "uninstall": "Desinstalar",

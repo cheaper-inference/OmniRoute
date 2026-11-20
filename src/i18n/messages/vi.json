@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Giữ nguyên các thông báo của hệ thống giữa cuộc trò chuyện",
     "requireUserLastMessageDescription": "Đối với các tuyến thượng nguồn từ chối điền trước trợ lý: bỏ lượt trợ lý ở cuối (không có tool_use) trước khi gửi. Mô hình có thể tạo lại câu trả lời trước đó của nó.",
     "requireUserLastMessageLabel": "Yêu cầu cuộc trò chuyện kết thúc bằng tin nhắn của người dùng",
+    "strictChatHistoryDescription": "Sửa các chuỗi gọi công cụ bị gián đoạn và gộp những tin nhắn liên tiếp của trợ lý trước khi gửi đến các nhà cung cấp tương thích với OpenAI áp dụng quy tắc nghiêm ngặt.",
+    "strictChatHistoryLabel": "Sửa lịch sử trò chuyện cho nhà cung cấp có quy tắc nghiêm ngặt",
     "bulkPasteAdded": "{count, plural, one {Đã thêm 1 khóa} other {Đã thêm # khóa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Đã bỏ qua 1 khóa trùng lặp} other {Đã bỏ qua # khóa trùng lặp}}",
     "bulkPasteHint": "Dán một khóa API trên mỗi dòng. Các dòng trống sẽ bị bỏ qua và các khóa trùng lặp sẽ bị bỏ qua.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Xóa khóa"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugin chạy với đầy đủ đặc quyền",
-    "privilegesWarningBody": "Một plugin chạy như một quy trình Node.js thông thường có cùng quyền truy cập như OmniRoute: nó có thể đọc tệp, chạy chương trình và sử dụng mạng, bất kỳ quyền nào mà bảng kê khai của nó khai báo. Chỉ cài đặt các plugin mà bạn tin tưởng.",
     "title": "Plugin",
     "description": "Cài đặt và quản lý các plugin để mở rộng chức năng của OmniRoute",
     "loading": "Đang tải các plugin...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Quét tìm plugin",
     "noPlugins": "Chưa cài đặt plugin nào",
     "noPluginsDescription": "Đặt các thư mục plugin vào ~/.omniroute/plugins/ và nhấp vào Quét.",
+    "privilegesWarningTitle": "Plugin chạy với đầy đủ đặc quyền",
+    "privilegesWarningBody": "Một plugin chạy như một quy trình Node.js thông thường có cùng quyền truy cập như OmniRoute: nó có thể đọc tệp, chạy chương trình và sử dụng mạng, bất kỳ quyền nào mà bảng kê khai của nó khai báo. Chỉ cài đặt các plugin mà bạn tin tưởng.",
     "activate": "Kích hoạt",
     "deactivate": "Hủy kích hoạt",
     "uninstall": "Gỡ cài đặt",
