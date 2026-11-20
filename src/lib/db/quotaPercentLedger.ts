@@ -47,7 +47,11 @@ interface CounterRow {
   updated_at: number;
 }
 
-/** UPSERT: tokens += delta, updated_at = nowMs. No read. */
+/**
+ * UPSERT: tokens += delta, updated_at = nowMs. No read. An amount that is not a finite number
+ * above zero changes nothing: a stored Infinity would poison the counter for good, and a negative
+ * amount would drop it below the key's watermark so the book would charge the whole counter again.
+ */
 export function addPercentLedgerTokens(
   poolId: string,
   connectionId: string,
@@ -55,6 +59,7 @@ export function addPercentLedgerTokens(
   tokens: number,
   nowMs: number
 ): void {
+  if (!Number.isFinite(tokens) || tokens <= 0) return;
   getDb()
     .prepare(
       `INSERT INTO quota_percent_ledger_tokens (pool_id, connection_id, api_key_id, tokens, updated_at)
@@ -70,7 +75,22 @@ export function addPercentLedgerTokens(
 function isKeyState(value: unknown): value is LedgerKeyState {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   const { attributed, seenTokens } = value as Record<string, unknown>;
-  return Number.isFinite(attributed) && Number.isFinite(seenTokens);
+  return isUsableNumber(attributed) && isUsableNumber(seenTokens);
+}
+
+/** A finite number >= 0. */
+function isUsableNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+/** Every number of the state is finite: anything else would survive every later transition. */
+function isStorableState(state: LedgerState): boolean {
+  const numbers = [state.rev, state.last, state.external, state.readAt, state.updatedAt];
+  if (state.resetAt !== null) numbers.push(state.resetAt);
+  for (const keyState of Object.values(state.keys)) {
+    numbers.push(keyState.attributed, keyState.seenTokens);
+  }
+  return numbers.every((n) => typeof n === "number" && Number.isFinite(n));
 }
 
 function parseKeysJson(json: string): unknown {
@@ -82,8 +102,8 @@ function parseKeysJson(json: string): unknown {
 }
 
 /**
- * The key map of a stored book. An entry that is not `{ attributed, seenTokens }` numbers is
- * dropped, and a map that does not parse to a plain object loses every entry; `complete` is false
+ * The key map of a stored book. An entry that is not `{ attributed, seenTokens }` numbers, both
+ * finite and >= 0, is dropped, and a map that does not parse to a plain object loses every entry; `complete` is false
  * then, so the caller moves the dropped part to external instead of failing the request.
  */
 function readKeys(json: string): { keys: Record<string, LedgerKeyState>; complete: boolean } {
@@ -146,8 +166,12 @@ export function readPercentLedger(key: LedgerKey): LedgerSnapshot {
   return { state: row ? rowToState(row) : null, counters };
 }
 
-/** Compare-and-set: stores `next` only when the stored revision is next.rev - 1 (no row counts as 0). */
+/**
+ * Compare-and-set: stores `next` only when the stored revision is next.rev - 1 (no row counts as 0).
+ * A state with a number that is not finite is never stored (false, nothing written).
+ */
 export function commitPercentLedger(key: LedgerKey, next: LedgerState): boolean {
+  if (!isStorableState(next)) return false;
   // One statement, so the revision check and the write cannot interleave with another writer.
   // The SELECT's WHERE keeps a missing row from being created at a revision other than 1; the
   // DO UPDATE's WHERE leaves an existing row untouched unless its revision is next.rev - 1.

@@ -101,6 +101,57 @@ test("a malformed key entry is dropped and its part of the bar becomes external"
   }
 });
 
+test("a stored key entry with a negative number is dropped and its part becomes external", () => {
+  const negative = { ...K, poolId: "negative" };
+  commitPercentLedger(negative, state(1, { last: 0.25, external: 0 }));
+  core
+    .getDbInstance()
+    .prepare(
+      `UPDATE quota_percent_ledger
+       SET keys_json = '{"a":{"attributed":-0.1,"seenTokens":7},"b":{"attributed":0.1,"seenTokens":-1},"c":{"attributed":0.05,"seenTokens":3}}'
+       WHERE pool_id = 'negative'`
+    )
+    .run();
+  const { state: s } = readPercentLedger(negative);
+  assert.deepEqual(s?.keys, { c: { attributed: 0.05, seenTokens: 3 } });
+  assert.equal(s?.external, 0.25 - 0.05);
+});
+
+test("a token amount that is not a finite number above zero changes nothing", () => {
+  const guarded = { ...K, poolId: "guarded-tokens" };
+  addPercentLedgerTokens(guarded.poolId, "c1", "a", 10, NOW);
+  for (const bad of [Infinity, -Infinity, Number.NaN, -5, 0]) {
+    addPercentLedgerTokens(guarded.poolId, "c1", "a", bad, NOW + 1);
+    addPercentLedgerTokens(guarded.poolId, "c1", "b", bad, NOW + 1);
+  }
+  assert.deepEqual(readPercentLedger(guarded).counters, { a: { tokens: 10, updatedAt: NOW } });
+});
+
+test("a state with a number that is not finite is never stored", () => {
+  const guarded = { ...K, poolId: "guarded-state" };
+  assert.equal(commitPercentLedger(guarded, state(1)), true);
+  const unusable: Array<Partial<LedgerState>> = [
+    { rev: Number.NaN },
+    { rev: Infinity },
+    { last: Number.NaN },
+    { external: Infinity },
+    { readAt: Number.NaN },
+    { updatedAt: Infinity },
+    { resetAt: Infinity },
+    { keys: { a: { attributed: Number.NaN, seenTokens: 4_000 } } },
+    { keys: { a: { attributed: 0.48, seenTokens: Infinity } } },
+  ];
+  for (const over of unusable) {
+    assert.equal(
+      commitPercentLedger(guarded, { ...state(2), ...over }),
+      false,
+      JSON.stringify(over)
+    );
+    assert.deepEqual(readPercentLedger(guarded).state, state(1));
+  }
+  assert.equal(commitPercentLedger(guarded, state(2, { resetAt: NOW + DAY })), true);
+});
+
 test("scheduled cleanup removes book rows idle for two monthly windows and keeps live ones", async () => {
   for (const [pool, age] of [
     ["old", 61],
