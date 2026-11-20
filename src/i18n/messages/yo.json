@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Jeki aarin-ibaraẹnisọrọ eto awọn ifiranṣẹ ni ibi",
     "requireUserLastMessageDescription": "Fun awọn ṣiṣan oke ti o kọ ifilọ oluranlọwọ: ju awọn oluranlọwọ itọpa silẹ (ko si irinṣẹ_use) ṣaaju fifiranṣẹ. Awoṣe naa le ṣe atunṣe idahun iṣaaju rẹ.",
     "requireUserLastMessageLabel": "Beere ibaraẹnisọrọ lati pari pẹlu ifiranṣẹ olumulo kan",
+    "strictChatHistoryDescription": "Ó ń tún àwọn ìtẹ̀lé ìpè irinṣẹ́ tí ó dá dúró ṣe, ó sì ń so àwọn ìfiránṣẹ́ olùrànlọ́wọ́ tí ó tẹ̀ lé ara wọn pọ̀ kí ó tó fi wọn ránṣẹ́ sí àwọn olùpèsè tí ó bá OpenAI mu tí wọ́n sì ń lo òfin líle.",
+    "strictChatHistoryLabel": "Àtúnṣe ìtàn ìjíròrò fún àwọn olùpèsè tí ó ní òfin líle",
     "bulkPasteAdded": "{count, plural, one {A ṣàfikún kọ́kọ́rọ́ 1} other {A ṣàfikún àwọn kọ́kọ́rọ́ #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {A fò ó kọjá ẹ̀dà àdáwòkọ 1} other {A fò ó kọjá àwọn ẹ̀dà àdáwòkọ #}}",
     "bulkPasteHint": "Lẹ kọ́kọ́rọ́ API kan sí ìlà kọ̀ọ̀kan. A ó fo àwọn ìlà òfo kọjá, a ó sì fo àwọn kọ́kọ́rọ́ àdáwòkọ kọjá.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Yọ kọ́kọ́rọ́ kúrò"
   },
   "plugins": {
-    "privilegesWarningTitle": "Awọn afikun ṣiṣẹ pẹlu awọn anfani ni kikun",
-    "privilegesWarningBody": "Ohun itanna kan n ṣiṣẹ bi ilana Node.js deede pẹlu iwọle kanna bi OmniRoute: o le ka awọn faili, ṣiṣe awọn eto ati lo nẹtiwọọki, ohunkohun ti awọn igbanilaaye ifihan rẹ n kede. Fi sori ẹrọ awọn afikun nikan ti o gbẹkẹle.",
     "title": "Àwọn àfikún",
     "description": "Fi àwọn àfikún sori ẹrọ kí o sì ṣàkóso wọn láti fa iṣẹ́ OmniRoute gbòòrò sí i",
     "loading": "Ń gbé àwọn àfikún wọlé...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Ṣàyẹ̀wò fún Àwọn Àfikún",
     "noPlugins": "Kò sí àfikún kankan tí a fi sori ẹrọ",
     "noPluginsDescription": "Fi àwọn fódà àfikún sínú ~/.omniroute/plugins/ kí o sì tẹ Ṣàyẹ̀wò.",
+    "privilegesWarningTitle": "Awọn afikun ṣiṣẹ pẹlu awọn anfani ni kikun",
+    "privilegesWarningBody": "Ohun itanna kan n ṣiṣẹ bi ilana Node.js deede pẹlu iwọle kanna bi OmniRoute: o le ka awọn faili, ṣiṣe awọn eto ati lo nẹtiwọọki, ohunkohun ti awọn igbanilaaye ifihan rẹ n kede. Fi sori ẹrọ awọn afikun nikan ti o gbẹkẹle.",
     "activate": "Mú ṣiṣẹ́",
     "deactivate": "Mú kúrò ní ṣíṣiṣẹ́",
     "uninstall": "Yọ kúrò",

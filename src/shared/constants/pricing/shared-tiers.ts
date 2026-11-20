@@ -81,6 +81,17 @@ export const GEMINI_4_ARGON_PROMO_PRICING = {
   cache_creation: 2.0,
 };
 
+// Gemini 4 Hydrogen flat paid-tier pricing ($1.50/$7.50/$0.075 input/output/cached input).
+// Successor to Gemini 3.8 Flash; no introductory discount.
+// https://aistudio.google.com/docs/whats-new-gemini-4-hydrogen
+export const GEMINI_4_HYDROGEN_PRICING = {
+  input: 1.5,
+  output: 7.5,
+  cached: 0.075,
+  reasoning: 7.5,
+  cache_creation: 1.5,
+};
+
 // Gemini 3.8 Flash paid-tier pricing through 2026-12-31; standard becomes
 // $1.50/$7.50/$0.15 (input/output/cached input) on 2027-01-01. Keep separate
 // from 3.7 so their rates can diverge.

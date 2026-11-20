@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Konuşma ortasında sistem mesajlarını yerinde tutun",
     "requireUserLastMessageDescription": "Asistan ön doldurmasını reddeden yukarı akışlar için: göndermeden önce sondaki asistan dönüşlerini bırakın (tool_use yok). Model önceki cevabını yeniden oluşturabilir.",
     "requireUserLastMessageLabel": "Konuşmanın bir kullanıcı mesajıyla bitmesini zorunlu kıl",
+    "strictChatHistoryDescription": "Kesintiye uğrayan araç çağrısı dizilerini onarır ve art arda gelen asistan iletilerini, katı kurallar uygulayan OpenAI uyumlu sağlayıcılara göndermeden önce birleştirir.",
+    "strictChatHistoryLabel": "Katı kurallı sağlayıcılar için sohbet geçmişini onarma",
     "bulkPasteAdded": "{count, plural, one {1 anahtar eklendi} other {# anahtar eklendi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 yinelenen anahtar atlandı} other {# yinelenen anahtar atlandı}}",
     "bulkPasteHint": "Her satıra bir API anahtarı yapıştırın. Boş satırlar yok sayılır ve yinelenen anahtarlar atlanır.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Anahtarı kaldır"
   },
   "plugins": {
-    "privilegesWarningTitle": "Eklentiler tam ayrıcalıklarla çalışır",
-    "privilegesWarningBody": "Bir eklenti, OmniRoute ile aynı erişime sahip normal bir Node.js işlemi olarak çalışır: manifestosunda belirtilen izinler ne olursa olsun dosyaları okuyabilir, programları çalıştırabilir ve ağı kullanabilir. Yalnızca güvendiğiniz eklentileri yükleyin.",
     "title": "Eklentiler",
     "description": "OmniRoute işlevselliğini genişleten eklentileri yükleyin ve yönetin",
     "loading": "Eklentiler yükleniyor...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Eklentileri Tara",
     "noPlugins": "Yüklü eklenti yok",
     "noPluginsDescription": "Eklenti dizinlerini ~/.omniroute/plugins/ içine yerleştirin ve Tara'ya tıklayın.",
+    "privilegesWarningTitle": "Eklentiler tam ayrıcalıklarla çalışır",
+    "privilegesWarningBody": "Bir eklenti, OmniRoute ile aynı erişime sahip normal bir Node.js işlemi olarak çalışır: manifestosunda belirtilen izinler ne olursa olsun dosyaları okuyabilir, programları çalıştırabilir ve ağı kullanabilir. Yalnızca güvendiğiniz eklentileri yükleyin.",
     "activate": "Etkinleştir",
     "deactivate": "Devre dışı bırak",
     "uninstall": "Kaldır",

@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Hold beskeder midt i samtalen på plads",
     "requireUserLastMessageDescription": "For upstreams, der afviser assistent-forudfyldning: slip efterfølgende assistentsving (ingen tool_use) før afsendelse. Modellen kan genskabe sit tidligere svar.",
     "requireUserLastMessageLabel": "Kræv, at samtalen afsluttes med en brugerbesked",
+    "strictChatHistoryDescription": "Reparerer afbrudte sekvenser af værktøjskald og fletter assistentens sammenhængende beskeder, før de sendes til udbydere, der er kompatible med OpenAI og håndhæver strenge regler.",
+    "strictChatHistoryLabel": "Reparation af chathistorik til strenge udbydere",
     "bulkPasteAdded": "{count, plural, one {1 nøgle tilføjet} other {# nøgler tilføjet}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dublet sprunget over} other {# dubletter sprunget over}}",
     "bulkPasteHint": "Indsæt én API-nøgle pr. linje. Tomme linjer ignoreres, og dublerede nøgler springes over.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Fjern nøgle"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugins kører med fulde privilegier",
-    "privilegesWarningBody": "Et plugin kører som en almindelig Node.js proces med samme adgang som OmniRoute: den kan læse filer, køre programmer og bruge netværket, uanset hvilke tilladelser dets manifest erklærer. Installer kun plugins, du har tillid til.",
     "title": "Plugins",
     "description": "Installer og administrer plugins for at udvide funktionaliteten i OmniRoute",
     "loading": "Indlæser plugins...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Scan efter plugins",
     "noPlugins": "Ingen plugins installeret",
     "noPluginsDescription": "Placer pluginmapper i ~/.omniroute/plugins/, og klik på Scan.",
+    "privilegesWarningTitle": "Plugins kører med fulde privilegier",
+    "privilegesWarningBody": "Et plugin kører som en almindelig Node.js proces med samme adgang som OmniRoute: den kan læse filer, køre programmer og bruge netværket, uanset hvilke tilladelser dets manifest erklærer. Installer kun plugins, du har tillid til.",
     "activate": "Aktivér",
     "deactivate": "Deaktivér",
     "uninstall": "Afinstaller",
