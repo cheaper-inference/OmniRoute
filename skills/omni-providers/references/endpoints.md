@@ -24,7 +24,7 @@
 - [`POST /api/providers/agy-auth/apply-local`](#post-apiprovidersagy-authapply-local)
 - [`GET /api/provider-nodes`](#get-apiprovider-nodes)
 - [`POST /api/provider-nodes`](#post-apiprovider-nodes)
-- [`PATCH /api/provider-nodes/{id}`](#patch-apiprovider-nodesid)
+- [`PUT /api/provider-nodes/{id}`](#put-apiprovider-nodesid)
 - [`DELETE /api/provider-nodes/{id}`](#delete-apiprovider-nodesid)
 - [`POST /api/provider-nodes/validate`](#post-apiprovider-nodesvalidate)
 - [`GET /api/provider-models`](#get-apiprovider-models)
@@ -298,14 +298,14 @@ curl -X POST http://localhost:20128/api/provider-nodes \
   -d '{}'
 ```
 
-### PATCH /api/provider-nodes/{id}
+### PUT /api/provider-nodes/{id}
 
 Update provider node
 
 Accepts `apiType` and `customJson` for custom JSON API nodes (see POST).
 
 ```bash
-curl -X PATCH http://localhost:20128/api/provider-nodes/{id} \
+curl -X PUT http://localhost:20128/api/provider-nodes/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

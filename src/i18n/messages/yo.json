@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Yọ kọ́kọ́rọ́ kúrò"
   },
   "plugins": {
+    "privilegesWarningTitle": "Awọn afikun ṣiṣẹ pẹlu awọn anfani ni kikun",
+    "privilegesWarningBody": "Ohun itanna kan n ṣiṣẹ bi ilana Node.js deede pẹlu iwọle kanna bi OmniRoute: o le ka awọn faili, ṣiṣe awọn eto ati lo nẹtiwọọki, ohunkohun ti awọn igbanilaaye ifihan rẹ n kede. Fi sori ẹrọ awọn afikun nikan ti o gbẹkẹle.",
     "title": "Àwọn àfikún",
     "description": "Fi àwọn àfikún sori ẹrọ kí o sì ṣàkóso wọn láti fa iṣẹ́ OmniRoute gbòòrò sí i",
     "loading": "Ń gbé àwọn àfikún wọlé...",

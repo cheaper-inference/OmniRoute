@@ -473,7 +473,7 @@ Kiro के दो अकाउंट साथ-साथ जोड़ने क
 2. **स्थायी समाधान:** अपने `docker run` कमांड में `-p 127.0.0.1:20128:20128` का उपयोग करके स्पष्ट रूप से IPv4 से बाइंड करें:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    यह IPv4 बाइंड को बाध्य करता है और प्रॉक्सी को सभी होस्ट इंटरफ़ेस पर उजागर होने से भी रोकता है।
 

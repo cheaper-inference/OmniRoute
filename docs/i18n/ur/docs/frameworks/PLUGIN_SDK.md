@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ایک فیکٹری فنکشن جو طے شدہ اقدار کے ساتھ ایک Plugin آبجیکٹ بناتا ہے۔
+فیکٹری فنکشن جو ڈیفالٹس کے ساتھ پلگ ان آبجیکٹ بناتا ہے۔
 
 **پیرامیٹرز:**
 
-- `name` (string، درکار) — kebab-case میں Plugin کا نام
-- `priority` (number، اختیاری، طے شدہ: 100) — کم قدر والا پہلے چلتا ہے
-- `enabled` (boolean، اختیاری، طے شدہ: true) — کیا فعال حالت میں شروع کیا جائے؟
-- `onRequest` (function، اختیاری) — chat handler سے پہلے چلتا ہے
-- `onResponse` (function، اختیاری) — chat handler کے بعد چلتا ہے
-- `onError` (function، اختیاری) — handler میں خرابی آنے پر چلتا ہے
+- `name` (سٹرنگ، مطلوبہ) — پلگ ان کا نام کباب کیس میں
+- `priority` (نمبر، اختیاری، ڈیفالٹ: 100) — لوئر پہلے چلتا ہے
+- `enabled` (بولین، اختیاری، ڈیفالٹ: سچ) — اسٹارٹ فعال ہے؟
+- `onRequest` (فنکشن، اختیاری) — چیٹ ہینڈلر سے پہلے چلتا ہے۔
+- `onResponse` (فنکشن، اختیاری) — چیٹ ہینڈلر کے بعد چلتا ہے۔
+- `onError` (فنکشن، اختیاری) — ہینڈلر کی غلطی پر چلتا ہے۔
 
 ### `blockRequest(response?): BlockingHookResult`
 
-درخواست کو مسدود کریں اور اختیاری طور پر حسبِ ضرورت جواب واپس کریں۔
+درخواست کو مسدود کریں اور اختیاری طور پر حسب ضرورت جواب واپس کریں۔
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-درخواست کی body کو provider تک پہنچنے سے پہلے تبدیل کریں۔
+فراہم کنندہ تک پہنچنے سے پہلے درخواست کی باڈی میں ترمیم کریں۔
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-درخواست کے context کے ساتھ metadata منسلک کریں۔
+درخواست کے سیاق و سباق میں میٹا ڈیٹا منسلک کریں۔
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin کا Context (`PluginContext`)
+## پلگ ان سیاق و سباق (`PluginContext`)
 
-| فیلڈ        | قسم                       | وضاحت                        |
-| ----------- | ------------------------- | ---------------------------- |
-| `requestId` | `string`                  | درخواست کا منفرد شناخت کنندہ |
-| `model`     | `string`                  | مطلوبہ model کا نام          |
-| `provider`  | `string`                  | ہدف provider ID              |
-| `body`      | `Record<string, unknown>` | درخواست کی body              |
-| `headers`   | `Record<string, string>`  | درخواست کے headers           |
-| `metadata`  | `Record<string, unknown>` | قابلِ ترمیم metadata         |
-| `timestamp` | `number`                  | درخواست کا timestamp         |
+| میدان        | قسم                       | تفصیل                             |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | منفرد درخواست شناخت کنندہ         |
+| `model`      | `string`                  | ماڈل کے نام کی درخواست کی۔        |
+| `provider`   | `string`                  | ہدف فراہم کنندہ ID                |
+| `body`       | `Record<string, unknown>` | جسم کی درخواست کریں۔              |
+| `headers`    | `Record<string, string>`  | ہیڈر کی درخواست کریں (نوٹ دیکھیں) |
+| `metadata`   | `Record<string, unknown>` | تغیر پذیر میٹا ڈیٹا               |
+| `timestamp`  | `number`                  | ٹائم اسٹیمپ کی درخواست کریں۔      |
+| `apiKeyInfo` | `object` (اختیاری)        | API کلیدی میٹا ڈیٹا (نوٹ دیکھیں)  |
+
+سیاق و سباق میں کبھی بھی کلائنٹ کی اسناد نہیں ہوتی ہیں: `authorization`، `x-api-key`، `proxy-authorization` اور `cookie` ہیڈر کو ہٹا دیا جاتا ہے (کوئی بھی کیسنگ)، اور `apiKeyInfo` کلید کا میٹا ڈیٹا (جیسے `id`، `name` اور `scopes`) رکھتا ہے لیکن کلیدی قدر یا اس کے فنگر پرنٹ (`redactPluginContext()` ) `src/lib/plugins/hooks.ts` نہیں رکھتا ہے۔ یہ `onRequest`، `onResponse` اور `onError` پر لاگو ہوتا ہے۔
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Hooks کو ترجیح کے ساتھ ترتیب دیا جا سکتا ہے (کم �
 }
 ```
 
-## اجازتوں کا نظام
+## اجازت کا نظام
 
-پلگ اِنز ایک سینڈ باکس شدہ VM سیاق میں چلتے ہیں۔ بیرونی وسائل تک رسائی کے لیے واضح اجازتیں درکار ہوتی ہیں:
+پلگ انز ہیں۔** سینڈ باکس نہیں** . ہر ایک فعال پلگ ان ایک الگ، عام Node.js چائلڈ پروسیس (`loadPlugin()` میں `src/lib/plugins/loader.ts`) کے طور پر اسی آپریٹنگ سسٹم کے صارف کے تحت چلتا ہے OmniRoute، بغیر VM سیاق و سباق اور بغیر Node.js اجازت کے جھنڈے کے۔ پلگ ان کوڈ `node:fs`، `node:child_process`، `fetch` اور ہر دوسری Node.js API استعمال کر سکتا ہے: یہ OmniRoute صارف (بشمول ڈیٹا ڈائرکٹری) کی کسی بھی فائل کو پڑھ اور لکھ سکتا ہے، پروگرام چلا سکتا ہے اور نیٹ ورک تک پہنچ سکتا ہے۔
 
-| اجازت        | فراہم کردہ رسائی                                             |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | صرف پڑھنے کے لیے `process.env` پراکسی                        |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+مینی فیسٹ کا `requires.permissions` `network`، `file-read`، `file-write`، `env` اور `exec` قبول کرتا ہے، لیکن آج رن ٹائم پر صرف `env` اثر ہوتا ہے:
 
-اجازت کے بغیر، متعلقہ گلوبلز سینڈ باکس میں دستیاب نہیں ہوتے۔
+| اجازت                                        | آج کا اثر                                                                                                                                                                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | پلگ ان کا عمل `PORT`, `HOSTNAME`, `TZ` اور `TMPDIR` بھی حاصل کرتا ہے۔ اس کے بغیر، یہ صرف `PATH`، `HOME`، `USER`، `LANG`، `LC_ALL`، `NODE_ENV`، `PLUGIN_ENTRY` اور `PLUGIN_NAME` (مزید Windows پر `SystemRoot` اور `windir` ) وصول کرتا ہے۔ |
+| `network`, `file-read`, `file-write`, `exec` | کوئی نہیں۔ وہ صرف اعلانات ہیں: جب وہ غائب ہوتے ہیں تو کچھ بھی مسدود نہیں ہوتا ہے۔                                                                                                                                                          |
+
+پلگ ان انسٹال کرنا میزبان پر کسی دوسرے پروگرام کو انسٹال کرنے کے مترادف ہے۔ صرف پلگ ان انسٹال کریں جن کے ذریعہ آپ کو بھروسہ ہے۔
 
 ## کنفیگریشن اسکیما
 
@@ -194,7 +196,7 @@ Hooks کو ترجیح کے ساتھ ترتیب دیا جا سکتا ہے (کم �
 
 ## مثالیں
 
-### درخواست لاگر
+### Logger کی درخواست کریں۔
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### شرح محدود کنندہ
+### ریٹ لِمیٹر
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 منٹ
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### جواب کی ہیئت بدلنے والا
+### رسپانس ٹرانسفارمر
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

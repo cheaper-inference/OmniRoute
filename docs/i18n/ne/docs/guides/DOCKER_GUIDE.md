@@ -27,13 +27,9 @@
 
 ---
 
-## द्रुत सञ्चालन
+## द्रुत दौड
 
-> **एउटै कमाण्डमा self-host गर्ने?**  
-> [Self-Host मार्गदर्शिका](../getting-started/SELF_HOST_GUIDE.md) हेर्नुहोस् —
-> `docker compose -f docker-compose.selfhost.yml up -d` (प्रकाशित image +
-> Redis, loopback मा मात्र, प्रोफाइल छनोट आवश्यक छैन)। तलको द्रुत सञ्चालन भनेको
-> पहिले नै अन्यत्र Redis चलाइरहेका प्रयोगकर्ताहरूका लागि एकल-container विधि हो।
+> **एक आदेश मा स्व-होस्ट?** [सेल्फ-होस्ट गाइड](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (प्रकाशित छवि + Redis, लुपब्याक-मात्र, कुनै प्रोफाइल विकल्प छैन) हेर्नुहोस्। तलको द्रुत रन पहिले नै अन्यत्र Redis चलाउने प्रयोगकर्ताहरूको लागि एकल कन्टेनर मार्ग हो।
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## Environment फाइलसहित
+## वातावरण फाइल संग
 
 ```bash
-# पहिले .env प्रतिलिपि गरेर सम्पादन गर्नुहोस्
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 उत्पादन स्ट्याक डेभ compose सँग समानान्तर रूपमा चल्छ (कन्टेनरका नाम, पोर्ट र भोल्युमहरू फरक छन्), त्यसैले उत्पादन चलिरहेकै बेला तपाईं स्थानीय रूपमा पुनरावृत्त सुधार जारी राख्न सक्नुहुन्छ।
 
-## Dockerfile का चरणहरू
+## डकरफाइल चरणहरू
 
-रिपोजिटरीसँग बहु-चरणीय Dockerfile (`Dockerfile`) आउँछ। चारवटा चरण उपलब्ध छन्; आफ्नो प्रयोगका लागि सही `target` छान्नुहोस्।
+भण्डारले बहु-चरण डकरफाइल (`Dockerfile`) पठाउँछ। चार चरणहरू खुला छन्; तपाईंको प्रयोग केसको लागि सही `target` छान्नुहोस्।
 
-| चरण           | आधार इमेज             | उद्देश्य                                                                                                                                                                                                                                                                                 |
-| ------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | निर्भरताहरू स्थापना गर्छ (`npm ci --legacy-peer-deps`) र `npm run build` चलाउँछ (पूर्वनिर्धारित रूपमा Turbopack — तलको निर्माण-समयका स्रोतहरू हेर्नुहोस्)                                                                                                                                |
-| `runner-base` | `node:26-trixie-slim` | Next.js को स्ट्यान्डअलोन आउटपुटसहितको उत्पादन रनटाइम। **कुनै पनि प्रदायक CLI समावेश गरिएको छैन।**                                                                                                                                                                                        |
-| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` र ग्लोबल CLI हरू थप्छ: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`। **एजेन्टिक कार्यप्रवाहहरूका लागि यसलाई छान्नुहोस्।**                                                                                                      |
-| `runner-web`  | `runner-base`         | वेब-सत्र प्रदायकहरूका लागि Playwright + Chromium ब्राउजर (`--with-deps`) थप्छ: `gemini-web`, `claude-web`, `claude-turnstile`। **ती प्रदायकहरू प्रयोग गर्दा यसलाई छान्नुहोस्** — यो नभएमा साधारण इमेज अनुरोधको समयमा असफल हुन्छ (Release Channels अन्तर्गतको `-web` टिप्पणी हेर्नुहोस्)। |
+| स्टेज         | आधार छवि              | उद्देश्य                                                                                                                                                                                                                                                                              |
+| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | deps (`npm ci --legacy-peer-deps`) स्थापना गर्दछ र `npm run build` चलाउँछ (Turbopack पूर्वनिर्धारित — तल निर्माण-समय स्रोतहरू हेर्नुहोस्)                                                                                                                                             |
+| `runner-base` | `node:26-trixie-slim` | Next.js स्ट्यान्डअलोन आउटपुटको साथ उत्पादन रनटाइम।** कुनै पनि प्रदायक CLIs बन्डल गरिएको छैन।**                                                                                                                                                                                        |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` र ग्लोबल CLIs थप्छ : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`।** एजेन्टिक कार्यप्रवाहका लागि यसलाई छान्नुहोस्।**                                                                                                        |
+| `runner-web`  | `runner-base`         | वेब-सत्र प्रदायकहरूको लागि Playwright + एक क्रोमियम ब्राउजर (`--with-deps`) थप्छ: `gemini-web`, `claude-web`, `claude-turnstile`।** तपाईंले ती प्रदायकहरू प्रयोग गर्दा यसलाई छान्नुहोस्** — सादा छवि बिना अनुरोधको समयमा असफल हुन्छ (रिलिज च्यानलहरू अन्तर्गत `-web` नोट हेर्नुहोस्)। |
 
-कुनै विशिष्ट लक्ष्य म्यानुअल रूपमा निर्माण गर्नुहोस्:
+म्यानुअल रूपमा एक विशिष्ट लक्ष्य बनाउनुहोस्:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### निर्माण-समयका स्रोतहरू
+### निर्माण-समय स्रोतहरू
 
-तीनवटा build arg ले `builder` चरणको लागत नियन्त्रण गर्छन्। तिनीहरू निर्माण-समयका लागि मात्र हुन् —
-`OMNIROUTE_MEMORY_MB` (तल) छुट्टै रनटाइम समायोजन हो।
+`builder` स्टेजको लागत के हो भनेर तीन बिल्ड आर्गले नियन्त्रण गर्छ। तिनीहरू निर्माण-समय मात्र हुन् — `OMNIROUTE_MEMORY_MB` (तल) एक अलग, रनटाइम नब हो।
 
-| Build arg                   | पूर्वनिर्धारित | प्रभाव                                                                                       |
-| --------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`            | `0` ले webpack मार्फत निर्माण गर्छ: न्यून अधिकतम मेमोरी, तर ढिलो। `1` ले Turbopack रोज्छ।    |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`         | सुरु गरिएको `next build` का लागि V8 heap सीमा (`--max-old-space-size`)।                      |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`            | `CIRCLE_NODE_TOTAL` मा मान दिन्छ; Next ले page-data सङ्कलनका लागि `workers = N - 1` निकाल्छ। |
+| अर्ग बनाउनुहोस्             | पूर्वनिर्धारित | प्रभाव                                                                                   |
+| --------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`            | `0` वेबप्याकको साथ बनाउँछ: तल्लो शिखर मेमोरी, ढिलो। `1` ले Turbopack लाई अप्ट गर्दछ।     |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`         | जन्मेको `next build` को लागि V8 हिप छत (`--max-old-space-size`)।                         |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`            | फिड `CIRCLE_NODE_TOTAL`; अर्को पृष्ठ-डेटा संग्रहको लागि `workers = N - 1` प्राप्त गर्दछ। |
 
-ठूलो builder मा बढाउनुपर्ने र सीमित स्रोत भएको निर्माण
-`✓ Compiled successfully` **पछि** बन्द हुँदा शङ्का गर्नुपर्ने समायोजन `OMNIROUTE_BUILD_WORKERS` हो। प्रत्येक
-page-data worker आफ्नै प्रक्रिया हो, र मूल `next build` पनि छुट्टै प्रक्रिया हो;
-प्रत्यक्ष VPS पुनरुत्पादन (issue #7518) मा `NODE_OPTIONS` heap flag बाट स्वतन्त्र रूपमा
-प्रत्येक प्रक्रियाको अधिकतम RSS ~4.5 GB मापन भयो (Turbopack ले V8 heap बाहिरको
-नेटिभ/Rust मेमोरीमा कम्पाइल गर्छ)। पूर्वनिर्धारित `2` (→ 1 worker, जम्मा 2
-प्रक्रिया) प्रकाशन पाइपलाइनले प्रयोग गर्ने 16 GB / 4 vCPU GitHub-hosted runner का लागि
-निर्धारण गरिएको हो। `8` (→ 7 workers) मा त्यो runner को मेमोरी सकियो र
-buildkit ले `ResourceExhausted: ... cannot allocate memory` सहित उक्त चरण असफल बनायो;
-प्रति-प्रक्रिया RSS अनुमान गर्नुको सट्टा प्रत्यक्ष रूपमा मापन गरेपछि
-`3` (→ 2 workers) पनि पर्याप्त भएन। `tests/unit/docker-build-memory-budget.test.ts`
-ले मापन गरिएको मानका आधारमा गणना गर्छ र यीमध्ये कुनै पनि समायोजन
-runner को क्षमताभन्दा ठूलो भएमा असफल हुन्छ।
+`OMNIROUTE_BUILD_WORKERS` ठूला निर्माणकर्तालाई उठाउने र बाध्यकारी निर्माण मर्दा शंका गर्ने व्यक्ति हो।** पछि** `✓ Compiled successfully` प्रत्येक पृष्ठ-डेटा कार्यकर्ता यसको आफ्नै प्रक्रिया हो, र अभिभावक `next build` आफै पनि हो; प्रत्यक्ष VPS प्रजनन (इस्यू #7518) ले प्रत्येक प्रक्रियाको शिखर RSS मापन ~ 4.5 GB मा `NODE_OPTIONS` हिप झण्डाबाट स्वतन्त्र (Turbopack V8 हीप बाहिर native/Rust मेमोरीमा कम्पाइल गर्दछ)। `2` को पूर्वनिर्धारित (→ 1 कार्यकर्ता, 2 प्रक्रियाहरू जम्मा) 16 GB / 4 vCPU GitHub-होस्ट गरिएका धावकहरू प्रकाशन पाइपलाइनले प्रयोग गर्दछ। `8` मा (→ 7 कार्यकर्ताहरू) त्यो धावकको मेमोरी सकियो र बिल्डकिटले `ResourceExhausted: ... cannot allocate memory` को साथ चरण असफल भयो; `3` (→ 2 कार्यकर्ताहरू) अझै पनि फिट भएन एक पटक प्रति-प्रक्रिया RSS अनुमानित गर्नुको सट्टा सीधा मापन गरियो। `tests/unit/docker-build-memory-budget.test.ts` मापन गरिएको आंकडाको विरुद्ध अंकगणित गर्दछ र यदि कुनै नबले धावकलाई पछाडि पार्छ भने असफल हुन्छ।
 
-Turbopack ले V8 heap **बाहिर** रहने नेटिभ Rust मेमोरीमा कम्पाइल गर्छ, त्यसैले
-`OMNIROUTE_BUILD_MEMORY_MB` ले त्यसलाई सीमित गर्दैन। मेमोरी सीमा भएको host मा
-त्यसपछि OOM killer ले कुनै पनि त्रुटि पाठ नदिई निर्माणलाई SIGKILL गर्छ — यो
-`Creating an optimized production build` को बीचमै रोकिन्छ, जुन मेमोरी सकिएको
-अवस्थाभन्दा पनि अड्किएको जस्तो देखिन्छ। त्यसैले `npm run dev` / `npm run build` मा
-Turbopack कोडको पूर्वनिर्धारित विकल्प भए पनि `Dockerfile` ले webpack
-(`OMNIROUTE_USE_TURBOPACK=0`) लाई पूर्वनिर्धारित बनाउँछ: कुनै build arg नभएको सामान्य
-`docker build .` (जुन Railway र अन्य एक-क्लिक host ले चलाउँछन्) मेमोरी-सीमित
-builder मा मौन रूपमा बन्द हुनु हुँदैन। प्रकाशित इमेजहरूले `docker-publish.yml` मा
-पहिल्यै स्पष्ट रूपमा `OMNIROUTE_USE_TURBOPACK=0` पठाउँछन्। प्रशस्त RAM भएको builder मा
-छिटो निर्माणका लागि Turbopack रोज्नुहोस्:
+Turbopack compiles in native Rust memory that lives **outside** the V8 heap, so `OMNIROUTE_BUILD_MEMORY_MB` does not bound it. On a host with a memory ceiling the build is then SIGKILLed by the OOM killer with no error text at all — it simply stops mid-`Creating an optimized production build`, which reads like a hang rather than an out-of-memory. That is why the `Dockerfile` defaults to webpack (`OMNIROUTE_USE_TURBOPACK=0`), unlike `npm run dev` / `npm run build`, where Turbopack is the code default: a bare `docker build .` with no build args (what Railway and other one-click hosts run) must not die silently on a memory-capped builder. The published images already pass `OMNIROUTE_USE_TURBOPACK=0` explicitly in `docker-publish.yml`. On a builder with plenty of RAM, opt into Turbopack for a faster build:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` सक्षम छ, त्यसैले `next build` ले मूल **र** worker
-प्रक्रिया चलाउँछ र प्रत्येकले `OMNIROUTE_BUILD_MEMORY_MB` लाई छुट्टाछुट्टै पालना गर्छ। कन्टेनरको
-सीमा त्यस मानको एक गुणाभन्दा होइन, लगभग दुई गुणाभन्दा बढी राख्नुहोस्।
+`webpackBuildWorker` सक्षम छ, त्यसैले `next build` अभिभावक चलाउँछ** र** एक कार्यकर्ता प्रक्रिया र प्रत्येक सम्मान `OMNIROUTE_BUILD_MEMORY_MB` अलग। कन्टेनर छतलाई त्यो मानको करिब दुई गुणा माथि आकार दिनुहोस्, एक पटक होइन।
 
-यस tree मा मापन गरिएको (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+यो रूख मा मापन (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | कन्टेनर सीमा   | नतिजा                           |
-| --------- | -------------- | ------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | दुवैमा मौन रूपमा OOM-killed     |
-| webpack   | 8 GiB          | build worker SIGKILL भयो        |
-| webpack   | 12 GiB         | सफल भयो, अधिकतम 11.1 GiB पुग्यो |
+| बन्डलर    | कन्टेनर छत     | नतिजा                                  |
+| --------- | -------------- | -------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB | OOM- दुवै मा मारिए, चुपचाप             |
+| वेबप्याक  | 8 GiB          | कार्यकर्ता SIGKILLed निर्माण गर्नुहोस् |
+| वेबप्याक  | 12 GiB         | सफल, 11.1 GiB मा उचाई                  |
 
-### रनटाइमका पूर्वनिर्धारित मानहरू
+### रनटाइम पूर्वनिर्धारितहरू
 
-`runner-base` द्वारा export गरिएका पूर्वनिर्धारित मानहरू: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`।
+`runner-base` द्वारा निर्यात गरिएको पूर्वनिर्धारित: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`।
 
-Docker मा मेमोरीको व्यवहार:
+Docker मा मेमोरी व्यवहार:
 
-- इमेजले `OMNIROUTE_MEMORY_MB=1024` सेट गर्छ र त्यसबाट `NODE_OPTIONS=--max-old-space-size=1024` व्युत्पन्न गर्छ।
-- वास्तविक सर्भर प्रक्रिया standalone launcher द्वारा सुरु गरिन्छ, जसले `OMNIROUTE_MEMORY_MB` पढ्छ र `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` थप्छ।
-- Node ले दोहोरिएको अन्तिम `--max-old-space-size` मान प्रयोग गर्छ, त्यसैले `OMNIROUTE_MEMORY_MB` सेट गर्दा प्रभावकारी Docker heap सीमा नियन्त्रण हुन्छ।
-- इमेजले यसलाई सधैँ सेट गर्ने भएकाले, launcher को आफ्नै RAM-अनुसार समायोजित fallback Docker अन्तर्गत कहिल्यै लागू हुँदैन। workload का लागि यसलाई स्पष्ट रूपमा बढाउनुहोस् (तलको तालिका)। coding-agent `/v1/responses` का लागि `2048` अझै पनि अपर्याप्त छ।
+- छविले `OMNIROUTE_MEMORY_MB=1024` सेट गर्छ र यसबाट `NODE_OPTIONS=--max-old-space-size=1024` लिन्छ।
+- वास्तविक सर्भर प्रक्रिया स्ट्यान्डअलोन लन्चरद्वारा सुरु हुन्छ, जसले `OMNIROUTE_MEMORY_MB` पढ्छ र `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` जोड्छ।
+- नोडले पछिल्लो पटक दोहोरिएको `--max-old-space-size` मान प्रयोग गर्दछ, त्यसैले `OMNIROUTE_MEMORY_MB` सेटिङले प्रभावकारी Docker हिप सीमा नियन्त्रण गर्छ।
+- किनभने छविले सधैं यसलाई सेट गर्छ, लन्चरको आफ्नै RAM-क्यालिब्रेट गरिएको फलब्याक Docker अन्तर्गत लागू हुँदैन। कार्यभारको लागि यसलाई स्पष्ट रूपमा बढाउनुहोस् (तलको तालिका)। कोडिङ-एजेन्ट `/v1/responses` को लागि `2048` अझै धेरै सानो छ।
 
-### coding agent हरूका लागि runtime RAM
+### कोडिङ एजेन्टहरूको लागि रनटाइम RAM
 
-1 GiB को Docker पूर्वनिर्धारित मान dashboard/हल्का chat का लागि न्यूनतम सीमा हो, production आकार होइन। लामो `POST /v1/responses` body हरूले (सयौँ message, दर्जनौँ tool) compression का क्रममा धेरै in-memory graph हरू कायम राख्छन्। एकै समयमा चलिरहेका ~3 MiB / ~750k-token का दुई request ले **12 GiB** old-space मा V8 बन्द गराएका छन् (`FATAL ERROR: Reached heap limit`) र 16 GiB cgroup OOM पनि निम्त्याएका छन्। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) हेर्नुहोस्।
+1 GiB Docker पूर्वनिर्धारित एक dashboard/light-chat फ्लोर हो, उत्पादन आकार होइन। लामो `POST /v1/responses` बडीहरू (सयौं सन्देशहरू, दशौं उपकरणहरू) कम्प्रेसनको समयमा धेरै इन-मेमोरी ग्राफहरू राख्छन्। दुई ओभरल्यापिङ ~ 3 MiB / ~ 750k-टोकन अनुरोधहरूले V8 लाई a मा रद्द गरेको छ।** 12 GiB** पुरानो-स्पेस (`FATAL ERROR: Reached heap limit`) र 16 GiB cgroup OOM पनि हिट गर्नुहोस्। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) हेर्नुहोस्।
 
-**cgroup `--memory` लाई heap भन्दा बढी** आकार दिनुहोस् — native buffer, SQLite, र compression का मध्यवर्ती data V8 बाहिर रहन्छन्।
+साइज** cgroup `--memory` ढेर माथि** — नेटिभ बफरहरू, SQLite, र कम्प्रेसन मध्यवर्तीहरू V8 बाहिर बस्छन्।
 
-| Workload                              | `OMNIROUTE_MEMORY_MB`              | Container / cgroup               | टिप्पणी                                                                                             |
-| ------------------------------------- | ---------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Dashboard, एउटा हल्का chat            | `1024` (इमेजको पूर्वनिर्धारित मान) | ≥2 GiB                           |                                                                                                     |
-| एउटा coding agent (Claude/Codex/Grok) | `8192`                             | ≥10 GiB                          | सामान्य single-session `/v1/responses`                                                              |
-| एकै समयमा दुईवटा लामा `/v1/responses` | `10240`–`12288`                    | ≥12–16 GiB                       | ~12 GiB heap मा मापन गरिएको V8 abort                                                                |
-| एकै समयमा तीन वा बढी लामा context     | एउटै process मा नगर्नुहोस्         | क्रमिक रूपमा चलाउनुहोस् / थप RAM | पूर्वनिर्धारित heavyweight admission मा 1 in-flight हुन्छ; RAM नबढाई यसलाई बढाउँदा abort फेरि हुन्छ |
+| कार्यभार                            | `OMNIROUTE_MEMORY_MB`       | कन्टेनर / cgroup    | नोटहरू                                                                                             |
+| ----------------------------------- | --------------------------- | ------------------- | -------------------------------------------------------------------------------------------------- |
+| ड्यासबोर्ड, एक हल्का च्याट          | `1024` (छवि पूर्वनिर्धारित) | ≥2 GiB              |                                                                                                    |
+| एक कोडिङ एजेन्ट (Claude/Codex/Grok) | `8192`                      | ≥10 GiB             | विशिष्ट एकल-सत्र `/v1/responses`                                                                   |
+| दुई समवर्ती लामो `/v1/responses`    | `10240`–`12288`             | ≥12–16 GiB          | मापन गरिएको V8 ~ 12 GiB हिपमा रद्द गर्नुहोस्                                                       |
+| तीन + समवर्ती लामो सन्दर्भ          | एक प्रक्रियामा नगर्नुहोस्   | क्रमबद्ध / अधिक RAM | पूर्वनिर्धारित हेवीवेट प्रवेश 1 इन-फ्लाइट हो; RAM बिना यसलाई उठाउनुले गर्भपातलाई पुन: परिचय गराउँछ |
 
-bare metal मा `omniroute serve` ले `OMNIROUTE_MEMORY_MB` **सेट नगरिएको** अवस्थामा RAM को ~35% अनुसार समायोजन गर्छ (`[512, 4096]` भित्र सीमित)। Docker ले सधैँ `1024` सेट गर्ने भएकाले, आधिकारिक इमेजमा उक्त समायोजन कहिल्यै चल्दैन।
+बेयर मेटलमा`omniroute serve` RAM को 35% ~(क्लम्प्ड `[512, 4096]`) क्यालिब्रेट गर्दछ जब `OMNIROUTE_MEMORY_MB` हुन्छ** सेट नगरिएको** । Docker सधैं `1024` सेट गर्छ, ताकि क्यालिब्रेसन आधिकारिक छविमा कहिल्यै चल्दैन।
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## महत्त्वपूर्ण वातावरणीय चरहरू
@@ -364,13 +335,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml` का लागि होस्ट-साइड ड्यासबोर्ड पोर्ट                                                                                                                                                                                                                                   | `20130`                |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` साइडकारका लागि होस्ट-साइड पोर्ट                                                                                                                                                                                                                                                   | `8317`                 |
 
-## उपपथमा रिभर्स प्रोक्सी (Traefik / nginx)
+## सबपाथमा रिभर्स प्रोक्सी (Traefik / nginx)
 
-Next.js `basePath` लाई स्ट्यान्डअलोन बन्डलमा कम्पाइल गरिन्छ। OmniRoute ले एपको मूलमा रहेको एउटा सेन्टिनल फाइलमा बिल्ड गरिएको मान अभिलेख गर्छ (`npm run build` का क्रममा लेखिन्छ; `scripts/docker/ensure-docker-base-path.mjs` द्वारा पढिन्छ) र कन्टेनर सुरु हुँदा त्यसलाई `OMNIROUTE_BASE_PATH` सँग तुलना गर्छ। तिनीहरू फरक हुँदा र इमेज डोमेनको मूलका लागि बिल्ड गरिएको हुँदा, `node dev/run-standalone.mjs` चल्नुअघि एन्ट्रीपोइन्टले स्ट्यान्डअलोन म्यानिफेस्टहरू, इम्बेड गरिएका `basePath`/`assetPrefix` लिटरलहरू (Next 16 ले SSR एसेट URL हरू `assetPrefix` बाट मात्र रेन्डर गर्छ — प्याचरले उपपथलाई यसमा पनि प्रतिबिम्बित गर्छ), बिल्ड गरिएका `/_next/static` एसेट URL हरू (क्लाइन्ट-रेफरेन्स म्यानिफेस्टहरू, मिडिया इम्पोर्टहरू, पहिले नै रेन्डर गरिएका त्रुटि पृष्ठहरू) र क्लाइन्ट `process.env` शिमलाई पुनर्लेखन गर्छ।
+Next.js `basePath` स्ट्यान्डअलोन बन्डलमा कम्पाइल गरिएको छ। OmniRoute एप रूटमा सेन्टिनेल फाइलमा बेक्ड मान रेकर्ड गर्दछ ( `npm run build` समयमा लेखिएको; `scripts/docker/ensure-docker-base-path.mjs` द्वारा पढिएको) र कन्टेनर सुरु हुँदा `OMNIROUTE_BASE_PATH` सँग तुलना गर्दछ। जब तिनीहरू फरक हुन्छन् र छवि डोमेन रूटको लागि बनाइएको थियो, एन्ट्रीपोइन्टले स्ट्यान्डअलोन प्रकट गर्दछ, इम्बेडेड `basePath`/`assetPrefix` लिटरलहरू पुन: लेख्छ (अर्को 16 ले `assetPrefix` एक्लो — बाट SSR सम्पत्ति URLs रेन्डर गर्दछ), प्याचरले यसमा सबपाथ मिरर URLs ( `/_next/static` को रूपमा) manifests, media imports, prerendered error pages) र `node dev/run-standalone.mjs` रन अघि क्लाइन्ट `process.env` shim।
 
-### Compose बिल्ड (सिफारिस गरिएको)
+### रचना रचना (सिफारिस गरिएको)
 
-इमेज र रनटाइम एकरूप होऊन् भनेर `.env` मा दुवै भेरिएबल सेट गर्नुहोस्, त्यसपछि पुनः बिल्ड गर्नुहोस्:
+दुबै चरहरू `.env` मा सेट गर्नुहोस्, त्यसपछि छवि र रनटाइम सहमत हुने गरी पुन: निर्माण गर्नुहोस्:
 
 ```bash
 # .env
@@ -382,53 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` ले `OMNIROUTE_BASE_PATH` लाई Docker बिल्ड-आर्गका रूपमा र रनटाइम वातावरण भेरिएबलका रूपमा पठाउँछ।
+`docker-compose.yml` ले `OMNIROUTE_BASE_PATH` Docker बिल्ड-आर्ग र रनटाइम वातावरण चरको रूपमा फर्वार्ड गर्छ।
 
-### पहिले नै बिल्ड गरिएको रुट इमेज + रनटाइम उपपथ
+### पूर्व-निर्मित रूट छवि + रनटाइम सबपाथ
 
-प्रकाशित `diegosouzapw/omniroute:*` इमेजहरू डोमेनको मूलका लागि बिल्ड गरिएका हुन्छन्। तपाईं अझै पनि रनटाइममा `OMNIROUTE_BASE_PATH` सेट गर्न सक्नुहुन्छ; कन्टेनरले स्टार्टअपमा बन्डललाई एकपटक प्याच गर्छ। यसलाई मेल खाने सार्वजनिक ओरिजिनसँग जोडा मिलाउनुहोस्:
+प्रकाशित `cheaperinference/omniroute:*` छविहरू डोमेन रूटको लागि बनाइएका छन्। तपाइँ अझै पनि रनटाइम मा `OMNIROUTE_BASE_PATH` सेट गर्न सक्नुहुन्छ; कन्टेनरले स्टार्टअपमा एक पटक बन्डललाई प्याच गर्दछ। मिल्दो सार्वजनिक उत्पत्तिसँग जोड्नुहोस्:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-**पूर्ण** बाह्य पथ फर्वार्ड गर्न रिभर्स प्रोक्सी कन्फिगर गर्नुहोस् (प्रिफिक्स नहटाउनुहोस्)। Traefik ले `StripPrefix` बिना `PathPrefix(`/omniroute`)` लाई कन्टेनरतर्फ रुट गर्नुपर्छ, जसले गर्दा Next.js ले `/omniroute/...` प्राप्त गर्छ र `/omniroute/_next/...` बाट एसेटहरू उपलब्ध गराउँछ।
+फर्वार्ड गर्न रिभर्स प्रोक्सी कन्फिगर गर्नुहोस्** पूर्ण** बाह्य मार्ग (उपसर्ग नछोड्नुहोस्)। Traefik ले `PathPrefix(`/omniroute `)` लाई `StripPrefix` बिना कन्टेनरमा रुट गर्नुपर्छ, त्यसैले Next.js `/omniroute/...` प्राप्त गर्छ र `/omniroute/_next/...` बाट सम्पत्तिहरू प्रदान गर्दछ।
 
-Docker हेल्थचेकले सक्रिय `OMNIROUTE_BASE_PATH` प्रिफिक्स जोडिएको हल्का `/healthz` लाइफसाइकल एन्डपोइन्ट जाँच्छ। मानवीय/ड्यासबोर्ड निदानका लागि `/api/monitoring/health` उपलब्ध रहन्छ; कन्टेनरको HEALTHCHECK लाई पुनः त्यतैतर्फ निर्देशित गर्न (उदाहरणका लागि, गहन स्वास्थ्य जाँच लागू गर्न) `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` सेट गर्नुहोस्। त्यो पथ एउटा **गहन** जाँच हो (DB + मोनिटरिङ सारांश) — तपाईंले पुनः सक्षम गर्ने विकल्प रोज्नुभयो भने Docker को कम आवृत्तिमा चल्ने `HEALTHCHECK` का लागि उपयुक्त हुन्छ, तर Kubernetes `livenessProbe` अन्तरालहरूका लागि **होइन**।
+Docker स्वास्थ्य जाँचले सक्रिय `OMNIROUTE_BASE_PATH` सँग उपसर्ग लगाइएको हल्का `/healthz` लाइफसायकल अन्तिम बिन्दुको जाँच गर्दछ। `/api/monitoring/health` human/dashboard निदानका लागि उपलब्ध रहन्छ; कन्टेनर HEALTHCHECK त्यसमा फर्काउन (उदाहरणका लागि गहिरो स्वास्थ्य प्रवर्तनको लागि), `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` सेट गर्नुहोस्। त्यो बाटो ए** गहिरो** जाँच गर्नुहोस् (DB + अनुगमन सारांश) — Docker को विरलै `HEALTHCHECK` को लागी उपयुक्त छ यदि तपाईले फिर्ता अप्ट इन गर्नुभयो भने, तर** होइन** Kubernetes `livenessProbe` अन्तरालहरूको लागि।
 
-अर्केस्ट्रेटरहरूका लागि (Kubernetes, Nomad, आदि):
+अर्केस्ट्रेटरहरूको लागि (कुबर्नेट्स, घुमन्ते, आदि):
 
-| प्रोब             | प्राथमिकता दिनुहोस्                                                      | बेवास्ता गर्नुहोस्                                 |
-| ----------------- | ------------------------------------------------------------------------ | -------------------------------------------------- |
-| लाइभनेस           | HTTP `GET /livez`, वा मुख्य पोर्टमा TCP (`PORT`, पूर्वनिर्धारित `20128`) | लाइभनेसका रूपमा `/api/monitoring/health`           |
-| रेडिनेस           | HTTP `GET /healthz`                                                      | इभेन्ट-लुप व्यस्त हुँदा मृत मान्ने छोटो टाइमआउटहरू |
-| गहन / ब्ल्याकबक्स | `/api/monitoring/health`                                                 | —                                                  |
+| अनुसन्धान           | रुचाउनुहोस्                                                              | बच्नुहोस्                                        |
+| ------------------- | ------------------------------------------------------------------------ | ------------------------------------------------ |
+| जीवन्तता            | HTTP `GET /livez`, वा TCP मुख्य पोर्टमा (`PORT`, पूर्वनिर्धारित `20128`) | जीवन्तताको रूपमा`/api/monitoring/health`         |
+| तयारी               | HTTP `GET /healthz`                                                      | टाइट टाइमआउट जसले घटना-लूप व्यस्तलाई मृत मान्छन् |
+| गहिरो / ब्ल्याकबक्स | `/api/monitoring/health`                                                 | —                                                |
 
-`/healthz` ले प्रोसेस लाइफसाइकल (`ok` / `starting` / `stopping`) रिपोर्ट गर्छ। `/livez` ले प्रोसेस जीवित छ कि छैन भन्ने मात्र जाँच्छ (ह्यान्डलर चल्न सक्ने अवस्थामा सधैँ 200; यसले रेडिनेसको प्रतीक्षा गर्दैन)। दुवै अझै पनि अनुरोध ह्यान्डलिङकै Node इभेन्ट लुपमा चल्छन्, त्यसैले CPU-बाउन्ड क्याटलग वा कम्प्रेसन कार्यले तिनलाई ढिलो गराउन सक्छ — व्यस्त ≠ मृत। HTTP प्रोबहरू टाइमआउट भएमा TCP लाइभनेसलाई प्राथमिकता दिनुहोस्। प्रोबसम्बन्धी पूर्ण मार्गदर्शन:
-[मोनिटरिङ गाइड — Kubernetes प्रोब सिफारिसहरू](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)।
+`/healthz` रिपोर्ट प्रक्रिया जीवनचक्र (`ok` / `starting` / `stopping`)। `/livez` मात्र प्रक्रिया-जीवित छ (200 जब ह्यान्डलर चलाउन सक्छ; यो तयारीको लागि पर्खदैन)। दुबै अझै पनि अनुरोध ह्यान्डलिंगको रूपमा समान नोड घटना लुपमा चल्छन्, त्यसैले CPU-बाउन्ड क्याटलग वा कम्प्रेसन कार्यले तिनीहरूलाई — व्यस्त ≠ मृत ढिलाइ गर्न सक्छ। HTTP ले टाइम आउट गरेमा TCP liveness लाई प्राथमिकता दिनुहोस्। पूर्ण जाँच निर्देशन: [निगरानी गाइड — Kubernetes अनुसन्धान सिफारिसहरू](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ।
 
-## Caddy सहित Docker Compose (HTTPS Auto-TLS)
+## Docker कम्पोज विथ क्याडी (HTTPS Auto-TLS)
 
-Caddy को स्वचालित SSL प्रावधान प्रयोग गरेर OmniRoute लाई सुरक्षित रूपमा सार्वजनिक गर्न सकिन्छ। तपाईंको डोमेनको DNS A रेकर्डले तपाईंको सर्भरको IP तर्फ सङ्केत गरेको सुनिश्चित गर्नुहोस्।
+OmniRoute सुरक्षित रूपमा Caddy को स्वचालित SSL प्रावधान प्रयोग गरेर उजागर गर्न सकिन्छ। सुनिश्चित गर्नुहोस् कि तपाईको डोमेनको DNS A रेकर्डले तपाईको सर्भरको IP मा पोइन्ट गर्दछ।
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth कलब्याक, ड्यासबोर्ड लिङ्क र उत्पन्न गरिएका सार्वजनिक URL हरूका लागि ब्राउजरले देख्ने ओरिजिन।
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # निर्धारित कार्यहरू / सेल्फ-फेचहरूका लागि आन्तरिक सर्भर-देखि-सर्भर URL।
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -445,11 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy ले अपस्ट्रिम कन्टेनरका लागि मानक फर्वार्डिङ हेडरहरू सेट गर्छ। OmniRoute ले
-OAuth कलब्याक र उत्पन्न गरिएका सार्वजनिक लिङ्कहरूका लागि `NEXT_PUBLIC_BASE_URL` लाई क्यानोनिकल सार्वजनिक ओरिजिनको रूपमा प्रयोग गर्छ;
-प्रमाणीकरण गरिएका ड्यासबोर्ड राइटहरूले सेसनसँग आबद्ध CSRF सुरक्षासहित समान-ओरिजिन अनुरोधहरू प्रयोग गर्छन्।
-तपाईंले स्पष्ट कन्फिगरेसनको सट्टा विश्वसनीय फर्वार्ड गरिएका हेडरहरूबाट सार्वजनिक ओरिजिन निर्धारण गर्न
-OmniRoute लाई जानाजानी लगाउन चाहनुहुने उन्नत डिप्लोयमेन्टहरूका लागि मात्र `OMNIROUTE_TRUST_PROXY` सक्षम गर्नुहोस्।
+क्याडीले अपस्ट्रिम कन्टेनरको लागि मानक फर्वार्डिङ हेडरहरू सेट गर्दछ। OmniRoute OAuth कलब्याकहरू र उत्पन्न सार्वजनिक लिङ्कहरूका लागि `NEXT_PUBLIC_BASE_URL` प्रामाणिक सार्वजनिक मूलको रूपमा प्रयोग गर्दछ; प्रमाणीकृत ड्यासबोर्डले समान-मूल अनुरोधहरू र सत्र-बाउन्ड CSRF सुरक्षा प्रयोग गर्दछ। केवल उन्नत परिनियोजनका लागि `OMNIROUTE_TRUST_PROXY` सक्षम गर्नुहोस् जहाँ तपाईं जानाजानी OmniRoute स्पष्ट कन्फिगरेसनको सट्टा विश्वसनीय फर्वार्ड गरिएका हेडरहरूबाट सार्वजनिक मूल प्राप्त गर्न चाहनुहुन्छ।
 
 ## Cloudflare Quick Tunnel
 
@@ -466,49 +432,51 @@ Docker डिप्लोयमेन्टका लागि ड्यास�
 - Docker इमेजहरूले प्रणालीका CA रुटहरू समावेश गर्छन् र तिनलाई व्यवस्थित `cloudflared` मा पठाउँछन्, जसले कन्टेनरभित्र टनेल बुटस्ट्र्याप हुँदा TLS विश्वास विफलताहरूबाट जोगाउँछ।
 - OmniRoute ले डाउनलोड गर्नुको सट्टा पहिले नै रहेको बाइनरी प्रयोग गरोस् भन्ने चाहनुहुन्छ भने `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` सेट गर्नुहोस्।
 
-## इमेज ट्यागहरू
+## छवि ट्यागहरू
 
-| इमेज                     | ट्याग    | साइज   | विवरण                                              |
-| ------------------------ | -------- | ------ | -------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | उच्चतम **प्रकाशित** स्थिर SemVer (git `main` होइन) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps का लागि यस वर्गको ट्याग पिन गर्नुहोस्       |
+| छवि                          | ट्याग    | साइज    | विवरण                                              |
+| ---------------------------- | -------- | ------- | -------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | उच्चतम** प्रकाशित** स्थिर SemVer (git `main` होइन) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | GitOps को लागि यो वर्गको ट्याग पिन गर्नुहोस्       |
 
-बहु-प्लेटफर्म म्यानिफेस्ट: `linux/amd64` + `linux/arm64` नेटिभ (Apple Silicon, AWS Graviton, Raspberry Pi)। Docker ले मिल्दो आर्किटेक्चर स्वतः चयन गर्छ; ARM होस्टहरूमा AMD64 इमुलेसन बलपूर्वक प्रयोग गर्न आवश्यक भए `--platform linux/amd64` पास गर्नुहोस्।
+एउटै छविहरू तीन भण्डारहरूमा प्रकाशित हुन्छन्, समान प्रति-आर्किटेक्चर डाइजेस्टको साथ: `cheaperinference/omniroute` (Docker हब, सस्तो अनुमान संगठन, 3.8.53 मा), `ghcr.io/cheaper-inference/omniroute` र लिगेसी `diegosouzapw/omniroute`, जसले यसको पुल इतिहास राख्छ र अझै पनि प्रत्येक रिलीज प्राप्त गर्दछ। अवस्थित `diegosouzapw/omniroute` परिनियोजनहरू अद्यावधिक गरिरहन्छन्; छवि नाम परिवर्तन वैकल्पिक छ। तलको `:next` / `:next-web` पूर्व-रिलीज च्यानल `diegosouzapw/omniroute` र GHCR मा मात्र प्रकाशित छ।
 
-### रिलिज च्यानलहरू
+बहु-प्लेटफर्म म्यानिफेस्ट: `linux/amd64` + `linux/arm64` नेटिभ (Apple Silicon, AWS Graviton, Raspberry Pi)। Docker मिल्दो वास्तुकला स्वचालित रूपमा चयन गर्दछ; यदि तपाईलाई ARM होस्टहरूमा AMD64 इमुलेशन जबरजस्ती गर्न आवश्यक छ भने `--platform linux/amd64` पास गर्नुहोस्।
 
-OmniRoute ले स्थिर रिलिजहरू, सक्रिय रिलिज-ब्रान्च परीक्षण र विकास बिल्डहरूका लागि छुट्टाछुट्टै Docker च्यानलहरू प्रकाशित गर्छ।
+### च्यानलहरू रिलीज गर्नुहोस्
 
-| च्यानल                          | स्रोत                                     | परिवर्तनशीलता                  | सिफारिस गरिएको प्रयोग                                                                                 |
-| ------------------------------- | ----------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | हस्ताक्षर गरिएको/संस्करणयुक्त रिलिज       | अपरिवर्तनीय                    | ठ्याक्कै एउटा रिलिज पिन गर्ने उत्पादन डिप्लोयमेन्टहरू                                                 |
-| `:latest` / `:latest-web`       | उच्चतम **प्रकाशित** स्थिर SemVer          | परिवर्तनशील स्थिर पोइन्टर      | SemVer प्रकाशन कार्यपछि स्थिर रिलिजहरू पछ्याउँछ — `main` वा अप्रकाशित `release/v*` कमिटहरू पछ्याउँदैन |
-| `:next` / `:next-web`           | हालको पूर्वनिर्धारित `release/v*` ब्रान्च | परिवर्तनशील प्रि-रिलिज पोइन्टर | सक्रिय रिलिज ब्रान्चमा आइसकेका तर स्थिर रिलिजमा अझै समावेश नभएका सुधारहरूको परीक्षण                   |
-| `:main` / `:main-web`           | `main` ब्रान्च                            | परिवर्तनशील विकास पोइन्टर      | विकास र एकीकरण परीक्षणका लागि मात्र                                                                   |
+OmniRoute स्थिर रिलीजहरू, सक्रिय रिलीज-शाखा परीक्षण, र विकास निर्माणहरूका लागि छुट्टै Docker च्यानलहरू प्रकाशित गर्दछ।
 
-#### वेब-सेसन प्रदायकहरू: `-web` इमेजहरू
+| च्यानल                          | स्रोत                                  | परिवर्तनशीलता               | प्रयोग गर्न सिफारिस गरिएको                                                                                           |
+| ------------------------------- | -------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned रिलीज                 | अपरिवर्तनीय                 | उत्पादन डिप्लोइमेन्टहरू जसले सटीक रिलीज पिन गर्दछ                                                                    |
+| `:latest` / `:latest-web`       | उच्चतम** प्रकाशित** स्थिर SemVer       | परिवर्तनीय स्थिर सूचक       | स्थिर रिलीजहरू पछ्याउँछ** पछि** SemVer प्रकाशित काम — गर्छ** होइन** ट्र्याक `main` वा अप्रकाशित `release/v*` कमिटहरू |
+| `:next` / `:next-web`           | हालको पूर्वनिर्धारित `release/v*` शाखा | परिवर्तनीय पूर्व-रिलीज सूचक | परीक्षण फिक्सहरू जुन सक्रिय रिलीज शाखामा ल्याइएका छन् तर अझै स्थिर रिलीजमा छैनन्                                     |
+| `:main` / `:main-web`           | `main` शाखा                            | परिवर्तनीय विकास सूचक       | विकास र एकीकरण परीक्षण मात्र                                                                                         |
 
-माथिको प्रत्येक च्यानल `-web` ट्याग (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) का रूपमा पनि उपलब्ध हुन्छ, जुन `runner-web` स्टेजबाट बिल्ड गरिएको हुन्छ — उही इमेजमा Playwright र Chromium ब्राउजर थपिएको हुन्छ। साधारण इमेज Chromium **बिना** पठाइन्छ; `gemini-web`, `claude-web` र `claude-turnstile` लाई यो आवश्यक पर्छ।
+#### वेब-सत्र प्रदायकहरू: `-web` छविहरू
 
-विफलता स्टार्टअपको समयमा नभई पछि मात्र हुन्छ: ती प्रदायकहरूले आफ्ना मोडेलहरू सूचीबद्ध गर्छन् र ड्यासबोर्डमा कनेक्ट भएको देखिन्छन्, तर पहिलो अनुरोध मात्र निम्न त्रुटिसहित विफल हुन्छ
+माथिको प्रत्येक च्यानल `-web` ट्याग (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) को रूपमा दोब्बर हुन्छ, `runner-web` चरण — उही छवि प्लस Playwright र क्रोमियम ब्राउजरबाट निर्मित। सादा छवि जहाज** बिना** क्रोमियम; `gemini-web`, `claude-web` र `claude-turnstile` लाई चाहिन्छ।
+
+विफलता स्थगित गरिएको छ, स्टार्टअप-समय होइन: ती प्रदायकहरूले आफ्नो मोडेलहरू सूचीबद्ध गर्छन् र ड्यासबोर्डमा जडान भएको रूपमा देखाउँछन्, र केवल पहिलो अनुरोध असफल हुन्छ।
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-यदि तपाईं ती प्रदायकहरू प्रयोग गर्नुहुन्छ भने, तपाईं पहिल्यै प्रयोग गरिरहनुभएको च्यानलको `-web` ट्याग पुल गर्नुहोस् — अरू केही परिवर्तन हुँदैन। npm/CLI इन्स्टलमा (Docker इमेज बिना), यसको समकक्ष छुटेको अंश ब्राउजर बाइनरी हो: होस्टमा `npx playwright install chromium` चलाउनुहोस्।
+यदि तपाइँ ती प्रदायकहरू प्रयोग गर्नुहुन्छ भने, च्यानलको `-web` ट्याग तान्नुहोस् जुन तपाइँ पहिले नै — मा हुनुहुन्छ अरू केहि परिवर्तन छैन। npm/CLI स्थापनामा (कोई Docker छवि छैन), बराबर हराएको टुक्रा ब्राउजर बाइनरी हो: होस्टमा `npx playwright install chromium` चलाउनुहोस्।
 
-#### प्रि-रिलिज च्यानल प्रयोग गर्ने तरिका
+#### पूर्व-रिलीज च्यानल प्रयोग गर्दै
 
-`next` च्यानल हालको पूर्वनिर्धारित `release/v*` शाखामा प्रत्येक push हुँदा पुनर्निर्माण गरिन्छ र AMD64 तथा ARM64 दुवैका लागि प्रकाशित गरिन्छ। पुराना मर्मतसम्भार शाखाहरूले यसलाई अधिलेखन गर्न सक्दैनन्। यो च्यानलले अर्को स्थिर tag तयार हुनुअघि सक्रिय release शाखामा merge गरिएका समाधानहरूका लागि pull गर्न मिल्ने image उपलब्ध गराउँछ।
+`next` च्यानल हालको पूर्वनिर्धारित `release/v*` शाखामा प्रत्येक धक्कामा पुन: निर्माण गरिन्छ र AMD64 र ARM64 दुवैका लागि प्रकाशित हुन्छ। पुरानो मर्मत शाखाहरूले यसलाई अधिलेखन गर्न सक्दैन। च्यानलले अर्को स्थिर ट्याग काट्नु अघि सक्रिय रिलीज शाखामा मर्ज भएका समाधानहरूको लागि तान्न मिल्ने छवि प्रदान गर्दछ।
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose का लागि, चयन गरिएको profile ले प्रयोग गर्ने image tag अधिलेखन गर्नुहोस्, त्यसपछि service pull गरी पुनः सिर्जना गर्नुहोस्:
+Docker रचनाको लागि, चयन गरिएको प्रोफाइलद्वारा प्रयोग गरिएको छवि ट्यागलाई ओभरराइड गर्नुहोस्, त्यसपछि सेवालाई तान्नुहोस् र पुन: सिर्जना गर्नुहोस्:
 
 ```yaml
 services:
@@ -523,30 +491,30 @@ docker compose up -d
 
 #### सुरक्षा र रोलब्याक
 
-`next` परिवर्तनशील पूर्व-release च्यानल हो। सक्रिय release शाखामा कुनै पनि push हुँदा यो परिवर्तन हुन सक्छ र यो **production प्रयोगका लागि समर्थित छैन**। कुनै निश्चित build को मूल्याङ्कन गर्दा image digest pin गर्नुहोस्:
+`next` एक फ्लोटिंग पूर्व-रिलीज च्यानल हो। यो सक्रिय रिलीज शाखामा कुनै पनि धक्का मा परिवर्तन हुन सक्छ र छ** उत्पादन प्रयोगको लागि समर्थित छैन** । विशिष्ट निर्माण मूल्याङ्कन गर्दा छवि डाइजेस्ट पिन गर्नुहोस्:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-परीक्षण गर्नुअघि OmniRoute data volume वा bind-mounted data directory को backup लिनुहोस्। रोलब्याक गर्न, पहिले प्रयोग गरिएको स्थिर version वा digest पुनर्स्थापना गर्नुहोस् र container पुनः सिर्जना गर्नुहोस्:
+परीक्षण गर्नु अघि, OmniRoute डाटा भोल्युम वा बाइन्ड-माउन्ट गरिएको डाटा डाइरेक्टरी ब्याकअप गर्नुहोस्। रोल ब्याक गर्न, पहिले प्रयोग गरिएको स्थिर संस्करण पुनर्स्थापना गर्नुहोस् वा डाइजेस्ट गर्नुहोस् र कन्टेनर पुन: सिर्जना गर्नुहोस्:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-release-branch build ले कहिल्यै `latest` सार्न सक्दैन; केवल योग्य स्थिर semantic version ले मात्र स्थिर pointer लाई प्रवर्द्धन गर्न सक्छ। `next` images मा release image inspection र CRITICAL-vulnerability रोकथाम gate कायम रहन्छ।
+रिलिज-शाखा निर्माणले `latest` कहिल्यै सार्न सक्दैन; केवल एक योग्य स्थिर सिमान्टिक संस्करणले स्थिर सूचकलाई बढावा दिन सक्छ। `next` छविहरूले रिलीज छवि निरीक्षण र CRITICAL-असुरक्षा गेट अवरुद्ध राख्छ।
 
-**`latest` ले git को नवीनताको प्रत्याभूति गर्दैन।** `main` वा सक्रिय `release/v*` शाखामा merge गरिएका समाधानहरू स्थिर SemVer image प्रकाशित नभएसम्म र publish job ले `:latest` लाई प्रवर्द्धन नगरेसम्म (त्यो SemVer कै समान digest सहित) `:latest` मा समावेश हुँदैनन्। GitHub मा समाधान पहिले नै देखिए पनि `latest` स्थिर देखिएमा, release शाखा परीक्षण गर्न `:next` pull गर्नुहोस् वा SemVer tag को प्रतीक्षा गर्नुहोस्।
+**`latest` git को लागि मुद्रा ग्यारेन्टी होइन।** `main` वा सक्रिय `release/v*` शाखामा मर्ज गरिएका फिक्सहरू छन्** होइन** `:latest` मा एक स्थिर SemVer छवि प्रकाशित नभएसम्म र प्रकाशित कार्यले `:latest` बढावा दिन्छ (जुन SemVer जस्तै डाइजेस्ट)। यदि GitHub पहिले नै फिक्स देखाउँदा `latest` स्थिर देखिन्छ भने, रिलीज शाखा परीक्षण गर्न `:next` तान्नुहोस् वा SemVer ट्यागको लागि पर्खनुहोस्।
 
-| तपाईंको आवश्यकता                                                                  | प्रयोग गर्नुहोस्                         |
-| --------------------------------------------------------------------------------- | ---------------------------------------- |
-| परिवर्तन हुन नहुने GitOps / production                                            | `:X.Y.Z` (वा image digest) pin गर्नुहोस् |
-| प्रकाशित स्थिर releases पछ्याउने र प्रत्येक release मा पुनः सिर्जना स्वीकार गर्ने | `:latest`                                |
-| अप्रकाशित `release/v*` commits परीक्षण गर्ने                                      | `:next` (production का लागि होइन)        |
-| `main` परीक्षण गर्ने                                                              | `:main` (production का लागि होइन)        |
+| तपाईं चाहनुहुन्छ                                                                  | प्रयोग गर्नुहोस्               |
+| --------------------------------------------------------------------------------- | ------------------------------ |
+| GitOps / उत्पादन जुन बहाउनु हुँदैन                                                | पिन `:X.Y.Z` (वा छवि डाइजेस्ट) |
+| प्रकाशित अस्तबलहरू पछ्याउनुहोस् र प्रत्येक रिलीजमा पुन: सिर्जना स्वीकार गर्नुहोस् | `:latest`                      |
+| जारी नगरिएको `release/v*` कमिटहरू परीक्षण गर्नुहोस्                               | `:next` (उत्पादन होइन)         |
+| परीक्षण `main`                                                                    | `:main` (उत्पादन होइन)         |
 
 ## Docker मा ड्यासबोर्ड अद्यावधिकहरू
 
@@ -717,54 +685,30 @@ volumes:
 
 इन-प्रक्रिया घनत्व ( HTTP आइसोलेट बन्द कम्प्रेसन) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) हो। साझा टिकाऊ स्थितिमा एउटा तार्किक क्लस्टर [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) हो।
 
-## Docker भित्र Gemini का क्षेत्रीय त्रुटिहरू
+## Docker भित्र मिथुन क्षेत्रीय त्रुटिहरू
 
-Google AI Studio / Gemini API ले HTTP 400 सहित FAILED_PRECONDITION र
-`API प्रयोगका लागि प्रयोगकर्ताको स्थान समर्थित छैन।` फर्काउन सक्छ। होस्टमा सफल भएको अनुरोधले
-कन्टेनरले पनि उही बहिर्गमन मार्ग प्रयोग गर्छ भन्ने प्रमाणित गर्दैन। DNS क्रम,
-IPv4/IPv6 कनेक्टिभिटी, VPN राउटिङ र कन्फिगर गरिएका प्रोक्सीहरू फरक हुन सक्छन्।
-[Google का समर्थित क्षेत्रहरू](https://ai.google.dev/gemini-api/docs/available-regions)
-का साथै वास्तविक जडान मार्ग पनि जाँच गर्नुहोस्; यो त्रुटिले मात्र खराब API key भएको पहिचान गर्दैन।
+Google AI Studio / Gemini API FAILED_PRECONDITION र `User location is not supported for the API use.` सँग HTTP 400 फिर्ता गर्न सक्छ होस्टमा सफल अनुरोधले कन्टेनरले उही आउटबाउन्ड मार्ग प्रयोग गरेको प्रमाणित गर्दैन। DNS अर्डरिङ, IPv4/IPv6 जडान, VPN राउटिङ र कन्फिगर गरिएका प्रोक्सीहरू फरक हुन सक्छन्। [Google को समर्थित क्षेत्रहरू](https://ai.google.dev/gemini-api/docs/available-regions) साथै वास्तविक जडान मार्ग जाँच गर्नुहोस्; यो त्रुटिले मात्र खराब API कुञ्जी पहिचान गर्दैन।
 
-### जडान-विशिष्ट प्रोक्सीलाई प्राथमिकता दिनुहोस्
+### जडान-विशेष प्रोक्सीलाई प्राथमिकता दिनुहोस्
 
-प्रभावित Gemini जडानका लागि OmniRoute को [प्रति-जडान प्रोक्सी कन्फिगरेसन](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-प्रयोग गर्नुहोस्, त्यसपछि उही मोडेल प्रयोग गरेर **जडान परीक्षण गर्नुहोस्** र एउटा सानो अनुरोध
-दोहोर्याउनुहोस्। यसले राउटिङ परिवर्तनलाई त्यही जडानमा सीमित राख्छ। प्रोक्सीमा
-कन्टेनरबाट पहुँच पुग्छ र जडानले वास्तवमै त्यसैलाई चयन गर्छ भन्ने पुष्टि गर्नुहोस्।
-मार्ग परिवर्तन गर्दैमा अपस्ट्रिम क्षेत्रीय योग्यता सुनिश्चित हुँदैन।
+प्रभावित मिथुन जडानको लागि OmniRoute को [प्रति-जडान प्रोक्सी कन्फिगरेसन](../ops/PROXY_GUIDE.md#4-level-proxy-system) प्रयोग गर्नुहोस्, त्यसपछि दोहोर्याउनुहोस्** परीक्षण जडान** र एउटै मोडेलको साथ एउटा सानो अनुरोध। यसले रूटिङ परिवर्तनलाई त्यो जडानमा स्कोप राख्छ। प्रमाणित गर्नुहोस् कि प्रोक्सी कन्टेनरबाट पहुँचयोग्य छ, र जडानले वास्तवमै यसलाई चयन गर्दछ। मार्ग परिवर्तन गर्नाले अपस्ट्रीम क्षेत्रीय योग्यताको ग्यारेन्टी गर्दैन।
 
 ### होस्ट र कन्टेनर नेटवर्किङ तुलना गर्नुहोस्
 
-प्रमाणीकृत परिणामहरू तुलना गर्दा key, मोडेल र अनुरोध उस्तै राख्नुहोस्; कुनै issue मा कहिल्यै
-प्रमाणपत्रहरू, प्रोक्सी पासवर्डहरू वा पूर्ण authorization headers नटाँस्नुहोस्।
-पहिले OS resolver ले कुन address families उपलब्ध गराउँछ भनी निरीक्षण गर्नुहोस्, होस्टमा
-र कन्टेनरभित्र उही command प्रयोग गरेर:
+प्रमाणिकरण परिणामहरू तुलना गर्दा कुञ्जी, मोडेल र अनुरोध समान राख्नुहोस्; कुनै मुद्दामा प्रमाणहरू, प्रोक्सी पासवर्डहरू वा पूर्ण प्राधिकरण हेडरहरू कहिल्यै टाँस्नुहोस्। पहिले होस्टमा र कन्टेनर भित्र उही आदेश प्रयोग गरेर OS रिजोल्भरले कुन ठेगाना परिवारहरू प्रस्ताव गर्दछ भनेर निरीक्षण गर्नुहोस्:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute` लाई तपाईंले चलाउने सेवाले प्रतिस्थापन गर्नुहोस् (उदाहरणका लागि, `omniroute-web`)। यी
-commands ले प्रमाणपत्र वा IP addresses बिना address families प्रिन्ट गर्छन्। फर्काइएको `6`
-ले IPv6 DNS परिणाम मात्र देखाउँछ: यसले प्रयोगयोग्य IPv6 मार्ग वा API पहुँच प्रमाणित
-**गर्दैन**। जहाँ `curl` इन्स्टल गरिएको छ, दुवै वातावरणमा
-`curl -4 -I https://generativelanguage.googleapis.com` लाई
-`curl -6 -I https://generativelanguage.googleapis.com` सँग तुलना गर्नुहोस्।
-प्रमाणीकरण नगरिएको त्रुटि भए पनि HTTP प्रतिक्रियाले उक्त परीक्षणका लागि कनेक्टिभिटी
-प्रमाणित गर्छ; प्रमाणीकृत मोडेल अनुरोधले मात्र Gemini योग्यता परीक्षण गर्छ।
+`omniroute` तपाईंले चलाउनुभएको सेवासँग बदल्नुहोस् (उदाहरणका लागि, `omniroute-web`)। यी आदेशहरूले प्रमाणहरू वा IP ठेगानाहरू बिना ठेगाना परिवारहरू छाप्छन्। फर्काइएको `6` IPv6 DNS परिणाम मात्र देखाउँछ: यसले गर्छ** होइन** प्रयोगयोग्य IPv6 मार्ग वा API पहुँच प्रमाणित गर्नुहोस्। जहाँ `curl` स्थापना गरिएको छ, दुबै वातावरणमा `curl -6 -I https://generativelanguage.googleapis.com` सँग `curl -4 -I https://generativelanguage.googleapis.com` तुलना गर्नुहोस्। एक HTTP प्रतिक्रियाले त्यो जाँचको लागि जडान प्रमाणित गर्दछ, यो एक अप्रमाणित त्रुटि भए पनि; केवल प्रमाणिकरण गरिएको मोडेल अनुरोधले मिथुन योग्यता परीक्षण गर्दछ।
 
-### होस्ट-स्तरीय विकल्प: कार्यरत IPv6 र resolver नीति
+### होस्ट-स्तर वैकल्पिक: काम गर्ने IPv6 र समाधानकर्ता नीति
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) का रिपोर्टकर्ताले आफ्नो
-वातावरणमा कन्टेनर IPv6 सक्षम गरेर र glibc address selection परिवर्तन गरेर पहुँच
-पुनर्स्थापित गरे। यसलाई वातावरण-विशिष्ट विकल्पका रूपमा लिनुहोस्। resolver प्राथमिकताहरू
-समायोजन गर्नुअघि कार्यरत होस्ट IPv6, कन्टेनर egress/routing र firewall नियमहरू पुष्टि
-गर्नुहोस्। निजी ULA address ले मात्र सार्वजनिक IPv6 कनेक्टिभिटी स्थापित गर्दैन।
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) को रिपोर्टरले कन्टेनर IPv6 सक्षम गरेर र glibc ठेगाना चयन परिवर्तन गरेर उनीहरूको वातावरणमा पहुँच पुनर्स्थापित गर्यो। यसलाई वातावरण-विशिष्ट विकल्पको रूपमा व्यवहार गर्नुहोस्। रिजोल्भर प्राथमिकताहरू समायोजन गर्नु अघि काम गर्ने होस्ट IPv6, कन्टेनर egress/routing र फायरवाल नियमहरू पुष्टि गर्नुहोस्। एक निजी ULA ठेगाना आफैले सार्वजनिक IPv6 जडान स्थापित गर्दैन।
 
-Compose को default network मा पहिल्यै जोडिएका सेवाहरूका लागि, यो खण्डले उक्त network मा
-IPv6 सक्षम गर्छ; आफ्नो सेवाको बाँकी भाग, ports, volumes र कन्फिगरेसन जस्ताको तस्तै राख्नुहोस्:
+कम्पोजको पूर्वनिर्धारित नेटवर्कमा पहिले नै संलग्न गरिएका सेवाहरूको लागि, यो टुक्राले त्यो नेटवर्कमा IPv6 सक्षम गर्दछ; तपाईंको बाँकी सेवा, पोर्ट, भोल्युम र कन्फिगरेसन कायम राख्नुहोस्:
 
 ```yaml
 networks:
@@ -772,33 +716,13 @@ networks:
     enable_ipv6: true
 ```
 
-नाम दिइएको network का लागि, सेवाले वास्तवमै प्रयोग गर्ने network मा यसलाई सक्षम गर्नुहोस्।
-Docker ले ULA subnet विनियोजन गर्न सक्छ; तपाईंको network लाई आवश्यक पर्दा मात्र स्पष्ट,
-नखप्टिने subnet चयन गर्नुहोस्। [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/)
-र [Compose network options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)
-हेर्नुहोस्।
+नामित नेटवर्कको लागि, सेवा वास्तवमा सामेल हुने नेटवर्कमा सक्षम गर्नुहोस्। Docker ULA सबनेट आवंटित गर्न सक्छ; तपाईंको नेटवर्कलाई आवश्यक पर्दा मात्र स्पष्ट, गैर-ओभरल्यापिङ सबनेट चयन गर्नुहोस्। [Docker IPv6 नेटवर्किङ](https://docs.docker.com/engine/daemon/ipv6/) र [रचना नेटवर्क विकल्पहरू](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6) हेर्नुहोस्।
 
-**glibc-आधारित image** मा, `/etc/gai.conf` ले address selection परिवर्तन गर्न सक्छ। हालको
-repository Dockerfile ले Debian प्रयोग गर्छ; अनुकूलित musl-आधारित images ले यो संयन्त्र
-साझा गर्दैनन्। रिपोर्ट गरिएको समायोजनले ULA label लाई `label fc00::/7 6` बाट
-`label fc00::/7 1` मा परिवर्तन गर्छ। image को पूर्ण policy table बाट सुरु गर्नुहोस् र यसका
-अन्य entries सुरक्षित राख्नुहोस्: `label` वा `precedence` entry थप्दा उक्त default table
-प्रतिस्थापन हुन्छ, त्यसैले परिवर्तन गरिएको line मात्र समावेश भएको file अपर्याप्त हुन्छ।
-[glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-ले ती semantics दस्तावेजीकरण गर्छ। समीक्षा गरिएको file लाई read-only रूपमा `/etc/gai.conf`
-मा bind-mount गर्नुहोस् र लागू गर्न सेवा पुनः सिर्जना गर्नुहोस्।
+मा ए** glibc आधारित छवि** , `/etc/gai.conf` ठेगाना चयन परिवर्तन गर्न सक्छ। हालको भण्डार डकरफाइलले डेबियन प्रयोग गर्दछ; अनुकूलन musl-आधारित छविहरूले यो संयन्त्र साझा गर्दैनन्। रिपोर्ट गरिएको समायोजनले ULA लेबललाई `label fc00::/7 6` बाट `label fc00::/7 1` मा परिवर्तन गर्छ। छविको पूर्ण नीति तालिकाबाट सुरु गर्नुहोस् र यसको अन्य प्रविष्टिहरू सुरक्षित गर्नुहोस्: `label` वा `precedence` प्रविष्टि थप्दा त्यो पूर्वनिर्धारित तालिकालाई प्रतिस्थापन गर्दछ, त्यसैले परिवर्तन गरिएको रेखा मात्र समावेश भएको फाइल अपर्याप्त छ। [glibc कन्फिगरेसन सन्दर्भले](https://github.com/bminor/glibc/blob/master/posix/gai.conf) ती शब्दार्थहरू कागजात गर्दछ। `/etc/gai.conf` मा रिड-ओनली समीक्षा गरिएको फाइललाई बाइन्ड-माउन्ट गर्नुहोस् र यसलाई लागू गर्न सेवा पुन: सिर्जना गर्नुहोस्।
 
-यसले **त्यो कन्टेनरभित्रका सबै बहिर्गमन ट्राफिकका लागि** OS address selection परिवर्तन गर्छ।
-यसले प्रत्येक application लाई IPv6 छनोट गर्न बाध्य पार्दैन: Node को DNS क्रम र जडान
-selection पनि महत्त्वपूर्ण हुन्छ। विशेषगरी, `--dns-result-order=ipv4first` ले IPv4 लाई
-प्राथमिकता दिन्छ र IPv4-मात्र विफलताका लागि समाधान होइन।
-[Node DNS ordering](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) हेर्नुहोस्।
+यसले OS ठेगाना चयनलाई परिवर्तन गर्छ** त्यो कन्टेनरमा सबै आउटबाउन्ड ट्राफिक** । यसले प्रत्येक अनुप्रयोगलाई IPv6 छनौट गर्न बाध्य पार्दैन: नोडको DNS अर्डर र जडान चयन पनि महत्त्वपूर्ण छ। विशेष गरी, `--dns-result-order=ipv4first` IPv4 प्राथमिकता दिन्छ र IPv4-only असफलताको लागि एक उपाय होइन। [नोड DNS अर्डर](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) हेर्नुहोस्।
 
-कुनै पनि होस्ट-स्तरीय परिवर्तनपछि Gemini र आफ्ना अन्य providers लाई पुनः परीक्षण गर्नुहोस्।
-पछाडि फर्काउन, अनुकूलित `gai.conf` mount हटाउनुहोस्, अघिल्लो network कन्फिगरेसन
-पुनर्स्थापित गर्नुहोस् र maintenance window का बेला प्रभावित सेवा/network पुनः सिर्जना
-गर्नुहोस्। network पुनः सिर्जना गर्दा त्यसमा जोडिएका अन्य कन्टेनरहरू अवरुद्ध हुन सक्छन्;
-persistent data volume नमेटाउनुहोस्।
+कुनै पनि होस्ट-स्तर परिवर्तन पछि जेमिनी र तपाईंका अन्य प्रदायकहरूको पुन: परीक्षण गर्नुहोस्। रोल ब्याक गर्न, अनुकूलन `gai.conf` माउन्ट हटाउनुहोस्, अघिल्लो नेटवर्क कन्फिगरेसन पुनर्स्थापना गर्नुहोस् र मर्मत सञ्झ्यालको समयमा प्रभावित service/network पुन: सिर्जना गर्नुहोस्। नेटवर्क पुन: सिर्जना गर्दा यसमा संलग्न अन्य कन्टेनरहरू अवरोध गर्न सक्छ; निरन्तर डाटा भोल्युम नमेट्नुहोस्।
 
 ## महत्त्वपूर्ण टिप्पणीहरू
 

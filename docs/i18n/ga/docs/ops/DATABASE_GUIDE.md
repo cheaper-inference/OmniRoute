@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **Sonraí aislíonta go cúramach** : bain úsáid as `UPDATE ... WHERE ...` chun na sraitheanna atá ann cheana a láimhseáil
 4. **Seiceáil ordú agus ainmniú** : `npm run test:migrations:fresh` (gach ascnamh ar bhunachar sonraí folamh) agus `npm run check:migration-numbering`
 5. **Tástáil ar chóip** : níor rith riamh ascnaimh neamhthástála ar tháirgeadh
+6. **Teastaíonn aistriú freisin ó thábla a chruthaítear ó chód** : má chruthaíonn modúl freisin an tábla leisciúil (`CREATE TABLE IF NOT EXISTS`, coinnithe mar chonair féin-leigheas), caithfidh imirce é a chruthú leis an DDL céanna . Seachas sin, críochnóidh suiteáil ghlan agus suiteáil uasghrádaithe le scéimeanna éagsúla, ag brath ar cé acu an raibh cosán an chóid sin ar siúl. Déanann `tests/unit/db/lazy-table-migration-guard.test.ts` scanadh `src/` agus `open-sse/` agus teipeann ar `CREATE` leisciúil gan ascnamh (#20557). Sampla: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Sampla:
 
