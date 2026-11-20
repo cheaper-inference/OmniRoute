@@ -181,30 +181,28 @@ A request must satisfy all dimensions to be allowed.
 A percent plan reports one usage figure per account and plan window. The provider gives no
 counter per API key.
 
-To give each key a part of that figure, each pool keeps an attribution book per account and
-plan window. `src/lib/quota/percentLedger.ts` holds the book's rules.
+To split that figure between keys, each pool keeps an attribution book per account and plan
+window. `src/lib/quota/percentLedger.ts` holds the book's rules.
 `src/lib/quota/percentAttribution.ts` turns the book into the numbers that enforcement uses. The
-result is an estimate. It is built from the tokens each key routes and from the observed changes
-of one number.
+result is an estimate built from the tokens each key routes.
 
 #### Readings that move the book
 
 The book moves only on the provider's own figure for the requested plan window. These connections
 report one:
 
-| Provider                            | Plan windows              |
-| ----------------------------------- | ------------------------- |
-| Claude, through an OAuth connection | `5h`, `weekly`            |
-| Codex                               | `5h`, `weekly`            |
-| Bailian                             | `5h`, `weekly`, `monthly` |
+| Provider                            | Plan windows   |
+| ----------------------------------- | -------------- |
+| Claude, through an OAuth connection | `5h`, `weekly` |
+| Codex                               | `5h`, `weekly` |
 
 These do not count as a reading:
 
-- a response the provider client marks as stale;
-- a window whose figure the provider did not report, or a Bailian window without a reported total;
-- another window's figure, or the worst case across windows;
-- the rate-limit header fallback;
-- a failed read.
+- a response the provider client marks as stale
+- a Claude window whose percentage the provider did not report
+- another window's figure, or the worst case across windows
+- the rate-limit header fallback
+- a failed read
 
 Other providers, including Claude with an API key, have no book. Each key is charged 0 on their
 percent dimensions, as before this change.
@@ -213,50 +211,79 @@ A reading shares the 30-second cache of the saturation signal. A Claude reading 
 the figure was observed in response headers or read from the usage endpoint, when that time is
 known. Other readings are dated by when that cache entry was built.
 
+#### What the book keeps
+
+Each recorded request adds its tokens, once, to a counter per pool, account and key. A counter
+only grows. The book keeps three things:
+
+- the baseline: the figure when the book opened or the window last turned
+- the last applied figure
+- per key, its token counter at that same moment, called its mark
+
+The book is updated when enforcement or the usage route computes the attribution. Writes are
+compare-and-set on a revision number. A writer that loses retries once on a fresh read.
+
+#### How a key's part is computed
+
+Each key's part is computed when the book is read. The growth of the figure since the baseline is
+split between the keys in proportion to the tokens each one routed since its mark.
+
+Together, those tokens explain at most one point of the figure per
+`QUOTA_PERCENT_MIN_TOKENS_PER_POINT` tokens (default 1,000). The growth they do not explain is
+external. The baseline is external too.
+
+For example, a book opens at 0. Key A then routes 900,000 tokens and key B routes 100,000. At a
+figure of 60, A's part is 54 points and B's part is 6.
+
+A counter below its key's mark has restarted and counts in full. A key without a mark, such as a
+key that joins the pool in the middle of a window, counts all its tokens. A figure that lags the
+tokens causes an error that goes away at the next reading. It does not accumulate.
+
+`QUOTA_PERCENT_MIN_TOKENS_PER_POINT` is read on every attribution. A value that is not a finite
+number of at least 1 falls back to 1,000.
+
 #### How a reading changes the book
 
-The book stores the last applied figure, the part attributed to each key and an external part.
-Each transition keeps these parts adding up to the last applied figure.
+The first matching rule applies:
 
-Each recorded request adds its tokens, once, to a counter per pool, account and key. The book is
-updated when enforcement or the usage route computes the attribution. The first matching rule
-applies:
+1. **No book yet:** the reading opens the book. Its figure is the baseline and every counter is
+   marked.
+2. **Older reading:** a reading dated before the last applied one is ignored. So is a reading
+   whose reset time is more than 30 minutes earlier than the stored one.
+3. **New provider window:** a reset time more than 30 minutes later than the stored one turns the
+   book. The figure becomes the baseline and every counter is marked again. Keys without a counter
+   leave the book.
+4. **Ended window:** a stored reset time that is not after the reading's data time means that
+   window has ended. The reading turns the book, whatever its figure.
+5. **Higher figure:** only the last figure moves. The baseline and the marks stay.
+6. **Same figure:** nothing changes and nothing is written.
+7. **Lower figure:** a lower figure is never applied as such. It turns the book only when three
+   things hold. It is at least two minutes newer than the last applied reading. Nothing says the
+   window is the same open one. It is more than one point lower.
 
-- **First reading:** it is a baseline and counts as external. Tokens already on the counters are
-  marked as seen, so they explain no later rise.
-- **Older reading:** a reading dated before the last applied one is ignored.
-- **Older window:** a reading whose reset time is more than 30 minutes earlier than the stored one
-  is ignored.
-- **New provider window:** a reset time that moves forward by more than 30 minutes starts a new
-  window. Every part returns to 0, keys without a counter leave the book, and the new figure is
-  applied as a rise.
-- **Rise:** it is shared among the keys in proportion to their pending tokens, the tokens the book
-  has not used yet. Together they explain at most one point per `DEFAULT_MIN_TOKENS_PER_PCT`
-  tokens (1,000). The rest of the rise is external.
-- **Same figure:** nothing changes and nothing is written.
-- **Drop:** it is applied only from a reading at least two minutes newer than the last applied
-  one. Any drop rescales every part when three things hold: both reset times are known, they are
-  within 30 minutes of each other, and the stored one is still ahead of the reading. Otherwise a
-  drop of up to one point rescales, and a larger drop starts a new window.
+The window counts as the same open one when three things hold. Both reset times are known. They
+are within 30 minutes of each other. The stored one is still ahead of the reading. A lower figure
+inside that window changes nothing.
 
-At a rise, a key whose last token write is more than 15 minutes old explains nothing. Its pending
-tokens are marked as seen. A rescale multiplies every part by the ratio of the new figure to the
-old one, and pending tokens stay pending. A token counter that cannot be read is ignored for that
-observation, and the key keeps its place in the book.
+A reset time is stored only while it is ahead of the data time of the reading that carries it. A
+higher figure stores its reading's reset time when that one is usable, and keeps the stored one
+otherwise. A reset time is recorded only when the book changes, so an equal figure with a new reset
+time records nothing.
 
-The attributed part of a key added to a pool in the middle of a window counts only the tokens it
-routes after joining. Writes are compare-and-set on a revision number. A writer that loses retries
-once on a fresh read.
+#### When the book is used
 
-#### Without a usable reading
+After a reading, the book is used unless its stored reset time is not after the current time.
+That case arises when a reading taken just before the reset, such as one served from the cache, is
+observed just after it.
 
 Without a usable reading, the stored book is used only while it can still be the current
 window's book. That holds in two cases:
 
-- its reset time is known and still ahead;
-- it has no reset time, and the last reading that changed it is at most 15 minutes old.
+- its reset time is known and still ahead
+- it has no reset time, and the last reading that changed it is at most 15 minutes old
 
-Otherwise nothing is attributed, as when there is no book.
+Otherwise nothing is attributed, as when there is no book. A book whose stored reset time has
+passed is never charged.
 
 #### Enforcement
 
@@ -270,13 +297,14 @@ Every number is scaled by the effective limit: the per-account limit times the n
 accounts in the pool.
 
 An absolute cap with `capUnit: "percent"` counts only the part attributed to the key, scaled the
-same way. With a per-account limit of 100 and k accounts, a cap of N is reached when the key's
-part of the serving account's figure reaches N/k points. Each account is checked against its own
-book. For example, with two accounts, a cap of 10 is reached at 5 points of one account's figure.
+same way. Take a per-account limit of 100 and k accounts. A cap of N is then reached when the
+key's part of the serving account's figure reaches N/k points. Each account is checked against its
+own book. For example, with two accounts, a cap of 10 is reached at 5 points of one account's
+figure.
 
 When the store cannot be read, nothing is attributed and every key is charged 0 on that
 dimension. When a book write fails, that attribution uses the book as it was read. A failed token
-write can leave that request's tokens out of the book.
+write leaves that request's tokens out of the book. None of these failures blocks a request.
 
 #### Usage route
 
@@ -286,7 +314,7 @@ dimension has one entry per pool connection in `accounts`. Its top-level `consum
 
 The route applies the current reading too, so it can advance the book as a request does.
 `internal + external` can differ from `consumedTotal` when there is no usable reading, or when a
-drop is not confirmed yet.
+lower figure is not applied.
 
 #### Storage and retention
 
@@ -297,17 +325,32 @@ rewritten, so the cutoff is set above the longest plan window.
 
 #### Limitations
 
-- Usage made elsewhere on the account, in an interval in which a key routed real volume, is
-  attributed to that key as far as its tokens cover it. The floor of 1,000 tokens per point
-  protects only against small volume.
-- "Elsewhere" includes traffic on the same account from keys outside the pool.
-- A rise first seen more than 15 minutes after the key's last token write counts as external. The
-  book observes the figure only when a request or the usage route computes the attribution.
-- Tokens routed shortly before a provider reset can be charged against the first figure of the
-  new window.
-- A stream that does not complete records no tokens. Its usage shows up as external.
+- Usage made outside OmniRoute while keys route traffic is split between those keys by their
+  tokens, up to the floor. With the default floor, a key that routes 60,000 tokens while outside
+  use raises the account 60 points is charged all 60. With the floor at 50,000, it is charged
+  1.2 points. Set `QUOTA_PERCENT_MIN_TOKENS_PER_POINT` close to what one point costs on your plan.
+- Outside use includes traffic on the same account from keys outside the pool.
+- The split is an estimate by token volume. A request counts as its prompt tokens plus its
+  completion tokens. Cache discounts and model prices do not change that count.
+- The usage of a request in flight or just finished can show up briefly in another active key's
+  part. It moves back once that request's tokens are recorded.
+- Usage already on the account when a book opens counts as external. This covers an upgrade, a new
+  pool and a new account. Usage in a new window before its first reading counts as external too.
+- That external usage reduces every key's room by weight until the window turns. With one account
+  at 85% and five keys of weight 20, each key starts with 17 of its 20 used.
+- A request whose response reports no token usage records no tokens. Its usage is split like
+  usage made outside OmniRoute.
 - In a pool with several accounts, the serving account's figure is applied to the summed budget.
   This is unchanged by the book.
+- When the provider sends no reset time, a window that resets and refills above the old figure
+  between two readings looks like a higher figure. The book keeps the old baseline and marks.
+- Readings are dated by the local clock. When it runs ahead of the provider's, or a source reports
+  a reset time a little early, the book can turn up to that difference early.
+- The growth in that short span is split by the tokens routed in it. The next window's first
+  reading corrects it. When the turned book holds no reset time, that correction needs a lower
+  figure at least two minutes newer than the last applied reading.
+- Instances that share a Redis store date readings with their own clocks, so keep those clocks in
+  sync. Readings of an instance whose clock runs behind look older and are ignored.
 - When no usable reading arrives after the stored reset time, per-key percent shares and percent
   caps are not enforced until a reading returns. Without a reset time, this starts 15 minutes
   after the last reading that changed the book.
@@ -423,13 +466,14 @@ The page hooks:
 
 ## Environment Variables
 
-| Variable                           | Default   | Description                                            |
-| ---------------------------------- | --------- | ------------------------------------------------------ |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Driver to use: `sqlite` or `redis`                     |
-| `QUOTA_STORE_REDIS_URL`            | _(empty)_ | Redis URL, e.g. `redis://localhost:6379`               |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` activates strict mode             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; multiplier for soft-policy combo score           |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Days before GC removes old `quota_consumption` buckets |
+| Variable                             | Default   | Description                                                    |
+| ------------------------------------ | --------- | -------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`                 | `sqlite`  | Driver to use: `sqlite` or `redis`                             |
+| `QUOTA_STORE_REDIS_URL`              | _(empty)_ | Redis URL, e.g. `redis://localhost:6379`                       |
+| `QUOTA_SATURATION_THRESHOLD`         | `0.5`     | 0..1; `>= threshold` activates strict mode                     |
+| `QUOTA_PERCENT_MIN_TOKENS_PER_POINT` | `1000`    | Tokens that explain at most one point of a percent plan window |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`     | `0.7`     | 0..1; multiplier for soft-policy combo score                   |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS`   | `14`      | Days before GC removes old `quota_consumption` buckets         |
 
 DB settings (`quotaStore.*`) override env vars.
 
