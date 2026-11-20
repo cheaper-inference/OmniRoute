@@ -47,6 +47,12 @@ separate administrative change; adding these jobs does not itself protect a bran
 
 ### Merge queue
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
+> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
+> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
+> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
+> omni-queue after that ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). The workflow handling of Mergify drafts described below is still in `ci.yml` and `quality.yml`, but no Mergify draft is opened any more.
+
 The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
 a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
 when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
