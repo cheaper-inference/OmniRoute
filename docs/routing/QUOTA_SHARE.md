@@ -289,9 +289,12 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 
 ### Enabling and authentication
 
-- Feature flag `QUOTA_SELF_PANEL`, default `false`. While it is off the route answers 404. It
-  resolves like every other flag (dashboard or REST override, then the environment variable of
-  the same name); see [`FEATURE_FLAGS.md`](../reference/FEATURE_FLAGS.md).
+- Feature flag `QUOTA_SELF_PANEL`, default `false`. While it is off, a request that reaches the
+  route gets 404. With `REQUIRE_API_KEY=true`, the client API policy refuses a missing or invalid
+  key with 401 before the route runs, whatever the flag. A request with no key but a signed-in
+  dashboard session passes that policy and gets the route's own answer. The flag resolves like
+  every other flag (dashboard or REST override, then the environment variable of the same name);
+  see [`FEATURE_FLAGS.md`](../reference/FEATURE_FLAGS.md).
 - The key is read from headers only: `Authorization: Bearer <key>` or `x-api-key: <key>`. When
   both are sent, the first one that validates is used. A key in the query string or a cookie is
   ignored. The server's environment key is refused (401).
@@ -362,7 +365,8 @@ logged on the server and never returned.
 - The account-level bar comes from the provider-limits cache and can lag the enforcement
   decision by a few minutes. A reading whose reset time has passed is reported as `stale`.
 - Per-model windows (`modelWindows`) are reported only for providers that have a plan-window
-  mapping: Claude and Codex today.
+  mapping: Claude and Codex today. For other providers `modelWindows` is still present when
+  account data is shown, with an empty `windows` list.
 - The key's own share of a `percent` window is reported as `unavailable`
   (`percent_attribution_unavailable`) for now.
 - Reserve floors of a schedule are not evaluated by the view: a schedule can show as `open`

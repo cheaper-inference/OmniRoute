@@ -17363,7 +17363,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
-      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status).
+      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status and /v1/me/quota/{provider}).
     ManagementSessionAuth:
       type: apiKey
       in: cookie

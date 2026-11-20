@@ -104,6 +104,7 @@ async function assertFixed500(res: Response, leaks: string[]) {
 
 test("both spellings are client API routes, with no public-route entry", () => {
   assert.equal(classifyRoute("/v1/me/quota/claude").routeClass, "CLIENT_API");
+  assert.equal(classifyRoute("/api/v1/me/quota/claude").routeClass, "CLIENT_API");
   assert.equal(classifyRoute("/api/v1/me/usage").routeClass, "CLIENT_API");
   // Every /api/v1/ route is reachable without a dashboard session through the existing
   // "/api/v1/" prefix (its handler authenticates the key itself, as /api/v1/me/status does).
@@ -126,10 +127,12 @@ test("both spellings are client API routes, with no public-route entry", () => {
 
 test("flag off is 404; no key is 401; no scope is 403; a bad provider is 400", async () => {
   delete process.env.QUOTA_SELF_PANEL;
-  assert.equal((await call("claude", bearer(scoped.key))).status, 404);
+  const off = await call("claude", bearer(scoped.key));
+  assert.deepEqual([off.status, off.headers.get("Cache-Control")], [404, "no-store"]);
   process.env.QUOTA_SELF_PANEL = "true";
   assert.equal((await call("claude")).status, 401);
-  assert.equal((await call("claude", bearer(unscoped.key))).status, 403);
+  const noScope = await call("claude", bearer(unscoped.key));
+  assert.deepEqual([noScope.status, noScope.headers.get("Cache-Control")], [403, "no-store"]);
   const bad = await call("cl aude/../x", bearer(scoped.key));
   assert.deepEqual([bad.status, bad.headers.get("Cache-Control")], [400, "no-store"]);
   assert.equal((await bad.json()).error.message, "Invalid provider");
