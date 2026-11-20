@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Alisin ang key"
   },
   "plugins": {
-    "privilegesWarningTitle": "Ang mga plugin ay tumatakbo nang may ganap na mga pribilehiyo",
-    "privilegesWarningBody": "Ang isang plugin ay tumatakbo bilang isang regular na proseso Node.js na may parehong access gaya ng OmniRoute: maaari itong magbasa ng mga file, magpatakbo ng mga programa at gamitin ang network, anuman ang mga pahintulot na idineklara ng manifest nito. Mag-install lamang ng mga plugin na pinagkakatiwalaan mo.",
     "title": "Mga plugin",
     "description": "Mag-install at mamahala ng mga plugin upang palawakin ang functionality ng OmniRoute",
     "loading": "Nilo-load ang mga plugin...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Mag-scan para sa mga plugin",
     "noPlugins": "Walang naka-install na plugin",
     "noPluginsDescription": "Ilagay ang mga direktoryo ng plugin sa ~/.omniroute/plugins/ at i-click ang Mag-scan.",
+    "privilegesWarningTitle": "Ang mga plugin ay tumatakbo nang may ganap na mga pribilehiyo",
+    "privilegesWarningBody": "Ang isang plugin ay tumatakbo bilang isang regular na proseso Node.js na may parehong access gaya ng OmniRoute: maaari itong magbasa ng mga file, magpatakbo ng mga programa at gamitin ang network, anuman ang mga pahintulot na idineklara ng manifest nito. Mag-install lamang ng mga plugin na pinagkakatiwalaan mo.",
     "activate": "I-activate",
     "deactivate": "I-deactivate",
     "uninstall": "I-uninstall",

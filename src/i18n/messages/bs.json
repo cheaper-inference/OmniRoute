@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Ukloni ključ"
   },
   "plugins": {
-    "privilegesWarningTitle": "Dodaci rade s punim privilegijama",
-    "privilegesWarningBody": "Dodatak radi kao običan Node.js proces sa istim pristupom kao i OmniRoute: može čitati datoteke, pokretati programe i koristiti mrežu, bez obzira na dozvole koje njegov manifest proglasi. Instalirajte samo dodatke u koje vjerujete.",
     "title": "Dodaci",
     "description": "Instalirajte i upravljajte dodacima za proširenje funkcionalnosti OmniRoute-a",
     "loading": "Učitavanje dodataka.",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Skeniraj dodatke",
     "noPlugins": "Nema instaliranih dodataka",
     "noPluginsDescription": "Postavite direktorije dodataka u ~/.omniroute/plugins/ i kliknite Skeniraj.",
+    "privilegesWarningTitle": "Dodaci rade s punim privilegijama",
+    "privilegesWarningBody": "Dodatak radi kao običan Node.js proces sa istim pristupom kao i OmniRoute: može čitati datoteke, pokretati programe i koristiti mrežu, bez obzira na dozvole koje njegov manifest proglasi. Instalirajte samo dodatke u koje vjerujete.",
     "activate": "Aktiviraj",
     "deactivate": "Deaktiviraj",
     "uninstall": "Deinstaliraj",

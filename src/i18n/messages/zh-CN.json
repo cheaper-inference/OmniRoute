@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "移除键"
   },
   "plugins": {
-    "privilegesWarningTitle": "插件以完全权限运行",
-    "privilegesWarningBody": "插件作为常规Node.js进程运行，具有与OmniRoute相同的访问权限：它可以读取文件、运行程序和使用网络，无论其清单声明什么权限。仅安装您信任的插件。",
     "title": "插件",
     "description": "安装和管理插件以扩展 OmniRoute 功能",
     "loading": "加载插件中…",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "扫描插件",
     "noPlugins": "未安装插件",
     "noPluginsDescription": "将插件目录放入 ~/.omniroute/plugins/ 并点击扫描。",
+    "privilegesWarningTitle": "插件以完全权限运行",
+    "privilegesWarningBody": "插件作为常规Node.js进程运行，具有与OmniRoute相同的访问权限：它可以读取文件、运行程序和使用网络，无论其清单声明什么权限。仅安装您信任的插件。",
     "activate": "激活",
     "deactivate": "停用",
     "uninstall": "卸载",

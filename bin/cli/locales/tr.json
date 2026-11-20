@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Limit pozitif bir tam sayı olmalıdır.",
     "error": "Hata: {message}",
     "serverOffline": "OmniRoute sunucusu çevrimdışı. Başlatın: omniroute serve",
     "authRequired": "Kimlik doğrulama gerekli. OMNIROUTE_API_KEY ayarlayın veya çalıştırın: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simülasyon] yapılacaktı: {action}",
     "cancelled": "İptal edildi.",
     "jsonOpt": "JSON olarak çıktı",
-    "yesOpt": "Onayı atla"
+    "yesOpt": "Onayı atla",
+    "positiveIntegerRequired": "Limit pozitif bir tam sayı olmalıdır."
   },
   "setup": {
     "title": "OmniRoute Kurulumu",

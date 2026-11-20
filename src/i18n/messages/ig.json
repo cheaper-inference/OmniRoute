@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Wepụ igodo"
   },
   "plugins": {
-    "privilegesWarningTitle": "Ngwa mgbakwunye na-eji ihe ùgwù zuru oke",
-    "privilegesWarningBody": "Ngwa mgbakwunye na-agba ọsọ dị ka usoro Node.js oge niile yana ohere dị ka OmniRoute: ọ nwere ike ịgụ faịlụ, mee mmemme ma jiri netwọk, ikike ọ bụla gosipụtara ya. Wụnye naanị plugins ị tụkwasịrị obi.",
     "title": "Ngwa mgbakwunye",
     "description": "Wụnye ma jikwaa ngwa mgbakwunye iji gbasaa ọrụ OmniRoute",
     "loading": "Na-ebunye ngwa mgbakwunye...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Nyochaa maka ngwa mgbakwunye",
     "noPlugins": "Enweghị ngwa mgbakwunye arụnyere",
     "noPluginsDescription": "Debe ndekọ ngwa mgbakwunye na ~/.omniroute/plugins/ wee pịa Nyochaa.",
+    "privilegesWarningTitle": "Ngwa mgbakwunye na-eji ihe ùgwù zuru oke",
+    "privilegesWarningBody": "Ngwa mgbakwunye na-agba ọsọ dị ka usoro Node.js oge niile yana ohere dị ka OmniRoute: ọ nwere ike ịgụ faịlụ, mee mmemme ma jiri netwọk, ikike ọ bụla gosipụtara ya. Wụnye naanị plugins ị tụkwasịrị obi.",
     "activate": "Mee ka ọ rụọ ọrụ",
     "deactivate": "Kwụsị ya ịrụ ọrụ",
     "uninstall": "Wepụ",

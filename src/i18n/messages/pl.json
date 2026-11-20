@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Usuń klucz"
   },
   "plugins": {
-    "privilegesWarningTitle": "Wtyczki działają z pełnymi uprawnieniami",
-    "privilegesWarningBody": "Wtyczka działa jak zwykły proces Node.js z takimi samymi uprawnieniami jak OmniRoute: może czytać pliki, uruchamiać programy i korzystać z sieci, niezależnie od uprawnień deklarowanych w jej manifeście. Instaluj tylko wtyczki, którym ufasz.",
     "title": "Wtyczki",
     "description": "Instalowanie i zarządzanie wtyczkami w celu rozszerzenia funkcjonalności OmniRoute",
     "loading": "Ładowanie wtyczek...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Skanuj w poszukiwaniu wtyczek",
     "noPlugins": "Brak zainstalowanych wtyczek",
     "noPluginsDescription": "Umieść katalogi wtyczek w ~/.omniroute/plugins/ i kliknij Skanuj.",
+    "privilegesWarningTitle": "Wtyczki działają z pełnymi uprawnieniami",
+    "privilegesWarningBody": "Wtyczka działa jak zwykły proces Node.js z takimi samymi uprawnieniami jak OmniRoute: może czytać pliki, uruchamiać programy i korzystać z sieci, niezależnie od uprawnień deklarowanych w jej manifeście. Instaluj tylko wtyczki, którym ufasz.",
     "activate": "Aktywuj",
     "deactivate": "Dezaktywuj",
     "uninstall": "Odinstaluj",

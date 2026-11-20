@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Kalitni olib tashlash"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plaginlar to'liq imtiyozlar bilan ishlaydi",
-    "privilegesWarningBody": "Plagin OmniRoute bilan bir xil kirish huquqiga ega oddiy Node.js jarayoni sifatida ishlaydi: u manifest e'lon qilgan ruxsatlardan qat'i nazar, fayllarni o'qiy oladi, dasturlarni ishga tushiradi va tarmoqdan foydalanishi mumkin. Faqat o'zingiz ishonadigan plaginlarni o'rnating.",
     "title": "Plaginlar",
     "description": "OmniRoute funksiyalarini kengaytirish uchun plaginlarni o‘rnating va boshqaring",
     "loading": "Plaginlar yuklanmoqda...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Plaginlarni tekshirish",
     "noPlugins": "Hech qanday plagin o‘rnatilmagan",
     "noPluginsDescription": "Plagin kataloglarini ~/.omniroute/plugins/ ichiga joylashtiring va «Tekshirish» tugmasini bosing.",
+    "privilegesWarningTitle": "Plaginlar to'liq imtiyozlar bilan ishlaydi",
+    "privilegesWarningBody": "Plagin OmniRoute bilan bir xil kirish huquqiga ega oddiy Node.js jarayoni sifatida ishlaydi: u manifest e'lon qilgan ruxsatlardan qat'i nazar, fayllarni o'qiy oladi, dasturlarni ishga tushiradi va tarmoqdan foydalanishi mumkin. Faqat o'zingiz ishonadigan plaginlarni o'rnating.",
     "activate": "Faollashtirish",
     "deactivate": "Faolsizlantirish",
     "uninstall": "O‘chirish",
