@@ -299,7 +299,7 @@ OmniRoute provides a two-layer defense: request-side injection scanning and resp
 
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
-| `AGENT_GUARD_MODE` | `off` | `src/lib/guardrails/agentGuard/settings.ts` | `off`, `monitor` or `block`. `monitor` logs requests to the `claude`/`anthropic` providers whose client is not an official agent. `block` refuses known third-party agents on the resolved provider. Headers can be forged. Also a DB feature flag (DB > ENV). |
+| `AGENT_GUARD_MODE` | `off` | `src/lib/guardrails/agentGuard/settings.ts` | `off`, `monitor` or `block`. `monitor` logs requests to the `claude`/`anthropic` providers whose client is not an official agent. `monitor` reads the provider from the model string, so only prefixed model ids (`cc/…`, `claude/…`, `anthropic/…`, quota-share ids) are observed, not bare ids or combos. `block` refuses known third-party agents on the resolved provider. Headers can be forged. Also a DB feature flag (DB > ENV). |
 | `AGENT_GUARD_STRICT` | `false` | `src/lib/guardrails/agentGuard/settings.ts` | With `AGENT_GUARD_MODE=block`, also refuse clients that cannot be identified. |
 
 ### Response-Side: PII Sanitizer

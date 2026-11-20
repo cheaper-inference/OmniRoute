@@ -1032,7 +1032,7 @@ handler makes the decision instead:
 6. In a combo, a refused target is skipped and the remaining targets run. The
    request fails with the policy error when at least one target was refused and
    no target got past the guard. The combo keeps its own error when a top-level
-   entry names another known provider with an explicit prefix.
+   entry names another known provider, by a prefix or by the step's provider id.
 7. A `fusion` combo fails before the panel runs when the judge the fusion
    service will use would be refused. That judge comes from the combo's
    configuration or from the global combo defaults. The same check runs when a
@@ -1054,9 +1054,19 @@ handler makes the decision instead:
 - `AGENT_GUARD_STRICT` refuses every client on those providers that is not
   Claude Code or an official SDK. That includes browser-based clients and the
   dashboard playground. The dashboard combo live test is exempt.
-- With `AGENT_GUARD_STRICT`, callers inside OmniRoute that build their own chat
-  request without identifying headers are refused on those providers too. The
-  Telegram chat proxy (`src/lib/telegram/chatProxy.ts`) is one of them.
+- Some features send their own request back through OmniRoute's `/v1/...`
+  routes. They are batch jobs (`src/lib/batches/dispatch.ts`), the MCP inference
+  tools (`open-sse/mcp-server/tools/inferenceTools.ts`), A2A smart routing
+  (`src/lib/a2a/skills/smartRouting.ts`), the vision bridge when it describes an
+  image through OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`) and the
+  Telegram chat proxy (`src/lib/telegram/chatProxy.ts`). Those inner requests
+  carry OmniRoute's own headers, not the headers of the client that started
+  them. The guard classifies them as unidentified clients.
+- Without `AGENT_GUARD_STRICT`, those inner requests are served on the guarded
+  providers whoever the original client was. A third-party agent that reaches
+  Claude through them is not refused.
+- With `AGENT_GUARD_STRICT`, those inner requests are refused on the guarded
+  providers whoever started them, Claude Code included.
 - Only requests that go through the chat handler are gated. Model validation
   (`src/lib/modelValidation/runner.ts`) calls the request core directly and is
   not gated.
@@ -1083,9 +1093,13 @@ handler makes the decision instead:
   combo paths behave this way.
 - On the safety-net redirect, the combo service receives empty settings. A
   judge set only in the global combo defaults is never used there.
-- While `block` is on, requests the guard would refuse do not use the sidecar
-  fast path, for any model. `POST /v1/messages/count_tokens` answers them with
-  the local estimate.
+- While `block` is on, a client the guard would refuse on a guarded provider
+  does not use the sidecar fast path, for any model. Under `AGENT_GUARD_STRICT`
+  that is every unidentified client. After its relay token check,
+  `POST /v1/relay/chat/completions/bifrost` answers those requests with a 503
+  and the `X-Bifrost-Fallback` header.
+- `POST /v1/messages/count_tokens` gives the local estimate to a client the
+  guard would refuse on the provider the model resolves to.
 - There is no per-key exemption.
 
 ## Base Contract (`base.ts`)
