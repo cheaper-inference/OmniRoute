@@ -329,7 +329,7 @@ clears the books on SQLite (see Limitations).
 - All growth of the account figure since the baseline is split by the tokens each key routed since
   then. When that growth happened does not matter.
 - So usage made outside OmniRoute is charged to the keys up to what their tokens allow. That
-  includes usage made before a key's first request of the window.
+  includes usage made before a key's first request of the window, when the book was already open.
 - For example, outside use raises the account 60 points while no key routes. A key then routes
   30,000 tokens and the figure reaches 60.6.
 - If the book was open before that use, the key's part is 30 points. It also carries 7.65 of
@@ -346,14 +346,15 @@ clears the books on SQLite (see Limitations).
   includes traffic on the same account from keys outside the pool.
 - A percent cap applies in every mode. A capped key can be refused while the account is far below
   the saturation threshold.
-- For example, with a cap of 10 and 12 points of outside use earlier in the window, a key that
-  routes 20,000 tokens is refused at an account figure of 12.4%.
+- Take a cap of 10 and 12 points of outside use earlier in the window. A key that routes 20,000
+  tokens is then refused at an account figure of 12.4%.
 - The split is an estimate by token volume. A request counts as its prompt tokens plus its
   completion tokens. Cache discounts and model prices do not change that count.
 - A request that does not end with status 200 records no tokens. Examples are a stream the client
   disconnects and an upstream error after usage was consumed.
-- The usage such a request caused is split among the keys that did record tokens. It does not move
-  back. A response that reports no token usage records no tokens either.
+- The usage such a request caused is charged to the keys that did record tokens, up to what their
+  tokens allow. The rest is external. It does not move back. A response that reports no token
+  usage records no tokens either.
 - The usage of a request in progress can show up in another active key's part for the whole
   request. It moves back only when the request ends with status 200.
 - Usage already on the account when a book opens counts as external. This covers an upgrade, a new
@@ -369,7 +370,9 @@ clears the books on SQLite (see Limitations).
 - The remedy is the manual usage-history reset (`POST /api/settings/purge-usage-history`). It
   clears the attribution books and their token counters in the SQLite database.
 - The `all` period clears every book. A shorter period clears only the books and counters not
-  written within it. The next reading then opens a fresh book at the current figure.
+  written within it. A book whose figure has not moved is not rewritten, so a shorter period can
+  also clear the current window's book. The next reading then opens a fresh book at the current
+  figure.
 - The reset does not touch a Redis quota store. There a book ends with its window, or expires 60
   days after its last write.
 - When the provider sends no reset time, a window that resets and refills above the old figure
