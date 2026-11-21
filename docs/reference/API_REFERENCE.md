@@ -386,6 +386,11 @@ reproducible. `n` is capped at 10. The request fails as a whole if any call fail
 of fan-out formats is `SINGLE_IMAGE_FANOUT_FORMATS` in
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Image models (`codex/gpt-image-*`) return PNG only: the upstream answers `200` with
+PNG bytes even when `jpeg` or `webp` is requested. A request with any other `output_format`
+(`webp`, `jpeg`, ...) is rejected with HTTP 400 instead of being silently ignored; omit it or
+send `png`. `output_compression` is not forwarded.
+
 ZenMux reuses the existing API-key connection and accepts `zenmux/` or `zm/` prefixes:
 
 - `zenmux/openai/gpt-image-2` uses ZenMux's OpenAI Images API. Options include `size`,
