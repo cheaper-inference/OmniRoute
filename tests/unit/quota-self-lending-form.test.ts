@@ -257,5 +257,6 @@ test("each write failure has one text, and only two offer a reload", () => {
 test("the rules read no clock, no storage and no React", async () => {
   const { readFileSync } = await import("node:fs");
   const source = readFileSync("src/app/quota/[provider]/lib/lendingForm.ts", "utf8");
+  assert.match(source, /export function buildLendingSubmission\(/);
   assert.doesNotMatch(source, /Date\.now|new Date\(|performance\.|from "react"|fetch\(|Storage/);
 });
