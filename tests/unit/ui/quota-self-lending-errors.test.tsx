@@ -272,6 +272,32 @@ describe("self-service quota page lending refusals", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
+  it("the saved message lives in the status region and an error alert stays outside it", async () => {
+    let answer: Patch = () => jsonResponse(consent({ lendingPercent: 25, lendingActive: true }));
+    serve(
+      () => consent(),
+      (call) => answer(call)
+    );
+    await openCard();
+    const card = saveButton().closest("form") as HTMLFormElement;
+    const statusRegion = card.querySelector('[role="status"]') as HTMLElement;
+    expect(statusRegion).toBeTruthy();
+    expect(statusRegion.textContent).toBe("");
+
+    changeAndSave();
+    await screen.findByText("Your lending choice was saved.");
+    expect(statusRegion.textContent).toContain("Your lending choice was saved.");
+    expect(card.querySelector('[role="alert"]')).toBeNull();
+
+    answer = refuse(500);
+    setPercent("30");
+    fireEvent.click(saveButton());
+    const alert = await screen.findByRole("alert");
+    expect(card.contains(alert)).toBe(true);
+    expect(statusRegion.contains(alert)).toBe(false);
+    expect(statusRegion.textContent).toBe("");
+  });
+
   it("forgetting the key during a save aborts the request and drops the answer", async () => {
     let answer: (response: Response) => void = () => {};
     const calls = serve(

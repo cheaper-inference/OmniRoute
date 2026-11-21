@@ -15,19 +15,18 @@ interface LendingMessageProps {
 }
 
 /**
- * The result of the last save. The container is always mounted, focusable and a polite live
- * region, so focus can move to it and a message put into it is announced. The saved message is
- * announced by the container, an error by its own alert. The text comes from the failure tag,
- * never from the server.
+ * The result of the last save. The container is always mounted and focusable, so focus can move
+ * to it after a save. Inside it, an always-mounted polite status region holds the saved message,
+ * so the message is announced when it arrives. An error is a critical alert, inserted next to the
+ * status region and never inside it, and announced on insertion. The text comes from the failure
+ * tag, never from the server.
  */
 export default function LendingMessage({ notice, onReload, ref }: LendingMessageProps) {
   const t = useTranslations("quotaSelf");
-  let banner: ReactNode = null;
-  if (notice?.kind === "saved") {
-    banner = <Alert variant="success" dismissible={false} role="none" title={t("lendingSaved")} />;
-  } else if (notice?.kind === "error") {
+  let error: ReactNode = null;
+  if (notice?.kind === "error") {
     const text = lendingErrorText(notice.error, notice.retryAfterSeconds);
-    banner = (
+    error = (
       <Alert
         variant="critical"
         dismissible={false}
@@ -44,8 +43,13 @@ export default function LendingMessage({ notice, onReload, ref }: LendingMessage
   }
 
   return (
-    <div ref={ref} tabIndex={-1} role="status" className="min-w-0 break-words">
-      {banner}
+    <div ref={ref} tabIndex={-1} className="min-w-0 break-words">
+      <div role="status" className="min-w-0">
+        {notice?.kind === "saved" ? (
+          <Alert variant="success" dismissible={false} role="none" title={t("lendingSaved")} />
+        ) : null}
+      </div>
+      {error}
     </div>
   );
 }
