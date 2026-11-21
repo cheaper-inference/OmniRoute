@@ -1646,4 +1646,19 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     apiHint:
       "Create an API key in your Gisoo account, then paste it here as a Bearer token. OpenAI-compatible base URL: https://gisoo.pro/api/v1. Prepaid credit; no free tier.",
   },
+  // JembatanAI (https://jembatanai.com): hosted multi-model gateway. OpenAI-compatible /v1;
+  // /v1/models is key-gated, so models are discovered live per key.
+  jembatanai: {
+    id: "jembatanai",
+    serviceKinds: ["llm"],
+    alias: "jembatanai",
+    name: "JembatanAI",
+    icon: "hub",
+    color: "#047857",
+    textIcon: "JA",
+    passthroughModels: true,
+    website: "https://jembatanai.com",
+    apiHint:
+      "Get a key at https://jembatanai.com or from the Telegram bot @jembatanai_bot, then paste it here as a Bearer token. OpenAI-compatible base URL: https://freeai.jembatanai.com/v1. Subscription plans have unlimited tokens under a fair-use policy, paced at 30 requests per minute per key (25 on daily plans); metered token plans and a 2M-token trial key are also available.",
+  },
 };
