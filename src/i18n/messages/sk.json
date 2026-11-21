@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Udržujte systémové správy uprostred konverzácie na mieste",
     "requireUserLastMessageDescription": "Pre upstreamy, ktoré odmietajú predvyplnenie asistenta: pred odoslaním zhoďte koncové otáčky asistenta (bez použitia nástroja). Model môže obnoviť svoju predchádzajúcu odpoveď.",
     "requireUserLastMessageLabel": "Vyžadovať ukončenie konverzácie používateľskou správou",
+    "strictChatHistoryDescription": "Opravuje prerušené sekvencie volaní nástrojov a zlučuje po sebe idúce správy asistenta pred odoslaním poskytovateľom kompatibilným s OpenAI, ktorí uplatňujú prísne pravidlá.",
+    "strictChatHistoryLabel": "Oprava histórie chatu pre prísnych poskytovateľov",
     "bulkPasteAdded": "{count, plural, one {Pridaný 1 kľúč} few {Pridané # kľúče} other {Pridaných # kľúčov}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Preskočený 1 duplikát} few {Preskočené # duplikáty} other {Preskočených # duplikátov}}",
     "bulkPasteHint": "Vložte jeden kľúč API na každý riadok. Prázdne riadky sa ignorujú a duplicitné kľúče sa preskočia.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Odstrániť kľúč"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pluginy bežia s plnými oprávneniami",
-    "privilegesWarningBody": "Doplnok beží ako bežný proces Node.js s rovnakým prístupom ako OmniRoute: môže čítať súbory, spúšťať programy a používať sieť bez ohľadu na povolenia, ktoré jeho manifest deklaruje. Inštalujte iba doplnky, ktorým dôverujete.",
     "title": "Pluginy",
     "description": "Inštalácia a správa pluginov na rozšírenie funkcií OmniRoute",
     "loading": "Načítavajú sa pluginy...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Vyhľadať pluginy",
     "noPlugins": "Nie sú nainštalované žiadne pluginy",
     "noPluginsDescription": "Umiestnite adresáre pluginov do ~/.omniroute/plugins/ a kliknite na Vyhľadať.",
+    "privilegesWarningTitle": "Pluginy bežia s plnými oprávneniami",
+    "privilegesWarningBody": "Doplnok beží ako bežný proces Node.js s rovnakým prístupom ako OmniRoute: môže čítať súbory, spúšťať programy a používať sieť bez ohľadu na povolenia, ktoré jeho manifest deklaruje. Inštalujte iba doplnky, ktorým dôverujete.",
     "activate": "Aktivovať",
     "deactivate": "Deaktivovať",
     "uninstall": "Odinštalovať",

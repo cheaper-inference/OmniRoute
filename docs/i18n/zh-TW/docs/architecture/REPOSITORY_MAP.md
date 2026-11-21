@@ -4,593 +4,627 @@
 
 ---
 
-> **每個目錄與根目錄檔案的一行說明。**
-> 最後更新：2026-06-28 — OmniRoute v3.8.40
+> **什麼存在於哪裡：每個追蹤的頂級目錄和根文件，具有一行目的。**最後更新：2026-11-13（OmniRoute v3.8.54）
 >
-> 使用此地圖快速瀏覽程式碼庫。如需深入瞭解，請前往各專門文件的連結。
+> 使用此地圖來尋找程式碼庫，然後點擊專用文件的連結。文件計數是在上述日期使用`git ls-files`進行測量的。它們幾乎隨著每個版本的發布而變化，因此將它們視為數量級。
 
-## 頂層目錄樹
+## 頂級樹
 
 ```
 OmniRoute/
-├── src/                  # Next.js 16 應用程式（UI + API 路由 + 函式庫 + 領域層 + 伺服器）
-├── open-sse/             # 串流引擎工作區（處理常式、執行器、轉譯器、MCP 伺服器）
-├── packages/            # npm 工作區：ui-kit（內建的 Keak CI UI Kit）與 browser-pool
-├── electron/             # 桌面封裝程式（Electron 41 + electron-builder 26.10）
-├── bin/                  # CLI 進入點與命令處理常式
-├── scripts/              # 建置、檢查、同步與一次性指令碼
-├── docs/                 # 公開文件（您目前位於此處）
-├── tests/                # 所有測試套件（單元、整合、e2e、協定用戶端）
-├── public/               # Next.js 靜態資源、PWA manifest、service worker、圖示
-├── config/               # 靜態設定 + 品質閘門狀態（i18n、payloadRules、quality/）
-├── images/               # 行銷／README 圖片資源
-├── @omniroute/           # 可發布的配套套件（opencode-plugin、opencode-provider）
-├── skills/               # CLI／代理程式技能套件（cli-* + omni-* + config-codex-cli）
-├── examples/             # 範例外掛程式 + omniroute-cmd-hello 起始範本
-├── contrib/              # 社群貢獻內容（podman/）
-├── .source/              # Fumadocs 來源設定（source.config.mjs + server/browser/dynamic）
-├── .github/              # GitHub Actions 工作流程 + 議題範本 + PR 範本
-├── .husky/               # Git 掛鉤（pre-commit、pre-push）
-├── .claude/              # Claude Code 斜線命令（專案範圍）
-├── .agents/              # Codex／通用代理程式工作流程 + 技能（.claude/ 的鏡像）
-├── .vscode/              # VS Code 工作區設定
-├── _ideia/               # 規劃筆記（非正式；不隨產品發布）
-├── _mono_repo/           # 歷史子專案（cloud、site、vscode-extension）
-├── _references/          # 來自相關 OSS 專案的唯讀參考複本
-├── _tasks/               # 各版本的工作追蹤檔案（非正式）
-├── .build/ .worktrees/ dist/   # 本機建置／git-worktree／建置輸出的暫存空間（gitignored）
-├── .issues/              # 本機議題快取（gitignored）
-├── .playwright-mcp/      # Playwright MCP 測試產出物
-├── coverage/             # c8 覆蓋率輸出（gitignored）
-├── logs/                 # 執行階段日誌（gitignored）
-├── node_modules/         # 相依套件（gitignored）
-├── package/              # npm pack 暫存區（建置產出物）
-├── .next/                # Next.js 建置輸出（gitignored）
-└──（根目錄檔案 — 請見下方）
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+本地、生成或私有路徑（所有 gitignored，從未提交，不進一步描述）：
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
 ## 根文件
 
-| 文件                                         | 目的                                                                           |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| **README.md**                                | 行銷登陸頁面+快速入門+功能矩陣（另請參閱`llm.txt`）                            |
-| **CHANGELOG.md**                             | 每個版本的變更日誌（由`/version-bump-cc`技能自動產生）                         |
-| **LICENSE**                                  | MIT許可證文本                                                                  |
-| **CLAUDE.md**                                | Claude代碼代理的項目規則（硬規則、約定、場景）                                 |
-| **AGENTS.md**                                | 與CLAUDE.md相同，但適用於非 Claude AI代理（Codex、 Cursor等）                  |
-| **GEMINI.md**                                | 基於 Gemini 的代理的簡明規則（ CLAUDE.md的子集）                               |
-| **CONTRIBUTING.md**                          | 貢獻者指南：設定、常規提交、測試、 PR流程                                      |
-| **SECURITY.md**                              | 漏洞報告策略、支援版本、威脅模型                                               |
-| **CODE_OF_CONDUCT**                          | 貢獻者契約—社區行為期望                                                        |
-| **llm.txt**                                  | 針對LLM爬蟲最佳化的純文字登陸（SEO用於AI助理）                                 |
-| **package.json**                             | npm 清單、腳本、依賴項、引擎、c8 覆蓋門                                        |
-| **package-lock.json**                        | 鎖定的依賴樹                                                                   |
-| **tsconfig.json**                            | 根TypeScript配置                                                               |
-| **tsconfig。typecheck-core.json**            | `src/`核心的類型檢查配置                                                       |
-| **tsconfig。typecheck-noimplicit-core.json** | 嚴格 (`noImplicitAny`) 類型檢查                                                |
-| **tsconfig.tsbuildinfo**                     | TS增量建置快取（gitignored）                                                   |
-| **下一個。config.mjs**                       | Next.js 16 建置配置（獨立輸出）                                                |
-| **下一個環境。d.ts**                         | Next.js自動產生的環境類型                                                      |
-| **埃斯林特。config.mjs**                     | ESLint平面配置（每個項目區域的規則）                                           |
-| **更漂亮。config.mjs**                       | Prettier格式規則                                                               |
-| **後CSS。config.mjs**                        | Tailwind/CSS管道的PostCSS配置                                                  |
-| **劇作家。config.ts**                        | Playwright E2E測試配置                                                         |
-| **維泰斯特。config.ts**                      | Vitest配置（預設套件）                                                         |
-| **維泰斯特.mcp。config.ts**                  | MCP伺服器 / autoCombo / 快取套件的Vitest配置                                   |
-| **聲納專案.properties**                      | SonarQube/SonarCloud配置（程式碼品質）                                         |
-| **Dockerfile**                               | 多階段Docker建置（建構器→ runner-base → runner-cli）                           |
-| **docker-compose.yml**                       | 開發人員使用 4 個設定檔（base、cli、host、cliproxyapi）進行組合+ redis sidecar |
-| **docker-compose。prod.yml**                 | 生產組合（連接埠 20130、redis、命名磁碟區）                                    |
-| **.dockerignore**                            | 從Docker上下文中排除的文件                                                     |
-| **fly.toml**                                 | Fly.io 部署配置（區域`sin`，連接埠 20128，/資料量）                            |
-| **.env.example**                             | 範本環境檔案（首次安裝時自動複製到`.env` ）                                    |
-| **.gitignore**                               | Git 忽略模式                                                                   |
-| **.npmignore**                               | npm 發布排除列表                                                               |
-| **.npmrc**                                   | npm 設定（登錄、鎖定檔案策略）                                                 |
-| **.node-版本**                               | 節點版本引腳（由 nvm 相容工具使用）                                            |
-| **.nvmrc**                                   | nvm 的節點版本引腳                                                             |
-| **eslint.complexity。config.mjs**            | ESLint複雜性棘輪配置 (`scripts/check/check-complexity.mjs --config`)           |
-| **eslint.sonarjs。config.mjs**               | SonarJS規則的ESLint配置（認知複雜度/重複）                                     |
-| **來源。config.ts**                          | Fumadocs `defineDocs`來源配置（提供`.source/`）                                |
-| **knip.json**                                | Knip config —未使用的files/exports/deps （提供死碼閘）                         |
-| **斯賽克。conf.mjs**                         | Stryker 突變測試配置（從`mutate`計算`tap.testFiles` ）                         |
-| **.size-limit.json**                         | 大小限制捆綁預算配置                                                           |
-| **promptfooconfig.yaml**                     | 提示foo評估配置                                                                |
-| **.gitleaks.toml**                           | gitleaks 秘密掃描規則集                                                        |
-| **.zizmor.yml**                              | zizmor GitHub-Actions security-lint 配置                                       |
-| **socket.yml**                               | Socket.dev 供應鏈配置                                                          |
-| **news.json**                                | 本地化 v2 公告提要；雷達發射項目船舶處於非活動狀態                             |
-| **弗萊克.尼克斯**/**片狀鎖**                 | Nix dev-shell 定義+鎖                                                          |
-| **.env**                                     | 本地秘密（從`.env.example`產生的 gitignored — ）                               |
+儲存庫根 (`git ls-files | grep -v /`) 中的所有追蹤文件，按功能分組。
 
-> **在 v3.8.26 中移出了根（整理）：**
->
-> - **→ `config/quality/`:** `quality-baseline.json`、 `complexity-baseline.json`、 `duplication-baseline.json`、 `file-size-baseline.json`、 `test-discovery-baseline.json`、 `dependency-allowlist.json`、 `.license-allowlist.json`和產生的`quality-metrics.json` （gitignored）。參見[`## config/`](#config--static-configs--quality-gate-state) 。
+### 專案文件
+
+| 文件                     | 目的                                                                     |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `README.md`              | Landing page: feature overview, quick start, install methods             |
+| `CHANGELOG.md`           | Per-release changelog (fragments from `changelog.d/` are folded in here) |
+| `ROADMAP.md`             | 公共路線圖                                                               |
+| `LICENSE`                | MIT許可證                                                                |
+| `THIRD_PARTY_NOTICES.md` | Notices for bundled third-party code (for example the wreq-js bindings)  |
+| `CONTRIBUTING.md`        | Contributor guide: setup, conventional commits, test matrix, PR flow     |
+| `SECURITY.md`            | 漏洞通報政策                                                             |
+| `CODE_OF_CONDUCT.md`     | 社區行為期望                                                             |
+| `llm.txt`                | LLM爬蟲和助手的純文字項目總結                                            |
+
+### AI輔助指令
+
+| 文件        | 目的                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------- |
+| `AGENTS.md` | Single source of truth for every AI assistant: conventions, quality gates, Hard Rules |
+| `CLAUDE.md` | 克勞德代碼 - 特定的增量；進口`AGENTS.md`                                              |
+| `GEMINI.md` | 雙子座特有的三角洲；指向`AGENTS.md`                                                   |
+
+Nested guides also exist next to the code they describe: `open-sse/services/AGENTS.md` and `src/lib/db/AGENTS.md`.
+
+### 包清單和節點工具鏈
+
+| 文件                       | 目的                                                                      |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `package.json`             | npm 清單：腳本、依賴項、 `engines`、 `workspaces`、已發佈的`files`        |
+| `package-lock.json`        | 鎖定的依賴樹                                                              |
+| `pnpm-workspace.yaml`      | pnpm workspace list (`packages/*`, `open-sse`) and native-build allowlist |
+| `.npmrc` / `.npmignore`    | npm 配置和發布排除                                                        |
+| `.node-version` / `.nvmrc` | 版本管理器的節點版本引腳                                                  |
+| `flake.nix` / `flake.lock` | Nix dev shell 及其鎖                                                      |
+| `Makefile`                 | 委託給 npm 腳本的`make`快捷方式                                           |
+
+### TypeScript、 Next.js和文件構建
+
+| 文件                                      | 目的                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `tsconfig.json`                           | 基本TypeScript配置與路徑別名（`@/*`、 `@omniroute/open-sse`）       |
+| `tsconfig.typecheck-core.json`            | `npm run typecheck:core`切片                                        |
+| `tsconfig.typecheck-noimplicit-core.json` | `npm run typecheck:noimplicit:core` （嚴格`noImplicitAny`）切片     |
+| `tsconfig.typecheck-api.json`             | API 路由類型檢查切片 (`scripts/check/check-api-typecheck.mjs`)      |
+| `tsconfig.typecheck-dashboard.json`       | 儀表板類型檢查切片 (`npm run check:dashboard-typecheck`)            |
+| `tsconfig.build.json`                     | 生產型式檢查（`npm run typecheck:build`、 `check:build-typecheck`） |
+| `tsconfig.mitm.json`                      | `scripts/build/buildMitm.mjs`使用的MITM建構配置                     |
+| `next.config.mjs`                         | Next.js 16 設定（獨立輸出，建構設定檔別名）                         |
+| `source.config.ts`                        | Fumadocs `defineDocs`配置：哪些`docs/`部分編譯成`/docs`             |
+| `postcss.config.mjs`                      | PostCSS / Tailwind管道                                              |
+
+### Lint 和格式化
+
+| 文件                                      | 目的                                                                              |
+| ----------------------------------------- | --------------------------------------------------------------------------------- |
+| `eslint.config.mjs`                       | 主要ESLint平面配置（`npm run lint`，與`config/quality/eslint-suppressions.json`） |
+| `eslint.complexity-ratchets.config.mjs`   | 一次ESLint傳遞中的複雜性和認知複雜性棘輪所使用的獨立配置                          |
+| `eslint.complexity.config.mjs`            | 僅具有核心`complexity` + `max-lines-per-function`獨立配置（由測試使用）           |
+| `prettier.config.mjs` / `.prettierignore` | Prettier規則和排除                                                                |
+| `.editorconfig`                           | 編輯器預設值（2 個空格縮排）                                                      |
+| `.markdownlint.json`                      | 諮詢 Markdown lint (`npm run lint:md`)                                            |
+| `.vale.ini`                               | 諮商散文 lint (`npm run lint:prose`)， `.vale/`中的詞彙                           |
+
+### 測試、評估和覆蓋範圍
+
+| 文件                          | 目的                                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------------- |
+| `vitest.config.ts`            | jsdom Vitest套件： `npm run test:vitest:ui` （儀表板`.tsx`、hooks、 memory/skills測試）      |
+| `vitest.mcp.config.ts`        | 節點Vitest套件： `npm run test:vitest` （MCP伺服器， autoCombo，組合， API `.spec.ts`）      |
+| `vitest.quarantine.config.ts` | 運行`config/quality/vitest-exclusions.json`中列出的隔離文件                                  |
+| `vitest.e2e-live.config.ts`   | 實時伺服器Vitest套件（`tests/e2e/ecosystem.test.ts`、 `tests/e2e/protocol-clients.test.ts`） |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                |
+| `stryker.conf.mjs`            | Stryker 突變測試（`npm run test:mutation`；根據`mutate`計算`tap.testFiles` ）                |
+| `stryker.disablebail.mjs`     | 不含卡環的 Stryker 型號，用於測試冗餘測量                                                    |
+| `promptfooconfig.yaml`        | Promptfoo LLM-安全套件                                                                       |
+| `codecov.yml`                 | Codecov 補丁覆蓋設置                                                                         |
+
+### Docker和部署
+
+| 文件                              | 目的                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `Dockerfile`                      | 多階段影像 (`builder` → `runner-base` → `runner-web` / `runner-cli*`)  |
+| `Dockerfile.bun`                  | Bun運行時上的替代映像（由`docker-publish.yml`建構）                    |
+| `docker-compose.yml`              | 預設使用設定檔（base、web、cli、host、記憶體、cliproxyapi 等）進行組合 |
+| `docker-compose.prod.yml`         | 在連接埠 20130 上的單獨生產快照實例                                    |
+| `docker-compose.selfhost.yml`     | 一指令環回自主機（與`.env.selfhost.example`配對）                      |
+| `docker-compose.ollama-local.yml` | Docker OmniRoute與主機本地Ollama對話                                   |
+| `.dockerignore`                   | Docker建構上下文排除                                                   |
+| `fly.toml`                        | Fly.io 應用程式設定（連接埠 20128， `/data`磁碟區）                    |
+
+### 安全、供應鏈和儲存庫機器人
+
+| 文件                                         | 目的                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------- |
+| `.gitleaks.toml`                             | gitleaks 秘密掃描規則和白名單                                        |
+| `.trivyignore`                               | 容器鏡像掃描可接受的風險抑制                                         |
+| `.zizmor.yml`                                | zizmor GitHub操作安全審核配置                                        |
+| `socket.yml`                                 | Socket.dev 應用程式配置（路徑忽略；不是CI門）                        |
+| `sonar-project.properties`                   | SonarQube/SonarCloud專案配置                                         |
+| `knip.json`                                  | Knip 未使用的files/exports/deps配置（提供`npm run check:dead-code`） |
+| `.size-limit.json`                           | 捆綁預算                                                             |
+| `.mergify.yml`                               | Mergify 合併佇列配置                                                 |
+| `.coderabbit.yaml`                           | CodeRabbit審核配置                                                   |
+| `.cbmignore`                                 | 忽略 codebase-memory-mcp 代碼索引列表                                |
+| `.gitignore` / `.gitattributes` / `.mailmap` | 忽略規則、腳本的LF行結尾、規範作者身份                               |
+
+### 環境範本、狀態和來源
+
+| 文件                        | 目的                                              |
+| --------------------------- | ------------------------------------------------- |
+| `.env.example`              | 首次安裝時將模板複製到`.env` ；環境變數的參考列表 |
+| `.env.selfhost.example`     | `docker-compose.selfhost.yml`模板                 |
+| `.env.homolog.example`      | 認證跑者的範本 (`npm run homolog`)                |
+| `.env.devin-bridge.example` | Devin橋設定的範例 env 檔案                        |
+| `.i18n-state.json`          | 增量翻譯狀態（每個文件和區域設定的來源哈希）      |
+| `news.json`                 | 由儀表板讀取的本地化公告提要（架構 v2）           |
 
 ---
 
 ## `src/` — Next.js應用
 
+大約 4,550 個追蹤文件。路徑別名`@/*` → `src/*`。
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### `src/app/` —應用路由器 (Next.js 16)
+### `src/app/` —應用路由器
 
-| 小路                                                                         | 目的                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | 公共 OpenAI-compat API （~ 25 條子路線：聊天、完成、嵌入、文件、批次、音訊、圖像、視訊、音樂、重新排名、審核、搜尋、ws、代理商、帳戶、提供者等）                                                                                                                                                                   |
-| `app/api/v1beta/`                                                            | Gemini 風格的API端點                                                                                                                                                                                                                                                                                               |
-| `app/api/playground/`                                                        | Playground Studio 路線： `improve-prompt/` (POST — LLM提示重寫器)、 `presets/` (GET list / POST create)、 `presets/[id]/` (GET / PUT / DELETE) — see `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                        |
-| `app/api/` (non-v1)                                                          | Management/admin路由（~ 60 目錄：提供者、組合、設定、mcp、a2a、evals、記憶體、技能、webhooks、合規性、彈性、監控、隧道、cli 工具等）                                                                                                                                                                               |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 條路由（伺服器控制、代理state/DNS/mappings、旁路、憑證、上游 CA）。 LOCAL_ONLY + SPAWN_CAPABLE。參見`docs/frameworks/AGENTBRIDGE.md §7`。                                                                                                                                                |
-| `app/api/tools/traffic-inspector/`                                           | 流量檢查器REST + WS API — 16 +路由（請求、會話、主機、擷取模式、匯出、ws）。 LOCAL_ONLY + SPAWN_CAPABLE。參見`docs/frameworks/TRAFFIC_INSPECTOR.md §8`。                                                                                                                                                           |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 入口點 (`POST /a2a`)                                                                                                                                                                                                                                                                              |
-| `app/.well-known/agent.json/`                                                | A2A代理卡（發現）                                                                                                                                                                                                                                                                                                  |
-| `app/(dashboard)/dashboard/`                                                 | 儀表板UI頁面（50 個+部分、 ~ 118 個page.tsx檔案：提供者、組合、設定、記憶體、技能、webhooks、評估、稽核、批次、快取、成本、運作狀況、系統、活動等）                                                                                                                                                                |
-| `app/(dashboard)/dashboard/search-tools/`                                    | 搜尋工具 Studio UI （3 個選項卡： Search/Scrape/Compare + SearchConceptCard + ProviderCatalog） —參見`docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                      |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (3-tab shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge儀表板頁面—伺服器卡、9 個代理卡、設定精靈、模型對應、旁路清單。 i18n PT-BR + EN。參見`docs/frameworks/AGENTBRIDGE.md`。                                                                                                                                                                                 |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector 儀表板頁面— DevTools拆分、7 個詳細資料標籤、4 個捕獲模式切換、會話記錄器、上下文著色。 i18n PT-BR + EN。參見`docs/frameworks/TRAFFIC_INSPECTOR.md`。                                                                                                                                             |
-| `app/(dashboard)/dashboard/activity/`                                        | 活動提要頁面（B 組）： `page.tsx` （伺服器） + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` —參見`docs/architecture/MONITORING_SECTIONS.md`                                                                                                                   |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | 配額分享頁（B組）： `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                    |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | 提供者計畫配置頁面（B 組）： `page.tsx` + `ProviderPlanConfigClient.tsx` —每個連線覆蓋的配額維度                                                                                                                                                                                                                   |
-| `app/docs/`                                                                  | 嵌入式文件檢視器（呈現`docs/*.md`）                                                                                                                                                                                                                                                                                |
-| `app/landing/`                                                               | 行銷登陸頁面                                                                                                                                                                                                                                                                                                       |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Auth相關頁面                                                                                                                                                                                                                                                                                                       |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP錯誤頁面                                                                                                                                                                                                                                                                                                       |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status頁面                                                                                                                                                                                                                                                                                                  |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | 根佈局、home、 PWA清單、全域CSS                                                                                                                                                                                                                                                                                    |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | 誤差邊界                                                                                                                                                                                                                                                                                                           |
+| 小路                                                                | 目的                                                                                                                             |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                       | 公共 OpenAI 相容API：聊天、完成、回應、訊息、嵌入、圖像、音訊、視訊、音樂、重新排名、審核、搜尋、檔案、批次、ws、模型…           |
+| `app/api/v1beta/`                                                   | 雙子座風格的端點                                                                                                                 |
+| `app/api/` （其他資料夾）                                           | 管理和管理路線：提供程序、組合、設定、金鑰、使用情況、日誌、mcp、a2a、acp、記憶體、技能、評估、webhooks、隧道、插件、雷達、工具… |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API —參見[AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                         |
+| `app/api/tools/traffic-inspector/`                                  | 交通督察REST API —參見[TRAFFIC_INSPECTOR.md](../frameworks/TRAFFIC_INSPECTOR.md)                                                 |
+| `app/(dashboard)/dashboard/`                                        | 每個儀表板部分一個資料夾（提供程序、組合、日誌、使用情況、成本、快取、壓縮、記憶體、遊樂場、搜尋工具、設定、工具等）             |
+| `app/(dashboard)/home/`                                             | 主螢幕及其小工具                                                                                                                 |
+| `app/docs/`                                                         | 文件檢視器呈現`source.config.ts`中列出的 Fumadocs 部分                                                                           |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | 根佈局、根條目（重定向）、 PWA清單、全域CSS                                                                                      |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | 錯誤邊界和回退                                                                                                                   |
 
-### `src/lib/` —核心庫（~ 50 個模組）
+API路線遵循`Route → CORS → Zod validation → optional auth → policy → handler`；請參閱[ARCHITECTURE.md](ARCHITECTURE.md)和[API_REFERENCE.md](../reference/API_REFERENCE.md) 。
 
-| 模組                                     | 目的                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A協定任務管理器、技能（5）、串流媒體                                                                                                                                                                                                                                                                |
-| `acp/`                                   | CLI代理註冊表（本地CLI發現—參見`docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`）                                                                                                                                                                                                                           |
-| `api/`                                   | 共享API助手（`requireManagementAuth`、驗證）                                                                                                                                                                                                                                                          |
-| `auth/`                                  | 會話、密碼雜湊、令牌驗證                                                                                                                                                                                                                                                                              |
-| `batches/`                               | OpenAI批次API處理程序                                                                                                                                                                                                                                                                                 |
-| `catalog/`                               | 提供者目錄Zod驗證+能力解析                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`                            | 雲端代理 (Codex Cloud、 Devin、 Jules) —參見`docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                          |
-| `combos/`                                | 組合解析+重新排序助手                                                                                                                                                                                                                                                                                 |
-| `audit/`                                 | 活動提要助理： `highLevelActions.ts` （允許列表+ `isHighLevelAction()`）、 `activityIcons.ts` （操作→ icon/verb地圖）、 `timeline.ts` (groupByDay/relativeTime) —請參閱`docs/architecture/MONITORING_SECTIONS.md`                                                                                     |
-| `compliance/`                            | 審核日誌+提供者審核—參考`docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                 |
-| `compression/`                           | 壓縮引擎膠（引擎住`open-sse/services/compression/`）                                                                                                                                                                                                                                                  |
-| `config/`                                | 運行時配置助手                                                                                                                                                                                                                                                                                        |
-| `db/`                                    | 120 +域DB模組+ 168 遷移（對於SQLite始終通過此處）                                                                                                                                                                                                                                                     |
-| `quota/`                                 | 配額共享引擎： `dimensions.ts` (types/Zod), `types.ts` (QuotaStore介面), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts` `docs/routing/QUOTA_SHARE.md` `spendRecorder.ts` — |
-| `radar/`                                 | 雷達自由模型目錄客戶端： `feedSchema.ts`、 `pinnedKeys.ts`、 `verify.ts`、 `sync.ts`、 `applyFeed.ts`、 `index.ts` (`getRadarCatalog()`) —參見`docs/frameworks/RADAR.md`                                                                                                                              |
-| `display/`                               | UI格式化助手（成本、延遲等）                                                                                                                                                                                                                                                                          |
-| `embeddings/`                            | 嵌入服務助理                                                                                                                                                                                                                                                                                          |
-| `env/`                                   | Env變數解析+驗證                                                                                                                                                                                                                                                                                      |
-| `evals/`                                 | Eval 框架（套件、運行器、運行時） —參見`docs/frameworks/EVALS.md`                                                                                                                                                                                                                                     |
-| `guardrails/`                            | PII masker、提示注入、視覺橋—參見`docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                        |
-| `jobs/`                                  | 後台作業（類似 cron）                                                                                                                                                                                                                                                                                 |
-| `memory/`                                | 會話記憶（SQLite FTS5 + sqlite-vec 混合RRF + Qdrant第 2 層） —參見`docs/frameworks/MEMORY.md`                                                                                                                                                                                                         |
-| `memory/embedding/`                      | 多源嵌入層： `index.ts` （解析器）、 `remote.ts`、 `staticPotion.ts`、 `transformersLocal.ts`、 `cache.ts`、 `types.ts` （方案21）                                                                                                                                                                    |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 包裝器— KNN暴力+混合RRF （FTS5 +向量，k = 60）。 Lazy-init，當 sqlite-vec 不可用時優雅地降級。 （計劃21）                                                                                                                                                                           |
-| `memory/reindex.ts`                      | `runReindexBatch()` —在背景使用`needs_reindex=1`處理記憶體；由`POST /api/memory/reindex`和惰性回填路徑呼叫。 （計劃21）                                                                                                                                                                               |
-| `monitoring/`                            | 健康檢查、指標排放                                                                                                                                                                                                                                                                                    |
-| `oauth/`                                 | 22 個提供者模組的OAuth/import流程（agy、antigravity、claude、cline、codebuddy-cn、codex、cursor、devin-desktop、ghe-copilot、github、gitlab-duo、grok-cli-oauth、vg-cli、kilocode、kimi-cogitlab-duo、grok-cli-oauth、vp-cli、kilo                                                                    |
-| `plugins/`                               | 外掛程式註冊表                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | 人類風格的提示快取斷點                                                                                                                                                                                                                                                                                |
-| `skills/`                                | 技能架構（內建+市場+ SkillsSH） —參見`docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                      |
-| `playground/`                            | Playground Studio 共享助理： `codeExport.ts` （curl/Python/TS產生器）、 `promptImprover.ts` （元提示建構器）、 `streamMetrics.ts` （純TTFT/TPS）、 `types.ts` （定價表） —參見`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                  |
-| `webhookDispatcher.ts`                   | HMAC webhook 傳遞—參考`docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                   |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | 隧道管理者—見`docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                              |
-| `cloudSync.ts`, `initCloudSync.ts`       | 可選的狀態雲同步                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | 重新導出資料庫模組的桶（僅無邏輯—重新導出）                                                                                                                                                                                                                                                           |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | 請求快取+冪等性                                                                                                                                                                                                                                                                                       |
-| （~ 30多個頂級檔案）                     | 專業助理（logEnv、 modelsDevSync、 piiSanitizer等）                                                                                                                                                                                                                                                   |
+### `src/lib/` —伺服器庫
 
-### `src/lib/db/` —資料庫（147 個模組+ 208 個遷移）
+大約 90 個子資料夾加上大約 90 個頂級模組。主要群體：
 
-| 子目錄                    | 目的                                                                                                                                                                 |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | 帶有WAL日誌功能的`getDbInstance()`單例                                                                                                                               |
-| `db/migrations/`          | 版本化的SQL檔（冪等、事務）。 `073_memory_vec.sql`增加`memory_vec_meta` + `needs_reindex`列（方案 21）。                                                             |
-| `db/playgroundPresets.ts` | Playground Studio 預設的CRUD模組（`listPlaygroundPresets`、 `getPlaygroundPreset`、 `createPlaygroundPreset`、 `updatePlaygroundPreset`、 `deletePlaygroundPreset`） |
-| `db/memoryVec.ts`         | CRUD for `memory_vec_meta` （active_dim、embedding_signature、last_reset_at、vec_loaded） + `markMemoryNeedsReindex`、 `getMemoryReindexQueue`等（計畫 21）          |
-| `db/<domain>.ts`          | 每個網域一個模組：providers、combos、 apiKeys、users、sessions、usage、audit log、webhooks、skills、memory_entries、cloud_agent_tasks、evals* \* 、推理快取等        |
+| 區域               | 資料夾/文件                                                                                                         | 深潛                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 資料庫             | `db/` —域模組、 `migrations/`、 `adapters/`、 `repositories/`、 `migrationRunner/`                                  | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md), [DATABASE_GUIDE](../ops/DATABASE_GUIDE.md)                                            |
+| 使用量、配額和支出 | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE](../routing/QUOTA_SHARE.md), [COST_TRACKING](../guides/COST_TRACKING.md)                                                       |
+| 提供者和模型       | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                    |
+| OAuth和憑證        | `oauth/` （提供者/、服務/、utils/）、 `zed-oauth/`、 `copilot/`、 `cursor/`、 `credentialHealth/`                   | `resolvePublicCred()` （運營商文件，未公開提供）                                                                                            |
+| 安全與治理         | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                      |
+| 代理特點           | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| 插件和服務         | `plugins/`、 `services/` （嵌入式服務安裝人員與主管）                                                               | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                          |
+| 路由和彈性         | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE](RESILIENCE_GUIDE.md)                                                                                                     |
+| 代理商和網路       | `proxyHealth/`, `proxySubscription/`, `proxyRelay/`, `proxyEvents/`, 隧道模組                                       | [PROXY_GUIDE](../ops/PROXY_GUIDE.md), [TUNNELS_GUIDE](../ops/TUNNELS_GUIDE.md)                                                              |
+| 工作和日程安排     | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                             |
+| 可觀察性和導出     | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                      |
+| CLI和IDE集成       | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                 |
+| 上下文來源         | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                               |
+| 其他特點           | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md), [PLAYGROUND_STUDIO](../frameworks/PLAYGROUND_STUDIO.md)                                                 |
 
-### `src/domain/`
+值得了解的頂級模組：
 
-| 模組                   | 目的                                     |
-| ---------------------- | ---------------------------------------- |
-| `policy.ts`            | 策略引擎                                 |
-| `fallbackPolicy.ts`    | 後備決策樹                               |
-| `costRules.ts`         | 成本計算規則                             |
-| `lockoutPolicy.ts`     | Model/connection鎖定政策                 |
-| `tagRouter.ts`         | 基於標籤的路由                           |
-| `comboResolver.ts`     | 組合解析度（由組合引擎使用）             |
-| `modelAvailability.ts` | 每個型號的可用性檢查                     |
-| `assessment/`          | 模型評估（RFC-AUTO-ASSESSMENT 第一階段） |
+| 文件                                                           | 目的                                          |
+| -------------------------------------------------------------- | --------------------------------------------- |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | 回應快取和冪等性                              |
+| `webhookDispatcher.ts`                                         | HMAC 簽署的 Webhook 交付                      |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | 隧道管理者                                    |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | 後台憑證健康檢查和刷新電路                    |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | 串流媒體回應消毒劑                            |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | 流程生命週期                                  |
+| `*.stub.ts`                                                    | 建置設定檔存根由`next.config.mjs`中的別名交換 |
 
-### `src/server/`
+### `src/lib/db/` —資料庫
 
-| 模組     | 目的                                                                                   |
-| -------- | -------------------------------------------------------------------------------------- |
-| `authz/` | 授權管道： `classify` → `policies` → `enforce` —參見`docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS配置                                                                               |
-| `auth/`  | 會話中介軟體                                                                           |
+| 小路                  | 目的                                                                                      |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| `db/core.ts`          | `getDbInstance()`單例（WAL日誌）                                                          |
+| `db/migrations/`      | 編號、冪等`.sql`遷移（撰寫本文時有 236 個檔案； `check-migration-numbering.mjs`保護編號） |
+| `db/migrationRunner/` | 遷移運行者                                                                                |
+| `db/adapters/`        | SQLite驅動器（better-sqlite3、node:sqlite、bun:sqlite、 sql.js）                          |
+| `db/repositories/`    | SQLite儲存庫實作（組合、遊樂場預設、路由配置）                                            |
+| `db/<domain>.ts`      | 大約 175 個域模組（提供者、組合、 apiKeys、設定、用法等） —總是直接導入這些模組           |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| 模組                             | 目的                                                                                   |
-| -------------------------------- | -------------------------------------------------------------------------------------- |
-| `components/`                    | 儀表板組件API： `packages/ui-kit`上的轉接器—請參閱`docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`：螢幕使用的圖示名稱→ Lucide 元件 (`<Icon>`)                                 |
-| `constants/providers.ts`         | **394 家提供者**透過Zod驗證（事實來源）                                                |
-| `constants/cliTools.ts`          | 外部CLI工具註冊表                                                                      |
-| `constants/routingStrategies.ts` | **22種路由策略**有優先事項                                                             |
-| `constants/publicApiRoutes.ts`   | 需要承載（與管理）身份驗證的路由                                                       |
-| `constants/upstreamHeaders.ts`   | 上游請求的標頭拒絕列表                                                                 |
-| `validation/schemas.ts`          | ~ 80 Zod模式（ API合約的單一事實來源）                                                 |
-| `validation/helpers.ts`          | Zod驗證助理（`validateBody`等）                                                        |
-| `types/`                         | 共享TS類型                                                                             |
-| `contracts/`                     | 公共API合約（由`package.json`中的`files:`使用）                                        |
-| `utils/circuitBreaker.ts`        | 提供者斷路器（參見`docs/architecture/RESILIENCE_GUIDE.md`）                            |
-| `utils/apiAuth.ts`               | API金鑰驗證、範圍檢查                                                                  |
-| `utils/fetchTimeout.ts`          | 用於上游取得的Timeout/abort包裝器                                                      |
-| `utils/releaseNotes.ts`          | 關閉v2/legacy公告解析器、本地化和ID解僱                                                |
+| 小路                                                           | 目的                                                                                                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/policyEngine.ts`                                       | 策略引擎                                                                                                                                 |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | 後備決策、鎖定政策、成本規則                                                                                                             |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | 配額快取和快照持久化                                                                                                                     |
+| `domain/assessment/`                                           | 模型評估（評估器、分類器、自我修復器）                                                                                                   |
+| `server/authz/`                                                | 授權管道和路由保護 (`routeGuard.ts`) —請參閱[AUTHZ_GUIDE.md](AUTHZ_GUIDE.md) 、 [ROUTE_GUARD_TIERS.md](../security/ROUTE_GUARD_TIERS.md) |
+| `server/origin/`, `server/cors/`                               | Public/MCP/WS原點解析和CORS —參見[CORS.md](../security/CORS.md)                                                                          |
+| `server/ws/`                                                   | 即時儀表板WebSocket伺服器                                                                                                                |
+| `shared/components/`                                           | `packages/ui-kit` —上的儀表板組件和轉接器請參閱[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                                                      |
+| `shared/constants/`                                            | 提供者目錄 (`providers.ts`)、路由策略、 CLI工具、圖示圖、上游標頭拒絕清單等                                                              |
+| `shared/validation/`                                           | Zod模式和驗證助手                                                                                                                        |
+| `shared/utils/`                                                | 斷路器、API 金鑰身份驗證、取得逾時、功能標誌…                                                                                            |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | 聊天准入中間件、網路助理、客戶端服務、 React掛鉤                                                                                         |
 
 ---
 
-## `open-sse/` — 串流引擎工作區
+## `open-sse/` —串流引擎工作區
 
-獨立的 npm 工作區（`@omniroute/open-sse`）。負責請求處理與提供者執行。
+npm 工作區`@omniroute/open-sse` （約 2,390 個追蹤文件）。它負責請求處理和提供者執行。概述： [OPEN_SSE_ARCHITECTURE](../frameworks/OPEN_SSE_ARCHITECTURE.md) 。
 
 ```
 open-sse/
-├── handlers/            # 16 個檔案（12 個處理器 + 4 個輔助程式）：chatCore、responsesHandler、embeddings、audio、image、video、music、rerank、moderations、search 等。
-├── executors/           # 163 個執行器模組（擴充 BaseExecutor 的類別 + 各提供者專用輔助程式）
-├── translator/          # 格式轉換器（9 個請求、9 個回應、9 個輔助程式）
-├── transformer/         # Responses API ↔ Chat Completions（TransformStream）
-├── services/            # 約 80+ 個服務模組（combo、accountFallback、autoCombo、reasoningCache、claude code/chatgpt stealth、modelDeprecation、taskAwareRouter、workflowFSM 等）
-├── mcp-server/          # MCP 伺服器（110 個工具、3 種傳輸方式、33 個範圍）
-├── config/              # 提供者／模型登錄、標頭設定、模型別名
-├── utils/               # TLS 用戶端、代理擷取／分派器、網路輔助程式
-├── index.ts             # 工作區進入點
-├── package.json         # 工作區資訊清單
-├── tsconfig.json        # 工作區 TS 設定
-└── types.d.ts           # 工作區類型宣告
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| 小路                                                                                           | 目的                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `combo.ts` + `combo/`                                                                          | 組合路由策略—參見[AUTO-COMBO.md](../routing/AUTO-COMBO.md)                                                                                       |
+| `autoCombo/`                                                                                   | 自動組合評分和模式包                                                                                                                             |
+| `accountFallback.ts` + `accountFallback/`                                                      | 連接冷卻和模型鎖定—參見[RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                                |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | 速率限制追蹤和標頭解析                                                                                                                           |
+| `compression/`                                                                                 | 壓縮引擎 (`engines/`)、規則包 (`rules/`)、 `eval/`、 `harness/`、 `riskGate/` —請參閱[COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | 令牌刷新、使用情況統計、快取、存取通道、會話池、 Codex帳戶、路由助手                                                                             |
+| `__tests__/`                                                                                   | 共置Vitest套件（由Vitest配置收集）                                                                                                               |
+| `AGENTS.md`                                                                                    | 此資料夾的代理指南                                                                                                                               |
+
+模式：資料夾`X/`旁邊的大模組`X.ts`表示該模組被拆分為較小的檔案（`handlers/chatCore.ts` + `handlers/chatCore/`、 `services/combo.ts` + `services/combo/`）。
 
 ### `open-sse/mcp-server/`
 
-| 路徑                        | 用途                                                                  |
-| --------------------------- | --------------------------------------------------------------------- |
-| `server.ts`                 | MCP 伺服器生命週期（stdio + HTTP 傳輸）                               |
-| `httpTransport.ts`          | HTTP Streamable + SSE 傳輸（`/api/mcp/sse`、`/api/mcp/stream`）       |
-| `audit.ts`                  | 將稽核日誌記錄至 `mcp_tool_audit` 資料表                              |
-| `scopeEnforcement.ts`       | 各工具的範圍驗證                                                      |
-| `runtimeHeartbeat.ts`       | 將健康狀態心跳寫入 `DATA_DIR/runtime/mcp-heartbeat.json`              |
-| `descriptionCompressor.ts`  | 壓縮工具描述中繼資料以節省上下文                                      |
-| `schemas/tools.ts`          | 36 個基礎工具定義 + 範圍                                              |
-| `tools/advancedTools.ts`    | 進階工具實作                                                          |
-| `tools/memoryTools.ts`      | 3 個記憶體工具（搜尋／新增／清除）                                    |
-| `tools/skillTools.ts`       | 4 個技能工具（列出／啟用／執行／執行記錄）                            |
-| `tools/compressionTools.ts` | 5 個壓縮工具                                                          |
-| `README.md`                 | 內部 MCP 伺服器 README（從 `docs/frameworks/MCP-SERVER.md` 交叉連結） |
+| 小路                  | 目的                                                                   |
+| --------------------- | ---------------------------------------------------------------------- |
+| `server.ts`           | MCP伺服器生命週期                                                      |
+| `httpTransport.ts`    | 可串流HTTP和SSE                                                        |
+| `scopeEnforcement.ts` | 每個工具範圍檢查                                                       |
+| `audit.ts`            | 工具呼叫審核日誌記錄                                                   |
+| `schemas/`            | 工具定義和範圍                                                         |
+| `tools/`              | 工具實作（記憶體、技能、壓縮…）                                        |
+| `toolSearch/`         | 工具搜尋                                                               |
+| `README.md`           | 內部架構筆記；完整目錄在[MCP-SERVER.md](../frameworks/MCP-SERVER.md)中 |
 
 ---
 
-## `packages/` — 工作區
+## `packages/` — npm 工作區
 
-| 路徑                     | 用途                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — Keak CI UI Kit 的內嵌快照（`private`、`UNLICENSED`），直接以原始碼形式使用（無需建置）。`UPSTREAM.md` 固定上游提交並記錄授權許可；`PATCHES.md` 列出本機修補程式（目前無）；`src/` 僅透過 `scripts/dev/sync-ui-kit.sh` 同步，並由 `npm run check:ui-kit-snapshot` 進行防護。請參閱 `docs/architecture/DESIGN_SYSTEM.md` |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — 選用的瀏覽器池服務（CloakBrowser 與由 Playwright 支援的聊天功能）                                                                                                                                                                                                                                                |
+| 小路                     | 目的                                                                                                                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`：Keak CI UI套件的供應快照，用作來源。 `UPSTREAM.md`固定上游提交， `PATCHES.md`列出本地補丁。 `src/`僅由`scripts/dev/sync-ui-kit.sh`同步並由`npm run check:ui-kit-snapshot`保護。參見[DESIGN_SYSTEM](DESIGN_SYSTEM.md) |
+| `packages/browser-pool/` | `@omniroute/browser-pool`：瀏覽器池介面與實作（`packages/browser-pool/src/index.ts`， `packages/browser-pool/src/interfaces.ts`）。列於`workspaces`；網關使用的執行時間瀏覽器池位於`open-sse/services/`中                                 |
 
----
+## `@omniroute/` —單獨發布包
 
-## `electron/` — 桌面封裝程式
+這些不是 npm 工作區。每個都有自己的`package.json`和鎖定檔案；該資料夾以`omniroute` tarball (`files: ["@omniroute/"]`) 形式提供。
 
-| 檔案             | 用途                                                                    |
-| ---------------- | ----------------------------------------------------------------------- |
-| `main.js`        | Electron 主程序（BrowserWindow、內嵌 Next.js 伺服器、系統匣、自動更新） |
-| `preload.js`     | IPC 橋接器（contextBridge → `window.omniroute`）                        |
-| `package.json`   | electron-builder 設定 + Electron 41 + electron-builder 26.10 相依套件   |
-| `assets/`        | 應用程式圖示（Windows .ico、macOS .icns、Linux .png）                   |
-| `dist-electron/` | 建置輸出（已由 git 忽略）                                               |
-| `types.d.ts`     | 轉譯器橋接器的類型宣告                                                  |
-| `README.md`      | Electron 內部 README（另請參閱 `docs/guides/ELECTRON_GUIDE.md`）        |
+| 小路                             | 目的                                                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `@omniroute/opencode-plugin/`    | OpenCode插件（模型發現、 `/connect` auth）； `omniroute setup-opencode`使用—參見[OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | v2 Promise 的OpenCode插件API —參見[OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md)                               |
+| `@omniroute/opencode-provider/`  | 靜態配置產生器；在自己的`package.json`中標記為棄用，轉而使用`opencode-plugin`                                            |
 
 ---
 
-## `bin/` — CLI
+## `bin/` — CLI和 ops 腳本
 
-| 檔案                                                                                                        | 用途                                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute.mjs`                                                                                             | 主要 CLI 進入點 — `omniroute serve`、`omniroute setup`、`omniroute doctor`、`omniroute providers`、`omniroute combos` 等 |
-| `reset-password.mjs`                                                                                        | 獨立的密碼重設 CLI                                                                                                       |
-| `cli/commands/setup.mjs`                                                                                    | 互動式 + 非互動式設定精靈                                                                                                |
-| `cli/commands/doctor.mjs`                                                                                   | 系統健康狀況診斷（8 項以上的檢查）                                                                                       |
-| `cli/commands/providers.mjs`                                                                                | 提供者清單／測試／驗證                                                                                                   |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | CLI 輔助模組                                                                                                             |
-| `cli/tray/tray.ts`                                                                                          | 系統匣整合（跨平台：Windows 使用 NotifyIcon，macOS/Linux 使用 systray2）                                                 |
-| `cli/tray/tray.ps1`                                                                                         | PowerShell NotifyIcon 後端（Windows，無需新增二進位檔案）                                                                |
-| `cli/tray/autostart.ts`                                                                                     | 跨平台自動啟動（LaunchAgent / .desktop / 登錄檔）                                                                        |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5 步驟 SQLite 驅動程式解析鏈（內附 → 執行階段 → 延遲安裝 → node:sqlite → sql.js）                                        |
-| `cli/runtime/magicBytes.mjs`                                                                                | 二進位魔術位元組驗證（ELF / Mach-O / Mach-O fat / PE）                                                                   |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — 在 postinstall／首次啟動時預先解析驅動程式                                                          |
-| `nodeRuntimeSupport.mjs`                                                                                    | 安裝時驗證受支援的 Node.js 版本                                                                                          |
+| 小路                                                                        | 目的                                                                            |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | 主要CLI條目（`omniroute serve`、 `setup`、 `doctor`、 `providers`、 `combo`等） |
+| `reset-password.mjs`                                                        | `omniroute-reset-password`進位文件                                              |
+| `mcp-server.mjs`                                                            | MCP stdio 入口點                                                                |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | 輔助橋/ MCP入口點                                                               |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | ESM解析鉤子，對應全域安裝的 tsconfig 路徑別名                                   |
+| `nodeRuntimeSupport.mjs`                                                    | 支援Node.js版本檢查                                                             |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | 自託管事件復原腳本（共享`_ops-common.sh`）                                      |
+| `cold-start-bench.sh`                                                       | 冷啟動基準—請參考[PERF_BASELINE.md](../ops/PERF_BASELINE.md)                    |
+| `cli/commands/`                                                             | 每個CLI指令一個模組（約 100 個，包括`setup-*`整合）                             |
+| `cli/api-commands/`                                                         | 由`npm run build:cli-api` —從`docs/openapi.yaml`生成，請勿編輯                  |
+| `cli/locales/`                                                              | CLI訊息目錄（67 語言環境）                                                      |
+| `cli/tui/`, `cli/tui-components/`                                           | 終端UI                                                                          |
+| `cli/tray/`                                                                 | 系統托盤和自動啟動（Windows PowerShell後端， macOS/Linux上的系統托盤）          |
+| `cli/runtime/`                                                              | 本機運行時解析（`sqliteRuntime.mjs`、 `magicBytes.mjs`）、進程管理器            |
+| `cli/*.mjs`                                                                 | 共享助理（參數、 API客戶端、資料目錄、加密、提供者儲存、設定儲存等）            |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | CLI內部結構與約定                                                               |
 
----
+請參閱[CLI-TOOLS.md](../reference/CLI-TOOLS.md)和[CLI-COMPANION.md](../guides/CLI-COMPANION.md) 。
 
-## `skills/` — 公開代理技能
+## `electron/` —桌面應用程式
 
-| 檔案                         | 用途                                                                         |
-| ---------------------------- | ---------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | 提供給外部 AI 代理（Claude Desktop、ChatGPT、Cursor、Cline）的 10 個技能清單 |
+| 小路                                                       | 目的                                                         |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| `main.js`                                                  | Electron主流程（視窗、嵌入式伺服器、托盤、更新）             |
+| `preload.js`                                               | IPC橋暴露給渲染器                                            |
+| `lib/`                                                     | 視窗生命週期、伺服器準備、運行狀況監視程式、遠端伺服器首選項 |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | 遠端伺服器提示視窗                                           |
+| `processTree.js`, `sqlite-inspection.js`                   | 子進程清理和SQLite檢查助手                                   |
+| `package.json` / `package-lock.json`                       | Electron-builder 配置和Electron依賴項                        |
+| `assets/`                                                  | 應用程式和托盤圖示（`.ico`、 `.icns`、 `.png`）              |
+| `README.md`                                                | 內註—參見[ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md)    |
 
----
+## `public/` —靜態資產
 
-## `scripts/` — 建置與檢查指令碼
+| 小路                                        | 目的                                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `providers/`                                | 由 id (`/providers/<id>.svg`) 載入的提供者徽標；出處`config/quality/provider-assets-provenance.jsonl` |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | 瀏覽器和PWA圖標                                                                                       |
+| `sw.js`                                     | 服務工作者—參見[PWA_GUIDE.md](../guides/PWA_GUIDE.md)                                                 |
+| `openapi.yaml`                              | `npm run gen:public-openapi`產生的`docs/openapi.yaml`的副本                                           |
+| `images/`, `sponsors/`, `deyin.svg`         | 層級流程圖、贊助商橫幅、 README圖稿                                                                   |
 
-| 指令碼                              | 用途                                                                  |
-| ----------------------------------- | --------------------------------------------------------------------- |
-| `run-next.mjs`                      | 具備環境變數載入功能的開發／啟動執行器                                |
-| `build-next-isolated.mjs`           | 獨立建置（Next.js 16 standalone）                                     |
-| `prepublish.ts`                     | 在 `npm pack` 前準備套件                                              |
-| `postinstall.mjs`                   | 首次安裝時自動從 `.env.example` 建立 `.env`                           |
-| `sync-env.mjs`                      | 將 `.env` 的鍵與 `.env.example` 重新同步                              |
-| `check-cycles.mjs`                  | 偵測循環相依性                                                        |
-| `check-route-validation.mjs`        | 驗證所有 API 路由均具有 Zod 驗證                                      |
-| `check-t11-any-budget.mjs`          | 強制執行每個檔案明確的 `any` 配額                                     |
-| `check-docs-sync.mjs`               | 驗證文件版本同步（現有的提交前檢查）                                  |
-| **`check-env-doc-sync.mjs`**        | 新增：交叉檢查程式碼、`.env.example` 與 `ENVIRONMENT.md` 中的環境變數 |
-| **`check-docs-counts-sync.mjs`**    | 新增：驗證數量（執行器、策略、OAuth、A2A 技能）是否與文件一致         |
-| **`check-deprecated-versions.mjs`** | 新增：標示文件中過時的版本／日期                                      |
-| `check-supported-node-runtime.ts`   | 驗證目前的 Node 版本是否受支援                                        |
-| `check-pr-test-policy.mjs`          | 對正式環境程式碼變更強制執行「必須測試」規則                          |
-| **`gen-provider-reference.ts`**     | 新增：從目錄自動產生 `docs/reference/PROVIDER_REFERENCE.md`           |
-| `i18n/generate-multilang.mjs`       | 透過 Google Translate 翻譯 UI 字串與文件                              |
-| `i18n_autotranslate.py`             | 以 LLM 為基礎的文件翻譯管線                                           |
-| `validate_translation.py`           | 逐語系翻譯驗證                                                        |
-| `check_translations.py`             | 程式碼端 i18n 鍵檢查                                                  |
-| `run-playwright-tests.mjs`          | Playwright E2E 執行器                                                 |
-| `run-protocol-clients-tests.mjs`    | MCP/A2A E2E 執行器                                                    |
-| `run-ecosystem-tests.mjs`           | 生態系統（提供者整合）測試                                            |
-| `test-report-summary.mjs`           | 產生涵蓋率摘要 markdown                                               |
-| `smoke-electron-packaged.mjs`       | 對封裝後的 Electron 建置執行冒煙測試                                  |
-| `native-binary-compat.mjs`          | 驗證原生相依套件（`better-sqlite3`）是否與 Electron 的 Node 相符      |
-| `validate-pack-artifact.ts`         | 驗證 npm pack 輸出                                                    |
-| `responses-ws-proxy.mjs`            | Codex Responses API 的 WebSocket 橋接器                               |
-| `v1-ws-bridge.mjs`                  | `/api/v1/ws` 端點的 WebSocket 橋接器                                  |
-| `standalone-server-ws.mjs`          | 獨立 WS 伺服器執行器                                                  |
-| `system-info.mjs`                   | 輸出系統／執行階段資訊以供支援使用                                    |
-| `healthcheck.mjs`                   | 單次健康狀態檢查（由 Docker HEALTHCHECK 使用）                        |
-| `uninstall.mjs`                     | 完整解除安裝指令碼                                                    |
-| `dev/sync-ui-kit.sh`                | 將固定提交版本的 CI UI Kit `src/` 複製至 `packages/ui-kit/src`        |
-| `check/check-ui-kit-snapshot.mjs`   | 提交前閘門：確認 `packages/ui-kit/src` 與固定的上游提交版本一致       |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — 列出使用中但未由 `ICON_MAP` 對應的圖示名稱   |
-| `dev/codemod-material-icons.mjs`    | 將字面值 Material Symbols span 重寫為 `<Icon>`（遷移工具）            |
+## `skills/` —代理技能
+
+46個技能，一個資料夾每個有一個`SKILL.md` （`cli-*`， `omni-*`， `config-codex-cli`， `ponytail`），加上`skills/README.md`。 `src/lib/agentSkills/catalog.ts`在運行時讀取它們並透過`/api/agent-skills`、 MCP和A2A公開它們。大多數清單是由`src/lib/agentSkills/generator.ts`產生的（`scripts/skills/generate-agent-skills.mjs`； `npm run check:agent-skills-sync`檢查漂移）。參見[AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) 。
 
 ---
 
-## `docs/` — 公開文件（7 個根目錄檔案 + 17 個子目錄）
+## `scripts/` —建造、大門與工具
 
-### 頂層指南
+大約 435 個追蹤文件。新腳本進入`AGENTS.md`允許的子資料夾之一；一次性程式碼放入`scripts/ad-hoc/`。
 
-| 文件                        | 用途                                                                          |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 高階架構、子系統對映、儀表板介面                                              |
-| `CODEBASE_DOCUMENTATION.md` | 工程參考：目錄、模組、慣例                                                    |
-| `FEATURES.md`               | 功能矩陣與 v3.8 重點                                                          |
-| `USER_GUIDE.md`             | 終端使用者手冊（設定、模型、組合、CLI、音訊等）                               |
-| `API_REFERENCE.md`          | API 端點參考與驗證模型                                                        |
-| `openapi.yaml`              | OpenAPI 3.0 規格（121 個路徑）                                                |
-| `SETUP_GUIDE.md`            | 安裝方法（npm、npx、Docker、Electron、Termux、原始碼）                        |
-| `ENVIRONMENT.md`            | 所有環境變數（約 800 個已記錄，`.env.example` 約 3,050 行）                   |
-| `TROUBLESHOOTING.md`        | 常見錯誤 + v3.8.0 已知問題                                                    |
-| `RELEASE_CHECKLIST.md`      | 完整發布流程（技能、husky、慣例式提交、部署）                                 |
-| `COVERAGE_PLAN.md`          | 覆蓋率目標與目前狀態                                                          |
-| `FREE_TIERS.md`             | 精選免費方案提供者（48+ 個免費方案 + 11 個 OAuth）                            |
-| `CLI-TOOLS.md`              | 外部 CLI 整合 + 內部 OmniRoute CLI                                            |
-| `I18N.md`                   | i18n 架構、新增語言、67 個地區設定                                            |
-| `UNINSTALL.md`              | 徹底解除安裝步驟                                                              |
-| `PROVIDER_REFERENCE.md`     | **自動產生**的 394 個提供者目錄（重新產生：`npm run gen:provider-reference`） |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
 
-### 子系統深入解析
+常用的入口點：
 
-| 文件                                        | 用途                                                     |
-| ------------------------------------------- | -------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP 伺服器：110 個工具、3 種傳輸、33 個範圍、REST 端點   |
-| `A2A-SERVER.md`                             | A2A v0.3：JSON-RPC、6 項技能、REST 輔助工具、代理卡片    |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | 統一指南：A2A 與 ACP 及 Cloud Agents 的比較              |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules 編排                         |
-| `SKILLS.md`                                 | 技能框架（內建 + 市集 + SkillsSH + 沙箱）                |
-| `RADAR.md`                                  | Radar 免費模型目錄覆蓋層（`RADAR_ENABLED`，預設關閉）    |
-| `MEMORY.md`                                 | 記憶體系統（SQLite FTS5 + Qdrant）                       |
-| `EVALS.md`                                  | 評估框架（套件、執行、評分規準）                         |
-| `GUARDRAILS.md`                             | PII 遮罩器、提示注入、視覺橋接                           |
-| `COMPLIANCE.md`                             | 稽核日誌、保留期限、noLog 選擇退出                       |
-| `WEBHOOKS.md`                               | HMAC 簽署的 Webhook 傳遞                                 |
-| `REASONING_REPLAY.md`                       | 用於 `reasoning_content` 的混合記憶體／SQLite 快取       |
-| `AUTHZ_GUIDE.md`                            | 授權管線（`classify` → `policies` → `enforce`）          |
-| `RESILIENCE_GUIDE.md`                       | 斷路器 + 冷卻時間 + 模型封鎖                             |
-| `docs/security/STEALTH_GUIDE.md` (git only) | TLS 指紋識別（JA3/JA4）、Claude Code CCH、MITM 憑證      |
-| `AUTO-COMBO.md`                             | Auto Combo 引擎（16 項因素評分、6 個模式套件、虛擬工廠） |
+| 腳本                                                                | 目的                                                                                 |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start`跑者                                                      |
+| `build/build-next-isolated.mjs`                                     | `npm run build` （Next.js獨立建構）                                                  |
+| `build/prepublish.ts`                                               | `npm run build:cli`：組裝 npm `dist/`                                                |
+| `build/postinstall.mjs`                                             | npm `postinstall`鉤子                                                                |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                         |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` （重新產生PROVIDER_REFERENCE.md）                   |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` （生成`src/app/docs/lib/openapi.generated.ts`）                      |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` （文件鏡像）                                                      |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                            |
+| `release/aggregate-changelog.mjs`                                   | 將`changelog.d/`片段折疊成`CHANGELOG.md`                                             |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` （文件準確度門）                                     |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` （阻止追蹤的根`_*`路徑）                           |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` （針對`config/quality/`公制棘輪）                          |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                   |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                               |
+| `dev/new-worktree.sh`                                               | 建立一個獨立的開發工作樹—請參閱[WORKTREE_ISOLATION.md](../ops/WORKTREE_ISOLATION.md) |
+| `dev/sync-ui-kit.sh`                                                | 將`packages/ui-kit/src`同步到固定的上游提交                                          |
 
-### 壓縮
+門庫存和政策： [QUALITY_GATES.md](QUALITY_GATES.md) 。
 
-| 文件                            | 用途                           |
-| ------------------------------- | ------------------------------ |
-| `COMPRESSION_GUIDE.md`          | 壓縮模式概覽 + 路線圖          |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK 引擎、登錄契約   |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman 規則套件 JSON 結構描述 |
-| `COMPRESSION_LANGUAGE_PACKS.md` | 各語言規則套件清單             |
-| `RTK_COMPRESSION.md`            | RTK 宣告式管線（56 個篩選器）  |
+## `config/` —版本化配置與門狀態
 
-### 部署
+| 小路                                     | 目的                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `i18n.json` / `i18n-schema.json`         | 支援的區域設定（區域設定計數的來源）及其架構                                         |
+| `payloadRules.json`                      | 上游負載規則 (`open-sse/services/payloadRules.ts`)                                   |
+| `cli-tools-manifest.json`                | 可整合CLI工具清單 (`bin/cli/cli-manifest.mjs`)                                       |
+| `alibaba-free-tier-allowlist.json`       | Alibaba免費層模型白名單                                                              |
+| `ci/toolchain.json`                      | CI工具鏈版本                                                                         |
+| `quality/quality-baseline.json`          | 多指標棘輪基線（覆蓋、警告、重複…）                                                  |
+| `quality/*-baseline.json`                | 各個門的凍結基線（複雜性、重複、檔案大小、類型檢查切片、測試發現…）                  |
+| `quality/*-allowlist.json`               | 限制許可名單（依賴項、許可證、 AI歸因、遺忘兄弟測試等）                              |
+| `quality/eslint-suppressions.json`       | `npm run lint`應用的凍結ESLint抑制                                                   |
+| `quality/gate-manifest.json`             | `scripts/quality/gate-manifest.mjs`檢查的登機口清單                                  |
+| `quality/vitest-exclusions.json`         | `vitest.quarantine.config.ts`檢疫庫存                                                |
+| `quality/skill-templates/`               | 由`scripts/quality/check-skill-contract.mjs`檢查的規格SKILL.md模板                   |
+| `quality/release-acceptance.schema.json` | 發布-接受證據模式—請參閱[QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md) |
+| `release/`                               | 變更日誌協調和 wreq-js 本機清單、許可證清單和通知                                    |
 
-| 文件                         | 用途                                                            |
-| ---------------------------- | --------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker 建置、設定檔（base/cli/host/cliproxyapi）、Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | 一般 VM/VPS 部署（Ubuntu/Debian + nginx + systemd）             |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 部署（目前僅提供中文版本）                               |
-| `TERMUX_GUIDE.md`            | 透過 Termux 在 Android 上以無頭模式執行                         |
-| `PWA_GUIDE.md`               | Progressive Web App 安裝與 service worker                       |
-| `ELECTRON_GUIDE.md`          | 桌面應用程式建置、簽署與發佈                                    |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
-| `PROXY_GUIDE.md`             | 4 層出站 Proxy + 1proxy 市集                                    |
+## `changelog.d/` —變更日誌片段
 
-### 子目錄
-
-| 子目錄                | 用途                                                                                                                                                                                         |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 本地化文件翻譯（41 種語系）                                                                                                                                                                  |
-| `docs/screenshots/`   | 指南的圖片資產                                                                                                                                                                               |
-| `_tasks/superpowers/` | superpowers 的計畫／規格（`writing-plans`／`brainstorming`）與研究資料——獨立且分開版本控制的儲存庫，已由主樹狀結構中的 gitignore 忽略。請參閱 CLAUDE.md →「Planning & Research Artifacts」。 |
-
----
-
-## `tests/` — 測試套件
-
-| 子目錄                               | 類型                                  | 執行器                          |
-| ------------------------------------ | ------------------------------------- | ------------------------------- |
-| `tests/unit/`                        | 單元測試（約 4,800 個檔案，速度最快） | Node 原生測試執行器             |
-| `tests/integration/`                 | 多模組 + DB 整合測試                  | Node 原生測試執行器（並行度 1） |
-| `tests/e2e/`                         | UI + 工作流程 E2E                     | Playwright                      |
-| `tests/e2e/protocol-clients.test.ts` | MCP + A2A 真實客戶端 E2E              | 自訂協定客戶端                  |
-| `tests/e2e/ecosystem.test.ts`        | 提供者整合（會存取網路）              | Node 原生測試執行器             |
+PR加入一個片段，而不是編輯`CHANGELOG.md`： `features/`、 `fixes/`或`maintenance/`，名為`<PR-number>-<slug>.md`。在發佈時`scripts/release/aggregate-changelog.mjs`將它們折疊到`CHANGELOG.md`中並刪除它們； `npm run check:changelog-integrity`驗證了它們。詳情請見`changelog.d/README.md`。
 
 ---
 
-## `public/` — 靜態資產
+## `docs/` —公共文件
 
-| 路徑                | 用途                                                     |
-| ------------------- | -------------------------------------------------------- |
-| `public/`（根目錄） | 網站圖示、robots.txt、manifest、Service Worker、行銷圖片 |
-| `public/providers/` | 提供者標誌 PNG/SVG（用於儀表板）                         |
+`source.config.ts`中列出的部分編譯到`/docs`站點（不包括一些僅限操作員的安全頁面）； `docs/meta.json`設定側邊欄順序。從[README.md](../README.md)開始。
 
----
+| 小路               | 內容                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `getting-started/` | 快速啟動、自架、提供者、免費套餐、自動組合和網頁 cookie 指南                                                                   |
+| `guides/`          | 操作員和開發人員指南：設定、 Docker、 Electron、 PWA、Termux、 CLIs、i18n、故障排除、使用者指南                                |
+| `architecture/`    | 架構、程式碼庫參考、修改配方、授權、彈性、品質閘、設計系統、這張地圖                                                           |
+| `reference/`       | API參考、環境變數、功能標誌、 CLI工具、免費套餐、產生的提供者參考、刪除的提供程序                                              |
+| `frameworks/`      | MCP、 A2A、 ACP、技能、記憶體、插件、雲端代理、webhooks、evals、日誌匯出、雷達、Playground，...                                |
+| `routing/`         | 自動連擊、推理replay/routing、配額份額、認購階梯、嚴格零成本…                                                                  |
+| `security/`        | 護欄、錯誤清理、 CORS、 SSO、出口策略、路由保護層、供應鏈…                                                                     |
+| `compression/`     | 壓縮指南、引擎、 RTK、規則格式、語言包、上下文編輯                                                                             |
+| `ops/`             | 發布流程、分支、合併訓練、部署（VM、Fly.io、Kubernetes）、資料庫、代理、工作樹、硬規則詳細信息                                 |
+| `providers/`       | 每個提供者的指南（Claude Code、 ChatGPT Web、 Cursor、 GitHub Copilot等）                                                      |
+| `comparison/`      | OmniRoute與替代方案的比較                                                                                                      |
+| `integrations/`    | 整合說明（fal.ai 原生、 MarkItDown MCP）；沒有編譯進`/docs`                                                                    |
+| `openapi.yaml`     | OpenAPI來源；提供`src/app/docs/lib/openapi.generated.ts`, `public/openapi.yaml`和`bin/cli/api-commands/`                       |
+| `diagrams/`        | 美人魚來源 (`.mmd`)、渲染的SVGs (`exported/`) 和README SVGs來自`scripts/docs/gen-readme-*`                                     |
+| `assets/`          | 語言標記SVGs和其他README資產                                                                                                   |
+| `screenshots/`     | README和指南使用的螢幕截圖                                                                                                     |
+| `i18n/`            | 翻譯後的鏡像：每個語言環境 (66) 一個資料夾，包含根文件和`docs/`子集；由`npm run i18n:run`製作—參見[I18N.md](../guides/I18N.md) |
+| 頂級`*.md`         | `README.md` （文件索引）、 `DEVELOPER-ENVIRONMENT.md`和一些獨立註釋                                                            |
 
-## `config/` — 靜態設定 + 品質閘門狀態
-
-隨附的設定範本，以及已提交的品質閘門基準
-（在 v3.8.26 中從儲存庫根目錄移至此處，以保持根目錄精簡）。
-
-| 路徑                                          | 用途                                                               |
-| --------------------------------------------- | ------------------------------------------------------------------ |
-| `config/i18n.json`                            | 語系清單 + 中繼資料（42 個語系計數的標準來源）                     |
-| `config/i18n-schema.json`                     | 用於驗證 `i18n.json` 的 JSON schema                                |
-| `config/payloadRules.json`                    | 上游酬載清理規則                                                   |
-| `config/quality/quality-baseline.json`        | 多指標棘輪基準（`scripts/quality/check-quality-ratchet.mjs`）      |
-| `config/quality/complexity-baseline.json`     | 凍結的 ESLint 複雜度基準（`check-complexity.mjs`）                 |
-| `config/quality/duplication-baseline.json`    | 凍結的 jscpd 重複基準（`check-duplication.mjs`）                   |
-| `config/quality/file-size-baseline.json`      | 凍結的逐檔案大小基準（`check-file-size.mjs`）                      |
-| `config/quality/test-discovery-baseline.json` | 凍結的孤立測試基準（`check-test-discovery.mjs`）                   |
-| `config/quality/dependency-allowlist.json`    | 核准的相依套件允許清單（`check-deps.mjs`）                         |
-| `config/quality/.license-allowlist.json`      | SPDX 授權允許清單（`check-licenses.mjs`）                          |
-| `config/quality/quality-metrics.json`         | 暫時收集的指標（由 `collect-metrics.mjs` 產生；**已由 git 忽略**） |
-
----
-
-## `.github/` — GitHub 整合
-
-| 路徑                               | 用途                                                            |
-| ---------------------------------- | --------------------------------------------------------------- |
-| `.github/workflows/`               | GitHub Actions CI/CD 工作流程（程式碼檢查、測試、覆蓋率、發布） |
-| `.github/ISSUE_TEMPLATE/`          | 錯誤／功能議題範本                                              |
-| `.github/pull_request_template.md` | PR 範本                                                         |
-| `.github/dependabot.yml`           | 相依套件更新設定                                                |
+關鍵入口點： [ARCHITECTURE.md](ARCHITECTURE.md) 、 [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md) 、 [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md) 、 [ENVIRONMENT.md](../reference/ENVIRONMENT.md) 、 [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) （由`npm run gen:provider-reference`產生）。
 
 ---
 
-## `.husky/` — Git Hooks
+## `tests/` —測試套件
 
-| 檔案         | 用途                                                        |
-| ------------ | ----------------------------------------------------------- |
-| `pre-commit` | 執行 `lint-staged + check-docs-sync + check:any-budget:t11` |
-| `pre-push`   | 目前已停用（已註解）。請手動執行 `npm run test:unit`。      |
-| `_/`         | Husky 內部檔案                                              |
+大約 9,670 個追蹤文件。測試檔案屬於此處，而不是專案根目錄。例外： Vitest配置收集的`src/`和`open-sse/`中的同位`__tests__/`資料夾。
 
----
+| 小路                                                   | 內容                                                                                                                                                                         | 跑者                                                                                    |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | Unit tests (over 9,000 files): many at the top level, plus domain folders (`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`, …) | 節點測試運行器（`npm run test:unit`）； `*.tsx`透過`test:vitest:ui`                     |
+| `tests/unit/serial/`                                   | CPU 敏感測試以併發 1 運行                                                                                                                                                    | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | 單元樹內的Vitest套件                                                                                                                                                         | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | 多模組和DB整合測試； `combo-matrix/`, , , `combo-live/`, , , , , , , `services/`                                                                                             | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` +現場套房`ecosystem.test.ts`, `protocol-clients.test.ts`                                                                                              | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | `*.live.test.ts`針對正在運行的實例                                                                                                                                           | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | 認證套件（`api/`、 `ui/`及其自己的Playwright配置）                                                                                                                           | `npm run homolog` —參見[HOMOLOGATION.md](../ops/HOMOLOGATION.md)                        |
+| `tests/load/`                                          | 載入和浸泡腳本 (k6)                                                                                                                                                          | 夜間彈性工作流程                                                                        |
+| `tests/_setup/`                                        | `--import` / 設定檔（隔離資料目錄、出口防護、 Vitest UI polyfills）                                                                                                          | 由跑步者加載                                                                            |
+| `tests/_helpers/`, `tests/helpers/`                    | 共享測試助理（黃金快照、管理會話…）                                                                                                                                          | 透過測試導入                                                                            |
+| `tests/fixtures/`                                      | 夾具資料和子進程夾具                                                                                                                                                         | 透過測試導入                                                                            |
+| `tests/snapshots/`                                     | `tests/helpers/goldenSnapshot.ts`的黃金文件                                                                                                                                  | 透過測試導入                                                                            |
+| `tests/manual/`                                        | 用於手動REST呼叫的`.http`文件                                                                                                                                                | 手動的                                                                                  |
+| `tests/security/`                                      | 安全性 shell 腳本                                                                                                                                                            | 手動/單元測試裝置                                                                       |
+| `tests/types/`                                         | 型式合約裝置                                                                                                                                                                 | —                                                                                       |
 
-## `.claude/` — Claude Code 斜線命令
-
-| 檔案                                                | 用途                                              |
-| --------------------------------------------------- | ------------------------------------------------- |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — 提升版本號並自動產生變更日誌 |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — 完整發布工作流程         |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | 部署至 VPS                                        |
-| `commands/capture-release-evidences-cc.md`          | 在瀏覽器中將新功能錄製為 WebP                     |
-| `commands/review-{prs,discussions}-cc.md`           | 分流處理 GitHub PR／討論                          |
-| `commands/{review-issues,implement-features}-cc.md` | 議題工作流程                                      |
-| `settings.local.json`                               | 個別專案的 Claude Code 設定                       |
-
----
-
-## `.agents/` — 通用代理工作流程（Codex／Cursor 等）
-
-| 路徑                     | 用途                                            |
-| ------------------------ | ----------------------------------------------- |
-| `workflows/*-ag.md`      | 11 個工作流程定義（`.claude/commands/` 的鏡像） |
-| `skills/<name>/SKILL.md` | 9 個包含 Codex 執行注意事項的技能定義           |
-
-> **注意：**工作流程與命令目前逐位元組完全相同。如果 `.agents/` 是用於不同的代理執行環境（Codex），各版本就需要有實質差異。
+完整矩陣： `CONTRIBUTING.md` → “運行測試”和[COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md) 。
 
 ---
 
-## `_ideia/`、`_mono_repo/`、`_references/`、`_tasks/` — 樹狀結構外內容
+## `deploy/` — Kubernetes
 
-這些以下劃線為前綴的目錄存放不隨套件發布的內容：
+| 小路                                               | 目的                                                                                   |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `deploy/helm/omniroute/`                           | Helm 圖表（`Chart.yaml`、 `values.yaml`、部署範本、服務、入口、 PVC、機密、configmap） |
+| `deploy/kubernetes/base/`                          | Kustomize 基礎（命名空間、部署、服務、 PVC、 configmap 、 `secret.example.yaml`）      |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | 特定於叢集的覆蓋（入口、儲存類別、資源、探測器）                                       |
 
-- **`_ideia/`** — 設計筆記（defer／notfit／viable 分類）
-- **`_mono_repo/`** — 歷史子專案（omnirouteCloud、omnirouteSite、vscode-extension）
-- **`_references/`** — 相關 OSS 專案的唯讀複本（LiteLLM、9router、ClawRouter、CLIProxyAPI、modelrelay、new-api 等），供開發期間交叉參考
-- **`_tasks/`** — 各版本的任務追蹤檔案（非正式）
+請參閱[KUBERNETES_DEPLOYMENT_GUIDE](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) 。
 
-不包含在 `npm pack` 輸出中。請參閱 `.npmignore`。
+## `docker/` —輔助影像
+
+| 小路                                | 目的                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `docker/chatgpt-web-codex-browser/` | 無頭瀏覽器圖像，帶有ChatGPT Web 執行器CDP代理—請參閱[CHATGPT_WEB.md](../providers/CHATGPT_WEB.md) |
+| `docker/devin-bridge/`              | Devin橋影像、撰寫檔案、模擬與網路防護                                                             |
+| `docker/vnc-browser/`               | Chromium 與VNC用於互動式瀏覽器會話                                                                |
+
+主圖像是根`Dockerfile`；參見[DOCKER_GUIDE](../guides/DOCKER_GUIDE.md) 。
+
+## `contrib/` —社群食譜（未官方支援）
+
+| 小路                    | 目的                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `contrib/podman/`       | Podman 四元組（容器、磁碟區、網路、 Redis）                                                                   |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                           |
+| `contrib/windows/`      | 用於從Windows結帳運行的`.bat`啟動器                                                                           |
+| `contrib/session-sync/` | README用於第三方會話同步瀏覽器擴充功能—請參閱[SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+
+## `examples/`
+
+| 小路                            | 目的                                                    |
+| ------------------------------- | ------------------------------------------------------- |
+| `examples/omniroute-cmd-hello/` | 最小指令插件—參見[PLUGINS.md](../frameworks/PLUGINS.md) |
+| `examples/plugins/`             | 範例外掛：langfuse、請求記錄器、主題管理器、歡迎橫幅    |
+| `examples/quickstart/`          | 客戶端片段：curl、 Node.js (axios)、 PHP、Python        |
 
 ---
 
-## 產生內容 / Git 已忽略項目
+## `.github/` — GitHub集成
 
-| 路徑                   | 用途                      |
-| ---------------------- | ------------------------- |
-| `node_modules/`        | npm 相依套件              |
-| `.next/`               | Next.js 建置輸出          |
-| `coverage/`            | c8 覆蓋率報告             |
-| `logs/`                | 執行階段日誌              |
-| `package/`             | npm pack 暫存區           |
-| `.playwright-mcp/`     | Playwright MCP 測試產出物 |
-| `.issues/`             | 本機 issue 快取           |
-| `tsconfig.tsbuildinfo` | TS 增量建置快取           |
+| 小路                                                         | 目的                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml`, `quality.yml`, `build.yml`), 安全掃描 (`codeql.yml`, `semgrep.yml`, `scorecard.yml`, `dast-smoke.yml`), 預定的`nightly-*.yml`套件, 發布 (`npm-publish.yml`, `docker-publish.yml`, `electron-release.yml`), 發布和維護工作流程 |
+| `.github/actions/npm-ci-retry/`                              | 複合操作：帶有快取和重試的`npm ci`                                                                                                                                                                                                          |
+| `.github/actions/prepare-unit-storage/`                      | 複合操作：釋放運行程式磁碟空間，然後安裝依賴項                                                                                                                                                                                              |
+| `.github/ISSUE_TEMPLATE/`                                    | 錯誤、功能和測試覆蓋率問題表                                                                                                                                                                                                                |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | 預設PR模板加上bugfix/feature變體                                                                                                                                                                                                            |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | 程式碼擁有者、贊助連結、相依性更新                                                                                                                                                                                                          |
+| `.github/labels.yml`                                         | `npm run labels:sync`應用程式的標籤定義                                                                                                                                                                                                     |
+| `.github/copilot-instructions.md`                            | GitHub Copilot指令（代理指令表面）                                                                                                                                                                                                          |
+
+CI工作圖： [QUALITY_GATES.md](QUALITY_GATES.md) 。
+
+## `.husky/` — git 鉤子
+
+| 文件         | 目的                                                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| `pre-commit` | Git 身分檢查、lint-staged、門清單、文件同步、任意預算、類型規模棘輪、追蹤工件和 ui-kit 快照檢查 |
+| `commit-msg` | `scripts/check/check-ai-attribution.mjs`關於提交訊息                                            |
+| `pre-push`   | 故意輕：退出 0 的PATH/npm健全性檢查                                                             |
+
+`.husky/_/`中的鉤子運行時是在安裝時產生的，不會被追蹤。
 
 ---
 
-## 導覽提示
+## 導航提示
 
-- **新貢獻者？** 請依序閱讀 `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md`。
-- **新增 provider？** 請遵循 `docs/architecture/ARCHITECTURE.md § Adding a New Provider`，並交叉核對 `docs/reference/PROVIDER_REFERENCE.md`。
-- **新增 route？** 請參閱 `docs/architecture/ARCHITECTURE.md § Adding a New API Route` 和 `src/shared/validation/schemas.ts`。
-- **新增 MCP tool？** 請參閱 `docs/frameworks/MCP-SERVER.md § Adding a Tool`。
-- **新增 A2A skill？** 請參閱 `docs/frameworks/A2A-SERVER.md § Adding a New Skill`。
-- **在本機執行？** 請參閱 `docs/guides/SETUP_GUIDE.md`。
-- **部署？** 請參閱 `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`。
-- **發布版本？** 請參閱 `docs/ops/RELEASE_CHECKLIST.md`（以及 `/generate-release-cc` Claude Code skill）。
+- **新貢獻者？** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md) 。
+- **改變一些常見的東西**（提供者、路線、 DB模組、 MCP工具、 A2A技能）？關注[MODIFICATION_SCENARIOS](MODIFICATION_SCENARIOS.md) 。
+- **新增提供者？**首先檢查[REMOVED_PROVIDERS.md](../reference/REMOVED_PROVIDERS.md) ，然後交叉檢查[PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) 。
+- **本地運行？** [SETUP_GUIDE](../guides/SETUP_GUIDE.md)
+- **部署？** [DOCKER_GUIDE](../guides/DOCKER_GUIDE.md) 、 [SELF_HOST_GUIDE](../getting-started/SELF_HOST_GUIDE.md) 、 [VM_DEPLOYMENT_GUIDE](../ops/VM_DEPLOYMENT_GUIDE.md) 、 [FLY_IO_DEPLOYMENT_GUIDE](../ops/FLY_IO_DEPLOYMENT_GUIDE.md) 、 [KUBERNETES_DEPLOYMENT_GUIDE](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) 。
+- **釋放？** [RELEASE_CHECKLIST](../ops/RELEASE_CHECKLIST.md)
+- **質量門失敗了？** [QUALITY_GATES.md](QUALITY_GATES.md)和[QUALITY_GATE_PLAYBOOK.md](../ops/QUALITY_GATE_PLAYBOOK.md) 。

@@ -4,7 +4,7 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import ModelCompatPopover from "../ModelCompatPopover";
+import ModelCompatPopover from "@/app/(dashboard)/dashboard/providers/[id]/components/ModelCompatPopover";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,

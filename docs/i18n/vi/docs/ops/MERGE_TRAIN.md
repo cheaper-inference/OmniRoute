@@ -4,10 +4,9 @@
 
 ---
 
-Kể từ v3.8.49 (WS3.2/WS3.4 của kế hoạch chất lượng/tốc độ), đường dẫn hợp nhất mặc định cho
-các PR đã được đánh giá vào `release/vX.Y.Z` là **hàng đợi hợp nhất Mergify** (`.mergify.yml`);
-**đoàn tàu hợp nhất thủ công** được ghi lại bên dưới là phương án DỰ PHÒNG — được sử dụng khi xảy ra sự cố,
-đóng băng phát hành hoặc nếu gói Mã nguồn Mở của Mergify có thay đổi.
+> **19-11-2026: hàng đợi hợp nhất Hợp nhất đã ngừng hoạt động** (quyết định của chủ sở hữu). `.mergify.yml` không còn xác định hàng đợi và từ chối các lệnh Hợp nhất hợp nhất hoặc viết lại yêu cầu kéo. Bản phát hành PRs được hợp nhất bằng tay theo bộ quy tắc kho lưu trữ "Yêu cầu cổng xanh trên bản phát hành đang hoạt động" (`Gate / CI` + `Gate / Quality`) cho đến khi hàng đợi omni chạy ở chế độ trực tiếp và sau đó thông qua hàng đợi omni ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Phần Hợp nhất bên dưới mô tả hàng đợi như cũ.
+
+Vì v3.8.49 (WS3.2/WS3.4 của gói quality/velocity ), đường dẫn hợp nhất mặc định cho PRs được xem xét thành `release/vX.Y.Z` là** Hợp nhất hàng đợi hợp nhất** (`.mergify.yml`); cái** hợp nhất thủ công** tài liệu bên dưới là FALLBACK — được sử dụng trong các sự cố, phát hành bị treo hoặc nếu gói Nguồn mở Hợp nhất thay đổi.
 
 ## Đường dẫn mặc định: hàng đợi Mergify
 

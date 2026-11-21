@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Το όριο πρέπει να είναι θετικός ακέραιος.",
     "error": "Σφάλμα: {message}",
     "serverOffline": "Ο διακομιστής OmniRoute είναι εκτός σύνδεσης. Εκκινήστε τον με: omniroute serve",
     "authRequired": "Απαιτείται έλεγχος ταυτότητας. Ορίστε το OMNIROUTE_API_KEY ή εκτελέστε: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[δοκιμαστική εκτέλεση] θα {action}",
     "cancelled": "Ακυρώθηκε.",
     "jsonOpt": "Έξοδος ως JSON",
-    "yesOpt": "Παράλειψη προτροπής επιβεβαίωσης"
+    "yesOpt": "Παράλειψη προτροπής επιβεβαίωσης",
+    "positiveIntegerRequired": "Το όριο πρέπει να είναι θετικός ακέραιος."
   },
   "setup": {
     "title": "Εγκατάσταση OmniRoute",

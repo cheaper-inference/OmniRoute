@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ଡିଫଲ୍ଟ ମୂଲ୍ୟ ସହିତ ଏକ Plugin ଅବଜେକ୍ଟ ସୃଷ୍ଟି କରୁଥିବା ଫ୍ୟାକ୍ଟରି ଫଙ୍କସନ୍।
+କାରଖାନା କାର୍ଯ୍ୟ ଯାହା ଡିଫଲ୍ଟ ସହିତ ଏକ ପ୍ଲଗଇନ୍ ବସ୍ତୁ ସୃଷ୍ଟି କରେ।
 
-**ପାରାମିଟରଗୁଡ଼ିକ:**
+**ପାରାମିଟରଗୁଡିକ:**
 
-- `name` (string, ଆବଶ୍ୟକ) — kebab-caseରେ Plugin ନାମ
-- `priority` (number, ବୈକଳ୍ପିକ, ଡିଫଲ୍ଟ: 100) — କମ୍ ମୂଲ୍ୟ ଥିବାଟି ପ୍ରଥମେ ଚାଲେ
-- `enabled` (boolean, ବୈକଳ୍ପିକ, ଡିଫଲ୍ଟ: true) — ସକ୍ଷମ ଅବସ୍ଥାରେ ଆରମ୍ଭ କରିବେ?
-- `onRequest` (function, ବୈକଳ୍ପିକ) — chat handler ପୂର୍ବରୁ ଚାଲେ
-- `onResponse` (function, ବୈକଳ୍ପିକ) — chat handler ପରେ ଚାଲେ
-- `onError` (function, ବୈକଳ୍ପିକ) — handlerରେ ତ୍ରୁଟି ହେଲେ ଚାଲେ
+- `name` (ଷ୍ଟ୍ରିଙ୍ଗ, ଆବଶ୍ୟକ) — କେବାବ-କ୍ଷେତ୍ରରେ ପ୍ଲଗଇନ୍ ନାମ।
+- `priority` (ସଂଖ୍ୟା, ବ al କଳ୍ପିକ, ଡିଫଲ୍ଟ: 100) — ଲୋୟର ପ୍ରଥମେ ଚାଲିଥାଏ।
+- `enabled` (ବୁଲିଅନ୍, ବ al କଳ୍ପିକ, ଡିଫଲ୍ଟ: ସତ୍ୟ) — ଆରମ୍ଭ ସକ୍ଷମ?
+- `onRequest` (କାର୍ଯ୍ୟ, ବ al କଳ୍ପିକ) — ଚାଟ୍ ହ୍ୟାଣ୍ଡେଲର୍ ପୂର୍ବରୁ ଚାଲିଥାଏ।
+- `onResponse` (କାର୍ଯ୍ୟ, ବ al କଳ୍ପିକ) — ଚାଟ୍ ହ୍ୟାଣ୍ଡେଲର୍ ପରେ ଚାଲିଥାଏ।
+- `onError` (କାର୍ଯ୍ୟ, ବ al କଳ୍ପିକ) — ହ୍ୟାଣ୍ଡେଲର୍ ତ୍ରୁଟିରେ ଚାଲିଥାଏ।
 
 ### `blockRequest(response?): BlockingHookResult`
 
-ଅନୁରୋଧକୁ ଅବରୋଧ କରନ୍ତୁ ଏବଂ ବୈକଳ୍ପିକ ଭାବେ ଏକ କଷ୍ଟମ୍ ପ୍ରତିକ୍ରିୟା ଫେରାନ୍ତୁ।
+ଅନୁରୋଧକୁ ଅବରୋଧ କରନ୍ତୁ ଏବଂ ବ option କଳ୍ପିକ ଭାବରେ ଏକ କଷ୍ଟମ୍ ପ୍ରତିକ୍ରିୟା ଫେରସ୍ତ କରନ୍ତୁ।
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-ଅନୁରୋଧଟି provider ପାଖରେ ପହଞ୍ଚିବା ପୂର୍ବରୁ ତାହାର body ପରିବର୍ତ୍ତନ କରନ୍ତୁ।
+ଏହା ପ୍ରଦାନକାରୀଙ୍କ ନିକଟରେ ପହଞ୍ଚିବା ପୂର୍ବରୁ ଅନୁରୋଧ ସଂସ୍ଥାକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ।
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-ଅନୁରୋଧ context ସହିତ metadata ସଂଲଗ୍ନ କରନ୍ତୁ।
+ଅନୁରୋଧ ପ୍ରସଙ୍ଗରେ ମେଟାଡାଟା ସଂଲଗ୍ନ କରନ୍ତୁ।
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin Context (`PluginContext`)
+## ପ୍ଲଗଇନ୍ ପ୍ରସଙ୍ଗ (`PluginContext`)
 
-| ଫିଲ୍ଡ       | ପ୍ରକାର                    | ବର୍ଣ୍ଣନା                    |
-| ----------- | ------------------------- | --------------------------- |
-| `requestId` | `string`                  | ଅନନ୍ୟ ଅନୁରୋଧ ପରିଚୟକ         |
-| `model`     | `string`                  | ଅନୁରୋଧ କରାଯାଇଥିବା model ନାମ |
-| `provider`  | `string`                  | ଲକ୍ଷ୍ୟ provider ID          |
-| `body`      | `Record<string, unknown>` | ଅନୁରୋଧ body                 |
-| `headers`   | `Record<string, string>`  | ଅନୁରୋଧ headers              |
-| `metadata`  | `Record<string, unknown>` | ପରିବର୍ତ୍ତନଶୀଳ metadata      |
-| `timestamp` | `number`                  | ଅନୁରୋଧ timestamp            |
+| କ୍ଷେତ୍ର      | ଟାଇପ୍ କରନ୍ତୁ।             | ବର୍ଣ୍ଣନା                          |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | ଅନନ୍ୟ ଅନୁରୋଧ ପରିଚାୟକ।             |
+| `model`      | `string`                  | ଅନୁରୋଧ କରାଯାଇଥିବା ମଡେଲ ନାମ।       |
+| `provider`   | `string`                  | ଲକ୍ଷ୍ୟ ପ୍ରଦାନକାରୀ ID              |
+| `body`       | `Record<string, unknown>` | ଶରୀର ପାଇଁ ଅନୁରୋଧ।                 |
+| `headers`    | `Record<string, string>`  | ହେଡର୍ ଅନୁରୋଧ (ଟିପ୍ପଣୀ ଦେଖନ୍ତୁ)    |
+| `metadata`   | `Record<string, unknown>` | ପରିବର୍ତ୍ତନଶୀଳ ମେଟାଡାଟା।           |
+| `timestamp`  | `number`                  | ସମୟ ସୀମା ଅନୁରୋଧ।                  |
+| `apiKeyInfo` | `object` (ବ al କଳ୍ପିକ)    | API କି ମେଟାଡାଟା (ଟିପ୍ପଣୀ ଦେଖନ୍ତୁ) |
+
+ପ୍ରସଙ୍ଗ କଦାପି ଗ୍ରାହକଙ୍କ ପରିଚୟ ବହନ କରେ ନାହିଁ: `authorization`, `x-api-key`, `proxy-authorization` ଏବଂ `cookie` ହେଡର୍ ଗୁଡିକ ଅପସାରଣ କରାଯାଏ (ଯେକ any ଣସି କେସିଙ୍ଗ୍), ଏବଂ `apiKeyInfo` ଚାବିର ମେଟାଡାଟା (ଯେପରିକି `id`, `name` ଏବଂ `scopes`) ରଖେ କିନ୍ତୁ ଏହାର ମୁଖ୍ୟ ମୂଲ୍ୟ କିମ୍ବା ଏହାର ଫିଙ୍ଗର ପ୍ରିଣ୍ଟ ନୁହେଁ ( `src/lib/plugins/hooks.ts` ରେ`redactPluginContext()` )। ଏହା `onRequest`, `onResponse` ଏବଂ `onError` ପାଇଁ ପ୍ରଯୁଜ୍ୟ।
 
 ## ମାନିଫେଷ୍ଟ (`plugin.json`)
 
@@ -138,19 +141,18 @@ Hooksକୁ ଅଗ୍ରାଧିକାର ସହିତ ବିନ୍ୟାସ �
 }
 ```
 
-## ଅନୁମତି ପ୍ରଣାଳୀ
+## ଅନୁମତି ବ୍ୟବସ୍ଥା।
 
-ପ୍ଲଗଇନ୍ଗୁଡ଼ିକ ଏକ ସ୍ୟାଣ୍ଡବକ୍ସ କରାଯାଇଥିବା VM ପ୍ରସଙ୍ଗରେ ଚାଲେ। ବାହ୍ୟ ସମ୍ବଳଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିବା ପାଇଁ ସ୍ପଷ୍ଟ ଅନୁମତି ଆବଶ୍ୟକ:
+ପ୍ଲଗଇନ୍ ଗୁଡିକ।** ବାଲୁକା ବାକ୍ସ ନୁହେଁ।** । ପ୍ରତ୍ୟେକ ସକ୍ରିୟ ପ୍ଲଗଇନ୍ ଏକ ଅଲଗା, ସାଧାରଣ Node.js ଶିଶୁ ପ୍ରକ୍ରିୟା ( `src/lib/plugins/loader.ts` ରେ`loadPlugin()` ) OmniRoute ସହିତ ସମାନ ଅପରେଟିଂ ସିଷ୍ଟମ୍ ଉପଭୋକ୍ତା ଭାବରେ ଚାଲିଥାଏ, କ z ଣସି VM ପ୍ରସଙ୍ଗ ଏବଂ Node.js ଅନୁମତି ପତାକା ବିନା। ପ୍ଲଗଇନ୍ କୋଡ୍ `node:fs`, `node:child_process`, `fetch` ଏବଂ ଅନ୍ୟାନ୍ୟ Node.js API ବ୍ୟବହାର କରିପାରିବ: ଏହା OmniRoute ବ୍ୟବହାରକାରୀ (ଡାଟା ଡିରେକ୍ଟୋରୀକୁ ଅନ୍ତର୍ଭୂକ୍ତ କରି) ଯେକ any ଣସି ଫାଇଲ ପ read ି ଲେଖିପାରେ, ପ୍ରୋଗ୍ରାମ ଚଲାଇ ନେଟୱର୍କରେ ପହଞ୍ଚିପାରେ।
 
-| ଅନୁମତି       | ପ୍ରଦାନ କରୁଥିବା ଆକ୍ସେସ୍                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | କେବଳ ପଠନଯୋଗ୍ୟ `process.env` ପ୍ରକ୍ସି                          |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+ମନିଫେଷ୍ଟର `requires.permissions` `network`, `file-read`, `file-write`, `env` ଏବଂ `exec` କୁ ଗ୍ରହଣ କରେ, କିନ୍ତୁ ଆଜି କେବଳ `env` ଚାଲିବା ସମୟରେ ଏହାର ପ୍ରଭାବ ଅଛି:
 
-କୌଣସି ଅନୁମତି ବିନା, ସମ୍ପୃକ୍ତ ଗ୍ଲୋବାଲ୍ଗୁଡ଼ିକ ସ୍ୟାଣ୍ଡବକ୍ସରେ ଉପଲବ୍ଧ ହୁଏ ନାହିଁ।
+| ଅନୁମତି                                       | ଆଜି ପ୍ରଭାବ                                                                                                                                                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | The plugin process also receives `PORT`, `HOSTNAME`, `TZ` and `TMPDIR`. Without it, it receives only `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` and `PLUGIN_NAME` (plus `SystemRoot` and `windir` on Windows). |
+| `network`, `file-read`, `file-write`, `exec` | କିଛି ନୁହେଁ। ସେଗୁଡ଼ିକ କେବଳ ଘୋଷଣାନାମା: ସେମାନେ ନିଖୋଜ ହେଲେ କିଛି ଅବରୋଧ ହୁଏ ନାହିଁ।                                                                                                                                                             |
+
+ଏକ ପ୍ଲଗଇନ୍ ସଂସ୍ଥାପନ ହୋଷ୍ଟରେ ଅନ୍ୟ କ program ଣସି ପ୍ରୋଗ୍ରାମ୍ ସଂସ୍ଥାପନ କରିବା ପରି। କେବଳ ପ୍ଲଗଇନ୍ ସଂସ୍ଥାପନ କର ଯାହାର ଉତ୍ସ ଉପରେ ତୁମେ ବିଶ୍ୱାସ କର।
 
 ## କନଫିଗ୍ ସ୍କିମା
 
@@ -192,9 +194,9 @@ Hooksକୁ ଅଗ୍ରାଧିକାର ସହିତ ବିନ୍ୟାସ �
 | `onDeactivate`    | ପ୍ଲଗଇନ୍ ନିଷ୍କ୍ରିୟ ହେଲେ                                    | `{ name, version, manifest }` |
 | `onUninstall`     | ପ୍ଲଗଇନ୍ ଅନ୍ଇନ୍ଷ୍ଟଲ୍ ହେଲେ (ଫାଇଲ୍ଗୁଡ଼ିକ ବିଲୋପ ହେବା ପୂର୍ବରୁ) | `{ name, version, manifest }` |
 
-## ଉଦାହରଣଗୁଡ଼ିକ
+## ଉଦାହରଣଗୁଡିକ
 
-### ଅନୁରୋଧ ଲଗର୍
+### ଲଗର୍ ଅନୁରୋଧ।
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### ରେଟ୍ ଲିମିଟର୍
+### ରେଟ୍ ସୀମା
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 ମିନିଟ୍
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### ପ୍ରତିକ୍ରିୟା ରୂପାନ୍ତରକାରୀ
+### ପ୍ରତିକ୍ରିୟା ଟ୍ରାନ୍ସଫର୍ମର।
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

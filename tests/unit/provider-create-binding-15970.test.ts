@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -28,9 +29,12 @@ const { POST } = await import("../../src/app/api/providers/route.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
 const { waitForConnectionFollowUps } =
   await import("../../src/lib/providers/connectionFollowUps.ts");
-const fetchCalls: string[] = [];
+// POST starts credential probes in the background after returning 201. A probe
+// from a previous test must not be attributed to a later rejected POST.
+const requestFetchCalls = new AsyncLocalStorage<string[]>();
+const fetchCallsByResponse = new WeakMap<Response, string[]>();
 globalThis.fetch = async (input) => {
-  fetchCalls.push(String(input instanceof Request ? input.url : input));
+  requestFetchCalls.getStore()?.push(String(input instanceof Request ? input.url : input));
   return Response.json({ data: [], models: [] });
 };
 
@@ -38,7 +42,6 @@ test.beforeEach(() => {
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
-  fetchCalls.length = 0;
 });
 test.after(async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 20));
@@ -62,19 +65,24 @@ async function makeNode(type = "openai-compatible-chat") {
 }
 
 async function post(provider: string, providerSpecificData?: Record<string, unknown>, extra = {}) {
-  const result = await POST(
-    await makeManagementSessionRequest("http://localhost/api/providers", {
-      method: "POST",
-      headers: { "X-Skip-Model-Sync": "true" },
-      body: {
-        provider,
-        name: "Binding fixture",
-        apiKey: "sk-fixture-only-15970",
-        ...(providerSpecificData ? { providerSpecificData } : {}),
-        ...extra,
-      },
-    })
+  const calls: string[] = [];
+  const result = await requestFetchCalls.run(calls, async () =>
+    POST(
+      await makeManagementSessionRequest("http://localhost/api/providers", {
+        method: "POST",
+        headers: { "X-Skip-Model-Sync": "true" },
+        body: {
+          provider,
+          name: "Binding fixture",
+          apiKey: "sk-fixture-only-15970",
+          ...(providerSpecificData ? { providerSpecificData } : {}),
+          ...extra,
+        },
+      })
+    )
   );
+  fetchCallsByResponse.set(result, calls);
+  await new Promise<void>((resolve) => setTimeout(resolve, 20));
   return result;
 }
 
@@ -86,7 +94,11 @@ async function assertRejected(result: Response, reason = /conflict/i) {
   assert.equal(result.status, 400, body);
   assert.match(body, reason);
   assert.equal((await connections.getProviderConnections()).length, 0);
-  assert.equal(fetchCalls.length, 0, "conflict must not start credential validation upstream");
+  assert.equal(
+    fetchCallsByResponse.get(result)?.length,
+    0,
+    "conflict must not start credential validation upstream"
+  );
   assert.doesNotMatch(body, /sk-fixture|first\.invalid|second\.invalid|at \//);
 }
 
@@ -100,6 +112,24 @@ for (const type of [
     await assertRejected(await post(type, { baseUrl: "https://second.invalid/v1" }));
   });
 }
+
+test("a prior request's delayed probe does not count toward a rejected create", async () => {
+  await makeNode();
+  const earlierCalls: string[] = [];
+  const delayedProbe = new Promise<void>((resolve, reject) => {
+    requestFetchCalls.run(earlierCalls, () => {
+      setTimeout(() => {
+        void fetch("https://first.invalid/v1/models").then(() => resolve(), reject);
+      }, 5);
+    });
+  });
+  const rejected = await post("openai-compatible-chat", {
+    baseUrl: "https://second.invalid/v1",
+  });
+  await delayedProbe;
+  await assertRejected(rejected);
+  assert.equal(earlierCalls.length, 1, "the earlier request's probe was observed separately");
+});
 
 test("unsupported bare Anthropic type stays invalid instead of expanding the API", async () => {
   await makeNode("anthropic-compatible");

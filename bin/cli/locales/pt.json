@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "O limite deve ser um número inteiro positivo.",
     "error": "Erro: {message}",
     "serverOffline": "O servidor OmniRoute está offline. Inicie com: omniroute serve",
     "authRequired": "Autenticação necessária. Defina OMNIROUTE_API_KEY ou execute: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simulação] faria: {action}",
     "cancelled": "Cancelado.",
     "jsonOpt": "Saída em JSON",
-    "yesOpt": "Ignorar confirmação"
+    "yesOpt": "Ignorar confirmação",
+    "positiveIntegerRequired": "O limite deve ser um número inteiro positivo."
   },
   "setup": {
     "title": "Configuração do OmniRoute",

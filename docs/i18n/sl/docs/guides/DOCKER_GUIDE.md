@@ -27,13 +27,9 @@
 
 ---
 
-## Hiter zagon
+## Hitri tek
 
-> **Samostojno gostovanje z enim ukazom?** Glejte
-> [Vodnik za samostojno gostovanje](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (objavljena slika +
-> Redis, dostop samo prek povratne zanke, brez izbire profila). Spodnji hitri zagon je
-> način z enim vsebnikom za uporabnike, ki Redis že izvajajo drugje.
+> **Samostojno gostovanje v enem ukazu?** Oglejte si [Vodnik za samostojno gostovanje](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (objavljena slika + Redis, samo povratna zanka, brez izbire profila). Spodnji hitri zagon je pot z enim vsebnikom za uporabnike, ki že izvajajo Redis drugje.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Z datoteko okolja
 
 ```bash
-# Najprej kopirajte in uredite .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -221,18 +217,18 @@ docker compose -f docker-compose.prod.yml down
 
 Produkcijski sklad se izvaja vzporedno z razvojnim okoljem Compose (uporablja drugačna imena vsebnikov, vrata in nosilce), zato lahko lokalno nadaljujete razvoj, medtem ko produkcijsko okolje ostane zagnano.
 
-## Faze Dockerfile
+## Stopnje Dockerfile
 
-Repozitorij vključuje večstopenjski Dockerfile (`Dockerfile`). Na voljo so štiri faze; izberite ustrezni `target` za svoj primer uporabe.
+Repozitorij pošilja večstopenjsko datoteko Docker (`Dockerfile`). Izpostavljene so štiri stopnje; izberite pravi `target` za vaš primer uporabe.
 
-| Faza          | Osnovna slika         | Namen                                                                                                                                                                                                                                                                                        |
-| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Namesti odvisnosti (`npm ci --legacy-peer-deps`) in zažene `npm run build` (privzeto uporablja Turbopack — glejte spodnji razdelek Viri med gradnjo)                                                                                                                                         |
-| `runner-base` | `node:26-trixie-slim` | Produkcijsko izvajalno okolje s samostojnim izhodom Next.js. **Orodja CLI ponudnikov niso vključena.**                                                                                                                                                                                       |
-| `runner-cli`  | `runner-base`         | Doda `git`, `docker.io`, `docker-compose` in globalna orodja CLI: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **To možnost izberite za agentske delovne tokove.**                                                                                                     |
-| `runner-web`  | `runner-base`         | Doda Playwright in brskalnik Chromium (`--with-deps`) za ponudnike spletnih sej: `gemini-web`, `claude-web`, `claude-turnstile`. **To možnost izberite, kadar uporabljate te ponudnike** — običajna slika brez tega odpove ob času zahteve (glejte opombo o `-web` v razdelku Kanali izdaj). |
+| Oder          | Osnovna slika         | Namen                                                                                                                                                                                                                                                                   |
+| ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Namesti deps (`npm ci --legacy-peer-deps`) in zažene `npm run build` (Turbopack privzeto — glejte vire za čas gradnje spodaj)                                                                                                                                           |
+| `runner-base` | `node:26-trixie-slim` | Proizvodni čas izvajanja s samostojnim izhodom Next.js.** Ni ponudnika CLIs v paketu.**                                                                                                                                                                                 |
+| `runner-cli`  | `runner-base`         | Doda `git`, `docker.io`, `docker-compose` in globalni CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Izberite to za agentske poteke dela.**                                                                                                 |
+| `runner-web`  | `runner-base`         | Doda Playwright + brskalnik Chromium (`--with-deps`) za ponudnike spletnih sej: `gemini-web`, `claude-web`, `claude-turnstile`.** To izberite, ko uporabljate te ponudnike** — navadna slika ne uspe ob času zahteve brez nje (glejte opombo `-web` pod kanali izdaje). |
 
-Ročno zgradite določen cilj:
+Ročno sestavite določen cilj:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -240,45 +236,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Viri med gradnjo
+### Viri časa gradnje
 
-Trije argumenti gradnje določajo porabo virov faze `builder`. Veljajo samo med gradnjo —
-`OMNIROUTE_MEMORY_MB` (spodaj) je ločena nastavitev za čas izvajanja.
+Trije argumenti gradnje nadzorujejo stroške stopnje `builder`. So samo v času gradnje — `OMNIROUTE_MEMORY_MB` (spodaj) je ločen gumb za čas izvajanja.
 
-| Argument gradnje            | Privzeto | Učinek                                                                                      |
-| --------------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` gradi z webpackom: manjša največja poraba pomnilnika, počasneje. `1` omogoči Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Zgornja meja kopice V8 (`--max-old-space-size`) za zagnani `next build`.                    |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Nastavi `CIRCLE_NODE_TOTAL`; Next izpelje `workers = N - 1` za zbiranje podatkov strani.    |
+| Gradi arg                   | Privzeto | Učinek                                                                                         |
+| --------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` gradi s spletnim paketom: nižji konični pomnilnik, počasnejši. `1` se odloči za Turbopack. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Zgornja meja kopice V8 (`--max-old-space-size`) za sproženi `next build`.                      |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Viri `CIRCLE_NODE_TOTAL`; Naprej izpelje `workers = N - 1` za zbiranje podatkov strani.        |
 
-`OMNIROUTE_BUILD_WORKERS` je nastavitev, ki jo povečajte na zmogljivem gradniku, in
-prva, na katero posumite, ko gradnja z omejenimi viri odpove **po** sporočilu
-`✓ Compiled successfully`. Vsak delavec za podatke strani je ločen proces, prav
-tako tudi nadrejeni proces `next build`; reprodukcija na delujočem VPS-u (težava
-#7518) je izmerila največji RSS vsakega procesa pri približno 4,5 GB, neodvisno
-od zastavice kopice `NODE_OPTIONS` (Turbopack prevaja v izvornem pomnilniku/Rustu
-zunaj kopice V8). Privzeta vrednost `2` (→ 1 delavec, skupaj 2 procesa) je
-prilagojena gostovanim izvajalnikom GitHub s 16 GB / 4 vCPU, ki jih uporablja
-cevovod za objavljanje. Pri `8` (→ 7 delavcev) je temu izvajalniku zmanjkalo
-pomnilnika in buildkit je prekinil korak z napako
-`ResourceExhausted: ... cannot allocate memory`; tudi `3` (→ 2 delavca) ni bilo
-dovolj, ko je bil RSS na proces izmerjen neposredno namesto ocenjen posredno.
-`tests/unit/docker-build-memory-budget.test.ts` opravi izračun na podlagi
-izmerjene vrednosti in odpove, če katera koli nastavitev preseže zmogljivost
-izvajalnika.
+`OMNIROUTE_BUILD_WORKERS` je tisti, ki se dvigne pri velikem graditelju, in tisti, na katerega se sumi, ko omejena zgradba umre** po** `✓ Compiled successfully`. Vsak podatkovni delavec strani je svoj proces, prav tako nadrejeni `next build` sam; reprodukcija VPS v živo (težava #7518) je izmerila vrh RSS vsakega procesa pri ~ 4,5 GB neodvisno od zastavice kopice `NODE_OPTIONS` (Turbopack prevaja v pomnilnik native/Rust zunaj kopice V8). Privzeta vrednost `2` (1 delavec →, skupaj 2 procesa) je prilagojena za 16 izvajalcev GB / 4 vCPU ki jih gosti GitHub, ki jih uporablja cevovod za objavo. Pri `8` (→ 7 delavcev) je temu izvajalcu zmanjkalo pomnilnika in buildkit ni opravil koraka z `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 delavca) še vedno ni ustrezal, potem ko je bil RSS na proces izmerjen neposredno namesto sklepanja. `tests/unit/docker-build-memory-budget.test.ts` izvede aritmetiko glede na izmerjeno številko in ne uspe, če kateri koli gumb preraste tekač.
 
-Turbopack prevaja v izvornem pomnilniku Rusta, ki je **zunaj** kopice V8, zato ga
-`OMNIROUTE_BUILD_MEMORY_MB` ne omejuje. Na gostitelju z omejitvijo pomnilnika
-gradnjo nato brez kakršnega koli besedila napake s signalom SIGKILL prekine
-mehanizem OOM — preprosto se ustavi sredi koraka
-`Creating an optimized production build`, kar je videti kot zastoj in ne kot
-pomanjkanje pomnilnika. Zato `Dockerfile` privzeto uporablja webpack
-(`OMNIROUTE_USE_TURBOPACK=0`), za razliko od `npm run dev` / `npm run build`, kjer
-je v kodi privzeto nastavljen Turbopack: goli `docker build .` brez argumentov
-gradnje (kar izvajajo Railway in drugi gostitelji z namestitvijo z enim klikom)
-na gradniku z omejenim pomnilnikom ne sme tiho odpovedati. Objavljene slike že
-izrecno posredujejo `OMNIROUTE_USE_TURBOPACK=0` v `docker-publish.yml`. Na
-gradniku z dovolj pomnilnika RAM omogočite Turbopack za hitrejšo gradnjo:
+Turbopack prevaja v izvorni pomnilnik Rust, ki živi** zunaj** kup V8, zato ga `OMNIROUTE_BUILD_MEMORY_MB` ne omejuje. Na gostitelju z zgornjo mejo pomnilnika gradnjo nato SIGKILLed izvede uničevalec OOM brez nikakršnega besedila napake — preprosto ustavi sredi `Creating an optimized production build`, kar se bere kot zastoj in ne kot zmanjkalo pomnilnika. Zato je `Dockerfile` privzeto nastavljen na webpack (`OMNIROUTE_USE_TURBOPACK=0`), za razliko od `npm run dev` / `npm run build`, kjer je Turbopack privzeta koda: goli `docker build .` brez argov za gradnjo (kar izvajajo Railway in drugi gostitelji z enim klikom) ne sme tiho umreti v gradilniku z omejenim pomnilnikom. Objavljene slike že izrecno prehajajo `OMNIROUTE_USE_TURBOPACK=0` v `docker-publish.yml`. Na gradilniku z veliko RAM se odločite za Turbopack za hitrejšo gradnjo:
 
 ```bash
 docker build --target runner-base \
@@ -286,49 +256,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` je omogočen, zato `next build` zažene nadrejeni proces
-**in** proces delavca, vsak od njiju pa ločeno upošteva
-`OMNIROUTE_BUILD_MEMORY_MB`. Zgornjo mejo vsebnika nastavite na približno
-dvakratnik te vrednosti, ne na enkratnik.
+`webpackBuildWorker` je omogočen, zato `next build` izvaja nadrejenega** in** delavski proces in vsak posebej spoštuje `OMNIROUTE_BUILD_MEMORY_MB`. Velikost stropa zabojnika naj bo približno dvakratna, ne enkrat.
 
 Izmerjeno na tem drevesu (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Orodje za združevanje | Zgornja meja vsebnika | Rezultat                                     |
-| --------------------- | --------------------- | -------------------------------------------- |
-| Turbopack             | 8 GiB / 16 GiB        | pri obeh prekinjeno zaradi OOM, brez izpisa  |
-| webpack               | 8 GiB                 | delavec gradnje prekinjen s signalom SIGKILL |
-| webpack               | 12 GiB                | uspešno, največja poraba 11,1 GiB            |
+| Bundler       | Strop kontejnerja | Rezultat                         |
+| ------------- | ----------------- | -------------------------------- |
+| Turbopack     | 8 GiB / 16 GiB    | OOM-ubil pri obeh, tiho          |
+| spletni paket | 8 GiB             | gradbeni delavec SIGKILLed       |
+| spletni paket | 12 GiB            | uspelo, dosegel vrh pri 11,1 GiB |
 
-### Privzete nastavitve med izvajanjem
+### Privzete nastavitve časa izvajanja
 
 Privzete vrednosti, ki jih izvozi `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Obnašanje pomnilnika v okolju Docker:
+Obnašanje pomnilnika v Docker:
 
-- Slika nastavi `OMNIROUTE_MEMORY_MB=1024` in iz te vrednosti izpelje `NODE_OPTIONS=--max-old-space-size=1024`.
-- Dejanski strežniški proces zažene samostojni zaganjalnik, ki prebere `OMNIROUTE_MEMORY_MB` in doda `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node uporabi zadnjo ponovljeno vrednost `--max-old-space-size`, zato nastavitev `OMNIROUTE_MEMORY_MB` določa dejansko omejitev kopice v Dockerju.
-- Ker jo slika vedno nastavi, se zaganjalnikova nadomestna nastavitev, prilagojena količini RAM-a, v Dockerju nikoli ne uporabi. Za delovno obremenitev jo izrecno povečajte (glejte spodnjo tabelo). `2048` je še vedno premalo za `/v1/responses` agenta za programiranje.
+- Slika nastavi `OMNIROUTE_MEMORY_MB=1024` in iz njega izpelje `NODE_OPTIONS=--max-old-space-size=1024`.
+- Dejanski proces strežnika zažene samostojni zaganjalnik, ki prebere `OMNIROUTE_MEMORY_MB` in doda `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Vozlišče uporablja zadnjo ponovljeno vrednost `--max-old-space-size`, zato nastavitev `OMNIROUTE_MEMORY_MB` nadzoruje efektivno omejitev kopice Docker.
+- Ker ga slika vedno nastavi, lastna nadomestna rešitev zaganjalnika, umerjena z RAM-om, nikoli ne velja pod Docker. Povečajte ga izrecno za delovno obremenitev (tabela spodaj). `2048` je še vedno premajhen za kodirnega agenta `/v1/responses`.
 
-### RAM med izvajanjem za agente za programiranje
+### Izvajalni čas RAM za agente za kodiranje
 
-Privzeta nastavitev Dockerja 1 GiB je minimum za nadzorno ploščo in preprost klepet, ne pa velikost za produkcijsko okolje. Dolga telesa zahtev `POST /v1/responses` (na stotine sporočil, na desetine orodij) med stiskanjem ohranijo več grafov v pomnilniku. Dve prekrivajoči se zahtevi velikosti približno 3 MiB oziroma 750.000 žetonov sta povzročili prekinitev V8 pri **12 GiB** starega prostora (`FATAL ERROR: Reached heap limit`) in tudi OOM v cgroup z omejitvijo 16 GiB. Glejte [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Privzeta vrednost 1 GiB Docker je nadstropje dashboard/light-chat, ne velikost proizvodnje. Dolga telesa `POST /v1/responses` (na stotine sporočil, na desetine orodij) med stiskanjem ohranijo več grafov v pomnilniku. Dve prekrivajoči se zahtevi za žeton ~ 3 MiB / ~ 750k sta prekinili V8 ob** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) in prav tako zadel 16 GiB cgroup OOM. Glej [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Nastavite **cgroup `--memory` nad velikost kopice** — izvorni medpomnilniki, SQLite in vmesni podatki stiskanja so zunaj V8.
+Velikost** cgroup `--memory` nad kopico** izvorni medpomnilniki —, SQLite in vmesni deli za stiskanje so zunaj V8.
 
-| Delovna obremenitev                           | `OMNIROUTE_MEMORY_MB`          | Vsebnik / cgroup                | Opombe                                                                                                                       |
-| --------------------------------------------- | ------------------------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Nadzorna plošča, en preprost klepet           | `1024` (privzeto v sliki)      | ≥2 GiB                          |                                                                                                                              |
-| En agent za programiranje (Claude/Codex/Grok) | `8192`                         | ≥10 GiB                         | Običajna seja z eno zahtevo `/v1/responses`                                                                                  |
-| Dve sočasni dolgi zahtevi `/v1/responses`     | `10240`–`12288`                | ≥12–16 GiB                      | Izmerjena prekinitev V8 pri približno 12 GiB kopice                                                                          |
-| Trije ali več sočasnih dolgih kontekstov      | ne uporabljajte v enem procesu | izvajajte zaporedno / več RAM-a | Privzeta omejitev za zahtevne operacije je 1 aktivna zahteva; njeno povečanje brez dodatnega RAM-a znova povzroči prekinitev |
+| Delovna obremenitev                  | `OMNIROUTE_MEMORY_MB`   | Vsebnik / cgroup     | Opombe                                                                                      |
+| ------------------------------------ | ----------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
+| Nadzorna plošča, en lahkoten klepet  | `1024` (privzeta slika) | ≥2 GiB               |                                                                                             |
+| En kodirni agent (Claude/Codex/Grok) | `8192`                  | ≥10 GiB              | Tipična `/v1/responses` z eno sejo                                                          |
+| Dva sočasna dolga `/v1/responses`    | `10240`–`12288`         | ≥12–16 GiB           | Izmerjena prekinitev V8 pri ~ 12 GiB                                                        |
+| Trije + sočasni dolgi konteksti      | ne na enem procesu      | serialize / more RAM | Privzeti sprejem za težke kategorije je 1 med letom; dvig brez RAM ponovno uvede prekinitev |
 
-`omniroute serve` na fizičnem sistemu nastavi približno 35 % RAM-a (omejeno na `[512, 4096]`), kadar `OMNIROUTE_MEMORY_MB` **ni nastavljena**. Docker vedno nastavi `1024`, zato se to prilagajanje v uradni sliki nikoli ne izvede.
+`omniroute serve` na goli kovini kalibrira ~ 35 % RAM (vpet `[512, 4096]`), ko je `OMNIROUTE_MEMORY_MB`** nenastavljeno** . Docker vedno nastavi `1024`, tako da se kalibracija nikoli ne izvaja v uradni podobi.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Kritične okoljske spremenljivke
@@ -352,21 +319,13 @@ Poleg privzetih vrednosti, dokumentiranih v [ENVIRONMENT.md](../reference/ENVIRO
 | `PROD_DASHBOARD_PORT`         | Vrata nadzorne plošče na gostiteljski strani za `docker-compose.prod.yml`                                                                                                                                                                                                                                | `20130`                        |
 | `CLIPROXYAPI_PORT`            | Vrata na gostiteljski strani za stranski vsebnik `cliproxyapi`                                                                                                                                                                                                                                           | `8317`                         |
 
-## Obratni posredniški strežnik na podpoti (Traefik / nginx)
+## Povratni proxy na podpoti (Traefik / nginx)
 
-Vrednost `basePath` ogrodja Next.js je prevedena v samostojni paket. OmniRoute zapiše vgrajeno
-vrednost v označevalno datoteko v korenu aplikacije (zapisano med `npm run build`; prebere jo
-`scripts/docker/ensure-docker-base-path.mjs`) in jo ob zagonu vsebnika primerja z
-`OMNIROUTE_BASE_PATH`. Če se vrednosti razlikujeta in je bila slika zgrajena za koren
-domene, vstopna točka pred zagonom `node dev/run-standalone.mjs` prepiše manifeste
-samostojnega paketa, vdelane literale `basePath`/`assetPrefix` (Next 16 upodablja URL-je
-sredstev SSR samo iz `assetPrefix` — popravljalnik vanj preslika tudi podpot), vgrajene
-URL-je sredstev `/_next/static` (manifesti sklicev odjemalca, uvozi predstavnostnih
-datotek, vnaprej upodobljene strani z napakami) in odjemalski nadomestek za `process.env`.
+Next.js `basePath` je preveden v samostojni sveženj. OmniRoute zabeleži pečeno vrednost v datoteko sentinel v korenu aplikacije (napisano med `npm run build`; prebere `scripts/docker/ensure-docker-base-path.mjs`) in jo primerja z `OMNIROUTE_BASE_PATH`, ko se vsebnik zažene. Ko se razlikujejo in je bila slika zgrajena za koren domene, vstopna točka prepiše samostojne manifeste, vdelane literale `basePath`/`assetPrefix` (naslednjih 16 upodobi SSR sredstvo URLs iz samega `assetPrefix` — popravljalec zrcali podpot vanj), pečeno sredstvo `/_next/static` URLs (manifesti sklicevanja odjemalca, uvozi medijev, vnaprej upodobljene strani z napakami) in odjemalca `process.env` shim pred zagonom `node dev/run-standalone.mjs`.
 
-### Gradnja s Compose (priporočeno)
+### Ustvari sestavo (priporočeno)
 
-Nastavite obe spremenljivki v `.env`, nato znova zgradite sliko, da se slika in izvajalno okolje ujemata:
+Nastavite obe spremenljivki v `.env`, nato znova sestavite, da se slika in izvajalno okolje ujemata:
 
 ```bash
 # .env
@@ -378,72 +337,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` posreduje `OMNIROUTE_BASE_PATH` kot argument za gradnjo Docker in kot
-spremenljivko izvajalnega okolja.
+`docker-compose.yml` posreduje `OMNIROUTE_BASE_PATH` kot Docker build-arg in kot spremenljivko izvajalnega okolja.
 
-### Vnaprej zgrajena korenska slika + podpot med izvajanjem
+### Vnaprej zgrajena korenska slika + izvajalna podpot
 
-Objavljene slike `diegosouzapw/omniroute:*` so zgrajene za koren domene. Kljub temu lahko
-med izvajanjem nastavite `OMNIROUTE_BASE_PATH`; vsebnik ob zagonu enkrat popravi paket.
-Uporabite jo skupaj z ustreznim javnim izvorom:
+Objavljene slike `cheaperinference/omniroute:*` so izdelane za koren domene. Še vedno lahko nastavite `OMNIROUTE_BASE_PATH` med izvajanjem; vsebnik popravi sveženj enkrat ob zagonu. Seznanite ga z ustreznim javnim izvorom:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Obratni posredniški strežnik konfigurirajte tako, da posreduje **celotno** zunanjo pot
-(ne odstranjujte predpone). Traefik naj usmeri `PathPrefix(`/omniroute`)` v vsebnik brez
-`StripPrefix`, tako da Next.js prejme `/omniroute/...` in streže sredstva iz
-`/omniroute/_next/...`.
+Konfigurirajte obratni proxy za posredovanje** poln** zunanja pot (ne odstranjujte predpone). Traefik bi moral usmeriti `PathPrefix(`/omniroute `)` v vsebnik brez `StripPrefix`, tako da Next.js prejme `/omniroute/...` in streže sredstva iz `/omniroute/_next/...`.
 
-Preverjanje zdravja Docker preverja lahkotno končno točko življenjskega cikla `/healthz`,
-pred katero je dodana aktivna vrednost `OMNIROUTE_BASE_PATH`. Končna točka
-`/api/monitoring/health` ostaja na voljo za diagnostiko za ljudi in nadzorne plošče; če
-želite preverjanje HEALTHCHECK vsebnika znova usmeriti nanjo (na primer za uveljavljanje
-poglobljenega preverjanja zdravja), nastavite
-`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Ta pot izvaja **poglobljeno**
-preverjanje (podatkovna zbirka + povzetek spremljanja) — primerno za redko izvajani
-Dockerjev `HEALTHCHECK`, če ga znova omogočite, vendar **ne** za intervale Kubernetes
-`livenessProbe`.
+Zdravstveni pregled Docker preverja končno točko življenjskega cikla lahkega `/healthz` s predpono aktivno `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` ostaja na voljo za diagnostiko human/dashboard ; če želite vsebnik HEALTHCHECK usmeriti nazaj nanj (na primer za globoko uveljavljanje zdravja), nastavite `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Ta pot je a** globoko** preverite (DB + povzetek spremljanja) — primerno za Docker redko `HEALTHCHECK` če se ponovno odločite, vendar** ne** za intervale Kubernetes `livenessProbe`.
 
 Za orkestratorje (Kubernetes, Nomad itd.):
 
-| Preverjanje            | Priporočeno                                                            | Izogibajte se                                                                |
-| ---------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Živost                 | HTTP `GET /livez` ali TCP na glavnih vratih (`PORT`, privzeto `20128`) | `/api/monitoring/health` kot preverjanju živosti                             |
-| Pripravljenost         | HTTP `GET /healthz`                                                    | Kratkim časovnim omejitvam, ki zasedeno zanko dogodkov obravnavajo kot mrtvo |
-| Poglobljeno / blackbox | `/api/monitoring/health`                                               | —                                                                            |
+| Sonda                 | Raje                                                                   | Izogibajte se                                                    |
+| --------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Živahnost             | HTTP `GET /livez` ali TCP na glavnih vratih (`PORT`, privzeto `20128`) | `/api/monitoring/health` kot živahnost                           |
+| Pripravljenost        | HTTP `GET /healthz`                                                    | Kratke časovne omejitve, ki zanko dogodkov obravnavajo kot mrtvo |
+| Globoka / črna škatla | `/api/monitoring/health`                                               | —                                                                |
 
-`/healthz` poroča o življenjskem ciklu procesa (`ok` / `starting` / `stopping`). `/livez`
-preverja samo, ali je proces živ (vrne 200, kadar koli se obravnavalnik lahko izvede; ne
-čaka na pripravljenost). Obe končni točki se še vedno izvajata v isti zanki dogodkov Node
-kot obravnavanje zahtev, zato ju lahko procesorsko zahtevna obdelava kataloga ali
-stiskanje zakasni — zasedeno ≠ mrtvo. Če poteče časovna omejitev preverjanj HTTP, dajte
-prednost preverjanju živosti TCP. Celotna navodila za preverjanja:
-[Priročnik za spremljanje — priporočila za preverjanja Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` poroča o življenjskem ciklu procesa (`ok` / `starting` / `stopping`). `/livez` je samo procesno živ (200, kadar se lahko izvajalec zažene; ne čaka na pripravljenost). Oba se še vedno izvajata v isti zanki dogodkov Node kot obravnavanje zahtev, zato lahko katalog ali stiskanje, vezano na CPE, povzročijo zamudo — busy ≠ dead. Raje TCP liveness, če sonde HTTP potečejo. Celotno vodenje sonde: [Vodnik za spremljanje — Priporočila sonde Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose s Caddyjem (samodejni TLS za HTTPS)
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-OmniRoute lahko varno izpostavite s Caddyjevim samodejnim zagotavljanjem potrdil SSL. Prepričajte se, da zapis A DNS vaše domene kaže na naslov IP vašega strežnika.
+OmniRoute je mogoče varno izpostaviti s Caddyjevim samodejnim zagotavljanjem SSL. Zagotovite, da zapis DNS A vaše domene kaže na IP vašega strežnika.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Izvor, viden brskalniku, za povratne klice OAuth, povezave nadzorne plošče in ustvarjene javne URL-je.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Notranji URL med strežniki za načrtovana opravila / samodejne poizvedbe.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -460,71 +399,68 @@ volumes:
   omniroute-data:
 ```
 
-Caddy nastavi standardne glave za posredovanje za nadrejeni vsebnik. OmniRoute uporablja
-`NEXT_PUBLIC_BASE_URL` kot kanonični javni izvor za povratne klice OAuth in ustvarjene javne
-povezave; overjeni zapisi na nadzorni plošči uporabljajo zahteve istega izvora in zaščito CSRF,
-vezano na sejo. Možnost `OMNIROUTE_TRUST_PROXY` omogočite samo pri naprednih uvedbah, pri katerih
-želite, da OmniRoute javni izvor namesto iz izrecne konfiguracije določi iz zaupanja vrednih
-posredovanih glav.
+Caddy nastavi standardne glave za posredovanje za zabojnik navzgor. OmniRoute uporablja `NEXT_PUBLIC_BASE_URL` kot kanonični javni izvor za povratne klice OAuth in ustvarjene javne povezave; overjeno pisanje na nadzorno ploščo uporablja zahteve istega izvora in zaščito CSRF vezano na sejo. Omogočite `OMNIROUTE_TRUST_PROXY` samo za napredne uvedbe, kjer namenoma želite, da OmniRoute izpelje javni izvor iz zaupanja vrednih posredovanih glav namesto izrecne konfiguracije.
 
-## Hitri tunel Cloudflare
+## Cloudflare hitri tunel
 
-Podpora nadzorne plošče za uvedbe Docker vključuje **hitri tunel Cloudflare** z enim klikom na `Nadzorna plošča → Končne točke`. Ob prvi omogočitvi se `cloudflared` prenese samo, ko je potreben, zažene začasni tunel do vaše trenutne končne točke `/v1` in prikaže ustvarjeni URL `https://*.trycloudflare.com/v1` neposredno pod vašim običajnim javnim URL-jem.
+Podpora na nadzorni plošči za uvedbe Docker vključuje en klik**Cloudflare hitri tunel** na `Dashboard → Endpoints`. Prvi omogoči prenose `cloudflared` samo, ko je to potrebno, zažene začasni tunel do vaše trenutne končne točke `/v1` in prikaže ustvarjeni `https://*.trycloudflare.com/v1` URL neposredno pod vašim običajnim javnim URL.
 
-Plošče tunelov končnih točk (Cloudflare, Tailscale, ngrok) lahko prikažete ali skrijete v `Nastavitve → Videz`, ne da bi spremenili stanje aktivnega tunela.
+Plošče tunela končne točke (Cloudflare, Tailscale, ngrok) je mogoče prikazati ali skriti pred `Settings → Appearance` brez spreminjanja aktivnega stanja tunela.
 
-### Opombe o tunelih
+### Tunnel Notes
 
-- URL-ji hitrih tunelov so začasni in se spremenijo po vsakem ponovnem zagonu.
-- Hitri tuneli se po ponovnem zagonu OmniRoute ali vsebnika ne obnovijo samodejno. Ko jih potrebujete, jih znova omogočite na nadzorni plošči.
-- Upravljana namestitev trenutno podpira Linux, macOS in Windows na arhitekturah `x64` / `arm64`.
-- Upravljani hitri tuneli privzeto uporabljajo prenos HTTP/2, da se v omejenih okoljih vsebnikov izognejo motečim opozorilom o medpomnilniku UDP za QUIC. Nastavite `CLOUDFLARED_PROTOCOL=quic` ali `auto`, če želite drugačen prenos.
-- Slike Docker vključujejo sistemske korenske overitelje potrdil in jih posredujejo upravljanemu programu `cloudflared`, kar prepreči napake zaupanja TLS, ko se tunel inicializira znotraj vsebnika.
-- Nastavite `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`, če želite, da OmniRoute namesto prenosa uporabi obstoječo izvršljivo datoteko.
+- Quick Tunnel URLs je začasen in se spremeni po vsakem ponovnem zagonu.
+- Hitri tuneli se po ponovnem zagonu OmniRoute ali vsebnika ne obnovijo samodejno. Po potrebi jih znova omogočite na nadzorni plošči.
+- Upravljana namestitev trenutno podpira Linux, macOS in Windows na `x64` / `arm64`.
+- Upravljani hitri tuneli privzeto uporabljajo HTTP/2 transport, da se izognejo hrupnim opozorilom medpomnilnika QUIC UDP v omejenih vsebniških okoljih. Nastavite `CLOUDFLARED_PROTOCOL=quic` ali `auto`, če želite drugačen prevoz.
+- Docker slike združijo sistemske korenine CA in jih posredujejo upravljanemu `cloudflared`, ki se izogne napakam zaupanja TLS, ko se tunel zažene znotraj vsebnika.
+- Nastavite `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` če želite, da OmniRoute namesto prenosa uporablja obstoječo dvojiško datoteko.
 
 ## Oznake slik
 
-| Slika                    | Oznaka   | Velikost | Opis                                                              |
-| ------------------------ | -------- | -------- | ----------------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB   | Najvišja **objavljena** stabilna različica SemVer (ne git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB   | Za GitOps pripnite ta razred oznake                               |
+| Slika                        | Oznaka   | Velikost | Opis                                                    |
+| ---------------------------- | -------- | -------- | ------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB | Najvišje** objavljeno** stabilen SemVer (ne git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB | Pripni ta razred oznake za GitOps                       |
 
-Večplatformni manifest: izvorna podpora za `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker samodejno izbere ustrezno arhitekturo; če morate na gostiteljih ARM vsiliti emulacijo AMD64, podajte `--platform linux/amd64`.
+Iste slike so objavljene v treh repozitorijih z enakimi izvlečki za vsako arhitekturo: `cheaperinference/omniroute` (Docker Hub, organizacija Cheaper Inference, od 3.8.53 naprej), `ghcr.io/cheaper-inference/omniroute` in stari `diegosouzapw/omniroute`, ki hrani svojo zgodovino umika in še vedno prejme vsako izdajo. Obstoječe uvedbe `diegosouzapw/omniroute` se nenehno posodabljajo; zamenjava imena slike ni obvezna. Spodnji kanal pred izdajo `:next` / `:next-web` je objavljen samo v `diegosouzapw/omniroute` in GHCR.
 
-### Kanali izdaj
+Manifest za več platform: izvorni `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker samodejno izbere ustrezno arhitekturo; prenesite `--platform linux/amd64`, če morate vsiliti emulacijo AMD64 na gostiteljih ARM.
 
-OmniRoute objavlja ločene kanale Docker za stabilne izdaje, aktivno preizkušanje veje izdaje in razvojne gradnje.
+### Sprostite kanale
 
-| Kanal                           | Vir                                               | Spremenljivost                  | Priporočena uporaba                                                                                                        |
-| ------------------------------- | ------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Podpisana/različicena izdaja                      | Nespremenljiv                   | Produkcijske uvedbe, ki so pripete na točno določeno izdajo                                                                |
-| `:latest` / `:latest-web`       | Najvišja **objavljena** stabilna različica SemVer | Spremenljiv stabilni kazalec    | Sledi stabilnim izdajam **po** opravilu objave SemVer — **ne** sledi veji `main` ali neobjavljenim spremembam `release/v*` |
-| `:next` / `:next-web`           | Trenutna privzeta veja `release/v*`               | Spremenljiv predizdajni kazalec | Preizkušanje popravkov, ki so že vključeni v aktivno vejo izdaje, vendar še niso del stabilne izdaje                       |
-| `:main` / `:main-web`           | Veja `main`                                       | Spremenljiv razvojni kazalec    | Samo za razvojno in integracijsko preizkušanje                                                                             |
+OmniRoute objavlja ločene kanale Docker za stabilne izdaje, aktivno testiranje veje izdaje in razvojne gradnje.
+
+| Kanal                           | Vir                                     | Spremenljivost                  | Priporočena uporaba                                                                                                   |
+| ------------------------------- | --------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | izdaja Signed/versioned                 | Nespremenljivo                  | Produkcijske uvedbe, ki določajo natančno izdajo                                                                      |
+| `:latest` / `:latest-web`       | Najvišje** objavljeno** stabilen SemVer | Spremenljiv stabilni kazalec    | Sledi stabilnim izdajam** po** objavo SemVer opravi —** ne** sledenje `main` ali neobjavljenim `release/v*` povezavam |
+| `:next` / `:next-web`           | Trenutna privzeta veja `release/v*`     | Spremenljiv kazalec pred izdajo | Testiranje popravkov, ki so pristali na veji aktivne izdaje, vendar še niso v stabilni izdaji                         |
+| `:main` / `:main-web`           | podružnica `main`                       | Spremenljiv razvojni kazalec    | Samo razvojno in integracijsko testiranje                                                                             |
 
 #### Ponudniki spletnih sej: slike `-web`
 
-Vsak zgornji kanal je na voljo tudi kot oznaka `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), zgrajena iz stopnje `runner-web` — gre za isto sliko z dodatkom Playwrighta in brskalnika Chromium. Običajna slika je dobavljena **brez** Chromiuma; `gemini-web`, `claude-web` in `claude-turnstile` ga potrebujejo.
+Vsak zgornji kanal deluje kot oznaka `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), zgrajena iz stopnje `runner-web` — iste slike plus Playwright in brskalnik Chromium. Pošilja se navadna slika** brez** krom; `gemini-web`, `claude-web` in `claude-turnstile` ga potrebujejo.
 
-Napaka je odložena in se ne pojavi ob zagonu: ti ponudniki navedejo svoje modele in so na nadzorni plošči prikazani kot povezani, odpove pa šele prva zahteva z naslednjim sporočilom:
+Napaka je odložena, ne ob času zagona: ti ponudniki navedejo svoje modele in se na nadzorni plošči prikažejo kot povezani, in samo prva zahteva ne uspe z
 
 ```
-[500]: Zunanjega modula playwright ni bilo mogoče naložiti: Napaka: Modula ni mogoče najti
+[500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Če uporabljate te ponudnike, prenesite oznako `-web` kanala, ki ga že uporabljate — nič drugega se ne spremeni. Pri namestitvi z npm/CLI (brez slike Docker) manjka enakovreden del, in sicer binarna datoteka brskalnika: na gostitelju zaženite `npx playwright install chromium`.
+Če uporabljate te ponudnike, potegnite oznako `-web` kanala, na katerem ste že — nič drugega se ne spremeni. Pri namestitvi npm/CLI (brez slike Docker ) je enakovreden manjkajoči del dvojiška datoteka brskalnika: zaženite `npx playwright install chromium` na gostitelju.
 
-#### Uporaba predizdajnega kanala
+#### Uporaba kanala pred izdajo
 
-Kanal `next` se znova zgradi ob vsakem potisku v trenutno privzeto vejo `release/v*` in je objavljen tako za AMD64 kot ARM64. Starejše vzdrževalne veje ga ne morejo prepisati. Kanal zagotavlja sliko, ki jo je mogoče prenesti in vsebuje popravke, združene v aktivno vejo izdaje, preden je ustvarjena naslednja stabilna oznaka.
+Kanal `next` se znova zgradi ob vsakem pritisku na trenutno privzeto vejo `release/v*` in je objavljen za AMD64 in ARM64. Starejše vzdrževalne veje ga ne morejo prepisati. Kanal zagotavlja sliko, ki jo je mogoče izvleči, za popravke, ki so bili združeni v vejo aktivne izdaje, preden se izreže naslednja stabilna oznaka.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Za Docker Compose prepišite oznako slike, ki jo uporablja izbrani profil, nato prenesite sliko in znova ustvarite storitev:
+Za Docker Compose preglasite slikovno oznako, ki jo uporablja izbrani profil, nato povlecite in znova ustvarite storitev:
 
 ```yaml
 services:
@@ -537,32 +473,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Varnost in povrnitev
+#### Varnost in povrnitev nazaj
 
-`next` je plavajoči kanal predizdajnih različic. Spremeni se lahko ob vsakem potisku v aktivno vejo izdaje in **ni podprt za uporabo v produkciji**. Med preverjanjem posamezne gradnje pripnite izvleček slike:
+`next` je plavajoči kanal pred objavo. Lahko se spremeni ob katerem koli pritisku na vejo za aktivno izdajo in je** ni podprt za produkcijsko uporabo** . Pripnite izvleček slike med ocenjevanjem določene zgradbe:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Pred preizkušanjem varnostno kopirajte podatkovni nosilec OmniRoute ali priklopljeni podatkovni imenik. Za povrnitev obnovite prej uporabljeno stabilno različico ali izvleček in znova ustvarite vsebnik:
+Pred testiranjem naredite varnostno kopijo podatkovnega nosilca OmniRoute ali podatkovnega imenika, nameščenega na povezovanje. Če se želite vrniti nazaj, obnovite predhodno uporabljeno stabilno različico ali predelajte in znova ustvarite vsebnik:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Gradnja veje izdaje ne more nikoli premakniti oznake `latest`; stabilni kazalec lahko posodobi samo ustrezna stabilna semantična različica. Slike `next` ohranijo pregled slike izdaje in blokirno preverjanje KRITIČNIH ranljivosti.
+Zgradba veje za izdajo nikoli ne more premakniti `latest`; samo primerna stabilna semantična različica lahko spodbuja stabilni kazalec. Slike `next` ohranijo pregled slike za izdajo in blokirajo vrata KRITIČNE ranljivosti.
 
-**`latest` ni zagotovilo aktualnosti glede na git.** Združeni popravki v veji `main` ali aktivni veji `release/v*` **niso** vključeni v `:latest`, dokler ni objavljena stabilna slika SemVer in opravilo objave ne posodobi oznake `:latest` (z enakim izvlečkom kot ta SemVer). Če je videti, da je `latest` nespremenjen, čeprav GitHub že prikazuje popravek, prenesite `:next`, da preizkusite vejo izdaje, ali počakajte na oznako SemVer.
+**`latest` ni garancija valute za git.** Združeni popravki na `main` ali na aktivni veji `release/v*` so** ne** v `:latest`, dokler ni objavljena stabilna slika SemVer in opravilo objave ne promovira `:latest` (isti izvleček kot ta SemVer). Če je `latest` videti zamrznjen, medtem ko GitHub že prikazuje popravek, povlecite `:next`, da preizkusite vejo izdaje, ali počakajte na oznako SemVer.
 
-| Kaj želite                                                                               | Uporabite                              |
-| ---------------------------------------------------------------------------------------- | -------------------------------------- |
-| GitOps/produkcija, ki ne sme odstopati                                                   | Pripnite `:X.Y.Z` (ali izvleček slike) |
-| Slediti objavljenim stabilnim različicam in sprejeti ponovno ustvarjanje ob vsaki izdaji | `:latest`                              |
-| Preizkusiti neobjavljene uveljavitve `release/v*`                                        | `:next` (ne za produkcijo)             |
-| Preizkusiti `main`                                                                       | `:main` (ne za produkcijo)             |
+| hočeš                                                                       | Uporaba                              |
+| --------------------------------------------------------------------------- | ------------------------------------ |
+| GitOps / proizvodnja, ki ne sme zanesti                                     | Pripni `:X.Y.Z` (ali povzetek slike) |
+| Sledite objavljenim hlevom in sprejmite ponovno ustvarjanje ob vsaki izdaji | `:latest`                            |
+| Preizkusite neobjavljene obveznosti `release/v*`                            | `:next` (ni proizvodnja)             |
+| Test `main`                                                                 | `:main` (ni proizvodnja)             |
 
 ## Posodobitve nadzorne plošče v Dockerju
 
@@ -745,54 +681,30 @@ volumes:
 
 Gostota med postopkom (stiskanje iz izolata HTTP ) je [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ena logična gruča v trajnem stanju v skupni rabi je [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
-## Regionalne napake Gemini znotraj Dockerja
+## Regionalne napake Gemini znotraj Docker
 
-Google AI Studio / Gemini API lahko vrne HTTP 400 z napako FAILED_PRECONDITION in
-`Lokacija uporabnika ni podprta za uporabo API-ja.` Uspešna zahteva na gostitelju
-ne dokazuje, da vsebnik uporablja isto izhodno pot. Vrstni red DNS,
-povezljivost IPv4/IPv6, usmerjanje VPN in nastavljeni posredniški strežniki se lahko razlikujejo. Preverite
-[Googlove podprte regije](https://ai.google.dev/gemini-api/docs/available-regions)
-in dejansko pot povezave; ta napaka sama po sebi ne pomeni, da je ključ API napačen.
+Google AI Studio / Gemini API lahko vrne HTTP 400 z FAILED_PRECONDITION in `User location is not supported for the API use.` Uspešna zahteva na gostitelju ne dokazuje, da vsebnik uporablja isto izhodno pot. Naročanje DNS, povezljivost IPv4/IPv6, usmerjanje VPN in konfigurirani posredniki se lahko razlikujejo. Preverite [regije, ki jih podpira Google,](https://ai.google.dev/gemini-api/docs/available-regions) kot tudi dejansko pot povezave; sama ta napaka ne identificira slabega ključa API.
 
-### Prednostno uporabite posredniški strežnik za posamezno povezavo
+### Dajte prednost proxyju, specifičnemu za povezavo
 
-Za prizadeto povezavo Gemini uporabite Omniroutovo
-[nastavitev posredniškega strežnika za posamezno povezavo](../ops/PROXY_GUIDE.md#4-level-proxy-system),
-nato pa znova izvedite **Preizkus povezave** in majhno zahtevo
-z istim modelom. Tako sprememba usmerjanja ostane omejena na to povezavo. Preverite,
-ali je posredniški strežnik dosegljiv iz vsebnika in ali ga povezava dejansko izbere.
-Sprememba poti ne zagotavlja regionalne upravičenosti pri ponudniku.
+Uporabite [konfiguracijo proxyja za posamezno povezavo](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute za prizadeto povezavo Gemini, nato ponovite** Testna povezava** in majhna prošnja za isti model. To ohranja spremembo usmerjanja v obsegu te povezave. Preverite, ali je proxy dosegljiv iz vsebnika in ali ga povezava res izbere. Sprememba poti ne zagotavlja regionalne upravičenosti navzgor po toku.
 
-### Primerjajte omrežne nastavitve gostitelja in vsebnika
+### Primerjajte gostiteljsko in vsebniško omrežje
 
-Pri primerjavi overjenih rezultatov ohranite enake ključ, model in zahtevo; v prijavo težave nikoli
-ne prilepite poverilnic, gesel posredniškega strežnika ali celotnih glav za avtorizacijo.
-Najprej preverite, katere družine naslovov ponuja sistemski razreševalnik, tako da uporabite isti ukaz
-na gostitelju in znotraj vsebnika:
+Pri primerjavi overjenih rezultatov naj bodo ključ, model in zahteva enaki; nikoli ne prilepite poverilnic, proxy gesel ali celotnih avtorizacijskih glav v težavo. Najprej preglejte, katere družine naslovov ponuja razreševalec OS, z uporabo istega ukaza na gostitelju in znotraj vsebnika:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute` zamenjajte s storitvijo, ki jo izvajate (na primer `omniroute-web`). Ti
-ukazi izpišejo družine naslovov brez poverilnic ali naslovov IP. Vrnjena vrednost `6`
-pomeni samo rezultat DNS za IPv6: **ne** dokazuje uporabne poti IPv6 ali dostopa do API-ja.
-Kjer je nameščen `curl`, primerjajte `curl -4 -I https://generativelanguage.googleapis.com`
-z `curl -6 -I https://generativelanguage.googleapis.com` v obeh okoljih.
-Odziv HTTP dokazuje povezljivost za ta preizkus, tudi če gre za neoverjeno
-napako; upravičenost za Gemini preveri samo overjena zahteva modelu.
+Zamenjajte `omniroute` s storitvijo, ki jo izvajate (na primer `omniroute-web`). Ti ukazi natisnejo družine naslovov brez poverilnic ali naslovov IP. Vrnjeni `6` prikazuje le rezultat IPv6 DNS : prikazuje** ne** dokazati uporabno pot IPv6 ali dostop API. Kjer je nameščen `curl`, primerjajte `curl -4 -I https://generativelanguage.googleapis.com` z `curl -6 -I https://generativelanguage.googleapis.com` v obeh okoljih. Odgovor HTTP dokazuje povezljivost za to sondo, tudi če gre za nepreverjeno napako; samo overjena zahteva modela preizkusi primernost Gemini.
 
-### Alternativa na ravni gostitelja: delujoč IPv6 in pravilnik razreševalnika
+### Alternativa na ravni gostitelja: delujoča politika IPv6 in razreševalca
 
-Prijavitelj težave [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) je v svojem okolju obnovil
-dostop tako, da je omogočil IPv6 vsebnika in spremenil izbiro naslovov glibc.
-To obravnavajte kot alternativo, značilno za posamezno okolje. Pred spreminjanjem prednostnih nastavitev razreševalnika preverite
-delovanje IPv6 na gostitelju, izhodno povezljivost/usmerjanje vsebnika in pravila požarnega zidu.
-Zasebni naslov ULA sam po sebi ne zagotavlja javne povezljivosti IPv6.
+Poročevalec [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) je obnovil dostop v svojem okolju tako, da je omogočil vsebnik IPv6 in spremenil izbiro naslova glibc. Obravnavajte to kot alternativo, specifično za okolje. Potrdite delujoč gostitelj IPv6, vsebnik egress/routing in pravila požarnega zidu, preden prilagodite nastavitve razreševalnika. Zasebni naslov ULA sam po sebi ne vzpostavi javne povezave IPv6.
 
-Za storitve, ki so že povezane s privzetim omrežjem Compose, ta fragment omogoči
-IPv6 v tem omrežju; ohranite preostale nastavitve storitve, vrat, nosilcev in konfiguracije:
+Za storitve, ki so že povezane s privzetim omrežjem Compose, ta fragment omogoča IPv6 v tem omrežju; ohranite preostalo storitev, vrata, količine in konfiguracijo:
 
 ```yaml
 networks:
@@ -800,30 +712,13 @@ networks:
     enable_ipv6: true
 ```
 
-Pri poimenovanem omrežju ga omogočite v omrežju, s katerim je storitev dejansko povezana. Docker lahko
-dodeli podomrežje ULA; izrecno, neprekrivajoče se podomrežje izberite samo, kadar ga vaše omrežje
-zahteva. Glejte [Omrežja IPv6 v Dockerju](https://docs.docker.com/engine/daemon/ipv6/)
-in [Možnosti omrežja Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Za imenovano omrežje ga omogočite v omrežju, ki se mu storitev dejansko pridruži. Docker lahko dodeli podomrežje ULA ; izberite eksplicitno podomrežje, ki se ne prekriva, le kadar to zahteva vaše omrežje. Glejte omrežne [možnosti](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6) [Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) in Compose networking.
 
-V **sliki, ki temelji na glibc**, lahko `/etc/gai.conf` spremeni izbiro naslovov. Trenutna
-datoteka Dockerfile repozitorija uporablja Debian; prilagojene slike, ki temeljijo na musl, tega mehanizma ne uporabljajo.
-Navedena prilagoditev spremeni oznako ULA iz `label fc00::/7 6` v
-`label fc00::/7 1`. Začnite s celotno tabelo pravilnikov slike in ohranite druge
-vnose: dodajanje vnosa `label` ali `precedence` nadomesti to privzeto tabelo, zato datoteka,
-ki vsebuje samo spremenjeno vrstico, ne zadostuje.
-[Referenca za konfiguracijo glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-opisuje to vedenje. Pregledano datoteko priklopite samo za branje na `/etc/gai.conf`
-in znova ustvarite storitev, da uveljavite spremembo.
+Na a** slika, ki temelji na glibc** , `/etc/gai.conf` lahko spremeni izbiro naslova. Trenutni repozitorij Dockerfile uporablja Debian; slike po meri, ki temeljijo na musl, nimajo tega mehanizma. Sporočena prilagoditev spremeni oznako ULA iz `label fc00::/7 6` v `label fc00::/7 1`. Začnite s celotno tabelo pravilnikov slike in ohranite njene druge vnose: dodajanje vnosa `label` ali `precedence` nadomesti to privzeto tabelo, zato datoteka, ki vsebuje samo spremenjeno vrstico, ne zadošča. [Referenca konfiguracije glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumentira to semantiko. Povežite pregledano datoteko samo za branje na `/etc/gai.conf` in znova ustvarite storitev, da jo uporabite.
 
-To spremeni izbiro naslovov operacijskega sistema za **ves izhodni promet v tem vsebniku**.
-Ne prisili vsake aplikacije, da izbere IPv6: pomembna sta tudi vrstni red DNS in
-izbira povezave v Node. Zlasti `--dns-result-order=ipv4first` daje prednost IPv4 in
-ni rešitev za napako, ki se pojavlja samo pri IPv4. Glejte [Vrstni red DNS v Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+To spremeni izbiro naslova OS za** ves izhodni promet v tem vsebniku** . Ne prisili vsake aplikacije, da izbere IPv6: pomembna sta tudi vrstni red DNS in izbira povezave Node. Zlasti `--dns-result-order=ipv4first` daje prednost IPv4 in ni zdravilo za napako IPv4-only. Glejte [Naročanje vozlišča DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Po vsaki spremembi na ravni gostitelja znova preizkusite Gemini in druge ponudnike. Za povrnitev sprememb
-odstranite priklop prilagojene datoteke `gai.conf`, obnovite prejšnjo omrežno konfiguracijo in
-v vzdrževalnem obdobju znova ustvarite prizadeto storitev/omrežje. Ponovno ustvarjanje omrežja
-lahko prekine delovanje drugih vsebnikov, ki so povezani z njim; ne izbrišite trajnega podatkovnega nosilca.
+Po vsaki spremembi na ravni gostitelja znova preizkusite Gemini in druge ponudnike. Za vrnitev nazaj odstranite nastavek `gai.conf` po meri, obnovite prejšnjo omrežno konfiguracijo in znova ustvarite prizadeti service/network med vzdrževalnim obdobjem. Ponovno ustvarjanje omrežja lahko prekine druge vsebnike, ki so nanj priključeni; ne izbrišite obstojnega obsega podatkov.
 
 ## Pomembne opombe
 

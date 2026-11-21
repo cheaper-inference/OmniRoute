@@ -557,6 +557,8 @@ Deze proxy:
 
 WebSocket upgrades voor het ingebedde dashboard worden afgehandeld door een begeleidende server op een speciale poort (zie `src/lib/services/embedWsProxy.ts`).
 
+Elke upgrade wordt geautoriseerd voordat de tunnel wordt geopend, met dezelfde regels als de HTTP insluitingsroute: de peer moet loopback zijn zonder reverse-proxy forwarding header, een browser `Origin` moet een dashboardoorsprong zijn (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` breidt de loopback-standaardinstellingen uit), en de beller heeft een dashboardsessie of een API -sleutel voor managementbereik nodig, tenzij inloggen op het dashboard is uitgeschakeld.
+
 **Beveiliging:** De embed proxy-routes zijn geclassificeerd onder `LOCAL_ONLY_API_PREFIXES` en zijn alleen bereikbaar via loopback. Een aanvaller die via een Cloudflare/Ngrok tunnel een JWT verkrijgt, kan geen toegang krijgen tot ingebedde services.
 
 ---

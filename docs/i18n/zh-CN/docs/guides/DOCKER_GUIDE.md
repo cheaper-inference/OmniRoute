@@ -27,13 +27,9 @@
 
 ---
 
-## 快速运行
+## 快速奔跑
 
-> **想用一条命令完成自托管？** 请参阅
-> [自托管指南](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d`（已发布镜像 +
-> Redis、仅限环回地址、无需选择配置文件）。下面的快速运行方式适用于
-> 已经在其他位置运行 Redis 的用户，用于部署单个容器。
+> **通过一个命令自行托管？**请参阅[自托管指南](../getting-started/SELF_HOST_GUIDE.md)— `docker compose -f docker-compose.selfhost.yml up -d` （已发布的映像+ Redis，仅环回，无配置文件选择）。下面的快速运行是已在其他地方运行Redis的用户的单容器路径。
 
 ```bash
 docker run -d \
@@ -42,7 +38,7 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## 带环境文件
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -236,16 +232,16 @@ docker compose -f docker-compose.prod.yml down
 
 ## Dockerfile 阶段
 
-该仓库提供了一个多阶段 Dockerfile（`Dockerfile`）。其中暴露了四个阶段；请根据你的使用场景选择正确的 `target`。
+该存储库附带了一个多阶段 Dockerfile (`Dockerfile`)。暴露了四个阶段；为您的用例选择正确的`target` 。
 
-| 阶段          | 基础镜像              | 用途                                                                                                                                                                                                                 |
-| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | 安装依赖（`npm ci --legacy-peer-deps`）并运行 `npm run build`（默认使用 Turbopack——参见下方的构建时资源）                                                                                                            |
-| `runner-base` | `node:26-trixie-slim` | 包含 Next.js standalone 输出的生产运行时。**不包含任何提供者 CLI。**                                                                                                                                                 |
-| `runner-cli`  | `runner-base`         | 添加 `git`、`docker.io`、`docker-compose` 以及全局 CLI：`@openai/codex`、`@anthropic-ai/claude-code`、`droid`、`openclaw`。**智能体工作流请选择此阶段。**                                                            |
-| `runner-web`  | `runner-base`         | 为 Web 会话提供者添加 Playwright 和 Chromium 浏览器（`--with-deps`）：`gemini-web`、`claude-web`、`claude-turnstile`。**使用这些提供者时请选择此阶段**——普通镜像会在请求时失败（参见发布渠道下关于 `-web` 的说明）。 |
+| 阶段          | 基础镜像              | 目的                                                                                                                                                                                                                        |
+| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | 安装 deps (`npm ci --legacy-peer-deps`) 并运行`npm run build` （默认为Turbopack —请参阅下面的构建时资源）                                                                                                                   |
+| `runner-base` | `node:26-trixie-slim` | 具有Next.js独立输出的生产运行时。**没有捆绑提供者CLIs 。**                                                                                                                                                                  |
+| `runner-cli`  | `runner-base`         | 添加`git`、 `docker.io`、 `docker-compose`和全局CLIs： `@openai/codex`、 `@anthropic-ai/claude-code`、 `droid`、 `openclaw`。**选择此选项用于代理工作流程。**                                                               |
+| `runner-web`  | `runner-base`         | 为 Web 会话提供程序添加Playwright + Chromium 浏览器 (`--with-deps`)： `gemini-web`、 `claude-web`、 `claude-turnstile`。**当您使用这些提供者时选择此项**—如果没有它，纯图像在请求时会失败（请参阅发布通道下的`-web`注释）。 |
 
-手动构建特定 target：
+手动构建特定目标：
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -255,19 +251,17 @@ docker build --target runner-web  -t omniroute:web  .
 
 ### 构建时资源
 
-有三个构建参数控制 `builder` 阶段的资源开销。它们仅在构建时生效——
-`OMNIROUTE_MEMORY_MB`（见下文）是另一个独立的运行时调节参数。
+三个构建参数控制`builder`阶段的成本。它们只是构建时的— `OMNIROUTE_MEMORY_MB` （如下）是一个单独的运行时旋钮。
 
-| 构建参数                    | 默认值 | 效果                                                                            |
-| --------------------------- | ------ | ------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` 使用 webpack 构建：峰值内存较低，但速度较慢。`1` 则启用 Turbopack。         |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | 为启动的 `next build` 设置 V8 堆上限（`--max-old-space-size`）。                |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | 传入 `CIRCLE_NODE_TOTAL`；Next 根据它推导用于页面数据收集的 `workers = N - 1`。 |
+| 构建参数                    | 默认   | 影响                                                                  |
+| --------------------------- | ------ | --------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0`使用 webpack 构建：峰值内存较低，速度较慢。 `1`选择加入Turbopack。 |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | 生成的`next build`的 V8 堆上限 (`--max-old-space-size`)。             |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | 饲料`CIRCLE_NODE_TOTAL`;接下来导出`workers = N - 1`用于页面数据收集。 |
 
-`OMNIROUTE_BUILD_WORKERS` 是在高配置构建器上应调高的参数，也是在资源受限的构建于 **`✓ Compiled successfully` 之后**失败时应优先排查的参数。每个页面数据 worker 都是一个独立进程，父级 `next build` 本身也是如此；一次真实 VPS 复现（issue #7518）测得，每个进程的峰值 RSS 约为 4.5 GB，且不受 `NODE_OPTIONS` 堆标志影响（Turbopack 使用 V8 堆之外的原生/Rust 内存进行编译）。默认值 `2`（→ 1 个 worker，共 2 个进程）是针对发布流水线所使用的 16 GB / 4 vCPU GitHub 托管运行器设定的。当值为 `8`（→ 7 个 worker）时，该运行器会耗尽内存，buildkit 会以 `ResourceExhausted: ... cannot allocate memory` 导致该步骤失败；在直接测量而非推断每个进程的 RSS 后发现，`3`（→ 2 个 worker）仍然无法满足内存限制。`tests/unit/docker-build-memory-budget.test.ts` 会根据实测数据进行计算，并在任一参数超出运行器承载能力时失败。
+`OMNIROUTE_BUILD_WORKERS`是向大型构建器筹集资金的人，也是在受限构建死亡时怀疑的人**后**`✓ Compiled successfully`.每个页面数据工作者都是它自己的进程，父`next build`本身也是如此；实时VPS复制（问题#7518）在~ 4.5 GB处测量每个进程的峰值RSS与`NODE_OPTIONS`堆标志无关（Turbopack在 V8 堆外的native/Rust内存中编译）。 `2`的默认值（→ 1 个工作线程，总共 2 个进程）的大小适合发布管道使用的 16 个GB / 4 vCPU GitHub 托管的运行程序。在`8` （→ 7 工作人员），运行程序内存不足，buildkit 失败了`ResourceExhausted: ... cannot allocate memory`的步骤；一旦直接测量而不是推断每个进程的RSS `3` （→ 2工人）仍然不适合。 `tests/unit/docker-build-memory-budget.test.ts`根据测量的数字进行算术，如果任一旋钮超出了转轮，则算术失败。
 
-Turbopack 使用位于 V8 堆 **之外**的原生 Rust 内存进行编译，因此
-`OMNIROUTE_BUILD_MEMORY_MB` 无法限制它。在有内存上限的主机上，构建随后会被 OOM killer 以 SIGKILL 终止，而且完全没有错误文本——它只会在 `Creating an optimized production build` 中途停止，看起来像是卡住，而非内存不足。这就是 `Dockerfile` 默认使用 webpack（`OMNIROUTE_USE_TURBOPACK=0`）的原因，这一点不同于 `npm run dev` / `npm run build`，后两者在代码中默认使用 Turbopack：不带任何构建参数的普通 `docker build .`（Railway 和其他一键式托管平台所运行的命令）不得在受内存限制的构建器上无提示地终止。已发布的镜像也已在 `docker-publish.yml` 中显式传入 `OMNIROUTE_USE_TURBOPACK=0`。在内存充足的构建器上，可以启用 Turbopack 以加快构建速度：
+Turbopack在本地 Rust 内存中进行编译**外部**V8堆，所以`OMNIROUTE_BUILD_MEMORY_MB`不绑定它。在具有内存上限的主机上，构建由OOM杀手进行SIGKILLed ，根本没有错误文本—它只是停止在`Creating an optimized production build`中，读起来像是挂起而不是内存不足。这就是为什么`Dockerfile`默认为 webpack (`OMNIROUTE_USE_TURBOPACK=0`)，与`npm run dev` / `npm run build`不同，其中Turbopack是代码默认值：没有构建参数的裸`docker build .` （Railway 和其他一键式主机运行的内容）不得在内存上限的构建器上悄无声息地死亡。发布的图像已在`docker-publish.yml`中显式通过`OMNIROUTE_USE_TURBOPACK=0` 。在具有大量RAM的构建器上，选择Turbopack以获得更快的构建：
 
 ```bash
 docker build --target runner-base \
@@ -275,46 +269,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` 已启用，因此 `next build` 会运行一个父进程 **以及** 一个 worker 进程，并且每个进程都会分别遵循 `OMNIROUTE_BUILD_MEMORY_MB`。容器的内存上限应设置为该值的大约两倍以上，而不是一倍。
+`webpackBuildWorker`已启用，因此`next build`运行父级**和**一个工作进程，每个进程分别尊重`OMNIROUTE_BUILD_MEMORY_MB` 。将容器上限的大小设置为大约两倍于该值，而不是一次。
 
-在此代码树上测得（`--target runner-base`、`OMNIROUTE_BUILD_MEMORY_MB=6144`）：
+在这棵树上测量（`--target runner-base`， `OMNIROUTE_BUILD_MEMORY_MB=6144`）：
 
-| 打包器    | 容器内存上限   | 结果                              |
-| --------- | -------------- | --------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | 两种上限下均被 OOM 终止，且无提示 |
-| webpack   | 8 GiB          | 构建 worker 被 SIGKILL 终止       |
-| webpack   | 12 GiB         | 成功，峰值达到 11.1 GiB           |
+| 捆绑器    | 集装箱顶棚     | 结果                      |
+| --------- | -------------- | ------------------------- |
+| Turbopack | 8 GiB / 16 GiB | 两者都被 OOM 杀死，默默地 |
+| 网络包    | 8 GiB          | 建筑工人SIGKILLed         |
+| 网络包    | 12 GiB         | 成功，最高达到 11.1 GiB   |
 
 ### 运行时默认值
 
-`runner-base` 导出的默认值：`PORT=20128`、`HOSTNAME=0.0.0.0`、`OMNIROUTE_MEMORY_MB=1024`、`NODE_OPTIONS=--max-old-space-size=1024`、`DATA_DIR=/app/data`、`OMNIROUTE_MIGRATIONS_DIR=/app/migrations`。
+`runner-base`导出的默认值： `PORT=20128`、 `HOSTNAME=0.0.0.0`、 `OMNIROUTE_MEMORY_MB=1024`、 `NODE_OPTIONS=--max-old-space-size=1024`、 `DATA_DIR=/app/data`、 `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`。
 
-Docker 中的内存行为：
+Docker中的内存行为：
 
-- 该镜像设置 `OMNIROUTE_MEMORY_MB=1024`，并由此派生出 `NODE_OPTIONS=--max-old-space-size=1024`。
-- 实际的服务器进程由独立启动器启动；该启动器会读取 `OMNIROUTE_MEMORY_MB`，并追加 `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`。
-- Node 会采用最后一个重复出现的 `--max-old-space-size` 值，因此，设置 `OMNIROUTE_MEMORY_MB` 即可控制 Docker 中实际生效的堆限制。
-- 由于镜像始终会设置该变量，启动器自身根据 RAM 自动校准的回退机制在 Docker 环境下永远不会生效。请根据工作负载显式提高该值（见下表）。对于编码智能体的 `/v1/responses`，`2048` 仍然太小。
+- 该图像设置`OMNIROUTE_MEMORY_MB=1024`并从中导出`NODE_OPTIONS=--max-old-space-size=1024` 。
+- 实际的服务器进程由独立启动器启动，它读取`OMNIROUTE_MEMORY_MB`并附加`--max-old-space-size=<OMNIROUTE_MEMORY_MB>`。
+- 节点使用最后重复的`--max-old-space-size`值，因此设置`OMNIROUTE_MEMORY_MB`控制有效的Docker堆限制。
+- 因为图像总是设置它，所以启动器自己的 RAM 校准后备在Docker下永远不会应用。针对工作负载明确提高它（下表）。 `2048`对于编码代理`/v1/responses`来说仍然太小。
 
-### 编码智能体的运行时 RAM
+### 编码代理的运行时RAM
 
-Docker 默认的 1 GiB 仅是仪表板/轻量聊天场景的最低配置，并非生产环境配置。较长的 `POST /v1/responses` 请求体（数百条消息、数十个工具）在压缩期间会在内存中保留多个对象图。两个重叠的、每个约 3 MiB / 约 75 万 token 的请求，曾导致 V8 在 **12 GiB** 老生代空间下中止（`FATAL ERROR: Reached heap limit`），并且还触发过 16 GiB cgroup OOM。参见 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)。
+1 GiB Docker默认是dashboard/light-chat底板，而不是生产尺寸。长`POST /v1/responses`主体（数百条消息、数十种工具）在压缩期间保留多个内存中图。两个重叠的~ 3 MiB / ~ 750k 令牌请求已中止 V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) 并还击中了 16 GiB cgroup OOM。参见[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 。
 
-请将 **cgroup `--memory` 设置为高于堆大小**——原生缓冲区、SQLite 和压缩过程中的中间数据都位于 V8 堆之外。
+尺寸**堆上方的 cgroup `--memory`** —本机缓冲区、 SQLite和压缩中间体位于 V8 之外。
 
-| 工作负载                            | `OMNIROUTE_MEMORY_MB` | 容器 / cgroup       | 说明                                                                                   |
-| ----------------------------------- | --------------------- | ------------------- | -------------------------------------------------------------------------------------- |
-| 仪表板、一个轻量聊天会话            | `1024`（镜像默认值）  | ≥2 GiB              |                                                                                        |
-| 一个编码智能体（Claude/Codex/Grok） | `8192`                | ≥10 GiB             | 典型的单会话 `/v1/responses`                                                           |
-| 两个并发的长 `/v1/responses` 请求   | `10240`–`12288`       | ≥12–16 GiB          | 实测在约 12 GiB 堆空间下发生 V8 中止                                                   |
-| 三个或更多并发长上下文              | 不要在单个进程中运行  | 串行处理 / 更多 RAM | 默认重量级请求准入限制为 1 个进行中请求；在没有更多 RAM 的情况下提高该值会再次导致中止 |
+| 工作量                          | `OMNIROUTE_MEMORY_MB` | 容器/cgroup      | 笔记                                                           |
+| ------------------------------- | --------------------- | ---------------- | -------------------------------------------------------------- |
+| 仪表板，一键聊天                | `1024` （图片默认）   | ≥2 GiB           |                                                                |
+| 一种编码剂（Claude/Codex/Grok） | `8192`                | ≥10 GiB          | 典型的单会话`/v1/responses`                                    |
+| 两个并发长`/v1/responses`       | `10240`–`12288`       | ≥12–16 GiB       | 测量到 V8 在~ 12 GiB堆处中止                                   |
+| 三个+并发长上下文               | 不要在一个进程上      | 序列化 / 更多RAM | 默认重量级入场次数为机上 1 次；在没有RAM下提升它会重新引入中止 |
 
-当 `OMNIROUTE_MEMORY_MB` **未设置**时，裸机上的 `omniroute serve` 会按 RAM 的约 35% 自动校准（限制在 `[512, 4096]` 范围内）。Docker 始终将其设置为 `1024`，因此官方镜像中永远不会执行该校准。
+~ `omniroute serve` RAM `[512, 4096]` `OMNIROUTE_MEMORY_MB`**未设置**。 Docker始终设置`1024`，因此校准永远不会在官方映像中运行。
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## 关键环境变量
@@ -340,11 +334,11 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 ## 子路径上的反向代理（Traefik / nginx）
 
-Next.js `basePath` 会被编译到独立包中。OmniRoute 会将构建时的值记录在应用根目录下的一个哨兵文件中（在执行 `npm run build` 期间写入；由 `scripts/docker/ensure-docker-base-path.mjs` 读取），并在容器启动时将其与 `OMNIROUTE_BASE_PATH` 进行比较。如果二者不同，并且镜像是针对域名根路径构建的，则入口点会在 `node dev/run-standalone.mjs` 运行之前，重写独立包清单、嵌入的 `basePath`/`assetPrefix` 字面值（Next 16 仅根据 `assetPrefix` 渲染 SSR 资源 URL，因此补丁程序会将子路径同步到其中）、构建时写入的 `/_next/static` 资源 URL（客户端引用清单、媒体导入、预渲染错误页面），以及客户端 `process.env` 垫片。
+Next.js `basePath`被编译到独立包中。 OmniRoute将烘焙值记录在应用程序根目录的哨兵文件中（在`npm run build`期间写入；由`scripts/docker/ensure-docker-base-path.mjs`读取），并在容器启动时将其与`OMNIROUTE_BASE_PATH`进行比较。当它们不同并且为域根构建映像时，入口点会重写独立清单、嵌入的`basePath`/`assetPrefix`文字（Next 16 仅从`assetPrefix`渲染SSR资产URLs —修补程序将子路径镜像到其中）、烘焙的`/_next/static`资产URLs （客户端引用清单、媒体导入、预渲染错误页面）以及`node dev/run-standalone.mjs`运行之前的客户端`process.env` shim。
 
-### Compose 构建（推荐）
+### 撰写构建（推荐）
 
-在 `.env` 中设置这两个变量，然后重新构建，以使镜像与运行时配置保持一致：
+在`.env`中设置两个变量，然后重建以使图像和运行时一致：
 
 ```bash
 # .env
@@ -356,53 +350,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` 会将 `OMNIROUTE_BASE_PATH` 同时作为 Docker 构建参数和运行时环境变量进行传递。
+`docker-compose.yml`将`OMNIROUTE_BASE_PATH`作为Docker构建参数和运行时环境变量转发。
 
-### 预构建的根路径镜像 + 运行时子路径
+### 预构建根镜像+运行时子路径
 
-已发布的 `diegosouzapw/omniroute:*` 镜像是针对域名根路径构建的。你仍然可以在运行时设置 `OMNIROUTE_BASE_PATH`；容器会在启动时对独立包进行一次修补。请同时配置与之匹配的公开源地址：
+已发布的`cheaperinference/omniroute:*`映像是为域根构建的。您仍然可以在运行时设置`OMNIROUTE_BASE_PATH` ；容器在启动时修补一次包。将其与匹配的公共来源配对：
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-配置反向代理，使其转发**完整的**外部路径（不要移除前缀）。Traefik 应将 `PathPrefix(`/omniroute`)` 路由到容器，且不使用 `StripPrefix`，这样 Next.js 就能接收到 `/omniroute/...`，并从 `/omniroute/_next/...` 提供资源。
+配置反向代理转发**满的**外部路径（不要去掉前缀）。 Traefik 应该将`PathPrefix(`/omniroute `)`路由到没有`StripPrefix`容器，因此Next.js接收`/omniroute/...`并从`/omniroute/_next/...`提供资产。
 
-Docker 健康检查会探测轻量级的 `/healthz` 生命周期端点，并在其前面加上当前生效的 `OMNIROUTE_BASE_PATH`。`/api/monitoring/health` 仍可用于人工或仪表板诊断；若要让容器的 HEALTHCHECK 改回使用该端点（例如用于执行深度健康检查），请设置 `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`。该路径执行的是**深度**检查（数据库 + 监控摘要）——如果你选择重新启用它，它适用于 Docker 中低频执行的 `HEALTHCHECK`，但**不适合** Kubernetes `livenessProbe` 的检查频率。
+Docker healthcheck 探测以活动`OMNIROUTE_BASE_PATH`为前缀的轻量级`/healthz`生命周期端点。 `/api/monitoring/health`仍然可用于human/dashboard诊断；要将容器HEALTHCHECK指向它（例如为了深度健康强制执行），请设置`OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`。这条路径是一条**深的**如果您选择重新加入，请检查（DB +监控摘要） —是否适合Docker的不常见`HEALTHCHECK` ，但是**不是**对于 Kubernetes `livenessProbe`间隔。
 
-对于编排器（Kubernetes、Nomad 等）：
+对于协调器（Kubernetes、Nomad 等）：
 
-| 探针          | 推荐                                                            | 避免                                           |
-| ------------- | --------------------------------------------------------------- | ---------------------------------------------- |
-| 存活探针      | HTTP `GET /livez`，或主端口上的 TCP（`PORT`，默认值为 `20128`） | 将 `/api/monitoring/health` 用作存活探针       |
-| 就绪探针      | HTTP `GET /healthz`                                             | 使用会将事件循环繁忙视为进程死亡的过短超时时间 |
-| 深度/黑盒探针 | `/api/monitoring/health`                                        | —                                              |
+| 探测      | 更喜欢                                                   | 避免                               |
+| --------- | -------------------------------------------------------- | ---------------------------------- |
+| 活力      | 主端口上的HTTP `GET /livez`或TCP （`PORT`，默认`20128`） | `/api/monitoring/health`作为活跃度 |
+| 准备状态  | HTTP `GET /healthz`                                      | 严格的超时将事件循环繁忙视为已死   |
+| 深/黑匣子 | `/api/monitoring/health`                                 | —                                  |
 
-`/healthz` 报告进程生命周期状态（`ok` / `starting` / `stopping`）。`/livez` 仅检查进程是否存活（只要处理程序能够运行，就会返回 200；它不会等待进程就绪）。两者仍与请求处理运行在同一个 Node 事件循环中，因此受 CPU 限制的目录或压缩工作可能会延迟其响应——繁忙 ≠ 死亡。如果 HTTP 探针超时，请优先使用 TCP 存活探针。完整的探针指南：
-[监控指南 — Kubernetes 探针建议](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
+`/healthz`报告流程生命周期（`ok` / `starting` / `stopping`）。 `/livez`仅是进程活动的（每当处理程序可以运行时为 200；它不等待准备就绪）。两者仍然在与请求处理相同的 Node 事件循环上运行，因此 CPU 密集的目录或压缩工作可能会延迟它们— busy ≠ dead。如果HTTP探测超时，则首选TCP liveness。完整探针指导：[监控指南— Kubernetes 探针建议](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
 
-## 将 Docker Compose 与 Caddy 配合使用（HTTPS 自动 TLS）
+## Docker使用 Caddy 撰写（HTTPS自动 TLS）
 
-可以使用 Caddy 的自动 SSL 配置功能安全地公开 OmniRoute。请确保你域名的 DNS A 记录指向服务器的 IP。
+使用 Caddy 的自动SSL配置可以安全地公开OmniRoute 。确保您域的DNS A 记录指向您服务器的IP。
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # 面向浏览器的源地址，用于 OAuth 回调、仪表板链接和生成的公共 URL。
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # 用于计划任务和自请求的内部服务器间 URL。
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -419,71 +412,68 @@ volumes:
   omniroute-data:
 ```
 
-Caddy 会为上游容器设置标准转发标头。OmniRoute 使用
-`NEXT_PUBLIC_BASE_URL` 作为 OAuth 回调和生成的公共链接的规范公共源地址；
-经过身份验证的仪表板写入操作使用同源请求以及与会话绑定的 CSRF
-保护。仅应在高级部署中启用 `OMNIROUTE_TRUST_PROXY`，即你有意
-让 OmniRoute 根据受信任的转发标头推导公共源地址，而不是使用显式
-配置时。
+Caddy 为上游容器设置标准转发标头。 OmniRoute使用`NEXT_PUBLIC_BASE_URL`作为OAuth回调和生成公共链接的规范公共来源；经过身份验证的仪表板写入使用同源请求以及会话绑定的CSRF保护。仅在您有意希望OmniRoute从受信任的转发标头而不是显式配置中派生公共源的高级部署中启用`OMNIROUTE_TRUST_PROXY` 。
 
-## Cloudflare 快速隧道
+## Cloudflare快速隧道
 
-Docker 部署的仪表板支持在 `Dashboard → Endpoints` 中一键启用 **Cloudflare Quick Tunnel**。首次启用时，仅在需要时下载 `cloudflared`，启动一条指向当前 `/v1` 端点的临时隧道，并直接在常规公共 URL 下方显示生成的 `https://*.trycloudflare.com/v1` URL。
+对Docker部署的仪表板支持包括一键式**Cloudflare快速隧道**在`Dashboard → Endpoints`上。第一个启用仅在需要时下载`cloudflared` ，启动到当前`/v1`端点的临时隧道，并在正常的公共URL正下方显示生成的`https://*.trycloudflare.com/v1` URL 。
 
-可以在 `Settings → Appearance` 中显示或隐藏端点隧道面板（Cloudflare、Tailscale、ngrok），而不会改变活动隧道的状态。
+端点隧道面板（Cloudflare、 Tailscale 、 ngrok ）可以在`Settings → Appearance`中显示或隐藏，而无需更改活动隧道状态。
 
-### 隧道注意事项
+### 隧道注释
 
-- Quick Tunnel URL 是临时的，每次重启后都会改变。
-- OmniRoute 或容器重启后不会自动恢复 Quick Tunnel。需要时请从仪表板中重新启用。
-- 托管安装目前支持 Linux、macOS 和 Windows 上的 `x64` / `arm64`。
-- 托管 Quick Tunnel 默认使用 HTTP/2 传输，以避免在受限容器环境中出现大量 QUIC UDP 缓冲区警告。如果需要使用其他传输方式，请将 `CLOUDFLARED_PROTOCOL` 设置为 `quic` 或 `auto`。
-- Docker 镜像包含系统 CA 根证书，并将其传递给托管的 `cloudflared`，从而避免隧道在容器内启动时发生 TLS 信任失败。
-- 如果希望 OmniRoute 使用现有二进制文件而不是下载文件，请设置 `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`。
+- 快速隧道URLs是临时的，每次重新启动后都会发生变化。
+- OmniRoute或容器重新启动后，快速隧道不会自动恢复。需要时从仪表板重新启用它们。
+- 托管安装当前支持`x64` / `arm64`上的Linux、 macOS和Windows 。
+- 托管快速隧道默认采用HTTP/2传输，以避免在受限容器环境中出现嘈杂的QUIC UDP缓冲区警告。如果您想要不同的传输，请设置`CLOUDFLARED_PROTOCOL=quic`或`auto` 。
+- Docker镜像捆绑系统CA根并将它们传递给托管`cloudflared`，这可以避免当隧道在容器内引导时TLS信任失败。
+- 如果您希望OmniRoute使用现有的二进制文件而不是下载二进制文件，请设置`CLOUDFLARED_BIN=/absolute/path/to/cloudflared` 。
 
-## 镜像标签
+## 图片标签
 
-| 镜像                     | 标签     | 大小   | 说明                                           |
-| ------------------------ | -------- | ------ | ---------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | 最高的**已发布**稳定 SemVer（不是 git `main`） |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | 对于 GitOps，请固定使用此类标签                |
+| 图像                         | 标签     | 尺寸 | 描述                                         |
+| ---------------------------- | -------- | ---- | -------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~    | 最高**发表**稳定的SemVer （不是 git `main`） |
+| `cheaperinference/omniroute` | `3.8.54` | ~    | 为GitOps固定此类标签                         |
 
-多平台清单：原生支持 `linux/amd64` + `linux/arm64`（Apple Silicon、AWS Graviton、Raspberry Pi）。Docker 会自动选择匹配的架构；如果需要在 ARM 主机上强制使用 AMD64 模拟，请传递 `--platform linux/amd64`。
+相同的图像发布到三个存储库，具有相同的每个架构摘要： `cheaperinference/omniroute` （Docker Hub，廉价推理组织，从 3.8.53 开始）、 `ghcr.io/cheaper-inference/omniroute`和旧版`diegosouzapw/omniroute`，它保留其拉取历史记录并仍然接收每个版本。现有的`diegosouzapw/omniroute`部署不断更新；切换图像名称是可选的。下面的`:next` / `:next-web`预发布通道仅发布到`diegosouzapw/omniroute`和GHCR 。
+
+多平台清单： `linux/amd64` + `linux/arm64`本机（Apple Silicon、 AWS Graviton、Raspberry Pi）。 Docker自动选择匹配的架构；如果需要在ARM主机上强制进行AMD64模拟，请传递`--platform linux/amd64` 。
 
 ### 发布渠道
 
-OmniRoute 为稳定版本、活动发布分支测试和开发构建发布独立的 Docker 渠道。
+OmniRoute为稳定版本、主动版本分支测试和开发构建发布单独的Docker通道。
 
-| 渠道                            | 来源                         | 可变性           | 推荐用途                                                                                     |
-| ------------------------------- | ---------------------------- | ---------------- | -------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | 已签名/已版本化的发布版本    | 不可变           | 固定使用确切发布版本的生产部署                                                               |
-| `:latest` / `:latest-web`       | 最高的**已发布**稳定 SemVer  | 可变的稳定指针   | 在 SemVer 发布作业完成**后**跟随稳定版本——**不会**跟踪 `main` 或尚未发布的 `release/v*` 提交 |
-| `:next` / `:next-web`           | 当前默认的 `release/v*` 分支 | 可变的预发布指针 | 测试已合入活动发布分支但尚未包含在稳定版本中的修复                                           |
-| `:main` / `:main-web`           | `main` 分支                  | 可变的开发指针   | 仅用于开发和集成测试                                                                         |
+| 渠道                            | 来源                     | 可变性         | 推荐用途                                                                                |
+| ------------------------------- | ------------------------ | -------------- | --------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned发布     | 不可变的       | 固定确切版本的生产部署                                                                  |
+| `:latest` / `:latest-web`       | 最高**发表**稳定的SemVer | 可变稳定指针   | 遵循稳定版本**后**SemVer发布作业—执行的操作**不是**跟踪`main`或未发布的`release/v*`提交 |
+| `:next` / `:next-web`           | 当前默认`release/v*`分支 | 可变预发布指针 | 测试已登陆活动版本分支但尚未进入稳定版本的修复程序                                      |
+| `:main` / `:main-web`           | `main`分行               | 可变开发指针   | 仅开发和集成测试                                                                        |
 
-#### Web 会话提供者：`-web` 镜像
+#### 网络会话提供者： `-web`图像
 
-上述每个渠道也都有对应的 `-web` 标签（`:latest-web`、`:<version>-web`、`:next-web`、`:main-web`），它们从 `runner-web` 阶段构建——即在相同镜像的基础上添加 Playwright 和 Chromium 浏览器。普通镜像**不包含** Chromium；`gemini-web`、`claude-web` 和 `claude-turnstile` 需要它。
+上面的每个通道都兼作`-web`标签（`:latest-web`、 `:<version>-web`、 `:next-web`、 `:main-web`），从`runner-web`阶段—相同的图像加上Playwright和 Chromium 浏览器构建。简单的图像船**没有**铬; `gemini-web`、 `claude-web`和`claude-turnstile`需要它。
 
-故障会延迟到请求时发生，而不是在启动时发生：这些提供者会列出其模型，并在仪表板中显示为已连接，但第一次请求会失败并显示
+失败是延迟的，而不是启动时间：这些提供者列出了他们的模型并在仪表板中显示为已连接，并且只有第一个请求失败并显示
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-如果使用这些提供者，请拉取当前所用渠道的 `-web` 标签——其他内容无需更改。对于 npm/CLI 安装（不使用 Docker 镜像），对应缺少的是浏览器二进制文件：请在主机上运行 `npx playwright install chromium`。
+如果您使用这些提供者，请拉取您已经在—上的频道的`-web`标签，没有其他变化。在npm/CLI安装（无Docker映像）上，等效的缺失部分是浏览器二进制文件：在主机上运行`npx playwright install chromium` 。
 
-#### 使用预发布渠道
+#### 使用预发布通道
 
-`next` 渠道会在每次推送到当前默认的 `release/v*` 分支时重新构建，并同时发布 AMD64 和 ARM64 镜像。较旧的维护分支无法覆盖它。该渠道提供可拉取的镜像，其中包含已合并到活跃发布分支、但尚未包含在下一个稳定标签中的修复。
+`next`通道会在每次推送到当前默认`release/v*`分支时重建，并针对AMD64和ARM64发布。较旧的维护分支无法覆盖它。该通道为在下一个稳定标签被删除之前已合并到活动发布分支中的修复程序提供了可拉取的图像。
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-对于 Docker Compose，请覆盖所选 profile 使用的镜像标签，然后拉取镜像并重新创建服务：
+对于Docker Compose，覆盖所选配置文件使用的镜像标签，然后拉取并重新创建服务：
 
 ```yaml
 services:
@@ -496,32 +486,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### 安全性与回滚
+#### 安全与回滚
 
-`next` 是一个浮动的预发布渠道。活跃发布分支的任何推送都可能使其发生变化，并且**不支持用于生产环境**。评估特定构建时，请固定镜像摘要：
+`next`是一个浮动预发布通道。它可能会在任何推送到活动发布分支时发生变化，并且是**不支持生产用途**。在评估特定构建时固定图像摘要：
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-测试前，请备份 OmniRoute 数据卷或通过 bind mount 挂载的数据目录。若要回滚，请恢复之前使用的稳定版本或摘要，然后重新创建容器：
+测试前，请备份OmniRoute数据卷或绑定挂载的数据目录。要回滚，请恢复以前使用的稳定版本或摘要并重新创建容器：
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-发布分支构建绝不会更新 `latest`；只有符合条件的稳定语义化版本才能提升稳定版指针。`next` 镜像仍需通过发布镜像检查和阻止 CRITICAL 漏洞的门禁。
+发布分支构建永远无法移动`latest`；只有符合条件的稳定语义版本才能提升稳定指针。 `next`镜像保留发布镜像检查并阻止关键漏洞门。
 
-**`latest` 并不保证与 git 保持最新。** 合并到 `main` 或活跃 `release/v*` 分支的修复，在稳定 SemVer 镜像发布且发布作业提升 `:latest`（其摘要与该 SemVer 镜像相同）之前，**不会**包含在 `:latest` 中。如果 GitHub 已显示修复，但 `latest` 看起来仍未更新，请拉取 `:next` 来测试发布分支，或等待 SemVer 标签发布。
+**`latest`不是 git 的货币保证。** `main`或活动`release/v*`分支上的合并修复是**不是**在`:latest`中，直到发布稳定的SemVer映像，并且发布作业会提升`:latest` （与SemVer相同的摘要）。如果`latest`看起来冻结，而GitHub已经显示修复，请拉`:next`来测试发布分支或等待SemVer标签。
 
-| 您的需求                                       | 使用方式                      |
-| ---------------------------------------------- | ----------------------------- |
-| 不得发生漂移的 GitOps / 生产环境               | 固定为 `:X.Y.Z`（或镜像摘要） |
-| 跟随已发布的稳定版本，并接受每次发布时重新创建 | `:latest`                     |
-| 测试尚未发布的 `release/v*` 提交               | `:next`（非生产环境）         |
-| 测试 `main`                                    | `:main`（非生产环境）         |
+| 你想要                                       | 使用                        |
+| -------------------------------------------- | --------------------------- |
+| GitOps / 生产不能漂移                        | Pin `:X.Y.Z` （或图像摘要） |
+| 关注已发布的稳定版本并接受每个版本的重新创建 | `:latest`                   |
+| 测试未发布的`release/v*`提交                 | `:next` （非生产）          |
+| 测试`main`                                   | `:main` （非生产）          |
 
 ## Docker 中的仪表板更新
 

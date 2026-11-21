@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "പരിധി ഒരു പോസിറ്റീവ് പൂർണ്ണസംഖ്യയായിരിക്കണം.",
     "error": "പിശക്: {message}",
     "serverOffline": "OmniRoute സെർവർ ഓഫ്ലൈനാണ്. ഇത് ആരംഭിക്കാൻ: omniroute serve",
     "authRequired": "പ്രാമാണീകരണം ആവശ്യമാണ്. OMNIROUTE_API_KEY സജ്ജമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തിപ്പിക്കുക: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} ചെയ്യുമായിരുന്നു",
     "cancelled": "റദ്ദാക്കി.",
     "jsonOpt": "JSON ആയി ഔട്ട്പുട്ട് ചെയ്യുക",
-    "yesOpt": "സ്ഥിരീകരണ നിർദ്ദേശം ഒഴിവാക്കുക"
+    "yesOpt": "സ്ഥിരീകരണ നിർദ്ദേശം ഒഴിവാക്കുക",
+    "positiveIntegerRequired": "പരിധി ഒരു പോസിറ്റീവ് പൂർണ്ണസംഖ്യയായിരിക്കണം."
   },
   "setup": {
     "title": "OmniRoute സജ്ജീകരണം",
