@@ -81,18 +81,19 @@ Dashboard (/dashboard/plugins)
 
 כל נקודות הקצה דורשות אישור ניהול (`requireManagementAuth`)** ו** הם `/api/plugins` — `/api/plugins/` רשומים ב- `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| נקודת קצה                        | שִׁיטָה | תֵאוּר                                           |
-| -------------------------------- | ------- | ------------------------------------------------ |
-| `/api/plugins`                   | GET     | רשימת תוספים מותקנים (מסנן `?status=` אופציונלי) |
-| `/api/plugins`                   | POST    | התקן תוסף מספריית מקורות הפלאגין                 |
-| `/api/plugins/scan`              | POST    | סרוק את ספריית התוספים ורשום תוספים חדשים        |
-| `/api/plugins/marketplace`       | GET     | רשימת ערכי קטלוג השוק                            |
-| `/api/plugins/[name]`            | GET     | קבל פרטי תוסף מותקן                              |
-| `/api/plugins/[name]`            | DELETE  | הסר התקנה של תוסף                                |
-| `/api/plugins/[name]/activate`   | POST    | הפעל (טען ווים + register)                       |
-| `/api/plugins/[name]/deactivate` | POST    | השבתה (אש `onDeactivate`, בטל רישום ווים)        |
-| `/api/plugins/[name]/config`     | GET     | קבל את סכימת התצורה של התוסף +                   |
-| `/api/plugins/[name]/config`     | PUT     | עדכון תצורת הפלאגין (אומת כנגד סכימה)            |
+| נקודת קצה                          | שִׁיטָה | תֵאוּר                                           |
+| ---------------------------------- | ------- | ------------------------------------------------ |
+| `/api/plugins`                     | GET     | רשימת תוספים מותקנים (מסנן `?status=` אופציונלי) |
+| `/api/plugins`                     | POST    | התקן תוסף מספריית מקורות הפלאגין                 |
+| `/api/plugins/scan`                | POST    | סרוק את ספריית התוספים ורשום תוספים חדשים        |
+| `/api/plugins/marketplace`         | GET     | רשימת ערכי קטלוג השוק                            |
+| `/api/plugins/marketplace/install` | POST    | התקן תוסף של Marketplace לפי שם                  |
+| `/api/plugins/[name]`              | GET     | קבל פרטי תוסף מותקן                              |
+| `/api/plugins/[name]`              | DELETE  | הסר התקנה של תוסף                                |
+| `/api/plugins/[name]/activate`     | POST    | הפעל (טען ווים + register)                       |
+| `/api/plugins/[name]/deactivate`   | POST    | השבתה (אש `onDeactivate`, בטל רישום ווים)        |
+| `/api/plugins/[name]/config`       | GET     | קבל את סכימת התצורה של התוסף +                   |
+| `/api/plugins/[name]/config`       | PUT     | עדכון תצורת הפלאגין (אומת כנגד סכימה)            |
 
 מסנן `GET /api/plugins` `status` מקבל אחד מ- `installed` / `active` / `inactive` / `error`. ערך לא חוקי מחזיר `400`.
 
@@ -114,7 +115,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 ה- `path` חייב להיות an** מוּחלָט** נתיב לספרייה** בתוך ספריית מקורות הפלאגין** : `plugin-sources` ליד שורש הפלאגין, אז `~/.omniroute/plugin-sources/` כברירת מחדל, או `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` כאשר המשתנה הזה מוגדר (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). תחילה העתק או שיבט את הפלאגין לשם. ההתקנה נדחתה עם `400` כאשר הנתיב מכיל `..` או byte null, נמצא מחוץ לאותה ספרייה, נפתר מחוצה לה באמצעות סימן-קישור, מכיל סימן-קישור שהיעד שלו נמצא מחוצה לו, או כאשר הספרייה אינה קיימת. ספריית המקור חייבת להכיל `plugin.json` חוקי (או להיות הורה של אחד). על הצלחה התגובה היא `201` עם שורת הפלאגין המותקנת.
 
-בניגוד למסלולי הפלאגין האחרים, זה דורש את אישורי הניהול (הפעלת לוח מחוונים או מפתח API בהיקף ניהול) גם כאשר הכניסה מושבתת (`requireLogin=false`): התקנת קוד היא אף פעם לא פעולה אנונימית.
+בניגוד למסלולי הפלאגין האחרים, זה דורש את אישורי הניהול (הפעלת לוח מחוונים או מפתח API בהיקף ניהול) גם כאשר הכניסה מושבתת (`requireLogin=false`): התקנת קוד היא אף פעם לא פעולה אנונימית. אותו דבר חל על `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### עיין בשוק
 
@@ -132,7 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` מאמת כל ערך שסופק כנגד `configSchema` של התוסף (מוצהר במניפסט): שדות `number` מכבדים `min`/`max`, שדות `select` חייבים להתאים ל- `enum` המוצהר. מותר לעבור למפתחות שאינם קיימים בסכימה.
+`PUT .../config` מאמת את הגוף מול `configSchema` של התוסף (מוצהר במניפסט) עם `validatePluginConfig()` מ- `src/lib/plugins/manifest.ts`: כל מפתח חייב להיות מוצהר בסכימה, הערכים חייבים להתאים לסוג המוצהר, שדות `number` מכבדים `min`/`max` ושדות `select` חייבים להתאים ל- `enum` המוצהר. כל הפרה מחזירה `400` ושום דבר לא מאוחסן. לפלאגין שמצהיר שאין `configSchema` אין מפתחות ניתנים להגדרה, ולכן הבקשה נדחתה עם `400` ("תוסף לא מצהיר על מפתחות ניתנים להגדרה").
 
 ## הגדרות
 

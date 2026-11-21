@@ -65,20 +65,21 @@ Dashboard (/dashboard/plugins)
 
 所有端點都需要管理身份驗證（`requireManagementAuth`）**和**僅環回— `/api/plugins`和`/api/plugins/`列在`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) 中。
 
-| 端點                             | 方法   | 描述                                       |
-| -------------------------------- | ------ | ------------------------------------------ |
-| `/api/plugins`                   | GET    | 列出已安裝的插件（可選用`?status=`過濾器） |
-| `/api/plugins`                   | POST   | 從插件來源目錄安裝插件                     |
-| `/api/plugins/scan`              | POST   | 掃描插件目錄並註冊新插件                   |
-| `/api/plugins/marketplace`       | GET    | 列出市場目錄條目                           |
-| `/api/plugins/[name]`            | GET    | 獲取已安裝插件的詳細信息                   |
-| `/api/plugins/[name]`            | DELETE | 解除安裝插件                               |
-| `/api/plugins/[name]/activate`   | POST   | 激活（加載+註冊鉤子）                      |
-| `/api/plugins/[name]/deactivate` | POST   | 停用（觸發`onDeactivate`，註銷鉤子）       |
-| `/api/plugins/[name]/config`     | GET    | 取得插件配置+配置模式                      |
-| `/api/plugins/[name]/config`     | PUT    | 更新插件配置（根據架構進行驗證）           |
+| 端點                               | 方法   | 描述                                       |
+| ---------------------------------- | ------ | ------------------------------------------ |
+| `/api/plugins`                     | GET    | 列出已安裝的插件（可選用`?status=`過濾器） |
+| `/api/plugins`                     | POST   | 從插件來源目錄安裝插件                     |
+| `/api/plugins/scan`                | POST   | 掃描插件目錄並註冊新插件                   |
+| `/api/plugins/marketplace`         | GET    | 列出市場目錄條目                           |
+| `/api/plugins/marketplace/install` | POST   | 按名稱安裝市場插件                         |
+| `/api/plugins/[name]`              | GET    | 獲取已安裝插件的詳細信息                   |
+| `/api/plugins/[name]`              | DELETE | 解除安裝插件                               |
+| `/api/plugins/[name]/activate`     | POST   | 激活（加載+註冊鉤子）                      |
+| `/api/plugins/[name]/deactivate`   | POST   | 停用（觸發`onDeactivate`，註銷鉤子）       |
+| `/api/plugins/[name]/config`       | GET    | 取得插件配置+配置模式                      |
+| `/api/plugins/[name]/config`       | PUT    | 更新插件配置（根據架構進行驗證）           |
 
-`GET /api/plugins` `status`过滤器接受`installed` / `active` / `inactive` / `error`之一。無效值傳回`400`。
+`GET /api/plugins` `status`濾波器接受`installed` / `active` / `inactive` / `error`之一。無效值傳回`400`。
 
 ### 列出已安裝的插件
 
@@ -96,9 +97,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path`必須是**絕對**目錄路徑**在插件來源目錄內**： `plugin-sources`位於插件根目錄旁邊，因此預設為`~/.omniroute/plugin-sources/` ，或設定該變數時為`<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` （ `src/lib/plugins/installSource.ts`中的`getPluginSourcesDir()` ）。首先複製或克隆外掛程式。当路径包含`..`或空字节、位于该目录外部、通过符号链接在其外部解析、包含目标位于其外部的符号链接或者目录不存在时，将使用`400`拒绝安装。來源目錄必須包含有效的`plugin.json` （或其中一個的父目錄）。成功後，回應是`201`以及已安裝的插件行。
+`path`必須是**絕對**目錄路徑**在插件來源目錄內**： `plugin-sources`位於插件根目錄旁邊，因此預設為`~/.omniroute/plugin-sources/` ，或設定該變數時為`<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` （ `src/lib/plugins/installSource.ts`中的`getPluginSourcesDir()` ）。首先複製或克隆外掛程式。當路徑包含`..`或空位元組、位於該目錄外部、透過符號連結在其外部解析、包含目標位於其外部的符號連結或目錄不存在時，將使用`400`拒絕安裝。來源目錄必須包含有效的`plugin.json` （或其中一個的父目錄）。成功後，回應是`201`以及已安裝的插件行。
 
-Unlike the other plugin routes, this one requires the management credential (a dashboard session or a manage-scoped API key) even when login is disabled (`requireLogin=false`): installing code is never an anonymous action.
+與其他外掛程式路由不同，即使停用登入（`requireLogin=false`），此路由也需要管理憑證（儀表板會話或管理範圍的API金鑰）：安裝程式碼永遠不是匿名操作。這同樣適用於`POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`)。
 
 ### 瀏覽市場
 
@@ -116,7 +117,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config`根據插件的`configSchema` （在清單中宣告）驗證每個提供的值： `number`欄位尊重`min`/`max`， `select`欄位必須與宣告的`enum`相符。允許通過架構中不存在的鍵。
+`PUT .../config`使用`src/lib/plugins/manifest.ts`中的`configSchema`根據插件的`validatePluginConfig()` （在清單中聲明）驗證主體：每個鍵都必須在架構中聲明，值必須與聲明的類型匹配， `number`字段遵循`min`/`max`，而`select`字段必須與聲明的`enum`匹配。任何違規都會回傳`400`並且不儲存任何內容。聲明沒有`configSchema`插件沒有可配置的鍵，因此使用`400`拒絕請求（「插件沒有聲明任何可配置的鍵」）。
 
 ## 設定
 

@@ -84,18 +84,19 @@ upozornenie a použije počiatočný zoznam.
 
 Všetky koncové body vyžadujú autorizáciu správy (`requireManagementAuth`)** a** sú len pre spätnú slučku — `/api/plugins` a `/api/plugins/` sú uvedené v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Koncový bod                      | Metóda | Popis                                                            |
-| -------------------------------- | ------ | ---------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Zoznam nainštalovaných doplnkov (voliteľný filter `?status=` )   |
-| `/api/plugins`                   | POST   | Nainštalujte doplnok z adresára zdrojov doplnkov                 |
-| `/api/plugins/scan`              | POST   | Naskenujte adresár doplnkov a zaregistrujte nové doplnky         |
-| `/api/plugins/marketplace`       | GET    | Zoznam položiek katalógu trhovísk                                |
-| `/api/plugins/[name]`            | GET    | Získajte podrobnosti o nainštalovanom doplnku                    |
-| `/api/plugins/[name]`            | DELETE | Odinštalujte doplnok                                             |
-| `/api/plugins/[name]/activate`   | POST   | Aktivovať (načítať háčiky registra + )                           |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivovať (vystreliť `onDeactivate`, zrušiť registráciu hákov) |
-| `/api/plugins/[name]/config`     | GET    | Získajte schému konfigurácie pluginu +                           |
-| `/api/plugins/[name]/config`     | PUT    | Aktualizujte konfiguráciu doplnku (overené podľa schémy)         |
+| Koncový bod                        | Metóda | Popis                                                            |
+| ---------------------------------- | ------ | ---------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Zoznam nainštalovaných doplnkov (voliteľný filter `?status=` )   |
+| `/api/plugins`                     | POST   | Nainštalujte doplnok z adresára zdrojov doplnkov                 |
+| `/api/plugins/scan`                | POST   | Naskenujte adresár doplnkov a zaregistrujte nové doplnky         |
+| `/api/plugins/marketplace`         | GET    | Zoznam položiek katalógu trhovísk                                |
+| `/api/plugins/marketplace/install` | POST   | Nainštalujte si doplnok Marketplace podľa názvu                  |
+| `/api/plugins/[name]`              | GET    | Získajte podrobnosti o nainštalovanom doplnku                    |
+| `/api/plugins/[name]`              | DELETE | Odinštalujte doplnok                                             |
+| `/api/plugins/[name]/activate`     | POST   | Aktivovať (načítať háčiky registra + )                           |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktivovať (vystreliť `onDeactivate`, zrušiť registráciu hákov) |
+| `/api/plugins/[name]/config`       | GET    | Získajte schému konfigurácie pluginu +                           |
+| `/api/plugins/[name]/config`       | PUT    | Aktualizujte konfiguráciu doplnku (overené podľa schémy)         |
 
 Filter `GET /api/plugins` `status` akceptuje jednu z možností `installed` / `active` / `inactive` / `error`. Neplatná hodnota vráti `400`.
 
@@ -117,7 +118,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` musí byť an** absolútne** cestu k adresáru** v adresári zdrojov doplnku** : `plugin-sources` vedľa koreňa pluginu, takže `~/.omniroute/plugin-sources/` predvolene, alebo `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` keď je táto premenná nastavená (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Najprv tam skopírujte alebo naklonujte doplnok. Inštalácia je odmietnutá pomocou `400`, keď cesta obsahuje `..` alebo nulový bajt, leží mimo tohto adresára, rieši sa mimo neho prostredníctvom symbolického odkazu, obsahuje symbolický odkaz, ktorého cieľ je mimo neho, alebo ak adresár neexistuje. Zdrojový adresár musí obsahovať platné `plugin.json` (alebo byť rodičom jedného). Po úspechu je odpoveď `201` s riadkom nainštalovaného pluginu.
 
-Na rozdiel od iných trás doplnkov, táto vyžaduje poverenie na správu (reláciu dashboardu alebo kľúč API v rozsahu správy), aj keď je prihlásenie zakázané (`requireLogin=false`): inštalácia kódu nikdy nie je anonymná akcia.
+Na rozdiel od iných trás doplnkov, táto vyžaduje poverenie na správu (reláciu dashboardu alebo kľúč API v rozsahu správy), aj keď je prihlásenie zakázané (`requireLogin=false`): inštalácia kódu nikdy nie je anonymná akcia. To isté platí pre `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Prehľadávať trhovisko
 
@@ -135,7 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` overí každú poskytnutú hodnotu oproti `configSchema` doplnku (deklarovanému v manifeste): polia `number` rešpektujú `min`/`max`, polia `select` sa musia zhodovať s deklarovaným `enum`. Kľúče, ktoré sa nenachádzajú v schéme, sú povolené.
+`PUT .../config` overí telo oproti `configSchema` doplnku (deklarované v manifeste) pomocou `validatePluginConfig()` z `src/lib/plugins/manifest.ts`: každý kľúč musí byť deklarovaný v schéme, hodnoty musia zodpovedať deklarovanému typu, polia `number` rešpektujú `min`/`max` a polia `select` sa musia zhodovať s deklarovaným `enum`. Akékoľvek porušenie vráti `400` a nič sa neuloží. Doplnok, ktorý nedeklaruje žiadne `configSchema` nemá žiadne konfigurovateľné kľúče, takže požiadavka je zamietnutá pomocou `400` („Plugin nedeklaruje žiadne konfigurovateľné kľúče“).
 
 ## Konfigurácia
 

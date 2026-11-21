@@ -82,18 +82,19 @@ yasiyotambulika, `listMarketplacePlugins()` hurekodi onyo na kurudi kwenye orodh
 
 Miisho yote inahitaji idhini ya usimamizi (`requireManagementAuth`)** na** ni `/api/plugins` — kitanzi pekee na `/api/plugins/` zimeorodheshwa katika `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Mwisho                           | Mbinu  | Maelezo                                                                    |
-| -------------------------------- | ------ | -------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Orodhesha programu-jalizi zilizosakinishwa (kichujio `?status=` cha hiari) |
-| `/api/plugins`                   | POST   | Sakinisha programu-jalizi kutoka kwa saraka ya vyanzo vya programu-jalizi  |
-| `/api/plugins/scan`              | POST   | Changanua saraka ya programu-jalizi na usajili programu-jalizi mpya        |
-| `/api/plugins/marketplace`       | GET    | Orodhesha maingizo ya katalogi ya soko                                     |
-| `/api/plugins/[name]`            | GET    | Pata maelezo ya programu-jalizi iliyosakinishwa                            |
-| `/api/plugins/[name]`            | DELETE | Sanidua programu-jalizi                                                    |
-| `/api/plugins/[name]/activate`   | POST   | Washa (pakia ndoano za rejista + )                                         |
-| `/api/plugins/[name]/deactivate` | POST   | Zima (moto `onDeactivate`, ondoa ndoano)                                   |
-| `/api/plugins/[name]/config`     | GET    | Pata schema ya usanidi wa programu-jalizi +                                |
-| `/api/plugins/[name]/config`     | PUT    | Sasisha usanidi wa programu-jalizi (imeidhinishwa dhidi ya schema)         |
+| Mwisho                             | Mbinu  | Maelezo                                                                    |
+| ---------------------------------- | ------ | -------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Orodhesha programu-jalizi zilizosakinishwa (kichujio `?status=` cha hiari) |
+| `/api/plugins`                     | POST   | Sakinisha programu-jalizi kutoka kwa saraka ya vyanzo vya programu-jalizi  |
+| `/api/plugins/scan`                | POST   | Changanua saraka ya programu-jalizi na usajili programu-jalizi mpya        |
+| `/api/plugins/marketplace`         | GET    | Orodhesha maingizo ya katalogi ya soko                                     |
+| `/api/plugins/marketplace/install` | POST   | Sakinisha programu-jalizi ya soko kwa jina                                 |
+| `/api/plugins/[name]`              | GET    | Pata maelezo ya programu-jalizi iliyosakinishwa                            |
+| `/api/plugins/[name]`              | DELETE | Sanidua programu-jalizi                                                    |
+| `/api/plugins/[name]/activate`     | POST   | Washa (pakia ndoano za rejista + )                                         |
+| `/api/plugins/[name]/deactivate`   | POST   | Zima (moto `onDeactivate`, ondoa ndoano)                                   |
+| `/api/plugins/[name]/config`       | GET    | Pata schema ya usanidi wa programu-jalizi +                                |
+| `/api/plugins/[name]/config`       | PUT    | Sasisha usanidi wa programu-jalizi (imeidhinishwa dhidi ya schema)         |
 
 Kichujio cha `GET /api/plugins` `status` kinakubali mojawapo ya `installed` / `active` / `inactive` / `error`. Thamani batili inarudisha `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` lazima iwe ni** kabisa** njia ya saraka** ndani ya saraka ya vyanzo vya programu-jalizi** : `plugin-sources` karibu na mzizi wa programu-jalizi, kwa hivyo `~/.omniroute/plugin-sources/` kwa chaguo-msingi, au `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` wakati utofauti huo umewekwa (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Nakili au utengeneze programu-jalizi hapo kwanza. Usakinishaji unakataliwa na `400` wakati njia ina `..` au null byte, iko nje ya saraka hiyo, hutatuliwa nje yake kupitia ulinganifu, ina ulinganifu ambao lengo lake liko nje yake, au wakati saraka haipo. Saraka chanzo lazima iwe na `plugin.json` halali (au uwe mzazi wa mtoto mmoja). Kwa mafanikio jibu ni `201` na safu ya programu-jalizi iliyosakinishwa.
 
-Tofauti na njia zingine za programu-jalizi, hii inahitaji kitambulisho cha usimamizi (kipindi cha dashibodi au kitufe API kilichodhibitiwa) hata wakati kuingia kumezimwa (`requireLogin=false`): kusakinisha msimbo kamwe si kitendo kisichojulikana.
+Tofauti na njia zingine za programu-jalizi, hii inahitaji kitambulisho cha usimamizi (kipindi cha dashibodi au kitufe API kilichodhibitiwa) hata wakati kuingia kumezimwa (`requireLogin=false`): kusakinisha msimbo kamwe si kitendo kisichojulikana. Hali hiyo hiyo inatumika kwa `POST /api/plugins/marketplace/install` (mwili `{ "name": "<plugin>" }`).
 
 ### Vinjari soko
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` huthibitisha kila thamani iliyotolewa dhidi ya `configSchema` ya programu-jalizi (iliyotangazwa kwenye faili ya maelezo): sehemu za `number` heshima `min`/`max`, sehemu za `select` lazima zilingane na `enum` iliyotangazwa. Vifunguo ambavyo havipo kwenye schema vinaruhusiwa kupitia.
+`PUT .../config` huthibitisha mwili dhidi ya `configSchema` ya programu-jalizi (iliyotangazwa kwenye faili ya maelezo) na `validatePluginConfig()` kutoka `src/lib/plugins/manifest.ts`: kila ufunguo lazima utangazwe kwenye taratibu, thamani lazima zilingane na aina iliyotangazwa, sehemu za `number` huheshimu `min`/`max`, na sehemu za `select` lazima zilingane na `enum` iliyotangazwa. Ukiukaji wowote unarudisha `400` na hakuna chochote kinachohifadhiwa. Programu-jalizi inayotangaza hakuna `configSchema` haina funguo zinazoweza kusanidiwa, kwa hivyo ombi limekataliwa na `400` ("Plugin haitangazi funguo zozote zinazoweza kusanidiwa").
 
 ## Usanidi
 

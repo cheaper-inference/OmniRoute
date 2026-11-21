@@ -82,18 +82,19 @@ innhold, logger `listMarketplacePlugins()` en advarsel og faller tilbake til sta
 
 Alle endepunkter krever administrasjonsgodkjenning (`requireManagementAuth`)** og** er loopback-bare — `/api/plugins` og `/api/plugins/` er oppført i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endepunkt                        | Metode | Beskrivelse                                             |
-| -------------------------------- | ------ | ------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Liste installerte plugins (valgfritt `?status=` filter) |
-| `/api/plugins`                   | POST   | Installer en plugin fra plugin-kildekatalogen           |
-| `/api/plugins/scan`              | POST   | Skann plugin-katalogen og registrer nye plugins         |
-| `/api/plugins/marketplace`       | GET    | List markedsplasskatalogoppføringer                     |
-| `/api/plugins/[name]`            | GET    | Få installert plugin-detaljer                           |
-| `/api/plugins/[name]`            | DELETE | Avinstaller en plugin                                   |
-| `/api/plugins/[name]/activate`   | POST   | Aktiver (last inn + registerkroker)                     |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiver (fire `onDeactivate`, avregistrer kroker)     |
-| `/api/plugins/[name]/config`     | GET    | Få plugin config + config skjema                        |
-| `/api/plugins/[name]/config`     | PUT    | Oppdater plugin-konfigurasjon (validert mot skjema)     |
+| Endepunkt                          | Metode | Beskrivelse                                             |
+| ---------------------------------- | ------ | ------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Liste installerte plugins (valgfritt `?status=` filter) |
+| `/api/plugins`                     | POST   | Installer en plugin fra plugin-kildekatalogen           |
+| `/api/plugins/scan`                | POST   | Skann plugin-katalogen og registrer nye plugins         |
+| `/api/plugins/marketplace`         | GET    | List markedsplasskatalogoppføringer                     |
+| `/api/plugins/marketplace/install` | POST   | Installer en markedsplass-plugin etter navn             |
+| `/api/plugins/[name]`              | GET    | Få installert plugin-detaljer                           |
+| `/api/plugins/[name]`              | DELETE | Avinstaller en plugin                                   |
+| `/api/plugins/[name]/activate`     | POST   | Aktiver (last inn + registerkroker)                     |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiver (fire `onDeactivate`, avregistrer kroker)     |
+| `/api/plugins/[name]/config`       | GET    | Få plugin config + config skjema                        |
+| `/api/plugins/[name]/config`       | PUT    | Oppdater plugin-konfigurasjon (validert mot skjema)     |
 
 `GET /api/plugins` `status` filteret godtar en av `installed` / `active` / `inactive` / `error`. En ugyldig verdi returnerer `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` må være en** absolutt** banen til en katalog** inne i plugin-kildekatalogen** : `plugin-sources` ved siden av plugin-roten, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` når den variabelen er satt (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopier eller klon plugin-en der først. Installasjonen avvises med `400` når banen inneholder `..` eller en nullbyte, ligger utenfor den katalogen, løses utenfor den gjennom en symbolkobling, inneholder en symbolkobling hvis mål er utenfor den, eller når katalogen ikke eksisterer. Kildekatalogen må inneholde en gyldig `plugin.json` (eller være en forelder til en). Ved suksess er svaret `201` med den installerte plugin-raden.
 
-I motsetning til de andre plugin-rutene, krever denne administrasjonslegitimasjonen (en dashbord-økt eller en API -nøkkel med administreringsomfang) selv når pålogging er deaktivert (`requireLogin=false`): å installere kode er aldri en anonym handling.
+I motsetning til de andre plugin-rutene, krever denne administrasjonslegitimasjonen (en dashbord-økt eller en API -nøkkel med administreringsomfang) selv når pålogging er deaktivert (`requireLogin=false`): å installere kode er aldri en anonym handling. Det samme gjelder for `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Bla gjennom markedsplassen
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validerer hver oppgitt verdi mot pluginens `configSchema` (erklært i manifestet): `number` feltene respekterer `min`/`max`, `select` -feltene må samsvare med det deklarerte `enum`. Nøkler som ikke er til stede i skjemaet tillates gjennom.
+`PUT .../config` validerer kroppen mot pluginens `configSchema` (erklært i manifestet) med `validatePluginConfig()` fra `src/lib/plugins/manifest.ts`: hver nøkkel må deklareres i skjemaet, verdiene må samsvare med den deklarerte typen, `number` -feltene respektere `min`/`max`, og `select` feltene må samsvare med den deklarerte `enum`. Ethvert brudd returnerer `400` og ingenting lagres. Et plugin som erklærer ingen `configSchema` har ingen konfigurerbare nøkler, så forespørselen blir avvist med `400` ("Plugin deklarerer ikke noen konfigurerbare nøkler").
 
 ## Konfigurasjon
 

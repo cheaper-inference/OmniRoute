@@ -82,18 +82,19 @@ dikenali, `listMarketplacePlugins()` merekodkan amaran dan kembali menggunakan s
 
 Semua titik akhir memerlukan pengesahan pengurusan (`requireManagementAuth`)** dan** ialah — `/api/plugins` gelung balik sahaja dan `/api/plugins/` disenaraikan dalam `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Titik akhir                      | Kaedah | Penerangan                                                    |
-| -------------------------------- | ------ | ------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Senaraikan pemalam yang dipasang (penapis `?status=` pilihan) |
-| `/api/plugins`                   | POST   | Pasang pemalam daripada direktori sumber pemalam              |
-| `/api/plugins/scan`              | POST   | Imbas direktori pemalam dan daftar pemalam baharu             |
-| `/api/plugins/marketplace`       | GET    | Senaraikan entri katalog pasaran                              |
-| `/api/plugins/[name]`            | GET    | Dapatkan butiran pemalam yang dipasang                        |
-| `/api/plugins/[name]`            | DELETE | Nyahpasang pemalam                                            |
-| `/api/plugins/[name]/activate`   | POST   | Aktifkan (muat cangkuk daftar + )                             |
-| `/api/plugins/[name]/deactivate` | POST   | Nyahaktifkan (api `onDeactivate`, nyahdaftar cangkuk)         |
-| `/api/plugins/[name]/config`     | GET    | Dapatkan skema konfigurasi + konfigurasi pemalam              |
-| `/api/plugins/[name]/config`     | PUT    | Kemas kini konfigurasi pemalam (disahkan terhadap skema)      |
+| Titik akhir                        | Kaedah | Penerangan                                                    |
+| ---------------------------------- | ------ | ------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Senaraikan pemalam yang dipasang (penapis `?status=` pilihan) |
+| `/api/plugins`                     | POST   | Pasang pemalam daripada direktori sumber pemalam              |
+| `/api/plugins/scan`                | POST   | Imbas direktori pemalam dan daftar pemalam baharu             |
+| `/api/plugins/marketplace`         | GET    | Senaraikan entri katalog pasaran                              |
+| `/api/plugins/marketplace/install` | POST   | Pasang pemalam pasaran mengikut nama                          |
+| `/api/plugins/[name]`              | GET    | Dapatkan butiran pemalam yang dipasang                        |
+| `/api/plugins/[name]`              | DELETE | Nyahpasang pemalam                                            |
+| `/api/plugins/[name]/activate`     | POST   | Aktifkan (muat cangkuk daftar + )                             |
+| `/api/plugins/[name]/deactivate`   | POST   | Nyahaktifkan (api `onDeactivate`, nyahdaftar cangkuk)         |
+| `/api/plugins/[name]/config`       | GET    | Dapatkan skema konfigurasi + konfigurasi pemalam              |
+| `/api/plugins/[name]/config`       | PUT    | Kemas kini konfigurasi pemalam (disahkan terhadap skema)      |
 
 Penapis `GET /api/plugins` `status` menerima salah satu daripada `installed` / `active` / `inactive` / `error`. Nilai tidak sah mengembalikan `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` mestilah an** mutlak** laluan ke direktori** di dalam direktori sumber pemalam** : `plugin-sources` di sebelah akar pemalam, jadi `~/.omniroute/plugin-sources/` secara lalai, atau `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` apabila pembolehubah itu ditetapkan (`getPluginSourcesDir()` dalam `src/lib/plugins/installSource.ts`). Salin atau klon pemalam di sana dahulu. Pemasangan ditolak dengan `400` apabila laluan mengandungi `..` atau bait nol, terletak di luar direktori itu, menyelesaikannya di luarnya melalui pautan sym, mengandungi pautan sym yang sasarannya berada di luarnya, atau apabila direktori itu tidak wujud. Direktori sumber mesti mengandungi `plugin.json` yang sah (atau menjadi induk kepada satu). Apabila berjaya, respons adalah `201` dengan baris pemalam yang dipasang.
 
-Tidak seperti laluan pemalam yang lain, laluan ini memerlukan bukti kelayakan pengurusan (sesi papan pemuka atau kekunci API skop pengurusan) walaupun semasa log masuk dilumpuhkan (`requireLogin=false`): memasang kod bukanlah tindakan tanpa nama.
+Tidak seperti laluan pemalam yang lain, laluan ini memerlukan bukti kelayakan pengurusan (sesi papan pemuka atau kekunci API skop pengurusan) walaupun semasa log masuk dilumpuhkan (`requireLogin=false`): memasang kod bukanlah tindakan tanpa nama. Perkara yang sama berlaku untuk `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Semak imbas pasaran
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` mengesahkan setiap nilai yang diberikan terhadap `configSchema` pemalam (diisytiharkan dalam manifes): medan `number` menghormati `min`/`max`, medan `select` mesti sepadan dengan `enum` yang diisytiharkan. Kunci yang tidak terdapat dalam skema dibenarkan melalui.
+`PUT .../config` mengesahkan kandungan terhadap `configSchema` pemalam (diisytiharkan dalam manifes) dengan `validatePluginConfig()` daripada `src/lib/plugins/manifest.ts`: setiap kunci mesti diisytiharkan dalam skema, nilai mesti sepadan dengan jenis yang diisytiharkan, medan `number` menghormati `min`/`max`, dan medan `select` mesti sepadan dengan `enum` yang diisytiharkan. Sebarang pelanggaran mengembalikan `400` dan tiada apa yang disimpan. Pemalam yang mengisytiharkan tiada `configSchema` tidak mempunyai kunci boleh dikonfigurasikan, jadi permintaan itu ditolak dengan `400` ("Pemalam tidak mengisytiharkan sebarang kunci boleh dikonfigurasikan").
 
 ## Konfigurasi
 

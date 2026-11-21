@@ -82,18 +82,19 @@ body ကို ပြန်ပေးခြင်း ဖြစ်ပါက `listM
 
 အဆုံးမှတ်အားလုံးသည် စီမံခန့်ခွဲမှု အထောက်အထား (`requireManagementAuth`) လိုအပ်သည်** နှင့်** loopback-only — `/api/plugins` နှင့် `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) တွင် ဖော်ပြထားပါသည်။
 
-| အဆုံးမှတ်                        | နည်းလမ်း | ဖော်ပြချက်                                                                            |
-| -------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET      | ထည့်သွင်းထားသော ပလပ်အင်များကို စာရင်းပြုစုပါ (ရွေးချယ်နိုင်သော `?status=` စစ်ထုတ်မှု) |
-| `/api/plugins`                   | POST     | ပလပ်အင်အရင်းအမြစ်လမ်းညွှန်မှ ပလပ်အင်တစ်ခုကို ထည့်သွင်းပါ။                             |
-| `/api/plugins/scan`              | POST     | ပလပ်အင်လမ်းညွှန်ကို စကန်ဖတ်ပြီး ပလပ်အင်အသစ်များကို စာရင်းသွင်းပါ။                     |
-| `/api/plugins/marketplace`       | GET      | စျေးကွက် ကတ်တလောက်ကို စာရင်းပြုစုပါ။                                                  |
-| `/api/plugins/[name]`            | GET      | ထည့်သွင်းထားသော ပလပ်အင်အသေးစိတ်အချက်အလက်များကို ရယူပါ။                                |
-| `/api/plugins/[name]`            | DELETE   | ပလပ်အင်ကို ဖြုတ်ပါ။                                                                   |
-| `/api/plugins/[name]/activate`   | POST     | အသက်သွင်းရန် ( + မှတ်ပုံတင်ချိတ်များကို တင်ပါ)                                        |
-| `/api/plugins/[name]/deactivate` | POST     | ပိတ်ပါ (မီး `onDeactivate`၊ ချိတ်ကို စာရင်းမသွင်းပါ)                                  |
-| `/api/plugins/[name]/config`     | GET      | plugin config + config schema ကိုရယူပါ။                                               |
-| `/api/plugins/[name]/config`     | PUT      | plugin config ကို အပ်ဒိတ်လုပ်ပါ (schema နှင့် ကိုက်ညီသည်)                             |
+| အဆုံးမှတ်                          | နည်းလမ်း | ဖော်ပြချက်                                                                            |
+| ---------------------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET      | ထည့်သွင်းထားသော ပလပ်အင်များကို စာရင်းပြုစုပါ (ရွေးချယ်နိုင်သော `?status=` စစ်ထုတ်မှု) |
+| `/api/plugins`                     | POST     | ပလပ်အင်အရင်းအမြစ်လမ်းညွှန်မှ ပလပ်အင်တစ်ခုကို ထည့်သွင်းပါ။                             |
+| `/api/plugins/scan`                | POST     | ပလပ်အင်လမ်းညွှန်ကို စကန်ဖတ်ပြီး ပလပ်အင်အသစ်များကို စာရင်းသွင်းပါ။                     |
+| `/api/plugins/marketplace`         | GET      | စျေးကွက် ကတ်တလောက်ကို စာရင်းပြုစုပါ။                                                  |
+| `/api/plugins/marketplace/install` | POST     | အမည်ဖြင့် စျေးကွက်ပလပ်အင်ကို ထည့်သွင်းပါ။                                             |
+| `/api/plugins/[name]`              | GET      | ထည့်သွင်းထားသော ပလပ်အင်အသေးစိတ်အချက်အလက်များကို ရယူပါ။                                |
+| `/api/plugins/[name]`              | DELETE   | ပလပ်အင်ကို ဖြုတ်ပါ။                                                                   |
+| `/api/plugins/[name]/activate`     | POST     | အသက်သွင်းရန် ( + မှတ်ပုံတင်ချိတ်များကို တင်ပါ)                                        |
+| `/api/plugins/[name]/deactivate`   | POST     | ပိတ်ပါ (မီး `onDeactivate`၊ ချိတ်ကို စာရင်းမသွင်းပါ)                                  |
+| `/api/plugins/[name]/config`       | GET      | plugin config + config schema ကိုရယူပါ။                                               |
+| `/api/plugins/[name]/config`       | PUT      | plugin config ကို အပ်ဒိတ်လုပ်ပါ (schema နှင့် ကိုက်ညီသည်)                             |
 
 `GET /api/plugins` `status` စစ်ထုတ်မှုသည် `installed` / `active` / `inactive` / `error` ထဲမှ တစ်ခုကို လက်ခံသည်။ မမှန်ကန်သောတန်ဖိုးသည် `400` ပြန်ပေးသည်။
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` an ဖြစ်ရမည်။** ပကတိ** လမ်းညွှန်တစ်ခုသို့လမ်းကြောင်း** plugin အရင်းအမြစ်များလမ်းညွှန်အတွင်း** ပလပ်အင် root ၏ဘေးတွင် `plugin-sources` ၊ ထို့ကြောင့် မူရင်းအားဖြင့် `~/.omniroute/plugin-sources/` သို့မဟုတ် ထို variable ကို သတ်မှတ်သည့်အခါ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`)။ အဲဒီမှာ ပလပ်အင်ကို ကော်ပီကူးပါ သို့မဟုတ် ပုံတူပွားပါ။ လမ်းကြောင်းတွင် `..` သို့မဟုတ် null byte ပါ၀င်သောအခါ၊ အဆိုပါလမ်းညွှန်အပြင်ဘက်တွင်တည်ရှိသည်၊ symlink မှတဆင့်၎င်း၏အပြင်ဘက်တွင်ဖြေရှင်းသည်၊ ၎င်းအပြင်ဘက်တွင်ပစ်မှတ်ရှိသော symlink တစ်ခုပါရှိသည်၊ သို့မဟုတ် directory မရှိသည့်အခါတွင်ထည့်သွင်းမှုကို `400` ဖြင့်ငြင်းဆိုထားသည်။ ရင်းမြစ်လမ်းညွှန်တွင် မှန်ကန်သော `plugin.json` (သို့မဟုတ် တစ်ခု၏ မိဘဖြစ်ရမည်) ပါရှိသည်။ အောင်မြင်သောအခါတွင် ထည့်သွင်းထားသော plugin အတန်းနှင့်အတူ တုံ့ပြန်မှုသည် `201` ဖြစ်သည်။
 
-အခြားပလပ်အင်လမ်းကြောင်းများနှင့်မတူဘဲ၊ ဤတစ်ခုသည် အကောင့်ဝင်ခြင်းကိုပိတ်ထားသည့်တိုင် (`requireLogin=false`) : ကုဒ်ထည့်သွင်းခြင်းသည် အမည်မသိလုပ်ဆောင်ချက် ဘယ်တော့မှမဟုတ်သည့် စီမံခန့်ခွဲမှုဆိုင်ရာအထောက်အထား (ဒက်ရှ်ဘုတ်စက်ရှင် သို့မဟုတ် စီမံခန့်ခွဲသည့် API ကီးတစ်ခု) လိုအပ်ပါသည်။
+အခြားပလပ်အင်လမ်းကြောင်းများနှင့်မတူဘဲ၊ ဤတစ်ခုသည် အကောင့်ဝင်ခြင်းကိုပိတ်ထားသည့်တိုင် (`requireLogin=false`) : ကုဒ်ထည့်သွင်းခြင်းသည် အမည်မသိလုပ်ဆောင်ချက် ဘယ်တော့မှမဟုတ်သည့် စီမံခန့်ခွဲမှုဆိုင်ရာအထောက်အထား (ဒက်ရှ်ဘုတ်စက်ရှင် သို့မဟုတ် စီမံခန့်ခွဲသည့် API ကီးတစ်ခု) လိုအပ်ပါသည်။ `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`) နှင့် အလားတူသည်။
 
 ### ဈေးကို လိုက်ကြည့်ပါ။
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` ပလပ်အင်၏ `configSchema` (မန်နီးဖက်စ်တွင် ကြေငြာထားသည်) နှင့် ပေးထားသော တန်ဖိုးတစ်ခုစီကို အတည်ပြုသည်- `number` အကွက်များကို ဂုဏ်ပြုသော `min`/`max`, `select` အကွက်များသည် ကြေညာထားသော `enum` နှင့် ကိုက်ညီရပါမည်။ schema တွင်မပါရှိသောသော့များကိုဖြတ်သန်းခွင့်ပြုသည်။
+`PUT .../config` validates the body against the plugin's `configSchema` (declared in the manifest) with `validatePluginConfig()` from `src/lib/plugins/manifest.ts`: every key must be declared in the schema, values must match the declared type, `number` fields honor `min`/`max`, and `select` fields must match the declared `enum`. Any violation returns `400` and nothing is stored. A plugin that declares no `configSchema` has no configurable keys, so the request is refused with `400` ("Plugin does not declare any configurable keys").
 
 ## ဖွဲ့စည်းသတ်မှတ်မှု
 

@@ -86,18 +86,19 @@ kirjaa varoituksen ja käyttää alustavaa luetteloa.
 
 Kaikki päätepisteet vaativat hallinnan todennuksen (`requireManagementAuth`)** ja** ovat vain silmukoita — `/api/plugins` ja `/api/plugins/` on lueteltu kohdassa `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Päätepiste                       | Menetelmä | Kuvaus                                                                   |
-| -------------------------------- | --------- | ------------------------------------------------------------------------ |
-| `/api/plugins`                   | GET       | Listaa asennetut laajennukset (valinnainen `?status=` suodatin)          |
-| `/api/plugins`                   | POST      | Asenna laajennus laajennuslähteiden hakemistosta                         |
-| `/api/plugins/scan`              | POST      | Tarkista laajennushakemisto ja rekisteröi uudet lisäosat                 |
-| `/api/plugins/marketplace`       | GET       | Listaa markkinapaikan luettelomerkinnät                                  |
-| `/api/plugins/[name]`            | GET       | Hanki asennetun laajennuksen tiedot                                      |
-| `/api/plugins/[name]`            | DELETE    | Poista laajennus                                                         |
-| `/api/plugins/[name]/activate`   | POST      | Aktivoi (lataa + -rekisterikoukut)                                       |
-| `/api/plugins/[name]/deactivate` | POST      | Poista käytöstä (sammuta `onDeactivate`, poista koukkujen rekisteröinti) |
-| `/api/plugins/[name]/config`     | GET       | Hae plugin config + config schema                                        |
-| `/api/plugins/[name]/config`     | PUT       | Päivitä laajennuksen kokoonpano (vahvistettu mallia vastaan)             |
+| Päätepiste                         | Menetelmä | Kuvaus                                                                   |
+| ---------------------------------- | --------- | ------------------------------------------------------------------------ |
+| `/api/plugins`                     | GET       | Listaa asennetut laajennukset (valinnainen `?status=` suodatin)          |
+| `/api/plugins`                     | POST      | Asenna laajennus laajennuslähteiden hakemistosta                         |
+| `/api/plugins/scan`                | POST      | Tarkista laajennushakemisto ja rekisteröi uudet lisäosat                 |
+| `/api/plugins/marketplace`         | GET       | Listaa markkinapaikan luettelomerkinnät                                  |
+| `/api/plugins/marketplace/install` | POST      | Asenna Marketplace-laajennus nimellä                                     |
+| `/api/plugins/[name]`              | GET       | Hanki asennetun laajennuksen tiedot                                      |
+| `/api/plugins/[name]`              | DELETE    | Poista laajennus                                                         |
+| `/api/plugins/[name]/activate`     | POST      | Aktivoi (lataa + -rekisterikoukut)                                       |
+| `/api/plugins/[name]/deactivate`   | POST      | Poista käytöstä (sammuta `onDeactivate`, poista koukkujen rekisteröinti) |
+| `/api/plugins/[name]/config`       | GET       | Hae plugin config + config schema                                        |
+| `/api/plugins/[name]/config`       | PUT       | Päivitä laajennuksen kokoonpano (vahvistettu mallia vastaan)             |
 
 `GET /api/plugins` `status` suodatin hyväksyy jonkin seuraavista : `installed` / `active` / `inactive` / `error`. Virheellinen arvo palauttaa `400`.
 
@@ -119,7 +120,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` on oltava an** ehdoton** polku hakemistoon** laajennuksen lähdehakemiston sisällä** : `plugin-sources` laajennuksen juuren vieressä, joten oletuksena `~/.omniroute/plugin-sources/` tai `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`, kun kyseinen muuttuja on asetettu (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopioi tai kloonaa laajennus ensin sinne. Asennus hylätään komennolla `400`, kun polku sisältää `..` tai nollatavun, sijaitsee kyseisen hakemiston ulkopuolella, ratkaisee sen ulkopuolella symlinkin kautta, sisältää symlinkin, jonka kohde on sen ulkopuolella, tai kun hakemistoa ei ole olemassa. Lähdehakemiston on sisällettävä kelvollinen `plugin.json` (tai sen on oltava sen ylätaso). Onnistuessa vastaus on `201` asennetulla liitännäisrivillä.
 
-Toisin kuin muut liitännäisreitit, tämä vaatii hallintatiedot (kojelaudan istunnon tai hallintalaajuisen API avaimen), vaikka sisäänkirjautuminen olisi estetty (`requireLogin=false`): koodin asentaminen ei ole koskaan anonyymi toimenpide.
+Toisin kuin muut liitännäisreitit, tämä vaatii hallintatiedot (kojelaudan istunnon tai hallintalaajuisen API avaimen), vaikka sisäänkirjautuminen olisi estetty (`requireLogin=false`): koodin asentaminen ei ole koskaan anonyymi toimenpide. Sama koskee `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Selaa markkinapaikkaa
 
@@ -137,7 +138,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` vahvistaa jokaisen syötetyn arvon laajennuksen `configSchema` vastaan (ilmoitettu luettelossa): `number` kentät kunnioittavat `min`/`max`, `select` -kenttien on vastattava ilmoitettua `enum`. Avaimet, joita ei ole skeemassa, sallitaan.
+`PUT .../config` vahvistaa rungon laajennuksen `configSchema` vastaan (ilmoitettu luettelossa) komennolla `validatePluginConfig()` alkaen `src/lib/plugins/manifest.ts`: jokainen avain on ilmoitettava skeemassa, arvojen on vastattava ilmoitettua tyyppiä, `number` kentät kunnioittavat `min`/`max`-kenttiä ja `select` -kenttien on vastattava ilmoitettua `enum`. Mikä tahansa rikkomus palauttaa `400`, eikä mitään tallenneta. Pluginilla, joka ilmoittaa, ettei `configSchema` ole konfiguroitavia avaimia, joten pyyntö hylätään `400` ("Plugin ei ilmoitta mitään konfiguroitavia avaimia").
 
 ## Määritykset
 

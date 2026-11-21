@@ -82,18 +82,19 @@ innehåll, loggar `listMarketplacePlugins()` en varning och återgår till start
 
 Alla slutpunkter kräver hanteringsbehörighet (`requireManagementAuth`)** och** är loopback-bara — `/api/plugins` och `/api/plugins/` listas i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Slutpunkt                        | Metod  | Beskrivning                                             |
-| -------------------------------- | ------ | ------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Lista installerade plugins (valfritt `?status=` filter) |
-| `/api/plugins`                   | POST   | Installera ett plugin från plugin sources-katalogen     |
-| `/api/plugins/scan`              | POST   | Skanna plugin-katalogen och registrera nya plugins      |
-| `/api/plugins/marketplace`       | GET    | Lista marknadsplatskatalogposter                        |
-| `/api/plugins/[name]`            | GET    | Få installerade plugin-detaljer                         |
-| `/api/plugins/[name]`            | DELETE | Avinstallera ett plugin                                 |
-| `/api/plugins/[name]/activate`   | POST   | Aktivera (ladda + registerkrokar)                       |
-| `/api/plugins/[name]/deactivate` | POST   | Inaktivera (avfyra `onDeactivate`, avregistrera krokar) |
-| `/api/plugins/[name]/config`     | GET    | Hämta plugin config + config schema                     |
-| `/api/plugins/[name]/config`     | PUT    | Uppdatera plugin-konfiguration (validerad mot schema)   |
+| Slutpunkt                          | Metod  | Beskrivning                                             |
+| ---------------------------------- | ------ | ------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Lista installerade plugins (valfritt `?status=` filter) |
+| `/api/plugins`                     | POST   | Installera ett plugin från plugin sources-katalogen     |
+| `/api/plugins/scan`                | POST   | Skanna plugin-katalogen och registrera nya plugins      |
+| `/api/plugins/marketplace`         | GET    | Lista marknadsplatskatalogposter                        |
+| `/api/plugins/marketplace/install` | POST   | Installera ett marknadsplatsplugin efter namn           |
+| `/api/plugins/[name]`              | GET    | Få installerade plugin-detaljer                         |
+| `/api/plugins/[name]`              | DELETE | Avinstallera ett plugin                                 |
+| `/api/plugins/[name]/activate`     | POST   | Aktivera (ladda + registerkrokar)                       |
+| `/api/plugins/[name]/deactivate`   | POST   | Inaktivera (avfyra `onDeactivate`, avregistrera krokar) |
+| `/api/plugins/[name]/config`       | GET    | Hämta plugin config + config schema                     |
+| `/api/plugins/[name]/config`       | PUT    | Uppdatera plugin-konfiguration (validerad mot schema)   |
 
 `GET /api/plugins` `status` filtret accepterar ett av `installed` / `active` / `inactive` / `error`. Ett ogiltigt värde returnerar `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` måste vara en** absolut** sökvägen till en katalog** i katalogen för plugin-källor** : `plugin-sources` bredvid plugin-roten, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` när den variabeln är inställd (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopiera eller klona insticksprogrammet dit först. Installationen avvisas med `400` när sökvägen innehåller `..` eller en nollbyte, ligger utanför den katalogen, löser sig utanför den genom en symbollänk, innehåller en symbollänk vars mål är utanför den, eller när katalogen inte existerar. Källkatalogen måste innehålla en giltig `plugin.json` (eller vara en förälder till en sådan). Vid framgång är svaret `201` med den installerade pluginraden.
 
-Till skillnad från de andra insticksrutterna kräver den här hanteringsuppgifterna (en instrumentpanelsession eller en API -nyckel) även när inloggningen är inaktiverad (`requireLogin=false`): installation av kod är aldrig en anonym åtgärd.
+Till skillnad från de andra insticksrutterna kräver den här hanteringsuppgifterna (en instrumentpanelsession eller en API -nyckel) även när inloggningen är inaktiverad (`requireLogin=false`): installation av kod är aldrig en anonym åtgärd. Detsamma gäller för `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Bläddra på marknadsplatsen
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validerar varje angett värde mot insticksprogrammets `configSchema` (deklarerat i manifestet): `number` fälten respekterar `min`/`max`, `select` -fälten måste matcha det deklarerade `enum`. Nycklar som inte finns i schemat är tillåtna.
+`PUT .../config` validerar kroppen mot pluginens `configSchema` (deklareras i manifestet) med `validatePluginConfig()` från `src/lib/plugins/manifest.ts`: varje nyckel måste deklareras i schemat, värden måste matcha den deklarerade typen, `number` -fälten respekterar `min`/`max` och `select` -fälten måste matcha den deklarerade `enum`. Varje överträdelse returnerar `400` och ingenting lagras. En plugin som deklarerar ingen `configSchema` har inga konfigurerbara nycklar, så begäran avvisas med `400` ("Plugin deklarerar inte några konfigurerbara nycklar").
 
 ## Konfiguration
 

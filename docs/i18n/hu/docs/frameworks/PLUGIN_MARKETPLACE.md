@@ -83,18 +83,19 @@ kezdeti listát használja.
 
 Minden végponthoz kezelési hitelesítés szükséges (`requireManagementAuth`)** és** csak visszacsatolásúak. — `/api/plugins` és `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` -ben (`src/server/authz/routeGuard.ts`) szerepel.
 
-| Végpont                          | Módszer | Leírás                                                                        |
-| -------------------------------- | ------- | ----------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | A telepített bővítmények listája (opcionális `?status=` szűrő)                |
-| `/api/plugins`                   | POST    | Telepítsen egy beépülő modult a bővítményforrások könyvtárából                |
-| `/api/plugins/scan`              | POST    | Vizsgálja meg a beépülő modulok könyvtárát, és regisztráljon új bővítményeket |
-| `/api/plugins/marketplace`       | GET     | Listázza a piactér katalógus bejegyzéseit                                     |
-| `/api/plugins/[name]`            | GET     | A telepített bővítmény részleteinek megtekintése                              |
-| `/api/plugins/[name]`            | DELETE  | Távolítson el egy bővítményt                                                  |
-| `/api/plugins/[name]/activate`   | POST    | Aktiválás ( + regiszterhorgok betöltése)                                      |
-| `/api/plugins/[name]/deactivate` | POST    | Deaktiválás ( `onDeactivate` eltüzelése, horgok regisztrációjának törlése)    |
-| `/api/plugins/[name]/config`     | GET     | Beépülő modul konfigurálása + konfigurációs séma                              |
-| `/api/plugins/[name]/config`     | PUT     | Frissítse a beépülő modul konfigurációját (a séma alapján érvényesítve)       |
+| Végpont                            | Módszer | Leírás                                                                        |
+| ---------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET     | A telepített bővítmények listája (opcionális `?status=` szűrő)                |
+| `/api/plugins`                     | POST    | Telepítsen egy beépülő modult a bővítményforrások könyvtárából                |
+| `/api/plugins/scan`                | POST    | Vizsgálja meg a beépülő modulok könyvtárát, és regisztráljon új bővítményeket |
+| `/api/plugins/marketplace`         | GET     | Listázza a piactér katalógus bejegyzéseit                                     |
+| `/api/plugins/marketplace/install` | POST    | Telepítsen egy piactéri bővítményt név szerint                                |
+| `/api/plugins/[name]`              | GET     | A telepített bővítmény részleteinek megtekintése                              |
+| `/api/plugins/[name]`              | DELETE  | Távolítson el egy bővítményt                                                  |
+| `/api/plugins/[name]/activate`     | POST    | Aktiválás ( + regiszterhorgok betöltése)                                      |
+| `/api/plugins/[name]/deactivate`   | POST    | Deaktiválás ( `onDeactivate` eltüzelése, horgok regisztrációjának törlése)    |
+| `/api/plugins/[name]/config`       | GET     | Beépülő modul konfigurálása + konfigurációs séma                              |
+| `/api/plugins/[name]/config`       | PUT     | Frissítse a beépülő modul konfigurációját (a séma alapján érvényesítve)       |
 
 A `GET /api/plugins` `status` szűrő `installed` / `active` / `inactive` / `error` egyikét fogadja el . Az érvénytelen érték `400` értéket adja vissza.
 
@@ -116,7 +117,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 A `path` nak an** abszolút** egy könyvtár elérési útja** a plugin források könyvtárában** : `plugin-sources` a plugin gyökér mellett, tehát alapértelmezés szerint `~/.omniroute/plugin-sources/`, vagy `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ha ez a változó be van állítva (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Először másolja vagy klónozza oda a bővítményt. A telepítés visszautasításra kerül `400` vel, ha az elérési út `..` vagy null byte-ot tartalmaz, azon a könyvtáron kívül esik, szimbolikus hivatkozáson keresztül azon kívül oldódik fel, olyan szimbolikus hivatkozást tartalmaz, amelynek célpontja azon kívül van, vagy ha a könyvtár nem létezik. A forráskönyvtárnak érvényes `plugin.json` kell tartalmaznia (vagy szülőjének kell lennie). Siker esetén a válasz `201` a telepített bővítménysorral.
 
-A többi beépülőútvonaltól eltérően ez megköveteli a felügyeleti hitelesítő adatokat (műszerfali munkamenetet vagy kezelési hatókörű API kulcsot), még akkor is, ha a bejelentkezés le van tiltva (`requireLogin=false`): a kód telepítése soha nem névtelen művelet.
+A többi beépülőútvonaltól eltérően ez megköveteli a felügyeleti hitelesítő adatokat (műszerfali munkamenetet vagy kezelési hatókörű API kulcsot), még akkor is, ha a bejelentkezés le van tiltva (`requireLogin=false`): a kód telepítése soha nem névtelen művelet. Ugyanez vonatkozik a `POST /api/plugins/marketplace/install` (test `{ "name": "<plugin>" }`).
 
 ### Böngésszen a piactéren
 
@@ -134,7 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` minden megadott értéket a beépülő modul `configSchema` szemben érvényesít (a jegyzékben deklarálva): `number` mezők tiszteletben tartják `min`/`max`, `select` mezőknek meg kell egyeznie a deklarált `enum`. A sémában nem szereplő kulcsok átengedhetők.
+`PUT .../config` ellenőrzi a törzset a beépülő modul `configSchema` szemben (a jegyzékben deklarálva) a `validatePluginConfig()` vel `src/lib/plugins/manifest.ts` ből: minden kulcsot deklarálni kell a sémában, az értékeknek meg kell egyeznie a deklarált típussal, a `number` mezőknek tiszteletben kell tartaniuk a `min`/`max`, és `select` mezőknek meg kell egyeznie a deklarált `enum`. Bármilyen szabálysértés `400` ad vissza, és semmi sem kerül tárolásra. A `configSchema` nem deklaráló beépülő modulnak nincsenek konfigurálható kulcsai, ezért a kérést `400` lel elutasítják ("A beépülő modul nem deklarál konfigurálható kulcsokat").
 
 ## Konfiguráció
 

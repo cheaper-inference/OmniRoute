@@ -65,18 +65,19 @@ Kada nije konfigurisan prilagođeni URL registra, katalog je ugrađeni `SEED_REG
 
 Sve krajnje tačke zahtijevaju autorizaciju upravljanja (`requireManagementAuth`)** i** su samo za petlju — `/api/plugins` i `/api/plugins/` su navedeni u `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Krajnja tačka                    | Metoda | Opis                                                        |
-| -------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Lista instaliranih dodataka (opcionalni `?status=` filter)  |
-| `/api/plugins`                   | POST   | Instalirajte dodatak iz direktorija izvora dodataka         |
-| `/api/plugins/scan`              | POST   | Skenirajte direktorij dodataka i registrirajte nove dodatke |
-| `/api/plugins/marketplace`       | GET    | Navedite unose u katalogu tržišta                           |
-| `/api/plugins/[name]`            | GET    | Preuzmite detalje o instaliranom dodatku                    |
-| `/api/plugins/[name]`            | DELETE | Deinstalirajte dodatak                                      |
-| `/api/plugins/[name]/activate`   | POST   | Aktiviraj (učitaj + registar kuke)                          |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiviraj (ispali `onDeactivate`, odjavi kuke)            |
-| `/api/plugins/[name]/config`     | GET    | Nabavite konfiguraciju plugina + konfiguracijsku šemu       |
-| `/api/plugins/[name]/config`     | PUT    | Ažuriraj konfiguraciju dodatka (potvrđeno prema šemi)       |
+| Krajnja tačka                      | Metoda | Opis                                                        |
+| ---------------------------------- | ------ | ----------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Lista instaliranih dodataka (opcionalni `?status=` filter)  |
+| `/api/plugins`                     | POST   | Instalirajte dodatak iz direktorija izvora dodataka         |
+| `/api/plugins/scan`                | POST   | Skenirajte direktorij dodataka i registrirajte nove dodatke |
+| `/api/plugins/marketplace`         | GET    | Navedite unose u katalogu tržišta                           |
+| `/api/plugins/marketplace/install` | POST   | Instalirajte dodatak za tržište po imenu                    |
+| `/api/plugins/[name]`              | GET    | Preuzmite detalje o instaliranom dodatku                    |
+| `/api/plugins/[name]`              | DELETE | Deinstalirajte dodatak                                      |
+| `/api/plugins/[name]/activate`     | POST   | Aktiviraj (učitaj + registar kuke)                          |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiviraj (ispali `onDeactivate`, odjavi kuke)            |
+| `/api/plugins/[name]/config`       | GET    | Nabavite konfiguraciju plugina + konfiguracijsku šemu       |
+| `/api/plugins/[name]/config`       | PUT    | Ažuriraj konfiguraciju dodatka (potvrđeno prema šemi)       |
 
 Filter `GET /api/plugins` `status` prihvata jedan od `installed` / `active` / `inactive` / `error`. Nevažeća vrijednost vraća `400`.
 
@@ -98,7 +99,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` mora biti an** apsolutno** put do direktorija** unutar direktorija izvora dodataka** : `plugin-sources` pored korijena dodatka, dakle `~/.omniroute/plugin-sources/` po defaultu, ili `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` kada je ta varijabla postavljena (`getPluginSourcesDir()` u `src/lib/plugins/installSource.ts`). Prvo kopirajte ili klonirajte dodatak tamo. Instalacija je odbijena sa `400` kada putanja sadrži `..` ili null bajt, leži izvan tog direktorija, rješava se izvan njega kroz simboličku vezu, sadrži simboličku vezu čiji je cilj izvan njega ili kada direktorij ne postoji. Izvorni direktorij mora sadržavati važeći `plugin.json` (ili biti njegov roditelj). Po uspjehu odgovor je `201` s instaliranim redom dodatka.
 
-Za razliku od drugih ruta dodataka, ovaj zahtijeva vjerodajnice za upravljanje (sesiju kontrolne ploče ili API ključ s opsegom upravljanja) čak i kada je prijava onemogućena (`requireLogin=false`): instaliranje koda nikada nije anonimna radnja.
+Za razliku od drugih ruta dodataka, ovaj zahtijeva vjerodajnice za upravljanje (sesiju kontrolne ploče ili API ključ s opsegom upravljanja) čak i kada je prijava onemogućena (`requireLogin=false`): instaliranje koda nikada nije anonimna radnja. Isto vrijedi i za `POST /api/plugins/marketplace/install` (tijelo `{ "name": "<plugin>" }`).
 
 ### Pregledajte tržište
 
@@ -116,7 +117,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` potvrđuje svaku datu vrijednost u odnosu na `configSchema` dodatka (deklariran u manifestu): `number` polja poštuju `min`/`max`, `select` polja moraju odgovarati deklariranom `enum`. Ključevi koji nisu prisutni u šemi su dozvoljeni.
+`PUT .../config` potvrđuje tijelo u odnosu na `configSchema` dodatka (deklariran u manifestu) sa `validatePluginConfig()` iz `src/lib/plugins/manifest.ts`: svaki ključ mora biti deklariran u šemi, vrijednosti moraju odgovarati deklariranom tipu, `number` polja poštuju `min`/`max`, a `select` polja moraju odgovarati deklariranom `enum`. Svako kršenje vraća `400` i ništa se ne pohranjuje. Dodatak koji deklarira da nema `configSchema` nema konfigurabilnih ključeva, tako da se zahtjev odbija sa `400` ("Plugin ne deklarira konfigurabilne ključeve").
 
 ## Konfiguracija
 
