@@ -12,6 +12,7 @@ import os from "node:os";
 import { once } from "node:events";
 
 const bridge = await import("../../src/lib/apiBridgeServer.ts");
+const panel = await import("../../src/lib/quotaPanelBridge.ts");
 
 type Seen = { method: string; url: string; headers: http.IncomingHttpHeaders };
 type Reply = { status: number; body: string };
@@ -641,9 +642,10 @@ test("a body refusal closes the connection and the next request on it is not ser
 test("the panel role object is frozen", () => {
   assert.equal(Object.isFrozen(bridge.createQuotaPanelRole()), true);
   assert.equal(Object.isFrozen(bridge.createQuotaPanelRole("/x")), true);
-  const { methods, droppedRequestHeaders } = bridge.createQuotaPanelRole();
+  const { methods, droppedRequestHeaders, droppedResponseHeaders } = bridge.createQuotaPanelRole();
   for (const collection of [
     methods,
+    droppedResponseHeaders,
     droppedRequestHeaders,
     droppedRequestHeaders.prefixes,
     droppedRequestHeaders.names,
@@ -777,5 +779,54 @@ test("an idle socket timeout closes a panel connection whose answer never comes"
   } finally {
     client.destroy();
     shut(front, silent);
+  }
+});
+
+test("the panel port answers with its own keep-alive, not the main port's", async () => {
+  const upstream = http.createServer((req, res) => {
+    req.resume();
+    res.writeHead(200, {
+      "content-type": "text/plain",
+      "keep-alive": "timeout=65",
+      connection: "keep-alive",
+    });
+    res.end("relayed");
+  });
+  const mainPort = await listen(upstream);
+  const keepAliveOf = (port: number, path: string) =>
+    new Promise<{ status: number; keepAlive: string; connection: string }>((resolve, reject) => {
+      const agent = new http.Agent({ keepAlive: true });
+      const req = http.request({ host: "127.0.0.1", port, path, agent }, (res) => {
+        res.resume();
+        res.on("end", () => {
+          agent.destroy();
+          resolve({
+            status: res.statusCode || 0,
+            keepAlive: String(res.headers["keep-alive"] ?? ""),
+            connection: String(res.headers.connection ?? ""),
+          });
+        });
+      });
+      req.on("error", reject);
+      req.end();
+    });
+  // The panel bridge gets the keep-alive value the listener sets on its server.
+  const panelFront = bridge.createApiBridgeServer(mainPort, bridge.createQuotaPanelRole());
+  panelFront.keepAliveTimeout = panel.QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS;
+  const apiFront = bridge.createApiBridgeServer(mainPort);
+  const panelPort = await listen(panelFront);
+  const apiPort = await listen(apiFront);
+  try {
+    const panelAnswer = await keepAliveOf(panelPort, "/quota/claude");
+    assert.equal(panelAnswer.status, 200);
+    assert.doesNotMatch(panelAnswer.keepAlive, /timeout=65/);
+    assert.match(panelAnswer.keepAlive, /^timeout=5\b/);
+    assert.equal(panelAnswer.connection.toLowerCase(), "keep-alive");
+    // The API role still copies the main port's answer.
+    const apiAnswer = await keepAliveOf(apiPort, "/v1/models");
+    assert.equal(apiAnswer.status, 200);
+    assert.match(apiAnswer.keepAlive, /timeout=65/);
+  } finally {
+    shut(panelFront, apiFront, upstream);
   }
 });

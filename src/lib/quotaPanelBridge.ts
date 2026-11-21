@@ -42,6 +42,15 @@ export const QUOTA_PANEL_DROPPED_HEADER_NAMES: readonly string[] = Object.freeze
   "next-resume",
 ]);
 
+/**
+ * Response headers of the main port that the panel does not copy to its client. They describe
+ * the main port's own connection, so the listener's HTTP server writes its own.
+ */
+export const QUOTA_PANEL_DROPPED_RESPONSE_HEADERS: readonly string[] = Object.freeze([
+  "keep-alive",
+  "connection",
+]);
+
 /** The methods the quota panel port relays, the only list of them. */
 export const QUOTA_PANEL_METHOD_NAMES: readonly string[] = Object.freeze(["GET", "HEAD"]);
 

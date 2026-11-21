@@ -9,6 +9,7 @@ import {
   isQuotaPanelPath,
   QUOTA_PANEL_DROPPED_HEADER_NAMES,
   QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
+  QUOTA_PANEL_DROPPED_RESPONSE_HEADERS,
   QUOTA_PANEL_HEADERS_TIMEOUT_MS,
   QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS,
   QUOTA_PANEL_MAX_CONNECTIONS,
@@ -117,6 +118,8 @@ export interface BridgeRole {
   errorDetail: boolean;
   /** Request headers not relayed, by lower-case name prefix or exact lower-case name. */
   droppedRequestHeaders: RequestHeaderDropRule;
+  /** Lower-case names of upstream response headers not copied to the client. */
+  droppedResponseHeaders: readonly string[];
 }
 
 export interface RequestHeaderDropRule {
@@ -143,6 +146,7 @@ const API_BRIDGE_ROLE: BridgeRole = {
   notFoundMessage: "API port only serves OpenAI-compatible routes.",
   errorDetail: true,
   droppedRequestHeaders: NO_REQUEST_HEADER_DROPS,
+  droppedResponseHeaders: Object.freeze([]),
 };
 
 /**
@@ -162,6 +166,7 @@ export function createQuotaPanelRole(basePath = ""): BridgeRole {
     notFoundMessage: "Not found.",
     errorDetail: false,
     droppedRequestHeaders: QUOTA_PANEL_REQUEST_HEADER_DROPS,
+    droppedResponseHeaders: QUOTA_PANEL_DROPPED_RESPONSE_HEADERS,
   });
 }
 
@@ -288,6 +293,17 @@ export function buildBridgeRequestHeaders(
   return relayed;
 }
 
+/** The upstream response headers copied to the client, without the role's dropped names. */
+function relayedResponseHeaders(
+  role: BridgeRole,
+  headers: IncomingHttpHeaders
+): IncomingHttpHeaders {
+  if (role.droppedResponseHeaders.length === 0) return headers;
+  const relayed: IncomingHttpHeaders = { ...headers };
+  for (const name of role.droppedResponseHeaders) delete relayed[name];
+  return relayed;
+}
+
 function proxyRequest(
   req: IncomingMessage,
   res: ServerResponse,
@@ -315,7 +331,7 @@ function proxyRequest(
         targetReq.setTimeout(0);
       }
 
-      res.writeHead(targetRes.statusCode || 502, targetRes.headers);
+      res.writeHead(targetRes.statusCode || 502, relayedResponseHeaders(role, targetRes.headers));
       // pipe() never ends the client on an upstream error; destroy it so the client fails fast.
       targetRes.on("error", () => res.destroy());
       targetRes.pipe(res);
