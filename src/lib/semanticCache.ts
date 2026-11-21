@@ -369,6 +369,15 @@ export function getCachedResponse(signature) {
   // 1. Check memory cache
   const memResult = getMemoryCache().get(signature);
   if (memResult) {
+    // The caller no longer records a legacy hit on top of this one, so the stored row's
+    // counter is kept here, as the SQLite branch below does.
+    try {
+      getDbInstance()
+        .prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?")
+        .run(signature);
+    } catch {
+      // DB not available — the memory hit is still served
+    }
     incrementMetric("hits");
     incrementMetric("tokens_saved", memResult.tokensSaved || 0);
     return memResult.response;
@@ -459,10 +468,13 @@ export function setCachedResponse(signature, model, response, tokensSaved = 0, t
   }
 
   // 1. Memory cache. An oversized answer drops any older entry for the key so it cannot go stale.
+  // The tier keeps its own copy: the caller still edits the answer in place after storing it
+  // (model echo for one client), and that edit must not reach the next caller.
   if (payloadJson !== undefined && exceedsEntryCap(payloadJson)) {
     getMemoryCache().delete(signature);
   } else {
-    getMemoryCache().set(signature, { response, tokensSaved }, ttl);
+    const own = payloadJson !== undefined ? JSON.parse(payloadJson) : response;
+    getMemoryCache().set(signature, { response: own, tokensSaved }, ttl);
   }
 
   // 2. SQLite
