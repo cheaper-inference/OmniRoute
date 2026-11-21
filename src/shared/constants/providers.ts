@@ -481,15 +481,31 @@ export const AUTH_METHODS = {
   apikey: { id: "apikey", name: "API Key", icon: "key" },
 };
 
-export function getProviderByAlias(alias: string): AiProviderDefinition | null {
+let _PROVIDER_BY_KEY: Map<string, AiProviderDefinition> | null = null;
+
+// One index over every alias and id. The first provider in section order wins a shared
+// key, the same rule the old linear scan applied.
+function buildProviderByKey(): Map<string, AiProviderDefinition> {
+  const index = new Map<string, AiProviderDefinition>();
   for (const section of _PROVIDER_SECTIONS) {
-    for (const provider of Object.values(section)) {
-      if (provider.alias === alias || provider.id === alias) {
-        return provider as AiProviderDefinition;
+    for (const provider of Object.values(section) as Array<
+      AiProviderDefinition & { alias?: string }
+    >) {
+      for (const key of [provider.alias, provider.id]) {
+        if (key && !index.has(key)) index.set(key, provider);
       }
     }
   }
-  return null;
+  return index;
+}
+
+function getOrCreateProviderByKey(): Map<string, AiProviderDefinition> {
+  _PROVIDER_BY_KEY ??= buildProviderByKey();
+  return _PROVIDER_BY_KEY;
+}
+
+export function getProviderByAlias(alias: string): AiProviderDefinition | null {
+  return getOrCreateProviderByKey().get(alias) ?? null;
 }
 
 // Helper: Get provider ID from alias
