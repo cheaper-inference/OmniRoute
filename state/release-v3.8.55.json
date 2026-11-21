@@ -2,48 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b21",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b21-f5c4de4bb0d3",
-    "candidateSha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
-    "baseSha": "76b26b8ead943efd7ae5fa8e65c5551cb392adb1",
-    "treeSha": "83d170dd1b38b6764b502610132142ccf72408a0",
-    "prs": [
-      {
-        "n": 14667,
-        "head": "8659558510a5799b16bd1ec03635dc561ee95912",
-        "title": "feat(api): list System One decision models on GET /v1/systemone/models",
-        "author": "PixmaNts",
-        "labeledAt": "2026-11-21T03:56:04Z"
-      },
-      {
-        "n": 18122,
-        "head": "8ef72f69f96896be79f2213d41609bc54af17a93",
-        "title": "feat(providers): show Muse Code session and weekly usage",
-        "author": "aldoeliacim",
-        "labeledAt": "2026-11-21T03:56:16Z"
-      },
-      {
-        "n": 19403,
-        "head": "b8705ef21a1cf8b52d9f396a7e0fb6bb08db2056",
-        "title": "fix(translator): 3 fixes in open-sse translator response",
-        "author": "serenity-X",
-        "labeledAt": "2026-11-21T03:56:26Z"
-      },
-      {
-        "n": 19542,
-        "head": "81a5a241fcc7f71bf35b8a0e6298ccef92a17092",
-        "title": "fix(mcp): skip a duplicate skill tool name instead of dropping later skills",
-        "author": "serenity-X",
-        "labeledAt": "2026-11-21T03:56:33Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-21T05:29:43.195Z",
-    "attempts": 0,
-    "bisect": null
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "7bca1e353169686029e8beb28165df6007d80470",
@@ -86,10 +45,11 @@
   ],
   "shadow": {
     "processed": {
-      "14667": "431849af6effb01d2518483171e6fa28d13ed22f",
+      "14667": "8659558510a5799b16bd1ec03635dc561ee95912",
       "14860": "537a2a9dd38dcfeb936fb37fa2ec26becd8d1925",
       "14863": "009cc84a60dec564b1ee84cefebfad43464744ee",
       "14864": "70a8e2e02e39d3185ce4d80b49025664fa36ee85",
+      "18122": "8ef72f69f96896be79f2213d41609bc54af17a93",
       "18142": "a62a6abf6c29aea7e3c1b2f4a3f95947a1791d11",
       "18544": "039bfcf2b12d1e31d4b285b3154da3f12bafb19b",
       "18551": "be28b2f4df97483112595236e4cdc4d24f9cded1",
@@ -109,6 +69,8 @@
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "19403": "b8705ef21a1cf8b52d9f396a7e0fb6bb08db2056",
+      "19542": "81a5a241fcc7f71bf35b8a0e6298ccef92a17092",
       "20781": "21c3a7a04be1d4cf466fed9caf748a8dc1ab51c4"
     }
   },
@@ -1558,8 +1520,35 @@
       "sha": "2a48a0a823bf12139867cc9cf8b70814302c2689",
       "detail": "head-changed-after-label",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871855421"
+    },
+    {
+      "at": "2026-11-21T06:34:33.612Z",
+      "type": "checks-green",
+      "batchId": "b21",
+      "prs": [
+        14667,
+        18122,
+        19403,
+        19542
+      ],
+      "sha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44876156523"
+    },
+    {
+      "at": "2026-11-21T06:34:48.890Z",
+      "type": "would-land",
+      "batchId": "b21",
+      "prs": [
+        14667,
+        18122,
+        19403,
+        19542
+      ],
+      "sha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
+      "detail": "shadow mode: would merge-ff onto 76b26b8ead94",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44876156523"
     }
   ],
-  "updatedAt": "2026-11-21T05:43:07.897Z",
+  "updatedAt": "2026-11-21T06:35:15.934Z",
   "batchWindow": 6
 }
