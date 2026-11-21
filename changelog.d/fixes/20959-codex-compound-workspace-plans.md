@@ -1,0 +1,1 @@
+- **fix(providers):** Codex Sol and Astra models route to ChatGPT workspace accounts whose plan is a compound id such as `self_serve_business_prolite` instead of failing with "No active credentials" ([#20959](https://github.com/cheaper-inference/OmniRoute/pull/20959)) — thanks @hayes0724
