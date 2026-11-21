@@ -2,27 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b25",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b25-2f50b6c94f40",
-    "candidateSha": "2f50b6c94f4038158df9de98986a27b2fb4f98f8",
-    "baseSha": "5ffa68e835442a12ed1204a2eebf4076c298aecb",
-    "treeSha": "62056fc61ee4e787baaf34c35eacc4140b201566",
-    "prs": [
-      {
-        "n": 20939,
-        "head": "3725904602e37ce030e05e3f427dcce8aa0b2f5b",
-        "title": "fix(ci): time limits for the Fast Quality Gates job and for each of its gates",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T18:12:50Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-21T20:52:25.701Z",
-    "attempts": 0,
-    "bisect": null
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
@@ -102,6 +82,7 @@
       "20825": "2a48a0a823bf12139867cc9cf8b70814302c2689",
       "20866": "b470798f230961a9607d905f60c5ea6a17f9e29b",
       "20867": "38d38c282537d6433be817567f3b28bb23510b7f",
+      "20939": "3725904602e37ce030e05e3f427dcce8aa0b2f5b",
       "20940": "321ffbe2c2e3753004937f3f63a1dbf1069caade"
     }
   },
@@ -1844,8 +1825,29 @@
         "20939": "2026-11-21T18:12:50Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44948476998"
+    },
+    {
+      "at": "2026-11-21T22:04:05.263Z",
+      "type": "checks-green",
+      "batchId": "b25",
+      "prs": [
+        20939
+      ],
+      "sha": "2f50b6c94f4038158df9de98986a27b2fb4f98f8",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44954745810"
+    },
+    {
+      "at": "2026-11-21T22:04:14.560Z",
+      "type": "would-land",
+      "batchId": "b25",
+      "prs": [
+        20939
+      ],
+      "sha": "2f50b6c94f4038158df9de98986a27b2fb4f98f8",
+      "detail": "shadow mode: would merge-ff onto 5ffa68e83544",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44954745810"
     }
   ],
-  "updatedAt": "2026-11-21T21:59:43.431Z",
+  "updatedAt": "2026-11-21T22:04:36.709Z",
   "batchWindow": 4
 }
