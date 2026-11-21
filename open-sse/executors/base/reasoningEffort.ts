@@ -468,6 +468,9 @@ export function sanitizeReasoningEffortForProvider(
     return stripEffortValue(working, c);
   }
 
+  // Cohere's compat endpoint only accepts "high" (422 otherwise, #20363).
+  if (provider === "cohere" && effortStr !== "high") return writeEffortValue(working, "high", c);
+
   // ── GLM-5.3 and GLM-5.3-FLASH specific rules ──────────────────────────────
   // Supported options: max (default & recommended), high, low.
   // none/minimal/low → low; medium/high → high; xhigh/max → max.

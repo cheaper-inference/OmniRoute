@@ -1,0 +1,1 @@
+- **fix(syntx):** undecodable or rejected image and video references now return 400 or 502 instead of generating without them ([#20560](https://github.com/cheaper-inference/OmniRoute/pull/20560)) — thanks @maxmad64bis
