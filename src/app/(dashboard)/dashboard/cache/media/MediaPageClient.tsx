@@ -122,6 +122,53 @@ function connectionStateFor(
   );
 }
 
+// Local providers (SD WebUI, ComfyUI) are listed only once they are set up (#390).
+const LOCAL_PROVIDERS = ["sdwebui", "comfyui"];
+
+/** The providers a tab lists: a local one only when it is configured. */
+function listedProviders(tab: Modality, configuredLocal: ReadonlySet<string>) {
+  return (PROVIDER_MODELS[tab] ?? []).filter(
+    (p) => !LOCAL_PROVIDERS.includes(p.id) || configuredLocal.has(p.id)
+  );
+}
+
+/**
+ * KEA-9390: the provider a tab should be on — `currentId` when it is connected, else the first
+ * connected one, else `currentId` (or the first listed provider when there is none).
+ */
+function preferredProvider(
+  tab: Modality,
+  currentId: string | null,
+  configuredLocal: ReadonlySet<string>,
+  connectedProviders: ReadonlySet<string> | null
+): ProviderModelGroup | undefined {
+  const providers = listedProviders(tab, configuredLocal);
+  const preferredId = pickPreferredMediaProvider(providers, currentId ?? providers[0]?.id, (id) =>
+    connectionStateFor(tab, id, connectedProviders)
+  );
+  return providers.find((p) => p.id === preferredId);
+}
+
+/**
+ * KEA-9390: the provider to move to once the connection list has loaded, or `null` to stay:
+ * nothing is known (`connectedProviders` is `null`) or the current provider is already the
+ * preferred one.
+ */
+function providerToOpenOn(
+  current: { tab: Modality; provider: string },
+  configuredLocal: ReadonlySet<string>,
+  connectedProviders: ReadonlySet<string> | null
+): string | null {
+  if (!connectedProviders) return null;
+  const preferred = preferredProvider(
+    current.tab,
+    current.provider,
+    configuredLocal,
+    connectedProviders
+  );
+  return preferred && preferred.id !== current.provider ? preferred.id : null;
+}
+
 // Voice presets per TTS provider
 const VOICE_PRESETS: Record<string, { id: string; label: string }[]> = {
   default: [
@@ -491,7 +538,6 @@ export default function MediaPageClient() {
 
   // Fix #390: Track which local providers (sdwebui, comfyui) are actually configured
   // so we can hide them when they haven't been set up in the providers page
-  const LOCAL_PROVIDERS = ["sdwebui", "comfyui"];
   const [configuredLocalProviders, setConfiguredLocalProviders] = useState<Set<string>>(
     new Set(LOCAL_PROVIDERS) // Optimistic: show all until we know otherwise
   );
@@ -554,28 +600,18 @@ export default function MediaPageClient() {
         // KEA-9390: open on a connected provider when the default one has no connection.
         const connected = collectConnectedProviderIds(data);
         setConnectedProviders(connected);
-        if (connected && !providerPicked.current) {
-          const { tab, provider } = selection.current;
-          const preferred = pickPreferredMediaProvider(
-            (PROVIDER_MODELS[tab] ?? []).filter(
-              (p) => !LOCAL_PROVIDERS.includes(p.id) || configured.has(p.id)
-            ),
-            provider,
-            (id) => connectionStateFor(tab, id, connected)
-          );
-          if (preferred && preferred !== provider) applyProvider(tab, preferred);
-        }
+        const next = providerPicked.current
+          ? null
+          : providerToOpenOn(selection.current, configured, connected);
+        if (next) applyProvider(selection.current.tab, next);
       })
       .catch(() => {
         // On error, keep showing all (fail-open)
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filter out unconfigured local providers from the provider list
-  const currentProviders = (PROVIDER_MODELS[activeTab] ?? []).filter(
-    (p) => !LOCAL_PROVIDERS.includes(p.id) || configuredLocalProviders.has(p.id)
-  );
+  const currentProviders = listedProviders(activeTab, configuredLocalProviders);
   const currentModels = currentProviders.find((p) => p.id === selectedProvider)?.models ?? [];
 
   const switchTab = (tab: Modality) => {
@@ -589,21 +625,21 @@ export default function MediaPageClient() {
     setImageMaskFile(null);
     // Pick the first connected provider (else the first listed one) and its first model. Only
     // providers the list shows: a local one that is not set up is not a choice.
-    const providers = (PROVIDER_MODELS[tab] ?? []).filter(
-      (p) => !LOCAL_PROVIDERS.includes(p.id) || configuredLocalProviders.has(p.id)
+    const firstProvider = preferredProvider(
+      tab,
+      null,
+      configuredLocalProviders,
+      connectedProviders
     );
-    const preferredId = pickPreferredMediaProvider(providers, providers[0]?.id, (id) =>
-      connectionStateFor(tab, id, connectedProviders)
-    );
-    const firstProvider = providers.find((p) => p.id === preferredId);
+    const firstProviderId = firstProvider?.id ?? "";
     providerPicked.current = false;
-    selection.current = { tab, provider: firstProvider?.id ?? "" };
-    setSelectedProvider(firstProvider?.id ?? "");
+    selection.current = { tab, provider: firstProviderId };
+    setSelectedProvider(firstProviderId);
     const firstModel = firstProvider?.models[0]?.id ?? "";
     setSelectedModel(firstModel);
     if (tab === "speech") {
-      setSpeechVoice(getVoiceList(firstProvider?.id ?? "")[0]?.id ?? "alloy");
-      setSpeechFormat(getSpeechFormats(firstProvider?.id ?? "")[0] ?? "mp3");
+      setSpeechVoice(getVoiceList(firstProviderId)[0]?.id ?? "alloy");
+      setSpeechFormat(getSpeechFormats(firstProviderId)[0] ?? "mp3");
     }
   };
 
