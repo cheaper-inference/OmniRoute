@@ -120,11 +120,12 @@ function compareDottedTriple(left: string, right: string): number {
   return 0;
 }
 
-function pickCodexVersionAtLeastPin(candidate: string | null): string {
-  if (candidate && compareDottedTriple(candidate, DEFAULT_CODEX_CLIENT_VERSION) > 0) {
-    return candidate;
-  }
-  return DEFAULT_CODEX_CLIENT_VERSION;
+function pickCodexVersionAtLeastPin(...candidates: Array<string | null | undefined>): string {
+  return candidates.reduce<string>(
+    (newest, candidate) =>
+      candidate && compareDottedTriple(candidate, newest) > 0 ? candidate : newest,
+    DEFAULT_CODEX_CLIENT_VERSION
+  );
 }
 
 async function fetchCodexReleaseTag(fetchImpl: FetchLike): Promise<string | null> {
@@ -151,7 +152,7 @@ async function fetchCodexReleaseTag(fetchImpl: FetchLike): Promise<string | null
 /**
  * Refresh the advertised Codex CLI version from the latest GitHub release.
  * A fetched dotted triple newer than the pin replaces it; any failure, a
- * malformed tag, or an older release keeps the pin. Cached for six hours.
+ * malformed tag, or an older release keeps the last known version (or pin). Cached for six hours.
  */
 export function resolveCodexClientVersion(fetchImpl: FetchLike = fetch): Promise<string> {
   const now = Date.now();
@@ -162,7 +163,7 @@ export function resolveCodexClientVersion(fetchImpl: FetchLike = fetch): Promise
 
   versionInFlight = (async () => {
     const fetched = await fetchCodexReleaseTag(fetchImpl);
-    const version = pickCodexVersionAtLeastPin(fetched ?? versionCache?.version ?? null);
+    const version = pickCodexVersionAtLeastPin(fetched, versionCache?.version);
     if (fetched) {
       versionCache = { fetchedAt: Date.now(), version };
       versionLookupFailedAt = 0;
@@ -199,23 +200,20 @@ export function getCodexClientVersion(): string {
     getCliVersionOverride("codex") ||
     getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override) return override;
-  // Discovery may cache a registry version, but never below the release pin.
-  if (
-    cachedCodexVersion &&
-    compareDottedTriple(cachedCodexVersion, DEFAULT_CODEX_CLIENT_VERSION) >= 0
-  ) {
-    return cachedCodexVersion;
-  }
+  const now = Date.now();
+  // Refresh expired caches too: long-lived inference traffic may never invoke
+  // model discovery again. Return the last known version while refreshing.
   if (
     canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
-    !versionCache &&
+    (!versionCache || now - versionCache.fetchedAt >= CODEX_VERSION_CACHE_TTL_MS) &&
     !versionInFlight &&
-    Date.now() - versionLookupFailedAt >= CODEX_VERSION_RETRY_AFTER_FAILURE_MS
+    !codexVersionRefresh &&
+    now - versionLookupFailedAt >= CODEX_VERSION_RETRY_AFTER_FAILURE_MS
   ) {
     void resolveCodexClientVersion();
   }
-  return getCachedCodexClientVersion();
+  return pickCodexVersionAtLeastPin(cachedCodexVersion, versionCache?.version);
 }
 
 /** Bound registry body reads as well as the connection; a stalled body must not block discovery. */
@@ -334,10 +332,7 @@ export function resetCodexClientVersionCacheForTests(): void {
 export function getCodexAdvertisedVersionSource(): CliVersionSource {
   if (getCliVersionOverride("codex")) return "settings";
   if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "env";
-  const discovered =
-    cachedCodexVersion && compareDottedTriple(cachedCodexVersion, DEFAULT_CODEX_CLIENT_VERSION) >= 0
-      ? cachedCodexVersion
-      : getCachedCodexClientVersion();
+  const discovered = pickCodexVersionAtLeastPin(cachedCodexVersion, versionCache?.version);
   return discovered !== DEFAULT_CODEX_CLIENT_VERSION ? "discovered" : "default";
 }
 
