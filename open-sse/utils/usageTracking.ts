@@ -511,6 +511,9 @@ export function isInputTokenCountPlausible(inputTokens: unknown, body: unknown):
     return false;
   }
 
+  // The bound is bytes * 2 + 8192, so anything up to the fixed allowance is plausible for every
+  // body: skip stringifying a multi-megabyte request just to confirm a small count.
+  if (inputTokens <= INPUT_USAGE_FIXED_ALLOWANCE) return true;
   const bodyBytes = getSerializedBodyBytes(body);
   if (bodyBytes === null) return true;
   const maximum = bodyBytes * INPUT_USAGE_BYTE_MULTIPLIER + INPUT_USAGE_FIXED_ALLOWANCE;
