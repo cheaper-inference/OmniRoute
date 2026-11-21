@@ -52,6 +52,7 @@ import {
   buildAddProviderSpecificData,
 } from "./connectionProviderSpecificData";
 import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import ConnectionLoggingToggle from "./ConnectionLoggingToggle";
 import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getCommandCodeAuthPhaseLabel } from "./commandCodeAuthPhase";
 import { createInitialAddApiKeyFormData } from "./addApiKeyInitialFormData";
@@ -760,6 +761,10 @@ export default function AddApiKeyModal({
               provider={provider}
               checked={formData.commandCodeZdrEnabled}
               onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+            />
+            <ConnectionLoggingToggle
+              checked={formData.loggingEnabled}
+              onChange={(checked) => setFormData({ ...formData, loggingEnabled: checked })}
             />
             <Input
               label={t("nameLabel")}

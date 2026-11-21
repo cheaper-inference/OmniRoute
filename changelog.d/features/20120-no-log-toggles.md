@@ -1,0 +1,1 @@
+- **feat(api):** add no-log toggles at global, connection, and per-model levels so any layer can withhold request/response payloads from call logs while keeping metadata (timestamp, model, status, duration, token counts, errors); pairs with the per-request `x-omniroute-no-log` header from #20096

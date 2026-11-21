@@ -35,6 +35,7 @@ import {
   type CompatByProtocolMap,
 } from "../providerPageHelpers";
 import ModelCompatPopover from "./ModelCompatPopover";
+import ModelLoggingToggle from "./ModelLoggingToggle";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -334,7 +335,7 @@ export default function CustomModelsSection({
 
   const saveCustomCompat = async (
     modelId: string,
-    patch: { compatByProtocol?: CompatByProtocolMap }
+    patch: { compatByProtocol?: CompatByProtocolMap; noLog?: boolean | null }
   ) => {
     setSavingModelId(modelId);
     try {
@@ -892,6 +893,16 @@ export default function CustomModelsSection({
                     className="size-6 min-h-6 rounded text-text-muted"
                     title={t("edit")}
                     aria-label={t("edit")}
+                  />
+                  <ModelLoggingToggle
+                    modelNoLog={model.noLog}
+                    disabled={savingModelId === model.id}
+                    t={t}
+                    onToggleLogging={(nextLoggingEnabled) =>
+                      saveCustomCompat(model.id!, {
+                        noLog: nextLoggingEnabled ? null : true,
+                      })
+                    }
                   />
                   <ModelCompatPopover
                     t={t}

@@ -322,6 +322,11 @@ export const updateSettingsSchema = z.object({
   probeCanDisable: z.boolean().optional(),
   debugMode: z.boolean().optional(),
   logToolSources: z.boolean().optional(),
+  // Global call-log payload retention. Default true (log payloads); false
+  // withholds request/response message content (metadata still recorded).
+  noLogPayloads: z.boolean().optional(),
+  // Canonical alias for noLogPayloads (true = log payloads, default true).
+  loggingEnabled: z.boolean().optional(),
   // Opt-in (absent = off): keep only the `maxTools` client tools most relevant to the
   // current user turn (BM25) before the provider tool cap. See open-sse/utils/toolDisclosure.ts.
   toolDisclosure: z

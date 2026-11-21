@@ -23,6 +23,7 @@ type FormData = QuotaScrapingFieldValues &
     ccCompatibleRedactThinking: boolean;
     ccCompatibleSummarizeThinking: boolean;
     commandCodeZdrEnabled?: boolean;
+    loggingEnabled?: boolean;
     consoleApiKey: string;
     customUserAgent: string;
     huggingfaceBillTo: string;
@@ -112,6 +113,7 @@ export function buildAddProviderSpecificData(options: {
   if (provider === "command-code" && formData.commandCodeZdrEnabled === true) {
     data.zdrEnabled = true;
   }
+  assignConnectionLogging(formData, data, false);
   assignQuotaScrapingProviderData(provider, formData, data);
   if (isGooglePse && formData.cx.trim()) data.cx = formData.cx.trim();
   if (provider === "aws-polly") {
@@ -152,6 +154,16 @@ function assignCommandCodeZdrOnEdit(
   if (provider === "command-code") target.zdrEnabled = formData.commandCodeZdrEnabled === true;
 }
 
+/** Edit path: explicit boolean so the PUT merge can turn Logging back on. Shared by both assign paths. */
+function assignConnectionLogging(
+  formData: FormData,
+  target: ProviderSpecificData,
+  edit: boolean
+): void {
+  const off = formData.loggingEnabled === false;
+  if (edit || off) target.noLog = off;
+}
+
 export function assignEditApiKeyProviderSpecificData(options: {
   provider: string;
   formData: FormData;
@@ -179,9 +191,7 @@ export function assignEditApiKeyProviderSpecificData(options: {
     ...o.openRouterPreset.getPatch(),
     ...(o.formData.passthroughModels ? { passthroughModels: true } : {}),
   });
-  if (CONSOLE_API_KEY_PROVIDERS.has(o.provider)) {
-    o.target.consoleApiKey = o.formData.consoleApiKey.trim() || undefined;
-  }
+  assignEditZdrBranches(o);
   if (o.provider === "huggingface") {
     // Explicit `null`, not `undefined`: the PUT route merges
     // { ...existing, ...incoming } and JSON.stringify drops `undefined`, so
@@ -194,9 +204,48 @@ export function assignEditApiKeyProviderSpecificData(options: {
     o.target.newApiUserId = o.formData.newApiUserId.trim() || undefined;
   }
   assignCommandCodeZdrOnEdit(o.provider, o.formData, o.target);
+  assignConnectionLogging(o.formData, o.target, true);
   assignQuotaScrapingProviderData(o.provider, o.formData, o.target);
   if (o.formData.validationModelId) o.target.validationModelId = o.formData.validationModelId;
   if (o.isGooglePse) o.target.cx = o.formData.cx.trim() || undefined;
+  assignEditRegionBranches(o);
+  if (o.isAntigravityFamily) o.target.projectId = o.trimmedCloudCodeProjectId || null;
+  if (isM365TierCapableProvider(o.provider)) applyM365Tier(o.target, o.formData.m365Tier ?? "");
+  if (o.isCcCompatible) {
+    o.target.requestDefaults = mergeCcCompatibleRequestDefaults(
+      o.target.requestDefaults,
+      o.formData
+    );
+  }
+  assignEditAggregatorBalance(o);
+  if (o.provider === "chatgpt-web-codex") {
+    o.target.tunnelId = o.formData.tunnelId.trim() || undefined;
+    o.target.connectorName = o.formData.connectorName.trim() || undefined;
+  }
+  assignEditConnectionExtras(o);
+}
+
+function assignEditZdrBranches(o: {
+  provider: string;
+  formData: FormData;
+  target: ProviderSpecificData;
+}): void {
+  if (CONSOLE_API_KEY_PROVIDERS.has(o.provider)) {
+    o.target.consoleApiKey = o.formData.consoleApiKey.trim() || undefined;
+  }
+}
+
+function assignEditRegionBranches(o: {
+  provider: string;
+  formData: FormData;
+  target: ProviderSpecificData;
+  usesBaseUrl: boolean;
+  validatedBaseUrl: string | null;
+  showsRegion: boolean;
+  defaultRegion: string;
+  isGlm: boolean;
+  isCloudflare: boolean;
+}): void {
   if (o.provider === "aws-polly") {
     o.target.accessKeyId = o.formData.awsAccessKeyId.trim() || undefined;
     o.target.region = o.formData.region.trim() || "us-east-1";
@@ -209,14 +258,12 @@ export function assignEditApiKeyProviderSpecificData(options: {
   } else if (o.isCloudflare && o.formData.accountId.trim()) {
     o.target.accountId = o.formData.accountId.trim();
   }
-  if (o.isAntigravityFamily) o.target.projectId = o.trimmedCloudCodeProjectId || null;
-  if (isM365TierCapableProvider(o.provider)) applyM365Tier(o.target, o.formData.m365Tier ?? "");
-  if (o.isCcCompatible) {
-    o.target.requestDefaults = mergeCcCompatibleRequestDefaults(
-      o.target.requestDefaults,
-      o.formData
-    );
-  }
+}
+
+function assignEditAggregatorBalance(o: {
+  formData: FormData;
+  target: ProviderSpecificData;
+}): void {
   // #9415 — New-API / One-API / Sub2API aggregator balance detection
   if (o.formData.newApiAggregatorBalance) {
     o.target.newApiAggregatorBalance = true;
@@ -232,9 +279,12 @@ export function assignEditApiKeyProviderSpecificData(options: {
     o.target.newApiAggregatorBalance = undefined;
     o.target.quotaPerUnit = undefined;
   }
-  if (o.provider === "chatgpt-web-codex") {
-    o.target.tunnelId = o.formData.tunnelId.trim() || undefined;
-    o.target.connectorName = o.formData.connectorName.trim() || undefined;
-  }
+}
+
+function assignEditConnectionExtras(o: {
+  formData: FormData;
+  target: ProviderSpecificData;
+  provider: string;
+}): void {
   assignM365RefreshToken(o.provider, o.formData, o.target);
 }

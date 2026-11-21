@@ -46,6 +46,8 @@ export interface ModelCompatSavePatch {
   upstreamHeaders?: Record<string, string>;
   compatByProtocol?: CompatByProtocolMap;
   isHidden?: boolean;
+  /** Per-model no-log flag; null unsets back to the logging default. */
+  noLog?: boolean | null;
 }
 
 export interface UseModelVisibilityHandlersParams {
@@ -142,11 +144,13 @@ export function useModelVisibilityHandlers({
     try {
       const c = customMap.get(modelId) as Record<string, unknown> | undefined;
       let body: Record<string, unknown>;
+      const hasNoLogPatch = Object.prototype.hasOwnProperty.call(patch, "noLog");
       const onlyCompatByProtocol =
         patch.compatByProtocol &&
         patch.normalizeToolCallId === undefined &&
         patch.preserveOpenAIDeveloperRole === undefined &&
-        !("upstreamHeaders" in patch);
+        !("upstreamHeaders" in patch) &&
+        !hasNoLogPatch;
 
       if (c) {
         if (onlyCompatByProtocol) {
@@ -183,6 +187,7 @@ export function useModelVisibilityHandlers({
                   : true,
           };
           if (patch.compatByProtocol) body.compatByProtocol = patch.compatByProtocol;
+          if (hasNoLogPatch) body.noLog = patch.noLog;
         }
       } else {
         body = { provider: providerId, modelId, ...patch };
