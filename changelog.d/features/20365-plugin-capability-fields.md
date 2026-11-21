@@ -1,0 +1,1 @@
+- **feat(plugin-v2):** Publish the gateway-computed temperature flag and a reasoning compatibility block in the stable model catalog ([#20365](https://github.com/cheaper-inference/OmniRoute/pull/20365)) — thanks @maxmad64bis
