@@ -1,0 +1,1 @@
+- **fix(sse):** System-prompt images are kept as text placeholders when a model requires the system role to be folded into the user turn ([#20559](https://github.com/cheaper-inference/OmniRoute/pull/20559)) — thanks @maxmad64bis

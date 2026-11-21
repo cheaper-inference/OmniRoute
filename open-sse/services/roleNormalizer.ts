@@ -118,7 +118,7 @@ interface NormalizedMessage {
   [key: string]: unknown;
 }
 
-function extractTextFromContent(content: unknown): string {
+function extractTextFromContent(content: unknown, renderNonText = false): string {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   return content
@@ -127,9 +127,22 @@ function extractTextFromContent(content: unknown): string {
         !!part &&
         typeof part === "object" &&
         "type" in part &&
-        (part as MessageContentPart).type === "text"
+        (renderNonText || (part as MessageContentPart).type === "text")
     )
-    .map((part) => (typeof part.text === "string" ? part.text : ""))
+    .map((part) => {
+      if (part.type === "text") return typeof part.text === "string" ? part.text : "";
+      // Keep a readable trace of a non-text part when the target cannot carry it.
+      const type = typeof part.type === "string" && part.type ? part.type : "unknown";
+      if (type !== "image_url" && type !== "input_image") return `[${type}]`;
+      const field = part.image_url;
+      const url =
+        typeof field === "string"
+          ? field
+          : field && typeof field === "object" && "url" in field && typeof field.url === "string"
+            ? field.url
+            : "";
+      return url ? `[Image: ${url}]` : "[Image]";
+    })
     .join("\n");
 }
 
@@ -236,7 +249,7 @@ export function normalizeSystemRole(
 
   // Build system content string
   const systemContent = systemMessages
-    .map((message: NormalizedMessage) => extractTextFromContent(message.content))
+    .map((message: NormalizedMessage) => extractTextFromContent(message.content, true))
     .filter(Boolean)
     .join("\n\n");
 
