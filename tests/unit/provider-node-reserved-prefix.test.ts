@@ -233,7 +233,7 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // two more (444 -> 446).
   // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
   // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 450.
-  assert.equal(RESERVED_PREFIX_COUNT, 450);
+  assert.equal(RESERVED_PREFIX_COUNT, 451);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
   for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {

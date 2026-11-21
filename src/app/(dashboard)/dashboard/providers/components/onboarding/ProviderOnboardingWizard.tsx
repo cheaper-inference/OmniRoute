@@ -12,6 +12,7 @@ import {
   Button,
   Card,
   CursorAuthModal,
+  GrokBotAuthModal,
   Input,
   KiroOAuthWrapper,
   OAuthModal,
@@ -311,6 +312,39 @@ function ResultSummary({
         </div>
       </div>
     </Card>
+  );
+}
+
+function ProviderOAuthDialog({
+  provider,
+  isOpen,
+  onSuccess,
+  onClose,
+}: {
+  provider: WizardProviderOption;
+  isOpen: boolean;
+  onSuccess: () => void;
+  onClose: () => void;
+}) {
+  return provider.id === "kiro" || provider.id === "amazon-q" ? (
+    <KiroOAuthWrapper
+      isOpen={isOpen}
+      providerInfo={{ id: provider.id, name: provider.name }}
+      onSuccess={onSuccess}
+      onClose={onClose}
+    />
+  ) : provider.id === "cursor" ? (
+    <CursorAuthModal isOpen={isOpen} onSuccess={onSuccess} onClose={onClose} />
+  ) : provider.id === "grok-bot" ? (
+    <GrokBotAuthModal isOpen={isOpen} onSuccess={onSuccess} onClose={onClose} />
+  ) : (
+    <OAuthModal
+      isOpen={isOpen}
+      provider={provider.id}
+      providerInfo={provider}
+      onSuccess={onSuccess}
+      onClose={onClose}
+    />
   );
 }
 
@@ -914,29 +948,14 @@ export default function ProviderOnboardingWizard() {
         <ResultSummary connection={createdConnection} testResult={testResult} error={error} t={t} />
       )}
 
-      {selectedProvider &&
-        (selectedProvider.id === "kiro" || selectedProvider.id === "amazon-q" ? (
-          <KiroOAuthWrapper
-            isOpen={showOAuthModal}
-            providerInfo={{ id: selectedProvider.id, name: selectedProvider.name }}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ) : selectedProvider.id === "cursor" ? (
-          <CursorAuthModal
-            isOpen={showOAuthModal}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ) : (
-          <OAuthModal
-            isOpen={showOAuthModal}
-            provider={selectedProvider.id}
-            providerInfo={selectedProvider}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ))}
+      {selectedProvider && (
+        <ProviderOAuthDialog
+          provider={selectedProvider}
+          isOpen={showOAuthModal}
+          onSuccess={handleOAuthSuccess}
+          onClose={() => setShowOAuthModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -49,3 +49,21 @@ for (const active of [true, false]) {
     assert.match(String(result.message), active ? /\(active\)/ : /\(inactive\)/);
   });
 }
+
+test("Muse subscription metadata remains available through generic usage dispatch", async () => {
+  const { getUsageForProvider } = await import("../../open-sse/services/usage.ts");
+  const { USAGE_FETCHER_PROVIDERS } =
+    await import("../../open-sse/services/usage/fetcherProviders.ts");
+  const { USAGE_SUPPORTED_PROVIDERS } =
+    await import("../../open-sse/services/usage/supportedProviders.ts");
+  assert.ok((USAGE_FETCHER_PROVIDERS as readonly string[]).includes("muse-code"));
+  assert.ok(USAGE_SUPPORTED_PROVIDERS.includes("muse-code"));
+  const result = await getUsageForProvider({
+    id: "muse-compat-test",
+    provider: "muse-code",
+    providerSpecificData: { subsTierName: "Synthetic tier", isSubsActive: true },
+  });
+  assert.equal(result.provider, "muse-code");
+  assert.equal(result.plan, "Synthetic tier");
+  assert.equal(result.isSubsActive, true);
+});

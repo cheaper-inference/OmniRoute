@@ -239,7 +239,7 @@ const DEVELOPER_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
   "changelog",
 ]);
 
-const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
+const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set<HideableSidebarItemId>([
   "home",
   "endpoints",
   "api-manager",

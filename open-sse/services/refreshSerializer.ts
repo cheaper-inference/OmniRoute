@@ -41,6 +41,11 @@ export const ROTATION_LOCK_GROUP: Record<string, string> = {
   // Openference rotates one-time-use refresh tokens on its own endpoint; a
   // concurrent sibling refresh would burn the token, so it gets its own lane.
   openference: "openference",
+  // Grok Bot: the server may or may not rotate the refresh token on any given
+  // refresh (measured both shapes). Serializing sibling refreshes keeps the
+  // product line from racing itself; whether rotation actually happens is a
+  // per-response property, not something this entry asserts.
+  "grok-bot": "grok-bot",
   // RenderHour rotates its refresh tokens (rhrt_*): each refresh returns a new pair
   // and the old token stops working at once, so siblings get their own lane.
   renderhour: "renderhour",
