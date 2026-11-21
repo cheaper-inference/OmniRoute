@@ -47,13 +47,21 @@ test("#16714: a degraded (refresh-failed) discovery must not replace a fuller sy
     providerSpecificData: { autoFetchModels: false },
   });
   const entry = (slug: string) => ({ slug, visibility: "list", supported_in_api: true });
+  // Match the request host exactly (a substring match would also accept other hosts).
+  const hostOf = (input: unknown) => {
+    try {
+      return new URL(input instanceof Request ? input.url : String(input)).hostname;
+    } catch {
+      return "";
+    }
+  };
 
   // Phase 1: healthy client version (override) -> backend advertises the newest model.
   process.env.CODEX_CLIENT_VERSION = "9.9.9";
   resetCodexClientVersionCacheForTests();
   clearCodexGithubCatalogCacheForTests();
   globalThis.fetch = async (input) =>
-    String(input).includes("chatgpt.com")
+    hostOf(input) === "chatgpt.com"
       ? Response.json({ models: [entry("gpt-old-a"), entry("gpt-old-b"), entry("gpt-new-gated")] })
       : Response.json({ models: [] });
   // The npm registry call is pinned (pinDns); route it through the test seam so no real network is used.
@@ -70,9 +78,9 @@ test("#16714: a degraded (refresh-failed) discovery must not replace a fuller sy
   resetCodexClientVersionCacheForTests();
   clearCodexGithubCatalogCacheForTests();
   globalThis.fetch = async (input) =>
-    String(input).includes("registry.npmjs.org")
+    hostOf(input) === "registry.npmjs.org"
       ? new Response("down", { status: 503 })
-      : String(input).includes("chatgpt.com")
+      : hostOf(input) === "chatgpt.com"
         ? Response.json({ models: [entry("gpt-old-a"), entry("gpt-old-b")] })
         : Response.json({ models: [] });
   const degraded = await call(c.id);
