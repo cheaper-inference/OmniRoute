@@ -105,7 +105,7 @@ test("quotaSnapshots aggregates by provider or connection and rejects invalid bu
   );
 });
 
-test("quotaSnapshots cleanup removes old rows and throttles repeated execution", () => {
+test("quotaSnapshots cleanup removes old rows and throttles repeated execution", async () => {
   const db = coreDb.getDbInstance();
   db.prepare(
     `
@@ -125,8 +125,8 @@ test("quotaSnapshots cleanup removes old rows and throttles repeated execution",
     "2000-01-01T00:00:00.000Z"
   );
 
-  const deleted = quotaSnapshotsDb.cleanupOldSnapshots(1);
-  const throttled = quotaSnapshotsDb.cleanupOldSnapshots(1);
+  const deleted = await quotaSnapshotsDb.cleanupOldSnapshots(1);
+  const throttled = await quotaSnapshotsDb.cleanupOldSnapshots(1);
 
   assert.equal(deleted, 1);
   assert.equal(throttled, 0);

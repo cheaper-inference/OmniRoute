@@ -42,17 +42,40 @@ export function tableExists(table: string): boolean {
   return Boolean(row?.name);
 }
 
-export function deleteAllFromTable(table: string): number {
+export async function deleteAllFromTable(
+  table: string,
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
+  const batchSize = options.batchSize ?? DELETE_BATCH_SIZE;
+  if (!Number.isInteger(batchSize) || batchSize < 1) {
+    throw new RangeError(`batchSize must be a positive integer, got ${batchSize}`);
+  }
   if (!tableExists(table)) return 0;
-  return getDbInstance().prepare(`DELETE FROM ${table}`).run().changes;
+
+  const statement = getDbInstance().prepare(
+    `DELETE FROM ${table}
+     WHERE rowid IN (
+       SELECT rowid FROM ${table}
+       LIMIT ?
+     )`
+  );
+  let deleted = 0;
+
+  while (true) {
+    const batch = statement.run(batchSize).changes;
+    deleted += batch;
+    if (options.progress) options.progress.deleted += batch;
+    if (batch < batchSize) return deleted;
+    await yieldToEventLoop();
+  }
 }
 
-export function deleteFromTableBefore(target: DeleteByPeriodTarget, cutoffIso: string): number {
-  if (!tableExists(target.table)) return 0;
-
-  return getDbInstance()
-    .prepare(`DELETE FROM ${target.table} WHERE ${target.column} < ?`)
-    .run(cutoffValue(target, cutoffIso)).changes;
+export async function deleteFromTableBefore(
+  target: DeleteByPeriodTarget,
+  cutoffIso: string,
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
+  return deleteFromTableBeforeInBatches(target, cutoffIso, options);
 }
 
 /**
@@ -64,6 +87,37 @@ export type DeleteProgress = { deleted: number };
 
 function yieldToEventLoop(): Promise<void> {
   return new Promise<void>((resolve) => setImmediate(resolve));
+}
+
+export async function deleteWhereInBatches(
+  table: string,
+  whereClause: string,
+  params: unknown[],
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
+  const batchSize = options.batchSize ?? DELETE_BATCH_SIZE;
+  if (!Number.isInteger(batchSize) || batchSize < 1) {
+    throw new RangeError(`batchSize must be a positive integer, got ${batchSize}`);
+  }
+  if (!tableExists(table)) return 0;
+
+  const statement = getDbInstance().prepare(
+    `DELETE FROM ${table}
+     WHERE rowid IN (
+       SELECT rowid FROM ${table}
+       WHERE ${whereClause}
+       LIMIT ?
+     )`
+  );
+  let deleted = 0;
+
+  while (true) {
+    const batch = statement.run(...params, batchSize).changes;
+    deleted += batch;
+    if (options.progress) options.progress.deleted += batch;
+    if (batch < batchSize) return deleted;
+    await yieldToEventLoop();
+  }
 }
 
 export async function deleteFromTableBeforeInBatches(
