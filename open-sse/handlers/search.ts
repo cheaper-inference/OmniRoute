@@ -41,6 +41,7 @@ import * as anysearchSearch from "./search/anysearchSearch.ts";
 import * as kimiSearch from "./search/kimiSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
 import * as keenableSearch from "./search/keenableSearch.ts";
+import * as tinyfishSearch from "./search/tinyfishSearch.ts";
 import { executeCodexSearch } from "./search/codexSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
 import { saveCallLog } from "@/lib/usageDb";
@@ -797,6 +798,7 @@ const requestBuilders: Record<string, SearchRequestBuilder> = {
   "anysearch-search": anysearchSearch.buildAnysearchSearchRequest,
   "parallel-search": parallelSearch.buildParallelSearchRequest,
   "keenable-search": keenableSearch.buildKeenableSearchRequest,
+  tinyfish: tinyfishSearch.buildTinyFishSearchRequest,
 };
 
 function buildRequest(
@@ -1432,6 +1434,7 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "anysearch-search": (data) => anysearchSearch.normalizeAnysearchSearchResponse(data, makeResult),
   "parallel-search": (data) => parallelSearch.normalizeParallelSearchResponse(data, makeResult),
   "keenable-search": (data) => keenableSearch.normalizeKeenableSearchResponse(data, makeResult),
+  tinyfish: (data) => tinyfishSearch.normalizeTinyFishSearchResponse(data, makeResult),
 };
 
 function normalizeResponse(

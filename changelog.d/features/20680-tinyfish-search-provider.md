@@ -1,0 +1,1 @@
+- **feat(search):** TinyFish search is available as a fallback-only web and news search provider; it reuses the stored TinyFish key and is never the first automatic choice. ([#20680](https://github.com/cheaper-inference/OmniRoute/pull/20680))
