@@ -17,8 +17,9 @@
  * `coverage.retentionDays` is the operator's raw usage-history retention setting.
  * `truncatedByRetention` compares the requested range with it and does not check whether rows
  * are actually missing. `byModel` keeps the 50 provider-and-model pairs with the most requests,
- * so with more pairs it does not add up to `summary`. `summary.uniqueModels` counts every
- * recorded model spelling.
+ * so with more pairs it does not add up to `summary`. `byModelTruncated` is then true. A model
+ * whose pairs fall on both sides of the cut shows partial totals. `summary.uniqueModels` counts
+ * every recorded model spelling.
  */
 
 import { z } from "zod";
@@ -77,6 +78,8 @@ export const selfUsageResponseSchema = z.object({
       lastUsed: z.string().nullable(),
     })
   ),
+  // True when more provider-and-model pairs existed than `byModel` keeps.
+  byModelTruncated: z.boolean(),
   byProvider: z.array(
     z.object({
       provider: z.string(),
