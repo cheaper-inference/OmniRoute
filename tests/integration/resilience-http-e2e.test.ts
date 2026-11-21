@@ -567,7 +567,9 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   // (`{ enabled }`, open-sse/services/antigravityTimingConfig.ts), not runtime state.
   // `preferredAccountFailover` is the stored per provider/model failover preference
   // added in #19259, also configuration rather than runtime state.
+  // #19132 adds only the stored adaptive-health toggle, never runtime samples.
   assert.deepEqual(Object.keys(json).sort(), [
+    "antigravityAdaptiveHealth",
     "antigravityTimingTelemetry",
     "comboCooldownWait",
     "connectionCooldown",
@@ -586,6 +588,8 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
     "tokenRefreshBreaker",
     "waitForCooldown",
   ]);
+  assert.deepEqual(Object.keys(json.antigravityAdaptiveHealth).sort(), ["enabled"]);
+  assert.equal(typeof json.antigravityAdaptiveHealth.enabled, "boolean");
   assert.equal("providerBreakers" in json, false);
   assert.equal("runtime" in json, false);
 });

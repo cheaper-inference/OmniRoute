@@ -13,6 +13,9 @@ import { NumberField, BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
 import PreferredAccountFailoverCard from "./PreferredAccountFailoverCard";
 import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
+import AntigravityAdaptiveHealthCard, {
+  type AntigravityAdaptiveHealthValue,
+} from "./AntigravityAdaptiveHealthCard";
 import AntigravityTimingTelemetryCard, {
   type AntigravityTimingTelemetryValue,
 } from "./AntigravityTimingTelemetryCard";
@@ -71,6 +74,7 @@ export type ProviderCooldownSettings = {
 
 type ResilienceResponse = {
   preferredAccountFailover?: PreferredAccountFailoverSettings;
+  antigravityAdaptiveHealth?: AntigravityAdaptiveHealthValue;
   antigravityTimingTelemetry?: AntigravityTimingTelemetryValue;
   requestQueue: RequestQueueSettings;
   connectionCooldown: {
@@ -92,6 +96,7 @@ type ResilienceResponse = {
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
   return {
     preferredAccountFailover: json.preferredAccountFailover,
+    antigravityAdaptiveHealth: json.antigravityAdaptiveHealth,
     antigravityTimingTelemetry: json.antigravityTimingTelemetry,
     requestQueue: json.requestQueue,
     connectionCooldown: json.connectionCooldown,
@@ -1229,6 +1234,15 @@ export default function ResilienceTab() {
           saving={savingSection === "preferredAccountFailover"}
           onSave={(preferredAccountFailover) =>
             savePatch("preferredAccountFailover", { preferredAccountFailover })
+          }
+        />
+      )}
+      {data.antigravityAdaptiveHealth && (
+        <AntigravityAdaptiveHealthCard
+          value={data.antigravityAdaptiveHealth}
+          saving={savingSection === "antigravityAdaptiveHealth"}
+          onSave={(antigravityAdaptiveHealth) =>
+            savePatch("antigravityAdaptiveHealth", { antigravityAdaptiveHealth })
           }
         />
       )}

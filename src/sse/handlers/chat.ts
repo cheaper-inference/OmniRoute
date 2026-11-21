@@ -21,14 +21,12 @@ import {
   getProviderCredentialsWithQuotaPreflight,
   markAccountUnavailable,
   buildExhaustionOptions,
-  isValidApiKey,
   extractSessionAffinityKey,
 } from "../services/auth";
 import { resolveClientApiKey } from "../services/clientApiKeyResolver";
 import {
   getRuntimeProviderProfile,
   clearModelLock,
-  lockModel,
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
 } from "@omniroute/open-sse/services/accountFallback.ts";
@@ -55,7 +53,6 @@ import { applyNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.
 import { resolveCcDiscoveryAliasStrip } from "@/lib/ccDiscoveryAliasResolve";
 import { handleComboChat, shouldSkipConnDisable } from "@omniroute/open-sse/services/combo.ts";
 import type { ComboLike, SingleModelTarget } from "@omniroute/open-sse/services/combo/types.ts";
-import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
 import { resolveRequestAutoControls } from "@omniroute/open-sse/services/autoCombo/requestControls.ts";
 import { isVerifiedNativeCodexRequest } from "@omniroute/open-sse/config/codexIdentity.ts";
 import { resolveCompressionSettings } from "@omniroute/open-sse/handlers/chatCore/compressionSettings.ts";
@@ -105,6 +102,15 @@ import {
   evictSessionAccountAffinityForConnectionAsync as evictSessionAccountAffinityForConnection,
 } from "@/lib/db/sessionAccountAffinity";
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
+import {
+  antigravityHealth,
+  isAntigravityAdaptiveHealthEnabled,
+} from "@omniroute/open-sse/services/antigravityHealth.ts";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import {
+  bindAntigravityHealthAttempt,
+  holdAntigravityHealthThroughResponse,
+} from "../services/antigravityHealthLifecycle";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { isManagedComboUnsupported } from "./chat/managedComboSupport.ts";
 import * as muse from "./chat/museOwnership.ts";
@@ -112,7 +118,6 @@ import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { resolveEmergencyFallbackDecision } from "./emergencyFallbackHeader.ts";
 import { resolveInternalUpstreamStartTimeoutMs } from "../services/internalUpstreamStartTimeout";
-import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { resolvePreferredConnectionUpstreamStartTimeoutMs } from "../services/preferredConnectionFailover";
 import { evaluateComboTargetPreflight } from "./chat/comboTargetKeyPolicy.ts";
 import * as resolvedPolicy from "./chat/resolvedModelPolicy.ts";
@@ -131,7 +136,6 @@ import {
   comboTargetCredentialProviderId,
   checkPipelineGates,
   checkResourcePressureBeforeProviderWork,
-  executeChatWithBreaker,
   findShadowedCompatibleNode,
   handleNoCredentials,
   safeResolveProxy,
@@ -163,7 +167,6 @@ import { markAntigravityMissingCloudCodeProject } from "@omniroute/open-sse/serv
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { wrapResponseWithOAuthSessionRelease } from "@omniroute/open-sse/services/oauthSessionOccupancy.ts";
 import {
-  inheritProviderProbeResponse,
   inheritResponsePolicies,
   isNoReplayResponse,
   markCustomJsonNoReplay,
@@ -202,12 +205,10 @@ import { markQuotaHealthy } from "../../domain/quotaCache";
 import { resolveForcedConnectionForCredentialPool } from "../services/sessionAffinityPin.ts";
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
 import { generateRequestId } from "../../shared/utils/requestId";
-import { logAuditEvent } from "../../lib/compliance/index";
 import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
 import { rejectIfMeteredBudgetExceeded } from "@/lib/usage/meteredBudgetPolicy";
 import { hasProviderQuotaBypassScope } from "../../shared/constants/apiKeyPolicyScopes";
 import { isMicrosoftDesignerWebProviderRetiredError } from "../../shared/constants/designerWebRetirement";
-import { cloneBoundedForLog } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { handleInternalUsageCommand } from "@/lib/usage/internalUsageCommand";
 import {
   applyTaskAwareRouting,
@@ -1037,7 +1038,6 @@ async function handleChatImplementation(
   // T05 — Task-Aware Smart Routing
   // Detect the semantic task type and optionally route to the optimal model
   let resolvedModelStr = modelStr;
-  let taskRouteInfo: { taskType: string; wasRouted: boolean } | null = null;
   if (getTaskRoutingConfig().enabled) {
     telemetry.startPhase("task-route");
     const tr = applyTaskAwareRouting(modelStr, body);
@@ -1051,7 +1051,6 @@ async function handleChatImplementation(
     } else if (tr.taskType !== "chat") {
       log.debug("T05", `Task-Aware: detected="${tr.taskType}" (no override configured)`);
     }
-    taskRouteInfo = { taskType: tr.taskType, wasRouted: tr.wasRouted };
     telemetry.endPhase();
   }
 
@@ -1829,6 +1828,8 @@ async function handleSingleModelChat(
   // No restart is needed for newly dispatched chat requests.
   const preferredFailoverSettings =
     resolveResilienceSettings(cachedRuntimeSettings).preferredAccountFailover;
+  const antigravityAdaptiveHealthEnabled =
+    resolveResilienceSettings(cachedRuntimeSettings).antigravityAdaptiveHealth.enabled;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
     provider === "claude-web" ||
@@ -1918,7 +1919,6 @@ async function handleSingleModelChat(
     const excludedConnectionIds = new Set<string>(agy.on ? agy.attempted : []);
     let lastError = requestRetryLastError;
     let lastStatus = requestRetryLastStatus;
-    let lastCooldownMs = requestRetryLastCooldownMs;
     let preselectedCredentials = initialPreselectedCredentials;
     initialPreselectedCredentials = null;
 
@@ -1952,6 +1952,7 @@ async function handleSingleModelChat(
             connectionRestrictionSources: restrictions.sources,
             requireToolCalling: hasQoderCallerTools(body),
             sessionKey: museOwner ? null : occupancySessionKey,
+            originalRequestedModelStr: modelStr,
             preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,
             excludeConnectionIds: Array.from(excluded),
@@ -2325,6 +2326,27 @@ async function handleSingleModelChat(
           ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
       );
+      const healthTicket =
+        isAntigravityAdaptiveHealthEnabled(provider, antigravityAdaptiveHealthEnabled) &&
+        credentials.connectionId
+          ? antigravityHealth.begin(
+              credentials.connectionId,
+              effectiveModel,
+              hasForcedConnection || credentials.antigravityHealthFallback === true
+            )
+          : undefined;
+      if (healthTicket === null) {
+        releaseOAuthSession();
+        agyLease.release(leaseId);
+        if (hasForcedConnection) {
+          return errorResponse(503, "Antigravity model recovery probe already in flight");
+        }
+        excludedConnectionIds.add(credentials.connectionId);
+        continue;
+      }
+      const antigravityHealthAttempt = healthTicket
+        ? bindAntigravityHealthAttempt(healthTicket, requestSignal)
+        : undefined;
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
@@ -2381,20 +2403,45 @@ async function handleSingleModelChat(
           runtimeOptions
         );
       } catch (error) {
+        antigravityHealthAttempt?.finish("ignored");
         releaseOAuthSession();
         agyLease.release(leaseId);
         throw error;
       }
       if (telemetry) telemetry.endPhase();
       if ("localResourcePressureResult" in execution) {
+        antigravityHealthAttempt?.finish("ignored");
         agyLease.release(leaseId);
         return execution.localResourcePressureResult.response;
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
       markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
+      if (antigravityHealthAttempt) {
+        if (requestSignal?.aborted || result.status === 499) {
+          antigravityHealthAttempt.finish("ignored");
+        } else if (result.success && requestBody.stream === true) {
+          result.response = holdAntigravityHealthThroughResponse(
+            result.response,
+            antigravityHealthAttempt
+          );
+        } else if (result.success) {
+          antigravityHealthAttempt.finish("success");
+        } else {
+          // Real HTTP 504 alone does not prove a local header deadline expired.
+          antigravityHealthAttempt.finish(
+            result.status === 504 &&
+              result.errorType === "upstream_timeout" &&
+              result.errorCode === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+              ? "timeout"
+              : result.status === 502 || result.status === 503
+                ? "transport"
+                : "ignored"
+          );
+        }
+      }
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
-        result.response = inheritProviderProbeResponse(
+        result.response = inheritResponsePolicies(
           result.response,
           agyLease.holdAntigravityLeaseThroughResponse(
             result.response,
@@ -2701,7 +2748,6 @@ async function handleSingleModelChat(
             `Antigravity connection ${accountId}... produced no useful stream content, trying fallback connection`
           );
           if (Number.isFinite(cooldownMs) && cooldownMs > 0) {
-            lastCooldownMs = cooldownMs;
             requestRetryLastCooldownMs = cooldownMs;
           }
           if (runtimeOptions.sessionAffinityKey) {
@@ -2751,7 +2797,6 @@ async function handleSingleModelChat(
             `Antigravity connection ${accountId}... timed out before response headers, trying fallback connection`
           );
           if (Number.isFinite(cooldownMs) && cooldownMs > 0) {
-            lastCooldownMs = cooldownMs;
             requestRetryLastCooldownMs = cooldownMs;
           }
           if (runtimeOptions.sessionAffinityKey) {
@@ -3048,7 +3093,6 @@ async function handleSingleModelChat(
       // already apply.
       if (shouldFallback && !hasForcedConnection) {
         if (Number.isFinite(cooldownMs) && cooldownMs > 0) {
-          lastCooldownMs = cooldownMs;
           requestRetryLastCooldownMs = cooldownMs;
         }
         log.warn("AUTH", `Account ${accountId}... unavailable (${result.status}), trying fallback`);

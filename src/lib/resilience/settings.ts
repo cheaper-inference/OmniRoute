@@ -89,6 +89,9 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   preferredAccountFailover: readPreferredFailoverSettings(),
+  antigravityAdaptiveHealth: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true",
+  },
   antigravityTimingTelemetry: {
     enabled: process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true",
   },
@@ -370,6 +373,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
     preferredAccountFailover: DEFAULT_RESILIENCE_SETTINGS.preferredAccountFailover,
+    antigravityAdaptiveHealth: DEFAULT_RESILIENCE_SETTINGS.antigravityAdaptiveHealth,
     antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
   };
 }
@@ -413,6 +417,11 @@ export function resolveResilienceSettings(
     preferredAccountFailover: normalizePreferredFailoverSettings(
       current.preferredAccountFailover,
       fallback.preferredAccountFailover
+    ),
+    antigravityAdaptiveHealth: normalizeAntigravityToggle(
+      current.antigravityAdaptiveHealth,
+      legacyAntigravitySettings.adaptiveHealthEnabled,
+      fallback.antigravityAdaptiveHealth.enabled
     ),
     antigravityTimingTelemetry: normalizeAntigravityToggle(
       current.antigravityTimingTelemetry,
@@ -480,6 +489,11 @@ export function mergeResilienceSettings(
     preferredAccountFailover: normalizePreferredFailoverSettings(
       updates.preferredAccountFailover,
       current.preferredAccountFailover
+    ),
+    antigravityAdaptiveHealth: normalizeAntigravityToggle(
+      updates.antigravityAdaptiveHealth,
+      undefined,
+      current.antigravityAdaptiveHealth.enabled
     ),
     antigravityTimingTelemetry: normalizeAntigravityToggle(
       updates.antigravityTimingTelemetry,
