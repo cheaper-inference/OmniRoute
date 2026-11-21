@@ -43,6 +43,10 @@ Implemented in `src/lib/quota/fairShare.ts`.
 
 Default `saturationThreshold = 0.5` (env `QUOTA_SATURATION_THRESHOLD`).
 
+These two modes describe a pool in the default borrow mode, `saturation`. A pool in `consent` mode
+always applies the strict rules, whatever the saturation. See
+[Consented lending (per-pool opt-in)](#consented-lending-per-pool-opt-in).
+
 ### Per-dimension decision
 
 For each active dimension in the pool, the engine computes:
@@ -84,6 +88,83 @@ maxAllowed = globalLimit - consumedByOtherKeys
 
 where `consumedByOtherKeys = consumedTotal - consumedByThisKey`. The teto global
 (pool `limit` for that dimension) is always the hard ceiling.
+
+### Consented lending (per-pool opt-in)
+
+Each pool has a borrow mode. `saturation` is the default and keeps the rules above. In `consent`
+mode a `hard` key passes its share only within capacity that other keys agreed to lend. The
+administrator sets the mode of each pool. Each key holder sets their own consent through
+[Lending consent](#lending-consent).
+
+A consent is a percentage from 0 to 100 and an optional deadline in epoch milliseconds. The key
+lends that percentage of its idle share while the deadline is in the future.
+
+For one dimension, `L` is the effective limit: the plan limit times the accounts in the pool.
+The gate computes, for the requesting key:
+
+```
+share_k         = w_k / 100 × L
+idle_k          = max(0, share_k − consumed_k)
+lent            = Σ over the other keys of lend_k / 100 × idle_k
+taken           = Σ over the other keys of max(0, consumed_k − share_k)
+borrowAvailable = max(0, lent − taken)
+```
+
+`w_k` is the key's weight, or `100 / n` for every key when no weight is above 0. `lend_k` is the
+key's active percentage, and 0 once its deadline has passed. The requesting key's own consent
+never counts. A `hard` key is refused once its consumption reaches its share plus
+`borrowAvailable`.
+
+Capacity that no allocation claims (100 minus the sum of the weights) is not lendable. No key
+agreed to lend it.
+
+**Example.** `L` is 1000.
+
+| Key | Weight | Share | Consumed | Lends |
+| --- | ------ | ----- | -------- | ----- |
+| A   | 50     | 500   | 530      | 0%    |
+| B   | 30     | 300   | 100      | 50%   |
+| C   | 0      | 0     | 60       | 0%    |
+
+- B lends 50% of its idle 200, which is 100. C already took 60 above its share. A may borrow 40.
+- A is served at 530 and refused once its consumption reaches 540.
+- Before C used anything, with A at or under its share, C could borrow 100.
+- Before C used anything, with A at 530, C could borrow 70.
+
+**Zero weight.** A key with weight 0 has a share of 0. It is served only while its consumption
+is below what others lend. When nobody lends, it is refused from its first request.
+
+**Deadlines.** No background task expires a consent. Each request compares the deadline with
+its own time, and a deadline equal to that time has passed. A stored deadline that is not a
+finite number, or is past the largest date a `Date` can hold, counts as passed.
+
+**`soft` and `burst`.** Lending does not limit them. A `soft` key is deprioritized once past its
+share. A `burst` key passes while the pool has room. The pool ceiling still refuses every key
+once the pool's total reaches its limit.
+
+**Cost on the request path.** A `saturation` pool reads nothing more than before. In a `consent`
+pool, a countable dimension reads the other keys only for a `hard` key at or above its share
+while another key lends. It then makes one read per other key, in parallel. A failed read counts
+as a consumption of 0 for that key. A `percent` dimension adds no read, because the attribution
+book holds every key.
+
+**Editing a pool.** An edit keeps the consent of the keys that stay. This holds for allocation
+edits, group-wide replacements and `ensure` calls. A removed key loses its consent, and a key
+added back starts at 0. The admin routes return each key's consent and never write it. Switching
+a pool back to `saturation` keeps every stored consent, which has no effect in that mode.
+
+**Upgrading.** A database from downstream builds may already have `lending_percent` and
+`lending_until`. The migration then adds only `borrow_mode`, and stored percentages stay as they
+are. Every pool starts in `saturation` mode. Turn `consent` on per pool in the pool wizard.
+Nothing is inferred from the stored values.
+
+**Limitations.**
+
+- A lender can find the pool at its ceiling before it uses its own share. Capacity that others
+  borrowed counts toward the pool's total.
+- The check runs before the request and reserves nothing. Concurrent requests read consumption
+  before any is recorded, so lent capacity can be spent more than once, bounded by the requests
+  in flight. The share check of `saturation` mode has the same property.
 
 ---
 
@@ -306,6 +387,11 @@ When the store cannot be read, nothing is attributed and every key is charged 0 
 dimension. When a book write fails, that attribution uses the book as it was read. A failed token
 write leaves that request's tokens out of the book. None of these failures blocks a request.
 
+In a `consent` pool, the lending formula uses each key's consumption on the percent dimension as
+described above. When another key lends, the book is read once and attributed to every key.
+Without a usable book every key is charged 0. A key with a weight then passes, and a key with
+weight 0 passes only when another key lends.
+
 #### Usage route
 
 `GET /api/quota/pools/{id}/usage` reports the same numbers through the same function. A percent
@@ -436,6 +522,25 @@ resolveComboTargets / handleSingleModel
 with a `pino.warn` log. This prevents a quota-engine bug from blocking all
 traffic.
 
+**When capacity returns.** A refusal at the key's share or at the pool ceiling ends with one of
+two sentences, in both borrow modes:
+
+- `percent` window: `. The <window> window resets at <time>.` The time is the reset the
+  provider reports.
+- Countable unit: `. Enough <window> usage is expected to clear by <time>.` The time is an upper
+  bound from the sliding window, if the key sends nothing else.
+
+`<time>` is an ISO 8601 instant in UTC. The refusal then carries `Retry-After`: the whole seconds
+until that instant, plus one. A client that waits that long retries at most one second after the
+instant. When the instant is not known, the refusal carries neither the sentence nor the header.
+An absolute cap refusal carries neither. The public code stays `quota_share_blocked`.
+
+A share refusal does not touch the shared connection. It sets no cooldown, no model lock and no
+provider breaker failure, and the other keys of the pool keep being served. When every target of
+a combo refuses the key for its share, the combo answers 429 without waiting. Its answer carries
+the hint as `Retry-After`, as it does for a closed schedule window. The embeddings path ends its
+refusal with the same sentence and sends no `Retry-After`.
+
 ### POST hook (record consumption)
 
 After a successful response:
@@ -481,6 +586,12 @@ Components (all in `src/app/(dashboard)/dashboard/costs/quota-share/`):
 | `AllocationTable`      | Table with consumed, fair share, deficit/surplus, borrowing flag  |
 | `BurnRateChart`        | EMA burn-rate line chart (lazy Recharts via `dynamic()`)          |
 | `EditAllocationsModal` | Edit allocation weights, caps, and policies for a pool            |
+| `BorrowModeField`      | Borrow mode selector (`saturation` or `consent`) in the wizard    |
+| `LendingBadge`         | Read-only badge on a key that lends, in `consent` pools only      |
+
+The lending badge shows the percentage and, when set, the deadline in UTC with the zone named.
+It judges the deadline at the time of the usage snapshot. An expired or unreadable deadline shows
+as `lending expired`.
 
 The page hooks:
 
@@ -582,6 +693,69 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 When the quota store cannot be read, the store-backed fields of `blocks` (a schedule budget's
 `exhausted`, a model cap's `consumed` and `reached`) are `null` as well.
 
+### Lending consent
+
+`PATCH /api/v1/me/quota/{provider}` records the calling key's own consent for one pool. It uses
+the flag, headers and provider rules of the `GET`. The `self:usage` scope authorizes this one
+write, although its name reads as read-only.
+
+```json
+{
+  "pool": "qpr_0123456789abcdef0123456789abcdef",
+  "lendingPercent": 30,
+  "lendingUntil": 1893456000000
+}
+```
+
+- `pool` is the `ref` the `GET` returns for that pool.
+- `lendingPercent` is an integer from 0 to 100. A value of 0 clears the consent and its deadline.
+- `lendingUntil` is optional: epoch milliseconds, or `null` for no deadline. It must be in the
+  future and at most 8640000000000000. A value below 100000000000 reads as seconds and is refused.
+- Any other field is refused. A body over 4096 characters is refused.
+
+The checks run in the order of this table. Every refusal uses the standard error body with a
+fixed message. A refusal by one of these checks writes nothing.
+
+| Status | Message                                                                                            | When                                                               |
+| ------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 404    | `Not found`                                                                                        | The `QUOTA_SELF_PANEL` flag is off.                                |
+| 401    | `Valid API key required`                                                                           | The key is missing or invalid, or is the server's environment key. |
+| 403    | `API key lacks the self:usage scope`                                                               | The key lacks `self:usage`.                                        |
+| 400    | `Invalid provider`                                                                                 | The provider segment is invalid.                                   |
+| 429    | `Too many lending changes. Retry later.`                                                           | The key passed its limit. The answer carries `Retry-After`.        |
+| 400    | `Body must be { pool, lendingPercent, lendingUntil }. lendingPercent is an integer from 0 to 100.` | The body is not JSON, is too long, or does not match the schema.   |
+| 400    | `lendingUntil must be a Unix time in milliseconds`                                                 | The deadline reads as seconds.                                     |
+| 400    | `lendingUntil must be in the future`                                                               | The deadline is at or before the request time.                     |
+| 404    | `Pool not found`                                                                                   | The `ref` names no pool of this key for this provider.             |
+| 403    | `Lending is not enabled for this pool`                                                             | The pool is in `saturation` mode.                                  |
+| 500    | `Failed to build quota view`                                                                       | Any other failure. Its cause is logged on the server.              |
+
+The limit is 20 requests per 60 seconds for each key. Every request that passes the provider check
+counts, even one refused later or one that changes nothing. It has its own counter, apart from the
+key's request rate limit.
+
+A request that changes the stored consent writes one `quota.pool.lending.updated` audit record.
+It names the key with the old and new values. The same body sent twice writes once and audits
+once. The answer is 200 with the full `GET` view, built after the write.
+
+The `GET` view reports lending as follows:
+
+- Each pool carries `borrowMode` (`saturation` or `consent`), and the key's own `lendingPercent`
+  and `lendingUntil`.
+- `lendingActive` is `true` only in a `consent` pool, with a percentage above 0 and a deadline
+  not reached.
+- In a `consent` pool, each countable `dimensions[].yourShare` carries `borrowAvailable`. It is
+  what the key may use above its share now, lent by the other keys.
+- `borrowAvailable` uses the gate's formula. It reads every other key, also while the key is under
+  its share. For a `hard` key that is one extra read per other key and countable dimension, in
+  parallel.
+- `borrowAvailable` is `null` for a `soft` or `burst` key, and `null` when a read fails.
+- `borrowAvailable` is one figure for all other keys together. In a pool of two keys it is the
+  other key's own figure.
+- `borrowAvailable` is not reported for `percent` windows or in `accounts[]` yet.
+- In a `saturation` pool the view reports the stored consent with `lendingActive: false` and no
+  `borrowAvailable`.
+
 ### Errors
 
 Every response of this route, success or error, carries `Cache-Control: no-store`. A refusal
@@ -590,6 +764,7 @@ or the IP filter's 403. Errors of the route use the standard error body with a f
 provider), 401 (missing or invalid key), 403 (missing `self:usage`), 404 (flag off) and 500
 (`Failed to build quota view`). The 500 covers any failure once the request reaches the route,
 including the key lookup itself; its cause is logged on the server and never returned.
+The errors of the `PATCH` are listed in [Lending consent](#lending-consent).
 
 ### Limitations
 
@@ -708,6 +883,11 @@ Three tables added by migrations `078`, `079` and `085`:
 - `provider_plans` — manual provider plan overrides (dimensions JSON per connectionId).
 
 All tables added via idempotent `CREATE TABLE IF NOT EXISTS` migrations.
+
+Consented lending adds three columns: `quota_allocations.lending_percent` (integer, default 0),
+`quota_allocations.lending_until` (epoch milliseconds, or `NULL` for no deadline) and
+`quota_pools.borrow_mode` (default `saturation`). Its migration only adds these columns and
+writes no existing row.
 
 The percent attribution book adds `quota_percent_ledger` (one row per pool, account and plan
 window) and `quota_percent_ledger_tokens` (one token counter per pool, account and API key).
