@@ -5,7 +5,10 @@ import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
 import { mayWriteCodexConnection } from "../codexConnectionFences";
 import { unblockAccount } from "@omniroute/open-sse/services/accountSemaphore.ts";
-import { hasActiveCodexScopeCooldown } from "./codexAccountRecovery";
+import {
+  hasActiveCodexScopeCooldown,
+  QUOTA_RESET_CLOCK_SKEW_GRACE_MS,
+} from "./codexAccountRecovery";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -225,9 +228,6 @@ export async function updateCodexScopedQuotaState(
   return persisted;
 }
 
-/** Grace window absorbing clock skew against the upstream quota server. */
-const QUOTA_RESET_CLOCK_SKEW_GRACE_MS = 30_000;
-
 /** Cheap probe: does this connection+scope currently carry a child cooldown? */
 export function hasCodexScopeCooldown(id: string, scope: "codex" | "spark"): boolean {
   if (typeof id !== "string" || id.length === 0) return false;
@@ -295,7 +295,8 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
     const nextSources = omitEmptyRecord(currentSources);
     if (nextCooldowns) nextPsd.codexScopeRateLimitedUntil = nextCooldowns;
     else delete nextPsd.codexScopeRateLimitedUntil;
-    gateReleasable = !nextCooldowns || !hasActiveCodexScopeCooldown(nextCooldowns);
+    gateReleasable =
+      !nextCooldowns || !hasActiveCodexScopeCooldown(nextCooldowns, nextSources ?? {});
     if (nextSources) nextPsd.codexScopeRateLimitSource = nextSources;
     else delete nextPsd.codexScopeRateLimitSource;
 

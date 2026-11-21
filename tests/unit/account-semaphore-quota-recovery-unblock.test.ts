@@ -168,6 +168,26 @@ test("an expired sibling scope cooldown does not keep the shared gate blocked", 
   assert.equal(blockedUntil(liftedKey), null);
 });
 
+test("a sibling quota_reset deadline inside the clock-skew grace keeps the gate blocked", async () => {
+  const a = await db.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    name: crypto.randomUUID(),
+    providerSpecificData: {
+      codexScopeRateLimitedUntil: {
+        codex: new Date(Date.now() + DAY_MS).toISOString(),
+        spark: new Date(Date.now() - 10_000).toISOString(),
+      },
+      codexScopeRateLimitSource: { codex: "fallback", spark: "quota_reset" },
+    },
+  });
+  const key = blockGate("codex", a.id);
+
+  await recovery.syncCodexQuotaObservation(a.id, recoveredUsage, a.providerSpecificData);
+
+  assert.notEqual(blockedUntil(key), null);
+});
+
 test("manual Codex cooldown release also releases the semaphore gate", async () => {
   const a = await seedCodex();
   const key = blockGate("codex", a.id);

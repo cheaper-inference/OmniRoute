@@ -30,18 +30,28 @@ function clearScope(data: RecordValue, scope: Scope): void {
  */
 function releaseGateWhenNoScopeCooldown(id: string, data: RecordValue | null): void {
   if (!data) return;
-  if (hasActiveCodexScopeCooldown(toRecord(data.codexScopeRateLimitedUntil))) return;
+  const cooldowns = toRecord(data.codexScopeRateLimitedUntil);
+  if (hasActiveCodexScopeCooldown(cooldowns, toRecord(data.codexScopeRateLimitSource))) return;
   unblockAccount({ provider: "codex", accountKey: id });
 }
 
+/** Grace window absorbing clock skew against the upstream quota server. */
+export const QUOTA_RESET_CLOCK_SKEW_GRACE_MS = 30_000;
+
 /**
  * True when any scope deadline is still in the future. A deadline that already
- * passed is not a cooldown; an unparseable one is treated as active.
+ * passed is not a cooldown, except an upstream `quota_reset` deadline inside
+ * the clock-skew grace; an unparseable one is treated as active.
  */
-export function hasActiveCodexScopeCooldown(cooldowns: RecordValue, now = Date.now()): boolean {
-  return Object.values(cooldowns).some((until) => {
+export function hasActiveCodexScopeCooldown(
+  cooldowns: RecordValue,
+  sources: RecordValue = {},
+  now = Date.now()
+): boolean {
+  return Object.entries(cooldowns).some(([scope, until]) => {
     const ms = typeof until === "string" ? Date.parse(until) : NaN;
-    return !Number.isFinite(ms) || ms > now;
+    const grace = sources[scope] === "quota_reset" ? QUOTA_RESET_CLOCK_SKEW_GRACE_MS : 0;
+    return !Number.isFinite(ms) || ms > now - grace;
   });
 }
 
