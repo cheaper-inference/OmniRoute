@@ -1,0 +1,1 @@
+- **fix(gemini):** tool schemas with `prefixItems` tuples keep their element type, nullable enums no longer offer the string "null" or keep string values on integer types, and Gemini 4 and provider-prefixed model ids (`models/gemini-3-...`) now drop a trailing model turn like Gemini 3. ([#20205](https://github.com/cheaper-inference/OmniRoute/pull/20205))

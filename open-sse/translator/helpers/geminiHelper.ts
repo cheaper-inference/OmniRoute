@@ -35,6 +35,15 @@ export const GEMINI_UNSUPPORTED_SCHEMA_KEYS = new Set([
   // decolua/9router#4283: ajv-errors `errorMessage` keyword emitted by some tool
   // generators — "Unknown name \"errorMessage\" ... Cannot find field".
   "errorMessage",
+  // Same class: the plural ajv-errors spelling, editor hints (`doNotSuggest`,
+  // `suggestSortText`) and OpenAPI-only annotations that a Pydantic/OpenAPI
+  // generator emits next to `oneOf` (`discriminator`, `xml`, `externalDocs`).
+  "errorMessages",
+  "doNotSuggest",
+  "suggestSortText",
+  "discriminator",
+  "xml",
+  "externalDocs",
   // decolua/9router#4169: Anthropic prompt-caching annotation leaking into tool
   // schemas — "Unknown name \"cache_control\" ... Cannot find field".
   "cache_control",
@@ -230,13 +239,14 @@ function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | unde
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
+  // Gemini rejects a part with an empty or missing `text`.
   if (typeof content === "string") {
-    parts.push({ text: content });
+    if (content) parts.push({ text: content });
   } else if (Array.isArray(content)) {
     for (const item of content) {
       const rec = toRecord(item);
       if (rec.type === "text") {
-        parts.push({ text: rec.text });
+        if (typeof rec.text === "string" && rec.text) parts.push({ text: rec.text });
       } else if (rec.type === "video_url" || rec.type === "input_video") {
         const video = videoPartToGemini(rec);
         if (video) parts.push(video);
@@ -535,12 +545,16 @@ function expandShorthandProperties(record: JsonRecord): void {
 // Pre-pass for Cloud Code (#12269): boolean `required` on a property and nested
 // bare property maps both survive the later phases and 400 Gemini's proto.
 // Mirrors CLIProxyAPI normalizeMalformedSchemaObjects.
-function normalizeMalformedSchemaObjects(obj: unknown, parentKey?: string): void {
+function normalizeMalformedSchemaObjects(
+  obj: unknown,
+  parentKey?: string,
+  isNameMap = false
+): void {
   if (!obj || typeof obj !== "object") return;
 
   if (Array.isArray(obj)) {
     for (const item of obj) {
-      normalizeMalformedSchemaObjects(item, parentKey);
+      normalizeMalformedSchemaObjects(item, parentKey, isNameMap);
     }
     return;
   }
@@ -559,11 +573,14 @@ function normalizeMalformedSchemaObjects(obj: unknown, parentKey?: string): void
     expandShorthandProperties(record);
   }
 
-  promoteBooleanRequired(record);
+  // Inside a name map (`properties`, `$defs`, …) every key is a property name: a parameter named
+  // `required` is not the schema keyword, and promoteBooleanRequired would delete it. Track the
+  // map context explicitly: a property that is itself named `properties` is a schema, not a map.
+  if (!isNameMap) promoteBooleanRequired(record);
 
   for (const [key, value] of Object.entries(record)) {
     if (value && typeof value === "object") {
-      normalizeMalformedSchemaObjects(value, key);
+      normalizeMalformedSchemaObjects(value, key, !isNameMap && SCHEMA_MAP_KEYS.has(key));
     }
   }
 }
@@ -762,8 +779,10 @@ function convertEnumValuesToStrings(obj: unknown): void {
 
   const record = obj as JsonRecord;
   if (record.enum && Array.isArray(record.enum)) {
-    // Gemini only supports enum for string types, not integer
-    if (record.type === "integer" || record.type === "number") {
+    // Gemini only supports enum for string types, not integer. A type array such as
+    // ["integer", "null"] is flattened later, so look through it here.
+    const typeNames = Array.isArray(record.type) ? record.type : [record.type];
+    if (typeNames.includes("integer") || typeNames.includes("number")) {
       // Keep the enum's range as the tightest constraint Gemini accepts on numbers.
       const numbers = record.enum.filter((v): v is number => typeof v === "number");
       if (numbers.length > 0 && record.minimum === undefined && record.maximum === undefined) {
@@ -775,7 +794,11 @@ function convertEnumValuesToStrings(obj: unknown): void {
       // Gemini rejects an empty string inside `enum` ("enum[N]: cannot be empty"). Some MCP servers
       // declare optional choices as ["a", "b", ""]; drop the empty value, and the whole enum when
       // that was its only value, instead of failing every request that carries the tool.
-      const values = record.enum.map((v: unknown) => String(v)).filter((v) => v !== "");
+      // A JSON null in the enum marks a nullable value, not the string "null".
+      const values = record.enum
+        .filter((v: unknown) => v !== null)
+        .map((v: unknown) => String(v))
+        .filter((v) => v !== "");
       if (values.length > 0) {
         record.enum = values;
       } else {
@@ -1040,6 +1063,20 @@ function preserveNullable(obj: unknown): void {
   }
 }
 
+/**
+ * Response schemas only: a JSON null inside `enum` (`["a", null]`) is the same "nothing is a
+ * legal answer" signal as a null union branch. Record it as `nullable: true` before
+ * convertEnumValuesToStrings drops the null.
+ */
+function markNullableEnums(obj: unknown): void {
+  if (!obj || typeof obj !== "object") return;
+  const record = obj as JsonRecord;
+  if (Array.isArray(record.enum) && record.enum.includes(null)) record.nullable = true;
+  for (const value of Object.values(record)) {
+    if (value && typeof value === "object") markNullableEnums(value);
+  }
+}
+
 /** Property Phase 6 adds to an empty object schema (stripped again by geminiPlaceholderArgs.ts). */
 export const GEMINI_PLACEHOLDER_KEY = "reason";
 export const GEMINI_PLACEHOLDER_SCHEMA = Object.freeze({
@@ -1080,6 +1117,7 @@ export function cleanJSONSchemaForAntigravity(
   // first — flattenAnyOfOneOf would otherwise keep only the first literal.
   mergeLiteralUnions(cleaned, { nullable: options.preserveNullable === true, location });
   convertConstToEnum(cleaned);
+  if (options.preserveNullable) markNullableEnums(cleaned);
   convertEnumValuesToStrings(cleaned);
 
   // Phase 1b: response schemas only — record nullability while the union

@@ -4,6 +4,7 @@ import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
 import { geminiFunctionParameters } from "../helpers/geminiFunctionParameters.ts";
+import { applyGeminiStopAndToolChoice } from "../helpers/geminiRequestParams.ts";
 
 const newCallId = () => `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -17,6 +18,7 @@ export function geminiToOpenAIRequest(model, body, stream) {
     temperature?: number;
     top_p?: number;
     tools?: Array<Record<string, unknown>>;
+    [key: string]: unknown;
   } = {
     model: model,
     messages: [],
@@ -79,6 +81,8 @@ export function geminiToOpenAIRequest(model, body, stream) {
       }
     }
   }
+
+  applyGeminiStopAndToolChoice(result, body.generationConfig, body.toolConfig);
 
   return result;
 }
@@ -165,7 +169,7 @@ function convertGeminiContent(content, toolCallIds) {
       tool_calls?: Array<Record<string, unknown>>;
     } = { role: "assistant" };
     if (parts.length > 0) {
-      result.content = parts.length === 1 ? parts[0].text : parts;
+      result.content = parts.length === 1 && parts[0].type === "text" ? parts[0].text : parts;
     }
     result.tool_calls = toolCalls;
     return result;

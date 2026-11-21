@@ -623,6 +623,16 @@ function isAntigravityGeminiChatModel(upstreamModel: string): boolean {
   return isGeminiTrailingModelTurnRejectingModel(upstreamModel);
 }
 
+/**
+ * The competing-agent identity strip and harness-marker rewrite predate Gemini 4 and apply to
+ * the Gemini 3.x and `gemini-pro-agent` families only. Gemini 4 joined the trailing-turn gate
+ * (it rejects a trailing model turn too) but keeps its system text; it only loses empty parts.
+ */
+function rewritesAntigravityGeminiSystemText(upstreamModel: string): boolean {
+  const id = upstreamModel.slice(upstreamModel.lastIndexOf("/") + 1).toLowerCase();
+  return !id.startsWith("gemini-4") && isAntigravityGeminiChatModel(upstreamModel);
+}
+
 // Test-only export so the unit suite can exercise the strip logic directly.
 export const __test_stripTrailingAntigravityAssistantTurn = stripTrailingAntigravityAssistantTurn;
 
@@ -965,10 +975,12 @@ export class AntigravityExecutor extends BaseExecutor {
         )
       : isGemini
         ? stripTrailingAntigravityAssistantTurn(
-            normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
+            rewritesAntigravityGeminiSystemText(upstreamModel)
+              ? normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
+              : dropEmptyAntigravitySystemParts(rawTransformedRequest)
           )
-        : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
-          // and no identity rewrite, but empty system parts are rejected the same way.
+        : // Other chat models (gpt-oss-120b-medium): no trailing-turn strip and no identity
+          // rewrite, but empty system parts are rejected the same way.
           dropEmptyAntigravitySystemParts(rawTransformedRequest);
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);

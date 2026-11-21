@@ -188,7 +188,22 @@ function coerceSchemaNode(node: JsonRecord, options: ShapeOptions): JsonRecord {
     if (coerced === DROP) delete next[key];
     else next[key] = coerced;
   }
-  return next ?? node;
+  const result = next ?? node;
+  // `prefixItems` (2020-12 tuples) is positional like a tuple `items`; no target expresses it,
+  // so a node without `items` takes the most informative element schema as `items` and keeps
+  // its element type. The keyword itself is stripped later by each target. Pick from the
+  // already-coerced entries (coercing them again through `items` doubled the work per level),
+  // and drop the element's own `prefixItems` from the copy: its derived `items` already carries
+  // the element type, and keeping both would double the tree at every nested tuple level.
+  if (result.items === undefined && Array.isArray(result.prefixItems)) {
+    const variants = result.prefixItems.filter(isPlainObject);
+    if (variants.length > 0) {
+      const element = { ...selectMostInformative(variants) };
+      delete element.prefixItems;
+      return { ...result, items: element };
+    }
+  }
+  return result;
 }
 
 /**

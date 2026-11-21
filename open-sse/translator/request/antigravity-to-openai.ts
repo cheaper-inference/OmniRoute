@@ -3,6 +3,8 @@ import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
 import { geminiFunctionParameters } from "../helpers/geminiFunctionParameters.ts";
+import { applyGeminiStopAndToolChoice } from "../helpers/geminiRequestParams.ts";
+import { geminiMediaToOpenAI } from "../helpers/mediaContentParts.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import { normalizeEffort } from "@/shared/reasoning/effortStandardization";
 
@@ -119,6 +121,8 @@ export function antigravityToOpenAIRequest(model, body, stream) {
       }
     }
   }
+
+  applyGeminiStopAndToolChoice(result, req.generationConfig, req.toolConfig);
 
   // Guard against orphan tool_result/tool_use pairs (#6026). Antigravity IDE can ship a
   // truncated history whose first turn is a `functionResponse` with no preceding
@@ -272,11 +276,24 @@ function preserveRequired(obj: unknown): void {
   }
 }
 
+// The Gemini `role` field is optional (single-turn requests omit it). Same rule as
+// gemini-to-openai: model-only parts (functionCall, thought) mean assistant, anything else user.
+// shortcut: no fallback to the previous turn's role for role-less text; add it if clients send
+// role-less multi-turn text.
+function inferRolelessTurn(content): "user" | "assistant" {
+  const parts = Array.isArray(content.parts) ? content.parts : [];
+  return parts.some((p) => p && (p.functionCall || p.thought === true)) ? "assistant" : "user";
+}
+
 // Convert Antigravity content to OpenAI message
 // Handles: text, thought, thoughtSignature, functionCall, functionResponse, inlineData
 function convertContent(content, toolCallIds) {
   const role =
-    content.role === "model" ? "assistant" : content.role === "user" ? "user" : content.role;
+    content.role === "model"
+      ? "assistant"
+      : content.role === "user"
+        ? "user"
+        : content.role || inferRolelessTurn(content);
 
   if (!content.parts || !Array.isArray(content.parts)) {
     return null;
@@ -318,6 +335,12 @@ function convertContent(content, toolCallIds) {
       });
     }
 
+    // File reference (fileData): same carriers as gemini-to-openai (image, video, audio, file)
+    if (part.fileData) {
+      const media = geminiMediaToOpenAI(part);
+      if (media) textParts.push(media);
+    }
+
     // Function call
     if (part.functionCall) {
       toolCalls.push({
@@ -348,7 +371,8 @@ function convertContent(content, toolCallIds) {
   // nothing is dropped (previously only the tool messages survived).
   if (toolResults.length > 0) {
     if (toolCalls.length > 0 || textParts.length > 0 || reasoningContent) {
-      const assistantMsg: JsonRecord = { role: "assistant" };
+      // A user turn can carry a tool result plus a follow-up: keep that follow-up a user message.
+      const assistantMsg: JsonRecord = { role: role === "user" ? "user" : "assistant" };
       if (textParts.length > 0) {
         assistantMsg.content =
           textParts.length === 1 && textParts[0].type === "text" ? textParts[0].text : textParts;
@@ -356,7 +380,7 @@ function convertContent(content, toolCallIds) {
       if (reasoningContent) {
         assistantMsg.reasoning_content = reasoningContent;
       }
-      if (toolCalls.length > 0) {
+      if (toolCalls.length > 0 && assistantMsg.role === "assistant") {
         assistantMsg.tool_calls = toolCalls;
       }
       return [...toolResults, assistantMsg];
