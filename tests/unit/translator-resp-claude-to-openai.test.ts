@@ -346,6 +346,57 @@ test("Claude stream: tool_use with an empty input_json_delta closes with {} argu
   assert.equal(state.toolCalls.get(0).function.arguments, "{}");
 });
 
+test("Claude stream: zero-parameter tool followed by a parameterized tool closes each independently (#20152)", () => {
+  const state = createState();
+  claudeToOpenAIResponse(
+    { type: "message_start", message: { id: "msg_20152_3", model: "claude-sonnet-4-6" } },
+    state
+  );
+
+  // Block 0: tool with no parameters, no input_json_delta at all.
+  claudeToOpenAIResponse(
+    {
+      type: "content_block_start",
+      index: 0,
+      content_block: { type: "tool_use", id: "call_0", name: "get_time" },
+    },
+    state
+  );
+  const stop0 = claudeToOpenAIResponse({ type: "content_block_stop", index: 0 }, state);
+  assert.ok(stop0, "content_block_stop must emit a chunk for empty tool arguments");
+  assert.equal(stop0[0].choices[0].delta.tool_calls[0].index, 0);
+  assert.equal(stop0[0].choices[0].delta.tool_calls[0].function.arguments, "{}");
+
+  // Block 1: tool with parameters; its streamed arguments are left untouched.
+  claudeToOpenAIResponse(
+    {
+      type: "content_block_start",
+      index: 1,
+      content_block: { type: "tool_use", id: "call_1", name: "format_time" },
+    },
+    state
+  );
+  claudeToOpenAIResponse(
+    {
+      type: "content_block_delta",
+      index: 1,
+      delta: { type: "input_json_delta", partial_json: '{"fmt":"iso"}' },
+    },
+    state
+  );
+  const stop1 = claudeToOpenAIResponse({ type: "content_block_stop", index: 1 }, state);
+  assert.equal(stop1, null);
+
+  assert.equal(state.toolCalls.get(0).function.arguments, "{}");
+  assert.equal(state.toolCalls.get(1).function.arguments, '{"fmt":"iso"}');
+
+  const msgDelta = claudeToOpenAIResponse(
+    { type: "message_delta", delta: { stop_reason: "tool_use" } },
+    state
+  );
+  assert.equal(msgDelta[0].choices[0].finish_reason, "tool_calls");
+});
+
 test("Claude stream: message_delta maps stop reason and usage including cache tokens (#1426, #2215)", () => {
   const state = createState();
   claudeToOpenAIResponse(
