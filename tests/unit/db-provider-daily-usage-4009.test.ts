@@ -135,3 +135,32 @@ test("#4009 getProviderDailyUsageRows — lowercases provider for consistent gro
   assert.equal(openaiRows.length, 1, "mixed-case provider values fold into one group");
   assert.equal(openaiRows[0].requests, 2, "both rows counted in the single lowercase group");
 });
+
+test("#4009 getProviderDailyUsageRows — archived summary rows count total_requests, not one per row", () => {
+  const db = core.getDbInstance();
+  const insertSummary = db.prepare(
+    `INSERT INTO daily_usage_summary (provider, model, date, total_requests, total_input_tokens, total_output_tokens)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  insertSummary.run("Gemini", "flash", "2026-01-05", 100, 1000, 2000);
+  insertSummary.run("gemini", "pro", "2026-01-05", 200, 3000, 4000);
+
+  const { unifiedSource, unifiedParams } = mod.buildUnifiedSource({
+    sinceIso: "2026-01-05T00:00:00.000Z",
+    untilIso: "2026-01-05T23:59:59.000Z",
+    rawCutoffDate: "2026-02-01",
+    apiKeyWhere: "",
+    apiKeyParams: {},
+  });
+
+  const rows = mod.getProviderDailyUsageRows(unifiedSource, unifiedParams);
+  const gemini = rows.filter((r) => r.date === "2026-01-05" && r.provider === "gemini");
+
+  assert.equal(gemini.length, 1);
+  assert.equal(
+    gemini[0].requests,
+    300,
+    "two summary buckets of 100 and 200 calls are 300 requests"
+  );
+  assert.equal(gemini[0].totalTokens, 10000);
+});

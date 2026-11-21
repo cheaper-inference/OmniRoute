@@ -3,9 +3,10 @@ import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OmniRoute AI 网关",
+    name: "OmniRoute AI Gateway",
     short_name: "OmniRoute",
-    description: "OmniRoute 是一个面向多提供者 LLM 的 AI 网关。一个端点连接您所有的 AI 提供者。",
+    description:
+      "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",
