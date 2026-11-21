@@ -1,0 +1,1 @@
+- **fix(sse):** cached reasoning is only replayed to the provider and model that stored it, so a shared tool call id cannot inject another provider's reasoning ([#20417](https://github.com/cheaper-inference/OmniRoute/pull/20417)) — thanks @maxmad64bis

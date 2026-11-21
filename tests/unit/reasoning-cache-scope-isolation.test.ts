@@ -161,10 +161,24 @@ test("tool_use blocks reaching the translator follow the same scope", () => {
   assert.equal(replayedThinking(SCOPE_A), SECRET);
 });
 
-test("Claude-shape replay follows the same scope", () => {
-  storeFor(SCOPE_A);
+test("Claude-shape replay follows the same scope and provider", () => {
+  // The Claude-shaped request is prepared for glm, so store the entry under that provider too.
+  reasoningCache.cacheReasoningFromAssistantMessage(
+    { role: "assistant", reasoning_content: SECRET, tool_calls: [{ id: "call_0" }] },
+    "glm",
+    MODEL,
+    { scope: SCOPE_A, historyMessages: [{ role: "user", content: "hi" }] }
+  );
   assert.notEqual(replayToClaude(SCOPE_B), SECRET);
   assert.equal(replayToClaude(SCOPE_A), SECRET);
+  // The same id stored by a different provider is not replayed to the glm request.
+  reasoningCache.cacheReasoning(
+    reasoningCache.buildToolCallCacheKey(SCOPE_A, "call_0"),
+    PROVIDER,
+    MODEL,
+    SECRET
+  );
+  assert.notEqual(replayToClaude(SCOPE_A), SECRET);
 });
 
 test("the request scope always names the API key, with or without a session", () => {
