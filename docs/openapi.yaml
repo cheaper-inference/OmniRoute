@@ -3519,6 +3519,86 @@ paths:
         "404":
           description: Combo not found
 
+  /api/combos/decision-preview:
+    post:
+      tags: [Combos]
+      summary: Preview the decision router menu and optionally test one decision
+      description: >-
+        Builds the menu (unique model ids of the given steps, in order) and the generated
+        cost-rank descriptions that the `decision` auto-router sends at request time. With
+        `prompt`, also runs one decision with the unsaved `decision` block; that call only
+        happens while the `COMBO_DECISION_ROUTER_ENABLED` feature flag is on (otherwise
+        `test.status` is `skipped` with reason `disabled`) and may bill the decider. A
+        `combo-model` decider is skipped (`live_request_only`). Requires management auth.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [models]
+              properties:
+                models:
+                  type: array
+                  maxItems: 200
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 300
+                  description: Combo step model strings (`provider/model`).
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 8000
+                decision:
+                  type: object
+                  additionalProperties: false
+                  required: [decider]
+                  properties:
+                    decider:
+                      type: string
+                      enum: [systemone, http, combo-model]
+                    model:
+                      type: string
+                      maxLength: 200
+                    baseUrl:
+                      type: string
+                      maxLength: 500
+                      description: http(s) URL without credentials, query or fragment.
+                    connectionId:
+                      type: string
+                      maxLength: 200
+                    wire:
+                      type: string
+                      enum: [systemone, openai-chat]
+                    timeoutMs:
+                      type: integer
+                      minimum: 100
+                      maximum: 5000
+                    minConfidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    descriptions:
+                      type: object
+                      maxProperties: 50
+                      additionalProperties:
+                        type: string
+                        maxLength: 1000
+      responses:
+        "200":
+          description: >-
+            `menu` and `generated`; with a prompt also `test` (`status`: `selected`, `skipped`
+            or `failed`, plus a log-safe `reason`, or `choice`, `confidence`, `probabilities`,
+            `backendModel` and `latencyMs`).
+        "400":
+          description: Invalid JSON or body (an `apiKey` field is rejected)
+        "401":
+          description: Management authentication required
+        "500":
+          description: Sanitized error
+
   /api/settings:
     get:
       tags: [Settings]
@@ -8137,9 +8217,11 @@ paths:
       tags: [System]
       summary: Inspect connection resilience state
       description: >-
-        Local-only operational view of per-connection cooldowns, provider circuit
-        breakers, model lockouts, and recent breaker transitions. Credential columns
-        are excluded by an explicit database whitelist.
+        Operational view of per-connection cooldowns, provider circuit breakers,
+        model lockouts, and recent breaker transitions. Local-only for anonymous
+        callers; a remote caller needs an authenticated dashboard session or a
+        manage-scope key (default manage-scope bypass). Credential columns are
+        excluded by an explicit database whitelist.
       x-internal: true
       parameters:
         - name: windowMs
@@ -10820,6 +10902,12 @@ paths:
   # are parsed from each route.ts's exports; summaries are path-derived.
   # Regenerate with: node scripts/ad-hoc/gen-openapi-missing-paths.mjs --apply
   /api/{omnirouteApiCatchAll}:
+    parameters:
+      - name: omnirouteApiCatchAll
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - OmnirouteApiCatchAll
@@ -10879,6 +10967,8 @@ paths:
         "200":
           description: OK
   /api/a2a/tasks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - A2a
@@ -10887,6 +10977,8 @@ paths:
         "200":
           description: OK
   /api/a2a/tasks/{id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - A2a
@@ -10998,6 +11090,8 @@ paths:
         "200":
           description: OK
   /api/batches/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Batches
@@ -11409,6 +11503,12 @@ paths:
         "200":
           description: OK
   /api/codex/connect/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Codex
@@ -11512,6 +11612,8 @@ paths:
         "201":
           description: Created
   /api/conductor/tasks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Conductor
@@ -11520,6 +11622,8 @@ paths:
         "200":
           description: OK
   /api/conductor/tasks/{id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Conductor
@@ -11574,6 +11678,8 @@ paths:
         "200":
           description: OK
   /api/context/combos/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Context
@@ -11596,6 +11702,8 @@ paths:
         "200":
           description: OK
   /api/context/combos/{id}/assignments:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Context
@@ -11657,6 +11765,8 @@ paths:
         "200":
           description: OK
   /api/conversations/{id}/tree:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Conversations
@@ -11674,6 +11784,12 @@ paths:
         "200":
           description: OK
   /api/cursor-cli/{path}:
+    parameters:
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Cursor cli
@@ -11791,6 +11907,13 @@ paths:
         "200":
           description: OK
   /api/discovery/results/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
     delete:
       tags:
         - Discovery
@@ -11817,6 +11940,13 @@ paths:
         "200":
           description: OK
   /api/discovery/verify/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
     post:
       tags:
         - Discovery
@@ -11850,6 +11980,12 @@ paths:
         "200":
           description: OK
   /api/evals/suites/{suiteId}:
+    parameters:
+      - name: suiteId
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - Evals
@@ -11880,6 +12016,8 @@ paths:
         "200":
           description: OK
   /api/files/{id}/content:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Files
@@ -12241,6 +12379,8 @@ paths:
         "200":
           description: OK
   /api/keys/{id}/regenerate:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Keys
@@ -12248,7 +12388,11 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/keys/{id}/reveal:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Keys
@@ -12256,7 +12400,11 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/keys/{id}/usage-limits:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Keys
@@ -12264,6 +12412,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/keys/{id}/self-service:
     get:
       tags:
@@ -12359,14 +12509,37 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     post:
       tags:
         - Keys
       summary: "POST keys › groups"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  pattern: '\S'
+                description:
+                  type: string
+                  default: ""
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Group created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/keys/groups/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Keys
@@ -12374,6 +12547,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     get:
       tags:
         - Keys
@@ -12381,6 +12556,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     put:
       tags:
         - Keys
@@ -12394,7 +12571,11 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/keys/groups/{id}/keys:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Keys
@@ -12402,6 +12583,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     get:
       tags:
         - Keys
@@ -12409,6 +12592,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     post:
       tags:
         - Keys
@@ -12416,7 +12601,11 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/keys/groups/{id}/permissions:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Keys
@@ -12424,6 +12613,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     get:
       tags:
         - Keys
@@ -12431,6 +12622,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
     post:
       tags:
         - Keys
@@ -12438,6 +12631,8 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
   /api/local/redis/start:
     post:
       tags:
@@ -12466,6 +12661,8 @@ paths:
         "200":
           description: OK
   /api/logs/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Logs
@@ -12671,6 +12868,12 @@ paths:
         "200":
           description: OK
   /api/middleware/hooks/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - Middleware
@@ -12733,6 +12936,8 @@ paths:
         "200":
           description: OK
   /api/model-combo-mappings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Model combo mappings
@@ -12787,6 +12992,12 @@ paths:
         "200":
           description: OK
   /api/oauth/{provider}/paste-credentials:
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Oauth
@@ -13031,6 +13242,12 @@ paths:
         "200":
           description: OK
   /api/plugins/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - Plugins
@@ -13048,6 +13265,12 @@ paths:
         "200":
           description: OK
   /api/plugins/{name}/activate:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Plugins
@@ -13057,6 +13280,12 @@ paths:
         "200":
           description: OK
   /api/plugins/{name}/config:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Plugins
@@ -13074,6 +13303,12 @@ paths:
         "200":
           description: OK
   /api/plugins/{name}/deactivate:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Plugins
@@ -13148,6 +13383,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/cc-alias:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Providers
@@ -13163,6 +13400,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/chatgpt-web-codex-doctor:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Providers
@@ -13172,6 +13411,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/claude-auth/apply-local:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13181,6 +13422,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/claude-auth/export:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13190,6 +13433,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/codex-auth/apply-local:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13199,6 +13444,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/codex-auth/export:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13208,6 +13455,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/interception-rules:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Providers
@@ -13230,6 +13479,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/login:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13239,6 +13490,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/param-filters:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Providers
@@ -13261,6 +13514,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/refresh:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13269,6 +13524,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/refresh-cursor:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13278,6 +13535,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/refresh-token:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13286,6 +13545,8 @@ paths:
         "200":
           description: OK
   /api/providers/{id}/sync-models:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Providers
@@ -13480,6 +13741,12 @@ paths:
         "200":
           description: OK
   /api/providers/volcengine-plan/connect/{sessionId}/cancel:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Providers
@@ -13489,6 +13756,12 @@ paths:
         "200":
           description: OK
   /api/providers/volcengine-plan/connect/{sessionId}/code:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Providers
@@ -13498,6 +13771,12 @@ paths:
         "200":
           description: OK
   /api/providers/volcengine-plan/connect/{sessionId}/identity:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Providers
@@ -13507,6 +13786,12 @@ paths:
         "200":
           description: OK
   /api/providers/volcengine-plan/connect/{sessionId}/resend:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - Providers
@@ -13516,6 +13801,12 @@ paths:
         "200":
           description: OK
   /api/providers/volcengine-plan/connect/{sessionId}/status:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Providers
@@ -13580,6 +13871,8 @@ paths:
         "200":
           description: OK
   /api/quota/groups/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Quota
@@ -13595,6 +13888,8 @@ paths:
         "200":
           description: OK
   /api/quota/keys/{id}/models:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Quota
@@ -13603,6 +13898,8 @@ paths:
         "200":
           description: OK
   /api/quota/pools/{id}/log:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Quota
@@ -13744,6 +14041,8 @@ paths:
         "200":
           description: OK
   /api/relay/tokens/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Relay
@@ -13808,6 +14107,12 @@ paths:
         "400":
           description: Neither connectionIds nor all was provided
   /api/routing/decisions/{requestId}:
+    parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Routing
@@ -13876,6 +14181,12 @@ paths:
         "200":
           description: OK
   /api/session-pools/{provider}:
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Session pools
@@ -14118,6 +14429,8 @@ paths:
         "200":
           description: OK
   /api/settings/free-proxies/{id}/add-to-pool:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Settings
@@ -14394,6 +14707,13 @@ paths:
         "200":
           description: OK
   /api/settings/proxies/{id}/repair-relay:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
     post:
       tags:
         - Settings
@@ -14670,6 +14990,8 @@ paths:
         "200":
           description: OK
   /api/settings/reasoning-routing-rules/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Settings
@@ -14872,6 +15194,8 @@ paths:
         "200":
           description: OK
   /api/skills/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Skills
@@ -14999,6 +15323,8 @@ paths:
         "200":
           description: OK
   /api/sync/tokens/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Sync
@@ -15163,6 +15489,8 @@ paths:
         "200":
           description: OK
   /api/tools/agent-bridge/agents/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Tools
@@ -15180,6 +15508,8 @@ paths:
         "200":
           description: OK
   /api/tools/agent-bridge/agents/{id}/detect:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Tools
@@ -15189,6 +15519,8 @@ paths:
         "200":
           description: OK
   /api/tools/agent-bridge/agents/{id}/detected-models:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Tools
@@ -15285,6 +15617,8 @@ paths:
         "200":
           description: OK
   /api/tools/traffic-inspector/sessions/{id}/requests:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Tools
@@ -15395,6 +15729,12 @@ paths:
         "200":
           description: OK
   /api/upstream-proxy/{providerId}:
+    parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - Upstream proxy
@@ -15480,6 +15820,13 @@ paths:
         "200":
           description: OK
   /api/usage/combo-trace/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: "^combo-"
     get:
       tags:
         - Usage
@@ -15535,6 +15882,8 @@ paths:
         "200":
           description: OK
   /api/usage/route-explain/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Usage
@@ -15581,6 +15930,12 @@ paths:
         "200":
           description: OK
   /api/v1/{omnirouteCatchAll}:
+    parameters:
+      - name: omnirouteCatchAll
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - V1 OmnirouteCatchAll
@@ -15617,6 +15972,8 @@ paths:
         "200":
           description: OK
   /api/v1/accounts/{id}/limits:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - V1 Accounts
@@ -15697,6 +16054,8 @@ paths:
         "200":
           description: OK
   /api/v1/agents/tasks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - V1 Agents
@@ -15727,6 +16086,15 @@ paths:
         "200":
           description: OK
   /api/v1/auto-combo/{channel}/candidates:
+    parameters:
+      - name: channel
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: "^[a-zA-Z0-9:_-]+$"
     get:
       tags:
         - V1 Auto-combo
@@ -15750,6 +16118,8 @@ paths:
         "200":
           description: OK
   /api/v1/batches/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - V1 Batches
@@ -15765,6 +16135,8 @@ paths:
         "200":
           description: OK
   /api/v1/batches/{id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - V1 Batches
@@ -15823,6 +16195,8 @@ paths:
         "200":
           description: OK
   /api/v1/files/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - V1 Files
@@ -15838,6 +16212,8 @@ paths:
         "200":
           description: OK
   /api/v1/files/{id}/content:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - V1 Files
@@ -16125,6 +16501,12 @@ paths:
         "404":
           description: Session not found
   /api/v1/models/{model}:
+    parameters:
+      - name: model
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Models
@@ -16156,6 +16538,12 @@ paths:
         "200":
           description: OK
   /api/v1/providers/{provider}/limits:
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Providers
@@ -16283,6 +16671,8 @@ paths:
         "403":
           $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/registered-keys/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - V1 Registered-keys
@@ -16318,6 +16708,8 @@ paths:
         "403":
           $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/registered-keys/{id}/revoke:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - V1 Registered-keys
@@ -16352,6 +16744,12 @@ paths:
         "200":
           description: OK
   /api/v1/responses/{path}:
+    parameters:
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Responses
@@ -16536,6 +16934,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16544,6 +16948,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/api/chat:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16552,6 +16962,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/api/show:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16560,6 +16976,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/api/tags:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16568,6 +16990,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/api/version:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16576,6 +17004,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/chat/completions:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16584,6 +17018,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/combos:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16592,6 +17032,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/models:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16600,6 +17046,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/responses:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16608,6 +17060,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/v1/chat/completions:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16616,6 +17074,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/{token}/v1/models:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16623,22 +17087,94 @@ paths:
       responses:
         "200":
           description: OK
-  /api/v1/vscode/combos/{token}/{{slug}}:
+  /api/v1/vscode/combos/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
-      summary: "GET vscode › combos › <token> › <{slug>}"
+      summary: List the VS Code combo catalog
       responses:
         "200":
-          description: OK
+          description: Combo metadata for the authenticated request
+  /api/v1/vscode/combos/{token}/api/version:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - V1 Vscode
+      summary: Read the Ollama compatibility version for the combo endpoint
+      responses:
+        "200":
+          description: Compatibility version
+  /api/v1/vscode/combos/{token}/api/tags:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - V1 Vscode
+      summary: List the combo catalog in Ollama format
+      responses:
+        "200":
+          description: Combo models in Ollama format
+  /api/v1/vscode/combos/{token}/api/show:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
-      summary: "POST vscode › combos › <token> › <{slug>}"
+      summary: Describe one combo in Ollama format
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              oneOf:
+                - required: [name]
+                  properties:
+                    name:
+                      type: string
+                      minLength: 1
+                      pattern: '\S'
+                - required: [model]
+                  properties:
+                    name:
+                      type: "null"
+                    model:
+                      type: string
+                      minLength: 1
+                      pattern: '\S'
       responses:
         "200":
-          description: OK
+          description: Combo model details
+        "400":
+          description: A nonempty model name is required
+        "404":
+          description: Model not found in the combo catalog
   /api/v1/vscode/raw/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16647,6 +17183,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/api/chat:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16655,6 +17197,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/api/show:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16663,6 +17211,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/api/tags:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16671,6 +17225,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/api/version:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16679,6 +17239,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/chat/completions:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16687,6 +17253,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/combos:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16695,6 +17267,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/models:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16703,6 +17281,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/responses:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16711,6 +17295,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/v1/chat/completions:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
@@ -16719,6 +17309,12 @@ paths:
         "200":
           description: OK
   /api/v1/vscode/raw/{token}/v1/models:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
@@ -16846,6 +17442,12 @@ paths:
         "200":
           description: OK
   /api/vnc-session/{params}:
+    parameters:
+      - name: params
+        in: path
+        required: true
+        schema:
+          type: string
     delete:
       tags:
         - Vnc session
@@ -16886,6 +17488,8 @@ paths:
         "200":
           description: OK
   /api/webhooks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     delete:
       tags:
         - Webhooks
@@ -16908,6 +17512,8 @@ paths:
         "200":
           description: OK
   /api/webhooks/{id}/deliveries:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     get:
       tags:
         - Webhooks
@@ -16916,6 +17522,8 @@ paths:
         "200":
           description: OK
   /api/webhooks/{id}/test:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
     post:
       tags:
         - Webhooks

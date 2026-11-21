@@ -89,6 +89,33 @@ for (const name of [
   });
 }
 
+test("accepts a new test in a workspace package's own tests/ directory", (t) => {
+  // @omniroute/* packages run their own suites from <package>/tests/ (52 files in
+  // opencode-plugin-v2 alone); a new test there is in the right place.
+  const f = fixture(t);
+  f.write("@omniroute/opencode-plugin-v2/tests/catalog-order.test.ts");
+  f.commit();
+  const result = f.run();
+  assert.equal(result.status, 0);
+  assert.match(result.report, /New test files outside tests\/: 0/);
+});
+
+for (const name of [
+  "@omniroute/opencode-plugin-v2/src/catalog-order.test.ts",
+  "@omniroute/opencode-plugin-v2/tests-old/catalog-order.test.ts",
+  "@other/pkg/tests/catalog-order.test.ts",
+  "packages/ui-kit/tests/button.test.ts",
+]) {
+  test(`still rejects a new test outside a package's own tests/: ${JSON.stringify(name)}`, (t) => {
+    const f = fixture(t);
+    f.write(name);
+    f.commit();
+    const result = f.run();
+    assert.equal(result.status, 1);
+    assert.match(result.report, /must be under `tests\//);
+  });
+}
+
 test("accepts production changes accompanied by a test under tests/", (t) => {
   const f = fixture(t);
   f.write("src/feature.ts", "export const value = 1;\n");

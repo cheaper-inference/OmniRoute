@@ -31,6 +31,12 @@ export const geminiProvider: RegistryEntry = {
       supportsVision: true,
     },
     {
+      id: "gemini-4-carbon",
+      name: "Gemini 4 Carbon",
+      toolCalling: true,
+      supportsVision: true,
+    },
+    {
       id: "gemini-4-hydrogen",
       name: "Gemini 4 Hydrogen",
       toolCalling: true,

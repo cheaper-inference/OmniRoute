@@ -311,7 +311,7 @@ function ProvidersPageContent() {
         if (data.expirations) setExpirations(data.expirations);
         if (data.blockedProviders) setBlockedProviders(data.blockedProviders);
         setCodexGlobalServiceMode(getCodexGlobalServiceMode(data.settings));
-        setOpenRouterProviderStats(data.openRouterProviderStats);
+        void data.openRouterProviderStats.then(setOpenRouterProviderStats);
       } catch (error) {
         console.log("Error fetching data:", error);
       } finally {
