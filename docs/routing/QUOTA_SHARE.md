@@ -538,8 +538,8 @@ An absolute cap refusal carries neither. The public code stays `quota_share_bloc
 A share refusal does not touch the shared connection. It sets no cooldown, no model lock and no
 provider breaker failure, and the other keys of the pool keep being served. When every target of
 a combo refuses the key for its share, the combo answers 429 without waiting. Its answer carries
-the hint as `Retry-After`, as it does for a closed schedule window. The embeddings path ends its
-refusal with the same sentence and sends no `Retry-After`.
+the hint as `Retry-After`. The embeddings path ends its refusal with the same sentence and sends
+no `Retry-After`.
 
 ### POST hook (record consumption)
 
