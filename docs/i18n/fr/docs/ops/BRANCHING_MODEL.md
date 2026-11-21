@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute utilise un modèle de publication en **cycles parallèles** : une branche dédiée `release/vX.Y.Z`
-pour le cycle actif, `main` pour la lignée publiée et un tag immuable
-`vX.Y.Z` lorsque ce cycle est publié. Il est normal de voir des commits arriver à la fois sur `release/*` _et_ sur
-`main` — ce n’est pas une erreur.
+OmniRoute utilise un** cycle parallèle** modèle de version : une branche `release/vX.Y.Z` dédiée pour le cycle actif, `main` pour la ligne publiée et une balise `vX.Y.Z` immuable lorsque ce cycle est expédié. Voir les commits atterrir sur `release/*` _et_ sur `main` est attendu — ce n'est pas une confusion.
 
-Les détails destinés aux mainteneurs figurent dans `CLAUDE.md` (règle stricte nº 21) et
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Cette page en présente le résumé public
-destiné aux contributeurs.
+Les détails du responsable résident dans `CLAUDE.md` (Hard Rule #21) et [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Cette page est le résumé public destiné aux contributeurs.
 
 ## En bref
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` n’est pas la branche d’intégration quotidienne. Les PR ouvertes vers `main`
 doivent généralement être redirigées avant leur fusion.
 
-## Gel de publication (cycles parallèles)
+## Libérer le gel (cycles parallèles)
 
-Lorsqu’une publication est en cours de rapprochement, une issue servant de marqueur et portant le label `release-freeze` est
-ouverte. Cela **n’interrompt pas le développement** :
+Lorsqu'une version est rapprochée, un problème de marqueur intitulé `release-freeze` est ouvert. Que** n'arrête pas le développement** :
 
-- La branche `release/vX.Y.Z` gelée est sous la responsabilité du responsable de cette publication.
-- La branche `release/vX+1` du cycle suivant est créée depuis la pointe gelée afin que les contributeurs puissent continuer
-  à intégrer leurs travaux.
-- Les PR ouvertes qui ciblent encore la branche gelée doivent être **redirigées** vers la branche
-  `release/v*` active (celle ayant la version la plus élevée).
+- Le `release/vX.Y.Z` gelé appartient au capitaine de libération de ce navire.
+- Le `release/vX+1` du cycle suivant est coupé de la pointe gelée afin que les contributeurs continuent à travailler.
+- PRs ouvert qui cible toujours la branche gelée devrait être** reciblé** à la branche `release/v*` active (la plus élevée).
 
-Vérifiez s’il existe un gel en cours avant de supposer que la branche souhaitée accepte les fusions :
+Recherchez un gel ouvert avant de supposer que la branche souhaitée est fusionnable :
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Les mécanismes de fusion (label `queue` du propriétaire → Mergify) sont documentés dans
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Les mécanismes de fusion (propriétaire `queue` label → Mergify) sont documentés dans [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **19/11/2026 : la file d'attente de fusion Mergify est supprimée** (décision du propriétaire). `.mergify.yml` ne définit plus de file d'attente et refuse les commandes Mergify qui fusionnent ou réécrivent une pull request. Les versions PRs sont fusionnées manuellement selon l'ensemble de règles du référentiel "Exiger des portes vertes sur la version active" (`Gate / CI` + `Gate / Quality`) jusqu'à ce que la file d'attente omni s'exécute en mode live, et via la file d'attente omni après cela ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Le label `queue` ne fusionne plus rien.
 
 ## Pourquoi une branche et un tag ?
 

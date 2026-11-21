@@ -538,6 +538,10 @@ async function priceUnmeteredSpendRow(
       provider,
       model,
       serviceTier: row.serviceTier || "standard",
+      // #20153: The row sums unmetered tokens across many requests in the window.
+      // Skip the per-request long-context pricing tier so the summed input does
+      // not falsely trip the threshold and overstate spend (~5x).
+      aggregatedTokens: true,
     }
   );
   if (result.failed) {

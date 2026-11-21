@@ -807,6 +807,7 @@ function makeSelfContainedRepo(): { dir: string; mig: string; gatePath: string }
     "open-sse",
     "config",
     "scripts/check",
+    "scripts/ci/native-worker-v8-layout.mjs",
     "package.json",
     "tsconfig.json",
   ]) {

@@ -134,35 +134,22 @@ restartēšanu izpildot vienā komandā.
   minūtes, bet augšupielāde no diska — 2 minūtes.
 - `.15` VPS ir paredzēts tikai homologācijai — tajā nekad nedarbojas CI izpildītāji.
 
-## Mitinātā josla (GitHub mitinātie izpildītāji)
+## Mitinātā josla (GitHub mitinātie skrējēji)
 
-Repozitorijs pieder organizācijai `cheaper-inference`, kurai ir **Team** plāns: **60 vienlaicīgi mitināti darbi**, ko kopīgi izmanto visi organizācijas repozitoriji, visas PR pārbaudes, visas pēc nosūtīšanas (push) aktivizētās darbplūsmas un CodeQL noklusējuma konfigurācija. Tālāk norādītie skaitļi tika izmērīti ar **Pro** plānu (40 vienlaicīgi mitināti darbi). Mērīts 2026-10-18
-sapludināšanas kampaņas laikā (~10 sapludināšanas stundā zarā `release/v3.8.52`): 24 stundu
-laikā izveidotas **2,500 darbplūsmu izpildes**, 6 stundu laikā zarā veikti 44 `push`, rindā bija
-**106 mitināti darbi**, kamēr PR pārbaudes gaidīja vairākas stundas un PR tika sapludināti bez tām.
-Katrā `push` uz šo zaru tika aktivizētas deviņas darbplūsmas:
+Repozitorijs pieder organizācijai `cheaper-inference`, uz** Komanda** plāns:** 60 vienlaikus mitinātas darba vietas** , ko koplieto katrs organizācijas repozitorijs, katra PR pārbaude, katra nospiežot darbplūsma un CodeQL noklusējuma iestatīšana. Tālāk norādītie skaitļi tika mērīti uz** Pro** plāns (40 vienlaikus mitinātas darbavietas). Mērīts 2026. 10.18. sapludināšanas kampaņas laikā (~ 10 merges/hour uz `release/v3.8.52`):** 24 stundu laikā izveidotas 2500 darbplūsmas** , 44 grūdieni uz zaru 6 stundās,** Rindā ir 106 mitinātie darbi** kamēr PR čeki gaidīja stundām un PRs tika sapludināti bez tiem. Deviņas darbplūsmas tiek aktivizētas, katru reizi piespiežot filiāli:
 
-| katram `push` uz `release/v*`                | mitinātie darbi | iznākums pārslodzes laikā                                           | kopš 2026-10-18                                                                    |
-| -------------------------------------------- | --------------: | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `ci.yml` (pilna matrica)                     |         līdz 30 | atcelta nākamā `push` dēļ, 24 no 24 vienā dienā                     | netiek sākta `release/**` `push` gadījumā (PR izpilde + Release-Green)             |
-| `quality.yml`                                |              ~6 | atcelta, 23 no 23                                                   | netiek sākta `release/**` `push` gadījumā                                          |
-| `Release-Green` `--quick`                    |               0 | darbojās uz `omni-build`, atcelta 97 no 100                         | `omni-release` vieta, nekad netiek atcelta, gaidošās izpildes tiek apvienotas      |
-| `Lock released branch`, `OpenSSF Scorecard`  |               2 | viena rindā gaidoša izpilde katram `push`                           | viena izpilde katrai atsaucei (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
-| `Release acceptance` (ēnas pārskats)         |               1 | viens mitināts `npm ci` katram `push`, nekad netiek atcelts         | bez izmaiņām — kandidāts `paths:` filtram                                          |
-| `Publish to Docker Hub` → `Deploy to VPS`    |               2 | atcelta katram `push`; amd64 posms konkurē uz `omni-build`          | bez izmaiņām — īpašnieka izvietošanas kanāls                                       |
-| CodeQL noklusējuma konfigurācija (`dynamic`) |               4 | `javascript-typescript`, `actions`, `c-cpp`, `python` katram `push` | bez izmaiņām — Settings → Code security; `c-cpp`/`python` šeit neko neskenē        |
+| par grūdienu uz `release/v*`                | mitinātas darbavietas | iznākums vētras laikā                                                   | kopš 2026-10-18                                                                  |
+| ------------------------------------------- | --------------------: | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `ci.yml` (pilna matrica)                    |               līdz 30 | atcelts ar nākamo grūdienu, 24 no 24 dienā                              | nav palaists uz `release/**` grūdieniem (PR run + Release-Green)                 |
+| `quality.yml`                               |                    ~6 | atcelts, 23 no 23                                                       | nav iedarbināts uz `release/**` grūdieniem                                       |
+| `Release-Green` `--quick`                   |                     0 | skrēja uz `omni-build`, atcēla 97 no 100                                | `omni-release` slots, nekad nav atcelts, gaidot izpildi sakļauj                  |
+| `Lock released branch`, `OpenSSF Scorecard` |                     2 | viens skrējiens rindā uz vienu grūdienu                                 | viens skrējiens par atsauci (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (ēnu ziņojums)         |                     1 | viens hosted `npm ci` uz vienu push, nekad atcelts                      | nemainīts — kandidāts `paths:` filtram                                           |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                     2 | atcelts uz vienu grūdienu; amd64 leg sacenšas uz `omni-build`           | nemainīgs — īpašnieka izvietošanas kanāls                                        |
+| CodeQL noklusējuma iestatīšana (`dynamic`)  |                     4 | `javascript-typescript`, `actions`, `c-cpp`, `python` uz vienu grūdienu | nemainīgs — Iestatījumi → Koda drošība; `c-cpp`/`python` šeit neko neskenē       |
 
-`tests/unit/build/push-storm-diet.test.ts` fiksē `ci.yml` un `quality.yml` `push` aktivizētāju tikai
-zarā `main`. Blakusefekts: Codecov vairs nesaņem bāzes augšupielādi katram `release` `push`
-(solis ir informatīvs un izmanto `continue-on-error`); repozitorijā esošā pārklājuma kontrole un
-PR komentārs netiek ietekmēti.
+`tests/unit/build/push-storm-diet.test.ts` piesprauž `main` un `ci.yml` -only `quality.yml`. Blakusparādība: Codecov vairs nesaņem bāzes augšupielādi katrā laidiena push (darbība ir informatīva un `continue-on-error`); repo pārklājuma vārti un PR komentārs netiek ietekmēti.
 
-**Papildu pašmitināta jauda neatrisina mitināto darbu rindu.** Izstrādes mašīna
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) varētu mitināt izpildītāju, taču aģentu sesijas jau
-uztur tās noslodzi 20–26 līmenī, aģenta konteineram nav Docker dēmona, un piesātināta ir tieši
-mitinātā josla. Tajā pašā brīdī `.113` mašīnā bija brīvi 71 GB un noslodze 5–8; tās ierobežojums
-ir iepriekš minētais atmiņas budžets katram klausītājam (maksimums 6 klausītāji), nevis CPU.
-Atlikušie risinājumi ir procesuāli: sapludināt kampaņas PR, izmantojot Mergify rindu
-(`label=queue`; paketes koplieto vienu `merge_group` CI izpildi, nevis pa vienai izpildei katram
-PR un vēl pa vienai katram `push`), samazināt CodeQL noklusējuma konfigurācijas valodu skaitu
-un filtrēt `release-acceptance.yml` pēc failiem, kurus tas nolasa.
+**Lielāka pašizmitinātā jauda neizlabo mitināto rindu.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) varētu mitināt skrējēju, taču aģenta sesijās jau ir slodze 20–26, aģenta konteinerā nav Docker dēmona, un piesātinātā josla ir mitinātā. `.113` kastē tajā pašā brīdī bija 71 GB brīvs un slodze 5–8; tā ierobežojums ir augstākais katra klausītāja atmiņas budžets (6 klausītāji), nevis CPU. Atlikušās sviras ir procesa sviras: nosūtiet kampaņu PRs caur sapludināšanas rindu (`label=queue`, partijas koplieto vienu `merge_group` CI palaišanu, nevis vienu izpildi uz PR plus vienu nospiešanu), sagrieziet CodeQL noklusējuma iestatīšanas valodas un filtrējiet `release-acceptance.yml` pēc failiem, ko tā nolasa.
+
+> **2026-11-19: sapludināšanas rinda ir pārtraukta** (īpašnieka lēmums). `.mergify.yml` vairs nedefinē rindu un noraida sapludināšanas komandas, kas apvieno vai pārraksta vilkšanas pieprasījumu. Laidieni PRs tiek apvienoti ar roku saskaņā ar repozitorija kārtulu kopu "Pieprasīt zaļos vārtus aktīvajā laidienā" (`Gate / CI` + `Gate / Quality`), līdz universālā rinda tiek palaista tiešraides režīmā, un pēc tam ar universālo rindu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Iepriekš esošā sapludināšanas svira vairs nepastāv.

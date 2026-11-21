@@ -44,6 +44,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // opt-in System One choice call (COMBO_JEV_STRATEGY_ENABLED). The call never
     // dispatches chat; the chosen targets still go through the normal path (class B).
     "open-sse/services/combo/jevAsk.ts": 1,
+    // Unified decision routing: the `decision` auto-router reads the key of the decider's
+    // referenced connection (or the scoped `typesafe` one) inside the API key allowlist,
+    // only behind COMBO_DECISION_ROUTER_ENABLED. The call never dispatches chat; the chosen
+    // model still goes through the normal path (class B, same as jevAsk).
+    "open-sse/services/decision/credentials.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.

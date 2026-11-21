@@ -81,8 +81,10 @@ describe("feature-flags-settings count update", () => {
     // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd;
     // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) the 123rd;
     // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED and
-    // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 126.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 126);
+    // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 126;
+    // PLUGIN_PERMISSION_MODEL_ENABLED (opt-in plugin sandbox, default off) to 127;
+    // COMBO_DECISION_ROUTER_ENABLED (decision auto-router, default off) to 128.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 128);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

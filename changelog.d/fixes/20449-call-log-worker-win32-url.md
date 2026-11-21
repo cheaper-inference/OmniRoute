@@ -1,0 +1,1 @@
+- **fix(callLogs):** guard call-log artifact worker path resolution when build-time `import.meta.url` is not a valid local file URL on Windows ([#20449](https://github.com/cheaper-inference/OmniRoute/issues/20449))
