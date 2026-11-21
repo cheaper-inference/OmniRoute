@@ -10,7 +10,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import * as yaml from "js-yaml";
-import { apiRoot, collectApiRouteUrlPaths } from "./lib/apiRoutes.mjs";
+import {
+  apiRoot,
+  collectApiRouteUrlPaths,
+  collectOptionalCatchAllRoutes,
+  isOptionalCatchAllRouteDocumented,
+} from "./lib/apiRoutes.mjs";
 
 const ROOT = process.cwd();
 const API_ROOT = apiRoot(ROOT);
@@ -35,6 +40,7 @@ if (!fs.existsSync(OPENAPI_PATH)) {
 }
 
 const implementedPaths = collectApiRouteUrlPaths(ROOT).sort((a, b) => a.localeCompare(b));
+const optionalRoutes = collectOptionalCatchAllRoutes(ROOT);
 const raw = yaml.load(fs.readFileSync(OPENAPI_PATH, "utf-8"));
 const documentedPaths = new Set(Object.keys(raw.paths || {}));
 
@@ -42,7 +48,10 @@ let covered = 0;
 const missing = [];
 
 for (const p of implementedPaths) {
-  if (documentedPaths.has(p)) {
+  if (
+    documentedPaths.has(p) ||
+    isOptionalCatchAllRouteDocumented(p, documentedPaths, optionalRoutes)
+  ) {
     covered++;
   } else {
     missing.push(p);

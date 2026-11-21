@@ -33,6 +33,40 @@ export function isNoMemoryRequested(
 }
 
 /**
+ * Per-request opt-out of call-log payload persistence via the
+ * `x-omniroute-no-log` header. Truthy values: `true` / `1` / `yes`
+ * (case-insensitive). The request still produces a call-log row with its
+ * timestamp, model, provider, status, duration and token counts, but the
+ * request/response bodies and pipeline artifacts are not stored.
+ *
+ * This complements the per-API-key `no_log` flag: the key flag applies to every
+ * request made with that key, while this header lets a client opt out for a
+ * single request without creating a separate key. It does not affect Memory
+ * extraction or the semantic cache; combine it with `x-omniroute-no-memory`
+ * and `x-omniroute-no-cache` when a request must leave no content anywhere.
+ */
+export function isNoLogRequested(
+  headers: Record<string, unknown> | Headers | null | undefined
+): boolean {
+  const value = (getHeaderValueCaseInsensitive(headers, "x-omniroute-no-log") || "")
+    .trim()
+    .toLowerCase();
+  return value === "true" || value === "1" || value === "yes";
+}
+
+/**
+ * Resolve the effective no-log decision for one request: the API key's persisted
+ * `no_log` flag OR the per-request `x-omniroute-no-log` header. Pure so the
+ * precedence stays testable without invoking the chat handler.
+ */
+export function resolveNoLogEnabled(
+  apiKeyInfo: { noLog?: unknown } | null | undefined,
+  headers: Record<string, unknown> | Headers | null | undefined
+): boolean {
+  return apiKeyInfo?.noLog === true || isNoLogRequested(headers);
+}
+
+/**
  * Per-request compression override via the `x-omniroute-compression` header. Mirrors the
  * `x-omniroute-no-memory` convention (#4290). Returns the raw trimmed value, or null when
  * absent/blank. The resolver (planFromHeader) owns interpretation and casing rules; this

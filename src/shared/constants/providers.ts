@@ -17,6 +17,10 @@ import { UPSTREAM_PROXY_PROVIDERS } from "./providers/upstream-proxy";
 import { CLOUD_AGENT_PROVIDERS } from "./providers/cloud-agent";
 import { SYSTEM_PROVIDERS } from "./providers/system";
 import { validateProviders } from "../validation/providerSchema";
+import {
+  getCredentialRequirement,
+  worksWithoutCredential,
+} from "../utils/providerCredentialRequirement";
 
 export const FREE_PROVIDERS = {};
 
@@ -292,19 +296,9 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
   "searxng-search",
   "firecrawl",
   "copilot-web",
-  "g4f-groq",
-  "g4f-gemini",
-  "g4f-pollinations",
-  "g4f-ollama",
-  "g4f-nvidia",
   "huggingchat",
   "gitlawb",
   "gitlawb-gmi",
-  "naga-ac",
-  // UC (uncensored.com) persona: un-metered subscription chat with NO API key —
-  // auth is a durable Clerk credential stored in providerSpecificData, from which
-  // the executor mints a short-lived session token per connect.
-  "uc",
 ]);
 
 export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
@@ -314,6 +308,10 @@ export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
     // ponytail: any noAuth provider auto-qualifies — no per-provider maintenance
     canonicalId in NOAUTH_PROVIDERS ||
     providerId in NOAUTH_PROVIDERS ||
+    // The credential registry is the source of truth for what is user-facing:
+    // anything declared optional or none works without a pasted key.
+    worksWithoutCredential(getCredentialRequirement(canonicalId)) ||
+    worksWithoutCredential(getCredentialRequirement(providerId)) ||
     EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(canonicalId) ||
     EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(providerId) ||
     isLocalProvider(canonicalId) ||
