@@ -13,7 +13,6 @@ import { sqliteInterceptionRuleLegacySync as legacySync } from "./repositories/s
 
 export type {
   FetchInterceptionBackend,
-  ModelInterceptionRule,
   ProviderInterceptionRules,
 } from "@/domain/persistence/interceptionRuleRepository";
 
