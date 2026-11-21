@@ -126,6 +126,7 @@ const SENSITIVE_AUDIT_KEYS = new Set([
   "setcookie",
   "consoleapikey",
   "clientsecret",
+  "credentialexactvalues",
 ]);
 
 export const API_KEY_AUTH_TOUCH_ACTION = "api_key.auth.touch";

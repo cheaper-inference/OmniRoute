@@ -6,6 +6,12 @@
  * at runtime (see: https://github.com/vercel/next.js/issues/12557).
  */
 import { z } from "zod";
+import {
+  EXACT_VALUE_MAX_COUNT,
+  EXACT_VALUE_MAX_LENGTH,
+  EXACT_VALUE_MIN_LENGTH,
+  isValidExactValueList,
+} from "@/shared/utils/credentialExactValues";
 import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
 import { CONNECTION_TEST_PROMPT_MAX_LENGTH } from "@/shared/constants/connectionTest";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
@@ -179,6 +185,14 @@ export const updateSettingsSchema = z.object({
   newPassword: z.string().min(1).max(200).optional(),
   currentPassword: z.string().max(200).optional(),
   credentialRedactionEnabled: z.boolean().optional(),
+  /** Exact secret values the credential masker hides, one per line (10-200 chars, max 50). */
+  credentialExactValues: z
+    .string()
+    .max(EXACT_VALUE_MAX_COUNT * (EXACT_VALUE_MAX_LENGTH + 2))
+    .refine(isValidExactValueList, {
+      message: `each value must be ${EXACT_VALUE_MIN_LENGTH} to ${EXACT_VALUE_MAX_LENGTH} characters, at most ${EXACT_VALUE_MAX_COUNT} values`,
+    })
+    .optional(),
   theme: z.string().max(50).optional(),
   language: z.string().max(10).optional(),
   requireLogin: z.boolean().optional(),

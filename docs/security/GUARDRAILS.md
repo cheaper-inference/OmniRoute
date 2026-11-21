@@ -934,6 +934,13 @@ to the upstream provider or back to the client.
   pattern. Header-shaped keys (`authorization`, `x-api-key`, `api-key`,
   `apikey`) are redacted structurally (value only, scheme prefix like
   `Bearer `/`Basic ` preserved) rather than via the generic text regex.
+- **Exact values (opt-in, off by default).** Secrets with no recognisable shape (a passphrase, an
+  internal token) can be listed in the `credentialExactValues` setting, one per line, 10 to 200
+  characters each, at most 50. Each exact, case-sensitive occurrence becomes
+  `[REDACTED:exact_value]`, on requests, responses and streams (a value split across SSE chunks is
+  held back until it can be judged), before the pattern catalog runs. The list is stored encrypted
+  with the other encrypted settings, is never returned by `GET`/`PATCH /api/settings`, and its audit
+  diff entry is redacted. It does nothing while the list is empty or credential redaction is off.
 - The guardrail never blocks; it only rewrites (`modifiedPayload` /
   `modifiedResponse`) and annotates (`meta.credentialsRedacted`, `meta.count`).
 

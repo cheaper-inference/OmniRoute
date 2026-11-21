@@ -1,0 +1,1 @@
+- Add two search operators to the model catalog filter: `/pattern/` matches a regular expression, and `!term` excludes models that contain the term (`claude !haiku`). Any other text stays a plain substring search, so existing searches return the same rows. ([#20235](https://github.com/cheaper-inference/OmniRoute/pull/20235))

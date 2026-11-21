@@ -1230,7 +1230,7 @@
   },
   "src/lib/guardrails/promptInjection.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 2
+      "count": 1
     }
   },
   "src/lib/guardrails/visionBridgeHelpers.ts": {
