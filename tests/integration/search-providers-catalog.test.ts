@@ -2,7 +2,7 @@
  * Integration tests for GET /api/search/providers — extended catalog (F4).
  *
  * Tests:
- * - Returns 32 items total (24 search + 8 fetch providers).
+ * - Returns 34 items total (25 search + 9 fetch providers).
  * - Each item carries the correct `kind` field.
  * - Status reflects actual DB credential state:
  *   - "configured"  when an active, non-rate-limited connection exists.
@@ -48,12 +48,12 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // Constants
 // ---------------------------------------------------------------------------
 
-// 24 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
-// google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
-// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search,
-// keenable-search, codex-search.
-const EXPECTED_SEARCH_COUNT = 24;
-const EXPECTED_FETCH_COUNT = 8;
+// 25 search-kind providers: deepseek, serper, brave, perplexity, exa, tavily, nimble-search,
+// firecrawl, google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search,
+// anysearch-search, context7 (#11140), duckduckgo-free, x-search, xquik-search,
+// parallel-search, kimi-search, keenable-search, codex-search.
+const EXPECTED_SEARCH_COUNT = 25;
+const EXPECTED_FETCH_COUNT = 9;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 
 // ---------------------------------------------------------------------------
@@ -139,7 +139,7 @@ test("search-providers-catalog: returns 401 for unauthenticated requests when au
   assert.ok(!bodyStr.includes(" at /"), "error body must not contain stack trace");
 });
 
-test("search-providers-catalog: returns 32 providers (24 search + 8 fetch)", async () => {
+test("search-providers-catalog: returns 34 providers (25 search + 9 fetch)", async () => {
   const req = await buildAuthRequest();
   const res = await route.GET(req);
 
@@ -419,6 +419,19 @@ test("search-providers-catalog: perplexity-search uses credential fallback", asy
     "configured",
     "perplexity-search should be 'configured' via fallback to perplexity credentials"
   );
+});
+
+test("search-providers-catalog: DeepSeek Search and Fetch reuse the active LLM connection", async () => {
+  await seedActiveConnection("deepseek");
+  const response = await route.GET(await buildAuthRequest());
+  const body = await response.json();
+  const entries = body.providers.filter((p: { id: string }) => p.id === "deepseek-search");
+  assert.equal(entries.length, 2);
+  for (const entry of entries) {
+    assert.equal(entry.status, "configured");
+    assert.equal(entry.costPerQuery, 0.00075);
+    assert.equal(entry.freeMonthlyQuota, 0);
+  }
 });
 
 test("search-providers-catalog: codex-search is configured via a connected Codex account", async () => {

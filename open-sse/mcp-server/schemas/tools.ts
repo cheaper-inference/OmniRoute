@@ -540,6 +540,7 @@ export const webFetchInput = z.object({
       "anysearch-search",
       "parallel-search",
       "keenable-search",
+      "deepseek-search",
     ])
     .optional()
     .describe(

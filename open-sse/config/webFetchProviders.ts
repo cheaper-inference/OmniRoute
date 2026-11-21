@@ -9,6 +9,7 @@ export const WEB_FETCH_PROVIDERS = Object.freeze([
   "nimble-search",
   "parallel-search",
   "keenable-search",
+  "deepseek-search",
 ] as const);
 
 export type WebFetchProviderId = (typeof WEB_FETCH_PROVIDERS)[number];

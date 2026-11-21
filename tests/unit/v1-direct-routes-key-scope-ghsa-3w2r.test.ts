@@ -192,6 +192,30 @@ type RouteCase = {
 
 const ROUTE_CASES: RouteCase[] = [
   {
+    name: "POST /v1/search (DeepSeek LLM credential fallback)",
+    provider: "deepseek",
+    call: (bearer) =>
+      searchRoute.POST(
+        jsonRequest("/v1/search", bearer, {
+          query: "DeepSeek",
+          provider: "deepseek-search",
+          max_results: 1,
+        }),
+        noContext
+      ),
+  },
+  {
+    name: "POST /v1/web/fetch (DeepSeek LLM credential fallback)",
+    provider: "deepseek",
+    call: (bearer) =>
+      webFetchRoute.POST(
+        jsonRequest("/v1/web/fetch", bearer, {
+          url: "https://example.com/article",
+          provider: "deepseek-search",
+        })
+      ),
+  },
+  {
     name: "POST /v1/audio/translations",
     provider: "openai",
     call: (bearer) => {
