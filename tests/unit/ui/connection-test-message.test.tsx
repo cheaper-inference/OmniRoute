@@ -63,6 +63,43 @@ function button(label: string) {
   if (!found) throw new Error(`Missing button ${label}`);
   return found;
 }
+function defaultModelTrigger() {
+  const label = [...document.body.querySelectorAll("label")].find(
+    (element) => element.textContent === "translated:defaultModel"
+  );
+  const trigger = label && document.getElementById(label.htmlFor);
+  expect(trigger).toBeInstanceOf(HTMLButtonElement);
+  return trigger as HTMLButtonElement;
+}
+
+async function chooseDefaultModel(value: string, assertDraftOnly: () => void) {
+  const trigger = defaultModelTrigger();
+  const previousValue = trigger.getAttribute("data-value");
+  const requestCount = calls.length;
+  await act(async () => trigger.click());
+  const search = document.body.querySelector<HTMLInputElement>('input[role="combobox"]')!;
+  expect(search).not.toBeNull();
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+      search,
+      value || "no matching model"
+    );
+    search.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(trigger.getAttribute("data-value")).toBe(previousValue);
+  expect(calls).toHaveLength(requestCount);
+  assertDraftOnly();
+  const option = [...document.body.querySelectorAll<HTMLElement>('[role="option"]')].find(
+    (element) => element.getAttribute("data-value") === value
+  );
+  expect(option).toBeDefined();
+  await act(async () => option!.click());
+  expect(trigger.getAttribute("data-value")).toBe(value);
+  expect(document.body.querySelector('input[role="combobox"]')).toBeNull();
+  expect(calls).toHaveLength(requestCount);
+  assertDraftOnly();
+}
+
 async function open(disabled = false, onSent = vi.fn()) {
   await act(async () =>
     root.render(
@@ -227,15 +264,9 @@ it.each(["oauth", "apikey"])(
         />
       )
     );
-    const label = [...document.body.querySelectorAll("label")].find(
-      (l) => l.textContent === "translated:defaultModel"
-    )!;
-    const select = document.getElementById(label.htmlFor) as HTMLSelectElement;
-    expect(select.value).toBe("small"); // fresh API value, not the stale connection snapshot
-    act(() => {
-      select.value = "large";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    // Fresh API value, not the stale connection snapshot.
+    expect(defaultModelTrigger().getAttribute("data-value")).toBe("small");
+    await chooseDefaultModel("large", () => expect(onSave).not.toHaveBeenCalled());
     expect(onSave).not.toHaveBeenCalled();
     expect(calls.every((c) => c.method === "GET")).toBe(true);
     await act(async () => button("save").click());
@@ -266,22 +297,13 @@ it("saving unrelated connection settings preserves newer server-side test model 
   await act(async () => render(true));
   await act(async () => button("save").click());
   expect(onSave.mock.calls[0][0].providerSpecificData).not.toHaveProperty("connectionTestModel");
-  const label = [...document.body.querySelectorAll("label")].find(
-    (l) => l.textContent === "translated:defaultModel"
-  )!;
-  const select = document.getElementById(label.htmlFor) as HTMLSelectElement;
-  act(() => {
-    select.value = "large";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-  });
+  expect(defaultModelTrigger().getAttribute("data-value")).toBe("small");
+  await chooseDefaultModel("large", () => expect(onSave).toHaveBeenCalledOnce());
   act(() => button("cancel").click());
   expect(onSave).toHaveBeenCalledOnce();
   await act(async () => render(false));
   await act(async () => render(true));
-  const freshLabel = [...document.body.querySelectorAll("label")].find(
-    (l) => l.textContent === "translated:defaultModel"
-  )!;
-  expect((document.getElementById(freshLabel.htmlFor) as HTMLSelectElement).value).toBe("small");
+  expect(defaultModelTrigger().getAttribute("data-value")).toBe("small");
   await act(async () => button("save").click());
   expect(onSave.mock.calls[1][0].providerSpecificData).not.toHaveProperty("connectionTestModel");
 });
@@ -298,14 +320,10 @@ it("connection settings can clear the default with an explicit null", async () =
       />
     )
   );
-  const label = [...document.body.querySelectorAll("label")].find(
-    (l) => l.textContent === "translated:defaultModel"
-  )!;
-  const select = document.getElementById(label.htmlFor) as HTMLSelectElement;
-  act(() => {
-    select.value = "";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-  });
+  expect(defaultModelTrigger().getAttribute("data-value")).toBe("small");
+  await chooseDefaultModel("", () => expect(onSave).not.toHaveBeenCalled());
+  expect(calls.every((call) => call.method === "GET")).toBe(true);
   await act(async () => button("save").click());
+  expect(onSave).toHaveBeenCalledOnce();
   expect(onSave.mock.calls[0][0].providerSpecificData.connectionTestModel).toBeNull();
 });
