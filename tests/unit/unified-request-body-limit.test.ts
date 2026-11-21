@@ -20,6 +20,8 @@ const { checkBodySize, getBodySizeLimit } =
   await import("../../src/shared/middleware/bodySizeGuard.ts");
 const { admitChatRequest, ChatAdmissionController, resolveSelfLoopBearer } =
   await import("../../src/shared/middleware/chatBodyAdmission.ts");
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
 
 const paths = [
   "/api/v1/chat/completions",
@@ -42,6 +44,7 @@ function request(pathname: string, bytes: number, declared?: number, internal = 
   if (internal) {
     headers.set("x-omniroute-admission-bypass", "internal");
     headers.set("authorization", `Bearer ${resolveSelfLoopBearer()}`);
+    headers.set(SELF_HOP_HEADER, ownListenerSelfHopToken());
   }
   const body = new ReadableStream<Uint8Array>(
     {

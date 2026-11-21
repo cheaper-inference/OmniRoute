@@ -4,6 +4,7 @@ import {
   INTERNAL_UPSTREAM_START_TIMEOUT_HEADER,
   resolveInternalUpstreamStartTimeoutMs,
 } from "../../src/sse/services/internalUpstreamStartTimeout.ts";
+import { SELF_HOP_HEADER, ownListenerSelfHopToken } from "../../open-sse/utils/selfHop.ts";
 
 const oldKey = process.env.OMNIROUTE_API_KEY;
 process.env.OMNIROUTE_API_KEY = "trusted-internal-test-key";
@@ -13,15 +14,19 @@ test.after(() => {
   else process.env.OMNIROUTE_API_KEY = oldKey;
 });
 
-function req(value: string, bearer = "trusted-internal-test-key", bypass = "internal") {
-  return new Request("http://127.0.0.1:20128/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${bearer}`,
-      "x-omniroute-admission-bypass": bypass,
-      [INTERNAL_UPSTREAM_START_TIMEOUT_HEADER]: value,
-    },
-  });
+function req(
+  value: string,
+  bearer = "trusted-internal-test-key",
+  bypass = "internal",
+  selfHop: string | null = ownListenerSelfHopToken()
+) {
+  const headers: Record<string, string> = {
+    authorization: `Bearer ${bearer}`,
+    "x-omniroute-admission-bypass": bypass,
+    [INTERNAL_UPSTREAM_START_TIMEOUT_HEADER]: value,
+  };
+  if (selfHop !== null) headers[SELF_HOP_HEADER] = selfHop;
+  return new Request("http://127.0.0.1:20128/v1/chat/completions", { method: "POST", headers });
 }
 
 test("trusted internal caller may set a bounded upstream-start cap", () => {
@@ -31,9 +36,22 @@ test("trusted internal caller may set a bounded upstream-start cap", () => {
 });
 
 test("ordinary or forged callers cannot set the internal upstream-start cap", () => {
-  assert.equal(resolveInternalUpstreamStartTimeoutMs(req("5000", "wrong-key")), undefined);
+  const envKey = "trusted-internal-test-key";
+  // The deployment env key is a key clients hold: with the bypass header it still proves nothing.
   assert.equal(
-    resolveInternalUpstreamStartTimeoutMs(req("5000", "trusted-internal-test-key", "no")),
+    resolveInternalUpstreamStartTimeoutMs(req("5000", envKey, "internal", null)),
+    undefined
+  );
+  assert.equal(
+    resolveInternalUpstreamStartTimeoutMs(req("5000", "wrong-key", "internal", null)),
+    undefined
+  );
+  assert.equal(
+    resolveInternalUpstreamStartTimeoutMs(req("5000", envKey, "internal", "0".repeat(64))),
+    undefined
+  );
+  assert.equal(
+    resolveInternalUpstreamStartTimeoutMs(req("5000", envKey, "internal", "")),
     undefined
   );
 });
