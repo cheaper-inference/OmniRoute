@@ -13,7 +13,12 @@ import {
   type OmniRouteProviderConnection,
 } from "./shared/index.js";
 import type { OmniRouteRawCombo, OmniRouteRawModelEntry } from "./shared/index.js";
-import { buildProviderPayload, collectCatalog } from "./catalog.js";
+import {
+  buildProviderPayloads,
+  collectCatalog,
+  publishProviderPayloads,
+  type ProviderPayload,
+} from "./catalog.js";
 import { usesModelsComboSource } from "./combos-source.js";
 import {
   UNREACHABLE_COOLDOWN_MS,
@@ -71,6 +76,11 @@ export default Plugin.define({
     assertContext(ctx);
     const parsed = parsePluginOptions(ctx.options);
     const X = parsed.providerId;
+    // Alias providers publish as `${providerId}-<alias>`; matching the base id
+    // alone would leave them out of the hooks below. Unrelated providers do
+    // not carry this plugin's prefix and stay excluded.
+    const isOwnedProvider = (providerID: string): boolean =>
+      providerID === X || providerID.startsWith(`${X}-`);
     const resolved = toResolvedOptions(parsed);
     const timeouts = resolveTimeouts(parsed);
     const log = createLogger(parsed.startupDebug ? "debug" : (parsed.logLevel ?? "warn"));
@@ -164,6 +174,9 @@ export default Plugin.define({
     // Both keys are derived from the credential: two credentials must never
     // share a snapshot, so they are recomputed whenever the key moves.
     let credentialChecked = false;
+    // One gateway key serves every published provider: when the caller omits
+    // it, apiKey: process.env.OMNIROUTE_API_KEY is the fallback resolved by
+    // toResolvedOptions, and that one value is shared across all groups.
     let apiKeyOrigin: ApiKeyOrigin = resolved.apiKey.length > 0 ? "option" : "missing";
     const ensureCredential = async (): Promise<void> => {
       // Settled once a key is in hand: re-reading on every refresh would let
@@ -442,7 +455,10 @@ export default Plugin.define({
     // The transform callback is synchronous, so it cannot await the fetch:
     // setup publishes first, then the host replays the callback (during
     // registration and on every reload) and reads the published snapshot.
-    let latest: { info: unknown; models: unknown[] } | undefined;
+    let latest: ProviderPayload[] | undefined;
+    // Setup-wide and bounded by the number of providers actually served: a
+    // vanished alias is removed from the editor and from this set on replay.
+    const publishedProviderIds = new Set<string>();
     const refreshAndPublish = async (options?: { force?: boolean }): Promise<void> => {
       if (stopped) return;
       await ensureCredential();
@@ -473,8 +489,8 @@ export default Plugin.define({
             providers: async () => effective.providers ?? [],
             enrichment: async () => effective.enrichment ?? new Map(),
           });
-          const payload = buildProviderPayload(collected, resolved);
-          latest = payload as unknown as { info: unknown; models: unknown[] };
+          const payloads = buildProviderPayloads(collected, resolved);
+          latest = payloads;
           return collected.counts;
         } catch (err) {
           log.warn(
@@ -506,7 +522,7 @@ export default Plugin.define({
     const providerRegistration = ctx.provider.transform((editor) => {
       if (latest !== undefined) {
         try {
-          editor.add(latest as never);
+          publishProviderPayloads(editor as never, latest, publishedProviderIds, log);
         } catch (err) {
           log.warn(
             `[omniroute-v2] catalog publish failed, keeping current catalog: ${err instanceof Error ? err.message : String(err)}`
@@ -564,7 +580,7 @@ export default Plugin.define({
             cb: (input: { model: { providerID: string; id: string }; language?: unknown }) => void
           ) => Promise<{ dispose: () => Promise<void> }>
         )("language", (input) => {
-          if (input.model.providerID !== X) return;
+          if (!isOwnedProvider(input.model.providerID)) return;
           input.language = sanitizeToolSchemasFor(
             input.language as never,
             input.model.id,
@@ -601,7 +617,7 @@ export default Plugin.define({
             }) => void
           ) => Promise<{ dispose: () => Promise<void> }>
         )("sdk", (input) => {
-          if (input.model.providerID !== X) return;
+          if (!isOwnedProvider(input.model.providerID)) return;
           if (!input.package.includes("@ai-sdk/openai-compatible")) return;
           input.options.telemetry = true;
         });

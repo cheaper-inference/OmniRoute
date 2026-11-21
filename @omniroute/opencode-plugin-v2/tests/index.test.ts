@@ -301,3 +301,79 @@ describe("plugin-v2 entrypoint", () => {
     }
   });
 });
+
+describe("host hooks reach plugin-owned alias providers", () => {
+  type HookCb = (input: {
+    model: { providerID: string; id: string };
+    language?: unknown;
+    package?: string;
+    options?: Record<string, unknown>;
+  }) => void;
+
+  function ctxWithHooks(options: Record<string, unknown>, hooks: Map<string, HookCb>): unknown {
+    return {
+      ...fakeCtx(options, []),
+      aisdk: {
+        hook: (name: string, cb: HookCb) => {
+          hooks.set(name, cb);
+          return Promise.resolve({ dispose: async () => {} });
+        },
+      },
+    };
+  }
+
+  it("sanitizes Gemini schemas on an alias provider, not on unrelated ones", async () => {
+    const hooks = new Map<string, HookCb>();
+    await (plugin as unknown as { setup: (ctx: unknown) => Promise<void> }).setup(
+      ctxWithHooks({ baseURL: "https://gw.example.com", providerId: "omniroute" }, hooks)
+    );
+    const cb = hooks.get("language");
+    assert.ok(cb, "the language hook must be registered");
+
+    const original = { doGenerate() {}, doStream() {} };
+    const aliasInput = {
+      model: { providerID: "omniroute-gemini", id: "gemini-2.5-flash" },
+      language: original as unknown,
+    };
+    cb!(aliasInput);
+    assert.notEqual(
+      aliasInput.language,
+      original,
+      "alias providers must get the same Gemini sanitization as the base provider"
+    );
+
+    const otherInput = {
+      model: { providerID: "anthropic", id: "gemini-2.5-flash" },
+      language: original as unknown,
+    };
+    cb!(otherInput);
+    assert.equal(otherInput.language, original, "unrelated providers stay untouched");
+  });
+
+  it("marks telemetry on an alias provider when the option is on", async () => {
+    const hooks = new Map<string, HookCb>();
+    await (plugin as unknown as { setup: (ctx: unknown) => Promise<void> }).setup(
+      ctxWithHooks(
+        { baseURL: "https://gw.example.com", providerId: "omniroute", telemetry: true },
+        hooks
+      )
+    );
+    const cb = hooks.get("sdk");
+    assert.ok(cb, "the sdk hook must be registered when telemetry is on");
+    const input = {
+      model: { providerID: "omniroute-cc", id: "sonnet" },
+      package: "@ai-sdk/openai-compatible",
+      options: {} as Record<string, unknown>,
+    };
+    cb!(input);
+    assert.equal(input.options.telemetry, true);
+  });
+
+  it("keeps telemetry disabled on an alias provider when the option is off", async () => {
+    const hooks = new Map<string, HookCb>();
+    await (plugin as unknown as { setup: (ctx: unknown) => Promise<void> }).setup(
+      ctxWithHooks({ baseURL: "https://gw.example.com", providerId: "omniroute" }, hooks)
+    );
+    assert.equal(hooks.has("sdk"), false, "no sdk hook when telemetry is off");
+  });
+});

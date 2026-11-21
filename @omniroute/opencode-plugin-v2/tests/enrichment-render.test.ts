@@ -93,3 +93,32 @@ describe("free budget under alias and without cap", () => {
     assert.ok(!m.name.includes("·"));
   });
 });
+
+describe("provider-prefix omission without a full enrichment entry", () => {
+  it("drops the route prefix when the option is on and enrichment is absent", () => {
+    const m = applyEnrichment(model("cc/sonnet", "cc - sonnet"), undefined, {
+      rawModelId: "cc/sonnet",
+      omitProvider: true,
+    });
+    assert.equal(m.name, "sonnet");
+  });
+
+  it("drops the route prefix from a pricing-only label when the option is on", () => {
+    const m = applyEnrichment(
+      model("cc/sonnet", "cc/sonnet"),
+      {
+        pricing: { input: 1, output: 2 },
+      },
+      { rawModelId: "cc/sonnet", omitProvider: true }
+    );
+    assert.equal(m.name, "sonnet");
+    assert.equal(m.cost.input, 1);
+  });
+
+  it("keeps the mapper label when enrichment is absent and the option is off", () => {
+    const m = applyEnrichment(model("cc/sonnet", "cc - sonnet"), undefined, {
+      rawModelId: "cc/sonnet",
+    });
+    assert.equal(m.name, "cc - sonnet");
+  });
+});

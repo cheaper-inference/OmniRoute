@@ -155,6 +155,12 @@ export interface ResolvedOptions extends FreeOptions {
    * set so a repeated publish (stale replay + refresh) warns once per key.
    */
   collisionWarned?: Set<string>;
+  /**
+   * Publish one provider per upstream alias instead of a single provider.
+   * Off by default: direct callers and existing configurations keep the
+   * current single-provider output.
+   */
+  publishPerProvider?: boolean;
 }
 
 export interface CatalogFetchers {
@@ -314,7 +320,7 @@ export type StableProviderInfo = Provider.Info;
 /**
  * Every path the refresh flow may request. The removed virtual-entries route
  * is absent by construction: no fetcher may build it, and the route-guard
- * test below asserts no stubbed call ever matches it.
+ * test below verifies no stubbed call ever matches it.
  */
 export const DECLARED_REFRESH_ROUTES = [
   "/v1/models",
@@ -422,7 +428,7 @@ const NPM_OPENAI_COMPAT = "@opencode/ai/providers/openai-compatible";
 
 /**
  * Fail-fast guard for a pre-mapped `api` block: the snapshot filter and the
- * stale-entry suite assert on it, and the beta-replay adapter relies on the
+ * stale-entry suite check it, and the beta-replay adapter relies on the
  * same refusal for entries that bypass the mapper. New mapper output always
  * carries a valid block via `resolveApiBlockV2`, so this fires only on stale
  * snapshots or hand-built entries.
@@ -594,6 +600,8 @@ interface PublishContext {
   enrichment: OmniRouteEnrichmentMap;
   rawModelById: Map<string, OmniRouteRawModelEntry>;
   collected: Map<string, LegacyModel>;
+  /** Publication groups, cleared when a combo overwrites an aliased model key. */
+  groups?: Map<string, PublishGroup>;
   publishedKeys: Set<string>;
   publishedModelIds: Map<string, string>;
   visibleFilter: ReturnType<typeof compileModelListFilter>;
@@ -634,6 +642,7 @@ async function publishCombos(
     enrichment,
     rawModelById,
     collected,
+    groups,
     publishedKeys,
     publishedModelIds,
     visibleFilter,
@@ -760,6 +769,9 @@ async function publishCombos(
           }
         }
       }
+      // A combo spanning providers stays on the base provider even when its
+      // friendly name collides with an aliased model's publication key.
+      groups?.delete(key);
       collected.set(key, mapped);
       publishedKeys.add(key);
       publishedModelIds.set(key, mapped.id);
@@ -783,6 +795,44 @@ async function publishCombos(
   return { published: comboCount, providerDropped };
 }
 
+/** The publication target of one catalog entry when per-provider output is on. */
+export interface PublishGroup {
+  providerId: string;
+  displayName: string;
+}
+
+/** One provider and its models as handed to the host editor. */
+export interface ProviderPayload {
+  info: StableProviderInfo;
+  models: StableModelInfo[];
+}
+
+/** Normalize an upstream alias to the `providerId` character set. */
+function slugAlias(value: string): string {
+  const slug = value
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug : "provider";
+}
+
+/** Upstream identity of an entry, or undefined when it stays on the base provider. */
+function aliasInfo(
+  rawId: string,
+  enrichment: OmniRouteEnrichmentEntry | undefined,
+  isCombo: boolean,
+  baseId: string
+): { alias: string; label: string } | undefined {
+  if (isCombo) return undefined;
+  const slash = rawId.indexOf("/");
+  if (slash <= 0) return undefined;
+  const prefix = rawId.slice(0, slash);
+  if (prefix === "auto" || prefix === baseId) return undefined;
+  const alias = (enrichment?.providerAlias ?? "").trim() || prefix;
+  const label = (enrichment?.providerDisplayName ?? "").trim() || alias;
+  return { alias, label };
+}
+
 /**
  * Collect the full catalog (models + combos) as legacy entries
  * keyed `providerId/bareId`, then project them onto the stable contract in
@@ -793,6 +843,8 @@ async function publishCombos(
 export interface CollectedCatalog {
   entries: Map<string, LegacyModel>;
   counts: PublishCounts;
+  /** Publication target per entry key. Absent on cold snapshots and direct calls. */
+  groups?: Map<string, PublishGroup>;
 }
 
 export async function collectCatalog(
@@ -801,6 +853,31 @@ export async function collectCatalog(
 ): Promise<CollectedCatalog> {
   const X = opts.providerId;
   const log = opts.logger ?? createLogger(opts.startupDebug ? "debug" : (opts.logLevel ?? "warn"));
+  const perProvider = opts.publishPerProvider === true;
+  const groups = perProvider ? new Map<string, PublishGroup>() : undefined;
+  const usedProviderIds = new Set<string>([X]);
+  // One alias maps to one provider across every entry it serves. Distinct
+  // aliases that normalize to the same slug get a numeric suffix.
+  const providerIdByAlias = new Map<string, string>();
+  const baseDisplayName = opts.displayName ?? "OmniRoute";
+  const aliasFor = (
+    rawId: string,
+    enrichment: OmniRouteEnrichmentEntry | undefined,
+    isCombo: boolean
+  ): { alias: string; label: string } | undefined =>
+    perProvider ? aliasInfo(rawId, enrichment, isCombo, X) : undefined;
+  const registerGroup = (key: string, alias: { alias: string; label: string }): void => {
+    if (!groups) return;
+    let providerId = providerIdByAlias.get(alias.alias);
+    if (providerId === undefined) {
+      const slug = slugAlias(alias.alias);
+      providerId = `${X}-${slug}`;
+      for (let n = 2; usedProviderIds.has(providerId); n++) providerId = `${X}-${slug}-${n}`;
+      usedProviderIds.add(providerId);
+      providerIdByAlias.set(alias.alias, providerId);
+    }
+    groups.set(key, { providerId, displayName: `${baseDisplayName} - ${alias.label}` });
+  };
   const modelsTimeout = opts.timeouts?.models ?? opts.timeoutMs;
   const combosTimeout = opts.timeouts?.combos ?? opts.timeoutMs;
 
@@ -972,10 +1049,12 @@ export async function collectCatalog(
       canonicalToAlias,
       entry.owned_by
     );
+    const alias = aliasFor(entry.id, enrichmentEntry, servedCombo);
     applyEnrichment(mapped, enrichmentEntry, {
       isCombo: servedCombo,
       rawModelId: entry.id,
       providerTag: opts.providerTag,
+      omitProvider: alias !== undefined,
     });
     const inferred = isInferredFree(entry.id, enrichmentEntry, opts, enrichment, canonicalToAlias);
     if (
@@ -991,6 +1070,7 @@ export async function collectCatalog(
     if (inferred) mapped.name += INFERRED_FREE_LABEL;
     const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
     const key = X + "/" + mid;
+    if (alias) registerGroup(key, alias);
     collected.set(key, mapped);
     publishedKeys.add(key);
     publishedModelIds.set(key, mapped.id);
@@ -1021,9 +1101,11 @@ export async function collectCatalog(
         canonicalToAlias,
         entry.owned_by
       );
+      const restoreAlias = aliasFor(entry.id, restoreEnrichment, false);
       applyEnrichment(mapped, restoreEnrichment, {
         rawModelId: entry.id,
         providerTag: opts.providerTag,
+        omitProvider: restoreAlias !== undefined,
       });
       const restoreInferred = isInferredFree(
         entry.id,
@@ -1044,6 +1126,7 @@ export async function collectCatalog(
       if (restoreInferred) mapped.name += INFERRED_FREE_LABEL;
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
+      if (restoreAlias) registerGroup(key, restoreAlias);
       collected.set(key, mapped);
       publishedKeys.add(key);
       publishedModelIds.set(key, mapped.id);
@@ -1064,6 +1147,7 @@ export async function collectCatalog(
             enrichment,
             rawModelById,
             collected,
+            groups,
             publishedKeys,
             publishedModelIds,
             visibleFilter,
@@ -1092,6 +1176,22 @@ export async function collectCatalog(
   // the published set renames collisions with a route suffix. Local to
   // this collect call — nothing survives the return.
   const applyNameDisambiguation = (): void => {
+    if (perProvider && groups) {
+      // Two providers may sell the same model name; each group keeps its own
+      // namespace, so only same-name entries within one provider get a suffix.
+      const buckets = new Map<string, Array<{ id: string; name: string }>>();
+      for (const [id, entry] of collected) {
+        const providerId = groups.get(id)?.providerId ?? X;
+        const bucket = buckets.get(providerId);
+        if (bucket) bucket.push({ id, name: entry.name });
+        else buckets.set(providerId, [{ id, name: entry.name }]);
+      }
+      for (const bucket of buckets.values()) {
+        const renamed = disambiguateDisplayNames(bucket);
+        for (const [id, name] of renamed) collected.get(id)!.name = name;
+      }
+      return;
+    }
     const renamed = disambiguateDisplayNames(
       [...collected].map(([id, entry]) => ({ id, name: entry.name }))
     );
@@ -1102,7 +1202,7 @@ export async function collectCatalog(
   if (comboResult === undefined) {
     applyNameDisambiguation();
     emitSummary(collected.size);
-    return { entries: collected, counts: { models: modelCount, combos: 0 } };
+    return { entries: collected, counts: { models: modelCount, combos: 0 }, groups };
   }
   const comboCount = comboResult.published;
   providerDroppedCount += comboResult.providerDropped;
@@ -1121,6 +1221,7 @@ export async function collectCatalog(
   return {
     entries: collected,
     counts: { models: modelCount, combos: comboCount },
+    groups,
   };
 }
 
@@ -1131,19 +1232,27 @@ export async function collectCatalog(
  * against 2.0.12) so inference authenticates; each model repeats them because
  * the host merges model settings over provider settings at request time.
  */
-export function buildProviderPayload(
-  collected: CollectedCatalog,
+function buildProviderInfo(
+  providerId: string,
+  displayName: string,
   opts: ResolvedOptions
-): { info: StableProviderInfo; models: StableModelInfo[] } {
-  const X = opts.providerId;
-  const info = {
-    id: X,
-    name: opts.displayName ?? "OmniRoute",
+): StableProviderInfo {
+  return {
+    id: providerId,
+    name: displayName,
     activation: "enabled",
     package: NPM_OPENAI_COMPAT,
     settings: { baseURL: ensureV1Suffix(opts.baseURL), apiKey: opts.apiKey },
-    integrationID: X,
+    integrationID: providerId,
   } as unknown as StableProviderInfo;
+}
+
+export function buildProviderPayload(
+  collected: CollectedCatalog,
+  opts: ResolvedOptions
+): ProviderPayload {
+  const X = opts.providerId;
+  const info = buildProviderInfo(X, opts.displayName ?? "OmniRoute", opts);
   const models: StableModelInfo[] = [];
   for (const [key, legacy] of collected.entries) {
     const slash = key.indexOf("/");
@@ -1151,6 +1260,105 @@ export function buildProviderPayload(
     models.push(legacyToStable(X, bareId, legacy, opts.apiKey, opts.baseURL));
   }
   return { info, models };
+}
+
+/**
+ * Project a collected catalog onto one payload per publication group.
+ * With the option off this is the single payload `buildProviderPayload` has
+ * always produced; with it on, each upstream alias becomes its own provider
+ * while combos, auto strategies and alias-less entries stay on the base one.
+ * The model id remains the full gateway id — only the provider id changes.
+ */
+export function buildProviderPayloads(
+  collected: CollectedCatalog,
+  opts: ResolvedOptions
+): ProviderPayload[] {
+  if (opts.publishPerProvider !== true) return [buildProviderPayload(collected, opts)];
+  const X = opts.providerId;
+  const baseDisplayName = opts.displayName ?? "OmniRoute";
+  const buckets = new Map<string, { displayName: string; models: StableModelInfo[] }>();
+  for (const [key, legacy] of collected.entries) {
+    const group = collected.groups?.get(key);
+    const providerId = group?.providerId ?? X;
+    const displayName = group?.displayName ?? baseDisplayName;
+    let bucket = buckets.get(providerId);
+    if (!bucket) {
+      bucket = { displayName, models: [] };
+      buckets.set(providerId, bucket);
+    }
+    const slash = key.indexOf("/");
+    const bareId = slash > 0 ? key.slice(slash + 1) : legacy.id;
+    bucket.models.push(legacyToStable(providerId, bareId, legacy, opts.apiKey, opts.baseURL));
+  }
+  const payloads: ProviderPayload[] = [];
+  for (const [providerId, bucket] of buckets) {
+    payloads.push({
+      info: buildProviderInfo(providerId, bucket.displayName, opts),
+      models: bucket.models,
+    });
+  }
+  return payloads;
+}
+
+/**
+ * Replay payloads into a host editor. Existing providers refresh their models
+ * in place, new ones are added, and ids that vanished from the catalog are
+ * removed. `published` is a setup-wide bounded set; removals are counted and
+ * logged once per replay, never one line per removed provider. Hosts that
+ * only expose `add` keep working through the set when `get`/`remove` or
+ * `models.set` are absent.
+ */
+export function publishProviderPayloads(
+  editor: StableProviderEditor,
+  payloads: readonly ProviderPayload[],
+  published: Set<string>,
+  log?: { warn(message: string): void }
+): void {
+  const wanted = new Map<string, ProviderPayload>();
+  for (const payload of payloads) wanted.set(String(payload.info.id), payload);
+
+  let removed = 0;
+  for (const id of [...published]) {
+    if (wanted.has(id)) continue;
+    if (typeof editor.get === "function" && editor.get(id) === undefined) {
+      // The host no longer has it; nothing to remove.
+    } else if (typeof editor.remove === "function") {
+      editor.remove(id);
+    }
+    published.delete(id);
+    removed += 1;
+  }
+
+  for (const [id, payload] of wanted) {
+    // Refresh in place only when the host can both be queried and have its
+    // models replaced. A host that exposes just `add` has no other way to
+    // receive a refreshed snapshot, so every replay goes through `add` again.
+    const canRefreshInPlace =
+      typeof editor.get === "function" &&
+      editor.get(id) !== undefined &&
+      typeof editor.models?.set === "function";
+    if (canRefreshInPlace) {
+      if (typeof editor.update === "function") {
+        // Enrichment can change a provider's label between refreshes; models
+        // alone would leave the old name on an already-published provider.
+        editor.update(id, (provider) => {
+          provider.name = payload.info.name;
+          provider.activation = payload.info.activation;
+          provider.package = payload.info.package;
+          provider.integrationID = payload.info.integrationID;
+          provider.settings = payload.info.settings;
+        });
+      }
+      editor.models.set(id, payload.models);
+    } else {
+      editor.add(payload as never);
+    }
+    published.add(id);
+  }
+
+  if (removed > 0 && typeof log?.warn === "function") {
+    log.warn(`[omniroute-v2] removed ${removed} provider(s) no longer served by the catalog`);
+  }
 }
 
 /**
