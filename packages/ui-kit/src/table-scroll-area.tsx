@@ -1,17 +1,22 @@
 "use client";
 
 import {
+  createContext,
+  useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
   type RefObject,
 } from "react";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
-import { TableScrollAreaContext } from "./table-scroll-context";
+import { TableScrollAreaContext, TableScrollAreaNameContext } from "./table-scroll-context";
 
 type ScrollbarMetrics = {
   maximum: number;
@@ -31,13 +36,40 @@ function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
+/** Interface text of the persistent scrollbar. */
+export interface TableScrollAreaLabels {
+  /** Accessible name of the scrollbar, built from `scrollbarLabel`. */
+  scrollbar: (label: string) => string;
+}
+export const defaultTableScrollAreaLabels: TableScrollAreaLabels = {
+  scrollbar: (label) => `Top ${label} horizontal scrollbar`,
+};
+
+const TableScrollAreaLabelsContext = createContext(defaultTableScrollAreaLabels);
+
+export interface TableScrollAreaLabelsProviderProps {
+  /** Missing or `undefined` keys keep the value of the provider above, or the English default. */
+  labels: Partial<TableScrollAreaLabels>;
+  children?: ReactNode;
+}
+
+/**
+ * Sets the scrollbar text once for every Table and TableScrollArea below it, so an app does not
+ * repeat `labels` on each table. A `labels` prop on a table still wins.
+ */
+export function TableScrollAreaLabelsProvider({ labels, children }: TableScrollAreaLabelsProviderProps) {
+  const inherited = useContext(TableScrollAreaLabelsContext);
+  const resolved = useMemo(() => resolveLabels(inherited, labels), [inherited, labels]);
+  return <TableScrollAreaLabelsContext.Provider value={resolved}>{children}</TableScrollAreaLabelsContext.Provider>;
+}
+
 function PersistentTableScrollbar({
   areaRef,
-  label,
+  name,
   targetId,
 }: {
   areaRef: RefObject<HTMLDivElement | null>;
-  label: string;
+  name: string;
   targetId: string;
 }) {
   const targetRef = useRef<HTMLElement | null>(null);
@@ -85,9 +117,18 @@ function PersistentTableScrollbar({
     const table = target.querySelector("table");
     if (table) resizeObserver.observe(table);
 
+    // Cell content can widen a fixed-layout table past its container without resizing either
+    // observed box. The metrics decide whether the bar is a tab stop, so remeasure on content
+    // changes too (one layout read per batch of mutations), as Table does for its container.
+    const mutationObserver = typeof MutationObserver === "undefined" ? undefined : new MutationObserver(sync);
+    if (table) {
+      mutationObserver?.observe(table, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["style", "class"] });
+    }
+
     return () => {
       target.removeEventListener("scroll", sync);
       resizeObserver.disconnect();
+      mutationObserver?.disconnect();
       targetRef.current = null;
     };
   }, [areaRef, targetId]);
@@ -162,24 +203,29 @@ function PersistentTableScrollbar({
     };
   };
 
+  // With nothing to scroll the bar keeps its box, so the layout does not shift, but it is neither
+  // a tab stop nor a scrollbar a screen reader can find. The server renders this state.
+  const overflowing = metrics.maximum > 0;
+
   return (
     <div
       data-slot="table-scrollbar"
       className="ci-table-scrollbar"
       role="scrollbar"
-      aria-label={`Top ${label} horizontal scrollbar`}
+      aria-label={name}
       aria-controls={targetId}
       aria-orientation="horizontal"
       aria-valuemin={0}
       aria-valuemax={Math.round(metrics.maximum)}
       aria-valuenow={Math.round(metrics.value)}
-      tabIndex={0}
+      aria-hidden={overflowing ? undefined : true}
+      tabIndex={overflowing ? 0 : undefined}
       onKeyDown={handleKeyDown}
     >
       <div
         ref={trackRef}
         className="ci-table-scrollbar__track"
-        data-overflowing={metrics.maximum > 0 ? "true" : "false"}
+        data-overflowing={overflowing ? "true" : "false"}
         onPointerDown={(event) => scrollFromTrack(event.clientX)}
       >
         <div
@@ -211,8 +257,13 @@ function PersistentTableScrollbar({
 }
 
 export interface TableScrollAreaProps extends ComponentProps<"div"> {
-  /** Accessible noun phrase used to label the persistent horizontal scrollbar. */
+  /**
+   * Accessible noun phrase used to label the persistent horizontal scrollbar. A Table inside
+   * with no other name also uses it for its scroll container.
+   */
   scrollbarLabel?: string;
+  /** Localized scrollbar text; missing or `undefined` keys fall back to the provider, then to defaultTableScrollAreaLabels. */
+  labels?: Partial<TableScrollAreaLabels>;
 }
 
 /**
@@ -222,11 +273,13 @@ export interface TableScrollAreaProps extends ComponentProps<"div"> {
 export function TableScrollArea({
   children,
   className,
-  scrollbarLabel = "Table",
+  scrollbarLabel,
+  labels: labelOverrides,
   ...props
 }: TableScrollAreaProps) {
   const areaRef = useRef<HTMLDivElement>(null);
   const targetId = useId();
+  const labels = resolveLabels(useContext(TableScrollAreaLabelsContext), labelOverrides);
 
   return (
     <div
@@ -238,10 +291,12 @@ export function TableScrollArea({
       <TableScrollAreaContext.Provider value={true}>
         <PersistentTableScrollbar
           areaRef={areaRef}
-          label={scrollbarLabel}
+          name={labels.scrollbar(scrollbarLabel ?? "Table")}
           targetId={targetId}
         />
-        {children}
+        <TableScrollAreaNameContext.Provider value={scrollbarLabel || undefined}>
+          {children}
+        </TableScrollAreaNameContext.Provider>
       </TableScrollAreaContext.Provider>
     </div>
   );

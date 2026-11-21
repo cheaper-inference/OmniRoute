@@ -1,12 +1,13 @@
 "use client";
 
-import { forwardRef, useId } from "react";
+import { forwardRef, useId, useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { AlignLeft, ArrowLeft, ArrowUp, Check, ChevronDown, Copy, History, Menu, MoreVertical, Pencil, Plus, RotateCcw, Square, SquarePen, ThumbsUp, Trash2, X } from "lucide-react";
 import { Button } from "./button";
 import { Badge } from "./badge";
 import { Textarea } from "./textarea";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 
 export interface ChatHeaderProps extends Omit<ComponentProps<"header">, "title"> {
@@ -106,6 +107,8 @@ export interface ChatComposerProps extends Omit<ComponentProps<"form">, "onChang
   onAttach?: () => void;
   attachLabel?: string;
   attachments?: readonly ChatAttachment[];
+  /** Accessible name of the attachment list. Defaults to "Attachments". */
+  attachmentsLabel?: string;
   onRemoveAttachment?: (id: string) => void;
   removeAttachmentLabel?: (attachment: ChatAttachment) => string;
   tools?: ReactNode;
@@ -116,13 +119,13 @@ export interface ChatComposerProps extends Omit<ComponentProps<"form">, "onChang
 /** A controlled editor. Transport, file selection/uploads and draft persistence stay in the app. */
 export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(function ChatComposer({
   value, onValueChange, onSend, placeholder, label = "Ask a question", sendLabel = "Send question", onStop, stopLabel = "Stop response", disabled = false, busy = false, sendDisabled = false, allowEmpty = false,
-  onAttach, attachLabel = "Attach file", attachments = [], onRemoveAttachment, removeAttachmentLabel = item => `Remove ${item.name}`, tools, footer, error, textareaProps, className, ...props
+  onAttach, attachLabel = "Attach file", attachments = [], attachmentsLabel = "Attachments", onRemoveAttachment, removeAttachmentLabel = item => `Remove ${item.name}`, tools, footer, error, textareaProps, className, ...props
 }, ref) {
   const errorId = useId();
   const canSend = !disabled && !busy && !sendDisabled && (allowEmpty || !!value.trim());
   function send() { if (canSend) onSend(value.trim()); }
   return <form className={cn("ci-chat-composer", className)} aria-busy={busy || undefined} {...props} onSubmit={event => { event.preventDefault(); send(); }}>
-    {!!attachments.length && <ul className="ci-chat-composer__attachments" aria-label="Attachments">{attachments.map(item => <li key={item.id}>
+    {!!attachments.length && <ul className="ci-chat-composer__attachments" aria-label={attachmentsLabel}>{attachments.map(item => <li key={item.id}>
       <Badge variant="outline" className="ci-chat-composer__attachment">
         {item.icon != null && <span aria-hidden>{item.icon}</span>}
         <span className="ci-chat-composer__filename" title={item.name}>{item.name}</span>
@@ -173,6 +176,29 @@ export function ChatMessage({ kind, author = kind === "user" ? "You" : "Assistan
   </article>;
 }
 export type ChatActivityState = "thinking" | "checking" | "streaming" | "complete" | "stopped" | "error" | "empty";
+/** Status text of ChatActivity. `children` still replaces the whole status; `stopLabel` and `retryLabel` stay separate props. */
+export interface ChatActivityLabels {
+  /** The thinking and checking states. */
+  thinking: string;
+  /** The streaming and complete states when `elapsed` is set. */
+  workedFor: (elapsed: ReactNode) => ReactNode;
+  /** The streaming and complete states without `elapsed`. */
+  activity: string;
+  stopped: string;
+  error: string;
+  empty: string;
+  /** Tooltip of the elapsed time shown while thinking. */
+  elapsedTitle: string;
+}
+export const defaultChatActivityLabels: ChatActivityLabels = {
+  thinking: "Thinking…",
+  workedFor: (elapsed) => <>Worked for {elapsed}</>,
+  activity: "Activity",
+  stopped: "Response stopped",
+  error: "Could not complete the response",
+  empty: "No response received",
+  elapsedTitle: "Elapsed thinking time",
+};
 export interface ChatActivityProps extends Omit<ComponentProps<"div">, "children"> {
   state: ChatActivityState;
   children?: ReactNode;
@@ -180,6 +206,8 @@ export interface ChatActivityProps extends Omit<ComponentProps<"div">, "children
   summary?: ReactNode;
   /** Optional accessible name for the disclosure; otherwise its visible label is used. */
   summaryLabel?: string;
+  /** Start expanded; subsequent user toggles survive activity updates. */
+  defaultSummaryOpen?: boolean;
   /** Caller-formatted elapsed time, e.g. "0:03". No clock is started or inferred here. */
   elapsed?: ReactNode;
   footer?: ReactNode;
@@ -187,22 +215,26 @@ export interface ChatActivityProps extends Omit<ComponentProps<"div">, "children
   onRetry?: () => void;
   stopLabel?: string;
   retryLabel?: string;
+  /** Localized status text; missing or `undefined` keys fall back to defaultChatActivityLabels. */
+  labels?: Partial<ChatActivityLabels>;
 }
-export function ChatActivity({ state, children, summary, summaryLabel, elapsed, footer, onStop, onRetry, stopLabel = "Stop response", retryLabel = "Try again", className, ...props }: ChatActivityProps) {
+export function ChatActivity({ state, children, summary, summaryLabel, defaultSummaryOpen = false, elapsed, footer, onStop, onRetry, stopLabel = "Stop response", retryLabel = "Try again", labels: labelOverrides, className, ...props }: ChatActivityProps) {
+  const text = resolveLabels(defaultChatActivityLabels, labelOverrides);
+  const [summaryOpen, setSummaryOpen] = useState(defaultSummaryOpen);
   const thinking = state === "thinking" || state === "checking";
   const active = thinking || state === "streaming";
   const labels: Record<ChatActivityState, ReactNode> = {
-    thinking: "Thinking…", checking: "Thinking…",
-    streaming: elapsed != null ? <>Worked for {elapsed}</> : "Activity",
-    complete: elapsed != null ? <>Worked for {elapsed}</> : "Activity",
-    stopped: "Response stopped", error: "Could not complete the response", empty: "No response received",
+    thinking: text.thinking, checking: text.thinking,
+    streaming: elapsed != null ? text.workedFor(elapsed) : text.activity,
+    complete: elapsed != null ? text.workedFor(elapsed) : text.activity,
+    stopped: text.stopped, error: text.error, empty: text.empty,
   };
   const activityLabel = <>
     <span className={thinking ? "ci-chat-activity__thinking" : "ci-chat-activity__label"} role={state === "error" ? "alert" : thinking || state === "stopped" || state === "empty" ? "status" : undefined}>{children ?? labels[state]}</span>
-    {thinking && elapsed != null && <span className="ci-chat-activity__elapsed" title="Elapsed thinking time" aria-hidden="true">{elapsed}</span>}
+    {thinking && elapsed != null && <span className="ci-chat-activity__elapsed" title={text.elapsedTitle} aria-hidden="true">{elapsed}</span>}
   </>;
   return <div className={cn("ci-chat-activity", className)} data-state={state} data-has-summary={summary != null || undefined} {...props}>
-    {summary != null ? <details className="ci-chat-activity__details">
+    {summary != null ? <details className="ci-chat-activity__details" open={summaryOpen} onToggle={event => setSummaryOpen(event.currentTarget.open)}>
       <summary className="ci-chat-activity__header" aria-label={summaryLabel}>{activityLabel}<ChevronDown size={18} strokeWidth={2} className="ci-chat-activity__chevron" aria-hidden="true" /></summary>
       <div className="ci-chat-activity__summary">{summary}</div>
     </details> : <div className="ci-chat-activity__header">{activityLabel}</div>}
