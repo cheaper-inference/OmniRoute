@@ -143,3 +143,38 @@ test("a relocated post-tool message closes before the next tool call opens", () 
   );
   assert.deepEqual(order, ["pre", "call_1", "abc", "call_2", "xyz"]);
 });
+
+test("a relocated message between two tool calls never makes a third call reuse an index", () => {
+  const call = (index, id) =>
+    mk({ tool_calls: [{ index, id, type: "function", function: { name: "f", arguments: "{}" } }] });
+  const events = collectEvents([
+    call(0, "call_1"),
+    mk({ content: "mid" }),
+    call(1, "call_2"),
+    call(2, "call_3"),
+    mk({}, "tool_calls", { usage: { prompt_tokens: 1, completion_tokens: 1 } }),
+  ]);
+
+  const added = events
+    .filter((e) => e.event === "response.output_item.added")
+    .map((e) => `${e.data.item.call_id ?? e.data.item.type}@${e.data.output_index}`);
+  const addedIndexes = events
+    .filter((e) => e.event === "response.output_item.added")
+    .map((e) => e.data.output_index);
+  assert.equal(new Set(addedIndexes).size, addedIndexes.length, `shared output_index: ${added}`);
+
+  const doneIndexes = events
+    .filter((e) => e.event === "response.output_item.done")
+    .map((e) => e.data.output_index);
+  assert.equal(
+    new Set(doneIndexes).size,
+    doneIndexes.length,
+    `shared output_index: ${doneIndexes}`
+  );
+
+  const completed = events.find((e) => e.event === "response.completed");
+  const callIds = completed.data.response.output
+    .filter((o) => o.type === "function_call")
+    .map((o) => o.call_id);
+  assert.deepEqual(callIds, ["call_1", "call_2", "call_3"]);
+});
