@@ -310,4 +310,33 @@ describe("KimiExecutor", () => {
 
     assert.deepEqual(transformed.thinking, { type: "disabled" });
   });
+
+  it("routes a Responses connection to /responses with Bearer auth and keeps the Responses body", () => {
+    const executor = new KimiExecutor();
+    const creds = credentials(FORMATS.OPENAI_RESPONSES);
+    const responsesUrl = "https://api.kimi.com/coding/v1/responses";
+
+    assert.equal(executor.buildUrl("kimi-for-coding", true, 0, creds), responsesUrl);
+    const headers = executor.buildHeaders(creds);
+    assert.equal(headers.Authorization, "Bearer oauth-token");
+    assert.equal(headers["x-api-key"], undefined);
+
+    const transformed = executor.transformRequest(
+      "kimi-for-coding",
+      { input: "hi", max_output_tokens: 256 },
+      true,
+      creds
+    ) as TransformedBody & { input?: unknown };
+    assert.equal(transformed.input, "hi");
+    assert.equal(transformed.messages, undefined);
+    assert.equal(transformed.max_completion_tokens, undefined);
+  });
+
+  it("keeps the chat URL when a connection has no Responses target format", () => {
+    const executor = new KimiExecutor();
+    assert.equal(
+      executor.buildUrl("kimi-for-coding", true, 0, credentials(FORMATS.OPENAI)),
+      KIMI_CODING_OPENAI_URL
+    );
+  });
 });

@@ -1,7 +1,7 @@
 import { ANTHROPIC_VERSION_HEADER } from "../../../../anthropicHeaders.ts";
 import type { RegistryEntry, RegistryModel } from "../../../shared.ts";
 import { resolvePublicCred } from "../../../shared.ts";
-import { KIMI_CODING_ANTHROPIC_URL } from "./runtime.ts";
+import { KIMI_CODING_ANTHROPIC_URL, KIMI_CODING_RESPONSES_URL } from "./runtime.ts";
 
 export const KIMI_CODING_MODELS: RegistryModel[] = [
   {
@@ -54,6 +54,14 @@ export const KIMI_CODING_SHARED = {
   headers: {
     "Anthropic-Version": ANTHROPIC_VERSION_HEADER,
   },
+  alternateFormats: [
+    {
+      format: "openai-responses",
+      baseUrl: KIMI_CODING_RESPONSES_URL,
+      authHeader: "bearer",
+      label: "Responses-compatible",
+    },
+  ],
   models: KIMI_CODING_MODELS,
 };
 

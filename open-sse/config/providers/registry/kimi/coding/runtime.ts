@@ -7,6 +7,7 @@ export const KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/v1";
 export const KIMI_CODING_MODELS_URL = `${KIMI_CODING_BASE_URL}/models`;
 export const KIMI_CODING_OPENAI_URL = `${KIMI_CODING_BASE_URL}/chat/completions`;
 export const KIMI_CODING_ANTHROPIC_URL = `${KIMI_CODING_BASE_URL}/messages?beta=true`;
+export const KIMI_CODING_RESPONSES_URL = `${KIMI_CODING_BASE_URL}/responses`;
 
 export const KIMI_CODE_CLI_PLATFORM = "kimi_code_cli";
 export const KIMI_CODE_CLI_VERSION = "2.1.1";
