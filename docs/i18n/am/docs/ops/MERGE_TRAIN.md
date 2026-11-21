@@ -4,10 +4,9 @@
 
 ---
 
-v3.8.49 (የquality/velocity ዕቅድ WS3.2/WS3.4) ጀምሮ፣ የተገመገሙ PRs ወደ
-`release/vX.Y.Z` የሚዋሃዱበት ነባሪ መንገድ **Mergify merge queue** (`.mergify.yml`) ነው፤
-ከታች የተመዘገበው **manual merge-train** የመጠባበቂያ አማራጭ ነው — በክስተቶች፣
-በrelease freezes ወቅት፣ ወይም የMergify Open Source ዕቅድ ከተቀየረ ጥቅም ላይ ይውላል።
+> **2026-11-19፡ የመርግፋይ ውህደት ወረፋ ጡረታ ወጥቷል።** (የባለቤቱ ውሳኔ). `.mergify.yml` ከአሁን በኋላ ወረፋን አይገልጽም እና የመሳብ ጥያቄን የሚያዋህዱ ወይም የሚጽፉ የ Mergify ትዕዛዞችን አይቀበልም። ልቀቅ PRs በማከማቻ ደንቡ መሠረት "በነቃ ልቀቱ ላይ አረንጓዴ በሮች ጠይቅ" (`Gate / CI` + `Gate / Quality`) omni-ወረፋ በቀጥታ ሁነታ ላይ እስኪሄድ ድረስ እና ከዚያ በኋላ በኦምኒ ወረፋ ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) ስር ይደባለቃሉ። ከታች ያሉት የመርግፋይ ክፍሎች ወረፋውን እንደነበረ ይገልጻሉ።
+
+ከ v3.8.49 (WS3.2/WS3.4 of the quality/velocity plan) ጀምሮ ለግምገማ PRs ወደ `release/vX.Y.Z` ነባሪ የውህደት መንገድ ነው።** የውህደት ወረፋን አዋህድ** (`.mergify.yml`); የ** በእጅ ውህደት-ባቡር** ከዚህ በታች በሰነድ የተመዘገበው FALLBACK — በአደጋዎች ጊዜ ጥቅም ላይ የሚውለው ፣በሚለቀቁበት ወቅት ወይም የ Mergify ክፍት ምንጭ ዕቅድ ከተለወጠ ነው።
 
 ## ነባሪ መንገድ፦ የMergify ወረፋ
 

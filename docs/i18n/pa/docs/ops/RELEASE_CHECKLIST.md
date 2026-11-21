@@ -355,106 +355,70 @@ embedded services ਨਾਲ ਸੰਬੰਧਿਤ ਤਬਦੀਲੀਆਂ ਵ�
 
 ---
 
-## 3.9.0 LTS ਕੱਟ (3.8.58 ਵਿੱਚ ਅਭਿਆਸ ਕੀਤਾ ਗਿਆ)
+## 3.9.0 LTS ਕੱਟ (3.8.58 ਵਿੱਚ ਰਿਹਰਸਲ)
 
-v3.8.59 ਤੋਂ ਬਾਅਦ ਅਗਲਾ ਵਰਜਨ 3.9.0 ਹੈ, ਅਤੇ ਇਸਦੀ ਟਿਪ ਦੋ ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਚੱਲਣ ਵਾਲੀਆਂ ਬ੍ਰਾਂਚਾਂ ਬਣ ਜਾਂਦੀ ਹੈ:
-`stable/v3` (v3 LTS ਲਾਈਨ, npm `latest`) ਅਤੇ `develop` (v4, 4.0.0 ਤੱਕ ਵਧਾਇਆ ਗਿਆ, npm
-`nightly`)। ਬ੍ਰਾਂਚ/ਚੈਨਲ ਮਾਡਲ, ਫਾਰਵਰਡ-ਪੋਰਟ ਅਤੇ ਲੇਬਲ
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ਵਿੱਚ ਹਨ; ਯੋਜਨਾ [ROADMAP](../../ROADMAP.md) (ਪੜਾਅ 3) ਵਿੱਚ ਹੈ। ਕੱਟ ਇੱਕ ਵਾਰ ਚੱਲਦਾ ਹੈ;
-3.8.58 ਵਿੱਚ ਫੋਰਕ ਉੱਤੇ ਸ਼ੁਰੂ ਤੋਂ ਅੰਤ ਤੱਕ ਇਸਦਾ ਅਭਿਆਸ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ 3.8.59
-[GO/NO-GO ਚੈੱਕਲਿਸਟ](./LTS_GO_NO_GO.md) ਨਾਲ ਸਮਾਪਤ ਹੁੰਦਾ ਹੈ।
+v3.8.59 ਤੋਂ ਬਾਅਦ ਅਗਲਾ ਸੰਸਕਰਣ 3.9.0 ਹੈ, ਅਤੇ ਇਸਦੀ ਟਿਪ ਦੋ ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਚੱਲਣ ਵਾਲੀਆਂ ਸ਼ਾਖਾਵਾਂ ਬਣ ਜਾਂਦੀ ਹੈ: `stable/v3` (v3 LTS ਲਾਈਨ, npm `latest`) ਅਤੇ `develop` (v4, 4.0.0 ਨੂੰ ਬੰਪ ਕੀਤਾ ਗਿਆ, npm `nightly`)। branch/channel ਮਾਡਲ, ਫਾਰਵਰਡ-ਪੋਰਟ ਅਤੇ ਲੇਬਲ [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ਵਿੱਚ ਹਨ; ਯੋਜਨਾ [ROADMAP](../../ROADMAP.md) (ਪੜਾਅ 3) ਵਿੱਚ ਹੈ। ਕੱਟ ਇੱਕ ਵਾਰ ਚੱਲਦਾ ਹੈ; 3.8.58 ਇਸ ਨੂੰ ਇੱਕ ਫੋਰਕ 'ਤੇ ਅੰਤ ਤੱਕ ਰੀਹਰਸਲ ਕਰਦਾ ਹੈ, ਅਤੇ 3.8.59 [GO/NO-GO ਚੈਕਲਿਸਟ](./LTS_GO_NO_GO.md) ਨਾਲ ਬੰਦ ਹੁੰਦਾ ਹੈ।
 
-### ਡ੍ਰਾਈ-ਰਨ (ਕੇਵਲ ਪੜ੍ਹਨ ਲਈ, ਕਿਸੇ ਵੀ ਸਮੇਂ ਸੁਰੱਖਿਅਤ)
+### ਡਰਾਈ-ਰਨ (ਸਿਰਫ਼ ਪੜ੍ਹਨ ਲਈ, ਕਿਸੇ ਵੀ ਸਮੇਂ ਸੁਰੱਖਿਅਤ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ਅਸਲ ਕੱਟ: HEAD ਤੋਂ 3.9.0, ਪਿਛਲਾ ਟੈਗ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ਸਰੋਤ ਕਮਿਟ ਨੂੰ ਪਿੰਨ ਕਰੋ
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ਕੁਝ ਵੀ ਚਲਾਉਂਦੀ ਨਹੀਂ: ਇਹ git ਅਤੇ `gh` ਨੂੰ ਪੜ੍ਹਦੀ ਹੈ ਅਤੇ
-ਪੂਰਾ ਕ੍ਰਮ ਪ੍ਰਿੰਟ ਕਰਦੀ ਹੈ — ਪੂਰਵ-ਸ਼ਰਤਾਂ (ਸਰੋਤ ਰਿਜ਼ਾਲਵ ਹੁੰਦਾ ਹੈ, ਸਰੋਤ ਰਿਪੋਜ਼ਟਰੀ ਕੋਲ ਪੂਰਾ ਇਤਿਹਾਸ ਹੈ —
-ਇੱਕ ਸ਼ੈਲੋ ਕਲੋਨ `stable/v3` ਨੂੰ ਪੁਸ਼ ਨਹੀਂ ਕਰ ਸਕਦਾ, ਪ੍ਰਾਪਤ ਕਰਨ ਵਾਲਾ ਪਾਸਾ ਪਹਿਲੇ
-ਗ੍ਰਾਫਟ ਕੀਤੇ ਪੇਰੈਂਟ ਉੱਤੇ ਪੈਕ ਨੂੰ ਰੱਦ ਕਰ ਦਿੰਦਾ ਹੈ, ਇਸ ਲਈ ਪੂਰੇ ਕਲੋਨ ਤੋਂ ਕੱਟ ਕਰੋ ਜਾਂ ਪਹਿਲਾਂ
-`git fetch --unshallow origin` ਚਲਾਓ — ਪਿਛਲਾ ਟੈਗ ਮੌਜੂਦ ਹੈ, `package.json` ਟਾਰਗੇਟ ਵਰਜਨ ਉੱਤੇ ਹੈ,
-ਇੱਕ `release-freeze` ਇਸ਼ੂ ਖੁੱਲ੍ਹਾ ਹੈ, ਮੌਜੂਦਾ ਰਿਲੀਜ਼ ਬ੍ਰਾਂਚ ਉੱਤੇ ਕੋਈ ਖੁੱਲ੍ਹਾ
-`Release branch not green` ਇਸ਼ੂ ਨਹੀਂ ਹੈ — ਜੋ ਬ੍ਰਾਂਚ ਮੌਜੂਦ ਨਹੀਂ ਹੈ ਉਹ `?` ਅਣਜਾਣ ਰਿਪੋਰਟ ਕਰਦੀ ਹੈ,
-ਕਦੇ ਵੀ ਗ੍ਰੀਨ ਨਹੀਂ — Mergify `release` ਕਤਾਰ ਕਨਫਿਗਰ ਕੀਤੀ ਗਈ ਹੈ (G11: `queue_rules`,
-`checks_timeout`, ਲੇਬਲ `queue`), `release/*` ਰੂਲਸੈੱਟ ਅਜੇ ਵੀ ਮਿਟਾਉਣ ਅਤੇ ਫੋਰਸ-ਪੁਸ਼ ਨੂੰ ਰੋਕਦਾ ਹੈ,
-ਅਤੇ `stable/v3` ਤੇ `develop` ਹਾਲੇ ਮੌਜੂਦ ਨਹੀਂ ਹਨ), ਦੋ ਬ੍ਰਾਂਚ ਪੜਾਅ, ਕਿਹੜੇ ਨਿਸ਼ਕ੍ਰਿਆ-ਵਰਕਫਲੋ
-ਟਰਿਗਰ ਅਤੇ `if:` ਸ਼ਰਤਾਂ ਸਹੀ ਹੁੰਦੀਆਂ ਹਨ (ਅਤੇ ਕਿਹੜੀਆਂ ਰਿਪੋਜ਼ਟਰੀ ਵੇਰੀਏਬਲ ਦੁਆਰਾ ਰੋਕੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ ਜਾਂ
-ਕੈਨੋਨਿਕਲ ਰਿਪੋਜ਼ਟਰੀ ਨਾਲ ਪਿੰਨ ਰਹਿੰਦੀਆਂ ਹਨ), ਉਮੀਦ ਕੀਤੇ dist-tags (`latest` → 3.9.0, `next` ਅਤੇ
-`nightly` ਖਾਲੀ) ਅਤੇ ਰੋਲਬੈਕ। ਐਗਜ਼ਿਟ `0` = `RESULT: READY`, `1` = ਕੋਈ ਰੋਕਣ ਵਾਲੀ ਪੂਰਵ-ਸ਼ਰਤ
-ਅਸਫਲ ਹੋਈ (`✗`), `2` = ਵਰਤੋਂ ਗਲਤੀ। `--advisory <id,...>` ਕਿਸੇ ਜਾਂਚ ਨੂੰ ਲੁਕਾਏ ਬਿਨਾਂ
-ਚੇਤਾਵਨੀ (`!`) ਵਿੱਚ ਘਟਾ ਦਿੰਦਾ ਹੈ।
+`scripts/release/dry-run-lts-cut.mjs` ਕੁਝ ਨਹੀਂ ਚਲਾਉਂਦਾ ਹੈ: ਇਹ git ਅਤੇ `gh` ਨੂੰ ਪੜ੍ਹਦਾ ਹੈ ਅਤੇ ਪੂਰੇ ਕ੍ਰਮ — ਪੂਰਵ-ਸ਼ਰਤਾਂ ਨੂੰ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ (ਸਰੋਤ ਹੱਲ, ਸਰੋਤ ਰਿਪੋਜ਼ਟਰੀ ਦਾ ਪੂਰਾ ਇਤਿਹਾਸ — ਹੈ, ਇੱਕ ਖੋਖਲਾ ਕਲੋਨ `stable/v3` ਪੁਸ਼ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ, ਪ੍ਰਾਪਤ ਕਰਨ ਵਾਲਾ ਸਾਈਡ ਪਹਿਲੇ ਗ੍ਰਾਫਟ ਕੀਤੇ ਮਾਤਾ-ਪਿਤਾ 'ਤੇ ਪੈਕ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਪਹਿਲੇ — ਟੈਗ ਤੋਂ ਪਹਿਲਾਂ ਕੱਟੋ ਜਾਂ ਪਹਿਲਾਂ ਮੌਜੂਦ `git fetch --unshallow origin` ਤੋਂ ਕੱਟੋ। `package.json` ਟੀਚਾ ਸੰਸਕਰਣ ਹੈ, ਇੱਕ `release-freeze` ਮੁੱਦਾ ਖੁੱਲਾ ਹੈ, ਮੌਜੂਦਾ ਰੀਲੀਜ਼ ਸ਼ਾਖਾ 'ਤੇ ਕੋਈ ਖੁੱਲਾ `Release branch not green` ਮੁੱਦਾ ਨਹੀਂ ਹੈ — ਇੱਕ ਬ੍ਰਾਂਚ ਜੋ ਮੌਜੂਦ ਨਹੀਂ ਹੈ `?` ਅਣਜਾਣ ਰਿਪੋਰਟਾਂ, ਕਦੇ ਵੀ ਹਰੀ — ਓਮਨੀ-ਕਿਊ ਲੈਂਡਜ਼ ਰਿਲੀਜ਼ PRs (G11: `config/merge-queue/config.json` ਵੈਧ `live`, ਇਸਦਾ `bases` ਰੀਲੀਜ਼ ਸ਼ਾਖਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ, `mode`, `release/*` ਦੇ ਨਿਯਮ ਅਜੇ ਵੀ ਮੌਜੂਦ ਹਨ) ਮਿਟਾਉਣਾ ਅਤੇ ਫੋਰਸ-ਪੁਸ਼, ਅਤੇ `stable/v3` ਅਤੇ `develop` ਅਜੇ ਮੌਜੂਦ ਨਹੀਂ ਹਨ), ਦੋ ਬ੍ਰਾਂਚ ਸਟੈਪਸ, ਜੋ ਡੋਰਮੈਂਟ-ਵਰਕਫਲੋ ਟ੍ਰਿਗਰ ਅਤੇ `if:` ਸਥਿਤੀਆਂ ਨੂੰ ਸਹੀ ਬਣਾਉਂਦੇ ਹਨ (ਅਤੇ ਜੋ ਕਿ ਇੱਕ ਰਿਪੋਜ਼ਟਰੀ ਵੇਰੀਏਬਲ ਦੁਆਰਾ ਗੇਟਡ ਰਹਿੰਦੇ ਹਨ ਜਾਂ ਕੈਨੋਨੀਕਲ ਰਿਪੋਜ਼ਟਰੀ ਵਿੱਚ ਪਿੰਨ ਕੀਤੇ ਜਾਂਦੇ ਹਨ), ਸੰਭਾਵਿਤ ਡਿਸਟ-ਟੈਗ (`latest` → `next` ਅਤੇ the `nightly` )। `0` = `RESULT: READY` ਬਾਹਰ ਜਾਓ, `1` = ਇੱਕ ਬਲਾਕਿੰਗ ਪੂਰਵ ਸ਼ਰਤ ਅਸਫਲ (`✗`), `2` = ਵਰਤੋਂ ਗਲਤੀ। `--advisory <id,...>` ਇੱਕ ਚੈਕ ਨੂੰ ਬਿਨਾਂ ਲੁਕਾਏ ਇੱਕ ਚੇਤਾਵਨੀ (`!`) ਵਿੱਚ ਡਾਊਨਗ੍ਰੇਡ ਕਰਦਾ ਹੈ।
 
-ਅਸਲ ਕੱਟ ਦਾ ਡ੍ਰਾਈ-ਰਨ ਉਸ ਵੇਲੇ ਚਲਾਓ ਜਦੋਂ 3.9.0 ਰਿਲੀਜ਼ ਫ੍ਰੀਜ਼ ਅਜੇ ਵੀ ਖੁੱਲ੍ਹਾ ਹੋਵੇ — ਬ੍ਰਾਂਚਾਂ
-ਟੈਗ ਤੋਂ ਬਾਅਦ ਅਤੇ ਪੜਾਅ 12c ਵੱਲੋਂ ਫ੍ਰੀਜ਼ ਹਟਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਬਣਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ।
+ਰੀਅਲ ਕੱਟ ਦੇ ਡਰਾਈ-ਰਨ ਨੂੰ ਚਲਾਓ ਜਦੋਂ ਕਿ 3.9.0 ਰੀਲੀਜ਼ ਫ੍ਰੀਜ਼ ਅਜੇ ਵੀ ਖੁੱਲ੍ਹਾ ਹੈ — ਸ਼ਾਖਾਵਾਂ ਟੈਗ ਤੋਂ ਬਾਅਦ ਅਤੇ ਫੇਜ਼ 12c ਦੁਆਰਾ ਫ੍ਰੀਜ਼ ਨੂੰ ਚੁੱਕਣ ਤੋਂ ਪਹਿਲਾਂ ਬਣਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ।
 
-### 3.8.58 ਅਭਿਆਸ (ਕੇਵਲ ਫੋਰਕ)
+### 3.8.58 ਰਿਹਰਸਲ (ਸਿਰਫ਼ ਫੋਰਕ)
 
 ```bash
-# 1. ਅਭਿਆਸ ਪੈਰਾਮੀਟਰਾਂ ਨਾਲ ਮੌਜੂਦਾ ਟਿਪ ਉੱਤੇ ਡ੍ਰਾਈ-ਰਨ ਕਰੋ
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. ਕਿਸੇ FORK ਰਿਮੋਟ ਦੇ ਵਿਰੁੱਧ ਚਲਾਓ (origin, ਜਾਂ ਕੋਈ ਵੀ ਰਿਮੋਟ ਜਿਸਦਾ URL ਕੈਨੋਨਿਕਲ
-#    ਰਿਪੋਜ਼ਟਰੀ ਹੈ, ਅਸਵੀਕਾਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; ਹਰ ਪੜਾਅ ਟਰਮੀਨਲ ਉੱਤੇ ਪੁਸ਼ਟੀ ਮੰਗਦਾ ਹੈ)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. ਫੋਰਕ ਵਿੱਚ ਨਿਸ਼ਕ੍ਰਿਆ ਵਰਕਫਲੋਆਂ ਦੀ ਜਾਂਚ ਕਰੋ (ਜਿੱਥੇ ਡ੍ਰਾਈ-ਰਨ
-#    ਕੈਨੋਨਿਕਲ-ਰਿਪੋਜ਼ਟਰੀ ਪਿੰਨ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ, ਉੱਥੇ workflow_dispatch), ਫਿਰ ਰੋਲਬੈਕ ਕਰੋ
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop ਬੰਪ ਕਮਿਟ git ਪਲੰਬਿੰਗ ਨਾਲ ਬਣਾਈ ਜਾਂਦੀ ਹੈ (ਕਿਸੇ ਵਰਕਿੰਗ ਟ੍ਰੀ ਨੂੰ ਛੂਹਿਆ ਨਹੀਂ ਜਾਂਦਾ) ਅਤੇ
-ਸਾਈਕਲ-ਓਪਨ ਕਮਿਟ ਵਾਲੀਆਂ ਉਹੀ ਪੰਜ ਫਾਈਲਾਂ ਨੂੰ ਬੰਪ ਕਰਦੀ ਹੈ: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` ਅਤੇ `docs/openapi.yaml`। `[4.0.0]`
-CHANGELOG ਭਾਗ ਅਤੇ ਇਸਦੇ i18n ਪ੍ਰਤੀਰੂਪ ਬਾਅਦ ਵਿੱਚ `develop` ਉੱਤੇ, ਇਸਦੀ ਪਹਿਲੀ
-PR ਤੋਂ ਪਹਿਲਾਂ, ਖੋਲ੍ਹੇ ਜਾਂਦੇ ਹਨ। ਸਕ੍ਰਿਪਟ ਕਦੇ ਵੀ npm dist-tags ਨੂੰ ਨਹੀਂ ਬਦਲਦੀ — ਉਨ੍ਹਾਂ ਦਾ ਅਭਿਆਸ
-ਕਿਸੇ ਸਕ੍ਰੈਚ ਪੈਕੇਜ ਉੱਤੇ ਕਰੋ।
+ਡਿਵੈਲਪ ਬੰਪ ਕਮਿਟ ਗਿੱਟ ਪਲੰਬਿੰਗ ਨਾਲ ਬਣਾਇਆ ਗਿਆ ਹੈ (ਕੋਈ ਕੰਮ ਕਰਨ ਵਾਲੇ ਰੁੱਖ ਨੂੰ ਛੂਹਿਆ ਨਹੀਂ ਗਿਆ ਹੈ) ਅਤੇ ਉਹੀ ਪੰਜ ਫਾਈਲਾਂ ਨੂੰ ਇੱਕ ਸਾਈਕਲ-ਓਪਨ ਕਮਿਟ ਦੇ ਰੂਪ ਵਿੱਚ ਬੰਪ ਕਰਦਾ ਹੈ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ਅਤੇ `docs/openapi.yaml`। `[4.0.0]` CHANGELOG ਸੈਕਸ਼ਨ ਅਤੇ ਇਸ ਦੇ i18n ਸ਼ੀਸ਼ੇ `develop` ਤੋਂ ਬਾਅਦ, ਇਸਦੇ ਪਹਿਲੇ PR ਤੋਂ ਪਹਿਲਾਂ ਖੋਲ੍ਹੇ ਜਾਂਦੇ ਹਨ। ਸਕ੍ਰਿਪਟ ਕਦੇ ਵੀ npm dist-tags — ਨੂੰ ਸਕ੍ਰੈਚ ਪੈਕੇਜ 'ਤੇ ਰਿਹਰਸਲ ਨਹੀਂ ਬਦਲਦੀ।
 
-### PR ਪ੍ਰੀਵਿਊ ਆਰਟੀਫੈਕਟ (ਇੱਕ ਵਾਰ ਬਿਲਡ ਕਰੋ, ਉਹੀ ਬਾਈਟਾਂ ਪ੍ਰਮੋਟ ਕਰੋ)
+### PR ਪੂਰਵਦਰਸ਼ਨ ਆਰਟੀਫੈਕਟ (ਇੱਕ ਵਾਰ ਬਣਾਓ, ਉਹੀ ਬਾਈਟਾਂ ਦਾ ਪ੍ਰਚਾਰ ਕਰੋ)
 
-`.github/workflows/preview-artifact.yml` ਇੱਕ PR ਹੈੱਡ ਤੋਂ ਇੱਕ ਪ੍ਰੋਡਕਸ਼ਨ ਟਾਰਬਾਲ ਬਣਾਉਂਦੀ ਹੈ ਅਤੇ
-ਉਸੇ ਸਟੀਕ ਬਿਲਡ ਨੂੰ ਵੈਲੀਡੇਟ ਕਰਦੀ ਹੈ (#8084 ਭਾਗ (a))। ਕੇਵਲ ਇੱਕੋ ਰਿਪੋਜ਼ਟਰੀ ਦੀਆਂ PRs; ਕੁਝ ਵੀ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।
+`.github/workflows/preview-artifact.yml` ਇੱਕ PR ਹੈੱਡ ਤੋਂ ਇੱਕ ਪ੍ਰੋਡਕਸ਼ਨ ਟਾਰਬਾਲ ਬਣਾਉਂਦਾ ਹੈ ਅਤੇ ਸਹੀ ਬਿਲਡ (#8084 ਸਲਾਈਸ (a)) ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਦਾ ਹੈ। ਇੱਕੋ-ਰਿਪੋਜ਼ਟਰੀ PRs ਸਿਰਫ਼; ਕੁਝ ਵੀ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਹੈ।
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ਜਾਂ `preview-artifact` ਲੇਬਲ ਜੋੜੋ
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # ਪ੍ਰੀਵਿਊ ਇੰਸਟਾਲ
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-ਰਨ `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ਚਲਾਉਂਦਾ ਹੈ, ਟਾਰਬਾਲ ਨੂੰ
-ਪੈਕ ਕਰਦਾ ਹੈ, `npm run check:pack-boot` (ਨਕਲੀ ਸੀਕ੍ਰੇਟ, ਅਸਥਾਈ ਡਾਟਾ ਡਾਇਰੈਕਟਰੀ) ਚਲਾਉਂਦਾ ਹੈ,
-ਮੁੜ ਪੈਕ ਕਰਦਾ ਹੈ ਅਤੇ ਜੇ ਡਾਈਜੈਸਟ ਇੱਕੋ ਜਿਹਾ ਨਾ ਹੋਵੇ ਤਾਂ ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ, ਫਿਰ
-`artifact-identity.json` (ਹੈੱਡ SHA, ਬੇਸ SHA, ਲਾਕਫਾਈਲ ਹੈਸ਼, ਪਲੇਟਫਾਰਮ, ਆਰਕੀਟੈਕਚਰ, node ABI,
-ਬੰਡਲਰ, ਬਿਲਡ ਨੀਤੀ — `scripts/release/artifact-identity.mjs`) ਰਿਕਾਰਡ ਕਰਦਾ ਹੈ ਅਤੇ ਇੱਕ ਵੱਖਰੀ
-ਜੌਬ ਵਿੱਚ ਟਾਰਬਾਲ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰਦਾ ਹੈ। ਕਿਸੇ ਪ੍ਰੀਵਿਊ ਨੂੰ ਪ੍ਰਮੋਟ ਕਰਨ ਦਾ ਅਰਥ ਉਸ ਟਾਰਬਾਲ ਨੂੰ
-ਇੰਸਟਾਲ ਕਰਨਾ ਹੈ: ਸਰੋਤ ਤੋਂ ਕਦੇ ਵੀ ਮੁੜ ਬਿਲਡ ਨਾ ਕਰੋ।
+ਰਨ ਕਰਦਾ ਹੈ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, ਟਾਰਬਾਲ ਨੂੰ ਪੈਕ ਕਰਦਾ ਹੈ, `npm run check:pack-boot` (ਜਾਅਲੀ ਭੇਦ, ਅਲੌਕਿਕ ਡੇਟਾ ਡਾਇਰ) ਨੂੰ ਚਲਾਉਂਦਾ ਹੈ, ਰੀ-ਪੈਕ ਕਰਦਾ ਹੈ ਅਤੇ ਫੇਲ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਕਿ ਡਾਇਜੈਸਟ ਇੱਕੋ ਜਿਹਾ ਨਹੀਂ ਹੁੰਦਾ, ਫਿਰ `artifact-identity.json` ਰਿਕਾਰਡ ਕਰਦਾ ਹੈ (ਹੈੱਡ SHA, ਬੇਸ SHA, lockfile ਹੈਸ਼, ਬਿਲਡ ਹੈਸ਼, ਬਿਲਡ ਪਾਲਿਸੀ, ABI, ਪਲੇਟਫਾਰਮ, — `scripts/release/artifact-identity.mjs`) ਅਤੇ ਇੱਕ ਵੱਖਰੇ ਕੰਮ ਵਿੱਚ ਟਾਰਬਾਲ ਦੀ ਤਸਦੀਕ ਕਰਦਾ ਹੈ। ਇੱਕ ਪੂਰਵਦਰਸ਼ਨ ਨੂੰ ਉਤਸ਼ਾਹਿਤ ਕਰਨ ਦਾ ਮਤਲਬ ਹੈ ਕਿ ਟਾਰਬਾਲ ਨੂੰ ਸਥਾਪਿਤ ਕਰਨਾ: ਸਰੋਤ ਤੋਂ ਕਦੇ ਵੀ ਦੁਬਾਰਾ ਨਾ ਬਣਾਓ।
 
 ### ਕੱਟ (3.9.0, GO ਤੋਂ ਬਾਅਦ)
 
-1. GO ਨੂੰ [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) ਵਿੱਚ ਦਰਜ ਕੀਤਾ ਗਿਆ।
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` ਪ੍ਰਿੰਟ ਕਰਦੀ ਹੈ।
-3. ਡ੍ਰਾਈ-ਰਨ ਵੱਲੋਂ ਪ੍ਰਿੰਟ ਕੀਤੀਆਂ ਕਮਾਂਡਾਂ ਨਾਲ `origin` ਉੱਤੇ ਹੱਥੀਂ ਬ੍ਰਾਂਚਾਂ ਬਣਾਓ —
-   ਸਕ੍ਰਿਪਟ `origin` ਉੱਤੇ ਪੁਸ਼ ਕਰਨ ਤੋਂ ਇਨਕਾਰ ਕਰਦੀ ਹੈ। ਸਮੀਖਿਆ ਕੀਤੀ develop ਕਮਿਟ ਨੂੰ ਮੁੜ ਵਰਤਣ ਲਈ,
-   ਪਹਿਲਾਂ ਆਪਣੇ ਫੋਰਕ ਦੇ ਵਿਰੁੱਧ 3.9.0 ਟਿਪ ਉੱਤੇ `--execute` ਅਭਿਆਸ ਚਲਾਓ; ਇਹ ਦੋਵੇਂ SHAs ਪ੍ਰਿੰਟ ਕਰਦੀ ਹੈ,
-   ਅਤੇ ਉਹੀ ਕਮਿਟ ਪੁਸ਼ ਕੀਤੀਆਂ ਜਾ ਸਕਦੀਆਂ ਹਨ:
+1. GO [LTS_GO_NO_GO](./LTS_GO_NO_GO.md)
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ਪ੍ਰਿੰਟ `RESULT: READY`.
+3. Create the branches on `origin` by hand with the commands the dry-run prints — the script refuses to push to `origin`. To reuse a reviewed develop commit, run the `--execute` rehearsal on the 3.9.0 tip against your fork first; it prints both SHAs, and the same commits can be pushed:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. ਪਹਿਲਾ PR ਮਰਜ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ `stable/v3` ਅਤੇ `develop` ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ (rulesets + merge queue)।
-5. ਸੁਸਤ workflows ਬ੍ਰਾਂਚ ਦੀ ਮੌਜੂਦਗੀ ਨਾਲ ਸਰਗਰਮ ਹੁੰਦੇ ਹਨ: `forward-port.yml` (`stable/v3` ਵੱਲ push), `validate-stable-pr.yml` (`stable/v3` ਵੱਲ PRs) ਅਤੇ `nightly-v4-build.yml` (`develop` ਨੂੰ build ਕਰਦਾ ਹੈ)। go-live ਤੋਂ ਪਹਿਲਾਂ, `secrets.FORWARD_PORT_TOKEN` repository secret ਸੈੱਟ ਕਰੋ (ਤਾਂ ਜੋ forward-port PRs ਉੱਤੇ CI ਚੱਲੇ); nightly publishing ਉਦੋਂ ਤੱਕ ਬੰਦ ਰਹਿੰਦੀ ਹੈ ਜਦੋਂ ਤੱਕ owner repository variable `vars.NIGHTLY_PUBLISH` ਨੂੰ `true` 'ਤੇ ਸੈੱਟ ਨਹੀਂ ਕਰਦਾ ਅਤੇ npm Trusted Publishing `nightly-v4-build.yml` ਨੂੰ ਸਵੀਕਾਰ ਨਹੀਂ ਕਰਦਾ। Channel resolution `scripts/release/dist-tag.mjs` ਹੈ, ਇਹੋ resolver `npm-publish.yml` ਵਰਤਦਾ ਹੈ।
-6. channels ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ: `npm view omniroute dist-tags --json` ਦਿਖਾਉਂਦਾ ਹੈ ਕਿ `latest` = 3.9.0 ਹੈ ਅਤੇ v4 publish ਹੋਣ ਤੱਕ ਕੋਈ `next` / `nightly` ਨਹੀਂ ਹੈ।
-7. ਜੇ ਲੋੜ ਹੋਵੇ ਤਾਂ rollback ਕਰੋ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ਅਤੇ `npm dist-tag add omniroute@3.8.59 latest`।
+4. ਪਹਿਲੇ PR ਲੈਂਡਜ਼ ਤੋਂ ਪਹਿਲਾਂ `stable/v3` ਅਤੇ `develop` (ਨਿਯਮਾਂ + ਮਰਜ ਕਤਾਰ) ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ।
+5. ਬ੍ਰਾਂਚ ਮੌਜੂਦਗੀ ਦੁਆਰਾ ਸੁਸਤ ਵਰਕਫਲੋਜ਼ ਚਾਲੂ ਹੁੰਦੇ ਹਨ: `forward-port.yml` ( `stable/v3` ਵੱਲ ਧੱਕੋ), `validate-stable-pr.yml` (PRs ਤੋਂ `stable/v3`) ਅਤੇ `nightly-v4-build.yml` ( `develop` ਬਣਾਉਂਦੇ ਹਨ )। ਗੋ-ਲਾਈਵ ਤੋਂ ਪਹਿਲਾਂ, `secrets.FORWARD_PORT_TOKEN` ਰਿਪੋਜ਼ਟਰੀ ਗੁਪਤ ਸੈੱਟ ਕਰੋ (ਇਸ ਲਈ CI ਫਾਰਵਰਡ-ਪੋਰਟ PRs ਤੇ ਚੱਲਦਾ ਹੈ); ਰਾਤ ਦਾ ਪ੍ਰਕਾਸ਼ਨ ਉਦੋਂ ਤੱਕ ਬੰਦ ਰਹਿੰਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਮਾਲਕ ਰਿਪੋਜ਼ਟਰੀ ਵੇਰੀਏਬਲ `vars.NIGHTLY_PUBLISH` ਨੂੰ `true` ਅਤੇ npm ਟਰੱਸਟਡ ਪਬਲਿਸ਼ਿੰਗ `nightly-v4-build.yml` ਸਵੀਕਾਰ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਚੈਨਲ ਰੈਜ਼ੋਲਿਊਸ਼ਨ `scripts/release/dist-tag.mjs` ਹੈ, ਉਹੀ ਰਿਜ਼ੋਲਵਰ `npm-publish.yml` ਵਰਤਦਾ ਹੈ।
+6. ਚੈਨਲਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ: `npm view omniroute dist-tags --json` `latest` = 3.9.0 ਦਿਖਾਉਂਦਾ ਹੈ ਅਤੇ v4 ਪ੍ਰਕਾਸ਼ਿਤ ਹੋਣ ਤੱਕ ਕੋਈ `next` / `nightly` ਨਹੀਂ।
+7. ਰੋਲਬੈਕ, ਜੇ ਲੋੜ ਹੋਵੇ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ਅਤੇ `npm dist-tag add omniroute@3.8.59 latest`।
 
 ---
 

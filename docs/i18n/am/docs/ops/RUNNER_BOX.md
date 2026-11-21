@@ -136,34 +136,22 @@ job ሳይያያዝበት RAM እና CPU መጠቀሙን ይቀጥላል። እ�
   ደቂቃ፣ ከdisk ላይ upload ለመደረግ ደግሞ 2 ደቂቃ ወስዷል።
 - `.15` VPS ለhomologation ብቻ ነው — CI runnersን ፈጽሞ አያስኬድም።
 
-## የተስተናገደ መስመር (በGitHub የሚስተናገዱ runners)
+## የተስተናገደ መስመር (GitHub-የተስተናገዱ ሯጮች)
 
-repositoryው የ`cheaper-inference` ድርጅት ነው፣ በ**Team** ዕቅድ ላይ፦ **60 በአንድ ጊዜ የሚሰሩ የተስተናገዱ jobs** አሉት፤ እነዚህም በድርጅቱ ውስጥ ባሉ ሁሉም repositories፣ በእያንዳንዱ PR ፍተሻ፣ በእያንዳንዱ በpush በሚነሳ workflow እና በCodeQL ነባሪ ቅንብር መካከል ይጋራሉ። ከዚህ በታች ያሉት አሃዞች የተለኩት በ**Pro** ዕቅድ ላይ ነው (40 በአንድ ጊዜ የሚሰሩ የተስተናገዱ jobs)። በ2026-10-18 በአንድ
-የማዋሃድ ዘመቻ ወቅት (~10 merges/hour በ`release/v3.8.52`) የተለካው፦ በ
-24 h ውስጥ **2,500 workflow runs ተፈጥረዋል**፣ በ6 h ውስጥ ወደ branch 44 pushes ተደርገዋል፣
-PR ፍተሻዎች ለሰዓታት ሲጠብቁ **106 hosted jobs ወረፋ ይዘዋል**፣ እና PR-ዎች ያለእነሱ
-ተዋህደዋል። ወደ branch በተደረገ እያንዳንዱ push ላይ ዘጠኝ workflows ተነስተዋል፦
+ማከማቻው `cheaper-inference` ድርጅት ነው፣ በ** ቡድን** እቅድ፡-** 60 በአንድ ጊዜ የሚስተናገዱ ስራዎች** ፣ በድርጅቱ ውስጥ ባሉ እያንዳንዱ ማከማቻዎች የተጋራ ፣ እያንዳንዱ PR ቼክ ፣ እያንዳንዱ የግፋ-ቀስቃሽ የስራ ፍሰት እና CodeQL ነባሪ ማዋቀር። ከታች ያሉት ምስሎች በ ላይ ይለካሉ** ፕሮ** እቅድ (40 በአንድ ጊዜ የሚስተናገዱ ስራዎች). በ2026-10-18 በውህደት ዘመቻ ጊዜ (~ 10 merges/hour on `release/v3.8.52`):** በ24 ሰአት ውስጥ 2,500 የስራ ሂደት ተፈጥሯል።** በ 6 ሰዓት ውስጥ 44 ወደ ቅርንጫፉ ይገፋፋል ፣** 106 የተስተናገዱ ስራዎች ተሰልፈዋል** PR ቼኮች ለሰዓታት ሲጠበቁ እና PRs ያለ እነርሱ ተቀላቅለዋል. በእያንዳንዱ ግፋ ወደ ቅርንጫፉ ላይ ዘጠኝ የስራ ፍሰቶች ተኮሱ፡-
 
-| በእያንዳንዱ push ወደ `release/v*`                | የተስተናገዱ jobs | በውድቀት ማዕበሉ ወቅት የነበረው ውጤት                                           | ከ2026-10-18 ጀምሮ                                                          |
-| ------------------------------------------- | -----------: | ------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `ci.yml` (ሙሉ matrix)                        |       እስከ 30 | በሚቀጥለው push ተሰርዟል፣ በአንድ ቀን ውስጥ 24 ከ24                              | በ`release/**` pushes ላይ አልተጀመረም (PR run + Release-Green)                 |
-| `quality.yml`                               |           ~6 | ተሰርዟል፣ 23 ከ23                                                      | በ`release/**` pushes ላይ አልተጀመረም                                          |
-| `Release-Green` `--quick`                   |            0 | በ`omni-build` ላይ ሰርቷል፣ 97 ከ100 ተሰርዟል                               | `omni-release` slot፣ ፈጽሞ አይሰረዝም፣ pending run ይጠቀለላል                      |
-| `Lock released branch`, `OpenSSF Scorecard` |            2 | በእያንዳንዱ push አንድ run ወረፋ ይዟል                                       | በእያንዳንዱ ref አንድ run (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
-| `Release acceptance` (የshadow ሪፖርት)         |            1 | በእያንዳንዱ push አንድ የተስተናገደ `npm ci`፣ ፈጽሞ አልተሰረዘም                     | አልተለወጠም — ለ`paths:` filter እጩ ነው                                         |
-| `Publish to Docker Hub` → `Deploy to VPS`   |            2 | በእያንዳንዱ push ተሰርዟል፤ amd64 leg በ`omni-build` ላይ ይወዳደራል              | አልተለወጠም — የባለቤቱ deploy ቻናል                                               |
-| CodeQL ነባሪ ቅንብር (`dynamic`)                 |            4 | በእያንዳንዱ push `javascript-typescript`፣ `actions`፣ `c-cpp`፣ `python` | አልተለወጠም — Settings → Code security፤ `c-cpp`/`python` እዚህ ምንም አይቃኙም       |
+| በአንድ ግፊት ወደ `release/v*`                    | የተስተናገዱ ስራዎች | በአውሎ ነፋሱ ስር ያለው ውጤት                                            | ከ2026-10-18 ጀምሮ                                                     |
+| ------------------------------------------- | -----------: | -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `ci.yml` (ሙሉ ማትሪክስ)                         |       እስከ 30 | በአንድ ቀን ውስጥ 24 ከ 24 በሚቀጥለው ግፊት ተሰርዟል።                          | በ `release/**` ግፊቶች ላይ አልተጀመረም (PR run + መልቀቅ-አረንጓዴ)                |
+| `quality.yml`                               |           ~6 | ተሰርዟል፣ 23 ከ23                                                  | በ `release/**` ግፊት አልተጀመረም።                                         |
+| `Release-Green` `--quick`                   |            0 | `omni-build` ላይ ሮጦ፣ 97 ከ100 ተሰርዟል።                             | `omni-release` ማስገቢያ፣ በጭራሽ አልተሰረዘም፣ በመጠባበቅ ላይ ያለ ሩጫ ይወድቃል           |
+| `Lock released branch`, `OpenSSF Scorecard` |            2 | አንድ ወረፋ ሩጫ በአንድ ግፊት                                            | አንድ ሩጫ በአንድ ሪፍ (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (የጥላ ዘገባ)              |            1 | አንድ የተስተናገደ `npm ci` በአንድ ግፊት፣ በጭራሽ አልተሰረዘም                    | ለ `paths:` ማጣሪያ ያልተለወጠ — እጩ                                         |
+| `Publish to Docker Hub` → `Deploy to VPS`   |            2 | በአንድ ግፊት ተሰርዟል; amd64 እግር `omni-build` ላይ ይወዳደራል።              | ያልተለወጠ — ባለቤት የማሰማራት ሰርጥ                                            |
+| CodeQL ነባሪ ማዋቀር (`dynamic`)                 |            4 | `javascript-typescript`, `actions`, `c-cpp`, `python` በአንድ ግፊት | ያልተለወጠ — ቅንብሮች → ኮድ ደህንነት; `c-cpp`/`python` እዚህ ምንም አይቃኝም።          |
 
-`tests/unit/build/push-storm-diet.test.ts` የ`ci.yml` እና
-`quality.yml` የ`main`-ብቻ push triggerን ያረጋግጣል። የጎንዮሽ ውጤት፦ Codecov ከእንግዲህ በእያንዳንዱ release push የbase upload
-አያገኝም (ደረጃው ለመረጃ ብቻ ነው እና `continue-on-error` ተደርጎለታል)፤ በrepository ውስጥ ያለው coverage gate እና PR comment
-አልተነኩም።
+`tests/unit/build/push-storm-diet.test.ts` የ `main` -only የግፋ ማስጀመሪያን የዝቅድ እና `ci.yml` ፒን ያያል `quality.yml` የጎንዮሽ ጉዳት: Codecov ከአሁን በኋላ የመሠረት ሰቀላ በእያንዳንዱ ልቀት ግፊት አይቀበልም (እርምጃው መረጃዊ እና `continue-on-error` ነው); የውስጠ-repo ሽፋን በር እና PR አስተያየት አልተነኩም።
 
-**ተጨማሪ self-hosted capacity የhosted queueን አያስተካክልም።** devbox
-(`devbox-vm-06-dev002`፣ 24 vCPU / 54 GB) runner ማስተናገድ ይችላል፣ ነገር ግን agent sessions አስቀድመው
-loadን በ20–26 ያቆዩታል፣ agent container Docker daemon የለውም፣ እና ሙሉ በሙሉ የተጨናነቀው መስመር
-hosted የሆነው ነው። በዚያው ጊዜ `.113` box 71 GB ነፃ ቦታ እና 5–8 load ነበረው፤ ገደቡ
-ከላይ ያለው የእያንዳንዱ listener የmemory budget ነው (ከፍተኛው 6 listeners)፣ CPU አይደለም። የቀሩት መፍትሔዎች
-የሂደት ለውጦች ናቸው፦ የዘመቻ PR-ዎችን በMergify queue (`label=queue`) በኩል ማዋሃድ፣ batches
-ለእያንዳንዱ PR አንድ run እና ለእያንዳንዱ push አንድ run ከመፍጠር ይልቅ አንድ `merge_group` CI run
-ይጋራሉ፤ የCodeQL ነባሪ-ቅንብር languagesን መቀነስ፣ እና `release-acceptance.yml`ን በሚያነባቸው files መሠረት ማጣራት።
+**የበለጠ በራሱ የሚስተናገድ አቅም የተስተናገደውን ወረፋ አያስተካክለውም።** ዴቭቦክስ (`devbox-vm-06-dev002`፣ 24 vCPU / 54 GB) ሯጭን ሊያስተናግድ ይችላል፣ ነገር ግን የወኪሉ ክፍለ ጊዜዎች ጭነቱን በ20-26 ያቆዩታል፣ የወኪሉ መያዣ ምንም Docker ዴሞን የለውም፣ እና የሳቹሬትድ ሌይን የሚስተናገደው ነው። የ `.113` ሳጥኑ 71 GB ነፃ እና በተመሳሳይ ጊዜ 5-8 ጭነት ነበረው; እገዳው ከላይ ያለው የአድማጭ ማህደረ ትውስታ በጀት ነው (ጣሪያ 6 አድማጮች) እንጂ CPU አይደለም። የተቀሩት ዘንጎች የሂደቱ ናቸው፡ የመሬት ዘመቻ PRs በ Mergify ወረፋ (`label=queue`፣ batches share share one `merge_group` CI run a run per PR plus one per push)፣ CodeQL ነባሪ ማዋቀሪያ ቋንቋዎችን ይከርክሙ እና `release-acceptance.yml` በሚያነቡ ፋይሎች ያጣሩ።
+
+> **2026-11-19፡ የመርግፋይ ውህደት ወረፋ ጡረታ ወጥቷል።** (የባለቤቱ ውሳኔ). `.mergify.yml` ከአሁን በኋላ ወረፋን አይገልጽም እና የመሳብ ጥያቄን የሚያዋህዱ ወይም የሚጽፉ የ Mergify ትዕዛዞችን አይቀበልም። ልቀቅ PRs በማከማቻ ደንቡ መሠረት "በነቃ ልቀቱ ላይ አረንጓዴ በሮች ጠይቅ" (`Gate / CI` + `Gate / Quality`) omni-ወረፋ በቀጥታ ሁነታ ላይ እስኪሄድ ድረስ እና ከዚያ በኋላ በኦምኒ ወረፋ ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) ስር ይደባለቃሉ። ከላይ ያለው የሜርጂፋይ ዱላ ከአሁን በኋላ የለም።
