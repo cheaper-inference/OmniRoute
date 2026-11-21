@@ -20,6 +20,7 @@ import { decideFairShare } from "./fairShare";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
 import { getQuotaStore } from "./QuotaStore";
+import { attributedPercentConsumed, recordPercentProxy } from "./percentProxy";
 import { listAllocationsForApiKey, getPool } from "@/lib/db/quotaPools";
 import { getModelCap } from "@/lib/db/quotaModelCaps";
 import { listEnabledSchedules } from "@/lib/db/quotaSchedules";
@@ -249,6 +250,14 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     } else {
       // percent (account-quota window): the saturation signal is authoritative.
       consumedTotal = globalUsedPercent * effectiveLimit;
+      // #19904: no local counter exists for percent — attribute this key's share of the
+      // upstream figure from the per-key token proxy bucket (0 when no data → unchanged).
+      consumedByThisKey[dimKeyStr] = await attributedPercentConsumed(
+        store,
+        input.apiKeyId,
+        dimKey,
+        consumedTotal
+      );
     }
 
     dimensionsInfo.push({
@@ -367,6 +376,10 @@ export async function recordConsumption(input: RecordConsumptionInput): Promise<
       await store.consume(input.apiKeyId, dimKey, cost).catch(() => {
         // Fail-open per B29 — drift expected; teto global do fetcher corrige
       });
+    }
+    if (dim.unit === "percent") {
+      // #19904: shadow token bucket so enforcement can attribute the upstream % per key.
+      await recordPercentProxy(store, input.apiKeyId, dimKey, input.cost);
     }
   }
 
