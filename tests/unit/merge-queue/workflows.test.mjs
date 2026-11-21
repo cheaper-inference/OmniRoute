@@ -14,6 +14,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -21,6 +22,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { load } from "js-yaml";
 import { botIdentity, candidateRef } from "../../../scripts/merge-queue/contracts.mjs";
+import { signingKeyPath } from "../../../scripts/merge-queue/compose.mjs";
 import { TICK_ACTIONS } from "../../../scripts/merge-queue/tick.mjs";
 import { evaluateAdmission } from "../../../scripts/quality/admission-verdict.mjs";
 
@@ -1042,6 +1044,7 @@ test("least privilege: no default token scopes, App token scoped per job", () =>
     "OMNI_QUEUE_APP_CLIENT_ID",
     "OMNI_QUEUE_APP_PRIVATE_KEY",
     "OMNI_QUEUE_LAND_TOKEN",
+    "OMNI_QUEUE_SIGNING_KEY",
   ]);
   assert.doesNotMatch(queueText, /GITHUB_TOKEN|github\.token/, "the queue never uses GITHUB_TOKEN");
 });
@@ -1132,6 +1135,71 @@ test("omni-queue.yml: the tick may write statuses and receives the land token", 
   // triggered this run (github.triggering_actor, the re-runner of a re-run) are approvers.
   assert.equal(step.env.GITHUB_ACTOR, "${{ github.actor }}");
   assert.equal(step.env.GITHUB_TRIGGERING_ACTOR, "${{ github.triggering_actor }}");
+});
+
+test("omni-queue.yml: the signing key reaches one step of the tick, and the approval job no owner secret", () => {
+  const holders = Object.entries(queue.jobs).flatMap(([id, job]) =>
+    job.steps
+      .filter((s) => JSON.stringify(s).includes("OMNI_QUEUE_SIGNING_KEY"))
+      .map((s) => `${id}: ${s.name}`)
+  );
+  assert.deepEqual(holders, ["tick: Write the merge-commit signing key"]);
+  const write = stepNamed("tick", "Write the merge-commit signing key");
+  assert.deepEqual(write.env, { OMNI_QUEUE_SIGNING_KEY: "${{ secrets.OMNI_QUEUE_SIGNING_KEY }}" });
+  // The approval job runs on label events with minimal permissions: no owner secret at all.
+  const approval = JSON.stringify(queue.jobs.approval);
+  assert.doesNotMatch(approval, /OMNI_QUEUE_LAND_TOKEN|OMNI_QUEUE_SIGNING_KEY/);
+  // Order: the key is on disk before the tick runs, and removed after it, whatever happened.
+  const names = queue.jobs.tick.steps.map((s) => s.name ?? s.uses);
+  const at = (name) => names.indexOf(name);
+  assert.ok(at("Write the merge-commit signing key") < at("Run one queue tick"));
+  assert.equal(names.at(-1), "Remove the merge-commit signing key");
+  const remove = stepNamed("tick", "Remove the merge-commit signing key");
+  assert.equal(remove.if, "always()", "removed on failure and on cancellation too");
+  assert.equal(remove.env, undefined, "the removal needs no secret");
+  // The tick reads the file at the path compose.signingKeyPath derives from RUNNER_TEMP.
+  assert.equal(signingKeyPath("$RUNNER_TEMP"), "$RUNNER_TEMP/omni-queue-signing/signing-key");
+  assert.match(String(write.run), /"\$RUNNER_TEMP\/omni-queue-signing\/signing-key"/);
+  // The key is never printed: no tracing, no echo of the variable.
+  for (const step of [write, remove]) {
+    assert.doesNotMatch(String(step.run), /set\s+-[a-z]*x|\becho\b[^\n]*OMNI_QUEUE_SIGNING_KEY/);
+  }
+});
+
+test("the signing-key steps write the key 0600 under RUNNER_TEMP, skip without a secret, and remove it", (t) => {
+  const write = stepNamed("tick", "Write the merge-commit signing key");
+  const remove = stepNamed("tick", "Remove the merge-commit signing key");
+  const key =
+    "-----BEGIN OPENSSH PRIVATE KEY-----\nAAAAfakekeymaterial\n-----END OPENSSH PRIVATE KEY-----";
+  const temp = mkdtempSync(join(tmpdir(), "omni-queue-runner-temp-"));
+  t.after(() => rmSync(temp, { recursive: true, force: true }));
+  const file = join(temp, "omni-queue-signing", "signing-key");
+
+  const none = runStep(t, write, { RUNNER_TEMP: temp, OMNI_QUEUE_SIGNING_KEY: "" });
+  assert.equal(none.code, 0, none.stderr);
+  assert.equal(existsSync(file), false, "no secret: no file, the tick composes unsigned");
+
+  const res = runStep(t, write, { RUNNER_TEMP: temp, OMNI_QUEUE_SIGNING_KEY: key });
+  assert.equal(res.code, 0, res.stderr);
+  assert.equal(readFileSync(file, "utf8"), `${key}\n`);
+  assert.equal(statSync(file).mode & 0o777, 0o600, "readable by the runner user only");
+  assert.equal(statSync(join(temp, "omni-queue-signing")).mode & 0o777, 0o700);
+  assert.ok(!`${res.stdout}${res.stderr}`.includes("fakekeymaterial"), "never printed");
+  assert.ok(!`${res.stdout}${res.stderr}`.includes(temp), "the path is not printed either");
+
+  // A key that cannot be written never fails the job: the tick runs and composes unsigned.
+  const notADir = join(temp, "plain-file");
+  writeFileSync(notADir, "");
+  const blocked = runStep(t, write, { RUNNER_TEMP: notADir, OMNI_QUEUE_SIGNING_KEY: key });
+  assert.equal(blocked.code, 0, blocked.stderr);
+  assert.match(blocked.stdout, /::warning::the merge-commit signing key could not be written/);
+  assert.ok(!`${blocked.stdout}${blocked.stderr}`.includes("fakekeymaterial"));
+
+  const gone = runStep(t, remove, { RUNNER_TEMP: temp });
+  assert.equal(gone.code, 0, gone.stderr);
+  assert.equal(existsSync(join(temp, "omni-queue-signing")), false);
+  // Removing again (no key was written) is not an error.
+  assert.equal(runStep(t, remove, { RUNNER_TEMP: temp }).code, 0);
 });
 
 test("the tick's test/sandbox overrides are never set by the real workflow", () => {
