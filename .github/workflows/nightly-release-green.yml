@@ -150,6 +150,8 @@ jobs:
           NAME: ${{ matrix.name }}
           SUITE: ${{ matrix.script }}
           TEST_SHARD: ${{ matrix.shard }}
+          # Match the validator's hard gate mode on this separate runner.
+          OMNIROUTE_GATE_MODE: pr
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set +e
@@ -497,6 +499,7 @@ jobs:
           NAME: ${{ matrix.name }}
           SUITE: ${{ matrix.script }}
           TEST_SHARD: ${{ matrix.shard }}
+          OMNIROUTE_GATE_MODE: pr
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set +e
