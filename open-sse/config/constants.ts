@@ -330,8 +330,9 @@ export const PROVIDER_PROFILES = {
     ),
   },
   // Local providers (localhost inference backends like Ollama, LM Studio, oMLX).
-  // Not yet wired into getProviderProfile() — will be used when local provider_nodes
-  // are integrated into the resilience layer. Kept here to avoid a second constants change.
+  // markAccountUnavailable (src/sse/services/auth.ts) reads rateLimitCooldown as the longest
+  // bench for a key whose base URL is loopback or private. The rest is not wired into
+  // getProviderProfile() yet.
   local: {
     transientCooldown: 2000, // 2s (local — very fast recovery)
     rateLimitCooldown: 5000, // 5s (local — no real rate limits)
