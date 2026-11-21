@@ -1,0 +1,1 @@
+- **refactor(db):** Move model capability overrides, context-window overrides and per-API-key `auto/*` candidate exclusions behind Promise-based repositories while preserving override validation, list ordering, model-catalog cache invalidation and the synchronous capability-resolution read path (#20946 — thanks @xiaoyaner0201).
