@@ -69,6 +69,175 @@ jobs:
       - run: npm run build
       - run: npm test
 
+  host-matrix:
+    name: Host compatibility (${{ matrix.host }})
+    runs-on: ubuntu-latest
+    needs: [test-v2]
+    defaults:
+      run:
+        working-directory: "@omniroute/opencode-plugin-v2"
+    strategy:
+      fail-fast: false
+      matrix:
+        host: ["2.0.12", "2.3.0"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+
+      - name: Build the plugin under test
+        run: npm ci --no-audit --no-fund && npm run build
+
+      - name: Install the host version under test
+        run: npm install -g "@opencode/cli@${{ matrix.host }}"
+
+      - name: Generate the catalog stub from the production shape
+        run: |
+          node --import tsx/esm --input-type=module -e '
+          import { writeFileSync } from "node:fs";
+          import { DECLARED_REFRESH_ROUTES } from "./src/catalog.ts";
+          // 59 rows, generated in a loop from the production route contract —
+          // never a hand-written array. The plugin reader shapes the payload.
+          const rows = Array.from({ length: 59 }, (_, i) => ({
+            id: `model-${String(i + 1).padStart(3, "0")}`,
+            owned_by: "omniroute",
+          }));
+          writeFileSync("gateway-models.json", JSON.stringify(rows));
+          writeFileSync("gateway-routes.json", JSON.stringify(DECLARED_REFRESH_ROUTES));
+          '
+
+      - name: Start the deterministic gateway stub
+        run: |
+          GATEWAY_DIR="$PWD" node --input-type=module -e '
+          import { createServer } from "node:http";
+          import { readFileSync } from "node:fs";
+          const dir = process.env.GATEWAY_DIR;
+          const rows = JSON.parse(readFileSync(`${dir}/gateway-models.json`, "utf8"));
+          const routes = new Set(JSON.parse(readFileSync(`${dir}/gateway-routes.json`, "utf8")));
+          const body = (path) => {
+            if (path === "/v1/models") return { data: rows };
+            if (path === "/api/combos") return { combos: [] };
+            if (path === "/api/providers") return { connections: [] };
+            if (routes.has(path)) return {};
+            return {};
+          };
+          createServer((req, res) => {
+            const path = new URL(req.url, "http://localhost").pathname;
+            res.setHeader("content-type", "application/json");
+            res.end(JSON.stringify(body(path)));
+          }).listen(20128, "127.0.0.1", () => console.log("gateway stub ready"));
+          ' > "$RUNNER_TEMP/gateway.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/gateway.pid"
+          for _ in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:20128/v1/models > /dev/null 2>&1 && break
+            sleep 0.1
+          done
+          # Fail here, not three steps later, when the stub never came up.
+          curl -fsS http://127.0.0.1:20128/v1/models > /dev/null
+
+      - name: Configure the host for this plugin variant
+        run: |
+          if [ "${{ matrix.host }}" = "2.0.12" ]; then
+            # 2.0.12 never reads package.json for a local plugin directory: it
+            # probes the `server` subpath, so the root server.js must be picked.
+            PLUGIN_ROOT="$PWD"
+            EXPECTED_ENTRY="server.js"
+          else
+            # 2.3.0 resolves a local directory through its package.json
+            # `exports["."]`. Point it at the packed-and-installed artifact so
+            # the published file list is exercised too. A bare package name
+            # would make the host install the registry release instead of
+            # this build, so the target stays a local path.
+            TARBALL=$(npm pack --silent --pack-destination "$RUNNER_TEMP" | tail -n 1)
+            npm install --prefix "$RUNNER_TEMP/installed" --no-audit --no-fund --no-save "$RUNNER_TEMP/$TARBALL"
+            PLUGIN_ROOT="$RUNNER_TEMP/installed/node_modules/@omniroute/opencode-plugin-v2"
+            EXPECTED_ENTRY="dist/index.js"
+          fi
+          mkdir -p "$RUNNER_TEMP/opencode"
+          # Publish all 59 stub rows (no per-owner showcase cap) and supply the
+          # key the /v1/models fetcher requires; the stub ignores its value.
+          printf "{\"plugins\":[{\"package\":\"file://%s\",\"options\":{\"providerId\":\"omniroute\",\"baseURL\":\"http://127.0.0.1:20128\",\"visibleModels\":[\"*\"],\"apiKey\":\"ci-test-key\"}}]}" "$PLUGIN_ROOT" > "$RUNNER_TEMP/opencode/opencode.json"
+          cat "$RUNNER_TEMP/opencode/opencode.json"
+          # The host server requires a password; a per-run random one is enough.
+          SERVER_PASSWORD=$(openssl rand -hex 16)
+          echo "::add-mask::$SERVER_PASSWORD"
+          {
+            echo "OPENCODE_CONFIG=$RUNNER_TEMP/opencode/opencode.json"
+            echo "OPENCODE_SERVER_PASSWORD=$SERVER_PASSWORD"
+            echo "PLUGIN_ROOT=$PLUGIN_ROOT"
+            echo "EXPECTED_ENTRY=$EXPECTED_ENTRY"
+          } >> "$GITHUB_ENV"
+
+      - name: Start the host server
+        run: |
+          # A dedicated server, not `opencode api` against the auto-spawned
+          # background service: that one answers before plugins finish
+          # loading and never prints its logs, so neither the catalog nor the
+          # loader trace would be observable.
+          opencode serve --hostname 127.0.0.1 --port 4096 --print-logs \
+            > "$RUNNER_TEMP/host.out" 2> "$RUNNER_TEMP/host.log" &
+          echo $! > "$RUNNER_TEMP/host.pid"
+
+      - name: Assert the catalog loads and publishes 59 models
+        run: |
+          # Plugins load asynchronously after the server starts, and the
+          # plugin publishes once its first catalog refresh lands: poll until
+          # the omniroute models appear (or give up after ~3 minutes).
+          COUNT=0
+          for _ in $(seq 1 90); do
+            if opencode api --server http://127.0.0.1:4096 get /api/model \
+              > "$RUNNER_TEMP/models.json" 2> "$RUNNER_TEMP/api.log"; then
+              # The host lists each model with its provider in `providerID`
+              # and the bare model id in `id`.
+              COUNT=$(node --input-type=module -e '
+              import { readFileSync } from "node:fs";
+              const raw = JSON.parse(readFileSync(process.argv[1], "utf8"));
+              const models = Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
+              console.log(models.filter((m) => {
+                const id = String(m.id ?? m.modelID ?? m.model ?? "");
+                return m.providerID === "omniroute" || id.startsWith("omniroute/");
+              }).length);
+              ' "$RUNNER_TEMP/models.json")
+              if [ "$COUNT" -ge 59 ]; then break; fi
+            fi
+            sleep 2
+          done
+          echo "::group::host stderr (logs)"
+          cat "$RUNNER_TEMP/host.log"
+          echo "::endgroup::"
+          echo "::group::host stdout (plugin console)"
+          cat "$RUNNER_TEMP/host.out"
+          echo "::endgroup::"
+          echo "::group::last /api/model response"
+          cat "$RUNNER_TEMP/api.log" "$RUNNER_TEMP/models.json"
+          echo "::endgroup::"
+          # The host must actually load the plugin through the expected entry:
+          # server.js on 2.0.12, the exports["."] target on 2.3.0.
+          if ! grep "loading plugin" "$RUNNER_TEMP/host.log" \
+            | grep -qF "entrypoint=file://$PLUGIN_ROOT/$EXPECTED_ENTRY"; then
+            echo "host did not load the plugin through $EXPECTED_ENTRY" >&2
+            exit 1
+          fi
+          # Neither the host nor the plugin may refuse the contract.
+          if grep -qE "host refused|contract breach|failed to load plugin" \
+            "$RUNNER_TEMP/host.log" "$RUNNER_TEMP/host.out"; then
+            echo "contract was refused by the host" >&2
+            exit 1
+          fi
+          # 59 omniroute models must be published.
+          echo "published omniroute models: $COUNT"
+          test "$COUNT" -eq 59
+
+      - name: Stop the host and the gateway stub
+        if: always()
+        run: |
+          kill "$(cat "$RUNNER_TEMP/host.pid")" 2>/dev/null || true
+          kill "$(cat "$RUNNER_TEMP/gateway.pid")" 2>/dev/null || true
+
   build:
     name: Build
     runs-on: ubuntu-latest

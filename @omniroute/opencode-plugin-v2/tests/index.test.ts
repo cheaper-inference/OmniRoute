@@ -300,4 +300,103 @@ describe("plugin-v2 entrypoint", () => {
       globalThis.fetch = origFetch;
     }
   });
+
+  it("returned Cleanup disposes every host registration and leaves no refresh loop behind", async () => {
+    const registryKey = Symbol.for("omniroute.opencode-plugin-v2.refresh-loops");
+    const registryOf = () =>
+      (globalThis as Record<symbol, Map<string, unknown>>)[registryKey] as
+        Map<string, unknown> | undefined;
+    const startSize = registryOf()?.size ?? 0;
+
+    const dispose = { provider: 0, integration: 0, language: 0, sdk: 0 };
+    const ctx = {
+      options: { baseURL: "https://gw.example.com", providerId: "cleanup-test", telemetry: true },
+      provider: {
+        transform: () =>
+          Promise.resolve({
+            dispose: async () => {
+              dispose.provider += 1;
+            },
+          }),
+        reload: async () => {},
+      },
+      model: {
+        transform: () => Promise.resolve({ dispose: async () => {} }),
+        reload: async () => {},
+      },
+      integration: {
+        transform: () =>
+          Promise.resolve({
+            dispose: async () => {
+              dispose.integration += 1;
+            },
+          }),
+      },
+      aisdk: {
+        hook: (name: string) => {
+          if (name === "language") {
+            return Promise.resolve({
+              dispose: async () => {
+                dispose.language += 1;
+              },
+            });
+          }
+          if (name === "sdk") {
+            return Promise.resolve({
+              dispose: async () => {
+                dispose.sdk += 1;
+              },
+            });
+          }
+          return Promise.resolve({ dispose: async () => {} });
+        },
+      },
+    };
+
+    const { mkdtempSync, rmSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const dir = mkdtempSync(join(tmpdir(), "omniroute-cleanup-"));
+    const prevDataDir = process.env.OPENCODE_DATA_DIR;
+    process.env.OPENCODE_DATA_DIR = dir;
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: unknown) => {
+      const href = String(url);
+      if (href.includes("/v1/models")) {
+        return {
+          ok: true,
+          status: 200,
+          statusText: "OK",
+          json: async () => ({ data: [{ id: "m1" }] }),
+        };
+      }
+      return { ok: true, status: 200, statusText: "OK", json: async () => ({ combos: [] }) };
+    }) as typeof fetch;
+
+    try {
+      const cycles = 3;
+      for (let i = 0; i < cycles; i += 1) {
+        const cleanup = await (
+          plugin as unknown as { setup: (c: unknown) => Promise<unknown> }
+        ).setup(ctx);
+        assert.equal(typeof cleanup, "function");
+        await (cleanup as () => Promise<void>)();
+        assert.equal(
+          registryOf()?.size ?? 0,
+          startSize,
+          "each setup/cleanup cycle returns the refresh registry to its starting size"
+        );
+      }
+      assert.deepEqual(
+        dispose,
+        { provider: cycles, integration: cycles, language: cycles, sdk: cycles },
+        "Cleanup disposes each of the four host registrations exactly once per cycle"
+      );
+    } finally {
+      globalThis.fetch = origFetch;
+      if (prevDataDir === undefined) delete process.env.OPENCODE_DATA_DIR;
+      else process.env.OPENCODE_DATA_DIR = prevDataDir;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

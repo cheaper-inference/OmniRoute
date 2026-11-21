@@ -14,6 +14,7 @@ import {
 } from "./shared/index.js";
 import type { OmniRouteRawCombo, OmniRouteRawModelEntry } from "./shared/index.js";
 import { buildProviderPayload, collectCatalog } from "./catalog.js";
+import type { StableModelInfo, StableProviderInfo } from "./catalog.js";
 import { usesModelsComboSource } from "./combos-source.js";
 import {
   UNREACHABLE_COOLDOWN_MS,
@@ -25,7 +26,6 @@ import {
   type CatalogSnapshot,
 } from "./cache.js";
 import { startRefreshLoop } from "./refresh-loop.js";
-import { assertContext } from "./compat.js";
 import { type ApiKeyOrigin, resolveApiKey, warnIfMissing } from "./credentials.js";
 import { createSourceErrorReporter } from "./enrichment-report.js";
 import { sanitizeToolSchemasFor } from "./gemini-language.js";
@@ -36,6 +36,9 @@ import {
   resolveTimeouts,
   toResolvedOptions,
 } from "./options.js";
+
+/** A host registration is the SDK's own type, read back from its context. */
+type HostRegistration = Awaited<ReturnType<Plugin.Context["provider"]["transform"]>>;
 
 /**
  * A fetch result that says whether it succeeded. Returning a bare `[]` on
@@ -68,7 +71,6 @@ export { toResolvedOptions } from "./options.js";
 export default Plugin.define({
   id: PLUGIN_ID,
   setup: async (ctx) => {
-    assertContext(ctx);
     const parsed = parsePluginOptions(ctx.options);
     const X = parsed.providerId;
     const resolved = toResolvedOptions(parsed);
@@ -442,7 +444,7 @@ export default Plugin.define({
     // The transform callback is synchronous, so it cannot await the fetch:
     // setup publishes first, then the host replays the callback (during
     // registration and on every reload) and reads the published snapshot.
-    let latest: { info: unknown; models: unknown[] } | undefined;
+    let latest: { info: StableProviderInfo; models: StableModelInfo[] } | undefined;
     const refreshAndPublish = async (options?: { force?: boolean }): Promise<void> => {
       if (stopped) return;
       await ensureCredential();
@@ -474,7 +476,7 @@ export default Plugin.define({
             enrichment: async () => effective.enrichment ?? new Map(),
           });
           const payload = buildProviderPayload(collected, resolved);
-          latest = payload as unknown as { info: unknown; models: unknown[] };
+          latest = payload;
           return collected.counts;
         } catch (err) {
           log.warn(
@@ -506,7 +508,7 @@ export default Plugin.define({
     const providerRegistration = ctx.provider.transform((editor) => {
       if (latest !== undefined) {
         try {
-          editor.add(latest as never);
+          editor.add(latest);
         } catch (err) {
           log.warn(
             `[omniroute-v2] catalog publish failed, keeping current catalog: ${err instanceof Error ? err.message : String(err)}`
@@ -514,23 +516,15 @@ export default Plugin.define({
         }
       }
     });
-    const integrationHook = (ctx.integration as unknown as { transform?: unknown } | undefined)
-      ?.transform;
+    const integrationTransform = ctx.integration?.transform;
     // A host that exposes the hook but throws while registering it must cost
     // the plugin nothing but the connect action: the throw happens OUTSIDE
     // any await, so only a call-site guard catches it (an await-guard alone
     // would let a synchronous throw escape setup and kill the catalog).
-    let integrationRegistration: unknown;
-    if (typeof integrationHook === "function") {
+    let integrationRegistration: ReturnType<Plugin.Context["integration"]["transform"]> | undefined;
+    if (typeof integrationTransform === "function") {
       try {
-        integrationRegistration = (
-          integrationHook as (
-            cb: (draft: {
-              update: (id: string, fn: (i: { name: string }) => void) => void;
-              method: { update: (input: unknown) => void };
-            }) => void
-          ) => unknown
-        )((draft) => {
+        integrationRegistration = integrationTransform((draft) => {
           draft.update(X, (integration) => {
             integration.name = parsed.displayName ?? "OmniRoute";
           });
@@ -552,24 +546,15 @@ export default Plugin.define({
      * still structured data. A host without the domain stays loadable,
      * minus the sanitising.
      */
-    const languageHook = (ctx.aisdk as unknown as { hook?: unknown } | undefined)?.hook;
+    const languageHook = ctx.aisdk?.hook;
     // A host that rejects this registration must cost the catalog nothing: the
     // plugin is a catalog first, and tool-schema cleaning is an extra.
-    let languageRegistration: Promise<{ dispose: () => Promise<void> }> | undefined;
+    let languageRegistration: Promise<HostRegistration> | undefined;
     if (parsed.geminiSanitization !== false && typeof languageHook === "function") {
       try {
-        languageRegistration = (
-          languageHook as (
-            name: string,
-            cb: (input: { model: { providerID: string; id: string }; language?: unknown }) => void
-          ) => Promise<{ dispose: () => Promise<void> }>
-        )("language", (input) => {
+        languageRegistration = languageHook("language", (input) => {
           if (input.model.providerID !== X) return;
-          input.language = sanitizeToolSchemasFor(
-            input.language as never,
-            input.model.id,
-            log
-          ) as unknown as undefined;
+          input.language = sanitizeToolSchemasFor(input.language, input.model.id, log);
         });
       } catch (err) {
         log.warn(
@@ -587,20 +572,11 @@ export default Plugin.define({
      * wrap fetch, never assign `sdk`. Gated on the opt-in `telemetry` flag
      * (off by default).
      */
-    const sdkHook = (ctx.aisdk as unknown as { hook?: unknown } | undefined)?.hook;
-    let sdkRegistration: Promise<{ dispose: () => Promise<void> }> | undefined;
+    const sdkHook = ctx.aisdk?.hook;
+    let sdkRegistration: Promise<HostRegistration> | undefined;
     if (parsed.telemetry === true && typeof sdkHook === "function") {
       try {
-        sdkRegistration = (
-          sdkHook as (
-            name: string,
-            cb: (input: {
-              model: { providerID: string; id: string };
-              package: string;
-              options: Record<string, unknown>;
-            }) => void
-          ) => Promise<{ dispose: () => Promise<void> }>
-        )("sdk", (input) => {
+        sdkRegistration = sdkHook("sdk", (input) => {
           if (input.model.providerID !== X) return;
           if (!input.package.includes("@ai-sdk/openai-compatible")) return;
           input.options.telemetry = true;
@@ -612,28 +588,31 @@ export default Plugin.define({
       }
     }
 
-    await providerRegistration;
+    const providerReg: HostRegistration = await providerRegistration;
+    let integrationReg: HostRegistration | undefined;
     if (integrationRegistration !== undefined) {
       try {
-        await integrationRegistration;
+        integrationReg = await integrationRegistration;
       } catch (err) {
         log.warn(
           `[omniroute-v2] host refused the integration hook, the connect action will be missing: ${err instanceof Error ? err.message : String(err)}`
         );
       }
     }
+    let languageReg: HostRegistration | undefined;
     if (languageRegistration !== undefined) {
       try {
-        await languageRegistration;
+        languageReg = await languageRegistration;
       } catch (err) {
         log.warn(
           `[omniroute-v2] language-model hook registration failed, Gemini tool schemas will not be cleaned: ${err instanceof Error ? err.message : String(err)}`
         );
       }
     }
+    let sdkReg: HostRegistration | undefined;
     if (sdkRegistration !== undefined) {
       try {
-        await sdkRegistration;
+        sdkReg = await sdkRegistration;
       } catch (err) {
         log.warn(
           `[omniroute-v2] sdk hook registration failed, inference telemetry will not be marked: ${err instanceof Error ? err.message : String(err)}`
@@ -687,6 +666,25 @@ export default Plugin.define({
 
     registry.set(X, { stop, state });
 
-    return stop;
+    // The host calls this on a watcher reload. Release every registration it
+    // handed us, then stop the loop — without the dispose() calls a reload
+    // leaves the previous provider/integration/hooks live and the catalog is
+    // published twice. A failed dispose is logged, never absorbed silently on
+    // a path that changes the catalog.
+    const cleanup: Plugin.Cleanup = async () => {
+      for (const registration of [providerReg, integrationReg, languageReg, sdkReg]) {
+        if (registration === undefined) continue;
+        try {
+          await registration.dispose();
+        } catch (err) {
+          log.warn(
+            `[omniroute-v2] registration dispose failed during cleanup, keeping the catalog consistent: ${err instanceof Error ? err.message : String(err)}`
+          );
+        }
+      }
+      stop();
+    };
+
+    return cleanup;
   },
 });
