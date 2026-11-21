@@ -9,6 +9,41 @@ import {
 const MAX_PERSISTED_OUTPUT_CHARS = 32_768;
 const MAX_PERSISTED_ERROR_CHARS = 4_096;
 
+// The table is a replay fence, not a log. A client retries within hours, so rows older than the
+// replay horizon are dead weight; a running claim with a live lease and any row from the last day
+// are never removed, or a retry could run a side-effecting tool twice.
+const REPLAY_HORIZON_MS = 30 * 86_400_000;
+const PROTECTED_RECENT_MS = 86_400_000;
+const MAX_FENCE_ROWS = 10_000;
+const SWEEP_INTERVAL_MS = 5 * 60_000;
+const lastSweepAt = new WeakMap<object, number>();
+
+function sqliteTime(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 19).replace("T", " ");
+}
+
+function sweepServerToolExecutions(db: SqliteAdapter, now: number): void {
+  const last = lastSweepAt.get(db);
+  if (last !== undefined && now - last < SWEEP_INTERVAL_MS) return;
+  lastSweepAt.set(db, now);
+  try {
+    const nowIso = new Date(now).toISOString();
+    const notLive = "NOT (status = 'running' AND claim_expires_at > ?)";
+    db.prepare(`DELETE FROM server_tool_executions WHERE created_at < ? AND ${notLive}`).run(
+      sqliteTime(now - REPLAY_HORIZON_MS),
+      nowIso
+    );
+    db.prepare(
+      `DELETE FROM server_tool_executions
+       WHERE created_at < ? AND ${notLive}
+         AND id IN (SELECT id FROM server_tool_executions ORDER BY created_at DESC LIMIT -1 OFFSET ?)`
+    ).run(sqliteTime(now - PROTECTED_RECENT_MS), nowIso, MAX_FENCE_ROWS);
+  } catch (err) {
+    // A failed sweep must never fail the tool call it rode in on.
+    console.warn("[skillExecutionFence] retention sweep failed:", err);
+  }
+}
+
 export type ServerToolClaim =
   | { kind: "claimed"; executionId: string }
   | {
@@ -154,6 +189,7 @@ export function claimServerToolExecution(
 ): ServerToolClaim {
   const executionId = randomUUID();
   const now = nowMs ?? Date.now();
+  sweepServerToolExecutions(db, now);
 
   // Try INSERT in a transaction
   const tryInsert = db.transaction(() => {
