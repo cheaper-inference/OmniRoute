@@ -124,6 +124,29 @@ test("the memory keeps at most 1000 entries and evicts the oldest", () => {
   assert.equal(memory.isProxyAvoided("http://@h:11000", START_MS + 1), true);
 });
 
+test("an expired entry is evicted before the oldest active one", () => {
+  const active = "http://@active:8080";
+  const oldestExpired = "http://@expired-0:8080";
+  const newest = "http://@newest:8080";
+  const expiredWriteAt = START_MS - 30_001;
+  const expiredUntil = START_MS + 29_999; // CHECK - 1, one 60 000 ms period after the write.
+  const check = START_MS + 30_000;
+
+  // The active entry is the oldest by insertion order but still in force at the check.
+  memory.noteProxyRefusal(active, "proxy_unreachable", START_MS);
+  for (let i = 0; i < 999; i++) {
+    memory.noteProxyRefusal(`http://@expired-${i}:8080`, "proxy_unreachable", expiredWriteAt);
+  }
+  // Reaching the bound must drop an expired entry, not the oldest active one.
+  memory.noteProxyRefusal(newest, "proxy_unreachable", check);
+
+  assert.equal(memory.__proxyRefusalMemorySizeForTesting(), 1000);
+  assert.equal(memory.isProxyAvoided(active, check), true);
+  // Just before the check this entry was still in force: only eviction can remove it.
+  assert.equal(memory.isProxyAvoided(oldestExpired, expiredUntil - 1), false);
+  assert.equal(memory.isProxyAvoided(newest, check + 1), true);
+});
+
 test("the key matches the one derived from the dispatcher's normalized proxy URL", async () => {
   // The memory module computes keys without importing the proxy dispatcher (so the DB layer
   // can consult it cheaply). Guard against drift from proxyConfigToUrl() normalization.
