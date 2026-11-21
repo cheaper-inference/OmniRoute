@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## עיון ב-API
+## API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-פונקציית מפעל שיוצרת אובייקט Plugin עם ערכי ברירת מחדל.
+פונקציית מפעל שיוצרת אובייקט פלאגין עם ברירות מחדל.
 
 **פרמטרים:**
 
-- `name` (מחרוזת, חובה) — שם התוסף בתבנית kebab-case
-- `priority` (מספר, אופציונלי, ברירת מחדל: 100) — ערך נמוך יותר מופעל ראשון
-- `enabled` (בוליאני, אופציונלי, ברירת מחדל: true) — האם להתחיל במצב מופעל?
-- `onRequest` (פונקציה, אופציונלי) — מופעלת לפני מטפל הצ'אט
-- `onResponse` (פונקציה, אופציונלי) — מופעלת אחרי מטפל הצ'אט
-- `onError` (פונקציה, אופציונלי) — מופעלת כאשר מתרחשת שגיאה במטפל
+- `name` (מחרוזת, חובה) — שם תוסף ב-kebab-case
+- `priority` (מספר, אופציונלי, ברירת מחדל: 100) — Lower פועל ראשון
+- `enabled` (בוליאנית, אופציונלי, ברירת מחדל: אמיתי) — התחל מופעלת?
+- `onRequest` (פונקציה, אופציונלי) — פועל לפני המטפל בצ'אט
+- `onResponse` (פונקציה, אופציונלי) — פועל לאחר מטפל בצ'אט
+- `onError` (פונקציה, אופציונלי) — פועל על שגיאת מטפל
 
 ### `blockRequest(response?): BlockingHookResult`
 
-חסימת הבקשה והחזרת תגובה מותאמת אישית באופן אופציונלי.
+חסום את הבקשה ואפשר להחזיר תגובה מותאמת אישית.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-שינוי גוף הבקשה לפני שהוא מגיע לספק.
+שנה את גוף הבקשה לפני שהוא מגיע לספק.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-צירוף מטא-נתונים להקשר הבקשה.
+צרף מטא נתונים להקשר הבקשה.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## הקשר התוסף (`PluginContext`)
+## ההקשר של הפלאגין (`PluginContext`)
 
-| שדה         | סוג                       | תיאור                     |
-| ----------- | ------------------------- | ------------------------- |
-| `requestId` | `string`                  | מזהה ייחודי של הבקשה      |
-| `model`     | `string`                  | שם המודל המבוקש           |
-| `provider`  | `string`                  | מזהה ספק היעד             |
-| `body`      | `Record<string, unknown>` | גוף הבקשה                 |
-| `headers`   | `Record<string, string>`  | כותרות הבקשה              |
-| `metadata`  | `Record<string, unknown>` | מטא-נתונים הניתנים לשינוי |
-| `timestamp` | `number`                  | חותמת הזמן של הבקשה       |
+| שָׂדֶה       | סוּג                      | תֵאוּר                            |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | מזהה בקשה ייחודי                  |
+| `model`      | `string`                  | שם הדגם המבוקש                    |
+| `provider`   | `string`                  | ספק היעד ID                       |
+| `body`       | `Record<string, unknown>` | גוף הבקשה                         |
+| `headers`    | `Record<string, string>`  | כותרות בקשה (ראה הערה)            |
+| `metadata`   | `Record<string, unknown>` | מטא נתונים ניתנים לשינוי          |
+| `timestamp`  | `number`                  | בקש חותמת זמן                     |
+| `apiKeyInfo` | `object` (אופציונלי)      | מטא נתונים של מפתח API (ראה הערה) |
+
+ההקשר לעולם לא נושא את האישורים של הלקוח: הכותרות `authorization`, `x-api-key`, `proxy-authorization` ו- `cookie` מוסרות (כל עט), ו- `apiKeyInfo` שומר על המטא-נתונים של המפתח (כגון `id`, `name` ו- `scopes`) אך לא את ערך המפתח או טביעת האצבע שלו (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). זה חל על `onRequest`, `onResponse` ו- `onError`.
 
 ## מניפסט (`plugin.json`)
 
@@ -140,17 +143,16 @@ onRequest: (ctx) => {
 
 ## מערכת הרשאות
 
-תוספים פועלים בהקשר של VM מבודד. גישה למשאבים חיצוניים דורשת הרשאות מפורשות:
+תוספים הם** לא בארגז חול** . כל תוסף פעיל פועל כתהליך צאצא נפרד, רגיל של Node.js (`loadPlugin()` ב- `src/lib/plugins/loader.ts`) תחת אותו משתמש מערכת הפעלה כמו OmniRoute, ללא הקשר VM וללא דגלי הרשאות Node.js. קוד הפלאגין יכול להשתמש `node:fs`, `node:child_process`, `fetch` ובכל Node.js API אחר: הוא יכול לקרוא ולכתוב כל קובץ שמשתמש OmniRoute יכול (כולל ספריית הנתונים), להפעיל תוכניות ולהגיע לרשת.
 
-| הרשאה        | מעניקה גישה אל                                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | מתווך `process.env` לקריאה בלבד                              |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` של המניפסט מקבל `network`, `file-read`, `file-write`, `env` ו- `exec`, אבל היום רק `env` משפיע בזמן ריצה:
 
-ללא הרשאה, המשתנים הגלובליים המתאימים פשוט אינם זמינים בארגז החול.
+| רְשׁוּת                                      | תוקף היום                                                                                                                                                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | תהליך הפלאגין מקבל גם `PORT`, `HOSTNAME`, `TZ` ו- `TMPDIR`. בלעדיו, הוא מקבל רק `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ו- `PLUGIN_NAME` (בתוספת `SystemRoot` ו- `windir` על Windows). |
+| `network`, `file-read`, `file-write`, `exec` | אַף לֹא אֶחָד. הן הצהרות בלבד: שום דבר לא חסום כשהן חסרות.                                                                                                                                                          |
+
+התקנת תוסף היא כמו התקנת כל תוכנה אחרת על המארח. התקן רק תוספים שאתה סומך על המקור שלהם.
 
 ## סכמת תצורה
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## דוגמאות
 
-### רושם בקשות
+### בקש לוגר
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### מגביל קצב
+### מגביל שיעור
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // דקה אחת
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### משנה תגובות
+### שנאי תגובה
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

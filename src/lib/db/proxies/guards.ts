@@ -10,18 +10,17 @@ export function isProxyRegistryStatusAlive(status: unknown): boolean {
   return status == null || !PROXY_UNAVAILABLE_STATUSES.has(String(status).toLowerCase());
 }
 
-export function isGlobalProxyEnabled(db: ReturnType<typeof getDbInstance>): boolean {
+export function isGlobalProxyEnabled(
+  db: ReturnType<typeof getDbInstance>,
+  strict = false
+): boolean {
   try {
     const row = db
       .prepare("SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'proxyEnabled'")
       .get() as { value?: string } | undefined;
-    if (!row?.value) return true;
-    try {
-      return JSON.parse(row.value) !== false;
-    } catch {
-      return true;
-    }
-  } catch {
+    return !row?.value || JSON.parse(row.value) !== false;
+  } catch (error) {
+    if (strict) throw error;
     return true;
   }
 }

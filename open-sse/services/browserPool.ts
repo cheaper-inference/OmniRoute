@@ -228,16 +228,12 @@ interface ProxyRecord {
 
 interface ResolvePlaywrightProxyDeps {
   resolveProxy?: (providerId: string) => Promise<ProxyRecord | null | undefined>;
-  /** Connection-scoped lookup. Resolving null means "no account-level proxy", which
-   * falls back to the provider proxy; throwing means the assignment is blocking and
-   * the call must fail closed. */
-  resolveConnectionProxy?: (connectionId: string) => Promise<ProxyRecord | null | undefined>;
 }
 
 function toPlaywrightProxy(
   p: ProxyRecord
 ): NonNullable<import("playwright").LaunchOptions["proxy"]> {
-  const scheme = p.type === "socks5" ? "socks5" : "http";
+  const scheme = p.type === "socks5" || p.type === "https" ? p.type : "http";
   // Build explicitly instead of a conditional object spread: the spread form
   // widens username/password to `{}` under the LaunchOptions["proxy"] type,
   // tripping typecheck once browserPool.ts is pulled into typecheck-core scope.
@@ -249,15 +245,6 @@ function toPlaywrightProxy(
     proxy.password = p.password == null ? "" : String(p.password);
   }
   return proxy;
-}
-
-export type ConnectionProxyLookup = (
-  connectionId: string
-) => Promise<{ proxy?: unknown } | null | undefined>;
-
-export interface ConnectionProxyDeps {
-  resolveProxyForConnection?: ConnectionProxyLookup;
-  hasBlockingProxyAssignment?: (connectionId: string) => boolean;
 }
 
 /**
@@ -289,41 +276,6 @@ function toProxyRecord(value: unknown): ProxyRecord | null {
   return record;
 }
 
-/**
- * Resolve the proxy assigned to one account.
- *
- * Returns null when the account has no proxy of its own (the caller then falls back to
- * the provider proxy). Throws when the account HAS an assignment but every member is
- * dead, so the caller fails closed instead of egressing from the host IP -- the same
- * rule the non-browser path applies (#6246, #13470).
- */
-export async function resolveConnectionScopedProxy(
-  connectionId: string,
-  deps?: ConnectionProxyDeps
-): Promise<ProxyRecord | null> {
-  const lookup: ConnectionProxyLookup =
-    deps?.resolveProxyForConnection ??
-    ((await import("../../src/lib/db/settings"))
-      .resolveProxyForConnection as ConnectionProxyLookup);
-
-  const resolved = await lookup(connectionId);
-  const proxy = toProxyRecord(resolved?.proxy);
-  if (proxy) return proxy;
-
-  // Only reach for the guard once the lookup came back empty: resolving it earlier
-  // would let a guard import failure break accounts that have a perfectly good proxy.
-  const hasBlocking: (connectionId: string) => boolean =
-    deps?.hasBlockingProxyAssignment ??
-    (await import("../../src/lib/db/proxies/guards")).hasBlockingProxyAssignment;
-
-  if (hasBlocking(connectionId)) {
-    throw new Error(
-      "PROXY_ASSIGNED_UNAVAILABLE: assigned proxy is inactive/unreachable; refusing to egress on a direct connection"
-    );
-  }
-  return null;
-}
-
 // Exported for tests (deps injection avoids mock.module()).
 export async function resolvePlaywrightProxy(
   providerKey: string,
@@ -348,37 +300,31 @@ export async function resolvePlaywrightProxy(
   }
 }
 
-/**
- * Resolve the Playwright proxy for one account, falling back to the provider-level
- * proxy when the connection has none of its own.
- *
- * The gemini-web executor used to resolve only the provider proxy, so every account of
- * that provider shared one egress IP even though the non-browser path already honoured
- * per-connection assignments. That is a provenance difference for a provider that ties
- * a session to its address, so this executor resolves the account first.
- *
- * The generic browser-pool path (resolveBrowserContextProxy) still resolves provider
- * scope only; widening it needs the context options to carry a connection id first.
- */
+// Account, provider and global fallback are resolved together by the settings layer.
 export async function resolvePlaywrightProxyForConnection(
   providerKey: string,
-  connectionId: string | null | undefined,
-  deps?: ResolvePlaywrightProxyDeps
+  connectionId: string | null | undefined
 ): Promise<import("playwright").LaunchOptions["proxy"] | undefined> {
-  const accountId = typeof connectionId === "string" ? connectionId.trim() : connectionId;
-  if (!accountId) return resolvePlaywrightProxy(providerKey, deps);
   try {
-    const resolver = deps?.resolveConnectionProxy ?? resolveConnectionScopedProxy;
-    const p = await resolver(accountId);
-    if (p?.host) return toPlaywrightProxy(p);
-  } catch (err) {
+    const { resolveProxyForBrowserContext } = await import("../../src/lib/db/settings");
+    const value = await resolveProxyForBrowserContext(
+      providerKey,
+      connectionId?.trim() || undefined
+    );
+    if (value === null) return undefined;
+    const proxy = toProxyRecord(value);
+    if (!proxy) throw new Error("Assigned browser proxy has an invalid host or port");
+    if (proxy.type === "socks5" && (proxy.username || proxy.password)) {
+      throw new Error("This browser does not support authenticated SOCKS5 proxies");
+    }
+    return toPlaywrightProxy(proxy);
+  } catch (error) {
     throw new Error(
-      `[BrowserPool] Proxy resolution failed for connection ${connectionId} (provider ${providerKey}); refusing direct connection (fail-closed): ${
-        err instanceof Error ? err.message : String(err)
+      `[BrowserPool] Proxy resolution failed for ${providerKey}; refusing direct connection (fail-closed): ${
+        error instanceof Error ? error.message : String(error)
       }`
     );
   }
-  return resolvePlaywrightProxy(providerKey, deps);
 }
 
 export async function resolveBrowserContextProxy(

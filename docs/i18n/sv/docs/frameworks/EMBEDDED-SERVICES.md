@@ -558,6 +558,8 @@ Denna proxy:
 
 WebSocket uppgraderingar för den inbäddade instrumentpanelen hanteras av en medföljande server på en dedikerad port (se `src/lib/services/embedWsProxy.ts`).
 
+Varje uppgradering auktoriseras innan tunneln öppnas, med samma regler som HTTP inbäddningsvägen: peer måste vara loopback utan omvänd proxy-vidarebefordranshuvud, en webbläsares `Origin` måste vara ett instrumentpanelsursprung (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extend the loopback defaults), och den som ringer behöver en instrumentpanelsession eller en API -inloggningsnyckel i managementomfattning om inte instrumentpanelen kan avaktiveras.
+
 **Säkerhet:** De inbäddade proxyvägarna klassificeras under `LOCAL_ONLY_API_PREFIXES` och kan endast nås från loopback. En angripare som skaffar en JWT via en Cloudflare/Ngrok tunnel kan inte proxy till inbäddade tjänster.
 
 ---

@@ -93,7 +93,7 @@ OMNIROUTE നിങ്ങളെ പണം ലാഭിക്കാനും ജ�
 
 [![npm പതിപ്പ്](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM പ്രതിമാസം](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![ലൈസൻസ്: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker ഡൗൺലോഡുകൾ](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron ഡൗൺലോഡുകൾ](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -777,7 +777,7 @@ omniroute configure codex          # ഇതിലും: claude opencode qwen ai
   <tr><th align="left">പ്ലാറ്റ്ഫോം</th><th align="left">ഇൻസ്റ്റാൾ</th><th align="left">പ്രധാന സവിശേഷതകൾ</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ഒരു കമാൻഡ്, ഏത് OS-ലും</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">അതേ രജിസ്ട്രി tarball, കൂടുതൽ വേഗത്തിലുള്ള ഇൻസ്റ്റാളുകൾ</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>ഡെസ്ക്ടോപ്പ് (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">നേറ്റീവ് വിൻഡോ + സിസ്റ്റം ട്രേ — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>മെനു-ബാർ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">സെർവറിനെ നിരീക്ഷിക്കുകയും സ്വയമേവ അപ്ഡേറ്റ് ചെയ്യുകയും ചെയ്യുന്നു — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>നേറ്റീവ് <code>arm64</code></td><td align="left">Raspberry Pi, ARM സെർവറുകൾ, Apple Silicon</td></tr>
@@ -1103,7 +1103,7 @@ Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` ഏറ്റവും പുതിയ **പ്രസിദ്ധീകരിച്ച** സ്ഥിരതയുള്ള SemVer പതിപ്പിനെ പിന്തുടരുന്നു. ഇത് git `main` പിന്തുടരുന്നില്ല. GitOps-നായി `:X.Y.Z` പതിപ്പ് നിർദ്ദിഷ്ടമായി ഉപയോഗിക്കുക. [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels) കാണുക. ഇമേജ് **`OMNIROUTE_MEMORY_MB=1024`** ആയി സജ്ജീകരിച്ചിരിക്കുന്നു. ഡാഷ്ബോർഡിനും ലഘുവായ ചാറ്റിനും ഇത് മതിയാകും. **കോഡിംഗ് ഏജന്റുകൾ** (`POST /v1/responses` Claude Code, Codex, Grok, … എന്നിവയിൽ നിന്ന്) വളരെ വലുതായ V8 heap ആവശ്യപ്പെടുന്നു; അല്ലാത്തപക്ഷം, രണ്ട് പരസ്പരം മൂടിവരുന്ന ദീർഘമായ കോൺടെക്സ്റ്റുകൾക്കിടയിൽ ഏകദേശം 12 GiB-ൽ പ്രോസസ് `FATAL ERROR` ഉണ്ടാക്കും. native buffers V8-ന് പുറത്തായതിനാൽ, heap-നേക്കാൾ വലുതായി കണ്ടെയ്നർ വലുപ്പം സജ്ജീകരിക്കുക:
@@ -1117,7 +1117,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 പൂർണ്ണ പട്ടിക: [Docker Guide — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1319,7 +1319,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ഇതും ഒ�
   <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിലാകെ <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ <code>any</code> ഒന്നുമില്ല)</td></tr>
   <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മോഡ്യൂളുകൾ, 240 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മോഡ്യൂളുകൾ, 244 മൈഗ്രേഷനുകൾ</td></tr>
   <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 പൂർണ്ണ-ടെക്സ്റ്റ് + int8-quantized വെക്ടർ എംബെഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ഡികേ</td></tr>
   <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O സാധുതാ പരിശോധന + API കരാറുകൾ</td></tr>
   <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1332,7 +1332,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ഇതും ഒ�
   <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js ടെസ്റ്റ് റണ്ണർ + Vitest — 8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി <b>60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ</b> (യൂണിറ്റ്, ഇന്റഗ്രേഷൻ, E2E, സുരക്ഷ, ഇക്കോസിസ്റ്റം)</td></tr>
   <tr><td nowrap><b>പ്ലാറ്റ്ഫോമുകൾ</b></td><td>ഡെസ്ക്ടോപ്പ് (Electron) · Android (Termux) · PWA (ഏത് ബ്രൗസറും)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — റിലീസിൽ സ്വയമേവ npm പ്രസിദ്ധീകരണം + Docker Hub</td></tr>
-  <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

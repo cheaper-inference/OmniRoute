@@ -9,15 +9,165 @@
 // `## [<NEXT>] — TBD` section (with any bullets it already accumulated) is
 // re-inserted on top. Design: _tasks/release-flow/2026-07-04_proposta-ciclo-paralelo-v2.md
 //
-// Usage: node scripts/release/sync-next-cycle.mjs <nextVersion>   e.g. 3.8.45
+// Usage: see SYNC_USAGE below (`--help`).
+//
+// The merge commit lands through a PULL REQUEST: release/vX+1 is the default branch and
+// ruleset 21899981 ("Require PR on default branch", no bypass actors) refuses a direct
+// push. The script pushes the merge commit to chore/sync-back-main-<sha12> and opens a PR
+// into the release branch; it never merges that PR (the owner lands it as a merge commit).
 //
 // Idempotent: safe to re-run after resolving any conflicts it could not
-// auto-resolve (it detects an in-progress merge in its worktree and resumes).
+// auto-resolve (it detects an in-progress merge in its worktree and resumes), and
+// after the side branch reached origin (it finds the open PR, or opens it, and stops).
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+
+export const SYNC_USAGE = `usage: node scripts/release/sync-next-cycle.mjs <nextVersion> [--skip-green-gate] [--direct-push]
+  e.g. node scripts/release/sync-next-cycle.mjs 3.8.45
+
+Merges origin/main into release/v<nextVersion>, pushes the merge commit to the side branch
+chore/sync-back-main-<first 12 hex of origin/main> and opens a pull request into the release
+branch. It never pushes to the release branch and never merges the PR: land it as a MERGE
+COMMIT (never squash or rebase) once the required gates are green.
+
+  --skip-green-gate  skip the release-green --quick gate on the merged tree (emergency only:
+                     verify first that the tip reds pre-exist on the release branch)
+  --direct-push      push the merge commit straight to the release branch instead of opening
+                     a PR. Off by default, for a repository without a PR-only rule on that
+                     branch: this repository refuses it (ruleset 21899981, "Require PR on
+                     default branch", no bypass actors).
+  -h, --help         print this text`;
+
+/** Pure: parse the CLI (`argv` = process.argv). `next` is null when absent or malformed. */
+export function parseSyncArgs(argv) {
+  const out = { next: null, skipGreenGate: false, directPush: false, help: false, unknown: [] };
+  for (const arg of argv.slice(2)) {
+    if (arg === "--skip-green-gate") out.skipGreenGate = true;
+    else if (arg === "--direct-push") out.directPush = true;
+    else if (arg === "--help" || arg === "-h") out.help = true;
+    else if (arg.startsWith("-")) out.unknown.push(arg);
+    else if (out.next === null && /^\d+\.\d+\.\d+$/.test(arg)) out.next = arg;
+    else out.unknown.push(arg);
+  }
+  return out;
+}
+
+/** Pure: the side branch the sync-back merge commit is pushed to. */
+export function syncBackBranchName(mainSha) {
+  const sha = String(mainSha || "").toLowerCase();
+  if (!/^[0-9a-f]+$/.test(sha)) throw new Error(`not a hex commit SHA: ${mainSha}`);
+  if (sha.length < 12) throw new Error(`need at least 12 hex characters, got ${sha.length}`);
+  return `chore/sync-back-main-${sha.slice(0, 12)}`;
+}
+
+/** Pure: the push argument array. Only --direct-push targets the release branch. */
+export function syncPushArgs({ directPush, branch, sideBranch }) {
+  const target = directPush ? branch : sideBranch;
+  return ["push", "origin", `HEAD:refs/heads/${target}`];
+}
+
+/** Pure: `owner/name` from a GitHub remote URL (https, scp-style or ssh://), else null. */
+export function githubRepoFromRemoteUrl(url) {
+  const m = String(url || "")
+    .trim()
+    .match(/^(?:https:\/\/|ssh:\/\/git@|git@)github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/);
+  return m ? `${m[1]}/${m[2]}` : null;
+}
+
+/** Pure: the sync-back PR title. */
+export function syncBackPrTitle(branch) {
+  return `chore(release): sync-back main → ${branch}`;
+}
+
+/** Pure: `gh pr create` argument array (body always through a file). */
+export function ghPrCreateArgs({ repo, base, head, title, bodyFile }) {
+  return [
+    "pr",
+    "create",
+    "--repo",
+    repo,
+    "--base",
+    base,
+    "--head",
+    head,
+    "--title",
+    title,
+    "--body-file",
+    bodyFile,
+  ];
+}
+
+/** Pure: `gh pr list` argument array that prints the URL of an OPEN PR head → base (or ""). */
+export function ghOpenPrListArgs({ repo, base, head }) {
+  return [
+    "pr",
+    "list",
+    "--repo",
+    repo,
+    "--head",
+    head,
+    "--base",
+    base,
+    "--state",
+    "open",
+    "--json",
+    "url",
+    "--jq",
+    ".[0].url // empty",
+  ];
+}
+
+function landingRules(branch) {
+  return [
+    "Land it as a MERGE COMMIT, never squash or rebase: a squash drops `main` from the release " +
+      "ancestry and the next sync-back re-conflicts on every file (551 files on v3.8.50 → v3.8.51).",
+    "The required gates must be green on the head commit before landing.",
+    "After landing, `git merge-base --is-ancestor origin/main origin/" +
+      branch +
+      "` must be true (exit 0).",
+  ];
+}
+
+const GREEN_GATE_TEXT = {
+  passed: "`validate-release-green.mjs --quick` passed on the merged tree before the push.",
+  skipped:
+    "skipped with `--skip-green-gate` (the operator verified that the tip reds pre-exist on the release branch).",
+};
+
+/** Pure: the sync-back PR body (written to a file and passed with --body-file). */
+export function syncBackPrBody({ branch, mainSha, prevVersion, greenGate }) {
+  const rules = landingRules(branch);
+  return [
+    "## Summary",
+    "",
+    `Parallel-cycle sync-back: merges \`origin/main\` at \`${String(mainSha).slice(0, 12)}\` ` +
+      `(v${prevVersion} close) into \`${branch}\`, opened by \`scripts/release/sync-next-cycle.mjs\`. ` +
+      "The release branch only accepts changes through a pull request (ruleset 21899981).",
+    "",
+    `Release-green gate: ${GREEN_GATE_TEXT[greenGate] || "not re-run (PR opened from a side branch already on origin)."}`,
+    "",
+    "## How to land",
+    "",
+    ...rules.map((r, i) => `${i + 1}. ${r}`),
+    "",
+    "Also check that `config/quality/eslint-suppressions.json` and `config/quality/quality-baseline.json` " +
+      "carried main's freezes (they merge as ours silently).",
+    "",
+  ].join("\n");
+}
+
+/** Pure: the final console output — PR URL + the three landing statements as next steps. */
+export function syncBackNextSteps({ branch, prUrl }) {
+  return [
+    `[sync-next-cycle] sync-back PR: ${prUrl}`,
+    "Next steps (the script never merges the PR):",
+    ...landingRules(branch).map((r, i) => `  ${i + 1}. ${r}`),
+  ].join("\n");
+}
 
 /**
  * Pure: insert (or replace) the next cycle's section into main's CHANGELOG.
@@ -103,7 +253,11 @@ export function extractSection(changelog, version) {
 function git(args, opts = {}) {
   // maxBuffer: the default 1 MiB overflows on `git show origin/main:CHANGELOG.md`
   // (the CHANGELOG alone is >1 MiB) — ENOBUFS found live in the v3.8.45 run (2026-07-06).
-  return execFileSync("git", args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, ...opts }).trim();
+  return execFileSync("git", args, {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    ...opts,
+  }).trim();
 }
 
 // The sync-back is the ONE write path to the release branch with no CI gate — a red
@@ -115,23 +269,123 @@ export function greenGateArgs(argv) {
   return ["scripts/quality/validate-release-green.mjs", "--quick"];
 }
 
+function gh(args) {
+  return execFileSync("gh", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "inherit"],
+  }).trim();
+}
+
+function isAncestor(ancestor, descendant, cwd) {
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", ancestor, descendant], {
+      cwd,
+      stdio: "ignore",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Find the open sync-back PR, or open it (body through a temp file + --body-file).
+function openSyncBackPr({ repo, branch, side, mainSha, prevVersion, greenGate }) {
+  const existing = gh(ghOpenPrListArgs({ repo, base: branch, head: side }));
+  if (existing) return { url: existing, created: false };
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "sync-next-cycle-"));
+  try {
+    const bodyFile = path.join(dir, "pr-body.md");
+    fs.writeFileSync(bodyFile, syncBackPrBody({ branch, mainSha, prevVersion, greenGate }));
+    const out = gh(
+      ghPrCreateArgs({
+        repo,
+        base: branch,
+        head: side,
+        title: syncBackPrTitle(branch),
+        bodyFile,
+      })
+    );
+    const url = out
+      .split("\n")
+      .filter((l) => /\/pull\/\d+\s*$/.test(l))
+      .pop();
+    return { url: (url || out).trim(), created: true };
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 function main() {
-  const NEXT = process.argv[2];
-  if (!/^\d+\.\d+\.\d+$/.test(NEXT || "")) {
-    console.error("usage: node scripts/release/sync-next-cycle.mjs <nextVersion>  (e.g. 3.8.45)");
+  const opts = parseSyncArgs(process.argv);
+  if (opts.help) {
+    console.log(SYNC_USAGE);
+    return;
+  }
+  if (!opts.next || opts.unknown.length) {
+    if (opts.unknown.length) {
+      console.error(`[sync-next-cycle] unknown argument(s): ${opts.unknown.join(" ")}`);
+    }
+    console.error(SYNC_USAGE);
     process.exit(2);
   }
+  const NEXT = opts.next;
   const ROOT = git(["rev-parse", "--show-toplevel"]);
   const BRANCH = `release/v${NEXT}`;
   const WT = path.join(ROOT, ".claude", "worktrees", `sync-next-${NEXT}`);
 
   git(["fetch", "origin", "main", BRANCH], { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
   const prevVersion = JSON.parse(git(["show", "origin/main:package.json"], { cwd: ROOT })).version;
+  const mainSha = git(["rev-parse", "origin/main"], { cwd: ROOT });
+  const SIDE = syncBackBranchName(mainSha);
   console.log(`[sync-next-cycle] main is v${prevVersion} → syncing into ${BRANCH}`);
 
+  let repo = null;
+  if (!opts.directPush) {
+    repo = githubRepoFromRemoteUrl(git(["remote", "get-url", "origin"], { cwd: ROOT }));
+    if (!repo) {
+      console.error("[sync-next-cycle] ABORT: origin is not a GitHub remote (needed for the PR).");
+      process.exit(1);
+    }
+    // Idempotent: this main commit's side branch is already on origin → reuse it.
+    const remoteSide = git(["ls-remote", "--heads", "origin", `refs/heads/${SIDE}`], {
+      cwd: ROOT,
+    });
+    if (remoteSide) {
+      const remoteSha = remoteSide.split(/\s+/)[0];
+      git(["fetch", "origin", SIDE], { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
+      if (!isAncestor(mainSha, remoteSha, ROOT)) {
+        console.error(
+          `[sync-next-cycle] ABORT: origin/${SIDE} exists but does not contain origin/main ` +
+            `(${mainSha.slice(0, 12)}) — inspect it by hand; this script never force-pushes.`
+        );
+        process.exit(1);
+      }
+      const pr = openSyncBackPr({
+        repo,
+        branch: BRANCH,
+        side: SIDE,
+        mainSha,
+        prevVersion,
+        greenGate: "unknown",
+      });
+      console.log(
+        pr.created
+          ? `[sync-next-cycle] ${SIDE} was already on origin — opened its PR.`
+          : `[sync-next-cycle] ${SIDE} is already on origin with an open PR — nothing to do.`
+      );
+      console.log(syncBackNextSteps({ branch: BRANCH, prUrl: pr.url }));
+      return;
+    }
+  }
+
   // Worktree (idempotent — reuse if a previous run left it for conflict resolution).
+  // Detached at origin/<BRANCH>: the merge commit never moves a local release branch ref
+  // (and the add does not fail when another checkout already has <BRANCH> checked out).
   if (!fs.existsSync(WT)) {
-    git(["worktree", "add", WT, BRANCH], { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
+    git(["worktree", "add", "--detach", WT, `origin/${BRANCH}`], {
+      cwd: ROOT,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
   }
   const mergeHeadPath = git(["rev-parse", "--path-format=absolute", "--git-path", "MERGE_HEAD"], {
     cwd: WT,
@@ -162,7 +416,9 @@ function main() {
   const merged = insertNextSection(mainChangelog + "\n", nextSection, NEXT);
   // Assertions: main's latest section intact + next section present.
   if (!merged.includes(`## [${prevVersion}]`)) {
-    console.error(`[sync-next-cycle] ABORT: main's ## [${prevVersion}] section missing after re-insertion`);
+    console.error(
+      `[sync-next-cycle] ABORT: main's ## [${prevVersion}] section missing after re-insertion`
+    );
     process.exit(1);
   }
   if (!merged.includes(`## [${NEXT}]`)) {
@@ -217,7 +473,14 @@ function main() {
     process.exit(1);
   }
 
-  git(["commit", "-m", `chore(release): sync main (v${prevVersion} close) into ${BRANCH} — parallel-cycle sync-back`], { cwd: WT });
+  git(
+    [
+      "commit",
+      "-m",
+      `chore(release): sync main (v${prevVersion} close) into ${BRANCH} — parallel-cycle sync-back`,
+    ],
+    { cwd: WT }
+  );
 
   // WS0.3 green gate: validate the MERGED tree before it reaches origin. The commit
   // stays local on failure so the captain can inspect/fix in the sync worktree.
@@ -238,16 +501,46 @@ function main() {
     }
     fs.rmSync(nm, { force: true });
   } else {
-    console.warn("[sync-next-cycle] ⚠ --skip-green-gate: pushing WITHOUT release-green validation.");
+    console.warn(
+      "[sync-next-cycle] ⚠ --skip-green-gate: pushing WITHOUT release-green validation."
+    );
   }
 
-  git(["push", "origin", BRANCH], { cwd: WT });
+  // The side branch is named after mainSha: refuse to push a tree that does not contain it
+  // (a reused worktree may hold a merge of an older main — re-run to merge the newer one).
+  if (!opts.directPush && !isAncestor(mainSha, "HEAD", WT)) {
+    console.error(
+      `[sync-next-cycle] ABORT: the merged tree in ${WT} does not contain origin/main ` +
+        `(${mainSha.slice(0, 12)}) — re-run this script to merge it.`
+    );
+    process.exit(1);
+  }
 
-  const left = git(["rev-list", "--count", `${BRANCH}..origin/main`], { cwd: WT });
-  console.log(`[sync-next-cycle] pushed. origin/main commits not in ${BRANCH}: ${left} (expected 0)`);
+  // Default: side branch + PR (ruleset 21899981 refuses a push to the release branch).
+  const target = opts.directPush ? BRANCH : SIDE;
+  git(syncPushArgs({ directPush: opts.directPush, branch: BRANCH, sideBranch: SIDE }), { cwd: WT });
+
+  const left = git(["rev-list", "--count", "HEAD..origin/main"], { cwd: WT });
+  console.log(
+    `[sync-next-cycle] pushed ${target}. origin/main commits not in it: ${left} (expected 0)`
+  );
 
   git(["worktree", "remove", "--force", WT], { cwd: ROOT });
-  console.log("[sync-next-cycle] done — worktree removed.");
+  console.log("[sync-next-cycle] worktree removed.");
+  if (opts.directPush) {
+    console.log(`[sync-next-cycle] done — --direct-push landed the merge commit on ${BRANCH}.`);
+    return;
+  }
+
+  const pr = openSyncBackPr({
+    repo,
+    branch: BRANCH,
+    side: SIDE,
+    mainSha,
+    prevVersion,
+    greenGate: gate ? "passed" : "skipped",
+  });
+  console.log(syncBackNextSteps({ branch: BRANCH, prUrl: pr.url }));
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();

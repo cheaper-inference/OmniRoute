@@ -595,7 +595,19 @@ export class GeminiWebExecutor extends BaseExecutor {
 
     let browser: any = null;
     let context: import("playwright").BrowserContext | null = null;
-    let abortBrowser: (() => void) | null = null;
+    let contextClosing: Promise<void> | undefined;
+    const closeContext = () => {
+      const owned = context;
+      if (!owned) return;
+      // Cancellation can start cleanup while a browser operation is still pending.
+      // The finalizer awaits the same close before releasing the browser lease.
+      return (contextClosing ??= Promise.resolve()
+        .then(() => owned.close())
+        .catch(() => undefined));
+    };
+    const abortBrowser = () => {
+      void closeContext();
+    };
     try {
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
@@ -604,9 +616,6 @@ export class GeminiWebExecutor extends BaseExecutor {
       const launchChromium = getStableLauncher(chromium);
       const { acquireGeminiBrowser } = await import("./gemini-web/browserLease.ts");
       browser = await acquireGeminiBrowser(launchChromium);
-      abortBrowser = () => {
-        void context?.close().catch(() => {});
-      };
       signal?.addEventListener("abort", abortBrowser, { once: true });
 
       // #15076: apply the proxy configured for gemini-web. Resolved per context so the
@@ -618,9 +627,7 @@ export class GeminiWebExecutor extends BaseExecutor {
         "gemini-web",
         credentials.connectionId
       );
-      // Resolving the account proxy awaits the settings DB and the guard, so an abort can
-      // land between registering the listener and creating the context. Re-check rather
-      // than let newContext run against a browser the listener already released.
+      // Proxy resolution can outlive cancellation. Re-check before allocating a context.
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
@@ -628,11 +635,9 @@ export class GeminiWebExecutor extends BaseExecutor {
         userAgent: GEMINI_USER_AGENT,
         ...(proxy ? { proxy } : {}),
       });
-      // The listener above is once-only and closes an already-assigned context, so an
-      // abort that lands inside newContext() leaves the new context unowned. Close it
-      // here rather than handing back a context nobody will release.
+      // If cancellation landed during creation, stop before touching the page.
+      // The finalizer closes the newly assigned context.
       if (signal?.aborted) {
-        await context.close().catch(() => undefined);
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
 
@@ -936,14 +941,8 @@ export class GeminiWebExecutor extends BaseExecutor {
         transformedBody: body,
       };
     } finally {
-      if (abortBrowser) signal?.removeEventListener("abort", abortBrowser);
-      // #13382: close this request's context. The Chromium process stays
-      // warm until it has been idle.
-      try {
-        await context?.close();
-      } catch {
-        /* ignore close errors */
-      }
+      signal?.removeEventListener("abort", abortBrowser);
+      await closeContext();
       if (browser) {
         const { releaseGeminiBrowser } = await import("./gemini-web/browserLease.ts");
         await releaseGeminiBrowser(browser);

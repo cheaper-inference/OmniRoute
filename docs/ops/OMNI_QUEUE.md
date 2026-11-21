@@ -12,6 +12,13 @@ the default `mode` in `config/merge-queue/config.json` is `shadow` (compose and 
 Until the owner approves the cut-over (see [Cut-over and rollback](#cut-over-and-rollback)), Mergify
 and the `queue` label stay the default merge path.
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision; step 1 of
+> [Cut-over and rollback](#cut-over-and-rollback)). `.mergify.yml` no longer defines a queue and
+> refuses the Mergify commands that merge or rewrite a pull request. Until omni-queue runs in live
+> mode, release PRs are merged by hand under the repository ruleset "Require green gates on the
+> active release" (`Gate / CI` + `Gate / Quality`); mentions below of Mergify as the current merge
+> path describe the state before that date.
+
 ## Why
 
 - **Cost.** Mergify bills per active contributor seat, and batching with automatic bisection is a
@@ -563,14 +570,26 @@ queue deliberately reads none (see below):
   so without this rule that PR's author could cancel, fail or re-run checks on it at will. Check
   runs that come from no Actions workflow run (other apps) are not read either. Until GitHub
   lists a push run for the ref, the verdict stays pending;
-- inside those suites, only the check runs of the push runs' **jobs** count. The tick lists the
-  jobs of each push run of the ref (`listWorkflowRunJobs`:
+- inside those suites, only the check runs of the push runs' **real jobs** count. The tick lists
+  the jobs of each push run of the ref (`listWorkflowRunJobs`:
   `GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs?filter=all`, every attempt, so the jobs a
-  re-run adds still count) and keeps the check runs those jobs name (each job's `check_run_url`).
-  Any token with `checks: write` (the `GITHUB_TOKEN` of any workflow run in the repository) can
-  create a check run on the candidate SHA, and GitHub files it in one of the commit's Actions
-  suites. Such a run is no job: it is ignored for the verdict (neither green nor red), and the
-  first tick that meets it for a batch records one `error` event,
+  re-run adds still count) and keeps the check runs those jobs name (each job's `check_run_url`),
+  but only for a listed entry that is a real job of that run (`isRealWorkflowJob` in
+  `scripts/merge-queue/contracts.mjs`). Any token with `checks: write` (the `GITHUB_TOKEN` of any
+  workflow run in the repository) can create a check run, with any name and conclusion, on the
+  candidate SHA. Measured on 2026-11-19: GitHub files it in one of the commit's Actions suites
+  and **lists it among the jobs** of the workflow run that owns that suite, with that run's id and
+  workflow name, but with `html_url` `https://github.com/<owner>/<repo>/runs/<check run id>`, no
+  runner (`runner_id` null), no labels and no steps. A real job's `html_url` is
+  `https://github.com/<owner>/<repo>/actions/runs/<run id>/job/<job id>` (at a re-run's later
+  attempt too), and its job id is its check run's id. A real job that was skipped has no runner and
+  no steps either, so the runner alone does not tell them apart. The tick counts a listed entry as
+  a job only when its `html_url` path ends in `/actions/runs/<run id>/job/<job id>` for the run it
+  listed and the entry's own id, and the entry's check run is that id; a `success` also needs a
+  runner. Anything else, a missing or unreadable `html_url` included, is not a job. Such a check
+  run is ignored for the verdict (neither green nor red: a forged failure takes no PR out, a forged
+  success never stands in for a required job nor replaces a real failure as if it were its
+  re-run), and the first tick that meets it for a batch records one `error` event,
   ``check runs on the candidate that are not jobs of its push runs, ignored for the verdict: `<name>` (app `<slug>`), …``.
   A job listing that fails fails the tick: nothing is blessed. The listing costs one request per
   push run of the ref and tick (two today: `ci.yml` and `quality.yml`), one more per 100 jobs;
@@ -830,6 +849,15 @@ with `; re-run refused (<status>)`, and the batch is classified in the same tick
   the base (`npm run queue -- pause <base>`, a paused base does not check its batch), fix the
   cause, then `npm run queue -- resume <base>`. Removing the queue label from a pull request drops
   it from the batch at the next tick, and the rest is recomposed.
+- **Only the candidate's verdict tells a forged check run from a job.** A check run that a
+  workflow token creates through the Checks API is from the `github-actions` app, like a real job
+  (see [Accepting a candidate](#accepting-a-candidate)). The candidate's verdict ignores it, and
+  that verdict is the one that decides a landing. Two other readings cannot make the distinction:
+  the PR gates (`prChecksRequired`, read on the PR's head by name and app, see
+  [The PR's own gates](#the-prs-own-gates-prchecksrequired)), so a forged `success` there can let a
+  PR into a batch and a forged `failure` can keep it waiting; and GitHub's own required status
+  checks, which match a check by name and, at most, by the app that created it (`integration_id`).
+  A PR let in that way still lands only through a candidate whose real jobs are green.
 - **Test-level matching needs a key on both sides.** A failure of the batch matches the base's only
   when the same check fails there and either both failures carry a test-level key (the candidate's
   tests must all fail on the base) or neither does (a match on the check name alone, reported as
@@ -2067,7 +2095,7 @@ What still tells nobody (each shows on the dashboard or in the history only):
 
 - a labeled PR that waits on `pr-checks-not-green`, `approval-missing`, `label-not-by-approver` or
   any other eligibility reason: it is not eligible, so the waiting rule does not count it;
-- a check run on a candidate that is no job of its push runs: one `error` event, nothing more;
+- a check run on a candidate that is no real job of its push runs: one `error` event, nothing more;
 - a `would-land` event that says `live mode would pause: …` or `… could not run (…)` in shadow
   mode;
 - a `base-red` pause younger than 120 minutes, and a release freeze that holds a green batch;

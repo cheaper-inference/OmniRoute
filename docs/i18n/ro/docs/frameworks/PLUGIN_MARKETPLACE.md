@@ -28,32 +28,26 @@ rutele nu pot fi accesate dintr-o origine care nu este loopback, indiferent de
 autentificare. Consultați
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Cum funcționează componentele împreună
+## Cum se potrivește Together
 
 ```
-Panou de control (/dashboard/plugins)
-  ├─ Fila „Instalate”    → GET /api/plugins            (listPlugins)
-  │                        POST /api/plugins/scan      (pluginManager.scan)
-  │                        POST /api/plugins/{name}/activate|deactivate
-  │                        DELETE /api/plugins/{name}   (dezinstalare)
-  └─ Fila „Piață”        → GET /api/plugins/marketplace
-                             → listMarketplacePlugins()
-                               ├─ fără URL personalizat → SEED_REGISTRY încorporat
-                               └─ URL personalizat → protecția SSRF isSafeMarketplaceUrl()
-                                                   → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Stratul registrului** — `src/lib/plugins/marketplace.ts`: listează / caută în
-  catalog, revenind la registrul inițial în cazul oricărei erori.
-- **Stratul ciclului de viață** — `src/lib/plugins/manager.ts` (instanța singleton
-  `pluginManager`): instalare, actualizare, activare, dezactivare, dezinstalare,
-  scanare, încărcare la pornire.
-- **Stratul manifestului** — `src/lib/plugins/manifest.ts`: schemă Zod + valori
-  implicite pentru `plugin.json`.
-- **Scannerul** — `src/lib/plugins/scanner.ts`: descoperă pluginurile de pe disc
-  în directorul de pluginuri.
-- **Încărcătorul** — `src/lib/plugins/loader.ts`: pornește fiecare plugin într-un
-  proces copil izolat și intermediază apelurile hook-urilor prin IPC.
+- **Stratul de registru** — `src/lib/plugins/marketplace.ts`: listează / caută în catalog, revenind la registrul de semințe la orice eșec.
+- **Stratul ciclului de viață** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): instalați, actualizați, activați, dezactivați, dezinstalați, scanați, încărcați pornirea.
+- **Stratul manifest** — `src/lib/plugins/manifest.ts`: Zod schema + implicite pentru `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: descoperă pluginuri pe disc în directorul plugin-urilor.
+- **Încărcător** — `src/lib/plugins/loader.ts`: generează fiecare plugin într-un proces secundar Node.js separat, iar brokerii atrag apelurile peste IPC. Copilul nu este un sandbox (vezi „Izolarea execuției pluginului” de mai jos).
 
 ## Catalogul pieței
 
@@ -90,36 +84,33 @@ inițială.
 > realizează prin fluxul de instalare dintr-o cale locală (`POST /api/plugins`) și
 > prin descoperirea pe disc (`POST /api/plugins/scan`).
 
-## API REST
+## REST API
 
-Toate endpointurile necesită autentificare de administrare (`requireManagementAuth`) **și** sunt
-accesibile exclusiv prin interfața loopback — `/api/plugins` și `/api/plugins/` sunt incluse în
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Toate punctele finale necesită autentificare de gestionare (`requireManagementAuth`)** şi** sunt doar pentru buclă inversă — `/api/plugins` și `/api/plugins/` sunt listate în `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Metodă | Descriere                                                                     |
-| -------------------------------- | ------ | ----------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Listează pluginurile instalate (filtru opțional `?status=`)                   |
-| `/api/plugins`                   | POST   | Instalează un plugin dintr-o cale locală absolută                             |
-| `/api/plugins/scan`              | POST   | Scanează directorul de pluginuri și înregistrează pluginuri noi               |
-| `/api/plugins/marketplace`       | GET    | Listează intrările din catalogul marketplace                                  |
-| `/api/plugins/[name]`            | GET    | Obține detaliile pluginului instalat                                          |
-| `/api/plugins/[name]`            | DELETE | Dezinstalează un plugin                                                       |
-| `/api/plugins/[name]/activate`   | POST   | Activează (încarcă + înregistrează hook-urile)                                |
-| `/api/plugins/[name]/deactivate` | POST   | Dezactivează (declanșează `onDeactivate`, anulează înregistrarea hook-urilor) |
-| `/api/plugins/[name]/config`     | GET    | Obține configurația pluginului + schema de configurare                        |
-| `/api/plugins/[name]/config`     | PUT    | Actualizează configurația pluginului (validată conform schemei)               |
+| Punct final                      | Metodă | Descriere                                                                 |
+| -------------------------------- | ------ | ------------------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Listați pluginurile instalate (filtru `?status=` opțional)                |
+| `/api/plugins`                   | POST   | Instalați un plugin din directorul surse de plugin                        |
+| `/api/plugins/scan`              | POST   | Scanați directorul de pluginuri și înregistrați noi pluginuri             |
+| `/api/plugins/marketplace`       | GET    | Listați intrările din catalogul pieței                                    |
+| `/api/plugins/[name]`            | GET    | Obțineți detalii despre pluginul instalat                                 |
+| `/api/plugins/[name]`            | DELETE | Dezinstalează un plugin                                                   |
+| `/api/plugins/[name]/activate`   | POST   | Activați (încărcați cârligele de înregistrare + )                         |
+| `/api/plugins/[name]/deactivate` | POST   | Dezactivați (declanșați `onDeactivate`, anulați înregistrarea cârligelor) |
+| `/api/plugins/[name]/config`     | GET    | Obțineți schema de configurare a pluginului +                             |
+| `/api/plugins/[name]/config`     | PUT    | Actualizați configurația pluginului (validat în funcție de schemă)        |
 
-Filtrul `status` pentru `GET /api/plugins` acceptă una dintre valorile
-`installed` / `active` / `inactive` / `error`. O valoare nevalidă returnează `400`.
+Filtrul `GET /api/plugins` `status` acceptă unul dintre `installed` / `active` / `inactive` / `error`. O valoare nevalidă returnează `400`.
 
-### Listarea pluginurilor instalate
+### Listați pluginurile instalate
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Instalarea dintr-o cale locală
+### Instalați dintr-o cale locală
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -128,19 +119,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` trebuie să fie **absolută** și nu poate conține segmente de traversare `..` sau
-octeți nuli (restricție impusă de Zod). Directorul sursă trebuie să conțină un
-`plugin.json` valid (sau să fie directorul părinte al unuia). În caz de succes, răspunsul este `201` și conține
-rândul pluginului instalat.
+`path` trebuie să fie un** absolut** cale către un director** în directorul surselor pluginului** : `plugin-sources` lângă rădăcina pluginului, deci `~/.omniroute/plugin-sources/` în mod implicit, sau `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` când acea variabilă este setată (`getPluginSourcesDir()` în `src/lib/plugins/installSource.ts`). Copiați sau clonați pluginul acolo mai întâi. Instalarea este refuzată cu `400` când calea conține `..` sau un octet nul, se află în afara acelui director, se rezolvă în afara lui printr-un link simbolic, conține un link simbolic a cărui țintă este în afara acestuia sau când directorul nu există. Directorul sursă trebuie să conțină un `plugin.json` valid (sau să fie părinte al unuia). La succes, răspunsul este `201` cu rândul de plugin instalat.
 
-### Navigarea în marketplace
+Spre deosebire de celelalte rute de plugin, aceasta necesită acreditările de gestionare (o sesiune de tablou de bord sau o cheie API gestionată) chiar și atunci când autentificarea este dezactivată (`requireLogin=false`): instalarea codului nu este niciodată o acțiune anonimă.
+
+### Navigați pe piață
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Actualizarea configurației pluginului
+### Actualizați configurația pluginului
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -149,10 +139,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validează fiecare valoare furnizată conform
-`configSchema` a pluginului (declarată în manifest): câmpurile `number` respectă `min`/`max`,
-iar câmpurile `select` trebuie să corespundă valorilor `enum` declarate. Cheile care nu sunt prezente în schemă
-sunt permise.
+`PUT .../config` validează fiecare valoare furnizată în raport cu `configSchema` pluginului (declarat în manifest): câmpurile `number` onorează `min`/`max`, câmpurile `select` trebuie să se potrivească cu `enum` declarat. Cheile care nu sunt prezente în schemă sunt permise.
 
 ## Configurare
 
@@ -211,82 +198,58 @@ Fila „Marketplace” din tabloul de bord oferă un câmp pentru acest URL (cit
 
 ## Securitate
 
-### Nivelul rutei — exclusiv loopback
+### Numai loopback pentru nivelul de traseu —
 
-Pluginurile execută cod în procese copil lansate separat, astfel încât întreaga suprafață `/api/plugins`
-este clasificată drept `LOCAL_ONLY` (Nivelul 1). Aplicarea restricției loopback rulează
-necondiționat **înaintea** oricărei verificări de autentificare, astfel încât un token de administrare divulgat care ajunge
-la sistem printr-un tunel tot nu poate instala, activa sau dezinstala un plugin.
-Consultați [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) și
-Regulile stricte #15 / #17.
+Pluginurile execută cod în procesele copil generate, astfel încât întreaga suprafață `/api/plugins` este clasificată `LOCAL_ONLY` (Nivelul 1). Aplicarea loopback rulează necondiționat** înainte** orice verificare de autentificare, astfel încât un jeton de gestionare scurs care ajunge la caseta peste un tunel tot nu poate instala, activa sau dezinstala un plugin. Consultați [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) și Reguli dure #15 / #17.
 
-### Protecție SSRF pentru registrul marketplace-ului
+### Registrul pieței SSRF guard
 
-Un URL de registru personalizat este o configurație care poate fi influențată de un atacator, astfel încât, înainte
-de a-l prelua, `listMarketplacePlugins()` îl trece prin două niveluri de protecție:
+Un registru personalizat URL este o configurație influențată de atacator, așa că, înainte de a-l prelua, `listMarketplacePlugins()` îl rulează prin două straturi:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Respinge orice adresă care nu utilizează `http:` / `https:`.
-   - Respinge gazdele literale private/loopback/link-local/ULA (IPv4 **și** IPv6,
-     inclusiv cele mapate IPv4) prin intermediul funcției canonice `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Rezolvă **atât** înregistrările `A`, cât și `AAAA` și respinge adresa dacă **oricare** adresă
-     rezolvată este privată — eliminând posibilitatea de eludare prin maparea unui nume de gazdă public la un IP privat.
-   - **Eșuează în mod sigur**: o eroare de rezoluție DNS determină respingerea URL-ului.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): reaplică la momentul preluării protecția URL
-   exclusiv pentru adrese publice și **blochează redirecționările** (fără posibilitatea unui pivot `30x`
-   de la public la privat).
+   - Respinge orice nu este `http:` / `https:`.
+   - Respinge gazdele private/loopback/link-local/ULA literale (IPv4** şi** IPv6, inclusiv IPv4-mapped) prin `isPrivateHost` canonic (`src/shared/network/outboundUrlGuard.ts`).
+   - Rezolvă** ambele** `A` și `AAAA` înregistrează și respinge dacă** orice** adresa rezolvată este private — închiderea numelui de gazdă public → private-IP bypass.
+   - **Eșuează închis** : un eșec de rezoluție DNS respinge URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): reaplică protecția URL numai pentru public la momentul preluării și** blochează redirecționările** (fără pivot public → privat `30x` ).
 
-Un URL care nu trece de oricare dintre cele două niveluri nu abandonează cererea — marketplace-ul
-revine în mod silențios la registrul inițial încorporat și înregistrează un avertisment.
+Un URL care nu reușește niciunul dintre straturi nu anulează cererea — piața revine în tăcere la registrul de semințe încorporat și înregistrează un avertisment.
 
-> Această protecție a fost consolidată în PR #3774 în mod special pentru a rezolva A + AAAA și pentru a utiliza
-> funcția canonică `isPrivateHost` în locul unei verificări limitate la IPv4.
+> Această protecție a fost întărită în PR #3774 special pentru a rezolva A + AAAA și a utiliza `isPrivateHost` canonic în loc de o verificare IPv4-only.
 
-### Izolarea execuției pluginurilor
+### Izolarea execuției pluginului
 
-- **Izolarea proceselor** — `loadPlugin()` (`src/lib/plugins/loader.ts`) lansează
-  fiecare plugin într-un proces copil Node.js separat și comunică prin IPC.
-  Apelurile hook au un timeout cu escaladare `SIGTERM` → `SIGKILL`.
-- **Listă de permisiuni pentru variabilele de mediu** — procesul copil primește doar un set permis de variabile
-  de mediu; setul mai larg este acordat numai atunci când manifestul solicită
-  permisiunea `env`.
-- **Limitarea căilor** — instalarea/actualizarea/dezinstalarea verifică dacă directorul
-  pluginului și `manifest.main` se rezolvă **în interiorul** rădăcinii administrate pentru pluginuri,
-  înaintea oricărei copieri sau ștergeri recursive (protejând împotriva căilor alterate din baza de date și a
-  traversării `../` în `manifest.main`). Activarea rezolvă legăturile simbolice prin
-  `realpath` și refuză încărcarea unui punct de intrare care iese din directorul
-  pluginului.
-- **Fixare opțională a integrității** — un manifest poate declara un câmp `integrity`
-  (`sha256-<base64>`, format SRI). Atunci când este prezent, loaderul verifică hash-ul
-  fișierului de intrare la momentul încărcării și refuză activarea în caz de neconcordanță. Aceasta este
-  o metodă opțională de detectare a modificărilor neautorizate, **nu** o limită de securitate — rutarea exclusiv
-  loopback și modelul de permisiuni reprezintă limitele reale.
+> **Pluginurile nu sunt sandbox.** Copilul este un proces Node.js obișnuit care rulează ca utilizator OmniRoute, fără context VM și fără steaguri de permisiune Node.js, astfel încât codul pluginului poate citi și scrie orice fișier pe care utilizatorul îl poate, rula programe și ajunge în rețea. `requires.permissions` decide doar ce variabile de mediu primește copilul; celelalte permisiuni nu sunt aplicate. Instalați numai pluginuri în care aveți încredere. Limita procesului de mai jos conține blocări și blocări; nu este o limită de securitate.
+
+- **Izolarea procesului** — `loadPlugin()` (`src/lib/plugins/loader.ts`) generează fiecare plugin într-un proces secundar Node.js separat și comunică prin IPC. Apelurile Hook au un timeout cu escaladare `SIGTERM` → `SIGKILL`.
+- **Lista permisă pentru Env** — copilul primește doar un set de variabile de mediu permis; setul mai larg este acordat numai atunci când manifestul solicită permisiunea `env`.
+- **Instalați reținerea sursei** — `POST /api/plugins` citește doar din directorul surselor pluginului (vezi „Instalarea de pe o cale locală”): calea este canonizată cu `realpath`, trebuie să rămână strict în acel director, iar un arbore sursă care poartă o legătură simbolică care scapă este refuzat înainte de a fi copiat ceva.
+- **Reținerea căii** — install/upgrade/uninstall afirmă că directorul pluginului și `manifest.main` se rezolvă** în** rădăcina pluginului gestionat înainte de orice copiere sau ștergere recursivă (protejează împotriva căilor DB modificate și traversării `../` în `manifest.main`). Activarea rezolvă legăturile simbolice prin `realpath` și refuză să încarce un punct de intrare care iese din directorul pluginului.
+- **Pin de integritate opțional** — un manifest poate declara un câmp `integrity` (`sha256-<base64>`, format SRI ). Când este prezent, încărcătorul verifică hash-ul fișierului de intrare la momentul încărcării și refuză să se activeze în caz de nepotrivire. Este opțiunea de detectare a falsificării,** nu** o limită de securitate: nu limitează ceea ce poate face un plugin încărcat.
+- **Fără acreditări de client în hooks** — contextul transmis la `onRequest`, `onResponse` și `onError` are antetele `authorization`, `x-api-key`, `proxy-authorization` și `cookie` eliminate, iar înregistrarea cheii API nu poartă nicio valoare a cheii (`redactPluginContext()` în `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
 Validat de `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Câmp               | Tip       | Observații                                                               |
-| ------------------ | --------- | ------------------------------------------------------------------------ |
-| `name`             | string    | Obligatoriu; kebab-case (`^[a-z0-9-]+$`), 1–100 de caractere             |
-| `version`          | string    | Obligatoriu; semver (`MAJOR.MINOR.PATCH`)                                |
-| `description`      | string?   | ≤ 500 de caractere                                                       |
-| `author`           | string?   | ≤ 200 de caractere                                                       |
-| `license`          | string?   | Valoarea implicită este `MIT`                                            |
-| `main`             | string?   | Fișier de intrare; valoarea implicită este `index.js`                    |
-| `source`           | enum?     | `local` \| `marketplace` (valoarea implicită este `local`)               |
-| `tags`             | string[]? | Etichete de căutare                                                      |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                          |
-| `hooks`            | object?   | Valori booleene care declară hook-urile implementate de plugin           |
-| `skills`           | object[]? | Definiții opționale ale abilităților                                     |
-| `enabledByDefault` | boolean?  | Activare automată la instalare                                           |
-| `configSchema`     | object?   | Hartă a câmpurilor de configurare (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Fixare opțională `sha256-<base64>` pentru fișierul de intrare            |
+| Domeniu            | Tip        | Note                                                                   |
+| ------------------ | ---------- | ---------------------------------------------------------------------- |
+| `name`             | şir        | Necesar; kebab-case (`^[a-z0-9-]+$`), 1–100 de caractere               |
+| `version`          | şir        | Necesar; semver (`MAJOR.MINOR.PATCH`)                                  |
+| `description`      | şir?       | ≤ 500 de caractere                                                     |
+| `author`           | şir?       | ≤ 200 de caractere                                                     |
+| `license`          | şir?       | Implicit la `MIT`                                                      |
+| `main`             | şir?       | Dosar de intrare; implicit la `index.js`                               |
+| `source`           | enumerare? | `local` \| `marketplace` (implicit la `local`)                         |
+| `tags`             | şir[]?     | Căutați etichete                                                       |
+| `requires`         | obiect?    | `{ omniroute?, permissions[] }`                                        |
+| `hooks`            | obiect?    | Booleeni care declară care cârlige implementează pluginul              |
+| `skills`           | obiect[]?  | Definiții opționale de abilități                                       |
+| `enabledByDefault` | boolean?   | Se activează automat la instalare                                      |
+| `configSchema`     | obiect?    | Harta câmpurilor de configurare (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | şir?       | Pin opțional pentru fișierul de intrare `sha256-<base64>`              |
 
-Permisiunile sunt selectate din enumerarea
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Permisiunile sunt extrase din enumerarea `network` / `file-read` / `file-write` / `env` / `exec`. Doar `env` are un efect de rulare (o listă de permisiuni de variabile de mediu puțin mai mare pentru copil); celelalte sunt declarații și nu sunt executate.
 
 ## Fluxul ciclului de viață
 
@@ -344,19 +307,16 @@ Tabelul `plugins` (migrarea `076_create_plugins.sql`):
 Metricile și datele analitice ale pluginurilor sunt urmărite în tabele suplimentare
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Panoul de control
+## Bord
 
-Pagina panoului de control de la `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) oferă două file:
+Pagina tabloului de bord de la `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) oferă două file:
 
-- **Instalate** — enumeră pluginurile instalate împreună cu hook-urile declarate, un
-  comutator de activare/dezactivare, un buton de dezinstalare și o acțiune „Scanează după pluginuri”
-  (`POST /api/plugins/scan`).
-- **Marketplace** — afișează catalogul de la `GET /api/plugins/marketplace` cu un
-  câmp pentru setarea URL-ului registrului personalizat.
+- **Instalat** — listează pluginurile instalate cu cârligele lor declarate, un comutator activate/deactivate, un buton de dezinstalare și o acțiune „Scanare pentru pluginuri” (`POST /api/plugins/scan`).
+- **Piața** — arată catalogul din `GET /api/plugins/marketplace` cu un câmp pentru a seta registrul personalizat URL.
 
-O pagină de configurare pentru fiecare plugin se află la `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Pagina afișează întotdeauna un avertisment că pluginurile rulează cu privilegiile complete ale procesului OmniRoute.
+
+O pagină de configurare pentru fiecare plugin se află la `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Consultați și
 

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const dataDir = mkdtempSync(join(tmpdir(), "omni-combo-vision-16789-"));
 process.env.DATA_DIR = dataDir;
@@ -107,9 +108,7 @@ test.before(async () => {
   for (const [name, members] of definitions) {
     await combos.createCombo({ name, strategy: "priority", models: [...members] });
   }
-  const response = await catalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const response = await getSettledModelCatalogResponse(catalog);
   assert.equal(response.status, 200);
   catalogRows = (await response.json()).data;
   const projected = await publicCombos.GET(new Request("http://localhost/api/v1/combos"));

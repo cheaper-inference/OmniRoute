@@ -15,6 +15,8 @@ import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
 import { invalidateDbCache } from "./readCache";
 import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
+import { isGlobalProxyEnabled } from "./proxies/guards";
+import { resolveRequiredProxyForScope } from "./proxies/rotation";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
 import {
@@ -515,6 +517,26 @@ function getComboModelProvider(modelEntry: unknown): string | null {
   return providerOrAlias ? resolveProviderAliasOrId(providerOrAlias) : null;
 }
 
+function* proxyComboIds(db: ReturnType<typeof getDbInstance>, provider: string) {
+  const rows = db.prepare("SELECT id, data FROM combos").all();
+  for (const row of rows) {
+    const record = toRecord(row);
+    if (typeof record.id !== "string" || !record.id || typeof record.data !== "string") continue;
+    let combo: JsonRecord;
+    try {
+      combo = toRecord(JSON.parse(record.data));
+    } catch {
+      continue;
+    }
+    if (
+      Array.isArray(combo.models) &&
+      combo.models.some((entry) => getComboModelProvider(entry) === provider)
+    ) {
+      yield record.id;
+    }
+  }
+}
+
 function migrateProxyEntry(value: unknown): JsonRecord | null {
   if (!value) return null;
   if (typeof value === "object") {
@@ -589,6 +611,45 @@ export async function getProxyForLevel(level: string, id?: string | null) {
   if (level === "global") return config.global || null;
   const map = toProxyMap(config[level + "s"] || config[level] || {});
   return (id ? map[id] : null) || null;
+}
+
+// Preserve the connection resolver's provider-based combo lookup: the browser
+// only knows the selected account and provider, not the active combo.
+// Only an unassigned scope can inherit the next scope's proxy.
+export async function resolveProxyForBrowserContext(providerId: string, connectionId?: string) {
+  const db = getDbInstance();
+  if (!isGlobalProxyEnabled(db, true)) return null;
+  if (connectionId) {
+    const connection = db
+      .prepare("SELECT proxy_enabled FROM provider_connections WHERE id = ?")
+      .get(connectionId) as { proxy_enabled?: number } | undefined;
+    if (!connection) throw new Error("Browser proxy connection no longer exists");
+    if (connection.proxy_enabled === 0) return null;
+    const account = resolveRequiredProxyForScope(db, "account", connectionId);
+    if (account) return account.proxy;
+  }
+  const legacy = await getProxyConfig();
+  const legacyAccount = connectionId ? legacy.keys?.[connectionId] : null;
+  if (legacyAccount != null) return legacyAccount;
+  const provider = resolveRequiredProxyForScope(db, "provider", providerId);
+  if (provider) return provider.proxy;
+  if (connectionId) {
+    for (const comboId of proxyComboIds(db, providerId)) {
+      const combo = resolveRequiredProxyForScope(db, "combo", comboId);
+      if (combo) return combo.proxy;
+      const legacyCombo = legacy.combos?.[comboId];
+      if (legacyCombo != null) return legacyCombo;
+    }
+  }
+  const legacyProvider = legacy.providers?.[providerId];
+  if (legacyProvider != null) return legacyProvider;
+  const global = resolveRequiredProxyForScope(db, "global", null);
+  if (global) return global.proxy;
+  if (legacy.global != null) return legacy.global;
+  if (!connectionId) return null;
+  const { selectWorkingProxyFallback } = await import("@omniroute/open-sse/utils/proxyFallback");
+  // No usable candidate permits direct egress here; a selector error must propagate.
+  return (await selectWorkingProxyFallback(connectionId))?.proxy ?? null;
 }
 
 export async function setProxyForLevel(level: string, id: string | null, proxy: ProxyValue) {
@@ -854,27 +915,13 @@ export async function resolveProxyForConnection(
     // proxy assignment completely inert). Fall back to the legacy in-memory
     // combos map for any pre-existing legacy data.
     if (connectionProvider && connectionProxyEnabled) {
-      const combos = db.prepare("SELECT id, data FROM combos").all();
-      for (const comboRow of combos) {
-        const comboRecord = toRecord(comboRow);
-        const comboId = typeof comboRecord.id === "string" ? comboRecord.id : null;
-        if (!comboId) continue;
+      for (const comboId of proxyComboIds(db, connectionProvider)) {
         try {
-          const comboRaw = typeof comboRecord.data === "string" ? comboRecord.data : null;
-          if (!comboRaw) continue;
-          const combo = toRecord(JSON.parse(comboRaw));
-          const comboModels = Array.isArray(combo.models) ? combo.models : [];
-          const usesProvider = comboModels.some(
-            (entry) => getComboModelProvider(entry) === connectionProvider
-          );
-          if (!usesProvider) continue;
-
           const registryCombo = await resolveProxyForScopeFromRegistry("combo", comboId);
           if (registryCombo?.proxy) {
             cacheProxyResolution(cacheKey, stamp, registryCombo);
             return registryCombo;
           }
-
           if (config.combos?.[comboId]) {
             const result = {
               proxy: withFamilyDefault(config.combos[comboId]),
@@ -885,7 +932,7 @@ export async function resolveProxyForConnection(
             return result;
           }
         } catch {
-          // Ignore malformed combo records during proxy resolution.
+          // Preserve the general resolver's best-effort combo lookup.
         }
       }
     }
