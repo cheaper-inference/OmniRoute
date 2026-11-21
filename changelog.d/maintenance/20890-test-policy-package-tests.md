@@ -1,0 +1,1 @@
+- **fix(ci):** `check-pr-test-policy` accepts new tests in a workspace package's own `@omniroute/<package>/tests/` directory, where the opencode plugin packages keep their suites; any other location outside `tests/` is still rejected ([#20890](https://github.com/cheaper-inference/OmniRoute/pull/20890))

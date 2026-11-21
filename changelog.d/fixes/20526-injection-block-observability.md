@@ -1,0 +1,1 @@
+- fix(guardrails): log blocked prompt-injection requests and name the matched rule ids (not the content) in the SECURITY_001 chat error body (#20526)

@@ -220,8 +220,10 @@ export function withoutPromptDerivedFields(context: AgentContext): AgentContext 
 }
 
 /**
- * Agent context for usage attribution. Keys with `noLog` never persist prompt-derived fields
- * (working directory, branch); explicit header identifiers are still kept.
+ * Agent context for usage attribution. Callers pass the effective no-log decision (the
+ * per-key `no_log` flag OR the per-request `x-omniroute-no-log` header): when `noLog` is
+ * true, prompt-derived fields (working directory, branch) are dropped; explicit header
+ * identifiers are still kept.
  */
 export function resolveUsageAgentContext(
   body: unknown,
