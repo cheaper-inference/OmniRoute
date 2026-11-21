@@ -71,3 +71,25 @@ export function shouldStripAnthropicAccountHeaders(
   const forwardAllowed = hasScope && providerShared && pinnedToSingleConnection;
   return !forwardAllowed;
 }
+
+/**
+ * #20345: the upstream Anthropic account headers (see {@link isAnthropicAccountHeader}) that the
+ * per-key policy lets through, picked from a provider-header map. Used by the non-streaming
+ * success path, which rebuilds the client headers from scratch and would otherwise drop them;
+ * the streaming path applies the same policy inside buildStreamingResponseHeaders. Returns an
+ * empty map when the key's policy strips them or no such header is present.
+ */
+export function pickForwardableAnthropicAccountHeaders(
+  providerHeaders: Record<string, string> | null | undefined,
+  apiKeyInfo: AnthropicAccountHeaderPolicyKeyInfo | null | undefined,
+  provider: string | null | undefined
+): Record<string, string> {
+  const picked: Record<string, string> = {};
+  if (!providerHeaders || shouldStripAnthropicAccountHeaders(apiKeyInfo, provider)) return picked;
+  for (const [name, value] of Object.entries(providerHeaders)) {
+    if (typeof value === "string" && isAnthropicAccountHeader(name)) {
+      picked[name.toLowerCase()] = value;
+    }
+  }
+  return picked;
+}

@@ -100,3 +100,74 @@ test("omitted fallbackAttempts does not invent a count", () => {
   buildNonStreamingResponseHeaders(baseArgs(), deps);
   assert.equal("fallbackAttempts" in metaCalls[0].meta, false);
 });
+
+// #20345: a Claude-format client gets the upstream Anthropic account headers under the same
+// per-key policy the streaming path applies; every other client format gets none.
+const UPSTREAM = {
+  "content-type": "application/json; charset=utf-8",
+  "anthropic-ratelimit-requests-limit": "50",
+  "anthropic-ratelimit-unified-5h-utilization": "0.4",
+  "anthropic-organization-id": "org-1",
+  "x-upstream-other": "skip",
+  "retry-after": "12",
+};
+
+test("claude source format copies only the Anthropic account headers", () => {
+  const { deps } = makeDeps();
+  const h = buildNonStreamingResponseHeaders(
+    baseArgs({ provider: "claude", sourceFormat: "claude", providerHeaders: UPSTREAM }),
+    deps
+  );
+  assert.equal(h["anthropic-ratelimit-requests-limit"], "50");
+  assert.equal(h["anthropic-ratelimit-unified-5h-utilization"], "0.4");
+  assert.equal(h["anthropic-organization-id"], "org-1");
+  assert.equal(h["x-upstream-other"], undefined);
+  assert.equal(h["retry-after"], undefined);
+  assert.equal(h["content-type"], undefined);
+  assert.equal(h["Content-Type"], "application/json");
+});
+
+test("claude source format honours a `strip` key", () => {
+  const { deps } = makeDeps();
+  const h = buildNonStreamingResponseHeaders(
+    baseArgs({
+      provider: "claude",
+      sourceFormat: "claude",
+      providerHeaders: UPSTREAM,
+      apiKeyInfo: { anthropicRateLimitHeaders: "strip" },
+    }),
+    deps
+  );
+  assert.equal(h["anthropic-ratelimit-requests-limit"], undefined);
+  assert.equal(h["anthropic-organization-id"], undefined);
+});
+
+test("claude source format honours an `auto` key that is not pinned to one connection", () => {
+  const { deps } = makeDeps();
+  const h = buildNonStreamingResponseHeaders(
+    baseArgs({
+      provider: "claude",
+      sourceFormat: "claude",
+      providerHeaders: UPSTREAM,
+      apiKeyInfo: {
+        anthropicRateLimitHeaders: "auto",
+        scopes: ["self:account-quota"],
+        allowedConnections: ["a", "b"],
+      },
+    }),
+    deps
+  );
+  assert.equal(h["anthropic-ratelimit-requests-limit"], undefined);
+});
+
+test("non-claude source formats never get upstream Anthropic account headers", () => {
+  for (const sourceFormat of ["openai", "openai-responses", "gemini", undefined]) {
+    const { deps } = makeDeps();
+    const h = buildNonStreamingResponseHeaders(
+      baseArgs({ provider: "claude", sourceFormat, providerHeaders: UPSTREAM }),
+      deps
+    );
+    assert.equal(h["anthropic-ratelimit-requests-limit"], undefined, String(sourceFormat));
+    assert.equal(h["anthropic-organization-id"], undefined, String(sourceFormat));
+  }
+});

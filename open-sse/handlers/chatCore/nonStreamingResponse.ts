@@ -1113,6 +1113,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       compressionResponseMeta,
       comboStrategy,
       fallbackAttempts,
+      sourceFormat,
+      providerHeaders,
+      apiKeyInfo,
     });
     // #6426: align response body `model` with the `X-OmniRoute-Model` header
     // (both must be the resolved backend model). Some upstreams (notably legacy
