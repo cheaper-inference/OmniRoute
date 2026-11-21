@@ -1,122 +1,39 @@
 import {
-  parseReasoningEffortsOverride,
-  REASONING_EFFORT_OVERRIDE_VALUES,
-  type ReasoningEffortOverrideValue,
-} from "@/shared/reasoning/reasoningEffortsOverride";
-import { getDbInstance } from "./core";
+  isBooleanKey,
+  isNumericModelCapabilityOverrideKey,
+  parseModelOverrideTarget,
+  type BooleanModelCapabilityOverrideKey,
+  type ModelCapabilityOverride,
+  type ModelCapabilityOverrideInputValue,
+  type ModelCapabilityOverrideKey,
+  type ModelCapabilityOverrideRepository,
+  type NumericModelCapabilityOverrideKey,
+} from "@/domain/persistence/modelOverrideRepositories";
+import type { ReasoningEffortOverrideValue } from "@/shared/reasoning/reasoningEffortsOverride";
 import { invalidateDbCache } from "./readCache";
+import { modelOverrideRepositories } from "./repositories/modelOverrideRepositories";
 
-export type NumericModelCapabilityOverrideKey =
-  "max_input_tokens" | "max_output_tokens" | "max_token";
+/**
+ * Manual model capability overrides per provider/model target.
+ *
+ * Persistence lives behind ModelCapabilityOverrideRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) because capability resolution reads them
+ * on the request hot path; this facade owns the model-catalog cache invalidation.
+ */
 
-export type BooleanModelCapabilityOverrideKey =
-  "structured_output" | "tool_calling" | "vision" | "attachment" | "temperature";
+export type {
+  BooleanModelCapabilityOverrideKey,
+  ModelCapabilityOverride,
+  ModelCapabilityOverrideKey,
+  NumericModelCapabilityOverrideKey,
+} from "@/domain/persistence/modelOverrideRepositories";
+export { isBooleanKey, parseModelOverrideTarget };
 
-export type ModelCapabilityOverrideKey =
-  NumericModelCapabilityOverrideKey | "reasoning_efforts" | BooleanModelCapabilityOverrideKey;
+const legacy = modelOverrideRepositories.legacySync.capabilities;
 
-interface ModelCapabilityOverrideBase {
-  provider: string;
-  modelId: string;
-  target: string;
-  refreshedAt: string;
-}
-
-export type ModelCapabilityOverride =
-  | (ModelCapabilityOverrideBase & {
-      key: NumericModelCapabilityOverrideKey;
-      value: number;
-    })
-  | (ModelCapabilityOverrideBase & {
-      key: "reasoning_efforts";
-      value: ReasoningEffortOverrideValue[];
-    })
-  | (ModelCapabilityOverrideBase & {
-      key: BooleanModelCapabilityOverrideKey;
-      value: boolean;
-    });
-
-interface OverrideRow {
-  provider: string;
-  model_id: string;
-  override_key: string;
-  override_value: string;
-  refreshed_at: string;
-}
-
-function isNumericKey(value: unknown): value is NumericModelCapabilityOverrideKey {
-  return value === "max_input_tokens" || value === "max_output_tokens" || value === "max_token";
-}
-
-export function isBooleanKey(value: unknown): value is BooleanModelCapabilityOverrideKey {
-  return (
-    value === "structured_output" ||
-    value === "tool_calling" ||
-    value === "vision" ||
-    value === "attachment" ||
-    value === "temperature"
-  );
-}
-
-function isSupportedKey(value: unknown): value is ModelCapabilityOverrideKey {
-  return isNumericKey(value) || value === "reasoning_efforts" || isBooleanKey(value);
-}
-
-function isPositiveInteger(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value > 0;
-}
-
-function isReasoningEfforts(value: unknown): value is ReasoningEffortOverrideValue[] {
-  if (!Array.isArray(value) || value.length === 0) return false;
-  const allowed = new Set<string>(REASONING_EFFORT_OVERRIDE_VALUES);
-  return (
-    value.every((entry) => typeof entry === "string" && allowed.has(entry)) &&
-    new Set(value).size === value.length
-  );
-}
-
-export function parseModelOverrideTarget(
-  target: unknown
-): { provider: string; modelId: string } | null {
-  const raw = typeof target === "string" ? target.trim() : "";
-  const slashIndex = raw.indexOf("/");
-  if (slashIndex <= 0 || slashIndex === raw.length - 1) return null;
-
-  const provider = raw.slice(0, slashIndex).trim();
-  const modelId = raw.slice(slashIndex + 1).trim();
-  if (!provider || !modelId) return null;
-  return { provider, modelId };
-}
-
-function toOverride(row: OverrideRow): ModelCapabilityOverride | null {
-  if (!isSupportedKey(row.override_key)) return null;
-
-  let parsedValue: unknown;
-  try {
-    parsedValue = JSON.parse(row.override_value);
-  } catch {
-    return null;
-  }
-
-  const base: ModelCapabilityOverrideBase = {
-    provider: row.provider,
-    modelId: row.model_id,
-    target: `${row.provider}/${row.model_id}`,
-    refreshedAt: row.refreshed_at,
-  };
-  if (row.override_key === "reasoning_efforts") {
-    return isReasoningEfforts(parsedValue)
-      ? { ...base, key: row.override_key, value: parsedValue }
-      : null;
-  }
-  if (isBooleanKey(row.override_key)) {
-    return typeof parsedValue === "boolean"
-      ? { ...base, key: row.override_key, value: parsedValue }
-      : null;
-  }
-  return isPositiveInteger(parsedValue)
-    ? { ...base, key: row.override_key, value: parsedValue }
-    : null;
+/** Async persistence contract; it never invalidates caches on its own. */
+export function getModelCapabilityOverrideRepository(): ModelCapabilityOverrideRepository {
+  return modelOverrideRepositories.capabilities;
 }
 
 /** Nested provider → model → numeric override map used by build-local snapshots. */
@@ -141,18 +58,8 @@ export function getBooleanModelCapabilityOverride(
     return bulkBooleanOverrides.get(target.provider)?.get(target.modelId)?.get(key) ?? null;
   }
 
-  try {
-    const row = getDbInstance()
-      .prepare(
-        "SELECT provider, model_id, override_key, override_value, refreshed_at " +
-          "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = ?"
-      )
-      .get(target.provider, target.modelId, key) as OverrideRow | undefined;
-    const override = row ? toOverride(row) : null;
-    return override && typeof override.value === "boolean" ? override.value : null;
-  } catch {
-    return null;
-  }
+  const override = legacy.find(target.provider, target.modelId, key);
+  return override && typeof override.value === "boolean" ? override.value : null;
 }
 
 export function getModelCapabilityOverride(
@@ -162,7 +69,7 @@ export function getModelCapabilityOverride(
   bulkMaxTokenOverrides?: NestedMaxTokenOverrideMap | null
 ): number | null {
   const target = parseModelOverrideTarget(`${provider || ""}/${modelId || ""}`);
-  if (!target || !isNumericKey(key)) return null;
+  if (!target || !isNumericModelCapabilityOverrideKey(key)) return null;
 
   if (bulkMaxTokenOverrides) {
     // The caller pairs the bulk map with the key it was built for
@@ -170,18 +77,8 @@ export function getModelCapabilityOverride(
     return bulkMaxTokenOverrides.get(target.provider)?.get(target.modelId) ?? null;
   }
 
-  try {
-    const row = getDbInstance()
-      .prepare(
-        "SELECT provider, model_id, override_key, override_value, refreshed_at " +
-          "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = ?"
-      )
-      .get(target.provider, target.modelId, key) as OverrideRow | undefined;
-    const override = row ? toOverride(row) : null;
-    return override && typeof override.value === "number" ? override.value : null;
-  } catch {
-    return null;
-  }
+  const override = legacy.find(target.provider, target.modelId, key);
+  return override && typeof override.value === "number" ? override.value : null;
 }
 
 export function getReasoningEffortsOverride(
@@ -193,64 +90,16 @@ export function getReasoningEffortsOverride(
   if (!target) return null;
   if (bulk) return bulk.get(target.provider)?.get(target.modelId) ?? null;
 
-  try {
-    const row = getDbInstance()
-      .prepare(
-        "SELECT provider, model_id, override_key, override_value, refreshed_at " +
-          "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = 'reasoning_efforts'"
-      )
-      .get(target.provider, target.modelId) as OverrideRow | undefined;
-    const override = row ? toOverride(row) : null;
-    return override?.key === "reasoning_efforts" ? override.value : null;
-  } catch {
-    return null;
-  }
-}
-
-type OverrideInputValue = number | string | boolean | readonly string[];
-type NormalizedOverrideValue = number | boolean | ReasoningEffortOverrideValue[];
-
-/** Accepts a boolean or its "true"/"false" string form (query-string style input). */
-function normalizeBooleanValue(value: OverrideInputValue): boolean | null {
-  if (typeof value === "boolean") return value;
-  if (value === "true") return true;
-  if (value === "false") return false;
-  return null;
-}
-
-/** The value as stored for `key`, or null when it is not valid for that key. */
-function normalizeOverrideValue(
-  key: ModelCapabilityOverrideKey,
-  value: OverrideInputValue
-): NormalizedOverrideValue | null {
-  if (key === "reasoning_efforts") {
-    const parsed = Array.isArray(value)
-      ? parseReasoningEffortsOverride(value.join(","))
-      : parseReasoningEffortsOverride(typeof value === "string" ? value : "");
-    return parsed.ok ? parsed.efforts : null;
-  }
-  if (isBooleanKey(key)) return normalizeBooleanValue(value);
-  return isPositiveInteger(value) ? value : null;
+  const override = legacy.find(target.provider, target.modelId, "reasoning_efforts");
+  return override?.key === "reasoning_efforts" ? override.value : null;
 }
 
 export function setModelCapabilityOverride(
   target: string,
   key: ModelCapabilityOverrideKey,
-  value: OverrideInputValue
+  value: ModelCapabilityOverrideInputValue
 ): boolean {
-  const parsedTarget = parseModelOverrideTarget(target);
-  if (!parsedTarget || !isSupportedKey(key)) return false;
-
-  const normalizedValue = normalizeOverrideValue(key, value);
-  if (normalizedValue === null) return false;
-
-  getDbInstance()
-    .prepare(
-      "INSERT OR REPLACE INTO model_capability_overrides " +
-        "(provider, model_id, override_key, override_value, refreshed_at) " +
-        "VALUES (?, ?, ?, ?, datetime('now'))"
-    )
-    .run(parsedTarget.provider, parsedTarget.modelId, key, JSON.stringify(normalizedValue));
+  if (!legacy.set(target, key, value)) return false;
   invalidateDbCache("model-capabilities");
   return true;
 }
@@ -259,29 +108,11 @@ export function removeModelCapabilityOverride(
   target: string,
   key: ModelCapabilityOverrideKey
 ): boolean {
-  const parsedTarget = parseModelOverrideTarget(target);
-  if (!parsedTarget || !isSupportedKey(key)) return false;
-
-  const info = getDbInstance()
-    .prepare(
-      "DELETE FROM model_capability_overrides " +
-        "WHERE provider = ? AND model_id = ? AND override_key = ?"
-    )
-    .run(parsedTarget.provider, parsedTarget.modelId, key);
-  if (info.changes > 0) invalidateDbCache("model-capabilities");
-  return info.changes > 0;
+  const removed = legacy.remove(target, key);
+  if (removed) invalidateDbCache("model-capabilities");
+  return removed;
 }
 
 export function listModelCapabilityOverrides(): ModelCapabilityOverride[] {
-  try {
-    const rows = getDbInstance()
-      .prepare(
-        "SELECT provider, model_id, override_key, override_value, refreshed_at " +
-          "FROM model_capability_overrides ORDER BY refreshed_at DESC"
-      )
-      .all() as OverrideRow[];
-    return rows.map(toOverride).filter((entry): entry is ModelCapabilityOverride => entry !== null);
-  } catch {
-    return [];
-  }
+  return legacy.list();
 }
