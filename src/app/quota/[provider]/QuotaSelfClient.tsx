@@ -47,14 +47,14 @@ function deriveScreen(query: SelfServiceQuery<SelfQuotaResponse>, stored: Stored
 export default function QuotaSelfClient({ provider, providerName }: QuotaSelfClientProps) {
   const { stored, hold, confirmKey, unpersist, forget } = useStoredApiKey();
   const apiKey = stored?.key ?? null;
-  const { query, reload, adopt } = useSelfServiceQuery({
+  const { query, reload, adopt, epoch } = useSelfServiceQuery({
     path: quotaPath(provider),
     apiKey,
     // A module constant: the hook re-requests when the schema reference changes.
     schema: selfQuotaResponseSchema,
     refetchOnReturn: true,
   });
-  const lending = useLendingSave({ path: quotaPath(provider), apiKey, adopt, reload });
+  const lending = useLendingSave({ path: quotaPath(provider), apiKey, adopt, reload, epoch });
   const { status, keyFormMode, view, storageBlocked } = deriveScreen(query, stored);
 
   // Storage follows the server's verdict on the current key: kept once accepted, dropped once

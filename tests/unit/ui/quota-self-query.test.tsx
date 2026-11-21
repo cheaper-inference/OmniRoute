@@ -333,4 +333,26 @@ describe("useSelfServiceQuery", () => {
     act(() => result.current.adopt(quota("B"), KEY));
     expect(result.current.query).toEqual({ status: "idle" });
   });
+
+  it("adopt under an earlier epoch is dropped even when the key value matches", async () => {
+    const fetches = stubFetch();
+    const { result, rerender } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("A"));
+    const earlier = result.current.epoch;
+    rerender({ path: `${QUOTA}claude`, apiKey: null });
+    rerender({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(1, quota("A again"));
+    expect(result.current.epoch).not.toBe(earlier);
+
+    act(() => result.current.adopt(quota("Late"), KEY, earlier));
+    expect(result.current.query).toMatchObject({
+      status: "ready",
+      data: { pools: [{ name: "A again" }] },
+    });
+    act(() => result.current.adopt(quota("Now"), KEY, result.current.epoch));
+    expect(result.current.query).toMatchObject({
+      status: "ready",
+      data: { pools: [{ name: "Now" }] },
+    });
+  });
 });

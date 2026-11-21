@@ -85,8 +85,10 @@ function useEpoch(path: string, apiKey: string | null): number {
 /**
  * Reads one self-service route with the key held in this browser. `schema` must be a stable
  * reference (a module constant): a new object on each render starts a new request.
- * `adopt(data, forApiKey)` shows an answer obtained elsewhere (the view a write returned) as the
- * answer to the current request, only while `forApiKey` is still the key being read.
+ * `adopt(data, forApiKey, forEpoch)` shows an answer obtained elsewhere (the view a write returned)
+ * as the answer to the current request, only while `forApiKey` is still the key being read and,
+ * when given, `forEpoch` is still the hook's `epoch`: a key forgotten and typed again is a new
+ * epoch, so a write sent under the earlier one is dropped.
  */
 export function useSelfServiceQuery<T>(input: {
   path: string;
@@ -96,7 +98,8 @@ export function useSelfServiceQuery<T>(input: {
 }): {
   query: SelfServiceQuery<T>;
   reload: () => void;
-  adopt: (data: T, forApiKey: string) => void;
+  adopt: (data: T, forApiKey: string, forEpoch?: number) => void;
+  epoch: number;
 } {
   const { path, apiKey, schema, refetchOnReturn = false } = input;
   const epoch = useEpoch(path, apiKey);
@@ -105,9 +108,10 @@ export function useSelfServiceQuery<T>(input: {
   const reload = useCallback(() => setAttempt((value) => value + 1), []);
   const running = useRef<Running | null>(null);
 
-  const adopt = useCallback((data: T, forApiKey: string) => {
+  const adopt = useCallback((data: T, forApiKey: string, forEpoch?: number) => {
     const current = running.current;
     if (!current || current.apiKey !== forApiKey) return;
+    if (forEpoch !== undefined && current.request.epoch !== forEpoch) return;
     // A read still in flight may carry the view from before the write.
     current.controller.abort();
     const outcome: Settled<T> = { status: "ready", data, receivedAt: Date.now() };
@@ -147,5 +151,5 @@ export function useSelfServiceQuery<T>(input: {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [refetchOnReturn, readyAt, reload]);
 
-  return { query, reload, adopt };
+  return { query, reload, adopt, epoch };
 }

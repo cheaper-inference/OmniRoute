@@ -256,9 +256,31 @@ describe("self-service quota page lending refusals", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("forgetting the key during a save drops the answer", async () => {
+  it("forgetting the key during a save aborts the request and drops the answer", async () => {
     let answer: (response: Response) => void = () => {};
-    serve(
+    const calls = serve(
+      () => consent(),
+      () =>
+        new Promise<Response>((resolve) => {
+          answer = resolve;
+        })
+    );
+    await openCard();
+    changeAndSave();
+    const [sent] = callsTo(calls, QUOTA, "PATCH");
+    expect(sent.signal?.aborted).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Forget key" }));
+    expect(sent.signal?.aborted).toBe(true);
+    await act(async () =>
+      answer(jsonResponse(consent({ name: "Late pool", lendingPercent: 25, lendingActive: true })))
+    );
+    expect(screen.queryByRole("heading", { name: "Late pool" })).toBeNull();
+    expect(screen.getByLabelText("API key")).toBeTruthy();
+  });
+
+  it("an answer from before the same key was typed again is never shown", async () => {
+    let answer: (response: Response) => void = () => {};
+    const calls = serve(
       () => consent(),
       () =>
         new Promise<Response>((resolve) => {
@@ -268,11 +290,16 @@ describe("self-service quota page lending refusals", () => {
     await openCard();
     changeAndSave();
     fireEvent.click(screen.getByRole("button", { name: "Forget key" }));
+    enterKey(KEY);
+    expect(await screen.findByRole("heading", { name: "Pool A" })).toBeTruthy();
+    await screen.findByRole("heading", { name: "Lend your idle share" });
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(2);
     await act(async () =>
       answer(jsonResponse(consent({ name: "Late pool", lendingPercent: 25, lendingActive: true })))
     );
     expect(screen.queryByRole("heading", { name: "Late pool" })).toBeNull();
-    expect(screen.getByLabelText("API key")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Pool A" })).toBeTruthy();
+    expect(screen.queryByText("Your lending choice was saved.")).toBeNull();
   });
 
   it("the key is never logged during a save, and the card passes axe in each state", async () => {

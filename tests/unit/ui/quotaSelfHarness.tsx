@@ -183,6 +183,8 @@ export interface FetchCall {
   headers: Headers;
   /** The body when it is a string, else null. */
   body: string | null;
+  /** The abort signal the caller passed, if any. */
+  signal: AbortSignal | null;
 }
 
 export type FetchRoute = (call: FetchCall) => Response | Promise<Response>;
@@ -200,6 +202,7 @@ export function stubFetch(routes: Record<string, FetchRoute>): FetchCall[] {
       method: (init?.method ?? "GET").toUpperCase(),
       headers: new Headers(init?.headers),
       body: typeof init?.body === "string" ? init.body : null,
+      signal: init?.signal ?? null,
     };
     calls.push(call);
     const prefix = Object.keys(routes).find((candidate) => url.startsWith(candidate));

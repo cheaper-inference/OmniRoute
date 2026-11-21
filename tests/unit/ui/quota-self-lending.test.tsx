@@ -298,6 +298,46 @@ describe("self-service quota page lending card", () => {
     expect(patches(calls)).toHaveLength(1);
   });
 
+  it("two saves at once show the later-started one's view, and both cards say saved", async () => {
+    const OTHER_REF = "qpr_fedcba9876543210fedcba9876543210";
+    const two = (first: string, second: string) =>
+      quotaView({
+        pools: [
+          pool({ ref: LENDING_REF, borrowMode: "consent", name: first }),
+          pool({ ref: OTHER_REF, borrowMode: "consent", name: second }),
+        ],
+      });
+    const answers: Array<(response: Response) => void> = [];
+    const calls = serve(
+      () => two("Pool A", "Pool B"),
+      () =>
+        new Promise<Response>((resolve) => {
+          answers.push(resolve);
+        })
+    );
+    renderPage();
+    enterKey(KEY);
+    await screen.findByRole("heading", { name: "Pool B" });
+    const fields = screen.getAllByLabelText(PERCENT);
+    const saves = screen.getAllByRole("button", { name: "Save" });
+    fireEvent.change(fields[0], { target: { value: "10" } });
+    fireEvent.click(saves[0]);
+    fireEvent.change(fields[1], { target: { value: "20" } });
+    fireEvent.click(saves[1]);
+    await waitFor(() => expect(answers).toHaveLength(2));
+    expect(patches(calls).map((call) => JSON.parse(call.body ?? "").pool)).toEqual([
+      LENDING_REF,
+      OTHER_REF,
+    ]);
+
+    await act(async () => answers[1](jsonResponse(two("Second A", "Second B"))));
+    await act(async () => answers[0](jsonResponse(two("First A", "First B"))));
+    expect(screen.getAllByText("Your lending choice was saved.")).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "Second A" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "First A" })).toBeNull();
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(1);
+  });
+
   const stored = (over: Partial<SelfQuotaPool> = {}) =>
     quotaView({ pools: [pool({ ref: LENDING_REF, lendingPercent: 40, ...over })] });
 
