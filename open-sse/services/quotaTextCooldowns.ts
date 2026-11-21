@@ -12,6 +12,7 @@
 
 import { RateLimitReason } from "../config/constants.ts";
 import { parseDayGranularityResetMs, parseIsoDateTimeResetMs } from "./quotaResetParsing.ts";
+import { quotaTextSignalCountsForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
 
 type RateLimitReasonValue = (typeof RateLimitReason)[keyof typeof RateLimitReason];
 
@@ -61,6 +62,26 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     lower.includes("usage limit exceeded") ||
     // Model and account subscription limits are Claude-only, not generic RPM.
     isClaudeSubscriptionQuotaText(lower, provider)
+  );
+}
+
+/**
+ * Status-aware form of isSubscriptionQuotaText, under the same contract as the
+ * credit signal (creditsExhaustedForStatus.ts): a 400 often quotes the caller's
+ * own input back in its message, so on 400 the phrase counts only with a
+ * structured credit/quota code or for a provider whose documented 400 form is
+ * message-only. Every other status keeps the plain text match.
+ */
+export function isSubscriptionQuotaForStatus(
+  status: number,
+  provider: string | null | undefined,
+  errorText: string,
+  structured?: unknown
+): boolean {
+  const text = String(errorText || "");
+  return (
+    isSubscriptionQuotaText(text.toLowerCase(), provider) &&
+    quotaTextSignalCountsForStatus(status, provider, text, structured)
   );
 }
 

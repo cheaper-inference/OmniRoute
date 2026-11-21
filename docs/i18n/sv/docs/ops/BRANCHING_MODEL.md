@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute använder en **parallell cykelmodell** för releaser: en särskild `release/vX.Y.Z`-gren
-för den aktiva cykeln, `main` för den publicerade linjen och en oföränderlig
-`vX.Y.Z`-tagg när cykeln släpps. Det är förväntat att se commits hamna både på `release/*` _och_ på
-`main` — det är inte ett misstag.
+OmniRoute använder en** parallell-cykel** release-modell: en dedikerad `release/vX.Y.Z` gren för den aktiva cykeln, `main` för den publicerade raden och en oföränderlig `vX.Y.Z` -tagg när den cykeln skickas. Att se commit landa på `release/*` _och_ på `main` förväntas — inte en sammanblandning.
 
-Detaljer för ansvariga finns i `CLAUDE.md` (Strikt regel nr 21) och
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Den här sidan är den offentliga
-sammanfattningen för bidragsgivare.
+Underhållarens detaljer finns i `CLAUDE.md` (Hard Rule #21) och [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Den här sidan är en sammanfattning som vänder sig till publiken.
 
 ## I korthet
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` är inte integrationsgrenen för det dagliga arbetet. PR:er som öppnas mot `main`
 behöver vanligtvis riktas om innan de slås samman.
 
-## Releasefrysning (parallella cykler)
+## Släpp frysning (parallella cykler)
 
-När en release stäms av öppnas ett markörärende med etiketten `release-freeze`.
-Det **stoppar inte utvecklingen**:
+När en utgåva stäms av öppnas ett markörproblem märkt `release-freeze`. Att** stoppar inte utvecklingen** :
 
-- Den frysta `release/vX.Y.Z` tillhör releaseansvarig för den releasen.
-- Nästa cykels `release/vX+1` skapas från den frysta spetsen så att bidragsgivare kan fortsätta
-  få in ändringar.
-- Öppna PR:er som fortfarande riktar sig mot den frysta grenen ska **riktas om** till den
-  aktiva (högst numrerade) `release/v*`-grenen.
+- Den frusna `release/vX.Y.Z` tillhör släppkaptenen för det fartyget.
+- Nästa cykels `release/vX+1` skärs från den frusna spetsen så att bidragsgivarna fortsätter att landa.
+- Öppna PRs som fortfarande riktar sig mot den frusna grenen** omriktat** till den aktiva (högsta) `release/v*` -grenen.
 
-Kontrollera om det finns en aktiv frysning innan du antar att grenen du vill använda kan slås samman:
+Kontrollera om det finns en öppen frysning innan du antar att grenen du vill ha är sammanfogbar:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Sammanslagningsmekaniken (ägarens `queue`-etikett → Mergify) dokumenteras i
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Merge mekanik (ägare `queue` label → Mergify) dokumenteras i [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: Mergify-sammanslagningskön har tagits bort** (ägarens beslut). `.mergify.yml` definierar inte längre en kö och vägrar Mergify-kommandona som sammanfogar eller skriver om en pull-begäran. Release PRs slås samman för hand under repository-regeluppsättningen "Kräv gröna grindar på den aktiva releasen" (`Gate / CI` + `Gate / Quality`) tills omni-queue körs i live-läge, och genom omni-queue efter det ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` etiketten sammanfogar inte längre någonting.
 
 ## Varför både en gren och en tagg?
 

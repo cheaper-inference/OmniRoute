@@ -106,33 +106,22 @@ ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get i
   منٹ لگے، جبکہ ڈسک سے اپ لوڈ ہونے میں 2 منٹ لگے۔
 - `.15` VPS صرف homologation کے لیے ہے — اس پر کبھی CI runners نہیں چلتے۔
 
-## ہوسٹڈ لین (GitHub-hosted runners)
+## ہوسٹڈ لین (GitHub کی میزبانی کرنے والے رنرز)
 
-یہ repository `cheaper-inference` تنظیم کی ہے، **Team** پلان پر: **60 بیک وقت ہوسٹڈ jobs**، جو تنظیم کی ہر repository، ہر PR چیک، ہر push سے متحرک ہونے والے workflow اور CodeQL کے default setup کے درمیان مشترک ہیں۔ نیچے دیے گئے اعداد و شمار **Pro** پلان (40 بیک وقت ہوسٹڈ jobs) پر ماپے گئے تھے۔ 2026-10-18 کو
-`release/v3.8.52` پر merge مہم (~10 merges/hour) کے دوران پیمائش کی گئی: **24 h میں
-2,500 workflow runs بنے**، 6 h میں branch پر 44 pushes ہوئے، اور **106 hosted jobs قطار میں تھے** جبکہ PR چیکس
-گھنٹوں انتظار کرتے رہے اور PRs ان کے بغیر merge کر دیے گئے۔ branch پر ہر push کے ساتھ نو workflows متحرک ہوئے:
+ذخیرے کا تعلق `cheaper-inference` تنظیم سے ہے۔** ٹیم** منصوبہ:** 60 ایک ساتھ میزبانی کی نوکریاں** ، تنظیم میں ہر ذخیرے، ہر PR چیک، ہر پش ٹرگرڈ ورک فلو اور CodeQL کے ڈیفالٹ سیٹ اپ کے ذریعے اشتراک کیا جاتا ہے۔ ذیل کے اعداد و شمار کو پر ماپا گیا تھا۔** پرو** منصوبہ (40 ایک ساتھ میزبانی کی نوکریاں)۔ انضمام کی مہم کے دوران 2026-10-18 کو پیمائش کی گئی (~ 10 merges/hour on `release/v3.8.52`):** 24 گھنٹے میں 2,500 ورک فلو رن بنائے گئے۔** ، 44 6 گھنٹے میں شاخ کی طرف دھکیلتا ہے،** 106 میزبان ملازمتیں قطار میں ہیں۔** جبکہ PR چیک گھنٹوں انتظار کرتے رہے اور PRs ان کے بغیر ضم ہو گئے۔ برانچ کو ہر دھکے پر نو ورک فلو فائر کیے گئے:
 
-| `release/v*` پر فی push                     |       hosted jobs | طوفان کے دوران نتیجہ                                          | 2026-10-18 سے                                                                      |
-| ------------------------------------------- | ----------------: | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `ci.yml` (مکمل matrix)                      | زیادہ سے زیادہ 30 | اگلے push سے منسوخ، ایک دن میں 24 میں سے 24                   | `release/**` pushes پر شروع نہیں ہوتا (PR run + Release-Green)                     |
-| `quality.yml`                               |                ~6 | منسوخ، 23 میں سے 23                                           | `release/**` pushes پر شروع نہیں ہوتا                                              |
-| `Release-Green` `--quick`                   |                 0 | `omni-build` پر چلا، 100 میں سے 97 منسوخ                      | `omni-release` slot، کبھی منسوخ نہیں ہوتا، زیرِ التوا run یکجا ہو جاتا ہے          |
-| `Lock released branch`, `OpenSSF Scorecard` |                 2 | ہر push پر ایک run قطار میں                                   | فی ref ایک run (`tests/unit/build/hosted-lane-concurrency.test.ts`)                |
-| `Release acceptance` (shadow رپورٹ)         |                 1 | ہر push پر ایک hosted `npm ci`، کبھی منسوخ نہیں ہوا           | غیر تبدیل شدہ — `paths:` filter کے لیے امیدوار                                     |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                 2 | فی push منسوخ؛ amd64 مرحلہ `omni-build` پر مقابلہ کرتا ہے     | غیر تبدیل شدہ — مالک کا deploy چینل                                                |
-| CodeQL default setup (`dynamic`)            |                 4 | فی push `javascript-typescript`، `actions`، `c-cpp`، `python` | غیر تبدیل شدہ — Settings → Code security؛ `c-cpp`/`python` یہاں کچھ scan نہیں کرتے |
+| `release/v*` پر دھکا                        | میزبانی کی ملازمتیں | طوفان کے تحت نتیجہ                                            | 2026-10-18 سے                                                                         |
+| ------------------------------------------- | ------------------: | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `ci.yml` (مکمل میٹرکس)                      |               30 تک | ایک دن میں 24 میں سے 24 اگلے دھکے سے منسوخ کر دیا گیا۔        | `release/**` pushes پر شروع نہیں ہوا (PR رن + ریلیز-گرین)                             |
+| `quality.yml`                               |                  ~6 | منسوخ، 23 میں سے 23                                           | `release/**` pushes پر شروع نہیں ہوا۔                                                 |
+| `Release-Green` `--quick`                   |                   0 | `omni-build` پر چلایا، 100 میں سے 97 کو منسوخ کر دیا۔         | `omni-release` سلاٹ، کبھی منسوخ نہیں، زیر التواء رن کے خاتمے                          |
+| `Lock released branch`, `OpenSSF Scorecard` |                   2 | ایک قطار میں رن فی پش                                         | ایک رن فی ریف (`tests/unit/build/hosted-lane-concurrency.test.ts`)                    |
+| `Release acceptance` (شیڈو رپورٹ)           |                   1 | ایک میزبان `npm ci` فی پش، کبھی منسوخ نہیں ہوا۔               | `paths:` فلٹر کے لیے غیر تبدیل شدہ — امیدوار                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                   2 | منسوخ فی دھکا؛ amd64 leg `omni-build` پر مقابلہ کرتا ہے۔      | غیر تبدیل شدہ — مالک کا تعیناتی چینل                                                  |
+| CodeQL ڈیفالٹ سیٹ اپ (`dynamic`)            |                   4 | `javascript-typescript`، `actions`، `c-cpp`، `python` فی دھکا | غیر تبدیل شدہ — سیٹنگز → کوڈ سیکیورٹی؛ `c-cpp`/`python` یہاں کچھ بھی نہیں اسکین کریں۔ |
 
-`tests/unit/build/push-storm-diet.test.ts`، `ci.yml` اور
-`quality.yml` کے صرف `main` والے push trigger کو برقرار رکھتا ہے۔ ضمنی اثر: Codecov کو اب ہر release push پر base upload موصول نہیں ہوتا (یہ
-step معلوماتی ہے اور `continue-on-error` ہے)؛ repository کے اندر coverage gate اور PR comment
-متاثر نہیں ہوتے۔
+`tests/unit/build/push-storm-diet.test.ts` `ci.yml` اور `quality.yml` کے `main` -only پش ٹرگر کو پن کرتا ہے۔ ضمنی اثر: Codecov اب فی ریلیز پش بیس اپ لوڈ وصول نہیں کرتا ہے (مرحلہ معلوماتی اور `continue-on-error` ہے)؛ ان ریپو کوریج گیٹ اور PR تبصرہ غیر متاثر ہیں۔
 
-**مزید self-hosted گنجائش hosted queue کا مسئلہ حل نہیں کرتی۔** devbox
-(`devbox-vm-06-dev002`، 24 vCPU / 54 GB) ایک runner ہوسٹ کر سکتا ہے، لیکن agent sessions پہلے ہی
-اس کا load 20–26 پر رکھتے ہیں، agent container میں Docker daemon نہیں ہے، اور سیر شدہ لین
-hosted لین ہے۔ اسی وقت `.113` باکس میں 71 GB خالی جگہ اور load 5–8 تھا؛ اس کی حد
-اوپر دیا گیا فی listener memory budget ہے (زیادہ سے زیادہ 6 listeners)، CPU نہیں۔ باقی دستیاب طریقے
-عمل سے متعلق ہیں: مہم کے PRs کو Mergify queue کے ذریعے land کریں (`label=queue`، batches فی PR ایک run
-اور فی push ایک run کے بجائے ایک `merge_group` CI run مشترک طور پر استعمال کرتے ہیں)، CodeQL
-default-setup کی languages کم کریں، اور `release-acceptance.yml` کو اس کی پڑھی جانے والی files کے مطابق filter کریں۔
+**زیادہ خود میزبانی میزبانی کی قطار کو ٹھیک نہیں کرتی ہے۔** devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) ایک رنر کی میزبانی کر سکتا ہے، لیکن ایجنٹ سیشنز پہلے سے ہی اس کا بوجھ 20-26 پر رکھتا ہے، ایجنٹ کنٹینر میں کوئی Docker ڈیمون نہیں ہے، اور سیر شدہ لین میزبان ہے۔ `.113` باکس میں 71 GB مفت اور ایک ہی لمحے میں 5–8 لوڈ؛ اس کی رکاوٹ اوپر فی سننے والا میموری بجٹ ہے (سیلنگ 6 سننے والے)، CPU نہیں۔ بقیہ لیورز پراسیس والے ہیں: زمینی مہم PRs مرگیفائی قطار کے ذریعے (`label=queue`، بیچز ایک `merge_group` CI رن فی PR پلس ون فی پش کے بجائے شیئر کرتے ہیں)، CodeQL ڈیفالٹ سیٹ اپ لینگویجز کو تراشیں، اور `release-acceptance.yml` ان فائلوں سے فلٹر کریں۔
+
+> **2026-11-19: مرجائف انضمام کی قطار ریٹائر ہو گئی ہے۔** (مالک کا فیصلہ) `.mergify.yml` اب قطار کی وضاحت نہیں کرتا ہے اور Mergify کمانڈز سے انکار کرتا ہے جو پل کی درخواست کو ضم یا دوبارہ لکھتے ہیں۔ ریلیز PRs ریپوزٹری رولسیٹ کے تحت ہاتھ سے ضم کیا جاتا ہے "ایکٹو ریلیز پر گرین گیٹس کی ضرورت ہے" (`Gate / CI` + `Gate / Quality`) جب تک کہ omni-queue لائیو موڈ میں نہیں چلتی، اور اس کے بعد omni-queue کے ذریعے ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) )۔ اوپر والا مرجائف لیور اب موجود نہیں ہے۔

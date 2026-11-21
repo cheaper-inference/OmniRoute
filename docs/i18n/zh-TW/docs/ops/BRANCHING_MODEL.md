@@ -41,25 +41,23 @@ flowchart LR
 `main` 並非日常整合分支。以 `main` 為目標開啟的 PR
 通常需要在合併前重新設定目標分支。
 
-## 發布凍結（平行週期）
+## 釋放凍結（並行循環）
 
-當某個發布版本正在進行核對整合時，會開啟一個標有 `release-freeze` 標籤的標記議題。
-這**不會停止開發**：
+當協調某個版本時，會開啟一個標記為`release-freeze`標記問題。那**並沒有停止發展**:
 
-- 已凍結的 `release/vX.Y.Z` 由該次發布的發布負責人管理。
-- 下一個週期的 `release/vX+1` 會從已凍結的頂端切出，讓貢獻者可以繼續
-  提交工作。
-- 仍以已凍結分支為目標的開放 PR，應該**重新設定目標**至
-  目前進行中的（版本最高的）`release/v*` 分支。
+- 凍結的`release/vX.Y.Z`屬於該船的釋放船長。
+- 下一個週期的`release/vX+1`將從凍結的尖端中刪除，以便貢獻者可以繼續工作。
+- 打開仍以凍結分支為目標的PRs應該是**重新定位**到活動（最高） `release/v*`分支。
 
-在假設所需分支可以合併之前，請先檢查是否有進行中的凍結：
+在假設您想要的分支可合併之前，請檢查開啟的凍結：
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-合併機制（擁有者新增 `queue` 標籤 → Mergify）記載於
-[MERGE_TRAIN.md](./MERGE_TRAIN.md)。
+合併機制（所有者`queue`標籤→ Mergify）記錄在[MERGE_TRAIN.md](./MERGE_TRAIN.md) 。
+
+> **2026-11-19：Mergify 合併隊列退役**（所有者的決定）。 `.mergify.yml`不再定義佇列並拒絕合併或重寫拉取請求的 Mergify 指令。版本PRs在儲存庫規則集「活動版本上需要綠色閘門」(`Gate / CI` + `Gate / Quality`) 下手動合併，直到全佇列在即時模式下運行，然後透過全佇列 ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 進行合併。 `queue`標籤不再合併任何內容。
 
 ## 為什麼同時需要分支和標籤？
 

@@ -19,15 +19,17 @@
 
 ### የእጩዎች መግቢያ
 
-CI እና የጥራት ጌትስ የስራ ፍሰቶች እያንዳንዳቸው የተረጋጋ ብይን ይሰጣሉ `Gate / CI` እና `Gate / Quality`. የእነርሱ ስሪት ያለው የመግቢያ ፖሊሲ እንደ አስፈላጊነቱ ወይም እንደ ምክር ሁሉንም የወራጅ ስራዎችን ይዘረዝራል። የሚመለከተው አስፈላጊ ሥራ ሊሳካለት ይገባል፡ የጠፋ፣ የተሰረዘ፣ የተዘለለ፣ በመጠባበቅ ላይ እና ያልታወቁ ውጤቶች PASS መመስረት አይችሉም። የሚሰራ ሰነዶች-ብቻ ወይም ካታሎግ-ብቻ ምደባ የኮድ መስመርን የማይተገበር ያደርገዋል። ረቂቅ PR ተቀባይነት ያለው እጩ አይደለም። የ `hotfix` መለያ ማስረጃን አይተውም።
+CI እና የጥራት ጌትስ የስራ ፍሰቶች እያንዳንዳቸው የተረጋጋ ብይን ይሰጣሉ `Gate / CI` እና `Gate / Quality`. የእነርሱ ስሪት ያለው የመግቢያ ፖሊሲ እንደ አስፈላጊነቱ ወይም እንደ ምክር ሁሉንም የወራጅ ስራዎችን ይዘረዝራል። የሚመለከተው አስፈላጊ ሥራ ስኬታማ መሆን አለበት፡ ጠፍቷል፣ የተሰረዘ፣ የተዘለለ፣ በመጠባበቅ ላይ እና ያልታወቁ ውጤቶች PASS መመስረት አይችሉም። የሚሰራ ሰነዶች-ብቻ ወይም ካታሎግ-ብቻ ምደባ የኮድ መስመርን የማይተገበር ያደርገዋል። ረቂቅ PR ተቀባይነት ያለው እጩ አይደለም። የ `hotfix` መለያ ማስረጃን አይተውም።
 
 ሁለቱም የስራ ፍሰቶች PRs ወደ main/release ቅርንጫፎች ይሸፍናሉ፣ ወደ `main` ይገፋሉ፣ በእጅ መላኪያ እና የቡድን ውህደት ክስተቶች። ሙሉ ምርጫውን ይግፉ፣ ይላኩ እና ያዋህዱ። ወደ `release/**` የሚገፋፉ አይጀምራቸውም (2026-10-18)፡ እያንዳንዱ ለውጥ ማትሪክስ ቀድሞውንም በ PR ላይ ሰርቷል እና የተዋሃደው ጥምር የልቀት-አረንጓዴ ስራ ነው (`docs/ops/RUNNER_BOX.md` → የሚስተናገድ ሌይን)። ሹካ እና የተዋሃዱ ቡድኖች በራሳቸው የሚስተናገዱ ሯጮችን ለሚመርጡ ስራዎች የተስተናገዱ ሯጮችን ይጠቀማሉ። ከታቀደው ልቀት በፊት በቂ የተስተናገደ አቅም መረጋገጥ አለበት።
 
 አንድ ተራ PR ፈጣን ምርጫን ያካሂዳል. የ `full-code` እና `full-code-e2e` የመግቢያ ፖሊሲ መስመሮች (E2E፣ ውህደት፣ የጥቅል ቅርስ፣ Electron ጭስ፣ Bun SQLite፣ ምህዳር እና ፕሮቶኮል ደንበኞች) በ Mergify ወረፋ ረቂቅ ወይም ሙሉ ሩጫ ላይ ብቻ ይሰራሉ `gh workflow run ci.yml --ref <branch>`.
 
-እያንዳንዱ JSON ደረሰኝ ተመዝግቦ የወጣውን SHA፣ የስራ ሂደትን እና ሙከራን ይለያል። CLI የ checkout/event SHA አለመዛመድን ውድቅ ያደርጋል። የስራ ፍሰት ሙከራዎች የፖሊሲ አባልነትን ከፍርዱ ስራ `needs` ዝርዝር ጋር ስለሚያቆራኙ አዲስ ወይም የተወገደ መስመር በፀጥታ ሊጠፋ አይችልም። ደረሰኞቹ የራሳቸውን የስራ ሂደት ይሸፍናሉ እንጂ ማተምን፣ ማሰማራትን ወይም ነባር የአማካሪ ስካነርን ውስጣዊ ነገሮች አይሸፍኑም። በቅርንጫፍ ደንቦች ውስጥ ሁለቱንም የቼክ ስሞች ማግበር የተለየ አስተዳደራዊ ለውጥ ነው; እነዚህን ስራዎች መጨመር እራሱን ቅርንጫፍ አይከላከልም.
+እያንዳንዱ JSON ደረሰኝ ተመዝግቦ የወጣውን SHA፣ የስራ ሂደትን እና ሙከራን ይለያል። CLI የ checkout/event SHA አለመዛመድን ውድቅ ያደርጋል። የስራ ፍሰት ሙከራዎች የፖሊሲ አባልነትን ከፍርዱ ስራ `needs` ዝርዝር ጋር ስለሚያቆራኙ አዲስ ወይም የተወገደ መስመር በፀጥታ እንዳይጠፋ። ደረሰኞቹ የራሳቸውን የስራ ሂደት ይሸፍናሉ እንጂ ማተምን፣ ማሰማራትን ወይም ነባር የአማካሪ ስካነርን ውስጣዊ ነገሮች አይሸፍኑም። በቅርንጫፍ ደንቦች ውስጥ ሁለቱንም የቼክ ስሞች ማግበር የተለየ አስተዳደራዊ ለውጥ ነው; እነዚህን ስራዎች መጨመር እራሱን ቅርንጫፍ አይከላከልም.
 
 ### ወረፋ አዋህድ
+
+> **2026-11-19፡ የመርግፋይ ውህደት ወረፋ ጡረታ ወጥቷል።** (የባለቤቱ ውሳኔ). `.mergify.yml` ከአሁን በኋላ ወረፋን አይገልጽም እና የመሳብ ጥያቄን የሚያዋህዱ ወይም የሚጽፉ የ Mergify ትዕዛዞችን አይቀበልም። ልቀቅ PRs በማከማቻ ደንቡ መሠረት "በነቃ ልቀቱ ላይ አረንጓዴ በሮች ጠይቅ" (`Gate / CI` + `Gate / Quality`) omni-ወረፋ በቀጥታ ሁነታ ላይ እስኪሄድ ድረስ እና ከዚያ በኋላ በኦምኒ ወረፋ ( [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md) ) ስር ይደባለቃሉ። ከዚህ በታች የተገለጹት የ Mergify ረቂቆች የስራ ፍሰት አያያዝ አሁንም በ `ci.yml` እና `quality.yml` ነው፣ ነገር ግን ምንም የ Mergify ረቂቅ ከአሁን በኋላ አልተከፈተም።
 
 `queue` መለያው ወደ Mergify ወረፋ (`.mergify.yml`) PR ይልካል። Mergify ረቂቅ PR በ `mergify/merge-queue/` ቅርንጫፍ ላይ ይከፍታል፣ CI ሙሉውን ምርጫ እዚያ ያካሂዳል፣ እና የመጀመሪያው PR `Gate / CI`, `Gate / Quality` እና `Merge integrity (changelog + generated skills)` ሲያልፍ ይዋሃዳሉ።
 
@@ -37,7 +39,7 @@ Mergify የወረፋ ማጠቃለያውን ወደ ረቂቁ መግለጫ ይጽ�
 
 ### በተቀባይ ተቀባይ ውስጥ የተያዙ ማስረጃዎች
 
-`scripts/quality/validate-release-acceptance.mjs` የቀረበውን እቅድ እና መግለጫዎቹን ይቀንሳል; እቅዱ ሙሉ ለሙሉ የመልቀቂያ ቧንቧን እንደሚሸፍን አያረጋግጥም. የእሱ ሪፖርቶች በግልጽ `releaseAcceptance: false` ያስቀምጣሉ፣ ምንም እንኳን ያ እቅድ `VERIFIED` ቢሆንም። የ `release-acceptance.yml` የስራ ፍሰቱ አሁንም የጥላ ዕቃዎችን ይጠቀማል እንጂ እውነተኛ ግንባታ፣ ጥቅል፣ ቡት ወይም የማስተዋወቂያ ደረሰኞች አይደለም።
+`scripts/quality/validate-release-acceptance.mjs` የቀረበውን እቅድ እና መግለጫዎቹን ይቀንሳል; እቅዱ የተጠናቀቀውን የመልቀቂያ ቧንቧ የሚሸፍን መሆኑን አያረጋግጥም. የእሱ ሪፖርቶች በግልጽ `releaseAcceptance: false` ያስቀምጣሉ፣ ምንም እንኳን ያ እቅድ `VERIFIED` ቢሆንም። የ `release-acceptance.yml` የስራ ፍሰቱ አሁንም ቢሆን የጥላ ዕቃዎችን ይጠቀማል እንጂ እውነተኛ ግንባታ፣ ጥቅል፣ ቡት ወይም የማስተዋወቂያ ደረሰኞች አይደለም።
 
 የተያዙ ማስረጃዎችን ለማረጋገጥ CLI `--evidence-root` ያስፈልገዋል። ፋይሎች እንደ `<evidence-root>/<artifact_id>/<member>` እና hashed እንደ SHA-256 ተፈትተዋል። የ PASS መዝገብ ያለ ማስረጃ፣ የጠፋ ወይም የተለወጠ ፋይል፣ ደህንነቱ ያልተጠበቀ መንገድ ወይም ሲምሊንክ ማረጋገጥን ይከለክላል። የጎደሉ ፋይሎች ስኬታማ ከሆኑ ምዝግብ ማስታወሻዎች ባዶ ጋር እኩል አይደሉም። አሁን ያሉት SHA/run/attempt ቼኮች ነጻ ሆነው ይቆያሉ፡ ተዛማጅ ባይት የቆየ ደረሰኝን ማዳን አይችልም። የፋይል ታማኝነት የአፈፃፀም ትክክለኛነት ወይም የቅርስ ማስተዋወቅ ማረጋገጫ አይደለም።
 
@@ -47,7 +49,7 @@ Mergify የወረፋ ማጠቃለያውን ወደ ረቂቁ መግለጫ ይጽ�
 
 የተመረጡትን ተለዋጭ ስሞች ሳትፈጽም ለመመርመር `npm run quality:scan -- --list` ወይም `npm run quality:scan:fast -- --list` ይጠቀሙ። ሯጩ የ npm መግቢያ ነጥብን ይጠራል፣ ስለዚህ የሩጫ ሰዓቱ (ከተዋቀረ Bun ጨምሮ) ተጠብቆ ይቆያል። አንጸባራቂው ከነዚያ መገለጫዎች ውጭ ተለዋጭ ስሞችን ለብቻው በተጠራ መልኩ ይመዘግባል፣ እና የጥገና ትዕዛዞች በተነባቢ-ብቻ ቅኝት መገለጫዎች የተከለከሉ ናቸው።
 
-እነዚህ መገለጫዎች የማይንቀሳቀስ ቅኝትን ብቻ ይሸፍናሉ። የምርት ሙከራዎችን፣ ሽፋንን፣ ማሸግን፣ የውጭ ቼኮችን ወይም የእጩን ሙሉ ልቀት መቀበልን አያረጋግጡም። የስራ ፍሰት መግቢያ የተገናኘውን `config/quality/admission-policy.json` እና `scripts/quality/admission-verdict.mjs` ይጠቀማል። የመልቀቂያ-ታዛቢ መገለጫዎች ተለይተው ይቀራሉ; የሚመለከታቸውን ቼኮች እና ደረሰኞች በተናጥል ይፈትሹ። የሙሉ ተመልካቾች የማይለዋወጡ ትዕዛዞች `audit:deps`፣ ሚውቴሽን-ሙከራ ምርጫ እና የትርጉም ፍተሻዎችን ጨምሮ በ `config/quality/release-green-static-profile.json` ውስጥ ተገልፀዋል። ጫኚው የ npm ትዕዛዞችን በ package.json እና በተቀረጹ CI/Quality መግለጫዎች ላይ ያረጋግጣል። የሼል ቶከኖችን እንደ ክርክር ከማስፈጸም ይልቅ ተንሸራታትን ውድቅ ያደርጋል። የሚያስፈልግ ስካነር SKIP/INCOMPLETE ውፅዓት PASS መመስረት አይችልም። መገለጫው ውጫዊ ማግለያዎቹን ይመዘግባል እና የተስተናገደ ሽፋን፣ የሙከራ ማትሪክስ፣ ጥቅል ወይም የማሰማራት ማስረጃን አይተካም። ከታች ያለው የስድ መዝገብ ዝርዝር ዋቢ እንጂ በር በትክክል መሮጡን ማረጋገጫ አይደለም።
+እነዚህ መገለጫዎች የማይንቀሳቀስ ቅኝትን ብቻ ይሸፍናሉ። የምርት ሙከራዎችን፣ ሽፋንን፣ ማሸግን፣ የውጭ ቼኮችን ወይም የእጩን ሙሉ ልቀት መቀበሉን አያረጋግጡም። የስራ ፍሰት መግቢያ የተገናኘውን `config/quality/admission-policy.json` እና `scripts/quality/admission-verdict.mjs` ይጠቀማል። የመልቀቂያ-ታዛቢ መገለጫዎች ተለይተው ይቀራሉ; የሚመለከታቸውን ቼኮች እና ደረሰኞች በተናጥል ይፈትሹ። የሙሉ ተመልካቾች የማይለዋወጡ ትዕዛዞች `audit:deps`፣ ሚውቴሽን-ሙከራ ምርጫ እና የትርጉም ፍተሻዎችን ጨምሮ በ `config/quality/release-green-static-profile.json` ውስጥ ታውጇል። ጫኚው የ npm ትዕዛዞችን በ package.json እና በተቀረጹ CI/Quality መግለጫዎች ላይ ያረጋግጣል። የሼል ቶከኖችን እንደ ክርክር ከማስፈጸም ይልቅ ተንሸራታትን ውድቅ ያደርጋል። የሚያስፈልግ ስካነር SKIP/INCOMPLETE ውፅዓት PASS መመስረት አይችልም። መገለጫው ውጫዊ ማግለያዎቹን ይመዘግባል እና የተስተናገደ ሽፋን፣ የሙከራ ማትሪክስ፣ ጥቅል ወይም የማሰማራት ማስረጃን አይተካም። ከታች ያለው የስድ መዝገብ ዝርዝር ዋቢ እንጂ በር በትክክል መሮጡን ማረጋገጫ አይደለም።
 
 ስክሪፕቶች በ `scripts/check/` (የፖሊሲ በሮች) እና `scripts/quality/` (የራትቼ ሞተር) ስር ይኖራሉ። CI የእውነት ምንጭ `.github/workflows/ci.yml` ነው።
 
@@ -64,9 +66,9 @@ Mergify የወረፋ ማጠቃለያውን ወደ ረቂቁ መግለጫ ይጽ�
 
 #### የተረሱ ወንድም እህት ፈተናዎች ሪፖርት ያደርጋሉ
 
-`npm run check:forgotten-sibling-tests` እንደ `Fast Quality Gates` የአማካሪ ደረጃ ይሰራል እና የማስመጣት ፈላጊውን ከሙከራ-ተጽእኖ ካርታው ጀርባ እንደገና ይጠቀማል። ለእያንዳንዱ የተለወጠ የምርት ሞጁል፣ የእጩው ፈተና ከመጎተት-ጥያቄ ልዩነት በማይኖርበት ጊዜ ቆራጥ የሆኑ `changed module/symbol -> static consumer -> candidate sibling test` ሰንሰለቶችን ሪፖርት ያደርጋል። የ Markdown ማጠቃለያ እና JSON ውጤት ከማንኛውም ማገድ መልቀቅ በፊት እንደ `forgotten-sibling-tests` የስራ ፍሰት ቅርስ ሆኖ እንዲቆይ ተደርጓል።
+`npm run check:forgotten-sibling-tests` እንደ `Fast Quality Gates` የማማከር ደረጃ ይሰራል እና ከሙከራ-ተፅእኖ ካርታ በስተጀርባ የማስመጣት ፈላጊውን እንደገና ይጠቀማል። ለእያንዳንዱ የተለወጠ የምርት ሞጁል፣ የእጩው ፈተና ከመጎተት-ጥያቄ ልዩነት በማይኖርበት ጊዜ ቆራጥ የሆኑ `changed module/symbol -> static consumer -> candidate sibling test` ሰንሰለቶችን ሪፖርት ያደርጋል። የማርክዳው ማጠቃለያ እና JSON ውጤት ከማናቸውም የማገድ ልቀት በፊት እንደ `forgotten-sibling-tests` የስራ ፍሰት ቅርስ ሆኖ እንዲቆይ ተደርጓል።
 
-በርሜል እንደገና ወደ ውጭ መላክ እና ተለዋዋጭ ወደ ሀገር ውስጥ መግባቶች የመፍትሄ ምርመራዎች ብቻ ናቸው; የማገድ ግኝትን ፈጽሞ አይፈጥሩም። የተገመገሙ ልዩ ሁኔታዎች በ `config/quality/forgotten-sibling-allowlist.json` ውስጥ ይኖራሉ። እያንዳንዱ ግቤት የሸማቹን እና የእጩዎችን ፈተና መሰየም፣ የተለየ ምክንያት መስጠት እና GitHub ጉዳይን ማገናኘት ወይም የመሳብ ጥያቄን ማያያዝ አለበት። የተበላሹ ምዝግቦች አልተዘጉም። ልዩ ሁኔታዎች የተሰረዘ እጩ ፈተናን ወይም `.skip`/`.todo` የሚጨምር ልዩነትን ማፈን አይችሉም። ማዳከም እና ሌሎች ጭንብል መሸፈኛዎች በተናጥል በተዘጋው `check:test-masking` በር ባለቤትነት ይቆያሉ።
+በርሜል እንደገና ወደ ውጭ መላክ እና ተለዋዋጭ ወደ አገር ውስጥ መግባቶች የመፍትሄ ምርመራዎች ብቻ ናቸው; የማገድ ግኝትን ፈጽሞ አይፈጥሩም። የተገመገሙ ልዩ ሁኔታዎች በ `config/quality/forgotten-sibling-allowlist.json` ውስጥ ይኖራሉ። እያንዳንዱ ግቤት የሸማቹን እና የእጩዎችን ፈተና መሰየም፣ የተለየ ምክንያት መስጠት እና GitHub ጉዳይን ማገናኘት ወይም የመሳብ ጥያቄን ማያያዝ አለበት። የተበላሹ ምዝግቦች አልተዘጉም። ልዩ ሁኔታዎች የተሰረዘ እጩ ፈተናን ወይም `.skip`/`.todo` የሚጨምር ልዩነትን ማፈን አይችሉም። ማዳከም እና ሌሎች ጭንብል መሸፈኛዎች በተናጥል በተዘጋው `check:test-masking` በር ባለቤትነት ይቆያሉ።
 
 ### ሥራ `lint`
 
@@ -175,11 +177,11 @@ Mergify የወረፋ ማጠቃለያውን ወደ ረቂቁ መግለጫ ይጽ�
 
 `scripts/i18n/sync-llm-mirrors.mjs` (እንዲሁም እንደ `syncLlmMirrors()` ወደ ውጭ ይላካል, ከ `--dry-run` ጋር) የ `llm.txt` መስተዋቶችን እንደገና ይጽፋል; የመልቀቂያው አድስ፣ የትርጉም ሞገድ እና የታቀደው `i18n-mirror-refresh.yml` ያካሂዱት (ማደሱ የቆዩ `llm.txt` መስተዋቶችን በደረቅ ሩጫ ይገነዘባል፣ ተንሳፋፊ ሪፖርቱ ስለማይዘረዝራቸው እና ከ `check:docs-all` በፊት ያመሳስላቸዋል)።
 
-በ `docs/diagrams/` ስር ያሉት አስራ ሁለቱ README SVGs ይፈጠራሉ (`scripts/docs/gen-readme-<name>.mjs`፣ `npm run docs:readme-diagrams` ሁሉንም ያድሳል)። እያንዳንዱ የባይት-ንጽጽር አሃድ ሙከራ (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) ያለው የተፈፀመው ፋይል በመልቀቂያ ሁነታ ላይ ሲያልቅ የማይሳካው; በ PR፣ `check:generated-artifacts` አንድ SVG PR አርትዖቶችን ይፈርዳል እና የመሠረቱ ተንሸራታች ለመልቀቂያው እድሳት ይቀራል ( [የተፈጠሩ ፋይሎችን እና የመነሻ መስመሮችን](#generated-files-and-derived-baselines-written-at-release) ይመልከቱ) — እና `check:docs-counts` ቀኖናዊ ቁጥሮችን ከ `<text>` nodes — ያነባሉ ለዚህም ነው የዝርዝር ሂደቱ በፋይሉ ውስጥ ያሉትን እያንዳንዱን ሕብረቁምፊዎች በማይታይ `<text>` ያቆየዋል። የ SVG ቀኖናዊ-ቁጥሮች ቼክ በ `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) የተዘረዘሩትን ፋይሎች ያነባል `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` እና `tier-flow-light.svg` የነፃው-ዘላለም፣ ካታሎግ-መግቢያ፣ ተደጋጋሚ ገንዳ እና የውጤት መንስኤዎች የይገባኛል ጥያቄዎች በተጨማሪ `promise-pillars.svg`, `free-tier-budget.svg` እና `strategies-grid.svg` አንብበዋል. እነዚህ ጄነሬተሮች የሚሳሉት ቆጠራዎች (የአቅራቢው ጠቅላላ፣ MCP መሣሪያዎች፣ የማዞሪያ ስልቶች፣ ለዘለዓለም ነጻ የሆኑ አቅራቢዎች፣ …) ከእውነታዎች ቅጽበታዊ ገጽ እይታ `docs/reference/derived-facts.json` እስከ `scripts/docs/readmeFacts.mjs` በኩል የሚመጡት እንጂ ከጥሬ ቃላት አይደሉም፣ ስለዚህ በማንኛውም ቅርንጫፍ ላይ ዲያግራምን እንደገና ማመንጨት የገባውን ፋይል እንደገና ያባዛል። `free-tier-budget.svg` ረድፎቹን ከተመሳሳዩ ቅጽበታዊ ገጽ እይታ ይሳሉ (`code.freeTierBudget`፣ ካታሎግ ማጠቃለያው የእውነታ መመርመሪያ መዝገቦች)፣ ስለዚህ `FREE_MODEL_BUDGETS` ወደ CI ቀይ ከመቀየር ይልቅ በሚቀጥለው ማደስ ካርዱ ላይ ይደርሳል።
+በ `docs/diagrams/` ስር ያሉት አስራ ሁለቱ README SVGs ይፈጠራሉ (`scripts/docs/gen-readme-<name>.mjs`፣ `npm run docs:readme-diagrams` ሁሉንም ያድሳል)። እያንዳንዱ የባይት-ንጽጽር አሃድ ፈተና (`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) ያለው የተፈፀመው ፋይል በመልቀቂያ ሁነታ ላይ ሲቀር አይሳካም; በ PR፣ `check:generated-artifacts` አንድ SVG PR አርትዖቶችን ይፈርዳል እና የመሠረቱ ተንሸራታች ለመልቀቂያው እድሳት ይቀራል ( [የተፈጠሩ ፋይሎችን እና የመነሻ መስመሮችን](#generated-files-and-derived-baselines-written-at-release) ይመልከቱ) — እና `check:docs-counts` ቀኖናዊ ቁጥሮችን ከ `<text>` nodes — ያነባሉ ለዚህም ነው የዝርዝር ሂደቱ በፋይሉ ውስጥ ያሉትን እያንዳንዱን ሕብረቁምፊዎች በማይታይ `<text>` ያቆየዋል። የ SVG ቀኖናዊ-ቁጥሮች ቼክ በ `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) የተዘረዘሩትን ፋይሎች ያነባል `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` እና `tier-flow-light.svg` የነፃው-ዘላለም፣ ካታሎግ-መግቢያ፣ ተደጋጋሚ ገንዳ እና የውጤት መንስኤዎች የይገባኛል ጥያቄዎች በተጨማሪ `promise-pillars.svg`, `free-tier-budget.svg` እና `strategies-grid.svg` አንብበዋል. እነዚህ ጄነሬተሮች የሚሳሉት ቆጠራዎች (የአቅራቢው ጠቅላላ፣ MCP መሣሪያዎች፣ የማዞሪያ ስልቶች፣ ለዘለዓለም ነጻ የሆኑ አቅራቢዎች፣ …) ከእውነታዎች ቅጽበታዊ ገጽ እይታ `docs/reference/derived-facts.json` እስከ `scripts/docs/readmeFacts.mjs` በኩል የሚመጡት እንጂ ከጥሬ ቃላት አይደሉም፣ ስለዚህ በማንኛውም ቅርንጫፍ ላይ ዲያግራምን እንደገና ማመንጨት የገባውን ፋይል እንደገና ያባዛል። `free-tier-budget.svg` ረድፎቹን ከተመሳሳዩ ቅጽበታዊ ገጽ እይታ ይሳሉ (`code.freeTierBudget`፣ ካታሎግ ማጠቃለያው የእውነታ መመርመሪያ መዝገቦች)፣ ስለዚህ `FREE_MODEL_BUDGETS` ወደ CI ቀይ ከመቀየር ይልቅ በሚቀጥለው ማደስ ካርዱ ላይ ይደርሳል።
 
 ### የተገኙ እሴቶች፡ የ `pr` እና `release` በር ሁነታዎች
 
-PR ባህሪ እንደ መነሻው ሁኔታ የሚወሰን እሴትን በጭራሽ አይጽፍም፡ አቅራቢ፣ ፍልሰት፣ MCP-መሳሪያ እና የስትራቴጂ ቆጠራዎች፣ የ README SVG ቁጥሮች፣ የእውነታዎች ቅጽበታዊ ገጽ እይታ። አንድ እርምጃ ሁሉንም ያሰላል፣ `npm run release:refresh-derived`፣ በተለቀቀው እና በምሽት በመነጨ-እድሳት PR የሚተዳደር። ስለዚህ** በተለቀቁት መካከል መሠረቱ ከቀጥታ ኮድ በንድፍ በስተጀርባ ነው።** , እና ዛፉን ከቀጥታ ኮድ ጋር የሚያነጻጽር በር ወይም ፈተና በእያንዳንዱ PR ላይ አንድ ወንድም ወይም እህት አቅራቢ ካከሉ በኋላ ቀይ ይሆናል። የተገኙትን እሴቶች የሚዳኙት በሮች ከሁለቱ ሁነታዎች በአንዱ ይሰራሉ በ `scripts/check/lib/gateMode.mjs` (የመጀመሪያ ግጥሚያ አሸነፈ)
+PR ባህሪ እንደ መነሻው ሁኔታ የሚወሰን እሴትን በጭራሽ አይጽፍም፡ አቅራቢ፣ ፍልሰት፣ MCP-መሳሪያ እና የስትራቴጂ ቆጠራዎች፣ የ README SVG ቁጥሮች፣ የእውነታዎች ቅጽበታዊ ገጽ እይታ። አንድ እርምጃ ሁሉንም ያሰላል፣ `npm run release:refresh-derived`፣ በተለቀቀው እና በምሽት በመነጨ-እድሳት PR የሚተዳደር። ስለዚህ** በተለቀቁት መካከል መሠረቱ ከቀጥታ ኮድ በንድፍ በስተጀርባ ነው።** , እና ዛፉን ከቀጥታ ኮድ ጋር የሚያወዳድረው በር ወይም ፈተና በእያንዳንዱ PR ላይ አንድ ወንድም ወይም እህት አቅራቢ ካከሉ በኋላ ቀይ ይሆናል። የተገኙትን እሴቶች የሚዳኙት በሮች ከሁለቱ ሁነታዎች በአንዱ ይሰራሉ በ `scripts/check/lib/gateMode.mjs` (የመጀመሪያ ግጥሚያ አሸነፈ)
 
 1. `--mode=pr|release` በትእዛዝ መስመር ላይ;
 2. የ `OMNIROUTE_GATE_MODE` አካባቢ ተለዋዋጭ (`pr` ወይም `release`);
@@ -213,7 +215,7 @@ PR ባህሪ እንደ መነሻው ሁኔታ የሚወሰን እሴትን በ�
 
 - `npm run facts` እያንዳንዱን የተገኘ ቁጥር እንደ JSON (`scripts/release/facts.mjs`) ያትማል። `--key=code.mcpTools` አንድ እሴት ያትማል፣ `--snapshot` ከቀጥታ ዛፍ ይልቅ የተፈጸመውን ቅጽበታዊ ገጽ እይታ ያነባል። እውነታውን መሰብሰብ በማይቻልበት ጊዜ 2 ውጣ።
 - `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) recomputes the derived files in one pass, in this order (step ids for `--only=`): `provider-reference` (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (the snapshot), `numbers` (the counts gate's rewrite plan applied to the docs, then carried to their `docs/i18n/` mirrors), `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since the last release; the values are translated in the same run by the backend configured in the environment or in `.env` (`OMNIROUTE_TRANSLATION_*`, only those keys are read) or by the Google engine. Without a backend it never writes `__MISSING__` markers: the release profile fails, the nightly skips the keys, and `--allow-untranslated` writes them on purpose), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts` and `check:agent-skills-sync` in release mode must pass; skipped in `--check` and when `--only` leaves it out; a failure is exit 2). The `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly` never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file would change or a managed value needs a manual edit (listing both); exit 2 on an infrastructure failure. `--json` prints the result as JSON.
-- `docs/reference/derived-facts.json` የመጨረሻው ማደስ ጥቅም ላይ የዋለው የእውነታዎች ቅጽበታዊ ገጽ እይታ ነው። ማደስ ብቻ ነው የሚጽፈው። የ README SVG ጀነሬተሮች አንብበውታል፣ እና የPR-time ዩኒት ሙከራዎች የተፈጸሙትን ሰነዶች እና የመነጩ ፋይሎች ከእሱ ጋር — በጭራሽ ከቀጥታ ኮድ ጋር ያወዳድራሉ። የስብስቡ ነጠላ የቀጥታ ንፅፅር በ `tests/unit/check-docs-counts-sync.test.ts` ውስጥ "የልቀት መታደስ ዑደቱን ይዘጋል" ነው፡ ከቀጥታ እውነታዎች ጋር፣ የማደስ ዳግም መፃፍ እቅድ በማህደረ ትውስታ ውስጥ የተተገበረው ምንም STRICT መንቀጥቀጥ አይተወውም፣ እና እንደገና እቅድ ማውጣት ምንም አይቀይረውም።
+- `docs/reference/derived-facts.json` ጥቅም ላይ የዋለው የመጨረሻው ማደስ የእውነታዎች ቅጽበታዊ ገጽ እይታ ነው። ማደስ ብቻ ነው የሚጽፈው። የ README SVG ጀነሬተሮች አንብበውታል፣ እና የPR-time ዩኒት ሙከራዎች የተፈጸሙትን ሰነዶች እና የመነጩ ፋይሎች ከእሱ ጋር — በጭራሽ ከቀጥታ ኮድ ጋር ያወዳድራሉ። የስብስቡ ነጠላ የቀጥታ ንፅፅር በ `tests/unit/check-docs-counts-sync.test.ts` ውስጥ "የልቀት መታደስ ዑደቱን ይዘጋል" ነው፡ ከቀጥታ እውነታዎች ጋር፣ የማደስ ዳግም መፃፍ እቅድ በማህደረ ትውስታ ውስጥ የተተገበረው ምንም STRICT መንቀጥቀጥ አይተወውም፣ እና እንደገና እቅድ ማውጣት ምንም አይቀይረውም።
 
 በአካባቢው ለመራባት (አካባቢያዊ አሂድ ወደ `release` ነባሪዎች)፡-
 
@@ -249,7 +251,7 @@ npm run release:refresh-derived -- --check                       # what the rele
 
 አንዱን i18n regression ይይዛል ሌላኛው በመዋቅራዊ መልኩ በሮች ማየት አይችሉም፡ የእንግሊዘኛ እሴት እንደገና ይፃፋል እና ከ _ቀዳሚ_ እንግሊዘኛ የተገኙት ትርጉሞች ወደ ኋላ ይቆያሉ፣ ስለዚህ እንግሊዛዊ ያልሆኑ ተጠቃሚዎች በልበ ሙሉነት-ቃል ያለው አሁን የተሳሳተ ቅጂ ያነባሉ።
 
-ይህ በእውነቱ ተልኳል። `oauthModal.googleOAuthWarning` በድጋሚ የተጻፈው አንቲግራቪቲ መግቢያ ረዳት ሲያርፍ (#5203);** 39 ከ 43 አከባቢዎች** ለኦፕሬተሮች "ሙሉውን URL ገልብጠው ከዚህ በታች ለጥፍ" — ለዚያ አገልግሎት አቅራቢ ማጠናቀቅ የማይችል ፍሰት እንዲያደርጉ የሚገልጽ ጽሁፍ ቀጠለ። እስከ #8463 ድረስ ሳይስተዋል ቀርቷል ምክንያቱም፡-
+ይህ በእውነቱ ተልኳል። `oauthModal.googleOAuthWarning` እንደገና የተጻፈው Antigravity መግቢያ ረዳት ሲያርፍ (#5203);** 39 ከ 43 አከባቢዎች** ለኦፕሬተሮች "ሙሉውን URL ገልብጠው ከዚህ በታች ለጥፍ" የሚል ጽሁፍ ደጋግሞ ለአገልግሎት አቅራቢው ማጠናቀቅ የማይችል — ። እስከ #8463 ድረስ ሳይስተዋል ቀርቷል ምክንያቱም፡-
 
 - `sync-ui-keys` ያሉትን ቁልፎች ብቻ ነው የሚሞላው።** የለም** ፣ በጭራሽ ያልሆኑት።** የቆየ** ;
 - `check-ui-keys-coverage` ቁልፍ _presence_ ይቆጥራል፣ ስለዚህ የቆየ ትርጉም እንደተሸፈነ ይቆጠራል።
