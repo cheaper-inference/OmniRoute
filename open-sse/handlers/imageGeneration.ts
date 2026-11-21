@@ -1436,6 +1436,9 @@ async function handleOpenAIImageGeneration({
     if (body.quality !== undefined) upstreamBody.quality = body.quality;
     if (body.response_format !== undefined) upstreamBody.response_format = body.response_format;
     if (body.style !== undefined) upstreamBody.style = body.style;
+    for (const field of providerConfig.bodyFields ?? []) {
+      if (body[field] !== undefined) upstreamBody[field] = body[field];
+    }
 
     const { imageUrl } = extractImageInputs(body);
     if (imageUrl && OPENAI_IMAGE_TO_IMAGE_MODELS.has(model)) {

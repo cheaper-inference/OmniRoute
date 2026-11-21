@@ -135,7 +135,8 @@ const STRIP_RULES: StripRule[] = [
   // format — glm-4.6v IS in the registry catalog there, `GLM_SHARED_MODELS` in
   // glmProvider.ts, maxOutputTokens: 32768, so clampToModelMaxOutput suffices).
   { provider: "zai", match: /^glm-4\.6v$/i, maxOutputCap: 32768 },
-  { provider: "glm", match: /^glm-4\.6v$/i, clampToModelMaxOutput: true },
+  // glm-4.5v shares the glm rule: its catalog ceiling is the vendor's 16K max output.
+  { provider: "glm", match: /^glm-4\.[56]v$/i, clampToModelMaxOutput: true },
   // Azure gpt-4o-mini deployments cap completion tokens at 16384 and 400 on
   // anything larger: "max_tokens is too large: 32000. This model supports at
   // most 16384 completion tokens". The 32000 used to come from OmniRoute's own

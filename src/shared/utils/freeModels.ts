@@ -56,7 +56,11 @@ const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeTyp
 /** Provider ids that have at least one documented free model. */
 // SiliconFlow has a live free-labelled catalog but the shipped ten-flagship list
 // was actually billable (#17028). Accept only verified per-model live evidence.
-const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow"] as const;
+// Nous Research lists zero-price `:free` models in its public /models payload; no static
+// rows are shipped for it, so the payload is the only evidence.
+const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow", "nous-research"] as const;
+const isLiveEvidenceOnlyProvider = (provider: string): boolean =>
+  (LIVE_EVIDENCE_ONLY_PROVIDERS as readonly string[]).includes(resolveProviderId(provider));
 export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
   ...FREE_BUDGETS.map((m) => m.provider),
   ...LIVE_EVIDENCE_ONLY_PROVIDERS,
@@ -112,8 +116,8 @@ export function isCatalogFreeModel(provider: string, modelId: unknown): boolean 
 export function isFreeModel(provider: string, model: FreeModelCandidate): boolean {
   // Live paid evidence overrides catalog entries and optimistic free markers (#17028).
   if (hasPayloadPaidEvidence(model)) return false;
-  // SiliconFlow requires affirmative live evidence; catalog membership is insufficient.
-  if (resolveProviderId(provider) === "siliconflow") {
+  // These providers require affirmative live evidence; catalog membership is insufficient.
+  if (isLiveEvidenceOnlyProvider(provider)) {
     return hasPayloadFreeEvidence(model);
   }
   if (isCatalogFreeModel(provider, model.id)) return true;
@@ -177,7 +181,7 @@ export function isModelFreeBadge(
   // Both badge modes honor client eligibility and the free-only import paid veto.
   if (hasFreeBadgeVeto(provider, model)) return false;
   const candidate = toFreeModelCandidate(model);
-  if (resolveProviderId(provider) === "siliconflow") {
+  if (isLiveEvidenceOnlyProvider(provider)) {
     return isFreeModel(provider, candidate);
   }
   if (!options.strict) {
