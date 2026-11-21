@@ -29,6 +29,8 @@ Iga JSON kviitung tuvastab väljamakstud SHA, töövoo käitamise ja katse. CLI 
 
 ### Ühenda järjekord
 
+> **2026-11-19: Mergify ühendamisjärjekord on lõpetatud** (omaniku otsus). `.mergify.yml` ei määratle enam järjekorda ja lükkab tagasi Mergify käsud, mis liidavad või kirjutavad ümber tõmbetaotluse. Tõmbetaotlused väljalaskeharule liidetakse käsitsi hoidla reeglistiku "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) alusel, kuni omni-queue töötab live-režiimis ja seejärel omni-queue kaudu ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). Allpool kirjeldatud Mergify mustandite töövoo käsitlemine on endiselt `ci.yml` ja `quality.yml`, kuid Mergify mustandit enam ei avata.
+
 `queue` silt saadab PR ühendamisjärjekorda (`.mergify.yml`). Mergify avab `mergify/merge-queue/` -harus mustandi PR, CI käivitab seal täieliku valiku ja `Gate / CI`, `Gate / Quality` ja `Merge integrity (changelog + generated skills)` möödumisel liidetakse algne PR.
 
 Mergify kirjutab oma järjekorra kokkuvõtte mustandi kirjeldusse ja ka teised rakendused saavad seda muuta. Sellise mustandi `pull_request` `edited` sündmus võtab oma samaaegsusrühma (`-queue-edit-<run_id>`), nii et see ei saa mustandi tegelikku käitamist tühistada ning jätab värava ja maatriksi vahele. Ainult `Merge integrity` töötab veel. Vahelejäetud värava töö kannab teistsugust kontrolli nime, kuna Mergify loeb vahele jäetud `Gate / CI` ebaõnnestunud kontrollina ja eemaldab PR.
