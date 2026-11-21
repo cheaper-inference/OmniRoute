@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Button from "@/shared/components/Button";
+import { LocalOnlyNotice } from "@/shared/components/LocalOnlyNotice";
+import { useLocalOnlyBlocked } from "@/shared/hooks/useLocalOnlyAccess";
+import { detectLocalOnlyRejection } from "@/shared/utils/localOnlyAccess";
 import type { InterceptedRequest } from "@/mitm/inspector/types";
 import { useTrafficStream } from "./hooks/useTrafficStream";
 import { useTrafficFilters } from "./hooks/useTrafficFilters";
@@ -17,16 +20,48 @@ import { DetailsPanel } from "./components/DetailsPanel";
 import { HistoricSessionBanner } from "./components/session/HistoricSessionBanner";
 
 const BUFFER_MAX = 1000;
+const CAPTURE_MODES_API_PATH = "/api/tools/traffic-inspector/capture-modes";
 
-export function TrafficInspectorPageClient({
-  title,
-  subtitle,
-  purpose,
-}: {
+interface TrafficInspectorHeaderProps {
   title?: string;
   subtitle?: string;
   purpose?: string;
-} = {}) {
+}
+
+function TrafficInspectorHeader({ title, subtitle, purpose }: TrafficInspectorHeaderProps) {
+  return (
+    title && (
+      <div className="shrink-0 px-4 pt-4 pb-2">
+        <PageHeader
+          compact
+          title={title}
+          description={subtitle ? <span>{subtitle}</span> : undefined}
+        />
+        {purpose && <p className="text-xs text-text-muted mt-2 max-w-2xl italic">{purpose}</p>}
+      </div>
+    )
+  );
+}
+
+/**
+ * Every Traffic Inspector API (capture modes, sessions, the live socket, the TPROXY status)
+ * is a local-only route. A session that cannot reach them gets the notice instead of an
+ * inspector that stays empty; the workspace, and all of its requests, mounts only otherwise.
+ */
+export function TrafficInspectorPageClient(props: TrafficInspectorHeaderProps = {}) {
+  const localOnly = useLocalOnlyBlocked(CAPTURE_MODES_API_PATH);
+  if (!localOnly) return <TrafficInspectorWorkspace {...props} />;
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <TrafficInspectorHeader {...props} />
+      <div className="px-4 pt-4">
+        <LocalOnlyNotice />
+      </div>
+    </div>
+  );
+}
+
+function TrafficInspectorWorkspace({ title, subtitle, purpose }: TrafficInspectorHeaderProps) {
   const t = useTranslations("trafficInspector");
   const [containerHeight, setContainerHeight] = useState(600);
   const listContainerRef = useRef<HTMLDivElement | null>(null);
@@ -50,8 +85,12 @@ export function TrafficInspectorPageClient({
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/tools/traffic-inspector/capture-modes")
-      .then((r) => (r.ok ? r.json() : null))
+    fetch(CAPTURE_MODES_API_PATH)
+      .then(async (r) => {
+        // Local-only rejection: the page swaps this workspace for the notice.
+        if (await detectLocalOnlyRejection(r, CAPTURE_MODES_API_PATH)) return null;
+        return r.ok ? r.json() : null;
+      })
       .then((data: { systemProxy?: { applied: boolean } } | null) => {
         if (!cancelled) setCaptureModes(data);
       })
@@ -103,16 +142,7 @@ export function TrafficInspectorPageClient({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {title && (
-        <div className="shrink-0 px-4 pt-4 pb-2">
-          <PageHeader
-            compact
-            title={title}
-            description={subtitle ? <span>{subtitle}</span> : undefined}
-          />
-          {purpose && <p className="text-xs text-text-muted mt-2 max-w-2xl italic">{purpose}</p>}
-        </div>
-      )}
+      <TrafficInspectorHeader title={title} subtitle={subtitle} purpose={purpose} />
 
       {/* Capture modes toolbar */}
       <div className="shrink-0 px-4 pt-4 pb-2">
