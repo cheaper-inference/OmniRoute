@@ -185,6 +185,7 @@ import {
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
 import {
   filterCodexPlanEligible,
+  getCodexPlanType,
   isCodexPaidOnlyModel,
   isConnectionPlanEligible,
 } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
@@ -1521,6 +1522,7 @@ export async function getProviderCredentials(
       const modelLocked = status === "modelLocked";
       const modelExcluded = status === "modelExcluded";
       const modelNotAdvertised = status === "modelNotAdvertised";
+      const planIneligible = status === "codexPlanIneligible" || status === "freePlan";
       if (excluded || rateLimited) {
         log.debug(
           "AUTH",
@@ -1535,6 +1537,11 @@ export async function getProviderCredentials(
         log.debug(
           "AUTH",
           `  → ${c.id?.slice(0, 8)} | synced inventory does not advertise ${requestedModel}`
+        );
+      } else if (planIneligible) {
+        log.debug(
+          "AUTH",
+          `  → ${c.id?.slice(0, 8)} | recorded plan ${getCodexPlanType(c.providerSpecificData) ?? "none"} cannot serve ${requestedModel}`
         );
       } else if (terminalStatus) {
         log.debug(
