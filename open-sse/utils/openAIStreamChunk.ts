@@ -15,6 +15,27 @@ function normalizeDeltaToolCallIds(choice: JsonRecord | null | undefined): boole
   return changed;
 }
 
+/** First non-empty finish_reason across every choice, regardless of index. */
+export function findFinishReason(choices: unknown): string | undefined {
+  if (!Array.isArray(choices)) return undefined;
+  for (const choice of choices as JsonRecord[]) {
+    const reason = choice?.finish_reason;
+    if (typeof reason === "string" && reason) return reason;
+  }
+  return undefined;
+}
+
+/** Indices of the choices that carry their own non-empty finish_reason in this chunk. */
+export function finishedChoiceIndices(choices: unknown): number[] {
+  if (!Array.isArray(choices)) return [];
+  const indices: number[] = [];
+  (choices as JsonRecord[]).forEach((choice, index) => {
+    const reason = choice?.finish_reason;
+    if (typeof reason === "string" && reason) indices.push(index);
+  });
+  return indices;
+}
+
 export function normalizeFinalOpenAIStreamChunk(
   parsed: JsonRecord,
   toolNameMap: unknown
@@ -32,8 +53,5 @@ export function normalizeFinalOpenAIStreamChunk(
   }
 
   changed = restoreOpenAIToolNames(parsed, toolNameMap) || changed;
-  const firstChoice = Array.isArray(parsed.choices)
-    ? (parsed.choices[0] as JsonRecord | undefined)
-    : undefined;
-  return { changed, hasFinishReason: Boolean(firstChoice?.finish_reason) };
+  return { changed, hasFinishReason: Boolean(findFinishReason(parsed.choices)) };
 }
