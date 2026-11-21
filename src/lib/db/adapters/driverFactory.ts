@@ -36,9 +36,11 @@ export type DriverProbe = () => boolean;
  * probe (verdict "bad") instead of a process-level deadlock. The verdict is
  * cached per process — the child spawn happens at most once.
  *
- * On POSIX this is a no-op returning true: broken addons throw there, which
- * the existing cascade already handles, and we don't want to pay a subprocess
- * spawn on every Linux/CI boot.
+ * On POSIX this is a no-op returning true by default: broken addons usually
+ * throw there, which the existing cascade already handles, and we don't want to
+ * pay a subprocess spawn on every Linux/CI boot. An addon that crashes the
+ * process on load (wrong ABI, missing CPU feature) is not catchable, so an
+ * operator can opt in with OMNIROUTE_SQLITE_CHILD_PROBE=1|true.
  */
 export function createBetterSqliteProbe(options: {
   platform?: string;
@@ -56,7 +58,8 @@ export function createBetterSqliteProbe(options: {
   let verdict: boolean | null = null;
   return () => {
     if (verdict !== null) return verdict;
-    if (platform !== "win32") {
+    const optIn = /^(1|true)$/i.test((process.env.OMNIROUTE_SQLITE_CHILD_PROBE ?? "").trim());
+    if (platform !== "win32" && !optIn) {
       verdict = true;
       return verdict;
     }

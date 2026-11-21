@@ -55,12 +55,24 @@ import {
   isClaudeQuotaMetadata,
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { readClaudeUsageLimitConfig } from "@omniroute/open-sse/services/claudeLowPriority.ts";
-import {
-  isClaudeModelCreditEntitlementText,
-  SUBSCRIPTION_QUOTA_COOLDOWN_MS,
-} from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
+import { isClaudeModelCreditEntitlementText } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
 import { getRequestQuotaCacheState as getState } from "./quotaCacheReadView";
+import {
+  BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA,
+  CONNECTION_SCOPED_CLAUDE_QUOTA,
+  HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA,
+  MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT,
+  decisionForLatestClaudeReset,
+  hasProvenClaudeAccountHeadroom,
+  isActiveClaudeExhaustion,
+  isBlockingClaudeQuota,
+  isOverageOnlyClaudeRejection,
+  type ClaudeQuotaScopeDecision,
+  type ClaudeResponseHeaders,
+} from "./quotaCacheClaudeScope";
+// Cooldown helper lives in ./quotaCacheClaudeScope; keep the public path.
+export { resolveClaudeQuotaCooldownMs } from "./quotaCacheClaudeScope";
 import {
   ACTIVE_TTL_MS,
   EXHAUSTED_MAX_PARK_MS,
@@ -299,6 +311,7 @@ function isWindowParkReleased(entry: QuotaCacheEntry, now: number): boolean {
 
 export function __clearForTests() {
   getState().cache.clear();
+  noSnapshotUntil.clear();
 }
 
 function resolveAntigravityQuotaWindowsForModel(
@@ -489,40 +502,6 @@ function isStandardQuotaExhausted(entry: QuotaCacheEntry, now: number): boolean 
   return true;
 }
 
-function reportedClaudeQuotaRemaining(quota: QuotaInfo): boolean {
-  return quota.fractionReported !== false && quota.remainingPercentage > 0;
-}
-
-function isBlockingClaudeQuota(quota: QuotaInfo): boolean {
-  const metadata = quota.claudeQuota;
-  if (!metadata?.active) return false;
-  const severity = metadata.severity?.trim().toLowerCase() || null;
-  return severity === null || severity === "critical";
-}
-
-function isPreflightBlockingClaudeQuota(quota: QuotaInfo): boolean {
-  // An active critical window with reported remaining quota is a predictive
-  // warning. It must not skip the upstream request, but a later real 429
-  // still classifies from the same active/critical metadata.
-  return isBlockingClaudeQuota(quota) && !reportedClaudeQuotaRemaining(quota);
-}
-
-function activeClaudeResetMs(
-  quota: QuotaInfo,
-  now: number,
-  blocking: (quota: QuotaInfo) => boolean = isBlockingClaudeQuota
-): number | null {
-  if (!blocking(quota) || !quota.resetAt) return null;
-  const resetMs = parseDate(quota.resetAt);
-  return resetMs !== null && resetMs > now ? resetMs : null;
-}
-
-function isActiveClaudeExhaustion(quota: QuotaInfo, now: number): boolean {
-  // Active critical limits can be predictive warnings while quota remains.
-  // Explicit upstream 429s still use activeClaudeResetMs without this preflight guard.
-  return activeClaudeResetMs(quota, now, isPreflightBlockingClaudeQuota) !== null;
-}
-
 function isClaudeQuotaExhaustedForRequest(
   entry: QuotaCacheEntry,
   requestedModel: string | null,
@@ -560,95 +539,14 @@ function isClaudeQuotaExhaustedForRequest(
   );
 }
 
-export type ClaudeQuotaScopeDecision = {
-  scope: "model" | "connection";
-  // "headroom": fresh telemetry proves every account-wide window has quota left (#18296).
-  evidence: "none" | "blocking" | "headroom";
-  resetAt: string | null;
-  cooldownMs: number | null;
-};
-
-export function resolveClaudeQuotaCooldownMs(
-  decision: ClaudeQuotaScopeDecision,
-  cachedQuotaCooldownMs: number | null,
-  fallbackCooldownMs: number
-): number {
-  if (decision.cooldownMs !== null) return decision.cooldownMs;
-  if (decision.evidence === "blocking") return fallbackCooldownMs;
-  return cachedQuotaCooldownMs ?? fallbackCooldownMs;
-}
-
-const CONNECTION_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
-  scope: "connection",
-  evidence: "none",
-  resetAt: null,
-  cooldownMs: null,
-};
-
-const BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
-  scope: "connection",
-  evidence: "blocking",
-  resetAt: null,
-  cooldownMs: null,
-};
-
-const HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
-  scope: "model",
-  evidence: "headroom",
-  resetAt: null,
-  cooldownMs: null,
-};
-
-// #18296 — Anthropic does not always report a per-model weekly window (e.g. Fable). When the
-// account-wide session AND weekly windows are both reported with quota left, an explicit quota
-// 429 can only be about the requested model, so it must not take the whole connection out.
-function hasProvenClaudeAccountHeadroom(globalWindows: QuotaInfo[]): boolean {
-  const kinds = new Set<string>();
-  for (const quota of globalWindows) {
-    if (quota.fractionReported === false || quota.remainingPercentage <= 0) return false;
-    kinds.add(quota.claudeQuota?.kind ?? "");
-  }
-  return kinds.has("session") && kinds.has("weekly_all");
-}
-
-// An explicit Claude model-credit entitlement failure is model scoped even
-// without a usable quota snapshot; never park unrelated sibling models.
-const MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT: ClaudeQuotaScopeDecision = {
-  scope: "model",
-  evidence: "blocking",
-  resetAt: null,
-  cooldownMs: SUBSCRIPTION_QUOTA_COOLDOWN_MS,
-};
-
-function decisionForLatestClaudeReset(
-  quotas: QuotaInfo[],
-  scope: ClaudeQuotaScopeDecision["scope"],
-  now: number
-): ClaudeQuotaScopeDecision | null {
-  let selected: { resetAt: string; resetMs: number } | null = null;
-  for (const quota of quotas) {
-    const resetMs = activeClaudeResetMs(quota, now);
-    if (resetMs === null || !quota.resetAt) continue;
-    if (!selected || resetMs > selected.resetMs) {
-      selected = { resetAt: quota.resetAt, resetMs };
-    }
-  }
-  return selected
-    ? {
-        scope,
-        evidence: "blocking",
-        resetAt: selected.resetAt,
-        cooldownMs: selected.resetMs - now,
-      }
-    : null;
-}
-
 export function getCachedClaudeQuotaScopeDecision(input: {
   connectionId: string | null | undefined;
   provider: string | null | undefined;
   status: number;
   errorText: string;
   model: string | null | undefined;
+  /** Headers of the 429 itself: they stand in for usage windows that are missing or stale. */
+  headers?: ClaudeResponseHeaders | null;
   nowMs?: number;
 }): ClaudeQuotaScopeDecision {
   const canonicalProvider = input.provider ? resolveProviderId(input.provider) : input.provider;
@@ -671,8 +569,9 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     resolveProviderId(entry.provider) !== canonicalProvider ||
     now - entry.fetchedAt >= ACTIVE_TTL_MS
   ) {
-    return modelCreditEntitlement
-      ? MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT
+    if (modelCreditEntitlement) return MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT;
+    return isOverageOnlyClaudeRejection(input.headers)
+      ? HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA
       : CONNECTION_SCOPED_CLAUDE_QUOTA;
   }
 
@@ -715,7 +614,12 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     );
   }
 
-  if (hasProvenClaudeAccountHeadroom(globalWindows)) return HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA;
+  if (
+    hasProvenClaudeAccountHeadroom(globalWindows) ||
+    isOverageOnlyClaudeRejection(input.headers)
+  ) {
+    return HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA;
+  }
 
   return CONNECTION_SCOPED_CLAUDE_QUOTA;
 }
@@ -924,6 +828,7 @@ function setQuotaCacheInner(
       : new Set<string>();
   const exhausted = isExhausted(quotas);
   if (isTelemetryOnlyRefresh(prior, quotas, modelQuotas)) return;
+  noSnapshotUntil.delete(connectionId);
   const entry: QuotaCacheEntry = {
     connectionId,
     provider,
@@ -998,6 +903,15 @@ export function getQuotaCacheOrSnapshot(connectionId: string): QuotaCacheEntry |
   return hydrateQuotaCacheFromSnapshots(connectionId);
 }
 
+// Connections whose last lookup found no snapshot rows, mapped to the time that verdict expires.
+// Credential selection asks about every candidate on every request; without this a pool with no
+// snapshots repeats the same empty query per candidate. setQuotaCache drops the verdict when it
+// records a reading. shortcut: module state, so a second bundle chunk (#8065) keeps its own copy
+// for at most NO_SNAPSHOT_TTL_MS; the shared cache entry is checked first and covers fresh writes.
+const NO_SNAPSHOT_TTL_MS = 30_000;
+const NO_SNAPSHOT_MAX_ENTRIES = 5_000;
+const noSnapshotUntil = new Map<string, number>();
+
 function codexSnapshotMatchesOwner(
   snapshot: ReturnType<typeof getLatestQuotaSnapshotsForConnection>[number],
   owner: NonNullable<ReturnType<typeof readCodexQuotaOwner>>
@@ -1016,12 +930,19 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
   const { cache } = getState();
   const cached = getQuotaCache(connectionId);
   if (cached) return cached;
+  if ((noSnapshotUntil.get(connectionId) ?? 0) > Date.now()) return null;
   const codexOwner = readCodexQuotaOwner(connectionId);
 
   let snapshots;
   try {
     snapshots = getLatestQuotaSnapshotsForConnection(connectionId);
   } catch {
+    return null;
+  }
+  // Only a connection with no rows at all is remembered; rows that all belong to a replaced Codex owner are not.
+  if (!snapshots.length) {
+    if (noSnapshotUntil.size >= NO_SNAPSHOT_MAX_ENTRIES) noSnapshotUntil.clear();
+    noSnapshotUntil.set(connectionId, Date.now() + NO_SNAPSHOT_TTL_MS);
     return null;
   }
   if (codexOwner)

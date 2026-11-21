@@ -11,13 +11,18 @@ interface ClaudeQuotaFailure {
   errorText: string;
   retainedMessage: string;
   retryAfterMs?: number | null;
+  headers?: Headers | null;
   hasCallerOwner: boolean;
   /** Dependencies already owned by chatCore; do not introduce new open-sse -> src edges. */
   deps: {
-    readConnection: (id: string) => Promise<{
-      testStatus?: unknown;
-      rateLimitedUntil?: unknown;
-    } | null | undefined>;
+    readConnection: (id: string) => Promise<
+      | {
+          testStatus?: unknown;
+          rateLimitedUntil?: unknown;
+        }
+      | null
+      | undefined
+    >;
     persistConnection: (
       id: string,
       update: {
@@ -62,9 +67,7 @@ export async function handleClaudeQuotaFailure(input: ClaudeQuotaFailure): Promi
   // shorten or extend a cooldown that is still active.
   const storedCooldown = connection.rateLimitedUntil;
   const existingUntil = cooldownUntilMs(
-    typeof storedCooldown === "string" || typeof storedCooldown === "number"
-      ? storedCooldown
-      : null
+    typeof storedCooldown === "string" || typeof storedCooldown === "number" ? storedCooldown : null
   );
   if (Number.isFinite(existingUntil) && existingUntil > Date.now()) return true;
   const scope = getCachedClaudeQuotaScopeDecision(input);
