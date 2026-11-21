@@ -30,8 +30,19 @@ function clearScope(data: RecordValue, scope: Scope): void {
  */
 function releaseGateWhenNoScopeCooldown(id: string, data: RecordValue | null): void {
   if (!data) return;
-  if (Object.keys(toRecord(data.codexScopeRateLimitedUntil)).length > 0) return;
+  if (hasActiveCodexScopeCooldown(toRecord(data.codexScopeRateLimitedUntil))) return;
   unblockAccount({ provider: "codex", accountKey: id });
+}
+
+/**
+ * True when any scope deadline is still in the future. A deadline that already
+ * passed is not a cooldown; an unparseable one is treated as active.
+ */
+export function hasActiveCodexScopeCooldown(cooldowns: RecordValue, now = Date.now()): boolean {
+  return Object.values(cooldowns).some((until) => {
+    const ms = typeof until === "string" ? Date.parse(until) : NaN;
+    return !Number.isFinite(ms) || ms > now;
+  });
 }
 
 /**

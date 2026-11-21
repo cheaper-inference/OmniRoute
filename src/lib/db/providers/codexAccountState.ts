@@ -5,6 +5,7 @@ import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
 import { mayWriteCodexConnection } from "../codexConnectionFences";
 import { unblockAccount } from "@omniroute/open-sse/services/accountSemaphore.ts";
+import { hasActiveCodexScopeCooldown } from "./codexAccountRecovery";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -294,7 +295,7 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
     const nextSources = omitEmptyRecord(currentSources);
     if (nextCooldowns) nextPsd.codexScopeRateLimitedUntil = nextCooldowns;
     else delete nextPsd.codexScopeRateLimitedUntil;
-    gateReleasable = !nextCooldowns;
+    gateReleasable = !nextCooldowns || !hasActiveCodexScopeCooldown(nextCooldowns);
     if (nextSources) nextPsd.codexScopeRateLimitSource = nextSources;
     else delete nextPsd.codexScopeRateLimitSource;
 

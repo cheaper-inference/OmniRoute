@@ -132,6 +132,42 @@ test("a Codex scope cooldown still parked keeps the shared account gate blocked"
   assert.notEqual(blockedUntil(key), null);
 });
 
+test("an expired sibling scope cooldown does not keep the shared gate blocked", async () => {
+  // A Spark deadline that already passed is not an active cooldown; recovering
+  // the main scope must reopen the gate (poll and headroom paths alike).
+  const future = new Date(Date.now() + DAY_MS).toISOString();
+  const past = new Date(Date.now() - DAY_MS).toISOString();
+  const seed = () =>
+    db.createProviderConnection({
+      provider: "codex",
+      authType: "oauth",
+      name: crypto.randomUUID(),
+      providerSpecificData: {
+        codexScopeRateLimitedUntil: { codex: future, spark: past },
+        codexScopeRateLimitSource: { codex: "fallback", spark: "fallback" },
+      },
+    });
+
+  const polled = await seed();
+  const polledKey = blockGate("codex", polled.id);
+  await recovery.syncCodexQuotaObservation(polled.id, recoveredUsage, polled.providerSpecificData);
+  assert.equal(blockedUntil(polledKey), null);
+
+  const lifted = await seed();
+  const liftedKey = blockGate("codex", lifted.id);
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: lifted.id,
+    window_key: "session",
+    remaining_percentage: 100,
+    is_exhausted: 0,
+    next_reset_at: new Date(Date.now() + 3600_000).toISOString(),
+    window_duration_ms: 18_000_000,
+    raw_data: null,
+  });
+  assert.equal(blockedUntil(liftedKey), null);
+});
+
 test("manual Codex cooldown release also releases the semaphore gate", async () => {
   const a = await seedCodex();
   const key = blockGate("codex", a.id);
