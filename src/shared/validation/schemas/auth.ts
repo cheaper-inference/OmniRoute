@@ -29,6 +29,7 @@ export const importCodexAuthSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   email: z.string().email("Must be a valid email").optional(),
   overwriteExisting: z.boolean().optional(),
+  autoSync: z.boolean().optional(),
 });
 
 // ──── Codex Import Bulk Schema ────
@@ -45,6 +46,7 @@ export const importCodexAuthBulkSchema = z.object({
     .min(1, "At least one entry is required")
     .max(50, "At most 50 entries per bulk import"),
   overwriteExisting: z.boolean().optional(),
+  autoSync: z.boolean().optional(),
 });
 
 // ──── Claude Auth Import Schema ────
