@@ -288,6 +288,15 @@ test("guardrail: the referer is logged without its query, fragment and userinfo"
     referer: "https://client.example/?from=kilocode",
   });
   assert.equal(byQuery.agent, "unknown");
+  // The userinfo runs to the last `@` of the authority.
+  const twoAt = classifyClientAgent({
+    "user-agent": "axios/1.7.2",
+    referer: "https://a@b:secret@host/p",
+  });
+  assert.equal(twoAt.signals.referer, "https://host/p");
+  // A referer that is not a URL is kept as it is.
+  const plain = classifyClientAgent({ "user-agent": "axios/1.7.2", referer: "kilocode app" });
+  assert.equal(plain.signals.referer, "kilocode app");
 });
 test("guardrail: fails open when headers or the logger throw, and without log or model", async () => {
   const boom = () => {

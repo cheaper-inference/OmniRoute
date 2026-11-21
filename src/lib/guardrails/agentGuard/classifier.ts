@@ -82,15 +82,14 @@ function readSignal(headers: HeadersLike, name: string): string {
 
 /**
  * A referer can carry a token in its query, its fragment or its userinfo. Only the part that
- * identifies the client page is kept: scheme, host and path.
+ * identifies the client page is kept: scheme, host and path. The userinfo runs to the last `@`
+ * of the authority, as in the WHATWG URL parser.
  */
 function refererOrigin(headers: HeadersLike): string {
   const raw = readHeader(headers, "http-referer") || readHeader(headers, "referer");
   const cut = raw.search(/[?#]/);
   const withoutQuery = cut === -1 ? raw : raw.slice(0, cut);
-  return withoutQuery
-    .replace(/^([a-z][a-z0-9+.-]*:\/\/)[^/@]*@/i, "$1")
-    .slice(0, MAX_SIGNAL_LENGTH);
+  return withoutQuery.replace(/^([a-z][a-z0-9+.-]*:\/\/)[^/]*@/i, "$1").slice(0, MAX_SIGNAL_LENGTH);
 }
 
 function readSignals(headers: HeadersLike): Signals {
