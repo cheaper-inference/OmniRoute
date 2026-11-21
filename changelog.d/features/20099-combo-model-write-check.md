@@ -1,0 +1,1 @@
+- **feat(combos):** set `OMNIROUTE_COMBO_MODEL_WRITE_CHECK=true` to reject combo saves whose model step does not resolve (HTTP 400, `details.reasonCode=model_not_found`); add `?force=true` to save anyway. Off by default.

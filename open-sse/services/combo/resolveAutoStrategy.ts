@@ -398,7 +398,8 @@ export async function resolveAutoStrategyOrder(
   const autoManifestHint: RoutingHint | null = await buildComplexityRoutingHint(
     eligibleTargets.filter((t) => t.kind === "model"),
     body,
-    log
+    log,
+    relayOptions?.sessionId
   );
 
   const {

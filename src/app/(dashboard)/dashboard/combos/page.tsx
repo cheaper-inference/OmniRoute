@@ -53,6 +53,7 @@ import {
   scrollToComboCardWhenRendered,
 } from "./comboPagination";
 import { useComboPagination } from "./useComboPagination";
+import { filterCombosBySearch } from "./comboSearch";
 import { ComboListToolbar, ComboPaginationNav } from "./ComboListControls";
 import { ResponseValidationEditor, type ResponseValidationValue } from "./ResponseValidationEditor";
 import ReasoningTokenBufferToggle from "./ReasoningTokenBufferToggle";
@@ -1055,18 +1056,28 @@ function CombosPageContent() {
     () => combos.filter((combo) => isIntelligentStrategy(combo?.strategy)),
     [combos]
   );
+  // Opt-in list search: `?search=1` shows the box. Without it the query stays empty and the
+  // list is exactly the strategy-filtered inventory.
+  const searchEnabled = searchParams.get("search") === "1";
+  const [comboSearch, setComboSearch] = useState("");
   const filteredCombos = useMemo(
-    () => filterCombosByStrategyCategory(combos, activeFilter),
-    [combos, activeFilter]
+    () =>
+      filterCombosBySearch(
+        filterCombosByStrategyCategory(combos, activeFilter),
+        searchEnabled ? comboSearch : ""
+      ),
+    [combos, activeFilter, searchEnabled, comboSearch]
   );
+  const comboPaginationKey = (search: string) => `${activeFilter}|${searchEnabled ? search : ""}`;
   const {
     page: visibleComboPage,
     setPage: setComboPage,
+    showPageForFilter: showComboPageForFilter,
     pageCount: comboPageCount,
     pageItems: pagedCombos,
     pageStart: comboPageStart,
     pageEnd: comboPageEnd,
-  } = useComboPagination(filteredCombos, activeFilter);
+  } = useComboPagination(filteredCombos, comboPaginationKey(comboSearch));
   const visibleCombos = reorderingAllCombos ? combos : pagedCombos;
   const selectedIntelligentCombo = useMemo(() => {
     if (intelligentCombos.length === 0) return null;
@@ -1361,7 +1372,10 @@ function CombosPageContent() {
       router.replace(buildUnfilteredCombosHref(searchParams.toString()), { scroll: false });
     }
     setReorderingAllCombos(false);
-    setComboPage(findComboPage(nextCombos, comboId));
+    // A list search can hide the created card: clear it, and select the page under the
+    // cleared key in the same step so the search reset does not send the list to page 1.
+    setComboSearch("");
+    showComboPageForFilter(findComboPage(nextCombos, comboId), comboPaginationKey(""));
     scrollToComboCardWhenRendered(comboId);
   };
 
@@ -1573,6 +1587,8 @@ function CombosPageContent() {
           reordering={reorderingAllCombos}
           savingOrder={savingComboOrder}
           onToggleReorder={handleReorderAllToggle}
+          searchQuery={comboSearch}
+          onSearchChange={searchEnabled ? setComboSearch : undefined}
         />
       )}
 
