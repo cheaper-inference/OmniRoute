@@ -9,6 +9,7 @@ import BlockNotices from "./components/BlockNotices";
 import ExpiryBadge from "./components/ExpiryBadge";
 import KeyForm from "./components/KeyForm";
 import MySpendSection from "./components/MySpendSection";
+import OnboardingCard from "./components/OnboardingCard";
 import PoolSection from "./components/PoolSection";
 import QuotaHeader from "./components/QuotaHeader";
 import QuotaStatusPanel from "./components/QuotaStatusPanel";
@@ -94,6 +95,14 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
         {view?.pools.map((pool) => (
           <PoolSection key={pool.ref} pool={pool} />
         ))}
+        {view ? (
+          <OnboardingCard
+            provider={provider}
+            providerName={providerName}
+            availableModels={view.availableModels}
+            apiBaseUrl={view.apiBaseUrl}
+          />
+        ) : null}
         {/* Only once the quota answer accepted the key (or while it refreshes). */}
         {view ? <MySpendSection /> : null}
       </div>
