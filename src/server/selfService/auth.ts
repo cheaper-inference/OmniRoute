@@ -124,7 +124,9 @@ export async function authenticateSelfServiceRequest(
   const apiKey = await findValidCandidate(store, candidates);
   if (!apiKey) return refuse(401, INVALID_KEY_MESSAGE);
 
-  const metadata = await store.getApiKeyMetadata(apiKey);
+  // Read from the row too: a scope or connection change made in another process takes effect
+  // on the next call, not when the 60 second metadata cache expires.
+  const metadata = await store.getApiKeyMetadata(apiKey, { bypassCache: true });
   if (!metadata || metadata.id === "env-key") return refuse(401, INVALID_KEY_MESSAGE);
   if (!hasSelfUsageScope(metadata.scopes)) {
     return refuse(403, "API key lacks the self:usage scope");

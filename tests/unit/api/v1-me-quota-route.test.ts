@@ -204,12 +204,13 @@ test("a builder failure is a fixed 500 message; keys outside the contract never 
     },
   });
   await assertFixed500(boom, ["SQLITE_ERROR", "selfView.ts", "/home/app"]);
-  const extra = await (
-    await call("claude", bearer(scoped.key), {
-      buildView: async () =>
-        ({ ...EMPTY_VIEW, poolId: "p", connectionId: "c" }) as typeof EMPTY_VIEW,
-    })
-  ).text();
+  const extraRes = await call("claude", bearer(scoped.key), {
+    buildView: async () => ({ ...EMPTY_VIEW, poolId: "p", connectionId: "c" }) as typeof EMPTY_VIEW,
+  });
+  // A 200 with the documented view: a fixed 500 body would also lack the extra keys.
+  assert.equal(extraRes.status, 200);
+  const extra = await extraRes.text();
+  assert.deepEqual(JSON.parse(extra), EMPTY_VIEW);
   assert.ok(!extra.includes("poolId") && !extra.includes("connectionId"));
 });
 

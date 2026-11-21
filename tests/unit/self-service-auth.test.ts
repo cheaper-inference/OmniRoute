@@ -144,6 +144,33 @@ test("the key is validated against its row on every call, never from the validat
   assert.deepEqual(seen, [{ bypassCache: true }, { bypassCache: true }]);
 });
 
+test("the key's metadata is read from its row on every call, never from the metadata cache", async () => {
+  const seen: unknown[] = [];
+  const store = {
+    validateApiKey: async () => true,
+    getApiKeyMetadata: async (_key: string, options?: unknown) => {
+      seen.push(options);
+      return { id: "k-1", name: "k", scopes: [SELF_USAGE_SCOPE] };
+    },
+  } as unknown as SelfServiceKeyStore;
+  const first = await authenticateSelfServiceRequest(req(bearer("any")), store);
+  const second = await authenticateSelfServiceRequest(req(bearer("any")), store);
+  assert.deepEqual([first.ok, second.ok], [true, true]);
+  assert.deepEqual(seen, [{ bypassCache: true }, { bypassCache: true }]);
+});
+
+test("a scope removed from the key's row is seen on the next call", async () => {
+  const created = await apiKeysDb.createApiKey("self-service-revoked-scope", "test-machine", [
+    SELF_USAGE_SCOPE,
+  ]);
+  assert.equal(await status(req(bearer(created.key))), 200);
+  core
+    .getDbInstance()
+    .prepare("UPDATE api_keys SET scopes = ? WHERE id = ?")
+    .run(JSON.stringify([]), created.id);
+  assert.equal(await status(req(bearer(created.key))), 403);
+});
+
 test("an injected key store cannot skip the flag, header, environment-key or scope checks", async () => {
   const reads: string[] = [];
   // Only the fields the gate reads; the cast stands in for the full metadata row.
