@@ -1,0 +1,12 @@
+{
+  "name": "family-alias-ask-gate",
+  "version": "0.1.0",
+  "description": "Fail-closed approval gate for host-proposed model fallbacks",
+  "license": "MIT",
+  "main": "index.mjs",
+  "source": "local",
+  "tags": ["routing", "approval", "safety"],
+  "hooks": { "onRequest": true },
+  "requires": { "permissions": [] },
+  "enabledByDefault": false
+}
