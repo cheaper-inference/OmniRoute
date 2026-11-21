@@ -13538,6 +13538,7 @@
     "spendDailyAria": "Tokens used per day over the selected period",
     "spendByModelTitle": "By model",
     "spendTableLabel": "Usage by model",
+    "spendByModelTruncated": "This list holds the 50 most used provider and model pairs, so a model's totals may be partial.",
     "spendColModel": "Model",
     "spendColRequests": "Requests",
     "spendColTokens": "Tokens",
