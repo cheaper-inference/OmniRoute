@@ -18,6 +18,7 @@ import { enforceResponsesToolHistory } from "../../translator/helpers/responsesT
 import { normalizeClaudeToolsForDispatch } from "./claudeToolDefaults.ts";
 import { normalizeToolSchemasForProvider } from "./openrouterToolSchemas.ts";
 import { buildClaudePassthroughToolNameMap } from "./passthroughToolNames.ts";
+import { dedupeDeepSeekTools } from "./dedupeDeepSeekTools.ts";
 import {
   extractRequestToolMetadata,
   resolveResponseToolNameMap,
@@ -84,6 +85,11 @@ export function finalizeTranslatedRequest({
   // regex in any tool schema; drop only those constraints before dispatch.
   if (Array.isArray(translatedBody?.tools)) {
     translatedBody.tools = normalizeToolSchemasForProvider(provider, translatedBody.tools, log);
+  }
+
+  // DeepSeek 400s on a repeated tool name (any endpoint); keep the first definition.
+  if (Array.isArray(translatedBody?.tools)) {
+    translatedBody.tools = dedupeDeepSeekTools(translatedBody.tools, effectiveModel);
   }
 
   // Kiro: sanitize tool schemas before dispatch. Kiro returns 400 "Improperly
@@ -186,10 +192,12 @@ export function finalizeTranslatedRequest({
           "PARAMS",
           `Stripped output_config.effort="${oc.effort}" because model "${finalModelToUpstream}" already encodes effort`
         );
-        delete oc.effort;
-        if (Object.keys(oc).length === 0) {
-          delete translatedBody.output_config;
-        }
+        // Copy-on-write: output_config is shared with the other targets of a combo (the body is
+        // only copied one level deep), so deleting in place also removed the client's effort
+        // from the next target.
+        const { effort: _effort, ...rest } = oc;
+        if (Object.keys(rest).length === 0) delete translatedBody.output_config;
+        else translatedBody.output_config = rest;
       }
     }
   }

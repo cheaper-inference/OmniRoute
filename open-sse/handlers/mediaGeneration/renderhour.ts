@@ -302,7 +302,7 @@ async function pollRenderhourJob({
         error: `RenderHour job ${job.id} did not finish within ${Math.round(timeoutMs / 1000)} s`,
       };
     }
-    await sleep(delay);
+    await sleep(delay, signal);
     delay = pollIntervalMs;
     // Asking about a job also moves it forward on RenderHour's side.
     const response = await fetch(`${baseUrl}/v1/generations/${encodeURIComponent(job.id)}`, {

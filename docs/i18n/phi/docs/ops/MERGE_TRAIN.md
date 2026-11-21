@@ -4,10 +4,9 @@
 
 ---
 
-Mula v3.8.49 (WS3.2/WS3.4 ng quality/velocity plan), ang default na merge path para sa
-mga na-review na PR papunta sa `release/vX.Y.Z` ay ang **Mergify merge queue** (`.mergify.yml`);
-ang **manual merge-train** na nakadokumento sa ibaba ang FALLBACK — ginagamit sa panahon ng mga insidente,
-release freeze, o kung sakaling magbago ang Mergify Open Source plan.
+> **2026-11-19: ang Megify merge queue ay itinigil na** (desisyon ng may-ari). Hindi na tinukoy `.mergify.yml` ang isang queue at tinatanggihan ang mga utos ng Mergify na nagsasama o muling nagsusulat ng isang pull request. Ang release PRs ay pinagsama-sama sa pamamagitan ng kamay sa ilalim ng repository ruleset na "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) hanggang sa tumakbo ang omni-queue sa live mode, at sa pamamagitan ng omni-queue pagkatapos noon ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ang mga seksyon ng Pagsama-samahin sa ibaba ay naglalarawan sa pila kung ano ito.
+
+Dahil v3.8.49 (WS3.2/WS3.4 ng quality/velocity plan) ang default na merge path para sa nasuri na PRs sa `release/vX.Y.Z` ay ang** Pagsamahin ang merge queue** (`.mergify.yml`); ang** manu-manong merge-train** ang nakadokumento sa ibaba ay ang FALLBACK — na ginagamit sa panahon ng mga insidente, pag-freeze ng release, o kung magbabago ang plano ng Mergify Open Source.
 
 ## Default na landas: ang pila ng Mergify
 

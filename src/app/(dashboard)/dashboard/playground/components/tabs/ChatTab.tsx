@@ -31,6 +31,7 @@ import {
   isChatCompletionsEndpoint,
   isNativeCodexPlaygroundModel,
   lastUserContent,
+  readStreamError,
   resolveChatTabRequestPath,
 } from "./chatTabEndpointRequest";
 
@@ -238,21 +239,27 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
       const decoder = new TextDecoder();
       let assistantResponse = "";
       let usageData: { prompt_tokens?: number; completion_tokens?: number } | undefined;
+      // KEA-9392: a turn that fails after the response is committed to 200 reports the failure
+      // as a `data:` frame. Keep the first one; it is shown once the stream ends.
+      let streamError: { message: string | null } | null = null;
+      // A network chunk can end mid-line: keep the tail until its newline arrives, or a frame
+      // split across two reads (an error body is the longest one) is never parsed.
+      let buffered = "";
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
-
-          if (firstChunk) {
+          if (!done && firstChunk) {
             streamMetrics.onFirstChunk();
             firstChunk = false;
           }
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
+          buffered += done ? decoder.decode() : decoder.decode(value, { stream: true });
+          const lines = buffered.split("\n");
+          buffered = done ? "" : (lines.pop() ?? "");
 
-          for (const line of lines) {
+          for (const rawLine of lines) {
+            const line = rawLine.trimEnd();
             if (line === "data: [DONE]") continue;
             if (line.startsWith("data: ")) {
               try {
@@ -265,6 +272,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
                     usage?: { input_tokens?: number; output_tokens?: number };
                   };
                 };
+                streamError ??= readStreamError(parsed);
                 const delta = nativeCodex
                   ? parsed.type === "response.output_text.delta"
                     ? (parsed.delta ?? "")
@@ -289,11 +297,24 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
                   };
                 }
               } catch {
-                // ignore parse errors for partial chunks
+                // ignore lines that are not JSON (SSE comments are skipped above)
               }
             }
           }
+          if (done) break;
         }
+      }
+
+      // KEA-9392: never end a turn silently. An in-band failure, or a stream that closed
+      // without any content, is reported; an answer that never started is removed so no empty
+      // bubble is left (what already streamed is kept, as on Stop).
+      if (streamError || !assistantResponse) {
+        setError(streamError ? (streamError.message ?? t("streamFailed")) : t("emptyResponse"));
+        if (!assistantResponse) setMessages((prev) => prev.slice(0, targetIndex));
+        setResponseDuration(Date.now() - startTime);
+        setLoading(false);
+        streamMetrics.reset();
+        return;
       }
 
       streamMetrics.finish(usageData);

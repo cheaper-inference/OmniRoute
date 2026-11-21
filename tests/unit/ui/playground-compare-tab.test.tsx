@@ -295,4 +295,46 @@ describe("CompareTab", () => {
       expect(abortCallTracker.calls).toBeGreaterThan(0);
     }
   });
+  // KEA-9392: a failure that arrives inside a 200 stream must not end as an empty "done" column.
+  it("marks the column as failed when the 200 stream carries an in-band error (KEA-9392)", async () => {
+    const encoder = new TextEncoder();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve(
+          new Response(
+            new ReadableStream({
+              start(controller) {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ choices: [], model: "keepalive" })}\n\n` +
+                      `data: ${JSON.stringify({ error: { message: "No active credentials for provider: demo" } })}\n\n`
+                  )
+                );
+                controller.close();
+              },
+            }),
+            { status: 200, headers: { "content-type": "text/event-stream" } }
+          )
+        )
+      ) as typeof fetch
+    );
+
+    const el = renderCompareTab();
+    const promptTextarea = el.querySelector("[aria-label='User prompt']") as HTMLTextAreaElement;
+    act(() => setInputValue(promptTextarea, "Compare this"));
+    const runBtn = el.querySelector("[aria-label='Run all columns']") as HTMLButtonElement;
+    await act(async () => {
+      runBtn.click();
+    });
+
+    const start = Date.now();
+    while (!el.textContent?.includes("No active credentials for provider: demo")) {
+      if (Date.now() - start > 3000) throw new Error("in-band error was not rendered");
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+    }
+    expect(el.textContent).toContain("No active credentials for provider: demo");
+  });
 });

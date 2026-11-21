@@ -144,15 +144,26 @@ export function escapeHistoricalContextAttribute(value: string): string {
     .replaceAll(">", "&gt;");
 }
 
+// `<` and `>` are escaped so a tool result cannot close or reopen the context block (tag
+// breakout). `&` is left alone: it cannot open or close a tag, and escaping it rewrote the
+// result the model reads (`a && b` became `a &amp;&amp; b`).
 export function escapeHistoricalContextContent(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return value.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-export function buildHistoricalToolResultContext(name: string, response: unknown): string {
+export function buildHistoricalToolResultContext(
+  name: string,
+  response: unknown,
+  isError = false
+): string {
   const source = escapeHistoricalContextAttribute(name || "unknown");
   const rawResult =
     typeof response === "string" ? response : stringifyHistoricalToolArguments(response);
-  const result = escapeHistoricalContextContent(rawResult);
+  // Same marker claude-to-openai uses: the context text has no is_error field, so the failure
+  // stays visible to the model in the text itself.
+  const result = escapeHistoricalContextContent(
+    isError ? `[tool_error: true]\n${rawResult}` : rawResult
+  );
   return [
     `<previous_tool_result_context source="${source}">`,
     result,

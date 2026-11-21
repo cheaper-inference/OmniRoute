@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### સુરક્ષા અને પરિવહન
+
+WebDAV પ્રમાણીકરણ પ્રતિ-IP નિષ્ફળતા ટ્રેકિંગ અને લોકઆઉટને લાગુ કરે છે (60-સેકન્ડની વિન્ડોમાં 10 નિષ્ફળ પ્રયાસો `429 Too Many Requests` અને `Retry-After` સાથે 5-મિનિટના લોકઆઉટને ટ્રિગર કરે છે). કારણ કે WebDAV મૂળભૂત પ્રમાણીકરણ ઓળખપત્રો પ્રસારિત કરે છે, લૂપબેકની બહાર WebDAV એન્ડપોઇન્ટને ઍક્સેસ કરતી વખતે TLS (અથવા સુરક્ષિત ટનલ જેમ કે Tailscale અથવા Cloudflare Tunnel પર રૂટીંગ) સમાપ્ત કરવાની ભારપૂર્વક ભલામણ કરવામાં આવે છે.
+
 ### પ્રતિ-API-key context source (વૈકલ્પિક)
 
 Obsidian configને `api_key_context_sources` ટેબલ

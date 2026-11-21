@@ -13,6 +13,9 @@ import {
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
+import { LocalOnlyNotice } from "@/shared/components/LocalOnlyNotice";
+import { useLocalOnlyBlocked } from "@/shared/hooks/useLocalOnlyAccess";
+import { detectLocalOnlyRejection } from "@/shared/utils/localOnlyAccess";
 import { cn } from "@/shared/utils/cn";
 import type { OmniSkill } from "./OmniSkillCard";
 import type { JSX } from "react";
@@ -36,6 +39,8 @@ interface SkillExecution {
 
 type InspectorTab = "schema" | "handler" | "executions" | "sandbox";
 
+const EXECUTIONS_API_PATH = "/api/skills/executions";
+
 interface SkillInspectorPaneProps {
   selectedSkillId: string | null;
   skill: OmniSkill | null;
@@ -55,6 +60,7 @@ export function SkillInspectorPane({
   const [detail, setDetail] = useState<SkillDetail | null>(null);
   const [executions, setExecutions] = useState<SkillExecution[]>([]);
   const [loadingExecs, setLoadingExecs] = useState(false);
+  const executionsLocalOnly = useLocalOnlyBlocked(EXECUTIONS_API_PATH);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,13 +89,17 @@ export function SkillInspectorPane({
   }, [selectedSkillId]);
 
   useEffect(() => {
-    if (!selectedSkillId || activeTab !== "executions") return;
+    if (!selectedSkillId || activeTab !== "executions" || executionsLocalOnly) return;
     let cancelled = false;
     Promise.resolve().then(() => {
       if (!cancelled) setLoadingExecs(true);
     });
-    fetch(`/api/skills/executions?skillId=${selectedSkillId}&limit=20`)
-      .then((r) => (r.ok ? r.json() : { data: [] }))
+    fetch(`${EXECUTIONS_API_PATH}?skillId=${selectedSkillId}&limit=20`)
+      .then(async (r) => {
+        // Local-only rejection: the notice below replaces the list.
+        if (await detectLocalOnlyRejection(r, EXECUTIONS_API_PATH)) return { data: [] };
+        return r.ok ? r.json() : { data: [] };
+      })
       .then((data: { data?: SkillExecution[] }) => {
         if (!cancelled) {
           setExecutions(data.data || []);
@@ -102,7 +112,7 @@ export function SkillInspectorPane({
     return () => {
       cancelled = true;
     };
-  }, [selectedSkillId, activeTab]);
+  }, [selectedSkillId, activeTab, executionsLocalOnly]);
 
   if (!selectedSkillId || !skill) {
     return (
@@ -128,7 +138,7 @@ export function SkillInspectorPane({
       <div className="px-4 pt-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
           <Icon name="auto_fix_high" size={18} className="text-primary" />
-          <h3 className="font-semibold text-text-main text-sm">{skill.name}</h3>
+          <h3 className="text-text-main text-sm">{skill.name}</h3>
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
@@ -202,15 +212,19 @@ export function SkillInspectorPane({
 
         {activeTab === "executions" && (
           <div>
-            {loadingExecs ? (
+            {executionsLocalOnly ? (
+              <LocalOnlyNotice />
+            ) : loadingExecs ? (
               <div className="text-xs text-text-muted">{t("loading")}...</div>
             ) : executions.length === 0 ? (
               <div className="text-xs text-text-muted text-center py-6">{t("noExecutions")}</div>
             ) : (
+              // The inspector pane's border is the frame around this table (#19620).
               <Table
                 className="text-xs"
                 aria-label={t("executionsTab")}
                 scrollbarLabel={t("executionsTab")}
+                containerClassName="rounded-none border-0"
               >
                 <TableHeader>
                   <TableRow>

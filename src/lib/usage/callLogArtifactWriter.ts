@@ -46,23 +46,41 @@ function fileExistsAtRuntime(candidate: string): boolean {
 }
 
 type WorkerResolutionContext = {
-  moduleDir?: string;
+  moduleDir?: string | null;
+  moduleUrl?: string;
   cwd?: string;
   entryFile?: string | null;
   fileExists?: (candidate: string) => boolean;
 };
 
+function safeModuleDir(moduleUrl: string): string | null {
+  try {
+    return path.dirname(fileURLToPath(moduleUrl));
+  } catch {
+    return null;
+  }
+}
+
+function resolveModuleDir(context: WorkerResolutionContext): string | null {
+  if (context.moduleDir !== undefined) return context.moduleDir;
+  return safeModuleDir(context.moduleUrl ?? import.meta.url);
+}
+
+function moduleWorkerPath(moduleDir: string | null, fileName: string): string | null {
+  return moduleDir ? path.join(moduleDir, fileName) : null;
+}
+
 export function resolveCallLogArtifactWorker(context: WorkerResolutionContext = {}): {
   workerFile: string;
   execArgv: string[];
 } {
-  const moduleDir = context.moduleDir ?? path.dirname(fileURLToPath(import.meta.url));
+  const moduleDir = resolveModuleDir(context);
   const cwd = context.cwd ?? process.cwd();
   const entryFile = context.entryFile === undefined ? process.argv[1] : context.entryFile;
   const exists = context.fileExists ?? fileExistsAtRuntime;
 
-  const moduleJs = path.join(moduleDir, "callLogArtifactWorker.js");
-  if (exists(moduleJs)) return { workerFile: moduleJs, execArgv: [] };
+  const moduleJs = moduleWorkerPath(moduleDir, "callLogArtifactWorker.js");
+  if (moduleJs && exists(moduleJs)) return { workerFile: moduleJs, execArgv: [] };
 
   const entryJs = entryFile
     ? path.join(path.dirname(path.resolve(entryFile)), "src/lib/usage/callLogArtifactWorker.js")
@@ -73,8 +91,8 @@ export function resolveCallLogArtifactWorker(context: WorkerResolutionContext = 
   if (exists(cwdJs)) return { workerFile: cwdJs, execArgv: [] };
 
   // Native TypeScript workers avoid esbuild zombies when terminated.
-  const moduleTs = path.join(moduleDir, "callLogArtifactWorker.ts");
-  if (exists(moduleTs)) {
+  const moduleTs = moduleWorkerPath(moduleDir, "callLogArtifactWorker.ts");
+  if (moduleTs && exists(moduleTs)) {
     return { workerFile: moduleTs, execArgv: [] };
   }
 

@@ -10,6 +10,7 @@ import { inheritResponsePolicies } from "./responsePolicies.ts";
 export type AccountRoutingTelemetry = {
   accountFallbacks?: number;
   accountFallbackReasons?: readonly string[];
+  selectedConnectionPlan?: string | null;
   sameAccountRetries?: number;
   routingWaitMs?: number;
 };
@@ -37,6 +38,30 @@ function fallbackReasons(values: readonly string[] | undefined): string[] {
     .filter((reason) => SAFE_FALLBACK_REASONS.has(reason) || /^http_[1-5][0-9]{2}$/.test(reason));
 }
 
+// Only explicitly enabled server operators can expose recognized subscription tiers.
+// An arbitrary provider field is never copied into a response header.
+const CODEX_PLAN_TIERS = new Set([
+  "free",
+  "go",
+  "plus",
+  "pro",
+  "prolite",
+  "promax",
+  "team",
+  "chatgptteam",
+  "business",
+  "enterprise",
+  "edu",
+  "education",
+]);
+
+function selectedCodexPlan(value: string | null | undefined): string | null {
+  if (process.env.OMNIROUTE_CODEX_PLAN_RESPONSE_HEADER !== "1") return null;
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  return CODEX_PLAN_TIERS.has(normalized) ? normalized : null;
+}
+
 export function withSelectedConnectionHeader(
   response: Response,
   connectionId: string | null | undefined,
@@ -44,15 +69,24 @@ export function withSelectedConnectionHeader(
 ): Response {
   if (!response) return response;
   const fallbacks = nonnegativeCount(telemetry?.accountFallbacks);
+  const plan = selectedCodexPlan(telemetry?.selectedConnectionPlan);
   const retries = nonnegativeCount(telemetry?.sameAccountRetries);
   const waitMs = nonnegativeCount(telemetry?.routingWaitMs);
   const reasons = fallbackReasons(telemetry?.accountFallbackReasons);
-  if (!connectionId && fallbacks === 0 && retries === 0 && waitMs === 0 && reasons.length === 0) {
+  if (
+    !connectionId &&
+    fallbacks === 0 &&
+    retries === 0 &&
+    waitMs === 0 &&
+    reasons.length === 0 &&
+    !plan
+  ) {
     return response;
   }
 
   const apply = (headers: Headers) => {
     if (connectionId) headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
+    if (plan) headers.set(OMNIROUTE_RESPONSE_HEADERS.selectedConnectionPlan, plan);
     if (fallbacks > 0) headers.set(OMNIROUTE_RESPONSE_HEADERS.accountFallbacks, String(fallbacks));
     if (reasons.length) {
       headers.set(OMNIROUTE_RESPONSE_HEADERS.accountFallbackReasons, reasons.join(","));

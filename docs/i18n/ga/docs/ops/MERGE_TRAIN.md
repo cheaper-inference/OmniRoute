@@ -4,9 +4,9 @@
 
 ---
 
-Ó v3.8.49 (WS3.2/WS3.4 den phlean cáilíochta/luais) i leith, is é **scuaine cumaiscthe Mergify** (`.mergify.yml`) an chonair réamhshocraithe chun PRanna athbhreithnithe a chumasc isteach in `release/vX.Y.Z`;
-is é an **traein chumaiscthe láimhe** a dhoiciméadaítear thíos an ROGHA CÚLTACA — úsáidtear í le linn teagmhas,
-reoite eisiúna, nó má athraíonn plean Foinse Oscailte Mergify riamh.
+> **2026-11-19: tá scuaine an chumaisc Mergify ar scor** (cinneadh an úinéara). Ní shainíonn `.mergify.yml` scuaine a thuilleadh agus diúltaíonn sé do na horduithe Mergify a chumasc nó a athscríobhann iarratas tarraingthe. Déantar scaoileadh PRs a chumasc de láimh faoin tacar rialacha stórtha "Éiligh geataí glasa ar an scaoileadh gníomhach" (`Gate / CI` + `Gate / Quality`) go dtí go ritheann omni-scuaine i mód beo, agus trí scuaine omni ina dhiaidh sin ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Déanann na codanna Mergify thíos cur síos ar an scuaine mar a bhí.
+
+Ós rud é v3.8.49 (WS3.2/WS3.4 den phlean quality/velocity ) is é an conair chumasc réamhshocraithe le haghaidh PRs athbhreithnithe go `release/vX.Y.Z`** Cumaisc scuaine chumaisc** (`.mergify.yml`); an** traein chumasc láimhe** doiciméadaithe thíos tá an FALLBACK — a úsáidtear le linn teagmhas, reo scaoileadh, nó má athraíonn plean Foinse Oscailte Mergify riamh.
 
 ## Conair réamhshocraithe: scuaine Mergify
 

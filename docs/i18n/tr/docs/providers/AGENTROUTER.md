@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 Yeniden başlatmanın ardından kontrol paneli, mevcut OpenAI uyumlu ve Anthropic uyumlu akışlara ek olarak **Claude Code Uyumlu Ekle** seçeneğini gösterir.

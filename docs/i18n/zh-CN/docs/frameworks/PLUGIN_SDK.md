@@ -4,7 +4,7 @@
 
 ---
 
-## 快速开始
+## 快速入门
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API 参考
+## API参考
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-创建带有默认值的 Plugin 对象的工厂函数。
+使用默认值创建插件对象的工厂函数。
 
 **参数：**
 
-- `name`（string，必需）— 使用 kebab-case 格式的插件名称
-- `priority`（number，可选，默认值：100）— 数值越低，执行越早
-- `enabled`（boolean，可选，默认值：true）— 启动时是否启用
-- `onRequest`（function，可选）— 在聊天处理程序之前运行
-- `onResponse`（function，可选）— 在聊天处理程序之后运行
-- `onError`（function，可选）— 在处理程序出错时运行
+- `name` （字符串，必填） —短横线格式的插件名称
+- `priority` （数字，可选，默认：100） —下层首先运行
+- `enabled` （布尔值，可选，默认值：true） —启动已启用？
+- `onRequest` （函数，可选） —在聊天处理程序之前运行
+- `onResponse` （函数，可选） —在聊天处理程序之后运行
+- `onError` （函数，可选） —在处理程序错误时运行
 
 ### `blockRequest(response?): BlockingHookResult`
 
-阻止请求，并可选择返回自定义响应。
+阻止请求并可选择返回自定义响应。
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-在请求正文到达提供者之前对其进行修改。
+在请求正文到达提供者之前修改请求正文。
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## 插件上下文（`PluginContext`）
+## 插件上下文 (`PluginContext`)
 
-| 字段        | 类型                      | 描述           |
-| ----------- | ------------------------- | -------------- |
-| `requestId` | `string`                  | 唯一请求标识符 |
-| `model`     | `string`                  | 请求的模型名称 |
-| `provider`  | `string`                  | 目标提供者 ID  |
-| `body`      | `Record<string, unknown>` | 请求正文       |
-| `headers`   | `Record<string, string>`  | 请求头         |
-| `metadata`  | `Record<string, unknown>` | 可变元数据     |
-| `timestamp` | `number`                  | 请求时间戳     |
+| 场地         | 类型                      | 描述                    |
+| ------------ | ------------------------- | ----------------------- |
+| `requestId`  | `string`                  | 唯一的请求标识符        |
+| `model`      | `string`                  | 请求的型号名称          |
+| `provider`   | `string`                  | 目标提供者ID            |
+| `body`       | `Record<string, unknown>` | 请求正文                |
+| `headers`    | `Record<string, string>`  | 请求标头（见注释）      |
+| `metadata`   | `Record<string, unknown>` | 可变元数据              |
+| `timestamp`  | `number`                  | 请求时间戳              |
+| `apiKeyInfo` | `object` （可选）         | API密钥元数据（见注释） |
+
+上下文永远不会携带客户端的凭据： `authorization`、 `x-api-key`、 `proxy-authorization`和`cookie`标头被删除（任何大小写），并且`apiKeyInfo`保留密钥的元数据（例如`id`、 `name`和`scopes`），但不保留密钥值或其指纹（ `src/lib/plugins/hooks.ts`中的`redactPluginContext()` ）。这适用于`onRequest`、 `onResponse`和`onError`。
 
 ## 清单（`plugin.json`）
 
@@ -140,17 +143,16 @@ onRequest: (ctx) => {
 
 ## 权限系统
 
-插件在沙箱化的 VM 上下文中运行。访问外部资源需要显式权限：
+插件有**未沙盒化**。每个活动插件在与OmniRoute相同的操作系统用户下作为单独的普通Node.js子进程（ `src/lib/plugins/loader.ts`中的`loadPlugin()` ）运行，没有VM上下文，也没有Node.js权限标志。插件代码可以使用`node:fs`、 `node:child_process`、 `fetch`和其他Node.js API：它可以读写OmniRoute用户可以访问的任何文件（包括数据目录）、运行程序并访问网络。
 
-| 权限         | 授予的能力                                                   |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`、`AbortController`、`Headers`、`Request`、`Response` |
-| `file-read`  | `fs.readFile`、`fs.readdir`、`fs.stat`                       |
-| `file-write` | `fs.writeFile`、`fs.mkdir`、`fs.rm`                          |
-| `env`        | 只读的 `process.env` 代理                                    |
-| `exec`       | `child_process.exec`、`child_process.execSync`               |
+清单的`requires.permissions`接受`network`、 `file-read`、 `file-write`、 `env`和`exec`，但现在只有`env`在运行时有效：
 
-如果没有相应权限，对应的全局对象在沙箱中将不可用。
+| 允许                                         | 今天生效                                                                                                                                                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | 插件进程还接收`PORT`、 `HOSTNAME`、 `TZ`和`TMPDIR`。如果没有它，它只会接收`PATH`、 `HOME`、 `USER`、 `LANG`、 `LC_ALL`、 `NODE_ENV`、 `PLUGIN_ENTRY`和`PLUGIN_NAME` （加上Windows上的`SystemRoot`和`windir` ）。 |
+| `network`, `file-read`, `file-write`, `exec` | 没有任何。它们只是声明：当它们丢失时，任何东西都不会被阻止。                                                                                                                                                     |
+
+安装插件就像在主机上安装任何其他程序一样。仅安装您信任来源的插件。
 
 ## 配置模式
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## 示例
 
-### 请求日志记录器
+### 请求记录器
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 分钟
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### 响应转换器
+### 响应变压器
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
