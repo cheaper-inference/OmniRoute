@@ -602,6 +602,11 @@ export function openaiResponsesToOpenAIRequest(
       if (!fnName) {
         continue;
       }
+      // Same as function_call (#2893): a call with a blank call_id can never be paired with its
+      // output, so skip it instead of re-pairing it later with a made-up id and an empty result.
+      if (!toString(item.call_id).trim()) {
+        continue;
+      }
       if (!currentAssistantMsg) {
         currentAssistantMsg = {
           role: "assistant",
@@ -625,7 +630,7 @@ export function openaiResponsesToOpenAIRequest(
         },
       });
       currentAssistantMsg.tool_calls = toolCalls;
-      if (toString(item.call_id).trim()) pendingCallIds.push(toString(item.call_id));
+      pendingCallIds.push(toString(item.call_id));
       continue;
     }
 
@@ -933,6 +938,12 @@ export function openaiResponsesToOpenAIRequest(
       { role: "user", content: `[Unpaired tool result ${toolCallId}]\n${toString(rec.content)}` },
     ];
   });
+
+  // Upstream providers reject messages:[] (see the empty-input placeholder above). Skipped
+  // replay items or dropped tool results can still leave nothing: keep the same placeholder.
+  if (Array.isArray(result.messages) && result.messages.length === 0) {
+    result.messages = [{ role: "user", content: "..." }];
+  }
 
   // Translate tool_choice object format: Responses {type,name} → Chat {type,function:{name}}
   if (
