@@ -45,6 +45,15 @@ import {
 } from "./streamHelpers.ts";
 import { rejectEmptyChoicesStream, buildEmptyChoicesStreamError } from "./streamEmptyChoices.ts";
 import { shouldAbortEmptyClaudeStream } from "./streamClaudeEmptyBody.ts";
+import {
+  buildSyntheticClaudeEmptyResponseEvents,
+  createClaudeEmptyResponseLifecycle,
+  isClaudeEventPayload,
+  shouldInjectClaudeEmptyResponseBeforeCurrentEvent,
+  shouldInjectClaudeMissingFinalizersOnFlush,
+  SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT,
+  updateClaudeEmptyResponseLifecycle,
+} from "./streamClaudeEmptyLifecycle.ts";
 import { calculateCost } from "@/lib/usage/costCalculator";
 import { buildOmniRouteSseMetadataComment } from "@/domain/omnirouteResponseMeta";
 import { sseCommentsEnabled } from "./sseHeartbeat.ts";
@@ -155,6 +164,7 @@ export function withBodyTimeout<T>(
 }
 
 export { formatSSE };
+export { createClaudeEmptyResponseLifecycle, updateClaudeEmptyResponseLifecycle };
 export { backfillResponsesCompletedOutput, stripResponsesLifecycleEcho };
 
 type JsonRecord = Record<string, unknown>;
@@ -298,6 +308,29 @@ type TranslateState = ReturnType<typeof initState> & {
 
 type UsageTokenRecord = Record<string, number>;
 
+/** A held textual-call header longer than this is prose, not a call: release it, never slide it. */
+const MAX_HELD_TEXTUAL_CALL_CHARS = 64 * 1024;
+
+/** Calls of a Claude client summary, as chat tool calls: the exact calls the client received. */
+function toolCallsFromClaudeSummary(summary: unknown): ToolCall[] {
+  const content = asRecord(summary).content;
+  const calls: ToolCall[] = [];
+  for (const block of Array.isArray(content) ? content : []) {
+    const b = asRecord(block);
+    if (b.type !== "tool_use") continue;
+    calls.push({
+      id: typeof b.id === "string" ? b.id : null,
+      index: calls.length,
+      type: "function",
+      function: {
+        name: typeof b.name === "string" ? b.name : "",
+        arguments: typeof b.input === "string" ? b.input : JSON.stringify(b.input ?? {}),
+      },
+    });
+  }
+  return calls;
+}
+
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
@@ -320,6 +353,12 @@ function isTerminalStreamPayload(payload: unknown): boolean {
   const finished = (list: unknown, key: string) =>
     Array.isArray(list) && list.some((entry) => asRecord(entry)[key] != null);
   return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
+}
+
+/** A Claude `message_delta` that carries a stop_reason: the turn is over even before `message_stop`. */
+function isClaudeStopDelta(payload: unknown): boolean {
+  const record = asRecord(payload);
+  return record.type === "message_delta" && Boolean(asRecord(record.delta).stop_reason);
 }
 
 /** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
@@ -569,177 +608,6 @@ function toResponsesCompletedWithToolCalls(parsed: JsonRecord, toolCalls: ToolCa
   };
 }
 
-type ClaudeEmptyResponseLifecycle = {
-  hasMessageStart: boolean;
-  hasContentBlock: boolean;
-  hasMessageDelta: boolean;
-  hasMessageStop: boolean;
-  hasError: boolean;
-  stopReason: string | null;
-  syntheticContentInjected: boolean;
-  warningLogged: boolean;
-};
-
-const SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT = "";
-
-export function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
-  return {
-    hasMessageStart: false,
-    hasContentBlock: false,
-    hasMessageDelta: false,
-    hasMessageStop: false,
-    hasError: false,
-    stopReason: null,
-    syntheticContentInjected: false,
-    warningLogged: false,
-  };
-}
-
-function getClaudeEventType(payload: unknown): string | null {
-  if (!payload || typeof payload !== "object") return null;
-  const type = (payload as JsonRecord).type;
-  return typeof type === "string" ? type : null;
-}
-
-function isClaudeEventPayload(payload: unknown): boolean {
-  return getClaudeEventType(payload) !== null;
-}
-
-export function updateClaudeEmptyResponseLifecycle(
-  lifecycle: ClaudeEmptyResponseLifecycle,
-  payload: unknown
-) {
-  const type = getClaudeEventType(payload);
-  if (!type) return;
-
-  switch (type) {
-    case "message_start":
-      lifecycle.hasMessageStart = true;
-      break;
-    case "content_block_start":
-    case "content_block_delta":
-    case "content_block_stop":
-      lifecycle.hasContentBlock = true;
-      break;
-    case "message_delta":
-      lifecycle.hasMessageDelta = true;
-      {
-        const delta = (payload as JsonRecord).delta;
-        const reason =
-          delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null;
-        if (typeof reason === "string" && reason) lifecycle.stopReason = reason;
-      }
-      break;
-    case "message_stop":
-      lifecycle.hasMessageStop = true;
-      break;
-    case "error":
-      lifecycle.hasError = true;
-      break;
-    default:
-      break;
-  }
-}
-
-function hasClaudeAssistantLifecycle(lifecycle: ClaudeEmptyResponseLifecycle): boolean {
-  return lifecycle.hasMessageStart || lifecycle.hasMessageDelta || lifecycle.hasMessageStop;
-}
-
-function shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-  lifecycle: ClaudeEmptyResponseLifecycle,
-  payload: unknown
-): boolean {
-  const type = getClaudeEventType(payload);
-  if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
-  if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
-  const delta = (payload as JsonRecord).delta;
-  // A bare `event: message_delta` line: its data line carries the stop_reason and decides.
-  if (type === "message_delta" && !delta) return false;
-  // A refusal has no content by design; forward it so the client sees why.
-  const stopReason =
-    (delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null) ??
-    lifecycle.stopReason;
-  if (stopReason === "refusal") return false;
-  return type === "message_delta" || type === "message_stop";
-}
-
-function shouldInjectClaudeMissingFinalizersOnFlush(
-  lifecycle: ClaudeEmptyResponseLifecycle
-): boolean {
-  if (lifecycle.hasError || !lifecycle.syntheticContentInjected) return false;
-  return !lifecycle.hasMessageDelta || !lifecycle.hasMessageStop;
-}
-
-function buildSyntheticClaudeEmptyResponseEvents(
-  lifecycle: ClaudeEmptyResponseLifecycle,
-  model: string | null,
-  options: {
-    includeContentBlock?: boolean;
-    includeMessageDelta?: boolean;
-    includeMessageStop?: boolean;
-  } = {}
-): JsonRecord[] {
-  const {
-    includeContentBlock = true,
-    includeMessageDelta = false,
-    includeMessageStop = false,
-  } = options;
-  const events: JsonRecord[] = [];
-  const resolvedModel = typeof model === "string" && model ? model : "unknown";
-
-  if (includeContentBlock) {
-    if (!lifecycle.hasMessageStart) {
-      events.push({
-        type: "message_start",
-        message: {
-          id: `msg_synthetic_${Date.now()}`,
-          type: "message",
-          role: "assistant",
-          model: resolvedModel,
-          content: [],
-          stop_reason: null,
-          stop_sequence: null,
-          usage: { input_tokens: 0, output_tokens: 0 },
-        },
-      });
-    }
-
-    events.push(
-      {
-        type: "content_block_start",
-        index: 0,
-        content_block: { type: "text", text: "" },
-      },
-      {
-        type: "content_block_delta",
-        index: 0,
-        delta: {
-          type: "text_delta",
-          text: SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT,
-        },
-      },
-      {
-        type: "content_block_stop",
-        index: 0,
-      }
-    );
-  }
-
-  if (includeMessageDelta) {
-    events.push({
-      type: "message_delta",
-      delta: { stop_reason: "end_turn", stop_sequence: null },
-      usage: { input_tokens: 0, output_tokens: 0 },
-    });
-  }
-
-  if (includeMessageStop) {
-    events.push({ type: "message_stop" });
-  }
-
-  return events;
-}
-
 function getOpenAIIntermediateChunks(value: unknown): unknown[] {
   if (!value || typeof value !== "object") return [];
   const candidate = (value as JsonRecord)._openaiIntermediate;
@@ -954,6 +822,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughFinishReason: string | null = null;
   /** Passthrough: a terminal event (finish reason, [DONE], response.completed, message_stop) was seen */
   let passthroughSawTerminalEvent = false;
+  let passthroughSawClaudeStop = false;
   /** Passthrough: the newest `data:` payload was not JSON and no valid payload followed it */
   let passthroughUnparsableDataTail = false;
   /** A success or failure outcome was already recorded; the flush catch must not record a second one */
@@ -1038,6 +907,46 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughForwardedUsageSummary = false;
   /** Translate: usage already reached the client, or no trailing usage chunk applies. */
   let translateForwardedUsage = sourceFormat !== FORMATS.OPENAI || !shouldEmitDoneTerminator;
+  /** Claude passthrough usage: message_start holds input, message_delta holds output; a 0 never erases a count. */
+  const mergeClaudePassthroughUsage = (extracted: unknown) => {
+    if (!usage) usage = {};
+    const u = usage;
+    const eu = extracted as UsageTokenRecord;
+    Object.assign(
+      u,
+      { usage_evidence: mergeUsageEvidence(u, extracted) },
+      mergeCacheCreationFields(u, extracted)
+    );
+    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
+    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
+    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
+    if (eu.cache_read_input_tokens !== undefined)
+      u.cache_read_input_tokens = eu.cache_read_input_tokens;
+    if (eu.cache_creation_input_tokens !== undefined)
+      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
+  };
+  /** EOF-tail frames skip the main loop: record the usage and finish evidence it would have kept. */
+  const noteTailPayload = (payload: unknown) => {
+    if (isTerminalStreamPayload(payload)) passthroughSawTerminalEvent = true;
+    if (isClaudeStopDelta(payload)) passthroughSawClaudeStop = true;
+    const extracted = extractUsage(payload as never);
+    if (extracted) {
+      if (clientExpectsClaudeStream) {
+        mergeClaudePassthroughUsage(extracted);
+      } else {
+        usage = {
+          ...mergeUsageSnapshot(usage, extracted),
+          ...mergeCacheCreationFields(usage, extracted),
+        };
+        // The tail frame already carries the usage to the client: flush adds no estimate.
+        if (hasValidUsage(extracted)) passthroughForwardedUsage = true;
+      }
+    }
+    const choices = asRecord(payload).choices;
+    if (Array.isArray(choices) && asRecord(choices[0]).finish_reason) {
+      passthroughSawFinishReason = true;
+    }
+  };
   // Passthrough Responses SSE: snapshots of items seen via `response.output_item.done`,
   // used to backfill `response.completed.response.output` when upstream returns it
   // empty (which happens when `store: false` — see backfillResponsesCompletedOutput).
@@ -1169,6 +1078,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   };
   let streamTimedOut = false;
   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
+  claudeEmptyResponseLifecycle.trustCleanEmptyStop = mode === STREAM_MODE.PASSTHROUGH;
   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
   const shouldAbortClaudeStream = () =>
     clientExpectsClaudeStream &&
@@ -1196,6 +1106,21 @@ export function createSSEStream(options: StreamOptions = {}) {
 
   const clearPendingPassthroughEvent = () => {
     passthroughEventPrefix.clear();
+  };
+
+  // Send a held, unfinished textual-call header as plain text. Called before the terminal
+  // frame so the client never gets content after finish_reason / response.completed.
+  const releaseHeldTextualCallContent = (controller: TransformStreamDefaultController) => {
+    const held = passthroughBufferedTextualToolCallContent;
+    if (!held) return;
+    passthroughBufferedTextualToolCallContent = "";
+    const frame = clientExpectsResponsesStream
+      ? { type: "response.output_text.delta", delta: held }
+      : buildSyntheticChatChunk(passthroughResponsesId, model, { content: held });
+    const output = `data: ${JSON.stringify(frame)}\n\n`;
+    reqLogger?.appendConvertedChunk?.(output);
+    forward(controller, encoder.encode(output));
+    passthroughAccumulatedContent = appendBoundedText(passthroughAccumulatedContent, held);
   };
 
   const applyTextualToolCallStreamingGuard = (parsed: Record<string, unknown>) => {
@@ -1230,12 +1155,19 @@ export function createSSEStream(options: StreamOptions = {}) {
           textualToolCallConverted = true;
           passthroughBufferedTextualToolCallContent = "";
         } else if (parsedCandidate?.kind === "partial") {
-          passthroughBufferedTextualToolCallContent = appendBoundedText(
-            passthroughBufferedTextualToolCallContent,
-            incomingContent
-          );
           textualToolCallConverted = true;
-          delta.content = "";
+          if (bufferedCandidate.length > MAX_HELD_TEXTUAL_CALL_CHARS) {
+            // Too long to be a call: send every held character instead of sliding the head out.
+            delta.content = bufferedCandidate;
+            passthroughAccumulatedContent = appendBoundedText(
+              passthroughAccumulatedContent,
+              bufferedCandidate
+            );
+            passthroughBufferedTextualToolCallContent = "";
+          } else {
+            passthroughBufferedTextualToolCallContent = bufferedCandidate;
+            delta.content = "";
+          }
         } else {
           if (passthroughBufferedTextualToolCallContent) {
             delta.content = passthroughBufferedTextualToolCallContent + incomingContent;
@@ -1774,6 +1706,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 observeProviderPayload(providerPayload);
                 passthroughUnparsableDataTail = false;
                 if (isTerminalStreamPayload(providerPayload)) passthroughSawTerminalEvent = true;
+                if (isClaudeStopDelta(providerPayload)) passthroughSawClaudeStop = true;
                 if ((providerPayload as { done?: unknown }).done === true) {
                   continue;
                 }
@@ -1869,6 +1802,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                     continue;
                   }
 
+                  if (TERMINAL_STREAM_EVENT_TYPES.has(parsed.type as string)) {
+                    releaseHeldTextualCallContent(controller);
+                  }
+
                   const responsesIdsNormalized = normalizeResponsesSseIds(parsed as JsonRecord);
                   const parsedResponse =
                     parsed.response &&
@@ -1941,13 +1878,20 @@ export function createSSEStream(options: StreamOptions = {}) {
                         parsed.delta = "";
                         if (collectedToolCall) continue;
                       } else if (parsedCandidate?.kind === "partial") {
-                        if (!passthroughBufferedTextualToolCallContent)
-                          passthroughBufferedTextPart = pickResponsesTextPart(parsed);
-                        passthroughBufferedTextualToolCallContent = appendBoundedText(
-                          passthroughBufferedTextualToolCallContent,
-                          incomingDelta
-                        );
-                        parsed.delta = "";
+                        if (bufferedCandidate.length > MAX_HELD_TEXTUAL_CALL_CHARS) {
+                          // Too long to be a call: send every held character instead of sliding.
+                          parsed.delta = bufferedCandidate;
+                          passthroughAccumulatedContent = appendBoundedText(
+                            passthroughAccumulatedContent,
+                            bufferedCandidate
+                          );
+                          passthroughBufferedTextualToolCallContent = "";
+                        } else {
+                          if (!passthroughBufferedTextualToolCallContent)
+                            passthroughBufferedTextPart = pickResponsesTextPart(parsed);
+                          passthroughBufferedTextualToolCallContent = bufferedCandidate;
+                          parsed.delta = "";
+                        }
                         output = `data: ${JSON.stringify(parsed)}\n\n`;
                         injectedUsage = true;
                       } else {
@@ -2222,25 +2166,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Claude SSE: extract usage, track content, forward as-is
                   const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
                   const extracted = extractUsage(parsed);
-                  if (extracted) {
-                    // Non-destructive merge: never overwrite a positive value with 0
-                    // message_start carries input_tokens, message_delta carries output_tokens;
-                    if (!usage) usage = {};
-                    const u = usage;
-                    const eu = extracted as UsageTokenRecord;
-                    Object.assign(
-                      u,
-                      { usage_evidence: mergeUsageEvidence(u, extracted) },
-                      mergeCacheCreationFields(u, extracted)
-                    );
-                    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
-                    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
-                    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
-                    if (eu.cache_read_input_tokens !== undefined)
-                      u.cache_read_input_tokens = eu.cache_read_input_tokens;
-                    if (eu.cache_creation_input_tokens !== undefined)
-                      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  }
+                  if (extracted) mergeClaudePassthroughUsage(extracted);
                   if (
                     shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                       claudeEmptyResponseLifecycle,
@@ -2562,6 +2488,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                         ...failureBoundaryOptions(),
                       });
                     passthroughSawFinishReason = true;
+                    releaseHeldTextualCallContent(controller);
                     // Record the raw upstream reason BEFORE the T18 tool_calls rewrite
                     // below: a `length` cut must stay visible to the truncation guard
                     // even when tool calls were streamed.
@@ -3005,7 +2932,13 @@ export function createSSEStream(options: StreamOptions = {}) {
               },
               pushProviderPayload: observeProviderPayload,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: sanitizePassthroughUsage,
+              // Runs once per tail data frame, after projection: read usage and finish evidence
+              // from the same payload the client receives.
+              sanitizeUsagePayload: (payload: unknown) => {
+                const changed = sanitizePassthroughUsage(payload);
+                noteTailPayload(payload);
+                return changed;
+              },
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
@@ -3060,6 +2993,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             };
 
             for (const line of normalizedTailLines) {
+              if (/^data:\s*\[DONE\]\s*$/.test(line.trim())) passthroughSawTerminalEvent = true;
               if (!skipPassthroughEvent && isUnparsableDataLine(line.trim())) {
                 // Same policy as the raw tail below: never forward it, report it once.
                 if (!passthroughSawTerminalEvent) passthroughUnparsableDataTail = true;
@@ -3101,6 +3035,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (sanitizePassthroughUsage(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
+                noteTailPayload(bufferedPayload);
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -3263,6 +3198,38 @@ export function createSSEStream(options: StreamOptions = {}) {
               clientPayloadCollector.push(thinkFlush.syntheticChunk);
               reqLogger?.appendConvertedChunk?.(thinkFlush.flushOutput);
               forward(controller, encoder.encode(thinkFlush.flushOutput));
+            }
+
+            // EOF with output but no provider terminal is a cut answer: fail it in the
+            // client protocol instead of faking a stop and recording a 200.
+            if (
+              (shouldEmitDoneTerminator || clientExpectsResponsesStream) &&
+              !passthroughSawTerminalEvent &&
+              !passthroughSawClaudeStop &&
+              !passthroughSawFinishReason &&
+              (totalContentLength > 0 || passthroughHasToolCalls)
+            ) {
+              const message = "Upstream stream ended without a terminal marker";
+              const failure: StreamFailurePayload = {
+                status: 502,
+                message,
+                code: "stream_early_eof",
+                type: "server_error",
+                streamSnapshot: buildStreamFailureSnapshot(providerPayloadCollector),
+              };
+              const errorFrame = formatTranslatedStreamError(
+                failure,
+                clientResponseFormat ?? undefined
+              );
+              reqLogger?.appendConvertedChunk?.(errorFrame);
+              forward(controller, encoder.encode(errorFrame));
+              upstreamErrorForwarded = true;
+              doneSent = true;
+              abortStreamFailure(controller, failure, message, {
+                notifyComplete: true,
+                ...failureBoundaryOptions(),
+              });
+              return;
             }
 
             // Estimate usage if provider didn't return valid usage
@@ -3757,7 +3724,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
               const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
               let content = (state?.accumulatedContent ?? "").trim() || "";
-              const normalizedToolCalls: ToolCall[] = state?.toolCalls?.size
+              const stateToolCalls: ToolCall[] = state?.toolCalls?.size
                 ? [...state.toolCalls.values()]
                     .map((tc: Record<string, unknown>): ToolCall => ({
                       id: tc.id != null ? String(tc.id) : null,
@@ -3770,6 +3737,16 @@ export function createSSEStream(options: StreamOptions = {}) {
                     }))
                     .sort((a, b) => a.index - b.index)
                 : [];
+              // Translators keep tool state in different shapes (a Claude client's entries carry
+              // argBuffer, a Gemini upstream keeps none), so a Claude client reads its calls from
+              // the client summary: the exact calls it received.
+              const claudeClientCalls =
+                sourceFormat === FORMATS.CLAUDE
+                  ? toolCallsFromClaudeSummary(clientPayloadCollector.getSummary())
+                  : [];
+              const normalizedToolCalls = claudeClientCalls.length
+                ? claudeClientCalls
+                : stateToolCalls;
               const textualToolCall = parseTextualToolCallFromContent(content);
               if (textualToolCall) {
                 normalizedToolCalls.push({

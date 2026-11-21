@@ -1,0 +1,1 @@
+- **fix(sse):** a Claude Messages stream that ends on purpose with no content (`end_turn` or `stop_sequence`) now finishes cleanly instead of failing with a 502 `empty_response` error. ([#19703](https://github.com/cheaper-inference/OmniRoute/pull/19703))
