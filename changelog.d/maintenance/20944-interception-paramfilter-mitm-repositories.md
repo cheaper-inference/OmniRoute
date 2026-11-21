@@ -1,0 +1,1 @@
+- **refactor(db):** Isolate interception-rule, parameter-filter and MITM-alias persistence behind Promise-based repositories while preserving synchronous request-path reads, caches, provider alias handling and the stored key_value shapes (#20944 — thanks @xiaoyaner0201).
