@@ -65,7 +65,10 @@ test("#16935 'page.waitForTimeout: ...browser has been closed' is not a terminal
               );
             }
           },
-          waitForSelector: async () => ({ click: async () => undefined }),
+          waitForSelector: async () => ({
+            click: async () => undefined,
+            getAttribute: async () => "true",
+          }),
           keyboard: { insertText: async () => undefined, press: async () => undefined },
         }),
         cookies: async () => [],
@@ -99,6 +102,8 @@ import { resolveResponseTimeoutMs } from "../../open-sse/executors/gemini-web/br
 test("#16935 response budget is configurable and longer for Argon", () => {
   assert.equal(resolveResponseTimeoutMs("gemini-3.1-pro", {}), 30_000);
   assert.equal(resolveResponseTimeoutMs("gemini-4-argon", {}), 180_000);
+  assert.equal(resolveResponseTimeoutMs("gemini-4-hydrogen-thinking", {}), 180_000);
+  assert.equal(resolveResponseTimeoutMs("gemini-4-hydrogen", {}), 30_000);
   assert.equal(
     resolveResponseTimeoutMs("gemini-3.1-pro", { GEMINI_WEB_RESPONSE_TIMEOUT_MS: "90000" }),
     90_000

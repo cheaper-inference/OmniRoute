@@ -34,15 +34,29 @@ import {
 } from "./gemini-web/capabilities.ts";
 import {
   describeModeSelectionFailure,
+  isGeminiModelActive,
   selectGeminiExtendedThinking,
   selectGeminiModel,
 } from "./gemini-web/modeSelection.ts";
+import {
+  attachFilesToGeminiComposer,
+  extractGeminiWebAttachments,
+  GeminiWebAttachmentError,
+  hasGeminiWebAttachmentParts,
+  isGeminiWebAttachmentPart,
+  resolveGeminiWebAttachments,
+  uploadTimeoutMs,
+  writeGeminiWebAttachmentFiles,
+  type GeminiWebAttachment,
+} from "./gemini-web/attachments.ts";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const GEMINI_URL = "https://gemini.google.com/app";
 /** Response-label fallback when no `model` was requested at all (unchanged since pre-#13381). */
 const DEFAULT_MODEL_ID = "gemini-2.5-pro";
+/** Floor for the response wait when files were attached: Gemini must analyze them first. */
+const ATTACHMENT_RESPONSE_TIMEOUT_MS = 120_000;
 
 // Re-exported for backward compatibility: some tests/callers import this classification helper
 // from gemini-web.ts, its original home (#3516). The implementation now lives in
@@ -97,6 +111,8 @@ function flattenGeminiTextContent(content: unknown): string | null {
   for (const part of content) {
     if (!part || typeof part !== "object" || Array.isArray(part)) return null;
     const record = part as Record<string, unknown>;
+    // Attachment parts are uploaded separately (./gemini-web/attachments.ts).
+    if (isGeminiWebAttachmentPart(record)) continue;
     if (record.type !== "text" || typeof record.text !== "string") return null;
     text.push(record.text);
   }
@@ -137,9 +153,15 @@ function flattenGeminiTextContent(content: unknown): string | null {
  */
 export function buildGeminiPrompt(messages: Array<{ role: string; content: unknown }>): string {
   const textMessages: Array<{ role: string; content: string }> = [];
-  for (const message of messages) {
+  const lastUserRawIdx = messages.map((m) => m.role).lastIndexOf("user");
+  for (const [index, message] of messages.entries()) {
     const content = flattenGeminiTextContent(message.content);
-    if (content?.trim()) textMessages.push({ role: message.role, content });
+    // An attachment-only final user turn is still the current ask (its files are uploaded).
+    const attachmentOnlyAsk =
+      index === lastUserRawIdx && content !== null && hasGeminiWebAttachmentParts(message.content);
+    if (content?.trim() || attachmentOnlyAsk) {
+      textMessages.push({ role: message.role, content: content ?? "" });
+    }
   }
 
   const userMessages = textMessages.filter((m) => m.role === "user");
@@ -350,7 +372,9 @@ export function parseStreamResponse(raw: string): string {
       // Skip unparseable lines
     }
   }
-  return lastText;
+  // Gemini marks text grounded in attachments with "[cite_start]" / "[cite: 1, 2]"; the web UI
+  // renders them as chips, a raw API answer should not carry them.
+  return lastText.replace(/\[cite_(?:start|end)\]| ?\[cite: ?[\d, ]+\]/g, "");
 }
 
 function readCredentialString(value: unknown): string {
@@ -376,6 +400,19 @@ function readProviderSpecificString(
     if (value) return value;
   }
   return "";
+}
+
+/**
+ * Cookies a browser keeps host-only on gemini.google.com. Spread to `.google.com`, the
+ * gemini OSID reached Gemini's upload host (contribution-*.usercontent.google.com), which
+ * answered 401 and broke every attachment upload (checked live 2026-11-20).
+ */
+const GEMINI_HOST_ONLY_COOKIES = new Set(["OSID", "__Secure-OSID", "COMPASS", "__Secure-BUCKET"]);
+
+export function toGeminiBrowserCookie({ name, value }: { name: string; value: string }) {
+  return GEMINI_HOST_ONLY_COOKIES.has(name)
+    ? { name, value, url: "https://gemini.google.com" }
+    : { name, value, domain: ".google.com", path: "/", secure: true };
 }
 
 /**
@@ -559,24 +596,58 @@ export class GeminiWebExecutor extends BaseExecutor {
       ? buildGeminiToolPrompt(effectiveMessages)
       : buildGeminiPrompt(messages);
 
+    // A user turn counts when it has readable text or attachments we can upload.
+    const isReadableUserContent = (content: unknown) => {
+      const text = flattenGeminiTextContent(content);
+      return text !== null && (Boolean(text.trim()) || hasGeminiWebAttachmentParts(content));
+    };
+
     // A system-only or unreadable user request must still 400. A system or tool
     // contract makes `prompt` alone an unreliable "no user message" signal.
     const hasUserMessage = messages.some(
       (m: { role: string; content: unknown }) =>
-        m.role === "user" && Boolean(flattenGeminiTextContent(m.content)?.trim())
+        m.role === "user" && isReadableUserContent(m.content)
     );
 
     // Tool mode sends only the LAST user turn as the current ask. If that turn is an array
-    // with no readable text (an image), an earlier readable user turn must not let it through.
+    // with neither readable text nor an attachment, an earlier readable user turn must not
+    // let it through. In both modes, an unreadable last array must not upload its
+    // attachments under an earlier question.
     const lastUserContent = messages
       .filter((m: { role: string }) => m.role === "user")
       .pop()?.content;
     const unreadableLastUserArray =
-      hasTools &&
       Array.isArray(lastUserContent) &&
-      !flattenGeminiTextContent(lastUserContent)?.trim();
+      !isReadableUserContent(lastUserContent) &&
+      (hasTools || hasGeminiWebAttachmentParts(lastUserContent));
 
-    if (!prompt || !hasUserMessage || unreadableLastUserArray) {
+    const attachmentError = (error: GeminiWebAttachmentError) => {
+      log?.warn?.("GEMINI-WEB", `Rejected attachment: ${error.message}`);
+      return {
+        response: new Response(
+          JSON.stringify(
+            buildErrorBody(error.status, error.message, null, {
+              type: "invalid_request_error",
+              code: error.code,
+            })
+          ),
+          { status: error.status, headers: { "Content-Type": "application/json" } }
+        ),
+        url: GEMINI_URL,
+        headers: {},
+        transformedBody: body,
+      };
+    };
+
+    let attachmentSources: ReturnType<typeof extractGeminiWebAttachments>;
+    try {
+      attachmentSources = extractGeminiWebAttachments(messages);
+    } catch (error) {
+      if (error instanceof GeminiWebAttachmentError) return attachmentError(error);
+      throw error;
+    }
+
+    if ((!prompt && attachmentSources.length === 0) || !hasUserMessage || unreadableLastUserArray) {
       return {
         response: new Response(JSON.stringify({ error: "No user message found" }), {
           status: 400,
@@ -588,6 +659,27 @@ export class GeminiWebExecutor extends BaseExecutor {
       };
     }
 
+    let attachments: GeminiWebAttachment[] = [];
+    try {
+      // Validate every attachment (type, size, video length) before the browser starts.
+      attachments = await resolveGeminiWebAttachments(attachmentSources, { signal });
+    } catch (error) {
+      const abortedStatus = abortStatus(signal);
+      if (abortedStatus) {
+        return {
+          response: new Response(JSON.stringify({ error: "Request aborted" }), {
+            status: abortedStatus,
+            headers: { "Content-Type": "application/json" },
+          }),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      if (error instanceof GeminiWebAttachmentError) return attachmentError(error);
+      throw error;
+    }
+
     // Resolved up front (#13381) — the pre-fix code only read `model` AFTER the
     // response was already captured, purely to stamp it on the reply. It now also
     // drives the in-browser mode-selection step below, before anything is typed.
@@ -596,6 +688,7 @@ export class GeminiWebExecutor extends BaseExecutor {
     let browser: any = null;
     let context: import("playwright").BrowserContext | null = null;
     let abortBrowser: (() => void) | null = null;
+    let cleanupAttachmentFiles: (() => Promise<void>) | null = null;
     try {
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
@@ -620,15 +713,7 @@ export class GeminiWebExecutor extends BaseExecutor {
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
-      await context.addCookies(
-        cookiePairs.map(({ name, value }) => ({
-          name,
-          value,
-          domain: ".google.com",
-          path: "/",
-          secure: true,
-        }))
-      );
+      await context.addCookies(cookiePairs.map(toGeminiBrowserCookie));
 
       const page = await context.newPage();
 
@@ -681,12 +766,10 @@ export class GeminiWebExecutor extends BaseExecutor {
       await page.waitForSelector(".ql-editor, [contenteditable='true']", { timeout: 10000 });
 
       // #13381 (Option B): verify the requested Gemini UI mode is actually active
-      // BEFORE anything is typed. `gemini-3.1-pro` is the mode gemini.google.com/app
-      // already opens to (no interaction attempted); every other advertised model is
-      // switched to and its active-mode indicator is read back — a confirmed match is
-      // required, or the request is rejected instead of silently running the account
-      // default under the requested model's label. See ./gemini-web/modeSelection.ts
-      // for why the selectors involved are UNVALIDATED and why that is safe here.
+      // BEFORE anything is typed. The model is picked from Gemini's model menu and read
+      // back from the menu (the choice persists on the account, so none is assumed
+      // active). Unconfirmed → the request is rejected instead of silently running
+      // another model under the requested label. See ./gemini-web/modeSelection.ts.
       if (model) {
         const modelSelection = await selectGeminiModel(page, modelId);
         if (!modelSelection.confirmed) {
@@ -744,6 +827,21 @@ export class GeminiWebExecutor extends BaseExecutor {
         }
       }
 
+      if (attachments.length > 0) {
+        const files = await writeGeminiWebAttachmentFiles(attachments);
+        cleanupAttachmentFiles = files.cleanup;
+        const totalBytes = attachments.reduce((sum, a) => sum + a.data.length, 0);
+        log?.info?.("GEMINI-WEB", `Uploading ${attachments.length} attachment(s)`);
+        await attachFilesToGeminiComposer(
+          page,
+          files.paths.map((path, i) => ({ path, mimeType: attachments[i].mimeType })),
+          uploadTimeoutMs(totalBytes)
+        );
+        if (signal?.aborted) {
+          throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+        }
+      }
+
       // Type and send message
       const inputEl = await page.waitForSelector(".ql-editor, [contenteditable='true']", {
         timeout: 10000,
@@ -756,12 +854,20 @@ export class GeminiWebExecutor extends BaseExecutor {
       // composer's Enter-submits-the-message handler before this function's
       // own explicit Enter below. It also removes the fixed 10ms/char typing
       // cost that made long prompts race the 30s response-wait timeout.
-      await page.keyboard.insertText(prompt);
+      if (prompt) await page.keyboard.insertText(prompt);
       await page.waitForTimeout(300);
       promptSubmitted = true;
       await page.keyboard.press("Enter");
 
-      await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
+      const responseTimeoutMs = resolveResponseTimeoutMs(modelId);
+      await Promise.race([
+        responsePromise,
+        page.waitForTimeout(
+          attachments.length > 0
+            ? Math.max(responseTimeoutMs, ATTACHMENT_RESPONSE_TIMEOUT_MS)
+            : responseTimeoutMs
+        ),
+      ]);
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
@@ -788,6 +894,37 @@ export class GeminiWebExecutor extends BaseExecutor {
       }
 
       await this.persistRotatedCookies(context, cookie, credentials, onCredentialsRefreshed, log);
+
+      // Under heavy demand Gemini answers with another model and switches the menu to it.
+      // That answer must not go out under the requested label.
+      // ponytail: the cooldown is connection-wide (it also pauses this account's other
+      // models); switch to a model-only lockout if that matters.
+      if (model && !(await isGeminiModelActive(page, modelId))) {
+        log?.warn?.("GEMINI-WEB", `"${modelId}" was replaced by Gemini (high demand)`);
+        return {
+          response: new Response(
+            JSON.stringify(
+              buildErrorBody(
+                503,
+                `Gemini answered with a different model because "${modelId}" is under high ` +
+                  "demand right now. The answer was discarded; retry later or use another model.",
+                null,
+                { type: "server_error", code: "server_is_overloaded" }
+              )
+            ),
+            {
+              status: 503,
+              headers: {
+                "Content-Type": "application/json",
+                "X-Omni-Fallback-Hint": "connection_cooldown",
+              },
+            }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
 
       if (hasTools) {
         const cid = `chatcmpl-gwe-${crypto.randomUUID().slice(0, 12)}`;
@@ -851,6 +988,9 @@ export class GeminiWebExecutor extends BaseExecutor {
         transformedBody: body,
       };
     } catch (error) {
+      if (error instanceof GeminiWebAttachmentError && !abortStatus(signal)) {
+        return attachmentError(error);
+      }
       const rawMessage = error instanceof Error ? error.message : "Unknown error";
       // #3516: a missing Playwright browser is a host/config problem, not a transient upstream
       // fault. Surface an actionable error and tag it with the connection-cooldown hint so
@@ -919,6 +1059,8 @@ export class GeminiWebExecutor extends BaseExecutor {
       };
     } finally {
       if (abortBrowser) signal?.removeEventListener("abort", abortBrowser);
+      // Attachment temp files never outlive the request, whatever the outcome.
+      await cleanupAttachmentFiles?.().catch(() => {});
       // #13382: close this request's context. The Chromium process stays
       // warm until it has been idle.
       try {
