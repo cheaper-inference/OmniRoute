@@ -10,6 +10,8 @@
  * (reasoning, web_search_call, function_call, message...).
  */
 
+import { normalizeResponsesCompletedUsage } from "../../utils/responsesStreamHelpers.ts";
+
 type JsonObject = Record<string, unknown>;
 
 // A replayed object is finished: anything that is not a failure ends as completed.
@@ -56,6 +58,7 @@ export function synthesizeResponsesSseFromObject(response: JsonObject): string {
   let sequence = 0;
   const emit = (type: string, fields: JsonObject) => {
     const data = { type, sequence_number: sequence++, ...fields };
+    if (type === "response.completed") normalizeResponsesCompletedUsage(data);
     chunks.push(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
