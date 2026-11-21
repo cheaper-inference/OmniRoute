@@ -124,6 +124,7 @@ const EMPTY_USAGE: SelfUsageResponse = {
   daily: [],
   dailyByModel: [],
   byModel: [],
+  byModelTruncated: false,
   byProvider: [],
 };
 
@@ -195,6 +196,7 @@ test("the response has exactly the documented keys", async () => {
   const body = await (await call("?range=7d", bearer(a.key))).json();
   assert.deepEqual(Object.keys(body).sort(), [
     "byModel",
+    "byModelTruncated",
     "byProvider",
     "coverage",
     "daily",
@@ -214,6 +216,15 @@ test("the response has exactly the documented keys", async () => {
     body.daily.reduce((sum: number, day: { requests: number }) => sum + day.requests, 0),
     body.summary.requests
   );
+  assert.equal(body.byModelTruncated, false);
+});
+
+test("a cut per-model list reaches the wire with byModelTruncated set", async () => {
+  const res = await call("", bearer(a.key), {
+    buildUsage: async () => ({ ...EMPTY_USAGE, byModelTruncated: true }),
+  });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).byModelTruncated, true);
 });
 
 test("a subscription request is $0 billed and priced at list price", async () => {

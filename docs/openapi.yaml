@@ -19862,7 +19862,18 @@ components:
         subscriptions included. A request whose model has no price row counts its stored cost,
         and only a request with neither counts 0, with no marker.
       additionalProperties: false
-      required: [range, generatedAt, coverage, summary, daily, dailyByModel, byModel, byProvider]
+      required:
+        [
+          range,
+          generatedAt,
+          coverage,
+          summary,
+          daily,
+          dailyByModel,
+          byModel,
+          byModelTruncated,
+          byProvider,
+        ]
       properties:
         range:
           type: string
@@ -19983,6 +19994,11 @@ components:
               avgLatencyMs: { type: number }
               successRatePct: { type: number }
               lastUsed: { type: [string, "null"], format: date-time }
+        byModelTruncated:
+          type: boolean
+          description: >-
+            True when more provider-and-model pairs existed than `byModel` keeps, so a model's
+            totals there may be partial.
         byProvider:
           type: array
           items:

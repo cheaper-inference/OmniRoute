@@ -429,7 +429,8 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
   the first and last request.
 - `byModel` lists the 50 provider-and-model pairs with the most requests. With more pairs its
   entries do not add up to `summary`, and `summary.uniqueModels` counts every recorded model
-  spelling.
+  spelling. `byModelTruncated` is then true, and a model whose pairs fall on both sides of the
+  cut shows partial totals.
 - Two costs are reported. `costUsd` is the billed cost, as the usage analytics show it.
   Flat-rate subscription providers, such as the Claude Code plan, count $0 there. `listPriceUsd`
   is the same usage priced at list price, subscriptions included. A request whose model has no

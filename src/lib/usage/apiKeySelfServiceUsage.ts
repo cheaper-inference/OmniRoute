@@ -217,7 +217,10 @@ function buildDaily(rows: DailyUsageRow[], costByDate: Map<string, Money>) {
   }));
 }
 
-/** Merges the per-day model rows by provider and model name: the 50 pairs with most requests. */
+/**
+ * Merges the per-day model rows by provider and model name and keeps the 50 pairs with most
+ * requests. `byModelTruncated` is true when more pairs existed than the list keeps.
+ */
 function buildByModel(rows: ModelUsageRow[], priceRow: PriceRow) {
   type Entry = Money & {
     model: string;
@@ -258,7 +261,7 @@ function buildByModel(rows: ModelUsageRow[], priceRow: PriceRow) {
     if (lastUsed > entry.lastUsed) entry.lastUsed = lastUsed;
     merged.set(key, addMoney(entry, priceBoth(priceRow, row)) as Entry);
   }
-  return [...merged.values()]
+  const rowsOut = [...merged.values()]
     .sort((left, right) => right.requests - left.requests)
     .slice(0, BY_MODEL_LIMIT)
     .map((entry) => ({
@@ -273,6 +276,7 @@ function buildByModel(rows: ModelUsageRow[], priceRow: PriceRow) {
       successRatePct: percent(entry.successfulRequests, entry.requests),
       lastUsed: entry.lastUsed || null,
     }));
+  return { byModel: rowsOut, byModelTruncated: merged.size > BY_MODEL_LIMIT };
 }
 
 function buildByProvider(rows: ProviderUsageRow[], costByProvider: Map<string, Money>) {
@@ -314,6 +318,7 @@ export async function buildApiKeySelfServiceUsage(
   const queries = deps.queries ?? DEFAULT_QUERIES;
   const priceRow = deps.priceRow ?? (await loadPricer());
   const costs = priceCostRows(queries.dailyCost(unifiedSource, unifiedParams), priceRow);
+  const models = buildByModel(queries.models(unifiedSource, unifiedParams), priceRow);
 
   return {
     range,
@@ -322,7 +327,8 @@ export async function buildApiKeySelfServiceUsage(
     summary: buildSummary(queries.summary(unifiedSource, unifiedParams), costs.total),
     daily: buildDaily(queries.daily(unifiedSource, unifiedParams), costs.byDate),
     dailyByModel: costs.dailyByModel,
-    byModel: buildByModel(queries.models(unifiedSource, unifiedParams), priceRow),
+    byModel: models.byModel,
+    byModelTruncated: models.byModelTruncated,
     byProvider: buildByProvider(queries.providers(unifiedSource, unifiedParams), costs.byProvider),
   };
 }

@@ -292,6 +292,25 @@ test("a key with no usage gets zeros and empty series; a key without the scope i
   );
 });
 
+test("byModel keeps 50 pairs and says when more pairs existed", async () => {
+  const withPairs = (count: number) => {
+    const base = deps();
+    const rows = Array.from(
+      { length: count },
+      (_, i) => slice("2026-05-27", "openai", `model-${i}`, count - i, 100, 50).model
+    );
+    return { ...base, queries: { ...base.queries, models: () => rows } };
+  };
+  const exact = await buildApiKeySelfServiceUsage(KEY, "7d", withPairs(50));
+  assert.deepEqual([exact.byModel.length, exact.byModelTruncated], [50, false]);
+  const over = await buildApiKeySelfServiceUsage(KEY, "7d", withPairs(51));
+  assert.deepEqual([over.byModel.length, over.byModelTruncated], [50, true]);
+  assert.equal(over.byModel[49].model, "model-49");
+  assert.equal(selfUsageResponseSchema.parse(over).byModelTruncated, true);
+  const small = await buildApiKeySelfServiceUsage(KEY, "7d", deps());
+  assert.equal(small.byModelTruncated, false);
+});
+
 test("account and key columns of the reused queries never reach the result", async () => {
   const out = await buildApiKeySelfServiceUsage(KEY, "7d", deps());
   const text = JSON.stringify(selfUsageResponseSchema.parse(out));
