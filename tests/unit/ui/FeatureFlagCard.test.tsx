@@ -225,3 +225,216 @@ describe("FeatureFlagsGrid — description mode toggle", () => {
     act(() => root.unmount());
   });
 });
+
+function resetButton(container: HTMLElement, label: string): HTMLButtonElement | null {
+  const match = Array.from(container.querySelectorAll("button")).find(
+    (button) => button.getAttribute("aria-label") === `Reset ${label} to default`
+  );
+  return (match as HTMLButtonElement | undefined) ?? null;
+}
+
+function renderWithHandlers(
+  flag: Flag,
+  handlers: { onToggle?: (key: string, value: string) => void; onReset?: (key: string) => void } = {},
+  saving = false
+): { container: HTMLElement; root: Root } {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  containers.push(container);
+  const root = createRoot(container);
+  act(() => {
+    root.render(
+      <FeatureFlagCard
+        flag={flag}
+        onToggle={handlers.onToggle ?? (() => {})}
+        onReset={handlers.onReset ?? (() => {})}
+        saving={saving}
+        descriptionMode="full"
+      />
+    );
+  });
+  return { container, root };
+}
+
+describe("FeatureFlagCard — environment-only flags", () => {
+  it("disables the switch and says where the value comes from", () => {
+    const onToggle = vi.fn();
+    const { container, root } = renderWithHandlers(
+      makeFlag({ envOnly: true, source: "env", effectiveValue: "true", label: "Env Only Flag" }),
+      { onToggle }
+    );
+
+    const toggle = container.querySelector('input[role="switch"]') as HTMLInputElement | null;
+    expect(toggle).not.toBeNull();
+    expect(toggle!.disabled).toBe(true);
+    expect(toggle!.checked).toBe(true);
+    expect(container.textContent).toContain(
+      "Read from the deployment environment. The dashboard cannot change it."
+    );
+
+    // `disabled` blocks activation at the control. The server-side refusal is covered
+    // by the API test in this stack (env-only-feature-flags), so no component-level
+    // guard is needed; one added here proved unreachable under injection.
+    act(() => toggle!.click());
+    expect(onToggle).not.toHaveBeenCalled();
+
+    act(() => root.unmount());
+  });
+
+  it("leaves a dashboard-editable flag clickable", () => {
+    const onToggle = vi.fn();
+    const { container, root } = renderWithHandlers(
+      makeFlag({ source: "db", effectiveValue: "false", label: "Editable Flag" }),
+      { onToggle }
+    );
+
+    const toggle = container.querySelector('input[role="switch"]') as HTMLInputElement | null;
+    expect(toggle).not.toBeNull();
+    expect(toggle!.disabled).toBe(false);
+    expect(container.textContent).not.toContain("Read from the deployment environment");
+
+    act(() => toggle!.click());
+    expect(onToggle).toHaveBeenCalledWith("SOME_FLAG", "true");
+
+    act(() => root.unmount());
+  });
+
+  it("offers no reset for an environment-only flag, and resets an editable one by name", () => {
+    const onReset = vi.fn();
+    const locked = renderWithHandlers(
+      makeFlag({ envOnly: true, source: "env", configuredSource: "db", label: "Env Only Flag" }),
+      { onReset }
+    );
+    expect(resetButton(locked.container, "Env Only Flag")).toBeNull();
+    expect(onReset).not.toHaveBeenCalled();
+    act(() => locked.root.unmount());
+
+    const editable = renderWithHandlers(
+      makeFlag({ source: "db", configuredSource: "db", label: "Editable Flag" }),
+      { onReset }
+    );
+    const button = resetButton(editable.container, "Editable Flag");
+    expect(button).not.toBeNull();
+    expect(onReset).not.toHaveBeenCalled();
+    act(() => button!.click());
+    expect(onReset).toHaveBeenCalledTimes(1);
+    expect(onReset).toHaveBeenCalledWith("SOME_FLAG");
+    act(() => editable.root.unmount());
+  });
+});
+
+describe("FeatureFlagCard — save in flight", () => {
+  it("disables an editable switch while a save is running", () => {
+    const onToggle = vi.fn();
+    const { container, root } = renderWithHandlers(
+      makeFlag({ source: "db", effectiveValue: "false", label: "Saving Flag" }),
+      { onToggle },
+      true
+    );
+
+    const toggle = container.querySelector('input[role="switch"]') as HTMLInputElement | null;
+    expect(toggle).not.toBeNull();
+    expect(toggle!.disabled).toBe(true);
+    act(() => toggle!.click());
+    expect(onToggle).not.toHaveBeenCalled();
+
+    act(() => root.unmount());
+  });
+});
+
+describe("FeatureFlagCard — the lock follows envOnly, not the resolved source", () => {
+  // A registry that locked only when `source === "env"` would still pass a suite whose
+  // fixtures all pair envOnly with source "env". These cases pin the real rule.
+  const CASES: Array<{ name: string; flag: Partial<Flag>; locked: boolean; reset: boolean }> = [
+    { name: "envOnly, environment variable absent (source default)", flag: { envOnly: true, source: "default" }, locked: true, reset: false },
+    { name: "envOnly, stale stored row reported (source db)", flag: { envOnly: true, source: "db", configuredSource: "db" }, locked: true, reset: false },
+    { name: "envOnly, resolved from the environment", flag: { envOnly: true, source: "env" }, locked: true, reset: false },
+    { name: "explicitly envOnly false", flag: { envOnly: false, source: "db" }, locked: false, reset: true },
+    { name: "not envOnly, value coming from env", flag: { source: "env" }, locked: false, reset: false },
+    { name: "not envOnly, value coming from a stored row", flag: { source: "db", configuredSource: "db" }, locked: false, reset: true },
+    { name: "not envOnly, env wins but a stored row is configured", flag: { source: "env", configuredSource: "db" }, locked: false, reset: true },
+    { name: "not envOnly, legacy row reported without configuredSource", flag: { source: "db" }, locked: false, reset: true },
+  ];
+
+  for (const testCase of CASES) {
+    it(`treats "${testCase.name}" as ${testCase.locked ? "locked" : "editable"}`, () => {
+      const onToggle = vi.fn();
+      const onReset = vi.fn();
+      const { container, root } = renderWithHandlers(
+        makeFlag({ effectiveValue: "true", label: "Case Flag", ...testCase.flag }),
+        { onToggle, onReset }
+      );
+
+      const toggle = container.querySelector('input[role="switch"]') as HTMLInputElement | null;
+      expect(toggle).not.toBeNull();
+      expect(toggle!.disabled).toBe(testCase.locked);
+      expect(container.textContent.includes("Read from the deployment environment")).toBe(
+        testCase.locked
+      );
+      // Expected reset state is spelled out per case, not recomputed from the same
+      // expression the component uses; a predicate that drifts fails the table.
+      expect(resetButton(container, "Case Flag") !== null).toBe(testCase.reset);
+
+      act(() => toggle!.click());
+      if (testCase.locked) expect(onToggle).not.toHaveBeenCalled();
+      else expect(onToggle).toHaveBeenCalledWith("SOME_FLAG", "false");
+
+      act(() => root.unmount());
+    });
+  }
+});
+
+describe("FeatureFlagsGrid — environment-only flags", () => {
+  it("locks the control the grid renders for an envOnly flag", async () => {
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      // Anything other than the documented load is a failure, not a silent second pass:
+      // a write on mount would otherwise be served the same list payload.
+      const method = init?.method ?? "GET";
+      if (String(input) !== "/api/settings/feature-flags" || method !== "GET") {
+        return Promise.reject(new Error(`unexpected request: ${method} ${String(input)}`));
+      }
+      return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            flags: [
+              // Same resolved source, only envOnly differs: a grid that derived the lock
+              // from `source` would pass the old fixture and fail this one.
+              makeFlag({ key: "PRICING_SYNC_ENABLED", label: "Pricing Sync", envOnly: true, source: "env" }),
+              makeFlag({ key: "EDITABLE_FLAG", label: "Editable Flag", envOnly: false, source: "env", effectiveValue: "true" }),
+            ],
+            summary: { total: 2, active: 1, inactive: 1, overriddenByDb: 1, overriddenByEnv: 1 },
+          }),
+      } as Response);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    containers.push(container);
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<FeatureFlagsGrid />);
+    });
+    await settle();
+
+    const groups = Array.from(container.querySelectorAll('[role="group"]')) as HTMLElement[];
+    const lockedGroup = groups.find((group) => group.getAttribute("aria-label") === "Pricing Sync");
+    const editableGroup = groups.find((group) => group.getAttribute("aria-label") === "Editable Flag");
+    expect(lockedGroup).toBeTruthy();
+    expect(editableGroup).toBeTruthy();
+
+    const lockedSwitch = lockedGroup!.querySelector('input[role="switch"]') as HTMLInputElement | null;
+    const editableSwitch = editableGroup!.querySelector('input[role="switch"]') as HTMLInputElement | null;
+    expect(lockedSwitch!.disabled).toBe(true);
+    expect(editableSwitch!.disabled).toBe(false);
+    expect(lockedGroup!.textContent).toContain(
+      "Read from the deployment environment. The dashboard cannot change it."
+    );
+    // The panel loads through the documented endpoint; a path or method change breaks here.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith("/api/settings/feature-flags");
+
+    act(() => root.unmount());
+  });
+});

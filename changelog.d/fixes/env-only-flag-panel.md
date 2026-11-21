@@ -1,0 +1,1 @@
+- **fix(settings):** An environment-only feature flag no longer renders a live switch. The card disables the control, says the value comes from the deployment environment, and drops the reset button, so a click no longer produces a failure banner for a write the API refuses by design.
