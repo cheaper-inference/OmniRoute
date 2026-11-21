@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute uporablja model izdajanja z **vzporednimi cikli**: namensko vejo `release/vX.Y.Z`
-za aktivni cikel, `main` za objavljeno linijo in nespremenljivo
-oznako `vX.Y.Z`, ko je cikel izdan. Pričakovano je, da se potrditve znajdejo tako na `release/*` _kot_ na
-`main` — ne gre za pomoto.
+OmniRoute uporablja a** vzporedni cikel** model izdaje: namenska veja `release/vX.Y.Z` za aktivni cikel, `main` za objavljeno vrstico in nespremenljiva oznaka `vX.Y.Z`, ko se ta cikel pošlje. Videti, da pristanejo pristanki na `release/*` _in_ na `main` je pričakovano — ni zmešnjava.
 
-Podrobnosti za vzdrževalce so v `CLAUDE.md` (strogo pravilo št. 21) in
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Ta stran je javni
-povzetek za sodelujoče.
+Podrobnosti vzdrževalcev so v `CLAUDE.md` (Hard Rule #21) in [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Ta stran je javni povzetek za sodelavce.
 
 ## Kratek pregled
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` ni veja za vsakodnevno integracijo. PR-je, odprte proti `main`,
 je običajno treba pred združitvijo preusmeriti na drugo ciljno vejo.
 
-## Zamrznitev izdaje (vzporedni cikli)
+## Sprostitev zamrznitve (vzporedni cikli)
 
-Ko poteka usklajevanje izdaje, se odpre označevalna zadeva z oznako `release-freeze`.
-To **ne ustavi razvoja**:
+Ko se izdaja usklajuje, se odpre težava označevalca z oznako `release-freeze`. to** ne ustavi razvoja** :
 
-- Zamrznjena veja `release/vX.Y.Z` pripada vodji te izdaje.
-- Veja naslednjega cikla `release/vX+1` se odcepi od zamrznjenega vrha, da lahko sodelujoči
-  nadaljujejo z vključevanjem sprememb.
-- Odprte PR-je, ki še vedno ciljajo na zamrznjeno vejo, je treba **preusmeriti** na
-  aktivno (najvišjo) vejo `release/v*`.
+- Zamrznjena `release/vX.Y.Z` pripada kapitanu za sprostitev te ladje.
+- `release/vX+1` naslednjega cikla je odrezan z zamrznjene konice, tako da sodelujoči nadaljujejo z delom.
+- Odprti PRs, ki še vedno cilja na zamrznjeno vejo, bi moral biti** preusmerjen** na aktivno (najvišjo) vejo `release/v*`.
 
-Preden domnevate, da je želeno vejo mogoče združevati, preverite, ali obstaja odprta zamrznitev:
+Preden domnevate, da je veja, ki jo želite, združljiva, preverite odprto zamrznitev:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mehanika združevanja (lastnik doda oznako `queue` → Mergify) je dokumentirana v
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mehanika spajanja (lastnik `queue` oznaka → Mergify) je dokumentirana v [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: čakalna vrsta za spajanje Mergify je umaknjena** (odločitev lastnika). `.mergify.yml` ne definira več čakalne vrste in zavrača ukaze Mergify, ki združijo ali prepišejo zahtevo za vleko. Izdaje PRs so združene ročno pod naborom pravil repozitorija »Zahtevaj zelena vrata pri aktivni izdaji« (`Gate / CI` + `Gate / Quality`), dokler se omni-queue ne zažene v načinu v živo, nato pa prek omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Oznaka `queue` ne spaja več ničesar.
 
 ## Zakaj tako veja kot oznaka?
 

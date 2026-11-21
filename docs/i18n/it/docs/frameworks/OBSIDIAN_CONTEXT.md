@@ -95,6 +95,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Sicurezza e trasporti
+
+L'autenticazione WebDAV applica il monitoraggio e il blocco degli errori per IP (10 tentativi falliti in una finestra di 60 secondi attivano un blocco di 5 minuti con `429 Too Many Requests` e `Retry-After`). Poiché WebDAV trasmette credenziali di autenticazione di base, è fortemente consigliabile terminare TLS (o instradare su un tunnel sicuro come Tailscale o Cloudflare Tunnel) quando si accede all'endpoint WebDAV all'esterno del loopback.
+
 ### Origine di contesto per chiave API (facoltativa)
 
 La configurazione di Obsidian può essere definita **per ogni chiave API** tramite la tabella `api_key_context_sources`

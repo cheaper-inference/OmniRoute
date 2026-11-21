@@ -93,7 +93,7 @@
 
 [![npm వెర్షన్](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM నెలవారీ డౌన్లోడ్లు](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 ![లైసెన్స్: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)(LICENSE)
 ![Docker పుల్లు](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron డౌన్లోడ్లు](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -778,7 +778,7 @@ omniroute configure codex          # అలాగే: claude opencode qwen aider
   <tr><th align="left">ప్లాట్ఫారమ్</th><th align="left">ఇన్స్టాల్</th><th align="left">ముఖ్యాంశాలు</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (గ్లోబల్)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ఒక కమాండ్, ఏ OS అయినా</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (గ్లోబల్)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">అదే రిజిస్ట్రీ tarball, మరింత వేగవంతమైన ఇన్స్టాలేషన్లు</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">బహుళ-ఆర్క్ <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">బహుళ-ఆర్క్ <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>డెస్క్టాప్ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">నేటివ్ విండో + సిస్టమ్ ట్రే — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>మెను-బార్ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">సర్వర్ను పర్యవేక్షిస్తుంది &amp; ఆటో-అప్డేట్ చేస్తుంది — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>నేటివ్ <code>arm64</code></td><td align="left">Raspberry Pi, ARM సర్వర్లు, Apple Silicon</td></tr>
@@ -1100,7 +1100,7 @@ Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` అత్యధిక **ప్రచురించబడిన** స్థిరమైన SemVer వెర్షన్ను అనుసరిస్తుంది. ఇది git `main`ను అనుసరించదు. GitOps కోసం `:X.Y.Z`ను నిర్దిష్టంగా ఉపయోగించండి. [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels) చూడండి. ఇమేజ్ **`OMNIROUTE_MEMORY_MB=1024`**ను నిర్దిష్టంగా సెట్ చేస్తుంది. డాష్బోర్డ్ మరియు తేలికపాటి చాట్కు ఇది సరిపోతుంది. **కోడింగ్ ఏజెంట్లకు** (`POST /v1/responses` from Claude Code, Codex, Grok, …) చాలా పెద్ద V8 heap అవసరం; లేకపోతే రెండు ఒకదానిపై ఒకటి పడే దీర్ఘకాలిక కాంటెక్స్ట్ల కింద సుమారు 12 GiB వద్ద ప్రాసెస్ `FATAL ERROR`ను ఇస్తుంది. heap కంటే కంటైనర్ పరిమాణాన్ని ఎక్కువగా సెట్ చేయండి (native buffers V8 వెలుపల ఉంటాయి):
@@ -1114,7 +1114,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 పూర్తి పట్టిక: [Docker Guide — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1321,7 +1321,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 కూడా ద�
   <tr><td nowrap><b>రన్టైమ్</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>భాష</b></td><td>TypeScript 6.0 — <code>src/</code> మరియు <code>open-sse/</code> అంతటా <b>100% TypeScript</b> (v2.0 నుండి కోర్లో <code>any</code> శూన్యం)</td></tr>
   <tr><td nowrap><b>ఫ్రేమ్వర్క్</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూల్స్, 240 మైగ్రేషన్లు</td></tr>
+  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూల్స్, 244 మైగ్రేషన్లు</td></tr>
   <tr><td nowrap><b>మెమరీ</b></td><td>SQLite FTS5 పూర్తి-టెక్స్ట్ + int8-క్వాంటైజ్ చేసిన వెక్టర్ ఎంబెడ్డింగ్లు, టైప్డ్ డికే</td></tr>
   <tr><td nowrap><b>స్కీమాలు</b></td><td>Zod 4 — MCP టూల్ I/O ధృవీకరణ + API కాంట్రాక్టులు</td></tr>
   <tr><td nowrap><b>ప్రోటోకాల్లు</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1334,7 +1334,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 కూడా ద�
   <tr><td nowrap><b>పరీక్షలు</b></td><td>Node.js టెస్ట్ రన్నర్ + Vitest — 8,400+ ట్రాక్ చేసిన టెస్ట్ ఫైళ్లలో (యూనిట్, ఇంటిగ్రేషన్, E2E, భద్రత, ఎకోసిస్టమ్) <b>60,000+ స్టాటిక్ టెస్ట్ డిక్లరేషన్లు</b></td></tr>
   <tr><td nowrap><b>ప్లాట్ఫారమ్లు</b></td><td>డెస్క్టాప్ (Electron) · Android (Termux) · PWA (ఏ బ్రౌజర్లోనైనా)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — విడుదల సమయంలో ఆటో npm పబ్లిష్ + Docker Hub</td></tr>
-  <tr><td nowrap><b>లింక్లు</b></td><td><a href="https://omniroute.online">వెబ్సైట్</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>లింక్లు</b></td><td><a href="https://omniroute.online">వెబ్సైట్</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

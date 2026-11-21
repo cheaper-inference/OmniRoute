@@ -863,6 +863,7 @@ function convertOpenAINonStreamingToClaude(
     content.push({
       type: "thinking",
       thinking: reasoningText,
+      signature: "",
     });
   }
 

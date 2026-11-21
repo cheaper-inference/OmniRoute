@@ -21,9 +21,16 @@ test("issue #10508: pollHealthOnce must target 127.0.0.1, not localhost", () => 
   assert.ok(hosts, "pollHealthOnce host list not found");
   assert.match(hosts[1], /"127\.0\.0\.1"/, "readiness poll must probe the literal 127.0.0.1");
   assert.doesNotMatch(hosts[1], /localhost/, "readiness poll must never resolve localhost");
+  // The ::1 probe needs URL brackets: `http://::1:port/` is not a valid URL, so
+  // an unbracketed IPv6 host would make that probe fail on every poll.
   assert.match(
     source,
-    /fetch\(`http:\/\/\$\{host\}:\$\{port\}\/api\/monitoring\/health`/,
+    /const urlHost = host\.includes\(":"\) \? `\[\$\{host\}\]` : host;/,
+    "pollHealthOnce must bracket IPv6 loopback hosts"
+  );
+  assert.match(
+    source,
+    /fetch\(`http:\/\/\$\{urlHost\}:\$\{port\}\/api\/monitoring\/health`/,
     "pollHealthOnce fetch call not found"
   );
 });

@@ -47,6 +47,12 @@ separate administrative change; adding these jobs does not itself protect a bran
 
 ### Merge queue
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
+> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
+> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
+> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
+> omni-queue after that ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). The workflow handling of Mergify drafts described below is still in `ci.yml` and `quality.yml`, but no Mergify draft is opened any more.
+
 The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
 a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
 when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
@@ -370,7 +376,10 @@ The commands behind it:
   `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
   ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
   `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
-  the last release), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
+  the last release; the values are translated in the same run by the backend configured in the
+  environment or in `.env` (`OMNIROUTE_TRANSLATION_*`, only those keys are read) or by the
+  Google engine. Without a backend it never writes `__MISSING__` markers: the release profile
+  fails, the nightly skips the keys, and `--allow-untranslated` writes them on purpose), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
   and `check:agent-skills-sync` in release mode must pass; skipped in `--check` and when `--only`
   leaves it out; a failure is exit 2). The
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
@@ -727,6 +736,12 @@ docs, `docs/openapi.yaml` — and `changelog.d/**`), e.g. a hero layout change w
 or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` with a
 hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
 editable next to a feature.
+
+Orphan cleanup is not judged by the families either: a PR may delete `docs/i18n/<locale>/<doc>`
+when the merge base had that mirror and `<doc>` no longer exists in the PR's head, and may edit
+`.i18n-state.json` only to drop such documents from `sources`. The guard lists those files under
+`orphan-cleanup`. Deleting the mirror of a document that still exists stays a violation: no other
+pipeline tracks that state, and the `llm.txt` and `CHANGELOG.md` mirrors have their own writers.
 
 **The checks, per gate mode** (`scripts/check/lib/gateMode.mjs`; helper
 `scripts/check/lib/derivedArtifactScope.mjs`):

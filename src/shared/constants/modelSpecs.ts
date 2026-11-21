@@ -4,7 +4,7 @@
  * when clients request more than the model supports.
  */
 
-export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
+export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high" | "xhigh";
 
 export interface ModelSpec {
   maxOutputTokens?: number;
@@ -171,6 +171,10 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
   "gpt-6.1-sol": {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-6.1-sol"],
+  },
+  "gpt-6.1-terra": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6.1-terra"],
   },
   // Public model limits; the Codex registry supplies its smaller OAuth window.
   // https://developers.openai.com/api/docs/models/gpt-6-astra
@@ -372,6 +376,28 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsTools: true,
     supportsVision: true,
     aliases: ["gemini-4"],
+  },
+
+  // ── Gemini 4 Carbon ─────────────────────────────────────────────
+  "gemini-4-carbon": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    defaultThinkingBudget: 8192,
+    thinkingBudgetCap: 24576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+  },
+
+  // ── Gemini 4 Hydrogen ────────────────────────────────────────────
+  "gemini-4-hydrogen": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    geminiThinkingLevels: ["low", "medium", "high", "xhigh"],
+    defaultGeminiThinkingLevel: "high",
   },
 
   // Provider-neutral compatibility for providers that still serve Gemini 3.6.

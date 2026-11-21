@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ಐಚ್ಛಿಕ) ಇಮೇಜ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ
+docker rmi cheaperinference/omniroute:latest
+# ಹಳೆಯ ಸ್ಥಾಪನೆಗಳು ಲೆಗಸಿ ಹೆಸರನ್ನು ಎಳೆದುಕೊಂಡಿವೆ:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

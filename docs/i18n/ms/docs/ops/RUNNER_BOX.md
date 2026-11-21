@@ -146,36 +146,22 @@ satu-satu masa, hanya apabila tidak aktif**, dengan semakan tidak aktif dan mula
   mengambil masa 27–32 minit untuk disimpan pada tmpfs dan 2 minit untuk dimuat naik dari cakera.
 - VPS `.15` hanya untuk homologasi — jangan sekali-kali menjalankan pelaksana CI.
 
-## Laluan dihoskan (pelaksana dihoskan GitHub)
+## Lorong yang dihoskan (pelari yang dihoskan oleh GitHub)
 
-Repositori ini milik organisasi `cheaper-inference`, pada pelan **Team**: **60
-tugas dihoskan serentak**, yang dikongsi oleh setiap repositori dalam organisasi, setiap semakan PR,
-setiap aliran kerja yang dicetuskan oleh tolakan dan persediaan lalai CodeQL. Angka di bawah diukur pada
-pelan **Pro** (40 tugas dihoskan serentak). Diukur pada 2026-10-18 semasa
-kempen penggabungan (~10 penggabungan/jam pada `release/v3.8.52`): **2,500 pelaksanaan aliran kerja dicipta dalam
-24 j**, 44 tolakan ke cabang tersebut dalam 6 j, **106 tugas dihoskan beratur** sementara semakan PR menunggu selama
-berjam-jam dan PR digabungkan tanpanya. Sembilan aliran kerja dicetuskan pada setiap tolakan ke cabang tersebut:
+Repositori kepunyaan organisasi `cheaper-inference`, di** Pasukan** rancangan:** 60 pekerjaan yang dihoskan serentak** , dikongsi oleh setiap repositori dalam organisasi, setiap semakan PR, setiap aliran kerja yang dicetuskan tekan dan persediaan lalai CodeQL. Angka di bawah diukur pada** Pro** pelan (40 pekerjaan dihoskan serentak). Diukur pada 2026-10-18 semasa kempen gabungan (~ 10 merges/hour on `release/v3.8.52`):** 2,500 aliran kerja dijalankan dalam 24 jam** , 44 menolak ke cawangan dalam 6 jam,** 106 pekerjaan yang dihoskan beratur** manakala cek PR menunggu berjam-jam dan PRs digabungkan tanpanya. Sembilan aliran kerja dilancarkan pada setiap tolakan ke cawangan:
 
-| bagi setiap tolakan ke `release/v*`         | tugas dihoskan | hasil semasa lonjakan tersebut                                            | sejak 2026-10-18                                                                           |
-| ------------------------------------------- | -------------: | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `ci.yml` (matriks penuh)                    |    sehingga 30 | dibatalkan oleh tolakan seterusnya, 24 daripada 24 dalam sehari           | tidak dimulakan pada tolakan `release/**` (pelaksanaan PR + Release-Green)                 |
-| `quality.yml`                               |             ~6 | dibatalkan, 23 daripada 23                                                | tidak dimulakan pada tolakan `release/**`                                                  |
-| `Release-Green` `--quick`                   |              0 | dijalankan pada `omni-build`, 97 daripada 100 dibatalkan                  | slot `omni-release`, tidak pernah dibatalkan, pelaksanaan tertunda digabungkan             |
-| `Lock released branch`, `OpenSSF Scorecard` |              2 | satu pelaksanaan beratur bagi setiap tolakan                              | satu pelaksanaan bagi setiap ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
-| `Release acceptance` (laporan bayangan)     |              1 | satu `npm ci` dihoskan bagi setiap tolakan, tidak pernah dibatalkan       | tidak berubah — calon untuk penapis `paths:`                                               |
-| `Publish to Docker Hub` → `Deploy to VPS`   |              2 | dibatalkan bagi setiap tolakan; bahagian amd64 bersaing pada `omni-build` | tidak berubah — saluran pengerahan pemilik                                                 |
-| Persediaan lalai CodeQL (`dynamic`)         |              4 | `javascript-typescript`, `actions`, `c-cpp`, `python` bagi setiap tolakan | tidak berubah — Settings → Code security; `c-cpp`/`python` tidak mengimbas apa-apa di sini |
+| setiap tolak ke `release/v*`                | pekerjaan yang dihoskan | hasil di bawah ribut                                               | sejak 2026-10-18                                                                        |
+| ------------------------------------------- | ----------------------: | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `ci.yml` (matriks penuh)                    |             sehingga 30 | dibatalkan oleh tolakan seterusnya, 24 daripada 24 dalam sehari    | tidak dimulakan pada `release/**` pushes (PR run + Release-Green)                       |
+| `quality.yml`                               |                      ~6 | dibatalkan, 23 daripada 23                                         | tidak bermula pada `release/**` menolak                                                 |
+| `Release-Green` `--quick`                   |                       0 | dijalankan pada `omni-build`, membatalkan 97 daripada 100          | slot `omni-release`, tidak pernah dibatalkan, pending run runtuh                        |
+| `Lock released branch`, `OpenSSF Scorecard` |                       2 | satu larian beratur setiap tolak                                   | satu larian setiap ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)             |
+| `Release acceptance` (laporan bayangan)     |                       1 | satu `npm ci` yang dihoskan setiap tolak, tidak pernah dibatalkan  | calon — yang tidak berubah untuk penapis `paths:`                                       |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | dibatalkan setiap tolak; kaki amd64 bersaing dengan `omni-build`   | saluran penggunaan pemilik — yang tidak berubah                                         |
+| persediaan lalai CodeQL (`dynamic`)         |                       4 | `javascript-typescript`, `actions`, `c-cpp`, `python` setiap tolak | — tidak berubah Tetapan → Kod keselamatan; `c-cpp`/`python` imbas tiada apa-apa di sini |
 
-`tests/unit/build/push-storm-diet.test.ts` menetapkan pencetus tolakan `ci.yml` dan
-`quality.yml` kepada `main` sahaja. Kesan sampingan: Codecov tidak lagi menerima muat naik asas bagi setiap tolakan keluaran (langkah
-tersebut bersifat makluman dan `continue-on-error`); gerbang liputan dalam repositori dan komen PR
-tidak terjejas.
+`tests/unit/build/push-storm-diet.test.ts` menyematkan pencetus tolak `main` -only `ci.yml` dan `quality.yml`. Kesan sampingan: Codecov tidak lagi menerima muat naik asas setiap tolak keluaran (langkahnya adalah bermaklumat dan `continue-on-error`); gerbang liputan dalam repo dan komen PR tidak terjejas.
 
-**Kapasiti hos sendiri yang lebih besar tidak menyelesaikan masalah baris gilir dihoskan.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) boleh mengehoskan pelaksana, tetapi sesi ejen sedia ada
-sudah mengekalkan bebannya pada 20–26, kontena ejen tidak mempunyai daemon Docker, dan laluan
-yang tepu ialah laluan dihoskan. Kotak `.113` mempunyai baki 71 GB dan beban 5–8 pada masa yang sama; kekangannya
-ialah belanjawan memori bagi setiap pendengar di atas (had maksimum 6 pendengar), bukannya CPU. Tuil yang masih ada
-berkaitan dengan proses: masukkan PR kempen melalui baris gilir Mergify (`label=queue`, kelompok berkongsi
-satu pelaksanaan CI `merge_group` dan bukannya satu pelaksanaan bagi setiap PR serta satu bagi setiap tolakan), kurangkan bahasa
-persediaan lalai CodeQL, dan tapis `release-acceptance.yml` berdasarkan fail yang dibacanya.
+**Lebih banyak kapasiti dihoskan sendiri tidak membetulkan baris gilir yang dihoskan.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) boleh menjadi tuan rumah kepada pelari, tetapi sesi ejen telah mengekalkan bebannya pada 20–26, bekas ejen tidak mempunyai daemon Docker, dan lorong tepu adalah yang dihoskan. Kotak `.113` mempunyai 71 GB percuma dan memuatkan 5–8 pada masa yang sama; kekangannya ialah belanjawan memori setiap pendengar di atas (siling 6 pendengar), bukan CPU. Tuas yang selebihnya adalah proses: kempen darat PRs melalui baris gilir Mergify (`label=queue`, kelompok berkongsi satu `merge_group` CI run dan bukannya satu larian setiap PR tambah satu setiap tolak), potong bahasa persediaan lalai CodeQL dan tapis `release-acceptance.yml` mengikut fail yang dibacanya.
+
+> **2026-11-19: baris gilir gabungan Mergify ditamatkan** (keputusan pemilik). `.mergify.yml` tidak lagi mentakrifkan baris gilir dan menolak perintah Mergify yang menggabungkan atau menulis semula permintaan tarik. Keluaran PRs digabungkan dengan tangan di bawah set peraturan repositori "Memerlukan gerbang hijau pada keluaran aktif" (`Gate / CI` + `Gate / Quality`) sehingga omni-queue berjalan dalam mod langsung, dan melalui omni-queue selepas itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Tuas Mergify di atas tidak lagi wujud.

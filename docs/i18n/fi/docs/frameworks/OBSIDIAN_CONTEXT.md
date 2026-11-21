@@ -96,6 +96,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Turvallisuus ja liikenne
+
+WebDAV -todennus pakottaa IP-virheiden seurannan ja lukituksen (10 epäonnistunutta yritystä 60 sekunnin ikkunassa laukaisee 5 minuutin lukituksen `429 Too Many Requests` ja `Retry-After` kanssa). Koska WebDAV lähettää perustodennustiedot, TLS päättäminen (tai suojatun tunnelin, kuten Tailscale tai Cloudflare Tunnel reititys) on erittäin suositeltavaa käytettäessä WebDAV -päätepistettä takaisinsilmukan ulkopuolella.
+
 ### API-avainkohtainen kontekstilähde (valinnainen)
 
 Obsidian-määritys voidaan rajata **API-avainkohtaisesti** `api_key_context_sources`-taulun

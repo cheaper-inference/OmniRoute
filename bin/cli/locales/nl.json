@@ -12,7 +12,8 @@
     "dryRun": "[simulatie] zou: {action}",
     "cancelled": "Geannuleerd.",
     "jsonOpt": "Uitvoer als JSON",
-    "yesOpt": "Bevestiging overslaan"
+    "yesOpt": "Bevestiging overslaan",
+    "positiveIntegerRequired": "Limiet moet een positief geheel getal zijn."
   },
   "setup": {
     "title": "OmniRoute-installatie",

@@ -93,7 +93,7 @@
 
 [![npm 版本](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM 每月下載量](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![授權條款：MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker 拉取次數](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron 下載次數](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -778,7 +778,7 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
   <tr><th align="left">平台</th><th align="left">安裝</th><th align="left">特色</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm（全域）</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">一個指令，適用任何作業系統</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun（全域）</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">相同的 registry tarball，更快速的安裝</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">多架構 <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">多架構 <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>桌面版（Electron）</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">原生視窗 + 系統匣 — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>選單列（OmniRouteTray）</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">監控並自動更新伺服器 — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>原生 <code>arm64</code></td><td align="left">Raspberry Pi、ARM 伺服器、Apple Silicon</td></tr>
@@ -1100,7 +1100,7 @@ Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` 會跟隨最高的**已發布**穩定 SemVer。它不會追蹤 git `main`。若使用 GitOps，請固定使用 `:X.Y.Z`。請參閱 [Docker 發布通道](docs/guides/DOCKER_GUIDE.md#release-channels)。此映像固定使用 **`OMNIROUTE_MEMORY_MB=1024`**。這足以支援儀表板和輕量聊天。**程式設計代理程式**（來自 Claude Code、Codex、Grok … 的 `POST /v1/responses`）需要大得多的 V8 heap，否則在兩個重疊的長上下文下，程序會在約 12 GiB 時發生 `FATAL ERROR`。請將容器大小設定為高於 heap 的容量（原生緩衝區位於 V8 之外）：
@@ -1114,7 +1114,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 完整表格：[Docker 指南 — 執行階段 RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)。
@@ -1316,7 +1316,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中零個 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 記錄）+ LowDB（JSON 舊版）— 147 個領域模組、240 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 記錄）+ LowDB（JSON 舊版）— 147 個領域模組、244 次遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、具類型衰減</td></tr>
   <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 契約</td></tr>
   <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
@@ -1329,7 +1329,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 8,400+ 個受追蹤測試檔案中超過 <b>60,000 個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
   <tr><td nowrap><b>平台</b></td><td>桌面版（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發行時自動發佈至 npm + Docker Hub</td></tr>
-  <tr><td nowrap><b>連結</b></td><td><a href="https://omniroute.online">網站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>連結</b></td><td><a href="https://omniroute.online">網站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
