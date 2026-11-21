@@ -604,6 +604,31 @@ export async function getAccessToken(
   const effectiveOnPersist = onPersist ?? getActiveOnPersist();
 
   const connectionId = credentials.connectionId;
+  const activeCasGuard = effectiveOnPersist ? getActiveCasGuard() : undefined;
+  const persistLateResult = effectiveOnPersist
+    ? async (result) => {
+        const token = result as { accessToken?: string } | null;
+        if (!token?.accessToken) return;
+        await runWithCasGuard(activeCasGuard, async () => {
+          if (await casGuardShouldSkipPersist(log)) return;
+          try {
+            await effectiveOnPersist(result);
+          } catch (persistErr) {
+            const { sanitizeErrorMessage } = await import("../utils/error.ts");
+            const context = connectionId ? provider + "/" + connectionId : provider;
+            const layer = connectionId ? "" : "Layer 2 ";
+            const errorMessage = sanitizeErrorMessage(
+              persistErr instanceof Error ? persistErr : new Error(String(persistErr))
+            );
+            log?.error?.(
+              "TOKEN_REFRESH",
+              layer + "onPersist callback failed for " + context + ": " + errorMessage
+            );
+            throw persistErr;
+          }
+        });
+      }
+    : undefined;
 
   // ── Layer 1: per-connection mutex ──────────────────────────────────────────
   if (connectionId && typeof connectionId === "string") {
@@ -629,7 +654,8 @@ export async function getAccessToken(
         provider,
         credentials,
         log,
-        proxyConfig
+        proxyConfig,
+        persistLateResult
       );
       // The refresh helpers return one of nine shapes; name the token once.
       const token = result as { accessToken?: string } | null;
@@ -688,7 +714,13 @@ export async function getAccessToken(
   // the legacy `connectionId`-less path would silently swallow the callback,
   // leaving DB rows out of sync with rotated tokens (Codex/OpenAI). We still
   // resolve the promise to all waiters with the refreshed credentials.
-  const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
+  const refreshPromise = _getAccessTokenWithStalenessCheck(
+    provider,
+    credentials,
+    log,
+    proxyConfig,
+    persistLateResult
+  )
     .then(async (result) => {
       // The refresh helpers return one of nine shapes; name the token once.
       const token = result as { accessToken?: string } | null;
@@ -731,11 +763,18 @@ export async function getAccessToken(
  * while Layer 2 consumes it; checking only before the wait still POSTs the
  * consumed token and burns the family (Claude/Anthropic, Auth0 Codex).
  */
-async function _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig) {
+async function _getAccessTokenWithStalenessCheck(
+  provider,
+  credentials,
+  log,
+  proxyConfig,
+  onLateResult
+) {
   return serializeRefresh(
     provider,
     () => _refreshWithFreshCredentials(provider, credentials, log, proxyConfig),
-    log
+    log,
+    onLateResult
   );
 }
 

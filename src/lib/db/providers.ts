@@ -1004,6 +1004,7 @@ export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
   expectedCodexFence?: CodexConnectionFence;
+  expectedRefreshToken?: string | null;
   /** Internal token rotation: the exact version committed by this write, never a later reread. */
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
 };
@@ -1111,6 +1112,13 @@ export async function updateProviderConnection(
     if (!existing) return null;
 
     const existingCamel = toRecord(rowToCamel(existing));
+    if (opts?.expectedRefreshToken !== undefined) {
+      const currentRefreshToken =
+        decryptConnectionFields({
+          refreshToken: existingCamel.refreshToken as string | null | undefined,
+        }).refreshToken ?? null;
+      if (currentRefreshToken !== opts.expectedRefreshToken) return null;
+    }
     const merged = buildMergedConnectionUpdate(data, existingCamel, opts);
     const existingRecord = toRecord(existing);
 
