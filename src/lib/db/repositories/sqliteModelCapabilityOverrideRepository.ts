@@ -96,12 +96,23 @@ function findSync(
 ): ModelCapabilityOverride | null {
   if (!provider || !modelId || !isSupportedModelCapabilityOverrideKey(key)) return null;
   try {
-    const row = getDbInstance()
-      .prepare(
-        SELECT_COLUMNS +
-          "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = ?"
-      )
-      .get(provider, modelId, key) as OverrideRow | undefined;
+    const db = getDbInstance();
+    // The reasoning-efforts lookup keeps its original literal-key statement.
+    const row = (
+      key === "reasoning_efforts"
+        ? db
+            .prepare(
+              SELECT_COLUMNS +
+                "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = 'reasoning_efforts'"
+            )
+            .get(provider, modelId)
+        : db
+            .prepare(
+              SELECT_COLUMNS +
+                "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = ?"
+            )
+            .get(provider, modelId, key)
+    ) as OverrideRow | undefined;
     return row ? toOverride(row) : null;
   } catch {
     return null;

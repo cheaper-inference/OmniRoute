@@ -106,6 +106,31 @@ test("capability overrides: normalization, typed reads and rejected values", () 
   );
 });
 
+test("single-row capability reads keep their SQL statements", () => {
+  const db = core.getDbInstance();
+  const original = db.prepare;
+  const statements: string[] = [];
+  db.prepare = function (this: typeof db, sql: string) {
+    statements.push(sql);
+    return original.call(this, sql);
+  } as typeof db.prepare;
+  try {
+    capabilities.getReasoningEffortsOverride("p", "m");
+    capabilities.getModelCapabilityOverride("p", "m", "max_token");
+    capabilities.getBooleanModelCapabilityOverride("p", "m", "vision");
+  } finally {
+    db.prepare = original;
+  }
+  const select = "SELECT provider, model_id, override_key, override_value, refreshed_at ";
+  const byPair =
+    "FROM model_capability_overrides WHERE provider = ? AND model_id = ? AND override_key = ";
+  assert.deepEqual(statements, [
+    `${select}${byPair}'reasoning_efforts'`,
+    `${select}${byPair}?`,
+    `${select}${byPair}?`,
+  ]);
+});
+
 test("capability overrides: list order, skipped corrupt rows and removal", () => {
   capabilities.setModelCapabilityOverride("a/one", "max_input_tokens", 100);
   capabilities.setModelCapabilityOverride("b/two", "tool_calling", true);
@@ -239,7 +264,7 @@ test("a rebuilt resolution snapshot reflects every override family", () => {
   assert.equal(rebuilt.maxTokenOverrides.get("p")?.get("m"), 11);
   assert.equal(rebuilt.maxInputTokenOverrides.get("p")?.get("m"), 22);
   assert.deepEqual(rebuilt.reasoningEffortsOverrides.get("p")?.get("m"), ["low"]);
-  assert.equal(rebuilt.booleanCapabilityOverrides.get("p")?.get("m")?.get("attachment"), true);
+  assert.equal(rebuilt.booleanCapabilityOverrides?.get("p")?.get("m")?.get("attachment"), true);
   assert.equal(rebuilt.contextOverrides.get("p")?.get("m"), 33);
   assert.equal(
     capabilities.getModelCapabilityOverride(
