@@ -112,10 +112,7 @@ test("fetchGrokCliQuota sends Authorization + X-Grpc-Web headers and a non-empty
   })) as GrokCliQuota | null;
 
   assert.equal(calls.length, 1);
-  assert.equal(
-    calls[0].url,
-    "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig"
-  );
+  assert.equal(calls[0].url, "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig");
   assert.equal(calls[0].headers["Authorization"], "Bearer grok-token");
   assert.equal(calls[0].headers["X-Grpc-Web"], "1");
   assert.equal(calls[0].headers["Content-Type"], "application/grpc-web+proto");
@@ -225,7 +222,8 @@ test("invalidateGrokCliQuotaCache forces a re-fetch on the next call", async () 
   invalidateGrokCliQuotaCache(connectionId);
 });
 
-test("registerGrokCliQuotaFetcher wires grok-cli into preflightQuota", async () => {
+test("registerGrokCliQuotaFetcher wires grok-cli into preflightQuota", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse("2026-07-20T00:00:00Z") });
   registerGrokCliQuotaFetcher();
 
   const connectionId = `grok-cli-preflight-${Date.now()}`;
