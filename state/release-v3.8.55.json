@@ -1549,8 +1549,18 @@
       "sha": "6441b5b6f3587b771547c106caf91229fa556cfb",
       "detail": "head-changed-after-label",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871402948"
+    },
+    {
+      "at": "2026-11-21T05:39:23.291Z",
+      "type": "would-dequeue",
+      "prs": [
+        20825
+      ],
+      "sha": "2a48a0a823bf12139867cc9cf8b70814302c2689",
+      "detail": "head-changed-after-label",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871855421"
     }
   ],
-  "updatedAt": "2026-11-21T05:34:07.180Z",
+  "updatedAt": "2026-11-21T05:39:39.390Z",
   "batchWindow": 6
 }
