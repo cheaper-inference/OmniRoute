@@ -151,14 +151,31 @@ export function buildArtifactRelativePath(timestamp: string, id: string) {
   return path.posix.join(dateFolder, `${safeTimestamp}_${id}.json`);
 }
 
-function computeArtifactChecksum(serialized: string): string {
-  const bytes = Buffer.from(serialized);
+// FNV-1a, 32 bit. This is an integrity check against disk rot and partial restores, not a
+// password hash and not tamper protection. It stays FNV on purpose: a SHA-256 over file content
+// trips the CodeQL "insecure password hashing" rule for no gain here, and the stored 8-hex value
+// is pinned by existing rows.
+function computeArtifactChecksum(serialized: string | Uint8Array): string {
+  const bytes = typeof serialized === "string" ? Buffer.from(serialized) : serialized;
   let hash = 0x811c9dc5;
   for (const byte of bytes) {
     hash ^= byte;
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
   return hash.toString(16).padStart(8, "0");
+}
+
+/**
+ * True when the file text still matches the checksum stored with its call_logs row.
+ * A row with no stored checksum (written before it existed, or inserted by hand) cannot be
+ * verified and counts as good. The caller treats false as an unreadable artifact.
+ */
+export function verifyArtifactChecksum(
+  fileContent: string | Uint8Array,
+  storedChecksum: string | null | undefined
+): boolean {
+  if (typeof storedChecksum !== "string" || storedChecksum.trim() === "") return true;
+  return computeArtifactChecksum(fileContent) === storedChecksum.trim().toLowerCase();
 }
 
 function truncateArtifactForStorage(artifact: CallLogArtifact): CallLogArtifact {
