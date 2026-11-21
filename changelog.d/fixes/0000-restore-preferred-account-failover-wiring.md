@@ -1,0 +1,1 @@
+- **fix(sse):** Preferred-account failover (Settings → Resilience) works again: chat requests once more apply the shortened response-start deadline to an API key's preferred account and hop once to an eligible sibling when it expires. A stale merge in the v3.8.55 cycle had dropped this wiring from the chat handler while the setting stayed in the dashboard (regression of #19259).
