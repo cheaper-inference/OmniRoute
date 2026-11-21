@@ -5,6 +5,8 @@ type McpHttpAuthContext = {
   cookie?: string;
   xApiKey?: string;
   anthropicVersion?: string;
+  authSource?: "dashboard-session";
+  xGoogleApiKey?: string;
 };
 
 /**
@@ -36,6 +38,7 @@ export function getMcpHttpAuthHeadersForInternalFetch(): Record<string, string> 
     headers["x-api-key"] = context.xApiKey;
     headers["anthropic-version"] = context.anthropicVersion;
   }
+  if (context?.xGoogleApiKey) headers["x-goog-api-key"] = context.xGoogleApiKey;
   return headers;
 }
 
@@ -50,6 +53,17 @@ export function getMcpHttpAuthHeadersForInternalFetch(): Record<string, string> 
  */
 export function hasMcpHttpAuthContext(): boolean {
   return mcpHttpAuthContext.getStore() !== undefined;
+}
+
+/**
+ * The session source captured from a cookie-only HTTP request: a dashboard
+ * `auth_token` cookie with no Authorization / x-api-key header. This is a label
+ * for audit attribution, not an authentication verdict — the route gate decides
+ * whether the request is authenticated. Resolving it here avoids a second
+ * `verifyDashboardSessionToken` (and its settings read) on the tool-call path.
+ */
+export function getMcpHttpAuthSource(): "dashboard-session" | undefined {
+  return mcpHttpAuthContext.getStore()?.authSource;
 }
 
 /**
@@ -98,13 +112,21 @@ export async function withMcpHttpAuthContext<T>(
   request: Request,
   callback: () => Promise<T>
 ): Promise<T> {
-  return mcpHttpAuthContext.run(
-    {
-      authorization: headerValue(request, "authorization"),
-      cookie: headerValue(request, "cookie"),
-      xApiKey: headerValue(request, "x-api-key"),
-      anthropicVersion: headerValue(request, "anthropic-version"),
-    },
-    callback
-  );
+  const authorization = headerValue(request, "authorization");
+  const xApiKey = headerValue(request, "x-api-key");
+  const xGoogleApiKey = headerValue(request, "x-goog-api-key");
+  const cookie = headerValue(request, "cookie");
+  const context: McpHttpAuthContext = {
+    authorization,
+    cookie,
+    xApiKey,
+    anthropicVersion: headerValue(request, "anthropic-version"),
+    xGoogleApiKey,
+  };
+  // A Google key owns the caller identity: if its metadata lookup fails, the
+  // caller must resolve to no principal, never fall back to the session label.
+  if (!authorization && !xApiKey && !xGoogleApiKey && cookie?.includes("auth_token=")) {
+    context.authSource = "dashboard-session";
+  }
+  return mcpHttpAuthContext.run(context, callback);
 }
