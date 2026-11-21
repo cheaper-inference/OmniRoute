@@ -1,0 +1,1 @@
+- **fix(resilience):** The combo quality peek releases a stream at most 1 s after the first lifecycle event (`message_start`, a block start, an empty thinking/signature delta, an OpenAI role chunk or Responses `response.created`), so long silent thinking or tool planning no longer reaches the client as pings only; empty one-burst replies still fail over

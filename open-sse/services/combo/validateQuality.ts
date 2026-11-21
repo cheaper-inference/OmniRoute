@@ -197,6 +197,60 @@ function contentBlockDeltaIsRealSignal(parsed: Record<string, unknown>): boolean
   return typeof text === "string" && text.length > 0;
 }
 
+/**
+ * Bounded wait, after the first lifecycle-progress event, before the streaming
+ * peek releases the buffered prefix without a content verdict.
+ *
+ * The peek used to hold the whole stream (message_start included) until the
+ * first non-empty text/thinking delta. Models that omit thinking text (Opus 5.x
+ * streams `thinking_delta` with an empty `thinking` plus a signature) or think
+ * for 10-60 s before the first visible token therefore reached the client as
+ * pings only, and clients that watch for real events aborted and resent.
+ *
+ * Progress events are: Claude `message_start`, any `content_block_start`, a
+ * thinking/signature/input_json delta (even when its text is empty), an OpenAI
+ * role-only chunk, and Responses `response.created` / `response.in_progress`.
+ * Once one is seen the peek waits at most this long for a verdict, then hands
+ * the stream to the client. Empty turns that complete inside the window — the
+ * #3685 content_filter lifecycle, #1382 empty block pair, #7285/#10404 empty
+ * OpenAI turns — still fail over. An empty turn whose events are spread over
+ * more than this window is committed instead.
+ */
+export const STREAM_PEEK_PROGRESS_GRACE_MS = 1000;
+
+function hasOpenAIRoleDelta(parsed: Record<string, unknown>): boolean {
+  const choices = parsed.choices;
+  return (
+    Array.isArray(choices) &&
+    choices.some((choice) => {
+      const delta = isRecord(choice) ? choice.delta : null;
+      const role = isRecord(delta) ? delta.role : null;
+      return typeof role === "string" && role.length > 0;
+    })
+  );
+}
+
+/** True for an event that proves the upstream started a real turn (see grace above). */
+function isLifecycleProgressEvent(eventType: string, parsed: Record<string, unknown>): boolean {
+  switch (eventType) {
+    case "message_start":
+    case "content_block_start":
+    case "response.created":
+    case "response.in_progress":
+      return true;
+    case "content_block_delta": {
+      const deltaType = asObject(parsed, "delta")?.type;
+      return (
+        deltaType === "thinking_delta" ||
+        deltaType === "signature_delta" ||
+        deltaType === "input_json_delta"
+      );
+    }
+    default:
+      return isOpenAIChoicesPayload(parsed) && hasOpenAIRoleDelta(parsed);
+  }
+}
+
 /** A message_delta closes the lifecycle once it carries a stop_reason. */
 function messageDeltaEndsLifecycle(parsed: Record<string, unknown>): boolean {
   return asObject(parsed, "delta")?.stop_reason != null;
@@ -482,6 +536,10 @@ export async function validateResponseQuality(
     // check below so a stream that already produced content before an error
     // is not misclassified as "aborted before content" (#12723 follow-up).
     let anyContentFound = false;
+    // A lifecycle-progress event was seen; arms the STREAM_PEEK_PROGRESS_GRACE_MS
+    // release so a long silent thinking/tool phase is not held back here.
+    let sawProgress = false;
+    let progressDeadline = 0;
     const sseLineNormalizer = createSSEDataLineNormalizer();
     let pendingEventType = "";
 
@@ -569,6 +627,8 @@ export async function validateResponseQuality(
 
         if (isTerminalUsageOnlyChunk(parsed, eventType)) sawTerminator = true;
 
+        if (!sawProgress && isLifecycleProgressEvent(eventType, parsed)) sawProgress = true;
+
         if (isKnownNonClaudeStreamPayload(parsed, eventType)) {
           return "content";
         }
@@ -587,12 +647,16 @@ export async function validateResponseQuality(
      * Preserves the original response's status, statusText, and headers.
      */
     function buildReplayResponse(
-      readerToForward: ReadableStreamDefaultReader<Uint8Array>
+      readerToForward: ReadableStreamDefaultReader<Uint8Array>,
+      inFlightRead: Promise<ReadableStreamReadResult<Uint8Array>> | null = null
     ): Response {
       // Snapshot the prefix so mutations after this point don't affect it.
       const prefix = bufferedChunks.slice();
       let prefixIdx = 0;
       let replayCancelled = false;
+      // A grace release hands over the read still pending on the source; it
+      // owns the next chunk, so it must be forwarded before any new read.
+      let carriedRead = inFlightRead;
       const stream = new ReadableStream<Uint8Array>({
         async pull(controller) {
           // 1. Drain the buffered prefix one chunk at a time.
@@ -602,7 +666,9 @@ export async function validateResponseQuality(
           }
           // 2. Forward the remainder from the original reader.
           try {
-            const { done, value } = await readerToForward.read();
+            const read = carriedRead ?? readerToForward.read();
+            carriedRead = null;
+            const { done, value } = await read;
             if (replayCancelled) return;
             if (done) {
               if (preContentTransportRecovery) cancelPeekReader();
@@ -615,14 +681,15 @@ export async function validateResponseQuality(
             if (!replayCancelled) controller.close();
           }
         },
-        ...(preContentTransportRecovery
-          ? {
-              cancel(reason: unknown) {
-                replayCancelled = true;
-                cancelPeekReader(reason);
-              },
-            }
-          : {}),
+        cancel(reason: unknown) {
+          carriedRead = null;
+          if (preContentTransportRecovery) {
+            replayCancelled = true;
+            cancelPeekReader(reason);
+          } else {
+            void readerToForward.cancel(reason).catch(() => {});
+          }
+        },
       });
       return new Response(stream, {
         status: response.status,
@@ -642,21 +709,58 @@ export async function validateResponseQuality(
           else signal.addEventListener("abort", onAbort, { once: true });
         })
       : null;
-    const readOrAbort = async () => {
-      if (!abortedPromise) return reader.read();
-      const r = await Promise.race([reader.read(), abortedPromise]);
-      return r === "aborted" ? null : r;
+    // The source read survives a grace release (the replay forwards it), so it
+    // is kept here instead of being re-issued per race.
+    let pendingRead: Promise<ReadableStreamReadResult<Uint8Array>> | null = null;
+    const readOrAbort = async (): Promise<
+      ReadableStreamReadResult<Uint8Array> | "aborted" | "grace"
+    > => {
+      if (!pendingRead) {
+        pendingRead = reader.read();
+        // Observed by the race or the replay; never an unhandled rejection.
+        pendingRead.catch(() => {});
+      }
+      const racers: Array<Promise<ReadableStreamReadResult<Uint8Array> | "aborted" | "grace">> = [
+        pendingRead,
+      ];
+      if (abortedPromise) racers.push(abortedPromise);
+      let graceTimer: ReturnType<typeof setTimeout> | undefined;
+      if (progressDeadline) {
+        racers.push(
+          new Promise<"grace">((resolve) => {
+            graceTimer = setTimeout(
+              () => resolve("grace"),
+              Math.max(0, progressDeadline - Date.now())
+            );
+          })
+        );
+      }
+      try {
+        const r = await Promise.race(racers);
+        if (r !== "aborted" && r !== "grace") pendingRead = null;
+        return r;
+      } finally {
+        if (graceTimer) clearTimeout(graceTimer);
+      }
     };
 
     // Main bounded-peek loop.
     try {
       while (true) {
         const next = await readOrAbort();
-        if (next === null) {
+        if (next === "aborted") {
           // Same as the error path: never await cancel() on a tee branch.
           if (preContentTransportRecovery) cancelPeekReader(signal?.reason);
           else reader.cancel(signal?.reason).catch(() => {});
           return { valid: true };
+        }
+        if (next === "grace") {
+          // The upstream started a real turn and is still working (silent
+          // thinking, tool planning). Release what is buffered; from here the
+          // client-facing stream is committed, like any content verdict.
+          const clonedResponse = buildReplayResponse(reader, pendingRead);
+          pendingRead = null;
+          return { valid: true, clonedResponse };
         }
         const { done, value } = next;
 
@@ -816,6 +920,10 @@ export async function validateResponseQuality(
           );
           const clonedResponse = buildReplayResponse(reader);
           return { valid: true, clonedResponse };
+        }
+
+        if (sawProgress && !progressDeadline) {
+          progressDeadline = Date.now() + STREAM_PEEK_PROGRESS_GRACE_MS;
         }
       }
     } catch (streamErr) {
