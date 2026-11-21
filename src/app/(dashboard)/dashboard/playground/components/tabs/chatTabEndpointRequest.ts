@@ -84,6 +84,46 @@ export function buildNativeCodexPlaygroundRequest({
   };
 }
 
+/**
+ * KEA-9392 — reads a failure carried INSIDE a streamed response.
+ *
+ * A streamed turn that fails after the route has committed to `200 text/event-stream` (the
+ * handler outlived the early-keepalive threshold, or the upstream died mid-stream) cannot
+ * change its HTTP status any more: the engine sends the sanitized error body as an ordinary
+ * `data:` frame instead. A reader that only looks at `choices[0].delta.content` drops that
+ * frame and the turn ends with neither a reply nor an error.
+ *
+ * Shapes (see `open-sse/utils/earlyStreamKeepalive.ts` and `streamErrorFormat.ts`):
+ *   - Chat Completions: `{ "error": { "message": … } }` (or `{ "error": "…" }`)
+ *   - Responses:        `{ "type": "error", "message": …, "error": { … } }`
+ *                       `{ "type": "response.failed", "response": { "error": { … } } }`
+ *
+ * Returns `null` for every ordinary frame; `{ message: null }` when the frame is a failure
+ * that carries no usable text (the caller supplies the wording).
+ */
+export function readStreamError(payload: unknown): { message: string | null } | null {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const frame = payload as Record<string, unknown>;
+  const text = (value: unknown): string | null =>
+    typeof value === "string" && value.trim() ? value : null;
+  const messageOf = (value: unknown): string | null =>
+    value && typeof value === "object"
+      ? text((value as Record<string, unknown>).message)
+      : text(value);
+
+  if (frame.type === "response.failed") {
+    const response = frame.response as Record<string, unknown> | null | undefined;
+    return { message: messageOf(response?.error) };
+  }
+  if (frame.type === "error") {
+    return { message: messageOf(frame.error) ?? text(frame.message) };
+  }
+  if (frame.error !== undefined && frame.error !== null && frame.error !== "") {
+    return { message: messageOf(frame.error) };
+  }
+  return null;
+}
+
 /** Resolves the fetch path (mounted under `/api`) for the selected Playground endpoint. */
 export function resolveChatTabRequestPath(endpoint: PlaygroundEndpoint | undefined): string {
   return `/api${endpointToPath(endpoint ?? "chat.completions")}`;
