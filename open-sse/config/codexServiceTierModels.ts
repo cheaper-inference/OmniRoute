@@ -5,8 +5,16 @@
  * it for the dashboard and the settings modules.
  */
 
-/** Official Ultrafast model IDs; automatic defaults must not guess future variants. */
-export const CODEX_ULTRAFAST_SUPPORTED_MODELS: readonly string[] = ["gpt-6-astra", "gpt-6.1-sol"];
+/**
+ * Official Ultrafast model IDs; automatic defaults must not guess future variants.
+ * gpt-6.2-sol lists `ultrafast` in its Codex service tiers; gpt-6.2-astra lists only
+ * `priority` (live Codex catalog, 2026-11-21).
+ */
+export const CODEX_ULTRAFAST_SUPPORTED_MODELS: readonly string[] = [
+  "gpt-6-astra",
+  "gpt-6.1-sol",
+  "gpt-6.2-sol",
+];
 
 export function isCodexUltrafastModel(model: unknown): boolean {
   if (typeof model !== "string") return false;

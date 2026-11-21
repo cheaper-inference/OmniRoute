@@ -11,6 +11,19 @@ export const GPT_6_ASTRA_PRICING = {
   cache_creation: 12.5,
 };
 
+// OpenAI API Standard (<=272K input tokens; longer prompts bill 2x input/cache, 1.5x output).
+// Cheaper than GPT-6 Astra. Codex Standard: 200 / 10 / 1000 credits per MTok, the same
+// dollar rates at 25 credits per USD.
+// https://developers.openai.com/api/docs/models/gpt-6.2-astra
+// https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-11-21)
+export const GPT_6_2_ASTRA_PRICING = {
+  input: 8.0,
+  output: 40.0,
+  cached: 0.4,
+  reasoning: 40.0,
+  cache_creation: 10.0,
+};
+
 export const GPT_6_SOL_PRICING = {
   input: 2.0,
   output: 10.0,
