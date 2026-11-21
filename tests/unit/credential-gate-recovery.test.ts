@@ -45,7 +45,7 @@ test.afterEach(() => {
 });
 
 test(
-  "flag off (default): only transport diagnoses bypass the legacy strict gate",
+  "default on (#20256): transient and inconclusive probe failures do not block routing",
   { timeout: 2000 },
   () => {
     delete process.env[FLAG];
@@ -55,6 +55,31 @@ test(
       "upstream_rate_limited",
     ]);
     assert.ok(AUTH_FAILURES.length > 0 && OTHER_INCONCLUSIVE_FAILURES.length > 0);
+    // All inconclusive failures (transport + other non-auth) keep traffic flowing under default
+    for (const type of INCONCLUSIVE_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe timed out", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), undefined, String(type));
+      assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+      assert.equal(getCredentialHealth("synthetic")?.status, "error");
+    }
+    // Scheduler catch path: untyped or runtime errors do not block by default
+    setCredentialHealth("synthetic", "codex", "error", "Scheduler error");
+    assert.equal(isCredentialHealthy("synthetic"), undefined);
+
+    // Only genuine authentication failures block
+    for (const type of AUTH_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), false, String(type));
+      assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+    }
+  }
+);
+
+test(
+  "opt-out flag off: legacy strict gate blocks all probe errors except transport failures",
+  { timeout: 2000 },
+  () => {
+    process.env[FLAG] = "false";
     for (const type of TRANSPORT_FAILURES) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), undefined, type);
@@ -66,13 +91,13 @@ test(
       assert.equal(isCredentialHealthy("synthetic"), false, String(type));
       assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
     }
-    // Scheduler catch path: untyped error (no lastErrorType) still blocks by default.
+    // Scheduler catch path: untyped error (no lastErrorType) still blocks when legacy flag is off
     setCredentialHealth("synthetic", "codex", "error", "Scheduler error");
     assert.equal(isCredentialHealthy("synthetic"), false);
   }
 );
 
-test("a throwing flag resolver fails closed to the release gate", { timeout: 2000 }, () => {
+test("a throwing flag resolver falls back to the flag default (#20256)", { timeout: 2000 }, () => {
   const key = Symbol.for("omniroute.featureFlagResolver");
   const store = globalThis as Record<symbol, unknown>;
   const previous = store[key];
@@ -86,8 +111,14 @@ test("a throwing flag resolver fails closed to the release gate", { timeout: 200
     setCredentialHealth("synthetic", "codex", "error", "Probe timed out", "network_error");
     assert.equal(isCredentialHealthy("synthetic"), undefined);
     assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
-    // A throwing feature-flag resolver still fails closed for OTHER diagnoses.
+    // A throwing feature-flag resolver falls back to the flag default (on since #20256):
+    // OTHER inconclusive diagnoses stay unknown, proven auth failures still block.
     for (const type of OTHER_INCONCLUSIVE_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), undefined, String(type));
+      assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+    }
+    for (const type of AUTH_FAILURES) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), false, String(type));
       assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
@@ -190,7 +221,8 @@ test("two transport-failed combo targets stay eligible without hiding probe fail
 });
 
 test("blocked credential-gate messages distinguish auth failures from ambiguous probes", () => {
-  delete process.env[FLAG];
+  // Under strict legacy mode (FLAG=false), ambiguous probes are blocked and formatted
+  process.env[FLAG] = "false";
   setCredentialHealth("auth", "codex", "error", "Invalid grant", "upstream_auth_error");
   const bad = checkCredentialGate("auth", "codex", "codex/model");
   assert.equal(bad.allowed, false);
@@ -210,4 +242,8 @@ test("blocked credential-gate messages distinguish auth failures from ambiguous 
   const enumShaped = checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "";
   assert.match(enumShaped, /diagnosis: unknown/);
   assert.doesNotMatch(enumShaped, /secret_payload/);
+
+  // Under default mode (#20256), ambiguous probes do not block
+  delete process.env[FLAG];
+  assert.notEqual(checkCredentialGate("unknown", "codex", "codex/model").allowed, false);
 });

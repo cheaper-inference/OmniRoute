@@ -39,6 +39,24 @@ test("without a registered resolver the bridge falls back to the env var only", 
   }
 });
 
+test("without a registered resolver an unset or empty env var falls back to the given default", () => {
+  bridge.registerFeatureFlagResolver(null);
+  const key = "OMNIROUTE_TEST_BRIDGE_DEFAULT_FLAG";
+  try {
+    delete process.env[key];
+    assert.equal(bridge.resolveRegisteredFeatureFlag(key), false);
+    assert.equal(bridge.resolveRegisteredFeatureFlag(key, true), true);
+    process.env[key] = "";
+    assert.equal(bridge.resolveRegisteredFeatureFlag(key, true), true);
+    process.env[key] = "false";
+    assert.equal(bridge.resolveRegisteredFeatureFlag(key, true), false);
+    process.env[key] = "1";
+    assert.equal(bridge.resolveRegisteredFeatureFlag(key, false), true);
+  } finally {
+    delete process.env[key];
+  }
+});
+
 test("loading featureFlags registers the DB-aware resolver (DB override wins over env)", async () => {
   // First load of featureFlags in this process (the previous test cleared the bridge).
   await import("../../src/shared/utils/featureFlags.ts");

@@ -33,11 +33,14 @@ function isTruthyFlagValue(value: string | undefined): boolean {
  * Resolve a boolean feature flag through the registered server resolver
  * (DB override > env > definition default). Without a registered resolver
  * (client bundle, or before the server resolver loaded) it falls back to the
- * environment variable only.
+ * environment variable, and to `defaultValue` when the variable is unset or
+ * empty (an empty value counts as unset, matching resolveFeatureFlag()).
+ * Pass the flag's definition default so both paths agree.
  */
-export function resolveRegisteredFeatureFlag(key: string): boolean {
+export function resolveRegisteredFeatureFlag(key: string, defaultValue = false): boolean {
   const resolver = (globalThis as ResolverStore)[RESOLVER_KEY];
   if (resolver) return resolver(key);
   const env = typeof process !== "undefined" ? process.env?.[key] : undefined;
+  if (env === undefined || env === "") return defaultValue;
   return isTruthyFlagValue(env);
 }
