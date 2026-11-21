@@ -1,5 +1,15 @@
-import { describe, it, mock, before, after, beforeEach, afterEach } from "node:test";
+import {
+  describe,
+  it,
+  mock,
+  before,
+  after,
+  beforeEach,
+  afterEach,
+  type TestContext,
+} from "node:test";
 import assert from "node:assert/strict";
+import { once } from "node:events";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,6 +19,7 @@ import { diskSnapshotPath, memoryCacheKey } from "../src/cache.js";
 
 interface ReloadCounter {
   count: number;
+  onReload?: () => void;
 }
 
 interface SetupResult {
@@ -48,6 +59,7 @@ function setupCtx(
             add: (input: unknown) => added.push(input as SetupResult["added"][number]),
           });
         }
+        reloads.onReload?.();
       },
     },
     model: { transform: () => Promise.resolve({ dispose: async () => {} }) },
@@ -116,6 +128,37 @@ describe("catalog freshness (background refresh loop)", () => {
     }
     mock.timers.reset();
   });
+
+  async function assertGatewayPublishesModel(t: TestContext, providerId: string, modelId: string) {
+    restoreDisk = isolateDisk();
+    mock.timers.enable({ apis: ["setInterval"] });
+    let gatewayModels = [{ id: "m1" }];
+    t.mock.method(globalThis, "fetch", (async (url: unknown) => {
+      const href = String(url);
+      if (href.includes("/v1/models")) return ok({ data: gatewayModels }) as unknown as Response;
+      return ok({ combos: [] }) as unknown as Response;
+    }) as typeof fetch);
+    const host = new EventTarget();
+    const { added, ctx } = setupCtx(providerId, {
+      count: 0,
+      onReload: () => {
+        if (publishedIds(added).length > 1) host.dispatchEvent(new Event("catalog-changed"));
+      },
+    });
+    await silence(async () => {
+      await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
+      assert.deepEqual(publishedIds(added), ["m1"]);
+
+      const updated = once(host, "catalog-changed", { signal: t.signal });
+      gatewayModels = [{ id: "m1" }, { id: modelId }];
+      mock.timers.tick(60_000);
+      await updated;
+      assert.ok(
+        publishedIds(added).includes(modelId),
+        `${modelId} is served after background refresh`
+      );
+    });
+  }
 
   it("served catalog follows the gateway after a background refresh", async () => {
     restoreDisk = isolateDisk();
@@ -351,30 +394,8 @@ describe("catalog freshness (background refresh loop)", () => {
     }
   });
 
-  it("gateway change converges without a restart", async () => {
-    restoreDisk = isolateDisk();
-    mock.timers.enable({ apis: ["setInterval"] });
-    const origFetch = globalThis.fetch;
-    let gatewayModels = [{ id: "m1" }];
-    globalThis.fetch = (async (url: unknown) => {
-      const href = String(url);
-      if (href.includes("/v1/models")) return ok({ data: gatewayModels }) as unknown as Response;
-      return ok({ combos: [] }) as unknown as Response;
-    }) as typeof fetch;
-    const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("f1", reloads);
-    try {
-      await silence(async () => {
-        await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
-        gatewayModels = [{ id: "m1" }, { id: "m2" }];
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
-        assert.ok(publishedIds(added).includes("m2"));
-      });
-    } finally {
-      globalThis.fetch = origFetch;
-    }
+  it("gateway change converges without a restart", { timeout: 10_000 }, async (t) => {
+    await assertGatewayPublishesModel(t, "f1", "m2");
   });
 
   it("disk snapshot and served catalog stay coherent after a tick", async () => {
@@ -412,29 +433,7 @@ describe("catalog freshness (background refresh loop)", () => {
     }
   });
 
-  it("a reactivated gateway branch is served without a restart", async () => {
-    restoreDisk = isolateDisk();
-    mock.timers.enable({ apis: ["setInterval"] });
-    const origFetch = globalThis.fetch;
-    let gatewayModels = [{ id: "m1" }];
-    globalThis.fetch = (async (url: unknown) => {
-      const href = String(url);
-      if (href.includes("/v1/models")) return ok({ data: gatewayModels }) as unknown as Response;
-      return ok({ combos: [] }) as unknown as Response;
-    }) as typeof fetch;
-    const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("f3", reloads);
-    try {
-      await silence(async () => {
-        await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
-        gatewayModels = [{ id: "m1" }, { id: "nvidia/direct" }];
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
-        assert.ok(publishedIds(added).includes("nvidia/direct"), "reactivated branch is served");
-      });
-    } finally {
-      globalThis.fetch = origFetch;
-    }
+  it("a reactivated gateway branch is served without a restart", { timeout: 10_000 }, async (t) => {
+    await assertGatewayPublishesModel(t, "f3", "nvidia/direct");
   });
 });
