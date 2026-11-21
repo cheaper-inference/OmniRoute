@@ -87,3 +87,19 @@ test("the root namespace payload gains quotaSelf and no dashboard namespace", ()
     assert.ok(!root.includes(name), `root should not contain ${name}`);
   }
 });
+
+test("the lending files set no timer, and read the clock only when a save is sent", () => {
+  const lending = sources.filter((file) => /[Ll]ending/.test(path.basename(file)));
+  assert.ok(lending.length >= 7);
+  for (const file of lending) {
+    const text = code(file);
+    assert.doesNotMatch(text, /setInterval|setTimeout|requestAnimationFrame/, relative(file));
+    assert.doesNotMatch(text, /new Date\(\s*\)|document\.cookie|indexedDB/, relative(file));
+  }
+  const clock = lending.filter((file) => code(file).includes("Date.now")).map(relative);
+  assert.deepEqual(clock, ["components/LendingForm.tsx"]);
+  assert.equal(
+    code(path.join(PAGE_DIR, "components/LendingForm.tsx")).match(/Date\.now/g)?.length,
+    1
+  );
+});
