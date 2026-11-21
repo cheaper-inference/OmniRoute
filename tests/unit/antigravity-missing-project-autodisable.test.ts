@@ -10,8 +10,8 @@
  * Contract: `markAntigravityMissingCloudCodeProject()` must persist the
  * typed marker (errorCode/lastErrorType) AND `isActive: false` +
  * `testStatus: "unavailable"` (recoverable — NOT a terminal status), while
- * `persistDiscoveredAntigravityProjectId()` re-enables the row when a project
- * is later discovered at request time.
+ * `persistDiscoveredAntigravityProjectId()` records a discovered project id
+ * without reactivating the row.
  *
  * Run: node --import tsx/esm --test tests/unit/antigravity-missing-project-autodisable.test.ts
  */
@@ -28,7 +28,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "ag-11284-test-secret
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { markAntigravityMissingCloudCodeProject, persistDiscoveredAntigravityProjectId } =
-  await import("../../open-sse/services/antigravityProjectPersistence.ts");
+  await import("../../open-sse/services/antigravityProjectPersist.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -68,21 +68,20 @@ test("confirmed-missing project disables the connection for selection", async ()
   assert.equal(updated?.lastErrorType, "oauth_missing_project_id");
 });
 
-test("discovery of a projectId later re-enables the connection", async () => {
+test("discovery of a projectId is recorded without reactivating the row", async () => {
   const connection = await createConnection();
 
   markAntigravityMissingCloudCodeProject(connection.id);
   await new Promise((resolve) => setTimeout(resolve, 50));
-  persistDiscoveredAntigravityProjectId(
+  await persistDiscoveredAntigravityProjectId(
     connection.id,
     "recovered-project-99",
     connection.providerSpecificData as Record<string, unknown>
   );
-  await new Promise((resolve) => setTimeout(resolve, 50));
 
   const healed = await providersDb.getProviderConnectionById(connection.id);
   assert.equal(healed?.projectId, "recovered-project-99");
-  assert.equal(healed?.isActive, true, "healthy accounts return to rotation");
-  assert.equal(healed?.testStatus, "active");
-  assert.ok(!healed?.errorCode);
+  assert.equal(healed?.isActive, false, "a confirmed-missing row stays disabled");
+  assert.equal(healed?.testStatus, "unavailable");
+  assert.equal(healed?.errorCode, "missing_project_id");
 });

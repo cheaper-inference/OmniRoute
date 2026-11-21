@@ -1,0 +1,1 @@
+- **refactor(sse):** Use one persistence module for discovered Antigravity projects ([#20459](https://github.com/cheaper-inference/OmniRoute/pull/20459)) — thanks @maxmad64bis

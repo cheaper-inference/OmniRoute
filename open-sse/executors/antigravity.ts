@@ -42,7 +42,7 @@ import {
   ANTIGRAVITY_REQUIRES_MANUAL_PROJECT,
 } from "../services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "../services/antigravityProjectPersist.ts";
-import { markAntigravityMissingCloudCodeProject } from "../services/antigravityProjectPersistence.ts";
+import { markAntigravityMissingCloudCodeProject } from "../services/antigravityProjectPersist.ts";
 import { getAntigravityModelFallbacks } from "../config/antigravityModelAliases.ts";
 import {
   shouldStripCloudCodeThinking,
