@@ -77,7 +77,7 @@ export function prepareChatGptRequest(model: string, source: unknown) {
     const clientTools = tools.filter((tool) => tool.type === "function" || tool.type === "custom");
     body.tools = tools.filter((tool) => tool.type !== "function" && tool.type !== "custom");
     if (clientTools.length)
-      (body.input as unknown[]).unshift({ type: "additional_tools", tools: clientTools });
+      (body.input as unknown[]).unshift({ type: "additional_tools", role: "developer", tools: clientTools });
   }
   return body;
 }
