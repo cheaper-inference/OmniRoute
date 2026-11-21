@@ -138,7 +138,10 @@ import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUp
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWalletCredits.ts";
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
-import { isCreditsExhaustedForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
+import {
+  isCreditsExhaustedForStatus,
+  quotaTextSignalCountsForStatus,
+} from "./accountFallback/creditsExhaustedForStatus.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
@@ -2306,8 +2309,20 @@ export function checkFallbackError(
     // UNCONDITIONALLY (not gated by shouldUseQuotaSignal) because it targets
     // apikey-category providers like ollama-cloud, which the oauth-only
     // shouldUseQuotaSignal gate deliberately excludes from the subscription
-    // check above.
-    if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
+    // check above. On 400 none of these quota TEXT signals counts without a structured
+    // code or an allow-listed provider: the message may quote the caller's own input.
+    const quotaTextCounts = quotaTextSignalCountsForStatus(
+      status,
+      provider,
+      errorStr,
+      structuredError?.code
+    );
+    if (
+      quotaTextCounts &&
+      shouldUseQuotaSignal &&
+      !isCreditsExhausted(errorStr) &&
+      !isDailyQuotaExhausted(errorStr)
+    ) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
         getUpstreamRetryHint,
@@ -2317,14 +2332,17 @@ export function checkFallbackError(
       );
       if (subResult) return subResult;
     }
-    const weeklyResult = buildWeeklyQuotaFallback(errorStr, undefined, provider);
+    const weeklyResult = quotaTextCounts
+      ? buildWeeklyQuotaFallback(errorStr, undefined, provider)
+      : null;
     if (weeklyResult) return weeklyResult;
     // Issue #7071 (session usage cap) is the same sibling gap as #3709 above —
     // runs UNCONDITIONALLY for the same reason: apikey-category providers
     // like ollama-cloud are excluded from the oauth-only shouldUseQuotaSignal
     // gate.
-    const sessionResult =
-      buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr);
+    const sessionResult = quotaTextCounts
+      ? (buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr))
+      : null;
     if (sessionResult) return sessionResult;
 
     const detectedRetryHint = detectRetryHint();
@@ -2336,6 +2354,7 @@ export function checkFallbackError(
         ? "body"
         : undefined;
     if (
+      quotaTextCounts &&
       shouldUseQuotaSignal &&
       quotaResetHintMs &&
       classifyErrorText(errorStr) === RateLimitReason.QUOTA_EXHAUSTED

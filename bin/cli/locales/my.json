@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ကန့်သတ်ချက်သည် အပေါင်းကိန်းပြည့်ဖြစ်ရမည်။",
     "error": "အမှား: {message}",
     "serverOffline": "OmniRoute ဆာဗာ အော့ဖ်လိုင်းဖြစ်နေသည်။ စတင်ရန်: omniroute serve",
     "authRequired": "စစ်မှန်ကြောင်း အတည်ပြုရန် လိုအပ်သည်။ OMNIROUTE_API_KEY ကို သတ်မှတ်ပါ သို့မဟုတ် ဤအမိန့်ကို လုပ်ဆောင်ပါ: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} လုပ်ဆောင်မည်",
     "cancelled": "ပယ်ဖျက်လိုက်သည်။",
     "jsonOpt": "JSON အဖြစ် ထုတ်ပေးရန်",
-    "yesOpt": "အတည်ပြုချက် တောင်းခံမှုကို ကျော်ရန်"
+    "yesOpt": "အတည်ပြုချက် တောင်းခံမှုကို ကျော်ရန်",
+    "positiveIntegerRequired": "ကန့်သတ်ချက်သည် အပေါင်းကိန်းပြည့်ဖြစ်ရမည်။"
   },
   "setup": {
     "title": "OmniRoute စနစ်ထည့်သွင်းခြင်း",

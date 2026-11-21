@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute naudoja **lygiagrečių ciklų** leidimų modelį: aktyviam ciklui skirtą
-`release/vX.Y.Z` šaką, paskelbtų leidimų linijai skirtą `main` ir nekintamą
-`vX.Y.Z` žymą, sukuriamą išleidžiant ciklo versiją. Įrašų atsiradimas tiek `release/*`,
-tiek `main` yra numatytas — tai nėra klaida.
+OmniRoute naudoja a** lygiagretus ciklas** leidimo modelis: speciali `release/vX.Y.Z` šaka aktyviam ciklui, `main` paskelbtai eilutei ir nekintanti `vX.Y.Z` žyma, kai šis ciklas pristatomas. Matant, kad įsipareigojimai patenka į `release/*` _ir_ ant `main` tikimasi, kad — nėra maišymas.
 
-Prižiūrėtojams skirta išsami informacija pateikiama `CLAUDE.md` (griežtoji taisyklė Nr. 21) ir
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Šiame puslapyje pateikiama vieša
-santrauka bendraautoriams.
+Prižiūrėtojo detalės yra `CLAUDE.md` (kieta taisyklė #21) ir [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Šis puslapis yra vieša bendraautorių santrauka.
 
 ## Trumpai
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` nėra kasdienio integravimo šaka. Į `main` nukreiptus PR
 paprastai prieš sujungiant reikia nukreipti į kitą šaką.
 
-## Leidimo užšaldymas (lygiagretūs ciklai)
+## Atleiskite užšalimą (lygiagretūs ciklai)
 
-Kai leidimas derinamas, sukuriama žymėjimo užduotis su etikete `release-freeze`.
-Tai **nesustabdo kūrimo darbų**:
+Kai leidimas suderinamas, atidaroma žymeklio problema, pažymėta `release-freeze`. Tai** vystymosi nesustabdo** :
 
-- Užšaldyta `release/vX.Y.Z` šaka iki to leidimo išleidimo priklauso leidimo vadovui.
-- Kito ciklo `release/vX+1` sukuriama iš užšaldytos viršūnės, kad bendraautoriai galėtų
-  toliau integruoti darbus.
-- Atviri PR, vis dar nukreipti į užšaldytą šaką, turėtų būti **nukreipti iš naujo** į
-  aktyvią (didžiausios versijos numerio) `release/v*` šaką.
+- Užšalęs `release/vX.Y.Z` priklauso to laivo išleidimo kapitonui.
+- Kito ciklo `release/vX+1` nupjaunamas nuo užšalusio galiuko, kad pagalbininkai tęstų nusileidimo darbus.
+- Atviros PRs, kurios vis dar nukreiptos į sušalusią šaką, turėtų būti** nukreipta iš naujo** į aktyviąją (aukščiausią) `release/v*` šaką.
 
-Prieš manydami, kad norimą šaką galima sujungti, patikrinkite, ar nėra aktyvaus užšaldymo:
+Prieš darydami prielaidą, kad norimą šaką galima sujungti, patikrinkite, ar nėra užšalimo:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Sujungimo mechanizmas (savininko `queue` etiketė → Mergify) aprašytas
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Sujungimo mechanika (savininko `queue` etiketė → Mergify) yra dokumentuota [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: sujungimo eilė panaikinta** (savininko sprendimas). `.mergify.yml` nebeapibrėžia eilės ir atmeta sujungimo komandas, kurios sujungia arba perrašo ištraukimo užklausą. Leidimas PRs yra sujungiamas rankomis pagal saugyklos taisyklių rinkinį „Reikalauti žaliųjų vartų aktyviam leidimui“ (`Gate / CI` + `Gate / Quality`), kol visa eilė paleidžiama tiesioginiu režimu, o po to per visą eilę ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` etiketė nieko nebejungia.
 
 ## Kodėl naudojama ir šaka, ir žyma?
 

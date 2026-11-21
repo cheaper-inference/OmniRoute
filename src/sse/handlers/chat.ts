@@ -38,6 +38,7 @@ import {
   resolveAvalancheSettings,
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
+import { getCodexPlanType } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
@@ -112,8 +113,6 @@ import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { resolveEmergencyFallbackDecision } from "./emergencyFallbackHeader.ts";
 import { resolveInternalUpstreamStartTimeoutMs } from "../services/internalUpstreamStartTimeout";
-import { resolveResilienceSettings } from "@/lib/resilience/settings";
-import { resolvePreferredConnectionUpstreamStartTimeoutMs } from "../services/preferredConnectionFailover";
 import { evaluateComboTargetPreflight } from "./chat/comboTargetKeyPolicy.ts";
 import {
   agentGuardFusionJudgeRefusal,
@@ -1866,13 +1865,9 @@ async function handleSingleModelChat(
   });
 
   const userAgent = request?.headers?.get("user-agent") || "";
-  const cachedRuntimeSettings =
-    runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})));
-  const baseRetrySettings = resolveCooldownAwareRetrySettings(cachedRuntimeSettings);
-  // The read cache invalidates on settings writes (up to its 5s TTL).
-  // No restart is needed for newly dispatched chat requests.
-  const preferredFailoverSettings =
-    resolveResilienceSettings(cachedRuntimeSettings).preferredAccountFailover;
+  const baseRetrySettings = resolveCooldownAwareRetrySettings(
+    runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})))
+  );
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
     provider === "claude-web" ||
@@ -1912,14 +1907,12 @@ async function handleSingleModelChat(
   // STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED: at most ONE sibling hop per request. Keeps the
   // original early-EOF 502 so an exhausted sibling pool surfaces it verbatim (combo detection).
   let earlyEofOriginal: Response | null = null;
-  // Preferred connection start timeout is a single-hop routing hint, never a cooldown.
-  let preferredTimeoutOriginal: Response | null = null;
-  let preferredFailoverUsed = false;
   const sameAccountTransportRetries = new Map<string, number>();
   // An obsolete Codex selection/response is not a fault of the current account. Reselect once
   // without cooling or excluding its connection ID; never replay a successful response.
   let staleCodexReselected = false;
   let accountFallbacks = 0;
+  let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
@@ -1931,6 +1924,7 @@ async function handleSingleModelChat(
   };
   const routingTelemetry = () => ({
     accountFallbacks,
+    selectedConnectionPlan,
     accountFallbackReasons,
     sameAccountRetries,
     routingWaitMs,
@@ -2071,7 +2065,6 @@ async function handleSingleModelChat(
         "allExpired" in credentials ||
         !credentials.connectionId
       ) {
-        if (preferredTimeoutOriginal) return preferredTimeoutOriginal;
         if (earlyEofOriginal) return withRoutingTelemetry(earlyEofOriginal, null);
         if (!credentials?.allRateLimited && agy.earliestRetryHintAtMs !== null)
           return agyLease.buildAntigravityPoolBusyResponse(agy.earliestRetryHintAtMs);
@@ -2170,6 +2163,8 @@ async function handleSingleModelChat(
           excludedConnectionIds.size > 0
             ? Array.from(excludedConnectionIds)[excludedConnectionIds.size - 1]
             : null;
+        // No account was selected for this response; don't report a previous attempt's plan.
+        selectedConnectionPlan = null;
         return withRoutingTelemetry(noCredsRes, lastFailedConnectionId);
       }
 
@@ -2192,6 +2187,9 @@ async function handleSingleModelChat(
         }
         pendingStreamRetryConnectionId = null;
       }
+      // Refresh on every selected credential so fallback never reports a stale plan.
+      selectedConnectionPlan =
+        provider === "codex" ? getCodexPlanType(credentials.providerSpecificData) : null;
       const accountId = credentials.connectionId.slice(0, 8);
       const releaseOAuthSession = credentials.releaseOAuthSession ?? (() => {});
       // Undefined whenever the lease flag is off, which makes every release/hold below a no-op.
@@ -2354,21 +2352,6 @@ async function handleSingleModelChat(
         reselectPoolMember?: () => Promise<unknown>;
       } = { proxy: null };
       const proxyStartTime = Date.now();
-      // A preferred API-key account can be given one shorter time-to-headers
-      // deadline when a vetted sibling exists. Pins/leases/combo/Muse are excluded.
-      const preferredDeadline = resolvePreferredConnectionUpstreamStartTimeoutMs(
-        provider,
-        credentials,
-        requestUpstreamStartTimeoutMs,
-        effectiveModel,
-        preferredFailoverUsed ||
-          hasForcedConnection ||
-          runtimeOptions.managedLease ||
-          museOwner ||
-          isCombo
-          ? { ...preferredFailoverSettings, enabled: false }
-          : preferredFailoverSettings
-      );
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
@@ -2416,7 +2399,7 @@ async function handleSingleModelChat(
             videoBridgeLog: runtimeOptions.videoBridgeLog,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             fallbackAttempts: runtimeOptions.fallbackAttempts,
-            requestUpstreamStartTimeoutMs: preferredDeadline.timeoutMs,
+            requestUpstreamStartTimeoutMs,
             beforeUpstreamAttempt:
               museOwner && muse.museBeforeUpstreamAttempt(museOwner, credentials),
             forcedConnectionId: hasForcedConnection ? forcedConnectionId : null, // #14116
@@ -2535,23 +2518,6 @@ async function handleSingleModelChat(
       // A shorter *preferred* deadline may perform one in-request sibling hop,
       // without recording a connection failure or evicting session affinity.
       if (result.errorCode === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE) {
-        if (
-          preferredDeadline.mayRotateOnRequestTimeout &&
-          !preferredFailoverUsed &&
-          requestSignal?.aborted !== true
-        ) {
-          preferredFailoverUsed = true;
-          preferredTimeoutOriginal = withSelectedConnectionHeader(
-            result.response,
-            credentials.connectionId
-          );
-          excludedConnectionIds.add(credentials.connectionId);
-          log.info(
-            "AUTH",
-            "Preferred account response-start timed out; trying one eligible sibling"
-          );
-          continue;
-        }
         return withSelectedConnectionHeader(result.response, credentials.connectionId);
       }
       // Never let generic account fallback or affinity eviction move a Muse caller.

@@ -8,6 +8,7 @@ import { createHmac } from "node:crypto";
 import { once } from "node:events";
 import { getLogExportDestinationType } from "../../src/lib/logExport/registry.ts";
 import type { LogExportRecord } from "../../src/lib/logExport/types.ts";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 import { createManagementSessionToken } from "../helpers/managementSession.ts";
 
 const packageVersion: string = JSON.parse(
@@ -34,6 +35,7 @@ const source = await import("../../src/lib/usage/callLogExportSource.ts");
 const route = await import("../../src/app/api/log-export/destinations/route.ts");
 const oneRoute = await import("../../src/app/api/log-export/destinations/[id]/route.ts");
 const otlp = await import("../../src/lib/logExport/destinations/otlpHttp.ts");
+const [, coveragePreload] = nativeCoverageArgs();
 
 type Payload = ReturnType<typeof otlp.buildOtlpPayload>;
 type Span = Payload["resourceSpans"][number]["scopeSpans"][number]["spans"][number];
@@ -101,6 +103,15 @@ function attributes(span: Span) {
 }
 const str = (stringValue: string) => ({ stringValue });
 const int = (value: number) => ({ intValue: String(value) });
+
+if (coveragePreload) {
+  test.beforeEach(() => {
+    runner.__setLogExportChildOptionsForTest({ coveragePreload });
+  });
+  test.afterEach(() => {
+    runner.__setLogExportChildOptionsForTest(null);
+  });
+}
 
 test.after(() => {
   core.resetDbInstance();
@@ -572,7 +583,7 @@ test("400 permanent excerpt redacts echoed header values; redirects never forwar
   }
 });
 
-test("429 respects Retry-After then succeeds; 5xx and timeout retries bounded and throw", async () => {
+test("429 respects Retry-After then succeeds; 5xx and network retries are bounded", async () => {
   const s = await server((_q, r, _b, i) => {
     r.writeHead(i === 1 ? 429 : 200, { "Retry-After": "1" }).end();
   });
@@ -584,7 +595,7 @@ test("429 respects Retry-After then succeeds; 5xx and timeout retries bounded an
   } finally {
     await s.close();
   }
-  for (const mode of ["5xx", "timeout", "network"]) {
+  for (const mode of ["5xx", "network"]) {
     const s = await server((q, r) => {
       if (mode === "5xx") r.writeHead(503).end("unavailable");
       if (mode === "network") q.socket.destroy();
@@ -592,17 +603,13 @@ test("429 respects Retry-After then succeeds; 5xx and timeout retries bounded an
     try {
       await assert.rejects(
         otlp.otlpHttpDestination
-          .createClient(
-            config({ endpoint: s.endpoint, timeoutMs: mode === "timeout" ? 30 : 5_000 })
-          )
+          .createClient(config({ endpoint: s.endpoint, timeoutMs: 5_000 }))
           .send([record]),
         {
           message:
             mode === "5xx"
               ? "OTLP/HTTP retryable status 503 (3 attempts, 1 spans not acknowledged)"
-              : mode === "timeout"
-                ? "OTLP/HTTP request timed out"
-                : "OTLP/HTTP network request failed",
+              : "OTLP/HTTP network request failed",
         }
       );
       assert.equal(s.calls.length, 3);
@@ -611,6 +618,41 @@ test("429 respects Retry-After then succeeds; 5xx and timeout retries bounded an
     }
   }
 });
+
+test(
+  "OTLP request timeouts are classified and retried three times",
+  { timeout: 10_000 },
+  async (t) => {
+    const nativeTimeout = AbortSignal.timeout.bind(AbortSignal);
+    const pending: AbortController[] = [];
+    const ms = 30;
+    const timeoutCalls = t.mock.method(AbortSignal, "timeout", (duration: number) => {
+      if (duration !== ms) return nativeTimeout(duration);
+      const controller = new AbortController();
+      pending.push(controller);
+      return controller.signal;
+    });
+    const s = await server((_req, _res, _body, request) => {
+      pending[request - 1]?.abort(new DOMException("fixture timeout", "TimeoutError"));
+    });
+    t.after(s.close);
+    await assert.rejects(
+      otlp.otlpHttpDestination
+        .createClient(config({ endpoint: s.endpoint, timeoutMs: ms }))
+        .send([record]),
+      { message: "OTLP/HTTP request timed out" }
+    );
+    assert.equal(s.calls.length, 3);
+    assert.deepEqual(
+      timeoutCalls.mock.calls
+        .filter((call) => call.arguments[0] === ms)
+        .map((call) => call.arguments),
+      [[ms], [ms], [ms]]
+    );
+    assert.equal(new Set(pending.map((controller) => controller.signal)).size, 3);
+    assert.ok(pending.every((controller) => controller.signal.aborted));
+  }
+);
 
 test("chunk requests obey byte and row caps; a single oversize span fails without sending", async () => {
   const s = await server((_q, r) => {
@@ -728,6 +770,7 @@ test("child runner end-to-end: cursor advances filtered rows, ttft mapped, secre
   const originalError = console.error;
   console.error = (...args: unknown[]) => output.push(args.join(" "));
   runner.__setLogExportChildOptionsForTest({
+    coveragePreload,
     onSpawn: (child) => {
       assert.equal(JSON.stringify(child.spawnargs).includes(secret), false);
       child.stdout?.on("data", (c: Buffer) => output.push(c.toString()));
@@ -845,6 +888,7 @@ test("real runner marks failure, retains pending rows and resends identical span
       let spawned = 0;
       runner.__setLogExportChildOptionsForTest({
         modulePath: "",
+        coveragePreload,
         onSpawn(child) {
           spawned++;
           child.stdout?.on("data", (c: Buffer) => output.push(c.toString()));
