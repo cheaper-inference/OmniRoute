@@ -520,7 +520,14 @@ const externalAddress = Object.values(os.networkInterfaces())
 test(
   "a remote client of the panel port is reported by the address of its connection",
   { skip: externalAddress ? false : "no non-loopback IPv4 interface" },
-  async () => {
+  async (t) => {
+    // The expected header assumes no peer is trusted as a proxy.
+    const savedTrustProxy = process.env.OMNIROUTE_TRUST_PROXY;
+    process.env.OMNIROUTE_TRUST_PROXY = "none";
+    t.after(() => {
+      if (savedTrustProxy === undefined) delete process.env.OMNIROUTE_TRUST_PROXY;
+      else process.env.OMNIROUTE_TRUST_PROXY = savedTrustProxy;
+    });
     await withPanel(
       async ({ panelPort, seen }) => {
         await call(panelPort, "/quota/claude", {
