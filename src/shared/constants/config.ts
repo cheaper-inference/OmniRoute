@@ -71,6 +71,7 @@ export const PROVIDER_ENDPOINTS = {
   kenari: "https://kenari.id/v1/chat/completions",
   chenzk: "https://chenzk.top/v1/chat/completions",
   tokenmarket: "https://api.tokensmarket.ai/v1/chat/completions",
+  aigrow: "https://aigrow.gg/v1/chat/completions",
   demonroute: "https://api.demonroute.com/v1/chat/completions",
   daoxe: "https://api.daoxe.com/v1/chat/completions",
   gisoo: "https://gisoo.pro/api/v1/chat/completions",

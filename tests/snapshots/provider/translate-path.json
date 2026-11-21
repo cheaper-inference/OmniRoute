@@ -183,6 +183,29 @@
       "stream": "https://api.ai21.com/studio/v1/chat/completions"
     }
   },
+  "aigrow": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://aigrow.gg/v1/chat/completions",
+      "stream": "https://aigrow.gg/v1/chat/completions"
+    }
+  },
   "aihorde": {
     "format": "openai",
     "headers": {
