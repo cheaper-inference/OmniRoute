@@ -149,10 +149,11 @@ import {
   computeCompatRejectedTargets,
   deriveRequestCompatibilityRequirements,
   describeCapabilityFilterExhaustion,
-  filterTargetsByRequestCompatibility,
+  resolveTargetRequestCompatibility,
   partitionConfirmedVisionTargets,
   resolveComboTargets,
 } from "./comboStructure.ts";
+import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
 import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
@@ -185,7 +186,7 @@ export async function handleRoundRobinCombo({
   clientManagedResponsesContext: _clientManagedResponsesContext,
   deferContextOverflowWhenCompressible: _deferContextOverflowWhenCompressible = false,
   compressionExclusions: _compressionExclusions,
-  sourceFormat: _sourceFormat = null,
+  sourceFormat = null,
   endpointPath: _endpointPath = null,
   requestHeaders: _requestHeaders = null,
   relayOptions,
@@ -271,17 +272,15 @@ export async function handleRoundRobinCombo({
     (config as { compatFilterFailOpen?: unknown }).compatFilterFailOpen === true ||
     (settings as { compatFilterFailOpen?: unknown } | null | undefined)?.compatFilterFailOpen ===
       true;
-  let filteredTargets = filterTargetsByRequestCompatibility(
+  const compatibility = resolveTargetRequestCompatibility(
     evalRankedTargets,
     body,
     log,
     "Context-aware round-robin fallback",
     {
       failOpen: rrCompatFailOpen,
-      outputLimitAdvisory:
-        (config as { outputLimitAdvisory?: unknown }).outputLimitAdvisory === true ||
-        (settings as { outputLimitAdvisory?: unknown } | null | undefined)?.outputLimitAdvisory ===
-          true,
+      outputLimitAdvisory: resolveOutputLimitAdvisory(config, settings),
+      sourceFormat,
     }
   );
   // #6238: keep the targets the compat pre-filter rejected so they can serve as a
@@ -289,11 +288,11 @@ export async function handleRoundRobinCombo({
   // BEFORE availability is known; if every compat-kept target then turns out to be
   // runtime-unavailable, we must reconsider these before returning 503, instead of
   // permanently dropping a compat-rejected-but-healthy provider.
-  const compatRejectedTargets = computeCompatRejectedTargets(
-    evalRankedTargets,
-    filteredTargets,
-    body
-  );
+  // Automatic cap fallback is intentionally restricted to its safe subset.
+  let filteredTargets = compatibility.targets;
+  const compatRejectedTargets = compatibility.usedAutomaticOutputCapFallback
+    ? []
+    : computeCompatRejectedTargets(evalRankedTargets, filteredTargets, body);
   let modelCount = filteredTargets.length;
   if (modelCount === 0) {
     const exhaustion = describeCapabilityFilterExhaustion(

@@ -19,8 +19,10 @@ import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.t
 import { resolveResetWindowConfig } from "./quotaScoring.ts";
 import {
   deriveRequestCompatibilityRequirements,
-  filterTargetsByRequestCompatibility,
+  resolveTargetRequestCompatibility,
+  type RequestCompatibilityRequirements,
 } from "./comboStructure.ts";
+import { resolveOutputLimitAdvisory } from "./outputLimitPolicy.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { evaluateContextLimit } from "./contextOverrideGate.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
@@ -37,6 +39,8 @@ import { partitionJevTargets, type JevPartition } from "./jevEligibility.ts";
 export type JevBlockCheckerDeps = {
   body: Record<string, unknown>;
   config: Record<string, unknown> | null | undefined;
+  settings?: Record<string, unknown> | null;
+  sourceFormat?: string | null;
   resilienceSettings: ResilienceSettings;
   log: ComboLogger;
   isModelAvailable?: IsModelAvailable;
@@ -147,19 +151,24 @@ export async function partitionJevTargetsForAsk(
   const contextRequirements = (
     deps.config as { contextRequirements?: Parameters<typeof applyContextRequirements>[1] } | null
   )?.contextRequirements;
-  const compatibility = filterTargetsByRequestCompatibility(
+  const compatibility = resolveTargetRequestCompatibility(
     perTarget.eligible,
     deps.body,
     deps.log,
     "Jev pre-ask",
-    { failOpen: compatFailOpen }
+    {
+      failOpen: compatFailOpen,
+      outputLimitAdvisory: resolveOutputLimitAdvisory(deps.config, deps.settings),
+      sourceFormat: deps.sourceFormat,
+    }
   );
-  const compatibilityOrdered = preserveInputOrder(perTarget.eligible, compatibility);
+  const compatibilityOrdered = preserveInputOrder(perTarget.eligible, compatibility.targets);
   const compatibilityBlocks = getRemovedTargets(perTarget.eligible, compatibilityOrdered);
   const contextEligible = filterJevTargetsByHardRequestContext(
     compatibilityOrdered,
     deps.body,
-    deps.deferContextOverflowWhenCompressible
+    deps.deferContextOverflowWhenCompressible,
+    compatibility.contextRequirementsByTarget
   );
   const hardContextBlocks = getRemovedTargets(compatibilityOrdered, contextEligible).map(
     (item) => ({
@@ -197,7 +206,8 @@ export async function partitionJevTargetsForAsk(
 export function filterJevTargetsByHardRequestContext(
   targets: readonly ResolvedComboTarget[],
   body: Record<string, unknown>,
-  deferContextOverflowWhenCompressible = false
+  deferContextOverflowWhenCompressible = false,
+  contextRequirementsByTarget?: ReadonlyMap<ResolvedComboTarget, RequestCompatibilityRequirements>
 ): ResolvedComboTarget[] {
   if (deferContextOverflowWhenCompressible || targets.length < 2) return [...targets];
   const requirements = deriveRequestCompatibilityRequirements(body);
@@ -208,7 +218,8 @@ export function filterJevTargetsByHardRequestContext(
       provider: target.providerId || target.provider || null,
       model: target.modelStr,
     });
-    return evaluateContextLimit(capabilities, requirements, target.modelStr) !== false;
+    const targetRequirements = contextRequirementsByTarget?.get(target) ?? requirements;
+    return evaluateContextLimit(capabilities, targetRequirements, target.modelStr) !== false;
   });
   return fitting.length > 0 ? fitting : [...targets];
 }
