@@ -397,6 +397,8 @@ export function classifyQualityFailure(quality: ResponseQualityResult): {
 export function isRequestScopedUpstreamFailure(error?: {
   code?: string | null;
   type?: string | null;
+  /** Upstream HTTP status, when the caller has it. */
+  status?: number | string | null;
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
@@ -407,11 +409,17 @@ export function isRequestScopedUpstreamFailure(error?: {
   // sibling-account fallback can continue. Letting the generic type win here
   // stops rotation after the first such account and leaks its 401 to the client.
   if (CREDENTIAL_AUTH_ERROR_CODES.has(code)) return false;
+  // The code list cannot keep up: Codex also answers a revoked or closed session with
+  // `token_invalidated` / `token_revoked`, or with no code at all. When the caller knows the
+  // upstream status, a 401 is a credential rejection and the generic type must not make it
+  // request-scoped; it used to skip markAccountUnavailable, so every request kept landing on
+  // the dead account. Explicit request-scoped codes keep their meaning.
+  const credentialRejected = Number(error?.status) === 401;
 
   return (
     REQUEST_SCOPED_UPSTREAM_ERROR_CODES[code] === true ||
     isContentPolicyRefusal(error) ||
-    type === "invalid_request_error" ||
+    (type === "invalid_request_error" && !credentialRejected) ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
     type === "account_semaphore_capacity" ||
@@ -507,7 +515,7 @@ export function isComboRequestScopedFailure(
   return (
     isLocalModelPolicyResponse(response) ||
     getTrustedLocalRateLimitResponse(response) !== null ||
-    isRequestScopedUpstreamFailure(error) ||
+    isRequestScopedUpstreamFailure({ ...error, status: response.status }) ||
     (response.status === 404 && isResourceNotFoundResponse(errorText)) ||
     // #14313: body-only free-tier refusals (relayed sentence, no error.type kept).
     isOpencodeFreeTierRefusal(response.status, errorText) ||
@@ -620,7 +628,11 @@ export function shouldSkipConnDisable(
     // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
     // the same model attribution predicate as failure persistence; ordinary
     // invalid_request_error (including 400) remains request-scoped.
-    (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
+    (isRequestScopedUpstreamFailure({
+      code: result.errorCode,
+      type: result.errorType,
+      status: result.status,
+    }) &&
       !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
     // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.
