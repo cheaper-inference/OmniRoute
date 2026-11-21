@@ -14,6 +14,7 @@
 
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { invalidateQoderJobToken, resolveQoderJobToken } from "../qoderCli.ts";
+import { isQoderDeviceToken } from "../qoderCapabilities.ts";
 import { toRecord, toNumber, toTitleCase } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 
@@ -102,6 +103,13 @@ export async function getQoderUsage(apiKey?: string, providerSpecificData?: Json
   const token = (apiKey || "").trim() || String(providerSpecificData?.qoderPat || "").trim();
   if (!token) {
     return { message: "Qoder connected. Add a Personal Access Token to view quota." };
+  }
+  // #18737: device-code sign-in tokens are sign-in only; never send them to the usage API.
+  if (isQoderDeviceToken(token)) {
+    return {
+      message:
+        "Qoder account signed in (sign-in only). Usage needs a Personal Access Token; this account cannot serve chat yet.",
+    };
   }
 
   let jobToken: string;

@@ -69,6 +69,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "grok-cli",
   "muse-code",
   "workbuddy",
+  "qoder",
   // MiniMax Code: the account service issues a device code the user confirms
   // in the browser; the credential lands in the local MiniMax Code profile.
   "minimax-code",

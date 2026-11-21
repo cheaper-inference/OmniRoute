@@ -84,26 +84,30 @@ export const CODEX_CONFIG = {
   },
 };
 
-// Qoder OAuth Configuration (Authorization Code)
-const QODER_OAUTH_AUTHORIZE_URL = process.env.QODER_OAUTH_AUTHORIZE_URL || "";
-const QODER_OAUTH_TOKEN_URL = process.env.QODER_OAUTH_TOKEN_URL || "";
-const QODER_OAUTH_USERINFO_URL = process.env.QODER_OAUTH_USERINFO_URL || "";
-const QODER_OAUTH_CLIENT_ID = process.env.QODER_OAUTH_CLIENT_ID || "";
+// Qoder OAuth / Device Flow Configuration
+const QODER_DEVICE_AUTH_URL =
+  process.env.QODER_DEVICE_AUTH_URL || "https://qoder.com/device/selectAccounts";
+const QODER_DEVICE_POLL_URL =
+  process.env.QODER_DEVICE_POLL_URL || "https://center.qoder.sh/api/v1/deviceToken/poll";
+const QODER_DEVICE_REFRESH_URL =
+  process.env.QODER_DEVICE_REFRESH_URL || "https://center.qoder.sh/api/v1/deviceToken/refresh";
+const QODER_OAUTH_USERINFO_URL =
+  process.env.QODER_USERINFO_URL ||
+  process.env.QODER_OAUTH_USERINFO_URL ||
+  "https://center.qoder.sh/api/v1/userinfo";
+const QODER_OAUTH_CLIENT_ID = resolvePublicCred("qoder_id", "QODER_OAUTH_CLIENT_ID");
 const QODER_OAUTH_CLIENT_SECRET = process.env.QODER_OAUTH_CLIENT_SECRET || "";
-const QODER_OAUTH_ENABLED =
-  !!QODER_OAUTH_AUTHORIZE_URL &&
-  !!QODER_OAUTH_TOKEN_URL &&
-  !!QODER_OAUTH_USERINFO_URL &&
-  !!QODER_OAUTH_CLIENT_ID &&
-  !!QODER_OAUTH_CLIENT_SECRET;
 
 export const QODER_CONFIG = {
-  enabled: QODER_OAUTH_ENABLED,
+  enabled: true,
   clientId: QODER_OAUTH_CLIENT_ID,
   clientSecret: QODER_OAUTH_CLIENT_SECRET,
-  authorizeUrl: QODER_OAUTH_AUTHORIZE_URL,
-  tokenUrl: QODER_OAUTH_TOKEN_URL,
+  deviceAuthUrl: QODER_DEVICE_AUTH_URL,
+  pollUrl: QODER_DEVICE_POLL_URL,
+  refreshUrl: QODER_DEVICE_REFRESH_URL,
   userInfoUrl: QODER_OAUTH_USERINFO_URL,
+  authorizeUrl: QODER_DEVICE_AUTH_URL,
+  tokenUrl: QODER_DEVICE_REFRESH_URL,
   extraParams: {
     loginMethod: "phone",
     type: "phone",

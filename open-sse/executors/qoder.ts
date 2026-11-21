@@ -24,7 +24,13 @@ import {
   runQoderCli,
 } from "../services/qoderCli.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
-import { hasQoderCallerTools, resolveQoderAuthToken } from "../services/qoderCapabilities.ts";
+import {
+  hasQoderCallerTools,
+  isQoderSignInOnlyCredential,
+  QODER_SIGN_IN_ONLY_CODE,
+  QODER_SIGN_IN_ONLY_MESSAGE,
+  resolveQoderAuthToken,
+} from "../services/qoderCapabilities.ts";
 
 /** Retry hint sent with a 429 `qodercli_busy` (local queue full). */
 const QODER_CLI_BUSY_RETRY_AFTER_SECONDS = 5;
@@ -210,6 +216,23 @@ export class QoderExecutor extends BaseExecutor {
   }
 
   async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }: ExecuteInput) {
+    // #18737: device-code sign-in accounts (dt-/drt- tokens) are sign-in only.
+    // No supported Qoder endpoint accepts their token, and the HTTP path below
+    // would send it to DashScope as a Bearer credential. Refuse before any
+    // upstream call; the message is static so it can never echo the token.
+    if (isQoderSignInOnlyCredential(credentials)) {
+      return {
+        response: createQoderErrorResponse({
+          status: 400,
+          message: sanitizeErrorMessage(QODER_SIGN_IN_ONLY_MESSAGE),
+          code: QODER_SIGN_IN_ONLY_CODE,
+        }),
+        url: "qoder://sign-in-only",
+        headers: {},
+        transformedBody: body,
+      };
+    }
+
     const token = resolveQoderAuthToken(credentials);
 
     if (!token) {
@@ -254,7 +277,8 @@ export class QoderExecutor extends BaseExecutor {
       return this.executeViaQoderCli({ model: resolvedModel, body, stream, token, signal });
     }
 
-    // Non-PAT tokens (OAuth apiKey / DashScope key) → DashScope OpenAI-compatible API.
+    // Non-PAT tokens (DashScope API key) → DashScope OpenAI-compatible API.
+    // Device-flow tokens never reach this point (refused above).
     let mappedModel = resolvedModel;
     if (resolvedModel === "qwen3.5-plus" || resolvedModel === "qwen3.6-plus") {
       mappedModel = "coder-model";
