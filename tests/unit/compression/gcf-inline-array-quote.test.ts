@@ -17,8 +17,11 @@ test("needsQuote flags the inline-array pattern [..]:  (SPEC §2.4)", () => {
   assert.equal(needsQuote("ERR[404]: Not Found"), true);
   assert.equal(needsQuote("[Speaker 1]: Hello"), true);
   assert.equal(needsQuote("[1]: y"), true);
+  assert.equal(needsQuote("header[owner] section[group]  : text"), true);
+  assert.equal(needsQuote("header[[owner] : text"), true);
   // Must not over-trigger on innocuous brackets without the colon.
   assert.equal(needsQuote("arr[0] index"), false);
+  assert.equal(needsQuote("partial[owner"), false);
   assert.equal(needsQuote("plain value here"), false);
 });
 

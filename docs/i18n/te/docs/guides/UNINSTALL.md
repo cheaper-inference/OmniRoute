@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ఐచ్ఛికం) ఇమేజ్ను తొలగించండి
+docker rmi cheaperinference/omniroute:latest
+# పాత ఇన్స్టాల్లు లెగసీ పేరును తీసివేసాయి:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

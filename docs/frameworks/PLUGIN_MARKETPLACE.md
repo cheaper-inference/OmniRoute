@@ -92,18 +92,19 @@ All endpoints require management auth (`requireManagementAuth`) **and** are
 loopback-only — `/api/plugins` and `/api/plugins/` are listed in
 `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Method | Description                                         |
-| -------------------------------- | ------ | --------------------------------------------------- |
-| `/api/plugins`                   | GET    | List installed plugins (optional `?status=` filter) |
-| `/api/plugins`                   | POST   | Install a plugin from the plugin sources directory  |
-| `/api/plugins/scan`              | POST   | Scan the plugin directory and register new plugins  |
-| `/api/plugins/marketplace`       | GET    | List marketplace catalog entries                    |
-| `/api/plugins/[name]`            | GET    | Get installed plugin details                        |
-| `/api/plugins/[name]`            | DELETE | Uninstall a plugin                                  |
-| `/api/plugins/[name]/activate`   | POST   | Activate (load + register hooks)                    |
-| `/api/plugins/[name]/deactivate` | POST   | Deactivate (fire `onDeactivate`, unregister hooks)  |
-| `/api/plugins/[name]/config`     | GET    | Get plugin config + config schema                   |
-| `/api/plugins/[name]/config`     | PUT    | Update plugin config (validated against schema)     |
+| Endpoint                           | Method | Description                                         |
+| ---------------------------------- | ------ | --------------------------------------------------- |
+| `/api/plugins`                     | GET    | List installed plugins (optional `?status=` filter) |
+| `/api/plugins`                     | POST   | Install a plugin from the plugin sources directory  |
+| `/api/plugins/scan`                | POST   | Scan the plugin directory and register new plugins  |
+| `/api/plugins/marketplace`         | GET    | List marketplace catalog entries                    |
+| `/api/plugins/marketplace/install` | POST   | Install a marketplace plugin by name                |
+| `/api/plugins/[name]`              | GET    | Get installed plugin details                        |
+| `/api/plugins/[name]`              | DELETE | Uninstall a plugin                                  |
+| `/api/plugins/[name]/activate`     | POST   | Activate (load + register hooks)                    |
+| `/api/plugins/[name]/deactivate`   | POST   | Deactivate (fire `onDeactivate`, unregister hooks)  |
+| `/api/plugins/[name]/config`       | GET    | Get plugin config + config schema                   |
+| `/api/plugins/[name]/config`       | PUT    | Update plugin config (validated against schema)     |
 
 The `GET /api/plugins` `status` filter accepts one of
 `installed` / `active` / `inactive` / `error`. An invalid value returns `400`.
@@ -137,7 +138,8 @@ the response is `201` with the installed plugin row.
 
 Unlike the other plugin routes, this one requires the management credential (a
 dashboard session or a manage-scoped API key) even when login is disabled
-(`requireLogin=false`): installing code is never an anonymous action.
+(`requireLogin=false`): installing code is never an anonymous action. The same
+applies to `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Browse the marketplace
 
@@ -155,10 +157,13 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validates each provided value against the plugin's
-`configSchema` (declared in the manifest): `number` fields honor `min`/`max`,
-`select` fields must match the declared `enum`. Keys not present in the schema
-are allowed through.
+`PUT .../config` validates the body against the plugin's `configSchema`
+(declared in the manifest) with `validatePluginConfig()` from
+`src/lib/plugins/manifest.ts`: every key must be declared in the schema, values
+must match the declared type, `number` fields honor `min`/`max`, and `select`
+fields must match the declared `enum`. Any violation returns `400` and nothing is
+stored. A plugin that declares no `configSchema` has no configurable keys, so the
+request is refused with `400` ("Plugin does not declare any configurable keys").
 
 ## Configuration
 

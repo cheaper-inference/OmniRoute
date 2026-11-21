@@ -12,7 +12,8 @@
     "dryRun": "[Simulation] würde: {action}",
     "cancelled": "Abgebrochen.",
     "jsonOpt": "Ausgabe als JSON",
-    "yesOpt": "Bestätigung überspringen"
+    "yesOpt": "Bestätigung überspringen",
+    "positiveIntegerRequired": "Der Grenzwert muss eine positive ganze Zahl sein."
   },
   "setup": {
     "title": "OmniRoute-Einrichtung",

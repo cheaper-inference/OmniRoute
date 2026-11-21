@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Izbirno) Odstranite sliko
+docker rmi cheaperinference/omniroute:latest
+# Starejše namestitve so potegnile podedovano ime:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

@@ -4,10 +4,9 @@
 
 ---
 
-Az OmniRoute **párhuzamos ciklusú** kiadási modellt használ: az aktív ciklushoz egy külön `release/vX.Y.Z` ág tartozik, a `main` a közzétett kiadási vonal, a ciklus kiadásakor pedig egy módosíthatatlan `vX.Y.Z` címke készül. Teljesen megszokott, hogy commitok kerülnek a `release/*` ágakra _és_ a `main` ágra is — ez nem tévedés.
+OmniRoute a** párhuzamos ciklusú** kiadási modell: egy dedikált `release/vX.Y.Z` ág az aktív ciklushoz, `main` a közzétett sorhoz, és egy változtathatatlan `vX.Y.Z` címke a ciklus szállításakor. `release/*` _és_ a `main` en commits landolás láttán — várhatóan nem keveredés.
 
-A karbantartóknak szóló részletek a `CLAUDE.md` fájlban (21. szigorú szabály) és a
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) dokumentumban találhatók. Ez az oldal a közreműködőknek szóló nyilvános összefoglaló.
+A karbantartó részletei `CLAUDE.md` (Hard Rule #21) és [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) -ben élnek. Ez az oldal a nyilvános közreműködők számára készült összefoglaló.
 
 ## Rövid áttekintés
 
@@ -37,22 +36,23 @@ flowchart LR
 
 A `main` nem a napi integrációs ág. A `main` ágra nyitott PR-ok célágát általában módosítani kell az egyesítés előtt.
 
-## Kiadási befagyasztás (párhuzamos ciklusok)
+## A fagyasztás feloldása (párhuzamos ciklusok)
 
-Egy kiadás egyeztetésekor megnyitunk egy `release-freeze` címkével ellátott jelölő issue-t. Ez **nem állítja le a fejlesztést**:
+Egy kiadás egyeztetésekor megnyílik egy `release-freeze` címkével ellátott jelölő probléma. Hogy** nem állítja meg a fejlődést** :
 
-- A befagyasztott `release/vX.Y.Z` az adott kiadás kiadási felelőséhez tartozik.
-- A következő ciklus `release/vX+1` ága a befagyasztott csúcsból indul, így a közreműködők továbbra is egyesíthetik munkájukat.
-- Azoknak a nyitott PR-oknak, amelyek még mindig a befagyasztott ágat célozzák, a célágát **módosítani kell** az aktív (legmagasabb verziószámú) `release/v*` ágra.
+- A lefagyott `release/vX.Y.Z` a hajó kiszabadító kapitányáé.
+- A következő ciklus `release/vX+1` van vágva a fagyott hegyről, így a közreműködők folytatják a leszállási munkát.
+- Nyitott PRs, hogy még mindig cél a fagyott ág legyen** újracélozva** az aktív (legmagasabb) `release/v*` ágra.
 
-Mielőtt egy ágról azt feltételeznéd, hogy egyesíthető, ellenőrizd, van-e folyamatban kiadási befagyasztás:
+Ellenőrizze, hogy nincs-e nyitott lefagyás, mielőtt feltételezi, hogy a kívánt ág összevonható:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Az egyesítés működését (a tulajdonos által hozzáadott `queue` címke → Mergify) a
-[MERGE_TRAIN.md](./MERGE_TRAIN.md) dokumentálja.
+Az egyesítési mechanika (a tulajdonos `queue` címke → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) fájlban van dokumentálva.
+
+> **2026-11-19: Az összevonási sor megszűnt** (tulajdonos döntése). `.mergify.yml` már nem definiál sort, és visszautasítja az összevonási parancsokat, amelyek összevonják vagy átírják a lekérést. PRs kiadásokat kézzel egyesítik a „Zöld kapuk megkövetelése az aktív kiadáson” (`Gate / CI` + `Gate / Quality`) lerakatszabályzat szerint, amíg az omni-queue élő módban nem fut, majd az omni-queue-n keresztül ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). A `queue` címke már nem von össze semmit.
 
 ## Miért van szükség ágra és címkére is?
 

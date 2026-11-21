@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Pilihan) Singkirkan imej
+docker rmi cheaperinference/omniroute:latest
+# Pemasangan lama telah menarik nama lama:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Tùy chọn) Xóa ảnh
+docker rmi cheaperinference/omniroute:latest
+# Các bản cài đặt cũ hơn đã lấy tên cũ:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

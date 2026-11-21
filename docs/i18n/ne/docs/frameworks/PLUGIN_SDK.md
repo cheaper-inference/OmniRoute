@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-पूर्वनिर्धारित मानहरूसहित Plugin वस्तु सिर्जना गर्ने फ्याक्ट्री फङ्सन।
+पूर्वनिर्धारितसँग प्लगइन वस्तु सिर्जना गर्ने फ्याक्ट्री प्रकार्य।
 
 **प्यारामिटरहरू:**
 
-- `name` (string, आवश्यक) — kebab-case मा Plugin को नाम
-- `priority` (number, वैकल्पिक, पूर्वनिर्धारित: 100) — कम मान भएको पहिले चल्छ
-- `enabled` (boolean, वैकल्पिक, पूर्वनिर्धारित: true) — सक्षम अवस्थामा सुरु गर्ने?
-- `onRequest` (function, वैकल्पिक) — chat handler अघि चल्छ
-- `onResponse` (function, वैकल्पिक) — chat handler पछि चल्छ
-- `onError` (function, वैकल्पिक) — handler मा त्रुटि हुँदा चल्छ
+- `name` (स्ट्रिङ, आवश्यक) — प्लगइन नाम कबाब-केसमा
+- `priority` (नम्बर, वैकल्पिक, पूर्वनिर्धारित: 100) — तल्लो रन पहिले
+- `enabled` (बुलियन, ऐच्छिक, पूर्वनिर्धारित: सत्य) — सुरु सक्षम?
+- `onRequest` (कार्य, वैकल्पिक) — च्याट ह्यान्डलर अघि चल्छ
+- `onResponse` (कार्य, वैकल्पिक) — च्याट ह्यान्डलर पछि चल्छ
+- `onError` (प्रकार्य, वैकल्पिक) — ह्यान्डलर त्रुटिमा चल्छ
 
 ### `blockRequest(response?): BlockingHookResult`
 
-अनुरोध रोक्नुहोस् र वैकल्पिक रूपमा अनुकूलित प्रतिक्रिया फर्काउनुहोस्।
+अनुरोध रोक्नुहोस् र वैकल्पिक रूपमा अनुकूलन प्रतिक्रिया फर्काउनुहोस्।
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-प्रदायकसम्म पुग्नुअघि अनुरोधको body परिमार्जन गर्नुहोस्।
+प्रदायकमा पुग्नु अघि अनुरोध मुख्य भाग परिमार्जन गर्नुहोस्।
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-अनुरोधको context मा metadata संलग्न गर्नुहोस्।
+अनुरोध सन्दर्भमा मेटाडेटा संलग्न गर्नुहोस्।
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin Context (`PluginContext`)
+## प्लगइन सन्दर्भ (`PluginContext`)
 
-| फिल्ड       | प्रकार                    | विवरण                         |
-| ----------- | ------------------------- | ----------------------------- |
-| `requestId` | `string`                  | अनुरोधको अद्वितीय पहिचानकर्ता |
-| `model`     | `string`                  | अनुरोध गरिएको model को नाम    |
-| `provider`  | `string`                  | लक्षित provider ID            |
-| `body`      | `Record<string, unknown>` | अनुरोधको body                 |
-| `headers`   | `Record<string, string>`  | अनुरोधका headers              |
-| `metadata`  | `Record<string, unknown>` | परिवर्तन गर्न मिल्ने metadata |
-| `timestamp` | `number`                  | अनुरोधको timestamp            |
+| क्षेत्र      | टाइप गर्नुहोस्            | विवरण                                     |
+| ------------ | ------------------------- | ----------------------------------------- |
+| `requestId`  | `string`                  | अद्वितीय अनुरोध पहिचानकर्ता               |
+| `model`      | `string`                  | मोडेलको नाम अनुरोध गरियो                  |
+| `provider`   | `string`                  | लक्ष्य प्रदायक ID                         |
+| `body`       | `Record<string, unknown>` | शरीर अनुरोध गर्नुहोस्                     |
+| `headers`    | `Record<string, string>`  | हेडरहरू अनुरोध गर्नुहोस् (नोट हेर्नुहोस्) |
+| `metadata`   | `Record<string, unknown>` | परिवर्तनीय मेटाडेटा                       |
+| `timestamp`  | `number`                  | टाइमस्ट्याम्प अनुरोध गर्नुहोस्            |
+| `apiKeyInfo` | `object` (वैकल्पिक)       | API कुञ्जी मेटाडेटा (नोट हेर्नुहोस्)      |
+
+सन्दर्भले ग्राहकको प्रमाणहरू कहिल्यै बोक्दैन: `authorization`, `x-api-key`, `proxy-authorization` र `cookie` हेडरहरू हटाइन्छ (कुनै पनि आवरण), र `apiKeyInfo` कुञ्जीको मेटाडेटा (जस्तै `id`, `name` र `scopes`) राख्छ तर कुञ्जी मान वा यसको औंठाछाप `src/lib/plugins/hooks.ts` `redactPluginContext()` राख्दैन। यो `onRequest`, `onResponse` र `onError` मा लागू हुन्छ।
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Hooks लाई प्राथमिकतासहित कन्फिगर
 
 ## अनुमति प्रणाली
 
-प्लगइनहरू स्यान्डबक्स गरिएको VM सन्दर्भमा चल्छन्। बाह्य स्रोतहरूमा पहुँचका लागि स्पष्ट अनुमतिहरू आवश्यक हुन्छन्:
+प्लगइनहरू छन्** स्यान्डबक्स गरिएको छैन** । प्रत्येक सक्रिय प्लगइन एक अलग, साधारण Node.js बाल प्रक्रिया ( `src/lib/plugins/loader.ts` मा`loadPlugin()` ) को रूपमा OmniRoute समान अपरेटिङ-सिस्टम प्रयोगकर्ता अन्तर्गत चल्छ, कुनै VM सन्दर्भ र कुनै Node.js अनुमति झण्डाहरू बिना। प्लगइन कोडले `node:fs`, `node:child_process`, `fetch` र अन्य सबै Node.js API प्रयोग गर्न सक्छ: यसले OmniRoute प्रयोगकर्ताले (डेटा डाइरेक्टरी सहित), प्रोग्रामहरू चलाउन र नेटवर्कमा पुग्न सक्ने कुनै पनि फाइल पढ्न र लेख्न सक्छ।
 
-| अनुमति       | प्रदान गरिने पहुँच                                           |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | पढ्न-मात्र मिल्ने `process.env` प्रोक्सी                     |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+manifest को `requires.permissions` `network`, `file-read`, `file-write`, `env` र `exec` स्वीकार गर्छ, तर आज रनटाइममा `env` मात्र प्रभाव पार्छ:
 
-अनुमति नभएमा, सम्बन्धित ग्लोबलहरू स्यान्डबक्समा उपलब्ध हुँदैनन्।
+| अनुमति                                       | आज प्रभाव                                                                                                                                                                                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | प्लगइन प्रक्रियाले `PORT`, `HOSTNAME`, `TZ` र `TMPDIR` पनि प्राप्त गर्दछ। यो बिना, यसले `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` र `PLUGIN_NAME` (प्लस `SystemRoot` र `windir` मा Windows) मात्र प्राप्त गर्दछ। |
+| `network`, `file-read`, `file-write`, `exec` | कुनै पनि छैन। तिनीहरू केवल घोषणाहरू हुन्: तिनीहरू हराइरहेको बेला केही पनि रोकिएको छैन।                                                                                                                                                      |
+
+प्लगइन स्थापना गर्नु भनेको होस्टमा कुनै अन्य प्रोग्राम स्थापना गर्नु जस्तै हो। केवल प्लगइनहरू स्थापना गर्नुहोस् जसको स्रोत तपाईंले विश्वास गर्नुहुन्छ।
 
 ## कन्फिग स्किमा
 
@@ -194,7 +196,7 @@ Hooks लाई प्राथमिकतासहित कन्फिगर
 
 ## उदाहरणहरू
 
-### अनुरोध लगर
+### Logger अनुरोध गर्नुहोस्
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### दर सीमक
+### रेट लिमिटर
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // १ मिनेट
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,13 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({ error: "दर सीमा नाघियो", status: 429 });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### प्रतिक्रिया रूपान्तरणकर्ता
+### प्रतिक्रिया ट्रान्सफर्मर
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

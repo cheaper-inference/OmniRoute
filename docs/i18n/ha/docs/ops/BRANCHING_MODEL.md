@@ -42,25 +42,23 @@ flowchart LR
 `main` ba reshen haɗa ayyukan yau da kullum ba ne. PRs da aka buɗe zuwa `main`
 galibi suna buƙatar a sauya musu reshen da suke nufi kafin haɗawa.
 
-## Dakatar da fitarwa (zagayowar layi ɗaya)
+## Saki daskare (daidaitacce hawan keke)
 
-Lokacin da ake daidaita fitarwa, ana buɗe issue mai alamar `release-freeze`.
-Wannan **ba ya dakatar da ci gaba**:
+Lokacin da ake sulhunta sakin, ana buɗe fitowar alama mai alamar `release-freeze`. Wannan** baya daina cigaba** :
 
-- `release/vX.Y.Z` da aka daskarar mallakin jagoran fitarwar wannan sigar ne.
-- Ana ƙirƙirar `release/vX+1` na zagayowar gaba daga ƙarshen da aka daskarar domin masu ba da gudummawa su ci gaba da
-  shigar da ayyukansu.
-- Ya kamata a **sauya inda** PRs da suke har yanzu nufin reshen da aka daskarar
-  zuwa reshen `release/v*` da ake aiki a kai (mafi girma).
+- Daskararre `release/vX.Y.Z` na da kyaftin ɗin sakin na wancan jirgin.
+- Ana yanke `release/vX+1` na gaba mai zuwa daga titin daskararre don haka masu ba da gudummawa su ci gaba da aikin saukowa.
+- Buɗe PRs wanda har yanzu ya kamata ya kasance daskararre reshen** mayar da martani** zuwa reshen `release/v*` mai aiki (mafi girma).
 
-Bincika ko akwai freeze da yake buɗe kafin ka ɗauka cewa ana iya haɗawa cikin reshen da kake so:
+Bincika buɗaɗɗen daskare kafin ɗauka cewa reshen da kuke so yana haɗuwa:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-An bayyana tsarin haɗawa (alamar `queue` ta mai shi → Mergify) a cikin
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Haɗa makanikai (mai alamar `queue` → Mergify) an rubuta su a cikin [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: layin Mergify ya yi ritaya** (shawarar mai gida). `.mergify.yml` baya bayyana jerin gwano kuma ya ƙi umarnin Mergify waɗanda ke haɗa ko sake rubuta buƙatun ja. Ana haɗe PRs ta hannu da hannu ƙarƙashin ƙa'idodin ma'ajin "Bukatar kofofin kore akan sakin aiki" (`Gate / CI` + `Gate / Quality`) har sai omni-queue yana gudana cikin yanayin rayuwa, kuma ta hanyar layin-kowane bayan haka ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Alamar `queue` ba ta haɗa komai ba.
 
 ## Me ya sa ake da reshe da kuma alama?
 

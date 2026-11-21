@@ -27,13 +27,9 @@
 
 ---
 
-## ਤੁਰੰਤ ਚਲਾਓ
+## ਤੇਜ਼ ਦੌੜ
 
-> **ਇੱਕ ਕਮਾਂਡ ਨਾਲ ਖੁਦ ਹੋਸਟ ਕਰਨਾ ਹੈ?**
-> [ਸੈਲਫ਼-ਹੋਸਟ ਗਾਈਡ](../getting-started/SELF_HOST_GUIDE.md) ਵੇਖੋ —
-> `docker compose -f docker-compose.selfhost.yml up -d` (ਪ੍ਰਕਾਸ਼ਿਤ ਇਮੇਜ +
-> Redis, ਸਿਰਫ਼ ਲੂਪਬੈਕ, ਕੋਈ ਪ੍ਰੋਫ਼ਾਈਲ ਚੋਣ ਨਹੀਂ)। ਹੇਠਾਂ ਦਿੱਤਾ ਤੁਰੰਤ ਚਲਾਉਣ ਦਾ ਤਰੀਕਾ
-> ਉਹਨਾਂ ਵਰਤੋਂਕਾਰਾਂ ਲਈ ਸਿੰਗਲ-ਕੰਟੇਨਰ ਮਾਰਗ ਹੈ ਜੋ ਪਹਿਲਾਂ ਹੀ Redis ਨੂੰ ਕਿਸੇ ਹੋਰ ਥਾਂ ਚਲਾ ਰਹੇ ਹਨ।
+> **ਇੱਕ ਕਮਾਂਡ ਵਿੱਚ ਸਵੈ-ਹੋਸਟ?** [ਸਵੈ-ਹੋਸਟ ਗਾਈਡ](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (ਪ੍ਰਕਾਸ਼ਿਤ ਚਿੱਤਰ + Redis, ਲੂਪਬੈਕ-ਸਿਰਫ਼, ਕੋਈ ਪ੍ਰੋਫਾਈਲ ਵਿਕਲਪ ਨਹੀਂ) ਦੇਖੋ। ਹੇਠਾਂ ਦਿੱਤੀ ਤਤਕਾਲ ਰਨ ਉਹਨਾਂ ਉਪਭੋਗਤਾਵਾਂ ਲਈ ਸਿੰਗਲ-ਕੰਟੇਨਰ ਮਾਰਗ ਹੈ ਜੋ ਪਹਿਲਾਂ ਹੀ ਕਿਤੇ ਹੋਰ Redis ਚਲਾ ਰਹੇ ਹਨ।
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## ਇਨਵਾਇਰਨਮੈਂਟ ਫ਼ਾਈਲ ਨਾਲ
+## ਵਾਤਾਵਰਣ ਫਾਈਲ ਦੇ ਨਾਲ
 
 ```bash
-# ਪਹਿਲਾਂ .env ਨੂੰ ਕਾਪੀ ਅਤੇ ਸੋਧੋ
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 ਪ੍ਰੋਡ ਸਟੈਕ ਡਿਵੈਲਪਮੈਂਟ ਕੰਪੋਜ਼ ਦੇ ਸਮਾਂਤਰ ਚੱਲਦਾ ਹੈ (ਕੰਟੇਨਰਾਂ ਦੇ ਨਾਮ, ਪੋਰਟ ਅਤੇ ਵਾਲਿਊਮ ਵੱਖਰੇ ਹਨ), ਇਸ ਲਈ ਪ੍ਰੋਡਕਸ਼ਨ ਨੂੰ ਚਾਲੂ ਰੱਖਦੇ ਹੋਏ ਤੁਸੀਂ ਲੋਕਲ ਤੌਰ 'ਤੇ ਕੰਮ ਕਰਨਾ ਜਾਰੀ ਰੱਖ ਸਕਦੇ ਹੋ।
 
-## Dockerfile ਪੜਾਅ
+## ਡੌਕਰਫਾਈਲ ਪੜਾਅ
 
-ਰਿਪੋਜ਼ਟਰੀ ਵਿੱਚ ਇੱਕ ਬਹੁ-ਪੜਾਅ Dockerfile (`Dockerfile`) ਸ਼ਾਮਲ ਹੈ। ਚਾਰ ਪੜਾਅ ਉਪਲਬਧ ਹਨ; ਆਪਣੀ ਵਰਤੋਂ ਦੇ ਮਾਮਲੇ ਲਈ ਸਹੀ `target` ਚੁਣੋ।
+ਰਿਪੋਜ਼ਟਰੀ ਇੱਕ ਮਲਟੀ-ਸਟੇਜ ਡੌਕਰਫਾਈਲ (`Dockerfile`) ਭੇਜਦੀ ਹੈ। ਚਾਰ ਪੜਾਵਾਂ ਦਾ ਸਾਹਮਣਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; ਆਪਣੇ ਵਰਤੋਂ ਦੇ ਕੇਸ ਲਈ ਸਹੀ `target` ਚੁਣੋ।
 
-| ਪੜਾਅ          | ਬੇਸ ਇਮੇਜ              | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                         |
-| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | ਨਿਰਭਰਤਾਵਾਂ ਇੰਸਟਾਲ ਕਰਦਾ ਹੈ (`npm ci --legacy-peer-deps`) ਅਤੇ `npm run build` ਚਲਾਉਂਦਾ ਹੈ (ਮੂਲ ਰੂਪ ਵਿੱਚ Turbopack — ਹੇਠਾਂ ਬਿਲਡ-ਸਮੇਂ ਦੇ ਸਰੋਤ ਵੇਖੋ)                                                                                                                                                |
-| `runner-base` | `node:26-trixie-slim` | Next.js ਦੇ ਸਟੈਂਡਅਲੋਨ ਆਉਟਪੁੱਟ ਨਾਲ ਪ੍ਰੋਡਕਸ਼ਨ ਰਨਟਾਈਮ। **ਕੋਈ ਪ੍ਰੋਵਾਈਡਰ CLI ਸ਼ਾਮਲ ਨਹੀਂ ਹੈ।**                                                                                                                                                                                                       |
-| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` ਅਤੇ ਗਲੋਬਲ CLI ਜੋੜਦਾ ਹੈ: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`। **ਏਜੰਟ-ਅਧਾਰਿਤ ਵਰਕਫ਼ਲੋ ਲਈ ਇਹ ਚੁਣੋ।**                                                                                                                           |
-| `runner-web`  | `runner-base`         | ਵੈੱਬ-ਸੈਸ਼ਨ ਪ੍ਰੋਵਾਈਡਰਾਂ ਲਈ Playwright + ਇੱਕ Chromium ਬ੍ਰਾਊਜ਼ਰ (`--with-deps`) ਜੋੜਦਾ ਹੈ: `gemini-web`, `claude-web`, `claude-turnstile`। **ਜਦੋਂ ਤੁਸੀਂ ਇਹ ਪ੍ਰੋਵਾਈਡਰ ਵਰਤਦੇ ਹੋ ਤਾਂ ਇਹ ਚੁਣੋ** — ਇਸ ਤੋਂ ਬਿਨਾਂ ਸਧਾਰਨ ਇਮੇਜ ਬੇਨਤੀ ਦੇ ਸਮੇਂ ਅਸਫਲ ਹੋ ਜਾਂਦੀ ਹੈ (ਰਿਲੀਜ਼ ਚੈਨਲਾਂ ਹੇਠਾਂ ਦਿੱਤਾ `-web` ਨੋਟ ਵੇਖੋ)। |
+| ਸਟੇਜ          | ਬੇਸ ਚਿੱਤਰ             | ਮਕਸਦ                                                                                                                                                                                                                                                                                            |
+| ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | deps (`npm ci --legacy-peer-deps`) ਨੂੰ ਸਥਾਪਿਤ ਕਰਦਾ ਹੈ ਅਤੇ `npm run build` ਚਲਾਉਂਦਾ ਹੈ (Turbopack ਮੂਲ ਰੂਪ ਵਿੱਚ — ਹੇਠਾਂ ਬਿਲਡ-ਟਾਈਮ ਸਰੋਤ ਵੇਖੋ)                                                                                                                                                       |
+| `runner-base` | `node:26-trixie-slim` | Next.js ਸਟੈਂਡਅਲੋਨ ਆਉਟਪੁੱਟ ਦੇ ਨਾਲ ਉਤਪਾਦਨ ਰਨਟਾਈਮ।** ਕੋਈ ਪ੍ਰਦਾਤਾ CLIs ਬੰਡਲ ਨਹੀਂ ਹੈ।**                                                                                                                                                                                                              |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` ਅਤੇ ਗਲੋਬਲ CLIs ਜੋੜਦਾ ਹੈ: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** ਏਜੰਟਿਕ ਵਰਕਫਲੋ ਲਈ ਇਸਨੂੰ ਚੁਣੋ।**                                                                                                                               |
+| `runner-web`  | `runner-base`         | ਵੈੱਬ-ਸੈਸ਼ਨ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ Playwright + ਇੱਕ Chromium ਬ੍ਰਾਊਜ਼ਰ (`--with-deps`) ਜੋੜਦਾ ਹੈ: `gemini-web`, `claude-web`, `claude-turnstile`।** ਜਦੋਂ ਤੁਸੀਂ ਉਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋ ਤਾਂ ਇਸਨੂੰ ਚੁਣੋ** — ਸਾਦਾ ਚਿੱਤਰ ਬਿਨਾਂ ਬੇਨਤੀ ਦੇ ਸਮੇਂ ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ (ਰਿਲੀਜ਼ ਚੈਨਲਾਂ ਦੇ ਅਧੀਨ `-web` ਨੋਟ ਦੇਖੋ)। |
 
-ਕਿਸੇ ਖ਼ਾਸ ਟਾਰਗੇਟ ਨੂੰ ਹੱਥੀਂ ਬਿਲਡ ਕਰੋ:
+ਹੱਥੀਂ ਇੱਕ ਖਾਸ ਟੀਚਾ ਬਣਾਓ:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### ਬਿਲਡ-ਸਮੇਂ ਦੇ ਸਰੋਤ
+### ਬਿਲਡ-ਟਾਈਮ ਸਰੋਤ
 
-ਤਿੰਨ ਬਿਲਡ ਆਰਗੂਮੈਂਟ ਇਹ ਨਿਯੰਤਰਿਤ ਕਰਦੇ ਹਨ ਕਿ `builder` ਪੜਾਅ ਕਿੰਨੇ ਸਰੋਤ ਵਰਤਦਾ ਹੈ। ਇਹ ਸਿਰਫ਼ ਬਿਲਡ ਸਮੇਂ ਲਈ ਹਨ —
-`OMNIROUTE_MEMORY_MB` (ਹੇਠਾਂ) ਇੱਕ ਵੱਖਰੀ ਰਨਟਾਈਮ ਸੈਟਿੰਗ ਹੈ।
+ਤਿੰਨ ਬਿਲਡ ਆਰਗਸ ਨਿਯੰਤਰਿਤ ਕਰਦੇ ਹਨ ਕਿ `builder` ਪੜਾਅ ਦੀ ਕੀਮਤ ਕਿੰਨੀ ਹੈ। ਉਹ ਬਿਲਡ-ਟਾਈਮ ਹਨ ਸਿਰਫ — `OMNIROUTE_MEMORY_MB` (ਹੇਠਾਂ) ਇੱਕ ਵੱਖਰਾ, ਰਨਟਾਈਮ ਨੌਬ ਹੈ।
 
-| ਬਿਲਡ ਆਰਗੂਮੈਂਟ               | ਮੂਲ ਮੁੱਲ | ਪ੍ਰਭਾਵ                                                                                               |
-| --------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` webpack ਨਾਲ ਬਿਲਡ ਕਰਦਾ ਹੈ: ਘੱਟ ਅਧਿਕਤਮ ਮੈਮੋਰੀ, ਪਰ ਹੌਲੀ। `1` Turbopack ਦੀ ਵਰਤੋਂ ਚੁਣਦਾ ਹੈ।           |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | ਸ਼ੁਰੂ ਕੀਤੇ `next build` ਲਈ V8 ਹੀਪ ਸੀਮਾ (`--max-old-space-size`)।                                     |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`      | `CIRCLE_NODE_TOTAL` ਨੂੰ ਮੁੱਲ ਦਿੰਦਾ ਹੈ; Next ਪੇਜ-ਡਾਟਾ ਇਕੱਠਾ ਕਰਨ ਲਈ `workers = N - 1` ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ। |
+| ਆਰਗ ਬਣਾਓ                    | ਡਿਫਾਲਟ | ਪ੍ਰਭਾਵ                                                                                 |
+| --------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` ਵੈੱਬਪੈਕ ਨਾਲ ਬਣਾਉਂਦਾ ਹੈ: ਲੋਅਰ ਪੀਕ ਮੈਮੋਰੀ, ਹੌਲੀ। `1` Turbopack ਦੀ ਚੋਣ ਕਰਦਾ ਹੈ।       |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | ਪੈਦਾ ਹੋਏ `next build` ਲਈ V8 ਹੀਪ ਸੀਲਿੰਗ (`--max-old-space-size`)।                       |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | ਫੀਡ `CIRCLE_NODE_TOTAL`; ਅਗਲਾ ਪੰਨਾ-ਡਾਟਾ ਇਕੱਠਾ ਕਰਨ ਲਈ `workers = N - 1` ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ। |
 
-ਵੱਡੇ ਬਿਲਡਰ ਉੱਤੇ `OMNIROUTE_BUILD_WORKERS` ਨੂੰ ਵਧਾਉਣਾ ਚਾਹੀਦਾ ਹੈ ਅਤੇ ਜਦੋਂ
-ਸੀਮਤ ਸਰੋਤਾਂ ਵਾਲਾ ਬਿਲਡ `✓ Compiled successfully` **ਤੋਂ ਬਾਅਦ** ਬੰਦ ਹੋ ਜਾਵੇ, ਤਾਂ ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਇਸੇ ਉੱਤੇ
-ਸ਼ੱਕ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ। ਹਰ ਪੇਜ-ਡਾਟਾ ਵਰਕਰ ਆਪਣੀ ਵੱਖਰੀ ਪ੍ਰਕਿਰਿਆ ਹੈ, ਅਤੇ ਮੂਲ `next build` ਵੀ
-ਆਪਣੀ ਵੱਖਰੀ ਪ੍ਰਕਿਰਿਆ ਹੈ; ਇੱਕ ਲਾਈਵ VPS ਪੁਨਰ-ਨਿਰਮਾਣ (ਮੁੱਦਾ #7518) ਵਿੱਚ ਹਰ ਪ੍ਰਕਿਰਿਆ ਦਾ ਅਧਿਕਤਮ RSS
-~4.5 GB ਮਾਪਿਆ ਗਿਆ, ਜੋ `NODE_OPTIONS` ਹੀਪ ਫਲੈਗ ਤੋਂ ਸੁਤੰਤਰ ਸੀ (Turbopack, V8 ਹੀਪ ਤੋਂ ਬਾਹਰ
-ਨੇਟਿਵ/Rust ਮੈਮੋਰੀ ਵਿੱਚ ਕੰਪਾਇਲ ਕਰਦਾ ਹੈ)। `2` ਦਾ ਮੂਲ ਮੁੱਲ (→ 1 ਵਰਕਰ, ਕੁੱਲ 2
-ਪ੍ਰਕਿਰਿਆਵਾਂ) ਉਹਨਾਂ 16 GB / 4 vCPU GitHub-ਹੋਸਟ ਕੀਤੇ ਰਨਰਾਂ ਲਈ ਨਿਰਧਾਰਤ ਕੀਤਾ ਗਿਆ ਹੈ, ਜਿਨ੍ਹਾਂ ਨੂੰ
-ਪਬਲਿਸ਼ ਪਾਈਪਲਾਈਨ ਵਰਤਦੀ ਹੈ। `8` ਉੱਤੇ (→ 7 ਵਰਕਰ) ਉਸ ਰਨਰ ਦੀ ਮੈਮੋਰੀ ਖ਼ਤਮ ਹੋ ਗਈ ਅਤੇ
-buildkit ਨੇ `ResourceExhausted: ... cannot allocate memory` ਨਾਲ ਪੜਾਅ ਅਸਫਲ ਕਰ ਦਿੱਤਾ;
-ਜਦੋਂ ਪ੍ਰਤੀ-ਪ੍ਰਕਿਰਿਆ RSS ਦਾ ਅਨੁਮਾਨ ਲਗਾਉਣ ਦੀ ਬਜਾਏ ਸਿੱਧਾ ਮਾਪਿਆ ਗਿਆ, ਤਾਂ `3` (→ 2 ਵਰਕਰ) ਵੀ ਫਿੱਟ ਨਹੀਂ ਹੋਇਆ।
-`tests/unit/docker-build-memory-budget.test.ts`
-ਮਾਪੇ ਗਏ ਅੰਕੜੇ ਦੇ ਆਧਾਰ 'ਤੇ ਗਣਨਾ ਕਰਦਾ ਹੈ ਅਤੇ ਜੇਕਰ ਕੋਈ ਵੀ ਸੈਟਿੰਗ
-ਰਨਰ ਦੀ ਸਮਰੱਥਾ ਤੋਂ ਵੱਧ ਜਾਂਦੀ ਹੈ, ਤਾਂ ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ।
+`OMNIROUTE_BUILD_WORKERS` ਉਹ ਹੈ ਜੋ ਇੱਕ ਵੱਡੇ ਬਿਲਡਰ 'ਤੇ ਉਠਾਉਣਾ ਹੈ ਅਤੇ ਜਦੋਂ ਇੱਕ ਅੜਚਨ ਵਾਲੇ ਬਿਲਡ ਦੇ ਮਰਨ 'ਤੇ ਸ਼ੱਕ ਕਰਨਾ ਹੈ** ਬਾਅਦ** `✓ Compiled successfully` ਹਰੇਕ ਪੇਜ-ਡਾਟਾ ਵਰਕਰ ਦੀ ਆਪਣੀ ਪ੍ਰਕਿਰਿਆ ਹੈ, ਅਤੇ ਇਸੇ ਤਰ੍ਹਾਂ ਪੇਰੈਂਟ `next build` ਵੀ ਹੈ; ਇੱਕ ਲਾਈਵ VPS ਰੀਪ੍ਰੋਡਕਸ਼ਨ (ਇਸ਼ੂ #7518) ਨੇ ਹਰੇਕ ਪ੍ਰਕਿਰਿਆ ਦੇ ਪੀਕ RSS ~ 4.5 GB 'ਤੇ `NODE_OPTIONS` ਹੀਪ ਫਲੈਗ ਤੋਂ ਸੁਤੰਤਰ ਮਾਪਿਆ (Turbopack V8 ਹੀਪ ਦੇ ਬਾਹਰ native/Rust ਮੈਮੋਰੀ ਵਿੱਚ ਕੰਪਾਈਲ ਕਰਦਾ ਹੈ)। `2` (→ 1 ਵਰਕਰ, ਕੁੱਲ 2 ਪ੍ਰਕਿਰਿਆਵਾਂ) ਦਾ ਆਕਾਰ 16 GB / 4 vCPU GitHub-ਹੋਸਟਡ ਦੌੜਾਕਾਂ ਲਈ ਹੈ ਜੋ ਪਬਲਿਸ਼ ਪਾਈਪਲਾਈਨ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ। `8` (→ 7 ਵਰਕਰ) 'ਤੇ ਉਸ ਦੌੜਾਕ ਦੀ ਮੈਮੋਰੀ ਖਤਮ ਹੋ ਗਈ ਅਤੇ ਬਿਲਡਕਿੱਟ `ResourceExhausted: ... cannot allocate memory` ਨਾਲ ਕਦਮ ਨੂੰ ਅਸਫਲ ਕਰ ਦਿੱਤਾ; `3` (→ 2 ਵਰਕਰ) ਅਜੇ ਵੀ ਫਿੱਟ ਨਹੀਂ ਹੋਏ ਜਦੋਂ ਪ੍ਰਤੀ-ਪ੍ਰਕਿਰਿਆ RSS ਅਨੁਮਾਨ ਦੀ ਬਜਾਏ ਸਿੱਧੇ ਮਾਪਿਆ ਗਿਆ ਸੀ। `tests/unit/docker-build-memory-budget.test.ts` ਮਾਪੇ ਗਏ ਅੰਕੜੇ ਦੇ ਵਿਰੁੱਧ ਗਣਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ ਜੇਕਰ ਕੋਈ ਨੋਬ ਦੌੜਾਕ ਨੂੰ ਪਛਾੜ ਦਿੰਦਾ ਹੈ।
 
-Turbopack ਨੇਟਿਵ Rust ਮੈਮੋਰੀ ਵਿੱਚ ਕੰਪਾਇਲ ਕਰਦਾ ਹੈ, ਜੋ V8 ਹੀਪ ਦੇ **ਬਾਹਰ** ਰਹਿੰਦੀ ਹੈ, ਇਸ ਲਈ
-`OMNIROUTE_BUILD_MEMORY_MB` ਇਸ ਨੂੰ ਸੀਮਿਤ ਨਹੀਂ ਕਰਦਾ। ਮੈਮੋਰੀ ਸੀਮਾ ਵਾਲੇ ਹੋਸਟ ਉੱਤੇ
-OOM killer ਫਿਰ ਬਿਨਾਂ ਕਿਸੇ ਗਲਤੀ-ਸੁਨੇਹੇ ਦੇ SIGKILL ਰਾਹੀਂ ਬਿਲਡ ਨੂੰ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ — ਇਹ ਸਿਰਫ਼
-`Creating an optimized production build` ਦੇ ਵਿਚਕਾਰ ਰੁਕ ਜਾਂਦਾ ਹੈ, ਜੋ
-ਮੈਮੋਰੀ ਖ਼ਤਮ ਹੋਣ ਦੀ ਬਜਾਏ ਅਟਕਣ ਵਰਗਾ ਲੱਗਦਾ ਹੈ। ਇਸੇ ਲਈ `Dockerfile` ਦਾ ਮੂਲ ਵਿਕਲਪ webpack
-(`OMNIROUTE_USE_TURBOPACK=0`) ਹੈ, ਜਦਕਿ `npm run dev` / `npm run build` ਵਿੱਚ
-ਕੋਡ ਦਾ ਮੂਲ ਵਿਕਲਪ Turbopack ਹੈ: ਬਿਨਾਂ ਕਿਸੇ ਬਿਲਡ ਆਰਗੂਮੈਂਟ ਦੇ ਸਧਾਰਨ `docker build .` (ਜੋ
-Railway ਅਤੇ ਹੋਰ ਇੱਕ-ਕਲਿੱਕ ਹੋਸਟ ਚਲਾਉਂਦੇ ਹਨ) ਨੂੰ ਮੈਮੋਰੀ-ਸੀਮਤ ਬਿਲਡਰ ਉੱਤੇ ਚੁੱਪਚਾਪ ਬੰਦ ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ।
-ਪ੍ਰਕਾਸ਼ਿਤ ਇਮੇਜਾਂ ਪਹਿਲਾਂ ਹੀ `docker-publish.yml` ਵਿੱਚ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ
-`OMNIROUTE_USE_TURBOPACK=0` ਪਾਸ ਕਰਦੀਆਂ ਹਨ। ਵੱਧ RAM ਵਾਲੇ ਬਿਲਡਰ ਉੱਤੇ ਤੇਜ਼ ਬਿਲਡ ਲਈ
-Turbopack ਚੁਣੋ:
+Turbopack ਨੇਟਿਵ ਰਸਟ ਮੈਮੋਰੀ ਵਿੱਚ ਕੰਪਾਈਲ ਕਰਦਾ ਹੈ ਜੋ ਰਹਿੰਦੀ ਹੈ** ਬਾਹਰ** V8 ਹੀਪ, ਇਸਲਈ `OMNIROUTE_BUILD_MEMORY_MB` ਇਸ ਨੂੰ ਬੰਨ੍ਹਦਾ ਨਹੀਂ ਹੈ। ਮੈਮੋਰੀ ਸੀਲਿੰਗ ਵਾਲੇ ਹੋਸਟ 'ਤੇ ਬਿਲਡ ਨੂੰ OOM ਕਿਲਰ ਦੁਆਰਾ SIGKILLed ਹੈ, ਬਿਨਾਂ ਕਿਸੇ ਗਲਤੀ ਦੇ ਟੈਕਸਟ ਦੇ — ਇਹ ਬਸ ਮੱਧ-`Creating an optimized production build` ਨੂੰ ਰੋਕਦਾ ਹੈ, ਜੋ ਕਿ ਮੈਮੋਰੀ ਤੋਂ ਬਾਹਰ ਹੋਣ ਦੀ ਬਜਾਏ ਹੈਂਗ ਵਾਂਗ ਪੜ੍ਹਦਾ ਹੈ। ਇਹੀ ਕਾਰਨ ਹੈ ਕਿ `Dockerfile` /`OMNIROUTE_USE_TURBOPACK=0` ਦੇ ਉਲਟ, `npm run dev` / `npm run build` ਦੇ ਉਲਟ, ਜਿੱਥੇ Turbopack ਕੋਡ ਡਿਫੌਲਟ ਹੈ: ਇੱਕ ਬੇਅਰ `docker build .` ਬਿਨਾਂ ਬਿਲਡ ਆਰਗਸ (ਜੋ ਰੇਲਵੇ ਅਤੇ ਹੋਰ ਇੱਕ-ਕਲਿੱਕ ਹੋਸਟ ਚਲਾਉਂਦੇ ਹਨ) ਇੱਕ ਮੈਮੋਰੀ-ਕੈਪਡ ਬਿਲਡਰ 'ਤੇ ਚੁੱਪ-ਚਾਪ ਨਹੀਂ ਮਰਨਾ ਚਾਹੀਦਾ। ਪ੍ਰਕਾਸ਼ਿਤ ਚਿੱਤਰ ਪਹਿਲਾਂ ਹੀ `docker-publish.yml` ਵਿੱਚ ਸਪੱਸ਼ਟ ਤੌਰ 'ਤੇ `OMNIROUTE_USE_TURBOPACK=0` ਪਾਸ ਕਰਦੇ ਹਨ। ਬਹੁਤ ਸਾਰੇ RAM ਵਾਲੇ ਬਿਲਡਰ 'ਤੇ, ਇੱਕ ਤੇਜ਼ ਬਿਲਡ ਲਈ Turbopack ਦੀ ਚੋਣ ਕਰੋ:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` ਸਮਰੱਥ ਹੈ, ਇਸ ਲਈ `next build` ਇੱਕ ਮੂਲ **ਅਤੇ** ਇੱਕ ਵਰਕਰ
-ਪ੍ਰਕਿਰਿਆ ਚਲਾਉਂਦਾ ਹੈ ਅਤੇ ਹਰੇਕ ਵੱਖਰੇ ਤੌਰ 'ਤੇ `OMNIROUTE_BUILD_MEMORY_MB` ਦੀ ਪਾਲਣਾ ਕਰਦੀ ਹੈ। ਕੰਟੇਨਰ ਦੀ
-ਸੀਮਾ ਨੂੰ ਇਸ ਮੁੱਲ ਦੇ ਲਗਭਗ ਦੁੱਗਣੇ ਤੋਂ ਵੱਧ ਰੱਖੋ, ਨਾ ਕਿ ਸਿਰਫ਼ ਇੱਕ ਗੁਣਾ।
+`webpackBuildWorker` ਸਮਰਥਿਤ ਹੈ, ਇਸਲਈ `next build` ਇੱਕ ਮਾਤਾ ਜਾਂ ਪਿਤਾ ਨੂੰ ਚਲਾਉਂਦਾ ਹੈ** ਅਤੇ** ਇੱਕ ਵਰਕਰ ਪ੍ਰਕਿਰਿਆ ਅਤੇ ਹਰ ਇੱਕ ਵੱਖਰੇ ਤੌਰ 'ਤੇ `OMNIROUTE_BUILD_MEMORY_MB` ਦਾ ਸਨਮਾਨ ਕਰਦਾ ਹੈ। ਕੰਟੇਨਰ ਦੀ ਛੱਤ ਦਾ ਆਕਾਰ ਉਸ ਮੁੱਲ ਤੋਂ ਲਗਭਗ ਦੁੱਗਣਾ ਕਰੋ, ਇੱਕ ਵਾਰ ਨਹੀਂ।
 
-ਇਸ ਟ੍ਰੀ ਉੱਤੇ ਮਾਪਿਆ ਗਿਆ (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+ਇਸ ਰੁੱਖ 'ਤੇ ਮਾਪਿਆ (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| ਬੰਡਲਰ     | ਕੰਟੇਨਰ ਸੀਮਾ    | ਨਤੀਜਾ                                     |
-| --------- | -------------- | ----------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | ਦੋਵਾਂ ਉੱਤੇ OOM ਦੁਆਰਾ ਚੁੱਪਚਾਪ ਬੰਦ ਕੀਤਾ ਗਿਆ |
-| webpack   | 8 GiB          | ਬਿਲਡ ਵਰਕਰ ਨੂੰ SIGKILL ਰਾਹੀਂ ਬੰਦ ਕੀਤਾ ਗਿਆ  |
-| webpack   | 12 GiB         | ਸਫਲ, ਅਧਿਕਤਮ ਵਰਤੋਂ 11.1 GiB ਰਹੀ            |
+| ਬੰਡਲਰ     | ਕੰਟੇਨਰ ਦੀ ਛੱਤ  | ਨਤੀਜਾ                                    |
+| --------- | -------------- | ---------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB | ਊਮ-ਦੋਹਾਂ 'ਤੇ ਮਾਰਿਆ, ਚੁੱਪਚਾਪ              |
+| ਵੈਬਪੈਕ    | 8 GiB          | ਵਰਕਰ SIGKILLed ਬਣਾਓ                      |
+| ਵੈਬਪੈਕ    | 12 GiB         | ਸਫਲ ਰਿਹਾ, 11.1 GiB ਤੇ ਸਿਖਰ 'ਤੇ ਪਹੁੰਚ ਗਿਆ |
 
-### ਰਨਟਾਈਮ ਦੇ ਮੂਲ ਮੁੱਲ
+### ਰਨਟਾਈਮ ਪੂਰਵ-ਨਿਰਧਾਰਤ
 
-`runner-base` ਵੱਲੋਂ ਐਕਸਪੋਰਟ ਕੀਤੇ ਮੂਲ ਮੁੱਲ: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`।
+`runner-base` ਦੁਆਰਾ ਨਿਰਯਾਤ ਕੀਤੇ ਡਿਫੌਲਟ : `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Docker ਵਿੱਚ ਮੈਮੋਰੀ ਦਾ ਵਿਹਾਰ:
+Docker ਵਿੱਚ ਮੈਮੋਰੀ ਵਿਵਹਾਰ:
 
-- ਇਮੇਜ `OMNIROUTE_MEMORY_MB=1024` ਸੈੱਟ ਕਰਦੀ ਹੈ ਅਤੇ ਇਸ ਤੋਂ `NODE_OPTIONS=--max-old-space-size=1024` ਨਿਰਧਾਰਤ ਕਰਦੀ ਹੈ।
-- ਅਸਲ ਸਰਵਰ ਪ੍ਰਕਿਰਿਆ standalone launcher ਦੁਆਰਾ ਸ਼ੁਰੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਜੋ `OMNIROUTE_MEMORY_MB` ਨੂੰ ਪੜ੍ਹਦਾ ਹੈ ਅਤੇ `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ਜੋੜਦਾ ਹੈ।
-- Node ਦੁਹਰਾਏ ਗਏ `--max-old-space-size` ਦਾ ਆਖਰੀ ਮੁੱਲ ਵਰਤਦਾ ਹੈ, ਇਸ ਲਈ `OMNIROUTE_MEMORY_MB` ਸੈੱਟ ਕਰਨਾ ਪ੍ਰਭਾਵਸ਼ਾਲੀ Docker heap ਸੀਮਾ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ।
-- ਕਿਉਂਕਿ ਇਮੇਜ ਇਸਨੂੰ ਹਮੇਸ਼ਾ ਸੈੱਟ ਕਰਦੀ ਹੈ, launcher ਦਾ ਆਪਣਾ RAM-ਅਨੁਸਾਰ ਕੈਲੀਬਰੇਟ ਕੀਤਾ fallback Docker ਅਧੀਨ ਕਦੇ ਲਾਗੂ ਨਹੀਂ ਹੁੰਦਾ। ਵਰਕਲੋਡ ਲਈ ਇਸਨੂੰ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਵਧਾਓ (ਹੇਠਾਂ ਦਿੱਤੀ ਸਾਰਣੀ)। coding-agent `/v1/responses` ਲਈ `2048` ਅਜੇ ਵੀ ਬਹੁਤ ਘੱਟ ਹੈ।
+- ਚਿੱਤਰ `OMNIROUTE_MEMORY_MB=1024` ਸੈੱਟ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸ ਤੋਂ `NODE_OPTIONS=--max-old-space-size=1024` ਲਿਆ ਜਾਂਦਾ ਹੈ।
+- ਅਸਲ ਸਰਵਰ ਪ੍ਰਕਿਰਿਆ ਸਟੈਂਡਅਲੋਨ ਲਾਂਚਰ ਦੁਆਰਾ ਸ਼ੁਰੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਜੋ `OMNIROUTE_MEMORY_MB` ਪੜ੍ਹਦਾ ਹੈ ਅਤੇ `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ਜੋੜਦਾ ਹੈ।
+- ਨੋਡ ਆਖਰੀ ਵਾਰ ਦੁਹਰਾਇਆ ਗਿਆ `--max-old-space-size` ਮੁੱਲ ਵਰਤਦਾ ਹੈ, ਇਸਲਈ `OMNIROUTE_MEMORY_MB` ਸੈੱਟ ਕਰਨਾ ਪ੍ਰਭਾਵਸ਼ਾਲੀ Docker ਹੀਪ ਸੀਮਾ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ।
+- ਕਿਉਂਕਿ ਚਿੱਤਰ ਹਮੇਸ਼ਾ ਇਸਨੂੰ ਸੈੱਟ ਕਰਦਾ ਹੈ, ਲਾਂਚਰ ਦਾ ਆਪਣਾ ਰੈਮ-ਕੈਲੀਬਰੇਟਿਡ ਫਾਲਬੈਕ ਕਦੇ ਵੀ Docker ਦੇ ਅਧੀਨ ਲਾਗੂ ਨਹੀਂ ਹੁੰਦਾ। ਵਰਕਲੋਡ (ਹੇਠਾਂ ਦਿੱਤੀ ਸਾਰਣੀ) ਲਈ ਇਸਨੂੰ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਵਧਾਓ। `2048` ਅਜੇ ਵੀ ਕੋਡਿੰਗ-ਏਜੰਟ `/v1/responses` ਲਈ ਬਹੁਤ ਛੋਟਾ ਹੈ।
 
 ### ਕੋਡਿੰਗ ਏਜੰਟਾਂ ਲਈ ਰਨਟਾਈਮ RAM
 
-1 GiB Docker ਡਿਫਾਲਟ dashboard/ਹਲਕੀ-chat ਲਈ ਘੱਟੋ-ਘੱਟ ਸੀਮਾ ਹੈ, production ਆਕਾਰ ਨਹੀਂ। ਲੰਬੀਆਂ `POST /v1/responses` ਬਾਡੀਆਂ (ਸੈਂਕੜੇ ਸੁਨੇਹੇ, ਦਰਜਨਾਂ ਟੂਲ) compression ਦੌਰਾਨ ਕਈ in-memory graphs ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੀਆਂ ਹਨ। ਇੱਕੋ ਸਮੇਂ ਚੱਲ ਰਹੀਆਂ ਲਗਭਗ 3 MiB / ਲਗਭਗ 750k-token ਦੀਆਂ ਦੋ overlapping ਬੇਨਤੀਆਂ ਨੇ **12 GiB** old-space 'ਤੇ V8 ਨੂੰ ਰੋਕ ਦਿੱਤਾ ਹੈ (`FATAL ERROR: Reached heap limit`) ਅਤੇ 16 GiB cgroup OOM ਸੀਮਾ ਨੂੰ ਵੀ ਛੂਹਿਆ ਹੈ। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ਵੇਖੋ।
+1 GiB Docker ਡਿਫੌਲਟ ਇੱਕ dashboard/light-chat ਫਲੋਰ ਹੈ, ਉਤਪਾਦਨ ਦਾ ਆਕਾਰ ਨਹੀਂ। ਲੰਬੀਆਂ `POST /v1/responses` ਬਾਡੀਜ਼ (ਸੈਂਕੜੇ ਸੁਨੇਹੇ, ਦਸਾਂ ਟੂਲ) ਕੰਪਰੈਸ਼ਨ ਦੌਰਾਨ ਕਈ ਇਨ-ਮੈਮੋਰੀ ਗ੍ਰਾਫ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ। ਦੋ ਓਵਰਲੈਪਿੰਗ ~ 3 MiB / ~ 750k-ਟੋਕਨ ਬੇਨਤੀਆਂ ਨੇ ਇੱਕ 'ਤੇ V8 ਨੂੰ ਰੱਦ ਕਰ ਦਿੱਤਾ ਹੈ** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ਅਤੇ ਇੱਕ 16 GiB cgroup OOM ਵੀ ਮਾਰਿਆ। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ਵੇਖੋ.
 
-**cgroup `--memory` ਦਾ ਆਕਾਰ heap ਤੋਂ ਵੱਧ ਰੱਖੋ** — native buffers, SQLite, ਅਤੇ compression intermediates V8 ਤੋਂ ਬਾਹਰ ਰਹਿੰਦੇ ਹਨ।
+ਆਕਾਰ** cgroup `--memory` ਢੇਰ ਦੇ ਉੱਪਰ** — ਨੇਟਿਵ ਬਫਰ, SQLite, ਅਤੇ ਕੰਪਰੈਸ਼ਨ ਇੰਟਰਮੀਡੀਏਟ V8 ਦੇ ਬਾਹਰ ਬੈਠਦੇ ਹਨ।
 
-| ਵਰਕਲੋਡ                               | `OMNIROUTE_MEMORY_MB`    | ਕੰਟੇਨਰ / cgroup       | ਟਿੱਪਣੀਆਂ                                                                                       |
-| ------------------------------------ | ------------------------ | --------------------- | ---------------------------------------------------------------------------------------------- |
-| Dashboard, ਇੱਕ ਹਲਕੀ chat             | `1024` (ਇਮੇਜ ਡਿਫਾਲਟ)     | ≥2 GiB                |                                                                                                |
-| ਇੱਕ ਕੋਡਿੰਗ ਏਜੰਟ (Claude/Codex/Grok)  | `8192`                   | ≥10 GiB               | ਆਮ single-session `/v1/responses`                                                              |
-| ਇੱਕੋ ਸਮੇਂ ਦੋ ਲੰਬੀਆਂ `/v1/responses`  | `10240`–`12288`          | ≥12–16 GiB            | ਲਗਭਗ 12 GiB heap 'ਤੇ ਮਾਪਿਆ ਗਿਆ V8 abort                                                        |
-| ਇੱਕੋ ਸਮੇਂ ਤਿੰਨ ਜਾਂ ਵੱਧ ਲੰਬੇ contexts | ਇੱਕ ਪ੍ਰਕਿਰਿਆ 'ਤੇ ਨਾ ਚਲਾਓ | ਲੜੀਵਾਰ ਚਲਾਓ / ਹੋਰ RAM | ਡਿਫਾਲਟ heavyweight admission 1 in-flight ਹੈ; RAM ਤੋਂ ਬਿਨਾਂ ਇਸਨੂੰ ਵਧਾਉਣ ਨਾਲ abort ਮੁੜ ਵਾਪਰਦਾ ਹੈ |
+| ਕੰਮ ਦਾ ਬੋਝ                          | `OMNIROUTE_MEMORY_MB`   | ਕੰਟੇਨਰ / cgroup      | ਨੋਟਸ                                                                                          |
+| ----------------------------------- | ----------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
+| ਡੈਸ਼ਬੋਰਡ, ਇੱਕ ਹਲਕਾ ਚੈਟ              | `1024` (ਚਿੱਤਰ ਮੂਲ)      | ≥2 GiB               |                                                                                               |
+| ਇੱਕ ਕੋਡਿੰਗ ਏਜੰਟ (Claude/Codex/Grok) | `8192`                  | ≥10 GiB              | ਆਮ ਸਿੰਗਲ-ਸੈਸ਼ਨ `/v1/responses`                                                                |
+| ਦੋ ਸਮਕਾਲੀ ਲੰਬੇ `/v1/responses`      | `10240`–`12288`         | ≥12–16 GiB           | ~ 12 GiB ਹੀਪ 'ਤੇ ਮਾਪਿਆ ਗਿਆ V8 ਅਧੂਰਾ ਛੱਡਿਆ ਗਿਆ                                                 |
+| ਤਿੰਨ + ਸਮਕਾਲੀ ਲੰਬੇ ਸੰਦਰਭ            | ਇੱਕ ਪ੍ਰਕਿਰਿਆ 'ਤੇ ਨਾ ਕਰੋ | ਸੀਰੀਅਲਾਈਜ਼ / ਹੋਰ RAM | ਡਿਫੌਲਟ ਹੈਵੀਵੇਟ ਦਾਖਲਾ 1 ਇਨ-ਫਲਾਈਟ ਹੈ; RAM ਤੋਂ ਬਿਨਾਂ ਇਸ ਨੂੰ ਵਧਾਉਣਾ ਅਧੂਰੇ ਨੂੰ ਦੁਬਾਰਾ ਪੇਸ਼ ਕਰਦਾ ਹੈ |
 
-bare metal 'ਤੇ `omniroute serve`, ਜਦੋਂ `OMNIROUTE_MEMORY_MB` **ਸੈੱਟ ਨਾ ਹੋਵੇ**, RAM ਦੇ ਲਗਭਗ 35% ਅਨੁਸਾਰ ਕੈਲੀਬਰੇਟ ਕਰਦਾ ਹੈ (`[512, 4096]` ਤੱਕ ਸੀਮਿਤ)। Docker ਹਮੇਸ਼ਾ `1024` ਸੈੱਟ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਅਧਿਕਾਰਤ ਇਮੇਜ ਵਿੱਚ ਉਹ calibration ਕਦੇ ਨਹੀਂ ਚੱਲਦੀ।
+ਬੇਅਰ ਮੈਟਲ 'ਤੇ`omniroute serve` ~ ਦਾ 35% RAM (ਕੈਂਪਡ `[512, 4096]`) ਨੂੰ ਕੈਲੀਬ੍ਰੇਟ ਕਰਦਾ ਹੈ ਜਦੋਂ `OMNIROUTE_MEMORY_MB` ਹੁੰਦਾ ਹੈ** ਅਣਸੈੱਟ** . Docker ਹਮੇਸ਼ਾ `1024` ਸੈੱਟ ਕਰਦਾ ਹੈ, ਤਾਂ ਕਿ ਕੈਲੀਬ੍ਰੇਸ਼ਨ ਕਦੇ ਵੀ ਅਧਿਕਾਰਤ ਚਿੱਤਰ ਵਿੱਚ ਨਾ ਚੱਲੇ।
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## ਅਹਿਮ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ
@@ -364,13 +335,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | `docker-compose.prod.yml` ਲਈ ਹੋਸਟ-ਸਾਈਡ ਡੈਸ਼ਬੋਰਡ ਪੋਰਟ                                                                                                                                                                                                                          | `20130`                    |
 | `CLIPROXYAPI_PORT`            | `cliproxyapi` ਸਾਈਡਕਾਰ ਲਈ ਹੋਸਟ-ਸਾਈਡ ਪੋਰਟ                                                                                                                                                                                                                                       | `8317`                     |
 
-## ਸਬਪਾਥ ਉੱਤੇ ਰਿਵਰਸ ਪ੍ਰਾਕਸੀ (Traefik / nginx)
+## ਸਬਪਾਥ 'ਤੇ ਉਲਟਾ ਪ੍ਰੌਕਸੀ (ਟ੍ਰੈਫਿਕ / ਐਨਜੀਨੈਕਸ)
 
-Next.js `basePath` ਨੂੰ standalone bundle ਵਿੱਚ ਕੰਪਾਇਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। OmniRoute ਐਪ ਰੂਟ ਉੱਤੇ ਇੱਕ sentinel ਫ਼ਾਈਲ ਵਿੱਚ ਪਹਿਲਾਂ ਤੋਂ ਸ਼ਾਮਲ ਕੀਤੇ ਮੁੱਲ ਨੂੰ ਦਰਜ ਕਰਦਾ ਹੈ (`npm run build` ਦੌਰਾਨ ਲਿਖਿਆ ਜਾਂਦਾ ਹੈ; `scripts/docker/ensure-docker-base-path.mjs` ਵੱਲੋਂ ਪੜ੍ਹਿਆ ਜਾਂਦਾ ਹੈ) ਅਤੇ ਕੰਟੇਨਰ ਸ਼ੁਰੂ ਹੋਣ ਵੇਲੇ ਇਸ ਦੀ ਤੁਲਨਾ `OMNIROUTE_BASE_PATH` ਨਾਲ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਇਹ ਵੱਖਰੇ ਹੁੰਦੇ ਹਨ ਅਤੇ ਇਮੇਜ ਡੋਮੇਨ ਰੂਟ ਲਈ ਬਣਾਇਆ ਗਿਆ ਸੀ, ਤਾਂ `node dev/run-standalone.mjs` ਦੇ ਚੱਲਣ ਤੋਂ ਪਹਿਲਾਂ entrypoint standalone manifests, embedded `basePath`/`assetPrefix` literals (Next 16 SSR asset URLs ਨੂੰ ਸਿਰਫ਼ `assetPrefix` ਤੋਂ ਰੈਂਡਰ ਕਰਦਾ ਹੈ — patcher ਸਬਪਾਥ ਨੂੰ ਇਸ ਵਿੱਚ ਵੀ ਪ੍ਰਤੀਬਿੰਬਤ ਕਰਦਾ ਹੈ), ਪਹਿਲਾਂ ਤੋਂ ਸ਼ਾਮਲ `/_next/static` asset URLs (client-reference manifests, media imports, prerendered error pages) ਅਤੇ client `process.env` shim ਨੂੰ ਮੁੜ ਲਿਖਦਾ ਹੈ।
+Next.js `basePath` ਨੂੰ ਸਟੈਂਡਅਲੋਨ ਬੰਡਲ ਵਿੱਚ ਕੰਪਾਇਲ ਕੀਤਾ ਗਿਆ ਹੈ। OmniRoute ਐਪ ਰੂਟ ( `npm run build` ਦੇ ਦੌਰਾਨ ਲਿਖਿਆ ਗਿਆ; `scripts/docker/ensure-docker-base-path.mjs` ਦੁਆਰਾ ਪੜ੍ਹਿਆ ਗਿਆ) 'ਤੇ ਇੱਕ ਸੈਂਟੀਨੇਲ ਫਾਈਲ ਵਿੱਚ ਬੇਕਡ ਮੁੱਲ ਨੂੰ ਰਿਕਾਰਡ ਕਰਦਾ ਹੈ ਅਤੇ ਜਦੋਂ ਕੰਟੇਨਰ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ ਤਾਂ `OMNIROUTE_BASE_PATH` ਨਾਲ ਇਸਦੀ ਤੁਲਨਾ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਉਹ ਵੱਖਰੇ ਹੁੰਦੇ ਹਨ ਅਤੇ ਚਿੱਤਰ ਨੂੰ ਡੋਮੇਨ ਰੂਟ ਲਈ ਬਣਾਇਆ ਗਿਆ ਸੀ, ਤਾਂ ਐਂਟਰੀਪੁਆਇੰਟ ਸਟੈਂਡਅਲੋਨ ਮੈਨੀਫੈਸਟ ਨੂੰ ਦੁਬਾਰਾ ਲਿਖਦਾ ਹੈ, ਏਮਬੈਡਡ `basePath`/`assetPrefix` ਲਿਟਰਲ (ਅਗਲਾ 16 SSR ਸੰਪਤੀ URLs `assetPrefix` ਤੋਂ ਇਕੱਲੇ — ਪੇਸ਼ ਕਰਦਾ ਹੈ, ਪੈਚਰ ਇਸ ਵਿੱਚ ਸਬਪਾਥ ਨੂੰ ਮਿਰਰ ਕਰਦਾ ਹੈ), `/_next/static` asqn URLs, ਮੀਡੀਆ ਆਯਾਤ, ਪਹਿਲਾਂ ਤੋਂ ਰੈਂਡਰਡ ਐਰਰ ਪੇਜ) ਅਤੇ `node dev/run-standalone.mjs` ਚੱਲਣ ਤੋਂ ਪਹਿਲਾਂ ਕਲਾਇੰਟ `process.env` ਸ਼ਿਮ।
 
-### Compose ਬਿਲਡ (ਸਿਫ਼ਾਰਸ਼ੀ)
+### ਕੰਪੋਜ਼ ਬਿਲਡ (ਸਿਫਾਰਸ਼ੀ)
 
-ਦੋਵੇਂ ਵੇਰੀਏਬਲ `.env` ਵਿੱਚ ਸੈੱਟ ਕਰੋ, ਫਿਰ ਮੁੜ ਬਿਲਡ ਕਰੋ ਤਾਂ ਜੋ ਇਮੇਜ ਅਤੇ runtime ਇੱਕੋ ਸੰਰਚਨਾ ਵਰਤਣ:
+`.env` ਵਿੱਚ ਦੋਵੇਂ ਵੇਰੀਏਬਲ ਸੈਟ ਕਰੋ, ਫਿਰ ਦੁਬਾਰਾ ਬਣਾਓ ਤਾਂ ਕਿ ਚਿੱਤਰ ਅਤੇ ਰਨਟਾਈਮ ਸਹਿਮਤ ਹੋਣ:
 
 ```bash
 # .env
@@ -382,53 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml`, `OMNIROUTE_BASE_PATH` ਨੂੰ Docker build-arg ਅਤੇ runtime environment variable ਦੋਵਾਂ ਵਜੋਂ ਅੱਗੇ ਭੇਜਦਾ ਹੈ।
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` Docker ਬਿਲਡ-ਆਰਗ ਅਤੇ ਰਨਟਾਈਮ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਵਜੋਂ ਅੱਗੇ ਭੇਜਦਾ ਹੈ।
 
-### ਪਹਿਲਾਂ ਤੋਂ ਬਣਿਆ root image + runtime subpath
+### ਪ੍ਰੀ-ਬਿਲਟ ਰੂਟ ਚਿੱਤਰ + ਰਨਟਾਈਮ ਸਬਪਾਥ
 
-ਪ੍ਰਕਾਸ਼ਿਤ `diegosouzapw/omniroute:*` images ਡੋਮੇਨ ਰੂਟ ਲਈ ਬਣਾਏ ਗਏ ਹਨ। ਤੁਸੀਂ ਫਿਰ ਵੀ runtime ਵੇਲੇ `OMNIROUTE_BASE_PATH` ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ; ਕੰਟੇਨਰ startup ਉੱਤੇ bundle ਨੂੰ ਇੱਕ ਵਾਰ patch ਕਰਦਾ ਹੈ। ਇਸਨੂੰ ਮੇਲ ਖਾਂਦੇ public origin ਨਾਲ ਜੋੜੋ:
+ਪ੍ਰਕਾਸ਼ਿਤ `cheaperinference/omniroute:*` ਚਿੱਤਰ ਡੋਮੇਨ ਰੂਟ ਲਈ ਬਣਾਏ ਗਏ ਹਨ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਰਨਟਾਈਮ 'ਤੇ `OMNIROUTE_BASE_PATH` ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ; ਕੰਟੇਨਰ ਇੱਕ ਵਾਰ ਸ਼ੁਰੂ ਹੋਣ 'ਤੇ ਬੰਡਲ ਨੂੰ ਪੈਚ ਕਰਦਾ ਹੈ। ਇਸ ਨੂੰ ਮੇਲ ਖਾਂਦੇ ਜਨਤਕ ਮੂਲ ਨਾਲ ਜੋੜੋ:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-ਰਿਵਰਸ ਪ੍ਰਾਕਸੀ ਨੂੰ **ਪੂਰਾ** ਬਾਹਰੀ ਪਾਥ ਅੱਗੇ ਭੇਜਣ ਲਈ ਸੰਰਚਿਤ ਕਰੋ (prefix ਨਾ ਹਟਾਓ)। Traefik ਨੂੰ `StripPrefix` ਤੋਂ ਬਿਨਾਂ `PathPrefix(`/omniroute`)` ਨੂੰ ਕੰਟੇਨਰ ਵੱਲ route ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ, ਤਾਂ ਜੋ Next.js ਨੂੰ `/omniroute/...` ਮਿਲੇ ਅਤੇ ਉਹ assets ਨੂੰ `/omniroute/_next/...` ਤੋਂ serve ਕਰੇ।
+ਨੂੰ ਅੱਗੇ ਭੇਜਣ ਲਈ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ ਨੂੰ ਕੌਂਫਿਗਰ ਕਰੋ** ਪੂਰਾ** ਬਾਹਰੀ ਮਾਰਗ (ਅਗੇਤਰ ਨੂੰ ਨਾ ਹਟਾਓ)। Traefik ਨੂੰ `PathPrefix(`/omniroute `)` `StripPrefix` ਤੋਂ ਬਿਨਾਂ ਕੰਟੇਨਰ ਤੱਕ ਰੂਟ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ, ਇਸਲਈ Next.js `/omniroute/...` ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ ਅਤੇ `/omniroute/_next/...` ਤੋਂ ਸੰਪਤੀਆਂ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
 
-Docker healthcheck, ਸਰਗਰਮ `OMNIROUTE_BASE_PATH` ਨਾਲ prefix ਕੀਤੇ ਹਲਕੇ `/healthz` lifecycle endpoint ਨੂੰ probe ਕਰਦਾ ਹੈ। ਮਨੁੱਖੀ/dashboard diagnostics ਲਈ `/api/monitoring/health` ਉਪਲਬਧ ਰਹਿੰਦਾ ਹੈ; ਕੰਟੇਨਰ HEALTHCHECK ਨੂੰ ਮੁੜ ਇਸ ਵੱਲ ਦਰਸਾਉਣ ਲਈ (ਉਦਾਹਰਨ ਵਜੋਂ, ਡੂੰਘੀ health enforcement ਲਈ), `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` ਸੈੱਟ ਕਰੋ। ਇਹ ਪਾਥ ਇੱਕ **ਡੂੰਘੀ** ਜਾਂਚ ਹੈ (DB + monitoring summary) — ਜੇ ਤੁਸੀਂ ਇਸਨੂੰ ਮੁੜ ਚੁਣਦੇ ਹੋ ਤਾਂ ਇਹ Docker ਦੇ ਘੱਟ-ਵਾਰ ਚੱਲਣ ਵਾਲੇ `HEALTHCHECK` ਲਈ ਢੁਕਵਾਂ ਹੈ, ਪਰ Kubernetes `livenessProbe` intervals ਲਈ **ਨਹੀਂ**।
+Docker ਹੈਲਥ-ਚੈੱਕ ਲਾਈਟਵੇਟ `/healthz` ਲਾਈਫਸਾਈਕਲ ਐਂਡਪੁਆਇੰਟ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ ਜੋ ਕਿਰਿਆਸ਼ੀਲ `OMNIROUTE_BASE_PATH` ਨਾਲ ਪ੍ਰੀਫਿਕਸ ਹੁੰਦਾ ਹੈ। `/api/monitoring/health` human/dashboard ਡਾਇਗਨੌਸਟਿਕਸ ਲਈ ਉਪਲਬਧ ਰਹਿੰਦਾ ਹੈ; ਕੰਟੇਨਰ HEALTHCHECK ਇਸ ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਨ ਲਈ (ਉਦਾਹਰਨ ਲਈ ਡੂੰਘੇ ਸਿਹਤ ਲਾਗੂ ਕਰਨ ਲਈ), `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` ਸੈੱਟ ਕਰੋ। ਉਹ ਮਾਰਗ ਏ** ਡੂੰਘੀ** ਚੈੱਕ ਕਰੋ (DB + ਨਿਗਰਾਨੀ ਸੰਖੇਪ) — Docker ਦੇ ਵਿਰਲੇ `HEALTHCHECK` ਲਈ ਉਚਿਤ ਹੈ ਜੇਕਰ ਤੁਸੀਂ ਵਾਪਸ ਚੁਣਦੇ ਹੋ, ਪਰ** ਨਹੀਂ** Kubernetes `livenessProbe` ਅੰਤਰਾਲਾਂ ਲਈ।
 
-orchestrators (Kubernetes, Nomad ਆਦਿ) ਲਈ:
+ਆਰਕੈਸਟਰੇਟਰਾਂ ਲਈ (ਕੁਬਰਨੇਟਸ, ਨੋਮੈਡ, ਆਦਿ):
 
-| Probe           | ਤਰਜੀਹ ਦਿਓ                                                           | ਬਚੋ                                                        |
-| --------------- | ------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Liveness        | HTTP `GET /livez`, ਜਾਂ ਮੁੱਖ port (`PORT`, default `20128`) ਉੱਤੇ TCP | liveness ਵਜੋਂ `/api/monitoring/health`                     |
-| Readiness       | HTTP `GET /healthz`                                                 | ਛੋਟੇ timeouts, ਜੋ event-loop ਦੇ busy ਹੋਣ ਨੂੰ dead ਮੰਨਦੇ ਹਨ |
-| Deep / blackbox | `/api/monitoring/health`                                            | —                                                          |
+| ਪੜਤਾਲ            | ਤਰਜੀਹ                                                              | ਬਚੋ                                                     |
+| ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------- |
+| ਜੀਵੰਤਤਾ          | HTTP `GET /livez`, ਜਾਂ ਮੁੱਖ ਪੋਰਟ ਉੱਤੇ TCP (`PORT`, ਡਿਫਾਲਟ `20128`) | `/api/monitoring/health` ਜੀਵਣਤਾ ਵਜੋਂ                    |
+| ਤਤਪਰਤਾ           | HTTP `GET /healthz`                                                | ਤੰਗ ਸਮਾਂ ਸਮਾਪਤ ਜੋ ਇਵੈਂਟ-ਲੂਪ ਰੁੱਝੇ ਹੋਏ ਨੂੰ ਮਰਿਆ ਸਮਝਦੇ ਹਨ |
+| ਡੂੰਘੇ / ਬਲੈਕਬਾਕਸ | `/api/monitoring/health`                                           | —                                                       |
 
-`/healthz` process lifecycle (`ok` / `starting` / `stopping`) ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ। `/livez` ਸਿਰਫ਼ process-alive ਹੈ (ਜਦੋਂ ਵੀ handler ਚੱਲ ਸਕਦਾ ਹੈ, 200; ਇਹ readiness ਦੀ ਉਡੀਕ ਨਹੀਂ ਕਰਦਾ)। ਦੋਵੇਂ ਹਾਲੇ ਵੀ request handling ਵਾਲੇ ਉਸੇ Node event loop ਉੱਤੇ ਚੱਲਦੇ ਹਨ, ਇਸ ਲਈ CPU-bound catalog ਜਾਂ compression ਦਾ ਕੰਮ ਉਨ੍ਹਾਂ ਵਿੱਚ ਦੇਰੀ ਕਰ ਸਕਦਾ ਹੈ — busy ≠ dead। ਜੇ HTTP probes time out ਹੋ ਜਾਣ ਤਾਂ TCP liveness ਨੂੰ ਤਰਜੀਹ ਦਿਓ। ਪੂਰੀ probe ਸੇਧ:
-[Monitoring guide — Kubernetes probe recommendations](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)।
+`/healthz` ਰਿਪੋਰਟ ਪ੍ਰਕਿਰਿਆ ਜੀਵਨ ਚੱਕਰ (`ok` / `starting` / `stopping`)। `/livez` ਸਿਰਫ਼ ਪ੍ਰਕਿਰਿਆ-ਜ਼ਿੰਦਾ ਹੈ (200 ਜਦੋਂ ਵੀ ਹੈਂਡਲਰ ਚੱਲ ਸਕਦਾ ਹੈ; ਇਹ ਤਿਆਰੀ ਦੀ ਉਡੀਕ ਨਹੀਂ ਕਰਦਾ)। ਦੋਵੇਂ ਅਜੇ ਵੀ ਬੇਨਤੀ ਹੈਂਡਲਿੰਗ ਦੇ ਤੌਰ 'ਤੇ ਉਸੇ ਨੋਡ ਇਵੈਂਟ ਲੂਪ 'ਤੇ ਚੱਲਦੇ ਹਨ, ਇਸਲਈ CPU-ਬੱਧ ਕੈਟਾਲਾਗ ਜਾਂ ਕੰਪਰੈਸ਼ਨ ਕੰਮ ਉਨ੍ਹਾਂ ਨੂੰ — ਵਿਅਸਤ ≠ ਡੈੱਡ ਦੇਰੀ ਕਰ ਸਕਦਾ ਹੈ। ਜੇ HTTP ਜਾਂਚ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੁੰਦਾ ਹੈ ਤਾਂ TCP ਜੀਵਣਤਾ ਨੂੰ ਤਰਜੀਹ ਦਿਓ। ਪੂਰੀ ਪੜਤਾਲ ਮਾਰਗਦਰਸ਼ਨ: [ਨਿਗਰਾਨੀ ਗਾਈਡ — Kubernetes ਪੜਤਾਲ ਸਿਫਾਰਸ਼ਾਂ](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ।
 
-## Caddy ਨਾਲ Docker Compose (HTTPS Auto-TLS)
+## Docker ਕੈਡੀ ਨਾਲ ਕੰਪੋਜ਼ ਕਰੋ (HTTPS ਆਟੋ-TLS)
 
-OmniRoute ਨੂੰ Caddy ਦੀ ਆਟੋਮੈਟਿਕ SSL ਪ੍ਰੋਵਿਜ਼ਨਿੰਗ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਉਪਲਬਧ ਕਰਵਾਇਆ ਜਾ ਸਕਦਾ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਡੋਮੇਨ ਦਾ DNS A ਰਿਕਾਰਡ ਤੁਹਾਡੇ ਸਰਵਰ ਦੇ IP ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਦਾ ਹੈ।
+OmniRoute Caddy ਦੇ ਆਟੋਮੈਟਿਕ SSL ਪ੍ਰੋਵਿਜ਼ਨਿੰਗ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਪ੍ਰਗਟ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਡੋਮੇਨ ਦਾ DNS A ਰਿਕਾਰਡ ਤੁਹਾਡੇ ਸਰਵਰ ਦੇ IP ਵੱਲ ਪੁਆਇੰਟ ਕਰਦਾ ਹੈ।
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # OAuth ਕਾਲਬੈਕਾਂ, ਡੈਸ਼ਬੋਰਡ ਲਿੰਕਾਂ ਅਤੇ ਤਿਆਰ ਕੀਤੇ ਜਨਤਕ URLs ਲਈ ਬ੍ਰਾਊਜ਼ਰ-ਮੁਖੀ ਮੂਲ।
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # ਨਿਯਤ ਕਾਰਜਾਂ / ਸਵੈ-ਫੈਚਾਂ ਲਈ ਅੰਦਰੂਨੀ ਸਰਵਰ-ਤੋਂ-ਸਰਵਰ URL।
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -445,11 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy ਅੱਪਸਟ੍ਰੀਮ ਕੰਟੇਨਰ ਲਈ ਮਿਆਰੀ ਫਾਰਵਰਡਿੰਗ ਹੈਡਰ ਸੈੱਟ ਕਰਦਾ ਹੈ। OmniRoute,
-`NEXT_PUBLIC_BASE_URL` ਨੂੰ OAuth ਕਾਲਬੈਕਾਂ ਅਤੇ ਤਿਆਰ ਕੀਤੇ ਜਨਤਕ ਲਿੰਕਾਂ ਲਈ ਕੈਨੋਨਿਕਲ ਜਨਤਕ ਮੂਲ ਵਜੋਂ ਵਰਤਦਾ ਹੈ;
-ਪ੍ਰਮਾਣਿਤ ਡੈਸ਼ਬੋਰਡ ਰਾਈਟਾਂ ਸਮਾਨ-ਮੂਲ ਬੇਨਤੀਆਂ ਦੇ ਨਾਲ ਸੈਸ਼ਨ-ਬੱਧ CSRF ਸੁਰੱਖਿਆ ਦੀ ਵਰਤੋਂ ਕਰਦੀਆਂ ਹਨ।
-`OMNIROUTE_TRUST_PROXY` ਨੂੰ ਕੇਵਲ ਉਹਨਾਂ ਉੱਨਤ ਡਿਪਲੌਇਮੈਂਟਾਂ ਲਈ ਸਮਰੱਥ ਕਰੋ ਜਿੱਥੇ ਤੁਸੀਂ ਜਾਣਬੁੱਝ ਕੇ
-ਚਾਹੁੰਦੇ ਹੋ ਕਿ OmniRoute ਸਪਸ਼ਟ ਸੰਰਚਨਾ ਦੀ ਬਜਾਏ ਭਰੋਸੇਯੋਗ ਫਾਰਵਰਡ ਕੀਤੇ ਹੈਡਰਾਂ ਤੋਂ ਜਨਤਕ ਮੂਲ ਨਿਰਧਾਰਤ ਕਰੇ।
+ਕੈਡੀ ਅੱਪਸਟ੍ਰੀਮ ਕੰਟੇਨਰ ਲਈ ਸਟੈਂਡਰਡ ਫਾਰਵਰਡਿੰਗ ਹੈਡਰ ਸੈੱਟ ਕਰਦਾ ਹੈ। OmniRoute OAuth ਕਾਲਬੈਕਸ ਅਤੇ ਜਨਰੇਟ ਕੀਤੇ ਜਨਤਕ ਲਿੰਕਾਂ ਲਈ `NEXT_PUBLIC_BASE_URL` ਕੈਨੋਨੀਕਲ ਜਨਤਕ ਮੂਲ ਵਜੋਂ ਵਰਤਦਾ ਹੈ; ਪ੍ਰਮਾਣਿਤ ਡੈਸ਼ਬੋਰਡ ਉਸੇ-ਮੂਲ ਬੇਨਤੀਆਂ ਅਤੇ ਸੈਸ਼ਨ-ਬਾਊਂਡ CSRF ਸੁਰੱਖਿਆ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਸਿਰਫ਼ ਉੱਨਤ ਤੈਨਾਤੀਆਂ ਲਈ `OMNIROUTE_TRUST_PROXY` ਸਮਰੱਥ ਬਣਾਓ ਜਿੱਥੇ ਤੁਸੀਂ ਜਾਣਬੁੱਝ ਕੇ OmniRoute ਸਪਸ਼ਟ ਸੰਰਚਨਾ ਦੀ ਬਜਾਏ ਭਰੋਸੇਯੋਗ ਫਾਰਵਰਡ ਕੀਤੇ ਸਿਰਲੇਖਾਂ ਤੋਂ ਜਨਤਕ ਮੂਲ ਪ੍ਰਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ।
 
 ## Cloudflare Quick Tunnel
 
@@ -466,49 +432,51 @@ Docker ਡਿਪਲੌਇਮੈਂਟਾਂ ਲਈ ਡੈਸ਼ਬੋਰਡ ਸ�
 - Docker ਇਮੇਜਾਂ ਵਿੱਚ ਸਿਸਟਮ CA ਰੂਟ ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ ਅਤੇ ਉਹਨਾਂ ਨੂੰ ਪ੍ਰਬੰਧਿਤ `cloudflared` ਤੱਕ ਪਹੁੰਚਾਇਆ ਜਾਂਦਾ ਹੈ, ਜਿਸ ਨਾਲ ਕੰਟੇਨਰ ਦੇ ਅੰਦਰ ਟਨਲ ਬੂਟਸਟਰੈਪ ਹੋਣ ਵੇਲੇ TLS ਭਰੋਸਾ ਅਸਫਲਤਾਵਾਂ ਤੋਂ ਬਚਿਆ ਜਾਂਦਾ ਹੈ।
 - ਜੇ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ ਕਿ OmniRoute ਕੋਈ ਬਾਈਨਰੀ ਡਾਊਨਲੋਡ ਕਰਨ ਦੀ ਬਜਾਏ ਮੌਜੂਦਾ ਬਾਈਨਰੀ ਦੀ ਵਰਤੋਂ ਕਰੇ, ਤਾਂ `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` ਸੈੱਟ ਕਰੋ।
 
-## ਇਮੇਜ ਟੈਗ
+## ਚਿੱਤਰ ਟੈਗਸ
 
-| ਇਮੇਜ                     | ਟੈਗ      | ਆਕਾਰ   | ਵੇਰਵਾ                                                   |
-| ------------------------ | -------- | ------ | ------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | ਸਭ ਤੋਂ ਉੱਚਾ **ਪ੍ਰਕਾਸ਼ਿਤ** ਸਥਿਰ SemVer (git `main` ਨਹੀਂ) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | GitOps ਲਈ ਇਸ ਸ਼੍ਰੇਣੀ ਦੇ ਟੈਗ ਨੂੰ ਪਿੰਨ ਕਰੋ                |
+| ਚਿੱਤਰ                        | ਟੈਗ ਕਰੋ  | ਆਕਾਰ    | ਵਰਣਨ                                                      |
+| ---------------------------- | -------- | ------- | --------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | ਸਭ ਤੋਂ ਉੱਚਾ** ਪ੍ਰਕਾਸ਼ਿਤ** ਸਥਿਰ SemVer ( git `main` ਨਹੀਂ ) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | GitOps ਲਈ ਟੈਗ ਦੀ ਇਸ ਸ਼੍ਰੇਣੀ ਨੂੰ ਪਿੰਨ ਕਰੋ                  |
 
-ਮਲਟੀ-ਪਲੇਟਫਾਰਮ ਮੈਨੀਫੈਸਟ: ਮੂਲ `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi)। Docker ਆਪਣੇ ਆਪ ਮੇਲ ਖਾਂਦਾ ਆਰਕੀਟੈਕਚਰ ਚੁਣਦਾ ਹੈ; ਜੇ ਤੁਹਾਨੂੰ ARM ਹੋਸਟਾਂ ਉੱਤੇ AMD64 ਇਮੂਲੇਸ਼ਨ ਲਾਜ਼ਮੀ ਕਰਨੀ ਹੋਵੇ ਤਾਂ `--platform linux/amd64` ਪਾਸ ਕਰੋ।
+ਉਹੀ ਚਿੱਤਰ ਤਿੰਨ ਰਿਪੋਜ਼ਟਰੀਆਂ ਵਿੱਚ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤੇ ਗਏ ਹਨ, ਇੱਕੋ ਪ੍ਰਤੀ-ਆਰਕੀਟੈਕਚਰ ਡਾਇਜੈਸਟਾਂ ਦੇ ਨਾਲ: `cheaperinference/omniroute` (Docker ਹੱਬ, ਸਸਤੀ ਇਨਫਰੈਂਸ ਸੰਸਥਾ, 3.8.53 ਤੋਂ), `ghcr.io/cheaper-inference/omniroute` ਅਤੇ ਵਿਰਾਸਤੀ `diegosouzapw/omniroute`, ਜੋ ਇਸਦੇ ਪੁੱਲ ਇਤਿਹਾਸ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦਾ ਹੈ ਅਤੇ ਅਜੇ ਵੀ ਹਰ ਰੀਲੀਜ਼ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ। ਮੌਜੂਦਾ `diegosouzapw/omniroute` ਤੈਨਾਤੀਆਂ ਅੱਪਡੇਟ ਹੁੰਦੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ; ਚਿੱਤਰ ਦਾ ਨਾਮ ਬਦਲਣਾ ਵਿਕਲਪਿਕ ਹੈ। ਹੇਠਾਂ `:next` / `:next-web` ਪ੍ਰੀ-ਰਿਲੀਜ਼ ਚੈਨਲ ਸਿਰਫ `diegosouzapw/omniroute` ਅਤੇ GHCR ਲਈ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤਾ ਗਿਆ ਹੈ।
 
-### ਰਿਲੀਜ਼ ਚੈਨਲ
+ਮਲਟੀ-ਪਲੇਟਫਾਰਮ ਮੈਨੀਫੈਸਟ: `linux/amd64` + `linux/arm64` ਮੂਲ (Apple Silicon, AWS Graviton, Raspberry Pi)। Docker ਆਪਣੇ ਆਪ ਮੇਲ ਖਾਂਦਾ ਆਰਕੀਟੈਕਚਰ ਚੁਣਦਾ ਹੈ; ਜੇ ਤੁਹਾਨੂੰ ARM ਮੇਜ਼ਬਾਨਾਂ 'ਤੇ AMD64 ਇਮੂਲੇਸ਼ਨ ਨੂੰ ਮਜਬੂਰ ਕਰਨ ਦੀ ਲੋੜ ਹੈ ਤਾਂ `--platform linux/amd64` ਪਾਸ ਕਰੋ।
 
-OmniRoute ਸਥਿਰ ਰਿਲੀਜ਼ਾਂ, ਸਰਗਰਮ ਰਿਲੀਜ਼-ਬ੍ਰਾਂਚ ਟੈਸਟਿੰਗ ਅਤੇ ਡਿਵੈਲਪਮੈਂਟ ਬਿਲਡਾਂ ਲਈ ਵੱਖਰੇ Docker ਚੈਨਲ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਦਾ ਹੈ।
+### ਚੈਨਲ ਰਿਲੀਜ਼ ਕਰੋ
 
-| ਚੈਨਲ                            | ਸਰੋਤ                                  | ਬਦਲਣਯੋਗਤਾ                   | ਸਿਫ਼ਾਰਸ਼ੀ ਵਰਤੋਂ                                                                                                                          |
-| ------------------------------- | ------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | ਦਸਤਖ਼ਤਸ਼ੁਦਾ/ਵਰਜਨਬੱਧ ਰਿਲੀਜ਼            | ਅਬਦਲਣਯੋਗ                    | ਪ੍ਰੋਡਕਸ਼ਨ ਡਿਪਲੌਇਮੈਂਟ ਜੋ ਕਿਸੇ ਸਟੀਕ ਰਿਲੀਜ਼ ਨੂੰ ਪਿੰਨ ਕਰਦੇ ਹਨ                                                                                |
-| `:latest` / `:latest-web`       | ਸਭ ਤੋਂ ਉੱਚਾ **ਪ੍ਰਕਾਸ਼ਿਤ** ਸਥਿਰ SemVer | ਬਦਲਣਯੋਗ ਸਥਿਰ ਪੁਆਇੰਟਰ        | SemVer ਪ੍ਰਕਾਸ਼ਨ ਕਾਰਜ ਤੋਂ **ਬਾਅਦ** ਸਥਿਰ ਰਿਲੀਜ਼ਾਂ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ — `main` ਜਾਂ ਅਣਰਿਲੀਜ਼ ਕੀਤੀਆਂ `release/v*` ਕਮਿਟਾਂ ਨੂੰ ਟਰੈਕ **ਨਹੀਂ** ਕਰਦਾ |
-| `:next` / `:next-web`           | ਮੌਜੂਦਾ ਡਿਫਾਲਟ `release/v*` ਬ੍ਰਾਂਚ     | ਬਦਲਣਯੋਗ ਪ੍ਰੀ-ਰਿਲੀਜ਼ ਪੁਆਇੰਟਰ | ਉਹਨਾਂ ਸੁਧਾਰਾਂ ਦੀ ਜਾਂਚ ਜੋ ਸਰਗਰਮ ਰਿਲੀਜ਼ ਬ੍ਰਾਂਚ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋ ਚੁੱਕੇ ਹਨ ਪਰ ਹਾਲੇ ਕਿਸੇ ਸਥਿਰ ਰਿਲੀਜ਼ ਵਿੱਚ ਨਹੀਂ ਹਨ                                |
-| `:main` / `:main-web`           | `main` ਬ੍ਰਾਂਚ                         | ਬਦਲਣਯੋਗ ਡਿਵੈਲਪਮੈਂਟ ਪੁਆਇੰਟਰ  | ਕੇਵਲ ਡਿਵੈਲਪਮੈਂਟ ਅਤੇ ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਟੈਸਟਿੰਗ ਲਈ                                                                                               |
+OmniRoute ਸਥਿਰ ਰੀਲੀਜ਼ਾਂ, ਸਰਗਰਮ ਰੀਲੀਜ਼-ਬ੍ਰਾਂਚ ਟੈਸਟਿੰਗ, ਅਤੇ ਵਿਕਾਸ ਬਿਲਡਾਂ ਲਈ ਵੱਖਰੇ Docker ਚੈਨਲ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਦਾ ਹੈ।
 
-#### ਵੈੱਬ-ਸੈਸ਼ਨ ਪ੍ਰਦਾਤਾ: `-web` ਇਮੇਜਾਂ
+| ਚੈਨਲ                            | ਸਰੋਤ                                  | ਪਰਿਵਰਤਨਸ਼ੀਲਤਾ                   | ਵਰਤਣ ਦੀ ਸਿਫਾਰਸ਼ ਕੀਤੀ                                                                                                                          |
+| ------------------------------- | ------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned ਰੀਲੀਜ਼               | ਅਟੱਲ                            | ਉਤਪਾਦਨ ਤੈਨਾਤੀਆਂ ਜੋ ਇੱਕ ਸਟੀਕ ਰੀਲੀਜ਼ ਨੂੰ ਪਿੰਨ ਕਰਦੀਆਂ ਹਨ                                                                                         |
+| `:latest` / `:latest-web`       | ਸਭ ਤੋਂ ਉੱਚਾ** ਪ੍ਰਕਾਸ਼ਿਤ** ਸਥਿਰ SemVer | ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਥਿਰ ਪੁਆਇੰਟਰ        | ਸਥਿਰ ਰੀਲੀਜ਼ਾਂ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ** ਬਾਅਦ** ਇੱਕ SemVer ਪਬਲਿਸ਼ ਨੌਕਰੀ — ਕਰਦਾ ਹੈ** ਨਹੀਂ** `main` ਜਾਂ ਅਣ-ਰਿਲੀਜ਼ ਕੀਤੇ `release/v*` ਕਮਿਟਾਂ ਨੂੰ ਟਰੈਕ ਕਰੋ |
+| `:next` / `:next-web`           | ਮੌਜੂਦਾ ਡਿਫੌਲਟ `release/v*` ਸ਼ਾਖਾ      | ਪਰਿਵਰਤਨਸ਼ੀਲ ਪ੍ਰੀ-ਰਿਲੀਜ਼ ਪੁਆਇੰਟਰ | ਟੈਸਟਿੰਗ ਫਿਕਸ ਜੋ ਸਰਗਰਮ ਰੀਲੀਜ਼ ਸ਼ਾਖਾ 'ਤੇ ਉਤਰੇ ਹਨ ਪਰ ਅਜੇ ਸਥਿਰ ਰੀਲੀਜ਼ ਵਿੱਚ ਨਹੀਂ ਹਨ                                                                |
+| `:main` / `:main-web`           | `main` ਸ਼ਾਖਾ                          | ਪਰਿਵਰਤਨਸ਼ੀਲ ਵਿਕਾਸ ਪੁਆਇੰਟਰ       | ਸਿਰਫ ਵਿਕਾਸ ਅਤੇ ਏਕੀਕਰਣ ਟੈਸਟਿੰਗ                                                                                                                 |
 
-ਉਪਰੋਕਤ ਹਰ ਚੈਨਲ ਇੱਕ `-web` ਟੈਗ (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) ਵਜੋਂ ਵੀ ਉਪਲਬਧ ਹੈ, ਜੋ `runner-web` ਪੜਾਅ ਤੋਂ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ — ਉਹੀ ਇਮੇਜ, ਨਾਲ Playwright ਅਤੇ ਇੱਕ Chromium ਬ੍ਰਾਊਜ਼ਰ। ਸਧਾਰਨ ਇਮੇਜ Chromium ਤੋਂ **ਬਿਨਾਂ** ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ; `gemini-web`, `claude-web` ਅਤੇ `claude-turnstile` ਨੂੰ ਇਸਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
+#### ਵੈੱਬ-ਸ਼ੈਸ਼ਨ ਪ੍ਰਦਾਤਾ: `-web` ਚਿੱਤਰ
 
-ਅਸਫਲਤਾ ਸਟਾਰਟਅੱਪ ਵੇਲੇ ਨਹੀਂ, ਸਗੋਂ ਬਾਅਦ ਲਈ ਟਾਲੀ ਜਾਂਦੀ ਹੈ: ਇਹ ਪ੍ਰਦਾਤਾ ਆਪਣੇ ਮਾਡਲਾਂ ਨੂੰ ਸੂਚੀਬੱਧ ਕਰਦੇ ਹਨ ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਕਨੈਕਟ ਹੋਏ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ, ਅਤੇ ਕੇਵਲ ਪਹਿਲੀ ਬੇਨਤੀ ਇਸ ਸੁਨੇਹੇ ਨਾਲ ਅਸਫਲ ਹੁੰਦੀ ਹੈ
+ਉਪਰੋਕਤ ਹਰੇਕ ਚੈਨਲ `-web` ਟੈਗ (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`) ਦੇ ਰੂਪ ਵਿੱਚ ਦੁੱਗਣਾ ਹੋ ਜਾਂਦਾ ਹੈ , `runner-web` ਪੜਾਅ — ਉਸੇ ਚਿੱਤਰ ਤੋਂ ਇਲਾਵਾ Playwright ਅਤੇ ਇੱਕ Chromium ਬ੍ਰਾਊਜ਼ਰ ਤੋਂ ਬਣਾਇਆ ਗਿਆ ਹੈ। ਸਾਦਾ ਚਿੱਤਰ ਜਹਾਜ਼** ਬਿਨਾ** ਕਰੋਮੀਅਮ; `gemini-web`, `claude-web` ਅਤੇ `claude-turnstile` ਇਸਦੀ ਲੋੜ ਹੈ।
+
+ਅਸਫਲਤਾ ਨੂੰ ਮੁਲਤਵੀ ਕੀਤਾ ਗਿਆ ਹੈ, ਸ਼ੁਰੂਆਤੀ ਸਮਾਂ ਨਹੀਂ: ਉਹ ਪ੍ਰਦਾਤਾ ਆਪਣੇ ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਬਣਾਉਂਦੇ ਹਨ ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਜੁੜੇ ਹੋਏ ਦਿਖਾਉਂਦੇ ਹਨ, ਅਤੇ ਸਿਰਫ਼ ਪਹਿਲੀ ਬੇਨਤੀ ਇਸ ਨਾਲ ਅਸਫਲ ਹੁੰਦੀ ਹੈ
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-ਜੇ ਤੁਸੀਂ ਇਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋ, ਤਾਂ ਉਸੇ ਚੈਨਲ ਦਾ `-web` ਟੈਗ ਪੁੱਲ ਕਰੋ ਜਿਸ ਉੱਤੇ ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ ਹੋ — ਹੋਰ ਕੁਝ ਨਹੀਂ ਬਦਲਦਾ। npm/CLI ਇੰਸਟਾਲ (ਕੋਈ Docker ਇਮੇਜ ਨਹੀਂ) ਉੱਤੇ ਇਸਦੇ ਬਰਾਬਰ ਗੁੰਮ ਹਿੱਸਾ ਬ੍ਰਾਊਜ਼ਰ ਬਾਈਨਰੀ ਹੈ: ਹੋਸਟ ਉੱਤੇ `npx playwright install chromium` ਚਲਾਓ।
+ਜੇ ਤੁਸੀਂ ਉਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋ, ਤਾਂ ਉਸ ਚੈਨਲ ਦੇ `-web` ਟੈਗ ਨੂੰ ਖਿੱਚੋ ਜੋ ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ — 'ਤੇ ਹੋ ਹੋਰ ਕੁਝ ਨਹੀਂ ਬਦਲਦਾ। ਇੱਕ npm/CLI ਇੰਸਟਾਲ (ਕੋਈ Docker ਚਿੱਤਰ ਨਹੀਂ) 'ਤੇ, ਬਰਾਬਰ ਦਾ ਗੁੰਮ ਹੋਇਆ ਟੁਕੜਾ ਬ੍ਰਾਊਜ਼ਰ ਬਾਈਨਰੀ ਹੈ: ਹੋਸਟ 'ਤੇ `npx playwright install chromium` ਚਲਾਓ।
 
 #### ਪ੍ਰੀ-ਰਿਲੀਜ਼ ਚੈਨਲ ਦੀ ਵਰਤੋਂ ਕਰਨਾ
 
-`next` ਚੈਨਲ ਨੂੰ ਮੌਜੂਦਾ ਡਿਫਾਲਟ `release/v*` ਬ੍ਰਾਂਚ ਉੱਤੇ ਹਰ push ਨਾਲ ਮੁੜ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ ਅਤੇ AMD64 ਅਤੇ ARM64 ਦੋਵਾਂ ਲਈ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਪੁਰਾਣੀਆਂ maintenance ਬ੍ਰਾਂਚਾਂ ਇਸਨੂੰ overwrite ਨਹੀਂ ਕਰ ਸਕਦੀਆਂ। ਇਹ ਚੈਨਲ ਉਹਨਾਂ fixes ਲਈ pull ਕੀਤੀ ਜਾ ਸਕਣ ਵਾਲੀ image ਮੁਹੱਈਆ ਕਰਦਾ ਹੈ ਜੋ ਅਗਲਾ stable tag ਬਣਾਏ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਸਰਗਰਮ release ਬ੍ਰਾਂਚ ਵਿੱਚ merge ਹੋ ਚੁੱਕੀਆਂ ਹਨ।
+`next` ਚੈਨਲ ਨੂੰ ਮੌਜੂਦਾ ਡਿਫਾਲਟ `release/v*` ਸ਼ਾਖਾ ਵਿੱਚ ਹਰ ਪੁਸ਼ 'ਤੇ ਦੁਬਾਰਾ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ ਅਤੇ AMD64 ਅਤੇ ARM64 ਦੋਵਾਂ ਲਈ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਪੁਰਾਣੀਆਂ ਰੱਖ-ਰਖਾਅ ਸ਼ਾਖਾਵਾਂ ਇਸ ਨੂੰ ਓਵਰਰਾਈਟ ਨਹੀਂ ਕਰ ਸਕਦੀਆਂ। ਚੈਨਲ ਉਹਨਾਂ ਫਿਕਸਾਂ ਲਈ ਇੱਕ ਖਿੱਚਣ ਯੋਗ ਚਿੱਤਰ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ ਜੋ ਅਗਲੇ ਸਟੇਬਲ ਟੈਗ ਨੂੰ ਕੱਟਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਿਆਸ਼ੀਲ ਰੀਲੀਜ਼ ਸ਼ਾਖਾ ਵਿੱਚ ਮਿਲ ਗਏ ਹਨ।
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Docker Compose ਲਈ, ਚੁਣੇ ਹੋਏ profile ਵੱਲੋਂ ਵਰਤੇ ਜਾਂਦੇ image tag ਨੂੰ override ਕਰੋ, ਫਿਰ service ਨੂੰ pull ਕਰਕੇ ਮੁੜ ਬਣਾਓ:
+Docker ਕੰਪੋਜ਼ ਲਈ, ਚੁਣੇ ਗਏ ਪ੍ਰੋਫਾਈਲ ਦੁਆਰਾ ਵਰਤੇ ਗਏ ਚਿੱਤਰ ਟੈਗ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰੋ, ਫਿਰ ਸੇਵਾ ਨੂੰ ਖਿੱਚੋ ਅਤੇ ਦੁਬਾਰਾ ਬਣਾਓ:
 
 ```yaml
 services:
@@ -523,30 +491,30 @@ docker compose up -d
 
 #### ਸੁਰੱਖਿਆ ਅਤੇ ਰੋਲਬੈਕ
 
-`next` ਇੱਕ ਬਦਲਦਾ ਰਹਿਣ ਵਾਲਾ pre-release ਚੈਨਲ ਹੈ। ਸਰਗਰਮ release ਬ੍ਰਾਂਚ ਉੱਤੇ ਕਿਸੇ ਵੀ push ਨਾਲ ਇਹ ਬਦਲ ਸਕਦਾ ਹੈ ਅਤੇ **production ਵਿੱਚ ਵਰਤੋਂ ਲਈ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ**। ਕਿਸੇ ਖ਼ਾਸ build ਦਾ ਮੁਲਾਂਕਣ ਕਰਦੇ ਸਮੇਂ image digest ਨੂੰ pin ਕਰੋ:
+`next` ਇੱਕ ਫਲੋਟਿੰਗ ਪ੍ਰੀ-ਰਿਲੀਜ਼ ਚੈਨਲ ਹੈ। ਇਹ ਸਰਗਰਮ ਰੀਲੀਜ਼ ਸ਼ਾਖਾ ਨੂੰ ਕਿਸੇ ਵੀ ਪੁਸ਼ 'ਤੇ ਬਦਲ ਸਕਦਾ ਹੈ ਅਤੇ ਹੈ** ਉਤਪਾਦਨ ਦੀ ਵਰਤੋਂ ਲਈ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ** . ਕਿਸੇ ਖਾਸ ਬਿਲਡ ਦਾ ਮੁਲਾਂਕਣ ਕਰਦੇ ਹੋਏ ਚਿੱਤਰ ਡਾਇਜੈਸਟ ਨੂੰ ਪਿੰਨ ਕਰੋ:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-ਟੈਸਟ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ, OmniRoute data volume ਜਾਂ bind-mounted data directory ਦਾ backup ਲਓ। ਰੋਲਬੈਕ ਕਰਨ ਲਈ, ਪਹਿਲਾਂ ਵਰਤੇ ਗਏ stable version ਜਾਂ digest ਨੂੰ restore ਕਰੋ ਅਤੇ container ਨੂੰ ਮੁੜ ਬਣਾਓ:
+ਜਾਂਚ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ, OmniRoute ਡੇਟਾ ਵਾਲੀਅਮ ਜਾਂ ਬਾਇੰਡ-ਮਾਊਂਟਡ ਡੇਟਾ ਡਾਇਰੈਕਟਰੀ ਦਾ ਬੈਕਅੱਪ ਲਓ। ਵਾਪਸ ਰੋਲ ਕਰਨ ਲਈ, ਪਹਿਲਾਂ ਵਰਤੇ ਗਏ ਸਥਿਰ ਸੰਸਕਰਣ ਨੂੰ ਰੀਸਟੋਰ ਕਰੋ ਜਾਂ ਡਾਇਜੈਸਟ ਕਰੋ ਅਤੇ ਕੰਟੇਨਰ ਨੂੰ ਦੁਬਾਰਾ ਬਣਾਓ:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-ਕਿਸੇ release-branch build ਨਾਲ `latest` ਕਦੇ ਵੀ ਅੱਗੇ ਨਹੀਂ ਵੱਧ ਸਕਦਾ; ਕੇਵਲ ਇੱਕ ਯੋਗ stable semantic version ਹੀ stable pointer ਨੂੰ promote ਕਰ ਸਕਦਾ ਹੈ। `next` images ਵਿੱਚ release image inspection ਅਤੇ ਰੋਕ ਲਗਾਉਣ ਵਾਲਾ CRITICAL-vulnerability gate ਬਰਕਰਾਰ ਰਹਿੰਦਾ ਹੈ।
+ਇੱਕ ਰੀਲਿਜ਼-ਬ੍ਰਾਂਚ ਬਿਲਡ ਕਦੇ ਵੀ `latest` ਹਿਲਾ ਨਹੀਂ ਸਕਦਾ; ਕੇਵਲ ਇੱਕ ਯੋਗ ਸਥਿਰ ਅਰਥ ਸੰਸਕਰਣ ਹੀ ਸਥਿਰ ਪੁਆਇੰਟਰ ਨੂੰ ਉਤਸ਼ਾਹਿਤ ਕਰ ਸਕਦਾ ਹੈ। `next` ਚਿੱਤਰ ਰੀਲੀਜ਼ ਚਿੱਤਰ ਨਿਰੀਖਣ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ ਅਤੇ CRITICAL- ਕਮਜ਼ੋਰੀ ਵਾਲੇ ਗੇਟ ਨੂੰ ਬਲੌਕ ਕਰਦੇ ਹਨ।
 
-**`latest`, git ਲਈ ਨਵੀਨਤਮ ਹੋਣ ਦੀ ਗਾਰੰਟੀ ਨਹੀਂ ਹੈ।** `main` ਜਾਂ ਸਰਗਰਮ `release/v*` ਬ੍ਰਾਂਚ ਉੱਤੇ merge ਕੀਤੀਆਂ fixes ਉਦੋਂ ਤੱਕ `:latest` ਵਿੱਚ **ਸ਼ਾਮਲ ਨਹੀਂ ਹੁੰਦੀਆਂ**, ਜਦੋਂ ਤੱਕ ਇੱਕ stable SemVer image ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਅਤੇ publish job `:latest` ਨੂੰ promote ਨਹੀਂ ਕਰਦੀ (ਉਸ SemVer ਵਾਲਾ ਹੀ digest)। ਜੇ GitHub ਉੱਤੇ fix ਪਹਿਲਾਂ ਹੀ ਦਿਖਾਈ ਦੇ ਰਹੀ ਹੈ ਪਰ `latest` ਰੁਕਿਆ ਹੋਇਆ ਲੱਗਦਾ ਹੈ, ਤਾਂ release ਬ੍ਰਾਂਚ ਨੂੰ ਟੈਸਟ ਕਰਨ ਲਈ `:next` pull ਕਰੋ ਜਾਂ SemVer tag ਦੀ ਉਡੀਕ ਕਰੋ।
+**`latest` git ਲਈ ਮੁਦਰਾ ਗਰੰਟੀ ਨਹੀਂ ਹੈ।** `main` ਤੇ ਜਾਂ ਸਰਗਰਮ `release/v*` ਸ਼ਾਖਾ 'ਤੇ ਵਿਲੀਨ ਕੀਤੇ ਫਿਕਸ ਹਨ** ਨਹੀਂ** `:latest` ਵਿੱਚ ਜਦੋਂ ਤੱਕ ਇੱਕ ਸਥਿਰ SemVer ਚਿੱਤਰ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਹੁੰਦਾ ਹੈ ਅਤੇ ਪ੍ਰਕਾਸ਼ਿਤ ਨੌਕਰੀ `:latest` ਉਤਸ਼ਾਹਿਤ ਕਰਦੀ ਹੈ (ਉਸ SemVer ਵਾਂਗ ਹੀ ਡਾਇਜੈਸਟ)। ਜੇਕਰ `latest` ਫ੍ਰੀਜ਼ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ ਜਦੋਂ ਕਿ GitHub ਪਹਿਲਾਂ ਹੀ ਫਿਕਸ ਦਿਖਾ ਰਿਹਾ ਹੈ, ਤਾਂ ਰੀਲੀਜ਼ ਸ਼ਾਖਾ ਦੀ ਜਾਂਚ ਕਰਨ ਲਈ `:next` ਖਿੱਚੋ ਜਾਂ SemVer ਟੈਗ ਦੀ ਉਡੀਕ ਕਰੋ।
 
-| ਤੁਸੀਂ ਕੀ ਚਾਹੁੰਦੇ ਹੋ                                                                | ਵਰਤੋ                                    |
-| ---------------------------------------------------------------------------------- | --------------------------------------- |
-| GitOps / production ਜਿਸ ਵਿੱਚ drift ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ                                | `:X.Y.Z` (ਜਾਂ image digest) ਨੂੰ pin ਕਰੋ |
-| ਪ੍ਰਕਾਸ਼ਿਤ stable releases ਨੂੰ follow ਕਰਨਾ ਅਤੇ ਹਰ release ਉੱਤੇ recreate ਸਵੀਕਾਰ ਕਰਨਾ | `:latest`                               |
-| ਅਪ੍ਰਕਾਸ਼ਿਤ `release/v*` commits ਨੂੰ ਟੈਸਟ ਕਰਨਾ                                      | `:next` (production ਲਈ ਨਹੀਂ)            |
-| `main` ਨੂੰ ਟੈਸਟ ਕਰਨਾ                                                               | `:main` (production ਲਈ ਨਹੀਂ)            |
+| ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ                                                         | ਵਰਤੋ                              |
+| ------------------------------------------------------------------------ | --------------------------------- |
+| GitOps /ਉਤਪਾਦਨ ਜੋ ਕਿ ਵਹਿਣਾ ਨਹੀਂ ਚਾਹੀਦਾ                                   | ਪਿੰਨ `:X.Y.Z` (ਜਾਂ ਚਿੱਤਰ ਡਾਇਜੈਸਟ) |
+| ਪ੍ਰਕਾਸ਼ਿਤ ਸਟੇਬਲ ਦੀ ਪਾਲਣਾ ਕਰੋ ਅਤੇ ਹਰੇਕ ਰੀਲੀਜ਼ 'ਤੇ ਇੱਕ ਰੀਕ੍ਰਿਏਟ ਸਵੀਕਾਰ ਕਰੋ | `:latest`                         |
+| ਅਪ੍ਰਕਾਸ਼ਿਤ `release/v*` ਕਮਿਟਾਂ ਦੀ ਜਾਂਚ ਕਰੋ                               | `:next` (ਉਤਪਾਦਨ ਨਹੀਂ)             |
+| ਟੈਸਟ `main`                                                              | `:main` (ਉਤਪਾਦਨ ਨਹੀਂ)             |
 
 ## Docker ਵਿੱਚ ਡੈਸ਼ਬੋਰਡ ਅੱਪਡੇਟ
 
