@@ -3,80 +3,88 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "basecheck-6d3f1d3f70e1-r1",
-    "kind": "base-check",
-    "candidateRef": "omni-queue/release-v3.8.55/basecheck-6d3f1d3f70e1-r1",
-    "candidateSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
-    "baseSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
-    "treeSha": null,
-    "prs": [],
+    "batchId": "b23",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b23-0563eb2ec52b",
+    "candidateSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
+    "baseSha": "5b6c0af52deb06d6f278adad542f988f58afc9e4",
+    "treeSha": "c74518f7610ed53955ea3c3b5f319ad45e27fd99",
+    "prs": [
+      {
+        "n": 20823,
+        "head": "6441b5b6f3587b771547c106caf91229fa556cfb",
+        "title": "test(security): pin linear model id parsing (CodeQL #1325, #1324, #1296)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T10:59:16Z"
+      },
+      {
+        "n": 20825,
+        "head": "2a48a0a823bf12139867cc9cf8b70814302c2689",
+        "title": "fix(security): bound caller grep regex in CCR and pin compression regex bounds (CodeQL #1349, #1301, #1302)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T10:59:23Z"
+      }
+    ],
     "stage": "testing",
-    "startedAt": "2026-11-21T16:17:27.540Z",
-    "attempts": 1,
-    "bisect": null,
-    "pendingRed": {
-      "batchId": "b22",
-      "candidateSha": "1656a66085161ea40ddd0d2405310ffe196e9786",
-      "prs": [
-        {
-          "n": 20823,
-          "head": "6441b5b6f3587b771547c106caf91229fa556cfb",
-          "title": "test(security): pin linear model id parsing (CodeQL #1325, #1324, #1296)",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-21T10:59:16Z"
-        },
-        {
-          "n": 20825,
-          "head": "2a48a0a823bf12139867cc9cf8b70814302c2689",
-          "title": "fix(security): bound caller grep regex in CCR and pin compression regex bounds (CodeQL #1349, #1301, #1302)",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-21T10:59:23Z"
-        },
-        {
-          "n": 20821,
-          "head": "e8c2057bcd703d4286c8a4144314a368b5f75e40",
-          "title": "fix(dashboard): head the Analytics counts as \"Used in this period\"",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-21T10:59:52Z"
-        },
-        {
-          "n": 20826,
-          "head": "7c50da1952cbead2b6773af66e7a5dcc56d07f02",
-          "title": "fix(api): let a remote dashboard read resilience state and skill executions",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-21T10:59:55Z"
-        },
-        {
-          "n": 20834,
-          "head": "997e83f68562c0c13d9ba65a8350201062dfea64",
-          "title": "fix(dashboard): validate the access-token, webhook and eval-suite forms inline",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-21T11:00:01Z"
-        },
-        {
-          "n": 20835,
-          "head": "9acef5ae62ca95180c2b220df2a746ab3b5cc209",
-          "title": "fix(dashboard): show a clear notice for local-only features on a remote session",
-          "author": "diegosouzapw",
-          "labeledAt": "2026-11-21T11:00:06Z"
-        }
+    "startedAt": "2026-11-21T18:03:58.692Z",
+    "attempts": 0,
+    "bisect": {
+      "rootBatchId": "b22",
+      "segments": [
+        [
+          {
+            "n": 20823,
+            "head": "6441b5b6f3587b771547c106caf91229fa556cfb",
+            "title": "test(security): pin linear model id parsing (CodeQL #1325, #1324, #1296)",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-21T10:59:16Z"
+          },
+          {
+            "n": 20825,
+            "head": "2a48a0a823bf12139867cc9cf8b70814302c2689",
+            "title": "fix(security): bound caller grep regex in CCR and pin compression regex bounds (CodeQL #1349, #1301, #1302)",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-21T10:59:23Z"
+          }
+        ],
+        [
+          {
+            "n": 20826,
+            "head": "7c50da1952cbead2b6773af66e7a5dcc56d07f02",
+            "title": "fix(api): let a remote dashboard read resilience state and skill executions",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-21T10:59:55Z"
+          },
+          {
+            "n": 20834,
+            "head": "997e83f68562c0c13d9ba65a8350201062dfea64",
+            "title": "fix(dashboard): validate the access-token, webhook and eval-suite forms inline",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-21T11:00:01Z"
+          },
+          {
+            "n": 20835,
+            "head": "9acef5ae62ca95180c2b220df2a746ab3b5cc209",
+            "title": "fix(dashboard): show a clear notice for local-only features on a remote session",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-21T11:00:06Z"
+          }
+        ]
       ],
-      "signatures": [
-        {
-          "check": "Gate / CI",
-          "key": "",
-          "infra": false
-        },
-        {
-          "check": "Unit Tests",
-          "key": "",
-          "infra": false
-        }
-      ],
-      "bisect": null
+      "culprits": [],
+      "landed": [],
+      "steps": 0,
+      "hang": false
     }
   },
   "baseChecks": [
+    {
+      "baseSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
+      "ref": "omni-queue/release-v3.8.55/basecheck-6d3f1d3f70e1-r1",
+      "status": "green",
+      "startedAt": "2026-11-21T16:17:27.540Z",
+      "signatures": []
+    },
     {
       "baseSha": "7bca1e353169686029e8beb28165df6007d80470",
       "ref": "omni-queue/release-v3.8.55/b16-7bca1e353169",
@@ -140,12 +148,12 @@
     }
   },
   "counters": {
-    "batchSeq": 22,
-    "ciRuns": 26,
+    "batchSeq": 23,
+    "ciRuns": 27,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
-    "bisections": 1,
+    "bisections": 2,
     "culprits": 1
   },
   "history": [
@@ -1718,8 +1726,58 @@
       "sha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
       "detail": "retry 1/1: checks timed out after 240 min",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44923728342"
+    },
+    {
+      "at": "2026-11-21T18:03:27.130Z",
+      "type": "checks-green",
+      "batchId": "basecheck-6d3f1d3f70e1-r1",
+      "prs": [],
+      "sha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44933350434"
+    },
+    {
+      "at": "2026-11-21T18:03:47.850Z",
+      "type": "bisect-split",
+      "batchId": "b22",
+      "prs": [
+        20823,
+        20825,
+        20821,
+        20826,
+        20834,
+        20835
+      ],
+      "sha": "1656a66085161ea40ddd0d2405310ffe196e9786",
+      "detail": "batch of 6 red: testing #20823, #20825, #20821 first",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44933350434"
+    },
+    {
+      "at": "2026-11-21T18:03:52.593Z",
+      "type": "pr-dequeued",
+      "batchId": "b22",
+      "prs": [
+        20821
+      ],
+      "detail": "withdrawn: already merged",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44933350434"
+    },
+    {
+      "at": "2026-11-21T18:04:01.542Z",
+      "type": "batch-started",
+      "batchId": "b23",
+      "prs": [
+        20823,
+        20825
+      ],
+      "sha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
+      "detail": "bisect of b22: 2 PR(s) on 5b6c0af52deb",
+      "labeledAt": {
+        "20823": "2026-11-21T10:59:16Z",
+        "20825": "2026-11-21T10:59:23Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44933350434"
     }
   ],
-  "updatedAt": "2026-11-21T17:50:58.780Z",
-  "batchWindow": 6
+  "updatedAt": "2026-11-21T18:04:20.326Z",
+  "batchWindow": 3
 }
