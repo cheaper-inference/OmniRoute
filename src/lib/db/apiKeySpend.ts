@@ -1,4 +1,5 @@
 import { getDbInstance } from "./core";
+import { tokenPriceableUsageSql, unpricedUnitUsageSql } from "./usageCostSql";
 
 interface UsageCostRow {
   storedCost: number | null;
@@ -26,13 +27,13 @@ export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCos
         LOWER(model) as model,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost,
-        SUM(CASE WHEN billing_unit IS NOT NULL AND COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN 1 ELSE 0 END) as unpricedUnitRequests,
+        SUM(CASE WHEN ${unpricedUnitUsageSql()} THEN 1 ELSE 0 END) as unpricedUnitRequests,
         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN 1 ELSE 0 END), 0) as unmeteredRequests,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) as promptTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as completionTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
-        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_input ELSE 0 END), 0) as promptTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_output ELSE 0 END), 0) as completionTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
+        COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql()} THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens,
         MIN(timestamp) as oldestTimestamp
       FROM usage_history
       WHERE api_key_id = @apiKeyId

@@ -136,6 +136,8 @@ export function ensureUsageHistoryAccountIndex(db: SqliteDatabase) {
 // Cloud initialization uses the inline schema without versioned migrations.
 // Reconcile stored-cost columns here as well as in the disk migration path.
 const USAGE_HISTORY_BILLING_COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  // Billing predicates distinguish reranks from token-priced chat/embedding aliases.
+  ["endpoint", "TEXT"],
   ["provider_cost_usd", "REAL CHECK(provider_cost_usd >= 0)"],
   ["calculated_cost_usd", "REAL CHECK(calculated_cost_usd >= 0)"],
   ["billing_unit", "TEXT"],
