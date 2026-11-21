@@ -9,6 +9,7 @@
  * - one timeout bounds the whole round trip, body included, and a caller abort cancels it;
  * - failures are status-only: an upstream body can echo the prompt or the key.
  */
+import { DEFAULT_DECISION_TIMEOUT_MS, MAX_DECISION_TIMEOUT_MS } from "./config.ts";
 import { DECISION_MODEL_REQUEST_HEADER, type DecisionFailureReason } from "./types.ts";
 
 export const MAX_DECISION_RESPONSE_BYTES = 64 * 1024;
@@ -144,7 +145,13 @@ export async function postDecisionJson(options: DecisionPostOptions): Promise<De
   };
   const onCallerAbort = () => stop("timeout");
   options.signal?.addEventListener("abort", onCallerAbort, { once: true });
-  const timer = setTimeout(() => stop("timeout"), options.timeoutMs);
+  // Callers pass a clamped value already; the explicit bound here keeps the timer delay
+  // provably capped at the call site, whatever a future caller passes.
+  const timeoutMs =
+    options.timeoutMs > 0 && options.timeoutMs <= MAX_DECISION_TIMEOUT_MS
+      ? options.timeoutMs
+      : DEFAULT_DECISION_TIMEOUT_MS;
+  const timer = setTimeout(() => stop("timeout"), timeoutMs);
 
   const operation = async (): Promise<unknown> => {
     const transport = options.transport ?? defaultDecisionTransport;
@@ -156,7 +163,7 @@ export async function postDecisionJson(options: DecisionPostOptions): Promise<De
         [DECISION_MODEL_REQUEST_HEADER]: "1",
       },
       body: JSON.stringify(options.body),
-      timeoutMs: options.timeoutMs,
+      timeoutMs,
       signal: controller.signal,
       redirect: "error",
     });

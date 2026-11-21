@@ -11,7 +11,11 @@
  */
 import { extractPanelText } from "../fusion.ts";
 import type { ComboCollectionLike, HandleSingleModel } from "../combo/types.ts";
-import { clampDecisionTimeout } from "./config.ts";
+import {
+  clampDecisionTimeout,
+  DEFAULT_DECISION_TIMEOUT_MS,
+  MAX_DECISION_TIMEOUT_MS,
+} from "./config.ts";
 import { decisionDepth, runInDecisionScope } from "./scope.ts";
 import { readBoundedJson } from "./transport.ts";
 import {
@@ -122,7 +126,10 @@ function dispatchInScope(
 
 export function createComboModelDecider(options: ComboModelDeciderOptions): Decider {
   const now = options.now ?? Date.now;
-  const timeoutMs = clampDecisionTimeout(options.timeoutMs);
+  const clamped = clampDecisionTimeout(options.timeoutMs);
+  // Explicit upper bound at the timer site (the clamp above already enforces it).
+  const timeoutMs =
+    clamped > 0 && clamped <= MAX_DECISION_TIMEOUT_MS ? clamped : DEFAULT_DECISION_TIMEOUT_MS;
 
   return async (request) => {
     const model = options.model?.trim();
