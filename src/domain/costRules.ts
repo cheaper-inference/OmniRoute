@@ -33,6 +33,7 @@ import { recordLedgerFromCost } from "@/lib/usage/costLedgerRecorder";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { recordUnpricedKeyQuotaUsage } from "@/domain/keyQuota";
 import { isFlatRateProvider } from "@/lib/usage/flatRateProviders";
+import { getBudgetTimeZone, getZonedBudgetWindow } from "@/domain/budgetWindowZone";
 
 export type BudgetResetInterval = "daily" | "weekly" | "monthly";
 
@@ -190,6 +191,8 @@ export function getBudgetWindow(
 ): BudgetWindow {
   const current = new Date(now);
   const [hours, minutes] = getResetTimeParts(normalizeResetTime(resetTime));
+  const zone = getBudgetTimeZone();
+  if (zone) return getZonedBudgetWindow(zone, resetInterval, hours, minutes, now);
   const year = current.getUTCFullYear();
   const month = current.getUTCMonth();
   const day = current.getUTCDate();
