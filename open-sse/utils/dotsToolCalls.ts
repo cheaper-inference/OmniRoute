@@ -104,8 +104,8 @@ function coerceUntyped(value: string): unknown {
 }
 
 function coerceNumeric(trimmed: string, raw: string, integer: boolean): unknown {
-  const n = integer ? parseInt(trimmed, 10) : parseFloat(trimmed);
-  return isNaN(n) ? raw : n;
+  const n = Number(trimmed);
+  return trimmed !== "" && Number.isFinite(n) && (!integer || Number.isInteger(n)) ? n : raw;
 }
 
 function coerceBoolean(trimmed: string, raw: string): unknown {
@@ -214,7 +214,7 @@ function generateCallId(): string {
 interface ToolIndex {
   declared: unknown[];
   schemas: Map<string, unknown>;
-  defs: Record<string, unknown>;
+  defs: Map<string, Record<string, unknown>>;
 }
 
 /** Schema of one tools[] entry in either shape (OpenAI parameters / Anthropic input_schema). */
@@ -234,13 +234,15 @@ function declaredNameOfTool(tool: unknown): string {
 }
 
 function buildToolIndex(tools: unknown[]): ToolIndex {
-  const index: ToolIndex = { declared: tools, schemas: new Map(), defs: {} };
+  const index: ToolIndex = { declared: tools, schemas: new Map(), defs: new Map() };
   for (const tool of tools) {
     const name = declaredNameOfTool(tool);
     const schema = schemaOfTool(tool);
     if (!name || !schema) continue;
     index.schemas.set(name, schema);
-    collectDefs(schema, index.defs);
+    const defs: Record<string, unknown> = {};
+    collectDefs(schema, defs);
+    index.defs.set(name, defs);
   }
   return index;
 }
@@ -279,7 +281,11 @@ function parseInvokeBody(inner: string, index: ToolIndex): DotsToolCall | null |
   const invokeInner = invokeEndMatch
     ? inner.slice((invokeMatch.index ?? 0) + invokeMatch[0].length, invokeEndMatch.index)
     : "";
-  const args = parseInvokeArgs(invokeInner, index.schemas.get(toolName), index.defs);
+  const args = parseInvokeArgs(
+    invokeInner,
+    index.schemas.get(toolName),
+    index.defs.get(toolName) ?? {}
+  );
   return makeToolCall(toolName, JSON.stringify(args));
 }
 

@@ -233,3 +233,36 @@ test("OpenAI sanitizer: JSON-fallback string arguments always reach tool_calls a
   assert.equal(kept.tool_calls, undefined);
   assert.equal(kept.content, bad);
 });
+
+test("Claude stream preserves Dots numeric values and tool-local definitions together", () => {
+  const tools = [
+    {
+      name: "string_tool",
+      input_schema: {
+        $defs: { Value: { type: "string" } },
+        properties: { n: { $ref: "#/$defs/Value" } },
+      },
+    },
+    {
+      name: "count",
+      input_schema: {
+        $defs: { Value: { type: "integer" } },
+        properties: { n: { $ref: "#/$defs/Value" } },
+      },
+    },
+  ];
+  const events = runStream(tools, [
+    '<dots_function_call><invoke name="string_tool"><parameter name="n">007</parameter></invoke></dots_function_call>',
+    '<dots_function_call><invoke name="count"><parameter name="n">1e3</parameter></invoke></dots_function_call>',
+  ]);
+  const uses = toolUses(events);
+  assert.deepEqual(
+    uses.map((event) => event.content_block?.name),
+    ["string_tool", "count"]
+  );
+  assert.deepEqual(
+    uses.map((event) => event.content_block?.input),
+    [{ n: "007" }, { n: 1000 }]
+  );
+  assert.equal(textOf(events), "");
+});
