@@ -181,11 +181,13 @@ test("inferGithubUnsyncedTargetFormat covers gh / ghe-copilot ids, prefixes and 
     assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-5.5"), "openai-responses");
     assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-5.1-codex"), "openai-responses");
     assert.equal(inferGithubUnsyncedTargetFormat(providerId, "codex-mini"), "openai-responses");
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "GPT-5.1-CoDeX"), "openai-responses");
     assert.equal(
       inferGithubUnsyncedTargetFormat(providerId, `${providerId}/gpt-6-sol`),
       "openai-responses"
     );
     assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-5.4"), undefined);
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-6\nmini"), undefined);
     assert.equal(inferGithubUnsyncedTargetFormat(providerId, "claude-codex"), undefined);
     assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gemini-gpt-6"), undefined);
   }

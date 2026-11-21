@@ -149,36 +149,22 @@ sí i — tún **runner kan ṣoṣo** bẹ̀rẹ̀ lẹ́ẹ̀kan, nígbà tí 
   27–32 láti dé sórí tmpfs, ó sì gba ìṣẹ́jú 2 láti ṣe upload láti disk.
 - VPS `.15` jẹ́ ti homologation nìkan — kò gbọdọ̀ ṣiṣẹ́ àwọn runner CI láé.
 
-## Ọ̀nà tí a gbàlejò (àwọn runner tí GitHub gbàlejò)
+## Ọ̀nà tí a gbàlejò (Àwọn asare tí a gbàlejò GitHub)
 
-Repository náà jẹ́ ti àjọ `cheaper-inference`, lórí ètò **Team**: **iṣẹ́ gbígbàlejò 60
-tí ó lè ṣiṣẹ́ lẹ́ẹ̀kan náà**, tí gbogbo repository nínú àjọ náà, gbogbo àyẹ̀wò PR,
-gbogbo ìṣàn-iṣẹ́ tí push ń mú ṣiṣẹ́ àti ètò àìrídìmú CodeQL ń pín. A wọn àwọn nọ́ńbà tó wà nísàlẹ̀ lórí
-ètò **Pro** (iṣẹ́ gbígbàlejò 40 tí ó lè ṣiṣẹ́ lẹ́ẹ̀kan náà). Gẹ́gẹ́ bí a ṣe wọn án ní 2026-10-18 nígbà
-ìpolongo ìdapọ̀ (~ìdapọ̀ 10/wákàtí lórí `release/v3.8.52`): **ìṣiṣẹ́ ìṣàn-iṣẹ́ 2,500 ni a ṣẹ̀dá láàárín
-24 h**, push 44 sí ẹ̀ka náà láàárín 6 h, **iṣẹ́ gbígbàlejò 106 dúró ní ìlà** nígbà tí àwọn àyẹ̀wò PR dúró fún
-ọ̀pọ̀ wákàtí tí a sì dapọ̀ àwọn PR láìsí wọn. Ìṣàn-iṣẹ́ mẹ́sàn-án bẹ̀rẹ̀ lórí gbogbo push sí ẹ̀ka náà:
+Ibi ipamọ jẹ ti ajo `cheaper-inference`, lori awọn** Egbe** ètò:** 60 ti gbalejo nigbakanna ise** , pín nipasẹ gbogbo ibi ipamọ ninu ajo, gbogbo PR ayẹwo, gbogbo titari-nfa bisesenlo ati CodeQL's aiyipada setup. Awọn isiro ni isalẹ won won lori awọn** Pro** ètò (40 igba ti gbalejo ise). Tiwọn ni 2026-10-18 lakoko ipolongo apapọ (~ 10 merges/hour lori `release/v3.8.52`):** 2,500 ṣiṣiṣẹsẹhin iṣẹ ti a ṣẹda ni awọn wakati 24** , Titari 44 si ẹka ni wakati 6,** 106 ti gbalejo ise queued** nigba ti awọn sọwedowo PR duro fun awọn wakati ati PRs ti dapọ laisi wọn. Awọn ṣiṣan iṣẹ mẹsan ti ta lori gbogbo titari si ẹka:
 
-| fún push kọ̀ọ̀kan sí `release/v*`             | àwọn iṣẹ́ gbígbàlejò | àbájáde lábẹ́ ìjì náà                                                  | láti 2026-10-18                                                                    |
-| ------------------------------------------- | ------------------: | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `ci.yml` (matrix kíkún)                     |          títí dé 30 | push tó tẹ̀ lé fagilé e, 24 nínú 24 ní ọjọ́ kan                         | kò bẹ̀rẹ̀ lórí àwọn push `release/**` (ìṣiṣẹ́ PR + Release-Green)                     |
-| `quality.yml`                               |                  ~6 | a fagilé e, 23 nínú 23                                                | kò bẹ̀rẹ̀ lórí àwọn push `release/**`                                                |
-| `Release-Green` `--quick`                   |                   0 | ṣiṣẹ́ lórí `omni-build`, a fagilé 97 nínú 100                          | ààyè `omni-release`, a kì í fagilé e, àwọn ìṣiṣẹ́ tó ń dúró ni a ṣọ̀kan              |
-| `Lock released branch`, `OpenSSF Scorecard` |                   2 | ìṣiṣẹ́ kan nínú ìlà fún push kọ̀ọ̀kan                                    | ìṣiṣẹ́ kan fún ref kọ̀ọ̀kan (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
-| `Release acceptance` (ìròyìn ojiji)         |                   1 | `npm ci` gbígbàlejò kan fún push kọ̀ọ̀kan, a kì í fagilé e              | kò yí padà — ó lè yẹ fún àsẹ̀ `paths:`                                              |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                   2 | a fagilé fún push kọ̀ọ̀kan; ẹsẹ̀ amd64 ń bá iṣẹ́ lórí `omni-build` díje   | kò yí padà — ọ̀nà ìmúṣiṣẹ́ olówó rẹ̀                                                  |
-| Ètò àìrídìmú CodeQL (`dynamic`)             |                   4 | `javascript-typescript`, `actions`, `c-cpp`, `python` fún push kọ̀ọ̀kan | kò yí padà — Settings → Code security; `c-cpp`/`python` kò ṣe àyẹ̀wò ohunkóhun níbí |
+| fun titari si `release/v*`                  | ti gbalejo ise | abajade labẹ iji                                                 | niwon 2026-10-18                                                          |
+| ------------------------------------------- | -------------: | ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `ci.yml` (matrix kikun)                     |          to 30 | fagilee nipasẹ titari atẹle, 24 ti 24 ni ọjọ kan                 | ko bẹrẹ lori awọn titari `release/**` (PR run + Tu-Alawọ ewe)             |
+| `quality.yml`                               |             ~6 | fagilee, 23 ti 23                                                | ko bere lori `release/**` titari                                          |
+| `Release-Green` `--quick`                   |              0 | ran lori `omni-build`, fagilee 97 ti 100                         | `omni-release` Iho, kò pawonre, ni isunmọtosi ni run collapses            |
+| `Lock released branch`, `OpenSSF Scorecard` |              2 | ọkan queued run fun titari                                       | ṣiṣe ọkan fun atunṣe (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (iroyin ojiji)         |              1 | ọkan ti gbalejo `npm ci` fun titari, ko fagilee                  | oludije — ti ko yipada fun àlẹmọ `paths:`                                 |
+| `Publish to Docker Hub` → `Deploy to VPS`   |              2 | fagilee fun titari; amd64 ẹsẹ dije lori `omni-build`             | ikanni imuṣiṣẹ oniwun — ko yipada                                         |
+| Eto aiyipada CodeQL (`dynamic`)             |              4 | `javascript-typescript`, `actions`, `c-cpp`, `python` fun titari | ko yipada — Eto → koodu aabo; `c-cpp`/`python` ọlọjẹ ohunkohun nibi       |
 
-`tests/unit/build/push-storm-diet.test.ts` mú ìmúnibẹ̀rẹ̀ nípasẹ̀ push sí `main` nìkan fún `ci.yml` àti
-`quality.yml` dúró ṣinṣin. Ìyọrísí ẹ̀gbẹ́: Codecov kò gba ìgbésókè ìpìlẹ̀ mọ́ fún push ìtújáde kọ̀ọ̀kan (ìgbésẹ̀
-náà jẹ́ fún ìfúnni ní ìsọfúnni, ó sì ní `continue-on-error`); ẹnu-ọ̀nà coverage inú repo àti àsọyé PR
-kò ní ipa kankan.
+`tests/unit/build/push-storm-diet.test.ts` pin si `main` -only titari okunfa ti `ci.yml` ati `quality.yml`. Ipa ẹgbẹ: Codecov ko tun gba ikojọpọ ipilẹ fun titari itusilẹ (igbesẹ naa jẹ alaye ati `continue-on-error`); ẹnu-ọna agbegbe in-repo ati asọye PR ko ni ipa.
 
-**Àfikún agbára tí a gbàlejò fúnra ẹni kò lè tún ìlà gbígbàlejò náà ṣe.** Devbox náà
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) lè gbà runner kan sílẹ̀, ṣùgbọ́n àwọn session agent ti ń
-mú kí load rẹ̀ wà ní 20–26, container agent náà kò ní daemon Docker, ọ̀nà tí ó sì ti kún ni
-ọ̀nà gbígbàlejò. Ẹ̀rọ `.113` ní 71 GB ọ̀fẹ́ àti load 5–8 ní àsìkò kan náà; ìdíwọ́ rẹ̀
-ni ìwọ̀n memory fún listener kọ̀ọ̀kan tí a mẹ́nu kàn lókè (ààlà listener 6), kì í ṣe CPU. Àwọn ọ̀nà
-tó kù jẹ́ ti ìlànà iṣẹ́: darapọ̀ àwọn PR ìpolongo nípasẹ̀ ìlà Mergify (`label=queue`, àwọn batch ń pín
-ìṣiṣẹ́ CI `merge_group` kan dípò ìṣiṣẹ́ kan fún PR kọ̀ọ̀kan àti ọ̀kan fún push kọ̀ọ̀kan), dín àwọn èdè
-ètò àìrídìmú CodeQL kù, kí o sì fi àwọn fáìlì tí `release-acceptance.yml` ń kà ṣe àsẹ̀ rẹ̀.
+**Agbara gbigbalejo ti ara ẹni diẹ sii ko ṣatunṣe isinyi ti gbalejo.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) le gbalejo olusare kan, ṣugbọn awọn akoko aṣoju ti tọju ẹru rẹ tẹlẹ ni 20-26, eiyan aṣoju ko ni Docker daemon, ati pe ọna ti o kun ni ọkan ti o gbalejo. Apoti `.113` ni 71 GB ọfẹ ati fifuye 5–8 ni akoko kanna; Idiwọn rẹ jẹ isuna iranti olutẹtisi fun oke (awọn olutẹtisi aja 6), kii ṣe CPU. Awọn lefa ti o ku jẹ awọn ilana: ipolongo ilẹ PRs nipasẹ isinyi Mergify (`label=queue`, batches pin ọkan `merge_group` CI ṣiṣe dipo ti ọkan run fun PR plus ọkan fun titari), gee CodeQL aiyipada-ede awọn ede, ati àlẹmọ `release-acceptance.yml` nipasẹ awọn faili ti o ka.
+
+> **2026-11-19: ti isinyi Mergify àkópọ ti fẹyìntì** (ipinnu eni). `.mergify.yml` ko ṣe alaye ti isinyi mọ ati kọ awọn aṣẹ Mergify ti o dapọ tabi tunkọ ibeere fa. Tu PRs ti wa ni dapọ nipa ọwọ labẹ awọn ibi ipamọ awọn ofinet "Beere alawọ ewe ibode lori awọn ti nṣiṣe lọwọ Tu" (`Gate / CI` + `Gate / Quality`) titi omni-isinyi gbalaye ni ifiwe mode, ati nipasẹ omni-isinyi lẹhin ti ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Lefa Mergify loke ko si mọ.
