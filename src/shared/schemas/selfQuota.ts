@@ -10,7 +10,12 @@
  */
 
 import { z } from "zod";
-import { PolicySchema, QuotaUnitSchema, QuotaWindowSchema } from "@/lib/quota/dimensions";
+import {
+  BorrowModeSchema,
+  PolicySchema,
+  QuotaUnitSchema,
+  QuotaWindowSchema,
+} from "@/lib/quota/dimensions";
 
 export const selfQuotaStatusSchema = z.enum(["ok", "stale", "unavailable"]);
 
@@ -27,6 +32,9 @@ const share = z.object({
   remaining: z.number().nullable(),
   status: selfQuotaStatusSchema,
   reason: z.string().optional(),
+  // What the key may use above its share now, lent by other keys (an aggregate). Set only in a
+  // consent pool. null when it does not apply to the key's policy or cannot be read.
+  borrowAvailable: z.number().nullable().optional(),
 });
 
 // Pool bucket; limit = plan limit x accounts.
@@ -66,7 +74,12 @@ const pool = z.object({
   ref: z.string(),
   name: z.string(),
   provider: z.string(),
-  borrowMode: z.literal("saturation"),
+  borrowMode: BorrowModeSchema,
+  // The key's own lending consent. lendingUntil is epoch ms. lendingActive is true only in a
+  // consent pool, with a percentage above 0 and the deadline not reached.
+  lendingPercent: z.number().int().min(0).max(100).default(0),
+  lendingUntil: z.number().int().nullable().default(null),
+  lendingActive: z.boolean().default(false),
   policy: PolicySchema,
   weight: z.number() /* the weight the gate uses */,
   cap: z.object({ unit: QuotaUnitSchema, value: z.number() }).nullable(),

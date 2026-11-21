@@ -32,8 +32,13 @@ export function input(over: Partial<QuotaSelfViewInput> = {}): QuotaSelfViewInpu
   };
 }
 
-export function alloc(apiKeyId: string, weight: number): PoolAllocation {
-  return { apiKeyId, weight, policy: "hard" };
+/** `extra` adds fields such as the lending consent (`lendingPercent`, `lendingUntil`) or a policy. */
+export function alloc(
+  apiKeyId: string,
+  weight: number,
+  extra: Partial<Omit<PoolAllocation, "apiKeyId" | "weight">> = {}
+): PoolAllocation {
+  return { apiKeyId, weight, policy: "hard", ...extra };
 }
 
 type LooseDimension = { unit: string; window: string; limit: number };
