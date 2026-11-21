@@ -135,6 +135,22 @@ describe("my spend", () => {
     expect(within(table).getByText("$6.00").className).toContain("tabular-nums");
   });
 
+  it("a cut per-model list says its totals may be partial", async () => {
+    const notice =
+      "This list holds the 50 most used provider and model pairs, so a model's totals may be partial.";
+    renderWithKey({ [QUOTA]: quotaOk, [USAGE]: () => jsonResponse(usageSeries()) });
+    await screen.findByRole("table", { name: "Usage by model" });
+    expect(screen.queryByText(notice)).toBeNull();
+    await restart();
+
+    renderWithKey({
+      [QUOTA]: quotaOk,
+      [USAGE]: () => jsonResponse(usageSeries({ byModelTruncated: true })),
+    });
+    await screen.findByRole("table", { name: "Usage by model" });
+    expect(screen.getByText(notice)).toBeTruthy();
+  });
+
   it("the daily chart has a text alternative", async () => {
     renderWithKey({ [QUOTA]: quotaOk, [USAGE]: () => jsonResponse(usageSeries()) });
     expect(

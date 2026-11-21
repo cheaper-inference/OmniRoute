@@ -725,7 +725,8 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
   (`retention.usageHistory` in the database settings). `coverage.truncatedByRetention` is true
   when the requested range is longer than that setting. It compares the two numbers and does not
   check whether rows are actually missing.
-- Provider and model are returned as recorded for the key's own requests. A combo request whose
+- Provider is returned as recorded for the key's own requests. Model is the recorded name after
+  its last `/`, and rows are grouped by it. A combo request whose
   every target was refused is recorded with the routing label as provider (the combo name, `auto`
   or `combo`) and the model string the client sent. Other refused requests, for example by an
   open circuit breaker, a model cooldown or a quota-parked skip, keep the target provider and
@@ -734,7 +735,8 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
   the first and last request.
 - `byModel` lists the 50 provider-and-model pairs with the most requests. With more pairs its
   entries do not add up to `summary`, and `summary.uniqueModels` counts every recorded model
-  spelling.
+  spelling. `byModelTruncated` is then true, and a model whose pairs fall on both sides of the
+  cut shows partial totals.
 - Two costs are reported. `costUsd` is the billed cost, as the usage analytics show it.
   Flat-rate subscription providers, such as the Claude Code plan, count $0 there. `listPriceUsd`
   is the same usage priced at list price, subscriptions included. A request whose model has no

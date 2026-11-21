@@ -20,7 +20,8 @@
  * is already before `now` (the window reset since it was read), is `stale` with its numbers kept.
  *
  * Model windows are listed only for providers in PLAN_WINDOW_CACHE_KEYS, whose other cache keys
- * are model or surface names. Other providers can key their cache by operator-chosen names or
+ * are model or surface names. They come from the entry's `quotas` and `modelQuotas` (where Claude
+ * keeps its per-model weekly windows), minus the plan windows. Other providers can key their cache by operator-chosen names or
  * upstream key/limit ids, so none of their labels is copied: their `windows` is empty.
  */
 
@@ -39,9 +40,13 @@ import {
   type PercentShares,
   type PercentShareState,
 } from "./selfViewPercent";
-import type { AccountQuotaEntryLike, SelfViewPoolContext } from "./selfViewTypes";
+import type {
+  AccountQuotaEntryLike,
+  CachedQuotaWindow,
+  SelfViewPoolContext,
+} from "./selfViewTypes";
 
-type CachedWindow = NonNullable<AccountQuotaEntryLike["quotas"]>[string];
+type CachedWindows = Record<string, CachedQuotaWindow>;
 type PercentDimension = QuotaDimension & { unit: "percent" };
 type ModelWindows = NonNullable<SelfQuotaAccount["modelWindows"]>;
 
@@ -66,7 +71,7 @@ const PLAN_WINDOW_CACHE_KEYS: Readonly<Record<string, Partial<Record<string, str
 /** The entry's state: a fixed reason when it carries no readings, else ok/stale. */
 type EntryState =
   | { status: "unavailable"; reason: string }
-  | { status: SelfQuotaStatus; quotas: NonNullable<AccountQuotaEntryLike["quotas"]> };
+  | { status: SelfQuotaStatus; quotas: CachedWindows; modelQuotas: CachedWindows };
 
 function entryState(entry: AccountQuotaEntryLike | undefined): EntryState {
   if (!entry) return { status: "unavailable", reason: NOT_AVAILABLE };
@@ -75,18 +80,28 @@ function entryState(entry: AccountQuotaEntryLike | undefined): EntryState {
       entry.reason && KNOWN_ENTRY_REASONS.has(entry.reason) ? entry.reason : NOT_AVAILABLE;
     return { status: "unavailable", reason };
   }
-  return { status: entry.stale ? "stale" : "ok", quotas: entry.quotas ?? {} };
+  return {
+    status: entry.stale ? "stale" : "ok",
+    quotas: entry.quotas ?? {},
+    modelQuotas: entry.modelQuotas ?? {},
+  };
 }
 
 function cachedWindow(
   provider: string,
   window: string,
-  quotas: NonNullable<AccountQuotaEntryLike["quotas"]>
-): CachedWindow | null {
+  quotas: CachedWindows
+): CachedQuotaWindow | null {
   const key = PLAN_WINDOW_CACHE_KEYS[provider]?.[window];
   if (!key || !Object.prototype.hasOwnProperty.call(quotas, key)) return null;
   const reading = quotas[key];
   return reading && Number.isFinite(reading.usedPercentage) ? reading : null;
+}
+
+/** The reading's reset time when it parses as a date, else null. */
+function readingResetAt(reading: CachedQuotaWindow): string | null {
+  const { resetAt } = reading;
+  return typeof resetAt === "string" && Number.isFinite(Date.parse(resetAt)) ? resetAt : null;
 }
 
 /** "stale" when the reading's window already reset before `now`; an unparseable time is ignored. */
@@ -112,7 +127,7 @@ function accountBar(
   return {
     used: (reading.usedPercentage / 100) * dim.limit,
     status: readingStatus(state.status, reading.resetAt, now),
-    resetAt: reading.resetAt ?? null,
+    resetAt: readingResetAt(reading),
   };
 }
 
@@ -125,9 +140,10 @@ function modelWindowsOf(provider: string, state: EntryState, now: number): Model
   const planKeys = new Set(Object.values(mapping));
   const windows: ModelWindows["windows"] = [];
   let status = state.status;
-  for (const [label, reading] of Object.entries(state.quotas)) {
+  const readings = [...Object.entries(state.quotas), ...Object.entries(state.modelQuotas)];
+  for (const [label, reading] of readings) {
     if (planKeys.has(label) || !reading || !Number.isFinite(reading.usedPercentage)) continue;
-    windows.push({ label, usedPercent: reading.usedPercentage, resetAt: reading.resetAt ?? null });
+    windows.push({ label, usedPercent: reading.usedPercentage, resetAt: readingResetAt(reading) });
     status = readingStatus(status, reading.resetAt, now);
   }
   return { status, windows };

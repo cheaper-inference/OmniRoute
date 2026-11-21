@@ -165,6 +165,7 @@ export function usageSeries(over: Partial<SelfUsageResponse> = {}): SelfUsageRes
     daily: [usageDay(), usageDay({ date: "2026-05-27" })],
     dailyByModel: [],
     byModel: [usageModelRow()],
+    byModelTruncated: false,
     byProvider: [],
     ...over,
   });

@@ -17,10 +17,16 @@ export interface AccountQuotaEntryLike {
   available?: false;
   reason?: string;
   stale?: boolean;
-  quotas?: Record<
-    string,
-    { usedPercentage: number; remainingPercentage: number; resetAt: string | null }
-  >;
+  quotas?: Record<string, CachedQuotaWindow>;
+  /** Model-scoped windows kept apart by the provider (Claude's per-model weekly windows). */
+  modelQuotas?: Record<string, CachedQuotaWindow>;
+}
+
+/** One normalized provider-limits window, as a percentage. */
+export interface CachedQuotaWindow {
+  usedPercentage: number;
+  remainingPercentage: number;
+  resetAt: string | null;
 }
 
 export interface QuotaSelfViewInput {

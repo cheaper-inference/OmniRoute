@@ -26,10 +26,15 @@ const NUMBER_CELL = `${CELL} whitespace-nowrap text-right tabular-nums`;
 
 interface SpendByModelTableProps {
   rows: SelfUsageResponse["byModel"];
+  /** The answer's `byModelTruncated`: more pairs existed than the answer carries. */
+  truncated: boolean;
 }
 
-/** The period's usage per model (pairs of one model under several providers summed). */
-export default function SpendByModelTable({ rows }: SpendByModelTableProps) {
+/**
+ * The period's usage per model (pairs of one model under several providers summed). When the
+ * answer cut its list of pairs, one sentence says a model's totals may be partial.
+ */
+export default function SpendByModelTable({ rows, truncated }: SpendByModelTableProps) {
   const t = useTranslations("quotaSelf");
   const number = useFormatNumber();
   const models = mergeUsageByModel(rows);
@@ -70,6 +75,9 @@ export default function SpendByModelTable({ rows }: SpendByModelTableProps) {
           ))}
         </TableBody>
       </Table>
+      {truncated ? (
+        <p className="min-w-0 break-words text-sm text-text-muted">{t("spendByModelTruncated")}</p>
+      ) : null}
     </div>
   );
 }

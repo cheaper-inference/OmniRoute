@@ -78,7 +78,7 @@ export default function MySpendSection() {
               <>
                 <SpendSummary summary={data.summary} />
                 <SpendDailyChart daily={data.daily} />
-                <SpendByModelTable rows={data.byModel} />
+                <SpendByModelTable rows={data.byModel} truncated={data.byModelTruncated} />
               </>
             )}
             {data.coverage.truncatedByRetention ? (
