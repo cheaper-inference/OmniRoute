@@ -304,6 +304,22 @@ Once you've run `omniroute connect <host>` (see
 automatically target that remote server and use its scoped access token — no
 extra flags needed. Override per-invocation with `--remote` / `--api-key`.
 
+`omniroute fcc-claude` refuses to send your API key to a remote target over plain
+`http://`, since the key would travel in plaintext. It prints this to stderr and
+exits with status 1:
+
+```text
+[fcc-claude] Refusing to send your OmniRoute API key in plaintext to http://192.168.0.15:20128: it is plain http:// and not a loopback address. Use an https:// URL, or, on a network you trust, set OMNIROUTE_ALLOW_INSECURE_REMOTE=1 in your shell to allow it.
+```
+
+Use an `https://` URL, or, on a network you trust, set
+`OMNIROUTE_ALLOW_INSECURE_REMOTE=1` in your shell or the data-dir `.env`. A `.env`
+in the working directory cannot set it, unless that directory is the data dir or the
+package root. The package-root `.env` can set it too, but the next `npm i -g`
+replaces that file, so keep the opt-in in the shell or the data-dir `.env`. Loopback
+addresses never need it. See
+[ENVIRONMENT.md](../reference/ENVIRONMENT.md#cli-binary-omniroute-helpers).
+
 ---
 
 ## Troubleshooting
