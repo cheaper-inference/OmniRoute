@@ -16,6 +16,13 @@ import { amountText } from "../lib/quotaText";
 import { mergeUsageByModel } from "../lib/usageRows";
 import { useFormatNumber } from "../lib/useFormatNumber";
 
+// The kit table keeps a 40rem minimum width and cells that never wrap. On a phone the four columns
+// share the card instead: the model id breaks anywhere and the numbers stay on one line. From
+// `sm` up the table keeps the kit's spacing.
+const CELL = "max-sm:px-2";
+const MODEL_CELL = `${CELL} whitespace-normal break-all`;
+const NUMBER_CELL = `${CELL} whitespace-nowrap text-right tabular-nums`;
+
 interface SpendByModelTableProps {
   rows: SelfUsageResponse["byModel"];
 }
@@ -35,22 +42,29 @@ export default function SpendByModelTable({ rows }: SpendByModelTableProps) {
         aria-label={t("spendTableLabel")}
         maxHeight={320}
         containerClassName="border-0"
+        className="min-w-0"
       >
         <TableHeader>
           <TableRow>
-            <TableHead>{t("spendColModel")}</TableHead>
-            <TableHead>{t("spendColRequests")}</TableHead>
-            <TableHead>{t("spendColTokens")}</TableHead>
-            <TableHead>{t("spendColListPrice")}</TableHead>
+            <TableHead className={CELL}>{t("spendColModel")}</TableHead>
+            <TableHead className={NUMBER_CELL}>{t("spendColRequests")}</TableHead>
+            <TableHead className={NUMBER_CELL}>{t("spendColTokens")}</TableHead>
+            <TableHead className={NUMBER_CELL}>{t("spendColListPrice")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {models.map((row) => (
             <TableRow key={row.model}>
-              <TableCell className="min-w-0 break-words">{row.model}</TableCell>
-              <TableCell>{number(row.requests, { maximumFractionDigits: 0 })}</TableCell>
-              <TableCell>{number(row.totalTokens, { maximumFractionDigits: 0 })}</TableCell>
-              <TableCell>{amountText("usd", row.listPriceUsd, t, number)}</TableCell>
+              <TableCell className={MODEL_CELL}>{row.model}</TableCell>
+              <TableCell className={NUMBER_CELL}>
+                {number(row.requests, { maximumFractionDigits: 0 })}
+              </TableCell>
+              <TableCell className={NUMBER_CELL}>
+                {number(row.totalTokens, { maximumFractionDigits: 0 })}
+              </TableCell>
+              <TableCell className={NUMBER_CELL}>
+                {amountText("usd", row.listPriceUsd, t, number)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

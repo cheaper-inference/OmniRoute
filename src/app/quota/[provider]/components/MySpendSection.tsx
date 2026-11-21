@@ -59,6 +59,8 @@ export default function MySpendSection() {
         </div>
         <SegmentedControl
           semantics="radio"
+          // The small size keeps the four periods inside the card on a 390 px phone.
+          size="sm"
           aria-label={t("spendRangeLabel")}
           options={SELF_USAGE_RANGES.map((value) => ({ value, label: t(`range${value}`) }))}
           value={range}

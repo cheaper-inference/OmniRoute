@@ -127,7 +127,12 @@ describe("my spend", () => {
   it("models are listed in a named table", async () => {
     renderWithKey({ [QUOTA]: quotaOk, [USAGE]: () => jsonResponse(usageSeries()) });
     const table = await screen.findByRole("table", { name: "Usage by model" });
-    expect(within(table).getByText("claude-sonnet-5").className).toContain("break-words");
+    // A table cell ignores `break-words`: on a phone the id must break anywhere to fit.
+    expect(within(table).getByText("claude-sonnet-5").className).toContain("break-all");
+    // Numbers stay on one line, right-aligned, under right-aligned headers.
+    const [requestsHead] = within(table).getAllByRole("columnheader").slice(1);
+    expect(requestsHead.className).toContain("text-right");
+    expect(within(table).getByText("$6.00").className).toContain("tabular-nums");
   });
 
   it("the daily chart has a text alternative", async () => {
