@@ -18,12 +18,11 @@ const quotaPreflight = await import("../../open-sse/services/quotaPreflight.ts")
 const family = await import("../../open-sse/services/antigravityQuotaFamily.ts");
 const fallback = await import("../../open-sse/services/accountFallback.ts");
 const { markConnectionQuotaExhausted } = await import("../../open-sse/executors/antigravity.ts");
-const { quotaRemainingPercentFromQuota } = await import(
-  "../../open-sse/services/combo/comboPredicates.ts"
-);
+const { quotaRemainingPercentFromQuota } =
+  await import("../../open-sse/services/combo/comboPredicates.ts");
 
-const CLAUDE_RESET = "2026-09-06T17:38:10.000Z";
-const GEMINI_RESET = "2026-09-09T09:59:00.000Z";
+const CLAUDE_RESET = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+const GEMINI_RESET = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
 
 function mixedWindows() {
   return {
@@ -40,7 +39,10 @@ test.after(() => {
 });
 
 test("selectAntigravityQuotaWindowNames keeps Claude weekly off a Gemini request", () => {
-  const names = family.selectAntigravityQuotaWindowNames(Object.keys(mixedWindows()), "gemini-3.1-flash-lite");
+  const names = family.selectAntigravityQuotaWindowNames(
+    Object.keys(mixedWindows()),
+    "gemini-3.1-flash-lite"
+  );
   assert.deepEqual(names.sort(), ["gemini-3.1-flash-lite", "gemini_weekly"].sort());
 });
 
@@ -208,9 +210,8 @@ test("persisted family cooldown rehydrates after a process-local lockout wipe", 
   const connId = (conn as { id: string }).id;
   const until = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
-  const { persistAntigravityFamilyCooldown, rehydrateAntigravityFamilyLocks } = await import(
-    "../../open-sse/services/antigravityFamilyCooldown.ts"
-  );
+  const { persistAntigravityFamilyCooldown, rehydrateAntigravityFamilyLocks } =
+    await import("../../open-sse/services/antigravityFamilyCooldown.ts");
   await persistAntigravityFamilyCooldown({
     connectionId: connId,
     model: "claude-sonnet-4",
@@ -233,9 +234,8 @@ test("persisted family cooldown rehydrates after a process-local lockout wipe", 
 
 test("preflight family lock covers both agy and antigravity spellings", async () => {
   fallback.clearAllModelLockouts();
-  const { persistAntigravityPreflightFamilyLock } = await import(
-    "../../open-sse/services/antigravityFamilyCooldown.ts"
-  );
+  const { persistAntigravityPreflightFamilyLock } =
+    await import("../../open-sse/services/antigravityFamilyCooldown.ts");
   const conn = await providersDb.createProviderConnection({
     provider: "antigravity",
     authType: "oauth",

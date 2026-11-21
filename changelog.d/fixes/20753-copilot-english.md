@@ -1,0 +1,1 @@
+- **fix(copilot):** translate the copilot system prompt, help response, knowledge examples, and create-combo guidance from Spanish to English while keeping the multilingual input-matching regexes intact ([#20753](https://github.com/cheaper-inference/OmniRoute/pull/20753)).

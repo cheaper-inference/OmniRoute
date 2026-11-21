@@ -186,6 +186,6 @@ test("wiring: chatCore records on PROJECT_ROUTE_ERROR, chat success path clears"
   const successEnd = helpers.indexOf("onStreamFailure:", successStart);
   assert.match(
     helpers.slice(successStart, successEnd),
-    /clearAntigravityVerificationUrl\(\s*provider,\s*credentials\.connectionId,\s*credentials\.providerSpecificData/
+    /clearAntigravityVerificationUrl\(\s*provider,\s*(?:credentials|served)\.connectionId,\s*(?:credentials|served)\.providerSpecificData/
   );
 });
