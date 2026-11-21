@@ -256,7 +256,8 @@ The first matching rule applies:
 4. **Ended window:** a stored reset time that is not after the reading's data time means that
    window has ended. The reading turns the book, whatever its figure.
 5. **Higher figure:** only the last figure moves. The baseline and the marks stay.
-6. **Same figure:** nothing changes and nothing is written.
+6. **Same figure:** the figure, baseline and marks stay. Only a reset time the book lacks is
+   written.
 7. **Lower figure:** a lower figure is never applied as such. It turns the book only when three
    things hold. It is at least two minutes newer than the last applied reading. Nothing says the
    window is the same open one. It is more than one point lower.
@@ -267,8 +268,8 @@ inside that window changes nothing.
 
 A reset time is stored only while it is ahead of the data time of the reading that carries it. A
 higher figure stores its reading's reset time when that one is usable, and keeps the stored one
-otherwise. A reset time is recorded only when the book changes, so an equal figure with a new reset
-time records nothing.
+otherwise. An equal figure records its reading's reset time only when the book has none. It
+changes nothing else. A lower figure that does not turn the book records no reset time.
 
 #### When the book is used
 
