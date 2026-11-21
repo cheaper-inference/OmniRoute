@@ -1,5 +1,6 @@
 /**
- * Response contract of the self-service quota endpoint (GET /api/v1/me/quota/[provider]).
+ * Contract of the self-service quota endpoint (/api/v1/me/quota/[provider]): the response of GET
+ * and PATCH, and the PATCH body by which the key holder records lending consent.
  *
  * The response always goes through `selfQuotaResponseSchema.parse()`, which drops any key
  * outside this contract (no pool or connection ids, no account e-mail or name).
@@ -134,6 +135,32 @@ export const selfQuotaResponseSchema = z.object({
   blocks,
 });
 
+/** PATCH body: the key's lending consent for one pool, named by its `ref`. */
+export const selfLendingPatchSchema = z
+  .object({
+    pool: z.string().regex(/^qpr_[0-9a-f]{32}$/),
+    lendingPercent: z.number().int().min(0).max(100),
+    lendingUntil: z.number().int().nullable().optional(),
+  })
+  .strict();
+
+/** Any Unix time in seconds is below this value. */
+export const LENDING_UNTIL_MIN_MS = 100_000_000_000;
+
+/**
+ * "ok" for no deadline or a future instant in milliseconds. "seconds" for a value below
+ * LENDING_UNTIL_MIN_MS, which reads as Unix seconds. "past" for an instant at or before nowMs.
+ */
+export function checkLendingDeadline(
+  until: number | null | undefined,
+  nowMs: number
+): "ok" | "seconds" | "past" {
+  if (until === null || until === undefined) return "ok";
+  if (until < LENDING_UNTIL_MIN_MS) return "seconds";
+  return until <= nowMs ? "past" : "ok";
+}
+
+export type SelfLendingPatch = z.infer<typeof selfLendingPatchSchema>;
 export type SelfQuotaStatus = z.infer<typeof selfQuotaStatusSchema>;
 export type SelfQuotaBar = z.infer<typeof bar>;
 export type SelfQuotaShare = z.infer<typeof share>;

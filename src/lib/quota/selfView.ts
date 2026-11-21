@@ -272,6 +272,17 @@ async function resolvePoolContexts(
   );
 }
 
+/**
+ * The key's pools for `input.provider`, each with its `ref` (the PATCH route finds the pool a ref
+ * names among these). Defaults are loaded as buildQuotaSelfView loads them.
+ */
+export async function resolveSelfPoolContexts(
+  input: QuotaSelfViewInput,
+  rawDeps: QuotaSelfViewDeps = {}
+): Promise<SelfViewPoolContext[]> {
+  return resolvePoolContexts(input, await normalizeDeps(rawDeps));
+}
+
 function compareText(a: string | undefined, b: string | undefined): number {
   const left = a ?? "";
   const right = b ?? "";

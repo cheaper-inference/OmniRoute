@@ -34,7 +34,7 @@ const log = createLogger("self-service:quota");
 const BUILD_FAILED_MESSAGE = "Failed to build quota view";
 const MISSING_SCOPE_ERROR = "missing_self_usage_scope";
 
-const providerSegmentSchema = z
+export const providerSegmentSchema = z
   .string()
   .trim()
   .toLowerCase()
@@ -46,7 +46,7 @@ export interface SelfQuotaHandlerDeps {
   keyStore?: SelfServiceKeyStore;
 }
 
-function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput {
+export function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput {
   return {
     apiKeyId: key.id,
     scopes: key.scopes,
@@ -58,7 +58,7 @@ function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput 
   };
 }
 
-function failureResponse(err: unknown): Response {
+export function failureResponse(err: unknown): Response {
   if (err instanceof Error && err.message === MISSING_SCOPE_ERROR) {
     return selfServiceError(403, "API key lacks the self:usage scope");
   }
