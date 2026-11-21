@@ -26,7 +26,7 @@ export default function OnboardingTabs({
   const t = useTranslations("quotaSelf");
   return (
     <Tabs defaultValue="claude-code" className="min-w-0">
-      <TabsList aria-label={t("onboardingTabsLabel")}>
+      <TabsList aria-label={t("onboardingTabsLabel")} className="max-w-full flex-wrap">
         <TabsTrigger value="claude-code">{t("onboardingTabClaudeCode")}</TabsTrigger>
         <TabsTrigger value="shell">{t("onboardingTabShell")}</TabsTrigger>
         <TabsTrigger value="desktop">{t("onboardingTabDesktop")}</TabsTrigger>
