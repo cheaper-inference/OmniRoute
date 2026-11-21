@@ -6,6 +6,7 @@ import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import { capMaxOutputTokens, capThinkingBudget } from "@/lib/modelCapabilities";
+import { fixedKiroProfileArn } from "../../services/kiroFixedProfile.ts";
 import {
   parseToolInput,
   normalizeKiroToolSchema,
@@ -747,16 +748,15 @@ function convertMessages(messages, tools, model) {
   const answeredToolUseIds = new Set<string>();
   for (const item of mergedHistory) {
     const toolResults = item.userInputMessage?.userInputMessageContext?.toolResults as
-      | Array<{ toolUseId?: string }>
-      | undefined;
+      Array<{ toolUseId?: string }> | undefined;
     if (Array.isArray(toolResults)) {
       for (const result of toolResults) {
         if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
       }
     }
   }
-  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage
-    ?.userInputMessageContext?.toolResults as Array<{ toolUseId?: string }> | undefined;
+  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage?.userInputMessageContext
+    ?.toolResults as Array<{ toolUseId?: string }> | undefined;
   if (Array.isArray(currentToolResultsForOrphanCheck)) {
     for (const result of currentToolResultsForOrphanCheck) {
       if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
@@ -764,8 +764,7 @@ function convertMessages(messages, tools, model) {
   }
   for (const item of mergedHistory) {
     const toolUses = item.assistantResponseMessage?.toolUses as
-      | Array<{ toolUseId?: string }>
-      | undefined;
+      Array<{ toolUseId?: string }> | undefined;
     if (!Array.isArray(toolUses)) continue;
     const filtered = toolUses.filter(
       (use) => use?.toolUseId && answeredToolUseIds.has(use.toolUseId)
@@ -954,7 +953,13 @@ export function buildKiroPayload(model, body, stream, credentials) {
     normalizedModel
   );
 
-  const profileArn = credentials?.providerSpecificData?.profileArn || "";
+  // A stored profileArn wins. Builder ID and GitHub/Google logins have none of their own, and
+  // every Kiro host answers them 400 "profileArn is required for this request." without one
+  // (live 2026-11-16), so they send the Kiro IDE's fixed profile, as the IDE does.
+  const profileArn =
+    credentials?.providerSpecificData?.profileArn ||
+    fixedKiroProfileArn(credentials?.providerSpecificData) ||
+    "";
 
   let finalContent = currentMessage?.userInputMessage?.content || "";
   const timestamp = new Date().toISOString();

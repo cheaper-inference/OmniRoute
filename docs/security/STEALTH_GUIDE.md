@@ -290,11 +290,13 @@ All MITM endpoints require management auth (`requireCliToolsAuth`). The sudo pas
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
 | `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
-| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `KIRO_USER_AGENT`   | _(unset; see note below)_                     |
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
 Consumed by `open-sse/executors/base.ts::buildHeaders()` via dynamic lookup. **Bump these when providers release new CLI versions** — stale UA strings start getting rejected as outdated clients.
+
+Kiro builds its identity in `open-sse/config/kiroClientIdentity.ts` (`KiroIDE-<version>-<machineId>`, the machineId derived per connection) and applies `KIRO_USER_AGENT` in `open-sse/executors/kiro.ts` only when it names a Kiro IDE version newer than the pin. To follow a Kiro version-floor bump, set `KIRO_IDE_VERSION` instead.
 
 ## CLI Compatibility Mode Toggles (`.env.example` section 13)
 
