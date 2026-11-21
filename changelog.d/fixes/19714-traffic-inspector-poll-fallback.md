@@ -1,0 +1,1 @@
+- **fix(traffic-inspector):** the Traffic Inspector page falls back to polling the request list every 2 seconds when its WebSocket cannot connect, instead of staying empty and offline. ([#19714](https://github.com/cheaper-inference/OmniRoute/pull/19714))

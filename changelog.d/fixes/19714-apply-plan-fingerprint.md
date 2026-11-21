@@ -1,0 +1,1 @@
+- **fix(cli-tools):** Apply can now be tied to the preview it confirms. A dry run returns a `planFingerprint`. If the CLI config file or the generated config changed after the preview, apply with that fingerprint answers 409 with the current preview and writes nothing. ([#19714](https://github.com/cheaper-inference/OmniRoute/pull/19714))

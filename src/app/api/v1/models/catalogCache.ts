@@ -12,16 +12,22 @@
  * Auth rejection is NOT handled here and must stay in the caller: it depends on
  * live per-request state (dashboard cookie, API key) and must never be cached.
  */
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 import { after } from "next/server";
 import { getCopilotRejectionCatalogVersion } from "@omniroute/open-sse/services/copilotModelRejections.ts";
 
 import { getModelCatalogCacheVersion as getDatabaseCatalogVersion } from "@/lib/db/readCache";
+import { isSyntheticApiKeyId } from "@/shared/constants/apiKeyIdentities";
 import { extractApiKey } from "@/sse/services/auth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
-import { catalogPageCacheKey, catalogStringResponse, parseCatalogPage } from "./catalogPagination";
+import {
+  CATALOG_BODY_CHUNK_BYTES,
+  catalogPageCacheKey,
+  catalogStringResponse,
+  parseCatalogPage,
+} from "./catalogPagination";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 
 /** Fingerprint an API key for the catalog memo Map. Never store the raw secret. */
@@ -35,8 +41,56 @@ export function fingerprintCatalogAuthKey(apiKey: string): string {
     .slice(0, 16);
 }
 
+/** The body is kept as UTF-8 bytes so a cache hit never re-encodes the catalog string. */
+/**
+ * Every API-key field the catalog build reads (`keyMeta.<field>` in the catalog*.ts
+ * sources; a test scans for new ones). Keys equal in all of them, and in group
+ * membership, get an identical catalog, so they can share one cache entry.
+ */
+export const CATALOG_KEY_SIGNATURE_FIELDS = [
+  "allowAutoCombos",
+  "allowCcDiscoveryAliases",
+  "allowedCombos",
+  "allowedModels",
+  "allowedQuotas",
+  "blockedModels",
+  "catalogScope",
+  "disableNonPublicModels",
+  "forcedModel",
+  "modelAccessMode",
+] as const;
+
+/**
+ * Cache identity of the caller: a digest of its effective catalog permissions, so equal
+ * keys share an entry. Env-key, self-loop and unknown keys, and any lookup failure, keep
+ * a per-key fingerprint — sharing is only for database keys whose permissions we read.
+ * Auth is already enforced by the caller; this only picks which cached body to replay.
+ */
+async function catalogKeyIdentity(request: Request): Promise<string> {
+  const apiKey = extractApiKey(request) || "";
+  if (!apiKey) return "";
+  try {
+    const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+    const meta = await getApiKeyMetadata(apiKey);
+    if (!meta || isSyntheticApiKeyId(meta.id)) return fingerprintCatalogAuthKey(apiKey);
+    const { getKeyGroupsForApiKey } = await import("@/lib/db/apiKeyGroups");
+    const fields = CATALOG_KEY_SIGNATURE_FIELDS.map((field) => {
+      const value = (meta as unknown as Record<string, unknown>)[field];
+      return Array.isArray(value) ? [...value].sort() : (value ?? null);
+    });
+    const groups = getKeyGroupsForApiKey(meta.id, true)
+      .map((group) => group.id)
+      .sort();
+    return `perm-${createHash("sha256")
+      .update(JSON.stringify([fields, groups]))
+      .digest("hex")}`;
+  } catch {
+    return fingerprintCatalogAuthKey(apiKey);
+  }
+}
+
 export type CachedCatalog = {
-  body: string;
+  body: Buffer;
   headers: Record<string, string>;
   status: number;
   expiresAt: number;
@@ -170,16 +224,16 @@ class BoundedCatalogCache {
   }
 
   set(key: string, entry: CachedCatalog): void {
-    // Two bytes per UTF-16 code unit bounds V8's one-/two-byte string storage.
-    // Entry-count limits bound object/Map overhead independently of string size.
+    // The body is a Buffer, so its length is its retained size. Key and header strings
+    // count two bytes per UTF-16 code unit. Entry-count limits bound object/Map overhead.
     const bytes =
+      entry.body.length +
       2 *
-      (key.length +
-        entry.body.length +
-        Object.entries(entry.headers).reduce(
-          (total, [name, value]) => total + name.length + value.length,
-          0
-        ));
+        (key.length +
+          Object.entries(entry.headers).reduce(
+            (total, [name, value]) => total + name.length + value.length,
+            0
+          ));
     if (bytes > CATALOG_CACHE_MAX_BYTES) return;
     // An oversized refresh must preserve an existing bounded last-good entry.
     this.delete(key);
@@ -277,10 +331,13 @@ const catalogInFlight = new Map<string, InFlightBuild>();
 
 let _catalogBuilderRuns = 0;
 
-function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOptions): string {
+function buildCatalogCacheKey(
+  request: Request,
+  catalogSettings?: CatalogCacheOptions,
+  identity = fingerprintCatalogAuthKey(extractApiKey(request) || "")
+): string {
   const url = new URL(request.url);
   const prefix = url.searchParams.get("prefix") || "";
-  const apiKey = extractApiKey(request) || "";
   const isCodex = isCodexModelCatalogClient(request) ? "1" : "0";
   const configuredOnly = url.searchParams.get("configuredOnly") === "true" ? "1" : "0";
   const hideAuto = catalogSettings?.hideAutoCombos ? "1" : "0";
@@ -290,7 +347,7 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
   // (the public /v1/models default) stays byte-identical.
   const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
   const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
-  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
+  return `${prefix}|${isCodex}|${identity}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last
@@ -314,6 +371,29 @@ function dropCatalogCacheIfStateChanged(): void {
   // it, and the generation check in storePayload keeps it from repopulating
   // the now-current cache. Clearing it here would just detach the entry while
   // the build still ran — wasted work with no correctness gain.
+}
+
+/**
+ * Serve cached bytes with Content-Length and chunked delivery, like
+ * `catalogStringResponse`, without encoding the body again. The Buffer is shared
+ * and read-only: chunks are views over it.
+ */
+function catalogBytesResponse(bytes: Buffer, headers: Headers, status: number): Response {
+  const merged = new Headers(headers);
+  merged.set("content-type", "application/json");
+  merged.set("content-length", String(bytes.length));
+  // A small body is copied (<= 64 KiB) so no Response ever holds the shared cached Buffer.
+  if (bytes.length <= CATALOG_BODY_CHUNK_BYTES)
+    return new Response(new Uint8Array(bytes), { status, headers: merged });
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (let offset = 0; offset < bytes.length; offset += CATALOG_BODY_CHUNK_BYTES) {
+        controller.enqueue(bytes.subarray(offset, offset + CATALOG_BODY_CHUNK_BYTES));
+      }
+      controller.close();
+    },
+  });
+  return new Response(stream, { status, headers: merged });
 }
 
 // Header sources mix Title-Case keys (diagnostic/cors headers built by app code) with
@@ -349,7 +429,7 @@ function storePayload(
   buildGeneration: string
 ): CachedCatalog {
   const entry: CachedCatalog = {
-    body: payload.body,
+    body: Buffer.from(payload.body),
     headers: payload.headers,
     status: payload.status,
     expiresAt: Date.now() + payload.cacheTTL,
@@ -450,7 +530,7 @@ async function awaitCatalogInFlight(
     }
     const lastGood = catalogLastGood.get(cacheKey);
     if (lastGood) {
-      return catalogStringResponse(
+      return catalogBytesResponse(
         lastGood.body,
         mergeCatalogHeaders(corsHeaders, lastGood.headers, diagnosticHeaders, {
           "x-omniroute-catalog": "last-good",
@@ -488,7 +568,7 @@ async function awaitCatalogInFlight(
       503
     );
   }
-  return catalogStringResponse(
+  return catalogBytesResponse(
     payload.body,
     mergeCatalogHeaders(corsHeaders, payload.headers, diagnosticHeaders),
     payload.status
@@ -509,9 +589,21 @@ export async function resolveCachedCatalogResponse(
   catalogSettings?: CatalogCacheOptions
 ): Promise<Response> {
   const { corsHeaders, diagnosticHeaders } = headerSources;
-  dropCatalogCacheIfStateChanged();
-
-  const cacheKey = buildCatalogCacheKey(request, catalogSettings);
+  // The identity lookup awaits. A permission write during it moves the generation, and the
+  // identity may then describe pre-write state: look it up again until the generation holds,
+  // so nothing awaits between the generation check and the cache read. After 5 moves fall
+  // back to the per-key fingerprint, which needs no await.
+  let cacheKey: string | undefined;
+  for (let attempt = 0; attempt < 5 && !cacheKey; attempt++) {
+    dropCatalogCacheIfStateChanged();
+    const generation = getModelCatalogCacheVersion();
+    const key = buildCatalogCacheKey(request, catalogSettings, await catalogKeyIdentity(request));
+    if (generation === getModelCatalogCacheVersion()) cacheKey = key;
+  }
+  if (!cacheKey) {
+    dropCatalogCacheIfStateChanged();
+    cacheKey = buildCatalogCacheKey(request, catalogSettings);
+  }
   const now = Date.now();
   const staleWindowMs =
     catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
@@ -520,7 +612,7 @@ export async function resolveCachedCatalogResponse(
 
   if (cached && cached.expiresAt > now) {
     if (cached.status === 200) catalogLastGood.get(cacheKey);
-    return catalogStringResponse(
+    return catalogBytesResponse(
       cached.body,
       mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
       cached.status
@@ -540,7 +632,7 @@ export async function resolveCachedCatalogResponse(
       buildPayload,
       catalogSettings?.scheduleBackgroundRefresh ?? defaultBackgroundRefreshScheduler
     );
-    return catalogStringResponse(
+    return catalogBytesResponse(
       cached.body,
       mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
       cached.status
@@ -587,7 +679,7 @@ export function __resetCatalogBuilderRunsForTest(): void {
   lastSeenCatalogCacheVersion = getModelCatalogCacheVersion();
 }
 
-/** Retained-string accounting only; successful bodies may be shared across maps. */
+/** Retained-byte accounting only; successful bodies may be shared across maps. */
 export function __getCatalogCacheStatsForTest() {
   return { cache: catalogCache.stats(), lastGood: catalogLastGood.stats() };
 }
@@ -614,8 +706,11 @@ export function __expireCatalogCacheForTest(msAgo = 1): void {
  * intentionally exception-resistant builder cannot be made to produce (e.g. a cached
  * non-200). Takes the Request so the cache-key format stays private to this module.
  */
-export function __setCatalogCacheEntryForTest(request: Request, entry: CachedCatalog): void {
-  catalogCache.set(buildCatalogCacheKey(request), entry);
+export function __setCatalogCacheEntryForTest(
+  request: Request,
+  entry: Omit<CachedCatalog, "body"> & { body: string }
+): void {
+  catalogCache.set(buildCatalogCacheKey(request), { ...entry, body: Buffer.from(entry.body) });
 }
 
 /** Awaits any background refresh in flight, instead of guessing at a real-time sleep. */
