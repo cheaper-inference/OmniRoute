@@ -29,8 +29,8 @@ export async function proxy(request: NextRequest) {
   const headlessResponse = headlessGateResponse(request.nextUrl.pathname);
   if (headlessResponse) return headlessResponse;
   // Self-service quota page: while QUOTA_SELF_PANEL is off or the provider is unknown,
-  // /quota/<provider> is rewritten to the not-found route here, before rendering starts, so
-  // the status is a real 404 (the root loading.tsx would otherwise stream a 200 first).
+  // /quota/<provider> is answered with a 404 here, before rendering starts, so the status is
+  // a real 404 (the root loading.tsx would otherwise stream a 200 first).
   const panelGate = quotaPanelGateResponse(request);
   if (panelGate) return panelGate;
   return runAuthzPipeline(request, { enforce: true });
