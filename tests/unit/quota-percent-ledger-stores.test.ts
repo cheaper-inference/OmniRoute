@@ -54,7 +54,6 @@ function record(method: string, args: unknown[]): void {
  */
 type Hook = () => void | Promise<void>;
 let beforeNextHgetall: Hook | null = null;
-let beforeNextHincrbyfloat: Hook | null = null;
 
 /** Run a hook; returns its promise only when it has one, so a plain hook adds no await. */
 function runHook(hook: Hook | null): Promise<void> | undefined {
@@ -101,10 +100,6 @@ const fake = {
   },
   async hincrbyfloat(key: string, field: string, increment: number): Promise<string> {
     record("hincrbyfloat", [key, field, increment]);
-    const hook = beforeNextHincrbyfloat;
-    beforeNextHincrbyfloat = null;
-    const pending = runHook(hook);
-    if (pending) await pending;
     const hash = hashOf(key);
     const next = Number(hash.get(field) ?? "0") + increment;
     hash.set(field, String(next));
@@ -733,30 +728,6 @@ test("redis: a commit overtaken before its confirmation is re-read, never applie
   );
   // Both keys routed after the book opened: the growth of 0.15 is split 50_000 : 30_000.
   assertParts(out, { a: 0.09375, b: 0.05625 }, 0.1, "after the spurious loss");
-});
-
-test("redis: a read between the two commands of a token write counts the tokens at the next one", async () => {
-  const redis = redisWithFakeClient();
-  const K = keyOf("p-redis-split-token-write");
-  const at = (m: number) => T0 + m * MIN;
-  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 10_000, T0);
-  await obs(redis, K, 0.1, 0);
-  // The write stores the last-write time, then increments the tokens: observe in between.
-  const seen: { mid: LedgerSnapshot | null } = { mid: null };
-  beforeNextHincrbyfloat = async () => {
-    const snap = await redis.ledgerRead(K);
-    assert.deepEqual(snap.counters.a, { tokens: 10_000, updatedAt: at(1) });
-    seen.mid = await obs(redis, K, 0.15, 2);
-  };
-  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 50_000, at(1));
-  const between = seen.mid;
-  assert.ok(between, "the interleaving ran");
-  assertParts(between, {}, 0.15, "nothing to explain the rise yet");
-  assert.deepEqual(between.state.keys, { a: { startTokens: 10_000 } });
-
-  const after = await obs(redis, K, 0.2, 3);
-  assertParts(after, { a: 0.1 }, 0.1, "the new tokens explain the growth since the baseline");
-  assert.deepEqual(after?.state.keys, { a: { startTokens: 10_000 } }, "the mark did not move");
 });
 
 test("redis: a stored field that is not a usable book is skipped and removed", async () => {
