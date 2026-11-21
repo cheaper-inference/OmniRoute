@@ -1,0 +1,1 @@
+- **fix(responses):** in the Chat to Responses stream converter, text or reasoning that follows a tool call no longer reuses the tool call's `output_index`. ([#20203](https://github.com/cheaper-inference/OmniRoute/pull/20203))

@@ -1,0 +1,1 @@
+- **fix(responses):** reasoning that comes back after the reasoning item was already closed (reasoning, content, reasoning in one stream) opens a new reasoning item in the Chat to Responses stream transformer, instead of sending its text on the closed item where it was lost from the final output. ([#20203](https://github.com/cheaper-inference/OmniRoute/pull/20203))

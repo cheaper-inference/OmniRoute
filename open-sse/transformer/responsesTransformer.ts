@@ -3,6 +3,7 @@ import { RESPONSES_DEFERRED_COMPLETION_GRACE_MS } from "../config/constants.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { mergeCacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
+import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
 import {
@@ -236,6 +237,9 @@ export function createResponsesApiTransformStream(
     msgItemDone: {},
     reasoningId: "",
     reasoningIndex: -1,
+    // Every output_index a reasoning item has used. A reopened reasoning item must not take
+    // the index (and so the id) of an earlier one that is already done.
+    reasoningIndexes: new Set<number>(),
     reasoningBuf: "",
     reasoningPartAdded: false,
     reasoningDone: false,
@@ -253,12 +257,16 @@ export function createResponsesApiTransformStream(
     // message state used to derive the base is no longer meaningful to
     // recompute — shares exactly the same output_index.
     funcOutputIndex: {} as Record<string, number>,
+    // Requested message index -> the index its message item really lives at, once text is
+    // re-homed past a done message or a tool call. Later deltas of that message reuse it.
+    msgIndexAlias: {} as Record<string, number>,
     completedOutputItems: [] as Array<{
       output_index: number;
       item: Record<string, unknown>;
       seq: number;
     }>,
     buffer: "",
+    pendingCr: false,
     completedSent: false,
     usage: null,
     finishReason: null as string | null,
@@ -267,6 +275,8 @@ export function createResponsesApiTransformStream(
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
     // still arrive for stream_options.include_usage=true upstreams.
     awaitingTrailingUsage: false,
+    // A top-level `error` chunk from the upstream; the terminal event is then response.failed.
+    upstreamError: null as Record<string, unknown> | null,
     completionTimer: null as ReturnType<typeof setTimeout> | null,
   };
 
@@ -316,10 +326,24 @@ export function createResponsesApiTransformStream(
   };
 
   // Helper to start reasoning
-  const startReasoning = (controller, idx) => {
-    if (!state.reasoningId) {
+  const startReasoning = (controller, requestedIdx) => {
+    // A done item takes no new deltas: reasoning that returns after content opens a new item at a
+    // free output_index (the old one already went out, and a delta on it would be lost).
+    const reopen = !!state.reasoningId && state.reasoningDone;
+    if (!state.reasoningId || reopen) {
+      // Reasoning that follows a tool call must not reuse the tool call's output_index.
+      const idx =
+        reopen || isToolOutputIndex(requestedIdx)
+          ? nextFreeMessageIndex(requestedIdx)
+          : requestedIdx;
+      if (reopen) {
+        state.reasoningBuf = "";
+        state.reasoningDone = false;
+        state.reasoningPartAdded = false;
+      }
       state.reasoningId = `rs_${state.responseId}_${idx}`;
       state.reasoningIndex = idx;
+      state.reasoningIndexes.add(normalizeOutputIndex(idx));
 
       emit(controller, "response.output_item.added", {
         type: "response.output_item.added",
@@ -397,15 +421,16 @@ export function createResponsesApiTransformStream(
   // CLI aborts on "OutputTextDelta without active item". Allocate the next
   // free output_index instead, avoiding reasoning, messages and cached
   // tool-call indexes.
+  const isToolOutputIndex = (i) =>
+    Object.values(state.funcOutputIndex || {}).some((v) => normalizeOutputIndex(v) === i);
+
   const nextFreeMessageIndex = (requestedIdx) => {
     let candidate = normalizeOutputIndex(requestedIdx);
     const allocatedToolIndexes = new Set(
       Object.values(state.funcOutputIndex || {}).map((v) => normalizeOutputIndex(v))
     );
     const claimed = (i) =>
-      state.msgItemAdded[i] ||
-      allocatedToolIndexes.has(i) ||
-      (state.reasoningId && i === normalizeOutputIndex(state.reasoningIndex));
+      state.msgItemAdded[i] || allocatedToolIndexes.has(i) || state.reasoningIndexes.has(i);
     while (claimed(candidate)) candidate += 1;
     return candidate;
   };
@@ -510,26 +535,18 @@ export function createResponsesApiTransformStream(
       const selection = lifecycle.get(idx)!;
       const isCustomTool = selection.custom;
 
-      // Fix #1674 & #1852: Final cleanup of empty string and empty array placeholders.
+      // Fix #1674 & #1852: drop empty placeholders only where the declared tool schema allows it.
+      // The helper keeps a required empty string or array, and removes nothing without a schema.
       // Custom-tool input is intentionally allowed to be an empty string.
       if (!isCustomTool) {
-        try {
-          const parsed = JSON.parse(args);
-          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-            let modified = false;
-            for (const [k, v] of Object.entries(parsed)) {
-              if (v === "" || (Array.isArray(v) && v.length === 0)) {
-                delete parsed[k];
-                modified = true;
-              }
-            }
-            if (modified) {
-              args = JSON.stringify(parsed);
-              state.funcArgsBuf[idx] = args;
-            }
-          }
-        } catch (e) {
-          // Ignore malformed JSON
+        const cleaned = stripEmptyOptionalToolArgs(
+          args,
+          selection.name,
+          options.toolSchemas?.get(selection.name)
+        );
+        if (typeof cleaned === "string" && cleaned !== args) {
+          args = cleaned;
+          state.funcArgsBuf[idx] = args;
         }
       }
 
@@ -633,7 +650,19 @@ export function createResponsesApiTransformStream(
         response.usage = normalizeResponsesContextUsage(state.usage);
       }
 
-      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
+      const eventType = finalizeResponsesTerminalStatus(
+        response,
+        state.finishReason,
+        state.upstreamError !== null
+      );
+      if (state.upstreamError) {
+        const failure = state.upstreamError as Record<string, unknown>;
+        response.status = "failed";
+        response.error = {
+          code: typeof failure.code === "string" ? failure.code : "upstream_error",
+          message: typeof failure.message === "string" ? failure.message : "Upstream failure",
+        };
+      }
       emit(controller, eventType, {
         type: eventType,
         response,
@@ -671,7 +700,13 @@ export function createResponsesApiTransformStream(
       transform(chunk, controller) {
         const text = decoder.decode(chunk, { stream: true });
         if (text.trim()) logger?.logInput(text.trim());
-        state.buffer += text;
+        // CRLF framing (\r\n\r\n) would otherwise never split: normalize to LF before buffering.
+        // A CR that ends this chunk may be the first half of a CRLF pair cut across two writes,
+        // so it is held back (state.pendingCr) and rejoined with the next chunk.
+        let incoming = (state.pendingCr ? "\r" : "") + text;
+        state.pendingCr = incoming.endsWith("\r");
+        if (state.pendingCr) incoming = incoming.slice(0, -1);
+        state.buffer += incoming.replace(/\r\n/g, "\n");
 
         const messages = state.buffer.split("\n\n");
         state.buffer = messages.pop() || "";
@@ -683,7 +718,11 @@ export function createResponsesApiTransformStream(
           if (!dataMatch) continue;
 
           const dataStr = dataMatch[1].trim();
-          if (dataStr === "[DONE]") continue;
+          if (dataStr === "[DONE]") {
+            // Items are already closed once completion was deferred for trailing usage.
+            if (state.awaitingTrailingUsage && !state.completedSent) sendCompleted(controller);
+            continue;
+          }
 
           let parsed;
           try {
@@ -708,7 +747,28 @@ export function createResponsesApiTransformStream(
           }
 
           if (parsed.usage) {
-            state.usage = normalizeResponsesUsage(state.usage, parsed.usage);
+            // Some upstreams put zeros (or {}) on every chunk. That is a placeholder: keep the
+            // earlier value, or none, so the real trailing usage chunk is still awaited.
+            const next = normalizeResponsesUsage(state.usage, parsed.usage);
+            // Judge the usage the client will see: cache writes kept out of input_tokens
+            // (cache_creation_in_prompt: false) are folded back in at the Responses boundary.
+            const visible = next ? normalizeResponsesContextUsage(next) : null;
+            const visibleTokens = visible
+              ? (usageNumber(visible.input_tokens) ?? 0) + (usageNumber(visible.output_tokens) ?? 0)
+              : 0;
+            if (visibleTokens > 0) {
+              state.usage = next;
+            }
+          }
+
+          // A top-level error chunk has no choices. End with response.failed, not an empty success.
+          if (parsed.error && typeof parsed.error === "object" && !parsed.choices?.length) {
+            state.upstreamError = parsed.error;
+            for (const i in state.msgItemAdded) closeMessage(controller, i);
+            closeReasoning(controller);
+            for (const i in state.funcCallIds) closeToolCall(controller, i);
+            sendCompleted(controller);
+            continue;
           }
 
           if (!parsed.choices?.length) {
@@ -824,24 +884,31 @@ export function createResponsesApiTransformStream(
               }
 
               // Regular text content
+              // Use a distinct output_index for the message when reasoning was
+              // emitted, so the message item does not collide with the
+              // reasoning item's output_index.
+              const requestedIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+              let msgIdx = state.msgIndexAlias[requestedIdx] ?? requestedIdx;
+              // #13693: a done item must never receive new deltas — re-home
+              // the text on a fresh message item instead. Same for an index that a tool call
+              // already owns: a tool call that comes first closes no message, so nothing
+              // else keeps the text off its output_index.
+              if (
+                state.msgItemDone[msgIdx] ||
+                (!state.msgItemAdded[msgIdx] && isToolOutputIndex(msgIdx))
+              ) {
+                msgIdx = nextFreeMessageIndex(msgIdx);
+                state.msgIndexAlias[requestedIdx] = msgIdx;
+              }
+
+              // Fix for #1211: Strip leading double-newlines / blank spaces from the very first
+              // text chunk. Trim before the guard below, and do not `continue` on a blank chunk:
+              // that would skip this chunk's tool_calls and finish_reason.
+              if (!state.msgTextBuf[msgIdx]) {
+                content = content.trimStart();
+              }
+
               if (content) {
-                // Use a distinct output_index for the message when reasoning was
-                // emitted, so the message item does not collide with the
-                // reasoning item's output_index.
-                let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-                // #13693: a done item must never receive new deltas — re-home
-                // the text on a fresh message item instead.
-                if (state.msgItemDone[msgIdx]) {
-                  msgIdx = nextFreeMessageIndex(msgIdx);
-                }
-
-                // Fix for #1211: Strip leading double-newlines / blank spaces from the very first text chunk
-                if (!state.msgTextBuf[msgIdx]) {
-                  content = content.trimStart();
-                }
-
-                if (!content) continue;
-
                 if (!state.msgItemAdded[msgIdx]) {
                   state.msgItemAdded[msgIdx] = true;
                   const msgId = `msg_${state.responseId}_${msgIdx}`;
@@ -894,7 +961,7 @@ export function createResponsesApiTransformStream(
               closeReasoning(controller);
             }
             const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-            closeMessage(controller, msgIdx);
+            closeMessage(controller, state.msgIndexAlias[msgIdx] ?? msgIdx);
 
             for (const tc of delta.tool_calls) {
               const tcIdx = tc.index ?? 0;
@@ -934,20 +1001,7 @@ export function createResponsesApiTransformStream(
 
               if (tc.function?.arguments) {
                 const refCallId = state.funcCallIds[tcIdx] || newCallId;
-                let deltaStr = tc.function.arguments;
-
-                // Fix #1674 & #1852: Strip empty strings and empty arrays from streaming deltas
-                if (
-                  deltaStr.includes('""') ||
-                  deltaStr.includes("[]") ||
-                  deltaStr.includes("[ ]")
-                ) {
-                  deltaStr = deltaStr
-                    .replace(/,"[a-zA-Z0-9_]+":""/g, "")
-                    .replace(/"[a-zA-Z0-9_]+":"",/g, "")
-                    .replace(/,"[a-zA-Z0-9_]+":\s*\[\s*\]/g, "")
-                    .replace(/"[a-zA-Z0-9_]+":\s*\[\s*\],?/g, "");
-                }
+                const deltaStr = tc.function.arguments;
 
                 const existingArgs = state.funcArgsBuf[tcIdx] || "";
                 const nextArgs = appendToolCallArgumentDelta(existingArgs, deltaStr);
@@ -1012,7 +1066,8 @@ export function createResponsesApiTransformStream(
         // still holding. With { stream:true } complete multi-byte chars are
         // emitted within transform(), so normally there is nothing left; this
         // only releases a terminating truncated byte and frees the decoder.
-        state.buffer += decoder.decode();
+        state.buffer += (state.pendingCr ? "\n" : "") + decoder.decode();
+        state.pendingCr = false;
         // Drain a final message that arrived without its "\n\n" terminator — typically
         // the last text delta, the finish_reason chunk or the usage chunk. Must run
         // BEFORE the close/complete calls below; sendCompleted() is idempotent
