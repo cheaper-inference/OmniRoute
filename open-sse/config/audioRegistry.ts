@@ -504,7 +504,9 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     id: "huggingface",
     // HF retired api-inference.huggingface.co; TTS now routes through
     // router.huggingface.co with the hf-inference provider pinned in the path
-    // (same convention as the image entry in imageRegistryData.ts).
+    // (same convention as the image entry in imageRegistryData.ts). hf-inference serves no
+    // TTS model, so the models listed below go to the deepinfra route on the same router
+    // (see handleHuggingFaceTtsSpeech); only a custom model id uses the hf-inference path.
     baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
