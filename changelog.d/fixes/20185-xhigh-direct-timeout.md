@@ -1,0 +1,1 @@
+- **fix(sse):** Give `xhigh` reasoning requests the same 180-second direct response-start floor as `high` and `max`, while preserving caller deadlines and operator overrides ([#20185](https://github.com/cheaper-inference/OmniRoute/pull/20185)) — thanks @marcello-pichini.

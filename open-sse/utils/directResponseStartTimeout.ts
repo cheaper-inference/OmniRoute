@@ -17,7 +17,7 @@ const DIRECT_RESPONSE_START_TIMEOUT_CODE = "DIRECT_RESPONSE_START_TIMEOUT";
 // (larger) deadline signal when one is present — see resolveDirectRetryTimeoutMs.
 const DEFAULT_DIRECT_RETRY_CEILING_MS = 600_000;
 
-// Reasoning models (GLM-5.2/5.3 reasoning.effort=high/max, codex-gpt-5.x-high,
+// Reasoning models (GLM-5.2/5.3 reasoning.effort=high/xhigh/max, codex-gpt-5.x-high,
 // third-party Claude-format replicas) warm up with a ~78s+ TTFB before emitting
 // the first byte. The stream-readiness layer (streamReadinessPolicy.ts) already
 // budgets 180s for this class (claude_format_heavy_reasoning /
@@ -27,9 +27,9 @@ const DEFAULT_DIRECT_RETRY_CEILING_MS = 600_000;
 // 504 regression introduced by 142ae9349 (flat 30s cut a 78s+ reasoning TTFB).
 const REASONING_READINESS_CEILING_MS = 180_000;
 // Bounded, non-overlapping pattern: a quoted "reasoning_effort" or nested
-// "effort" field whose value is high or max. No variable-length quantifier
+// "effort" field whose value is high, xhigh or max. No variable-length quantifier
 // overlap → no ReDoS surface (project PII rule #1).
-const HIGH_REASONING_EFFORT_PATTERN = /"(?:reasoning_effort|effort)"\s*:\s*"(?:high|max)"/i;
+const HIGH_REASONING_EFFORT_PATTERN = /"(?:reasoning_effort|effort)"\s*:\s*"(?:high|xhigh|max)"/i;
 
 function hasHighReasoningEffort(body?: string | null): boolean {
   if (!body || typeof body !== "string") return false;
