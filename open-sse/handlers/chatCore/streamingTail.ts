@@ -538,7 +538,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     );
     recordStreamingUsageStats(streamUsage, {
       provider,
-      model,
+      model: responseModel,
       streamStatus: normalizedStreamStatus,
       startTime,
       ttft,
@@ -602,7 +602,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     recordStreamingCost({
       apiKeyId: apiKeyInfo?.id,
       provider,
-      model,
+      model: responseModel,
       streamUsage,
       serviceTier: effectiveServiceTier,
       calculateCost: calculateCostDetailed,
@@ -614,7 +614,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // A metered model with no price must not pass the dollar budget as $0.
       recordUnpricedCost: (apiKeyId, cost) => {
         if (isUnpricedMeteredCost(provider, cost)) {
-          recordUnpricedBudgetUsage(apiKeyId, { provider, model });
+          recordUnpricedBudgetUsage(apiKeyId, { provider, model: responseModel });
         }
       },
       ledger: buildStreamLedgerDetails(effectiveServiceTier, normalizedStreamStatus < 400, traceId),
@@ -628,7 +628,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       apiKeyId: apiKeyInfo?.id,
       connectionId: credentials?.connectionId,
       provider,
-      model,
+      model: responseModel,
       streamUsage,
       streamStatus: normalizedStreamStatus,
       serviceTier: effectiveServiceTier,
@@ -736,6 +736,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // turn (call log 1787566395384-bab9ab: reasoning dropped → model emitted
   // DSML tool-call markers as plain text → incomplete `stop` finish).
   const requestedThinking = hasActiveClaudeThinking((body ?? {}) as Record<string, unknown>);
+  // The executor adds stream_options.include_usage upstream. A Chat client that did not ask for it
+  // must not see the extra trailing usage-only chunk (strict parsers read choices[0]).
+  const dropUnrequestedUsageChunk =
+    clientResponseFormat === FORMATS.OPENAI &&
+    (body as { stream_options?: { include_usage?: unknown } } | null | undefined)?.stream_options
+      ?.include_usage !== true;
 
   streamTimingOriginOffsetMs = Date.now() - startTime;
   if (needsResponsesTranslation) {
@@ -816,7 +822,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       clientResponseFormat,
       requestToolIdentityMap,
       (body as Record<string, unknown> | null | undefined)?.tools ?? null,
-      pendingRequestOwner ?? pendingRequestId
+      pendingRequestOwner ?? pendingRequestId,
+      dropUnrequestedUsageChunk
     );
   }
 

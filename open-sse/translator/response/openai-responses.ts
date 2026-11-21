@@ -40,6 +40,7 @@ import { logger } from "../../utils/logger.ts";
 import { plaintextCollaborationFields } from "./openai-responses/collaborationPlaintextMarker.ts";
 import { resolveLocalToolCallIndex } from "./openai-responses/toolCallLocalIndex.ts";
 import {
+  drainOpenToolCallArgs,
   synthesizeCompletedToolItem,
   buildFinalChunk,
   computeFinishReason,
@@ -280,6 +281,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     }
     return [];
   }
+
+  // Nothing may follow response.completed: a late content or tool chunk would add items after it.
+  if (state.completedSent) return [];
 
   const { events, emit } = createEventEmitter(state);
 
@@ -757,6 +761,11 @@ function repairDoubleEscapedTabs(state, tcIdx, rawArgs: string): string {
   return fixDoubleEscapedTabs(rawArgs, state.funcArgsTabState[tcIdx]);
 }
 
+// #6459: some upstreams send the arguments as a parsed object; the escape scanners read text.
+function toolArgsText(value: unknown): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
@@ -803,7 +812,7 @@ function emitToolCall(state, emit, tc) {
     if (!state.funcArgsEscapeState[tcIdx]) {
       state.funcArgsEscapeState[tcIdx] = createJsonStringEscapeState();
     }
-    const rawArgs = repairDoubleEscapedTabs(state, tcIdx, tc.function.arguments);
+    const rawArgs = repairDoubleEscapedTabs(state, tcIdx, toolArgsText(tc.function.arguments));
     const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
     const emittedDelta = nextArgs.slice(existingArgs.length);
@@ -1085,45 +1094,18 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     // Iterate every still-open call with a buffered argument payload — argument
     // deltas are buffered for every tool, so an incomplete stream must flush every
     // buffered call, not only the historical uppercase Agent path.
-    const pendingNormalized: Array<{ index: number; argsStr: string }> = [];
-    if (state.toolCallByCallId instanceof Map) {
-      for (const entry of state.toolCallByCallId.values()) {
-        if (entry.argsBuffer) {
-          const toolSchema = state.toolSchemas?.get(entry.name);
-          const argsToEmit = stripEmptyOptionalToolArgs(entry.argsBuffer, entry.name, toolSchema);
-          pendingNormalized.push({
-            index: entry.index,
-            argsStr: typeof argsToEmit === "string" ? argsToEmit : JSON.stringify(argsToEmit ?? {}),
-          });
-          entry.argsBuffer = "";
-          entry.needsNormalization = false;
-        }
-      }
-    }
-    if (pendingNormalized.length > 0) {
+    const pendingChunks = drainOpenToolCallArgs(state);
+    if (pendingChunks.length > 0) {
       state.finishReasonSent = true;
       state.finishReason = "tool_calls";
-      const common = {
+      pendingChunks.push({
         id: state.chatId,
         object: "chat.completion.chunk",
         created: state.created,
         model: state.model || "gpt-4",
-      };
-      const chunks: Record<string, unknown>[] = pendingNormalized.map(({ index, argsStr }) => ({
-        ...common,
-        choices: [
-          {
-            index: 0,
-            delta: { tool_calls: [{ index, function: { arguments: argsStr } }] },
-            finish_reason: null,
-          },
-        ],
-      }));
-      chunks.push({
-        ...common,
         choices: [{ index: 0, delta: {}, finish_reason: "tool_calls" }],
       });
-      return chunks;
+      return pendingChunks;
     }
     // Flush: send final chunk with finish_reason
     if (!state.finishReasonSent && state.started) {
@@ -1592,12 +1574,20 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const textByIndex = recoverTextSnapshotsByOutputIndex(state, output);
     closeResponsesTextSnapshots(state);
     if (state.finishReasonSent) return null;
+    // A call without output_item.done is still open: send its arguments before the terminal,
+    // and report a cut (not tool_calls) when the turn ended on a limit.
+    const cutByLimit =
+      state.incompleteReason === "max_output_tokens" || state.incompleteReason === "content_filter";
+    state.toolCallCut =
+      cutByLimit && state.toolCallByCallId instanceof Map && state.toolCallByCallId.size > 0;
+    const openCallArgs = drainOpenToolCallArgs(state, output);
     const recovered = output.flatMap((item, index) => [
       ...(textByIndex.get(index) ?? []),
       ...synthesizeCompletedToolItem(state, item),
     ]);
     const finalChunk = buildFinalChunk(state);
-    return recovered.length ? [...recovered, finalChunk] : finalChunk;
+    const before = [...openCallArgs, ...recovered];
+    return before.length ? [...before, finalChunk] : finalChunk;
   }
 
   if (eventType === "response.failed" || eventType === "error") {

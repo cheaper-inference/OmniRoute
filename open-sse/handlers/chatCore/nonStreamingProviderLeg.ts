@@ -486,8 +486,10 @@ export async function runNonStreamingProviderLeg(
           outcome.result.status,
           formatted,
           undefined,
-          // Keep the upstream retry hint on the sanitized response.
-          outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
+          // Keep the upstream retry hint on the sanitized response: the pipeline's parsed hint
+          // (header or body, restated 429), else the raw header.
+          outcome.result.retryAfterMs ??
+            (outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null),
           outcome.result.errorCode,
           outcome.result.errorType,
           { passthrough: input.sourceFormat === "claude" }
