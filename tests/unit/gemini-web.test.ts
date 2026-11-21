@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { GeminiWebExecutor, parseStreamResponse } =
+const { GeminiWebExecutor, parseStreamResponse, toGeminiBrowserCookie } =
   await import("../../open-sse/executors/gemini-web.ts");
 const { getExecutor, hasSpecializedExecutor } = await import("../../open-sse/executors/index.ts");
 
@@ -311,6 +311,38 @@ test("parseStreamResponse keeps only the final cumulative StreamGenerate snapsho
   const frame3 = "Hello! How can I help you out today?";
   const raw = `)]}'\n10\n${makeChunk(frame1)}\n5\n${makeChunk(frame2)}\n5\n${makeChunk(frame3)}`;
   assert.equal(parseStreamResponse(raw), frame3);
+});
+
+test("gemini.google.com-only cookies stay host-only so they never reach Gemini's upload host", () => {
+  // A .google.com-wide OSID made contribution-*.usercontent.google.com answer 401 to uploads.
+  for (const name of ["OSID", "__Secure-OSID", "COMPASS"]) {
+    assert.deepEqual(toGeminiBrowserCookie({ name, value: "v" }), {
+      name,
+      value: "v",
+      url: "https://gemini.google.com",
+    });
+  }
+  assert.deepEqual(toGeminiBrowserCookie({ name: "__Secure-1PSID", value: "v" }), {
+    name: "__Secure-1PSID",
+    value: "v",
+    domain: ".google.com",
+    path: "/",
+    secure: true,
+  });
+});
+
+test("parseStreamResponse drops the [cite: N] markers Gemini adds for attachments", () => {
+  const inner = new Array(80).fill(null);
+  inner[4] = [[null, ["[cite_start]Blue background with 1, 2 and 3[cite: 1]. Done [cite: 1, 2]"]]];
+  const raw = `)]}'\n10\n[["wrb.fr", null, ${JSON.stringify(JSON.stringify(inner))}]]`;
+  assert.equal(parseStreamResponse(raw), "Blue background with 1, 2 and 3. Done");
+  inner[4] = [[null, ["The [cite_start]cat[cite_end] is black [cite: 1]."]]];
+  const mid = `)]}'\n10\n[["wrb.fr", null, ${JSON.stringify(JSON.stringify(inner))}]]`;
+  assert.equal(
+    parseStreamResponse(mid),
+    "The cat is black.",
+    "the word before a marker keeps its space"
+  );
 });
 
 test("parseStreamResponse ignores wrb.fr lines whose first entry is not an array", () => {
