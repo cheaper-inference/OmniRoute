@@ -221,4 +221,75 @@ describe("PoolWizard on the kit Wizard", () => {
     expect(mockFetch.mock.calls[0][0]).toBe("/api/quota/pools/pool-1");
     expect(requestsTo("PATCH")).toHaveLength(1);
   });
+
+  it("create sends the default borrow mode", async () => {
+    const onClose = vi.fn();
+    render(<PoolWizard {...props({ onClose })} />);
+    pickConnection();
+    expect(
+      (
+        screen.getByRole("radio", { name: "borrowModeSaturation" }) as HTMLInputElement
+      ).getAttribute("aria-checked")
+    ).toBe("true");
+    expect(screen.getByText("borrowModeSaturationHint")).toBeTruthy();
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton("wizardCreatePool"));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("POST")[0][1].body).borrowMode).toBe("saturation");
+  });
+
+  it("links the borrow mode group to the hint of the chosen mode", () => {
+    render(<PoolWizard {...props()} />);
+    pickConnection();
+    const group = () => screen.getByRole("radiogroup", { name: "borrowModeLabel" });
+    const saturationHint = screen.getByText("borrowModeSaturationHint");
+    expect(saturationHint.id).not.toBe("");
+    expect(group().getAttribute("aria-describedby")).toBe(saturationHint.id);
+    fireEvent.click(screen.getByRole("radio", { name: "borrowModeConsent" }));
+    expect(group().getAttribute("aria-describedby")).toBe(
+      screen.getByText("borrowModeConsentHint").id
+    );
+  });
+
+  it("choosing By consent sends it", async () => {
+    const onClose = vi.fn();
+    render(<PoolWizard {...props({ onClose })} />);
+    pickConnection();
+    fireEvent.click(screen.getByRole("radio", { name: "borrowModeConsent" }));
+    expect(screen.getByText("borrowModeConsentHint")).toBeTruthy();
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton("wizardCreatePool"));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("POST")[0][1].body).borrowMode).toBe("consent");
+  });
+
+  it("edit starts from the pool's mode and sends it back", async () => {
+    const onSaved = vi.fn();
+    const base = props({ open: false, onSaved });
+    const pool = {
+      id: "pool-1",
+      name: "Existing",
+      connectionId: "conn-1",
+      connectionIds: ["conn-1"],
+      groupId: "group-1",
+      borrowMode: "consent",
+      allocations: [{ apiKeyId: "key-1", weight: 100, policy: "hard" }],
+    } as unknown as WizardProps["editPool"];
+    const { rerender } = render(<PoolWizard {...base} />);
+    rerender(<PoolWizard {...base} open editPool={pool} />);
+
+    expect(
+      screen.getByRole("radio", { name: "borrowModeConsent" }).getAttribute("aria-checked")
+    ).toBe("true");
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton());
+    fireEvent.click(nextButton("saveChanges"));
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(requestsTo("PATCH")[0][1].body).borrowMode).toBe("consent");
+  });
 });

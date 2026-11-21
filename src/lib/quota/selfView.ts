@@ -9,6 +9,10 @@
  *   consumed  = store.peek(apiKeyId, { poolId, unit, window })
  * Placeholder dimensions (limit not above Number.EPSILON) are skipped, as the gate skips them.
  *
+ * Each pool reports its borrow mode and the key's own lending consent. In a consent pool each
+ * countable dimension also reports `borrowAvailable`, the aggregate other keys lend to this key
+ * (selfViewLending.ts).
+ *
  * `accounts[]` (selfViewAccounts.ts) lists one neutral entry per pool connection with the
  * `percent` dimensions. Account-level readings come from resolveAccountQuotaEntries (the cached
  * provider-limits snapshot behind /v1/me/status, sharing its refresh tracker and 60 s floor), and
@@ -48,10 +52,12 @@ import {
   resolveAccountQuotaEntries,
 } from "@/lib/usage/apiKeySelfServiceAccounts";
 import type { PoolAllocation, QuotaPool } from "@/lib/db/quotaPools";
+import { effectiveWeights } from "./consentBorrow";
 import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
 import { buildSelfViewBlocks } from "./selfViewBlocks";
+import { selfBorrowAvailable, selfLendingFields } from "./selfViewLending";
 import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type {
   AccountQuotaEntryLike,
@@ -188,12 +194,8 @@ function sameProviderFamily(a: string, b: string): boolean {
 /** The weight the gate applies: the key's own, or an equal split when all weights are 0. */
 function gateEffectiveWeight(pool: QuotaPool, allocation: PoolAllocation): number {
   const allocations = Array.isArray(pool.allocations) ? pool.allocations : [];
-  const totalWeight = allocations.reduce(
-    (sum, a) => sum + (Number.isFinite(a.weight) ? a.weight : 0),
-    0
-  );
-  if (totalWeight > 0) return allocation.weight;
-  return allocations.length > 0 ? 100 / allocations.length : 0;
+  const index = allocations.findIndex((a) => a.apiKeyId === allocation.apiKeyId);
+  return index < 0 ? 0 : effectiveWeights(allocations)[index];
 }
 
 async function resolvePoolContext(
@@ -270,6 +272,17 @@ async function resolvePoolContexts(
   );
 }
 
+/**
+ * The key's pools for `input.provider`, each with its `ref` (the PATCH route finds the pool a ref
+ * names among these). Defaults are loaded as buildQuotaSelfView loads them.
+ */
+export async function resolveSelfPoolContexts(
+  input: QuotaSelfViewInput,
+  rawDeps: QuotaSelfViewDeps = {}
+): Promise<SelfViewPoolContext[]> {
+  return resolvePoolContexts(input, await normalizeDeps(rawDeps));
+}
+
 function compareText(a: string | undefined, b: string | undefined): number {
   const left = a ?? "";
   const right = b ?? "";
@@ -280,27 +293,41 @@ function isCountableDimension(dim: QuotaDimension): dim is CountableDimension {
   return COUNTABLE_UNITS.has(dim.unit) && dim.limit > Number.EPSILON;
 }
 
+/** The key's own numbers in one dimension. A failed read is unavailable, never zero. */
+function ownShare(fairShare: number, consumed: number | null): SelfQuotaShare {
+  if (consumed === null) {
+    return {
+      fairShare,
+      consumed: null,
+      remaining: null,
+      status: "unavailable",
+      reason: STORE_UNAVAILABLE,
+    };
+  }
+  return { fairShare, consumed, remaining: Math.max(0, fairShare - consumed), status: "ok" };
+}
+
 async function buildSharedDimension(
   ctx: SelfViewPoolContext,
   dim: CountableDimension,
   store: ViewStore | null,
-  apiKeyId: string
+  apiKeyId: string,
+  nowMs: number
 ): Promise<SelfQuotaSharedDimension> {
   const limit = dim.limit * ctx.connectionIds.length;
   const fairShare = (ctx.effectiveWeight / 100) * limit;
   const key = { poolId: ctx.pool.id, unit: dim.unit, window: dim.window };
 
   const consumed = await readViewStore(store ? () => store.peek(apiKeyId, key) : null);
-  const yourShare: SelfQuotaShare =
-    consumed === null
-      ? {
-          fairShare,
-          consumed: null,
-          remaining: null,
-          status: "unavailable",
-          reason: STORE_UNAVAILABLE,
-        }
-      : { fairShare, consumed, remaining: Math.max(0, fairShare - consumed), status: "ok" };
+  const borrow = await selfBorrowAvailable({
+    ctx,
+    apiKeyId,
+    limit,
+    consumed,
+    nowMs,
+    peek: store ? (id) => store.peek(id, key) : null,
+  });
+  const yourShare: SelfQuotaShare = { ...ownShare(fairShare, consumed), ...borrow };
 
   const dimension: SelfQuotaSharedDimension = {
     unit: dim.unit,
@@ -366,16 +393,17 @@ async function buildPoolView(
   input: QuotaSelfViewInput,
   deps: CoreDeps
 ): Promise<SelfQuotaPool> {
+  const nowMs = deps.now();
   const dimensions: SelfQuotaSharedDimension[] = [];
   for (const dim of ctx.plan.dimensions ?? []) {
     if (!isCountableDimension(dim)) continue;
-    dimensions.push(await buildSharedDimension(ctx, dim, store, input.apiKeyId));
+    dimensions.push(await buildSharedDimension(ctx, dim, store, input.apiKeyId, nowMs));
   }
   return {
     ref: ctx.ref,
     name: ctx.pool.name,
     provider: ctx.provider,
-    borrowMode: "saturation",
+    ...selfLendingFields(ctx, nowMs),
     policy: gatePolicy(ctx.allocation.policy),
     weight: ctx.effectiveWeight,
     cap: allocationCap(ctx.allocation),

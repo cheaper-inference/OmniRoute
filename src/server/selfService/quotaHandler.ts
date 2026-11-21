@@ -41,7 +41,7 @@ export interface SelfQuotaHandlerDeps {
   keyStore?: SelfServiceKeyStore;
 }
 
-function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput {
+export function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput {
   return {
     apiKeyId: key.id,
     scopes: key.scopes,
@@ -53,7 +53,7 @@ function toViewInput(key: SelfServiceKey, provider: string): QuotaSelfViewInput 
   };
 }
 
-function failureResponse(err: unknown): Response {
+export function failureResponse(err: unknown): Response {
   if (err instanceof Error && err.message === MISSING_SCOPE_ERROR) {
     return selfServiceError(403, "API key lacks the self:usage scope");
   }

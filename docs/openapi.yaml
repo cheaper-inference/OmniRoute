@@ -16073,6 +16073,122 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      tags:
+        - V1 Me
+      summary: "PATCH me › quota"
+      description: >-
+        Records the calling API key's own lending consent for one Quota Share pool of the
+        provider (also served at /v1/me/quota/{provider}). The pool is named by the `ref` the GET
+        returns. A consent above 0 needs a pool in `consent` borrow mode, and 0 withdraws the
+        consent in either mode. Same feature flag, headers and provider
+        rules as the GET. The `self:usage` scope authorizes this write. Checks run in this order:
+        flag (404), key (401), scope (403), provider (400), per-key limit (429), body (400),
+        deadline (400), pool reference (404), borrow mode (403). A refusal by a check writes
+        nothing. A change of the stored consent is audited as `quota.pool.lending.updated`. The
+        same body twice writes and audits once. Limit: 20 requests per 60 seconds per key, counted
+        apart from the key's request rate limit.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: >-
+            Provider id or registry alias (for example `claude`, `anthropic`, `cc`, `codex`).
+            Trimmed and lower-cased; must then match `^[a-z0-9][a-z0-9._-]{0,63}$`.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelfLendingPatch"
+      responses:
+        "200":
+          description: The consent is stored. The body is the full quota view, built after the write.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelfQuotaView"
+        "400":
+          description: Invalid provider, a body that is not JSON, too long (over 4096 characters) or outside the schema, or a deadline in seconds or not in the future
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key, or the server's environment key
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The key lacks the self:usage scope, or the pool is not in consent mode and lendingPercent is above 0
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The QUOTA_SELF_PANEL feature flag is off, or the ref names no pool of this key for this provider
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: The key passed its limit of lending changes
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+            Retry-After:
+              description: Seconds until the limit window ends (60 when that time is not known)
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: The request failed (fixed message, no detail)
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/me/sessions:
     get:
       tags:
@@ -18616,6 +18732,12 @@ components:
         createdAt:
           type: string
           format: date-time
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+          description: >-
+            How a key may pass its share: on account headroom (saturation, the default) or only
+            within capacity other keys agreed to lend (consent).
         allocations:
           type: array
           items:
@@ -18643,6 +18765,20 @@ components:
         policy:
           type: string
           enum: [hard, soft, burst]
+        lendingPercent:
+          type: integer
+          minimum: 1
+          maximum: 100
+          readOnly: true
+          description: >-
+            Present only when the key holder lends. Set by the key holder through
+            PATCH /api/v1/me/quota/{provider}. Admin writes ignore it.
+        lendingUntil:
+          type: integer
+          readOnly: true
+          description: >-
+            Present only when a lending deadline is stored (epoch milliseconds). Admin writes
+            ignore it.
 
     PoolCreate:
       type: object
@@ -18653,6 +18789,10 @@ components:
         name:
           type: string
           maxLength: 120
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+          default: saturation
         allocations:
           type: array
           items:
@@ -18665,6 +18805,10 @@ components:
         name:
           type: string
           maxLength: 120
+        borrowMode:
+          type: string
+          enum: [saturation, consent]
+          description: Changes the pool's borrow mode. Stored lending consents are kept.
         allocations:
           type: array
           items:
@@ -18710,6 +18854,43 @@ components:
                       description: "Negative = surplus; positive = over-allocation"
                     borrowing:
                       type: boolean
+              accounts:
+                type: array
+                description: "Present for percent dimensions: one entry per pool connection, from that account's attribution book. globalUsedPercent is 0..1. The other amounts are in the dimension's units. internal + external can differ from consumedTotal when there is no usable plan-window reading or a lower figure is not applied."
+                items:
+                  type: object
+                  properties:
+                    connectionId:
+                      type: string
+                    globalUsedPercent:
+                      type: number
+                    consumedTotal:
+                      type: number
+                    internal:
+                      type: number
+                      description: "Sum of the parts attributed to keys. They split the growth of the account figure since the book's baseline, as far as the keys' tokens since then explain it."
+                    external:
+                      type: number
+                      description: "Part of the account figure not attributed to any key. It is the baseline (the figure when the book opened or the window last turned), plus the growth the keys' tokens do not explain."
+                    externalCharged:
+                      type: number
+                      description: "External part charged to the keys by weight, after the capacity no allocation claims."
+                    perKey:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          apiKeyId:
+                            type: string
+                          consumed:
+                            type: number
+                          fairShare:
+                            type: number
+                          deficit:
+                            type: number
+                            description: "Negative = surplus; positive = over-allocation"
+                          borrowing:
+                            type: boolean
         burnRate:
           type: object
           nullable: true
@@ -19634,6 +19815,13 @@ components:
           $ref: "#/components/schemas/SelfQuotaStatus"
         reason:
           type: string
+        borrowAvailable:
+          type: [number, "null"]
+          description: >-
+            Countable dimensions of a pool in consent mode only: what the key may use above its
+            share now, lent by the other keys, as one figure for all of them. In a pool of two
+            keys it is the other key's own figure. Null for a soft or burst key, and null when a
+            read fails. Not reported for percent windows or in accounts[].
     SelfQuotaSharedDimension:
       type: object
       description: Pool bucket of a countable unit; `limit` is the plan limit times the pool's accounts.
@@ -19709,7 +19897,21 @@ components:
       type: object
       additionalProperties: false
       required:
-        [ref, name, provider, borrowMode, policy, weight, cap, accountVisible, dimensions, accounts]
+        [
+          ref,
+          name,
+          provider,
+          borrowMode,
+          lendingPercent,
+          lendingUntil,
+          lendingActive,
+          policy,
+          weight,
+          cap,
+          accountVisible,
+          dimensions,
+          accounts,
+        ]
       properties:
         ref:
           type: string
@@ -19723,7 +19925,22 @@ components:
           type: string
         borrowMode:
           type: string
-          enum: [saturation]
+          enum: [saturation, consent]
+        lendingPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 0
+          description: The key's own stored lending percentage.
+        lendingUntil:
+          type: [integer, "null"]
+          default: null
+          description: The key's own lending deadline in epoch milliseconds, or null for none.
+        lendingActive:
+          type: boolean
+          default: false
+          description: >-
+            True only in a consent pool, with a percentage above 0 and the deadline not reached.
         policy:
           type: string
           enum: [hard, soft, burst]
@@ -19750,6 +19967,26 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SelfQuotaAccount"
+    SelfLendingPatch:
+      type: object
+      additionalProperties: false
+      required: [pool, lendingPercent]
+      properties:
+        pool:
+          type: string
+          pattern: "^qpr_[0-9a-f]{32}$"
+          description: The pool's `ref`, as the GET returns it.
+        lendingPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Share of the key's idle capacity it lends. 0 clears the consent and its deadline.
+        lendingUntil:
+          type: [integer, "null"]
+          maximum: 8640000000000000
+          description: >-
+            Epoch milliseconds, in the future, or null (or absent) for no deadline. A value below
+            100000000000 reads as seconds and is refused. Not checked when lendingPercent is 0.
     SelfQuotaBlocks:
       type: object
       additionalProperties: false

@@ -40,6 +40,21 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
   }
 }
 
+/**
+ * The audit metadata of an update. The wizard always sends `borrowMode`, so the stored mode is
+ * added as `previousBorrowMode` when the request changes it, and only then. Read before the write.
+ */
+function updateAuditMetadata<T extends { borrowMode?: string }>(
+  id: string,
+  data: T
+): T & { previousBorrowMode?: string } {
+  if (data.borrowMode === undefined) return data;
+  const previous = getPool(id)?.borrowMode;
+  return previous !== undefined && previous !== data.borrowMode
+    ? { ...data, previousBorrowMode: previous }
+    : data;
+}
+
 export async function PATCH(request: Request, { params }: RouteParams): Promise<Response> {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
@@ -51,6 +66,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     if (!parsed.success) {
       return NextResponse.json(buildErrorBody(400, parsed.error.message), { status: 400 });
     }
+    const auditMetadata = updateAuditMetadata(id, parsed.data);
 
     // Capture prev allocations BEFORE the update so we know which keys are leaving.
     // Only needed when `exclusive` is explicitly present in the request body.
@@ -112,7 +128,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     logAuditEvent({
       action: "quota.pool.updated",
       target: id,
-      metadata: parsed.data,
+      metadata: auditMetadata,
       ipAddress: ctx.ipAddress ?? undefined,
       requestId: ctx.requestId,
     });
