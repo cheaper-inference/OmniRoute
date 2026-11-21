@@ -74,6 +74,40 @@ test("resolveWildcardAlias: handles empty/null", () => {
   assert.equal(resolveWildcardAlias(null, []), null);
 });
 
+test("resolveWildcardAlias: stored specificity does not outrank a specific pattern", () => {
+  const aliases = [
+    { pattern: "claude-*", target: "generic", specificity: 9999 },
+    { pattern: "claude-sonnet-4-*", target: "specific" },
+  ];
+  const result = resolveWildcardAlias("claude-sonnet-4-20250514", aliases);
+  assert.equal(result.target, "specific");
+});
+
+test("resolveWildcardAlias: returns the computed specificity when none is stored", () => {
+  const aliases = [{ pattern: "claude-sonnet-4-*", target: "sonnet4" }];
+  const result = resolveWildcardAlias("claude-sonnet-4-20250514", aliases);
+  assert.equal(result.specificity, getSpecificity("claude-sonnet-4-*"));
+});
+
+test("resolveWildcardAlias: first declared wins on equal computed specificity", () => {
+  const aliases = [
+    { pattern: "claude-?-*", target: "first", specificity: 1 },
+    { pattern: "claude-*-?", target: "second", specificity: 9999 },
+  ];
+  const result = resolveWildcardAlias("claude-x-y", aliases);
+  assert.equal(result.target, "first");
+  assert.equal(result.specificity, 35);
+});
+
+test("resolveWildcardAlias: keeps extra fields but replaces stored specificity with the computed score", () => {
+  const aliases = [
+    { pattern: "claude-*", target: "generic", specificity: 9999, weight: "preserved" },
+  ];
+  const result = resolveWildcardAlias("claude-sonnet-4", aliases);
+  assert.equal(result.weight, "preserved");
+  assert.equal(result.specificity, 28);
+});
+
 // ─── resolveModel ───────────────────────────────────────────────────────────
 
 test("resolveModel: exact alias takes priority", () => {
