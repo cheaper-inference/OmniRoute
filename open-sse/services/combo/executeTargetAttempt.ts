@@ -20,6 +20,7 @@ import {
   selectLockoutCooldownMs,
 } from "../accountFallback.ts";
 import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../utils/error.ts";
+import { MALFORMED_TOOL_CALL_ARGUMENTS_CODE } from "../../handlers/chatCore/malformedToolCallArguments.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { isMusePolicyRefusal } from "../musePolicyRefusal.ts";
@@ -1137,7 +1138,10 @@ export async function executeTargetAttempt(
         isStreamEarlyEof,
         status: result.status,
         sameProviderNext,
-        skipProviderBreaker: fallbackResult.skipProviderBreaker,
+        // #17198: a malformed tool-call response still falls back, but is no provider failure.
+        skipProviderBreaker:
+          fallbackResult.skipProviderBreaker ||
+          structuredError?.code === MALFORMED_TOOL_CALL_ARGUMENTS_CODE,
         requestScopedFailure: scopedFailure,
         error: errorText,
         isProxyUnreachable: structuredError?.code === "proxy_unreachable",
