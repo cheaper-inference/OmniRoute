@@ -1,0 +1,1 @@
+- **fix(providers):** classify `gemini-4-neon-*` and `gemini-4-hydrogen-*` in the Antigravity Gemini quota family (instead of Argon) and `gpt-oss-*` in the Claude/GPT quota family ([#20832](https://github.com/cheaper-inference/OmniRoute/issues/20832)).
