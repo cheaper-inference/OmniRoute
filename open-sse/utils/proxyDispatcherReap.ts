@@ -71,19 +71,28 @@ function setBoundedFailureStreak(proxyUrl: string, timestamps: number[]): void {
   proxyFailureStreaks.set(proxyUrl, timestamps);
 }
 
+function appendProxyFailureTimestamp(proxyUrl: string, now: number): number[] {
+  const existing = proxyFailureStreaks.get(proxyUrl);
+  return existing ? [...existing, now] : [now];
+}
+
+function evictAndReapProxyDispatcher(proxyUrl: string, now: number): void {
+  proxyFailureStreaks.delete(proxyUrl);
+  evictProxyDispatcher(proxyUrl);
+  const { hostname, isLocal } = parseProxyHost(proxyUrl);
+  maybeReapDispatcherPool(hostname, isLocal, now);
+}
+
 export function recordProxyDispatcherFailure(
   proxyUrl: string,
   now: number = Date.now()
 ): boolean {
   if (!proxyUrl) return false;
   pruneProxyFailureStreaks(now);
-  const recent = [...(proxyFailureStreaks.get(proxyUrl) ?? []), now];
+  const recent = appendProxyFailureTimestamp(proxyUrl, now);
 
   if (recent.length >= PROXY_DISPATCHER_EVICT_THRESHOLD) {
-    proxyFailureStreaks.delete(proxyUrl);
-    evictProxyDispatcher(proxyUrl);
-    const { hostname, isLocal } = parseProxyHost(proxyUrl);
-    maybeReapDispatcherPool(hostname, isLocal, now);
+    evictAndReapProxyDispatcher(proxyUrl, now);
     return true;
   }
 
