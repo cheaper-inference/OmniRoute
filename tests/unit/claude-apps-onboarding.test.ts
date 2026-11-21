@@ -41,6 +41,14 @@ test("a quote, a dollar sign and a backtick stay inside one quoted token", () =>
   assert.equal(buildShellExports({ K: "sk-a'b$(x)`y\\z" }), "export K='sk-a'\\''b$(x)`y\\z'");
 });
 
+test("a value with a space stays one single-quoted token", () => {
+  assert.equal(buildShellExports({ K: "sk a  b" }), "export K='sk a  b'");
+});
+
+test("a value with a newline stays one single-quoted token", () => {
+  assert.equal(buildShellExports({ K: "sk-a\nb", L: "c" }), "export K='sk-a\nb'\nexport L='c'");
+});
+
 test("the local profile swaps only the host of a plain http origin with a port", () => {
   assert.equal(
     deriveLocalNetworkBaseUrl("http://gw.example.net:20128", "192.168.0.10"),

@@ -56,13 +56,16 @@ export default function OnboardingCard({
     },
   });
 
-  // Choices and shape only, never the key: a new value gives each tab a fresh copy status.
+  // Choices and server values only, never the key: any change of the generated text gives each
+  // tab a fresh copy status. The base URL is the published address or the placeholder.
   const resetKey = [
     includeKey,
     state.mainModel ?? "",
     state.longContext,
     state.models.length,
+    state.models.join(","),
     state.baseUrlKnown,
+    state.baseUrl,
   ].join("|");
 
   return (

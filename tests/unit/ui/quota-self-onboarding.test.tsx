@@ -212,6 +212,28 @@ describe("self-service quota page: tool setup card", () => {
     expect(html()).not.toContain(KEY);
   });
 
+  it("a refresh that changes the base URL or the models clears the copied status", async () => {
+    stubClipboard();
+    // The same number of models for this provider, one of them another model.
+    const HAIKU_NEXT = "qtSd/team/claude/claude-haiku-4-6";
+    const answers = [
+      view(),
+      view({ apiBaseUrl: "https://gw2.example.net" }),
+      view({ apiBaseUrl: "https://gw2.example.net", availableModels: [HAIKU_NEXT, OPUS, SONNET] }),
+    ];
+    stubFetch({ [QUOTA]: () => jsonResponse(answers.shift() ?? view()) });
+    renderPage();
+    enterKey(KEY);
+    await screen.findByRole("heading", { name: "Set up your tools" });
+    for (const expected of ["https://gw2.example.net", HAIKU_NEXT]) {
+      fireEvent.click(screen.getByRole("button", { name: "Copy settings" }));
+      expect(await screen.findByText("Copied.")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+      await vi.waitFor(() => expect(settings().textContent).toContain(expected));
+      expect(screen.queryByText("Copied.")).toBeNull();
+    }
+  });
+
   it("the card stays through a refresh of the same key and leaves when it fails", async () => {
     let answer: (response: Response) => void = () => {};
     let first = true;
@@ -288,6 +310,10 @@ describe("self-service quota page: tool setup card", () => {
           "nested-interactive",
           "tabindex",
           "scrollable-region-focusable",
+          "select-name",
+          "aria-required-children",
+          "aria-required-parent",
+          "aria-allowed-attr",
         ],
       },
     };

@@ -290,6 +290,10 @@ describe("self-service quota page: Shell and Claude Desktop tabs", () => {
           "scrollable-region-focusable",
           "definition-list",
           "dlitem",
+          "select-name",
+          "aria-required-children",
+          "aria-required-parent",
+          "aria-allowed-attr",
         ],
       },
     };
