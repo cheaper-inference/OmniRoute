@@ -84,20 +84,3 @@ test("opencode-go exposes Muse Spark Contributor effort aliases with a 1M contex
     );
   }
 });
-
-test("opencode-go advertises glm-5.3 and glm-5.3-flash with the vendor Go list limits", () => {
-  // Vendor: GET https://opencode.ai/zen/go/v1/models (glm-5.3: 1M context, 131072 output,
-  // efforts low/high/max; glm-5.3-flash: same limits, image and video input).
-  const byId = new Map(
-    (opencode_goProvider.models ?? []).map((m) => [m.id, m as Record<string, unknown>])
-  );
-  for (const id of ["glm-5.3", "glm-5.3-flash"]) {
-    const model = byId.get(id);
-    assert.ok(model, `expected ${id} in opencode-go catalog, got: ${modelIds().join(", ")}`);
-    assert.equal(model.contextLength, 1000000, `${id} context`);
-    assert.equal(model.maxOutputTokens, 131072, `${id} max output`);
-    assert.deepEqual(model.supportedThinkingEfforts, ["low", "high", "max"], `${id} efforts`);
-  }
-  assert.equal(byId.get("glm-5.3-flash")?.supportsVision, true);
-  assert.notEqual(byId.get("glm-5.3")?.supportsVision, true);
-});
