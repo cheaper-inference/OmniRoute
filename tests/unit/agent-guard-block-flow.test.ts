@@ -45,12 +45,13 @@ const BARE = "claude-opus-5";
 const OTHER = "openai/gpt-4.1";
 const OTHER2 = "openai/gpt-4.1-mini";
 const OTHER3 = "openai/gpt-4.1-nano";
+// Groq always answers 503: a failing step on a connection no OpenAI target shares.
+const FAILING = "groq/llama-3.3-70b-versatile";
 
 const originalFetch = globalThis.fetch;
 const calls: string[] = [];
-// The model of every OpenAI call, and one OpenAI model that answers 503 (null: none).
+// The model of every OpenAI call.
 const openaiModels: string[] = [];
-let failingOpenAIModel: string | null = null;
 function requestedModel(init?: RequestInit): string {
   try {
     return String(JSON.parse(String(init?.body)).model);
@@ -77,14 +78,15 @@ function stubUpstreams() {
     }
     if (host === "api.openai.com") {
       calls.push("openai");
-      const model = requestedModel(init);
-      openaiModels.push(model);
-      if (model === failingOpenAIModel)
-        return Response.json(
-          { error: { message: "Service unavailable", type: "server_error" } },
-          { status: 503 }
-        );
+      openaiModels.push(requestedModel(init));
       return buildOpenAIResponse("from-openai", "gpt-4.1");
+    }
+    if (host === "api.groq.com") {
+      calls.push("groq");
+      return Response.json(
+        { error: { message: "Service unavailable", type: "server_error" } },
+        { status: 503 }
+      );
     }
     return Response.json({ data: [] });
   }) as typeof fetch;
@@ -131,7 +133,6 @@ test.beforeEach(async () => {
 test.afterEach(async () => {
   delete process.env.AGENT_GUARD_MODE;
   delete process.env.AGENT_GUARD_STRICT;
-  failingOpenAIModel = null;
   globalThis.fetch = originalFetch;
   BaseExecutor.RETRY_CONFIG.delayMs = harness.originalRetryDelayMs;
   await resetStorage();
@@ -421,25 +422,38 @@ test("block: a fusion combo reached through the safety-net redirect has its judg
     models: [OTHER, OTHER3],
     config: { judgeModel: CLAUDE },
   });
-  await combosDb.createCombo({ name: "guard-net-outer", strategy: "priority", models: [OTHER2] });
+  const groq = await seedConnection("groq");
+  // The outer step fails on its own Groq connection, once: `maxRetries: 0` skips the retry delay.
+  await combosDb.createCombo({
+    name: "guard-net-outer",
+    strategy: "priority",
+    models: [FAILING],
+    config: { maxRetries: 0 },
+  });
   await settingsDb.updateSettings({ globalFallbackModel: "auto/guard-net-fusion" });
-  failingOpenAIModel = "gpt-4.1-mini";
-  // Guard off: the redirect runs the fallback combo, its panel member and its judge.
+  // Guard off: the redirect runs the fallback combo, both panel members and its judge.
   const open = await chat("guard-net-outer", KILO);
   assert.deepEqual(
-    [openaiModels.includes("gpt-4.1"), calls.includes("anthropic")],
-    [true, true],
+    [open.status, calls.includes("groq"), [...openaiModels].sort(), calls.includes("anthropic")],
+    [200, true, ["gpt-4.1", "gpt-4.1-nano"], true],
     JSON.stringify([open.status, calls, openaiModels])
   );
+  // The 503 cooled the Groq connection down: clear it so the outer step runs again.
+  await providersDb.updateProviderConnection(String(groq.id), {
+    rateLimitedUntil: null,
+    backoffLevel: 0,
+    testStatus: "active",
+  });
+  clearAllModelLockouts();
   block();
   const res = await chat("guard-net-outer", KILO);
   // Claude never called, and no panel member of the fallback fusion combo dispatched.
   assert.deepEqual(
-    [calls.includes("anthropic"), openaiModels.filter((model) => model !== "gpt-4.1-mini")],
+    [calls.includes("anthropic"), openaiModels],
     [false, []],
     JSON.stringify([res.status, calls, openaiModels])
   );
-  assert.ok(openaiModels.includes("gpt-4.1-mini"), JSON.stringify(openaiModels)); // outer ran
+  assert.ok(calls.includes("groq"), JSON.stringify(calls)); // outer ran
   assert.equal(res.ok, false);
 });
 
@@ -450,23 +464,24 @@ test("block + strict: the trusted live test keeps its exemption through the safe
     models: [OTHER, OTHER3],
     config: { judgeModel: CLAUDE },
   });
+  await seedConnection("groq");
   await combosDb.createCombo({
     name: "guard-net-live-outer",
     strategy: "priority",
-    models: [OTHER2],
+    models: [FAILING],
+    config: { maxRetries: 0 },
   });
   await settingsDb.updateSettings({ globalFallbackModel: "auto/guard-net-live" });
-  failingOpenAIModel = "gpt-4.1-mini";
   block("true");
   const trusted = {
     "x-internal-test": "combo-health-check",
     [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
   };
   const res = await chat("guard-net-live-outer", trusted);
-  // A panel member of the fallback fusion combo ran, and so did its Claude judge.
+  // The outer step failed, both panel members of the fallback fusion combo ran, and its judge.
   assert.deepEqual(
-    [res.status, openaiModels.some((m) => m !== "gpt-4.1-mini"), calls.includes("anthropic")],
-    [200, true, true],
+    [res.status, calls.includes("groq"), [...openaiModels].sort(), calls.includes("anthropic")],
+    [200, true, ["gpt-4.1", "gpt-4.1-nano"], true],
     JSON.stringify([res.status, await codeOf(res), calls, openaiModels])
   );
 });
