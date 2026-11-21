@@ -168,6 +168,10 @@ const GEMINI_36_FLASH_MODEL_SPEC = {
 
 export const MODEL_SPECS: Record<string, ModelSpec> = {
   // Public API limits; Codex's smaller window lives in its provider registry.
+  "gpt-6.2-sol": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6.2-sol"],
+  },
   "gpt-6.1-sol": {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-6.1-sol"],
