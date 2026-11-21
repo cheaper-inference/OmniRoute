@@ -3,9 +3,11 @@ import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http"
 import net from "net";
 import { classifyIpScope } from "@/lib/ipUtils";
 import {
+  isLoopbackBindHost,
   isPrintableAsciiTarget,
   isQuotaPanelPath,
   QUOTA_PANEL_METHODS,
+  resolveQuotaPanelListener,
 } from "@/lib/quotaPanelBridge";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { warnIfNonLoopbackWithoutApiKey } from "@/lib/startup/nonLoopbackApiKeyGuard";
@@ -376,6 +378,8 @@ function proxyUpgrade(
 
 declare global {
   var __omnirouteApiBridgeStarted: boolean | undefined;
+  // undefined: never attempted. null: off or refused.
+  var __omnirouteQuotaPanelServer: http.Server | null | undefined;
 }
 
 export function createApiBridgeServer(
@@ -412,12 +416,57 @@ export function createApiBridgeServer(
   return server;
 }
 
+/**
+ * Starts the quota panel listener when QUOTA_PANEL_PORT asks for it.
+ *
+ * Returns null when the variable is unset or refused. A bind failure logs a warning and leaves
+ * the returned server not listening. Nothing here throws.
+ */
+export function startQuotaPanelListener(
+  env: Record<string, string | undefined> = process.env,
+  ports: { apiPort: number; dashboardPort: number } = getRuntimePorts()
+): http.Server | null {
+  const decision = resolveQuotaPanelListener(env, ports);
+  if (decision.kind === "off") return null;
+  if (decision.kind === "refused") {
+    console.warn(`[Quota Panel] ${decision.warning}`);
+    return null;
+  }
+
+  const { port, host, basePath } = decision;
+  const { dashboardPort } = ports;
+  const server = createApiBridgeServer(dashboardPort, createQuotaPanelRole(basePath));
+  server.on("error", (error: NodeJS.ErrnoException) => {
+    if (error?.code === "EADDRINUSE") {
+      console.warn(`[Quota Panel] Port ${port} is already in use. The quota panel port stays off.`);
+      return;
+    }
+    console.warn("[Quota Panel] Failed to start:", error?.message || error);
+  });
+  if (!isLoopbackBindHost(host)) {
+    console.warn(
+      `[Quota Panel] Bound to ${host}. This port serves plain HTTP and the page sends API keys. Put a TLS reverse proxy in front of it.`
+    );
+  }
+  server.listen(port, host, () => {
+    console.log(`[Quota Panel] Listening on ${host}:${port} -> dashboard:${dashboardPort}`);
+  });
+  return server;
+}
+
+function initQuotaPanelServer(): void {
+  if (globalThis.__omnirouteQuotaPanelServer !== undefined) return;
+  globalThis.__omnirouteQuotaPanelServer = startQuotaPanelListener();
+}
+
 export function initApiBridgeServer(): void {
   // Safety net: a client aborting a connection can emit `Error: aborted`/
   // ECONNRESET on the request stream; without this the single missed listener
   // becomes an uncaughtException that kills the server. Benign aborts are
   // swallowed; genuine errors still crash loudly (#fix-dev-server-aborted).
   installProcessCrashGuard();
+  // The quota panel listener starts on its own, also when the API port is not split.
+  initQuotaPanelServer();
   if (globalThis.__omnirouteApiBridgeStarted) return;
 
   const { apiPort, dashboardPort } = getRuntimePorts();
