@@ -2515,6 +2515,37 @@ export function extractImageGenerationCalls(
   return results;
 }
 
+/** Parse one SSE `data:` line into a response.completed event, or null for any other line. */
+function completedEventFromSseLine(line: string): Record<string, unknown> | null {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("data:")) return null;
+  const payload = trimmed.slice(5).trim();
+  if (!payload || payload === "[DONE]") return null;
+  try {
+    const evt = JSON.parse(payload) as Record<string, unknown>;
+    return evt?.type === "response.completed" ? evt : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Image-tool token usage from the response.completed event (tool_usage.image_gen), for the
+ * call log only. Never returned as `data.usage`: the accounting path would price it at the
+ * host model's text rates. Zero or missing blocks are ignored. */
+export function extractImageGenToolUsage(sseText: string): Record<string, unknown> | null {
+  for (const line of String(sseText || "").split("\n")) {
+    const evt = completedEventFromSseLine(line);
+    if (!evt) continue;
+    const response = evt.response as Record<string, unknown> | undefined;
+    const toolUsage = response?.tool_usage as Record<string, unknown> | undefined;
+    const imageGen = toolUsage?.image_gen as Record<string, unknown> | undefined;
+    if (!imageGen || typeof imageGen !== "object") return null;
+    const total = (Number(imageGen.input_tokens) || 0) + (Number(imageGen.output_tokens) || 0);
+    return total > 0 ? imageGen : null;
+  }
+  return null;
+}
+
 // The image_generation hosted tool accepts { "auto" | "low" | "medium" | "high" }
 // for `quality`. Legacy image clients often send "standard" / "hd". Map those values
 // so OpenWebUI's quality dropdown doesn't silently get rejected upstream.
@@ -2714,6 +2745,7 @@ async function handleCodexImageGeneration({
 
     const rawSSE = await response.text();
     const items = extractImageGenerationCalls(rawSSE);
+    const toolUsage = extractImageGenToolUsage(rawSSE);
     if (items.length === 0) {
       return {
         ok: false as const,
@@ -2730,7 +2762,7 @@ async function handleCodexImageGeneration({
       };
     }
 
-    return { ok: true as const, items };
+    return { ok: true as const, items, toolUsage };
   };
 
   const imageResults = await Promise.all(
@@ -2738,8 +2770,15 @@ async function handleCodexImageGeneration({
   );
 
   const collected: Array<{ b64_json: string; revised_prompt?: string }> = [];
+  const usageTotals = { input_tokens: 0, output_tokens: 0 };
+  let sawToolUsage = false;
   for (const imageResult of imageResults) {
     if (!imageResult.ok) return saveImageErrorResult(imageResult.error);
+    if (imageResult.toolUsage) {
+      sawToolUsage = true;
+      usageTotals.input_tokens += Number(imageResult.toolUsage.input_tokens) || 0;
+      usageTotals.output_tokens += Number(imageResult.toolUsage.output_tokens) || 0;
+    }
     for (const item of imageResult.items) {
       collected.push({
         b64_json: item.b64,
@@ -2765,7 +2804,12 @@ async function handleCodexImageGeneration({
     model,
     startTime,
     requestBody: requestBodyForLog,
-    responseBody: { images_count: data.length },
+    responseBody: {
+      images_count: data.length,
+      // Call-log only (see extractImageGenToolUsage). Never on the returned result: the
+      // accounting path would price these tokens at the host model's text rates.
+      ...(sawToolUsage ? { usage: usageTotals } : {}),
+    },
     images: data,
     path: logPath,
   });
