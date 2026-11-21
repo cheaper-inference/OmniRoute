@@ -355,111 +355,70 @@ npm run build:release
 
 ---
 
-## Αποκοπή της 3.9.0 LTS (πρόβα στην 3.8.58)
+## 3.9.0 LTS cut (πρόβα στο 3.8.58)
 
-Μετά τη v3.8.59, η επόμενη έκδοση είναι η 3.9.0 και η κορυφή της μετατρέπεται σε δύο μακρόβιους κλάδους:
-`stable/v3` (η γραμμή v3 LTS, npm `latest`) και `develop` (v4, αναβαθμισμένη σε 4.0.0, npm
-`nightly`). Το μοντέλο κλάδων/καναλιών, το forward-port και οι ετικέτες βρίσκονται στο
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)· το σχέδιο βρίσκεται στο [ROADMAP](../../ROADMAP.md) (Φάση 3). Η αποκοπή εκτελείται μία φορά·
-η 3.8.58 αποτελεί πλήρη πρόβα της σε ένα fork και η 3.8.59 ολοκληρώνεται με τη
-[λίστα ελέγχου GO/NO-GO](./LTS_GO_NO_GO.md).
+Μετά την έκδοση 3.8.59, η επόμενη έκδοση είναι η 3.9.0 και η άκρη της γίνεται δύο κλάδοι με μεγάλη διάρκεια ζωής: `stable/v3` (η γραμμή v3 LTS, npm `latest`) και `develop` (v4, μειώθηκε σε 4.0.0, npm `nightly`). Το μοντέλο branch/channel, η θύρα προς τα εμπρός και οι ετικέτες είναι σε [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; το σχέδιο είναι στο [ROADMAP](../../ROADMAP.md) (Φάση 3). Η περικοπή εκτελείται μία φορά. Το 3.8.58 το κάνει πρόβες από άκρη σε άκρη σε ένα πιρούνι και το 3.8.59 κλείνει με τη [λίστα ελέγχου GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Δοκιμαστική εκτέλεση (μόνο για ανάγνωση, ασφαλής ανά πάσα στιγμή)
+### Ξηρή λειτουργία (μόνο για ανάγνωση, ασφαλής ανά πάσα στιγμή)
 
 ```bash
-npm run release:dry-run-lts-cut                       # η πραγματική αποκοπή: 3.9.0 από το HEAD, προηγούμενο tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # καθορισμός του commit προέλευσης
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-Το `scripts/release/dry-run-lts-cut.mjs` δεν εκτελεί τίποτα: διαβάζει τα git και `gh` και εμφανίζει
-ολόκληρη την ακολουθία — προϋποθέσεις (η προέλευση επιλύεται, το αποθετήριο προέλευσης έχει πλήρες ιστορικό —
-ένα shallow clone δεν μπορεί να προωθήσει το `stable/v3`, η πλευρά λήψης απορρίπτει το πακέτο στον πρώτο
-grafted γονέα, επομένως εκτελέστε την αποκοπή από ένα πλήρες clone ή εκτελέστε πρώτα `git fetch --unshallow origin` — το προηγούμενο
-tag υπάρχει, το `package.json` έχει την έκδοση-στόχο, υπάρχει ανοιχτό issue `release-freeze`, δεν υπάρχει ανοιχτό
-issue `Release branch not green`
-σε υπάρχοντα κλάδο έκδοσης — ένας κλάδος που δεν υπάρχει αναφέρεται ως `?` άγνωστος, ποτέ
-πράσινος — η ουρά `release` του Mergify είναι διαμορφωμένη (G11: `queue_rules`, `checks_timeout`,
-ετικέτα `queue`), το σύνολο κανόνων `release/*` εξακολουθεί να αποκλείει τη διαγραφή και το force-push και
-τα `stable/v3` και `develop` δεν υπάρχουν ακόμη), τα δύο βήματα δημιουργίας κλάδων, ποια εναύσματα ανενεργών workflow
-και ποιες συνθήκες `if:` γίνονται αληθείς (και ποια παραμένουν αποκλεισμένα από μια μεταβλητή αποθετηρίου ή
-καρφιτσωμένα στο κανονικό αποθετήριο), τα αναμενόμενα dist-tags (`latest` → 3.9.0, `next` και
-`nightly` κενά) και την επαναφορά. Κωδικός εξόδου `0` = `RESULT: READY`, `1` = αποτυχία προϋπόθεσης
-που εμποδίζει τη διαδικασία (`✗`), `2` = σφάλμα χρήσης. Το `--advisory <id,...>` υποβαθμίζει έναν έλεγχο σε προειδοποίηση (`!`)
-χωρίς να τον αποκρύπτει.
+`scripts/release/dry-run-lts-cut.mjs` δεν εκτελεί τίποτα: διαβάζει git και `gh` και εκτυπώνει ολόκληρη τη σειρά — προϋποθέσεις (η πηγή επιλύεται, το αποθετήριο πηγής έχει πλήρες ιστορικό — ένας ρηχός κλώνος δεν μπορεί να ωθήσει `stable/v3`, η πλευρά λήψης απορρίπτει το πακέτο στον πρώτο ενοφθαλμισμένο γονέα, οπότε κόψτε από έναν πλήρη κλώνο ή `git fetch --unshallow origin` η πρώτη έκδοση — είναι ανοιχτή, το `package.json` είναι ανοιχτό το προηγούμενο θέμα `release-freeze` `Release branch not green` σε έναν υπάρχοντα κλάδο έκδοσης — ένας κλάδος που δεν υπάρχει αναφέρει `?` άγνωστο, ποτέ πράσινο — omni-queue προσγειώνει την έκδοση PRs (G11: `config/merge-queue/config.json` ισχύει, `bases` του διαχειρίζεται τον κλάδο έκδοσης, `mode` `live`, η ετικέτα του υπάρχει), το σύνολο κανόνων `release/*` εξακολουθεί να μπλοκάρει τη διαγραφή και την εξαναγκαστική ώθηση του κλάδου, και `stable/v3` `develop` οι ενεργοποιήσεις και οι συνθήκες `if:` γίνονται αληθείς (και οι οποίες παραμένουν περιφραγμένες από μια μεταβλητή χώρου αποθήκευσης ή καρφιτσωμένες στο κανονικό αποθετήριο), οι αναμενόμενες ετικέτες απόστασης (`latest` → 3.9.0, `next` και `nightly` κενές) και η επαναφορά. Έξοδος `0` = `RESULT: READY`, `1` = απέτυχε μια προϋπόθεση αποκλεισμού (`✗`), σφάλμα χρήσης `2` =. `--advisory <id,...>` υποβαθμίζει μια επιταγή σε προειδοποίηση (`!`) χωρίς να την κρύβει.
 
-Εκτελέστε τη δοκιμαστική εκτέλεση της πραγματικής αποκοπής όσο το πάγωμα έκδοσης της 3.9.0 παραμένει ανοιχτό — οι κλάδοι
-δημιουργούνται μετά το tag και πριν η Φάση 12c άρει το πάγωμα.
+Εκτελέστε το dry-run της πραγματικής κοπής — το freeze απελευθέρωσης 3.9.0 είναι ακόμα ανοιχτό.
 
-### Πρόβα της 3.8.58 (μόνο σε fork)
+### 3.8.58 πρόβα (μόνο πιρούνι)
 
 ```bash
-# 1. Δοκιμαστική εκτέλεση στην τρέχουσα κορυφή με παραμέτρους πρόβας
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Εκτέλεση σε remote ενός FORK (το origin ή οποιοδήποτε remote του οποίου το URL είναι αυτό του κανονικού
-#    αποθετηρίου απορρίπτεται· κάθε βήμα ζητά επιβεβαίωση στο τερματικό)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Δοκιμή των ανενεργών workflow στο fork (workflow_dispatch όπου η δοκιμαστική εκτέλεση
-#    αναφέρει καρφίτσωμα στο κανονικό αποθετήριο) και, στη συνέχεια, επαναφορά
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Το commit αναβάθμισης του develop δημιουργείται με χαμηλού επιπέδου εντολές του git (χωρίς να επηρεάζεται το working tree) και αναβαθμίζει
-τα ίδια πέντε αρχεία με ένα commit ανοίγματος κύκλου: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` και `docs/openapi.yaml`. Η ενότητα `[4.0.0]`
-του CHANGELOG και τα αντίστοιχα i18n αντίγραφά της ανοίγονται κατόπιν στο `develop`, πριν από το πρώτο
-PR του. Το script δεν αλλάζει ποτέ τα npm dist-tags — κάντε πρόβα αυτών σε ένα δοκιμαστικό πακέτο.
+Το develop bump commit είναι χτισμένο με git plumbing (δεν αγγίζεται δέντρο που λειτουργεί) και προσκρούει τα ίδια πέντε αρχεία με μια δέσμευση κυκλικού ανοιχτού: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` και `docs/openapi.yaml`. Το τμήμα `[4.0.0]` CHANGELOG και οι καθρέφτες του i18n ανοίγουν στο `develop` μετά, πριν από το πρώτο PR. Το σενάριο δεν αλλάζει ποτέ npm dist-tags — κάνουν πρόβα εκείνων σε πακέτο scratch.
 
-### Artifact προεπισκόπησης PR (δημιουργία μία φορά, προώθηση των ίδιων byte)
+### τεχνούργημα προεπισκόπησης PR (δημιουργήστε μία φορά, προωθήστε τα ίδια byte)
 
-Το `.github/workflows/preview-artifact.yml` δημιουργεί ένα tarball παραγωγής από την κεφαλή ενός PR και
-επικυρώνει ακριβώς αυτό το build (τμήμα (a) του #8084). Μόνο PR από το ίδιο αποθετήριο· τίποτα δεν δημοσιεύεται.
+`.github/workflows/preview-artifact.yml` κατασκευάζει ένα tarball παραγωγής από μια κεφαλή PR και επικυρώνει αυτό ακριβώς το build (#8084 slice (a)). Μόνο PRs ίδιου αποθετηρίου. τίποτα δεν δημοσιεύεται.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ή προσθέστε την ετικέτα `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # εγκατάσταση προεπισκόπησης
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Η εκτέλεση πραγματοποιεί `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, συσκευάζει το
-tarball, εκτελεί `npm run check:pack-boot` (ψεύτικα μυστικά, προσωρινός κατάλογος δεδομένων), επανασυσκευάζει και
-αποτυγχάνει εκτός αν το digest είναι πανομοιότυπο, έπειτα καταγράφει το `artifact-identity.json` (SHA κεφαλής, SHA βάσης,
-hash του lockfile, πλατφόρμα, αρχιτεκτονική, ABI του node, bundler, πολιτική build —
-`scripts/release/artifact-identity.mjs`) και πιστοποιεί το tarball σε ξεχωριστό job. Η προώθηση
-μιας προεπισκόπησης σημαίνει εγκατάσταση αυτού του tarball: ποτέ μην εκτελείτε νέο build από τον πηγαίο κώδικα.
+Η εκτέλεση εκτελεί `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, γεμίζει το tarball, εκτελεί `npm run check:pack-boot` (ψεύτικα μυστικά, εφήμερα δεδομένα dir), επανασυσκευάζεται και αποτυγχάνει, εκτός εάν η σύνοψη είναι πανομοιότυπη, και στη συνέχεια καταγράφει `artifact-identity.json` (κεφαλή SHA, βάση SHA, lockfile hash, arch, κόμβος ABI `scripts/release/artifact-identity.mjs` πλατφόρμα — το tarball σε ξεχωριστή δουλειά. Η προώθηση μιας προεπισκόπησης σημαίνει εγκατάσταση αυτού του tarball: ποτέ μην αναδημιουργείτε από την πηγή.
 
-### Η αποκοπή (3.9.0, μετά το GO)
+### Το cut (3.9.0, μετά GO)
 
-1. Το GO καταγράφεται στο [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. Το `npm run release:dry-run-lts-cut -- --from v3.9.0` εμφανίζει `RESULT: READY`.
-3. Δημιουργήστε τους κλάδους στο `origin` χειροκίνητα με τις εντολές που εμφανίζει η δοκιμαστική εκτέλεση — το
-   script αρνείται να κάνει push στο `origin`. Για να επαναχρησιμοποιήσετε ένα ελεγμένο commit του develop, εκτελέστε πρώτα την
-   πρόβα με `--execute` στην κορυφή της 3.9.0, χρησιμοποιώντας το fork σας· εμφανίζει και τα δύο SHA και
-   μπορούν να γίνουν push τα ίδια commit:
+1. GO καταγράφηκε σε [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` εκτυπώνει `RESULT: READY`.
+3. Δημιουργήστε τα κλαδιά στο `origin` με το χέρι με τις εντολές που εκτυπώνει η ξηρή εκτέλεση — το σενάριο αρνείται να ωθήσει στο `origin`. Για να επαναχρησιμοποιήσετε ένα αναθεωρημένο commit ανάπτυξης, εκτελέστε πρώτα την πρόβα `--execute` στο άκρο 3.9.0 στο πιρούνι σας. Εκτυπώνει και τα δύο SHAs και μπορούν να προωθηθούν οι ίδιες δεσμεύσεις:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Προστατέψτε τα `stable/v3` και `develop` (rulesets + merge queue) πριν ενσωματωθεί το πρώτο PR.
-5. Οι ανενεργές ροές εργασίας ενεργοποιούνται με την ύπαρξη των κλάδων: `forward-port.yml` (push στο
-   `stable/v3`), `validate-stable-pr.yml` (PRs προς το `stable/v3`) και `nightly-v4-build.yml`
-   (κάνει build το `develop`). Πριν από την έναρξη λειτουργίας, ορίστε το repository secret `secrets.FORWARD_PORT_TOKEN` (ώστε το CI να εκτελείται στα
-   forward-port PRs)· η νυχτερινή δημοσίευση παραμένει απενεργοποιημένη μέχρι ο ιδιοκτήτης να ορίσει τη μεταβλητή repository
-   `vars.NIGHTLY_PUBLISH` σε `true` και το npm Trusted Publishing να αποδεχτεί το
-   `nightly-v4-build.yml`. Η επίλυση του καναλιού γίνεται από το `scripts/release/dist-tag.mjs`, το ίδιο
-   resolver που χρησιμοποιεί το `npm-publish.yml`.
-6. Επαληθεύστε τα κανάλια: το `npm view omniroute dist-tags --json` εμφανίζει `latest` = 3.9.0 και κανένα
-   `next` / `nightly` μέχρι να δημοσιευτεί η v4.
-7. Επαναφορά, αν χρειαστεί: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   και `npm dist-tag add omniroute@3.8.59 latest`.
+4. Προστατέψτε `stable/v3` και `develop` (κανόνες ουράς συγχώνευσης + ) πριν προσγειωθεί το πρώτο PR.
+5. Οι αδρανείς ροές εργασίας ενεργοποιούνται ανάλογα με την ύπαρξη διακλάδωσης: `forward-port.yml` (ώθηση σε `stable/v3`), `validate-stable-pr.yml` (PRs σε `stable/v3`) και `nightly-v4-build.yml` (δημιουργία `develop`). Πριν το go-live, ορίστε το μυστικό αποθετηρίου `secrets.FORWARD_PORT_TOKEN` (έτσι CI εκτελείται στη θύρα προώθησης PRs). Η νυχτερινή δημοσίευση παραμένει απενεργοποιημένη έως ότου ο κάτοχος ορίσει τη μεταβλητή χώρου αποθήκευσης `vars.NIGHTLY_PUBLISH` σε `true` και η npm Trusted Publishing αποδεχτεί `nightly-v4-build.yml`. Η ανάλυση καναλιού είναι `scripts/release/dist-tag.mjs`, την ίδια ανάλυση που χρησιμοποιεί `npm-publish.yml`.
+6. Επαληθεύστε τα κανάλια: `npm view omniroute dist-tags --json` εμφανίζει `latest` = 3.9.0 και κανένα `next` / `nightly` μέχρι να δημοσιευτεί το v4.
+7. Επαναφορά, εάν χρειάζεται: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` και `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

@@ -13,6 +13,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseNodeVersion } from "../../../src/shared/utils/nodeRuntimeSupport.ts";
 
 import { registerAliasResolver, resolveAlias } from "../../../bin/aliasResolver.mjs";
+import { nativeCoverageArgs } from "../../_helpers/nativeCoverageArgs.ts";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const REPO_ROOT = join(__dirname, "..", "..", "..");
@@ -24,6 +25,9 @@ const NODE_26_SKIP_REASON =
 // Child import() specifiers must be real file URLs. A Windows drive letter in
 // a bare path would otherwise be parsed as a URL scheme.
 const repoFileUrl = (relPath: string) => pathToFileURL(join(REPO_ROOT, relPath)).href;
+const coverageTsxImport = nativeCoverageArgs().length
+  ? repoFileUrl("scripts/ci/native-cli-v8-tsx.mjs")
+  : undefined;
 
 function runChild(script: string, cwd = REPO_ROOT) {
   const result = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
@@ -44,7 +48,7 @@ describe("aliasResolver Node 26 registration (#12073)", () => {
     { skip: NODE_VERSION.major >= 26 ? false : NODE_26_SKIP_REASON },
     () => {
       const script = `
-        await import("tsx/esm");
+        await import(${JSON.stringify(coverageTsxImport ?? "tsx/esm")});
         const { registerAliasResolver } = await import(${JSON.stringify(repoFileUrl("bin/aliasResolver.mjs"))});
         const ok = await registerAliasResolver(${JSON.stringify(REPO_ROOT)});
         if (!ok) { console.error("FAIL: registerAliasResolver returned false"); process.exit(2); }
@@ -71,7 +75,7 @@ describe("aliasResolver Node 26 registration (#12073)", () => {
     const globalInstallCwd = mkdtempSync(join(tmpdir(), "alias-resolver-global-install-"));
     try {
       const script = `
-        await import(${JSON.stringify(repoFileUrl("node_modules/tsx/dist/esm/index.mjs"))});
+        await import(${JSON.stringify(coverageTsxImport ?? repoFileUrl("node_modules/tsx/dist/esm/index.mjs"))});
         const { registerAliasResolver } = await import(${JSON.stringify(repoFileUrl("bin/aliasResolver.mjs"))});
         const ok = await registerAliasResolver(${JSON.stringify(REPO_ROOT)});
         if (!ok) { console.error("FAIL: registerAliasResolver returned false"); process.exit(2); }
@@ -101,7 +105,7 @@ describe("aliasResolver Node 26 registration (#12073)", () => {
 
   it("retains module.register() for simulated legacy runtimes", () => {
     const script = `
-      await import("tsx/esm");
+      await import(${JSON.stringify(coverageTsxImport ?? "tsx/esm")});
       const { createRequire, syncBuiltinESMExports } = await import("node:module");
       const require = createRequire(import.meta.url);
       const cjsModule = require("node:module");

@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "会話中のシステム メッセージを適切な位置に維持する",
     "requireUserLastMessageDescription": "アシスタントの事前入力を拒否するアップストリームの場合: 送信前に後続のアシスタント ターンを削除します (tool_use なし)。モデルは以前の答えを再生成する場合があります。",
     "requireUserLastMessageLabel": "会話はユーザーメッセージで終了する必要があります",
+    "strictChatHistoryDescription": "厳密なルールを適用する OpenAI 互換プロバイダーに送信する前に、中断されたツール呼び出しの並びを修復し、連続するアシスタントのメッセージを結合します。",
+    "strictChatHistoryLabel": "厳格なプロバイダー向けのチャット履歴修復",
     "bulkPasteAdded": "{count, plural, one {1件のキーを追加しました} other {#件のキーを追加しました}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {重複した1件をスキップしました} other {重複した#件をスキップしました}}",
     "bulkPasteHint": "1行につき1つのAPIキーを貼り付けてください。空行は無視され、重複するキーはスキップされます。",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "キーを削除"
   },
   "plugins": {
-    "privilegesWarningTitle": "プラグインは完全な権限で実行されます",
-    "privilegesWarningBody": "プラグインは、 OmniRouteと同じアクセス権を持つ通常のNode.jsプロセスとして実行されます。マニフェストで宣言されている権限に関係なく、ファイルの読み取り、プログラムの実行、ネットワークの使用が可能です。信頼できるプラグインのみをインストールしてください。",
     "title": "プラグイン",
     "description": "OmniRoute の機能を拡張するプラグインをインストール・管理します",
     "loading": "プラグインを読み込み中...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "プラグインをスキャン",
     "noPlugins": "インストール済みのプラグインはありません",
     "noPluginsDescription": "プラグインディレクトリを ~/.omniroute/plugins/ に配置し、［スキャン］をクリックしてください。",
+    "privilegesWarningTitle": "プラグインは完全な権限で実行されます",
+    "privilegesWarningBody": "プラグインは、 OmniRouteと同じアクセス権を持つ通常のNode.jsプロセスとして実行されます。マニフェストで宣言されている権限に関係なく、ファイルの読み取り、プログラムの実行、ネットワークの使用が可能です。信頼できるプラグインのみをインストールしてください。",
     "activate": "有効化",
     "deactivate": "無効化",
     "uninstall": "アンインストール",

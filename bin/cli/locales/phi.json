@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Ang limitasyon ay dapat na isang positibong integer.",
     "error": "Error: {message}",
     "serverOffline": "Offline ang OmniRoute server. Simulan ito gamit ang: omniroute serve",
     "authRequired": "Kinakailangan ang authentication. Itakda ang OMNIROUTE_API_KEY o patakbuhin ang: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] isasagawa sana ang {action}",
     "cancelled": "Kinansela.",
     "jsonOpt": "I-output bilang JSON",
-    "yesOpt": "Laktawan ang prompt sa pagkumpirma"
+    "yesOpt": "Laktawan ang prompt sa pagkumpirma",
+    "positiveIntegerRequired": "Ang limitasyon ay dapat na isang positibong integer."
   },
   "setup": {
     "title": "Pag-setup ng OmniRoute",

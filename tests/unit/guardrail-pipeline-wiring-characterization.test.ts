@@ -194,8 +194,8 @@ test("proxyFetch stamps the self-hop header before any dispatch decision", () =>
 
 test("characterization: the vision-bridge describe call uses undici fetch, bypassing the self-hop stamp", () => {
   // VisionBridgeGuardrail injects `undiciFetch` as fetchImpl, so the describe self-call never
-  // passes through proxyFetch.patchedFetchUnrecorded and carries no x-omniroute-self-hop
-  // header; admission instead relies on x-omniroute-admission-bypass + the self-loop bearer
+  // passes through proxyFetch.patchedFetchUnrecorded and is never stamped there; the describe
+  // call sets x-omniroute-self-hop itself, the only thing admission trusts for the bypass
   // (pinned behaviorally in guardrail-pipeline-characterization.test.ts).
   const bridge = read("src/lib/guardrails/visionBridge.ts");
   assert.match(bridge, /import \{ fetch as undiciFetch \} from "undici";/);
@@ -205,7 +205,13 @@ test("characterization: the vision-bridge describe call uses undici fetch, bypas
     /fetchImpl: undiciFetch as unknown as typeof fetch,/
   );
   const helpers = read("src/lib/guardrails/visionBridgeHelpers.ts");
-  assert.doesNotMatch(helpers, /self-hop|selfHop/);
+  // The token is set by hand, and only inside the own-listener (self-loop bearer) branch.
+  const selfLoopBranch = indexOrFail(helpers, "if (selfLoopBearer) {");
+  assert.match(
+    helpers.slice(selfLoopBranch, selfLoopBranch + 1200),
+    /headers\[SELF_HOP_HEADER\] = ownListenerSelfHopToken\(\);/
+  );
+  assert.equal(helpers.match(/ownListenerSelfHopToken\(\)/g)?.length, 1);
   assert.match(helpers, /headers\["x-omniroute-disabled-guardrails"\] = routeThroughOmniRoute/);
 });
 

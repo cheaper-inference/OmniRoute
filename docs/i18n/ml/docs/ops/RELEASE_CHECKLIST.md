@@ -415,8 +415,7 @@ side pack നിരസിക്കും, അതിനാൽ പൂർണ്ണ 
 നടത്തിയോ കട്ട് ചെയ്യണം — previous tag നിലവിലുണ്ട്, `package.json` target version ആണ്,
 `release-freeze` issue തുറന്നിരിക്കണം, നിലവിലുള്ള release branch-ൽ തുറന്ന
 `Release branch not green` issue ഇല്ല — നിലവിലില്ലാത്ത branch `?` unknown എന്ന് റിപ്പോർട്ട് ചെയ്യും,
-ഒരിക്കലും green എന്ന് റിപ്പോർട്ട് ചെയ്യില്ല — Mergify `release` queue കോൺഫിഗർ ചെയ്തിട്ടുണ്ട്
-(G11: `queue_rules`, `checks_timeout`, label `queue`), `release/*` ruleset ഇപ്പോഴും
+ഒരിക്കലും green എന്ന് റിപ്പോർട്ട് ചെയ്യില്ല — omni-queue റിലീസ് ബ്രാഞ്ചിലേക്ക് പുൾ അഭ്യർത്ഥനകൾ ലയിപ്പിക്കുന്നു (G11: `config/merge-queue/config.json` സാധുതയുള്ളതാണ്, അതിൻ്റെ `bases` റിലീസ് ബ്രാഞ്ച് നിയന്ത്രിക്കുന്നു, `mode` `live`, അതിൻ്റെ ലേബൽ നിലവിലുണ്ട്), `release/*` ruleset ഇപ്പോഴും
 deletion-നും force-push-നും തടസ്സം സൃഷ്ടിക്കുന്നു, `stable/v3`, `develop` എന്നിവ ഇതുവരെ
 നിലവിലില്ല), രണ്ട് branch ഘട്ടങ്ങൾ, dormant-workflow triggers-കളും `if:` conditions-കളും
 ഏതൊക്കെ true ആകുന്നു (ഏതൊക്കെ repository variable വഴി gated ആയി തുടരുന്നു അല്ലെങ്കിൽ

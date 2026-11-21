@@ -66,10 +66,22 @@ function refuse(status: number, message: string): SelfServiceAuth {
   return { ok: false, response: selfServiceError(status, message) };
 }
 
+const BEARER_SCHEME = "bearer";
+
+/**
+ * The token of a Bearer `Authorization` value: the scheme in any case, then whitespace, then the
+ * token. Read by slicing, so the cost is linear in the header's length.
+ */
+function readBearerToken(authorization: string): string | undefined {
+  const scheme = authorization.slice(0, BEARER_SCHEME.length);
+  const rest = authorization.slice(BEARER_SCHEME.length);
+  if (scheme.toLowerCase() !== BEARER_SCHEME || rest.trimStart() === rest) return undefined;
+  return rest.trim() || undefined;
+}
+
 /** Header credentials in the order they are tried: Bearer token, then `x-api-key`. */
 function readCredentialCandidates(request: Request): string[] {
-  const authorization = request.headers.get("Authorization") ?? "";
-  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+  const bearer = readBearerToken(request.headers.get("Authorization") ?? "");
   const xApiKey = request.headers.get("x-api-key")?.trim();
   return [...new Set([bearer, xApiKey].filter((value): value is string => Boolean(value)))];
 }

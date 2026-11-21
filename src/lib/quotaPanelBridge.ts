@@ -174,7 +174,7 @@ function parsePanelPort(value: string): number | null {
 function liveWsPort(env: ListenerEnv): number | null {
   const flag = env.OMNIROUTE_ENABLE_LIVE_WS;
   const enabled = flag === undefined || flag === "1" || flag.toLowerCase() === "true";
-  return enabled ? parseInt(env.LIVE_WS_PORT || String(LIVE_WS_DEFAULT_PORT), 10) : null;
+  return enabled ? Number.parseInt(env.LIVE_WS_PORT || String(LIVE_WS_DEFAULT_PORT), 10) : null;
 }
 
 /** The base path, "" for none, or null for an unsupported shape. */
