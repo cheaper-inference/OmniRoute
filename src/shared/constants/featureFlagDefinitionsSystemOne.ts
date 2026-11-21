@@ -1,8 +1,8 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 
 /**
- * Default-off flags for the System One decisions backends and the jev combo strategy
- * (#16676, #14667, #15279). Spread at the end of FEATURE_FLAG_DEFINITIONS;
+ * Default-off flags for the System One decisions backends, the jev combo strategy and the
+ * `decision` auto-router (#16676, #14667, #15279). Spread at the end of FEATURE_FLAG_DEFINITIONS;
  * kept apart only because featureFlagDefinitions.ts is at its file-size cap.
  */
 export const SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
@@ -36,6 +36,18 @@ export const SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "Let combos that use the jev strategy ask TypeSafe System One (Jev) which of their models should answer each request (#15279). Every routed request then sends a bounded excerpt of the conversation to api.typesafe.ai and draws paid TypeSafe usage on the configured typesafe connection; a stored TypeSafe key alone never turns it on. Off by default: jev combos make no TypeSafe call and keep the operator's preference order.",
     descriptionI18nKey: "featureFlagComboJevStrategyEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "COMBO_DECISION_ROUTER_ENABLED",
+    label: "Combo: Decision Router Calls Its Decider",
+    description:
+      "Let auto combos that use the decision router strategy ask their configured decider which model should answer each request: TypeSafe System One, an operator decision URL (System One or OpenAI chat wire), or one of the combo's own models in process. Every routed request then sends the last user message (at most 8000 characters) and the model menu to that decider, which may be a paid third-party call; a stored key alone never turns it on. Off by default: decision combos read no credential, make no call and route with the rules strategy.",
+    descriptionI18nKey: "featureFlagComboDecisionRouterEnabledDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",
