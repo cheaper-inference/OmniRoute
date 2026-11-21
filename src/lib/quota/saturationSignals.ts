@@ -321,7 +321,11 @@ async function fetchCodexSaturation(
   // apart and keeps the original combo order.
   const quota = await mod.fetchCodexQuota(connectionId, connection);
   if (!quota) return { value: 0, plan: null };
-  const plan = codexPlanReading(quota, dim.window, Date.now());
+  const now = Date.now();
+  const reading = codexPlanReading(quota, dim.window, now);
+  // The fetcher can serve a cached figure from before the window's reset. It does not describe
+  // the current window, so it is no plan reading.
+  const plan = reading && reading.resetAt !== null && reading.resetAt <= now ? null : reading;
 
   const winKey = codexWindowKey(dim.window);
   const windows = quota.windows as Record<string, { percentUsed: number } | undefined>;
