@@ -27,6 +27,7 @@ import {
 } from "@omniroute/open-sse/handlers/webFetch.ts";
 import * as log from "@/sse/utils/logger";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
+import { getSearchCredentialFallbacks } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
 import {
@@ -83,8 +84,8 @@ export async function OPTIONS() {
  * caller key's connection scope (`allowedConnections`, null = unscoped); a
  * provider whose connections are all outside it counts as unconfigured.
  */
-async function resolveCredentials(
-  providerId: WebFetchProviderId,
+async function lookupScopedCredentials(
+  providerId: string,
   allowedConnections: string[] | null
 ): Promise<CredentialsLookup> {
   try {
@@ -95,6 +96,26 @@ async function resolveCredentials(
   } catch {
     return null;
   }
+}
+
+/**
+ * A fetch provider whose upstream accepts a chat provider's key (deepseek-search →
+ * deepseek, via SEARCH_CREDENTIAL_FALLBACKS) borrows that key when it has no
+ * connection of its own. The borrowed lookup keeps the same connection scope and
+ * quota preflight, mirroring the search route.
+ */
+async function resolveCredentials(
+  providerId: WebFetchProviderId,
+  allowedConnections: string[] | null
+): Promise<CredentialsLookup> {
+  const credentials = await lookupScopedCredentials(providerId, allowedConnections);
+  if (credentials && !isAllRateLimitedCredentials(credentials)) return credentials;
+
+  for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
+    const fallbackCredentials = await lookupScopedCredentials(fallbackId, allowedConnections);
+    if (fallbackCredentials) return fallbackCredentials;
+  }
+  return credentials;
 }
 
 /** A request-time upstream status that means "try the next provider" instead of giving up. */
@@ -110,10 +131,13 @@ function isRetryableWebFetchStatus(providerId: WebFetchProviderId, status?: numb
 /** Find the next untried, non-rate-limited, credentialed provider in pool order. */
 async function findNextFallbackProvider(
   tried: Set<WebFetchProviderId>,
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  format: string
 ): Promise<{ providerId: WebFetchProviderId; credentials: WebFetchCredentials } | null> {
   for (const pid of WEB_FETCH_PROVIDERS) {
     if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
+    // DeepSeek returns markdown only, so it cannot satisfy any other format.
+    if (pid === "deepseek-search" && format !== "markdown") continue;
     if (tried.has(pid)) continue;
     const creds = await resolveCredentials(pid, allowedConnections);
     tried.add(pid);
@@ -160,7 +184,7 @@ async function executeWithFallback(
   }
 
   while (!result.success && isRetryableWebFetchStatus(provider, result.status)) {
-    const next = await findNextFallbackProvider(triedProviders, allowedConnections);
+    const next = await findNextFallbackProvider(triedProviders, allowedConnections, reqBody.format);
     if (!next) {
       return { result, provider, poolExhausted: true };
     }
@@ -234,7 +258,8 @@ async function resolveExplicitTarget(
  * rate-limited stubs instead of letting them short-circuit the loop (#8297).
  */
 async function resolveAutoSelectTarget(
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  format: string
 ): Promise<ResolvedWebFetchTarget> {
   let firstRateLimited: {
     providerId: WebFetchProviderId;
@@ -243,6 +268,8 @@ async function resolveAutoSelectTarget(
 
   for (const pid of WEB_FETCH_PROVIDERS) {
     if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
+    // DeepSeek returns markdown only, so it cannot satisfy any other format.
+    if (pid === "deepseek-search" && format !== "markdown") continue;
     const creds = await resolveCredentials(pid, allowedConnections);
     if (isAllRateLimitedCredentials(creds)) {
       firstRateLimited ??= { providerId: pid, credentials: creds };
@@ -281,12 +308,13 @@ async function resolveAutoSelectTarget(
 /** Resolve the provider + credentials to use for this request (explicit or auto-select). */
 async function resolveWebFetchTarget(
   requestedProvider: string | undefined,
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  format: string
 ): Promise<ResolvedWebFetchTarget> {
   if (requestedProvider) {
     return resolveExplicitTarget(requestedProvider as WebFetchProviderId, allowedConnections);
   }
-  return resolveAutoSelectTarget(allowedConnections);
+  return resolveAutoSelectTarget(allowedConnections, format);
 }
 
 export async function POST(request: Request) {
@@ -345,7 +373,7 @@ async function executeWebFetchBody(
   allowedConnections: string[] | null
 ): Promise<Response> {
   // Resolve provider + credentials (explicit provider never falls back; #8297)
-  const target = await resolveWebFetchTarget(body.provider, allowedConnections);
+  const target = await resolveWebFetchTarget(body.provider, allowedConnections, body.format);
   if (!target.ok) return target.response;
 
   log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);

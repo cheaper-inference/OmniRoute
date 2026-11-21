@@ -27,6 +27,7 @@ import { nimbleFetch } from "../executors/nimble-fetch.ts";
 import { anysearchFetch } from "../executors/anysearch-fetch.ts";
 import { parallelFetch } from "../executors/parallel-fetch.ts";
 import { keenableFetch } from "../executors/keenable-fetch.ts";
+import { deepseekFetch } from "../executors/deepseek-fetch.ts";
 import type { WebFetchProviderId } from "../config/webFetchProviders.ts";
 export { WEB_FETCH_PROVIDERS, type WebFetchProviderId } from "../config/webFetchProviders.ts";
 
@@ -43,7 +44,8 @@ export interface WebFetchRequest {
     | "nimble-search"
     | "anysearch-search"
     | "parallel-search"
-    | "keenable-search";
+    | "keenable-search"
+    | "deepseek-search";
   format?: WebFetchFormat;
   depth?: 0 | 1 | 2;
   wait_for_selector?: string;
@@ -172,6 +174,15 @@ export async function handleWebFetch(
       case "keenable-search":
         // Keenable fetch is markdown-only; keenableFetch rejects other formats with 400.
         return await keenableFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "deepseek-search":
+        // DeepSeek fetch is markdown-only; deepseekFetch rejects other formats with 400.
+        return await deepseekFetch({
           url: req.url,
           format,
           includeMetadata,
