@@ -198,6 +198,26 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
 }
 
 /**
+ * Warn at startup when `freeSignals` is supplied without `freeOnly`. The extra
+ * signals only matter under `freeOnly`, so with it off they are accepted by the
+ * schema but ignored: tell the operator instead of failing silently. Pure —
+ * the caller owns the sink, so tests can observe the message without booting
+ * the plugin. The published catalog is never changed by this notice.
+ */
+export function warnOnIgnoredFreeSignals(
+  raw: unknown,
+  parsed: PluginOptions,
+  warn: (message: string) => void
+): void {
+  if (raw === null || typeof raw !== "object") return;
+  if (!("freeSignals" in raw)) return;
+  if (parsed.freeOnly === true) return;
+  warn(
+    "freeSignals is set but freeOnly is false; the extra signals are ignored and the published catalog is unchanged."
+  );
+}
+
+/**
  * The host reads the plugin id from the module, before any option is known, so
  * it cannot carry the configured provider id. Publishing two gateways from one
  * install is a `providerId` matter — that one does reach the catalog.
