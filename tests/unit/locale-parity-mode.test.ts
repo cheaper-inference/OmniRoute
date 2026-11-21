@@ -80,6 +80,10 @@ const ALLOWED = new Map([
     "placeholder parity defers keys whose English the PR rewrote",
   ],
   ["tests/unit/locale-parity-mode.test.ts", "this test"],
+  [
+    "tests/unit/managed-proxy-ui-i18n.test.ts",
+    "managed-proxy raw locale completeness at release; runtime fallback always checked",
+  ],
 ]);
 
 function walk(dir: string, out: string[] = []): string[] {

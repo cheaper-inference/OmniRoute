@@ -1,0 +1,1 @@
+- Preserve the authentication error status when the ordinary proxy endpoint rejects managed-core deletion, without deleting the registry row or invoking the native lifecycle.
