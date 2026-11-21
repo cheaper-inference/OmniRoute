@@ -66,6 +66,7 @@ import {
 } from "./validation/cloudProviders";
 import {
   validateDeepgramProvider,
+  validateAzureSpeechProvider,
   validateAssemblyAIProvider,
   validateRevAiProvider,
   validateSonioxProvider,
@@ -241,6 +242,7 @@ export async function validateProviderApiKey({
 
   // ── Specialty provider validation ──
   const SPECIALTY_VALIDATORS = {
+    "azure-speech": validateAzureSpeechProvider,
     "cloudflare-ai": validateCloudflareAiProvider,
     "v0-vercel": ({ apiKey, providerSpecificData }: any) =>
       validateV0VercelProvider({ apiKey, providerSpecificData, isLocal }),

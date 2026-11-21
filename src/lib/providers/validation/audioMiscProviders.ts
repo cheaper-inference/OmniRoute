@@ -25,6 +25,37 @@ import {
 } from "@omniroute/open-sse/config/maritalk.ts";
 import { signAwsRequest } from "@omniroute/open-sse/utils/awsSigV4.ts";
 import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProviderRegions";
+import { resolveAzureSpeechVoicesUrl } from "@omniroute/open-sse/executors/azureSpeechTts.ts";
+
+/** Validate an Azure Speech key against the connection's regional voices endpoint. */
+export async function validateAzureSpeechProvider({ apiKey, providerSpecificData = {} }: any) {
+  const url = resolveAzureSpeechVoicesUrl({ providerSpecificData });
+  if (!url) {
+    return {
+      valid: false,
+      error: "Azure Speech requires a valid region or custom Base URL",
+      unsupported: false,
+    };
+  }
+
+  try {
+    const response = await validationRead(url, {
+      method: "GET",
+      headers: applyCustomUserAgent({ "Ocp-Apim-Subscription-Key": apiKey }, providerSpecificData),
+    });
+    if (response.ok) return { valid: true, error: null, unsupported: false };
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: "Invalid Azure Speech key or region", unsupported: false };
+    }
+    return {
+      valid: false,
+      error: `Azure Speech validation failed: ${response.status}`,
+      unsupported: false,
+    };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
 
 export async function validateDeepgramProvider({ apiKey, providerSpecificData = {} }: any) {
   try {
