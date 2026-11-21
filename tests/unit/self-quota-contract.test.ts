@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { buildPoolRef } from "../../src/lib/quota/selfPoolRef.ts";
-import { selfQuotaResponseSchema } from "../../src/shared/schemas/selfQuota.ts";
+import { MAX_MEMBER_SLICES, selfQuotaResponseSchema } from "../../src/shared/schemas/selfQuota.ts";
 
 const POOL = "0b6c3f0e-1111-4222-8333-444455556666";
 
@@ -223,6 +223,12 @@ test("member slices: at least three, and only three fields each", () => {
   assert.deepEqual(parsed.pools[0].accounts[0].dimensions[0].members, three);
 
   assert.equal(selfQuotaResponseSchema.safeParse(response(three.slice(0, 2))).success, false);
+  // At most MAX_MEMBER_SLICES, the view's own ceiling.
+  const slicesOf = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ slot: i + 1, consumed: i, isYou: i === 0 }));
+  assert.equal(MAX_MEMBER_SLICES, 20);
+  assert.equal(selfQuotaResponseSchema.safeParse(response(slicesOf(20))).success, true);
+  assert.equal(selfQuotaResponseSchema.safeParse(response(slicesOf(21))).success, false);
   // A slice is strict: an id or a weight riding along is rejected, never passed on.
   const carrying = three.map((m) => ({ ...m, apiKeyId: "key-b", weight: 30 }));
   assert.equal(selfQuotaResponseSchema.safeParse(response(carrying)).success, false);

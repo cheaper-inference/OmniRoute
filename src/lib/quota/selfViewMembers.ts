@@ -19,14 +19,18 @@
 
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { createLogger } from "@/shared/utils/logger";
-import type { SelfQuotaMemberSlice, SelfQuotaSharedDimension } from "@/shared/schemas/selfQuota";
+import {
+  MAX_MEMBER_SLICES,
+  type SelfQuotaMemberSlice,
+  type SelfQuotaSharedDimension,
+} from "@/shared/schemas/selfQuota";
 import { readViewStore, type ViewStore } from "./selfViewStore";
 import type { SelfViewPoolContext } from "./selfViewTypes";
 
 /** Usable keys the pool needs for the bars. */
 const MIN_MEMBERS_FOR_BREAKDOWN = 3;
 /** Allocated keys above which the bars are not sent: each one costs a read per window. */
-const MAX_MEMBERS_FOR_BREAKDOWN = 20;
+const MAX_MEMBERS_FOR_BREAKDOWN = MAX_MEMBER_SLICES;
 const MEMBER_SLOT_CONTEXT = "quota-member-slot:v1";
 const MEMBER_SLOT_DIGEST_LENGTH = 32;
 
@@ -55,7 +59,7 @@ export function readMemberBreakdown(input: {
     };
   } catch (err) {
     log.warn(
-      { err: (err as Error)?.message, poolId: input.poolId },
+      { err, poolId: input.poolId },
       "self-service quota view: member breakdown lookup failed"
     );
     return off;

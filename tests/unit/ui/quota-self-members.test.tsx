@@ -24,9 +24,9 @@ vi.mock("next-intl", async (importOriginal) => await importOriginal());
 afterEach(() => cleanup());
 
 const ESTIMATE =
-  "This is an estimate. The account reports one figure, and it is split between keys by the tokens each key sent.";
+  "This is an estimate. The account reports one figure. The part routed through this pool is split by the tokens each key sent.";
 const MEMBERS_NOTE =
-  "Other members are shown without names. Numbers can change when a key joins or leaves the pool.";
+  "Other members are shown without names. Member numbers can change when a key joins or leaves the pool.";
 const PERCENT_NOTE =
   "On this plan each figure is an estimate of what the member routed through the pool.";
 

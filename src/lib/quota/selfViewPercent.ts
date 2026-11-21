@@ -17,7 +17,8 @@
  *
  * `consumed` is what the gate compares with the share: the key's attributed part plus its charge
  * for usage made outside the pool, the same sum the gate builds. Both parts are reported apart,
- * so `attributed + external` equals `consumed` exactly.
+ * so `attributed + external` equals `consumed` exactly, and only to a key that may see account
+ * data.
  */
 
 import type { SelfQuotaShare } from "@/shared/schemas/selfQuota";
@@ -173,10 +174,15 @@ export async function readPercentShares(input: ReadPercentSharesInput): Promise<
   return new Map(await Promise.all(reads));
 }
 
-/** The `yourShare` of one account dimension; a missing state is not counted yet. */
+/**
+ * The `yourShare` of one account dimension; a missing state is not counted yet. The two parts
+ * go only to a key that may see account data (`withParts`): with its own weight, the external
+ * charge would let any key work out the account's use made outside the pool.
+ */
 export function percentShareOf(
   fairShare: number,
-  state: PercentShareState | undefined
+  state: PercentShareState | undefined,
+  withParts: boolean
 ): SelfQuotaShare {
   if (!state || state.status === "unavailable") {
     return {
@@ -187,12 +193,12 @@ export function percentShareOf(
       reason: state?.reason ?? PERCENT_ATTRIBUTION_UNAVAILABLE,
     };
   }
-  return {
+  const read: SelfQuotaShare = {
     fairShare,
     consumed: state.consumed,
     remaining: Math.max(0, fairShare - state.consumed),
     status: state.status,
-    attributed: state.attributed,
-    external: state.external,
   };
+  if (!withParts) return read;
+  return { ...read, attributed: state.attributed, external: state.external };
 }

@@ -153,3 +153,11 @@ test("a key past its expiry, or expiring at the instant, is not usable", async (
   await apiKeys.setApiKeyExpiry(ids[0], new Date(NOW_MS - 60_000).toISOString());
   assert.equal(countUsablePoolKeys(poolId, NOW_MS), 2);
 });
+
+// Last in the file: it drops a column of the keys table.
+test("the count adds the key columns it reads when an older table lacks them", async () => {
+  const { poolId } = await poolOfThree("legacy");
+  const db = core.getDbInstance() as unknown as { exec: (sql: string) => void };
+  db.exec("ALTER TABLE api_keys DROP COLUMN is_banned");
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 3);
+});

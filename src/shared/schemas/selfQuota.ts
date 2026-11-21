@@ -38,10 +38,14 @@ const share = z.object({
   remaining: z.number().nullable(),
   status: selfQuotaStatusSchema,
   reason: z.string().optional(),
-  // Percent windows only, with status ok or stale: attributed + external = consumed.
+  // Percent windows only, with status ok or stale, for a key with the account scope:
+  // attributed + external = consumed.
   attributed: z.number().optional(),
   external: z.number().optional(),
 });
+
+/** The most member slices a dimension carries: the view sends none for a larger pool. */
+export const MAX_MEMBER_SLICES = 20;
 
 // One member's use of a window, without id, name or weight. Strict: an extra key is rejected.
 const memberSlice = z
@@ -59,7 +63,7 @@ const sharedDimension = z.object({
   limit: z.number(),
   total: bar.optional(),
   yourShare: share,
-  members: z.array(memberSlice).min(3).optional(),
+  members: z.array(memberSlice).min(3).max(MAX_MEMBER_SLICES).optional(),
 });
 
 // One account; limit = plan limit.
@@ -69,7 +73,7 @@ const accountDimension = z.object({
   limit: z.number(),
   account: bar.optional(),
   yourShare: share,
-  members: z.array(memberSlice).min(3).optional(),
+  members: z.array(memberSlice).min(3).max(MAX_MEMBER_SLICES).optional(),
 });
 
 const account = z.object({

@@ -508,7 +508,12 @@ test("a failing read of the option or of the usable keys counts as off and is lo
     assert.equal(JSON.stringify(v).includes('"members"'), false);
     const logged = warnings.map((w) => (w.obj as { poolId?: string }).poolId).sort();
     assert.deepEqual(logged, ["pool-a-id", "pool-b-id"]);
-    assert.equal(JSON.stringify(warnings).includes("db down"), true);
+    for (const w of warnings) {
+      const err = (w.obj as { err?: unknown }).err;
+      assert.ok(err instanceof Error, "the error object is logged, so its stack is kept");
+      assert.equal(err.message, "db down");
+      assert.deepEqual(Object.keys(w.obj as object).sort(), ["err", "poolId"]);
+    }
   }
 });
 

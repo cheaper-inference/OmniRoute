@@ -163,7 +163,7 @@ const PERCENT_SHARE_AND_MEMBER_STRINGS: Record<string, string> = {
     "The window that was being counted has ended. Your part returns when the account reports the new window.",
   reasonAccountNotUsedByKey: "Your key does not use this account.",
   sharePercentEstimate:
-    "This is an estimate. The account reports one figure, and it is split between keys by the tokens each key sent.",
+    "This is an estimate. The account reports one figure. The part routed through this pool is split by the tokens each key sent.",
   sharePercentParts:
     "{own} came from your requests. {external} is your part of usage made outside this pool.",
   membersTitle: "Usage by member",
@@ -172,7 +172,7 @@ const PERCENT_SHARE_AND_MEMBER_STRINGS: Record<string, string> = {
   memberOther: "Member {number}",
   memberValue: "{name}: {amount}",
   membersNote:
-    "Other members are shown without names. Numbers can change when a key joins or leaves the pool.",
+    "Other members are shown without names. Member numbers can change when a key joins or leaves the pool.",
   membersPercentNote:
     "On this plan each figure is an estimate of what the member routed through the pool.",
 };

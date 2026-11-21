@@ -271,7 +271,30 @@ test("the share needs self:usage only, and no account bar leaks with it", async 
     })
   );
   near(share(v).consumed, 54);
+  assert.equal(share(v).status, "stale");
   assert.equal(v.pools[0].accounts[0].dimensions[0].account, undefined);
+  // Without the account scope the share comes without its two parts.
+  assert.equal("attributed" in share(v), false);
+  assert.equal("external" in share(v), false);
+});
+
+test("the two parts are sent only to a key that may see account data", async () => {
+  const snap = {
+    "conn-secret-1": { state: state({ baseline: 0.3 }), counters: counters(10_000, 0) },
+  };
+  const asKey = (scopes: string[]) =>
+    buildQuotaSelfView(
+      input({ apiKeyId: "key-a", scopes, provider: "claude" }),
+      makeDeps({ plan: PERCENT_PLAN, getQuotaStore: async () => ledger(snap) })
+    );
+  const basic = share(await asKey([SELF_USAGE_SCOPE]));
+  near(basic.consumed, 35);
+  assert.deepEqual(Object.keys(basic).sort(), ["consumed", "fairShare", "remaining", "status"]);
+  const full = share(await asKey(BOTH));
+  near(full.attributed, 10);
+  near(full.external, 25);
+  assert.equal((full.attributed ?? NaN) + (full.external ?? NaN), full.consumed);
+  assert.equal(full.consumed, basic.consumed);
 });
 
 test("the builder without attribution keeps the unread share", () => {

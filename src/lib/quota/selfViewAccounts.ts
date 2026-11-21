@@ -179,7 +179,7 @@ function accountDimension(
     unit: "percent",
     window: dim.window,
     limit: dim.limit,
-    yourShare: percentShareOf((ctx.effectiveWeight / 100) * dim.limit, share),
+    yourShare: percentShareOf((ctx.effectiveWeight / 100) * dim.limit, share, ctx.accountVisible),
   };
   if (state) dimension.account = accountBar(ctx.provider, dim, state, now);
   const members = percentMembers(ctx, connectionId, share, percent);

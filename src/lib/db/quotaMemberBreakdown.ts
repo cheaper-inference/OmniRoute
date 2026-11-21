@@ -5,6 +5,7 @@
  * module, apart from the pool CRUD, so a pool row is read and written here only for this flag.
  */
 
+import { ensureApiKeyFallbackColumns } from "./apiKeyColumnFallbacks";
 import { getDbInstance } from "./core";
 
 interface StatementLike<TRow> {
@@ -41,9 +42,13 @@ export function setPoolMemberBreakdown(poolId: string, enabled: boolean): boolea
  * How many keys allocated in the pool can make requests at `nowMs`: active, not banned, not
  * revoked and not expired. The rule is the one the key queries of apiKeys.ts apply
  * (getExclusiveLeaseConnectionIds), so an expiry at or before the instant counts as expired.
- * An allocation without a key row is not counted.
+ * An allocation without a key row is not counted. The key columns it reads are added first when
+ * an older table lacks them, as the keys module does before its own queries.
  */
 export function countUsablePoolKeys(poolId: string, nowMs: number): number {
+  ensureApiKeyFallbackColumns(
+    getDbInstance() as unknown as Parameters<typeof ensureApiKeyFallbackColumns>[0]
+  );
   const row = getDb()
     .prepare<{ n: number }>(
       `SELECT COUNT(DISTINCT a.api_key_id) AS n FROM quota_allocations a
