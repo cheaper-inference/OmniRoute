@@ -10,10 +10,12 @@ import { PROVIDERS } from "../config/constants.ts";
 import {
   getGrokBuildSessionHeaders,
   GROK_BUILD_DEFAULT_REASONING_EFFORT,
+  GROK_BUILD_NO_INLINE_CITATIONS,
   GROK_BUILD_REASONING_INCLUDE,
   GROK_BUILD_RESPONSES_URL,
   GROK_BUILD_SUPPORTED_REASONING_EFFORTS,
   GROK_BUILD_TOKEN_URL,
+  recordGrokBuildLiveContextWindow,
 } from "../config/grokBuild.ts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
 import {
@@ -124,6 +126,59 @@ function sanitizeGrokBuildResponsesBody(body: Record<string, unknown>): Record<s
   return changed ? { ...body, input: nextInput } : body;
 }
 
+/**
+ * The CLI sends `x-grok-context-window` on every response; remembering it keeps the
+ * loop/compaction headers on later turns mirroring what the backend actually served.
+ */
+function captureGrokBuildLiveContextWindow(
+  result: unknown,
+  credentials: ProviderCredentials,
+  model: string
+): void {
+  const response =
+    result instanceof Response
+      ? result
+      : ((result as { response?: Response } | null)?.response ?? null);
+  if (!(response instanceof Response)) return;
+  const windowHeader = response.headers.get("x-grok-context-window");
+  if (!windowHeader) return;
+  const parsed = Number.parseInt(windowHeader.trim(), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return;
+  recordGrokBuildLiveContextWindow(credentials.connectionId, model, parsed);
+}
+
+/**
+ * Grok Build rejects the Responses named native-tool choice (ModelToolChoice).
+ * `"required"` is equivalent only when every offered tool is native web search; with mixed
+ * tools it could force an unrelated function instead.
+ */
+function resolveGrokBuildToolChoice(
+  transformed: Record<string, unknown>,
+  tools: unknown[]
+): unknown {
+  const isNativeToolChoice = asRequestRecord(transformed.tool_choice).type === "web_search";
+  if (!isNativeToolChoice || tools.length === 0) return transformed.tool_choice;
+  return tools.every((tool) => asRequestRecord(tool).type === "web_search")
+    ? "required"
+    : transformed.tool_choice;
+}
+
+/**
+ * Response-side tool shaping: drops the OpenAI-only `web_search` arguments, resolves the
+ * named native-tool choice, caps the tool count and repairs root schemas Grok refuses.
+ */
+function normalizeGrokBuildTools(transformed: Record<string, unknown>): void {
+  if (!Array.isArray(transformed.tools)) return;
+  const tools = stripUnsupportedGrokBuildWebSearchArgs(transformed.tools);
+  transformed.tool_choice = resolveGrokBuildToolChoice(transformed, tools);
+  // xAI's cli-chat-proxy rejects requests containing more than 200 tools. The cap keeps
+  // hosted web_search/x_search tools and the function tool_choice forces.
+  const capped = capGrokBuildTools(tools, transformed.tool_choice, GROK_BUILD_MAX_TOOLS);
+  // Grok Build refuses a root anyOf/oneOf with a `$ref` or non-object branch
+  // (`invalid_client_tool_schema`), e.g. Codex desktop's `automation_update`.
+  transformed.tools = normalizeGrokBuildToolSchemas(capped);
+}
+
 type GrokBuildRefreshResult = Partial<ProviderCredentials> | null | undefined;
 
 function nonEmptyString(value: unknown): string | null {
@@ -144,10 +199,15 @@ function asRequestRecord(value: unknown): Record<string, unknown> {
     : {};
 }
 
-function ensureReasoningInclude(value: unknown): unknown[] {
+function ensureGrokBuildInclude(value: unknown): unknown[] {
   const include = Array.isArray(value) ? [...value] : [];
   if (!include.includes(GROK_BUILD_REASONING_INCLUDE)) {
     include.push(GROK_BUILD_REASONING_INCLUDE);
+  }
+  // The CLI 1.0.89 sends `no_inline_citations` on grok-4.7 turns so answers keep
+  // their numbered [1] markers in scrollback instead of inline citations.
+  if (!include.includes(GROK_BUILD_NO_INLINE_CITATIONS)) {
+    include.push(GROK_BUILD_NO_INLINE_CITATIONS);
   }
   return include;
 }
@@ -168,7 +228,10 @@ function normalizeGrokBuildReasoning(
   }
   if (model === "grok-composer-2.5-fast") {
     delete reasoning.effort;
-  } else if (!hasExplicitEffort) {
+  } else if (!hasExplicitEffort && !("summary" in reasoning)) {
+    // The CLI's auxiliary turns send `reasoning: { summary: "concise" }` with NO
+    // effort (captured 1.0.89); injecting one would force a heavyweight reasoning
+    // path xAI does not expect for those turns.
     reasoning.effort = GROK_BUILD_DEFAULT_REASONING_EFFORT;
   }
   return Object.keys(reasoning).length > 0 ? reasoning : null;
@@ -279,6 +342,7 @@ export class GrokCliExecutor extends BaseExecutor {
       );
     }
     const result = await super.execute(body === input.body ? input : { ...input, body });
+    captureGrokBuildLiveContextWindow(result, input.credentials, input.model);
     if (!identityMap && !customTools) return result;
     const restore = async (response: Response) => {
       const named = identityMap
@@ -345,6 +409,7 @@ export class GrokCliExecutor extends BaseExecutor {
       userId: nonEmptyString(providerData.userId),
       email: nonEmptyString(credentials.email) || nonEmptyString(providerData.email),
       principalType,
+      connectionId: credentials.connectionId || null,
     });
 
     // Preserve the standard GROK_CLI_USER_AGENT override produced by BaseExecutor.
@@ -370,7 +435,14 @@ export class GrokCliExecutor extends BaseExecutor {
 
     // Grok Build applies these Responses defaults before every request.
     if (transformed.store === undefined) transformed.store = false;
-    transformed.include = ensureReasoningInclude(transformed.include);
+    transformed.include = ensureGrokBuildInclude(transformed.include);
+
+    // The CLI sends a stable per-session prompt_cache_key so Grok Build can reuse
+    // cached prompts. No conversation id exists at this layer, so scope it to the
+    // connection (the same key every turn for one connection keeps the cache hit).
+    if (transformed.prompt_cache_key === undefined) {
+      transformed.prompt_cache_key = `omr-${_credentials?.connectionId ?? "unknown"}-${model}`;
+    }
 
     // OpenAI-compatible clients may carry fields the Grok Responses endpoint rejects.
     stripUnsupportedGrokBuildParams(transformed);
@@ -386,36 +458,7 @@ export class GrokCliExecutor extends BaseExecutor {
       delete transformed.reasoning;
     }
 
-    if (Array.isArray(transformed.tools)) {
-      transformed.tools = stripUnsupportedGrokBuildWebSearchArgs(transformed.tools);
-    }
-
-    // Grok Build rejects the Responses named native-tool choice (ModelToolChoice).
-    // "required" is equivalent only when every offered tool is native web search;
-    // with mixed tools it could force an unrelated function instead.
-    if (
-      asRequestRecord(transformed.tool_choice).type === "web_search" &&
-      Array.isArray(transformed.tools) &&
-      transformed.tools.length > 0 &&
-      transformed.tools.every((tool) => asRequestRecord(tool).type === "web_search")
-    ) {
-      transformed.tool_choice = "required";
-    }
-
-    // xAI's cli-chat-proxy rejects requests containing more than 200 tools. The cap keeps
-    // hosted web_search/x_search tools and the function tool_choice forces.
-    if (Array.isArray(transformed.tools)) {
-      transformed.tools = capGrokBuildTools(
-        transformed.tools,
-        transformed.tool_choice,
-        GROK_BUILD_MAX_TOOLS
-      );
-    }
-    // Grok Build refuses a root anyOf/oneOf with a `$ref` or non-object branch
-    // (`invalid_client_tool_schema`), e.g. Codex desktop's `automation_update`.
-    if (Array.isArray(transformed.tools)) {
-      transformed.tools = normalizeGrokBuildToolSchemas(transformed.tools);
-    }
+    normalizeGrokBuildTools(transformed);
 
     // Repair tool-result payloads that would fail Grok's strict JSON body parser (#7611)
     // and drop null reasoning content Grok cannot decode.

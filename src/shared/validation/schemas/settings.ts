@@ -403,10 +403,15 @@ export const updateCliVersionSchema = z
   .object({
     claude: z.string().trim().nullable().optional(),
     codex: z.string().trim().nullable().optional(),
+    "grok-cli": z.string().trim().nullable().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (value.claude === undefined && value.codex === undefined) {
+    if (
+      value.claude === undefined &&
+      value.codex === undefined &&
+      value["grok-cli"] === undefined
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "No valid fields to update",

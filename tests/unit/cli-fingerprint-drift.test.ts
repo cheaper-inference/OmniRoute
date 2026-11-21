@@ -121,5 +121,5 @@ test("grok's wire version is the platform binary the launcher installs, not the 
 
 test("the grok pin matches the platform binary shipped by the published launcher", () => {
   const grok = FINGERPRINT_SOURCES.find((source) => source.id === "grok-build");
-  assert.equal(grok?.pinned, "1.0.41");
+  assert.equal(grok?.pinned, "1.0.89");
 });

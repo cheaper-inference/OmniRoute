@@ -73,6 +73,7 @@ test("grok-cli sends the current grok-build session headers", () => {
   const streaming = executor.buildHeaders(
     {
       accessToken: "token",
+      connectionId: "conn-1",
       providerSpecificData: { userId: "user-123", email: "grok@example.com" },
     },
     true,
@@ -82,15 +83,27 @@ test("grok-cli sends the current grok-build session headers", () => {
   assert.equal(streaming.Authorization, "Bearer token");
   assert.equal(streaming.Accept, "text/event-stream");
   assert.equal(streaming["x-grok-client-version"], getGrokBuildClientVersion());
-  assert.equal(streaming["x-grok-client-identifier"], "grok-shell");
-  assert.equal(streaming["x-grok-client-mode"], "headless");
+  assert.equal(streaming["x-grok-client-identifier"], "grok-pager");
+  assert.equal(streaming["x-grok-client-mode"], "interactive");
   assert.equal(streaming["User-Agent"], getGrokBuildUserAgent());
   assert.equal(streaming["X-XAI-Token-Auth"], "xai-grok-cli");
   assert.equal(streaming["x-authenticateresponse"], "authenticate-response");
   assert.equal(streaming["x-grok-model-override"], "grok-4.5");
-  assert.equal(streaming["x-userid"], "user-123");
+  // Chat turns identify the account with x-grok-user-id only (captured CLI 1.0.89).
+  assert.equal("x-userid" in streaming, false);
   assert.equal(streaming["x-grok-user-id"], "user-123");
-  assert.equal(streaming["x-email"], "grok@example.com");
+  assert.equal("x-email" in streaming, false);
+  // Per-connection turn tracing and loop/compaction control (captured CLI 1.0.89).
+  assert.equal(typeof streaming["x-grok-conv-group-id"], "string");
+  assert.equal(typeof streaming["x-grok-conv-id"], "string");
+  assert.equal(typeof streaming["x-grok-session-id"], "string");
+  assert.equal(typeof streaming["x-grok-req-id"], "string");
+  assert.match(streaming["x-grok-turn-idx"] ?? "", /^[0-9]+$/);
+  assert.match(streaming.traceparent ?? "", /^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
+  assert.equal(streaming["x-compactions-remaining"], "1");
+  assert.match(streaming["x-compaction-at"] ?? "", /^[0-9]+$/);
+  assert.equal(streaming["x-grok-doom-loop-check"], "1024");
+  assert.equal(streaming["x-grok-exact-repetition-check"], "64");
 
   const team = executor.buildHeaders(
     {
@@ -105,7 +118,8 @@ test("grok-cli sends the current grok-build session headers", () => {
     null,
     "grok-4.5"
   );
-  assert.equal(team["x-userid"], "team-123");
+  assert.equal("x-userid" in team, false);
+  assert.equal(team["x-grok-user-id"], "team-123");
   assert.equal("x-email" in team, false);
 
   const json = executor.buildHeaders({ apiKey: "token" }, false, null, "grok-composer-2.5-fast");

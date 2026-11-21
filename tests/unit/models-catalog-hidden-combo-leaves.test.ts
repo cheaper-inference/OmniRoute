@@ -7,6 +7,9 @@ import test from "node:test";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-hidden-combo-catalog-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET ||= "hidden-combo-catalog-test-secret";
+// Cold catalog builds are bounded by CATALOG_BUILD_TIMEOUT_MS (#12627, 8s in production).
+// These tests assert catalog shape, not the timeout, and a loaded CI runner can exceed 8s.
+process.env.CATALOG_BUILD_TIMEOUT_MS ??= "120000";
 
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");

@@ -63,7 +63,7 @@ test("GET reports one row per kind with effective, source and pinned", async () 
   const res = await route.GET(await makeManagementSessionRequest(ROUTE_URL));
   assert.equal(res.status, 200);
   const body = (await res.json()) as { items: Array<Record<string, unknown>> };
-  assert.deepEqual(body.items.map((item) => item.key).sort(), ["claude", "codex"]);
+  assert.deepEqual(body.items.map((item) => item.key).sort(), ["claude", "codex", "grok-cli"]);
 
   const row = body.items.find((item) => item.key === "claude");
   assert.ok(row, "claude row should be present");

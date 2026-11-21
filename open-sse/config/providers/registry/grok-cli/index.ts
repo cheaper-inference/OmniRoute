@@ -2,6 +2,7 @@ import type { RegistryEntry } from "../../shared.ts";
 import { resolvePublicCred } from "../../shared.ts";
 import {
   getGrokBuildClientVersion,
+  GROK_BUILD_DEFAULT_CONTEXT_WINDOW,
   GROK_BUILD_MODELS_URL,
   GROK_BUILD_TOKEN_URL,
 } from "../../../grokBuild.ts";
@@ -24,7 +25,7 @@ export const grok_cliProvider: RegistryEntry = {
     {
       id: "grok-4.7",
       name: "Grok 4.7",
-      contextLength: 500000,
+      contextLength: GROK_BUILD_DEFAULT_CONTEXT_WINDOW,
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
       toolCalling: true,
@@ -36,7 +37,7 @@ export const grok_cliProvider: RegistryEntry = {
       // carries grok-4.7's window and efforts. Vision is left undeclared until probed.
       id: "grok-4.7-build-fast",
       name: "Grok 4.7 Build Fast",
-      contextLength: 500000,
+      contextLength: GROK_BUILD_DEFAULT_CONTEXT_WINDOW,
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
       toolCalling: true,
@@ -46,7 +47,7 @@ export const grok_cliProvider: RegistryEntry = {
     {
       id: "grok-4.6",
       name: "Grok 4.6",
-      contextLength: 500000,
+      contextLength: GROK_BUILD_DEFAULT_CONTEXT_WINDOW,
       supportsReasoning: true,
       // Verified with a Responses `input_image` probe. grok-4.5 misread the same image,
       // so it stays undeclared.
@@ -59,7 +60,7 @@ export const grok_cliProvider: RegistryEntry = {
     {
       id: "grok-4.5",
       name: "Grok 4.5",
-      contextLength: 500000,
+      contextLength: GROK_BUILD_DEFAULT_CONTEXT_WINDOW,
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high"],
       toolCalling: true,

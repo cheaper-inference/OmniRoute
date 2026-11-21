@@ -19,6 +19,11 @@ import {
   getCodexClientVersion,
   getCodexAdvertisedVersionSource,
 } from "@omniroute/open-sse/config/codexClient.ts";
+import {
+  GROK_BUILD_DEFAULT_CLIENT_VERSION,
+  getGrokBuildClientVersion,
+  getGrokBuildClientVersionSource,
+} from "@omniroute/open-sse/config/grokBuild.ts";
 import { updateCliVersionSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -47,6 +52,11 @@ const RESOLVERS: Record<
     resolve: getCodexClientVersion,
     source: getCodexAdvertisedVersionSource,
     pinned: DEFAULT_CODEX_CLIENT_VERSION,
+  },
+  "grok-cli": {
+    resolve: getGrokBuildClientVersion,
+    source: getGrokBuildClientVersionSource,
+    pinned: GROK_BUILD_DEFAULT_CLIENT_VERSION,
   },
 };
 
@@ -84,7 +94,11 @@ export async function GET(request: Request) {
  */
 function applyOverridePatch(
   current: CliVersionOverrides,
-  patch: { claude?: string | null; codex?: string | null }
+  patch: {
+    claude?: string | null;
+    codex?: string | null;
+    "grok-cli"?: string | null;
+  }
 ): CliVersionOverrides {
   const next: CliVersionOverrides = { ...current };
   for (const key of CLI_VERSION_KEYS) {

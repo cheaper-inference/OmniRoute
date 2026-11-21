@@ -1,6 +1,8 @@
 import { getAntigravityModelsDiscoveryUrls } from "@omniroute/open-sse/config/antigravityUpstream.ts";
 import {
+  getGrokBuildContextWindowOverride,
   getGrokBuildModelsHeaders,
+  GROK_BUILD_DEFAULT_CONTEXT_WINDOW,
   GROK_BUILD_MODELS_URL,
   GROK_BUILD_SUPPORTED_REASONING_EFFORTS,
 } from "@omniroute/open-sse/config/grokBuild.ts";
@@ -314,12 +316,6 @@ function grokBuildPositiveNumber(...values: unknown[]): number | undefined {
 }
 
 /**
- * Ceiling the Grok Build backend actually serves. Requests above it are rejected
- * upstream, so the discovery layer never advertises more than this.
- */
-const GROK_BUILD_MAX_CONTEXT_WINDOW = 500000;
-
-/**
  * Largest tier in an advertised `context_windows` list.
  *
  * Grok Build reports every model with `context_window: 256000` plus a tier list
@@ -353,6 +349,10 @@ function resolveGrokBuildInputTokenLimit(
   metadata: GrokBuildModelRecord,
   id: string
 ): number | undefined {
+  // Operator-set window wins over discovery and the registry.
+  const envWindow = getGrokBuildContextWindowOverride();
+  if (envWindow !== null) return envWindow;
+
   // Registry first. Grok Build's /v1/models advertises contextWindow 256000 for every
   // model, yet the backend serves grok-4.6 up to 500k (prod: 88 successful requests
   // with 256k-485k input; upstream rejects at "> 500000 tokens"). Trusting the
@@ -375,7 +375,7 @@ function resolveGrokBuildInputTokenLimit(
   );
   return (
     GROK_CLI_REGISTRY_CONTEXT_BY_ID.get(id) ??
-    (advertisedBest > 0 ? Math.min(advertisedBest, GROK_BUILD_MAX_CONTEXT_WINDOW) : undefined)
+    (advertisedBest > 0 ? Math.min(advertisedBest, GROK_BUILD_DEFAULT_CONTEXT_WINDOW) : undefined)
   );
 }
 
