@@ -20,8 +20,10 @@ import {
   ROUTER_STRATEGY_OPTIONS,
   normalizeIntelligentRoutingConfig,
 } from "@/lib/combos/intelligentRouting";
+import { isDecisionRouterStrategy } from "@/lib/combos/decisionModelDraft";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { compareTr } from "@/shared/utils/turkishText";
+import DecisionModelSection from "./DecisionModelSection";
 
 function getI18nOrFallback(
   t: any,
@@ -192,12 +194,15 @@ export default function BuilderIntelligentStep({
   config,
   onChange,
   activeProviders,
+  stepModels = [],
   strategy = "auto",
 }: {
   t: any;
   config: Record<string, unknown>;
   onChange: (nextConfig: Record<string, unknown>) => void;
   activeProviders: any[];
+  /** Plain `provider/model` steps, for the decision router's menu and descriptions. */
+  stepModels?: string[];
   strategy?: string;
 }) {
   const normalizedConfig = normalizeIntelligentRoutingConfig(config);
@@ -424,6 +429,15 @@ export default function BuilderIntelligentStep({
             )}
           />
         </Card.Section>
+      )}
+
+      {isDecisionRouterStrategy(normalizedConfig.routerStrategy) && (
+        <DecisionModelSection
+          t={t}
+          config={config}
+          stepModels={stepModels}
+          onChange={(decision) => updateConfig({ decision })}
+        />
       )}
 
       {normalizedConfig.routerStrategy === "nadir" && (
