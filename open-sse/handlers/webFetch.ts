@@ -21,6 +21,7 @@ import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { context7Fetch } from "../executors/context7-fetch.ts";
 import { firecrawlFetch } from "../executors/firecrawl-fetch.ts";
 import { jinaReaderFetch } from "../executors/jina-reader-fetch.ts";
+import { ollamaFetch } from "../executors/ollama-fetch.ts";
 import { tavilyFetch } from "../executors/tavily-fetch.ts";
 import { tinyfishFetch } from "../executors/tinyfish-fetch.ts";
 import { nimbleFetch } from "../executors/nimble-fetch.ts";
@@ -42,6 +43,7 @@ export interface WebFetchRequest {
     | "context7"
     | "nimble-search"
     | "anysearch-search"
+    | "ollama-search"
     | "parallel-search"
     | "keenable-search";
   format?: WebFetchFormat;
@@ -81,7 +83,7 @@ export interface WebFetchCredentials {
  * All repo consumers go through TypeScript, which is the threat model here.
  */
 export const EXPLICIT_ONLY_WEB_FETCH_PROVIDERS: ReadonlySet<WebFetchProviderId> =
-  new Set<WebFetchProviderId>(["context7"]);
+  new Set<WebFetchProviderId>(["context7", "ollama-search"]);
 
 /**
  * Providers whose upstream serves a usable anonymous tier, so an explicit
@@ -163,6 +165,15 @@ export async function handleWebFetch(
       case "parallel-search":
         // Parallel Extract is markdown-only; parallelFetch rejects other formats with 400.
         return await parallelFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "ollama-search":
+        // Ollama web_fetch is markdown-only; ollamaFetch rejects other formats with 400.
+        return await ollamaFetch({
           url: req.url,
           format,
           includeMetadata,

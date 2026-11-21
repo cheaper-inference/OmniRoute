@@ -1,0 +1,1 @@
+- **feat(providers):** Opt-in `MOONSHOT_REGION_PROBE` makes Moonshot key validation try the other region host when the default host rejects the key, and saves the base URL of the host that accepts it.

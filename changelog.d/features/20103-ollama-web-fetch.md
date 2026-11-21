@@ -1,0 +1,1 @@
+- **feat(web-fetch):** `POST /v1/web/fetch` accepts `provider: "ollama-search"` (explicit only, Markdown only), using your Ollama Search or `ollama-cloud` key.

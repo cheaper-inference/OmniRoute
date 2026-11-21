@@ -1,9 +1,12 @@
+import { signAwsRequest } from "../utils/awsSigV4.ts";
 import {
   buildBedrockNativeInferenceProfilesUrl,
   buildBedrockNativeModelsUrl,
+  getBedrockIamKeys,
   normalizeBedrockDiscoveredModels,
   resolveBedrockRegion,
   type BedrockDiscoveredModel,
+  type BedrockIamKeys,
 } from "../config/bedrock.ts";
 
 export type BedrockNativeFetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -73,12 +76,23 @@ function getErrorMessage(body: unknown, fallback: string): string {
 async function fetchBedrockJson(
   fetcher: BedrockNativeFetch,
   url: string,
-  apiKey: string,
-  init: RequestInit = {}
+  apiKey: string | null | undefined,
+  init: RequestInit = {},
+  iam: BedrockIamKeys | null = null,
+  region = ""
 ): Promise<unknown> {
-  const headers = buildBedrockNativeHeaders(apiKey, {
-    ...((init.headers as Record<string, string> | undefined) || {}),
-  });
+  const extra = { ...((init.headers as Record<string, string> | undefined) || {}) };
+  // IAM static keys: sign the control-plane request with SigV4 instead of a bearer key.
+  const headers = iam
+    ? signAwsRequest({
+        method: init.method || "GET",
+        url,
+        region,
+        service: "bedrock",
+        headers: { Accept: "application/json", "Content-Type": "application/json", ...extra },
+        credentials: iam,
+      })
+    : buildBedrockNativeHeaders(apiKey, extra);
   const response = await fetcher(url, {
     ...init,
     method: init.method || "GET",
@@ -99,7 +113,8 @@ async function fetchBedrockJson(
 async function fetchInferenceProfiles(
   fetcher: BedrockNativeFetch,
   region: string,
-  apiKey: string
+  apiKey: string,
+  iam: BedrockIamKeys | null = null
 ): Promise<{ inferenceProfileSummaries: unknown[] }> {
   const summaries: unknown[] = [];
   let nextToken: string | null = null;
@@ -108,7 +123,10 @@ async function fetchInferenceProfiles(
     const data = await fetchBedrockJson(
       fetcher,
       buildBedrockNativeInferenceProfilesUrl(region, { nextToken }),
-      apiKey
+      apiKey,
+      {},
+      iam,
+      region
     );
     const record = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
     const pageSummaries = Array.isArray(record.inferenceProfileSummaries)
@@ -131,17 +149,21 @@ export async function discoverBedrockNativeModels({
   fetcher?: BedrockNativeFetch;
 }): Promise<BedrockNativeDiscoveryResult> {
   const region = resolveBedrockRegion(providerSpecificData);
+  const iam = getBedrockIamKeys({ apiKey, providerSpecificData });
   const foundationModelsResponse = await fetchBedrockJson(
     fetcher,
     buildBedrockNativeModelsUrl(region),
-    apiKey
+    apiKey,
+    {},
+    iam,
+    region
   );
 
   let inferenceProfilesResponse: unknown = { inferenceProfileSummaries: [] };
   const warnings: string[] = [];
 
   try {
-    inferenceProfilesResponse = await fetchInferenceProfiles(fetcher, region, apiKey);
+    inferenceProfilesResponse = await fetchInferenceProfiles(fetcher, region, apiKey, iam);
   } catch (error) {
     if (isBedrockNativeAuthError(error)) {
       throw error;
