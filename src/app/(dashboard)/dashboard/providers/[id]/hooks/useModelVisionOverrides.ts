@@ -29,6 +29,15 @@ async function readVisionOverrides(provider: string): Promise<Record<string, boo
   }
 }
 
+function saveErrorMessage(
+  error: unknown,
+  t: (key: string, values?: Record<string, unknown>) => string
+): string {
+  return error instanceof Error && error.message
+    ? error.message
+    : providerText(t, "failedSaveModelEndpointSettings", "Failed to save model endpoint settings");
+}
+
 type OverrideState = { provider: string; values: Record<string, boolean> };
 
 function applyVisionOverride(
@@ -46,8 +55,10 @@ function applyVisionOverride(
 export function useModelVisionOverrides(
   provider: string,
   t: (key: string, values?: Record<string, unknown>) => string,
-  onModelsChanged?: () => void
+  onModelsChanged?: () => void,
+  options: { enabled?: boolean } = {}
 ) {
+  const enabled = options.enabled !== false;
   const [state, setState] = useState<OverrideState>({ provider, values: {} });
   const [saving, setSaving] = useState<{ scope: { provider: string }; modelId: string } | null>(
     null
@@ -58,6 +69,7 @@ export function useModelVisionOverrides(
   const readRevisionRef = useRef(0);
   const notify = useNotificationStore();
   useEffect(() => {
+    if (!enabled) return;
     scopeRef.current = providerScope;
     const revision = readRevisionRef.current;
     let active = true;
@@ -69,7 +81,7 @@ export function useModelVisionOverrides(
       active = false;
       scopeRef.current = { provider: "" };
     };
-  }, [provider, providerScope]);
+  }, [provider, providerScope, enabled]);
   const save = useCallback(
     async (modelId: string, value: boolean | null): Promise<boolean> => {
       const scope = scopeRef.current;
@@ -101,15 +113,7 @@ export function useModelVisionOverrides(
         return true;
       } catch (error) {
         if (!isCurrent()) return false;
-        notify.error(
-          error instanceof Error && error.message
-            ? error.message
-            : providerText(
-                t,
-                "failedSaveModelEndpointSettings",
-                "Failed to save model endpoint settings"
-              )
-        );
+        notify.error(saveErrorMessage(error, t));
         return false;
       } finally {
         if (isCurrent()) {
