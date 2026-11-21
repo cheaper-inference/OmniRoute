@@ -129,64 +129,75 @@ describe("catalog freshness (background refresh loop)", () => {
     mock.timers.reset();
   });
 
-  async function assertGatewayPublishesModel(t: TestContext, providerId: string, modelId: string) {
+  async function assertGatewayPublishesModel(
+    t: TestContext,
+    providerId: string,
+    modelId: string,
+    installations = 1
+  ) {
     restoreDisk = isolateDisk();
     mock.timers.enable({ apis: ["setInterval"] });
+    const intervalMs = 60_000;
+    let now = Date.now();
+    t.mock.method(Date, "now", () => now);
     let gatewayModels = [{ id: "m1" }];
+    let modelFetches = 0;
     t.mock.method(globalThis, "fetch", (async (url: unknown) => {
       const href = String(url);
-      if (href.includes("/v1/models")) return ok({ data: gatewayModels }) as unknown as Response;
+      if (href.includes("/v1/models")) {
+        modelFetches += 1;
+        return ok({ data: gatewayModels }) as unknown as Response;
+      }
       return ok({ combos: [] }) as unknown as Response;
     }) as typeof fetch);
     const host = new EventTarget();
-    const { added, ctx } = setupCtx(providerId, {
+    let active: SetupResult | undefined;
+    const reloads: ReloadCounter = {
       count: 0,
       onReload: () => {
-        if (publishedIds(added).length > 1) host.dispatchEvent(new Event("catalog-changed"));
+        host.dispatchEvent(new Event("reloaded"));
+        if (active && publishedIds(active.added).length > 1) {
+          host.dispatchEvent(new Event("catalog-changed"));
+        }
       },
-    });
+    };
     await silence(async () => {
-      await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-      assert.deepEqual(publishedIds(added), ["m1"]);
+      for (let index = 0; index < installations; index += 1) {
+        // Expire the disk cache before the next install without advancing the scheduled ticks.
+        now += intervalMs + 1;
+        active = setupCtx(providerId, reloads);
+        const bootReloaded = once(host, "reloaded", { signal: t.signal });
+        await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(active.ctx);
+        await bootReloaded;
+      }
+      assert.ok(active);
+      assert.deepEqual(publishedIds(active.added), ["m1"]);
+      assert.equal(getRegistry().size, 1, "only one loop registered for the providerId");
 
+      const fetchesBeforeTick = modelFetches;
+      const reloadsBeforeTick = reloads.count;
       const updated = once(host, "catalog-changed", { signal: t.signal });
       gatewayModels = [{ id: "m1" }, { id: modelId }];
-      mock.timers.tick(60_000);
+      now += intervalMs;
+      mock.timers.tick(intervalMs);
       await updated;
       assert.ok(
-        publishedIds(added).includes(modelId),
+        publishedIds(active.added).includes(modelId),
         `${modelId} is served after background refresh`
       );
+      // All intervals due on this tick start their models fetch before the host replay.
+      assert.equal(modelFetches - fetchesBeforeTick, 1, "one models fetch on the tick");
+      assert.equal(reloads.count - reloadsBeforeTick, 1, "one reload on the tick");
     });
   }
 
-  it("served catalog follows the gateway after a background refresh", async () => {
-    restoreDisk = isolateDisk();
-    mock.timers.enable({ apis: ["setInterval"] });
-    const origFetch = globalThis.fetch;
-    let gatewayModels = [{ id: "m1" }];
-    globalThis.fetch = (async (url: unknown) => {
-      const href = String(url);
-      if (href.includes("/v1/models")) return ok({ data: gatewayModels }) as unknown as Response;
-      return ok({ combos: [] }) as unknown as Response;
-    }) as typeof fetch;
-    const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("t1", reloads);
-    try {
-      await silence(async () => {
-        await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
-        const before = reloads.count;
-        gatewayModels = [{ id: "m1" }, { id: "m2" }];
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
-        assert.ok(publishedIds(added).includes("m2"), "m2 must be published after the tick");
-        assert.equal(reloads.count - before, 1, "exactly one reload on the tick");
-      });
-    } finally {
-      globalThis.fetch = origFetch;
+  it(
+    "served catalog follows the gateway after a background refresh",
+    { timeout: 10_000 },
+    async (t) => {
+      await assertGatewayPublishesModel(t, "t1", "m2");
     }
-  });
+  );
 
   it("an unchanged catalog does not request a reload", async () => {
     restoreDisk = isolateDisk();
@@ -234,31 +245,13 @@ describe("catalog freshness (background refresh loop)", () => {
     }
   });
 
-  it("a second install replaces the loop instead of stacking it", async () => {
-    restoreDisk = isolateDisk();
-    mock.timers.enable({ apis: ["setInterval"] });
-    const origFetch = globalThis.fetch;
-    globalThis.fetch = (async (url: unknown) => {
-      const href = String(url);
-      if (href.includes("/v1/models")) return ok({ data: [{ id: "m1" }] }) as unknown as Response;
-      return ok({ combos: [] }) as unknown as Response;
-    }) as typeof fetch;
-    const reloads: ReloadCounter = { count: 0 };
-    try {
-      for (let i = 0; i < 3; i++) {
-        const { ctx } = setupCtx("t4", reloads);
-        await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 20));
-      }
-      assert.equal(getRegistry().size, 1, "only one loop registered for the providerId");
-      const before = reloads.count;
-      await mock.timers.tick(60000);
-      await new Promise((r) => setTimeout(r, 200));
-      assert.equal(reloads.count - before, 1, "a single tick triggers a single refresh");
-    } finally {
-      globalThis.fetch = origFetch;
+  it(
+    "a second install replaces the loop instead of stacking it",
+    { timeout: 10_000 },
+    async (t) => {
+      await assertGatewayPublishesModel(t, "t4", "m2", 3);
     }
-  });
+  );
 
   it("the period is clamped to the 60s floor", async () => {
     restoreDisk = isolateDisk();
