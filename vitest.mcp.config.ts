@@ -26,6 +26,7 @@ export default defineConfig({
       "open-sse/services/__tests__/fail-fast-concurrency-gate.test.ts",
       "src/lib/memory/__tests__/generic-backend.test.ts",
       "tests/unit/autoCombo/**/*.test.ts",
+      "tests/unit/mcp/v2-*.spec.ts",
       "tests/unit/api/**/*.spec.ts",
       "tests/unit/encryption.spec.ts",
       "src/shared/components/**/*.test.tsx",
@@ -33,6 +34,7 @@ export default defineConfig({
       "src/app/(dashboard)/**/__tests__/**/*.test.tsx",
     ],
     exclude: ["**/node_modules/**", "**/.git/**"],
+    setupFiles: ["tests/unit/mcp/v2-host-hooks.setup.ts"],
     coverage: {
       reportsDirectory: "coverage",
     },
