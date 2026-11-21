@@ -129,4 +129,124 @@ test("cache-config route resolves and modelCatalogCacheTtlMs round-trips", async
     assert.ok(harrier, "harrier-oss-v1-0.6b model should be present in lemonade models");
     assert.equal(harrier.dimensions, 1024);
   });
+
+  await t.test(
+    "PUT semanticCacheEnabled syncs flat settings, /api/cache, and runtime check (#20399)",
+    async () => {
+      const { getSettings, getSettingsRevision, updateSettings, SettingsRevisionConflictError } =
+        await import("../../src/lib/db/settings.ts");
+      const { isSemanticCacheDbEnabled } = await import("../../src/lib/db/databaseSettings.ts");
+      const { isSemanticCacheEnabled } =
+        await import("../../open-sse/handlers/chatCore/semanticCache.ts");
+      const cacheRoute = await import("../../src/app/api/cache/route.ts");
+
+      // Reproduce #20399: flat settings has semanticCacheEnabled=false while
+      // databaseSettings.cache.semanticCacheEnabled is true.
+      await updateSettings({ semanticCacheEnabled: false });
+
+      const initialGet = await cacheConfigRoute.GET(makeJsonRequest("GET") as never);
+      const initialConfig = await initialGet.json();
+      assert.equal(
+        initialConfig.semanticCacheEnabled,
+        false,
+        "cache-config GET must reflect disabled runtime when flat semanticCacheEnabled is false"
+      );
+      assert.equal(isSemanticCacheDbEnabled(), false);
+      assert.equal(isSemanticCacheEnabled(await getSettings(), null), false);
+
+      // Enabling via updateSettings (PATCH /api/settings path) also syncs databaseSettings
+      await updateSettings({ semanticCacheEnabled: true });
+      assert.equal(isSemanticCacheDbEnabled(), true);
+      assert.equal(isSemanticCacheEnabled(await getSettings(), null), true);
+
+      // Disable again to test PUT /api/settings/cache-config + revision bump
+      await updateSettings({ semanticCacheEnabled: false });
+      const revBeforePut = await getSettingsRevision();
+
+      // Saving semanticCacheEnabled: true via cache-config must re-enable runtime,
+      // flat settings, /api/cache, and advance the settings revision.
+      const enablePut = await cacheConfigRoute.PUT(
+        makeJsonRequest("PUT", { semanticCacheEnabled: true }) as never
+      );
+      assert.equal(enablePut.status, 200);
+
+      const revAfterPut = await getSettingsRevision();
+      assert.equal(revAfterPut, revBeforePut + 1);
+      await assert.rejects(
+        () => updateSettings({ debugMode: false }, { expectedRevision: revBeforePut }),
+        SettingsRevisionConflictError
+      );
+
+      const afterEnableSettings = await getSettings();
+      assert.equal(afterEnableSettings.semanticCacheEnabled, true);
+      assert.equal(isSemanticCacheEnabled(afterEnableSettings, null), true);
+
+      const afterEnableConfig = await (
+        await cacheConfigRoute.GET(makeJsonRequest("GET") as never)
+      ).json();
+      assert.equal(afterEnableConfig.semanticCacheEnabled, true);
+
+      const afterEnableCacheStats = await (
+        await cacheRoute.GET(new Request("http://localhost/api/cache") as never)
+      ).json();
+      assert.equal(afterEnableCacheStats.config.semanticCacheEnabled, true);
+
+      // Saving semanticCacheEnabled: false via cache-config must disable all three.
+      const disablePut = await cacheConfigRoute.PUT(
+        makeJsonRequest("PUT", { semanticCacheEnabled: false }) as never
+      );
+      assert.equal(disablePut.status, 200);
+
+      const afterDisableSettings = await getSettings();
+      assert.equal(afterDisableSettings.semanticCacheEnabled, false);
+      assert.equal(isSemanticCacheEnabled(afterDisableSettings, null), false);
+
+      const afterDisableCacheStats = await (
+        await cacheRoute.GET(new Request("http://localhost/api/cache") as never)
+      ).json();
+      assert.equal(afterDisableCacheStats.config.semanticCacheEnabled, false);
+    }
+  );
+
+  await t.test(
+    "PATCH-path semanticCacheEnabled rebuilds the semantic cache manager (#20399)",
+    async () => {
+      const { updateSettings } = await import("../../src/lib/db/settings.ts");
+      const { updateDatabaseSettings } = await import("../../src/lib/db/databaseSettings.ts");
+      const { ensureSemanticCacheDbBridge } =
+        await import("../../src/lib/cache/semanticCacheDbBridge.ts");
+      const { getSemanticCacheManager, resetSemanticCacheManager } =
+        await import("../../open-sse/services/cache/semanticCacheManager.ts");
+
+      const previousEnvFlag = process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED;
+      delete process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED;
+      try {
+        ensureSemanticCacheDbBridge();
+        // Vector layer on, master toggle off (Settings -> Cache disabled the feature).
+        updateDatabaseSettings({
+          cache: { semanticCacheVectorEnabled: true, semanticCacheEnabled: false },
+        });
+        resetSemanticCacheManager();
+
+        // A request builds the manager while the master flag is off.
+        const disabledManager = getSemanticCacheManager();
+        assert.equal(disabledManager.getConfig().enabled, false);
+
+        // PATCH /api/settings re-enables it through updateSettings().
+        await updateSettings({ semanticCacheEnabled: true });
+
+        const rebuiltManager = getSemanticCacheManager();
+        assert.notEqual(
+          rebuiltManager,
+          disabledManager,
+          "updateSettings must drop the stale semantic cache manager"
+        );
+        assert.equal(rebuiltManager.getConfig().enabled, true);
+      } finally {
+        resetSemanticCacheManager();
+        if (previousEnvFlag === undefined) delete process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED;
+        else process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED = previousEnvFlag;
+      }
+    }
+  );
 });

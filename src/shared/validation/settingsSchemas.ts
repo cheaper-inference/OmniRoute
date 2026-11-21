@@ -585,6 +585,7 @@ export const updateSettingsSchema = z.object({
   // Gemini through Antigravity only; default off and no explicit cache resources.
   geminiPromptCacheMode: z.enum(["off", "implicit"]).optional(),
   antigravitySignatureCacheMode: z.enum(signatureCacheModeValues).optional(),
+  semanticCacheEnabled: z.boolean().optional(),
   // Adaptive Volume Routing
   adaptiveVolumeRouting: z.boolean().optional(),
   // Usage token buffer — safety margin added to reported prompt/input token counts.

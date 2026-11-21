@@ -1,0 +1,1 @@
+- **fix(cache):** Keep `semanticCacheEnabled` synchronized between `databaseSettings` and the flat `settings` store across `/api/settings/cache-config`, `updateDatabaseSettings`, and `/api/cache` so saving cache settings activates runtime semantic caching without drift ([#20399](https://github.com/cheaper-inference/OmniRoute/issues/20399))
