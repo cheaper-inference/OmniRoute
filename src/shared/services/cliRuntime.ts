@@ -431,8 +431,13 @@ const runProcess = (
   } = {}
 ): Promise<any> =>
   new Promise((resolve) => {
-    const managed = resolveManagedCliInvocation(command, args);
-    if (managed) ({ command, args, useShell } = managed);
+    try {
+      const managed = resolveManagedCliInvocation(command, args);
+      if (managed) ({ command, args, useShell } = managed);
+    } catch {
+      resolve({ ok: false, stdout: "", stderr: "invalid managed CLI executable", exitCode: -1 });
+      return;
+    }
     // Guard: reject commands with shell metacharacters — command comes from
     // server-controlled env vars/config, not HTTP input, but belt-and-suspenders.
     if (/[;&|`$<>\n\r]/.test(command)) {

@@ -103,7 +103,10 @@ test("explicit executable overrides keep managed binaries inactive", async (t) =
   });
   process.env.DATA_DIR = f.data;
   delete process.env.CLI_CODEX_BIN;
-  assert.equal(getManagedCliCommand("codex"), f.shim);
+  assert.equal(
+    getManagedCliCommand("codex"),
+    process.platform === "win32" ? `${f.shim}.cmd` : f.shim
+  );
   process.env.CLI_CODEX_BIN = "/operator/codex";
   assert.equal(getManagedCliCommand("codex"), null);
 });

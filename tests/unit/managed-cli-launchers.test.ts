@@ -16,6 +16,7 @@ import { AcpManager } from "../../src/lib/acp/manager.ts";
 import { detectInstalledAgents, setCustomAgents } from "../../src/lib/acp/registry.ts";
 import { getManagedCliDefinition } from "../../src/shared/services/managedCliRuntimeCore.mjs";
 import { resolveManagedCliInvocation } from "../../src/shared/services/managedCliLaunch.ts";
+import { getCliRuntimeStatus } from "../../src/shared/services/cliRuntime.ts";
 import {
   getQoderCliCommand,
   resolveQoderCliInvocation,
@@ -139,6 +140,15 @@ test("unrecognized Windows entry formats fail closed instead of invoking a shell
     () => resolveManagedCliSpawn("codex", "win32"),
     /Unsupported managed CLI executable/
   );
+});
+
+test("runtime status reports an unsupported managed Windows entry as not runnable", async () => {
+  mock.method(os, "platform", () => "win32");
+  const installed = activate("codex", "1.2.3", "win32", Buffer.from("#!/bin/sh\n"));
+  const status = await getCliRuntimeStatus("codex");
+  assert.equal(status.commandPath, installed.command);
+  assert.equal(status.runnable, false);
+  assert.equal(status.reason, "healthcheck_failed");
 });
 
 test("managed runtime probes preserve argument boundaries without a Windows shell", () => {
