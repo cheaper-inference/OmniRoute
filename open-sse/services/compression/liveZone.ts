@@ -357,13 +357,15 @@ async function compressAndStore(
   compress: (body: Record<string, unknown>) => Promise<CompressionResult>
 ): Promise<CompressionResult> {
   const result = await compress(body);
+  // Start the TTL when the entry is stored, not when the request arrived: a slow
+  // compression would otherwise store an entry that is already near expiry (#20621).
   store(
     context.key,
     context.rawItemDigests,
     context.rawStableFieldsDigest,
     result,
     context.field,
-    context.now,
+    Date.now(),
     context.ttlMs
   );
   return result;
