@@ -114,7 +114,8 @@ jobs:
     needs: resolve-target
     if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Match native CI for unit shards and use 30 minutes for integration and Vitest.
+    timeout-minutes: ${{ matrix.script == 'test:unit:ci:shard' && 35 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -464,7 +465,8 @@ jobs:
     needs: [resolve-target, resolve-main]
     if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Match native CI for unit shards and use 30 minutes for integration and Vitest.
+    timeout-minutes: ${{ matrix.script == 'test:unit:ci:shard' && 35 || 30 }}
     strategy:
       fail-fast: false
       matrix:
