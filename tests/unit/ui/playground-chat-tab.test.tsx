@@ -121,6 +121,41 @@ function buildSseResponse(content: string) {
   });
 }
 
+/** A 200 event-stream made of the given raw SSE frames, one network chunk each. */
+function buildRawSseResponse(frames: string[]) {
+  const encoder = new TextEncoder();
+  let idx = 0;
+  const stream = new ReadableStream({
+    pull(controller) {
+      if (idx < frames.length) {
+        controller.enqueue(encoder.encode(frames[idx++]));
+      } else {
+        controller.close();
+      }
+    },
+  });
+  return new Response(stream, {
+    status: 200,
+    headers: { "content-type": "text/event-stream" },
+  });
+}
+
+const KEEPALIVE_FRAME =
+  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[]}\n\n';
+
+async function sendMessage(el: HTMLDivElement, text: string): Promise<void> {
+  const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
+  act(() => {
+    setInputValue(textarea, text);
+  });
+  const sendBtn = Array.from(el.querySelectorAll("button")).find((b) =>
+    b.textContent?.includes("Send")
+  ) as HTMLButtonElement | undefined;
+  await act(async () => {
+    sendBtn?.click();
+  });
+}
+
 const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
 function renderChatTab(
@@ -481,5 +516,92 @@ describe("ChatTab", () => {
     expect(fetchCount).toBeGreaterThan(countBefore);
 
     fetchSpy.mockRestore();
+  });
+  // ── KEA-9392: a failure that arrives inside a 200 stream must be shown ───────────────────
+
+  it("shows the error a 200 stream carries in-band instead of ending silently (KEA-9392)", async () => {
+    // What /v1/chat/completions sends when the handler fails after the keepalive threshold:
+    // HTTP 200, keepalive frames, then the sanitized error body as a `data:` frame.
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      buildRawSseResponse([
+        KEEPALIVE_FRAME,
+        KEEPALIVE_FRAME,
+        `data: ${JSON.stringify({
+          error: {
+            message: "No active credentials for provider: demo",
+            type: "server_error",
+            code: "service_unavailable",
+          },
+        })}\n\n`,
+      ])
+    );
+
+    const el = renderChatTab();
+    await sendMessage(el, "hi");
+
+    await waitFor(
+      () => el.textContent?.includes("No active credentials for provider: demo") === true
+    );
+    await waitFor(() => !el.textContent?.includes("Generating"));
+    // The user's message stays; no empty assistant bubble is left behind.
+    expect(el.textContent).toContain("hi");
+    expect(el.querySelector("[data-testid='markdown-content']")).toBeNull();
+    expect(
+      Array.from(el.querySelectorAll("button")).some((b) => b.textContent?.includes("Regenerate"))
+    ).toBe(false);
+  });
+
+  it("reads an error frame that is split across network chunks (KEA-9392)", async () => {
+    const frame = `data: ${JSON.stringify({ error: { message: "Provider demo is unavailable" } })}\n\n`;
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      buildRawSseResponse([KEEPALIVE_FRAME, frame.slice(0, 25), frame.slice(25)])
+    );
+
+    const el = renderChatTab();
+    await sendMessage(el, "hi");
+
+    await waitFor(() => el.textContent?.includes("Provider demo is unavailable") === true);
+  });
+
+  it("says so when the stream ends without any content or error (KEA-9392)", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      buildRawSseResponse([KEEPALIVE_FRAME, "data: [DONE]\n\n"])
+    );
+
+    const el = renderChatTab();
+    await sendMessage(el, "hi");
+
+    await waitFor(() => el.textContent?.includes("The model returned an empty response") === true);
+    expect(el.querySelector("[data-testid='markdown-content']")).toBeNull();
+  });
+
+  it("keeps the partial reply and shows the error when the stream fails midway (KEA-9392)", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      buildRawSseResponse([
+        `data: ${JSON.stringify({ choices: [{ delta: { content: "Partial answer" } }] })}\n\n`,
+        `data: ${JSON.stringify({ error: { message: "upstream died" } })}\n\ndata: [DONE]\n\n`,
+      ])
+    );
+
+    const el = renderChatTab();
+    await sendMessage(el, "hi");
+
+    await waitFor(() => el.textContent?.includes("upstream died") === true);
+    expect(el.querySelector("[data-testid='markdown-content']")?.textContent).toBe(
+      "Partial answer"
+    );
+  });
+
+  it("falls back to a generic message when the in-band error has no text (KEA-9392)", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      buildRawSseResponse([KEEPALIVE_FRAME, 'data: {"error":{}}\n\n'])
+    );
+
+    const el = renderChatTab();
+    await sendMessage(el, "hi");
+
+    await waitFor(
+      () => el.textContent?.includes("The provider returned an error before replying") === true
+    );
   });
 });
