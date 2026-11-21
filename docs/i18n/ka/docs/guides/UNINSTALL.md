@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (არასავალდებულო) იმიჯის წაშლა
+docker rmi cheaperinference/omniroute:latest
+# ძველმა ინსტალაციამ მოიპოვა ძველი სახელი:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

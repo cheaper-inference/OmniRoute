@@ -12,7 +12,8 @@
     "dryRun": "[symulacja] wykonałoby: {action}",
     "cancelled": "Anulowano.",
     "jsonOpt": "Wyjście jako JSON",
-    "yesOpt": "Pomiń potwierdzenie"
+    "yesOpt": "Pomiń potwierdzenie",
+    "positiveIntegerRequired": "Limit musi być dodatnią liczbą całkowitą."
   },
   "setup": {
     "title": "Konfiguracja OmniRoute",

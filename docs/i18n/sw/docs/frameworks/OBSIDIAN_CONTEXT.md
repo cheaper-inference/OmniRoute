@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Usalama na Usafiri
+
+uthibitishaji wa WebDAV hutekeleza ufuatiliaji wa kutofaulu kwa IP-kwa-IP na kufungia nje (majaribio 10 yasiyofaulu ndani ya dirisha la sekunde 60 husababisha kufungwa kwa dakika 5 na `429 Too Many Requests` na `Retry-After`). Kwa sababu WebDAV hutuma vitambulisho vya Msingi vya uthibitishaji, kukomesha TLS (au kuelekeza juu ya handaki salama kama vile Tailscale au Cloudflare Tunnel) kunapendekezwa sana wakati wa kufikia mwisho wa WebDAV nje ya kitanzi.
+
 ### Chanzo cha muktadha kwa kila ufunguo wa API (hiari)
 
 Usanidi wa Obsidian unaweza kuwekewa upeo **kwa kila ufunguo wa API** kupitia jedwali la `api_key_context_sources`

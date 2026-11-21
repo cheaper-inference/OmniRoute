@@ -141,36 +141,22 @@ en de herstart in dezelfde opdracht.
   minuten nodig om op de tmpfs terecht te komen en 2 minuten om vanaf schijf te uploaden.
 - De VPS `.15` is uitsluitend voor homologatie — hierop draaien nooit CI-runners.
 
-## Gehoste lane (door GitHub gehoste runners)
+## Gehoste baan (door GitHub gehoste hardlopers)
 
-De repository is van de organisatie `cheaper-inference`, op het **Team**-abonnement: **60
-gelijktijdige gehoste jobs**, gedeeld door elke repository in de organisatie, elke PR-controle,
-elke door een push geactiveerde workflow en de standaardconfiguratie van CodeQL. De onderstaande cijfers zijn gemeten op het
-**Pro**-abonnement (40 gelijktijdige gehoste jobs). Gemeten op 2026-10-18 tijdens een
-mergecampagne (~10 merges/uur op `release/v3.8.52`): **2.500 workflowruns aangemaakt in
-24 uur**, 44 pushes naar de branch in 6 uur, **106 gehoste jobs in de wachtrij** terwijl PR-controles
-urenlang wachtten en PR's zonder die controles werden gemerged. Negen workflows werden bij elke push naar de branch geactiveerd:
+De repository is eigendom van de `cheaper-inference` organisatie, op de** Team** plan:** 60 gelijktijdige gehoste taken** , gedeeld door elke repository in de organisatie, elke PR controle, elke push-triggered workflow en de standaardinstellingen van CodeQL. Onderstaande cijfers zijn gemeten op de** Pro** plan (40 gelijktijdig gehoste taken). Gemeten op 18-10-2026 tijdens een fusiecampagne (~ 10 merges/hour op `release/v3.8.52`):** 2.500 workflowruns gemaakt in 24 uur** , 44 duwtjes naar de tak in 6 uur,** 106 gehoste taken in de wachtrij** terwijl PR -cheques uren wachtten en PRs zonder hen werden samengevoegd. Negen workflows worden geactiveerd bij elke push naar het filiaal:
 
-| per push naar `release/v*`                   | gehoste jobs | resultaat tijdens de storm                                     | sinds 2026-10-18                                                                  |
-| -------------------------------------------- | -----------: | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `ci.yml` (volledige matrix)                  |  maximaal 30 | geannuleerd door de volgende push, 24 van 24 op één dag        | niet gestart bij pushes naar `release/**` (PR-run + Release-Green)                |
-| `quality.yml`                                |           ~6 | geannuleerd, 23 van 23                                         | niet gestart bij pushes naar `release/**`                                         |
-| `Release-Green` `--quick`                    |            0 | draaide op `omni-build`, 97 van 100 geannuleerd                | `omni-release`-slot, nooit geannuleerd, wachtende run wordt samengevoegd          |
-| `Lock released branch`, `OpenSSF Scorecard`  |            2 | één run in de wachtrij per push                                | één run per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)              |
-| `Release acceptance` (schaduwrapport)        |            1 | één gehoste `npm ci` per push, nooit geannuleerd               | ongewijzigd — kandidaat voor een `paths:`-filter                                  |
-| `Publish to Docker Hub` → `Deploy to VPS`    |            2 | geannuleerd per push; amd64-deel concurreert op `omni-build`   | ongewijzigd — deploymentkanaal van de eigenaar                                    |
-| Standaardconfiguratie van CodeQL (`dynamic`) |            4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per push | ongewijzigd — Instellingen → Codebeveiliging; `c-cpp`/`python` scannen hier niets |
+| per push naar `release/v*`                  | gehoste banen | uitkomst onder de storm                                        | sinds 2026-10-18                                                                |
+| ------------------------------------------- | ------------: | -------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `ci.yml` (volledige matrix)                 |        tot 30 | geannuleerd bij de volgende push, 24 van 24 op een dag         | niet gestart bij `release/**` pushes (PR run + Release-Green)                   |
+| `quality.yml`                               |            ~6 | geannuleerd, 23 van 23                                         | niet begonnen met `release/**` pushs                                            |
+| `Release-Green` `--quick`                   |             0 | draaide op `omni-build`, geannuleerd 97 van 100                | `omni-release` slot, nooit geannuleerd, in afwachting van instorting van de run |
+| `Lock released branch`, `OpenSSF Scorecard` |             2 | één run in de wachtrij per push                                | één run per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)            |
+| `Release acceptance` (schaduwrapport)       |             1 | één gehoste `npm ci` per push, nooit geannuleerd               | ongewijzigde — kandidaat voor een `paths:` filter                               |
+| `Publish to Docker Hub` → `Deploy to VPS`   |             2 | geannuleerd per push; amd64 leg concurreert op `omni-build`    | ongewijzigd implementatiekanaal van — eigenaar                                  |
+| CodeQL standaardinstelling (`dynamic`)      |             4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per push | ongewijzigd — Instellingen → Codebeveiliging; `c-cpp`/`python` scan hier niets  |
 
-`tests/unit/build/push-storm-diet.test.ts` legt de alleen-voor-`main`-pushtrigger van `ci.yml` en
-`quality.yml` vast. Neveneffect: Codecov ontvangt niet langer een basisupload per releasepush (de
-stap is informatief en gebruikt `continue-on-error`); de coveragedrempel in de repository en de PR-opmerking blijven
-ongewijzigd.
+`tests/unit/build/push-storm-diet.test.ts` pint de `main` -only push-trigger van `ci.yml` en `quality.yml`. Bijwerking: Codecov ontvangt niet langer een basisupload per release-push (de stap is informatief en `continue-on-error`); de dekkingspoort in de repo en PR opmerking worden niet beïnvloed.
 
-**Meer zelfgehoste capaciteit lost de gehoste wachtrij niet op.** De devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) zou een runner kunnen hosten, maar de agentsessies houden
-de belasting al op 20–26, de agentcontainer heeft geen Docker-daemon en de verzadigde lane is
-de gehoste lane. De `.113`-machine had op hetzelfde moment 71 GB vrij en een belasting van 5–8; de beperking
-daar is het geheugenbudget per listener hierboven (maximaal 6 listeners), niet de CPU. De resterende
-mogelijkheden zijn procesmatig: laat campagne-PR's landen via de Mergify-wachtrij (`label=queue`, batches delen
-één `merge_group`-CI-run in plaats van één run per PR plus één per push), beperk de talen van de
-standaardconfiguratie van CodeQL en filter `release-acceptance.yml` op basis van de bestanden die deze workflow leest.
+**Meer zelf-gehoste capaciteit lost de gehoste wachtrij niet op.** De devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) zou een runner kunnen hosten, maar de agentsessies houden hun belasting al op 20-26, de agentcontainer heeft geen Docker daemon en de verzadigde baan is de gehoste. De `.113` box had 71 GB vrij en laadde 5–8 op hetzelfde moment; de beperking is het bovenstaande geheugenbudget per luisteraar (maximaal 6 luisteraars), niet CPU. De resterende hefbomen zijn processen: landcampagne PRs via de Mergify-wachtrij (`label=queue`, batches delen één `merge_group` CI -run in plaats van één run per PR plus één per push), trim de CodeQL -standaardinstallatietalen en filter `release-acceptance.yml` op de bestanden die het leest.
+
+> **19-11-2026: de samenvoegwachtrij voor samenvoegen is buiten gebruik gesteld** (beslissing van de eigenaar). `.mergify.yml` definieert niet langer een wachtrij en weigert de Mergify-opdrachten die een pull-verzoek samenvoegen of herschrijven. Release PRs wordt met de hand samengevoegd onder de repository-regelset "Vereist groene poorten voor de actieve release" (`Gate / CI` + `Gate / Quality`) totdat de omni-queue in de live-modus draait, en daarna via de omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). De hendel Samenvoegen hierboven bestaat niet meer.

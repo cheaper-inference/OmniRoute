@@ -4,7 +4,7 @@
 
 ---
 
-## Greitoji pradžia
+## Greita pradžia
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API žinynas
+## API nuoroda
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Gamyklinė funkcija, kuri sukuria Plugin objektą su numatytosiomis reikšmėmis.
+Gamyklos funkcija, kuri sukuria papildinio objektą su numatytaisiais parametrais.
 
 **Parametrai:**
 
-- `name` (string, privalomas) — Papildinio pavadinimas kebab-case formatu
-- `priority` (number, neprivalomas, numatytoji reikšmė: 100) — Mažesnė reikšmė vykdoma pirmiau
-- `enabled` (boolean, neprivalomas, numatytoji reikšmė: true) — Ar pradėti įjungus?
-- `onRequest` (function, neprivalomas) — Vykdoma prieš pokalbio apdorojimo funkciją
-- `onResponse` (function, neprivalomas) — Vykdoma po pokalbio apdorojimo funkcijos
-- `onError` (function, neprivalomas) — Vykdoma įvykus apdorojimo funkcijos klaidai
+- `name` (eilutė, būtina) — Įskiepio pavadinimas kebabo dėkle
+- `priority` (skaičius, neprivaloma, numatytasis: 100) — Apatinis paleidžiamas pirmiausia
+- `enabled` (bulio reikšmė, neprivaloma, numatytoji: tiesa) — Pradėti įjungta?
+- `onRequest` (funkcija, neprivaloma) — Paleidžiama prieš pokalbių tvarkyklę
+- `onResponse` (funkcija, neprivaloma) — Vyksta po pokalbių tvarkyklės
+- `onError` (funkcija, neprivaloma) — Vykdo tvarkyklės klaidą
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Užblokuoja užklausą ir pasirinktinai grąžina pasirinktinį atsakymą.
+Užblokuokite užklausą ir pasirinktinai grąžinkite tinkintą atsakymą.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Pakeičia užklausos turinį prieš jam pasiekiant teikėją.
+Pakeiskite užklausos turinį, kol jis pasiekia teikėją.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Prie užklausos konteksto prideda metaduomenis.
+Pridėkite metaduomenis prie užklausos konteksto.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Papildinio kontekstas (`PluginContext`)
 
-| Laukas      | Tipas                     | Aprašymas                           |
-| ----------- | ------------------------- | ----------------------------------- |
-| `requestId` | `string`                  | Unikalus užklausos identifikatorius |
-| `model`     | `string`                  | Prašomo modelio pavadinimas         |
-| `provider`  | `string`                  | Tikslinio teikėjo ID                |
-| `body`      | `Record<string, unknown>` | Užklausos turinys                   |
-| `headers`   | `Record<string, string>`  | Užklausos antraštės                 |
-| `metadata`  | `Record<string, unknown>` | Keičiami metaduomenys               |
-| `timestamp` | `number`                  | Užklausos laiko žyma                |
+| Laukas       | Tipas                     | Aprašymas                            |
+| ------------ | ------------------------- | ------------------------------------ |
+| `requestId`  | `string`                  | Unikalus užklausos identifikatorius  |
+| `model`      | `string`                  | Prašomo modelio pavadinimo           |
+| `provider`   | `string`                  | Tikslinis teikėjas ID                |
+| `body`       | `Record<string, unknown>` | Prašymo įstaiga                      |
+| `headers`    | `Record<string, string>`  | Užklausų antraštės (žr. pastabą)     |
+| `metadata`   | `Record<string, unknown>` | Keičiami metaduomenys                |
+| `timestamp`  | `number`                  | Prašyti laiko žymą                   |
+| `apiKeyInfo` | `object` (neprivaloma)    | API rakto metaduomenys (žr. pastabą) |
+
+Kontekstas niekada neperduoda kliento kredencialų: `authorization`, `x-api-key`, `proxy-authorization` ir `cookie` antraštės pašalinamos (bet kokia didžioji raidė), o `apiKeyInfo` išsaugo rakto metaduomenis (pvz., `id`, `name` ir `scopes`), bet ne rakto reikšmę ar jo `src/lib/plugins/hooks.ts` `redactPluginContext()`. Tai taikoma `onRequest`, `onResponse` ir `onError`.
 
 ## Manifestas (`plugin.json`)
 
@@ -140,17 +143,16 @@ Arba kaip paprastas logines reikšmes (numatytasis prioritetas 100):
 
 ## Leidimų sistema
 
-Papildiniai vykdomi izoliuotame VM kontekste. Prieigai prie išorinių išteklių reikalingi aiškiai suteikti leidimai:
+Papildiniai yra** ne smėlio dėžė** . Kiekvienas aktyvus įskiepis veikia kaip atskiras įprastas Node.js antrinis procesas (`loadPlugin()` in `src/lib/plugins/loader.ts`) naudojant tą patį operacinės sistemos vartotoją kaip ir OmniRoute, be VM konteksto ir be Node.js leidimo vėliavėlių. Įskiepio kodas gali naudoti `node:fs`, `node:child_process`, `fetch` ir visus kitus Node.js API: jis gali skaityti ir rašyti bet kokį failą, kurį gali OmniRoute vartotojas (įskaitant duomenų katalogą), paleisti programas ir pasiekti tinklą.
 
-| Leidimas     | Suteikia prieigą                                             |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Tik skaitymui skirtas `process.env` tarpinis objektas        |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifesto `requires.permissions` priima `network`, `file-read`, `file-write`, `env` ir `exec`, tačiau šiandien tik `env` veikia vykdymo metu:
 
-Neturint leidimo, atitinkami globalieji objektai izoliuotoje aplinkoje tiesiog nepasiekiami.
+| Leidimas                                     | Efektas šiandien                                                                                                                                                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | Įskiepio procesas taip pat gauna `PORT`, `HOSTNAME`, `TZ` ir `TMPDIR`. Be jo jis gauna tik `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ir `PLUGIN_NAME` (plius `SystemRoot` ir `windir` ant Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nėra. Jie yra tik deklaracijos: nieko neužblokuojama, kai jų trūksta.                                                                                                                                                          |
+
+Papildinio diegimas yra kaip bet kurios kitos programos diegimas pagrindiniame kompiuteryje. Įdiekite tik papildinius, kurių šaltiniu pasitikite.
 
 ## Konfigūracijos schema
 
@@ -194,7 +196,7 @@ Konfigūracijos reikšmės išsaugomos duomenų bazėje ir yra pasiekiamos valdy
 
 ## Pavyzdžiai
 
-### Užklausų registravimo priemonė
+### Užklausų registratorius
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Dažnio ribotuvas
+### Normos ribotuvas
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minutė
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Atsakymo transformavimo priemonė
+### Reagavimo transformatorius
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

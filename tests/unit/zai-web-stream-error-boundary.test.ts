@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const fixture = fileURLToPath(
   new URL("../fixtures/zai-web-stream-error-boundary.fixture.ts", import.meta.url)
@@ -23,12 +24,16 @@ test("Z.ai stream error boundaries pass in a process-isolated fixture", () => {
   delete childEnv.NODE_TEST_CONTEXT;
 
   try {
-    const result = spawnSync(process.execPath, ["--import", "tsx/esm", "--test", fixture], {
-      cwd: fileURLToPath(new URL("../..", import.meta.url)),
-      encoding: "utf8",
-      env: childEnv,
-      timeout: 60_000,
-    });
+    const result = spawnSync(
+      process.execPath,
+      [...nativeCoverageArgs(), "--import", "tsx/esm", "--test", fixture],
+      {
+        cwd: fileURLToPath(new URL("../..", import.meta.url)),
+        encoding: "utf8",
+        env: childEnv,
+        timeout: 60_000,
+      }
+    );
     const diagnostics = [result.stdout, result.stderr].filter(Boolean).join("\n");
 
     assert.equal(result.error, undefined, diagnostics);

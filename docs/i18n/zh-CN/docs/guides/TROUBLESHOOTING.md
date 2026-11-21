@@ -431,7 +431,7 @@ OmniRoute 会自动刷新令牌。如果问题仍然存在：
 2. **永久修复：** 在 `docker run` 命令中使用 `-p 127.0.0.1:20128:20128`，显式绑定到 IPv4：
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    这会强制使用 IPv4 绑定，同时避免将代理暴露在主机的所有网络接口上。
 
