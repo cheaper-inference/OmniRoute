@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { parse } from "yaml";
 
 // Pure helpers of the release-green validator (Solution C). The orchestration is
 // guarded behind a direct-run check, so importing the module here is side-effect-free.
@@ -883,6 +884,25 @@ test("HARD items run in pr gate mode unless the caller already chose one", () =>
   assert.deepEqual(withMode(undefined, { OMNIROUTE_GATE_MODE: "  " }), {
     OMNIROUTE_GATE_MODE: "pr",
   });
+});
+
+test("hosted suites use the same hard gate mode as the local observer", async () => {
+  const fs = await import("node:fs");
+  const workflow = parse(
+    fs.readFileSync(
+      new URL("../../.github/workflows/nightly-release-green.yml", import.meta.url),
+      "utf8"
+    )
+  ) as {
+    jobs: Record<string, { steps: { name?: string; env?: Record<string, string> }[] }>;
+  };
+
+  for (const job of ["suites", "main-suites"]) {
+    const suite = workflow.jobs[job]?.steps.find(
+      (step) => step.name === "Run the suite and record its result"
+    );
+    assert.equal(suite?.env?.OMNIROUTE_GATE_MODE, mod.HARD_GATE_MODE, job);
+  }
 });
 
 test("every HARD command of the pre-flight goes through withHardGateMode; drift ones do not", async () => {
