@@ -4,7 +4,16 @@ import test from "node:test";
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
 
 const harness = await createChatPipelineHarness("account-fallback-telemetry");
-const { buildOpenAIResponse, buildRequest, handleChat, resetStorage, seedConnection } = harness;
+const {
+  apiKeysDb,
+  buildOpenAIResponse,
+  buildRequest,
+  handleChat,
+  resetStorage,
+  seedApiKey,
+  seedConnection,
+  settingsDb,
+} = harness;
 const { withSelectedConnectionHeader } = await import("../../src/sse/handlers/chatHelpers.ts");
 
 test.beforeEach(async () => {
@@ -141,4 +150,66 @@ test("completed empty-content sibling rotation uses its own allowlisted reason",
     "empty_content_sibling"
   );
   assert.equal(response.headers.get("X-OmniRoute-Same-Account-Retries"), null);
+});
+
+test("preferred response-start timeout records a real sibling hop in routing telemetry", async () => {
+  const slow = await seedConnection("openai", {
+    name: "preferred-slow",
+    apiKey: "sk-preferred-slow",
+    priority: 1,
+  });
+  const sibling = await seedConnection("openai", {
+    name: "preferred-healthy",
+    apiKey: "sk-preferred-healthy",
+    priority: 2,
+  });
+  const key = await seedApiKey();
+  await apiKeysDb.updateApiKeyPermissions(key.id, {
+    allowedConnections: [slow.id, sibling.id],
+    preferredConnections: [slow.id, sibling.id],
+  });
+  await settingsDb.updateSettings({
+    resilienceSettings: {
+      preferredAccountFailover: {
+        enabled: true,
+        defaultTimeoutMs: 500,
+        providerTimeoutsMs: {},
+        modelTimeoutsMs: {},
+      },
+    },
+  });
+
+  const attemptedAccounts: string[] = [];
+  globalThis.fetch = async (input, init) => {
+    const request = input instanceof Request ? input : new Request(input, init);
+    const authorization = request.headers.get("authorization") ?? "";
+    attemptedAccounts.push(authorization);
+    if (authorization.includes("sk-preferred-slow")) {
+      // Finish after the 500ms preferred response-start deadline; a sibling
+      // must answer first, without marking the slow account as globally dead.
+      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      return buildOpenAIResponse("late primary", "gpt-4o-mini");
+    }
+    return buildOpenAIResponse("healthy sibling", "gpt-4o-mini");
+  };
+
+  const response = await handleChat(
+    buildRequest({
+      authKey: key.key,
+      body: {
+        model: "openai/gpt-4o-mini",
+        stream: false,
+        messages: [{ role: "user", content: "hello" }],
+      },
+    })
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), sibling.id);
+  assert.equal(response.headers.get("X-OmniRoute-Account-Fallbacks"), "1");
+  assert.equal(
+    response.headers.get("X-OmniRoute-Account-Fallback-Reasons"),
+    "pre_response_timeout"
+  );
+  assert.ok(attemptedAccounts.some((value) => value.includes("sk-preferred-slow")));
+  assert.ok(attemptedAccounts.some((value) => value.includes("sk-preferred-healthy")));
 });
