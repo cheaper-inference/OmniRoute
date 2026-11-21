@@ -1405,7 +1405,12 @@ function runStep(t, step, env) {
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const bin = join(dir, "bin");
   spawnSync("mkdir", [bin]);
-  writeFake(bin, "node", `printf '%s\\n' "$@" > "$FAKE_ARGS"`);
+  writeFake(
+    bin,
+    "node",
+    `printf '%s\\n' "$@" > "$FAKE_ARGS"
+printf '%s' "$FAKE_NODE_OUT"`
+  );
   writeFake(bin, "gh", `printf '%s\\n' "$@" > "$FAKE_GH_ARGS"; printf '%s\\n' "$FAKE_GH_OUT"`);
   // FAKE_NPM_FAIL=<script>: only `npm run <script>` fails (exit 1); FAKE_NPM_RC applies to all.
   writeFake(
@@ -1872,6 +1877,57 @@ test("quality.yml: a base-check candidate runs the whole unit suite in the TIA s
     assert.equal(batch.npmArgs, null, `source '${source}' never runs the full suite`);
     assert.deepEqual(batch.args, ["scripts/quality/select-impacted-tests.mjs"]);
     assert.match(batch.stdout, /skipping unit tests/);
+  }
+});
+
+test("quality.yml: TIA only defers broad selections for ready release PRs with full CI", (t) => {
+  const quality = loadWorkflow("quality.yml");
+  const ci = loadWorkflow("ci.yml");
+  const tia = quality.jobs["fast-gates"].steps.find(
+    (s) => s.name === "Impacted unit tests (TIA subset; blocking)"
+  );
+  const unit = ci.jobs["test-unit"];
+  const releasePr = prContext("fix/tia");
+  const mainPr = prContext("fix/tia");
+  mainPr.github.base_ref = "main";
+  mainPr.github.event.pull_request.base.ref = "main";
+  const docsPr = prContext("docs/tia");
+  docsPr.__outputs.changes.code = "false";
+  const shardsFor = (ctx) =>
+    render(tia.env.TIA_CI_UNIT_SHARDS, {
+      ...ctx,
+      needs: { changes: { outputs: ctx.__outputs.changes } },
+    });
+  const shards = shardsFor(releasePr);
+  assert.equal(shards, String(unit.strategy.matrix.shard.length));
+  assert.equal(scheduledJobs(ci, releasePr)["test-unit"], true);
+  assert.equal(policy.profiles.ci.jobs["test-unit"].disposition, "required");
+  assert.deepEqual(ci.on.pull_request, quality.on.pull_request);
+  assert.equal(
+    unit.steps.find((s) => s.uses?.startsWith("actions/checkout@")).with?.ref,
+    quality.jobs["fast-gates"].steps[0].with?.ref,
+    "both jobs use the same pull request merge candidate"
+  );
+  const ready = runStep(t, tia, { TIA_CI_UNIT_SHARDS: shards, FAKE_NODE_OUT: "__RUN_ALL__" });
+  assert.equal(ready.code, 0, ready.stderr);
+  assert.deepEqual(ready.args, [
+    "scripts/quality/select-impacted-tests.mjs",
+    `--ci-unit-shards=${shards}`,
+  ]);
+  assert.equal(ready.npmArgs, null, "the full suite remains the responsibility of CI");
+  assert.equal(readFileSync(join(ready.dir, "tia-selection.txt"), "utf8"), "__RUN_ALL__\n");
+  assert.match(ready.summary, /full-suite authority stays with ci\.yml test-unit/);
+
+  for (const ctx of [
+    mainPr,
+    docsPr,
+    prContext("fix/draft", { draft: true }),
+    prContext("mergify/merge-queue/test", { draft: true, user: MERGIFY_USER }),
+    pushContext(CANDIDATE_REF),
+    pushContext("refs/heads/main", { eventName: "workflow_dispatch" }),
+    pushContext(CANDIDATE_REF, { eventName: "merge_group" }),
+  ]) {
+    assert.equal(shardsFor(ctx), "");
   }
 });
 
