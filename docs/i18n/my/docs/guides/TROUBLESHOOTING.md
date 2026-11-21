@@ -454,7 +454,7 @@ Kiro အကောင့်နှစ်ခုကို ဘေးချင်း�
 2. **အမြဲတမ်းဖြေရှင်းနည်း:** သင့် `docker run` command တွင် `-p 127.0.0.1:20128:20128` ကို အသုံးပြု၍ IPv4 သို့ တိတိကျကျ bind လုပ်ပါ:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ဤနည်းသည် IPv4 bind ကို အတင်းအကျပ် အသုံးပြုစေပြီး host interface အားလုံးပေါ်တွင် proxy ကို ဖော်ထုတ်ခြင်းမှလည်း ရှောင်ရှားပေးသည်။
 

@@ -52,6 +52,7 @@ test("buildUsageCommandText formats cached Claude usage windows exactly", async 
       id: "key-1",
       name: "main",
       allowedConnections: ["conn-claude"],
+      scopes: ["self:account-quota"],
     },
     {
       now: () => NOW,
@@ -120,6 +121,7 @@ test("buildUsageCommandText formats API key USD limits as personal percentages",
       usageLimitEnabled: true,
       dailyUsageLimitUsd: 10,
       weeklyUsageLimitUsd: 50,
+      scopes: ["self:account-quota"],
     },
     {
       now: () => NOW,
@@ -178,6 +180,7 @@ test("buildUsageCommandText scales provider quota remaining by configured cutoff
       id: "key-cutoff",
       name: "cutoff",
       allowedConnections: ["conn-claude"],
+      scopes: ["self:account-quota"],
     },
     {
       now: () => NOW,
@@ -243,6 +246,7 @@ test("handleInternalUsageCommandHttpRequest returns terminal text for an allowed
         name: "Claude terminal",
         allowedConnections: ["conn-codex", "conn-claude"],
         allowUsageCommand: true,
+        scopes: ["self:account-quota"],
       }),
       getProviderConnectionById: async (connectionId) => ({
         id: connectionId,
@@ -453,6 +457,7 @@ test("handleInternalUsageCommand returns enabled usage snapshot locally", async 
         name: "enabled",
         allowedConnections: ["conn-claude"],
         allowUsageCommand: true,
+        scopes: ["self:account-quota"],
       }),
       now: () => NOW,
       getProviderConnectionById: async () => ({

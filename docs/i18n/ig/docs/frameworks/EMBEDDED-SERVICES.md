@@ -557,6 +557,8 @@ Nke a proxy:
 
 WebSocket nkwalite maka dashboard agbakwunyere na-ejikwa ihe nkesa ibe na ọdụ ụgbọ mmiri raara onwe ya nye (lee `src/lib/services/embedWsProxy.ts`).
 
+Enyere ikike nkwalite ọ bụla tupu ọwara emeghe, yana otu iwu dị ka ụzọ HTTP agbakwunyere: onye ọgbọ ga-adịghachi azụ na-enweghị isi ihe ntụgharị proxy, ihe nchọgharị `Origin` ga-abụrịrị mmalite dashboard (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` ịgbatị ndabara loopback), onye na-akpọ oku chọrọ nnọkọ dashboard ma ọ bụ igodo njikwa API ọ gwụla ma ọ bụrụ nbanye dashboard.
+
 **Nchekwa:** Ụzọ proxy agbakwunyere bụ nkewa n'okpuru `LOCAL_ONLY_API_PREFIXES` na enwere ike ịnweta ya site na loopback. Onye mwakpo nke nwetara JWT site na ọwara Cloudflare/Ngrok enweghị ike onye nnọchi anya ọrụ agbakwunyere.
 
 ---

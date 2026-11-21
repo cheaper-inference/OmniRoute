@@ -12,7 +12,8 @@
     "dryRun": "[अनुकरण] करेगा: {action}",
     "cancelled": "रद्द किया गया।",
     "jsonOpt": "JSON के रूप में आउटपुट",
-    "yesOpt": "पुष्टि छोड़ें"
+    "yesOpt": "पुष्टि छोड़ें",
+    "positiveIntegerRequired": "सीमा एक धनात्मक पूर्णांक होनी चाहिए."
   },
   "setup": {
     "title": "OmniRoute सेटअप",

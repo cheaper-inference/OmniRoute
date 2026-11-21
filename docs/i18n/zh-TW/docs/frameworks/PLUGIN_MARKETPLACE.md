@@ -16,26 +16,26 @@ OmniRoute 隨附一套 WordPress 風格的外掛系統。外掛是自包含的�
 每個外掛路由皆**僅限迴路位址**（第 1 層級 — `LOCAL_ONLY`）：外掛會在子行程中載入並執行程式碼，因此無論驗證狀態如何，都無法從非迴路來源存取這些路由。請參閱
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)。
 
-## 整體運作方式
+## 它如何適合Together
 
 ```
-儀表板 (/dashboard/plugins)
-  ├─「已安裝」分頁 → GET /api/plugins            (listPlugins)
-  │                  POST /api/plugins/scan      (pluginManager.scan)
-  │                  POST /api/plugins/{name}/activate|deactivate
-  │                  DELETE /api/plugins/{name}   (解除安裝)
-  └─「市集」分頁     → GET /api/plugins/marketplace
-                        → listMarketplacePlugins()
-                          ├─ 無自訂 URL → 內建 SEED_REGISTRY
-                          └─ 自訂 URL → isSafeMarketplaceUrl() SSRF 防護
-                                      → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **登錄層** — `src/lib/plugins/marketplace.ts`：列出／搜尋目錄，發生任何失敗時皆回退至種子登錄檔。
-- **生命週期層** — `src/lib/plugins/manager.ts`（`pluginManager` 單例）：安裝、升級、啟用、停用、解除安裝、掃描、啟動時載入。
-- **資訊清單層** — `src/lib/plugins/manifest.ts`：`plugin.json` 的 Zod 結構描述與預設值。
-- **掃描器** — `src/lib/plugins/scanner.ts`：探索外掛目錄下磁碟中的外掛。
-- **載入器** — `src/lib/plugins/loader.ts`：在隔離的子行程中啟動各外掛，並透過 IPC 代理掛鉤呼叫。
+- **註冊表層**— `src/lib/plugins/marketplace.ts`：列出/搜尋目錄，在任何失敗時回退到種子註冊表。
+- **生命週期層**— `src/lib/plugins/manager.ts` (`pluginManager` singleton)：安裝、升級、啟用、停用、卸載、掃描、啟動載入。
+- **清單層**— `src/lib/plugins/manifest.ts`： Zod模式+預設為`plugin.json`。
+- **掃描器**— `src/lib/plugins/scanner.ts`：發現磁碟上插件目錄下的插件。
+- **裝載機**— `src/lib/plugins/loader.ts`：在單獨的Node.js子程序中產生每個插件，並透過IPC代理掛鉤呼叫。子級不是沙箱（請參閱下面的“插件執行隔離”）。
 
 ## 市集目錄
 
@@ -63,33 +63,31 @@ OmniRoute 隨附一套 WordPress 風格的外掛系統。外掛是自包含的�
 
 ## REST API
 
-所有端點都需要管理驗證（`requireManagementAuth`），**而且**僅限迴路位址存取 — `/api/plugins` 和 `/api/plugins/` 均列於
-`LOCAL_ONLY_API_PREFIXES`（`src/server/authz/routeGuard.ts`）中。
+所有端點都需要管理身份驗證（`requireManagementAuth`）**和**僅環回— `/api/plugins`和`/api/plugins/`列在`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) 中。
 
-| 端點                             | 方法   | 說明                                             |
-| -------------------------------- | ------ | ------------------------------------------------ |
-| `/api/plugins`                   | GET    | 列出已安裝的外掛程式（可使用 `?status=` 篩選器） |
-| `/api/plugins`                   | POST   | 從絕對本機路徑安裝外掛程式                       |
-| `/api/plugins/scan`              | POST   | 掃描外掛程式目錄並註冊新的外掛程式               |
-| `/api/plugins/marketplace`       | GET    | 列出市集目錄項目                                 |
-| `/api/plugins/[name]`            | GET    | 取得已安裝外掛程式的詳細資料                     |
-| `/api/plugins/[name]`            | DELETE | 解除安裝外掛程式                                 |
-| `/api/plugins/[name]/activate`   | POST   | 啟用（載入並註冊掛鉤）                           |
-| `/api/plugins/[name]/deactivate` | POST   | 停用（觸發 `onDeactivate` 並取消註冊掛鉤）       |
-| `/api/plugins/[name]/config`     | GET    | 取得外掛程式設定與設定結構描述                   |
-| `/api/plugins/[name]/config`     | PUT    | 更新外掛程式設定（依照結構描述進行驗證）         |
+| 端點                             | 方法   | 描述                                       |
+| -------------------------------- | ------ | ------------------------------------------ |
+| `/api/plugins`                   | GET    | 列出已安裝的插件（可選用`?status=`過濾器） |
+| `/api/plugins`                   | POST   | 從插件來源目錄安裝插件                     |
+| `/api/plugins/scan`              | POST   | 掃描插件目錄並註冊新插件                   |
+| `/api/plugins/marketplace`       | GET    | 列出市場目錄條目                           |
+| `/api/plugins/[name]`            | GET    | 獲取已安裝插件的詳細信息                   |
+| `/api/plugins/[name]`            | DELETE | 解除安裝插件                               |
+| `/api/plugins/[name]/activate`   | POST   | 激活（加載+註冊鉤子）                      |
+| `/api/plugins/[name]/deactivate` | POST   | 停用（觸發`onDeactivate`，註銷鉤子）       |
+| `/api/plugins/[name]/config`     | GET    | 取得插件配置+配置模式                      |
+| `/api/plugins/[name]/config`     | PUT    | 更新插件配置（根據架構進行驗證）           |
 
-`GET /api/plugins` 的 `status` 篩選器接受以下其中一個值：
-`installed` / `active` / `inactive` / `error`。無效值會傳回 `400`。
+`GET /api/plugins` `status`过滤器接受`installed` / `active` / `inactive` / `error`之一。無效值傳回`400`。
 
-### 列出已安裝的外掛程式
+### 列出已安裝的插件
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### 從本機路徑安裝
+### 從本地路徑安裝
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -98,17 +96,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` 必須是**絕對路徑**，且不得包含 `..` 路徑遍歷片段或 Null 位元組（由 Zod 強制執行）。來源目錄必須包含有效的
-`plugin.json`（或是包含該檔案之目錄的父目錄）。成功時，回應為 `201`，並包含已安裝的外掛程式資料列。
+`path`必須是**絕對**目錄路徑**在插件來源目錄內**： `plugin-sources`位於插件根目錄旁邊，因此預設為`~/.omniroute/plugin-sources/` ，或設定該變數時為`<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` （ `src/lib/plugins/installSource.ts`中的`getPluginSourcesDir()` ）。首先複製或克隆外掛程式。当路径包含`..`或空字节、位于该目录外部、通过符号链接在其外部解析、包含目标位于其外部的符号链接或者目录不存在时，将使用`400`拒绝安装。來源目錄必須包含有效的`plugin.json` （或其中一個的父目錄）。成功後，回應是`201`以及已安裝的插件行。
 
-### 瀏覽市集
+Unlike the other plugin routes, this one requires the management credential (a dashboard session or a manage-scoped API key) even when login is disabled (`requireLogin=false`): installing code is never an anonymous action.
+
+### 瀏覽市場
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### 更新外掛程式設定
+### 更新插件配置
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -117,8 +116,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` 會依據外掛程式的 `configSchema`（於資訊清單中宣告）驗證每個提供的值：`number` 欄位會遵循 `min`/`max`，
-`select` 欄位必須符合宣告的 `enum`。結構描述中不存在的鍵可直接通過。
+`PUT .../config`根據插件的`configSchema` （在清單中宣告）驗證每個提供的值： `number`欄位尊重`min`/`max`， `select`欄位必須與宣告的`enum`相符。允許通過架構中不存在的鍵。
 
 ## 設定
 
@@ -161,64 +159,60 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
 > （`src/shared/validation/settingsSchemas.ts`）中宣告，因此在依賴它之前，請先確認您所使用版本中的持久化行為 — 一旦該鍵存在於設定儲存區中，**讀取**路徑（`getSettings()` →
 > `listMarketplacePlugins()`）便會遵循該鍵。
 
-## 安全性
+## 安全
 
-### 路由層級 — 僅限迴路介面
+### 僅路由層—環回
 
-外掛程式會在衍生的子行程中執行程式碼，因此整個 `/api/plugins`
-介面均歸類為 `LOCAL_ONLY`（第 1 層）。迴路介面限制會無條件地在任何驗證檢查**之前**執行，因此即使外洩的管理權杖透過通道傳入該主機，仍無法安裝、啟用或解除安裝外掛程式。
-請參閱 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) 以及
-強制規則 #15 / #17。
+插件在產生的子程序中執行程式碼，因此整個`/api/plugins`表面被分類為`LOCAL_ONLY` （第 1 層）。環回強制執行無條件運行**前**任何身份驗證檢查，因此透過隧道到達盒子的洩漏管理令牌仍然無法安裝、啟動或卸載插件。請參閱[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)和硬規則#15 / #17。
 
-### 市集登錄檔 SSRF 防護
+### 市場註冊SSRF守衛
 
-自訂登錄檔 URL 是可能受攻擊者影響的設定，因此在擷取之前，`listMarketplacePlugins()` 會讓它通過兩層防護：
+自訂註冊表URL是受攻擊者影響的配置，因此在獲取它之前， `listMarketplacePlugins()`通過兩層運行它：
 
-1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`)：
-   - 拒絕任何不是 `http:` / `https:` 的內容。
-   - 透過標準的 `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) 拒絕字面形式的私有／迴路／鏈路本機／ULA 主機（IPv4 **及** IPv6，包括 IPv4 映射位址）。
-   - 解析 `A` 與 `AAAA` 記錄，並在**任何**已解析位址為私有位址時拒絕 — 封堵公開主機名稱 → 私有 IP 的繞過方式。
-   - **故障時封閉**：DNS 解析失敗時會拒絕該 URL。
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`)：在擷取時重新套用僅限公開位址的 URL 防護，並**封鎖重新導向**（不允許公開位址 → 私有位址的 `30x` 樞紐跳轉）。
+1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
+   - 拒絕任何不是`http:` / `https:`內容。
+   - 拒絕文字private/loopback/link-local/ULA主機 (IPv4**和**IPv6，包括IPv4-mapped）透過規範的`isPrivateHost` （`src/shared/network/outboundUrlGuard.ts`）。
+   - 解決**兩個都**`A`和`AAAA`記錄並拒絕如果**任何**解析的位址是私有—關閉公用主機名稱→私人 IP 旁路。
+   - **失敗關閉**： DNS解析失敗會拒絕URL。
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`)：在獲取時重新應用僅限公共的URL防護，並且**阻止重定向**（沒有公共→私有`30x`樞軸）。
 
-URL 未通過任一層防護時不會中止要求 — 市集會靜默回退至內建的種子登錄檔，並記錄警告。
+任一層失敗的URL都不會中止請求—市場會默默地退回到內建種子註冊表並記錄警告。
 
-> 此防護已在 PR #3774 中強化，明確解析 A + AAAA，並使用標準的 `isPrivateHost`，取代僅檢查 IPv4 的機制。
+> 此防護在PR #3774中專門用於解析 A + AAAA並使用規範`isPrivateHost`而不是IPv4-only檢查。
 
-### 外掛程式執行隔離
+### 插件執行隔離
 
-- **行程隔離** — `loadPlugin()` (`src/lib/plugins/loader.ts`) 會在個別的 Node.js 子行程中衍生每個外掛程式，並透過 IPC 通訊。
-  Hook 呼叫設有逾時，並依 `SIGTERM` → `SIGKILL` 的順序逐級終止。
-- **環境變數允許清單** — 子行程只會收到允許清單中的環境變數；只有當資訊清單要求 `env` 權限時，才會授予較完整的集合。
-- **路徑限制** — 安裝／升級／解除安裝會先確認外掛程式目錄與 `manifest.main` 解析後位於受管理的外掛程式根目錄**之內**，才會執行任何複製或遞迴刪除（防止遭竄改的資料庫路徑，以及 `manifest.main` 中的 `../` 路徑遍歷）。啟用時會透過 `realpath` 解析符號連結，並拒絕載入逸出外掛程式目錄的進入點。
-- **選用的完整性固定值** — 資訊清單可宣告 `integrity`
-  (`sha256-<base64>`，SRI 格式) 欄位。若存在此欄位，載入器會在載入時驗證進入點檔案的雜湊值，若不相符則拒絕啟用。這是選用的竄改偵測機制，**並非**安全邊界 — 僅限迴路介面的路由與權限模型才是真正的安全邊界。
+> **插件不是沙盒的。**子進程是一個以OmniRoute用戶身份運行的普通Node.js進程，沒有VM上下文，也沒有Node.js權限標誌，因此插件程式碼可以讀取和寫入用戶可以運行的程式並存取網路的任何檔案。 `requires.permissions`只決定子程序接收哪些環境變數；其他權限不強制執行。僅安裝您信任的插件。下面的進程邊界包含崩潰和掛起；它不是安全邊界。
 
-## 資訊清單 (`plugin.json`)
+- **行程隔離**— `loadPlugin()` (`src/lib/plugins/loader.ts`) 在單獨的Node.js子程序中產生每個插件，並透過IPC進行通訊。 Hook 呼叫會因`SIGTERM` → `SIGKILL`升級而逾時。
+- **環境白名單**—子程序僅接收一組允許的環境變數；僅當清單請求`env`權限時才會授予更廣泛的集。
+- **安裝源遏制**— `POST /api/plugins`僅從插件來源目錄讀取（請參閱「從本機路徑安裝」）：該路徑使用`realpath`進行規範化，必須嚴格保留在該目錄內，並且在複製任何內容之前，拒絕攜帶轉義符號連結的來源樹。
+- **路徑遏制**— install/upgrade/uninstall斷言插件目錄和`manifest.main`解析**之內**任何複製或遞歸刪除之前的託管外掛根（防止DB路徑被竄改和`manifest.main`中的`../`遍歷）。啟動透過`realpath`解析符號連結並拒絕載入轉義插件目錄的入口點。
+- **可選完整性銷**—清單可以宣告`integrity` （`sha256-<base64>`、 SRI格式）欄位。如果存在，載入程式會在載入時驗證條目檔案哈希，並在不匹配時拒絕啟動。它是選擇加入篡改檢測，**不是**安全邊界：它不限制載入的插件可以執行的操作。
+- **鉤子中沒有客戶端憑證**—傳遞給`onRequest`、 `onResponse`和`onError`上下文已刪除`authorization`、 `x-api-key`、 `proxy-authorization`和`cookie`標頭，並且API鍵記錄不攜帶鍵值（ `src/lib/plugins/hooks.ts`中的`redactPluginContext()` ）。
 
-由 `PluginManifestSchema` (`src/lib/plugins/manifest.ts`) 驗證：
+## 清單 (`plugin.json`)
 
-| 欄位               | 類型      | 說明                                                     |
-| ------------------ | --------- | -------------------------------------------------------- |
-| `name`             | string    | 必填；kebab-case (`^[a-z0-9-]+$`)，1–100 個字元          |
-| `version`          | string    | 必填；semver (`MAJOR.MINOR.PATCH`)                       |
-| `description`      | string?   | ≤ 500 個字元                                             |
-| `author`           | string?   | ≤ 200 個字元                                             |
-| `license`          | string?   | 預設為 `MIT`                                             |
-| `main`             | string?   | 進入點檔案；預設為 `index.js`                            |
-| `source`           | enum?     | `local` \| `marketplace`（預設為 `local`）               |
-| `tags`             | string[]? | 搜尋標籤                                                 |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                          |
-| `hooks`            | object?   | 宣告外掛程式實作哪些 Hook 的布林值                       |
-| `skills`           | object[]? | 選用的技能定義                                           |
-| `enabledByDefault` | boolean?  | 安裝時自動啟用                                           |
-| `configSchema`     | object?   | 設定欄位的對映表（`string`/`number`/`boolean`/`select`） |
-| `integrity`        | string?   | 選用的 `sha256-<base64>` 進入點檔案固定值                |
+由`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) 驗證：
 
-權限取自以下列舉值：
-`network` / `file-read` / `file-write` / `env` / `exec`。
+| 場地               | 類型     | 筆記                                                |
+| ------------------ | -------- | --------------------------------------------------- |
+| `name`             | 細繩     | 必需的; kebab-case (`^[a-z0-9-]+$`)，1–100 個字符   |
+| `version`          | 細繩     | 必需的;塞姆弗（`MAJOR.MINOR.PATCH`）                |
+| `description`      | 細繩？   | ≤ 500 個字符                                        |
+| `author`           | 細繩？   | ≤ 200 個字符                                        |
+| `license`          | 細繩？   | 預設為`MIT`                                         |
+| `main`             | 細繩？   | 錄入文件；預設為`index.js`                          |
+| `source`           | 枚舉？   | `local` \| `marketplace` （預設為`local`）          |
+| `tags`             | 細繩[]？ | 搜尋標籤                                            |
+| `requires`         | 目的？   | `{ omniroute?, permissions[] }`                     |
+| `hooks`            | 目的？   | 布林值聲明外掛程式實作哪個鉤子                      |
+| `skills`           | 目的[]？ | 可選技能定義                                        |
+| `enabledByDefault` | 布林值？ | 安裝時自動啟動                                      |
+| `configSchema`     | 目的？   | 配置字段映射 (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | 細繩？   | 可選的`sha256-<base64>`條目檔案 pin                 |
+
+權限來自枚舉`network` / `file-read` / `file-write` / `env` / `exec`。只有`env`具有運行時效果（子層級的環境變數允許清單稍大）；其他的是聲明，不強制執行。
 
 ## 生命週期流程
 
@@ -278,14 +272,14 @@ URL 未通過任一層防護時不會中止要求 — 市集會靜默回退至�
 
 ## 儀表板
 
-位於 `/dashboard/plugins`
-（`src/app/(dashboard)/dashboard/plugins/page.tsx`）的儀表板頁面提供兩個分頁：
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) 的儀表板頁面提供兩個選項卡：
 
-- **已安裝** — 列出已安裝的外掛程式及其宣告的掛鉤、啟用／停用切換開關、解除安裝按鈕，以及「掃描外掛程式」操作（`POST /api/plugins/scan`）。
-- **市集** — 顯示來自 `GET /api/plugins/marketplace` 的目錄，並提供用於設定自訂登錄庫 URL 的欄位。
+- **已安裝**—列出了已安裝的插件及其聲明的掛鉤、 activate/deactivate切換按鈕、卸載按鈕和「掃描插件」操作 (`POST /api/plugins/scan`)。
+- **市場**—顯示`GET /api/plugins/marketplace`的目錄，其中包含用於設定自訂註冊表URL欄位。
 
-各外掛程式的設定頁面位於 `/dashboard/plugins/[name]/config`
-（`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`）。
+頁面始終顯示警告，提示插件以OmniRoute進程的完全權限運行。
+
+每個插件的設定頁面位於`/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`)。
 
 ## 另請參閱
 

@@ -18,6 +18,15 @@ const HEARTBEAT_ENCODER = new TextEncoder();
 const OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD = buildResponsesInProgressPayload();
 
 export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
+export const DEFAULT_MAX_UNCONSUMED_HEARTBEATS = 8;
+
+export function maxUnconsumedHeartbeatsConfig(): number {
+  if (typeof process === "undefined") return DEFAULT_MAX_UNCONSUMED_HEARTBEATS;
+  const raw = process.env.SSE_HEARTBEAT_MAX_UNCONSUMED;
+  if (!raw) return DEFAULT_MAX_UNCONSUMED_HEARTBEATS;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_UNCONSUMED_HEARTBEATS;
+}
 
 /** Transport liveness without inventing a response identity or lifecycle event. */
 export const RESPONSES_KEEPALIVE_FRAME = HEARTBEAT_ENCODER.encode("\n\n");
@@ -100,6 +109,7 @@ type SseHeartbeatTransformOptions = {
   shape?: HeartbeatShape;
   chunkId?: string;
   chunkModel?: string;
+  maxUnconsumedHeartbeats?: number;
 };
 
 /**
@@ -148,12 +158,69 @@ function createSseFramingTracker() {
   };
 }
 
+type ResponsesInProgressTracker = ReturnType<typeof createResponsesInProgressTracker>;
+
+function encodeHeartbeatFrame(
+  shape: HeartbeatShape,
+  opts: {
+    transportOnly: boolean;
+    chunkId?: string;
+    chunkModel?: string;
+    responsesTracker: ResponsesInProgressTracker | null;
+  }
+): Uint8Array {
+  if (opts.transportOnly) return RESPONSES_KEEPALIVE_FRAME;
+  const tracker = opts.responsesTracker;
+  return HEARTBEAT_ENCODER.encode(
+    buildHeartbeatPayload(shape, {
+      chunkId: opts.chunkId,
+      chunkModel: opts.chunkModel,
+      responsesPayload: tracker ? () => tracker.payload() : undefined,
+    })
+  );
+}
+
+type BackpressureVerdict = "send" | "skip" | "abandon";
+
+/**
+ * #19640: while the readable queue is full (desiredSize <= 0) the previous frame is still
+ * unread, so a heartbeat tick is skipped instead of growing the queue; after `maxUnconsumed`
+ * consecutive full ticks the stream is treated as abandoned. Any upstream chunk resets the count.
+ */
+function createBackpressureGuard(maxUnconsumed: number) {
+  let consecutiveTicks = 0;
+  return {
+    check(desiredSize: number | null): BackpressureVerdict {
+      if (typeof desiredSize !== "number" || desiredSize > 0) {
+        consecutiveTicks = 0;
+        return "send";
+      }
+      consecutiveTicks++;
+      return maxUnconsumed > 0 && consecutiveTicks >= maxUnconsumed ? "abandon" : "skip";
+    },
+    reset(): void {
+      consecutiveTicks = 0;
+    },
+  };
+}
+
+function abandonStream(controller: TransformStreamDefaultController<Uint8Array>): void {
+  try {
+    controller.error(
+      new Error("SSE stream abandoned: consumer stopped reading (backpressure timeout)")
+    );
+  } catch {
+    // ignore if already closed/errored
+  }
+}
+
 export function createSseHeartbeatTransform({
   intervalMs = DEFAULT_SSE_HEARTBEAT_INTERVAL_MS,
   signal,
   shape = DEFAULT_SSE_HEARTBEAT_SHAPE,
   chunkId,
   chunkModel,
+  maxUnconsumedHeartbeats,
 }: SseHeartbeatTransformOptions = {}): TransformStream<Uint8Array, Uint8Array> {
   if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
     return new TransformStream<Uint8Array, Uint8Array>();
@@ -167,6 +234,9 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
+  const backpressure = createBackpressureGuard(
+    maxUnconsumedHeartbeats ?? maxUnconsumedHeartbeatsConfig()
+  );
   const isResponsesShape = shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
   const transportOnly = isResponsesShape && isResponsesTransportKeepaliveEnabled();
   const responsesTracker =
@@ -179,53 +249,56 @@ export function createSseHeartbeatTransform({
     intervalId = undefined;
   };
 
-  return transformStreamWithCancel<Uint8Array, Uint8Array>({
-    start(controller) {
-      intervalId = globalThis.setInterval(() => {
-        if (signal?.aborted) {
-          stop();
-          return;
+  return transformStreamWithCancel<Uint8Array, Uint8Array>(
+    {
+      start(controller) {
+        intervalId = globalThis.setInterval(() => {
+          if (signal?.aborted) {
+            stop();
+            return;
+          }
+
+          // #19640: bound queue growth if the downstream consumer stops reading.
+          const pressure = backpressure.check(controller.desiredSize);
+          if (pressure === "abandon") {
+            stop();
+            abandonStream(controller);
+          }
+          if (pressure !== "send") return;
+
+          if (!framing.atBoundary()) return;
+          try {
+            controller.enqueue(
+              encodeHeartbeatFrame(shape, { transportOnly, chunkId, chunkModel, responsesTracker })
+            );
+          } catch {
+            stop();
+          }
+        }, intervalMs);
+
+        if (intervalId && typeof intervalId === "object" && "unref" in intervalId) {
+          intervalId.unref?.();
         }
 
-        if (!framing.atBoundary()) return;
-        try {
-          controller.enqueue(
-            transportOnly
-              ? RESPONSES_KEEPALIVE_FRAME
-              : HEARTBEAT_ENCODER.encode(
-                  buildHeartbeatPayload(shape, {
-                    chunkId,
-                    chunkModel,
-                    responsesPayload: responsesTracker
-                      ? () => responsesTracker.payload()
-                      : undefined,
-                  })
-                )
-          );
-        } catch {
-          stop();
-        }
-      }, intervalMs);
+        signal?.addEventListener("abort", stop, { once: true });
+      },
 
-      if (intervalId && typeof intervalId === "object" && "unref" in intervalId) {
-        intervalId.unref?.();
-      }
+      transform(chunk, controller) {
+        backpressure.reset();
+        framing.note(chunk);
+        responsesTracker?.observe(chunk);
+        controller.enqueue(chunk);
+      },
 
-      signal?.addEventListener("abort", stop, { once: true });
+      flush() {
+        stop();
+      },
+
+      cancel() {
+        stop();
+      },
     },
-
-    transform(chunk, controller) {
-      framing.note(chunk);
-      responsesTracker?.observe(chunk);
-      controller.enqueue(chunk);
-    },
-
-    flush() {
-      stop();
-    },
-
-    cancel() {
-      stop();
-    },
-  });
+    undefined,
+    { highWaterMark: 1 }
+  );
 }

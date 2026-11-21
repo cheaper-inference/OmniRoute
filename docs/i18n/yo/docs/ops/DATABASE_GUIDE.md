@@ -309,6 +309,7 @@ Lo `IF NOT EXISTS`, `IF EXISTS`, ati awọn gbolohun ọrọ `OR IGNORE` / `OR R
 3. **Pada data fara** : lo `UPDATE ... WHERE ...` lati mu awọn ori ila ti o wa tẹlẹ
 4. **Ṣayẹwo ibere ati lorukọ** : `npm run test:migrations:fresh` (gbogbo awọn ijira lori aaye data ti o ṣofo) ati `npm run check:migration-numbering`
 5. **Idanwo lori ẹda kan** : ko ṣiṣe awọn iṣiwa ti ko ni idanwo lori iṣelọpọ
+6. **Tabili ti a ṣẹda lati koodu nilo ijira paapaa** : ti o ba ti module tun ṣẹda tabili lazily (`CREATE TABLE IF NOT EXISTS`, pa bi a ara-iwosan ona), a ijira gbọdọ ṣẹda ti o pẹlu kanna DDL. Bibẹẹkọ fifi sori ẹrọ ti o mọ ati fifi sori ẹrọ igbesoke pari pẹlu awọn eto oriṣiriṣi, da lori boya ọna koodu yẹn ṣiṣẹ. `tests/unit/db/lazy-table-migration-guard.test.ts` ṣayẹwo `src/` ati `open-sse/` o kuna lori `CREATE` ọlẹ laisi ijira (#20557). Apeere: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Apeere:
 
