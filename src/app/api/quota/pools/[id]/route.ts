@@ -16,6 +16,7 @@ import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { PoolUpdateSchema } from "@/shared/schemas/quota";
 import { getPool, updatePool, deletePool } from "@/lib/db/quotaPools";
+import { setPoolMemberBreakdown, withMemberBreakdown } from "@/lib/db/quotaMemberBreakdown";
 import { logAuditEvent, getAuditRequestContext } from "@/lib/compliance/index";
 import { reconcilePoolExclusivity } from "@/lib/quota/quotaKey";
 
@@ -33,7 +34,7 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
     if (!pool) {
       return NextResponse.json(buildErrorBody(404, "Pool not found"), { status: 404 });
     }
-    return NextResponse.json({ pool });
+    return NextResponse.json({ pool: withMemberBreakdown([pool])[0] });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to get pool";
     return NextResponse.json(buildErrorBody(500, message), { status: 500 });
@@ -87,6 +88,9 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     if (!pool) {
       return NextResponse.json(buildErrorBody(404, "Pool not found"), { status: 404 });
     }
+    if (parsed.data.memberBreakdown !== undefined) {
+      setPoolMemberBreakdown(id, parsed.data.memberBreakdown);
+    }
 
     if (combosNeedResync) {
       try {
@@ -117,7 +121,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       requestId: ctx.requestId,
     });
 
-    return NextResponse.json({ pool });
+    return NextResponse.json({ pool: withMemberBreakdown([pool])[0] });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update pool";
     return NextResponse.json(buildErrorBody(500, message), { status: 500 });

@@ -48,6 +48,8 @@ export const QuotaPoolSchema = z.object({
   name: z.string().min(1),
   /** Group this pool belongs to. Defaults to 'group-demo' for legacy pools. */
   groupId: z.string().optional(),
+  /** Whether key holders see member usage bars on the self-service page. Off by default. */
+  memberBreakdown: z.boolean().optional(),
   createdAt: z.string().datetime(),
   allocations: z.array(PoolAllocationSchema).default([]),
 });
