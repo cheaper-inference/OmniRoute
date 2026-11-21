@@ -28,6 +28,9 @@ import type { EnforceDecision } from "../../../src/lib/quota/types.ts";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-external-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.QUOTA_STORE_DRIVER = "sqlite";
+// Expected values assume the default floor, except inside withFloorEnv.
+const savedFloorEnv = process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
+delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
 
 const providerPlans = await import("../../../src/lib/db/providerPlans.ts");
 const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
@@ -47,6 +50,7 @@ test.after(() => {
   sat._clearRateLimitHeaders();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (savedFloorEnv !== undefined) process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT = savedFloorEnv;
 });
 
 const PROV = "claude";
