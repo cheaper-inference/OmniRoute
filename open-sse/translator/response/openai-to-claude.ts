@@ -1,6 +1,7 @@
 import { extractXmlInvokeBlocks } from "../helpers/xmlToolCalls.ts";
 import { register } from "../registry.ts";
 import { mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+import { usableTokenCounter } from "../../utils/usageEvidence.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
 import {
@@ -317,7 +318,11 @@ function readUsageCounters(usage) {
   return {
     promptTokens: firstNumber(usage.prompt_tokens, usage.input_tokens),
     outputTokens: firstNumber(usage.completion_tokens, usage.output_tokens),
-    cacheReadTokens: firstNumber(promptDetails?.cached_tokens ?? inputDetails?.cached_tokens),
+    reportedCacheReadTokens: [
+      promptDetails?.cached_tokens,
+      inputDetails?.cached_tokens,
+      usage.cache_read_input_tokens,
+    ].find(usableTokenCounter),
     cacheCreateTokens: firstNumber(
       promptDetails?.cache_creation_tokens ?? inputDetails?.cache_creation_tokens
     ),
@@ -337,7 +342,7 @@ function trackUsageFromChunk(chunk, state) {
   const {
     promptTokens,
     outputTokens,
-    cacheReadTokens,
+    reportedCacheReadTokens,
     cacheCreateTokens,
     writeInPrompt,
     reasoningTokens,
@@ -346,7 +351,7 @@ function trackUsageFromChunk(chunk, state) {
   // #2215 reports cache creation outside prompt_tokens.
   const inputTokens = Math.max(
     0,
-    promptTokens - cacheReadTokens - (writeInPrompt ? cacheCreateTokens : 0)
+    promptTokens - (reportedCacheReadTokens ?? 0) - (writeInPrompt ? cacheCreateTokens : 0)
   );
 
   state.usage = {
@@ -355,9 +360,9 @@ function trackUsageFromChunk(chunk, state) {
     output_tokens: outputTokens,
   };
 
-  // Add cache_read_input_tokens if present
-  if (cacheReadTokens > 0) {
-    state.usage.cache_read_input_tokens = cacheReadTokens;
+  // A reported zero is evidence of no cached input, not an unknown count.
+  if (reportedCacheReadTokens !== undefined) {
+    state.usage.cache_read_input_tokens = reportedCacheReadTokens;
   }
 
   // Add cache_creation_input_tokens if present
