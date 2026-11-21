@@ -32,6 +32,49 @@ function isOpenAiCompatiblePath(pathname: string): boolean {
   return OPENAI_COMPAT_PATHS.some((pattern) => pattern.test(pathname));
 }
 
+// The percent escapes that can hide a dot, a separator or another escape, and what each one
+// stands for.
+const HIDDEN_PATH_CHARS: Record<string, string> = { "25": "%", "2e": ".", "2f": "/", "5c": "\\" };
+const HIDDEN_PATH_CHAR_PATTERN = /%(25|2e|2f|5c)/gi;
+const MAX_UNWRAP_PASSES = 8;
+
+/**
+ * True when the path carries a `.` or `..` segment, literal or percent-encoded.
+ *
+ * The allowlist is matched against the path as the client sent it, and that same
+ * path is relayed untouched, so a dot segment would let the server behind the
+ * bridge resolve the request to a route the allowlist never saw. Only the
+ * escapes that can hide a separator or a dot are unwrapped, one level per pass,
+ * and the result is used for this check alone, never as a path. The loop is
+ * bounded and cannot throw on malformed escapes.
+ */
+export function hasDotSegment(pathname: string): boolean {
+  let current = pathname;
+  for (let pass = 0; pass < MAX_UNWRAP_PASSES; pass += 1) {
+    const next = current.replace(
+      HIDDEN_PATH_CHAR_PATTERN,
+      (_escape, hex: string) => HIDDEN_PATH_CHARS[hex.toLowerCase()]
+    );
+    if (next === current) break;
+    current = next;
+  }
+  return current.split(/[/\\]/).some((segment) => segment === "." || segment === "..");
+}
+
+/**
+ * A request is relayed only when its path is free of dot segments and on the allowlist.
+ *
+ * A path that carries a fragment marker is refused as well. A request target has no
+ * fragment, and parsers disagree on where such a path ends, so the path this function
+ * validated would not be the path the server behind the bridge resolves. A marker after
+ * the `?` belongs to the query for every parser and is left alone.
+ */
+export function isRelayablePath(rawUrl: string): boolean {
+  const pathname = rawUrl.split("?")[0] || "/";
+  if (pathname.includes("#")) return false;
+  return !hasDotSegment(pathname) && isOpenAiCompatiblePath(pathname);
+}
+
 function requestWantsStreaming(req: IncomingMessage): boolean {
   const accept = String(req.headers.accept || "").toLowerCase();
   if (accept.includes("text/event-stream")) return true;
@@ -260,10 +303,8 @@ export function createApiBridgeServer(dashboardPort: number): http.Server {
     // HMR/bfcache) on the request/response streams so they never surface as an
     // uncaughtException that kills the server (#fix-dev-server-aborted).
     attachRequestStreamGuards(req, res);
-    const rawUrl = req.url || "/";
-    const pathname = rawUrl.split("?")[0] || "/";
 
-    if (!isOpenAiCompatiblePath(pathname)) {
+    if (!isRelayablePath(req.url || "/")) {
       res.writeHead(404, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
@@ -281,10 +322,7 @@ export function createApiBridgeServer(dashboardPort: number): http.Server {
   server.keepAliveTimeout = API_BRIDGE_TIMEOUTS.serverKeepAliveTimeoutMs;
   server.setTimeout(API_BRIDGE_TIMEOUTS.serverSocketTimeoutMs);
   server.on("upgrade", (req, socket, head) => {
-    const rawUrl = req.url || "/";
-    const pathname = rawUrl.split("?")[0] || "/";
-
-    if (!isOpenAiCompatiblePath(pathname)) {
+    if (!isRelayablePath(req.url || "/")) {
       writeUpgradeProxyError(
         socket,
         404,
