@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       target: ${{ steps.branch.outputs.target }}
+      sha: ${{ steps.branch.outputs.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -45,16 +46,21 @@ jobs:
           if [ -n "${INPUT_BRANCH:-}" ]; then
             TARGET="$INPUT_BRANCH"
           else
-            TARGET=$(git for-each-ref --format='%(refname:short)' 'refs/remotes/origin/release/v*' \
-              | sed 's#origin/##' \
-              | sort -t/ -k2 -V \
+            TARGET=$(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin/release/ \
+              | awk '/^release\/v[0-9]+\.[0-9]+\.[0-9]+$/' \
+              | LC_ALL=C sort -V \
               | tail -1)
           fi
-          case "$TARGET" in
-            release/v[0-9]*.[0-9]*.[0-9]*) ;;
-            *) echo "Refusing non-canonical branch name: $TARGET"; exit 1 ;;
-          esac
-          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          if ! [[ "$TARGET" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Refusing non-canonical release branch"
+            exit 1
+          fi
+          SHA=$(git rev-parse --verify "refs/remotes/origin/$TARGET^{commit}")
+          if ! [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Could not resolve a commit for $TARGET"
+            exit 1
+          fi
+          printf 'target=%s\nsha=%s\n' "$TARGET" "$SHA" >> "$GITHUB_OUTPUT"
 
   compat-build-26:
     if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
@@ -65,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve-branch.outputs.target }}
+          ref: ${{ needs.resolve-branch.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -106,7 +112,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve-branch.outputs.target }}
+          ref: ${{ needs.resolve-branch.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -122,18 +128,29 @@ jobs:
     if: ${{ (!cancelled() && (needs.compat-tests.result == 'failure' || needs.compat-build-26.result == 'failure')) && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     needs: [resolve-branch, compat-build-26, compat-tests]
     permissions:
+      contents: read
       issues: write
     steps:
       - name: Open or update issue
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET: ${{ needs.resolve-branch.outputs.target }}
+          VALIDATED_SHA: ${{ needs.resolve-branch.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          if ! [[ "$TARGET" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ && "$VALIDATED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Missing verified release identity. Skipping issue update."
+            exit 0
+          fi
           TITLE="🌙 nightly-compat: Node 24/26 failures on $TARGET"
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number')
-          BODY="Nightly Node-compat run failed on \`$TARGET\`: $RUN_URL — triage which Node version/shard broke (fail-fast off, all versions reported)."
+          BODY="Nightly Node-compat run failed on \`$TARGET\` at \`$VALIDATED_SHA\`: $RUN_URL — triage which Node version/shard broke (fail-fast off, all versions reported)."
+          if ! CURRENT_SHA=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$TARGET" --jq '.object.sha') ||
+             [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "Release tip changed or could not be verified. Skipping issue update."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "$BODY"
           else
