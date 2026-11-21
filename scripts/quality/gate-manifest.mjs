@@ -1,17 +1,43 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { CHANGE_DOMAINS } from "./classify-pr-changes.mjs";
 
 const VALIDATION_ALIAS =
   /^(check(?::|$)|test(?::|$)|quality:|lint(?::|$)|typecheck:|audit:|i18n:check)/;
-const DISPOSITIONS = new Set(["separately-invoked", "maintenance"]);
+const DISPOSITIONS = new Set(["separately-invoked", "maintenance", "pr-dependent"]);
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Shell and YAML comments are never executed. Drop full-line and trailing
+// comments before resolving aliases or delegated scripts, so a documented
+// invocation cannot satisfy a workflow requirement.
+export function executableCommands(text) {
+  return String(text)
+    .split(/\r?\n/)
+    .map((line) => {
+      let quote = null;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (quote) {
+          if (ch === quote && line[i - 1] !== "\\") quote = null;
+          continue;
+        }
+        if (ch === "'" || ch === '"') {
+          quote = ch;
+          continue;
+        }
+        if (ch === "#" && (i === 0 || /\s/.test(line[i - 1]))) return line.slice(0, i);
+      }
+      return line;
+    })
+    .join("\n");
+}
 
 // Inventory membership does not imply execution, requiredness or acceptance.
 // Profiles select executable aliases; other aliases remain explicitly separate.
-export function validateManifest(manifest, scripts) {
+export function validateManifest(manifest, scripts, opts = {}) {
   const errors = [];
   if (manifest?.schemaVersion !== 1) errors.push("unsupported manifest schema");
   if (!Array.isArray(manifest?.aliases)) return [...errors, "missing aliases"];
@@ -54,6 +80,22 @@ export function validateManifest(manifest, scripts) {
       if (!entry) errors.push(`unknown profile member: ${name}/${alias}`);
       if (entry?.disposition === "maintenance")
         errors.push(`maintenance in scan: ${name}/${alias}`);
+      if (entry?.disposition === "pr-dependent")
+        errors.push(`pr-dependent in scan: ${name}/${alias}`);
+    }
+  }
+  // A PR-dependent alias must be invoked from a workflow `run:` line. Passing
+  // workflowSources is optional so scratch fixtures and resolveProfile keep
+  // working without the workflow files; the committed inventory always supplies
+  // them through readManifest().
+  if (Array.isArray(opts.workflowSources)) {
+    const sources = executableCommands(opts.workflowSources.join("\n"));
+    for (const entry of manifest.aliases) {
+      if (entry?.disposition !== "pr-dependent") continue;
+      const invoked = new RegExp(`npm\\s+run(?:\\s+--silent)?\\s+${escapeRe(entry.name)}\\b`).test(
+        sources
+      );
+      if (!invoked) errors.push(`pr-dependent alias not invoked by any workflow: ${entry.name}`);
     }
   }
   return errors;
@@ -90,12 +132,53 @@ function validateAdmissionDomains(policy) {
   );
 }
 
+// Workflow `run:` blocks may delegate to a local script (the PR detectors are
+// grouped by a single sequencer). Collect those script bodies too, so every
+// PR-dependent alias is checked against its real workflow entrypoint.
+function workflowSources(root) {
+  const dir = resolve(root, ".github/workflows");
+  let files = [];
+  try {
+    files = readdirSync(dir).filter((f) => /\.ya?ml$/.test(f));
+  } catch {
+    return [];
+  }
+  const texts = files.map((f) => readFileSync(resolve(dir, f), "utf8"));
+  const joined = executableCommands(texts.join("\n"));
+  const delegated = new Set();
+  // Direct `bash scripts/...` / `node scripts/...` calls inside run: blocks.
+  for (const m of joined.matchAll(
+    /\b(?:bash|sh|node)\s+(scripts\/[\w./-]+\.(?:sh|mjs|cjs|js))\b/g
+  )) {
+    delegated.add(m[1]);
+  }
+  // npm aliases are the other entrypoint: a workflow calls `npm run <alias>`,
+  // and package.json maps it to a local script that may itself call more gates.
+  let scripts = {};
+  try {
+    scripts = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8")).scripts ?? {};
+  } catch {
+    scripts = {};
+  }
+  for (const m of joined.matchAll(/\bnpm\s+run(?:\s+--silent)?\s+([\w:-]+)/g)) {
+    const command = scripts[m[1]];
+    if (!command) continue;
+    for (const p of command.matchAll(/(scripts\/[\w./-]+\.(?:sh|mjs|cjs|js))/g))
+      delegated.add(p[1]);
+  }
+  for (const rel of delegated) {
+    const p = resolve(root, rel);
+    if (existsSync(p)) texts.push(executableCommands(readFileSync(p, "utf8")));
+  }
+  return texts;
+}
+
 export function readManifest(root = process.cwd()) {
   const manifest = JSON.parse(
     readFileSync(resolve(root, "config/quality/gate-manifest.json"), "utf8")
   );
   const { scripts } = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
-  const errors = validateManifest(manifest, scripts);
+  const errors = validateManifest(manifest, scripts, { workflowSources: workflowSources(root) });
   if (errors.length) throw new Error(errors.join("\n"));
   if (manifest.admissionPolicy !== "config/quality/admission-policy.json") {
     throw new Error("invalid admission policy reference");

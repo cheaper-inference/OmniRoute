@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "source": "Read at runtime by display_name_golden (never hardcoded)",
+  "cases": [
+    {
+      "id": "combo-without-name-keeps-its-name",
+      "provider": "OpenAI",
+      "name": "",
+      "rawModelId": "kg/auto-fallback",
+      "expected": "kg/auto-fallback",
+      "note": "a combo without a name or rawModelId keeps its name"
+    },
+    {
+      "id": "gpt4-turbo-preview",
+      "provider": "OpenAI",
+      "name": "GPT-4 - Turbo preview",
+      "expected": "OpenAI - GPT-4 - Turbo preview",
+      "note": "the full name is kept and prefixed with the provider"
+    },
+    {
+      "id": "real-prefix-stripped",
+      "provider": "OpenAI",
+      "name": "OpenAI - GPT-4 - Turbo preview",
+      "expected": "Turbo preview",
+      "note": "the real 'OpenAI - GPT-4' prefix is stripped"
+    }
+  ]
+}
