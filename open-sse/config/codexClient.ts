@@ -181,6 +181,14 @@ export function getCachedCodexClientVersion(): string {
   return pickCodexVersionAtLeastPin(versionCache?.version ?? null);
 }
 
+function getDiscoveredCodexClientVersion(): string {
+  const registryVersion = pickCodexVersionAtLeastPin(cachedCodexVersion);
+  const releaseVersion = getCachedCodexClientVersion();
+  return compareDottedTriple(registryVersion, releaseVersion) >= 0
+    ? registryVersion
+    : releaseVersion;
+}
+
 export function seedCodexClientVersionCache(version: string, fetchedAt = Date.now()): void {
   if (!CODEX_DOTTED_TRIPLE_PATTERN.test(version)) {
     throw new TypeError(`Invalid Codex client version: ${version}`);
@@ -192,11 +200,8 @@ export function seedCodexClientVersionCache(version: string, fetchedAt = Date.no
 export function seedVerifiedCodexClientVersion(version: string): void {
   const parsed = codexVersionMetadataSchema.safeParse({ name: "@openai/codex", version });
   if (!parsed.success) throw new TypeError("Invalid verified Codex client version");
-  const current = pickCodexVersionAtLeastPin(cachedCodexVersion);
-  const previous = getCachedCodexClientVersion();
-  const floor = compareDottedTriple(current, previous) >= 0 ? current : previous;
-  cachedCodexVersion =
-    compareDottedTriple(parsed.data.version, floor) > 0 ? parsed.data.version : floor;
+  if (compareDottedTriple(parsed.data.version, getDiscoveredCodexClientVersion()) < 0) return;
+  cachedCodexVersion = parsed.data.version;
   seedCodexClientVersionCache(cachedCodexVersion);
   codexVersionRefreshAt = Date.now() + CODEX_VERSION_CACHE_TTL_MS;
   codexVersionSource = "registry";
@@ -213,23 +218,17 @@ export function getCodexClientVersion(): string {
     getCliVersionOverride("codex") ||
     getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override) return override;
-  // Discovery may cache a registry version, but never below the release pin.
-  if (
-    cachedCodexVersion &&
-    compareDottedTriple(cachedCodexVersion, DEFAULT_CODEX_CLIENT_VERSION) >= 0
-  ) {
-    return cachedCodexVersion;
-  }
   if (
     canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
+    !cachedCodexVersion &&
     !versionCache &&
     !versionInFlight &&
     Date.now() - versionLookupFailedAt >= CODEX_VERSION_RETRY_AFTER_FAILURE_MS
   ) {
     void resolveCodexClientVersion();
   }
-  return getCachedCodexClientVersion();
+  return getDiscoveredCodexClientVersion();
 }
 
 /** Bound registry body reads as well as the connection; a stalled body must not block discovery. */
@@ -348,11 +347,9 @@ export function resetCodexClientVersionCacheForTests(): void {
 export function getCodexAdvertisedVersionSource(): CliVersionSource {
   if (getCliVersionOverride("codex")) return "settings";
   if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "env";
-  const discovered =
-    cachedCodexVersion && compareDottedTriple(cachedCodexVersion, DEFAULT_CODEX_CLIENT_VERSION) >= 0
-      ? cachedCodexVersion
-      : getCachedCodexClientVersion();
-  return discovered !== DEFAULT_CODEX_CLIENT_VERSION ? "discovered" : "default";
+  return getDiscoveredCodexClientVersion() !== DEFAULT_CODEX_CLIENT_VERSION
+    ? "discovered"
+    : "default";
 }
 
 /**

@@ -77,3 +77,29 @@ test("unverified version syntax cannot enter provider client caches", () => {
     assert.throws(() => claude.seedVerifiedClaudeCodeClientVersion(version), TypeError);
   }
 });
+
+test("a newer GitHub release remains visible after an in-flight managed version seed", async () => {
+  let finishFetch!: (response: Response) => void;
+  const response = new Promise<Response>((resolve) => {
+    finishFetch = resolve;
+  });
+  const pending = codex.resolveCodexClientVersion(async () => response);
+  codex.seedVerifiedCodexClientVersion("9.10.0");
+  finishFetch(Response.json({ tag_name: "rust-v9.11.0" }));
+
+  assert.equal(await pending, "9.11.0");
+  assert.equal(codex.getCodexClientVersion(), "9.11.0");
+});
+
+test("verifying an older Codex installation does not extend a newer cached version's life", async (t) => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
+  codex.seedVerifiedCodexClientVersion("9.11.0");
+  now += codex.CODEX_VERSION_CACHE_TTL_MS + 1;
+  codex.seedVerifiedCodexClientVersion("9.10.0");
+
+  const discovered = await codex.refreshCodexClientVersion(async () =>
+    Response.json({ name: "@openai/codex", version: "9.12.0" })
+  );
+  assert.equal(discovered, "9.12.0");
+});
