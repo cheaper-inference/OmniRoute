@@ -67,8 +67,9 @@ const P = await import("../../src/shared/constants/providers.ts");
 // EmpirioLabs AI (#17209) adds one apikey entry in its own extract, apikey/empiriolabs.ts: 257.
 // ParalonCloud adds one apikey/inference-hosts entry — 258.
 // Replicate, Cerebrium, Hetzner Inference and Grokified (#19206) add four
-// apikey/inference-hosts entries — 262.
-const APIKEY_PROVIDER_COUNT = 262;
+// apikey/inference-hosts entries — 262. Obscurify.ai (#18463) adds one
+// apikey/gateways entry — 263.
+const APIKEY_PROVIDER_COUNT = 263;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
