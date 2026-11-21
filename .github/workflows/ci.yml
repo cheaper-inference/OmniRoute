@@ -594,12 +594,12 @@ jobs:
           OMNIROUTE_GATE_MODE: ${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' && !startsWith(github.ref_name, 'release/v') && 'pr' || '' }}
       # Previously-orphaned contract gates (existed as files, never wired anywhere).
       # All exit 0 today: cli-i18n is a hard gate, openapi-coverage is a ratchet
-      # (floor ~36), openapi-security-tiers is advisory (Hard Rules #15/#17).
+      # (floor ~36), openapi-security-tiers fails on annotations that contradict GET exemptions (Hard Rules #15/#17).
       - name: CLI i18n consistency
         run: npm run check:cli-i18n
       - name: OpenAPI route coverage (ratchet)
         run: npm run check:openapi-coverage
-      - name: OpenAPI security-tier consistency (advisory)
+      - name: OpenAPI security-tier consistency
         run: npm run check:openapi-security-tiers
       # One FS inventory of src/app/api for both anti-hallucination directions.
       - name: API docs refs (openapi + prose → routes)
