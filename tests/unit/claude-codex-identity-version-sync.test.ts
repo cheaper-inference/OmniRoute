@@ -40,21 +40,29 @@ test("Claude CLI version constants are in lockstep across all 4 sources", () => 
   );
 });
 
-test("Claude CLI pin clears Anthropic's Opus 5.5 model gate (>= 2.1.280)", () => {
-  const [major, minor, patch] = canonical.CLAUDE_CODE_CLIENT_VERSION.split(".").map(Number);
-  const meetsGate = major > 2 || (major === 2 && (minor > 1 || (minor === 1 && patch >= 280)));
-  assert.ok(
-    meetsGate,
-    `claude-cli pin ${canonical.CLAUDE_CODE_CLIENT_VERSION} < 2.1.280 — Anthropic rejects claude-opus-5-5 with 400 "Claude Code ${canonical.CLAUDE_CODE_CLIENT_VERSION} does not support this model"`
-  );
+test("Claude CLI cold-start pin clears the reported >= 2.1.290 model gate", async () => {
+  await withEnv({ CLAUDE_CODE_CLIENT_VERSION: undefined }, async () => {
+    canonical.resetClaudeCodeClientVersionCache();
+    await canonical.refreshClaudeCodeClientVersion(async () => {
+      throw new Error("registry unavailable");
+    });
+    const version = canonical.getClaudeCodeClientVersion();
+    const [major, minor, patch] = version.split(".").map(Number);
+    const meetsGate = major > 2 || (major === 2 && (minor > 1 || (minor === 1 && patch >= 290)));
+    assert.ok(meetsGate, `offline claude-cli pin ${version} < required 2.1.290`);
+    assert.equal(canonical.getClaudeCodeClientVersionSource(), "default");
+    assert.equal(id.getClaudeCodeVersion(), version);
+    assert.equal(compat.getClaudeCodeCompatibleVersion(), version);
+    assert.equal(hdr.getClaudeCliBillingVersion(), canonical.getClaudeCodeClientBillingVersion());
+  });
 });
 
-test("Claude CLI wire versions match the captured 2.1.280 binary", () => {
-  assert.equal(canonical.CLAUDE_CODE_CLIENT_VERSION, "2.1.280");
-  assert.equal(canonical.CLAUDE_CODE_CLIENT_BUILD_REVISION, "1e2");
-  assert.equal(canonical.CLAUDE_CODE_CLIENT_BILLING_VERSION, "2.1.280.1e2");
-  assert.equal(canonical.CLAUDE_CODE_SDK_PACKAGE_VERSION, "0.112.1");
-  assert.equal(canonical.CLAUDE_CODE_RUNTIME_VERSION, "v26.3.0");
+test("Claude CLI wire versions match the captured 2.1.326 binary", () => {
+  assert.equal(canonical.CLAUDE_CODE_CLIENT_VERSION, "2.1.326");
+  assert.equal(canonical.CLAUDE_CODE_CLIENT_BUILD_REVISION, "518");
+  assert.equal(canonical.CLAUDE_CODE_CLIENT_BILLING_VERSION, "2.1.326.518");
+  assert.equal(canonical.CLAUDE_CODE_SDK_PACKAGE_VERSION, "0.128.0");
+  assert.equal(canonical.CLAUDE_CODE_RUNTIME_VERSION, "v26.12.1");
   assert.equal(
     compat.CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION,
     canonical.CLAUDE_CODE_SDK_PACKAGE_VERSION
