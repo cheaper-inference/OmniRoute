@@ -1872,8 +1872,12 @@ test("ci.yml and quality.yml install the same pinned gitleaks, osv-scanner and o
       .map((w) => w.replace(/^"|"$/g, ""));
   // A scanner release during a batch's CI must not red check:secrets / check:openapi-breaking on
   // the candidate (those gates judge the tree), nor give one gate two verdicts on one candidate.
-  const TOOLS = { "gitleaks/gitleaks": "gitleaks", "google/osv-scanner": "osv-scanner" };
-  const toolOf = (repo) => TOOLS[repo] ?? (/\/oasdiff$/i.test(repo) ? "oasdiff" : null);
+  const TOOLS = {
+    "gitleaks/gitleaks": "gitleaks",
+    "google/osv-scanner": "osv-scanner",
+    "oasdiff/oasdiff": "oasdiff",
+  };
+  const toolOf = (repo) => TOOLS[repo] ?? null;
   const installs = {};
   for (const file of Object.values(PROFILES)) {
     for (const [id, job] of Object.entries(loadWorkflow(file).jobs)) {
