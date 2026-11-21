@@ -138,6 +138,17 @@ function routesToNativeDecision(model: unknown): boolean {
   return !cloudflarePrefix || model.slice(cloudflarePrefix.length).startsWith("@");
 }
 
+function nativeCloudflareRejection(model: unknown): Response | null {
+  if (typeof model !== "string") return null;
+  if (!CLOUDFLARE_SYSTEMONE_PREFIXES.some((p) => model.startsWith(p))) return null;
+  if (isSystemOneCloudflareBackendEnabled()) return null;
+  return errorResponse(
+    HTTP_STATUS.BAD_REQUEST,
+    `Decisions model ${model} needs the Cloudflare Workers AI backend, which is off. ` +
+      `Enable the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag to use it.`
+  );
+}
+
 async function postHandler(request: Request): Promise<Response> {
   let rawBody: unknown;
   try {
@@ -156,6 +167,8 @@ async function postHandler(request: Request): Promise<Response> {
   // Extend the merged gateway without changing its TypeSafe/OpenRouter wire contract.
   // Unknown qualified providers use the native decision adapter and its stricter admission.
   if (routesToNativeDecision(record(rawBody).model)) {
+    const cfRejection = nativeCloudflareRejection(record(rawBody).model);
+    if (cfRejection) return cfRejection;
     const { postDecision } = await import("./decisionRuntime");
     return postDecision(
       new Request(request.url, {

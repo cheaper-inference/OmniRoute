@@ -40,6 +40,7 @@ async function refusal(executor: DefaultExecutor, input: ExecuteArgs) {
 test("a registry System One provider is refused with POST /v1/systemone", async () => {
   const body = await refusal(new DefaultExecutor("supersoniclabs"), chatInput());
   assert.equal(body.error.type, "invalid_request_error");
+  assert.equal(body.error.code, "native_endpoint_required");
   assert.match(body.error.message, /POST \/v1\/systemone/);
 });
 
@@ -49,6 +50,7 @@ test("a connection whose apiType is decisions is refused with POST /v1/decisions
     chatInput({ apiType: "decisions" })
   );
   assert.equal(body.error.type, "invalid_request_error");
+  assert.equal(body.error.code, "native_endpoint_required");
   assert.match(body.error.message, /POST \/v1\/decisions/);
 });
 

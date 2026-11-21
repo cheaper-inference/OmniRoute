@@ -198,6 +198,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "multipart_protocol_violation",
   "multiple_tool_requests",
   "native_codex_pinned_model_unavailable",
+  "native_endpoint_required",
   "network_error",
   "no_active_connection",
   "no_eligible_targets",

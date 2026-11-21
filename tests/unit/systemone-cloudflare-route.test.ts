@@ -160,7 +160,13 @@ test("cloudflare route: with the flag at its default (off), Cloudflare models ar
   apiKeysDb.clearApiKeyCaches();
   const upstream = stubCloudflare();
   try {
-    for (const model of ["cf/jev", "cloudflare-ai/clef", "cloudflare-ai/clef-flash"]) {
+    for (const model of [
+      "cf/jev",
+      "cloudflare-ai/clef",
+      "cloudflare-ai/clef-flash",
+      "cloudflare-ai/@cf/cloudflare/clef",
+      "cf/@cf/cloudflare/clef",
+    ]) {
       const response = await systemOneRoute.POST(postRequest({ ...BODY, model }, key.key));
       assert.equal(response.status, 400, model);
       assert.match(await response.text(), /SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED/);
