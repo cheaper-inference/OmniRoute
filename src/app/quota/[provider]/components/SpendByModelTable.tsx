@@ -20,7 +20,8 @@ import { useFormatNumber } from "../lib/useFormatNumber";
 // share the card instead: the model id breaks anywhere and the numbers stay on one line. From
 // `sm` up the table keeps the kit's spacing.
 const CELL = "max-sm:px-2";
-const MODEL_CELL = `${CELL} whitespace-normal break-all`;
+// `wrap-anywhere` lets the column shrink and still prefers the id's own break points (hyphens).
+const MODEL_CELL = `${CELL} whitespace-normal wrap-anywhere`;
 const NUMBER_CELL = `${CELL} whitespace-nowrap text-right tabular-nums`;
 
 interface SpendByModelTableProps {

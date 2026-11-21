@@ -128,7 +128,7 @@ describe("my spend", () => {
     renderWithKey({ [QUOTA]: quotaOk, [USAGE]: () => jsonResponse(usageSeries()) });
     const table = await screen.findByRole("table", { name: "Usage by model" });
     // A table cell ignores `break-words`: on a phone the id must break anywhere to fit.
-    expect(within(table).getByText("claude-sonnet-5").className).toContain("break-all");
+    expect(within(table).getByText("claude-sonnet-5").className).toContain("wrap-anywhere");
     // Numbers stay on one line, right-aligned, under right-aligned headers.
     const [requestsHead] = within(table).getAllByRole("columnheader").slice(1);
     expect(requestsHead.className).toContain("text-right");
