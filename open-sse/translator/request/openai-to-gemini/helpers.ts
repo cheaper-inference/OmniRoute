@@ -194,7 +194,7 @@ function isFunctionResponsePart(part: GeminiPart): boolean {
   return !!part && typeof part === "object" && "functionResponse" in part;
 }
 
-function moveFunctionResponsesLast(parts: GeminiPart[]): GeminiPart[] {
+export function moveFunctionResponsesLast(parts: GeminiPart[]): GeminiPart[] {
   const others: GeminiPart[] = [];
   const responses: GeminiPart[] = [];
   for (const part of parts) {

@@ -58,6 +58,7 @@ import {
   type GeminiPart,
   type GeminiContent,
   mergeConsecutiveSameRoleContents,
+  moveFunctionResponsesLast,
   ensureHistoryDoesNotOpenWithFunctionCall,
   sanitizeFunctionResponseData,
 } from "./openai-to-gemini/helpers.ts";
@@ -747,6 +748,19 @@ function openaiToGeminiBase(
 
   // Collapse any consecutive same-role contents Gemini would reject (9router#2191).
   result.contents = mergeConsecutiveSameRoleContents(result.contents ?? [], model);
+  // A tool-result turn can mix native functionResponse parts with signature-less
+  // text contexts (partial thought-signature resolution on a parallel tool-call
+  // batch). Gemini rejects such a turn unless it ends on a functionResponse: the
+  // same rule the merge above enforces across turns (9router#4802).
+  result.contents = result.contents.map((content) => {
+    if (content.role !== "user") return content;
+    if (
+      !content.parts.some((part) => part && typeof part === "object" && "functionResponse" in part)
+    ) {
+      return content;
+    }
+    return { ...content, parts: moveFunctionResponsesLast(content.parts) };
+  });
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.
   result.contents = ensureHistoryDoesNotOpenWithFunctionCall(result.contents);
