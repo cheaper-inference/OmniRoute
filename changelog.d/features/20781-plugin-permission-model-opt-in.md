@@ -1,0 +1,1 @@
+- **feat(plugins):** Opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` feature flag (off by default) runs each plugin process under the Node.js permission model built from its manifest: reads confined to the plugin directory, writes only to its data directory with `file-write`, child processes only with `exec`; `network` stays declarative

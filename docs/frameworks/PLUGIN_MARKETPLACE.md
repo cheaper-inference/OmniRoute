@@ -258,13 +258,17 @@ silently falls back to the built-in seed registry and logs a warning.
 
 ### Plugin execution isolation
 
-> **Plugins are not sandboxed.** The child is an ordinary Node.js process running
-> as the OmniRoute user, with no VM context and no Node.js permission flags, so
-> plugin code can read and write any file that user can, run programs and reach
-> the network. `requires.permissions` only decides which environment variables
-> the child receives; the other permissions are not enforced. Install only
-> plugins you trust. The process boundary below contains crashes and hangs; it
-> is not a security boundary.
+> **Plugins are not sandboxed by default.** The child is an ordinary Node.js
+> process running as the OmniRoute user, with no VM context and no Node.js
+> permission flags, so plugin code can read and write any file that user can,
+> run programs and reach the network. `requires.permissions` only decides which
+> environment variables the child receives; the other permissions are not
+> enforced. The opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` feature flag (off by
+> default) runs each plugin under the Node.js permission model built from those
+> permissions, except `network`, which Node.js cannot restrict (see
+> [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system)). Install only plugins
+> you trust. The process boundary below contains crashes and hangs; it is not a
+> security boundary.
 
 - **Process isolation** — `loadPlugin()` (`src/lib/plugins/loader.ts`) spawns
   each plugin in a separate Node.js child process and communicates over IPC.
