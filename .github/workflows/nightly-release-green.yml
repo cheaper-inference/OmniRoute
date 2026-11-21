@@ -340,6 +340,7 @@ jobs:
         if: steps.validate.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           TARGET: ${{ steps.branch.outputs.target }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
@@ -347,6 +348,10 @@ jobs:
           AFTER_SHA: ${{ github.event.after }}
         run: |
           set -euo pipefail
+          if [[ ! "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::warning::No validated revision for the tracking issue; skipping the update."
+            exit 0
+          fi
           TITLE="🔴 Release branch not green: ${TARGET}"
           {
             echo "The **release-green** validation found HARD failures on \`${TARGET}\`."
@@ -354,6 +359,7 @@ jobs:
             echo "signature on the exact base before attributing a defect to a contributor."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "Validated revision \`${VALIDATED_SHA}\`."
             # This is an observed range, not proof of causality. Compare with the base.
             if [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE_SHA:-}" ] && \
                git cat-file -e "$BEFORE_SHA" 2>/dev/null; then
@@ -377,6 +383,19 @@ jobs:
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title $TITLE" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          # The observer can finish after another commit reaches the branch.
+          # Keep its verdict and artifact tied to the tested SHA.
+          REF="refs/heads/$TARGET"
+          REMOTE_ENTRY=$(git ls-remote --exit-code --refs origin "$REF") || REMOTE_ENTRY=""
+          CURRENT_SHA=${REMOTE_ENTRY%%$'\t'*}
+          if [[ ! "$CURRENT_SHA" =~ ^[0-9a-f]{40}$ || "$REMOTE_ENTRY" != "$CURRENT_SHA"$'\t'"$REF" ]]; then
+            echo "::warning::Could not verify the current revision of $REF; skipping the tracking issue update."
+            exit 0
+          fi
+          if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "::notice::Skipping the tracking issue update for $REF at $VALIDATED_SHA (current $CURRENT_SHA)."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
             echo "Updated existing issue #$EXISTING"
@@ -638,10 +657,15 @@ jobs:
         if: steps.validate.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
+          if [[ ! "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::warning::No validated revision for the tracking issue; skipping the update."
+            exit 0
+          fi
           TITLE="🔴 main branch not green"
           {
             echo "The **main-green** validation found HARD failures on \`main\`."
@@ -654,6 +678,7 @@ jobs:
             echo "\`_shared/merge-gates.md\` §8), NOT chasing each contributor PR."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "Validated revision \`${VALIDATED_SHA}\`."
             echo ""
             echo '```'
             if grep -q '──────── verdict ────────' main-green.log; then
@@ -668,6 +693,19 @@ jobs:
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title $TITLE" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          # The observer can finish after another commit reaches the branch.
+          # Keep its verdict and artifact tied to the tested SHA.
+          REF=refs/heads/main
+          REMOTE_ENTRY=$(git ls-remote --exit-code --refs origin "$REF") || REMOTE_ENTRY=""
+          CURRENT_SHA=${REMOTE_ENTRY%%$'\t'*}
+          if [[ ! "$CURRENT_SHA" =~ ^[0-9a-f]{40}$ || "$REMOTE_ENTRY" != "$CURRENT_SHA"$'\t'"$REF" ]]; then
+            echo "::warning::Could not verify the current revision of $REF; skipping the tracking issue update."
+            exit 0
+          fi
+          if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "::notice::Skipping the tracking issue update for $REF at $VALIDATED_SHA (current $CURRENT_SHA)."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
             echo "Updated existing issue #$EXISTING"
