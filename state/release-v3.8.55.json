@@ -3,51 +3,58 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b17",
+    "batchId": "b18",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b17-102a0a6818ff",
-    "candidateSha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
-    "baseSha": "186db2e375c76a7eeda8b56cd349246c201faede",
-    "treeSha": "0f634a9b07a09ea85a667a2d9e9ef4387a078e4a",
+    "candidateRef": "omni-queue/release-v3.8.55/b18-3917441ded0b",
+    "candidateSha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
+    "baseSha": "355eb07c36fcae2440e6c4407b39542b2000374f",
+    "treeSha": "0006e4a5d271774d9697f0cf8a2b84c1dbc6d728",
     "prs": [
       {
-        "n": 19167,
-        "head": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
-        "title": "feat(images): expose opt-in Codex quota snapshots from successful images",
-        "author": "Bl0ck154",
-        "labeledAt": "2026-11-20T17:09:35Z"
-      },
-      {
-        "n": 19305,
-        "head": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-        "title": "feat(dashboard): show actual OpenAI costs without double counting",
-        "author": "JxnLexn",
-        "labeledAt": "2026-11-20T17:10:31Z"
-      },
-      {
-        "n": 19306,
-        "head": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
-        "title": "feat(dashboard): display request payload size in request logger details",
-        "author": "bufftop25",
-        "labeledAt": "2026-11-20T17:10:52Z"
-      },
-      {
-        "n": 20770,
-        "head": "f866adce299b632bcd8d62a1baf68dafb150965a",
-        "title": "fix(security): limit the usage command text to the personal quota for client keys",
+        "n": 20776,
+        "head": "d7727a7e99d74f1ef9cb8a669e26b5bd2fc4fba0",
+        "title": "fix(security): gate subscription quota text on HTTP 400 behind a structured code",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:34Z"
+        "labeledAt": "2026-11-20T23:33:39Z"
       },
       {
-        "n": 20775,
-        "head": "492d650774c568895b3458c3a435d4bc838e2441",
-        "title": "fix(security): require credential for marketplace install and restrict plugin config keys",
+        "n": 20819,
+        "head": "035b02bcd111d013904b860c0743d011f37b7cd6",
+        "title": "fix(security): operator-only credential and denied roots for corpus and vault paths (CodeQL #1371, #1372, #1373)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:36Z"
+        "labeledAt": "2026-11-20T23:33:42Z"
+      },
+      {
+        "n": 20820,
+        "head": "c28fec4e9f7193bea4730b9454107a5f1d79b58a",
+        "title": "fix(security): require the per-process token for the internal admission bypass",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-20T23:33:44Z"
+      },
+      {
+        "n": 20823,
+        "head": "b03f265540ae84c22ff404c764b6ff91ef49046e",
+        "title": "fix(security): linear model id regexes (CodeQL #1325, #1324, #1296)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-20T23:33:47Z"
+      },
+      {
+        "n": 20824,
+        "head": "46259366085f853b727ae04883fc48c266922ff7",
+        "title": "fix(security): clamp media polling and guard syntx provider rules (CodeQL #1389, #1392)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-20T23:33:50Z"
+      },
+      {
+        "n": 20825,
+        "head": "c13cee2357119a5aec1e3f2d6eb756d442dbd06d",
+        "title": "fix(security): bound regex work in compression engines (CodeQL #1301, #1302, #1349)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-20T23:33:54Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-20T23:56:41.672Z",
+    "startedAt": "2026-11-21T01:12:02.836Z",
     "attempts": 0,
     "bisect": null
   },
@@ -112,12 +119,17 @@
       "18786": "267b99c512dbac09b2fe8876c9a9ec9b7913ab9f",
       "18804": "a140f9b78053705ef57686e6fc4b484d380c1776",
       "19132": "beed91198d6f1f34a82955166724b2f61fa22ff0",
-      "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b"
+      "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
+      "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
+      "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "20770": "f866adce299b632bcd8d62a1baf68dafb150965a",
+      "20775": "492d650774c568895b3458c3a435d4bc838e2441"
     }
   },
   "counters": {
-    "batchSeq": 17,
-    "ciRuns": 19,
+    "batchSeq": 18,
+    "ciRuns": 20,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 7,
@@ -1331,8 +1343,61 @@
         "20775": "2026-11-20T23:33:36Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
+    },
+    {
+      "at": "2026-11-21T01:10:55.614Z",
+      "type": "checks-green",
+      "batchId": "b17",
+      "prs": [
+        19167,
+        19305,
+        19306,
+        20770,
+        20775
+      ],
+      "sha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
+    },
+    {
+      "at": "2026-11-21T01:11:11.734Z",
+      "type": "would-land",
+      "batchId": "b17",
+      "prs": [
+        19167,
+        19305,
+        19306,
+        20770,
+        20775
+      ],
+      "sha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
+      "detail": "shadow mode: would merge-ff onto 186db2e375c7",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
+    },
+    {
+      "at": "2026-11-21T01:12:06.738Z",
+      "type": "batch-started",
+      "batchId": "b18",
+      "prs": [
+        20776,
+        20819,
+        20820,
+        20823,
+        20824,
+        20825
+      ],
+      "sha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
+      "detail": "6 PR(s) on 355eb07c36fc; window 6",
+      "labeledAt": {
+        "20776": "2026-11-20T23:33:39Z",
+        "20819": "2026-11-20T23:33:42Z",
+        "20820": "2026-11-20T23:33:44Z",
+        "20823": "2026-11-20T23:33:47Z",
+        "20824": "2026-11-20T23:33:50Z",
+        "20825": "2026-11-20T23:33:54Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
     }
   ],
-  "updatedAt": "2026-11-21T00:59:21.476Z",
-  "batchWindow": 5
+  "updatedAt": "2026-11-21T01:12:08.347Z",
+  "batchWindow": 6
 }
