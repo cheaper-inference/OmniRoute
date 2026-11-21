@@ -115,6 +115,52 @@ export function lendingChoices(status: LendingStatus): LendingDeadlineChoice[] {
   return keptDeadline(status) === null ? choices : ["keep", ...choices];
 }
 
+/** What the holder edited, with the deadline that `keep` named when one was last in force. */
+export interface LendingDraft {
+  values: LendingFormValues;
+  keptUntil: number | null;
+}
+
+export interface LendingDeadlineOption {
+  choice: LendingDeadlineChoice;
+  disabled: boolean;
+}
+
+interface LendingFormView {
+  values: LendingFormValues;
+  /** The deadline the `keep` option names, or null when there is none to name. */
+  keptUntil: number | null;
+  options: LendingDeadlineOption[];
+}
+
+/** The draft after an edit. It remembers the kept deadline once it is no longer in force. */
+export function lendingDraft(
+  values: LendingFormValues,
+  status: LendingStatus,
+  previous: LendingDraft | null
+): LendingDraft {
+  return { values, keptUntil: keptDeadline(status) ?? previous?.keptUntil ?? null };
+}
+
+/**
+ * What the form shows: the draft, or what is in force when nothing was edited. A draft keeps its
+ * deadline choice even when the state no longer offers it. That choice is then listed disabled,
+ * so the select shows it, and Save reports a deadline problem instead of sending another deadline.
+ */
+export function lendingFormView(
+  draft: LendingDraft | null,
+  status: LendingStatus
+): LendingFormView {
+  const values = draft ? draft.values : lendingBaseline(status);
+  const offered = lendingChoices(status).map((choice) => ({ choice, disabled: false }));
+  const listed = offered.some((option) => option.choice === values.deadline);
+  return {
+    values,
+    keptUntil: keptDeadline(status) ?? draft?.keptUntil ?? null,
+    options: listed ? offered : [{ choice: values.deadline, disabled: true }, ...offered],
+  };
+}
+
 /** A whole number from 0 to 100, written with digits only. */
 export function parseLendingPercent(raw: string): number | null {
   if (!/^[0-9]{1,3}$/.test(raw)) return null;

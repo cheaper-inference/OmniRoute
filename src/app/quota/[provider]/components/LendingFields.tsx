@@ -8,16 +8,18 @@ import Select from "@/shared/components/Select";
 import {
   LENDING_DURATIONS,
   LENDING_UNTIL_FORMAT,
-  lendingChoices,
   parseLendingPercent,
   type LendingDeadlineChoice,
+  type LendingDeadlineOption,
   type LendingFormValues,
-  type LendingStatus,
 } from "../lib/lendingForm";
 
 interface LendingFieldsProps {
   values: LendingFormValues;
-  status: LendingStatus;
+  /** The deadline the `keep` option names, or null when there is none to name. */
+  keptUntil: number | null;
+  /** The deadline choices. A kept deadline that is no longer in force is listed disabled. */
+  options: LendingDeadlineOption[];
   problem: "percent" | "deadline" | null;
   disabled: boolean;
   onChange: (values: LendingFormValues) => void;
@@ -44,20 +46,20 @@ function deadlineHint(idle: boolean, deadline: LendingDeadlineChoice, t: Transla
 /** The two fields of the lending form: the percentage and how long the consent lasts. */
 export default function LendingFields({
   values,
-  status,
+  keptUntil,
+  options,
   problem,
   disabled,
   onChange,
 }: LendingFieldsProps) {
   const t = useTranslations("quotaSelf");
   const format = useFormatter();
-  const keptUntil =
-    status.kind === "active" && status.until !== null
-      ? format.dateTime(new Date(status.until), LENDING_UNTIL_FORMAT)
-      : "";
-  const options = lendingChoices(status).map((choice) => ({
-    value: choice,
-    label: choiceLabel(choice, keptUntil, t),
+  const keptLabel =
+    keptUntil === null ? "" : format.dateTime(new Date(keptUntil), LENDING_UNTIL_FORMAT);
+  const items = options.map((option) => ({
+    value: option.choice,
+    label: choiceLabel(option.choice, keptLabel, t),
+    disabled: option.disabled,
   }));
   // With 0 nothing is lent, so a deadline has nothing to end.
   const idle = parseLendingPercent(values.percent) === 0;
@@ -86,7 +88,7 @@ export default function LendingFields({
         label={t("lendingDeadlineLabel")}
         hint={deadlineHint(idle, values.deadline, t)}
         error={problem === "deadline" ? t("lendingDeadlinePassed") : undefined}
-        options={options}
+        options={items}
         value={values.deadline}
         disabled={disabled || idle}
         onChange={(event) =>

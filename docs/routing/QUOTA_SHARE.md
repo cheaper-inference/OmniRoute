@@ -861,7 +861,8 @@ the server rejects is removed from storage.
 A pool in `consent` mode shows a lending card. There the key holder sets a whole percentage from
 0 to 100 of the key's idle share to lend. The holder also picks how long the consent lasts: until
 turned off, 1 hour, 8 hours, 24 hours, 7 days or 30 days. A duration counts from the moment of
-saving. While a deadline is in force, the holder can keep it instead. With 0% no deadline is sent.
+saving. While a deadline is in force, the holder can keep it instead. If that deadline passes
+before Save, the card sends nothing and asks for another choice. With 0% no deadline is sent.
 The card shows the stored deadline with its time zone named. A consent whose deadline has passed
 is shown as ended.
 

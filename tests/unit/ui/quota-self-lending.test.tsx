@@ -291,6 +291,47 @@ describe("self-service quota page lending card", () => {
     expect(patches(calls)).toHaveLength(0);
   });
 
+  it("a kept deadline that ends while the holder is away is never saved as no deadline", async () => {
+    const clock = vi.spyOn(Date, "now").mockReturnValue(NOW);
+    let view = consent({ lendingPercent: 30, lendingUntil: UNTIL, lendingActive: true });
+    const calls = serve(() => view);
+    await openCard();
+    setPercent("50");
+    expect(deadlineField().value).toBe("keep");
+
+    // The holder comes back after the deadline: the page reads the quota again.
+    view = consent({ lendingPercent: 30, lendingUntil: UNTIL, lendingActive: false });
+    clock.mockReturnValue(UNTIL + 1);
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(await screen.findByText(/^Your consent to lend 30% ended on Jun 1, 2026/)).toBeTruthy();
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(2);
+
+    expect(percentField().value).toBe("50");
+    expect(deadlineField().value).toBe("keep");
+    const kept = deadlineField().selectedOptions[0];
+    expect(kept.disabled).toBe(true);
+    expect(kept.textContent).toMatch(/^Keep the current deadline \(Jun 1, 2026.*UTC\)$/);
+    expect(saveButton().disabled).toBe(false);
+    fireEvent.click(saveButton());
+    expect(screen.getByText("That deadline has passed. Choose another one.")).toBeTruthy();
+    expect(document.activeElement).toBe(deadlineField());
+    expect(patches(calls)).toHaveLength(0);
+
+    setDeadline("24h");
+    expect(screen.queryByText("That deadline has passed. Choose another one.")).toBeNull();
+    expect(Array.from(deadlineField().options).map((o) => o.value)).not.toContain("keep");
+    fireEvent.click(saveButton());
+    await waitFor(() => expect(patches(calls)).toHaveLength(1));
+    expect(JSON.parse(patches(calls)[0].body ?? "")).toEqual({
+      pool: LENDING_REF,
+      lendingPercent: 50,
+      lendingUntil: UNTIL + 1 + 86_400_000,
+    });
+  });
+
   it("two presses send one request, and the fields wait for the answer", async () => {
     let answer: (response: Response) => void = () => {};
     const calls = serve(

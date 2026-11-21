@@ -9,7 +9,9 @@ import {
   lendingBorrowRows,
   lendingCardKind,
   lendingChoices,
+  lendingDraft,
   lendingErrorText,
+  lendingFormView,
   lendingIsDirty,
   parseLendingPercent,
   type LendingDeadlineChoice,
@@ -150,6 +152,46 @@ test("a submission mirrors the PATCH schema", () => {
       choice
     );
   }
+});
+
+test("a draft that keeps a deadline is never sent without one after that deadline ends", () => {
+  const ended = { kind: "ended", percent: 30, until: UNTIL } as const;
+  const kept = lendingDraft({ percent: "50", deadline: "keep" }, active(30, UNTIL), null);
+  assert.deepEqual(kept, { values: { percent: "50", deadline: "keep" }, keptUntil: UNTIL });
+  // The ended state no longer names a kept deadline, so the draft keeps the one it had.
+  assert.equal(lendingDraft(kept.values, ended, kept).keptUntil, UNTIL);
+
+  const view = lendingFormView(kept, ended);
+  assert.deepEqual(view.values, { percent: "50", deadline: "keep" });
+  assert.equal(view.keptUntil, UNTIL);
+  assert.deepEqual(view.options[0], { choice: "keep", disabled: true });
+  assert.deepEqual(
+    view.options.slice(1),
+    lendingChoices(ended).map((choice) => ({ choice, disabled: false }))
+  );
+  assert.equal(lendingIsDirty(view.values, ended), true);
+  assert.deepEqual(buildLendingSubmission(view.values, ended, NOW), {
+    ok: false,
+    problem: "deadline",
+  });
+
+  // Another choice is listed as offered, and the kept one is no longer shown.
+  const other = lendingFormView(
+    lendingDraft({ percent: "50", deadline: "24h" }, ended, kept),
+    ended
+  );
+  assert.ok(other.options.every((option) => option.choice !== "keep" && !option.disabled));
+  assert.deepEqual(buildLendingSubmission(other.values, ended, NOW), {
+    ok: true,
+    lendingPercent: 50,
+    lendingUntil: NOW + 86_400_000,
+  });
+
+  // While the deadline is in force, keep is offered and nothing is disabled.
+  const live = lendingFormView(kept, active(30, UNTIL));
+  assert.deepEqual(live.options[0], { choice: "keep", disabled: false });
+  assert.equal(live.keptUntil, UNTIL);
+  assert.deepEqual(lendingFormView(null, ended).values, { percent: "0", deadline: "none" });
 });
 
 test("the form is dirty only when saving would change what is in force", () => {

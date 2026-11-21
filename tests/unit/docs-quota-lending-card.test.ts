@@ -18,7 +18,9 @@ import {
   describeLending,
   lendingBorrowRows,
   lendingCardKind,
+  lendingDraft,
   lendingErrorText,
+  lendingFormView,
   parseLendingPercent,
 } from "../../src/app/quota/[provider]/lib/lendingForm.ts";
 import {
@@ -251,6 +253,17 @@ test("the deadline and ended-consent sentences match the rules", () => {
     describeLending({ lendingPercent: 40, lendingUntil: 1, lendingActive: false }).kind,
     "ended"
   );
+
+  has("If that deadline passes before Save, the card sends nothing and asks for another choice.");
+  const ended = describeLending({
+    lendingPercent: 40,
+    lendingUntil: now + 3_600_000,
+    lendingActive: false,
+  });
+  const kept = lendingDraft({ percent: "40", deadline: "keep" }, lending, null);
+  const { values } = lendingFormView(kept, ended);
+  assert.equal(values.deadline, "keep");
+  assert.deepEqual(buildLendingSubmission(values, ended, now), { ok: false, problem: "deadline" });
 });
 
 test("the documented cards are the ones lendingCardKind picks", () => {
