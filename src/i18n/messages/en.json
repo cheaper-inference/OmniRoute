@@ -6369,6 +6369,8 @@
     "maxOutputTokenOverrideInvalid": "Max output tokens override must be a positive whole number of tokens",
     "visionCapableLabel": "Vision capable",
     "visionCapableHint": "Manually flag this model as vision-capable when the provider's discovery metadata doesn't report an image input modality (common for self-hosted/local backends).",
+    "thinkingCapableLabel": "Thinking capable",
+    "thinkingCapableHint": "Manually flag this model as a reasoning model when its id and the provider's discovery metadata don't say so (common for self-hosted backends). Off by default; a marked model is sent reasoning parameters, so only mark a model that accepts them.",
     "compatParamFiltersLabel": "Param Filters",
     "compatBlockedParamsHint": "Blocked params (stripped from requests)",
     "compatAllowedParamsHint": "Allowed params (re-added after deny)",

@@ -32,7 +32,11 @@ import {
   getProviderNodeIdByPrefixSync,
   getProviderNodePrefixSync,
 } from "@/lib/db/providers/nodePrefix";
-import { getCustomModelVisionOverride, getSyncedAvailableModelVision } from "@/lib/db/models";
+import {
+  getCustomModelThinkingFlag,
+  getCustomModelVisionOverride,
+  getSyncedAvailableModelVision,
+} from "@/lib/db/models";
 import type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 import { resolveAudioCapability, resolveVideoCapability } from "@/lib/modelCapabilityModalities";
 import {
@@ -998,15 +1002,28 @@ export function getResolvedModelCapabilities(
   const reasoningEffortsOverride = usePersistedOverrides
     ? getReasoningEffortsCapabilityOverride(resolved, snapshot)
     : null;
-  const supportsThinking = reasoningEffortsOverride
-    ? true
-    : reasoningDenied
-      ? false
-      : (synced?.reasoning ??
-        (typeof registryModel?.supportsReasoning === "boolean"
-          ? registryModel.supportsReasoning
-          : null) ??
-        (typeof spec?.supportsThinking === "boolean" ? spec.supportsThinking : null));
+  const catalogThinking = reasoningDenied
+    ? false
+    : (synced?.reasoning ??
+      (typeof registryModel?.supportsReasoning === "boolean"
+        ? registryModel.supportsReasoning
+        : null) ??
+      (typeof spec?.supportsThinking === "boolean" ? spec.supportsThinking : null));
+  // The operator's "Thinking capable" mark on a custom model (opt-in) outranks the catalog and
+  // the name heuristic; the override-free view (reconciliation) never sees it.
+  const supportsThinking =
+    reasoningEffortsOverride ||
+    (usePersistedOverrides &&
+      catalogThinking !== true &&
+      resolved.provider &&
+      resolved.model &&
+      getCustomModelThinkingFlag(
+        resolved.provider,
+        resolved.model,
+        snapshot?.customModelsByProvider
+      ))
+      ? true
+      : catalogThinking;
 
   const authoritativeContextWindow = getAuthoritativeStaticContextWindow(
     resolved.provider,

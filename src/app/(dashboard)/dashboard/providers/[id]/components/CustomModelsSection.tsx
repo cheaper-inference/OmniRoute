@@ -162,6 +162,9 @@ export default function CustomModelsSection({
   // the model as vision-capable by hand (read back by getCustomVisionCapabilityFields()).
   const [newSupportsVision, setNewSupportsVision] = useState(false);
   const [editingSupportsVision, setEditingSupportsVision] = useState(false);
+  // Opt-in manual thinking-capable flag (self-hosted reasoning models); default off.
+  const [newSupportsThinking, setNewSupportsThinking] = useState(false);
+  const [editingSupportsThinking, setEditingSupportsThinking] = useState(false);
   const [newIsFree, setNewIsFree] = useState(false);
   const [editingIsFree, setEditingIsFree] = useState(false);
 
@@ -213,6 +216,7 @@ export default function CustomModelsSection({
           supportedEndpoints: newEndpoints,
           ...(newTargetFormat ? { targetFormat: newTargetFormat } : {}),
           ...(newSupportsVision ? { supportsVision: true } : {}),
+          ...(newSupportsThinking ? { supportsThinking: true } : {}),
           ...(contextOverride.value != null
             ? { contextWindowOverride: contextOverride.value }
             : {}),
@@ -226,6 +230,7 @@ export default function CustomModelsSection({
         setNewEndpoints(["chat"]);
         setNewTargetFormat("");
         setNewSupportsVision(false);
+        setNewSupportsThinking(false);
         setNewContextWindowOverride("");
         setNewIsFree(false);
         await fetchCustomModels();
@@ -317,6 +322,7 @@ export default function CustomModelsSection({
       typeof model.maxOutputTokenOverride === "number" ? String(model.maxOutputTokenOverride) : ""
     );
     setEditingSupportsVision(model.supportsVision === true);
+    setEditingSupportsThinking(model.supportsThinking === true);
     setEditingIsFree(model.isFree === true);
   };
 
@@ -328,6 +334,7 @@ export default function CustomModelsSection({
     setEditingContextWindowOverride("");
     setEditingMaxOutputTokenOverride("");
     setEditingSupportsVision(false);
+    setEditingSupportsThinking(false);
     setEditingIsFree(false);
     setSavingModelId(null);
   };
@@ -395,6 +402,7 @@ export default function CustomModelsSection({
           // clear. Persisted by persistOutputTokenOverride() on the API side.
           maxOutputTokenOverride,
           supportsVision: editingSupportsVision ? true : null,
+          supportsThinking: editingSupportsThinking ? true : null,
           isFree: editingIsFree ? true : null,
         }),
       });
@@ -580,6 +588,17 @@ export default function CustomModelsSection({
                 checked={newSupportsVision}
                 onChange={(e) => setNewSupportsVision(e.target.checked)}
                 label={t("visionCapableLabel")}
+              />
+            </span>
+            <span
+              className="text-xs text-text-main whitespace-nowrap"
+              title={t("thinkingCapableHint")}
+            >
+              <Checkbox
+                id="custom-model-supports-thinking"
+                checked={newSupportsThinking}
+                onChange={(e) => setNewSupportsThinking(e.target.checked)}
+                label={t("thinkingCapableLabel")}
               />
             </span>
             <span
@@ -829,6 +848,17 @@ export default function CustomModelsSection({
                               checked={editingSupportsVision}
                               onChange={(e) => setEditingSupportsVision(e.target.checked)}
                               label={t("visionCapableLabel")}
+                            />
+                          </span>
+                          <span
+                            className="text-xs text-text-main whitespace-nowrap py-1 lg:px-2.5 lg:py-2"
+                            title={t("thinkingCapableHint")}
+                          >
+                            <Checkbox
+                              id={`custom-model-edit-thinking-${model.id}`}
+                              checked={editingSupportsThinking}
+                              onChange={(e) => setEditingSupportsThinking(e.target.checked)}
+                              label={t("thinkingCapableLabel")}
                             />
                           </span>
                           <span
