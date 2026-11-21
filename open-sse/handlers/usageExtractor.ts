@@ -123,7 +123,8 @@ export function extractUsageFromResponse(responseBody, provider) {
     const reportedCache = (value: unknown) =>
       isClaudeProvider || (value !== undefined && value !== null);
 
-    return {
+    // Use the original counters so protocol defaults do not look provider-reported.
+    return carryEstimatedUsageMarker(responseBody.usage, {
       ...cacheCreationFields(responseBody.usage),
       prompt_tokens: promptTokens,
       completion_tokens: responseBody.usage.output_tokens || 0,
@@ -134,7 +135,7 @@ export function extractUsageFromResponse(responseBody, provider) {
         ? { cache_creation_input_tokens: cacheCreation }
         : {}),
       ...(typeof reasoningTokens === "number" ? { reasoning_tokens: reasoningTokens } : {}),
-    };
+    });
   }
 
   // OpenAI Responses API format (input_tokens / output_tokens)

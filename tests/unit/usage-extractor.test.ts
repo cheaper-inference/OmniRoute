@@ -204,6 +204,13 @@ test("extractUsageFromResponse reads Responses API cache_read_input_tokens as ca
   });
 });
 
+const reportedAnthropicUsage = {
+  input: { source: "reported" },
+  output: { source: "reported" },
+  cacheRead: { source: "reported" },
+  cacheCreation: { source: "reported" },
+};
+
 test("extractUsageFromResponse totals Claude prompt tokens with cache read and cache creation", () => {
   const usage = extractUsageFromResponse(
     {
@@ -222,6 +229,7 @@ test("extractUsageFromResponse totals Claude prompt tokens with cache read and c
     completion_tokens: 7,
     cache_read_input_tokens: 4,
     cache_creation_input_tokens: 6,
+    usage_evidence: reportedAnthropicUsage,
   });
 });
 
@@ -244,6 +252,7 @@ for (const provider of ["vertex", "vertex-partner"]) {
       completion_tokens: 7,
       cache_read_input_tokens: 4_000,
       cache_creation_input_tokens: 1_000,
+      usage_evidence: reportedAnthropicUsage,
     });
   });
 }
@@ -266,6 +275,11 @@ test("extractUsageFromResponse surfaces Claude thinking tokens without inflating
     cache_read_input_tokens: 0,
     cache_creation_input_tokens: 0,
     reasoning_tokens: 85,
+    usage_evidence: {
+      ...reportedAnthropicUsage,
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });
 
@@ -648,6 +662,7 @@ test("extractUsageFromResponse totals Anthropic cache tokens for a non-native pr
     completion_tokens: 50,
     cache_read_input_tokens: 9_000,
     cache_creation_input_tokens: 900,
+    usage_evidence: reportedAnthropicUsage,
   });
   assert.equal(getLoggedInputTokens(usage), TOTAL_PROMPT_TOKENS);
 });
@@ -664,6 +679,22 @@ test("Anthropic-shaped non-streaming usage matches the native claude id and the 
   assert.equal(getLoggedInputTokens(shaped), getLoggedInputTokens(streamed));
   assert.equal(getPromptCacheReadTokens(shaped), getPromptCacheReadTokens(streamed));
   assert.equal(getPromptCacheCreationTokens(shaped), getPromptCacheCreationTokens(streamed));
+});
+
+test("non-streaming Anthropic extraction preserves explicit token evidence", () => {
+  const evidence = {
+    ...reportedAnthropicUsage,
+    input: { source: "estimated", method: "tokenizer" },
+    cacheCreation: { source: "unknown" },
+  };
+  const usage = extractUsageFromResponse(
+    anthropicMessageBody({ ...ANTHROPIC_USAGE, usage_evidence: evidence }),
+    "claude"
+  );
+
+  assert.deepEqual(usage.usage_evidence, evidence);
+  assert.equal(usage.prompt_tokens, 9_100);
+  assert.equal(usage.estimated, true);
 });
 
 test("Anthropic SSE buffered for a non-streaming request is totalled once", () => {
@@ -725,14 +756,29 @@ test("a Claude-format provider with no prompt cache keeps the cache counters N/A
   assert.equal(getPromptCacheCreationTokensOrNull(usage), null);
 });
 
-test("a native Claude id still reports unreported cache counters as 0", () => {
+test("native Claude usage distinguishes omitted cache counters from reported zeros", () => {
   const usage = extractUsageFromResponse(
     anthropicMessageBody({ input_tokens: 42, output_tokens: 7 }),
     "anthropic"
   );
 
-  assert.equal(getPromptCacheReadTokensOrNull(usage), 0);
-  assert.equal(getPromptCacheCreationTokensOrNull(usage), 0);
+  assert.equal(usage.cache_read_input_tokens, 0);
+  assert.equal(usage.cache_creation_input_tokens, 0);
+  assert.equal(getPromptCacheReadTokensOrNull(usage), null);
+  assert.equal(getPromptCacheCreationTokensOrNull(usage), null);
+
+  const explicitZeros = extractUsageFromResponse(
+    anthropicMessageBody({
+      input_tokens: 42,
+      output_tokens: 7,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+    }),
+    "anthropic"
+  );
+  assert.deepEqual(explicitZeros.usage_evidence, reportedAnthropicUsage);
+  assert.equal(getPromptCacheReadTokensOrNull(explicitZeros), 0);
+  assert.equal(getPromptCacheCreationTokensOrNull(explicitZeros), 0);
 });
 
 test("a Claude-format provider reporting only one cache counter keeps the other N/A", () => {
