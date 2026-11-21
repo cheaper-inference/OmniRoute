@@ -1,7 +1,7 @@
 // One idempotent tick of omni-queue (scripts/merge-queue/tick.mjs) against in-memory fakes of
 // GitHub and of the WP1/WP2/WP4 modules; the real state store and bisection run underneath.
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -4858,7 +4858,8 @@ test("main: the client counts only the App's own comment markers (botLogin)", as
       created_at: "2026-11-13T10:00:00Z",
     },
   ]);
-  // Live mode: the committed config is in shadow mode, where the tick comments on no PR.
+  // Live mode, set here whatever the committed config ships: in shadow mode the tick comments
+  // on no PR.
   const configPath = join(runnerTemp, "omni-queue.config.json");
   writeFileSync(configPath, JSON.stringify({ ...loadConfig(), mode: "live" }));
   const env = {
@@ -6811,9 +6812,10 @@ test("a dry-run of a stalled queue writes nothing", async () => {
  * main() against the fake GitHub API, as the workflow runs it (--base), with a config whose
  * approvers are invented logins. `fake.inject` makes the PR listing of the snapshot fail, so the
  * tick throws after loading the state and before the end of run(). `dashboard: false` starts
- * with no dashboard issue (no tick of the base has completed yet).
+ * with no dashboard issue (no tick of the base has completed yet). `mode` is pinned to `shadow`,
+ * the mode these scenarios were written against, whatever the committed config ships.
  */
-async function mainAgainstFake(t, { dashboard = true } = {}) {
+async function mainAgainstFake(t, { dashboard = true, mode = "shadow" } = {}) {
   const token = "ghs_tick_stalled";
   const fake = await startFakeGitHub({ token, actor: "omni-queue[bot]" });
   t.after(() => fake.close());
@@ -6823,7 +6825,7 @@ async function mainAgainstFake(t, { dashboard = true } = {}) {
   t.mock.method(console, "log", () => {});
   t.mock.method(console, "error", (line) => errors.push(String(line)));
   const configPath = join(runnerTemp, "omni-queue.config.json");
-  writeFileSync(configPath, JSON.stringify({ ...loadConfig(), approvers: TEST_APPROVERS }));
+  writeFileSync(configPath, JSON.stringify({ ...loadConfig(), mode, approvers: TEST_APPROVERS }));
   const base = "release/v3.8.54";
   if (dashboard) {
     fake.addIssue({ number: 40, title: dashboardTitle(base), labels: [DASHBOARD_LABEL] });
@@ -7743,8 +7745,9 @@ test("a PR that produced a would-land in shadow is batched again once the mode i
   assert.ok(types(await h.state()).includes("landed"));
 });
 
-test("M1 through main(), shadow mode (the shipped config): a tick that throws after it left a stored landing withdraws the status and saves the batch at testing with its error", async (t) => {
-  const q = await mainAgainstFake(t);
+test("M1 through main(), shadow mode: a tick that throws after it left a stored landing withdraws the status and saves the batch at testing with its error", async (t) => {
+  const q = await mainAgainstFake(t, { mode: "shadow" });
+  assert.equal(JSON.parse(readFileSync(q.env.OMNI_QUEUE_CONFIG, "utf8")).mode, "shadow");
   const now = new Date().toISOString();
   const candidateSha = fakeSha("main-candidate");
   q.fake.refs.set(`heads/${q.base}`, fakeSha("main-tip"));
