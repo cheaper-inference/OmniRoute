@@ -488,6 +488,12 @@ The page hooks:
 - `usePoolUsage` — fetches `GET /api/quota/pools/[id]/usage` on demand.
 - `useLocalStoragePoolMigration` — runs once on mount to migrate legacy LS data.
 
+The keys step of the pool wizard has a `Show usage by member to key holders` box. It sets the
+pool's `memberBreakdown` option (see [Member usage](#member-usage)). Below it, the wizard warns
+that someone who knows what one key used can match a bar to that key. With the box ticked, it says
+so when the step lists fewer than three or more than 20 keys, as the bars then stay hidden. It
+counts the keys in the step and cannot tell which of them can make requests.
+
 ### `/dashboard/costs/quota-share/plans` — Provider plan config
 
 - `ProviderPlanConfigClient.tsx`: dropdown to select a provider, view resolved
@@ -526,10 +532,10 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 
 ### What each visibility shows
 
-| Visibility    | Requires                                                                                  | Fields                                                                                                                                                                |
-| ------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Own share     | `self:usage`                                                                              | `pools[]` (ref, name, provider, policy, weight, cap), `dimensions[].yourShare`, `accounts[]` with `yourShare`, `blocks`, `availableModels`, `expiresAt`, `apiBaseUrl` |
-| Account level | `self:usage` + `self:account-quota`, and the provider in the key's `sharedQuotaProviders` | adds `dimensions[].total`, `accounts[].dimensions[].account` and `accounts[].modelWindows`                                                                            |
+| Visibility    | Requires                                                                                  | Fields                                                                                                                                                                       |
+| ------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Own share     | `self:usage`                                                                              | `pools[]` (ref, name, provider, policy, weight, cap), `dimensions[].yourShare`, `accounts[]` with `yourShare`, `blocks`, `availableModels`, `expiresAt`, `apiBaseUrl`        |
+| Account level | `self:usage` + `self:account-quota`, and the provider in the key's `sharedQuotaProviders` | adds `dimensions[].total`, `accounts[].dimensions[].account` and `accounts[].modelWindows`, and `members` on a pool with member usage on (see [Member usage](#member-usage)) |
 
 - `sharedQuotaProviders` is a per-key setting (`PUT /api/keys/[id]/self-service`): `null`, the
   default, means every provider the key reaches; `[]` means none. Each pool's `accountVisible`
@@ -563,21 +569,23 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 
 ### `status` and `reason`
 
-| `status`      | Meaning                                                                                                                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ok`          | A current reading.                                                                                                                                                                                        |
-| `stale`       | A cached account reading marked stale, or one whose reset time has passed since it was read. Numbers are kept. One model window whose reset time has passed marks the whole `modelWindows` group `stale`. |
-| `unavailable` | No reading; the numbers are `null`, never `0`. `reason` says why.                                                                                                                                         |
+| `status`      | Meaning                                                                                                                                                                                                                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ok`          | A current reading.                                                                                                                                                                                                                                                                                                                       |
+| `stale`       | A cached account reading marked stale, or one whose reset time has passed since it was read. Numbers are kept. One model window whose reset time has passed marks the whole `modelWindows` group `stale`. For the key's own share of a `percent` window: the book was read without an account reading in the gate's cache to confirm it. |
+| `unavailable` | No reading; the numbers are `null`, never `0`. `reason` says why.                                                                                                                                                                                                                                                                        |
 
-| `reason`                          | When                                                                        |
-| --------------------------------- | --------------------------------------------------------------------------- |
-| `store_unavailable`               | The quota store could not be read.                                          |
-| `percent_attribution_unavailable` | The key's own share of a `percent` window (see Limitations).                |
-| `window_not_reported`             | The provider-limits cache has no reading for that plan window.              |
-| `connection_lookup_failed`        | The account's connection could not be read.                                 |
-| `not_supported`                   | OmniRoute cannot read usage limits for the account's provider.              |
-| `fetch_failed`                    | No cached reading was usable and the provider-limits refresh failed.        |
-| `not_available`                   | The reading carries no usage windows, or the account has no reading at all. |
+| `reason`                          | When                                                                                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `store_unavailable`               | The quota store could not be read, or it cannot read attribution books.                                                                   |
+| `percent_attribution_unavailable` | The key's own share of a `percent` window: no attribution book exists yet for that account and window, or the book does not list the key. |
+| `percent_window_ended`            | The key's own share of a `percent` window: the book belongs to a plan window that has ended.                                              |
+| `account_not_used_by_key`         | The key's own share of a `percent` window: the account's connection is outside the key's allowed connections. Its book is not read.       |
+| `window_not_reported`             | The provider-limits cache has no reading for that plan window.                                                                            |
+| `connection_lookup_failed`        | The account's connection could not be read.                                                                                               |
+| `not_supported`                   | OmniRoute cannot read usage limits for the account's provider.                                                                            |
+| `fetch_failed`                    | No cached reading was usable and the provider-limits refresh failed.                                                                      |
+| `not_available`                   | The reading carries no usage windows, or the account has no reading at all.                                                               |
 
 When the quota store cannot be read, the store-backed fields of `blocks` (a schedule budget's
 `exhausted`, a model cap's `consumed` and `reached`) are `null` as well.
@@ -604,8 +612,27 @@ including the key lookup itself; its cause is logged on the server and never ret
 - Per-model windows (`modelWindows`) are reported only for providers that have a plan-window
   mapping: Claude and Codex today. For other providers `modelWindows` is still present when
   account data is shown, with an empty `windows` list.
-- The key's own share of a `percent` window is reported as `unavailable`
-  (`percent_attribution_unavailable`) for now.
+- The key's own share of a `percent` window is an estimate. It comes from the attribution book and
+  carries every limitation listed under "Percent dimensions: per-key attribution" above.
+- `consumed` is the number enforcement compares with the fair share. It is `attributed` plus
+  `external`, exactly. `attributed` is the part the book gives the key for the tokens it routed.
+  `external` is the key's part of the account's use that the pool's keys do not account for.
+- Both parts are sent to every key with `self:usage`, also to a key without `self:account-quota`.
+  So a key holder learns its part of the use made outside the pool without seeing the account.
+- For example, a book opens at 0, with keys A and B at weight 50 each. Key A routes 900,000 tokens
+  and key B 100,000. The account then reaches 60% of a limit of 100. Then `attributed` is 54 for
+  key A and 6 for key B, and `external` is 0 for both.
+- The view reads the book and never writes its state. It does not open a book, and it never asks
+  the provider for a reading. With the Redis store, a read removes superseded revision fields in
+  the background, as the gate's reads do.
+- The share is `ok` only while the gate's cache holds a reading of the account. Without one it is
+  `stale`, so in a pool with no recent request it shows as possibly out of date.
+- Until a request goes through the pool, the share is unavailable. That request opens the book,
+  and the account's figure at that moment counts as use made outside the pool.
+- In a pool with several accounts, each account entry uses that account's own book and the limit
+  of one account. Enforcement scales both sides by the number of accounts, so the proportion is the
+  same.
+- Per-model windows carry no share for the key. The book keeps no per-model data.
 - Reserve floors of a schedule are not evaluated by the view: a schedule can show as `open`
   while a request is refused with reason `schedule-reserve`.
 - When two pools of the same key share a connection, enforcement applies one of them, and the
@@ -615,6 +642,59 @@ including the key lookup itself; its cause is logged on the server and never ret
   deny the route to every key holder. With `REQUIRE_API_KEY=true`, an invalid key is refused by
   the client API policy before the route runs, with that policy's 401 body instead of this
   route's.
+
+### Member usage
+
+An administrator can let key holders see how a window's use splits between the pool's members.
+The option is the pool's `memberBreakdown`, off by default. It is set in the pool wizard or with
+`PATCH /api/quota/pools/{id}`. `GET /api/quota/pools` and `GET /api/quota/pools/{id}` report it.
+
+A dimension of the view carries `members` only when all of these hold:
+
+- the pool's option is on
+- the pool has at most 20 allocated keys, and at least three of them can make requests: active,
+  not revoked, not banned and not past their expiry
+- the pool's `accountVisible` is true: the key has `self:account-quota` and the provider is in its
+  `sharedQuotaProviders`
+- on a `percent` window, the account's connection is one the key may use
+- the key's own share of that window was read: its `status` is not `unavailable`
+
+Otherwise `members` is absent. It is never an empty list.
+
+- Each slice is `{ slot, consumed, isYou }`. The response schema rejects any other property on a
+  slice. Slices are listed in slot order.
+- There is one slice per allocated key, including a key that can no longer make requests. A
+  member with no use shows a real zero.
+- Slot 1 is always the asking key, with `isYou` true. The other slot numbers are ranks of a keyed
+  hash. It is keyed with `API_KEY_SECRET` and covers the pool, the asking key and the member.
+- So the numbers do not line up between holders. For one holder they stay the same between
+  visits. They can change when a key joins or leaves the pool, or when that secret is rotated.
+- On a countable window a slice is the member's counter in the quota store, the same counter as
+  its own `consumed`.
+- On a `percent` window a slice is the member's `attributed` part, from the same book read as the
+  key's own share. Usage made outside the pool is never split into slices. That charge is split by
+  weight, so slices that carried it would show the weights.
+- Each view reads one value per other member and countable window, in parallel. On a `percent`
+  window the slices cost no read beyond the share's own book read. When one value cannot be read,
+  that window has no `members`, and the key's own share stays.
+- The option and the number of usable keys are read once per pool, and only for a key that may
+  see account data. A failing read of the option or of the usable-key count turns the bars off for
+  that pool. The server logs a warning, and the rest of the view is built.
+
+The bars carry no names or ids. They still tell a key holder things about the other members:
+
+- Holders can still match slices by their values.
+- A stable numbering lets a holder follow one member over time.
+- The number of slices shows how many keys are allocated in the pool.
+- In a pool of three keys, someone who knows what one key used can tell what the last key used.
+- When a pool drops below three usable keys, the bars disappear. Views taken earlier still show
+  what each member used.
+- On a countable window, the pool total minus the slices shows the use of keys that are no longer
+  allocated.
+- A member that shows zero on one account and use on another shows which member uses which
+  account.
+- In a countable pool with the `hard` policy, a slice that stops growing at a member's fair share
+  hints at that member's weight.
 
 ### Usage series (`GET /api/v1/me/usage`)
 
@@ -676,8 +756,15 @@ accepts is kept in the tab's `sessionStorage`. With "Remember on this device" it
 removed from storage.
 
 A reading the API marks `stale` is shown as possibly out of date. A reading it marks
-`unavailable` is shown with its reason, never as zero. On percentage plans the key's own share is
-not calculated yet, and the page says so.
+`unavailable` is shown with its reason, never as zero.
+
+On percentage plans the page draws the key's own share when the API reports it. It says that the
+number is an estimate and names its two parts. Per-model limits show the account only.
+
+When a window carries `members`, its card also shows a bar with one segment per member, in slot
+order. The asking key's segment uses the accent colour. The other segments cycle through the
+theme's chart colours. A text legend lists every segment with its value, so nothing depends on
+colour. Segments are labelled `You` or `Member N`, where N is the slot.
 
 ---
 

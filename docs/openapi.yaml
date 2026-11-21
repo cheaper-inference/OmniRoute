@@ -16012,7 +16012,8 @@ paths:
         the key is never read from the query string or a cookie. Requires scope `self:usage`.
         Account-level readings (`total`, `accounts[].dimensions[].account`, `modelWindows`) are
         included only with scope `self:account-quota` and only for providers in the key's
-        `sharedQuotaProviders` setting. Account bars and model windows are further limited to
+        `sharedQuotaProviders` setting. Member usage slices (`members`) also need the pool's
+        `memberBreakdown` option. Account bars and model windows are further limited to
         the connections the key may use when it has a list of allowed connections. Pools are
         identified by an opaque per-key `ref`. The pool's display name and schedule labels are
         returned as the administrator wrote them. No pool id, connection id or account identity
@@ -18613,6 +18614,11 @@ components:
           type: string
         name:
           type: string
+        memberBreakdown:
+          type: boolean
+          description: >-
+            Whether key holders see member usage bars on the self-service page. Off by default.
+            Reported by the list, read and update routes.
         createdAt:
           type: string
           format: date-time
@@ -18669,6 +18675,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PoolAllocation"
+        memberBreakdown:
+          type: boolean
+          description: >-
+            Turns the member usage bars of the self-service page on or off for this pool. Left
+            unchanged when omitted.
 
     PoolUsageSnapshot:
       type: object
@@ -19671,6 +19682,40 @@ components:
           $ref: "#/components/schemas/SelfQuotaStatus"
         reason:
           type: string
+          description: >-
+            Set when `status` is `unavailable`. On a `percent` window it is one of
+            `percent_attribution_unavailable`, `percent_window_ended`, `account_not_used_by_key`
+            or `store_unavailable`.
+        attributed:
+          type: number
+          description: >-
+            `percent` windows with status `ok` or `stale` only. The part of the attribution book
+            given to the key for the tokens it routed. `attributed + external` equals `consumed`.
+        external:
+          type: number
+          description: >-
+            `percent` windows with status `ok` or `stale` only. The key's part of the account's use
+            that the pool's keys do not account for.
+    SelfQuotaMemberSlice:
+      type: object
+      description: >-
+        One member's use of a window, with no name, id or weight. Slot 1 is the asking key. The
+        other slots are ranks of a keyed hash per asking key, so they do not line up between
+        holders.
+      additionalProperties: false
+      required: [slot, consumed, isYou]
+      properties:
+        slot:
+          type: integer
+          minimum: 1
+        consumed:
+          type: number
+          minimum: 0
+          description: >-
+            The member's counter in a countable window, or its attributed part in a `percent`
+            window.
+        isYou:
+          type: boolean
     SelfQuotaSharedDimension:
       type: object
       description: Pool bucket of a countable unit; `limit` is the plan limit times the pool's accounts.
@@ -19688,6 +19733,15 @@ components:
           $ref: "#/components/schemas/SelfQuotaBar"
         yourShare:
           $ref: "#/components/schemas/SelfQuotaShare"
+        members:
+          type: array
+          minItems: 3
+          description: >-
+            Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
+            allocated keys with at least 3 that can make requests, `accountVisible` is true and the
+            key's own share was read. Never an empty list.
+          items:
+            $ref: "#/components/schemas/SelfQuotaMemberSlice"
     SelfQuotaAccountDimension:
       type: object
       description: A `percent` window of one account; `limit` is the plan limit.
@@ -19705,6 +19759,15 @@ components:
           $ref: "#/components/schemas/SelfQuotaBar"
         yourShare:
           $ref: "#/components/schemas/SelfQuotaShare"
+        members:
+          type: array
+          minItems: 3
+          description: >-
+            Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
+            allocated keys with at least 3 that can make requests, `accountVisible` is true and the
+            key's own share was read. Never an empty list.
+          items:
+            $ref: "#/components/schemas/SelfQuotaMemberSlice"
     SelfQuotaAccount:
       type: object
       additionalProperties: false
