@@ -130,6 +130,7 @@ export default function ComboDefaultsTab() {
   const [sessionAffinityTtlMs, setSessionAffinityTtlMs] = useState(0);
   const [promptCacheAffinityEnabled, setPromptCacheAffinityEnabled] = useState(true);
   const [geminiPromptCacheMode, setGeminiPromptCacheMode] = useState<GeminiPromptCacheMode>();
+  const savedGeminiPromptCacheMode = useRef<GeminiPromptCacheMode | undefined>(undefined);
   const [providerOverrides, setProviderOverrides] = useState<any>({});
   const [availableProviders, setAvailableProviders] = useState<{ id: string; provider: string }[]>(
     []
@@ -209,9 +210,10 @@ export default function ComboDefaultsTab() {
             : 0
         );
         setPromptCacheAffinityEnabled(settingsData.promptCacheAffinityEnabled !== false);
-        setGeminiPromptCacheMode(
-          settingsData.geminiPromptCacheMode === "implicit" ? "implicit" : "off"
-        );
+        const loadedGeminiPromptCacheMode =
+          settingsData.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+        savedGeminiPromptCacheMode.current = loadedGeminiPromptCacheMode;
+        setGeminiPromptCacheMode(loadedGeminiPromptCacheMode);
       })
       .catch((err) => console.error("Failed to fetch combo defaults:", err));
   }, []);
@@ -258,7 +260,11 @@ export default function ComboDefaultsTab() {
         // (mirrors stickyRoundRobinLimit) so combo.ts resolution reads settings.disableSessionStickiness.
         disableSessionStickiness: disableSessionStickiness === true,
         promptCacheAffinityEnabled,
-        geminiPromptCacheMode,
+        // An unchanged tab snapshot must not overwrite a newer choice from another client.
+        geminiPromptCacheMode:
+          geminiPromptCacheMode === savedGeminiPromptCacheMode.current
+            ? undefined
+            : geminiPromptCacheMode,
       };
 
       const comboDefaultsRes = await fetch("/api/settings/combo-defaults", {
@@ -275,6 +281,8 @@ export default function ComboDefaultsTab() {
       }
 
       await syncGlobalRoutingSettings(settingsPatch);
+      savedGeminiPromptCacheMode.current =
+        settingsPatch.geminiPromptCacheMode ?? savedGeminiPromptCacheMode.current;
       showStatus("success", t("savedSuccessfully"));
     } catch (err) {
       console.error("Failed to save combo defaults:", err);
