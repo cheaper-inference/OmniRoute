@@ -19,11 +19,18 @@ const originalFetch = globalThis.fetch;
 type FetchCall = { url: string; init: Record<string, unknown>; body?: Record<string, unknown> };
 
 const PINNED_COMMAND_CODE_MODELS = [
+  "claude-opus-5-5",
+  "claude-opus-5",
+  "claude-opus-4-8",
   "claude-opus-4-7",
+  "claude-fable-5-2",
+  "claude-fable-5-1",
   "claude-fable-5",
   "claude-opus-4-6",
+  "claude-sonnet-5",
   "claude-sonnet-5-5",
   "claude-sonnet-4-6",
+  "claude-haiku-5-5",
   "claude-haiku-4-5-20251001",
   "gpt-5.5",
   "gpt-5.4",
@@ -41,6 +48,27 @@ const PINNED_COMMAND_CODE_MODELS = [
   "MiniMaxAI/MiniMax-M2.5",
   "Qwen/Qwen3.6-Max-Preview",
   "Qwen/Qwen3.6-Plus",
+];
+
+// Command Code's live catalog declares these models on /messages ONLY
+// (supported_endpoints: ["/messages"]). The executor routes by
+// `targetFormat: "claude"`: without the tag the request is posted to
+// /provider/v1/chat/completions and the gateway rejects it with
+// `400 "Model \"<id>\" must be called via <path>"`.
+const MESSAGES_ONLY_CLAUDE_MODELS = [
+  "claude-opus-5-5",
+  "claude-opus-5",
+  "claude-opus-4-8",
+  "claude-opus-4-7",
+  "claude-fable-5-2",
+  "claude-fable-5-1",
+  "claude-fable-5",
+  "claude-opus-4-6",
+  "claude-sonnet-5",
+  "claude-sonnet-5-5",
+  "claude-sonnet-4-6",
+  "claude-haiku-5-5",
+  "claude-haiku-4-5-20251001",
 ];
 
 const CHAT_URL = "https://api.commandcode.ai/provider/v1/chat/completions";
@@ -140,10 +168,10 @@ test("getExecutor returns the specialized Command Code executor", async () => {
 });
 
 test("Command Code Claude models select Anthropic as their target format", () => {
-  const models = ["claude-opus-4-7", "claude-fable-5", "claude-sonnet-5-5"];
-
-  for (const model of models) {
-    assert.equal(getModelTargetFormat("command-code", model), "claude");
+  for (const model of MESSAGES_ONLY_CLAUDE_MODELS) {
+    assert.equal(getModelTargetFormat("command-code", model), "claude", model);
+    // The public alias resolves identically.
+    assert.equal(getModelTargetFormat("cmd", model), "claude", model);
   }
 });
 
@@ -173,6 +201,98 @@ test("Command Code executor sends Claude models to the Anthropic Messages endpoi
       (calls[0].init.headers as Record<string, string>)?.["anthropic-version"],
       ANTHROPIC_VERSION_HEADER
     );
+  }
+});
+
+// Regression: claude-haiku-5-5 (and six sibling Claude models) were absent from
+// the Command Code registry, so getModelTargetFormat returned null and the
+// executor posted to /provider/v1/chat/completions. Command Code serves them on
+// /messages only and answered `400 "Model \"claude-haiku-5-5\" must be called
+// via <path>"`. Drive the exact reported request shape — chat-shaped inbound
+// body carrying Claude-native thinking/output_config — and assert the wire
+// request lands on /messages with the anthropic-version header.
+test("Command Code executor routes the exact reported claude-haiku-5-5 request to /messages", async () => {
+  const calls = captureFetch({});
+  const { url, headers } = await (
+    await getExecutor("command-code")
+  ).execute({
+    model: "claude-haiku-5-5",
+    stream: true,
+    credentials: { apiKey: "cc_test_key" },
+    body: {
+      model: "claude-haiku-5-5",
+      stream: true,
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: "Reply with exactly: pong" }],
+        },
+      ],
+      thinking: { type: "adaptive" },
+      output_config: { effort: "xhigh" },
+      max_tokens: 64,
+    },
+  });
+
+  assert.equal(url, MESSAGES_URL);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, MESSAGES_URL);
+  assert.notEqual(calls[0].url, CHAT_URL);
+  assert.equal(headers["anthropic-version"], ANTHROPIC_VERSION_HEADER);
+  assert.deepEqual(calls[0].body?.thinking, { type: "adaptive" });
+  assert.deepEqual(calls[0].body?.output_config, { effort: "xhigh" });
+});
+
+// Every /messages-only model must resolve to `claude` (endpoint selection), and
+// the full list is exercised through the executor so a future registry edit
+// cannot silently drop one again.
+test("Command Code executor routes every /messages-only Claude model to /messages", async () => {
+  const executor = await getExecutor("command-code");
+
+  for (const model of MESSAGES_ONLY_CLAUDE_MODELS) {
+    const calls = captureFetch({});
+    const { url, headers } = await executor.execute({
+      model,
+      stream: false,
+      credentials: { apiKey: "cc_test_key" },
+      body: { model, max_tokens: 32, messages: [{ role: "user", content: "Hi" }] },
+    });
+
+    assert.equal(url, MESSAGES_URL, model);
+    assert.equal(calls[0].url, MESSAGES_URL, model);
+    assert.equal(calls[0].body?.model, model);
+    assert.equal(headers["anthropic-version"], ANTHROPIC_VERSION_HEADER, model);
+  }
+});
+
+// The non-Claude models must NOT be dragged onto /messages by the fix.
+test("Command Code executor keeps non-Claude models on /chat/completions", async () => {
+  const executor = await getExecutor("command-code");
+  const openaiModels = [
+    "gpt-5.5",
+    "gpt-5.4",
+    "gpt-5.3-codex",
+    "gpt-5.4-mini",
+    "deepseek/deepseek-v4-pro",
+    "deepseek/deepseek-v4-flash",
+    "moonshotai/Kimi-K2.5",
+    "zai-org/GLM-5.1",
+    "MiniMaxAI/MiniMax-M2.5",
+    "Qwen/Qwen3.6-Plus",
+  ];
+
+  for (const model of openaiModels) {
+    const calls = captureFetch({});
+    const { url, headers } = await executor.execute({
+      model,
+      stream: false,
+      credentials: { apiKey: "cc_test_key" },
+      body: { model, messages: [{ role: "user", content: "Hi" }] },
+    });
+
+    assert.equal(url, CHAT_URL, model);
+    assert.equal(calls[0].url, CHAT_URL, model);
+    assert.equal(headers["anthropic-version"], undefined, model);
   }
 });
 
