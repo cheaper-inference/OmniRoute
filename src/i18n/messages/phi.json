@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Panatilihing nasa lugar ang mga mensahe ng system sa kalagitnaan ng pag-uusap",
     "requireUserLastMessageDescription": "Para sa mga upstream na tinatanggihan ang prefill ng assistant: i-drop ang mga sumusunod na assistant turn (walang tool_use) bago ipadala. Maaaring i-regenerate ng modelo ang dati nitong sagot.",
     "requireUserLastMessageLabel": "Atasan ang pag-uusap upang tapusin sa isang mensahe ng user",
+    "strictChatHistoryDescription": "Inaayos ang mga naputol na sunod-sunod na tawag sa tool at pinagsasama ang magkakasunod na mensahe ng assistant bago ipadala sa mga provider na tugma sa OpenAI at nagpapatupad ng mahihigpit na tuntunin.",
+    "strictChatHistoryLabel": "Pag-aayos ng kasaysayan ng chat para sa mahihigpit na provider",
     "bulkPasteAdded": "{count, plural, one {1 key ang naidagdag} other {# key ang naidagdag}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicate ang nilaktawan} other {# duplicate ang nilaktawan}}",
     "bulkPasteHint": "Mag-paste ng isang API key sa bawat linya. Binabalewala ang mga walang lamang linya at nilalaktawan ang mga duplicate na key.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Alisin ang key"
   },
   "plugins": {
-    "privilegesWarningTitle": "Ang mga plugin ay tumatakbo nang may ganap na mga pribilehiyo",
-    "privilegesWarningBody": "Ang isang plugin ay tumatakbo bilang isang regular na proseso Node.js na may parehong access gaya ng OmniRoute: maaari itong magbasa ng mga file, magpatakbo ng mga programa at gamitin ang network, anuman ang mga pahintulot na idineklara ng manifest nito. Mag-install lamang ng mga plugin na pinagkakatiwalaan mo.",
     "title": "Mga plugin",
     "description": "Mag-install at mamahala ng mga plugin upang palawakin ang functionality ng OmniRoute",
     "loading": "Nilo-load ang mga plugin...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Mag-scan para sa mga plugin",
     "noPlugins": "Walang naka-install na plugin",
     "noPluginsDescription": "Ilagay ang mga direktoryo ng plugin sa ~/.omniroute/plugins/ at i-click ang Mag-scan.",
+    "privilegesWarningTitle": "Ang mga plugin ay tumatakbo nang may ganap na mga pribilehiyo",
+    "privilegesWarningBody": "Ang isang plugin ay tumatakbo bilang isang regular na proseso Node.js na may parehong access gaya ng OmniRoute: maaari itong magbasa ng mga file, magpatakbo ng mga programa at gamitin ang network, anuman ang mga pahintulot na idineklara ng manifest nito. Mag-install lamang ng mga plugin na pinagkakatiwalaan mo.",
     "activate": "I-activate",
     "deactivate": "I-deactivate",
     "uninstall": "I-uninstall",

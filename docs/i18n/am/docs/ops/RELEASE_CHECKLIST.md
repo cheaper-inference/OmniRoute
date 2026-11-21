@@ -379,8 +379,7 @@ grafted parent ላይ packን ውድቅ ያደርጋል፤ ስለዚህ ከሙ�
 የቀድሞው tag አለ፣ `package.json` የዒላማው ስሪት ነው፣ የ`release-freeze` issue ክፍት ነው፣
 እና በነባር release branch ላይ ክፍት `Release branch not green` issue የለም —
 የሌለ branch `?` ያልታወቀ ብሎ ይመልሳል፣ ፈጽሞ green አይባልም —
-የMergify `release` queue ተዋቅሯል (G11፦ `queue_rules`፣ `checks_timeout`፣
-መለያ `queue`)፣ የ`release/*` ruleset አሁንም መሰረዝን እና force-pushን ይከለክላል፣ እንዲሁም
+omni-queue የማዋሃድ ጥያቄዎችን ወደ መልቀቂያ ቅርንጫፍ ያዋህዳል (G11: `config/merge-queue/config.json` የሚሰራ፣ የእሱ `bases` የመልቀቂያ ቅርንጫፉን ያስተዳድራል፣ `mode` `live`፣ መለያው አለ)፣ የ`release/*` ruleset አሁንም መሰረዝን እና force-pushን ይከለክላል፣ እንዲሁም
 `stable/v3` እና `develop` ገና የሉም)፣ ሁለቱን የbranch ደረጃዎች፣ የትኞቹ የቦዘኑ workflow
 triggerዎች እና `if:` ሁኔታዎች true እንደሚሆኑ (እና የትኞቹ በrepository variable
 እንደታገዱ ወይም ወደ canonical repository እንደተወሰኑ)፣ የሚጠበቁ dist-tagዎችን (`latest` → 3.9.0፣

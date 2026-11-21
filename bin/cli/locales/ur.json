@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "حد ایک مثبت صحیح عدد ہونی چاہیے۔",
     "error": "خرابی: {message}",
     "serverOffline": "OmniRoute سرور آف لائن ہے۔ اسے اس کمانڈ سے شروع کریں: omniroute serve",
     "authRequired": "توثیق درکار ہے۔ OMNIROUTE_API_KEY سیٹ کریں یا یہ کمانڈ چلائیں: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[آزمائشی اجرا] {action} کیا جاتا",
     "cancelled": "منسوخ کر دیا گیا۔",
     "jsonOpt": "JSON کی صورت میں آؤٹ پٹ دیں",
-    "yesOpt": "تصدیقی پیغام کو چھوڑ دیں"
+    "yesOpt": "تصدیقی پیغام کو چھوڑ دیں",
+    "positiveIntegerRequired": "حد ایک مثبت صحیح عدد ہونی چاہیے۔"
   },
   "setup": {
     "title": "OmniRoute سیٹ اپ",
