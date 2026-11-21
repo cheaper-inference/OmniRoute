@@ -259,10 +259,6 @@ jobs:
         if: steps.resolve.outputs.skip != 'true'
         run: git fetch --no-tags --depth=50 origin +refs/heads/main:refs/remotes/origin/main
 
-      - name: Validate npm package artifact
-        if: steps.resolve.outputs.skip != 'true'
-        run: npm run check:pack-artifact
-
       # Pack ONCE. Up to v3.8.54 this job ran `npm pack` on the same dist/ four times per
       # attempt — inside check:pack-boot, inside check:install-upgrade, for the stage-npm
       # hand-off and inside the GitHub Packages publish — and `npm pack` is single-threaded:
@@ -270,6 +266,8 @@ jobs:
       # 44304134021). Every consumer below now uses this one file, so the bytes the gates
       # boot are byte-for-byte the bytes stage-npm publishes; the sha256 recorded here is
       # re-checked before the upload and again in stage-npm after the download.
+      # It runs BEFORE the pack-artifact validation (#20644), so that gate checks this file
+      # instead of a second `npm pack --dry-run` of its own (12-22 min on the v3.8.54 runs).
       - name: Pack the release tarball once
         id: pack
         if: steps.resolve.outputs.skip != 'true'
@@ -281,7 +279,7 @@ jobs:
           rm -f "$TARBALL"
           STARTED=$(date +%s)
           # --ignore-scripts: prepublishOnly would re-run build:cli-api && build:cli,
-          # rebuilding bytes this job has already built and validated.
+          # rebuilding bytes this job has already built.
           npm pack --ignore-scripts
           test -f "$TARBALL" || { echo "expected $TARBALL to exist after npm pack" >&2; ls -la ./*.tgz || true; exit 1; }
           SHA256=$(sha256sum "$TARBALL" | cut -d' ' -f1)
@@ -290,6 +288,17 @@ jobs:
             echo "path=$GITHUB_WORKSPACE/$TARBALL"
             echo "sha256=$SHA256"
           } >> "$GITHUB_OUTPUT"
+
+      # Validates the tarball packed above (OMNIROUTE_PACKED_TARBALL, #20644): its own file
+      # list, packed size (the PACK_ARTIFACT_MAX_PACKED_BYTES budget), required runtime
+      # paths, MCP closure, leaked tests, locale catalog chunks, package.json name/version
+      # and dist/BUILD_SHA provenance — the bytes that are booted and published, not a
+      # second dry-run pack. Without the variable the gate still packs the tree itself.
+      - name: Validate npm package artifact
+        if: steps.resolve.outputs.skip != 'true'
+        env:
+          OMNIROUTE_PACKED_TARBALL: ${{ steps.pack.outputs.path }}
+        run: npm run check:pack-artifact
 
       - name: Generate CycloneDX SBOM (npm)
         if: steps.resolve.outputs.skip != 'true'
@@ -379,7 +388,7 @@ jobs:
       # hosted one (16 GB is not enough for build:cli's next-build fallback — see
       # this job's runs-on comment). So this job proves the bytes and hands them
       # over; a tiny hosted job does the upload. No re-pack: the file handed over is the
-      # one packed after "Validate npm package artifact" and proven by both gates above.
+      # one packed once above, validated by check:pack-artifact and proven by both gates.
       - name: Confirm the proven tarball is unchanged before the hand-off
         if: steps.resolve.outputs.skip != 'true'
         env:

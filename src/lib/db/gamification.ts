@@ -91,6 +91,7 @@ interface StatementLike<TRow = unknown> {
 
 interface DbLike {
   prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
+  transaction: <T>(fn: () => T) => () => T;
 }
 
 function db(): DbLike {
@@ -185,6 +186,24 @@ export function addXp(apiKeyId: string, action: string, amount: number, metadata
      DO UPDATE SET total_xp = total_xp + excluded.total_xp, updated_at = datetime('now')`
     )
     .run(apiKeyId, amount, calculateLevel(amount));
+}
+
+/**
+ * One award = the XP rows of addXp plus the leaderboard credit for each scope, in a single commit.
+ * Run as separate autocommits, an award cost one commit per statement and a failure part-way left
+ * XP without a score (or the reverse).
+ */
+export function awardXp(
+  apiKeyId: string,
+  action: string,
+  amount: number,
+  metadata: string | undefined,
+  scopes: readonly string[]
+): void {
+  db().transaction(() => {
+    addXp(apiKeyId, action, amount, metadata);
+    for (const scope of scopes) updateScore(apiKeyId, scope, amount);
+  })();
 }
 
 export function getXp(apiKeyId: string): UserLevelRow | null {

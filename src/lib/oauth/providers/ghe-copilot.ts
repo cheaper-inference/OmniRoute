@@ -75,6 +75,32 @@ async function optionalJson(url: string, init: RequestInit) {
   }
 }
 
+async function resolveGheCopilotToken(
+  gheUrl: string,
+  accessToken: string,
+  lookupInit: RequestInit
+) {
+  const copilotToken = await optionalJson(`${gheUrl}/api/v3/copilot_internal/v2/token`, lookupInit);
+  if (copilotToken?.token || copilotToken?.endpoints?.api) {
+    return copilotToken;
+  }
+
+  // GHE Cloud with data residency (*.ghe.com) does not expose
+  // /api/v3/copilot_internal/v2/token (returns 404). Instead, it exposes
+  // endpoints via /api/v3/copilot_internal/user and accepts the GitHub OAuth
+  // access_token directly as a Bearer token on endpoints.api.
+  const copilotUser = await optionalJson(`${gheUrl}/api/v3/copilot_internal/user`, lookupInit);
+  if (!copilotUser?.endpoints?.api && !copilotUser?.endpoints?.proxy) {
+    return copilotToken;
+  }
+  return {
+    ...copilotToken,
+    token: accessToken,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    endpoints: copilotUser.endpoints,
+  };
+}
+
 export const gheCopilot = {
   config: GHE_COPILOT_CONFIG,
   flowType: "device_code" as const,
@@ -142,10 +168,7 @@ export const gheCopilot = {
         "User-Agent": getGitHubCopilotChatUserAgent(),
       },
     };
-    const copilotToken = await optionalJson(
-      `${gheUrl}/api/v3/copilot_internal/v2/token`,
-      lookupInit
-    );
+    const copilotToken = await resolveGheCopilotToken(gheUrl, tokens.access_token, lookupInit);
     const userInfo = await optionalJson(`${gheUrl}/api/v3/user`, lookupInit);
     return {
       copilotToken,
