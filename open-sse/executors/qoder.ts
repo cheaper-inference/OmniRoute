@@ -18,6 +18,7 @@ import {
   buildQoderPrompt,
   createQoderErrorResponse,
   isQoderUpstreamBusy,
+  isQoderBillingBlock,
   parseQoderCliFailure,
   parseQoderRetryAfterSeconds,
   parseQoderCliResult,
@@ -134,6 +135,16 @@ async function unwrapQoderEnvelope(response: Response): Promise<Response> {
 
   if (errorStatus) {
     reader.cancel();
+    // Nested envelope codes 110/112: the account spent its daily credits.
+    // 429 (not the outer 403) keeps the healthy PAT routable on other accounts.
+    // Checked before the busy heuristic: the inner payload can carry `isQueued`.
+    if (isQoderBillingBlock(errorMsg)) {
+      return createQoderErrorResponse({
+        status: 429,
+        message: `[qoder error ${errorStatus}: ${sanitizeErrorMessage(truncate(errorMsg, 200))}]`,
+        code: "qoder_billing_block",
+      });
+    }
     // #3510: a 403 envelope carrying the nested code 10605 is Qoder's temporary
     // queue throttle, not an auth failure. Surface it as 503 upstream_busy (same
     // classification as the CLI path) so healthy accounts are not parked on the
