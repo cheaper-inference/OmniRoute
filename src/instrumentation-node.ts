@@ -306,6 +306,7 @@ export async function registerQuotaFetchers(): Promise<void> {
     { registerCrofUsageFetcher },
     { registerDeepseekQuotaFetcher },
     { registerMoonshotQuotaFetcher, registerMoonshotFetchersForNodes },
+    { registerSensenovaQuotaFetcher, registerSensenovaFetchersForNodes },
     { registerOpenrouterQuotaFetcher },
     { registerOpencodeQuotaFetcher },
     { registerGrokWebQuotaFetcher },
@@ -317,6 +318,7 @@ export async function registerQuotaFetchers(): Promise<void> {
     import("@omniroute/open-sse/services/crofUsageFetcher"),
     import("@omniroute/open-sse/services/deepseekQuotaFetcher"),
     import("@omniroute/open-sse/services/moonshotQuotaFetcher"),
+    import("@omniroute/open-sse/services/sensenovaQuotaFetcher"),
     import("@omniroute/open-sse/services/openrouterQuotaFetcher"),
     import("@omniroute/open-sse/services/opencodeQuotaFetcher"),
     import("@omniroute/open-sse/services/grokQuotaFetcher"),
@@ -329,18 +331,19 @@ export async function registerQuotaFetchers(): Promise<void> {
   registerCrofUsageFetcher();
   registerDeepseekQuotaFetcher();
   registerMoonshotQuotaFetcher();
+  registerSensenovaQuotaFetcher();
   try {
     const { getProviderNodes } = await import("@/lib/db/providers");
     const nodes = await getProviderNodes();
-    registerMoonshotFetchersForNodes(
-      (Array.isArray(nodes) ? nodes : []).map((node) => ({
-        id: typeof node.id === "string" ? node.id : null,
-        prefix: typeof node.prefix === "string" ? node.prefix : null,
-        baseUrl: typeof node.baseUrl === "string" ? node.baseUrl : null,
-      }))
-    );
+    const nodeList = (Array.isArray(nodes) ? nodes : []).map((node) => ({
+      id: typeof node.id === "string" ? node.id : null,
+      prefix: typeof node.prefix === "string" ? node.prefix : null,
+      baseUrl: typeof node.baseUrl === "string" ? node.baseUrl : null,
+    }));
+    registerMoonshotFetchersForNodes(nodeList);
+    registerSensenovaFetchersForNodes(nodeList);
   } catch (error) {
-    console.warn("[STARTUP] Moonshot custom-node fetcher scan skipped:", error);
+    console.warn("[STARTUP] Custom-node quota fetcher scan skipped:", error);
   }
   registerOpenrouterQuotaFetcher();
   registerOpencodeQuotaFetcher();

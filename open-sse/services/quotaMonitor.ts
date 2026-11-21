@@ -100,6 +100,10 @@ if (typeof _alertSweep === "object" && "unref" in _alertSweep) {
 }
 // Registry mirror from quotaPreflight (same Map reference via re-export)
 const quotaFetcherRegistry = new Map<string, QuotaFetcher>();
+export function getMonitorFetcher(provider: string): QuotaFetcher | undefined {
+  return quotaFetcherRegistry.get(provider);
+}
+
 export function registerMonitorFetcher(provider: string, fetcher: QuotaFetcher): void {
   quotaFetcherRegistry.set(provider, fetcher);
   registerQuotaFetcher(provider, fetcher);
