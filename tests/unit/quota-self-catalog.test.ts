@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
+import { IntlMessageFormat } from "intl-messageformat";
+
 const EN = JSON.parse(
   readFileSync(path.join(process.cwd(), "src/i18n/messages/en.json"), "utf8")
 ) as Record<string, unknown>;
@@ -105,6 +107,41 @@ const KEYS = [
   "modelCapUsage",
   "modelCapUnknown",
   "modelCapReached",
+  "lendingTitle",
+  "lendingIntro",
+  "lendingStatusOff",
+  "lendingStatusOpen",
+  "lendingStatusUntil",
+  "lendingStatusEnded",
+  "lendingStoredInactive",
+  "lendingPercentLabel",
+  "lendingPercentHint",
+  "lendingPercentInvalid",
+  "lendingDeadlineLabel",
+  "lendingDeadlineHint",
+  "lendingDeadlineIdleHint",
+  "lendingDeadlineNone",
+  "lendingDeadlineKeep",
+  "lendingDeadlineHours",
+  "lendingDeadlineDays",
+  "lendingDeadlinePassed",
+  "lendingSave",
+  "lendingWithdraw",
+  "lendingSaved",
+  "lendingErrorKey",
+  "lendingErrorClosed",
+  "lendingErrorGone",
+  "lendingErrorRejected",
+  "lendingErrorRateLimited",
+  "lendingErrorRateLimitedUnknown",
+  "lendingErrorServer",
+  "lendingErrorNetwork",
+  "lendingErrorUnreadable",
+  "lendingReload",
+  "lendingBorrowTitle",
+  "lendingBorrowAmount",
+  "lendingBorrowUnknown",
+  "lendingBorrowNotApplicable",
   "spendTitle",
   "spendRangeLabel",
   "range1d",
@@ -154,4 +191,53 @@ test("plural and variable strings keep their placeholders", () => {
   assert.ok(String(quotaSelf.usedOf).includes("{limit}"));
   assert.ok(String(quotaSelf.keyInUse).includes("{key}"));
   assert.ok(String(quotaSelf.noPoolsBody).includes("{provider}"));
+});
+
+test("the lending strings keep their placeholders and plain punctuation", () => {
+  const quotaSelf = namespace();
+  assert.ok(
+    String(quotaSelf.lendingStatusUntil).includes("{percent}") &&
+      String(quotaSelf.lendingStatusUntil).includes("{until}")
+  );
+  assert.ok(String(quotaSelf.lendingStoredInactive).includes("{percent}"));
+  assert.ok(String(quotaSelf.lendingDeadlineHours).includes("{hours, plural,"));
+  assert.ok(String(quotaSelf.lendingDeadlineDays).includes("{days, plural,"));
+  assert.ok(String(quotaSelf.lendingErrorRateLimited).includes("{seconds, plural,"));
+  assert.ok(
+    String(quotaSelf.lendingBorrowAmount).includes("{window}") &&
+      String(quotaSelf.lendingBorrowAmount).includes("{amount}")
+  );
+  const lending = Object.entries(quotaSelf).filter(([key]) => key.startsWith("lending"));
+  assert.equal(lending.length, 35);
+  for (const [key, value] of lending) assert.doesNotMatch(String(value), /['<>;—]|anonym/i, key);
+});
+
+test("every lending string compiles as an ICU message", () => {
+  const quotaSelf = namespace();
+  for (const [key, value] of Object.entries(quotaSelf).filter(([name]) =>
+    name.startsWith("lending")
+  )) {
+    assert.doesNotThrow(() => new IntlMessageFormat(String(value), "en"), key);
+  }
+  const format = (key: string, values: Record<string, unknown>) =>
+    new IntlMessageFormat(String(quotaSelf[key]), "en").format(values);
+  assert.equal(
+    format("lendingErrorRateLimited", { seconds: 1 }),
+    "Too many changes in a short time. Try again in 1 second."
+  );
+  assert.equal(
+    format("lendingErrorRateLimited", { seconds: 7 }),
+    "Too many changes in a short time. Try again in 7 seconds."
+  );
+  assert.equal(format("lendingDeadlineDays", { days: 7 }), "For 7 days");
+  assert.equal(
+    format("lendingStoredInactive", { percent: 40 }),
+    "You stored a lending percentage of 40%. It has no effect while this pool does not lend."
+  );
+});
+
+test("the lending block sits right after modelCapReached", () => {
+  const keys = Object.keys(namespace());
+  const start = keys.indexOf("modelCapReached") + 1;
+  assert.ok(keys.slice(start, start + 35).every((key) => key.startsWith("lending")));
 });
