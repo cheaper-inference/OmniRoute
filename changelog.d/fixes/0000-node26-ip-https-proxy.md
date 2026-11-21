@@ -1,0 +1,1 @@
+- Restore HTTPS proxy connections by IP on Node.js 26 while preserving certificate identity verification.
