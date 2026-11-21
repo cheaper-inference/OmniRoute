@@ -20,6 +20,8 @@ export const AUTHZ_HEADER_AUTH_KIND = "x-omniroute-auth-kind";
 export const AUTHZ_HEADER_AUTH_ID = "x-omniroute-auth-id";
 export const AUTHZ_HEADER_AUTH_LABEL = "x-omniroute-auth-label";
 export const AUTHZ_HEADER_AUTH_SCOPES = "x-omniroute-auth-scopes";
+/** Original deletion route, stamped only for an authorized same-request local rewrite. */
+export const AUTHZ_HEADER_PROXY_DELETE_ORIGIN = "x-omniroute-proxy-delete-origin";
 
 /** CLI sends this header so the local process can call management APIs without login. */
 export const CLI_TOKEN_HEADER = "x-omniroute-cli-token";
@@ -118,6 +120,7 @@ export const AUTHZ_TRUSTED_HEADERS: ReadonlyArray<string> = [
   AUTHZ_HEADER_AUTH_ID,
   AUTHZ_HEADER_AUTH_LABEL,
   AUTHZ_HEADER_AUTH_SCOPES,
+  AUTHZ_HEADER_PROXY_DELETE_ORIGIN,
   AUTHZ_HEADER_PEER_LOCALITY,
   AUTHZ_HEADER_TRUSTED_PEER_IP,
   AUTHZ_HEADER_TRUSTED_CLIENT_IP,
