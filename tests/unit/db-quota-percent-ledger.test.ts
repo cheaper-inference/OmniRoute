@@ -63,13 +63,15 @@ test("commit is compare-and-set on the revision", () => {
 });
 
 test("an unreadable key map degrades to no key entry and leaves the rest as stored", () => {
+  const broken = { ...K, poolId: "broken" };
+  assert.equal(commitPercentLedger(broken, state(1, { last: 0.7, resetAt: NOW + DAY })), true);
   core
     .getDbInstance()
-    .prepare("UPDATE quota_percent_ledger SET keys_json = '{' WHERE pool_id = 'p1'")
+    .prepare("UPDATE quota_percent_ledger SET keys_json = '{' WHERE pool_id = 'broken'")
     .run();
   assert.deepEqual(
-    readPercentLedger(K).state,
-    state(2, { last: 0.7, resetAt: NOW + DAY, keys: {} })
+    readPercentLedger(broken).state,
+    state(1, { last: 0.7, resetAt: NOW + DAY, keys: {} })
   );
 });
 
