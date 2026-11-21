@@ -355,107 +355,70 @@ Radar 公告是有意与`active: false`共同承诺的。激活是在以下每�
 
 ---
 
-## 3.9.0 LTS 切分（已在 3.8.58 中演练）
+## 3.9.0 LTS cut（3.8.58排练）
 
-v3.8.59 之后的下一个版本是 3.9.0，其顶端提交将分化为两个长期维护分支：
-`stable/v3`（v3 LTS 版本线，npm `latest`）和 `develop`（v4，版本提升至 4.0.0，npm
-`nightly`）。分支/渠道模型、前向移植和标签请参阅
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)；计划请参阅 [ROADMAP](../../ROADMAP.md)（阶段 3）。切分仅执行一次；
-3.8.58 会在 fork 上进行端到端演练，而 3.8.59 则以
-[GO/NO-GO 检查清单](./LTS_GO_NO_GO.md)收尾。
+v3.8.59 之后的下一个版本是 3.9.0，它的尖端变成了两个长期存在的分支： `stable/v3` （v3 LTS行， npm `latest`）和`develop` （v4，升至 4.0.0， npm `nightly`）。 branch/channel模型、转发端口和标签位于[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)中；该计划属于[ROADMAP](../../ROADMAP.md) （第 3 阶段）。剪切运行一次； 3.8.58 在 fork 上进行端到端排练，3.8.59 以[GO/NO-GO检查表](./LTS_GO_NO_GO.md)结束。
 
-### 试运行（只读，可随时安全执行）
+### 试运行（只读，随时安全）
 
 ```bash
-npm run release:dry-run-lts-cut                       # 实际切分：从 HEAD 创建 3.9.0，前一个标签为 v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # 固定源提交
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` 不执行任何操作：它读取 git 和 `gh`，并输出
-完整流程——前置条件（源可解析；源仓库具有完整历史记录——
-浅克隆无法推送 `stable/v3`，接收端会在遇到第一个嫁接的父提交时拒绝该 pack，
-因此请从完整克隆执行切分，或先执行 `git fetch --unshallow origin`——前一个
-标签存在；`package.json` 为目标版本；存在一个打开的 `release-freeze` issue；现有
-发布分支上没有打开的 `Release branch not green` issue——不存在的分支会报告
-`?`（未知），绝不会报告为绿色——Mergify `release` 队列已配置（G11：`queue_rules`、
-`checks_timeout`、标签 `queue`）；`release/*` 规则集仍会阻止删除和强制推送；并且
-`stable/v3` 和 `develop` 尚不存在）、两个分支步骤、哪些休眠工作流的触发器和
-`if:` 条件会变为 true（以及哪些仍受仓库变量限制或固定到规范仓库）、预期的
-dist-tags（`latest` → 3.9.0，`next` 和 `nightly` 为空）以及回滚流程。退出码 `0` =
-`RESULT: READY`，`1` = 某项阻塞性前置条件失败（`✗`），`2` = 用法错误。
-`--advisory <id,...>` 会将某项检查降级为警告（`!`），但不会隐藏它。
+`scripts/release/dry-run-lts-cut.mjs`不执行任何操作：它读取 git 和`gh`并打印整个序列—前提条件（源解析，源存储库具有完整历史记录—浅克隆无法推送`stable/v3`，接收方拒绝第一个嫁接父级的包，因此从完整克隆或`git fetch --unshallow origin`中剪切第一个—先前标签存在， `package.json`是目标版本， `release-freeze`问题已打开，现有发布分支上没有打开`Release branch not green`问题—不存在的分支存在报告`?`未知，从不绿色—全方位队列登陆发布PRs （G11： `config/merge-queue/config.json`有效，其`bases`管理发布分支， `mode` `live`，其标签存在）， `release/*`规则集仍然阻止删除和强制推送，并且`stable/v3`和`develop`尚不存在），两个分支步骤，休眠工作流触发器和`if:`条件变为 true（并且由存储库变量保持门控或固定到存储库）规范存储库）、预期的 dist 标签（`latest` → 3.9.0、 `next`和`nightly`为空）和回滚。退出`0` = `RESULT: READY`、 `1` =阻塞前提条件失败 (`✗`)、 `2` =使用错误。 `--advisory <id,...>`将检查降级为警告（`!`）而不隐藏它。
 
-请在 3.9.0 发布冻结仍处于开启状态时执行实际切分的试运行——分支会在创建标签之后、
-阶段 12c 解除冻结之前创建。
+在 3.9.0 版本冻结仍处于打开状态时运行真实剪切的试运行—分支是在标签之后、阶段 12c 解除冻结之前创建的。
 
-### 3.8.58 演练（仅限 fork）
+### 3.8.58 排练（仅限 fork）
 
 ```bash
-# 1. 使用演练参数在当前顶端提交上进行试运行
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. 针对 FORK 远程仓库执行（会拒绝 origin 或 URL 为规范仓库的任何远程仓库；
-#    每个步骤都会在终端中请求确认）
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. 在 fork 中运行休眠工作流（如果试运行报告固定到了规范仓库，
-#    则使用 workflow_dispatch），然后回滚
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop 版本提升提交通过 git 底层命令构建（不会触及工作树），并会更新与周期开启提交
-相同的五个文件：`package.json`、`open-sse/package.json`、
-`electron/package.json`、`package-lock.json` 和 `docs/openapi.yaml`。随后会在
-`develop` 上开启 `[4.0.0]` CHANGELOG 章节及其 i18n 镜像，并在该分支的第一个
-PR 之前完成。该脚本绝不会更改 npm dist-tags——请在临时软件包上演练这些操作。
+开发碰撞提交是使用 git 管道构建的（不触及任何工作树），并碰撞与循环开放提交相同的五个文件： `package.json`、 `open-sse/package.json`、 `electron/package.json`、 `package-lock.json`和`docs/openapi.yaml`。之后，在第一个PR之前， `[4.0.0]` CHANGELOG部分及其 i18n 镜像在`develop`上打开。该脚本永远不会更改 npm dist-tags —在临时包上排练这些内容。
 
-### PR 预览制品（构建一次，推广相同的字节内容）
+### PR预览神器（构建一次，提升相同字节）
 
-`.github/workflows/preview-artifact.yml` 从 PR 头部提交构建一个生产 tarball，并
-验证该确切构建（#8084 切片 (a)）。仅支持同一仓库内的 PR；不会发布任何内容。
+`.github/workflows/preview-artifact.yml`从PR头构建一个生产 tarball 并验证确切的构建（#8084 slice (a)）。仅限同一存储库PRs ；没有任何内容被发布。
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # 或添加 `preview-artifact` 标签
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # 安装预览版本
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-该运行会执行 `npm ci`、`npm run build:release`、`npm run check:pack-artifact`，
-打包 tarball，运行 `npm run check:pack-boot`（使用伪造的密钥和临时数据目录），
-再次打包；除非摘要完全相同，否则运行失败。随后记录 `artifact-identity.json`
-（头部 SHA、基准 SHA、锁文件哈希、平台、架构、node ABI、打包器、构建策略——
-`scripts/release/artifact-identity.mjs`），并在单独的作业中证明该 tarball。
-推广预览版本意味着安装该 tarball：绝不要从源代码重新构建。
+运行操作`npm ci`、 `npm run build:release`、 `npm run check:pack-artifact`，打包 tarball，运行`npm run check:pack-boot` （假秘密，临时数据目录），重新打包并失败，除非摘要相同，然后记录`artifact-identity.json` （头SHA，基础SHA，锁定文件哈希，平台，arch，节点ABI，捆绑器，构建策略— `scripts/release/artifact-identity.mjs`）并在单独的作业中证明 tarball 。推广预览意味着安装该 tarball：永远不要从源重建。
 
-### 切分（3.9.0，在 GO 之后）
+### 剪切（3.9.0， GO之后）
 
-1. GO 已记录在 [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) 中。
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` 输出 `RESULT: READY`。
-3. 使用试运行输出的命令，手动在 `origin` 上创建分支——该脚本拒绝推送到
-   `origin`。若要复用已审核的 develop 提交，请先在 3.9.0 顶端提交上，针对你的
-   fork 执行 `--execute` 演练；它会输出两个 SHA，随后可以推送相同的提交：
+1. GO记录在[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)中。
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0`打印`RESULT: READY`。
+3. 使用空运行打印—命令手动在`origin`上创建分支，脚本拒绝推送到`origin`。要重用经过审查的开发提交，请首先针对您的 fork 在 3.9.0 提示上运行`--execute`演练；它打印SHAs，并且可以推送相同的提交：
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. 在第一个 PR 合并之前，保护 `stable/v3` 和 `develop`（规则集 + 合并队列）。
-5. 休眠的工作流会根据分支是否存在而启用：`forward-port.yml`（推送到
-   `stable/v3`）、`validate-stable-pr.yml`（以 `stable/v3` 为目标分支的 PR）和 `nightly-v4-build.yml`
-   （构建 `develop`）。正式启用前，请设置仓库密钥 `secrets.FORWARD_PORT_TOKEN`（以便 CI 在
-   前向移植 PR 上运行）；在所有者将仓库变量 `vars.NIGHTLY_PUBLISH` 设置为 `true`，且 npm 可信发布接受
-   `nightly-v4-build.yml` 之前，夜间发布将保持关闭。渠道解析由 `scripts/release/dist-tag.mjs` 负责，即
-   `npm-publish.yml` 使用的同一解析器。
-6. 验证渠道：`npm view omniroute dist-tags --json` 应显示 `latest` = 3.9.0，且在 v4 发布之前不存在
-   `next` / `nightly`。
-7. 如有需要，可执行回滚：`git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   和 `npm dist-tag add omniroute@3.8.59 latest`。
+4. 在第一个PR登陆之前保护`stable/v3`和`develop` （规则集+合并队列）。
+5. 休眠工作流程根据分支存在而打开： `forward-port.yml` （推送到`stable/v3`）、 `validate-stable-pr.yml` （PRs到`stable/v3`）和`nightly-v4-build.yml` （构建`develop`）。在上线之前，设置`secrets.FORWARD_PORT_TOKEN`存储库机密（以便CI在转发端口PRs上运行）；每晚发布将保持关闭状态，直到所有者将存储库变量`vars.NIGHTLY_PUBLISH`设置为`true`并且 npm Trusted Publishing 接受`nightly-v4-build.yml`。通道分辨率为`scripts/release/dist-tag.mjs`，与`npm-publish.yml`使用的解析器相同。
+6. 验证通道： `npm view omniroute dist-tags --json`显示`latest` = 3.9.0，并且在 v4 发布之前没有`next` / `nightly` 。
+7. 如果需要的话回滚： `git push origin --delete refs/heads/stable/v3 refs/heads/develop`和`npm dist-tag add omniroute@3.8.59 latest`。
 
 ---
 

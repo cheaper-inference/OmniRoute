@@ -42,25 +42,23 @@ flowchart LR
 `main` không phải là nhánh tích hợp hằng ngày. Các PR được mở với đích là `main`
 thường cần được đổi đích trước khi hợp nhất.
 
-## Đóng băng phát hành (các chu kỳ song song)
+## Phát hành đóng băng (chu kỳ song song)
 
-Khi một bản phát hành đang được đối soát, một issue đánh dấu có nhãn `release-freeze` sẽ
-được mở. Điều đó **không làm gián đoạn quá trình phát triển**:
+Khi một bản phát hành đang được đối chiếu, một vấn đề đánh dấu có nhãn `release-freeze` sẽ được mở. Cái đó** không ngừng phát triển** :
 
-- Nhánh `release/vX.Y.Z` đã đóng băng thuộc quyền quản lý của người phụ trách bản phát hành đó.
-- Nhánh `release/vX+1` của chu kỳ tiếp theo được tách từ đầu mút đã đóng băng để người đóng góp tiếp tục
-  đưa công việc vào.
-- Các PR đang mở vẫn nhắm đến nhánh đã đóng băng nên được **đổi đích** sang nhánh
-  `release/v*` đang hoạt động (có phiên bản cao nhất).
+- `release/vX.Y.Z` đông lạnh thuộc về thuyền trưởng thả con tàu đó.
+- `release/vX+1` của chu kỳ tiếp theo được cắt khỏi phần đầu đông lạnh để những người đóng góp tiếp tục công việc hạ cánh.
+- Mở PRs mà vẫn nhắm mục tiêu vào nhánh đông lạnh** được nhắm mục tiêu lại** đến nhánh `release/v*` đang hoạt động (cao nhất).
 
-Hãy kiểm tra xem có đợt đóng băng nào đang mở hay không trước khi cho rằng nhánh bạn muốn có thể được hợp nhất:
+Kiểm tra tình trạng đóng băng mở trước khi cho rằng nhánh bạn muốn có thể hợp nhất được:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Cơ chế hợp nhất (nhãn `queue` của chủ sở hữu → Mergify) được ghi lại trong
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Cơ chế hợp nhất (chủ sở hữu nhãn `queue` → Mergify) được ghi lại trong [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **19-11-2026: hàng đợi hợp nhất Hợp nhất đã ngừng hoạt động** (quyết định của chủ sở hữu). `.mergify.yml` không còn xác định hàng đợi và từ chối các lệnh Hợp nhất hợp nhất hoặc viết lại yêu cầu kéo. Bản phát hành PRs được hợp nhất bằng tay theo bộ quy tắc kho lưu trữ "Yêu cầu cổng xanh trên bản phát hành đang hoạt động" (`Gate / CI` + `Gate / Quality`) cho đến khi hàng đợi omni chạy ở chế độ trực tiếp và sau đó thông qua hàng đợi omni ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Nhãn `queue` không còn hợp nhất bất cứ thứ gì nữa.
 
 ## Tại sao cần cả nhánh lẫn thẻ?
 

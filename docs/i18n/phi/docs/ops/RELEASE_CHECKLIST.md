@@ -378,8 +378,7 @@ grafted parent, kaya gawin ang cut mula sa isang full clone o patakbuhin muna an
 tag, target na bersyon ang nasa `package.json`, may bukas na `release-freeze` issue, walang bukas na
 `Release branch not green` issue
 sa isang umiiral na release branch — ang branch na hindi umiiral ay nag-uulat ng `?` unknown, at hindi kailanman
-green — naka-configure ang Mergify `release` queue (G11: `queue_rules`, `checks_timeout`,
-label na `queue`), hinaharang pa rin ng `release/*` ruleset ang deletion at force-push, at
+green — Pinagsasama ng omni-queue ang mga pull request sa release branch (G11: `config/merge-queue/config.json` valid, ang `bases` nito ay namamahala sa release branch, `mode` `live`, umiiral ang label nito), hinaharang pa rin ng `release/*` ruleset ang deletion at force-push, at
 hindi pa umiiral ang `stable/v3` at `develop`), ang dalawang hakbang sa branch, kung aling mga dormant-workflow
 trigger at `if:` condition ang nagiging true (at kung alin ang nananatiling naka-gate ng repository variable o
 naka-pin sa canonical repository), ang inaasahang mga dist-tag (`latest` → 3.9.0, walang laman ang `next` at

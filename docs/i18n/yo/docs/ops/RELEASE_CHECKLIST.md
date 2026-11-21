@@ -355,113 +355,70 @@ Ikede Radar naa ni ifaramọ pẹlumọmọ pẹlu `active: false`. Muu ṣiṣ�
 
 ---
 
-## Gígé 3.9.0 LTS (tí a ṣe ìdánwò rẹ̀ ní 3.8.58)
+## 3.9.0 LTS ge (atunṣe ni 3.8.58)
 
-Lẹ́yìn v3.8.59, ẹ̀yà tó kàn ni 3.9.0, òkè rẹ̀ sì di ẹ̀ka méjì tí yóò wà fún ìgbà pípẹ́:
-`stable/v3` (ìlà v3 LTS, npm `latest`) àti `develop` (v4, tí a gbé sókè sí 4.0.0, npm
-`nightly`). Àwòṣe ẹ̀ka/ikanni, ìgbé lọ síwájú àti àwọn àmì wà nínú
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); ètò náà wà nínú [ROADMAP](../../ROADMAP.md) (Ìpele 3). Gígé náà máa ṣiṣẹ́ lẹ́ẹ̀kan ṣoṣo;
-3.8.58 ṣe ìdánwò rẹ̀ láti ìbẹ̀rẹ̀ dé òpin lórí fork kan, 3.8.59 sì parí pẹ̀lú
-[àtòjọ àyẹ̀wò GO/NO-GO](./LTS_GO_NO_GO.md).
+Lẹhin v3.8.59 ti ikede ti o tẹle jẹ 3.9.0, ati imọran rẹ di awọn ẹka igba pipẹ meji: `stable/v3` (laini v3 LTS, npm `latest`) ati `develop` (v4, bumped to 4.0.0, npm `nightly`). Awoṣe branch/channel, ibudo-iwaju ati awọn akole wa ni [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; Ilana naa wa ninu [ROADMAP](../../ROADMAP.md) (Ipele 3). Awọn ge nṣiṣẹ lẹẹkan; 3.8.58 tun ṣe lati pari lati pari lori orita, ati 3.8.59 tilekun pẹlu [akojọ ayẹwo GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Ìdánwò ṣáájú (kíkà-nìkan, ó láàbò nígbàkigbà)
+### Ṣiṣe-gbẹ (ka-nikan, ailewu nigbakugba)
 
 ```bash
-npm run release:dry-run-lts-cut                       # gígé gidi: 3.9.0 láti HEAD, àmì tó ṣáájú v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fi commit orísun náà dúró ṣinṣin
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` kò ṣe ohunkóhun: ó ka git àti `gh`, ó sì tẹ gbogbo
-ìlànà náà jáde — àwọn àjọsọ ṣáájú (orísun náà lè yanjú, ibi ìpamọ́ orísun náà ní gbogbo ìtàn —
-shallow clone kò lè push `stable/v3`, apá olùgbà kọ pack náà ní parent grafted àkọ́kọ́,
-nítorí náà ṣe gígé láti full clone tàbí kọ́kọ́ ṣe `git fetch --unshallow origin` — àmì tó
-ṣáájú wà, `package.json` jẹ́ ẹ̀yà àfojúsùn, issue `release-freeze` kan ṣí sílẹ̀, kò sí issue
-`Release branch not green` tó ṣí sílẹ̀
-lórí ẹ̀ka ìtújáde tó ti wà — ẹ̀ka tí kò sí máa fi `?` hàn gẹ́gẹ́ bí àìmọ̀, kò sì jẹ́
-aláwọ̀ ewé láé — a ti ṣètò àkójọ Mergify `release` (G11: `queue_rules`, `checks_timeout`,
-àmì `queue`), ruleset `release/*` ṣì dí píparẹ́ àti force-push, àti pé
-`stable/v3` àti `develop` kò tíì sí), àwọn ìgbésẹ̀ ẹ̀ka méjèèjì, àwọn ohun ìmúṣiṣẹ́ workflow
-tó ń sùn àti àwọn ipò `if:` tí yóò di òótọ́ (àti àwọn tó ṣì jẹ́ dídènà nípasẹ̀ variable ibi
-ìpamọ́ tàbí tí a so mọ́ ibi ìpamọ́ canonical), àwọn dist-tags tí a retí (`latest` → 3.9.0,
-`next` àti `nightly` ṣófo) àti ìpadà-sẹ́yìn. Exit `0` = `RESULT: READY`, `1` = àjọsọ ṣáájú
-tó ń dí iṣẹ́ kan kùnà (`✗`), `2` = àṣìṣe lílò. `--advisory <id,...>` sọ àyẹ̀wò kan di ìkìlọ̀ (`!`)
-láìfi í pamọ́.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-Ṣe ìdánwò ṣáájú fún gígé gidi nígbà tí dídì ìtújáde 3.9.0 ṣì ṣí sílẹ̀ — a máa dá àwọn ẹ̀ka
-náà lẹ́yìn àmì náà àti ṣáájú kí Ìpele 12c tó yọ dídì náà.
+Ṣiṣe awọn gidi gige ti gbẹ-ṣiṣe nigba ti 3.9.0 itusilẹ didi ṣi ṣi — awọn ẹka ti ṣẹda lẹhin tag ati ṣaaju ki Alakoso 12c gbe didi naa soke.
 
-### Ìdánwò 3.8.58 (fork nìkan)
+### 3.8.58 atunwi (orita nikan)
 
 ```bash
-# 1. Ṣe ìdánwò ṣáájú lórí òkè lọ́wọ́lọ́wọ́ pẹ̀lú àwọn parameter ìdánwò
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Ṣe é sí remote FORK kan (origin, tàbí remote èyíkéyìí tí URL rẹ̀ jẹ́ ibi ìpamọ́
-#    canonical, ni a kọ̀; gbogbo ìgbésẹ̀ máa ń béèrè ìfìdímúlẹ̀ lórí terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Ṣe ìdánwò àwọn workflow tó ń sùn nínú fork náà (workflow_dispatch níbi tí ìdánwò ṣáájú
-#    ti ṣe ìròyìn ìsopọ̀ mọ́ ibi ìpamọ́ canonical), lẹ́yìn náà padà sẹ́yìn
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-A kọ commit ìgbésókè develop pẹ̀lú git plumbing (a kò fọwọ́ kan working tree kankan), ó sì
-gbé àwọn fáìlì márùn-ún kan náà sókè bí commit ṣíṣí-cycle: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` àti `docs/openapi.yaml`. A máa ṣí abala
-CHANGELOG `[4.0.0]` àti àwọn àwòkọ i18n rẹ̀ lórí `develop` lẹ́yìn náà, ṣáájú PR àkọ́kọ́ rẹ̀.
-Script náà kì í yí npm dist-tags padà láé — ṣe ìdánwò àwọn wọ̀nyẹn lórí package àdánwò kan.
+Iṣe idagbasoke ijalu jẹ itumọ pẹlu git Plumbing (ko si igi ti n ṣiṣẹ ti a fi ọwọ kan) ati bumps awọn faili marun kanna bi iṣẹ-iṣisi iyipo: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ati `docs/openapi.yaml`. Abala `[4.0.0]` CHANGELOG ati awọn digi i18n rẹ wa ni ṣiṣi lori `develop` lẹhinna, ṣaaju ki akọkọ PR rẹ. Iwe afọwọkọ ko yipada npm dist-tags — tun ṣe awọn ti o wa lori package ibere kan.
 
-### Artifact àwòrán-àkọ́kọ́ PR (kọ́ ọ lẹ́ẹ̀kan, gbé bytes kan náà ga)
+### artifact awotẹlẹ PR (kọ lẹẹkan, ṣe igbega awọn baiti kanna)
 
-`.github/workflows/preview-artifact.yml` kọ tarball production kan láti orí PR kan, ó sì
-fọwọ́sí build náà gan-an (#8084 apá (a)). Àwọn PR láti ibi ìpamọ́ kan náà nìkan; kò sí ohun
-tí a tẹ̀ jáde.
+`.github/workflows/preview-artifact.yml` ṣe agbejade tarball iṣelọpọ kan lati ori PR kan ati pe o ṣe ifọwọsi itumọ gangan (bibẹ #8084 (a)). Ibi ipamọ-kanna PRs nikan; ohunkohun ti wa ni atejade.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # tàbí fi àmì `preview-artifact` kún un
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # fífi àwòrán-àkọ́kọ́ sori ẹrọ
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Ìṣiṣẹ́ náà ṣe `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, ó kó
-tarball náà, ó ṣiṣẹ́ `npm run check:pack-boot` (àwọn secret èké, data dir fún ìgbà díẹ̀), ó
-tún un kó, ó sì kùnà àyàfi tí digest náà bá jẹ́ ọ̀kan náà; lẹ́yìn náà ó ṣàkọsílẹ̀
-`artifact-identity.json` (head SHA, base SHA, hash lockfile, platform, arch, node ABI,
-bundler, ìlànà build — `scripts/release/artifact-identity.mjs`), ó sì jẹ́rìí sí tarball náà
-nínú job ọ̀tọ̀. Gígbé àwòrán-àkọ́kọ́ ga túmọ̀ sí fífi tarball náà sori ẹrọ: má ṣe tún un kọ́
-láti orísun láé.
+Ṣiṣe naa n ṣe `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, ṣajọpọ tarball, nṣiṣẹ `npm run check:pack-boot` (awọn asiri iro, ephemeral data dir), tun-pack ati kuna ayafi ti ijẹẹjẹ ba jẹ aami, lẹhinna ṣe igbasilẹ `artifact-identity.json` (ori SHA, ipilẹ SHA, lockfile hash, platform, arch, node ABI, bundler ni iṣẹ-ṣiṣe —, kọ `scripts/release/artifact-identity.mjs` ni eto imulo ) Igbega awotẹlẹ tumọ si fifi tarball yẹn sori ẹrọ: ko tun kọ lati orisun.
 
-### Gígé náà (3.9.0, lẹ́yìn GO)
+### Ge (3.9.0, lẹhin GO)
 
-1. A ṣàkọsílẹ̀ GO nínú [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` tẹ `RESULT: READY` jáde.
-3. Dá àwọn ẹ̀ka náà sílẹ̀ lórí `origin` pẹ̀lú ọwọ́ nípa àwọn àṣẹ tí ìdánwò ṣáájú tẹ̀ jáde —
-   script náà kọ̀ láti push sí `origin`. Láti tún commit develop tí a ti ṣàyẹ̀wò lò, ṣiṣẹ́
-   ìdánwò `--execute` lórí òkè 3.9.0 sí fork rẹ kọ́kọ́; ó tẹ SHA méjèèjì jáde, a sì lè push
-   àwọn commit kan náà:
+1. GO ti a gbasilẹ ni [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` tẹ jade `RESULT: READY`.
+3. Ṣẹda awọn ẹka lori `origin` pẹlu ọwọ pẹlu awọn aṣẹ awọn atẹjade ti o gbẹ-gbẹ — iwe afọwọkọ kọ lati Titari si `origin`. Lati tun lo idagbasoke idagbasoke ti a ṣe atunyẹwo, ṣiṣe atunwi `--execute` lori imọran 3.9.0 lodi si orita rẹ akọkọ; o ṣe atẹjade mejeeji SHAs, ati pe awọn iṣe kanna ni a le titari:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Dáàbò bo `stable/v3` àti `develop` (àwọn àkójọpọ̀ òfin + ìlà ìdapọ̀) kí PR àkọ́kọ́ tó wọlé.
-5. Àwọn ìṣàn iṣẹ́ tí kò tíì ṣiṣẹ́ yóò bẹ̀rẹ̀ nípasẹ̀ wíwà ẹ̀ka náà: `forward-port.yml` (ìfìránṣẹ́ sí
-   `stable/v3`), `validate-stable-pr.yml` (àwọn PR sí `stable/v3`) àti `nightly-v4-build.yml`
-   (ń kọ́ `develop`). Kí ìfilọ́lẹ̀ tó bẹ̀rẹ̀, ṣètò àṣírí ibi ìpamọ́ `secrets.FORWARD_PORT_TOKEN` (kí CI lè ṣiṣẹ́ lórí
-   àwọn PR forward-port); ìtẹ̀jáde alẹ́ kò ní ṣiṣẹ́ títí tí olówó yóò fi ṣètò oníyípadà ibi ìpamọ́
-   `vars.NIGHTLY_PUBLISH` sí `true` tí npm Trusted Publishing sì gba
-   `nightly-v4-build.yml`. Ìyanjú channel wà ní `scripts/release/dist-tag.mjs`, olùyanjú kan náà
-   tí `npm-publish.yml` ń lò.
-6. Ṣàyẹ̀wò àwọn channel náà: `npm view omniroute dist-tags --json` ń fi `latest` = 3.9.0 hàn, kò sì sí
-   `next` / `nightly` títí v4 yóò fi tẹ̀jáde.
-7. Ìpadà-sẹ́yìn, bí ó bá ṣe pàtàkì: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   àti `npm dist-tag add omniroute@3.8.59 latest`.
+4. Dabobo `stable/v3` ati `develop` (awọn ofin ti ila ilapọ + ) ṣaaju awọn ilẹ PR akọkọ.
+5. Awọn iṣan-iṣẹ iṣẹ ti o wa ni isinmi yipada nipasẹ aye ti ẹka: `forward-port.yml` (titari si `stable/v3`), `validate-stable-pr.yml` (PRs si `stable/v3`) ati `nightly-v4-build.yml` (kọ `develop`). Ṣaaju ki o to lọ-ifiwe, ṣeto aṣiri ibi ipamọ `secrets.FORWARD_PORT_TOKEN` (nitorina CI nṣiṣẹ lori ibudo-iwaju PRs); Titẹjade alẹ alẹ duro ni pipa titi oniwun yoo ṣeto oniyipada ibi ipamọ `vars.NIGHTLY_PUBLISH` si `true` ati npm Titẹ Igbẹkẹle gba `nightly-v4-build.yml`. Ipinnu ikanni jẹ `scripts/release/dist-tag.mjs`, ipinnu kanna `npm-publish.yml` nlo.
+6. Daju awọn ikanni: `npm view omniroute dist-tags --json` fihan `latest` = 3.9.0 ko si si `next` / `nightly` titi v4 ṣe atẹjade.
+7. Yipada, ti o ba nilo: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ati `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 
