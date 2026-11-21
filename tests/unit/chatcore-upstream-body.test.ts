@@ -908,6 +908,86 @@ test("injects prompt_cache_key for Kimi Code's OpenAI protocol", async () => {
   assert.match(String(out.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
 });
 
+test("injects a stable prompt_cache_key for Mistral Chat Completions", async () => {
+  const opts = {
+    translatedBody: {
+      model: "mistral-small-latest",
+      messages: [
+        { role: "system", content: "stable coding instructions" },
+        { role: "user", content: "fix this" },
+      ],
+    },
+    modelToCall: "mistral-small-latest",
+    provider: "mistral",
+    targetFormat: "openai",
+    credentials: { apiKey: "k" },
+  };
+  const first = await prepareUpstreamBody(opts);
+  const second = await prepareUpstreamBody({
+    ...opts,
+    translatedBody: {
+      ...opts.translatedBody,
+      messages: [...opts.translatedBody.messages, { role: "user", content: "and then this" }],
+    },
+  });
+  assert.match(String(first.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
+  assert.equal(second.prompt_cache_key, first.prompt_cache_key);
+});
+
+test("injects a stable prompt_cache_key for Mistral Responses bodies", async () => {
+  const build = (extra: unknown[]) => ({
+    translatedBody: {
+      model: "labs-leanstral-1-5-1",
+      instructions: "stable coding instructions",
+      input: [{ role: "user", content: "fix this" }, ...extra],
+    },
+    modelToCall: "labs-leanstral-1-5-1",
+    provider: "mistral",
+    targetFormat: "openai-responses",
+    credentials: { apiKey: "k" },
+  });
+  const first = await prepareUpstreamBody(build([]));
+  const second = await prepareUpstreamBody(
+    build([
+      { role: "assistant", content: "ok" },
+      { role: "user", content: "more" },
+    ])
+  );
+  assert.match(String(first.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
+  assert.equal(second.prompt_cache_key, first.prompt_cache_key);
+
+  const other = await prepareUpstreamBody({
+    ...build([]),
+    translatedBody: { ...build([]).translatedBody, instructions: "different instructions" },
+  });
+  assert.notEqual(other.prompt_cache_key, first.prompt_cache_key);
+});
+
+test("Mistral Responses body keeps a client-supplied prompt_cache_key and never gets one for other providers' Responses bodies", async () => {
+  const kept = await prepareUpstreamBody({
+    translatedBody: {
+      model: "labs-leanstral-1-5-1",
+      instructions: "x",
+      input: [],
+      prompt_cache_key: "client-key",
+    },
+    modelToCall: "labs-leanstral-1-5-1",
+    provider: "mistral",
+    targetFormat: "openai-responses",
+    credentials: { apiKey: "k" },
+  });
+  assert.equal(kept.prompt_cache_key, "client-key");
+
+  const none = await prepareUpstreamBody({
+    translatedBody: { model: "gpt-5", instructions: "x", input: [{ role: "user", content: "hi" }] },
+    modelToCall: "gpt-5",
+    provider: "openai",
+    targetFormat: "openai-responses",
+    credentials: { apiKey: "k" },
+  });
+  assert.equal(none.prompt_cache_key, undefined);
+});
+
 test("Codex Responses attempts reuse immutable input when no payload rules exist", async () => {
   setPayloadRulesConfig({});
   const input = [
