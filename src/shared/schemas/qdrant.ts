@@ -4,7 +4,7 @@ export const QdrantQuantizationSchema = z.enum(["none", "int8", "binary"]);
 
 export const QdrantSettingsSchema = z.object({
   enabled: z.boolean(),
-  host: z.string().min(0), // string vazia OK quando enabled=false
+  host: z.string().min(0), // empty string OK when enabled=false
   port: z.number().int().min(1).max(65535).default(6333),
   collection: z.string().min(1).default("omniroute_memory"),
   embeddingModel: z.string().default("openai/text-embedding-3-small"),
@@ -21,7 +21,7 @@ export const QdrantSettingsUpdateSchema = z
     collection: z.string().min(1).optional(),
     embeddingModel: z.string().min(1).optional(),
     quantization: QdrantQuantizationSchema.optional(),
-    apiKey: z.string().optional(), // string vazia = remove
+    apiKey: z.string().optional(), // empty string = remove
   })
   .strict();
 

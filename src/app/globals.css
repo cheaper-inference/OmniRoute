@@ -68,7 +68,7 @@
   --color-primary-hover: var(--ci-color-accent-hover);
   /* Primary as TEXT (`text-primary` via @theme's --text-color-primary): the accent is a
      surface that carries dark ink, never ink on light (Classic lime-400 on the background
-     ≈ 1.1:1, Editions copper ≈ 1.8:1). The kit has no accent-ink token yet (pendência), so
+     ≈ 1.1:1, Editions copper ≈ 1.8:1). The kit has no accent-ink token yet (pending), so
      Classic light uses its lime-800 (≈ 7.1:1) and dark flips back to the lime below; Editions
      reads its own accent-active (block after the dark one). */
   --color-primary-ink: var(--ci-lime-800);

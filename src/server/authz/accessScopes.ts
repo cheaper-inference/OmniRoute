@@ -13,8 +13,8 @@ import { type AccessScope } from "@/lib/accessTokens/scopes";
  *   - ADMIN_MUTATION_EXACT_PATHS: same as above, but for one route only (no sub-routes).
  *
  * This covers every existing management route with zero per-route edits. A NEW
- * mutating route nasce exigindo `write` por padrão (não `admin`) — quando uma
- * rota nova for sensível, adicione seu prefixo a uma das listas abaixo.
+ * mutating route requires `write` by default (not `admin`) — when a
+ * new route is sensitive, add its prefix to one of the lists below.
  *
  * Note: this only governs the access-token credential path. Dashboard JWT, the
  * loopback CLI machine-id token, and manage-scope API keys remain full-access.

@@ -296,7 +296,7 @@ export default function DroidToolCard({
     };
 
     const platform = typeof navigator !== "undefined" && navigator.platform;
-    // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+    // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
     const isWindows = platform?.toLowerCase().includes("win");
     const settingsPath = isWindows
       ? "%USERPROFILE%\\.factory\\settings.json"

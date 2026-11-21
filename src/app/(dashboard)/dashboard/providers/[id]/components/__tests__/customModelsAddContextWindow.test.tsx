@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 //
-// Add-form context-window override: o form de CADASTRO de modelo custom deve
-// enviar contextWindowOverride no POST /api/provider-models quando preenchido
-// (antes só a EDIÇÃO tinha o campo — #4125), e validar entrada inválida.
+// Add-form context-window override: the custom-model CREATE form must
+// send contextWindowOverride in the POST /api/provider-models when filled
+// (before #4125 only the EDIT form had the field), and validate invalid input.
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -64,7 +64,7 @@ describe("CustomModelsSection add form", () => {
     vi.useRealTimers();
     notifyError.mockClear();
     fetchMock.mockReset();
-    // GET on mount → lista vazia; POST → sucesso.
+    // GET on mount → empty list; POST → success.
     fetchMock.mockImplementation(async (_url: string, init?: RequestInit) => {
       if (init?.method === "POST") {
         return new Response(JSON.stringify({ model: { id: "m1" } }), { status: 200 });

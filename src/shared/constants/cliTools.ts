@@ -234,8 +234,8 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
     color: "#4285F4",
     description: "Google Antigravity IDE — MITM intercept required (plan 11 backlog)",
     docsUrl: "/docs?section=cli-tools&tool=antigravity",
-    // configType:"mitm" — fluxo MITM; baseUrlSupport:"none" → excluído das listas,
-    // acessível só via legacy /[id] route após F8
+    // configType:"mitm" — MITM flow; baseUrlSupport:"none" → excluded from lists,
+    // reachable only via the legacy /[id] route after F8
     configType: "mitm",
     category: "code",
     vendor: "Google",
@@ -421,8 +421,8 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
     color: "#FF6B35",
     description: "Amazon Kiro — AI-powered IDE with MITM intercept (plan 11 backlog)",
     docsUrl: "/docs?section=cli-tools&tool=kiro",
-    // configType:"mitm" — fluxo MITM; baseUrlSupport:"none" → excluído das listas,
-    // acessível só via legacy /[id] route após F8
+    // configType:"mitm" — MITM flow; baseUrlSupport:"none" → excluded from lists,
+    // reachable only via the legacy /[id] route after F8
     configType: "mitm",
     category: "code",
     vendor: "Amazon",

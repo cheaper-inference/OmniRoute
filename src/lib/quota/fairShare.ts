@@ -101,7 +101,7 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
     const consumed = consumedByThisKey[dKey] ?? 0;
     const fairShare = (allocation.weight / 100) * dim.limit;
 
-    // ── Cap absoluto (intransponível, sempre) ──────────────────────────────
+    // ── Absolute cap (never crossed, always) ───────────────────────────────
     if (
       allocation.capValue !== undefined &&
       allocation.capUnit === dim.key.unit &&
@@ -110,7 +110,7 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
       return { kind: "block", reason: "cap-absolute" };
     }
 
-    // ── Teto global intransponível ─────────────────────────────────────────
+    // ── Uncrossable global ceiling ─────────────────────────────────────────
     // If the pool's global limit is already reached AND this key's request
     // would exceed it (burst mode without borrow room), block as "global-saturated".
     if (dim.consumedTotal >= dim.limit) {

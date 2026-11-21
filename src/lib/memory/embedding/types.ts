@@ -4,25 +4,25 @@ export interface EmbeddingProviderListing {
   provider: string; // e.g. "openai"
   hasKey: boolean;
   models: Array<{
-    id: string; // formato `provider/model`, e.g. "openai/text-embedding-3-small"
+    id: string; // `provider/model` format, e.g. "openai/text-embedding-3-small"
     name: string;
     dimensions: number | null;
   }>;
 }
 
 export interface EmbeddingResolution {
-  /** Fonte ativa após resolveEmbeddingSource(settings). null = nenhuma disponível → degrada p/ FTS5. */
+  /** Active source after resolveEmbeddingSource(settings). null = none available → falls back to FTS5. */
   source: "remote" | "static" | "transformers" | null;
-  /** Modelo ativo (formato provider/model para remote, "potion-base-8M" para static, "Xenova/all-MiniLM-L6-v2" para transformers). */
+  /** Active model (provider/model format for remote, "potion-base-8M" for static, "Xenova/all-MiniLM-L6-v2" for transformers). */
   model: string | null;
-  /** Dimensão do vetor produzido. null antes da 1ª chamada (lazy probe). */
+  /** Dimension of the produced vector. null before the first call (lazy probe). */
   dimensions: number | null;
-  /** Assinatura única usada como chave do vectorStore para detectar troca de modelo. */
+  /** Unique signature used as the vectorStore key to detect a model swap. */
   signature: string; // ${source}:${model}:${dim}
   /** Cache/signature identity when the same model ID can exist at multiple custom endpoints. */
   identity?: string;
-  /** Motivo da escolha (UI exibe no Engine status). */
-  reason: string; // e.g. "provider openai com key configurada"
+  /** Reason for the choice (shown in the UI's Engine status). */
+  reason: string; // e.g. "provider openai with key configured"
 }
 
 export interface EmbeddingResult {

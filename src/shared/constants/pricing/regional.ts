@@ -16,7 +16,7 @@ export const DEFAULT_PRICING_REGIONAL = {
       cache_creation: 1.0,
     },
     // Kimi K2.5 — acesso direto via Moonshot API
-    // Context: 262.144 tokens | Capabilities: reasoning, vision, agentic, tools
+    // Context: 262,144 tokens | Capabilities: reasoning, vision, agentic, tools
     "kimi-k2.5": {
       input: 0.6,
       output: 3.0,
@@ -109,7 +109,7 @@ export const DEFAULT_PRICING_REGIONAL = {
       cache_creation: 0.5,
     },
     // MiniMax M2.5 — mais barato que M2.1, reasoning + tools
-    // Context: 204.800 tokens | Max Output: 16.384 tokens
+    // Context: 204,800 tokens | Max Output: 16,384 tokens
     "minimax-m2.5": {
       input: 0.27,
       output: 0.95,

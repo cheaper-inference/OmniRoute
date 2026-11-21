@@ -1,8 +1,8 @@
 /**
- * POST /api/conductor/tasks/[id]/cancel — cancela a task no hub do Conductor.
- * Ação destrutiva: auth de gerência + confirmação na UI (ConfirmModal). A
- * recusa do hub volta só como status + mensagem sanitizada (nunca o corpo
- * upstream — Hard Rule #12).
+ * POST /api/conductor/tasks/[id]/cancel — cancels a task on the Conductor hub.
+ * Destructive action: management auth + UI confirmation (ConfirmModal). A
+ * hub refusal comes back only as status + a sanitized message (never the
+ * upstream body — Hard Rule #12).
  */
 
 import { NextResponse } from "next/server";

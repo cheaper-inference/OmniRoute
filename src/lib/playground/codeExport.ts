@@ -2,13 +2,13 @@
 import { z } from "zod";
 
 /**
- * Endpoint suportado pelo Playground Studio. Reflete os 13 endpoints da API OmniRoute
- * consumíveis pelas tabs Chat/Compare/Build/Search/Scrape via Export Code.
+ * Endpoint supported by Playground Studio. Reflects the 13 OmniRoute API endpoints
+ * consumable by the Chat/Compare/Build/Search/Scrape tabs via Export Code.
  *
- * D4-rev2 (2026-05-28): contrato expandido de 10 → 13 incluindo `responses`, `video`,
- * `music` para refletir a API real (`/v1/responses`, `/v1/videos/generations`,
- * `/v1/music/generations`). A tab API (Monaco editor) mantém seu próprio sistema
- * de endpoint values (D14) e não consome este type.
+ * D4-rev2 (2026-05-28): contract expanded from 10 → 13 to include `responses`, `video`,
+ * `music` to reflect the real API (`/v1/responses`, `/v1/videos/generations`,
+ * `/v1/music/generations`). The API tab (Monaco editor) keeps its own
+ * endpoint-value system (D14) and does not consume this type.
  */
 export type PlaygroundEndpoint =
   | "chat.completions"
@@ -25,10 +25,10 @@ export type PlaygroundEndpoint =
   | "search"
   | "web.fetch";
 
-/** Linguagens de export suportadas. */
+/** Supported export languages. */
 export type ExportLanguage = "curl" | "python" | "typescript";
 
-/** Mensagem chat single-turn ou multi-turn. */
+/** Single-turn or multi-turn chat message. */
 export interface ChatMessage {
   role: "system" | "user" | "assistant" | "tool";
   content: string | Array<{ type: string; [k: string]: unknown }>;
@@ -36,7 +36,7 @@ export interface ChatMessage {
   tool_call_id?: string;
 }
 
-/** Tool definition no formato OpenAI Function Calling. */
+/** Tool definition in OpenAI Function Calling format. */
 export interface ToolDefinition {
   type: "function";
   function: {
@@ -46,11 +46,11 @@ export interface ToolDefinition {
   };
 }
 
-/** Estado completo capturável pelo Playground (subset de campos por endpoint). */
+/** Full state capturable by the Playground (subset of fields per endpoint). */
 export interface PlaygroundState {
   endpoint: PlaygroundEndpoint;
-  baseUrl: string; // ex.: "http://localhost:20128"
-  model?: string; // não aplicável a web.fetch
+  baseUrl: string; // e.g.: "http://localhost:20128"
+  model?: string; // not applicable to web.fetch
   systemPrompt?: string;
   messages?: ChatMessage[]; // chat/completions
   prompt?: string; // completions/embeddings
@@ -386,8 +386,8 @@ function buildTypescriptSnippet(state: PlaygroundState): string {
 }
 
 /**
- * Gera código para uma linguagem específica a partir do estado atual.
- * Sempre usa `API_KEY_PLACEHOLDER` para a API key (D11).
+ * Generates code for a given language from the current state.
+ * Always uses `API_KEY_PLACEHOLDER` for the API key (D11).
  */
 export function exportCode(state: PlaygroundState, language: ExportLanguage): string {
   switch (language) {

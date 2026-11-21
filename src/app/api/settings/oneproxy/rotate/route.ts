@@ -1,5 +1,5 @@
-// Compat redirect: 1 release — /rotate foi descontinuado junto com o sistema 1proxy legado.
-// O conceito mais próximo no novo sistema é forçar uma sincronização das fontes de free proxy.
+// Compat redirect: 1 release — /rotate was retired along with the legacy 1proxy system.
+// The closest concept in the new system is forcing a sync of the free-proxy sources.
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 export async function POST(request: Request) {

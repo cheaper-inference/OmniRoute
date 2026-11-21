@@ -422,7 +422,7 @@ export default function QuotaSharePageClient() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Falha ao remover: dispensável, mas nunca silenciosa. */}
+      {/* Removal failure: non-blocking, but never silent. */}
       {removeError && (
         <Alert
           variant="critical"

@@ -3,12 +3,12 @@ import { z } from "zod";
 
 export const ImprovePromptRequestSchema = z
   .object({
-    /** Conteúdo atual a melhorar; pelo menos um dos dois deve ser não-vazio. */
+    /** Current content to improve; at least one of the two must be non-empty. */
     system: z.string().max(50_000).optional(),
     prompt: z.string().max(50_000).optional(),
-    /** Modelo configurado no painel Config — escolha do usuário (D8). */
+    /** Model configured in the Config panel — user's choice (D8). */
     model: z.string().min(1),
-    /** Tom: "concise" (padrão) ou "detailed" (mais verboso). */
+    /** Tone: "concise" (default) or "detailed" (more verbose). */
     tone: z.enum(["concise", "detailed"]).default("concise"),
   })
   .refine((d) => Boolean(d.system?.trim() || d.prompt?.trim()), {
@@ -19,17 +19,17 @@ export const ImprovePromptRequestSchema = z
 export type ImprovePromptRequest = z.infer<typeof ImprovePromptRequestSchema>;
 
 export interface ImprovePromptResult {
-  /** Versões melhoradas (apenas as fornecidas no request retornam). */
+  /** Improved versions (only the ones provided in the request are returned). */
   improvedSystem?: string;
   improvedPrompt?: string;
-  /** Tokens consumidos no call de melhoria (do usage). */
+  /** Tokens consumed by the improve call (from usage). */
   tokensIn: number;
   tokensOut: number;
 }
 
 /**
- * Meta-prompt fixado (D8). NÃO alterar sem aprovação do orquestrador.
- * Inspirado em Anthropic Console Prompt Improver.
+ * Fixed meta-prompt (D8). DO NOT change without orchestrator approval.
+ * Inspired by Anthropic Console Prompt Improver.
  */
 export const META_SYSTEM_PROMPT = `\
 You are an expert prompt engineer. Rewrite the user-supplied prompts to be:
@@ -43,8 +43,8 @@ If you receive both a system message and a user prompt, output them on separate
 lines prefixed with "<<SYSTEM>>" and "<<PROMPT>>" respectively.`;
 
 /**
- * Monta o body de /v1/chat/completions para o improve call.
- * Exportado para reuso em testes + na rota.
+ * Builds the /v1/chat/completions body for the improve call.
+ * Exported for reuse in tests and in the route.
  */
 export function buildImproveChatBody(req: ImprovePromptRequest): {
   model: string;
@@ -74,20 +74,20 @@ export function buildImproveChatBody(req: ImprovePromptRequest): {
 }
 
 /**
- * Parse da resposta do meta-LLM em improvedSystem/improvedPrompt.
- * Retorna ambos quando ambos foram enviados; senão retorna só o presente.
+ * Parses the meta-LLM response into improvedSystem/improvedPrompt.
+ * Returns both when both were sent; otherwise returns only the one present.
  *
  * Edge cases:
- * - Se raw não contém marcadores <<SYSTEM>> ou <<PROMPT>>:
- *   - Se hadSystem e !hadPrompt → trata todo o conteúdo como improvedSystem
- *   - Se !hadSystem e hadPrompt → trata todo o conteúdo como improvedPrompt
- *   - Se hadSystem e hadPrompt → trata todo o conteúdo como improvedPrompt (fallback)
- * - Whitespace é trimado antes de retornar
+ * - If raw has no <<SYSTEM>> or <<PROMPT>> markers:
+ *   - If hadSystem and !hadPrompt → treat the whole content as improvedSystem
+ *   - If !hadSystem and hadPrompt → treat the whole content as improvedPrompt
+ *   - If hadSystem and hadPrompt → treat the whole content as improvedPrompt (fallback)
+ * - Whitespace is trimmed before returning
  */
 export function parseImprovedContent(
   raw: string,
   hadSystem: boolean,
-  hadPrompt: boolean,
+  hadPrompt: boolean
 ): { improvedSystem?: string; improvedPrompt?: string } {
   const result: { improvedSystem?: string; improvedPrompt?: string } = {};
 

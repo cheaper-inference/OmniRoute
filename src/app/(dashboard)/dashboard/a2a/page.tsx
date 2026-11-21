@@ -121,7 +121,7 @@ export default function A2APage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page title (lote 7 pendência 12): the shell title hides when a PageHeader is present. */}
+      {/* Page title (batch 7, pending item 12): the shell title hides when a PageHeader is present. */}
       <PageHeader compact title={tSidebar("a2a")} description={tSidebar("a2aSubtitle")} />
       <Card>
         <div className="flex items-start justify-between gap-4">

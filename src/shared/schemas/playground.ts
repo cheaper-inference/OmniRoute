@@ -2,18 +2,18 @@
 import { z } from "zod";
 import { partialWithoutDefaults } from "@/shared/validation/partialWithoutDefaults";
 
-/** Row da tabela playground_presets. */
+/** Row from the playground_presets table. */
 export const PlaygroundPresetRowSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(100),
   endpoint: z.string().min(1),
   model: z.string().min(1),
   system: z.string().max(50_000).nullable(),
-  params_json: z.string(), // JSON serializado (parsed na rota)
+  params_json: z.string(), // serialized JSON (parsed in the route)
   created_at: z.string().datetime(),
 });
 
-/** Body de POST /api/playground/presets. */
+/** Body of POST /api/playground/presets. */
 export const PlaygroundPresetCreateSchema = z.object({
   name: z.string().min(1).max(100),
   endpoint: z.string().min(1),
@@ -22,7 +22,7 @@ export const PlaygroundPresetCreateSchema = z.object({
   params: z.record(z.string(), z.any()).default({}),
 });
 
-/** Body de PUT /api/playground/presets/[id]. */
+/** Body of PUT /api/playground/presets/[id]. */
 export const PlaygroundPresetUpdateSchema = partialWithoutDefaults(PlaygroundPresetCreateSchema);
 
 export const PlaygroundPresetListItemSchema = z.object({
@@ -36,7 +36,7 @@ export const PlaygroundPresetListItemSchema = z.object({
 });
 export type PlaygroundPresetListItem = z.infer<typeof PlaygroundPresetListItemSchema>;
 
-/** Tool definition aceito pelo Build tab. Validação client-side. */
+/** Tool definition accepted by the Build tab. Client-side validation. */
 export const ToolDefinitionSchema = z.object({
   type: z.literal("function"),
   function: z.object({
@@ -46,7 +46,7 @@ export const ToolDefinitionSchema = z.object({
   }),
 });
 
-/** JSON schema do response_format (Structured Output). Validação client-side. */
+/** JSON schema for response_format (Structured Output). Client-side validation. */
 export const StructuredOutputSchema = z.object({
   type: z.literal("json_schema"),
   json_schema: z.object({
@@ -56,13 +56,13 @@ export const StructuredOutputSchema = z.object({
   }),
 });
 
-/** Stream metrics — uma medição por coluna/mensagem. */
+/** Stream metrics — one measurement per column/message. */
 export const StreamMetricsSchema = z.object({
-  ttftMs: z.number().nonnegative().nullable(), // null = não chegou primeiro chunk ainda
+  ttftMs: z.number().nonnegative().nullable(), // null = the first chunk has not arrived yet
   totalMs: z.number().nonnegative().nullable(),
   tokensOut: z.number().int().nonnegative(),
   tokensIn: z.number().int().nonnegative(),
-  tps: z.number().nonnegative().nullable(), // tokens/segundo (out/totalSec)
+  tps: z.number().nonnegative().nullable(), // tokens/second (out/totalSec)
   costUsd: z.number().nonnegative().nullable(),
 });
 export type StreamMetrics = z.infer<typeof StreamMetricsSchema>;
