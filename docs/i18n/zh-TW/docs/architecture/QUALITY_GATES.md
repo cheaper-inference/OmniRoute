@@ -29,6 +29,8 @@ CI和 Quality Gates 工作流程各自發出穩定的結論： `Gate / CI`和`Ga
 
 ### 合併隊列
 
+> **2026-11-19: Mergify 合併佇列已停用**（所有者的決定）。 `.mergify.yml`不再定義佇列並拒絕合併或重寫拉取請求的Mergify指令。向發布分支發出的拉取請求會在儲存庫規則集「Require green gates on the active release」 (`Gate / CI` + `Gate / Quality`) 下手動合併，直到omni-queue 在 live 模式下運行，然後透過omni-queue ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)) 進行合併。以下所描述的Mergify草稿的工作流程仍在`ci.yml`和`quality.yml`中，但不再開啟Mergify草稿。
+
 `queue`標籤將PR傳送到 Mergify 佇列 (`.mergify.yml`)。 Mergify 在`mergify/merge-queue/`分支上開啟草稿PR ， CI在那裡運行完整選擇，並且當`Gate / CI`、 `Gate / Quality`和`Merge integrity (changelog + generated skills)`通過時原始PR合併。
 
 Mergify 將其佇列摘要寫入草稿的描述中，其他應用程式也可以對其進行編輯。此類草稿上的`pull_request` `edited`事件採用自己的並發組 (`-queue-edit-<run_id>`)，因此它無法取消草稿的實際運行，並且它會跳過門和矩陣。只有`Merge integrity`還在運作。跳過的門作業帶有不同的檢查名稱，因為 Mergify 將跳過的`Gate / CI`讀取為失敗的檢查並使PR出列。

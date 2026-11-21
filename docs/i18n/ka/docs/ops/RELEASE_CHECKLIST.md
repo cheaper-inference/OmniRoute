@@ -355,112 +355,70 @@ npm run build:release
 
 ---
 
-## 3.9.0 LTS განშტოება (რეპეტიცია 3.8.58-ში)
+## 3.9.0 LTS cut (რეპეტიცია 3.8.58-ში)
 
-v3.8.59-ის შემდეგ მომდევნო ვერსიაა 3.9.0 და მისი წვერო ორ ხანგრძლივ განშტოებად იქცევა:
-`stable/v3` (v3 LTS ხაზი, npm `latest`) და `develop` (v4, ვერსია გაზრდილია 4.0.0-მდე, npm
-`nightly`). განშტოებების/არხების მოდელი, წინ გადატანა და ჭდეები აღწერილია
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)-ში; გეგმა მოცემულია [ROADMAP](../../ROADMAP.md)-ში (ფაზა 3). განშტოება ერთხელ სრულდება;
-3.8.58-ზე მისი სრული რეპეტიცია fork-ზე ტარდება, ხოლო 3.8.59 სრულდება
-[GO/NO-GO საკონტროლო სიით](./LTS_GO_NO_GO.md).
+v3.8.59-ის შემდეგ, შემდეგი ვერსია არის 3.9.0 და მისი წვერი ხდება ორი გრძელვადიანი ტოტი: `stable/v3` (v3 LTS ხაზი, npm `latest`) და `develop` (v4, შეკუმშული 4.0.0-მდე, npm `nightly`). branch/channel მოდელი, წინსვლის პორტი და ეტიკეტები არის [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; გეგმა არის [ROADMAP](../../ROADMAP.md) ში (ფაზა 3). ჭრილი გადის ერთხელ; 3.8.58 იმეორებს მას ბოლომდე ჩანგალზე და 3.8.59 იხურება [GO/NO-GO საკონტროლო სიით](./LTS_GO_NO_GO.md).
 
-### საცდელი გაშვება (მხოლოდ წაკითხვა, უსაფრთხოა ნებისმიერ დროს)
+### მშრალი გაშვება (მხოლოდ წაკითხვადი, უსაფრთხო ნებისმიერ დროს)
 
 ```bash
-npm run release:dry-run-lts-cut                       # რეალური განშტოება: 3.9.0 HEAD-იდან, წინა ჭდე v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # წყაროს commit-ის დაფიქსირება
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` არაფერს ასრულებს: ის კითხულობს git-სა და `gh`-ს და ბეჭდავს
-მთელ თანმიმდევრობას — წინაპირობებს (წყარო ამოიცნობა, წყაროს რეპოზიტორიას სრული ისტორია აქვს —
-ზედაპირული clone ვერ შეძლებს `stable/v3`-ის push-ს, მიმღები მხარე პაკეტს პირველივე
-ჩანერგილ მშობელზე უარყოფს, ამიტომ განშტოება სრული clone-იდან შეასრულეთ ან ჯერ
-`git fetch --unshallow origin` გაუშვით — წინა ჭდე არსებობს, `package.json`-ში სამიზნე ვერსიაა,
-`release-freeze` issue გახსნილია, არსებულ release განშტოებაზე ღია
-`Release branch not green` issue არ არის — არარსებული განშტოება აბრუნებს `?` უცნობს და არასოდეს
-მწვანეს — Mergify-ის `release` რიგი კონფიგურირებულია (G11: `queue_rules`, `checks_timeout`,
-ჭდე `queue`), `release/*` წესების ნაკრები კვლავ ბლოკავს წაშლასა და force-push-ს და
-`stable/v3` და `develop` ჯერ არ არსებობს), განშტოების შექმნის ორ ნაბიჯს, უმოქმედო workflow-ების
-რომელი ტრიგერები და `if:` პირობები ხდება ჭეშმარიტი (და რომელი რჩება რეპოზიტორიის ცვლადით
-შეზღუდული ან კანონიკურ რეპოზიტორიაზე დაფიქსირებული), მოსალოდნელ dist-tag-ებს (`latest` → 3.9.0,
-`next` და `nightly` ცარიელია) და უკან დაბრუნებას. გასვლის კოდი `0` = `RESULT: READY`, `1` =
-დაბლოკვის გამომწვევი წინაპირობა ვერ შესრულდა (`✗`), `2` = გამოყენების შეცდომა.
-`--advisory <id,...>` შემოწმებას გაფრთხილებამდე (`!`) აქვეითებს, მისი დამალვის გარეშე.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-რეალური განშტოების საცდელი გაშვება შეასრულეთ, სანამ 3.9.0 release freeze ჯერ კიდევ აქტიურია —
-განშტოებები იქმნება ჭდის შემდეგ და მანამდე, სანამ ფაზა 12c freeze-ს მოხსნის.
+გაუშვით რეალური ჭრის მშრალი გაშვება, სანამ 3.9.0 გამოშვების გაყინვა ჯერ კიდევ ღიაა — ტოტები იქმნება ტეგის შემდეგ და სანამ ფაზა 12c არ მოხსნის გაყინვას.
 
-### 3.8.58-ის რეპეტიცია (მხოლოდ fork-ზე)
+### 3.8.58 რეპეტიცია (მხოლოდ ჩანგალი)
 
 ```bash
-# 1. საცდელი გაშვება მიმდინარე წვეროზე, რეპეტიციის პარამეტრებით
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. შესრულება FORK remote-ის მიმართ (origin, ან ნებისმიერი remote, რომლის URL კანონიკური
-#    რეპოზიტორიისაა, უარყოფილია; ყოველი ნაბიჯი ტერმინალში დადასტურებას ითხოვს)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. fork-ში უმოქმედო workflow-ების გამოცდა (workflow_dispatch იქ, სადაც საცდელი გაშვება
-#    კანონიკურ რეპოზიტორიაზე დაფიქსირებას აჩვენებს), შემდეგ უკან დაბრუნება
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop-ის ვერსიის გაზრდის commit იქმნება git plumbing-ით (სამუშაო ხეს არ ეხება) და ცვლის
-იმავე ხუთ ფაილს, რასაც ციკლის გახსნის commit: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` და `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG სექცია და მისი i18n ასლები შემდეგ `develop`-ზე, მის პირველ PR-მდე იხსნება.
-სკრიპტი არასოდეს ცვლის npm dist-tag-ებს — მათი რეპეტიცია სატესტო პაკეტზე ჩაატარეთ.
+განვითარების bump commit აგებულია git plumbing-ით (არანაირი სამუშაო ხე არ არის შეხებული) და არღვევს იმავე ხუთ ფაილს, როგორც ციკლის ღია commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` და `docs/openapi.yaml`. `[4.0.0]` CHANGELOG განყოფილება და მისი i18n სარკეები იხსნება `develop` ზე შემდეგ, მის პირველ PR მდე. სკრიპტი არასოდეს ცვლის npm dist-tags — რეპეტიციებს მათ scratch პაკეტი.
 
-### PR-ის წინასწარი გადახედვის არტეფაქტი (ერთხელ ააწყვეთ, იგივე ბაიტები დაწინაურეთ)
+### PR წინასწარი გადახედვის არტეფაქტი (ერთჯერ აშენება, იგივე ბაიტების პოპულარიზაცია)
 
-`.github/workflows/preview-artifact.yml` PR-ის head-იდან ერთ production tarball-ს აწყობს და
-ზუსტად ამ build-ს ამოწმებს (#8084-ის ნაწილი (a)). მხოლოდ იმავე რეპოზიტორიის PR-ები; არაფერი ქვეყნდება.
+`.github/workflows/preview-artifact.yml` აშენებს ერთ საწარმოო tarball-ს PR თავიდან და ამოწმებს ამ ზუსტ კონსტრუქციას (#8084 ნაჭერი (a)). იგივე საცავი მხოლოდ PRs ; არაფერი არ არის გამოქვეყნებული.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ან დაამატეთ `preview-artifact` ჭდე
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # წინასწარი გადახედვის ინსტალაცია
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-გაშვება ასრულებს `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ბრძანებებს,
-ფუთავს tarball-ს, უშვებს `npm run check:pack-boot`-ს (ყალბი საიდუმლოები, ეფემერული მონაცემების
-დირექტორია), ხელახლა ფუთავს და მარცხდება, თუ დაიჯესტი იდენტური არ არის, შემდეგ კი
-აფიქსირებს `artifact-identity.json`-ს (head SHA, base SHA, lockfile-ის ჰეში, პლატფორმა,
-არქიტექტურა, node ABI, bundler, build-ის პოლიტიკა —
-`scripts/release/artifact-identity.mjs`) და ცალკე job-ში tarball-ის ატესტაციას ქმნის.
-წინასწარი გადახედვის დაწინაურება ამ tarball-ის ინსტალაციას ნიშნავს: წყაროდან ხელახლა არასოდეს ააწყოთ.
+გაშვება აკეთებს `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, აწყობს tarball-ს, აწარმოებს `npm run check:pack-boot` (ყალბი საიდუმლოებები, ეფემერული მონაცემების dir), ხელახლა შეფუთულია და ფუჭდება, თუ დაიჯესტი არ არის იდენტური, შემდეგ ჩაწერს `artifact-identity.json` (head SHA, საბაზისო SHA, lockfile hash, პლატფორმა, ABI, `scripts/release/artifact-identity.mjs` — ტარბოლი ცალკე სამუშაოში. წინასწარი გადახედვის ხელშეწყობა ნიშნავს ამ tarball-ის დაყენებას: არასოდეს აღადგინოთ წყაროდან.
 
-### განშტოება (3.9.0, GO-ს შემდეგ)
+### გაჭრა (3.9.0, GO შემდეგ)
 
-1. GO დაფიქსირებულია [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)-ში.
+1. GO ჩაწერილი [LTS_GO_NO_GO.მდ](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ბეჭდავს `RESULT: READY`.
-3. `origin`-ზე განშტოებები ხელით შექმენით, საცდელი გაშვების მიერ დაბეჭდილი ბრძანებებით —
-   სკრიპტი `origin`-ზე push-ს უარყოფს. განხილული develop commit-ის ხელახლა გამოსაყენებლად,
-   ჯერ 3.9.0-ის წვეროზე `--execute` რეპეტიცია თქვენი fork-ის მიმართ გაუშვით; ის ორივე SHA-ს
-   დაბეჭდავს და შესაძლებელი იქნება იმავე commit-ების push:
+3. შექმენით ტოტები `origin` ზე ხელით ბრძანებებით dry-run prints — სკრიპტი უარს ამბობს `origin` ზე გადასვლაზე. განხილული განვითარების commit-ის ხელახლა გამოსაყენებლად, ჯერ გაიარეთ `--execute` რეპეტიცია 3.9.0 წვერით თქვენი ჩანგლის წინააღმდეგ; ის ბეჭდავს ორივე SHAs და იგივე დავალებების შესრულება შესაძლებელია:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. დაიცავით `stable/v3` და `develop` (წესების ნაკრებები + შერწყმის რიგი) პირველი PR-ის მიღებამდე.
-5. არააქტიური სამუშაო პროცესები განშტოების არსებობისას ჩაირთვება: `forward-port.yml` (`stable/v3`-ში
-   push), `validate-stable-pr.yml` (`stable/v3`-ისთვის განკუთვნილი PR-ები) და `nightly-v4-build.yml`
-   (`develop`-ის აგებები). გაშვებამდე დააყენეთ საცავის საიდუმლო `secrets.FORWARD_PORT_TOKEN` (რათა CI გაეშვას
-   forward-port PR-ებზე); ღამის გამოქვეყნება გამორთული დარჩება, სანამ მფლობელი საცავის
-   ცვლადს `vars.NIGHTLY_PUBLISH` მნიშვნელობად `true`-ს არ მიანიჭებს და npm Trusted Publishing
-   არ მიიღებს `nightly-v4-build.yml`-ს. არხის განსაზღვრას ასრულებს `scripts/release/dist-tag.mjs` — იგივე
-   განმსაზღვრელი, რომელსაც `npm-publish.yml` იყენებს.
-6. გადაამოწმეთ არხები: `npm view omniroute dist-tags --json` აჩვენებს, რომ `latest` = 3.9.0, ხოლო
-   `next` / `nightly` არ არსებობს, სანამ v4 არ გამოქვეყნდება.
-7. საჭიროების შემთხვევაში, უკან დასაბრუნებლად გამოიყენეთ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   და `npm dist-tag add omniroute@3.8.59 latest`.
+4. დაიცავით `stable/v3` და `develop` (წესები + შერწყმის რიგში) პირველი PR დაშვებამდე.
+5. მიძინებული სამუშაო ნაკადები ირთვება განშტოების არსებობის მიხედვით: `forward-port.yml` (დააყენებს `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) და `nightly-v4-build.yml` (აშენებს `develop`). გადასვლა-live-მდე დააყენეთ `secrets.FORWARD_PORT_TOKEN` საცავი საიდუმლო (ასე რომ CI მუშაობს წინ-პორტზე PRs); ღამის გამოქვეყნება გამორთულია მანამ, სანამ მფლობელი არ დააყენებს საცავის ცვლადს `vars.NIGHTLY_PUBLISH` `true` ზე და npm Trusted Publishing მიიღებს `nightly-v4-build.yml`. არხის გარჩევადობა არის `scripts/release/dist-tag.mjs`, იგივე გადამწყვეტს იყენებს `npm-publish.yml`.
+6. გადაამოწმეთ არხები: `npm view omniroute dist-tags --json` აჩვენებს `latest` = 3.9.0 და არ არის `next` / `nightly`, სანამ v4 არ გამოქვეყნდება.
+7. უკან დაბრუნება, საჭიროების შემთხვევაში: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` და `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

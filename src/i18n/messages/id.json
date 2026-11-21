@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Pertahankan pesan sistem di tengah percakapan",
     "requireUserLastMessageDescription": "Untuk upstream yang menolak pra-pengisian asisten: hilangkan putaran asisten di akhir (tanpa penggunaan_alat) sebelum mengirim. Model tersebut mungkin menghasilkan kembali jawaban sebelumnya.",
     "requireUserLastMessageLabel": "Mengharuskan percakapan diakhiri dengan pesan pengguna",
+    "strictChatHistoryDescription": "Memperbaiki urutan panggilan alat yang terputus dan menggabungkan pesan asisten yang berurutan sebelum mengirimnya ke penyedia yang kompatibel dengan OpenAI dan menerapkan aturan ketat.",
+    "strictChatHistoryLabel": "Perbaikan riwayat chat untuk penyedia yang ketat",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambahkan} other {# kunci ditambahkan}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikat dilewati} other {# duplikat dilewati}}",
     "bulkPasteHint": "Tempelkan satu kunci API per baris. Baris kosong akan diabaikan dan kunci duplikat akan dilewati.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Hapus kunci"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugin dijalankan dengan hak penuh",
-    "privilegesWarningBody": "Sebuah plugin berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: plugin dapat membaca file, menjalankan program dan menggunakan jaringan, apa pun izin yang dinyatakan dalam manifesnya. Instal hanya plugin yang Anda percayai.",
     "title": "Plugin",
     "description": "Instal dan kelola plugin untuk memperluas fungsionalitas OmniRoute",
     "loading": "Memuat plugin...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Pindai Plugin",
     "noPlugins": "Tidak ada plugin yang terpasang",
     "noPluginsDescription": "Tempatkan direktori plugin di ~/.omniroute/plugins/ lalu klik Pindai.",
+    "privilegesWarningTitle": "Plugin dijalankan dengan hak penuh",
+    "privilegesWarningBody": "Sebuah plugin berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: plugin dapat membaca file, menjalankan program dan menggunakan jaringan, apa pun izin yang dinyatakan dalam manifesnya. Instal hanya plugin yang Anda percayai.",
     "activate": "Aktifkan",
     "deactivate": "Nonaktifkan",
     "uninstall": "Copot pemasangan",
