@@ -374,33 +374,46 @@ test("the builder receives the calling key's id, scopes and the parsed range", a
 });
 
 test("keys outside the contract never reach the wire; a broken result is the fixed 500", async () => {
-  const extra = await (
-    await call("", bearer(a.key), {
-      buildUsage: async () =>
-        ({
-          ...EMPTY_USAGE,
-          connectionId: "conn-x",
-          apiKeyName: "Key B",
-          byModel: [
-            {
-              model: "m",
-              provider: "p",
-              requests: 1,
-              promptTokens: 1,
-              completionTokens: 1,
-              totalTokens: 2,
-              costUsd: 0,
-              listPriceUsd: 0,
-              avgLatencyMs: 1,
-              successRatePct: 100,
-              lastUsed: null,
-              accountKey: "acct-secret",
-              comboName: "combo-secret",
-            },
-          ],
-        }) as unknown as SelfUsageResponse,
-    })
-  ).text();
+  const extraRes = await call("", bearer(a.key), {
+    buildUsage: async () =>
+      ({
+        ...EMPTY_USAGE,
+        connectionId: "conn-x",
+        apiKeyName: "Key B",
+        byModel: [
+          {
+            model: "m",
+            provider: "p",
+            requests: 1,
+            promptTokens: 1,
+            completionTokens: 1,
+            totalTokens: 2,
+            costUsd: 0,
+            listPriceUsd: 0,
+            avgLatencyMs: 1,
+            successRatePct: 100,
+            lastUsed: null,
+            accountKey: "acct-secret",
+            comboName: "combo-secret",
+          },
+        ],
+      }) as unknown as SelfUsageResponse,
+  });
+  assert.equal(extraRes.status, 200);
+  const extra = await extraRes.text();
+  assert.deepEqual(Object.keys(JSON.parse(extra).byModel[0]).sort(), [
+    "avgLatencyMs",
+    "completionTokens",
+    "costUsd",
+    "lastUsed",
+    "listPriceUsd",
+    "model",
+    "promptTokens",
+    "provider",
+    "requests",
+    "successRatePct",
+    "totalTokens",
+  ]);
   for (const leak of ["connectionId", "conn-x", "Key B", "acct-secret", "combo-secret"]) {
     assert.ok(!extra.includes(leak), `leaked: ${leak}`);
   }
