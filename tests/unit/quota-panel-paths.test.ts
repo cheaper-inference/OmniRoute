@@ -187,3 +187,25 @@ test("a target with a character outside printable ASCII is not printable", () =>
     assert.equal(panel.isPrintableAsciiTarget(bad), false, JSON.stringify(bad));
   }
 });
+
+test("the write paths are the two quota view paths only", () => {
+  for (const path of ["/api/v1/me/quota/claude", "/v1/me/quota/claude"]) {
+    assert.equal(panel.isQuotaPanelWritePath(path), true, path);
+    assert.equal(panel.isQuotaPanelWritePath(`/a/b${path}`, "/a/b"), true, path);
+    assert.equal(panel.isQuotaPanelWritePath(path, "/a/b"), false, path);
+  }
+  for (const path of [
+    "/quota/claude",
+    "/api/v1/me/usage",
+    "/v1/me/usage",
+    "/_next/static/a.js",
+    "/favicon.ico",
+    "/api/v1/me/quota/",
+    "/api/v1/me/quota/a/b",
+    "/API/v1/me/quota/claude",
+  ]) {
+    assert.equal(panel.isQuotaPanelWritePath(path), false, path);
+  }
+  assert.equal(panel.QUOTA_PANEL_WRITE_METHOD, "PATCH");
+  assert.equal(panel.QUOTA_PANEL_WRITE_MAX_BYTES, 4096);
+});

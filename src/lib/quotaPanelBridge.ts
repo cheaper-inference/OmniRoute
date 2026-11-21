@@ -5,15 +5,19 @@
  * API routes it calls and their `/v1` aliases, the build assets and the tab icons. Every
  * pattern is anchored and case sensitive, like the route it serves, and is matched against
  * the path without its query. The bridge runs its dot segment and fragment guard before this
- * list is consulted.
+ * list is consulted. The write paths are the two quota view paths, where one bounded `PATCH`
+ * is relayed (`isQuotaPanelWritePath`).
  */
 
 import net from "net";
 
+const QUOTA_VIEW_PATH = /^\/api\/v1\/me\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const QUOTA_VIEW_ALIAS_PATH = /^\/v1\/me\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const PANEL_WRITE_PATH_PATTERNS: readonly RegExp[] = [QUOTA_VIEW_PATH, QUOTA_VIEW_ALIAS_PATH];
 const PANEL_PATH_PATTERNS: readonly RegExp[] = [
   /^\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/,
-  /^\/api\/v1\/me\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/,
-  /^\/v1\/me\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/,
+  QUOTA_VIEW_PATH,
+  QUOTA_VIEW_ALIAS_PATH,
   /^\/api\/v1\/me\/usage$/,
   /^\/v1\/me\/usage$/,
   /^\/_next\/static\/[^/\\]/,
@@ -51,8 +55,15 @@ export const QUOTA_PANEL_DROPPED_RESPONSE_HEADERS: readonly string[] = Object.fr
   "connection",
 ]);
 
-/** The methods the quota panel port relays, the only list of them. */
+/** The methods the quota panel port relays without a body. */
 export const QUOTA_PANEL_METHOD_NAMES: readonly string[] = Object.freeze(["GET", "HEAD"]);
+
+/** The one method the quota panel port relays with a body, on the write paths only. */
+export const QUOTA_PANEL_WRITE_METHOD = "PATCH";
+/** The largest body of that request, in bytes, as declared by its `Content-Length`. */
+export const QUOTA_PANEL_WRITE_MAX_BYTES = 4096;
+/** The time a client has to send that body before the request is refused. */
+export const QUOTA_PANEL_WRITE_TIMEOUT_MS = 5_000;
 
 /** True when every character of the request target is printable ASCII, space excluded. */
 export function isPrintableAsciiTarget(rawUrl: string): boolean {
@@ -66,12 +77,24 @@ export function isPrintableAsciiTarget(rawUrl: string): boolean {
  * exact prefix followed by `/`, and only the rest is compared with the list.
  */
 export function isQuotaPanelPath(pathname: string, basePath = ""): boolean {
-  let path = pathname;
-  if (basePath) {
-    if (!pathname.startsWith(`${basePath}/`)) return false;
-    path = pathname.slice(basePath.length);
-  }
+  const path = pathUnderBasePath(pathname, basePath);
+  if (path === null) return false;
   return PANEL_EXACT_PATHS.has(path) || PANEL_PATH_PATTERNS.some((pattern) => pattern.test(path));
+}
+
+/**
+ * True when the path, without its query, is a write path: the quota view or its `/v1` alias.
+ * The base path rule is the one of `isQuotaPanelPath`.
+ */
+export function isQuotaPanelWritePath(pathname: string, basePath = ""): boolean {
+  const path = pathUnderBasePath(pathname, basePath);
+  return path !== null && PANEL_WRITE_PATH_PATTERNS.some((pattern) => pattern.test(path));
+}
+
+/** The path without the base path, or null when it does not start with the base path and `/`. */
+function pathUnderBasePath(pathname: string, basePath: string): string | null {
+  if (!basePath) return pathname;
+  return pathname.startsWith(`${basePath}/`) ? pathname.slice(basePath.length) : null;
 }
 
 /** The address the quota panel listener binds when QUOTA_PANEL_HOST is empty. */

@@ -1,7 +1,8 @@
 /**
  * The quota panel role of the bridge relays the self-service quota page, the two API routes
- * it calls and the build assets, with GET and HEAD only and no request body, and answers the
- * bridge's 404 for everything else. It goes through the same path guard as the API role.
+ * it calls and the build assets, with GET and HEAD and no request body, plus the one bounded
+ * PATCH covered in quota-panel-bridge-write.test.ts, and answers the bridge's 404 for everything
+ * else. It goes through the same path guard as the API role.
  */
 
 import test from "node:test";
@@ -642,9 +643,12 @@ test("a body refusal closes the connection and the next request on it is not ser
 test("the panel role object is frozen", () => {
   assert.equal(Object.isFrozen(bridge.createQuotaPanelRole()), true);
   assert.equal(Object.isFrozen(bridge.createQuotaPanelRole("/x")), true);
-  const { methods, droppedRequestHeaders, droppedResponseHeaders } = bridge.createQuotaPanelRole();
+  const { methods, boundedBody, droppedRequestHeaders, droppedResponseHeaders } =
+    bridge.createQuotaPanelRole();
+  assert.notEqual(boundedBody, null);
   for (const collection of [
     methods,
+    boundedBody,
     droppedResponseHeaders,
     droppedRequestHeaders,
     droppedRequestHeaders.prefixes,

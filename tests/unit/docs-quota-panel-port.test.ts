@@ -54,7 +54,17 @@ test(".env.example has both variables commented out, so the port is off by defau
   const port = match(envExample, /^# QUOTA_PANEL_PORT=([0-9]+)$/m)[1];
   const host = match(envExample, /^# QUOTA_PANEL_HOST=(\S+)$/m)[1];
   assert.equal(host, panel.QUOTA_PANEL_DEFAULT_HOST);
-  assert.match(envExample, /^# Every other path answers 404\. Only GET and HEAD are relayed\.$/m);
+  const envMethods = match(
+    envExample,
+    /^# Every other path answers 404\. ([A-Z]+) and ([A-Z]+) are relayed without a body\.$/m
+  );
+  assert.deepEqual(envMethods.slice(1).sort(), [...panel.QUOTA_PANEL_METHOD_NAMES].sort());
+  const [, envWrite, envMax] = match(
+    envExample,
+    /^# One JSON ([A-Z]+) of the quota view is also relayed, with a body of at most ([0-9]+) bytes\.$/m
+  );
+  assert.equal(envWrite, panel.QUOTA_PANEL_WRITE_METHOD);
+  assert.equal(Number(envMax), panel.QUOTA_PANEL_WRITE_MAX_BYTES);
   assert.match(
     envExample,
     /^# The port serves plain HTTP\. Keep it on 127\.0\.0\.1 and put a TLS reverse proxy in front of it\.$/m
@@ -88,8 +98,13 @@ test("the environment reference documents both variables with the code defaults"
   ]) {
     assert.ok(row.includes(sentence), sentence);
   }
-  const [, first, second] = match(row, / Only ([A-Z]+) and ([A-Z]+) requests are relayed\. /);
+  const [, first, second, write, max] = match(
+    row,
+    / ([A-Z]+) and ([A-Z]+) requests are relayed without a body, and one JSON ([A-Z]+) of the quota view with a body of at most ([0-9]+) bytes\. /
+  );
   assert.deepEqual([first, second].sort(), [...panel.QUOTA_PANEL_METHOD_NAMES].sort());
+  assert.equal(write, panel.QUOTA_PANEL_WRITE_METHOD);
+  assert.equal(Number(max), panel.QUOTA_PANEL_WRITE_MAX_BYTES);
 });
 
 test("the Port Modes example uses a port that opens a listener", () => {
@@ -100,10 +115,7 @@ test("the Port Modes example uses a port that opens a listener", () => {
     panel.resolveQuotaPanelListener({ QUOTA_PANEL_PORT: port }, UNSPLIT_PORTS).kind,
     "listen"
   );
-  assert.match(
-    networkSection,
-    new RegExp(`→ Page: http://${host.replace(/\./g, "\\.")}:${port}/quota/<provider> `)
-  );
+  assert.ok(networkSection.includes(`→ Page: http://${host}:${port}/quota/<provider> `));
 });
 
 test("the section says the port is off unless QUOTA_PANEL_PORT is set, on the default host", () => {
@@ -175,11 +187,14 @@ test("the path table lists exactly what the allowlist relays", () => {
 });
 
 test("the section states the methods, the body rule and the upgrade rule", () => {
-  const [, first, second] = match(sectionText, /Only `([A-Z]+)` and `([A-Z]+)` are relayed\./);
+  const [, first, second] = match(
+    sectionText,
+    /`([A-Z]+)` and `([A-Z]+)` are relayed without a body\./
+  );
   assert.deepEqual([first, second].sort(), [...panel.QUOTA_PANEL_METHOD_NAMES].sort());
   for (const sentence of [
     "Any other method answers 404, except a CONNECT request, whose connection is closed with no answer.",
-    "A request that declares a body answers 404 and its connection is closed.",
+    "Any other request that declares a body answers 404 and its connection is closed.",
     "A raw control character in the target is answered 400 by the HTTP parser, before this port's own check.",
     "Upgrade requests are refused and their connection is closed.",
     "The dashboard, the login page, the management API and the inference routes cannot be reached through this port.",
@@ -391,4 +406,36 @@ test("the Limitations list is complete", () => {
     "- The listener has no connection or rate limit per client address.",
     "- Container setups are not covered by this section.",
   ]);
+});
+
+test("the section states the one write the port relays, with the code's limits", () => {
+  const [, method] = match(
+    sectionText,
+    /One request with a body is also relayed: a `([A-Z]+)` of the quota view path, which the page sends to save a lending choice\./
+  );
+  assert.equal(method, panel.QUOTA_PANEL_WRITE_METHOD);
+  const [, max] = match(
+    sectionText,
+    /It must carry one `Content-Length` from 1 to ([0-9]+), written as plain digits, and no `Transfer-Encoding`\./
+  );
+  assert.equal(Number(max), panel.QUOTA_PANEL_WRITE_MAX_BYTES);
+  const { boundedBody } = bridge.createQuotaPanelRole();
+  assert.equal(boundedBody?.maxBytes, Number(max));
+  const [, seconds] = match(
+    sectionText,
+    /The port reads the declared bytes before it contacts the main port, and waits at most ([0-9]+) seconds for them\./
+  );
+  assert.equal(Number(seconds) * 1000, panel.QUOTA_PANEL_WRITE_TIMEOUT_MS);
+  assert.equal(boundedBody?.timeoutMs, panel.QUOTA_PANEL_WRITE_TIMEOUT_MS);
+  for (const sentence of [
+    "The `PATCH` must carry `Content-Type: application/json`, with no parameter or with `charset=utf-8` only.",
+    "A `PATCH` that breaks one of these rules answers 404.",
+    "A body that is not complete by then answers 404 and its connection is closed.",
+    "Nothing reaches the main port in that case, or when the client leaves first.",
+    "The port relays exactly the declared bytes, with the same `Content-Length`.",
+    "Bytes after them are read as the next request on the connection.",
+    "A TLS reverse proxy in front must forward `Content-Length` and must not re-chunk the request body.",
+  ]) {
+    assert.ok(sectionText.includes(sentence), sentence);
+  }
 });

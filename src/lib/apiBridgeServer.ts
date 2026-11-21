@@ -1,12 +1,14 @@
 import http from "http";
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
 import net from "net";
+import { declaredJsonBodyLength, readBoundedBody } from "@/lib/bridgeBoundedBody";
 import { classifyIpScope } from "@/lib/ipUtils";
 import {
   isLoopbackBindHost,
   isPrintableAsciiTarget,
   isQuotaPanelBasePath,
   isQuotaPanelPath,
+  isQuotaPanelWritePath,
   QUOTA_PANEL_DROPPED_HEADER_NAMES,
   QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
   QUOTA_PANEL_DROPPED_RESPONSE_HEADERS,
@@ -17,6 +19,9 @@ import {
   QUOTA_PANEL_REQUEST_TIMEOUT_MS,
   QUOTA_PANEL_SOCKET_TIMEOUT_MS,
   QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS,
+  QUOTA_PANEL_WRITE_MAX_BYTES,
+  QUOTA_PANEL_WRITE_METHOD,
+  QUOTA_PANEL_WRITE_TIMEOUT_MS,
   resolveQuotaPanelListener,
 } from "@/lib/quotaPanelBridge";
 import { getRuntimePorts } from "@/lib/runtime/ports";
@@ -110,8 +115,12 @@ export interface BridgeRole {
   strictTarget: boolean;
   /** When false, every upgrade request is refused. */
   relayUpgrades: boolean;
-  /** When false, a request that declares a body is refused. */
+  /**
+   * When false, a request that declares a body is refused, unless `boundedBody` relays it.
+   */
   relayBodies: boolean;
+  /** The one kind of request relayed with a body when `relayBodies` is false, or null. */
+  boundedBody: BoundedBodyRule | null;
   /** The `message` of the 404 body. It never says why the request was refused. */
   notFoundMessage: string;
   /** When false, the 502 and 504 bodies carry no `detail`. */
@@ -120,6 +129,23 @@ export interface BridgeRole {
   droppedRequestHeaders: RequestHeaderDropRule;
   /** Lower-case names of upstream response headers not copied to the client. */
   droppedResponseHeaders: readonly string[];
+}
+
+/**
+ * One method relayed with a body of a declared length, on some paths.
+ *
+ * The body must be JSON, with one `Content-Length` from 1 to `maxBytes` and no transfer coding.
+ * It is read in full, within `timeoutMs`, before the request is relayed with that length.
+ */
+export interface BoundedBodyRule {
+  /** The method, upper case. */
+  method: string;
+  /** Allowlist for this method, matched against the raw path without the query. */
+  isAllowedPath: (pathname: string) => boolean;
+  /** The largest declared body, in bytes. */
+  maxBytes: number;
+  /** The time the client has to send the whole body. */
+  timeoutMs: number;
 }
 
 export interface RequestHeaderDropRule {
@@ -143,6 +169,7 @@ const API_BRIDGE_ROLE: BridgeRole = {
   strictTarget: false,
   relayUpgrades: true,
   relayBodies: true,
+  boundedBody: null,
   notFoundMessage: "API port only serves OpenAI-compatible routes.",
   errorDetail: true,
   droppedRequestHeaders: NO_REQUEST_HEADER_DROPS,
@@ -150,10 +177,11 @@ const API_BRIDGE_ROLE: BridgeRole = {
 };
 
 /**
- * The role of the quota panel port: the self-service quota page, read only.
+ * The role of the quota panel port: the self-service quota page, with `GET` and `HEAD` and no
+ * body, plus one bounded `PATCH` of the quota view, which saves the key's lending choice.
  *
  * A base path that is not empty and not supported (see `isQuotaPanelBasePath`) gives a role that
- * refuses every path. The role object is frozen.
+ * refuses every path. The role object and its bounded body rule are frozen.
  */
 export function createQuotaPanelRole(basePath = ""): BridgeRole {
   const supportedBasePath = basePath === "" || isQuotaPanelBasePath(basePath);
@@ -163,6 +191,13 @@ export function createQuotaPanelRole(basePath = ""): BridgeRole {
     strictTarget: true,
     relayUpgrades: false,
     relayBodies: false,
+    boundedBody: Object.freeze({
+      method: QUOTA_PANEL_WRITE_METHOD,
+      isAllowedPath: (pathname: string) =>
+        supportedBasePath && isQuotaPanelWritePath(pathname, basePath),
+      maxBytes: QUOTA_PANEL_WRITE_MAX_BYTES,
+      timeoutMs: QUOTA_PANEL_WRITE_TIMEOUT_MS,
+    }),
     notFoundMessage: "Not found.",
     errorDetail: false,
     droppedRequestHeaders: QUOTA_PANEL_REQUEST_HEADER_DROPS,
@@ -173,7 +208,8 @@ export function createQuotaPanelRole(basePath = ""): BridgeRole {
 /**
  * True when the role relays this method and target. The path goes through `isRelayablePath`.
  *
- * This does not cover the body rule of a role (`relayBodies`): `bridgeRequestDecision` does.
+ * This does not cover the body rules of a role (`relayBodies`, `boundedBody`):
+ * `bridgeRequestDecision` does.
  */
 export function isRelayableRequest(
   role: BridgeRole,
@@ -192,21 +228,48 @@ function declaresRequestBody(headers: IncomingHttpHeaders): boolean {
   return length !== undefined && Number(length) !== 0;
 }
 
-type BridgeRequestDecision = "relay" | "refuse" | "refuse-and-close";
+type BridgeRequestDecision =
+  | { kind: "relay" }
+  | { kind: "relay-bounded"; length: number; timeoutMs: number }
+  | { kind: "refuse" }
+  | { kind: "refuse-and-close" };
+
+/**
+ * The declared body length when the request follows the role's bounded body rule, else null.
+ * The target and the path go through the same checks as every other request of the role.
+ */
+function boundedBodyLength(role: BridgeRole, req: IncomingMessage): number | null {
+  const rule = role.boundedBody;
+  const rawUrl = req.url || "/";
+  if (!rule || req.method !== rule.method) return null;
+  if (role.strictTarget && !isPrintableAsciiTarget(rawUrl)) return null;
+  if (!isRelayablePath(rawUrl, rule.isAllowedPath)) return null;
+  return declaredJsonBodyLength(req.headers, req.rawHeaders, rule.maxBytes);
+}
 
 /**
  * What the bridge does with a request: the body, method and path rules of the role, together.
  *
- * A request refused for its body also closes the connection, so its body is not read.
+ * The bounded body rule comes first. Any other request refused for its body also closes the
+ * connection, so its body is not read.
  */
-function bridgeRequestDecision(
-  role: BridgeRole,
-  method: string | undefined,
-  rawUrl: string,
-  headers: IncomingHttpHeaders
-): BridgeRequestDecision {
-  if (!role.relayBodies && declaresRequestBody(headers)) return "refuse-and-close";
-  return isRelayableRequest(role, method, rawUrl) ? "relay" : "refuse";
+function bridgeRequestDecision(role: BridgeRole, req: IncomingMessage): BridgeRequestDecision {
+  const length = boundedBodyLength(role, req);
+  if (length !== null && role.boundedBody) {
+    return { kind: "relay-bounded", length, timeoutMs: role.boundedBody.timeoutMs };
+  }
+  if (!role.relayBodies && declaresRequestBody(req.headers)) return { kind: "refuse-and-close" };
+  return isRelayableRequest(role, req.method, req.url || "/")
+    ? { kind: "relay" }
+    : { kind: "refuse" };
+}
+
+/** The bridge's 404. `close` ends the connection after it, so an unread body is never parsed. */
+function refuseRequest(res: ServerResponse, role: BridgeRole, close: boolean): void {
+  const headers: http.OutgoingHttpHeaders = { "content-type": "application/json" };
+  if (close) headers.connection = "close";
+  res.writeHead(404, headers);
+  res.end(notFoundBody(role));
 }
 
 function notFoundBody(role: BridgeRole): string {
@@ -304,25 +367,32 @@ function relayedResponseHeaders(
   return relayed;
 }
 
+/**
+ * Relays the request to the dashboard. With `body`, that buffer is the whole request body and
+ * its length is the relayed `content-length`. Without it, the client's body is streamed.
+ */
 function proxyRequest(
   req: IncomingMessage,
   res: ServerResponse,
   dashboardPort: number,
-  role: BridgeRole
+  role: BridgeRole,
+  body?: Buffer
 ): void {
   const proxyTimeoutMs = getProxyTimeoutMs(req);
+  const headers = buildBridgeRequestHeaders(
+    req.headers,
+    req.socket.remoteAddress,
+    dashboardPort,
+    role.droppedRequestHeaders
+  );
+  if (body) headers["content-length"] = String(body.length);
   const targetReq = http.request(
     {
       hostname: "127.0.0.1",
       port: dashboardPort,
       method: req.method,
       path: req.url,
-      headers: buildBridgeRequestHeaders(
-        req.headers,
-        req.socket.remoteAddress,
-        dashboardPort,
-        role.droppedRequestHeaders
-      ),
+      headers,
       timeout: proxyTimeoutMs,
     },
     (targetRes) => {
@@ -361,7 +431,27 @@ function proxyRequest(
     targetReq.destroy();
   });
 
-  req.pipe(targetReq);
+  if (body) targetReq.end(body);
+  else req.pipe(targetReq);
+}
+
+/**
+ * Reads the declared body, then relays the request with exactly those bytes. Nothing is sent to
+ * the dashboard before the body is complete. A body that is not complete in time is refused and
+ * the connection closed. When the client is gone by then, nothing is sent or answered.
+ */
+function relayBoundedRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  dashboardPort: number,
+  role: BridgeRole,
+  decision: { length: number; timeoutMs: number }
+): void {
+  void readBoundedBody(req, decision.length, decision.timeoutMs).then((body) => {
+    if (res.destroyed || req.socket.destroyed) return;
+    if (body === null) refuseRequest(res, role, true);
+    else proxyRequest(req, res, dashboardPort, role, body);
+  });
 }
 
 function writeUpgradeProxyError(socket: net.Socket, status: number, body: string): void {
@@ -486,16 +576,14 @@ export function createApiBridgeServer(
     // uncaughtException that kills the server (#fix-dev-server-aborted).
     attachRequestStreamGuards(req, res);
 
-    const decision = bridgeRequestDecision(role, req.method, req.url || "/", req.headers);
-    if (decision !== "relay") {
-      const headers: http.OutgoingHttpHeaders = { "content-type": "application/json" };
-      if (decision === "refuse-and-close") headers.connection = "close";
-      res.writeHead(404, headers);
-      res.end(notFoundBody(role));
-      return;
+    const decision = bridgeRequestDecision(role, req);
+    if (decision.kind === "relay") {
+      proxyRequest(req, res, dashboardPort, role);
+    } else if (decision.kind === "relay-bounded") {
+      relayBoundedRequest(req, res, dashboardPort, role, decision);
+    } else {
+      refuseRequest(res, role, decision.kind === "refuse-and-close");
     }
-
-    proxyRequest(req, res, dashboardPort, role);
   };
   const server = serverOptions
     ? http.createServer(serverOptions, handleRequest)
