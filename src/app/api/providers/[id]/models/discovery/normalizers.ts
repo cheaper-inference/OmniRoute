@@ -22,6 +22,7 @@ import {
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
 import { hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
+import { requiresLiveFreeEvidence } from "@/shared/utils/freeModels";
 import { asRecord, toNonEmptyString } from "./helpers";
 import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
@@ -270,7 +271,8 @@ function pickEffortDeclarations(item: Record<string, unknown>): Record<string, u
   return picked;
 }
 
-// Preserve SiliconFlow live evidence and other providers' paid vetoes through
+// Preserve live free evidence for providers without catalog rows (SiliconFlow, Nous Portal:
+// an unsuffixed free id has nothing else, #19562) and other providers' paid vetoes through
 // discovery. Project only the fields consumed by payloadFreeEvidence.
 function pickPricingEvidence(item: Record<string, unknown>): Record<string, unknown> {
   const picked: Record<string, unknown> = {};
@@ -308,7 +310,7 @@ export function normalizeOpenAiLikeModelsResponse(
         toNonEmptyString(item.owned_by) || toNonEmptyString(item.provider) || fallbackOwner;
       return {
         ...pickEffortDeclarations(item),
-        ...(fallbackOwner === "siliconflow" || hasPayloadPaidEvidence(item)
+        ...(requiresLiveFreeEvidence(fallbackOwner) || hasPayloadPaidEvidence(item)
           ? pickPricingEvidence(item)
           : {}),
         id,
