@@ -1,0 +1,82 @@
+{
+  "argv": ["--settings", "${TMP}/claude-settings.json", "--model", "anthropic/claude-sonnet-4-6"],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "ANTHROPIC_API_KEY": "",
+      "ANTHROPIC_AUTH_TOKEN": "${TOKEN}",
+      "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128",
+      "ANTHROPIC_DEFAULT_FABLE_MODEL": "anthropic/claude-sonnet-4-6",
+      "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-sonnet-4-6",
+      "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-sonnet-4-6",
+      "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-sonnet-4-6",
+      "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+      "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "190000",
+      "CLAUDE_CODE_AUTO_MODE_SERVER": "0",
+      "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+      "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
+      "CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST": "1",
+      "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-sonnet-4-6",
+      "CLAUDE_CONFIG_DIR": "/home/fixture/.claude/profiles/work",
+      "DISABLE_ERROR_REPORTING": "1",
+      "DISABLE_FEEDBACK_COMMAND": "1"
+    },
+    "unset": [
+      "CLAUDE_CODE_USE_ANTHROPIC_AWS",
+      "CLAUDE_CODE_USE_ANTHROPIC_GOOGLE_CLOUD",
+      "CLAUDE_CODE_USE_BEDROCK",
+      "CLAUDE_CODE_USE_FOUNDRY",
+      "CLAUDE_CODE_USE_GATEWAY",
+      "CLAUDE_CODE_USE_MANTLE",
+      "CLAUDE_CODE_USE_VERTEX"
+    ]
+  },
+  "modelList": {
+    "injected": 5,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Press s in /model to switch for this launch only; Enter saves the model to /home/fixture/.claude/profiles/work/settings.json."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [
+    {
+      "key": "model",
+      "kind": "json-key-unchanged",
+      "message": "Claude Code saved a default model in /home/fixture/.claude/profiles/work/settings.json during this launch (/model + Enter).",
+      "path": "/home/fixture/.claude/profiles/work/settings.json",
+      "revertHint": "Restore the previous \"model\" value in /home/fixture/.claude/profiles/work/settings.json, or run /model in a plain claude session."
+    }
+  ],
+  "preflight": [
+    {
+      "key": "availableModels",
+      "kind": "file-json-key",
+      "path": "/etc/claude-code/managed-settings.json",
+      "severity": "warn",
+      "why": "A managed availableModels allowlist still filters the OmniRoute picker rows."
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "ANTHROPIC_AUTH_TOKEN",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"modelPicker\": {\n    \"options\": [\n      {\n        \"behavesAs\": \"claude-sonnet-4-6\",\n        \"description\": \"200k ctx via OmniRoute\",\n        \"label\": \"Claude Sonnet 4.6\",\n        \"model\": \"anthropic/claude-sonnet-4-6\"\n      },\n      {\n        \"description\": \"400k ctx via OmniRoute\",\n        \"label\": \"GPT-5.2\",\n        \"model\": \"openai/gpt-5.2\"\n      },\n      {\n        \"description\": \"via OmniRoute\",\n        \"label\": \"Unknown Context\",\n        \"model\": \"mystery/unknown-context\"\n      },\n      {\n        \"description\": \"32k ctx via OmniRoute\",\n        \"label\": \"Small 32k\",\n        \"model\": \"small/ctx-32k\"\n      },\n      {\n        \"description\": \"combo, 128k ctx via OmniRoute\",\n        \"label\": \"Combo fastest\",\n        \"model\": \"fastest\"\n      }\n    ],\n    \"replaceBuiltInOptions\": true\n  },\n  \"skipWebFetchPreflight\": true\n}\n",
+      "format": "json",
+      "mode": 384,
+      "path": "claude-settings.json"
+    }
+  ],
+  "tool": "claude",
+  "warnings": []
+}

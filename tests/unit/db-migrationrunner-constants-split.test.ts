@@ -77,8 +77,17 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 107 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 111);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 113 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 113);
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "launch_sessions"),
+      ["240", "242"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "launch_sessions",
+        toVersion: "20261116102450",
+        toName: "launch_sessions",
+      }))
+    );
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "usage_history_calculated_cost"
