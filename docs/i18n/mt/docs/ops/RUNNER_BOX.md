@@ -116,31 +116,20 @@ Il-`KillMode=process` default tar-runner iħalli `Runner.Worker → npm → next
 
 ## Korsija ospitata (runners ospitati minn GitHub)
 
-Ir-repository tappartjeni lill-organizzazzjoni `cheaper-inference`, fuq il-pjan **Team**: **60 biċċa xogħol ospitata konkorrenti**, kondiviżi bejn kull repository fl-organizzazzjoni, kull kontroll ta’ PR, kull workflow skattat minn push u l-konfigurazzjoni predefinita ta’ CodeQL. Iċ-ċifri ta’ hawn taħt tkejlu fuq il-pjan **Pro** (40 biċċa xogħol ospitata konkorrenti). Imkejjel fit-2026-10-18 waqt
-kampanja ta’ merges (~10 merges/siegħa fuq `release/v3.8.52`): **2,500 eżekuzzjoni ta’ workflow maħluqa
-f’24 siegħa**, 44 push lejn il-fergħa f’6 sigħat, **106 biċċiet xogħol ospitati fil-kju** waqt li l-kontrolli tal-PRs stennew
-għal sigħat u l-PRs ġew integrati mingħajrhom. Disa’ workflows ġew skattati ma’ kull push lejn il-fergħa:
+Ir-repożitorju jappartjeni lill-organizzazzjoni `cheaper-inference`, fuq il** Tim** pjan:** 60 impjieg ospitat konkorrenti** , kondiviża minn kull repożitorju fl-organizzazzjoni, kull kontroll PR, kull fluss tax-xogħol imqabbad u s-setup default ta ' CodeQL. Iċ-ċifri hawn taħt ġew imkejla fuq il-** Pro** pjan (40 impjieg ospitat konkorrenti). Imkejjel fl-2026-10-18 waqt kampanja ta' amalgamazzjoni (~ 10 merges/hour fuq `release/v3.8.52`):** 2,500 workflow run maħluqa f'24 siegħa** , 44 timbotta lejn il-fergħa f'6 sigħat,** 106 impjieg ospitat fil-kju** filwaqt li PR checks stennew sigħat u PRs ġew magħquda mingħajrhom. Disa' flussi tax-xogħol sparati fuq kull spinta lejn il-fergħa:
 
-| għal kull push lejn `release/v*`                   | xogħlijiet ospitati | riżultat matul il-maltempata                                           | mill-2026-10-18                                                                            |
-| -------------------------------------------------- | ------------------: | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `ci.yml` (matriċi sħiħa)                           |         sa mass. 30 | ikkanċellat mill-push li jmiss, 24 minn 24 f’ġurnata                   | ma jinbediex fuq pushes lejn `release/**` (eżekuzzjoni tal-PR + Release-Green)             |
-| `quality.yml`                                      |                  ~6 | ikkanċellat, 23 minn 23                                                | ma jinbediex fuq pushes lejn `release/**`                                                  |
-| `Release-Green` `--quick`                          |                   0 | eżegwit fuq `omni-build`, 97 minn 100 ġew ikkanċellati                 | slot `omni-release`, qatt ma jiġi kkanċellat, l-eżekuzzjonijiet pendenti jiġu kkonsolidati |
-| `Lock released branch`, `OpenSSF Scorecard`        |                   2 | eżekuzzjoni waħda fil-kju għal kull push                               | eżekuzzjoni waħda għal kull referenza (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
-| `Release acceptance` (rapport parallelu)           |                   1 | `npm ci` ospitat wieħed għal kull push, qatt ma jiġi kkanċellat        | l-istess — kandidat għal filtru `paths:`                                                   |
-| `Publish to Docker Hub` → `Deploy to VPS`          |                   2 | ikkanċellat għal kull push; il-parti amd64 tikkompeti fuq `omni-build` | l-istess — il-kanal tal-iskjerament tas-sid                                                |
-| Konfigurazzjoni predefinita ta’ CodeQL (`dynamic`) |                   4 | `javascript-typescript`, `actions`, `c-cpp`, `python` għal kull push   | l-istess — Settings → Sigurtà tal-kodiċi; `c-cpp`/`python` ma jiskennjaw xejn hawn         |
+| kull push to `release/v*`                   | impjiegi ospitati | riżultat taħt il-maltemp                                          | mill-2026-10-18                                                                |
+| ------------------------------------------- | ----------------: | ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `ci.yml` (matriċi sħiħa)                    |             sa 30 | ikkanċellat mill-imbottatura li jmiss, 24 minn 24 f'ġurnata       | ma bdietx fuq `release/**` pushes (PR run + Release-Green)                     |
+| `quality.yml`                               |                ~6 | ikkanċellat, 23 minn 23                                           | ma bdietx fuq `release/**` pushes                                              |
+| `Release-Green` `--quick`                   |                 0 | dam fuq `omni-build`, annullat 97 minn 100                        | `omni-release` slot, qatt ikkanċellat, pendenti run kollass                    |
+| `Lock released branch`, `OpenSSF Scorecard` |                 2 | ġirja waħda fil-kju għal kull push                                | ġirja waħda għal kull ref (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (shadow report)        |                 1 | one hosted `npm ci` per push, never cancelled                     | kandidat — mhux mibdul ghal filtru `paths:`                                    |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                 2 | ikkanċellat għal kull push; amd64 leg jikkompeti fuq `omni-build` | il-kanal tal-iskjerament tas-sid — mhux mibdul                                 |
+| CodeQL default setup (`dynamic`)            |                 4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per push    | mhux mibdul — Settings → Sigurtà tal-kodiċi; `c-cpp`/`python` scan xejn hawn   |
 
-`tests/unit/build/push-storm-diet.test.ts` jiffissa l-iskattar permezz ta’ push għal `main` biss ta’ `ci.yml` u
-`quality.yml`. Effett sekondarju: Codecov ma jibqax jirċievi upload bażi għal kull push ta’ release (il-pass
-huwa informattiv u juża `continue-on-error`); il-limitu tal-kopertura fir-repo u l-kumment fuq il-PR
-ma jiġux affettwati.
+`tests/unit/build/push-storm-diet.test.ts` pins il `main` -only push trigger ta `ci.yml` u `quality.yml`. Effett sekondarju: Codecov m'għadux jirċievi upload bażi għal kull push push (il-pass huwa informattiv u `continue-on-error`); il-bieb tal-kopertura in-repo u l-kumment PR mhumiex affettwati.
 
-**Aktar kapaċità self-hosted ma ssolvix il-kju ospitat.** Id-devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) jista’ jospita runner, iżda s-sessjonijiet tal-aġenti diġà
-jżommu t-tagħbija tiegħu bejn 20–26, il-container tal-aġent ma għandux daemon ta’ Docker, u l-korsija saturata
-hija dik ospitata. Il-kaxxa `.113` kellha 71 GB liberi u tagħbija ta’ 5–8 fl-istess mument; il-limitazzjoni tagħha
-hija l-baġit tal-memorja għal kull listener imsemmi hawn fuq (limitu massimu ta’ 6 listeners), mhux is-CPU. Il-lievi li jifdal
-huma dawk tal-proċess: integra l-PRs tal-kampanja permezz tal-kju ta’ Mergify (`label=queue`, il-batches jaqsmu
-eżekuzzjoni CI waħda ta’ `merge_group` minflok eżekuzzjoni waħda għal kull PR flimkien ma’ waħda għal kull push), naqqas il-lingwi
-tal-konfigurazzjoni predefinita ta’ CodeQL, u ffiltra `release-acceptance.yml` skont il-fajls li jaqra.
+**Kapaċità aktar self-hosted ma tiffissax il-kju ospitat.** Id-devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) jista 'jospita runner, iżda s-sessjonijiet tal-aġent diġà jżommu t-tagħbija tiegħu f'20-26, il-kontenitur tal-aġent m'għandux daemon Docker, u l-korsija saturata hija dik ospitata. Il-kaxxa `.113` kellha 71 GB ħielsa u tagħbija 5–8 fl-istess mument; ir-restrizzjoni tagħha hija l-baġit tal-memorja għal kull semmiegħa hawn fuq (limitu massimu ta '6 semmiegħa), mhux CPU. Il-lievi li jifdal huma dawk tal-proċess: kampanja tal-art PRs permezz tal-kju Mergify (`label=queue`, lottijiet jaqsmu ġirja waħda `merge_group` CI minflok ġirja waħda għal kull PR flimkien ma 'wieħed għal kull push), ittrimmja l-lingwi CodeQL default-setup, u iffiltra `release-acceptance.yml` mill-fajls li jaqra.
+
+> **2026-11-19: il-kju ta' amalgamazzjoni Mergify huwa rtirat** (deċiżjoni tas-sid). `.mergify.yml` m'għadux jiddefinixxi kju u jirrifjuta l-kmandi Mergify li jingħaqdu jew jiktbu mill-ġdid pull request. Ir-rilaxx PRs huma magħquda bl-idejn taħt ir-regoli tar-repożitorju "Jeħtieġu gradi ħodor fuq ir-rilaxx attiv" (`Gate / CI` + `Gate / Quality`) sakemm omni-queue jaħdem fil-modalità ħaj, u permezz ta 'omni-queue wara dak ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Il-lieva Mergify hawn fuq m'għadhiex teżisti.

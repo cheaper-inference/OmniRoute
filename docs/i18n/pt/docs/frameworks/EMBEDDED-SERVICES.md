@@ -559,6 +559,8 @@ Este proxy:
 
 As atualizações WebSocket para o painel integrado são geridas por um servidor complementar numa porta dedicada (consulte `src/lib/services/embedWsProxy.ts`).
 
+Cada atualização é autorizada antes da abertura do túnel, com as mesmas regras da rota de incorporação HTTP : o peer deve ser um loopback sem cabeçalho de encaminhamento de proxy reverso, um navegador `Origin` deve ser uma origem do painel (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` estende os padrões de loopback) e o chamador precisa de uma sessão do painel ou de uma chave API de âmbito de gestão, a menos que o login do painel esteja desativado.
+
 **Segurança:** As rotas de proxy incorporadas são classificadas em `LOCAL_ONLY_API_PREFIXES` e só podem ser acedidas através de loopback. Um atacante que obtenha um JWT através de um túnel Cloudflare/Ngrok não pode fazer proxy em serviços incorporados.
 
 ---

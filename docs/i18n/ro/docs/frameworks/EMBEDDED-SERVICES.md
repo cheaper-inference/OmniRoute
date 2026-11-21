@@ -557,6 +557,8 @@ Acest proxy:
 
 Upgrade-urile WebSocket pentru tabloul de bord încorporat sunt gestionate de un server însoțitor pe un port dedicat (vezi `src/lib/services/embedWsProxy.ts`).
 
+Fiecare upgrade este autorizat înainte de deschiderea tunelului, cu aceleași reguli ca și ruta de încorporare HTTP : peer-ul trebuie să fie loopback fără antet de redirecționare reverse-proxy, un browser `Origin` trebuie să fie o origine a tabloului de bord (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extind valorile implicite de loopback), iar apelantul are nevoie de o sesiune de tablou de bord sau de o cheie API conectare a tabloului de bord fără management.
+
 **Securitate:** Rutele proxy încorporate sunt clasificate în `LOCAL_ONLY_API_PREFIXES` și pot fi accesate numai din loopback. Un atacator care obține un JWT printr-un tunel Cloudflare/Ngrok nu poate folosi proxy în serviciile încorporate.
 
 ---

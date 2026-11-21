@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import dns from "node:dns";
+import { getSettledModelCatalogRouteResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-image-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -209,7 +210,7 @@ test("v1 image models GET exposes image-only modalities for credential-backed im
   await seedConnection("topaz", { apiKey: "topaz-key" });
   await seedConnection("stability-ai", { apiKey: "stability-key" });
 
-  const response = await imageRoute.GET();
+  const response = await getSettledModelCatalogRouteResponse(v1ModelsCatalog, imageRoute.GET);
   const body = (await response.json()) as { data: ImageModelRow[] };
   const byId = new Map(body.data.map((item) => [item.id, item]));
 
@@ -222,7 +223,7 @@ test("v1 image models GET exposes image-only modalities for credential-backed im
 test("v1 image models GET exposes current Codex image models and hides inactive providers", async () => {
   await seedConnection("codex", { apiKey: "codex-key" });
 
-  const response = await imageRoute.GET();
+  const response = await getSettledModelCatalogRouteResponse(v1ModelsCatalog, imageRoute.GET);
   const body = (await response.json()) as { data: Array<{ id: string }> };
   const ids = body.data.map((item) => item.id);
 
@@ -524,6 +525,54 @@ test("v1 image edit POST defaults Codex results to b64_json when response_format
   assert.equal(body.data[0].url, undefined);
 });
 
+test("v1 image edit POST forwards 128 hosted Codex references without truncation", async () => {
+  await seedConnection("codex", { apiKey: "codex-oauth-token" });
+  let forwardedReferences = -1;
+
+  globalThis.fetch = async (url, options: RequestInit = {}) => {
+    assert.equal(String(url), "https://chatgpt.com/backend-api/codex/responses");
+    const upstream = JSON.parse(String(options.body || "{}")) as CapturedResponsesBody;
+    forwardedReferences = upstream.input[0].content.filter(
+      (item) => item.type === "input_image"
+    ).length;
+    assert.deepEqual(upstream.tools, [
+      { type: "image_generation", output_format: "png", action: "edit" },
+    ]);
+    const event = {
+      type: "response.output_item.done",
+      item: {
+        type: "image_generation_call",
+        id: "ig_128_refs",
+        status: "completed",
+        result: "ZWRpdGVkLTEyOA==",
+      },
+    };
+    return new Response(`data: ${JSON.stringify(event)}\n\ndata: [DONE]\n\n`, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
+  };
+
+  const formData = createCodexEditForm("combine all 128 references");
+  for (let index = 2; index <= 128; index += 1) {
+    formData.append(
+      "image[]",
+      new File([VALID_PNG_BYTES], `reference-${index}.png`, { type: "image/png" })
+    );
+  }
+
+  const response = await imageEditRoute.POST(
+    new Request("http://localhost/api/v1/images/edits", {
+      method: "POST",
+      body: formData,
+    })
+  );
+  const body = (await response.json()) as ImageResponseBody;
+  assert.equal(response.status, 200);
+  assert.equal(forwardedReferences, 128);
+  assert.equal(body.data[0].b64_json, "ZWRpdGVkLTEyOA==");
+});
+
 test("v1 image edit POST rejects excessive or malformed Codex reference sets", async () => {
   await seedConnection("codex", { apiKey: "codex-oauth-token" });
   globalThis.fetch = async () => {
@@ -531,7 +580,7 @@ test("v1 image edit POST rejects excessive or malformed Codex reference sets", a
   };
 
   const formData = createCodexEditForm("combine these references");
-  for (let index = 2; index <= 9; index += 1) {
+  for (let index = 2; index <= 129; index += 1) {
     formData.append(
       "image[]",
       new File([VALID_PNG_BYTES], `reference-${index}.png`, { type: "image/png" })
@@ -547,7 +596,7 @@ test("v1 image edit POST rejects excessive or malformed Codex reference sets", a
   const body = (await response.json()) as ErrorResponseBody;
 
   assert.equal(response.status, 400);
-  assert.match(body.error.message, /at most 8 reference images/i);
+  assert.match(body.error.message, /at most 128 reference images/i);
 
   const jsonResponse = await imageEditRoute.POST(
     new Request("http://localhost/api/v1/images/edits", {
@@ -1066,7 +1115,10 @@ for (const [provider, alias] of [
     assert.deepEqual(((await response.json()) as ImageResponseBody).data, [
       { b64_json: "ZmFrZQ==" },
     ]);
-    const catalog = await imageRoute.GET(new Request("http://localhost/v1/images/generations"));
+    const catalog = await getSettledModelCatalogRouteResponse(v1ModelsCatalog, () =>
+      imageRoute.GET(new Request("http://localhost/v1/images/generations"))
+    );
+    assert.equal(catalog.status, 200);
     const payload = (await catalog.json()) as { data: ImageModelRow[] };
     assert.ok(payload.data.some((row) => row.id === `${provider}/grok-imagine-image-2.0`));
   });

@@ -12,7 +12,8 @@
     "dryRun": "[simulering] ville: {action}",
     "cancelled": "Avbrutt.",
     "jsonOpt": "Utdata som JSON",
-    "yesOpt": "Hopp over bekreftelse"
+    "yesOpt": "Hopp over bekreftelse",
+    "positiveIntegerRequired": "Grensen må være et positivt heltall."
   },
   "setup": {
     "title": "Oppsett av OmniRoute",

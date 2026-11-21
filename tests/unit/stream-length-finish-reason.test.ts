@@ -171,6 +171,111 @@ test("passthrough control: a stop-finish stream still caches", async () => {
   assert.notEqual(sem.getCachedResponse(sig), null, "a complete stop stream is still cacheable");
 });
 
+test("passthrough: a content_filter stream keeps finish_reason content_filter and is not cached", async () => {
+  let completed: Completed = null;
+  const body = {
+    messages: [{ role: "user", content: "a prompt the provider filters" }],
+    temperature: 0,
+    stream: true,
+  };
+  const ts = createPassthroughStreamWithLogger(
+    "openai",
+    null,
+    null,
+    "gpt-4o",
+    "conn-filter-1",
+    body,
+    (p) => {
+      completed = p;
+    },
+    null,
+    null,
+    "openai",
+    null,
+    null,
+    null
+  );
+  await runStream(
+    ts,
+    chatChunk({ role: "assistant", content: "I can" }) +
+      chatChunk({}, "content_filter") +
+      "data: [DONE]\n\n"
+  );
+  assert.equal(completed?.status, 200);
+  assert.equal(completed?.responseBody?.choices?.[0]?.finish_reason, "content_filter");
+  assert.equal(sem.isTruncatedStreamBody(completed?.responseBody), true);
+
+  storeStreamingSemanticCacheResponse({
+    enabled: true,
+    streamStatus: 200,
+    streamResponseBody: completed?.responseBody,
+    body,
+    headers: {},
+    model: "gpt-4o",
+    provider: "openai",
+    apiKeyId: "k-filter-1",
+    streamUsage: completed?.usage as Record<string, unknown> | null,
+  });
+  const sig = sem.generateSignature(
+    "gpt-4o",
+    body.messages,
+    0,
+    undefined,
+    "k-filter-1",
+    sem.outputContractOf(body)
+  );
+  assert.equal(sem.getCachedResponse(sig), null, "a content_filter stream must not be cached");
+});
+
+test("translate claude->chat: stop_reason refusal reaches the assembled body as content_filter", async () => {
+  let completed: Completed = null;
+  const body = {
+    messages: [{ role: "user", content: "a prompt the model refuses" }],
+    temperature: 0,
+    stream: true,
+  };
+  const ts = createSSETransformStreamWithLogger(
+    FORMATS.CLAUDE,
+    FORMATS.OPENAI,
+    "anthropic",
+    null,
+    null,
+    "claude-sonnet-4-6",
+    "conn-filter-2",
+    body,
+    (p) => {
+      completed = p;
+    },
+    null,
+    null
+  );
+  await runStream(
+    ts,
+    claudeEvent("message_start", {
+      message: {
+        id: "msg_2",
+        role: "assistant",
+        model: "claude-sonnet-4-6",
+        usage: { input_tokens: 10 },
+      },
+    }) +
+      claudeEvent("content_block_start", { index: 0, content_block: { type: "text", text: "" } }) +
+      claudeEvent("content_block_delta", {
+        index: 0,
+        delta: { type: "text_delta", text: "I can" },
+      }) +
+      claudeEvent("content_block_stop", { index: 0 }) +
+      claudeEvent("message_delta", {
+        delta: { stop_reason: "refusal" },
+        usage: { output_tokens: 2 },
+      }) +
+      claudeEvent("message_stop", {})
+  );
+  assert.equal(completed?.status, 200);
+  assert.equal(completed?.responseBody?.choices?.[0]?.finish_reason, "content_filter");
+  assert.equal(sem.isTruncatedStreamBody(completed?.responseBody), true);
+});
+
 test("passthrough: tool calls with an upstream length finish keep finish_reason length", async () => {
   let completed: Completed = null;
   const body = {

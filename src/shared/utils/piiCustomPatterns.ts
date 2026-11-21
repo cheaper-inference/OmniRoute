@@ -3,12 +3,13 @@
  *
  * Every pattern passes the same gate before it is stored, previewed or run:
  * a length cap, a flag allow-list, a compile check, the `safe-regex`
- * catastrophic-backtracking check, and a refusal of patterns that match the
+ * catastrophic-backtracking check, a timed probe run, and a refusal of patterns that match the
  * empty string (a global regex that matches "" never advances). A stored
  * pattern that somehow fails the gate later (hand-edited DB row) is skipped at
  * runtime instead of being compiled raw.
  */
 
+import vm from "node:vm";
 import safeRegex from "safe-regex";
 import { PII_CUSTOM_PATTERN_LIMITS } from "@/shared/constants/piiTypes";
 
@@ -86,6 +87,31 @@ export function wildcardToRegexSource(pattern: string): string {
   return out;
 }
 
+// `safe-regex` is a static star-height check and accepts overlapping alternations such as
+// `(x|xx)+$`, which take exponential time on a run of `x`. Run the pattern on a few long
+// single-character runs under a vm deadline; a catastrophic one is cut off and refused.
+// shortcut: only these run shapes are probed, widen the list if a slow pattern gets through.
+const PROBE_RUN_CHARS = ["a", "\u00e9", "1", " ", "-", "_", "."];
+const PROBE_RUN_LENGTH = 64;
+const PROBE_DEADLINE_MS = 100;
+const probeScript = new vm.Script("re.lastIndex = 0; re.test(s)");
+
+function finishesInTime(regex: RegExp): boolean {
+  for (const ch of PROBE_RUN_CHARS) {
+    try {
+      probeScript.runInNewContext(
+        { re: regex, s: ch.repeat(PROBE_RUN_LENGTH) + "!" },
+        { timeout: PROBE_DEADLINE_MS }
+      );
+    } catch {
+      return false;
+    } finally {
+      regex.lastIndex = 0;
+    }
+  }
+  return true;
+}
+
 function normalizeFlags(flags: string | undefined): string | null {
   const unique = new Set<string>();
   for (const flag of flags ?? "") {
@@ -115,7 +141,7 @@ export function compilePiiCustomPattern(input: {
   } catch {
     return { ok: false, reason: "invalid" };
   }
-  if (!safeRegex(regex)) return { ok: false, reason: "unsafe" };
+  if (!safeRegex(regex) || !finishesInTime(regex)) return { ok: false, reason: "unsafe" };
   const probe = new RegExp(source, flags.replace("g", ""));
   if (probe.test("")) return { ok: false, reason: "matches_empty" };
   if (REDACTION_PLACEHOLDERS.some((placeholder) => probe.test(placeholder))) {

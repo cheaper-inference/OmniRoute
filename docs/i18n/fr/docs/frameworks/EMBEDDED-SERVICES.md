@@ -557,6 +557,8 @@ Ce proxy :
 
 Les mises à niveau WebSocket pour le tableau de bord intégré sont gérées par un serveur compagnon sur un port dédié (voir `src/lib/services/embedWsProxy.ts`).
 
+Chaque mise à niveau est autorisée avant l'ouverture du tunnel, avec les mêmes règles que la route d'intégration HTTP : le homologue doit être un bouclage sans en-tête de transfert de proxy inverse, un navigateur `Origin` doit être une origine du tableau de bord (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` étend les valeurs par défaut du bouclage) et l'appelant a besoin d'une session de tableau de bord ou d'une clé API de portée de gestion à moins que la connexion au tableau de bord ne soit désactivée.
+
 **Sécurité:** Les routes proxy intégrées sont classées sous `LOCAL_ONLY_API_PREFIXES` et ne peuvent être atteintes qu'à partir du bouclage. Un attaquant qui obtient un JWT via un tunnel Cloudflare/Ngrok ne peut pas accéder aux services embarqués par proxy.
 
 ---

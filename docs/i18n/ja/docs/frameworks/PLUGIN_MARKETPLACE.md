@@ -26,31 +26,26 @@ OmniRoute には、WordPress 形式のプラグインシステムが搭載され
 ループバック以外のオリジンからルートへアクセスすることはできません。詳細については、
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)を参照してください。
 
-## 全体の仕組み
+## Together適合する方法
 
 ```
-ダッシュボード（/dashboard/plugins）
-  ├─ 「インストール済み」タブ → GET /api/plugins            （listPlugins）
-  │                              POST /api/plugins/scan      （pluginManager.scan）
-  │                              POST /api/plugins/{name}/activate|deactivate
-  │                              DELETE /api/plugins/{name}   （アンインストール）
-  └─ 「マーケットプレイス」タブ → GET /api/plugins/marketplace
-                                   → listMarketplacePlugins()
-                                     ├─ カスタム URL なし → 組み込み SEED_REGISTRY
-                                     └─ カスタム URL → isSafeMarketplaceUrl() SSRF ガード
-                                                       → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **レジストリレイヤー** — `src/lib/plugins/marketplace.ts`：カタログの一覧表示や検索を行い、
-  障害が発生した場合はシードレジストリへフォールバックします。
-- **ライフサイクルレイヤー** — `src/lib/plugins/manager.ts`（`pluginManager` シングルトン）：
-  インストール、アップグレード、アクティブ化、非アクティブ化、アンインストール、スキャン、起動時の読み込みを行います。
-- **マニフェストレイヤー** — `src/lib/plugins/manifest.ts`：`plugin.json` 用の
-  Zod スキーマとデフォルト値を定義します。
-- **スキャナー** — `src/lib/plugins/scanner.ts`：プラグインディレクトリ配下の
-  ディスク上にあるプラグインを検出します。
-- **ローダー** — `src/lib/plugins/loader.ts`：各プラグインを分離された
-  子プロセスで起動し、IPC 経由でフック呼び出しを仲介します。
+- **レジストリ層**— `src/lib/plugins/marketplace.ts`: カタログをリスト/検索し、失敗するとシード レジストリにフォールバックします。
+- **ライフサイクル層**— `src/lib/plugins/manager.ts` (`pluginManager`シングルトン): インストール、アップグレード、アクティブ化、非アクティブ化、アンインストール、スキャン、起動ロード。
+- **マニフェスト層**— `src/lib/plugins/manifest.ts`: Zodスキーマ+ `plugin.json`のデフォルトです。
+- **スキャナー**— `src/lib/plugins/scanner.ts`: プラグイン ディレクトリ下のディスク上のプラグインを検出します。
+- **ローダ**— `src/lib/plugins/loader.ts`: 個別のNode.js子プロセスで各プラグインを生成し、 IPCを介してフック呼び出しを仲介します。子はサンドボックスではありません (下記の「プラグイン実行の分離」を参照)。
 
 ## マーケットプレイスカタログ
 
@@ -86,34 +81,31 @@ OmniRoute には、WordPress 形式のプラグインシステムが搭載され
 
 ## REST API
 
-すべてのエンドポイントで管理認証（`requireManagementAuth`）が必要であり、**かつ**
-ループバックからのみアクセスできます。`/api/plugins` と `/api/plugins/` は
-`LOCAL_ONLY_API_PREFIXES`（`src/server/authz/routeGuard.ts`）に登録されています。
+すべてのエンドポイントには管理認証 (`requireManagementAuth`) が必要です**そして**ループバック専用の— `/api/plugins`および`/api/plugins/`は`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) にリストされています。
 
-| エンドポイント                   | メソッド | 説明                                                                 |
-| -------------------------------- | -------- | -------------------------------------------------------------------- |
-| `/api/plugins`                   | GET      | インストール済みプラグインを一覧表示（任意の `?status=` フィルター） |
-| `/api/plugins`                   | POST     | ローカルの絶対パスからプラグインをインストール                       |
-| `/api/plugins/scan`              | POST     | プラグインディレクトリをスキャンし、新しいプラグインを登録           |
-| `/api/plugins/marketplace`       | GET      | マーケットプレイスのカタログエントリを一覧表示                       |
-| `/api/plugins/[name]`            | GET      | インストール済みプラグインの詳細を取得                               |
-| `/api/plugins/[name]`            | DELETE   | プラグインをアンインストール                                         |
-| `/api/plugins/[name]/activate`   | POST     | 有効化（ロード + フックを登録）                                      |
-| `/api/plugins/[name]/deactivate` | POST     | 無効化（`onDeactivate` を実行し、フックを登録解除）                  |
-| `/api/plugins/[name]/config`     | GET      | プラグイン設定 + 設定スキーマを取得                                  |
-| `/api/plugins/[name]/config`     | PUT      | プラグイン設定を更新（スキーマに対して検証）                         |
+| 終点                             | 方法   | 説明                                                                                |
+| -------------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | インストールされているプラグインを一覧表示します (オプションの`?status=`フィルター) |
+| `/api/plugins`                   | POST   | プラグインのソース ディレクトリからプラグインをインストールする                     |
+| `/api/plugins/scan`              | POST   | プラグイン ディレクトリをスキャンし、新しいプラグインを登録します                   |
+| `/api/plugins/marketplace`       | GET    | マーケットプレイスのカタログ エントリを一覧表示する                                 |
+| `/api/plugins/[name]`            | GET    | インストールされているプラグインの詳細を取得する                                    |
+| `/api/plugins/[name]`            | DELETE | プラグインをアンインストールする                                                    |
+| `/api/plugins/[name]/activate`   | POST   | アクティブ化 ( +レジスターフックのロード)                                           |
+| `/api/plugins/[name]/deactivate` | POST   | 非アクティブ化 ( `onDeactivate`を起動、フックの登録を解除)                          |
+| `/api/plugins/[name]/config`     | GET    | プラグイン構成+構成スキーマを取得する                                               |
+| `/api/plugins/[name]/config`     | PUT    | プラグイン構成を更新します (スキーマに対して検証済み)                               |
 
-`GET /api/plugins` の `status` フィルターには、
-`installed` / `active` / `inactive` / `error` のいずれかを指定できます。無効な値を指定すると `400` が返されます。
+`GET /api/plugins` `status`フィルターは、 `installed` / `active` / `inactive` / `error`のいずれかを受け入れます。無効な値は`400`を返します。
 
-### インストール済みプラグインの一覧表示
+### インストールされているプラグインを一覧表示する
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### ローカルパスからのインストール
+### ローカルパスからインストールする
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -122,18 +114,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` は**絶対パス**である必要があり、`..` トラバーサルセグメントや
-null バイトを含めることはできません（Zod によって強制されます）。ソースディレクトリには有効な
-`plugin.json` が含まれている必要があります（または、その親ディレクトリを指定できます）。成功すると、インストールされたプラグインの行とともに `201` が返されます。
+The `path` must be an **absolute** path to a directory **inside the plugin sources directory**: `plugin-sources` next to the plugin root, so `~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` when that variable is set (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The install is refused with `400` when the path contains `..` or a null byte, lies outside that directory, resolves outside it through a symlink, contains a symlink whose target is outside it, or when the directory does not exist. The source directory must contain a valid `plugin.json` (or be a parent of one). On success the response is `201` with the installed plugin row.
 
-### マーケットプレイスの閲覧
+他のプラグイン ルートとは異なり、このルートでは、ログインが無効になっている場合でも (`requireLogin=false`)、管理資格情報 (ダッシュボード セッションまたは管理スコープのAPIキー) が必要です。コードのインストールは決して匿名のアクションではありません。
+
+### マーケットプレイスを閲覧する
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### プラグイン設定の更新
+### プラグイン設定を更新する
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` は、指定された各値をプラグインの
-`configSchema`（マニフェストで宣言）に対して検証します。`number` フィールドには `min`/`max` が適用され、
-`select` フィールドは宣言された `enum` と一致する必要があります。スキーマに存在しないキーは
-そのまま許可されます。
+`PUT .../config` validates each provided value against the plugin's `configSchema` (declared in the manifest): `number` fields honor `min`/`max`, `select` fields must match the declared `enum`. Keys not present in the schema are allowed through.
 
 ## 設定
 
@@ -201,88 +190,60 @@ SSRF ガードにより失敗した場合や、不正なレスポンスが返さ
 > 使用しているリリースで設定が永続化されることを確認してください。設定ストアにキーが存在すれば、**読み取り**パス（`getSettings()` →
 > `listMarketplacePlugins()`）はそのキーを反映します。
 
-## セキュリティ
+## 安全
 
-### ルート階層 — ループバックのみ
+### ルート層—ループバックのみ
 
-プラグインは生成された子プロセス内でコードを実行するため、`/api/plugins`
-サーフェス全体が `LOCAL_ONLY`（Tier 1）に分類されます。ループバックの強制は、
-認証チェックよりも**前に**無条件で実行されるため、管理トークンが漏洩し、
-トンネル経由で対象ホストに到達した場合でも、プラグインのインストール、
-有効化、アンインストールはできません。
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) および
-Hard Rules #15 / #17 を参照してください。
+プラグインは生成された子プロセスでコードを実行するため、 `/api/plugins`サーフェス全体が`LOCAL_ONLY` (Tier 1) に分類されます。ループバック強制は無条件で実行されます**前に**認証チェックがないため、漏洩した管理トークンがトンネルを介してボックスに到達しても、プラグインのインストール、アクティブ化、またはアンインストールはできません。 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)およびハード ルール#15 / #17を参照してください。
 
-### マーケットプレイスレジストリの SSRF ガード
+### マーケットプレイス レジストリSSRFガード
 
-カスタムレジストリ URL は攻撃者が影響を及ぼせる設定であるため、
-`listMarketplacePlugins()` は取得前に次の 2 層の検査を実行します。
+カスタム レジストリURLは攻撃者の影響を受ける構成であるため、 `listMarketplacePlugins()`それをフェッチする前に 2 つのレイヤーを介して実行します。
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - `http:` / `https:` 以外をすべて拒否します。
-   - 正規の `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) を使用し、リテラル表記の
-     プライベート／ループバック／リンクローカル／ULA ホスト（IPv4 と IPv6
-     の**両方**。IPv4 射影アドレスを含む）を拒否します。
-   - `A` と `AAAA` の**両方**のレコードを解決し、解決されたアドレスの
-     **いずれか**がプライベートである場合は拒否します。これにより、公開ホスト名
-     → プライベート IP というバイパスを防ぎます。
-   - **フェイルクローズ**：DNS 解決に失敗した場合は URL を拒否します。
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): フェッチ時に public-only URL
-   ガードを再適用し、**リダイレクトをブロック**します（公開アドレスから
-   プライベートアドレスへの `30x` ピボットを許可しません）。
+   - `http:` / `https:`以外のものはすべて拒否します。
+   - リテラルのprivate/loopback/link-local/ULAホスト (IPv4**そして**正規の`isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) を介したIPv6、 IPv4-mappedを含む)。
+   - 解決します**両方**`A`および`AAAA`記録し、次の場合は拒否します。**どれでも**解決されたアドレスはプライベート—で、パブリックホスト名→プライベート IP バイパスを閉じています。
+   - **フェイルクローズ**: DNS解決失敗によりURLが拒否されます。
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): フェッチ時にパブリック専用のURLガードを再適用し、**リダイレクトをブロックする**(パブリック→プライベート`30x`ピボットはありません)。
 
-いずれかの層で URL が拒否されてもリクエストは中止されません。マーケットプレイスは
-警告をログに記録し、組み込みのシードレジストリへ暗黙的にフォールバックします。
+いずれかの層で失敗したURLはリクエスト—を中止せず、マーケットプレイスは黙って組み込みのシード レジストリにフォールバックし、警告を記録します。
 
-> このガードは PR #3774 で強化され、特に A + AAAA の両方を解決し、
-> IPv4 のみのチェックではなく、正規の `isPrivateHost` を使用するようになりました。
+> このガードは、特に A + AAAA解決し、 IPv4-onlyチェックの代わりに正規の`isPrivateHost`を使用するために、 PR #3774で強化されました。
 
 ### プラグイン実行の分離
 
-- **プロセス分離** — `loadPlugin()` (`src/lib/plugins/loader.ts`) は各プラグインを
-  個別の Node.js 子プロセスで起動し、IPC 経由で通信します。フック呼び出しには
-  タイムアウトがあり、`SIGTERM` → `SIGKILL` の順で強制終了処理が行われます。
-- **環境変数の許可リスト** — 子プロセスが受け取る環境変数は許可リストに含まれる
-  ものだけです。マニフェストが `env` 権限を要求した場合に限り、より広い範囲の
-  環境変数が付与されます。
-- **パスの封じ込め** — インストール／アップグレード／アンインストールでは、
-  コピーまたは再帰削除を行う前に、プラグインディレクトリと `manifest.main` が
-  管理対象のプラグインルートの**内部**に解決されることを検証します
-  （改ざんされた DB パスや `manifest.main` 内の `../` トラバーサルを防止します）。
-  有効化時には `realpath` でシンボリックリンクを解決し、プラグインディレクトリ外へ
-  逸脱するエントリポイントの読み込みを拒否します。
-- **オプションの整合性固定** — マニフェストでは `integrity`
-  （`sha256-<base64>`、SRI 形式）フィールドを宣言できます。指定されている場合、
-  ローダーは読み込み時にエントリファイルのハッシュを検証し、一致しなければ
-  有効化を拒否します。これはオプトインの改ざん検出であり、セキュリティ境界では
-  **ありません**。実際の境界は、ループバック専用ルーティングと権限モデルです。
+> **プラグインはサンドボックス化されていません。**子プロセスは、 OmniRouteユーザーとして実行される通常のNode.jsプロセスであり、 VMコンテキストやNode.js権限フラグはありません。そのため、プラグイン コードは、ユーザーが実行できる任意のファイルの読み取りと書き込み、プログラムの実行、ネットワークへのアクセスが可能です。 `requires.permissions` 、子がどの環境変数を受け取るかを決定するだけです。他の権限は強制されません。信頼できるプラグインのみをインストールしてください。以下のプロセス境界にはクラッシュとハングが含まれています。それはセキュリティ境界ではありません。
+
+- **プロセスの分離**— `loadPlugin()` (`src/lib/plugins/loader.ts`) は、個別のNode.js子プロセスで各プラグインを生成し、 IPC経由で通信します。フック呼び出しには、 `SIGTERM` → `SIGKILL`エスカレーションでタイムアウトが発生します。
+- **環境許可リスト**—子は、許可リストに登録された環境変数セットのみを受け取ります。より広範なセットは、マニフェストが`env`権限を要求した場合にのみ付与されます。
+- **ソース封じ込めをインストールする**— `POST /api/plugins`プラグインのソース ディレクトリからのみ読み取ります (「ローカル パスからのインストール」を参照)。パスは`realpath`で正規化されており、厳密にそのディレクトリ内に存在する必要があり、それをエスケープするシンボリックリンクを含むソース ツリーは、何かがコピーされる前に拒否されます。
+- **パスの封じ込め**— install/upgrade/uninstallプラグイン ディレクトリと`manifest.main`が解決されることをアサートします**内で**コピーまたは再帰的削除の前に管理対象プラグインのルートを作成します (改ざんされたDBパスと`manifest.main`での`../`トラバーサルを防ぎます)。アクティブ化すると、 `realpath`経由でシンボリックリンクが解決され、プラグイン ディレクトリをエスケープするエントリ ポイントのロードが拒否されます。
+- **オプションの整合性ピン**—マニフェストでは`integrity` (`sha256-<base64>`、 SRI形式) フィールドを宣言できます。存在する場合、ローダーはロード時にエントリ ファイルのハッシュを検証し、不一致がある場合はアクティブ化を拒否します。オプトインの改ざん検出です。**ない**セキュリティ境界: ロードされたプラグインが実行できることは制限されません。
+- **フックにクライアント資格情報がありません**— `onRequest`、 `onResponse`および`onError`に渡されるコンテキストでは、 `authorization`、 `x-api-key`、 `proxy-authorization`および`cookie`ヘッダーが削除され、 APIキー レコードにはキー値が含まれません ( `src/lib/plugins/hooks.ts`の`redactPluginContext()` )。
 
 ## マニフェスト (`plugin.json`)
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) によって検証されます。
+`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) によって検証されました:
 
-| フィールド         | 型        | 備考                                                           |
-| ------------------ | --------- | -------------------------------------------------------------- |
-| `name`             | string    | 必須。kebab-case（`^[a-z0-9-]+$`）、1～100 文字                |
-| `version`          | string    | 必須。semver（`MAJOR.MINOR.PATCH`）                            |
-| `description`      | string?   | 500 文字以下                                                   |
-| `author`           | string?   | 200 文字以下                                                   |
-| `license`          | string?   | デフォルトは `MIT`                                             |
-| `main`             | string?   | エントリファイル。デフォルトは `index.js`                      |
-| `source`           | enum?     | `local` \| `marketplace`（デフォルトは `local`）               |
-| `tags`             | string[]? | 検索タグ                                                       |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                |
-| `hooks`            | object?   | プラグインが実装するフックを宣言するブール値                   |
-| `skills`           | object[]? | オプションのスキル定義                                         |
-| `enabledByDefault` | boolean?  | インストール時に自動有効化                                     |
-| `configSchema`     | object?   | 設定フィールドのマップ（`string`/`number`/`boolean`/`select`） |
-| `integrity`        | string?   | オプションの `sha256-<base64>` エントリファイル固定            |
+| 分野               | タイプ    | 注意事項                                                      |
+| ------------------ | --------- | ------------------------------------------------------------- |
+| `name`             | 弦        | 必須;ケバブケース (`^[a-z0-9-]+$`)、1 ～ 100 文字             |
+| `version`          | 弦        | 必須;センバー (`MAJOR.MINOR.PATCH`)                           |
+| `description`      | 弦？      | ≤ 500 文字                                                    |
+| `author`           | 弦？      | ≤ 200文字                                                     |
+| `license`          | 弦？      | デフォルトは`MIT`                                             |
+| `main`             | 弦？      | エントリーファイル;デフォルトは`index.js`                     |
+| `source`           | 列挙型?   | `local` \| `marketplace` (デフォルトは`local`)                |
+| `tags`             | 弦[]？    | タグを検索                                                    |
+| `requires`         | 物体？    | `{ omniroute?, permissions[] }`                               |
+| `hooks`            | 物体？    | プラグインが実装するフックを宣言するブール値                  |
+| `skills`           | 物体[]？  | オプションのスキル定義                                        |
+| `enabledByDefault` | ブール値? | インストール時に自動アクティブ化                              |
+| `configSchema`     | 物体？    | 設定フィールドのマップ (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | 弦？      | オプションの`sha256-<base64>`エントリーファイル ピン          |
 
-権限は列挙型
-`network` / `file-read` / `file-write` / `env` / `exec`
-から選択されます。
+権限は列挙型`network` / `file-read` / `file-write` / `env` / `exec`から取得されます。 `env`のみが実行時効果 (子に対するわずかに大きい環境変数許可リスト) を持ちます。他のものは宣言であり、強制されません。
 
 ## ライフサイクルフロー
 
@@ -342,16 +303,14 @@ uninstall (DELETE /api/plugins/{name})
 
 ## ダッシュボード
 
-`/dashboard/plugins` にあるダッシュボードページ
-（`src/app/(dashboard)/dashboard/plugins/page.tsx`）には、2 つのタブがあります:
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) のダッシュボード ページには 2 つのタブがあります。
 
-- **インストール済み** — インストール済みプラグインと宣言されたフック、activate/deactivate の切り替え、uninstall ボタン、および「プラグインをスキャン」
-  アクション（`POST /api/plugins/scan`）を表示します。
-- **マーケットプレイス** — `GET /api/plugins/marketplace` から取得したカタログと、カスタムレジストリ URL を設定する
-  フィールドを表示します。
+- **インストール済み**— 、宣言されたフック、 activate/deactivateトグル、アンインストール ボタン、および「プラグインのスキャン」アクション (`POST /api/plugins/scan`) とともに、インストールされているプラグインをリストします。
+- **市場**—カスタム レジストリURLを設定するフィールドを含む`GET /api/plugins/marketplace`のカタログを表示します。
 
-プラグインごとの設定ページは `/dashboard/plugins/[name]/config`
-（`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`）にあります。
+このページには、プラグインがOmniRouteプロセスの完全な権限で実行されるという警告が常に表示されます。
+
+プラグインごとの設定ページは`/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) にあります。
 
 ## 関連項目
 

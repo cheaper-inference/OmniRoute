@@ -42,25 +42,23 @@ flowchart LR
 `main` bukan branch integrasi sehari-hari. PR yang dibuka terhadap `main`
 biasanya perlu ditargetkan ulang sebelum digabungkan.
 
-## Pembekuan rilis (siklus paralel)
+## Rilis pembekuan (siklus paralel)
 
-Saat sebuah rilis sedang direkonsiliasi, issue penanda berlabel `release-freeze`
-akan dibuka. Hal tersebut **tidak menghentikan pengembangan**:
+Ketika rilis sedang direkonsiliasi, masalah penanda berlabel `release-freeze` dibuka. Itu** tidak menghentikan pembangunan** :
 
-- `release/vX.Y.Z` yang dibekukan menjadi tanggung jawab kapten rilis untuk peluncuran tersebut.
-- `release/vX+1` untuk siklus berikutnya dibuat dari ujung yang dibekukan agar kontributor dapat terus
-  memasukkan pekerjaan.
-- PR terbuka yang masih menargetkan branch yang dibekukan harus **ditargetkan ulang** ke
-  branch `release/v*` yang aktif (tertinggi).
+- `release/vX.Y.Z` yang dibekukan adalah milik kapten pelepas kapal itu.
+- `release/vX+1` siklus berikutnya dipotong dari ujung yang beku sehingga kontributor terus melakukan pekerjaan pendaratan.
+- Buka PRs yang masih menargetkan cabang yang dibekukan** ditargetkan ulang** ke cabang `release/v*` aktif (tertinggi).
 
-Periksa apakah ada pembekuan yang masih terbuka sebelum mengasumsikan branch yang Anda inginkan dapat digabungkan:
+Periksa apakah ada pembekuan terbuka sebelum mengasumsikan cabang yang Anda inginkan dapat digabungkan:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mekanisme penggabungan (label `queue` oleh pemilik → Mergify) didokumentasikan dalam
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mekanisme penggabungan (pemilik `queue` label → Mergify) didokumentasikan dalam [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **19-11-2026: antrean penggabungan Mergify dihentikan** (keputusan pemilik). `.mergify.yml` tidak lagi mendefinisikan antrian dan menolak perintah Mergify yang menggabungkan atau menulis ulang permintaan tarik. Rilis PRs digabungkan secara manual di bawah aturan repositori "Memerlukan gerbang hijau pada rilis aktif" (`Gate / CI` + `Gate / Quality`) hingga omni-queue berjalan dalam mode langsung, dan melalui omni-queue setelah itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Label `queue` tidak lagi menggabungkan apa pun.
 
 ## Mengapa menggunakan branch sekaligus tag?
 
