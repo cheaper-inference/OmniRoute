@@ -94,7 +94,10 @@ for (const [timezone, instant, expected] of clockCases) {
         assert.equal(line.slice(0, 10), `[${expected}]`);
       }
       assert.ok(lines[0].includes("[USAGE] OPENAI | in=10 | out=5"));
-      assert.ok(lines[1].endsWith("[STREAM] OPENAI | clock-fixture | 0ms | complete"));
+      assert.equal(
+        lines[1],
+        `[${expected}] 🌊 [STREAM] OPENAI | clock-fixture | 0ms | \x1b[32mcomplete\x1b[0m`
+      );
 
       const entries = readFileSync(logPath, "utf8")
         .trim()
@@ -104,6 +107,10 @@ for (const [timezone, instant, expected] of clockCases) {
       assert.deepEqual(
         entries.map((entry) => entry.component),
         ["USAGE", "STREAM"]
+      );
+      assert.equal(
+        entries[1].message,
+        `[${expected}] 🌊 [STREAM] OPENAI | clock-fixture | 0ms | complete`
       );
       for (const entry of entries) {
         assert.equal(entry.message.slice(0, 10), `[${expected}]`);

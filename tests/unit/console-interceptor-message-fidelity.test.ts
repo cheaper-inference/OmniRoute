@@ -25,6 +25,12 @@ process.env.APP_LOG_TO_FILE = "true";
 const { initConsoleInterceptor, __consoleInterceptorInternals } =
   await import("../../src/lib/consoleInterceptor.ts");
 
+// The stream formatter integration loads usageDb and can open its SQLite singleton.
+test.after(async () => {
+  const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+  resetDbInstance();
+});
+
 function readEntries(): Array<Record<string, unknown>> {
   if (!fs.existsSync(LOG_PATH)) return [];
   return fs
@@ -213,6 +219,35 @@ test("a first argument that coincidentally contains a printf token does not swal
     assert.ok(entry, "entry not written");
     assert.ok(entry.includes("boom"), "Error message was dropped");
     assert.ok(entry.includes(err.stack || ""), "Error stack was dropped");
+  } finally {
+    __consoleInterceptorInternals.reset();
+    fs.rmSync(LOG_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("stream status colors are stripped from persisted log entries", async () => {
+  const { formatStreamStatus } = await import("../../open-sse/utils/streamHandler.ts");
+  const statuses = [
+    "complete",
+    "client_disconnect",
+    "client_disconnect (post-abort)",
+    "aborted",
+    "error: unknown",
+  ];
+  try {
+    initConsoleInterceptor();
+    for (const status of statuses) {
+      console.log(`[12:34:56] 🌊 [STREAM] OPENAI | model | 12ms | ${formatStreamStatus(status)}`);
+    }
+    __consoleInterceptorInternals.reset();
+    const entries = readEntries();
+    for (const status of statuses) {
+      const expected = `[12:34:56] 🌊 [STREAM] OPENAI | model | 12ms | ${status}`;
+      const entry = entries.find((entry) => entry.message === expected);
+      assert.ok(entry, `plain stream status ${status} was not persisted`);
+      assert.equal(entry.component, "STREAM");
+      assert.ok(!String(entry.message).includes("\x1b"));
+    }
   } finally {
     __consoleInterceptorInternals.reset();
     fs.rmSync(LOG_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
