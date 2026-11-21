@@ -515,6 +515,38 @@ function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined 
   return config;
 }
 
+// Converse model ids that reject a `system` block ("This model doesn't support system
+// messages"). Data, not logic: add an entry when Bedrock rejects another family. The name may
+// follow a region prefix (`us.`) or an ARN path (`...:foundation-model/`).
+const BEDROCK_NO_SYSTEM_MODEL_PATTERNS: readonly RegExp[] = [
+  /(^|[./])amazon\.titan-text/i,
+  /(^|[./])cohere\.command(-light)?-text/i,
+  /(^|[./])mistral\.mistral-7b-instruct/i,
+  /(^|[./])mistral\.mixtral-8x7b-instruct/i,
+];
+
+// Fold the system text into the first user turn instead of sending a block the model rejects.
+function foldSystemIntoFirstUserTurn(messages: Message[], system: SystemContentBlock[]) {
+  const block = { text: system.map((b) => ("text" in b ? b.text : "")).join("\n") };
+  const first = messages[0];
+  if (first?.role === "user") first.content = [block, ...(first.content ?? [])];
+  else messages.unshift({ role: "user", content: [block] });
+}
+
+// A model that rejects `system` gets the text in its first user turn; every other model gets the block.
+function placeSystemBlocks(
+  payload: { messages: Message[]; system?: SystemContentBlock[] },
+  model: string,
+  system: SystemContentBlock[]
+) {
+  if (system.length === 0) return;
+  if (BEDROCK_NO_SYSTEM_MODEL_PATTERNS.some((pattern) => pattern.test(model))) {
+    foldSystemIntoFirstUserTurn(payload.messages, system);
+  } else {
+    payload.system = system;
+  }
+}
+
 // A Bedrock id wraps the Claude id in a region, a provider and a version
 // (us.anthropic.claude-sonnet-4-5-20250929-v1:0); the model specs know the inner one.
 function claudeSpecId(model) {
@@ -603,7 +635,7 @@ export function openAIToBedrockConverse(model, body) {
 
   const system = systemBlocksFromOpenAI(messages, cachePoints);
   if (cachePoints) enforceCachePointLimit(system, payload.messages);
-  if (system.length > 0) payload.system = system;
+  placeSystemBlocks(payload, model, system);
 
   const toolConfig = toolConfigFromOpenAI(request.tools, request.tool_choice);
   if (toolConfig) payload.toolConfig = toolConfig;

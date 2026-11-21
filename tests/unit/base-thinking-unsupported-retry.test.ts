@@ -18,6 +18,11 @@ import {
   deleteParamFilterConfig,
   setGlobalAutoLearnEnabled,
 } from "../../src/lib/db/paramFilters.ts";
+import { __clearLearnedStrippedFieldsForTests } from "../../open-sse/executors/base/fieldDowngradeRecovery.ts";
+
+// Each test starts from an empty learned-field table: the executor now remembers a field the
+// upstream rejected for the same provider and model, and these tests reuse one model name.
+test.beforeEach(() => __clearLearnedStrippedFieldsForTests());
 
 /** First call returns `status` with `errorText`; subsequent calls return 200 OK. */
 function mockFetchErrorThenOk(status: number, errorText: string) {

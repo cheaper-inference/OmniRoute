@@ -1,0 +1,1 @@
+- **fix(kiro):** A Kiro stream cut before its stop event, or an AWS exception frame inside a 200 response, now fails over with a mapped status instead of ending as a normal stop, and Kiro `MAX_TOKENS` and content-filter stops reach the client as `length` and `content_filter`. ([#19723](https://github.com/cheaper-inference/OmniRoute/pull/19723))

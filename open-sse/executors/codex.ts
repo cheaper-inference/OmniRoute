@@ -867,6 +867,26 @@ export class CodexExecutor extends BaseExecutor {
       };
     }
 
+    // Claude Code sends no Codex session ids, and the Claude -> Responses translator drops the body
+    // metadata, so its own session header is the only per-session signal. Without it every Claude Code
+    // conversation on the account falls back to the account-wide workspace cache key.
+    const claudeCodeSession = normalizeCodexSessionId(
+      Object.entries(nextInput.clientHeaders ?? {}).find(
+        ([name]) => name.toLowerCase() === "x-claude-code-session-id"
+      )?.[1]
+    );
+    const sessionBody = nextInput.body as Record<string, unknown> | null | undefined;
+    if (
+      claudeCodeSession &&
+      sessionBody &&
+      typeof sessionBody === "object" &&
+      !normalizeCodexSessionId(sessionBody.prompt_cache_key) &&
+      !normalizeCodexSessionId(sessionBody.session_id) &&
+      !normalizeCodexSessionId(sessionBody.conversation_id)
+    ) {
+      nextInput.body = { ...sessionBody, prompt_cache_key: claudeCodeSession };
+    }
+
     if (isCodexAppServerRequired(nextInput.credentials)) {
       // The app-server adapter does not forward service tiers. Never silently
       // ignore an API-key override (especially a cost-controlling Standard mode).
@@ -1308,9 +1328,10 @@ export class CodexExecutor extends BaseExecutor {
     const promptCacheKey = normalizeCodexSessionId(body?.prompt_cache_key);
     if (promptCacheKey) return promptCacheKey;
 
-    // Prefer per-session identifiers from the client request body
-    const sessionId = body?.session_id ?? body?.conversation_id;
-    const normalizedSessionId = normalizeCodexSessionId(sessionId);
+    // Prefer per-session identifiers from the client request body; an empty or unsafe
+    // session_id must not hide a valid conversation_id.
+    const normalizedSessionId =
+      normalizeCodexSessionId(body?.session_id) || normalizeCodexSessionId(body?.conversation_id);
     if (normalizedSessionId) {
       return normalizedSessionId;
     }
