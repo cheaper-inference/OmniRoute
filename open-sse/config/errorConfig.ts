@@ -231,6 +231,21 @@ export function matchErrorRuleByStatus(statusCode: number): ErrorRule | null {
   return ERROR_RULES.find((rule) => rule.status === statusCode) || null;
 }
 
+/**
+ * True when the text carries an account-quota signal ("out of extra usage", "quota exceeded",
+ * ...). Providers such as Claude OAuth relay these as `invalid_request_error`, which would
+ * otherwise read as a request-scoped failure and stop sibling-account failover.
+ * Scans every quota rule instead of only the first text match, so an earlier rule
+ * ("Rate limit exceeded: You're out of extra usage") cannot hide the quota signal.
+ */
+export function isQuotaExhaustedText(message: unknown): boolean {
+  const lower = normalizeErrorMessage(message);
+  if (!lower) return false;
+  return ERROR_RULES.some(
+    (rule) => rule.reason === "quota_exhausted" && !!rule.text && lower.includes(rule.text)
+  );
+}
+
 export function findMatchingErrorRule(statusCode: number, message: unknown): ErrorRule | null {
   return matchErrorRuleByText(message) || matchErrorRuleByStatus(statusCode);
 }
