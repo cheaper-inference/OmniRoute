@@ -20,6 +20,12 @@ import { getDbInstance } from "./db/core";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
 import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
+import {
+  bufferCacheHitCount,
+  bufferCacheMetric,
+  discardSemanticCacheMetrics,
+  flushSemanticCacheMetrics,
+} from "./semanticCacheMetrics";
 import { isCompleteToolCallArguments } from "../../open-sse/handlers/sseParser/truncation";
 
 // Like reasoning-cache cleanup, start from the consumer module, independent of boot path.
@@ -69,14 +75,7 @@ export function ensureCacheMetricsTable() {
 }
 
 function incrementMetric(metric: "hits" | "misses" | "tokens_saved", amount = 1) {
-  try {
-    const db = getDbInstance();
-    db.prepare(
-      `UPDATE cache_metrics SET value = value + ?, updated_at = datetime('now') WHERE key = ?`
-    ).run(amount, metric);
-  } catch {
-    // DB not available — fall back to in-memory
-  }
+  bufferCacheMetric(metric, amount);
 }
 
 function getMetricValue(metric: string): number {
@@ -172,7 +171,7 @@ export function clearMemoryCache(): void {
  * These are stored under their raw request-body key only — no camelCase mirror exists,
  * because every caller passes `outputContractOf(body)` through untouched.
  */
-export const SEMANTIC_CACHE_KEY_SCHEMA = 2;
+export const SEMANTIC_CACHE_KEY_SCHEMA = 3;
 
 /**
  * Canonical (sorted-key) JSON serializer shared by both exact-cache hashes. Re-exported here so the
@@ -180,6 +179,11 @@ export const SEMANTIC_CACHE_KEY_SCHEMA = 2;
  * open-sse -> src boundary edge.
  */
 export { canonicalJson };
+
+/** Who may share an entry: the caller's x-omniroute-cache-key tenant namespace. */
+export interface SignatureScope {
+  cacheKey?: string | null;
+}
 
 export interface SignatureConstraints extends Partial<Record<GenerationParamKey, unknown>> {
   toolChoice?: unknown;
@@ -196,6 +200,9 @@ export interface SignatureConstraints extends Partial<Record<GenerationParamKey,
  * (seed 0, top_k 0, stop "").
  */
 const GENERATION_PARAM_KEYS = [
+  "previous_response_id",
+  "conversation",
+  "store",
   "reasoning",
   "reasoning_effort",
   "max_tokens",
@@ -287,6 +294,8 @@ function pickGenerationParams(constraints?: SignatureConstraints | null): Record
  * @param {number} temperature
  * @param {number} topP
  * @param {string} [apiKeyId] - API key ID for per-key isolation (prevents cross-user cache hits)
+ * @param {SignatureScope} [scope] - x-omniroute-cache-key tenant; an entry is shared only
+ *   inside one tenant namespace (the dual-layer manager scopes the same way).
  * @param {SignatureConstraints} [constraints] - tool_choice/tools/response_format (#12734)
  *   plus the Responses-API `text.format` spelling (#12307): these change model behavior
  *   and must not collide with a signature computed without them. Also carries the
@@ -299,7 +308,8 @@ export function generateSignature(
   temperature = 0,
   topP = 1,
   apiKeyId?: string,
-  constraints?: SignatureConstraints | null
+  constraints?: SignatureConstraints | null,
+  scope?: SignatureScope | null
 ) {
   // JSON round-trip retains JSON.stringify omission/default semantics before sorting
   // nested object keys. Versioning prevents reads of older incomplete signatures.
@@ -317,6 +327,7 @@ export function generateSignature(
         response_format: constraints?.responseFormat ?? constraints?.response_format,
         text_format: constraints?.text_format,
         ...pickGenerationParams(constraints),
+        cache_key: scope?.cacheKey || undefined,
       })
     )
   );
@@ -399,10 +410,8 @@ export function getCachedResponse(signature) {
           tokensSaved,
         });
       }
-      // Update hit count in DB
-      db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
-        signature
-      );
+      // Hit count and metrics are buffered (semanticCacheMetrics.ts), not written per hit.
+      bufferCacheHitCount(signature);
 
       incrementMetric("hits");
       incrementMetric("tokens_saved", tokensSaved);
@@ -537,6 +546,7 @@ export function invalidateStale(maxAgeMs: number): number {
  */
 export function clearCache(): number {
   getMemoryCache().clear();
+  discardSemanticCacheMetrics();
   let removed = 0;
   try {
     const db = getDbInstance();
@@ -550,6 +560,7 @@ export function clearCache(): number {
 }
 
 export function getCacheStats() {
+  flushSemanticCacheMetrics();
   const memStats = getMemoryCache().getStats();
   let dbSize = 0;
   try {
@@ -584,15 +595,38 @@ export function getCacheStats() {
  * because the provider default may be non-deterministic (e.g. random/creative tasks).
  */
 export function isCacheableForRead(body, headers) {
+  if (isCacheBypassedByHeaders(headers)) return false;
+  if (typeof body.temperature !== "number" || body.temperature !== 0) return false;
+  // A Responses conversation grows upstream with every turn: the same body and conversation id
+  // can need a different answer later, so a cached reply is never current for it.
+  if (body.conversation !== undefined && body.conversation !== null) return false;
+  return true;
+}
+
+/**
+ * Same request controls as SemanticCacheManager.isBypassed: x-omniroute-no-cache, and
+ * no-cache in Cache-Control or Pragma. A write also honors no-store (Cache-Control) and
+ * x-omniroute-cache-no-store.
+ */
+function isCacheBypassedByHeaders(headers, forWrite = false): boolean {
   if ((getHeaderValue(headers, "x-omniroute-no-cache") || "").toLowerCase() === "true") {
-    return false;
+    return true;
   }
   const cacheControl = (getHeaderValue(headers, "cache-control") || "").toLowerCase();
-  if (cacheControl.includes("no-cache")) {
-    return false;
-  }
-  if (typeof body.temperature !== "number" || body.temperature !== 0) return false;
-  return true;
+  const pragma = (getHeaderValue(headers, "pragma") || "").toLowerCase();
+  if (cacheControl.includes("no-cache") || pragma.includes("no-cache")) return true;
+  if (!forWrite) return false;
+  const noStore = (getHeaderValue(headers, "x-omniroute-cache-no-store") || "").toLowerCase();
+  return noStore === "true" || cacheControl.includes("no-store");
+}
+
+/**
+ * Scope of a legacy cache entry, read from the request headers.
+ * shortcut: the answering provider is not part of the key. Two provider nodes that serve the same
+ * model id for the same API key still share an entry; add the provider here when that matters.
+ */
+export function signatureScopeOf(headers): SignatureScope {
+  return { cacheKey: getHeaderValue(headers, "x-omniroute-cache-key") };
 }
 
 /**
@@ -602,13 +636,7 @@ export function isCacheableForRead(body, headers) {
  * because the provider default may be non-deterministic.
  */
 export function isCacheableForWrite(body, headers) {
-  if ((getHeaderValue(headers, "x-omniroute-no-cache") || "").toLowerCase() === "true") {
-    return false;
-  }
-  const cacheControl = (getHeaderValue(headers, "cache-control") || "").toLowerCase();
-  if (cacheControl.includes("no-cache")) {
-    return false;
-  }
+  if (isCacheBypassedByHeaders(headers, true)) return false;
   if (body.temperature !== 0) return false;
   return true;
 }

@@ -14,7 +14,6 @@ import {
 } from "./responsesSequence.ts";
 
 const FRAME_ENCODER = new TextEncoder();
-const TRACKER_DECODER = new TextDecoder();
 const MAX_PENDING_LINE_CHARS = 256 * 1024;
 
 /** Brand-neutral model name for keepalives sent before any model is known. */
@@ -97,13 +96,15 @@ function readIdentity(line: string): TrackedIdentity | null {
  * keepalive frames can reuse it. Never throws; tolerates frames split across chunks.
  */
 export function createResponsesInProgressTracker() {
+  // One decoder per stream: a cut multibyte character must not leak into another stream.
+  const decoder = new TextDecoder();
   let pending = "";
   let identity: TrackedIdentity | null = null;
 
   return {
     observe(chunk: Uint8Array): void {
       try {
-        pending += TRACKER_DECODER.decode(chunk, { stream: true });
+        pending += decoder.decode(chunk, { stream: true });
         const lines = pending.split("\n");
         pending = lines.pop() ?? "";
         if (pending.length > MAX_PENDING_LINE_CHARS) pending = "";

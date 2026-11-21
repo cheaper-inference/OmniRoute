@@ -11,6 +11,7 @@
 import {
   generateSignature as defaultGenerateSignature,
   outputContractOf,
+  signatureScopeOf,
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedCompletion as defaultIsTruncatedCompletion,
@@ -88,7 +89,8 @@ export function storeSemanticCacheResponse(
     args.body.temperature,
     args.body.top_p,
     args.apiKeyId ?? undefined,
-    outputContractOf(args.body)
+    outputContractOf(args.body),
+    signatureScopeOf(args.headers)
   );
   const tokensSaved = args.usage?.prompt_tokens + args.usage?.completion_tokens || 0;
   deps.setCachedResponse(signature, args.model, args.translatedResponse, tokensSaved);
