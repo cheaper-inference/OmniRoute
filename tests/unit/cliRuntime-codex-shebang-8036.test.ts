@@ -42,31 +42,45 @@ const nodeBinDir = path.dirname(process.execPath);
 
 const { getCliRuntimeStatus } = await import("../../src/shared/services/cliRuntime.ts");
 
-test("#8036: codex is reported runnable even when the launcher PATH omits node's own bin dir", async () => {
-  const originalPath = process.env.PATH;
-  // Bogus PATH: no `sh`/`env`/system dirs, and — crucially — no node's own
-  // bin dir. The known-path match above never needs PATH to LOCATE codex;
-  // this isolates whether checkRunnable()'s healthcheck spawn can still
-  // RUN it (the `#!/usr/bin/env node` shebang needs `node` resolvable via
-  // the child's PATH).
-  process.env.PATH = path.join(sandboxHome, "nonexistent-launcher-path");
-  try {
-    const status = await getCliRuntimeStatus("codex");
-    assert.equal(
-      status.installed,
-      true,
-      `expected installed=true but got installed=${status.installed} reason=${status.reason}`
-    );
-    assert.equal(
-      status.runnable,
-      true,
-      `expected runnable=true but got runnable=${status.runnable} reason=${status.reason} ` +
-        `(launcher PATH lacked node's bin dir ${nodeBinDir} — checkRunnable() must merge it in)`
-    );
-  } finally {
-    process.env.PATH = originalPath;
+// Windows npm CLIs are `.cmd` shims, not `#!/usr/bin/env node` scripts, so this
+// POSIX shebang fixture is never a known-path candidate there (getKnownToolPaths
+// only enumerates .cmd/.exe), so this fixture does not exercise the Windows
+// shim path. Skip with a reason instead of a fixture that would pass for the
+// wrong reason.
+const win32Skip =
+  process.platform === "win32"
+    ? "POSIX shebang / minimal-PATH scenario; Windows uses .cmd shims, not #!/usr/bin/env node scripts"
+    : false;
+
+test(
+  "#8036: codex is reported runnable even when the launcher PATH omits node's own bin dir",
+  { skip: win32Skip },
+  async () => {
+    const originalPath = process.env.PATH;
+    // Bogus PATH: no `sh`/`env`/system dirs, and — crucially — no node's own
+    // bin dir. The known-path match above never needs PATH to LOCATE codex;
+    // this isolates whether checkRunnable()'s healthcheck spawn can still
+    // RUN it (the `#!/usr/bin/env node` shebang needs `node` resolvable via
+    // the child's PATH).
+    process.env.PATH = path.join(sandboxHome, "nonexistent-launcher-path");
+    try {
+      const status = await getCliRuntimeStatus("codex");
+      assert.equal(
+        status.installed,
+        true,
+        `expected installed=true but got installed=${status.installed} reason=${status.reason}`
+      );
+      assert.equal(
+        status.runnable,
+        true,
+        `expected runnable=true but got runnable=${status.runnable} reason=${status.reason} ` +
+          `(launcher PATH lacked node's bin dir ${nodeBinDir} — checkRunnable() must merge it in)`
+      );
+    } finally {
+      process.env.PATH = originalPath;
+    }
   }
-});
+);
 
 test.after(async () => {
   await fsp.rm(sandboxHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
