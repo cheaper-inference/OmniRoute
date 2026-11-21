@@ -609,7 +609,7 @@ async function getSaturationEntry(
   }
 
   const pending = _inflight.get(key);
-  if (pending) return pending;
+  if (pending !== undefined) return pending;
   const task = (async (): Promise<SaturationEntry> => {
     let entry: SaturationEntry;
     try {
