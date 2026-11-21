@@ -597,6 +597,9 @@ Persisted `strategy: "auto"` combos can set `config.routerStrategy` (or legacy
 - `lkgp` — last known good provider first
 - `nadir` — ask [Nadir](https://getnadir.com)'s decision API which model in the pool the
   prompt needs; opt-in, fail-open to `rules`
+- `decision` — ask a configured decider (TypeSafe System One, your own decision URL, or one
+  of the combo's own models) which model in the pool fits the request; behind the
+  default-off `COMBO_DECISION_ROUTER_ENABLED` flag, fail-open to `rules`
 
 ### Router strategies in detail
 
@@ -822,6 +825,90 @@ and a frontier model), where always-frontier is the cost you want to cut.
 
 ---
 
+#### 7. `decision` — pluggable decider picks the model
+
+`decision` asks a **decider** which model in the pool fits the request, then narrows the
+pool to that model and lets `rules` pick the connection (quota, health and cost still
+choose the account). The decider is set in the combo's decision block — `config.decision`
+when the router knobs sit at the top of `config` (what the dashboard writes), or
+`config.auto.decision` next to `config.auto.routerStrategy`:
+
+| `decider`     | Who answers                                                                                                         | Needs                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), default model `jev-latest`                       | a `typesafe` connection or the env key |
+| `http`        | your own decider at `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) or `"openai-chat"` (chat completions) | `baseUrl` + `model`; key optional      |
+| `combo-model` | one of your provider models, called in process like the fusion judge                                                | `model` as `provider/model` (no combo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Fields (validated by a strict schema on save and again at request time):
+
+- `decider` — `systemone`, `http` or `combo-model`.
+- `model` — TypeSafe model, the decision model at your URL, or the `provider/model` of a
+  combo-model call (up to 200 characters).
+- `baseUrl` — `http` only: an `http(s)` URL up to 500 characters, without credentials,
+  query or fragment. A URL pointing at this OmniRoute (loopback + `PORT`) is refused.
+- `wire` — `http` only: `systemone` (default) or `openai-chat`.
+- `connectionId` — the stored connection whose key is used (only inside the calling API
+  key's allowed connections). Without it, `systemone` reads a `typesafe` connection and
+  every network decider falls back to `OMNIROUTE_DECISION_API_KEY`. There is no `apiKey`
+  field: a key is never stored in a combo.
+- `timeoutMs` — integer, 100–5000, default 2000.
+- `minConfidence` — 0–1; a lower-confidence answer falls back to `rules` (a decider that
+  reports no confidence counts as 0).
+- `descriptions` — up to 50 entries (key up to 300, text up to 1000 characters), keyed by
+  model id or `provider/model`; unset entries get a generated cost-rank description.
+
+**Flag.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gates every decider. While it is
+off, a `decision` combo reads no credential, makes no call and routes with `rules`; the log
+says `fallback (disabled)`. A stored key alone never turns it on. Combos without a decision
+block are not affected at all.
+
+**What leaves the box.** Only the text of the last user message (up to 8000 characters;
+chat/Claude `messages` or Responses `input`) and the menu of model ids with their
+descriptions. Never the system prompt, Responses `instructions`, tools, history, headers or
+account data. Network calls go through the provider outbound guard with no retries, no
+redirects and a 64 KB response cap. The `combo-model` call is non-streaming, tool-free,
+`temperature: 0`, with a 256-token budget; a decision started inside a decision call is
+refused.
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the
+reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of
+`disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`,
+`invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`,
+`low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network
+error the endpoint is skipped for 30 s. A successful pick reads
+`decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL,
+key, prompt or upstream body reaches the log.
+
+The combo builder shows these fields when the router strategy is `decision`, with the
+generated descriptions as placeholders and a **Test decision** button that calls
+`POST /api/combos/decision-preview` once with the unsaved settings (same flag).
+
+**When to use**: mixed-difficulty traffic where you want the tier picked per request by a
+classifier you choose, not by Nadir specifically.
+
+**Alias**: `decision` (no alias)
+
+---
+
 ### Custom router strategies
 
 You can register your own `RouterStrategy` implementation via the public API:
@@ -875,6 +962,7 @@ Then use it:
 | Strict SLOs       | `sla-aware` | Filters by p95/error/cost thresholds |
 | Multi-turn chat   | `lkgp`      | Session stickiness                   |
 | Mixed difficulty  | `nadir`     | Picks the model tier per prompt      |
+| Own classifier    | `decision`  | Your decider picks the model         |
 
 SLA-aware fields:
 
