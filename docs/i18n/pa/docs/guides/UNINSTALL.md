@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ਵਿਕਲਪਿਕ) ਇਮੇਜ ਹਟਾਓ
+docker rmi cheaperinference/omniroute:latest
+# ਪੁਰਾਣੀਆਂ ਸਥਾਪਨਾਵਾਂ ਨੇ ਵਿਰਾਸਤੀ ਨਾਮ ਖਿੱਚਿਆ:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

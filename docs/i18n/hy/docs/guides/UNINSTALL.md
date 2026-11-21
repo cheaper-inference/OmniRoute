@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Ըստ ցանկության) հեռացնել պատկերը
+docker rmi cheaperinference/omniroute:latest
+# Ավելի հին տեղադրումները հանել են ժառանգության անունը.
 docker rmi diegosouzapw/omniroute:latest
 ```
 

@@ -102,10 +102,13 @@ export function formatApiKeyLabel(
  * @returns {string}
  */
 export function fmtCompact(n: number | null | undefined) {
-  if (n && n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n && n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n && n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return new Intl.NumberFormat().format(n || 0);
+  if (!n) return new Intl.NumberFormat().format(0);
+  const abs = Math.abs(n);
+  const sign = n < 0 ? "-" : "";
+  if (abs >= 999_950_000) return `${sign}${(abs / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 999_950) return `${sign}${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(1)}K`;
+  return `${sign}${new Intl.NumberFormat().format(abs)}`;
 }
 
 /**

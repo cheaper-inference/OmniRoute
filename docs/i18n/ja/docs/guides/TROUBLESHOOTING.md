@@ -463,7 +463,7 @@ v3.8.0 より_前_にインポートされた接続には、接続ごとのク�
 2. **恒久的な修正：** `docker run` コマンドで `-p 127.0.0.1:20128:20128` を使用し、明示的に IPv4 へバインドします：
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    これにより IPv4 へのバインドが強制され、ホストのすべてのインターフェースでプロキシが公開されることも防げます。
 

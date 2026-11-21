@@ -42,25 +42,23 @@ flowchart LR
 Ang `main` ay hindi ang pang-araw-araw na integration branch. Ang mga PR na binubuksan laban sa `main`
 ay karaniwang kailangang muling i-target bago i-merge.
 
-## Release freeze (magkakasabay na mga cycle)
+## Release freeze (parallel cycles)
 
-Kapag nire-reconcile ang isang release, nagbubukas ng marker issue na may label na `release-freeze`.
-**Hindi nito pinatitigil ang development**:
+Kapag ang isang release ay pinagkasundo, isang marker na isyu na may label na `release-freeze` ay magbubukas. yun** hindi humihinto sa pag-unlad** :
 
-- Ang naka-freeze na `release/vX.Y.Z` ay nasa pamamahala ng release captain para sa paglalabas na iyon.
-- Ginagawa ang `release/vX+1` ng susunod na cycle mula sa naka-freeze na tip upang patuloy na
-  makapag-merge ng trabaho ang mga contributor.
-- Ang mga bukas na PR na naka-target pa rin sa naka-freeze na branch ay dapat **muling i-target** sa
-  aktibong (pinakamataas na) `release/v*` branch.
+- Ang nakapirming `release/vX.Y.Z` ay pag-aari ng release captain para sa barkong iyon.
+- Ang `release/vX+1` ng susunod na cycle ay pinutol mula sa nakapirming tip kaya patuloy na gumagana ang mga nag-aambag.
+- Buksan ang PRs na tina-target pa rin ang nakapirming sangay dapat** na-retarget** sa aktibong (pinakamataas) na sangay `release/v*`.
 
-Suriin kung may bukas na freeze bago ipagpalagay na maaaring i-merge ang branch na gusto mo:
+Suriin para sa isang bukas na pag-freeze bago ipagpalagay na ang sangay na gusto mo ay maaaring pagsamahin:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Ang mga mekanismo ng merge (`queue` label ng may-ari → Mergify) ay nakadokumento sa
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+→ sa `queue` [MERGE_TRAIN](./MERGE_TRAIN.md).
+
+> **2026-11-19: ang Megify merge queue ay itinigil na** (desisyon ng may-ari). Hindi na tinukoy `.mergify.yml` ang isang queue at tinatanggihan ang mga utos ng Mergify na nagsasama o muling nagsusulat ng isang pull request. Ang release PRs ay pinagsama-sama sa pamamagitan ng kamay sa ilalim ng repository ruleset na "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) hanggang sa tumakbo ang omni-queue sa live mode, at sa pamamagitan ng omni-queue pagkatapos noon ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ang `queue` label ay hindi na nagsasama ng anuman.
 
 ## Bakit may branch at tag?
 
