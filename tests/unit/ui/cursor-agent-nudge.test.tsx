@@ -1,45 +1,18 @@
 // @vitest-environment jsdom
-/**
- * CursorAgentNudge (Cursor renewal plan, Task 5) — dismissible dashboard
- * banner suggesting `cursor-agent` installation when it's unavailable.
- * Mirrors tests/unit/ui/kimiSponsorBanner.test.tsx's technique for the same
- * useSyncExternalStore + localStorage dismissal pattern (KimiSponsorBanner.tsx
- * is the precedent this component follows), and this directory's own
- * __tests__/phase1d.test.tsx for the createRoot/act mounting convention.
- */
-// NOTE ON WHICH CONFIG DISCOVERS THIS FILE (kept as a `//` block — see why
-// below): unlike tests/unit/ui/use-provider-connections-cursor-refresh.test.tsx
-// and tests/unit/ui/connectionsSearchFilter.test.tsx (which had to relocate
-// out of their __tests__/ directories because vitest.mcp.config.ts's
-// src/app/(dashboard)/**/__tests__/**/*.test.tsx glob spells out the
-// (dashboard) path segment literally, which tinyglobby parses as an (empty)
-// extglob group — matching nothing), THIS file's location IS correct per the
-// plan: vitest.config.ts's glob (src/app/**/dashboard/providers/**/__tests__/
-// **/*.test.tsx) never spells out (dashboard) literally — its ** wildcard
-// swallows that segment regardless of its literal name — so it matches here
-// without hitting the same bug. That means this file is collected only by
-// vitest.config.ts (`npm run test:vitest:ui`), NOT by vitest.mcp.config.ts
-// (`npm run test:vitest`) — confirmed via a direct `vitest list` probe
-// against both configs. Both jobs are CI-blocking (`test:vitest:ui` was
-// promoted from advisory to blocking per ci.yml's own comment, PR #7127),
-// so this is a coverage-attribution quirk, not a real CI gap — this file
-// still runs and gates merges, just via the sibling config.
-// (This note is a `//` block, not part of the /** */ JSDoc above, because
-// the glob patterns it quotes contain a literal `*/` sequence that would
-// otherwise terminate a block comment early.)
 import React from "react";
 import { act } from "react";
-import { createRoot, hydrateRoot } from "react-dom/client";
+import { createRoot, hydrateRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import CursorAgentNudge from "../CursorAgentNudge";
+import CursorAgentNudge from "@/app/(dashboard)/dashboard/providers/[id]/components/CursorAgentNudge";
 
 const STORAGE_KEY = "omniroute.cursorAgentNudgeDismissed";
+const roots = new Set<Root>();
 
 vi.mock("next-intl", () => ({ useTranslations: () => (k: string) => k }));
 
 function mockFetch(cursorAgentAvailable: boolean | null) {
-  return vi.fn(async (url: string) => {
+  return vi.fn(async (_url: string) => {
     if (cursorAgentAvailable === null) {
       return { ok: false, json: async () => ({}) } as Response;
     }
@@ -57,6 +30,7 @@ function renderNudge(): HTMLDivElement {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
+  roots.add(root);
   act(() => {
     root.render(<CursorAgentNudge />);
   });
@@ -71,7 +45,11 @@ describe("CursorAgentNudge", () => {
     localStorage.removeItem(STORAGE_KEY);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await act(async () => {
+      for (const root of roots) root.unmount();
+    });
+    roots.clear();
     document.body.innerHTML = "";
     localStorage.removeItem(STORAGE_KEY);
     vi.unstubAllGlobals();
@@ -143,6 +121,7 @@ describe("CursorAgentNudge", () => {
     const first = document.createElement("div");
     document.body.appendChild(first);
     const firstRoot = createRoot(first);
+    roots.add(firstRoot);
     act(() => {
       firstRoot.render(<CursorAgentNudge />);
     });
@@ -156,6 +135,7 @@ describe("CursorAgentNudge", () => {
     act(() => {
       firstRoot.unmount();
     });
+    roots.delete(firstRoot);
     first.remove();
 
     const second = renderNudge();
@@ -176,23 +156,12 @@ describe("CursorAgentNudge", () => {
     container.innerHTML = serverHtml;
     document.body.appendChild(container);
 
-    const errors: unknown[][] = [];
-    const originalConsoleError = console.error;
-    console.error = (...args: unknown[]) => {
-      errors.push(args);
-    };
+    const onRecoverableError = vi.fn();
+    await act(async () => {
+      roots.add(hydrateRoot(container, <CursorAgentNudge />, { onRecoverableError }));
+    });
 
-    try {
-      act(() => {
-        hydrateRoot(container, <CursorAgentNudge />);
-      });
-    } finally {
-      console.error = originalConsoleError;
-    }
-
-    const hydrationWarnings = errors.filter((args) =>
-      args.some((a) => typeof a === "string" && /hydrat/i.test(a))
-    );
-    expect(hydrationWarnings).toEqual([]);
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(container.querySelector("[role='complementary']")).not.toBeNull();
   });
 });
