@@ -4,10 +4,9 @@
 
 ---
 
-Kopš v3.8.49 (kvalitātes/ātruma plāna WS3.2/WS3.4) noklusējuma apvienošanas ceļš
-pārskatītiem PR zarā `release/vX.Y.Z` ir **Mergify apvienošanas rinda** (`.mergify.yml`);
-tālāk dokumentētais **manuālais apvienošanas vilciens** ir REZERVES RISINĀJUMS — to izmanto incidentu,
-laidiena iesaldēšanas laikā vai tad, ja Mergify Open Source plāns kādreiz mainās.
+> **2026-11-19: sapludināšanas rinda ir pārtraukta** (īpašnieka lēmums). `.mergify.yml` vairs nedefinē rindu un noraida sapludināšanas komandas, kas apvieno vai pārraksta vilkšanas pieprasījumu. Laidieni PRs tiek apvienoti ar roku saskaņā ar repozitorija kārtulu kopu "Pieprasīt zaļos vārtus aktīvajā laidienā" (`Gate / CI` + `Gate / Quality`), līdz universālā rinda tiek palaista tiešraides režīmā, un pēc tam ar universālo rindu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Tālāk redzamajās sadaļās Apvienot ir aprakstīta rinda tāda, kāda tā bija.
+
+Kopš versijas 3.8.49 ( quality/velocity plāna WS3.2/WS3.4 ) pārskatītā PRs noklusējuma sapludināšanas ceļš ir `release/vX.Y.Z`** Apvienot sapludināšanas rindu** (`.mergify.yml`); uz** manuāla sapludināšanas vilciens** Tālāk ir dokumentēts FALLBACK — kas tiek izmantots incidentu, laidienu iesaldēšanas vai sapludināšanas atvērtā pirmkoda plāna maiņas gadījumā.
 
 ## Noklusējuma ceļš: Mergify rinda
 

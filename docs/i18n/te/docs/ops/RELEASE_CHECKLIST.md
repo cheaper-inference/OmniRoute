@@ -391,103 +391,68 @@ Radar ప్రకటనను ఉద్దేశపూర్వకంగా `ac
 
 ## 3.9.0 LTS కట్ (3.8.58లో రిహార్సల్ చేయబడింది)
 
-v3.8.59 తర్వాతి వెర్షన్ 3.9.0 అవుతుంది, దాని టిప్ రెండు దీర్ఘకాలిక బ్రాంచ్లుగా మారుతుంది:
-`stable/v3` (v3 LTS లైన్, npm `latest`) మరియు `develop` (v4, 4.0.0కు పెంచబడుతుంది, npm
-`nightly`). బ్రాంచ్/చానల్ మోడల్, ఫార్వర్డ్-పోర్ట్ మరియు లేబుళ్లు
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)లో ఉన్నాయి; ప్రణాళిక [ROADMAP](../../ROADMAP.md)లో ఉంది (Phase 3). కట్ ఒక్కసారి మాత్రమే నడుస్తుంది;
-3.8.58 దాన్ని ఫోర్క్పై మొదటి నుంచి చివరి వరకు రిహార్సల్ చేస్తుంది, మరియు 3.8.59
-[GO/NO-GO checklist](./LTS_GO_NO_GO.md)తో ముగుస్తుంది.
+v3.8.59 తర్వాత తదుపరి వెర్షన్ 3.9.0, మరియు దాని చిట్కా రెండు దీర్ఘకాల శాఖలుగా మారుతుంది: `stable/v3` (v3 LTS లైన్, npm `latest`) మరియు `develop` (v4, 4.0.0కి బంప్ చేయబడింది, npm `nightly`). branch/channel మోడల్, ఫార్వర్డ్-పోర్ట్ మరియు లేబుల్లు [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) లో ఉన్నాయి; ప్లాన్ [ROADMAP](../../ROADMAP.md) (ఫేజ్ 3)లో ఉంది. కట్ ఒకసారి నడుస్తుంది; 3.8.58 ఫోర్క్లో ఎండ్ నుండి ఎండ్ వరకు రిహార్సల్ చేస్తుంది మరియు 3.8.59 [GO/NO-GO చెక్లిస్ట్తో](./LTS_GO_NO_GO.md) ముగుస్తుంది.
 
 ### డ్రై-రన్ (చదవడానికి మాత్రమే, ఎప్పుడైనా సురక్షితం)
 
 ```bash
-npm run release:dry-run-lts-cut                       # అసలు కట్: HEAD నుంచి 3.9.0, మునుపటి ట్యాగ్ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # సోర్స్ కమిట్ను పిన్ చేయండి
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ఏదీ అమలు చేయదు: ఇది git మరియు `gh`ను చదివి
-మొత్తం క్రమాన్ని ముద్రిస్తుంది — ముందస్తు షరతులు (సోర్స్ పరిష్కరించబడుతుందా, సోర్స్ రిపాజిటరీకి పూర్తి చరిత్ర ఉందా —
-shallow clone ద్వారా `stable/v3`ను push చేయలేరు, స్వీకరించే వైపు మొదటి grafted parent వద్ద packను తిరస్కరిస్తుంది, కాబట్టి
-పూర్తి clone నుంచి కట్ చేయండి లేదా ముందుగా `git fetch --unshallow origin` అమలు చేయండి — మునుపటి
-ట్యాగ్ ఉందా, `package.json` టార్గెట్ వెర్షన్దా, `release-freeze` issue తెరిచి ఉందా, ఇప్పటికే ఉన్న release branchపై
-తెరిచి ఉన్న `Release branch not green` issue ఏదీ లేదానా — లేని branch `?` unknownగా చూపబడుతుంది, ఎప్పుడూ
-greenగా కాదు — Mergify `release` queue కాన్ఫిగర్ చేయబడిందా (G11: `queue_rules`, `checks_timeout`,
-లేబుల్ `queue`), `release/*` ruleset ఇప్పటికీ deletion మరియు force-pushను నిరోధిస్తుందా, అలాగే
-`stable/v3` మరియు `develop` ఇంకా లేవా), రెండు branch దశలు, dormant-workflow
-ట్రిగ్గర్లు మరియు `if:` షరతుల్లో ఏవి trueగా మారతాయో (మరియు ఏవి repository variable ద్వారా
-గేటెడ్గా ఉంటాయో లేదా canonical repositoryకు పిన్ చేయబడతాయో), అంచనా dist-tags (`latest` → 3.9.0, `next` మరియు
-`nightly` ఖాళీగా) మరియు rollback. Exit `0` = `RESULT: READY`, `1` = ఒక blocking precondition
-విఫలమైంది (`✗`), `2` = usage error. `--advisory <id,...>` ఒక checkను warning (`!`)గా తగ్గిస్తుంది
-కానీ దాన్ని దాచదు.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-3.9.0 release freeze ఇంకా తెరిచి ఉన్నప్పుడే అసలు కట్కు dry-runను అమలు చేయండి — tag తర్వాత మరియు Phase 12c
-freezeను ఎత్తివేయడానికి ముందు branches సృష్టించబడతాయి.
+3.9.0 విడుదల ఫ్రీజ్ ఇప్పటికీ — తెరిచి ఉన్నప్పుడే నిజమైన కట్ యొక్క డ్రై-రన్ను అమలు చేయండి, ట్యాగ్ తర్వాత మరియు ఫేజ్ 12c ఫ్రీజ్ని ఎత్తే ముందు శాఖలు సృష్టించబడతాయి.
 
-### 3.8.58 రిహార్సల్ (ఫోర్క్లో మాత్రమే)
+### 3.8.58 రిహార్సల్ (ఫోర్క్ మాత్రమే)
 
 ```bash
-# 1. ప్రస్తుత టిప్పై రిహార్సల్ పరామితులతో డ్రై-రన్
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK remoteకు వ్యతిరేకంగా అమలు చేయండి (origin, లేదా canonical
-#    repository URL ఉన్న ఏ remoteనైనా తిరస్కరిస్తుంది; ప్రతి దశ terminalలో నిర్ధారణ అడుగుతుంది)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. ఫోర్క్లోని dormant workflowsను పరీక్షించండి (dry-run canonical-repository pinను
-#    నివేదించిన చోట workflow_dispatch), తర్వాత rollback చేయండి
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop bump commit git plumbingతో నిర్మించబడుతుంది (working treeను తాకదు) మరియు cycle-open commit వలె అదే ఐదు
-ఫైళ్లను bump చేస్తుంది: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` మరియు `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG section మరియు దాని i18n mirrors తర్వాత `develop`లో తెరవబడతాయి, దాని మొదటి
-PRకు ముందు. స్క్రిప్ట్ ఎప్పుడూ npm dist-tagsను మార్చదు — వాటిని scratch packageపై రిహార్సల్ చేయండి.
+డెవలప్ బంప్ కమిట్ అనేది జిట్ ప్లంబింగ్తో నిర్మించబడింది (పనిచేసే చెట్టును తాకడం లేదు) మరియు సైకిల్-ఓపెన్ కమిట్ వలె అదే ఐదు ఫైల్లను బంప్ చేస్తుంది: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` మరియు `docs/openapi.yaml`. `[4.0.0]` CHANGELOG విభాగం మరియు దాని i18n అద్దాలు దాని మొదటి PR కంటే ముందు `develop` తర్వాత తెరవబడతాయి. స్క్రిప్ట్ ఎప్పుడూ npm డిస్ట్-ట్యాగ్లను మార్చదు — స్క్రాచ్ ప్యాకేజీలో ఉన్న వాటిని రిహార్సల్ చేస్తుంది.
 
-### PR preview artifact (ఒక్కసారి build చేసి, అదే bytesను promote చేయండి)
+### PR ప్రివ్యూ ఆర్టిఫ్యాక్ట్ (ఒకసారి నిర్మించండి, అదే బైట్లను ప్రచారం చేయండి)
 
-`.github/workflows/preview-artifact.yml` PR head నుంచి ఒక production tarballను build చేసి,
-అదే buildను validate చేస్తుంది (#8084 slice (a)). Same-repository PRలు మాత్రమే; ఏదీ publish చేయబడదు.
+`.github/workflows/preview-artifact.yml` PR హెడ్ నుండి ఒక ఉత్పత్తి టార్బాల్ను నిర్మిస్తుంది మరియు ఆ ఖచ్చితమైన నిర్మాణాన్ని ధృవీకరిస్తుంది (#8084 స్లైస్ (a)). అదే-రిపోజిటరీ PRs మాత్రమే; ఏమీ ప్రచురించబడలేదు.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # లేదా `preview-artifact` labelను జోడించండి
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-రన్ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`ను అమలు చేసి, tarballను
-pack చేస్తుంది, తర్వాత `npm run check:pack-boot`ను అమలు చేస్తుంది (నకిలీ secrets, తాత్కాలిక data dir),
-మళ్లీ re-pack చేసి digest ఒకేలా లేకపోతే విఫలమవుతుంది, అనంతరం `artifact-identity.json`ను నమోదు చేస్తుంది (head SHA, base
-SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
-`scripts/release/artifact-identity.mjs`) మరియు ప్రత్యేక jobలో tarballకు attestation ఇస్తుంది. Previewను promote చేయడం అంటే ఆ tarballను install చేయడం:
-source నుంచి ఎప్పుడూ మళ్లీ build చేయవద్దు.
+రన్ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, టార్బాల్ను ప్యాక్ చేస్తుంది, `npm run check:pack-boot` (నకిలీ రహస్యాలు, అశాశ్వత డేటా dir), రీ-ప్యాక్ చేస్తుంది మరియు డైజెస్ట్ ఒకేలా ఉంటే తప్ప విఫలమవుతుంది, ఆపై `artifact-identity.json` రికార్డ్ చేస్తుంది (హెడ్ SHA, బేస్ SHA, lockfile ABI, ప్లాట్ఫారమ్ లేదు, బిల్డ్ లేదు — `scripts/release/artifact-identity.mjs`) మరియు టార్బాల్ను ప్రత్యేక ఉద్యోగంలో ధృవీకరిస్తుంది. ప్రివ్యూను ప్రచారం చేయడం అంటే ఆ టార్బాల్ను ఇన్స్టాల్ చేయడం: మూలం నుండి ఎప్పుడూ పునర్నిర్మించవద్దు.
 
 ### కట్ (3.9.0, GO తర్వాత)
 
-1. GOను [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)లో నమోదు చేశారు.
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY`ను ముద్రిస్తుంది.
-3. dry-run ముద్రించే commandsతో `origin`పై branchesను చేతితో సృష్టించండి —
-   స్క్రిప్ట్ `origin`కు push చేయడాన్ని తిరస్కరిస్తుంది. సమీక్షించబడిన develop commitను మళ్లీ ఉపయోగించడానికి,
-   ముందుగా మీ ఫోర్క్పై 3.9.0 tipకు వ్యతిరేకంగా `--execute` rehearsalను అమలు చేయండి; అది రెండు SHAsను ముద్రిస్తుంది, మరియు
-   అదే commitsను push చేయవచ్చు:
+1. GO [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) లో రికార్డ్ చేయబడింది.
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` ని ముద్రిస్తుంది.
+3. డ్రై-రన్ ప్రింట్లు — అనే ఆదేశాలతో చేతితో `origin` లో బ్రాంచ్లను సృష్టించండి స్క్రిప్ట్ `origin` కి నెట్టడానికి నిరాకరించింది. సమీక్షించబడిన డెవలప్మెంట్ కమిట్ను మళ్లీ ఉపయోగించేందుకు, ముందుగా మీ ఫోర్క్కు వ్యతిరేకంగా 3.9.0 చిట్కాపై `--execute` రిహార్సల్ను అమలు చేయండి; ఇది SHAs రెండింటినీ ప్రింట్ చేస్తుంది మరియు అదే కమిట్లను నెట్టవచ్చు:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. మొదటి PR చేరకముందే `stable/v3` మరియు `develop`లను రక్షించండి (రూల్సెట్లు + మెర్జ్ క్యూ).
-5. నిష్క్రియంగా ఉన్న వర్క్ఫ్లోలు బ్రాంచ్ ఉనికిని బట్టి సక్రియమవుతాయి: `forward-port.yml` (`stable/v3`కి పుష్), `validate-stable-pr.yml` (`stable/v3`కి PRలు), మరియు `nightly-v4-build.yml`
-   (`develop`ను బిల్డ్ చేస్తుంది). లైవ్కు వెళ్లే ముందు, రిపాజిటరీ సీక్రెట్ `secrets.FORWARD_PORT_TOKEN`ను సెట్ చేయండి (దీంతో
-   ఫార్వర్డ్-పోర్ట్ PRలపై CI అమలవుతుంది); యజమాని రిపాజిటరీ వేరియబుల్ `vars.NIGHTLY_PUBLISH`ను `true`గా సెట్ చేసి, npm Trusted Publishing `nightly-v4-build.yml`ను అంగీకరించే వరకు నైట్లీ పబ్లిషింగ్ ఆఫ్లోనే ఉంటుంది. ఛానల్ పరిష్కరణ `scripts/release/dist-tag.mjs`లో ఉంది; `npm-publish.yml` ఉపయోగించే అదే పరిష్కారకాన్ని ఇది ఉపయోగిస్తుంది.
-6. ఛానళ్లను ధృవీకరించండి: `npm view omniroute dist-tags --json`లో `latest` = 3.9.0గా, అలాగే v4 పబ్లిష్ అయ్యే వరకు `next` / `nightly` ఏవీ లేకుండా చూపాలి.
-7. అవసరమైతే రోల్బ్యాక్ చేయండి: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   మరియు `npm dist-tag add omniroute@3.8.59 latest`.
+4. మొదటి PR ల్యాండ్లకు ముందు `stable/v3` మరియు `develop` (రూల్సెట్లు + విలీన క్యూ)ని రక్షించండి.
+5. డోర్మాంట్ వర్క్ఫ్లోలు శాఖ ఉనికి ద్వారా స్విచ్ ఆన్ చేయబడతాయి: `forward-port.yml` ( `stable/v3` కి పుష్), `validate-stable-pr.yml` (PRs నుండి `stable/v3`) మరియు `nightly-v4-build.yml` ( `develop` నిర్మిస్తుంది). గో-లైవ్కు ముందు, `secrets.FORWARD_PORT_TOKEN` రిపోజిటరీ రహస్యాన్ని సెట్ చేయండి (కాబట్టి CI ఫార్వర్డ్-పోర్ట్ PRs పై నడుస్తుంది); యజమాని రిపోజిటరీ వేరియబుల్ `vars.NIGHTLY_PUBLISH` `true` కి సెట్ చేసే వరకు మరియు npm ట్రస్టెడ్ పబ్లిషింగ్ `nightly-v4-build.yml` అంగీకరించే వరకు రాత్రి పబ్లిషింగ్ నిలిపివేయబడుతుంది. ఛానెల్ రిజల్యూషన్ `scripts/release/dist-tag.mjs`, అదే పరిష్కరిణి `npm-publish.yml` ఉపయోగిస్తుంది.
+6. ఛానెల్లను ధృవీకరించండి: `npm view omniroute dist-tags --json` `latest` = 3.9.0ని చూపుతుంది మరియు v4 ప్రచురించే వరకు `next` / `nightly` లేదు.
+7. రోల్బ్యాక్, అవసరమైతే: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` మరియు `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

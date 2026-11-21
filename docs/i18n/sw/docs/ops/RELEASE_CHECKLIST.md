@@ -355,111 +355,70 @@ Kabla ya kutoa toleo lolote la v3.8.x, thibitisha vipengele hivi vya ziada:
 
 ---
 
-## Ukataji wa 3.9.0 LTS (uliofanyiwa mazoezi katika 3.8.58)
+## 3.9.0 LTS kata (imekaririwa katika 3.8.58)
 
-Baada ya v3.8.59 toleo linalofuata ni 3.9.0, na kilele chake kinakuwa matawi mawili ya muda mrefu:
-`stable/v3` (mkondo wa v3 LTS, npm `latest`) na `develop` (v4, lililopandishwa hadi 4.0.0, npm
-`nightly`). Muundo wa matawi/vituo, usogezaji mbele na lebo ziko katika
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); mpango uko katika [ROADMAP](../../ROADMAP.md) (Awamu ya 3). Ukataji unafanyika mara moja;
-3.8.58 unaufanyia mazoezi kutoka mwanzo hadi mwisho kwenye fork, na 3.8.59 unahitimishwa kwa
-[orodha hakiki ya GO/NO-GO](./LTS_GO_NO_GO.md).
+Baada ya v3.8.59 toleo linalofuata ni 3.9.0, na ncha yake inakuwa matawi mawili ya muda mrefu: `stable/v3` (mstari wa v3 LTS, npm `latest`) na `develop` (v4, bumped hadi 4.0.0, npm `nightly`). Muundo wa branch/channel, bandari ya mbele na lebo ziko katika [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; mpango upo katika [ROADMAP](../../ROADMAP.md) (Awamu ya 3). Kata inaendesha mara moja; 3.8.58 huifanyia mazoezi mwisho hadi mwisho kwenye uma, na 3.8.59 hufunga kwa [orodha hakiki GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Jaribio kavu (kusoma pekee, salama wakati wowote)
+### Dry-run (kusoma-tu, salama wakati wowote)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ukataji halisi: 3.9.0 kutoka HEAD, tag iliyotangulia v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # bainisha commit chanzo
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` haitekelezi chochote: inasoma git na `gh` na kuchapisha
-mfuatano mzima — masharti ya awali (chanzo kinatambulika, hazina chanzo ina historia kamili —
-shallow clone haiwezi kusukuma `stable/v3`, upande unaopokea unakataa kifurushi kwenye mzazi wa kwanza
-aliyeunganishwa, kwa hiyo kata kutoka full clone au tekeleza `git fetch --unshallow origin` kwanza —
-tag iliyotangulia ipo, `package.json` ina toleo lengwa, issue ya `release-freeze` iko wazi, hakuna
-issue iliyo wazi ya `Release branch not green`
-kwenye tawi la toleo lililopo — tawi ambalo halipo huripoti `?` isiyojulikana, kamwe
-si kijani — foleni ya Mergify `release` imesanidiwa (G11: `queue_rules`, `checks_timeout`,
-lebo `queue`), ruleset ya `release/*` bado inazuia ufutaji na force-push, na
-`stable/v3` na `develop` bado hazipo), hatua mbili za matawi, vichochezi gani vya workflow
-zilizositishwa na masharti ya `if:` yanakuwa kweli (na yapi yanaendelea kuzuiwa na variable ya hazina au
-yamebainishwa kwenye hazina rasmi), dist-tags zinazotarajiwa (`latest` → 3.9.0, `next` na
-`nightly` tupu) na urejeshaji nyuma. Exit `0` = `RESULT: READY`, `1` = sharti la awali linalozuia
-halikutimizwa (`✗`), `2` = hitilafu ya matumizi. `--advisory <id,...>` hushusha ukaguzi kuwa onyo (`!`)
-bila kuuficha.
+`scripts/release/dry-run-lts-cut.mjs` haitekelezi chochote: inasoma git na `gh` na kuchapisha mlolongo mzima wa masharti ya — (chanzo hutatuliwa, hazina ya chanzo ina historia kamili — clone isiyo na kina haiwezi kushinikiza `stable/v3`, upande wa kupokea unakataa pakiti kwa mzazi wa kwanza aliyepandikizwa, kwa hivyo kata kutoka kwa clone kamili au `git fetch --unshallow origin` — la awali lipo, `package.json` tag ya kwanza iko, tag ya kwanza iko. Suala la `release-freeze` limefunguliwa, hakuna toleo `Release branch not green` lililo wazi kwenye tawi la toleo lililopo — tawi ambalo halipo linaripoti `?` haijulikani, kamwe foleni ya — ya kijani isiyoweza kuachilia PRs (G11: `config/merge-queue/config.json` halali, `bases` yake inasimamia tawi la kutolewa, `mode` `live`, lebo yake ipo), sheria za `release/*` bado na kulazimisha `stable/v3` `develop` bado haipo), hatua mbili za tawi, ambazo husababisha mtiririko wa kazi tulivu na hali ya `if:` kugeuka kuwa kweli (na ambayo hukaa kwenye lango la kibadilishaji cha hazina au kubandikwa kwenye hazina ya kisheria), tagi za dist zinazotarajiwa (`latest` → 3.9.0, `next` na `nightly` tupu) na urejeshaji. Ondoka `0` = `RESULT: READY`, `1` = sharti la kuzuia halikufaulu (`✗`), `2` = hitilafu ya matumizi. `--advisory <id,...>` inapunguza hundi hadi onyo (`!`) bila kuificha.
 
-Endesha jaribio kavu la ukataji halisi wakati release freeze ya 3.9.0 bado iko wazi — matawi
-huundwa baada ya tag na kabla ya Awamu ya 12c kuondoa freeze.
+Endesha ukataji halisi wakati kigandishi cha 3.9.0 bado kiko wazi — matawi huundwa baada ya lebo na kabla ya Awamu ya 12c kuinua kugandisha.
 
-### Mazoezi ya 3.8.58 (fork pekee)
+### 3.8.58 mazoezi (uma pekee)
 
 ```bash
-# 1. Jaribio kavu kwenye kilele cha sasa kwa kutumia vigezo vya mazoezi
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Tekeleza dhidi ya remote ya FORK (origin, au remote yoyote ambayo URL yake ni ya hazina
-#    rasmi, inakataliwa; kila hatua huomba uthibitisho kwenye terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Jaribu workflow zilizosimamishwa kwenye fork (workflow_dispatch pale ambapo jaribio kavu
-#    huripoti ubainishaji kwenye hazina rasmi), kisha rejesha nyuma
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit ya kupandisha toleo la develop hujengwa kwa git plumbing (working tree haiguswi) na hupandisha matoleo ya
-faili zilezile tano kama commit ya kufungua mzunguko: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` na `docs/openapi.yaml`. Sehemu ya `[4.0.0]`
-ya CHANGELOG na nakala zake za i18n hufunguliwa kwenye `develop` baadaye, kabla ya PR yake ya kwanza.
-Script haibadilishi kamwe npm dist-tags — zifanyie mazoezi kwenye kifurushi cha majaribio.
+Ahadi ya kuendeleza bump imejengwa na git plumbing (hakuna mti unaofanya kazi unaoguswa) na hugonga faili tano sawa na ahadi ya kufunguliwa kwa mzunguko: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` na `docs/openapi.yaml`. Sehemu ya `[4.0.0]` CHANGELOG na vioo vyake vya i18n hufunguliwa kwenye `develop` baadaye, kabla ya PR yake ya kwanza. Hati haibadilishi npm dist-tags — jizoeze zile zilizo kwenye kifurushi cha mwanzo.
 
-### Artifact ya uhakiki wa PR (jenga mara moja, kuza bytes zilezile)
+### PR onyesho la kukagua vizalia vya programu (jenga mara moja, tangaza baiti sawa)
 
-`.github/workflows/preview-artifact.yml` hujenga tarball moja ya uzalishaji kutoka kichwa cha PR na
-kuthibitisha build hiyo kamili (sehemu ya (a) ya #8084). PR za hazina hiyo hiyo pekee; hakuna kinachochapishwa.
+`.github/workflows/preview-artifact.yml` huunda tarball moja ya uzalishaji kutoka kwa kichwa cha PR na inadhibitisha muundo huo (#8084 kipande (a)). PRs ya hazina moja pekee; hakuna kinachochapishwa.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # au ongeza lebo ya `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # usakinishaji wa uhakiki
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Utekelezaji hufanya `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, hufungasha
-tarball, huendesha `npm run check:pack-boot` (siri bandia, saraka ya data ya muda), hufungasha upya na
-hushindwa isipokuwa digest iwe sawa, kisha hurekodi `artifact-identity.json` (SHA ya kichwa, SHA ya msingi,
-hash ya lockfile, jukwaa, arch, node ABI, bundler, sera ya build —
-`scripts/release/artifact-identity.mjs`) na kuthibitisha tarball katika job tofauti. Kukuza
-uhakiki kunamaanisha kusakinisha tarball hiyo: usijenge upya kamwe kutoka kwenye chanzo.
+Uendeshaji hufanya `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, hupakia tarball, huendesha `npm run check:pack-boot` (siri bandia, ephemeral data dir), hupakia tena na kutofaulu isipokuwa muhtasari unafanana, kisha hurekodi `artifact-identity.json` (head SHA, base SHA, lockfile ABI, jukwaa, arch, — `scripts/release/artifact-identity.mjs`, node ) na inathibitisha tarball katika kazi tofauti. Kukuza onyesho la kukagua kunamaanisha kusakinisha tarball hiyo: usijenge tena kutoka kwa chanzo.
 
-### Ukataji (3.9.0, baada ya GO)
+### Kata (3.9.0, baada ya GO)
 
-1. GO imerekodiwa katika [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` huchapisha `RESULT: READY`.
-3. Unda matawi kwenye `origin` kwa mkono ukitumia amri zinazochapishwa na jaribio kavu —
-   script inakataa kusukuma kwenye `origin`. Ili kutumia tena commit ya develop iliyokaguliwa, endesha
-   mazoezi ya `--execute` kwenye kilele cha 3.9.0 dhidi ya fork yako kwanza; inachapisha SHA zote mbili, na
-   commit zilezile zinaweza kusukumwa:
+1. GO iliyorekodiwa katika [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` huchapa `RESULT: READY`.
+3. Unda matawi kwenye `origin` kwa mkono na maagizo dry-run chapa — hati inakataa kushinikiza `origin`. Ili kutumia tena ahadi ya usanidi iliyohakikiwa, endesha mazoezi `--execute` kwenye kidokezo cha 3.9.0 dhidi ya uma yako kwanza; inachapisha zote mbili SHAs, na ahadi zile zile zinaweza kusukumwa:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Linda `stable/v3` na `develop` (mikusanyo ya kanuni + foleni ya kuunganisha) kabla ya PR ya kwanza kuwasilishwa.
-5. Mitiririko ya kazi iliyositishwa huwashwa kulingana na kuwepo kwa tawi: `forward-port.yml` (push kwenda
-   `stable/v3`), `validate-stable-pr.yml` (PR zinazoenda `stable/v3`) na `nightly-v4-build.yml`
-   (hujenga `develop`). Kabla ya kuanza kutumika, weka siri ya hazina `secrets.FORWARD_PORT_TOKEN` (ili CI iendeshwe kwenye
-   PR za forward-port); uchapishaji wa kila usiku hubaki umezimwa hadi mmiliki aweke kigezo cha hazina
-   `vars.NIGHTLY_PUBLISH` kuwa `true` na npm Trusted Publishing ikubali
-   `nightly-v4-build.yml`. Utatuzi wa chaneli unafanywa na `scripts/release/dist-tag.mjs`, kitatuzi kilekile
-   kinachotumiwa na `npm-publish.yml`.
-6. Thibitisha chaneli: `npm view omniroute dist-tags --json` huonyesha `latest` = 3.9.0 na hakuna
-   `next` / `nightly` hadi v4 ichapishwe.
-7. Rejesha hali ya awali, ikihitajika: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   na `npm dist-tag add omniroute@3.8.59 latest`.
+4. Linda `stable/v3` na `develop` (rulesets + unganisha foleni) kabla ya PR ya kwanza kutua.
+5. Mitiririko ya kazi tulivu huwashwa kwa kuwepo kwa tawi: `forward-port.yml` (shinikiza hadi `stable/v3`), `validate-stable-pr.yml` (PRs hadi `stable/v3`) na `nightly-v4-build.yml` (hujenga `develop`). Kabla ya kwenda moja kwa moja, weka siri ya hazina `secrets.FORWARD_PORT_TOKEN` (ili CI iendeshe bandari ya mbele PRs); uchapishaji wa kila usiku husalia hadi mmiliki aweke kigezo cha hazina `vars.NIGHTLY_PUBLISH` hadi `true` na npm Uchapishaji Unaoaminika ukubali `nightly-v4-build.yml`. Azimio la kituo ni `scripts/release/dist-tag.mjs`, kisuluhishi sawa na `npm-publish.yml` hutumia.
+6. Thibitisha vituo: `npm view omniroute dist-tags --json` inaonyesha `latest` = 3.9.0 na hakuna `next` / `nightly` hadi v4 itakapochapisha.
+7. Kurudisha nyuma, ikiwa inahitajika: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` na `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

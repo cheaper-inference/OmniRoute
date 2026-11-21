@@ -355,112 +355,70 @@ Enne mis tahes v3.8.x versiooni väljalaskmist kontrollige ka järgmisi punkte:
 
 ---
 
-## 3.9.0 LTS-i haru loomine (läbi harjutatud versioonis 3.8.58)
+## 3.9.0 LTS lõige (harjutatud 3.8.58)
 
-Pärast versiooni v3.8.59 on järgmine versioon 3.9.0 ja selle tipust saavad kaks pikaealist haru:
-`stable/v3` (v3 LTS-i versiooniliin, npm `latest`) ja `develop` (v4, versioon tõstetud 4.0.0-ni, npm
-`nightly`). Harude/kanalite mudelit, edasipordimist ja silte kirjeldab
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plaan asub dokumendis [ROADMAP](../../ROADMAP.md) (3. etapp). Haru loomine toimub üks kord;
-versioonis 3.8.58 harjutatakse seda algusest lõpuni fork-repositooriumis ning 3.8.59 lõpetatakse
-[GO/NO-GO kontrollnimekirjaga](./LTS_GO_NO_GO.md).
+Pärast v3.8.59 on järgmine versioon 3.9.0 ja selle tipust saab kaks pikaealist haru: `stable/v3` (v3 LTS rida, npm `latest`) ja `develop` (v4, 4.0.0, npm `nightly`). branch/channel mudel, edasi-port ja sildid on formaadis [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; plaan on [ROADMAP](../../ROADMAP.md) (3. faas). Lõige jookseb üks kord; 3.8.58 harjutab seda otsast lõpuni kahvlil ja 3.8.59 lõpetab [GO/NO-GO kontrollnimekirjaga](./LTS_GO_NO_GO.md).
 
-### Proovikäivitus (kirjutuskaitstud, alati ohutu)
+### Kuivtöö (kirjutuskaitstud, ohutu igal ajal)
 
 ```bash
-npm run release:dry-run-lts-cut                       # tegelik haru loomine: 3.9.0 lähtekohast HEAD, eelmine silt v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fikseeri lähtekommit
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ei käivita midagi: see loeb git-i ja `gh` andmeid ning prindib
-kogu jada — eeltingimused (lähtekoht lahendub, lähterepositoorium sisaldab täielikku ajalugu —
-pinnapealne kloon ei saa haru `stable/v3` üles laadida, sest vastuvõttev pool lükkab paketi esimese
-poogitud eellase juures tagasi, seega looge haru täielikust kloonist või käivitage esmalt
-`git fetch --unshallow origin` — eelmine silt on olemas, `package.json` sisaldab sihtversiooni,
-`release-freeze` probleem on avatud, olemasoleval väljalaskeharul pole avatud probleemi
-`Release branch not green`
-— olematu haru olekuks kuvatakse `?` ehk teadmata, mitte kunagi roheline — Mergify `release`-i
-järjekord on seadistatud (G11: `queue_rules`, `checks_timeout`, silt `queue`), `release/*`
-reeglistik blokeerib endiselt kustutamise ja sunnitud üleslaadimise ning harusid
-`stable/v3` ja `develop` pole veel olemas), kaks haru loomise sammu, millised uinuvad töövood
-käivituvad ja millised `if:`-tingimused muutuvad tõeseks (ning millised jäävad repositooriumi
-muutuja taha või on fikseeritud kanoonilisele repositooriumile), eeldatavad dist-sildid
-(`latest` → 3.9.0, `next` ja `nightly` on tühjad) ning tagasipööramine. Väljumiskood `0` =
-`RESULT: READY`, `1` = blokeeriv eeltingimus ebaõnnestus (`✗`), `2` = kasutusviga.
-`--advisory <id,...>` muudab kontrolli hoiatuseks (`!`) ilma seda peitmata.
+`scripts/release/dry-run-lts-cut.mjs` ei käivita midagi: loeb git ja `gh` ning prindib kogu jada — eeltingimused (allikas lahendab, allikahoidlal on täielik ajalugu — madal kloon ei saa `stable/v3` lükata, vastuvõttev pool lükkab paki tagasi esimese poogitud vanema juures, nii et lõigatakse eelmisest kloonist või `git fetch --unshallow origin` on esimene —, sihtmärk on olemas `package.json` probleem on avatud, pole avatud `release-freeze` probleem olemasolevas väljalaskeharus `Release branch not green` haru — mida pole olemas, teatab `?` tundmatu, mitte kunagi roheline — omni-queue toob välja väljalaske PRs (G11: `config/merge-queue/config.json` kehtib, selle `bases` haldab väljalaskeharu, `mode` `live`, selle silt on olemas ja `release/*` -puss ja kustutamise reeglid on endiselt blokeeritud) `stable/v3` - `develop` pole veel olemas), kaks haruetappi, mis seisva töövoo päästikud ja `if:` tingimused muutuvad tõeseks (ja mis jäävad hoidla muutujaga piiratuks või kanoonilise hoidla külge kinnitatud), eeldatavad dist-sildid (`latest` → 3.9.0, `next` ja `nightly` tühi) ja tagasipööramine. Välju `0` = `RESULT: READY`, `1` = blokeerimise eeltingimus ebaõnnestus (`✗`), `2` = kasutusviga. `--advisory <id,...>` alandab tšeki hoiatuseks (`!`) seda varjamata.
 
-Käivitage tegeliku haru loomise proovikäivitus ajal, mil 3.9.0 väljalaske külmutus on veel aktiivne —
-harud luuakse pärast silti ja enne seda, kui etapp 12c külmutuse lõpetab.
+Käivitage tõeline lõikamine kuivalt, kuni 3.9.0 vabastuskülm on veel avatud — oksad luuakse pärast silti ja enne, kui faas 12c külmutamise tühistab.
 
-### 3.8.58 harjutus (ainult fork-repositooriumis)
+### 3.8.58 proov (ainult kahvel)
 
 ```bash
-# 1. Proovikäivitus praeguse tipu põhjal koos harjutuse parameetritega
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Käivitage FORK-kaugserveri vastu (origin või mis tahes kaugserver, mille URL on kanoonilise
-#    repositooriumi oma, lükatakse tagasi; iga samm küsib terminalis kinnitust)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Käivitage fork-repositooriumis uinuvad töövood (workflow_dispatch seal, kus proovikäivitus
-#    teatab fikseeritusest kanoonilisele repositooriumile), seejärel pöörake muudatused tagasi
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Harus `develop` versiooni tõstev kommit luuakse git-i madala taseme vahenditega (tööpuud ei muudeta) ja see tõstab
-sama viie faili versiooni nagu tsükli avamise kommit: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` ja `docs/openapi.yaml`. Jaotis `[4.0.0]`
-failis CHANGELOG ja selle i18n-peeglid avatakse seejärel harus `develop` enne selle esimest
-PR-i. Skript ei muuda kunagi npm-i dist-silte — harjutage neid ajutise paketiga.
+Arendamise tõkestus on üles ehitatud git torustikuga (tööpuud pole puudutatud) ja tõrjub samad viis faili nagu tsükliliselt avatud tagatis: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ja `docs/openapi.yaml`. Sektsioon `[4.0.0]` CHANGELOG ja selle i18n peeglid avatakse `develop` hiljem, enne selle esimest PR. Skript ei muutu kunagi npm dist-tags — harjutab neid, mis on kriimustatud pakendil.
 
-### PR-i eelvaate artefakt (koosta üks kord, eduta samad baidid)
+### PR eelvaate artefakt (ehitage üks kord, reklaamige samu baite)
 
-`.github/workflows/preview-artifact.yml` koostab PR-i tipust ühe tootmiskeskkonna tarball-faili ja
-valideerib täpselt selle järgu (#8084 osa (a)). Ainult sama repositooriumi PR-id; midagi ei avaldata.
+`.github/workflows/preview-artifact.yml` koostab PR -peast ühe tootmistarkvara ja kinnitab selle täpse ehituse (#8084 slice (a)). Ainult sama hoidla PRs ; midagi ei avaldata.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # või lisa silt `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # eelvaate installimine
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Käivitus täidab käsud `npm ci`, `npm run build:release` ja `npm run check:pack-artifact`, pakib
-tarball-faili, käivitab `npm run check:pack-boot` (võltsitud saladused, ajutine andmekataloog), pakib selle
-uuesti ning ebaõnnestub, kui räsi pole identne; seejärel salvestab `artifact-identity.json` (tipu SHA, baasi
-SHA, lukufaili räsi, platvorm, arhitektuur, node ABI, komplekteerija, järgu poliitika —
-`scripts/release/artifact-identity.mjs`) ja atesteerib tarball-faili eraldi töös. Eelvaate edutamine
-tähendab selle tarball-faili installimist: ärge kunagi koostage lähtekoodist uuesti.
+Käivitamine teeb `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakib tarballi, käivitab `npm run check:pack-boot` (võltssaladused, lühiajaline andmekataloog), pakib uuesti ja ebaõnnestub, kui kokkuvõte pole identne, seejärel salvestab `artifact-identity.json` (pea SHA, baasi SHA, lukufaili ehitamine, räsi, de platvormi ABI, — `scripts/release/artifact-identity.mjs`) ja atesteerib tarballi eraldi töös. Eelvaate reklaamimine tähendab selle tarballi installimist: ärge kunagi allikast uuesti üles ehitage.
 
-### Haru loomine (3.9.0, pärast GO-otsust)
+### Lõige (3.9.0, pärast GO)
 
-1. GO-otsus on salvestatud dokumendis [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO salvestatud failis [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` prindib `RESULT: READY`.
-3. Looge harud `origin`-is käsitsi proovikäivituse prinditud käskudega — skript keeldub
-   `origin`-isse üles laadimast. Ülevaadatud develop-kommiti taaskasutamiseks käivitage
-   esmalt `--execute`-harjutus 3.9.0 tipus oma fork-repositooriumi vastu; see prindib mõlemad SHA-d ja
-   samad kommitid saab üles laadida:
+3. Looge `origin` harud käsitsi, kasutades käske kuivkäivitus prindib — skript keeldub `origin`-le surumast. Ülevaadatud arenduskohustuse taaskasutamiseks käivitage esmalt `--execute` proovi 3.9.0 otsas; see prindib mõlemad SHAs ja samad sissekanded saab lükata:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Kaitske harusid `stable/v3` ja `develop` (reeglistikud + liitmisjärjekord) enne esimese PR-i saabumist.
-5. Ootel töövood aktiveeruvad haru olemasolul: `forward-port.yml` (tõuge harusse
-   `stable/v3`), `validate-stable-pr.yml` (harusse `stable/v3` suunatud PR-id) ja `nightly-v4-build.yml`
-   (koostab haru `develop`). Enne kasutuselevõttu määrake hoidla saladus `secrets.FORWARD_PORT_TOKEN` (et CI käivituks
-   edasikantud PR-ide puhul); öine avaldamine jääb väljalülitatuks, kuni omanik määrab hoidla
-   muutuja `vars.NIGHTLY_PUBLISH` väärtuseks `true` ja npm Trusted Publishing aktsepteerib
-   faili `nightly-v4-build.yml`. Kanali määrab `scripts/release/dist-tag.mjs`, sama
-   lahendaja, mida kasutab `npm-publish.yml`.
-6. Kontrollige kanaleid: `npm view omniroute dist-tags --json` näitab, et `latest` = 3.9.0 ning
-   `next` / `nightly` puuduvad kuni v4 avaldamiseni.
-7. Vajaduse korral tagasipööramine: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ja `npm dist-tag add omniroute@3.8.59 latest`.
+4. Kaitske `stable/v3` ja `develop` (reeglistiku + ühendamisjärjekord) enne esimese PR maandumist.
+5. Seisvad töövood lülituvad sisse haru olemasolu järgi: `forward-port.yml` (tõuke `stable/v3`-le), `validate-stable-pr.yml` (PRs -le `stable/v3`) ja `nightly-v4-build.yml` (ehitab `develop`). Enne reaalajas käivitamist määrake `secrets.FORWARD_PORT_TOKEN` hoidla saladus (nii et CI töötab edasi-pordis PRs); igaõhtune avaldamine jääb välja, kuni omanik määrab hoidla muutuja `vars.NIGHTLY_PUBLISH` väärtuseks `true` ja npm Trusted Publishing aktsepteerib `nightly-v4-build.yml`. Kanali eraldusvõime on `scripts/release/dist-tag.mjs`, sama lahendaja `npm-publish.yml`.
+6. Kontrollige kanaleid: `npm view omniroute dist-tags --json` näitab `latest` = 3.9.0 ja `next` / `nightly` pole kuni v4 avaldamiseni.
+7. Vajadusel tagasipööramine: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ja `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Håll meddelanden i mitten av konversationen på plats",
     "requireUserLastMessageDescription": "För uppströms som avvisar assistentförfyllning: släpp efterföljande assistentsvängar (ingen tool_use) innan du skickar. Modellen kan återskapa sitt tidigare svar.",
     "requireUserLastMessageLabel": "Kräv att konversationen avslutas med ett användarmeddelande",
+    "strictChatHistoryDescription": "Reparerar avbrutna sekvenser av verktygsanrop och slår ihop assistentens meddelanden som följer direkt på varandra innan de skickas till OpenAI-kompatibla leverantörer med strikta regler.",
+    "strictChatHistoryLabel": "Reparation av chatthistorik för strikta leverantörer",
     "bulkPasteAdded": "{count, plural, one {1 nyckel tillagd} other {# nycklar tillagda}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dubblett överhoppad} other {# dubbletter överhoppade}}",
     "bulkPasteHint": "Klistra in en API-nyckel per rad. Tomma rader ignoreras och dubblettnycklar hoppas över.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Ta bort nyckel"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugins körs med fullständiga rättigheter",
-    "privilegesWarningBody": "En plugin körs som en vanlig Node.js process med samma åtkomst som OmniRoute: den kan läsa filer, köra program och använda nätverket, oavsett vilka behörigheter som dess manifest deklarerar. Installera endast plugins som du litar på.",
     "title": "Insticksprogram",
     "description": "Installera och hantera insticksprogram för att utöka funktionaliteten i OmniRoute",
     "loading": "Läser in insticksprogram...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Sök efter insticksprogram",
     "noPlugins": "Inga insticksprogram installerade",
     "noPluginsDescription": "Placera insticksprogramkataloger i ~/.omniroute/plugins/ och klicka på Sök.",
+    "privilegesWarningTitle": "Plugins körs med fullständiga rättigheter",
+    "privilegesWarningBody": "En plugin körs som en vanlig Node.js process med samma åtkomst som OmniRoute: den kan läsa filer, köra program och använda nätverket, oavsett vilka behörigheter som dess manifest deklarerar. Installera endast plugins som du litar på.",
     "activate": "Aktivera",
     "deactivate": "Inaktivera",
     "uninstall": "Avinstallera",

@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "הגבלה חייבת להיות מספר שלם חיובי.",
     "error": "שגיאה: {message}",
     "serverOffline": "שרת OmniRoute אינו מקוון. הפעילו אותו באמצעות: omniroute serve",
     "authRequired": "נדרש אימות. הגדירו את OMNIROUTE_API_KEY או הריצו: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[הרצה-יבשה] הפעולה שהייתה מתבצעת: {action}",
     "cancelled": "בוטל.",
     "jsonOpt": "פלט בפורמט JSON",
-    "yesOpt": "דילוג על בקשת האישור"
+    "yesOpt": "דילוג על בקשת האישור",
+    "positiveIntegerRequired": "הגבלה חייבת להיות מספר שלם חיובי."
   },
   "setup": {
     "title": "הגדרת OmniRoute",
