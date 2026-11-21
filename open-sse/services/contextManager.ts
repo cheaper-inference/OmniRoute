@@ -11,6 +11,7 @@ import {
   type ModelCapabilityResolutionSnapshot,
 } from "../../src/lib/modelCapabilities.ts";
 import { parseModel } from "./model.ts";
+import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
 import { encodedStringLength, jsonLength } from "../utils/jsonSize.ts";
 
 // Default token limits per provider (fallbacks when not in registry)
@@ -560,17 +561,60 @@ export function getComboTargetTokenLimit(options: {
   return getSourcedTokenLimit(provider, parsedModel ?? null);
 }
 
+export type TokenLimitResolution = {
+  limit: number;
+  specific: boolean;
+  /**
+   * True only when `limit` is a passthrough provider's provider-wide default applied to a model
+   * it has no data for. The upstream may serve a far larger window, so a caller must not reject
+   * or rewrite a request on this number alone. Absent otherwise.
+   */
+  placeholder?: boolean;
+};
+
+/**
+ * A passthrough provider forwards models its catalog never listed. For such a model the
+ * provider-wide `defaultContextLength` is a placeholder; a model the registry entry lists
+ * itself (by id or alias) keeps the default as its curated window, as does a provider that marks
+ * its default `defaultContextLengthAuthoritative` (one backend, one real window for every model).
+ */
+function isUncatalogedPassthroughModel(
+  provider: string,
+  entry: {
+    models?: ReadonlyArray<{ id: string; aliases?: readonly string[] }>;
+    defaultContextLengthAuthoritative?: boolean;
+  },
+  model: string | null
+): boolean {
+  if (!model || entry.defaultContextLengthAuthoritative) return false;
+  if (!isRegistryPassthroughProvider(provider)) return false;
+  return !entry.models?.some((m) => m.id === model || m.aliases?.includes(model));
+}
+
+/** Step 3: provider registry default; a placeholder for uncataloged passthrough models. */
+function resolveRegistryDefaultLimit(
+  provider: string,
+  model: string | null
+): TokenLimitResolution | null {
+  const registryEntry = REGISTRY[provider];
+  const limit = registryEntry?.defaultContextLength;
+  if (!limit) return null;
+  return isUncatalogedPassthroughModel(provider, registryEntry, model)
+    ? { limit, specific: false, placeholder: true }
+    : { limit, specific: true };
+}
+
 /**
  * Same chain as getTokenLimit, but also reports whether the limit came from
  * a provider/model-specific source (env override, synced DB, registry,
  * name heuristic, curated per-provider default) or only from the generic
- * catch-all default.
+ * catch-all default, and whether it is a passthrough placeholder.
  */
 export function resolveTokenLimit(
   provider: string,
   model: string | null = null,
   snapshot?: ModelCapabilityResolutionSnapshot | null
-): { limit: number; specific: boolean } {
+): TokenLimitResolution {
   // 1. Check environment variable override first
   const envOverride = getEnvOverride(provider);
   if (envOverride) return { limit: envOverride, specific: true };
@@ -584,10 +628,8 @@ export function resolveTokenLimit(
   }
 
   // 3. Check registry for provider default
-  const registryEntry = REGISTRY[provider];
-  if (registryEntry?.defaultContextLength) {
-    return { limit: registryEntry.defaultContextLength, specific: true };
-  }
+  const registryDefault = resolveRegistryDefaultLimit(provider, model);
+  if (registryDefault) return registryDefault;
 
   // 4. Check if model name hints at a known limit
   if (model) {
