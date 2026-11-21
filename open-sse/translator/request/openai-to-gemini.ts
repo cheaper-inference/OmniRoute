@@ -911,6 +911,26 @@ export function openaiToCloudCodeGeminiRequest(
   return request;
 }
 
+/**
+ * Prepend client system parts to the first user message so they still guide the model's
+ * behavior early in the conversation (#9030). A history that opens with a model turn gets a new
+ * user turn instead: a system text there would read as a model utterance.
+ */
+function prependClientSystemParts(
+  request: CloudCodeEnvelope["request"],
+  clientParts: GeminiPart[]
+) {
+  if (clientParts.length === 0) return;
+  const first = request.contents?.[0];
+  if (first && first.role === "user") {
+    first.parts.unshift(...clientParts);
+  } else if (first) {
+    request.contents.unshift({ role: "user", parts: [...clientParts] });
+  } else {
+    request.contents = [{ role: "user", parts: [...clientParts] }];
+  }
+}
+
 function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   // Fall back to providerSpecificData.projectId — some connections (and post-refresh
   // credentials) store it there rather than at the top level, which otherwise produced a
@@ -963,20 +983,7 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   const defaultPart: GeminiPart = { text: ANTIGRAVITY_DEFAULT_SYSTEM };
   const clientParts = envelope.request.systemInstruction?.parts?.slice() ?? [];
   envelope.request.systemInstruction = { role: "system", parts: [defaultPart] };
-
-  if (clientParts.length > 0) {
-    // Prepend client system parts to the first user message so they still guide
-    // the model's behavior early in the conversation.
-    const first = envelope.request.contents?.[0];
-    if (first && first.role === "user") {
-      first.parts.unshift(...clientParts);
-    } else if (first) {
-      // History opens with a model turn: a system text there would read as a model utterance.
-      envelope.request.contents.unshift({ role: "user", parts: [...clientParts] });
-    } else {
-      envelope.request.contents = [{ role: "user", parts: [...clientParts] }];
-    }
-  }
+  prependClientSystemParts(envelope.request, clientParts);
 
   // Strip Gemini built-in tool *names* out of functionDeclarations — but only while
   // a native grounding entry (e.g. `{ googleSearch: {} }`) is actually present.
