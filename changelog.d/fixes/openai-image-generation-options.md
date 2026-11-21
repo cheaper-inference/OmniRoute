@@ -1,0 +1,1 @@
+- Forward OpenAI image complexity and moderation along with JPEG and WebP compression options.
