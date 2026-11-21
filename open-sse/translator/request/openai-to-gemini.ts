@@ -201,10 +201,10 @@ type GeminiToolNameOptions = {
 // from the incoming OpenAI-format body, honoring both the camelCase and
 // snake_case spellings at the top level and nested under
 // generationConfig.thinkingConfig (the operator payload-override surface).
-// Returns the trimmed non-empty level, or null when no level was supplied — an
-// empty/whitespace string is treated as "no level" so it can never disagree
-// with the extraction that later writes the field onto the request.
-function extractExplicitThinkingLevel(body: Record<string, unknown>): string | null {
+// Native thinking-level models require supported enum values. Preserve the
+// pre-existing passthrough for models that do not use native thinking levels.
+function extractExplicitThinkingLevel(body: Record<string, unknown>, model: string): string | null {
+  const validatesNativeLevel = isGeminiThinkingLevelModel(model);
   const gc = body.generationConfig as Record<string, unknown> | undefined;
   const tc = gc?.thinkingConfig as Record<string, unknown> | undefined;
   const tcSnake = gc?.thinking_config as Record<string, unknown> | undefined;
@@ -215,7 +215,14 @@ function extractExplicitThinkingLevel(body: Record<string, unknown>): string | n
     body.thinking_level,
   ];
   for (const candidate of candidates) {
-    if (typeof candidate === "string" && candidate.trim() !== "") return candidate.trim();
+    if (typeof candidate !== "string") continue;
+    const trimmed = candidate.trim();
+    if (!trimmed) continue;
+    if (!validatesNativeLevel) return trimmed;
+    const level = trimmed.toLowerCase();
+    if (level === "minimal" || level === "low" || level === "medium" || level === "high") {
+      return level;
+    }
   }
   return null;
 }
@@ -247,7 +254,7 @@ function openaiToGeminiBase(
   // directly) makes the numeric budget injected below redundant — and Google's
   // 3.x migration guidance documents `thinkingBudget` as deprecated — so the
   // level wins and no budget is set. Only the string level is forwarded.
-  const explicitThinkingLevel = extractExplicitThinkingLevel(body);
+  const explicitThinkingLevel = extractExplicitThinkingLevel(body, model);
   const toolNameMap = new Map<string, string>();
   const sanitizeToolName = (name: string) =>
     sanitizeGeminiToolName(name, {
