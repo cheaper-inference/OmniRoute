@@ -17,6 +17,7 @@ import path from "node:path";
 
 import type { LedgerKey, QuotaStore } from "../../src/lib/quota/types.ts";
 import type { PercentAttributionStore } from "../../src/lib/quota/percentAttribution.ts";
+import { runFakeLedgerScript } from "./helpers/fakeRedisLedgerScripts.ts";
 
 // DATA_DIR must be set before any DB module is imported.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-attribution-"));
@@ -97,6 +98,9 @@ const fake = {
   },
   async expire(): Promise<number> {
     return 1;
+  },
+  async eval(script: string, numkeys: number, ...args: unknown[]): Promise<unknown> {
+    return runFakeLedgerScript(fake, script, numkeys, args);
   },
   async quit(): Promise<string> {
     return "OK";

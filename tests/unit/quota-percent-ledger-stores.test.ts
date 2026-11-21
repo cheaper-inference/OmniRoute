@@ -21,6 +21,7 @@ import type {
   QuotaStore,
 } from "../../src/lib/quota/types.ts";
 import type { LedgerStore } from "../../src/lib/quota/percentLedger.ts";
+import { runFakeLedgerScript } from "./helpers/fakeRedisLedgerScripts.ts";
 
 // DATA_DIR must be set before any DB module is imported.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-ledger-stores-"));
@@ -40,7 +41,12 @@ test.after(() => {
 // ─── In-memory stand-in for the ioredis client ──────────────────────────────
 
 const hashes = new Map<string, Map<string, string>>();
-const calls: Array<{ method: string; args: unknown[] }> = [];
+/** Every command the store sends. `inScript` marks a command run by a script, not sent alone. */
+const calls: Array<{ method: string; args: unknown[]; inScript: boolean }> = [];
+let scriptDepth = 0;
+function record(method: string, args: unknown[]): void {
+  calls.push({ method, args, inScript: scriptDepth > 0 });
+}
 /**
  * One-shot hooks run inside the next hgetall / hincrbyfloat, before it acts (to interleave another
  * writer). A hook that returns a promise is awaited first; one that returns nothing is not, so a
@@ -72,7 +78,7 @@ function hashOf(key: string): Map<string, string> {
 
 const fake = {
   async hgetall(key: string): Promise<Record<string, string>> {
-    calls.push({ method: "hgetall", args: [key] });
+    record("hgetall", [key]);
     const hook = beforeNextHgetall;
     beforeNextHgetall = null;
     const pending = runHook(hook);
@@ -80,21 +86,21 @@ const fake = {
     return Object.fromEntries(hashes.get(key) ?? []);
   },
   async hset(key: string, field: string, value: string): Promise<number> {
-    calls.push({ method: "hset", args: [key, field, value] });
+    record("hset", [key, field, value]);
     const hash = hashOf(key);
     const created = hash.has(field) ? 0 : 1;
     hash.set(field, value);
     return created;
   },
   async hsetnx(key: string, field: string, value: string): Promise<number> {
-    calls.push({ method: "hsetnx", args: [key, field, value] });
+    record("hsetnx", [key, field, value]);
     const hash = hashOf(key);
     if (hash.has(field)) return 0;
     hash.set(field, value);
     return 1;
   },
   async hincrbyfloat(key: string, field: string, increment: number): Promise<string> {
-    calls.push({ method: "hincrbyfloat", args: [key, field, increment] });
+    record("hincrbyfloat", [key, field, increment]);
     const hook = beforeNextHincrbyfloat;
     beforeNextHincrbyfloat = null;
     const pending = runHook(hook);
@@ -105,12 +111,12 @@ const fake = {
     return String(next);
   },
   async hdel(key: string, ...fields: string[]): Promise<number> {
-    calls.push({ method: "hdel", args: [key, ...fields] });
+    record("hdel", [key, ...fields]);
     const hash = hashes.get(key);
     return fields.filter((f) => hash?.delete(f)).length;
   },
   async expire(key: string, seconds: number): Promise<number> {
-    calls.push({ method: "expire", args: [key, seconds] });
+    record("expire", [key, seconds]);
     return hashes.has(key) ? 1 : 0;
   },
   async incrbyfloat(): Promise<string> {
@@ -119,8 +125,14 @@ const fake = {
   async mget(...keys: string[]): Promise<Array<string | null>> {
     return keys.map(() => null);
   },
-  async eval(): Promise<unknown> {
-    return null;
+  async eval(script: string, numkeys: number, ...args: unknown[]): Promise<unknown> {
+    record("eval", [script, numkeys, ...args]);
+    scriptDepth += 1;
+    try {
+      return await runFakeLedgerScript(fake, script, numkeys, args);
+    } finally {
+      scriptDepth -= 1;
+    }
   },
   async del(): Promise<number> {
     return 0;
@@ -597,6 +609,61 @@ test("redis: one hash per pool connection, old revisions removed, 60-day TTL", a
     calls.filter((c) => c.method === "hdel").map((c) => c.args),
     [[hashKey, "s:5h:1"]]
   );
+});
+
+test("redis: each book write sets the hash expiry in the same call as the write", async () => {
+  const redis = redisWithFakeClient();
+  const K = keyOf("p-redis-atomic-expiry");
+  const hashKey = `${process.env.REDIS_KEY_PREFIX?.trim() || "omniroute:"}quota-ledger:${K.poolId}:c`;
+  const TTL = 5_184_000;
+  const sentAlone = () => calls.filter((c) => !c.inScript && c.method !== "hgetall");
+  const runByScript = () => {
+    const ran = calls.filter((c) => c.inScript);
+    assert.ok(
+      ran.every((c) => c.args[0] === hashKey),
+      "the script writes the book's hash"
+    );
+    return ran.map((c) => [c.method, c.args[1]]);
+  };
+
+  calls.length = 0;
+  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 10_000, T0);
+  assert.deepEqual(
+    sentAlone().map((c) => c.method),
+    ["eval"],
+    "the token write and its expiry are one call"
+  );
+  assert.match(String(sentAlone()[0].args[0]), /"EXPIRE", KEYS\[1\]/);
+  assert.deepEqual(runByScript(), [
+    ["hset", "u:a"],
+    ["hincrbyfloat", "t:a"],
+    ["expire", TTL],
+  ]);
+
+  calls.length = 0;
+  assert.equal((await obs(redis, K, 0.1, 0))?.state.rev, 1);
+  assert.deepEqual(
+    sentAlone().map((c) => c.method),
+    ["eval"],
+    "the commit and its expiry are one call"
+  );
+  assert.match(String(sentAlone()[0].args[0]), /"EXPIRE", KEYS\[1\]/);
+  assert.deepEqual(runByScript(), [
+    ["hsetnx", "s:5h:1"],
+    ["expire", TTL],
+  ]);
+
+  // The removal of the superseded revision stays a separate best-effort call.
+  calls.length = 0;
+  assert.equal((await obs(redis, K, 0.3, 1))?.state.rev, 2);
+  assert.deepEqual(
+    sentAlone().map((c) => c.method),
+    ["eval", "hdel"]
+  );
+  assert.deepEqual(runByScript(), [
+    ["hsetnx", "s:5h:2"],
+    ["expire", TTL],
+  ]);
 });
 
 test("redis: a revision field removed after the check cannot be won a second time", async () => {
