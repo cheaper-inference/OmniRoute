@@ -90,10 +90,24 @@ default for any new LOCAL_ONLY path remains strict-loopback. Unauthenticated
 requests and requests with non-manage keys are still rejected with
 `403 LOCAL_ONLY`.
 
-Today the only bypassable prefix is `/api/mcp/`. `/api/cli-tools/runtime/` and
-`/api/services/` are intentionally excluded because they can spawn arbitrary
-subprocesses (`npm install`, `node`), which is the exact CVE class the
-LOCAL_ONLY tier exists to prevent.
+The default bypassable prefixes are `/api/mcp/` and `/api/resilience/connections`.
+The second is read-only JSON that spawns nothing; it is on the list so that
+Resilience > Connections loads on a remote dashboard (managed instance, tunnel,
+reverse proxy) for an authenticated dashboard session or a `manage` key, while an
+anonymous remote caller still gets `403 LOCAL_ONLY` — also when
+`requireLogin=false`. An install that stored its own list keeps that list.
+`/api/cli-tools/runtime/` and `/api/services/` are intentionally excluded because
+they can spawn arbitrary subprocesses (`npm install`, `node`), which is the exact
+CVE class the LOCAL_ONLY tier exists to prevent.
+
+#### Read-method exemptions
+
+A few LOCAL_ONLY paths are exempt for `GET`/`HEAD`/`OPTIONS` only, by exact path
+(`LOCAL_ONLY_API_GET_EXEMPTIONS`): the read performs no spawn, the write methods
+do. `GET /api/skills/executions` is one of them — it lists stored execution rows
+(two SQLite reads) so Skills > Executions loads on a remote dashboard, while
+`POST /api/skills/executions`, which runs a skill and reaches the sandbox
+container spawn, stays loopback-only. An exempt read falls to the MANAGEMENT tier.
 
 **#7895 — `mcp:connect` narrow scope:** the `/api/mcp/` carve-out ALSO accepts
 a Bearer key holding the narrow `mcp:connect` scope
@@ -128,8 +142,10 @@ operator responsibilities remain:
   `X-Forwarded-For: 127.0.0.1`, or a proxy that rewrites the source address to
   loopback, re-opens exactly the RCE class this tier closes. Expose the
   dashboard/API through the proxy — never the spawn-capable routes.
-- **Keep the manage-scope bypass minimal.** Only `/api/mcp/` is bypassable, and
-  only with a `manage`-scoped API key. The `SPAWN_CAPABLE_PREFIXES` can never be
+- **Keep the manage-scope bypass minimal.** By default only `/api/mcp/` and the
+  read-only `/api/resilience/connections` are bypassable, and only with a
+  `manage`-scoped API key or an authenticated dashboard session. The
+  `SPAWN_CAPABLE_PREFIXES` can never be
   added to the bypass list — the zod schema rejects them and
   `isLocalOnlyBypassableByManageScope` denies them at runtime (defence-in-depth),
   which is what the dashboard means by "cannot be made bypassable". The same
