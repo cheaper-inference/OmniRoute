@@ -3,16 +3,22 @@ import { brandTintVars } from "./brand-tint";
 import { cn } from "./lib/utils";
 
 export type CardFooterAlign = "start" | "between" | "end";
+export type CardSurface = "default" | "subtle" | "inset";
 export interface CardProps extends Omit<ComponentProps<"div">, "title"> {
   title?: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   footer?: ReactNode;
   footerAlign?: CardFooterAlign;
+  /** Renders `children` edge to edge instead of inside the padded content slot. */
   flush?: boolean;
-  /** A subtle neutral gradient for grouped secondary actions. */
-  surface?: "default" | "subtle";
-  /** A third-party brand as a tint: `#rgb` or `#rrggbb`. Replaces `surface`; other values are ignored. */
+  /**
+   * `subtle`: a neutral gradient for grouped secondary actions.
+   * `inset`: a flat, compact panel for one level of nesting inside a card or dialog. It pads itself,
+   * so children need no `CardContent` wrapper.
+   */
+  surface?: CardSurface;
+  /** A third-party brand as a tint: `#rgb` or `#rrggbb`. Replaces the `subtle` gradient and recolours an inset; other values are ignored. */
   brandColor?: string;
 }
 
@@ -20,8 +26,9 @@ export function Card({ className, title, description, action, footer, footerAlig
   const brand = brandTintVars(brandColor);
   const hasHeader = title != null || description != null || action != null;
   const structured = hasHeader || footer != null;
+  const inset = surface === "inset";
   return (
-    <div data-slot="card" data-surface={surface === "subtle" && !brand ? surface : undefined} className={cn("ci-card", brand && "ci-brand-tint", className)} style={brand ? { ...brand, ...style } as CSSProperties : style} {...props}>
+    <div data-slot="card" data-surface={inset || (surface === "subtle" && !brand) ? surface : undefined} data-flush={inset && flush ? "" : undefined} className={cn("ci-card", brand && "ci-brand-tint", className)} style={brand ? { ...brand, ...style } as CSSProperties : style} {...props}>
       {hasHeader && <CardHeader>{title != null && <CardTitle>{title}</CardTitle>}{description != null && <CardDescription>{description}</CardDescription>}{action != null && <CardAction>{action}</CardAction>}</CardHeader>}
       {structured && !flush ? <CardContent>{children}</CardContent> : children}
       {footer != null && <CardFooter align={footerAlign}>{footer}</CardFooter>}

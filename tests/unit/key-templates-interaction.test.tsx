@@ -58,9 +58,14 @@ vi.mock("@/shared/components/Toggle", () => ({
     />
   ),
 }));
-vi.mock("@/shared/components/Card", () => ({
-  default: ({ children }) => <section>{children}</section>,
-}));
+vi.mock("@/shared/components/Card", () => {
+  const Card = ({ children }) => <section>{children}</section>;
+  // The policy panels are Card.Section (the kit inset card) since the kit adoption.
+  Card.Section = function CardSection({ children }) {
+    return <div>{children}</div>;
+  };
+  return { default: Card };
+});
 vi.mock("@/shared/components/Loading", () => ({
   Spinner: () => <span role="status">Loading</span>,
   CardSkeleton: () => null,

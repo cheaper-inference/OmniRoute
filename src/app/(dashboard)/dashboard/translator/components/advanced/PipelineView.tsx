@@ -257,9 +257,7 @@ export default function PipelineView({
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-text-main">{step.name}</p>
                           {step.description && (
-                            <p className="text-[10px] text-text-muted truncate">
-                              {step.description}
-                            </p>
+                            <p className="text-xs text-text-muted truncate">{step.description}</p>
                           )}
                         </div>
 

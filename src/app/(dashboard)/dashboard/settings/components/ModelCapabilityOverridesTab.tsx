@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { EmptyState } from "@omniroute/ui-kit/empty-state";
 import { Badge, Card, Button, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import {
   filterModelOverrideTargets,
   toModelOverrideTargets,
@@ -29,10 +30,10 @@ interface StatusMessage {
   message: string;
 }
 
-function statusClassName(tone: StatusTone) {
-  if (tone === "success") return "bg-success/10 border-success/20 text-success";
-  if (tone === "error") return "bg-error/10 border-error/20 text-error";
-  return "bg-info/10 border-info/20 text-info";
+function statusVariant(tone: StatusTone) {
+  if (tone === "success") return "success";
+  if (tone === "error") return "critical";
+  return "info";
 }
 
 function useModelCapabilityOverridesData() {
@@ -140,11 +141,7 @@ export default function ModelCapabilityOverridesTab() {
 }
 
 function StatusMessageBanner({ status }: { status: StatusMessage }) {
-  return (
-    <div className={`px-3 py-2 rounded-lg border text-sm ${statusClassName(status.tone)}`}>
-      {status.message}
-    </div>
-  );
+  return <Notice variant={statusVariant(status.tone)}>{status.message}</Notice>;
 }
 
 function ModelCapabilityOverridesPanel({
@@ -198,7 +195,7 @@ function ModelOverridesHeader({ count }: { count: number }) {
   return (
     <div className="flex items-start justify-between gap-3 mb-3">
       <div>
-        <h3 className="text-sm flex items-center gap-2">
+        <h3 className="ci-heading flex items-center gap-2" data-size="sm">
           <Icon name="tune" size={18} className="text-primary" />
           {t("modelOverridesTitle")}
         </h3>
@@ -298,16 +295,16 @@ function ModelOverrideEditor({
 }) {
   const t = useTranslations("settings");
   return (
-    <div className="rounded-lg border border-border/50 p-3 flex flex-col gap-3">
+    <Card.Section className="flex flex-col gap-3">
       <div>
-        <p className="text-[10px] uppercase tracking-wide text-text-muted font-semibold mb-1">
+        <p className="ci-eyebrow mb-1" data-size="3xs" data-weight="medium">
           {t("selectedModel")}
         </p>
         <p className="text-xs font-mono break-all">{activeTarget || t("none")}</p>
       </div>
       <ModelOverrideForm activeTarget={activeTarget} onSave={onSave} />
       <ModelOverrideRows activeOverrides={activeOverrides} onRemove={onRemove} />
-    </div>
+    </Card.Section>
   );
 }
 

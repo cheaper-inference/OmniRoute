@@ -2,6 +2,7 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import { ArrowDown, ArrowRight, ArrowUp, Minus } from "lucide-react";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 import { Card } from "./card";
 import { Stat, type StatProps } from "./stat";
@@ -9,18 +10,29 @@ import { Skeleton } from "./skeleton";
 import { EmptyState } from "./empty-state";
 import { Button } from "./button";
 
+/** Screen-reader text for each trend direction, read before the value. */
+export interface MetricTrendLabels {
+  up: string;
+  down: string;
+  flat: string;
+}
+export const defaultMetricTrendLabels: MetricTrendLabels = { up: "Increase", down: "Decrease", flat: "No change" };
+
 export interface MetricTrendProps extends ComponentProps<"div"> {
   /** Already formatted change. No percentage or comparison-period math happens here. */
   value: ReactNode;
   direction?: "up" | "down" | "flat";
   tone?: "neutral" | "positive" | "negative";
   comparison?: ReactNode;
+  /** Localized direction text; missing or `undefined` keys fall back to defaultMetricTrendLabels. */
+  labels?: Partial<MetricTrendLabels>;
 }
 
-export function MetricTrend({ value, direction, tone = "neutral", comparison, className, ...props }: MetricTrendProps) {
+export function MetricTrend({ value, direction, tone = "neutral", comparison, labels: labelOverrides, className, ...props }: MetricTrendProps) {
+  const labels = resolveLabels(defaultMetricTrendLabels, labelOverrides);
   const Icon = direction === "up" ? ArrowUp : direction === "down" ? ArrowDown : direction === "flat" ? Minus : null;
   return <div {...props} className={cn("ci-metric-trend", className)} data-tone={tone}>
-    <div className="ci-metric-trend__value">{Icon && <Icon size={17} aria-hidden="true" />}{direction && <span className="ci-sr-only">{direction === "up" ? "Increase " : direction === "down" ? "Decrease " : "No change "}</span>}{value}</div>
+    <div className="ci-metric-trend__value">{Icon && <Icon size={17} aria-hidden="true" />}{direction && <span className="ci-sr-only">{labels[direction]} </span>}{value}</div>
     {comparison != null && <div className="ci-metric-trend__comparison">{comparison}</div>}
   </div>;
 }

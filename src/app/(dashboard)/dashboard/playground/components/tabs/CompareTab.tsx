@@ -409,7 +409,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
             placeholder={t("modelPlaceholderCompare")}
             disabled={atColumnLimit}
             aria-label={t("newColumnModelName")}
-            inputClassName="text-xs"
+            size="xs"
             className="w-40 min-w-0"
           />
           <GuardedAction
@@ -418,7 +418,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
             icon="add"
             onClick={addColumn}
             reason={atColumnLimit ? t("maxColumnsReached", { max: MAX_COLUMNS }) : undefined}
-            className="text-text-muted"
+            tone="muted"
             title={t("addColumn")}
             aria-label={t("addModelColumn")}
           >
@@ -427,7 +427,7 @@ export default function CompareTab({ configState }: CompareTabProps) {
         </div>
 
         {/* Column count indicator */}
-        <span className="ml-auto text-[11px] text-text-muted">
+        <span className="ml-auto text-2xs text-text-muted">
           {t("columnCount", { count: columns.length, max: MAX_COLUMNS })}
         </span>
       </div>

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Field } from "@omniroute/ui-kit/field";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
@@ -413,7 +414,7 @@ function ImageResults({ data }: { data: any }) {
             </a>
             {img.revised_prompt && (
               <p
-                className="text-[11px] text-text-muted px-2 py-1 bg-surface/80 truncate"
+                className="text-2xs text-text-muted px-2 py-1 bg-surface/80 truncate"
                 title={img.revised_prompt}
               >
                 {img.revised_prompt}
@@ -938,7 +939,9 @@ export default function MediaPageClient() {
           <Card padding="md">
             <div className="flex items-center gap-2 mb-4">
               <Icon name={config.icon} size={20} className="text-primary" />
-              <h3 className="text-sm text-text-main">{t("result")}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {t("result")}
+              </h3>
               <span className="text-xs text-text-muted ml-auto">
                 {new Date(result.timestamp).toLocaleTimeString()}
               </span>
@@ -971,7 +974,7 @@ export default function MediaPageClient() {
                       {t("wordTimestamps", { count: result.data.words.length })}
                     </DisclosureTrigger>
                     <DisclosureContent keepMounted>
-                      <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48 custom-scrollbar">
+                      <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48">
                         {JSON.stringify(result.data.words, null, 2)}
                       </pre>
                     </DisclosureContent>
@@ -979,7 +982,7 @@ export default function MediaPageClient() {
                 )}
               </div>
             ) : (
-              <pre className="bg-bg-subtle rounded-lg p-4 text-xs text-text-muted overflow-auto max-h-96 custom-scrollbar">
+              <pre className="bg-bg-subtle rounded-lg p-4 text-xs text-text-muted overflow-auto max-h-96">
                 {JSON.stringify(result.data, null, 2)}
               </pre>
             )}
@@ -1003,9 +1006,9 @@ export default function MediaPageClient() {
               <p className="text-xs text-text-muted">
                 {t("providerCount", { count: providerCount })}
               </p>
-              <code className="block mt-2 break-all text-xs text-text-muted bg-bg-subtle rounded px-2 py-1">
+              <InlineCode className="mt-2 block break-all text-text-muted">
                 POST {cfg.endpoint}
-              </code>
+              </InlineCode>
             </Card>
           );
         })}
