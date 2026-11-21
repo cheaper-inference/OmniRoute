@@ -1,0 +1,1 @@
+- **feat(plugin):** add a `routers` option (default true) that hides routing entries from the published catalog when set to false, without changing direct models or combos ([#20366](https://github.com/cheaper-inference/OmniRoute/pull/20366)) — thanks @maxmad64bis

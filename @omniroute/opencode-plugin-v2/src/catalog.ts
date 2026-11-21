@@ -20,6 +20,7 @@ import {
 } from "./capability-presets.js";
 import { type FreeOptions, INFERRED_FREE_LABEL } from "./shared/free-signals.js";
 import { isInferredFree, warnOnEmptyFreeOverlay } from "./shared/free-signals.js";
+import { isRouterEntryId } from "./shared/router-id.js";
 import {
   isHttpUrl,
   type ApiFormatV2,
@@ -119,6 +120,8 @@ export interface ResolvedOptions extends FreeOptions {
   usableOnly: boolean;
   /** Hide every combo when false (default true keeps combos). */
   combos?: boolean;
+  /** Hide routing entries when false (default true keeps them). */
+  routers?: boolean;
   /**
    * Combo source. Absent or `"api"` keeps the member-verified `/api/combos`
    * pass; `"models"` opts into the `/v1/models` combo rows when no
@@ -930,6 +933,7 @@ export async function collectCatalog(
   // the published combos, so they skip the default-view narrowing exactly
   // like the /api/combos pass never narrows a combo.
   const combosEnabled = opts.combos !== false;
+  const routersEnabled = opts.routers !== false;
   const modelsComboSource = combosEnabled && usesModelsComboSource(opts);
   if (opts.combosSource === "models" && !modelsComboSource) {
     log.debug(
@@ -940,6 +944,7 @@ export async function collectCatalog(
   for (const entry of rawModels) {
     if (!entry.id) continue;
     if (combosEnabled === false && entry.owned_by === "combo") continue;
+    if (routersEnabled === false && !isUserComboRow(entry) && isRouterEntryId(entry.id)) continue;
     if (canonicalDedup.has(entry.id)) continue;
     if (usable && !isUsableRawModelId(entry.id, usable)) continue;
     if (!passesModelAllowlist(entry.id, visibleFilter, hiddenFilter)) continue;
