@@ -1,0 +1,1 @@
+- **fix(providers):** route `opencode-go` and `opencode-zen` models to their per-model published `provider.api` base URLs, honor `providerSpecificData.baseUrl` overrides in `OpencodeExecutor.buildUrl()`, and recognize `https://opencode.ai/inference/go` as the `"go"` surface ([#20881](https://github.com/cheaper-inference/OmniRoute/issues/20881)) — thanks @zerafachris

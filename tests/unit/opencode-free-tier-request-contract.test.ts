@@ -36,6 +36,7 @@ import {
   isPremiumOpencodeModel,
   mergeClientToolsWithObserved,
   noteFreeTierOutcome,
+  opencodeEndpointUrl,
   placeholderToolParameters,
   prepareFreeTierRequest,
   isGatedFreeTierRequest,
@@ -115,8 +116,29 @@ test("with the synced catalog pinned, only its ids count as free", () => {
 test("the surface is told apart by base url, so the `oc` alias needs no special case", () => {
   assert.equal(surfaceFromBaseUrl("https://opencode.ai/zen/v1"), "zen");
   assert.equal(surfaceFromBaseUrl("https://opencode.ai/zen/go/v1"), "go");
+  assert.equal(surfaceFromBaseUrl("https://opencode.ai/inference/go/v1"), "go");
+  assert.equal(surfaceFromBaseUrl("https://opencode.ai/inference/go/openai/v1"), "go");
+  assert.equal(surfaceFromBaseUrl("https://opencode.ai/inference/go/anthropic/v1"), "go");
+  assert.equal(surfaceFromBaseUrl("https://opencode.ai/inference/go/google/v1beta"), "go");
   assert.equal(surfaceFromBaseUrl("https://api.groq.com/openai/v1"), "other");
   assert.equal(surfaceFromBaseUrl(undefined), "other");
+});
+
+test("opencodeEndpointUrl routes Go Gemini requests to the supplied /google/v1beta base", () => {
+  assert.equal(
+    opencodeEndpointUrl(
+      "gemini",
+      "go",
+      "https://opencode.ai/inference/go/google/v1beta",
+      "gemini-3-pro",
+      true
+    ),
+    "https://opencode.ai/inference/go/google/v1beta/models/gemini-3-pro:streamGenerateContent?alt=sse"
+  );
+  assert.equal(
+    opencodeEndpointUrl("gemini", "go", "https://opencode.ai/zen/go/v1", "gemini-3-pro", false),
+    "https://opencode.ai/inference/go/v1/models/gemini-3-pro:generateContent"
+  );
 });
 
 test("chat completions: the contract adds streaming and a placeholder tool, and no tool_choice", () => {

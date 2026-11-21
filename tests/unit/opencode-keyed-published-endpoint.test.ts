@@ -241,6 +241,83 @@ test("flag on: an invalid published api is refused and the registry base stays",
   }
 });
 
+// 5b. Flag on: a per-model `provider.api` overrides the section-level `api` so Anthropic and
+// Gemini models on Go/Zen resolve to their published SDK base instead of the OpenAI base.
+test("flag on: a per-model provider.api overrides the section api and routes to the right endpoint", async () => {
+  process.env[FLAG] = "true";
+  const goAnthropicBase = "https://opencode.ai/inference/go/anthropic/v1";
+  const goGeminiBase = "https://opencode.ai/inference/go/google/v1beta";
+  configurePublishedCatalogForTests({
+    opencode: {
+      id: "opencode",
+      api: PUBLISHED_BASE,
+      models: {
+        [CHAT_MODEL]: { provider: { npm: "@ai-sdk/mistral" } },
+        "claude-opus-4-7": {
+          provider: {
+            npm: "@ai-sdk/anthropic",
+            api: "https://opencode.ai/inference/anthropic/v1",
+          },
+        },
+      },
+    },
+    "opencode-go": {
+      id: "opencode-go",
+      api: PUBLISHED_GO_BASE,
+      models: {
+        "glm-5.1": { provider: { npm: "@ai-sdk/openai-compatible" } },
+        "minimax-m2.7": {
+          provider: { npm: "@ai-sdk/anthropic", api: goAnthropicBase },
+        },
+        "gemini-4-argon": {
+          provider: { npm: "@ai-sdk/google", api: goGeminiBase },
+        },
+        "bad-override": {
+          provider: { npm: "@ai-sdk/anthropic", api: "https://evil.test/v1" },
+        },
+      },
+    },
+  });
+
+  // Model-level `provider.api` takes precedence; without one (or when invalid), section `api` is returned.
+  assert.equal(getPublishedBaseUrl("opencode-go", "minimax-m2.7"), goAnthropicBase);
+  assert.equal(getPublishedBaseUrl("opencode-go", "gemini-4-argon"), goGeminiBase);
+  assert.equal(getPublishedBaseUrl("opencode-go", "glm-5.1"), PUBLISHED_GO_BASE);
+  assert.equal(getPublishedBaseUrl("opencode-go", "bad-override"), PUBLISHED_GO_BASE);
+  assert.equal(getPublishedBaseUrl("opencode-go"), PUBLISHED_GO_BASE);
+  assert.equal(
+    getPublishedBaseUrl("opencode-zen", "claude-opus-4-7"),
+    "https://opencode.ai/inference/anthropic/v1"
+  );
+
+  const goExecutor = new OpencodeExecutor("opencode-go");
+  assert.equal(goExecutor.buildUrl("minimax-m2.7", true), `${goAnthropicBase}/messages`);
+  assert.equal(goExecutor.buildUrl("glm-5.1", true), `${PUBLISHED_GO_BASE}/chat/completions`);
+  assert.equal(
+    goExecutor.buildUrl("gemini-4-argon", true),
+    `${goGeminiBase}/models/gemini-4-argon:streamGenerateContent?alt=sse`
+  );
+  assert.equal(
+    goExecutor.buildUrl("gemini-4-argon", false),
+    `${goGeminiBase}/models/gemini-4-argon:generateContent`
+  );
+
+  // Explicit connection override (`providerSpecificData.baseUrl`) beats both the published
+  // catalog and the registry default, including for Anthropic/Responses/Gemini endpoints.
+  const customGoCreds = {
+    apiKey: "test-key",
+    providerSpecificData: { baseUrl: "https://opencode.ai/inference/go/v1" },
+  };
+  assert.equal(
+    goExecutor.buildUrl("minimax-m2.7", true, undefined, customGoCreds),
+    "https://opencode.ai/inference/go/v1/messages"
+  );
+  assert.equal(
+    goExecutor.buildUrl("glm-5.1", true, undefined, customGoCreds),
+    "https://opencode.ai/inference/go/v1/chat/completions"
+  );
+});
+
 // 6. Flag on: the catalog read goes through the registered proxy-aware transport.
 test("flag on: the catalog read uses the registered transport, not globalThis.fetch", async () => {
   process.env[FLAG] = "true";

@@ -426,7 +426,14 @@ export class OpencodeExecutor extends BaseExecutor {
     if (context) context.session = value;
     else this._sessionFallback = value;
   }
-  private _surface = () => surfaceFromBaseUrl(this.config?.baseUrl);
+  private _surface = (credentials?: ProviderCredentials | null) => {
+    const psdBaseUrl = credentials?.providerSpecificData?.baseUrl;
+    if (typeof psdBaseUrl === "string" && psdBaseUrl.trim()) {
+      const configuredSurface = surfaceFromBaseUrl(psdBaseUrl);
+      if (configuredSurface !== "other") return configuredSurface;
+    }
+    return surfaceFromBaseUrl(this.config?.baseUrl);
+  };
 
   /** Free-tier retry context: the request-scoped contract state the retry helper needs. */
   private freeTierRetryCtx(input: ExecuteInput) {
@@ -1557,15 +1564,22 @@ export class OpencodeExecutor extends BaseExecutor {
     credentials: ProviderCredentials | null = null
   ) {
     void urlIndex;
-    void credentials;
 
-    // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
-    // the inference contract's constant and never consults the catalog.
+    const surface = this._surface(credentials);
+    const psdBaseUrl = credentials?.providerSpecificData?.baseUrl;
+    const customBase =
+      typeof psdBaseUrl === "string" && psdBaseUrl.trim()
+        ? psdBaseUrl.trim().replace(/\/+$/, "")
+        : null;
+
+    // Off, unpublished or invalid: the registered base URL (or operator override).
+    // A gated free-tier request keeps the inference contract's constant and never consults the catalog.
     const base =
-      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
+      Boolean(model) && isGatedFreeTierRequest(surface, this.provider, model)
         ? freeTierDispatchBase()
-        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
-    return opencodeEndpointUrl(this._requestFormat, this._surface(), base, model, stream);
+        : (customBase ?? getPublishedBaseUrl(this.provider, model) ?? this.config.baseUrl);
+    const requestFormat = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
+    return opencodeEndpointUrl(requestFormat, surface, base, model, stream);
   }
 
   /**
