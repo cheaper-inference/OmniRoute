@@ -3,6 +3,20 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const NOAUTH_PROVIDERS = {
+  rosebud: {
+    id: "rosebud",
+    alias: "rosebud",
+    name: "Rosebud AI",
+    icon: "image",
+    color: "#EB4899",
+    textIcon: "RB",
+    website: "https://rosebud.ai",
+    noAuth: false,
+    hasFree: false,
+    serviceKinds: ["image", "video", "music", "tts"],
+    authHint:
+      "Authorize the official Rosebud CLI on this server. Each connection has isolated credentials.",
+  },
   "devin-cli-agentic": {
     id: "devin-cli-agentic",
     alias: "dva",

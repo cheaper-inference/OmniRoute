@@ -20,6 +20,7 @@ import { testSingleConnection } from "../[id]/test/route";
 import { providersBatchTestSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { requireRosebudAccess } from "@/lib/rosebud/authorization";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
@@ -148,6 +149,14 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+
+    const authorizedConnections = [];
+    for (const connection of connectionsToTest) {
+      if (connection.provider === "rosebud" && (await requireRosebudAccess(request, connection.id)))
+        continue;
+      authorizedConnections.push(connection);
+    }
+    connectionsToTest = authorizedConnections;
 
     if (connectionsToTest.length === 0) {
       // Include a summary so consumers gated on `summary` still get feedback
