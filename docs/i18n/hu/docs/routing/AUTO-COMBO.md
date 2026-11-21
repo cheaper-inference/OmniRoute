@@ -493,56 +493,47 @@ A kérések 5%-a (konfigurálható) véletlenszerű szolgáltatókhoz kerül fel
 
 ## API
 
-**Nincs dedikált `POST /api/combos/auto` végpont** — az Auto-Combo kétféleképpen használható:
+Van** nincs dedikált `POST /api/combos/auto` végpont** — Auto-Combo kétféleképpen fogyasztható:
 
-1. **Konfiguráció nélkül (ajánlott):** Küldjön bármilyen csevegésikiegészítés-kérést `model: "auto"` vagy `model: "auto/<variant>"` értékkel. A virtuális gyár kérésenként építi fel a kombót — nincs szükség tartós tárolásra vagy API-hívásokra.
+1. **Zero-config (ajánlott):** Bármilyen csevegés befejezési kérelmét elküldheti `model: "auto"` vagy `model: "auto/<variant>"` segítségével. A virtuális gyár kérésenként állítja össze a kombót — nincs kitartás, nincs szükség API hívásokra.
 
-2. **Tartósan tárolt kombó `strategy: "auto"` beállítással:** Hozzon létre egy normál kombót a `POST /api/combos` használatával, és állítsa be a `strategy: "auto"` értéket, valamint a `config.auto.weights` / `config.auto.candidatePool` beállításokat. Ugyanaz a pontozómotor kerül használatra; a kombó a `combos` tárolóban lesz mentve, és azonosító alapján újra felhasználható.
+2. **Tartós kombó `strategy: "auto"`:** Hozzon létre egy normál kombót `POST /api/combos` keresztül, és állítsa be `strategy: "auto"` plusz `config.auto.weights` / `config.auto.candidatePool`. Ugyanazt a pontozási motort használják; a kombót `combos` fájl tárolja, és ID újrafelhasználhatja.
 
-A felderítéshez a `GET /api/combos/auto` felsorolja az összes változatot a feloldott jelöltkészletével, valamint a `context_length` / `max_output_tokens` értékekkel — ezek a jelöltkészlet ablakai közül vett MAX értékek. A klienseknek (például az opencode beépülő modulnak) ezeket az értékeket kell meghirdetniük `0` helyett: a nulla méretű kontextus teljesen letiltja az opencode automatikus tömörítését, így a munkamenetek addig növekednek, amíg az átjáró előzménytisztítása el nem pusztítja a kontextust. A MAX érték meghirdetése biztonságos, mert az auto-combo kontextus-előszűrője a túlméretes kéréseket nagy ablakkal rendelkező jelöltekhez irányítja.
+A felfedezéshez `GET /api/combos/auto` minden változatot felsorol a feloldott jelöltkészlettel, valamint `context_length` / `max_output_tokens` — a MAX ablakaiban. A klienseknek (pl. az opencode beépülő modulnak) ezeket az értékeket kell hirdetniük `0` helyett: a nulla kontextus teljesen letiltja az opencode automatikus tömörítését, és hagyja, hogy a munkamenetek növekedjenek, amíg az átjáró előzményeinek törlése el nem pusztítja a kontextust. MAX hirdetése biztonságos, mert az automatikus kombinált kontextus-előszűrő a túlméretezett kéréseket a nagy ablakú jelöltekhez irányítja.
 
 ```bash
-# Konfiguráció nélküli használat (kombó létrehozása nélkül)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Tartósan tárolt automatikus kombó a normál kombóvégponton keresztül
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Automatikus útválasztási stratégiák
+### Automatikus útválasztó stratégiák
 
-A tartósan tárolt, `strategy: "auto"` beállítású kombóknál a `config.routerStrategy` (vagy az örökölt
-`config.auto.routerStrategy`) az alábbi értékek egyikére állítható:
+A tartós `strategy: "auto"` kombók beállíthatják `config.routerStrategy` (vagy az örökölt `config.auto.routerStrategy`) a következők egyikére:
 
 - `rules` — alapértelmezett súlyozott pontozás
-- `score` — a legmagasabb konfigurált súlyozott pontszámot választja. Pontosan azonos pontszám esetén megőrzi a konfigurált
-  jelöltsorrendet; a meglévő `explorationRate` a teljes rangsorolt készletből végez mintavételt.
-- `cost` / `eco` — a legolcsóbb kifogástalan állapotú szolgáltató
-- `latency` / `fast` — a legalacsonyabb p95 késleltetés megbízhatósági büntetéssel
-- `sla-aware` / `sla` — előnyben részesíti azokat a jelölteket, amelyek megfelelnek a p95 késleltetési, hibaarány- és opcionális
-  költség-SLO-knak
-- `lkgp` — először a legutóbb ismerten jól működő szolgáltató
-- `nadir` — megkérdezi a [Nadir](https://getnadir.com) döntési API-ját, hogy a készlet melyik modelljére van szüksége az
-  utasításnak; külön engedélyezendő, hiba esetén a `rules` stratégiára tér át
+- `score` — kiválasztja a legmagasabb konfigurált súlyozott pontszámot. A pontos kapcsolatok megőrzik a konfigurált jelöltsorrendet; a meglévő `explorationRate` -mintákat a teljes rangsorolt készletből.
+- `cost` / `eco` — legolcsóbb egészséges szolgáltató
+- `latency` / `fast` — legalacsonyabb p95 késleltetés megbízhatósági büntetéssel
+- `sla-aware` / `sla` — azokat a jelölteket részesíti előnyben, amelyek megfelelnek a p95 késleltetési időnek, hibaaránynak és opcionális SLOs költségnek
+- `lkgp` — utolsó ismert jó szolgáltató első
+- `nadir` — kérdezze meg [Nadir](https://getnadir.com) döntését API hogy a készlet melyik modelljére van szüksége; opt-in, hibaüzenet a `rules`-hez
+- `decision` — kérdezzen meg egy konfigurált döntéshozót (TypeSafe System One, saját döntés URL, vagy a kombinált saját modellek egyike), hogy a készlet melyik modellje felel meg a kérésnek; az alapértelmezett kikapcsolt `COMBO_DECISION_ROUTER_ENABLED` jelző mögött, a fail-open a `rules` re
 
-### Az útválasztási stratégiák részletesen
+### Router stratégiák részletesen
 
-Az auto-combo motor 7 cserélhető **RouterStrategy**-megvalósítást kínál, amelyek között
-a `config.routerStrategy` (vagy az örökölt `config.auto.routerStrategy`) használatával válthat.
-Minden stratégia egy szolgáltatót választ a jelöltkészletből egy `RoutingContext` alapján
-(feladattípus, eszköz-/képi tippek, tokenbecslés, opcionális SLA-szabályzat, opcionális
-legutóbb ismerten jól működő szolgáltató).
+Az automatikus kombinált motor 7 csatlakoztatható**RouterStrategy** implementációk, amelyeket `config.routerStrategy` (vagy az örökölt `config.auto.routerStrategy`) keresztül cserélhet. Minden stratégia kiválaszt egy szolgáltatót a jelöltkészletből, egy `RoutingContext` vel (feladattípus, tool/vision -tippek, tokenbecslés, opcionális SLA házirend, opcionális utolsó ismert-jó szolgáltató).
 
-#### 1. `rules` (alapértelmezett) — 16 tényezős súlyozott pontozás
+#### 1. `rules` (alapértelmezett) — 16 faktoros súlyozott pontozás
 
-A meglévő pontozómotort foglalja egységbe. Kiszűri az `OPEN` állapotú megszakítóval rendelkező
-jelölteket, majd az aktuális feladattípussal és a `getTaskFitness()` használatával futtatja a `scorePool()` függvényt,
-és a legmagasabb pontszámú szolgáltatót választja.
+Becsomagolja a meglévő pontozási motort. Kiszűri `OPEN` megszakítójelölteket, majd futtatja `scorePool()` az aktuális feladattípussal és `getTaskFitness()`, kiválasztva a legjobb pontszámot elérő szolgáltatót.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -562,16 +553,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mikor használja**: Alapértelmezés szerint. Akkor használja, ha az összes jel közötti kiegyensúlyozott kompromisszumra van szüksége.
+**Mikor kell használni** : Alapértelmezett. Akkor használja, ha kiegyensúlyozott kompromisszumot szeretne elérni az összes jel között.
 
-**Álnév**: `rules` (nincs álnév)
+**Álnév** : `rules` (nincs álnév)
 
 ---
 
-#### 2. `cost` / `eco` — a legolcsóbb kifogástalan állapotú szolgáltató
+#### 2. `cost` / `eco` — legolcsóbb egészséges szolgáltató
 
-A jelöltkészletet a `costPer1MTokens` szerint növekvő sorrendbe rendezi, és a legolcsóbbat választja.
-Először kiszűri az `OPEN` állapotú jelölteket.
+A jelöltkészletet `costPer1MTokens` (növekvő) szerint rendezi, és kiválasztja a legolcsóbbat. Először kiszűri `OPEN` jelölteket.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -586,16 +576,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mikor használja**: Költségérzékeny munkaterhelésekhez, kötegelt feldolgozáshoz vagy háttérfeladatokhoz.
+**Mikor kell használni** : Költségérzékeny munkaterhelések, kötegelt feldolgozás vagy háttérfeladatok.
 
-**Álnevek**: `cost`, `eco`
+**Álnevek** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — a legalacsonyabb p95 késleltetés megbízhatósági büntetéssel
+#### 3. `latency` / `fast` — legalacsonyabb p95 késleltetés megbízhatósági büntetéssel
 
-A `p95LatencyMs + (errorRate * 1000)` alapján rendez. A hibaarányra vonatkozó büntetés biztosítja,
-hogy a megbízhatatlan szolgáltatók akkor is alacsonyabb helyre kerüljenek a rangsorban, ha a névleges késleltetésük alacsony.
+Rendezés `p95LatencyMs + (errorRate * 1000)` szerint. A hibaarány-büntetés biztosítja, hogy a megbízhatatlan szolgáltatók még akkor is alacsonyabbak legyenek, ha névleges késleltetésük alacsony.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -612,28 +601,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mikor használja**: Késleltetésérzékeny munkaterhelésekhez, például valós idejű csevegéshez, automatikus kiegészítéshez vagy
-interaktív kódolási asszisztensekhez.
+**Mikor kell használni** : Késésérzékeny munkaterhelések, például valós idejű csevegés, automatikus kiegészítés vagy interaktív kódolási segédek.
 
-**Álnevek**: `latency`, `fast`
+**Álnevek** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — késleltetési/hiba-/költség-SLO-knak való megfelelés
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO megfelelőség
 
-Minden jelöltet aszerint pontoz, hogy mennyire felel meg a konfigurált SLO-szabályzatnak:
+Minden jelöltet aszerint pontoz, hogy mennyire felel meg a konfigurált SLO szabályzatnak:
 
-| Tényező               | Súly | Képlet                                                  |
-| --------------------- | ---- | ------------------------------------------------------- |
-| Késleltetési pontszám | 35%  | `threshold / max(value, ε)`                             |
-| Hibapontszám          | 35%  | `threshold / max(value, ε)`                             |
-| Állapotpontszám       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)       |
-| Költségpontszám       | 10%  | `threshold / max(value, ε)` vagy fordított normalizálás |
-| Stabilitási pontszám  | 5%   | a késleltetés szórásának fordított normalizálása        |
+| Tényező                 | Súly | Képlet                                              |
+| ----------------------- | ---- | --------------------------------------------------- |
+| A késleltetési pontszám | 35%  | `threshold / max(value, ε)`                         |
+| Hibapontszám            | 35%  | `threshold / max(value, ε)`                         |
+| Egészségügyi pontszám   | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)   |
+| Költségpontszám         | 10%  | `threshold / max(value, ε)` vagy inverz normalizált |
+| Stabilitási pontszám    | 5%   | inverz normalizált késleltetés stddev               |
 
-Ha a `hardConstraints: true`, a jelöltek rendezése elsődlegesen a **sértési pontszám**
-(azaz hogy mennyivel lépik túl valamelyik SLO-t), majd az összesített pontszám alapján történik. Ellenkező esetben
-csak az összesített pontszám számít.
+Amikor `hardConstraints: true`, a jelöltek elsősorban a szerint vannak rendezve** szabálysértési pontszám** (mennyivel haladják meg bármelyik SLO), majd összetett pontszám alapján. Ellenkező esetben ez csak az összetett pontszám.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -642,12 +628,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... minden jelöltet pontoz a szabályzat alapján: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA-mezők** (a kombinált konfigurációban állíthatók be):
+**SLA mezők** (beállítva a kombinált konfigurációban):
 
 ```json
 {
@@ -662,17 +648,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mikor érdemes használni**: Szigorú késleltetési, hibaarány- vagy költségkerettel rendelkező éles munkaterhelésekhez.
+**Mikor kell használni** : Gyártási munkaterhelések szigorú késleltetési, hibaarány- vagy költségkeretekkel.
 
-**Álnevek**: `sla-aware`, `sla`
+**Álnevek** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — az utolsó ismert jó szolgáltató először
+#### 5. `lkgp` — utolsó ismert jó szolgáltató először
 
-Először az **utolsó ismert jó szolgáltatót** próbálja ki (ha be van állítva), majd visszatér a
-`rules` stratégiára. Hasznos a munkamenet-rögzítéshez — ugyanaz a szolgáltató kezeli
-a beszélgetés további kéréseit.
+Kipróbálja a** utolsó ismert jó szolgáltató** (ha be van állítva) először, majd visszatér a `rules` stratégiához. Hasznos a munkamenet ragadóssága esetén — ugyanaz a szolgáltató kezeli a nyomon követési kéréseket egy beszélgetésben.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -693,27 +677,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Visszatérés a rules stratégiára
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Mikor érdemes használni**: Többfordulós beszélgetéseknél, ahol azt szeretné, hogy ugyanaz a szolgáltató kezelje
-a további kéréseket (például gyorsítótárazás, kontextusfolytonosság vagy egységes árazás érdekében).
+**Mikor kell használni** : Többfordulós beszélgetések, ahol azt szeretné, hogy ugyanaz a szolgáltató kezelje a nyomon követési kéréseket (pl. gyorsítótárazás, kontextus folytonossága vagy árkonzisztencia).
 
-**Álnév**: `lkgp` (nincs álnév)
+**Álnév** : `lkgp` (nincs álnév)
 
 ---
 
-#### 6. `nadir` — prompttudatos modellválasztás a Nadir segítségével
+#### 6. `nadir` — azonnali modellválasztás Nadiron keresztül
 
-A fenti stratégiák mindegyike a saját telemetriai adatai alapján rangsorolja a jelölteket; egyik sem olvassa
-a kérést. A `nadir` elküldi az utolsó felhasználói fordulót és a készlet modellazonosítóit a
-[Nadir](https://getnadir.com) döntési API-jának (`POST /v1/bucket`), majd a Nadir által
-a kínálatból kiválasztott modellhez irányít (`simple` → a legolcsóbb megfelelő modell, `complex` → a
-csúcskategóriás modell). Az adott modellt kiszolgáló kapcsolatot továbbra is a `rules` választja ki, így a kvóta,
-az állapot és a költség továbbra is meghatározza, hogy melyik fiókot használja.
+Minden fenti stratégia saját telemetria alapján rangsorolja a jelölteket; egyikük sem olvassa el a kérést. `nadir` elküldi az utolsó felhasználói kört és a készlet modellazonosítóit [Nadir](https://getnadir.com) döntésének API (`POST /v1/bucket`), és a Nadir által a menüből kiválasztott modellhez irányít (`simple` → a legolcsóbb képes modell, `complex` → a határvonal). Az ezt a modellt kiszolgáló kapcsolatot továbbra is a `rules` választja ki, így a kvóta, az állapot és a költségek továbbra is döntik el, hogy melyik fiókot.
 
 ```json
 {
@@ -729,34 +707,75 @@ az állapot és a költség továbbra is meghatározza, hogy melyik fiókot hasz
 }
 ```
 
-Az `OMNIROUTE_NADIR_API_KEY` és az `OMNIROUTE_NADIR_BASE_URL` környezeti tartalékérték a két
-karakterlánchoz. A `baseUrl` csak saját üzemeltetésű Nadir esetén szükséges (a rendszer elfogadja a záró `/v1` részt).
-A kulcs nélküli hívások a Nadir anonim csomagjába kerülnek, amely IP-címenkénti sebességkorlátozást alkalmaz. Kulccsal
-([hozzon létre egyet](https://app.getnadir.com/dashboard/api-keys)) minden döntés
-naplózásra kerül a Nadir irányítópultján. Teljes beállítási és ellenőrzési útmutató:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` és `OMNIROUTE_NADIR_BASE_URL` a két karakterlánc env tartalékai. `baseUrl` csak egy önálló Nadir esetén szükséges (a `/v1` utólagos eltűrése megengedett). A kulcsnélküli hívások Nadir névtelen szintjén landolnak, ami IP-enként korlátozott. Egy kulccsal ( [hozzon létre egyet](https://app.getnadir.com/dashboard/api-keys) ) minden döntés naplózásra kerül a Nadir irányítópultján. Teljes beállítás és ellenőrzés: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-A rendszert a következő adatok hagyják el: az utolsó felhasználói üzenet szövege (az első 16 ezer karakter), a jelölt
-modellek azonosítói és egy `source: "omniroute"` csatornacímke. A rendszerprompt, az előzmények, az eszközök és a
-fejlécek nem kerülnek továbbításra.
+Ami a dobozból marad: az utolsó felhasználói üzenet szövege (első 16 000 karakter), a jelölt modellazonosítók és egy `source: "omniroute"` csatornacímke. Nincsenek rendszerkérdések, előzmények, eszközök vagy fejlécek.
 
-Hiba esetén a működés nyitott módon folytatódik: időtúllépés (alapértelmezés szerint 2000 ms), nem 2xx válasz, elérhetetlen
-gazdagép, hibás formátumú válasz vagy a készleten kívüli választás esetén a rendszer a `rules`
-döntését használja, és az indoklás a `NadirStrategy: fallback (…)` előtagot kapja. Egy sikertelen hívás után a
-stratégia 30 másodpercig kihagyja a hálózati hozzáférést, így egy kiesés 30 másodpercenként egy időtúllépéssel jár,
-nem pedig kérésenként eggyel. Az útválasztási események csak akkor jelentenek `strategy: "nadir"` értéket, ha valóban
-a Nadir hozta meg a döntést.
+A meghibásodási viselkedés sikertelen: az időtúllépés (alapértelmezett 2000 ms), a non-2xx, egy elérhetetlen gazdagép, egy rosszul formázott válasz vagy a készleten kívüli kijelölés a `rules` döntést oldja meg, és az ok előtagja `NadirStrategy: fallback (…)`. Sikertelen hívás után a stratégia 30 másodpercig kihagyja a hálózatot, így a kimaradás 30 másodpercenként egy időtúllépésbe kerül, nem pedig kérésenként. Az útválasztási események csak akkor jelentenek `strategy: "nadir"`, amikor Nadir ténylegesen választott.
 
-**Mikor érdemes használni**: Vegyes nehézségű forgalomhoz olyan készleten, amely több modellszintet fog át (egy kisebb, egy középkategóriás
-és egy csúcskategóriás modellt), ha csökkenteni szeretné a csúcskategóriás modell állandó használatából eredő költséget.
+**Mikor kell használni** : vegyes nehézségű forgalom egy modellszinteken átívelő medencén (egy kicsi, egy közepes és egy határmodell), ahol a mindig határon túli költség a csökkenteni kívánt költség.
 
-**Álnév**: `nadir` (nincs álnév)
+**Álnév** : `nadir` (nincs álnév)
 
 ---
 
-### Egyéni útválasztási stratégiák
+#### 7. `decision` — csatlakoztatható döntéshozó kiválasztja a modellt
 
-A nyilvános API-n keresztül saját `RouterStrategy`-megvalósítást regisztrálhat:
+`decision` kérdi a** döntõ** a készlet melyik modellje felel meg a kérésnek, majd leszűkíti a készletet arra a modellre, és hagyja, hogy `rules` válassza ki a kapcsolatot (a kvóta, az állapot és a költség továbbra is kiválasztja a fiókot). A döntést a kombináció — `config.decision` döntési blokkjában állítjuk be, amikor az útválasztó gombjai `config` (amit a műszerfal ír) tetején, vagy `config.auto.decision` `config.auto.routerStrategy` mellett:
+
+| `decider`     | Aki válaszol                                                                                                                | Igények                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), alapértelmezett `jev-latest` modell                      | egy `typesafe` kapcsolat vagy az env kulcs  |
+| `http`        | a saját döntésed a `baseUrl` nál: `wire: "systemone"` (`{baseUrl}/v1/systemone`) vagy `"openai-chat"` (csevegés befejezése) | `baseUrl` + `model`; kulcs választható      |
+| `combo-model` | az egyik szolgáltatói modell, amelyet folyamatban hívnak, mint a fúziós bíró                                                | `model` mint `provider/model` (nincs kombó) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Mezők (szigorú séma ellenőrzi mentéskor és kéréskor újra):
+
+- `decider` — `systemone`, `http` vagy `combo-model`.
+- `model` — TypeSafe modell, a URL döntési modellje vagy egy kombinált modellhívás `provider/model` (legfeljebb 200 karakter).
+- `baseUrl` — csak `http` : legfeljebb 500 karakter hosszúságú `http(s)` URL, hitelesítő adatok, lekérdezés vagy töredék nélkül. Az erre a OmniRoute -re mutató URL (loopback + `PORT`) elutasítva.
+- `wire` — csak `http` : `systemone` (alapértelmezett) vagy `openai-chat`.
+- `connectionId` — a tárolt kapcsolat, amelynek kulcsát használjuk (csak a hívó API billentyű engedélyezett kapcsolatain belül). Enélkül `systemone` beolvassa a `typesafe` kapcsolatot, és minden hálózati döntéshozó visszaesik `OMNIROUTE_DECISION_API_KEY`-re. Nincs `apiKey` mező: a kulcs soha nem tárolódik kombóban.
+- `timeoutMs` — integer, 100–5000, alapértelmezett 2000.
+- `minConfidence` — 0–1; az alacsonyabb megbízhatóságú válasz `rules` esik vissza (az a döntés, amelyik nem megbízható, 0-nak számít).
+- `descriptions` — legfeljebb 50 bejegyzés (legfeljebb 300 kulcs, szöveg legfeljebb 1000 karakter), modellazonosítóval vagy `provider/model`-vel; Az unset bejegyzések generált költségrangsor leírást kapnak.
+
+**Zászló.** `COMBO_DECISION_ROUTER_ENABLED` (alapértelmezett `false`) minden döntéshozó kaput biztosít. Amíg ki van kapcsolva, a `decision` kombó nem olvas hitelesítő adatokat, nem kezdeményez hívást és `rules` vel irányít; a naplóban az áll, hogy `fallback (disabled)`. Egy tárolt kulcs önmagában soha nem kapcsolja be. A döntési blokk nélküli kombinációkat ez egyáltalán nem érinti.
+
+**Mi hagyja el a dobozt.** Csak az utolsó felhasználói üzenet szövege (legfeljebb 8000 karakter; chat/Claude `messages` vagy Responses `input`) és a modellazonosítók menüje a leírásukkal együtt. Soha nem a rendszer kéri, válaszok `instructions`, eszközök, előzmények, fejlécek vagy fiókadatok. A hálózati hívások a szolgáltató kimenő védőjén keresztül mennek át, nincs újrapróbálkozás, nincs átirányítás és 64 KB válaszkorlát. A `combo-model` hívás nem streaming, eszközmentes, `temperature: 0`, 256 token költségvetéssel; a döntési felhíváson belül megkezdett döntést elutasítják.
+
+**Sikertelen viselkedés** hibamentes: minden hiba a `rules` döntésre oldódik fel, az ok pedig `decision(<decider>): fallback (<reason>)`, `<reason>` esetén pedig `network_error` `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `recursion`, `low_confidence` vagy `single_option` `no_user_text` Időtúllépés, HTTP hiba vagy hálózati hiba után a végpont 30 másodpercig kihagyásra kerül. A sikeres választás `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` olvas. Nem éri el a naplót URL, kulcs, prompt vagy upstream test.
+
+A kombinált építő megjeleníti ezeket a mezőket, ha az útválasztó stratégia `decision`, a generált leírásokkal helyőrzőként és** Teszt döntés** gomb, amely egyszer meghívja `POST /api/combos/decision-preview` a nem mentett beállításokkal (ugyanaz a jelző).
+
+**Mikor kell használni** : vegyes nehézségű forgalom, ahol azt szeretné, hogy a szintet kérésenként az Ön által választott osztályozó határozza meg, nem pedig kifejezetten Nadir.
+
+**Álnév** : `decision` (nincs álnév)
+
+---
+
+### Egyedi útválasztó stratégiák
+
+Regisztrálhatja saját `RouterStrategy` implementációját a nyilvános API keresztül:
 
 ```ts
 import {
@@ -769,7 +788,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Ide kerül az egyéni útválasztási logika
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -784,7 +803,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Ezután használja a következőképpen:
+Akkor használd:
 
 ```json
 {
@@ -797,16 +816,17 @@ Ezután használja a következőképpen:
 
 ---
 
-### Útmutató az útválasztási stratégia kiválasztásához
+### Útválasztó stratégia kiválasztásának útmutatója
 
-| Használati eset            | Stratégia   | Indoklás                                          |
-| -------------------------- | ----------- | ------------------------------------------------- |
-| Kiegyensúlyozott terhelés  | `rules`     | Alapértelmezett — minden tényezőt figyelembe vesz |
-| Költség minimalizálása     | `cost`      | Mindig a legolcsóbbat választja                   |
-| Késleltetés minimalizálása | `latency`   | A leggyorsabb megbízható szolgáltatót választja   |
-| Szigorú SLO-k              | `sla-aware` | A p95-/hiba-/költségküszöbök alapján szűr         |
-| Többfordulós csevegés      | `lkgp`      | Munkamenethez kötöttség                           |
-| Vegyes nehézség            | `nadir`     | Kérésenként választja ki a modell szintjét        |
+| Használati eset                | Stratégia   | Ok                                                   |
+| ------------------------------ | ----------- | ---------------------------------------------------- |
+| Kiegyensúlyozott munkaterhelés | `rules`     | Az alapértelmezett — minden tényezőt figyelembe vesz |
+| Minimalizálja a költségeket    | `cost`      | Mindig a legolcsóbbat választja                      |
+| Minimalizálja a késleltetést   | `latency`   | A leggyorsabb megbízható szolgáltatót választja      |
+| Szigorú SLOs                   | `sla-aware` | Szűrések p95/error/cost küszöbértékek szerint        |
+| Többfordulós csevegés          | `lkgp`      | A munkamenet ragadóssága                             |
+| Vegyes nehézségű               | `nadir`     | Promptenként kiválasztja a modellszintet             |
+| Saját osztályozó               | `decision`  | A modellt a döntéshozó választja ki                  |
 
 SLA-tudatos mezők:
 

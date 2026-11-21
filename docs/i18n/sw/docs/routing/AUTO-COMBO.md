@@ -466,56 +466,47 @@ Hii inamaanisha kuwa **kuongeza mtoa huduma mpya ambaye `auto/*` imewezeshwa hup
 
 ## API
 
-**Hakuna endpoint maalum ya `POST /api/combos/auto`** — Auto-Combo hutumiwa kwa njia mbili:
+Kuna** hakuna mwisho wa `POST /api/combos/auto` uliojitolea** — Auto-Combo inatumiwa kwa njia mbili:
 
-1. **Usanidi-sifuri (inapendekezwa):** Tuma ombi lolote la ukamilishaji wa gumzo lenye `model: "auto"` au `model: "auto/<variant>"`. Kiwanda pepe huunda combo kwa kila ombi — hakuna uhifadhi wa kudumu wala miito ya API inayohitajika.
+1. **Zero-config (inapendekezwa):** Tuma ombi lolote la kukamilisha gumzo na `model: "auto"` au `model: "auto/<variant>"`. Kiwanda cha mtandaoni huunda mchanganyiko kwa kila ombi — hakuna kuendelea, hakuna simu za API zinazohitajika.
 
-2. **Combo iliyohifadhiwa yenye `strategy: "auto"`:** Unda combo ya kawaida kupitia `POST /api/combos` na uweke `strategy: "auto"` pamoja na `config.auto.weights` / `config.auto.candidatePool`. Injini ileile ya uwekaji alama hutumiwa; combo huhifadhiwa katika `combos` na inaweza kutumiwa tena kwa ID.
+2. **Mchanganyiko unaoendelea na `strategy: "auto"`:** Unda mchanganyiko wa kawaida kupitia `POST /api/combos` na uweke `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Injini sawa ya bao hutumiwa; combo imehifadhiwa `combos` na inaweza kutumika tena na ID.
 
-Kwa ajili ya ugunduzi, `GET /api/combos/auto` huorodhesha kila lahaja pamoja na mkusanyiko wake wa wagombea uliotatuliwa na `context_length` / `max_output_tokens` — thamani ya MAX katika madirisha ya mkusanyiko wa wagombea. Wateja (k.m. programu-jalizi ya opencode) lazima watangaze thamani hizi badala ya `0`: muktadha wa sifuri huzima kabisa ubanaji otomatiki wa opencode, na kuruhusu vipindi kukua hadi usafishaji wa historia wa gateway unapoharibu muktadha. Ni salama kutangaza MAX kwa sababu kichujio cha awali cha muktadha wa auto-combo huelekeza maombi makubwa kupita kiasi kwa wagombea wenye madirisha makubwa.
+Kwa ugunduzi, `GET /api/combos/auto` huorodhesha kila lahaja na kundi lake la mgombea lililotatuliwa pamoja na `context_length` / `max_output_tokens` — MAX kwenye madirisha ya bwawa la wagombea. Wateja (km programu-jalizi ya opencode) lazima watangaze thamani hizi badala ya `0`: muktadha sifuri huzima uwekaji kiotomatiki wa opencode kabisa, kuruhusu vipindi kukua hadi usafishaji wa historia ya lango uharibu muktadha. MAX ni salama kutangaza kwa sababu kichujio cha awali cha muktadha wa muktadha wa kiotomatiki huelekeza maombi makubwa kwa waombaji wa dirisha kubwa.
 
 ```bash
-# Matumizi ya usanidi-sifuri (bila kuunda combo)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo otomatiki iliyohifadhiwa kupitia endpoint ya kawaida ya combos
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Mikakati ya router otomatiki
+### Mikakati ya kipanga njia kiotomatiki
 
-Combo zilizohifadhiwa zenye `strategy: "auto"` zinaweza kuweka `config.routerStrategy` (au ya zamani
-`config.auto.routerStrategy`) kuwa mojawapo ya:
+Mchanganyiko wa `strategy: "auto"` unaoendelea unaweza kuweka `config.routerStrategy` (au legacy `config.auto.routerStrategy`) kwa mojawapo ya:
 
-- `rules` — uwekaji alama chaguomsingi wenye uzani
-- `score` — huchagua alama ya juu zaidi iliyosanidiwa yenye uzani. Sare kamili huhifadhi mpangilio wa
-  wagombea uliosanidiwa; `explorationRate` iliyopo huchukua sampuli kutoka kwenye mkusanyiko wote uliopangwa kwa nafasi.
-- `cost` / `eco` — mtoa huduma mwenye afya aliye wa bei nafuu zaidi
-- `latency` / `fast` — muda wa kusubiri wa chini zaidi wa p95 wenye adhabu ya kutegemeka
-- `sla-aware` / `sla` — hupendelea wagombea wanaokidhi muda wa kusubiri wa p95, kiwango cha hitilafu, na
-  SLO za gharama za hiari
-- `lkgp` — mtoa huduma wa mwisho anayejulikana kuwa mzuri kwanza
-- `nadir` — huuliza API ya maamuzi ya [Nadir](https://getnadir.com) ni modeli ipi katika mkusanyiko ambayo
-  kidokezo kinahitaji; ni ya kuchagua kujiunga, na ikishindwa hurudi kwenye `rules`
+- `rules` — chaguo-msingi la uzani wa bao
+- `score` — huchagua alama ya juu zaidi yenye uzani iliyosanidiwa. Uhusiano kamili huhifadhi mpangilio wa mgombea aliyesanidiwa; sampuli zilizopo `explorationRate` kutoka kwa bwawa lililoorodheshwa kamili.
+- `cost` / `eco` — mtoa huduma wa afya nafuu zaidi
+- `latency` / `fast` — muda wa chini zaidi wa p95 wenye adhabu ya kuaminika
+- `sla-aware` / `sla` — wanapendelea watahiniwa wanaokidhi muda wa kusubiri wa p95, kiwango cha makosa, na gharama ya hiari SLOs
+- `lkgp` — mtoa huduma mzuri wa mwisho anayejulikana kwanza
+- `nadir` — uliza uamuzi wa [Nadir](https://getnadir.com) API ni kielelezo gani kwenye bwawa ambacho kinahitaji papo hapo; chagua kuingia, fungua-fungua kwa `rules`
+- `decision` — uliza kiamua kilichosanidiwa (TypeSafe System One, uamuzi wako mwenyewe URL, au mojawapo ya vielelezo vya kuchana) ni kielelezo gani kwenye dimbwi kinachofaa ombi; nyuma ya bendera `COMBO_DECISION_ROUTER_ENABLED` chaguo-msingi, kushindwa-kufungua kwa `rules`
 
 ### Mikakati ya router kwa undani
 
-Injini ya auto-combo hutoa utekelezaji 7 unaoweza kuunganishwa wa **RouterStrategy** ambao
-unaweza kubadilishana kupitia `config.routerStrategy` (au `config.auto.routerStrategy` ya zamani).
-Kila mkakati huchagua mtoa huduma mmoja kutoka kwenye mkusanyiko wa wagombea, kwa kuzingatia `RoutingContext`
-(aina ya jukumu, vidokezo vya zana/maono, makadirio ya tokeni, sera ya SLA ya hiari, mtoa huduma
-wa mwisho anayejulikana kuwa mzuri wa hiari).
+Injini ya kuchana kiotomatiki inafichua 7 zinazoweza kuzibika**RouterStrategy** utekelezaji ambao unaweza kubadilishana kupitia `config.routerStrategy` (au urithi `config.auto.routerStrategy`). Kila mkakati huchagua mtoaji mmoja kutoka kwa kundi la wateule, kutokana na `RoutingContext` (aina ya kazi, vidokezo vya tool/vision, makadirio ya tokeni, sera ya SLA ya hiari, mtoa huduma bora wa mwisho anayejulikana kwa hiari).
 
-#### 1. `rules` (chaguomsingi) — uwekaji alama wenye uzani wa vipengele 16
+#### 1. `rules` (chaguo-msingi) — mabao yenye uzani wa vipengele 16
 
-Hufunika injini iliyopo ya uwekaji alama. Huchuja wagombea wa circuit-breaker wenye hali ya `OPEN`,
-kisha huendesha `scorePool()` kwa aina ya sasa ya jukumu na `getTaskFitness()`,
-na kuchagua mtoa huduma mwenye alama za juu zaidi.
+Hufunga injini ya bao iliyopo. Huchuja wagombeaji wa kivunja mzunguko wa `OPEN`, kisha kuendesha `scorePool()` na aina ya kazi ya sasa na `getTaskFitness()`, ikichagua mtoaji aliye na alama za juu.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -535,16 +526,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wakati wa kutumia**: Chaguomsingi. Tumia unapotaka uwiano uliosawazishwa kati ya ishara zote.
+**Wakati wa kutumia** : Chaguomsingi. Tumia unapotaka biashara iliyosawazishwa kwenye mawimbi yote.
 
-**Jina mbadala**: `rules` (hakuna jina mbadala)
+**Lakabu** : `rules` (hakuna lakabu)
 
 ---
 
-#### 2. `cost` / `eco` — mtoa huduma mwenye afya aliye wa bei nafuu zaidi
+#### 2. `cost` / `eco` — mtoa huduma wa afya nafuu zaidi
 
-Hupanga mkusanyiko wa wagombea kwa `costPer1MTokens` (kwa mpangilio wa kupanda) na kuchagua aliye wa bei nafuu zaidi.
-Huchuja kwanza wagombea wenye hali ya `OPEN`.
+Hupanga kundi la wagombea kwa `costPer1MTokens` (hupanda) na huchagua bei nafuu zaidi. Huchuja wagombea wa `OPEN` kwanza.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -559,16 +549,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wakati wa kutumia**: Mizigo ya kazi inayozingatia gharama, uchakataji wa kundi, au kazi za chinichini.
+**Wakati wa kutumia** : Uzito wa kazi unaozingatia gharama, usindikaji wa bechi, au kazi za chinichini.
 
-**Majina mbadala**: `cost`, `eco`
+**Majina ya utani** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — muda wa kusubiri wa chini zaidi wa p95 wenye adhabu ya kutegemeka
+#### 3. `latency` / `fast` — muda wa chini zaidi wa p95 na adhabu ya kutegemewa
 
-Hupanga kwa `p95LatencyMs + (errorRate * 1000)`. Adhabu ya kiwango cha hitilafu huhakikisha
-watoa huduma wasiotegemeka wanawekwa nafasi ya chini hata kama muda wao wa kawaida wa kusubiri ni mdogo.
+Inapangwa kulingana na `p95LatencyMs + (errorRate * 1000)`. Adhabu ya kiwango cha makosa huhakikisha watoa huduma wasioaminika wameorodheshwa chini hata kama muda wao wa kusubiri ni mdogo.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -585,28 +574,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wakati wa kutumia**: Mizigo ya kazi inayozingatia muda wa kusubiri kama vile gumzo la wakati halisi, ukamilishaji otomatiki, au
-visaidizi shirikishi vya uandishi wa msimbo.
+**Wakati wa kutumia** : Mzigo wa kazi unaozingatia muda wa kusubiri kama vile gumzo la wakati halisi, kukamilisha kiotomatiki au visaidia shirikishi vya usimbaji.
 
-**Majina mbadala**: `latency`, `fast`
+**Majina ya utani** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — utiifu wa SLO wa muda wa kusubiri/hitilafu/gharama
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO kufuata
 
-Huweka alama kwa kila mgombea kulingana na jinsi anavyokidhi sera ya SLO iliyosanidiwa:
+Humpa kila mgombeaji kwa jinsi inavyokidhi sera SLO iliyosanidiwa:
 
-| Kipengele                 | Uzito | Fomula                                                         |
-| ------------------------- | ----- | -------------------------------------------------------------- |
-| Alama ya muda wa kusubiri | 35%   | `threshold / max(value, ε)`                                    |
-| Alama ya hitilafu         | 35%   | `threshold / max(value, ε)`                                    |
-| Alama ya afya             | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)              |
-| Alama ya gharama          | 10%   | `threshold / max(value, ε)` au thamani iliyosawazishwa kinyume |
-| Alama ya uthabiti         | 5%    | mkengeuko sanifu wa muda wa kusubiri uliosawazishwa kinyume    |
+| Sababu            | Uzito | Mfumo                                             |
+| ----------------- | ----- | ------------------------------------------------- |
+| Alama ya kusubiri | 35%   | `threshold / max(value, ε)`                       |
+| Alama ya makosa   | 35%   | `threshold / max(value, ε)`                       |
+| Alama ya afya     | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
+| Alama ya gharama  | 10%   | `threshold / max(value, ε)` au kinyume na kawaida |
+| Alama ya utulivu  | 5%    | inverse normalized latency stddev                 |
 
-Wakati `hardConstraints: true`, wagombea hupangwa kimsingi kwa **alama ya ukiukaji**
-(kiasi ambacho wanazidi SLO yoyote), kisha kwa alama ya jumla. Vinginevyo, hutumika
-alama ya jumla pekee.
+Wakati `hardConstraints: true`, watahiniwa hupangwa kimsingi kwa** alama ya ukiukaji** (zinazidi umbali gani SLO yoyote), kisha kwa alama za mchanganyiko. Vinginevyo ni alama ya mchanganyiko tu.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -615,12 +601,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... hupatia kila mgombea alama dhidi ya sera: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Sehemu za SLA** (huwekwa kwenye usanidi wa mchanganyiko):
+**mashamba SLA** (weka kwenye usanidi wa combo):
 
 ```json
 {
@@ -635,17 +621,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wakati wa kutumia**: Mizigo ya kazi ya uzalishaji yenye masharti makali ya muda wa kusubiri, kiwango cha hitilafu, au bajeti za gharama.
+**Wakati wa kutumia** : Mizigo ya kazi ya uzalishaji iliyo na ucheleweshaji mkali, kiwango cha makosa, au bajeti ya gharama.
 
-**Lakabu**: `sla-aware`, `sla`
+**Majina ya utani** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — mtoa huduma mzuri anayejulikana wa mwisho kwanza
+#### 5. `lkgp` — mwisho kujulikana mtoa huduma mzuri kwanza
 
-Hujaribu **mtoa huduma mzuri anayejulikana wa mwisho** (ikiwa amewekwa) kwanza, kisha hutumia
-mkakati wa `rules` kama mbadala. Hii ni muhimu kwa udumishaji wa kipindi — mtoa huduma yuleyule hushughulikia
-maombi ya ufuatiliaji katika mazungumzo.
+Inajaribu** mtoa huduma mzuri wa mwisho anayejulikana** (ikiwa imewekwa) kwanza, kisha inarudi kwenye mkakati `rules`. Inafaa kwa kunata kwa kipindi — mtoaji huyo huyo hushughulikia maombi ya ufuatiliaji katika mazungumzo.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -666,27 +650,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Tumia mkakati wa rules kama mbadala
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Wakati wa kutumia**: Mazungumzo yenye awamu nyingi ambapo unataka mtoa huduma yuleyule ashughulikie
-maombi ya ufuatiliaji (kwa mfano, kwa uhifadhi wa akiba, mwendelezo wa muktadha, au uthabiti wa bei).
+**Wakati wa kutumia** : Mazungumzo ya pande nyingi ambapo unataka mtoa huduma sawa kushughulikia maombi ya ufuatiliaji (km, kwa akiba, mwendelezo wa muktadha, au uwiano wa bei).
 
-**Lakabu**: `lkgp` (haina lakabu)
+**Lakabu** : `lkgp` (hakuna lakabu)
 
 ---
 
-#### 6. `nadir` — uchaguzi wa modeli unaozingatia kidokezo kupitia Nadir
+#### 6. `nadir` — chaguo la modeli la kufahamu haraka kupitia Nadir
 
-Kila mkakati hapo juu hupanga wagombea kwa telemetria yake wenyewe; hakuna unaosoma
-ombi. `nadir` hutuma zamu ya mwisho ya mtumiaji pamoja na vitambulisho vya modeli vya kundi kwa
-API ya maamuzi ya [Nadir](https://getnadir.com) (`POST /v1/bucket`) na kuelekeza kwenye modeli
-ambayo Nadir huchagua kutoka kwenye menyu hiyo (`simple` → modeli ya bei nafuu zaidi yenye uwezo, `complex` → modeli
-ya kiwango cha juu). Muunganisho unaohudumia modeli hiyo bado huchaguliwa na `rules`, kwa hivyo kiwango,
-afya na gharama huendelea kuamua akaunti ipi itumike.
+Kila mkakati hapo juu unaweka watahiniwa kulingana na telemetry yao wenyewe; hakuna hata mmoja wao anayesoma ombi hilo. `nadir` hutuma zamu ya mwisho ya mtumiaji pamoja na vitambulisho vya kielelezo cha bwawa kwa uamuzi wa [Nadir](https://getnadir.com) API (`POST /v1/bucket`) na njia hadi kwa kielelezo Nadir anachagua kutoka kwenye menyu hiyo (`simple` → kielelezo cha bei nafuu zaidi, `complex` → cha mpaka). Muunganisho unaotumika kwa mtindo huo bado unachaguliwa na `rules`, kwa hivyo kiasi, afya na gharama huendelea kuamua ni akaunti gani.
 
 ```json
 {
@@ -702,34 +680,75 @@ afya na gharama huendelea kuamua akaunti ipi itumike.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` na `OMNIROUTE_NADIR_BASE_URL` ni chaguo mbadala za mazingira kwa mifuatano hiyo miwili.
-`baseUrl` inahitajika tu kwa Nadir inayopangishwa binafsi (`/v1` ya mwisho inakubalika).
-Miito isiyo na ufunguo huwekwa kwenye kiwango cha Nadir cha watumiaji wasiojulikana, ambacho kina kikomo cha kasi kwa kila IP. Ukiwa na ufunguo
-([unda mmoja](https://app.getnadir.com/dashboard/api-keys)), kila uamuzi
-hurekodiwa kwenye dashibodi yako ya Nadir. Usanidi kamili na uthibitishaji:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` na `OMNIROUTE_NADIR_BASE_URL` ni vianzio vya env kwa mifuatano miwili. `baseUrl` inahitajika tu kwa Nadir anayejipangisha mwenyewe ( `/v1` inayofuata inavumiliwa). Keyless inapiga simu kwenye kiwango cha Nadir kisichojulikana, ambacho ni kikomo cha bei kwa kila IP. Kwa ufunguo ( [tengeneza moja](https://app.getnadir.com/dashboard/api-keys) ), kila uamuzi utawekwa kwenye dashibodi yako ya Nadir. Usanidi kamili na uthibitishaji: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Kinachoondoka kwenye mfumo: maandishi ya ujumbe wa mwisho wa mtumiaji (herufi 16k za kwanza), vitambulisho vya modeli
-za wagombea na lebo ya kituo ya `source: "omniroute"`. Hakuna kidokezo cha mfumo, historia, zana au
-vichwa.
+Kinachoondoka kwenye kisanduku: maandishi ya mwisho ya ujumbe wa mtumiaji (herufi 16k za kwanza), vitambulisho vya kielelezo cha mgombea na lebo ya kituo cha `source: "omniroute"`. Hakuna haraka ya mfumo, historia, zana au vichwa.
 
-Tabia wakati wa hitilafu ni kuendelea kufanya kazi: kuisha kwa muda (chaguo-msingi ni ms 2000), jibu lisilo la 2xx, seva pangishi
-isiyofikika, jibu lenye muundo usio sahihi au chaguo ambalo halipo kwenye kundi hutatuliwa kwa uamuzi wa `rules`
-na sababu hutangulizwa na `NadirStrategy: fallback (…)`. Baada ya mwito uliofeli,
-mkakati huruka mtandao kwa sekunde 30, kwa hivyo kukatika kwa huduma husababisha kuisha kwa muda mara moja kwa kila sekunde 30 badala ya
-mara moja kwa kila ombi. Matukio ya uelekezaji huripoti `strategy: "nadir"` tu wakati Nadir ilifanya
-uchaguzi.
+Tabia ya kutofaulu iko wazi: kuisha kwa muda (chaguo-msingi 2000 ms), non-2xx, seva pangishi isiyoweza kufikiwa, jibu lenye hitilafu au uteuzi nje ya kidimbwi hutatuliwa kwa uamuzi wa `rules` na sababu imewekwa `NadirStrategy: fallback (…)`. Baada ya simu ambayo haikufaulu mkakati huruka mtandao kwa sekunde 30, kwa hivyo kukatika hugharimu muda kuisha kwa sekunde 30 badala ya moja kwa kila ombi. Matukio ya uelekezaji yanaripoti `strategy: "nadir"` tu wakati Nadir alifanya chaguo.
 
-**Wakati wa kutumia**: trafiki yenye viwango tofauti vya ugumu kwenye kundi linalojumuisha madaraja mbalimbali ya modeli (modeli ndogo, ya kati
-na ya kiwango cha juu), ambapo matumizi ya modeli ya kiwango cha juu kila wakati ndiyo gharama unayotaka kupunguza.
+**Wakati wa kutumia** : trafiki ya matatizo mchanganyiko kwenye bwawa ambalo hueneza viwango vya mfano (mtindo mdogo, wa kati na wa mpaka), ambapo daima-mpaka ni gharama unayotaka kupunguza.
 
-**Lakabu**: `nadir` (haina lakabu)
+**Lakabu** : `nadir` (hakuna lakabu)
+
+---
+
+#### 7. `decision` — kiamua pluggable chagua kielelezo
+
+`decision` anauliza a** mwamuzi** ni kielelezo gani kwenye bwawa kinacholingana na ombi, kisha kupunguza kidimbwi kwa kielelezo hicho na kuruhusu `rules` kuchagua muunganisho (idadi, afya na gharama bado kuchagua akaunti). Kiamuzi kimewekwa katika kizuizi cha uamuzi cha mchanganyiko — `config.decision` wakati visu vya kipanga njia hukaa juu ya `config` (kile dashibodi inaandika), au `config.auto.decision` karibu na `config.auto.routerStrategy`:
+
+| `decider`     | Nani anajibu                                                                                                                          | Mahitaji                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), mfano chaguo-msingi `jev-latest`                                   | muunganisho `typesafe` au kitufe cha env            |
+| `http`        | mwamuzi wako mwenyewe katika `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) au `"openai-chat"` (kukamilika kwa mazungumzo) | `baseUrl` + `model`; ufunguo wa hiari               |
+| `combo-model` | moja ya miundo ya watoa huduma wako, inayoitwa katika mchakato kama hakimu wa muunganisho                                             | `model` kama `provider/model` (hakuna mchanganyiko) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Sehemu (imeidhinishwa na schema kali ya kuokoa na tena kwa wakati wa ombi):
+
+- `decider` — `systemone`, `http` au `combo-model`.
+- `model` — TypeSafe kielelezo, kielelezo cha uamuzi katika URL yako , au `provider/model` ya simu ya modeli ya mchanganyiko (hadi herufi 200).
+- `baseUrl` — `http` pekee: `http(s)` URL hadi herufi 500, bila vitambulisho, hoja au kipande. URL inayoelekeza kwenye OmniRoute hii ( loopback + `PORT`) inakataliwa.
+- `wire` — `http` pekee: `systemone` (chaguo-msingi) au `openai-chat`.
+- `connectionId` — muunganisho uliohifadhiwa ambao ufunguo wake unatumika (tu ndani ya viunganisho vinavyoruhusiwa vya ufunguo API ). Bila hivyo, `systemone` inasoma muunganisho `typesafe` na kila mwamuzi wa mtandao hurudi kwa `OMNIROUTE_DECISION_API_KEY`. Hakuna uga `apiKey` : ufunguo hauhifadhiwi kamwe kwenye mchanganyiko.
+- `timeoutMs` — nambari kamili, 100–5000, chaguomsingi 2000.
+- `minConfidence` — 0-1; jibu la kutojiamini hurejea kwa `rules` (mwamuzi anayeripoti kutokuwa na imani ni 0).
+- `descriptions` — hadi maingizo 50 (ufunguo hadi 300, maandishi hadi herufi 1000), yaliyowekwa na kitambulisho cha mfano au `provider/model`; maingizo ambayo hayajawekwa hupata maelezo ya kiwango cha gharama.
+
+**Bendera.** `COMBO_DECISION_ROUTER_ENABLED` (chaguo-msingi `false`) humfungulia kila anayeamua. Wakati imezimwa, mseto wa `decision` hausomi kitambulisho, haupigi simu na njia na `rules`; logi inasema `fallback (disabled)`. Ufunguo uliohifadhiwa pekee hauwashi kamwe. Mchanganyiko bila kizuizi cha uamuzi hauathiriwi hata kidogo.
+
+**Nini huacha sanduku.** Maandishi ya ujumbe wa mwisho wa mtumiaji pekee (hadi herufi 8000; chat/Claude `messages` au Majibu `input`) na menyu ya vitambulisho vya muundo na maelezo yao. Usiwahi kuombwa na mfumo, Majibu `instructions`, zana, historia, vichwa au data ya akaunti. Simu za mtandao hupitia mlinzi wa nje wa mtoaji bila majaribio tena, hakuna uelekezaji kwingine na kikomo cha majibu KB 64. Simu `combo-model` sio ya kutiririsha, haina zana, `temperature: 0`, na bajeti ya ishara 256; uamuzi ulioanzishwa ndani ya simu ya uamuzi unakataliwa.
+
+**Tabia ya kushindwa** ni kushindwa-wazi: kushindwa kutatuliwa kwa uamuzi wa `rules`, na sababu `recursion` `decision(<decider>): fallback (<reason>)`, na `<reason>` moja ya `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `low_confidence` `no_user_text` `single_option` Baada ya muda kuisha, hitilafu HTTP au hitilafu ya mtandao sehemu ya mwisho inarukwa kwa sekunde 30. Chaguo lililofanikiwa husoma `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Hakuna URL, ufunguo, sehemu ya papo hapo au sehemu ya juu inayofikia logi.
+
+Kijenzi cha kuchana kinaonyesha sehemu hizi wakati mkakati wa kipanga njia ni `decision`, pamoja na maelezo yaliyotolewa kama vishika nafasi na a.** Uamuzi wa mtihani** kitufe kinachoita `POST /api/combos/decision-preview` mara moja na mipangilio ambayo haijahifadhiwa (bendera sawa).
+
+**Wakati wa kutumia** : trafiki ya matatizo mseto ambapo unataka kiwango kichukuliwe kwa kila ombi na kiainishaji unachochagua, si Nadir haswa.
+
+**Lakabu** : `decision` (hakuna lakabu)
 
 ---
 
 ### Mikakati maalum ya kipanga njia
 
-Unaweza kusajili utekelezaji wako mwenyewe wa `RouterStrategy` kupitia API ya umma:
+Unaweza kusajili utekelezaji wako wa `RouterStrategy` kupitia umma API:
 
 ```ts
 import {
@@ -742,7 +761,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Mantiki yako ya uelekezaji hapa
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -757,7 +776,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Kisha uitumie:
+Kisha itumie:
 
 ```json
 {
@@ -770,18 +789,19 @@ Kisha uitumie:
 
 ---
 
-### Mwongozo wa kuchagua mkakati wa kipanga njia
+### Mwongozo wa uteuzi wa mkakati wa kipanga njia
 
-| Hali ya matumizi             | Mkakati     | Sababu                                               |
-| ---------------------------- | ----------- | ---------------------------------------------------- |
-| Mzigo wa kazi uliosawazishwa | `rules`     | Chaguo-msingi — huzingatia vipengele vyote           |
-| Punguza gharama              | `cost`      | Daima huchagua ya bei nafuu zaidi                    |
-| Punguza ucheleweshaji        | `latency`   | Huchagua mtoa huduma wa haraka na wa kuaminika       |
-| SLO kali                     | `sla-aware` | Huchuja kulingana na vikomo vya p95/hitilafu/gharama |
-| Gumzo la zamu nyingi         | `lkgp`      | Uthabiti wa kipindi                                  |
-| Ugumu mchanganyiko           | `nadir`     | Huchagua daraja la modeli kwa kila kidokezo          |
+| Tumia kesi                | Mkakati     | Sababu                                         |
+| ------------------------- | ----------- | ---------------------------------------------- |
+| Mzigo wa kazi wenye usawa | `rules`     | — chaguo-msingi huzingatia vipengele vyote     |
+| Punguza gharama           | `cost`      | Daima huchagua gharama nafuu                   |
+| Punguza muda wa kusubiri  | `latency`   | Huchagua mtoaji anayetegemewa kwa haraka zaidi |
+| SLOs                      | `sla-aware` | Vichujio kwa vizingiti vya p95/error/cost      |
+| Gumzo la zamu nyingi      | `lkgp`      | Kunata kwa kikao                               |
+| Ugumu wa mchanganyiko     | `nadir`     | Huchagua kiwango cha muundo kwa kila kidokezo  |
+| Kiainishaji mwenyewe      | `decision`  | Mwamuzi wako anachagua mfano                   |
 
-Sehemu zinazozingatia SLA:
+Sehemu zinazofahamu SLA:
 
 ```json
 {

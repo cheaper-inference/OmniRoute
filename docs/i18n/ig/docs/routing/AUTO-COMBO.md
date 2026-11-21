@@ -465,56 +465,47 @@ A na-eziga 5% nke arịrịọ (enwere ike ịhazi ya) n'aka provider ndị ah�
 
 ## API
 
-Ọ dịghị **ebe njedebe `POST /api/combos/auto` pụrụ iche** — a na-eji Auto-Combo eme ihe n'ụzọ abụọ:
+Enwere** enweghị raara onwe ya `POST /api/combos/auto` njedebe** A na-eri — Auto-Combo n'ụzọ abụọ:
 
-1. **Nhazi-efu (a tụrụ aro):** Zipụ arịrịọ mmecha nkata ọ bụla nwere `model: "auto"` ma ọ bụ `model: "auto/<variant>"`. Ụlọ nrụpụta mebere na-emepụta kombọ ahụ maka arịrịọ ọ bụla — enweghị nchekwa na-adịgide adịgide ma ọ bụ oku API achọrọ.
+1. **Zero-config (atụ aro):** Jiri `model: "auto"` ma ọ bụ `model: "auto/<variant>"` zipu arịrịọ mmecha nkata ọ bụla. Factorylọ ọrụ mebere na-ewulite ngwakọta kwa arịrịọ — enweghị nnọgidesi ike, enweghị oku API achọrọ.
 
-2. **Kombiso echekwara nwere `strategy: "auto"`:** Mepụta kombọ nkịtị site na `POST /api/combos` ma tọọ `strategy: "auto"` tinyere `config.auto.weights` / `config.auto.candidatePool`. A na-eji otu injin akara ahụ; a na-echekwa kombọ ahụ na `combos`, a pụkwara iji ID ya mee ihe ọzọ.
+2. **Ngwakọta na-adịgide adịgide na `strategy: "auto"`:** Mepụta ngwakọta oge niile site na `POST /api/combos` wee tọọ `strategy: "auto"` gbakwunyere `config.auto.weights` / `config.auto.candidatePool`. A na-eji otu akara akara ahụ; A na-echekwa ngwakọta ahụ na `combos` ma meekwa ya site na ID.
 
-Maka nchọpụta, `GET /api/combos/auto` na-edepụta ụdịdị niile tinyere ọdọ ndị ndoro-ndoro edoziworo ya yana `context_length` / `max_output_tokens` — uru kacha elu n'ime windo niile nke ọdọ ndị ndoro-ndoro ahụ. Ndị ahịa (dịka ọmụmaatụ, ngwa mgbakwunye opencode) ga-akpọsa ụkpụrụ ndị a kama `0`: ogologo ọnọdụ efu na-agbanyụ mkpakọ-akpaka nke opencode kpamkpam, na-eme ka nnọkọ na-eto ruo mgbe nhichapụ akụkọ ihe mere eme nke gateway bibiri ọnọdụ ahụ. Ọ dị nchebe ịkpọsa uru kacha elu n'ihi na ihe nzacha ọnọdụ tupu nhọpụta nke auto-combo na-eziga arịrịọ ndị buru oke ibu na ndị ndoro-ndoro nwere windo buru ibu.
+Maka nchọta, `GET /api/combos/auto` depụtara ụdịdị ọ bụla na ọdọ mmiri ndị o kpebiri ime gbakwunyere `context_length` / `max_output_tokens` — nke MAX n'ofe windo ọdọ mmiri onye ndoro-ndoro ochichi. Ndị ahịa (dịka ngwa mgbakwunye opencode) ga-akpọsa ụkpụrụ ndị a kama `0`: ọnọdụ efu na-eme ka mkpịsị aka akpaaka nke opencode kpamkpam, na-ekwe ka oge na-eto ruo mgbe akụkọ ihe mere eme ọnụ ụzọ emebi emebi ọnọdụ. MAX adịghị mma ịkpọsa n'ihi na ọnọdụ akpaaka combo na-ebu ụzọ nzacha gabigara arịrịọ ndị chọrọ ime windo buru ibu.
 
 ```bash
-# Ojiji nhazi-efu (enweghị imepụta kombọ)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Kombọ auto echekwara site na ebe njedebe combos nkịtị
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Atụmatụ router auto
+### Atụmatụ rawụta akpaaka
 
-Kombiso `strategy: "auto"` echekwara nwere ike ịtọ `config.routerStrategy` (ma ọ bụ nke ochie
-`config.auto.routerStrategy`) ka ọ bụrụ otu n'ime ndị a:
+combos `strategy: "auto"` na-adịgide adịgide nwere ike ịtọ `config.routerStrategy` (ma ọ bụ `config.auto.routerStrategy` nketa) na otu n'ime:
 
-- `rules` — akara ndabara e nyere ibu
-- `score` — na-ahọrọ akara kachasị elu e nyere ibu nke ahaziri. Mgbe akara hà nhata kpọmkwem, a na-edobe
-  usoro ndị ndoro-ndoro ahaziri; `explorationRate` dị ugbu a na-ahọrọ n'omume site n'ọdọ niile a haziri n'usoro.
-- `cost` / `eco` — onye na-eweta ọrụ ahụike dị ọnụ ala karịa
-- `latency` / `fast` — latency p95 kacha ala nwere ntaramahụhụ ntụkwasị obi
-- `sla-aware` / `sla` — na-ahọrọ ndị ndoro-ndoro na-emezu latency p95, ọnụọgụ njehie, yana
-  SLO ọnụahịa ma ọ bụrụ na e nyere ya
-- `lkgp` — onye na-eweta ọrụ ikpeazụ a maara na ọ dị mma ga-ebu ụzọ
-- `nadir` — jụọ API mkpebi nke [Nadir](https://getnadir.com) ụdị model dị n'ọdọ ahụ nke
-  prompt chọrọ; a ga-ahọrọ ịgbanye ya, ma ọ bụrụ na ọ daa, ọ ga-emeghe laghachi na `rules`
+- `rules` — akara agbadoro agbadoro
+- `score` — na-ahọpụta akara nha ahazi kachasị elu. Kpọmkwem agbatị na-echekwa usoro ndoro-ndoro ochichi ahaziri; ihe nlere `explorationRate` dị ugbu a sitere na ọdọ mmiri a họọrọ nke ọma.
+- `cost` / `eco` — onye na-eweta ahụike dị ọnụ ala
+- `latency` / `fast` — p95 kacha ala na ntaramahụhụ ntụkwasị obi
+- `sla-aware` / `sla` — na-ahọrọ ndị ga-emeju afọ p95 latency, ọnụego njehie, na ọnụahịa nhọrọ SLOs
+- `lkgp` — ikpeazụ mara ezigbo onye na-eweta mbụ
+- `nadir` — jụọ [Nadir](https://getnadir.com) mkpebi API nke nlereanya na ọdọ mmiri mkpa ozugbo; Nwepu, daa-emeghe na `rules`
+- `decision` — jụọ onye nhazi ahazi (TypeSafe System One, mkpebi nke gị URL, ma ọ bụ otu n'ime ụdị nke combo) nke ihe nlereanya na ọdọ mmiri dabara na arịrịọ ahụ; n'azụ ọkọlọtọ `COMBO_DECISION_ROUTER_ENABLED` nke adapụrụ, ada-emeghe na `rules`
 
-### Nkọwa zuru ezu banyere atụmatụ router
+### Atụmatụ rawụta n'ụzọ zuru ezu
 
-Injin auto-combo na-enye mmejuputa **RouterStrategy** 7 a pụrụ itinye ma gbanwee,
-nke ị nwere ike ịgbanwe site na `config.routerStrategy` (ma ọ bụ nke ochie `config.auto.routerStrategy`).
-Atụmatụ ọ bụla na-ahọrọ otu onye na-eweta ọrụ site n'ọdọ ndị ndoro-ndoro, dabere na `RoutingContext`
-(ụdị ọrụ, ntụnye ngwá ọrụ/ọhụụ, atụmatụ token, iwu SLA ma ọ bụrụ na e nyere ya, yana
-onye na-eweta ọrụ ikpeazụ a maara na ọ dị mma ma ọ bụrụ na e nyere ya).
+Injin combo akpaaka na-ekpughe pluggable 7**RouterStrategy** mmejuputa iwu nke ị nwere ike gbanwee site na `config.routerStrategy` (ma ọ bụ ihe nketa `config.auto.routerStrategy`). Atụmatụ ọ bụla na-ahọrọ otu onye na-eweta site na ọdọ mmiri ndị a na-azọ ọkwa, nyere `RoutingContext` (ụdị ọrụ, akara tool/vision, atụmatụ akara, amụma SLA nhọrọ, onye na-eweta nke kacha mara amara).
 
-#### 1. `rules` (ndabara) — akara e nyere ibu nke ihe 16
+#### 1. `rules` (nke ndabara) — 16-ndụmịnye akara
 
-Ọ na-ekpuchi injin akara dị ugbu a. Ọ na-ewepụ ndị ndoro-ndoro circuit-breaker
-ha bụ `OPEN`, wee jiri ụdị ọrụ dị ugbu a na `getTaskFitness()` kpọọ `scorePool()`,
-na-ahọrọ onye na-eweta ọrụ nwere akara kacha elu.
+Na-ekpuchi igwe akara akara dị ugbu a. Na-enyocha ndị na-aga ime sekit-breaker `OPEN`, wee jiri ụdị ọrụ dị ugbu a na `getTaskFitness()` `scorePool()`, na-ewere onye na-eweta akara kacha elu.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -534,16 +525,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mgbe e kwesịrị iji ya**: Ndabara. Jiri ya mgbe ịchọrọ nguzozi kwesịrị ekwesị n'etiti mgbaàmà niile.
+**Mgbe iji** : Ndabere. Jiri mgbe ịchọrọ ngbanwe ziri ezi n'ofe akara niile.
 
-**Aha ọzọ**: `rules` (enweghị aha ọzọ)
+**Aha aha** : `rules` (enweghị utu aha)
 
 ---
 
-#### 2. `cost` / `eco` — onye na-eweta ọrụ ahụike dị ọnụ ala karịa
+#### 2. `cost` / `eco` — onye na-eweta ahụike dị ọnụ ala
 
-Ọ na-ahazi ọdọ ndị ndoro-ndoro site na `costPer1MTokens` (site na nke kacha nta ruo nke kacha ukwuu) wee họrọ nke dị ọnụ ala karịa.
-Ọ na-ebu ụzọ wepụ ndị ndoro-ndoro `OPEN`.
+Na-ahazi ọdọ mmiri onye ndoro-ndoro site na `costPer1MTokens` (nrịgo) wee họrọ nke kacha ọnụ ala. Na-ebu ụzọ wepụ ndị ga-azọ ọkwa `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -558,16 +548,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mgbe e kwesịrị iji ya**: Ọrụ ndị na-elekwasị anya n'ọnụahịa, nhazi ogbe, ma ọ bụ ọrụ ndabere.
+**Mgbe iji** : Ọrụ na-akpata ego, nhazi ogbe, ma ọ bụ ọrụ ndabere.
 
-**Aha ndị ọzọ**: `cost`, `eco`
+**Aha aha** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — latency p95 kacha ala nwere ntaramahụhụ ntụkwasị obi
+#### 3. `latency` / `fast` — kacha ala p95 latency na ntaramahụhụ ntụkwasị obi
 
-Ọ na-ahazi site na `p95LatencyMs + (errorRate * 1000)`. Ntaramahụhụ ọnụọgụ njehie na-eme ka
-ndị na-eweta ọrụ a na-apụghị ịdabere na ha nọrọ n'ọkwa dị ala, ọbụna ma latency aha ha dị ala.
+Hazie site na `p95LatencyMs + (errorRate * 1000)`. Ntaramahụhụ-ọnụego njehie ahụ na-eme ka ndị na-enye ndị na-enweghị ntụkwasị obi bụrụ ọkwa dị ala ọbụlagodi ma ọ bụrụ na njiri aha ha dị ala.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -584,28 +573,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mgbe e kwesịrị iji ya**: Ọrụ ndị na-elekwasị anya na latency dịka nkata ozugbo, mmecha-akpaka, ma ọ bụ
-ndị enyemaka ide koodu mmekọrịta.
+**Mgbe iji** : Ibu ọrụ na-emetụ n'ahụ dị ka mkparịta ụka n'ezie, mezue akpaaka, ma ọ bụ ndị enyemaka nzuzo.
 
-**Aha ndị ọzọ**: `latency`, `fast`
+**Aha aha** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — nrubeisi na SLO latency/njehie/ọnụahịa
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO nnabata
 
-Ọ na-enye onye ndoro-ndoro ọ bụla akara dabere n'otú o si emezu iwu SLO ahaziri:
+Na-enye onye ọ bụla akara site na otu o si emeju amụma SLO ahaziri:
 
-| Ihe na-emetụta   | Arọ | Usoro mgbakọ                                                   |
-| ---------------- | --- | -------------------------------------------------------------- |
-| Akara igbu oge   | 35% | `threshold / max(value, ε)`                                    |
-| Akara njehie     | 35% | `threshold / max(value, ε)`                                    |
-| Akara ahụike     | 15% | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)              |
-| Akara ọnụ ahịa   | 10% | `threshold / max(value, ε)` ma ọ bụ nke ahaziri n'ụzọ ntụgharị |
-| Akara nkwụsi ike | 5%  | stddev nke igbu oge ahaziri n'ụzọ ntụgharị                     |
+| Ihe kpatara ya   | Ibu | Usoro                                                  |
+| ---------------- | --- | ------------------------------------------------------ |
+| Akara latency    | 35% | `threshold / max(value, ε)`                            |
+| Akara mperi      | 35% | `threshold / max(value, ε)`                            |
+| Akara ahụike     | 15% | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)      |
+| Akara ọnụ        | 10% | `threshold / max(value, ε)` ma ọ bụ inverse normalized |
+| Akara kwụsie ike | 5%  | inverse normalized latency stddev                      |
 
-Mgbe `hardConstraints: true`, a na-ahazi ndị ndoro-ndoro ọkachasị site na **akara mmebi**
-(ókè ha gafere SLO ọ bụla), emesịa site na akara ngwakọta. Ma ọ bụghị ya, a na-eji naanị
-akara ngwakọta ahụ.
+Mgbe `hardConstraints: true`, a na-ahazi ndị na-eme ntuli aka site na** akara mmebi** ( ole ha gafere SLO ọ bụla), wee jiri akara agwakọta. Ma ọ bụghị ya, ọ bụ naanị akara agwakọta.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -614,12 +600,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... na-enye onye ndoro-ndoro ọ bụla akara dabere na iwu: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Oghere SLA** (a na-etinye ha na nhazi combo):
+**SLA** (tọọ na nhazi ngwakọta):
 
 ```json
 {
@@ -634,17 +620,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mgbe a ga-eji ya**: Ibu ọrụ mmepụta nwere oke siri ike maka igbu oge, ọnụọgụ njehie, ma ọ bụ mmefu ego.
+**Mgbe iji** : Mmepụta ọrụ na-arụ ọrụ na nkwụsịtụ siri ike, ọnụego njehie, ma ọ bụ mmefu ego efu.
 
-**Aha nnọchi**: `sla-aware`, `sla`
+**Aha aha** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — buru ụzọ jiri onye na-eweta ọrụ ikpeazụ a maara na ọ dị mma
+#### 5. `lkgp` — ikpeazụ mara ezigbo onye na-eweta mbụ
 
-Ọ na-ebu ụzọ nwalee **onye na-eweta ọrụ ikpeazụ a maara na ọ dị mma** (ọ bụrụ na edobere ya), emesịa ọ laghachi na
-atụmatụ `rules`. Ọ bara uru maka ijigide otu onye na-eweta ọrụ n'ime nnọkọ — otu onye na-eweta ọrụ ahụ na-ahụ maka
-arịrịọ ndị na-esochi n'ime mkparịta ụka.
+Na-agbalị na** ikpeazụ mara ezi onye na-eweta** (ọ bụrụ na edobere) nke mbụ, wee daa azụ na atụmatụ `rules`. Ọ bara uru maka nrapagidesi ike nke oge — otu onye na-eweta ya na-ejikwa arịrịọ nsonye na mkparịta ụka.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -665,27 +649,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Laghachi na atụmatụ rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Mgbe a ga-eji ya**: Mkparịta ụka nwere ọtụtụ ntụgharị ebe ịchọrọ ka otu onye na-eweta ọrụ ahụ na-ahụ maka
-arịrịọ ndị na-esochi (dịka ọmụmaatụ, maka caching, ịga n'ihu nke context, ma ọ bụ ịdị n'otu nke ọnụ ahịa).
+**Mgbe iji** Mkparịta ụka ọtụtụ ntụgharị ebe ịchọrọ ka otu onye na-eweta ya jikwaa arịrịọ nleba anya (dịka ọmụmaatụ, maka caching, onodu ọganihu, ma ọ bụ nkwekọ ọnụ ahịa).
 
-**Aha nnọchi**: `lkgp` (enweghị aha nnọchi)
+**Aha aha** : `lkgp` (enweghị utu aha)
 
 ---
 
-#### 6. `nadir` — ịhọrọ model dabere na prompt site na Nadir
+#### 6. `nadir` — ozugbo-mara nlereanya nhọrọ site Nadir
 
-Atụmatụ ọ bụla dị n'elu na-ahazi ndị ndoro-ndoro site na telemetry nke ya; ọ dịghị nke ọ bụla n'ime ha na-agụ
-arịrịọ ahụ. `nadir` na-eziga ntụgharị ikpeazụ nke onye ọrụ yana model ids dị na pool ahụ na
-API mkpebi nke [Nadir](https://getnadir.com) (`POST /v1/bucket`) ma duru arịrịọ ahụ gaa na model
-Nadir họọrọ n'ime ndepụta ahụ (`simple` → model kacha ọnụ ala nke nwere ike ịrụ ọrụ ahụ, `complex` → model
-frontier). A ka na-eji `rules` ahọrọ njikọ na-enye model ahụ, yabụ quota,
-ahụike na ọnụ ahịa ka na-ekpebi account a ga-eji.
+Atụmatụ ọ bụla dị n'elu na-edobe ndị a na-eme ntuli aka site na telemetry nke ha; ọ dịghị onye n'ime ha na-agụ arịrịọ ahụ. `nadir` na-eziga ntụgharị onye ọrụ ikpeazụ gbakwunyere ids ụdị ọdọ mmiri gaa na mkpebi [Nadir](https://getnadir.com) API (`POST /v1/bucket`) yana ụzọ ihe nlereanya Nadir na-ahọrọ na menu ahụ (`simple` → nke dị ọnụ ala nwere ike nlereanya, `complex` → the frontier one). Njikọ na-eje ozi ihe nlereanya ahụ ka na-ahọrọ `rules`, yabụ oke, ahụike na ọnụ ahịa na-ekpebi akaụntụ ọ bụla.
 
 ```json
 {
@@ -701,33 +679,75 @@ ahụike na ọnụ ahịa ka na-ekpebi account a ga-eji.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` na `OMNIROUTE_NADIR_BASE_URL` bụ env fallbacks maka string abụọ ahụ.
-`baseUrl` dị mkpa naanị maka Nadir ị na-akwado n'onwe gị (a na-anabata `/v1` dị na njedebe).
-Oku ndị na-enweghị key na-abanye na ọkwa anonymous nke Nadir, nke nwere mmachi ọnụego maka IP ọ bụla. Site na key
-([mepụta otu](https://app.getnadir.com/dashboard/api-keys)), a na-edekọ mkpebi ọ bụla
-na dashboard Nadir gị. Nhazi na nkwenye zuru ezu:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` na `OMNIROUTE_NADIR_BASE_URL` bụ env ọdịda maka eriri abụọ ahụ. `baseUrl` ka achọrọ maka Nadir nwere onwe ya (anakweere `/v1` na-eso ya). Ọkpọkpọ oku enweghị igodo ala na ọkwa Nadir na-amaghị aha, nke nwere oke nha kwa IP. Iji igodo ( [mepụta otu](https://app.getnadir.com/dashboard/api-keys) ), mkpebi ọ bụla na-abanye na dashboard Nadir gị. Nhazi na nkwenye zuru oke: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Ihe na-apụ na sistemụ: ederede nke ozi ikpeazụ onye ọrụ zitere (mkpụrụedemede 16k mbụ), model ids
-ndị ndoro-ndoro na channel tag `source: "omniroute"`. A naghị eziga system prompt, akụkọ gara aga, tools ma ọ bụ
-headers.
+Kedu ihe na-ahapụ igbe: ederede ozi onye ọrụ ikpeazụ (mkpụrụedemede 16k mbụ), ids onye ndoro-ndoro ochichi na mkpado ọwa `source: "omniroute"`. Enweghị ngwa ngwa sistemụ, akụkọ ihe mere eme, ngwaọrụ ma ọ bụ nkụnye eji isi mee.
 
-Omume mgbe ọdịda mere bụ fail-open: timeout (ndabara bụ 2000 ms), nzaghachi na-abụghị 2xx, host
-a na-apụghị iru, nzaghachi na-adịghị n'ụdị ziri ezi, ma ọ bụ nhọrọ na-adịghị n'ime pool ga-alaghachi na mkpebi `rules`,
-a ga-etinyekwa `NadirStrategy: fallback (…)` na mbido ihe kpatara ya. Mgbe oku dara, atụmatụ ahụ na-awụli netwọkụ
-maka 30 s, ya mere outage na-efu naanị otu timeout kwa 30 s kama ịbụ otu maka arịrịọ ọ bụla. Routing events na-akọ
-`strategy: "nadir"` naanị mgbe Nadir mere nhọrọ ahụ n'ezie.
+Omume ọdịda dara-emeghe: oge nkwụsị (ndabara 2000 ms), non-2xx, onye ọbịa a na-apụghị ịchọta, nzaghachi adịghị mma ma ọ bụ nhọrọ n'èzí ọdọ mmiri na-ekpebi mkpebi `rules` na ihe kpatara ya bụ `NadirStrategy: fallback (…)`. Mgbe oku na-ada ada, atụmatụ a na-amafe netwọkụ ahụ maka s30, yabụ nkwụsị na-efu otu oge n'ime 30 s karịa otu n'ime arịrịọ ọ bụla. Ihe omume ngagharị na-akọ `strategy: "nadir"` naanị mgbe Nadir mere nhọrọ n'ezie.
 
-**Mgbe a ga-eji ya**: traffic nwere ogo isi ike dị iche iche n'ime pool nke nwere ọkwa model dị iche iche (obere model, model etiti
-na model frontier), ebe iji frontier mgbe niile bụ ọnụ ahịa ịchọrọ ibelata.
+**Mgbe iji** : okporo ụzọ siri ike agwakọta na ọdọ mmiri nke na-agbasa ọkwa ụdị (obere, etiti na ihe n'ókè), ebe oke ala bụ ọnụ ahịa ịchọrọ ịkpụ.
 
-**Aha nnọchi**: `nadir` (enweghị aha nnọchi)
+**Aha aha** : `nadir` (enweghị utu aha)
 
 ---
 
-### Atụmatụ router ahaziri iche
+#### 7. `decision` — pluggable decisionr na-ahọrọ ihe nlereanya
 
-Ị nwere ike idebanye mmejuputa `RouterStrategy` nke gị site na public API:
+`decision` jụrụ a** onye na-ekpebi** nke nlereanya na ọdọ mmiri dabara na arịrịọ, wee warara ọdọ mmiri na nlereanya na-ahapụ `rules` họrọ njikọ (oke, ahụike na ọnụ ahịa ka na-ahọrọ akaụntụ). A na-edobe onye na-ekpebi ihe na mkpebi combo ngọngọ — `config.decision` mgbe eriri rawụta nọ ọdụ n'elu `config` (ihe dashboard dere), ma ọ bụ `config.auto.decision` n'akụkụ `config.auto.routerStrategy`:
+
+| `decider`     | Onye zara                                                                                                                 | Mkpa                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `systemone`   | TypeSafe Sistemụ Otu (`POST https://api.typesafe.ai/v1/systemone`), ụdị `jev-latest` nke ndabara                          | njikọ `typesafe` ma ọ bụ igodo env                |
+| `http`        | onye na-ekpebi nke gị na `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ma ọ bụ `"openai-chat"` (mmecha nkata) | `baseUrl` + `model`; isi nhọrọ                    |
+| `combo-model` | otu n'ime ndị na-eweta gị ụdị, a na-akpọ na usoro dị ka fusion ọkàikpe                                                    | `model` dị ka `provider/model` (enweghị ngwakọta) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Ubi (nke atụmatụ siri ike kwadobere na nchekwa na oge ọzọ n'oge arịrịọ):
+
+- `decider` — `systemone`, `http` ma ọ bụ `combo-model`.
+- `model` — TypeSafe nlereanya, ihe nlereanya mkpebi na gị URL, ma ọ bụ `provider/model` nke a combo-model oku (ihe ruru 200 mkpụrụedemede).
+- `baseUrl` — `http` naanị: `http(s)` URL ruru mkpụrụedemede 500, na-enweghị nzere, ajụjụ ma ọ bụ iberibe. Ajụrụ URL na-atụ aka na OmniRoute a (loopback + `PORT`).
+- `wire` — `http` naanị: `systemone` (ndabere) ma ọ bụ `openai-chat`.
+- `connectionId` — njikọ echekwara nke ejiri igodo ya (naanị n'ime njikọ anabatara igodo API ). Na-enweghị ya, `systemone` na-agụ njikọ `typesafe` na onye ọ bụla na-ekpebi netwọk ga-adaghachi na `OMNIROUTE_DECISION_API_KEY`. Enweghị ogige `apiKey` : anaghị echekwa igodo na ngwakọta.
+- `timeoutMs` — integer, 100–5000, ndabara 2000.
+- `minConfidence` — 0–1; Azịza ntụkwasị obi dị ala na-adaghachi na `rules` (onye na-ekpebi nke na-akọ enweghị ntụkwasị obi dị ka 0).
+- `descriptions` — ruru ndenye 50 (igodo ruo 300, ederede ruo mkpụrụedemede 1000), nke ejiri ụdị id ma ọ bụ `provider/model` tinye ya; ndenye ewepụrụ na-enweta nkọwa ọkwa ọnụ ahịa ewepụtara.
+
+**Ọkọlọtọ.** `COMBO_DECISION_ROUTER_ENABLED` (ndabara `false`) ga-eghe onye ọ bụla na-ekpebi. Mgbe ọ na-agbanyụ, `decision` combo na-agụ enweghị nzere, ọ dịghị akpọ oku na ụzọ na `rules`; ndekọ na-ekwu `fallback (disabled)`. Naanị igodo echekwara anaghị agbanwuo ya. Combos na-enweghị ngọngọ mkpebi anaghị emetụta ma ọlị.
+
+**Gịnị na-ahapụ igbe.** Naanị ederede nke ozi onye ọrụ ikpeazụ (ihe ruru mkpụrụedemede 8000; chat/Claude `messages` ma ọ bụ azịza `input`) yana menu nke ids nlereanya na nkọwa ha. Ọ dịghị mgbe usoro ahụ ozugbo, azịza `instructions`, ngwaọrụ, akụkọ ihe mere eme, nkụnye eji isi mee ma ọ bụ data akaụntụ. Oku netwọkụ na-aga site na onye na-eche nche na-apụ apụ na-enweghị nyochagharị, enweghị ntụgharị na okpu nzaghachi 64 KB. Oku `combo-model` na-abụghị nkwanye, enweghị ngwá ọrụ, `temperature: 0`, na mmefu ego 256-token; Ajụjụ mkpebi malitere n'ime oku mkpebi.
+
+**Omume ọdịda** bụ ọdịda-emeghe `http_error` ọdịda ọ `out_of_menu` na `refused` `cooldown` mkpebi `rules`, ihe `recursion` `network_error` na-agụ `decision(<decider>): fallback (<reason>)`, `not_configured` `timeout` `<reason>` otu n'ime `disabled` `invalid_response` `missing_credential` `low_confidence` `single_option` `no_user_text` Mgbe oge gwụchara, njehie HTTP ma ọ bụ njehie netwọk a na-amafe njedebe njedebe maka 30 s. Nhọrọ na-aga nke ọma na-agụ `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ọ nweghị URL, igodo, ngwa ngwa ma ọ bụ ahụ dị elu na-erute ndekọ ahụ.
+
+Onye na-ewu combo na-egosi mpaghara ndị a mgbe atụmatụ rawụta bụ `decision`, yana nkọwa ndị emepụtara dị ka ndị na-edebe ebe na a.** Nnwale mkpebi** bọtịnụ na-akpọ `POST /api/combos/decision-preview` otu ugboro yana ntọala echekwara (otu ọkọlọtọ).
+
+**Mgbe iji** : okporo ụzọ siri ike agwakọta ebe ịchọrọ ịhọrọ ọkwa n'otu arịrịọ site na nhazi ọkwa ị họọrọ, ọ bụghị nke Nadir kpọmkwem.
+
+**Aha aha** : `decision` (enweghị utu aha)
+
+---
+
+### Atụmatụ rawụta omenala
+
+Ị nwere ike ịdebanye aha mmejuputa `RouterStrategy` nke gị site na API ọha:
 
 ```ts
 import {
@@ -740,7 +760,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Tinye routing logic gị ebe a
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -755,7 +775,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Mgbe ahụ jiri ya:
+wee jiri ya:
 
 ```json
 {
@@ -768,18 +788,19 @@ Mgbe ahụ jiri ya:
 
 ---
 
-### Ntuziaka ịhọrọ atụmatụ router
+### Ntuziaka nhọrọ atụmatụ rawụta
 
-| Ọnọdụ ojiji                 | Atụmatụ     | Ihe kpatara ya                                           |
-| --------------------------- | ----------- | -------------------------------------------------------- |
-| Ibu ọrụ ziri ezi            | `rules`     | Nke ndabara — na-atụle ihe niile                         |
-| Belata ọnụ ahịa             | `cost`      | Na-ahọrọ nke dị ọnụ ala mgbe niile                       |
-| Belata igbu oge             | `latency`   | Na-ahọrọ onye na-eweta ọrụ a pụrụ ịtụkwasị obi kacha ọsọ |
-| SLO ndị siri ike            | `sla-aware` | Na-enyocha site n’oke p95/mperi/ọnụ ahịa                 |
-| Mkparịta ụka ọtụtụ ntụgharị | `lkgp`      | Ịrapara na nnọkọ                                         |
-| Ogo isi ike dị iche iche    | `nadir`     | Na-ahọrọ ọkwa model maka prompt ọ bụla                   |
+| Jiri akpa                   | Atụmatụ     | Ihe kpatara ya                               |
+| --------------------------- | ----------- | -------------------------------------------- |
+| Ọrụ kwesịrị ekwesị          | `rules`     | — ndabara na-atụle ihe niile                 |
+| Wedata ọnụ ahịa             | `cost`      | Na-ahọrọ dị ọnụ ala mgbe niile               |
+| Wetulata oge nkwụsị         | `latency`   | Na-ahọrọ ndị na-eweta ntụkwasị obi kacha ọsọ |
+| SLOs siri ike               | `sla-aware` | Nzacha site na ụzọ p95/error/cost            |
+| Mkparịta ụka ọtụtụ ntụgharị | `lkgp`      | Nrapara nke oge                              |
+| Ihe isi ike agwakọtara      | `nadir`     | Na-ahọrọ ọkwa nlereanya kwa ozugbo           |
+| Nkewa nkeonwe               | `decision`  | Onye na-ekpebi gị na-ahọrọ ihe nlereanya     |
 
-Fịldụ SLA-aware:
+Mpaghara mara SLA:
 
 ```json
 {

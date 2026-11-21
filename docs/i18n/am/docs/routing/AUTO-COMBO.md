@@ -485,56 +485,47 @@ curl -X POST http://localhost:20128/api/combos \
 
 ## API
 
-**የተለየ `POST /api/combos/auto` መጨረሻ ነጥብ የለም** — Auto-Combo በሁለት መንገዶች ጥቅም ላይ ይውላል፦
+አለ።** ምንም የተለየ `POST /api/combos/auto` የመጨረሻ ነጥብ** — Auto-Combo በሁለት መንገዶች ይበላል፡-
 
-1. **ዜሮ-ውቅር (የሚመከር)፦** ማንኛውንም የውይይት ማጠናቀቂያ ጥያቄ በ`model: "auto"` ወይም `model: "auto/<variant>"` ይላኩ። ምናባዊው ፋብሪካ ለእያንዳንዱ ጥያቄ comboውን ይገነባል — ምንም ዘላቂ ማከማቻ ወይም የAPI ጥሪዎች አያስፈልጉም።
+1. **ዜሮ-ውቅር (የሚመከር)** ማንኛውንም የውይይት ማጠናቀቂያ ጥያቄ በ `model: "auto"` ወይም `model: "auto/<variant>"` ይላኩ። ምናባዊ ፋብሪካው ጥምርን በጥያቄ ይገነባል — ምንም ጽናት የለም፣ ምንም API ጥሪ አያስፈልግም።
 
-2. **በ`strategy: "auto"` የተከማቸ combo፦** መደበኛ combo በ`POST /api/combos` ይፍጠሩ እና `strategy: "auto"`ን ከ`config.auto.weights` / `config.auto.candidatePool` ጋር ያዘጋጁ። ተመሳሳዩ የውጤት አሰጣጥ ሞተር ጥቅም ላይ ይውላል፤ comboው በ`combos` ውስጥ ተከማችቶ በID እንደገና ጥቅም ላይ ሊውል ይችላል።
+2. **የማያቋርጥ ጥምር ከ `strategy: "auto"` ጋር** በ `POST /api/combos` በኩል መደበኛ ጥምር ይፍጠሩ እና `strategy: "auto"` ፕላስ `config.auto.weights` / `config.auto.candidatePool` ያዘጋጁ። ተመሳሳይ የውጤት ሞተር ጥቅም ላይ ይውላል; ጥምርው በ `combos` ውስጥ ተከማችቷል እና በ ID እንደገና ጥቅም ላይ ሊውል ይችላል.
 
-ለማግኘት፣ `GET /api/combos/auto` እያንዳንዱን ልዩነት ከተወሰነው የእጩዎች ስብስብ እና `context_length` / `max_output_tokens` ጋር ይዘረዝራል — ይህም በእጩዎች ስብስቡ መስኮቶች ውስጥ ያለው MAX ነው። ደንበኞች (ለምሳሌ፣ opencode plugin) ከ`0` ይልቅ እነዚህን እሴቶች ማሳወቅ አለባቸው፦ ዜሮ ዐውደ-ጽሑፍ የopencodeን ራስ-ሰር መጭመቅ ሙሉ በሙሉ ያሰናክላል፣ ይህም የgateway የታሪክ ማጽዳት ዐውደ-ጽሑፉን እስኪያጠፋ ድረስ ክፍለ ጊዜዎች እንዲያድጉ ያደርጋል። MAXን ማሳወቅ ደህንነቱ የተጠበቀ ነው፣ ምክንያቱም የauto-combo ዐውደ-ጽሑፍ ቅድመ-ማጣሪያ ከመጠን በላይ ትልቅ ጥያቄዎችን ሰፊ መስኮት ወዳላቸው እጩዎች ይመራል።
+ለግኝት፣ `GET /api/combos/auto` እያንዳንዱን ልዩነት ከተፈታ እጩ ገንዳ እና `context_length` / `max_output_tokens` — በእጩ ገንዳ መስኮቶች ላይ ያለውን MAX ይዘረዝራል። ደንበኞች (ለምሳሌ የክፍት ኮድ ፕለጊን) ከ `0` ይልቅ እነዚህን እሴቶች ማስተዋወቅ አለባቸው፡ ዜሮ አውድ የክፍት ኮድ ራስ-መጨመሪያን ሙሉ ለሙሉ ያሰናክላል፣ ይህም የአግባቢ ፍኖት ታሪክን ማጽዳት አውድ እስኪያጠፋ ድረስ ክፍለ ጊዜዎች እንዲያድጉ ያስችላቸዋል። MAX ለማስተዋወቅ ደህንነቱ የተጠበቀ ነው ምክንያቱም የራስ-ጥምር አውድ ቅድመ ማጣሪያ መስመሮች ከመጠን በላይ ጥያቄዎችን ለትልቅ መስኮት እጩዎች ስለሚያስተላልፍ።
 
 ```bash
-# የዜሮ-ውቅር አጠቃቀም (combo መፍጠር ሳያስፈልግ)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# በመደበኛው combos መጨረሻ ነጥብ በኩል የተከማቸ auto combo
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### የAuto router ስትራቴጂዎች
+### ራስ-ሰር ራውተር ስትራቴጂዎች
 
-የተከማቹ `strategy: "auto"` combos `config.routerStrategy`ን (ወይም የቆየውን
-`config.auto.routerStrategy`) ከሚከተሉት አንዱ እንዲሆን ሊያዘጋጁ ይችላሉ፦
+ቀጣይነት ያለው `strategy: "auto"` combos `config.routerStrategy` (ወይም የቆየ `config.auto.routerStrategy`) ወደ አንዱ ሊያቀናብር ይችላል፡-
 
-- `rules` — ነባሪ ክብደት ያለው የውጤት አሰጣጥ
-- `score` — ከተዋቀሩት መካከል ከፍተኛውን ክብደት ያለው ውጤት ይመርጣል። ፍጹም እኩል ውጤቶች የተዋቀረውን
-  የእጩዎች ቅደም ተከተል ይጠብቃሉ፤ አሁን ያለው `explorationRate` ከሙሉው ደረጃ ከተሰጠው ስብስብ ናሙና ይወስዳል።
-- `cost` / `eco` — በጣም ርካሹ ጤናማ provider
-- `latency` / `fast` — ከአስተማማኝነት ቅጣት ጋር ዝቅተኛው p95 latency
-- `sla-aware` / `sla` — የp95 latency፣ የስህተት መጠን እና አማራጭ
-  የወጪ SLOዎችን የሚያሟሉ እጩዎችን ይመርጣል
-- `lkgp` — በመጀመሪያ የመጨረሻው የሚታወቀው ጥሩ provider
-- `nadir` — በስብስቡ ውስጥ promptው የትኛውን model እንደሚፈልግ የ[Nadir](https://getnadir.com) ውሳኔ APIን ይጠይቃል፤
-  በምርጫ የሚነቃ ሲሆን፣ ካልተሳካ ወደ `rules` በክፍት ሁኔታ ይመለሳል
+- `rules` — ነባሪ የክብደት ነጥብ
+- `score` — ከፍተኛውን የተዋቀረ የክብደት ነጥብ ይመርጣል። ትክክለኛ ትስስሮች የተዋቀሩ የእጩዎችን ትዕዛዝ ይጠብቃሉ; አሁን ያሉት `explorationRate` ናሙናዎች ከሙሉ ደረጃ ገንዳ.
+- `cost` / `eco` — በጣም ርካሽ ጤናማ አቅራቢ
+- `latency` / `fast` — ዝቅተኛው p95 መዘግየት ከአስተማማኝነት ቅጣት ጋር
+- `sla-aware` / `sla` — p95 መዘግየትን፣ የስህተት መጠን እና አማራጭ ወጪ SLOs የሚያረኩ እጩዎችን ይመርጣሉ።
+- `lkgp` — የመጨረሻው የታወቀ ጥሩ አቅራቢ በመጀመሪያ
+- `nadir` — [የናዲርን](https://getnadir.com) ውሳኔ API በመዋኛ ገንዳ ውስጥ የትኛው ሞዴል አፋጣኝ እንደሚያስፈልገው ይጠይቁ። መርጦ መግባት፣ አልተሳካም-ወደ `rules` ክፍት
+- `decision` — የተዋቀረውን መወሰኛ ይጠይቁ (TypeSafe ስርዓት አንድ ፣ የእራስዎ ውሳኔ URL፣ ወይም ከኮምቦው ሞዴሎች ውስጥ አንዱ) በገንዳው ውስጥ ያለው ሞዴል ከጥያቄው ጋር የሚስማማው ፣ ነባሪ-ጠፍቷል `COMBO_DECISION_ROUTER_ENABLED` ባንዲራ ጀርባ፣ አልተሳካም-ክፍት ለ `rules`
 
-### የRouter ስትራቴጂዎች በዝርዝር
+### የራውተር ስልቶች በዝርዝር
 
-የauto-combo ሞተር በ`config.routerStrategy` (ወይም በቆየው `config.auto.routerStrategy`)
-በኩል መቀያየር የሚችሏቸውን 7 ሊሰኩ የሚችሉ **RouterStrategy** ትግበራዎችን ያቀርባል።
-እያንዳንዱ ስትራቴጂ `RoutingContext` ሲሰጠው ከእጩዎች ስብስቡ አንድ provider ይመርጣል
-(የተግባር አይነት፣ የመሣሪያ/ምስል ፍንጮች፣ የtoken ግምት፣ አማራጭ የSLA ፖሊሲ፣ አማራጭ
-የመጨረሻው የሚታወቅ ጥሩ provider)።
+የራስ-ኮምቦ ሞተር 7 ተሰኪዎችን ያጋልጣል**RouterStrategy** በ `config.routerStrategy` (ወይንም የድሮው `config.auto.routerStrategy`) የምትለዋወጡ አተገባበር። እያንዳንዱ ስልት `RoutingContext` (የተግባር አይነት፣ tool/vision ፍንጭ፣ ማስመሰያ ግምት፣ አማራጭ SLA ፖሊሲ፣ አማራጭ የመጨረሻ የታወቀ ጥሩ አቅራቢ) ከተመረጡት ገንዳ አንድ አቅራቢን ይመርጣል።
 
-#### 1. `rules` (ነባሪ) — ባለ16-ምክንያት ክብደት ያለው የውጤት አሰጣጥ
+#### 1. `rules` (ነባሪ) — ባለ 16-ደረጃ ክብደት ያለው ነጥብ
 
-አሁን ያለውን የውጤት አሰጣጥ ሞተር ይጠቀልላል። `OPEN` የcircuit-breaker
-እጩዎችን ያጣራል፣ ከዚያም `scorePool()`ን ከአሁኑ የተግባር አይነት እና `getTaskFitness()` ጋር በማስኬድ
-ከፍተኛውን ውጤት ያገኘውን provider ይመርጣል።
+ያለውን የውጤት መስጫ ሞተር ያጠቃልላል። `OPEN` ወረዳ-ተላላፊ እጩዎችን ያጣራል፣ ከዚያም `scorePool()` አሁን ባለው የተግባር አይነት እና `getTaskFitness()` ያካሂዳል፣ ከፍተኛ ነጥብ ያለው አቅራቢን ይመርጣል።
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -554,16 +545,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**፦ ነባሪ። በሁሉም ምልክቶች መካከል ሚዛናዊ ማመቻቸት ሲፈልጉ ይጠቀሙ።
+**መቼ መጠቀም** : ነባሪ በሁሉም ምልክቶች ላይ ሚዛናዊ የሆነ የንግድ ልውውጥ ሲፈልጉ ይጠቀሙ።
 
-**ተለዋጭ ስም**፦ `rules` (ተለዋጭ ስም የለውም)
+**ተለዋጭ ስም** `rules` (ቅፅል ስም የለውም)
 
 ---
 
-#### 2. `cost` / `eco` — በጣም ርካሹ ጤናማ provider
+#### 2. `cost` / `eco` — በጣም ርካሹ ጤናማ አቅራቢ
 
-የእጩዎችን ስብስብ በ`costPer1MTokens` (ከዝቅተኛ ወደ ከፍተኛ) ይደረድራል እና በጣም ርካሹን ይመርጣል።
-በመጀመሪያ `OPEN` እጩዎችን ያጣራል።
+የእጩ ገንዳውን በ `costPer1MTokens` (በማስወጣት) ይመድባል እና በጣም ርካሹን ይመርጣል። በመጀመሪያ `OPEN` እጩዎችን ያጣራል።
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -578,16 +568,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**፦ ለወጪ ትኩረት የሚሰጡ የሥራ ጫናዎች፣ የቡድን ማቀናበር ወይም የጀርባ ሥራዎች።
+**መቼ መጠቀም** : ወጪ ቆጣቢ የስራ ጫናዎች፣ ባች ማቀናበር ወይም የጀርባ ስራዎች።
 
-**ተለዋጭ ስሞች**፦ `cost`፣ `eco`
+**ተለዋጭ ስሞች** `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — ከአስተማማኝነት ቅጣት ጋር ዝቅተኛው p95 latency
+#### 3. `latency` / `fast` — ዝቅተኛው p95 መዘግየት ከአስተማማኝነት ቅጣት ጋር
 
-በ`p95LatencyMs + (errorRate * 1000)` ይደረድራል። የስህተት መጠን ቅጣቱ፣
-የተገለጸው latencyያቸው ዝቅተኛ ቢሆንም እንኳ አስተማማኝ ያልሆኑ providers ዝቅተኛ ደረጃ እንዲሰጣቸው ያረጋግጣል።
+በ `p95LatencyMs + (errorRate * 1000)` መደርደር. የስህተት-ተመን ቅጣቱ ታማኝ ያልሆኑ አቅራቢዎች የስም መዘግየት ዝቅተኛ ቢሆንም እንኳ ዝቅተኛ ደረጃ መያዙን ያረጋግጣል።
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -604,28 +593,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንዳለብዎት**፦ እንደ ቅጽበታዊ ውይይት፣ autocomplete ወይም
-በይነተገናኝ የኮድ ረዳቶች ያሉ ለlatency ትኩረት የሚሰጡ የሥራ ጫናዎች።
+**መቼ መጠቀም** እንደ ቅጽበታዊ ውይይት፣ ራስ-አጠናቅቅ፣ ወይም በይነተገናኝ ኮድ ረዳቶች ያሉ የቆይታ ጊዜ-ስሱ የስራ ጫናዎች።
 
-**ተለዋጭ ስሞች**፦ `latency`፣ `fast`
+**ተለዋጭ ስሞች** `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — የlatency/ስህተት/ወጪ SLO ተገዢነት
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO ማክበር
 
-እያንዳንዱ እጩ የተዋቀረውን የSLO ፖሊሲ ምን ያህል በደንብ እንደሚያሟላ መሠረት ውጤት ይሰጠዋል፦
+የተዋቀረውን SLO ፖሊሲን ምን ያህል እንደሚያረካ ለእያንዳንዱ እጩ ነጥብ ይሰጣል፡-
 
-| መለኪያ       | ክብደት | ቀመር                                                |
-| ---------- | ---- | -------------------------------------------------- |
-| የመዘግየት ነጥብ | 35%  | `threshold / max(value, ε)`                        |
-| የስህተት ነጥብ  | 35%  | `threshold / max(value, ε)`                        |
-| የጤና ነጥብ    | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)  |
-| የወጪ ነጥብ    | 10%  | `threshold / max(value, ε)` ወይም በተገላቢጦሽ መደበኛ የተደረገ |
-| የመረጋጋት ነጥብ | 5%   | በተገላቢጦሽ መደበኛ የተደረገ የመዘግየት መደበኛ ልዩነት                |
+| ምክንያት      | ክብደት | ፎርሙላ                                              |
+| ---------- | ---- | ------------------------------------------------- |
+| የመዘግየት ውጤት | 35%  | `threshold / max(value, ε)`                       |
+| የስህተት ነጥብ  | 35%  | `threshold / max(value, ε)`                       |
+| የጤና ነጥብ    | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
+| የወጪ ነጥብ    | 10%  | `threshold / max(value, ε)` ወይም የተገላቢጦሽ መደበኛ      |
+| የመረጋጋት ውጤት | 5%   | የተገላቢጦሽ መደበኛ መዘግየት stddev                         |
 
-`hardConstraints: true` ሲሆን፣ እጩዎች በዋናነት በ**ጥሰት ነጥብ**
-(ማንኛውንም SLO ምን ያህል እንደሚያልፉ)፣ ከዚያም በድምር ነጥብ ይደረደራሉ። አለበለዚያ
-የድምር ነጥቡ ብቻ ጥቅም ላይ ይውላል።
+`hardConstraints: true` ሲሆን እጩዎች በዋነኝነት የሚደረደሩት በ** ጥሰት ነጥብ** (ከየትኛውም SLO ምን ያህል እንደሚበልጡ)፣ ከዚያም በተቀናጀ ውጤት። ያለበለዚያ የተቀናበረ ውጤት ብቻ ነው።
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -634,12 +620,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... እያንዳንዱን እጩ በፖሊሲው መሠረት ነጥብ ይሰጣል፦ { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**የSLA መስኮች** (በጥምር ውቅሩ ላይ የሚዋቀሩ):
+**SLA መስኮች** (በኮምቦ ውቅር ላይ ተዘጋጅቷል)
 
 ```json
 {
@@ -654,17 +640,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**መቼ መጠቀም እንደሚገባ**: ጥብቅ የመዘግየት፣ የስህተት መጠን ወይም የወጪ በጀት ላላቸው የምርት የሥራ ጫናዎች።
+**መቼ መጠቀም** የማምረት ስራ ጫናዎች ጥብቅ መዘግየት፣ የስህተት መጠን ወይም የወጪ በጀቶች።
 
-**ተለዋጭ ስሞች**: `sla-aware`, `sla`
+**ተለዋጭ ስሞች** `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — በመጨረሻ ጥሩ ሆኖ የታወቀው አቅራቢ መጀመሪያ
+#### 5. `lkgp` — የመጨረሻው የታወቀ ጥሩ አቅራቢ በመጀመሪያ
 
-**በመጨረሻ ጥሩ ሆኖ የታወቀውን አቅራቢ** (ከተዋቀረ) መጀመሪያ ይሞክራል፣ ከዚያም ወደ
-`rules` ስልት ይመለሳል። ለክፍለ ጊዜ ተጣባቂነት ጠቃሚ ነው — በውይይት ውስጥ
-ተከታይ ጥያቄዎችን ያው አቅራቢ ያስተናግዳል።
+ይሞክራል።** የመጨረሻው የታወቀ ጥሩ አቅራቢ** (ከተዋቀረ) መጀመሪያ፣ ከዚያም ወደ `rules` ስትራቴጂ ይመለሳል። ለክፍለ-ጊዜ መጣበቅ ይጠቅማል — ያው አቅራቢ በውይይት ውስጥ የክትትል ጥያቄዎችን ያስተናግዳል።
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -685,27 +669,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // ወደ rules ስልት ተመለስ
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**መቼ መጠቀም እንደሚገባ**: ተከታይ ጥያቄዎችን ያው አቅራቢ እንዲያስተናግድ
-በሚፈልጉባቸው ባለብዙ ዙር ውይይቶች (ለምሳሌ፣ ለመሸጎጫ፣ ለዐውድ ቀጣይነት ወይም ለዋጋ አወጣጥ ወጥነት)።
+**መቼ መጠቀም** ተመሳሳዩ አቅራቢ የክትትል ጥያቄዎችን እንዲያስተናግድ (ለምሳሌ ለመሸጎጫ፣ የአውድ ቀጣይነት ወይም የዋጋ አወጣጥ ወጥነት) ባለብዙ ዙር ንግግሮች።
 
-**ተለዋጭ ስም**: `lkgp` (ተለዋጭ ስም የለውም)
+**ተለዋጭ ስም** `lkgp` (ቅፅል ስም የለውም)
 
 ---
 
-#### 6. `nadir` — Nadirን በመጠቀም ጥያቄን የሚያገናዝብ የሞዴል ምርጫ
+#### 6. `nadir` — ፈጣን ግንዛቤ ያለው ሞዴል ምርጫ በናዲር በኩል
 
-ከላይ ያሉት እያንዳንዱ ስልቶች እጩዎቹን በራሳቸው የቴሌሜትሪ መረጃ መሠረት ያስቀድማሉ፤ አንዳቸውም
-ጥያቄውን አያነቡም። `nadir` የመጨረሻውን የተጠቃሚ ዙር ከpool የሞዴል ids ጋር ወደ
-[Nadir](https://getnadir.com) የውሳኔ API (`POST /v1/bucket`) ይልካል፣ እንዲሁም Nadir ከዚያ ዝርዝር
-ወደሚመርጠው ሞዴል ይመራል (`simple` → ብቃት ካላቸው ሞዴሎች በጣም ርካሹ፣ `complex` → በጣም
-የላቀው)። ያንን ሞዴል የሚያቀርበው ግንኙነት አሁንም በ`rules` ይመረጣል፣ ስለዚህ ኮታ፣
-ጤና እና ወጪ የትኛው መለያ እንደሚመረጥ መወሰናቸውን ይቀጥላሉ።
+ከላይ ያለው እያንዳንዱ ስልት እጩዎቹን በራሳቸው ቴሌሜትሪ ደረጃ ያስቀምጣቸዋል; አንዳቸውም ጥያቄውን አያነብም. `nadir` የመጨረሻውን ተጠቃሚ መታጠፊያ እና የመዋኛ ገንዳውን ሞዴል መታወቂያዎች ወደ [ናዲር](https://getnadir.com) ውሳኔ API (`POST /v1/bucket`) ይልካል እና ወደ ሞዴል ናዲር የሚወስዱ መንገዶችን ከዚያ ምናሌ ይመርጣል (`simple` → በጣም ርካሹን አቅም ያለው ሞዴል፣ `complex` → the frontier one)። ያንን ሞዴል የሚያቀርበው ግንኙነት አሁንም በ `rules` የተመረጠ ነው፣ ስለዚህ ኮታ፣ ጤና እና ወጪ የትኛውን መለያ ይወስኑ።
 
 ```json
 {
@@ -721,34 +699,75 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` እና `OMNIROUTE_NADIR_BASE_URL` ለሁለቱ ሕብረቁምፊዎች የአካባቢ ተለዋዋጭ አማራጮች ናቸው።
-`baseUrl` የሚያስፈልገው በራስ ለሚስተናገድ Nadir ብቻ ነው (በመጨረሻ ያለ `/v1` ተቀባይነት አለው)።
-ቁልፍ የሌላቸው ጥሪዎች በየIP የጥሪ መጠን ገደብ ወዳለበት የNadir ማንነት አልባ ደረጃ ይገባሉ። ቁልፍ ካለ
-([አንድ ይፍጠሩ](https://app.getnadir.com/dashboard/api-keys))፣ እያንዳንዱ ውሳኔ
-በNadir ዳሽቦርድዎ ላይ ይመዘገባል። ሙሉ ውቅር እና ማረጋገጫ፦
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)።
+`OMNIROUTE_NADIR_API_KEY` እና `OMNIROUTE_NADIR_BASE_URL` ለሁለቱ ገመዶች env ውድቀት ናቸው። `baseUrl` ለራስ-አስተናጋጅ ናዲር ብቻ ነው የሚያስፈልገው (ተከታይ `/v1` ይቋቋማል)። ቁልፍ የሌለው በናዲር ስም-አልባ ደረጃ ላይ መሬት ይደውላል፣ ይህም በ IP በታሪፍ የተገደበ ነው። በቁልፍ ( [አንድ ፍጠር](https://app.getnadir.com/dashboard/api-keys) ) እያንዳንዱ ውሳኔ ወደ ናዲር ዳሽቦርድዎ ገብቷል። ሙሉ ማዋቀር እና ማረጋገጫ [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-ከሳጥኑ የሚወጣው፦ የመጨረሻው የተጠቃሚ መልዕክት ጽሑፍ (የመጀመሪያዎቹ 16k ቁምፊዎች)፣ የእጩ
-ሞዴል ids እና የ`source: "omniroute"` ሰርጥ መለያ። ምንም የስርዓት ጥያቄ፣ ታሪክ፣ መሣሪያዎች ወይም
-ራስጌዎች አይላኩም።
+ከሳጥኑ የሚወጣው ምንድን ነው፡ የመጨረሻው የተጠቃሚ መልእክት ጽሑፍ (የመጀመሪያዎቹ 16k ቁምፊዎች)፣ የእጩ ሞዴል መታወቂያዎች እና `source: "omniroute"` ቻናል መለያ። ምንም የስርዓት ጥያቄ፣ ታሪክ፣ መሳሪያዎች ወይም ራስጌዎች የሉም።
 
-የብልሽት ባህሪው ሥራን የሚቀጥል ነው፦ የጊዜ ገደብ ማለፍ (ነባሪው 2000 ms)፣ non-2xx፣ ሊደረስበት የማይችል
-host፣ የተበላሸ ምላሽ ወይም ከpool ውጭ የሆነ ምርጫ ወደ `rules`
-ውሳኔ ይመለሳል፣ እና ምክንያቱ በ`NadirStrategy: fallback (…)` ቅድመ ቅጥያ ይጀምራል። ከከሸፈ ጥሪ በኋላ
-ስልቱ ለ30 s አውታረ መረቡን ይዘላል፣ ስለዚህ መቋረጥ በእያንዳንዱ ጥያቄ አንድ የጊዜ ገደብ ማለፍ ከማስከተል ይልቅ
-በየ30 s አንድ ብቻ ያስከትላል። Nadir ምርጫውን በትክክል ሲያደርግ ብቻ የማዞሪያ ክስተቶች
-`strategy: "nadir"` ይዘግባሉ።
+የውድቀት ባህሪው አልተሳካም-ክፍት፡ የጊዜ ማብቂያ (ነባሪ 2000 ms)፣ non-2xx፣ ሊደረስበት የማይችል አስተናጋጅ፣ የተሳሳተ ምላሽ ወይም ከገንዳው ውጭ ያለው ምርጫ ለ `rules` ውሳኔ ይቀርባል እና ምክንያቱ `NadirStrategy: fallback (…)` ቅድመ ቅጥያ ነው። ካልተሳካ ጥሪ በኋላ ስልቱ ኔትወርኩን ለ30 ሰከንድ ይዘልላል፣ ስለዚህ ማቋረጥ በጥያቄ አንድ ጊዜ በ30 ሰከንድ አንድ ጊዜ ያበቃል። የማዞሪያ ክስተቶች `strategy: "nadir"` ሪፖርት የሚያደርጉት ናዲር በትክክል ምርጫውን ሲያደርግ ብቻ ነው።
 
-**መቼ መጠቀም እንደሚገባ**: የተለያዩ የሞዴል ደረጃዎችን (አንድ ትንሽ፣ አንድ መካከለኛ
-እና አንድ እጅግ የላቀ ሞዴል) በሚያካትት pool ላይ ለተቀላቀለ የአስቸጋሪነት ደረጃ ያለው ትራፊክ፣ ሁልጊዜ እጅግ የላቀውን ሞዴል መጠቀም ሊቀንሱት የሚፈልጉት ወጪ ሲሆን።
+**መቼ መጠቀም** የሞዴል ደረጃዎችን (ትንሽ ፣ መካከለኛ እና የድንበር ሞዴል) በሚሸፍነው ገንዳ ላይ የተደባለቀ አስቸጋሪ ትራፊክ ሁል ጊዜ ድንበር ለመቁረጥ የሚፈልጉት ወጪ ነው።
 
-**ተለዋጭ ስም**: `nadir` (ተለዋጭ ስም የለውም)
+**ተለዋጭ ስም** `nadir` (ቅፅል ስም የለውም)
 
 ---
 
-### ብጁ የማዞሪያ ስልቶች
+#### 7. `decision` — pluggable decider ሞዴሉን ይመርጣል
 
-የራስዎን `RouterStrategy` ትግበራ በይፋዊ APIው በኩል መመዝገብ ይችላሉ፦
+`decision` ይጠይቃል ሀ** ወሳኙ** በገንዳው ውስጥ ያለው የትኛው ሞዴል ከጥያቄው ጋር እንደሚስማማ፣ ከዚያም ገንዳውን ወደዚያ ሞዴል በማጥበብ `rules` ግንኙነቱን እንዲመርጥ ያስችለዋል (ኮታ፣ ጤና እና ወጪ አሁንም መለያውን ይምረጡ)። ራውተር ማዞሪያዎች በ `config` (ዳሽቦርዱ የሚፅፈውን) ወይም `config.auto.decision` ከ `config.auto.routerStrategy` ቀጥሎ ሲቀመጡ፣ ወሳኙ በኮምቦው ውሳኔ የማገጃ — `config.decision` ተቀናብሯል።
+
+| `decider`     | ማን ይመልስ                                                                                             | ያስፈልገዋል                                |
+| ------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `systemone`   | TypeSafe ስርዓት አንድ (`POST https://api.typesafe.ai/v1/systemone`)፣ ነባሪ ሞዴል `jev-latest`               | የ `typesafe` ግንኙነት ወይም የኢንቪ ቁልፍ        |
+| `http`        | የራስዎ ውሳኔ በ `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ወይም `"openai-chat"` (ቻት ማጠናቀቅ) | `baseUrl` + `model`; ቁልፍ አማራጭ          |
+| `combo-model` | ከአቅራቢዎ ሞዴሎች አንዱ፣ በሂደት ላይ እንደ ውህድ ዳኛ ይባላል                                                            | `model` እንደ `provider/model` (ጥምር የለም) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+መስኮች (በማዳን ላይ በጥብቅ ንድፍ የተረጋገጠ እና በጥያቄ ጊዜ እንደገና)
+
+- `decider` — `systemone`, `http` ወይም `combo-model`.
+- `model` — TypeSafe ሞዴል፣ በእርስዎ URL ላይ ያለው የውሳኔ ሞዴል፣ ወይም የጥምር ሞዴል ጥሪ `provider/model` (እስከ 200 ቁምፊዎች)።
+- `baseUrl` — `http` ብቻ፡ አንድ `http(s)` URL እስከ 500 ቁምፊዎች፣ ያለ ምስክርነቶች፣ መጠይቅ ወይም ቁርጥራጭ። ወደዚህ OmniRoute (loopback + `PORT`) የሚያመለክት URL ውድቅ ተደርጓል።
+- `wire` — `http` ብቻ `systemone` (ነባሪ) ወይም `openai-chat`.
+- `connectionId` — የተከማቸ ግንኙነት ቁልፉ ጥቅም ላይ የዋለ (በጥሪ API ቁልፍ ውስጥ በተፈቀዱ ግንኙነቶች ውስጥ ብቻ)። ያለ እሱ፣ `systemone` የ `typesafe` ግንኙነትን ያነባል እና እያንዳንዱ የአውታረ መረብ ወሳጅ ወደ `OMNIROUTE_DECISION_API_KEY` ይመለሳል። `apiKey` መስክ የለም፡ ቁልፉ መቼም ቢሆን በጥምረት ውስጥ አይከማችም።
+- `timeoutMs` — ኢንቲጀር፣ 100–5000፣ ነባሪ 2000።
+- `minConfidence` — 0–1; ዝቅተኛ እምነት ያለው መልስ ወደ `rules` ይመለሳል (መተማመን እንደሌለ የሚዘግብ 0 እንደ 0 ይቆጠራል)።
+- `descriptions` — እስከ 50 ግቤቶች (ቁልፍ እስከ 300፣ እስከ 1000 ቁምፊዎች ጽሑፍ)፣ በሞዴል መታወቂያ ወይም `provider/model` የተቆለፈ; ያልተስተካከሉ ግቤቶች የመነጨ የወጪ-ደረጃ መግለጫ ያገኛሉ።
+
+**ባንዲራ** `COMBO_DECISION_ROUTER_ENABLED` (ነባሪ `false`) እያንዳንዱን ቆራጭ በሮች ያደርጋል። ጠፍቶ እያለ፣ የ `decision` ጥምር ምንም ምስክርነት አያነብም፣ ጥሪ አያደርግም እና ከ `rules` ጋር ይጓዛል። መዝገቡ `fallback (disabled)` ይላል . የተከማቸ ቁልፍ ብቻውን አያበራውም። ያለ ውሳኔ እገዳዎች ኮምቦዎች ምንም አይነኩም.
+
+**ከሳጥኑ የሚወጣው.** የመጨረሻው የተጠቃሚ መልእክት ጽሁፍ ብቻ (እስከ 8000 ቁምፊዎች፣ chat/Claude `messages` ወይም ምላሾች `input`) እና የሞዴል መታወቂያዎች ዝርዝር ከገለፃቸው ጋር። ስርዓቱ በጭራሽ አይጠይቅ፣ ምላሾች `instructions`፣ መሳሪያዎች፣ ታሪክ፣ ራስጌዎች ወይም የመለያ ውሂብ። የአውታረ መረብ ጥሪዎች በአገልግሎት አቅራቢው ወደ ውጪ ጠባቂ በኩል ይሄዳሉ ምንም ሙከራዎች፣ ምንም ማዘዋወር እና 64 KB ምላሽ ካፕ። የ `combo-model` ጥሪው የማይተላለፍ፣ ከመሳሪያ ነፃ፣ `temperature: 0`፣ ከ256-ቶከን በጀት ጋር ነው። በውሳኔ ጥሪ ውስጥ የተጀመረ ውሳኔ ውድቅ ተደርጓል።
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network error the endpoint is skipped for 30 s. A successful pick reads `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL, key, prompt or upstream body reaches the log.
+
+ጥምር ገንቢው እነዚህን መስኮች የሚያሳየው የራውተር ስትራቴጂ `decision` ሲሆን በተፈጠሩት መግለጫዎች እንደ ቦታ ያዥ እና** የሙከራ ውሳኔ** ካልተቀመጡ ቅንብሮች (ተመሳሳይ ባንዲራ) ጋር `POST /api/combos/decision-preview` አንድ ጊዜ የሚደውል አዝራር።
+
+**መቼ መጠቀም** የተቀላቀለ አስቸጋሪ ትራፊክ የፈለጉት ደረጃ በናዲር ሳይሆን በመረጡት ክላሲፋየር በጥያቄ እንዲመረጥ ይፈልጋሉ።
+
+**ተለዋጭ ስም** `decision` (ቅፅል ስም የለውም)
+
+---
+
+### ብጁ ራውተር ስልቶች
+
+በህዝብ API የራስዎን `RouterStrategy` ትግበራ መመዝገብ ይችላሉ፡-
 
 ```ts
 import {
@@ -761,7 +780,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // የማዞሪያ አመክንዮዎን እዚህ ያስገቡ
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -776,7 +795,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-ከዚያ ይጠቀሙበት፦
+ከዚያ ይጠቀሙበት፡-
 
 ```json
 {
@@ -789,18 +808,19 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ---
 
-### የማዞሪያ ስልት ምርጫ መመሪያ
+### የራውተር ስትራቴጂ ምርጫ መመሪያ
 
-| የአጠቃቀም ሁኔታ     | ስትራቴጂ       | ምክንያት                        |
-| -------------- | ----------- | ---------------------------- |
-| ሚዛናዊ የሥራ ጫና    | `rules`     | ነባሪ — ሁሉንም ሁኔታዎች ከግምት ያስገባል  |
-| ወጪን መቀነስ       | `cost`      | ሁልጊዜ ዋጋው ዝቅተኛውን ይመርጣል        |
-| መዘግየትን መቀነስ    | `latency`   | ፈጣኑንና አስተማማኙን አቅራቢ ይመርጣል     |
-| ጥብቅ SLOዎች      | `sla-aware` | በp95/ስህተት/ወጪ ገደቦች መሠረት ያጣራል  |
-| ባለብዙ-ዙር ውይይት   | `lkgp`      | የክፍለ ጊዜ ቋሚነት                 |
-| የተቀላቀለ አስቸጋሪነት | `nadir`     | ለእያንዳንዱ ጥያቄ የሞዴል ደረጃውን ይመርጣል |
+| መያዣ ይጠቀሙ     | ስልት         | ምክንያት                           |
+| ------------ | ----------- | ------------------------------- |
+| ሚዛናዊ የሥራ ጫና  | `rules`     | ነባሪ — ሁሉንም ሁኔታዎች ግምት ውስጥ ያስገባል። |
+| ወጪን አሳንስ     | `cost`      | ሁልጊዜ በጣም ርካሽ ይመርጣል              |
+| መዘግየትን ይቀንሱ  | `latency`   | በጣም ፈጣን ታማኝ አቅራቢን ይመርጣል         |
+| ጥብቅ SLOs     | `sla-aware` | ማጣሪያዎች በ p95/error/cost ገደቦች    |
+| ባለብዙ ዙር ውይይት | `lkgp`      | የክፍለ ጊዜ መጣበቅ                    |
+| የተቀላቀለ ችግር   | `nadir`     | በአንድ ጥያቄ የሞዴል ደረጃን ይመርጣል        |
+| የራሱ ክላሲፋየር   | `decision`  | ውሳኔ ሰጪዎ ሞዴሉን ይመርጣል              |
 
-SLAን የሚያገናዝቡ መስኮች፦
+SLA የሚያውቁ መስኮች፡
 
 ```json
 {

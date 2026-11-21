@@ -492,55 +492,47 @@ So‘rovlarning 5%i (sozlanishi mumkin) tadqiqot maqsadida tasodifiy provayderla
 
 ## API
 
-**Maxsus `POST /api/combos/auto` endpointi mavjud emas** — Auto-Combo ikki usulda ishlatiladi:
+Mavjud** maxsus `POST /api/combos/auto` oxirgi nuqtasi yo'q** — Auto-Combo ikki usulda iste'mol qilinadi:
 
-1. **Nol konfiguratsiya (tavsiya etiladi):** Istalgan chat yakunlash soʻrovini `model: "auto"` yoki `model: "auto/<variant>"` bilan yuboring. Virtual fabrika har bir soʻrov uchun komboni yaratadi — saqlash ham, API chaqiruvlari ham talab qilinmaydi.
+1. **Nol konfiguratsiya (tavsiya etiladi):** `model: "auto"` yoki `model: "auto/<variant>"` bilan har qanday suhbatni yakunlash so'rovini yuboring. Virtual zavod — API so'rov bo'yicha kombinat yaratadi.
 
-2. **`strategy: "auto"` bilan saqlanadigan kombo:** `POST /api/combos` orqali odatiy kombo yarating va `strategy: "auto"` hamda `config.auto.weights` / `config.auto.candidatePool` qiymatlarini sozlang. Xuddi shu baholash mexanizmi ishlatiladi; kombo `combos` ichida saqlanadi va ID orqali qayta ishlatilishi mumkin.
+2. **`strategy: "auto"` bilan doimiy kombinatsiya:** `POST /api/combos` orqali oddiy kombinatsiya yarating va `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool` ni o'rnating. Xuddi shu skorlama mexanizmi ishlatiladi; combo `combos` da saqlanadi va ID tomonidan qayta foydalanish mumkin.
 
-Aniqlash uchun `GET /api/combos/auto` har bir variantni uning aniqlangan nomzodlar puli hamda `context_length` / `max_output_tokens` qiymatlari bilan birga roʻyxatlaydi — bu nomzodlar pulidagi kontekst oynalari orasidagi MAKSIMAL qiymatdir. Klientlar (masalan, opencode plagini) `0` oʻrniga ushbu qiymatlarni eʼlon qilishi kerak: nol kontekst opencode avtomatik ixchamlashtirishini butunlay oʻchiradi va seanslarning shlyuz tarixni tozalab, kontekstni yoʻq qilguniga qadar oʻsishiga imkon beradi. MAX qiymatini eʼlon qilish xavfsiz, chunki auto-combo kontekstining dastlabki filtri hajmi ortiqcha soʻrovlarni katta kontekst oynali nomzodlarga yoʻnaltiradi.
+Topish uchun `GET /api/combos/auto` har bir variantni oʻzining hal qilingan nomzodlar puli va `context_length` / `max_output_tokens` — nomzodlar pulining oynalari boʻylab MAX roʻyxatini koʻrsatadi. Mijozlar (masalan, opencode plagini) `0` oʻrniga ushbu qiymatlarni reklama qilishlari kerak: nol kontekst opencodening avtomatik siqilishini butunlay oʻchirib qoʻyadi, bu esa shlyuz tarixini tozalash kontekstni yoʻq qilmaguncha seanslar oʻsishiga imkon beradi. MAX reklama qilish xavfsiz, chunki avtomatik kombinatsiyalangan kontekstni oldindan filtrlash katta o'lchamli so'rovlarni katta oynali nomzodlarga yo'naltiradi.
 
 ```bash
-# Nol konfiguratsiya bilan foydalanish (kombo yaratmasdan)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Oddiy combos endpointi orqali saqlanadigan avtomatik kombo
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Avtomatik marshrutizator strategiyalari
+### Avtomatik router strategiyalari
 
-Saqlanadigan `strategy: "auto"` kombolari `config.routerStrategy` (yoki eski
-`config.auto.routerStrategy`) qiymatini quyidagilardan biriga sozlashi mumkin:
+Doimiy `strategy: "auto"` kombinatsiyalari `config.routerStrategy` (yoki eski `config.auto.routerStrategy`) ni quyidagilardan biriga o'rnatishi mumkin:
 
-- `rules` — standart vaznli baholash
-- `score` — sozlangan eng yuqori vaznli bahoni tanlaydi. Mutlaq tengliklarda sozlangan
-  nomzodlar tartibi saqlanadi; mavjud `explorationRate` toʻliq tartiblangan puldan namuna tanlaydi.
-- `cost` / `eco` — eng arzon sogʻlom provayder
-- `latency` / `fast` — ishonchlilik jarimasi bilan eng past p95 kechikish
-- `sla-aware` / `sla` — p95 kechikish, xatolik darajasi va ixtiyoriy
-  xarajat SLO talablarini qanoatlantiradigan nomzodlarni afzal koʻradi
-- `lkgp` — avval oxirgi maʼlum yaxshi provayder
-- `nadir` — puldagi qaysi model prompt uchun kerakligini [Nadir](https://getnadir.com) qaror API’sidan
-  soʻraydi; ixtiyoriy ravishda yoqiladi, xatolik yuz bersa `rules` strategiyasiga ochiq qaytadi
+- `rules` — sukut bo'yicha og'irlikdagi ball
+- `score` — eng yuqori konfiguratsiya qilingan vaznli ballni tanlaydi. Aniq aloqalar konfiguratsiya qilingan nomzod tartibini saqlaydi; to'liq reytingli hovuzdan mavjud `explorationRate` namunalari.
+- `cost` / `eco` — eng arzon sog'lom provayder
+- `latency` / `fast` — ishonchlilik jazosi bilan eng past p95 kechikish
+- `sla-aware` / `sla` — p95 kechikishi, xatolik darajasi va ixtiyoriy SLOs narxini qondiradigan nomzodlarni afzal ko'radi
+- `lkgp` — oxirgi ma'lum yaxshi provayder birinchi
+- `nadir` — [Nodirning](https://getnadir.com) qarorini so'rang API hovuzdagi qaysi model promptga kerak; ro'yxatdan o'tish, `rules` uchun muvaffaqiyatsiz ochish
+- `decision` — sozlangan hal qiluvchidan (TypeSafe System One, o‘z qaroringiz URL yoki kombinatning o‘z modellaridan biri) so‘rovga hovuzdagi qaysi model mos kelishini so‘rang; sukut bo'yicha o'chirilgan `COMBO_DECISION_ROUTER_ENABLED` bayrog'i ortida, `rules` uchun muvaffaqiyatsiz ochiq
 
-### Marshrutizator strategiyalari batafsil
+### Router strategiyalari batafsil
 
-Auto-combo mexanizmi `config.routerStrategy` (yoki eski `config.auto.routerStrategy`)
-orqali almashtirishingiz mumkin boʻlgan 7 ta ulanadigan **RouterStrategy** implementatsiyasini taqdim etadi.
-Har bir strategiya `RoutingContext` (vazifa turi, vosita/koʻrish ishoralari, tokenlar taxmini, ixtiyoriy SLA siyosati,
-ixtiyoriy oxirgi maʼlum yaxshi provayder) asosida nomzodlar pulidan bitta provayderni tanlaydi.
+Avtomatik kombinatsiyalangan dvigatel 7 ta ulanishni ochib beradi**RouterStrategy** `config.routerStrategy` (yoki eski `config.auto.routerStrategy`) orqali almashtirishingiz mumkin bo'lgan ilovalar. Har bir strategiya `RoutingContext` (vazifa turi, tool/vision maslahatlari, token smetasi, ixtiyoriy SLA siyosati, ixtiyoriy oxirgi taniqli-yaxshi provayder) berilgan nomzodlar pulidan bitta provayderni tanlaydi.
 
-#### 1. `rules` (standart) — 16 omilli vaznli baholash
+#### 1. `rules` (standart) — 16 faktorli vaznli baholash
 
-Mavjud baholash mexanizmini oʻraydi. `OPEN` holatidagi circuit-breaker
-nomzodlarini filtrlab tashlaydi, soʻng joriy vazifa turi va `getTaskFitness()` bilan `scorePool()`ni
-ishga tushirib, eng yuqori ball olgan provayderni tanlaydi.
+Mavjud skoring mexanizmini o'rab oladi. `OPEN` o'chirgich nomzodlarini filtrlaydi, so'ngra eng yuqori ball olgan provayderni tanlab, joriy vazifa turi va `getTaskFitness()` bilan `scorePool()` ishga tushiradi.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -560,16 +552,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Qachon foydalanish kerak**: Standart holatda. Barcha signallar orasida muvozanatli kelishuv kerak boʻlganda foydalaning.
+**Qachon foydalanish kerak** : Standart. Barcha signallar bo'yicha muvozanatli savdoni xohlaganingizda foydalaning.
 
-**Taxallus**: `rules` (taxallusi yoʻq)
+**Taxallus** : `rules` (taxallussiz)
 
 ---
 
-#### 2. `cost` / `eco` — eng arzon sogʻlom provayder
+#### 2. `cost` / `eco` — eng arzon sog'lom provayder
 
-Nomzodlar pulini `costPer1MTokens` boʻyicha (oʻsish tartibida) saralaydi va eng arzonini tanlaydi.
-Avval `OPEN` holatidagi nomzodlarni filtrlab tashlaydi.
+Nomzodlar pulini `costPer1MTokens` (ko'tarilish) bo'yicha saralaydi va eng arzonini tanlaydi. Avval `OPEN` nomzodlarini filtrlaydi.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -584,16 +575,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Qachon foydalanish kerak**: Xarajatlarga sezgir ish yuklari, paketli qayta ishlash yoki fon vazifalari uchun.
+**Qachon foydalanish kerak** : Xarajatga bog'liq ish yuklari, ommaviy ishlov berish yoki fondagi ishlar.
 
-**Taxalluslar**: `cost`, `eco`
+**Taxalluslar** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — ishonchlilik jarimasi bilan eng past p95 kechikish
+#### 3. ishonchlilik jazosi bilan `latency` / `fast` — eng past p95 kechikish
 
-`p95LatencyMs + (errorRate * 1000)` boʻyicha saralaydi. Xatolik darajasi jarimasi
-ishonchsiz provayderlarning nominal kechikishi past boʻlsa ham, pastroq oʻrinda turishini taʼminlaydi.
+`p95LatencyMs + (errorRate * 1000)` bo'yicha saralash. Xatolik jazosi ishonchsiz provayderlarning nominal kechikish muddati past bo'lsa ham pastroq reytingda bo'lishini ta'minlaydi.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -610,28 +600,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Qachon foydalanish kerak**: Real vaqt chatlari, avtomatik toʻldirish yoki
-interaktiv dasturlash yordamchilari kabi kechikishga sezgir ish yuklari uchun.
+**Qachon foydalanish kerak** : Haqiqiy vaqtda chat, avtomatik toʻldirish yoki interaktiv kodlash yordamchilari kabi kechikishga sezgir ish yuklari.
 
-**Taxalluslar**: `latency`, `fast`
+**Taxalluslar** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — kechikish/xatolik/xarajat SLO talablariga muvofiqlik
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO muvofiqligi
 
-Har bir nomzodni sozlangan SLO siyosatini qanchalik yaxshi qanoatlantirishiga qarab baholaydi:
+Har bir nomzodni konfiguratsiya qilingan SLO siyosatiga qanchalik mos kelishiga qarab baholaydi:
 
-| Omil             | Vazn | Formula                                                           |
-| ---------------- | ---- | ----------------------------------------------------------------- |
-| Kechikish bali   | 35%  | `threshold / max(value, ε)`                                       |
-| Xatolik bali     | 35%  | `threshold / max(value, ε)`                                       |
-| Holat bali       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)                 |
-| Xarajat bali     | 10%  | `threshold / max(value, ε)` yoki teskari normallashtirilgan       |
-| Barqarorlik bali | 5%   | kechikish standart ogʻishining teskari normallashtirilgan qiymati |
+| Faktor                  | Og'irligi | Formula                                                     |
+| ----------------------- | --------- | ----------------------------------------------------------- |
+| Kechikish bahosi        | 35%       | `threshold / max(value, ε)`                                 |
+| Xato hisobi             | 35%       | `threshold / max(value, ε)`                                 |
+| Salomatlik ko'rsatkichi | 15%       | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)           |
+| Narx bahosi             | 10%       | `threshold / max(value, ε)` yoki teskari normallashtirilgan |
+| Barqarorlik reytingi    | 5%        | teskari normallashtirilgan kechikish stddev                 |
 
-`hardConstraints: true` boʻlganda nomzodlar avvalo **buzilish bali**
-(ular biror SLO chegarasidan qanchalik oshib ketgani), soʻngra umumiy ball boʻyicha saralanadi. Aks holda faqat
-umumiy ball ishlatiladi.
+Qachon `hardConstraints: true`, nomzodlar birinchi navbatda saralanadi** buzilish balli** (ular har qanday SLO qanchalik oshadi), keyin kompozit ball bo'yicha. Aks holda, bu faqat umumiy ball.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -640,12 +627,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... har bir nomzodni siyosat asosida baholaydi: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA maydonlari** (kombinatsiya konfiguratsiyasida belgilanadi):
+**SLA maydonlari** (kombo konfiguratsiyada o'rnatilgan):
 
 ```json
 {
@@ -660,17 +647,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Qachon ishlatish kerak**: Kechikish, xatolik darajasi yoki xarajat byudjetlari qatʼiy boʻlgan ishlab chiqarish yuklamalari uchun.
+**Qachon foydalanish kerak** : Qattiq kechikish, xatolik darajasi yoki xarajatlar byudjeti bilan ishlab chiqarish ish yuklari.
 
-**Taxalluslar**: `sla-aware`, `sla`
+**Taxalluslar** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — avval oxirgi maʼlum yaxshi provayder
+#### 5. `lkgp` — oxirgi ma'lum yaxshi provayder birinchi
 
-Avval **oxirgi maʼlum yaxshi provayderni** (agar belgilangan boʻlsa) sinab koʻradi, soʻngra
-`rules` strategiyasiga qaytadi. Bu sessiyani bir provayderga biriktirish uchun foydali — suhbatdagi
-keyingi soʻrovlarni ham ayni provayder qayta ishlaydi.
+ni sinab ko'radi** oxirgi taniqli yaxshi provayder** (agar o'rnatilgan bo'lsa), avval `rules` strategiyasiga qaytadi. Seansning yopishqoqligi uchun foydalidir — bir xil provayder suhbatda keyingi so'rovlarni ko'rib chiqadi.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -691,27 +676,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // rules strategiyasiga qaytish
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Qachon ishlatish kerak**: Ayni provayder keyingi soʻrovlarni ham qayta ishlashi kerak boʻlgan
-koʻp bosqichli suhbatlarda (masalan, keshlash, kontekst uzluksizligi yoki narx barqarorligi uchun).
+**Qachon foydalanish kerak** : Bir xil provayderdan keyingi soʻrovlarni bajarishini istagan koʻp burilishli suhbatlar (masalan, keshlash, kontekstning uzluksizligi yoki narxlarning barqarorligi uchun).
 
-**Taxallus**: `lkgp` (boshqa taxallusi yoʻq)
+**Taxallus** : `lkgp` (taxallussiz)
 
 ---
 
-#### 6. `nadir` — Nadir orqali soʻrov mazmuniga asoslangan model tanlovi
+#### 6. `nadir` — prompt-aware model tanlash Nodir orqali
 
-Yuqoridagi har bir strategiya nomzodlarni oʻz telemetriyasi boʻyicha tartiblaydi; ularning hech biri
-soʻrovni oʻqimaydi. `nadir` foydalanuvchining oxirgi xabarini va puldagi model identifikatorlarini
-[Nadir](https://getnadir.com) qaror qabul qilish API xizmatiga (`POST /v1/bucket`) yuboradi hamda
-Nadir shu roʻyxatdan tanlagan modelga yoʻnaltiradi (`simple` → vazifani bajara oladigan eng arzon model, `complex` → eng
-ilgʻor model). Ushbu modelga xizmat koʻrsatuvchi ulanish baribir `rules` orqali tanlanadi, shuning uchun kvota,
-holat va xarajat qaysi hisob ishlatilishini belgilashda davom etadi.
+Yuqoridagi har bir strategiya nomzodlarni o'z telemetriyasi bo'yicha tartiblaydi; ularning hech biri so'rovni o'qimaydi. `nadir` oxirgi foydalanuvchi navbatini va hovuz modeli identifikatorlarini [Nodirning](https://getnadir.com) qaroriga API (`POST /v1/bucket`) yuboradi va Nodir o‘sha menyudan tanlagan modelga marshrut beradi (`simple` → eng arzon qobiliyatli model, `complex` → chegarasi). Ushbu modelga xizmat ko'rsatadigan ulanish hali ham `rules` tomonidan tanlanadi, shuning uchun kvota, sog'liq va narx qaysi hisobni tanlashda davom etadi.
 
 ```json
 {
@@ -727,34 +706,75 @@ holat va xarajat qaysi hisob ishlatilishini belgilashda davom etadi.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` va `OMNIROUTE_NADIR_BASE_URL` ushbu ikki satr uchun muhitdagi
-zaxira qiymatlardir. `baseUrl` faqat mustaqil joylashtirilgan Nadir uchun kerak (oxiridagi `/v1` qabul qilinadi).
-Kalitsiz chaqiruvlar Nadir xizmatining har bir IP uchun tezligi cheklangan anonim darajasiga yuboriladi. Kalit bilan
-([kalit yarating](https://app.getnadir.com/dashboard/api-keys)) har bir qaror
-Nadir boshqaruv panelingizga yozib boriladi. Toʻliq sozlash va tekshirish:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` va `OMNIROUTE_NADIR_BASE_URL` ikkita satr uchun env zaxiralaridir. `baseUrl` faqat o'z-o'zidan boshqariladigan Nodir uchun kerak bo'ladi (so'nggi `/v1` yo'l qo'yiladi). Kalitsiz qo'ng'iroqlar Nodirning anonim darajasiga tushadi, har bir IP tarifi cheklangan. Kalit yordamida ( [bir yarating](https://app.getnadir.com/dashboard/api-keys) ) har bir qaror Nodir boshqaruv paneliga qayd qilinadi. To'liq sozlash va tekshirish: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Tashqariga yuboriladigan maʼlumotlar: foydalanuvchining oxirgi xabari matni (dastlabki 16 mingta belgi), nomzod
-model identifikatorlari va `source: "omniroute"` kanal tegi. Tizim koʻrsatmasi, tarix, vositalar yoki
-sarlavhalar yuborilmaydi.
+Qutidan nima chiqadi: oxirgi foydalanuvchi xabarining matni (birinchi 16 ming belgi), nomzod model identifikatorlari va `source: "omniroute"` kanal yorlig'i. Tizim so'rovi, tarix, asboblar yoki sarlavhalar yo'q.
 
-Nosozlik holatida tizim ishlashda davom etadi: vaqt tugashi (standart 2000 ms), 2xx boʻlmagan javob, ulanib boʻlmaydigan
-xost, notoʻgʻri shakllangan javob yoki pulga kirmaydigan tanlov `rules`
-qaroriga olib keladi va sabab boshiga `NadirStrategy: fallback (…)` qoʻshiladi. Muvaffaqiyatsiz chaqiruvdan keyin
-strategiya 30 soniya davomida tarmoqdan foydalanmaydi, shuning uchun uzilish har bir soʻrov uchun emas, har 30 soniyada
-faqat bir marta vaqt tugashiga olib keladi. Yoʻnaltirish hodisalari faqat tanlovni haqiqatda Nadir qilganida
-`strategy: "nadir"` haqida xabar beradi.
+Muvaffaqiyatsizlik xatosi ochiq: vaqt tugashi (standart 2000 ms), non-2xx, kirish imkoni bo'lmagan xost, noto'g'ri javob yoki hovuzdan tashqaridagi tanlov `rules` qarorini hal qiladi va sabab `NadirStrategy: fallback (…)` prefiksi bilan belgilanadi. Muvaffaqiyatsiz qo'ng'iroqdan keyin strategiya tarmoqni 30 soniya davomida o'tkazib yuboradi, shuning uchun uzilish har bir so'rov uchun emas, balki 30 soniyada bir taym-autga to'g'ri keladi. Marshrutlash voqealari hisoboti `strategy: "nadir"` faqat Nodir haqiqatda tanlaganida.
 
-**Qachon ishlatish kerak**: Turli darajadagi modellarni (kichik, oʻrta
-va eng ilgʻor modelni) oʻz ichiga olgan puldagi murakkabligi aralash trafik uchun, doim eng ilgʻor modeldan foydalanish xarajatini kamaytirish kerak boʻlganda.
+**Qachon foydalanish kerak** : model darajalarini (kichik, o'rta va chegaraviy model) o'z ichiga olgan hovuzdagi aralash qiyinchilikdagi trafik, bunda har doim chegara - siz qisqartirmoqchi bo'lgan xarajat.
 
-**Taxallus**: `nadir` (boshqa taxallusi yoʻq)
+**Taxallus** : `nadir` (taxallussiz)
 
 ---
 
-### Maxsus yoʻnaltiruvchi strategiyalar
+#### 7. `decision` — pluggable hal qiluvchi modelni tanlaydi
 
-Ommaviy API orqali oʻzingizning `RouterStrategy` implementatsiyangizni roʻyxatdan oʻtkazishingiz mumkin:
+`decision` so'radi a** hal qiluvchi** hovuzdagi qaysi model so'rovga mos keladi, keyin hovuzni o'sha modelga toraytiradi va `rules` ulanishni tanlashga imkon beradi (kvota, sog'liq va narx hali ham hisobni tanlaydi). Router tugmalari `config` tepasida (boshqaruv paneli nima yozadi) yoki `config.auto.routerStrategy` yonida `config.auto.decision` o'tirganda hal qiluvchi — `config.decision` kombinatsiyasining qaror blokida o'rnatiladi:
+
+| `decider`     | Kim javob beradi                                                                                | Ehtiyojlar                                   |
+| ------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standart model `jev-latest`  | `typesafe` ulanishi yoki env kaliti          |
+| `http`        | `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) yoki `"openai-chat"` (chat yakunlari) | `baseUrl` + `model`; kalit ixtiyoriy         |
+| `combo-model` | provayder modellaringizdan biri, termoyadroviy sudya kabi jarayonda chaqiriladi                 | `model` sifatida `provider/model` (kombosiz) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Maydonlar (saqlashda qat'iy sxema bilan tasdiqlangan va so'rov vaqtida yana):
+
+- `decider` — `systemone`, `http` yoki `combo-model`.
+- `model` — TypeSafe modeli, URL da qaror modeli yoki birlashgan model chaqiruvining `provider/model` (200 belgigacha).
+- faqat `baseUrl` — `http` : `http(s)` URL 500 belgigacha, hisob maʼlumotlari, soʻrovlar yoki fragmentlarsiz. Bu OmniRoute ga ishora qiluvchi URL (loopback + `PORT`) rad etiladi.
+- faqat `wire` — `http` : `systemone` (standart) yoki `openai-chat`.
+- `connectionId` — kaliti ishlatiladigan saqlangan ulanish (faqat chaqiruvchi API kalitining ruxsat etilgan ulanishlari ichida). Busiz `systemone` `typesafe` ulanishini o'qiydi va har bir tarmoq qarori `OMNIROUTE_DECISION_API_KEY` ga qaytadi. `apiKey` maydoni mavjud emas: kalit hech qachon kombinatda saqlanmaydi.
+- `timeoutMs` — butun soni, 100–5000, standart 2000.
+- `minConfidence` — 0–1; Ishonch darajasi past bo'lgan javob `rules` ga qaytadi (ishonch yo'qligi haqida xabar bergan qarorchi 0 deb hisoblanadi).
+- `descriptions` — 50 tagacha yozuvlar (300 tagacha kalit, 1000 tagacha matn), model identifikatori yoki `provider/model` bilan kalitlangan; sozlanmagan yozuvlar ishlab chiqarilgan xarajat darajasi tavsifini oladi.
+
+**Bayroq.** `COMBO_DECISION_ROUTER_ENABLED` (standart `false`) har bir qaror qabul qiluvchiga eshik beradi. U o'chirilgan bo'lsa, `decision` kombinatsiyasi hisob ma'lumotlarini o'qimaydi, qo'ng'iroq qilmaydi va `rules` bilan yo'naltiradi; jurnalda `fallback (disabled)` deyiladi. Saqlangan kalitning o'zi uni hech qachon yoqmaydi. Qaror bloki bo'lmagan kombinatsiyalar umuman ta'sir qilmaydi.
+
+**Qutidan nima qoldiradi.** Faqat oxirgi foydalanuvchi xabarining matni (8000 belgigacha; chat/Claude `messages` yoki Responses `input`) va ularning tavsiflari bilan model identifikatorlari menyusi. Hech qachon tizim so'rovi, Responses `instructions`, asboblar, tarix, sarlavhalar yoki hisob ma'lumotlari. Tarmoq qo'ng'iroqlari qayta urinishlarsiz, qayta yo'naltirishlarsiz va 64 KB javob chegarasisiz provayderning chiqish qo'riqchisi orqali o'tadi. `combo-model` qo'ng'irog'i oqimsiz, asboblarsiz, `temperature: 0`, 256 tokenli byudjet bilan; qaror chaqiruvi ichida boshlangan qaror rad etiladi.
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network error the endpoint is skipped for 30 s. A successful pick reads `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL, key, prompt or upstream body reaches the log.
+
+Router strategiyasi `decision` bo'lganda, birlashtirilgan quruvchi bu maydonlarni ko'rsatadi, to'ldiruvchi sifatida yaratilgan tavsiflar va** Sinov qarori** `POST /api/combos/decision-preview` saqlanmagan sozlamalar bilan bir marta chaqiradigan tugma (bir xil bayroq).
+
+**Qachon foydalanish kerak** : Nodir tomonidan emas, balki siz tanlagan klassifikator tomonidan har bir soʻrov boʻyicha tanlanishi kerak boʻlgan aralash qiyin trafik.
+
+**Taxallus** : `decision` (taxallussiz)
+
+---
+
+### Maxsus marshrutizator strategiyalari
+
+Siz o'zingizning `RouterStrategy` dasturingizni umumiy API orqali ro'yxatdan o'tkazishingiz mumkin:
 
 ```ts
 import {
@@ -767,7 +787,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Yoʻnaltirish mantiqingiz shu yerda
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -782,7 +802,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Soʻngra undan foydalaning:
+Keyin foydalaning:
 
 ```json
 {
@@ -795,18 +815,19 @@ Soʻngra undan foydalaning:
 
 ---
 
-### Yoʻnaltiruvchi strategiyani tanlash boʻyicha qoʻllanma
+### Router strategiyasini tanlash bo'yicha qo'llanma
 
-| Foydalanish holati        | Strategiya  | Sabab                                            |
-| ------------------------- | ----------- | ------------------------------------------------ |
-| Muvozanatli ish yuklamasi | `rules`     | Standart — barcha omillarni hisobga oladi        |
-| Xarajatni kamaytirish     | `cost`      | Har doim eng arzonini tanlaydi                   |
-| Kechikishni kamaytirish   | `latency`   | Eng tezkor ishonchli provayderni tanlaydi        |
-| Qatʼiy SLO talablar       | `sla-aware` | p95/xato/xarajat chegaralari bo‘yicha filtrlaydi |
-| Ko‘p bosqichli chat       | `lkgp`      | Sessiyaga bog‘liqlik                             |
-| Aralash murakkablik       | `nadir`     | Har bir so‘rov uchun model darajasini tanlaydi   |
+| Foydalanish holati             | Strategiya  | Sabab                                          |
+| ------------------------------ | ----------- | ---------------------------------------------- |
+| Balanslangan ish yuki          | `rules`     | Standart — barcha omillarni hisobga oladi      |
+| Xarajatlarni minimallashtirish | `cost`      | Har doim eng arzonini tanlaydi                 |
+| Kechikishni minimallashtiring  | `latency`   | Eng tezkor ishonchli provayderni tanlaydi      |
+| Qattiq SLOs                    | `sla-aware` | p95/error/cost chegaralari bo‘yicha filtrlar   |
+| Ko'p burilishli chat           | `lkgp`      | Sessiyaning yopishqoqligi                      |
+| Aralash qiyinchilik            | `nadir`     | Har bir taklif uchun model darajasini tanlaydi |
+| O'z tasniflagichi              | `decision`  | Sizning qaroringiz modelni tanlaydi            |
 
-SLA-aware maydonlari:
+SLA-dan xabardor maydonlar:
 
 ```json
 {

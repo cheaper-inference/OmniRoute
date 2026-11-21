@@ -82,18 +82,19 @@ logib `listMarketplacePlugins()` hoiatuse ja kasutab algloendit.
 
 Kõik lõpp-punktid nõuavad haldamise autentimist (`requireManagementAuth`)** ja** on ainult loopback — `/api/plugins` ja `/api/plugins/` on loetletud `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Lõpp-punkt                       | meetod | Kirjeldus                                                                        |
-| -------------------------------- | ------ | -------------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Loetlege installitud pistikprogrammid (valikuline `?status=` filter)             |
-| `/api/plugins`                   | POST   | Installige pistikprogrammi allikate kataloogist                                  |
-| `/api/plugins/scan`              | POST   | Kontrollige pistikprogrammide kataloogi ja registreerige uued pluginad           |
-| `/api/plugins/marketplace`       | GET    | Loetlege turuplatsi kataloogi kirjed                                             |
-| `/api/plugins/[name]`            | GET    | Hankige installitud pistikprogrammi üksikasjad                                   |
-| `/api/plugins/[name]`            | DELETE | Desinstallige pistikprogramm                                                     |
-| `/api/plugins/[name]/activate`   | POST   | Aktiveeri (laadige + registrikonksud)                                            |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiveerimine (tulekahju `onDeactivate`, konksude registreerimisest loobumine) |
-| `/api/plugins/[name]/config`     | GET    | Hankige pistikprogrammi konfiguratsioon + konfiguratsiooniskeem                  |
-| `/api/plugins/[name]/config`     | PUT    | Värskenda pistikprogrammi konfiguratsiooni (valideeritud skeemi alusel)          |
+| Lõpp-punkt                         | meetod | Kirjeldus                                                                        |
+| ---------------------------------- | ------ | -------------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Loetlege installitud pistikprogrammid (valikuline `?status=` filter)             |
+| `/api/plugins`                     | POST   | Installige pistikprogrammi allikate kataloogist                                  |
+| `/api/plugins/scan`                | POST   | Kontrollige pistikprogrammide kataloogi ja registreerige uued pluginad           |
+| `/api/plugins/marketplace`         | GET    | Loetlege turuplatsi kataloogi kirjed                                             |
+| `/api/plugins/marketplace/install` | POST   | Installige Marketplace'i pistikprogramm nime järgi                               |
+| `/api/plugins/[name]`              | GET    | Hankige installitud pistikprogrammi üksikasjad                                   |
+| `/api/plugins/[name]`              | DELETE | Desinstallige pistikprogramm                                                     |
+| `/api/plugins/[name]/activate`     | POST   | Aktiveeri (laadige + registrikonksud)                                            |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiveerimine (tulekahju `onDeactivate`, konksude registreerimisest loobumine) |
+| `/api/plugins/[name]/config`       | GET    | Hankige pistikprogrammi konfiguratsioon + konfiguratsiooniskeem                  |
+| `/api/plugins/[name]/config`       | PUT    | Värskenda pistikprogrammi konfiguratsiooni (valideeritud skeemi alusel)          |
 
 Filter `GET /api/plugins` `status` aktsepteerib ühte järgmistest: `installed` / `active` / `inactive` / `error`. Kehtetu väärtus tagastab `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` peab olema an** absoluutne** tee kataloogi** plugina allikate kataloogis** : `plugin-sources` pistikprogrammi juure kõrval, seega vaikimisi `~/.omniroute/plugin-sources/` või `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`, kui see muutuja on määratud (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Esmalt kopeerige või kloonige plugin sinna. Paigaldamisest keeldutakse `400`, kui tee sisaldab `..` või nullbaiti, asub väljaspool seda kataloogi, lahendatakse sellest väljaspool sümlingi kaudu, sisaldab sümbollinki, mille sihtmärk on sellest väljaspool, või kui kataloogi pole olemas. Lähtekataloog peab sisaldama kehtivat `plugin.json` (või olema selle emakataloog). Edu korral on vastuseks installitud pistikprogrammi rea `201`.
 
-Erinevalt teistest pistikprogrammide marsruutidest nõuab see haldusmandaati (armatuurlaua seanss või hallatava ulatusega API võti) isegi siis, kui sisselogimine on keelatud (`requireLogin=false`): koodi installimine ei ole kunagi anonüümne toiming.
+Erinevalt teistest pistikprogrammide marsruutidest nõuab see haldusmandaati (armatuurlaua seanss või hallatava ulatusega API võti) isegi siis, kui sisselogimine on keelatud (`requireLogin=false`): koodi installimine ei ole kunagi anonüümne toiming. Sama kehtib `POST /api/plugins/marketplace/install` (keha `{ "name": "<plugin>" }`) kohta.
 
 ### Sirvige turgu
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` kontrollib iga antud väärtust pistikprogrammi `configSchema` suhtes (mis on deklareeritud manifestis): `number` väljad austavad `min`/`max`, `select` väljad peavad ühtima deklareeritud `enum`. Skeemis puuduvad võtmed on lubatud.
+`PUT .../config` validates the body against the plugin's `configSchema` (declared in the manifest) with `validatePluginConfig()` from `src/lib/plugins/manifest.ts`: every key must be declared in the schema, values must match the declared type, `number` fields honor `min`/`max`, and `select` fields must match the declared `enum`. Any violation returns `400` and nothing is stored. A plugin that declares no `configSchema` has no configurable keys, so the request is refused with `400` ("Plugin does not declare any configurable keys").
 
 ## Konfiguratsioon
 
@@ -212,14 +213,14 @@ Kummagi kihi ebaõnnestunud URL ei katkesta taotlust. — turg langeb vaikselt t
 
 ### Plugina täitmise isoleerimine
 
-> **Pluginad ei ole liivakastis.** Laps on tavaline Node.js protsess, mis töötab OmniRoute kasutajana, ilma VM konteksti ja Node.js -lubadeta, seega saab pistikprogrammi kood lugeda ja kirjutada mis tahes faile, mida kasutaja saab, käivitada programme ja jõuda võrku. `requires.permissions` otsustab ainult, millised keskkonnamuutujad laps saab; teisi õigusi ei jõustata. Installige ainult usaldusväärsed pistikprogrammid. Allpool olev protsessipiir sisaldab kokkujooksmisi ja hangumist; see ei ole turvapiir.
+> **Pistikprogrammid ei ole vaikimisi liivakastis.** Laps on tavaline Node.js protsess, mis töötab OmniRoute kasutajana, ilma VM konteksti ja Node.js -lubadeta, seega saab pistikprogrammi kood lugeda ja kirjutada mis tahes faile, mida kasutaja saab, käivitada programme ja jõuda võrku. `requires.permissions` otsustab ainult, millised keskkonnamuutujad laps saab; teisi õigusi ei jõustata. Valitud `PLUGIN_PERMISSION_MODEL_ENABLED` -funktsiooni lipp (vaikimisi välja lülitatud) käivitab iga pistikprogrammi Node.js -lubade mudeli alusel, mis on ehitatud nendest õigustest, välja arvatud `network`, mida Node.js ei saa piirata (vt [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Installige ainult usaldusväärsed pistikprogrammid. Allpool olev protsessipiir sisaldab kokkujooksmisi ja hangumist; see ei ole turvapiir.
 
 - **Protsessi isoleerimine** — `loadPlugin()` (`src/lib/plugins/loader.ts`) loob iga pistikprogrammi eraldi Node.js alamprotsessina ja suhtleb IPC kaudu. Konkskõnedel on ajalõpp koos `SIGTERM` → `SIGKILL` eskalatsiooniga.
 - **Env lubade loend** — laps saab ainult lubatud keskkonnamuutujate komplekti; laiem komplekt antakse ainult siis, kui manifest nõuab `env` luba.
 - **Installige allika kaitse** — `POST /api/plugins` loeb ainult pistikprogrammi allikate kataloogist (vt "Installi kohalikult teelt"): tee kanoniseeritakse `realpath`, see peab jääma rangelt sellesse kataloogi ja lähtepuust, mis kannab sümboli linki, mis sellest välja pääseb, keeldutakse enne kui midagi kopeeritakse.
 - **Tee piiramine** — install/upgrade/uninstall kinnitab, et pistikprogrammide kataloog ja `manifest.main` lahendavad** sees** hallatava pistikprogrammi juur enne mis tahes kopeerimist või rekursiivset kustutamist (kaitseb rikutud DB teede ja `../` läbipääsu eest `manifest.main` is). Aktiveerimine lahendab sümbollingid `realpath` kaudu ja keeldub laadimast sisenemispunkti, mis väljub pistikprogrammide kataloogist.
 - **Valikuline terviklikkuse tihvt** — manifest võib deklareerida välja `integrity` (`sha256-<base64>`, SRI vorming). Kui see on olemas, kontrollib laadija sisestusfaili räsi laadimise ajal ja keeldub mittevastavuse korral aktiveerimast. See on lubatav võltsimise tuvastamine,** mitte** turvapiir: see ei piira seda, mida laaditud pistikprogramm saab teha.
-- **Kliendi mandaate pole konksus** — `onRequest`, `onResponse` ja `onError` edastatud kontekstist on eemaldatud päised `authorization`, `x-api-key`, `proxy-authorization` ja `cookie` ning API võtmekirje ei kanna võtmeväärtust (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
+- **Konksus pole kliendi mandaate** — `onRequest`, `onResponse` ja `onError` edastatud kontekstist on eemaldatud päised `authorization`, `x-api-key`, `proxy-authorization` ja `cookie` ning API võtmekirje ei kanna võtmeväärtust (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 

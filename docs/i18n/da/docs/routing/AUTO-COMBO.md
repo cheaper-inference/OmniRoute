@@ -447,56 +447,47 @@ Det betyder, at **tilføjelse af en ny udbyder med `auto/*` aktiveret automatisk
 
 ## API
 
-Der findes **ikke noget dedikeret `POST /api/combos/auto`-slutpunkt** — Auto-Combo bruges på to måder:
+Der er** intet dedikeret `POST /api/combos/auto` endepunkt** — Auto-Combo forbruges på to måder:
 
-1. **Uden konfiguration (anbefalet):** Send en vilkårlig chatfuldførelsesanmodning med `model: "auto"` eller `model: "auto/<variant>"`. Den virtuelle fabrik opbygger kombinationen for hver anmodning — ingen persistens eller API-kald er nødvendige.
+1. **Zero-config (anbefalet):** Send enhver anmodning om fuldførelse af chat med `model: "auto"` eller `model: "auto/<variant>"`. Den virtuelle fabrik bygger kombinationen pr. anmodning — ingen persistens, ingen API -opkald er nødvendige.
 
-2. **Persistent kombination med `strategy: "auto"`:** Opret en almindelig kombination via `POST /api/combos`, og angiv `strategy: "auto"` samt `config.auto.weights` / `config.auto.candidatePool`. Den samme scoringsmotor bruges; kombinationen gemmes i `combos` og kan genbruges via ID.
+2. **Vedvarende kombination med `strategy: "auto"`:** Opret en almindelig combo via `POST /api/combos` og indstil `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Den samme scoringsmotor bruges; kombinationen er gemt i `combos` og kan genbruges af ID.
 
-Til registrering viser `GET /api/combos/auto` alle varianter med deres evaluerede kandidatpulje samt `context_length` / `max_output_tokens` — MAKSIMUM på tværs af kandidatpuljens vinduer. Klienter (f.eks. opencode-pluginet) skal annoncere disse værdier i stedet for `0`: En kontekst på nul deaktiverer fuldstændigt opencodes automatiske komprimering, så sessioner kan vokse, indtil gatewayens oprydning af historikken ødelægger konteksten. Det er sikkert at annoncere MAKSIMUM, fordi auto-kombinationens kontekstforfilter sender for store anmodninger til kandidater med store vinduer.
+For at opdage, lister `GET /api/combos/auto` hver variant med dens løste kandidatpulje plus `context_length` / `max_output_tokens` — MAX på tværs af kandidatpuljens vinduer. Klienter (f.eks. opencode-pluginnet) skal reklamere for disse værdier i stedet for `0`: en nul-kontekst deaktiverer opencodes automatiske komprimering fuldstændigt og lader sessioner vokse, indtil gatewayens historierensning ødelægger konteksten. MAX er sikkert at annoncere, fordi forfilteret for autokombinationskontekst dirigerer overdimensionerede anmodninger til kandidater med store vinduer.
 
 ```bash
-# Brug uden konfiguration (ingen oprettelse af kombination)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Persistent automatisk kombination via det almindelige kombinationsslutpunkt
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Strategier for automatisk routing
+### Auto router strategier
 
-Persistente kombinationer med `strategy: "auto"` kan angive `config.routerStrategy` (eller det ældre
-`config.auto.routerStrategy`) til én af følgende:
+Vedvarende `strategy: "auto"` -kombinationer kan indstille `config.routerStrategy` (eller legacy `config.auto.routerStrategy`) til en af:
 
-- `rules` — vægtet standardscoring
-- `score` — vælger den højeste konfigurerede vægtede score. Ved helt ens scorer bevares den konfigurerede
-  kandidatrækkefølge; den eksisterende `explorationRate` udtager stikprøver fra hele den rangerede pulje.
+- `rules` — standard vægtet scoring
+- `score` — vælger den højest konfigurerede vægtede score. Præcise bånd bevarer konfigureret kandidatrækkefølge; de eksisterende `explorationRate` -prøver fra den fulde rangerede pulje.
 - `cost` / `eco` — billigste sunde udbyder
-- `latency` / `fast` — laveste p95-latenstid med straf for manglende pålidelighed
-- `sla-aware` / `sla` — foretrækker kandidater, som opfylder SLO'er for p95-latenstid, fejlrate og valgfrie
-  omkostninger
-- `lkgp` — senest kendte fungerende udbyder først
-- `nadir` — spørg [Nadirs](https://getnadir.com) beslutnings-API, hvilken model i puljen prompten
-  kræver; aktivt tilvalg, og ved fejl fortsættes med `rules`
+- `latency` / `fast` — laveste p95 latency med pålidelighedsstraf
+- `sla-aware` / `sla` — foretrækker kandidater, der opfylder p95 latency, fejlrate og valgfri pris SLOs
+- `lkgp` — sidst kendte gode udbyder først
+- `nadir` — spørg [Nadirs](https://getnadir.com) beslutning API hvilken model i puljen prompten har brug for; opt-in, fail-open til `rules`
+- `decision` — spørg en konfigureret beslutter (TypeSafe System One, din egen beslutning URL, eller en af comboens egne modeller), hvilken model i puljen der passer til anmodningen; bag standard-off `COMBO_DECISION_ROUTER_ENABLED` flag, fail-open til `rules`
 
-### Routingstrategier i detaljer
+### Routerstrategier i detaljer
 
-Auto-kombinationsmotoren eksponerer 7 udskiftelige **RouterStrategy**-implementeringer, som
-du kan skifte mellem via `config.routerStrategy` (eller det ældre `config.auto.routerStrategy`).
-Hver strategi vælger én udbyder fra kandidatpuljen ud fra en `RoutingContext`
-(opgavetype, værktøjs-/billedindikatorer, tokenestimat, valgfri SLA-politik og valgfri
-senest kendte fungerende udbyder).
+Den automatiske kombinationsmotor viser 7 pluggbare**RouterStrategy** implementeringer, som du kan bytte via `config.routerStrategy` (eller den gamle `config.auto.routerStrategy`). Hver strategi vælger én udbyder fra kandidatpuljen, givet en `RoutingContext` (opgavetype, tool/vision -tip, token-estimat, valgfri SLA politik, valgfri sidst kendte-god udbyder).
 
-#### 1. `rules` (standard) — vægtet scoring med 16 faktorer
+#### 1. `rules` (standard) — 16-faktor vægtet scoring
 
-Indkapsler den eksisterende scoringsmotor. Filtrerer kandidater med en `OPEN`-afbryder
-fra og kører derefter `scorePool()` med den aktuelle opgavetype og `getTaskFitness()`,
-hvorefter udbyderen med den højeste score vælges.
+Omslutter den eksisterende scoringsmotor. Filtrerer `OPEN` -afbryderkandidater fra, og kører derefter `scorePool()` med den aktuelle opgavetype og `getTaskFitness()` og vælger den bedste udbyder.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -516,16 +507,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Hvornår den skal bruges**: Standard. Brug den, når du ønsker en afbalanceret afvejning på tværs af alle signaler.
+**Hvornår skal bruges** : Standard. Brug, når du ønsker en afbalanceret afvejning på tværs af alle signaler.
 
-**Alias**: `rules` (intet alias)
+**Alias** : `rules` (ingen alias)
 
 ---
 
 #### 2. `cost` / `eco` — billigste sunde udbyder
 
-Sorterer kandidatpuljen efter `costPer1MTokens` (stigende) og vælger den billigste.
-Filtrerer først kandidater med `OPEN` fra.
+Sorterer kandidatpuljen efter `costPer1MTokens` (stigende) og vælger den billigste. Filtrerer `OPEN` kandidater først.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -540,16 +530,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Hvornår den skal bruges**: Omkostningsfølsomme arbejdsbelastninger, batchbehandling eller baggrundsjob.
+**Hvornår skal bruges** : Omkostningsfølsomme arbejdsbelastninger, batchbehandling eller baggrundsjob.
 
-**Aliasser**: `cost`, `eco`
+**Aliaser** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — laveste p95-latenstid med straf for manglende pålidelighed
+#### 3. `latency` / `fast` — laveste p95 latency med pålidelighedsstraf
 
-Sorterer efter `p95LatencyMs + (errorRate * 1000)`. Straffen for fejlraten sikrer,
-at upålidelige udbydere rangeres lavere, selv hvis deres nominelle latenstid er lav.
+Sorterer efter `p95LatencyMs + (errorRate * 1000)`. Fejlratestraffen sikrer, at upålidelige udbydere rangeres lavere, selvom deres nominelle latenstid er lav.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -566,28 +555,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Hvornår den skal bruges**: Latenstidsfølsomme arbejdsbelastninger såsom chat i realtid, autofuldførelse eller
-interaktive kodeassistenter.
+**Hvornår skal bruges** : Latency-følsomme arbejdsbelastninger som chat i realtid, autofuldførelse eller interaktive kodningsassistenter.
 
-**Aliasser**: `latency`, `fast`
+**Aliaser** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — overholdelse af SLO'er for latenstid, fejl og omkostninger
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO overholdelse
 
-Giver hver kandidat en score efter, hvor godt den opfylder den konfigurerede SLO-politik:
+Scorer hver kandidat efter, hvor godt den opfylder den konfigurerede SLO politik:
 
 | Faktor           | Vægt | Formel                                                 |
 | ---------------- | ---- | ------------------------------------------------------ |
-| Latensscore      | 35%  | `threshold / max(value, ε)`                            |
+| Latency score    | 35%  | `threshold / max(value, ε)`                            |
 | Fejlscore        | 35%  | `threshold / max(value, ε)`                            |
 | Sundhedsscore    | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)      |
 | Omkostningsscore | 10%  | `threshold / max(value, ε)` eller omvendt normaliseret |
-| Stabilitetsscore | 5%   | omvendt normaliseret standardafvigelse for latens      |
+| Stabilitetsscore | 5%   | invers normaliseret latens stddev                      |
 
-Når `hardConstraints: true`, sorteres kandidaterne primært efter **overtrædelsesscore**
-(hvor meget de overskrider en given SLO) og derefter efter samlet score. Ellers bruges
-kun den samlede score.
+Når `hardConstraints: true` sorteres kandidater primært efter** overtrædelsesscore** (hvor langt de overstiger enhver SLO), derefter ved sammensat score. Ellers er det bare det sammensatte partitur.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -596,12 +582,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... scorer hver kandidat i forhold til politikken: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA-felter** (angives i kombinationskonfigurationen):
+**SLA felter** (indstillet på combo-konfigurationen):
 
 ```json
 {
@@ -616,17 +602,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Hvornår den skal bruges**: Produktionsbelastninger med strenge budgetter for latens, fejlrate eller omkostninger.
+**Hvornår skal bruges** : Produktionsarbejdsbelastninger med streng latenstid, fejlfrekvens eller omkostningsbudgetter.
 
-**Aliasser**: `sla-aware`, `sla`
+**Aliaser** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — senest kendte velfungerende udbyder først
+#### 5. `lkgp` — sidst kendte gode udbyder først
 
-Forsøger først med den **senest kendte velfungerende udbyder** (hvis angivet) og falder derefter tilbage til
-`rules`-strategien. Nyttig til sessionstilknytning — den samme udbyder håndterer
-opfølgende anmodninger i en samtale.
+Prøver** sidst kendte gode udbyder** (hvis indstillet) først, falder derefter tilbage til `rules` strategien. Nyttigt for session klæbrig — den samme udbyder håndterer opfølgningsanmodninger i en samtale.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -647,27 +631,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Fald tilbage til rules-strategien
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Hvornår den skal bruges**: Samtaler med flere runder, hvor den samme udbyder skal håndtere
-opfølgende anmodninger (f.eks. med henblik på caching, kontekstsammenhæng eller ensartet prissætning).
+**Hvornår skal bruges** : Multi-turn-samtaler, hvor du ønsker, at den samme udbyder skal håndtere opfølgningsanmodninger (f.eks. for caching, kontekstkontinuitet eller priskonsistens).
 
-**Alias**: `lkgp` (intet alias)
+**Alias** : `lkgp` (ingen alias)
 
 ---
 
-#### 6. `nadir` — promptbevidst modelvalg via Nadir
+#### 6. `nadir` — prompt-bevidst modelvalg via Nadir
 
-Alle ovenstående strategier rangerer kandidaterne ud fra deres egen telemetri; ingen af dem læser
-anmodningen. `nadir` sender den seneste brugerbesked samt puljens model-id'er til
-[Nadirs](https://getnadir.com) beslutnings-API (`POST /v1/bucket`) og dirigerer til den model,
-som Nadir vælger fra denne menu (`simple` → den billigste egnede model, `complex` → den
-førende model). Forbindelsen, der leverer denne model, vælges stadig af `rules`, så kvote,
-sundhed og omkostninger fortsat afgør, hvilken konto der bruges.
+Hver strategi ovenfor rangerer kandidaterne efter deres egen telemetri; ingen af dem læser anmodningen. `nadir` sender den sidste brugertur plus puljens model-id'er til [Nadirs](https://getnadir.com) beslutning API (`POST /v1/bucket`) og ruter til den model, Nadir vælger fra den menu (`simple` → den billigste model, `complex` → den grænsende). Forbindelsen, der tjener den model, vælges stadig af `rules`, så kvote, sundhed og omkostninger bliver ved med at bestemme hvilken konto.
 
 ```json
 {
@@ -683,34 +661,75 @@ sundhed og omkostninger fortsat afgør, hvilken konto der bruges.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` og `OMNIROUTE_NADIR_BASE_URL` er miljøvariabler, der fungerer som fallback for de to
-strenge. `baseUrl` er kun nødvendig for en selvhostet Nadir (et afsluttende `/v1` accepteres).
-Kald uden nøgle ender på Nadirs anonyme niveau, som er hastighedsbegrænset pr. IP-adresse. Med en nøgle
-([opret en](https://app.getnadir.com/dashboard/api-keys)) logføres hver beslutning
-på dit Nadir-dashboard. Fuld opsætning og bekræftelse:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` og `OMNIROUTE_NADIR_BASE_URL` er env-faldbacks for de to strenge. `baseUrl` er kun nødvendig for en selv-hostet Nadir (en efterfølgende `/v1` tolereres). Nøgleløse opkald lander på Nadirs anonyme niveau, som er takstbegrænset pr IP. Med en nøgle ( [opret en](https://app.getnadir.com/dashboard/api-keys) ) logges hver beslutning til dit Nadir-dashboard. Fuld opsætning og verifikation: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Dette forlader systemet: teksten i den seneste brugerbesked (de første 16.000 tegn), kandidatmodellernes
-id'er og et `source: "omniroute"`-kanalmærke. Ingen systemprompt, historik, værktøjer eller
-headere.
+Hvad forlader boksen: den sidste brugermeddelelses tekst (første 16.000 tegn), kandidatmodel-id'erne og et `source: "omniroute"` -kanaltag. Ingen systemprompt, historik, værktøjer eller overskrifter.
 
-Fejladfærden er fail-open: En timeout (som standard 2000 ms), en ikke-2xx-status, en utilgængelig
-vært, et ugyldigt svar eller et valg uden for puljen medfører en `rules`-beslutning,
-og årsagen får præfikset `NadirStrategy: fallback (…)`. Efter et mislykket kald
-springer strategien netværket over i 30 sekunder, så et nedbrud koster én timeout pr. 30 sekunder i stedet for
-én pr. anmodning. Routinghændelser rapporterer kun `strategy: "nadir"`, når Nadir faktisk traf
-valget.
+Fejladfærd er fail-open: en timeout (standard 2000 ms), en non-2xx, en vært, der ikke kan nås, et forkert udformet svar eller et valg uden for puljen løser `rules` beslutningen, og årsagen er foranstillet `NadirStrategy: fallback (…)`. Efter et mislykket opkald springer strategien netværket over i 30 s, så et udfald koster en timeout pr. 30 s i stedet for en pr. anmodning. Routing-hændelser rapporterer kun `strategy: "nadir"`, når Nadir faktisk har truffet valget.
 
-**Hvornår den skal bruges**: Trafik med blandet sværhedsgrad i en pulje, der spænder over flere modelniveauer (en lille, en mellemstor
-og en førende model), hvor du ønsker at reducere omkostningerne ved altid at bruge den førende model.
+**Hvornår skal bruges** : trafik med blandet sværhedsgrad på en pulje, der spænder over modelniveauer (en lille, en mellem- og en grænsemodel), hvor altid-grænse er den omkostning, du vil skære ned.
 
-**Alias**: `nadir` (intet alias)
+**Alias** : `nadir` (ingen alias)
+
+---
+
+#### 7. `decision` — pluggable beslutter vælger modellen
+
+`decision` spørger a** bestemmer** hvilken model i puljen, der passer til anmodningen, indsnævrer derefter puljen til den model og lader `rules` vælge forbindelsen (kvote, sundhed og omkostninger stadig vælge kontoen). Beslutningen indstilles i kombinationens beslutningsblok — `config.decision` når routerknapperne sidder øverst på `config` (hvad dashboardet skriver), eller `config.auto.decision` ved siden af `config.auto.routerStrategy`:
+
+| `decider`     | Hvem svarer                                                                                                                | Behov                                            |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standardmodel `jev-latest`                              | en `typesafe` forbindelse eller env-nøglen       |
+| `http`        | din egen beslutning ved `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) eller `"openai-chat"` (chatafslutninger) | `baseUrl` + `model`; nøgle valgfri               |
+| `combo-model` | en af dine udbydermodeller, kaldet i proces ligesom fusionsdommeren                                                        | `model` som `provider/model` (ingen kombination) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Felter (valideret af et strengt skema ved gem og igen på anmodningstidspunkt):
+
+- `decider` — `systemone`, `http` eller `combo-model`.
+- `model` — TypeSafe -model, beslutningsmodellen på din URL eller `provider/model` for et combo-model-kald (op til 200 tegn).
+- `baseUrl` — kun `http` : en `http(s)` URL op til 500 tegn, uden legitimationsoplysninger, forespørgsel eller fragment. En URL der peger på denne OmniRoute (loopback + `PORT`), afvises.
+- `wire` — kun `http` : `systemone` (standard) eller `openai-chat`.
+- `connectionId` — den lagrede forbindelse, hvis nøgle bruges (kun inden for den kaldende API nøgles tilladte forbindelser). Uden den læser `systemone` en `typesafe` forbindelse, og hver netværksbeslutning falder tilbage til `OMNIROUTE_DECISION_API_KEY`. Der er intet `apiKey` felt: en nøgle gemmes aldrig i en kombination.
+- `timeoutMs` — heltal, 100–5000, standard 2000.
+- `minConfidence` — 0-1; et svar med lavere konfidens falder tilbage til `rules` (en beslutter, der rapporterer manglende tillid, tæller som 0).
+- `descriptions` — op til 50 indgange (tast op til 300, tekst op til 1000 tegn), tastet af model-id eller `provider/model`; uaktiverede poster får en genereret omkostningsrangeringsbeskrivelse.
+
+**Flag.** `COMBO_DECISION_ROUTER_ENABLED` (standard `false`) porter hver beslutningstager. Mens den er slået fra, læser en `decision` kombination ingen legitimationsoplysninger, foretager ingen opkald og ruter med `rules`; loggen siger `fallback (disabled)`. En gemt nøgle alene tænder den aldrig. Kombinationer uden beslutningsblok påvirkes overhovedet ikke.
+
+**Hvad forlader kassen.** Kun teksten i den sidste brugermeddelelse (op til 8000 tegn; chat/Claude `messages` eller Responses `input`) og menuen med model-id'er med deres beskrivelser. Aldrig systemprompten, svar `instructions`, værktøjer, historik, overskrifter eller kontodata. Netværksopkald går gennem udbyderens udgående vagt uden genforsøg, ingen omdirigeringer og et svarloft på 64 KB. `combo-model` opkaldet er ikke-streaming, værktøjsfrit, `temperature: 0`, med et budget på 256 tokens; en beslutning påbegyndt i et beslutningsopkald afvises.
+
+**Fejladfærd** er fejlåben: enhver fejl løser sig efter `rules` beslutningen, og årsagen lyder `decision(<decider>): fallback (<reason>)`, med `<reason>` en af `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` `no_user_text`. Efter en timeout, HTTP fejl eller netværksfejl springes slutpunktet over i 30 s. Et vellykket valg læser `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ingen URL, nøgle, prompt eller upstream body når loggen.
+
+Kombinationsbyggeren viser disse felter, når routerstrategien er `decision`, med de genererede beskrivelser som pladsholdere og en** Test beslutning** knap, der kalder `POST /api/combos/decision-preview` én gang med de ikke-gemte indstillinger (samme flag).
+
+**Hvornår skal bruges** : Trafik med blandet sværhedsgrad, hvor du vil have niveauet valgt pr. anmodning af en klassificering, du vælger, ikke specifikt af Nadir.
+
+**Alias** : `decision` (ingen alias)
 
 ---
 
 ### Brugerdefinerede routerstrategier
 
-Du kan registrere din egen implementering af `RouterStrategy` via det offentlige API:
+Du kan registrere din egen `RouterStrategy` implementering via den offentlige API:
 
 ```ts
 import {
@@ -723,7 +742,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Din routinglogik her
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -738,7 +757,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Brug den derefter:
+Så brug det:
 
 ```json
 {
@@ -753,14 +772,15 @@ Brug den derefter:
 
 ### Vejledning til valg af routerstrategi
 
-| Anvendelsestilfælde          | Strategi    | Begrundelse                                      |
-| ---------------------------- | ----------- | ------------------------------------------------ |
-| Balanceret arbejdsbelastning | `rules`     | Standard — tager højde for alle faktorer         |
-| Minimer omkostninger         | `cost`      | Vælger altid den billigste                       |
-| Minimer latenstid            | `latency`   | Vælger den hurtigste pålidelige udbyder          |
-| Strenge SLO'er               | `sla-aware` | Filtrerer efter tærskler for p95/fejl/omkostning |
-| Chat med flere dialogrunder  | `lkgp`      | Sessionsfastholdelse                             |
-| Varierende sværhedsgrad      | `nadir`     | Vælger modelniveauet for hver prompt             |
+| Use case                  | Strategi    | Årsag                                        |
+| ------------------------- | ----------- | -------------------------------------------- |
+| Afbalanceret arbejdsbyrde | `rules`     | Standard — tager alle faktorer i betragtning |
+| Minimer omkostningerne    | `cost`      | Vælger altid det billigste                   |
+| Minimer latenstid         | `latency`   | Vælger den hurtigste pålidelige udbyder      |
+| Streng SLOs               | `sla-aware` | Filtrerer efter p95/error/cost -tærskler     |
+| Multi-turn chat           | `lkgp`      | Session klæbrighed                           |
+| Blandet sværhedsgrad      | `nadir`     | Vælger modelniveauet pr. prompt              |
+| Egen klassificerer        | `decision`  | Din beslutningstager vælger modellen         |
 
 SLA-bevidste felter:
 

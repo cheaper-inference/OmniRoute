@@ -84,18 +84,19 @@ obsah, `listMarketplacePlugins()` zaznamená upozornění a použije základní 
 
 Všechny koncové body vyžadují ověření správy (`requireManagementAuth`)** a** jsou pouze pro zpětnou smyčku — `/api/plugins` a `/api/plugins/` jsou uvedeny v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Koncový bod                      | Metoda | Popis                                                           |
-| -------------------------------- | ------ | --------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Seznam nainstalovaných pluginů (volitelný filtr `?status=` )    |
-| `/api/plugins`                   | POST   | Nainstalujte plugin z adresáře zdrojů pluginů                   |
-| `/api/plugins/scan`              | POST   | Prohledejte adresář pluginů a zaregistrujte nové pluginy        |
-| `/api/plugins/marketplace`       | GET    | Seznam položek katalogu tržiště                                 |
-| `/api/plugins/[name]`            | GET    | Získejte podrobnosti o nainstalovaném pluginu                   |
-| `/api/plugins/[name]`            | DELETE | Odinstalujte plugin                                             |
-| `/api/plugins/[name]/activate`   | POST   | Aktivovat (načíst háčky registru + )                            |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivovat (vystřelit `onDeactivate`, zrušit registraci háčků) |
-| `/api/plugins/[name]/config`     | GET    | Získejte konfiguraci pluginu + konfigurační schéma              |
-| `/api/plugins/[name]/config`     | PUT    | Aktualizovat konfiguraci pluginu (ověřeno podle schématu)       |
+| Koncový bod                        | Metoda | Popis                                                           |
+| ---------------------------------- | ------ | --------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Seznam nainstalovaných pluginů (volitelný filtr `?status=` )    |
+| `/api/plugins`                     | POST   | Nainstalujte plugin z adresáře zdrojů pluginů                   |
+| `/api/plugins/scan`                | POST   | Prohledejte adresář pluginů a zaregistrujte nové pluginy        |
+| `/api/plugins/marketplace`         | GET    | Seznam položek katalogu tržiště                                 |
+| `/api/plugins/marketplace/install` | POST   | Nainstalujte plugin tržiště podle názvu                         |
+| `/api/plugins/[name]`              | GET    | Získejte podrobnosti o nainstalovaném pluginu                   |
+| `/api/plugins/[name]`              | DELETE | Odinstalujte plugin                                             |
+| `/api/plugins/[name]/activate`     | POST   | Aktivovat (načíst háčky registru + )                            |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktivovat (vystřelit `onDeactivate`, zrušit registraci háčků) |
+| `/api/plugins/[name]/config`       | GET    | Získejte konfiguraci pluginu + konfigurační schéma              |
+| `/api/plugins/[name]/config`       | PUT    | Aktualizovat konfiguraci pluginu (ověřeno podle schématu)       |
 
 Filtr `GET /api/plugins` `status` přijímá jeden z `installed` / `active` / `inactive` / `error`. Neplatná hodnota vrátí `400`.
 
@@ -115,9 +116,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` musí být an** absolutní** cesta k adresáři** uvnitř adresáře zdrojů pluginů** : `plugin-sources` vedle kořenového adresáře pluginu, takže `~/.omniroute/plugin-sources/` ve výchozím nastavení nebo `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` když je tato proměnná nastavena (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Nejprve tam zkopírujte nebo naklonujte plugin. Instalace je odmítnuta pomocí `400`, pokud cesta obsahuje `..` nebo prázdný bajt, leží mimo tento adresář, řeší se mimo něj prostřednictvím symbolického odkazu, obsahuje symbolický odkaz, jehož cíl je mimo něj, nebo když adresář neexistuje. Zdrojový adresář musí obsahovat platné `plugin.json` (nebo být jeho rodičem). Po úspěchu je odpověď `201` s nainstalovaným řádkem pluginu.
+`path` musí být an** absolutní** cesta k adresáři** uvnitř adresáře zdrojů pluginů** : `plugin-sources` vedle kořenového adresáře pluginu, takže `~/.omniroute/plugin-sources/` ve výchozím nastavení, nebo `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` když je tato proměnná nastavena (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Nejprve tam zkopírujte nebo naklonujte plugin. Instalace je odmítnuta pomocí `400`, pokud cesta obsahuje `..` nebo prázdný bajt, leží mimo tento adresář, řeší se mimo něj prostřednictvím symbolického odkazu, obsahuje symbolický odkaz, jehož cíl je mimo něj, nebo když adresář neexistuje. Zdrojový adresář musí obsahovat platné `plugin.json` (nebo být jeho rodičem). Po úspěchu je odpověď `201` s nainstalovaným řádkem pluginu.
 
-Na rozdíl od jiných cest zásuvných modulů tato vyžaduje pověření pro správu (relaci řídicího panelu nebo klíč API v rozsahu správy), i když je přihlášení zakázáno (`requireLogin=false`): instalace kódu není nikdy anonymní akcí.
+Na rozdíl od jiných cest zásuvných modulů tato vyžaduje pověření pro správu (relaci řídicího panelu nebo klíč API v rozsahu správy), i když je přihlášení zakázáno (`requireLogin=false`): instalace kódu není nikdy anonymní akcí. Totéž platí pro `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Procházet tržiště
 
@@ -135,7 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` ověřuje každou poskytnutou hodnotu proti `configSchema` pluginu (deklarovanému v manifestu): pole `number` respektují `min`/`max`, pole `select` musí odpovídat deklarovanému `enum`. Klíče, které nejsou ve schématu, jsou povoleny.
+`PUT .../config` ověřuje tělo proti `configSchema` pluginu (deklarovanému v manifestu) pomocí `validatePluginConfig()` z `src/lib/plugins/manifest.ts`: každý klíč musí být deklarován ve schématu, hodnoty musí odpovídat deklarovanému typu, pole `number` respektují `min`/`max` a pole `select` musí odpovídat deklarovanému `enum`. Jakékoli porušení vrátí `400` a nic se neuloží. Plugin, který nedeklaruje žádné `configSchema` nemá žádné konfigurovatelné klíče, takže požadavek je odmítnut pomocí `400` („Plugin nedeklaruje žádné konfigurovatelné klíče“).
 
 ## Konfigurace
 
@@ -212,20 +213,20 @@ Vlastní registr URL je konfigurace ovlivnitelná útočníkem, takže před jeh
    - **Selhání zavřeno** : selhání rozlišení DNS odmítne URL.
 2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): znovu použije ochranu URL pouze pro veřejnost v době načítání a** blokuje přesměrování** (žádný veřejný → soukromý `30x` pivot).
 
-URL která selže na kterékoli vrstvě, nezruší požadavek — tržiště se tiše vrátí do vestavěného registru seed a zaznamená varování.
+A URL that fails either layer does not abort the request — the marketplace silently falls back to the built-in seed registry and logs a warning.
 
 > Tento kryt byl zesílen v PR #3774 speciálně pro vyřešení A + AAAA a použití kanonického `isPrivateHost` místo kontroly IPv4-only.
 
 ### Izolace spuštění pluginu
 
-> **Pluginy nejsou v sandboxu.** Dítě je obyčejný proces Node.js běžící jako uživatel OmniRoute, bez kontextu VM a bez příznaků oprávnění Node.js, takže kód pluginu může číst a zapisovat jakýkoli soubor, který uživatel může, spouštět programy a dostat se do sítě. `requires.permissions` pouze rozhoduje o tom, které proměnné prostředí dítě obdrží; ostatní oprávnění nejsou vynucována. Instalujte pouze pluginy, kterým důvěřujete. Níže uvedená hranice procesu obsahuje selhání a zablokování; není to bezpečnostní hranice.
+> **Pluginy nejsou ve výchozím nastavení v sandboxu.** The child is an ordinary Node.js process running as the OmniRoute user, with no VM context and no Node.js permission flags, so plugin code can read and write any file that user can, run programs and reach the network. `requires.permissions` pouze rozhoduje o tom, které proměnné prostředí dítě obdrží; ostatní oprávnění nejsou vynucována. The opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` feature flag (off by default) runs each plugin under the Node.js permission model built from those permissions, except `network`, which Node.js cannot restrict (see [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Instalujte pouze pluginy, kterým důvěřujete. Níže uvedená hranice procesu obsahuje selhání a zablokování; není to bezpečnostní hranice.
 
 - **Procesní izolace** — `loadPlugin()` (`src/lib/plugins/loader.ts`) vytvoří každý plugin v samostatném podřízeném procesu Node.js a komunikuje přes IPC. Hook hovory mají časový limit s eskalací `SIGTERM` → `SIGKILL`.
 - **Env seznam povolených** — dítě obdrží pouze povolenou sadu proměnných prostředí; širší sada je udělena pouze tehdy, když manifest vyžaduje oprávnění `env`.
-- **Nainstalujte zdrojový obal** — `POST /api/plugins` čte pouze z adresáře zdrojů zásuvných modulů (viz "Instalace z místní cesty"): cesta je kanonizována pomocí `realpath`, musí zůstat přísně uvnitř tohoto adresáře a zdrojový strom obsahující symbolický odkaz, který z něj uniká, je odmítnut, než se cokoli zkopíruje.
+- **Nainstalujte zdrojový obal** — `POST /api/plugins` only reads from the plugin sources directory (see "Install from a local path"): the path is canonicalized with `realpath`, must stay strictly inside that directory, and a source tree carrying a symlink that escapes it is refused before anything is copied.
 - **Zadržování cesty** — install/upgrade/uninstall tvrdí, že adresář pluginu a `manifest.main` se vyřeší** v** spravovaný kořen zásuvného modulu před jakýmkoli kopírováním nebo rekurzivním odstraněním (chrání před zfalšovanými cestami DB a průchodem `../` v `manifest.main`). Aktivace řeší symbolické odkazy přes `realpath` a odmítá načíst vstupní bod, který uniká z adresáře pluginu.
 - **Volitelný kolík integrity** — manifest může deklarovat pole `integrity` (formát `sha256-<base64>`, SRI ). Pokud je přítomen, zavaděč ověří hash vstupního souboru při načítání a odmítne se aktivovat při neshodě. Je to opt-in detekce manipulace,** ne** bezpečnostní hranice: neomezuje to, co může načtený plugin dělat.
-- **Žádné přihlašovací údaje klienta v hácích** — kontext předaný `onRequest`, `onResponse` a `onError` má odstraněné záhlaví `authorization`, `x-api-key`, `proxy-authorization` a `cookie` a záznam klíče API nenese žádnou hodnotu klíče (`redactPluginContext()` v `src/lib/plugins/hooks.ts`).
+- **Žádné přihlašovací údaje klienta v hácích** — the context passed to `onRequest`, `onResponse` and `onError` has the `authorization`, `x-api-key`, `proxy-authorization` and `cookie` headers removed, and the API key record carries no key value (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 

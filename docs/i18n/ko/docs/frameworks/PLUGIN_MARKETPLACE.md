@@ -63,18 +63,19 @@ Dashboard (/dashboard/plugins)
 
 모든 엔드포인트에는 관리 인증(`requireManagementAuth`)이 필요합니다.** 그리고** 루프백 전용입니다. — `/api/plugins` 및 `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`)에 나열되어 있습니다.
 
-| 엔드포인트                       | 방법   | 설명                                                   |
-| -------------------------------- | ------ | ------------------------------------------------------ |
-| `/api/plugins`                   | GET    | 설치된 플러그인 나열(선택적 `?status=` 필터)           |
-| `/api/plugins`                   | POST   | 플러그인 소스 디렉토리에서 플러그인 설치               |
-| `/api/plugins/scan`              | POST   | 플러그인 디렉토리를 스캔하고 새 플러그인을 등록하세요. |
-| `/api/plugins/marketplace`       | GET    | 마켓플레이스 카탈로그 항목 나열                        |
-| `/api/plugins/[name]`            | GET    | 설치된 플러그인 세부정보 가져오기                      |
-| `/api/plugins/[name]`            | DELETE | 플러그인 제거                                          |
-| `/api/plugins/[name]/activate`   | POST   | 활성화( + 레지스터 후크 로드)                          |
-| `/api/plugins/[name]/deactivate` | POST   | 비활성화( `onDeactivate` 실행, 후크 등록 취소)         |
-| `/api/plugins/[name]/config`     | GET    | 플러그인 구성 + 구성 스키마 가져오기                   |
-| `/api/plugins/[name]/config`     | PUT    | 플러그인 구성 업데이트(스키마에 대해 검증됨)           |
+| 엔드포인트                         | 방법   | 설명                                                   |
+| ---------------------------------- | ------ | ------------------------------------------------------ |
+| `/api/plugins`                     | GET    | 설치된 플러그인 나열(선택적 `?status=` 필터)           |
+| `/api/plugins`                     | POST   | 플러그인 소스 디렉토리에서 플러그인 설치               |
+| `/api/plugins/scan`                | POST   | 플러그인 디렉토리를 스캔하고 새 플러그인을 등록하세요. |
+| `/api/plugins/marketplace`         | GET    | 마켓플레이스 카탈로그 항목 나열                        |
+| `/api/plugins/marketplace/install` | POST   | 이름으로 마켓플레이스 플러그인 설치                    |
+| `/api/plugins/[name]`              | GET    | 설치된 플러그인 세부정보 가져오기                      |
+| `/api/plugins/[name]`              | DELETE | 플러그인 제거                                          |
+| `/api/plugins/[name]/activate`     | POST   | 활성화( + 레지스터 후크 로드)                          |
+| `/api/plugins/[name]/deactivate`   | POST   | 비활성화( `onDeactivate` 실행, 후크 등록 취소)         |
+| `/api/plugins/[name]/config`       | GET    | 플러그인 구성 + 구성 스키마 가져오기                   |
+| `/api/plugins/[name]/config`       | PUT    | 플러그인 구성 업데이트(스키마에 대해 검증됨)           |
 
 `GET /api/plugins` `status` 필터는 `installed` / `active` / `inactive` / `error` 중 하나를 허용합니다. 잘못된 값은 `400` 반환합니다.
 
@@ -96,7 +97,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` 다음과 같아야 합니다.** 순수한** 디렉토리 경로** 플러그인 소스 디렉토리 내부** : 플러그인 루트 옆에 `plugin-sources` 있으므로 기본적으로 `~/.omniroute/plugin-sources/` 이거나 해당 변수가 설정된 경우 `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ( `src/lib/plugins/installSource.ts` 의 `getPluginSourcesDir()` ). 먼저 플러그인을 복사하거나 복제하세요. 경로에 `..` 또는 널 바이트가 포함되어 있거나, 해당 디렉토리 외부에 있거나, 심볼릭 링크를 통해 외부에서 확인되거나, 대상이 외부에 있는 심볼릭 링크가 포함되어 있거나, 디렉토리가 존재하지 않는 경우 `400` 로 설치가 거부됩니다. 소스 디렉토리에는 유효한 `plugin.json` 포함되어 있어야 합니다(또는 그 상위 디렉토리여야 합니다). 성공하면 응답은 플러그인 행이 설치된 `201` 입니다.
 
-다른 플러그인 경로와 달리 이 경로에는 로그인이 비활성화된 경우에도(`requireLogin=false`) 관리 자격 증명(대시보드 세션 또는 관리 범위 API 키)이 필요합니다. 코드 설치는 결코 익명 작업이 아닙니다.
+다른 플러그인 경로와 달리 이 경로에는 로그인이 비활성화된 경우에도(`requireLogin=false`) 관리 자격 증명(대시보드 세션 또는 관리 범위 API 키)이 필요합니다. 코드 설치는 결코 익명 작업이 아닙니다. `POST /api/plugins/marketplace/install` (본문 `{ "name": "<plugin>" }`)에도 동일하게 적용됩니다.
 
 ### 마켓플레이스 탐색
 
@@ -114,7 +115,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` 플러그인의 `configSchema` (매니페스트에 선언됨)에 대해 제공된 각 값을 검증합니다. `number` 필드는 `min`/`max` 따르고, `select` 필드는 선언된 `enum` 와 일치해야 합니다. 스키마에 없는 키는 통과가 허용됩니다.
+`PUT .../config` `src/lib/plugins/manifest.ts` 의 `validatePluginConfig()` 사용하여 플러그인의 `configSchema` (매니페스트에 선언됨)에 대해 본문의 유효성을 검사합니다. 모든 키는 스키마에서 선언되어야 하고 값은 선언된 유형과 일치해야 하며, `number` 필드는 `min`/`max` 따르고, `select` 필드는 선언된 `enum` 와 일치해야 합니다. 모든 위반은 `400` 반환하고 아무것도 저장되지 않습니다. `configSchema` 없다고 선언하는 플러그인에는 구성 가능한 키가 없으므로 `400` 에 대한 요청이 거부됩니다("플러그인은 구성 가능한 키를 선언하지 않습니다").
 
 ## 구성
 
@@ -194,7 +195,7 @@ JSON 항목 배열 또는 `plugins` 배열이 있는 객체를 허용합니다. 
 
 ### 플러그인 실행 격리
 
-> **플러그인은 샌드박스 처리되지 않습니다.** 하위 항목은 VM 컨텍스트나 Node.js 권한 플래그가 없는 OmniRoute 사용자로 실행되는 일반 Node.js 프로세스이므로 플러그인 코드는 사용자가 할 수 있는 모든 파일을 읽고 쓸 수 있고, 프로그램을 실행하고 네트워크에 연결할 수 있습니다. `requires.permissions` 자식이 어떤 환경 변수를 받을지 결정합니다. 다른 권한은 적용되지 않습니다. 신뢰할 수 있는 플러그인만 설치하세요. 아래 프로세스 경계에는 충돌 및 정지가 포함되어 있습니다. 이는 보안 경계가 아닙니다.
+> **플러그인은 기본적으로 샌드박스 처리되지 않습니다.** 하위 항목은 VM 컨텍스트나 Node.js 권한 플래그가 없는 OmniRoute 사용자로 실행되는 일반 Node.js 프로세스이므로 플러그인 코드는 사용자가 할 수 있는 모든 파일을 읽고 쓸 수 있고, 프로그램을 실행하고 네트워크에 연결할 수 있습니다. `requires.permissions` 자식이 어떤 환경 변수를 받을지 결정합니다. 다른 권한은 적용되지 않습니다. 옵트인 `PLUGIN_PERMISSION_MODEL_ENABLED` 기능 플래그(기본적으로 꺼져 있음)는 Node.js 제한할 수 없는 `network` 제외하고 해당 권한으로 구축된 Node.js 권한 모델에서 각 플러그인을 실행합니다( [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) 참조). 신뢰할 수 있는 플러그인만 설치하세요. 아래 프로세스 경계에는 충돌 및 정지가 포함되어 있습니다. 이는 보안 경계가 아닙니다.
 
 - **프로세스 격리** — `loadPlugin()` (`src/lib/plugins/loader.ts`)는 별도의 Node.js 하위 프로세스에서 각 플러그인을 생성하고 IPC 통해 통신합니다. 후크 호출은 `SIGTERM` → `SIGKILL` 에스컬레이션으로 인해 시간 초과됩니다.
 - **환경 허용 목록** — 자식은 허용 목록에 있는 환경 변수 세트만 받습니다. 더 넓은 세트는 매니페스트가 `env` 권한을 요청할 때만 부여됩니다.

@@ -500,56 +500,47 @@ Nangangahulugan ito na **ang pagdaragdag ng bagong provider na naka-enable ang `
 
 ## API
 
-**Walang nakalaang `POST /api/combos/auto` endpoint** — ginagamit ang Auto-Combo sa dalawang paraan:
+meron** walang nakalaang `POST /api/combos/auto` endpoint** — Auto-Combo ay ginagamit sa dalawang paraan:
 
-1. **Zero-config (inirerekomenda):** Magpadala ng anumang kahilingan sa chat completion na may `model: "auto"` o `model: "auto/<variant>"`. Binubuo ng virtual factory ang combo para sa bawat kahilingan — hindi kailangan ng persistence o mga API call.
+1. **Zero-config (inirerekomenda):** Magpadala ng anumang kahilingan sa pagkumpleto ng chat gamit ang `model: "auto"` o `model: "auto/<variant>"`. Binubuo ng virtual factory ang combo sa bawat kahilingan — walang pagtitiyaga, walang API na tawag na kailangan.
 
-2. **Naka-persist na combo na may `strategy: "auto"`:** Gumawa ng regular na combo sa pamamagitan ng `POST /api/combos` at itakda ang `strategy: "auto"` kasama ng `config.auto.weights` / `config.auto.candidatePool`. Ginagamit ang parehong scoring engine; iniimbak ang combo sa `combos` at maaari itong muling gamitin ayon sa ID.
+2. **Patuloy na combo na may `strategy: "auto"`:** Gumawa ng regular na combo sa pamamagitan ng `POST /api/combos` at itakda `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Ang parehong scoring engine ay ginagamit; ang combo ay nakaimbak sa `combos` at magagamit muli ng ID.
 
-Para sa discovery, inililista ng `GET /api/combos/auto` ang bawat variant kasama ang na-resolve nitong candidate pool at ang `context_length` / `max_output_tokens` — ang MAX sa lahat ng window ng candidate pool. Dapat i-advertise ng mga client (hal., ang opencode plugin) ang mga value na ito sa halip na `0`: ganap na dini-disable ng zero context ang auto-compaction ng opencode, kaya patuloy na lumalaki ang mga session hanggang sa sirain ng history purge ng gateway ang context. Ligtas i-advertise ang MAX dahil niruruta ng context pre-filter ng auto-combo ang mga sobrang laking kahilingan sa mga kandidatong may malalaking window.
+Para sa pagtuklas, inililista ng `GET /api/combos/auto` ang bawat variant kasama ang naresolbang candidate pool nito at `context_length` / `max_output_tokens` — ang MAX sa mga bintana ng candidate pool. Dapat i-advertise ng mga kliyente (hal. ang opencode plugin) ang mga value na ito sa halip na `0`: ang isang zero na konteksto ay ganap na hindi pinapagana ang auto-compaction ng opencode, hinahayaan ang mga session na lumago hanggang sa sirain ng history purge ng gateway ang konteksto. Ligtas ang MAX na mag-advertise dahil ang auto-combo na konteksto na pre-filter ay nagruruta ng napakalaking kahilingan sa mga malalaking window na kandidato.
 
 ```bash
-# Paggamit ng zero-config (walang paggawa ng combo)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Naka-persist na auto combo sa pamamagitan ng regular na combos endpoint
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Mga strategy ng auto router
+### Mga diskarte sa auto router
 
-Maaaring itakda ng mga naka-persist na `strategy: "auto"` combo ang `config.routerStrategy` (o ang legacy na
-`config.auto.routerStrategy`) sa isa sa mga sumusunod:
+Maaaring itakda ng patuloy na `strategy: "auto"` combo `config.routerStrategy` (o legacy `config.auto.routerStrategy`) sa isa sa:
 
-- `rules` — default na weighted scoring
-- `score` — pinipili ang pinakamataas na naka-configure na weighted score. Sa mga eksaktong tabla, pinananatili ang naka-configure na
-  pagkakasunod-sunod ng mga kandidato; kumukuha ng sample ang umiiral na `explorationRate` mula sa buong naka-rank na pool.
-- `cost` / `eco` — pinakamurang maayos na provider
-- `latency` / `fast` — pinakamababang p95 latency na may reliability penalty
-- `sla-aware` / `sla` — pinapaboran ang mga kandidatong nakatutugon sa p95 latency, error rate, at opsyonal na
-  mga cost SLO
-- `lkgp` — inuuna ang huling provider na nalamang maayos
-- `nadir` — tinatanong ang decision API ng [Nadir](https://getnadir.com) kung aling model sa pool ang
-  kailangan ng prompt; opt-in, at nagfa-fail-open sa `rules`
+- `rules` — default na may timbang na pagmamarka
+- Pinipili ng `score` — ang pinakamataas na naka-configure na may timbang na marka. Ang mga eksaktong ugnayan ay nagpapanatili ng naka-configure na order ng kandidato; ang mga umiiral na `explorationRate` sample mula sa buong ranggo na pool.
+- `cost` / `eco` — pinakamurang malusog na provider
+- `latency` / `fast` — pinakamababang p95 latency na may parusa sa pagiging maaasahan
+- mas gusto ng `sla-aware` / `sla` — ang mga kandidatong nakakatugon sa p95 latency, error-rate, at opsyonal na gastos SLOs
+- `lkgp` — huling kilalang mabuting provider muna
+- `nadir` — tanungin ang desisyon ni [Nadir](https://getnadir.com) API kung aling modelo sa pool ang kailangan kaagad; mag-opt-in, mabigo-bukas sa `rules`
+- `decision` — magtanong sa isang naka-configure na tagapasya (TypeSafe System One, sarili mong desisyon URL, o isa sa mga sariling modelo ng combo) kung aling modelo sa pool ang akma sa kahilingan; sa likod ng default-off `COMBO_DECISION_ROUTER_ENABLED` flag, fail-open sa `rules`
 
-### Mga strategy ng router nang detalyado
+### Mga diskarte sa router nang detalyado
 
-Nagbibigay ang auto-combo engine ng 7 napapalitang **RouterStrategy** implementation na
-maaari mong palitan sa pamamagitan ng `config.routerStrategy` (o ng legacy na `config.auto.routerStrategy`).
-Pumipili ang bawat strategy ng isang provider mula sa candidate pool, batay sa isang `RoutingContext`
-(uri ng gawain, mga tool/vision hint, pagtatantya ng token, opsyonal na patakaran sa SLA, opsyonal na
-huling provider na nalamang maayos).
+Ang auto-combo engine ay naglalantad ng 7 pluggable**RouterStrategy** mga pagpapatupad na maaari mong palitan sa pamamagitan ng `config.routerStrategy` (o ang legacy `config.auto.routerStrategy`). Ang bawat diskarte ay pumipili ng isang provider mula sa pool ng kandidato, na binibigyan ng `RoutingContext` (uri ng gawain, mga pahiwatig tool/vision, pagtatantya ng token, opsyonal na patakaran SLA, opsyonal na huling-kilalang mahusay na provider).
 
-#### 1. `rules` (default) — 16-factor na weighted scoring
+#### 1. `rules` (default) — 16-factor weighted scoring
 
-Binabalot nito ang umiiral na scoring engine. Sinasala muna nito ang mga kandidatong may `OPEN` na circuit breaker,
-pagkatapos ay pinapatakbo ang `scorePool()` gamit ang kasalukuyang uri ng gawain at `getTaskFitness()`,
-at pinipili ang provider na may pinakamataas na score.
+Binabalot ang kasalukuyang scoring engine. Sinasala ang mga kandidato ng `OPEN` circuit-breaker, pagkatapos ay nagpapatakbo ng `scorePool()` gamit ang kasalukuyang uri ng gawain at `getTaskFitness()`, na pinipili ang provider na may pinakamataas na marka.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -569,16 +560,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kailan gagamitin**: Default. Gamitin kapag gusto mo ng balanseng trade-off sa lahat ng signal.
+**Kailan gagamitin** : Default. Gamitin kapag gusto mo ng balanseng trade-off sa lahat ng signal.
 
-**Alias**: `rules` (walang alias)
+**alyas** : `rules` (walang alias)
 
 ---
 
-#### 2. `cost` / `eco` — pinakamurang maayos na provider
+#### 2. `cost` / `eco` — pinakamurang malusog na provider
 
-Inaayos nito ang candidate pool ayon sa `costPer1MTokens` (pataas) at pinipili ang pinakamura.
-Sinasala muna nito ang mga kandidatong may `OPEN`.
+Pag-uri-uriin ang pool ng kandidato ayon sa `costPer1MTokens` (pataas) at pipiliin ang pinakamurang. Salain muna ang mga kandidato `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -593,16 +583,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kailan gagamitin**: Mga workload na sensitibo sa gastos, batch processing, o mga background job.
+**Kailan gagamitin** : Mga workload na sensitibo sa gastos, pagproseso ng batch, o mga trabaho sa background.
 
-**Mga alias**: `cost`, `eco`
+**Mga alyas** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — pinakamababang p95 latency na may reliability penalty
+#### 3. `latency` / `fast` — pinakamababang p95 latency na may parusa sa pagiging maaasahan
 
-Inaayos ayon sa `p95LatencyMs + (errorRate * 1000)`. Tinitiyak ng penalty sa error rate na
-mas mababa ang ranggo ng mga hindi maaasahang provider kahit mababa ang kanilang nominal latency.
+Pinagbukud-bukod ayon sa `p95LatencyMs + (errorRate * 1000)`. Tinitiyak ng parusa sa rate ng error na mababa ang ranggo ng mga hindi mapagkakatiwalaang provider kahit na mababa ang kanilang nominal latency.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -619,28 +608,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kailan gagamitin**: Mga workload na sensitibo sa latency tulad ng real-time chat, autocomplete, o
-mga interactive coding assistant.
+**Kailan gagamitin** : Mga workload na sensitibo sa latency tulad ng real-time na chat, autocomplete, o mga interactive na coding assistant.
 
-**Mga alias**: `latency`, `fast`
+**Mga alyas** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — pagsunod sa latency/error/cost SLO
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO pagsunod
 
-Binibigyan ng score ang bawat kandidato batay sa kung gaano kahusay nitong natutugunan ang naka-configure na patakaran sa SLO:
+Binibigyan ng marka ang bawat kandidato ayon sa kung gaano kahusay nito natutugunan ang naka-configure na patakaran SLO :
 
-| Salik              | Timbang | Pormula                                                  |
-| ------------------ | ------- | -------------------------------------------------------- |
-| Iskor ng latency   | 35%     | `threshold / max(value, ε)`                              |
-| Iskor ng error     | 35%     | `threshold / max(value, ε)`                              |
-| Iskor ng kalusugan | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
-| Iskor ng gastos    | 10%     | `threshold / max(value, ε)` o kabaligtarang na-normalize |
-| Iskor ng katatagan | 5%      | kabaligtarang na-normalize na stddev ng latency          |
+| Salik              | Timbang | Formula                                            |
+| ------------------ | ------- | -------------------------------------------------- |
+| Marka ng latency   | 35%     | `threshold / max(value, ε)`                        |
+| Iskor ng error     | 35%     | `threshold / max(value, ε)`                        |
+| Marka ng kalusugan | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)  |
+| Marka ng gastos    | 10%     | `threshold / max(value, ε)` o inverse na-normalize |
+| Marka ng katatagan | 5%      | inverse normalized latency stddev                  |
 
-Kapag `hardConstraints: true`, pangunahing inaayos ang mga kandidato ayon sa **iskor ng paglabag**
-(kung gaano kalaki ang paglampas nila sa anumang SLO), pagkatapos ay ayon sa pinagsamang iskor. Kung hindi, ang
-pinagsamang iskor lamang ang ginagamit.
+Kapag `hardConstraints: true`, ang mga kandidato ay pinagbukod-bukod pangunahin ayon sa** marka ng paglabag** (kung gaano kalayo sila lumampas sa anumang SLO), pagkatapos ay sa pamamagitan ng pinagsama-samang marka. Kung hindi, ang composite score lang.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -649,12 +635,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... binibigyan ng iskor ang bawat kandidato batay sa patakaran: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Mga field ng SLA** (itakda sa combo config):
+**mga patlang SLA** (itakda sa combo config):
 
 ```json
 {
@@ -669,17 +655,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kailan gagamitin**: Mga production workload na may mahihigpit na badyet para sa latency, rate ng error, o gastos.
+**Kailan gagamitin** : Mga workload sa produksyon na may mahigpit na latency, error-rate, o mga badyet sa gastos.
 
-**Mga alyas**: `sla-aware`, `sla`
+**Mga alyas** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — unahin ang huling provider na nalamang maayos
+#### 5. `lkgp` — huling kilalang mabuting provider muna
 
-Sinusubukan muna ang **huling provider na nalamang maayos** (kung nakatakda), pagkatapos ay bumabalik sa
-`rules` strategy. Kapaki-pakinabang para sa session stickiness — ang parehong provider ang nangangasiwa sa
-mga follow-up request sa isang pag-uusap.
+Sinusubukan ang** huling kilalang mabuting provider** (kung itinakda) muna, pagkatapos ay bumalik sa diskarte `rules`. Kapaki-pakinabang para sa pagiging malagkit ng session — ang parehong provider ay humahawak ng mga follow-up na kahilingan sa isang pag-uusap.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -700,27 +684,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Bumalik sa rules strategy
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kailan gagamitin**: Mga pag-uusap na may maraming turn kung saan gusto mong ang parehong provider ang mangasiwa sa
-mga follow-up request (hal., para sa caching, pagpapatuloy ng konteksto, o pagkakapare-pareho ng pagpepresyo).
+**Kailan gagamitin** : Mga multi-turn na pag-uusap kung saan mo gustong pangasiwaan ng parehong provider ang mga follow-up na kahilingan (hal, para sa pag-cache, pagpapatuloy ng konteksto, o pagkakapare-pareho ng pagpepresyo).
 
-**Alyas**: `lkgp` (walang alyas)
+**alyas** : `lkgp` (walang alias)
 
 ---
 
-#### 6. `nadir` — pagpili ng model na isinasaalang-alang ang prompt sa pamamagitan ng Nadir
+#### 6. `nadir` — maagap-aware na pagpili ng modelo sa pamamagitan ng Nadir
 
-Niraranggo ng bawat strategy sa itaas ang mga kandidato ayon sa sarili nitong telemetry; wala sa mga ito ang nagbabasa
-ng request. Ipinapadala ng `nadir` ang huling turn ng user kasama ang mga model id ng pool sa
-decision API ng [Nadir](https://getnadir.com) (`POST /v1/bucket`) at nagra-route sa model
-na pinili ng Nadir mula sa menu na iyon (`simple` → ang pinakamurang model na may kakayahan, `complex` → ang
-frontier model). Ang koneksiyong nagseserbisyo sa model na iyon ay pinipili pa rin ng `rules`, kaya patuloy na
-tinutukoy ng quota, kalusugan, at gastos kung aling account ang gagamitin.
+Ang bawat diskarte sa itaas ay niraranggo ang mga kandidato sa pamamagitan ng kanilang sariling telemetry; wala sa kanila ang nagbabasa ng kahilingan. Ipinapadala ng `nadir` ang huling user turn kasama ang mga model id ng pool sa desisyon ni [Nadir](https://getnadir.com) API (`POST /v1/bucket`) at mga ruta sa modelong pinili ni Nadir mula sa menu na iyon (`simple` → ang pinakamurang modelong may kakayahang, `complex` → ang frontier). Ang koneksyon na naghahatid sa modelong iyon ay pinipili pa rin ng `rules`, kaya patuloy na nagpapasya ang quota, kalusugan at gastos kung aling account.
 
 ```json
 {
@@ -736,34 +714,75 @@ tinutukoy ng quota, kalusugan, at gastos kung aling account ang gagamitin.
 }
 ```
 
-Ang `OMNIROUTE_NADIR_API_KEY` at `OMNIROUTE_NADIR_BASE_URL` ay mga env fallback para sa dalawang
-string. Kailangan lang ang `baseUrl` para sa isang self-hosted na Nadir (tinatanggap ang trailing na `/v1`).
-Ang mga call na walang key ay napupunta sa anonymous tier ng Nadir, na nililimitahan ang rate ayon sa IP. Kapag may key
-([gumawa nito](https://app.getnadir.com/dashboard/api-keys)), ila-log ang bawat desisyon
-sa iyong Nadir dashboard. Kumpletong pag-setup at pag-verify:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` at `OMNIROUTE_NADIR_BASE_URL` ay env fallback para sa dalawang string. `baseUrl` ay kailangan lang para sa isang self-host na Nadir (ang sumusunod `/v1` ay pinahihintulutan). Dumating ang mga keyless na tawag sa anonymous na tier ni Nadir, na may limitasyon sa rate bawat IP. Gamit ang isang susi ( [gumawa ng isa](https://app.getnadir.com/dashboard/api-keys) ), ang bawat desisyon ay naka-log sa iyong Nadir dashboard. Buong pag-setup at pag-verify: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Ang lumalabas sa kahon: ang text ng huling mensahe ng user (unang 16k character), ang mga model id ng kandidato,
-at isang `source: "omniroute"` na channel tag. Walang system prompt, history, tool, o
-header.
+Ano ang naiwan sa kahon: ang text ng huling mensahe ng user (unang 16k character), ang candidate model id at isang `source: "omniroute"` channel tag. Walang system prompt, kasaysayan, mga tool o header.
 
-Ang gawi kapag nagka-failure ay fail-open: ang timeout (default na 2000 ms), non-2xx, hindi maabot na
-host, maling format ng response, o pagpiling wala sa pool ay bumabalik sa desisyon ng `rules`
-at nilalagyan ang dahilan ng prefix na `NadirStrategy: fallback (…)`. Pagkatapos ng isang nabigong call,
-nilalaktawan ng strategy ang network sa loob ng 30 s, kaya ang isang outage ay nagdudulot ng isang timeout bawat 30 s sa halip na
-isa sa bawat request. Iniuulat lamang ng mga routing event ang `strategy: "nadir"` kapag ang Nadir mismo ang
-gumawa ng pagpili.
+Fail-open ang pag-uugali ng pagkabigo: isang timeout (default na 2000 ms), isang non-2xx, isang hindi maabot na host, isang malform na tugon o isang pagpipilian sa labas ng pool ay nalutas sa `rules` na desisyon at ang dahilan ay may prefix na `NadirStrategy: fallback (…)`. Pagkatapos ng isang nabigong tawag, nilaktawan ng diskarte ang network sa loob ng 30 s, kaya ang isang outage ay nagkakahalaga ng isang timeout bawat 30 s sa halip na isa bawat kahilingan. Nag-uulat lang ng `strategy: "nadir"` ang mga kaganapan sa pagruruta kapag si Nadir talaga ang pumili.
 
-**Kailan gagamitin**: trapikong may magkakaibang antas ng hirap sa isang pool na sumasaklaw sa mga tier ng model (isang maliit, isang mid,
-at isang frontier model), kung saan gusto mong bawasan ang gastos ng palaging paggamit sa frontier.
+**Kailan gagamitin** : pinaghalong-hirap na trapiko sa isang pool na sumasaklaw sa mga tier ng modelo (isang maliit, isang mid at isang frontier na modelo), kung saan palaging-frontier ang gastos na gusto mong bawasan.
 
-**Alyas**: `nadir` (walang alyas)
+**alyas** : `nadir` (walang alias)
 
 ---
 
-### Mga custom na router strategy
+#### 7. Pinipili `decision` — pluggable decider ang modelo
 
-Maaari mong irehistro ang sarili mong implementasyon ng `RouterStrategy` sa pamamagitan ng pampublikong API:
+tanong `decision` a** nagpapasya** kung aling modelo sa pool ang akma sa kahilingan, pagkatapos ay paliitin ang pool sa modelong iyon at hayaan ang `rules` na pumili ng koneksyon (quota, kalusugan at gastos pa rin ang pumili ng account). Ang desisyon ay nakatakda sa bloke ng desisyon ng combo — `config.decision` kapag ang mga knob ng router ay nakaupo sa tuktok ng `config` (kung ano ang isinusulat ng dashboard), o `config.auto.decision` sa tabi ng `config.auto.routerStrategy`:
+
+| `decider`     | Sino ang sumasagot                                                                                                            | Pangangailangan                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), default na modelong `jev-latest`                           | isang `typesafe` na koneksyon o ang env key    |
+| `http`        | sarili mong desisyon sa `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) o `"openai-chat"` (mga pagkumpleto ng chat) | `baseUrl` + `model`; opsyonal na key           |
+| `combo-model` | isa sa iyong mga modelo ng provider, na tinatawag sa proseso tulad ng fusion judge                                            | `model` bilang `provider/model` (walang combo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Mga Field (na-validate ng mahigpit na schema sa pag-save at muli sa oras ng kahilingan):
+
+- `decider` — `systemone`, `http` o `combo-model`.
+- `model` — TypeSafe model, ang modelo ng desisyon sa iyong URL, o ang `provider/model` ng isang combo-model na tawag (hanggang 200 character).
+- `baseUrl` — `http` lang: isang `http(s)` URL hanggang 500 character, walang mga kredensyal, query o fragment. Ang URL na tumuturo sa OmniRoute na ito (loopback + `PORT`) ay tinanggihan.
+- `wire` — `http` lang: `systemone` (default) o `openai-chat`.
+- `connectionId` — ang naka-imbak na koneksyon na ang key ay ginagamit (sa loob lamang ng mga pinahihintulutang koneksyon ng API key sa pagtawag). Kung wala ito, `systemone` ay nagbabasa ng isang `typesafe` na koneksyon at ang bawat network decider ay bumabalik sa `OMNIROUTE_DECISION_API_KEY`. Walang field `apiKey` : hindi kailanman iniimbak ang isang susi sa isang combo.
+- `timeoutMs` — integer, 100–5000, default 2000.
+- `minConfidence` — 0–1; ang isang mas mababang kumpiyansa na sagot ay bumabalik sa `rules` (isang nagpapasya na nag-uulat na walang kumpiyansa ay binibilang bilang 0).
+- `descriptions` — hanggang sa 50 entry (key hanggang 300, text hanggang 1000 character), na na-key ng model id o `provider/model`; ang mga hindi nakatakdang entry ay nakakakuha ng nabuong paglalarawan sa ranggo ng gastos.
+
+**Bandila.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) ay nagbibigay-daan sa bawat nagpapasya. Habang naka-off ito, ang `decision` combo ay hindi nagbabasa ng kredensyal, hindi gumagawa ng tawag at mga ruta na may `rules`; sabi ng log `fallback (disabled)`. Ang isang naka-imbak na susi lamang ay hindi kailanman ino-on ito. Ang mga combo na walang block ng desisyon ay hindi maaapektuhan.
+
+**Ano ang umalis sa kahon.** Tanging ang text ng huling mensahe ng user (hanggang 8000 character; chat/Claude `messages` o Mga Tugon `input`) at ang menu ng mga model id kasama ng kanilang mga paglalarawan. Huwag kailanman ang prompt ng system, Mga Tugon `instructions`, mga tool, kasaysayan, mga header o data ng account. Ang mga tawag sa network ay dumaan sa provider ng outbound guard na walang mga muling pagsubok, walang mga pag-redirect at isang 64 KB response cap. Ang `combo-model` na tawag ay non-streaming, tool-free, `temperature: 0`, na may 256-token na badyet; ang isang desisyon na sinimulan sa loob ng isang desisyon na tawag ay tinanggihan.
+
+**Pag-uugali ng pagkabigo** ay fail-open: ang anumang pagkabigo ay nalutas sa `rules` na desisyon, at ang dahilan ay nagbabasa ng `decision(<decider>): fallback (<reason>)`, na may `<reason>` isa sa `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` o `no_user_text`. Pagkatapos ng timeout, HTTP error o network error ang endpoint ay nilaktawan ng 30 s. Ang isang matagumpay na pagpili ay nagbabasa ng `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Walang URL, key, prompt o upstream na katawan ang nakakarating sa log.
+
+Ipinapakita ng tagabuo ng combo ang mga field na ito kapag ang diskarte ng router ay `decision`, kasama ang mga nabuong paglalarawan bilang mga placeholder at isang** Pagpapasya sa pagsubok** button na tumatawag sa `POST /api/combos/decision-preview` nang isang beses kasama ang mga hindi naka-save na setting (parehong bandila).
+
+**Kailan gagamitin** : pinaghalong pinaghirapang trapiko kung saan mo gustong piliin ang tier sa bawat kahilingan ng isang classifier na pipiliin mo, hindi ng partikular na Nadir.
+
+**alyas** : `decision` (walang alias)
+
+---
+
+### Mga diskarte sa custom na router
+
+Maaari mong irehistro ang iyong sariling pagpapatupad `RouterStrategy` sa pamamagitan ng pampublikong API:
 
 ```ts
 import {
@@ -776,7 +795,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Ilagay rito ang iyong routing logic
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -791,7 +810,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Pagkatapos, gamitin ito:
+Pagkatapos ay gamitin ito:
 
 ```json
 {
@@ -804,18 +823,19 @@ Pagkatapos, gamitin ito:
 
 ---
 
-### Gabay sa pagpili ng router strategy
+### Gabay sa pagpili ng diskarte sa router
 
-| Gamit na kaso          | Estratehiya | Dahilan                                            |
-| ---------------------- | ----------- | -------------------------------------------------- |
-| Balanseng workload     | `rules`     | Default — isinasaalang-alang ang lahat             |
-| Bawasan ang gastos     | `cost`      | Palaging pinipili ang pinakamura                   |
-| Bawasan ang latency    | `latency`   | Pinipili ang pinakamabilis na maaasahang provider  |
-| Mahihigpit na SLO      | `sla-aware` | Sinasala ayon sa mga threshold ng p95/error/gastos |
-| Multi-turn na chat     | `lkgp`      | Pagpapanatili ng session                           |
-| Magkakaibang kahirapan | `nadir`     | Pinipili ang tier ng modelo para sa bawat prompt   |
+| Use case               | Diskarte    | Dahilan                                                |
+| ---------------------- | ----------- | ------------------------------------------------------ |
+| Balanse na workload    | `rules`     | Isinasaalang-alang ng default — ang lahat ng mga salik |
+| Bawasan ang gastos     | `cost`      | Palaging pinipili ang pinakamurang                     |
+| I-minimize ang latency | `latency`   | Pinipili ang pinakamabilis na maaasahang provider      |
+| Mahigpit SLOs          | `sla-aware` | Mga filter ayon sa mga threshold p95/error/cost        |
+| Multi-turn chat        | `lkgp`      | Pagkadikit ng session                                  |
+| Magkahalong hirap      | `nadir`     | Pinipili ang tier ng modelo sa bawat prompt            |
+| Sariling classifier    | `decision`  | Ang iyong nagpapasya ang pumili ng modelo              |
 
-Mga field na SLA-aware:
+Mga field ng SLA-aware:
 
 ```json
 {

@@ -467,55 +467,47 @@ Auto Combo इन्जिनलाई पूर्व-परिभाषित 
 
 ## API
 
-त्यहाँ **कुनै समर्पित `POST /api/combos/auto` endpoint छैन** — Auto-Combo दुई तरिकाले प्रयोग गरिन्छ:
+त्यहाँ छ** कुनै समर्पित `POST /api/combos/auto` अन्त्य बिन्दु छैन** — अटो-कम्बो दुई तरिकामा खपत हुन्छ:
 
-1. **शून्य-कन्फिगरेसन (सिफारिस गरिएको):** `model: "auto"` वा `model: "auto/<variant>"` सहित कुनै पनि chat completion अनुरोध पठाउनुहोस्। virtual factory ले प्रत्येक अनुरोधका लागि combo निर्माण गर्छ — persistence वा API call आवश्यक पर्दैन।
+1. **शून्य कन्फिगरेसन (सिफारिस गरिएको):** `model: "auto"` वा `model: "auto/<variant>"` सँग कुनै पनि च्याट पूरा गर्ने अनुरोध पठाउनुहोस्। भर्चुअल फ्याक्ट्रीले प्रति अनुरोध — कुनै निरन्तरता, कुनै API कलहरू आवश्यक पर्दैन कम्बो निर्माण गर्दछ।
 
-2. **`strategy: "auto"` सहित persisted combo:** `POST /api/combos` मार्फत नियमित combo सिर्जना गर्नुहोस् र `config.auto.weights` / `config.auto.candidatePool` का साथ `strategy: "auto"` सेट गर्नुहोस्। उही scoring engine प्रयोग हुन्छ; combo लाई `combos` मा भण्डारण गरिन्छ र ID द्वारा पुनः प्रयोग गर्न सकिन्छ।
+2. **`strategy: "auto"` सँग स्थायी कम्बो:** `POST /api/combos` मार्फत नियमित कम्बो सिर्जना गर्नुहोस् र `strategy: "auto"` प्लस `config.auto.weights` / `config.auto.candidatePool` सेट गर्नुहोस्। एउटै स्कोरिङ इन्जिन प्रयोग गरिन्छ; कम्बो `combos` मा भण्डारण गरिएको छ र ID द्वारा पुन: प्रयोग गर्न सकिन्छ।
 
-खोजका लागि, `GET /api/combos/auto` ले प्रत्येक variant लाई त्यसको resolved candidate pool तथा `context_length` / `max_output_tokens` सहित सूचीबद्ध गर्छ — जुन candidate pool का windows मध्ये अधिकतम हो। Clients (जस्तै, opencode plugin) ले `0` को सट्टा यी मानहरू advertise गर्नुपर्छ: शून्य context ले opencode को auto-compaction पूर्ण रूपमा निष्क्रिय पार्छ, जसले gateway को history purge ले context नष्ट नगरेसम्म sessions लाई बढिरहन दिन्छ। अधिकतम मान advertise गर्नु सुरक्षित हुन्छ, किनभने auto-combo context pre-filter ले अत्यधिक ठूला अनुरोधहरूलाई large-window candidates तर्फ route गर्छ।
+खोजको लागि, `GET /api/combos/auto` प्रत्येक भेरियन्टलाई यसको समाधान गरिएको उम्मेद्वार पूल प्लस `context_length` / `max_output_tokens` — the MAX उम्मेद्वार पूलको झ्यालहरूमा सूचीबद्ध गर्दछ। ग्राहकहरूले (जस्तै ओपनकोड प्लगइन) `0` को सट्टा यी मानहरू विज्ञापन गर्नुपर्छ: शून्य सन्दर्भले ओपनकोडको स्वत: कम्पेक्शन पूर्ण रूपमा असक्षम पार्छ, गेटवेको इतिहास पर्जले सन्दर्भलाई नष्ट नगरेसम्म सत्रहरू बढ्न दिन्छ। MAX विज्ञापन गर्न सुरक्षित छ किनभने स्वत: कम्बो सन्दर्भ प्रि-फिल्टर मार्गहरूले ठूलो-सञ्झ्याल उम्मेद्वारहरूलाई ठूलो अनुरोध गर्दछ।
 
 ```bash
-# शून्य-कन्फिगरेसन प्रयोग (combo सिर्जना नगरी)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# नियमित combos endpoint मार्फत persisted auto combo
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Auto router strategies
+### स्वत: राउटर रणनीतिहरू
 
-Persisted `strategy: "auto"` combos ले `config.routerStrategy` (वा legacy
-`config.auto.routerStrategy`) लाई निम्नमध्ये कुनै एकमा सेट गर्न सक्छन्:
+स्थिर `strategy: "auto"` कम्बोहरूले `config.routerStrategy` (वा लिगेसी `config.auto.routerStrategy`) लाई निम्न मध्ये एकमा सेट गर्न सक्छ:
 
-- `rules` — पूर्वनिर्धारित weighted scoring
-- `score` — कन्फिगर गरिएको सबैभन्दा उच्च weighted score चयन गर्छ। ठ्याक्कै बराबर score हुँदा कन्फिगर गरिएको
-  candidate क्रम कायम रहन्छ; विद्यमान `explorationRate` ले सम्पूर्ण ranked pool बाट sample गर्छ।
-- `cost` / `eco` — सबैभन्दा सस्तो healthy provider
-- `latency` / `fast` — reliability penalty सहित सबैभन्दा कम p95 latency
-- `sla-aware` / `sla` — p95 latency, error-rate, र वैकल्पिक
-  cost SLOs पूरा गर्ने candidates लाई प्राथमिकता दिन्छ
-- `lkgp` — last known good provider लाई पहिलो प्राथमिकता
-- `nadir` — pool भित्रको कुन model prompt का लागि आवश्यक छ भनेर [Nadir](https://getnadir.com) को decision API लाई सोध्छ;
-  opt-in हो, र असफल हुँदा `rules` मा fail-open हुन्छ
+- `rules` — पूर्वनिर्धारित भारित स्कोरिङ
+- `score` — उच्चतम कन्फिगर गरिएको भारित स्कोर चयन गर्दछ। सटीक सम्बन्धले कन्फिगर गरिएको उम्मेद्वार आदेश सुरक्षित गर्दछ; पूर्ण श्रेणीबद्ध पूलबाट अवस्थित `explorationRate` नमूनाहरू।
+- `cost` / `eco` — सस्तो स्वस्थ प्रदायक
+- `latency` / `fast` — सबैभन्दा कम p95 विलम्बता विश्वसनीयता दण्डको साथ
+- `sla-aware` / `sla` — p95 विलम्बता, त्रुटि-दर, र वैकल्पिक लागत SLOs पूरा गर्ने उम्मेदवारहरूलाई प्राथमिकता दिन्छ।
+- `lkgp` — पछिल्लो ज्ञात राम्रो प्रदायक पहिले
+- `nadir` — [नादिरको](https://getnadir.com) निर्णय API सोध्नुहोस् पोखरीमा कुन मोडेललाई तुरुन्त चाहिन्छ; अप्ट-इन, फेल-ओपन `rules` मा
+- `decision` — कन्फिगर गरिएको निर्णयकर्तालाई सोध्नुहोस् (TypeSafe प्रणाली एक, तपाईंको आफ्नै निर्णय URL, वा कम्बोको आफ्नै मोडेलहरू मध्ये एक) पूलमा कुन मोडेल अनुरोधमा फिट हुन्छ; पूर्वनिर्धारित-अफ `COMBO_DECISION_ROUTER_ENABLED` झण्डा पछाडि, `rules` मा असफल-खुल्ला
 
-### Router strategies को विस्तृत विवरण
+### राउटर रणनीतिहरू विस्तृत रूपमा
 
-Auto-combo engine ले 7 वटा pluggable **RouterStrategy** implementations उपलब्ध गराउँछ, जसलाई
-तपाईं `config.routerStrategy` (वा legacy `config.auto.routerStrategy`) मार्फत परिवर्तन गर्न सक्नुहुन्छ।
-प्रत्येक strategy ले `RoutingContext` (task type, tool/vision hints, token estimate, वैकल्पिक SLA policy, वैकल्पिक
-last-known-good provider) का आधारमा candidate pool बाट एउटा provider चयन गर्छ।
+अटो-कम्बो इन्जिनले 7 प्लग गर्न मिल्छ**RouterStrategy** कार्यान्वयनहरू जुन तपाईंले `config.routerStrategy` (वा लिगेसी `config.auto.routerStrategy`) मार्फत स्वैप गर्न सक्नुहुन्छ। प्रत्येक रणनीतिले `RoutingContext` (कार्य प्रकार, tool/vision संकेतहरू, टोकन अनुमान, वैकल्पिक SLA नीति, वैकल्पिक अन्तिम-ज्ञात-राम्रो प्रदायक) दिएर उम्मेद्वार पूलबाट एक प्रदायक छान्छ।
 
-#### 1. `rules` (पूर्वनिर्धारित) — 16-factor weighted scoring
+#### 1. `rules` (पूर्वनिर्धारित) — 16-कारक भारित स्कोरिङ
 
-विद्यमान scoring engine लाई wrap गर्छ। `OPEN` circuit-breaker
-candidates लाई filter out गर्छ, त्यसपछि हालको task type र `getTaskFitness()` सहित `scorePool()` चलाएर
-सबैभन्दा उच्च score भएको provider चयन गर्छ।
+अवस्थित स्कोरिङ इन्जिनलाई लपेट्छ। `OPEN` सर्किट ब्रेकर उम्मेद्वारहरूलाई फिल्टर गर्नुहोस्, त्यसपछि `scorePool()` हालको कार्य प्रकार र `getTaskFitness()` सँग चलाउनुहोस्, शीर्ष-स्कोरिङ प्रदायक छनोट गर्नुहोस्।
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -535,16 +527,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**कहिले प्रयोग गर्ने**: पूर्वनिर्धारित रूपमा। सबै signals बीच सन्तुलित trade-off चाहिँदा प्रयोग गर्नुहोस्।
+**कहिले प्रयोग गर्ने** : पूर्वनिर्धारित। जब तपाइँ सबै संकेतहरूमा सन्तुलित ट्रेड-अफ चाहनुहुन्छ प्रयोग गर्नुहोस्।
 
-**Alias**: `rules` (alias छैन)
+**उपनाम** : `rules` (कुनै उपनाम)
 
 ---
 
-#### 2. `cost` / `eco` — सबैभन्दा सस्तो healthy provider
+#### 2. `cost` / `eco` — सस्तो स्वस्थ प्रदायक
 
-Candidate pool लाई `costPer1MTokens` (ascending) अनुसार क्रमबद्ध गर्छ र सबैभन्दा सस्तो provider चयन गर्छ।
-पहिले `OPEN` candidates लाई filter out गर्छ।
+उम्मेदवारको पोखरीलाई `costPer1MTokens` (आरोही) द्वारा क्रमबद्ध गर्छ र सस्तो छान्छ। पहिले `OPEN` उम्मेद्वारहरू फिल्टर गर्नुहोस्।
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -559,16 +550,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**कहिले प्रयोग गर्ने**: लागत-संवेदनशील workloads, batch processing, वा background jobs का लागि।
+**कहिले प्रयोग गर्ने** : लागत-संवेदनशील कार्यभार, ब्याच प्रशोधन, वा पृष्ठभूमि कार्यहरू।
 
-**Aliases**: `cost`, `eco`
+**उपनामहरू** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — reliability penalty सहित सबैभन्दा कम p95 latency
+#### 3. `latency` / `fast` — सबैभन्दा कम p95 विलम्बता विश्वसनीयता दण्डको साथ
 
-`p95LatencyMs + (errorRate * 1000)` अनुसार क्रमबद्ध गर्छ। Error-rate penalty ले nominal latency कम भए पनि
-अविश्वसनीय providers लाई तल्लो स्थानमा rank गरिने सुनिश्चित गर्छ।
+`p95LatencyMs + (errorRate * 1000)` द्वारा क्रमबद्ध गर्नुहोस्। त्रुटि-दर दण्डले अविश्वसनीय प्रदायकहरूलाई तिनीहरूको नाममात्र विलम्बता कम भए तापनि निम्न श्रेणीमा राखिएको सुनिश्चित गर्दछ।
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -585,28 +575,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**कहिले प्रयोग गर्ने**: real-time chat, autocomplete, वा
-interactive coding assistants जस्ता latency-संवेदनशील workloads का लागि।
+**कहिले प्रयोग गर्ने** : विलम्ब-संवेदनशील कार्यभारहरू जस्तै वास्तविक-समय कुराकानी, स्वत: पूर्ण, वा अन्तरक्रियात्मक कोडिङ सहायकहरू।
 
-**Aliases**: `latency`, `fast`
+**उपनामहरू** : `latency`, `fast`
 
 ---
 
 #### 4. `sla-aware` / `sla` — latency/error/cost SLO अनुपालन
 
-कन्फिगर गरिएको SLO policy लाई प्रत्येक candidate ले कति राम्रोसँग पूरा गर्छ भन्ने आधारमा score गर्छ:
+प्रत्येक उम्मेद्वारलाई यसले कन्फिगर गरिएको SLO नीतिलाई कत्तिको राम्रोसँग सन्तुष्ट गर्छ भनेर स्कोर गर्छ:
 
-| कारक            | भार | सूत्र                                                 |
-| --------------- | --- | ----------------------------------------------------- |
-| विलम्बता स्कोर  | 35% | `threshold / max(value, ε)`                           |
-| त्रुटि स्कोर    | 35% | `threshold / max(value, ε)`                           |
-| स्वास्थ्य स्कोर | 15% | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)     |
-| लागत स्कोर      | 10% | `threshold / max(value, ε)` वा व्युत्क्रम सामान्यीकृत |
-| स्थिरता स्कोर   | 5%  | व्युत्क्रम सामान्यीकृत विलम्बता मानक विचलन            |
+| कारक            | वजन | सूत्र                                             |
+| --------------- | --- | ------------------------------------------------- |
+| विलम्बता स्कोर  | 35% | `threshold / max(value, ε)`                       |
+| त्रुटि स्कोर    | 35% | `threshold / max(value, ε)`                       |
+| स्वास्थ्य स्कोर | 15% | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
+| लागत स्कोर      | 10% | `threshold / max(value, ε)` वा उल्टो सामान्यीकृत  |
+| स्थिरता स्कोर   | 5%  | उल्टो सामान्यीकृत विलम्बता stddev                 |
 
-जब `hardConstraints: true` हुन्छ, उम्मेदवारहरूलाई मुख्य रूपमा **उल्लङ्घन स्कोर**
-(तिनीहरूले कुनै SLO लाई कति नाघ्छन्) का आधारमा, त्यसपछि समग्र स्कोरका आधारमा क्रमबद्ध गरिन्छ। अन्यथा,
-समग्र स्कोर मात्र प्रयोग गरिन्छ।
+जब `hardConstraints: true`, उम्मेदवारहरू मुख्य रूपमा क्रमबद्ध हुन्छन्** उल्लङ्घन स्कोर** (कति टाढा तिनीहरूले कुनै पनि SLO भन्दा बढि), त्यसपछि समग्र स्कोर द्वारा। अन्यथा यो समग्र स्कोर मात्र हो।
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -615,12 +602,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... प्रत्येक उम्मेदवारलाई नीतिसँग तुलना गरेर स्कोर गर्छ: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA फिल्डहरू** (कम्बो कन्फिगमा सेट गरिने):
+**SLA क्षेत्रहरू** (कम्बो कन्फिगरेसनमा सेट गर्नुहोस्):
 
 ```json
 {
@@ -635,17 +622,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**कहिले प्रयोग गर्ने**: कडा विलम्बता, त्रुटि-दर वा लागत बजेट भएका उत्पादन वर्कलोडहरूमा।
+**कहिले प्रयोग गर्ने** : कडा विलम्बता, त्रुटि-दर, वा लागत बजेटको साथ उत्पादन कार्यभार।
 
-**उपनामहरू**: `sla-aware`, `sla`
+**उपनामहरू** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — अन्तिम ज्ञात राम्रो प्रदायक पहिले
+#### 5. `lkgp` — पछिल्लो ज्ञात राम्रो प्रदायक पहिले
 
-पहिले **अन्तिम ज्ञात राम्रो प्रदायक** (सेट गरिएको छ भने) प्रयास गर्छ, त्यसपछि
-`rules` रणनीतिमा फर्कन्छ। यो सत्र स्टिकिनेसका लागि उपयोगी छ — एउटै प्रदायकले
-कुराकानीका फलो-अप अनुरोधहरू सम्हाल्छ।
+कोसिस गर्छ** पछिल्लो ज्ञात राम्रो प्रदायक** (यदि सेट) पहिले, त्यसपछि `rules` रणनीतिमा फर्किन्छ। सत्र चिपचिपाहटको लागि उपयोगी — एउटै प्रदायकले कुराकानीमा फलो-अप अनुरोधहरू ह्यान्डल गर्दछ।
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -666,27 +651,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // rules रणनीतिमा फर्कनुहोस्
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**कहिले प्रयोग गर्ने**: एउटै प्रदायकले फलो-अप अनुरोधहरू सम्हालोस् भन्ने चाहना भएका
-बहु-टर्न कुराकानीहरूमा (जस्तै, क्यासिङ, सन्दर्भ निरन्तरता वा मूल्य निर्धारणको एकरूपताका लागि)।
+**कहिले प्रयोग गर्ने** : बहु-टर्न वार्तालापहरू जहाँ तपाईं एउटै प्रदायकले फलो-अप अनुरोधहरू ह्यान्डल गर्न चाहनुहुन्छ (जस्तै, क्यासिङ, सन्दर्भ निरन्तरता, वा मूल्य स्थिरता)।
 
-**उपनाम**: `lkgp` (कुनै उपनाम छैन)
+**उपनाम** : `lkgp` (कुनै उपनाम)
 
 ---
 
-#### 6. `nadir` — Nadir मार्फत प्रम्प्ट-सचेत मोडेल छनोट
+#### 6. `nadir` — प्रम्प्ट-अवेयर मोडेल विकल्प नादिर मार्फत
 
-माथिका प्रत्येक रणनीतिले उम्मेदवारहरूलाई आफ्नै टेलिमेट्रीका आधारमा श्रेणीबद्ध गर्छ; तीमध्ये कुनैले पनि
-अनुरोध पढ्दैन। `nadir` ले अन्तिम प्रयोगकर्ता टर्न र पूलका मोडेल ID हरू
-[Nadir](https://getnadir.com) को निर्णय API (`POST /v1/bucket`) मा पठाउँछ र उक्त मेनुबाट Nadir ले
-छानेको मोडेलमा रुट गर्छ (`simple` → सक्षममध्ये सबैभन्दा सस्तो मोडेल, `complex` →
-फ्रन्टियर मोडेल)। उक्त मोडेल सेवा गर्ने कनेक्सन अझै पनि `rules` द्वारा छनोट हुन्छ, त्यसैले कोटा,
-स्वास्थ्य र लागतले कुन खाता प्रयोग गर्ने भन्ने निर्णय गरिरहन्छन्।
+माथिको प्रत्येक रणनीतिले उम्मेदवारहरूलाई तिनीहरूको आफ्नै टेलिमेट्रीद्वारा श्रेणीबद्ध गर्दछ; तिनीहरू मध्ये कुनै पनि अनुरोध पढ्दैनन्। `nadir` अन्तिम प्रयोगकर्ता पालो र पूलको मोडेल आइडीहरू [नादिरको](https://getnadir.com) निर्णय API (`POST /v1/bucket`) मा पठाउँछ र मोडेल नादिरले त्यो मेनुबाट चयन गर्छ (`simple` → सबैभन्दा सस्तो सक्षम मोडेल, `complex` → द फ्रन्टियर वन)। त्यो मोडेल सेवा गर्ने जडान अझै पनि `rules` द्वारा छनोट गरिएको छ, त्यसैले कोटा, स्वास्थ्य र लागत कुन खातामा निर्णय गरिरहनुहोस्।
 
 ```json
 {
@@ -702,33 +681,75 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-यी दुई स्ट्रिङका लागि `OMNIROUTE_NADIR_API_KEY` र `OMNIROUTE_NADIR_BASE_URL` env फलब्याक हुन्।
-`baseUrl` स्वयं-होस्ट गरिएको Nadir का लागि मात्र आवश्यक हुन्छ (अन्त्यमा आउने `/v1` स्वीकार गरिन्छ)।
-कुञ्जीविनाका कलहरू Nadir को अनाम टियरमा जान्छन्, जुन प्रति IP दर-सीमित हुन्छ। कुञ्जी प्रयोग गर्दा
-([एउटा सिर्जना गर्नुहोस्](https://app.getnadir.com/dashboard/api-keys)), प्रत्येक निर्णय तपाईंको
-Nadir ड्यासबोर्डमा लग गरिन्छ। पूर्ण सेटअप र प्रमाणीकरण:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)।
+`OMNIROUTE_NADIR_API_KEY` र `OMNIROUTE_NADIR_BASE_URL` दुई स्ट्रिङका लागि env फलब्याकहरू हुन्। `baseUrl` केवल स्व-होस्ट गरिएको नादिरको लागि आवश्यक छ (एक पछि लाग्ने `/v1` सहन गरिन्छ)। कीलेस कल ल्यान्ड नादिरको बेनामी टियरमा, जुन दर-सीमित प्रति IP छ। एउटा कुञ्जीको साथ ( [एउटा सिर्जना गर्नुहोस्](https://app.getnadir.com/dashboard/api-keys) ), प्रत्येक निर्णय तपाईंको नादिर ड्यासबोर्डमा लग इन हुन्छ। पूर्ण सेटअप र प्रमाणिकरण: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/) ।
 
-बाकसभन्दा बाहिर जाने सामग्री: अन्तिम प्रयोगकर्ता सन्देशको पाठ (पहिलो 16k वर्ण), उम्मेदवार
-मोडेल ID हरू र एउटा `source: "omniroute"` च्यानल ट्याग। कुनै सिस्टम प्रम्प्ट, इतिहास, उपकरण वा
-हेडर पठाइँदैन।
+बक्समा के छोड्छ: अन्तिम प्रयोगकर्ता सन्देशको पाठ (पहिलो 16k क्यारेक्टर), उम्मेद्वार मोडेल आईडी र `source: "omniroute"` च्यानल ट्याग। कुनै प्रणाली प्रम्प्ट, इतिहास, उपकरण वा हेडर छैन।
 
-विफलताको व्यवहार fail-open हुन्छ: टाइमआउट (पूर्वनिर्धारित 2000 ms), non-2xx, पहुँच गर्न नसकिने
-होस्ट, विकृत प्रतिक्रिया वा पूलबाहिरको छनोट हुँदा `rules` को निर्णय प्रयोग गरिन्छ र कारणको अगाडि
-`NadirStrategy: fallback (…)` थपिन्छ। कल विफल भएपछि रणनीतिले 30 s सम्म नेटवर्क छोड्छ, त्यसैले
-आउटेज हुँदा प्रत्येक अनुरोधमा एउटा टाइमआउट लाग्नुको सट्टा प्रत्येक 30 s मा एउटा टाइमआउट मात्र लाग्छ।
-Nadir ले वास्तवमै छनोट गरेको अवस्थामा मात्र रुटिङ इभेन्टहरूले `strategy: "nadir"` रिपोर्ट गर्छन्।
+असफल व्यवहार फेल-ओपन हो: एक टाइमआउट (पूर्वनिर्धारित 2000 ms), एक non-2xx, पहुँचयोग्य होस्ट, एक विकृत प्रतिक्रिया वा पूल बाहिरको चयनले `rules` निर्णयमा समाधान गर्दछ र कारण `NadirStrategy: fallback (…)` उपसर्ग हो। असफल कल पछि रणनीतिले नेटवर्कलाई ३० सेकेन्डका लागि छोड्छ, त्यसैले आउटेजले प्रति अनुरोधको सट्टा प्रति ३० सेकेन्डमा एक टाइमआउट खर्च गर्छ। नादिरले वास्तवमा छनोट गरेपछि मात्र रूटिङ घटनाहरू `strategy: "nadir"` रिपोर्ट गर्छ।
 
-**कहिले प्रयोग गर्ने**: विभिन्न मोडेल टियरहरू (सानो, मध्यम र फ्रन्टियर मोडेल) समेट्ने पूलमा
-मिश्रित-कठिनाइ भएको ट्राफिकका लागि, जहाँ सधैँ फ्रन्टियर मोडेल प्रयोग गर्दाको लागत घटाउन चाहनुहुन्छ।
+**कहिले प्रयोग गर्ने** : मोडेल टियरहरू (सानो, मध्य र सीमावर्ती मोडेल) फैलिएको पोखरीमा मिश्रित-कठीन ट्राफिक, जहाँ सँधै-सीमाना तपाईंले कटौती गर्न चाहेको लागत हो।
 
-**उपनाम**: `nadir` (कुनै उपनाम छैन)
+**उपनाम** : `nadir` (कुनै उपनाम)
+
+---
+
+#### 7. `decision` — प्लगेबल निर्णयकर्ताले मोडेल छान्छ
+
+`decision` ले सोध्छ** निर्णायक** पूलमा कुन मोडेलले अनुरोधलाई फिट गर्छ, त्यसपछि पूललाई त्यो मोडेलमा साँघुरो पार्छ र `rules` जडान छनोट गर्न दिन्छ (कोटा, स्वास्थ्य र लागत अझै खाता छान्नुहोस्)। निर्णायक कम्बोको निर्णय ब्लक — `config.decision` मा सेट गरिन्छ जब राउटर knobs `config` को शीर्षमा बस्छ (ड्यासबोर्डले के लेख्छ), वा `config.auto.routerStrategy` को छेउमा `config.auto.decision` :
+
+| `decider`     | कसले जवाफ दिन्छ                                                                                                             | आवश्यकताहरू                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe प्रणाली वन (`POST https://api.typesafe.ai/v1/systemone`), पूर्वनिर्धारित मोडेल `jev-latest`                        | `typesafe` जडान वा env कुञ्जी                  |
+| `http`        | `baseUrl` मा तपाईंको आफ्नै निर्णयकर्ता : `wire: "systemone"` (`{baseUrl}/v1/systemone`) वा `"openai-chat"` ( च्याट पूराहरू) | `baseUrl` + `model`; कुञ्जी वैकल्पिक           |
+| `combo-model` | तपाइँको प्रदायक मोडेल मध्ये एक, फ्यूजन न्यायाधीश जस्तै प्रक्रिया मा बोलाइएको                                                | `model` `provider/model` को रूपमा (कुम्बो छैन) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+क्षेत्रहरू (बचतमा कडा स्किमाद्वारा प्रमाणित र अनुरोधको समयमा पुन:)
+
+- `decider` — `systemone`, `http` वा `combo-model`।
+- `model` — TypeSafe मोडेल, तपाईंको URL मा निर्णय मोडेल, वा कम्बो-मोडेल कलको `provider/model` (200 वर्णहरू सम्म)।
+- `baseUrl` — `http` मात्र: एक `http(s)` URL 500 क्यारेक्टर सम्म, प्रमाण, क्वेरी वा टुक्रा बिना। यो OmniRoute (लूपब्याक + `PORT`) मा संकेत गर्ने URL अस्वीकार गरिएको छ।
+- `wire` — `http` मात्र: `systemone` (पूर्वनिर्धारित) वा `openai-chat`।
+- `connectionId` — भण्डारण गरिएको जडान जसको कुञ्जी प्रयोग गरिन्छ (केवल कलिङ API कुञ्जीको अनुमति जडानहरू भित्र)। यो बिना, `systemone` `typesafe` जडान पढ्छ र प्रत्येक नेटवर्क निर्णयकर्ता `OMNIROUTE_DECISION_API_KEY` मा फर्किन्छ। त्यहाँ कुनै `apiKey` फिल्ड छैन: कुञ्जी कहिल्यै कम्बोमा भण्डार गरिएको छैन।
+- `timeoutMs` — पूर्णांक, 100–5000, पूर्वनिर्धारित 2000।
+- `minConfidence` — 0-1; कम-विश्वासको जवाफ `rules` मा फर्किन्छ (निर्णयकर्ता जसले अविश्वासलाई ० को रूपमा गणना गर्छ)।
+- `descriptions` — 50 प्रविष्टिहरू सम्म (300 सम्म कुञ्जी, 1000 क्यारेक्टरहरू सम्मको पाठ), मोडेल आईडी वा `provider/model` द्वारा कुञ्जी; अनसेट प्रविष्टिहरूले उत्पन्न लागत-रैंक विवरण प्राप्त गर्दछ।
+
+**झण्डा।** `COMBO_DECISION_ROUTER_ENABLED` (पूर्वनिर्धारित `false`) प्रत्येक निर्णयकर्तालाई गेट गर्दछ। यो बन्द हुँदा, `decision` कम्बोले कुनै प्रमाणहरू पढ्दैन, कुनै कल गर्दैन र `rules` सँग रुटहरू गर्दैन; लगले `fallback (disabled)` भन्छ। एक्लै भण्डार गरिएको कुञ्जीले यसलाई कहिल्यै खोल्दैन। निर्णय ब्लक बिना कम्बोहरू सबै प्रभावित हुँदैनन्।
+
+**के बक्स छोड्छ।** केवल अन्तिम प्रयोगकर्ता सन्देशको पाठ (8000 वर्णहरू सम्म; chat/Claude `messages` वा प्रतिक्रियाहरू `input`) र तिनीहरूका विवरणहरू सहितको मोडेल आईडीहरूको मेनु। प्रणाली प्रम्प्ट, प्रतिक्रियाहरू `instructions`, उपकरण, इतिहास, हेडर वा खाता डेटा कहिल्यै। नेटवर्क कलहरू कुनै पुन: प्रयास बिना, कुनै रिडिरेक्ट र 64 KB प्रतिक्रिया क्याप बिना प्रदायक आउटबाउन्ड गार्ड मार्फत जान्छन्। `combo-model` कल 256-टोकन बजेटको साथ गैर-स्ट्रिमिङ, उपकरण-रहित, `temperature: 0` हो; निर्णय कल भित्र सुरु भएको निर्णय अस्वीकार गरिएको छ।
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network error the endpoint is skipped for 30 s. A successful pick reads `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL, key, prompt or upstream body reaches the log.
+
+कम्बो बिल्डरले यी क्षेत्रहरू देखाउँदछ जब राउटर रणनीति `decision` हुन्छ, प्लेसहोल्डरहरू र ए.** परीक्षण निर्णय** सेभ नगरिएको सेटिङ्हरू (उही झण्डा) सँग एक पटक `POST /api/combos/decision-preview` कल गर्ने बटन।
+
+**कहिले प्रयोग गर्ने** : मिश्रित-कठीन ट्राफिक जहाँ तपाइँ तपाइँले रोजेको वर्गीकरणकर्ता द्वारा प्रति अनुरोध टियर छनौट गर्न चाहनुहुन्छ, विशेष गरी नादिर द्वारा होइन।
+
+**उपनाम** : `decision` (कुनै उपनाम)
 
 ---
 
 ### अनुकूलन राउटर रणनीतिहरू
 
-तपाईंले सार्वजनिक API मार्फत आफ्नै `RouterStrategy` कार्यान्वयन दर्ता गर्न सक्नुहुन्छ:
+तपाइँ सार्वजनिक API मार्फत तपाइँको आफ्नै `RouterStrategy` कार्यान्वयन दर्ता गर्न सक्नुहुन्छ:
 
 ```ts
 import {
@@ -741,7 +762,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // तपाईंको राउटिङ तर्क यहाँ
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -769,18 +790,19 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ---
 
-### राउटर रणनीति छनोट मार्गदर्शिका
+### राउटर रणनीति चयन गाइड
 
-| प्रयोगको अवस्था    | रणनीति      | कारण                                         |
-| ------------------ | ----------- | -------------------------------------------- |
-| सन्तुलित कार्यभार  | `rules`     | पूर्वनिर्धारित — सबै कारकलाई विचार गर्छ      |
-| लागत न्यूनीकरण     | `cost`      | सधैँ सबैभन्दा सस्तो विकल्प रोज्छ             |
-| विलम्बता न्यूनीकरण | `latency`   | सबैभन्दा छिटो विश्वसनीय प्रदायक रोज्छ        |
-| कडा SLO हरू        | `sla-aware` | p95/त्रुटि/लागत सीमाहरूका आधारमा फिल्टर गर्छ |
-| बहु-चरणीय च्याट    | `lkgp`      | सत्र स्थिरता                                 |
-| मिश्रित कठिनाइ     | `nadir`     | प्रत्येक प्रम्प्टअनुसार मोडेल तह रोज्छ       |
+| केस प्रयोग गर्नुहोस्  | रणनीति      | कारण                                         |
+| --------------------- | ----------- | -------------------------------------------- |
+| सन्तुलित कार्यभार     | `rules`     | पूर्वनिर्धारित — सबै कारकहरूलाई विचार गर्दछ  |
+| लागत कम गर्नुहोस्     | `cost`      | सँधै सस्तो लिन्छ                             |
+| विलम्बता कम गर्नुहोस् | `latency`   | सबैभन्दा छिटो भरपर्दो प्रदायक छनोट गर्नुहोस् |
+| कडा SLOs              | `sla-aware` | p95/error/cost थ्रेसहोल्डहरूद्वारा फिल्टरहरू |
+| बहु-टर्न च्याट        | `lkgp`      | सत्र चिपचिपाहट                               |
+| मिश्रित कठिनाई        | `nadir`     | प्रति प्रम्प्ट मोडेल टियर छान्छ              |
+| आफ्नै वर्गीकरणकर्ता   | `decision`  | तपाईंको निर्णयकर्ताले मोडेल छान्छ            |
 
-SLA-aware फिल्डहरू:
+SLA-सचेत क्षेत्रहरू:
 
 ```json
 {

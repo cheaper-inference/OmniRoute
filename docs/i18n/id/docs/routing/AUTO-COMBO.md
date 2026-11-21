@@ -487,22 +487,22 @@ Ini berarti **menambahkan provider baru dengan `auto/*` yang diaktifkan akan sec
 
 ## API
 
-**Tidak ada endpoint khusus `POST /api/combos/auto`** — Auto-Combo digunakan dengan dua cara:
+Ada** tidak ada titik akhir `POST /api/combos/auto` khusus** — Auto-Combo digunakan dalam dua cara:
 
-1. **Tanpa konfigurasi (direkomendasikan):** Kirim permintaan penyelesaian chat apa pun dengan `model: "auto"` atau `model: "auto/<variant>"`. Factory virtual membuat combo untuk setiap permintaan — tidak memerlukan persistensi atau panggilan API.
+1. **Konfigurasi nol (disarankan):** Kirim permintaan penyelesaian obrolan apa pun dengan `model: "auto"` atau `model: "auto/<variant>"`. Pabrik virtual membangun kombo per permintaan — tanpa ketekunan, tidak perlu panggilan API.
 
-2. **Combo persisten dengan `strategy: "auto"`:** Buat combo biasa melalui `POST /api/combos`, lalu tetapkan `strategy: "auto"` beserta `config.auto.weights` / `config.auto.candidatePool`. Mesin penilaian yang sama digunakan; combo disimpan di `combos` dan dapat digunakan kembali berdasarkan ID.
+2. **Kombo yang bertahan dengan `strategy: "auto"`:** Buat kombo reguler melalui `POST /api/combos` dan atur `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Mesin penilaian yang sama digunakan; kombo disimpan di `combos` dan dapat digunakan kembali oleh ID.
 
-Untuk penemuan, `GET /api/combos/auto` mencantumkan setiap varian beserta candidate pool yang telah di-resolve serta `context_length` / `max_output_tokens` — nilai MAKSIMUM di seluruh jendela candidate pool. Klien (misalnya plugin opencode) harus mengiklankan nilai-nilai ini, bukan `0`: konteks bernilai nol sepenuhnya menonaktifkan pemadatan otomatis opencode, sehingga sesi terus membesar sampai penghapusan riwayat oleh gateway menghancurkan konteks. Nilai MAKSIMUM aman untuk diiklankan karena prafilter konteks auto-combo merutekan permintaan berukuran terlalu besar ke kandidat dengan jendela besar.
+Untuk penemuan, `GET /api/combos/auto` mencantumkan setiap varian dengan kumpulan kandidat yang terselesaikan ditambah `context_length` / `max_output_tokens` — MAX di seluruh jendela kumpulan kandidat. Klien (misalnya plugin kode terbuka) harus mengiklankan nilai-nilai ini alih-alih `0`: konteks nol menonaktifkan pemadatan otomatis kode terbuka sepenuhnya, membiarkan sesi berkembang hingga pembersihan riwayat gateway menghancurkan konteks. MAX aman untuk diiklankan karena pra-filter konteks kombo otomatis merutekan permintaan berukuran besar ke kandidat berjendela besar.
 
 ```bash
-# Penggunaan tanpa konfigurasi (tanpa pembuatan combo)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo otomatis persisten melalui endpoint combo biasa
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -510,33 +510,24 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Strategi router otomatis
 
-Combo persisten dengan `strategy: "auto"` dapat menetapkan `config.routerStrategy` (atau format lama
-`config.auto.routerStrategy`) ke salah satu dari:
+Kombo `strategy: "auto"` yang bertahan dapat menyetel `config.routerStrategy` (atau `config.auto.routerStrategy` lama) ke salah satu dari:
 
-- `rules` — penilaian berbobot default
-- `score` — memilih skor berbobot terkonfigurasi tertinggi. Jika skor sama persis, urutan
-  kandidat yang dikonfigurasi dipertahankan; `explorationRate` yang ada mengambil sampel dari seluruh pool yang telah diperingkat.
-- `cost` / `eco` — penyedia sehat termurah
+- `rules` — penilaian tertimbang default
+- `score` — memilih skor tertimbang terkonfigurasi tertinggi. Ikatan yang tepat mempertahankan urutan kandidat yang terkonfigurasi; sampel `explorationRate` yang ada dari kumpulan peringkat penuh.
+- `cost` / `eco` — penyedia kesehatan termurah
 - `latency` / `fast` — latensi p95 terendah dengan penalti keandalan
-- `sla-aware` / `sla` — mengutamakan kandidat yang memenuhi SLO latensi p95, tingkat kesalahan, dan
-  biaya opsional
-- `lkgp` — penyedia terakhir yang diketahui berfungsi dengan baik diprioritaskan
-- `nadir` — meminta API keputusan [Nadir](https://getnadir.com) menentukan model mana dalam pool yang
-  diperlukan prompt; harus diaktifkan secara eksplisit, dan jika gagal akan kembali ke `rules`
+- `sla-aware` / `sla` — lebih memilih kandidat yang memenuhi latensi p95, tingkat kesalahan, dan biaya opsional SLOs
+- `lkgp` — penyedia bagus yang terakhir diketahui terlebih dahulu
+- `nadir` — menanyakan keputusan [Nadir](https://getnadir.com) API model mana dalam kumpulan yang dibutuhkan prompt; ikut serta, gagal membuka ke `rules`
+- `decision` — menanyakan penentu yang dikonfigurasi (TypeSafe System One, keputusan Anda sendiri URL, atau salah satu model kombo sendiri) model mana di kumpulan yang sesuai dengan permintaan; di belakang tanda `COMBO_DECISION_ROUTER_ENABLED` yang tidak aktif secara default, gagal dibuka ke `rules`
 
-### Detail strategi router
+### Strategi router secara rinci
 
-Mesin auto-combo menyediakan 7 implementasi **RouterStrategy** modular yang
-dapat Anda ganti melalui `config.routerStrategy` (atau format lama `config.auto.routerStrategy`).
-Setiap strategi memilih satu penyedia dari candidate pool berdasarkan `RoutingContext`
-(jenis tugas, petunjuk alat/visual, estimasi token, kebijakan SLA opsional, penyedia
-terakhir yang diketahui berfungsi dengan baik yang bersifat opsional).
+Mesin kombo otomatis menampilkan 7 pluggable**RouterStrategy** implementasi yang dapat Anda tukar melalui `config.routerStrategy` (atau warisan `config.auto.routerStrategy`). Setiap strategi memilih satu penyedia dari kumpulan kandidat, diberi `RoutingContext` (jenis tugas, petunjuk tool/vision, perkiraan token, kebijakan SLA opsional, penyedia barang terakhir yang diketahui opsional).
 
-#### 1. `rules` (default) — penilaian berbobot dengan 16 faktor
+#### 1. `rules` (default) — penilaian tertimbang 16 faktor
 
-Membungkus mesin penilaian yang sudah ada. Memfilter kandidat circuit breaker
-`OPEN`, lalu menjalankan `scorePool()` dengan jenis tugas saat ini dan `getTaskFitness()`,
-kemudian memilih penyedia dengan skor tertinggi.
+Membungkus mesin penilaian yang ada. Memfilter kandidat pemutus sirkuit `OPEN`, lalu menjalankan `scorePool()` dengan jenis tugas saat ini dan `getTaskFitness()`, memilih penyedia dengan skor tertinggi.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -556,16 +547,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kapan digunakan**: Default. Gunakan ketika Anda menginginkan kompromi seimbang di antara semua sinyal.
+**Kapan harus digunakan** : Bawaan. Gunakan saat Anda menginginkan trade-off yang seimbang di semua sinyal.
 
-**Alias**: `rules` (tanpa alias)
+**Alias** : `rules` (tanpa alias)
 
 ---
 
-#### 2. `cost` / `eco` — penyedia sehat termurah
+#### 2. `cost` / `eco` — penyedia kesehatan termurah
 
-Mengurutkan candidate pool berdasarkan `costPer1MTokens` (menaik) dan memilih yang termurah.
-Kandidat `OPEN` difilter terlebih dahulu.
+Urutkan kumpulan kandidat berdasarkan `costPer1MTokens` (menaik) dan pilih yang termurah. Saring kandidat `OPEN` terlebih dahulu.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -580,16 +570,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kapan digunakan**: Beban kerja yang sensitif terhadap biaya, pemrosesan batch, atau pekerjaan latar belakang.
+**Kapan harus digunakan** : Beban kerja yang sensitif terhadap biaya, pemrosesan batch, atau pekerjaan latar belakang.
 
-**Alias**: `cost`, `eco`
+**Alias** : `cost`, `eco`
 
 ---
 
 #### 3. `latency` / `fast` — latensi p95 terendah dengan penalti keandalan
 
-Mengurutkan berdasarkan `p95LatencyMs + (errorRate * 1000)`. Penalti tingkat kesalahan memastikan
-penyedia yang tidak andal diberi peringkat lebih rendah meskipun latensi nominalnya rendah.
+Urutkan berdasarkan `p95LatencyMs + (errorRate * 1000)`. Penalti tingkat kesalahan memastikan penyedia yang tidak dapat diandalkan diberi peringkat lebih rendah meskipun latensi nominalnya rendah.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -606,28 +595,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kapan digunakan**: Beban kerja yang sensitif terhadap latensi seperti chat real-time, pelengkapan otomatis, atau
-asisten pemrograman interaktif.
+**Kapan harus digunakan** : Beban kerja yang sensitif terhadap latensi seperti obrolan waktu nyata, pelengkapan otomatis, atau asisten pengkodean interaktif.
 
-**Alias**: `latency`, `fast`
+**Alias** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — kepatuhan terhadap SLO latensi/kesalahan/biaya
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO
 
-Menilai setiap kandidat berdasarkan seberapa baik kandidat tersebut memenuhi kebijakan SLO yang dikonfigurasi:
+Nilai setiap kandidat berdasarkan seberapa baik kandidat tersebut memenuhi kebijakan SLO yang dikonfigurasi:
 
-| Faktor          | Bobot | Rumus                                                     |
-| --------------- | ----- | --------------------------------------------------------- |
-| Skor latensi    | 35%   | `threshold / max(value, ε)`                               |
-| Skor galat      | 35%   | `threshold / max(value, ε)`                               |
-| Skor kesehatan  | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)         |
-| Skor biaya      | 10%   | `threshold / max(value, ε)` atau normalisasi terbalik     |
-| Skor stabilitas | 5%    | simpangan baku latensi yang dinormalisasi secara terbalik |
+| Faktor          | Berat | Rumus                                                       |
+| --------------- | ----- | ----------------------------------------------------------- |
+| Skor latensi    | 35%   | `threshold / max(value, ε)`                                 |
+| Skor kesalahan  | 35%   | `threshold / max(value, ε)`                                 |
+| Skor kesehatan  | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)           |
+| Skor biaya      | 10%   | `threshold / max(value, ε)` atau kebalikannya dinormalisasi |
+| Skor stabilitas | 5%    | stddev latensi normalisasi terbalik                         |
 
-Ketika `hardConstraints: true`, kandidat diurutkan terutama berdasarkan **skor pelanggaran**
-(seberapa jauh kandidat melampaui SLO), lalu berdasarkan skor gabungan. Jika tidak, pengurutan
-hanya berdasarkan skor gabungan.
+Saat `hardConstraints: true`, kandidat diurutkan berdasarkan** skor pelanggaran** (seberapa jauh mereka melebihi SLO), lalu dengan skor gabungan. Kalau tidak, itu hanya skor gabungan.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -636,12 +622,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... memberi skor pada setiap kandidat berdasarkan kebijakan: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Kolom SLA** (ditetapkan pada konfigurasi combo):
+**bidang SLA** (atur pada konfigurasi kombo):
 
 ```json
 {
@@ -656,17 +642,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kapan digunakan**: Beban kerja produksi dengan anggaran latensi, tingkat galat, atau biaya yang ketat.
+**Kapan harus digunakan** : Beban kerja produksi dengan latensi, tingkat kesalahan, atau anggaran biaya yang ketat.
 
-**Alias**: `sla-aware`, `sla`
+**Alias** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — penyedia terakhir yang diketahui baik didahulukan
+#### 5. `lkgp` — penyedia baik yang terakhir diketahui terlebih dahulu
 
-Mencoba **penyedia terakhir yang diketahui baik** (jika ditetapkan) terlebih dahulu, lalu beralih ke
-strategi `rules`. Berguna untuk persistensi sesi — penyedia yang sama menangani
-permintaan lanjutan dalam sebuah percakapan.
+Mencoba** penyedia baik yang terakhir diketahui** (jika disetel) terlebih dahulu, lalu kembali ke strategi `rules`. Berguna untuk kelekatan sesi — penyedia yang sama menangani permintaan tindak lanjut dalam percakapan.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -687,27 +671,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Beralih ke strategi rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kapan digunakan**: Percakapan multi-giliran ketika Anda ingin penyedia yang sama menangani
-permintaan lanjutan (misalnya, untuk caching, kesinambungan konteks, atau konsistensi harga).
+**Kapan harus digunakan** : Percakapan multi-turn di mana Anda ingin penyedia yang sama menangani permintaan tindak lanjut (misalnya, untuk cache, kontinuitas konteks, atau konsistensi harga).
 
-**Alias**: `lkgp` (tanpa alias)
+**Alias** : `lkgp` (tanpa alias)
 
 ---
 
-#### 6. `nadir` — pemilihan model yang mempertimbangkan prompt melalui Nadir
+#### 6. `nadir` — pilihan model yang sadar cepat melalui Nadir
 
-Setiap strategi di atas mengurutkan kandidat berdasarkan telemetrinya sendiri; tidak ada yang membaca
-permintaan. `nadir` mengirim giliran terakhir pengguna beserta ID model dalam pool ke
-API keputusan [Nadir](https://getnadir.com) (`POST /v1/bucket`) dan merutekan ke model
-yang dipilih Nadir dari menu tersebut (`simple` → model termurah yang mampu menangani permintaan, `complex` → model
-frontier). Koneksi yang melayani model tersebut tetap dipilih oleh `rules`, sehingga kuota,
-kesehatan, dan biaya tetap menentukan akun yang digunakan.
+Setiap strategi di atas memberi peringkat pada kandidat berdasarkan telemetrinya masing-masing; tidak satupun dari mereka membaca permintaan tersebut. `nadir` mengirimkan giliran pengguna terakhir ditambah id model kumpulan ke keputusan [Nadir](https://getnadir.com) API (`POST /v1/bucket`) dan mengarahkan ke model yang dipilih Nadir dari menu itu (`simple` → model berkemampuan termurah, `complex` → yang terdepan). Koneksi yang melayani model tersebut masih dipilih oleh `rules`, jadi kuota, kesehatan, dan biaya tetap menentukan akun mana.
 
 ```json
 {
@@ -723,34 +701,75 @@ kesehatan, dan biaya tetap menentukan akun yang digunakan.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` dan `OMNIROUTE_NADIR_BASE_URL` merupakan fallback env untuk kedua
-string tersebut. `baseUrl` hanya diperlukan untuk Nadir yang di-host sendiri (akhiran `/v1` dapat diterima).
-Panggilan tanpa kunci masuk ke tingkat anonim Nadir, yang dibatasi berdasarkan laju per IP. Dengan kunci
-([buat kunci](https://app.getnadir.com/dashboard/api-keys)), setiap keputusan akan
-dicatat di dasbor Nadir Anda. Penyiapan dan verifikasi lengkap:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` dan `OMNIROUTE_NADIR_BASE_URL` adalah env fallback untuk dua string. `baseUrl` hanya diperlukan untuk Nadir yang dihosting sendiri ( `/v1` tambahan dapat ditoleransi). Panggilan tanpa kunci masuk ke tingkat anonim Nadir, yang tarifnya dibatasi per IP. Dengan kunci ( [buat satu](https://app.getnadir.com/dashboard/api-keys) ), setiap keputusan dicatat ke dasbor Nadir Anda. Penyiapan dan verifikasi lengkap: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Data yang dikirim ke luar: teks pesan terakhir pengguna (16 ribu karakter pertama), ID model
-kandidat, dan tag saluran `source: "omniroute"`. Tidak ada prompt sistem, riwayat, alat, atau
-header.
+Yang tersisa dari kotak: teks pesan pengguna terakhir (16 ribu karakter pertama), id model kandidat, dan tag saluran `source: "omniroute"`. Tidak ada perintah sistem, riwayat, alat, atau header.
 
-Perilaku saat terjadi kegagalan bersifat fail-open: timeout (default 2000 md), respons non-2xx, host yang tidak
-dapat dijangkau, respons yang tidak valid, atau pilihan di luar pool akan menggunakan keputusan `rules`
-dan alasannya diawali dengan `NadirStrategy: fallback (…)`. Setelah panggilan gagal, strategi akan
-melewati akses jaringan selama 30 dtk., sehingga gangguan hanya mengakibatkan satu timeout per 30 dtk., bukan
-satu per permintaan. Peristiwa perutean melaporkan `strategy: "nadir"` hanya ketika Nadir benar-benar membuat
-pilihan.
+Perilaku kegagalan adalah fail-open: batas waktu (default 2000 ms), non-2xx, host yang tidak dapat dijangkau, respons yang salah format, atau pilihan di luar kumpulan menentukan keputusan `rules` dan alasannya diawali `NadirStrategy: fallback (…)`. Setelah panggilan gagal, strategi akan melewati jaringan selama 30 detik, sehingga pemadaman memerlukan satu waktu tunggu per 30 detik, bukan satu waktu tunggu per permintaan. Peristiwa perutean melaporkan `strategy: "nadir"` hanya ketika Nadir benar-benar membuat pilihan.
 
-**Kapan digunakan**: lalu lintas dengan tingkat kesulitan beragam pada pool yang mencakup beberapa tingkatan model (model kecil, menengah,
-dan frontier), ketika Anda ingin mengurangi biaya akibat selalu menggunakan model frontier.
+**Kapan harus digunakan** : lalu lintas dengan tingkat kesulitan campuran pada kumpulan yang mencakup tingkatan model (model kecil, menengah, dan terdepan), dengan selalu-batas depan adalah biaya yang ingin Anda potong.
 
-**Alias**: `nadir` (tanpa alias)
+**Alias** : `nadir` (tanpa alias)
+
+---
+
+#### 7. `decision` — pluggable penentu memilih model
+
+`decision` bertanya a** penentu** model mana dalam kumpulan yang sesuai dengan permintaan, lalu persempit kumpulan ke model tersebut dan biarkan `rules` memilih koneksi (kuota, kesehatan, dan biaya tetap memilih akun). Pengambil keputusan diatur dalam blok keputusan kombo — `config.decision` ketika kenop router berada di bagian atas `config` (apa yang ditulis dasbor), atau `config.auto.decision` di sebelah `config.auto.routerStrategy`:
+
+| `decider`     | Siapa yang menjawab                                                                                                           | Kebutuhan                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe Sistem Satu (`POST https://api.typesafe.ai/v1/systemone`), model default `jev-latest`                                | koneksi `typesafe` atau kunci env              |
+| `http`        | penentu Anda sendiri di `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) atau `"openai-chat"` (penyelesaian obrolan) | `baseUrl` + `model`; kunci opsional            |
+| `combo-model` | salah satu model penyedia Anda, dipanggil dalam proses seperti juri fusi                                                      | `model` sebagai `provider/model` (tanpa kombo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Bidang (divalidasi oleh skema ketat saat menyimpan dan lagi pada waktu permintaan):
+
+- `decider` — `systemone`, `http` atau `combo-model`.
+- `model` — TypeSafe model, model keputusan di URL Anda, atau `provider/model` panggilan model kombo (hingga 200 karakter).
+- `baseUrl` — `http` saja: `http(s)` URL hingga 500 karakter, tanpa kredensial, kueri, atau fragmen. URL yang menunjuk ke OmniRoute ini (loopback + `PORT`) ditolak.
+- `wire` — `http` saja: `systemone` (default) atau `openai-chat`.
+- `connectionId` — koneksi tersimpan yang kuncinya digunakan (hanya di dalam koneksi yang diizinkan dari kunci API pemanggil). Tanpanya, `systemone` membaca koneksi `typesafe` dan setiap penentu jaringan kembali ke `OMNIROUTE_DECISION_API_KEY`. Tidak ada bidang `apiKey` : kunci tidak pernah disimpan dalam kombo.
+- `timeoutMs` — bilangan bulat, 100–5000, default 2000.
+- `minConfidence` — 0–1; jawaban dengan keyakinan lebih rendah kembali ke `rules` (pengambil keputusan yang melaporkan tidak ada keyakinan dihitung sebagai 0).
+- `descriptions` — hingga 50 entri (kunci hingga 300, teks hingga 1000 karakter), dikunci berdasarkan id model atau `provider/model`; entri yang tidak disetel mendapatkan deskripsi peringkat biaya yang dihasilkan.
+
+**Bendera.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gerbang setiap penentu. Saat tidak aktif, kombo `decision` tidak membaca kredensial, tidak membuat panggilan, dan merutekan dengan `rules`; log mengatakan `fallback (disabled)`. Kunci yang disimpan saja tidak pernah menyalakannya. Kombo tanpa blok keputusan tidak terpengaruh sama sekali.
+
+**Apa yang keluar dari kotak itu.** Hanya teks pesan pengguna terakhir (hingga 8000 karakter; chat/Claude `messages` atau Responses `input`) dan menu id model beserta deskripsinya. Jangan pernah meminta sistem, Responses `instructions`, alat, riwayat, header, atau data akun. Panggilan jaringan melewati penjaga keluar penyedia tanpa percobaan ulang, tanpa pengalihan, dan batas respons 64 KB. Panggilan `combo-model` bersifat non-streaming, bebas alat, `temperature: 0`, dengan anggaran 256 token; keputusan yang dimulai di dalam panggilan keputusan ditolak.
+
+**Perilaku kegagalan** adalah fail-open: kegagalan apa pun ditentukan oleh keputusan `rules`, dan alasannya berbunyi `decision(<decider>): fallback (<reason>)`, dengan `<reason>` salah satu dari `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` atau `no_user_text`. Setelah batas waktu, kesalahan HTTP, atau kesalahan jaringan, titik akhir dilewati selama 30 detik. Pilihan yang berhasil berbunyi `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Tidak ada URL, key, prompt atau upstream body yang mencapai log.
+
+Pembuat kombo menampilkan bidang ini ketika strategi router adalah `decision`, dengan deskripsi yang dihasilkan sebagai placeholder dan a** Keputusan tes** tombol yang memanggil `POST /api/combos/decision-preview` satu kali dengan pengaturan yang belum disimpan (bendera yang sama).
+
+**Kapan harus digunakan** : lalu lintas dengan tingkat kesulitan campuran yang Anda inginkan agar tingkatannya dipilih per permintaan oleh pengklasifikasi yang Anda pilih, bukan oleh Nadir secara khusus.
+
+**Alias** : `decision` (tanpa alias)
 
 ---
 
 ### Strategi router khusus
 
-Anda dapat mendaftarkan implementasi `RouterStrategy` sendiri melalui API publik:
+Anda dapat mendaftarkan implementasi `RouterStrategy` Anda sendiri melalui API publik :
 
 ```ts
 import {
@@ -763,7 +782,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Logika perutean Anda di sini
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -778,7 +797,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Kemudian gunakan strategi tersebut:
+Kemudian gunakan:
 
 ```json
 {
@@ -793,16 +812,17 @@ Kemudian gunakan strategi tersebut:
 
 ### Panduan pemilihan strategi router
 
-| Kasus penggunaan          | Strategi    | Alasan                                       |
-| ------------------------- | ----------- | -------------------------------------------- |
-| Beban kerja seimbang      | `rules`     | Default — mempertimbangkan semua faktor      |
-| Meminimalkan biaya        | `cost`      | Selalu memilih yang termurah                 |
-| Meminimalkan latensi      | `latency`   | Memilih penyedia andal yang tercepat         |
-| SLO ketat                 | `sla-aware` | Memfilter berdasarkan ambang p95/error/biaya |
-| Percakapan multi-giliran  | `lkgp`      | Konsistensi sesi                             |
-| Tingkat kesulitan beragam | `nadir`     | Memilih tingkat model untuk setiap prompt    |
+| Kasus penggunaan          | Strategi    | Alasan                                          |
+| ------------------------- | ----------- | ----------------------------------------------- |
+| Beban kerja yang seimbang | `rules`     | — default mempertimbangkan semua faktor         |
+| Minimalkan biaya          | `cost`      | Selalu memilih yang termurah                    |
+| Minimalkan latensi        | `latency`   | Memilih penyedia tercepat yang dapat diandalkan |
+| SLOs yang ketat           | `sla-aware` | Filter berdasarkan ambang batas p95/error/cost  |
+| Obrolan multi-putaran     | `lkgp`      | Kelengketan sesi                                |
+| Kesulitan campuran        | `nadir`     | Memilih tingkat model per prompt                |
+| Pengklasifikasi sendiri   | `decision`  | Penentu Anda memilih modelnya                   |
 
-Kolom berbasis SLA:
+Bidang yang sadar SLA:
 
 ```json
 {

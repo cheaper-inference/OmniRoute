@@ -84,18 +84,19 @@ advarsel og falder tilbage til basislisten.
 
 Alle slutpunkter kræver administrationsgodkendelse (`requireManagementAuth`)** og** er loopback-only — `/api/plugins` og `/api/plugins/` er angivet i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Slutpunkt                        | Metode | Beskrivelse                                                  |
-| -------------------------------- | ------ | ------------------------------------------------------------ |
-| `/api/plugins`                   | GET    | Liste over installerede plugins (valgfrit `?status=` filter) |
-| `/api/plugins`                   | POST   | Installer et plugin fra plugin-kildebiblioteket              |
-| `/api/plugins/scan`              | POST   | Scan plugin-biblioteket og registrer nye plugins             |
-| `/api/plugins/marketplace`       | GET    | Liste markedspladskatalogposter                              |
-| `/api/plugins/[name]`            | GET    | Få installeret plugin detaljer                               |
-| `/api/plugins/[name]`            | DELETE | Afinstaller et plugin                                        |
-| `/api/plugins/[name]/activate`   | POST   | Aktiver (indlæs + registerkroge)                             |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiver (fire `onDeactivate`, afregistrer kroge)           |
-| `/api/plugins/[name]/config`     | GET    | Hent plugin config + config skema                            |
-| `/api/plugins/[name]/config`     | PUT    | Opdater plugin-konfiguration (valideret mod skema)           |
+| Slutpunkt                          | Metode | Beskrivelse                                                  |
+| ---------------------------------- | ------ | ------------------------------------------------------------ |
+| `/api/plugins`                     | GET    | Liste over installerede plugins (valgfrit `?status=` filter) |
+| `/api/plugins`                     | POST   | Installer et plugin fra plugin-kildebiblioteket              |
+| `/api/plugins/scan`                | POST   | Scan plugin-biblioteket og registrer nye plugins             |
+| `/api/plugins/marketplace`         | GET    | Liste markedspladskatalogposter                              |
+| `/api/plugins/marketplace/install` | POST   | Installer et markedsplads-plugin efter navn                  |
+| `/api/plugins/[name]`              | GET    | Få installeret plugin detaljer                               |
+| `/api/plugins/[name]`              | DELETE | Afinstaller et plugin                                        |
+| `/api/plugins/[name]/activate`     | POST   | Aktiver (indlæs + registerkroge)                             |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiver (fire `onDeactivate`, afregistrer kroge)           |
+| `/api/plugins/[name]/config`       | GET    | Hent plugin config + config skema                            |
+| `/api/plugins/[name]/config`       | PUT    | Opdater plugin-konfiguration (valideret mod skema)           |
 
 `GET /api/plugins` `status` filteret accepterer en af `installed` / `active` / `inactive` / `error`. En ugyldig værdi returnerer `400`.
 
@@ -115,9 +116,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` skal være en** absolut** stien til en mappe** inde i plugin-kildebiblioteket** : `plugin-sources` ved siden af plugin-roden, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` når denne variabel er indstillet (`getPluginSourcesDir()` i `src/lib/plugins/installSource.ts`). Kopier eller klon plugin'et der først. Installationen afvises med `400`, når stien indeholder `..` eller en null-byte, ligger uden for den mappe, løses uden for den gennem et symlink, indeholder et symlink, hvis mål er uden for det, eller når biblioteket ikke eksisterer. Kildebiblioteket skal indeholde en gyldig `plugin.json` (eller være forælder til en). Ved succes er svaret `201` med den installerede plugin-række.
+`path` skal være en** absolut** stien til en mappe** inde i plugin-kildebiblioteket** : `plugin-sources` ved siden af plugin-roden, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` når den variabel er indstillet (`getPluginSourcesDir()` i `src/lib/plugins/installSource.ts`). Kopier eller klon plugin'et der først. Installationen afvises med `400`, når stien indeholder `..` eller en null-byte, ligger uden for den mappe, løses uden for den gennem et symlink, indeholder et symlink, hvis mål er uden for det, eller når biblioteket ikke eksisterer. Kildemappen skal indeholde en gyldig `plugin.json` (eller være forælder til en). Ved succes er svaret `201` med den installerede plugin-række.
 
-I modsætning til de andre plugin-ruter kræver denne administrationslegitimationsoplysninger (en dashboard-session eller en API -nøgle med administrationsomfang), selv når login er deaktiveret (`requireLogin=false`): installation af kode er aldrig en anonym handling.
+I modsætning til de andre plugin-ruter kræver denne administrationslegitimationsoplysninger (en dashboard-session eller en API -nøgle med administrationsomfang), selv når login er deaktiveret (`requireLogin=false`): installation af kode er aldrig en anonym handling. Det samme gælder for `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Gennemse markedspladsen
 
@@ -135,7 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validerer hver angivne værdi mod plugin's `configSchema` (erklæret i manifestet): `number` -felter respekterer `min`/`max`, `select` -felter skal matche de erklærede `enum`. Nøgler, der ikke er til stede i skemaet, tillades igennem.
+`PUT .../config` validerer kroppen mod plugin's `configSchema` (erklæret i manifestet) med `validatePluginConfig()` fra `src/lib/plugins/manifest.ts`: hver nøgle skal deklareres i skemaet, værdier skal matche den deklarerede type, `number` -felter respekterer `min`/`max`, og `select` felter skal matche den erklærede `enum`. Enhver overtrædelse returnerer `400` og intet er gemt. Et plugin, der erklærer ingen `configSchema` har ingen konfigurerbare nøgler, så anmodningen afvises med `400` ("Plugin erklærer ikke nogen konfigurerbare nøgler").
 
 ## Konfiguration
 
@@ -215,7 +216,7 @@ En URL, der fejler et af lagene, afbryder ikke anmodningen — markedspladsen fa
 
 ### Isolering af plugin-udførelse
 
-> **Plugins er ikke sandboxed.** Barnet er en almindelig Node.js proces, der kører som OmniRoute brugeren, uden VM kontekst og ingen Node.js tilladelsesflag, så plugin-kode kan læse og skrive enhver fil, som brugeren kan, køre programmer og nå netværket. `requires.permissions` bestemmer kun hvilke miljøvariabler barnet modtager; de andre tilladelser håndhæves ikke. Installer kun plugins, du har tillid til. Procesgrænsen nedenfor indeholder nedbrud og hænger; det er ikke en sikkerhedsgrænse.
+> **Plugins er ikke sandboxed som standard.** Barnet er en almindelig Node.js proces, der kører som OmniRoute brugeren, uden VM kontekst og ingen Node.js tilladelsesflag, så plugin-kode kan læse og skrive enhver fil, som brugeren kan, køre programmer og nå netværket. `requires.permissions` bestemmer kun hvilke miljøvariabler barnet modtager; de andre tilladelser håndhæves ikke. Opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` -funktionsflaget (fra som standard) kører hvert plugin under Node.js -tilladelsesmodellen bygget ud fra disse tilladelser, undtagen `network`, som Node.js ikke kan begrænse (se [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Installer kun plugins, du har tillid til. Procesgrænsen nedenfor indeholder nedbrud og hænger; det er ikke en sikkerhedsgrænse.
 
 - **Proces isolation** — `loadPlugin()` (`src/lib/plugins/loader.ts`) afføder hvert plugin i en separat Node.js underordnet proces og kommunikerer over IPC. Hook-opkald har en timeout med `SIGTERM` → `SIGKILL` eskalering.
 - **Env tilladelsesliste** — barnet modtager kun et godkendt sæt af miljøvariabler; det bredere sæt gives kun, når manifestet anmoder om `env` tilladelsen.

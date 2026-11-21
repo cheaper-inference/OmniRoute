@@ -65,20 +65,21 @@ Dashboard (/dashboard/plugins)
 
 所有端點都需要管理身份驗證（`requireManagementAuth`）**和**僅環回— `/api/plugins`和`/api/plugins/`列在`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) 中。
 
-| 端點                             | 方法   | 描述                                       |
-| -------------------------------- | ------ | ------------------------------------------ |
-| `/api/plugins`                   | GET    | 列出已安裝的插件（可選用`?status=`過濾器） |
-| `/api/plugins`                   | POST   | 從插件來源目錄安裝插件                     |
-| `/api/plugins/scan`              | POST   | 掃描插件目錄並註冊新插件                   |
-| `/api/plugins/marketplace`       | GET    | 列出市場目錄條目                           |
-| `/api/plugins/[name]`            | GET    | 獲取已安裝插件的詳細信息                   |
-| `/api/plugins/[name]`            | DELETE | 解除安裝插件                               |
-| `/api/plugins/[name]/activate`   | POST   | 激活（加載+註冊鉤子）                      |
-| `/api/plugins/[name]/deactivate` | POST   | 停用（觸發`onDeactivate`，註銷鉤子）       |
-| `/api/plugins/[name]/config`     | GET    | 取得插件配置+配置模式                      |
-| `/api/plugins/[name]/config`     | PUT    | 更新插件配置（根據架構進行驗證）           |
+| 端點                               | 方法   | 描述                                       |
+| ---------------------------------- | ------ | ------------------------------------------ |
+| `/api/plugins`                     | GET    | 列出已安裝的插件（可選用`?status=`過濾器） |
+| `/api/plugins`                     | POST   | 從插件來源目錄安裝插件                     |
+| `/api/plugins/scan`                | POST   | 掃描插件目錄並註冊新插件                   |
+| `/api/plugins/marketplace`         | GET    | 列出市場目錄條目                           |
+| `/api/plugins/marketplace/install` | POST   | 按名稱安裝市場插件                         |
+| `/api/plugins/[name]`              | GET    | 獲取已安裝插件的詳細信息                   |
+| `/api/plugins/[name]`              | DELETE | 解除安裝插件                               |
+| `/api/plugins/[name]/activate`     | POST   | 激活（加載+註冊鉤子）                      |
+| `/api/plugins/[name]/deactivate`   | POST   | 停用（觸發`onDeactivate`，註銷鉤子）       |
+| `/api/plugins/[name]/config`       | GET    | 取得插件配置+配置模式                      |
+| `/api/plugins/[name]/config`       | PUT    | 更新插件配置（根據架構進行驗證）           |
 
-`GET /api/plugins` `status`过滤器接受`installed` / `active` / `inactive` / `error`之一。無效值傳回`400`。
+`GET /api/plugins` `status`濾波器接受`installed` / `active` / `inactive` / `error`之一。無效值傳回`400`。
 
 ### 列出已安裝的插件
 
@@ -98,7 +99,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path`必須是**絕對**目錄路徑**在插件來源目錄內**： `plugin-sources`位於插件根目錄旁邊，因此預設為`~/.omniroute/plugin-sources/` ，或設定該變數時為`<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` （ `src/lib/plugins/installSource.ts`中的`getPluginSourcesDir()` ）。首先複製或克隆外掛程式。当路径包含`..`或空字节、位于该目录外部、通过符号链接在其外部解析、包含目标位于其外部的符号链接或者目录不存在时，将使用`400`拒绝安装。來源目錄必須包含有效的`plugin.json` （或其中一個的父目錄）。成功後，回應是`201`以及已安裝的插件行。
 
-Unlike the other plugin routes, this one requires the management credential (a dashboard session or a manage-scoped API key) even when login is disabled (`requireLogin=false`): installing code is never an anonymous action.
+与其他插件路由不同，即使禁用登录 (`requireLogin=false`)，此路由也需要管理凭据（仪表板会话或管理范围的API密钥）：安装代码永远不是匿名操作。這同樣適用於`POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`)。
 
 ### 瀏覽市場
 
@@ -116,7 +117,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config`根據插件的`configSchema` （在清單中宣告）驗證每個提供的值： `number`欄位尊重`min`/`max`， `select`欄位必須與宣告的`enum`相符。允許通過架構中不存在的鍵。
+`PUT .../config`使用`src/lib/plugins/manifest.ts`中的`configSchema`根据插件的`validatePluginConfig()` （在清单中声明）验证主体：每个键都必须在架构中声明，值必须与声明的类型匹配， `number`字段遵循`min`/`max`，而`select`字段必须与声明的`enum`匹配。任何違規都會回傳`400`並且不儲存任何內容。聲明 no `configSchema`插件沒有可設定的鍵，因此使用`400`拒絕請求（「插件未聲明任何可配置的鍵」）。
 
 ## 設定
 
@@ -182,7 +183,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
 
 ### 插件執行隔離
 
-> **插件不是沙盒的。**子進程是一個以OmniRoute用戶身份運行的普通Node.js進程，沒有VM上下文，也沒有Node.js權限標誌，因此插件程式碼可以讀取和寫入用戶可以運行的程式並存取網路的任何檔案。 `requires.permissions`只決定子程序接收哪些環境變數；其他權限不強制執行。僅安裝您信任的插件。下面的進程邊界包含崩潰和掛起；它不是安全邊界。
+> **Plugins are not sandboxed by default.** The child is an ordinary Node.js process running as the OmniRoute user, with no VM context and no Node.js permission flags, so plugin code can read and write any file that user can, run programs and reach the network. `requires.permissions` only decides which environment variables the child receives; the other permissions are not enforced. The opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` feature flag (off by default) runs each plugin under the Node.js permission model built from those permissions, except `network`, which Node.js cannot restrict (see [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system)). Install only plugins you trust. The process boundary below contains crashes and hangs; it is not a security boundary.
 
 - **行程隔離**— `loadPlugin()` (`src/lib/plugins/loader.ts`) 在單獨的Node.js子程序中產生每個插件，並透過IPC進行通訊。 Hook 呼叫會因`SIGTERM` → `SIGKILL`升級而逾時。
 - **環境白名單**—子程序僅接收一組允許的環境變數；僅當清單請求`env`權限時才會授予更廣泛的集。
