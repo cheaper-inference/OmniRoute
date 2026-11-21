@@ -51,6 +51,34 @@ function isVacuumWorkerResult(value: unknown): value is VacuumSnapshotWorkerResu
   );
 }
 
+function attachVacuumWorkerHandlers(
+  child: ReturnType<typeof fork>,
+  timeoutMs: number,
+  resolve: (value: VacuumSnapshotWorkerResult) => void,
+  reject: (reason: Error) => void
+): (message: string) => void {
+  let result: VacuumSnapshotWorkerResult | null = null;
+  let failure: Error | null = null;
+  const failAndKill = (message: string) => {
+    failure = new Error(message);
+    child.kill("SIGKILL");
+  };
+  const timer = setTimeout(() => failAndKill("Vacuum snapshot worker timed out"), timeoutMs);
+  child.on("message", (message: unknown) => {
+    if (isVacuumWorkerResult(message)) result = message;
+    else failure = new Error("Vacuum snapshot worker failed");
+  });
+  child.on("error", () => {
+    failure = new Error("Vacuum snapshot worker failed to start");
+  });
+  child.once("close", (code) => {
+    clearTimeout(timer);
+    if (!failure && code === 0 && result) resolve(result);
+    else reject(failure ?? new Error("Vacuum snapshot worker exited without a result"));
+  });
+  return failAndKill;
+}
+
 export async function runVacuumSnapshotWithHashInChild(
   job: VacuumSnapshotJob,
   options: {
@@ -67,32 +95,14 @@ export async function runVacuumSnapshotWithHashInChild(
       execArgv: resolved.execArgv,
       stdio: ["ignore", "ignore", "ignore", "ipc"],
     });
-    let result: VacuumSnapshotWorkerResult | null = null;
-    let failure: Error | null = null;
-    const timer = setTimeout(() => {
-      failure = new Error("Vacuum snapshot worker timed out");
-      child.kill("SIGKILL");
-    }, options.timeoutMs ?? 120_000);
-    child.on("message", (message: unknown) => {
-      if (isVacuumWorkerResult(message)) result = message;
-      else failure = new Error("Vacuum snapshot worker failed");
-    });
-    child.on("error", () => {
-      failure = new Error("Vacuum snapshot worker failed to start");
-    });
-    child.once("close", (code) => {
-      clearTimeout(timer);
-      if (!failure && code === 0 && result) {
-        resolve(result);
-      } else {
-        reject(failure ?? new Error("Vacuum snapshot worker exited without a result"));
-      }
-    });
+    const failAndKill = attachVacuumWorkerHandlers(
+      child,
+      options.timeoutMs ?? 120_000,
+      resolve,
+      reject
+    );
     child.send(job, (error) => {
-      if (error) {
-        failure = new Error("Vacuum snapshot worker communication failed");
-        child.kill("SIGKILL");
-      }
+      if (error) failAndKill("Vacuum snapshot worker communication failed");
     });
   });
 }
