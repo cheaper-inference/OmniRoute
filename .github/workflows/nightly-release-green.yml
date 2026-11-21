@@ -132,6 +132,8 @@ jobs:
           - { name: integration-2, script: "test:integration:ci", shard: "2/2" }
           - { name: vitest, script: "test:vitest", shard: "" }
     env:
+      # Use the same gate mode as the validator's hard commands.
+      OMNIROUTE_GATE_MODE: pr
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
@@ -150,8 +152,6 @@ jobs:
           NAME: ${{ matrix.name }}
           SUITE: ${{ matrix.script }}
           TEST_SHARD: ${{ matrix.shard }}
-          # Match the validator's hard gate mode on this separate runner.
-          OMNIROUTE_GATE_MODE: pr
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set +e
@@ -481,6 +481,7 @@ jobs:
           - { name: integration-2, script: "test:integration:ci", shard: "2/2" }
           - { name: vitest, script: "test:vitest", shard: "" }
     env:
+      OMNIROUTE_GATE_MODE: pr
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
@@ -499,7 +500,6 @@ jobs:
           NAME: ${{ matrix.name }}
           SUITE: ${{ matrix.script }}
           TEST_SHARD: ${{ matrix.shard }}
-          OMNIROUTE_GATE_MODE: pr
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set +e
