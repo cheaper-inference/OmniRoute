@@ -1209,6 +1209,58 @@ test("currentSuitePredicate: a run supersedes only a run of the same workflow an
   );
 });
 
+test("currentSuitePredicate: a run that skipped every job (a PR title/body edit) supersedes nothing", () => {
+  // ci.yml / quality.yml / api-route-typecheck.yml on a `pull_request` `edited` event without a
+  // base change: a concurrency group of its own, every job skipped, the workflow run concludes
+  // `skipped`, and its skipped gate job is named by its unevaluated expression (never the gate's
+  // name). Being the newest run of the workflow on the head, it used to make every real suite
+  // non-current: a gate the real runs disagree on read missing until the next push.
+  const wf = (id, checkSuiteId, extra = {}) => ({
+    id,
+    workflowId: 7,
+    checkSuiteId,
+    event: "pull_request",
+    status: "completed",
+    conclusion: "success",
+    ...extra,
+  });
+  const runs = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }), // cancelled by the retarget
+    checkRun(20, "Gate / CI", { suite: 2 }), // the run on the new base
+    checkRun(30, "(github.event_name == 'pull_request' && …) && 'Gate / CI (PR metadata edit)'", {
+      conclusion: "skipped",
+      suite: 3,
+    }),
+  ];
+  const edit = wf(300, 3, { conclusion: "skipped" });
+  const isCurrent = currentSuitePredicate([
+    wf(100, 1, { conclusion: "cancelled" }),
+    wf(200, 2),
+    edit,
+  ]);
+  assert.deepEqual([1, 2, 3].map(isCurrent), [false, true, true]);
+  assert.equal(prCheckState(runs, "Gate / CI", isCurrent), "success");
+  // the same edit run on top of a red run on the new base: still red, never green
+  const red = runs.map((run) => (run.id === 20 ? { ...run, conclusion: "failure" } : run));
+  assert.equal(prCheckState(red, "Gate / CI", isCurrent), "failure");
+  // an edit run that has not concluded yet supersedes as any run does (the stricter reading)
+  const running = currentSuitePredicate([
+    wf(100, 1),
+    wf(200, 2),
+    { ...edit, status: "in_progress", conclusion: null },
+  ]);
+  assert.deepEqual([1, 2, 3].map(running), [false, false, true]);
+  assert.equal(prCheckState(runs, "Gate / CI", running), null);
+  // only `completed` + `skipped` counts: other conclusions still supersede
+  for (const conclusion of ["success", "failure", "cancelled", "neutral", "action_required"]) {
+    const other = currentSuitePredicate([wf(100, 1), wf(200, 2), wf(300, 3, { conclusion })]);
+    assert.deepEqual([1, 2, 3].map(other), [false, false, true], conclusion);
+  }
+  // two skipped runs: neither supersedes the real one, nor each other
+  const twoEdits = currentSuitePredicate([wf(200, 2), edit, wf(400, 4, { conclusion: "skipped" })]);
+  assert.deepEqual([2, 3, 4].map(twoEdits), [true, true, true]);
+});
+
 test("prChecksNeedWorkflowRuns: only when two suites carry a gate and disagree", () => {
   const gates = ["Gate / CI", "Gate / Quality"];
   // one suite per gate (the usual head): nothing to list

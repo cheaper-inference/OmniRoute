@@ -522,14 +522,16 @@ of `prChecksRequired` that is not green, with its state: `failure`, `pending` or
 What it means: a PR enters a batch only when each check in `prChecksRequired` (`Gate / CI`,
 `Gate / Quality` and `API Route Typecheck` in the shipped config) is green on its current head.
 `API Route Typecheck` (`.github/workflows/api-route-typecheck.yml`) runs on every pull request to
-`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened` and
-`ready_for_review` (a draft pull request runs it too). A head on which it never ran reads
-`API Route Typecheck missing` and waits like any other gate that is not green. It stays missing for
-good in three cases: the pull request's base was changed from a branch outside `main` and
-`release/**` (a base change, `edited`, is not one of the workflow's event types), a fork's run that
-waits for a maintainer's approval, and a head with merge conflicts (GitHub runs no `pull_request`
-workflow then). What to do: push a commit (or close and reopen the pull request), approve the
-fork's run, or resolve the conflict. Nothing is done about it by the queue: the
+`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened`,
+`ready_for_review` and a base change (`edited` with `changes.base`, a retarget); a draft pull
+request runs it too. A title/body edit (`edited` without a base change) runs no job of it, nor of
+`ci.yml` and `quality.yml`, and leaves no check under a gate's name (see
+[`docs/architecture/QUALITY_GATES.md`](../architecture/QUALITY_GATES.md#pr-titlebody-edits-and-retargets)).
+A head on which it never ran reads `API Route Typecheck missing` and waits like any other gate that
+is not green. It stays missing for good in two cases: a fork's run that waits for a maintainer's
+approval, and a head with merge conflicts (GitHub runs no `pull_request` workflow then). What to
+do: approve the fork's run, or resolve the conflict (or push a commit, or close and reopen the
+pull request). Nothing is done about it by the queue: the
 label stays, no comment is posted, and the PR becomes eligible by itself once its gates turn green.
 The reason is computed by every tick and shown on the dashboard only; it is never stored in the
 state. `npm run queue -- why <PR>` reads the PR gates the same way and prints each gate's state, so
@@ -547,8 +549,10 @@ How a gate is read, per head (the check runs of the PR's current head SHA):
   (`listWorkflowRuns`): a suite that belongs to a run superseded by a newer run of the same
   workflow and the same event on that head (a newer `pull_request` run after a retarget cancelled
   the older one) is dropped. A `workflow_dispatch` run never supersedes a `pull_request` run, nor
-  the other way round. Until the newest run's gate job has started, the previous run's result is
-  what counts. A listing that fails keeps every suite, the stricter reading.
+  the other way round. A run that concluded `skipped` (every job skipped: the run of a title/body
+  edit) supersedes nothing, so the real runs on that head keep counting; while it is still in
+  progress it supersedes like any run. Until the newest run's gate job has started, the previous
+  run's result is what counts. A listing that fails keeps every suite, the stricter reading.
 
 The PR gates are read when the queue is built, not again right before a green batch lands, and
 never for a PR of the base-repair lane (see [Batch selection](#batch-selection)). The candidate's
