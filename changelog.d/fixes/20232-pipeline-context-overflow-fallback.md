@@ -1,0 +1,1 @@
+- **fix(sse):** Retry a non-streaming request on a larger-context model after a context-overflow error, as streaming already does. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))

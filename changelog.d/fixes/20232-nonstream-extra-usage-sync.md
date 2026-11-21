@@ -1,0 +1,1 @@
+- **fix(sse):** a non-streaming Claude response no longer waits for the extra-usage sync (up to 10 s on a cache miss); the sync now runs in the background as it does for streaming. ([#20232](https://github.com/cheaper-inference/OmniRoute/pull/20232))
