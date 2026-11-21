@@ -58,12 +58,12 @@ export function createSelfServiceUsageCache({
   );
   /** boundedMap.get drops an entry that has expired at `nowMs`; keys() lists expired ones too. */
   function dropExpired(nowMs: number): void {
-    for (const stored of [...entries.keys()]) entries.get(stored, nowMs);
+    for (const stored of [...entries.keys()]) void entries.get(stored, nowMs);
   }
   return {
     memoize(key, nowMs, build) {
       const hit = entries.get(key, nowMs);
-      if (hit) return hit;
+      if (hit !== undefined) return hit;
       dropExpired(nowMs);
       const value = (async () => build())();
       entries.set(key, value, nowMs);
