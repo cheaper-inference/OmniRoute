@@ -726,7 +726,17 @@ export default function ProxyLogger() {
         )}
       </DataTableShell>
       {/* Detail Panel */}
-      {selectedLog && <ProxyLogDetail log={selectedLog} onClose={() => setSelectedLog(null)} />}
+      {selectedLog && (
+        <ProxyLogDetail
+          log={selectedLog}
+          attemptTotal={
+            selectedLog.correlationId
+              ? logs.filter((l) => l.correlationId === selectedLog.correlationId).length
+              : null
+          }
+          onClose={() => setSelectedLog(null)}
+        />
+      )}
     </div>
   );
 }
