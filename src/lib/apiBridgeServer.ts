@@ -7,12 +7,14 @@ import {
   isPrintableAsciiTarget,
   isQuotaPanelBasePath,
   isQuotaPanelPath,
+  QUOTA_PANEL_DROPPED_HEADER_NAMES,
   QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
   QUOTA_PANEL_HEADERS_TIMEOUT_MS,
   QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS,
   QUOTA_PANEL_MAX_CONNECTIONS,
   QUOTA_PANEL_METHOD_NAMES,
   QUOTA_PANEL_REQUEST_TIMEOUT_MS,
+  QUOTA_PANEL_SOCKET_TIMEOUT_MS,
   QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS,
   resolveQuotaPanelListener,
 } from "@/lib/quotaPanelBridge";
@@ -102,7 +104,7 @@ export interface BridgeRole {
   /** Allowlist, matched against the raw path without the query. */
   isAllowedPath: (pathname: string) => boolean;
   /** Methods relayed, upper case. `null` relays every method. */
-  methods: ReadonlySet<string> | null;
+  methods: readonly string[] | null;
   /** When true, a target with a character outside printable ASCII is refused. */
   strictTarget: boolean;
   /** When false, every upgrade request is refused. */
@@ -113,9 +115,24 @@ export interface BridgeRole {
   notFoundMessage: string;
   /** When false, the 502 and 504 bodies carry no `detail`. */
   errorDetail: boolean;
-  /** Request headers whose lower-case name starts with one of these are not relayed. */
-  droppedHeaderPrefixes: readonly string[];
+  /** Request headers not relayed, by lower-case name prefix or exact lower-case name. */
+  droppedRequestHeaders: RequestHeaderDropRule;
 }
+
+export interface RequestHeaderDropRule {
+  prefixes: readonly string[];
+  names: readonly string[];
+}
+
+const NO_REQUEST_HEADER_DROPS: RequestHeaderDropRule = Object.freeze({
+  prefixes: Object.freeze([]),
+  names: Object.freeze([]),
+});
+
+const QUOTA_PANEL_REQUEST_HEADER_DROPS: RequestHeaderDropRule = Object.freeze({
+  prefixes: QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
+  names: QUOTA_PANEL_DROPPED_HEADER_NAMES,
+});
 
 const API_BRIDGE_ROLE: BridgeRole = {
   isAllowedPath: isOpenAiCompatiblePath,
@@ -125,7 +142,7 @@ const API_BRIDGE_ROLE: BridgeRole = {
   relayBodies: true,
   notFoundMessage: "API port only serves OpenAI-compatible routes.",
   errorDetail: true,
-  droppedHeaderPrefixes: [],
+  droppedRequestHeaders: NO_REQUEST_HEADER_DROPS,
 };
 
 /**
@@ -138,13 +155,13 @@ export function createQuotaPanelRole(basePath = ""): BridgeRole {
   const supportedBasePath = basePath === "" || isQuotaPanelBasePath(basePath);
   return Object.freeze({
     isAllowedPath: (pathname: string) => supportedBasePath && isQuotaPanelPath(pathname, basePath),
-    methods: new Set(QUOTA_PANEL_METHOD_NAMES),
+    methods: QUOTA_PANEL_METHOD_NAMES,
     strictTarget: true,
     relayUpgrades: false,
     relayBodies: false,
     notFoundMessage: "Not found.",
     errorDetail: false,
-    droppedHeaderPrefixes: QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
+    droppedRequestHeaders: QUOTA_PANEL_REQUEST_HEADER_DROPS,
   });
 }
 
@@ -159,7 +176,7 @@ export function isRelayableRequest(
   rawUrl: string
 ): boolean {
   if (role.strictTarget && !isPrintableAsciiTarget(rawUrl)) return false;
-  if (role.methods && !role.methods.has(method ?? "")) return false;
+  if (role.methods && !role.methods.includes(method ?? "")) return false;
   return isRelayablePath(rawUrl, role.isAllowedPath);
 }
 
@@ -245,19 +262,20 @@ function resolveClientPolicy(remoteAddress: string | undefined): ClientPolicy {
 }
 
 /**
- * The headers relayed to the dashboard. A header whose lower-case name starts with one of
- * `droppedHeaderPrefixes` is left out. `Host` and the forwarding headers are then set.
+ * The headers relayed to the dashboard. A header that `dropped` names, by lower-case prefix or
+ * exact lower-case name, is left out. `Host` and the forwarding headers are then set.
  */
 export function buildBridgeRequestHeaders(
   headers: IncomingHttpHeaders,
   remoteAddress: string | undefined,
   dashboardPort: number,
-  droppedHeaderPrefixes: readonly string[] = []
+  dropped: RequestHeaderDropRule = NO_REQUEST_HEADER_DROPS
 ): IncomingHttpHeaders {
   const relayed: IncomingHttpHeaders = { ...headers, host: `127.0.0.1:${dashboardPort}` };
   for (const name of Object.keys(relayed)) {
     const lower = name.toLowerCase();
-    if (droppedHeaderPrefixes.some((prefix) => lower.startsWith(prefix))) delete relayed[name];
+    const byPrefix = dropped.prefixes.some((prefix) => lower.startsWith(prefix));
+    if (byPrefix || dropped.names.includes(lower)) delete relayed[name];
   }
   const policy = resolveClientPolicy(remoteAddress);
   if (policy.kind === "remote") {
@@ -287,7 +305,7 @@ function proxyRequest(
         req.headers,
         req.socket.remoteAddress,
         dashboardPort,
-        role.droppedHeaderPrefixes
+        role.droppedRequestHeaders
       ),
       timeout: proxyTimeoutMs,
     },
@@ -509,6 +527,8 @@ export function startQuotaPanelListener(
   server.headersTimeout = QUOTA_PANEL_HEADERS_TIMEOUT_MS;
   server.requestTimeout = QUOTA_PANEL_REQUEST_TIMEOUT_MS;
   server.keepAliveTimeout = QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS;
+  // An idle socket, in either direction, is closed after this long.
+  server.setTimeout(QUOTA_PANEL_SOCKET_TIMEOUT_MS);
   let listening = false;
   server.on("error", (error: NodeJS.ErrnoException) => {
     if (listening) {

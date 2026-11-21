@@ -481,10 +481,11 @@ connection is closed with no answer. A request that declares a body answers 404 
 connection is closed. Upgrade requests are refused and their connection is closed. A path with a
 dot segment or a fragment marker is refused, as on the API port. So is a request target with a
 character outside printable ASCII. A raw control character in the target is answered 400 by the
-HTTP parser, before this port's own check. Request headers whose names begin with
-`x-middleware-` or `x-invoke-` are not relayed, and the request is relayed without them. The
-dashboard, the login page, the management API and the inference routes cannot be reached through
-this port.
+HTTP parser, before this port's own check. Request headers that the framework reserves for its
+own use are not relayed: names that begin with `x-middleware-`, `x-invoke-`, `x-nextjs-`,
+`x-now-` or `x-next-`, and the names `x-matched-path` and `next-resume`. The request is relayed
+without them. The dashboard, the login page, the management API and the inference routes cannot
+be reached through this port.
 
 The 404 body is `{"error":"not_found","message":"Not found."}`. A failed relay answers 502
 (`api_bridge_unavailable`) or 504 (`api_bridge_timeout`) with no `detail` field.
@@ -505,9 +506,11 @@ header only with `OMNIROUTE_TRUST_PROXY=private` (or `lan`). Any other peer is r
 address of its connection, and the forwarding headers it sent are dropped.
 
 The listener holds at most 256 connections at a time. A client has 10 seconds to send the request
-headers and 30 seconds to send the whole request. An idle kept-alive connection closes after 5
-seconds. These values are fixed. Set connection and rate limits on the reverse proxy in front as
-well. The relay to the main port uses the upstream timeouts of the API port (`API_BRIDGE_*`).
+headers and 30 seconds to send the whole request. An idle kept-alive connection closes after
+about 5 seconds. A connection with no activity for 60 seconds is closed. These values are fixed.
+Set connection and rate limits on the reverse proxy in front as well. A reverse proxy in front
+should keep its idle upstream connections for less than 5 seconds, or not reuse them. The relay
+to the main port uses the upstream timeouts of the API port (`API_BRIDGE_*`).
 
 The listener also starts when `API_PORT` is not set. `QUOTA_PANEL_PORT` must be a port from 1 to
 65535, written in digits only. It must differ from the dashboard port and the API port. While the
@@ -524,7 +527,7 @@ same `OMNIROUTE_BASE_PATH` at build time and at run time. Write it with a leadin
 trailing slash, for example `/omniroute`. Another shape, including `/` and `/omniroute/`, leaves
 the port off with a warning, although the build accepts those forms. So does a base path whose
 first segment names an application route: `api`, `v1`, `v1beta`, `_next`, `quota`, `dashboard`,
-`docs` or `login`, in any case.
+`docs`, `login`, `codex`, `responses`, `anthropic`, `openai`, `v0` or `connect`, in any case.
 
 Limitations:
 

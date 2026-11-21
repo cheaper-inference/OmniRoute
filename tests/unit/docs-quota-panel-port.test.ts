@@ -186,15 +186,16 @@ test("the section states the methods, the body rule and the upgrade rule", () =>
   ]) {
     assert.ok(sectionText.includes(sentence), sentence);
   }
-  const [, firstPrefix, secondPrefix] = match(
+  const [, prefixList, nameList] = match(
     sectionText,
-    /Request headers whose names begin with `([a-z-]+)` or `([a-z-]+)` are not relayed, and the request is relayed without them\./
+    /Request headers that the framework reserves for its own use are not relayed: names that begin with (.+?), and the names (.+?)\. The request is relayed without them\./
   );
-  assert.deepEqual([firstPrefix, secondPrefix], [...panel.QUOTA_PANEL_DROPPED_HEADER_PREFIXES]);
-  assert.deepEqual(bridge.createQuotaPanelRole().droppedHeaderPrefixes, [
-    firstPrefix,
-    secondPrefix,
-  ]);
+  const ticked = (text: string) => [...text.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+  const { droppedRequestHeaders } = bridge.createQuotaPanelRole();
+  assert.deepEqual(ticked(prefixList), [...panel.QUOTA_PANEL_DROPPED_HEADER_PREFIXES]);
+  assert.deepEqual(ticked(nameList), [...panel.QUOTA_PANEL_DROPPED_HEADER_NAMES]);
+  assert.deepEqual([...droppedRequestHeaders.prefixes], ticked(prefixList));
+  assert.deepEqual([...droppedRequestHeaders.names], ticked(nameList));
 });
 
 test("the section states the port clashes, and the live WebSocket default matches the code", () => {
@@ -335,14 +336,20 @@ test("the trusted proxy values named in the section are the ones the code accept
 });
 
 test("the section states the limits of the listener with the values of the code", () => {
-  const [, connections, headers, request, keepAlive] = match(
+  const [, connections, headers, request, keepAlive, idle] = match(
     sectionText,
-    /The listener holds at most ([0-9]+) connections at a time\. A client has ([0-9]+) seconds to send the request headers and ([0-9]+) seconds to send the whole request\. An idle kept-alive connection closes after ([0-9]+) seconds\. These values are fixed\./
+    /The listener holds at most ([0-9]+) connections at a time\. A client has ([0-9]+) seconds to send the request headers and ([0-9]+) seconds to send the whole request\. An idle kept-alive connection closes after about ([0-9]+) seconds\. A connection with no activity for ([0-9]+) seconds is closed\. These values are fixed\./
   );
   assert.equal(Number(connections), panel.QUOTA_PANEL_MAX_CONNECTIONS);
   assert.equal(Number(headers) * 1000, panel.QUOTA_PANEL_HEADERS_TIMEOUT_MS);
   assert.equal(Number(request) * 1000, panel.QUOTA_PANEL_REQUEST_TIMEOUT_MS);
   assert.equal(Number(keepAlive) * 1000, panel.QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS);
+  assert.equal(Number(idle) * 1000, panel.QUOTA_PANEL_SOCKET_TIMEOUT_MS);
+  const proxyIdle = match(
+    sectionText,
+    /A reverse proxy in front should keep its idle upstream connections for less than ([0-9]+) seconds, or not reuse them\./
+  )[1];
+  assert.equal(Number(proxyIdle) * 1000, panel.QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS);
   assert.ok(
     sectionText.includes("Set connection and rate limits on the reverse proxy in front as well.")
   );
@@ -359,16 +366,7 @@ test("the base path segments the section names leave the port off", () => {
     /So does a base path whose first segment names an application route: (.+), in any case\./
   )[1];
   const segments = [...list.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
-  assert.deepEqual(segments, [
-    "api",
-    "v1",
-    "v1beta",
-    "_next",
-    "quota",
-    "dashboard",
-    "docs",
-    "login",
-  ]);
+  assert.deepEqual(segments, [...panel.QUOTA_PANEL_RESERVED_BASE_SEGMENTS]);
   for (const segment of segments) {
     for (const value of [`/${segment}`, `/${segment.toUpperCase()}/x`]) {
       assert.equal(panel.isQuotaPanelBasePath(value), false, value);

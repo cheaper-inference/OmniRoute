@@ -26,13 +26,23 @@ const PANEL_EXACT_PATHS: ReadonlySet<string> = new Set([
 ]);
 const PRINTABLE_ASCII_TARGET = /^[\x21-\x7e]+$/;
 
-/** Request headers whose lower-case name starts with one of these are not relayed by the panel. */
+/**
+ * Request headers the framework reserves for its own use. The panel does not relay a header
+ * whose lower-case name starts with one of the prefixes or equals one of the names.
+ */
 export const QUOTA_PANEL_DROPPED_HEADER_PREFIXES: readonly string[] = Object.freeze([
   "x-middleware-",
   "x-invoke-",
+  "x-nextjs-",
+  "x-now-",
+  "x-next-",
+]);
+export const QUOTA_PANEL_DROPPED_HEADER_NAMES: readonly string[] = Object.freeze([
+  "x-matched-path",
+  "next-resume",
 ]);
 
-/** The methods the quota panel port relays. Each panel role builds its own set from this list. */
+/** The methods the quota panel port relays, the only list of them. */
 export const QUOTA_PANEL_METHOD_NAMES: readonly string[] = Object.freeze(["GET", "HEAD"]);
 
 /** True when every character of the request target is printable ASCII, space excluded. */
@@ -71,6 +81,29 @@ export const QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS = 5_000;
  * checks them every 30 seconds by default, which would let them run past their values.
  */
 export const QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS = 1_000;
+/** A connection of the quota panel listener with no activity for this long is closed. */
+export const QUOTA_PANEL_SOCKET_TIMEOUT_MS = 60_000;
+
+/**
+ * The first segments of application routes, rewrite prefixes included. A base path that starts
+ * with one of them is refused, so the allowlist never lines up with another route.
+ */
+export const QUOTA_PANEL_RESERVED_BASE_SEGMENTS: readonly string[] = Object.freeze([
+  "api",
+  "v1",
+  "v1beta",
+  "_next",
+  "quota",
+  "dashboard",
+  "docs",
+  "login",
+  "codex",
+  "responses",
+  "anthropic",
+  "openai",
+  "v0",
+  "connect",
+]);
 
 export type QuotaPanelListenerDecision =
   | { kind: "off" }
@@ -90,18 +123,7 @@ const BASE_PATH_WARNING = `OMNIROUTE_BASE_PATH has a shape the quota panel port 
 const PORT_DIGITS = /^[0-9]{1,5}$/;
 // A leading slash and one or more segments, with no trailing slash and no empty segment.
 const BASE_PATH_SHAPE = /^(?:\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*)+$/;
-// The first segments of application routes. A base path that starts with one of them is refused,
-// so the allowlist never lines up with another route of the application.
-const RESERVED_BASE_SEGMENTS: ReadonlySet<string> = new Set([
-  "api",
-  "v1",
-  "v1beta",
-  "_next",
-  "quota",
-  "dashboard",
-  "docs",
-  "login",
-]);
+const RESERVED_BASE_SEGMENTS: ReadonlySet<string> = new Set(QUOTA_PANEL_RESERVED_BASE_SEGMENTS);
 const LOOPBACK_BIND_HOSTS: ReadonlySet<string> = new Set(["::1", "localhost"]);
 // 127.0.0.0/8, written as four decimal octets, alone or in its IPv4-mapped IPv6 form.
 const LOOPBACK_IPV4 = /^(?:::ffff:)?127(?:\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$/;
@@ -133,7 +155,7 @@ function resolvePanelBasePath(value: string | undefined): string | null {
 /**
  * True for a base path the quota panel role supports: a leading slash and one or more segments,
  * with no trailing slash, no empty segment and none of `\ ? # %`. The first segment must not be
- * the first segment of an application route (`RESERVED_BASE_SEGMENTS`, in any case).
+ * the first segment of an application route (`QUOTA_PANEL_RESERVED_BASE_SEGMENTS`, in any case).
  */
 export function isQuotaPanelBasePath(basePath: string): boolean {
   if (!BASE_PATH_SHAPE.test(basePath)) return false;

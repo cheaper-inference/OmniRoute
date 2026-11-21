@@ -265,14 +265,39 @@ test("a base path whose first segment names an application route opens nothing",
       { QUOTA_PANEL_PORT: "20133", OMNIROUTE_BASE_PATH: value },
       PORTS
     );
-  for (const segment of ["api", "v1", "v1beta", "_next", "quota", "dashboard", "docs", "login"]) {
+  for (const segment of [
+    "api",
+    "v1",
+    "v1beta",
+    "_next",
+    "quota",
+    "dashboard",
+    "docs",
+    "login",
+    "codex",
+    "responses",
+    "anthropic",
+    "openai",
+    "v0",
+    "connect",
+  ]) {
     const mixed = segment.charAt(0).toUpperCase() + segment.slice(1).toUpperCase();
     for (const value of [`/${segment}`, `/${mixed}`, `/${segment}/x`, `/${mixed}/x`]) {
       assert.equal(panel.isQuotaPanelBasePath(value), false, value);
       assert.deepEqual(withBase(value), { kind: "refused", warning: BASE }, value);
     }
   }
-  for (const value of ["/apiary", "/quotas", "/v10", "/x/api", "/docs-site"]) {
+  for (const value of [
+    "/apiary",
+    "/quotas",
+    "/v10",
+    "/x/api",
+    "/docs-site",
+    "/codexes",
+    "/v00",
+    "/connected",
+    "/x/openai",
+  ]) {
     assert.equal(panel.isQuotaPanelBasePath(value), true, value);
     assert.equal(withBase(value).kind, "listen", value);
   }
@@ -451,6 +476,8 @@ test("the panel listener has its own connection limit and timeouts", async () =>
     assert.equal(server.headersTimeout, panel.QUOTA_PANEL_HEADERS_TIMEOUT_MS);
     assert.equal(server.requestTimeout, panel.QUOTA_PANEL_REQUEST_TIMEOUT_MS);
     assert.equal(server.keepAliveTimeout, panel.QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS);
+    assert.equal(panel.QUOTA_PANEL_SOCKET_TIMEOUT_MS, 60_000);
+    assert.equal(server.timeout, panel.QUOTA_PANEL_SOCKET_TIMEOUT_MS);
     // The interval is passed as a server option, and the server keeps the value it was given.
     // The test "server options reach the bridge server" in quota-panel-bridge.test.ts shows
     // that the option makes the header timeout apply.

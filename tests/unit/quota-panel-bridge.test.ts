@@ -561,13 +561,12 @@ test("a panel role with an unsupported base path refuses every path", () => {
   assert.equal(bridge.createQuotaPanelRole("/x").isAllowedPath("/x/quota/claude"), true);
 });
 
-test("each panel role has its own set of methods", () => {
-  const first = bridge.createQuotaPanelRole();
-  const second = bridge.createQuotaPanelRole();
-  assert.ok(first.methods && second.methods);
-  assert.notEqual(first.methods, second.methods);
-  (first.methods as Set<string>).add("POST");
-  assert.equal(bridge.isRelayableRequest(second, "POST", "/quota/claude"), false);
+test("the methods of a panel role cannot be widened", () => {
+  const role = bridge.createQuotaPanelRole();
+  assert.ok(role.methods);
+  assert.deepEqual([...role.methods].sort(), ["GET", "HEAD"]);
+  assert.throws(() => (role.methods as string[]).push("POST"), TypeError);
+  assert.equal(bridge.isRelayableRequest(role, "POST", "/quota/claude"), false);
   assert.equal(
     bridge.isRelayableRequest(bridge.createQuotaPanelRole(), "POST", "/quota/claude"),
     false
@@ -642,6 +641,15 @@ test("a body refusal closes the connection and the next request on it is not ser
 test("the panel role object is frozen", () => {
   assert.equal(Object.isFrozen(bridge.createQuotaPanelRole()), true);
   assert.equal(Object.isFrozen(bridge.createQuotaPanelRole("/x")), true);
+  const { methods, droppedRequestHeaders } = bridge.createQuotaPanelRole();
+  for (const collection of [
+    methods,
+    droppedRequestHeaders,
+    droppedRequestHeaders.prefixes,
+    droppedRequestHeaders.names,
+  ]) {
+    assert.equal(Object.isFrozen(collection), true);
+  }
 });
 
 test("a panel role whose base path names an application route refuses every path", () => {
@@ -702,21 +710,29 @@ test("server options reach the bridge server: a short check interval enforces th
   }
 });
 
-test("the panel port does not relay x-middleware- and x-invoke- request headers", async () => {
+test("the panel port does not relay the request headers the framework reserves", async () => {
   const dropped = {
     "x-middleware-prefetch": "1",
     "x-middleware-subrequest": "a",
     "X-Middleware-Rewrite": "/dashboard",
     "x-invoke-path": "/dashboard",
+    "x-nextjs-data": "1",
+    "X-Now-Route-Matches": "a",
+    "x-next-revalidate": "1",
+    "x-matched-path": "/dashboard",
+    "Next-Resume": "1",
   };
   const kept = {
     rsc: "1",
     "next-router-state-tree": "%5B%22%22%5D",
     "next-router-prefetch": "1",
     "next-router-segment-prefetch": "/_tree",
+    "next-router-stale-time": "30",
     "next-url": "/quota/claude",
+    "next-hmr-refresh": "1",
     accept: "text/x-component",
     authorization: "Bearer sk-test",
+    "x-matched-path-extra": "kept, only the exact name is dropped",
   };
   const droppedNames = Object.keys(dropped).map((name) => name.toLowerCase());
   await withPanel(async ({ panelPort, seen }) => {
@@ -738,4 +754,28 @@ test("the panel port does not relay x-middleware- and x-invoke- request headers"
       assert.equal(seen[0].headers.rsc, "1");
     }
   );
+});
+
+test("an idle socket timeout closes a panel connection whose answer never comes", async () => {
+  const silent = http.createServer(() => undefined); // Never answers.
+  const mainPort = await listen(silent);
+  const front = bridge.createApiBridgeServer(mainPort, bridge.createQuotaPanelRole());
+  front.setTimeout(200); // The listener sets its own value the same way.
+  const port = await listen(front);
+  const client = net.connect(port, "127.0.0.1");
+  client.on("error", () => undefined);
+  client.resume();
+  try {
+    await once(client, "connect");
+    const started = Date.now();
+    client.write("GET /quota/claude HTTP/1.1\r\nHost: panel.test\r\n\r\n");
+    const closed = once(client, "close").then(() => Date.now() - started);
+    const bound = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000));
+    const elapsed = await Promise.race([closed, bound]);
+    assert.notEqual(elapsed, null, "the socket is still open after 2000 ms");
+    assert.ok((elapsed as number) >= 190, `closed after ${elapsed} ms, before the timeout`);
+  } finally {
+    client.destroy();
+    shut(front, silent);
+  }
 });
