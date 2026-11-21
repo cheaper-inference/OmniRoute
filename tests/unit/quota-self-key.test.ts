@@ -1,7 +1,7 @@
 import test, { describe } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 import { parseApiKeyInput } from "../../src/app/quota/[provider]/lib/apiKeyInput.ts";
 import {
@@ -360,6 +360,6 @@ function sourceFiles(dir: string): string[] {
 test("browser storage is reached only through the key hook", () => {
   const offenders = sourceFiles(QUOTA_PAGE_DIR)
     .filter((file) => /\b(sessionStorage|localStorage)\b/.test(readFileSync(file, "utf8")))
-    .map((file) => relative(process.cwd(), file));
+    .map((file) => relative(process.cwd(), file).split(sep).join("/"));
   assert.deepEqual(offenders, ["src/app/quota/[provider]/lib/useStoredApiKey.ts"]);
 });
