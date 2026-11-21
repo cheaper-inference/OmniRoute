@@ -327,6 +327,26 @@ test("a reading whose reset time already passed is stale, with its numbers kept"
   assert.equal(unparseable.modelWindows?.status, "ok");
 });
 
+test("a reset time that does not parse as a date is reported as null", () => {
+  const [account] = buildSelfViewAccounts(
+    ctx(),
+    [
+      {
+        connectionId: "conn-secret-1",
+        quotas: { "session (5h)": w(40, "garbage"), "weekly (7d)": w(81, R2) },
+        modelQuotas: { "weekly Opus (7d)": w(30, "garbage") },
+      },
+    ],
+    NOW
+  );
+  assert.deepEqual(account.dimensions[0].account, { used: 40, status: "ok", resetAt: null });
+  assert.deepEqual(account.dimensions[1].account, { used: 81, status: "ok", resetAt: R2 });
+  assert.deepEqual(account.modelWindows, {
+    status: "ok",
+    windows: [{ label: "weekly Opus (7d)", usedPercent: 30, resetAt: null }],
+  });
+});
+
 test("two entries for the same connection: the first one wins", () => {
   const [account] = buildSelfViewAccounts(
     ctx(),

@@ -89,6 +89,12 @@ function cachedWindow(
   return reading && Number.isFinite(reading.usedPercentage) ? reading : null;
 }
 
+/** The reading's reset time when it parses as a date, else null. */
+function readingResetAt(reading: CachedQuotaWindow): string | null {
+  const { resetAt } = reading;
+  return typeof resetAt === "string" && Number.isFinite(Date.parse(resetAt)) ? resetAt : null;
+}
+
 /** "stale" when the reading's window already reset before `now`; an unparseable time is ignored. */
 function readingStatus(
   status: SelfQuotaStatus,
@@ -112,7 +118,7 @@ function accountBar(
   return {
     used: (reading.usedPercentage / 100) * dim.limit,
     status: readingStatus(state.status, reading.resetAt, now),
-    resetAt: reading.resetAt ?? null,
+    resetAt: readingResetAt(reading),
   };
 }
 
@@ -128,7 +134,7 @@ function modelWindowsOf(provider: string, state: EntryState, now: number): Model
   const readings = [...Object.entries(state.quotas), ...Object.entries(state.modelQuotas)];
   for (const [label, reading] of readings) {
     if (planKeys.has(label) || !reading || !Number.isFinite(reading.usedPercentage)) continue;
-    windows.push({ label, usedPercent: reading.usedPercentage, resetAt: reading.resetAt ?? null });
+    windows.push({ label, usedPercent: reading.usedPercentage, resetAt: readingResetAt(reading) });
     status = readingStatus(status, reading.resetAt, now);
   }
   return { status, windows };
