@@ -11,6 +11,7 @@ import {
   type ImageRequestAccounting,
 } from "@/lib/usage/imageRequestAccounting";
 import * as log from "@/sse/utils/logger";
+import { editSuccessResponse } from "@/lib/images/editCost";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -141,7 +142,12 @@ export async function handleAdobeFireflyEditRequest(params: {
 
   if ((result as { success?: boolean }).success) {
     await clearRecoveredProviderState(credentials);
-    return jsonResponse((result as { data?: unknown }).data);
+    return editSuccessResponse(
+      accounting,
+      parsed.provider,
+      parsed.model,
+      (result as { data?: unknown }).data
+    );
   }
   return jsonResponse(
     toJsonErrorPayload((result as { error?: unknown }).error, "Image edit provider error"),
