@@ -25,6 +25,7 @@ import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 import { dashboardDetailIo, resolveCallLogDetail } from "./callLogDetailResolver";
 import { shouldPersistToDisk } from "./migrations";
+import { recordRequestMetrics } from "@/lib/metrics/prometheus";
 import { markRequestPersistedById, updateRequestTokensById } from "./usageHistory";
 import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
 import { serializeResilienceActions, resetResilienceActions } from "./resilienceActionsContext";
@@ -939,6 +940,9 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
 }
 
 export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
+  // Opt-in Prometheus metrics (OMNIROUTE_PROMETHEUS_METRICS): one observation per logged call,
+  // never for the extra upstream-attempt rows, whatever the disk setting is.
+  if (!metadataOnly) recordRequestMetrics(entry);
   // Usage is also needed by the live dashboard when disk history is disabled.
   if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
     updateRequestTokensById(entry.pendingRequestId ?? entry.id, {

@@ -147,6 +147,13 @@ async function cleanup(): Promise<void> {
     }
     await closeCallLogSaves();
     try {
+      const { flushUsageBatch } = await import("@/lib/usage/usageBatchWriter");
+      const written = await flushUsageBatch();
+      if (written > 0) console.log(`[Shutdown] Usage batch writer flushed ${written} row(s).`);
+    } catch {
+      /* an opt-in batch that cannot flush must not block the stop */
+    }
+    try {
       const { flushPayloadTraffic } = await import("@/lib/db/proxyTraffic");
       flushPayloadTraffic();
     } catch {
