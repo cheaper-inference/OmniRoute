@@ -64,6 +64,14 @@ describe("LendingBadge", () => {
     );
   });
 
+  it("treats a damaged deadline as expired also when there is no snapshot time", () => {
+    // The database reader turns an unreadable deadline into 0. It must never print as 1970.
+    expect(badgeText({ percent: 30, until: 0, nowMs: null })).toBe("lendingBadgeExpired");
+    expect(badgeText({ percent: 30, until: 99_999_999_999, nowMs: null })).toBe(
+      "lendingBadgeExpired"
+    );
+  });
+
   it("renders nothing when the key lends nothing", () => {
     expect(badgeText({ percent: 0, nowMs: NOW })).toBeNull();
     expect(badgeText({ nowMs: NOW })).toBeNull();

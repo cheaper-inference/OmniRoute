@@ -11,6 +11,7 @@
  */
 
 import { z } from "zod";
+import { LENDING_UNTIL_MAX_MS, LENDING_UNTIL_MIN_MS } from "@/shared/constants/quotaLending";
 import {
   BorrowModeSchema,
   PolicySchema,
@@ -135,9 +136,6 @@ export const selfQuotaResponseSchema = z.object({
   blocks,
 });
 
-/** The largest epoch ms a Date can hold. A later deadline cannot be formatted. */
-export const LENDING_UNTIL_MAX_MS = 8_640_000_000_000_000;
-
 /** PATCH body: the key's lending consent for one pool, named by its `ref`. */
 export const selfLendingPatchSchema = z
   .object({
@@ -147,8 +145,8 @@ export const selfLendingPatchSchema = z
   })
   .strict();
 
-/** Any Unix time in seconds is below this value. */
-export const LENDING_UNTIL_MIN_MS = 100_000_000_000;
+// Re-exported so the existing importers of this module keep their import path.
+export { LENDING_UNTIL_MAX_MS, LENDING_UNTIL_MIN_MS };
 
 /**
  * "ok" for no deadline or a future instant in milliseconds. "seconds" for a value below

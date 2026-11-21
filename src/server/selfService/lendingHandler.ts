@@ -4,9 +4,10 @@
  *
  * Checks run in this order, each refusal a fixed body: the self-service gate (flag, header key,
  * self:usage), the provider segment, the per-key change limit, the body, the deadline, the ref
- * among the key's pools of that provider, the pool's consent mode. A ref that is malformed,
- * belongs to another key, names another provider's pool or a pool the key is not in is always
- * the same 404. Nothing is written before every check passes.
+ * among the key's pools of that provider, the pool's consent mode. A percentage of 0 withdraws
+ * the consent and is accepted in either mode, so a holder can always take it back. A ref that is
+ * malformed, belongs to another key, names another provider's pool or a pool the key is not in is
+ * always the same 404. Nothing is written before every check passes.
  *
  * The same body twice writes once and is audited once. The answer is the full GET view, rebuilt
  * after the write. Errors go through the fixed 500 of quotaHandler.ts, logged on the server.
@@ -169,7 +170,7 @@ async function applyLendingPatch(
   const secret = getApiKeySecret();
   const ctx = await findOwnPool(input, body.pool, secret);
   if (!ctx) return selfServiceError(404, NOT_FOUND_MESSAGE);
-  if (!isConsentPool(ctx.pool))
+  if (body.lendingPercent > 0 && !isConsentPool(ctx.pool))
     return selfServiceError(403, "Lending is not enabled for this pool");
 
   const refused = recordConsent(request, ctx, auth.key.id, body, deps.audit ?? logAuditEvent);

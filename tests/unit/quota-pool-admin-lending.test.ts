@@ -192,7 +192,7 @@ test("the new quotaShare strings are the planned English text", () => {
     borrowModeSaturationHint:
       "A key may pass its share while the account is below the saturation threshold.",
     borrowModeConsentHint:
-      "A key may pass its share only within the idle share other keys agreed to lend. Key holders give that consent themselves.",
+      "A key may pass its share only within the idle share other keys agreed to lend. With no lender, a key stops at its share even while the account has room. Key holders give that consent themselves.",
     lendingBadge: "lends {percent}%",
     lendingBadgeUntil: "lends {percent}% until {date}",
     lendingBadgeExpired: "lending expired",
@@ -200,4 +200,32 @@ test("the new quotaShare strings are the planned English text", () => {
   for (const [key, text] of Object.entries(expected)) {
     assert.equal(EN.quotaShare[key], text, `quotaShare.${key}`);
   }
+});
+
+test("the update audit record names the previous mode only when the mode changed", async () => {
+  const poolId = createPool({
+    connectionId: "conn-admin-mode-audit",
+    name: "mode-audit",
+    allocations: [{ apiKeyId: "a", weight: 100, policy: "hard" }],
+  }).id;
+  const patch = (body: Record<string, unknown>) =>
+    makeManagementSessionRequest(`http://localhost/api/quota/pools/${poolId}`, {
+      method: "PATCH",
+      body,
+    }).then((req) => poolIdRoute.PATCH(req, { params: Promise.resolve({ id: poolId }) }));
+  const latest = () => auditMetadata("quota.pool.updated", poolId)[0];
+
+  assert.equal((await patch({ name: "mode-audit-1", borrowMode: "consent" })).status, 200);
+  assert.equal(latest()?.name, "mode-audit-1");
+  assert.equal(latest()?.borrowMode, "consent");
+  assert.equal(latest()?.previousBorrowMode, "saturation");
+
+  // The wizard always sends the mode: an unchanged mode adds no previous mode.
+  assert.equal((await patch({ name: "mode-audit-2", borrowMode: "consent" })).status, 200);
+  assert.equal(latest()?.name, "mode-audit-2");
+  assert.equal("previousBorrowMode" in (latest() ?? {}), false);
+
+  assert.equal((await patch({ name: "mode-audit-3" })).status, 200);
+  assert.equal(latest()?.name, "mode-audit-3");
+  assert.equal("previousBorrowMode" in (latest() ?? {}), false);
 });

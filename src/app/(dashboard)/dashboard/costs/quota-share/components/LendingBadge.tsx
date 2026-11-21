@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Badge from "@/shared/components/Badge";
+import { LENDING_UNTIL_MAX_MS, LENDING_UNTIL_MIN_MS } from "@/shared/constants/quotaLending";
 
 interface LendingBadgeProps {
   percent?: number;
@@ -9,9 +10,6 @@ interface LendingBadgeProps {
   /** The time the consent is judged at (the usage snapshot time), or null when unknown. */
   nowMs: number | null;
 }
-
-/** Same bound as the database layer: a deadline past it counts as expired. */
-const MAX_DATE_MS = 8_640_000_000_000_000;
 
 const DEADLINE_FORMAT: Intl.DateTimeFormatOptions = {
   year: "numeric",
@@ -28,8 +26,12 @@ type LendingState =
   | { kind: "until"; percent: number; until: number }
   | { kind: "expired" };
 
+/**
+ * Same bounds as the request schema and the database reader. Outside them a deadline counts as
+ * expired: the reader stores 0 for a damaged value, which must never print as a date in 1970.
+ */
 function readableDeadline(until: number): boolean {
-  return Number.isFinite(until) && until <= MAX_DATE_MS;
+  return Number.isFinite(until) && until >= LENDING_UNTIL_MIN_MS && until <= LENDING_UNTIL_MAX_MS;
 }
 
 function lendingState(

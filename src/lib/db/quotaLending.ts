@@ -8,6 +8,7 @@
 
 import { getDbInstance } from "./core";
 import type { BorrowMode } from "@/lib/quota/dimensions";
+import { LENDING_UNTIL_MAX_MS } from "@/shared/constants/quotaLending";
 
 export type { BorrowMode };
 
@@ -41,9 +42,6 @@ export function normalizeBorrowMode(value: unknown): BorrowMode {
   return value === "consent" ? "consent" : "saturation";
 }
 
-/** The largest epoch ms a Date can hold. */
-const MAX_DATE_MS = 8_640_000_000_000_000;
-
 /** Integer 0..100. Anything else is 0. */
 export function normalizeLendingPercent(value: unknown): number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 100
@@ -58,7 +56,9 @@ export function normalizeLendingPercent(value: unknown): number {
  */
 export function normalizeLendingUntil(value: unknown): number | null {
   if (value === null || value === undefined) return null;
-  return typeof value === "number" && Number.isFinite(value) && value <= MAX_DATE_MS ? value : 0;
+  return typeof value === "number" && Number.isFinite(value) && value <= LENDING_UNTIL_MAX_MS
+    ? value
+    : 0;
 }
 
 function rowToLending(row: LendingRow): AllocationLending {

@@ -15,7 +15,7 @@ const core = await import("../../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../../src/lib/db/apiKeys.ts");
 const { createProviderConnection } = await import("../../../src/lib/db/providers.ts");
 const { upsertPlan } = await import("../../../src/lib/db/providerPlans.ts");
-const { createPool } = await import("../../../src/lib/db/quotaPools.ts");
+const { createPool, updatePool } = await import("../../../src/lib/db/quotaPools.ts");
 const { getAllocationLending, setAllocationLending } =
   await import("../../../src/lib/db/quotaLending.ts");
 const { recordConsumption, enforceQuotaShare } = await import("../../../src/lib/quota/enforce.ts");
@@ -466,4 +466,51 @@ test("a body over 4096 characters is the fixed 400 and writes nothing", async ()
 
   const padded = await patch(me.key, "claude", valid + " ".repeat(4096 - valid.length));
   assert.equal(padded.status, 200, await padded.clone().text());
+});
+
+test("a key holder can withdraw a stored consent after the pool is switched to saturation", async () => {
+  const ref = refOf(me.id, saturationPool.id);
+  updatePool(saturationPool.id, { borrowMode: "consent" });
+  setAllocationLending(saturationPool.id, me.id, { lendingPercent: 25, lendingUntil: UNTIL });
+  updatePool(saturationPool.id, { borrowMode: "saturation" });
+  const audit: unknown[] = [];
+  const deps: LendingDeps = { audit: (e) => void audit.push(e) };
+
+  const raised = await patch(me.key, "claude", { pool: ref, lendingPercent: 25 }, deps);
+  assert.equal(raised.status, 403);
+  assert.equal(await messageOf(raised), "Lending is not enabled for this pool");
+  assert.deepEqual(getAllocationLending(saturationPool.id, me.id), {
+    lendingPercent: 25,
+    lendingUntil: UNTIL,
+  });
+  assert.equal(audit.length, 0);
+
+  const withdrawn = await patch(
+    me.key,
+    "claude",
+    { pool: ref, lendingPercent: 0, lendingUntil: UNTIL },
+    deps
+  );
+  assert.equal(withdrawn.status, 200, await withdrawn.clone().text());
+  const view = selfQuotaResponseSchema.parse(await withdrawn.json());
+  const pool = view.pools.find((p) => p.ref === ref);
+  assert.deepEqual(
+    [pool?.borrowMode, pool?.lendingPercent, pool?.lendingUntil, pool?.lendingActive],
+    ["saturation", 0, null, false]
+  );
+  // A deadline sent with zero is stored as no deadline, as in a consent pool.
+  assert.deepEqual(getAllocationLending(saturationPool.id, me.id), {
+    lendingPercent: 0,
+    lendingUntil: null,
+  });
+  assert.equal(audit.length, 1);
+  assert.partialDeepStrictEqual(audit[0], {
+    action: "quota.pool.lending.updated",
+    target: saturationPool.id,
+    metadata: { lendingPercent: 0, lendingUntil: null, previousLendingPercent: 25 },
+  });
+
+  const again = await patch(me.key, "claude", { pool: ref, lendingPercent: 0 }, deps);
+  assert.equal(again.status, 200);
+  assert.equal(audit.length, 1, "the same withdrawal is audited once");
 });
