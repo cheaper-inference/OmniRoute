@@ -123,6 +123,16 @@ export function getProvider(name) {
 }
 
 /**
+ * Explicit allowlist of providers whose authorize redirect never echoes `state` back
+ * (regression of GHSA-3fxv-j4h8-9mgg fix #15688, see #20576 / #20580). Every other provider
+ * keeps the strict state binding enforced by `isCallbackStateAcceptable`.
+ * - cline: authorize URL only carries client_type/callback_url/redirect_uri; redirect has `?code=` only.
+ * - zed-hosted: native-app redirect is `?user_id=&access_token=`; the attempt is bound by its
+ *   one-time RSA key pair (server decrypts with the attempt's private key verifier).
+ */
+const STATELESS_CALLBACK_PROVIDERS: ReadonlySet<string> = new Set(["cline", "zed-hosted"]);
+
+/**
  * Generate auth data for a provider.
  *
  * Returns `{ supported: false, error }` (no `authUrl`) for providers whose
@@ -135,7 +145,10 @@ export function generateAuthData(providerName, redirectUri) {
   const provider = getProvider(providerName);
   const pkce = generatePKCE(provider.pkceVerifierBytes || 32);
   let codeVerifier = pkce.codeVerifier;
-  const { codeChallenge, state } = pkce;
+  const { codeChallenge } = pkce;
+  // Providers whose authorize URL cannot carry/echo `state` get none (#20576, #20580): a
+  // state that never round-trips would make OAuthModal reject every genuine relayed callback.
+  const state = STATELESS_CALLBACK_PROVIDERS.has(providerName) ? undefined : pkce.state;
 
   if (provider.flowType === "import_token" && !provider.supportsBrowserPkce) {
     let error: string;
