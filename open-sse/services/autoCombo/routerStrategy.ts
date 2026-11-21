@@ -10,6 +10,7 @@
  *   - SLAStrategy: prefers candidates that satisfy latency/error/cost SLOs
  *   - LKGPStrategy: tries last known good provider first
  *   - NadirStrategy: asks Nadir's decision API which model the prompt needs (nadirStrategy.ts)
+ *   - DecisionStrategy: asks the combo's configured decider which model fits (decisionStrategy.ts)
  */
 
 import type { ProviderCandidate, ScoredProvider, ScoringWeights } from "./scoring.ts";
@@ -19,6 +20,8 @@ import { clamp01 } from "../../utils/number.ts";
 import { rankBySpeed } from "./speedRanking.ts";
 import type { SpeedCandidate } from "./speedRanking.ts";
 import { NadirStrategyImpl, type NadirRoutingConfig } from "./nadirStrategy.ts";
+import { DecisionStrategyImpl } from "./decisionStrategy.ts";
+import type { DecisionRoutingContext } from "../decision/factory.ts";
 import type { RoutingHint } from "../manifestAdapter.ts";
 
 export interface SlaRoutingPolicy {
@@ -43,6 +46,8 @@ export interface RoutingContext {
   messages?: unknown;
   /** The combo's `config.nadir` block; see nadirStrategy.ts. */
   nadir?: NadirRoutingConfig;
+  /** The combo's decision block plus request seams; see decisionStrategy.ts. */
+  decision?: DecisionRoutingContext;
 }
 
 export interface RoutingDecision {
@@ -404,6 +409,7 @@ strategyRegistry.set("sla-aware", slaStrategy);
 strategyRegistry.set("sla", slaStrategy); // alias
 strategyRegistry.set("lkgp", lkgpStrategy);
 strategyRegistry.set("nadir", new NadirStrategyImpl({ fallback: rulesStrategy }));
+strategyRegistry.set("decision", new DecisionStrategyImpl({ fallback: rulesStrategy }));
 
 export function getStrategy(name: string): RouterStrategy {
   const strategy = strategyRegistry.get(name);
