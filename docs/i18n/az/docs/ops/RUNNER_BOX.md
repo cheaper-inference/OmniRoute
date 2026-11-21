@@ -134,35 +134,22 @@ runner-ı və yalnız boş olduqda** yenidən başladın.
   dəqiqə, diskdən yüklənməsi isə 2 dəqiqə çəkmişdi.
 - `.15` VPS yalnız homologasiya üçündür — onun üzərində heç vaxt CI runner-ləri işləmir.
 
-## Host edilən zolaq (GitHub tərəfindən host edilən icraçılar)
+## Hosted zolaq (GitHub-a ev sahibliyi edən qaçışçılar)
 
-Repo `cheaper-inference` təşkilatına məxsusdur və **Team** planındadır: **eyni vaxtda 60 host edilən tapşırıq**; bu limit təşkilatdakı hər bir repo, hər bir PR yoxlaması, push ilə işə düşən hər bir iş axını və CodeQL-in standart konfiqurasiyası arasında paylaşılır. Aşağıdakı rəqəmlər **Pro** planında (eyni vaxtda 40 host edilən tapşırıq) ölçülüb.
-2026-10-18 tarixində birləşdirmə kampaniyası zamanı (`release/v3.8.52` üzərində saatda təxminən
-10 birləşdirmə) aparılan ölçmələr: **24 saatda 2,500 iş axını icrası yaradıldı**, 6 saat ərzində
-budağa 44 push edildi, PR yoxlamaları saatlarla gözlədiyi və PR-lər onlarsız birləşdirildiyi halda
-**106 host edilən tapşırıq növbəyə düşdü**. Budağa edilən hər push zamanı doqquz iş axını işə düşürdü:
+Anbar `cheaper-inference` təşkilatına məxsusdur** Komanda** plan:** 60 paralel iş yeri** , təşkilatdakı hər bir depo, hər PR yoxlanışı, hər təkanla işə salınan iş axını və CodeQL-nin standart quraşdırması tərəfindən paylaşılır. Aşağıdakı rəqəmlər üzərində ölçüldü** Pro** plan (40 eyni vaxtda qəbul edilən iş). Birləşmə kampaniyası zamanı 2026-10-18 tarixində ölçüldü ( `release/v3.8.52` üzrə ~ 10 merges/hour ):** 24 saat ərzində 2500 iş axını yaradıldı** , 6 saat ərzində filiala 44 itələyir,** 106 hosted iş növbəyə** PR çekləri isə saatlarla gözlədi və PRs onsuz birləşdirildi. Filial üçün hər təkanda doqquz iş axını işə salındı:
 
-| `release/v*` üçün hər push                  | host edilən tapşırıqlar | yüklənmə zamanı nəticə                                              | 2026-10-18 tarixindən etibarən                                                   |
-| ------------------------------------------- | ----------------------: | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `ci.yml` (tam matris)                       |              30-a qədər | növbəti push tərəfindən ləğv edildi, bir gündə 24-dən 24-ü          | `release/**` push-larında başladılmır (PR icrası + Release-Green)                |
-| `quality.yml`                               |                      ~6 | ləğv edildi, 23-dən 23-ü                                            | `release/**` push-larında başladılmır                                            |
-| `Release-Green` `--quick`                   |                       0 | `omni-build` üzərində işlədi, 100-dən 97-si ləğv edildi             | `omni-release` yuvası, heç vaxt ləğv edilmir, gözləyən icralar birləşdirilir     |
-| `Lock released branch`, `OpenSSF Scorecard` |                       2 | hər push üçün növbədə bir icra                                      | hər ref üçün bir icra (`tests/unit/build/hosted-lane-concurrency.test.ts`)       |
-| `Release acceptance` (kölgə hesabatı)       |                       1 | hər push üçün host edilən bir `npm ci`, heç vaxt ləğv edilmir       | dəyişməyib — `paths:` filtri üçün namizəddir                                     |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | hər push üçün ləğv edilir; amd64 qolu `omni-build` üçün yarışır     | dəyişməyib — sahibin yerləşdirmə kanalı                                          |
-| CodeQL standart konfiqurasiyası (`dynamic`) |                       4 | hər push üçün `javascript-typescript`, `actions`, `c-cpp`, `python` | dəyişməyib — Settings → Code security; `c-cpp`/`python` burada heç nə skan etmir |
+| `release/v*` üçün təkan başına              | iş yerləri tutur | fırtına altında nəticə                                          | 2026-10-18 tarixindən                                                                    |
+| ------------------------------------------- | ---------------: | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ci.yml` (tam matris)                       |       30-a qədər | növbəti təkanla ləğv edildi, gündə 24-dən 24-ü                  | `release/**` təkanlarında başlamadı (PR run + Release-Green)                             |
+| `quality.yml`                               |               ~6 | ləğv edildi, 23-dən 23-ü                                        | `release/**` push-da başlamadı                                                           |
+| `Release-Green` `--quick`                   |                0 | `omni-build` da qaçdı, 100-dən 97-ni ləğv etdi                  | `omni-release` slot, heç vaxt ləğv edilməyib, gözlənilən qaçış dağılır                   |
+| `Lock released branch`, `OpenSSF Scorecard` |                2 | təkan başına bir növbəli qaçış                                  | ref hər bir qaçış (`tests/unit/build/hosted-lane-concurrency.test.ts`)                   |
+| `Release acceptance` (kölgə hesabatı)       |                1 | bir təkan başına `npm ci` hosted, ləğv heç vaxt                 | `paths:` filtri üçün dəyişməz — namizədi                                                 |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                2 | təkan üçün ləğv edilir; amd64 ayağı `omni-build` üzrə yarışır   | dəyişməmiş — sahibinin yerləşdirmə kanalı                                                |
+| CodeQL defolt quraşdırma (`dynamic`)        |                4 | `javascript-typescript`, `actions`, `c-cpp`, `python` hər təkan | dəyişməz — Parametrləri → Kodu təhlükəsizliyi; `c-cpp`/`python` burada heç nə skan etmir |
 
-`tests/unit/build/push-storm-diet.test.ts`, `ci.yml` və `quality.yml` fayllarının yalnız `main`
-üçün olan push trigger-ini sabitləyir. Yan təsir: Codecov artıq hər release push-u üçün baza
-yükləməsi almır (addım məlumat xarakterlidir və `continue-on-error` istifadə edir); repozitoriya
-daxilindəki əhatə qapısı və PR şərhi bundan təsirlənmir.
+`tests/unit/build/push-storm-diet.test.ts` `ci.yml` və `quality.yml` nin `main` -only təkan tetikleyicisini bərkidir. Yan təsir: Codecov artıq hər buraxılış üçün əsas yükləmə qəbul etmir (addım məlumat xarakterlidir və `continue-on-error`); in-repo əhatə qapısı və PR şərhi təsirlənmir.
 
-**Daha çox self-hosted tutum host edilən növbəni düzəltmir.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) bir icraçını host edə bilərdi, lakin agent sessiyaları
-artıq onun yükünü 20–26 səviyyəsində saxlayır, agent konteynerində Docker demonu yoxdur və
-doymuş zolaq host edilən zolaqdır. Eyni anda `.113` maşınında 71 GB boş yer və 5–8 yük var idi;
-onun məhdudiyyəti CPU deyil, yuxarıda göstərilən hər listener üçün yaddaş büdcəsidir
-(maksimum 6 listener). Qalan imkanlar proseslə bağlıdır: kampaniya PR-lərini Mergify növbəsi
-vasitəsilə birləşdirin (`label=queue`; paketlər hər PR üçün bir icra və hər push üçün əlavə bir
-icra əvəzinə bir `merge_group` CI icrasını paylaşır), CodeQL standart konfiqurasiyasındakı
-dilləri azaldın və `release-acceptance.yml` faylını oxuduğu fayllara əsasən filtrləyin.
+**Daha çox öz-özünə yerləşdirilən tutum ev sahibliyi növbəsini düzəltmir.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) bir qaçışçıya ev sahibliyi edə bilər, lakin agent seansları artıq yükünü 20-26 səviyyəsində saxlayır, agent konteynerində Docker demonu yoxdur və doymuş zolaq hosteddir. `.113` qutusunda 71 GB boş və eyni anda 5-8 yük var idi; onun məhdudiyyəti yuxarıdakı hər dinləyici üçün yaddaş büdcəsidir (tavan 6 dinləyici), CPU deyil. Qalan rıçaqlar prosesdir: Birləşdirmə növbəsi vasitəsilə torpaq kampaniyası PRs (`label=queue`, partiyalar hər PR başına bir qaçış əvəzinə bir `merge_group` CI qaçışını paylaşır və hər təkan üçün bir qaçış), CodeQL defolt quraşdırma dillərini kəsin və oxuduğu fayllara görə `release-acceptance.yml` süzün.
+
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request. Release PRs are merged by hand under the repository ruleset "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through omni-queue after that ([OMNI_QUEUE.md](./OMNI_QUEUE.md)). The Mergify lever above no longer exists.

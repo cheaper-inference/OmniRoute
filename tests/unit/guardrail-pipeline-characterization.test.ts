@@ -467,7 +467,7 @@ test("stampOwnListenerSelfHop stamps only requests to this process's own listene
   assert.equal(new Headers(presetOpts.headers).get("x-omniroute-self-hop"), "preset");
 });
 
-test("vision-bridge describe self-loop: recursion-guard headers sent, no self-hop header", async () => {
+test("vision-bridge describe self-loop: recursion-guard headers and the process token sent", async () => {
   await createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -495,13 +495,10 @@ test("vision-bridge describe self-loop: recursion-guard headers sent, no self-ho
   assert.equal(headers["x-omniroute-compression"], "off");
   assert.equal(headers["x-omniroute-admission-bypass"], "internal");
   assert.equal(headers.Authorization, `Bearer ${resolveSelfLoopBearer()}`);
-  // characterization: the describe call is built WITHOUT x-omniroute-self-hop. Production
-  // injects undici fetch (visionBridge.ts) which bypasses proxyFetch's stamp, so admission
-  // relies on x-omniroute-admission-bypass + the self-loop bearer instead.
-  assert.equal(
-    Object.keys(headers).some((h) => h.toLowerCase() === "x-omniroute-self-hop"),
-    false
-  );
+  // characterization: production injects undici fetch (visionBridge.ts), which bypasses
+  // proxyFetch's stamp, so the describe call sets x-omniroute-self-hop itself: admission
+  // grants the bypass only on that per-process token, never on the header + bearer alone.
+  assert.equal(headers["x-omniroute-self-hop"], selfHop.ownListenerSelfHopToken());
 
   // The receiving chat route resolves the recursion-guard header into a disable list that
   // makes the nested pre-call pass skip both bridges.

@@ -355,111 +355,70 @@ Har qanday v3.8.x relizini chiqarishdan oldin quyidagi qo‘shimcha bandlarni te
 
 ---
 
-## 3.9.0 LTS ajratilishi (3.8.58 da mashq qilingan)
+## 3.9.0 LTS kesish (3.8.58 da takrorlangan)
 
-v3.8.59 dan keyingi versiya 3.9.0 boʻladi va uning soʻnggi commit’i uzoq muddat ishlatiladigan ikkita tarmoqqa aylanadi:
-`stable/v3` (v3 LTS liniyasi, npm `latest`) va `develop` (v4, 4.0.0 ga oshirilgan, npm
-`nightly`). Tarmoq/kanal modeli, oldinga portlash va yorliqlar
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) faylida; reja esa [ROADMAP](../../ROADMAP.md) faylida (3-bosqich). Ajratish bir marta bajariladi;
-3.8.58 uni fork’da boshidan oxirigacha mashq qiladi, 3.8.59 esa
-[GO/NO-GO nazorat roʻyxati](./LTS_GO_NO_GO.md) bilan yakunlanadi.
+v3.8.59 dan so'ng keyingi versiya 3.9.0 bo'lib, uning uchi ikkita uzoq muddatli shoxga aylanadi: `stable/v3` (v3 LTS liniyasi, npm `latest`) va `develop` (v4, 4.0.0 ga to'g'ri keldi, npm `nightly`). branch/channel modeli, oldinga port va teglar [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) da; reja [ROADMAP](../../ROADMAP.md) (3-bosqich). Kesish bir marta ishlaydi; 3.8.58 vilkada oxirigacha mashq qiladi va 3.8.59 [GO/NO-GO nazorat ro'yxati](./LTS_GO_NO_GO.md) bilan yopiladi.
 
-### Sinov ishga tushirishi (faqat oʻqish, istalgan vaqtda xavfsiz)
+### Quruq yugurish (faqat o'qish uchun, istalgan vaqtda xavfsiz)
 
 ```bash
-npm run release:dry-run-lts-cut                       # haqiqiy ajratish: HEAD dan 3.9.0, oldingi teg v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # manba commit’ini belgilash
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` hech narsani bajarmaydi: u git va `gh` maʼlumotlarini oʻqib, butun
-ketma-ketlikni chiqaradi — dastlabki shartlar (manba aniqlanadi, manba repozitoriyda toʻliq tarix mavjud —
-sayoz klon `stable/v3` tarmogʻini push qila olmaydi, qabul qiluvchi tomon birinchi
-payvandlangan ota commit’da paketni rad etadi, shuning uchun avval toʻliq klondan ajrating yoki `git fetch --unshallow origin` buyrugʻini bajaring —
-oldingi teg mavjud, `package.json` maqsadli versiyada, `release-freeze` muammosi ochiq, mavjud reliz tarmogʻida
-ochiq `Release branch not green` muammosi
-yoʻq — mavjud boʻlmagan tarmoq yashil emas, balki `?` nomaʼlum deb koʻrsatiladi —
-Mergify `release` navbati sozlangan (G11: `queue_rules`, `checks_timeout`,
-`queue` yorligʻi), `release/*` qoidalar toʻplami hali ham oʻchirish va majburiy push’ni bloklaydi hamda
-`stable/v3` va `develop` hali mavjud emas), ikkita tarmoq qadami, qaysi harakatsiz workflow
-triggerlari va `if:` shartlari rost boʻlishi (hamda qaysilari repozitoriy oʻzgaruvchisi bilan cheklangan yoki
-kanonik repozitoriyga biriktirilgan holda qolishi), kutiladigan dist-tag’lar (`latest` → 3.9.0, `next` va
-`nightly` boʻsh) va ortga qaytarish. Chiqish kodi `0` = `RESULT: READY`, `1` = bloklovchi dastlabki shart
-bajarilmadi (`✗`), `2` = foydalanish xatosi. `--advisory <id,...>` tekshiruvni yashirmasdan ogohlantirish (`!`)
-darajasiga tushiradi.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-Haqiqiy ajratishning sinov ishga tushirishini 3.9.0 reliz muzlatilishi hali ochiq paytda bajaring — tarmoqlar
-tegdan keyin va 12c-bosqich muzlatishni olib tashlashidan oldin yaratiladi.
+3.9.0 versiyasidagi muzlatish hali ochiq bo'lganda haqiqiy kesishning quruq ishlashini bajaring — novdalar tegdan keyin va 12c fazasi muzlashni ko'tarishdan oldin yaratiladi.
 
-### 3.8.58 mashqi (faqat fork’da)
+### 3.8.58 Repetitsiya (faqat vilkalar)
 
 ```bash
-# 1. Joriy soʻnggi commit’da mashq parametrlari bilan sinov ishga tushirishini bajaring
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK remote’iga nisbatan bajaring (origin yoki URL manzili kanonik
-#    repozitoriy boʻlgan har qanday remote rad etiladi; har bir qadam terminalda tasdiqlashni soʻraydi)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Fork’dagi harakatsiz workflow’larni sinab koʻring (sinov ishga tushirishi
-#    kanonik repozitoriyga biriktirish haqida xabar bergan joyda workflow_dispatch), soʻng ortga qaytaring
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop versiyasini oshiruvchi commit git plumbing yordamida yaratiladi (ishchi daraxtga tegilmaydi) va
-siklni ochuvchi commit bilan bir xil beshta fayldagi versiyani oshiradi: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` va `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG boʻlimi va uning i18n nusxalari keyinroq, birinchi PR’dan oldin `develop` tarmogʻida ochiladi.
-Skript npm dist-tag’larini hech qachon oʻzgartirmaydi — ularni vaqtinchalik paketda mashq qiling.
+Rivojlanish bump commit git plumbing bilan qurilgan (hech qanday ishlaydigan daraxtga tegilmaydi) va bir xil beshta faylni sikl-ochiq commitga aylantiradi: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` va `docs/openapi.yaml`. `[4.0.0]` CHANGELOG kesimi va uning i18n oynalari `develop` da keyin birinchi PR dan oldin ochiladi. Skript hech qachon npm dist-teglarini o'zgartirmaydi — skretch paketidagilarni takrorlaydi.
 
-### PR oldindan koʻrish artefakti (bir marta build qiling, ayni baytlarni targʻib qiling)
+### PR oldindan ko'rish artefakti (bir marta yarating, bir xil baytlarni targ'ib qiling)
 
-`.github/workflows/preview-artifact.yml` PR head’dan bitta production tarball yaratadi va
-aynan shu build’ni tekshiradi (#8084 boʻlagi (a)). Faqat ayni repozitoriydagi PR’lar; hech narsa chop etilmaydi.
+`.github/workflows/preview-artifact.yml` PR boshidan bitta ishlab chiqarish tarballini yaratadi va aynan shu qurilishni tasdiqlaydi (#8084 tilim (a)). Faqat bir xil ombor PRs ; hech narsa chop etilmaydi.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # yoki `preview-artifact` yorligʻini qoʻshing
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # oldindan koʻrish versiyasini oʻrnatish
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Ishga tushirish `npm ci`, `npm run build:release`, `npm run check:pack-artifact` buyruqlarini bajaradi, tarball’ni
-paketlaydi, `npm run check:pack-boot` buyrugʻini ishga tushiradi (soxta maxfiy maʼlumotlar, vaqtinchalik maʼlumotlar katalogi), qayta paketlaydi va
-digest bir xil boʻlmasa muvaffaqiyatsiz tugaydi, soʻng `artifact-identity.json` fayliga (head SHA, base
-SHA, lockfile xeshi, platforma, arxitektura, node ABI, bundler, build siyosati —
-`scripts/release/artifact-identity.mjs`) maʼlumotlarini yozadi va alohida job’da tarball’ni attestatsiyadan oʻtkazadi. Oldindan koʻrish versiyasini
-targʻib qilish shu tarball’ni oʻrnatishni anglatadi: hech qachon manbadan qayta build qilmang.
+Yugurish `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ni bajaradi, tarballni to‘playdi, `npm run check:pack-boot` (soxta sirlar, vaqtinchalik ma’lumotlar direktori) ni ishga tushiradi, agar dayjest bir xil bo‘lmasa, qayta to‘planadi va ishlamay qoladi, so‘ngra `artifact-identity.json` qayd etadi (head SHA, base SHA, lockfile build , nodezq , buckfile , arch ABI, busqindz — `scripts/release/artifact-identity.mjs`) va tarbolni alohida ishda tasdiqlaydi. Oldindan ko'rishni targ'ib qilish bu tarballni o'rnatishni anglatadi: hech qachon manbadan qayta tiklamang.
 
-### Ajratish (3.9.0, GO qaroridan keyin)
+### Kesim (3.9.0, GO dan keyin)
 
-1. GO qarori [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) faylida qayd etilgan.
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` buyrugʻi `RESULT: READY` natijasini chiqaradi.
-3. Tarmoqlarni sinov ishga tushirishi koʻrsatgan buyruqlar yordamida `origin` da qoʻlda yarating —
-   skript `origin` ga push qilishni rad etadi. Koʻrib chiqilgan develop commit’ini qayta ishlatish uchun
-   avval 3.9.0 ning soʻnggi commit’ida fork’ingizga nisbatan `--execute` mashqini bajaring; u ikkala SHA’ni ham chiqaradi va
-   ayni commit’larni push qilish mumkin:
+1. GO [LTS_GO_NO_GO da qayd etilgan .md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` ni chop etadi.
+3. Quruq chop etish buyruqlari bilan qo'lda `origin` -da filiallarni yarating — skript `origin` ga bosishdan bosh tortadi. Ko'rib chiqilgan ishlab chiqish majburiyatini qayta ishlatish uchun avval 3.9.0 uchida `--execute` mashqini vilkangizga qarshi bajaring; u ikkala SHAs ham chop etadi va bir xil majburiyatlar bosilishi mumkin:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Birinchi PR qabul qilinishidan oldin `stable/v3` va `develop` tarmoqlarini himoyalang (qoidalar toʻplami + birlashtirish navbati).
-5. Faol boʻlmagan ish jarayonlari tarmoq mavjudligiga qarab ishga tushadi: `forward-port.yml` (`stable/v3` tarmogʻiga push),
-   `validate-stable-pr.yml` (`stable/v3` tarmogʻiga PR’lar) va `nightly-v4-build.yml`
-   (`develop` tarmogʻini yigʻadi). Ishga tushirishdan oldin `secrets.FORWARD_PORT_TOKEN` repozitoriy sirini sozlang (shunda CI
-   forward-port PR’larida ishlaydi); tungi nashr qilish repozitoriy egasi
-   `vars.NIGHTLY_PUBLISH` oʻzgaruvchisini `true` qilib sozlamaguncha va npm Trusted Publishing
-   `nightly-v4-build.yml` faylini qabul qilmaguncha oʻchiq qoladi. Kanalni aniqlash `scripts/release/dist-tag.mjs` orqali amalga oshiriladi — bu
-   `npm-publish.yml` ishlatadigan rezolverning oʻzi.
-6. Kanallarni tekshiring: `npm view omniroute dist-tags --json` buyrugʻi `latest` = 3.9.0 ekanini va v4 nashr etilmaguncha
-   `next` / `nightly` mavjud emasligini koʻrsatadi.
-7. Zarur boʻlsa, orqaga qaytarish: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   va `npm dist-tag add omniroute@3.8.59 latest`.
+4. Birinchi PR erlaridan oldin `stable/v3` va `develop` (qoidalar + birlashma navbati) ni himoya qiling.
+5. Harakatsiz ish oqimlari tarmoq mavjudligi boʻyicha yoqiladi: `forward-port.yml` ( `stable/v3` ga surish ), `validate-stable-pr.yml` (PRs to `stable/v3`) va `nightly-v4-build.yml` ( `develop` yaratadi). Jonli efirga kirishdan oldin `secrets.FORWARD_PORT_TOKEN` ombori sirini o'rnating (shuning uchun CI PRs oldinga portida ishlaydi); Tungi nashr qilish egasi `vars.NIGHTLY_PUBLISH` o'zgaruvchisini `true` ga o'rnatmaguncha va npm Trusted Publishing `nightly-v4-build.yml` qabul qilmaguncha o'chiriladi. Kanal o'lchamlari `scripts/release/dist-tag.mjs`, `npm-publish.yml` bir xil rezolyutsiyadan foydalanadi.
+6. Kanallarni tekshiring: `npm view omniroute dist-tags --json` `latest` = 3.9.0 ni ko‘rsatadi va v4 nashr qilinmaguncha `next` / `nightly` yo‘q.
+7. Agar kerak bo'lsa, orqaga qaytarish: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` va `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

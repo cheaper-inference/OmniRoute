@@ -1,0 +1,1 @@
+- **fix(providers):** preserve multi-key JSON payloads and solitary thought objects in Gemini leak filter instead of stripping structured responses to 0 chars ([#19805](https://github.com/cheaper-inference/OmniRoute/issues/19805)) — thanks @ctrindade0503

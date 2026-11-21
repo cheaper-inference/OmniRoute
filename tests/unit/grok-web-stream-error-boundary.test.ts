@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
 const fixturePath = fileURLToPath(
@@ -36,11 +37,15 @@ function runFixture(): Promise<FixtureResult> {
   delete childEnv.NODE_TEST_CONTEXT;
 
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--import", "tsx/esm", "--test", fixturePath], {
-      cwd: repoRoot,
-      env: childEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    const child = spawn(
+      process.execPath,
+      [...nativeCoverageArgs(), "--import", "tsx/esm", "--test", fixturePath],
+      {
+        cwd: repoRoot,
+        env: childEnv,
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
     let stdout = "";
     let stderr = "";
     let timedOut = false;
