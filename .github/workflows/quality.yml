@@ -400,6 +400,11 @@ jobs:
           # omni-queue/** candidates: select against the batch base, not HEAD~1.
           GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
           CANDIDATE_SOURCE: ${{ needs.changes.outputs.candidateSource }}
+          # A ready release code PR runs all eight CI unit shards on the same merge SHA.
+          TIA_CI_UNIT_SHARDS: >-
+            ${{ github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/') &&
+                github.event.pull_request.draft == false && needs.changes.outputs.code == 'true' &&
+                '8' || '' }}
         run: |
           # omni-queue base-check (the bare base, its own base): a base-relative selection is
           # empty, so a test that fails in a red batch's subset could never fail here and the
@@ -415,7 +420,11 @@ jobs:
           git fetch --no-tags origin "$GITHUB_BASE_REF" || true
           # The advisory sibling-test step generates the same map earlier in this job.
           [ -f config/quality/test-impact-map.json ] || node scripts/quality/build-test-impact-map.mjs
-          SEL="$(node scripts/quality/select-impacted-tests.mjs)"
+          TIA_ARGS=()
+          if [ -n "${TIA_CI_UNIT_SHARDS:-}" ]; then
+            TIA_ARGS+=("--ci-unit-shards=$TIA_CI_UNIT_SHARDS")
+          fi
+          SEL="$(node scripts/quality/select-impacted-tests.mjs "${TIA_ARGS[@]}")"
           # Shadow evidence (#8084): persist every selection so TIA false negatives can
           # be measured against ci.yml test-unit's full-suite verdict across releases BEFORE
           # any gate authority moves off ordinary PRs. Artifact uploaded below.
@@ -430,8 +439,8 @@ jobs:
           # which must not happen on a blocking gate. DATA_DIR isolation keeps the parallel
           # run race-free regardless of concurrency.
           if echo "$SEL" | grep -q "__RUN_ALL__"; then
-            echo "TIA selection: __RUN_ALL__ (fail-safe) — full-suite authority stays with ci.yml test-unit" >> "$GITHUB_STEP_SUMMARY"
-            echo "Fail-safe: __RUN_ALL__ — deferring FULL unit suite to ci.yml test-unit (8-shard)."
+            echo "TIA selection: __RUN_ALL__ (fail-safe or broad selection) — full-suite authority stays with ci.yml test-unit" >> "$GITHUB_STEP_SUMMARY"
+            echo "TIA selection: __RUN_ALL__ — deferring FULL unit suite to ci.yml test-unit (8-shard)."
             echo "Not re-running unsharded test:unit:ci here (duplicate of test-unit coverage)."
             exit 0
           fi
