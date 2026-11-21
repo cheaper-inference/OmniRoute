@@ -27,6 +27,7 @@ import {
   pluginExists,
   type PluginRow,
 } from "../db/plugins";
+import { logAuditEvent } from "../compliance";
 import type { PluginManifestWithDefaults } from "./manifest";
 
 const log = logger("PLUGIN_MANAGER");
@@ -141,8 +142,9 @@ class PluginManager {
    * Install a plugin from a source directory.
    * Copies to a staging dir first, validates manifest.main containment, then
    * atomically renames into place. Cleans up staging dir on any failure.
+   * `autoActivate: false` ignores the manifest's `enabledByDefault` (marketplace installs).
    */
-  async install(sourceDir: string): Promise<PluginRow> {
+  async install(sourceDir: string, { autoActivate = true } = {}): Promise<PluginRow> {
     // Check if sourceDir itself contains plugin.json (direct plugin dir)
     const { safeValidateManifest } = await import("./manifest");
     const { readFile: readFileFs } = await import("fs/promises");
@@ -187,7 +189,7 @@ class PluginManager {
       const existing = getPluginByName(name)!;
       if (compareSemver(manifest.version, existing.version) > 0) {
         // Source is newer — delegate to upgrade()
-        return this.upgrade(sourceDir);
+        return this.upgrade(sourceDir, { autoActivate });
       }
       throw new Error(
         `Plugin '${name}' is already installed (${existing.version}) and source version ${manifest.version} is not newer`
@@ -221,7 +223,11 @@ class PluginManager {
     }
 
     // Register in DB (destDir is now in place)
-    const row = insertPlugin(pluginRegistration(manifest, name, destDir, randomUUID()));
+    const activateNow = autoActivate && manifest.enabledByDefault;
+    const row = insertPlugin({
+      ...pluginRegistration(manifest, name, destDir, randomUUID()),
+      enabled: activateNow,
+    });
 
     log.info("manager.installed", { name, version: manifest.version });
 
@@ -231,7 +237,7 @@ class PluginManager {
     }
 
     // Auto-activate if enabledByDefault
-    if (manifest.enabledByDefault) {
+    if (activateNow) {
       await this.activate(name);
     }
 
@@ -246,7 +252,7 @@ class PluginManager {
    * Atomically: copy to staging → validate → rm old (containment-checked) → rename staging.
    * On any failure after staging copy, staging is cleaned up and old install is left intact.
    */
-  async upgrade(sourceDir: string): Promise<PluginRow> {
+  async upgrade(sourceDir: string, { autoActivate = true } = {}): Promise<PluginRow> {
     // Scan source to get new manifest
     const { safeValidateManifest } = await import("./manifest");
     const { readFile: readFileFs } = await import("fs/promises");
@@ -327,11 +333,15 @@ class PluginManager {
       throw err;
     }
 
-    const row = insertPlugin(pluginRegistration(manifest, name, destDir, randomUUID()));
+    const activateNow = autoActivate && manifest.enabledByDefault;
+    const row = insertPlugin({
+      ...pluginRegistration(manifest, name, destDir, randomUUID()),
+      enabled: activateNow,
+    });
 
     log.info("manager.upgraded", { name, version: manifest.version });
 
-    if (manifest.enabledByDefault) {
+    if (activateNow) {
       await this.activate(name);
     }
 
@@ -426,7 +436,24 @@ class PluginManager {
     }
 
     try {
-      const loaded = await loadPlugin(entryPoint, manifest);
+      const loaded = await loadPlugin(entryPoint, manifest, {
+        // The loader never respawns a dead plugin process. Drop its hooks and show it as
+        // failed, so the dashboard stops listing a dead plugin (and a dead blocking plugin)
+        // as active.
+        onUnexpectedExit: ({ code }) => {
+          if (this.loadedPlugins.get(name) !== loaded) return;
+          unregisterHooks(name);
+          this.loadedPlugins.delete(name);
+          updatePluginStatus(name, "error", `Plugin process exited unexpectedly (code ${code})`);
+          logAuditEvent({
+            action: "plugin.process_dead",
+            target: name,
+            resourceType: "plugin",
+            status: "error",
+            details: { code },
+          });
+        },
+      });
 
       const hookNames: LifecycleHookName[] = [
         "onRequest",
