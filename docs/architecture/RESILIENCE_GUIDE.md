@@ -309,6 +309,7 @@ Regression guards: `tests/unit/banked-reset-policy.test.ts`,
 
 - TTL resolution: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
 - Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- New pins: `fill-first`, `priority` and `cost-optimized` pin a new session to the first eligible account in priority order (skipping accounts at their concurrency cap), so lower priorities stay failover-only. The other account strategies pin it to the least recently used account (`startsNewSessionsOnLru()`).
 - Header extraction (generic, any provider): `src/sse/services/auth.ts::extractSessionAffinityKey()`
 - Persisted pin table: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
 - Setting: `sessionAffinityTtlMs` (global TTL in ms, `0` disables) — `src/lib/db/settings.ts`. Renamed from the Codex-only `codexSessionAffinityTtlMs` by migration `124_generic_session_affinity_ttl.sql`, which carries over any previously-configured Codex TTL as the new default.

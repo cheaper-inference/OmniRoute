@@ -122,6 +122,20 @@ test("a session pinned to a full account keeps that account", async () => {
   releases.forEach((release) => release());
 });
 
+test("fill-first: a new session pin skips an account at its cap", async () => {
+  await settingsDb.updateSettings({ fallbackStrategy: "fill-first", sessionAffinityTtlMs: 60_000 });
+  const full = await seed("new-pin-full-primary", 1, 1);
+  const open = await seed("new-pin-open-secondary", 2, 4);
+  const releases = await Promise.all(fillAccount(full, 1));
+
+  const selected = await auth.getProviderCredentials("openai", null, null, "gpt-4o", {
+    sessionKey: "new-pin-full-session",
+  });
+
+  assert.equal(selected.connectionId, open, "a new pin starts where fill-first routes");
+  releases.forEach((release) => release());
+});
+
 test("an API-key preference keeps a full preferred account and still reports its fallback", async () => {
   const preferred = await seed("preferred-full", 2, 1);
   const sibling = await seed("preferred-sibling", 1, 1);
