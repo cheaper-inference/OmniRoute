@@ -5,7 +5,7 @@
  */
 import React from "react";
 import axe from "axe-core";
-import { act, cleanup, fireEvent, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,6 +21,7 @@ import {
   renderQuota,
   sharedDim,
   stubFetch,
+  usageSeries,
 } from "./quotaSelfHarness";
 
 // The shared UI setup mocks next-intl without `useFormatter`; this page runs on the real one,
@@ -157,6 +158,30 @@ describe("self-service quota page", () => {
     expect(screen.getByLabelText("API key")).toBeTruthy();
     expect(window.sessionStorage.length).toBe(0);
     expect(window.localStorage.length).toBe(0);
+  });
+
+  it("a key refused on refresh and sent again shows no old pools and asks for no usage", async () => {
+    const answers: Array<() => Response | Promise<Response>> = [
+      () => jsonResponse(quotaView()),
+      () => jsonResponse({ error: "revoked" }, 401),
+      () => new Promise<Response>(() => {}),
+    ];
+    let answered = 0;
+    const calls = stubFetch({
+      [QUOTA]: () => answers[Math.min(answered++, answers.length - 1)](),
+      "/api/v1/me/usage": () => jsonResponse(usageSeries()),
+    });
+    renderPage();
+    enterKey(KEY);
+    expect(await screen.findByText("Pool A")).toBeTruthy();
+    await waitFor(() => expect(callsTo(calls, "/api/v1/me/usage")).toHaveLength(1));
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    expect(await screen.findByText("This key was not accepted")).toBeTruthy();
+    enterKey(KEY);
+    await waitFor(() => expect(callsTo(calls, QUOTA)).toHaveLength(3));
+    expect(screen.queryByText("Pool A")).toBeNull();
+    expect(callsTo(calls, "/api/v1/me/usage")).toHaveLength(1);
   });
 
   it("403 tells the holder whom to ask", async () => {

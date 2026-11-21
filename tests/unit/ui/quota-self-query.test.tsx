@@ -34,7 +34,11 @@ function quota(name: string): SelfQuotaResponse {
   };
 }
 
-type Pending = { url: string; init: RequestInit; respond: (body: unknown) => void };
+type Pending = {
+  url: string;
+  init: RequestInit;
+  respond: (body: unknown, status?: number) => void;
+};
 
 /**
  * Requests under the self-service routes wait for the test to answer; anything else is a 404.
@@ -52,7 +56,7 @@ function stubFetch() {
         pending.push({
           url,
           init,
-          respond: (body) => resolve(new Response(JSON.stringify(body), { status: 200 })),
+          respond: (body, status = 200) => resolve(new Response(JSON.stringify(body), { status })),
         });
       });
     })
@@ -60,9 +64,9 @@ function stubFetch() {
   return {
     pending,
     count: (prefix: string) => pending.filter((entry) => entry.url.startsWith(prefix)).length,
-    answer: async (index: number, body: unknown) => {
+    answer: async (index: number, body: unknown, status = 200) => {
       await act(async () => {
-        pending[index].respond(body);
+        pending[index].respond(body, status);
       });
     },
   };
@@ -130,6 +134,24 @@ describe("useSelfServiceQuery", () => {
 
     await fetches.answer(1, quota("Pool B"));
     expect(result.current.query.status).toBe("ready");
+  });
+
+  it("a refusal drops the last answer; a server failure keeps it", async () => {
+    const fetches = stubFetch();
+    const { result } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("Pool A"));
+    const previous = result.current.query.status === "ready" ? result.current.query.data : null;
+
+    act(() => result.current.reload());
+    await fetches.answer(1, { error: "boom" }, 500);
+    act(() => result.current.reload());
+    expect(result.current.query).toEqual({ status: "loading", data: previous });
+
+    await fetches.answer(2, { error: "refused" }, 401);
+    expect(result.current.query).toEqual({ status: "refused", reason: "invalid-key" });
+    // The same key sent again starts from nothing, not from the refused key's old answer.
+    act(() => result.current.reload());
+    expect(result.current.query).toEqual({ status: "loading", data: null });
   });
 
   it("a slower earlier answer never overwrites a newer one", async () => {

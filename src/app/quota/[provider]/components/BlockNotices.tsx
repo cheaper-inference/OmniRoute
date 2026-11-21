@@ -66,6 +66,7 @@ export default function BlockNotices({ blocks, pools }: BlockNoticesProps) {
           <Alert
             key={`${schedule.pool}:${index}`}
             variant="warning"
+            dismissible={false}
             title={t(keys.title)}
             description={
               <span className="flex min-w-0 flex-col gap-1 break-words">

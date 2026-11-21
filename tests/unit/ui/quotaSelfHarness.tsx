@@ -21,9 +21,9 @@ import messages from "../../../src/i18n/messages/en.json";
 
 export const KEY = "sk-live-1234567890";
 
-export function renderQuota(ui: React.ReactElement) {
+export function renderQuota(ui: React.ReactElement, timeZone = "UTC") {
   return render(
-    <NextIntlClientProvider locale="en" timeZone="UTC" messages={messages}>
+    <NextIntlClientProvider locale="en" timeZone={timeZone} messages={messages}>
       {ui}
     </NextIntlClientProvider>
   );

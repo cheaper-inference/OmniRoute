@@ -55,7 +55,8 @@ function nextState<T>(
   if (outcome.status === "ready") {
     return { request, outcome, good: { epoch: request.epoch, data: outcome.data } };
   }
-  const good = previous?.good;
+  // A refused key loses its last answer: re-sending it must not bring old data back on screen.
+  const good = outcome.status === "refused" ? null : previous?.good;
   return { request, outcome, good: good && good.epoch === request.epoch ? good : null };
 }
 

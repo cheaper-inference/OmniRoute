@@ -82,6 +82,12 @@ describe("block notices", () => {
     expect(screen.getByText("It reopens in about 2 hours.")).toBeTruthy();
   });
 
+  it("a schedule notice cannot be dismissed while the block holds", () => {
+    renderNotices({ schedules: [schedule()] });
+    expect(screen.getByText("Paused by a schedule")).toBeTruthy();
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
   it("outside the allowed hours has its own wording and no guess about reopening", () => {
     renderNotices({
       schedules: [schedule({ reason: "outside-window", retryAfterSeconds: null, label: null })],

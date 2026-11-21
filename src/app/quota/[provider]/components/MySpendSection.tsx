@@ -69,7 +69,9 @@ export default function MySpendSection() {
         {data ? (
           <>
             {data.summary.requests === 0 ? (
-              <p className="text-sm text-text-muted">{t("spendEmpty")}</p>
+              <p role="status" className="text-sm text-text-muted">
+                {t("spendEmpty")}
+              </p>
             ) : (
               <>
                 <SpendSummary summary={data.summary} />
@@ -91,7 +93,9 @@ export default function MySpendSection() {
         ) : null}
         {settledBadly ? (
           <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <p className="text-sm text-text-muted">{t("spendFailed")}</p>
+            <p role="status" className="text-sm text-text-muted">
+              {t("spendFailed")}
+            </p>
             <Button variant="secondary" size="sm" onClick={reload}>
               {t("retry")}
             </Button>

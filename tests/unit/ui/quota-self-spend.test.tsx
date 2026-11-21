@@ -6,6 +6,7 @@ import React from "react";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import SpendDailyChart from "@/app/quota/[provider]/components/SpendDailyChart";
 import {
   KEY,
   callsTo,
@@ -144,6 +145,17 @@ describe("my spend", () => {
     expect(screen.queryByLabelText("Tokens used per day over the selected period")).toBeNull();
   });
 
+  it("a usage day keeps its calendar date in a time zone west of UTC", () => {
+    renderQuota(
+      <SpendDailyChart
+        daily={[usageDay({ date: "2026-11-19" }), usageDay({ date: "2026-11-20" })]}
+      />,
+      "America/Los_Angeles"
+    );
+    expect(screen.getAllByText("Nov 20").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Nov 18")).toBeNull();
+  });
+
   it("no usage, truncated history and failure each say so", async () => {
     const empty = usageSeries();
     renderWithKey({
@@ -151,7 +163,9 @@ describe("my spend", () => {
       [USAGE]: () =>
         jsonResponse({ ...empty, summary: { ...empty.summary, requests: 0 }, byModel: [] }),
     });
-    expect(await screen.findByText("No usage in this period.")).toBeTruthy();
+    expect((await screen.findByText("No usage in this period.")).getAttribute("role")).toBe(
+      "status"
+    );
     await restart();
 
     const truncated = usageSeries();
@@ -174,7 +188,9 @@ describe("my spend", () => {
       [QUOTA]: quotaOk,
       [USAGE]: () => jsonResponse({ error: "boom" }, 500),
     });
-    expect(await screen.findByText("Your usage could not be loaded.")).toBeTruthy();
+    const failed = await screen.findByText("Your usage could not be loaded.");
+    // A live region: a period change that fails is announced.
+    expect(failed.getAttribute("role")).toBe("status");
     expect(screen.getByText("Pool A")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     await waitFor(() => expect(callsTo(calls, USAGE)).toHaveLength(2));
