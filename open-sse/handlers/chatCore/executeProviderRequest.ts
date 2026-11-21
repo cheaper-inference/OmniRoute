@@ -77,6 +77,7 @@ import {
 } from "@/lib/resilience/settings";
 import { updatePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
+import { cacheDebugDir, writeCacheDebugRecord } from "../../services/cacheDebug.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
@@ -277,6 +278,14 @@ export async function executeProviderRequest(
     updatePendingScope(pendingScope, {
       providerRequest: bodyToSend,
       stage: "payload_prepared",
+    });
+
+    // Opt-in prompt-cache debug (OMNIROUTE_CACHE_DEBUG): tags of what the client sent vs. what goes on the wire.
+    writeCacheDebugRecord({
+      dir: cacheDebugDir(),
+      inbound: body,
+      outbound: bodyToSend,
+      route: `${provider}/${modelToCall}`,
     });
 
     let releaseRawResultAccountSemaphore = () => {};

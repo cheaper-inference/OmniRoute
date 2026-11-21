@@ -85,6 +85,19 @@ export function contentEncodingRejectionResponse(reason: "unsupported" | "invali
   );
 }
 
+/** Opt-in guard: the JSON body names `model` twice, so the routed model would depend on the parser. */
+export function duplicateModelFieldResponse(): Response {
+  return new Response(
+    JSON.stringify(
+      buildErrorBody(400, "Request body has more than one top-level `model` field.", undefined, {
+        type: "invalid_request_error",
+        code: "duplicate_model_field",
+      })
+    ),
+    { status: 400, headers: JSON_HEADERS }
+  );
+}
+
 export function resourcePressureRejectionResponse(): Response {
   return new Response(
     JSON.stringify(
