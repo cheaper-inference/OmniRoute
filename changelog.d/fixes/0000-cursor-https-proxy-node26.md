@@ -1,0 +1,1 @@
+- **fix(cursor):** Restore connections to HTTPS proxies addressed by IP on Node.js 26 while preserving TLS certificate verification.
