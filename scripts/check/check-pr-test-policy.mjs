@@ -100,8 +100,12 @@ const addedFiles = runGit([
 ])
   .split("\0")
   .filter(Boolean);
+// Workspace packages under @omniroute/ run their own suites from <package>/tests/,
+// so a new test there is placed correctly too.
+const PACKAGE_TEST_DIR = /^@omniroute\/[^/]+\/tests\//;
+const isPlacedTest = (filePath) => filePath.startsWith("tests/") || PACKAGE_TEST_DIR.test(filePath);
 const misplacedNewTests = addedFiles.filter(
-  (filePath) => isTestFile(filePath) && !filePath.startsWith("tests/")
+  (filePath) => isTestFile(filePath) && !isPlacedTest(filePath)
 );
 
 const changedSourceFiles = changedFiles.filter(isSourceFile);
@@ -146,7 +150,7 @@ if (passesPolicy) {
   }
   if (misplacedNewTests.length > 0) {
     reportLines.push(
-      "New test files must be under `tests/`, including renamed or copied tests.",
+      "New test files must be under `tests/` (or a workspace package's own `@omniroute/<package>/tests/`), including renamed or copied tests.",
       ""
     );
     for (const filePath of misplacedNewTests.slice(0, 20)) {

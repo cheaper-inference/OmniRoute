@@ -66,6 +66,8 @@ export interface CfChatFrame {
   error?: boolean;
   done?: boolean;
   body?: unknown;
+  seq?: number;
+  replay?: boolean;
 }
 
 /** Parse a raw WS frame. Returns null for non-JSON / unrelated frames. */
@@ -98,9 +100,24 @@ export class CfStreamParser {
   finishReason: string | null = null;
   error: { status: number; message: string } | null = null;
   private seenStart = false;
+  private maxSeq = -1;
 
   constructor(chatId: string) {
     this.chatId = chatId;
+  }
+
+  /**
+   * Cloudflare Agents resumable streams tag chunks with a per-stream `seq` and
+   * mark re-sent ones `replay: true`. Skip replayed chunks and any seq at or
+   * below the high-water mark (never dedupe by text: repeated tokens are legit).
+   */
+  private isReplayedChunk(msg: CfChatFrame, body: Record<string, unknown>): boolean {
+    if (msg.replay === true || body.replay === true) return true;
+    const seq = typeof msg.seq === "number" ? msg.seq : body.seq;
+    if (typeof seq !== "number" || !Number.isFinite(seq)) return false;
+    if (seq <= this.maxSeq) return true;
+    this.maxSeq = seq;
+    return false;
   }
 
   /** Returns the SSE-relevant event, or null when the frame is ignorable. */
@@ -127,6 +144,13 @@ export class CfStreamParser {
       return null;
     }
     if (!body || typeof body.type !== "string") return null;
+
+    if (
+      (body.type === "text-delta" || body.type === "reasoning-delta") &&
+      this.isReplayedChunk(msg, body)
+    ) {
+      return null;
+    }
 
     switch (body.type) {
       case "start":
