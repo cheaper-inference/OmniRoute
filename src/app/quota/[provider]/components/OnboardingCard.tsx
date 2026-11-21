@@ -3,14 +3,13 @@
 import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import Card from "@/shared/components/Card";
 
 import { deriveOnboardingState } from "../lib/onboardingState";
 import { useStoredApiKey } from "../lib/useStoredApiKey";
-import OnboardingClaudeCodeTab from "./OnboardingClaudeCodeTab";
 import OnboardingOptions from "./OnboardingOptions";
+import OnboardingTabs from "./OnboardingTabs";
 
 interface OnboardingCardProps {
   provider: string;
@@ -85,19 +84,12 @@ export default function OnboardingCard({
           onMainModel={setMainModel}
           onLongContext={setLongContext}
         />
-        <Tabs defaultValue="claude-code" className="min-w-0">
-          <TabsList aria-label={t("onboardingTabsLabel")}>
-            <TabsTrigger value="claude-code">{t("onboardingTabClaudeCode")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="claude-code" className="min-w-0 pt-3">
-            <OnboardingClaudeCodeTab
-              key={resetKey}
-              settingsJson={state.settingsJson}
-              discovery={state.models.length === 0}
-              providerName={providerName}
-            />
-          </TabsContent>
-        </Tabs>
+        <OnboardingTabs
+          state={state}
+          providerName={providerName}
+          resetKey={resetKey}
+          includeKey={includeKey}
+        />
       </section>
     </Card>
   );
