@@ -1,0 +1,1 @@
+- **fix(security):** The internal chat admission bypass and the internal upstream-start cap are granted only on a per-process token held in memory; the deployment env key (`OMNIROUTE_API_KEY` / `ROUTER_API_KEY`) still authenticates requests but no longer marks them as internal

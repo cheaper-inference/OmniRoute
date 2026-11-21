@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "வரம்பு நேர்மறை முழு எண்ணாக இருக்க வேண்டும்.",
     "error": "பிழை: {message}",
     "serverOffline": "OmniRoute சேவையகம் ஆஃப்லைனில் உள்ளது. இதைக் கொண்டு தொடங்கவும்: omniroute serve",
     "authRequired": "அங்கீகாரம் தேவை. OMNIROUTE_API_KEY-ஐ அமைக்கவும் அல்லது இதை இயக்கவும்: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} செய்யப்படும்",
     "cancelled": "ரத்துசெய்யப்பட்டது.",
     "jsonOpt": "JSON ஆக வெளியிடு",
-    "yesOpt": "உறுதிப்படுத்தல் கேள்வியைத் தவிர்"
+    "yesOpt": "உறுதிப்படுத்தல் கேள்வியைத் தவிர்",
+    "positiveIntegerRequired": "வரம்பு நேர்மறை முழு எண்ணாக இருக்க வேண்டும்."
   },
   "setup": {
     "title": "OmniRoute அமைப்பு",

@@ -314,6 +314,18 @@ async function panelAnswer(path: string): Promise<{ status: number; body: string
   }
 }
 
+test("the section says the development server's page needs the main port", () => {
+  for (const sentence of [
+    "Under the development server (`next dev`), the page does not become interactive through this port.",
+    "The development hot-reload socket is an upgrade request, and the port refuses it.",
+    "Use the main port while developing.",
+  ]) {
+    assert.ok(sectionText.includes(sentence), sentence);
+  }
+  // The panel role refuses every upgrade, whatever its path.
+  assert.equal(bridge.createQuotaPanelRole().relayUpgrades, false);
+});
+
 test("the quoted 404 body and the relay error names are what the port answers", async () => {
   const quoted = match(sectionText, /The 404 body is `([^`]+)`\./)[1];
   const refused = await panelAnswer("/dashboard");

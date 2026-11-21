@@ -902,6 +902,10 @@ The 404 body is `{"error":"not_found","message":"Not found."}`. A failed relay a
 The listener does not read `QUOTA_SELF_PANEL`, and it does not turn the page on. While the flag
 is off, the page and its API answer 404 on the main port, and the listener relays that answer.
 
+Under the development server (`next dev`), the page does not become interactive through this
+port. The development hot-reload socket is an upgrade request, and the port refuses it. Use the
+main port while developing.
+
 The port serves plain HTTP and the page sends API keys. Keep the default bind address and put a
 reverse proxy with TLS in front of it. A bind address other than loopback logs this notice:
 

@@ -42,25 +42,23 @@ flowchart LR
 `main` si tawi la ujumuishaji wa kazi za kila siku. PR zinazofunguliwa dhidi ya `main`
 kwa kawaida zinahitaji kuelekezwa kwenye tawi jingine kabla ya kuunganishwa.
 
-## Kusitisha toleo (mizunguko sambamba)
+## Acha kufungia (mizunguko sambamba)
 
-Wakati toleo linasawazishwa, issue ya alama yenye lebo ya `release-freeze`
-hufunguliwa. Hilo **halisimamishi usanidi**:
+Wakati toleo linapatanishwa, toleo la alama linaloitwa `release-freeze` hufunguliwa. Hiyo** haizuii maendeleo** :
 
-- `release/vX.Y.Z` iliyositishwa inasimamiwa na msimamizi mkuu wa toleo hilo.
-- `release/vX+1` ya mzunguko unaofuata huundwa kutoka kwenye ncha iliyositishwa ili wachangiaji waendelee
-  kuwasilisha kazi.
-- PR zilizo wazi ambazo bado zinalenga tawi lililositishwa zinapaswa **kuelekezwa upya** kwenye
-  tawi linalotumika (la juu zaidi) la `release/v*`.
+- `release/vX.Y.Z` iliyoganda ni ya nahodha wa kuachiliwa kwa meli hiyo.
+- `release/vX+1` ya mzunguko unaofuata hukatwa kutoka kwenye ncha iliyoganda ili wachangiaji waendelee na kazi ya kutua.
+- Fungua PRs ambayo bado inalenga tawi lililogandishwa inapaswa kuwa** iliyolengwa upya** kwa tawi linalotumika (juu zaidi) `release/v*`.
 
-Kagua kama kuna usitishaji ulio wazi kabla ya kudhani kuwa tawi unalotaka linaweza kuunganishwa:
+Angalia kufungia wazi kabla ya kudhani tawi unalotaka linaweza kuunganishwa:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Taratibu za kuunganisha (lebo ya mmiliki ya `queue` → Mergify) zimefafanuliwa katika
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Unganisha mechanics (lebo ya mmiliki `queue` → Mergify) imeandikwa katika [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: foleni ya kuunganisha ya Mergify imesimamishwa** (uamuzi wa mmiliki). `.mergify.yml` haifafanui tena foleni na inakataa amri za Mergify zinazounganisha au kuandika upya ombi la kuvuta. Toleo la PRs huunganishwa kwa mkono chini ya mpangilio wa kanuni wa hazina "Inahitaji milango ya kijani kwenye toleo amilifu" (`Gate / CI` + `Gate / Quality`) hadi omni-foleni iendeshe katika hali ya moja kwa moja, na kupitia omni-foleni baada ya hapo ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Lebo ya `queue` haiunganishi tena chochote.
 
 ## Kwa nini kuwe na tawi na lebo?
 

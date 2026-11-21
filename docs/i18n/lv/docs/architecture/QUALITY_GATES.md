@@ -29,6 +29,8 @@ Katrā JSON kvītī ir norādīts izņemtais SHA, darbplūsmas izpilde un mēģi
 
 ### Apvienot rindu
 
+> **2026-11-19: Mergify sapludināšanas rinda ir pārtraukta** (īpašnieka lēmums). `.mergify.yml` vairs nedefinē rindu un noraida Mergify komandas, kas apvieno vai pārraksta vilkšanas pieprasījumu. Izvilkšanas pieprasījumi laidiena atzaram tiek apvienoti manuāli saskaņā ar repozitorija kārtulu kopu "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`), līdz omni-queue darbojas live režīmā, un pēc tam, izmantojot omni-queue ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). Tālāk aprakstītā Mergify melnrakstu darbplūsmas apstrāde joprojām ir `ci.yml` un `quality.yml`, taču Mergify melnraksti vairs netiek atvērti.
+
 `queue` etiķete nosūta PR uz sapludināšanas rindu (`.mergify.yml`). Mergify atver PR melnrakstu `mergify/merge-queue/` atzarā, CI palaiž tur pilnu atlasi, un sākotnējais PR tiek sapludināts, kad `Gate / CI`, `Gate / Quality` un `Merge integrity (changelog + generated skills)` tiek nokārtoti.
 
 Mergify ieraksta savu rindas kopsavilkumu melnraksta aprakstā, un arī citas lietotnes var to rediģēt. Šāda melnraksta `pull_request` `edited` notikumam ir sava vienlaicības grupa (`-queue-edit-<run_id>`), tāpēc tas nevar atcelt melnraksta reālo izpildi, un tas izlaiž vārtus un matricu. Tikai `Merge integrity` joprojām darbojas. Izlaistajam vārtu darbam ir cits pārbaudes nosaukums, jo Mergify nolasa izlaisto `Gate / CI` kā neizdevušos pārbaudi un izslēdz PR.
