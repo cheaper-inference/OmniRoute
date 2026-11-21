@@ -18,6 +18,9 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
+const HORDE_MODEL_NAME = "catalog-envkey-image-6406";
+const HORDE_MODEL_ID = `aihorde/${HORDE_MODEL_NAME}`;
 
 // `getUnifiedModelsResponse` returns the OpenAI-shaped `{object, data}` catalog
 // list (see catalog.ts's `responseBody`); only `data[].id` is asserted here.
@@ -47,9 +50,16 @@ async function seedOpenAi() {
 
 test.beforeEach(async () => {
   await resetStorage();
+  // The anonymous provider refreshes from the live Horde worker feed by default.
+  // Both authorization variants must build against the same available inventory.
+  aiHordeImageCatalog.clear();
+  aiHordeImageCatalog.setFetch(async () =>
+    Response.json([{ name: HORDE_MODEL_NAME, type: "image", count: 1 }])
+  );
 });
 
 test.after(async () => {
+  aiHordeImageCatalog.clear();
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -67,6 +77,10 @@ test("#6406 env-var master key (no DB metadata) sees the full catalog, not 0 mod
   assert.equal(unauthResponse.status, 200);
   const unauthCount = unauthBody.data.length;
   assert.ok(unauthCount > 0, `unauth baseline must have models, got ${unauthCount}`);
+  assert.ok(
+    unauthBody.data.some(({ id }) => id === HORDE_MODEL_ID),
+    "unauth baseline must include the controlled anonymous provider inventory"
+  );
 
   // Env-var master key path — no DB row, so getApiKeyMetadata returns null.
   const envKey = "sk-envkey-6406-master";
@@ -88,6 +102,11 @@ test("#6406 env-var master key (no DB metadata) sees the full catalog, not 0 mod
     `env-var key catalog (${authBody.data.length}) must equal unauth catalog (${unauthCount}); auth should GATE access, not FILTER inventory when the key carries no restrictions`
   );
   assert.notEqual(authBody.data.length, 0, "env-var master key must not collapse catalog to 0");
+  assert.deepEqual(
+    authBody.data.map(({ id }) => id).sort(),
+    unauthBody.data.map(({ id }) => id).sort(),
+    "env-var master key must preserve the same inventory, including anonymous provider models"
+  );
 });
 
 test("#6406 DB-backed key with allowedModels still filters (unchanged behavior)", async () => {
@@ -114,4 +133,5 @@ test("#6406 DB-backed key with allowedModels still filters (unchanged behavior)"
     false,
     "DB-backed allowedModels filter must still exclude non-matching families"
   );
+  assert.equal(ids.includes(HORDE_MODEL_ID), false, "DB-backed key must exclude the Horde fixture");
 });

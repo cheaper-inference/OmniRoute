@@ -1,4 +1,5 @@
 import test from "node:test";
+import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -137,6 +138,61 @@ test(
         assert.equal((error as NodeJS.ErrnoException).code, "ENOENT");
       }
     }
+  }
+);
+
+test(
+  "a Linux process group with only an unreaped child preserves its successful exit",
+  {
+    skip:
+      process.platform !== "linux" ||
+      spawnSync("python3", ["--version"], { stdio: "ignore" }).status !== 0,
+  },
+  (t) => {
+    const driver = String.raw`
+import { runGateProcess } from "./scripts/quality/gate-process.mjs";
+const [logPath, python] = process.argv.slice(1);
+const program = process.env.GATE_ZOMBIE_PROGRAM;
+const result = await runGateProcess(python, ["-c", program], {
+  logPath, timeout: 5000, killGraceMs: 100,
+});
+console.log(JSON.stringify({ code: result.code, outcome: result.receipt.outcome, out: result.out }));
+`;
+    // Retain the exited child until the gate has reported, regardless of how quickly PID 1 reaps.
+    const subreaper = String.raw`
+import ctypes, os, subprocess, sys
+assert ctypes.CDLL(None).prctl(36, 1, 0, 0, 0) == 0  # PR_SET_CHILD_SUBREAPER
+result = subprocess.run([*sys.argv[1:], sys.executable], timeout=7)
+while True:
+    try:
+        os.waitpid(-1, 0)
+    except ChildProcessError:
+        break
+sys.exit(result.returncode)
+`;
+    const program = String.raw`
+import os, pathlib, time
+child = os.fork()
+if child == 0:
+    os._exit(0)
+for attempt in range(500):
+    stat = pathlib.Path(f"/proc/{child}/stat").read_text()
+    if stat.rsplit(") ", 1)[1].split()[0] == "Z":
+        print("child exited and awaits reaping", flush=True)
+        os._exit(0)
+    time.sleep(.002)
+raise RuntimeError("could not observe the exited child")
+`;
+    const result = spawnSync(
+      "python3",
+      ["-c", subreaper, process.execPath, "--input-type=module", "-e", driver, fixture(t).logPath],
+      { encoding: "utf8", env: { ...process.env, GATE_ZOMBIE_PROGRAM: program }, timeout: 9000 }
+    );
+    assert.equal(result.status, 0, result.stderr);
+    const verdict = JSON.parse(result.stdout);
+    assert.match(verdict.out, /child exited and awaits reaping/);
+    assert.equal(verdict.outcome, "PASS");
+    assert.equal(verdict.code, 0);
   }
 );
 
