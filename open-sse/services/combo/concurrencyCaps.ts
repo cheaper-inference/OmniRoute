@@ -37,20 +37,22 @@ export async function lookupPositiveCap(connectionId: string): Promise<number | 
 /**
  * Resolve each distinct target connection's `maxConcurrent` into a Map keyed by
  * connectionId. null entries mean "no limit". DB reads are deduplicated per
- * connectionId, so this adds at most one lookup per distinct connection.
+ * connectionId and issued in a single wave, so this adds at most one lookup per
+ * distinct connection.
  */
 export async function resolveMaxConcurrentByConnection(
-  targets: ResolvedComboTarget[]
+  targets: ResolvedComboTarget[],
+  lookupCap: (connectionId: string) => Promise<number | null> = lookupPositiveCap
 ): Promise<Map<string, number | null>> {
-  const caps = new Map<string, number | null>();
   const distinctIds = new Set<string>();
   for (const target of targets) {
     const connId = target.connectionId ?? "";
     if (connId) distinctIds.add(connId);
   }
-  for (const connId of distinctIds) {
-    caps.set(connId, await lookupPositiveCap(connId));
-  }
+  const ids = [...distinctIds];
+  const resolved = await Promise.all(ids.map((connId) => lookupCap(connId)));
+  const caps = new Map<string, number | null>();
+  ids.forEach((connId, index) => caps.set(connId, resolved[index]));
   return caps;
 }
 
