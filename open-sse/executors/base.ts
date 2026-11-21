@@ -156,7 +156,10 @@ import {
   clampTopLevelMaxTokens,
   getLearnedMaxTokensCap,
 } from "../services/learnedMaxTokensCaps.ts";
-import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import {
+  applyFieldDowngradeRecovery,
+  reapplyStrippedFields,
+} from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
 
@@ -986,19 +989,8 @@ export class BaseExecutor {
       }
       // Fields an upstream already rejected with a 400 in this execute() stay stripped
       // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
-      if (strippedFields.size > 0 && transformedBody && typeof transformedBody === "object") {
-        const record = transformedBody as Record<string, unknown>;
-        const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
-        for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
-        if (msgFields.length > 0 && Array.isArray(record.messages)) {
-          record.messages = record.messages.map((m) => {
-            if (!m || typeof m !== "object") return m;
-            const copy = { ...(m as Record<string, unknown>) };
-            for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
-            return copy;
-          });
-        }
-      }
+      // Applied again after the Claude block below, which can re-add a stripped field.
+      reapplyStrippedFields(transformedBody, strippedFields);
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
       syncSkillsBeta(headers, this.provider, transformedBody, usesClaudeCodeProtocol);
@@ -1533,6 +1525,7 @@ export class BaseExecutor {
           connectionOptedIn: ccRequestDefaults.redactThinking === true,
           claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
         });
+        reapplyStrippedFields(transformedBody, strippedFields);
         stripInternalBodyFields(transformedBody);
 
         const shouldFingerprint =
@@ -1566,7 +1559,12 @@ export class BaseExecutor {
         applyPeerTraceHeader(finalHeaders, clientHeaders, url);
         // Rides `anthropic-usage-limit: slow` once this account accepted the offer.
         const claudeSentSlow = claudeUsageLimit.applyHeader(finalHeaders, activeCredentials);
-        const serializedBody = parseSerializedBody(bodyString);
+        // Without a fingerprint or CCH signing the wire string is exactly
+        // JSON.stringify(transformedBody), so the live object already has the wire
+        // content (and its _toolNameMap); a parse-back would only copy it per attempt.
+        const wireIsLiveJson =
+          !shouldFingerprint && !(usesClaudeCodeProtocol || this.provider === "claude");
+        const serializedBody = wireIsLiveJson ? transformedBody : parseSerializedBody(bodyString);
         // #4307 — Preserve the non-enumerable tool-name cloak/remap reverse map
         // (`_toolNameMap`, set on the live `transformedBody` by
         // remapToolNamesInRequest / cloakThirdPartyToolNames) that the JSON
