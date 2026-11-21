@@ -16080,7 +16080,8 @@ paths:
       description: >-
         Records the calling API key's own lending consent for one Quota Share pool of the
         provider (also served at /v1/me/quota/{provider}). The pool is named by the `ref` the GET
-        returns, and must be in `consent` borrow mode. Same feature flag, headers and provider
+        returns. A consent above 0 needs a pool in `consent` borrow mode, and 0 withdraws the
+        consent in either mode. Same feature flag, headers and provider
         rules as the GET. The `self:usage` scope authorizes this write. Checks run in this order:
         flag (404), key (401), scope (403), provider (400), per-key limit (429), body (400),
         deadline (400), pool reference (404), borrow mode (403). A refusal by a check writes
@@ -16140,7 +16141,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: The key lacks the self:usage scope, or the pool is not in consent mode
+          description: The key lacks the self:usage scope, or the pool is not in consent mode and lendingPercent is above 0
           headers:
             Cache-Control:
               schema:

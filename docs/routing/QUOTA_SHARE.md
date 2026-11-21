@@ -152,11 +152,13 @@ book holds every key.
 edits, group-wide replacements and `ensure` calls. A removed key loses its consent, and a key
 added back starts at 0. The admin routes return each key's consent and never write it. Switching
 a pool back to `saturation` keeps every stored consent, which has no effect in that mode.
+Switching the pool to `consent` again reactivates the stored consents whose deadline has not
+passed. A key holder can clear a stored consent in either mode.
 
-**Upgrading.** A database from downstream builds may already have `lending_percent` and
-`lending_until`. The migration then adds only `borrow_mode`, and stored percentages stay as they
-are. Every pool starts in `saturation` mode. Turn `consent` on per pool in the pool wizard.
-Nothing is inferred from the stored values.
+**Upgrading.** If the columns `lending_percent` and `lending_until` already exist, the migration
+adds only `borrow_mode`, and stored percentages stay as they are. Every pool starts in
+`saturation` mode. Turn `consent` on per pool in the pool wizard. Nothing is inferred from the
+stored values.
 
 **Limitations.**
 
@@ -709,9 +711,11 @@ write, although its name reads as read-only.
 
 - `pool` is the `ref` the `GET` returns for that pool.
 - `lendingPercent` is an integer from 0 to 100. A value of 0 clears the consent and its deadline.
+  A body with `lendingPercent` 0 is accepted in either mode.
 - `lendingUntil` is optional: epoch milliseconds, or `null` for no deadline. It must be in the
   future and at most 8640000000000000. A value below 100000000000 reads as seconds and is refused.
-- Any other field is refused. A body over 4096 characters is refused.
+- Any other field is refused. A body longer than 4096 characters, or with a declared length above
+  4096 bytes, is refused.
 
 The checks run in the order of this table. Every refusal uses the standard error body with a
 fixed message. A refusal by one of these checks writes nothing.
@@ -727,7 +731,7 @@ fixed message. A refusal by one of these checks writes nothing.
 | 400    | `lendingUntil must be a Unix time in milliseconds`                                                 | The deadline reads as seconds.                                     |
 | 400    | `lendingUntil must be in the future`                                                               | The deadline is at or before the request time.                     |
 | 404    | `Pool not found`                                                                                   | The `ref` names no pool of this key for this provider.             |
-| 403    | `Lending is not enabled for this pool`                                                             | The pool is in `saturation` mode.                                  |
+| 403    | `Lending is not enabled for this pool`                                                             | The pool is in `saturation` mode and `lendingPercent` is above 0.  |
 | 500    | `Failed to build quota view`                                                                       | Any other failure. Its cause is logged on the server.              |
 
 The limit is 20 requests per 60 seconds for each key. Every request that passes the provider check

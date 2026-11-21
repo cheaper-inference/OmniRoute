@@ -150,7 +150,9 @@ test("the section states the rules the gate applies", () => {
     "A failed read counts as a consumption of 0 for that key.",
     "A removed key loses its consent, and a key added back starts at 0.",
     "Switching a pool back to `saturation` keeps every stored consent, which has no effect in that mode.",
-    "The migration then adds only `borrow_mode`, and stored percentages stay as they are.",
+    "Switching the pool to `consent` again reactivates the stored consents whose deadline has not passed.",
+    "A key holder can clear a stored consent in either mode.",
+    "If the columns `lending_percent` and `lending_until` already exist, the migration adds only `borrow_mode`, and stored percentages stay as they are.",
     "A lender can find the pool at its ceiling before it uses its own share.",
     "Concurrent requests read consumption before any is recorded, so lent capacity can be spent more than once, bounded by the requests in flight.",
   ]) {
@@ -198,7 +200,14 @@ test("the PATCH text, limits and error table are the handler's", () => {
     )
   );
   assert.match(handlerSource, /SELF_LENDING_MAX_BODY_CHARS = 4096;/);
-  assert.ok(consentProse.includes("A body over 4096 characters is refused."));
+  assert.match(handlerSource, /content-length/);
+  assert.ok(
+    consentProse.includes(
+      "A body longer than 4096 characters, or with a declared length above 4096 bytes, is refused."
+    )
+  );
+  assert.match(handlerSource, /body\.lendingPercent > 0 && !isConsentPool\(ctx\.pool\)/);
+  assert.ok(consentProse.includes("A body with `lendingPercent` 0 is accepted in either mode."));
   assert.match(handlerSource, /SELF_LENDING_RATE_LIMIT = \{ limit: 20, window: 60 \}/);
   assert.ok(consentProse.includes("The limit is 20 requests per 60 seconds for each key."));
   assert.ok(
@@ -238,6 +247,10 @@ test("the PATCH text, limits and error table are the handler's", () => {
     const escaped = message.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(tableRows[i], new RegExp(`^\\| ${status} +\\| \`${escaped}\` +\\|`));
   });
+  assert.ok(
+    tableRows[9].includes("The pool is in `saturation` mode and `lendingPercent` is above 0."),
+    "the borrow mode refusal applies only to a consent above 0"
+  );
 });
 
 test("the schema summary names the three columns the migration adds", () => {
