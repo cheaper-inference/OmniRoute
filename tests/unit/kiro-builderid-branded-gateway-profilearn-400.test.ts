@@ -10,11 +10,14 @@ import { KiroExecutor } from "../../open-sse/executors/kiro.ts";
 // currently-working Builder ID kiro-cli session: the identical access token
 // + request body gets `400 {"message":"profileArn is required for this
 // request."}` from runtime.us-east-1.kiro.dev and a normal streaming
-// response from codewhisperer.us-east-1.amazonaws.com. Because a plain 400
+// response from the regional Amazon Q host. Because a plain 400
 // was excluded from KIRO_ENDPOINT_FALLBACK_STATUSES (correctly — a malformed
 // body can't be fixed by resending it elsewhere), every Builder ID
 // connection's first request always failed here instead of ever reaching
 // the host that would have served it.
+// 2026-11-10 (#19607) — the fallback host is q.us-east-1.amazonaws.com;
+// the legacy codewhisperer.us-east-1 special case was retired with Kiro's
+// client-version enforcement (kirodotdev/Kiro#11335).
 
 function jsonResponse(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -23,7 +26,7 @@ function jsonResponse(status: number, body: unknown) {
   });
 }
 
-test("KiroExecutor.execute falls back to the CodeWhisperer host when the branded gateway rejects a profileArn-less (Builder ID) account", async () => {
+test("KiroExecutor.execute falls back to the regional Amazon Q host when the branded gateway rejects a profileArn-less (Builder ID) account", async () => {
   const executor = new KiroExecutor();
   const originalFetch = globalThis.fetch;
   const calledUrls: string[] = [];
@@ -61,10 +64,10 @@ test("KiroExecutor.execute falls back to the CodeWhisperer host when the branded
     assert.equal(
       calledUrls.length,
       2,
-      "must retry on the CodeWhisperer host after the gateway 400"
+      "must retry on the regional Amazon Q host after the gateway 400"
     );
     assert.match(calledUrls[0], /runtime\.us-east-1\.kiro\.dev/);
-    assert.match(calledUrls[1], /codewhisperer\.us-east-1\.amazonaws\.com/);
+    assert.match(calledUrls[1], /q\.us-east-1\.amazonaws\.com/);
   } finally {
     globalThis.fetch = originalFetch;
   }
