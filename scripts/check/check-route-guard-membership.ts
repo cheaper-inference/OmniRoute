@@ -276,6 +276,25 @@ export const KNOWN_TRANSITIVE_SPAWN_SINKS: Record<string, string> = {
   "open-sse/lib/deepseek-pow.ts": `${G09_BASELINE} (worker_threads)`,
   "open-sse/services/adobeFireflyBrowserLogin.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/services/obscura.ts": `${G09_BASELINE} (child_process)`,
+  // Same design as the qoder CLI sinks below: the agy ACP transport is opt-in per
+  // connection (`providerSpecificData.transport === "acp"`) or per deployment
+  // (`AGY_CLI_TRANSPORT=acp`), and HTTP stays the default for every request that has
+  // not opted in. The spawn is a local CLI the operator installed and signed in, not
+  // a request-driven installer — so the route-level loopback tier would lock the whole
+  // Antigravity provider (chat, quotas, model discovery) for a path most installations
+  // never take. Reviewed under Hard Rules #15/#17 with the same reasoning as #20315.
+  "open-sse/services/agyCliAcp.ts":
+    "G-09: opt-in `acp` transport for the agy/antigravity provider (spawns the operator's own agy CLI). " +
+    "Off unless the connection or the deployment opts in; HTTP is the default and untouched. " +
+    "Same freeze rationale as open-sse/services/qoderCliAcp.ts.",
+  "open-sse/services/agyTuiHooks.ts":
+    "G-09: opt-in `tui` transport for the agy/antigravity provider (writes the hook entry the spawned agy runs). " +
+    "Off unless the connection or the deployment opts in; HTTP is the default and untouched. " +
+    "Same freeze rationale as open-sse/services/qoderCliAcp.ts.",
+  "open-sse/services/agyTuiPty.ts":
+    "G-09: opt-in `tui` transport for the agy/antigravity provider (spawns `script` to give the operator's own " +
+    "agy CLI a pty). Off unless the connection or the deployment opts in; HTTP is the default and untouched. " +
+    "Same freeze rationale as open-sse/services/qoderCliAcp.ts.",
   "open-sse/services/qoderCliAcp.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/services/qoderCliSpawn.ts": `${G09_BASELINE} (child_process)`,
   "open-sse/services/virtualDisplay.ts": `${G09_BASELINE} (child_process)`,
