@@ -19849,8 +19849,9 @@ components:
           maxItems: 20
           description: >-
             Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
-            allocated keys with at least 3 that can make requests, `accountVisible` is true and the
-            key's own share was read. Never an empty list.
+            allocated keys with at least 3 that can make requests, `accountVisible` is true, the
+            account's connection is one the key may use and the key's own share was read. Never an
+            empty list.
           items:
             $ref: "#/components/schemas/SelfQuotaMemberSlice"
     SelfQuotaAccount:
