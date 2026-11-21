@@ -8,6 +8,10 @@
 import test, { afterEach, describe } from "node:test";
 import assert from "node:assert/strict";
 
+import {
+  applyRuntimeSettings,
+  resetRuntimeSettingsStateForTests,
+} from "../../src/lib/config/runtimeSettings.ts";
 import { resolveDashboardLocalAccess } from "../../src/lib/security/dashboardLocalAccess.ts";
 import { isLocalOnlyPath } from "../../src/server/authz/routeGuard.ts";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "../../src/server/authz/headers.ts";
@@ -30,6 +34,7 @@ afterEach(() => {
     else process.env[key] = savedEnv[key];
   }
   __resetLocalOnlyRejectionsForTests();
+  resetRuntimeSettingsStateForTests();
 });
 
 /** The page request as a server component sees it: the pipeline already stamped the verdict. */
@@ -59,9 +64,11 @@ describe("resolveDashboardLocalAccess (server)", () => {
     const access = resolveDashboardLocalAccess(pageHeaders("remote"));
 
     assert.equal(access.locality, "remote");
+    // Paths no configuration opens to a remote session. The two plain reads
+    // (/api/resilience/connections, /api/skills/executions) are left out on purpose: whether
+    // a remote session may run them is the guard's decision (a GET exemption or the
+    // manage-scope bypass), covered by the two tests below.
     for (const path of [
-      "/api/resilience/connections",
-      "/api/skills/executions",
       "/api/db/health",
       "/api/plugins",
       "/api/tools/traffic-inspector/capture-modes",
@@ -79,6 +86,27 @@ describe("resolveDashboardLocalAccess (server)", () => {
     // GET /api/services/cliproxy/status sits in LOCAL_ONLY_API_GET_EXEMPTIONS.
     assert.equal(isLocalOnlyPath("/api/services/cliproxy/status", "GET"), false);
     assert.equal(access.remoteBlockedPaths.includes("/api/services/cliproxy/status"), false);
+  });
+
+  test("a path stops being reported when the manage-scope bypass opens it", async () => {
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN = "stamp-token";
+    delete process.env.OMNIROUTE_TRUST_PROXY;
+    const path = "/api/resilience/connections";
+    const reported = () =>
+      resolveDashboardLocalAccess(pageHeaders("remote")).remoteBlockedPaths.includes(path);
+    const setBypassPrefixes = (prefixes: string[]) =>
+      applyRuntimeSettings(
+        { localOnlyManageScopeBypassEnabled: true, localOnlyManageScopeBypassPrefixes: prefixes },
+        { force: true }
+      );
+
+    // The answer must follow the guard's configuration, whatever the default list is: a
+    // notice over a page whose request would succeed hides a working feature.
+    await setBypassPrefixes(["/api/mcp/"]);
+    assert.equal(reported(), true, `${path} is local-only while the bypass does not list it`);
+
+    await setBypassPrefixes(["/api/mcp/", path]);
+    assert.equal(reported(), false, `${path} must not be reported once the bypass lists it`);
   });
 
   test("loopback and private-LAN sessions are local", () => {
