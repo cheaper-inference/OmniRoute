@@ -2,7 +2,62 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b22",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b22-1656a6608516",
+    "candidateSha": "1656a66085161ea40ddd0d2405310ffe196e9786",
+    "baseSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
+    "treeSha": "e222237d078273403afbe2ff12358911938614a1",
+    "prs": [
+      {
+        "n": 20823,
+        "head": "6441b5b6f3587b771547c106caf91229fa556cfb",
+        "title": "test(security): pin linear model id parsing (CodeQL #1325, #1324, #1296)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T10:59:16Z"
+      },
+      {
+        "n": 20825,
+        "head": "2a48a0a823bf12139867cc9cf8b70814302c2689",
+        "title": "fix(security): bound caller grep regex in CCR and pin compression regex bounds (CodeQL #1349, #1301, #1302)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T10:59:23Z"
+      },
+      {
+        "n": 20821,
+        "head": "e8c2057bcd703d4286c8a4144314a368b5f75e40",
+        "title": "fix(dashboard): head the Analytics counts as \"Used in this period\"",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T10:59:52Z"
+      },
+      {
+        "n": 20826,
+        "head": "7c50da1952cbead2b6773af66e7a5dcc56d07f02",
+        "title": "fix(api): let a remote dashboard read resilience state and skill executions",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T10:59:55Z"
+      },
+      {
+        "n": 20834,
+        "head": "997e83f68562c0c13d9ba65a8350201062dfea64",
+        "title": "fix(dashboard): validate the access-token, webhook and eval-suite forms inline",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T11:00:01Z"
+      },
+      {
+        "n": 20835,
+        "head": "9acef5ae62ca95180c2b220df2a746ab3b5cc209",
+        "title": "fix(dashboard): show a clear notice for local-only features on a remote session",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T11:00:06Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-21T11:00:51.011Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "7bca1e353169686029e8beb28165df6007d80470",
@@ -70,8 +125,8 @@
     }
   },
   "counters": {
-    "batchSeq": 21,
-    "ciRuns": 23,
+    "batchSeq": 22,
+    "ciRuns": 24,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 7,
@@ -1542,8 +1597,32 @@
       "sha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
       "detail": "shadow mode: would merge-ff onto 76b26b8ead94",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44876156523"
+    },
+    {
+      "at": "2026-11-21T11:00:53.753Z",
+      "type": "batch-started",
+      "batchId": "b22",
+      "prs": [
+        20823,
+        20825,
+        20821,
+        20826,
+        20834,
+        20835
+      ],
+      "sha": "1656a66085161ea40ddd0d2405310ffe196e9786",
+      "detail": "6 PR(s) on 6d3f1d3f70e1; window 6",
+      "labeledAt": {
+        "20821": "2026-11-21T10:59:52Z",
+        "20823": "2026-11-21T10:59:16Z",
+        "20825": "2026-11-21T10:59:23Z",
+        "20826": "2026-11-21T10:59:55Z",
+        "20834": "2026-11-21T11:00:01Z",
+        "20835": "2026-11-21T11:00:06Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44896897130"
     }
   ],
-  "updatedAt": "2026-11-21T10:59:56.254Z",
+  "updatedAt": "2026-11-21T11:00:55.285Z",
   "batchWindow": 6
 }
