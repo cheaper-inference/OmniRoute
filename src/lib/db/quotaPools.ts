@@ -15,6 +15,7 @@ import { deleteSchedulesForPool } from "./quotaSchedules";
 import {
   normalizeBorrowMode,
   normalizeLendingPercent,
+  normalizeLendingUntil,
   restorePoolLending,
   setPoolBorrowMode,
   snapshotPoolLending,
@@ -218,7 +219,8 @@ function rowToAllocation(row: AllocationRow): PoolAllocation {
   if (row.cap_unit != null) alloc.capUnit = row.cap_unit as QuotaUnit;
   const lendingPercent = normalizeLendingPercent(row.lending_percent);
   if (lendingPercent > 0) alloc.lendingPercent = lendingPercent;
-  if (row.lending_until != null) alloc.lendingUntil = row.lending_until;
+  const lendingUntil = normalizeLendingUntil(row.lending_until);
+  if (lendingUntil !== null) alloc.lendingUntil = lendingUntil;
   return alloc;
 }
 

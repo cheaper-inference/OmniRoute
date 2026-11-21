@@ -66,3 +66,11 @@ test("out-of-range percentages and unusable numbers are safe", () => {
   assert.equal(borrow("c", [A, B, C], { b: Number.NaN }), 150); // unreadable consumption counts as 0
   assert.equal(borrow("c", [A, B, C], { b: 100 }, Number.NaN), 0);
 });
+
+test("a deadline that is not a finite number lends nothing, and null lends with no end", () => {
+  for (const lendingUntil of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    assert.equal(activeLendingPercent({ lendingPercent: 50, lendingUntil }, NOW), 0);
+  }
+  assert.equal(activeLendingPercent({ lendingPercent: 50, lendingUntil: null }, NOW), 50);
+  assert.equal(activeLendingPercent({ lendingPercent: 50 }, NOW), 50);
+});

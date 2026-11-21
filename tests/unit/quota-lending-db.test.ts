@@ -24,6 +24,7 @@ const {
 const { createGroup } = await import("../../src/lib/db/quotaGroups.ts");
 const { getAllocationLending, setAllocationLending, normalizeBorrowMode, normalizeLendingPercent } =
   await import("../../src/lib/db/quotaLending.ts");
+const consentBorrow = await import("../../src/lib/quota/consentBorrow.ts");
 
 const alloc = (apiKeyId: string, weight: number) => ({
   apiKeyId,
@@ -164,4 +165,71 @@ test("the borrow mode is saved by create and update, and an unknown stored value
     [30, 30.5, -1, 101, "30", null].map(normalizeLendingPercent),
     [30, 0, 0, 0, 0, 0]
   );
+});
+
+test("an unreadable stored deadline reads as expired through both readers, also after an edit", () => {
+  const { activeLendingPercent, computeBorrowAvailable } = consentBorrow;
+  const pool = createPool({
+    connectionId: "c-text-until",
+    name: "text-until",
+    allocations: [alloc("a", 50), alloc("b", 50)],
+  });
+  // A damaged row: text where the deadline should be an epoch ms number.
+  core
+    .getDbInstance()
+    .prepare(
+      "UPDATE quota_allocations SET lending_percent = 50, lending_until = 'soon' WHERE pool_id = ? AND api_key_id = ?"
+    )
+    .run(pool.id, "b");
+  const lendsNothing = () => {
+    const viaLending = lendingOf(pool.id, "b");
+    assert.equal(viaLending?.lendingPercent, 50);
+    assert.notEqual(viaLending?.lendingUntil, null);
+    assert.equal(activeLendingPercent(viaLending ?? {}, Date.now()), 0);
+    const allocations = getPool(pool.id)?.allocations ?? [];
+    const b = allocations.find((x) => x.apiKeyId === "b");
+    assert.notEqual(b?.lendingUntil, undefined);
+    assert.equal(activeLendingPercent(b ?? {}, Date.now()), 0);
+    const borrow = computeBorrowAvailable({
+      allocations,
+      requesterKeyId: "a",
+      limit: 1000,
+      consumedByKey: { a: 600, b: 0 },
+      nowMs: Date.now(),
+    });
+    assert.equal(borrow, 0);
+  };
+  lendsNothing();
+  updatePool(pool.id, { name: "text-until-2", allocations: [alloc("a", 60), alloc("b", 40)] });
+  lendsNothing();
+  // A real null deadline still lends with no end.
+  setAllocationLending(pool.id, "b", { lendingPercent: 50, lendingUntil: null });
+  assert.deepEqual(lendingOf(pool.id, "b"), { lendingPercent: 50, lendingUntil: null });
+  assert.equal(activeLendingPercent(lendingOf(pool.id, "b") ?? {}, Date.now()), 50);
+});
+
+test("lending fields in an admin allocation payload are never written", () => {
+  const lent = (apiKeyId: string, weight: number) => ({
+    ...alloc(apiKeyId, weight),
+    lendingPercent: 90,
+    lendingUntil: UNTIL,
+  });
+  const zero = { lendingPercent: 0, lendingUntil: null };
+  const pool = createPool({
+    connectionId: "c-payload",
+    name: "payload",
+    allocations: [lent("a", 50), lent("b", 50)],
+  });
+  assert.deepEqual([lendingOf(pool.id, "a"), lendingOf(pool.id, "b")], [zero, zero]);
+
+  setAllocationLending(pool.id, "a", { lendingPercent: 30, lendingUntil: UNTIL + 1 });
+  const kept = { lendingPercent: 30, lendingUntil: UNTIL + 1 };
+  updatePool(pool.id, { allocations: [lent("a", 40), lent("b", 30), lent("c", 30)] });
+  assert.deepEqual(
+    [lendingOf(pool.id, "a"), lendingOf(pool.id, "b"), lendingOf(pool.id, "c")],
+    [kept, zero, zero]
+  );
+
+  upsertAllocations(pool.id, [lent("a", 50), lent("d", 50)]);
+  assert.deepEqual([lendingOf(pool.id, "a"), lendingOf(pool.id, "d")], [kept, zero]);
 });

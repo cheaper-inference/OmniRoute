@@ -48,8 +48,14 @@ export function normalizeLendingPercent(value: unknown): number {
     : 0;
 }
 
-function normalizeLendingUntil(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
+/**
+ * The stored deadline. Only null (SQL NULL, or an absent field) means "no deadline". A finite
+ * number is kept. Anything else is unreadable and becomes 0, an instant in the past, so a
+ * damaged value lends nothing instead of lending with no end.
+ */
+export function normalizeLendingUntil(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function rowToLending(row: LendingRow): AllocationLending {

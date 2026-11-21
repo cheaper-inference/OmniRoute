@@ -29,7 +29,11 @@ function finitePositive(value: number | undefined): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
 }
 
-/** 0 when the percentage is not above 0 or the deadline is at or before nowMs. Otherwise the percentage, capped at 100. */
+/**
+ * 0 when the percentage is not above 0, or the deadline is at or before nowMs, or the deadline
+ * is set but not a finite number. Otherwise the percentage, capped at 100. A null or absent
+ * deadline means no end.
+ */
 export function activeLendingPercent(
   alloc: Pick<ConsentAllocation, "lendingPercent" | "lendingUntil">,
   nowMs: number
@@ -37,7 +41,8 @@ export function activeLendingPercent(
   const percent = finitePositive(alloc.lendingPercent);
   if (percent === 0) return 0;
   const until = alloc.lendingUntil;
-  if (typeof until === "number" && until <= nowMs) return 0;
+  if (until === null || until === undefined) return Math.min(100, percent);
+  if (!Number.isFinite(until) || until <= nowMs) return 0;
   return Math.min(100, percent);
 }
 
