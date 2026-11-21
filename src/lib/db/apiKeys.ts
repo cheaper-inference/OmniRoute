@@ -840,6 +840,13 @@ export async function createApiKey(
   setNoLog(apiKey.id, false);
 
   backupDbFile("pre-write");
+
+  const { logAuditEvent } = await import("@/lib/compliance");
+  logAuditEvent({
+    action: "apiKey.create",
+    target: apiKey.id,
+    details: { name },
+  });
   return apiKey;
 }
 
@@ -1423,6 +1430,13 @@ export async function deleteApiKey(id: string) {
   await deleteRedisAuthCacheEntry(row?.key_hash);
 
   backupDbFile("pre-write");
+
+  const { logAuditEvent } = await import("@/lib/compliance");
+  logAuditEvent({
+    action: "apiKey.delete",
+    target: id,
+    details: { name: String(row?.name || "") },
+  });
   return true;
 }
 
