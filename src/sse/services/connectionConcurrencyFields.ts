@@ -12,6 +12,7 @@ export function buildConnectionConcurrencyFields(connection: ProviderConnectionV
   maxConcurrent: number | null;
   rateLimitMaxConcurrent: number | null;
   modelConcurrency: Record<string, number> | null;
+  newSessionMaxConcurrent: number | null;
 } {
   // M365 admits one turn per account, across all models. Use the existing
   // account semaphore via credentials; overrides must not reopen parallel turns.
@@ -20,5 +21,6 @@ export function buildConnectionConcurrencyFields(connection: ProviderConnectionV
     maxConcurrent: serialM365 ? 1 : connection.maxConcurrent,
     rateLimitMaxConcurrent: serialM365 ? 1 : connection.rateLimitMaxConcurrent,
     modelConcurrency: normalizeModelConcurrencyMap(connection.rateLimitOverrides?.modelConcurrency),
+    newSessionMaxConcurrent: connection.rateLimitOverrides?.newSessionMaxConcurrent ?? null,
   };
 }

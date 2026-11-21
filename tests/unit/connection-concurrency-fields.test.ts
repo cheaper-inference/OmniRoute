@@ -8,6 +8,21 @@ const { buildConnectionConcurrencyFields } =
 const { toProviderConnection } = await import("../../src/lib/db/providers/lazyConnectionView.ts");
 
 describe("buildConnectionConcurrencyFields", () => {
+  it("clears a stale fresh-session threshold when credentials rotate", () => {
+    const previous = buildConnectionConcurrencyFields(
+      toProviderConnection({
+        id: "old",
+        provider: "openai",
+        rateLimitOverrides: { newSessionMaxConcurrent: 2 },
+      })
+    );
+    assert.equal(previous.newSessionMaxConcurrent, 2);
+    Object.assign(
+      previous,
+      buildConnectionConcurrencyFields(toProviderConnection({ id: "next", provider: "openai" }))
+    );
+    assert.equal(previous.newSessionMaxConcurrent, null);
+  });
   it("propagates account caps and the normalized per-model map", () => {
     const view = toProviderConnection({
       id: "c1",
@@ -19,6 +34,7 @@ describe("buildConnectionConcurrencyFields", () => {
       maxConcurrent: 4,
       rateLimitMaxConcurrent: 2,
       modelConcurrency: { "glm-5": 1, "glm-4.7": 3 },
+      newSessionMaxConcurrent: null,
     });
   });
 
@@ -28,6 +44,7 @@ describe("buildConnectionConcurrencyFields", () => {
       maxConcurrent: null,
       rateLimitMaxConcurrent: null,
       modelConcurrency: null,
+      newSessionMaxConcurrent: null,
     });
     const malformed = toProviderConnection({
       id: "c3",

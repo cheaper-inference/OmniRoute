@@ -103,6 +103,20 @@ async function clickSave() {
 }
 
 describe("EditConnectionModal — per-model concurrency caps", () => {
+  it("loads and saves the fresh-session threshold beside the hard cap", async () => {
+    const onSave = renderModal({ newSessionMaxConcurrent: 2, maxConcurrent: 4 });
+    const input = document.body.querySelector(
+      'input[aria-label="newSessionMaxConcurrentLabel"]'
+    ) as HTMLInputElement | null;
+    expect(input).not.toBeNull();
+    expect(input!.value).toBe("2");
+    await clickSave();
+    expect(onSave.mock.calls[0][0].rateLimitOverrides).toEqual({
+      newSessionMaxConcurrent: 2,
+      maxConcurrent: 4,
+    });
+  });
+
   it("loads the stored map into the editor", () => {
     renderModal({ modelConcurrency: { "glm-5": 1, "glm-4.7": 3 } });
     expect(modelConcurrencyInput().value).toBe("glm-4.7=3\nglm-5=1");

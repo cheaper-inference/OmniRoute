@@ -124,3 +124,29 @@ test("subsequent dashboard-style save preserves the configured map", async () =>
   assert.equal(overrides?.rpm, 60);
   assert.deepEqual(overrides?.modelConcurrency, { "glm-5": 1 });
 });
+
+test("PUT validates, persists, and clears the fresh-session routing threshold", async () => {
+  const connection = await createConnection();
+  const id = String(connection.id);
+  const response = await patchConnection(id, {
+    rateLimitOverrides: { newSessionMaxConcurrent: 2, maxConcurrent: 4 },
+  });
+  assert.equal(response.status, 200);
+  const persisted = await getProviderConnectionById(id);
+  assert.equal(
+    (persisted?.rateLimitOverrides as Record<string, unknown>)?.newSessionMaxConcurrent,
+    2
+  );
+  const bad = await patchConnection(id, {
+    rateLimitOverrides: { newSessionMaxConcurrent: -1 },
+  });
+  assert.equal(bad.status, 400);
+  assert.equal(
+    ((await getProviderConnectionById(id))?.rateLimitOverrides as Record<string, unknown>)
+      ?.newSessionMaxConcurrent,
+    2
+  );
+  const cleared = await patchConnection(id, { rateLimitOverrides: null });
+  assert.equal(cleared.status, 200);
+  assert.equal((await getProviderConnectionById(id))?.rateLimitOverrides, null);
+});

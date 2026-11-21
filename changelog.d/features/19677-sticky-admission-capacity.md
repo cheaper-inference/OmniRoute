@@ -1,0 +1,1 @@
+- **feat(routing):** Add an opt-in, advisory new-session routing threshold while preserving the shared account hard concurrency cap for valid affinity reuse ([#19677](https://github.com/cheaper-inference/OmniRoute/pull/19677)) — thanks @xiaoyaner0201

@@ -139,6 +139,7 @@ export default function EditConnectionModal({
     name: "",
     priority: 1,
     maxConcurrent: "",
+    newSessionMaxConcurrent: "",
     rpm: "",
     rpd: "",
     tpm: "",
@@ -377,6 +378,10 @@ export default function EditConnectionModal({
             ? String(connection.rateLimitOverrides.maxConcurrent)
             : "",
         modelConcurrency: modelConcurrencyFormValue(connection.rateLimitOverrides),
+        newSessionMaxConcurrent:
+          connection.rateLimitOverrides?.newSessionMaxConcurrent != null
+            ? String(connection.rateLimitOverrides.newSessionMaxConcurrent)
+            : "",
         apiKey: "",
         // Unset per-connection override means "follow the global default" —
         // surface that as an empty field (0 renders as an explicit opt-out).
@@ -587,6 +592,8 @@ export default function EditConnectionModal({
       const rateLimit = buildRateLimitOverridesFromForm(formData, connection?.rateLimitOverrides);
       const invalid = rateLimit.invalidModelConcurrency;
       if (invalid) return setSaveError(t("rateLimitOverridesModelConcurrencyInvalid", invalid));
+      const invalidFresh = rateLimit.invalidNewSessionMaxConcurrent;
+      if (invalidFresh) return setSaveError(t("newSessionMaxConcurrentInvalid", invalidFresh));
       updates.rateLimitOverrides = rateLimit.overrides;
       if (isAntigravityFamily) {
         updates.projectId = trimmedCloudCodeProjectId || null;
@@ -1042,6 +1049,17 @@ export default function EditConnectionModal({
             }}
             placeholder="0"
             hint={t("accountConcurrencyCapHint")}
+          />
+          <Input
+            label={t("newSessionMaxConcurrentLabel")}
+            aria-label={t("newSessionMaxConcurrentLabel")}
+            type="number"
+            min={0}
+            max={10000}
+            step={1}
+            value={formData.newSessionMaxConcurrent}
+            onChange={(e) => setFormData({ ...formData, newSessionMaxConcurrent: e.target.value })}
+            placeholder="0"
           />
         </div>
         {saveError && (
