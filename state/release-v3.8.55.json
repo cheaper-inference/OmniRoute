@@ -3,12 +3,12 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b18",
+    "batchId": "b19",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b18-3917441ded0b",
-    "candidateSha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
-    "baseSha": "355eb07c36fcae2440e6c4407b39542b2000374f",
-    "treeSha": "0006e4a5d271774d9697f0cf8a2b84c1dbc6d728",
+    "candidateRef": "omni-queue/release-v3.8.55/b19-f6316b6a06f9",
+    "candidateSha": "f6316b6a06f985f1c6dd819752e8980ae449e0b4",
+    "baseSha": "b748429cf5b3aeb142a708fd3e8751b6918b9dc8",
+    "treeSha": "c2deaec894c9e0ce5cf40f31df47c3fddd6ddfc1",
     "prs": [
       {
         "n": 20776,
@@ -32,29 +32,15 @@
         "labeledAt": "2026-11-20T23:33:44Z"
       },
       {
-        "n": 20823,
-        "head": "b03f265540ae84c22ff404c764b6ff91ef49046e",
-        "title": "fix(security): linear model id regexes (CodeQL #1325, #1324, #1296)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:47Z"
-      },
-      {
         "n": 20824,
         "head": "46259366085f853b727ae04883fc48c266922ff7",
         "title": "fix(security): clamp media polling and guard syntx provider rules (CodeQL #1389, #1392)",
         "author": "diegosouzapw",
         "labeledAt": "2026-11-20T23:33:50Z"
-      },
-      {
-        "n": 20825,
-        "head": "c13cee2357119a5aec1e3f2d6eb756d442dbd06d",
-        "title": "fix(security): bound regex work in compression engines (CodeQL #1301, #1302, #1349)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:54Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-21T01:12:02.836Z",
+    "startedAt": "2026-11-21T02:19:45.369Z",
     "attempts": 0,
     "bisect": null
   },
@@ -128,8 +114,8 @@
     }
   },
   "counters": {
-    "batchSeq": 18,
-    "ciRuns": 20,
+    "batchSeq": 19,
+    "ciRuns": 21,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 7,
@@ -1396,8 +1382,75 @@
         "20825": "2026-11-20T23:33:54Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
+    },
+    {
+      "at": "2026-11-21T02:19:30.900Z",
+      "type": "checks-green",
+      "batchId": "b18",
+      "prs": [
+        20776,
+        20819,
+        20820,
+        20823,
+        20824,
+        20825
+      ],
+      "sha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
+    },
+    {
+      "at": "2026-11-21T02:19:39.364Z",
+      "type": "land-rejected",
+      "batchId": "b18",
+      "prs": [
+        20823,
+        20825
+      ],
+      "sha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
+      "detail": "batch changed before landing: #20823 conflicting; #20825 conflicting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
+    },
+    {
+      "at": "2026-11-21T02:19:49.211Z",
+      "type": "batch-started",
+      "batchId": "b19",
+      "prs": [
+        20776,
+        20819,
+        20820,
+        20824
+      ],
+      "sha": "f6316b6a06f985f1c6dd819752e8980ae449e0b4",
+      "detail": "4 PR(s) on b748429cf5b3; window 6",
+      "labeledAt": {
+        "20776": "2026-11-20T23:33:39Z",
+        "20819": "2026-11-20T23:33:42Z",
+        "20820": "2026-11-20T23:33:44Z",
+        "20824": "2026-11-20T23:33:50Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
+    },
+    {
+      "at": "2026-11-21T02:20:00.597Z",
+      "type": "would-dequeue",
+      "prs": [
+        20825
+      ],
+      "sha": "c13cee2357119a5aec1e3f2d6eb756d442dbd06d",
+      "detail": "conflicting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
+    },
+    {
+      "at": "2026-11-21T02:20:05.404Z",
+      "type": "would-dequeue",
+      "prs": [
+        20823
+      ],
+      "sha": "b03f265540ae84c22ff404c764b6ff91ef49046e",
+      "detail": "conflicting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
     }
   ],
-  "updatedAt": "2026-11-21T02:18:14.488Z",
+  "updatedAt": "2026-11-21T02:20:24.833Z",
   "batchWindow": 6
 }
