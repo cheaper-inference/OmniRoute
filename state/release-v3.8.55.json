@@ -3,37 +3,23 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b24",
+    "batchId": "b25",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b24-3927e06e015a",
-    "candidateSha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
+    "candidateRef": "omni-queue/release-v3.8.55/b25-2f50b6c94f40",
+    "candidateSha": "2f50b6c94f4038158df9de98986a27b2fb4f98f8",
     "baseSha": "5ffa68e835442a12ed1204a2eebf4076c298aecb",
-    "treeSha": "a7b6541c028fa5dc84fab3fa752418f355870251",
+    "treeSha": "62056fc61ee4e787baaf34c35eacc4140b201566",
     "prs": [
       {
-        "n": 20866,
-        "head": "b470798f230961a9607d905f60c5ea6a17f9e29b",
-        "title": "docs(ci): AGENTS.md — landing on a release branch through omni-queue, sync-back by pull request",
+        "n": 20939,
+        "head": "3725904602e37ce030e05e3f427dcce8aa0b2f5b",
+        "title": "fix(ci): time limits for the Fast Quality Gates job and for each of its gates",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T11:20:21Z"
-      },
-      {
-        "n": 20867,
-        "head": "38d38c282537d6433be817567f3b28bb23510b7f",
-        "title": "fix(security): clamp caller polling values at the remaining media handlers (CodeQL #1389)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T13:25:28Z"
-      },
-      {
-        "n": 20940,
-        "head": "321ffbe2c2e3753004937f3f63a1dbf1069caade",
-        "title": "chore(quality): end the temporary codeqlAlerts ceiling (103 -> 6)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T18:09:50Z"
+        "labeledAt": "2026-11-21T18:12:50Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-21T19:41:54.078Z",
+    "startedAt": "2026-11-21T20:52:25.701Z",
     "attempts": 0,
     "bisect": null
   },
@@ -113,12 +99,15 @@
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
       "20823": "6441b5b6f3587b771547c106caf91229fa556cfb",
-      "20825": "2a48a0a823bf12139867cc9cf8b70814302c2689"
+      "20825": "2a48a0a823bf12139867cc9cf8b70814302c2689",
+      "20866": "b470798f230961a9607d905f60c5ea6a17f9e29b",
+      "20867": "38d38c282537d6433be817567f3b28bb23510b7f",
+      "20940": "321ffbe2c2e3753004937f3f63a1dbf1069caade"
     }
   },
   "counters": {
-    "batchSeq": 24,
-    "ciRuns": 28,
+    "batchSeq": 25,
+    "ciRuns": 29,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1816,8 +1805,47 @@
         "20940": "2026-11-21T18:09:50Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
+    },
+    {
+      "at": "2026-11-21T20:51:46.139Z",
+      "type": "checks-green",
+      "batchId": "b24",
+      "prs": [
+        20866,
+        20867,
+        20940
+      ],
+      "sha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44948476998"
+    },
+    {
+      "at": "2026-11-21T20:51:57.287Z",
+      "type": "would-land",
+      "batchId": "b24",
+      "prs": [
+        20866,
+        20867,
+        20940
+      ],
+      "sha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
+      "detail": "shadow mode: would merge-ff onto 5ffa68e83544",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44948476998"
+    },
+    {
+      "at": "2026-11-21T20:52:28.350Z",
+      "type": "batch-started",
+      "batchId": "b25",
+      "prs": [
+        20939
+      ],
+      "sha": "2f50b6c94f4038158df9de98986a27b2fb4f98f8",
+      "detail": "1 PR(s) on 5ffa68e83544; window 4",
+      "labeledAt": {
+        "20939": "2026-11-21T18:12:50Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44948476998"
     }
   ],
-  "updatedAt": "2026-11-21T20:47:17.296Z",
-  "batchWindow": 3
+  "updatedAt": "2026-11-21T20:52:29.960Z",
+  "batchWindow": 4
 }
