@@ -5,6 +5,9 @@ const ANTIGRAVITY_CLI_RELEASE_URL =
 
 export const ANTIGRAVITY_VERSION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 export const ANTIGRAVITY_VERSION_FETCH_TIMEOUT_MS = 5_000;
+// A failed lookup (e.g. GitHub's 60/h anonymous limit) is not retried before this, so the
+// version probe cannot add a refused round trip to every chat request.
+export const ANTIGRAVITY_VERSION_FAILURE_BACKOFF_MS = 15 * 60 * 1000;
 // Version floor for the IDE fingerprint. Cloud Code's fetchAvailableModels only returns quota
 // buckets for newer models (e.g. Gemini 3.7 Flash) to IDE clients >= 2.5.5, and the public
 // updater feed can lag behind that, so the resolver never reports anything older than this.
@@ -19,6 +22,7 @@ type VersionCache = {
 type ProductVersionState = {
   cache: VersionCache | null;
   inFlight: Promise<string> | null;
+  failedAt?: number;
 };
 
 type FetchLike = typeof fetch;
@@ -87,6 +91,12 @@ function parseCliRelease(payload: unknown): string | null {
   return normalizeVersion(release.tag_name ?? release.name);
 }
 
+/**
+ * Resolve one product's advertised client version: a fresh cached success (6 h TTL) wins;
+ * concurrent callers share one in-flight lookup; after a failed lookup the last known or
+ * fallback version is returned without refetching for ANTIGRAVITY_VERSION_FAILURE_BACKOFF_MS,
+ * so a refused source (e.g. GitHub's anonymous rate limit) is not hit on every request.
+ */
 async function resolveProductVersion(
   state: ProductVersionState,
   fallbackVersion: string,
@@ -101,6 +111,13 @@ async function resolveProductVersion(
 
   if (state.inFlight) {
     return state.inFlight;
+  }
+
+  if (
+    state.failedAt !== undefined &&
+    now - state.failedAt < ANTIGRAVITY_VERSION_FAILURE_BACKOFF_MS
+  ) {
+    return pickNewestVersion(state.cache?.version, fallbackVersion) ?? fallbackVersion;
   }
 
   state.inFlight = (async () => {
@@ -119,6 +136,9 @@ async function resolveProductVersion(
         fetchedAt: Date.now(),
         version,
       };
+      state.failedAt = undefined;
+    } else {
+      state.failedAt = Date.now();
     }
     return version;
   })();
@@ -174,9 +194,12 @@ export function seedAntigravityCliVersionCache(version: string, fetchedAt = Date
   seedVersionCache(cliState, version, fetchedAt);
 }
 
+/** Reset both products' cache, in-flight lookup and failure backoff (tests and operator reloads). */
 export function clearAntigravityVersionCaches(): void {
   ideState.cache = null;
   ideState.inFlight = null;
+  ideState.failedAt = undefined;
   cliState.cache = null;
   cliState.inFlight = null;
+  cliState.failedAt = undefined;
 }

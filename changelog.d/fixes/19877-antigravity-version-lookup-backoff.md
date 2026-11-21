@@ -1,0 +1,1 @@
+- **fix(antigravity):** a refused client-version lookup (GitHub anonymous rate limit) is backed off for 15 minutes instead of being retried before every Antigravity request ([#19877](https://github.com/cheaper-inference/OmniRoute/pull/19877)) — thanks @adevwithpurpose
