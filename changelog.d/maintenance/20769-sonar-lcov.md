@@ -1,0 +1,1 @@
+- **fix(ci):** SonarCloud gets `coverage/lcov.info` on pull requests again — the coverage merge skipped the lcov reporter on PRs since #18336, so every PR showed 0.0% coverage on new code; the SonarQube job now also fails clearly when the file is missing ([#20769](https://github.com/cheaper-inference/OmniRoute/pull/20769))

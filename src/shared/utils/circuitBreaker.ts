@@ -228,6 +228,8 @@ export class CircuitBreaker {
   state: CircuitState;
   failureCount: number;
   successCount: number;
+  /** Probe successes in the current HALF_OPEN episode; `halfOpenRequests` of them close the breaker. */
+  halfOpenSuccesses = 0;
   lastFailureTime: number | null;
   halfOpenAllowed: number;
   halfOpenProbeStartedAt: number | null;
@@ -513,11 +515,15 @@ export class CircuitBreaker {
       this.kindFailureCounts = {};
     } else if (this.state === STATE.HALF_OPEN) {
       this.successCount++;
-      this._transition(STATE.CLOSED, "probe-success");
-      this.failureCount = 0;
-      this.lastFailureKind = null;
-      this.openCycleCount = 0;
-      this.kindFailureCounts = {};
+      this.halfOpenSuccesses++;
+      // A flapping provider can pass one probe by luck: all allowed probes must pass.
+      if (this.halfOpenSuccesses >= this.halfOpenRequests) {
+        this._transition(STATE.CLOSED, "probe-success");
+        this.failureCount = 0;
+        this.lastFailureKind = null;
+        this.openCycleCount = 0;
+        this.kindFailureCounts = {};
+      }
     } else {
       // CLOSED or DEGRADED: reset counts
       this.failureCount = Math.max(0, this.failureCount - 1); // gradual recovery
@@ -661,6 +667,7 @@ export class CircuitBreaker {
       Date.now() - this.halfOpenProbeStartedAt >= this.resetTimeout
     ) {
       this.halfOpenAllowed = this.halfOpenRequests;
+      this.halfOpenSuccesses = 0;
       this.halfOpenProbeStartedAt = null;
       this.halfOpenProbeGeneration++;
     }
@@ -675,6 +682,7 @@ export class CircuitBreaker {
     }
     this.halfOpenProbeGeneration++;
     this.halfOpenProbeStartedAt = null;
+    this.halfOpenSuccesses = 0;
     // Record transition
     this.transitionHistory.push({
       from: oldState,

@@ -911,7 +911,7 @@ export function getProviderDailyUsageRows(
       SELECT
         DATE(timestamp) as date,
         LOWER(provider) as provider,
-        COUNT(*) as requests,
+        COALESCE(SUM(requests), 0) as requests,
         COALESCE(SUM(tokens_input), 0) as promptTokens,
         COALESCE(SUM(tokens_output), 0) as completionTokens,
         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens

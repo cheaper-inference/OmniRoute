@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Referência da API
+## Referência API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Função de fábrica que cria um objeto Plugin com valores padrão.
+Função de fábrica que cria um objeto Plugin com padrões.
 
 **Parâmetros:**
 
-- `name` (string, obrigatório) — Nome do plugin em kebab-case
-- `priority` (number, opcional, padrão: 100) — Valores menores são executados primeiro
-- `enabled` (boolean, opcional, padrão: true) — Iniciar habilitado?
-- `onRequest` (function, opcional) — Executado antes do manipulador de chat
-- `onResponse` (function, opcional) — Executado após o manipulador de chat
-- `onError` (function, opcional) — Executado quando ocorre um erro no manipulador
+- `name` (string, obrigatório) — Nome do plug-in no kebab-case
+- `priority` (número, opcional, padrão: 100) — Lower é executado primeiro
+- `enabled` (booleano, opcional, padrão: verdadeiro) — Iniciar ativado?
+- `onRequest` (função, opcional) — É executado antes do manipulador de chat
+- `onResponse` (função, opcional) — É executado após o manipulador de bate-papo
+- `onError` (função, opcional) — É executado em caso de erro do manipulador
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Bloqueia a solicitação e, opcionalmente, retorna uma resposta personalizada.
+Bloqueie a solicitação e, opcionalmente, retorne uma resposta personalizada.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Modifica o corpo da solicitação antes que ele chegue ao provedor.
+Modifique o corpo da solicitação antes que ela chegue ao provedor.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Anexa metadados ao contexto da solicitação.
+Anexe metadados ao contexto da solicitação.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Contexto do plugin (`PluginContext`)
+## Contexto do plug-in (`PluginContext`)
 
-| Campo       | Tipo                      | Descrição                              |
-| ----------- | ------------------------- | -------------------------------------- |
-| `requestId` | `string`                  | Identificador exclusivo da solicitação |
-| `model`     | `string`                  | Nome do modelo solicitado              |
-| `provider`  | `string`                  | ID do provedor de destino              |
-| `body`      | `Record<string, unknown>` | Corpo da solicitação                   |
-| `headers`   | `Record<string, string>`  | Cabeçalhos da solicitação              |
-| `metadata`  | `Record<string, unknown>` | Metadados mutáveis                     |
-| `timestamp` | `number`                  | Timestamp da solicitação               |
+| Campo        | Tipo                      | Descrição                              |
+| ------------ | ------------------------- | -------------------------------------- |
+| `requestId`  | `string`                  | Identificador de solicitação exclusivo |
+| `model`      | `string`                  | Nome do modelo solicitado              |
+| `provider`   | `string`                  | Provedor de destino ID                 |
+| `body`       | `Record<string, unknown>` | Solicitar corpo                        |
+| `headers`    | `Record<string, string>`  | Solicitar cabeçalhos (ver nota)        |
+| `metadata`   | `Record<string, unknown>` | Metadados mutáveis                     |
+| `timestamp`  | `number`                  | Solicitar carimbo de data/hora         |
+| `apiKeyInfo` | `object` (opcional)       | Metadados da chave API (ver nota)      |
+
+O contexto nunca carrega as credenciais do cliente: os cabeçalhos `authorization`, `x-api-key`, `proxy-authorization` e `cookie` são removidos (qualquer caixa) e `apiKeyInfo` mantém os metadados da chave (como `id`, `name` e `scopes`), mas não o valor da chave ou sua impressão digital (`redactPluginContext()` em `src/lib/plugins/hooks.ts`). Isso se aplica a `onRequest`, `onResponse` e `onError`.
 
 ## Manifesto (`plugin.json`)
 
@@ -138,19 +141,18 @@ Ou como valores booleanos simples (prioridade padrão 100):
 }
 ```
 
-## Sistema de Permissões
+## Sistema de permissão
 
-Os plugins são executados em um contexto de VM isolado. O acesso a recursos externos exige permissões explícitas:
+Plug-ins são** não em sandbox** . Cada plug-in ativo é executado como um processo filho Node.js comum e separado (`loadPlugin()` em `src/lib/plugins/loader.ts`) sob o mesmo usuário do sistema operacional que OmniRoute, sem contexto VM e sem sinalizadores de permissão Node.js. O código do plug-in pode usar `node:fs`, `node:child_process`, `fetch` e todos os outros Node.js API: ele pode ler e gravar qualquer arquivo que o usuário OmniRoute puder (incluindo o diretório de dados), executar programas e acessar a rede.
 
-| Permissão    | Concede acesso a                                             |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy somente leitura de `process.env`                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+O `requires.permissions` do manifesto aceita `network`, `file-read`, `file-write`, `env` e `exec`, mas hoje apenas `env` tem efeito em tempo de execução:
 
-Sem uma permissão, os globais correspondentes simplesmente não ficam disponíveis no ambiente isolado.
+| Permissão                                    | Efeito hoje                                                                                                                                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | O processo do plugin também recebe `PORT`, `HOSTNAME`, `TZ` e `TMPDIR`. Sem ele, recebe apenas `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` e `PLUGIN_NAME` (mais `SystemRoot` e `windir` em Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nenhum. São apenas declarações: nada é bloqueado quando faltam.                                                                                                                                                                |
+
+Instalar um plugin é como instalar qualquer outro programa no host. Instale apenas plug-ins cuja fonte você confia.
 
 ## Esquema de Configuração
 
@@ -194,7 +196,7 @@ Os valores de configuração são persistidos no banco de dados e podem ser aces
 
 ## Exemplos
 
-### Registrador de Requisições
+### Registrador de solicitações
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Limitador de Taxa
+### Limitador de taxa
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuto
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,13 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({ error: "Limite de taxa excedido", status: 429 });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### Transformador de Respostas
+### Transformador de resposta
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

@@ -4,7 +4,7 @@ import type { ConnectionRestrictionSource } from "./credentialSelectionDiagnosti
 export interface CredentialSelectionOptions {
   /** Provenance of the effective allowlist; does not alter authorization. */
   connectionRestrictionSources?: readonly ConnectionRestrictionSource[];
-  /** Exclude credential-specific transports that cannot serve caller tools. */
+  /** Exclude credential-specific transports that cannot serve caller tools or image input. */
   requireToolCalling?: boolean;
   allowSuppressedConnections?: boolean;
   allowRateLimitedConnections?: boolean;

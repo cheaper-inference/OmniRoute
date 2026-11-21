@@ -18,7 +18,7 @@ import {
 } from "node:fs";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
 import { tmpdir } from "node:os";
-import { dirname, join, extname, basename } from "node:path";
+import { dirname, join, extname, basename, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { resolveDataDir } from "../data-dir.mjs";
@@ -63,6 +63,7 @@ export function registerBackup(program) {
     .option("--cron <expr>", t("backup.auto.cronOpt"), "0 3 * * *")
     .option("--cloud", t("backup.cloudOpt"))
     .option("--encrypt", t("backup.encryptOpt"))
+    .option("--key-file <path>", t("backup.keyFileOpt"))
     .option("--retention <n>", t("backup.retentionOpt"), parseInt)
     .action(async (opts) => {
       const exitCode = await runBackupAutoEnableCommand(opts);
@@ -241,7 +242,16 @@ export async function runBackupCommand(opts = {}) {
   let passphrase = null;
   if (opts.encrypt) {
     if (opts.keyFile) {
-      passphrase = readFileSync(opts.keyFile, "utf8").trim();
+      try {
+        passphrase = readFileSync(opts.keyFile, "utf8").trim();
+      } catch (err) {
+        console.error(`Cannot read key file ${opts.keyFile}: ${err?.code || "read error"}`);
+        return 1;
+      }
+      if (!passphrase) {
+        console.error(t("backup.noPassphrase"));
+        return 1;
+      }
     } else {
       passphrase = await promptPassphrase();
       if (!passphrase) {
@@ -385,11 +395,29 @@ function getSchedulePath() {
 
 export async function runBackupAutoEnableCommand(opts = {}) {
   const schedulePath = getSchedulePath();
+  let keyFile;
+  if (opts.encrypt) {
+    // A scheduled run has no TTY, so an encrypted schedule needs a key file.
+    // Persist the absolute PATH only (never the passphrase): the server cwd
+    // differs from the CLI cwd.
+    if (!opts.keyFile) {
+      console.error("Encrypted automatic backups need --key-file <path> (no TTY on a schedule).");
+      return 1;
+    }
+    keyFile = resolve(String(opts.keyFile));
+    try {
+      if (!readFileSync(keyFile, "utf8").trim()) throw new Error("empty");
+    } catch {
+      console.error(`Key file ${keyFile} is missing, unreadable or empty.`);
+      return 1;
+    }
+  }
   const schedule = {
     enabled: true,
     cron: opts.cron || "0 3 * * *",
     cloud: !!opts.cloud,
     encrypt: !!opts.encrypt,
+    ...(keyFile ? { keyFile } : {}),
     retention: opts.retention || null,
     updatedAt: new Date().toISOString(),
   };
@@ -424,7 +452,10 @@ export async function runBackupAutoStatusCommand() {
   console.log(`  cron:      ${schedule.cron}`);
   console.log(`  cloud:     ${schedule.cloud ? "yes" : "no"}`);
   console.log(`  encrypt:   ${schedule.encrypt ? "yes" : "no"}`);
+  if (schedule.keyFile) console.log(`  key-file:  ${schedule.keyFile}`);
   console.log(`  retention: ${schedule.retention ?? "unlimited"}`);
+  if (schedule.lastRunAt) console.log(`  last run:  ${schedule.lastRunAt}`);
+  if (schedule.lastError) console.log(`  last error: ${schedule.lastError}`);
   return 0;
 }
 

@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Varsayılan değerlerle bir Plugin nesnesi oluşturan fabrika fonksiyonu.
+Varsayılanlara sahip bir Eklenti nesnesi oluşturan fabrika işlevi.
 
 **Parametreler:**
 
-- `name` (string, zorunlu) — kebab-case biçiminde eklenti adı
-- `priority` (number, isteğe bağlı, varsayılan: 100) — Daha düşük değer önce çalışır
-- `enabled` (boolean, isteğe bağlı, varsayılan: true) — Etkin olarak başlatılsın mı?
-- `onRequest` (function, isteğe bağlı) — Sohbet işleyicisinden önce çalışır
-- `onResponse` (function, isteğe bağlı) — Sohbet işleyicisinden sonra çalışır
-- `onError` (function, isteğe bağlı) — İşleyici hatası oluştuğunda çalışır
+- `name` (string, gerekli) — Kebab durumunda eklenti adı
+- `priority` (sayı, isteğe bağlı, varsayılan: 100) — Önce alt çalıştırma
+- `enabled` (boolean, isteğe bağlı, varsayılan: doğru) — Başlatma etkin mi?
+- `onRequest` (işlev, isteğe bağlı) — Sohbet işleyicisinden önce çalışır
+- `onResponse` (işlev, isteğe bağlı) — Sohbet işleyicisinden sonra çalışır
+- `onError` (işlev, isteğe bağlı) — İşleyici hatası durumunda çalışır
 
 ### `blockRequest(response?): BlockingHookResult`
 
-İsteği engeller ve isteğe bağlı olarak özel bir yanıt döndürür.
+İsteği engelleyin ve isteğe bağlı olarak özel bir yanıt döndürün.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Sağlayıcıya ulaşmadan önce istek gövdesini değiştirir.
+Sağlayıcıya ulaşmadan önce istek gövdesini değiştirin.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-İstek bağlamına meta veri ekler.
+Meta verileri istek bağlamına ekleyin.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Eklenti Bağlamı (`PluginContext`)
+## Eklenti İçeriği (`PluginContext`)
 
-| Alan        | Tür                       | Açıklama                      |
-| ----------- | ------------------------- | ----------------------------- |
-| `requestId` | `string`                  | Benzersiz istek tanımlayıcısı |
-| `model`     | `string`                  | İstenen model adı             |
-| `provider`  | `string`                  | Hedef sağlayıcı kimliği       |
-| `body`      | `Record<string, unknown>` | İstek gövdesi                 |
-| `headers`   | `Record<string, string>`  | İstek üstbilgileri            |
-| `metadata`  | `Record<string, unknown>` | Değiştirilebilir meta veri    |
-| `timestamp` | `number`                  | İstek zaman damgası           |
+| Alan         | Tip                       | Tanım                                  |
+| ------------ | ------------------------- | -------------------------------------- |
+| `requestId`  | `string`                  | Benzersiz istek tanımlayıcı            |
+| `model`      | `string`                  | İstenen model adı                      |
+| `provider`   | `string`                  | Hedef sağlayıcı ID                     |
+| `body`       | `Record<string, unknown>` | Talep gövdesi                          |
+| `headers`    | `Record<string, string>`  | İstek başlıkları (nota bakın)          |
+| `metadata`   | `Record<string, unknown>` | Değiştirilebilir meta veriler          |
+| `timestamp`  | `number`                  | Zaman damgası iste                     |
+| `apiKeyInfo` | `object` (isteğe bağlı)   | API anahtar meta verileri (nota bakın) |
+
+Bağlam hiçbir zaman müşterinin kimlik bilgilerini taşımaz: `authorization`, `x-api-key`, `proxy-authorization` ve `cookie` başlıkları kaldırılır (herhangi bir büyük harf) ve `apiKeyInfo` anahtarın meta verilerini ( `id`, `name` ve `scopes` gibi) tutar, ancak anahtar değerini veya parmak izini ( `src/lib/plugins/hooks.ts` içindeki `redactPluginContext()` ) tutmaz. Bu `onRequest`, `onResponse` ve `onError` için geçerlidir.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Ya da basit boolean değerleri olarak yapılandırılabilir (varsayılan önceli
 
 ## İzin Sistemi
 
-Eklentiler, korumalı bir VM bağlamında çalışır. Harici kaynaklara erişim için açık izinler gerekir:
+Eklentiler** korumalı alana alınmamış** . Her etkin eklenti, OmniRoute ile aynı işletim sistemi kullanıcısı altında, VM bağlamı ve Node.js izin işaretleri olmadan, ayrı, sıradan bir Node.js alt süreci ( `src/lib/plugins/loader.ts` `loadPlugin()` ) olarak çalışır. Eklenti kodu `node:fs`, `node:child_process`, `fetch` ve diğer tüm Node.js API kullanabilir: OmniRoute kullanıcısının (veri dizini dahil) yapabileceği herhangi bir dosyayı okuyabilir ve yazabilir, programları çalıştırabilir ve ağa erişebilir.
 
-| İzin         | Sağladığı Yetkiler                                           |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Salt okunur `process.env` proxy'si                           |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Bildirinin `requires.permissions` `network`, `file-read`, `file-write`, `env` ve `exec` kabul eder, ancak bugün yalnızca `env` çalışma zamanında etkisi vardır:
 
-Bir izin olmadan ilgili global değişkenler korumalı alanda kullanılamaz.
+| İzin                                         | Bugünün etkisi                                                                                                                                                                                                                     |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Eklenti işlemi aynı zamanda `PORT`, `HOSTNAME`, `TZ` ve `TMPDIR` de alır. Bu olmadan yalnızca `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ve `PLUGIN_NAME` (artı Windows `SystemRoot` ve `windir` ) alır. |
+| `network`, `file-read`, `file-write`, `exec` | Hiçbiri. Bunlar yalnızca bildirimdir: eksik olduklarında hiçbir şey engellenmez.                                                                                                                                                   |
+
+Bir eklenti yüklemek, ana bilgisayara başka herhangi bir program yüklemek gibidir. Yalnızca kaynağına güvendiğiniz eklentileri yükleyin.
 
 ## Yapılandırma Şeması
 
@@ -194,7 +196,7 @@ Yapılandırma değerleri veritabanında kalıcı olarak saklanır ve kontrol pa
 
 ## Örnekler
 
-### İstek Günlükleyici
+### Talep Kaydedici
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 dakika
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Yanıt Dönüştürücü
+### Tepki Transformatörü
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

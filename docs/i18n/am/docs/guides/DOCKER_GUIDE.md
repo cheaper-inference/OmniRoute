@@ -27,14 +27,9 @@
 
 ---
 
-## ፈጣን አስጀማሪ
+## ፈጣን ሩጫ
 
-> **በአንድ ትዕዛዝ በራስዎ ማስተናገድ ይፈልጋሉ?**
-> [በራስ የማስተናገጃ መመሪያን](../getting-started/SELF_HOST_GUIDE.md) ይመልከቱ —
-> `docker compose -f docker-compose.selfhost.yml up -d` (የታተመ image +
-> Redis፣ loopback ብቻ፣ የመገለጫ ምርጫ የሌለው)። ከታች ያለው ፈጣን አስጀማሪ
-> Redisን ቀድሞውኑ በሌላ ቦታ ለሚያስኬዱ ተጠቃሚዎች የተዘጋጀ
-> የነጠላ-container መንገድ ነው።
+> **በአንድ ትዕዛዝ ውስጥ እራስን ማስተናገድ?** [የራስ አስተናጋጅ መመሪያ](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` ይመልከቱ (የታተመ ምስል + Redis፣ loopback-only፣ ምንም የመገለጫ ምርጫ የለም)። ከዚህ በታች ያለው ፈጣን ሩጫ በሌላ ቦታ Redis ለሚያሄዱ ተጠቃሚዎች ባለአንድ ኮንቴነር መንገድ ነው።
 
 ```bash
 docker run -d \
@@ -43,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## ከአካባቢ ፋይል ጋር
 
 ```bash
-# መጀመሪያ .envን ይቅዱና ያርትዑ
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -59,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -238,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 የምርት stack ከልማት compose ጋር በትይዩ ይሰራል (የተለያዩ የኮንቴይነር ስሞች፣ ወደቦች እና የውሂብ ጥራዞች)፣ ስለዚህ ምርት እንደተነሳ ሳለ በአካባቢዎ ላይ መሻሻልዎን መቀጠል ይችላሉ።
 
-## የDockerfile ደረጃዎች
+## Dockerfile ደረጃዎች
 
-ማከማቻው ባለብዙ-ደረጃ Dockerfile (`Dockerfile`) ይዟል። አራት ደረጃዎች ቀርበዋል፤ ለአጠቃቀምዎ ትክክለኛውን `target` ይምረጡ።
+ማከማቻው ባለብዙ ደረጃ Dockerfile (`Dockerfile`) ይልካል። አራት ደረጃዎች ይጋለጣሉ; ለአጠቃቀም ጉዳይዎ ትክክለኛውን `target` ይምረጡ።
 
-| ደረጃ           | መሠረታዊ image           | ዓላማ                                                                                                                                                                                                                              |
-| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | ጥገኞችን ይጭናል (`npm ci --legacy-peer-deps`) እና `npm run build` ያስኬዳል (በነባሪ Turbopack — ከታች ያለውን የግንባታ ጊዜ ሀብቶች ይመልከቱ)                                                                                                                |
-| `runner-base` | `node:26-trixie-slim` | የNext.js ራሱን የቻለ ውጤት ያለው የምርት runtime። **ምንም የአቅራቢ CLI አልተካተተም።**                                                                                                                                                                |
-| `runner-cli`  | `runner-base`         | `git`፣ `docker.io`፣ `docker-compose` እና አለምአቀፍ CLIዎችን ይጨምራል፦ `@openai/codex`፣ `@anthropic-ai/claude-code`፣ `droid`፣ `openclaw`። **ራስ-ሰር ወኪል ላላቸው የሥራ ፍሰቶች ይህን ይምረጡ።**                                                            |
-| `runner-web`  | `runner-base`         | ለድር-ክፍለጊዜ አቅራቢዎች Playwright + የChromium አሳሽ (`--with-deps`) ይጨምራል፦ `gemini-web`፣ `claude-web`፣ `claude-turnstile`። **እነዚያን አቅራቢዎች ሲጠቀሙ ይህን ይምረጡ** — ያለዚህ ተራው image ጥያቄ በሚቀርብበት ጊዜ ይከሽፋል (በልቀት ቻናሎች ስር ያለውን የ`-web` ማስታወሻ ይመልከቱ)። |
+| ደረጃ           | የመሠረት ምስል             | ዓላማ                                                                                                                                                                                                                     |
+| ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | deps (`npm ci --legacy-peer-deps`) ይጭናል እና `npm run build` ያስኬዳል (Turbopack በነባሪነት — የግንባታ ጊዜ መርጃዎችን ከዚህ በታች ይመልከቱ)                                                                                                     |
+| `runner-base` | `node:26-trixie-slim` | የማምረቻ አሂድ ጊዜ በ Next.js ራሱን የቻለ ውፅዓት።** ምንም አቅራቢ CLIs የተጠቀለለ የለም።**                                                                                                                                                      |
+| `runner-cli`  | `runner-base`         | `git`, `docker.io`, `docker-compose` እና ግሎባል CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw` ይጨምራል።** ይህንን ለወኪል የስራ ፍሰቶች ይምረጡ።**                                                                |
+| `runner-web`  | `runner-base`         | ለድር ክፍለ ጊዜ አቅራቢዎች Playwright + a Chromium አሳሽ (`--with-deps`) ያክላል `gemini-web`፣ `claude-web`፣ `claude-turnstile`።** እነዚህን አቅራቢዎች ሲጠቀሙ ይህንን ይምረጡ** — ምስሉ ሳይኖር በተጠየቀ ጊዜ አይሳካም (በመለቀቅ ቻናሎች ስር ያለውን የ `-web` ማስታወሻ ይመልከቱ)። |
 
-አንድን የተወሰነ target በእጅ ይገንቡ፦
+አንድ የተወሰነ ግብ በእጅ ይገንቡ፡-
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -259,40 +254,17 @@ docker build --target runner-web  -t omniroute:web  .
 
 ### የግንባታ ጊዜ ሀብቶች
 
-ሦስት build args የ`builder` ደረጃውን የሀብት ፍጆታ ይቆጣጠራሉ። እነሱ ለግንባታ ጊዜ ብቻ ናቸው —
-`OMNIROUTE_MEMORY_MB` (ከታች) የተለየ የruntime ማስተካከያ ነው።
+ሶስት ግንባታ አርጎች የ `builder` ደረጃ ወጪዎችን ይቆጣጠራሉ። የግንባታ ጊዜ ብቻ — `OMNIROUTE_MEMORY_MB` (ከታች) የተለየ፣ የአሂድ ጊዜ ቁልፍ ነው።
 
-| Build arg                   | ነባሪ    | ተጽዕኖ                                                                                |
-| --------------------------- | ------ | ----------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` በwebpack ይገነባል፦ ዝቅተኛ ከፍተኛው የማህደረ ትውስታ ፍጆታ፣ ግን የዘገየ። `1` Turbopackን ለመጠቀም ያስችላል። |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | ለሚጀመረው `next build` የV8 heap ከፍተኛ ገደብ (`--max-old-space-size`)።                     |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | `CIRCLE_NODE_TOTAL`ን ያቀርባል፤ Next ለገጽ-ውሂብ ስብስብ `workers = N - 1`ን ያወጣል።              |
+| አርግን ይገንቡ                   | ነባሪ    | ውጤት                                                                  |
+| --------------------------- | ------ | -------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` በድር ጥቅል ይገነባል፡ ዝቅተኛ ከፍተኛ ማህደረ ትውስታ፣ ቀርፋፋ። `1` ወደ Turbopack መርጧል። |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | V8 ክምር ጣሪያ (`--max-old-space-size`) ለተፈጠረው `next build`.             |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | `CIRCLE_NODE_TOTAL` ይመገባል; ቀጥሎ ለገጽ-መረጃ መሰብሰብ `workers = N - 1` ያመጣል። |
 
-ትልቅ builder ላይ ከፍ ማድረግ ያለብዎት እና ሀብት ውስን የሆነ ግንባታ
-**ከ** `✓ Compiled successfully` **በኋላ** ሲቋረጥ መጠርጠር ያለብዎት `OMNIROUTE_BUILD_WORKERS`ን ነው። እያንዳንዱ
-የገጽ-ውሂብ worker የራሱ የሆነ process ነው፣ ዋናው `next build` ራሱም እንዲሁ ነው፤
-በቀጥታ በVPS ላይ የተደረገ ድጋሚ ሙከራ (issue #7518) የእያንዳንዱ process ከፍተኛ RSS
-ከ`NODE_OPTIONS` heap flag ነጻ በሆነ መንገድ ~4.5 GB እንደሆነ ለክቷል (Turbopack ከV8 heap
-ውጭ ባለው native/Rust ማህደረ ትውስታ ውስጥ ያጠናቅራል)። የ`2` ነባሪ ዋጋ (→ 1 worker፣ በድምሩ 2
-processes) የማተሚያ pipeline ለሚጠቀምባቸው 16 GB / 4 vCPU በGitHub ላይ ለሚስተናገዱ runners
-ተመጣጥኖ ተዘጋጅቷል። `8` ላይ (→ 7 workers) ያ runner ማህደረ ትውስታው አልቆ
-buildkit ደረጃውን `ResourceExhausted: ... cannot allocate memory` በሚል አሳስቶታል፤
-`3` (→ 2 workers) እንኳን የእያንዳንዱ process RSS በግምት ፈንታ በቀጥታ ከተለካ በኋላ
-አሁንም አልተመጣጠነም። `tests/unit/docker-build-memory-budget.test.ts`
-በተለካው አኃዝ ላይ ስሌቱን ያከናውናል፣ ከሁለቱ ማስተካከያዎች አንዱ
-ከrunner አቅም በላይ ካደገም ይከሽፋል።
+`OMNIROUTE_BUILD_WORKERS` ትልቅ ግንበኛ ላይ የሚያነሳው እና የተገደበ ግንብ ሲሞት የሚጠራጠር ነው።** በኋላ** `✓ Compiled successfully`. እያንዳንዱ ገጽ-ዳታ ሠራተኛ የራሱ ሂደት ነው, እና ወላጅ `next build` ራሱ ነው; የቀጥታ VPS መባዛት (እትም #7518) የእያንዳንዱን ሂደት ከፍተኛ RSS በ ~ 4.5 GB `NODE_OPTIONS` ክምር ባንዲራ ነፃ በሆነ መልኩ ለካ (Turbopack በ native/Rust ማህደረ ትውስታ ከV8 ቁልል ውጭ ያጠናቅራል)። የ `2` ነባሪ (→ 1 ሠራተኛ፣ አጠቃላይ 2 ሂደቶች) ለ16 GB /4 vCPU GitHub የሚስተናገዱ የቧንቧ መስመር ሯጮች መጠን ነው። በ `8` (→ 7 ሠራተኞች) ያ ሯጭ የማስታወስ ችሎታው አልቆበታል እና የግንባታ ኪት በ `ResourceExhausted: ... cannot allocate memory` ደረጃውን ወድቋል። `3` (→ 2 ሠራተኞች) በአንድ ሂደት RSS ከመገመት ይልቅ በቀጥታ ከተለካ በኋላ አሁንም አልገባም። `tests/unit/docker-build-memory-budget.test.ts` ሒሳቡን በሚለካው አሃዝ ላይ ይሰራል እና የትኛውም እንቡጥ ሯጩን ካደገ አይሳካም።
 
-Turbopack ከV8 heap **ውጭ** ባለ native Rust ማህደረ ትውስታ ውስጥ ያጠናቅራል፣ ስለዚህ
-`OMNIROUTE_BUILD_MEMORY_MB` ገደብ አያበጅለትም። የማህደረ ትውስታ ገደብ ባለው host ላይ
-ግንባታው ምንም የስህተት ጽሑፍ ሳይኖር OOM killer አማካኝነት SIGKILL ይደረጋል — በቀላሉ
-በ`Creating an optimized production build` መሃል ይቆማል፣ ይህም ከማህደረ ትውስታ መሟጠጥ
-ይልቅ የተንጠለጠለ ያስመስለዋል። ለዚህም ነው `Dockerfile` እንደ `npm run dev` / `npm run build`
-በነባሪ ኮድ Turbopackን ከመጠቀም በተቃራኒ webpackን
-(`OMNIROUTE_USE_TURBOPACK=0`) በነባሪ የሚጠቀመው፦ ምንም build args የሌለው ተራ `docker build .`
-(Railway እና ሌሎች ባለአንድ-ጠቅታ hosts የሚያስኬዱት) ማህደረ ትውስታው በተገደበ builder ላይ
-ያለማስጠንቀቂያ መቋረጥ የለበትም። የታተሙት images አስቀድመው `docker-publish.yml` ውስጥ
-`OMNIROUTE_USE_TURBOPACK=0`ን በግልጽ ያስተላልፋሉ። ብዙ RAM ባለው builder ላይ ለፈጣን
-ግንባታ Turbopackን ለመጠቀም ይምረጡ፦
+Turbopack የሚኖረውን የዝገት ትውስታን ያጠናቅራል።** ውጭ** የ V8 ክምር፣ ስለዚህ `OMNIROUTE_BUILD_MEMORY_MB` አያስረውም። የማስታወሻ ጣሪያ ባለው አስተናጋጅ ላይ ግንባታው SIGKILLed በ OOM ገዳይ ምንም ስህተት የሌለበት ጽሑፍ በጭራሽ — በቀላሉ መሃል `Creating an optimized production build` ይቆማል፣ ይህም ከማስታወስ ውጭ ሳይሆን እንደ ማንጠልጠያ ይነበባል። ለዚያም ነው `Dockerfile` ወደ ዌብፓክ (`OMNIROUTE_USE_TURBOPACK=0`) የገባው፣ እንደ `npm run dev` / `npm run build` ሳይሆን፣ Turbopack የኮድ ነባሪ በሆነበት፡ ባዶ `docker build .` ምንም ግንባታ አርግስ የሌለው (ባቡር እና ሌሎች የአንድ ጠቅታ አስተናጋጆች የሚያሄዱት) ማህደረ ትውስታ ባለ ገንቢ ላይ በጸጥታ መሞት የለበትም። የታተሙት ምስሎች ቀድሞውኑ `OMNIROUTE_USE_TURBOPACK=0` በ `docker-publish.yml` ውስጥ በግልጽ ያልፋሉ። ብዙ RAM ባለው ግንበኛ ላይ ለፈጣን ግንባታ ወደ Turbopack ይምረጡ
 
 ```bash
 docker build --target runner-base \
@@ -300,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` ነቅቷል፣ ስለዚህ `next build` ዋና process **እና** worker
-process ያስኬዳል፣ እያንዳንዱም `OMNIROUTE_BUILD_MEMORY_MB`ን ለየብቻ ያከብራል። የcontainer
-ገደቡን ከዚያ ዋጋ አንድ እጥፍ ሳይሆን በግምት ከሁለት እጥፍ በላይ ያድርጉት።
+`webpackBuildWorker` ነቅቷል፣ ስለዚህ `next build` ወላጅ ይሰራል** እና** የሰራተኛ ሂደት እና እያንዳንዱ `OMNIROUTE_BUILD_MEMORY_MB` ለየብቻ ያከብራል። የመያዣውን ጣሪያ ከዋጋው በግምት በእጥፍ ከፍ ያድርጉት ፣ አንድ ጊዜ አይደለም።
 
-በዚህ tree ላይ የተለካ (`--target runner-base`፣ `OMNIROUTE_BUILD_MEMORY_MB=6144`)፦
+በዚህ ዛፍ ላይ ይለካል (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | የcontainer ገደብ | ውጤት                              |
-| --------- | -------------- | -------------------------------- |
-| Turbopack | 8 GiB / 16 GiB | በሁለቱም ላይ ያለማስጠንቀቂያ OOM-killed ሆነ |
-| webpack   | 8 GiB          | build worker SIGKILLed ሆነ        |
-| webpack   | 12 GiB         | ተሳካ፣ ከፍተኛው 11.1 GiB ደረሰ          |
+| ቅርቅብ       | የመያዣ ጣሪያ       | ውጤት                        |
+| ---------- | -------------- | -------------------------- |
+| Turbopack  | 8 GiB / 16 GiB | OOM-በፀጥታ በሁለቱም ተገደለ        |
+| የድረ-ገጽ ጥቅል | 8 GiB          | የሠራተኛ SIGKILLed መገንባት      |
+| የድረ-ገጽ ጥቅል | 12 GiB         | ተሳክቷል፣ ከፍተኛው 11.1 GiB ደርሷል |
 
-### የRuntime ነባሪዎች
+### የአሂድ ጊዜ ነባሪዎች
 
-በ`runner-base` የሚላኩ ነባሪዎች፦ `PORT=20128`፣ `HOSTNAME=0.0.0.0`፣ `OMNIROUTE_MEMORY_MB=1024`፣ `NODE_OPTIONS=--max-old-space-size=1024`፣ `DATA_DIR=/app/data`፣ `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`።
+ነባሪዎች በ `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations` ወደ ውጭ ይላካሉ.
 
-በDocker ውስጥ የማህደረ ትውስታ ባህሪ፦
+የማስታወስ ባህሪ በ Docker;
 
-- ኢሜጁ `OMNIROUTE_MEMORY_MB=1024`ን ያዘጋጃል፣ ከዚያም `NODE_OPTIONS=--max-old-space-size=1024`ን ያመነጫል።
-- ትክክለኛው የሰርቨር ፕሮሰስ የሚጀመረው `OMNIROUTE_MEMORY_MB`ን አንብቦ `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`ን በሚያክለው ራሱን የቻለ ማስጀመሪያ ነው።
-- Node በተደጋጋሚ ከተሰጡት `--max-old-space-size` እሴቶች የመጨረሻውን ይጠቀማል፤ ስለዚህ `OMNIROUTE_MEMORY_MB`ን ማዘጋጀት ተግባራዊውን የDocker heap ገደብ ይቆጣጠራል።
-- ኢሜጁ ሁልጊዜ ይህን ስለሚያዘጋጅ፣ የማስጀመሪያው በራሱ RAM መጠን የሚስተካከል መጠባበቂያ በDocker ስር ፈጽሞ ጥቅም ላይ አይውልም። ለሥራው ጫና በግልጽ ያሳድጉት (ከታች ያለውን ሰንጠረዥ ይመልከቱ)። `2048` እንኳን ለcoding-agent `/v1/responses` አሁንም በጣም አነስተኛ ነው።
+- ምስሉ `OMNIROUTE_MEMORY_MB=1024` ያዘጋጃል እና ከእሱ `NODE_OPTIONS=--max-old-space-size=1024` ያገኛል።
+- ትክክለኛው የአገልጋይ ሂደት የሚጀምረው ለብቻው ማስጀመሪያ ነው፣ እሱም `OMNIROUTE_MEMORY_MB` በማንበብ እና `--max-old-space-size=<OMNIROUTE_MEMORY_MB>` ይጨምራል።
+- መስቀለኛ መንገድ የመጨረሻውን የተደጋገመ `--max-old-space-size` እሴት ይጠቀማል፣ ስለዚህ `OMNIROUTE_MEMORY_MB` ማቀናበር ውጤታማ Docker ክምር ገደብ ይቆጣጠራል።
+- ምስሉ ሁል ጊዜ ስለሚያስቀምጠው፣ የአስጀማሪው በራሱ RAM-callibrated fallback Docker በሚለው ስር ፈጽሞ አይተገበርም። ለሥራው ጫና (ከዚህ በታች ሠንጠረዥ) በግልጽ ያሳድጉ. `2048` አሁንም ለኮዲንግ-ወኪል `/v1/responses` በጣም ትንሽ ነው።
 
-### ለcoding agents የሚያስፈልግ የRuntime RAM
+### የሩጫ ጊዜ RAM ለኮድ ወኪሎች
 
-የ1 GiB Docker ነባሪ መጠን ለdashboard/ቀላል ውይይት ዝቅተኛው ገደብ እንጂ የproduction መጠን አይደለም። ረጅም `POST /v1/responses` ይዘቶች (በመቶዎች የሚቆጠሩ መልዕክቶች፣ በአስሮች የሚቆጠሩ መሣሪያዎች) በማመቅ ጊዜ በርካታ በማህደረ ትውስታ ውስጥ ያሉ graphsን እንደያዙ ይቆያሉ። ሁለት ተደራራቢ ~3 MiB / ~750k-token ጥያቄዎች በ**12 GiB** old-space ላይ V8ን እንዲቋረጥ (`FATAL ERROR: Reached heap limit`) አድርገዋል፣ እንዲሁም የ16 GiB cgroup OOM ገደብን ደርሰዋል። [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)ን ይመልከቱ።
+የ1 GiB Docker ነባሪ የ dashboard/light-chat ወለል እንጂ የምርት መጠን አይደለም። ረጅም `POST /v1/responses` አካላት (በመቶዎች የሚቆጠሩ መልእክቶች፣ አስር መሳሪያዎች) በሚጨመቁበት ጊዜ ብዙ የማስታወሻ ግራፎችን ይይዛሉ። ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ጥያቄዎች V8ን በኤ አቋርጠዋል።** 12 GiB** የድሮ ቦታ (`FATAL ERROR: Reached heap limit`) እና እንዲሁም 16 GiB cgroup OOM ን መታ። [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ተመልከት.
 
-የ**cgroup `--memory`ን ከheap በላይ ያዘጋጁ** — native buffers፣ SQLite እና የማመቂያ መካከለኛ ውጤቶች ከV8 ውጭ ይቀመጣሉ።
+መጠን** cgroup `--memory` ከቁልል በላይ** — ቤተኛ ቋጠሮዎች፣ SQLite እና መጭመቂያ መካከለኛ ከV8 ውጪ ተቀምጠዋል።
 
-| የሥራ ጫና                                | `OMNIROUTE_MEMORY_MB` | Container / cgroup      | ማስታወሻዎች                                                                                  |
-| ------------------------------------- | --------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
-| Dashboard፣ አንድ ቀላል ውይይት               | `1024` (የኢሜጁ ነባሪ)     | ≥2 GiB                  |                                                                                          |
-| አንድ coding agent (Claude/Codex/Grok)  | `8192`                | ≥10 GiB                 | የተለመደ ባለአንድ-session `/v1/responses`                                                      |
-| ሁለት በአንድ ጊዜ የሚካሄዱ ረጅም `/v1/responses` | `10240`–`12288`       | ≥12–16 GiB              | በ~12 GiB heap ላይ የተለካ የV8 መቋረጥ                                                           |
-| ሦስት+ በአንድ ጊዜ የሚካሄዱ ረጅም contexts       | በአንድ process ላይ አያድርጉ | በተከታታይ ያከናውኑ / ተጨማሪ RAM | ነባሪው heavyweight admission በሂደት ላይ ለሚገኝ 1 ጥያቄ ነው፤ RAMን ሳያሳድጉ ይህን ማሳደግ መቋረጡን እንደገና ያስከትላል |
+| የሥራ ጫና                          | `OMNIROUTE_MEMORY_MB` | መያዣ / ስብስብ       | ማስታወሻዎች                                                          |
+| ------------------------------- | --------------------- | ---------------- | ---------------------------------------------------------------- |
+| ዳሽቦርድ፣ አንድ ቀላል ውይይት             | `1024` (የምስል ነባሪ)     | ≥2 GiB           |                                                                  |
+| አንድ የኮድ ወኪል (Claude/Codex/Grok) | `8192`                | ≥10 GiB          | የተለመደ ነጠላ ክፍለ ጊዜ `/v1/responses`                                 |
+| ሁለት ተመሳሳይ ረጅም `/v1/responses`   | `10240`–`12288`       | ≥12–16 GiB       | የሚለካው V8 ውርጃ በ ~ 12 GiB ክምር                                      |
+| ሶስት + በተመሳሳይ ረጅም አውዶች           | በአንድ ሂደት ላይ አታድርጉ     | ተከታታይ / ተጨማሪ RAM | ነባሪው የከባድ ሚዛን መግቢያ 1 በበረራ ላይ ነው; ያለ RAM ማሳደግ ውርጃውን እንደገና ያስተዋውቃል |
 
-`OMNIROUTE_MEMORY_MB` **ሳይዘጋጅ** ሲቀር፣ `omniroute serve` በbare metal ላይ ወደ ~35% የRAM መጠን ይስተካከላል (በ`[512, 4096]` ውስጥ የተገደበ)። Docker ሁልጊዜ `1024`ን ስለሚያዘጋጅ፣ ያ ማስተካከያ በይፋዊው ኢሜጅ ውስጥ ፈጽሞ አይከናወንም።
+`omniroute serve` በባዶ ብረት ይለካል ~ 35% የ RAM (የተጨመቀ `[512, 4096]`) `OMNIROUTE_MEMORY_MB` ሲሆን** አልተዋቀረም።** . Docker ሁል ጊዜ `1024` ያዘጋጃል፣ ስለዚህም መለካት በኦፊሴላዊው ምስል ውስጥ በጭራሽ አይሰራም።
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## ወሳኝ የአካባቢ ተለዋዋጮች
@@ -365,22 +335,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 | `PROD_DASHBOARD_PORT`         | ለ`docker-compose.prod.yml` የhost-side dashboard port                                                                                                                                                                               | `20130`                |
 | `CLIPROXYAPI_PORT`            | ለ`cliproxyapi` sidecar የhost-side port                                                                                                                                                                                             | `8317`                 |
 
-## በንዑስ ዱካ ላይ Reverse Proxy (Traefik / nginx)
+## በንዑስ ዱካ ላይ ተገላቢጦሽ (Traefik/nginx)
 
-የNext.js `basePath` በstandalone bundle ውስጥ ይቀናበራል። OmniRoute በተተገበረው
-የመተግበሪያው ሥር ያለ የምልክት ፋይል ውስጥ ዋጋውን ይመዘግባል (በ`npm run build` ጊዜ ይጻፋል፤
-በ`scripts/docker/ensure-docker-base-path.mjs` ይነበባል) እና ኮንቴይነሩ ሲጀምር ከ
-`OMNIROUTE_BASE_PATH` ጋር ያነጻጽረዋል። እሴቶቹ ሲለያዩ እና imageው
-ለዶሜኑ ሥር የተገነባ ከሆነ፣ entrypointው standalone manifestsን፣ የተካተቱትን
-`basePath`/`assetPrefix` literals (Next 16 የSSR asset URLዎችን ከ
-`assetPrefix` ብቻ ያቀርባል — patcherው ንዑስ ዱካውን ወደዚያም ያንጸባርቃል)፣ በቅድሚያ የተካተቱትን
-`/_next/static` asset URLዎች (client-reference manifests፣ media imports፣ በቅድሚያ የተቀረጹ
-የስህተት ገጾች) እና የclient `process.env` shimን `node dev/run-standalone.mjs`
-ከመሄዱ በፊት እንደገና ይጽፋል።
+Next.js `basePath` ራሱን የቻለ ጥቅል ውስጥ ተሰብስቧል። OmniRoute የተጋገረውን እሴት በሴንቲነል ፋይል በመተግበሪያው ስር ይመዘግባል (በ `npm run build` ጊዜ የተጻፈ ፣ በ `scripts/docker/ensure-docker-base-path.mjs` የተነበበ) እና መያዣው ሲጀመር ከ `OMNIROUTE_BASE_PATH` ጋር ያነፃፅራል። ሲለያዩ እና ምስሉ ለጎራ ስር ሲሰራ፣ የመግቢያ ነጥቡ ራሱን የቻለ መገለጫዎችን፣ የተከተተውን `basePath`/`assetPrefix` ቀጥተኛዎችን (በቀጣይ 16 SSR asset URLs ከ `assetPrefix` ብቻ — በውስጡ ንዑስ ዱካውን ያንጸባርቃል)፣ የተጋገረው `/_next/static` ንብረት URLs (የደንበኛ ማጣቀሻ እና የማስመጣት ዝርዝር መግለጫ) `node dev/run-standalone.mjs` ከመሮጥ በፊት `process.env`.
 
-### የCompose build (የሚመከር)
+### ግንባታ አዘጋጅ (የሚመከር)
 
-imageው እና runtimeው እንዲጣጣሙ ሁለቱንም variables በ`.env` ውስጥ ያዘጋጁ፣ ከዚያም እንደገና ይገንቡ፦
+ሁለቱንም ተለዋዋጮች በ `.env` ያቀናብሩ እና ምስሉ እና የአሂድ ጊዜ እንዲስማሙ እንደገና ይገንቡ
 
 ```bash
 # .env
@@ -392,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` `OMNIROUTE_BASE_PATH`ን እንደ Docker build-arg እና እንደ
-runtime environment variable ያስተላልፋል።
+`docker-compose.yml` `OMNIROUTE_BASE_PATH` እንደ Docker ግንባታ-arg እና እንደ የአሂድ አከባቢ ተለዋዋጭ ያስተላልፋል።
 
-### በቅድሚያ የተገነባ root image + runtime ንዑስ ዱካ
+### ቅድመ-የተሰራ ስር ምስል + የአሂድ ጊዜ ንዑስ መንገድ
 
-የታተሙት `diegosouzapw/omniroute:*` images ለዶሜኑ ሥር የተገነቡ ናቸው። ቢሆንም
-`OMNIROUTE_BASE_PATH`ን በruntime ማዘጋጀት ይችላሉ፤ ኮንቴይነሩ ሲጀምር bundleውን አንድ ጊዜ patch ያደርጋል።
-ከሚዛመደው ይፋዊ origin ጋር ያጣምሩት፦
+የታተሙ `cheaperinference/omniroute:*` ምስሎች ለጎራ ስር የተሰሩ ናቸው። አሁንም በ runtime ላይ `OMNIROUTE_BASE_PATH` ማዘጋጀት ይችላሉ; መያዣው በሚነሳበት ጊዜ ጥቅሉን አንድ ጊዜ ያስተካክላል። ከተዛማጅ ህዝባዊ መነሻ ጋር አጣምሩት፡-
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-reverse proxyው **ሙሉውን** ውጫዊ ዱካ እንዲያስተላልፍ ያዋቅሩት (prefixውን አያስወግዱ)።
-Next.js `/omniroute/...`ን ተቀብሎ assetsን ከ
-`/omniroute/_next/...` እንዲያቀርብ፣ Traefik `PathPrefix(`/omniroute`)`ን ያለ
-`StripPrefix` ወደ ኮንቴይነሩ route ማድረግ አለበት።
+ለማስተላለፍ የተገላቢጦሹን ፕሮክሲ ያዋቅሩ** ሙሉ** ውጫዊ መንገድ (ቅድመ-ቅጥያውን አይነቅፉ). Traefik `PathPrefix(`/omniroute `)` ወደ መያዣው ያለ `StripPrefix` ማምራት አለበት፣ስለዚህ Next.js `/omniroute/...` ይቀበላል እና ንብረቶችን ከ `/omniroute/_next/...` ያቀርባል።
 
-የDocker healthcheck ከንቁ `OMNIROUTE_BASE_PATH` በፊት የተጨመረውን ቀላል
-የ`/healthz` lifecycle endpoint ይመረምራል። `/api/monitoring/health` ለ
-ሰው/dashboard ምርመራዎች እንደተገኘ ይቆያል፤ የኮንቴይነሩን HEALTHCHECK ወደዚያ መልሶ ለማመልከት (ለምሳሌ
-ለጥልቅ የጤና ማረጋገጫ)፣ `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`ን ያዘጋጁ።
-ይህ ዱካ **ጥልቅ** ምርመራ ነው (DB + monitoring summary) — ተመልሰው ለመጠቀም ከመረጡ ለDocker
-አልፎ አልፎ ለሚካሄደው `HEALTHCHECK` ተስማሚ ነው፣ ነገር ግን ለKubernetes `livenessProbe`
-ክፍተቶች **አይደለም**።
+የ Docker የጤና ቼክ ቀላል ክብደት ያለው `/healthz` የሕይወት ዑደት የመጨረሻ ነጥብ ከገባሪው `OMNIROUTE_BASE_PATH` ጋር ቅድመ ቅጥያውን ይመረምራል። `/api/monitoring/health` ለ human/dashboard ምርመራዎች ይገኛል; መያዣውን ወደ እሱ ለመመለስ HEALTHCHECK (ለምሳሌ ጥልቅ የጤና ማስፈጸሚያ)፣ `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health` ያዘጋጁ። ያ መንገድ ሀ** ጥልቅ** ቼክ (DB + የክትትል ማጠቃለያ) — ለ Docker ተደጋጋሚ ያልሆነ `HEALTHCHECK` ተገቢ ነው፣ ነገር ግን ተመልሰው ከገቡ** አይደለም** ለ Kubernetes `livenessProbe` ክፍተቶች.
 
-ለorchestrators (Kubernetes፣ Nomad፣ ወዘተ)፦
+ለኦርኬስትራዎች (ኩበርኔትስ፣ ዘላን፣ ወዘተ)፡-
 
-| ምርመራ           | የሚመረጠው                                                     | የሚወገደው                                          |
-| -------------- | ---------------------------------------------------------- | ----------------------------------------------- |
-| Liveness       | HTTP `GET /livez`፣ ወይም TCP በዋናው port (`PORT`፣ ነባሪ `20128`) | `/api/monitoring/health`ን እንደ liveness          |
-| Readiness      | HTTP `GET /healthz`                                        | event-loopን busy መሆን እንደ መሞት የሚቆጥሩ አጭር timeouts |
-| ጥልቅ / blackbox | `/api/monitoring/health`                                   | —                                               |
+| መርማሪ          | እመርጣለሁ።                                                      | አስወግዱ                                 |
+| ------------- | ------------------------------------------------------------ | ------------------------------------- |
+| መኖር           | HTTP `GET /livez`፣ ወይም TCP በዋናው ወደብ ላይ (`PORT`፣ ነባሪ `20128`) | `/api/monitoring/health` እንደ መኖር      |
+| ዝግጁነት         | HTTP `GET /healthz`                                          | የክስተት-ሉፕን እንደ ሞተ የሚቆጥሩ ጥብቅ የጊዜ ማብቂያዎች |
+| ጥልቅ / ጥቁር ሳጥን | `/api/monitoring/health`                                     | —                                     |
 
-`/healthz` የprocess lifecycleን (`ok` / `starting` / `stopping`) ያሳውቃል። `/livez`
-processው በሕይወት መኖሩን ብቻ ያረጋግጣል (handlerው መሄድ በቻለ ቁጥር 200፤
-readinessን አይጠብቅም)። ሁለቱም አሁንም request handling በሚጠቀምበት ተመሳሳይ Node event loop ላይ ይሰራሉ፣ ስለዚህ
-CPU-bound የcatalog ወይም compression ሥራ ሊያዘገያቸው ይችላል — busy ≠ dead። HTTP
-ምርመራዎች time out ካደረጉ TCP livenessን ይምረጡ። ሙሉ የምርመራ መመሪያ፦
-[የMonitoring መመሪያ — የKubernetes ምርመራ ምክረ ሐሳቦች](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` የሂደቱን የህይወት ዑደት (`ok` / `starting` / `stopping`) ሪፖርት ያደርጋል። `/livez` በሂደት-ህያው ብቻ ነው (ተቆጣጣሪው በሚሰራበት ጊዜ ሁሉ 200; ዝግጁነት አይጠብቅም)። ሁለቱም አሁንም እንደ የጥያቄ አያያዝ በተመሳሳይ የኖድ ክስተት ዑደት ይሰራሉ፣ ስለዚህ በሲፒዩ የታሰረ ካታሎግ ወይም የማመቅ ስራ — ስራ የበዛባቸው ≠ እንዲሞቱ ሊያዘገያቸው ይችላል። HTTP ጊዜው ካለፈበት TCP ህያውነትን ይምረጡ። ሙሉ የምርመራ መመሪያ [፡ የክትትል መመሪያ — Kubernetes የመርማሪ ምክሮች](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ።
 
-## Docker Compose ከCaddy ጋር (HTTPS Auto-TLS)
+## Docker በ Caddy ጻፍ (HTTPS Auto-TLS)
 
-OmniRoute የCaddyን ራስ-ሰር SSL አቅርቦት በመጠቀም በደህንነት ለውጭ ሊቀርብ ይችላል። የዶሜንዎ DNS A መዝገብ ወደ አገልጋይዎ IP እንደሚያመለክት ያረጋግጡ።
+OmniRoute የ Caddy አውቶማቲክ SSL አቅርቦትን በመጠቀም ደህንነቱ በተጠበቀ ሁኔታ መጋለጥ ይችላል። የጎራዎን DNS ያረጋግጡ ሪከርድ ወደ አገልጋይዎ IP።
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # ለOAuth መልሶ ጥሪዎች፣ ለዳሽቦርድ አገናኞች እና ለሚፈጠሩ ይፋዊ URLs በአሳሽ በኩል የሚታይ መነሻ።
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # ለታቀዱ ሥራዎች / ራስ-ሰር ጥያቄዎች የውስጥ አገልጋይ-ለአገልጋይ URL።
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -471,11 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy ለወደላይኛው ኮንቴይነር መደበኛ የማስተላለፊያ ራስጌዎችን ያዘጋጃል። OmniRoute
-`NEXT_PUBLIC_BASE_URL`ን ለOAuth መልሶ ጥሪዎች እና ለሚፈጠሩ ይፋዊ
-አገናኞች ቀኖናዊ ይፋዊ መነሻ አድርጎ ይጠቀማል፤ ማረጋገጫ የተደረገባቸው የዳሽቦርድ የመጻፍ ጥያቄዎች የተመሳሳይ-መነሻ ጥያቄዎችን ከክፍለ-ጊዜ ጋር ከተሳሰረ CSRF
-ጥበቃ ጋር ይጠቀማሉ። OmniRoute ይፋዊውን መነሻ ከግልጽ
-ውቅር ይልቅ ከታመኑ የተላለፉ ራስጌዎች እንዲያወጣ ሆን ብለው ለሚፈልጉባቸው የላቁ ስምሪቶች ብቻ `OMNIROUTE_TRUST_PROXY`ን ያንቁ።
+ካዲ ለላይኛው መያዣ መደበኛውን የማስተላለፊያ ራስጌዎችን ያዘጋጃል። OmniRoute `NEXT_PUBLIC_BASE_URL` እንደ ቀኖናዊ የህዝብ ምንጭ ለ OAuth ጥሪ መልሶች እና ለተፈጠሩ የህዝብ ማገናኛዎች ይጠቀማል። የተረጋገጠ ዳሽቦርድ ይጽፋል ተመሳሳይ መነሻ ጥያቄዎችን እና ከክፍለ ጊዜ ጋር የተያያዘ CSRF ጥበቃን ይጠቀሙ። ሆን ብለህ OmniRoute ከግልጽ ውቅረት ይልቅ የህዝብ ምንጭን ከታመኑ የተላለፉ ራስጌዎች እንዲያገኝ ለፈለክበት የላቀ ስምሪት `OMNIROUTE_TRUST_PROXY` ያንቁ።
 
 ## Cloudflare Quick Tunnel
 
@@ -494,47 +434,49 @@ Caddy ለወደላይኛው ኮንቴይነር መደበኛ የማስተላለ�
 
 ## የምስል መለያዎች
 
-| ምስል                      | መለያ      | መጠን    | መግለጫ                                           |
-| ------------------------ | -------- | ------ | ---------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | ከፍተኛው **የታተመ** የተረጋጋ SemVer (git `main` አይደለም) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | ለGitOps የዚህን አይነት መለያ ይቆልፉ                     |
+| ምስል                          | መለያ      | መጠን     | መግለጫ                                          |
+| ---------------------------- | -------- | ------- | --------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | ከፍተኛ** የታተመ** የተረጋጋ SemVer (git `main` አይደለም) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | ይህን የመለያ ክፍል ለ GitOps ይሰኩት                    |
 
-ባለብዙ-መድረክ manifest፦ `linux/amd64` + `linux/arm64` ቤተኛ (Apple Silicon፣ AWS Graviton፣ Raspberry Pi)። Docker ተዛማጁን architecture በራስ-ሰር ይመርጣል፤ በARM hosts ላይ AMD64 emulationን በግድ መጠቀም ካስፈለገዎት `--platform linux/amd64`ን ያስተላልፉ።
+ተመሳሳይ ምስሎች ለሶስት ማከማቻዎች ታትመዋል፣ በየአርኪቴክቸር መፍቻዎች ተመሳሳይ ናቸው `cheaperinference/omniroute` (Docker Hub፣ the Cheaper Inference organization, from 3.8.53 on), `ghcr.io/cheaper-inference/omniroute` እና the legacy `diegosouzapw/omniroute`, እሱም የመሳብ ታሪኩን የሚይዝ እና አሁንም እያንዳንዱን ልቀት የሚቀበል። ነባር `diegosouzapw/omniroute` ማሰማራቶች ማዘመን ይቀጥላሉ; የምስሉን ስም መቀየር አማራጭ ነው። ከታች ያለው `:next` / `:next-web` የቅድመ-መለቀቅ ቻናል ለ `diegosouzapw/omniroute` እና GHCR ብቻ ታትሟል።
 
-### የልቀት ቻናሎች
+ባለብዙ ፕላትፎርም አንጸባራቂ `linux/amd64` + `linux/arm64` ቤተኛ (Apple Silicon፣ AWS Graviton፣ Raspberry Pi)። Docker የሚዛመደውን አርክቴክቸር በራስ ሰር ይመርጣል; በ ARM አስተናጋጆች ላይ AMD64 emulation ማስገደድ ከፈለጉ `--platform linux/amd64` ን ማለፍ።
 
-OmniRoute ለተረጋጉ ልቀቶች፣ ለንቁ የልቀት-ቅርንጫፍ ሙከራ እና ለልማት ግንባታዎች የተለያዩ Docker ቻናሎችን ያትማል።
+### ቻናሎችን ልቀቅ
 
-| ቻናል                             | ምንጭ                         | የመለወጥ ችሎታ         | የሚመከር አጠቃቀም                                                                                       |
-| ------------------------------- | --------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | የተፈረመ/ስሪት የተሰጠው ልቀት         | የማይለወጥ            | ትክክለኛ ልቀትን የሚቆልፉ የምርት ስምሪቶች                                                                       |
-| `:latest` / `:latest-web`       | ከፍተኛው **የታተመ** የተረጋጋ SemVer | ተለዋዋጭ የተረጋጋ ጠቋሚ   | ከSemVer የህትመት ሥራ **በኋላ** የተረጋጉ ልቀቶችን ይከተላል — `main`ን ወይም ያልተለቀቁ `release/v*` commitsን **አይከታተልም** |
-| `:next` / `:next-web`           | የአሁኑ ነባሪ `release/v*` ቅርንጫፍ | ተለዋዋጭ ቅድመ-ልቀት ጠቋሚ | በንቁው የልቀት ቅርንጫፍ ላይ የገቡ ነገር ግን ገና በተረጋጋ ልቀት ውስጥ ያልተካተቱ ማስተካከያዎችን መሞከር                              |
-| `:main` / `:main-web`           | `main` ቅርንጫፍ                | ተለዋዋጭ የልማት ጠቋሚ    | ለልማት እና ለውህደት ሙከራ ብቻ                                                                              |
+OmniRoute ለተረጋጋ ልቀቶች፣ ገባሪ ልቀት-ቅርንጫፍ ሙከራ እና ለግንባታ ግንባታዎች የተለየ Docker ቻናሎችን ያትማል።
 
-#### የድር-ክፍለ-ጊዜ አቅራቢዎች፦ የ`-web` ምስሎች
+| ቻናል                             | ምንጭ                         | ተለዋዋጭነት               | የሚመከር አጠቃቀም                                                                                          |
+| ------------------------------- | --------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned መልቀቅ       | የማይለወጥ                | ትክክለኛ ልቀት የሚሰካ የምርት ስምሪት                                                                             |
+| `:latest` / `:latest-web`       | ከፍተኛ** የታተመ** የተረጋጋ SemVer  | ተለዋዋጭ የተረጋጋ ጠቋሚ       | የተረጋጋ ልቀቶችን ይከተላል** በኋላ** SemVer የማተም ስራ — ይሰራል** አይደለም** `main` ይከታተሉ ወይም ያልተለቀቀ `release/v*` ይፈጽማል |
+| `:next` / `:next-web`           | የአሁኑ ነባሪ `release/v*` ቅርንጫፍ | ሊለወጥ የሚችል ቅድመ-ልቀት ጠቋሚ | በነቃ የተለቀቀው ቅርንጫፍ ላይ ያረፉ ነገር ግን በተረጋጋ ልቀት ውስጥ ያልነበሩ የፍተሻ ጥገናዎች                                        |
+| `:main` / `:main-web`           | `main` ቅርንጫፍ                | ተለዋዋጭ የእድገት ጠቋሚ       | ልማት እና ውህደት ሙከራ ብቻ                                                                                   |
 
-ከላይ ያለው እያንዳንዱ ቻናል ከ`runner-web` ደረጃ የተገነባ `-web` መለያ (`:latest-web`፣ `:<version>-web`፣ `:next-web`፣ `:main-web`) ይኖረዋል — ተመሳሳዩ ምስል ከPlaywright እና Chromium አሳሽ ጋር። መደበኛው ምስል Chromiumን **ሳያካትት** ይቀርባል፤ `gemini-web`፣ `claude-web` እና `claude-turnstile` ያስፈልጋቸዋል።
+#### የድር ክፍለ ጊዜ አቅራቢዎች፡ የ `-web` ምስሎች
 
-ውድቀቱ የሚዘገይ እንጂ በማስጀመሪያ ጊዜ አይከሰትም፦ እነዚያ አቅራቢዎች ሞዴሎቻቸውን ይዘረዝራሉ፣ በዳሽቦርዱ ውስጥም እንደተገናኙ ይታያሉ፣ እና የመጀመሪያው ጥያቄ ብቻ በሚከተለው ስህተት ይወድቃል
+ከላይ ያለው እያንዳንዱ ቻናል እንደ `-web` መለያ (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), ከ `runner-web` ደረጃ — ተመሳሳይ ምስል እና Playwright እና Chromium አሳሽ የተሰራ ነው። ግልጽ ምስል መርከቦች** ያለ** Chromium; `gemini-web`, `claude-web` እና `claude-turnstile` ያስፈልጋቸዋል.
+
+አለመሳካቱ የሚዘገይ እንጂ የሚጀመርበት ጊዜ አይደለም፡ እነዚያ አቅራቢዎች ሞዴሎቻቸውን ይዘረዝራሉ እና በዳሽቦርድ ውስጥ እንደተገናኙ ያሳያሉ፣ እና የመጀመሪያው ጥያቄ ብቻ ነው የሚቀረው
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-እነዚያን አቅራቢዎች የሚጠቀሙ ከሆነ፣ አሁን ካሉበት ቻናል የ`-web` መለያን pull ያድርጉ — ሌላ ምንም ነገር አይቀየርም። በnpm/CLI ጭነት ላይ (Docker ምስል በሌለበት)፣ ተመጣጣኙ የጎደለው ክፍል የአሳሹ binary ነው፦ በhost ላይ `npx playwright install chromium`ን ያሂዱ።
+እነዚያን አቅራቢዎች ከተጠቀሙ በ — ላይ ያሉበትን ቻናል `-web` ታግ ይጎትቱ ሌላ ምንም ለውጥ የለም። በ npm/CLI ጫኝ (ምንም Docker ምስል የለም)፣ ተመጣጣኝ የጎደለው ቁራጭ የአሳሽ ሁለትዮሽ ነው `npx playwright install chromium` በአስተናጋጁ ላይ ያሂዱ።
 
-#### የቅድመ-ልቀት ቻናሉን መጠቀም
+#### የቅድመ-መለቀቅ ጣቢያን በመጠቀም
 
-`next` ቻናል ወደ አሁኑ ነባሪ `release/v*` ቅርንጫፍ በሚደረግ እያንዳንዱ push ላይ እንደገና የሚገነባ ሲሆን ለAMD64 እና ARM64 ይታተማል። የቆዩ የጥገና ቅርንጫፎች በላዩ ላይ ደርበው መጻፍ አይችሉም። ይህ ቻናል ቀጣዩ የተረጋጋ tag ከመዘጋጀቱ በፊት ወደ ንቁው የልቀት ቅርንጫፍ ለተዋሃዱ ማስተካከያዎች pull ሊደረግ የሚችል image ያቀርባል።
+`next` ቻናል በእያንዳንዱ ግፊት ወደ የአሁኑ `release/v*` ቅርንጫፍ እንደገና ይገነባል እና ለ AMD64 እና ARM64 ታትሟል። የቆዩ የጥገና ቅርንጫፎች ሊጽፉት አይችሉም. ቻናሉ ቀጣዩ የተረጋጋ መለያ ከመቁረጡ በፊት ወደ ንቁ የመልቀቂያ ቅርንጫፍ ለተቀላቀሉ ጥገናዎች ሊጎተት የሚችል ምስል ያቀርባል።
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-ለDocker Compose፣ በተመረጠው profile ጥቅም ላይ የዋለውን image tag override ያድርጉ፣ ከዚያም service-ውን pull አድርገው እንደገና ይፍጠሩ፦
+ለ Docker Compose፣ የተመረጠው መገለጫ የተጠቀመበትን የምስል መለያ ይሽረው፣ ከዚያ ይጎትቱ እና አገልግሎቱን እንደገና ይፍጠሩ
 
 ```yaml
 services:
@@ -547,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### ደህንነት እና ወደ ቀዳሚው ስሪት መመለስ
+#### ደህንነት እና መልሶ መመለስ
 
-`next` ተንሳፋፊ የቅድመ-ልቀት ቻናል ነው። ወደ ንቁው የልቀት ቅርንጫፍ በሚደረግ ማንኛውም push ላይ ሊቀየር የሚችል ሲሆን **ለproduction አጠቃቀም ድጋፍ አይደረግለትም**። አንድን የተወሰነ build በሚገመግሙበት ጊዜ image digest-ውን pin ያድርጉ፦
+`next` ተንሳፋፊ የቅድመ-መለቀቅ ቻናል ነው። በማንኛውም ግፊት ወደ ንቁ የመልቀቂያ ቅርንጫፍ ሊለወጥ ይችላል እና ነው።** ለምርት አገልግሎት አይደገፍም** . አንድን የተወሰነ ግንባታ በሚገመግሙበት ጊዜ የምስሉን መፍጨት ይሰኩት፡-
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-ከሙከራው በፊት የOmniRoute data volume ወይም bind-mounted data directory ምትኬ ይያዙ። ወደ ቀዳሚው ስሪት ለመመለስ፣ ቀደም ሲል ጥቅም ላይ የነበረውን የተረጋጋ ስሪት ወይም digest ወደነበረበት ይመልሱ እና container-ውን እንደገና ይፍጠሩ፦
+ከመሞከርዎ በፊት፣ የ OmniRoute ውሂብ መጠንን ወይም የታሰረውን የውሂብ ማውጫን ምትኬ ያስቀምጡ። ወደ ኋላ ለመንከባለል፣ ከዚህ ቀደም ጥቅም ላይ የዋለውን የተረጋጋ ስሪት ወደነበረበት መመለስ ወይም መፍጨት እና መያዣውን እንደገና ይፍጠሩ፡
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-የrelease-branch build `latest`ን በፍጹም ማንቀሳቀስ አይችልም፤ የተረጋጋውን pointer promote ማድረግ የሚችለው መስፈርቱን የሚያሟላ የተረጋጋ semantic version ብቻ ነው። የ`next` images የrelease image ፍተሻን እና CRITICAL ተጋላጭነትን የሚያግድ gate ይዘው ይቆያሉ።
+የመልቀቂያ-ቅርንጫፍ ግንባታ `latest` ፈጽሞ ማንቀሳቀስ አይችልም; ብቁ የሆነ የተረጋጋ የትርጉም ስሪት ብቻ የተረጋጋ ጠቋሚውን ሊያበረታታ ይችላል። የ `next` ምስሎቹ የሚለቀቀውን ምስል ፍተሻ ያቆያሉ እና ወሳኝ-የተጋላጭነት በርን ይዘጋሉ።
 
-**`latest` ለgit ወቅታዊነት ዋስትና አይደለም።** በ`main` ወይም በንቁው `release/v*` ቅርንጫፍ ላይ የተዋሃዱ ማስተካከያዎች የተረጋጋ SemVer image እስኪታተም እና publish job-ው `:latest`ን promote እስኪያደርግ ድረስ (ከዚያ SemVer ጋር ተመሳሳይ digest) በ`:latest` ውስጥ **አይኖሩም**። GitHub ማስተካከያውን አስቀድሞ እያሳየ ሳለ `latest` የቆመ ከመሰለ፣ የrelease branch-ውን ለመሞከር `:next`ን pull ያድርጉ ወይም SemVer tag-ውን ይጠብቁ።
+**`latest` ለ git የምንዛሪ ዋስትና አይደለም።** የተዋሃዱ ጥገናዎች በ `main` ላይ ወይም ንቁ በሆነው `release/v*` ቅርንጫፍ ላይ ናቸው።** አይደለም** በ `:latest` ውስጥ የተረጋጋ SemVer ምስል እስኪታተም ድረስ እና የማተም ስራ `:latest` (ከዚያ SemVer ጋር ተመሳሳይ መፍጨት) ያስተዋውቃል። `latest` አስቀድሞ ማስተካከያውን በሚያሳይበት ጊዜ GitHub የቀዘቀዘ ከመሰለ፣ የሚለቀቀውን ቅርንጫፉን ለመፈተሽ `:next` ይጎትቱ ወይም የ SemVer መለያን ይጠብቁ።
 
-| የሚፈልጉት                                                | ይጠቀሙ                                     |
-| ----------------------------------------------------- | ---------------------------------------- |
-| መንሸራተት የሌለበት GitOps / production                      | `:X.Y.Z`ን pin ያድርጉ (ወይም image digest-ውን) |
-| የታተሙ የተረጋጉ ስሪቶችን መከተል እና በእያንዳንዱ ልቀት እንደገና መፍጠርን መቀበል | `:latest`                                |
-| ያልተለቀቁ `release/v*` commitsን መሞከር                     | `:next` (ለproduction አይደለም)              |
-| `main`ን መሞከር                                          | `:main` (ለproduction አይደለም)              |
+| ትፈልጋለህ                                          | ተጠቀም                        |
+| ----------------------------------------------- | --------------------------- |
+| GitOps / መንሸራተት የሌለበት ምርት                       | ፒን `:X.Y.Z` (ወይም የምስሉ መፍጨት) |
+| የታተሙ ማረጋጊያዎችን ይከተሉ እና በእያንዳንዱ ልቀት ላይ እንደገና ይፍጠሩ | `:latest`                   |
+| ያልተለቀቀ `release/v*` ይፈጽማል                       | `:next` (አመራረት አይደለም)       |
+| `main`                                          | `:main` (አመራረት አይደለም)       |
 
 ## በDocker ውስጥ የዳሽቦርድ ዝማኔዎች
 
@@ -635,13 +577,13 @@ sudo systemctl enable --now omniroute-update.path
 
 ## ተገኝነት፡ ነባሪ SQLite ነጠላ-ብዜት ነው።
 
-የአክሲዮን Docker / Kubernetes OmniRoute ነው።** አንድ መስቀለኛ ሂደት + አንድ SQLite ጸሐፊ** . ከፍተኛ ተደራሽነት ነው።** አይደገፍም።** በዚያ ቶፖሎጂ ላይ.
+የአክሲዮን Docker / Kubernetes OmniRoute ነው።** አንድ መስቀለኛ ሂደት + አንድ SQLite ጸሐፊ** . ከፍተኛ አቅርቦት ነው።** አይደገፍም።** በዚያ ቶፖሎጂ ላይ.
 
-| ገደብ                                       | መዘዝ                                                                                                                                                                                                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ነጠላ ጸሐፊ                                   | መ ስ ራ ት** አይደለም** በተመሳሳዩ SQLite ፋይል ላይ ብዙ ቅጂዎችን ያሂዱ። DB ያበላሻል።                                                                                                                                                                        |
-| እንደገና ፍጠር / እንደገና አስጀምር / HEALTHCHECK ግድያ | **ሙሉ መቋረጥ** የበረራ ውስጥ SSE፣ ዳሽቦርድ ክፍለ ጊዜዎች እና የማህደረ ትውስታ ሁኔታ። እያንዳንዱ የተገናኘ ደንበኛ ይወድቃል። በባዶ-ፍጻሜ መስኮቱ ወቅት አዲስ ጥያቄዎች ተገላቢጦሽ ተኪ ያገኛሉ**`502 Bad Gateway: Unknown error`** OmniRoute JSON አይደለም — ደንበኞች ይህንን ከአቅራቢው ውድቀት (#11015) መለየት አይችሉም። |
-| እንደ `/healthz` ተመሳሳይ የክስተት ዑደት            | ሥራ የበዛበት ካታሎግ ወይም የመጨመቂያ ምልክት መመርመሪያዎችን ሊያዘገይ ይችላል; አጭር ጊዜ ካለፈ በኋላ እንደገና ይጀምራል** ብቻ** ግልባጭ                                                                                                                                            |
+| ገደብ                                       | መዘዝ                                                                                                                                                                                                                                    |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ነጠላ ጸሐፊ                                   | መ ስ ራ ት** አይደለም** በተመሳሳዩ SQLite ፋይል ላይ ብዙ ቅጂዎችን ያሂዱ። DB ያበላሻል።                                                                                                                                                                         |
+| እንደገና ፍጠር / እንደገና አስጀምር / HEALTHCHECK ግድያ | **ሙሉ መቋረጥ** የበረራ ውስጥ SSE፣ ዳሽቦርድ ክፍለ ጊዜዎች እና የማህደረ ትውስታ ሁኔታ። እያንዳንዱ የተገናኘ ደንበኛ ይወድቃል። በባዶ-ፍጻሜ መስኮቱ ወቅት አዲስ ጥያቄዎች ተገላቢጦሽ ተኪ ያገኛሉ**`502 Bad Gateway: Unknown error`** ፣ OmniRoute JSON — አይደለም ደንበኞች ይህንን ከአቅራቢ ውድቀት (#11015) መለየት አይችሉም። |
+| እንደ `/healthz` ተመሳሳይ የክስተት ዑደት            | ሥራ የበዛበት ካታሎግ ወይም የመጨመቂያ ምልክት መመርመሪያዎችን ሊያዘገይ ይችላል; አጭር ጊዜ ካለፈ በኋላ እንደገና ይጀምራል** ብቻ** ግልባጭ                                                                                                                                             |
 
 **የፍተሻ ማትሪክስ** (በተጨማሪ [የኩበርኔትስ የምርመራ ምክሮችን](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ይመልከቱ)
 
@@ -651,9 +593,9 @@ sudo systemctl enable --now omniroute-update.path
 | ዝግጁነት     | HTTP `GET /healthz`                                  | የክስተት-ሉፕን እንደ ሞተ የሚቆጥሩ ጥብቅ የጊዜ ማብቂያዎች |
 | ጥልቅ / ሰዎች | `/api/monitoring/health`                             | አውቶሜትድ kubelet ህያውነት                  |
 
-**ማሻሻያዎች፡** እያንዳንዱ ክፍለ ጊዜ እንደሚቀንስ ይጠብቁ. ከቻሉ ደንበኞችን አፍስሱ; በነባሪ SQLite ላይ ምንም የሚንከባለል ዝማኔ የለም። `restart: unless-stopped` ፕላስ Docker `HEALTHCHECK` ፃፍ እንዲሁም መያዣው ጤናማ ካልሆነ - ተመሳሳይ ፍንዳታ ራዲየስ በሚሆንበት ጊዜ ብቸኛውን ሂደት ይተካል።
+**ማሻሻያዎች፡** እያንዳንዱ ክፍለ ጊዜ እንደሚቀንስ ይጠብቁ. ከቻሉ ደንበኞችን አፍስሱ; በነባሪ SQLite ላይ ምንም የሚንከባለል ዝማኔ የለም። `restart: unless-stopped` ፕላስ Docker `HEALTHCHECK` ፃፍ እንዲሁም መያዣው ጤናማ ያልሆነ — ተመሳሳይ ፍንዳታ ራዲየስ በሚሆንበት ጊዜ ብቸኛውን ሂደት ይተካል።
 
-ዝግጁ የሆኑ መግለጫዎች እና የ Helm ገበታ በ `deploy/kubernetes/` እና `deploy/helm/omniroute/` - የ [Kubernetes የማሰማራት መመሪያን](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ይመልከቱ።
+ዝግጁ የሆኑ መግለጫዎች እና የ Helm ገበታ በ `deploy/kubernetes/` እና `deploy/helm/omniroute/` — ቀጥታ ስርጭት [የኩበርኔትስ ማሰማራት መመሪያን](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ይመልከቱ።
 
 ኩበርኔትስ ቅንጭብጭብ ለ** ነጠላ ቅጂ** (ዳግም መፍጠር ያስፈልጋል፡ በአንድ SQLite ፋይል ላይ `replicas` ከፍ አታድርጉ)
 
@@ -682,9 +624,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` እንቅልፍ kube እንዲጥል ያስችለዋል የአገልግሎት የመጨረሻ ነጥቦች ከ SIGTERM በፊት** አዲስ** ትራፊክ ወደ ሞት ሂደት መምታት ያቆማል። በበረራ ላይ `/v1/responses` SSE እስከ `SHUTDOWN_TIMEOUT_MS` (ነባሪ 30ዎች) በከባድ ክብደት ማስገቢያ የሊዝ ውል (#11015) ይፈሳል። አሁንም ወደ ሂደቱ የሚደርሱ አዳዲስ ጥያቄዎች `503` + `Retry-After: 5` ያገኛሉ። ተተኪው ዝግጁ እስኪሆን ድረስ ባዶ-መጨረሻ ነጥብ ክፍተቱን እንደገና ይፍጠሩ ከባድ መቋረጥ ነው - ይህ SQLite ቶፖሎጂ ነው እንጂ የመርማሪ ስህተት አይደለም።
+`preStop` እንቅልፍ kube እንዲጥል ያስችለዋል የአገልግሎት የመጨረሻ ነጥቦች ከ SIGTERM በፊት** አዲስ** ትራፊክ ወደ ሞት ሂደት መምታት ያቆማል። በበረራ ላይ `/v1/responses` SSE እስከ `SHUTDOWN_TIMEOUT_MS` (ነባሪ 30ዎች) በከባድ ክብደት ቅበላ ሊዝ (#11015) በኩል ይፈስሳል። አሁንም ወደ ሂደቱ የሚደርሱ አዳዲስ ጥያቄዎች `503` + `Retry-After: 5` ያገኛሉ። ተተኪው ዝግጁ እስኪሆን ድረስ ባዶ-መጨረሻ ነጥብ ክፍተቱን እንደገና ይፍጠሩ የ SQLite ቶፖሎጂ እንጂ የመመርመሪያ ስህተት ውቅረት አይደለም —
 
-ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ። HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [# 8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣይ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
+ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ. HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣዩ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
 
 ## ልኬት-ውጭ: N ገለልተኛ ሂደቶች
 

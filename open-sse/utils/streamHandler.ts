@@ -30,6 +30,8 @@ import {
 // decolua/9router#1243.
 const DEFAULT_STREAM_STALL_TIMEOUT_MS = STREAM_IDLE_TIMEOUT_MS;
 const SSE_EVENT_BOUNDARY = new TextEncoder().encode("\n\n");
+/** How long a withheld terminal waits for the upstream to end before it is released. */
+const HELD_TERMINAL_GRACE_MS = 1000;
 
 type StreamController = ReturnType<typeof createStreamController>;
 
@@ -654,13 +656,36 @@ export function createDisconnectAwareStream(
   const toolHandoffDecoder = new TextDecoder();
   let clientTerminalSeen = false;
   let bytesWereForwarded = false;
+  // The client terminal frame withheld while the stream has produced nothing
+  // useful. `resolveSilentCloseOutcome` can only judge the stream once the reader
+  // reports `done`, and a terminal already forwarded by then is invisible to a
+  // client that stops reading at it (`data: [DONE]` for the `openai` SDK,
+  // `event: message_stop`, `event: response.completed`). That ordering is how an
+  // empty Gemini stream reached production as a clean `finish_reason: "stop"`
+  // with the generated error frame stranded behind `[DONE]`: the client recorded
+  // an empty but successful turn and never retried. Released when the stream is
+  // judged, dropped when the verdict is a failure.
+  let heldTerminalChunk: Uint8Array | null = null;
   const completionDrain = createCompletionDrain(reader, writer, streamController, () =>
     clientTerminalSeen ? "terminal_stream_grace_expired" : "completed_tool_handoff_grace_expired"
   );
   streamController.registerCompletedToolHandoffDrain?.(completionDrain.start);
 
-  const noteClientChunk = (chunk: unknown) => {
-    if (!(chunk instanceof Uint8Array)) return;
+  /** Release the withheld terminal, if any. A dropped one is never replayed. */
+  const flushHeldTerminal = (controller: { enqueue: (chunk: Uint8Array) => void }) => {
+    const held = heldTerminalChunk;
+    if (!held) return;
+    heldTerminalChunk = null;
+    controller.enqueue(held);
+    streamController.markClientTerminalSeen?.();
+  };
+
+  /**
+   * Observe a client-bound chunk. Returns `false` when the chunk is the withheld
+   * terminal and must not be forwarded yet.
+   */
+  const noteClientChunk = (chunk: unknown): boolean => {
+    if (!(chunk instanceof Uint8Array)) return true;
     bytesWereForwarded = true;
     // Runs past clientTerminalSeen: the frame that carries the terminal marker
     // can carry the only content too, and #8649 needs the whole stream scanned.
@@ -671,12 +696,66 @@ export function createDisconnectAwareStream(
     ) {
       streamController.markCompletedToolHandoffSeen?.();
     }
-    if (clientTerminalSeen) return;
+    if (clientTerminalSeen) return true;
 
+    const boundaryBefore = terminalWatcher.atBoundary();
     clientTerminalSeen = terminalWatcher.note(terminalDecoder.decode(chunk, { stream: true }));
-    if (clientTerminalSeen) {
-      streamController.markClientTerminalSeen?.();
+    if (!clientTerminalSeen) return true;
+    // Hold only a self-contained event — both ends on an event boundary — so no
+    // other byte is ever delayed or reordered, and only while the stream still
+    // looks empty: content, an in-band error or a legitimate empty terminal all
+    // make the clean terminal the right answer, so it goes out untouched.
+    if (
+      boundaryBefore &&
+      terminalWatcher.atBoundary() &&
+      !contentWatcher.sawContent() &&
+      !contentWatcher.sawError() &&
+      !contentWatcher.sawLegitEmptyTerminal() &&
+      options.permitsEmptyTurn?.() !== true
+    ) {
+      heldTerminalChunk = chunk;
+      return false;
     }
+    // The controller learns about the terminal only once the client can see it.
+    streamController.markClientTerminalSeen?.();
+    return true;
+  };
+
+  /**
+   * Read the next upstream chunk. While a terminal is withheld the upstream gets a
+   * short grace to end. One that stays open after its terminal (a keep-alive
+   * socket) gets the terminal released exactly as before this hold-back existed,
+   * so the client is never left waiting for a terminal it would already have had.
+   */
+  const readNextChunk = async (controller: {
+    enqueue: (chunk: Uint8Array) => void;
+  }): Promise<ReadableStreamReadResult<Uint8Array>> => {
+    const read = reader.read();
+    if (!heldTerminalChunk) return read;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const graceExpired = new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), HELD_TERMINAL_GRACE_MS);
+    });
+    try {
+      const first = await Promise.race([read, graceExpired]);
+      if (first) return first;
+    } finally {
+      clearTimeout(timer);
+    }
+    flushHeldTerminal(controller);
+    return read;
+  };
+
+  /** Forward a chunk unless it is the terminal being withheld. */
+  const admitClientChunk = (
+    controller: { enqueue: (chunk: Uint8Array) => void },
+    value: Uint8Array
+  ): boolean => {
+    // Anything that follows a withheld terminal must stay behind it.
+    flushHeldTerminal(controller);
+    if (!noteClientChunk(value)) return false;
+    controller.enqueue(value);
+    return true;
   };
 
   const highWaterMark = options.highWaterMark ?? 16384;
@@ -689,7 +768,7 @@ export function createDisconnectAwareStream(
           // transform pipe. Cancel it so the provider stops generating for a
           // client that is gone. A completed terminal stream with a grace window
           // hands the inner reader to the bounded drain so late usage can flush.
-          if (clientTerminalSeen) {
+          if (clientTerminalSeen && !heldTerminalChunk) {
             if (Number(streamController.clientDisconnectGracePeriodMs) > 0) {
               completionDrain.start();
             }
@@ -702,8 +781,25 @@ export function createDisconnectAwareStream(
         }
 
         try {
-          const { done, value } = await reader.read();
-          if (done) {
+          // A withheld terminal enqueues nothing, and ReadableStream does not
+          // call pull() again after a pull that enqueued nothing: keep reading
+          // until a chunk is forwarded or the upstream ends.
+          let result = await readNextChunk(controller);
+          while (!result.done && !admitClientChunk(controller, result.value)) {
+            result = await readNextChunk(controller);
+          }
+          if (heldTerminalChunk && !streamController.isConnected()) {
+            // The client left while the terminal was withheld: it never saw an
+            // ending, and the upstream's end is not the provider's verdict.
+            heldTerminalChunk = null;
+            try {
+              controller.close();
+            } catch {
+              // Expected: downstream may have already closed
+            }
+            return;
+          }
+          if (result.done) {
             contentWatcher.finish();
             const silentClose = resolveSilentCloseOutcome({
               bytesWereForwarded,
@@ -720,6 +816,9 @@ export function createDisconnectAwareStream(
               // Anthropic SDK / Claude Code don't report a mid-response break.
               streamController.handleComplete();
               try {
+                // Defensive: a truncation verdict requires a MISSING terminal, so
+                // nothing can be held here. Kept so no withheld byte can be lost.
+                flushHeldTerminal(controller);
                 for (const chunk of buildGracefulTruncationChunks(
                   streamController.clientResponseFormat
                 )) {
@@ -729,6 +828,11 @@ export function createDisconnectAwareStream(
                 // downstream may have closed; stream already marked complete
               }
             } else if (silentClose) {
+              // Drop the withheld terminal instead of delivering it: handing the
+              // client the clean stop first is exactly what made this failure
+              // invisible. Every frame still ends on an event boundary, so the
+              // error frames below stand on their own.
+              heldTerminalChunk = null;
               console.warn(
                 `[STREAM] detector=post-translation reason=${
                   silentClose.reason === "Provider returned empty content"
@@ -756,6 +860,13 @@ export function createDisconnectAwareStream(
                 // downstream may have closed; original error already recorded
               }
             } else {
+              try {
+                // Content arrived after the terminal was withheld, or the empty
+                // turn is permitted: the terminal is the correct ending after all.
+                flushHeldTerminal(controller);
+              } catch {
+                // downstream may have closed; the verdict is already recorded
+              }
               streamController.handleComplete();
             }
             try {
@@ -765,8 +876,6 @@ export function createDisconnectAwareStream(
             }
             return;
           }
-          controller.enqueue(value);
-          noteClientChunk(value);
         } catch (error) {
           if (!streamController.isConnected()) {
             // A pending pull can lose enqueue to cancellation after the drain takes ownership.
@@ -782,6 +891,13 @@ export function createDisconnectAwareStream(
           }
 
           if (clientTerminalSeen) {
+            try {
+              // An error after the terminal keeps meaning a completed stream
+              // (stream-handler.test.ts): release the withheld terminal as is.
+              flushHeldTerminal(controller);
+            } catch {
+              // downstream may have closed
+            }
             streamController.handleComplete();
             reader.cancel(new Error("Client terminal seen")).catch(() => {});
             try {
@@ -824,7 +940,8 @@ export function createDisconnectAwareStream(
       async cancel(reason) {
         const deferCompletedToolHandoff =
           streamController.shouldDeferCompletedToolHandoff?.() === true;
-        if (clientTerminalSeen) {
+        // A withheld terminal never reached the client: this is a disconnect.
+        if (clientTerminalSeen && !heldTerminalChunk) {
           if (Number(streamController.clientDisconnectGracePeriodMs) > 0) {
             completionDrain.start();
             streamController.handleComplete();
