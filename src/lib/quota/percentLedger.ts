@@ -420,7 +420,7 @@ export async function observeLedger(
 }
 
 // ---------------------------------------------------------------------------
-// Preview: read and apply in memory, never write
+// Preview: read and apply in memory, never write the book's state
 // ---------------------------------------------------------------------------
 
 /**
@@ -432,9 +432,11 @@ export type LedgerPreview =
   | { kind: "none" | "ended" | "failed" };
 
 /**
- * The book as observeLedger would leave it, from one store read and without any write. A missing
- * book is never opened, the reading is applied in memory only (applyReading is pure) and nothing
- * is committed, so looking at a book never moves its baseline. Never throws.
+ * The book as observeLedger would leave it, from one store read, and it never writes the book's
+ * state. A missing book is never opened, the reading is applied in memory only (applyReading is
+ * pure) and nothing is committed, so looking at a book never moves its baseline. A store may
+ * still clean superseded revision fields on that read, as it does for the gate's reads. Never
+ * throws.
  */
 export async function previewLedger(
   store: Pick<QuotaStore, "ledgerRead">,

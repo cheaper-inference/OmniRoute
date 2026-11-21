@@ -1,10 +1,12 @@
 /**
  * selfViewPercent.ts — the key's own part of each percent plan window in the self-service view.
  *
- * Read-only. For every pool connection and every `percent` plan dimension (limit above
- * Number.EPSILON) it reads the attribution book once, through previewPercentDimension, with the
- * plan limit of ONE account. The plan-window reading comes only from the quota gate's cache
- * (peekPlanWindowReading): the provider is never called, and no book is opened or written.
+ * It never writes the book's state. For every pool connection and every `percent` plan dimension
+ * (limit above Number.EPSILON) it reads the attribution book once, through
+ * previewPercentDimension, with the plan limit of ONE account. The plan-window reading comes only
+ * from the quota gate's cache (peekPlanWindowReading): the provider is never called, and no book
+ * is opened or rewritten. A store may still clean superseded revision fields on a read, as it
+ * does for the gate's reads.
  *
  * Each state of the book has its own answer, never a zero:
  *   - a usable book with a cached reading: `ok`; without one, the last stored state: `stale`;
@@ -14,7 +16,8 @@
  *   - a connection the key may not use: `account_not_used_by_key`, and its book is not read.
  *
  * `consumed` is what the gate compares with the share: the key's attributed part plus its charge
- * for usage made outside the pool. Both parts are reported apart.
+ * for usage made outside the pool, the same sum the gate builds. Both parts are reported apart,
+ * so `attributed + external` equals `consumed` exactly.
  */
 
 import type { SelfQuotaShare } from "@/shared/schemas/selfQuota";
@@ -123,17 +126,16 @@ function hasOwn(map: Record<string, number>, key: string): boolean {
 /** The key's state from one preview; a key the book does not list is not counted yet. */
 function shareState(preview: PercentDimensionPreview, apiKeyId: string): PercentShareState {
   if (preview.kind !== "book") return unavailable(REASON_BY_KIND[preview.kind]);
-  const { consumedByKey, internalByKey } = preview.shares;
-  if (!hasOwn(consumedByKey, apiKeyId) || !hasOwn(internalByKey, apiKeyId)) {
-    return unavailable(PERCENT_ATTRIBUTION_UNAVAILABLE);
-  }
-  const consumed = consumedByKey[apiKeyId];
-  const attributed = internalByKey[apiKeyId];
+  const { consumedByKey, internalByKey, externalByKey } = preview.shares;
+  const listed = [consumedByKey, internalByKey, externalByKey].every((map) =>
+    hasOwn(map, apiKeyId)
+  );
+  if (!listed) return unavailable(PERCENT_ATTRIBUTION_UNAVAILABLE);
   return {
     status: preview.confirmed ? "ok" : "stale",
-    consumed,
-    attributed,
-    external: consumed - attributed,
+    consumed: consumedByKey[apiKeyId],
+    attributed: internalByKey[apiKeyId],
+    external: externalByKey[apiKeyId],
     memberAttributed: { ...internalByKey },
   };
 }

@@ -190,3 +190,35 @@ test("a pool nobody routed through stays without a book after a view", async () 
   });
   assert.equal(book.state, null);
 });
+
+test("with a baseline above zero and use outside the pool, the view splits as the gate does", async () => {
+  const W = "conn-self-parity-w";
+  providerPlans.upsertPlan(W, PROV, PLAN_DIMENSIONS, "manual");
+  const outside = quotaPools.createPool({
+    connectionId: W,
+    connectionIds: [W],
+    name: "outside",
+    allocations: hard(["a", "b"], 50),
+  });
+  mockUsage({ [W]: { fiveHour: 20 } });
+  await ask(W, "a"); // opens the book of account W at 20%: that part is the baseline
+  await burn(W, "a", 10_000); // explains at most 10 points
+  mockUsage({ [W]: { fiveHour: 60 } }); // 40 points of growth: the rest came from outside
+  await ask(W, "a");
+  const [s] = sharesOf(await selfView("a"), "outside");
+  const gate = await attributePercentDimension({
+    store: new SqliteQuotaStore(),
+    pool: outside,
+    connectionId: W,
+    provider: PROV,
+    dimension: { window: "5h", limit: 100 },
+  });
+  assert.equal(s.status, "ok");
+  assert.ok(gate.externalCharged > 0, "use outside the pool is charged");
+  assert.equal(s.consumed, gate.consumedByKey.a);
+  assert.equal(s.attributed, gate.internalByKey.a);
+  assert.equal(s.external, gate.externalByKey.a);
+  near(s.attributed, 10);
+  near(s.external, 25);
+  near(s.consumed, 35);
+});

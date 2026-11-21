@@ -12,7 +12,7 @@ import assert from "node:assert/strict";
 import type { LedgerKey, LedgerSnapshot, LedgerState } from "../../src/lib/quota/types.ts";
 import type { SelfQuotaResponse, SelfQuotaShare } from "../../src/shared/schemas/selfQuota.ts";
 import { SELF_USAGE_SCOPE } from "../../src/shared/constants/selfServiceScopes.ts";
-import { BOTH, PERCENT_PLAN, ctx, input, makeDeps } from "./fixtures/quotaSelfView.ts";
+import { BOTH, PERCENT_PLAN, alloc, ctx, input, makeDeps } from "./fixtures/quotaSelfView.ts";
 import type { MakeDepsOverrides } from "./fixtures/quotaSelfView.ts";
 
 // The floor is read from the environment on every call: a value in the shell must not change
@@ -22,6 +22,8 @@ delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
 
 const { buildQuotaSelfView } = await import("../../src/lib/quota/selfView.ts");
 const { buildSelfViewAccounts } = await import("../../src/lib/quota/selfViewAccounts.ts");
+const { previewPercentDimension, splitExternalUsage } =
+  await import("../../src/lib/quota/percentAttribution.ts");
 
 test.after(() => {
   if (savedFloor === undefined) delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
@@ -55,20 +57,30 @@ function counters(a: number, b: number): LedgerSnapshot["counters"] {
   };
 }
 
-/** A store whose book reads answer by connection and are recorded; writes fail the test. */
+/**
+ * A store whose book reads answer by connection and are recorded. Writes are counted, not thrown:
+ * the preview catches every exception, so a throw would only turn the share unavailable.
+ */
 function ledger(byConnection: Record<string, LedgerSnapshot>) {
   const read: LedgerKey[] = [];
-  return {
+  const store = {
     read,
+    writes: 0,
     peek: async () => 120,
     poolConsumedTotal: async () => 400,
     ledgerRead: async (key: LedgerKey): Promise<LedgerSnapshot> => {
       read.push(key);
       return byConnection[key.connectionId] ?? { state: null, counters: {} };
     },
-    ledgerCommit: async (): Promise<boolean> => assert.fail("the view must not write the book"),
-    ledgerRecordTokens: async (): Promise<void> => assert.fail("the view must not record tokens"),
+    ledgerCommit: async (): Promise<boolean> => {
+      store.writes += 1;
+      return true;
+    },
+    ledgerRecordTokens: async (): Promise<void> => {
+      store.writes += 1;
+    },
   };
+  return store;
 }
 
 function view(over: MakeDepsOverrides = {}) {
@@ -83,12 +95,11 @@ function share(v: SelfQuotaResponse, account = 0): SelfQuotaShare {
 }
 
 test("a usable book gives the share its numbers, stale without a fresh reading", async () => {
-  const s = share(
-    await view({
-      getQuotaStore: async () =>
-        ledger({ "conn-secret-1": { state: state(), counters: counters(900_000, 100_000) } }),
-    })
-  );
+  const store = ledger({
+    "conn-secret-1": { state: state(), counters: counters(900_000, 100_000) },
+  });
+  const s = share(await view({ getQuotaStore: async () => store }));
+  assert.equal(store.writes, 0);
   assert.equal(s.status, "stale");
   assert.equal(s.fairShare, 50);
   near(s.consumed, 54);
@@ -98,10 +109,12 @@ test("a usable book gives the share its numbers, stale without a fresh reading",
 });
 
 test("a reading still in the gate's cache confirms the share", async () => {
+  const store = ledger({
+    "conn-secret-1": { state: state(), counters: counters(900_000, 100_000) },
+  });
   const s = share(
     await view({
-      getQuotaStore: async () =>
-        ledger({ "conn-secret-1": { state: state(), counters: counters(900_000, 100_000) } }),
+      getQuotaStore: async () => store,
       peekPlanWindowReading: () => ({
         used: 0.7,
         resetAt: NOW + 3_600_000,
@@ -109,6 +122,7 @@ test("a reading still in the gate's cache confirms the share", async () => {
       }),
     })
   );
+  assert.equal(store.writes, 0); // the reading is applied in memory only
   assert.equal(s.status, "ok");
   near(s.consumed, 63);
 });
@@ -167,6 +181,46 @@ test("the external charge is part of consumed and reported apart", async () => {
   near(s.external, 25);
   near(s.consumed, 35);
   near(s.remaining, 15);
+});
+
+test("attributed plus external is consumed exactly, and external is the gate's charge", async () => {
+  // Three keys at weight 0 split the external part in thirds, which do not round nicely.
+  const allocations = [alloc("key-a", 0), alloc("key-b", 0), alloc("key-c", 0)];
+  const keys = {
+    "key-a": { startTokens: 0 },
+    "key-b": { startTokens: 0 },
+    "key-c": { startTokens: 0 },
+  };
+  const snap: LedgerSnapshot = {
+    state: state({ baseline: 0.3, keys }),
+    counters: { ...counters(14_000, 0), "key-c": { tokens: 0, updatedAt: NOW - 120_000 } },
+  };
+  const s = share(
+    await view({
+      pool: { allocations },
+      getQuotaStore: async () => ledger({ "conn-secret-1": snap }),
+    })
+  );
+  assert.equal(s.status, "stale");
+  const gate = await previewPercentDimension({
+    store: { ledgerRead: async () => snap },
+    pool: { id: "pool-a-id", allocations },
+    connectionId: "conn-secret-1",
+    dimension: { window: "5h", limit: 100 },
+    reading: null,
+    nowMs: NOW,
+  });
+  if (gate.kind !== "book") throw new Error(`expected a book, got ${gate.kind}`);
+  const charge = splitExternalUsage({
+    external: gate.shares.external,
+    limit: 100,
+    weights: [0, 0, 0],
+  });
+  assert.equal(s.external, charge.perKey[0]);
+  assert.equal(s.consumed, gate.shares.consumedByKey["key-a"]);
+  assert.equal((s.attributed ?? NaN) + (s.external ?? NaN), s.consumed);
+  near(s.attributed, 14);
+  near(s.external, 46 / 3);
 });
 
 test("each account of a pool reads its own book with the limit of one account", async () => {

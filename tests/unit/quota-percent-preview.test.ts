@@ -54,12 +54,19 @@ function counters(a: number, b: number): LedgerSnapshot["counters"] {
 function fake(snapshot: LedgerSnapshot) {
   const store = {
     reads: 0,
+    // Counted, not thrown: the preview catches every exception and answers "failed".
+    writes: 0,
     ledgerRead: async () => {
       store.reads += 1;
       return snapshot;
     },
-    ledgerCommit: async (): Promise<boolean> => assert.fail("the preview must not write"),
-    ledgerRecordTokens: async (): Promise<void> => assert.fail("the preview must not write"),
+    ledgerCommit: async (): Promise<boolean> => {
+      store.writes += 1;
+      return true;
+    },
+    ledgerRecordTokens: async (): Promise<void> => {
+      store.writes += 1;
+    },
   };
   return store;
 }
@@ -171,7 +178,7 @@ test("no book, an ended window and a failed read are three different answers", a
 
 test("the preview reads the book once and writes nothing", async () => {
   const store = fake({ state: state(), counters: counters(1, 1) });
-  await previewPercentDimension({
+  const r = await previewPercentDimension({
     store,
     pool: POOL,
     connectionId: "c",
@@ -179,7 +186,9 @@ test("the preview reads the book once and writes nothing", async () => {
     reading: { used: 0.9, resetAt: NOW + 3_600_000, fetchedAt: NOW - 1_000 },
     nowMs: NOW,
   });
+  assert.equal(r.kind, "book");
   assert.equal(store.reads, 1);
+  assert.equal(store.writes, 0);
 });
 
 test("the cache peek returns the gate's reading and never fetches", async () => {

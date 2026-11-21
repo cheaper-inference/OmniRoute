@@ -96,6 +96,8 @@ export interface BookShares {
   consumedByKey: Record<string, number>;
   /** Same keys; only the part the book attributes to the key (the base of the absolute cap). */
   internalByKey: Record<string, number>;
+  /** Same keys; the key's charge for usage made outside the pool (consumed = internal + this). */
+  externalByKey: Record<string, number>;
 }
 
 export type PercentAttribution = BookShares & {
@@ -184,10 +186,12 @@ function scaleBook(
   const wanted = new Set(apiKeyIds ?? pool.allocations.map((a) => a.apiKeyId));
   const consumedByKey: Record<string, number> = {};
   const internalByKey: Record<string, number> = {};
+  const externalByKey: Record<string, number> = {};
   pool.allocations.forEach((a, i) => {
     if (!wanted.has(a.apiKeyId)) return;
     const own = (book?.internalByKey[a.apiKeyId] ?? 0) * limit;
     internalByKey[a.apiKeyId] = own;
+    externalByKey[a.apiKeyId] = split.perKey[i];
     consumedByKey[a.apiKeyId] = own + split.perKey[i];
   });
 
@@ -198,6 +202,7 @@ function scaleBook(
     externalCharged: split.externalCharged,
     consumedByKey,
     internalByKey,
+    externalByKey,
   };
 }
 
@@ -248,10 +253,10 @@ export type PercentDimensionPreview =
   { kind: "book"; confirmed: boolean; shares: BookShares } | { kind: "none" | "ended" | "failed" };
 
 /**
- * The attribution the gate would compute from the same book and reading, without any write and
- * without reading the provider: one book read, the reading applied in memory, the same split as
- * attributePercentDimension. No book, an ended window and a failed read are told apart instead
- * of reading as zero. Never throws.
+ * The attribution the gate would compute from the same book and reading, without writing the
+ * book's state and without reading the provider: one book read, the reading applied in memory,
+ * the same split as attributePercentDimension. No book, an ended window and a failed read are
+ * told apart instead of reading as zero. Never throws.
  */
 export async function previewPercentDimension(
   input: PreviewPercentDimensionInput
