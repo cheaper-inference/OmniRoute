@@ -17,6 +17,7 @@ import type { EnforceDecision, EnforceInput, QuotaStore, RecordConsumptionInput 
 import type { ProviderPlan, QuotaUnit } from "./dimensions";
 import { dimensionKeyToString } from "./dimensions";
 import { decideFairShare } from "./fairShare";
+import { attributePercentDimension, recordPercentTokens } from "./percentAttribution";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
 import { getQuotaStore } from "./QuotaStore";
@@ -37,22 +38,6 @@ import {
 // ---------------------------------------------------------------------------
 
 const SATURATION_THRESHOLD = Number(process.env.QUOTA_SATURATION_THRESHOLD ?? "0.5");
-
-/**
- * Units for which the store tracks a real pool-wide aggregate (sum of per-key
- * consumption via quota_consumption rows). For these units, globalUsedPercent
- * (the saturation signal from the upstream provider) is always 0 because no
- * external API reports a "percent used" for raw request/token/usd counters.
- *
- * Using globalUsedPercent × effectiveLimit for countable units would always
- * yield consumedTotal = 0, meaning the pool never saturates and per-key
- * overage is never blocked. We use store.poolConsumedTotal() instead, which
- * sums the actual consumption across all keys in the pool window.
- *
- * "percent" dimensions remain driven by the saturation signal because that IS
- * the authoritative consumption measure (the upstream provider percentage).
- */
-const COUNTABLE_UNITS = new Set(["requests", "tokens", "usd"]);
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -211,6 +196,9 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     globalUsedPercent: number;
   }> = [];
   const consumedByThisKey: Record<string, number> = {};
+  // Percent dimensions only: the absolute cap counts the part the attribution
+  // book charges to the key (internal), never the book's external part.
+  const capConsumedByThisKey: Record<string, number> = {};
 
   for (const dim of plan.dimensions) {
     // Skip placeholder dimensions whose limit is unknown (Number.EPSILON / 0 — the
@@ -222,6 +210,32 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     if (!(dim.limit > Number.EPSILON)) continue;
     const dimKey = { poolId: pool.id, unit: dim.unit, window: dim.window };
     const dimKeyStr = dimensionKeyToString(dimKey);
+
+    if (dim.unit === "percent") {
+      // percent (account-quota window): the saturation signal is the account
+      // consumption; this key's part of it comes from the account's attribution
+      // book (growth since the window started, split by tokens routed since), and
+      // the book's external part is charged by weight only once it exceeds the
+      // capacity no allocation claims. Never throws.
+      const effectiveLimit = dim.limit * accountCount;
+      const attribution = await attributePercentDimension({
+        store,
+        pool,
+        connectionId: input.connectionId,
+        provider: input.provider,
+        dimension: { window: dim.window, limit: effectiveLimit },
+        apiKeyIds: [input.apiKeyId],
+      });
+      consumedByThisKey[dimKeyStr] = attribution.consumedByKey[input.apiKeyId] ?? 0;
+      capConsumedByThisKey[dimKeyStr] = attribution.internalByKey[input.apiKeyId] ?? 0;
+      dimensionsInfo.push({
+        key: dimKey,
+        limit: effectiveLimit,
+        consumedTotal: attribution.accountConsumed,
+        globalUsedPercent: attribution.globalUsedPercent,
+      });
+      continue;
+    }
 
     const consumedThisKey = await store.peek(input.apiKeyId, dimKey).catch(() => 0);
     consumedByThisKey[dimKeyStr] = consumedThisKey;
@@ -235,21 +249,8 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     // This is the summed budget: N accounts contribute N × L capacity to the shared bucket.
     const effectiveLimit = dim.limit * accountCount;
 
-    // Derive consumedTotal based on the unit type:
-    //   - Countable units (requests/tokens/usd): use the real store aggregate so the
-    //     pool can actually saturate and block per-key overage. The saturation signal
-    //     (globalUsedPercent) is always 0 for these units — using it would permanently
-    //     keep consumedTotal at 0 and never trigger the block path.
-    //   - percent dimensions: the saturation signal IS the consumed signal (the upstream
-    //     provider returns a utilisation percentage, not raw counts).
-    let consumedTotal: number;
-    if (COUNTABLE_UNITS.has(dim.unit)) {
-      // Real pool-wide aggregate (sum of per-key consumption across all apiKeyIds).
-      consumedTotal = await store.poolConsumedTotal(pool.id, dimKey).catch(() => 0);
-    } else {
-      // percent (account-quota window): the saturation signal is authoritative.
-      consumedTotal = globalUsedPercent * effectiveLimit;
-    }
+    // Countable units (requests/tokens/usd): the real pool-wide store aggregate.
+    const consumedTotal = await store.poolConsumedTotal(pool.id, dimKey).catch(() => 0);
 
     dimensionsInfo.push({
       key: dimKey,
@@ -274,6 +275,7 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     dimensions: dimensionsInfo,
     allocation: { ...poolAllocation, weight: effectiveWeight },
     consumedByThisKey,
+    capConsumedByThisKey,
     saturationThreshold: SATURATION_THRESHOLD,
   });
 
@@ -369,6 +371,11 @@ export async function recordConsumption(input: RecordConsumptionInput): Promise<
       });
     }
   }
+  // percent: the account bar is read upstream, so record this key's routed
+  // tokens once per request for the attribution books of the plan's percent
+  // dimensions on this connection. Never throws.
+  const ledgerTarget = { poolId, connectionId: input.connectionId, apiKeyId: input.apiKeyId };
+  await recordPercentTokens(store, ledgerTarget, plan.dimensions, input.cost);
 
   // Per-(key, model) consumption tracking (Fase 3 #7).
   // When the caller provides a model name, increment the model-scoped bucket so

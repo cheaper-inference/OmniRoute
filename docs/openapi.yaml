@@ -18556,6 +18556,43 @@ components:
                       description: "Negative = surplus; positive = over-allocation"
                     borrowing:
                       type: boolean
+              accounts:
+                type: array
+                description: "Present for percent dimensions: one entry per pool connection, from that account's attribution book. globalUsedPercent is 0..1. The other amounts are in the dimension's units. internal + external can differ from consumedTotal when there is no usable plan-window reading or a lower figure is not applied."
+                items:
+                  type: object
+                  properties:
+                    connectionId:
+                      type: string
+                    globalUsedPercent:
+                      type: number
+                    consumedTotal:
+                      type: number
+                    internal:
+                      type: number
+                      description: "Sum of the parts attributed to keys. They split the growth of the account figure since the book's baseline, as far as the keys' tokens since then explain it."
+                    external:
+                      type: number
+                      description: "Part of the account figure not attributed to any key. It is the baseline (the figure when the book opened or the window last turned), plus the growth the keys' tokens do not explain."
+                    externalCharged:
+                      type: number
+                      description: "External part charged to the keys by weight, after the capacity no allocation claims."
+                    perKey:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          apiKeyId:
+                            type: string
+                          consumed:
+                            type: number
+                          fairShare:
+                            type: number
+                          deficit:
+                            type: number
+                            description: "Negative = surplus; positive = over-allocation"
+                          borrowing:
+                            type: boolean
         burnRate:
           type: object
           nullable: true
