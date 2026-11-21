@@ -1,6 +1,7 @@
 import type { LegacyModel as ModelV2 } from "../legacy-model.js";
-import { buildModelDisplayName } from "./naming.js";
+import { buildModelDisplayName, titleCaseAlias } from "./naming.js";
 import type { FreeModelFreeType } from "./naming.js";
+import { defaultOmniRouteProvidersFetcher } from "./usable.js";
 
 export interface OmniRouteEnrichmentEntry {
   /** Human-readable display name. Replaces ModelV2.name when present. */
@@ -28,9 +29,12 @@ export interface OmniRouteEnrichmentEntry {
   /**
    * Human-readable upstream provider label (e.g. `Claude`, `Kiro`,
    * `Windsurf`, `GitHub Models`). Populated from the per-provider
-   * `entry.name` field inside `/api/pricing/models`. Used by the
-   * destination so the OC TUI picker can differentiate the same
-   * model id sold through different upstream connections.
+   * `entry.name` field inside `/api/pricing/models`. A custom compatible
+   * node is the exception: that slot is named after its generated id, so
+   * the operator-entered `providerSpecificData.nodeName` from
+   * `/api/providers` wins, with the public route prefix as a fallback.
+   * Used by the destination so the OC TUI picker can differentiate the
+   * same model id sold through different upstream connections.
    */
   providerDisplayName?: string;
   /** Free-model budget type (from freeModelCatalog). */
@@ -251,6 +255,57 @@ function trimTrailingSlashes(value: string): string {
  * Ported from the v1 plugin (`index.ts:1906-2106`); the shared logger is
  * the only intentional difference (no plugin-contract dependency here).
  */
+
+/**
+ * Generated ids for custom compatible-provider nodes
+ * (`openai-compatible-chat-<uuid>`, `anthropic-compatible-cc-<uuid>`).
+ * `/api/pricing/models` names such a slot after this id, never after the
+ * name the operator typed, so it is not a label fit for a picker.
+ */
+const GENERATED_ADAPTER_ID = /^(?:openai|anthropic)-compatible-/;
+
+interface AdapterNodeLabels {
+  byProvider: Map<string, string>;
+  byPrefix: Map<string, string>;
+}
+
+/**
+ * Human labels for custom compatible-provider nodes, keyed by connection
+ * provider id and by public route prefix. `/api/pricing/models` carries the
+ * generated node id; the operator-entered name lives on the connection as
+ * `providerSpecificData.nodeName`. Best-effort: without a management token
+ * this endpoint answers 403, and the caller keeps a prefix-derived label.
+ */
+async function fetchAdapterNodeLabels(
+  baseURL: string,
+  apiKey: string,
+  timeoutMs: number
+): Promise<AdapterNodeLabels> {
+  const byProvider = new Map<string, string>();
+  const byPrefix = new Map<string, string>();
+  try {
+    const connections = await defaultOmniRouteProvidersFetcher(baseURL, apiKey, timeoutMs);
+    for (const connection of connections) {
+      const data = connection.providerSpecificData;
+      if (!data || typeof data !== "object") continue;
+      const nodeName = (data as { nodeName?: unknown }).nodeName;
+      if (typeof nodeName !== "string" || nodeName.trim().length === 0) continue;
+      const label = nodeName.trim();
+      if (connection.provider.length > 0 && !byProvider.has(connection.provider)) {
+        byProvider.set(connection.provider, label);
+      }
+      const prefix = (data as { prefix?: unknown }).prefix;
+      if (typeof prefix === "string" && prefix.trim().length > 0 && !byPrefix.has(prefix.trim())) {
+        byPrefix.set(prefix.trim(), label);
+      }
+    }
+  } catch {
+    // A label is cosmetic: a refused or unreachable source must not fail
+    // the whole refresh, nor drop names and pricing collected below.
+  }
+  return { byProvider, byPrefix };
+}
+
 export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = async (
   baseURL,
   apiKey,
@@ -289,6 +344,17 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
         (body as { providers?: Record<string, { models?: unknown[] }> })?.providers ??
         (body as Record<string, { models?: unknown[] }>);
       if (providers && typeof providers === "object") {
+        // The operator name of a custom adapter lives on the connection, not
+        // in the catalog: fetch it only when a generated adapter slot needs it.
+        const needsAdapterLabels = Object.values(providers).some((slot) => {
+          if (!slot || typeof slot !== "object") return false;
+          const name = (slot as { name?: unknown }).name;
+          const trimmed = typeof name === "string" ? name.trim().toLowerCase() : "";
+          return GENERATED_ADAPTER_ID.test(trimmed);
+        });
+        const adapterLabels = needsAdapterLabels
+          ? await fetchAdapterNodeLabels(baseURL, apiKey, timeoutMs)
+          : { byProvider: new Map<string, string>(), byPrefix: new Map<string, string>() };
         for (const [catalogKey, slot] of Object.entries(providers)) {
           if (!slot || typeof slot !== "object") continue;
           const configuredPrefix = (slot as { displayPrefix?: unknown }).displayPrefix;
@@ -303,10 +369,20 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
           catalogAliasByKey.set(catalogKey, providerAlias);
           catalogAliasByKey.set(providerCanonical, providerAlias);
           const slotNameRaw = (slot as { name?: unknown }).name;
-          const providerDisplayName =
+          const slotName =
             typeof slotNameRaw === "string" && slotNameRaw.trim().length > 0
               ? slotNameRaw.trim()
-              : undefined;
+              : "";
+          // A generated adapter id is not a label: prefer the operator name
+          // carried by the connection, then the public route prefix.
+          const generatedLabel =
+            slotName.length === 0 || GENERATED_ADAPTER_ID.test(slotName.toLowerCase());
+          const providerDisplayName = generatedLabel
+            ? (adapterLabels.byProvider.get(providerCanonical) ??
+              adapterLabels.byPrefix.get(publicPrefix) ??
+              (publicPrefix.length > 0 ? titleCaseAlias(publicPrefix) : undefined) ??
+              (slotName.length > 0 ? slotName : undefined))
+            : slotName;
           for (const m of models) {
             if (!m || typeof m !== "object") continue;
             const id = (m as { id?: unknown }).id;

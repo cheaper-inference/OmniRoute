@@ -3,7 +3,7 @@ import type { Logger } from "./shared/index.js";
 /** What the catalog loses when a given gateway source cannot be read. */
 function consequenceOf(endpoint: string): string {
   if (endpoint.includes("/api/providers")) {
-    return "the usable-provider filter is disabled for this refresh, so unprovisioned providers stay listed";
+    return "the usable-provider filter and custom-adapter labels are unavailable for this refresh, so unprovisioned providers stay listed and adapter models fall back to their route prefix";
   }
   return "model names, provider labels, canonical dedupe and pricing are degraded";
 }
