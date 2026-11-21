@@ -297,31 +297,12 @@ Release, deployment, proxies, tunnels, coverage, database, monitoring.
 
 ## Supporting and historical documents
 
-Asset documentation, retained design notes and changelog fragments are included for
-traceability. For current releases, use the root [CHANGELOG.md](../CHANGELOG.md);
+Asset documentation is included for traceability. For current releases, use the root [CHANGELOG.md](../CHANGELOG.md);
 for future milestones, use [ROADMAP.md](../ROADMAP.md).
 
 ### assets/
 
 - [flags/README.md](assets/flags/README.md) — flag assets and their sources.
-
-### changelog/fragments/
-
-- [10962.md](changelog/fragments/10962.md)
-- [14268.md](changelog/fragments/14268.md)
-- [15006.md](changelog/fragments/15006.md)
-- [15540.md](changelog/fragments/15540.md)
-- [15659.md](changelog/fragments/15659.md)
-- [18608.md](changelog/fragments/18608.md)
-- [7778.md](changelog/fragments/7778.md)
-
-### plans/
-
-Retained implementation plans; read the current guide and source before relying on
-a historical plan's proposed behavior.
-
-- [11690-anysearch-provider-integration.md](plans/11690-anysearch-provider-integration.md) — AnySearch provider integration (PR #11690).
-- [7778-hierarchical-admission.md](plans/7778-hierarchical-admission.md) — #7778 hierarchical admission cleanup plan.
 
 ## diagrams/
 
