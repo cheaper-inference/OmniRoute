@@ -1,3 +1,4 @@
+import { isPrivateAdmissionError } from "../../services/combo/auxiliaryAdmission.ts";
 import type {
   HttpAttemptSelection,
   HttpAttemptRejectionSlot,
@@ -424,6 +425,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
       undefined,
       pendingScope.owner ?? pendingRequestId
     );
+    if (isPrivateAdmissionError(error)) throw error;
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)

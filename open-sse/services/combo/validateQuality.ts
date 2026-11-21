@@ -1,3 +1,4 @@
+import { accountCapacityAdmissionSignal } from "../accountSemaphore.ts";
 /**
  * Combo response-quality validation extracted from combo.ts.
  *
@@ -378,6 +379,35 @@ function parseJsonRecord(data: string): Record<string, unknown> | null {
   }
 }
 
+async function readQualityText(response: Response, signal: AbortSignal | null): Promise<string> {
+  if (!signal) return response.text();
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
+  const abort = () => {
+    void reader.cancel(signal.reason).catch(() => {});
+  };
+  try {
+    if (signal.aborted) {
+      abort();
+      throw signal.reason;
+    }
+    signal.addEventListener("abort", abort, { once: true });
+    while (true) {
+      const chunk = await reader.read();
+      if (signal.aborted) throw signal.reason;
+      if (chunk.done) break;
+      chunks.push(decoder.decode(chunk.value, { stream: true }));
+    }
+    chunks.push(decoder.decode());
+    return chunks.join("");
+  } finally {
+    signal.removeEventListener("abort", abort);
+    reader.releaseLock();
+  }
+}
+
 export async function validateResponseQuality(
   response: Response,
   isStreaming: boolean,
@@ -615,14 +645,10 @@ export async function validateResponseQuality(
             if (!replayCancelled) controller.close();
           }
         },
-        ...(preContentTransportRecovery
-          ? {
-              cancel(reason: unknown) {
-                replayCancelled = true;
-                cancelPeekReader(reason);
-              },
-            }
-          : {}),
+        cancel(reason: unknown) {
+          replayCancelled = true;
+          cancelPeekReader(reason);
+        },
       });
       return new Response(stream, {
         status: response.status,
@@ -917,9 +943,11 @@ export async function validateResponseQuality(
   }
 
   let text: string;
+  const admissionSignal = accountCapacityAdmissionSignal();
   try {
-    text = await cloned.text();
-  } catch {
+    text = await readQualityText(cloned, admissionSignal);
+  } catch (error) {
+    if (admissionSignal?.aborted) throw error;
     return { valid: true };
   }
 

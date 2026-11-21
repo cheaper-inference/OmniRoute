@@ -1,3 +1,4 @@
+import { isPrivateAdmissionError } from "./auxiliaryAdmission.ts";
 /**
  * Wrap a single-model dispatch with a per-target timeout that aborts and falls back.
  *
@@ -13,7 +14,11 @@ import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../../utils
 import { DECLARED_FIRST_OUTPUT_WAIT_CAP_MS } from "../comboConfig.ts";
 import { requestMediaRequirements, nonImageMediaFailures } from "./mediaCompatibility.ts";
 import { parseModel } from "../model.ts";
-import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
+import {
+  COMBO_PER_MODEL_TIMEOUT_REASON,
+  isHedgeCancelledSignal,
+  isHedgeCancelledReasonError,
+} from "./comboAbortReasons.ts";
 import { awaitFirstOutput, isEventStreamResponse } from "./firstOutputStream.ts";
 import type { HandleSingleModel, SingleModelTarget, ComboLogger } from "./types.ts";
 
@@ -274,9 +279,14 @@ export function buildTargetTimeoutRunner(deps: {
         "COMBO",
         `Per-model combo timeout is DISABLED (effectiveTimeoutMs=${effectiveTimeoutMs}) for ${modelStr} — a hung upstream will hang this target until the combo loop safety timeout`
       );
-      return handleSingleModel(b, modelStr, target).catch((err) =>
-        errorResponse(502, err?.message ?? "Upstream model error")
-      );
+      return handleSingleModel(b, modelStr, target).catch((err) => {
+        if (
+          isPrivateAdmissionError(err) ||
+          (isHedgeCancelledSignal(target?.modelAbortSignal) && isHedgeCancelledReasonError(err))
+        )
+          throw err;
+        return errorResponse(502, err?.message ?? "Upstream model error");
+      });
     }
 
     const startedAt = Date.now();
@@ -319,6 +329,11 @@ export function buildTargetTimeoutRunner(deps: {
     try {
       dispatched = await Promise.race([
         handleSingleModel(b, modelStr, targetWithSignal).catch((err) => {
+          if (
+            isPrivateAdmissionError(err) ||
+            (isHedgeCancelledSignal(target?.modelAbortSignal) && isHedgeCancelledReasonError(err))
+          )
+            throw err;
           if (timedOut) {
             // Inner call rejected because we aborted it. The synthetic 504 from timeoutPromise
             // already won the race; resolve cleanly without leaking err.message.
@@ -328,6 +343,11 @@ export function buildTargetTimeoutRunner(deps: {
         }),
         timeoutPromise,
       ]).catch((raceErr) => {
+        if (
+          isPrivateAdmissionError(raceErr) ||
+          (isHedgeCancelledSignal(parentHedgeSignal) && isHedgeCancelledReasonError(raceErr))
+        )
+          throw raceErr;
         // Defensive: should never fire — both race branches always resolve.
         const detail = raceErr instanceof Error ? raceErr.message : String(raceErr);
         log.error?.(

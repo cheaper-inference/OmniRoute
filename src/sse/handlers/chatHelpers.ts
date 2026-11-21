@@ -1,3 +1,4 @@
+import { isPrivateAdmissionError } from "../../../open-sse/services/combo/auxiliaryAdmission.ts";
 import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { credentialCooldownResponse } from "./credentialCooldownResponse";
 import {
@@ -402,7 +403,7 @@ export async function checkPipelineGates(
     degradationThreshold: providerProfile.degradationThreshold,
     resetTimeout: providerProfile.resetTimeoutMs ?? providerProfile.circuitBreakerReset,
     // A local stream lifecycle error never reached the provider.
-    isFailure: (e) => !isLocalStreamLifecycleError(e),
+    isFailure: (e) => !isLocalStreamLifecycleError(e) && !isPrivateAdmissionError(e),
     onStateChange: (name: string, from: string, to: string) =>
       log.info("CIRCUIT", `${name}: ${from} → ${to}`),
     ...(useHints429

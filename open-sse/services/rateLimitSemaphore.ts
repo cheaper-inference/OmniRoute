@@ -13,6 +13,7 @@ interface QueueItem {
   resolve: (release: () => void) => void;
   reject: (error: Error) => void;
   timer: ReturnType<typeof setTimeout>;
+  cleanup: () => void;
 }
 
 interface ModelGate {
@@ -25,6 +26,7 @@ interface ModelGate {
 }
 
 interface AcquireOptions {
+  signal?: AbortSignal | null;
   maxConcurrency?: number;
   timeoutMs?: number;
   /**
@@ -99,7 +101,7 @@ function drainQueue(modelStr: string): void {
   while (gate.queue.length > 0 && gate.running < gate.max && !isRateLimited(gate)) {
     const next = gate.queue.shift();
     if (!next) break;
-    clearTimeout(next.timer);
+    next.cleanup();
     gate.running++;
     next.resolve(createReleaseFn(modelStr));
   }
@@ -143,8 +145,10 @@ function createReleaseFn(modelStr: string): () => void {
  */
 export function acquire(
   modelStr: string,
-  { maxConcurrency = 3, timeoutMs = 30000, maxQueueSize }: AcquireOptions = {}
+  { maxConcurrency = 3, timeoutMs = 30000, maxQueueSize, signal = null }: AcquireOptions = {}
 ): Promise<() => void> {
+  if (signal?.aborted)
+    return Promise.reject(signal.reason ?? new DOMException("Aborted", "AbortError"));
   const gate = getGate(modelStr, maxConcurrency);
 
   // Fast path: slot available and not rate-limited
@@ -165,20 +169,37 @@ export function acquire(
     return Promise.reject(err);
   }
 
-  // Slow path: enqueue and wait
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      // Remove from queue on timeout
-      const idx = gate.queue.findIndex((item) => item.timer === timer);
-      if (idx !== -1) gate.queue.splice(idx, 1);
-      const err = new Error(`Semaphore timeout after ${timeoutMs}ms for ${modelStr}`) as Error & {
-        code?: string;
-      };
-      err.code = "SEMAPHORE_TIMEOUT";
-      reject(err);
-    }, timeoutMs);
-
-    gate.queue.push({ resolve, reject, timer });
+    const cleanup = () => {
+      clearTimeout(item.timer);
+      signal?.removeEventListener("abort", abort);
+    };
+    const remove = (error: Error) => {
+      const index = gate.queue.indexOf(item);
+      if (index < 0) return;
+      gate.queue.splice(index, 1);
+      cleanup();
+      reject(error);
+      drainQueue(modelStr);
+    };
+    const abort = () => remove(signal?.reason ?? new DOMException("Aborted", "AbortError"));
+    const item: QueueItem = {
+      resolve,
+      reject,
+      cleanup,
+      timer: setTimeout(
+        () =>
+          remove(
+            Object.assign(new Error("Auxiliary semaphore wait timed out"), {
+              code: "SEMAPHORE_TIMEOUT",
+            })
+          ),
+        Math.max(0, timeoutMs)
+      ),
+    };
+    gate.queue.push(item);
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) abort();
   });
 }
 
@@ -244,7 +265,7 @@ export function getStats(prefix?: string): Record<string, RateLimitStatsEntry> {
 export function resetAll(): void {
   for (const [, gate] of gates) {
     for (const item of gate.queue) {
-      clearTimeout(item.timer);
+      item.cleanup();
       item.reject(new Error("Semaphore reset"));
     }
     // Clear all cooldown timers

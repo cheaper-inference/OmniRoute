@@ -14,7 +14,8 @@ const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const SAFETY_TIMEOUT_MS = 31_337;
-const SET_RETRY_DELAY_MS = 60_000;
+// Keep both virtual retry waits within the overall combo timeout.
+const SET_RETRY_DELAY_MS = 10_000;
 
 function makeLog() {
   const warnings: string[] = [];

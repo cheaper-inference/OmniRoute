@@ -1,3 +1,8 @@
+import { resolveConnectionConcurrencyCeiling } from "@omniroute/open-sse/services/connectionConcurrency.ts";
+export {
+  resolveConnectionConcurrencyCeiling,
+  resolveAccountConcurrencyLimit,
+} from "@omniroute/open-sse/services/connectionConcurrency.ts";
 /**
  * Concurrency fields copied from a stored connection onto the selected
  * credentials (#13700). Shared by `auth.ts` materializeConnection and the
@@ -15,10 +20,10 @@ export function buildConnectionConcurrencyFields(connection: ProviderConnectionV
 } {
   // M365 admits one turn per account, across all models. Use the existing
   // account semaphore via credentials; overrides must not reopen parallel turns.
-  const serialM365 = connection.provider === "copilot-m365-web";
+  const concurrencyCeiling = resolveConnectionConcurrencyCeiling(connection.provider);
   return {
-    maxConcurrent: serialM365 ? 1 : connection.maxConcurrent,
-    rateLimitMaxConcurrent: serialM365 ? 1 : connection.rateLimitMaxConcurrent,
+    maxConcurrent: concurrencyCeiling ?? connection.maxConcurrent,
+    rateLimitMaxConcurrent: concurrencyCeiling ?? connection.rateLimitMaxConcurrent,
     modelConcurrency: normalizeModelConcurrencyMap(connection.rateLimitOverrides?.modelConcurrency),
   };
 }

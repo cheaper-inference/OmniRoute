@@ -1,3 +1,9 @@
+import { isConnectionRateLimitEnabled as isRateLimitEnabled } from "../rateLimitManager/queueSettings.ts";
+import { toProviderConnection } from "../../../src/lib/db/providers/lazyConnectionView.ts";
+import {
+  buildConnectionConcurrencyFields,
+  resolveAccountConcurrencyLimit,
+} from "../../../src/sse/services/connectionConcurrencyFields.ts";
 /**
  * Pre-dispatch skip gates for handleComboChat's executeTarget.
  * Order is locked (spec §4.1). Do not reorder.
@@ -11,6 +17,11 @@ import {
   isAccountSemaphoreFull,
   isModelLocked,
 } from "../accountFallback.ts";
+import {
+  buildAccountSemaphoreKey,
+  accountSemaphoreCapacityRevision,
+  isComboAccountCapacityUnavailable,
+} from "../accountSemaphore.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
 import { checkCredentialGate, logCredentialSkip } from "../credentialGate.ts";
 import { stopProtectedPriorityTarget as stopPriorityTarget } from "./executeTargetClassify.ts";
@@ -206,7 +217,7 @@ export async function evaluateExecuteTargetGates(opts: {
     const persistedSkip = await resolveAndRecordPersistedCooldown(
       state,
       target,
-      (id) => readConnectionForCooldownGate(id, false),
+      (id) => readConnectionForCooldownGate(id, state.capacityWaitStartedAt != null),
       allowRateLimitedConnection
     );
     if (persistedSkip) {
@@ -318,7 +329,7 @@ export async function evaluateExecuteTargetGates(opts: {
           };
         }
       }
-      return { kind: "skip", result: null };
+      return { kind: "skip", result: null, capacityRetryEligible: false };
     }
   }
 
@@ -344,7 +355,7 @@ export async function evaluateExecuteTargetGates(opts: {
         target
       );
       bumpFallback();
-      return { kind: "skip", result: null };
+      return { kind: "skip", result: null, capacityRetryEligible: false };
     }
   }
 
@@ -460,8 +471,30 @@ export async function evaluateExecuteTargetGates(opts: {
       };
     }
 
-    const maxConcurrentCap = await lookupPositiveCap(connectionId);
-    if (maxConcurrentCap && isAccountSemaphoreFull(provider, connectionId, maxConcurrentCap)) {
+    const capacityRevision = accountSemaphoreCapacityRevision(
+      buildAccountSemaphoreKey({ provider, accountKey: connectionId })
+    );
+    let maxConcurrentCap: number | null;
+    if (deps.capacityAdmissionEnabled) {
+      try {
+        const connection = await getCachedProviderConnectionById(connectionId);
+        const fields = buildConnectionConcurrencyFields(toProviderConnection(connection));
+        maxConcurrentCap = resolveAccountConcurrencyLimit(
+          fields.maxConcurrent,
+          fields.rateLimitMaxConcurrent,
+          isRateLimitEnabled(connectionId)
+        );
+      } catch {
+        // no-effect: optional cap lookup retains the existing fail-open policy.
+        maxConcurrentCap = null;
+      }
+    } else maxConcurrentCap = await lookupPositiveCap(connectionId);
+    if (
+      maxConcurrentCap &&
+      (deps.capacityAdmissionEnabled
+        ? isComboAccountCapacityUnavailable(provider, connectionId, maxConcurrentCap)
+        : isAccountSemaphoreFull(provider, connectionId, maxConcurrentCap))
+    ) {
       deps.log.info(
         "COMBO",
         `Skipping ${modelStr} — connection ${connectionId} is at max concurrency cap (${maxConcurrentCap})`
@@ -473,9 +506,24 @@ export async function evaluateExecuteTargetGates(opts: {
         reason: "concurrency_cap",
       });
       bumpFallback();
+      if (!deps.capacityAdmissionEnabled) {
+        return {
+          kind: "skip",
+          result: stopProtectedPriorityTarget(`Connection capacity reached for ${modelStr}`),
+        };
+      }
       return {
         kind: "skip",
-        result: stopProtectedPriorityTarget(`Connection capacity reached for ${modelStr}`),
+        // Capacity is not an observed upstream failure. Protected priority keeps a
+        // traversal barrier while awaiting capacity instead of poisoning quota trust.
+        result: null,
+        capacity: {
+          key: buildAccountSemaphoreKey({ provider, accountKey: connectionId }),
+          maxConcurrency: maxConcurrentCap,
+          followExecutionCapacity: true,
+          capacityRevision,
+        },
+        protectedPriorityTarget,
       };
     }
   }

@@ -1,4 +1,8 @@
-import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
+import { waitForAccountCapacityAdmission } from "../accountSemaphore.ts";
+async function waitForCooldownAwareRetry(delay: number, signal: AbortSignal): Promise<boolean> {
+  await waitForAccountCapacityAdmission(delay, signal);
+  return !signal.aborted;
+}
 import type { AttemptLoopDeps, AttemptLoopState } from "./attemptLoopTypes.ts";
 import { COMBO_COOLDOWN_WAIT_MARGIN_MS, shouldWaitForComboCooldown } from "./comboCooldownRetry.ts";
 import { COMBO_LOOP_SAFETY_TIMEOUT_MS, resolveDelayMs } from "./comboPredicates.ts";

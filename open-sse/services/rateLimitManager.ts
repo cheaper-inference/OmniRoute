@@ -1,3 +1,15 @@
+import { updateAccountSemaphoreExecutionCapacity } from "./accountSemaphore.ts";
+import {
+  connectionRateLimitOverrides,
+  enabledConnections,
+  requestQueueState,
+  resolveRequestQueueMaxWaitMs,
+} from "./rateLimitManager/queueSettings.ts";
+export {
+  resolveRequestQueueMaxWaitMs,
+  ZAI_WEB_REQUEST_QUEUE_MAX_WAIT_MS,
+  MAXAI_REQUEST_QUEUE_MAX_WAIT_MS,
+} from "./rateLimitManager/queueSettings.ts";
 /**
  * Rate Limit Manager — Adaptive rate limiting using Bottleneck
  *
@@ -23,7 +35,6 @@ import { getAntigravityQuotaFamily } from "./antigravityQuotaFamily.ts";
 import { getCodexRateLimitKey } from "../executors/codex.ts";
 import { awaitProviderDefaultSlot, setProviderQuotaOverrides } from "./providerDefaultRateLimit.ts";
 import {
-  DEFAULT_RESILIENCE_SETTINGS,
   resolveResilienceSettings,
   type RequestQueueSettings,
 } from "../../src/lib/resilience/settings";
@@ -86,12 +97,8 @@ function toRecord(value: unknown): JsonRecord {
 // Store limiters keyed by "provider:connectionId" (and optionally ":model")
 const limiters = new Map<string, Bottleneck>();
 
-// Store connections that have rate limit protection enabled
-const enabledConnections = new Set<string>();
-
 // Store per-connection rate limit overrides (RPM, TPM, TPD, minTime, maxConcurrent)
 // Populated from provider_connections.rateLimitOverrides on startup and refresh.
-const connectionRateLimitOverrides = new Map<string, ConnectionRateLimitOverrides>();
 
 // Store learned limits for persistence (debounced)
 // One learned entry per limiter key (provider:connection[:model]). The previous
@@ -107,16 +114,6 @@ const PERSIST_DEBOUNCE_MS = 60_000; // Debounce persistence to every 60s max
 
 // Track initialization
 let initialized = false;
-
-let currentRequestQueueSettings: RequestQueueSettings = DEFAULT_RESILIENCE_SETTINGS.requestQueue;
-export const ZAI_WEB_REQUEST_QUEUE_MAX_WAIT_MS = 60_000;
-// MaxAI proxies reasoning models (deepseek-r1, gpt-5.6-thinking, grok-4.5,
-// gemini-3.1-pro-preview, grok-4-1-fast-reasoning) whose single upstream turn
-// legitimately runs tens of seconds to minutes. The 15s default execution
-// expiration (Bottleneck `expiration`, applied AFTER dispatch) kills those mid
-// think and surfaces a spurious local 504. Floor MaxAI at 5 min — the same
-// ceiling waitForCooldown.budgetMs uses — so slow reasoning turns complete.
-export const MAXAI_REQUEST_QUEUE_MAX_WAIT_MS = 300_000;
 
 const limiterEffectiveSettings = new WeakMap<Bottleneck, Bottleneck.ConstructorOptions>();
 // Wedge evictions stash per-key limiter settings here for the NEXT replacement
@@ -179,7 +176,7 @@ function hasRpmOverride(connectionId: string): boolean {
 // than the operator's global or per-connection minTime floor (#9763).
 function capMinTimeWithFloor(connectionId: string, capMinTime: number): number {
   return Math.max(
-    resolveMinTime(currentRequestQueueSettings.minTimeBetweenRequestsMs),
+    resolveMinTime(requestQueueState.settings.minTimeBetweenRequestsMs),
     resolveMinTime(connectionRateLimitOverrides.get(connectionId)?.minTime),
     capMinTime
   );
@@ -218,26 +215,6 @@ function resolveMaxConcurrent(override: number | undefined | null): number {
   return resolveOverride(override, EFFECTIVELY_INFINITE_CONCURRENCY);
 }
 
-export function resolveRequestQueueMaxWaitMs(
-  provider: string,
-  configuredMaxWaitMs: number = currentRequestQueueSettings.maxWaitMs,
-  connectionId?: string
-): number {
-  const p = provider.trim().toLowerCase();
-  let legacyDefault = configuredMaxWaitMs;
-  if (p === "zai-web") {
-    legacyDefault = Math.max(configuredMaxWaitMs, ZAI_WEB_REQUEST_QUEUE_MAX_WAIT_MS);
-  } else if (p === "maxai" || p === "mx") {
-    // MaxAI's slow reasoning models legitimately need up to ~5 min; floor the
-    // per-request execution budget so they aren't cut off early.
-    legacyDefault = Math.max(configuredMaxWaitMs, MAXAI_REQUEST_QUEUE_MAX_WAIT_MS);
-  }
-  const override = connectionId
-    ? connectionRateLimitOverrides.get(connectionId)?.maxWaitMs
-    : undefined;
-  return resolveOverride(override, legacyDefault);
-}
-
 /**
  * Limiter-managed execution backstop (Bottleneck `expiration`). Starts only
  * after a job leaves QUEUED; bounds execution, never queue wait. Kept strictly
@@ -251,7 +228,7 @@ export function resolveExecutionMaxWaitMs(connectionId?: string): number {
     ? (connectionRateLimitOverrides.get(connectionId) as ConnectionRateLimitOverrides | undefined)
         ?.executionMaxWaitMs
     : undefined;
-  return resolveOverride(override, currentRequestQueueSettings.executionMaxWaitMs);
+  return resolveOverride(override, requestQueueState.settings.executionMaxWaitMs);
 }
 
 function buildLimiterDefaults() {
@@ -259,10 +236,10 @@ function buildLimiterDefaults() {
   // the global request-queue settings the same way per-connection overrides
   // are interpreted (see resolveRpm / resolveMinTime / resolveMaxConcurrent).
   return {
-    maxConcurrent: resolveMaxConcurrent(currentRequestQueueSettings.concurrentRequests),
-    minTime: resolveMinTime(currentRequestQueueSettings.minTimeBetweenRequestsMs),
-    reservoir: resolveRpm(currentRequestQueueSettings.requestsPerMinute),
-    reservoirRefreshAmount: resolveRpm(currentRequestQueueSettings.requestsPerMinute),
+    maxConcurrent: resolveMaxConcurrent(requestQueueState.settings.concurrentRequests),
+    minTime: resolveMinTime(requestQueueState.settings.minTimeBetweenRequestsMs),
+    reservoir: resolveRpm(requestQueueState.settings.requestsPerMinute),
+    reservoirRefreshAmount: resolveRpm(requestQueueState.settings.requestsPerMinute),
     reservoirRefreshInterval: 60 * 1000,
   };
 }
@@ -342,6 +319,7 @@ function reconcileEnabledConnections(
 
   for (const connectionId of nextEnabledConnections) {
     enabledConnections.add(connectionId);
+    notifyExecutionCapacity(connectionId);
   }
 
   return {
@@ -431,7 +409,7 @@ export async function initializeRateLimits() {
       getCachedSettings(),
     ]);
     const resilience = resolveResilienceSettings(settings);
-    currentRequestQueueSettings = { ...resilience.requestQueue };
+    requestQueueState.settings = { ...resilience.requestQueue };
     // #6846 Phase 1: operator overrides for header-less providers' static RPM
     // budget + concurrency cap (nvidia today). No-op for every provider without
     // an entry in either providerQuotaOverrides or PROVIDER_DEFAULT_RATE_LIMITS.
@@ -439,7 +417,7 @@ export async function initializeRateLimits() {
     loadOverrideMap(connectionRateLimitOverrides, connections as Array<Record<string, unknown>>);
     const { explicitCount, autoCount } = reconcileEnabledConnections(
       connections as unknown[],
-      currentRequestQueueSettings
+      requestQueueState.settings
     );
     updateAllLimiterSettings();
     reconcileLimitersWithOverrides();
@@ -462,14 +440,14 @@ export async function initializeRateLimits() {
 }
 
 export async function applyRequestQueueSettings(nextSettings: RequestQueueSettings) {
-  currentRequestQueueSettings = { ...nextSettings };
+  requestQueueState.settings = { ...nextSettings };
   // Global policy changes invalidate snapshots from the previous generation.
   preservedReplacementSettings.clear();
   const { getCachedProviderConnections } = await import("@/lib/db/readCache");
   const connections = await getCachedProviderConnections();
   // Also discard any snapshot created while the asynchronous DB read yielded.
   preservedReplacementSettings.clear();
-  reconcileEnabledConnections(connections as unknown[], currentRequestQueueSettings);
+  reconcileEnabledConnections(connections as unknown[], requestQueueState.settings);
   updateAllLimiterSettings();
 }
 
@@ -479,6 +457,7 @@ export async function applyRequestQueueSettings(nextSettings: RequestQueueSettin
 export function enableRateLimitProtection(connectionId) {
   if (!enabledConnections.has(connectionId)) clearPreservedReplacementSettings(connectionId);
   enabledConnections.add(connectionId);
+  notifyExecutionCapacity(connectionId);
 }
 
 /**
@@ -486,6 +465,7 @@ export function enableRateLimitProtection(connectionId) {
  */
 export function disableRateLimitProtection(connectionId) {
   enabledConnections.delete(connectionId);
+  notifyExecutionCapacity(connectionId);
   clearPreservedReplacementSettings(connectionId);
   // Ordinary administrative eviction uses disconnect(), not stop(), so
   // in-flight requests can finish. Wedge recovery is the deliberate exception:
@@ -508,6 +488,16 @@ export function isRateLimitEnabled(connectionId) {
   return enabledConnections.has(connectionId);
 }
 
+function notifyExecutionCapacity(connectionId: string): void {
+  const configured = Number(connectionRateLimitOverrides.get(connectionId)?.maxConcurrent);
+  updateAccountSemaphoreExecutionCapacity(
+    connectionId,
+    enabledConnections.has(connectionId) && Number.isFinite(configured) && configured > 0
+      ? configured
+      : null
+  );
+}
+
 /**
  * Refresh per-connection rate limit overrides.
  *
@@ -524,6 +514,7 @@ export function refreshConnectionRateLimits(connectionId, overrides) {
   } else {
     connectionRateLimitOverrides.set(connectionId, overrides);
   }
+  notifyExecutionCapacity(connectionId);
   clearPreservedReplacementSettings(connectionId);
   // The operator just restated this connection's limits: forget any cap
   // learned from a 429 body so a bad or stale one cannot outlive the change.
@@ -741,12 +732,12 @@ export async function withRateLimit(
   // the queue is already at/over maxQueueDepth. Default 0 = disabled.
   const admissionErr = checkQueueAdmission(
     limiter.counts().QUEUED,
-    currentRequestQueueSettings.maxQueueDepth,
+    requestQueueState.settings.maxQueueDepth,
     model ? `${provider}/${model}` : provider
   );
   if (admissionErr) {
     logRateLimit(
-      `🚧 [RATE-LIMIT] ${getLimiterKey(provider, connectionId, model)} — queue full, rejecting fast (maxQueueDepth=${currentRequestQueueSettings.maxQueueDepth})`
+      `🚧 [RATE-LIMIT] ${getLimiterKey(provider, connectionId, model)} — queue full, rejecting fast (maxQueueDepth=${requestQueueState.settings.maxQueueDepth})`
     );
     throw admissionErr;
   }
@@ -985,7 +976,7 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
         );
       } else if (remaining > limit * 0.5) {
         // Plenty of headroom — relax the limiter
-        updates.minTime = resolveMinTime(currentRequestQueueSettings.minTimeBetweenRequestsMs);
+        updates.minTime = resolveMinTime(requestQueueState.settings.minTimeBetweenRequestsMs);
         updates.reservoir = null;
         updates.reservoirRefreshAmount = null;
         updates.reservoirRefreshInterval = null;

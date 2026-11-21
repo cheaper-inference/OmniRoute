@@ -27,6 +27,9 @@ async function withFallbackClock(
     cleared(): number;
   }) => Promise<void>
 ) {
+  const originalNow = Date.now;
+  let now = originalNow();
+  Date.now = () => now;
   const originalSetTimeout = globalThis.setTimeout;
   const originalClearTimeout = globalThis.clearTimeout;
   const timers = new Map<TimerHandle, () => void>();
@@ -52,6 +55,7 @@ async function withFallbackClock(
   const fire = () => {
     const pending = [...timers.values()];
     timers.clear();
+    if (pending.length) now += WAIT_MS;
     for (const callback of pending) callback();
   };
   try {
@@ -65,6 +69,7 @@ async function withFallbackClock(
     fire();
     globalThis.setTimeout = originalSetTimeout;
     globalThis.clearTimeout = originalClearTimeout;
+    Date.now = originalNow;
   }
 }
 
