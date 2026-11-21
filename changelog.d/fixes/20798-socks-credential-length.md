@@ -1,0 +1,1 @@
+- **fix(proxy):** A SOCKS5 username or password longer than the 255-byte length prefix is refused before the connection is dialed, on the fetch connector and on the Cursor HTTP/2 tunnel, instead of throwing inside the SOCKS client and taking the process down ([#20798](https://github.com/cheaper-inference/OmniRoute/pull/20798))
