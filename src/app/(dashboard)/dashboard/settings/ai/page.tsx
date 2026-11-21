@@ -30,6 +30,7 @@ export default function SettingsAiPage() {
       <CodexFastTierTab />
       <ConnectionTestSettings />
       <CodexAutoPingTab />
+      <CodexAutoPingTab provider="claude" />
       <BankedResetAutoApplyTab />
       <ClaudeFastModeTab />
       <MemorySkillsTab />

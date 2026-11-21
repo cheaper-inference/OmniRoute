@@ -16,12 +16,17 @@ const TASK = {
 
 const roots: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
-async function render() {
+async function render(provider: "codex" | "claude" = "codex") {
   const el = document.createElement("div");
   document.body.appendChild(el);
   const root = createRoot(el);
   await act(async () => {
-    root.render(<CodexWakeupsSection accounts={[{ id: "codex-1", label: "work@example.com" }]} />);
+    root.render(
+      <CodexWakeupsSection
+        provider={provider}
+        accounts={[{ id: "codex-1", label: "work@example.com", inactive: true }]}
+      />
+    );
   });
   roots.push({ root, el });
 }
@@ -104,4 +109,51 @@ describe("Codex scheduled wakeups section", () => {
       "The action failed. Try again in a moment."
     );
   });
+});
+
+it("sends scheduled Claude wakeup actions to the Claude account scope", async () => {
+  const fetchMock = mockApi();
+  await render("claude");
+  expect(document.querySelector("#claude-wakeups-title")).toBeTruthy();
+  await act(async () => {
+    button("Run now")?.click();
+  });
+  expect(
+    fetchMock.mock.calls.every(([url]) => url === "/api/settings/codex-wakeups?provider=claude")
+  ).toBe(true);
+  expect(fetchMock.mock.calls.some(([, init]) => init?.method === "POST")).toBe(true);
+});
+
+it("shows the accounts and edits the existing wakeup with prefilled values", async () => {
+  const fetchMock = mockApi(200);
+  await render();
+  expect(document.body.textContent).toContain("Accounts · work@example.com (Inactive)");
+  await act(async () => {
+    button("Edit")?.click();
+  });
+  const name = [...document.querySelectorAll("input")].find((input) => input.value === TASK.name)!;
+  expect(name).toBeTruthy();
+  expect(document.querySelector('input[type="number"]')).toHaveProperty("value", "90");
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+      name,
+      "Afternoon"
+    );
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await act(async () => {
+    button("Save")?.click();
+  });
+  const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
+  expect(JSON.parse(String(post?.[1]?.body))).toEqual({
+    action: "update",
+    id: TASK.id,
+    task: {
+      name: "Afternoon",
+      connectionIds: TASK.connectionIds,
+      schedule: TASK.schedule,
+      enabled: TASK.enabled,
+    },
+  });
+  expect(button("Cancel")).toBeUndefined();
 });

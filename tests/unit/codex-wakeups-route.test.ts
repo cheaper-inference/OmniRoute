@@ -30,8 +30,8 @@ test.after(async () => {
 
 const URL = "http://localhost/api/settings/codex-wakeups";
 
-function post(body: unknown) {
-  return makeManagementSessionRequest(URL, {
+function post(body: unknown, url = URL) {
+  return makeManagementSessionRequest(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: body as Record<string, unknown>,
@@ -96,7 +96,7 @@ test("invalid payloads are rejected with 400 and no stack trace", async () => {
   assert.equal(malformed.status, 400);
 });
 
-test("create refuses accounts that are not active Codex OAuth connections", async () => {
+test("create refuses accounts that are not Codex OAuth connections", async () => {
   const apiKey = (await providersDb.createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -149,4 +149,69 @@ test("create, list, run, update and delete a wakeup task", async () => {
   assert.equal(missing.status, 404);
   const missingRun = await route.POST(await post({ action: "run", id: saved.id }));
   assert.equal(missingRun.status, 404);
+});
+
+test("Claude schedules and history are isolated from the existing Codex API", async () => {
+  const url = URL + "?provider=claude";
+  const claude = await codexAccount({ provider: "claude", isActive: false });
+  const codex = await codexAccount();
+  assert.equal(
+    (await route.POST(await post({ action: "create", task: task([codex.id]) }, url))).status,
+    400
+  );
+
+  const response = await route.POST(await post({ action: "create", task: task([claude.id]) }, url));
+  assert.equal(response.status, 201);
+  const { task: saved } = await response.json();
+  assert.equal(saved.provider, "claude");
+  const list = async (endpoint: string) =>
+    (await route.GET(await makeManagementSessionRequest(endpoint))).json();
+  assert.deepEqual((await list(URL)).tasks, []);
+  assert.deepEqual(
+    (await list(url)).tasks.map((entry: { id: string }) => entry.id),
+    [saved.id]
+  );
+  assert.equal((await route.POST(await post({ action: "run", id: saved.id }))).status, 404);
+
+  await providersDb.updateProviderConnection(claude.id, { isActive: false });
+  assert.equal((await route.POST(await post({ action: "run", id: saved.id }, url))).status, 202);
+  await service.waitForCodexWakeupRuns();
+  assert.deepEqual((await list(URL)).runs, []);
+  assert.equal((await list(url)).runs[0].results[0].reason, "inactive");
+  assert.equal((await route.POST(await post({ action: "delete", id: saved.id }, url))).status, 200);
+});
+
+test("Claude manual and automatic pings share the same persistent account claim", async () => {
+  const claude = await codexAccount({ provider: "claude" });
+  const { claimClaudeWakeup, recordClaudeWakeupReset } =
+    await import("../../src/lib/db/claudeWakeups.ts");
+  const now = Date.now();
+  const reset = now + 5 * 60 * 60_000;
+  assert.equal(claimClaudeWakeup(claude.id, now), true);
+  assert.equal(claimClaudeWakeup(claude.id, now), false);
+  recordClaudeWakeupReset(claude.id, now, reset);
+  assert.equal(claimClaudeWakeup(claude.id, reset - 1), false);
+  assert.equal(claimClaudeWakeup(claude.id, reset), true);
+});
+
+test("a scheduled wakeup can be saved with a deactivated Codex account and skips it at runtime", async () => {
+  const inactive = await codexAccount({ isActive: false });
+  const initial = task([inactive.id], { schedule: { kind: "interval", minutes: 45 } });
+  const created = await route.POST(await post({ action: "create", task: initial }));
+  assert.equal(created.status, 201);
+  const { task: saved } = await created.json();
+  const updated = await route.POST(
+    await post({ action: "update", id: saved.id, task: { ...initial, name: "Renamed" } })
+  );
+  assert.equal(updated.status, 200);
+  const edited = (await updated.json()).task;
+  assert.equal(edited.id, saved.id);
+  assert.equal(edited.name, "Renamed");
+  assert.equal(edited.nextRunAt, saved.nextRunAt);
+
+  assert.equal((await route.POST(await post({ action: "run", id: saved.id }))).status, 202);
+  await service.waitForCodexWakeupRuns();
+  const data = await (await route.GET(await makeManagementSessionRequest(URL))).json();
+  assert.equal(data.runs[0].results[0].reason, "inactive");
+  assert.equal((await route.POST(await post({ action: "delete", id: saved.id }))).status, 200);
 });

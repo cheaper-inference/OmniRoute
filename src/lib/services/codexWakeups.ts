@@ -33,7 +33,8 @@ import {
   type CodexWakeupTrigger,
 } from "@/lib/db/codexWakeups";
 import { QUOTA_AUTOPING_PROVIDERS } from "@/shared/constants/quotaAutoPing";
-import type { CodexWakeupSchedule } from "@/shared/validation/codexWakeupSchemas";
+import type { CodexWakeupSchedule, WakeupProvider } from "@/shared/validation/codexWakeupSchemas";
+import { createClaudeAutoPingTick, runClaudeWakeup } from "./claudeWakeups";
 import { nextWakeupAt } from "./codexWakeupSchedule";
 import {
   createDefaultQuotaAutoPingDeps,
@@ -62,6 +63,7 @@ export type CodexWakeupPingReason =
   | "auth_failed"
   | "no_token"
   | "quota_unavailable"
+  | "window_active"
   | "quota_exhausted"
   | "not_completed"
   | "timeout"
@@ -70,12 +72,13 @@ export type CodexWakeupPingReason =
 export interface CodexWakeupPingResult {
   status: CodexWakeupPingStatus;
   reason: CodexWakeupPingReason;
+  nextProbeAt?: number;
 }
 
 type WakeupConnection = QuotaAutoPingConnection & { isActive?: boolean | null };
 
 export interface CodexWakeupStore {
-  listTasks: () => CodexWakeupTask[];
+  listTasks: (provider?: WakeupProvider) => CodexWakeupTask[];
   claimRun: (
     taskId: string,
     trigger: CodexWakeupTrigger,
@@ -90,6 +93,7 @@ export interface CodexWakeupStore {
 export interface CodexWakeupDeps extends QuotaAutoPingDeps {
   getProviderConnectionById: (id: string) => Promise<WakeupConnection | null>;
   store: CodexWakeupStore;
+  listClaudeTasks?: () => CodexWakeupTask[];
 }
 
 export interface CodexWakeupState {
@@ -128,6 +132,7 @@ export function createDefaultCodexWakeupDeps(): CodexWakeupDeps {
     getProviderConnectionById:
       getProviderConnectionById as unknown as CodexWakeupDeps["getProviderConnectionById"],
     store: createDbCodexWakeupStore(),
+    listClaudeTasks: () => listCodexWakeupTasks("claude"),
   };
 }
 
@@ -145,18 +150,19 @@ function warn(message: string, err: unknown): void {
   log.warn(message, { error: sanitizeErrorMessage((err as Error)?.message ?? String(err)) });
 }
 
-function isUsableAccount(connection: WakeupConnection | null): boolean {
-  return Boolean(
-    connection &&
-    connection.provider === "codex" &&
-    connection.authType === "oauth" &&
-    connection.isActive !== false
-  );
+function isSupportedWakeupAccount(
+  connection: WakeupConnection | null,
+  provider: WakeupProvider
+): boolean {
+  return Boolean(connection && connection.provider === provider && connection.authType === "oauth");
 }
 
-function rejectConnection(connection: WakeupConnection | null): CodexWakeupPingResult | null {
+function rejectConnection(
+  connection: WakeupConnection | null,
+  provider: WakeupProvider
+): CodexWakeupPingResult | null {
   if (!connection) return outcome("skipped", "not_found");
-  if (connection.provider !== "codex" || connection.authType !== "oauth") {
+  if (connection.provider !== provider || connection.authType !== "oauth") {
     return outcome("skipped", "unsupported");
   }
   if (connection.isActive === false) return outcome("skipped", "inactive");
@@ -257,7 +263,8 @@ async function withTimeout(
 export async function pingCodexAccountForWakeup(
   connectionId: string,
   deps: CodexWakeupDeps = createDefaultCodexWakeupDeps(),
-  state: CodexWakeupState = sharedState
+  state: CodexWakeupState = sharedState,
+  provider: WakeupProvider = "codex"
 ): Promise<CodexWakeupPingResult> {
   let connection: WakeupConnection | null;
   try {
@@ -266,14 +273,17 @@ export async function pingCodexAccountForWakeup(
     warn(`codex:${connectionId}: connection lookup failed`, err);
     return outcome("failed", "error");
   }
-  const rejected = rejectConnection(connection);
+  const rejected = rejectConnection(connection, provider);
   if (rejected) return rejected;
   if (state.inFlight.has(connectionId)) return outcome("skipped", "busy");
 
   state.inFlight.add(connectionId);
   try {
     return await withTimeout(
-      (signal) => runAccountPing(connection as WakeupConnection, deps, signal),
+      (signal) =>
+        provider === "claude"
+          ? runClaudeWakeup(connection as WakeupConnection, signal)
+          : runAccountPing(connection as WakeupConnection, deps, signal),
       state.pingTimeoutMs,
       connectionId
     );
@@ -292,10 +302,16 @@ export async function executeCodexWakeupRun(
   try {
     for (const connectionId of claim.task.connectionIds) {
       const startedAt = Date.now();
-      const result = await pingCodexAccountForWakeup(connectionId, deps, state);
+      const result = await pingCodexAccountForWakeup(
+        connectionId,
+        deps,
+        state,
+        claim.task.provider
+      );
       deps.store.recordResult(claim.run.id, {
         connectionId,
-        ...result,
+        status: result.status,
+        reason: result.reason,
         durationMs: Date.now() - startedAt,
       });
     }
@@ -333,7 +349,7 @@ export async function runCodexWakeupTick(
   try {
     const nowMs = now();
     deps.store.recoverRuns(nowMs);
-    for (const task of deps.store.listTasks()) {
+    for (const task of [...deps.store.listTasks(), ...(deps.listClaudeTasks?.() ?? [])]) {
       if (!task.enabled || !task.nextRunAt || Date.parse(task.nextRunAt) > nowMs) continue;
       const claim = deps.store.claimRun(task.id, "scheduled", nowMs, nextWakeupAt);
       if (!claim) continue;
@@ -373,22 +389,29 @@ export async function waitForCodexWakeupRuns(state: CodexWakeupState = sharedSta
   }
 }
 
-/** Ids from `connectionIds` that are not active Codex OAuth connections. */
-export async function findUnusableWakeupAccounts(
+/** Ids from `connectionIds` that are not supported OAuth connections. */
+export async function findUnsupportedWakeupAccounts(
   connectionIds: string[],
-  deps: Pick<CodexWakeupDeps, "getProviderConnectionById"> = createDefaultCodexWakeupDeps()
+  deps: Pick<CodexWakeupDeps, "getProviderConnectionById"> = createDefaultCodexWakeupDeps(),
+  provider: WakeupProvider = "codex"
 ): Promise<string[]> {
   const unusable: string[] = [];
   for (const id of connectionIds) {
-    if (!isUsableAccount(await deps.getProviderConnectionById(id))) unusable.push(id);
+    if (!isSupportedWakeupAccount(await deps.getProviderConnectionById(id), provider))
+      unusable.push(id);
   }
   return unusable;
 }
 
 let schedulerInterval: ReturnType<typeof setInterval> | null = null;
 
+const runClaudeAutoPing = createClaudeAutoPingTick((id) =>
+  pingCodexAccountForWakeup(id, undefined, sharedState, "claude")
+);
+
 function tick(): void {
   runCodexWakeupTick(createDefaultCodexWakeupDeps(), sharedState).catch(() => undefined);
+  runClaudeAutoPing().catch((err) => warn("Claude auto-ping tick failed", err));
 }
 
 /** Start the in-process scheduler. Idempotent; a no-op until a task exists and is due. */

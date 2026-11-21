@@ -390,6 +390,9 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  claudeQuotaAutoPing: z
+    .object({ connections: z.record(z.string().max(100), z.boolean()).optional() })
+    .optional(),
   // Opt-in auto-apply of banked resets; off by default (see bankedResetAutoApplySchema).
   bankedResetAutoApply: bankedResetAutoApplySchema.optional(),
   // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the

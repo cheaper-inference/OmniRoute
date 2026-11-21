@@ -7,6 +7,9 @@
  */
 import { z } from "zod";
 
+export const wakeupProviderSchema = z.enum(["codex", "claude"]);
+export type WakeupProvider = z.infer<typeof wakeupProviderSchema>;
+
 export const CODEX_WAKEUP_MAX_ACCOUNTS = 20;
 export const CODEX_WAKEUP_MIN_INTERVAL_MINUTES = 5;
 export const CODEX_WAKEUP_MAX_INTERVAL_MINUTES = 7 * 24 * 60;

@@ -351,6 +351,7 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    claudeQuotaAutoPing: { connections: {} },
     // Opt-in auto-apply of banked resets (Codex credits, Claude grants, Claude weekly
     // session reset). OFF and dry-run by default — never redeems on the operator's behalf
     // until enabled. Stored values are merged with these defaults by

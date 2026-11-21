@@ -11,6 +11,7 @@ import { getDbInstance } from "./core";
 import type {
   CodexWakeupSchedule,
   CodexWakeupTaskInput,
+  WakeupProvider,
 } from "@/shared/validation/codexWakeupSchemas";
 
 export const CODEX_WAKEUP_MAX_TASKS = 100;
@@ -24,6 +25,7 @@ export type CodexWakeupResultStatus = "succeeded" | "failed" | "skipped";
 export type CodexWakeupRunStatus = "running" | CodexWakeupResultStatus | "partial" | "interrupted";
 
 export interface CodexWakeupTask {
+  provider?: WakeupProvider;
   id: string;
   name: string;
   connectionIds: string[];
@@ -70,6 +72,7 @@ export class CodexWakeupStoreError extends Error {
 }
 
 type TaskRow = {
+  provider: WakeupProvider;
   id: string;
   name: string;
   connection_ids: string;
@@ -81,6 +84,7 @@ type TaskRow = {
 };
 
 type RunRow = {
+  provider: WakeupProvider;
   id: string;
   task_id: string;
   task_name: string;
@@ -103,6 +107,7 @@ function parseJsonArray<T>(value: string): T[] {
 
 function toTask(row: TaskRow): CodexWakeupTask {
   return {
+    provider: row.provider,
     id: row.id,
     name: row.name,
     connectionIds: parseJsonArray<string>(row.connection_ids),
@@ -142,10 +147,10 @@ function hasLiveRun(taskId: string, nowMs: number): boolean {
   return Boolean(row);
 }
 
-export function listCodexWakeupTasks(): CodexWakeupTask[] {
+export function listCodexWakeupTasks(provider: WakeupProvider = "codex"): CodexWakeupTask[] {
   const rows = getDbInstance()
-    .prepare("SELECT * FROM codex_wakeup_tasks ORDER BY created_at ASC, id ASC")
-    .all() as TaskRow[];
+    .prepare("SELECT * FROM codex_wakeup_tasks WHERE provider = ? ORDER BY created_at ASC, id ASC")
+    .all(provider) as TaskRow[];
   return rows.map(toTask);
 }
 
@@ -157,20 +162,23 @@ export function getCodexWakeupTask(id: string): CodexWakeupTask | null {
 export function createCodexWakeupTask(
   input: CodexWakeupTaskInput,
   nextRunAt: string | null,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  provider: WakeupProvider = "codex"
 ): CodexWakeupTask {
   const db = getDbInstance();
   const id = randomUUID();
   const now = new Date(nowMs).toISOString();
   db.transaction(() => {
-    const { n } = db.prepare("SELECT COUNT(*) AS n FROM codex_wakeup_tasks").get() as {
+    const { n } = db
+      .prepare("SELECT COUNT(*) AS n FROM codex_wakeup_tasks WHERE provider = ?")
+      .get(provider) as {
       n: number;
     };
     if (n >= CODEX_WAKEUP_MAX_TASKS) throw new CodexWakeupStoreError("limit");
     db.prepare(
       `INSERT INTO codex_wakeup_tasks
-         (id, name, connection_ids, schedule, enabled, next_run_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+         (id, name, connection_ids, schedule, enabled, next_run_at, created_at, updated_at, provider)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       input.name,
@@ -179,7 +187,8 @@ export function createCodexWakeupTask(
       input.enabled ? 1 : 0,
       input.enabled ? nextRunAt : null,
       now,
-      now
+      now,
+      provider
     );
   })();
   return getCodexWakeupTask(id) as CodexWakeupTask;
@@ -265,9 +274,17 @@ export function claimCodexWakeupRun(
     };
     db.prepare(
       `INSERT INTO codex_wakeup_runs
-         (id, task_id, task_name, trigger_kind, status, results, started_at, lease_expires_at)
-       VALUES (?, ?, ?, ?, 'running', '[]', ?, ?)`
-    ).run(run.id, taskId, run.taskName, trigger, run.startedAt, run.leaseExpiresAt);
+         (id, task_id, task_name, trigger_kind, status, results, started_at, lease_expires_at, provider)
+       VALUES (?, ?, ?, ?, 'running', '[]', ?, ?, ?)`
+    ).run(
+      run.id,
+      taskId,
+      run.taskName,
+      trigger,
+      run.startedAt,
+      run.leaseExpiresAt,
+      task.provider ?? "codex"
+    );
     return { run, task };
   })();
 }
@@ -297,17 +314,17 @@ function deriveRunStatus(
   return statuses.size === 1 ? results[0].status : "partial";
 }
 
-function pruneRuns(): void {
+function pruneRuns(provider: WakeupProvider): void {
   getDbInstance()
     .prepare(
       `DELETE FROM codex_wakeup_runs
-        WHERE status != 'running'
+        WHERE status != 'running' AND provider = ?
           AND id NOT IN (
-            SELECT id FROM codex_wakeup_runs WHERE status != 'running'
+            SELECT id FROM codex_wakeup_runs WHERE status != 'running' AND provider = ?
              ORDER BY started_at DESC, id DESC LIMIT ?
           )`
     )
-    .run(CODEX_WAKEUP_MAX_RUNS);
+    .run(provider, provider, CODEX_WAKEUP_MAX_RUNS);
 }
 
 /** Close a running run with a status derived from its results; prunes old history. */
@@ -330,7 +347,7 @@ export function finishCodexWakeupRun(
       run.finishedAt,
       runId
     );
-    pruneRuns();
+    pruneRuns(row.provider);
     return run;
   })();
 }
@@ -346,9 +363,14 @@ export function recoverCodexWakeupRuns(nowMs: number = Date.now()): number {
   return result.changes;
 }
 
-export function listCodexWakeupRuns(limit = 20): CodexWakeupRun[] {
+export function listCodexWakeupRuns(
+  limit = 20,
+  provider: WakeupProvider = "codex"
+): CodexWakeupRun[] {
   const rows = getDbInstance()
-    .prepare("SELECT * FROM codex_wakeup_runs ORDER BY started_at DESC, id DESC LIMIT ?")
-    .all(Math.max(1, Math.min(limit, CODEX_WAKEUP_MAX_RUNS))) as RunRow[];
+    .prepare(
+      "SELECT * FROM codex_wakeup_runs WHERE provider = ? ORDER BY started_at DESC, id DESC LIMIT ?"
+    )
+    .all(provider, Math.max(1, Math.min(limit, CODEX_WAKEUP_MAX_RUNS))) as RunRow[];
   return rows.map(toRun);
 }
