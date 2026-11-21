@@ -10,6 +10,7 @@ import { markServerReady, markServerStarting } from "@/lib/serverLifecycle";
 import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { normalizeBootError } from "@/lib/instrumentationBootError";
 import { isHeadless, skipInHeadless } from "@/lib/system/headless";
+import { registerQuotaWindowPingRefresh } from "@/lib/config/quotaWindowPingRefresh";
 
 function getRandomBytes(byteLength: number): Uint8Array {
   const bytes = new Uint8Array(byteLength);
@@ -734,6 +735,13 @@ export async function registerNodejs(): Promise<void> {
     const { startCodexWakeups } = await import("@/lib/services/codexWakeups");
     startCodexWakeups();
     console.log("[STARTUP] Codex wakeup scheduler started (no-op until a task is created)");
+    const { startQuotaWindowPingScheduler, refreshQuotaWindowPingScheduler } =
+      await import("@/lib/services/quotaWindowPingScheduler");
+    registerQuotaWindowPingRefresh(refreshQuotaWindowPingScheduler);
+    await startQuotaWindowPingScheduler().catch(() => undefined);
+    console.log(
+      "[STARTUP] Quota window ping scheduler initialized (opt-in, lazy: no timer until enabled with a target)"
+    );
     const { startCodexResetCreditAutospend } =
       await import("@/lib/services/codexResetCreditAutospend");
     startCodexResetCreditAutospend();
