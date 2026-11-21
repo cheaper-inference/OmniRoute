@@ -12,7 +12,7 @@
  */
 
 import { saveRequestUsage } from "@/lib/usageDb";
-import { recordKeyQuotaUsage } from "@/domain/keyQuota";
+import { boundKeyQuotaReservation, recordKeyQuotaUsage } from "@/domain/keyQuota";
 import { recordTokenUsage } from "../../services/tokenLimitCounter.ts";
 import { computeBillableTokens } from "./upstreamTimeouts.ts";
 import { type EffectiveServiceTier } from "./serviceTier.ts";
@@ -74,7 +74,9 @@ function recordStreamingBillableTokens(
     // Key-quota rpm/tpm advance on every stream, aborted or failed ones too: the
     // provider already generated the partial tokens, and the apiKeyPolicy gate
     // must see the request, or a key that aborts after the first token is never counted.
-    recordKeyQuotaUsage(ctx.apiKeyInfo.id, billable);
+    recordKeyQuotaUsage(ctx.apiKeyInfo.id, billable, {
+      reservation: boundKeyQuotaReservation(ctx.apiKeyInfo),
+    });
     if (ctx.streamStatus === 200 && billable > 0)
       recordTokenUsage(
         ctx.apiKeyInfo.id,

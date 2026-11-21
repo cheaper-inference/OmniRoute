@@ -13,11 +13,19 @@ import {
   type AdaptiveAdmissionRuntime,
 } from "@omniroute/open-sse/services/admission/runtime.ts";
 import type { PerTargetAdmissionHook } from "@omniroute/open-sse/services/admission/types.ts";
+import type { KeyQuotaReservation } from "@/domain/keyQuota";
+import { releaseChatAdmissionAfterHandler } from "@/shared/middleware/chatAdmissionRelease";
 
 /** Single fairness bucket for unauthenticated / keyless traffic. Opaque; never a raw key. */
 export const ANONYMOUS_ADMISSION_TENANT_KEY = "anonymous";
 
 export type ChatAdmissionContext = {
+  /**
+   * Hand over the key-quota rpm slot the policy phase took for this call. The wrapper releases it
+   * when the call ends: a thrown error, a non-stream response, or the end / cancel / abort / error
+   * of a stream. The usage recorder may convert it earlier (recording releases it).
+   */
+  holdKeyQuota(reservation: KeyQuotaReservation): void;
   /**
    * Acquire once against the process runtime.
    * Returns a sanitized rejection Response, or null when admitted / already acquired.
@@ -240,12 +248,29 @@ export function resolveClientRawAfterAdmission(
 
 export function createChatAdmissionContext(
   getRuntime: () => AdaptiveAdmissionRuntime = getAdaptiveAdmissionRuntime
-): ChatAdmissionContext & { getAdmittedState(): AdmittedState | null } {
+): ChatAdmissionContext & {
+  getAdmittedState(): AdmittedState | null;
+  /** One lease over every key-quota slot handed to `holdKeyQuota`; null when none was. */
+  getKeyQuotaLease(): { readonly released: boolean; release(): void } | null;
+} {
   let state: AdmittedState | null = null;
   let acquireStarted = false;
+  const heldSlots: KeyQuotaReservation[] = [];
+  const keyQuotaLease = {
+    get released() {
+      return heldSlots.every((slot) => slot.released);
+    },
+    release() {
+      for (const slot of heldSlots) slot.release();
+    },
+  };
 
   return {
     getAdmittedState: () => state,
+    getKeyQuotaLease: () => (heldSlots.length > 0 ? keyQuotaLease : null),
+    holdKeyQuota(reservation) {
+      heldSlots.push(reservation);
+    },
     async acquire(apiKeyId, request, body) {
       // Exactly once per logical request — never re-enter the runtime.
       if (state || acquireStarted) return null;
@@ -315,7 +340,7 @@ export function withChatAdmission(
     );
     const effectiveSignal = lifecycleSignal ?? request?.signal ?? undefined;
     try {
-      const response = await implementation(
+      let response = await implementation(
         request,
         clientRawRequest,
         preParsedBody,
@@ -323,6 +348,17 @@ export function withChatAdmission(
         admissionContext,
         effectiveSignal
       );
+      // Only a call that holds a key-quota slot gets the extra stream wrapper.
+      const keyQuotaLease = admissionContext.getKeyQuotaLease();
+      if (keyQuotaLease) {
+        response = await releaseChatAdmissionAfterHandler(
+          Promise.resolve(response),
+          keyQuotaLease,
+          {
+            signal: effectiveSignal,
+          }
+        );
+      }
       const admittedState = admissionContext.getAdmittedState();
       if (!admittedState) return response;
 
@@ -332,6 +368,7 @@ export function withChatAdmission(
         signal: effectiveSignal,
       });
     } catch (err) {
+      admissionContext.getKeyQuotaLease()?.release();
       const admittedState = admissionContext.getAdmittedState();
       if (admittedState) {
         const { runtime, admitted } = admittedState;
