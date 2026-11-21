@@ -187,10 +187,83 @@ function resolveBatchApiKeyValue(batch: Pick<BatchRecord, "apiKeyId">, apiKeyRow
   return null;
 }
 
+// Byte length of the whitespace sequence at offset i that String.trim() removes, or 0 when
+// the byte is content. Covers the ECMAScript WhiteSpace and LineTerminator ranges (U+00A0
+// included) except LF, which the caller handles as the line separator. UTF-8 is scanned in
+// place so no string or array is materialised for a rejected file.
+function isAsciiWhitespaceByte(byte: number): boolean {
+  return byte === 0x09 || byte === 0x0b || byte === 0x0c || byte === 0x0d || byte === 0x20;
+}
+
+function isTwoByteWhitespace(b0: number, b1: number): boolean {
+  return b0 === 0xc2 && b1 === 0xa0; // U+00A0
+}
+
+function isE2Whitespace(b1: number, b2: number): boolean {
+  if (b1 === 0x80) {
+    return (b2 >= 0x80 && b2 <= 0x8a) || b2 === 0xa8 || b2 === 0xa9 || b2 === 0xaf;
+  }
+  return b1 === 0x81 && b2 === 0x9f; // U+205F
+}
+
+function isThreeByteWhitespace(b0: number, b1: number, b2: number): boolean {
+  if (b0 === 0xe1) return b1 === 0x9a && b2 === 0x80; // U+1680
+  if (b0 === 0xe2) return isE2Whitespace(b1, b2);
+  if (b0 === 0xe3) return b1 === 0x80 && b2 === 0x80; // U+3000
+  return b0 === 0xef && b1 === 0xbb && b2 === 0xbf; // U+FEFF
+}
+
+function whitespaceBytesAt(content: Buffer, i: number): number {
+  const b0 = content[i];
+  if (isAsciiWhitespaceByte(b0)) return 1;
+  const b1 = i + 1 < content.length ? content[i + 1] : -1;
+  const b2 = i + 2 < content.length ? content[i + 2] : -1;
+  if (isTwoByteWhitespace(b0, b1)) return 2;
+  return isThreeByteWhitespace(b0, b1, b2) ? 3 : 0;
+}
+
+function countBatchItemLines(content: Buffer): number {
+  let lines = 0;
+  let hasNonWhitespace = false;
+  for (let i = 0; i < content.length;) {
+    if (content[i] === 0x0a) {
+      if (hasNonWhitespace) lines += 1;
+      hasNonWhitespace = false;
+      i += 1;
+      continue;
+    }
+    const whitespace = whitespaceBytesAt(content, i);
+    if (whitespace > 0) {
+      i += whitespace;
+      continue;
+    }
+    hasNonWhitespace = true;
+    i += 1;
+  }
+  if (hasNonWhitespace) lines += 1;
+  return lines;
+}
+
+function resolveMaxBatchItems(): number {
+  const raw = (process.env.MAX_BATCH_ITEMS ?? "").trim();
+  const parsed = /^\d+$/.test(raw) ? Number(raw) : NaN;
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 100_000;
+}
+
 export function parseBatchItems(
   content: Buffer,
-  batchEndpoint: SupportedBatchEndpoint
+  batchEndpoint: SupportedBatchEndpoint,
+  options: { skipItemLimit?: boolean } = {}
 ): { items: BatchRequestItem[]; error: null } | { items: null; error: string } {
+  const maxItems = resolveMaxBatchItems();
+  const itemCount = countBatchItemLines(content);
+  if (!options.skipItemLimit && itemCount > maxItems) {
+    return {
+      items: null,
+      error: `Batch has ${itemCount} items; MAX_BATCH_ITEMS limits batches to ${maxItems} items`,
+    };
+  }
+
   const lines = content
     .toString()
     .split("\n")
@@ -317,17 +390,17 @@ async function startBatch(batch: any): Promise<void> {
   }
 
   try {
-    const parsedItems = parseBatchItems(content, batch.endpoint);
+    // A batch with persisted checkpoints is a resumed run admitted before this limit;
+    // the item cap applies only to newly admitted batches.
+    const isResume = countBatchItemCheckpoints(batch.id) > 0;
+    const parsedItems = parseBatchItems(content, batch.endpoint, { skipItemLimit: isResume });
     if (parsedItems.error) {
-      // Set total count even on validation failure so UI shows correct numbers
-      const lines = content
-        .toString()
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean);
+      // Set total count even on validation failure so UI shows correct numbers.
+      // A resumed batch keeps its persisted failed count instead of losing it here.
+      const lineCount = countBatchItemLines(content);
       updateBatch(batch.id, {
-        requestCountsTotal: lines.length,
-        requestCountsFailed: lines.length, // All failed due to validation error
+        requestCountsTotal: lineCount,
+        ...(isResume ? {} : { requestCountsFailed: lineCount }),
       });
       failBatch(batch.id, parsedItems.error);
       return;
