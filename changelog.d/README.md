@@ -1,17 +1,17 @@
 # changelog.d/ — changelog fragments
 
 **A PR never edits `CHANGELOG.md` directly during the cycle.** Instead it adds ONE new
-file here — its changelog entry as a *fragment*. Two PRs never touch the same file, so
+file here — its changelog entry as a _fragment_. Two PRs never touch the same file, so
 changelog merge conflicts (the "CHANGELOG-eat" cascade that forced a re-sync push + full
 CI re-run after every sibling merge) are structurally impossible.
 
 ## Convention
 
-| Directory      | Aggregates under        |
-| -------------- | ----------------------- |
-| `features/`    | `### ✨ New Features`   |
-| `fixes/`       | `### 🐛 Bug Fixes`      |
-| `maintenance/` | `### 📝 Maintenance`    |
+| Directory      | Aggregates under      |
+| -------------- | --------------------- |
+| `features/`    | `### ✨ New Features` |
+| `fixes/`       | `### 🐛 Bug Fixes`    |
+| `maintenance/` | `### 📝 Maintenance`  |
 
 - **Filename**: `<PR-number>-<short-slug>.md` (e.g. `fixes/6700-dockerfile-better-sqlite3.md`).
   The PR number prefix keeps aggregation order deterministic.

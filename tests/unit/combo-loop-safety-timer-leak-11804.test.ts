@@ -44,7 +44,7 @@ test("#11804: the loop-safety timer is released in a finally, not only on succes
 });
 
 test("#11804: the timer handle is reachable from the function-scope cleanup", () => {
-  // The timer is created inside the `for (setTry...)` loop; the cleanup lives at
+  // The timer is created inside the `while (setTry...)` loop; the cleanup lives at
   // function scope. If the handle is not published to that outer binding, the
   // finally silently clears nothing.
   assert.match(
@@ -53,7 +53,7 @@ test("#11804: the timer handle is reachable from the function-scope cleanup", ()
     "the per-iteration timer must be published to the function-scope handle"
   );
   const declIdx = comboSrc.indexOf("let activeLoopSafetyTimer");
-  const loopIdx = comboSrc.indexOf("for (let setTry = 0");
+  const loopIdx = comboSrc.indexOf("while (setTry <= extra.maxSetRetries)");
   assert.ok(declIdx > 0, "function-scope timer handle must be declared");
   assert.ok(
     declIdx < loopIdx,
