@@ -10,6 +10,8 @@ vi.mock("next-intl", () => ({
 
 const { default: LendingBadge } =
   await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/LendingBadge");
+const { default: AllocationTable } =
+  await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/AllocationTable");
 
 const NOW = Date.UTC(2026, 10, 20, 12, 0, 0);
 const FUTURE = Date.UTC(2100, 0, 1, 0, 0, 0);
@@ -68,9 +70,6 @@ describe("LendingBadge", () => {
     expect(badgeText({ percent: Number.NaN, until: FUTURE, nowMs: NOW })).toBeNull();
   });
 });
-
-const { default: AllocationTable } =
-  await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/AllocationTable");
 
 describe("AllocationTable lending badges", () => {
   const allocations = [
