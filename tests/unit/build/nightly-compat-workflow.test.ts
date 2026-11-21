@@ -115,7 +115,7 @@ gh() {
       printf "%s\\n" "$VALIDATED_SHA"
     fi
   elif [[ "$1 $2" == "issue create" || "$1 $2" == "issue comment" ]]; then
-    printf "%s\\n" "$*" >> "$FIXTURE_WRITES"
+    printf "%s\\0" "$@" >> "$FIXTURE_WRITES"
   else
     return 92
   fi
@@ -127,13 +127,30 @@ test("the nightly records the tested SHA only while it still matches the release
   const dir = mkdtempSync(join(tmpdir(), "omni-nightly-compat-report-"));
   context.after(() => rmSync(dir, { recursive: true, force: true }));
   const tested = "a".repeat(40);
+  const target = "release/v3.8.55";
+  const repo = "fixture/repo";
+  const runUrl = "https://example.invalid/runs/1";
+  const title = `🌙 nightly-compat: Node 24/26 failures on ${target}`;
+  const body =
+    `Nightly Node-compat run failed on \`${target}\` at \`${tested}\`: ${runUrl} — ` +
+    "triage which Node version/shard broke (fail-fast off, all versions reported).";
   const scenarios = [
     { current: "b".repeat(40), failure: "0", existing: "123", write: null },
     { current: tested, failure: "1", existing: "123", write: null },
     { current: "", failure: "0", existing: "123", write: null },
     { current: "null", failure: "0", existing: "", write: null },
-    { current: tested, failure: "0", existing: "123", write: /issue comment 123/ },
-    { current: tested, failure: "0", existing: "", write: /issue create/ },
+    {
+      current: tested,
+      failure: "0",
+      existing: "123",
+      write: ["issue", "comment", "123", "--repo", repo, "--body"],
+    },
+    {
+      current: tested,
+      failure: "0",
+      existing: "",
+      write: ["issue", "create", "--repo", repo, "--title", title, "--body"],
+    },
   ];
   for (const [index, scenario] of scenarios.entries()) {
     const writes = join(dir, `writes-${index}`);
@@ -142,10 +159,10 @@ test("the nightly records the tested SHA only while it still matches the release
       reportStep,
       dir,
       {
-        TARGET: "release/v3.8.55",
+        TARGET: target,
         VALIDATED_SHA: tested,
-        GITHUB_REPOSITORY: "fixture/repo",
-        RUN_URL: "https://example.invalid/runs/1",
+        GITHUB_REPOSITORY: repo,
+        RUN_URL: runUrl,
         FIXTURE_WRITES: writes,
         FIXTURE_LISTED: join(dir, `listed-${index}`),
         FIXTURE_READ_FAIL: scenario.failure,
@@ -160,8 +177,10 @@ test("the nightly records the tested SHA only while it still matches the release
       assert.equal(mutation, "", `scenario ${index} must not write a tracking issue`);
       continue;
     }
-    assert.match(mutation, scenario.write);
-    assert.ok(mutation.includes(`\`release/v3.8.55\` at \`${tested}\``), mutation);
-    assert.ok(mutation.includes("https://example.invalid/runs/1"), mutation);
+    const args = mutation.split("\0");
+    assert.equal(args.pop(), "", `scenario ${index} terminates its last argument`);
+    const reportedBody = args.pop();
+    assert.deepEqual(args, scenario.write, `scenario ${index} issue command`);
+    assert.equal(reportedBody, body, `scenario ${index} issue body`);
   }
 });
