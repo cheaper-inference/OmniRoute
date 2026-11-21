@@ -54,15 +54,15 @@ test("a fetched version newer than the pin is returned", async () => {
   const urls: string[] = [];
   const fetchMock = async (url: string | URL | Request) => {
     urls.push(String(url));
-    return jsonResponse({ version: "2.1.291" });
+    return jsonResponse({ version: "99.0.1" });
   };
 
   await withEnv({ CLAUDE_CODE_CLIENT_VERSION: undefined }, async () => {
     assert.equal(
       await canonical.refreshClaudeCodeClientVersion(fetchMock as typeof fetch),
-      "2.1.291"
+      "99.0.1"
     );
-    assert.equal(canonical.getClaudeCodeClientVersion(), "2.1.291");
+    assert.equal(canonical.getClaudeCodeClientVersion(), "99.0.1");
   });
   assert.equal(urls.length, 1);
   assert.equal(urls[0], NPM_LATEST);

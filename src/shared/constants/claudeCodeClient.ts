@@ -21,11 +21,11 @@ import {
   type CliVersionSource,
 } from "@omniroute/open-sse/config/cliVersions.ts";
 
-export const CLAUDE_CODE_CLIENT_VERSION = "2.1.280";
-export const CLAUDE_CODE_CLIENT_BUILD_REVISION = "1e2";
+export const CLAUDE_CODE_CLIENT_VERSION = "2.1.326";
+export const CLAUDE_CODE_CLIENT_BUILD_REVISION = "518";
 export const CLAUDE_CODE_CLIENT_BILLING_VERSION = `${CLAUDE_CODE_CLIENT_VERSION}.${CLAUDE_CODE_CLIENT_BUILD_REVISION}`;
-export const CLAUDE_CODE_SDK_PACKAGE_VERSION = "0.112.1";
-export const CLAUDE_CODE_RUNTIME_VERSION = "v26.3.0";
+export const CLAUDE_CODE_SDK_PACKAGE_VERSION = "0.128.0";
+export const CLAUDE_CODE_RUNTIME_VERSION = "v26.12.1";
 
 export type ClaudeCodeEntrypoint = "cli" | "sdk-cli";
 

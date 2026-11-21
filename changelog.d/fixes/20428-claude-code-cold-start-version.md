@@ -1,0 +1,1 @@
+- **fix(providers):** Update the captured Claude Code fallback to 2.1.326 so cold starts and registry outages do not advertise 2.1.280 to models requiring 2.1.290 or newer.

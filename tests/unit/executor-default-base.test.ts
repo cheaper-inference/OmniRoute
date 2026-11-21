@@ -1624,8 +1624,8 @@ test("DefaultExecutor.execute does not produce duplicate anthropic-version heade
   );
   assert.equal(versionKeys.length, 1, "Duplicate anthropic-version header keys found");
   assert.equal(capturedHeaders[versionKeys[0]], "2023-06-01");
-  assert.equal(capturedHeaders["X-Stainless-Runtime-Version"], "v26.3.0");
-  assert.equal(capturedHeaders["X-Stainless-Package-Version"], "0.112.1");
+  assert.equal(capturedHeaders["X-Stainless-Runtime-Version"], "v26.12.1");
+  assert.equal(capturedHeaders["X-Stainless-Package-Version"], "0.128.0");
 
   const sentBody = JSON.parse(capturedBody) as { system?: Array<{ text?: string }> };
   const cc = `x-anthropic-billing-header: cc_version=${CLAUDE_CODE_CLIENT_BILLING_VERSION}; `;
