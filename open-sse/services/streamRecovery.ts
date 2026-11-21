@@ -703,7 +703,11 @@ export function createRecoverableStream(
   ): void => {
     controller.enqueue(chunk);
     if (!continueEnabled) return;
-    emittedTail += trackDecoder.decode(chunk, { stream: true });
+    // Normalize only the scan buffer. A CRLF pair can span upstream chunks.
+    emittedTail = (emittedTail + trackDecoder.decode(chunk, { stream: true })).replaceAll(
+      "\r\n",
+      "\n"
+    );
     const boundary = emittedTail.lastIndexOf("\n\n");
     if (boundary < 0) return;
     const complete = emittedTail.slice(0, boundary + 2);
