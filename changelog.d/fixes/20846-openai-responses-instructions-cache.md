@@ -1,0 +1,1 @@
+- **fix(responses):** move top-level `instructions` into `input` as a leading `developer` message on stateless OpenAI API `/v1/responses` requests so OpenAI prompt caching caches the system prompt ([#20846](https://github.com/cheaper-inference/OmniRoute/issues/20846)).
