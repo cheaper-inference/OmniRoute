@@ -504,7 +504,11 @@ export function isGlmProvider(providerId?: string | null) {
 
 // parseRoutingTagsInput / parseExcludedModelsInput moved to the pure leaf
 // providerInputParsers.ts (kept re-exported here for existing UI importers).
-export { parseExcludedModelsInput, parseRoutingTagsInput } from "./providerInputParsers";
+export {
+  parseExcludedModelsForEdit,
+  parseExcludedModelsInput,
+  parseRoutingTagsInput,
+} from "./providerInputParsers";
 
 export function formatRoutingTagsInput(value: unknown): string {
   if (!Array.isArray(value)) return "";

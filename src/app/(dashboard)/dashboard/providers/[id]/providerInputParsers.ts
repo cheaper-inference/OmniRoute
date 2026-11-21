@@ -27,3 +27,13 @@ export function parseExcludedModelsInput(value: string): string[] | undefined {
   );
   return patterns.length > 0 ? patterns : undefined;
 }
+
+/**
+ * Excluded models for an edit save. The provider PUT route merges the incoming
+ * providerSpecificData over the stored one and JSON drops `undefined`, so a cleared
+ * field must be sent as an explicit `[]` or the saved list is kept (#20745). The
+ * server normalizer removes the empty list.
+ */
+export function parseExcludedModelsForEdit(value: string): string[] {
+  return parseExcludedModelsInput(value) ?? [];
+}
