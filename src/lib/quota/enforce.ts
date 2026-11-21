@@ -17,6 +17,7 @@ import type { EnforceDecision, EnforceInput, QuotaStore, RecordConsumptionInput 
 import type { ProviderPlan, QuotaUnit } from "./dimensions";
 import { dimensionKeyToString } from "./dimensions";
 import { decideFairShare } from "./fairShare";
+import { countableConsentBorrow } from "./consentGate";
 import { attributePercentDimension, recordPercentTokens } from "./percentAttribution";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
@@ -194,11 +195,14 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     limit: number;
     consumedTotal: number;
     globalUsedPercent: number;
+    borrowAvailable?: number;
   }> = [];
   const consumedByThisKey: Record<string, number> = {};
   // Percent dimensions only: the absolute cap counts the part the attribution
   // book charges to the key (internal), never the book's external part.
   const capConsumedByThisKey: Record<string, number> = {};
+  // One instant for every lending deadline this request checks.
+  const nowMs = Date.now();
 
   for (const dim of plan.dimensions) {
     // Skip placeholder dimensions whose limit is unknown (Number.EPSILON / 0 — the
@@ -257,6 +261,16 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
       limit: effectiveLimit,
       consumedTotal,
       globalUsedPercent,
+      // Consent pools only: what other keys lend. A saturation pool adds nothing here.
+      ...(await countableConsentBorrow({
+        pool,
+        requesterKeyId: input.apiKeyId,
+        policy: poolAllocation.policy,
+        limit: effectiveLimit,
+        consumedThisKey,
+        nowMs,
+        peek: (id) => store.peek(id, dimKey),
+      })),
     });
   }
 

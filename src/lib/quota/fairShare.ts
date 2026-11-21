@@ -11,6 +11,9 @@
  *
  * Cap absoluto is always enforced regardless of mode or policy.
  *
+ * A dimension that carries borrowAvailable belongs to a pool in consent mode. It always
+ * uses the strict rules, and a hard key stops at its share plus what other keys lend.
+ *
  * Part of: Group B — Quota Sharing Engine (plan 22, frente F6).
  */
 
@@ -29,6 +32,8 @@ export interface FairShareDimension {
   limit: number; // global pool limit for this dimension
   consumedTotal: number; // total consumed by ALL keys so far
   globalUsedPercent: number; // 0..1 signal from saturationSignals
+  /** Defined only in a consent pool: what this key may use above its share right now. */
+  borrowAvailable?: number;
 }
 
 export interface FairShareAllocation {
@@ -123,7 +128,8 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
       return { kind: "block", reason: "global-saturated" };
     }
 
-    const isStrict = dim.globalUsedPercent >= saturationThreshold;
+    const isStrict =
+      dim.borrowAvailable !== undefined || dim.globalUsedPercent >= saturationThreshold;
 
     if (isStrict) {
       // ── Strict mode ────────────────────────────────────────────────────
@@ -131,8 +137,8 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
       // exhaustive and an unknown policy is enforced as hard.
       switch (effectivePolicy) {
         case "hard":
-          // Hard: block once consumed >= fair_share
-          if (consumed >= fairShare) {
+          // Hard: block once consumed >= fair_share (plus what is lent, in a consent pool)
+          if (consumed >= fairShare + (dim.borrowAvailable ?? 0)) {
             return { kind: "block", reason: "fair-share" };
           }
           break;
