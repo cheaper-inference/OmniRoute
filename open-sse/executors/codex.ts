@@ -224,16 +224,35 @@ export function getCodexUpstreamModel(model: unknown): string {
 }
 
 /**
+ * Chat Completions translation lifts the first system/developer message into
+ * `instructions` and drops it from `input`. GPT-5 and GPT-6.2 do not cache
+ * `instructions`, so that hoist re-bills the system prompt on every turn.
+ * Restore the text to the front of `input` as a developer message and keep
+ * only the short neutral instructions the translated Codex path requires.
+ */
+function restoreHoistedInstructionsToInput(body: Record<string, unknown>): void {
+  const instructions = body.instructions;
+  if (typeof instructions !== "string") return;
+  const trimmed = instructions.trim();
+  if (!trimmed || trimmed === CODEX_CHAT_DEFAULT_INSTRUCTIONS) return;
+
+  const item = {
+    type: "message",
+    role: "developer",
+    content: [{ type: "input_text", text: instructions }],
+    status: "completed",
+  };
+  if (Array.isArray(body.input)) body.input.unshift(item);
+  else body.input = [item];
+  body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
+}
+
+/**
  * Convert role=system messages in `input` to role=developer.
  *
- * GPT-5 models support the `developer` role in input, but reject `system`.
- * This keeps the content inside
- * the `input` array where it benefits from OpenAI's automatic prompt caching.
- *
- * OpenAI's prompt caching matches on the serialized prefix of the `input` array
- * (+ tools). The `instructions` field is NOT included in the cache key for
- * GPT-5 models. Moving system prompts from `input` to `instructions` therefore
- * removes them from the cacheable prefix, resulting in 0% cache hit rates.
+ * GPT-5 and GPT-6.2 cache the serialized prefix of `input` (+ tools). The
+ * `instructions` field is not in that key. `system` is rejected upstream, so
+ * the role is rewritten in place and the text stays in `input`.
  *
  * Ref: https://community.openai.com/t/caching-is-borked-for-gpt-5-models/1359574
  * Ref: https://community.openai.com/t/no-caching-with-model-responses/1338627
@@ -1471,14 +1490,16 @@ export class CodexExecutor extends BaseExecutor {
     // OmniRoute's wire differ from the same client talking to Codex directly.
     // Translated clients (OpenCode, SDKs) are not Codex CLI: never give them the Codex CLI
     // persona (whose approval/sandbox rules tell the model to work around constraints). The
-    // backend still requires a value for translated requests, so a neutral one is used only
-    // when the client sent none; the client's own system prompt stays in `input`.
-    if (
-      !nativeCodexPassthrough &&
-      (!body.instructions ||
-        (typeof body.instructions === "string" && body.instructions.trim() === ""))
-    ) {
-      body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
+    // Chat Completions translator still puts the client system prompt in `instructions`.
+    // GPT-6.2 does not cache that field, so the translated path moves it back to `input`.
+    if (!nativeCodexPassthrough) {
+      restoreHoistedInstructionsToInput(body);
+      if (
+        !body.instructions ||
+        (typeof body.instructions === "string" && body.instructions.trim() === "")
+      ) {
+        body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
+      }
     }
 
     // Store: regular Codex Responses rejects store=true with
