@@ -6819,6 +6819,7 @@
     "antigravityProjectIdHint": "Optional override for Antigravity Cloud Code requests. Leave blank to use the project discovered during Google OAuth.",
     "antigravityClientProfileLabel": "Client profile",
     "antigravityClientProfileHint": "Choose which Antigravity client identity OmniRoute presents to the API.",
+    "antigravityIdeModelAvailabilityHint": "If Gemini 4 Argon, Carbon, or Neon is missing or returns a 404, switch the client profile to CLI. Model availability also depends on your account.",
     "antigravityClientProfileIde": "IDE",
     "antigravityClientProfileCli": "CLI",
     "codexFastTierActiveChip": "Codex Fast tier is active",
