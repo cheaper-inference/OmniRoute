@@ -43,3 +43,26 @@ test("defaultOmniRouteModelsFetcher default timeout is 30s", async () => {
     globalThis.fetch = original;
   }
 });
+
+test("defaultOmniRouteModelsFetcher replaces caller-provided authorization by casing", async () => {
+  const original = globalThis.fetch;
+  let captured: RequestInit["headers"] | undefined;
+  globalThis.fetch = (async (_input, init) => {
+    captured = init?.headers;
+    return new Response(JSON.stringify({ object: "list", data: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+  try {
+    await defaultOmniRouteModelsFetcher("https://gateway.example/v1", "test-key", 1_000, {
+      authorization: "Basic user",
+      "CF-Access-Client-Id": "id",
+    });
+  } finally {
+    globalThis.fetch = original;
+  }
+  const headers = new Headers(captured);
+  assert.equal(headers.get("authorization"), "Bearer test-key");
+  assert.equal(headers.get("cf-access-client-id"), "id");
+});

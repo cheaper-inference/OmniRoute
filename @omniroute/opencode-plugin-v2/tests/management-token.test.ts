@@ -65,7 +65,7 @@ describe("plugin-v2 managementReadToken wiring (F1)", () => {
     const origFetch = globalThis.fetch;
     globalThis.fetch = (async (url: unknown, init?: { headers?: Record<string, string> }) => {
       const href = String(url);
-      seen.set(href, String(init?.headers?.Authorization ?? ""));
+      seen.set(href, String(new Headers(init?.headers).get("Authorization") ?? ""));
       if (href.includes("/api/combos")) {
         return { ok: true, status: 200, statusText: "OK", json: async () => ({ combos: [] }) };
       }
@@ -102,7 +102,7 @@ describe("plugin-v2 managementReadToken wiring (F1)", () => {
     const origFetch = globalThis.fetch;
     globalThis.fetch = (async (url: unknown, init?: { headers?: Record<string, string> }) => {
       const href = String(url);
-      seen.set(href, String(init?.headers?.Authorization ?? ""));
+      seen.set(href, String(new Headers(init?.headers).get("Authorization") ?? ""));
       if (href.includes("/api/combos")) {
         return { ok: true, status: 200, statusText: "OK", json: async () => ({ combos: [] }) };
       }

@@ -38,6 +38,14 @@ const pluginOptionsSchema = z
       .trim()
       .refine(isHttpUrl, "baseURL must be an http(s) URL, for example http://localhost:20128"),
     apiKey: z.string().optional(),
+    /**
+     * Extra HTTP headers sent with every gateway fetch (models, combos,
+     * providers, enrichment, usage) and published on the provider so
+     * inference carries them too. Useful for gateways behind Cloudflare
+     * Access or other header-based auth proxies. Added next to the bearer
+     * token; an `Authorization` entry, in any casing, never replaces it.
+     */
+    headers: z.record(z.string(), z.string()).optional(),
     displayName: z.string().optional(),
     managementReadToken: z.string().optional(),
     timeoutMs: z.number().positive().default(10000),
@@ -166,6 +174,7 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
     providerId: parsed.providerId,
     baseURL: parsed.baseURL,
     apiKey: parsed.apiKey ?? process.env.OMNIROUTE_API_KEY ?? "",
+    headers: parsed.headers,
     managementReadToken: resolveManagementReadToken(parsed.managementReadToken),
     timeoutMs: parsed.timeoutMs,
     timeouts: parsed.timeouts,

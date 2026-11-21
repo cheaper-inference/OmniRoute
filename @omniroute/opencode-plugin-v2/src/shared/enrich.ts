@@ -1,4 +1,5 @@
 import type { LegacyModel as ModelV2 } from "../legacy-model.js";
+import { buildAuthHeaders } from "./auth-headers.js";
 import { buildModelDisplayName } from "./naming.js";
 import type { FreeModelFreeType } from "./naming.js";
 
@@ -217,7 +218,8 @@ export type OmniRouteEnrichmentFetcher = (
   baseURL: string,
   apiKey: string,
   timeoutMs?: number,
-  onSourceError?: OmniRouteEnrichmentSourceError
+  onSourceError?: OmniRouteEnrichmentSourceError,
+  extraHeaders?: Record<string, string>
 ) => Promise<OmniRouteEnrichmentMap>;
 
 function trimTrailingSlashes(value: string): string {
@@ -255,7 +257,8 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   baseURL,
   apiKey,
   timeoutMs = 10_000,
-  onSourceError
+  onSourceError,
+  extraHeaders
 ) => {
   const report = (endpoint: string, reason: unknown): void => {
     onSourceError?.(endpoint, reason instanceof Error ? reason.message : String(reason));
@@ -267,10 +270,7 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   const compatiblePublicPrefixes = new Set<string>();
   if (!baseURL || !apiKey) return out;
   const root = trimTrailingSlashes(baseURL.replace(/\/v1\/?$/, ""));
-  const headers = {
-    Authorization: `Bearer ${apiKey}`,
-    Accept: "application/json",
-  };
+  const headers = buildAuthHeaders(extraHeaders, apiKey);
 
   // 1. Catalog with nice display names.
   const catalogAc = new AbortController();
