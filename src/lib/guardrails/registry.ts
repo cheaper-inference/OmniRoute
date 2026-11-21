@@ -10,6 +10,7 @@ import { VisionBridgeGuardrail } from "./visionBridge";
 import { AudioBridgeGuardrail } from "./audioBridge";
 import { VideoBridgeGuardrail } from "./videoBridge";
 import { CredentialMaskerGuardrail } from "./credentialMasker";
+import { noteGuardrailFailOpen } from "@/lib/readinessChecks";
 
 /**
  * `preCall`/`postCall` may legitimately return nothing — that is the documented
@@ -211,6 +212,7 @@ export class GuardrailRegistry {
           stage: "pre",
         });
         logger.warn?.("GUARDRAIL", `${guardrail.name} pre-call failed open`, { error: message });
+        noteGuardrailFailOpen(guardrail.name);
       }
     }
 
@@ -287,6 +289,7 @@ export class GuardrailRegistry {
           stage: "post",
         });
         logger.warn?.("GUARDRAIL", `${guardrail.name} post-call failed open`, { error: message });
+        noteGuardrailFailOpen(guardrail.name);
       }
     }
 

@@ -1,5 +1,6 @@
 import type { ProviderCredentials } from "./base.ts";
 import { CodeBuddyBaseExecutor } from "./codebuddy/shared.ts";
+import { withConversationHeaders } from "./codebuddy-intl.ts";
 import { requiresReasoningReplay } from "../services/reasoningCache.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 
@@ -102,6 +103,22 @@ function injectAssistantReasoning(model: string, messages: unknown): unknown {
 export class CodeBuddyCnExecutor extends CodeBuddyBaseExecutor {
   constructor(providerId: string = "codebuddy-cn") {
     super(providerId);
+  }
+
+  // The official client sends the X-Conversation-* family on the CN gateway as well.
+  buildHeaders(
+    credentials: ProviderCredentials,
+    stream: boolean = true,
+    clientHeaders?: Record<string, string> | null,
+    model?: string | null,
+    _health?: unknown,
+    body?: unknown
+  ): Record<string, string> {
+    const headers = super.buildHeaders(credentials, stream, clientHeaders, model, _health, body);
+    return withConversationHeaders(headers, body, {
+      clientHeaders,
+      connectionId: credentials?.connectionId,
+    });
   }
 
   transformRequest(

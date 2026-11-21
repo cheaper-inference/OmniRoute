@@ -16,11 +16,14 @@
 import http from "node:http";
 import net from "node:net";
 import { randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import type { ReadableStream as NodeWebStream } from "node:stream/web";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { sanitizeHeaders } from "../sanitizeHeaders.ts";
 import { maskSecret } from "../maskSecrets.ts";
 import { applyIdleTimeout, MITM_IDLE_TIMEOUT_MS } from "../socketTimeouts.ts";
-import { globalTrafficBuffer } from "./buffer.ts";
+import { TRUNCATION_MARKER, getMaxBodyBytes, globalTrafficBuffer } from "./buffer.ts";
 import type { InterceptedRequest } from "./types.ts";
 
 const DEFAULT_PORT = parseEnvNumber(process.env.INSPECTOR_HTTP_PROXY_PORT, 8080);
@@ -89,6 +92,58 @@ async function readBody(req: http.IncomingMessage): Promise<Buffer<ArrayBuffer>>
   return Buffer.concat(chunks);
 }
 
+/**
+ * Mask the captured head of a response. `kept` is the first bytes of the body, `total` its full
+ * length. A cut can land inside a key: drop the trailing token run first, so the masker never
+ * sees a key head that is too short to match.
+ */
+function maskCapturedBody(kept: Buffer, total: number, cap: number): string {
+  const truncated = total > kept.length;
+  let text = kept.toString("utf8");
+  if (truncated) {
+    let end = text.length;
+    while (end > 0 && /[\w.~+/=-]/.test(text[end - 1])) end -= 1;
+    text = text.slice(0, end);
+  }
+  const masked = maskSecret(text);
+  if (!truncated) return masked;
+  return masked.slice(0, cap - TRUNCATION_MARKER.length) + TRUNCATION_MARKER;
+}
+
+/**
+ * Pipe the upstream body to the client as it arrives (with backpressure). Returns the first `cap`
+ * bytes for the capture and the full byte count. Rejects if either side breaks mid-body.
+ */
+async function streamBody(
+  body: ReadableStream<Uint8Array> | null,
+  res: http.ServerResponse,
+  cap: number
+): Promise<{ kept: Buffer; total: number }> {
+  if (!body) {
+    res.end();
+    return { kept: Buffer.alloc(0), total: 0 };
+  }
+  const kept: Buffer[] = [];
+  let keptBytes = 0;
+  let total = 0;
+  await pipeline(
+    Readable.fromWeb(body as unknown as NodeWebStream),
+    async function* (chunks: AsyncIterable<Buffer>) {
+      for await (const chunk of chunks) {
+        total += chunk.length;
+        if (keptBytes < cap) {
+          const part = chunk.subarray(0, cap - keptBytes);
+          kept.push(part);
+          keptBytes += part.length;
+        }
+        yield chunk;
+      }
+    },
+    res
+  );
+  return { kept: Buffer.concat(kept), total };
+}
+
 function handleHttp(req: http.IncomingMessage, res: http.ServerResponse): void {
   const startedAt = performance.now();
   const intercepted: InterceptedRequest = {
@@ -130,19 +185,9 @@ function handleHttp(req: http.IncomingMessage, res: http.ServerResponse): void {
         redirect: "manual",
       });
 
-      const respBuf = Buffer.from(await upstream.arrayBuffer());
-      const totalLatencyMs = performance.now() - startedAt;
-
       intercepted.responseHeaders = sanitizeHeaders(
         Object.fromEntries(upstream.headers) as Record<string, string>
       );
-      intercepted.responseBody = maskSecret(respBuf.toString("utf8"));
-      intercepted.responseSize = respBuf.length;
-      intercepted.status = upstream.status;
-      intercepted.totalLatencyMs = totalLatencyMs;
-      intercepted.upstreamLatencyMs = totalLatencyMs;
-      intercepted.proxyLatencyMs = 0;
-
       const safeRespHeaders: Record<string, string> = {};
       upstream.headers.forEach((value, key) => {
         if (key.toLowerCase() === "content-length") return;
@@ -150,7 +195,17 @@ function handleHttp(req: http.IncomingMessage, res: http.ServerResponse): void {
         safeRespHeaders[key] = value;
       });
       res.writeHead(upstream.status, safeRespHeaders);
-      res.end(respBuf);
+
+      const cap = getMaxBodyBytes();
+      const { kept, total } = await streamBody(upstream.body, res, cap);
+
+      const totalLatencyMs = performance.now() - startedAt;
+      intercepted.responseBody = maskCapturedBody(kept, total, cap);
+      intercepted.responseSize = total;
+      intercepted.status = upstream.status;
+      intercepted.totalLatencyMs = totalLatencyMs;
+      intercepted.upstreamLatencyMs = totalLatencyMs;
+      intercepted.proxyLatencyMs = 0;
 
       globalTrafficBuffer.update(intercepted.id, intercepted);
     } catch (err) {
