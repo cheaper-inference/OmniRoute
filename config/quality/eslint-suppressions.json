@@ -2080,11 +2080,6 @@
       "count": 2
     }
   },
-  "tests/unit/antigravity-discovery-bootstrap.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "tests/unit/antigravity-local-usage-fallback-3821.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 4

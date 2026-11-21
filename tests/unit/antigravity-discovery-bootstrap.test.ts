@@ -62,7 +62,7 @@ describe("ensureAntigravityProjectAssigned", () => {
   test("subsequent calls for the same token skip the network", async () => {
     let networkCalls = 0;
 
-    const mockFetch = async (url: string, _init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (_url: string, _init?: RequestInit): Promise<Response> => {
       networkCalls += 1;
       return new Response(JSON.stringify({ cloudaicompanionProject: "proj-cached" }), {
         status: 200,
@@ -80,7 +80,7 @@ describe("ensureAntigravityProjectAssigned", () => {
   test("different tokens each trigger their own loadCodeAssist call", async () => {
     const calledFor: string[] = [];
 
-    const mockFetch = async (url: string, init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (_url: string, init?: RequestInit): Promise<Response> => {
       const auth = new Headers(init?.headers).get("Authorization") ?? "";
       calledFor.push(auth);
       return new Response(JSON.stringify({ cloudaicompanionProject: "proj-x" }), {
@@ -143,7 +143,7 @@ describe("ensureAntigravityProjectAssigned", () => {
 
     assert.match(
       capturedHeaders?.get("User-Agent") || "",
-      /^antigravity\/cli\/1\.3\.4 \(aidev_client; os_type=.+; arch=.+; auth_method=consumer\)$/
+      /^antigravity\/cli\/1\.5\.3 \(aidev_client; os_type=.+; arch=.+; auth_method=consumer\)$/
     );
     assert.equal(capturedHeaders?.get("X-Goog-Api-Client"), null);
     assert.equal(capturedHeaders?.get("Client-Metadata"), null);
