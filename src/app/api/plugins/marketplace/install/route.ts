@@ -14,10 +14,12 @@ export async function OPTIONS() {
 }
 
 /**
- * POST /api/plugins/marketplace/install — Install a plugin from marketplace by name
+ * POST /api/plugins/marketplace/install — Install a plugin from marketplace by name.
+ * Installing (and possibly activating) downloaded code is never anonymous, so the
+ * management credential is required even when login is disabled, as for POST /api/plugins.
  */
 export async function POST(request: NextRequest) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const parsed = InstallBodySchema.safeParse(await request.json());

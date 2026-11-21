@@ -1,0 +1,1 @@
+- **fix(resilience):** a circuit breaker with `halfOpenRequests` above 1 now needs that many probe successes in a row before it closes, so one lucky probe no longer restores a flapping provider. ([#19724](https://github.com/cheaper-inference/OmniRoute/pull/19724))
