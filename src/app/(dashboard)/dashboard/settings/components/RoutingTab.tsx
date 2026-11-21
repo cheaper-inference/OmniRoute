@@ -17,6 +17,7 @@ import {
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getClaudeCodeClientBuildRevision } from "@/shared/constants/claudeCodeClient";
 import { compareTr } from "@/shared/utils/turkishText";
+import AntigravityCreditsCard from "./AntigravityCreditsCard";
 import { HERMES } from "./systemTransformsHermesDefaults";
 
 // Provider keys (mirror of open-sse/services/systemTransforms.ts).
@@ -1358,6 +1359,16 @@ export default function RoutingTab() {
           ))}
         </RadioGroup>
       </Card>
+
+      <AntigravityCreditsCard
+        mode={settings.antigravityCreditsMode}
+        onSaved={(mode) =>
+          setSettings((prev: Record<string, unknown>) => ({
+            ...prev,
+            antigravityCreditsMode: mode,
+          }))
+        }
+      />
 
       <Card>
         <div className="flex items-center gap-3 mb-4">

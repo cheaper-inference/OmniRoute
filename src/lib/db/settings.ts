@@ -228,6 +228,8 @@ export async function getSettings() {
     requestRetry: 3,
     maxRetryIntervalSec: 30,
     antigravitySignatureCacheMode: "enabled",
+    // Null means inherit ANTIGRAVITY_CREDITS. Keep it distinct from a saved "off".
+    antigravityCreditsMode: null,
     requireLogin: true,
     oidcEnabled: false,
     oidcDisablePasswordLogin: false,

@@ -1,0 +1,1 @@
+- Choose when Antigravity uses Google One AI credits from Dashboard → Settings → Routing. Saved choices apply without restarting and preserve the environment fallback until explicitly changed.

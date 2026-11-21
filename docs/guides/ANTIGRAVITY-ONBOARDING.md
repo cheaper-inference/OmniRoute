@@ -55,6 +55,22 @@ Both providers share the **same Google backend** — identical OAuth client, tok
 
 Google Antigravity uses a **dual-layer quota** based on "Work Done" (computational weight), not message count.
 
+### Google One AI Credits
+
+In **Dashboard → Settings → Routing → Antigravity Google One AI Credits**, choose when OmniRoute
+uses credits for Antigravity and Antigravity CLI:
+
+- **Disabled (default)** (`off`): do not use Google One AI credits.
+- **Retry on quota exhaustion** (`retry`): try normal quota first, then retry with credits only
+  after an eligible quota-exhausted HTTP 429.
+- **Always (credits first)** (`always`): request credits on the first request. This can consume
+  paid credits immediately, including during credit-balance checks. Review Google's terms and
+  the risk of account enforcement before enabling credit use.
+
+A saved choice, including **Disabled**, applies without restarting and overrides
+`ANTIGRAVITY_CREDITS`. Before you save a choice, the dashboard shows the effective value inherited
+from that environment variable, or **Disabled** if the variable is missing or invalid.
+
 ### The Two Layers
 
 | Layer              | What it is                    | Refresh cycle                                                      |
