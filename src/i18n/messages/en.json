@@ -9514,6 +9514,8 @@
     "disableSessionStickinessDesc": "Round-robin and random combos rotate to a different connection on every request instead of pinning a whole conversation to one connection by the first-message hash. Leave off to preserve prompt-cache hits for multi-turn chats. Per-combo overrides take precedence.",
     "promptCacheAffinity": "Prompt-cache locality routing",
     "promptCacheAffinityDesc": "Prefer the same provider account for matching prompt-cache keys while preserving health and quota failover.",
+    "geminiPromptCacheMode": "Antigravity Gemini implicit prompt caching",
+    "geminiPromptCacheModeDesc": "Off by default. When on, Antigravity Gemini requests use implicit prompt caching and compression keeps their cacheable system prompt intact.",
     "reasoningTokenBuffer": "Reasoning token buffer",
     "reasoningTokenBufferDesc": "Allow combo routing to add max_tokens headroom only for known reasoning models when the full buffer fits inside a known output cap.",
     "zeroLatencyOptimizations": "Zero-latency optimizations",
