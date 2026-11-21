@@ -221,6 +221,29 @@ function endsWithServerToolResult(message: ChatMessage | undefined): boolean {
 }
 
 /**
+ * True for a user turn that carries a tool result rather than the user's own words:
+ * a Claude-native `tool_result` block, or an OpenAI-format `role: "tool"` message.
+ */
+function isToolResultTurn(message: ChatMessage): boolean {
+  if ((message.role as string) === "tool") return true;
+  const content = message.content as unknown;
+  return (
+    Array.isArray(content) &&
+    content.some((block) => (block as { type?: unknown } | null)?.type === "tool_result")
+  );
+}
+
+/**
+ * #3890 cache-safe anchor: the last user turn that is NOT a tool result. In an agent
+ * loop the newest user turn usually only answers the preceding tool_use; splicing
+ * memory before it would separate the call from its result, and OpenAI-format
+ * upstreams then treat the call as unanswered.
+ */
+function findCacheSafeIndex(messages: ChatMessage[]): number {
+  return messages.findLastIndex((m) => m.role === "user" && !isToolResultTurn(m));
+}
+
+/**
  * Place a memory message at the #3890 cache-safe anchor (just before the last
  * user turn) when one exists, else prepend it. Shared by the system and user
  * injection strategies to keep injectMemory flat.
@@ -261,7 +284,7 @@ export function injectMemory(
   // #3890: in a caching context, anchor the injection just before the LAST user message so
   // the cacheable prefix (system prompt + prior turns) is preserved byte-for-byte. Falls
   // back to a leading message when caching is off or there is no user turn to anchor on.
-  const cacheSafeIndex = options.cacheSafe ? messages.findLastIndex((m) => m.role === "user") : -1;
+  const cacheSafeIndex = options.cacheSafe ? findCacheSafeIndex(messages) : -1;
 
   const supportsSystem = providerSupportsSystemMessage(provider);
 
