@@ -18,6 +18,7 @@ import { isConsentPool } from "@/lib/quota/consentGate";
 import { buildQuotaSelfView, resolveSelfPoolContexts } from "@/lib/quota/selfView";
 import type { QuotaSelfViewInput, SelfViewPoolContext } from "@/lib/quota/selfViewTypes";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { readRequestBodyWithLimit } from "@/shared/middleware/bodySizeGuard";
 import {
   checkLendingDeadline,
   selfLendingPatchSchema,
@@ -69,24 +70,23 @@ async function rateLimitRefusal(
   });
 }
 
-/** Characters of the largest body read. A valid body is far shorter. */
-const SELF_LENDING_MAX_BODY_CHARS = 4096;
+/** Bytes of the largest body read. A valid body is far shorter. */
+const SELF_LENDING_MAX_BODY_BYTES = 4096;
 
-/** The body text, or null when it is declared or found longer than the cap. */
-async function readCappedText(request: Request): Promise<string | null> {
-  const declared = Number(request.headers.get("content-length"));
-  if (Number.isFinite(declared) && declared > SELF_LENDING_MAX_BODY_CHARS) return null;
-  const text = await request.text();
-  return text.length > SELF_LENDING_MAX_BODY_CHARS ? null : text;
+/**
+ * The body text. The read streams and stops at the cap, so a longer body is never held whole.
+ * It throws `RequestBodyTooLargeError` when the body is declared or found longer than the cap.
+ */
+async function readCappedText(request: Request): Promise<string> {
+  const bytes = await readRequestBodyWithLimit(request, SELF_LENDING_MAX_BODY_BYTES);
+  return new TextDecoder().decode(bytes);
 }
 
 /** The parsed body, or null for a body that is too long, not JSON or not in the schema. */
 async function readBody(request: Request): Promise<SelfLendingPatch | null> {
   let raw: unknown;
   try {
-    const text = await readCappedText(request);
-    if (text === null) return null;
-    raw = JSON.parse(text);
+    raw = JSON.parse(await readCappedText(request));
   } catch {
     return null;
   }

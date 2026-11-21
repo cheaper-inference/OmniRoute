@@ -16199,7 +16199,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SelfQuotaView"
         "400":
-          description: Invalid provider, a body that is not JSON, too long (over 4096 characters) or outside the schema, or a deadline in seconds or not in the future
+          description: Invalid provider, a body that is not JSON, too long (over 4096 bytes) or outside the schema, or a deadline in seconds or not in the future
           headers:
             Cache-Control:
               schema:

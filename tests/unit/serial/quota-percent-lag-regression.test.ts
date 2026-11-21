@@ -351,7 +351,11 @@ test("a burst inside one cache lifetime followed by silence", async () => {
   assert.equal(await acc.gate("A"), "block");
   assert.equal(await acc.gate("B"), "allow");
   parts = await acc.parts();
-  assert.ok(parts.A >= 55 && parts.B <= 1, `A ${parts.A}, B ${parts.B}`);
+  const wantB = (60 * 3_000) / 3_003_000;
+  assert.ok(
+    Math.abs(parts.B - wantB) < 1e-3 && Math.abs(parts.A - (60 - wantB)) < 1e-3,
+    `A ${parts.A}, B ${parts.B}`
+  );
 });
 
 test("a long stream", async () => {

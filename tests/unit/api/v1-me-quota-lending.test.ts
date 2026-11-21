@@ -441,7 +441,41 @@ test("a deadline past the largest Date is the fixed 400 and writes nothing", asy
   });
 });
 
-test("a body over 4096 characters is the fixed 400 and writes nothing", async () => {
+test("a streamed body over 4096 bytes without Content-Length is refused before it is drained", async () => {
+  const before = getAllocationLending(consentPool.id, me.id);
+  const totalChunks = 64;
+  let pulled = 0;
+  let cancelled = false;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (pulled >= totalChunks) {
+        controller.close();
+        return;
+      }
+      pulled += 1;
+      controller.enqueue(new Uint8Array(1024).fill(0x20));
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  const request = new Request("http://localhost/api/v1/me/quota/claude", {
+    method: "PATCH",
+    headers: { Authorization: "Bearer " + me.key, "Content-Type": "application/json" },
+    body: stream,
+    duplex: "half",
+  } as RequestInit);
+  assert.equal(request.headers.get("content-length"), null);
+
+  const res = await handleSelfLendingPatch(request, "claude");
+  assert.equal(res.status, 400);
+  assert.equal(await messageOf(res), BODY_MESSAGE);
+  assert.equal(cancelled, true);
+  assert.ok(pulled < totalChunks, `pulled ${pulled} of ${totalChunks} chunks`);
+  assert.deepEqual(getAllocationLending(consentPool.id, me.id), before);
+});
+
+test("a body over 4096 bytes is the fixed 400 and writes nothing", async () => {
   const before = getAllocationLending(consentPool.id, me.id);
   const valid = JSON.stringify({ pool: mine, lendingPercent: 10 });
   const long = await patch(me.key, "claude", valid + " ".repeat(5000 - valid.length));

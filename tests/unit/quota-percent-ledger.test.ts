@@ -291,10 +291,39 @@ test("a reading carrying the passed reset time turns once; the next ones are ord
   // The new window's reset time arrives: a rise records it, the turn's baseline stays.
   const timed = run(risen, COUNTERS, rd(0.6, 7, R)).state;
   assert.deepEqual([timed.rev, timed.last, timed.baseline, timed.resetAt], [6, 0.6, 0.5, R]);
-  // With an equal figure nothing changes, so the new reset time is not recorded yet. Intended: a
-  // reset time is only stored when the state changes.
+  // An equal figure records the new reset time too, and changes nothing else.
   const equal = run(risen, COUNTERS, rd(0.55, 7, R));
-  assert.deepEqual([equal.changed, equal.state === risen], [false, true]);
+  assert.deepEqual(equal, {
+    changed: true,
+    state: { ...risen, rev: 6, resetAt: R, updatedAt: T0 + 7 * MIN },
+  });
+});
+
+test("an equal figure records a reset time the book lacks; the next reading after it turns the book", () => {
+  const untimed = st({ resetAt: null, readAt: T0 + MIN });
+  const learned = run(untimed, COUNTERS, rd(0.6, 5, R));
+  assert.deepEqual(learned, {
+    changed: true,
+    state: { ...untimed, rev: 4, resetAt: R, updatedAt: T0 + 5 * MIN },
+  });
+  assert.equal(learned.state.keys, untimed.keys);
+
+  // A higher figure after that reset time is a new window, not a rise of the old one.
+  const afterReset = (R - T0) / MIN + 1;
+  const next = run(learned.state, COUNTERS, rd(0.7, afterReset, null)).state;
+  assert.deepEqual(
+    [next.rev, next.last, next.baseline, next.resetAt, next.keys],
+    [5, 0.7, 0.7, null, { k1: { startTokens: 10_000 }, k2: { startTokens: 2_000 } }]
+  );
+});
+
+test("an equal figure keeps a reset time already stored, and a kept drop records none", () => {
+  const timed = st();
+  const same = run(timed, COUNTERS, rd(0.6, 5, R + 10 * MIN));
+  assert.deepEqual([same.changed, same.state === timed], [false, true]);
+  const untimed = st({ resetAt: null });
+  const drop = run(untimed, COUNTERS, rd(0.4, 1, R));
+  assert.deepEqual([drop.changed, drop.state === untimed], [false, true]);
 });
 
 test("row 3b boundary: a stored reset time equal to the data time turns; one millisecond later does not", () => {
