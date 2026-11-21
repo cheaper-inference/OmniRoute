@@ -18,6 +18,7 @@ import type { ProviderPlan, QuotaUnit } from "./dimensions";
 import { dimensionKeyToString } from "./dimensions";
 import { decideFairShare } from "./fairShare";
 import { attributionKeyIds, countableConsentBorrow, percentConsentBorrow } from "./consentGate";
+import { blockResetSuffix, resolveBlockReset, retryAfterSecondsFor } from "./blockReset";
 import { attributePercentDimension, recordPercentTokens } from "./percentAttribution";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
@@ -316,13 +317,20 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
       // webhook dispatch is best-effort
     }
 
+    // When capacity returns: unknown (an absolute cap, or no provider reset) adds nothing.
+    const resetAtMs = await resolveBlockReset({
+      blocked: decision.blocked,
+      connectionId: input.connectionId,
+      provider: input.provider,
+      nowMs,
+    });
     return {
       kind: "block",
-      reason: messageForReason(decision.reason, input.provider),
+      reason:
+        messageForReason(decision.reason, input.provider) +
+        blockResetSuffix(decision.blocked, resetAtMs),
       httpStatus: 429,
-      retryAfterSeconds: decision.retryAfterMs
-        ? Math.ceil(decision.retryAfterMs / 1000)
-        : undefined,
+      retryAfterSeconds: retryAfterSecondsFor(resetAtMs, nowMs),
     };
   }
 

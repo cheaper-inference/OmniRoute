@@ -22,6 +22,8 @@ const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
 const { setAllocationLending } = await import("../../../src/lib/db/quotaLending.ts");
 const { enforceQuotaShare, recordConsumption } = await import("../../../src/lib/quota/enforce.ts");
 const { getQuotaStore } = await import("../../../src/lib/quota/QuotaStore.ts");
+const { runQuotaSharePreHook } =
+  await import("../../../open-sse/handlers/chatCore/quotaSharePreHook.ts");
 const sat = await import("../../../src/lib/quota/saturationSignals.ts");
 const core = await import("../../../src/lib/db/core.ts");
 
@@ -150,6 +152,12 @@ await test("quota-consent-countable", async (t) => {
       refused.kind === "block" ? refused.reason : "",
       /^Quota share limit reached for your API key on claude/
     );
+    const reason = refused.kind === "block" ? refused.reason : "";
+    assert.match(
+      reason,
+      /\. Enough daily usage is expected to clear by \d{4}-\d\d-\d\dT[\d:.]+Z\.$/
+    );
+    assert.ok(((refused.kind === "block" && refused.retryAfterSeconds) || 0) > 0);
     assert.equal((await ask("c-none", "b")).kind, "allow");
     assert.equal((await ask("c-none", "c")).kind, "block"); // weight 0, nothing lent
   });
@@ -189,6 +197,66 @@ await test("quota-consent-countable", async (t) => {
       });
     }
   );
+
+  await t.test(
+    "the refusal reaches the client with the clear-by instant and Retry-After",
+    async () => {
+      mk("c-wire", "consent");
+      await burn("c-wire", "a", 500);
+      const before = Date.now();
+      const result = await runQuotaSharePreHook({
+        apiKeyInfo: { id: "a" },
+        credentials: { connectionId: "c-wire" },
+        provider: PROV,
+        model: "",
+        isCombo: false,
+        comboStepId: null,
+        comboExecutionKey: null,
+        finalizePendingRequest: () => {},
+      });
+      assert.ok(result);
+      assert.equal(result.response.status, 429);
+      const body = await result.response.json();
+      assert.equal(body.error.code, "quota_share_blocked");
+      const match =
+        /^Quota share limit reached for your API key on claude\. Enough daily usage is expected to clear by (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z)\.$/.exec(
+          body.error.message
+        );
+      assert.ok(match, body.error.message);
+      const clearAt = Date.parse(match[1]);
+      assert.ok(clearAt > before);
+      const retryAfter = Number(result.response.headers.get("Retry-After"));
+      assert.ok(retryAfter > 0);
+      // The header and the instant in the message describe the same moment.
+      assert.ok(Math.abs(before + retryAfter * 1000 - clearAt) < 5_000);
+    }
+  );
+
+  await t.test("an absolute cap refusal carries no reset time and no Retry-After", async () => {
+    providerPlans.upsertPlan(
+      "c-cap",
+      PROV,
+      [{ unit: "tokens", window: "daily", limit: 1000 }],
+      "manual"
+    );
+    quotaPools.createPool({
+      connectionId: "c-cap",
+      name: "c-cap",
+      borrowMode: "consent",
+      allocations: [
+        { apiKeyId: "a", weight: 50, policy: "hard", capValue: 100, capUnit: "tokens" },
+        { apiKeyId: "b", weight: 50, policy: "hard" },
+      ],
+    });
+    await burn("c-cap", "a", 100);
+    const refused = await ask("c-cap", "a");
+    assert.equal(refused.kind, "block");
+    assert.equal(
+      refused.kind === "block" ? refused.reason : "",
+      "Absolute quota cap reached for your API key on claude"
+    );
+    assert.equal(refused.kind === "block" ? refused.retryAfterSeconds : 0, undefined);
+  });
 
   await t.test("a deadline that passes turns the loan off on the next request", async () => {
     const p = mk("c-until", "consent");

@@ -23,6 +23,8 @@ const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
 const { setAllocationLending } = await import("../../../src/lib/db/quotaLending.ts");
 const { enforceQuotaShare, recordConsumption } = await import("../../../src/lib/quota/enforce.ts");
 const sat = await import("../../../src/lib/quota/saturationSignals.ts");
+const { runQuotaSharePreHook } =
+  await import("../../../open-sse/handlers/chatCore/quotaSharePreHook.ts");
 const core = await import("../../../src/lib/db/core.ts");
 
 test.after(() => {
@@ -34,7 +36,9 @@ test.after(() => {
 
 const PROV = "claude";
 
-function mockUsage(byConn: Record<string, { fiveHour?: number; weekly?: number }>) {
+function mockUsage(
+  byConn: Record<string, { fiveHour?: number; weekly?: number; resetAt?: string }>
+) {
   sat._clearSaturationCache();
   sat.__setAnthropicSaturationDepsForTests({
     loadConnection: async (id: string) => ({ id, accessToken: "tok", authType: "oauth" }),
@@ -42,7 +46,9 @@ function mockUsage(byConn: Record<string, { fiveHour?: number; weekly?: number }
       const u = byConn[String(conn.id)] ?? {};
       return {
         quotas: {
-          ...(u.fiveHour !== undefined ? { "session (5h)": { used: u.fiveHour, total: 100 } } : {}),
+          ...(u.fiveHour !== undefined
+            ? { "session (5h)": { used: u.fiveHour, total: 100, resetAt: u.resetAt } }
+            : {}),
           ...(u.weekly !== undefined ? { "weekly (7d)": { used: u.weekly, total: 100 } } : {}),
         },
       };
@@ -73,13 +79,13 @@ const WEIGHTED: PoolAllocation[] = [
 ];
 
 /** Open the book at 0, route 900k tokens on a and 100k on b, then read the account at 40%. */
-async function prime(conn: string, mode: "saturation" | "consent") {
+async function prime(conn: string, mode: "saturation" | "consent", resetAt?: string) {
   const pool = makePool(conn, mode, WEIGHTED);
-  mockUsage({ [conn]: { fiveHour: 0 } });
+  mockUsage({ [conn]: { fiveHour: 0, resetAt } });
   assert.equal((await ask(conn, "a")).kind, "allow"); // opens the book at 0
   await burn(conn, "a", 900_000);
   await burn(conn, "b", 100_000);
-  mockUsage({ [conn]: { fiveHour: 40 } });
+  mockUsage({ [conn]: { fiveHour: 40, resetAt } });
   return pool;
 }
 
@@ -102,8 +108,42 @@ await test("quota-consent-percent", async (t) => {
       refused.kind === "block" ? refused.reason : "",
       /^Quota share limit reached for your API key on claude/
     );
+    // The mocked provider reports no reset, so no time is shown and no Retry-After is set.
+    assert.doesNotMatch(refused.kind === "block" ? refused.reason : "", /resets at/);
+    assert.equal(refused.kind === "block" ? refused.retryAfterSeconds : 0, undefined);
     assert.equal((await ask(C, "b")).kind, "allow"); // 4 < 50
   });
+
+  await t.test(
+    "the refusal reaches the client with the provider's reset and Retry-After",
+    async () => {
+      const C = "p-wire";
+      const resetAt = new Date(Date.now() + 2 * 3_600_000).toISOString();
+      await prime(C, "consent", resetAt);
+      const before = Date.now();
+      const result = await runQuotaSharePreHook({
+        apiKeyInfo: { id: "a" },
+        credentials: { connectionId: C },
+        provider: PROV,
+        model: "",
+        isCombo: false,
+        comboStepId: null,
+        comboExecutionKey: null,
+        finalizePendingRequest: () => {},
+      });
+      assert.ok(result);
+      assert.equal(result.response.status, 429);
+      const body = await result.response.json();
+      assert.equal(body.error.code, "quota_share_blocked");
+      assert.equal(
+        body.error.message,
+        `Quota share limit reached for your API key on claude. The 5h window resets at ${resetAt}.`
+      );
+      const retryAfter = Number(result.response.headers.get("Retry-After"));
+      const expected = Math.ceil((Date.parse(resetAt) - before) / 1000);
+      assert.ok(retryAfter > 0 && retryAfter <= expected && expected - retryAfter < 30);
+    }
+  );
 
   await t.test(
     "consent pool: the idle share another key lends lets the heavy key pass",
