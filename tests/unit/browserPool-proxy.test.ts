@@ -132,6 +132,41 @@ describe("resolvePlaywrightProxy", () => {
     );
   });
 
+  it("rejects a record without a usable host instead of serving a direct context", async () => {
+    await assert.rejects(
+      resolvePlaywrightProxy("gemini-web", {
+        resolveProxy: async () => ({ type: "http", host: "", port: 8080 }),
+      }),
+      (err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        assert.match(message, /refusing direct connection \(fail-closed\)/);
+        return true;
+      }
+    );
+  });
+
+  it("lowercases an uppercase SOCKS5 type instead of treating it as http", async () => {
+    const proxy = await resolvePlaywrightProxy("gemini-web", {
+      resolveProxy: async () => ({ type: "SOCKS5", host: "socks.example.com", port: 1080 }),
+    });
+    assert.deepStrictEqual(proxy, { server: "socks5://socks.example.com:1080" });
+  });
+
+  it("names an edge relay in the refusal", async () => {
+    await assert.rejects(
+      resolvePlaywrightProxy("gemini-web", {
+        resolveProxy: async () => ({ type: "vercel", host: "relay.example.test", port: 443 }),
+      }),
+      (err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        assert.match(message, /edge relay/);
+        // One prefix, not two: the reason stays a plain fragment.
+        assert.equal(message.match(/\[BrowserPool]/g)?.length, 1);
+        return true;
+      }
+    );
+  });
+
   it("passes the actual provider key to the resolver", async () => {
     let capturedKey = "";
     await resolvePlaywrightProxy("gemini-web", {
@@ -169,6 +204,7 @@ describe("acquireBrowserContext proxy lookup failure", () => {
     const originalPoolFlag = process.env.OMNIROUTE_BROWSER_POOL;
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-browser-pool-proxy-"));
     let newContextCalls = 0;
+    let launchCalls = 0;
     // A regular file used as a directory: the DB layer's module-level DATA_DIR calls
     // mkdirSync on first proxy lookup and fails with ENOTDIR, which resolveWritableDataDir
     // propagates. That failed module evaluation stays cached for the whole process, so no
@@ -176,14 +212,17 @@ describe("acquireBrowserContext proxy lookup failure", () => {
     fs.writeFileSync(path.join(root, "not-a-directory"), "");
     process.env.DATA_DIR = path.join(root, "not-a-directory", "data");
     process.env.OMNIROUTE_BROWSER_POOL = "on";
-    playwright.chromium.launch = (async () => ({
-      isConnected: () => true,
-      newContext: async () => {
-        newContextCalls++;
-        return { close: async () => undefined };
-      },
-      close: async () => undefined,
-    })) as never;
+    playwright.chromium.launch = (async () => {
+      launchCalls++;
+      return {
+        isConnected: () => true,
+        newContext: async () => {
+          newContextCalls++;
+          return { close: async () => undefined };
+        },
+        close: async () => undefined,
+      };
+    }) as never;
     __resetBrowserPoolMetricsForTest();
     try {
       await assert.rejects(
@@ -195,6 +234,9 @@ describe("acquireBrowserContext proxy lookup failure", () => {
         /fail-closed/
       );
       assert.equal(newContextCalls, 0);
+      // A browser launched before the proxy lookup failed would stay open with
+      // no idle timer scheduled for it.
+      assert.equal(launchCalls, 0);
       assert.equal(getBrowserPoolStatus().contexts, 0);
       assert.equal(getBrowserPoolMetrics().metrics.contextCreateFailures, 2);
     } finally {
