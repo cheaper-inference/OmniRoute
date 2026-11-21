@@ -20,7 +20,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function renderTab(strategy: string) {
+async function renderTab(strategy: string, geminiPromptCacheMode?: "off" | "implicit") {
   const patches: Patch[] = [];
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal(
@@ -31,7 +31,7 @@ async function renderTab(strategy: string) {
         ? { comboDefaults: { strategy } }
         : url === "/api/providers"
           ? []
-          : { fallbackStrategy: "round-robin", stickyRoundRobinLimit: 7 };
+          : { fallbackStrategy: "round-robin", stickyRoundRobinLimit: 7, geminiPromptCacheMode };
       return { ok: true, json: async () => data } as Response;
     })
   );
@@ -82,5 +82,33 @@ it("#16459 supported round-robin combo defaults still sync account strategy and 
   expect(patches.filter((patch) => patch.url === "/api/settings")[1].body).toMatchObject({
     fallbackStrategy: "round-robin",
     stickyRoundRobinLimit: 7,
+  });
+});
+
+it("renders the Gemini cache switch off by default and saves an explicit opt-in", async () => {
+  const patches = await renderTab("priority");
+  const toggle = container!.querySelector<HTMLInputElement>(
+    '[role="switch"][aria-label="geminiPromptCacheMode"]'
+  );
+  expect(toggle?.getAttribute("aria-checked")).toBe("false");
+  await act(async () => toggle!.click());
+  expect(toggle?.getAttribute("aria-checked")).toBe("true");
+  expect(patches).toEqual([]);
+  await clickButton("saveComboDefaults");
+  expect(patches.find(({ url }) => url === "/api/settings")?.body).toMatchObject({
+    geminiPromptCacheMode: "implicit",
+  });
+  expect(
+    patches.find(({ url }) => url.endsWith("/combo-defaults"))?.body.comboDefaults
+  ).not.toHaveProperty("geminiPromptCacheMode");
+});
+
+it("keeps an explicit Gemini cache opt-in when saving unrelated combo defaults", async () => {
+  const patches = await renderTab("priority", "implicit");
+  const toggle = container!.querySelector('[role="switch"][aria-label="geminiPromptCacheMode"]');
+  expect(toggle?.getAttribute("aria-checked")).toBe("true");
+  await clickButton("saveComboDefaults");
+  expect(patches.find(({ url }) => url === "/api/settings")?.body).toMatchObject({
+    geminiPromptCacheMode: "implicit",
   });
 });
