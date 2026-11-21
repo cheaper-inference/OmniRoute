@@ -12,6 +12,10 @@ import {
 import { directFetchWithBoundedResponseStart } from "./directResponseStartTimeout.ts";
 import { stampOwnListenerSelfHop } from "./selfHop.ts";
 import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
+import {
+  recordProxyDispatcherFailure,
+  recordProxyDispatcherSuccess,
+} from "./proxyDispatcherReap.ts";
 import { sanitizeTransportError } from "./proxyTransportError.ts";
 import { redactProxyDetailsInMessage } from "./proxyFetchRedaction.ts";
 import { dispatchDirectFetch } from "./proxyFetchDirectTransport.ts";
@@ -260,7 +264,12 @@ async function sendProxy(
         dedicatedCodexImageRequest,
         attempt
       );
-      recordProxiedSuccess(proxyUrl, target);
+      if (response.status === 504) {
+        recordProxyDispatcherFailure(proxyUrl);
+      } else {
+        recordProxiedSuccess(proxyUrl, target);
+        recordProxyDispatcherSuccess(proxyUrl);
+      }
       return response;
     } catch (error) {
       if (getEffectiveSignal(input, options)?.aborted) throw error;
@@ -269,8 +278,10 @@ async function sendProxy(
         max <= 1 ||
         !isProxyTransportFailure(error) ||
         !canResendAfterTransportError(input, options, error)
-      )
+      ) {
+        recordProxyDispatcherFailure(proxyUrl);
         throw finalProxyError(error, proxyUrl, target, source);
+      }
       lastError = error;
       await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
     }
