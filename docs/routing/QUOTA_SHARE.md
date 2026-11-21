@@ -716,8 +716,8 @@ write, although its name reads as read-only.
   A body with `lendingPercent` 0 is accepted in either mode.
 - `lendingUntil` is optional: epoch milliseconds, or `null` for no deadline. It must be in the
   future and at most 8640000000000000. A value below 100000000000 reads as seconds and is refused.
-- Any other field is refused. A body longer than 4096 characters, or with a declared length above
-  4096 bytes, is refused.
+- Any other field is refused. A body longer than 4096 bytes is refused. The read stops at that
+  size, so a longer body is never held whole.
 
 The checks run in the order of this table. Every refusal uses the standard error body with a
 fixed message. A refusal by one of these checks writes nothing.
