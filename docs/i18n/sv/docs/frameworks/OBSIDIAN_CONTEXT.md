@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Säkerhet & Transport
+
+WebDAV autentisering upprätthåller felspårning och lockout per IP (10 misslyckade försök inom ett 60-sekunders fönster utlöser en 5-minuters lockout med `429 Too Many Requests` och `Retry-After`). Eftersom WebDAV sänder grundläggande autentiseringsuppgifter, rekommenderas det starkt att avsluta TLS (eller dirigera över en säker tunnel som Tailscale eller Cloudflare Tunnel) vid åtkomst till WebDAV slutpunkten utanför loopback.
+
 ### Kontextkälla per API-nyckel (valfritt)
 
 Obsidian-konfiguration kan avgränsas **per API-nyckel** via tabellen `api_key_context_sources`

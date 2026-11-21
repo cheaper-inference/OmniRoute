@@ -125,17 +125,21 @@ test("independent SQLite connections race on encrypted duplicate plaintext: exac
       stdio: ["ignore", "ignore", "pipe", "ipc"],
     })
   );
+  const signal = AbortSignal.timeout(90_000);
+  const closed = Promise.all(children.map((child) => once(child, "close", { signal })));
+  // A worker can fail while the parent is still waiting for IPC messages.
+  void closed.catch(() => undefined);
   try {
     await Promise.all(
       children.map(async (child) => {
-        const [message] = await once(child, "message");
+        const [message] = await once(child, "message", { signal });
         assert.equal(message, "ready");
       })
     );
     const key = secret();
     const results = await Promise.all(
       children.map(async (child) => {
-        const message = once(child, "message");
+        const message = once(child, "message", { signal });
         child.send({ id: randomUUID(), key });
         return (await message)[0] as { status: number | string };
       })
@@ -150,7 +154,21 @@ test("independent SQLite connections race on encrypted duplicate plaintext: exac
     assert.equal(rows[0].usage_limit_enabled, 1);
     assert.equal(rows[0].daily_usage_limit_usd, 5);
     assert.equal(rows[0].chaos_mode_enabled, 1);
+    // Let workers close SQLite and finish writing V8 coverage after the IPC reply.
+    for (const [code, exitSignal] of await closed) {
+      assert.deepEqual([code, exitSignal], [0, null], "import worker must exit cleanly");
+    }
   } finally {
-    for (const child of children) child.kill();
+    const cleanupSignal = AbortSignal.timeout(5_000);
+    const running = children.filter(
+      (child) => child.pid !== undefined && child.exitCode === null && child.signalCode === null
+    );
+    await Promise.all(
+      running.map(async (child) => {
+        const reaped = once(child, "close", { signal: cleanupSignal });
+        child.kill("SIGKILL");
+        await reaped;
+      })
+    );
   }
 });

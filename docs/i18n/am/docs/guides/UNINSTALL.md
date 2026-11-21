@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (አማራጭ) ኢሜጁን ያስወግዱ
+docker rmi cheaperinference/omniroute:latest
+# የቆዩ ጭነቶች የርስቱን ስም ጎትተውታል፡-
 docker rmi diegosouzapw/omniroute:latest
 ```
 

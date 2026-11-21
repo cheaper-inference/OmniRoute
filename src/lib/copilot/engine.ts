@@ -7,7 +7,15 @@
  */
 
 import { getCopilotSystemPrompt } from "./systemPrompt";
-import { COPILOT_TOOLS, getCopilotTool, getCopilotToolDescriptions } from "./tools";
+import { requireCredentialForManagementScopedKey } from "@/lib/api/requireManagementAuth";
+import { hasManageScope } from "@/shared/constants/managementScopes";
+import {
+  COPILOT_TOOLS,
+  MANAGEMENT_SCOPE_KEY_REFUSAL,
+  getCopilotTool,
+  getCopilotToolDescriptions,
+  parseCopilotKeyScopes,
+} from "./tools";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -274,9 +282,65 @@ function getHelpResponse(): string {
 ### Tools disponibles:\n\n${getCopilotToolDescriptions()}`;
 }
 
+// ── createApiKey ─────────────────────────────────────────────────────────────
+
+/**
+ * The scopes come from the user's free text, so a management scope needs the same
+ * credential POST /api/keys demands — even when login is disabled. No request, no key.
+ */
+async function isManagementScopeAuthorized(
+  scopes: string[] | undefined,
+  httpRequest: Request | undefined
+): Promise<boolean> {
+  if (!httpRequest) return false;
+  return (await requireCredentialForManagementScopedKey(httpRequest, scopes)) === null;
+}
+
+async function handleCreateApiKey(
+  userText: string,
+  httpRequest: Request | undefined
+): Promise<CopilotResponse> {
+  const nameMatch = userText.match(
+    /(?:llamad[oa]|named?|par[ae]?)\s*["'']?([a-zA-Z0-9_-]+)["'']?/i
+  );
+  const name = nameMatch ? nameMatch[1] : "copilot-key";
+  const scopeMatch = userText.match(/(?:con\s*)?scope?s?\s*:?\s*["'']?([a-zA-Z,]+)["'']?/i);
+  const scopes = scopeMatch ? scopeMatch[1] : undefined;
+
+  const tool = getCopilotTool("createApiKey");
+  if (!tool) return { message: "Error: createApiKey tool not found." };
+
+  const requestedScopes = parseCopilotKeyScopes(scopes);
+  const needsManagementCredential = hasManageScope(requestedScopes ?? []);
+  if (
+    needsManagementCredential &&
+    !(await isManagementScopeAuthorized(requestedScopes, httpRequest))
+  ) {
+    return { message: MANAGEMENT_SCOPE_KEY_REFUSAL };
+  }
+
+  const result = await tool.handler(
+    { name, machineId: "copilot", scopes },
+    { managementScopeAuthorized: needsManagementCredential }
+  );
+
+  return {
+    message: result,
+    toolCalls: [{ name: "createApiKey", args: { name, scopes }, result }],
+  };
+}
+
 // ── Chat Engine ──────────────────────────────────────────────────────────────
 
-export async function processCopilotChat(request: CopilotRequest): Promise<CopilotResponse> {
+/**
+ * @param httpRequest The HTTP request that carried the chat message. Tools that need the
+ *   caller's credential (creating a management-scoped API key) check it here; without it
+ *   they refuse.
+ */
+export async function processCopilotChat(
+  request: CopilotRequest,
+  httpRequest?: Request
+): Promise<CopilotResponse> {
   const lastMessage = request.messages[request.messages.length - 1];
   if (!lastMessage || lastMessage.role !== "user") {
     return { message: "No user message found." };
@@ -323,26 +387,7 @@ Puedes decirme algo como:
 
   // Handle createApiKey — extract name from sentence
   if (intent.tool === "createApiKey") {
-    const nameMatch = userText.match(
-      /(?:llamad[oa]|named?|par[ae]?)\s*["'']?([a-zA-Z0-9_-]+)["'']?/i
-    );
-    const name = nameMatch ? nameMatch[1] : "copilot-key";
-    const scopeMatch = userText.match(/(?:con\s*)?scope?s?\s*:?\s*["'']?([a-zA-Z,]+)["'']?/i);
-    const scopes = scopeMatch ? scopeMatch[1] : undefined;
-
-    const tool = getCopilotTool("createApiKey");
-    if (!tool) return { message: "Error: createApiKey tool not found." };
-
-    const result = await tool.handler({
-      name,
-      machineId: "copilot",
-      scopes,
-    });
-
-    return {
-      message: result,
-      toolCalls: [{ name: "createApiKey", args: { name, scopes }, result }],
-    };
+    return handleCreateApiKey(userText, httpRequest);
   }
 
   // Handle CLI executor — pass the full command

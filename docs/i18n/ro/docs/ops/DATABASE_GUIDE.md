@@ -184,31 +184,94 @@ Lista completă de peste 30 de tabele se află în `src/lib/db/migrations/`.
 
 ---
 
-## Migrări
+## Migrații
 
-OmniRoute utilizează **migrări versionate și idempotente** în `src/lib/db/migrations/`. Fiecare migrare este un singur fișier SQL denumit `NNN_description.sql`.
+OmniRoute folosește** migrari versionate, idempotente** în `src/lib/db/migrations/`. Fiecare migrare este un singur fișier SQL. Două formate de denumire coexistă; versiunea înregistrată în `_omniroute_migrations` este prefixul numeric.
 
-### Denumirea migrărilor
+### Denumirea migrației
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                           | Exemplu                              | Folosit pentru                                                                                                                                                                               |
+| ------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (exact 3 cifre)            | `241_seen_models.sql`                | Vechea serie `001`–`241`. Înghețat când a aterizat formatul de marcaj temporal (`240` și `241` au fost îmbinate chiar înainte de acesta): niciun fișier nou nu primește un număr secvenţial. |
+| `YYYYMMDDHHMMSS_description.sql` (14 cifre, UTC) | `20261113120000_add_usage_index.sql` | Fiecare migrație creată începând cu 2026-11-13.                                                                                                                                              |
 
-### Cum rulează migrările
+De ce schimbarea: cu numere secvențiale, paralel PRs a ales același număr următor și toți, mai puțin unul, au trebuit să renumeroteze înainte de a fuziona. Un marcaj de timp UTC oferă fiecărui PR propria versiune.
+
+Reguli pentru formatul de marcaj temporal (aplicat de `npm run check:migration-numbering`, partajat cu generatorul în `scripts/check/lib/migrationNaming.mjs`):
+
+- Marca temporală este o dată și o oră UTC reale, nu mai devreme decât `20261113000000` și nu mai mult de 10 minute în viitor.
+- Descrierea este `snake_case` minusculă care începe cu o literă (`a-z`, `0-9`, un singur `_` între cuvinte), cel mult 80 de caractere.
+- Două fișiere cu același marcaj temporal sunt duplicate.
+- Regula fără decalaj se aplică numai seriilor vechi: trebuie să existe fiecare număr de la `001` la `241`, cu excepția golurilor cunoscute `026`, `055` și `121`. Ștergerea `241` (sau a oricărui fișier vechi) eșuează. `001` și `241` nu pot fi adăugate niciodată la lista de permisiuni `KNOWN_GAPS`. Fișierele marcate de timp nu creează niciodată un gol.
+- Fiecare intrare din `src/lib/db/migrations/` trebuie să fie un fișier obișnuit cu un nume `.sql` valid cu minuscule. Un director, un link simbolic, un fișier `.SQL` sau `.sql.bak`, un fișier ascuns sau un nume cu un spațiu eșuează poarta, pentru că alergătorul ar sări peste el în tăcere sau se prăbușește la pornire.
+
+**Aplicați comanda.** Runnerul sortează după valoarea numerică a prefixului, nu după text: mai întâi fișierele vechi `001`–`241`, apoi fișierele marcate de timp în ordinea marcajului de timp, apoi orice directoare cu spații de nume înregistrate cu `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (versiuni precum `ee-001`). O migrare în așteptare este orice fișier a cărui versiune nu este în `_omniroute_migrations`, deci o migrare dintr-o ramură mai veche care fuzionează după una mai nouă se aplică în continuare bazelor de date existente.
+
+**Marca temporală este ordinea de creare, nu ordinea de îmbinare.** Dacă migrarea dvs. depinde de un tabel sau de o coloană creată de o migrare cu a** mai nou** timestamp (de exemplu, unul de la un alt PR care a fuzionat primul), o bază de date proaspătă ar rula prima a ta și ar eșua. În timp ce PR dvs. este încă deschis, regenerați numele fișierului cu `npm run db:new-migration` astfel încât să primească un marcaj de timp mai nou sau să îl faceți independent. `npm run test:migrations:fresh` aplică fiecare migrare la o bază de date goală și prinde acest lucru.
+
+### O migrare îmbinată nu este niciodată ștearsă sau redenumită
+
+Odată ce un fișier de migrare se află pe o ramură de lansare sau `main`, acesta a rulat deja pe baze de date de omologi și dezvoltatori, pe instalări VPS și în sincronizarea Enterprise. De atunci înainte:
+
+- **Nu-l șterge niciodată.** Instalările noi și-ar pierde schema în timp ce bazele de date actualizate o păstrează.
+- **Nu-l redenumi niciodată.** Versiunea din `_omniroute_migrations` nu s-ar mai potrivi cu un fișier, așa că fiecare bază de date care a aplicat-o deja o va rula din nou. SQL non-idempotent duplică apoi datele sau oprește pornirea.
+- **Ai nevoie de o schemă diferită?** Creați o nouă migrare cu `npm run db:new-migration`.
+
+Redenumirea este sigură numai pentru un fișier care nu este încă îmbinat, la care se referă indicațiile porții. O etichetă de lansare nu schimbă nimic aici: fiecare apăsare către o ramură `release/v*` publică imaginea Docker `:next` și rulează pe omolog, instalări VPS și sincronizare Enterprise, așa că o migrare îmbinată a rulat pe baze de date reale înainte de a exista orice etichetă `vX.Y.Z`. Poarta eșuează la fiecare ștergere a unui fișier de bază, etichetat sau nu.
+
+- **Revenire la o migrare îmbinată.** Un `git revert` care șterge fișierul eșuează. Păstrați fișierul și anulați schema într-o nouă migrare: `npm run db:new-migration -- <description>`, cu `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` și așa mai departe. Bazele de date actualizate și proaspete se termină apoi cu aceeași schemă.
+- **Redenumirea cea acceptată: o intrare de compatibilitate și conținut identic.** Dacă un fișier îmbinat trebuie să se mute (de exemplu, două fișiere îmbinate partajează un marcaj de timp, iar runner-ul se oprește cu o coliziune de versiune), redenumiți-l pe cel mai târziu fără a-l atinge SQL și adăugați `{ fromVersion, fromName, toVersion, toName }` la `RENAMED_MIGRATION_COMPATIBILITY` în `src/lib/db/migrationRunner/constants.ts`. Bazele de date care au aplicat versiunea veche își mută rândul `_omniroute_migrations` în loc să ruleze din nou fișierul. Poarta avertizează despre o astfel de redenumire și rulează întotdeauna verificarea comutării pe ea, indiferent de noua marca temporală: instalările proaspete aplică fișierul în noua sa poziție, bazele de date actualizate nu, așa că alegeți un nou marcaj temporal lângă cel vechi. Poarta nu reușește redenumirea dacă conținutul s-a schimbat (o schimbare de schemă are loc în continuare într-o nouă migrare) sau dacă fișierul țintă al intrării nu este pe disc.
+- **Nu redenumiți niciodată în același timp și marcaj.** O redenumire care păstrează marca temporală și schimbă doar descrierea eșuează la poartă, cu sau fără o intrare. Cu o intrare a cărei `toVersion` este egală cu `fromVersion`, runnerul șterge vechiul rând `_omniroute_migrations` și aplică fișierul din nou pe fiecare bază de date care a rulat-o deja. Fără o intrare, alergătorul urmărește doar versiunea: omite fișierul din acele baze de date (conținut nou nu rulează niciodată acolo) și înregistrează o eroare de renumerotare la fiecare pornire. Utilizați un alt marcaj temporal plus o intrare de compatibilitate sau păstrați numele.
+- **Poarta verifică dacă fișierul redenumit nu rulează din nou.** Pentru fiecare redenumire acoperită, poarta trece noul nume de fișier la verificarea comutației cu `--must-not-apply`. Verificarea pornește baza de date actualizată cu runnerul real, iar dacă runnerul aplică din nou acel fișier (de exemplu, pentru că intrarea are o versiune sau un nume greșit sau pentru că parserul de text al porții citește `constants.ts` diferit de TypeScript), poarta eșuează cu `migration renomeada rodaria de novo` și vă cere să verificați versiunile și numele vechi și noi ale intrării.
+
+### Ce verifică poarta împotriva bazei
+
+La rulările pull request și merge-queue, `npm run check:migration-numbering` compară `src/lib/db/migrations/` de pe disc cu același director de pe ramura de bază. Baza este, în această ordine: `--base-latest-tag`, `--base <ref>`, variabila `MIGRATION_BASE_REF` sau, când `GITHUB_EVENT_NAME` este `pull_request`, `pull_request_target` sau `merge_group`, primul părinte al comiterii de îmbinare, `merge_group.base_sha` al sarcinii utile de eveniment sau `git merge-base HEAD origin/$GITHUB_BASE_REF`. Într-o cerere de extragere sau rulare în coadă de îmbinare fără o bază rezolvabilă, poarta eșuează. În afara CI fără `--base`, imprimă `comparação com a base: pulada (sem --base)` și omite aceste reguli.
+
+`--base-latest-tag` se compară cu cea mai nouă etichetă de lansare (`vX.Y.Z` în ordinea semver; etichetele sufixate, cum ar fi nightlies, nu contează) care se află în istoria `HEAD`, cu aceleași reguli ca `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) rulează poarta în acest fel, deoarece rulările push și programate nu au o bază de solicitare pull și o îmbinare poate ajunge fără o nouă rulare CI. Fără nicio etichetă de eliberare în istorie, poarta eșuează; rulați `git fetch --tags` (în CI, `actions/checkout` cu `fetch-depth: 0` aduce etichetele).
+
+| Modificare la cererea de tragere                                                                           | Rezultat                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Un fișier care există pe bază este redenumit, cu o intrare `RENAMED_MIGRATION_COMPATIBILITY`               | **Avertizare** dacă conținutul este identic, iar verificarea de comutare se execută indiferent de noul timestamp; nu reușește dacă noua poziție modifică schema finală (anulați redenumirea sau alegeți un alt nou marcaj temporal în care face naveta) sau dacă alergătorul ar aplica fișierul redenumit din nou pe o bază de date actualizată.** Eșuează** dacă conținutul s-a schimbat. |
+| Un fișier care există pe bază este redenumit păstrându-și marca temporală (se schimbă doar descrierea)     | **Eșuează** , cu sau fără o intrare: alergătorul l-ar aplica din nou (cu intrarea) sau o sări peste versiune (fără una). Utilizați un alt marcaj temporal plus o intrare de compatibilitate sau păstrați numele.                                                                                                                                                                           |
+| Un fișier care există pe bază este șters sau redenumit fără o intrare                                      | **Eșuează** , indiferent dacă fișierul se află sau nu într-o etichetă de lansare. Pentru a o anula, restaurați fișierul cu `git checkout <base> -- src/lib/db/migrations/<file>`; pentru a-și reveni schema, adăugați o nouă migrare cu `DROP ... IF EXISTS`.                                                                                                                              |
+| Un fișier care există pe bază are conținut diferit                                                         | **Avertizare** (o adnotare `::warning` în Acțiuni GitHub ), iar verificarea comutației rulează. Eșuează dacă editarea modifică schema finală, deoarece bazele de date actualizate nu aplică din nou fișierul editat: puneți modificarea într-o nouă migrare. O editare inofensivă (un comentariu, `IF NOT EXISTS`) doar avertizează.                                                       |
+| Se adaugă un fișier marcat de timp cu un marcaj de timp nu mai nou decât cel mai nou al bazei              | Execută verificarea comutării, descrisă mai jos.                                                                                                                                                                                                                                                                                                                                           |
+| Un fișier `NNN_` în format vechi este adăugat cu un număr sub cel mai nou fișier în format vechi al bazei  | **Eșuează** , chiar dacă `KNOWN_GAPS` este editat în aceeași cerere de extragere: seria veche este înghețată, creați migrarea cu `npm run db:new-migration`. Fișierele în format vechi de deasupra celui mai nou al bazei (o cerere de extragere `release/v*` la `main` ) sunt acceptate.                                                                                                  |
+| Un fișier necomandat, editat sau redenumit conține instrucțiuni `INSERT`, `UPDATE`, `DELETE` sau `REPLACE` | **Avertizare** : verificarea comutării nu compară datele, deci verificați dacă ordinea în care se aplică bazele de date actualizate și proaspete modifică rezultatul.                                                                                                                                                                                                                      |
+
+O execuție a verificării de comutare acoperă împreună fișierele neregulate, editate și redenumite.
+
+Verificarea comutației (`scripts/check/migration-commutation.ts`) construiește două baze de date temporare cu calea reală de instalare: a** actualizat** unul (porniți cu migrațiile de bază, apoi porniți din nou pe același fișier cu migrațiile cererii de extragere) și un** proaspăt** unul (un boot cu migrarea cererii de extragere). Se compară schemele rezultate: tabele și coloanele (ignorând ordinea coloanelor), constrângerile UNIQUE / PRIMARY KEY și FOREIGN KEY, textul `CREATE TABLE` normalizat al fiecărui tabel (care acoperă constrângerile CHECK, colațiile, coloanele generate și opțiunile de tabel), indici, declanșatoare și vizualizări. Datele de rând nu sunt comparate. Dacă se potrivesc, poarta afișează că fișierul nu este în ordine, dar face naveta și trece. Dacă diferă, poarta eșuează cu diferența și un indiciu pentru caz: pentru un fișier necomandat, regenerează-i numele cu `npm run db:new-migration`, ceea ce este sigur deoarece fișierul nu este încă îmbinat; pentru un fișier de bază editat, restaurați conținutul de bază și puneți modificarea într-o nouă migrare; pentru un fișier redenumit, anulați redenumirea sau alegeți un alt nou marcaj de timp în care comută, niciodată același marcaj de timp cu alt nume. Dacă verificarea în sine nu poate rula, poarta eșuează în CI și avertizează doar local. Pentru un fișier de bază editat, baza de date actualizată este construită cu conținutul bazei acelui fișier, iar a doua pornire îl omite deoarece versiunea sa este deja înregistrată. Pentru un fișier redenumit, baza de date actualizată este construită cu fișierul sub numele său vechi, iar a doua pornire își mută rândul `_omniroute_migrations` prin intrarea de compatibilitate în loc să-l ruleze din nou; poarta trece noul nume cu `--must-not-apply`, deci verificarea eșuează dacă al doilea boot îl aplică. Dacă o migrare a cererii de extragere nu reușește să se aplice pe calea actualizată, adică după fiecare migrare de bază (indiferent dacă eșuează sau nu și la o instalare nouă), poarta raportează `migration do PR não aplica` și vă solicită să remediați SQL ul față de schema curentă a bazei; dacă fișierul depinde de o altă migrare a cererii de extragere cu un marcaj temporal ulterioară, regenerează-i numele cu `npm run db:new-migration`.
+
+Pentru a rula aceeași comparație la nivel local, transmiteți baza explicit, de exemplu `npm run check:migration-numbering -- --base origin/<base-branch>` sau `npm run check:migration-numbering -- --base-latest-tag` pentru a compara cu cea mai recentă versiune.
+
+### Convertirea unei Migrații `NNN` a unui Open PR
+
+O solicitare de extragere deschisă înainte de comutare poate încă transporta un fișier secvenţial, cum ar fi `242_add_widgets.sql`. Numerele vechi de deasupra `241` sunt respinse, așa că convertiți-le înainte de îmbinare:
+
+1. **Redenumiți fișierul cu generatorul, păstrând descrierea.** Rulați `npm run db:new-migration -- <same description>` pentru a obține noul nume, mutați SQL în el și ștergeți vechiul fișier `NNN_`. Descrierea trebuie să rămână identică: intrarea de compatibilitate de mai jos se potrivește cu ea.
+2. **Adăugați o intrare de compatibilitate dacă o bază de date persistentă a rulat numărul vechi.** Dacă orice bază de date păstrată (homolog, a VPS, instalarea proprie a unui colaborator) a rulat o versiune a PR cu fișierul `NNN_`, adăugați `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` la `RENAMED_MIGRATION_COMPATIBILITY` în `src/lib/db/migrationRunner/constants.ts`. Aceasta este** necesar pentru `237` la `241`** : acele sloturi dețin acum `237_usage_history_calculated_cost.sql` canonic , `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` și `241_seen_models.sql`, iar fără intrare o astfel de bază de date omite migrarea canonică pentru totdeauna și rulează din nou cea convertită. De asemenea, funcționează pentru un slot care rămâne gol, cum ar fi `242`, când destinația este un marcaj de timp. Când aveți îndoieli, adăugați intrarea. Unde îl adăugați în matrice nu contează: atunci când slotul țintă al unei intrări încă mai deține un rând pe care o altă intrare se deplasează (de exemplu `237` ținând un rând PR în timp ce un rând `usage_history_calculated_cost` mai vechi așteaptă să se mute în `237`), alergătorul lasă intrarea să aștepte până când slotul este liber. Doar un conflict real, cum ar fi un slot deținut de un rând fără mișcări de intrare sau două intrări care schimbă sloturi, oprește boot-ul cu `Cannot reconcile ...`.
+3. **Păstrați SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), deoarece migrarea convertită poate întâlni o bază de date în care schema sa există deja.
+4. **Mutați cazurile speciale cu cheie de versiune.** Dacă PR a adăugat o majuscule pentru numărul său vechi în `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) sau în `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), schimbați cheia la noul marcaj temporal.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` este un exemplu de lucru al unui test pentru o migrare redenumită.
+
+### Backporturi către ramuri înainte de comutare
+
+Nu alegeți niciodată sau nu portați înapoi un fișier `YYYYMMDDHHMMSS_` într-o ramură care precede comutarea (de exemplu, o ramură `release/v*` mai veche). Runnerul de acolo sortează numele fișierelor ca text, astfel încât un fișier marcat de timp ar rula între `201_` și `202_` pe o bază de date proaspătă, iar vechea poartă de acolo nu înțelege prefixele de 14 cifre. Pe o astfel de ramură, scrieți modificarea ca următorul fișier `NNN_` al acelei ramuri, idempotent, deci este o opțiune fără opțiune atunci când versiunea marcată temporală sosește mai târziu.
+
+### Cum se desfășoară migrațiile
 
 La pornire, `migrationRunner.ts`:
 
-1. Creează tabelul `_omniroute_migrations` dacă nu există
-2. Interoghează migrările deja aplicate
-3. Aplică în ordine orice migrări noi, fiecare într-o tranzacție
-4. Înregistrează fiecare migrare aplicată împreună cu marcajul temporal
+1. Creează tabel `_omniroute_migrations` dacă nu există
+2. Interogări pentru migrarea deja aplicată
+3. Aplica orice migrare noua in ordine, fiecare intr-o tranzactie
+4. Înregistrează fiecare migrare aplicată cu marca temporală
 
 ```ts
-// src/lib/db/migrationRunner.ts (simplificat)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Idempotență
+### Idempotenta
 
-Migrările trebuie să fie **idempotente** — rularea lor de două ori nu ar trebui să producă nicio modificare:
+Migrațiile trebuie să fie** idempotent** — să le ruleze de două ori ar trebui să fie un nu-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Utilizați din abundență clauzele `IF NOT EXISTS`, `IF EXISTS` și `OR IGNORE` / `OR REPLACE`.
+Folosiți cu generozitate clauzele `IF NOT EXISTS`, `IF EXISTS` și `OR IGNORE` / `OR REPLACE`.
 
-### Adăugarea unei migrări noi
+### Adăugarea unei noi migrari
 
-1. **Identificați următorul număr**: `ls src/lib/db/migrations/ | tail -1`
-2. **Creați fișierul**: `NNN_my_change.sql`
-3. **Utilizați DDL sigur**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Completați cu atenție datele existente**: utilizați `UPDATE ... WHERE ...` pentru a gestiona rândurile existente
-5. **Testați pe o copie**: nu rulați niciodată migrări netestate în producție
+1. **Creați fișierul cu generatorul** : `npm run db:new-migration -- <description>` (de exemplu `npm run db:new-migration -- add combo priority`). Scrie `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` cu ora UTC curentă și un antet de comentariu, înaintează cu o secundă dacă este luată marca temporală și nu suprascrie niciodată un fișier. Nu alegeți un număr manual.
+2. **Utilizați DDL sigur** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Completați cu atenție datele** : utilizați `UPDATE ... WHERE ...` pentru a gestiona rândurile existente
+4. **Verificați ordinea și denumirea** : `npm run test:migrations:fresh` (toate migrările pe o bază de date goală) și `npm run check:migration-numbering`
+5. **Testați pe o copie** : nu rulați niciodată migrări netestate în producție
+6. **Un tabel creat din cod are nevoie și de o migrare** : dacă un modul creează și tabelul leneș (`CREATE TABLE IF NOT EXISTS`, păstrat ca o cale de auto-vindecare), o migrare trebuie să o creeze cu același DDL. În caz contrar, o instalare curată și o instalare actualizată ajung cu scheme diferite, în funcție de a rula calea codului. `tests/unit/db/lazy-table-migration-guard.test.ts` scanează `src/` și `open-sse/` și eșuează pe un `CREATE` leneș fără o migrare (#20557). Exemplu: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Exemplu:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Modificările incompatibile cu versiunile anterioare** (de exemplu, eliminarea coloanelor) sunt dificil de gestionat. OmniRoute NU acceptă revenirea la o versiune anterioară — odată ce o migrare este aplicată, modificarea schemei este permanentă. Planificați în consecință.
+> **Schimbări incompatibile cu înapoi** (de exemplu, aruncarea coloanelor) sunt complicate. OmniRoute NOT acceptă downgrade — odată ce o migrare este aplicată, schimbarea schemei este permanentă. Planificați în consecință.
 
 ---
 
@@ -403,26 +467,27 @@ Aceasta utilizează API-ul SQLite pentru copii de siguranță online — poate f
 
 ---
 
-## Optimizarea performanței
+## Tuning de performanță
 
 ### Modul WAL
 
-WAL este activat implicit. Pentru sarcini cu multe operațiuni de scriere, luați în considerare:
+WAL este activat în mod implicit. Pentru sarcinile de lucru cu scriere mare, luați în considerare:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Punct de control la fiecare 1000 de pagini
-PRAGMA journal_size_limit = 67108864;  -- Limită WAL de 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### Indecși
+OmniRoute nu setează `journal_size_limit`. Un punct de control mută cadrele WAL în fișierul principal, dar fișierul WAL își păstrează dimensiunea cea mai mare alocată. Paznicul `OMNIROUTE_WAL_GUARD_MAX_MB` doar avertizează și rulează `wal_checkpoint(RESTART)`; nu este un capac de dimensiunea unui disc.
 
-Indecși importanți pentru performanță (creați automat prin migrări):
+### Indici
 
-- `idx_models_provider` — căutarea modelelor după furnizor
-- `idx_combo_targets_combo_id` — extinderea țintelor combinației
-- `idx_usage_history_api_key_timestamp` — analiza utilizării
-- `idx_quota_snapshots_api_key_window` — monitorizarea cotelor
-- `idx_call_logs_timestamp` — interogarea jurnalelor de apeluri
+Indici cheie pentru performanță (creați automat prin migrații):
+
+- Căutări de model `idx_models_provider` — după furnizor
+- `idx_combo_targets_combo_id` — combo extindere țintă
+- `idx_usage_history_api_key_timestamp` — analize de utilizare
+- Urmărirea cotei `idx_quota_snapshots_api_key_window` —
+- `idx_call_logs_timestamp` — interogări în jurnalul de apeluri
 
 Pentru a adăuga un index nou, creați o migrare:
 
@@ -431,24 +496,24 @@ Pentru a adăuga un index nou, creați o migrare:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O cu mapare în memorie
+### Memory-Mapped I/O
 
-Pentru baze de date foarte mari (>10GB), maparea în memorie poate fi ajustată printr-o pragma SQLite:
+Pentru bazele de date foarte mari (> 10GB), maparea memoriei poate fi ajustată prin SQLite pragma:
 
 ```sql
--- Setați prin pragma SQLite (ajustați în core.ts sau la execuție)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Compactare
 
-Instanțele OmniRoute care rulează perioade îndelungate beneficiază de executarea ocazională a comenzii `VACUUM`:
+Instanțele OmniRoute de lungă durată beneficiază de `VACUUM` ocazional:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Rulați-o lunar, în intervalele cu trafic redus. (Modul WAL reduce necesitatea, dar nu o elimină.)
+Rulați lunar în timpul ferestrelor cu trafic redus. (Modul WAL reduce nevoia, dar nu o elimină.)
 
 ---
 

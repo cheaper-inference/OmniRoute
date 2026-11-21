@@ -4,16 +4,9 @@
 
 ---
 
-OmniRoute izmanto **paralēlo ciklu** laidienu modeli: aktīvajam ciklam ir
-paredzēts atsevišķs `release/vX.Y.Z` zars, `main` ir paredzēts publicētajai
-versiju līnijai, un, izlaižot cikla laidienu, tiek izveidots nemainīgs
-`vX.Y.Z` tags. Ir sagaidāms, ka izmaiņu iesniegumi nonāk gan `release/*`, _gan_
-`main` zarā — tā nav kļūda.
+OmniRoute izmanto a** paralēlais cikls** izlaišanas modelis: speciāls `release/vX.Y.Z` atzars aktīvajam ciklam, `main` publicētajai līnijai un nemainīgs `vX.Y.Z` tags, kad šis cikls tiek piegādāts. Redzot, ka apņemšanās nonāk uz `release/*` _un_ uz `main` ir sagaidāms, ka — nav sajaukums.
 
-Uzturētājiem paredzētā detalizētā informācija ir atrodama `CLAUDE.md`
-(21. stingrais noteikums) un
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Šī lapa ir publisks,
-līdzautoriem paredzēts kopsavilkums.
+Uzturētāja informācija atrodas `CLAUDE.md` (cietais noteikums #21) un [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Šī lapa ir kopsavilkums, kas paredzēts līdzstrādniekiem.
 
 ## Īsumā
 
@@ -44,26 +37,23 @@ flowchart LR
 `main` nav ikdienas integrācijas zars. PR, kas atvērti ar mērķi `main`, parasti
 pirms apvienošanas ir jāpārvirza uz citu mērķa zaru.
 
-## Laidiena iesaldēšana (paralēlie cikli)
+## Atlaidiet iesaldēšanu (paralēli cikli)
 
-Kad notiek laidiena saskaņošana, tiek atvērts marķiera pieteikums ar etiķeti
-`release-freeze`. Tas **neaptur izstrādi**:
+Kad laidiens tiek saskaņots, tiek atvērta marķiera problēma ar apzīmējumu `release-freeze`. Tas** attīstība neapstājas** :
 
-- Iesaldētais `release/vX.Y.Z` ir attiecīgā laidiena vadītāja pārziņā.
-- Nākamā cikla `release/vX+1` zars tiek izveidots no iesaldētās galotnes, lai
-  līdzautori varētu turpināt iesniegt izmaiņas.
-- Atvērtie PR, kuru mērķis joprojām ir iesaldētais zars, ir **jāpārvirza** uz
-  aktīvo `release/v*` zaru ar visaugstāko versiju.
+- Sasaldētais `release/vX.Y.Z` pieder šī kuģa atbrīvošanas kapteinim.
+- Nākamā cikla `release/vX+1` tiek nogriezts no sasalušā gala, lai veicinātāji turpinātu nosēšanās darbu.
+- Atvērtām PRs, kas joprojām ir vērstas uz sasalušu zaru, vajadzētu būt** atkārtoti** uz aktīvo (augstāko) `release/v*` atzaru.
 
-Pirms pieņemt, ka vajadzīgajā zarā drīkst veikt apvienošanu, pārbaudiet, vai nav
-aktīvas iesaldēšanas:
+Pirms pieņemt, ka vēlamā filiāle ir apvienojama, pārbaudiet, vai nav iesaldēta:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Apvienošanas mehānika (īpašnieka `queue` etiķete → Mergify) ir dokumentēta
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Sapludināšanas mehānika (īpašnieks `queue` etiķete → Mergify) ir dokumentēta failā [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: sapludināšanas rinda ir pārtraukta** (īpašnieka lēmums). `.mergify.yml` vairs nedefinē rindu un noraida sapludināšanas komandas, kas apvieno vai pārraksta vilkšanas pieprasījumu. Laidieni PRs tiek apvienoti ar roku saskaņā ar repozitorija kārtulu kopu "Pieprasīt zaļos vārtus aktīvajā laidienā" (`Gate / CI` + `Gate / Quality`), līdz universālā rinda tiek palaista tiešraides režīmā, un pēc tam ar universālo rindu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` etiķete vairs neko nesaplūst.
 
 ## Kāpēc vajadzīgs gan zars, gan tags?
 

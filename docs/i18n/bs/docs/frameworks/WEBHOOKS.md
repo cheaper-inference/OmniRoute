@@ -15,18 +15,22 @@ Dispatcher potpisuje svaku isporuku sa HMAC-SHA256, ponovo pokušava u slučaju 
 
 ## Podržani događaji
 
-Tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, koji koristi `src/lib/webhookDispatcher.ts`) trenutno modelira tačno četiri događaja:
+Tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, konzumira `src/lib/webhookDispatcher.ts`) trenutno modelira osam događaja:
 
-| Događaj             | Aktivira se kada                                          |
-| ------------------- | --------------------------------------------------------- |
-| `request.completed` | Proksirani zahtjev se uspješno završi                     |
-| `request.failed`    | Proksirani zahtjev ne uspije nakon svih pokušaja/povratka |
-| `quota.exceeded`    | API ključ pređe prag budžeta/kvote                        |
-| `test.ping`         | Sintetički događaj koji koristi testna krajnja tačka      |
+| Događaj                   | Pali kada                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Zahtjev s proxyjem je uspješno završen                                                                                  |
+| `request.failed`          | Proxy zahtjev ne uspijeva nakon svih retries/fallback                                                                   |
+| `quota.exceeded`          | API ključ prelazi budget/quota prag                                                                                     |
+| `proxy.set_aside`         | Član skupa proksija se izdvaja nakon ponovljenih odbijanja (samo prijelaz)                                              |
+| `proxy.pool.exhausted`    | Svaki član opsega proxy pool-a je izdvojen                                                                              |
+| `provider.reset_redeemed` | Automatska primjena bankovnih poništavanja iskoristila je kredit za poništavanje ili resetiranje Claude sedmične sesije |
+| `provider.exhausted`      | Svaki račun provajdera se hladi (najviše jednom po provajderu svakih 10 minuta)                                         |
+| `test.ping`               | Sintetički događaj koji koristi krajnja točka testa                                                                     |
 
-Pretplate prihvataju literal `"*"` za primanje svakog događaja. Nepoznata imena događaja u `events` se ignorišu u trenutku slanja.
+Pretplate prihvataju doslovno `"*"` za primanje svakog događaja. Nepoznata imena događaja u `events` se zanemaruju u vrijeme otpreme.
 
-> Napomena: dispatcher API je povezan, ali produkcijske lokacije poziva za neke od događaja koji nisu `test.ping` još uvijek pristižu. Provjerite `grep dispatchEvent` da vidite koje putanje trenutno pozivaju dispatcher u vašem izdanju.
+> Napomena: dispečer API je povezan, ali proizvodne pozivne lokacije za neke od događaja koji nisu `test.ping` još uvijek slijeću. Provjerite `grep dispatchEvent` da vidite koje staze trenutno pozivaju dispečera u vašem izdanju.
 
 ## Arhitektura
 
@@ -170,9 +174,9 @@ Stranica kontrolne ploče na `/dashboard/webhooks` (pogledajte `src/app/(dashboa
 - Testna isporuka jednim klikom
 - Ručni prekidač za omogućavanje/onemogućavanje
 
-## Primjeri sadržaja
+## Primjeri nosivosti
 
-### request.completed
+### zahtjev.završen
 
 ```json
 {
@@ -204,7 +208,7 @@ Stranica kontrolne ploče na `/dashboard/webhooks` (pogledajte `src/app/(dashboa
 }
 ```
 
-Strukture polja za događaje koji nisu `test.ping` definirane su mjestima poziva koja ih emitiraju; tretirajte objekt `data` kao kompatibilan s budućim verzijama (dodajte polja, nemojte se oslanjati na njihovo odsustvo).
+Oblici polja za događaje koji nisu `test.ping` definisani su pozivnim lokacijama koje ih emituju; tretirajte `data` objekat kao kompatibilan za naprijed (dodajte polja, ne ovise o odsustvu).
 
 ## Najbolje prakse
 

@@ -4,593 +4,627 @@
 
 ---
 
-> **Iga kataloogi ja juurfaili üherealine kirjeldus.**
-> Viimati uuendatud: 2026-06-28 — OmniRoute v3.8.40
+> **Mis kus elab: iga jälgitav tippkataloog ja juurfail üherealise eesmärgiga.** Viimati värskendatud: 2026-11-13 (OmniRoute v3.8.54)
 >
-> Kasutage seda kaarti koodibaasis kiireks navigeerimiseks. Põhjalikuma teabe saamiseks järgige spetsiaalse dokumentatsiooni linke.
+> Kasutage seda kaarti koodibaasis orienteerumiseks, seejärel järgige spetsiaalsete dokumentide linke. Failide arvu mõõdeti ülaltoodud kuupäeval `git ls-files`. Need muutuvad peaaegu iga väljalaskega, seega käsitlege neid suurusjärkudena.
 
-## Tipptaseme puu
+## Tipptasemel puu
 
 ```
 OmniRoute/
-├── src/                  # Next.js 16 rakendus (kasutajaliides + API marsruudid + teegid + domeen + server)
-├── open-sse/             # Voogedastusmootori tööruum (töötlejad, täiturid, tõlkija, MCP-server)
-├── packages/            # npm-i tööruumid: ui-kit (kaasatud Keak CI UI Kit) ja browser-pool
-├── electron/             # Töölauarakenduse ümbris (Electron 41 + electron-builder 26.10)
-├── bin/                  # CLI sisenemispunkt ja käskude töötlejad
-├── scripts/              # Koostamis-, kontrollimis-, sünkroonimis- ja ühekordsed skriptid
-├── docs/                 # Avalik dokumentatsioon (olete siin)
-├── tests/                # Kõik testikomplektid (ühik-, integratsiooni-, e2e- ja protokolliklientide testid)
-├── public/               # Next.js-i staatilised varad, PWA manifest, teenusetöötaja, ikoonid
-├── config/               # Staatiline konfiguratsioon + kvaliteedivärava olek (i18n, payloadRules, quality/)
-├── images/               # Turunduse / README pildivarad
-├── @omniroute/           # Avaldatavad kaaspaketid (opencode-plugin, opencode-provider)
-├── skills/               # CLI/agentide oskuspaketid (cli-* + omni-* + config-codex-cli)
-├── examples/             # Näidispluginad + omniroute-cmd-hello alustuspõhi
-├── contrib/              # Kogukonna panused (podman/)
-├── .source/              # Fumadocsi lähtekonfiguratsioon (source.config.mjs + server/browser/dynamic)
-├── .github/              # GitHub Actionsi töövood + probleemimallid + PR-i mall
-├── .husky/               # Git-konksud (pre-commit, pre-push)
-├── .claude/              # Claude Code'i kaldkriipsukäsud (projektipõhised)
-├── .agents/              # Codexi / üldiste agentide töövood + oskused (.claude/ peegel)
-├── .vscode/              # VS Code'i tööruumi sätted
-├── _ideia/               # Planeerimismärkmed (mitteametlikud; ei tarnita)
-├── _mono_repo/           # Ajaloolised alamprojektid (cloud, site, vscode-extension)
-├── _references/          # Seotud OSS-projektide kirjutuskaitstud viitekloonid
-├── _tasks/               # Väljalaskepõhised ülesannete jälgimise failid (mitteametlikud)
-├── .build/ .worktrees/ dist/   # Kohalikud koostamis-, git-worktree- ja koostamisväljundi ajutised failid (gitignore'iga eiratud)
-├── .issues/              # Kohalik probleemide vahemälu (gitignore'iga eiratud)
-├── .playwright-mcp/      # Playwright MCP testiartefaktid
-├── coverage/             # c8 testikatvuse väljund (gitignore'iga eiratud)
-├── logs/                 # Käitusaegsed logid (gitignore'iga eiratud)
-├── node_modules/         # Sõltuvused (gitignore'iga eiratud)
-├── package/              # npm pack-i ettevalmistusala (koostamisartefakt)
-├── .next/                # Next.js-i koostamisväljund (gitignore'iga eiratud)
-└── (juurfailid — vt allpool)
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+Kohalikud, loodud või privaatsed teed (kõiki eiratud, kunagi sidumata, täpsemalt kirjeldamata):
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
 ## Juurfailid
 
-| Fail                                        | Otstarve                                                                                                  |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Turunduslik sihtleht + kiirjuhend + funktsioonide maatriks (vt ka `llm.txt`)                              |
-| **CHANGELOG.md**                            | Väljalaskepõhine muudatuste logi (genereeritakse automaatselt oskusega `/version-bump-cc`)                |
-| **LICENSE**                                 | MIT-litsentsi tekst                                                                                       |
-| **CLAUDE.md**                               | Projekti reeglid Claude Code’i agentidele (kohustuslikud reeglid, kokkulepped, stsenaariumid)             |
-| **AGENTS.md**                               | Sama mis CLAUDE.md, kuid muudele AI-agentidele (Codex, Cursor jne)                                        |
-| **GEMINI.md**                               | Lühikesed reeglid Gemini-põhistele agentidele (CLAUDE.md alamhulk)                                        |
-| **CONTRIBUTING.md**                         | Kaastööjuhend: seadistamine, tavapärased commit’id, testimine, PR-i töövoog                               |
-| **SECURITY.md**                             | Turvanõrkustest teatamise kord, toetatud versioonid, ohumudel                                             |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — kogukonnas käitumise ootused                                                       |
-| **llm.txt**                                 | Lihttekstis sihtleht, mis on optimeeritud LLM-i roomikutele (SEO AI-assistentide jaoks)                   |
-| **package.json**                            | npm-i manifest, skriptid, sõltuvused, käituskeskkonna nõuded, c8 katvuskontroll                           |
-| **package-lock.json**                       | Lukustatud sõltuvuspuu                                                                                    |
-| **tsconfig.json**                           | TypeScripti juurkonfiguratsioon                                                                           |
-| **tsconfig.typecheck-core.json**            | Tüübikontrolli konfiguratsioon `src/` tuuma jaoks                                                         |
-| **tsconfig.typecheck-noimplicit-core.json** | Range (`noImplicitAny`) tüübikontroll                                                                     |
-| **tsconfig.tsbuildinfo**                    | TS-i inkrementaalse koostamise vahemälu (gitignored)                                                      |
-| **next.config.mjs**                         | Next.js 16 koostekonfiguratsioon (eraldiseisev väljund)                                                   |
-| **next-env.d.ts**                           | Next.js-i automaatselt genereeritud keskkonnatüübid                                                       |
-| **eslint.config.mjs**                       | ESLinti lamekonfiguratsioon (reeglid projektialade kaupa)                                                 |
-| **prettier.config.mjs**                     | Prettieri vormindusreeglid                                                                                |
-| **postcss.config.mjs**                      | PostCSS-i konfiguratsioon Tailwindi/CSS-i töövoo jaoks                                                    |
-| **playwright.config.ts**                    | Playwrighti E2E-testide konfiguratsioon                                                                   |
-| **vitest.config.ts**                        | Vitesti konfiguratsioon (vaikimisi testikomplekt)                                                         |
-| **vitest.mcp.config.ts**                    | Vitesti konfiguratsioon MCP-serveri / autoCombo / vahemälu testikomplektide jaoks                         |
-| **sonar-project.properties**                | SonarQube’i/SonarCloudi konfiguratsioon (koodikvaliteet)                                                  |
-| **Dockerfile**                              | Mitmeetapiline Dockeri koosteprotsess (builder → runner-base → runner-cli)                                |
-| **docker-compose.yml**                      | Arenduskeskkonna Compose nelja profiiliga (base, cli, host, cliproxyapi) + Redise kõrvalkonteiner         |
-| **docker-compose.prod.yml**                 | Tootmiskeskkonna Compose (port 20130, Redis, nimega andmeköited)                                          |
-| **.dockerignore**                           | Dockeri kontekstist välistatud failid                                                                     |
-| **fly.toml**                                | Fly.io juurutuskonfiguratsioon (piirkond `sin`, port 20128, andmeköide /data)                             |
-| **.env.example**                            | Keskkonnafaili mall (kopeeritakse esimesel installimisel automaatselt faili `.env`)                       |
-| **.gitignore**                              | Giti eiramismustrid                                                                                       |
-| **.npmignore**                              | npm-is avaldamisest välistatavate failide loend                                                           |
-| **.npmrc**                                  | npm-i konfiguratsioon (register, lukustusfaili reeglid)                                                   |
-| **.node-version**                           | Fikseeritud Node’i versioon (kasutavad nvm-iga ühilduvad tööriistad)                                      |
-| **.nvmrc**                                  | Fikseeritud Node’i versioon nvm-i jaoks                                                                   |
-| **eslint.complexity.config.mjs**            | ESLinti konfiguratsioon keerukuse astmelise piiraja jaoks (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | ESLinti konfiguratsioon SonarJS-i reeglite jaoks (kognitiivne keerukus / dubleerimine)                    |
-| **source.config.ts**                        | Fumadocsi `defineDocs` lähtekonfiguratsioon (täidab `.source/` sisu)                                      |
-| **knip.json**                               | Knipi konfiguratsioon — kasutamata failid/ekspordid/sõltuvused (toidab surnud koodi kontrolli)            |
-| **stryker.conf.json**                       | Strykeri mutatsioonitestimise konfiguratsioon                                                             |
-| **.size-limit.json**                        | size-limit'i paketi mahupiirangu konfiguratsioon                                                          |
-| **promptfooconfig.yaml**                    | promptfoo hindamise konfiguratsioon                                                                       |
-| **.gitleaks.toml**                          | gitleaksi saladuste skannimise reeglistik                                                                 |
-| **.zizmor.yml**                             | zizmori GitHub Actionsi turbekontrolli konfiguratsioon                                                    |
-| **socket.yml**                              | Socket.devi tarkvara tarneahela konfiguratsioon                                                           |
-| **news.json**                               | Lokaliseeritud v2 teadaannete voog; Radari väljalaskekirje tarnitakse inaktiivsena                        |
-| **flake.nix** / **flake.lock**              | Nixi arenduskesta definitsioon + lukufail                                                                 |
-| **.env**                                    | Kohalikud saladused (gitignore'iga eiratud — genereeritud failist `.env.example`)                         |
+Kõik jälgitavad failid hoidla juurtes (`git ls-files | grep -v /`), rühmitatud funktsioonide järgi.
 
-> **Teisaldatud versioonis v3.8.26 juurkataloogist välja (korrastamine):**
->
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja genereeritud `quality-metrics.json` (gitignore'iga eiratud). Vaadake jaotist [`## config/`](#config--static-configs--quality-gate-state).
+### Projekti dokumentatsioon
+
+| Fail                     | Eesmärk                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `README.md`              | Sihtleht: funktsioonide ülevaade, kiirkäivitus, installimeetodid                |
+| `CHANGELOG.md`           | Väljalaskepõhine muudatuste logi (siia volditakse `changelog.d/` fragmendid)    |
+| `ROADMAP.md`             | Avalik teekaart                                                                 |
+| `LICENSE`                | MIT litsents                                                                    |
+| `THIRD_PARTY_NOTICES.md` | Märkused komplekteeritud kolmanda osapoole koodide kohta (nt wreq-js sidumised) |
+| `CONTRIBUTING.md`        | Kaasautori juhend: seadistamine, tavapärased sissekanded, testmaatriks, PR voog |
+| `SECURITY.md`            | Haavatavuse aruandluspoliitika                                                  |
+| `CODE_OF_CONDUCT.md`     | Kogukonna käitumise ootused                                                     |
+| `llm.txt`                | Lihtteksti projekti kokkuvõte LLM roomikutele ja assistentidele                 |
+
+### AI-assistendi juhised
+
+| Fail        | Eesmärk                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| `AGENTS.md` | Üks tõeallikas iga AI assistendi jaoks: kokkulepped, kvaliteetsed väravad, karmid reeglid |
+| `CLAUDE.md` | Claude Code'i spetsiifilised deltad; impordib `AGENTS.md`                                 |
+| `GEMINI.md` | Kaksikutele omased deltad; osutab tagasi `AGENTS.md`                                      |
+
+Pesastatud juhised on olemas ka nendes kirjeldatud koodi kõrval: `open-sse/services/AGENTS.md` ja `src/lib/db/AGENTS.md`.
+
+### Paketi manifestid ja sõlme tööriistaahel
+
+| Fail                       | Eesmärk                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `package.json`             | npm manifest: skriptid, sõltuvused, `engines`, `workspaces`, avaldatud `files`     |
+| `package-lock.json`        | Lukustatud sõltuvuspuu                                                             |
+| `pnpm-workspace.yaml`      | pnpm tööruumide loend (`packages/*`, `open-sse`) ja loomuliku ehituse lubade loend |
+| `.npmrc` / `.npmignore`    | npm config ja avaldage välistused                                                  |
+| `.node-version` / `.nvmrc` | Sõlme versiooni tihvtid versioonihalduritele                                       |
+| `flake.nix` / `flake.lock` | Nix dev kest ja selle lukk                                                         |
+| `Makefile`                 | `make` otseteed, mis delegeerivad npm-skripte                                      |
+
+### TypeScript, Next.js ja docs build
+
+| Fail                                      | Eesmärk                                                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `tsconfig.json`                           | TypeScript põhikonfiguratsioon ja tee varjunimed (`@/*`, `@omniroute/open-sse`)          |
+| `tsconfig.typecheck-core.json`            | `npm run typecheck:core` viil                                                            |
+| `tsconfig.typecheck-noimplicit-core.json` | `npm run typecheck:noimplicit:core` (range `noImplicitAny`) viil                         |
+| `tsconfig.typecheck-api.json`             | API-marsruudi tüübikontrolli osa (`scripts/check/check-api-typecheck.mjs`)               |
+| `tsconfig.typecheck-dashboard.json`       | Armatuurlaua tüübikontrolli osa (`npm run check:dashboard-typecheck`)                    |
+| `tsconfig.build.json`                     | Tootmise tüübikontroll (`npm run typecheck:build`, `check:build-typecheck`)              |
+| `tsconfig.mitm.json`                      | `scripts/build/buildMitm.mjs` kasutatav MITM build konfiguratsioon                       |
+| `next.config.mjs`                         | Next.js 16 konfiguratsioon (eraldi väljund, ehitusprofiili varjunimed)                   |
+| `source.config.ts`                        | Fumadocs `defineDocs` konfiguratsioon: millised `docs/` jaotised kompileeritakse `/docs` |
+| `postcss.config.mjs`                      | PostCSS / Tailwind torujuhe                                                              |
+
+### Lint ja vormindamine
+
+| Fail                                      | Eesmärk                                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `eslint.config.mjs`                       | Peamine ESLint lame konfiguratsioon (`npm run lint`, `config/quality/eslint-suppressions.json`-ga)                 |
+| `eslint.complexity-ratchets.config.mjs`   | Eraldiseisev konfiguratsioon, mida kasutavad keerukuse ja kognitiivse keerukuse põrkmehhanismid ühes ESLint käigus |
+| `eslint.complexity.config.mjs`            | Iseseisev konfiguratsioon ainult `complexity` + `max-lines-per-function` -ga (kasutatakse testides)                |
+| `prettier.config.mjs` / `.prettierignore` | Prettier reeglid ja välistused                                                                                     |
+| `.editorconfig`                           | Redaktori vaikeseaded (kahe tühikuga taane)                                                                        |
+| `.markdownlint.json`                      | Soovitav allahindlus (`npm run lint:md`)                                                                           |
+| `.vale.ini`                               | Nõuandev proosa lint (`npm run lint:prose`), sõnavara `.vale/` keeles                                              |
+
+### Testid, hindamine ja katvus
+
+| Fail                          | Eesmärk                                                                                                   |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `vitest.config.ts`            | jsdom Vitest komplekt: `npm run test:vitest:ui` (armatuurlaud `.tsx`, konksud, memory/skills testid)      |
+| `vitest.mcp.config.ts`        | Sõlme Vitest komplekt: `npm run test:vitest` (MCP server, autoCombo, kombineeritud, API `.spec.ts`)       |
+| `vitest.quarantine.config.ts` | Käitab `config/quality/vitest-exclusions.json` loetletud karantiini pandud faile                          |
+| `vitest.e2e-live.config.ts`   | Reaalajas serveri Vitest komplektid (`tests/e2e/ecosystem.test.ts`, `tests/e2e/protocol-clients.test.ts`) |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                             |
+| `stryker.conf.mjs`            | Stryker mutation testing (`npm run test:mutation`; computes `tap.testFiles` from `mutate`)                |
+| `stryker.disablebail.mjs`     | Stryker variant ilma kautsjonita, test-liigsuse mõõtmiseks                                                |
+| `promptfooconfig.yaml`        | promptfoo LLM-turvakomplekt                                                                               |
+| `codecov.yml`                 | Codecovi plaastri katvuse seaded                                                                          |
+
+### Docker ja kasutuselevõtt
+
+| Fail                              | Eesmärk                                                                            |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| `Dockerfile`                      | Mitmeastmeline kujutis (`builder` → `runner-base` → `runner-web` / `runner-cli*`)  |
+| `Dockerfile.bun`                  | Alternatiivne pilt Bun käitusajal (ehitatud `docker-publish.yml` poolt)            |
+| `docker-compose.yml`              | Vaikimisi koostamine profiilidega (baas, veeb, kliki, host, mälu, cliproxyapi jne) |
+| `docker-compose.prod.yml`         | Eraldi tootmise hetketõmmise eksemplar pordis 20130                                |
+| `docker-compose.selfhost.yml`     | Ühe käsuga loopback isehost (paarid `.env.selfhost.example`)                       |
+| `docker-compose.ollama-local.yml` | Docker OmniRoute vestleb host-native Ollama                                        |
+| `.dockerignore`                   | Docker ehituskonteksti välistused                                                  |
+| `fly.toml`                        | Rakenduse Fly.io konfiguratsioon (port 20128, `/data` helitugevus)                 |
+
+### Turvalisuse, tarneahela ja hoidlate robotid
+
+| Fail                                         | Eesmärk                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `.gitleaks.toml`                             | gitleaks salajase skannimise reeglid ja lubatud loendid                               |
+| `.trivyignore`                               | Konteinerkujutise skannimise puhul aktsepteeritud riskide mahasurumine                |
+| `.zizmor.yml`                                | zizmor GitHub Toimingute turvaauditi konfiguratsioon                                  |
+| `socket.yml`                                 | Rakenduse Socket.dev konfiguratsioon (tee ignoreerib; mitte CI värav)                 |
+| `sonar-project.properties`                   | SonarQube/SonarCloud projekti konfiguratsioon                                         |
+| `knip.json`                                  | Knip kasutamata files/exports/deps konfiguratsioon (toidab `npm run check:dead-code`) |
+| `.size-limit.json`                           | Paki suuruses eelarved                                                                |
+| `.mergify.yml`                               | Ühenda ühendamisjärjekorra konfiguratsioon                                            |
+| `.coderabbit.yaml`                           | CodeRabbit ülevaate konfiguratsioon                                                   |
+| `.cbmignore`                                 | Ignoreeri koodibaasi-mälu-mcp koodiindeksi loendit                                    |
+| `.gitignore` / `.gitattributes` / `.mailmap` | Ignoreeri reegleid, skriptide LF realõpusid, kanoonilisi autoriidentiteete            |
+
+### Keskkonna mallid, olek ja vood
+
+| Fail                        | Eesmärk                                                                  |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `.env.example`              | Mall kopeeriti esmakordsel installimisel `.env` ; viitenimekiri env vars |
+| `.env.selfhost.example`     | `docker-compose.selfhost.yml`                                            |
+| `.env.homolog.example`      | Homologeerimise jooksja mall (`npm run homolog`)                         |
+| `.env.devin-bridge.example` | Devin silla seadistuse env-faili näide                                   |
+| `.i18n-state.json`          | Tõlke järkjärguline olek (allika räsid dokumendi ja lokaadi kohta)       |
+| `news.json`                 | Lokaliseeritud teadaannete voog (skeem v2), mida loeb armatuurlaud       |
 
 ---
 
 ## `src/` — Next.js rakendus
 
+Umbes 4550 jälgitavat faili. Tee alias `@/*` → `src/*`.
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### `src/app/` — rakenduse ruuter (Next.js 16)
+### `src/app/` — rakenduse ruuter
 
-| Tee                                                                          | Eesmärk                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Avalik OpenAI-compat API (~ 25 alammarsruudid: vestlus, lõpetamised, manustused, failid, paketid, heli, pildid, videod, muusika, ümberpaigutamine, modereerimine, otsing, ws, agendid, kontod, pakkujad jne)                                                                                                          |
-| `app/api/v1beta/`                                                            | Kaksikute stiilis API lõpp-punktid                                                                                                                                                                                                                                                                                    |
-| `app/api/playground/`                                                        | Playground Studio marsruudid: `improve-prompt/` (POST — LLM viipade ümberkirjutaja), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — vaata `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                         |
-| `app/api/` (non-v1)                                                          | Management/admin marsruudid (~ 60 kataloogid: pakkujad, kombod, seaded, mcp, a2a, evals, mälu, oskused, veebihaagid, vastavus, vastupidavus, jälgimine, tunnelid, kliiritööriistad jne)                                                                                                                               |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marsruuti (serveri juhtimine, agent state/DNS/mappings, ümbersõit, sert, ülesvoolu CA). LOCAL_ONLY + SPAWN_CAPABLE. Vaata `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                              |
-| `app/api/tools/traffic-inspector/`                                           | Liiklusinspektor REST + WS API — 16 + marsruuti (päringud, seansid, hostid, püüdmisrežiimid, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vaata `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                               |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 sisendpunkt (`POST /a2a`)                                                                                                                                                                                                                                                                            |
-| `app/.well-known/agent.json/`                                                | A2A agendikaart (avastus)                                                                                                                                                                                                                                                                                             |
-| `app/(dashboard)/dashboard/`                                                 | Armatuurlaua UI lehed (50 + jaotist, ~ 118 page.tsx -faili: pakkujad, kombinatsioonid, seaded, mälu, oskused, veebihaagid, evals, audit, pakett, vahemälu, kulud, tervis, süsteem, tegevus jne)                                                                                                                       |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Otsingutööriistad Studio UI (3 vahekaarti: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — vaata `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                              |
-| `app/(dashboard)/dashboard/memory/`                                          | Mälustuudio (plaan 21): `page.tsx` (3 vahekaardi kest), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/`, (useEngineStatususeMemorySettings |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge armatuurlaua leht — serverikaart, 9 agendikaarti, häälestusviisard, mudeli kaardistamine, möödaviiguloend. i18n PT-BR + EN. Vaata `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                       |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Liiklusinspektori armatuurlaua leht — DevTools split, 7 detaili vahekaarti, 4 jäädvustamisrežiimi lülitit, seansi salvestaja, konteksti värvimine. i18n PT-BR + EN. Vaata `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                     |
-| `app/(dashboard)/dashboard/activity/`                                        | Tegevuste voo leht (rühm B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                     |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvoodi jagamise leht (rühm B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pakkuja plaani konfiguratsioonileht (rühm B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvoodi mõõtmed ühenduse alistamise kohta                                                                                                                                                                                  |
-| `app/docs/`                                                                  | Manustatud dokumentatsiooni vaataja (renderdab `docs/*.md`)                                                                                                                                                                                                                                                           |
-| `app/landing/`                                                               | Turunduse sihtleht                                                                                                                                                                                                                                                                                                    |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Authiga seotud lehed                                                                                                                                                                                                                                                                                                  |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP vealehed                                                                                                                                                                                                                                                                                                         |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status                                                                                                                                                                                                                                                                                                         |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Juurepaigutus, koduleht, PWA manifest, globaalne CSS                                                                                                                                                                                                                                                                  |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Vigade piirid                                                                                                                                                                                                                                                                                                         |
+| Tee                                                                 | Eesmärk                                                                                                                                                                                                  |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                       | Avalik OpenAI-ga ühilduv API: vestlus, lõpetamised, vastused, sõnumid, manustused, pildid, heli, videod, muusika, ümberpaigutamine, modereerimine, otsing, failid, partiid, ws, mudelid, …               |
+| `app/api/v1beta/`                                                   | Kaksikute stiilis lõpp-punktid                                                                                                                                                                           |
+| `app/api/` (muud kaustad)                                           | Haldus- ja administraatorite marsruudid: pakkujad, kombinatsioonid, seaded, võtmed, kasutus, logid, mcp, a2a, acp, mälu, oskused, evals, veebihaagid, tunnelid, pistikprogrammid, radar, tööriistad, ... |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API — [AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                                                                                                    |
+| `app/api/tools/traffic-inspector/`                                  | Liiklusinspektor REST API — vt [TRAFFIC_INSPECTOR.md](../frameworks/TRAFFIC_INSPECTOR.md)                                                                                                                |
+| `app/(dashboard)/dashboard/`                                        | Üks kaust armatuurlaua jaotise kohta (pakkujad, kombinatsioonid, logid, kasutus, kulud, vahemälu, tihendamine, mälu, mänguväljak, otsingutööriistad, sätted, tööriistad jne)                             |
+| `app/(dashboard)/home/`                                             | Avakuva ja selle vidinad                                                                                                                                                                                 |
+| `app/docs/`                                                         | Dokumendivaatur, mis renderdab `source.config.ts` loetletud Fumadocsi jaotisi                                                                                                                            |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | Juurpaigutus, juurkirje (ümbersuunamised), PWA manifest, globaalne CSS                                                                                                                                   |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | Veapiirid ja tagasilöögid                                                                                                                                                                                |
 
-### `src/lib/` — põhiteegid (~ 50 moodulit)
+API marsruudid järgivad `Route → CORS → Zod validation → optional auth → policy → handler`; vt [ARCHITECTURE.md](ARCHITECTURE.md) ja [API_REFERENCE.md](../reference/API_REFERENCE.md).
 
-| Moodul                                   | Eesmärk                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                   | A2A protokolli ülesannete haldur, oskused (5), voogedastus                                                                                                                                                                                                                                                               |
-| `acp/`                                   | CLI agendiregister (kohalik CLI tuvastus — vt `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                |
-| `api/`                                   | Jagatud API abilised (`requireManagementAuth`, valideerimine)                                                                                                                                                                                                                                                            |
-| `auth/`                                  | Seanss, parooli räsimine, loa valideerimine                                                                                                                                                                                                                                                                              |
-| `batches/`                               | OpenAI Partii API käitlejad                                                                                                                                                                                                                                                                                              |
-| `catalog/`                               | Pakkuja kataloog Zod valideerimine + võimekuse eraldusvõime                                                                                                                                                                                                                                                              |
-| `cloudAgent/`                            | Pilveagendid (Codex Cloud, Devin, Jules) — vt `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                           |
-| `combos/`                                | Kombineeritud eraldusvõimega + ümbertellimise abilised                                                                                                                                                                                                                                                                   |
-| `audit/`                                 | Tegevusvoo abilised: `highLevelActions.ts` (lubade loend + `isHighLevelAction()`), `activityIcons.ts` (tegevuste → icon/verb kaart), `timeline.ts` (groupByDay/relativeTime) — vt `docs/architecture/MONITORING_SECTIONS.md`                                                                                             |
-| `compliance/`                            | Auditi logi + pakkuja audit — vt `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                           |
-| `compression/`                           | Kompressioonmootori liim (mootorid elavad `open-sse/services/compression/`)                                                                                                                                                                                                                                              |
-| `config/`                                | Käitusaja konfigureerimise abilised                                                                                                                                                                                                                                                                                      |
-| `db/`                                    | 120 + domeeni DB moodulit + 168 migratsiooni ( SQLite puhul minge alati siit läbi)                                                                                                                                                                                                                                       |
-| `quota/`                                 | Kvoodi jagamise mootor: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore liides), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — vaata `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radari vabamudeli kataloogi klient: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`                                                                                                                                              |
-| `display/`                               | UI vormindamise abilised (kulu, latentsus jne)                                                                                                                                                                                                                                                                           |
-| `embeddings/`                            | Manustatakse teenuse abilised                                                                                                                                                                                                                                                                                            |
-| `env/`                                   | Env muutuja parsimine + valideerimine                                                                                                                                                                                                                                                                                    |
-| `evals/`                                 | Eval raamistik (sviidid, jooksja, käitusaeg) — vt `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                             |
-| `guardrails/`                            | PII masker, kiire süstimine, nägemissild — vt `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
-| `jobs/`                                  | Taustatööd (cronilaadsed)                                                                                                                                                                                                                                                                                                |
-| `memory/`                                | Vestlusmälu (SQLite FTS5 + sqlite-vec hübriid RRF + Qdrant tase 2) — vt `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                      |
-| `memory/embedding/`                      | Mitme allikaga manustamiskiht: `index.ts` (lahendaja), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plaan 21)                                                                                                                                                                         |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ümbris — KNN brute-force + hübriid RRF (FTS5 + vektor, k = 60). Lazy-init, laguneb graatsiliselt, kui sqlite-vec pole saadaval. (plaan 21)                                                                                                                                                             |
-| `memory/reindex.ts`                      | `runReindexBatch()` — töötleb mälestusi `needs_reindex=1` taustal; kutsutakse `POST /api/memory/reindex` ja lazy-backfill path poolt. (plaan 21)                                                                                                                                                                         |
-| `monitoring/`                            | Tervisekontroll, mõõdikud heide                                                                                                                                                                                                                                                                                          |
-| `oauth/`                                 | OAuth/import vood 22 pakkuja mooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilokood, kimi-kodeerimine, traqo, xaioference, kiro, xaioference zed-hosted, zed)                                                   |
-| `plugins/`                               | Pluginate register                                                                                                                                                                                                                                                                                                       |
-| `promptCache/`                           | Antroopilises stiilis kiire vahemälu katkestuspunktid                                                                                                                                                                                                                                                                    |
-| `skills/`                                | Oskuste raamistik (sisseehitatud + turg + SkillsSH) — vt `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
-| `playground/`                            | Playground Studio jagasid abilised: `codeExport.ts` (curl/Python/TS generaator), `promptImprover.ts` (meta-prompt builder), `streamMetrics.ts` (puhas TTFT/TPS), `types.ts` (hinnatabel) — vaata `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                  |
-| `webhookDispatcher.ts`                   | HMAC veebihaagi kohaletoimetamine — vt `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                     |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelihaldurid — vt `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                         |
-| `cloudSync.ts`, `initCloudSync.ts`       | Valikuline oleku pilvesünkroonimine                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | Re-ekspordi tünn db-moodulite jaoks (ei ole ainult loogika — reeksport)                                                                                                                                                                                                                                                  |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Taotlege + idempotentsuse vahemällu salvestamist                                                                                                                                                                                                                                                                         |
-| (~ veel 30 tipptaseme faili)             | Spetsialiseerunud abilised (logEnv, modelsDevSync, piiSanitizer jne)                                                                                                                                                                                                                                                     |
+### `src/lib/` — serveri raamatukogud
 
-### `src/lib/db/` — andmebaas (147 moodulit + 208 migratsiooni)
+Umbes 90 alamkausta pluss umbes 90 tipptaseme moodulit. Peamised rühmad:
 
-| Subdir                    | Eesmärk                                                                                                                                                                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton koos WAL ajakirjandusega                                                                                                                                                       |
-| `db/migrations/`          | Versioonitud SQL failid (idempotentsed, tehingupõhised). `073_memory_vec.sql` lisab `memory_vec_meta` + `needs_reindex` veeru (plaan 21).                                                                  |
-| `db/playgroundPresets.ts` | CRUD moodul Playground Studio eelseadete jaoks (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                              |
-| `db/memoryVec.ts`         | CRUD `memory_vec_meta` jaoks (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` jne (plaan 21)                                               |
-| `db/<domain>.ts`          | Üks moodul domeeni kohta: pakkujad, kombinatsioonid, apiKeys, kasutajad, seansid, kasutamine, auditi logi, veebihaagid, oskused, mälu_kirjed, pilve_agendi_ülesanded, evals* \* , põhjenduse_vahemälu jne. |
+| Piirkond                      | Kaustad / failid                                                                                                    | Sügav sukeldumine                                                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Andmebaas                     | `db/` — domeenimoodulid, `migrations/`, `adapters/`, `repositories/`, `migrationRunner/`                            | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md), [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md)                                            |
+| Kasutus, kvoot ja kulu        | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE.md](../routing/QUOTA_SHARE.md), [COST_TRACKING.md](../guides/COST_TRACKING.md)                                                    |
+| Pakkujad ja mudelid           | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                       |
+| OAuth ja volikirjad           | `oauth/` (pakkujad/, teenused/, utils/), `zed-oauth/`, `copilot/`, `cursor/`, `credentialHealth/`                   | `resolvePublicCred()` (operaatori dokument, ei esitata avalikult)                                                                              |
+| Ohutus ja juhtimine           | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                         |
+| Agendi omadused               | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE.md](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| Pluginad ja teenused          | `plugins/`, `services/` (manustatud teenuse paigaldajad ja juhendaja)                                               | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                             |
+| Marsruutimine ja vastupidavus | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                                                     |
+| Puhverserverid ja võrgundus   | `proxyHealth/`, `proxySubscription/`, `proxyRelay/`, `proxyEvents/`, tunnelimoodulid                                | [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md), [TUNNELS_GUIDE.md](../ops/TUNNELS_GUIDE.md)                                                           |
+| Tööd ja ajakava               | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                                |
+| Vaadeldavus ja eksport        | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                         |
+| CLI ja IDE integratsioon      | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                    |
+| Konteksti allikad             | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT.md](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                               |
+| Muud omadused                 | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md), [PLAYGROUND_STUDIO.md](../frameworks/PLAYGROUND_STUDIO.md)                                                 |
 
-### `src/domain/`
+Tipptasemel moodulid, mida tasub teada:
 
-| Moodul                 | Eesmärk                                                   |
-| ---------------------- | --------------------------------------------------------- |
-| `policy.ts`            | Poliitikamootor                                           |
-| `fallbackPolicy.ts`    | Varuotsuste puu                                           |
-| `costRules.ts`         | Kulude arvutamise reeglid                                 |
-| `lockoutPolicy.ts`     | Model/connection töösulu poliitika                        |
-| `tagRouter.ts`         | Sildipõhine marsruutimine                                 |
-| `comboResolver.ts`     | Kombineeritud eraldusvõime (kasutab kombineeritud mootor) |
-| `modelAvailability.ts` | Mudeli saadavuse kontroll                                 |
-| `assessment/`          | Mudeli hindamine (RFC-AUTO-HINDAMISE 1. etapp)            |
+| Fail                                                           | Eesmärk                                                              |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | Vastuste vahemällu salvestamine ja idempotentsus                     |
+| `webhookDispatcher.ts`                                         | HMAC-allkirjaga veebihaagi kohaletoimetamine                         |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | Tunneli haldajad                                                     |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | Taustmandaatide tervisekontroll ja värskendusring                    |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | Voogesitusreaktsioonide puhastusvahendid                             |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | Protsessi elutsükkel                                                 |
+| `*.stub.ts`                                                    | Ehitise profiili tünnid on `next.config.mjs` asendatud varjunimedega |
 
-### `src/server/`
+### `src/lib/db/` — andmebaas
 
-| Moodul   | Eesmärk                                                                                             |
-| -------- | --------------------------------------------------------------------------------------------------- |
-| `authz/` | Autoriseerimiskonveier: `classify` → `policies` → `enforce` — vt `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS konfiguratsioon                                                                                |
-| `auth/`  | Seansi vahevara                                                                                     |
+| Tee                   | Eesmärk                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`          | `getDbInstance()` singleton (WAL ajakirjandus)                                                                                   |
+| `db/migrations/`      | Nummerdatud idempotentsed `.sql` migratsioonid (kirjutamise ajal 236 faili; `check-migration-numbering.mjs` valvab nummerdamist) |
+| `db/migrationRunner/` | Rändejooksja                                                                                                                     |
+| `db/adapters/`        | SQLite draiveri adapterid (better-sqlite3, node:sqlite, bun:sqlite, sql.js)                                                      |
+| `db/repositories/`    | SQLite hoidla rakendused (kombod, mänguväljaku eelseaded, marsruutimise konfiguratsioon)                                         |
+| `db/<domain>.ts`      | Umbes 175 domeenimoodulit (pakkujad, kombinatsioonid, apiKeys, sätted, kasutus jne) impordib — need alati otse                   |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| Moodul                           | Eesmärk                                                                                           |
-| -------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `components/`                    | Armatuurlaua komponent API: `packages/ui-kit` adapterid — vt `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ekraanidel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                  |
-| `constants/providers.ts`         | **381 pakkujat** Zod valideerimisega (tõe allikas)                                                |
-| `constants/cliTools.ts`          | Väline CLI tööriista register                                                                     |
-| `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** prioriteetidega                                                    |
-| `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad kandja (vs haldamise) autentimist                                         |
-| `constants/upstreamHeaders.ts`   | Päise keelamisloend ülesvoolu päringute jaoks                                                     |
-| `validation/schemas.ts`          | ~ 80 Zod skeemi (üks tõeallikas API lepingute jaoks)                                              |
-| `validation/helpers.ts`          | Zod valideerimisabilised (`validateBody` jne)                                                     |
-| `types/`                         | Jagatud TS tüübid                                                                                 |
-| `contracts/`                     | Riiklikud API lepingud (tarbib `files:` `package.json`)                                           |
-| `utils/circuitBreaker.ts`        | Pakkuja kaitselüliti (vt `docs/architecture/RESILIENCE_GUIDE.md`)                                 |
-| `utils/apiAuth.ts`               | API võtme valideerimine, ulatuse kontroll                                                         |
-| `utils/fetchTimeout.ts`          | Timeout/abort ümbrised ülesvoolu toomiseks                                                        |
-| `utils/releaseNotes.ts`          | Suletud v2/legacy teadaannete parser, lokaliseerimine ja ID vallandamine                          |
+| Tee                                                            | Eesmärk                                                                                                                                                  |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/policyEngine.ts`                                       | Poliitikamootor                                                                                                                                          |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | Varuotsused, sulgemispoliitika, kulureeglid                                                                                                              |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | Kvoodi vahemälu ja hetktõmmiste püsivus                                                                                                                  |
+| `domain/assessment/`                                           | Mudeli hindamine (hindaja, kategoriseerija, enesetervendaja)                                                                                             |
+| `server/authz/`                                                | Autoriseerimistoru ja marsruudi valvur (`routeGuard.ts`) — vt [AUTHZ_GUIDE.md](AUTHZ_GUIDE.md), [ROUTE_GUARD_TIERS.md](../security/ROUTE_GUARD_TIERS.md) |
+| `server/origin/`, `server/cors/`                               | Public/MCP/WS päritolu eraldusvõime ja CORS — vt [CORS.md](../security/CORS.md)                                                                          |
+| `server/ws/`                                                   | Reaalajas armatuurlaua WebSocket server                                                                                                                  |
+| `shared/components/`                                           | Armatuurlaua komponendid ja adapterid üle `packages/ui-kit` — vt [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                                                    |
+| `shared/constants/`                                            | Pakkujate kataloog (`providers.ts`), marsruutimisstrateegiad, CLI tööriistad, ikoonikaart, ülesvoolu päise keelamise loend, ...                          |
+| `shared/validation/`                                           | Zod skeemid ja valideerimisabilised                                                                                                                      |
+| `shared/utils/`                                                | Kaitselüliti, API-võtme autentimine, toomise ajalõpud, funktsioonide lipud, …                                                                            |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | Vestluste sissepääsu vahevara, võrguabilised, klienditeenindused, React konksud                                                                          |
 
 ---
 
-## `open-sse/` — voogedastusmootori tööruum
+## `open-sse/` — voogesitusmootori tööala
 
-Eraldi npm-i tööruum (`@omniroute/open-sse`). Tegeleb päringute töötlemise ja teenusepakkujate käitamisega.
+npm tööruum `@omniroute/open-sse` (umbes 2390 jälgitavat faili). See töötleb taotlusi ja täidab teenusepakkuja. Ülevaade: [OPEN_SSE_ARCHITECTURE.md](../frameworks/OPEN_SSE_ARCHITECTURE.md).
 
 ```
 open-sse/
-├── handlers/            # 16 faili (12 töötlejat + 4 abifaili): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search jne.
-├── executors/           # 150 käituri moodulit (BaseExecutorit laiendavad klassid + teenusepakkuja-põhised abifailid)
-├── translator/          # Vormingute teisendajad (9 päringu-, 9 vastuse- ja 9 abimoodulit)
-├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ teenusemoodulit (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM jne)
-├── mcp-server/          # MCP-server (110 tööriista, 3 transporti, 33 ulatust)
-├── config/              # Teenusepakkujate/mudelite registrid, päiste konfiguratsioon, mudelite aliased
-├── utils/               # TLS-klient, puhverserveri fetch/dispatcher, võrguabitööriistad
-├── index.ts             # Tööruumi sisenemispunkt
-├── package.json         # Tööruumi manifest
-├── tsconfig.json        # Tööruumi TS-konfiguratsioon
-└── types.d.ts           # Tööruumi tüübideklaratsioonid
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| Tee                                                                                            | Eesmärk                                                                                                                                                           |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `combo.ts` + `combo/`                                                                          | Kombineeritud marsruutimise strateegiad — vt [AUTO-COMBO.md](../routing/AUTO-COMBO.md)                                                                            |
+| `autoCombo/`                                                                                   | Auto-Combo punktiarvestus ja režiimipaketid                                                                                                                       |
+| `accountFallback.ts` + `accountFallback/`                                                      | Ühenduse jahtumine ja mudeli lukustus — vt [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                             |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | Piirmäära jälgimine ja päise sõelumine                                                                                                                            |
+| `compression/`                                                                                 | Kompressioonmootorid (`engines/`), reeglikomplektid (`rules/`), `eval/`, `harness/`, `riskGate/` — vt [COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | Tokeni värskendamine, kasutusarvestus, vahemällu salvestamine, sissepääsuteed, seansikogumid, Codex kontod, marsruutimisabilised                                  |
+| `__tests__/`                                                                                   | Ühisasukohaga Vitest sviidid (kogutud Vitest konfiguratsioonidega)                                                                                                |
+| `AGENTS.md`                                                                                    | Agendi juhend selle kausta jaoks                                                                                                                                  |
+
+Muster: suur moodul `X.ts` kausta `X/` kõrval tähendab, et moodul on jagatud väiksemateks failideks (`handlers/chatCore.ts` + `handlers/chatCore/`, `services/combo.ts` + `services/combo/`).
 
 ### `open-sse/mcp-server/`
 
-| Tee                         | Otstarve                                                                           |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP-serveri elutsükkel (stdio- ja HTTP-transpordid)                                |
-| `httpTransport.ts`          | HTTP Streamable'i + SSE transpordid (`/api/mcp/sse`, `/api/mcp/stream`)            |
-| `audit.ts`                  | Auditilogimine tabelisse `mcp_tool_audit`                                          |
-| `scopeEnforcement.ts`       | Tööriistapõhine ulatuse valideerimine                                              |
-| `runtimeHeartbeat.ts`       | Tervise olekusignaal faili `DATA_DIR/runtime/mcp-heartbeat.json`                   |
-| `descriptionCompressor.ts`  | Tihendab konteksti säästmiseks tööriistakirjelduste metaandmeid                    |
-| `schemas/tools.ts`          | 36 põhitööriista definitsiooni + ulatused                                          |
-| `tools/advancedTools.ts`    | Täiustatud tööriistade teostused                                                   |
-| `tools/memoryTools.ts`      | 3 mälutööriista (otsimine/lisamine/tühjendamine)                                   |
-| `tools/skillTools.ts`       | 4 oskusetööriista (loend/lubamine/käivitamine/käivitused)                          |
-| `tools/compressionTools.ts` | 5 tihendustööriista                                                                |
-| `README.md`                 | MCP-serveri sisemine README (ristviidatud failist `docs/frameworks/MCP-SERVER.md`) |
+| Tee                   | Eesmärk                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `server.ts`           | MCP serveri elutsükkel                                                                     |
+| `httpTransport.ts`    | Voogesitavad HTTP ja SSE transpordid                                                       |
+| `scopeEnforcement.ts` | Tööriista ulatuse kontrollid                                                               |
+| `audit.ts`            | Tööriistakõne auditi logimine                                                              |
+| `schemas/`            | Tööriistade määratlused ja ulatused                                                        |
+| `tools/`              | Tööriistade rakendused (mälu, oskused, tihendamine jne)                                    |
+| `toolSearch/`         | Tööriistaotsing                                                                            |
+| `README.md`           | Sisearhitektuuri märkmed; täielik kataloog on [MCP-SERVER.md](../frameworks/MCP-SERVER.md) |
 
 ---
 
-## `packages/` — tööruumid
+## `packages/` — npm tööruumid
 
-| Tee                      | Otstarve                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — Keak CI UI Kit-i repoteegis hoitav hetktõmmis (`private`, `UNLICENSED`), mida kasutatakse lähtekoodina (koostamist pole). `UPSTREAM.md` fikseerib ülesvoolu commiti ja dokumenteerib litsentsiloa; `PATCHES.md` loetleb kohalikud paigad (puuduvad); `src/` sünkroonitakse ainult skriptiga `scripts/dev/sync-ui-kit.sh` ja seda kontrollib `npm run check:ui-kit-snapshot`. Vt `docs/architecture/DESIGN_SYSTEM.md` |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — valikuline brauserikogumi teenus (CloakBrowseri ja Playwrighti-põhine vestlus)                                                                                                                                                                                                                                                                                                                                 |
+| Tee                      | Eesmärk                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`: Keak CI UI komplekti tarnitud hetktõmmis, mida kasutatakse allikana. `UPSTREAM.md` kinnitab ülesvoolu kinnitamise, `PATCHES.md` loetleb kohalikud paigad. `src/` sünkroonib ainult `scripts/dev/sync-ui-kit.sh` ja seda valvab `npm run check:ui-kit-snapshot`. Vaadake [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) |
+| `packages/browser-pool/` | `@omniroute/browser-pool`: brauseri basseini liidesed ja teostus (`packages/browser-pool/src/index.ts`, `packages/browser-pool/src/interfaces.ts`). Loetletud `workspaces`; lüüsi kasutatav käitusaja brauseri bassein asub `open-sse/services/`                                                                                  |
 
----
+## `@omniroute/` — eraldi avaldatud paketid
 
-## `electron/` — Töölauarakenduse ümbris
+Need ei ole npm tööruumid. Igal neist on oma `package.json` ja lukustusfail; kaust tarnitakse `omniroute` tarballis (`files: ["@omniroute/"]`).
 
-| Fail             | Otstarve                                                                                                    |
-| ---------------- | ----------------------------------------------------------------------------------------------------------- |
-| `main.js`        | Electroni põhiprotsess (BrowserWindow, sisseehitatud Next.js-i server, süsteemisalv, automaatne uuendamine) |
-| `preload.js`     | IPC-sild (contextBridge → `window.omniroute`)                                                               |
-| `package.json`   | electron-builderi konfiguratsioon + Electron 41 + electron-builder 26.10 sõltuvused                         |
-| `assets/`        | Rakenduse ikoonid (Windows .ico, macOS .icns, Linux .png)                                                   |
-| `dist-electron/` | Koosteväljund (giti poolt eiratud)                                                                          |
-| `types.d.ts`     | Renderdusprotsessi silla tüübi deklaratsioonid                                                              |
-| `README.md`      | Electroni sisemine README (vt ka `docs/guides/ELECTRON_GUIDE.md`)                                           |
+| Tee                              | Eesmärk                                                                                                                                |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `@omniroute/opencode-plugin/`    | OpenCode plugin (mudeli avastamine, `/connect` auth); kasutab `omniroute setup-opencode` — vt [OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | OpenCode plugin v2 jaoks Promise API — vt [OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md)                                     |
+| `@omniroute/opencode-provider/`  | Staatiline konfiguratsioonigeneraator; märgitud aegunud `package.json` `opencode-plugin` kasuks                                        |
 
 ---
 
-## `bin/` — Käsurealiides
+## `bin/` — CLI ja ops skriptid
 
-| Fail                                                                                                        | Otstarve                                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute.mjs`                                                                                             | Käsurealiidese peamine sisenemispunkt — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos` jne |
-| `reset-password.mjs`                                                                                        | Eraldiseisev käsureatööriist parooli lähtestamiseks                                                                                             |
-| `cli/commands/setup.mjs`                                                                                    | Interaktiivne ja mitteinteraktiivne häälestusviisard                                                                                            |
-| `cli/commands/doctor.mjs`                                                                                   | Süsteemi seisundi diagnostika (üle 8 kontrolli)                                                                                                 |
-| `cli/commands/providers.mjs`                                                                                | Pakkujate loendamine/testimine/valideerimine                                                                                                    |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | Käsurealiidese abimoodulid                                                                                                                      |
-| `cli/tray/tray.ts`                                                                                          | Süsteemisalve integratsioon (platvormiülene: NotifyIcon Windowsis, systray2 macOS-is/Linuxis)                                                   |
-| `cli/tray/tray.ps1`                                                                                         | PowerShelli NotifyIconi taustaprogramm (Windows, ei lisa uusi binaarfaile)                                                                      |
-| `cli/tray/autostart.ts`                                                                                     | Platvormiülene automaatkäivitus (LaunchAgent / .desktop / register)                                                                             |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | SQLite'i draiveri 5-etapiline lahendusahel (komplekteeritud → käituskeskkond → viitpaigaldus → node:sqlite → sql.js)                            |
-| `cli/runtime/magicBytes.mjs`                                                                                | Binaarfailide signatuurbaitide valideerimine (ELF / Mach-O / Mach-O fat / PE)                                                                   |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — eellahendab draiverid pärast paigaldamist / esmakordsel käivitamisel                                                       |
-| `nodeRuntimeSupport.mjs`                                                                                    | Toetatud Node.js-i versiooni valideerimine paigaldamisel                                                                                        |
+| Tee                                                                         | Eesmärk                                                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | Peamine CLI sisestus (`omniroute serve`, `setup`, `doctor`, `providers`, `combo`, …)              |
+| `reset-password.mjs`                                                        | `omniroute-reset-password` kahend                                                                 |
+| `mcp-server.mjs`                                                            | MCP stdio sisenemispunkt                                                                          |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | Abisild / MCP sisenemispunktid                                                                    |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | ESM lahendamiskonks, mis kaardistab tsconfigi tee varjunimed globaalsete installide jaoks         |
+| `nodeRuntimeSupport.mjs`                                                    | Toetatud Node.js versioonikontroll                                                                |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | Isehosti intsidentide taastamise skriptid (jaga `_ops-common.sh`)                                 |
+| `cold-start-bench.sh`                                                       | Külmkäivituse etalon — vt [PERF_BASELINE.md](../ops/PERF_BASELINE.md)                             |
+| `cli/commands/`                                                             | Üks moodul CLI käsu kohta (umbes 100, sealhulgas `setup-*` -integratsioonid)                      |
+| `cli/api-commands/`                                                         | `docs/openapi.yaml` genereeris — `npm run build:cli-api` muuda                                    |
+| `cli/locales/`                                                              | CLI sõnumikataloogid (67 asukohta)                                                                |
+| `cli/tui/`, `cli/tui-components/`                                           | Terminal UI                                                                                       |
+| `cli/tray/`                                                                 | Süsteemi salv ja automaatkäivitus (Windows PowerShell taustaprogramm, macOS/Linux-s systray)      |
+| `cli/runtime/`                                                              | Algne käitusaegne eraldusvõime (`sqliteRuntime.mjs`, `magicBytes.mjs`), protsessi juhendaja       |
+| `cli/*.mjs`                                                                 | Jagatud abilised (args, API klient, andmekataloog, krüpteerimine, pakkuja pood, seadete pood jne) |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | CLI sisemised osad ja kokkulepped                                                                 |
 
----
+Vt [CLI-TOOLS.md](../reference/CLI-TOOLS.md) ja [CLI-COMPANION.md](../guides/CLI-COMPANION.md).
 
-## `skills/` — avalikud agendioskused
+## `electron/` — töölauarakendus
 
-| Fail                         | Eesmärk                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | 10 oskuste manifesti välistele tehisintellektiagentidele (Claude Desktop, ChatGPT, Cursor, Cline) |
+| Tee                                                        | Eesmärk                                                                 |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `main.js`                                                  | Electron põhiprotsess (aken, sisseehitatud server, salv, värskendused)  |
+| `preload.js`                                               | IPC sild renderdajale avatud                                            |
+| `lib/`                                                     | Akna elutsükkel, serveri valmidus, tervisevalve, kaugserveri eelistused |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | Kaugserveri viipade aken                                                |
+| `processTree.js`, `sqlite-inspection.js`                   | Lapsprotsesside puhastamise ja SQLite kontrolli abilised                |
+| `package.json` / `package-lock.json`                       | elektronide koostaja konfiguratsiooni ja Electron sõltuvused            |
+| `assets/`                                                  | Rakenduste ja salve ikoonid (`.ico`, `.icns`, `.png`)                   |
+| `README.md`                                                | Sisemised märkmed — vt [ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md) |
 
----
+## `public/` — staatilised varad
 
-## `scripts/` — koostamis- ja kontrollskriptid
+| Tee                                         | Eesmärk                                                                                                         |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `providers/`                                | Pakkuja logod laaditi ID-ga (`/providers/<id>.svg`); päritolu `config/quality/provider-assets-provenance.jsonl` |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | Brauseri ja PWA ikoonid                                                                                         |
+| `sw.js`                                     | Teenindustöötaja — vt [PWA_GUIDE.md](../guides/PWA_GUIDE.md)                                                    |
+| `openapi.yaml`                              | `npm run gen:public-openapi` loodud `docs/openapi.yaml` koopia                                                  |
+| `images/`, `sponsors/`, `deyin.svg`         | Tier-flow diagrammid, sponsori bänner, README kunstiteos                                                        |
 
-| Skript                              | Eesmärk                                                                                                     |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `run-next.mjs`                      | Arendus-/käivitustööriist keskkonnamuutujate laadimisega                                                    |
-| `build-next-isolated.mjs`           | Autonoomne koostamine (Next.js 16 standalone)                                                               |
-| `prepublish.ts`                     | Paketi ettevalmistamine enne käsku `npm pack`                                                               |
-| `postinstall.mjs`                   | `.env`-faili automaatne loomine `.env.example`-faili põhjal esmakordsel installimisel                       |
-| `sync-env.mjs`                      | `.env`-faili võtmete uuesti sünkroonimine `.env.example`-failiga                                            |
-| `check-cycles.mjs`                  | Tsükliliste sõltuvuste tuvastamine                                                                          |
-| `check-route-validation.mjs`        | Kontrollib, et kõigil API marsruutidel oleks Zodi valideerimine                                             |
-| `check-t11-any-budget.mjs`          | Jõustab failipõhise selgesõnalise `any` limiidi                                                             |
-| `check-docs-sync.mjs`               | Dokumentatsiooni versioonide sünkroonsuse kontrollimine (olemasolev eelkommiteri kontroll)                  |
-| **`check-env-doc-sync.mjs`**        | UUS: koodis, `.env.example`-failis ja `ENVIRONMENT.md`-failis olevate keskkonnamuutujate ristkontroll       |
-| **`check-docs-counts-sync.mjs`**    | UUS: kontrollib, et arvud (täitjad, strateegiad, OAuth, A2A oskused) vastaksid dokumentatsioonile           |
-| **`check-deprecated-versions.mjs`** | UUS: märgib dokumentatsioonis aegunud versioonid/kuupäevad                                                  |
-| `check-supported-node-runtime.ts`   | Kontrollib, kas praegune Node'i versioon on toetatud                                                        |
-| `check-pr-test-policy.mjs`          | Jõustab tootmiskoodi muudatuste puhul reegli „testid on kohustuslikud”                                      |
-| **`gen-provider-reference.ts`**     | UUS: genereerib kataloogist automaatselt faili `docs/reference/PROVIDER_REFERENCE.md`                       |
-| `i18n/generate-multilang.mjs`       | Kasutajaliidese stringide ja dokumentatsiooni tõlkimine Google Translate'i kaudu                            |
-| `i18n_autotranslate.py`             | LLM-il põhinev dokumentatsiooni tõlketöövoog                                                                |
-| `validate_translation.py`           | Tõlgete valideerimine lokaadi kaupa                                                                         |
-| `check_translations.py`             | Koodipoolne i18n-võtmete kontroll                                                                           |
-| `run-playwright-tests.mjs`          | Playwrighti E2E-testide käivitaja                                                                           |
-| `run-protocol-clients-tests.mjs`    | MCP/A2A E2E-testide käivitaja                                                                               |
-| `run-ecosystem-tests.mjs`           | Ökosüsteemi (teenusepakkujate integratsiooni) testid                                                        |
-| `test-report-summary.mjs`           | Katvuse kokkuvõtte genereerimine Markdowni vormingus                                                        |
-| `smoke-electron-packaged.mjs`       | Pakendatud Electroni koostu suitsutest                                                                      |
-| `native-binary-compat.mjs`          | Kontrollib, et omasõltuvused (`better-sqlite3`) vastaksid Electroni Node'ile                                |
-| `validate-pack-artifact.ts`         | npm-paketi väljundi valideerimine                                                                           |
-| `responses-ws-proxy.mjs`            | WebSocketi sild Codex Responses API jaoks                                                                   |
-| `v1-ws-bridge.mjs`                  | WebSocketi sild lõpp-punktile `/api/v1/ws`                                                                  |
-| `standalone-server-ws.mjs`          | Autonoomse WS-serveri käivitaja                                                                             |
-| `system-info.mjs`                   | Süsteemi-/käituskeskkonna teabe kuvamine kasutajatoe jaoks                                                  |
-| `healthcheck.mjs`                   | Ühekordne seisundikontroll (kasutab Docker HEALTHCHECK)                                                     |
-| `uninstall.mjs`                     | Puhas desinstallimisskript                                                                                  |
-| `dev/sync-ui-kit.sh`                | CI UI Kit-i kataloogi `src/` kopeerimine fikseeritud kommiti seisuga kataloogi `packages/ui-kit/src`        |
-| `check/check-ui-kit-snapshot.mjs`   | Eelkommiteri kontroll: `packages/ui-kit/src` vastab fikseeritud ülesvoolu kommitile                         |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — kasutatavad ikooninimed, mida `ICON_MAP` ei vastenda                               |
-| `dev/codemod-material-icons.mjs`    | Literaalsete Material Symbolsi span-elementide ümberkirjutamine elemendiks `<Icon>` (migreerimistööriistad) |
+## `skills/` — agendi oskused
+
+46 oskust, igaühes üks kaust `SKILL.md` (`cli-*`, `omni-*`, `config-codex-cli`, `ponytail`), pluss `skills/README.md`. `src/lib/agentSkills/catalog.ts` loeb neid käitusajal ja paljastab need `/api/agent-skills`, MCP ja A2A kaudu. Enamiku manifestidest genereerib `src/lib/agentSkills/generator.ts` (`scripts/skills/generate-agent-skills.mjs`; `npm run check:agent-skills-sync` kontrollib triivi). Vaadake [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md).
 
 ---
 
-## `docs/` — avalik dokumentatsioon (7 juurfaili + 17 alamkataloogi)
+## `scripts/` — ehitus, väravad ja tööriistad
 
-### Tipptasemel juhendid
+Umbes 435 jälgitud faili. Uued skriptid lähevad ühte `AGENTS.md` poolt lubatud alamkaustadest; ühekordne kood läheb `scripts/ad-hoc/` sse.
 
-| Doc                         | Eesmärk                                                                                        |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Kõrgetasemeline arhitektuur, alamsüsteemi kaart, armatuurlaua pind                             |
-| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, kokkulepped                                             |
-| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstmistega                                                 |
-| `USER_GUIDE.md`             | Lõppkasutaja käsiraamat (seadistus, mudelid, kombinatsioonid, CLIs, heli jne)                  |
-| `API_REFERENCE.md`          | API lõpp-punkti viide autentimismudeliga                                                       |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 rada)                                                        |
-| `SETUP_GUIDE.md`            | Installimismeetodid (npm, npx, Docker, Electron, Termux, allikas)                              |
-| `ENVIRONMENT.md`            | Kõik env-vars (dokumenteeritud ~ 800, ~ 3050 rida `.env.example`)                              |
-| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                   |
-| `RELEASE_CHECKLIST.md`      | Täielik vabastamise voog (oskused, husky, tavapärased kohustused, juurutamine)                 |
-| `COVERAGE_PLAN.md`          | Katvuse eesmärgid ja hetkeseis                                                                 |
-| `FREE_TIERS.md`             | Kureeritud vabataseme pakkujad (48 + tasuta + 11 OAuth)                                        |
-| `CLI-TOOLS.md`              | Välised CLI integratsioonid + Sisemine OmniRoute CLI                                           |
-| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaali                                                   |
-| `UNINSTALL.md`              | Puhastage desinstalli sammud                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** kataloog 381 pakkujast (regen: `npm run gen:provider-reference`) |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
 
-### Alamsüsteemi süvasukeldumised
+Sageli kasutatavad sisenemispunktid:
 
-| Doc                                           | Eesmärk                                                                                       |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP server: 110 tööriista, 3 transporti, 33 ulatust, REST lõpp-punktid                        |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 oskust, REST abilised, agendikaart                                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Ühtne juhend: A2A vs ACP vs pilveagendid                                                      |
-| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules orkestratsioon                                                    |
-| `SKILLS.md`                                   | Oskuste raamistik (sisseehitatud + turuplats + SkillsSH + liivakast)                          |
-| `RADAR.md`                                    | Radari vabamudeli kataloogi ülekate (`RADAR_ENABLED`, vaikimisi väljas)                       |
-| `MEMORY.md`                                   | Mälusüsteem (SQLite FTS5 + Qdrant)                                                            |
-| `EVALS.md`                                    | Evali raamistik (sviidid, jooksud, rubriigid)                                                 |
-| `GUARDRAILS.md`                               | PII masker, kiire süstimine, nägemissild                                                      |
-| `COMPLIANCE.md`                               | Auditi logi, säilitamine, noLog loobumine                                                     |
-| `WEBHOOKS.md`                                 | HMAC-allkirjaga veebihaagi kohaletoimetamine                                                  |
-| `REASONING_REPLAY.md`                         | Hübriidne memory/SQLite vahemälu `reasoning_content` jaoks                                    |
-| `AUTHZ_GUIDE.md`                              | Autoriseerimiskonveier (`classify` → `policies` → `enforce`)                                  |
-| `RESILIENCE_GUIDE.md`                         | Kaitselüliti + jahtumine + mudeli lukustus                                                    |
-| `docs/security/STEALTH_GUIDE.md` (ainult git) | TLS sõrmejälgede võtmine (JA3/JA4), Claude kood CCH, MITM sert                                |
-| `AUTO-COMBO.md`                               | Automaatne kombineeritud mootor (16-teguriline hindamine, 6 režiimipaketti, virtuaalne tehas) |
+| Skript                                                              | Eesmärk                                                                                   |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start` jooksja                                                       |
+| `build/build-next-isolated.mjs`                                     | `npm run build` (Next.js eraldiseisev konstruktsioon)                                     |
+| `build/prepublish.ts`                                               | `npm run build:cli`: paneb kokku npm `dist/`                                              |
+| `build/postinstall.mjs`                                             | npm `postinstall` konks                                                                   |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                              |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` (regenereerib PROVIDER_REFERENCE.md)                     |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` (genereerib `src/app/docs/lib/openapi.generated.ts`)                      |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` (dokumendi peeglid)                                                    |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                                 |
+| `release/aggregate-changelog.mjs`                                   | Voldib `changelog.d/` killud `CHANGELOG.md`                                               |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` (dokumendi täpsusvärav)                                   |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` (blokeerib jälgitavad juur `_*` teed)                   |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` (meetriline põrkmehhanism `config/quality/` vastu)              |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                        |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                                    |
+| `dev/new-worktree.sh`                                               | Loob isoleeritud arendustööpuu — vt [WORKTREE_ISOLATION.md](../ops/WORKTREE_ISOLATION.md) |
+| `dev/sync-ui-kit.sh`                                                | Sünkroonib `packages/ui-kit/src` kinnitatud ülesvoolu kinnitusega                         |
 
-### Kokkusurumine
+Värava inventar ja eeskirjad: [QUALITY_GATES.md](QUALITY_GATES.md).
 
-| Doc                             | Eesmärk                                    |
-| ------------------------------- | ------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | Ülevaade tihendusrežiimidest + tegevuskava |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK mootorid, registrileping     |
-| `COMPRESSION_RULES_FORMAT.md`   | Koopainimese reeglipaketi JSON skeem       |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Keelepõhine reeglipaketi inventar          |
-| `RTK_COMPRESSION.md`            | RTK deklaratiivne torujuhe (56 filtrit)    |
+## `config/` — versiooniga konfiguratsioon ja värava olek
 
-### Kasutuselevõtt
+| Tee                                      | Eesmärk                                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `i18n.json` / `i18n-schema.json`         | Toetatud lokaadid (lokaatide arvu allikas) ja nende skeem                                                                |
+| `payloadRules.json`                      | Ülesvoolu kasuliku koormuse reeglid (`open-sse/services/payloadRules.ts`)                                                |
+| `cli-tools-manifest.json`                | Integreeritavate CLI tööriistade manifest (`bin/cli/cli-manifest.mjs`)                                                   |
+| `alibaba-free-tier-allowlist.json`       | Alibaba vabataseme mudelite lubatud loend                                                                                |
+| `ci/toolchain.json`                      | CI tööriistaketi versioonid                                                                                              |
+| `quality/quality-baseline.json`          | Mitmemeetriline põrkmehhanismi baasjoon (katvus, hoiatused, dubleerimine jne)                                            |
+| `quality/*-baseline.json`                | Üksikute väravate külmutatud lähtejooned (keerukus, dubleerimine, faili suurus, tüübikontrolli lõigud, testtuvastus jne) |
+| `quality/*-allowlist.json`               | Väravate lubade loendid (sõltuvused, litsentsid, AI omistamine, unustatud õdede testid jne)                              |
+| `quality/eslint-suppressions.json`       | `npm run lint` rakendas külmutatud ESLint -supressioonid                                                                 |
+| `quality/gate-manifest.json`             | Värava manifesti kontrollis `scripts/quality/gate-manifest.mjs`                                                          |
+| `quality/vitest-exclusions.json`         | `vitest.quarantine.config.ts` karantiinivaru                                                                             |
+| `quality/skill-templates/`               | `scripts/quality/check-skill-contract.mjs` kontrollis kanoonilisi SKILL.md malle                                         |
+| `quality/release-acceptance.schema.json` | Väljalaske-vastuvõtmise tõendite skeem — vt [QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md)                 |
+| `release/`                               | Muudatuste logi kooskõlastused ja wreq-js-i loomulik manifest, litsentside loend ja teatised                             |
 
-| Doc                          | Eesmärk                                                              |
-| ---------------------------- | -------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker ehitus, profiilid (base/cli/host/cliproxyapi), Redis külgkorv |
-| `VM_DEPLOYMENT_GUIDE.md`     | Üldine VM/VPS juurutus (Ubuntu/Debian + nginx + systemd)             |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io juurutamine (praegu ainult Hiina jaoks)                       |
-| `TERMUX_GUIDE.md`            | Android peata Termuxi kaudu                                          |
-| `PWA_GUIDE.md`               | Progressiivne veebirakenduse installi + teenindustöötaja             |
-| `ELECTRON_GUIDE.md`          | Töölauarakenduse loomine + märgi + levitamine                        |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale lehter                               |
-| `PROXY_GUIDE.md`             | 4-tasemeline väljaminev puhverserver + 1 puhverserveri turg          |
+## `changelog.d/` — muutuste logi fragmendid
 
-### Alamkataloogid
-
-| Subdir                | Eesmärk                                                                                                                                                                                    |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Lokaliseeritud dokumentide tõlked (41 lokaadi)                                                                                                                                             |
-| `docs/screenshots/`   | Pildivarad juhenditele                                                                                                                                                                     |
-| `_tasks/superpowers/` | Plans/specs superjõududelt (`writing-plans`/`brainstorming`) + uurib — isoleeritud, eraldi versiooniga repo, mida peapuu ignoreerib. Vt CLAUDE.md → "Planeerimise ja uurimise artefaktid". |
-
----
-
-## `tests/` — Testikomplektid
-
-| Alamkataloog                         | Tüüp                                       | Käitaja                                            |
-| ------------------------------------ | ------------------------------------------ | -------------------------------------------------- |
-| `tests/unit/`                        | Üksustestid (~4 800 faili, kõige kiiremad) | Node'i sisseehitatud testikäitaja                  |
-| `tests/integration/`                 | Mitme mooduli + DB integratsioonitestid    | Node'i sisseehitatud testikäitaja (paralleelsus 1) |
-| `tests/e2e/`                         | Kasutajaliidese + töövoo E2E-testid        | Playwright                                         |
-| `tests/e2e/protocol-clients.test.ts` | MCP + A2A pärisklientide E2E-testid        | Kohandatud protokollikliendid                      |
-| `tests/e2e/ecosystem.test.ts`        | Pakkujate integratsioon (kasutab võrku)    | Node'i sisseehitatud testikäitaja                  |
+PR lisab `CHANGELOG.md` redigeerimise asemel ühe fragmendi: `features/`, `fixes/` või `maintenance/`, nimega `<PR-number>-<slug>.md`. Vabastamise ajal voldib `scripts/release/aggregate-changelog.mjs` need `CHANGELOG.md` ja kustutab; `npm run check:changelog-integrity` kinnitab need. Üksikasjad `changelog.d/README.md`.
 
 ---
 
-## `public/` — Staatilised ressursid
+## `docs/` — avalik dokumentatsioon
 
-| Tee                 | Otstarve                                                        |
-| ------------------- | --------------------------------------------------------------- |
-| `public/` (juur)    | Favikonid, robots.txt, manifest, teenusetöötaja, turunduspildid |
-| `public/providers/` | Pakkujate logod PNG-/SVG-vormingus (kasutatakse juhtpaneelil)   |
+`source.config.ts` loetletud jaotised kompileeritakse `/docs` saidile (välja arvatud mõned ainult operaatorile mõeldud turbelehed); `docs/meta.json` määrab külgriba järjekorra. Alustage [README.md](../README.md).
 
----
+| Tee                | Sisu                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getting-started/` | Kiirstart, isehostja, pakkujad, tasuta tasemed, automaatse kombineerimise ja veebiküpsiste juhendid                                                     |
+| `guides/`          | Operaatori ja arendaja juhendid: seadistamine, Docker, Electron, PWA, Termux, CLIs, i18n, tõrkeotsing, kasutusjuhend                                    |
+| `architecture/`    | Arhitektuur, koodibaasi viited, modifikatsiooniretseptid, autentsus, vastupidavus, kvaliteediväravad, disainisüsteem, see kaart                         |
+| `reference/`       | API viide, keskkonnamuutujad, funktsioonide lipud, CLI tööriistad, tasuta tasemed, loodud pakkuja viide, eemaldatud pakkujad                            |
+| `frameworks/`      | MCP, A2A, ACP, oskused, mälu, pistikprogrammid, pilvagendid, veebihaagid, evals, logide eksport, radar, mänguväljak, …                                  |
+| `routing/`         | Automaatkombinatsioon, replay/routing arutluskäik, kvoodijaotus, märkimisredel, range nullkulu, …                                                       |
+| `security/`        | Piirded, vigade desinfitseerimine, CORS, SSO, väljapääsupoliitika, marsruudi valve tasemed, tarneahel, ...                                              |
+| `compression/`     | Tihendusjuhend, mootorid, RTK, reeglivorming, keelepaketid, konteksti redigeerimine                                                                     |
+| `ops/`             | Väljalaskevoog, hargnemine, liitmisrong, juurutamine (VM, Fly.io, Kubernetes), andmebaas, puhverserverid, tööpuud, kõvade reeglite üksikasjad           |
+| `providers/`       | Pakkujapõhised juhendid (Claude Code, ChatGPT Web, Cursor, GitHub Copilot, …)                                                                           |
+| `comparison/`      | OmniRoute võrreldes alternatiividega                                                                                                                    |
+| `integrations/`    | Integratsioonimärkmed (fal.ai native, MarkItDown MCP); pole `/docs`-ks kompileeritud                                                                    |
+| `openapi.yaml`     | OpenAPI allikas; toidab `src/app/docs/lib/openapi.generated.ts`, `public/openapi.yaml` ja `bin/cli/api-commands/`                                       |
+| `diagrams/`        | Merineitsi allikad (`.mmd`), renderdatud SVGs (`exported/`) ja README SVGs alates `scripts/docs/gen-readme-*`                                           |
+| `assets/`          | Keelelipp SVGs ja muud README varad                                                                                                                     |
+| `screenshots/`     | README ja juhendite kasutatud ekraanipildid                                                                                                             |
+| `i18n/`            | Tõlgitud peeglid: üks kaust lokaadi kohta (66) koos juurdokumentide ja `docs/` alamhulgaga; tootja `npm run i18n:run` — vt [I18N.md](../guides/I18N.md) |
+| tipptasemel `*.md` | `README.md` (doc index), `DEVELOPER-ENVIRONMENT.md` ja mõned eraldiseisvad märkmed                                                                      |
 
-## `config/` — Staatilised konfiguratsioonid + kvaliteedivärava olek
-
-Tarnitavad konfiguratsioonimallid koos versioonihaldusesse lisatud kvaliteedivärava lähtetasemetega
-(teisaldatud hoidla juurkataloogist siia versioonis v3.8.26, et hoida juurkataloog puhtana).
-
-| Tee                                           | Otstarve                                                                                         |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `config/i18n.json`                            | Lokaatide loend + metaandmed (42 lokaadi arvu kanooniline allikas)                               |
-| `config/i18n-schema.json`                     | JSON-skeem faili `i18n.json` valideerimiseks                                                     |
-| `config/payloadRules.json`                    | Ülesvoolu kasuliku koormuse puhastamise reeglid                                                  |
-| `config/quality/quality-baseline.json`        | Mitme mõõdiku järkjärgulise karmistamise lähtetase (`scripts/quality/check-quality-ratchet.mjs`) |
-| `config/quality/complexity-baseline.json`     | Fikseeritud ESLinti keerukuse lähtetase (`check-complexity.mjs`)                                 |
-| `config/quality/duplication-baseline.json`    | Fikseeritud jscpd dubleerimise lähtetase (`check-duplication.mjs`)                               |
-| `config/quality/file-size-baseline.json`      | Fikseeritud failipõhise suuruse lähtetase (`check-file-size.mjs`)                                |
-| `config/quality/test-discovery-baseline.json` | Fikseeritud sidumata testide lähtetase (`check-test-discovery.mjs`)                              |
-| `config/quality/dependency-allowlist.json`    | Heakskiidetud sõltuvuste lubatud loend (`check-deps.mjs`)                                        |
-| `config/quality/.license-allowlist.json`      | SPDX-litsentside lubatud loend (`check-licenses.mjs`)                                            |
-| `config/quality/quality-metrics.json`         | Ajutised kogutud mõõdikud (genereerib `collect-metrics.mjs`; **gitignore'iga eiratud**)          |
-
----
-
-## `.github/` — GitHubi integratsioon
-
-| Tee                                | Otstarve                                                                |
-| ---------------------------------- | ----------------------------------------------------------------------- |
-| `.github/workflows/`               | GitHub Actionsi CI/CD töövood (lintimine, testimine, katvus, väljalase) |
-| `.github/ISSUE_TEMPLATE/`          | Vea- ja funktsioonitaotluste mallid                                     |
-| `.github/pull_request_template.md` | PR-i mall                                                               |
-| `.github/dependabot.yml`           | Sõltuvuste uuendamise konfiguratsioon                                   |
+Peamised sisenemispunktid: [ARCHITECTURE.md](ARCHITECTURE.md), [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md), [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md), [ENVIRONMENT.md](../reference/ENVIRONMENT.md), [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) (genereeritud `npm run gen:provider-reference`).
 
 ---
 
-## `.husky/` — Giti konksud
+## `tests/` — testikomplektid
 
-| Fail         | Otstarve                                                                     |
-| ------------ | ---------------------------------------------------------------------------- |
-| `pre-commit` | Käitab `lint-staged + check-docs-sync + check:any-budget:t11`                |
-| `pre-push`   | Praegu keelatud (välja kommenteeritud). Käitage `npm run test:unit` käsitsi. |
-| `_/`         | Husky sisemised failid                                                       |
+Umbes 9670 jälgitavat faili. Testfailid kuuluvad siia, mitte projekti juure. Erandid: `src/` ja `open-sse/` asuvad `__tests__/` kaustad, mida Vitest -konfiguratsioonid koguvad.
 
----
+| Tee                                                    | Sisu                                                                                                                                                                         | Jooksja                                                                                 |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | Ühikutestid (üle 9000 faili): paljud tipptasemel, lisaks domeenikaustad (`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`, ...) | Sõlme testijooksja (`npm run test:unit`); `*.tsx` `test:vitest:ui` kaudu                |
+| `tests/unit/serial/`                                   | CPU-tundlikud testid jooksevad samaaegsusega 1                                                                                                                               | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | Vitest sviidid ühikupuu sees                                                                                                                                                 | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | Mitme mooduli ja DB integratsiooni testid; `combo-matrix/`, `combo-live/`, `services/`                                                                                       | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` + live sviidid `ecosystem.test.ts`, `protocol-clients.test.ts`                                                                                        | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | `*.live.test.ts` töötava eksemplari vastu                                                                                                                                    | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | Homologeerimiskomplektid (`api/`, `ui/` oma Playwright -konfiguratsiooniga)                                                                                                  | `npm run homolog` — vt [HOMOLOGATION.md](../ops/HOMOLOGATION.md)                        |
+| `tests/load/`                                          | Laadi ja leotage skriptid (k6)                                                                                                                                               | Öine vastupidavuse töövoog                                                              |
+| `tests/_setup/`                                        | `--import` / seadistusfailid (isoleeritud andmekataloog, väljapääsukaitse, Vitest UI polütäited)                                                                             | Laaditud jooksjate poolt                                                                |
+| `tests/_helpers/`, `tests/helpers/`                    | Jagatud testiabilised (kuldsed hetktõmmised, haldusseanss jne)                                                                                                               | Imporditud testidega                                                                    |
+| `tests/fixtures/`                                      | Armatuuriandmed ja lapseprotsesside kinnitused                                                                                                                               | Imporditud testidega                                                                    |
+| `tests/snapshots/`                                     | Kuldsed failid `tests/helpers/goldenSnapshot.ts` jaoks                                                                                                                       | Imporditud testidega                                                                    |
+| `tests/manual/`                                        | `.http` failid käsitsi REST kõnede jaoks                                                                                                                                     | Käsiraamat                                                                              |
+| `tests/security/`                                      | Turvakesta skriptid                                                                                                                                                          | Käsitsi/ühikkatseseadmed                                                                |
+| `tests/types/`                                         | Tüübi tasemel lepingute kinnitused                                                                                                                                           | —                                                                                       |
 
-## `.claude/` — Claude Code'i kaldkriipsukäsud
-
-| Fail                                                | Otstarve                                                             |
-| --------------------------------------------------- | -------------------------------------------------------------------- |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — versiooni tõstmine + automaatne muudatuste logi |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — täielik väljalaske töövoog                  |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | VPS-i juurutamine                                                    |
-| `commands/capture-release-evidences-cc.md`          | Uute funktsioonide salvestamine brauseris WebP-vormingus             |
-| `commands/review-{prs,discussions}-cc.md`           | GitHubi PR-ide/arutelude triaaž                                      |
-| `commands/{review-issues,implement-features}-cc.md` | Probleemidega seotud töövood                                         |
-| `settings.local.json`                               | Projektipõhised Claude Code'i sätted                                 |
-
----
-
-## `.agents/` — Üldised agenditöövood (Codex / Cursor / jne)
-
-| Tee                      | Otstarve                                                |
-| ------------------------ | ------------------------------------------------------- |
-| `workflows/*-ag.md`      | 11 töövoo definitsiooni (`.claude/commands/` peegeldus) |
-| `skills/<name>/SKILL.md` | 9 oskuse definitsiooni koos Codexi käivitusmärkustega   |
-
-> **Märkus:** Töövood ja käsud on praegu bait-baidi haaval identsed. Kui `.agents/` on mõeldud teisele agendi käituskeskkonnale (Codex), peavad variandid sisuliselt erinema.
+Täismaatriks: `CONTRIBUTING.md` → "Running Tests" ja [COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md).
 
 ---
 
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — Põhipuust väljaspool
+## `deploy/` — Kubernetes
 
-Need alakriipsuga algavad kataloogid sisaldavad sisu, mida ei tarnita:
+| Tee                                                | Eesmärk                                                                                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `deploy/helm/omniroute/`                           | Helidiagramm (`Chart.yaml`, `values.yaml`, juurutamise mallid, teenus, sisenemine, PVC, salajane, konfiguratsioonikaart) |
+| `deploy/kubernetes/base/`                          | Kustomize'i baas (nimeruum, juurutamine, teenus, PVC, konfiguratsioonikaart, `secret.example.yaml`)                      |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | Klastrispetsiifilised ülekatted (sisend, salvestusklass, ressursid, proovid)                                             |
 
-- **`_ideia/`** — disainimärkmed (edasilükkamise / sobimatuse / elujõulisuse kategooriad)
-- **`_mono_repo/`** — ajaloolised alamprojektid (omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — seotud avatud lähtekoodiga projektide (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api jne) kirjutuskaitstud kloonid, mida kasutatakse arenduse ajal ristviideteks
-- **`_tasks/`** — väljalaskepõhised ülesannete jälgimise failid (mitteametlikud)
+Vaadake [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
-Ei sisaldu `npm pack` väljundis. Vaadake `.npmignore`.
+## `docker/` — abipildid
+
+| Tee                                 | Eesmärk                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `docker/chatgpt-web-codex-browser/` | Headless browser image with a CDP proxy for the ChatGPT Web executor — see [CHATGPT_WEB.md](../providers/CHATGPT_WEB.md) |
+| `docker/devin-bridge/`              | Devin silla pilt, faili koostamine, pilkamised ja võrguvalve                                                             |
+| `docker/vnc-browser/`               | Chromium koos VNC interaktiivsete brauseri seansside jaoks                                                               |
+
+Põhikujutis on juur `Dockerfile`; vaata [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md).
+
+## `contrib/` — kogukonna retseptid (ametlikult ei toetata)
+
+| Tee                     | Eesmärk                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contrib/podman/`       | Podmani quadletid (konteiner, maht, võrk, Redis)                                                                                             |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                                          |
+| `contrib/windows/`      | `.bat` kanderaketid Windows kassast jooksmiseks                                                                                              |
+| `contrib/session-sync/` | README kolmanda osapoole seansi sünkroonimise brauseri laienduse jaoks — vt [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+
+## `examples/`
+
+| Tee                             | Eesmärk                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| `examples/omniroute-cmd-hello/` | Minimaalne käsuplugin — vt [PLUGINS.md](../frameworks/PLUGINS.md)       |
+| `examples/plugins/`             | Näidispluginad: langfuse, request-logger, theme-manager, welcome-banner |
+| `examples/quickstart/`          | Kliendilõigud: curl, Node.js (axios), PHP, Python                       |
 
 ---
 
-## Genereeritud / Giti poolt ignoreeritud
+## `.github/` — GitHub integratsioon
 
-| Tee                    | Otstarve                       |
-| ---------------------- | ------------------------------ |
-| `node_modules/`        | npm-i sõltuvused               |
-| `.next/`               | Next.js-i koosteväljund        |
-| `coverage/`            | c8 testkatvuse aruanded        |
-| `logs/`                | Käitusaegsed logid             |
-| `package/`             | npm pack-i ettevalmistusala    |
-| `.playwright-mcp/`     | Playwright MCP testiartefaktid |
-| `.issues/`             | Kohalik probleemide vahemälu   |
-| `tsconfig.tsbuildinfo` | TS-i inkrementaalne vahemälu   |
+| Tee                                                          | Eesmärk                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml`, `quality.yml`, `build.yml`), turvakontrollid (`codeql.yml`, `semgrep.yml`, `scorecard.yml`, `dast-smoke.yml`), ajastatud `nightly-*.yml` komplektid, avaldamine (`npm-publish.yml`, `docker-publish.yml`, `electron-release.yml`), väljalaske ja hoolduse töövood |
+| `.github/actions/npm-ci-retry/`                              | Komposiittoiming: `npm ci` vahemäluga ja proovi uuesti                                                                                                                                                                                                                          |
+| `.github/actions/prepare-unit-storage/`                      | Komposiittoiming: vabastab jooksja kettaruumi, seejärel installib sõltuvused                                                                                                                                                                                                    |
+| `.github/ISSUE_TEMPLATE/`                                    | Vea-, funktsiooni- ja testikatte probleemide vormid                                                                                                                                                                                                                             |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | Vaikimisi PR mall pluss bugfix/feature variandid                                                                                                                                                                                                                                |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | Koodiomanikud, sponsorlingid, sõltuvuste värskendused                                                                                                                                                                                                                           |
+| `.github/labels.yml`                                         | `npm run labels:sync` rakendatud siltide määratlused                                                                                                                                                                                                                            |
+| `.github/copilot-instructions.md`                            | GitHub Copilot juhised (agendi-juhiste pind)                                                                                                                                                                                                                                    |
+
+CI töökaart: [QUALITY_GATES.md](QUALITY_GATES.md).
+
+## `.husky/` — git konksud
+
+| Fail         | Eesmärk                                                                                                                                                                                              |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | Giti identiteedikontroll, lint-stage, värava manifest, dokumentide sünkroonimine, mis tahes eelarvega, tüübiskaalaga põrkmehhanism, jälgitavad artefaktid ja kasutajaliidese hetktõmmiste kontrollid |
+| `commit-msg` | `scripts/check/check-ai-attribution.mjs` kinnitusteate kohta                                                                                                                                         |
+| `pre-push`   | Tahtlikult kerge: PATH/npm mõistuse kontroll, mis väljub 0-st                                                                                                                                        |
+
+`.husky/_/` konksu käitusaeg genereeritakse installimisel ja seda ei jälgita.
 
 ---
 
-## Navigeerimisjuhised
+## Navigeerimisnõuanded
 
-- **Uus kaastööline?** Loe `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md`.
-- **Lisad teenusepakkujat?** Järgi jaotist `docs/architecture/ARCHITECTURE.md § Adding a New Provider` ning kontrolli teavet failist `docs/reference/PROVIDER_REFERENCE.md`.
-- **Lisad marsruuti?** Vaata `docs/architecture/ARCHITECTURE.md § Adding a New API Route` ja `src/shared/validation/schemas.ts`.
-- **Lisad MCP tööriista?** Vaata `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
-- **Lisad A2A oskust?** Vaata `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
-- **Käivitad kohalikult?** Vaata `docs/guides/SETUP_GUIDE.md`.
-- **Juurutad?** Vaata `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
-- **Avaldad versiooni?** Vaata `docs/ops/RELEASE_CHECKLIST.md` (ja Claude Code’i oskust `/generate-release-cc`).
+- **Uus kaastööline?** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md).
+- **Millegi ühise muutmine** (pakkuja, marsruut, DB moodul, MCP tööriist, A2A oskus)? Jälgi [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md).
+- **Kas lisada teenusepakkuja?** Esmalt kontrollige [REMOVED_PROVIDERS.md](../reference/REMOVED_PROVIDERS.md) ja seejärel ristkontrollige [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md).
+- **Kas jooksete kohapeal?** [SETUP_GUIDE.md](../guides/SETUP_GUIDE.md).
+- **Kas kasutusele võtta?** [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md), [SELF_HOST_GUIDE.md](../getting-started/SELF_HOST_GUIDE.md), [VM_DEPLOYMENT_GUIDE.md](../ops/VM_DEPLOYMENT_GUIDE.md), [FLY_IO_DEPLOYMENT_GUIDE.md](../ops/FLY_IO_DEPLOYMENT_GUIDE.md), [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+- **Vabastab?** [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md).
+- **Kvaliteetne värav ebaõnnestus?** [QUALITY_GATES.md](QUALITY_GATES.md) ja [QUALITY_GATE_PLAYBOOK.md](../ops/QUALITY_GATE_PLAYBOOK.md).
