@@ -556,6 +556,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 嵌入式仪表板的WebSocket升级由专用端口上的配套服务器处理（请参阅`src/lib/services/embedWsProxy.ts`）。
 
+每次升级都会在隧道打开之前获得授权，规则与HTTP嵌入路由相同：对等点必须是环回且没有反向代理转发标头，浏览器`Origin`必须是仪表板源（`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS`扩展环回默认值），并且调用者需要仪表板会话或管理范围API密钥，除非禁用仪表板登录。
+
 **安全：**嵌入代理路由属于`LOCAL_ONLY_API_PREFIXES` ，只能从环回到达。通过Cloudflare/Ngrok隧道获取JWT的攻击者无法代理到嵌入式服务。
 
 ---

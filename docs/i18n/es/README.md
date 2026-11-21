@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -778,7 +778,7 @@ del historial de tu shell. → [Integraciones CLI](docs/guides/CLI-INTEGRATIONS.
   <tr><th align="left">Plataforma</th><th align="left">Instalación</th><th align="left">Características destacadas</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Un comando, cualquier sistema operativo</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">El mismo tarball del registro, instalaciones más rápidas</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arquitectura <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multi-arquitectura <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Escritorio (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Ventana nativa + bandeja del sistema — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Barra de menús (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Supervisa y actualiza automáticamente el servidor — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> nativo</td><td align="left">Raspberry Pi, servidores ARM, Apple Silicon</td></tr>
@@ -1101,7 +1101,7 @@ Usa estos alias únicamente con clientes que no puedan adjuntar `Authorization: 
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` sigue el SemVer estable **publicado** más alto. No sigue `main` de git. Fija `:X.Y.Z` para GitOps. Consulta [Canales de lanzamiento de Docker](docs/guides/DOCKER_GUIDE.md#release-channels).La imagen fija **`OMNIROUTE_MEMORY_MB=1024`**. Esto es suficiente para el panel y un chat ligero. Los **agentes de programación** (`POST /v1/responses` desde Claude Code, Codex, Grok, …) necesitan un heap de V8 mucho mayor o el proceso produce `FATAL ERROR` con aproximadamente 12 GiB bajo dos contextos largos superpuestos. Dimensiona el contenedor por encima del heap (los búferes nativos se encuentran fuera de V8):
@@ -1115,7 +1115,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Tabla completa: [Guía de Docker — RAM en tiempo de ejecución](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1324,7 +1324,7 @@ Métricas canónicas al 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Entorno de ejecución</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lenguaje</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> en <code>src/</code> y <code>open-sse/</code> (cero <code>any</code> en el núcleo desde v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 240 migraciones</td></tr>
+  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 244 migraciones</td></tr>
   <tr><td nowrap><b>Memoria</b></td><td>Búsqueda de texto completo SQLite FTS5 + embeddings vectoriales cuantizados a int8, decaimiento tipado</td></tr>
   <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validación de E/S de herramientas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1337,7 +1337,7 @@ Métricas canónicas al 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Pruebas</b></td><td>Ejecutor de pruebas de Node.js + Vitest — <b>más de 60.000 declaraciones de pruebas estáticas</b> en más de 8.400 archivos de pruebas registrados (unitarias, de integración, E2E, de seguridad y del ecosistema)</td></tr>
   <tr><td nowrap><b>Plataformas</b></td><td>Escritorio (Electron) · Android (Termux) · PWA (cualquier navegador)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicación automática en npm + Docker Hub durante el lanzamiento</td></tr>
-  <tr><td nowrap><b>Enlaces</b></td><td><a href="https://omniroute.online">Sitio web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Enlaces</b></td><td><a href="https://omniroute.online">Sitio web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

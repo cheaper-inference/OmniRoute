@@ -755,6 +755,7 @@ export async function createProviderConnection(data: JsonRecord) {
     "lastErrorAt",
     "lastErrorType",
     "lastErrorSource",
+    "backoffLevel",
     "rateLimitedUntil",
     "expiresIn",
     "errorCode",

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { resolveDataDir } from "./dataPaths";
+import { DENIED_ROOT_DIRECTORY_ERROR, isDeniedRootDirectory } from "./deniedRootDirectories";
 import {
   getObsidianVaultPath,
   setObsidianVaultPath,
@@ -74,6 +75,12 @@ export async function enableObsidianVaultSync(
   vaultPath: string
 ): Promise<ObsidianSyncEnableResult> {
   const resolvedPath = path.resolve(vaultPath);
+
+  // The vault root is served read/write by the WebDAV file service: the filesystem root, the
+  // home directory itself and system directories are never a vault (CodeQL #1372/#1373).
+  if (isDeniedRootDirectory(resolvedPath)) {
+    return { success: false, error: DENIED_ROOT_DIRECTORY_ERROR };
+  }
 
   if (!fs.existsSync(resolvedPath)) {
     return { success: false, error: `Vault directory not found: ${resolvedPath}` };

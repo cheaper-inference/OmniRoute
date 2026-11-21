@@ -1774,7 +1774,7 @@ What OmniRoute is built with, as declared in [`package.json`](package.json) on `
   <tr><td nowrap><b>Runtime</b></td><td>Node.js <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code> (22.x from 22.22.2, and 24.x to 26.x). Bun 1.4.2 is pinned only to run a few build scripts and a best-effort compatibility path; it is not a supported runtime</td></tr>
   <tr><td nowrap><b>Language</b></td><td>TypeScript 6 for the app and the streaming engine (<code>src/</code> and <code>open-sse/</code>); the <code>omniroute</code> CLI in <code>bin/</code> is ES-module JavaScript</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4, with the vendored Keak CI UI Kit (<code>packages/ui-kit</code>)</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>SQLite with WAL journaling through better-sqlite3, with a driver fallback chain — 178 modules in <code>src/lib/db/</code>, 240 migrations</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>SQLite with WAL journaling through better-sqlite3, with a driver fallback chain — 178 modules in <code>src/lib/db/</code>, 244 migrations</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text search + int8-quantized vector embeddings with typed decay; optional Qdrant</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — API contracts and MCP tool input/output validation</td></tr>
   <tr><td nowrap><b>Protocols</b></td><td>MCP (stdio / SSE / Streamable HTTP, 110 tools) + A2A v0.3 (JSON-RPC 2.0 + SSE) with A2A v1.0 client compatibility</td></tr>

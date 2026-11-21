@@ -454,7 +454,7 @@ v3.8.0 _이전_에 가져온 연결에는 연결별 클라이언트
 2. **영구적인 해결 방법:** `docker run` 명령에서 `-p 127.0.0.1:20128:20128`을 사용하여 IPv4에 명시적으로 바인딩합니다:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    이렇게 하면 IPv4 바인딩을 강제하고 모든 호스트 인터페이스에 프록시가 노출되는 것도 방지할 수 있습니다.
 

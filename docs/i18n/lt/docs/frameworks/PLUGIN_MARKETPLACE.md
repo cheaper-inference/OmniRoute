@@ -25,31 +25,26 @@ papildiniai įkelia ir vykdo kodą antriniuose procesuose, todėl šie maršruta
 iš ne vietinės kilmės šaltinio, neatsižvelgiant į autentifikavimą. Žr.
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Kaip visa tai veikia kartu
+## Kaip tai tinka Together
 
 ```
-Valdymo skydelis (/dashboard/plugins)
-  ├─ Skirtukas „Įdiegti“ → GET /api/plugins            (listPlugins)
-  │                        POST /api/plugins/scan      (pluginManager.scan)
-  │                        POST /api/plugins/{name}/activate|deactivate
-  │                        DELETE /api/plugins/{name}   (pašalinimas)
-  └─ Skirtukas „Prekyvietė“ → GET /api/plugins/marketplace
-                                → listMarketplacePlugins()
-                                  ├─ nėra pasirinktinio URL → integruotas SEED_REGISTRY
-                                  └─ pasirinktinis URL → isSafeMarketplaceUrl() SSRF apsauga
-                                                        → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Registro sluoksnis** — `src/lib/plugins/marketplace.ts`: pateikia katalogo
-  sąrašą / atlieka jame paiešką, o įvykus bet kokiai klaidai naudoja pradinį registrą.
-- **Gyvavimo ciklo sluoksnis** — `src/lib/plugins/manager.ts` (`pluginManager` vienetinis objektas):
-  diegimas, naujovinimas, aktyvinimas, pasyvinimas, pašalinimas, nuskaitymas, įkėlimas paleidžiant.
-- **Manifesto sluoksnis** — `src/lib/plugins/manifest.ts`: „Zod“ schema ir numatytosios
-  `plugin.json` reikšmės.
-- **Skaitytuvas** — `src/lib/plugins/scanner.ts`: aptinka papildinių kataloge
-  diske esančius papildinius.
-- **Įkėliklis** — `src/lib/plugins/loader.ts`: paleidžia kiekvieną papildinį izoliuotame
-  antriniame procese ir tarpininkauja iškviečiant kablius per IPC.
+- **Registro sluoksnis** — `src/lib/plugins/marketplace.ts`: išvardija / ieško kataloge ir grįžta į sėklų registrą dėl bet kokių gedimų.
+- **Gyvenimo ciklo sluoksnis** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): įdiegti, atnaujinti, suaktyvinti, išjungti, pašalinti, nuskaityti, paleisties įkėlimas.
+- **Akivaizdus sluoksnis** — `src/lib/plugins/manifest.ts`: Zod schema + numatytieji `plugin.json` nustatymai.
+- **Skaitytuvas** — `src/lib/plugins/scanner.ts`: aptinka papildinius diske pagal papildinių katalogą.
+- **Krautuvas** — `src/lib/plugins/loader.ts`: sukuria kiekvieną papildinį atskirame Node.js antriniame procese ir tarpininkai sujungia skambučius per IPC. Vaikas nėra smėlio dėžė (žr. toliau „Įskiepių vykdymo izoliavimas“).
 
 ## Prekyvietės katalogas
 
@@ -85,35 +80,31 @@ turinį, `listMarketplacePlugins()` užregistruoja įspėjimą ir grįžta prie 
 
 ## REST API
 
-Visiems galiniams taškams reikalingas valdymo autentifikavimas (`requireManagementAuth`),
-be to, jie pasiekiami tik per grįžtamojo ryšio sąsają — `/api/plugins` ir
-`/api/plugins/` yra įtraukti į `LOCAL_ONLY_API_PREFIXES`
-(`src/server/authz/routeGuard.ts`).
+Visiems galiniams taškams reikalingas valdymo autentifikavimas (`requireManagementAuth`)** ir** yra tik grįžtamojo ryšio — `/api/plugins` ir `/api/plugins/` yra išvardyti `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Galinis taškas                   | Metodas | Aprašymas                                                             |
-| -------------------------------- | ------- | --------------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | Pateikti įdiegtų papildinių sąrašą (pasirinktinis `?status=` filtras) |
-| `/api/plugins`                   | POST    | Įdiegti papildinį iš absoliutaus vietinio kelio                       |
-| `/api/plugins/scan`              | POST    | Nuskaityti papildinių katalogą ir užregistruoti naujus papildinius    |
-| `/api/plugins/marketplace`       | GET     | Pateikti prekyvietės katalogo įrašų sąrašą                            |
-| `/api/plugins/[name]`            | GET     | Gauti įdiegto papildinio informaciją                                  |
-| `/api/plugins/[name]`            | DELETE  | Pašalinti papildinį                                                   |
-| `/api/plugins/[name]/activate`   | POST    | Aktyvinti (įkelti ir užregistruoti kablius)                           |
-| `/api/plugins/[name]/deactivate` | POST    | Pasyvinti (iškviesti `onDeactivate`, išregistruoti kablius)           |
-| `/api/plugins/[name]/config`     | GET     | Gauti papildinio konfigūraciją ir konfigūracijos schemą               |
-| `/api/plugins/[name]/config`     | PUT     | Atnaujinti papildinio konfigūraciją (patikrinant pagal schemą)        |
+| Galutinis taškas                 | Metodas | Aprašymas                                                            |
+| -------------------------------- | ------- | -------------------------------------------------------------------- |
+| `/api/plugins`                   | GET     | Įdiegtų papildinių sąrašas (pasirenkamas `?status=` filtras)         |
+| `/api/plugins`                   | POST    | Įdiekite papildinį iš papildinio šaltinių katalogo                   |
+| `/api/plugins/scan`              | POST    | Nuskaitykite įskiepių katalogą ir užregistruokite naujus papildinius |
+| `/api/plugins/marketplace`       | GET     | Išvardykite prekyvietės katalogo įrašus                              |
+| `/api/plugins/[name]`            | GET     | Gaukite išsamią įdiegto papildinio informaciją                       |
+| `/api/plugins/[name]`            | DELETE  | Pašalinkite papildinį                                                |
+| `/api/plugins/[name]/activate`   | POST    | Suaktyvinti (įkelti + registro kabliukus)                            |
+| `/api/plugins/[name]/deactivate` | POST    | Išjungti (uždegti `onDeactivate`, išregistruoti kabliukus)           |
+| `/api/plugins/[name]/config`     | GET     | Gaukite papildinio config + config schemą                            |
+| `/api/plugins/[name]/config`     | PUT     | Atnaujinti papildinio konfigūraciją (patvirtinta pagal schemą)       |
 
-`GET /api/plugins` filtras `status` priima vieną iš šių reikšmių:
-`installed` / `active` / `inactive` / `error`. Neteisinga reikšmė grąžina `400`.
+Filtras `GET /api/plugins` `status` priima vieną iš `installed` / `active` / `inactive` / `error`. Netinkama reikšmė grąžina `400`.
 
-### Įdiegtų papildinių sąrašas
+### Įdiegtų priedų sąrašas
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Diegimas iš vietinio kelio
+### Įdiegti iš vietinio kelio
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -122,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` turi būti **absoliutus** ir jame negali būti `..` perėjimo segmentų arba
-nulinių baitų (tai užtikrina Zod). Šaltinio kataloge turi būti tinkamas
-`plugin.json` (arba katalogas turi būti jo pirminis katalogas). Sėkmės atveju
-atsakymas yra `201` su įdiegto papildinio įrašu.
+`path` turi būti an** absoliutus** kelias į katalogą** įskiepių šaltinių kataloge** : `plugin-sources` šalia papildinio šaknies, taigi `~/.omniroute/plugin-sources/` pagal numatytuosius nustatymus arba `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` kai šis kintamasis nustatytas (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Pirmiausia ten nukopijuokite arba klonuokite papildinį. Diegimas atmetamas naudojant `400` kai kelyje yra `..` arba nulinis baitas, jis yra už šio katalogo ribų, išsprendžiamas už jo ribų naudojant simbolinę nuorodą, yra simbolio nuoroda, kurios tikslas yra už jo ribų, arba kai katalogo nėra. Šaltinio kataloge turi būti galiojantis `plugin.json` (arba jis turi būti pirminis). Sėkmės atveju atsakymas yra `201` su įdiegto papildinio eilute.
 
-### Prekyvietės naršymas
+Skirtingai nuo kitų įskiepių maršrutų, šiam reikalingas valdymo kredencialas (prietaisų skydelio seansas arba valdymo apimties API raktas), net kai prisijungimas išjungtas (`requireLogin=false`): kodo įdiegimas niekada nėra anoniminis veiksmas.
+
+### Naršykite turgavietėje
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Papildinio konfigūracijos atnaujinimas
+### Atnaujinti papildinio konfigūraciją
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -143,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` patikrina kiekvieną pateiktą reikšmę pagal papildinio
-`configSchema` (deklaruotą manifeste): `number` laukuose atsižvelgiama į
-`min`/`max`, o `select` laukai turi atitikti deklaruotą `enum`. Schemoje
-nenurodyti raktai yra leidžiami.
+`PUT .../config` patikrina kiekvieną pateiktą reikšmę pagal papildinio `configSchema` (nurodytas manifeste): `number` laukai turi atitikti `min`/`max`, `select` laukai turi atitikti deklaruotą `enum`. Leidžiami raktai, kurių nėra schemoje.
 
 ## Konfigūracija
 
@@ -208,89 +195,58 @@ nuskaitoma iš `GET /api/settings`).
 
 ## Saugumas
 
-### Maršruto lygis — tik grįžtamasis ryšys
+### Tik maršruto pakopos — kilpa
 
-Papildiniai vykdo kodą sukurtuose antriniuose procesuose, todėl visa `/api/plugins`
-sritis priskiriama `LOCAL_ONLY` (1 lygis). Grįžtamojo ryšio apribojimas taikomas
-besąlygiškai **prieš** bet kokią autentifikavimo patikrą, todėl nutekintas valdymo
-atpažinimo ženklas, pasiekiantis įrenginį per tunelį, vis tiek negali įdiegti,
-aktyvuoti ar pašalinti papildinio.
-Žr. [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) ir
-griežtąsias taisykles Nr. 15 / Nr. 17.
+Papildiniai vykdo kodą sukurtuose antriniuose procesuose, todėl visas `/api/plugins` paviršius klasifikuojamas `LOCAL_ONLY` (1 pakopa). Atgalinis vykdymas vykdomas besąlygiškai** prieš** bet koks autentifikavimo patikrinimas, todėl nutekėjęs valdymo prieigos raktas, pasiekiantis langelį per tunelį, vis tiek negali įdiegti, suaktyvinti arba pašalinti papildinio. Žr. [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) ir griežtos taisyklės #15 / #17.
 
 ### Prekyvietės registro SSRF apsauga
 
-Pasirinktinio registro URL yra konfigūracija, kurią gali paveikti užpuolikas,
-todėl prieš jį gaudama `listMarketplacePlugins()` pritaiko du apsaugos sluoksnius:
+Tinkintas registras URL yra konfigūracija, kurią gali paveikti užpuolikai, todėl prieš jį paimdamas `listMarketplacePlugins()` paleidžia jį per du sluoksnius:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - Atmeta viską, kas nėra `http:` / `https:`.
-   - Naudodama kanoninę `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) atmeta tiesiogiai nurodytus
-     privačius, grįžtamojo ryšio, vietinio ryšio ir ULA pagrindinius kompiuterius
-     (tiek IPv4, **tiek** IPv6, įskaitant IPv4 atvaizdavimą).
-   - Išsprendžia **ir** `A`, **ir** `AAAA` įrašus bei atmeta URL, jei **bet kuris**
-     išspręstas adresas yra privatus — taip užkertant kelią viešo pagrindinio
-     kompiuterio vardo → privataus IP apėjimui.
-   - **Gedimo atveju uždraudžia**: nepavykus DNS vardų išsprendimui, URL
-     atmetamas.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): gavimo metu dar kartą pritaiko
-   tik viešiesiems adresams skirtą URL apsaugą ir **blokuoja peradresavimus**
-   (neleidžiamas viešo → privataus adreso `30x` perėjimas).
+   - Atmeta pažodinius private/loopback/link-local/ULA pagrindinius kompiuterius (IPv4** ir** IPv6, įskaitant IPv4-mapped) per kanoninį `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Išsprendžia** tiek** `A` ir `AAAA` įrašo ir atmeta, jei** bet koks** Išspręstas adresas yra privatus — uždarantis viešąjį pagrindinio kompiuterio pavadinimą → privatų IP apėjimą.
+   - **Nepavyksta uždaryti** : DNS skyros gedimas atmeta URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): iš naujo pritaiko tik viešą URL apsaugą gavimo metu ir** blokuoja peradresavimus** (jokio viešojo → privataus `30x` sukimosi).
 
-Nė vieno sluoksnio patikros nepraėjęs URL nenutraukia užklausos — prekyvietė
-tyliai grįžta prie integruoto pradinio registro ir užregistruoja įspėjimą.
+Jei URL nepavyksta bet kurio sluoksnio, prašymas neatšaukiamas. — prekyvietė tyliai grįžta į integruotą sėklų registrą ir registruoja įspėjimą.
 
-> Ši apsauga buvo sustiprinta PR #3774, kad būtų konkrečiai išsprendžiami A + AAAA
-> įrašai ir vietoje tik IPv4 skirtos patikros naudojama kanoninė `isPrivateHost`.
+> Ši apsauga buvo sutvirtinta PR #3774 specialiai siekiant išspręsti A + AAAA ir naudoti kanoninį `isPrivateHost` vietoj IPv4-only patikrinimo.
 
-### Papildinių vykdymo izoliavimas
+### Papildinio vykdymo izoliavimas
 
-- **Procesų izoliavimas** — `loadPlugin()` (`src/lib/plugins/loader.ts`) paleidžia
-  kiekvieną papildinį atskirame antriniame Node.js procese ir palaiko ryšį per
-  IPC. Kablių iškvietimams taikomas skirtasis laikas su `SIGTERM` → `SIGKILL`
-  eskalavimu.
-- **Aplinkos leidžiamųjų sąrašas** — antrinis procesas gauna tik į leidžiamųjų
-  sąrašą įtrauktą aplinkos kintamųjų rinkinį; platesnis rinkinys suteikiamas tik
-  tada, kai manifeste prašoma `env` teisės.
-- **Kelio apribojimas** — diegiant, atnaujinant ar šalinant patikrinama, ar
-  papildinio katalogas ir `manifest.main` išsprendžiami **valdomos papildinių
-  šakninės vietos ribose**, prieš atliekant bet kokį kopijavimą ar rekursyvų
-  šalinimą (taip apsisaugoma nuo pakeistų DB kelių ir `../` perėjimo
-  `manifest.main` reikšmėje). Aktyvavimo metu simbolinės nuorodos išsprendžiamos
-  naudojant `realpath`, o įkėlimo vieta, išeinanti už papildinio katalogo ribų,
-  atmetama.
-- **Pasirinktinis vientisumo susiejimas** — manifeste gali būti nurodytas
-  `integrity` (`sha256-<base64>`, SRI formatas) laukas. Jei jis pateiktas,
-  įkėlimo programa įkėlimo metu patikrina įvesties failo maišą ir, jai
-  nesutapus, atsisako aktyvuoti papildinį. Tai yra pasirenkamas pakeitimų
-  aptikimo mechanizmas, **o ne** saugumo riba — tik grįžtamajam ryšiui skirtas
-  maršrutizavimas ir leidimų modelis yra tikrosios ribos.
+> **Papildiniai nėra smėlio dėžės.** Vaikas yra įprastas Node.js procesas, veikiantis kaip OmniRoute vartotojas, be VM konteksto ir Node.js leidimo vėliavėlių, todėl papildinio kodas gali nuskaityti ir rašyti bet kokį vartotojo galimą failą, paleisti programas ir pasiekti tinklą. `requires.permissions` tik nusprendžia, kokius aplinkos kintamuosius gauna vaikas; kiti leidimai nevykdomi. Įdiekite tik tuos papildinius, kuriais pasitikite. Toliau pateiktoje proceso riboje yra gedimų ir užstrigimų; tai nėra saugumo riba.
+
+- **Proceso izoliacija** — `loadPlugin()` (`src/lib/plugins/loader.ts`) sukuria kiekvieną papildinį atskirame Node.js antriniame procese ir bendrauja per IPC. Pakabinamų skambučių skirtasis laikas baigiasi su `SIGTERM` → `SIGKILL` eskalavimu.
+- **Env leidimų sąrašas** — vaikas gauna tik leistiną aplinkos kintamųjų rinkinį; platesnis rinkinys suteikiamas tik tada, kai manifeste prašoma `env` leidimo.
+- **Įdiekite šaltinio izoliaciją** — `POST /api/plugins` skaito tik iš įskiepių šaltinių katalogo (žr. „Įdiegti iš vietinio kelio“): kelias yra kanonizuotas naudojant `realpath`, turi likti griežtai tame kataloge, o šaltinio medis, turintis simbolinę nuorodą, išeinančią iš jos, atmetamas prieš nieko nukopijuojant.
+- **Kelio suvaržymas** — install/upgrade/uninstall teigia, kad papildinio katalogas ir `manifest.main` išsprendžia** viduje** valdomo papildinio šaknį prieš bet kokį kopijavimą ar rekursinį trynimą (apsaugo nuo sugadintų DB kelių ir `../` perėjimo `manifest.main`). Aktyvinimas išsprendžia simbolių nuorodas per `realpath` ir atsisako įkelti įvesties tašką, kuris išeina iš papildinio katalogo.
+- **Pasirenkamas vientisumo kaištis** — manifeste gali būti nurodytas `integrity` (`sha256-<base64>`, SRI formato) laukas. Kai yra, įkroviklis patikrina įvesties failo maišą įkelties metu ir atsisako suaktyvinti, kai nesutampa. Tai pasirenkamas klastojimo aptikimas,** ne** saugumo riba: ji neriboja įkelto papildinio.
+- **Nėra kliento kredencialų** — kontekstas, perduotas `onRequest`, `onResponse` ir `onError` pašalina `authorization`, `x-api-key`, `proxy-authorization` ir `cookie` antraštes, o API rakto įraše nėra rakto reikšmės (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifestas (`plugin.json`)
 
-Tikrinamas naudojant `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Patvirtino `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Laukas             | Tipas     | Pastabos                                                              |
-| ------------------ | --------- | --------------------------------------------------------------------- |
-| `name`             | string    | Privalomas; kebab-case (`^[a-z0-9-]+$`), 1–100 simbolių               |
-| `version`          | string    | Privalomas; semver (`MAJOR.MINOR.PATCH`)                              |
-| `description`      | string?   | ≤ 500 simbolių                                                        |
-| `author`           | string?   | ≤ 200 simbolių                                                        |
-| `license`          | string?   | Numatytoji reikšmė — `MIT`                                            |
-| `main`             | string?   | Įvesties failas; numatytoji reikšmė — `index.js`                      |
-| `source`           | enum?     | `local` \| `marketplace` (numatytoji reikšmė — `local`)               |
-| `tags`             | string[]? | Paieškos žymos                                                        |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                       |
-| `hooks`            | object?   | Loginės reikšmės, nurodančios, kuriuos kablius įgyvendina papildinys  |
-| `skills`           | object[]? | Pasirinktiniai gebėjimų apibrėžimai                                   |
-| `enabledByDefault` | boolean?  | Automatiškai aktyvuoti įdiegus                                        |
-| `configSchema`     | object?   | Konfigūracijos laukų žemėlapis (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Pasirinktinis įvesties failo `sha256-<base64>` susiejimas             |
+| Laukas             | Tipas        | Pastabos                                                              |
+| ------------------ | ------------ | --------------------------------------------------------------------- |
+| `name`             | styga        | Reikalingas; kebabo dėklas (`^[a-z0-9-]+$`), 1–100 simbolių           |
+| `version`          | styga        | Reikalingas; semveris (`MAJOR.MINOR.PATCH`)                           |
+| `description`      | styga?       | ≤ 500 simbolių                                                        |
+| `author`           | styga?       | ≤ 200 simbolių                                                        |
+| `license`          | styga?       | Pagal numatytuosius nustatymus `MIT`                                  |
+| `main`             | styga?       | Įvesties failas; numatytasis `index.js`                               |
+| `source`           | enum?        | `local` \| `marketplace` (numatytasis nustatymas į `local`)           |
+| `tags`             | eilutė []?   | Ieškoti žymų                                                          |
+| `requires`         | objektas?    | `{ omniroute?, permissions[] }`                                       |
+| `hooks`            | objektas?    | Būlio vertės, nurodančios, kurios kabliukais įgyvendina papildinį     |
+| `skills`           | objektas []? | Neprivalomi įgūdžių apibrėžimai                                       |
+| `enabledByDefault` | loginis?     | Automatiškai suaktyvinti įdiegus                                      |
+| `configSchema`     | objektas?    | Konfigūracijos laukų žemėlapis (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | styga?       | Pasirenkamas `sha256-<base64>` įvesties failo kaištis                 |
 
-Leidimai pasirenkami iš išvardijimo
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Leidimai paimti iš sąrašo `network` / `file-read` / `file-write` / `env` / `exec`. Tik `env` turi vykdymo efektą (šiek tiek didesnis aplinkos kintamųjų leidimų sąrašas vaikui); kiti yra pareiškimai ir nėra vykdomi.
 
 ## Gyvavimo ciklo eiga
 
@@ -349,20 +305,16 @@ Lentelė `plugins` (migracija `076_create_plugins.sql`):
 Papildinių metrika ir analizės duomenys sekami papildomose lentelėse
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Valdymo skydelis
+## Prietaisų skydelis
 
-Valdymo skydelio puslapyje `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) pateikiami du skirtukai:
+Prietaisų skydelio puslapyje `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) yra du skirtukai:
 
-- **Įdiegti** — pateikiamas įdiegtų papildinių sąrašas su jų deklaruotais
-  kabliais, aktyvavimo / išaktyvinimo jungikliu, pašalinimo mygtuku ir veiksmu
-  „Ieškoti papildinių“ (`POST /api/plugins/scan`).
-- **Prekyvietė** — rodomas katalogas iš `GET /api/plugins/marketplace` ir
-  laukas pasirinktiniam registro URL nustatyti.
+- **Įdiegta** — pateikia įdiegtų įskiepių sąrašą su jų deklaruotais kabliais, activate/deactivate perjungikliu, pašalinimo mygtuku ir veiksmu „Ieškoti papildinių“ (`POST /api/plugins/scan`).
+- **Turgavietė** — rodo katalogą iš `GET /api/plugins/marketplace` su lauku, skirtu pasirinktiniam registrui URL nustatyti.
 
-Atskiro papildinio konfigūracijos puslapis pasiekiamas adresu
-`/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Puslapyje visada rodomas įspėjimas, kad papildiniai veikia su visomis OmniRoute proceso privilegijomis.
+
+Papildinio konfigūracijos puslapis yra adresu `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Taip pat žr.
 
