@@ -82,6 +82,8 @@ export function openaiToAntigravityResponse(chunk, state) {
         },
       });
     }
+    // A repeated finish chunk must not emit the same calls again.
+    state._toolCallAccum = {};
   }
 
   // Skip empty non-finish chunks
