@@ -185,13 +185,10 @@ export function percentShareOf(
   withParts: boolean
 ): SelfQuotaShare {
   if (!state || state.status === "unavailable") {
-    return {
-      fairShare,
-      consumed: null,
-      remaining: null,
-      status: "unavailable",
-      reason: state?.reason ?? PERCENT_ATTRIBUTION_UNAVAILABLE,
-    };
+    // Narrowed by the status here, so the read also typechecks without strict null checks.
+    const reason =
+      state && state.status === "unavailable" ? state.reason : PERCENT_ATTRIBUTION_UNAVAILABLE;
+    return { fairShare, consumed: null, remaining: null, status: "unavailable", reason };
   }
   const read: SelfQuotaShare = {
     fairShare,
