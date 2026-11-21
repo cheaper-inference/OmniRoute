@@ -157,8 +157,7 @@ test(
         t.mock.timers.enable({ apis: ["setTimeout"] });
         readyResolve();
       },
-      complete: (ms) => {
-        clock += ms;
+      complete: () => {
         resumedAt = performance.now();
         t.mock.timers.reset();
       },
@@ -234,9 +233,18 @@ test(
     assert.ok(observation.waitMs > 0 && observation.waitMs <= 1000);
     assert.equal(fetchCalls, 0, "upstream must not be called before the cooldown wait");
     assert.equal(observation.done, false);
+    clock += observation.waitMs - 1;
     t.mock.timers.tick(observation.waitMs - 1);
     await new Promise((resolve) => setImmediate(resolve));
     assert.equal(observation.done, false, "the actual wait must not finish before its deadline");
+
+    // A timer may settle while the persisted cooldown is still 1ms in the future.
+    t.mock.timers.tick(1);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(observation.done, false, "an early timer must not consume a request retry");
+    assert.equal(fetchCalls, 0);
+
+    clock += 1;
     t.mock.timers.tick(1);
     const response = await pending;
     const body = (await response.json()) as unknown as {

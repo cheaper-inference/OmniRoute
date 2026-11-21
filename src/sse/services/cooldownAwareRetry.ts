@@ -196,22 +196,32 @@ export function getCooldownAwareRetryDecision({
 
 export async function waitForCooldownAwareRetry(
   waitMs: number,
-  signal?: AbortSignal | null
+  signal?: AbortSignal | null,
+  retryAfter?: string | null
 ): Promise<boolean> {
   if (signal?.aborted) return false;
   if (!Number.isFinite(waitMs) || waitMs <= 0) return signal?.aborted !== true;
 
+  const retryAtMs = retryAfter ? Date.parse(retryAfter) : null;
   return await new Promise((resolve) => {
     let settled = false;
-    let timeoutId: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null;
+    const onTimeout = () => {
       if (settled) return;
+      const remainingMs = retryAtMs === null ? 0 : retryAtMs - Date.now();
+      if (remainingMs > 0) {
+        // A timer can fire before the wall-clock deadline persisted for the account.
+        timeoutId = setTimeout(onTimeout, remainingMs);
+        return;
+      }
       settled = true;
       if (signal) {
         signal.removeEventListener("abort", onAbort);
       }
       timeoutId = null;
       resolve(true);
-    }, waitMs);
+    };
+    timeoutId = setTimeout(onTimeout, waitMs);
 
     const onAbort = () => {
       if (settled) return;
