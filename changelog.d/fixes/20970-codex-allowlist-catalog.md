@@ -1,0 +1,1 @@
+- **fix(catalog):** apply `modelVisibilityAllowlist` / `modelVisibilityDenylist` to the Codex-native bare-id rows and the OpenRouter live-catalog chat rows of `/v1/models`, so an exact Codex allowlist no longer advertises `codex/*` ids the `auto/*` pools already drop ([#20970](https://github.com/cheaper-inference/OmniRoute/issues/20970)) — thanks @domenicomassafra
