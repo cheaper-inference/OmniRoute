@@ -112,6 +112,24 @@ describe("self-service quota page lending card", () => {
     ]);
     expect(deadlineField().value).toBe("none");
     expect(saveButton().disabled).toBe(true);
+    expect(screen.getByRole("heading", { level: 3, name: "Lend your idle share" })).toBeTruthy();
+    // The live region is there before any message, so the message is announced when it arrives.
+    const region = saveButton().closest("form")?.querySelector('[role="status"]');
+    expect(region).toBeTruthy();
+    expect(region?.textContent).toBe("");
+  });
+
+  it("the deadline hint shows only for a duration choice", async () => {
+    const HINT = "The time counts from the moment you save.";
+    serve(() => consent({ lendingPercent: 30, lendingUntil: UNTIL, lendingActive: true }));
+    await openCard();
+    expect(deadlineField().value).toBe("keep");
+    expect(screen.queryByText(HINT)).toBeNull();
+    setDeadline("none");
+    expect(screen.queryByText(HINT)).toBeNull();
+    setDeadline("7d");
+    expect(screen.getByText(HINT)).toBeTruthy();
+    expect(deadlineField().getAttribute("aria-describedby")).toBeTruthy();
   });
 
   it("a stored deadline is shown with its time zone named", async () => {
@@ -385,21 +403,50 @@ describe("self-service quota page lending card", () => {
     expect(screen.getByRole("heading", { name: "Pool A" })).toBeTruthy();
   });
 
-  it("a 0% save that leaves the pool out of consent mode keeps the saved message on screen", async () => {
-    let view = consent({ lendingPercent: 30, lendingActive: true });
+  it("a 0% save that leaves the pool out of consent mode keeps only the status and the saved message", async () => {
+    const dimensions = [sharedDim()];
+    let view = consent({ lendingPercent: 30, lendingActive: true, dimensions });
     const calls = serve(
       () => view,
       () => {
-        view = quotaView({ pools: [pool({ ref: LENDING_REF })] });
+        view = quotaView({ pools: [pool({ ref: LENDING_REF, dimensions })] });
         return jsonResponse(view);
       }
     );
     await openCard();
+    expect(screen.getByText("Lent to you by other keys right now")).toBeTruthy();
     setPercent("0");
     fireEvent.click(saveButton());
     expect(await screen.findByText("Your lending choice was saved.")).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Lend your idle share" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 3, name: "Lend your idle share" })).toBeTruthy();
     expect(screen.getByText("You are not lending right now.")).toBeTruthy();
+    expect(screen.queryByLabelText(PERCENT)).toBeNull();
+    expect(screen.queryByLabelText("Lend until")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
+    expect(screen.queryByText("Lent to you by other keys right now")).toBeNull();
+    expect(document.body.textContent).not.toContain("While you are not using your share");
+    expect(document.activeElement?.textContent).toContain("Your lending choice was saved.");
     expect(callsTo(calls, QUOTA, "GET")).toHaveLength(1);
+  });
+
+  it("a second press on Withdraw while the first is pending sends nothing", async () => {
+    let answer: (response: Response) => void = () => {};
+    const calls = serve(
+      () => stored(),
+      () =>
+        new Promise<Response>((resolve) => {
+          answer = resolve;
+        })
+    );
+    await openCard();
+    const withdraw = screen.getByRole("button", { name: "Withdraw" });
+    fireEvent.click(withdraw);
+    fireEvent.click(withdraw);
+    await waitFor(() => expect(patches(calls)).toHaveLength(1));
+    expect((withdraw as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(withdraw);
+    await act(async () => answer(jsonResponse(stored({ lendingPercent: 0 }))));
+    expect(await screen.findByText("Your lending choice was saved.")).toBeTruthy();
+    expect(patches(calls)).toHaveLength(1);
   });
 });

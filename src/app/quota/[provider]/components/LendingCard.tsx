@@ -37,6 +37,8 @@ export default function LendingCard({ pool, lending }: LendingCardProps) {
   const [hold, setHold] = useState<Hold | null>(null);
   const kind = shownKind(pool, hold);
   if (!lending || kind === "none") return null;
+  // Held after a save whose view needs another card: only what is in force and the message stay.
+  const settled = kind !== lendingCardKind(pool);
 
   const watch: LendingSaveWatch = {
     onStart: () => setHold({ kind, until: "saving" }),
@@ -48,10 +50,18 @@ export default function LendingCard({ pool, lending }: LendingCardProps) {
     <Card padding="sm" title={t("lendingTitle")} className="min-w-0">
       {kind === "full" ? (
         <div className="min-w-0 space-y-3">
-          <p className="break-words text-sm text-text-muted">{t("lendingIntro")}</p>
+          {settled ? null : (
+            <p className="break-words text-sm text-text-muted">{t("lendingIntro")}</p>
+          )}
           <LendingStatusLine status={status} />
-          <LendingForm poolRef={pool.ref} status={status} lending={lending} watch={watch} />
-          <LendingBorrowFacts pool={pool} />
+          <LendingForm
+            poolRef={pool.ref}
+            status={status}
+            lending={lending}
+            watch={watch}
+            settled={settled}
+          />
+          {settled ? null : <LendingBorrowFacts pool={pool} />}
         </div>
       ) : (
         <LendingWithdraw pool={pool} lending={lending} watch={watch} />

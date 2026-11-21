@@ -18,6 +18,7 @@ import {
   pool,
   quotaView,
   renderQuota,
+  sharedDim,
   stubFetch,
   type FetchCall,
 } from "./quotaSelfHarness";
@@ -105,6 +106,11 @@ const AXE_RULES = {
       "list",
       "listitem",
       "nested-interactive",
+      "form-field-multiple-labels",
+      "aria-required-attr",
+      "aria-required-children",
+      "aria-required-parent",
+      "aria-hidden-focus",
     ],
   },
 };
@@ -213,6 +219,16 @@ describe("self-service quota page lending refusals", () => {
       "The server answered with an error, so the change may not have been saved. Try again in a moment.",
     ],
     [
+      "502",
+      refuse(502),
+      "The server answered with an error, so the change may not have been saved. Try again in a moment.",
+    ],
+    [
+      "504",
+      refuse(504),
+      "The server answered with an error, so the change may not have been saved. Try again in a moment.",
+    ],
+    [
       "a network failure",
       () => Promise.reject(new TypeError("offline")),
       "The server could not be reached, so the change may not have been saved. Check your connection and try again.",
@@ -300,6 +316,58 @@ describe("self-service quota page lending refusals", () => {
     expect(screen.queryByRole("heading", { name: "Late pool" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Pool A" })).toBeTruthy();
     expect(screen.queryByText("Your lending choice was saved.")).toBeNull();
+  });
+
+  it("with the page turned off, a save says the pool is gone and the reload shows the page's failure", async () => {
+    let gets = 0;
+    stubFetch({
+      [QUOTA]: (call) =>
+        call.method === "PATCH"
+          ? refuse(404)(call)
+          : (gets += 1) === 1
+            ? jsonResponse(consent())
+            : new Response(null, { status: 404 }),
+    });
+    await openCard();
+    changeAndSave();
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "This pool is no longer available to this key."
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Reload my quota" }));
+    expect(await screen.findByText("Your quota could not be loaded")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Lend your idle share" })).toBeNull();
+    expect(window.sessionStorage.getItem(STORAGE_ENTRY)).toContain(KEY);
+  });
+
+  it("the card passes axe once saved, as a withdrawal, and with borrow rows", async () => {
+    let view = consent({
+      dimensions: [
+        sharedDim({
+          yourShare: {
+            fairShare: 500,
+            consumed: 120,
+            remaining: 380,
+            status: "ok",
+            borrowAvailable: 40,
+          },
+        }),
+      ],
+    });
+    serve(
+      () => view,
+      () => jsonResponse(view)
+    );
+    await openCard();
+    expect(screen.getByText("Lent to you by other keys right now")).toBeTruthy();
+    expect((await axe.run(document.body, AXE_RULES)).violations).toEqual([]);
+    changeAndSave();
+    await screen.findByText("Your lending choice was saved.");
+    expect((await axe.run(document.body, AXE_RULES)).violations).toEqual([]);
+
+    view = quotaView({ pools: [pool({ ref: LENDING_REF, lendingPercent: 40 })] });
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    await screen.findByRole("button", { name: "Withdraw" });
+    expect((await axe.run(document.body, AXE_RULES)).violations).toEqual([]);
   });
 
   it("the key is never logged during a save, and the card passes axe in each state", async () => {

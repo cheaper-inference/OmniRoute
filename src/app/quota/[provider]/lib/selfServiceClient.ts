@@ -111,6 +111,8 @@ const WRITE_REFUSALS: Readonly<Record<number, SelfServiceWriteFailure>> = {
   401: "unauthorized",
   403: "forbidden",
   404: "not-found",
+  // A timeout says nothing about the values: the change may or may not have been saved.
+  408: "server",
   429: "rate-limited",
 };
 

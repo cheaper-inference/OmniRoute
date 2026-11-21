@@ -8,6 +8,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { createElement } from "react";
+import { renderToString } from "react-dom/server";
 
 import {
   LENDING_DURATIONS,
@@ -88,19 +90,32 @@ const status =
   () =>
     Promise.resolve(new Response("{}", { status: code, headers }));
 
+/** The hook's actions, from one render of a component that calls it (it keeps its own refs). */
+function saveActions(input: Parameters<typeof useLendingSave>[0]) {
+  let actions: ReturnType<typeof useLendingSave> | null = null;
+  function Probe() {
+    actions = useLendingSave(input);
+    return null;
+  }
+  renderToString(createElement(Probe));
+  if (!actions) throw new Error("the hook did not render");
+  return actions as ReturnType<typeof useLendingSave>;
+}
+
 /** What the card shows for one answer: catalog text, reload button, automatic reload. */
 async function outcomeOf(response: () => Promise<Response>) {
   const original = globalThis.fetch;
   globalThis.fetch = answering(response, []);
   let reloads = 0;
   try {
-    const actions = useLendingSave({
+    const actions = saveActions({
       path: PATH,
       apiKey: KEY,
       adopt: () => {},
       reload: () => {
         reloads++;
       },
+      epoch: 0,
     });
     const result = await actions.save(
       { pool: POOL, lendingPercent: 25, lendingUntil: null },
@@ -203,6 +218,8 @@ test("the deadline and ended-consent sentences match the rules", () => {
 test("the documented cards are the ones lendingCardKind picks", () => {
   has("A pool in `saturation` mode whose key stores a percentage above 0 shows a withdrawal only.");
   has("A pool in `saturation` mode with a stored 0 shows no lending card.");
+  // Pinned through the page in tests/unit/ui/quota-self-lending.test.tsx (the withdrawal test).
+  has("After a save, the card keeps its message until the quota is read again.");
   has("Its Withdraw button sends 0 with no deadline.");
   assert.equal(catalog.lendingWithdraw, "Withdraw");
   assert.equal(lendingCardKind({ borrowMode: "consent", lendingPercent: 0 }), "full");
@@ -265,9 +282,14 @@ test("each documented refusal class is the text and reload the page picks for th
   assert.equal(untimed.text, catalog.lendingErrorRateLimitedUnknown);
 
   has(
-    "A 5xx answer or a network failure says the change may not have been saved, and keeps the typed values."
+    "A 5xx answer, a 408 or a network failure says the change may not have been saved, and keeps the typed values."
   );
-  for (const response of [status(500), status(503), () => Promise.reject(new TypeError("x"))]) {
+  for (const response of [
+    status(500),
+    status(503),
+    status(408),
+    () => Promise.reject(new TypeError("x")),
+  ]) {
     const failed = await outcomeOf(response);
     assert.ok(failed.text.includes("the change may not have been saved"));
     assert.deepEqual([failed.button, failed.reloads], [false, 0]);

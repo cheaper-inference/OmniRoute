@@ -24,6 +24,8 @@ interface LendingFormProps {
   status: LendingStatus;
   lending: LendingActions;
   watch: LendingSaveWatch;
+  /** The saved view needs another card: show only the message, no fields and no button. */
+  settled?: boolean;
 }
 
 const FIELD_NAME = { percent: "lendingPercent", deadline: "lendingDeadline" } as const;
@@ -42,7 +44,13 @@ function formValues(draft: LendingFormValues | null, status: LendingStatus): Len
  * keeps the values as typed. The instant of a deadline is read from the clock when Save is
  * pressed, never while rendering.
  */
-export default function LendingForm({ poolRef, status, lending, watch }: LendingFormProps) {
+export default function LendingForm({
+  poolRef,
+  status,
+  lending,
+  watch,
+  settled = false,
+}: LendingFormProps) {
   const t = useTranslations("quotaSelf");
   const [draft, setDraft] = useState<LendingFormValues | null>(null);
   const [problem, setProblem] = useState<"percent" | "deadline" | null>(null);
@@ -61,7 +69,8 @@ export default function LendingForm({ poolRef, status, lending, watch }: Lending
     if (busy() || !dirty) return;
     const form = event.currentTarget;
     const built = buildLendingSubmission(values, status, Date.now());
-    if (!built.ok) {
+    // `in` narrows the union with or without strictNullChecks.
+    if ("problem" in built) {
       setProblem(built.problem);
       const field = form.elements.namedItem(FIELD_NAME[built.problem]);
       if (field instanceof HTMLElement) field.focus();
@@ -79,16 +88,20 @@ export default function LendingForm({ poolRef, status, lending, watch }: Lending
       aria-busy={saving}
       onSubmit={(event) => void submit(event)}
     >
-      <LendingFields
-        values={values}
-        status={status}
-        problem={problem}
-        disabled={saving}
-        onChange={edit}
-      />
-      <Button type="submit" disabled={!dirty || saving} loading={saving}>
-        {t("lendingSave")}
-      </Button>
+      {settled ? null : (
+        <>
+          <LendingFields
+            values={values}
+            status={status}
+            problem={problem}
+            disabled={saving}
+            onChange={edit}
+          />
+          <Button type="submit" disabled={!dirty || saving} loading={saving}>
+            {t("lendingSave")}
+          </Button>
+        </>
+      )}
       <LendingMessage notice={notice} onReload={lending.reload} ref={messageRef} />
     </form>
   );

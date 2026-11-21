@@ -35,6 +35,12 @@ function choiceLabel(choice: LendingDeadlineChoice, keptUntil: string, t: Transl
     : t("lendingDeadlineDays", { days: duration.value });
 }
 
+/** Only a duration counts from the moment of saving: no hint for `none` or a kept deadline. */
+function deadlineHint(idle: boolean, deadline: LendingDeadlineChoice, t: Translate) {
+  if (idle) return t("lendingDeadlineIdleHint");
+  return deadline === "none" || deadline === "keep" ? undefined : t("lendingDeadlineHint");
+}
+
 /** The two fields of the lending form: the percentage and how long the consent lasts. */
 export default function LendingFields({
   values,
@@ -78,7 +84,7 @@ export default function LendingFields({
         name="lendingDeadline"
         className="min-w-0"
         label={t("lendingDeadlineLabel")}
-        hint={idle ? t("lendingDeadlineIdleHint") : t("lendingDeadlineHint")}
+        hint={deadlineHint(idle, values.deadline, t)}
         error={problem === "deadline" ? t("lendingDeadlinePassed") : undefined}
         options={options}
         value={values.deadline}

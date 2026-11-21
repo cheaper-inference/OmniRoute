@@ -236,6 +236,7 @@ describe("sendSelfService", () => {
         [400, "rejected"],
         [413, "rejected"],
         [415, "rejected"],
+        [408, "server"],
         [429, "rate-limited"],
         [500, "server"],
         [502, "server"],

@@ -15,14 +15,16 @@ interface LendingMessageProps {
 }
 
 /**
- * The result of the last save. The container is always mounted and focusable, so focus can move
- * to it when a result arrives. The text comes from the failure tag, never from the server.
+ * The result of the last save. The container is always mounted, focusable and a polite live
+ * region, so focus can move to it and a message put into it is announced. The saved message is
+ * announced by the container, an error by its own alert. The text comes from the failure tag,
+ * never from the server.
  */
 export default function LendingMessage({ notice, onReload, ref }: LendingMessageProps) {
   const t = useTranslations("quotaSelf");
   let banner: ReactNode = null;
   if (notice?.kind === "saved") {
-    banner = <Alert variant="success" dismissible={false} title={t("lendingSaved")} />;
+    banner = <Alert variant="success" dismissible={false} role="none" title={t("lendingSaved")} />;
   } else if (notice?.kind === "error") {
     const text = lendingErrorText(notice.error, notice.retryAfterSeconds);
     banner = (
@@ -42,7 +44,7 @@ export default function LendingMessage({ notice, onReload, ref }: LendingMessage
   }
 
   return (
-    <div ref={ref} tabIndex={-1} className="min-w-0 break-words">
+    <div ref={ref} tabIndex={-1} role="status" className="min-w-0 break-words">
       {banner}
     </div>
   );
