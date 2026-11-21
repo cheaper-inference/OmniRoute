@@ -11,8 +11,17 @@ vi.mock("@/shared/components", () => ({
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
   Select: (props: React.SelectHTMLAttributes<HTMLSelectElement>) => <select {...props} />,
   Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...props} />,
-  Button: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button {...props}>{children}</button>
+  Button: ({ children, onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => (
+    <button
+      {...props}
+      onClick={(event) => {
+        // The real controller returns its entire action, including body reads and receipt writes.
+        const action: unknown = onClick?.(event);
+        if (action instanceof Promise) trackWork(action);
+      }}
+    >
+      {children}
+    </button>
   ),
 }));
 
@@ -49,117 +58,125 @@ const key = await keys.createApiKey("fal-ui", "fal-ui-machine", [], {
 });
 saveFalDefinition(connectionId, definition, true);
 
-afterEach(() => {
-  cleanup();
+const pendingWork = new Set<Promise<unknown>>();
+function trackWork<T>(request: Promise<T>) {
+  pendingWork.add(request);
+  void request.then(
+    () => pendingWork.delete(request),
+    () => pendingWork.delete(request)
+  );
+  return request;
+}
+async function drainWork() {
+  while (pendingWork.size) await Promise.allSettled([...pendingWork]);
+}
+async function cleanupRequests() {
+  await act(async () => {
+    cleanup();
+    // Fetch can settle before response.json(), fingerprinting or receipt persistence finishes.
+    // Drain the real controller actions as well as their nested requests before clearing state.
+    await drainWork();
+  });
   sessionStorage.clear();
   vi.unstubAllGlobals();
-});
+}
+afterEach(cleanupRequests);
 afterAll(async () => {
   await waitForCallLogSaves(10_000);
   keys.resetApiKeyState();
   core.resetDbInstance();
 });
 
-async function loadPanel(
-  definitionLoaded: Promise<void>,
-  value = '{"input_image_url":"https://example.com/source.png"}'
-) {
+async function loadPanel(value = '{"input_image_url":"https://example.com/source.png"}') {
   fireEvent.change(screen.getByRole("textbox", { name: "falNative.endpoint" }), {
     target: { value: endpoint },
   });
-  await act(async () => {
-    fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[0]);
-    await definitionLoaded;
-  });
-  fireEvent.change(screen.getByLabelText("falNative.input"), { target: { value } });
+  fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[0]);
+  await act(drainWork);
   await waitFor(() =>
     expect(
       (screen.getByRole("button", { name: /falNative.(run|newGeneration)/ }) as HTMLButtonElement)
         .disabled
     ).toBe(false)
   );
+  fireEvent.change(screen.getByLabelText("falNative.input"), { target: { value } });
 }
 
-for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
-  test(`real panel and routes recover ${failure} with one generation POST across rapid clicks, reload and GETs`, async () => {
+for (const [failure, delayed] of [
+  ["non-json-with-header", false],
+  ["non-json-with-header", true],
+  ["disconnect-without-response", false],
+  ["disconnect-without-response", true],
+] as const) {
+  test(`real panel and routes recover ${failure} with one generation POST across rapid clicks, reload and GETs${delayed ? " with delayed responses" : ""}`, async () => {
     let generations = 0;
     let browserPosts = 0;
-    let browserGets = 0;
-    let definitionsLoaded = 0;
+    let completedPosts = 0;
     const sentKeys: string[] = [];
-    const definitions = Array.from({ length: 2 }, () => Promise.withResolvers<void>());
-    const posts = Array.from({ length: 3 }, () => Promise.withResolvers<void>());
-    const refreshes = Array.from({ length: 2 }, () => Promise.withResolvers<void>());
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-        if (url.startsWith("/api/providers/")) {
-          definitions[definitionsLoaded++]?.resolve();
-          return Response.json({ ...definition, capabilities: falCapabilities(definition) });
-        }
-        if (url === "/api/v1/fal/run") {
-          const post = browserPosts++;
-          sentKeys.push(new Headers(init?.headers).get("Idempotency-Key")!);
-          try {
-            const response = await run.POST(
-              new Request(`http://localhost${url}`, {
-                ...init,
-                headers: {
-                  ...Object.fromEntries(new Headers(init?.headers)),
-                  Authorization: `Bearer ${key.key}`,
-                },
-              })
-            );
-            if (post === 0) {
-              if (failure === "disconnect-without-response")
-                throw new TypeError("Connection lost after acceptance");
-              return new Response("proxy body unavailable", {
-                status: 502,
-                headers: { "X-Request-ID": response.headers.get("X-Request-ID")! },
-              });
-            }
-            return response;
-          } finally {
-            posts[post]?.resolve();
-          }
-        }
-        if (url.startsWith("/api/v1/fal/jobs/")) {
-          const get = browserGets++;
-          const id = url.split("/").at(-1)!.split("?")[0];
-          try {
-            return await jobs.GET(
-              new Request(`http://localhost${url}`, {
-                headers: { Authorization: `Bearer ${key.key}` },
-              }),
-              { params: Promise.resolve({ id }) }
-            );
-          } finally {
-            refreshes[get]?.resolve();
-          }
-        }
-        if (url === `https://queue.fal.run/${endpoint}`) {
-          generations++;
-          return Response.json({
-            request_id: `upstream-${generations}`,
-            status_url: `https://queue.fal.run/${endpoint}/requests/upstream-${generations}/status`,
-            response_url: `https://queue.fal.run/${endpoint}/requests/upstream-${generations}`,
+    const mockFetch = async (url: string, init?: RequestInit): Promise<Response> => {
+      if (url.startsWith("/api/providers/"))
+        return Response.json({ ...definition, capabilities: falCapabilities(definition) });
+      if (url === "/api/v1/fal/run") {
+        browserPosts++;
+        sentKeys.push(new Headers(init?.headers).get("Idempotency-Key")!);
+        // Exceed Testing Library's default 1 s deadline without delaying the whole suite.
+        if (delayed && browserPosts === 1)
+          await new Promise((resolve) => setTimeout(resolve, 1_100));
+        const response = await run.POST(
+          new Request(`http://localhost${url}`, {
+            ...init,
+            headers: {
+              ...Object.fromEntries(new Headers(init?.headers)),
+              Authorization: `Bearer ${key.key}`,
+            },
+          })
+        );
+        // Acceptance is not completion: keep the final browser response in flight.
+        if (delayed && browserPosts === 3) await new Promise((resolve) => setTimeout(resolve, 100));
+        completedPosts++;
+        if (browserPosts === 1) {
+          if (failure === "disconnect-without-response")
+            throw new TypeError("Connection lost after acceptance");
+          return new Response("proxy body unavailable", {
+            status: 502,
+            headers: { "X-Request-ID": response.headers.get("X-Request-ID")! },
           });
         }
-        if (url.endsWith("/status")) return Response.json({ status: "COMPLETED" });
+        return response;
+      }
+      if (url.startsWith("/api/v1/fal/jobs/")) {
+        const id = url.split("/").at(-1)!.split("?")[0];
+        return jobs.GET(
+          new Request(`http://localhost${url}`, {
+            headers: { Authorization: `Bearer ${key.key}` },
+          }),
+          { params: Promise.resolve({ id }) }
+        );
+      }
+      if (url === `https://queue.fal.run/${endpoint}`) {
+        generations++;
         return Response.json({
-          mesh: { url: "https://example.com/result.glb", file_name: "result.glb" },
+          request_id: `upstream-${generations}`,
+          status_url: `https://queue.fal.run/${endpoint}/requests/upstream-${generations}/status`,
+          response_url: `https://queue.fal.run/${endpoint}/requests/upstream-${generations}`,
         });
-      })
+      }
+      if (url.endsWith("/status")) return Response.json({ status: "COMPLETED" });
+      return Response.json({
+        mesh: { url: "https://example.com/result.glb", file_name: "result.glb" },
+      });
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => trackWork(mockFetch(url, init)))
     );
     const mounted = render(<FalNativePanel connectionId={connectionId} />);
-    await loadPanel(definitions[0].promise);
+    await loadPanel();
     const button = screen.getByRole("button", { name: "falNative.run" });
-    await act(async () => {
-      fireEvent.click(button);
-      fireEvent.click(button);
-      await posts[0].promise;
-    });
-    await screen.findByRole("alert");
+    fireEvent.click(button);
+    fireEvent.click(button);
+    await act(drainWork);
+    expect(screen.getByRole("alert")).toBeTruthy();
     expect(generations).toBe(1);
     expect(browserPosts).toBe(1);
     expect(screen.getByText("falNative.submissionUnknown")).toBeTruthy();
@@ -169,30 +186,23 @@ for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
     expect(sessionStorage.getItem(sessionStorage.key(0)!)).not.toContain("source.png");
     mounted.unmount();
     render(<FalNativePanel connectionId={connectionId} />);
-    await loadPanel(
-      definitions[1].promise,
-      '{"input_image_url":"https://example.com/changed.png"}'
-    );
+    await loadPanel('{"input_image_url":"https://example.com/changed.png"}');
     fireEvent.click(screen.getByRole("button", { name: "falNative.recover" }));
     await screen.findByText("falNative.recoveryMismatch");
     expect(browserPosts).toBe(1);
     fireEvent.change(screen.getByLabelText("falNative.input"), {
       target: { value: '{"input_image_url":"https://example.com/source.png"}' },
     });
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "falNative.recover" }));
-      await posts[1].promise;
-    });
+    fireEvent.click(screen.getByRole("button", { name: "falNative.recover" }));
+    await act(drainWork);
     await waitFor(() =>
       expect((screen.getByLabelText("falNative.job") as HTMLInputElement).value).not.toBe("")
     );
     await waitFor(() => expect(screen.queryByText("falNative.submissionUnknown")).toBeNull());
     expect(sentKeys[1]).toBe(sentKeys[0]);
-    for (const refresh of refreshes) {
-      await act(async () => {
-        fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[1]);
-        await refresh.promise;
-      });
+    for (let i = 0; i < 2; i++) {
+      fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[1]);
+      await act(drainWork);
       await screen.findByRole("link", { name: "result.glb" });
       await waitFor(() =>
         expect(
@@ -202,12 +212,13 @@ for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
       );
     }
     expect(generations).toBe(1);
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "falNative.newGeneration" }));
-      await posts[2].promise;
-    });
-    expect(generations).toBe(2);
+    fireEvent.click(screen.getByRole("button", { name: "falNative.newGeneration" }));
+    await act(drainWork);
+    await waitFor(() => expect(generations).toBe(2));
     expect(sentKeys[2]).not.toBe(sentKeys[0]);
+    expect(completedPosts).toBe(3);
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByText("falNative.submissionUnknown")).toBeNull();
   });
 }
 
@@ -229,3 +240,92 @@ test("submission fingerprints bind endpoint, connection, transport and ordered v
   ])
     expect(await falFingerprint(changed)).not.toBe(await falFingerprint(draft));
 });
+
+test("cleanup drains rejected requests before restoring fetch and clearing late receipts", async () => {
+  const deferred = Promise.withResolvers<Response>();
+  const fetcher = vi.fn(() =>
+    trackWork(
+      deferred.promise.catch((error) => {
+        sessionStorage.setItem("receipt", "late");
+        throw error;
+      })
+    )
+  );
+  vi.stubGlobal("fetch", fetcher);
+  const pending = fetch("/pending-fal-test-request");
+  sessionStorage.setItem("receipt", "pending");
+
+  const cleaning = cleanupRequests();
+  const fetchDuringCleanup = globalThis.fetch;
+  const receiptDuringCleanup = sessionStorage.getItem("receipt");
+  deferred.reject(new TypeError("Connection lost after acceptance"));
+  await expect(pending).rejects.toThrow("Connection lost after acceptance");
+  await cleaning;
+
+  expect(fetchDuringCleanup).toBe(fetcher);
+  expect(receiptDuringCleanup).toBe("pending");
+  expect(pendingWork.size).toBe(0);
+  expect(globalThis.fetch).not.toBe(fetcher);
+  expect(sessionStorage.length).toBe(0);
+});
+
+for (const delayedBody of [false, true]) {
+  test(`cleanup waits for the real panel to consume a ${delayedBody ? "delayed" : "buffered"} response after unmount`, async () => {
+    const response = Promise.withResolvers<Response>();
+    const started = Promise.withResolvers<void>();
+    const bodyStarted = Promise.withResolvers<void>();
+    const body = Promise.withResolvers<{ id: string; status: string }>();
+    const consumed = Promise.withResolvers<void>();
+    const fetcher = vi.fn((url: string) => {
+      if (url === "/api/v1/fal/run") {
+        started.resolve();
+        return trackWork(response.promise);
+      }
+      return trackWork(
+        Promise.resolve(Response.json({ ...definition, capabilities: falCapabilities(definition) }))
+      );
+    });
+    vi.stubGlobal("fetch", fetcher);
+    render(<FalNativePanel connectionId={connectionId} />);
+    await loadPanel();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "falNative.run" }));
+      await started.promise;
+    });
+
+    const reply = Response.json(
+      { id: "late-result", status: "IN_QUEUE" },
+      { headers: { "X-Request-ID": "late-header" } }
+    );
+    if (delayedBody)
+      vi.spyOn(reply, "json").mockImplementation(() => {
+        bodyStarted.resolve();
+        return body.promise;
+      });
+    const observeFinalReceipt = () => {
+      if (sessionStorage.getItem("fal-submission-receipts-v2")?.includes("late-result"))
+        consumed.resolve();
+    };
+    window.addEventListener("fal-receipts", observeFinalReceipt);
+    const cleaning = cleanupRequests();
+    try {
+      response.resolve(reply);
+      if (delayedBody) {
+        await bodyStarted.promise;
+        // Fetch is already settled; the consumer action must remain tracked until its body ends.
+        expect(pendingWork.size).toBe(1);
+        expect(globalThis.fetch).toBe(fetcher);
+        body.resolve({ id: "late-result", status: "IN_QUEUE" });
+      }
+      await cleaning;
+      await consumed.promise;
+      expect(pendingWork.size).toBe(0);
+      expect(sessionStorage.length).toBe(0);
+      expect(globalThis.fetch).not.toBe(fetcher);
+    } finally {
+      body.resolve({ id: "late-result", status: "IN_QUEUE" });
+      await cleaning;
+      window.removeEventListener("fal-receipts", observeFinalReceipt);
+    }
+  });
+}

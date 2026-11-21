@@ -20,6 +20,7 @@ import { clearPostOutputFailureStreak } from "../../services/accountFallback/pos
 import { FORMATS } from "../../translator/formats.ts";
 import { needsTranslation } from "../../translator/index.ts";
 import { runEmptyTurnRetryLoop } from "./emptyTurnRetryLoop.ts";
+import { requestFollowsToolCalls } from "../../utils/emptyTurnRetry.ts";
 import { buildErrorBody } from "../../utils/error.ts";
 import {
   createPassthroughStreamWithLogger,
@@ -323,9 +324,13 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   if (stream && providerResponse.ok && providerResponse.body) {
     let flushEmptyRetryArmed = false;
     try {
+      // #20092: post-tool continuations arm the retry by default — an empty
+      // continuation silently breaks an agentic loop, and the probe cost only
+      // lands on turns that already carry submitted tool results.
       // A custom JSON business call may already have taken effect: an empty reply is final.
       flushEmptyRetryArmed =
-        isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED") &&
+        (isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED") ||
+          requestFollowsToolCalls(body)) &&
         !isCustomJsonProviderData(credentials?.providerSpecificData);
     } catch {
       flushEmptyRetryArmed = false;
