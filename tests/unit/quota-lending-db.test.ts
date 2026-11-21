@@ -233,3 +233,28 @@ test("lending fields in an admin allocation payload are never written", () => {
   upsertAllocations(pool.id, [lent("a", 50), lent("d", 50)]);
   assert.deepEqual([lendingOf(pool.id, "a"), lendingOf(pool.id, "d")], [kept, zero]);
 });
+
+test("a stored deadline past the largest Date reads as expired through both readers", () => {
+  const { activeLendingPercent } = consentBorrow;
+  const pool = createPool({
+    connectionId: "c-huge-until",
+    name: "huge-until",
+    allocations: [alloc("a", 50), alloc("b", 50)],
+  });
+  const store = (until: number) =>
+    core
+      .getDbInstance()
+      .prepare(
+        "UPDATE quota_allocations SET lending_percent = 50, lending_until = ? WHERE pool_id = ? AND api_key_id = ?"
+      )
+      .run(until, pool.id, "b");
+  const readUntil = () => {
+    const b = (getPool(pool.id)?.allocations ?? []).find((x) => x.apiKeyId === "b");
+    return [lendingOf(pool.id, "b")?.lendingUntil, b?.lendingUntil];
+  };
+  store(8_640_000_000_000_001);
+  assert.deepEqual(readUntil(), [0, 0]);
+  assert.equal(activeLendingPercent(lendingOf(pool.id, "b") ?? {}, Date.now()), 0);
+  store(8_640_000_000_000_000);
+  assert.deepEqual(readUntil(), [8_640_000_000_000_000, 8_640_000_000_000_000]);
+});

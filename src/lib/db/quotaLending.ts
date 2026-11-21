@@ -41,6 +41,9 @@ export function normalizeBorrowMode(value: unknown): BorrowMode {
   return value === "consent" ? "consent" : "saturation";
 }
 
+/** The largest epoch ms a Date can hold. */
+const MAX_DATE_MS = 8_640_000_000_000_000;
+
 /** Integer 0..100. Anything else is 0. */
 export function normalizeLendingPercent(value: unknown): number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 100
@@ -50,12 +53,12 @@ export function normalizeLendingPercent(value: unknown): number {
 
 /**
  * The stored deadline. Only null (SQL NULL, or an absent field) means "no deadline". A finite
- * number is kept. Anything else is unreadable and becomes 0, an instant in the past, so a
- * damaged value lends nothing instead of lending with no end.
+ * number a Date can hold is kept. Anything else is unreadable and becomes 0, an instant in the
+ * past, so a damaged value lends nothing instead of lending with no end.
  */
 export function normalizeLendingUntil(value: unknown): number | null {
   if (value === null || value === undefined) return null;
-  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+  return typeof value === "number" && Number.isFinite(value) && value <= MAX_DATE_MS ? value : 0;
 }
 
 function rowToLending(row: LendingRow): AllocationLending {

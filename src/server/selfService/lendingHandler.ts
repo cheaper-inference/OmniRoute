@@ -72,11 +72,24 @@ async function rateLimitRefusal(
   });
 }
 
-/** The parsed body, or null for a body that is not JSON or not in the schema. */
+/** Characters of the largest body read. A valid body is far shorter. */
+const SELF_LENDING_MAX_BODY_CHARS = 4096;
+
+/** The body text, or null when it is declared or found longer than the cap. */
+async function readCappedText(request: Request): Promise<string | null> {
+  const declared = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > SELF_LENDING_MAX_BODY_CHARS) return null;
+  const text = await request.text();
+  return text.length > SELF_LENDING_MAX_BODY_CHARS ? null : text;
+}
+
+/** The parsed body, or null for a body that is too long, not JSON or not in the schema. */
 async function readBody(request: Request): Promise<SelfLendingPatch | null> {
   let raw: unknown;
   try {
-    raw = JSON.parse(await request.text());
+    const text = await readCappedText(request);
+    if (text === null) return null;
+    raw = JSON.parse(text);
   } catch {
     return null;
   }
@@ -162,7 +175,7 @@ async function applyLendingPatch(
   const refused = recordConsent(request, ctx, auth.key.id, body, deps.audit ?? logAuditEvent);
   if (refused) return refused;
 
-  const view = await (deps.buildView ?? buildQuotaSelfView)(input, { secret });
+  const view = await (deps.buildView ?? buildQuotaSelfView)(input, { secret, now });
   return selfServiceJson(selfQuotaResponseSchema.parse(view));
 }
 

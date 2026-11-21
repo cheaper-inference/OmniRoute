@@ -417,3 +417,53 @@ test("the deadline check", () => {
     ["ok", "ok", "ok", "past", "seconds"]
   );
 });
+
+test("a deadline past the largest Date is the fixed 400 and writes nothing", async () => {
+  const before = getAllocationLending(consentPool.id, me.id);
+  const tooLate = await patch(me.key, "claude", {
+    pool: mine,
+    lendingPercent: 10,
+    lendingUntil: 8_640_000_000_000_001,
+  });
+  assert.equal(tooLate.status, 400);
+  assert.equal(await messageOf(tooLate), BODY_MESSAGE);
+  assert.deepEqual(getAllocationLending(consentPool.id, me.id), before);
+
+  const latest = await patch(me.key, "claude", {
+    pool: mine,
+    lendingPercent: 10,
+    lendingUntil: 8_640_000_000_000_000,
+  });
+  assert.equal(latest.status, 200, await latest.clone().text());
+  assert.deepEqual(getAllocationLending(consentPool.id, me.id), {
+    lendingPercent: 10,
+    lendingUntil: 8_640_000_000_000_000,
+  });
+});
+
+test("a body over 4096 characters is the fixed 400 and writes nothing", async () => {
+  const before = getAllocationLending(consentPool.id, me.id);
+  const valid = JSON.stringify({ pool: mine, lendingPercent: 10 });
+  const long = await patch(me.key, "claude", valid + " ".repeat(5000 - valid.length));
+  assert.equal(long.status, 400);
+  assert.equal(await messageOf(long), BODY_MESSAGE);
+
+  const declared = await handleSelfLendingPatch(
+    new Request("http://localhost/api/v1/me/quota/claude", {
+      method: "PATCH",
+      headers: {
+        Authorization: "Bearer " + me.key,
+        "Content-Type": "application/json",
+        "Content-Length": "4097",
+      },
+      body: valid,
+    }),
+    "claude"
+  );
+  assert.equal(declared.status, 400);
+  assert.equal(await messageOf(declared), BODY_MESSAGE);
+  assert.deepEqual(getAllocationLending(consentPool.id, me.id), before);
+
+  const padded = await patch(me.key, "claude", valid + " ".repeat(4096 - valid.length));
+  assert.equal(padded.status, 200, await padded.clone().text());
+});

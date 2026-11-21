@@ -135,12 +135,15 @@ export const selfQuotaResponseSchema = z.object({
   blocks,
 });
 
+/** The largest epoch ms a Date can hold. A later deadline cannot be formatted. */
+export const LENDING_UNTIL_MAX_MS = 8_640_000_000_000_000;
+
 /** PATCH body: the key's lending consent for one pool, named by its `ref`. */
 export const selfLendingPatchSchema = z
   .object({
     pool: z.string().regex(/^qpr_[0-9a-f]{32}$/),
     lendingPercent: z.number().int().min(0).max(100),
-    lendingUntil: z.number().int().nullable().optional(),
+    lendingUntil: z.number().int().max(LENDING_UNTIL_MAX_MS).nullable().optional(),
   })
   .strict();
 

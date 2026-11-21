@@ -8,7 +8,8 @@
  * formula the quota gate applies (computeBorrowAvailable). Unlike the gate it takes no shortcut:
  * it reads every other key, so the figure is real also while the key is under its own share. It
  * is null for a soft or burst key (the gate does not limit those by it) and null when any read
- * fails. It names no other key and no percentage of anyone else.
+ * fails. The view carries no id, name or weight of another member. It reports lending by others
+ * only as one aggregate, which in a two-key pool is the other key's own figure.
  */
 
 import type { SelfQuotaPool } from "@/shared/schemas/selfQuota";
