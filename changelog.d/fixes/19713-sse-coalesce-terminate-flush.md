@@ -1,0 +1,1 @@
+- **fix(sse):** with `SSE_FRAME_COALESCE_MS` on, a stream that ends on an upstream failure now still delivers the last queued content frame and the real error frame to the client. ([#19713](https://github.com/cheaper-inference/OmniRoute/pull/19713))

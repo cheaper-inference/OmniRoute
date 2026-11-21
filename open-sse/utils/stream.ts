@@ -75,7 +75,7 @@ import {
   projectStreamFailureEvent,
   type StreamFailurePayload,
 } from "./streamErrorFormat.ts";
-import { createStreamFailureAborter } from "./streamFailureBoundary.ts";
+import { createStreamFailureAborter, clearIdleTimerOnError } from "./streamFailureBoundary.ts";
 import { buildStreamFailureSnapshot } from "./streamFailureSnapshot.ts";
 import { nativeFinishFailure, readPassthroughChatId } from "./streamPassthroughFinish.ts";
 import { createReasoningStreamObserver } from "./responsesReasoningObservation.ts";
@@ -1671,7 +1671,7 @@ export function createSSEStream(options: StreamOptions = {}) {
         }
       },
 
-      transform(chunk, controller) {
+      transform: clearIdleTimerOnError(clearIdleTimer, (chunk, controller) => {
         if (streamTimedOut) return;
         const now = Date.now();
         timing.markByte();
@@ -2955,7 +2955,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             deferredCompletionTimer.unref?.();
           }
         }
-      },
+      }),
 
       async flush(controller) {
         flushing = true;
