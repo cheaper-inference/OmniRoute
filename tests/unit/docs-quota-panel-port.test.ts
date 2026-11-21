@@ -6,8 +6,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import http from "node:http";
+import net from "node:net";
 
 const panel = await import("../../src/lib/quotaPanelBridge.ts");
+const bridge = await import("../../src/lib/apiBridgeServer.ts");
+const { getTrustProxyMode } = await import("../../src/server/origin/trustProxyMode.ts");
 
 const envExample = readFileSync(".env.example", "utf8");
 const envReference = readFileSync("docs/reference/ENVIRONMENT.md", "utf8");
@@ -174,7 +178,9 @@ test("the section states the methods, the body rule and the upgrade rule", () =>
   const [, first, second] = match(sectionText, /Only `([A-Z]+)` and `([A-Z]+)` are relayed\./);
   assert.deepEqual([first, second].sort(), [...panel.QUOTA_PANEL_METHOD_NAMES].sort());
   for (const sentence of [
-    "Any other method answers 404, and so does a request that declares a body.",
+    "Any other method answers 404, except a CONNECT request, whose connection is closed with no answer.",
+    "A request that declares a body answers 404 and its connection is closed.",
+    "A raw control character in the target is answered 400 by the HTTP parser, before this port's own check.",
     "Upgrade requests are refused and their connection is closed.",
     "The dashboard, the login page, the management API and the inference routes cannot be reached through this port.",
   ]) {
@@ -251,4 +257,131 @@ test("the section says the feature flag, not the port, turns the page on", () =>
   }
   const withFlagOff = { QUOTA_PANEL_PORT: "20133", QUOTA_SELF_PANEL: "false" };
   assert.equal(panel.resolveQuotaPanelListener(withFlagOff, UNSPLIT_PORTS).kind, "listen");
+});
+
+async function closedPort(): Promise<number> {
+  const server = net.createServer();
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address() as net.AddressInfo;
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  return port;
+}
+
+/** The status and body a real panel bridge in front of a closed main port answers for a path. */
+async function panelAnswer(path: string): Promise<{ status: number; body: string }> {
+  const front = bridge.createApiBridgeServer(await closedPort(), bridge.createQuotaPanelRole());
+  await new Promise<void>((resolve) => front.listen(0, "127.0.0.1", resolve));
+  const { port } = front.address() as net.AddressInfo;
+  try {
+    return await new Promise((resolve, reject) => {
+      const req = http.request({ host: "127.0.0.1", port, path }, (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (body += chunk));
+        res.on("end", () => resolve({ status: res.statusCode || 0, body }));
+      });
+      req.on("error", reject);
+      req.end();
+    });
+  } finally {
+    front.close();
+    front.closeAllConnections();
+  }
+}
+
+test("the quoted 404 body and the relay error names are what the port answers", async () => {
+  const quoted = match(sectionText, /The 404 body is `([^`]+)`\./)[1];
+  const refused = await panelAnswer("/dashboard");
+  assert.equal(refused.status, 404);
+  assert.equal(refused.body, quoted);
+  const [, unavailable, timeout] = match(
+    sectionText,
+    /A failed relay answers 502 \(`([a-z_]+)`\) or 504 \(`([a-z_]+)`\) with no `detail` field\./
+  );
+  const failed = await panelAnswer("/quota/claude");
+  assert.equal(failed.status, 502);
+  assert.deepEqual(JSON.parse(failed.body), { error: unavailable });
+  // The 504 is answered after the relay timeout, so its error name is read from the source.
+  assert.match(
+    bridgeSource,
+    new RegExp(`writeHead\\(504[\\s\\S]{0,120}relayErrorBody\\(\\s*role,\\s*"${timeout}"`)
+  );
+});
+
+test("the trusted proxy values named in the section are the ones the code accepts", () => {
+  const [, first, second] = match(
+    sectionText,
+    /trusted for that header only with `OMNIROUTE_TRUST_PROXY=([a-z]+)` \(or `([a-z]+)`\)\./
+  );
+  const saved = process.env.OMNIROUTE_TRUST_PROXY;
+  try {
+    for (const value of [first, second]) {
+      process.env.OMNIROUTE_TRUST_PROXY = value;
+      assert.equal(getTrustProxyMode(), "private", value);
+    }
+  } finally {
+    if (saved === undefined) delete process.env.OMNIROUTE_TRUST_PROXY;
+    else process.env.OMNIROUTE_TRUST_PROXY = saved;
+  }
+});
+
+test("the section states the limits of the listener with the values of the code", () => {
+  const [, connections, headers, request, keepAlive] = match(
+    sectionText,
+    /The listener holds at most ([0-9]+) connections at a time\. A client has ([0-9]+) seconds to send the request headers and ([0-9]+) seconds to send the whole request\. An idle kept-alive connection closes after ([0-9]+) seconds\. These values are fixed\./
+  );
+  assert.equal(Number(connections), panel.QUOTA_PANEL_MAX_CONNECTIONS);
+  assert.equal(Number(headers) * 1000, panel.QUOTA_PANEL_HEADERS_TIMEOUT_MS);
+  assert.equal(Number(request) * 1000, panel.QUOTA_PANEL_REQUEST_TIMEOUT_MS);
+  assert.equal(Number(keepAlive) * 1000, panel.QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS);
+  assert.ok(
+    sectionText.includes("Set connection and rate limits on the reverse proxy in front as well.")
+  );
+});
+
+test("the section quotes the warning for a port already in use as the code logs it", () => {
+  const warning = match(section, /^\[Quota Panel\] Port <port> is already in use\. .*$/m)[0];
+  assert.ok(bridgeSource.includes(`\`${warning.replace("<port>", "${port}")}\``), warning);
+});
+
+test("the base path segments the section names leave the port off", () => {
+  const list = match(
+    sectionText,
+    /So does a base path whose first segment names an application route: (.+), in any case\./
+  )[1];
+  const segments = [...list.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+  assert.deepEqual(segments, [
+    "api",
+    "v1",
+    "v1beta",
+    "_next",
+    "quota",
+    "dashboard",
+    "docs",
+    "login",
+  ]);
+  for (const segment of segments) {
+    for (const value of [`/${segment}`, `/${segment.toUpperCase()}/x`]) {
+      assert.equal(panel.isQuotaPanelBasePath(value), false, value);
+    }
+  }
+});
+
+test("the Limitations list is complete", () => {
+  const start = section.indexOf("Limitations:");
+  assert.notEqual(start, -1);
+  const items = section
+    .slice(start)
+    .split("\n")
+    .filter((line) => line.startsWith("- "));
+  assert.deepEqual(items, [
+    "- `/quota/{provider}/` with a trailing slash answers 404 on this port.",
+    "- The service worker and the web app manifest are not served on this port.",
+    "- A custom favicon set in the dashboard is not shown on this port.",
+    "- Icons are not shown when the application runs under a base path.",
+    "- The port speaks plain HTTP/1.1.",
+    "- A bind that fails is not retried until the process restarts.",
+    "- The listener has no connection or rate limit per client address.",
+    "- Container setups are not covered by this section.",
+  ]);
 });

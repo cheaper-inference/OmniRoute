@@ -476,11 +476,13 @@ The listener relays these paths to the main port and answers 404 for every other
 | `/_next/static/`                                                         | Scripts, styles and fonts of the build |
 | `/favicon.ico`, `/favicon.svg`, `/icon-512.png`, `/apple-touch-icon.png` | Icons                                  |
 
-Only `GET` and `HEAD` are relayed. Any other method answers 404, and so does a request that
-declares a body. Upgrade requests are refused and their connection is closed. A path with a dot
-segment or a fragment marker is refused, as on the API port. So is a request target with a
-character outside printable ASCII. The dashboard, the login page, the management API and the
-inference routes cannot be reached through this port.
+Only `GET` and `HEAD` are relayed. Any other method answers 404, except a CONNECT request, whose
+connection is closed with no answer. A request that declares a body answers 404 and its
+connection is closed. Upgrade requests are refused and their connection is closed. A path with a
+dot segment or a fragment marker is refused, as on the API port. So is a request target with a
+character outside printable ASCII. A raw control character in the target is answered 400 by the
+HTTP parser, before this port's own check. The dashboard, the login page, the management API and
+the inference routes cannot be reached through this port.
 
 The 404 body is `{"error":"not_found","message":"Not found."}`. A failed relay answers 502
 (`api_bridge_unavailable`) or 504 (`api_bridge_timeout`) with no `detail` field.
@@ -500,23 +502,37 @@ the same host must send `X-Forwarded-For`. A proxy on a private address is trust
 header only with `OMNIROUTE_TRUST_PROXY=private` (or `lan`). Any other peer is reported by the
 address of its connection, and the forwarding headers it sent are dropped.
 
-The listener uses the timeouts of the API port (`API_BRIDGE_*`). It also starts when `API_PORT`
-is not set. `QUOTA_PANEL_PORT` must be a port from 1 to 65535, written in digits only. It must
-differ from the dashboard port and the API port. While the live WebSocket server is on, it must
-also differ from `LIVE_WS_PORT` (default 20132). Any other value opens nothing and logs a
-warning. A port that is already in use does the same. A warning about a refused value names the
-variable and does not repeat the value.
+The listener holds at most 256 connections at a time. A client has 10 seconds to send the request
+headers and 30 seconds to send the whole request. An idle kept-alive connection closes after 5
+seconds. These values are fixed. Set connection and rate limits on the reverse proxy in front as
+well. The relay to the main port uses the upstream timeouts of the API port (`API_BRIDGE_*`).
+
+The listener also starts when `API_PORT` is not set. `QUOTA_PANEL_PORT` must be a port from 1 to
+65535, written in digits only. It must differ from the dashboard port and the API port. While the
+live WebSocket server is on, it must also differ from `LIVE_WS_PORT` (default 20132). Any other
+value opens nothing and logs a warning. A warning about a refused value names the variable and
+does not repeat the value. A port that is already in use opens nothing and logs this warning:
+
+```text
+[Quota Panel] Port <port> is already in use. The quota panel port stays off.
+```
 
 With `OMNIROUTE_BASE_PATH` set, the listener expects every path above under that prefix. Use the
 same `OMNIROUTE_BASE_PATH` at build time and at run time. Write it with a leading slash and no
 trailing slash, for example `/omniroute`. Another shape, including `/` and `/omniroute/`, leaves
-the port off with a warning, although the build accepts those forms.
+the port off with a warning, although the build accepts those forms. So does a base path whose
+first segment names an application route: `api`, `v1`, `v1beta`, `_next`, `quota`, `dashboard`,
+`docs` or `login`, in any case.
 
 Limitations:
 
 - `/quota/{provider}/` with a trailing slash answers 404 on this port.
 - The service worker and the web app manifest are not served on this port.
 - A custom favicon set in the dashboard is not shown on this port.
+- Icons are not shown when the application runs under a base path.
+- The port speaks plain HTTP/1.1.
+- A bind that fails is not retried until the process restarts.
+- The listener has no connection or rate limit per client address.
 - Container setups are not covered by this section.
 
 ---
