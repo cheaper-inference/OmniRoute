@@ -1,0 +1,1 @@
+- **fix(build):** Colocate and verify required standalone runtime workers from the direct build entrypoint, honoring custom output directories and failing closed when worker files or scoped ESM metadata are missing. (#20484)

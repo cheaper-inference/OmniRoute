@@ -16,20 +16,32 @@
  *
  * Run manually after a build, or automatically via the `postbuild` npm hook.
  */
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runBuildTool } from "./buildToolRunner.mjs";
 import { computeDependencyClosure } from "./colocateOptionals.mjs";
 
 const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
-// STANDALONE defaults to the real build output; OMNIROUTE_STANDALONE_DIR overrides
-// it so tests can drive the co-location logic against a synthetic tree without a
-// full `next build`. Mirrors the OMNIROUTE_* override seams in the sibling build
-// scripts (write-build-sha.mjs, write-build-base-path.mjs, optionalPackStaging.mjs).
-const STANDALONE = process.env.OMNIROUTE_STANDALONE_DIR
-  ? process.env.OMNIROUTE_STANDALONE_DIR
-  : join(ROOT, ".build", "next", "standalone");
+// STANDALONE defaults to the real build output; OMNIROUTE_STANDALONE_DIR or
+// NEXT_DIST_DIR overrides it so tests and custom-distDir builds drive
+// co-location against the right standalone tree without touching live paths.
+// resolve() keeps an absolute NEXT_DIST_DIR absolute, matching the build's
+// path.resolve() in build-next-isolated.mjs.
+export function resolveStandaloneDir(env = process.env, root = ROOT) {
+  return env.OMNIROUTE_STANDALONE_DIR
+    ? env.OMNIROUTE_STANDALONE_DIR
+    : resolve(root, env.NEXT_DIST_DIR || join(".build", "next"), "standalone");
+}
+const STANDALONE = resolveStandaloneDir();
 
 const CALL_LOG_WORKER_REL = join("src", "lib", "usage", "callLogArtifactWorker.js");
 const CALL_LOG_WORKER_SRC = join(ROOT, "src", "lib", "usage", "callLogArtifactWorker.ts");
@@ -41,6 +53,48 @@ const COMPRESSION_WORKER_SRC = join(
   "compression",
   "compressionWorker.ts"
 );
+export const REQUIRED_STANDALONE_WORKERS = [
+  "src/lib/db/healthCheckWorker.js",
+  "src/lib/usage/callLogArtifactWorker.js",
+  "src/lib/logExport/exportChild.js",
+  "open-sse/services/compression/compressionWorker.js",
+];
+
+/**
+ * Fail closed if any required runtime worker or its ESM package.json scope is
+ * missing or empty in the assembled standalone directory.
+ */
+export function verifyColocatedStandaloneWorkers(standaloneDir = STANDALONE) {
+  const problems = [];
+  for (const relPath of REQUIRED_STANDALONE_WORKERS) {
+    const workerPath = join(standaloneDir, relPath);
+    if (!existsSync(workerPath)) {
+      problems.push(`missing worker: ${relPath}`);
+    } else if (statSync(workerPath).size === 0) {
+      problems.push(`empty worker: ${relPath}`);
+    }
+    const scopePath = join(dirname(workerPath), "package.json");
+    if (!existsSync(scopePath)) {
+      problems.push(`missing ESM scope: ${join(dirname(relPath), "package.json")}`);
+    } else {
+      try {
+        const parsed = JSON.parse(readFileSync(scopePath, "utf8"));
+        if (parsed?.type !== "module") {
+          problems.push(`invalid ESM scope type in ${join(dirname(relPath), "package.json")}`);
+        }
+      } catch (err) {
+        problems.push(
+          `unreadable ESM scope ${join(dirname(relPath), "package.json")}: ${err.message}`
+        );
+      }
+    }
+  }
+  if (problems.length > 0) {
+    throw new Error(
+      `[colocate-standalone] Standalone runtime worker check failed for ${standaloneDir}:\n  - ${problems.join("\n  - ")}`
+    );
+  }
+}
 const WORKER_REL = join(
   "open-sse",
   "services",
@@ -182,6 +236,7 @@ function main() {
       "[colocate-standalone] optional SLM deps absent at root node_modules — LLMLingua stays fail-open (slim install)."
     );
     writeEsmWorkerScopes(workerDirs);
+    verifyColocatedStandaloneWorkers(STANDALONE);
     return;
   }
 
@@ -208,6 +263,7 @@ function main() {
 
   // 3) Give each esbuild'd ESM worker its own "type":"module" scope (see helper doc).
   writeEsmWorkerScopes(workerDirs);
+  verifyColocatedStandaloneWorkers(STANDALONE);
 }
 
 /**
