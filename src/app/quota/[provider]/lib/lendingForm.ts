@@ -64,11 +64,11 @@ export interface LendingFormValues {
   deadline: LendingDeadlineChoice;
 }
 
-export type LendingSubmission =
+type LendingSubmission =
   | { ok: true; lendingPercent: number; lendingUntil: number | null }
   | { ok: false; problem: "percent" | "deadline" };
 
-export type LendingBorrowRows =
+type LendingBorrowRows =
   | { kind: "none" }
   | { kind: "not-applicable" }
   | { kind: "rows"; rows: Array<{ window: QuotaWindow; unit: QuotaUnit; amount: number | null }> };

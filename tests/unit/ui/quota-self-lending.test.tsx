@@ -316,23 +316,14 @@ describe("self-service quota page lending card", () => {
     expect(patches(calls)).toHaveLength(1);
   });
 
-  it("two saves at once show the later-started one's view, and both cards say saved", async () => {
-    const OTHER_REF = "qpr_fedcba9876543210fedcba9876543210";
-    const two = (first: string, second: string) =>
-      quotaView({
-        pools: [
-          pool({ ref: LENDING_REF, borrowMode: "consent", name: first }),
-          pool({ ref: OTHER_REF, borrowMode: "consent", name: second }),
-        ],
-      });
-    const answers: Array<(response: Response) => void> = [];
-    const calls = serve(
-      () => two("Pool A", "Pool B"),
-      () =>
-        new Promise<Response>((resolve) => {
-          answers.push(resolve);
-        })
-    );
+  const OTHER_REF = "qpr_fedcba9876543210fedcba9876543210";
+  /** Two consent pools. Each pool's percentage is the second value of its pair. */
+  const consentPool = (ref: string, [name, percent]: [string, number]) =>
+    pool({ ref, borrowMode: "consent", name, lendingPercent: percent, lendingActive: percent > 0 });
+  const two = (first: [string, number], second: [string, number]) =>
+    quotaView({ pools: [consentPool(LENDING_REF, first), consentPool(OTHER_REF, second)] });
+  /** Opens both cards, then presses Save on each card in turn with 10% and 20%. */
+  async function saveBoth(between?: () => Promise<void>) {
     renderPage();
     enterKey(KEY);
     await screen.findByRole("heading", { name: "Pool B" });
@@ -340,19 +331,104 @@ describe("self-service quota page lending card", () => {
     const saves = screen.getAllByRole("button", { name: "Save" });
     fireEvent.change(fields[0], { target: { value: "10" } });
     fireEvent.click(saves[0]);
+    if (between) await between();
     fireEvent.change(fields[1], { target: { value: "20" } });
     fireEvent.click(saves[1]);
+  }
+
+  it("two saves at once are followed by one read, whose view the page shows", async () => {
+    let current = two(["Pool A", 0], ["Pool B", 0]);
+    const answers: Array<(response: Response) => void> = [];
+    const calls = serve(
+      () => current,
+      () =>
+        new Promise<Response>((resolve) => {
+          answers.push(resolve);
+        })
+    );
+    await saveBoth();
     await waitFor(() => expect(answers).toHaveLength(2));
     expect(patches(calls).map((call) => JSON.parse(call.body ?? "").pool)).toEqual([
       LENDING_REF,
       OTHER_REF,
     ]);
 
-    await act(async () => answers[1](jsonResponse(two("Second A", "Second B"))));
-    await act(async () => answers[0](jsonResponse(two("First A", "First B"))));
-    expect(screen.getAllByText("Your lending choice was saved.")).toHaveLength(2);
+    // The later-started answer is shown while the first one is still out.
+    await act(async () => answers[1](jsonResponse(two(["Second A", 0], ["Second B", 20]))));
     expect(screen.getByRole("heading", { name: "Second A" })).toBeTruthy();
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(1);
+
+    // The first-started answer arrives last. The read that follows holds both changes.
+    current = two(["Read A", 10], ["Read B", 20]);
+    await act(async () => answers[0](jsonResponse(two(["First A", 10], ["First B", 0]))));
+    await screen.findByRole("heading", { name: "Read A" });
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(2);
     expect(screen.queryByRole("heading", { name: "First A" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Second A" })).toBeNull();
+    expect(screen.getByText(/You are lending 10% of your idle share/)).toBeTruthy();
+    expect(screen.getByText(/You are lending 20% of your idle share/)).toBeTruthy();
+    expect(screen.getAllByText("Your lending choice was saved.")).toHaveLength(2);
+  });
+
+  it("two saves one after the other send no read", async () => {
+    let saved = 0;
+    const calls = serve(
+      () => two(["Pool A", 0], ["Pool B", 0]),
+      () => {
+        saved += 1;
+        return jsonResponse(two([`Saved ${saved} A`, 10], ["Pool B", saved > 1 ? 20 : 0]));
+      }
+    );
+    await saveBoth(async () => {
+      await screen.findByRole("heading", { name: "Saved 1 A" });
+    });
+    await screen.findByRole("heading", { name: "Saved 2 A" });
+    expect(patches(calls)).toHaveLength(2);
+    expect(screen.getAllByText("Your lending choice was saved.")).toHaveLength(2);
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(1);
+  });
+
+  it("two saves at once where one is refused are followed by one read", async () => {
+    let current = two(["Pool A", 0], ["Pool B", 0]);
+    const answers: Array<(response: Response) => void> = [];
+    const calls = serve(
+      () => current,
+      () =>
+        new Promise<Response>((resolve) => {
+          answers.push(resolve);
+        })
+    );
+    await saveBoth();
+    await waitFor(() => expect(answers).toHaveLength(2));
+    current = two(["Read A", 0], ["Read B", 20]);
+    await act(async () =>
+      answers[0](new Response("{}", { status: 429, headers: { "retry-after": "30" } }))
+    );
+    await act(async () => answers[1](jsonResponse(two(["Second A", 0], ["Second B", 20]))));
+    await screen.findByRole("heading", { name: "Read A" });
+    expect(callsTo(calls, QUOTA, "GET")).toHaveLength(2);
+    expect(
+      screen.getByText("Too many changes in a short time. Try again in 30 seconds.")
+    ).toBeTruthy();
+    expect(screen.getAllByText("Your lending choice was saved.")).toHaveLength(1);
+  });
+
+  it("two saves at once that both fail send no read", async () => {
+    const answers: Array<(response: Response) => void> = [];
+    const calls = serve(
+      () => two(["Pool A", 0], ["Pool B", 0]),
+      () =>
+        new Promise<Response>((resolve) => {
+          answers.push(resolve);
+        })
+    );
+    await saveBoth();
+    await waitFor(() => expect(answers).toHaveLength(2));
+    await act(async () => answers[1](new Response("{}", { status: 429 })));
+    await act(async () => answers[0](new Response("{}", { status: 500 })));
+    await waitFor(() => expect(screen.getByText(/The server answered with an error/)).toBeTruthy());
+    expect(screen.getByText(/Wait a moment and try again/)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Pool A" })).toBeTruthy();
     expect(callsTo(calls, QUOTA, "GET")).toHaveLength(1);
   });
 
