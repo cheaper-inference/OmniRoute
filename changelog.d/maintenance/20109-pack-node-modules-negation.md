@@ -1,0 +1,1 @@
+- **perf(release):** `npm pack` finishes in about three minutes instead of being killed after eight under npm 12 — the `files[]` exclusions now target directories and shipped roots instead of expanding to one ignore rule per file (231,685 → 688 rules) ([#20109](https://github.com/cheaper-inference/OmniRoute/pull/20109) — thanks @maxmad64bis)
