@@ -20,6 +20,7 @@ import {
   storedCacheWriteUsage,
 } from "@omniroute/open-sse/utils/cacheWriteUsage.ts";
 import { estimateApiEquivalentCacheWrite } from "./cacheWriteEstimate";
+import { readEffortValue } from "./reasoningEffort";
 import { failPendingCallLogDetail, publishPendingCallLogDetail } from "../db/callLogDetails";
 import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
@@ -662,24 +663,9 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
       ? 1
       : null;
   const reasoningDurationMs = reasoningObservation.source === "encrypted" ? streamDurationMs : null;
-  const readEffortValue = (body: unknown): string | null => {
-    if (body === null || typeof body !== "object" || Array.isArray(body)) return null;
-    const record = body as Record<string, unknown>;
-    const direct = record.reasoning_effort;
-    if (typeof direct === "string" && direct.trim().length > 0) return direct;
-    const nested = record.reasoning;
-    if (nested !== null && typeof nested === "object" && !Array.isArray(nested)) {
-      const effort = (nested as Record<string, unknown>).effort;
-      if (typeof effort === "string" && effort.trim().length > 0) return effort;
-    }
-    return null;
-  };
-  const reasoningEffortRequested =
-    reasoningObservation.source === "encrypted"
-      ? readEffortValue(entry.clientRequestBody ?? entry.requestBody)
-      : null;
-  const reasoningEffortUpstream =
-    reasoningObservation.source === "encrypted" ? readEffortValue(entry.upstreamRequestBody) : null;
+  // Effort describes the request, independently of the response's reasoning source.
+  const reasoningEffortRequested = readEffortValue(entry.clientRequestBody ?? entry.requestBody);
+  const reasoningEffortUpstream = readEffortValue(entry.upstreamRequestBody);
   const errorType = toStoredErrorType(
     classifyCallLogError(entry.status, entry.error, entry.provider)
   );
