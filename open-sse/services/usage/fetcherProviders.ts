@@ -24,6 +24,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "github",
   "antigravity",
   "agy",
+  "gemini-app",
+  "gapp",
   "claude",
   "anthropic",
   "codex",

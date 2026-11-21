@@ -23,6 +23,11 @@ import {
   restorePlaygroundImageResponse,
 } from "@/shared/utils/playgroundImageStream";
 import type { StreamMetrics } from "@/shared/schemas/playground";
+import {
+  extractSseErrorMessage,
+  getRiskNoticeTermsUrl,
+  isGeminiAppTosPreconditionError,
+} from "@/app/(dashboard)/dashboard/providers/riskNoticeTerms";
 import { buildReasoningRequestFields } from "../reasoningControlUtils";
 import {
   buildNativeCodexPlaygroundRequest,
@@ -64,6 +69,11 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
   const [error, setError] = useState<string | null>(null);
   const [responseStatus, setResponseStatus] = useState<number | null>(null);
   const [responseDuration, setResponseDuration] = useState<number | null>(null);
+
+  const tosLink = isGeminiAppTosPreconditionError(responseStatus, error, configState.model)
+    ? getRiskNoticeTermsUrl("gemini-app")
+    : undefined;
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const nativeCodexThreadRef = useRef<string>(crypto.randomUUID());
@@ -237,6 +247,7 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let assistantResponse = "";
+      let pendingSseError = false;
       let usageData: { prompt_tokens?: number; completion_tokens?: number } | undefined;
 
       if (reader) {
@@ -253,18 +264,33 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
           const lines = chunk.split("\n");
 
           for (const line of lines) {
+            if (line === "event: error") {
+              pendingSseError = true;
+              continue;
+            }
             if (line === "data: [DONE]") continue;
             if (line.startsWith("data: ")) {
               try {
                 const parsed = JSON.parse(line.slice(6)) as {
                   type?: string;
                   delta?: string;
+                  error?: { message?: string };
+                  message?: string;
                   choices?: Array<{ delta?: { content?: string } }>;
                   usage?: { prompt_tokens?: number; completion_tokens?: number };
                   response?: {
                     usage?: { input_tokens?: number; output_tokens?: number };
                   };
                 };
+                const sseError = extractSseErrorMessage(parsed, pendingSseError);
+                if (sseError) {
+                  pendingSseError = false;
+                  setError(sseError);
+                  setMessages((prev) => prev.slice(0, targetIndex));
+                  setLoading(false);
+                  streamMetrics.reset();
+                  return;
+                }
                 const delta = nativeCodex
                   ? parsed.type === "response.output_text.delta"
                     ? (parsed.delta ?? "")
@@ -486,8 +512,22 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
         )}
 
         {error && (
-          <div className="text-center p-2 text-sm text-error bg-error/10 rounded border border-error/20">
+          <div
+            role="alert"
+            className="text-center p-2 text-sm text-error bg-error/10 rounded border border-error/20"
+          >
             {error}
+            {tosLink && (
+              <a
+                href={tosLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="gemini-app-tos-link"
+                className="mt-1 block break-all underline underline-offset-2"
+              >
+                {tosLink}
+              </a>
+            )}
           </div>
         )}
 

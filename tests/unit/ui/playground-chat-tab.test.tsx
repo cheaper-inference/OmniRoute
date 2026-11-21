@@ -267,6 +267,37 @@ describe("ChatTab", () => {
     fetchSpy.mockRestore();
   });
 
+  it("shows the actionable ToS link for a gemini-app 428 error", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: {
+            message:
+              "Accept the current Gemini Terms of Service in your Google account, then retry",
+          },
+        }),
+        { status: 428, headers: { "Content-Type": "application/json" } }
+      )
+    );
+    const config = makeConfig();
+    config.model = "gemini-neon";
+    const el = renderChatTab(config);
+    const textarea = el.querySelector("textarea") as HTMLTextAreaElement;
+    act(() => setInputValue(textarea, "Hello"));
+    const sendBtn = Array.from(el.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Send")
+    );
+
+    await act(async () => sendBtn?.click());
+    await waitFor(() => el.querySelector('[data-testid="gemini-app-tos-link"]') !== null);
+
+    const link = el.querySelector('[data-testid="gemini-app-tos-link"]') as HTMLAnchorElement;
+    expect(link.getAttribute("href")).toBe("https://policies.google.com/terms");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(el.querySelector('[role="alert"]')?.textContent).toContain("Terms of Service");
+    fetchSpy.mockRestore();
+  });
+
   it("uses native Responses protocol for ChatGPT Web Codex models", async () => {
     let capturedUrl = "";
     let capturedInit: RequestInit | undefined;

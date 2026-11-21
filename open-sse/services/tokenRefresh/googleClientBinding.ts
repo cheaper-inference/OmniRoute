@@ -23,11 +23,18 @@ export const BUILTIN_GEMINI_CLIENT = {
   clientSecret: resolvePublicCred("gemini_alt"),
 } as const;
 
+/** Gemini App (Robin native client) has its own public desktop OAuth client. */
+export const BUILTIN_GEMINI_APP_CLIENT = {
+  clientId: resolvePublicCred("gemini_app_id"),
+  clientSecret: resolvePublicCred("gemini_app_alt"),
+} as const;
+
 /** Marker recorded at authorize time; the literal id guards client rotation. */
 export type GoogleOauthClientMarker = "builtin" | `custom:${string}` | undefined;
 
 function builtinClientFor(provider: string) {
   if (provider === "gemini") return BUILTIN_GEMINI_CLIENT;
+  if (provider === "gemini-app") return BUILTIN_GEMINI_APP_CLIENT;
   if (provider === "antigravity" || provider === "agy") return BUILTIN_ANTIGRAVITY_CLIENT;
   // Unknown Google-family provider: no embedded client exists to fall back
   // to. The antigravity client would mint Google 401s for tokens it never

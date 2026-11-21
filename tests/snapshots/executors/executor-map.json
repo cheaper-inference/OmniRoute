@@ -320,10 +320,20 @@
       "configSource": "freebuff",
       "provider": "freebuff"
     },
+    "gapp": {
+      "className": "GeminiAppExecutor",
+      "configSource": "<custom-config>",
+      "provider": "gemini-app"
+    },
     "gc": {
       "className": "GrokCliExecutor",
       "configSource": "grok-cli",
       "provider": "grok-cli"
+    },
+    "gemini-app": {
+      "className": "GeminiAppExecutor",
+      "configSource": "<custom-config>",
+      "provider": "gemini-app"
     },
     "gemini-web": {
       "className": "GeminiWebExecutor",
@@ -731,6 +741,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 146,
+  "keyCount": 148,
   "sharedInstances": []
 }
