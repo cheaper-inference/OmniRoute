@@ -532,10 +532,10 @@ is built by `src/lib/quota/selfView.ts` and its response contract is
 
 ### What each visibility shows
 
-| Visibility    | Requires                                                                                  | Fields                                                                                                                                                                       |
-| ------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Own share     | `self:usage`                                                                              | `pools[]` (ref, name, provider, policy, weight, cap), `dimensions[].yourShare`, `accounts[]` with `yourShare`, `blocks`, `availableModels`, `expiresAt`, `apiBaseUrl`        |
-| Account level | `self:usage` + `self:account-quota`, and the provider in the key's `sharedQuotaProviders` | adds `dimensions[].total`, `accounts[].dimensions[].account` and `accounts[].modelWindows`, and `members` on a pool with member usage on (see [Member usage](#member-usage)) |
+| Visibility    | Requires                                                                                  | Fields                                                                                                                                                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Own share     | `self:usage`                                                                              | `pools[]` (ref, name, provider, policy, weight, cap), `dimensions[].yourShare`, `accounts[]` with `yourShare` (on a `percent` window without `attributed` and `external`), `blocks`, `availableModels`, `expiresAt`, `apiBaseUrl`                  |
+| Account level | `self:usage` + `self:account-quota`, and the provider in the key's `sharedQuotaProviders` | adds `dimensions[].total`, `accounts[].dimensions[].account` and `accounts[].modelWindows`, `attributed` and `external` on the `yourShare` of a `percent` window, and `members` on a pool with member usage on (see [Member usage](#member-usage)) |
 
 - `sharedQuotaProviders` is a per-key setting (`PUT /api/keys/[id]/self-service`): `null`, the
   default, means every provider the key reaches; `[]` means none. Each pool's `accountVisible`
@@ -617,8 +617,13 @@ including the key lookup itself; its cause is logged on the server and never ret
 - `consumed` is the number enforcement compares with the fair share. It is `attributed` plus
   `external`, exactly. `attributed` is the part the book gives the key for the tokens it routed.
   `external` is the key's part of the account's use that the pool's keys do not account for.
-- Both parts are sent to every key with `self:usage`, also to a key without `self:account-quota`.
-  So a key holder learns its part of the use made outside the pool without seeing the account.
+- Both parts are sent only when the pool's `accountVisible` is true: the key has
+  `self:account-quota` and the provider is in its `sharedQuotaProviders`. A key without it gets
+  `consumed` alone, with the same `status` and `reason`.
+- With both parts and its own weight, a holder can work out the use made outside the pool that is
+  charged to the pool's keys. A holder with the account scope already sees the account total.
+- A key that routed nothing in the window can still read its external charge from `consumed`,
+  because its attributed part is then 0.
 - For example, a book opens at 0, with keys A and B at weight 50 each. Key A routes 900,000 tokens
   and key B 100,000. The account then reaches 60% of a limit of 100. Then `attributed` is 54 for
   key A and 6 for key B, and `external` is 0 for both.
@@ -662,7 +667,7 @@ A dimension of the view carries `members` only when all of these hold:
 Otherwise `members` is absent. It is never an empty list.
 
 - Each slice is `{ slot, consumed, isYou }`. The response schema rejects any other property on a
-  slice. Slices are listed in slot order.
+  slice, and a list of more than 20 slices. Slices are listed in slot order.
 - There is one slice per allocated key, including a key that can no longer make requests. A
   member with no use shows a real zero.
 - Slot 1 is always the asking key, with `isYou` true. The other slot numbers are ranks of a keyed
@@ -689,9 +694,9 @@ The bars carry no names or ids. They still tell a key holder things about the ot
 - In a pool of three keys, someone who knows what one key used can tell what the last key used.
 - When a pool drops below three usable keys, the bars disappear. Views taken earlier still show
   what each member used.
-- On a countable window, the pool total minus the slices shows the use of keys that are no longer
-  allocated.
-- A member that shows zero on one account and use on another shows which member uses which
+- On a countable window, the pool total minus the slices can show the use of keys that are no
+  longer allocated.
+- A member that shows zero on one account and use on another can show which member uses which
   account.
 - In a countable pool with the `hard` policy, a slice that stops growing at a member's fair share
   hints at that member's weight.

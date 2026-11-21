@@ -23,7 +23,8 @@ delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
 const { previewPercentDimension } = await import("../../src/lib/quota/percentAttribution.ts");
 const { buildMemberSlices, membersAllowed } =
   await import("../../src/lib/quota/selfViewMembers.ts");
-const { selfQuotaResponseSchema } = await import("../../src/shared/schemas/selfQuota.ts");
+const { MAX_MEMBER_SLICES, selfQuotaResponseSchema } =
+  await import("../../src/shared/schemas/selfQuota.ts");
 const { PoolUpdateSchema } = await import("../../src/shared/schemas/quota.ts");
 const { QuotaPoolSchema } = await import("../../src/lib/quota/dimensions.ts");
 
@@ -44,6 +45,7 @@ type OpenApiSchema = {
   additionalProperties?: boolean;
   minimum?: number;
   minItems?: number;
+  maxItems?: number;
   items?: { $ref?: string };
   properties?: Record<string, OpenApiSchema>;
 };
@@ -116,7 +118,27 @@ test("the docs state how the percent share is read and what its two parts are", 
   );
   hasSentence(
     selfService,
-    "Both parts are sent to every key with `self:usage`, also to a key without `self:account-quota`."
+    "Both parts are sent only when the pool's `accountVisible` is true: the key has `self:account-quota` and the provider is in its `sharedQuotaProviders`. A key without it gets `consumed` alone, with the same `status` and `reason`."
+  );
+  hasSentence(
+    selfService,
+    "With both parts and its own weight, a holder can work out the use made outside the pool that is charged to the pool's keys. A holder with the account scope already sees the account total."
+  );
+  hasSentence(
+    selfService,
+    "A key that routed nothing in the window can still read its external charge from `consumed`, because its attributed part is then 0."
+  );
+  assert.equal(/sent to every key with `self:usage`/.test(prose(selfService)), false);
+  const table = section(selfService, "### What each visibility shows");
+  assert.match(
+    table,
+    /^\| Own share +\|[^\n]*without `attributed` and `external`/m,
+    "the own-share row says the two parts are left out"
+  );
+  assert.match(
+    table,
+    /^\| Account level +\|[^\n]*`attributed` and `external` on the `yourShare` of a `percent` window/m,
+    "the account-level row adds the two parts"
   );
   hasSentence(
     selfService,
@@ -149,6 +171,7 @@ test("the documented member floor and ceiling are the ones the view applies", ()
     (n) => !allowed(n + 1, floor)
   ) as number;
   assert.equal(allowed(ceiling, floor), true);
+  assert.equal(ceiling, MAX_MEMBER_SLICES, "the view's ceiling is the schema's");
 
   hasSentence(
     memberUsage,
@@ -174,6 +197,15 @@ test("the documented slot rules and limits are stated as whole sentences", () =>
     memberUsage,
     "A failing read of the option or of the usable-key count turns the bars off for that pool."
   );
+  hasSentence(
+    memberUsage,
+    "On a countable window, the pool total minus the slices can show the use of keys that are no longer allocated."
+  );
+  hasSentence(
+    memberUsage,
+    "A member that shows zero on one account and use on another can show which member uses which account."
+  );
+  assert.equal(/slices shows the use|another shows which/.test(prose(memberUsage)), false);
   assert.equal(/cannot match|anonym/i.test(memberUsage), false);
 });
 
@@ -290,6 +322,9 @@ test("the OpenAPI share, member slice and pool option match the Zod schemas", ()
     assert.deepEqual(Object.keys(dim.properties ?? {}).sort(), Object.keys(zodShape).sort(), name);
     assert.equal(dim.properties?.members?.type, "array", name);
     assert.equal(dim.properties?.members?.minItems, minItems, name);
+    assert.equal(dim.properties?.members?.maxItems, MAX_MEMBER_SLICES, name);
+    assert.equal(members.safeParse(list(MAX_MEMBER_SLICES)).success, true, name);
+    assert.equal(members.safeParse(list(MAX_MEMBER_SLICES + 1)).success, false, name);
     assert.equal(dim.properties?.members?.items?.$ref, "#/components/schemas/SelfQuotaMemberSlice");
     assert.equal(dim.required?.includes("members"), false, name);
   }

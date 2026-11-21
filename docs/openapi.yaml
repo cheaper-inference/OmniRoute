@@ -19689,12 +19689,14 @@ components:
         attributed:
           type: number
           description: >-
-            `percent` windows with status `ok` or `stale` only. The part of the attribution book
+            `percent` windows with status `ok` or `stale` only, sent only with the account scope
+            (`self:account-quota`, the pool's `accountVisible`). The part of the attribution book
             given to the key for the tokens it routed. `attributed + external` equals `consumed`.
         external:
           type: number
           description: >-
-            `percent` windows with status `ok` or `stale` only. The key's part of the account's use
+            `percent` windows with status `ok` or `stale` only, sent only with the account scope
+            (`self:account-quota`, the pool's `accountVisible`). The key's part of the account's use
             that the pool's keys do not account for.
     SelfQuotaMemberSlice:
       type: object
@@ -19736,6 +19738,7 @@ components:
         members:
           type: array
           minItems: 3
+          maxItems: 20
           description: >-
             Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
             allocated keys with at least 3 that can make requests, `accountVisible` is true and the
@@ -19762,6 +19765,7 @@ components:
         members:
           type: array
           minItems: 3
+          maxItems: 20
           description: >-
             Present only when the pool's `memberBreakdown` option is on, the pool has from 3 to 20
             allocated keys with at least 3 that can make requests, `accountVisible` is true and the
