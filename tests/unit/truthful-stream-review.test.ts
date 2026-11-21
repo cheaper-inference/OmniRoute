@@ -99,10 +99,19 @@ for (const reported of [false, true]) {
     await new Response(
       new Response(`data: ${JSON.stringify(event)}\n\n`).body!.pipeThrough(stream)
     ).text();
-    const usage = complete.usage as Record<string, unknown>;
+    const usage = complete.usage as import("../../open-sse/utils/usageTracking.ts").UsageLike;
     const responseBody = complete.responseBody as { usage: Record<string, unknown> };
-    assert.ok(Number(usage.prompt_tokens) > 0);
-    assert.ok(Number(usage.completion_tokens) > 0);
+    if (reported) {
+      assert.equal(usage.prompt_tokens, 80);
+      assert.equal(usage.completion_tokens, 9);
+      assert.deepEqual(
+        [usage.usage_evidence?.input, usage.usage_evidence?.output],
+        [{ source: "reported" }, { source: "reported" }]
+      );
+    } else {
+      assert.ok(Number(usage.prompt_tokens) > 0);
+      assert.ok(Number(usage.completion_tokens) > 0);
+    }
     assert.equal(responseBody.usage.prompt_tokens, usage.prompt_tokens);
     assert.equal(responseBody.usage.completion_tokens, usage.completion_tokens);
     const expected = Number(usage.prompt_tokens) + Number(usage.completion_tokens);

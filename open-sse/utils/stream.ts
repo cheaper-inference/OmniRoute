@@ -1,7 +1,9 @@
+import { carryComputedUsageTotals } from "./computedUsageTotals.ts";
+import { projectClaudeClientUsage } from "../translator/response/claudeClientUsage.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
-import { mergeUsageEvidence } from "./usageEvidence.ts";
+import { deriveUsageEvidence, mergeUsageEvidence } from "./usageEvidence.ts";
 import { mergeUsageSnapshot } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
@@ -11,7 +13,10 @@ import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
-import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
+import {
+  resolveTrailingUsageSummary,
+  completeTrailingUsagePayload,
+} from "./passthroughTrailingUsage.ts";
 import { createUsageGuard } from "./streamUsageGuard.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import { initTranslateStreamState } from "./streamTranslateState.ts";
@@ -263,6 +268,8 @@ type TranslateState = ReturnType<typeof initState> & {
   toolNameMap?: unknown;
   signatureNamespace?: string | null;
   usage?: unknown;
+  claudeAccountingUsage?: UsageLike;
+  claudeCacheCreationInPrompt?: boolean;
   cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
   /** Responses translator: finish_reason seen, response.completed waits for a usage chunk. */
@@ -1018,10 +1025,106 @@ export function createSSEStream(options: StreamOptions = {}) {
       format:
         mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat || FORMATS.OPENAI : targetFormat,
     });
-  const getClientUsage = () =>
-    projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
-  // One usage basis per stream, so per-chunk usage does not redo the body work (#20086).
+  const accumulateTranslatedText = (text: string) => {
+    totalContentLength += text.length;
+    if (state?.accumulatedContent !== undefined)
+      state.accumulatedContent = appendBoundedText(state.accumulatedContent, text);
+  };
+  const accumulateTranslatedReasoning = (text: string) => {
+    totalContentLength += text.length;
+    if (state?.accumulatedReasoning !== undefined)
+      state.accumulatedReasoning = appendBoundedText(state.accumulatedReasoning, text);
+  };
+  const accumulateOpenAiText = (parsed: NonNullable<ReturnType<typeof parseSSELine>>) => {
+    const content = parsed.choices?.[0]?.delta?.content;
+    if (typeof content === "string") accumulateTranslatedText(content);
+    else if (Array.isArray(content)) {
+      for (const part of content) {
+        if (part?.text && typeof part.text === "string") accumulateTranslatedText(part.text);
+      }
+    }
+  };
+  const accumulateOpenAiReasoning = (parsed: NonNullable<ReturnType<typeof parseSSELine>>) => {
+    const delta = parsed.choices?.[0]?.delta;
+    const reasoning = getReadableReasoningValue(delta);
+    if (reasoning) accumulateTranslatedReasoning(reasoning);
+    // Mirror only client-unsupported aliases when reasoning_content is absent.
+    // Keep the mirror accounting separate from readable reasoning (#12665).
+    if (typeof delta?.reasoning_content === "string" && delta.reasoning_content.length > 0) return;
+    const unsupported = getUnsupportedReasoningValue(delta);
+    if (typeof unsupported !== "string" || unsupported.length === 0) return;
+    parsed.choices[0].delta.reasoning_content = unsupported;
+    delete parsed.choices[0].delta.thinking;
+    delete parsed.choices[0].delta.thought;
+    accumulateTranslatedReasoning(unsupported);
+  };
+  const accumulateGeminiText = (parsed: NonNullable<ReturnType<typeof parseSSELine>>) => {
+    // Cloud Code wraps candidates in response; unwrap only Gemini-family formats.
+    const isGeminiFormat = targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY;
+    const chunk = isGeminiFormat ? unwrapGeminiChunk(parsed) : parsed;
+    const parts = chunk.candidates?.[0]?.content?.parts;
+    if (!parts) return;
+    for (const part of parts) {
+      if (part.text && typeof part.text === "string") accumulateTranslatedText(part.text);
+    }
+  };
+  const accumulateResponsesOrGenericText = (
+    parsed: NonNullable<ReturnType<typeof parseSSELine>>
+  ) => {
+    const record = parsed as JsonRecord;
+    const isResponsesEvent = typeof record.type === "string" && record.type.startsWith("response.");
+    if (isResponsesEvent) {
+      // Only output_text deltas are visible answers. Done events are snapshots,
+      // and reasoning reaches its separate accumulator through the translator.
+      if (typeof record.delta === "string") {
+        totalContentLength += record.delta.length;
+        if (record.type === "response.output_text.delta" && state?.accumulatedContent !== undefined)
+          state.accumulatedContent = appendBoundedText(state.accumulatedContent, record.delta);
+      }
+      return;
+    }
+    if (state?.accumulatedContent === undefined) return;
+    for (const field of ["delta", "content", "text"]) {
+      const value = record[field];
+      if (typeof value === "string") accumulateTranslatedText(value);
+    }
+  };
+  const accumulateTranslatedContent = (parsed: NonNullable<ReturnType<typeof parseSSELine>>) => {
+    // Read raw provider content before translation in both the main and EOF paths.
+    const claudeDelta = collectClaudeDelta(parsed.delta, state);
+    totalContentLength += claudeDelta.contentLength;
+    accumulateOpenAiText(parsed);
+    accumulateOpenAiReasoning(parsed);
+    accumulateGeminiText(parsed);
+    accumulateResponsesOrGenericText(parsed);
+    return claudeDelta;
+  };
+
+  const getClientUsage = () => {
+    const accounting = getAccountingUsage();
+    const claudeState = state as {
+      claudeAccountingUsage?: UsageLike;
+      claudeCacheCreationInPrompt?: boolean;
+    } | null;
+    if (sourceFormat === FORMATS.CLAUDE && claudeState?.claudeAccountingUsage)
+      return projectClaudeClientUsage(
+        accounting,
+        claudeState.claudeCacheCreationInPrompt !== false
+      );
+    return projectStreamingClientUsage(accounting, targetFormat, sourceFormat);
+  };
+  // Reuse the request usage basis throughout this stream (#20086).
   const usageGuard = createUsageGuard(body, clientResponseFormat, () => usage, getAccountingUsage);
+  const sanitizePassthroughUsage = (payload: unknown) => {
+    const completed = completeTrailingUsagePayload(
+      payload,
+      usage,
+      body,
+      observedContentLength(),
+      clientResponseFormat
+    );
+    return usageGuard.sanitizePassthrough(payload) || completed;
+  };
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -1843,7 +1946,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type.startsWith("content_block") ||
                     parsed.type === "ping" ||
                     parsed.type === "error");
-                if (usageGuard.sanitizePassthrough(parsed)) {
+                if (sanitizePassthroughUsage(parsed)) {
                   output = `data: ${JSON.stringify(parsed)}\n\n`;
                   injectedUsage = true;
                 }
@@ -1879,10 +1982,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Responses SSE: only extract usage, forward payload as-is
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = {
-                      ...mergeUsageSnapshot(usage, extracted),
-                      ...mergeCacheCreationFields(usage, extracted),
-                    };
+                    usage = Object.assign(
+                      mergeUsageSnapshot(usage, extracted),
+                      mergeCacheCreationFields(usage, extracted)
+                    );
                   }
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
@@ -2538,10 +2641,10 @@ export function createSSEStream(options: StreamOptions = {}) {
 
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = {
-                      ...mergeUsageSnapshot(usage, extracted),
-                      ...mergeCacheCreationFields(usage, extracted),
-                    };
+                    usage = Object.assign(
+                      mergeUsageSnapshot(usage, extracted),
+                      mergeCacheCreationFields(usage, extracted)
+                    );
                   }
 
                   const isFinishChunk = parsed.choices?.[0]?.finish_reason;
@@ -2593,7 +2696,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // and made the real trailing block get dropped in favor of the estimate
                   // (billing regression pinned by tests/unit/stream-utils.test.ts). The
                   // estimate is now emitted in flush(), only when the upstream stayed silent.
-                  if (isFinishChunk && hasValidUsage(usage) && !passthroughForwardedUsage) {
+                  if (isFinishChunk && hasValidUsage(parsed.usage) && !passthroughForwardedUsage) {
                     const buffered = addBufferToUsage(usage);
                     parsed.usage = timing.withTps(
                       carryCacheCreationMarker(
@@ -2712,6 +2815,13 @@ export function createSSEStream(options: StreamOptions = {}) {
           if (parsed && parsed.done) {
             continue;
           }
+          completeTrailingUsagePayload(
+            parsed,
+            state?.usage,
+            body,
+            observedContentLength(),
+            targetFormat
+          );
           sanitizeUsagePayloadForRequest(parsed, body, targetFormat, usageGuard.basis);
           if (parsed.choices?.[0]?.delta?.tool_calls) {
             lastToolCallChunkTime = now;
@@ -2723,124 +2833,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
           }
 
-          // Track content length and accumulate for call log (from raw provider chunk, so content is never missed)
-          // Do this before translation so we capture content regardless of translator output shape
-
-          // Claude format
-          const claudeDelta = collectClaudeDelta(parsed.delta, state);
-          totalContentLength += claudeDelta.contentLength;
-
-          // OpenAI format
-          if (parsed.choices?.[0]?.delta?.content) {
-            const c = parsed.choices[0].delta.content;
-            if (typeof c === "string") {
-              totalContentLength += c.length;
-              if (state?.accumulatedContent !== undefined)
-                state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-            } else if (Array.isArray(c)) {
-              for (const part of c) {
-                if (part?.text && typeof part.text === "string") {
-                  totalContentLength += part.text.length;
-                  if (state?.accumulatedContent !== undefined)
-                    state.accumulatedContent = appendBoundedText(
-                      state.accumulatedContent,
-                      part.text
-                    );
-                }
-              }
-            }
-          }
-          const openAiDelta = parsed.choices?.[0]?.delta;
-          const openAiReasoning = getReadableReasoningValue(openAiDelta);
-          if (openAiReasoning) {
-            totalContentLength += openAiReasoning.length;
-            if (state?.accumulatedReasoning !== undefined)
-              state.accumulatedReasoning = appendBoundedText(
-                state.accumulatedReasoning,
-                openAiReasoning
-              );
-          }
-          // Mirror only client-unsupported reasoning aliases into `reasoning_content`.
-          // Gate on reasoning_content being ABSENT (not on getReadableReasoningValue
-          // which also includes the `reasoning` string): OpenRouter thinking models
-          // return BOTH `reasoning` and `reasoning_details[].text`, and `reasoning`
-          // alone previously skipped the mirror, dropping thinking traces for clients
-          // that only read `reasoning_content` (#12665).
-          const openAiReasoningContent =
-            typeof openAiDelta?.reasoning_content === "string" &&
-            openAiDelta.reasoning_content.length > 0
-              ? openAiDelta.reasoning_content
-              : "";
-          if (!openAiReasoningContent) {
-            const delta = openAiDelta;
-            const r = getUnsupportedReasoningValue(delta);
-            if (typeof r === "string" && r.length > 0) {
-              parsed.choices[0].delta.reasoning_content = r;
-              delete parsed.choices[0].delta.thinking;
-              delete parsed.choices[0].delta.thought;
-              totalContentLength += r.length;
-              if (state?.accumulatedReasoning !== undefined)
-                state.accumulatedReasoning = appendBoundedText(state.accumulatedReasoning, r);
-            }
-          }
-
-          // Gemini / Cloud Code format - may have multiple parts
-          // Cloud Code API wraps in { response: { candidates: [...] } }, so unwrap.
-          // Only applies to Gemini-family formats — skip for OpenAI, Claude, etc.
-          const isGeminiFormat =
-            targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY;
-          const geminiChunk = isGeminiFormat ? unwrapGeminiChunk(parsed) : parsed;
-          if (geminiChunk.candidates?.[0]?.content?.parts) {
-            for (const part of geminiChunk.candidates[0].content.parts) {
-              if (part.text && typeof part.text === "string") {
-                totalContentLength += part.text.length;
-                if (state?.accumulatedContent !== undefined)
-                  state.accumulatedContent = appendBoundedText(state.accumulatedContent, part.text);
-              }
-            }
-          }
-
-          // Responses-API upstream (e.g. grok-cli): only output_text deltas are the
-          // visible answer. Reasoning reaches accumulatedReasoning through the response
-          // translator (replayable text on output_item.done), and the `.done` events
-          // repeat the full text as snapshots, so the generic `delta`/`text` fallback
-          // below must not see these events at all.
-          const responsesEventType =
-            typeof (parsed as JsonRecord).type === "string" &&
-            ((parsed as JsonRecord).type as string).startsWith("response.")
-              ? ((parsed as JsonRecord).type as string)
-              : null;
-          if (responsesEventType) {
-            const d = (parsed as JsonRecord).delta;
-            if (typeof d === "string") {
-              totalContentLength += d.length;
-              if (
-                responsesEventType === "response.output_text.delta" &&
-                state?.accumulatedContent !== undefined
-              ) {
-                state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-              }
-            }
-          }
-
-          // Generic fallback: delta string, top-level content/text (e.g. some SSE payloads)
-          if (!responsesEventType && state?.accumulatedContent !== undefined) {
-            if (typeof (parsed as JsonRecord).delta === "string") {
-              const d = (parsed as JsonRecord).delta as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-              totalContentLength += d.length;
-            }
-            if (typeof (parsed as JsonRecord).content === "string") {
-              const c = (parsed as JsonRecord).content as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-              totalContentLength += c.length;
-            }
-            if (typeof (parsed as JsonRecord).text === "string") {
-              const t = (parsed as JsonRecord).text as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, t);
-              totalContentLength += t.length;
-            }
-          }
+          const claudeDelta = accumulateTranslatedContent(parsed);
 
           const translateHasContent =
             claudeDelta.hasText ||
@@ -2876,8 +2869,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                 mergeCacheCreationFields(su, extracted)
               );
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
-              if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-              if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
+              if (
+                eu.completion_tokens > 0 ||
+                (eu.completion_tokens === 0 && deriveUsageEvidence(eu).output.source !== "unknown")
+              )
+                su.completion_tokens = eu.completion_tokens;
+              if (eu.total_tokens > 0) {
+                su.total_tokens = eu.total_tokens;
+                carryComputedUsageTotals(eu, su);
+              }
               if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
               if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
               if (eu.cache_read_input_tokens !== undefined)
@@ -2999,15 +2999,16 @@ export function createSSEStream(options: StreamOptions = {}) {
               },
               pushProviderPayload: observeProviderPayload,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: usageGuard.sanitizePassthrough,
+              sanitizeUsagePayload: sanitizePassthroughUsage,
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
               setUsage: (value: unknown) => {
-                usage = {
-                  ...mergeUsageSnapshot(usage, value as UsageLike),
-                  ...mergeCacheCreationFields(usage, value),
-                };
+                passthroughForwardedUsage = true;
+                usage = Object.assign(
+                  mergeUsageSnapshot(usage, value as UsageLike),
+                  mergeCacheCreationFields(usage, value)
+                );
               },
               mergeCacheCreationUsage: mergePassthroughCacheCreationUsage,
               addTotalContentLength: (value: number) => {
@@ -3092,9 +3093,17 @@ export function createSSEStream(options: StreamOptions = {}) {
                     );
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 }
-                if (usageGuard.sanitizePassthrough(bufferedPayload))
+                if (sanitizePassthroughUsage(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
-                mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
+                const tailUsage = extractUsage(bufferedPayload);
+                if (tailUsage) {
+                  usage = Object.assign(
+                    mergeUsageSnapshot(usage, tailUsage),
+                    mergeCacheCreationFields(usage, tailUsage)
+                  );
+                  passthroughForwardedUsage = true;
+                }
+                mergePassthroughCacheCreationUsage(tailUsage);
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -3458,12 +3467,10 @@ export function createSSEStream(options: StreamOptions = {}) {
             return;
           }
 
-          // Translate mode: process remaining buffer
-          // Held tail lines first, then the partial buffer below: exactly one
-          // of the two ever holds data (the normalizer clears `buffer` when it
-          // produces the tail), so the two paths never emit twice.
+          // Drain both newline-normalized and unterminated tails through one path.
+          // The normalizer clears buffer when it produces held lines.
           if (
-            drainTranslateFlushTail(normalizedTailLines, controller, {
+            drainTranslateFlushTail(buffer.trim() ? [buffer] : normalizedTailLines, controller, {
               targetFormat,
               openaiFormat: FORMATS.OPENAI,
               openaiResponsesFormat: FORMATS.OPENAI_RESPONSES,
@@ -3500,6 +3507,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   ctrl as TransformStreamDefaultController<Uint8Array>,
                   parsed
                 ),
+              accumulateContent: (parsed) => {
+                accumulateTranslatedContent(parsed as NonNullable<ReturnType<typeof parseSSELine>>);
+              },
               translateAndEmit: (ctrl, parsed) => {
                 // #18600 — restore aliases before translation (same seam as the
                 // main translate loop; the flush tail replays through here).
@@ -3530,81 +3540,6 @@ export function createSSEStream(options: StreamOptions = {}) {
             })
           )
             return;
-          if (buffer.trim()) {
-            const parsed = parseSSELine(buffer.trim());
-            if (parsed && !parsed.done) {
-              if (emitTranslatedFailureAndAbort(controller, parsed)) return;
-              if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-              observeProviderPayload(parsed);
-              // Extract usage from remaining buffer — if the usage-bearing event
-              // (e.g. response.completed) is the last SSE line, it ends up here
-              // in the flush handler where extractUsage was not called.
-              // Non-destructive merge: some providers send usage across multiple
-              // events (e.g. prompt_tokens in message_start, completion_tokens
-              // in message_delta). Direct assignment would lose earlier data.
-              const extracted = extractUsage(parsed);
-              if (extracted) {
-                if (!state.usage) {
-                  state.usage = extracted;
-                } else {
-                  const su = state.usage as UsageLike;
-                  const eu = extracted as UsageLike;
-                  Object.assign(
-                    su,
-                    { usage_evidence: mergeUsageEvidence(su, extracted) },
-                    mergeCacheCreationFields(su, extracted)
-                  );
-                  if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
-                  if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-                  if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-                  if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
-                  if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-                  if (eu.cache_read_input_tokens !== undefined)
-                    su.cache_read_input_tokens = eu.cache_read_input_tokens;
-                  if (eu.cache_creation_input_tokens !== undefined)
-                    su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  if (eu.cache_evidence === "invalid") {
-                    delete su.cached_tokens;
-                  } else if (eu.cached_tokens !== undefined) {
-                    su.cached_tokens = eu.cached_tokens;
-                  }
-                  if (eu.cache_evidence !== undefined) su.cache_evidence = eu.cache_evidence;
-                  if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
-                }
-              }
-
-              // #18600 — restore aliases before translation on the flush-path
-              // partial buffer too (same seam as the main translate loop).
-              if (
-                targetFormat === FORMATS.OPENAI_RESPONSES &&
-                typeof (parsed as JsonRecord).type === "string"
-              ) {
-                restoreResponsesToolNames(
-                  parsed as JsonRecord,
-                  responsesToolAliasMap,
-                  requestToolIdentityMap
-                );
-              }
-              const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
-              if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
-                usage = { ...usage, cache_evidence: state?.cacheEvidence };
-                lastPropagatedCacheEvidence = state?.cacheEvidence;
-              }
-
-              // Log OpenAI intermediate chunks
-              for (const item of getOpenAIIntermediateChunks(translated)) {
-                const openaiOutput = formatSSE(item, FORMATS.OPENAI);
-                reqLogger?.appendOpenAIChunk?.(openaiOutput);
-              }
-
-              if (translated?.length > 0) {
-                for (const item of translated) {
-                  emitTranslatedClientItem(controller, item);
-                }
-              }
-            }
-          }
-
           if (state?.upstreamError) {
             const err = state.upstreamError;
 

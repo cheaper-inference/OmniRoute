@@ -1,3 +1,4 @@
+import { carryComputedUsageTotals } from "./computedUsageTotals.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
 import type { UsageLike } from "./usageTracking.ts";
@@ -5,14 +6,21 @@ import type { UsageLike } from "./usageTracking.ts";
 /** Normalize receipt aliases once so completion, partial usage and quota consumers agree. */
 export function canonicalStreamingUsage(usage: UsageLike | null | undefined): UsageLike | null {
   if (!usage) return null;
-  if (usage.promptTokenCount === undefined && usage.candidatesTokenCount === undefined)
+  if (
+    usage.promptTokenCount === undefined &&
+    usage.candidatesTokenCount === undefined &&
+    usage.cachedContentTokenCount === undefined &&
+    usage.totalTokenCount === undefined
+  )
     return usage;
-  return {
+  return carryComputedUsageTotals(usage, {
     ...usage,
     prompt_tokens: usage.prompt_tokens ?? usage.input_tokens ?? usage.promptTokenCount,
     completion_tokens: usage.completion_tokens ?? usage.output_tokens ?? usage.candidatesTokenCount,
     total_tokens: usage.total_tokens ?? usage.totalTokenCount,
-  };
+    cached_tokens:
+      usage.cached_tokens ?? usage.cache_read_input_tokens ?? usage.cachedContentTokenCount,
+  });
 }
 
 type StreamAccountingInput = {

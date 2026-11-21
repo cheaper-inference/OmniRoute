@@ -28,7 +28,7 @@ test("normalizeUsage keeps finite nested cache-read fields for stream cost calcu
       output_tokens: 3,
       cached_tokens: 2,
       usage_evidence: {
-        input: { source: "unknown" },
+        input: { source: "reported" },
         output: { source: "reported" },
         cacheRead: { source: "reported" },
         cacheCreation: { source: "unknown" },
