@@ -13,6 +13,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { isGeminiDecisionProbe } from "@/lib/api/geminiDecisionProbe";
 import { DEFAULT_MODEL_TEST_TIMEOUT_MS, runSingleModelTest } from "@/lib/api/modelTestRunner";
 import { setModelIsHidden } from "@/lib/db/models";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
@@ -97,8 +98,14 @@ export async function POST(request: Request) {
   }
   const { providerId, modelIds, connectionId, respectRateLimit, autoHideFailed } = validation.data;
   const providerConnections = await getProviderConnections({ provider: providerId });
-  if (providerConnections.length > 0 && providerConnections.every((connection) => connection.isActive === false)) {
-    return NextResponse.json({ error: { message: `Provider ${providerId} has no active connections` } }, { status: 409 });
+  if (
+    providerConnections.length > 0 &&
+    providerConnections.every((connection) => connection.isActive === false)
+  ) {
+    return NextResponse.json(
+      { error: { message: `Provider ${providerId} has no active connections` } },
+      { status: 409 }
+    );
   }
 
   // #6328 (follow-up to #6495): REMOVE — not just hide — paid Test-all dispatches
@@ -156,11 +163,14 @@ export async function POST(request: Request) {
       // `connectionId` is provided. To honor `respectRateLimit=false`, we
       // omit the connectionId so the runner bypasses `withRateLimit`.
       const effectiveConnectionId =
-        connectionId && respectRateLimit !== false ? connectionId : undefined;
+        connectionId && (respectRateLimit !== false || isGeminiDecisionProbe(providerId, modelId))
+          ? connectionId
+          : undefined;
       const result = await runSingleModelTest({
         providerId,
         modelId,
         ...(effectiveConnectionId ? { connectionId: effectiveConnectionId } : {}),
+        respectRateLimit,
         timeoutMs: DEFAULT_MODEL_TEST_TIMEOUT_MS,
         streamChat: true,
       });

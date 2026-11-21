@@ -1,3 +1,5 @@
+import { POST as postGeminiDecision } from "@/app/api/v1beta/decisions/route";
+import { decisionProbeBody, decisionProbeText, isGeminiDecisionProbe } from "./geminiDecisionProbe";
 import { randomUUID } from "node:crypto";
 import { prepareConnectionModelTest } from "@/lib/providerModels/prepareConnectionModelTest";
 import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
@@ -430,6 +432,7 @@ export function parseRetryAfterHeader(value: string | null | undefined): number 
 }
 
 export interface RunSingleModelTestOptions {
+  respectRateLimit?: boolean;
   providerId: string;
   modelId: string;
   connectionId?: string;
@@ -612,7 +615,8 @@ export async function runSingleModelTest(
 
   // #13376: Skip image/music/video generation models — dispatching them as
   // chat completions incurs real billable generations the operator never asked for.
-  if (isNonChatGeneration) {
+  const decision = isGeminiDecisionProbe(providerId, fullModelStr);
+  if (!decision && isNonChatGeneration) {
     return {
       modelId: fullModelStr,
       status: "error",
@@ -629,7 +633,7 @@ export async function runSingleModelTest(
 
   if (
     options.prompt !== undefined &&
-    (isEmbedding || isRerank || isAudioTranscription || isAudioSpeech)
+    (decision || isEmbedding || isRerank || isAudioTranscription || isAudioSpeech)
   ) {
     return {
       modelId: fullModelStr,
@@ -685,6 +689,20 @@ export async function runSingleModelTest(
   }, effectiveTimeoutMs);
 
   const runInner = async (signal: AbortSignal): Promise<Response> => {
+    if (decision) {
+      return postGeminiDecision(
+        new Request(`${INTERNAL_ORIGIN}/v1beta/decisions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${resolveSelfLoopBearer()}`,
+            ...(connectionId ? { "X-OmniRoute-Connection": connectionId } : {}),
+          },
+          body: JSON.stringify(decisionProbeBody()),
+          signal,
+        })
+      );
+    }
     if (isEmbedding) {
       return handleValidatedEmbeddingRequestBody(
         testBody as Record<string, unknown> & { model: string },
@@ -711,7 +729,7 @@ export async function runSingleModelTest(
 
   let res: Response;
   try {
-    if (connectionId) {
+    if (connectionId && options.respectRateLimit !== false) {
       res = await withRateLimit(
         providerId,
         connectionId,
@@ -809,13 +827,15 @@ export async function runSingleModelTest(
       // error frame inside a 200 stream (Sentinel blocks, "account
       // deactivated") would run outside runAsProbe and could still reach
       // markAccountUnavailable (#9817).
-      const parsedResponse = await runAsProbe(() =>
-        extractModelTestResponseText(
-          res,
-          !isEmbedding && !isRerank && !isResponses && streamChat,
-          isAudioSpeech
-        )
-      );
+      const parsedResponse: ModelTestResponseText = decision
+        ? { text: decisionProbeText(await res.json()) }
+        : await runAsProbe(() =>
+            extractModelTestResponseText(
+              res,
+              !isEmbedding && !isRerank && !isResponses && streamChat,
+              isAudioSpeech
+            )
+          );
       responseText = parsedResponse.text;
       streamError = parsedResponse.error;
     } catch {
@@ -876,7 +896,9 @@ export async function runSingleModelTest(
         latencyMs,
         statusCode: res.status,
         httpStatus: 400,
-        error: "Provider returned HTTP 200 but no text content.",
+        error: decision
+          ? "Gemini returned no valid decision answer."
+          : "Provider returned HTTP 200 but no text content.",
       };
     }
     return {
