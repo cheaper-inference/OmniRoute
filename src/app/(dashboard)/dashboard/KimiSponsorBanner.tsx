@@ -58,7 +58,7 @@ function getServerSnapshot() {
  * partnership on the dashboard home page. Self-contained: reads the app's own
  * version (APP_CONFIG.version) to decide whether it is still inside the
  * agreed display window (see kimiSponsorBannerGate.ts) and persists dismissal via
- * localStorage. The logomark reuses <ProviderIcon providerId="moonshot" .../>
+ * localStorage. The logomark reuses <ProviderIcon providerId="kimi" .../>
  * so it stays theme-aware for free via the THEMED_SVGS wiring in
  * ProviderIcon.tsx.
  */
@@ -92,7 +92,7 @@ export default function KimiSponsorBanner() {
     >
       <div className="flex min-w-0 items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface">
-          <ProviderIcon providerId="moonshot" size={24} type="color" />
+          <ProviderIcon providerId="kimi" size={24} type="color" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-text-main">{t("foundingFriendTitle")}</p>

@@ -1,3 +1,4 @@
+import { canonicalKimiModel } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * providerQuotaState.ts — per-connection token budget ledger.
  *
@@ -67,6 +68,18 @@ function normalizeRow(row: RowLike): ProviderQuotaRow {
   };
 }
 
+function quotaIdentity(
+  db: ReturnType<typeof getDbInstance>,
+  connectionId: string,
+  model: string
+): { model: string; native: boolean } {
+  const owner = db
+    .prepare("SELECT provider FROM provider_connections WHERE id = ?")
+    .get(connectionId) as { provider?: string } | undefined;
+  const native = owner?.provider === "kimi" || owner?.provider === "moonshot";
+  return { model: native ? canonicalKimiModel(model) : model, native };
+}
+
 /**
  * Read the current quota snapshot for (connectionId, model).
  * When the record is stale (its window expired) the caller sees
@@ -79,6 +92,7 @@ export function getProviderQuota(
   if (!connectionId || !model) return null;
   try {
     const db = getDbInstance();
+    model = quotaIdentity(db, connectionId, model).model;
     const row = db
       .prepare("SELECT * FROM provider_quota_state WHERE connection_id = ? AND model = ?")
       .get(connectionId, model) as RowLike | undefined;
@@ -120,6 +134,20 @@ export function getProviderQuota(
   }
 }
 
+function nextQuotaTokenLimit(
+  currentLimit: number,
+  requestedLimit: number | undefined,
+  preserveWindow: boolean
+): number {
+  const configuredLimit = requestedLimit && requestedLimit > 0 ? requestedLimit : currentLimit;
+  return preserveWindow && Number.isFinite(currentLimit) && currentLimit > 0
+    ? Math.min(
+        currentLimit,
+        Number.isFinite(configuredLimit) && configuredLimit > 0 ? configuredLimit : currentLimit
+      )
+    : configuredLimit;
+}
+
 /**
  * Record token usage for (connectionId, model) in the current window.
  *
@@ -135,6 +163,8 @@ export function recordProviderQuotaUsage(
   if (!connectionId || !model || !(tokensUsedDelta > 0)) return;
   try {
     const db = getDbInstance();
+    const identity = quotaIdentity(db, connectionId, model);
+    model = identity.model;
     const existing = db
       .prepare("SELECT * FROM provider_quota_state WHERE connection_id = ? AND model = ?")
       .get(connectionId, model) as RowLike | undefined;
@@ -164,8 +194,8 @@ export function recordProviderQuotaUsage(
     const normalized = normalizeRow(existing);
     const windowRolledOver = normalized.windowReset > 0 && now > normalized.windowReset;
     const nextUsed = windowRolledOver ? tokensUsedDelta : normalized.tokensUsed + tokensUsedDelta;
-    const nextLimit =
-      opts.tokenLimit && opts.tokenLimit > 0 ? opts.tokenLimit : normalized.tokenLimit;
+    const preserveWindow = identity.native && !windowRolledOver;
+    const nextLimit = nextQuotaTokenLimit(normalized.tokenLimit, opts.tokenLimit, preserveWindow);
 
     db.prepare(
       `UPDATE provider_quota_state
@@ -174,8 +204,8 @@ export function recordProviderQuotaUsage(
     ).run(
       nextUsed,
       nextLimit,
-      windowStart,
-      windowReset,
+      preserveWindow ? normalized.windowStart : windowStart,
+      preserveWindow ? normalized.windowReset : windowReset,
       new Date().toISOString(),
       connectionId,
       model

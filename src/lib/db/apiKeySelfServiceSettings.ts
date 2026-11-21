@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * db/apiKeySelfServiceSettings.ts — Per-API-key self-service settings (migration 233).
  *
@@ -87,7 +88,7 @@ export function normalizeSharedQuotaProviders(value: unknown): string[] | null {
   for (const item of value) {
     if (typeof item !== "string") continue;
     const trimmed = item.trim();
-    if (trimmed) unique.add(trimmed);
+    if (trimmed) unique.add(canonicalKimiProvider(trimmed));
   }
   return [...unique].sort();
 }

@@ -42,6 +42,27 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "20261115112345",
     toName: "daily_usage_evidence",
   },
+  // #20090 builds ran the Kimi consolidation as 239 and 240 (both canonical base slots now)
+  // and then as 242. Move those rows to the timestamped file so the canonical 239/240 run
+  // and the Kimi data migration never re-runs.
+  {
+    fromVersion: "239",
+    fromName: "canonical_kimi_provider",
+    toVersion: "20261115232030",
+    toName: "canonical_kimi_provider",
+  },
+  {
+    fromVersion: "240",
+    fromName: "canonical_kimi_provider",
+    toVersion: "20261115232030",
+    toName: "canonical_kimi_provider",
+  },
+  {
+    fromVersion: "242",
+    fromName: "canonical_kimi_provider",
+    toVersion: "20261115232030",
+    toName: "canonical_kimi_provider",
+  },
   {
     // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
     // Match the name too: canonical cleanup/cache rows must never be rehomed.

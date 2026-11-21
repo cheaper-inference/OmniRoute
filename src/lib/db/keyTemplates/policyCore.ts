@@ -455,7 +455,7 @@ export function insertKeyPolicyRows(
     });
   }
   if (rows.reasoningRules.length > 0) requireTable(db, RELATED_TABLES.reasoningRules.table);
-  for (const rule of rows.reasoningRules) {
+  for (const [ruleIndex, rule] of rows.reasoningRules.entries()) {
     if (rule.scope !== "apiKey") {
       throw new Error("Key policy reasoning rules must use apiKey scope");
     }
@@ -463,7 +463,7 @@ export function insertKeyPolicyRows(
       ...rule,
       id: randomUUID(),
       api_key_id: identity.id,
-      created_at: identity.createdAt,
+      created_at: new Date(Date.parse(identity.createdAt) + ruleIndex).toISOString(),
       updated_at: identity.createdAt,
     });
   }

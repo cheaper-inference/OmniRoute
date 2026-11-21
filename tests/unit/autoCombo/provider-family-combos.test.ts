@@ -292,6 +292,7 @@ describe("additional auto-routing families (#13214)", () => {
   });
 
   it("materializes Kimi across coding, web and Moonshot without unrelated models", async () => {
+    const connectionIds = new Map<string, string>();
     for (const [provider, defaultModel] of [
       ["kimi-coding", "k3"],
       ["kimi-coding-apikey", "k3"],
@@ -299,38 +300,48 @@ describe("additional auto-routing families (#13214)", () => {
       ["moonshot", "kimi-k2.5"],
       ["openai", "gpt-4o"],
     ]) {
-      await providersDb.createProviderConnection({
+      const connection = await providersDb.createProviderConnection({
         provider,
         defaultModel,
         authType: "apikey",
         name: provider,
         apiKey: "test",
       });
+      connectionIds.set(provider, connection.id);
     }
+    assert.equal(
+      core
+        .getDbInstance()
+        .prepare("SELECT provider FROM provider_connections WHERE id=?")
+        .get(connectionIds.get("moonshot"))?.provider,
+      "moonshot"
+    );
     const combo = await builtinCatalog.createBuiltinAutoCombo("auto/kimi", "kimi");
     assert.equal(combo.id, "auto/kimi");
     assert.equal(combo.strategy, "auto");
-    for (const provider of ["kimi-coding", "kimi-coding-apikey", "kimi-web", "moonshot"]) {
+    for (const provider of ["kimi-coding", "kimi-coding-apikey", "kimi-web", "kimi"]) {
       assert.ok(
         combo.models.some((model) => model.providerId === provider),
         provider
       );
     }
-    for (const [providerId, model] of [
-      ["moonshot", "kimi-k3.1-pro"],
-      ["moonshot", "kimi-k3.1-pro-highspeed"],
-      ["kimi-coding", "k3.1-pro"],
-      ["kimi-coding", "k3.1-pro-highspeed"],
-      ["kimi-coding-apikey", "k3.1-pro"],
-      ["kimi-coding-apikey", "k3.1-pro-highspeed"],
+    for (const [providerId, expectedModel] of [
+      ["kimi", "kimi/kimi-k3.1-pro"],
+      ["kimi", "kimi/kimi-k3.1-pro-highspeed"],
+      ["kimi-coding", "kimi-coding/k3.1-pro"],
+      ["kimi-coding", "kimi-coding/k3.1-pro-highspeed"],
+      ["kimi-coding-apikey", "kimi-coding-apikey/k3.1-pro"],
+      ["kimi-coding-apikey", "kimi-coding-apikey/k3.1-pro-highspeed"],
     ]) {
       assert.ok(
         combo.models.some(
-          (candidate) =>
-            candidate.providerId === providerId && candidate.model === `${providerId}/${model}`
+          (candidate) => candidate.providerId === providerId && candidate.model === expectedModel
         ),
-        `${providerId}/${model}`
+        `${providerId}: ${expectedModel}`
       );
+    }
+    for (const candidate of combo.models.filter((model) => model.providerId === "kimi")) {
+      assert.deepEqual(candidate.allowedConnectionIds, [connectionIds.get("moonshot")]);
     }
     assert.ok(combo.models.every((model) => model.providerId !== "openai"));
   });

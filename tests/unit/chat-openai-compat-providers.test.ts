@@ -16,7 +16,7 @@ const CHAT_OPENAI_COMPAT_PROVIDER_IDS = [
   "ovhcloud",
   "baseten",
   "publicai",
-  "moonshot",
+  "kimi",
   "meta-llama",
   "v0-vercel",
   "morph",

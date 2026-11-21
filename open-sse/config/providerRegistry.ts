@@ -186,7 +186,7 @@ function ensureByAliasPopulated(): void {
 /** Get registry entry by provider ID or alias */
 export function getRegistryEntry(provider: string): RegistryEntry | null {
   ensureByAliasPopulated();
-  return REGISTRY[provider] || _byAlias.get(provider) || null;
+  return REGISTRY[provider === "moonshot" ? "kimi" : provider] || _byAlias.get(provider) || null;
 }
 
 /** Resolve only a model's explicit reasoning vocabulary. */

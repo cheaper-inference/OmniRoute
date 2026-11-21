@@ -96,15 +96,11 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     id: "kimi",
     serviceKinds: ["llm"],
     alias: "kimi",
-    name: "Kimi (Legacy Moonshot API)",
-    icon: "psychology",
-    color: "#1E3A8A",
-    textIcon: "KM",
-    // Kimi official-partnership aff link (2026-07) — see KIMI_PROVIDER_IDS in
-    // featuredProviders.ts. hiddenFromDashboard, so this rarely renders, but is
-    // kept in sync with moonshot's aff link for consistency.
+    name: "Kimi",
+    icon: "rocket_launch",
+    color: "#1E40AF",
+    textIcon: "MS",
     website: "https://platform.kimi.ai?aff=omniroute",
-    hiddenFromDashboard: true,
   },
   "kimi-coding-apikey": {
     id: "kimi-coding-apikey",
@@ -199,26 +195,6 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     hasFree: true,
     freeNote:
       "Free: one-time 10M-token grant after account signup + KYC verification (LongCat-2.0). One-time only — not a recurring daily/monthly allowance.",
-  },
-  moonshot: {
-    id: "moonshot",
-    serviceKinds: ["llm"],
-    alias: "moonshot",
-    // Display name only — Kimi official-partnership rebrand (2026-07). The
-    // catalog id/alias/routing stay "moonshot" (DB connections, combos, and
-    // /dashboard/providers/moonshot all address it by id, never by name) — see
-    // KIMI_PROVIDER_IDS in featuredProviders.ts for the full id list this
-    // touches. "Kimi (Legacy Moonshot API)" (id "kimi") and "Moonshot AI" in
-    // company-name mentions (e.g. README, kimiOfficialSupporterTooltip) are
-    // intentionally left as-is.
-    name: "Kimi",
-    icon: "rocket_launch",
-    color: "#1E40AF",
-    textIcon: "MS",
-    // Kimi official-partnership aff link (2026-07): the "Kimi API Platform"
-    // tracking link — was the unattributed legacy platform.moonshot.ai domain
-    // (301s to platform.kimi.ai with no aff tag).
-    website: "https://platform.kimi.ai?aff=omniroute",
   },
   volcengine: {
     id: "volcengine",

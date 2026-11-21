@@ -1,3 +1,7 @@
+import {
+  canonicalKimiProvider,
+  canonicalKimiModel,
+} from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * API Key Groups DB — CRUD operations for team/enterprise key grouping
  *
@@ -266,7 +270,8 @@ export interface ModelAccessCheck {
 export function checkKeyModelAccess(
   keyId: string,
   model: string,
-  provider?: string
+  provider?: string,
+  inputKind: "wire" | "local-qualified" = "wire"
 ): ModelAccessCheck {
   const groups = getKeyGroupsForApiKey(keyId, true);
   if (groups.length === 0) {
@@ -294,8 +299,8 @@ export function checkKeyModelAccess(
   const denyRules = permissions.filter(
     (p) =>
       p.accessType === "deny" &&
-      matchesModelPattern(p.modelPattern, model) &&
-      (!p.provider || p.provider === provider)
+      matchesModelPattern(p.modelPattern, model, provider, inputKind) &&
+      (!p.provider || canonicalKimiProvider(p.provider) === canonicalKimiProvider(provider || ""))
   );
 
   if (denyRules.length > 0) {
@@ -308,8 +313,8 @@ export function checkKeyModelAccess(
     (p) =>
       p.accessType === "allow" &&
       activeGroupIds.has(p.groupId) &&
-      matchesModelPattern(p.modelPattern, model) &&
-      (!p.provider || p.provider === provider)
+      matchesModelPattern(p.modelPattern, model, provider, inputKind) &&
+      (!p.provider || canonicalKimiProvider(p.provider) === canonicalKimiProvider(provider || ""))
   );
 
   if (allowRules.length > 0) {
@@ -345,12 +350,21 @@ function modelPatternToRegex(pattern: string): RegExp {
   return new RegExp(`^${escaped}$`);
 }
 
-function matchesModelPattern(pattern: string, model: string): boolean {
+function matchesModelPattern(
+  pattern: string,
+  model: string,
+  provider: string | undefined,
+  inputKind: "wire" | "local-qualified"
+): boolean {
   if (pattern === "*") return true;
-  if (pattern.includes("*")) {
-    return modelPatternToRegex(pattern).test(model);
+  const models = [model];
+  if (inputKind === "local-qualified" && canonicalKimiProvider(provider || "") === "kimi") {
+    const canonical = canonicalKimiModel(model);
+    if (canonical.startsWith("kimi/")) models.push(canonical, "moonshot/" + canonical.slice(5));
   }
-  return pattern === model;
+  return models.some((candidate) =>
+    pattern.includes("*") ? modelPatternToRegex(pattern).test(candidate) : pattern === candidate
+  );
 }
 
 // ── Row Mappers ──────────────────────────────────────────────────────────

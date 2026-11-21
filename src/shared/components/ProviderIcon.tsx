@@ -333,6 +333,10 @@ const THEMED_SVGS: Record<string, { light: string; dark: string }> = {
     light: "/providers/kimi-logomark-light.svg",
     dark: "/providers/kimi-logomark-dark.svg",
   },
+  kimi: {
+    light: "/providers/kimi-logomark-light.svg",
+    dark: "/providers/kimi-logomark-dark.svg",
+  },
   moonshot: {
     light: "/providers/kimi-logomark-light.svg",
     dark: "/providers/kimi-logomark-dark.svg",

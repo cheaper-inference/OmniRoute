@@ -169,8 +169,8 @@ export function normalizeMoonshotRequest(model: string, body: unknown): unknown 
 }
 
 export class MoonshotExecutor extends DefaultExecutor {
-  constructor(provider = "moonshot") {
-    super(provider);
+  constructor(provider = "kimi") {
+    super(provider === "moonshot" ? "kimi" : provider);
   }
 
   transformRequest(

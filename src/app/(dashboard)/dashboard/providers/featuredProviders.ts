@@ -28,16 +28,15 @@ export const CHEAPERINFERENCE_BRAND_COLOR = "#31f889";
 
 /**
  * Every Kimi/Moonshot dashboard-catalog provider id (`src/shared/constants/providers/`),
- * including the two `hiddenFromDashboard` aliases that never render their own
- * card today — kept here so the set stays correct if that ever changes.
+ * including the hidden Coding API-key entry and the legacy Moonshot spelling.
  *
- *  - "kimi"               legacy Moonshot API alias — apikey category, hiddenFromDashboard
+ *  - "kimi"               canonical Open Platform API — apikey category (visible card)
  *  - "kimi-coding"        Kimi Code CLI — oauth category (visible card)
  *  - "kimi-coding-apikey" Kimi Code API Key — apikey category, hiddenFromDashboard
  *                         (its connections fold into the kimi-coding card, see
  *                         PROVIDER_CONNECTION_ALIASES in providerPageUtils.ts)
  *  - "kimi-web"           Kimi Web — web-cookie category (visible card)
- *  - "moonshot"           Moonshot AI — apikey category (visible card)
+ *  - "moonshot"           legacy API spelling for saved connections
  */
 const KIMI_PROVIDER_IDS: readonly string[] = [
   "kimi",

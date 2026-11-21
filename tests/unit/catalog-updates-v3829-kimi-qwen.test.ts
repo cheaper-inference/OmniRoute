@@ -44,7 +44,7 @@ test("kmca stable fallback only carries documented static capabilities", () => {
   }
 });
 
-test("Kimi exposes one Code card plus Web and Moonshot services", () => {
+test("Kimi exposes one Code card plus Web and the canonical API service", () => {
   const entries = providerPageUtils.buildProviderEntries(
     providers.APIKEY_PROVIDERS,
     "apikey",
@@ -53,8 +53,8 @@ test("Kimi exposes one Code card plus Web and Moonshot services", () => {
   );
   const apiKeyProviderIds = entries.map((entry) => entry.providerId);
 
-  assert.equal(apiKeyProviderIds.includes("moonshot"), true);
-  assert.equal(apiKeyProviderIds.includes("kimi"), false);
+  assert.equal(apiKeyProviderIds.includes("moonshot"), false);
+  assert.equal(apiKeyProviderIds.includes("kimi"), true);
   assert.equal(apiKeyProviderIds.includes("kimi-coding-apikey"), false);
   assert.equal(providers.APIKEY_PROVIDERS["kimi-coding-apikey"].name, "Kimi Code API Key");
   assert.equal(providers.APIKEY_PROVIDERS["kimi-coding-apikey"].hiddenFromDashboard, true);

@@ -1,5 +1,6 @@
 // Pure model-permission matching. Runtime settings and storage are resolved by callers.
 
+import { canonicalKimiModel } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { getProviderByAlias, resolveProviderId } from "@/shared/constants/providers";
 
 export const CLAUDE_CODE_PROVIDER_PREFIXES = new Set(["cc", "claude"]);
@@ -46,7 +47,14 @@ export function addProviderAliasScopedCandidates(
 }
 
 export function modelPatternMatches(pattern: string, candidates: string[]): boolean {
-  for (const candidate of candidates) {
+  pattern = canonicalKimiModel(pattern);
+  const equivalentCandidates = candidates.flatMap((original) => {
+    const canonical = canonicalKimiModel(original);
+    return canonical.startsWith("kimi/")
+      ? [original, canonical, "moonshot/" + canonical.slice(5)]
+      : [original];
+  });
+  for (const candidate of equivalentCandidates) {
     if (pattern === candidate) return true;
     if (pattern.endsWith("/*")) {
       const prefix = pattern.slice(0, -2);

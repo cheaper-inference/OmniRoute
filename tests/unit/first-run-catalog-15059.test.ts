@@ -74,8 +74,8 @@ test("Moonshot live catalog hides phantom static Kimi K3 after a successful sync
   const body: { data: { id: string }[] } = await response.json();
   assert.equal(response.status, 200, JSON.stringify(body));
   const ids = new Set(body.data.map((model) => model.id));
-  assert.ok(ids.has("moonshot/kimi-k2.7-code"));
-  assert.ok(ids.has("moonshot/kimi-k2.6"));
-  assert.equal(ids.has("moonshot/kimi-k3"), false);
-  assert.equal(ids.has("moonshot/kimi-k3-256k"), false);
+  assert.ok(ids.has("kimi/kimi-k2.7-code"));
+  assert.ok(ids.has("kimi/kimi-k2.6"));
+  assert.equal(ids.has("kimi/kimi-k3"), false);
+  assert.equal(ids.has("kimi/kimi-k3-256k"), false);
 });

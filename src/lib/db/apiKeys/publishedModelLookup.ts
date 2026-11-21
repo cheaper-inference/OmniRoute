@@ -74,11 +74,21 @@ export async function findPublishedModel(
   const providerIds = [providerOrAlias];
   const canonicalId = await canonicalProviderForAlias(providerOrAlias);
   if (canonicalId) providerIds.push(canonicalId);
+  if (providerIds.includes("kimi") && !providerIds.includes("moonshot"))
+    providerIds.push("moonshot");
+  // A connection and its imported snapshot may use different native spellings.
+  const nativeAdmissionRefs = providerIds.includes("kimi")
+    ? Promise.all(["moonshot", "kimi"].map((id) => getActiveConnectionAdmissionRefs(id))).then(
+        (refs) => [...new Map(refs.flat().map((ref) => [ref.id, ref] as const)).values()]
+      )
+    : null;
 
   for (const providerId of providerIds) {
     const [syncedModelsByConnection, admissionRefs, customModels] = await Promise.all([
       getSyncedAvailableModelsByConnection(providerId),
-      getActiveConnectionAdmissionRefs(providerId),
+      nativeAdmissionRefs && (providerId === "kimi" || providerId === "moonshot")
+        ? nativeAdmissionRefs
+        : getActiveConnectionAdmissionRefs(providerId),
       getCustomModels(providerId),
     ]);
     // A free-only connection publishes only its free rows.
@@ -118,7 +128,12 @@ export async function isDeniedUnderCanonicalProvider(
   const canonicalProvider = provider ? await canonicalProviderForAlias(provider) : null;
   if (!canonicalProvider) return false;
   return Boolean(
-    checkKeyModelAccess(apiKeyId, modelTarget, canonicalProvider).deniedBy ||
-    checkKeyModelAccess(apiKeyId, `${canonicalProvider}/${modelTarget}`, canonicalProvider).deniedBy
+    checkKeyModelAccess(apiKeyId, modelTarget, canonicalProvider, "wire").deniedBy ||
+    checkKeyModelAccess(
+      apiKeyId,
+      `${canonicalProvider}/${modelTarget}`,
+      canonicalProvider,
+      "local-qualified"
+    ).deniedBy
   );
 }

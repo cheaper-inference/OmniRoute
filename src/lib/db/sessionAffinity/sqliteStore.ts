@@ -1,3 +1,5 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
+import { matchesSessionAffinityIdentity, sessionAffinityAccountIdentity } from "./accountIdentity";
 import { createHash } from "crypto";
 
 import { getDbInstance } from "../core";
@@ -58,16 +60,30 @@ function deleteAffinityKey(key: string): void {
     .run(NAMESPACE, key);
 }
 
-/** Redis-only fallback provenance helpers; callers must compare exact SQLite bytes. */
+function affinityKeys(sessionKey: string, provider: string): string[] {
+  const canonical = canonicalKimiProvider(provider);
+  return canonical === "kimi"
+    ? [affinityKey(sessionKey, "kimi"), affinityKey(sessionKey, "moonshot")]
+    : [affinityKey(sessionKey, provider)];
+}
+
+function stored(sessionKey: string, provider: string): { key: string; value: string } | null {
+  const db = getDbInstance();
+  for (const key of affinityKeys(sessionKey, provider)) {
+    const row = db
+      .prepare<{ value: string }>("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+      .get(NAMESPACE, key);
+    if (row) return { key, value: row.value };
+  }
+  return null;
+}
+
+/** Return the exact winning bytes, including a legacy-hash fallback. */
 export function getSessionAccountAffinitySerialized(
   sessionKey: string,
   provider: string
 ): string | null {
-  if (!sessionKey || !provider) return null;
-  const row = getDbInstance()
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, affinityKey(sessionKey, provider)) as { value?: unknown } | undefined;
-  return typeof row?.value === "string" ? row.value : null;
+  return sessionKey && provider ? (stored(sessionKey, provider)?.value ?? null) : null;
 }
 
 export function deleteSessionAccountAffinityIfValue(
@@ -76,10 +92,18 @@ export function deleteSessionAccountAffinityIfValue(
   serializedValue: string
 ): boolean {
   if (!sessionKey || !provider || typeof serializedValue !== "string") return false;
-  const result = getDbInstance()
-    .prepare("DELETE FROM key_value WHERE namespace = ? AND key = ? AND value = ?")
-    .run(NAMESPACE, affinityKey(sessionKey, provider), serializedValue);
-  return Number(result.changes) > 0;
+  return getDbInstance().transaction(() => {
+    const winner = stored(sessionKey, provider);
+    if (!winner || winner.value !== serializedValue) return false;
+    const result = getDbInstance()
+      .prepare("DELETE FROM key_value WHERE namespace = ? AND key = ? AND value = ?")
+      .run(NAMESPACE, winner.key, serializedValue);
+    if (Number(result.changes) <= 0) return false;
+    for (const key of affinityKeys(sessionKey, provider)) {
+      if (key !== winner.key) deleteAffinityKey(key);
+    }
+    return true;
+  })();
 }
 
 export function getSessionAccountAffinity(
@@ -90,15 +114,11 @@ export function getSessionAccountAffinity(
 ): SessionAccountAffinityRecord | null {
   if (!sessionKey || !provider || normalizePositiveTtl(ttlMs) <= 0) return null;
 
-  const key = affinityKey(sessionKey, provider);
-  const row = getDbInstance()
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, key) as { value?: unknown } | undefined;
-  const record = parseRecord(row?.value);
+  const winner = stored(sessionKey, provider);
+  const record = parseRecord(winner?.value);
   if (!record) return null;
-
   if (Date.parse(record.expiresAt) <= now) {
-    deleteAffinityKey(key);
+    deleteSessionAccountAffinityIfValue(sessionKey, provider, winner!.value);
     return null;
   }
 
@@ -135,9 +155,17 @@ function persistSessionAccountAffinity(
   provider: string,
   record: SessionAccountAffinityRecord
 ): void {
-  getDbInstance()
-    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
-    .run(NAMESPACE, affinityKey(sessionKey, provider), JSON.stringify(record));
+  getDbInstance().transaction(() => {
+    getDbInstance()
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run(
+        NAMESPACE,
+        affinityKey(sessionKey, canonicalKimiProvider(provider)),
+        JSON.stringify(record)
+      );
+    if (canonicalKimiProvider(provider) === "kimi")
+      deleteAffinityKey(affinityKey(sessionKey, "moonshot"));
+  })();
 }
 
 export function touchSessionAccountAffinity(
@@ -164,7 +192,7 @@ export function touchSessionAccountAffinity(
 
 export function deleteSessionAccountAffinity(sessionKey: string, provider: string): void {
   if (!sessionKey || !provider) return;
-  deleteAffinityKey(affinityKey(sessionKey, provider));
+  for (const key of affinityKeys(sessionKey, provider)) deleteAffinityKey(key);
 }
 
 /**
@@ -190,21 +218,23 @@ export function evictSessionAccountAffinityForConnection(
 ): boolean {
   if (!sessionKey || !provider || !connectionId) return false;
 
-  const key = affinityKey(sessionKey, provider);
-  const row = getDbInstance()
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, key) as { value?: unknown } | undefined;
-  const record = parseRecord(row?.value);
+  const winner = stored(sessionKey, provider);
+  const record = parseRecord(winner?.value);
+  if (!record) return false;
+  if (record.accountIdentity && !accountIdentity && canonicalKimiProvider(provider) === "kimi") {
+    const candidate = getDbInstance()
+      .prepare<Record<string, unknown>>("SELECT * FROM provider_connections WHERE id = ?")
+      .get(connectionId);
+    if (!candidate) return false;
+    accountIdentity = sessionAffinityAccountIdentity(candidate, provider);
+  }
   if (
-    !record ||
-    (record.accountIdentity && accountIdentity
-      ? record.accountIdentity !== accountIdentity
-      : record.connectionId !== connectionId)
+    record.accountIdentity && accountIdentity
+      ? !matchesSessionAffinityIdentity(record.accountIdentity, accountIdentity, provider)
+      : record.connectionId !== connectionId
   )
     return false;
-
-  deleteAffinityKey(key);
-  return true;
+  return deleteSessionAccountAffinityIfValue(sessionKey, provider, winner!.value);
 }
 
 export function cleanupStaleSessionAccountAffinities(
@@ -217,11 +247,16 @@ export function cleanupStaleSessionAccountAffinities(
     .all(NAMESPACE) as Array<{ key?: unknown; value?: unknown }>;
   let deleted = 0;
 
+  const hasLegacyHashes = rows.some(
+    (row) => typeof row.key === "string" && row.key.startsWith("moonshot:")
+  );
   const tx = db.transaction(() => {
     for (const row of rows) {
       if (typeof row.key !== "string") continue;
       const record = parseRecord(row.value);
       if (!record || Date.parse(record.expiresAt) <= now) {
+        // An opaque legacy hash cannot be paired here; keep canonical tombstones until raw-key lookup can retire both.
+        if (hasLegacyHashes && row.key.startsWith("kimi:")) continue;
         db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(NAMESPACE, row.key);
         deleted++;
       }

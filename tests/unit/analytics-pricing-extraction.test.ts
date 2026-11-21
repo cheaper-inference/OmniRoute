@@ -126,3 +126,48 @@ test("analytics keeps reported cost separate from token-priced usage", { timeout
     0
   );
 });
+
+test("historical Moonshot rows use Kimi prices before unrelated model fallback", () => {
+  const prices = {
+    foreign: { shared: { marker: 99 } },
+    moonshot: { shared: { marker: 3, legacy: true }, "moonshot/raw": { marker: 4 } },
+    kimi: { shared: { marker: 7 }, "kimi/raw": { marker: 5 } },
+  };
+  const historical = {
+    provider: "moonshot",
+    model: "shared",
+    promptTokens: 1,
+    completionTokens: 0,
+  };
+  assert.equal(
+    computeUsageRowCost(
+      historical,
+      { foreign: prices.foreign, kimi: prices.kimi },
+      {},
+      (m) => m,
+      (price) => Number(price.marker)
+    ),
+    7
+  );
+  for (const provider of ["moonshot", "kimi"]) {
+    for (const [model, expected] of [
+      ["shared", 7],
+      ["moonshot/raw", 4],
+      ["kimi/raw", 5],
+    ] as const) {
+      const row = { provider, model, promptTokens: 1, completionTokens: 0 };
+      const calculate = (price: Record<string, unknown>) => {
+        if (model === "shared") assert.equal(price.legacy, true);
+        return Number(price.marker);
+      };
+      assert.equal(
+        computeUsageRowCost(row, prices, {}, (m) => m, calculate),
+        expected
+      );
+      assert.equal(
+        computeUsageRowStandardCost(row, prices, {}, (m) => m, calculate),
+        expected
+      );
+    }
+  }
+});

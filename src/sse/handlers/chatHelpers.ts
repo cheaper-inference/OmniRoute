@@ -88,10 +88,10 @@ const NON_OAUTH_MODEL_PREFIX = /^(deepseek|qwen|kimi|glm|minimax|mimo)/i;
 const PREFERRED_BY_FAMILY: Record<string, string> = {
   deepseek: "deepseek",
   qwen: "bailian",
-  kimi: "moonshot",
+  kimi: "kimi",
   glm: "zhipu",
   minimax: "minimax",
-  mimo: "moonshot",
+  mimo: "kimi",
 };
 
 const CODEX_NATIVE_RESPONSES_MODELS = new Set(["gpt-5.5"]);

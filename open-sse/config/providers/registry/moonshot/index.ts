@@ -1,4 +1,4 @@
-import { REASONING_UNSUPPORTED, type RegistryEntry, type RegistryModel } from "../../shared.ts";
+import { REASONING_UNSUPPORTED, type RegistryModel } from "../../shared.ts";
 
 // Kimi K3: Moonshot's flagship 1M-context model. The Chat Completions API
 // currently accepts only reasoning_effort="max" while reasoning is enabled.
@@ -98,14 +98,3 @@ export const MOONSHOT_KIMI_MODELS: RegistryModel[] = [
     unsupportedParams: REASONING_UNSUPPORTED,
   },
 ];
-
-export const moonshotProvider: RegistryEntry = {
-  id: "moonshot",
-  alias: "moonshot",
-  format: "openai",
-  executor: "moonshot",
-  baseUrl: "https://api.moonshot.ai/v1/chat/completions",
-  authType: "apikey",
-  authHeader: "bearer",
-  models: MOONSHOT_KIMI_MODELS,
-};

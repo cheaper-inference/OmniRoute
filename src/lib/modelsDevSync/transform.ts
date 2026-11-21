@@ -159,9 +159,9 @@ export const MODELS_DEV_PROVIDER_MAP: Record<string, string[]> = {
   "alibaba-coding-plan": ["bcp", "bailian-coding-plan"],
   zai: ["zai", "glm"], // GLM models via Z.AI
   "zai-coding-plan": ["zai", "glm"],
-  moonshotai: ["moonshot", "kimi"],
-  "moonshotai-cn": ["moonshot", "kimi"],
-  moonshot: ["moonshot", "kimi", "kimi-coding", "kmc", "kmca"],
+  moonshotai: ["kimi"],
+  "moonshotai-cn": ["kimi"],
+  moonshot: ["kimi", "kimi-coding", "kmc", "kmca"],
   minimax: ["minimax", "minimax-cn"],
   "minimax-cn": ["minimax-cn"],
   longcat: ["lc", "longcat"],

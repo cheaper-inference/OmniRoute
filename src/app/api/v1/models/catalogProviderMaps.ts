@@ -14,6 +14,7 @@ export const FALLBACK_ALIAS_TO_PROVIDER = {
   gh: "github",
   kc: "kilocode",
   kmc: "kimi-coding",
+  moonshot: "kimi",
   kr: "kiro",
 };
 
@@ -68,6 +69,7 @@ export function buildAliasMaps() {
     if (!providerIdToAlias[providerId]) providerIdToAlias[providerId] = alias;
   }
 
+  providerIdToAlias.moonshot = "kimi";
   return { aliasToProviderId, providerIdToAlias };
 }
 

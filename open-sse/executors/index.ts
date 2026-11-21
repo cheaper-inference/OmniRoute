@@ -163,8 +163,8 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "kimi-coding-apikey": () =>
     import("./kimi.ts").then((m) => new m.KimiExecutor("kimi-coding-apikey")), // Legacy alias
   "kimi-coding": () => import("./kimi.ts").then((m) => new m.KimiExecutor()), // Alias
-  moonshot: () => import("./moonshot.ts").then((m) => new m.MoonshotExecutor()),
-  kimi: () => import("./moonshot.ts").then((m) => new m.MoonshotExecutor("kimi")), // Hidden legacy Moonshot provider id
+  moonshot: () => import("./moonshot.ts").then((m) => new m.MoonshotExecutor("kimi")),
+  kimi: () => import("./moonshot.ts").then((m) => new m.MoonshotExecutor("kimi")),
   cheaperinference: () =>
     import("./cheaperinference.ts").then((m) => new m.CheaperInferenceExecutor()),
   cinf: () =>

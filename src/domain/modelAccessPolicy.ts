@@ -23,7 +23,12 @@ export interface ModelAccessLookups {
     modelId: string
   ): Promise<{ providerId: string; publishedModelId: string } | null>;
   isPublishedModelHidden(providerId: string, alias: string, modelId: string): boolean;
-  checkGroupAccess(keyId: string, modelId: string, provider?: string): { allowed: boolean };
+  checkGroupAccess(
+    keyId: string,
+    modelId: string,
+    provider?: string,
+    inputKind?: "wire" | "local-qualified"
+  ): { allowed: boolean };
   isDeniedUnderCanonicalProvider(
     keyId: string,
     provider: string | undefined,
@@ -98,8 +103,13 @@ export async function evaluateModelAccess(
       const hasProvider = groupModelId.includes("/");
       const provider = hasProvider ? groupModelId.split("/")[0] : undefined;
       const target = hasProvider ? groupModelId.split("/").slice(1).join("/") : groupModelId;
-      const targetOk = lookups.checkGroupAccess(policy.id, target, provider).allowed;
-      const fullOk = lookups.checkGroupAccess(policy.id, groupModelId, provider).allowed;
+      const targetOk = lookups.checkGroupAccess(policy.id, target, provider, "wire").allowed;
+      const fullOk = lookups.checkGroupAccess(
+        policy.id,
+        groupModelId,
+        provider,
+        "local-qualified"
+      ).allowed;
       if (!targetOk || !fullOk) allowed = false;
 
       if (allowed && (await lookups.isDeniedUnderCanonicalProvider(policy.id, provider, target))) {

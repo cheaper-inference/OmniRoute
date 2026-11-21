@@ -62,7 +62,7 @@ type ProviderConnectionRef = {
 };
 
 function resolveStoredProviderId(aliasOrId: string): string {
-  const normalized = aliasOrId.trim();
+  const normalized = aliasOrId.trim() === "moonshot" ? "kimi" : aliasOrId.trim();
   if (!normalized) return "";
 
   if (Object.prototype.hasOwnProperty.call(PROVIDER_ID_TO_ALIAS, normalized)) {
@@ -84,6 +84,8 @@ function resolveStoredProviderId(aliasOrId: string): string {
  * persist catalogs under `agy:` and the IDE card under `antigravity:`.
  */
 const CATALOG_SIBLING_IDS: Record<string, string[]> = {
+  kimi: ["moonshot"],
+  moonshot: ["kimi"],
   antigravity: ["agy"],
   agy: ["antigravity"],
 };

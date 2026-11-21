@@ -44,7 +44,10 @@ import {
   type RateLimitedCredentials,
 } from "@/app/api/v1/_shared/rateLimit";
 import { getSettings } from "@/lib/db/settings";
-import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
+import {
+  isProviderBlockedByIdOrAlias,
+  normalizeBlockedProviderSet,
+} from "@/shared/utils/noAuthProviders";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
 import type { z } from "zod";
@@ -225,7 +228,11 @@ async function executeSearchBody(
 
   // Resolve provider and credentials
   if (body.provider) {
-    if (isProviderBlockedByIdOrAlias(body.provider, blockedProviders)) {
+    if (
+      body.provider === "moonshot"
+        ? normalizeBlockedProviderSet(blockedProviders).has("moonshot")
+        : isProviderBlockedByIdOrAlias(body.provider, blockedProviders)
+    ) {
       return errorResponse(
         HTTP_STATUS.FORBIDDEN,
         `Search provider ${body.provider} is blocked by security policy`

@@ -13,16 +13,14 @@ const featuredProviders =
 const KIMI_CODING_AFF_URL = "https://www.kimi.ai/code?aff=omniroute";
 const KIMI_PLATFORM_AFF_URL = "https://platform.kimi.ai?aff=omniroute";
 
-test("moonshot: id/alias/routing untouched, display name rebranded to 'Kimi'", () => {
-  const moonshot = providers.APIKEY_PROVIDERS.moonshot;
-  assert.ok(moonshot, "moonshot must still exist in the apikey catalog");
-  assert.equal(moonshot.id, "moonshot", "id must never change — DB/routes/combos address it by id");
-  assert.equal(moonshot.alias, "moonshot", "alias must never change");
-  assert.equal(moonshot.name, "Kimi", "display name is the rebrand target");
-});
-
-test("moonshot top-of-page link: the Kimi API Platform aff link (was unattributed platform.moonshot.ai)", () => {
-  assert.equal(providers.APIKEY_PROVIDERS.moonshot.website, KIMI_PLATFORM_AFF_URL);
+test("the canonical Kimi API card keeps its brand and affiliate link", () => {
+  const kimi = providers.APIKEY_PROVIDERS.kimi;
+  assert.equal(kimi.id, "kimi");
+  assert.equal(kimi.alias, "kimi");
+  assert.equal(kimi.name, "Kimi");
+  assert.equal(kimi.website, KIMI_PLATFORM_AFF_URL);
+  assert.equal(providers.resolveProviderId("moonshot"), "kimi");
+  assert.equal("moonshot" in providers.APIKEY_PROVIDERS, false);
 });
 
 test("kimi-coding (Kimi Code CLI) top-of-page link: the Kimi Coding Plan aff link (was missing)", () => {
@@ -43,7 +41,7 @@ test("kimi-coding-apikey (hidden, folds into kimi-coding card) also carries the 
   assert.equal(providers.APIKEY_PROVIDERS["kimi-coding-apikey"].website, KIMI_CODING_AFF_URL);
 });
 
-test("legacy 'kimi' alias (hidden) is aligned to the platform aff link too", () => {
+test("canonical Kimi keeps the platform affiliate link", () => {
   assert.equal(providers.APIKEY_PROVIDERS.kimi.website, KIMI_PLATFORM_AFF_URL);
 });
 
@@ -68,6 +66,6 @@ test("no visible Kimi provider website field still points at the unattributed pl
 test("runtime endpoints are untouched by the rename/aff-link changes (moonshot API base URL still api.moonshot.ai)", async () => {
   // Guard against the aff-link change ever leaking into a runtime executor
   // config — website is a UI navigation field only, never a fetch target.
-  const registry = await import("../../open-sse/config/providers/registry/moonshot/index.ts");
-  assert.equal(registry.moonshotProvider.baseUrl, "https://api.moonshot.ai/v1/chat/completions");
+  const registry = await import("../../open-sse/config/providers/registry/kimi/index.ts");
+  assert.equal(registry.kimiProvider.baseUrl, "https://api.moonshot.ai/v1/chat/completions");
 });

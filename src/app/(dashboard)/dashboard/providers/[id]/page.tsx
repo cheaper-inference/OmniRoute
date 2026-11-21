@@ -1,8 +1,7 @@
+import { redirect } from "next/navigation";
 import ProviderDetailPageClient from "./ProviderDetailPageClient";
 
-// Thin route wrapper — all logic lives in ProviderDetailPageClient (Issue #3501,
-// Phase 0 of the strangler-fig decomposition of this 12.8K-LOC god-component).
-// The client reads the route id itself via useParams(), so no props are threaded.
-export default function ProviderDetailPage() {
+export default async function ProviderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  if ((await params).id === "moonshot") redirect("/dashboard/providers/kimi");
   return <ProviderDetailPageClient />;
 }

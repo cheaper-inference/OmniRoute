@@ -1,3 +1,5 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
+import { mergeKimiPricingTables, normalizeKimiPricingLayer } from "../../kimiPricing";
 /**
  * db/settings/pricing.ts — Pricing data CRUD (user overrides, LiteLLM sync, models.dev sync).
  */
@@ -111,10 +113,10 @@ async function getPricingLayers() {
   const litellm = readPricingNamespace(db, "pricing_synced");
   remapHistoricalLitellmRows(litellm);
   return {
-    defaults: getDefaultPricing(),
-    litellm,
-    modelsDev: readPricingNamespace(db, "models_dev_pricing"),
-    user: readPricingNamespace(db, "pricing"),
+    defaults: normalizeKimiPricingLayer(getDefaultPricing()),
+    litellm: normalizeKimiPricingLayer(litellm),
+    modelsDev: normalizeKimiPricingLayer(readPricingNamespace(db, "models_dev_pricing")),
+    user: normalizeKimiPricingLayer(readPricingNamespace(db, "pricing")),
   };
 }
 
@@ -161,8 +163,14 @@ export function findProviderPricing(
   provider: string,
   find: PricingKeyFinder = findKeyInsensitive
 ): PricingModels | null {
-  const pLower = (provider || "").toLowerCase();
-  let providerPricing = find<PricingModels>(pricing, pLower);
+  const pLower = canonicalKimiProvider((provider || "").toLowerCase());
+  let providerPricing =
+    pLower === "kimi"
+      ? mergeKimiPricingTables(
+          find<PricingModels>(pricing, "moonshot"),
+          find<PricingModels>(pricing, "kimi")
+        )
+      : find<PricingModels>(pricing, pLower);
 
   if (!providerPricing) {
     const alias = find<string>(PROVIDER_ID_TO_ALIAS, pLower);
@@ -224,9 +232,15 @@ export async function updatePricing(pricingData: PricingByProvider) {
     existing[key] = toRecord(JSON.parse(rawValue)) as PricingModels;
   }
 
+  const nativeUpdate = Object.hasOwn(pricingData, "kimi") || Object.hasOwn(pricingData, "moonshot");
+  const previous = nativeUpdate ? normalizeKimiPricingLayer(existing) : existing;
+  const incoming = normalizeKimiPricingLayer(pricingData);
   const tx = db.transaction(() => {
-    for (const [provider, models] of Object.entries(pricingData)) {
-      insert.run(provider, JSON.stringify({ ...(existing[provider] || {}), ...models }));
+    for (const [provider, models] of Object.entries(incoming)) {
+      insert.run(provider, JSON.stringify({ ...(previous[provider] || {}), ...models }));
+    }
+    if (nativeUpdate) {
+      db.prepare("DELETE FROM key_value WHERE namespace = 'pricing' AND key = 'moonshot'").run();
     }
   });
   tx();
@@ -247,27 +261,35 @@ export async function updatePricing(pricingData: PricingByProvider) {
 export async function resetPricing(provider: string, model?: string) {
   const db = getDbInstance();
 
-  if (model) {
-    const row = db
-      .prepare("SELECT value FROM key_value WHERE namespace = 'pricing' AND key = ?")
-      .get(provider);
-    if (row) {
-      const rowRecord = toRecord(row);
-      const value = typeof rowRecord.value === "string" ? rowRecord.value : "{}";
-      const models = toRecord(JSON.parse(value));
-      delete models[model];
-      if (Object.keys(models).length === 0) {
-        db.prepare("DELETE FROM key_value WHERE namespace = 'pricing' AND key = ?").run(provider);
+  const providers = canonicalKimiProvider(provider) === "kimi" ? ["kimi", "moonshot"] : [provider];
+  db.transaction(() => {
+    for (const targetProvider of providers) {
+      if (model) {
+        const row = db
+          .prepare("SELECT value FROM key_value WHERE namespace = 'pricing' AND key = ?")
+          .get(targetProvider);
+        if (row) {
+          const rowRecord = toRecord(row);
+          const value = typeof rowRecord.value === "string" ? rowRecord.value : "{}";
+          const models = toRecord(JSON.parse(value));
+          delete models[model];
+          if (Object.keys(models).length === 0) {
+            db.prepare("DELETE FROM key_value WHERE namespace = 'pricing' AND key = ?").run(
+              targetProvider
+            );
+          } else {
+            db.prepare(
+              "UPDATE key_value SET value = ? WHERE namespace = 'pricing' AND key = ?"
+            ).run(JSON.stringify(models), targetProvider);
+          }
+        }
       } else {
-        db.prepare("UPDATE key_value SET value = ? WHERE namespace = 'pricing' AND key = ?").run(
-          JSON.stringify(models),
-          provider
+        db.prepare("DELETE FROM key_value WHERE namespace = 'pricing' AND key = ?").run(
+          targetProvider
         );
       }
     }
-  } else {
-    db.prepare("DELETE FROM key_value WHERE namespace = 'pricing' AND key = ?").run(provider);
-  }
+  })();
 
   backupDbFile("pre-write");
   await touchPricing();

@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "../../config/kimiProvider.ts";
 import { parseModel } from "../model.ts";
 import { splitFingerprintPin } from "./fingerprintExpansion.ts";
 import type { ResolvedComboTarget } from "./types.ts";
@@ -28,7 +29,7 @@ function realConnectionId(connectionId: string): string {
 
 export function targetProvider(target: ResolvedComboTarget): string {
   const parsed = parseModel(target.modelStr);
-  return (
+  return canonicalKimiProvider(
     target.provider || target.providerId || parsed.provider || parsed.providerAlias || "unknown"
   );
 }
@@ -49,9 +50,10 @@ export function groupConnectionsByProvider(
 ): Map<string, ActiveConnectionRecord[]> {
   const grouped = new Map<string, ActiveConnectionRecord[]>();
   for (const connection of connections) {
-    const existing = grouped.get(connection.provider);
+    const providerKey = canonicalKimiProvider(connection.provider);
+    const existing = grouped.get(providerKey);
     if (existing) existing.push(connection);
-    else grouped.set(connection.provider, [connection]);
+    else grouped.set(providerKey, [connection]);
   }
   return grouped;
 }

@@ -1,3 +1,4 @@
+import { canonicalKimiModel } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * POST /api/v1/relay/chat/completions
  *
@@ -324,9 +325,14 @@ async function postHandler(request: Request) {
         const allowedModels: string[] = JSON.parse(token.allowedModels);
         if (allowedModels.length > 0 && !allowedModels.includes("*")) {
           const model = (parsedBody as { model?: string }).model || "";
-          const allowed = allowedModels.some(
-            (p) => model === p || (p.endsWith("*") && model.startsWith(p.slice(0, -1)))
-          );
+          const canonicalModel = canonicalKimiModel(model);
+          const allowed = allowedModels
+            .map(canonicalKimiModel)
+            .some(
+              (p) =>
+                canonicalModel === p ||
+                (p.endsWith("*") && canonicalModel.startsWith(p.slice(0, -1)))
+            );
           if (!allowed) {
             // Echo the requested model string back through buildErrorBody so any
             // accidental path/stack leakage in `model` is sanitized.

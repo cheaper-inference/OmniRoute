@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * GET /v1/me/status — accountQuotas (scope self:account-quota) and the admin
  * "availableProviders" list.
@@ -168,7 +169,9 @@ async function listReachableConnections(
 
 function isProviderShared(provider: string, sharedQuotaProviders: string[] | null | undefined) {
   if (sharedQuotaProviders === null || sharedQuotaProviders === undefined) return true;
-  return sharedQuotaProviders.includes(provider);
+  return sharedQuotaProviders.some(
+    (saved) => canonicalKimiProvider(saved) === canonicalKimiProvider(provider)
+  );
 }
 
 /** Providers of the connections the key can reach, with counts (admin UI). */

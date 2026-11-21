@@ -1,3 +1,4 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 /**
  * lib/chaos/chaosExecutor.ts
  *
@@ -116,6 +117,20 @@ function resolveEffectiveRunParams(
   return { mode, timeoutMs, maxTokens, effectiveSystemPrompt };
 }
 
+function matchesProviderSelector(
+  selector: string,
+  conn: { id?: string; provider?: string },
+  connectionIds: Set<string>
+): boolean {
+  const id = selector.toLowerCase();
+  if (connectionIds.has(id) && canonicalKimiProvider(id) === "kimi")
+    return id === (conn.id || "").toLowerCase();
+  return (
+    id === (conn.id || "").toLowerCase() ||
+    canonicalKimiProvider(id) === canonicalKimiProvider((conn.provider || "").toLowerCase())
+  );
+}
+
 /**
  * Resolve the model ID for a provider connection: an enabled override's `modelId`
  * wins, then the connection's `defaultModel`. Returns `null` when neither is set —
@@ -123,13 +138,11 @@ function resolveEffectiveRunParams(
  */
 function resolveModelId(
   conn: { provider?: string; id?: string; defaultModel?: string | null },
-  overrides: ChaosConfig["providerOverrides"]
+  overrides: ChaosConfig["providerOverrides"],
+  connectionIds: Set<string>
 ): string | null {
   const override = overrides.find(
-    (o) =>
-      o.enabled &&
-      (o.providerId.toLowerCase() === (conn.provider || "").toLowerCase() ||
-        o.providerId.toLowerCase() === (conn.id || "").toLowerCase())
+    (o) => o.enabled && matchesProviderSelector(o.providerId, conn, connectionIds)
   );
   const overrideModel = override?.modelId?.trim();
   if (overrideModel) return overrideModel;
@@ -158,32 +171,35 @@ function buildNoModelResult(provider: ProviderInfo): ModelResult {
 
 /** Narrow `active` connections down to the caller-requested `providers` filter. */
 function filterByRequestedProviders(active: any[], requested: string[]): any[] {
-  const filterSet = new Set(requested.map((p: string) => p.toLowerCase()));
-  const selected = active.filter((c: any) => filterSet.has((c.provider ?? "").toLowerCase()));
+  const filterSet = new Set(requested.map((p: string) => canonicalKimiProvider(p.toLowerCase())));
+  const selected = active.filter((c: any) =>
+    filterSet.has(canonicalKimiProvider((c.provider ?? "").toLowerCase()))
+  );
   if (selected.length === 0) {
     throw new Error(`None of the specified providers are active: ${requested.join(", ")}`);
   }
   return selected;
 }
 
-/** Narrow `active` connections down to the enabled global-config overrides (soft filter). */
+/** Native API overrides must never fall back to a broader account selection. */
 function filterByEnabledOverrides(
   active: any[],
-  enabledOverrides: ChaosConfig["providerOverrides"]
+  enabledOverrides: ChaosConfig["providerOverrides"],
+  connectionIds: Set<string>,
+  strict: boolean
 ): any[] {
-  const overrideIds = new Set(enabledOverrides.map((o) => o.providerId.toLowerCase()));
-  const selected = active.filter(
-    (c: any) =>
-      overrideIds.has((c.provider ?? "").toLowerCase()) ||
-      overrideIds.has((c.id ?? "").toLowerCase())
+  const selected = active.filter((c: any) =>
+    enabledOverrides.some((o) => matchesProviderSelector(o.providerId, c, connectionIds))
   );
-  return selected.length > 0 ? selected : active; // fallback to all active
+  if (strict && selected.length === 0)
+    throw new Error("No active provider connections match the enabled Chaos overrides");
+  return selected.length > 0 ? selected : active;
 }
 
 function toProviderInfoList(selected: any[]): ProviderInfo[] {
   const providerMap = new Map<string, ProviderInfo>();
   for (const conn of selected) {
-    const providerKey = conn.provider || conn.id;
+    const providerKey = conn.provider ? canonicalKimiProvider(conn.provider) : conn.id;
     if (!providerMap.has(providerKey)) {
       providerMap.set(providerKey, {
         id: conn.id,
@@ -204,7 +220,11 @@ function toProviderInfoList(selected: any[]): ProviderInfo[] {
 async function selectChaosProviders(
   input: ChaosRunInput,
   globalConfig: ChaosConfig
-): Promise<{ providers: ProviderInfo[]; enabledOverrides: ChaosConfig["providerOverrides"] }> {
+): Promise<{
+  providers: ProviderInfo[];
+  enabledOverrides: ChaosConfig["providerOverrides"];
+  connectionIds: Set<string>;
+}> {
   const allConnections = await getProviderConnections().catch(() => [] as any[]);
   const active = (Array.isArray(allConnections) ? allConnections : []).filter(
     (c: any) => c.isActive !== false
@@ -214,16 +234,20 @@ async function selectChaosProviders(
     throw new Error("No active provider connections found");
   }
 
+  const strict = globalConfig.providerOverrides.some(
+    (o) => canonicalKimiProvider(o.providerId.toLowerCase()) === "kimi"
+  );
   const enabledOverrides = globalConfig.providerOverrides.filter((o) => o.enabled);
+  const connectionIds = new Set<string>(allConnections.map((c: any) => String(c.id).toLowerCase()));
 
   let selected = active;
   if (input.providers && input.providers.length > 0) {
     selected = filterByRequestedProviders(active, input.providers);
-  } else if (enabledOverrides.length > 0) {
-    selected = filterByEnabledOverrides(active, enabledOverrides);
+  } else if (enabledOverrides.length > 0 || strict) {
+    selected = filterByEnabledOverrides(active, enabledOverrides, connectionIds, strict);
   }
 
-  return { providers: toProviderInfoList(selected), enabledOverrides };
+  return { providers: toProviderInfoList(selected), enabledOverrides, connectionIds };
 }
 
 // ── Internal helpers — single-model dispatch ────────────────────────────────
@@ -361,10 +385,11 @@ async function dispatchParallel(
   providers: ProviderInfo[],
   input: ChaosRunInput,
   overrides: ChaosConfig["providerOverrides"],
-  params: EffectiveRunParams
+  params: EffectiveRunParams,
+  connectionIds: Set<string>
 ): Promise<ModelResult[]> {
   const tasks = providers.map((p) => async () => {
-    const modelId = resolveModelId(p, overrides);
+    const modelId = resolveModelId(p, overrides, connectionIds);
     if (!modelId) return buildNoModelResult(p);
     const messages = buildMessages(params.effectiveSystemPrompt, input.task);
     return dispatchToModel(
@@ -394,13 +419,14 @@ async function dispatchCollaborative(
   providers: ProviderInfo[],
   input: ChaosRunInput,
   overrides: ChaosConfig["providerOverrides"],
-  params: EffectiveRunParams
+  params: EffectiveRunParams,
+  connectionIds: Set<string>
 ): Promise<ModelResult[]> {
   const results: ModelResult[] = [];
   let context = input.task;
 
   for (const p of providers) {
-    const modelId = resolveModelId(p, overrides);
+    const modelId = resolveModelId(p, overrides, connectionIds);
     if (!modelId) {
       results.push(buildNoModelResult(p));
       continue;
@@ -446,17 +472,20 @@ function buildCollaborativeSummary(mode: ChaosMode, results: ModelResult[]): str
 export async function executeChaosRun(input: ChaosRunInput): Promise<ChaosRunResult> {
   const globalConfig = await getChaosConfig();
   const params = resolveEffectiveRunParams(input, globalConfig);
-  const { providers, enabledOverrides } = await selectChaosProviders(input, globalConfig);
+  const { providers, enabledOverrides, connectionIds } = await selectChaosProviders(
+    input,
+    globalConfig
+  );
 
-  if (!providers.some((p) => resolveModelId(p, enabledOverrides))) {
+  if (!providers.some((p) => resolveModelId(p, enabledOverrides, connectionIds))) {
     throw new Error(NO_MODEL_RUN_ERROR);
   }
 
   const startedAt = new Date().toISOString();
   const results =
     params.mode === "parallel"
-      ? await dispatchParallel(providers, input, enabledOverrides, params)
-      : await dispatchCollaborative(providers, input, enabledOverrides, params);
+      ? await dispatchParallel(providers, input, enabledOverrides, params, connectionIds)
+      : await dispatchCollaborative(providers, input, enabledOverrides, params, connectionIds);
 
   const summary = buildCollaborativeSummary(params.mode, results);
 

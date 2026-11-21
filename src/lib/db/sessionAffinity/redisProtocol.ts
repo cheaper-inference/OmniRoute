@@ -19,6 +19,50 @@ redis.call("SET", KEYS[1], ARGV[2], "PX", ARGV[3])
 return {1, ARGV[2], ARGV[3]}
 `;
 
+// Both keys are observed/mutated atomically. Canonical state supersedes the
+// legacy key, including malformed state; retiring it prevents later resurrection.
+// Key slots retain provenance independently of configured Redis prefixes.
+export const READ_KIMI_WITH_TTL = `
+local key = KEYS[1]
+local slot = 1
+local raw = redis.call("GET", key)
+if raw then
+  redis.call("DEL", KEYS[2])
+else
+  key = KEYS[2]
+  slot = 2
+  raw = redis.call("GET", key)
+  if not raw then key = KEYS[1]; slot = 1 end
+end
+return {raw or false, redis.call("PTTL", key), slot}
+`;
+
+export const COMPARE_KIMI_AND_UPDATE = `
+local key = KEYS[1]
+local slot = 1
+local raw = redis.call("GET", key)
+if raw then
+  redis.call("DEL", KEYS[2])
+else
+  key = KEYS[2]
+  slot = 2
+  raw = redis.call("GET", key)
+  if not raw then key = KEYS[1]; slot = 1 end
+end
+local ttl = redis.call("PTTL", key)
+if slot ~= tonumber(ARGV[1]) or (raw or "") ~= ARGV[2] then
+  return {0, raw or false, ttl, slot}
+end
+local existed = raw and 1 or 0
+redis.call("DEL", KEYS[2])
+if ARGV[3] == "" then
+  redis.call("DEL", KEYS[1])
+  return {existed, false, -2, 1}
+end
+redis.call("SET", KEYS[1], ARGV[3], "PX", ARGV[4])
+return {1, ARGV[3], ARGV[4], 1}
+`;
+
 export interface RedisObservation {
   raw: string | null;
   pttl: number;

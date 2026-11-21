@@ -4,6 +4,7 @@
  * models/; this file re-exports their public APIs for backward compatibility.
  */
 
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
 import { getDbInstance } from "./core";
@@ -22,6 +23,12 @@ import {
   persistCanonicalSyncedAvailableModels,
 } from "./models/syncedAvailableModelPersistence";
 import { finishModelCatalogWriteWithBackup } from "./models/modelCatalogWriteSignals";
+import {
+  getRawSyncedAvailableModelsByConnection,
+  SYNCED_AVAILABLE_MODELS_MALFORMED,
+  type SyncedAvailableModelsByConnection,
+} from "./models/syncedAvailableModelReads";
+
 import {
   readCompatList,
   writeCompatList,
@@ -85,6 +92,14 @@ export {
   type SyncedAvailableModelVisionDatabase,
   type SyncedAvailableModelVisionReadOptions,
 } from "./models/syncedAvailableModelVision";
+
+export {
+  getRawSyncedAvailableModelsByConnection,
+  SYNCED_AVAILABLE_MODELS_MALFORMED,
+  type RawSyncedAvailableModelsByConnection,
+  type SyncedAvailableModelsByConnection,
+} from "./models/syncedAvailableModelReads";
+export { getKimiAutoComboInputs, getKimiAutoComboCandidates } from "./models/kimiAutoComboInputs";
 
 // ──────────────── Custom Models ────────────────
 
@@ -469,9 +484,14 @@ export async function getSyncedAvailableModels(
   for (const row of rows) {
     const { key, value } = getKeyValue(row);
     if (!key || value === null) continue;
-    const models = normalizeSyncedAvailableModels(JSON.parse(value), providerId);
-    for (const m of models) {
-      if (m.id) map.set(m.id, m);
+    try {
+      const models = normalizeSyncedAvailableModels(JSON.parse(value), providerId);
+      for (const m of models) {
+        if (m.id) map.set(m.id, m);
+      }
+    } catch (error) {
+      // Native namespace merges must not let one account erase healthy metadata.
+      if (canonicalKimiProvider(providerId) !== "kimi") throw error;
     }
   }
   return Array.from(map.values());
@@ -499,39 +519,25 @@ export function readSyncedOpencodeFamilyModelIds(): Set<string> {
   return ids;
 }
 
-export const SYNCED_AVAILABLE_MODELS_MALFORMED = Symbol("syncedAvailableModelsMalformed");
-export type SyncedAvailableModelsByConnection = Record<string, SyncedAvailableModel[]> & {
-  [SYNCED_AVAILABLE_MODELS_MALFORMED]?: true;
-};
-
-/**
- * Get synced available models for a provider grouped by connection id.
- * A non-enumerable symbol marks malformed persisted rows so strict callers can
- * fail closed without changing the existing Record-shaped API.
- */
 export async function getSyncedAvailableModelsByConnection(
   providerId: string
 ): Promise<SyncedAvailableModelsByConnection> {
-  const db = getDbInstance();
-  const prefix = `${providerId}:`;
-  const rows = db
-    .prepare(
-      "SELECT key, value FROM key_value WHERE namespace = 'syncedAvailableModels' AND key LIKE ?"
-    )
-    .all(`${prefix}%`);
+  const raw = await getRawSyncedAvailableModelsByConnection(providerId);
   const result: SyncedAvailableModelsByConnection = {};
-  for (const row of rows) {
-    const { key, value } = getKeyValue(row);
-    if (!key || value === null || !key.startsWith(prefix)) continue;
+  let malformed = raw[SYNCED_AVAILABLE_MODELS_MALFORMED] === true;
+  for (const [connectionId, row] of Object.entries(raw)) {
+    if (row.malformed) continue;
     try {
-      const connectionId = key.slice(prefix.length);
-      result[connectionId] = normalizeSyncedAvailableModels(JSON.parse(value), providerId);
+      result[connectionId] = normalizeSyncedAvailableModels(row.value, providerId);
     } catch {
-      Object.defineProperty(result, SYNCED_AVAILABLE_MODELS_MALFORMED, {
-        value: true,
-        enumerable: false,
-      });
+      malformed = true;
     }
+  }
+  if (malformed) {
+    Object.defineProperty(result, SYNCED_AVAILABLE_MODELS_MALFORMED, {
+      value: true,
+      enumerable: false,
+    });
   }
   return result;
 }
@@ -580,7 +586,8 @@ export async function getActiveProvidersWithSyncedModel(modelId: string): Promis
        FROM provider_connections pc
        JOIN key_value kv
          ON kv.namespace = 'syncedAvailableModels'
-        AND kv.key = pc.provider || ':' || pc.id
+        AND (kv.key = pc.provider || ':' || pc.id
+          OR (pc.provider IN ('kimi','moonshot') AND kv.key IN ('kimi:' || pc.id,'moonshot:' || pc.id)))
        JOIN json_each(CASE WHEN json_valid(kv.value) THEN kv.value ELSE '[]' END) synced_model
        WHERE pc.is_active = 1
          AND COALESCE(
@@ -593,7 +600,7 @@ export async function getActiveProvidersWithSyncedModel(modelId: string): Promis
        FROM provider_connections pc
        JOIN key_value kv
          ON kv.namespace = 'customModels'
-        AND kv.key = pc.provider
+        AND (kv.key = pc.provider OR (pc.provider IN ('kimi','moonshot') AND kv.key IN ('kimi','moonshot')))
        JOIN json_each(CASE WHEN json_valid(kv.value) THEN kv.value ELSE '[]' END) custom_model
        WHERE pc.is_active = 1
          AND COALESCE(

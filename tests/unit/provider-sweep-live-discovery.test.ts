@@ -48,7 +48,12 @@ interface ModelsBody {
 }
 
 // provider → the upstream /models URL the route resolves from its registry baseUrl.
-const LIVE_CASES: Array<{ provider: string; liveUrl: string; source?: string }> = [
+const LIVE_CASES: Array<{
+  provider: string;
+  liveUrl: string;
+  source?: string;
+  advertisedProvider?: string;
+}> = [
   { provider: "venice", liveUrl: "https://api.venice.ai/api/v1/models" },
   { provider: "deepinfra", liveUrl: "https://api.deepinfra.com/v1/openai/models" },
   { provider: "wandb", liveUrl: "https://api.inference.wandb.ai/v1/models" },
@@ -57,7 +62,11 @@ const LIVE_CASES: Array<{ provider: string; liveUrl: string; source?: string }> 
   { provider: "inference-net", liveUrl: "https://api.inference.net/v1/models" },
   { provider: "hetzner", liveUrl: "https://inference.hetzner.com/api/v1/models" },
   { provider: "grokified", liveUrl: "https://api.grokified.com/v1/models" },
-  { provider: "moonshot", liveUrl: "https://api.moonshot.ai/v1/models" },
+  {
+    provider: "moonshot",
+    liveUrl: "https://api.moonshot.ai/v1/models",
+    advertisedProvider: "kimi",
+  },
   // GPU-cloud / aggregator marketplaces (sweep cont.).
   { provider: "crof", liveUrl: "https://crof.ai/v1/models" },
   { provider: "featherless-ai", liveUrl: "https://api.featherless.ai/v1/models" },
@@ -82,7 +91,7 @@ const LIVE_CASES: Array<{ provider: string; liveUrl: string; source?: string }> 
   { provider: "api-airforce", liveUrl: "https://api.airforce/v1/models" },
 ];
 
-for (const { provider, liveUrl, source = "api" } of LIVE_CASES) {
+for (const { provider, liveUrl, source = "api", advertisedProvider = provider } of LIVE_CASES) {
   test(`sweep: ${provider} import fetches the live /models catalog`, async () => {
     await resetStorage();
     const connection = await providersDb.createProviderConnection({
@@ -113,7 +122,7 @@ for (const { provider, liveUrl, source = "api" } of LIVE_CASES) {
       );
       assert.equal(response.status, 200);
       const body = (await response.json()) as ModelsBody;
-      assert.equal(body.provider, provider);
+      assert.equal(body.provider, advertisedProvider);
       assert.ok(fetched, `should have probed ${liveUrl}`);
       assert.equal(
         body.source,

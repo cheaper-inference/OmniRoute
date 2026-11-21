@@ -1,9 +1,14 @@
+import { canonicalKimiProvider } from "@omniroute/open-sse/config/kimiProvider.ts";
+import { matchesSessionAffinityIdentity } from "./accountIdentity";
 import { createHash } from "node:crypto";
 import { createRedisLogThrottle } from "@/shared/utils/rateLimiter";
 import { parseRecord, type sqliteSessionAffinityStore } from "./sqliteStore";
 import {
   COMPARE_AND_UPDATE,
   READ_WITH_TTL,
+  READ_KIMI_WITH_TTL,
+  COMPARE_KIMI_AND_UPDATE,
+  type RedisObservation,
   liveRedisRecord,
   redisReadResult,
   redisMutationResult,
@@ -64,13 +69,78 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
   private outstanding = 0;
   // Opaque provenance retains original Redis bytes across local deadline mapping.
   // SQLite fallback objects carry no shared authority and compare as a miss.
-  private readonly observations = new WeakMap<SessionAccountAffinityRecord, string>();
+  private readonly observations = new WeakMap<
+    SessionAccountAffinityRecord,
+    RedisObservation & { key: string }
+  >();
 
   constructor(
     private readonly getClient: () => Promise<AffinityRedisClient>,
     private readonly fallback: LocalStore,
     private readonly timeoutMs: number
   ) {}
+
+  private async read(
+    client: AffinityRedisClient,
+    session: string,
+    provider: string,
+    rawOnly = false
+  ): Promise<RedisObservation & { key: string }> {
+    const key = keyFor(session, provider);
+    if (provider === "kimi") {
+      const reply = await client.eval(READ_KIMI_WITH_TTL, 2, key, keyFor(session, "moonshot"));
+      return {
+        ...redisReadResult(reply),
+        key: Number((reply as unknown[])[2]) === 2 ? keyFor(session, "moonshot") : key,
+      };
+    }
+    return rawOnly
+      ? { raw: await client.get(key), pttl: -1, key }
+      : { ...redisReadResult(await client.eval(READ_WITH_TTL, 1, key)), key };
+  }
+
+  private async mutate(
+    client: AffinityRedisClient,
+    session: string,
+    provider: string,
+    observed: RedisObservation & { key: string },
+    replacement: string,
+    ttl: number
+  ): Promise<RedisObservation & { key: string; updated: number }> {
+    const key = keyFor(session, provider);
+    if (provider === "kimi") {
+      const reply = await client.eval(
+        COMPARE_KIMI_AND_UPDATE,
+        2,
+        key,
+        keyFor(session, "moonshot"),
+        observed.key === key ? 1 : observed.key === keyFor(session, "moonshot") ? 2 : 0,
+        observed.raw ?? "",
+        replacement,
+        ttl
+      );
+      return {
+        ...redisMutationResult(reply),
+        key: Number((reply as unknown[])[3]) === 2 ? keyFor(session, "moonshot") : key,
+      };
+    }
+    return {
+      ...redisMutationResult(
+        await client.eval(COMPARE_AND_UPDATE, 1, key, observed.raw ?? "", replacement, ttl)
+      ),
+      key,
+    };
+  }
+
+  private observed(session: string, provider: string, value: SessionAccountAffinityRecord | null) {
+    return (
+      (value && this.observations.get(value)) || {
+        key: keyFor(session, provider),
+        raw: null,
+        pttl: -2,
+      }
+    );
+  }
 
   private async run<T>(
     operation: (client: AffinityRedisClient, signal: AbortSignal) => Promise<T>,
@@ -137,15 +207,14 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
     ttlMs = 0,
     now = Date.now()
   ): Promise<SessionAccountAffinityRecord | null> {
+    provider = canonicalKimiProvider(provider);
     if (!enabled(sessionKey, provider, ttlMs)) return Promise.resolve(null);
     return this.run(
       async (client, signal) => {
-        const result = redisReadResult(
-          await client.eval(READ_WITH_TTL, 1, keyFor(sessionKey, provider))
-        );
+        const result = await this.read(client, sessionKey, provider);
         const record = liveRedisRecord(result, now);
         if (!signal.aborted) this.fallback.delete(sessionKey, provider);
-        if (record) this.observations.set(record, result.raw!);
+        if (record) this.observations.set(record, result);
         return record;
       },
       () => this.fallback.get(sessionKey, provider, ttlMs, now)
@@ -161,22 +230,22 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
     accountIdentity?: string,
     observed?: SessionAccountAffinityRecord | null
   ): Promise<void | SessionAccountAffinityRecord | null> {
+    provider = canonicalKimiProvider(provider);
     if (!enabled(sessionKey, provider, ttlMs) || !connectionId) return;
-    const key = keyFor(sessionKey, provider);
     let commandStarted = false;
     let fallbackValue: string | null = null;
     return this.run<void | SessionAccountAffinityRecord | null>(
       async (client, signal) => {
-        let raw: string | null;
+        let observation: RedisObservation & { key: string };
         if (observed === undefined) {
           commandStarted = true;
-          raw = redisReadResult(await client.eval(READ_WITH_TTL, 1, key)).raw;
+          observation = await this.read(client, sessionKey, provider);
           if (!signal.aborted) this.fallback.delete(sessionKey, provider);
         } else {
-          raw = observed === null ? null : (this.observations.get(observed) ?? null);
+          observation = this.observed(sessionKey, provider, observed);
         }
         signal.throwIfAborted();
-        const existing = parseRecord(raw);
+        const existing = parseRecord(observation.raw);
         const timestamp = new Date(now).toISOString();
         const record: SessionAccountAffinityRecord = {
           connectionId,
@@ -186,14 +255,19 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
           expiresAt: new Date(now + ttlMs).toISOString(),
         };
         commandStarted = true;
-        const result = redisMutationResult(
-          await client.eval(COMPARE_AND_UPDATE, 1, key, raw ?? "", JSON.stringify(record), ttlMs)
+        const result = await this.mutate(
+          client,
+          sessionKey,
+          provider,
+          observation,
+          JSON.stringify(record),
+          ttlMs
         );
         if (signal.aborted) return;
         this.fallback.delete(sessionKey, provider);
         if (result.updated <= 0) {
           const winner = liveRedisRecord(result, now);
-          if (winner) this.observations.set(winner, result.raw!);
+          if (winner) this.observations.set(winner, result);
           return winner;
         }
       },
@@ -218,14 +292,14 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
   }
 
   async touch(sessionKey: string, provider: string, now = Date.now(), ttlMs = 0): Promise<void> {
+    provider = canonicalKimiProvider(provider);
     if (!enabled(sessionKey, provider, ttlMs)) return;
-    const key = keyFor(sessionKey, provider);
     let commandStarted = false;
     let fallbackValue: string | null = null;
     await this.run(
       async (client, signal) => {
         commandStarted = true;
-        const result = redisReadResult(await client.eval(READ_WITH_TTL, 1, key));
+        const result = await this.read(client, sessionKey, provider);
         signal.throwIfAborted();
         this.fallback.delete(sessionKey, provider);
         const existing = liveRedisRecord(result, now);
@@ -235,7 +309,7 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
           lastUsedAt: new Date(now).toISOString(),
           expiresAt: new Date(now + ttlMs).toISOString(),
         };
-        await client.eval(COMPARE_AND_UPDATE, 1, key, result.raw!, JSON.stringify(record), ttlMs);
+        await this.mutate(client, sessionKey, provider, result, JSON.stringify(record), ttlMs);
         if (!signal.aborted) this.fallback.delete(sessionKey, provider);
       },
       () => {
@@ -255,23 +329,19 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
     provider: string,
     observed?: SessionAccountAffinityRecord | null
   ): Promise<void> {
+    provider = canonicalKimiProvider(provider);
     if (!sessionKey || !provider) return;
     await this.run(
       async (client, signal) => {
-        const key = keyFor(sessionKey, provider);
-        let raw: string | null;
+        let observation: RedisObservation & { key: string };
         if (observed === undefined) {
-          raw = await client.get(key);
+          observation = await this.read(client, sessionKey, provider, true);
           if (!signal.aborted) this.fallback.delete(sessionKey, provider);
         } else {
-          raw = observed === null ? null : (this.observations.get(observed) ?? null);
+          observation = this.observed(sessionKey, provider, observed);
         }
         signal.throwIfAborted();
-        if (raw === null) {
-          this.fallback.delete(sessionKey, provider);
-          return;
-        }
-        await client.eval(COMPARE_AND_UPDATE, 1, key, raw, "", 0);
+        await this.mutate(client, sessionKey, provider, observation, "", 0);
         if (!signal.aborted) this.fallback.delete(sessionKey, provider);
       },
       () => this.fallback.delete(sessionKey, provider)
@@ -284,26 +354,27 @@ export class RedisSessionAffinityStore implements SessionAffinityStore {
     connectionId: string,
     accountIdentity?: string
   ): Promise<boolean> {
+    provider = canonicalKimiProvider(provider);
     if (!sessionKey || !provider || !connectionId) return false;
     // Remove this failed account locally even when Redis is down. No shared reply
     // can reinstall it; a later outage fallback is the only possible local writer.
     const localEvicted = this.fallback.evict(sessionKey, provider, connectionId, accountIdentity);
     return this.run(
       async (client, signal) => {
-        const key = keyFor(sessionKey, provider);
-        const raw = await client.get(key);
+        const observation = await this.read(client, sessionKey, provider, true);
         signal.throwIfAborted();
-        const record = parseRecord(raw);
+        const record = parseRecord(observation.raw);
         this.fallback.delete(sessionKey, provider);
         if (
           !record ||
+          (provider === "kimi" && record.accountIdentity && !accountIdentity) ||
           (record.accountIdentity && accountIdentity
-            ? record.accountIdentity !== accountIdentity
+            ? !matchesSessionAffinityIdentity(record.accountIdentity, accountIdentity, provider)
             : record.connectionId !== connectionId)
         )
           return localEvicted;
-        const reply = await client.eval(COMPARE_AND_UPDATE, 1, key, raw!, "", 0);
-        const deleted = Array.isArray(reply) ? Number(reply[0]) : Number(reply);
+        const reply = await this.mutate(client, sessionKey, provider, observation, "", 0);
+        const deleted = reply.updated;
         if (!signal.aborted) this.fallback.delete(sessionKey, provider);
         return deleted > 0 || localEvicted;
       },
