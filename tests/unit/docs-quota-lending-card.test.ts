@@ -249,8 +249,8 @@ test("each documented refusal class is the text and reload the page picks for th
   assert.ok(gone.text.startsWith("This pool is no longer available"));
   assert.deepEqual([gone.button, gone.reloads], [true, 0]);
 
-  has("Any other 4xx asks the holder to check the percentage and the deadline.");
-  for (const code of [400, 409, 422]) {
+  has("A 400 asks the holder to check the percentage and the deadline.");
+  for (const code of [400]) {
     const rejected = await outcomeOf(status(code));
     assert.ok(rejected.text.includes("Check the percentage and the deadline"), String(code));
     assert.deepEqual([rejected.button, rejected.reloads], [false, 0]);

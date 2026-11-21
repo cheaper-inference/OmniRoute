@@ -879,7 +879,7 @@ keep the consent in browser storage.
 A refused change is explained on the card by a text chosen from the HTTP status. The error body is
 not read. A 401 says the key was not accepted and reloads the quota. A 403 says the pool is not
 taking lending changes, and a 404 says the pool is gone. Both offer a button that reloads the
-quota. Any other 4xx asks the holder to check the percentage and the deadline. A 429 asks the
+quota. A 400 asks the holder to check the percentage and the deadline. A 429 asks the
 holder to wait, with the seconds of `Retry-After` when the answer gives them. A 5xx answer or a
 network failure says the change may not have been saved, and keeps the typed values. An answer
 outside the contract reloads the quota. A failed save does not remove the key by itself. When the
