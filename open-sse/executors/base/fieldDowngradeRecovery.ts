@@ -1,4 +1,4 @@
-// Reactive 400 field-downgrade (and auto-learn) retry, extracted verbatim in
+// Reactive 400/422 field-downgrade (and auto-learn) retry, extracted verbatim in
 // behavior from BaseExecutor.execute() (base.ts) to keep that file under its
 // frozen size cap. On an upstream 400 that names an offending request field,
 // the field is deleted from the live body and the SAME url is retried once per
@@ -16,6 +16,7 @@ import { isK31RejectionFinal } from "../../utils/kimiK31.ts";
 import {
   findOffendingField,
   detectRejectedMessageFields,
+  detectRejectedTopLevelFields,
   detectUnsupportedParam,
   isUnsupportedThinkingError,
   REASONING_REQUEST_FIELDS,
@@ -125,11 +126,12 @@ async function applyMessageFieldRecovery(
   errText: string
 ): Promise<Response | null> {
   const { url, body, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
+  const structuredOnly = params.response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY;
   const messages = record.messages;
   if (!Array.isArray(messages)) return null;
   const hasField = (field: string) =>
     messages.some((m) => m && typeof m === "object" && Object.hasOwn(m, field));
-  const fields = detectRejectedMessageFields(errText).filter(
+  const fields = detectRejectedMessageFields(errText, { structuredOnly }).filter(
     (field) =>
       !params.protectedFields?.includes(field) &&
       !strippedFields.has(`messages.*.${field}`) &&
@@ -151,18 +153,75 @@ async function applyMessageFieldRecovery(
   return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
+/**
+ * pydantic/FastAPI validation errors (Mistral's 422) name rejected top-level fields in
+ * `detail[].loc = ["body", field]`. Drop them and retry once; null when nothing applies.
+ */
+async function applyTopLevelFieldRecovery(
+  params: FieldDowngradeParams,
+  record: Record<string, unknown>,
+  errText: string
+): Promise<Response | null> {
+  const { url, body, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
+  const fields = detectRejectedTopLevelFields(errText).filter(
+    (field) =>
+      !params.protectedFields?.includes(field) &&
+      !strippedFields.has(field) &&
+      record[field] !== undefined
+  );
+  if (fields.length === 0) return null;
+  for (const field of fields) {
+    strippedFields.add(field);
+    delete record[field];
+  }
+  const retryBody = await serializeBody(body);
+  log?.debug?.(
+    "FIELD_400",
+    `Upstream validation error rejected ${fields.join(", ")} on ${url} — retrying without it`
+  );
+  return fetchFn(url, { ...fetchOptions, body: retryBody });
+}
+
+function isFieldRejectionStatus(status: number): boolean {
+  return status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY;
+}
+
+// A strict upstream reports its violations in stages (one rejected field per response), so a
+// retry's own 400/422 may name the next field. Every field is stripped at most once, which
+// bounds the chain; this cap bounds the added round trips.
+const MAX_FIELD_RECOVERY_ROUNDS = 4;
+
 /** Returns the response to use going forward (the retry's when one was issued). */
 export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams): Promise<Response> {
+  let current = params;
+  for (let round = 0; round < MAX_FIELD_RECOVERY_ROUNDS; round++) {
+    const next = await applyFieldDowngradeRecoveryOnce(current);
+    if (next === current.response || !isFieldRejectionStatus(next.status)) return next;
+    current = { ...current, response: next };
+  }
+  return current.response;
+}
+
+async function applyFieldDowngradeRecoveryOnce(params: FieldDowngradeParams): Promise<Response> {
   const { url, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
   const { response } = params;
   const body = params.body;
-  if (response.status !== HTTP_STATUS.BAD_REQUEST || !body || typeof body !== "object") {
+  if (!isFieldRejectionStatus(response.status) || !body || typeof body !== "object") {
     return response;
   }
   const record = body as Record<string, unknown>;
   if (isK31RejectionFinal(params.model, record)) return response;
 
   const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
+  // A 422 is a structured schema validation error: only act on the fields its `loc` paths
+  // name. The substring/prose heuristics below can match user content echoed in `input`.
+  if (response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+    return (
+      (await applyMessageFieldRecovery(params, record, errText)) ??
+      (await applyTopLevelFieldRecovery(params, record, errText)) ??
+      response
+    );
+  }
   const offending = findOffendingField(errText);
   if (
     offending &&
@@ -178,6 +237,8 @@ export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams):
   }
   const messageFieldRetry = await applyMessageFieldRecovery(params, record, errText);
   if (messageFieldRetry) return messageFieldRetry;
+  const topLevelRetry = await applyTopLevelFieldRecovery(params, record, errText);
+  if (topLevelRetry) return topLevelRetry;
   const thinkingRetry = await applyThinkingUnsupportedRecovery(params, record, errText);
   if (thinkingRetry) return thinkingRetry;
   return (await applyAutoLearnRecovery(params, record, errText)) ?? response;
