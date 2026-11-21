@@ -1,0 +1,1 @@
+- **fix(usage):** Keep provider-window USD values separate from API-key budget entries, price each request with declared model-alias fallback, and disclose incomplete pricing without extrapolating a full subscription allowance ([#19691](https://github.com/cheaper-inference/OmniRoute/pull/19691)) — thanks @xiaoyaner0201
