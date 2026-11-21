@@ -16211,7 +16211,8 @@ paths:
         is on (a request that reaches the route gets 404 otherwise). Authenticate with
         `Authorization: Bearer <key>` or `x-api-key: <key>`; the key is never read from the query
         string or a cookie. Requires scope `self:usage`. The key is checked before `range`.
-        Provider and model are returned as recorded. A combo request whose every target was
+        Provider is returned as recorded. Model is the recorded name after its last `/`, and
+        rows are grouped by it. A combo request whose every target was
         refused is recorded with the routing label as provider (the combo name, `auto` or
         `combo`) and the model string the client sent. `costUsd` is the billed cost, where
         flat-rate subscription providers count $0. `listPriceUsd` prices the same usage at list
