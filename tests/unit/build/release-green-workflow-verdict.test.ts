@@ -156,3 +156,113 @@ for (const job of ["release-green", "main-green"]) {
     }
   });
 }
+
+function reportFailure(
+  job: string,
+  fixture: { remote?: string; gitExit?: number; existing?: string; validated?: string } = {}
+) {
+  const step = workflow.jobs[job].steps.find((step) =>
+    step.name?.startsWith("Open / update tracking issue")
+  );
+  assert.ok(step?.run);
+  const target = job === "main-green" ? "main" : "release/v3.8.55";
+  const dir = mkdtempSync(join(tmpdir(), "omni-green-failure-issue-"));
+  try {
+    const calls = join(dir, "calls");
+    const body = join(dir, "issue-body.md");
+    writeFileSync(calls, "");
+    writeFileSync(join(dir, `${job}.log`), "validation failed\n");
+    const result = spawnSync(
+      "bash",
+      [
+        "-euo",
+        "pipefail",
+        "-c",
+        `
+        git() {
+          printf 'git %s\\n' "$*" >> "$FIXTURE_CALLS"
+          printf '%s' "$FIXTURE_REMOTE"
+          return "$FIXTURE_GIT_EXIT"
+        }
+        gh() {
+          printf 'gh %s\\n' "$*" >> "$FIXTURE_CALLS"
+          if [ "$2" = "list" ]; then printf '%s\\n' "$FIXTURE_EXISTING"; fi
+        }
+        ${step.run}
+        `,
+      ],
+      {
+        cwd: dir,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          GH_TOKEN: "",
+          TARGET: target,
+          VALIDATED_SHA: fixture.validated ?? sha,
+          RUN_URL: "https://example.invalid/runs/1",
+          GITHUB_REPOSITORY: "fixture/repo",
+          EVENT_NAME: "workflow_dispatch",
+          FIXTURE_CALLS: calls,
+          FIXTURE_REMOTE: fixture.remote ?? `${sha}\trefs/heads/${target}`,
+          FIXTURE_GIT_EXIT: String(fixture.gitExit ?? 0),
+          FIXTURE_EXISTING: fixture.existing ?? "",
+        },
+      }
+    );
+    assert.equal(result.error, undefined);
+    assert.equal(result.status, 0, result.stderr);
+    return {
+      stdout: result.stdout,
+      calls: readFileSync(calls, "utf8"),
+      body: existsSync(body) ? readFileSync(body, "utf8") : "",
+      target,
+    };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+for (const job of ["release-green", "main-green"]) {
+  test(`${job}: a stale failed observation cannot mutate the tracking issue`, () => {
+    const target = job === "main-green" ? "main" : "release/v3.8.55";
+    for (const existing of ["", "123"]) {
+      const result = reportFailure(job, {
+        remote: `${"2".repeat(40)}\trefs/heads/${target}`,
+        existing,
+      });
+      assert.doesNotMatch(result.calls, /^gh issue (create|comment)\b/m);
+      assert.match(result.stdout, /::notice::/);
+    }
+  });
+  test(`${job}: missing, malformed or ambiguous revision evidence cannot mutate the issue`, () => {
+    const target = job === "main-green" ? "main" : "release/v3.8.55";
+    for (const fixture of [
+      { gitExit: 128 },
+      { remote: "" },
+      { remote: "invalid" },
+      { remote: `${sha}\trefs/heads/another` },
+      { remote: `${sha}\trefs/heads/${target}\n${sha}\trefs/heads/${target}` },
+      { validated: "" },
+    ]) {
+      const result = reportFailure(job, { ...fixture, existing: "123" });
+      assert.doesNotMatch(result.calls, /^gh issue (create|comment)\b/m);
+      assert.match(result.stdout, /::warning::/);
+    }
+  });
+  test(`${job}: a current failed observation creates or updates its issue`, () => {
+    const step = workflow.jobs[job].steps.find((step) =>
+      step.name?.startsWith("Open / update tracking issue")
+    );
+    for (const existing of ["", "123"]) {
+      const result = reportFailure(job, { existing });
+      const lines = result.calls.trim().split("\n");
+      assert.match(lines[0], /^gh issue list /);
+      assert.equal(lines[1], `git ls-remote --exit-code --refs origin refs/heads/${result.target}`);
+      assert.match(lines[2], existing ? /^gh issue comment 123 / : /^gh issue create /);
+      assert.equal(lines.length, 3);
+      assert.ok(result.body.includes(sha));
+    }
+    assert.equal(step?.if, "steps.validate.outputs.exit != '0'");
+    assert.equal(step?.env?.VALIDATED_SHA, "${{ steps.revision.outputs.sha }}");
+  });
+}
