@@ -4,10 +4,9 @@
 
 ---
 
-Láti v3.8.49 (WS3.2/WS3.4 ti ètò quality/velocity) ọ̀nà ìdarapọ̀ àìròtẹ́lẹ̀ fún
-àwọn PR tí a ti ṣàyẹ̀wò sínú `release/vX.Y.Z` ni **ìlà ìdarapọ̀ Mergify** (`.mergify.yml`);
-**ọkọ̀-ìdarapọ̀ afọwọ́ṣe** tí a ṣàkọsílẹ̀ rẹ̀ ní ìsàlẹ̀ ni Ọ̀NÀ ÀFẸ́YÌNTÌ — a máa ń lò ó nígbà ìṣẹ̀lẹ̀,
-ìdádúró ìtújáde, tàbí bí ètò Mergify Open Source bá yí padà láéláé.
+> **2026-11-19: ti isinyi Mergify àkópọ ti fẹyìntì** (ipinnu eni). `.mergify.yml` ko ṣe alaye ti isinyi mọ ati kọ awọn aṣẹ Mergify ti o dapọ tabi tunkọ ibeere fa. Tu PRs ti wa ni dapọ nipa ọwọ labẹ awọn ibi ipamọ awọn ofinet "Beere alawọ ewe ibode lori awọn ti nṣiṣe lọwọ Tu" (`Gate / CI` + `Gate / Quality`) titi omni-isinyi gbalaye ni ifiwe mode, ati nipasẹ omni-isinyi lẹhin ti ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Awọn apakan Mergify ni isalẹ ṣe apejuwe isinyi bi o ti jẹ.
+
+Niwọn igba ti v3.8.49 (WS3.2/WS3.4 ti ero quality/velocity ) ọna idapọ aiyipada fun PRs atunyẹwo sinu `release/vX.Y.Z` ni** Ṣafikun isinyi akojọpọ** (`.mergify.yml`); awọn** Afowoyi dapọ-reluwe** ti a ṣe akọsilẹ ni isalẹ ni FALLBACK — ti a lo lakoko awọn iṣẹlẹ, awọn didi idasilẹ, tabi ti ero Orisun Ṣiṣii Mergify ba yipada lailai.
 
 ## Ọ̀nà àìyípadà: ìlà Mergify
 

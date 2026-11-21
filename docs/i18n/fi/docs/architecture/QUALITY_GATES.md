@@ -29,6 +29,8 @@ Jokainen JSON -kuitti tunnistaa uloskirjatun SHA, työnkulun suorituksen ja yrit
 
 ### Yhdistä jono
 
+> **2026-11-19: Mergify-yhdistämisjono on poistettu käytöstä** (omistajan päätös). `.mergify.yml` ei enää määritä jonoa ja hylkää Mergify-komennot, jotka yhdistävät tai kirjoittavat uudelleen vetopyynnön. Julkaisuhaaran vetopyynnöt yhdistetään manuaalisesti arkiston sääntöjoukon "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) alla, kunnes omni-queue toimii live-tilassa ja sen jälkeen omni-queue kautta ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). Alla kuvattu Mergify luonnosten työnkulku on edelleen `ci.yml` ja `quality.yml` muodossa, mutta Mergify-luonnoksia ei enää avata.
+
 `queue` -tunniste lähettää PR n yhdistämisjonoon (`.mergify.yml`). Mergify avaa PR -luonnoksen `mergify/merge-queue/` -haarassa, CI suorittaa siellä täyden valikoiman ja alkuperäinen PR sulautuu, kun `Gate / CI`, `Gate / Quality` ja `Merge integrity (changelog + generated skills)` kulkevat.
 
 Mergify kirjoittaa jonon yhteenvedon luonnoksen kuvaukseen, ja myös muut sovellukset voivat muokata sitä. Tällaisen luonnoksen `pull_request` `edited` -tapahtuma ottaa oman samanaikaisuusryhmänsä (`-queue-edit-<run_id>`), joten se ei voi peruuttaa luonnoksen todellista ajoa ja se ohittaa portin ja matriisin. Vain `Merge integrity` toimii edelleen. Ohitetulla porttityöllä on eri tarkistusnimi, koska Mergify lukee ohitetun `Gate / CI` epäonnistuneena tarkistuksena ja poistaa PR n jonosta.

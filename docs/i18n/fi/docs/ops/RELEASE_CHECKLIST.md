@@ -355,112 +355,70 @@ Ennen minkään v3.8.x-julkaisun toimittamista varmista lisäksi seuraavat asiat
 
 ---
 
-## 3.9.0 LTS-haarautus (harjoiteltu versiossa 3.8.58)
+## 3.9.0 LTS -leikkaus (harjoitettu 3.8.58)
 
-Version v3.8.59 jälkeen seuraava versio on 3.9.0, ja sen kärjestä muodostetaan kaksi pitkäikäistä haaraa:
-`stable/v3` (v3:n LTS-linja, npm `latest`) ja `develop` (v4, jonka versioksi nostetaan 4.0.0, npm
-`nightly`). Haara-/kanavamalli, eteenpäin siirto ja tunnisteet on kuvattu tiedostossa
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); suunnitelma on [ROADMAPissa](../../ROADMAP.md) (vaihe 3). Haarautus suoritetaan kerran;
-versiossa 3.8.58 se harjoitellaan alusta loppuun forkissa, ja 3.8.59 viimeistellään
-[GO/NO-GO-tarkistuslistalla](./LTS_GO_NO_GO.md).
+V3.8.59:n jälkeen seuraava versio on 3.9.0, ja sen kärjestä tulee kaksi pitkäikäistä haaraa: `stable/v3` (v3 LTS -linja, npm `latest`) ja `develop` (v4, 4.0.0, npm `nightly`). branch/channel malli, eteenpäin suuntautuva portti ja tarrat ovat muodossa [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; suunnitelma on [ROADMAP](../../ROADMAP.md) :ssa (vaihe 3). Leikkaus suoritetaan kerran; 3.8.58 harjoittelee sen päästä päähän haarukalla ja 3.8.59 päättää [GO/NO-GO tarkistuslistalla](./LTS_GO_NO_GO.md).
 
-### Kuivaharjoittelu (vain luku, turvallinen milloin tahansa)
+### Kuivakäynti (vain luku, turvallinen milloin tahansa)
 
 ```bash
-npm run release:dry-run-lts-cut                       # varsinainen haarautus: 3.9.0 HEADista, edellinen tunniste v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # kiinnitä lähde-commit
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ei suorita mitään: se lukee gitin ja `gh`:n tiedot ja tulostaa
-koko sarjan — ennakkoehdot (lähde voidaan selvittää, lähderepossa on täydellinen historia —
-matalasta kloonista ei voi puskea `stable/v3`-haaraa, koska vastaanottava osapuoli hylkää paketin ensimmäisen
-liitetyn vanhemman kohdalla, joten tee haarautus täydestä kloonista tai suorita ensin `git fetch --unshallow origin` —
-edellinen tunniste on olemassa, `package.json` sisältää kohdeversion, avoin `release-freeze`-issue on olemassa eikä
-olemassa olevassa julkaisuhaarassa ole avointa
-`Release branch not green` -issuea
-— haara, jota ei ole olemassa, ilmoitetaan tuntemattomaksi `?`, ei koskaan vihreäksi —
-Mergifyn `release`-jono on määritetty (G11: `queue_rules`, `checks_timeout`,
-tunniste `queue`), `release/*`-sääntöjoukko estää edelleen poistamisen ja pakotetun puskemisen, eivätkä
-`stable/v3` ja `develop` ole vielä olemassa), kaksi haaravaihetta, mitkä käyttämättöminä olleiden työnkulkujen
-laukaisimet ja `if:`-ehdot muuttuvat tosiksi (ja mitkä pysyvät repomuuttujan estäminä tai
-kanoniseen repoon kiinnitettyinä), odotetut dist-tagit (`latest` → 3.9.0, `next` ja
-`nightly` tyhjiä) sekä palautus. Poistumiskoodi `0` = `RESULT: READY`, `1` = estävä ennakkoehto
-epäonnistui (`✗`), `2` = käyttövirhe. `--advisory <id,...>` alentaa tarkistuksen varoitukseksi (`!`)
-piilottamatta sitä.
+`scripts/release/dry-run-lts-cut.mjs` ei suorita mitään: se lukee git ja `gh` ja tulostaa koko sekvenssin — -ehdot (lähde ratkaisee, lähdearkistolla on täysi historia — matala klooni ei voi työntää `stable/v3`, vastaanottava puoli hylkää paketin ensimmäisellä siirretyllä vanhemmalla, joten leikataan aiemmasta kloonista tai `git fetch --unshallow origin` on olemassa ensin — versio ongelma on avoin, ei avointa `release-freeze` -ongelmaa olemassa olevassa julkaisuhaarassa `Release branch not green` haara — jota ei ole olemassa `package.json` ilmoittaa `?` tuntematon, ei koskaan vihreä — omni-queue laskeutuu julkaisuun PRs (G11: `config/merge-queue/config.json` valid, sen `bases` hallitsee julkaisuhaaraa, `mode` `live`, sen nimiö on olemassa ja `release/*` -pushs anddeleet edelleen). `stable/v3` ei ole vielä olemassa), kaksi haaravaihetta, jotka lepotilan työnkulun laukaisevat ja `develop` `if:` ehdot muuttuvat todeksi (ja jotka pysyvät arkistomuuttujan porteilla tai kiinnitettyinä kanoniseen arkistoon), odotetut dist-tagit (`latest` → 3.9.0, `next` ja `nightly` tyhjä) ja palautus. Poistu `0` = `RESULT: READY`, `1` = a estoehto epäonnistui (`✗`), `2` = käyttövirhe. `--advisory <id,...>` alentaa shekin varoitukseksi (`!`) piilottamatta sitä.
 
-Suorita varsinaisen haarautuksen kuivaharjoittelu, kun version 3.9.0 julkaisujäädytys on vielä voimassa — haarat
-luodaan tunnisteen jälkeen ja ennen kuin vaihe 12c päättää jäädytyksen.
+Suorita todellisen leikkauksen kuivaajo, kun 3.9.0:n vapautusjäädytys on vielä auki — oksat luodaan tagin jälkeen ja ennen kuin vaihe 12c nostaa jäädytyksen.
 
-### Version 3.8.58 harjoittelu (vain forkissa)
+### 3.8.58 harjoitus (vain haarukka)
 
 ```bash
-# 1. Kuivaharjoittele nykyisellä kärjellä käyttäen harjoitteluparametreja
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Suorita FORK-etärepoa vasten (origin tai mikä tahansa etärepo, jonka URL on kanonisen
-#    repon URL, hylätään; jokainen vaihe pyytää vahvistuksen päätteessä)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Testaa forkissa käyttämättöminä olleet työnkulut (workflow_dispatch, jos kuivaharjoittelu
-#    ilmoittaa kiinnityksestä kanoniseen repoon) ja palauta sitten muutokset
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Develop-versionnostocommit muodostetaan gitin matalan tason komennoilla (työpuuhun ei kosketa), ja se päivittää
-samat viisi tiedostoa kuin kehityssyklin avaava commit: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` ja `docs/openapi.yaml`. CHANGELOGin `[4.0.0]`-osio
-ja sen i18n-vastineet avataan tämän jälkeen `develop`-haarassa ennen sen ensimmäistä
-PR:ää. Skripti ei koskaan muuta npm:n dist-tageja — harjoittele niitä testipaketilla.
+Kehitysbump commit on rakennettu git-putkistolla (työpuuhun ei kosketa) ja se tekee samat viisi tiedostoa kuin cycl-open commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ja `docs/openapi.yaml`. `[4.0.0]` CHANGELOG -osio ja sen i18n-peilit avataan `develop` ssa jälkeenpäin, ennen sen ensimmäistä PR. Käsikirjoitus ei koskaan muutu npm dist-tags — harjoittelee niitä scratch-paketissa.
 
-### PR-esikatseluartifakti (koosta kerran, ylennä samat tavut)
+### PR preview artefakti (koonti kerran, mainosta samoja tavuja)
 
-`.github/workflows/preview-artifact.yml` koostaa yhden tuotantotarballin PR:n kärjestä ja
-validoi täsmälleen kyseisen koosteen (#8084:n osa (a)). Vain saman repon PR:t; mitään ei julkaista.
+`.github/workflows/preview-artifact.yml` rakentaa yhden tuotantotarballin PR -päästä ja vahvistaa sen tarkan koontiversion (#8084 slice (a)). Vain saman arkiston PRs ; mitään ei julkaista.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # tai lisää `preview-artifact`-tunniste
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # esikatseluasennus
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Suoritus ajaa komennot `npm ci`, `npm run build:release` ja `npm run check:pack-artifact`, paketoi
-tarballin, ajaa komennon `npm run check:pack-boot` (väärennetyt salaisuudet, tilapäinen datahakemisto), paketoi uudelleen ja
-epäonnistuu, ellei tiiviste ole identtinen, minkä jälkeen se tallentaa tiedoston `artifact-identity.json` (kärjen SHA, pohjan
-SHA, lockfile-tiiviste, alusta, arkkitehtuuri, node ABI, paketoija, koostekäytäntö —
-`scripts/release/artifact-identity.mjs`) ja varmentaa tarballin erillisessä työssä. Esikatselun
-ylentäminen tarkoittaa kyseisen tarballin asentamista: älä koskaan koosta sitä uudelleen lähdekoodista.
+Suoritus suorittaa `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakkaa tarballin, suorittaa `npm run check:pack-boot` (väärennössalaisuudet, lyhytaikainen datakansio), pakkaa uudelleen ja epäonnistuu, ellei tiivistelmä ole identtinen, ja tallentaa sitten `artifact-identity.json` (head SHA, base SHA, lockfile build, no policy ABI, q arch, no policy, de platform, — `scripts/release/artifact-identity.mjs`) ja todistaa tarballin erillisessä työssä. Esikatselun edistäminen tarkoittaa kyseisen tarballin asentamista: älä koskaan rakenna uudelleen lähteestä.
 
-### Haarautus (3.9.0, GO-päätöksen jälkeen)
+### Leikkaus (3.9.0, GO jälkeen)
 
-1. GO-päätös on kirjattu tiedostoon [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO tallennettu muodossa [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` tulostaa `RESULT: READY`.
-3. Luo haarat käsin `origin`-repoon kuivaharjoittelun tulostamilla komennoilla —
-   skripti kieltäytyy puskemasta `origin`-repoon. Jos haluat käyttää uudelleen tarkastettua develop-committia, suorita
-   `--execute`-harjoittelu ensin version 3.9.0 kärjellä omaa forkiasi vasten; se tulostaa molemmat SHA:t, ja
-   samat commitit voidaan puskea:
+3. Luo `origin` haarat käsin komennoilla kuiva-ajo tulostaa — komentosarja kieltäytyy työntämästä tiedostoon `origin`. Jos haluat käyttää tarkistettua kehityssitoumusta uudelleen, suorita `--execute` -harjoitus 3.9.0-kärjellä ensin haarukkaa vasten; se tulostaa molemmat SHAs ja samat commits voidaan työntää:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Suojaa `stable/v3` ja `develop` (sääntöjoukot + yhdistämisjono) ennen ensimmäisen PR:n saapumista.
-5. Lepotilassa olevat työnkulut aktivoituvat haaran olemassaolon perusteella: `forward-port.yml` (push kohteeseen
-   `stable/v3`), `validate-stable-pr.yml` (PR:t kohteeseen `stable/v3`) ja `nightly-v4-build.yml`
-   (koostaa `develop`-haaran). Aseta ennen käyttöönottoa repositorion salaisuus `secrets.FORWARD_PORT_TOKEN` (jotta CI suoritetaan
-   eteenpäin siirtävissä PR:issä); öinen julkaiseminen pysyy poissa käytöstä, kunnes omistaja asettaa repositorion
-   muuttujan `vars.NIGHTLY_PUBLISH` arvoksi `true` ja npm Trusted Publishing hyväksyy
-   `nightly-v4-build.yml`-työnkulun. Kanavan määritys tapahtuu tiedostossa `scripts/release/dist-tag.mjs`, jota myös
-   `npm-publish.yml` käyttää.
-6. Tarkista kanavat: `npm view omniroute dist-tags --json` näyttää `latest` = 3.9.0 eikä
-   `next`- tai `nightly`-tunnisteita, ennen kuin v4 julkaistaan.
-7. Palautus tarvittaessa: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ja `npm dist-tag add omniroute@3.8.59 latest`.
+4. Suojaa `stable/v3` ja `develop` (sääntöjoukot + yhdistämisjono) ennen kuin ensimmäinen PR laskeutuu.
+5. Lepotilassa olevat työnkulut kytkeytyvät päälle haaran olemassaolon mukaan: `forward-port.yml` (työnä `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) ja `nightly-v4-build.yml` (rakenna `develop`). Aseta `secrets.FORWARD_PORT_TOKEN` tietovaraston salaisuus ennen käyttöönottoa (joten CI toimii eteenpäin suunnatussa portissa PRs); iltajulkaisu pysyy pois päältä, kunnes omistaja asettaa arkistomuuttujan `vars.NIGHTLY_PUBLISH` arvoksi `true` ja npm Trusted Publishing hyväksyy `nightly-v4-build.yml`. Kanavan resoluutio on `scripts/release/dist-tag.mjs`, jota `npm-publish.yml` käyttää.
+6. Tarkista kanavat: `npm view omniroute dist-tags --json` näyttää `latest` = 3.9.0 ja ei `next` / `nightly` ennen kuin v4 julkaistaan.
+7. Palautus tarvittaessa: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ja `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 
