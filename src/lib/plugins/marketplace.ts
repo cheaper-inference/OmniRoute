@@ -4,7 +4,7 @@ import { isPrivateHost } from "@/shared/network/outboundUrlGuard";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { pluginManager } from "./manager";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { gunzipSync } from "node:zlib";
@@ -224,6 +224,21 @@ const MAX_ARCHIVE_ENTRIES = 2000;
 
 type TarFile = { path: string; data: Buffer | null }; // data null = directory
 
+/** Read the download into memory, refusing more than MAX_ARCHIVE_BYTES (the cap on its expanded size). */
+async function readArchiveWithinCap(response: Response): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  // Throwing inside for-await cancels the stream, which closes the connection.
+  for await (const chunk of response.body ?? []) {
+    size += chunk.byteLength;
+    if (size > MAX_ARCHIVE_BYTES) {
+      throw new Error(`Plugin download is too large (exceeds ${MAX_ARCHIVE_BYTES} bytes)`);
+    }
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
 function tarString(block: Buffer, start: number, end: number): string {
   const raw = block.subarray(start, end);
   const nul = raw.indexOf(0);
@@ -368,6 +383,15 @@ async function extractPluginArchive(archive: Buffer, destDir: string): Promise<v
   }
 }
 
+/** `name` in the extracted archive's plugin.json (undefined when it is missing or unreadable). */
+async function readArchiveManifestName(dir: string): Promise<unknown> {
+  try {
+    return JSON.parse(await readFile(join(dir, "plugin.json"), "utf8")).name;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Install a plugin from the marketplace by name.
  * Downloads the plugin archive, verifies checksum if present, and installs via PluginManager.
@@ -391,7 +415,7 @@ export async function installMarketplacePlugin(
     if (!response.ok) {
       throw new Error(`Failed to download plugin '${name}': ${response.status}`);
     }
-    const buffer = Buffer.from(await response.arrayBuffer());
+    const buffer = await readArchiveWithinCap(response);
 
     // Verify SHA-256 checksum if provided
     if (entry.checksum) {
@@ -407,8 +431,17 @@ export async function installMarketplacePlugin(
     await mkdir(stagingDir);
     await extractPluginArchive(buffer, stagingDir);
 
-    // Delegate to pluginManager.install
-    const result = await pluginManager.install(stagingDir);
+    // install() upgrades an installed plugin of the archive's own name, so the archive must be
+    // the plugin the listing names, or one listing could replace a different plugin.
+    const archiveName = await readArchiveManifestName(stagingDir);
+    if (archiveName !== entry.name) {
+      throw new Error(
+        `Plugin archive manifest name '${archiveName}' does not match marketplace entry '${entry.name}'`
+      );
+    }
+
+    // Install inactive: a listing must not activate code on its own, whatever its manifest asks.
+    const result = await pluginManager.install(stagingDir, { autoActivate: false });
     return { name: result.name, version: result.version };
   } finally {
     // Cleanup temp dir

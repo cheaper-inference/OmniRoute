@@ -2,6 +2,7 @@ import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import dnsPromises from "node:dns/promises";
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -20,7 +21,8 @@ fs.mkdirSync(process.env.DATA_DIR, { recursive: true });
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { installMarketplacePlugin } = await import("../../src/lib/plugins/marketplace.ts");
-const { pluginExists, deletePlugin } = await import("../../src/lib/db/plugins.ts");
+const { pluginManager } = await import("../../src/lib/plugins/manager.ts");
+const { pluginExists, deletePlugin, getPluginByName } = await import("../../src/lib/db/plugins.ts");
 
 const REGISTRY_URL = "https://registry.example.test/index.json";
 const ARCHIVE_URL = "https://registry.example.test/plugin.tar.gz";
@@ -68,8 +70,11 @@ const goodEntries = (name: string): TarEntry[] => [
 ];
 
 let counter = 0;
-/** Serve `archive` for `name` through the registry and download URL, with no real network. */
-async function install(archive: Buffer, name = `archive-plugin-${++counter}`) {
+/** Serve `archive` (or the response `archive()` returns) for `name` through the registry and download URL. */
+async function install(
+  archive: Buffer | (() => Promise<Response>),
+  name = `archive-plugin-${++counter}`
+) {
   mock.method(dnsPromises, "lookup", async () => [{ address: "93.184.216.34", family: 4 }]);
   await settingsDb.updateSettings({ pluginMarketplaceUrl: REGISTRY_URL });
   globalThis.fetch = (async (input: string | URL | Request) => {
@@ -94,7 +99,9 @@ async function install(archive: Buffer, name = `archive-plugin-${++counter}`) {
         { headers: { "content-type": "application/json" } }
       );
     }
-    if (url === ARCHIVE_URL) return new Response(new Uint8Array(archive));
+    if (url === ARCHIVE_URL) {
+      return typeof archive === "function" ? archive() : new Response(new Uint8Array(archive));
+    }
     return new Response("unexpected", { status: 500 });
   }) as typeof fetch;
   try {
@@ -111,10 +118,13 @@ async function rejection(archive: Buffer, pattern: RegExp) {
 }
 
 test("a plugin.tar.gz entry is extracted and installed", async () => {
-  const { name, result } = await install(gzipSync(tar(goodEntries("placeholder"))), "good-archive");
+  const { name, result } = await install(
+    gzipSync(tar(goodEntries("good-archive"))),
+    "good-archive"
+  );
   assert.equal(name, "good-archive");
-  assert.deepEqual(result, { name: "placeholder", version: "1.0.0" });
-  assert.ok(fs.existsSync(path.join(root, "plugins", "placeholder", "index.js")));
+  assert.deepEqual(result, { name: "good-archive", version: "1.0.0" });
+  assert.ok(fs.existsSync(path.join(root, "plugins", "good-archive", "index.js")));
 });
 
 test("a package/ prefixed archive (npm pack layout) installs too", async () => {
@@ -122,7 +132,7 @@ test("a package/ prefixed archive (npm pack layout) installs too", async () => {
     ...entry,
     name: `package/${entry.name}`,
   }));
-  const { result } = await install(gzipSync(tar(entries)));
+  const { result } = await install(gzipSync(tar(entries)), "prefixed-plugin");
   assert.equal(result.name, "prefixed-plugin");
 });
 
@@ -178,11 +188,106 @@ test("archives written by the system tar install, with long names and a package/
     const out = path.join(src, `${format}.tgz`);
     const made = spawnSync("tar", [`--format=${format}`, "-czf", out, "-C", src, "package"]);
     if (made.status !== 0) continue; // no system tar to compare with
-    const { result } = await install(fs.readFileSync(out), `system-tar-${format}`);
+    const { result } = await install(fs.readFileSync(out), "system-tar-plugin");
     assert.equal(result.name, "system-tar-plugin");
     const extracted = path.join(root, "plugins", "system-tar-plugin");
     assert.ok(fs.existsSync(path.join(extracted, long, "long.txt")), `${format} long path`);
     deletePlugin("system-tar-plugin");
     fs.rmSync(extracted, { recursive: true, force: true });
+  }
+});
+
+test("a download past the byte cap is refused, no longer read, and installs nothing", async () => {
+  // A chunked body with no Content-Length: only a cap on the bytes read can stop it.
+  const total = 128 * 1024 * 1024;
+  const chunk = Buffer.alloc(64 * 1024);
+  let sent = 0;
+  const server = http.createServer((_req, res) => {
+    const pump = () => {
+      while (sent < total) {
+        sent += chunk.length;
+        if (!res.write(chunk)) return void res.once("drain", pump);
+      }
+      res.end();
+    };
+    pump();
+  });
+  await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+  const { port } = server.address() as import("node:net").AddressInfo;
+  const name = `big-download-${++counter}`;
+  try {
+    await assert.rejects(
+      () => install(() => originalFetch(`http://127.0.0.1:${port}/plugin.tar.gz`), name),
+      /download is too large/i
+    );
+    assert.ok(sent < total, `the download was cut short (${sent} of ${total} bytes sent)`);
+    assert.equal(pluginExists(name), false, "a refused download installs nothing");
+  } finally {
+    server.closeAllConnections();
+    await new Promise((done) => server.close(done));
+  }
+});
+
+test("an archive whose plugin.json names another plugin is refused and the installed one is unchanged", async () => {
+  // Without the name check, pluginManager.install() sees "victim" installed at 1.0.0, the archive's
+  // 2.0.0 as newer, and upgrades (replaces) it: one listing could overwrite a different plugin.
+  const victim = `victim-plugin-${++counter}`;
+  await install(gzipSync(tar(goodEntries(victim))), victim);
+  const before = getPluginByName(victim);
+  const upgrade = Buffer.from(JSON.stringify({ name: victim, version: "2.0.0", main: "index.js" }));
+  const entries = [
+    { name: "plugin.json", data: upgrade },
+    { name: "index.js", data: Buffer.from("module.exports = { replaced: true };") },
+  ];
+  await assert.rejects(
+    () => install(gzipSync(tar(entries)), `listed-as-another-${++counter}`),
+    /does not match/i
+  );
+  const after = getPluginByName(victim);
+  assert.equal(after?.version, "1.0.0");
+  assert.equal(after?.id, before?.id);
+  assert.equal(
+    fs.readFileSync(path.join(root, "plugins", victim, "index.js"), "utf8"),
+    "module.exports = {};"
+  );
+});
+
+/** A plugin.json + index.js pair that asks to be activated on install. */
+const autoActivating = (name: string, version = "1.0.0"): TarEntry[] => [
+  {
+    name: "plugin.json",
+    data: Buffer.from(JSON.stringify({ name, version, main: "index.js", enabledByDefault: true })),
+  },
+  { name: "index.js", data: Buffer.from("module.exports = {};") },
+];
+
+test("a marketplace install and upgrade leave an enabledByDefault plugin inactive; a local install activates it", async () => {
+  const local = `local-auto-${++counter}`;
+  const market = `market-auto-${++counter}`;
+  try {
+    // Local installs keep today's behaviour: enabledByDefault activates at once.
+    const source = fs.mkdtempSync(path.join(root, "local-src-"));
+    for (const entry of autoActivating(local)) {
+      fs.writeFileSync(path.join(source, entry.name), entry.data!);
+    }
+    assert.equal((await pluginManager.install(source)).name, local);
+    assert.equal(getPluginByName(local)?.status, "active");
+
+    // Marketplace installs of the same manifest stay inactive and show as not enabled.
+    await install(gzipSync(tar(autoActivating(market))), market);
+    for (const row of [getPluginByName(market)]) {
+      assert.equal(row?.status, "installed");
+      assert.equal(row?.enabled, 0);
+    }
+    assert.equal(pluginManager.getLoaded(market), undefined);
+
+    // An upgrade from the listing does not activate the plugin either.
+    await install(gzipSync(tar(autoActivating(market, "2.0.0"))), market);
+    assert.equal(getPluginByName(market)?.version, "2.0.0");
+    assert.notEqual(getPluginByName(market)?.status, "active");
+    assert.equal(pluginManager.getLoaded(market), undefined);
+  } finally {
+    await pluginManager.uninstall(local).catch(() => {});
+    await pluginManager.uninstall(market).catch(() => {});
   }
 });
