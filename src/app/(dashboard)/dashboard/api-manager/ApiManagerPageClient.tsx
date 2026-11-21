@@ -41,6 +41,7 @@ import {
 } from "./apiManagerPageUtils";
 import type { KeyStatus, KeyType } from "./apiManagerPageUtils";
 import { readActiveOnlyPreference, writeActiveOnlyPreference } from "./apiManagerPageStorage";
+import { ApiKeyDetailsLink } from "./components/ApiKeyDetailsLink";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { hasProviderQuotaBypassScope } from "@/shared/constants/apiKeyPolicyScopes";
 import RoutingEntryLink from "@/shared/components/routing/RoutingEntryLink";
@@ -983,6 +984,7 @@ export default function ApiManagerPageClient() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
+                      <ApiKeyDetailsLink keyId={key.id} keyName={key.name} />
                       <a
                         href={`/dashboard/costs?range=all&apiKeyIds=${encodeURIComponent(key.id)}&groupBy=model`}
                         className="p-2 hover:bg-success/10 rounded text-text-muted hover:text-success opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"

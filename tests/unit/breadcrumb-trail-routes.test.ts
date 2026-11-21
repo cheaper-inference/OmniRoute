@@ -116,7 +116,6 @@ test("the four dead links of the review are gone, and real pages stay links", ()
     "/dashboard/system",
     "/dashboard/tools",
     "/dashboard/gamification",
-    "/dashboard/api-manager/key-1",
     "/dashboard/plugins/my-plugin",
   ]) {
     assert.equal(routeHasPage(href), false, `${href} has no page: its crumb must not be a link`);
@@ -126,8 +125,10 @@ test("the four dead links of the review are gone, and real pages stay links", ()
     "/dashboard/providers",
     "/dashboard/providers/chatgpt",
     "/dashboard/api-manager",
-    // A static folder next to the page-less `api-manager/[id]`.
+    // A static folder next to the dynamic `api-manager/[id]`.
     "/dashboard/api-manager/routing",
+    // `api-manager/[id]` has its own page: the key details view (#14863).
+    "/dashboard/api-manager/key-1",
     "/dashboard/plugins",
     "/dashboard/settings",
     "/dashboard/resilience/connections",
