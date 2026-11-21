@@ -154,3 +154,19 @@ test("sanitizeProviderSpecificDataForResponse removes credentials and quota scra
     tag: "primary",
   });
 });
+
+test("normalizeProviderSpecificData keeps only boolean nativeJsonSchema", () => {
+  assert.equal(
+    normalizeProviderSpecificData("openai-compatible-chat-x", { nativeJsonSchema: true })
+      ?.nativeJsonSchema,
+    true
+  );
+  assert.equal(
+    "nativeJsonSchema" in
+      (normalizeProviderSpecificData("openai-compatible-chat-x", {
+        nativeJsonSchema: "yes",
+        baseUrl: "https://compat.example/v1",
+      }) ?? {}),
+    false
+  );
+});

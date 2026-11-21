@@ -447,3 +447,17 @@ test("provider schemas reject invalid timeoutMs values", () => {
     assert.equal(updated.success, false, `timeoutMs=${String(bad)} must be rejected`);
   }
 });
+
+test("provider schemas accept only boolean nativeJsonSchema in providerSpecificData", () => {
+  for (const [value, ok] of [
+    [true, true],
+    [false, true],
+    ["yes", false],
+    [1, false],
+  ] as const) {
+    const updated = updateProviderConnectionSchema.safeParse({
+      providerSpecificData: { nativeJsonSchema: value },
+    });
+    assert.equal(updated.success, ok, `nativeJsonSchema: ${JSON.stringify(value)}`);
+  }
+});

@@ -677,9 +677,14 @@ export class DefaultExecutor extends BaseExecutor {
    * DeepSeek V4 Flash rejects it with HTTP 400 `Invalid input: response_format`,
    * verified live 2026-08-15 — same class as #9992's opencode fix). Gated so
    * providers with native Structured Output support keep the native
-   * `json_schema` path.
+   * `json_schema` path. A connection whose upstream does support native
+   * `json_schema` (and may reject `json_object`) opts out per connection via
+   * `providerSpecificData.nativeJsonSchema: true`.
    */
-  applyJsonSchemaFallback<T>(body: T): T {
+  applyJsonSchemaFallback<T>(
+    body: T,
+    credentials?: { providerSpecificData?: Record<string, unknown> | null } | null
+  ): T {
     const provider = this.provider ?? "";
     const isOpenAiCompatible = provider.startsWith("openai-compatible-");
     const isDeepSeek = provider === "deepseek";
@@ -691,6 +696,10 @@ export class DefaultExecutor extends BaseExecutor {
     const rf = record.response_format as
       { type?: string; json_schema?: { schema?: unknown } } | undefined;
     if (!rf) return body;
+    // The opt-out covers json_schema only; text/json_object keep their provider handling
+    // (kilocode still has to drop a json_object it would reject).
+    if (rf.type === "json_schema" && credentials?.providerSpecificData?.nativeJsonSchema === true)
+      return body;
 
     // openai-compatible-* accept json_object natively; only json_schema needs downgrading there.
     // kilocode rejects BOTH forms, so it strips below. Non-JSON formats (text/unknown/malformed)
@@ -782,7 +791,7 @@ export class DefaultExecutor extends BaseExecutor {
       withDefaults = ensureToolMessageNames(withDefaults as Record<string, unknown>);
     }
 
-    withDefaults = this.applyJsonSchemaFallback(withDefaults);
+    withDefaults = this.applyJsonSchemaFallback(withDefaults, credentials);
     withDefaults = this.defaultResponsesTextFormat(withDefaults, credentials);
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);

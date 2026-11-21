@@ -214,6 +214,10 @@ export function isValidGheUrl(raw: string): boolean {
   }
 }
 
+/**
+ * Zod refinement for `providerSpecificData`: reports an issue on `ctx` for each field with an
+ * invalid shape (GHE URL, `nativeJsonSchema` that is not a boolean, ...).
+ */
 export function validateProviderSpecificData(
   data: Record<string, unknown> | undefined,
   ctx: z.RefinementCtx
@@ -354,6 +358,14 @@ export function validateProviderSpecificData(
         path: ["codexPromptCacheKeyScope"],
       });
     }
+  }
+
+  if (data.nativeJsonSchema !== undefined && typeof data.nativeJsonSchema !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.nativeJsonSchema must be a boolean",
+      path: ["nativeJsonSchema"],
+    });
   }
 
   const preserveEncryptedReasoning = data.preserveEncryptedReasoning;
