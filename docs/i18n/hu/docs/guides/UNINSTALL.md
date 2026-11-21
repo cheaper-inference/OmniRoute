@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Opcionális) A lemezkép eltávolítása
+docker rmi cheaperinference/omniroute:latest
+# A régebbi telepítések felvették a régi nevet:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

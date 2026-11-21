@@ -52,6 +52,7 @@ import { buildPostCallGuardrailContext } from "../chatCore/postCallGuardrailCont
 import { buildNonStreamingResponseHeaders } from "../chatCore/nonStreamingResponseHeaders.ts";
 import { maybeWrapForcedNonStreamingResponsesJson } from "../chatCore/responsesJsonToSse.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
+import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
 import {
   createRequestFamilyFallback,
   modelAfterFamilyFallback,
@@ -208,6 +209,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     isResponsesEndpoint,
     preserveCacheControl,
     reasoningCacheScope,
+    antigravitySessionKey,
     requestToolIdentityMap,
     stream,
     toolNameMap,
@@ -279,6 +281,13 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           getProviderCredentials,
           getProviderCredentialsWithQuotaPreflight,
           allowedConnections: deps.allowedConnections ?? null,
+          admitRotation: (nextConnectionId) =>
+            admitQuotaShareRotation({
+              apiKeyInfo,
+              connectionId: nextConnectionId,
+              provider,
+              model,
+            }),
         },
         wire: {
           body: translatedBody as Record<string, unknown>,
@@ -566,6 +575,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             signatureNamespace: connectionId,
             copilotClient: copilotCompatibleReasoning,
             reasoningCacheScope,
+            antigravitySessionKey,
             onReasoningReplayHistory: (messages) => {
               reasoningReplayHistory = messages;
             },

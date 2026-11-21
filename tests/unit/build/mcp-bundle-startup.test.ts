@@ -1,9 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 import { buildSync } from "esbuild";
 
 // Regression guard for the Node 24 MCP startup crash caused by an ESM init cycle.
@@ -37,9 +36,12 @@ test("MCP server bundle imports successfully on Node 24", () => {
       "MCP bundle must not contain the auth ↔ googApiKeyAuth circular initializer"
     );
 
-    const importScript = `await import(${JSON.stringify(pathToFileURL(outFile).href)});`;
+    // A file-based entry lets the bundle's workers inherit valid Node arguments
+    // while the child still runs under the same CI coverage preloads.
+    const importFile = join(outDir, "verify-import.mjs");
+    writeFileSync(importFile, 'import "./server.js";\n');
     assert.doesNotThrow(() => {
-      execFileSync(process.execPath, ["--input-type=module", "-e", importScript], {
+      execFileSync(process.execPath, [importFile], {
         cwd: repoRoot,
         env: {
           ...process.env,

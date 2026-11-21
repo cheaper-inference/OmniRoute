@@ -42,6 +42,7 @@ test("modelDisplayName names from the last path segment of a routed id", () => {
 
 test("modelDisplayName keeps v-prefixed version markers and unknown words", () => {
   assert.equal(modelDisplayName("oc/mimo-v2.6-flash-free"), "MiMo V2.6 Flash Free");
+  assert.equal(modelDisplayName("gpt-v12.34-preview"), "GPT-V12.34 Preview");
   assert.equal(modelDisplayName("oc/jev-1.13-free"), "Jev 1.13 Free");
   assert.equal(modelDisplayName("qwen3.8-max"), "Qwen 3.8 Max");
 });

@@ -469,7 +469,7 @@ OmniRoute מרענן אסימונים באופן אוטומטי. אם הבעיו
 2. **תיקון קבוע:** אגדו במפורש ל־IPv4 באמצעות `-p 127.0.0.1:20128:20128` בפקודת `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    פעולה זו כופה איגוד ל־IPv4 וגם מונעת את חשיפת הפרוקסי בכל ממשקי המארח.
 

@@ -4,6 +4,9 @@
 // - Credentials travel in the environment (GIT_CONFIG_COUNT/KEY/VALUE → http extraheader), never
 //   in argv or in the remote URL, and every error message is redacted before it is thrown. The
 //   tick's OMNI_QUEUE_TOKEN / OMNI_QUEUE_LAND_TOKEN are removed from every git child's environment.
+// - Configuration a single command needs (the signing key of a merge commit: compose.mjs) also
+//   travels as GIT_CONFIG_* entries of that command's environment (run option `config`), never as
+//   `-c` arguments: argv is logged, the environment is not.
 // - Synchronous: one tick is a short, sequential script.
 
 import { spawnSync } from "node:child_process";
@@ -48,6 +51,25 @@ function withoutTokens(env) {
 }
 
 /**
+ * `env` plus `entries` ([key, value] pairs) appended to its GIT_CONFIG_COUNT/KEY_n/VALUE_n list
+ * (the token's http header, when there is one, keeps index 0). Git reads these as command-line
+ * configuration of that one process.
+ * @param {object} env
+ * @param {[string, string][]} entries
+ */
+export function withConfigEntries(env, entries) {
+  if (!entries?.length) return env;
+  const count = Number.parseInt(env.GIT_CONFIG_COUNT ?? "", 10);
+  const start = Number.isSafeInteger(count) && count > 0 ? count : 0;
+  const out = { ...env, GIT_CONFIG_COUNT: String(start + entries.length) };
+  entries.forEach(([key, value], i) => {
+    out[`GIT_CONFIG_KEY_${start + i}`] = key;
+    out[`GIT_CONFIG_VALUE_${start + i}`] = value;
+  });
+  return out;
+}
+
+/**
  * @typedef {object} GitResult
  * @property {number|null} code
  * @property {string} stdout
@@ -57,8 +79,11 @@ function withoutTokens(env) {
 /**
  * @typedef {object} Git
  * @property {string} cwd
- * @property {(args: string[], opts?: {allowFail?: boolean, input?: string, env?: object}) => GitResult} run
- * @property {(args: string[], opts?: {input?: string, env?: object}) => string} out  stdout trimmed; throws GitError
+ * @property {(args: string[], opts?: {allowFail?: boolean, input?: string, env?: object,
+ *            config?: [string, string][]}) => GitResult} run   config: git configuration of this
+ *            one command, passed through the environment (withConfigEntries), never logged
+ * @property {(args: string[], opts?: {input?: string, env?: object,
+ *            config?: [string, string][]}) => string} out  stdout trimmed; throws GitError
  */
 
 /**
@@ -88,12 +113,13 @@ export function createGit({ cwd, token, env = {}, identity, log = () => {} }) {
     ...env,
   });
 
-  function run(args, { allowFail = false, input, env: extra } = {}) {
+  function run(args, { allowFail = false, input, env: extra, config } = {}) {
     const shown = args.map(redact);
     log(`git ${shown.join(" ")}`);
+    const env = extra ? withoutTokens({ ...baseEnv, ...extra }) : baseEnv;
     const res = spawnSync("git", args, {
       cwd,
-      env: extra ? withoutTokens({ ...baseEnv, ...extra }) : baseEnv,
+      env: withConfigEntries(env, config),
       input,
       encoding: "utf8",
       maxBuffer: 256 * 1024 * 1024,

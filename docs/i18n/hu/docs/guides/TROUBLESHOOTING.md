@@ -479,7 +479,7 @@ a [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md) dokumentumban találja.
 2. **Végleges javítás:** Kösse kifejezetten IPv4-hez a portot úgy, hogy a `docker run` parancsban a `-p 127.0.0.1:20128:20128` beállítást használja:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Ez kikényszeríti az IPv4-kötést, és azt is megakadályozza, hogy a proxy a gazdagép összes hálózati interfészén elérhető legyen.
 

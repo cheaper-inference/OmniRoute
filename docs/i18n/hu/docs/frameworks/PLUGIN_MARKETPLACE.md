@@ -25,31 +25,26 @@ gyermekfolyamatokban töltenek be és futtatnak kódot, ezért az útvonalak a h
 nem érhetők el nem visszacsatolási eredetről. Lásd:
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## A rendszer felépítése
+## Hogyan illik Together hoz
 
 ```
-Vezérlőpult (/dashboard/plugins)
-  ├─ „Telepítve” lap  → GET /api/plugins            (listPlugins)
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
   │                     POST /api/plugins/scan      (pluginManager.scan)
   │                     POST /api/plugins/{name}/activate|deactivate
-  │                     DELETE /api/plugins/{name}   (eltávolítás)
-  └─ „Piactér” lap → GET /api/plugins/marketplace
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ nincs egyéni URL → beépített SEED_REGISTRY
-                            └─ egyéni URL → isSafeMarketplaceUrl() SSRF-védelem
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
                                           → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Regisztrációs réteg** — `src/lib/plugins/marketplace.ts`: listázza és keresi a
-  katalógust, hiba esetén pedig a kezdeti regisztrációs adatbázist használja tartalékként.
-- **Életciklusréteg** — `src/lib/plugins/manager.ts` (`pluginManager` singleton):
-  telepítés, frissítés, aktiválás, deaktiválás, eltávolítás, vizsgálat és indításkori betöltés.
-- **Manifeszt réteg** — `src/lib/plugins/manifest.ts`: Zod-séma és alapértelmezések a
-  `plugin.json` fájlhoz.
-- **Vizsgáló** — `src/lib/plugins/scanner.ts`: felderíti a lemezen, a
-  bővítménykönyvtárban található bővítményeket.
-- **Betöltő** — `src/lib/plugins/loader.ts`: minden bővítményt különálló
-  gyermekfolyamatban indít el, és IPC-n keresztül közvetíti a hookhívásokat.
+- **Registry réteg** — `src/lib/plugins/marketplace.ts`: listázza/keresi a katalógust, és minden meghibásodás esetén visszatér a magnyilvántartásba.
+- **Életciklus réteg** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): telepítés, frissítés, aktiválás, deaktiválás, eltávolítás, vizsgálat, indítási betöltés.
+- **Manifest réteg** — `src/lib/plugins/manifest.ts`: Zod séma + alapértékei a `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: felfedezi a bővítményeket a lemezen a plugin könyvtárban.
+- **Rakodó** — `src/lib/plugins/loader.ts`: minden beépülő modult egy külön Node.js gyermekfolyamatban hoz létre, és a közvetítők IPC keresztül kapcsolják össze a hívásokat. A gyermek nem homokozó (lásd alább a „Plugin-végrehajtás elkülönítése” részt).
 
 ## Piactéri katalógus
 
@@ -86,35 +81,31 @@ kezdeti listát használja.
 
 ## REST API
 
-Minden végpont kezelői hitelesítést (`requireManagementAuth`) igényel, **és**
-kizárólag loopback-interfészről érhető el — az `/api/plugins` és az `/api/plugins/`
-szerepel a `LOCAL_ONLY_API_PREFIXES` listában
-(`src/server/authz/routeGuard.ts`).
+Minden végponthoz kezelési hitelesítés szükséges (`requireManagementAuth`)** és** csak visszacsatolásúak. — `/api/plugins` és `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` -ben (`src/server/authz/routeGuard.ts`) szerepel.
 
-| Végpont                          | Metódus | Leírás                                                                            |
-| -------------------------------- | ------- | --------------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | Telepített bővítmények listázása (opcionális `?status=` szűrővel)                 |
-| `/api/plugins`                   | POST    | Bővítmény telepítése abszolút helyi elérési útról                                 |
-| `/api/plugins/scan`              | POST    | A bővítménykönyvtár átvizsgálása és az új bővítmények regisztrálása               |
-| `/api/plugins/marketplace`       | GET     | A piactér katalógusbejegyzéseinek listázása                                       |
-| `/api/plugins/[name]`            | GET     | Egy telepített bővítmény részleteinek lekérése                                    |
-| `/api/plugins/[name]`            | DELETE  | Egy bővítmény eltávolítása                                                        |
-| `/api/plugins/[name]/activate`   | POST    | Aktiválás (betöltés + hookok regisztrálása)                                       |
-| `/api/plugins/[name]/deactivate` | POST    | Deaktiválás (az `onDeactivate` meghívása, hookok regisztrációjának megszüntetése) |
-| `/api/plugins/[name]/config`     | GET     | A bővítmény konfigurációjának és konfigurációs sémájának lekérése                 |
-| `/api/plugins/[name]/config`     | PUT     | A bővítmény konfigurációjának frissítése (a séma alapján ellenőrizve)             |
+| Végpont                          | Módszer | Leírás                                                                        |
+| -------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `/api/plugins`                   | GET     | A telepített bővítmények listája (opcionális `?status=` szűrő)                |
+| `/api/plugins`                   | POST    | Telepítsen egy beépülő modult a bővítményforrások könyvtárából                |
+| `/api/plugins/scan`              | POST    | Vizsgálja meg a beépülő modulok könyvtárát, és regisztráljon új bővítményeket |
+| `/api/plugins/marketplace`       | GET     | Listázza a piactér katalógus bejegyzéseit                                     |
+| `/api/plugins/[name]`            | GET     | A telepített bővítmény részleteinek megtekintése                              |
+| `/api/plugins/[name]`            | DELETE  | Távolítson el egy bővítményt                                                  |
+| `/api/plugins/[name]/activate`   | POST    | Aktiválás ( + regiszterhorgok betöltése)                                      |
+| `/api/plugins/[name]/deactivate` | POST    | Deaktiválás ( `onDeactivate` eltüzelése, horgok regisztrációjának törlése)    |
+| `/api/plugins/[name]/config`     | GET     | Beépülő modul konfigurálása + konfigurációs séma                              |
+| `/api/plugins/[name]/config`     | PUT     | Frissítse a beépülő modul konfigurációját (a séma alapján érvényesítve)       |
 
-A `GET /api/plugins` végpont `status` szűrője az
-`installed` / `active` / `inactive` / `error` értékek egyikét fogadja el. Érvénytelen érték esetén `400` választ ad vissza.
+A `GET /api/plugins` `status` szűrő `installed` / `active` / `inactive` / `error` egyikét fogadja el . Az érvénytelen érték `400` értéket adja vissza.
 
-### Telepített bővítmények listázása
+### A telepített bővítmények listája
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Telepítés helyi elérési útról
+### Telepítés helyi útvonalról
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -123,20 +114,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-A `path` értékének **abszolútnak** kell lennie, és nem tartalmazhat `..`
-útvonal-bejárási szegmenseket vagy nullbájtokat (ezt a Zod kényszeríti ki). A
-forráskönyvtárnak érvényes `plugin.json` fájlt kell tartalmaznia (vagy egy ilyet
-tartalmazó könyvtár szülőjének kell lennie). Siker esetén a válasz `201`, és
-tartalmazza a telepített bővítmény rekordját.
+A `path` nak an** abszolút** egy könyvtár elérési útja** a plugin források könyvtárában** : `plugin-sources` a plugin gyökér mellett, tehát alapértelmezés szerint `~/.omniroute/plugin-sources/`, vagy `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ha ez a változó be van állítva (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Először másolja vagy klónozza oda a bővítményt. A telepítés visszautasításra kerül `400` vel, ha az elérési út `..` vagy null byte-ot tartalmaz, azon a könyvtáron kívül esik, szimbolikus hivatkozáson keresztül azon kívül oldódik fel, olyan szimbolikus hivatkozást tartalmaz, amelynek célpontja azon kívül van, vagy ha a könyvtár nem létezik. A forráskönyvtárnak érvényes `plugin.json` kell tartalmaznia (vagy szülőjének kell lennie). Siker esetén a válasz `201` a telepített bővítménysorral.
 
-### Böngészés a piactéren
+A többi beépülőútvonaltól eltérően ez megköveteli a felügyeleti hitelesítő adatokat (műszerfali munkamenetet vagy kezelési hatókörű API kulcsot), még akkor is, ha a bejelentkezés le van tiltva (`requireLogin=false`): a kód telepítése soha nem névtelen művelet.
+
+### Böngésszen a piactéren
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Bővítmény-konfiguráció frissítése
+### Frissítse a bővítmény konfigurációját
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -145,11 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-A `PUT .../config` minden megadott értéket ellenőriz a bővítmény
-`configSchema` sémája alapján (amelyet a manifest deklarál): a `number` mezők
-figyelembe veszik a `min`/`max` korlátokat, a `select` mezőknek pedig meg kell
-felelniük a deklarált `enum` értékek egyikének. A sémában nem szereplő kulcsok
-változtatás nélkül átengedhetők.
+`PUT .../config` minden megadott értéket a beépülő modul `configSchema` szemben érvényesít (a jegyzékben deklarálva): `number` mezők tiszteletben tartják `min`/`max`, `select` mezőknek meg kell egyeznie a deklarált `enum`. A sémában nem szereplő kulcsok átengedhetők.
 
 ## Konfiguráció
 
@@ -211,90 +196,58 @@ a `GET /api/settings` végpontról olvassa vissza).
 
 ## Biztonság
 
-### Útvonal-besorolás — csak visszacsatolási interfész
+### Csak — visszacsatolási szint
 
-A bővítmények elindított gyermekfolyamatokban hajtanak végre kódot, ezért a teljes `/api/plugins`
-felület `LOCAL_ONLY` (1. szint) besorolású. A visszacsatolási interfész megkövetelése
-feltétel nélkül, **minden** hitelesítési ellenőrzés előtt történik, így még egy
-alagúton keresztül a gépre eljutó, kiszivárgott felügyeleti token sem képes
-bővítményt telepíteni, aktiválni vagy eltávolítani.
-Lásd: [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) és
-a 15. / 17. szigorú szabály.
+A beépülő modulok kódot hajtanak végre a létrehozott gyermekfolyamatokban, így a teljes `/api/plugins` felület `LOCAL_ONLY` (Tier 1) besorolású. A visszahurkolt végrehajtás feltétel nélkül fut** előtt** bármilyen hitelesítési ellenőrzést, így a kiszivárgott felügyeleti token, amely egy alagúton keresztül éri el a dobozt, továbbra sem tudja telepíteni, aktiválni vagy eltávolítani a bővítményt. Lásd [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) és kemény szabályok #15 / #17.
 
-### A piactéri nyilvántartás SSRF-védelme
+### Piactér regisztrációs SSRF őr
 
-Az egyéni nyilvántartási URL támadó által befolyásolható konfiguráció, ezért
-a lekérése előtt a `listMarketplacePlugins()` két védelmi rétegen futtatja át:
+Az egyéni registry URL a támadók által befolyásolható konfiguráció, ezért a lekérés előtt `listMarketplacePlugins()` két rétegen futtatja át:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Elutasít mindent, ami nem `http:` / `https:`.
-   - Elutasítja a literális privát/visszacsatolási/link-local/ULA-gazdagépeket
-     (IPv4 **és** IPv6, beleértve az IPv4-re leképezett címeket is) a kanonikus
-     `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) használatával.
-   - **Mind az** `A`, **mind az** `AAAA` rekordokat feloldja, és elutasítja az
-     URL-t, ha **bármelyik** feloldott cím privát — ezzel megszüntetve a
-     nyilvános gazdagépnév → privát IP-cím megkerülési lehetőséget.
-   - **Biztonságosan zár**: a DNS-feloldás sikertelensége esetén elutasítja az
-     URL-t.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): a lekéréskor ismét alkalmazza
-   a csak nyilvános URL-eket engedélyező védelmet, és **blokkolja az
-   átirányításokat** (nincs nyilvános → privát `30x` átfordulás).
+   - Mindent elutasít, ami nem `http:` / `https:`.
+   - Elutasítja a szó szerinti private/loopback/link-local/ULA gazdagépeket (IPv4** és** IPv6, beleértve IPv4-mapped a kanonikus `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) segítségével.
+   - Megoldja** mindkét** `A` és `AAAA` rögzíti és elutasítja, ha** bármilyen** A megoldott cím privát —, amely bezárja a public-hostname → private-IP bypass-t.
+   - **Sikertelen lezárás** : a DNS felbontási hiba elutasítja a URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): újra alkalmazza a csak nyilvános URL védelmet a lekérés időpontjában és** blokkolja az átirányításokat** (nincs nyilvános → privát `30x` pivot).
 
-Ha egy URL bármelyik rétegen megbukik, az nem szakítja meg a kérést — a piactér
-észrevétlenül visszaáll a beépített kezdeti nyilvántartásra, és figyelmeztetést
-naplóz.
+A URL, amely egyik rétegben sem működik, nem szakítja meg a kérést. — a piactér csendben visszaesik a beépített magnyilvántartásba, és figyelmeztetést naplóz.
 
-> Ezt a védelmet a #3774 PR-ben erősítették meg kifejezetten azért, hogy az A +
-> AAAA rekordokat egyaránt feloldja, és a kizárólag IPv4-címeket vizsgáló
-> ellenőrzés helyett a kanonikus `isPrivateHost` függvényt használja.
+> Ezt a védőt PR #3774 -ben kifejezetten az A + AAAA feloldására és a kanonikus `isPrivateHost` használatára erősítették a IPv4-only ellenőrzés helyett.
 
-### A bővítmények végrehajtásának elkülönítése
+### Beépülő modul végrehajtásának elkülönítése
 
-- **Folyamatelkülönítés** — a `loadPlugin()` (`src/lib/plugins/loader.ts`)
-  minden bővítményt külön Node.js-gyermekfolyamatban indít el, és IPC-n keresztül
-  kommunikál vele. A hook-hívások időkorláttal rendelkeznek, `SIGTERM` →
-  `SIGKILL` eszkalációval.
-- **Környezeti változók engedélyezési listája** — a gyermekfolyamat csak az
-  engedélyezési listán szereplő környezeti változókat kapja meg; a bővebb
-  készletet csak akkor kapja meg, ha a jegyzék kéri az `env` engedélyt.
-- **Útvonal-korlátozás** — a telepítési/frissítési/eltávolítási műveletek minden
-  másolás vagy rekurzív törlés előtt ellenőrzik, hogy a bővítmény könyvtára és
-  a `manifest.main` feloldott útvonala a felügyelt bővítménygyökéren **belül**
-  található-e (védelem a manipulált adatbázis-útvonalak és a `manifest.main`
-  értékében lévő `../` útvonalbejárás ellen). Az aktiválás a szimbolikus
-  hivatkozásokat a `realpath` segítségével oldja fel, és megtagadja az olyan
-  belépési pont betöltését, amely kilép a bővítmény könyvtárából.
-- **Opcionális integritásrögzítés** — a jegyzék megadhat egy `integrity`
-  (`sha256-<base64>`, SRI-formátum) mezőt. Ha jelen van, a betöltő betöltéskor
-  ellenőrzi a belépési fájl kivonatát, és eltérés esetén megtagadja az
-  aktiválást. Ez önkéntesen használható manipulációészlelés, **nem** biztonsági
-  határ — a valódi határokat a csak visszacsatolási interfészen elérhető
-  útválasztás és az engedélymodell jelentik.
+> **A beépülő modulok nincsenek homokozóban.** A gyermek egy közönséges Node.js folyamat, amely OmniRoute felhasználóként fut, VM kontextus és Node.js engedélyjelzők nélkül, így a beépülő modul bármilyen fájlt képes olvasni és írni, futtathat programokat és elérheti a hálózatot. `requires.permissions` csak azt dönti el, hogy a gyermek mely környezeti változókat kapja meg; a többi engedély nem érvényesül. Csak olyan bővítményeket telepítsen, amelyekben megbízik. Az alábbi folyamathatár összeomlásokat és lefagyásokat tartalmaz; ez nem biztonsági határ.
 
-## Jegyzék (`plugin.json`)
+- **A folyamat leválasztása** — `loadPlugin()` (`src/lib/plugins/loader.ts`) minden beépülő modult külön Node.js gyermekfolyamatként hoz létre, és IPC keresztül kommunikál. A horoghívások időtúllépéssel rendelkeznek `SIGTERM` → `SIGKILL` eszkalációval.
+- **Env engedélyezési lista** — a gyermek csak a környezeti változók engedélyezett listás halmazát kapja meg; a szélesebb halmaz csak akkor engedélyezett, ha a jegyzék kéri a `env` engedélyt.
+- **Telepítse a forrás elszigetelését** — `POST /api/plugins` csak a beépülő modul forráskönyvtárából olvas (lásd: "Telepítés helyi elérési útról"): az elérési út kanonizálva van `realpath`-vel, szigorúan a könyvtáron belül kell maradnia, és a forrásfát, amely egy szimbolikus hivatkozást tartalmaz, amely kikerül, a rendszer visszautasítja, mielőtt bármit másolna.
+- **Út elzárása** — install/upgrade/uninstall azt állítja, hogy a plugin-könyvtár és `manifest.main` megoldódik** belül** a felügyelt beépülő modul gyökere minden másolás vagy rekurzív törlés előtt (védi a manipulált DB útvonalakat és `../` bejárást `manifest.main` ben). Az aktiválás a szimbolikus hivatkozásokat `realpath` keresztül oldja fel, és nem hajlandó betölteni egy olyan belépési pontot, amely kikerül a beépülő modulok könyvtárából.
+- **Opcionális integritástű** — a jegyzék deklarálhat egy `integrity` (`sha256-<base64>`, SRI formátum) mezőt. Ha jelen van, a betöltő ellenőrzi a belépési fájl kivonatát a betöltéskor, és megtagadja az aktiválást, ha nem egyezik. Opcionális szabotázsészlelés,** nem** biztonsági határ: nem korlátozza, mit tehet egy betöltött bővítmény.
+- **Nincsenek kliens hitelesítő adatok a hookban** — a `onRequest`, `onResponse` és `onError` átadott kontextusból a `authorization`, `x-api-key`, `proxy-authorization` és `cookie` fejlécek eltávolításra kerülnek, és a API kulcsrekord nem hordoz kulcsértéket (`redactPluginContext()` a `src/lib/plugins/hooks.ts`-ban).
 
-A `PluginManifestSchema` (`src/lib/plugins/manifest.ts`) ellenőrzi:
+## Manifest (`plugin.json`)
 
-| Mező               | Típus     | Megjegyzések                                                          |
-| ------------------ | --------- | --------------------------------------------------------------------- |
-| `name`             | string    | Kötelező; kebab-case (`^[a-z0-9-]+$`), 1–100 karakter                 |
-| `version`          | string    | Kötelező; semver (`MAJOR.MINOR.PATCH`)                                |
-| `description`      | string?   | ≤ 500 karakter                                                        |
-| `author`           | string?   | ≤ 200 karakter                                                        |
-| `license`          | string?   | Alapértelmezett értéke `MIT`                                          |
-| `main`             | string?   | Belépési fájl; alapértelmezett értéke `index.js`                      |
-| `source`           | enum?     | `local` \| `marketplace` (alapértelmezett: `local`)                   |
-| `tags`             | string[]? | Keresési címkék                                                       |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                       |
-| `hooks`            | object?   | A bővítmény által megvalósított hookokat jelző logikai értékek        |
-| `skills`           | object[]? | Opcionális készségdefiníciók                                          |
-| `enabledByDefault` | boolean?  | Automatikus aktiválás telepítéskor                                    |
-| `configSchema`     | object?   | Konfigurációs mezők leképezése (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Opcionális `sha256-<base64>` belépésifájl-rögzítés                    |
+`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) által hitelesített:
 
-Az engedélyek a következő felsorolásból származnak:
-`network` / `file-read` / `file-write` / `env` / `exec`.
+| Mező               | Írja be        | Megjegyzések                                                               |
+| ------------------ | -------------- | -------------------------------------------------------------------------- |
+| `name`             | húr            | Kívánt; kebabtartó (`^[a-z0-9-]+$`), 1-100 karakter                        |
+| `version`          | húr            | Kívánt; semver (`MAJOR.MINOR.PATCH`)                                       |
+| `description`      | húr?           | ≤ 500 karakter                                                             |
+| `author`           | húr?           | ≤ 200 karakter                                                             |
+| `license`          | húr?           | Alapértelmezésben a `MIT`                                                  |
+| `main`             | húr?           | Belépési fájl; alapértelmezés szerint `index.js`                           |
+| `source`           | enum?          | `local` \| `marketplace` (alapértelmezett: `local`)                        |
+| `tags`             | húr[]?         | Címkék keresése                                                            |
+| `requires`         | objektum?      | `{ omniroute?, permissions[] }`                                            |
+| `hooks`            | objektum?      | Booleans, amely deklarálja, hogy a beépülő modul mely horgokat tartalmazza |
+| `skills`           | objektum[]?    | Választható készségdefiníciók                                              |
+| `enabledByDefault` | logikai érték? | Automatikus aktiválás telepítéskor                                         |
+| `configSchema`     | objektum?      | A konfigurációs mezők térképe (`string`/`number`/`boolean`/`select`)       |
+| `integrity`        | húr?           | Opcionális `sha256-<base64>` belépőfájl tű                                 |
+
+Az engedélyek a `network` / `file-read` / `file-write` / `env` / `exec` enumból származnak. Csak `env` van futásidejű hatása (kicsit nagyobb környezeti változók engedélyezési listája a gyermek számára); a többi nyilatkozat, és nem érvényesül.
 
 ## Életciklus folyamata
 
@@ -352,19 +305,16 @@ A `plugins` tábla (`076_create_plugins.sql` migráció):
 A bővítmények metrikáit és analitikai adatait további táblák követik nyomon
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Irányítópult
+## Műszerfal
 
-A `/dashboard/plugins` címen található irányítópultoldal
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) két lapot biztosít:
+A `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) irányítópult oldala két lapot kínál:
 
-- **Telepítve** — felsorolja a telepített bővítményeket a deklarált hookjaikkal, egy
-  aktiválási/deaktiválási kapcsolóval, egy eltávolítási gombbal és egy „Bővítmények keresése”
-  művelettel (`POST /api/plugins/scan`).
-- **Piactér** — megjeleníti a `GET /api/plugins/marketplace` által visszaadott katalógust egy,
-  az egyéni regisztrációs adatbázis URL-jének beállítására szolgáló mezővel.
+- **Telepítve** — felsorolja a telepített beépülő modulokat a deklarált hookkal, egy activate/deactivate kapcsolóval, egy eltávolítás gombbal és egy "Beépülő modulok keresése" művelettel (`POST /api/plugins/scan`).
+- **Piactér** — a `GET /api/plugins/marketplace` katalógusát jeleníti meg egy mezővel az egyéni URL beállításjegyzék beállításához.
 
-A bővítményenkénti konfigurációs oldal a `/dashboard/plugins/[name]/config`
-címen található (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Az oldalon mindig megjelenik egy figyelmeztetés, hogy a bővítmények a OmniRoute folyamat teljes jogosultságával futnak.
+
+A beépülő modulonkénti konfigurációs oldal `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) címen található.
 
 ## Lásd még
 

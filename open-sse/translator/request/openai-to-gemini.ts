@@ -8,7 +8,7 @@ import {
 import {
   generateAntigravityRequestId,
   getAntigravityEnvelopeUserAgent,
-  getAntigravitySessionId,
+  getAntigravityConversationSessionId,
 } from "../../services/antigravityIdentity.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import {
@@ -910,7 +910,10 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
     project: projectId,
     requestId: generateAntigravityRequestId(),
     request: {
-      sessionId: getAntigravitySessionId(credentials),
+      sessionId: getAntigravityConversationSessionId(
+        credentials,
+        (credentials as { _antigravitySessionKey?: string } | null)?._antigravitySessionKey
+      ),
       contents: cloudCodeRequest.contents,
       systemInstruction: cloudCodeRequest.systemInstruction,
       generationConfig: applyAntigravityGenerationDefaults(cloudCodeRequest.generationConfig),

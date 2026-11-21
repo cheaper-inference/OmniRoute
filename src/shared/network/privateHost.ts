@@ -115,6 +115,17 @@ export function isSameIpv6Address(a: string, b: string): boolean {
   return !!first && !!second && first.every((value, index) => value === second[index]);
 }
 
+/**
+ * 198.18.0.0/15 (RFC 2544 benchmarking) is never routed publicly, but it stays public by default:
+ * fake-IP proxies (Clash, Mihomo, Surge in TUN mode) answer every name with an address in it, so
+ * blocking it would refuse every guarded download behind such a proxy (#15039). An operator whose
+ * network has real internal services in that range opts in with
+ * OMNIROUTE_BLOCK_BENCHMARK_RANGE=true. Read on every call so a change applies without a restart.
+ */
+function blocksBenchmarkRange(): boolean {
+  return typeof process !== "undefined" && process.env?.OMNIROUTE_BLOCK_BENCHMARK_RANGE === "true";
+}
+
 export function isPrivateHost(hostname: string) {
   const normalized = normalizeHost(hostname);
   if (!normalized) return true;
@@ -150,6 +161,7 @@ export function isPrivateHost(hostname: string) {
     // 192.0.0.0/24 (IETF protocol assignments), 224.0.0.0/4 multicast, and the Azure host
     // fabric address.
     if (a === 192 && b === 0 && c === 0) return true;
+    if (a === 198 && (b === 18 || b === 19) && blocksBenchmarkRange()) return true;
     if (a >= 224 && a <= 239) return true;
     // 240.0.0.0/4 reserved ("Class E"), whose top address is the limited broadcast
     // 255.255.255.255. Never a public destination; some cloud networks use it as private space.

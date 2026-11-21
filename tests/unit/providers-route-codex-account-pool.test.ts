@@ -132,7 +132,7 @@ test("GET keeps one parent row and projects raw Codex state without exposing cre
   assert.equal("consoleApiKey" in safeProviderData, false);
 });
 
-test("GET projects the same scoped Codex quota observations used by routing", async () => {
+test("GET projects the same scoped Codex quota observations used by routing", async (t) => {
   const resetAt5h = new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString();
   const resetAt7d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   const codex = await providersDb.createProviderConnection({
@@ -149,16 +149,24 @@ test("GET projects the same scoped Codex quota observations used by routing", as
     },
   });
 
-  quotaCache.setQuotaCache(codex.id, "codex", {
-    session: { remainingPercentage: 50, resetAt: resetAt5h },
-    weekly: { remainingPercentage: 50, resetAt: resetAt7d },
-  });
-  quotaCache.setQuotaCache(codex.id, "codex", {
-    session: { remainingPercentage: 0, resetAt: resetAt5h },
-    weekly: { remainingPercentage: 75, resetAt: resetAt7d },
-    gpt_5_3_codex_spark_session: { remainingPercentage: 60, resetAt: resetAt5h },
-    gpt_5_3_codex_spark_weekly: { remainingPercentage: 40, resetAt: resetAt7d },
-  });
+  // The cache timestamps each reported window separately. Cross a millisecond
+  // boundary during setup without aging out the observations during the request.
+  let observedAt = Date.now() - 1_000;
+  const clock = t.mock.method(Date, "now", () => observedAt++);
+  try {
+    quotaCache.setQuotaCache(codex.id, "codex", {
+      session: { remainingPercentage: 50, resetAt: resetAt5h },
+      weekly: { remainingPercentage: 50, resetAt: resetAt7d },
+    });
+    quotaCache.setQuotaCache(codex.id, "codex", {
+      session: { remainingPercentage: 0, resetAt: resetAt5h },
+      weekly: { remainingPercentage: 75, resetAt: resetAt7d },
+      gpt_5_3_codex_spark_session: { remainingPercentage: 60, resetAt: resetAt5h },
+      gpt_5_3_codex_spark_weekly: { remainingPercentage: 40, resetAt: resetAt7d },
+    });
+  } finally {
+    clock.mock.restore();
+  }
 
   const routing = auth.evaluateQuotaLimitPolicy(
     "codex",
@@ -170,6 +178,14 @@ test("GET projects the same scoped Codex quota observations used by routing", as
   );
   assert.equal(routing.blocked, true);
   assert.deepEqual(routing.reasons, ["session usage 100%"]);
+
+  const generalObservation = quotaCache.getQuotaWindowObservation(codex.id, "session");
+  const sparkObservation = quotaCache.getQuotaWindowObservation(
+    codex.id,
+    "gpt_5_3_codex_spark_session"
+  );
+  assert.ok(generalObservation?.observedAt);
+  assert.ok(sparkObservation?.observedAt);
 
   const response = await providersRoute.GET(
     await makeManagementSessionRequest("http://localhost/api/providers?provider=codex")
@@ -227,6 +243,6 @@ test("GET projects the same scoped Codex quota observations used by routing", as
     resetAt: resetAt7d,
     usedPercentage: 60,
   });
-  assert.ok(general.quota.observedAt);
-  assert.equal(general.quota.observedAt, spark.quota.observedAt);
+  assert.equal(general.quota.observedAt, generalObservation.observedAt);
+  assert.equal(spark.quota.observedAt, sparkObservation.observedAt);
 });
