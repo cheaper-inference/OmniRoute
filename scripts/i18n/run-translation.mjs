@@ -196,6 +196,21 @@ function sha256(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
+const USAGE = [
+  "Usage: node scripts/i18n/run-translation.mjs [options]",
+  "",
+  "  --locale=<csv>       Target locales (default: all except `en`)",
+  "  --files=<csv>        Relative paths to translate (default: all sources)",
+  "  --force              Retranslate even when hashes match",
+  "  --dry-run            Report what would happen but never call the API",
+  "  --adopt              Rebuild .i18n-state.json from the files on disk (no API calls)",
+  "  --targets-only       With --adopt: re-hash only the mirrors, keeping every source_hash",
+  "  --concurrency=<n>    Parallel API requests (default: env CONCURRENCY or 4)",
+  "  --failures-json=<p>  Write the run summary and the failed units to <p> as JSON",
+  "",
+  "Exit: 0 all translated, 3 partial (failed units left untouched), 1 none translated or error, 2 usage error",
+].join("\n");
+
 function parseArgs(argv) {
   const opts = {
     locales: null,
@@ -233,23 +248,12 @@ function parseArgs(argv) {
     else if (arg.startsWith("--concurrency=")) opts.concurrency = Number(arg.slice(14));
     else if (arg.startsWith("--failures-json=")) opts.failuresJson = arg.slice(16);
     else if (arg === "--help" || arg === "-h") {
-      console.log(
-        [
-          "Usage: node scripts/i18n/run-translation.mjs [options]",
-          "",
-          "  --locale=<csv>       Target locales (default: all except `en`)",
-          "  --files=<csv>        Relative paths to translate (default: all sources)",
-          "  --force              Retranslate even when hashes match",
-          "  --dry-run            Report what would happen but never call the API",
-          "  --adopt              Rebuild .i18n-state.json from the files on disk (no API calls)",
-          "  --targets-only       With --adopt: re-hash only the mirrors, keeping every source_hash",
-          "  --concurrency=<n>    Parallel API requests (default: env CONCURRENCY or 4)",
-          "  --failures-json=<p>  Write the run summary and the failed units to <p> as JSON",
-          "",
-          "Exit: 0 all translated, 3 partial (failed units left untouched), 1 none translated or error",
-        ].join("\n")
-      );
+      console.log(USAGE);
       process.exit(0);
+    } else {
+      logError(`unknown option: ${arg}`);
+      console.error(USAGE);
+      process.exit(EXIT_USAGE);
     }
   }
   return opts;
@@ -511,6 +515,11 @@ const CODE_LITERAL = new RegExp(
   [BACKTICK_CODE.source, TILDE_CODE.source, INLINE_CODE.source].join("|"),
   "gm"
 );
+// Markdown indented code blocks (four spaces or a tab) are code as well. A block starts at
+// the beginning of the text or after a blank line; indented list continuations follow a list
+// item and stay in the prose. Kept separate from CODE_LITERAL so the think-tag protection is
+// untouched, and compiled without "m" so its leading anchor means the start of the text.
+const INDENTED_CODE = /(?:^|\n[ \t]*\n)((?: {4}|\t)[^\n]*(?:\n(?: {4}|\t)[^\n]*)*)/g;
 const mapThinkCode = (text, visit) =>
   text.replace(CODE_LITERAL, (code) => code.replace(THINK_LITERAL, visit));
 
@@ -583,6 +592,21 @@ export function validateTranslatedChunk(source, output) {
   problems.push(...htmlStructureProblems(source, text));
   const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
   if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
+  // Code examples are byte-identical in every language, so compare prose only. Fenced and
+  // inline code is removed by CODE_LITERAL, indented blocks by INDENTED_CODE, so preserved
+  // code cannot make a translated section look like an echo. NUL-delimited sentinel tokens
+  // are internal markers, never prose. One substantive prose line is then enough for the
+  // byte-equal path of looksUntranslated; its >= 80% path still needs three lines.
+  const proseOnly = (value) =>
+    value
+      .replace(CODE_LITERAL, "")
+      .replace(INDENTED_CODE, "")
+      .replace(/\x00[^\x00]*\x00/g, "");
+  const sourceProse = proseOnly(source);
+  const outputProse = proseOnly(text);
+  if (proseLines(sourceProse).length >= 1 && looksUntranslated(outputProse, sourceProse)) {
+    problems.push("untranslated output");
+  }
   return { text, problems };
 }
 
@@ -1370,6 +1394,9 @@ function createLimiter(max) {
 
 // ----- Main ----------------------------------------------------------------
 
+// An invalid command line is refused before any work is done.
+const EXIT_USAGE = 2;
+
 // A run where some units translated and some failed. The workflow commits the good mirrors
 // and lists the failed units; a failed unit is never written and never gets a state record.
 export const EXIT_PARTIAL = 3;
@@ -1476,7 +1503,7 @@ async function main() {
 
   if (opts.targetsOnly && !opts.adopt) {
     logError("--targets-only only applies to --adopt; re-run as `--adopt --targets-only`");
-    process.exit(2);
+    process.exit(EXIT_USAGE);
   }
 
   if (opts.adopt && opts.targetsOnly) {
