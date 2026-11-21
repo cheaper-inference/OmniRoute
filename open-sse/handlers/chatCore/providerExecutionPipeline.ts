@@ -38,6 +38,7 @@ import {
 } from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
 import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
+import { stripUndecryptableReasoning } from "../../executors/codex/reasoningReplayRejection.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -564,6 +565,13 @@ export async function runProviderExecutionPipeline(
           retryAfterMs,
         });
         connection.replaceCredentials(nextCreds as Record<string, unknown>);
+        // Reasoning ciphertext is bound to the account that made it: the new account would
+        // answer 400 invalid_encrypted_content. The per-account 400 retry stays as a backstop.
+        const moved = stripUndecryptableReasoning(wire.body);
+        if (moved.removed > 0) {
+          wire.body = moved.body as Record<string, unknown>;
+          wire.setBodyAndModel(wire.body, wire.currentModel);
+        }
         attempts += 1;
         continue;
       }
