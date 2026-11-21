@@ -29,6 +29,7 @@ const { isCodexUltrafastModel } = await import("../../open-sse/config/codexServi
 const { CODEX_FAST_TIER_DEFAULT_SUPPORTED_MODELS } =
   await import("../../src/lib/providers/codexFastTier.ts");
 const { getModelSpec } = await import("../../src/shared/constants/modelSpecs.ts");
+const { DEFAULT_CODEX_CLIENT_VERSION } = await import("../../src/shared/constants/codexClient.ts");
 
 const EFFORTS = ["ultra", "max", "xhigh", "high", "medium", "low"];
 const BASES = ["gpt-6.2-sol", "gpt-6.2-astra"] as const;
@@ -88,12 +89,20 @@ test("bare GPT-6.2 ids route to Codex when Codex and OpenAI are both active", as
   }
 });
 
-test("bare gpt-6.2-astra stays on OpenAI when no Codex connection is active", async () => {
-  // gpt-6.2-sol joins the OpenAI registry in #20811; Astra is registered here.
+test("bare GPT-6.2 ids stay on OpenAI when no Codex connection is active", async () => {
   await seedConnection("openai");
-  const info = await getModelInfoCore("gpt-6.2-astra", null);
-  assert.equal(info.provider, "openai");
-  assert.equal(info.model, "gpt-6.2-astra");
+  for (const id of ["gpt-6.2-sol", "gpt-6.2-astra"]) {
+    const info = await getModelInfoCore(id, null);
+    assert.equal(info.provider, "openai", id);
+    assert.equal(info.model, id);
+  }
+});
+
+test("the fallback Codex client version is new enough for GPT-6.2", () => {
+  // The backend serves gpt-6.2-* only to minimal_client_version 0.166.0 or newer;
+  // the fallback is what a caller that sends no Codex version advertises.
+  const [major, minor] = DEFAULT_CODEX_CLIENT_VERSION.split(".").map(Number);
+  assert.ok(major > 0 || minor >= 166, DEFAULT_CODEX_CLIENT_VERSION);
 });
 
 test("GPT-6.2 effort aliases split to their base model, up to ultra", () => {
@@ -138,7 +147,9 @@ test("GPT-6.2 Astra carries its published price, below GPT-6 Astra", () => {
   }
 });
 
-test("openai/gpt-6.2-astra routes through Responses with the public 1.05M window", () => {
-  assert.equal(getModelTargetFormat("openai", "gpt-6.2-astra"), "openai-responses");
-  assert.equal(getModelSpec("gpt-6.2-astra")?.contextWindow, 1050000);
+test("openai GPT-6.2 models route through Responses with the public 1.05M window", () => {
+  for (const id of BASES) {
+    assert.equal(getModelTargetFormat("openai", id), "openai-responses", id);
+    assert.equal(getModelSpec(id)?.contextWindow, 1050000, id);
+  }
 });
