@@ -50,6 +50,10 @@ function parseCatalog(): DocRow[] {
 const docRows = parseCatalog();
 const docByKey = new Map(docRows.map((row) => [row.key, row]));
 
+test("every catalog row has a unique flag key", () => {
+  assert.equal(docRows.length, docByKey.size);
+});
+
 test("every defined feature flag has a catalog row in FEATURE_FLAGS.md", () => {
   const missing = FEATURE_FLAG_DEFINITIONS.filter((d) => !docByKey.has(d.key)).map((d) => d.key);
   assert.deepEqual(
