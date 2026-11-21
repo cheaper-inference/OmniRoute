@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Batas harus berupa bilangan bulat positif.",
     "error": "Kesalahan: {message}",
     "serverOffline": "Server OmniRoute sedang offline. Mulai dengan: omniroute serve",
     "authRequired": "Autentikasi diperlukan. Setel OMNIROUTE_API_KEY atau jalankan: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[simulasi] akan: {action}",
     "cancelled": "Dibatalkan.",
     "jsonOpt": "Keluaran sebagai JSON",
-    "yesOpt": "Lewati konfirmasi"
+    "yesOpt": "Lewati konfirmasi",
+    "positiveIntegerRequired": "Batas harus berupa bilangan bulat positif."
   },
   "setup": {
     "title": "Penyiapan OmniRoute",

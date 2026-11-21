@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Limit musbat butun son boʻlishi kerak.",
     "error": "Xato: {message}",
     "serverOffline": "OmniRoute serveri oflayn. Uni quyidagi buyruq bilan ishga tushiring: omniroute serve",
     "authRequired": "Autentifikatsiya talab qilinadi. OMNIROUTE_API_KEY ni sozlang yoki quyidagi buyruqni bajaring: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} bajarilgan bo‘lardi",
     "cancelled": "Bekor qilindi.",
     "jsonOpt": "JSON formatida chiqarish",
-    "yesOpt": "Tasdiqlash so‘rovini o‘tkazib yuborish"
+    "yesOpt": "Tasdiqlash so‘rovini o‘tkazib yuborish",
+    "positiveIntegerRequired": "Limit musbat butun son boʻlishi kerak."
   },
   "setup": {
     "title": "OmniRoute sozlamalari",

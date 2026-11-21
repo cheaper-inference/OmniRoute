@@ -1,0 +1,1 @@
+- Add an opt-in `X-OmniRoute-Selected-Connection-Plan` response header for Codex account-routing troubleshooting (`OMNIROUTE_CODEX_PLAN_RESPONSE_HEADER=1`), off by default with an explicit plan allowlist.

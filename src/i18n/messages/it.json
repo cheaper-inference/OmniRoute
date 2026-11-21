@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Mantieni i messaggi di sistema durante la conversazione",
     "requireUserLastMessageDescription": "Per gli upstream che rifiutano la precompilazione dell'assistente: eliminare i turni finali dell'assistente (no tool_use) prima dell'invio. Il modello può rigenerare la sua risposta precedente.",
     "requireUserLastMessageLabel": "Richiedi che la conversazione termini con un messaggio utente",
+    "strictChatHistoryDescription": "Ripara le sequenze interrotte di chiamate agli strumenti e unisce i messaggi consecutivi dell’assistente prima di inviarli ai provider compatibili con OpenAI che applicano regole rigorose.",
+    "strictChatHistoryLabel": "Riparazione della cronologia della chat per provider rigorosi",
     "bulkPasteAdded": "{count, plural, one {1 chiave aggiunta} other {# chiavi aggiunte}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicato ignorato} other {# duplicati ignorati}}",
     "bulkPasteHint": "Incolla una chiave API per riga. Le righe vuote e le chiavi duplicate vengono ignorate.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Rimuovi chiave"
   },
   "plugins": {
-    "privilegesWarningTitle": "I plugin vengono eseguiti con privilegi completi",
-    "privilegesWarningBody": "Un plugin viene eseguito come un normale processo Node.js con lo stesso accesso di OmniRoute: può leggere file, eseguire programmi e utilizzare la rete, qualunque siano le autorizzazioni dichiarate dal suo manifest. Installa solo i plugin di cui ti fidi.",
     "title": "Plugin",
     "description": "Installa e gestisci i plugin per estendere le funzionalità di OmniRoute",
     "loading": "Caricamento dei plugin...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Cerca plugin",
     "noPlugins": "Nessun plugin installato",
     "noPluginsDescription": "Inserisci le directory dei plugin in ~/.omniroute/plugins/ e fai clic su Cerca.",
+    "privilegesWarningTitle": "I plugin vengono eseguiti con privilegi completi",
+    "privilegesWarningBody": "Un plugin viene eseguito come un normale processo Node.js con lo stesso accesso di OmniRoute: può leggere file, eseguire programmi e utilizzare la rete, qualunque siano le autorizzazioni dichiarate dal suo manifest. Installa solo i plugin di cui ti fidi.",
     "activate": "Attiva",
     "deactivate": "Disattiva",
     "uninstall": "Disinstalla",

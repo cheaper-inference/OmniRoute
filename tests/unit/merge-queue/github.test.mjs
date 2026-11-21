@@ -770,6 +770,127 @@ test("a request that keeps timing out fails with GitHubError status 0", async (t
   });
 });
 
+// ── owner voice: the owner's token writes, the App's reads, both logins' markers count ──
+
+const OWNER_TOKEN = "github_pat_OwnerFineGrainedToken0123456789";
+
+/** Fake GitHub with the App's token (omni-queue[bot]) and the owner's (`owner-login`). */
+async function voiceSetup(t) {
+  const fake = await startFakeGitHub({ token: TOKEN, actor: "omni-queue[bot]" });
+  t.after(() => fake.close());
+  fake.tokenActors.set(OWNER_TOKEN, "owner-login");
+  const client = (token) =>
+    createGitHubClient({
+      token,
+      repository: fake.repository,
+      apiUrl: fake.url,
+      botLogin: "omni-queue[bot]",
+      sleep: async () => {},
+    });
+  return { fake, app: client(TOKEN), owner: client(OWNER_TOKEN) };
+}
+
+const marked = (id, key, login) => ({
+  id,
+  body: `earlier\n\n${commentMarker(key)}`,
+  user: { login, type: /\[bot\]$/.test(login) ? "Bot" : "User" },
+  created_at: "2026-11-13T10:00:00Z",
+});
+
+test("getAuthenticatedLogin: the login of the token's user (GET /user)", async (t) => {
+  const { fake, app, owner } = await voiceSetup(t);
+  assert.equal(await owner.getAuthenticatedLogin(), "owner-login");
+  assert.equal(await app.getAuthenticatedLogin(), "omni-queue[bot]");
+  const reads = fake.requests.filter((r) => r.path === "!/user");
+  assert.equal(reads.length, 2);
+  assert.ok(reads.every((r) => r.method === "GET"));
+});
+
+test("commentOnce alsoLogins: a marker by that login counts as the queue's own", async (t) => {
+  const { fake, app } = await voiceSetup(t);
+  fake.addPull({ number: 21 });
+  fake.comments.set(21, [marked(1, "culprit:abc", "owner-login")]);
+  // Without the owner's login only the App's markers count (today's behaviour)...
+  assert.deepEqual(await app.commentOnce(21, "culprit:abc", "x"), { posted: true });
+  fake.comments.set(21, [marked(1, "culprit:abc", "owner-login")]);
+  // ...with it, the owner's earlier comment is the queue's own: nothing is posted again.
+  assert.deepEqual(await app.commentOnce(21, "culprit:abc", "x", { alsoLogins: ["owner-login"] }), {
+    posted: false,
+  });
+  assert.equal(fake.comments.get(21).length, 1);
+});
+
+test("commentOnce alsoLogins: a marker by anybody else still never counts", async (t) => {
+  const { fake, app } = await voiceSetup(t);
+  fake.addPull({ number: 22 });
+  fake.comments.set(22, [marked(1, "culprit:abc", "mallory")]);
+  assert.deepEqual(await app.commentOnce(22, "culprit:abc", "x", { alsoLogins: ["owner-login"] }), {
+    posted: true,
+  });
+  const comments = fake.comments.get(22);
+  assert.equal(comments.length, 2, "mallory's planted marker is left alone and ignored");
+  assert.equal(comments[0].user.login, "mallory");
+  assert.equal(comments[1].user.login, "omni-queue[bot]");
+});
+
+test("commentOnce reader: lists through the reader's token, posts through its own", async (t) => {
+  const { fake, app, owner } = await voiceSetup(t);
+  fake.addPull({ number: 23 });
+  const opts = { reader: app, alsoLogins: ["owner-login"] };
+  assert.deepEqual(await owner.commentOnce(23, "landed:abc", "Landed", opts), { posted: true });
+  const [comment] = fake.comments.get(23);
+  assert.equal(comment.user.login, "owner-login", "the comment is the owner's");
+  assert.equal(comment.body, `Landed\n\n${commentMarker("landed:abc")}`);
+  const auth = (r) => String(r.headers.authorization ?? "");
+  const lists = fake.requests.filter((r) => r.method === "GET" && r.path === "/issues/23/comments");
+  assert.ok(lists.length >= 1);
+  assert.ok(
+    lists.every((r) => auth(r) === `Bearer ${TOKEN}`),
+    "every read uses the App's token"
+  );
+  const posts = fake.requests.filter(
+    (r) => r.method === "POST" && r.path === "/issues/23/comments"
+  );
+  assert.deepEqual(
+    posts.map((r) => auth(r)),
+    [`Bearer ${OWNER_TOKEN}`]
+  );
+  // The owner's own marker counts on the next call, and on the App's fallback path too.
+  assert.deepEqual(await owner.commentOnce(23, "landed:abc", "Landed", opts), { posted: false });
+  assert.deepEqual(
+    await app.commentOnce(23, "landed:abc", "Landed", { alsoLogins: ["owner-login"] }),
+    { posted: false }
+  );
+  assert.equal(fake.comments.get(23).length, 1);
+});
+
+test("commentOnce reader: a duplicate the owner raced with the App is removed, oldest kept", async (t) => {
+  const { fake, app } = await voiceSetup(t);
+  fake.addPull({ number: 24 });
+  let planted = false;
+  const racing = createGitHubClient({
+    token: OWNER_TOKEN,
+    repository: fake.repository,
+    apiUrl: fake.url,
+    botLogin: "omni-queue[bot]",
+    fetchImpl: async (url, init) => {
+      if (!planted && init.method === "POST" && url.endsWith("/issues/24/comments")) {
+        planted = true; // the App's approval job posts between our read and our write
+        fake.comments.set(24, [marked(1, "not-approver", "omni-queue[bot]")]);
+      }
+      return fetch(url, init);
+    },
+  });
+  const result = await racing.commentOnce(24, "not-approver", "mine", {
+    reader: app,
+    alsoLogins: ["owner-login"],
+  });
+  assert.deepEqual(result, { posted: false });
+  const comments = fake.comments.get(24);
+  assert.equal(comments.length, 1, "the owner's newer duplicate was deleted");
+  assert.equal(comments[0].id, 1);
+});
+
 test("commentOnce keeps the oldest when another writer posted the same marker meanwhile", async (t) => {
   const fake = await startFakeGitHub({ token: TOKEN, actor: "omni-queue[bot]" });
   t.after(() => fake.close());
