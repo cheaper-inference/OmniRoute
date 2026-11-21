@@ -1,8 +1,10 @@
 import {
   clearDispatcherCache,
   evictDispatcherPool,
+  evictProxyDispatcher,
   type DispatcherPoolScope,
 } from "./proxyDispatcherCache.ts";
+import { isLocalEgressHostname } from "./proxyDispatcher.ts";
 
 /**
  * Minimum delay between two reaps of a bounded pool. Under a real outage
@@ -12,17 +14,65 @@ import {
  * stays observable in tests and out of the hot path.
  */
 export const REAP_MIN_INTERVAL_MS = 30_000;
+export const PROXY_DISPATCHER_EVICT_THRESHOLD = 3;
+export const PROXY_DISPATCHER_FAILURE_WINDOW_MS = 60_000;
+
+type ProxyFailureStreak = {
+  count: number;
+  lastFailureAt: number;
+};
 
 const lastReapByScope = new Map<DispatcherPoolScope, number>();
+const proxyFailureStreaks = new Map<string, ProxyFailureStreak>();
 
 /** Test seam: drop the stored reap timestamps between tests. */
 export function __resetDispatcherReapForTest(): void {
   lastReapByScope.clear();
+  proxyFailureStreaks.clear();
 }
 
 /** Test seam: how many reap timestamps are stored (always at most 2). */
 export function __dispatcherReapSizeForTest(): number {
   return lastReapByScope.size;
+}
+
+export function __proxyFailureStreakSizeForTest(): number {
+  return proxyFailureStreaks.size;
+}
+
+export function recordProxyDispatcherSuccess(proxyUrl: string): void {
+  if (!proxyUrl) return;
+  proxyFailureStreaks.delete(proxyUrl);
+}
+
+function parseProxyHost(proxyUrl: string): { hostname: string | null; isLocal: boolean } {
+  try {
+    const hostname = new URL(proxyUrl).hostname;
+    return { hostname, isLocal: isLocalEgressHostname(hostname) };
+  } catch {
+    return { hostname: null, isLocal: false };
+  }
+}
+
+export function recordProxyDispatcherFailure(
+  proxyUrl: string,
+  now: number = Date.now()
+): boolean {
+  if (!proxyUrl) return false;
+  const prev = proxyFailureStreaks.get(proxyUrl);
+  const count =
+    prev && now - prev.lastFailureAt <= PROXY_DISPATCHER_FAILURE_WINDOW_MS ? prev.count + 1 : 1;
+
+  if (count >= PROXY_DISPATCHER_EVICT_THRESHOLD) {
+    proxyFailureStreaks.delete(proxyUrl);
+    evictProxyDispatcher(proxyUrl);
+    const { hostname, isLocal } = parseProxyHost(proxyUrl);
+    maybeReapDispatcherPool(hostname, isLocal, now);
+    return true;
+  }
+
+  proxyFailureStreaks.set(proxyUrl, { count, lastFailureAt: now });
+  return false;
 }
 
 function reapBounded(scope: DispatcherPoolScope, now: number): void {

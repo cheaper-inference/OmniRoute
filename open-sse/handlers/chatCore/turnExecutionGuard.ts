@@ -37,6 +37,18 @@ export function createTurnInProgressResult(retryCount: number) {
   };
 }
 
+export const DEFAULT_TURN_GUARD_TTL_MS = 120_000;
+
+export function getTurnGuardTtlMs(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_TURN_GUARD_TTL_MS;
+  if (raw == null || raw.trim() === "") return DEFAULT_TURN_GUARD_TTL_MS;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return DEFAULT_TURN_GUARD_TTL_MS;
+  return parsed <= 0 ? 0 : Math.floor(parsed);
+}
+
 const activeTurns = new Map<string, ActiveTurn>();
 
 /**
@@ -46,24 +58,30 @@ const activeTurns = new Map<string, ActiveTurn>();
 export function acquireTurnExecution(key: string | null): TurnExecutionAcquireResult {
   if (!key) return { acquired: true, release: () => {} };
 
-  // A re-entry of the request that already holds this key (same-account
-  // retry, account rotation, combo leg) is the same turn continuing, not a
-  // duplicate: it proceeds under the owner's slot and must not release it.
   const ownership = getTurnExecutionOwnership();
-  if (ownership?.keys.has(key)) return { acquired: true, release: () => {} };
-
+  const ttlMs = getTurnGuardTtlMs();
+  const now = Date.now();
   const existing = activeTurns.get(key);
-  if (existing) {
+
+  if (existing && ttlMs > 0 && now - existing.startedAt >= ttlMs) {
+    activeTurns.delete(key);
+    ownership?.keys.delete(key);
+  } else if (ownership?.keys.has(key)) {
+    // A re-entry of the request that already holds this key (same-account
+    // retry, account rotation, combo leg) is the same turn continuing, not a
+    // duplicate: it proceeds under the owner's slot and must not release it.
+    return { acquired: true, release: () => {} };
+  } else if (existing) {
     existing.retryCount += 1;
     return {
       acquired: false,
       retryCount: existing.retryCount,
-      ageMs: Math.max(0, Date.now() - existing.startedAt),
+      ageMs: Math.max(0, now - existing.startedAt),
       release: () => {},
     };
   }
 
-  const entry: ActiveTurn = { startedAt: Date.now(), retryCount: 0 };
+  const entry: ActiveTurn = { startedAt: now, retryCount: 0 };
   activeTurns.set(key, entry);
   ownership?.keys.add(key);
   let released = false;
@@ -72,8 +90,10 @@ export function acquireTurnExecution(key: string | null): TurnExecutionAcquireRe
     release: () => {
       if (released) return;
       released = true;
-      ownership?.keys.delete(key);
-      if (activeTurns.get(key) === entry) activeTurns.delete(key);
+      if (activeTurns.get(key) === entry) {
+        ownership?.keys.delete(key);
+        activeTurns.delete(key);
+      }
     },
   };
 }
