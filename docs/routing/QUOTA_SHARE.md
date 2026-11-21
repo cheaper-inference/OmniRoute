@@ -849,10 +849,41 @@ provider, and every `/quota/*` path while the flag is off, answer 404. Pools on 
 or Anthropic-compatible node have no page. The API still answers for them.
 
 The page has no session. The key is sent only in the `Authorization` header of
-`GET /api/v1/me/quota/{provider}` and `GET /api/v1/me/usage`, never in a URL. A key the server
-accepts is kept in the tab's `sessionStorage`. With "Remember on this device" it is kept in
-`localStorage` instead, and "Forget key" removes it from both. A key the server rejects is
-removed from storage.
+`GET /api/v1/me/quota/{provider}`, `PATCH /api/v1/me/quota/{provider}` and `GET /api/v1/me/usage`,
+never in a URL. A key the server accepts is kept in the tab's `sessionStorage`. With "Remember on
+this device" it is kept in `localStorage` instead, and "Forget key" removes it from both. A key
+the server rejects is removed from storage.
+
+A pool in `consent` mode shows a lending card. There the key holder sets a whole percentage from
+0 to 100 of the key's idle share to lend. The holder also picks how long the consent lasts: until
+turned off, 1 hour, 8 hours, 24 hours, 7 days or 30 days. A duration counts from the moment of
+saving. While a deadline is in force, the holder can keep it instead. With 0% no deadline is sent.
+The card shows the stored deadline with its time zone named. A consent whose deadline has passed
+is shown as ended.
+
+For a `hard` key the card also lists, per pool window, what other keys lend to the key right now.
+Each row is one figure for all other keys together. In a pool of two keys it is the other key's
+own figure. A figure the view does not report reads as not available, not as zero. For a `soft` or
+`burst` key the card says that no figure applies.
+
+A pool in `saturation` mode whose key stores a percentage above 0 shows a withdrawal only. It says
+that the stored percentage has no effect there. Its Withdraw button sends 0 with no deadline. A
+pool in `saturation` mode with a stored 0 shows no lending card.
+
+Nothing is saved until the holder presses Save or Withdraw. Each press sends one
+`PATCH /api/v1/me/quota/{provider}` request, and a second press sends nothing while the first is
+pending. The body carries the pool's opaque `ref` from the view, the percentage and the deadline.
+The answer is the rebuilt quota view, and the page shows it with no second read. The page does not
+keep the consent in browser storage.
+
+A refused change is explained on the card by a text chosen from the HTTP status. The error body is
+not read. A 401 says the key was not accepted and reloads the quota. A 403 says the pool is not
+taking lending changes, and a 404 says the pool is gone. Both offer a button that reloads the
+quota. Any other 4xx asks the holder to check the percentage and the deadline. A 429 asks the
+holder to wait, with the seconds of `Retry-After` when the answer gives them. A 5xx answer or a
+network failure says the change may not have been saved, and keeps the typed values. An answer
+outside the contract reloads the quota. A failed save does not remove the key by itself. When the
+reload after it is refused, the page removes the key as on any refused read.
 
 A reading the API marks `stale` is shown as possibly out of date. A reading it marks
 `unavailable` is shown with its reason, never as zero. On percentage plans the key's own share is
