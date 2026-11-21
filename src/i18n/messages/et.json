@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Hoidke vestluse keskel olevad süsteemisõnumid paigas",
     "requireUserLastMessageDescription": "Ülesvoolude puhul, mis keelduvad assistendi eeltäitmisest: enne saatmist langetage abimehe pöörded (tööriista_kasutamata). Mudel võib taastada oma eelmise vastuse.",
     "requireUserLastMessageLabel": "Nõua, et vestlus lõppeks kasutaja sõnumiga",
+    "strictChatHistoryDescription": "Parandab katkestatud tööriistakutsete jadad ja ühendab assistendi järjestikused sõnumid enne saatmist OpenAI-ga ühilduvatele teenusepakkujatele, kes järgivad rangeid reegleid.",
+    "strictChatHistoryLabel": "Vestlusajaloo parandamine rangete teenusepakkujate jaoks",
     "bulkPasteAdded": "{count, plural, one {Lisati 1 võti} other {Lisati # võtit}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikaat jäeti vahele} other {# duplikaati jäeti vahele}}",
     "bulkPasteHint": "Kleepige igale reale üks API-võti. Tühje ridu eiratakse ja duplikaatvõtmed jäetakse vahele.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Eemalda võti"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pluginad töötavad täielike õigustega",
-    "privilegesWarningBody": "Pistikprogramm töötab tavalise Node.js protsessina, millel on sama juurdepääs kui OmniRoute: see võib lugeda faile, käivitada programme ja kasutada võrku olenemata sellest, mis õigused selle manifest deklareerib. Installige ainult usaldusväärsed pistikprogrammid.",
     "title": "Pistikprogrammid",
     "description": "Installi ja halda pistikprogramme OmniRoute'i funktsionaalsuse laiendamiseks",
     "loading": "Pistikprogrammide laadimine...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Skanni pistikprogramme",
     "noPlugins": "Ühtegi pistikprogrammi pole installitud",
     "noPluginsDescription": "Paiguta pistikprogrammide kataloogid asukohta ~/.omniroute/plugins/ ja klõpsa nuppu „Skanni“.",
+    "privilegesWarningTitle": "Pluginad töötavad täielike õigustega",
+    "privilegesWarningBody": "Pistikprogramm töötab tavalise Node.js protsessina, millel on sama juurdepääs kui OmniRoute: see võib lugeda faile, käivitada programme ja kasutada võrku olenemata sellest, mis õigused selle manifest deklareerib. Installige ainult usaldusväärsed pistikprogrammid.",
     "activate": "Aktiveeri",
     "deactivate": "Inaktiveeri",
     "uninstall": "Desinstalli",

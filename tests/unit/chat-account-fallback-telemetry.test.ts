@@ -32,6 +32,38 @@ test("telemetry headers are bounded and never echo untrusted errors", () => {
   assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Plan"), null);
 });
 
+test("Codex account plan diagnostics are off by default and allowlisted when enabled", () => {
+  const key = "OMNIROUTE_CODEX_PLAN_RESPONSE_HEADER";
+  const before = process.env[key];
+  try {
+    delete process.env[key];
+    const hidden = withSelectedConnectionHeader(new Response("ok"), "c", {
+      selectedConnectionPlan: "Plus",
+    });
+    assert.equal(hidden.headers.get("X-OmniRoute-Selected-Connection-Plan"), null);
+
+    process.env[key] = "1";
+    const visible = withSelectedConnectionHeader(new Response("ok"), "c", {
+      selectedConnectionPlan: "Plus",
+    });
+    assert.equal(visible.headers.get("X-OmniRoute-Selected-Connection-Plan"), "plus");
+    const normalized = withSelectedConnectionHeader(new Response("ok"), "c", {
+      selectedConnectionPlan: "Pro Max",
+    });
+    assert.equal(normalized.headers.get("X-OmniRoute-Selected-Connection-Plan"), "promax");
+
+    for (const unsafe of ["custom-internal-secret", "Plus\r\nInjected: true", ""]) {
+      const response = withSelectedConnectionHeader(new Response("ok"), "c", {
+        selectedConnectionPlan: unsafe,
+      });
+      assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Plan"), null);
+    }
+  } finally {
+    if (before === undefined) delete process.env[key];
+    else process.env[key] = before;
+  }
+});
+
 test("immutable response clone retains trusted response policies alongside telemetry", async () => {
   const { markProviderProbeResponse, isProviderProbeResponse } =
     await import("../../src/shared/utils/providerProbeResult.ts");

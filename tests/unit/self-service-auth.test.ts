@@ -90,6 +90,23 @@ test("the environment key and a key without self:usage are refused", async () =>
   assert.equal(await status(req(bearer(unscoped.key))), 403);
 });
 
+test("the Bearer scheme is read in any case and after any run of whitespace", async () => {
+  const accepted = [
+    `bearer ${scoped.key}`,
+    `BEARER ${scoped.key}`,
+    `Bearer\t${scoped.key}`,
+    `Bearer${" ".repeat(5000)}${scoped.key}`,
+  ];
+  for (const value of accepted) {
+    const a = await authenticateSelfServiceRequest(req({ Authorization: value }));
+    assert.ok(a.ok && a.key.id === scoped.id, `expected ${value.slice(0, 12)} to authenticate`);
+  }
+  const refused = [`Bearer${scoped.key}`, "Bearer", `Basic ${scoped.key}`, `xBearer ${scoped.key}`];
+  for (const value of refused) {
+    assert.equal(await status(req({ Authorization: value })), 401, value.slice(0, 12));
+  }
+});
+
 test("an invalid Bearer next to a valid x-api-key authenticates as the x-api-key key", async () => {
   const a = await authenticateSelfServiceRequest(
     req({ ...bearer("not-ours"), "x-api-key": scoped.key })

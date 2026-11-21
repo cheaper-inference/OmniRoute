@@ -355,111 +355,70 @@ Sebelum merilis versi v3.8.x apa pun, verifikasi item-item tambahan berikut:
 
 ---
 
-## Pemotongan 3.9.0 LTS (direhearsalkan di 3.8.58)
+## 3.9.0 LTS cut (dilatih di 3.8.58)
 
-Setelah v3.8.59, versi berikutnya adalah 3.9.0, dan tip-nya menjadi dua cabang berumur panjang:
-`stable/v3` (jalur v3 LTS, npm `latest`) dan `develop` (v4, dinaikkan ke 4.0.0, npm
-`nightly`). Model cabang/channel, forward-port, dan label tersedia di
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); rencananya tersedia di [ROADMAP](../../ROADMAP.md) (Fase 3). Pemotongan dijalankan satu kali;
-3.8.58 merehearsalkannya dari awal hingga akhir pada sebuah fork, dan 3.8.59 ditutup dengan
-[daftar periksa GO/NO-GO](./LTS_GO_NO_GO.md).
+Setelah v3.8.59, versi berikutnya adalah 3.9.0, dan ujungnya menjadi dua cabang yang berumur panjang: `stable/v3` (baris v3 LTS, npm `latest`) dan `develop` (v4, diubah menjadi 4.0.0, npm `nightly`). Model branch/channel, port maju, dan label ada di [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; rencananya ada di [ROADMAP](../../ROADMAP.md) (Fase 3). Pemotongan dilakukan satu kali; 3.8.58 melatihnya dari ujung ke ujung pada garpu, dan 3.8.59 ditutup dengan [daftar periksa GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Dry-run (hanya baca, aman kapan saja)
+### Uji coba (hanya baca, aman kapan saja)
 
 ```bash
-npm run release:dry-run-lts-cut                       # pemotongan sebenarnya: 3.9.0 dari HEAD, tag sebelumnya v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # sematkan commit sumber
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` tidak mengeksekusi apa pun: skrip ini membaca git dan `gh`, lalu mencetak
-seluruh urutan — prasyarat (sumber dapat di-resolve, repositori sumber memiliki riwayat lengkap —
-shallow clone tidak dapat melakukan push ke `stable/v3`, sisi penerima menolak pack pada parent hasil graft pertama,
-jadi lakukan pemotongan dari clone lengkap atau jalankan `git fetch --unshallow origin` terlebih dahulu — tag
-sebelumnya tersedia, `package.json` berisi versi target, issue `release-freeze` sedang terbuka, tidak ada
-issue `Release branch not green` yang terbuka
-pada cabang rilis yang ada — cabang yang tidak ada melaporkan `?` unknown, tidak pernah
-green — antrean `release` Mergify telah dikonfigurasi (G11: `queue_rules`, `checks_timeout`,
-label `queue`), ruleset `release/*` masih memblokir penghapusan dan force-push, serta
-`stable/v3` dan `develop` belum tersedia), kedua langkah cabang, trigger workflow dorman dan
-kondisi `if:` mana yang menjadi true (serta mana yang tetap dibatasi oleh variabel repositori atau
-disematkan ke repositori kanonis), dist-tag yang diharapkan (`latest` → 3.9.0, `next` dan
-`nightly` kosong), serta rollback. Exit `0` = `RESULT: READY`, `1` = prasyarat pemblokir
-gagal (`✗`), `2` = kesalahan penggunaan. `--advisory <id,...>` menurunkan pemeriksaan menjadi peringatan (`!`)
-tanpa menyembunyikannya.
+`scripts/release/dry-run-lts-cut.mjs` tidak mengeksekusi apa pun: ia membaca git dan `gh` dan mencetak seluruh urutan — prasyarat (sumber terselesaikan, repositori sumber memiliki riwayat lengkap — klon dangkal tidak dapat mendorong `stable/v3`, pihak penerima menolak paket pada induk pertama yang dicangkokkan, jadi potong dari klon penuh atau `git fetch --unshallow origin` pertama — tag sebelumnya ada, `package.json` adalah versi target, masalah `release-freeze` terbuka, tidak ada masalah `Release branch not green` terbuka pada cabang rilis yang ada — cabang yang tidak ada laporan `?` tidak diketahui, tidak pernah hijau — omni-queue mendaratkan rilis PRs (G11: `config/merge-queue/config.json` valid, `bases` nya mengelola cabang rilis, `mode` `live`, labelnya ada), kumpulan aturan `release/*` masih memblokir penghapusan dan dorongan paksa, dan `stable/v3` dan `develop` belum ada), dua langkah cabang, yang memicu alur kerja tidak aktif dan kondisi `if:` menjadi benar (dan yang tetap terjaga keamanannya oleh variabel repositori atau disematkan ke repositori kanonik), dist-tag yang diharapkan (`latest` → 3.9.0, `next` dan `nightly` kosong) dan rollback. Keluar `0` = `RESULT: READY`, `1` = prasyarat pemblokiran gagal (`✗`), kesalahan penggunaan `2` =. `--advisory <id,...>` menurunkan versi cek menjadi peringatan (`!`) tanpa menyembunyikannya.
 
-Jalankan dry-run pemotongan sebenarnya selagi release freeze 3.9.0 masih terbuka — cabang
-dibuat setelah tag dan sebelum Fase 12c mencabut freeze.
+Jalankan proses kering pemotongan sebenarnya saat pembekuan rilis 3.9.0 masih terbuka — cabang dibuat setelah tag dan sebelum Fase 12c menghilangkan pembekuan.
 
-### Rehearsal 3.8.58 (khusus fork)
+### 3.8.58 latihan (hanya garpu)
 
 ```bash
-# 1. Jalankan dry-run pada tip saat ini dengan parameter rehearsal
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Eksekusi terhadap remote FORK (origin, atau remote apa pun yang URL-nya merupakan
-#    repositori kanonis, akan ditolak; setiap langkah meminta konfirmasi di terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Uji workflow dorman di fork (workflow_dispatch jika dry-run
-#    melaporkan penyematan repositori kanonis), lalu lakukan rollback
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit bump develop dibuat dengan git plumbing (working tree tidak disentuh) dan menaikkan
-lima file yang sama seperti commit cycle-open: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json`, dan `docs/openapi.yaml`. Bagian `[4.0.0]`
-CHANGELOG beserta mirror i18n-nya kemudian dibuka di `develop`, sebelum PR pertamanya.
-Skrip tidak pernah mengubah npm dist-tag — lakukan rehearsal terhadapnya pada package sementara.
+Komitmen pengembangan dikembangkan dibuat dengan pipa git (tidak ada pohon kerja yang disentuh) dan menggabungkan lima file yang sama dengan komit siklus terbuka: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` dan `docs/openapi.yaml`. Bagian `[4.0.0]` CHANGELOG dan mirror i18nnya dibuka pada `develop` setelahnya, sebelum PR pertama. Skrip tidak pernah mengubah npm dist-tags — latih yang ada di paket awal.
 
-### Artefak pratinjau PR (build sekali, promosikan byte yang sama)
+### artefak pratinjau PR (buat sekali, promosikan byte yang sama)
 
-`.github/workflows/preview-artifact.yml` membuat satu tarball produksi dari head PR dan
-memvalidasi build yang sama persis (#8084 bagian (a)). Hanya untuk PR dari repositori yang sama; tidak ada yang dipublikasikan.
+`.github/workflows/preview-artifact.yml` membuat satu tarball produksi dari kepala PR dan memvalidasi build yang tepat tersebut (#8084 slice (a)). Hanya PRs repositori yang sama; tidak ada yang dipublikasikan.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # atau tambahkan label `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # instalasi pratinjau
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Proses tersebut menjalankan `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, mengemas
-tarball, menjalankan `npm run check:pack-boot` (secret palsu, direktori data sementara), mengemas ulang, dan
-gagal kecuali digest-nya identik, kemudian mencatat `artifact-identity.json` (head SHA, base
-SHA, hash lockfile, platform, arch, node ABI, bundler, kebijakan build —
-`scripts/release/artifact-identity.mjs`) serta mengatestasi tarball dalam job terpisah. Mempromosikan
-pratinjau berarti menginstal tarball tersebut: jangan pernah melakukan build ulang dari sumber.
+Proses ini melakukan `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, mengemas tarball, menjalankan `npm run check:pack-boot` (rahasia palsu, direktori data sementara), mengemas ulang dan gagal kecuali intisarinya identik, kemudian mencatat `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI, bundler, build policy — `scripts/release/artifact-identity.mjs`) dan membuktikan tarball dalam pekerjaan terpisah. Mempromosikan pratinjau berarti memasang tarball itu: jangan pernah membangun kembali dari sumber.
 
 ### Pemotongan (3.9.0, setelah GO)
 
-1. GO dicatat di [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO direkam di [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` mencetak `RESULT: READY`.
-3. Buat cabang di `origin` secara manual menggunakan perintah yang dicetak oleh dry-run —
-   skrip menolak melakukan push ke `origin`. Untuk menggunakan kembali commit develop yang telah ditinjau, jalankan
-   rehearsal `--execute` pada tip 3.9.0 terhadap fork Anda terlebih dahulu; perintah tersebut mencetak kedua SHA, dan
-   commit yang sama dapat di-push:
+3. Buat cabang di `origin` dengan tangan dengan perintah yang dicetak secara kering — skrip menolak untuk mendorong ke `origin`. Untuk menggunakan kembali komit pengembangan yang telah ditinjau, jalankan latihan `--execute` pada tip 3.9.0 pada fork Anda terlebih dahulu; itu mencetak keduanya SHAs, dan komit yang sama dapat didorong:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Lindungi `stable/v3` dan `develop` (ruleset + antrean penggabungan) sebelum PR pertama masuk.
-5. Workflow yang tidak aktif akan diaktifkan berdasarkan keberadaan cabang: `forward-port.yml` (push ke
-   `stable/v3`), `validate-stable-pr.yml` (PR ke `stable/v3`), dan `nightly-v4-build.yml`
-   (membangun `develop`). Sebelum peluncuran, atur secret repositori `secrets.FORWARD_PORT_TOKEN` (agar CI berjalan pada
-   PR forward-port); publikasi nightly tetap dinonaktifkan hingga pemilik mengatur variabel repositori
-   `vars.NIGHTLY_PUBLISH` menjadi `true` dan npm Trusted Publishing menerima
-   `nightly-v4-build.yml`. Resolusi kanal dilakukan oleh `scripts/release/dist-tag.mjs`, resolver yang sama
-   dengan yang digunakan `npm-publish.yml`.
-6. Verifikasi kanal: `npm view omniroute dist-tags --json` menampilkan `latest` = 3.9.0 dan tidak ada
-   `next` / `nightly` hingga v4 dipublikasikan.
-7. Rollback, jika diperlukan: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   dan `npm dist-tag add omniroute@3.8.59 latest`.
+4. Lindungi `stable/v3` dan `develop` (aturan antrian penggabungan + ) sebelum PR pertama mendarat.
+5. Alur kerja yang tidak aktif diaktifkan berdasarkan keberadaan cabang: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) dan `nightly-v4-build.yml` (builds `develop`). Sebelum ditayangkan, setel rahasia repositori `secrets.FORWARD_PORT_TOKEN` (sehingga CI berjalan pada port maju PRs); penerbitan malam tetap tidak aktif hingga pemilik menyetel variabel repositori `vars.NIGHTLY_PUBLISH` ke `true` dan npm Trusted Publishing menerima `nightly-v4-build.yml`. Resolusi saluran adalah `scripts/release/dist-tag.mjs`, penyelesai yang sama yang digunakan `npm-publish.yml`.
+6. Verifikasi saluran: `npm view omniroute dist-tags --json` menampilkan `latest` = 3.9.0 dan tidak ada `next` / `nightly` hingga v4 diterbitkan.
+7. Kembalikan, jika diperlukan: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` dan `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

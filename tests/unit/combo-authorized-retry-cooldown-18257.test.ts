@@ -590,15 +590,24 @@ test("missing/read-failed rows preserve ordinary fallthrough but cannot reopen a
   }
 });
 
-// normalizeComboCooldownWait floors budgetMs at maxWaitMs, so keep maxWaitMs (x TIME_SCALE = 480)
-// just under budgetMs (x TIME_SCALE = 520): one ~375 ms wait fits, a second one cannot.
-for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 120, budgetMs: 130 }]) {
+// Two timing faults made this flaky under load. Each target rereads its cooldown ~160 ms after its
+// retry is announced, and a wait is granted only when (cooldown end - now + 50 ms) <= maxWaitMs and
+// fits the shared budget. With a 480 ms cooldown and maxWaitMs 480: a stall that delayed the
+// cooldown write until the reread made the first wait ~530 ms, over maxWaitMs, so the first target
+// stopped without spending the allowance and the second one used it (200 !== 502); a stall after
+// the write let the cooldown lapse unwaited, with the same result. A 2 s cooldown (x TIME_SCALE)
+// leaves ~1.8 s of slack, and maxWaitMs = budgetMs = 2.6 s admits any first wait (1.4-2.05 s under
+// a 500 ms stall either side) while what is left can never cover a second one. With maxAttempts 1
+// the default limits fit one wait and the attempt count stops the second.
+const SHARED_WAIT_COOLDOWN_MS = 500;
+for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 650, budgetMs: 650 }]) {
   test(`different targets share the existing request wait allowance: ${JSON.stringify(waitSettings)}`, async () => {
     const { response, calls } = await run({
       coolingFallback: true,
       retryFails: true,
       config: { maxGlobalAttempts: 4 },
       waitSettings,
+      cooldownMs: SHARED_WAIT_COOLDOWN_MS,
     });
     assert.equal(response.status, 502);
     assert.deepEqual(
