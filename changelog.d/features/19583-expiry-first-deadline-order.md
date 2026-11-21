@@ -1,0 +1,1 @@
+- **feat(providers):** `expiry-first` treats a lapsed weekly/monthly reset (stale quota read) as refilled instead of "expires now", and gains an opt-in `expiryFirstOrder: "deadline"` (per provider) that spends the account whose quota is lost first while it has quota ([#19583](https://github.com/diegosouzapw/OmniRoute/pull/19583)) — thanks @feci
