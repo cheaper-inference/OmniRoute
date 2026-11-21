@@ -20,18 +20,36 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function renderTab(strategy: string, geminiPromptCacheMode?: "off" | "implicit") {
+type GeminiCacheServer = { mode?: "off" | "implicit"; failNextSettingsPatch?: boolean };
+
+async function renderTab(strategy: string, geminiCacheServer: GeminiCacheServer = {}) {
   const patches: Patch[] = [];
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string, init?: RequestInit) => {
-      if (init?.method === "PATCH") patches.push({ url, body: JSON.parse(String(init.body)) });
+      if (init?.method === "PATCH") {
+        const body = JSON.parse(String(init.body));
+        patches.push({ url, body });
+        if (url === "/api/settings") {
+          if (geminiCacheServer.failNextSettingsPatch) {
+            geminiCacheServer.failNextSettingsPatch = false;
+            return { ok: false } as Response;
+          }
+          if (body.geminiPromptCacheMode !== undefined) {
+            geminiCacheServer.mode = body.geminiPromptCacheMode;
+          }
+        }
+      }
       const data = url.endsWith("/combo-defaults")
         ? { comboDefaults: { strategy } }
         : url === "/api/providers"
           ? []
-          : { fallbackStrategy: "round-robin", stickyRoundRobinLimit: 7, geminiPromptCacheMode };
+          : {
+              fallbackStrategy: "round-robin",
+              stickyRoundRobinLimit: 7,
+              geminiPromptCacheMode: geminiCacheServer.mode,
+            };
       return { ok: true, json: async () => data } as Response;
     })
   );
@@ -103,12 +121,54 @@ it("renders the Gemini implicit cache default and saves an explicit opt-out", as
   ).not.toHaveProperty("geminiPromptCacheMode");
 });
 
-it("keeps an explicit Gemini cache opt-out when saving unrelated combo defaults", async () => {
-  const patches = await renderTab("priority", "off");
+it("does not overwrite a newer Gemini cache opt-out when saving unrelated combo defaults", async () => {
+  const server: GeminiCacheServer = { mode: "implicit" };
+  const patches = await renderTab("priority", server);
   const toggle = container!.querySelector('[role="switch"][aria-label="geminiPromptCacheMode"]');
-  expect(toggle?.getAttribute("aria-checked")).toBe("false");
+  expect(toggle?.getAttribute("aria-checked")).toBe("true");
+
+  // The original tab is now stale: another settings client turned caching off.
+  server.mode = "off";
   await clickButton("saveComboDefaults");
-  expect(patches.find(({ url }) => url === "/api/settings")?.body).toMatchObject({
-    geminiPromptCacheMode: "off",
-  });
+  expect(patches.find(({ url }) => url === "/api/settings")?.body).not.toHaveProperty(
+    "geminiPromptCacheMode"
+  );
+  expect(server.mode).toBe("off");
+});
+
+it("retries an explicit Gemini cache opt-in and only sends it until the save succeeds", async () => {
+  const server: GeminiCacheServer = { mode: "off", failNextSettingsPatch: true };
+  const patches = await renderTab("priority", server);
+  const toggle = container!.querySelector<HTMLInputElement>(
+    '[role="switch"][aria-label="geminiPromptCacheMode"]'
+  );
+  expect(toggle?.getAttribute("aria-checked")).toBe("false");
+  await act(async () => toggle!.click());
+  expect(toggle?.getAttribute("aria-checked")).toBe("true");
+
+  await clickButton("saveComboDefaults");
+  expect(server.mode).toBe("off");
+  await clickButton("saveComboDefaults");
+  expect(server.mode).toBe("implicit");
+  await clickButton("saveComboDefaults");
+
+  const settings = patches.filter(({ url }) => url === "/api/settings");
+  expect(settings).toHaveLength(3);
+  expect(settings[0].body).toHaveProperty("geminiPromptCacheMode", "implicit");
+  expect(settings[1].body).toHaveProperty("geminiPromptCacheMode", "implicit");
+  expect(settings[2].body).not.toHaveProperty("geminiPromptCacheMode");
+});
+
+it("omits the Gemini cache setting when the toggle returns to its loaded value", async () => {
+  const patches = await renderTab("priority", { mode: "off" });
+  const toggle = container!.querySelector<HTMLInputElement>(
+    '[role="switch"][aria-label="geminiPromptCacheMode"]'
+  );
+  expect(toggle?.getAttribute("aria-checked")).toBe("false");
+  await act(async () => toggle!.click());
+  await act(async () => toggle!.click());
+  await clickButton("saveComboDefaults");
+  expect(patches.find(({ url }) => url === "/api/settings")?.body).not.toHaveProperty(
+    "geminiPromptCacheMode"
+  );
 });
