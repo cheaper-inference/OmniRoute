@@ -2,7 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { parseAutoConfig } from "@omniroute/open-sse/services/combo/autoConfig.ts";
-import { DEFAULT_WEIGHTS, normalizeScoringWeights } from "@omniroute/open-sse/services/autoCombo/scoring.ts";
+import {
+  DEFAULT_WEIGHTS,
+  normalizeScoringWeights,
+} from "@omniroute/open-sse/services/autoCombo/scoring.ts";
 import { MODE_PACKS } from "@omniroute/open-sse/services/autoCombo/modePacks.ts";
 
 // Split guard for Block J Task 2: parseAutoConfig was extracted verbatim from
@@ -106,4 +109,23 @@ test("non-finite explorationRate falls back to 0.05", () => {
     []
   );
   assert.equal(cfg.explorationRate, 0.05);
+});
+
+// Unified decision routing (step 7): `config.auto.decision` (or `config.decision` when the
+// combo keeps its router knobs at the top level) is parsed by the strict decision schema.
+test("decision config: absent stays undefined; valid parses; plain-text apiKey is invalid", () => {
+  assert.equal(parseAutoConfig({ name: "c", config: {} } as never, []).decisionConfig, undefined);
+  const nested = parseAutoConfig(
+    {
+      name: "c",
+      config: { auto: { routerStrategy: "decision", decision: { decider: "systemone" } } },
+    } as never,
+    []
+  );
+  assert.deepEqual(nested.decisionConfig, { valid: true, config: { decider: "systemone" } });
+  const withKey = parseAutoConfig(
+    { name: "c", config: { decision: { decider: "http", apiKey: "sk-plain" } } } as never,
+    []
+  );
+  assert.deepEqual(withKey.decisionConfig, { valid: false });
 });
