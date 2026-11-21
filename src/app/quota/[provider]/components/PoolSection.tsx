@@ -41,6 +41,7 @@ export default function PoolSection({ pool }: PoolSectionProps) {
                 readingLabel={t("barPool")}
                 share={dimension.yourShare}
                 policy={pool.policy}
+                members={dimension.members}
               />
             ))}
           </div>

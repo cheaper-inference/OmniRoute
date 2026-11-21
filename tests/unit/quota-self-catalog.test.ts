@@ -155,3 +155,32 @@ test("plural and variable strings keep their placeholders", () => {
   assert.ok(String(quotaSelf.keyInUse).includes("{key}"));
   assert.ok(String(quotaSelf.noPoolsBody).includes("{provider}"));
 });
+
+const PERCENT_SHARE_AND_MEMBER_STRINGS: Record<string, string> = {
+  reasonPercentAttributionUnavailable:
+    "Your part of this window is not counted yet. Counting starts when a request goes through this pool and the account reports its usage.",
+  reasonPercentWindowEnded:
+    "The window that was being counted has ended. Your part returns when the account reports the new window.",
+  reasonAccountNotUsedByKey: "Your key does not use this account.",
+  sharePercentEstimate:
+    "This is an estimate. The account reports one figure, and it is split between keys by the tokens each key sent.",
+  sharePercentParts:
+    "{own} came from your requests. {external} is your part of usage made outside this pool.",
+  membersTitle: "Usage by member",
+  membersBarLabel: "Usage split between {count} members",
+  memberYou: "You",
+  memberOther: "Member {number}",
+  memberValue: "{name}: {amount}",
+  membersNote:
+    "Other members are shown without names. Numbers can change when a key joins or leaves the pool.",
+  membersPercentNote:
+    "On this plan each figure is an estimate of what the member routed through the pool.",
+};
+
+test("the percent share and member bar strings read exactly as written", () => {
+  const quotaSelf = namespace();
+  assert.equal(Object.keys(PERCENT_SHARE_AND_MEMBER_STRINGS).length, 12);
+  for (const [key, text] of Object.entries(PERCENT_SHARE_AND_MEMBER_STRINGS)) {
+    assert.equal(quotaSelf[key], text, `quotaSelf.${key}`);
+  }
+});

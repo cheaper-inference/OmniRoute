@@ -20,6 +20,8 @@ const REASON_KEYS: Record<string, string> = {
   not_supported: "reasonNotSupported",
   fetch_failed: "reasonFetchFailed",
   not_available: "reasonNotAvailable",
+  percent_window_ended: "reasonPercentWindowEnded",
+  account_not_used_by_key: "reasonAccountNotUsedByKey",
 };
 
 const WINDOW_KEYS: Record<QuotaWindow, string> = {
@@ -42,7 +44,7 @@ const POLICY_KEYS: Record<Policy, string> = {
   burst: "policyBurst",
 };
 
-/** The seven documented reasons map to their own sentence; anything else to `reasonUnknown`. */
+/** The nine documented reasons map to their own sentence; anything else to `reasonUnknown`. */
 export function reasonKey(reason: string | undefined): string {
   return (
     (reason !== undefined && Object.hasOwn(REASON_KEYS, reason) && REASON_KEYS[reason]) ||
@@ -122,6 +124,26 @@ export function shareFootnote(
  */
 export function isDrawableReading(limit: number, used: number | null): used is number {
   return Number.isFinite(limit) && limit > 0 && used !== null && Number.isFinite(used) && used >= 0;
+}
+
+/**
+ * Segment widths in percent of the track, or null when the bar cannot honestly be drawn: fewer
+ * than three slices, a limit that is not a finite number above 0, or a slice that is not a finite
+ * number of 0 or more. Slices that add up past the limit share the whole track instead.
+ */
+export function memberBarWidths(
+  members: ReadonlyArray<{ consumed: number }>,
+  limit: number
+): number[] | null {
+  if (members.length < 3) return null;
+  if (!Number.isFinite(limit) || limit <= 0) return null;
+  if (!members.every(({ consumed }) => Number.isFinite(consumed) && consumed >= 0)) return null;
+  const scale = Math.max(
+    limit,
+    members.reduce((sum, { consumed }) => sum + consumed, 0)
+  );
+  // Multiplying first keeps exact values exact: 300 of 1000 gives 30, not 30.000000000000004.
+  return members.map(({ consumed }) => (consumed * 100) / scale);
 }
 
 /** True when some window of the account carries the account-wide reading, whatever its state. */

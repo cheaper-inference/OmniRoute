@@ -33,7 +33,7 @@ const REASONS: Array<[string, string]> = [
   ["store_unavailable", "Usage could not be read just now. Try again in a moment."],
   [
     "percent_attribution_unavailable",
-    "This plan is measured as a percentage of the whole account. Your own part of it is not calculated yet.",
+    "Your part of this window is not counted yet. Counting starts when a request goes through this pool and the account reports its usage.",
   ],
   ["window_not_reported", "The provider does not report this window."],
   ["connection_lookup_failed", "This account could not be looked up."],

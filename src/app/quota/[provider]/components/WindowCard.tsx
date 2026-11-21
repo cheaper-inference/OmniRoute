@@ -4,9 +4,14 @@ import { useTranslations } from "next-intl";
 
 import Card from "@/shared/components/Card";
 import type { Policy, QuotaUnit, QuotaWindow } from "@/lib/quota/dimensions";
-import type { SelfQuotaBar, SelfQuotaShare } from "@/shared/schemas/selfQuota";
+import type {
+  SelfQuotaBar,
+  SelfQuotaMemberSlice,
+  SelfQuotaShare,
+} from "@/shared/schemas/selfQuota";
 
 import { windowKey } from "../lib/quotaText";
+import MemberBar from "./MemberBar";
 import QuotaReading from "./QuotaReading";
 import ShareReading from "./ShareReading";
 
@@ -21,11 +26,13 @@ interface WindowCardProps {
   readingLabel: string;
   share: SelfQuotaShare;
   policy: Policy;
+  /** Each member's use of this window, without names, when the pool sends it. */
+  members?: SelfQuotaMemberSlice[];
 }
 
 /** One usage window: how full the pool or account is for everyone, and the key's own part. */
 export default function WindowCard(props: WindowCardProps) {
-  const { window, unit, limit, reading, readingLabel, share, policy } = props;
+  const { window, unit, limit, reading, readingLabel, share, policy, members } = props;
   const t = useTranslations("quotaSelf");
 
   return (
@@ -43,6 +50,7 @@ export default function WindowCard(props: WindowCardProps) {
           />
         ) : null}
         <ShareReading share={share} unit={unit} policy={policy} />
+        {members ? <MemberBar members={members} unit={unit} limit={limit} /> : null}
       </div>
     </Card>
   );

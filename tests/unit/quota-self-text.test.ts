@@ -11,6 +11,7 @@ import {
   hasAccountReading,
   hasDrawnAccountReading,
   isDrawableReading,
+  memberBarWidths,
   modelWindowsRepeatReason,
   policyKey,
   reasonKey,
@@ -63,6 +64,11 @@ describe("catalog keys", () => {
     assert.equal(new Set(keys).size, REASONS.length);
     for (const key of keys) assert.ok(catalog[key], `${key} is in the catalog`);
     assert.ok(!keys.includes("reasonUnknown"));
+  });
+
+  test("the two new reasons have their own sentence", () => {
+    assert.equal(reasonKey("percent_window_ended"), "reasonPercentWindowEnded");
+    assert.equal(reasonKey("account_not_used_by_key"), "reasonAccountNotUsedByKey");
   });
 
   test("an unknown or missing reason falls back to the generic sentence", () => {
@@ -249,5 +255,28 @@ describe("account helpers", () => {
       false
     );
     assert.equal(modelWindowsRepeatReason(accountWith({ dimensions: [failed] })), false);
+  });
+});
+
+describe("memberBarWidths", () => {
+  test("member bar widths share the track and never pass it", () => {
+    assert.deepEqual(
+      memberBarWidths([{ consumed: 120 }, { consumed: 300 }, { consumed: 0 }], 1000),
+      [12, 30, 0]
+    );
+    assert.deepEqual(
+      memberBarWidths([{ consumed: 1200 }, { consumed: 300 }, { consumed: 0 }], 1000),
+      [80, 20, 0]
+    );
+  });
+
+  test("a member bar that cannot be drawn is null, never zeros", () => {
+    assert.equal(memberBarWidths([{ consumed: 1 }, { consumed: 2 }], 100), null);
+    assert.equal(
+      memberBarWidths([{ consumed: 1 }, { consumed: Number.NaN }, { consumed: 2 }], 100),
+      null
+    );
+    assert.equal(memberBarWidths([{ consumed: 1 }, { consumed: -1 }, { consumed: 2 }], 100), null);
+    assert.equal(memberBarWidths([{ consumed: 1 }, { consumed: 2 }, { consumed: 3 }], 0), null);
   });
 });
