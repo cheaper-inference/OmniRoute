@@ -166,7 +166,10 @@ async function listReachableConnections(
   return connections;
 }
 
-function isProviderShared(provider: string, sharedQuotaProviders: string[] | null | undefined) {
+export function isProviderShared(
+  provider: string,
+  sharedQuotaProviders: string[] | null | undefined
+) {
   if (sharedQuotaProviders === null || sharedQuotaProviders === undefined) return true;
   return sharedQuotaProviders.includes(provider);
 }
