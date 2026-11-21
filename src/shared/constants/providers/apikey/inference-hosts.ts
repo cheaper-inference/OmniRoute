@@ -167,7 +167,11 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     icon: "cloud",
     color: "#2EE6A6",
     textIcon: "PC",
+    passthroughModels: true,
     website: "https://paraloncloud.com",
+    authHint: "Create an API key (prlc_…) in the ParalonCloud console, then paste it here.",
+    apiHint:
+      "OpenAI-compatible base URL: https://paraloncloud.com/v1. Prepaid credits, priced per token. The catalog follows the GPUs online on the network; check the live model list before selecting one.",
     notice: {
       apiKeyUrl: "https://paraloncloud.com/console",
     },
