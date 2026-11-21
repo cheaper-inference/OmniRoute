@@ -873,27 +873,28 @@ The listener relays these paths to the main port and answers 404 for every other
 | `/_next/static/`                                                         | Scripts, styles and fonts of the build |
 | `/favicon.ico`, `/favicon.svg`, `/icon-512.png`, `/apple-touch-icon.png` | Icons                                  |
 
-`GET` and `HEAD` are relayed without a body. One request with a body is also relayed: a `PATCH`
-of the quota view path, which the page sends to save a lending choice. Any other method answers
-404, except a CONNECT request, whose connection is closed with no answer. Any other request that
-declares a body answers 404 and its connection is closed. Upgrade requests are refused and their connection is closed. A path with a
-dot segment or a fragment marker is refused, as on the API port. So is a request target with a
-character outside printable ASCII. A raw control character in the target is answered 400 by the
-HTTP parser, before this port's own check. Request headers that the framework reserves for its
-own use are not relayed: names that begin with `x-middleware-`, `x-invoke-`, `x-nextjs-`,
-`x-now-` or `x-next-`, and the names `x-matched-path` and `next-resume`. The request is relayed
-without them. The dashboard, the login page, the management API and the inference routes cannot
-be reached through this port.
+`GET` and `HEAD` are relayed without a body. One request with a body is also relayed: a `PATCH` of
+the quota view path, which the page sends to save a lending choice. Any other method answers 404,
+except a CONNECT request, whose connection is closed with no answer. Any other request that declares
+a body answers 404 and its connection is closed. Upgrade requests are refused and their connection
+is closed. A path with a dot segment or a fragment marker is refused, as on the API port. So is a
+request target with a character outside printable ASCII. A raw control character in the target is
+answered 400 by the HTTP parser, before this port's own check. Request headers that the framework
+reserves for its own use are not relayed: names that begin with `x-middleware-`, `x-invoke-`,
+`x-nextjs-`, `x-now-` or `x-next-`, and the names `x-matched-path` and `next-resume`. The request is
+relayed without them. The dashboard, the login page, the management API and the inference routes
+cannot be reached through this port.
 
-The `PATCH` must carry `Content-Type: application/json`, with no parameter or with
-`charset=utf-8` only. It must carry one `Content-Length` from 1 to 4096, written as plain digits,
-and no `Transfer-Encoding`. A `PATCH` that breaks one of these rules answers 404. The port reads
-the declared bytes before it contacts the main port, and waits at most 5 seconds for them. A body
-that is not complete by then answers 404 and its connection is closed. Nothing reaches the main
-port in that case, or when the client leaves first. The port relays exactly the declared bytes,
-with the same `Content-Length`. Bytes after them are read as the next request on the connection.
-A TLS reverse proxy in front must forward `Content-Length` and must not re-chunk the request body.
-The main port checks the API key in the `Authorization` header, as for the `GET`.
+The `PATCH` must carry `Content-Type: application/json`, with no parameter or with `charset=utf-8`
+only. It must carry one `Content-Length` from 1 to 4096, written as plain digits, and no
+`Transfer-Encoding`. A `PATCH` that breaks one of these rules answers 404. Some malformed lengths,
+such as a signed or a repeated one, are answered 400 by the HTTP parser before this port's own
+check. The port reads the declared bytes before it contacts the main port, and waits at most 5
+seconds for them. A body that is not complete by then answers 404 and its connection is closed.
+Nothing reaches the main port in that case, or when the client leaves first. The port relays exactly
+the declared bytes, with the same `Content-Length`. Bytes after them are read as the next request on
+the connection. A TLS reverse proxy in front must forward `Content-Length` and must not re-chunk the
+request body. The main port checks the API key in the `Authorization` header, as for the `GET`.
 
 The 404 body is `{"error":"not_found","message":"Not found."}`. A failed relay answers 502
 (`api_bridge_unavailable`) or 504 (`api_bridge_timeout`) with no `detail` field.

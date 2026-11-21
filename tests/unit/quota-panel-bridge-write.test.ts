@@ -165,6 +165,17 @@ test("a JSON PATCH of the quota view is relayed with exactly the declared bytes"
   });
 });
 
+test("a write sent with Expect is relayed without it, body whole", async () => {
+  await withPanel(async ({ panelPort, seen }) => {
+    const head = [JSON_TYPE, length(BODY), "Expect: 100-continue"];
+    const res = await raw(panelPort, request("PATCH /api/v1/me/quota/claude", head, BODY));
+    assert.match(res, /\r\n\r\nHTTP\/1\.1 200 |^HTTP\/1\.1 200 /);
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].headers.expect, undefined);
+    assert.equal(seen[0].body, BODY);
+  });
+});
+
 test("the largest body is 4096 bytes, and a charset parameter is accepted", async () => {
   await withPanel(async ({ panelPort, seen }) => {
     const full = "a".repeat(4096);

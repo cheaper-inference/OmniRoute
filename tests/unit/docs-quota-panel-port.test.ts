@@ -430,6 +430,7 @@ test("the section states the one write the port relays, with the code's limits",
   for (const sentence of [
     "The `PATCH` must carry `Content-Type: application/json`, with no parameter or with `charset=utf-8` only.",
     "A `PATCH` that breaks one of these rules answers 404.",
+    "Some malformed lengths, such as a signed or a repeated one, are answered 400 by the HTTP parser before this port's own check.",
     "A body that is not complete by then answers 404 and its connection is closed.",
     "Nothing reaches the main port in that case, or when the client leaves first.",
     "The port relays exactly the declared bytes, with the same `Content-Length`.",

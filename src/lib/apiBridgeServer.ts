@@ -369,7 +369,8 @@ function relayedResponseHeaders(
 
 /**
  * Relays the request to the dashboard. With `body`, that buffer is the whole request body and
- * its length is the relayed `content-length`. Without it, the client's body is streamed.
+ * its length is the relayed `content-length`. `expect` is not relayed then, as the body is
+ * already read. Without it, the client's body is streamed.
  */
 function proxyRequest(
   req: IncomingMessage,
@@ -385,7 +386,10 @@ function proxyRequest(
     dashboardPort,
     role.droppedRequestHeaders
   );
-  if (body) headers["content-length"] = String(body.length);
+  if (body) {
+    headers["content-length"] = String(body.length);
+    delete headers.expect;
+  }
   const targetReq = http.request(
     {
       hostname: "127.0.0.1",
@@ -447,11 +451,13 @@ function relayBoundedRequest(
   role: BridgeRole,
   decision: { length: number; timeoutMs: number }
 ): void {
-  void readBoundedBody(req, decision.length, decision.timeoutMs).then((body) => {
-    if (res.destroyed || req.socket.destroyed) return;
-    if (body === null) refuseRequest(res, role, true);
-    else proxyRequest(req, res, dashboardPort, role, body);
-  });
+  void readBoundedBody(req, decision.length, decision.timeoutMs)
+    .then((body) => {
+      if (res.destroyed || req.socket.destroyed) return;
+      if (body === null) refuseRequest(res, role, true);
+      else proxyRequest(req, res, dashboardPort, role, body);
+    })
+    .catch(() => res.destroy());
 }
 
 function writeUpgradeProxyError(socket: net.Socket, status: number, body: string): void {
