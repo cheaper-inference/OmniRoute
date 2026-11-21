@@ -1,0 +1,1 @@
+- **fix(sse):** non-transient errors thrown during a backend fallback now surface on the first attempt instead of being retried with backoff ([#20416](https://github.com/cheaper-inference/OmniRoute/pull/20416)) — thanks @maxmad64bis
