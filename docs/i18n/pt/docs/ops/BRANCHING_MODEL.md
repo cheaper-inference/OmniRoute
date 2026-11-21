@@ -4,14 +4,9 @@
 
 ---
 
-O OmniRoute utiliza um modelo de lançamento de **ciclos paralelos**: um ramo dedicado `release/vX.Y.Z`
-para o ciclo ativo, `main` para a linha publicada e uma etiqueta imutável
-`vX.Y.Z` quando esse ciclo é lançado. É normal ver commits a chegar a `release/*` _e_ a
-`main` — não se trata de um engano.
+OmniRoute usa um** ciclo paralelo** modelo de lançamento: uma ramificação `release/vX.Y.Z` dedicada para o ciclo ativo, `main` para a linha publicada e uma etiqueta `vX.Y.Z` imutável quando esse ciclo for lançado. Ver commits aterrar em `release/*` _e_ em `main` é esperado que — não seja uma confusão.
 
-Os detalhes para os responsáveis pela manutenção encontram-se em `CLAUDE.md` (Regra Rígida n.º 21) e
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Esta página é o resumo público
-destinado aos contribuidores.
+Os detalhes do mantenedor residem em `CLAUDE.md` (Hard Rule #21) e [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Esta página é o resumo público dirigido ao colaborador.
 
 ## Visão geral
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` não é o ramo de integração diária. Os PRs abertos contra `main`
 normalmente têm de ser redirecionados antes da integração.
 
-## Congelamento do lançamento (ciclos paralelos)
+## Libertar congelamento (ciclos paralelos)
 
-Quando um lançamento está a ser reconciliado, é aberta uma issue marcadora com a etiqueta `release-freeze`.
-Isto **não interrompe o desenvolvimento**:
+Quando uma versão está a ser reconciliada, é aberto um problema de marcador denominado `release-freeze`. Que** não para o desenvolvimento** :
 
-- O `release/vX.Y.Z` congelado fica a cargo do responsável por esse lançamento.
-- O `release/vX+1` do ciclo seguinte é criado a partir da ponta congelada, para que os contribuidores possam continuar
-  a integrar trabalho.
-- Os PRs abertos que ainda tenham como destino o ramo congelado devem ser **redirecionados** para o
-  ramo `release/v*` ativo (com a versão mais elevada).
+- O `release/vX.Y.Z` congelado pertence ao capitão de libertação desse navio.
+- O `release/vX+1` do ciclo seguinte é cortado da ponta congelada para que os contribuidores continuem a trabalhar.
+- PRs aberto que ainda tem como alvo o branch congelado deve ser** redirecionado** para o ramo `release/v*` ativo (mais elevado).
 
-Verifique se existe um congelamento aberto antes de assumir que o ramo pretendido aceita integrações:
+Verifique se existe um congelamento aberto antes de assumir que o branch que pretende pode ser fundido:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-A mecânica de integração (etiqueta `queue` do proprietário → Mergify) está documentada em
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+A mecânica de fusão (proprietário `queue` label → Mergify) está documentada em [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **19/11/2026: a fila de fusão do Mergify foi desativada** (decisão do proprietário). `.mergify.yml` já não define uma fila e recusa os comandos Mergify que fundem ou reescrevem um pull request. A versão PRs é fundida manualmente sob o conjunto de regras do repositório "Exigir portões verdes na versão ativa" (`Gate / CI` + `Gate / Quality`) até que a omni-queue seja executada no modo ao vivo, e através da omni-queue depois disso ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). O rótulo `queue` não funde mais nada.
 
 ## Porquê um ramo e uma etiqueta?
 

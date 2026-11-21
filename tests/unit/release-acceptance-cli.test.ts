@@ -1,13 +1,17 @@
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import {
   exitFor,
   reduceManifests,
   main,
 } from "../../scripts/quality/validate-release-acceptance.mjs";
+
+import { runShadow } from "../../scripts/quality/release-acceptance/run-shadow.mjs";
 
 const SHA = "30b5bf18fbe827a0283ce17e91bda22cc8b4c13e";
 function key(id) {
@@ -85,6 +89,8 @@ test("workflow source-guard", () => {
   assert.match(text, /cancel-in-progress: false/);
   assert.equal(text.includes("gh issue close"), false);
   assert.match(text, /if: github.event_name != 'pull_request'/);
+  assert.match(text, /run-shadow\.mjs/);
+  assert.doesNotMatch(text, /tests\/fixtures\/release-acceptance/);
 });
 
 test("schema_invalid does not throw when required_gates is missing", async () => {
@@ -172,3 +178,84 @@ test("schema_invalid keeps FAILED when reduce already failed", async () => {
   assert.equal(report.verdict, "FAILED");
   assert.ok(report.evidence_errors.some((e) => e.code === "schema_invalid"));
 });
+
+for (const { exitCode, verdict } of [
+  { exitCode: 0, verdict: "VERIFIED" },
+  { exitCode: 1, verdict: "FAILED" },
+]) {
+  test(`live shadow reports the checkout and retains the real gate result ${verdict}`, async () => {
+    const dir = mkdtempSync(join(tmpdir(), "omni-live-shadow-"));
+    try {
+      const cwd = join(dir, "checkout");
+      const gateScript = join(cwd, "scripts", "quality", "gate-manifest.mjs");
+      const gitConfig = join(dir, "gitconfig");
+      writeFileSync(gitConfig, "");
+      const git = (...args: string[]) =>
+        execFileSync("git", args, {
+          cwd,
+          encoding: "utf8",
+          env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: gitConfig },
+        });
+      mkdirSync(dirname(gateScript), { recursive: true });
+      writeFileSync(gateScript, `console.log("gate inventory ran"); process.exit(${exitCode});\n`);
+      git("init", "--quiet", "--template=");
+      git("add", ".");
+      git(
+        "-c",
+        "user.email=fixture@example.test",
+        "-c",
+        "user.name=Fixture",
+        "commit",
+        "--quiet",
+        "-m",
+        "fixture"
+      );
+      const sha = git("rev-parse", "HEAD").trim();
+      const out = join(dir, "receipt");
+      const env = {
+        ...process.env,
+        GITHUB_REPOSITORY: "cheaper-inference/OmniRoute",
+        GITHUB_RUN_ID: "2040601",
+        GITHUB_RUN_ATTEMPT: "2",
+        GITHUB_EVENT_NAME: "workflow_dispatch",
+        GITHUB_REF: "refs/heads/fix/live-shadow-test",
+        GITHUB_SHA: sha,
+      };
+      const wrongSha = sha.replace(/^./, sha.startsWith("a") ? "b" : "a");
+      await assert.rejects(
+        runShadow(out, { cwd, env: { ...env, GITHUB_SHA: wrongSha } }),
+        /SHA mismatch/
+      );
+      assert.equal(existsSync(out), false);
+      assert.equal(await runShadow(out, { cwd, env }), exitCode);
+      const report = JSON.parse(readFileSync(join(out, "release-acceptance-report.json"), "utf8"));
+      assert.deepEqual(report.identity, {
+        repository: env.GITHUB_REPOSITORY,
+        run_id: "2040601",
+        run_attempt: 2,
+        workflow: "release-acceptance.yml",
+        trigger: env.GITHUB_EVENT_NAME,
+        scope: "release",
+        requested_ref: env.GITHUB_REF,
+        base_sha: sha,
+        candidate_sha: sha,
+        tested_sha: sha,
+      });
+      assert.equal(report.verdict, verdict);
+      assert.equal(report.releaseAcceptance, false);
+      assert.equal(report.artifact, null);
+      assert.deepEqual(report.evidence_errors, []);
+      const gate = report.gates[0];
+      assert.equal(gate.tested_sha, sha);
+      assert.equal(gate.exit_code, exitCode);
+      assert.equal(gate.evidence.length, 1);
+      const retained = readFileSync(
+        join(out, gate.evidence[0].artifact_id, gate.evidence[0].member)
+      );
+      assert.match(retained.toString("utf8"), /gate inventory ran/);
+      assert.equal(gate.evidence[0].digest, createHash("sha256").update(retained).digest("hex"));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}

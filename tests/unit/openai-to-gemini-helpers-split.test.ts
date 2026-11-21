@@ -71,9 +71,9 @@ test("historical-tool-context builders stringify and escape as expected", () => 
     h.buildInertHistoricalToolResponseText("bar", "ok"),
     "[tool_history_result: bar] ok"
   );
-  // Attribute escaping includes quotes; content escaping does not.
+  // Attribute escaping includes quotes and `&`; content escaping covers only `<` and `>`.
   assert.equal(h.escapeHistoricalContextAttribute('<t>"&'), "&lt;t&gt;&quot;&amp;");
-  assert.equal(h.escapeHistoricalContextContent('<t>"&'), '&lt;t&gt;"&amp;');
+  assert.equal(h.escapeHistoricalContextContent('<t>"&'), '&lt;t&gt;"&');
 });
 
 test("buildHistoricalToolResultContext wraps escaped source + result in the context tag", () => {

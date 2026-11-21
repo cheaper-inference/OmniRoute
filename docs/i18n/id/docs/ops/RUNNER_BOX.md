@@ -144,36 +144,22 @@ satu waktu, hanya ketika idle**, dengan pemeriksaan kondisi idle dan perintah mu
   1,3 GB memerlukan 27–32 menit untuk disimpan di tmpfs dan 2 menit untuk diunggah dari disk.
 - VPS `.15` hanya untuk homologasi — tidak pernah menjalankan runner CI.
 
-## Jalur hosted (runner yang dihosting GitHub)
+## Jalur yang dihosting (pelari yang dihosting GitHub)
 
-Repositori ini milik organisasi `cheaper-inference`, yang menggunakan paket **Team**: **60
-job hosted serentak**, yang digunakan bersama oleh setiap repositori dalam organisasi, setiap pemeriksaan PR,
-setiap workflow yang dipicu oleh push, dan penyiapan default CodeQL. Angka-angka di bawah ini diukur pada
-paket **Pro** (40 job hosted serentak). Pengukuran pada 2026-10-18 selama
-kampanye merge (~10 merge/jam pada `release/v3.8.52`) menunjukkan: **2.500 proses workflow dibuat dalam
-24 jam**, 44 push ke branch tersebut dalam 6 jam, serta **106 job hosted mengantre** sementara pemeriksaan PR menunggu
-selama berjam-jam dan PR di-merge tanpa pemeriksaan tersebut. Sembilan workflow dipicu pada setiap push ke branch:
+Repositori milik organisasi `cheaper-inference`, di** Tim** rencana:** 60 pekerjaan yang dihosting secara bersamaan** , dibagikan oleh setiap repositori di organisasi, setiap pemeriksaan PR, setiap alur kerja yang dipicu oleh push, dan pengaturan default CodeQL. Angka-angka di bawah ini diukur pada** Pro** rencana (40 pekerjaan yang dihosting secara bersamaan). Diukur pada 18-10-2026 selama kampanye penggabungan (~ 10 merges/hour on `release/v3.8.52`):** 2.500 alur kerja berjalan dibuat dalam 24 jam** , 44 dorongan ke cabang dalam 6 jam,** 106 pekerjaan yang dihosting mengantri** sementara pemeriksaan PR menunggu berjam-jam dan PRs digabungkan tanpa pemeriksaan tersebut. Sembilan alur kerja diaktifkan pada setiap dorongan ke cabang:
 
-| per push ke `release/v*`                    | job hosted | hasil selama lonjakan                                          | sejak 2026-10-18                                                                            |
-| ------------------------------------------- | ---------: | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `ci.yml` (matriks lengkap)                  |  hingga 30 | dibatalkan oleh push berikutnya, 24 dari 24 dalam sehari       | tidak dimulai pada push ke `release/**` (proses PR + Release-Green)                         |
-| `quality.yml`                               |         ~6 | dibatalkan, 23 dari 23                                         | tidak dimulai pada push ke `release/**`                                                     |
-| `Release-Green` `--quick`                   |          0 | berjalan di `omni-build`, 97 dari 100 dibatalkan               | slot `omni-release`, tidak pernah dibatalkan, proses tertunda digabung                      |
-| `Lock released branch`, `OpenSSF Scorecard` |          2 | satu proses mengantre per push                                 | satu proses per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)                    |
-| `Release acceptance` (laporan bayangan)     |          1 | satu `npm ci` hosted per push, tidak pernah dibatalkan         | tidak berubah — kandidat untuk filter `paths:`                                              |
-| `Publish to Docker Hub` → `Deploy to VPS`   |          2 | dibatalkan per push; bagian amd64 bersaing di `omni-build`     | tidak berubah — saluran deployment pemilik                                                  |
-| Penyiapan default CodeQL (`dynamic`)        |          4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per push | tidak berubah — Pengaturan → Keamanan kode; `c-cpp`/`python` tidak memindai apa pun di sini |
+| per dorongan ke `release/v*`                | pekerjaan yang dihosting | hasil di bawah badai                                                  | sejak 2026-10-18                                                                             |
+| ------------------------------------------- | -----------------------: | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `ci.yml` (matriks penuh)                    |                hingga 30 | dibatalkan oleh dorongan berikutnya, 24 dari 24 dalam sehari          | tidak dimulai pada dorongan `release/**` (PR run + Release-Green)                            |
+| `quality.yml`                               |                       ~6 | dibatalkan, 23 dari 23                                                | tidak dimulai pada dorongan `release/**`                                                     |
+| `Release-Green` `--quick`                   |                        0 | berlari di `omni-build`, membatalkan 97 dari 100                      | slot `omni-release`, tidak pernah dibatalkan, proses berjalan tertunda                       |
+| `Lock released branch`, `OpenSSF Scorecard` |                        2 | satu proses antrian per dorongan                                      | satu putaran per referensi (`tests/unit/build/hosted-lane-concurrency.test.ts`)              |
+| `Release acceptance` (laporan bayangan)     |                        1 | satu `npm ci` yang dihosting per push, tidak pernah dibatalkan        | kandidat — yang tidak berubah untuk filter `paths:`                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                        2 | dibatalkan per dorongan; leg amd64 berkompetisi di `omni-build`       | saluran penerapan pemilik — tidak berubah                                                    |
+| pengaturan default CodeQL (`dynamic`)       |                        4 | `javascript-typescript`, `actions`, `c-cpp`, `python` setiap dorongan | tidak berubah — Pengaturan keamanan kode → ; `c-cpp`/`python` tidak memindai apa pun di sini |
 
-`tests/unit/build/push-storm-diet.test.ts` mengunci pemicu push khusus `main` milik `ci.yml` dan
-`quality.yml`. Efek samping: Codecov tidak lagi menerima unggahan dasar untuk setiap push release (langkah
-tersebut hanya bersifat informatif dan menggunakan `continue-on-error`); gerbang cakupan dalam repositori dan komentar PR
-tidak terpengaruh.
+`tests/unit/build/push-storm-diet.test.ts` menyematkan pemicu dorong -only `main` dari `ci.yml` dan `quality.yml`. Efek samping: Codecov tidak lagi menerima unggahan dasar per rilis push (langkahnya bersifat informasi dan `continue-on-error`); gerbang cakupan dalam repo dan komentar PR tidak terpengaruh.
 
-**Kapasitas self-hosted tambahan tidak memperbaiki antrean hosted.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) dapat menjadi host runner, tetapi sesi agen yang ada
-sudah membuat load-nya berada pada 20–26, container agen tidak memiliki daemon Docker, dan jalur yang
-jenuh adalah jalur hosted. Box `.113` memiliki ruang kosong 71 GB dan load 5–8 pada saat yang sama; batasannya
-adalah anggaran memori per listener di atas (maksimum 6 listener), bukan CPU. Opsi yang tersisa
-berkaitan dengan proses: merge PR kampanye melalui antrean Mergify (`label=queue`, batch berbagi
-satu proses CI `merge_group`, bukan satu proses per PR ditambah satu per push), kurangi bahasa pada
-penyiapan default CodeQL, dan filter `release-acceptance.yml` berdasarkan file yang dibacanya.
+**Kapasitas yang lebih besar yang dihosting sendiri tidak memperbaiki antrean yang dihosting.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) dapat menghosting runner, namun sesi agen sudah mempertahankan muatannya pada 20–26, container agen tidak memiliki daemon Docker, dan jalur jenuh adalah yang dihosting. Kotak `.113` memiliki 71 GB gratis dan memuat 5–8 pada saat yang sama; kendalanya adalah anggaran memori per pendengar di atas (batas 6 pendengar), bukan CPU. Tuas yang tersisa adalah tuas proses: melakukan kampanye PRs melalui antrian Mergify (`label=queue`, batch berbagi satu `merge_group` CI run alih-alih satu run per PR ditambah satu per push), memangkas bahasa pengaturan default CodeQL, dan memfilter `release-acceptance.yml` berdasarkan file yang dibacanya.
+
+> **19-11-2026: antrean penggabungan Mergify dihentikan** (keputusan pemilik). `.mergify.yml` tidak lagi mendefinisikan antrian dan menolak perintah Mergify yang menggabungkan atau menulis ulang permintaan tarik. Rilis PRs digabungkan secara manual di bawah aturan repositori "Memerlukan gerbang hijau pada rilis aktif" (`Gate / CI` + `Gate / Quality`) hingga omni-queue berjalan dalam mode langsung, dan melalui omni-queue setelah itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Tuas Mergify di atas sudah tidak ada lagi.

@@ -38,6 +38,9 @@ env:
   # system TLS). Belt-and-suspenders with tests/_setup/isolateDataDir.ts.
   OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
   CI_NODE_VERSION: "24"
+  # The V8 manifests require the producer and aggregator to have the same Node
+  # patch. A floating major can resolve to different patch versions on runner caches.
+  CI_V8_NODE_VERSION: "24.22.3"
   CI_NODE_24_VERSION: "24"
   CI_NODE_26_VERSION: "26"
 
@@ -1172,7 +1175,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/prepare-unit-storage
         with:
           cache: ${{ github.event_name == 'pull_request' }}
@@ -1192,6 +1195,7 @@ jobs:
       - name: Unit tests (shard ${{ matrix.shard }}/8) with V8 coverage
         env:
           TEST_SHARD: ${{ matrix.shard }}/8
+          TMPDIR: ${{ runner.temp }}/v8-tsx-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
           # NODE_OPTIONS (nao so o flag em test:unit:ci:shard) porque quem estoura o
           # heap e o processo `c8` que embrulha a suite — ele agrega ~577 MB de JSON
           # de cobertura bruta. Subir o teto so no node filho deixa o pai no default
@@ -1201,6 +1205,12 @@ jobs:
         run: |
           trap 'status=$?; { df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"; du -sh coverage-shard; } || :; exit "$status"' EXIT
           rm -rf coverage-shard coverage-shard-report
+          # Capture the transforms this producer actually executes; a reused or
+          # shared TSX cache cannot establish generated-layout provenance.
+          node scripts/ci/prepare-v8-coverage.mjs init-cache "$TMPDIR" "$TEST_SHARD" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE"
+          V8_CACHE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/atomic-tsx-cache.mjs")"
+          V8_NATIVE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/native-worker-v8-layout.mjs")"
+          OMNIROUTE_CI_SYNC_TSX_CACHE="$TMPDIR" NODE_OPTIONS="$NODE_OPTIONS --import=$V8_CACHE_PRELOAD --import=$V8_NATIVE_PRELOAD" \
           npx c8 --merge-async \
             --temp-directory=coverage-shard \
             --reports-dir=coverage-shard-report \
@@ -1208,11 +1218,23 @@ jobs:
             --exclude=tests/** \
             --exclude=**/*.test.* \
             npm run test:unit:ci:shard
-      - name: Upload raw shard coverage
-        if: always()
+      - name: Package successful shard coverage
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/8
+          TMPDIR: ${{ runner.temp }}/v8-tsx-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+        run: node scripts/ci/prepare-v8-coverage.mjs pack coverage-shard coverage-shard-upload "$TEST_SHARD" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE" "$TMPDIR"
+      - name: Upload complete shard coverage
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: coverage-shard-${{ matrix.shard }}
+          name: coverage-shard-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: coverage-shard-upload/
+          compression-level: 0
+          if-no-files-found: error
+      - name: Preserve raw coverage from failed shards
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: failed-unit-coverage-${{ github.run_attempt }}-${{ matrix.shard }}
           path: coverage-shard/*.json
           if-no-files-found: error
 
@@ -1315,6 +1337,9 @@ jobs:
   # the release gate can still exercise them via workflow_dispatch when needed).
   test-coverage:
     name: Coverage
+    permissions:
+      contents: read
+      actions: read
     runs-on: ubuntu-latest
     # 10min was sized before #7114 added the lcov reporter (Codecov/Sonar need it);
     # merging 8 shard JSONs + text+json+lcov now takes ~10-12min — three consecutive
@@ -1354,21 +1379,27 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/npm-ci-retry
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
+      - name: Select coverage producers for this attempt
+        id: coverage_selection
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p coverage
+          node scripts/ci/select-v8-coverage.mjs coverage/coverage-selection.json 8
       - name: Download all shard coverage
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          pattern: coverage-shard-*
+          artifact-ids: ${{ steps.coverage_selection.outputs.artifact_ids }}
           path: coverage-shards/
-          merge-multiple: true
+          merge-multiple: false
       - name: Merge + report + gate
-        # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
-        # keeps the V8 coverage merge incremental instead of loading every raw
-        # JSON blob into one in-memory merge, which avoids Node heap OOMs.
+        # Verify and merge each raw report in order without storing a second
+        # raw copy. c8 reads the aggregate for source mapping and reporting.
         # lcov on a PR only when SonarQube runs (#20725). #18336 (2026-10-26) dropped it on
         # pull_request because its only PR consumer was the informational Codecov upload while
         # SonarQube was off; once vars.SONARQUBE_ENABLED came back the `sonarqube` job scanned
@@ -1378,21 +1409,17 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
           EVENT_NAME: ${{ github.event_name }}
           SONARQUBE_ENABLED: ${{ vars.SONARQUBE_ENABLED }}
+          RUN_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           LCOV_REPORTER=()
-          if [ "$EVENT_NAME" != "pull_request" ] || [ "$SONARQUBE_ENABLED" = "true" ]; then
+          if [ "$EVENT_NAME" != "pull_request" ] || [ "${SONARQUBE_ENABLED:-}" = "true" ]; then
             LCOV_REPORTER=(--reporter=lcov)
           fi
           mkdir -p coverage
-          first_coverage_file=""
-          if [ -d coverage-shards ]; then
-            first_coverage_file="$(find coverage-shards -maxdepth 1 -type f -name '*.json' -print -quit)"
-          fi
-          if [ -z "$first_coverage_file" ]; then
-            echo "::error::No raw coverage shard data was downloaded."
-            find . -maxdepth 3 -type f | sort
-            exit 1
-          fi
+          # Retained producers keep their original attempts. The receipt binds all
+          # eight job/artifact identities and the aggregate sent to c8.
+          node scripts/ci/prepare-v8-coverage.mjs prepare coverage-shards coverage-shards-verified 8 "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE" coverage/coverage-selection.json "$RUN_HEAD_SHA" "$GITHUB_REPOSITORY" > coverage/coverage-preparation.json
+          cat coverage/coverage-preparation.json
           # Gate aligned to the project's local coverage bar: `npm run test:coverage`
           # gates at 60/60/60/60, so CI must match it (the previous CI floor of 40
           # silently undershot the local bar — a real drift). Real merged coverage is
@@ -1400,7 +1427,7 @@ jobs:
           # coverage ratchet (quality-baseline.json) layers "must not drop vs baseline"
           # on top of this floor.
           npx c8 report \
-            --temp-directory coverage-shards \
+            --temp-directory coverage-shards-verified \
             --reports-dir coverage \
             --merge-async \
             --reporter=text-summary \
@@ -1410,6 +1437,7 @@ jobs:
             --exclude=**/*.test.* \
             --check-coverage \
             --statements 60 --lines 60 --functions 60 --branches 60
+          node scripts/ci/prepare-v8-coverage.mjs verify-report coverage
       - name: Build coverage summary
         if: always()
         run: |
@@ -1460,6 +1488,8 @@ jobs:
           path: |
             coverage/coverage-summary.json
             coverage/coverage-report.md
+            coverage/coverage-selection.json
+            coverage/coverage-preparation.json
             coverage/lcov.info
           if-no-files-found: warn
 

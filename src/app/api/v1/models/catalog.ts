@@ -2363,8 +2363,10 @@ async function buildUnifiedModelsResponseCore(
       if (!provider) return undefined;
       const canonicalId = aliasToProviderId[provider] || provider;
 
-      const registryFallback = REGISTRY[canonicalId]?.defaultContextLength;
-      if (registryFallback) return registryFallback;
+      // #20415: a passthrough provider's default is a placeholder, not a real window.
+      const registry = REGISTRY[canonicalId];
+      if (registry?.passthroughModels) return undefined;
+      if (registry?.defaultContextLength) return registry.defaultContextLength;
 
       const modelId =
         catalogMetadataLookup(model)?.model ||

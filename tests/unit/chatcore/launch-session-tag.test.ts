@@ -73,6 +73,28 @@ describe("launch session agent context", () => {
     assert.equal(context.gitBranch, null);
   });
 
+  it("a resolved no-log state (key flag or x-omniroute-no-log header) overrides the key's own flag", () => {
+    // chatCore resolves no-log from the key flag OR the request header and passes it explicitly.
+    const headerOnly = resolveUsageAgentContext(
+      claudeBody,
+      headers(),
+      { launchSession: LAUNCH },
+      true
+    );
+    assert.equal(headerOnly.clientSessionId, LAUNCH.id);
+    assert.equal(headerOnly.projectPath, null);
+    assert.equal(headerOnly.gitBranch, null);
+
+    const explicitOff = resolveUsageAgentContext(
+      claudeBody,
+      headers(),
+      { noLog: true, launchSession: LAUNCH },
+      false
+    );
+    assert.equal(explicitOff.projectName, "demo");
+    assert.equal(explicitOff.gitBranch, "main");
+  });
+
   it("falls back to the user-agent client when the session has no tool id", () => {
     const context = resolveUsageAgentContext(claudeBody, headers(), {
       launchSession: { id: LAUNCH.id },

@@ -274,20 +274,24 @@ export function resolveCallLogSessionTag(
 }
 
 /**
- * Agent context for usage attribution. Keys with `noLog` never persist prompt-derived fields
- * (working directory, branch); explicit header identifiers are still kept.
+ * Agent context for usage attribution. Callers pass the effective no-log decision (the
+ * per-key `no_log` flag OR the per-request `x-omniroute-no-log` header): when `noLog` is
+ * true, prompt-derived fields (working directory, branch) are dropped; explicit header
+ * identifiers are still kept.
  */
 export function resolveUsageAgentContext(
   body: unknown,
   headers: HeaderSource,
-  apiKeyInfo: UsageKeyInfo | null | undefined
+  apiKeyInfo: UsageKeyInfo | null | undefined,
+  /** Resolved no-log state (per-key flag OR `x-omniroute-no-log` header); overrides `apiKeyInfo.noLog`. */
+  noLog?: boolean
 ): AgentContext {
   const context = withLaunchSession(
     extractAgentContext(body, headers),
     headers,
     apiKeyInfo?.launchSession
   );
-  return apiKeyInfo?.noLog === true ? withoutPromptDerivedFields(context) : context;
+  return (noLog ?? apiKeyInfo?.noLog) === true ? withoutPromptDerivedFields(context) : context;
 }
 
 export function hasAgentIdentity(

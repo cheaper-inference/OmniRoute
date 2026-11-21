@@ -52,7 +52,11 @@ import { runStreamingTail } from "./chatCore/streamingTail.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import { isReasoningContinuationIncompatible } from "./chatCore/reasoningInputGate.ts";
 
-import { getHeaderValueCaseInsensitive, resolveCompressionHeader } from "./chatCore/headers.ts";
+import {
+  getHeaderValueCaseInsensitive,
+  resolveCompressionHeader,
+  resolveNoLogEnabled,
+} from "./chatCore/headers.ts";
 
 import {
   isCodexOriginatedHeaders,
@@ -622,7 +626,16 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
+  // before agent-context extraction so a header-only no-log request also drops
+  // prompt-derived project/branch fields from usage attribution.
+  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const agentContext = resolveUsageAgentContext(
+    body,
+    clientRawRequest?.headers,
+    apiKeyInfo,
+    noLogEnabled
+  );
   // `omniroute launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
   // header is present; null for every other request, so their session_tag is unchanged.
   const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);
@@ -950,7 +963,6 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  const noLogEnabled = apiKeyInfo?.noLog === true;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
   const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
@@ -1022,6 +1034,10 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
+  // One upstream Antigravity session per conversation (prompt-cache scope); the
+  // non-streaming server-tool follow-up leg must reuse it, or it falls back to the
+  // account-wide session and evicts parallel conversations' caches.
+  const antigravitySessionKey = conversationId || sessionAffinityKey || null;
   const reasoningCacheScope = buildReasoningCacheScope(
     apiKeyInfo?.id,
     reasoningReplaySessionKey ? String(reasoningReplaySessionKey) : null
@@ -2469,6 +2485,7 @@ async function handleChatCoreInner({
           signatureNamespace: connectionId,
           copilotClient: copilotCompatibleReasoning,
           reasoningCacheScope,
+          antigravitySessionKey,
           videoTranscriptSensitive: videoBridgeObserved,
           onReasoningReplayHistory: (messages) => {
             reasoningReplayHistory = messages;
@@ -3516,6 +3533,7 @@ async function handleChatCoreInner({
       persistFailureUsage,
       pipelineRecovered,
       pipelineSessionId,
+      antigravitySessionKey,
       preserveCacheControl,
       provider,
       providerHeaders,
