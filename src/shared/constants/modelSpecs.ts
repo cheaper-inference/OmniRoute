@@ -172,6 +172,15 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-6.1-sol"],
   },
+  "gpt-6.2-sol": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6.2-sol"],
+  },
+  // https://developers.openai.com/api/docs/models/gpt-6.2-astra
+  "gpt-6.2-astra": {
+    ...GPT_5_6_MODEL_SPEC,
+    aliases: ["openai/gpt-6.2-astra"],
+  },
   "gpt-6.1-terra": {
     ...GPT_5_6_MODEL_SPEC,
     aliases: ["openai/gpt-6.1-terra"],

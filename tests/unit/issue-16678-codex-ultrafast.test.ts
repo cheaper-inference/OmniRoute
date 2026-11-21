@@ -21,7 +21,7 @@ import {
   resolveReportedServiceTier,
 } from "../../open-sse/handlers/chatCore/serviceTier.ts";
 
-const models = ["gpt-6-astra", "gpt-6.1-sol"];
+const models = ["gpt-6-astra", "gpt-6.1-sol", "gpt-6.2-sol"];
 const data = { requestDefaults: { serviceTier: "ultrafast" } };
 const credentials = { providerSpecificData: data };
 const global = { codexServiceTier: { enabled: true, tier: "ultrafast" } };

@@ -1,0 +1,1 @@
+- **fix(providers):** GPT-6.2 Sol and GPT-6.2 Astra are in the Codex and OpenAI catalogs with published prices: bare ids route to the Codex plan, effort aliases split, and 6.2 requests are no longer costed at $0 ([#20875](https://github.com/cheaper-inference/OmniRoute/pull/20875)) — thanks @Crazyop757

@@ -9,6 +9,8 @@ export const CODEX_EFFORT_ORDER = [
 ] as const;
 export type CodexEffortLevel = (typeof CODEX_EFFORT_ORDER)[number];
 export const CODEX_MAX_ALIAS_MODELS = new Set([
+  "gpt-6.2-sol",
+  "gpt-6.2-astra",
   "gpt-6.1-sol",
   "gpt-6.1-terra",
   "gpt-5.6-sol",
@@ -20,6 +22,8 @@ export const CODEX_MAX_ALIAS_MODELS = new Set([
   "gpt-6-luna",
 ]);
 export const CODEX_ULTRA_ALIAS_MODELS = new Set([
+  "gpt-6.2-sol",
+  "gpt-6.2-astra",
   "gpt-6.1-sol",
   "gpt-6.1-terra",
   "gpt-5.6-sol",
