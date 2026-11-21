@@ -19,6 +19,9 @@ function quota(name: string): SelfQuotaResponse {
         name,
         provider: "claude",
         borrowMode: "saturation",
+        lendingPercent: 0,
+        lendingUntil: null,
+        lendingActive: false,
         policy: "hard",
         weight: 50,
         cap: null,
@@ -268,5 +271,66 @@ describe("useSelfServiceQuery", () => {
     vi.setSystemTime(new Date("2026-11-20T12:05:00.000Z"));
     act(() => setVisibility("visible"));
     expect(fetches.count(QUOTA)).toBe(1);
+  });
+
+  it("adopt replaces the answer without a request", async () => {
+    const fetches = stubFetch();
+    const { result } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("A"));
+    act(() => result.current.adopt(quota("B"), KEY));
+    expect(result.current.query).toMatchObject({
+      status: "ready",
+      data: { pools: [{ name: "B" }] },
+    });
+    expect(fetches.pending).toHaveLength(1);
+  });
+
+  it("adopt drops a refresh that was already in flight", async () => {
+    const fetches = stubFetch();
+    const { result } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("A"));
+    act(() => result.current.reload());
+    expect(result.current.query.status).toBe("loading");
+    expect(fetches.pending).toHaveLength(2);
+    act(() => result.current.adopt(quota("B"), KEY));
+    expect(result.current.query.status).toBe("ready");
+    await act(async () => fetches.pending[1].respond(quota("stale")));
+    expect(result.current.query).toMatchObject({
+      status: "ready",
+      data: { pools: [{ name: "B" }] },
+    });
+    expect(fetches.pending).toHaveLength(2);
+  });
+
+  it("a reload after adopt asks again and shows the new answer", async () => {
+    const fetches = stubFetch();
+    const { result } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("A"));
+    act(() => result.current.adopt(quota("B"), KEY));
+    act(() => result.current.reload());
+    expect(result.current.query).toMatchObject({
+      status: "loading",
+      data: { pools: [{ name: "B" }] },
+    });
+    expect(fetches.pending).toHaveLength(2);
+    await fetches.answer(1, quota("C"));
+    expect(result.current.query).toMatchObject({
+      status: "ready",
+      data: { pools: [{ name: "C" }] },
+    });
+  });
+
+  it("adopt for another key, or with no key, changes nothing", async () => {
+    const fetches = stubFetch();
+    const { result, rerender } = renderQuery({ path: `${QUOTA}claude`, apiKey: KEY });
+    await fetches.answer(0, quota("A"));
+    rerender({ path: `${QUOTA}claude`, apiKey: "sk-live-0987654321" });
+    expect(result.current.query).toEqual({ status: "loading", data: null });
+    act(() => result.current.adopt(quota("B"), KEY));
+    expect(result.current.query).toEqual({ status: "loading", data: null });
+    rerender({ path: `${QUOTA}claude`, apiKey: null });
+    expect(result.current.query).toEqual({ status: "idle" });
+    act(() => result.current.adopt(quota("B"), KEY));
+    expect(result.current.query).toEqual({ status: "idle" });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   requestSelfService,
@@ -23,6 +23,8 @@ const REFRESH_ON_RETURN_MIN_AGE_MS = 60_000;
  * only for the exact request it answers, and last good data only within the same epoch.
  */
 type Request = { epoch: number; attempt: number };
+/** The request the fetch effect last started, with its key and its controller. */
+type Running = { request: Request; apiKey: string; controller: AbortController };
 type Settled<T> = Exclude<SelfServiceQuery<T>, { status: "idle" } | { status: "loading" }>;
 type QueryState<T> = {
   request: Request;
@@ -83,23 +85,41 @@ function useEpoch(path: string, apiKey: string | null): number {
 /**
  * Reads one self-service route with the key held in this browser. `schema` must be a stable
  * reference (a module constant): a new object on each render starts a new request.
+ * `adopt(data, forApiKey)` shows an answer obtained elsewhere (the view a write returned) as the
+ * answer to the current request, only while `forApiKey` is still the key being read.
  */
 export function useSelfServiceQuery<T>(input: {
   path: string;
   apiKey: string | null;
   schema: ResponseSchema<T>;
   refetchOnReturn?: boolean;
-}): { query: SelfServiceQuery<T>; reload: () => void } {
+}): {
+  query: SelfServiceQuery<T>;
+  reload: () => void;
+  adopt: (data: T, forApiKey: string) => void;
+} {
   const { path, apiKey, schema, refetchOnReturn = false } = input;
   const epoch = useEpoch(path, apiKey);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<QueryState<T> | null>(null);
   const reload = useCallback(() => setAttempt((value) => value + 1), []);
+  const running = useRef<Running | null>(null);
+
+  const adopt = useCallback((data: T, forApiKey: string) => {
+    const current = running.current;
+    if (!current || current.apiKey !== forApiKey) return;
+    // A read still in flight may carry the view from before the write.
+    current.controller.abort();
+    const outcome: Settled<T> = { status: "ready", data, receivedAt: Date.now() };
+    setState((previous) => nextState(previous, current.request, outcome));
+  }, []);
 
   useEffect(() => {
     if (!apiKey) return;
     const controller = new AbortController();
     const request: Request = { epoch, attempt };
+    const entry: Running = { request, apiKey, controller };
+    running.current = entry;
     void requestSelfService({ path, apiKey, schema, signal: controller.signal })
       // Anything thrown after the fetch (a throwing schema, for example) is a server failure.
       .catch((): SelfServiceResult<T> => SERVER_FAILURE)
@@ -108,7 +128,10 @@ export function useSelfServiceQuery<T>(input: {
         const outcome = settle(result, Date.now());
         if (outcome) setState((previous) => nextState(previous, request, outcome));
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      if (running.current === entry) running.current = null;
+    };
   }, [path, apiKey, schema, epoch, attempt]);
 
   const query = deriveQuery(state, apiKey ? { epoch, attempt } : null);
@@ -124,5 +147,5 @@ export function useSelfServiceQuery<T>(input: {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [refetchOnReturn, readyAt, reload]);
 
-  return { query, reload };
+  return { query, reload, adopt };
 }

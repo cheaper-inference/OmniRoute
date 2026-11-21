@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   quotaPath,
   requestSelfService,
+  sendSelfService,
   usagePath,
   type ResponseSchema,
   type SelfServiceResult,
@@ -192,6 +193,101 @@ describe("requestSelfService", () => {
       assert.ok(!(result instanceof Error));
     }
   });
+});
+
+describe("sendSelfService", () => {
+  const PATCH_BODY = {
+    pool: "qpr_0123456789abcdef0123456789abcdef",
+    lendingPercent: 25,
+    lendingUntil: null,
+  };
+  function send(stub: ReturnType<typeof fetchStub>, signal = new AbortController().signal) {
+    return sendSelfService({
+      path: quotaPath("claude"),
+      apiKey: KEY,
+      body: PATCH_BODY,
+      schema: OK,
+      signal,
+      fetchImpl: stub.impl,
+    });
+  }
+
+  scenario("a write sends PATCH with a JSON body and the key only in the header", async () => {
+    const stub = fetchStub(json({ pools: [] }));
+    assert.deepEqual(await send(stub), { ok: true, data: { pools: [] } });
+    const { url, init } = stub.calls[0];
+    const headers = new Headers(init.headers);
+    assert.equal(url, "/api/v1/me/quota/claude");
+    assert.equal(init.method, "PATCH");
+    assert.equal(headers.get("Authorization"), `Bearer ${KEY}`);
+    assert.equal(headers.get("Content-Type"), "application/json");
+    assert.deepEqual(JSON.parse(String(init.body)), PATCH_BODY);
+    assert.ok(!url.includes(KEY) && !String(init.body).includes(KEY));
+    assert.deepEqual([init.cache, init.credentials, init.redirect], ["no-store", "omit", "error"]);
+  });
+
+  scenario(
+    "a write outcome follows the status and carries nothing from the error body",
+    async () => {
+      const expected: Array<[number, string]> = [
+        [401, "unauthorized"],
+        [403, "forbidden"],
+        [404, "not-found"],
+        [400, "rejected"],
+        [413, "rejected"],
+        [415, "rejected"],
+        [429, "rate-limited"],
+        [500, "server"],
+        [502, "server"],
+        [504, "server"],
+      ];
+      for (const [status, failure] of expected) {
+        const result = await send(fetchStub(json({ error: { message: `detail ${KEY}` } }, status)));
+        assert.deepEqual(result, { ok: false, failure, retryAfterSeconds: null }, String(status));
+      }
+    }
+  );
+
+  scenario("a 429 reports Retry-After only as whole seconds", async () => {
+    const cases: Array<[string | null, number | null]> = [
+      ["7", 7],
+      ["60", 60],
+      [null, null],
+      ["0", null],
+      ["-1", null],
+      ["1.5", null],
+      ["Wed, 21 Oct 2026 07:28:00 GMT", null],
+    ];
+    for (const [value, seconds] of cases) {
+      const headers: Record<string, string> = value === null ? {} : { "Retry-After": value };
+      const result = await send(fetchStub(() => new Response("{}", { status: 429, headers })));
+      assert.deepEqual(
+        result,
+        { ok: false, failure: "rate-limited", retryAfterSeconds: seconds },
+        String(value)
+      );
+    }
+  });
+
+  scenario(
+    "a write reports a network failure, an abort and an answer outside the contract",
+    async () => {
+      assert.deepEqual(await send(fetchStub(new TypeError("offline"))), {
+        ok: false,
+        failure: "network",
+        retryAfterSeconds: null,
+      });
+      assert.deepEqual(await send(fetchStub(json({ nope: true }))), {
+        ok: false,
+        failure: "invalid-response",
+        retryAfterSeconds: null,
+      });
+      const controller = new AbortController();
+      const pending = send(fetchStub("hang"), controller.signal);
+      controller.abort();
+      assert.deepEqual(await pending, { ok: false, failure: "aborted", retryAfterSeconds: null });
+    }
+  );
 });
 
 test("nothing is logged", async () => {
