@@ -1,0 +1,1 @@
+- **fix(claude):** The Claude OAuth session id and device id sent upstream (`metadata.user_id`, `X-Claude-Code-Session-Id`) now stay the same when the access token is refreshed, because they are cached per connection instead of per access token. A connection with no id keeps the old token seed. A persisted `cliUserID` and `accountUUID` still win.
