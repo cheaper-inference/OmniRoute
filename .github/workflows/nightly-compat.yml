@@ -89,20 +89,32 @@ jobs:
 
   compat-tests:
     if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
-    name: Node ${{ matrix.node }} Compat Tests (${{ matrix.shard }}/4)
+    name: Node ${{ matrix.node }} Compat Tests (${{ matrix.shard }}/${{ matrix.shardTotal }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: resolve-branch
     strategy:
       fail-fast: false
       matrix:
-        node: [24, 26]
-        shard: [1, 2, 3, 4]
+        include:
+          - { node: 24, shard: 1, shardTotal: 4 }
+          - { node: 24, shard: 2, shardTotal: 4 }
+          - { node: 24, shard: 3, shardTotal: 4 }
+          - { node: 24, shard: 4, shardTotal: 4 }
+          # Node 26 repeatedly reached the job timeout with four shards.
+          - { node: 26, shard: 1, shardTotal: 8 }
+          - { node: 26, shard: 2, shardTotal: 8 }
+          - { node: 26, shard: 3, shardTotal: 8 }
+          - { node: 26, shard: 4, shardTotal: 8 }
+          - { node: 26, shard: 5, shardTotal: 8 }
+          - { node: 26, shard: 6, shardTotal: 8 }
+          - { node: 26, shard: 7, shardTotal: 8 }
+          - { node: 26, shard: 8, shardTotal: 8 }
     env:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
-      TEST_SHARD: ${{ matrix.shard }}/4
+      TEST_SHARD: ${{ matrix.shard }}/${{ matrix.shardTotal }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
