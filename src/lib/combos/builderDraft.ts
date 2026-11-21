@@ -507,3 +507,254 @@ export function computeBatchDeselectModelSteps(
   if (values.size === 0) return models;
   return models.filter((m) => !values.has(m.model));
 }
+
+export type ComboStepAccountDetails = {
+  type: "combo-ref" | "pinned" | "dynamic-restricted" | "dynamic-all" | "legacy";
+  summary: string;
+  tooltip: string | null;
+  accountNames: string[];
+  restrictedCount?: number;
+  totalPoolCount?: number;
+};
+
+export type ComboStepAccountLabels = {
+  pinned?: string;
+  dynamic?: string;
+  /** A function receives the number of allowed accounts, for a "{count} restricted" message. */
+  restricted?: string | ((count: number) => string);
+  allActive?: string;
+  legacy?: string;
+  comboRef?: string;
+};
+
+export type ComboStepAccountOptions = {
+  formatConnectionLabel?: (label: string) => string;
+  labels?: ComboStepAccountLabels;
+};
+
+export function getComboStepAccountDetails(
+  entry: unknown,
+  providers: Array<{
+    providerId?: unknown;
+    alias?: unknown;
+    prefix?: unknown;
+    connections?: Array<
+      { id?: string | null; label?: string | null } & ComboEligibleConnectionLike
+    >;
+  }> = [],
+  options: ComboStepAccountOptions = {}
+): ComboStepAccountDetails {
+  const formatLabel = options.formatConnectionLabel || ((label: string) => label);
+  const labels = options.labels || {};
+  const restrictedLabel = (count: number) =>
+    typeof labels.restricted === "function"
+      ? labels.restricted(count)
+      : labels.restricted || `${count} restricted`;
+
+  if (!isRecord(entry)) {
+    return {
+      type: "legacy",
+      summary: labels.legacy || "Legacy model entry",
+      tooltip: null,
+      accountNames: [],
+    };
+  }
+
+  if (entry.kind === "combo-ref") {
+    return {
+      type: "combo-ref",
+      summary: labels.comboRef || "Nested combo reference",
+      tooltip: null,
+      accountNames: [],
+    };
+  }
+
+  const findProvider = (providerIdentifier: unknown) => {
+    const normalized = toTrimmedString(providerIdentifier);
+    if (!normalized) return null;
+    return (
+      providers.find((p) => {
+        const id = toTrimmedString(p.providerId);
+        const alias = toTrimmedString(p.alias);
+        const prefix = toTrimmedString(p.prefix);
+        return id === normalized || alias === normalized || prefix === normalized;
+      }) || null
+    );
+  };
+
+  if (entry.kind === "provider-wildcard") {
+    const providerIdentifier = toTrimmedString(entry.providerId);
+    const matchedProvider = findProvider(providerIdentifier);
+    const connections = Array.isArray(matchedProvider?.connections)
+      ? matchedProvider.connections
+      : [];
+    const connectionId = toTrimmedString(entry.connectionId);
+
+    if (connectionId) {
+      const match = connections.find((c) => toTrimmedString(c.id) === connectionId);
+      const raw =
+        toTrimmedString(match?.label) ||
+        toTrimmedString(entry.label) ||
+        `acct ${connectionId.slice(0, 8)}`;
+      const label = formatLabel(raw);
+      const pinnedPrefix = labels.pinned || "Pinned account";
+      return {
+        type: "pinned",
+        summary: `${pinnedPrefix}: ${label}`,
+        tooltip: `${pinnedPrefix}: ${label} (${connectionId})`,
+        accountNames: [label],
+      };
+    }
+
+    const allowed = Array.isArray(entry.allowedConnectionIds)
+      ? entry.allowedConnectionIds
+          .map((id) => toTrimmedString(id))
+          .filter((id): id is string => !!id)
+      : [];
+    const dynamicPrefix = labels.dynamic || "Dynamic account";
+
+    if (allowed.length > 0) {
+      const names = allowed.map((id) => {
+        const match = connections.find((c) => toTrimmedString(c.id) === id);
+        const raw = toTrimmedString(match?.label) || `acct ${id.slice(0, 8)}`;
+        return formatLabel(raw);
+      });
+      const restrictedPrefix = restrictedLabel(allowed.length);
+      return {
+        type: "dynamic-restricted",
+        summary: `${dynamicPrefix} · ${restrictedPrefix}: ${names.join(", ")}`,
+        tooltip: `Dynamic account restricted to ${allowed.length} account(s):\n${names.map((n) => `• ${n}`).join("\n")}`,
+        accountNames: names,
+        restrictedCount: allowed.length,
+        totalPoolCount: connections.length,
+      };
+    }
+
+    const active = connections.filter(isEligibleActiveConnection);
+    const allNames = active.map((c) => {
+      const raw = toTrimmedString(c.label) || toTrimmedString(c.id) || "account";
+      return formatLabel(raw);
+    });
+    const allActivePrefix = labels.allActive || "All active accounts";
+    return {
+      type: "dynamic-all",
+      summary:
+        active.length > 0
+          ? `${dynamicPrefix} · ${allActivePrefix} (${active.length})`
+          : `${dynamicPrefix} · ${allActivePrefix}`,
+      tooltip:
+        active.length > 0
+          ? `Dynamic account using all ${active.length} active account(s) in pool:\n${allNames.map((n) => `• ${n}`).join("\n")}`
+          : "Dynamic account using all active accounts in pool",
+      accountNames: allNames,
+      totalPoolCount: active.length,
+    };
+  }
+
+  const modelValue = toTrimmedString(entry.model);
+  const parsed = parseQualifiedModel(modelValue);
+  const providerIdentifier = toTrimmedString(entry.providerId) || parsed?.providerId;
+  const matchedProvider = findProvider(providerIdentifier);
+  const connections = Array.isArray(matchedProvider?.connections)
+    ? matchedProvider.connections
+    : [];
+  const connectionId = toTrimmedString(entry.connectionId);
+
+  if (connectionId) {
+    const match = connections.find((c) => toTrimmedString(c.id) === connectionId);
+    const raw =
+      toTrimmedString(match?.label) ||
+      toTrimmedString(entry.label) ||
+      `acct ${connectionId.slice(0, 8)}`;
+    const label = formatLabel(raw);
+    const pinnedPrefix = labels.pinned || "Pinned account";
+    return {
+      type: "pinned",
+      summary: `${pinnedPrefix}: ${label}`,
+      tooltip: `${pinnedPrefix}: ${label} (${connectionId})`,
+      accountNames: [label],
+    };
+  }
+
+  const allowed = Array.isArray(entry.allowedConnectionIds)
+    ? entry.allowedConnectionIds.map((id) => toTrimmedString(id)).filter((id): id is string => !!id)
+    : [];
+  const dynamicPrefix = labels.dynamic || "Dynamic account";
+
+  if (allowed.length > 0) {
+    const names = allowed.map((id) => {
+      const match = connections.find((c) => toTrimmedString(c.id) === id);
+      const raw = toTrimmedString(match?.label) || `acct ${id.slice(0, 8)}`;
+      return formatLabel(raw);
+    });
+    const restrictedPrefix = restrictedLabel(allowed.length);
+    return {
+      type: "dynamic-restricted",
+      summary: `${dynamicPrefix} · ${restrictedPrefix}: ${names.join(", ")}`,
+      tooltip: `Dynamic account restricted to ${allowed.length} account(s):\n${names.map((n) => `• ${n}`).join("\n")}`,
+      accountNames: names,
+      restrictedCount: allowed.length,
+      totalPoolCount: connections.length,
+    };
+  }
+
+  if (entry.providerId || matchedProvider) {
+    const active = connections.filter(isEligibleActiveConnection);
+    const allNames = active.map((c) => {
+      const raw = toTrimmedString(c.label) || toTrimmedString(c.id) || "account";
+      return formatLabel(raw);
+    });
+    const allActivePrefix = labels.allActive || "All active accounts";
+    return {
+      type: "dynamic-all",
+      summary:
+        active.length > 0
+          ? `${dynamicPrefix} · ${allActivePrefix} (${active.length})`
+          : `${dynamicPrefix} · ${allActivePrefix}`,
+      tooltip:
+        active.length > 0
+          ? `Dynamic account using all ${active.length} active account(s) in pool:\n${allNames.map((n) => `• ${n}`).join("\n")}`
+          : "Dynamic account using all active accounts in pool",
+      accountNames: allNames,
+      totalPoolCount: active.length,
+    };
+  }
+
+  return {
+    type: "legacy",
+    summary: labels.legacy || "Legacy model entry",
+    tooltip: null,
+    accountNames: [],
+  };
+}
+
+/** Account-scope fields of a step; an edit replaces them together (cleared ones are omitted). */
+const STEP_ACCOUNT_SCOPE_KEYS = ["connectionId", "label", "allowedConnectionIds"] as const;
+
+/**
+ * The step that replaces `prevStep` after an in-place edit: the new provider/model/account scope
+ * from `updatedStep`, with the previous weight and every unrelated setting (id, tags, …) kept.
+ */
+export function mergeEditedComboStep<T extends Record<string, unknown>>(
+  prevStep: T,
+  updatedStep: ComboModelStep
+): Record<string, unknown> {
+  const rest: Record<string, unknown> = { ...prevStep };
+  for (const key of STEP_ACCOUNT_SCOPE_KEYS) delete rest[key];
+  const prevWeight = typeof prevStep.weight === "number" ? prevStep.weight : undefined;
+  return { ...rest, ...updatedStep, weight: prevWeight ?? updatedStep.weight ?? 0 };
+}
+
+/**
+ * Where the step under edit sits after `next` replaced `prev`, found by identity: a drag, sort,
+ * add or removal elsewhere moves it; removing the step itself ends the edit (null).
+ */
+export function remapEditingStepIndex<T>(
+  prev: readonly T[],
+  next: readonly T[],
+  editingIndex: number | null
+): number | null {
+  if (editingIndex === null || editingIndex < 0 || editingIndex >= prev.length) return null;
+  const index = next.indexOf(prev[editingIndex]);
+  return index === -1 ? null : index;
+}
