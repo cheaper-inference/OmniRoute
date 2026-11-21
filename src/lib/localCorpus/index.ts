@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { DENIED_ROOT_DIRECTORY_ERROR, isDeniedRootDirectory } from "../deniedRootDirectories";
+
 const DEFAULT_ALLOWED_EXTENSIONS = new Set([
   ".cfg",
   ".csv",
@@ -277,6 +279,9 @@ export async function canonicalizeLocalCorpusRoot(inputPath: string): Promise<st
     stat = await fs.stat(canonical);
   } catch {
     throw new Error("Local corpus root is not accessible");
+  }
+  if (isDeniedRootDirectory(canonical)) {
+    throw new Error(DENIED_ROOT_DIRECTORY_ERROR);
   }
   if (!stat.isDirectory()) {
     throw new Error("Local corpus root must point to a directory");

@@ -16,6 +16,8 @@ const {
   resolveSelfLoopBearer,
 } = admissionModule;
 const { withEarlyStreamKeepalive } = await import("../../open-sse/utils/earlyStreamKeepalive.ts");
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
 const { getActiveRequestCount } = await import("../../src/lib/gracefulShutdown.ts");
 
 /**
@@ -633,6 +635,8 @@ function selfLoopChatRequest(
     // test wraps itself in withSelfLoopEnv({}) so it is deterministic even when
     // the developer's shell has OMNIROUTE_API_KEY set).
     authorization: `Bearer ${resolveSelfLoopBearer()}`,
+    // The per-process token is what grants the bypass; the header and bearer alone do not.
+    [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
   };
   if (contentLength !== null) headers["content-length"] = contentLength;
   return new Request("http://x/v1/chat/completions", {
@@ -827,7 +831,7 @@ test("resolveSelfLoopBearer uses ROUTER_API_KEY when OMNIROUTE_API_KEY is unset"
   }
 });
 
-test("env-key bearer is honored as a self-loop admission bypass (REQUIRE_API_KEY deployment)", async () => {
+test("env-key self-loop call bypasses admission when it carries the process token (REQUIRE_API_KEY deployment)", async () => {
   const restore = withSelfLoopEnv({ OMNIROUTE_API_KEY: "env-key" });
   try {
     const controller = new ChatAdmissionController(1);
@@ -845,6 +849,7 @@ test("env-key bearer is honored as a self-loop admission bypass (REQUIRE_API_KEY
         "content-type": "application/json",
         "x-omniroute-admission-bypass": "internal",
         authorization: "Bearer env-key",
+        [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
         "content-length": String(body.length),
       },
       body,

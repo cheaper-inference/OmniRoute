@@ -91,6 +91,7 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   "minimax",
   "minimax-cn",
   "crof",
+  "mistral",
   "nanogpt",
   "nan",
   "apmix",

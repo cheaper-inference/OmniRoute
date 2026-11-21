@@ -134,33 +134,22 @@ wakati mmoja, wakati tu haitumiki**, huku ukaguzi wa kutotumika na uanzishaji up
   dakika 27–32 kufika kwenye tmpfs na dakika 2 kupakiwa kutoka kwenye diski.
 - VPS ya `.15` ni ya homologation pekee — kamwe haiendeshi runner za CI.
 
-## Mkondo unaohudumiwa (runners zinazoendeshwa na GitHub)
+## Njia ya kupangishwa (wakimbiaji wenyeji wa GitHub)
 
-Repo ni mali ya shirika la `cheaper-inference`, lililo kwenye mpango wa **Team**: **kazi 60 zinazoweza kuendeshwa kwa wakati mmoja kwenye runners zinazohudumiwa**, zinazoshirikiwa na kila repo ya shirika, kila ukaguzi wa PR, kila workflow inayochochewa na push na usanidi chaguomsingi wa CodeQL. Takwimu zilizo hapa chini zilipimwa kwenye mpango wa **Pro** (kazi 40 kwa wakati mmoja). Ilipimwa tarehe 2026-10-18 wakati wa
-kampeni ya merge (~merge 10 kwa saa kwenye `release/v3.8.52`): **workflow runs 2,500 ziliundwa ndani ya
-saa 24**, push 44 kwenye branch ndani ya saa 6, **kazi 106 zinazohudumiwa zikiwa kwenye foleni** huku ukaguzi wa PR ukisubiri kwa
-saa nyingi na PR zikiunganishwa bila ukaguzi huo. Workflow tisa zilianzishwa kwa kila push kwenye branch hiyo:
+Hifadhi ni ya shirika la `cheaper-inference`, kwenye** Timu** mpango:** Ajira 60 zinazopangishwa kwa wakati mmoja** , inayoshirikiwa na kila hazina katika shirika, kila hundi ya PR, kila mtiririko wa kazi unaosababishwa na msukumo na usanidi chaguo-msingi wa CodeQL. Takwimu hapa chini zilipimwa kwenye** Pro** mpango (kazi 40 zinazoshirikiwa kwa wakati mmoja). Ilipimwa mnamo 2026-10-18 wakati wa kampeni ya kuunganisha (~ 10 merges/hour kwenye `release/v3.8.52`):** Mitiririko 2,500 ya mtiririko wa kazi iliyoundwa katika h 24** , 44 inasukuma kwa tawi katika h 6,** Ajira 106 zilizopangishwa zimepangwa** huku hundi za PR zikisubiri kwa masaa na PRs ziliunganishwa bila wao. Mitiririko tisa ya kazi ilifutwa kwa kila kushinikiza kwenye tawi:
 
-| kwa kila push kwenda `release/v*`           | kazi zinazohudumiwa | matokeo wakati wa msongamano                                              | tangu 2026-10-18                                                                         |
-| ------------------------------------------- | ------------------: | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `ci.yml` (matrix kamili)                    |             hadi 30 | ilighairiwa na push iliyofuata, 24 kati ya 24 kwa siku                    | haianzishwi kwenye push za `release/**` (PR run + Release-Green)                         |
-| `quality.yml`                               |                  ~6 | ilighairiwa, 23 kati ya 23                                                | haianzishwi kwenye push za `release/**`                                                  |
-| `Release-Green` `--quick`                   |                   0 | iliendeshwa kwenye `omni-build`, 97 kati ya 100 zikaghairiwa              | nafasi ya `omni-release`, haighairiwi kamwe, run inayosubiri huunganishwa                |
-| `Lock released branch`, `OpenSSF Scorecard` |                   2 | run moja ya foleni kwa kila push                                          | run moja kwa kila ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)               |
-| `Release acceptance` (ripoti kivuli)        |                   1 | `npm ci` moja inayohudumiwa kwa kila push, haighairiwi kamwe              | haijabadilishwa — inafaa kuwekewa kichujio cha `paths:`                                  |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                   2 | ilighairiwa kwa kila push; sehemu ya amd64 hushindana kwenye `omni-build` | haijabadilishwa — mkondo wa deployment wa mmiliki                                        |
-| usanidi chaguomsingi wa CodeQL (`dynamic`)  |                   4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kwa kila push       | haijabadilishwa — Settings → Code security; `c-cpp`/`python` hazichanganui chochote hapa |
+| kwa kusukuma kwa `release/v*`               | kazi mwenyeji | matokeo chini ya dhoruba                                                   | tangu 2026-10-18                                                                            |
+| ------------------------------------------- | ------------: | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `ci.yml` (matrix kamili)                    |       hadi 30 | kughairiwa na msukumo unaofuata, 24 kati ya 24 kwa siku                    | haijaanza kwenye `release/**` pushs (PR run + Release-Green)                                |
+| `quality.yml`                               |            ~6 | kughairiwa, 23 kati ya 23                                                  | haijaanza kwa misukumo `release/**`                                                         |
+| `Release-Green` `--quick`                   |             0 | iliendeshwa kwa `omni-build`, ilighairi 97 kati ya 100                     | `omni-release` yanayopangwa, kamwe kughairiwa, inasubiri kuanguka kuanguka                  |
+| `Lock released branch`, `OpenSSF Scorecard` |             2 | kukimbia kwa foleni kwa kila msukuma                                       | kukimbia moja kwa ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)                  |
+| `Release acceptance` (ripoti kivuli)        |             1 | `npm ci` moja iliyopangishwa kwa kila msukuma, haijaghairiwa               | mgombeaji — ambaye hajabadilishwa kwa kichujio cha `paths:`                                 |
+| `Publish to Docker Hub` → `Deploy to VPS`   |             2 | kufutwa kwa kushinikiza; amd64 mguu hushindana kwenye `omni-build`         | kituo cha kusambaza cha mmiliki wa — hakijabadilishwa                                       |
+| usanidi chaguo-msingi wa CodeQL (`dynamic`) |             4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kwa kila kushinikiza | — isiyobadilika Mipangilio → Usalama wa msimbo; `c-cpp`/`python` usichanganue chochote hapa |
 
-`tests/unit/build/push-storm-diet.test.ts` huhakikisha kichochezi cha push cha `ci.yml` na
-`quality.yml` kinatumika kwenye `main` pekee. Athari ya pembeni: Codecov haipokei tena upload ya msingi kwa kila push ya release (hatua hiyo
-ni ya taarifa tu na ina `continue-on-error`); kizuizi cha coverage kilicho ndani ya repo na maoni ya PR
-hayaathiriki.
+`tests/unit/build/push-storm-diet.test.ts` hubandika kichochezi cha `main` -only cha `ci.yml` na `quality.yml`. Athari mbaya: Codecov haipokei tena upakiaji msingi kwa kila toleo la kushinikiza (hatua ni ya taarifa na `continue-on-error`); lango la chanjo ya ndani-repo na maoni ya PR hayajaathiriwa.
 
-**Kuongeza uwezo wa self-hosted hakutatui foleni ya hosted.** Devbox
-(`devbox-vm-06-dev002`, vCPU 24 / GB 54) ingeweza kuhudumia runner, lakini vipindi vya agent tayari
-hudumisha load yake kati ya 20–26, container ya agent haina Docker daemon, na mkondo uliojaa ni
-ule wa hosted. Mashine ya `.113` ilikuwa na GB 71 zilizo wazi na load ya 5–8 wakati huohuo; kizuizi chake
-ni bajeti ya kumbukumbu kwa kila listener iliyo hapo juu (kikomo cha listener 6), si CPU. Njia zilizobaki
-ni za mchakato: unganisha PR za kampeni kupitia foleni ya Mergify (`label=queue`, batch hushiriki
-CI run moja ya `merge_group` badala ya run moja kwa kila PR pamoja na moja kwa kila push), punguza lugha za
-usanidi chaguomsingi wa CodeQL, na uchuje `release-acceptance.yml` kulingana na faili inazosoma.
+**Uwezo zaidi wa kujipangisha haurekebishi foleni iliyopangishwa.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) inaweza kupangisha mwanariadha, lakini vipindi vya wakala tayari huweka mzigo wake saa 20–26, kontena la wakala halina daemon Docker, na njia iliyojaa ndiyo inayopangishwa. Sanduku `.113` lilikuwa na GB 71 bila malipo na kupakia 5-8 kwa wakati mmoja; kizuizi chake ni bajeti ya kumbukumbu ya kila msikilizaji hapo juu (wasikilizaji 6 wa dari), sio CPU. Viingilio vilivyosalia ni vile vya kuchakata: kampeni ya ardhi PRs kupitia foleni ya Mergify (`label=queue`, bechi hushiriki `merge_group` CI kukimbia moja badala ya mkimbio mmoja kwa PR pamoja na moja kwa kila kusukuma), punguza lugha za usanidi-msingi za CodeQL, na uchuje `release-acceptance.yml` kwa faili zinazosoma.
+
+> **2026-11-19: foleni ya kuunganisha ya Mergify imesimamishwa** (uamuzi wa mmiliki). `.mergify.yml` haifafanui tena foleni na inakataa amri za Mergify zinazounganisha au kuandika upya ombi la kuvuta. Toleo la PRs huunganishwa kwa mkono chini ya mpangilio wa kanuni wa hazina "Inahitaji milango ya kijani kwenye toleo amilifu" (`Gate / CI` + `Gate / Quality`) hadi omni-foleni iendeshe katika hali ya moja kwa moja, na kupitia omni-foleni baada ya hapo ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Lever ya Mergify hapo juu haipo tena.

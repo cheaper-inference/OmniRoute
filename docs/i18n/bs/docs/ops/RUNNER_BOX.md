@@ -137,36 +137,22 @@ odjednom, samo kada nije aktivan**, pri čemu provjera neaktivnosti i ponovno po
   minute da se smjesti na tmpfs i 2 minute da se otpremi s diska.
 - VPS `.15` namijenjen je samo homologaciji — na njemu se nikada ne pokreću CI runneri.
 
-## Hostovana traka (izvršioci koje hostuje GitHub)
+## Hostirana traka (trkači hostovani na GitHubu)
 
-Repozitorij pripada organizaciji `cheaper-inference`, na **Team** planu: **60
-istovremenih hostovanih poslova**, koje dijele svi repozitoriji u organizaciji, sve PR provjere,
-svi radni tokovi pokrenuti slanjem izmjena i zadana postavka za CodeQL. Brojke u nastavku izmjerene su na
-**Pro** planu (40 istovremenih hostovanih poslova). Izmjereno 2026-10-18 tokom
-kampanje spajanja (~10 spajanja/sat na `release/v3.8.52`): **2.500 izvršavanja radnih tokova kreirano je
-za 24 h**, 44 slanja izmjena na granu za 6 h, **106 hostovanih poslova na čekanju**, dok su PR provjere čekale
-satima, a PR-ovi su spajani bez njih. Devet radnih tokova pokretalo se pri svakom slanju izmjena na granu:
+Repozitorijum pripada `cheaper-inference` organizaciji, na** Tim** plan:** 60 istovremeno hostiranih poslova** , koji dijeli svako spremište u organizaciji, svaka PR provjera, svaki tok posla pokrenut i CodeQL-ova zadana postavka. Cifre ispod su izmjerene na** Pro** plan (40 istovremeno hostiranih poslova). Izmjereno 18.10.2026. tokom kampanje spajanja (~ 10 merges/hour na `release/v3.8.52`):** 2.500 pokretanja toka posla kreirano za 24 h** , 44 guranja do grane za 6 h,** 106 hostovanih poslova na čekanju** dok su PR provjere čekale satima i PRs su spojeni bez njih. Devet tokova posla je pokrenuto pri svakom pritisku na granu:
 
-| po slanju izmjena na `release/v*`           | hostovani poslovi | ishod tokom navale                                                      | od 2026-10-18                                                                        |
-| ------------------------------------------- | ----------------: | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `ci.yml` (puna matrica)                     |             do 30 | otkazano sljedećim slanjem izmjena, 24 od 24 u jednom danu              | ne pokreće se pri slanjima na `release/**` (PR izvršavanje + Release-Green)          |
-| `quality.yml`                               |                ~6 | otkazano, 23 od 23                                                      | ne pokreće se pri slanjima na `release/**`                                           |
-| `Release-Green` `--quick`                   |                 0 | izvršeno na `omni-build`, otkazano 97 od 100                            | `omni-release` mjesto, nikad se ne otkazuje, objedinjuje izvršavanja na čekanju      |
-| `Lock released branch`, `OpenSSF Scorecard` |                 2 | jedno izvršavanje na čekanju po slanju izmjena                          | jedno izvršavanje po ref-u (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
-| `Release acceptance` (izvještaj u sjeni)    |                 1 | jedan hostovani `npm ci` po slanju izmjena, nikad se ne otkazuje        | nepromijenjeno — kandidat za `paths:` filter                                         |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                 2 | otkazano po slanju izmjena; amd64 dio se nadmeće na `omni-build`        | nepromijenjeno — vlasnikov kanal za implementaciju                                   |
-| Zadana postavka za CodeQL (`dynamic`)       |                 4 | `javascript-typescript`, `actions`, `c-cpp`, `python` po slanju izmjena | nepromijenjeno — Settings → Code security; `c-cpp`/`python` ovdje ništa ne skeniraju |
+| po push to `release/v*`                     | hosted jobs | ishod pod olujom                                              | od 2026-10-18                                                                       |
+| ------------------------------------------- | ----------: | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `ci.yml` (puna matrica)                     |       do 30 | otkazan sljedećim pritiskom, 24 od 24 u danu                  | nije pokrenut na `release/**` pushes (PR run + Release-Green)                       |
+| `quality.yml`                               |          ~6 | otkazan, 23 od 23                                             | nije pokrenut na `release/**` guranje                                               |
+| `Release-Green` `--quick`                   |           0 | pokrenut na `omni-build`, otkazan 97 od 100                   | `omni-release` slot, nikad otkazan, na čekanju se sruši                             |
+| `Lock released branch`, `OpenSSF Scorecard` |           2 | jedno trčanje u redu po potisku                               | jedna vožnja po ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)            |
+| `Release acceptance` (izvještaj u senci)    |           1 | jedan hosted `npm ci` po push, nikad otkazan                  | nepromijenjen — kandidat za `paths:` filter                                         |
+| `Publish to Docker Hub` → `Deploy to VPS`   |           2 | poništeno po guranje; amd64 noga se takmiči na `omni-build`   | nepromijenjen kanal raspoređivanja vlasnika —                                       |
+| zadana postavka CodeQL (`dynamic`)          |           4 | `javascript-typescript`, `actions`, `c-cpp`, `python` po push | nepromijenjena — Postavke → Sigurnost koda; `c-cpp`/`python` ne skenira ništa ovdje |
 
-`tests/unit/build/push-storm-diet.test.ts` učvršćuje okidač za slanje izmjena samo na `main` za `ci.yml` i
-`quality.yml`. Nuspojava: Codecov više ne prima osnovno otpremanje pri svakom slanju izmjena za izdanje (taj
-korak je informativan i koristi `continue-on-error`); provjera pokrivenosti unutar repozitorija i PR komentar
-nisu pogođeni.
+`tests/unit/build/push-storm-diet.test.ts` pričvršćuje `main` -only push okidač za `ci.yml` i `quality.yml`. Nuspojava: Codecov više ne prima osnovni upload po guranju izdanja (korak je informativni i `continue-on-error`); kapija pokrivenosti u repo-u i PR komentar su nepromijenjeni.
 
-**Dodatni samostalno hostovani kapacitet ne rješava red čekanja hostovane trake.** Razvojni računar
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) mogao bi hostovati izvršioca, ali sesije agenata već
-održavaju njegovo opterećenje na 20–26, kontejner agenta nema Docker demon, a zasićena je
-hostovana traka. `.113` računar je u istom trenutku imao 71 GB slobodnog prostora i opterećenje 5–8; njegovo
-ograničenje je prethodno navedeni memorijski budžet po slušaocu (najviše 6 slušalaca), a ne CPU. Preostale
-mogućnosti su procesne: spojiti PR-ove kampanje putem Mergify reda (`label=queue`, grupe dijele
-jedno `merge_group` CI izvršavanje umjesto jednog izvršavanja po PR-u plus jednog po slanju izmjena), smanjiti broj jezika
-u zadanoj postavci za CodeQL i filtrirati `release-acceptance.yml` prema datotekama koje čita.
+**Više samostalnog hostinga ne popravlja hostirani red čekanja.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) može ugostiti pokretač, ali sesije agenta već drže svoje opterećenje na 20–26, kontejner agenta nema Docker demona, a zasićena traka je hostovana. `.113` kutija je imala 71 GB slobodno i opterećenje 5–8 u istom trenutku; njegovo ograničenje je viši budžet memorije po slušaocu (gornja granica od 6 slušalaca), a ne CPU. Preostale poluge su procesne: uzemite kampanju PRs kroz red čekanja za spajanje (`label=queue`, grupe dijele jedno `merge_group` CI pokretanje umjesto jednog pokretanja po PR plus jedno po guranje), skraćivanje jezika za zadano podešavanje CodeQL -a i filtriranje `release-acceptance.yml` prema datotekama koje čita.
+
+> **2026-11-19: Red spajanja Mergeify je povučen** (odluka vlasnika). `.mergify.yml` više ne definira red i odbija naredbe za spajanje koje spajaju ili prepisuju zahtjev za povlačenjem. Izdanja PRs se spajaju ručno pod skupom pravila spremišta "Zahtijevajte zelene kapije na aktivnom izdanju" (`Gate / CI` + `Gate / Quality`) dok se omni-red ne pokrene u živom modu, a nakon toga kroz omni-red ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Gore navedena poluga Mergify više ne postoji.

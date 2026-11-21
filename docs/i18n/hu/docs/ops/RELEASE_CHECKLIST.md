@@ -355,111 +355,70 @@ Bármely v3.8.x kiadás közzététele előtt ellenőrizze ezeket a további ele
 
 ---
 
-## 3.9.0 LTS elágazás (próba a 3.8.58-ban)
+## 3.9.0 LTS vágás (3.8.58-ban gyakorolva)
 
-A v3.8.59 után a következő verzió a 3.9.0, amelynek csúcsából két hosszú életű ág jön létre:
-`stable/v3` (a v3 LTS-vonal, npm `latest`) és `develop` (v4, 4.0.0-ra emelve, npm
-`nightly`). Az ág-/csatornamodellt, az előre portolást és a címkéket a
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) tartalmazza; a terv a [ROADMAP](../../ROADMAP.md) dokumentumban található (3. fázis). Az elágazás egyszer fut le;
-a 3.8.58 egy forkban próbálja el a teljes folyamatot, a 3.8.59 pedig a
-[GO/NO-GO ellenőrzőlistával](./LTS_GO_NO_GO.md) zárul.
+A v3.8.59 után a következő verzió a 3.9.0, és a csúcsa két hosszú életű ágból áll: `stable/v3` (a v3 LTS vonal, npm `latest`) és `develop` (v4, 4.0.0-ra, npm `nightly`). A branch/channel modell, az előremenő port és a címkék [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) formátumban vannak; a terv a [ROADMAP](../../ROADMAP.md) ban van (3. fázis). A vágás egyszer fut; A 3.8.58 végétől a végéig elpróbálja egy villán, a 3.8.59 pedig a [GO/NO-GO ellenőrzőlistával](./LTS_GO_NO_GO.md) zárja le.
 
-### Próbafuttatás (csak olvasás, bármikor biztonságos)
+### Száraz futás (csak olvasható, bármikor biztonságos)
 
 ```bash
-npm run release:dry-run-lts-cut                       # a valódi elágazás: 3.9.0 a HEAD-ből, előző címke: v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # a forrás-commit rögzítése
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-A `scripts/release/dry-run-lts-cut.mjs` nem hajt végre semmit: beolvassa a git és a `gh` adatait, majd kiírja a
-teljes folyamatot — az előfeltételeket (a forrás feloldható, a forrástároló teljes előzményekkel rendelkezik —
-egy sekély klón nem tudja feltölteni a `stable/v3` ágat, mert a fogadó oldal az első
-beillesztett szülőnél elutasítja a csomagot, ezért teljes klónból végezze az elágazást, vagy előbb futtassa a `git fetch --unshallow origin` parancsot —
-az előző címke létezik, a `package.json` a célverziót tartalmazza, nyitva van egy `release-freeze` ügy, nincs nyitott
-`Release branch not green` ügy
-egy meglévő kiadási ágon — egy nem létező ág `?` ismeretlen állapotot jelez, soha nem
-zöld — a Mergify `release` várólistája konfigurálva van (G11: `queue_rules`, `checks_timeout`,
-`queue` címke), a `release/*` szabálykészlet továbbra is tiltja a törlést és a kényszerített feltöltést, valamint
-a `stable/v3` és a `develop` még nem létezik), a két áglépést, hogy mely inaktív munkafolyamatok
-triggerei és `if:` feltételei válnak igazzá (és melyek maradnak egy tárolóváltozó által korlátozva vagy
-a kanonikus tárolóhoz rögzítve), a várt dist-tageket (`latest` → 3.9.0, a `next` és a
-`nightly` üres), valamint a visszaállítást. A `0` kilépési kód jelentése `RESULT: READY`, az `1` azt jelzi, hogy egy blokkoló előfeltétel
-meghiúsult (`✗`), a `2` pedig használati hibát jelent. Az `--advisory <id,...>` egy ellenőrzést figyelmeztetéssé (`!`)
-minősít vissza anélkül, hogy elrejtené.
+`scripts/release/dry-run-lts-cut.mjs` nem hajt végre semmit: beolvassa a git-et és `gh`, és kiírja a teljes szekvenciát — előfeltételek (forrás feloldja, a forrástár teljes előzményekkel rendelkezik — sekély klón nem tudja lenyomni `stable/v3`, a fogadó oldal elutasítja a csomagot az első beoltott szülőnél, így a teljes klónból kivágva a teljes — vagy a `git fetch --unshallow origin` verzió létezik először `package.json` probléma nyitott, nincs `Release branch not green` `release-freeze` egy meglévő kiadási ágon — egy nem létező ág jelent `?` ismeretlen, soha nem zöld — omni-queue a PRs kiadáshoz érkezik (G11: `config/merge-queue/config.json` érvényes, `bases` kezeli a kiadási ágat, `mode` `live`, címkéje létezik), a `release/*` -pusz és törlés továbbra is blokkolja a `stable/v3`, és a törlést `develop` még nem létezik), a két elágazási lépés, amelyek alvó munkafolyamat-indítók és `if:` feltételek igazra váltanak (és amelyek egy lerakatváltozó által zárva maradnak, vagy a kanonikus lerakathoz vannak rögzítve), a várt dist-tag (`latest` → 3.9.0, `next` és `nightly` üres) és a rollback. Kilépés a következőből: `0` = `RESULT: READY`, `1` = a blokkolási előfeltétel nem sikerült (`✗`), `2` = használati hiba. `--advisory <id,...>` leminősíti a csekket figyelmeztetéssé (`!`) anélkül, hogy elrejtené.
 
-A valódi elágazás próbafuttatását akkor végezze el, amikor a 3.9.0 kiadás befagyasztása még érvényben van — az ágak
-a címke után és azelőtt jönnek létre, hogy a 12c fázis feloldaná a befagyasztást.
+Futtassa az igazi vágást a szárazon, amíg a 3.9.0 kioldó fagyasztás még nyitva van — az ágak a címke után jönnek létre, mielőtt a 12c fázis feloldja a fagyasztást.
 
-### 3.8.58-próba (csak forkban)
+### 3.8.58 próba (csak villánál)
 
 ```bash
-# 1. Próbafuttatás az aktuális csúcson, a próba paramétereivel
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Végrehajtás egy FORK távoli tárolóján (az origin, illetve bármely olyan távoli tároló,
-#    amelynek URL-je a kanonikus tárolóra mutat, vissza lesz utasítva; minden lépés megerősítést kér a terminálon)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Az inaktív munkafolyamatok kipróbálása a forkban (workflow_dispatch ott, ahol a próbafuttatás
-#    a kanonikus tárolóhoz való rögzítést jelez), majd visszaállítás
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-A develop verzióemelő commit git plumbing használatával készül (a munkafa érintése nélkül), és
-ugyanazt az öt fájlt frissíti, mint egy ciklusnyitó commit: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` és `docs/openapi.yaml`. A `[4.0.0]`
-CHANGELOG-szakasz és annak i18n-tükörpéldányai ezt követően, az első
-PR előtt nyílnak meg a `develop` ágon. A szkript soha nem módosítja az npm dist-tageket — ezeket egy ideiglenes csomagon próbálja el.
+A fejlesztési bump commit git plumbing segítségével épül fel (nem érinti a működő fát), és ugyanazt az öt fájlt bumpolja ciklusnyitott véglegesítésként: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` és `docs/openapi.yaml`. A `[4.0.0]` CHANGELOG szakasz és i18n tükrei `develop` utólag, az első PR előtt nyílnak meg. A szkript — nem változik.
 
-### PR-előnézeti műtermék (egyszeri build, ugyanazon bájtok előléptetése)
+### PR előnézeti műtermék (egyszer építeni, ugyanazokat a bájtokat hirdetni)
 
-A `.github/workflows/preview-artifact.yml` egyetlen éles tarballt készít egy PR csúcsából, és
-pontosan ezt a buildet ellenőrzi (#8084, (a) rész). Csak azonos tárolóból származó PR-ek esetén; semmi nem kerül közzétételre.
+`.github/workflows/preview-artifact.yml` egy termelési tarballt épít egy PR fejből, és érvényesíti azt a pontos összeállítást (#8084 szelet (a)). Csak azonos adattár PRs ; semmit sem publikálnak.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # vagy adja hozzá a `preview-artifact` címkét
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # előnézeti telepítés
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-A futtatás végrehajtja az `npm ci`, `npm run build:release` és `npm run check:pack-artifact` parancsokat, becsomagolja a
-tarballt, futtatja az `npm run check:pack-boot` parancsot (ál-hitelesítő adatokkal, ideiglenes adatkönyvtárral), újracsomagolja, és
-meghiúsul, ha a kivonat nem azonos; ezután rögzíti az `artifact-identity.json` fájlt (csúcs-SHA, alap-
-SHA, lockfile-kivonat, platform, architektúra, node ABI, csomagoló, buildszabályzat —
-`scripts/release/artifact-identity.mjs`), majd egy külön feladatban igazolja a tarballt. Egy
-előnézet előléptetése az adott tarball telepítését jelenti: soha ne készítsen új buildet a forrásból.
+A futás végrehajtja `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, becsomagolja a tarballt, lefuttatja `npm run check:pack-boot` (hamis titkok, efemer adatkönyvtár), újracsomagolja és meghiúsul, hacsak nem azonos a kivonat, majd rögzíti `artifact-identity.json` (head SHA, base SHA, lockfile build, no policy, de platform ABI, — `scripts/release/artifact-identity.mjs`), és külön munkakörben tanúsítja a tarballt. Az előnézet népszerűsítése a tarball telepítését jelenti: soha ne építsd újra forrásból.
 
-### Az elágazás (3.9.0, a GO után)
+### A vágás (3.9.0, GO után)
 
-1. A GO rögzítve van az [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) dokumentumban.
-2. Az `npm run release:dry-run-lts-cut -- --from v3.9.0` kiírja a `RESULT: READY` eredményt.
-3. Hozza létre kézzel az ágakat az `origin` tárolón a próbafuttatás által kiírt parancsokkal — a
-   szkript nem hajlandó feltölteni az `origin` tárolóba. Egy ellenőrzött develop commit újrafelhasználásához először futtassa a
-   `--execute` próbát a 3.9.0 csúcson a saját forkja ellen; ez kiírja mindkét SHA-t, és
-   ugyanazok a commitok tölthetők fel:
+1. GO rögzítve a [LTS_GO_NO_GO.md fájlban](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` nyomtat `RESULT: READY`.
+3. Kézzel hozza létre az ágakat `origin` szárazon futtatott parancsokkal a — parancsot, amelyet a szkript nem hajlandó leküldeni a `origin`. Egy áttekintett fejlesztési commit újrafelhasználásához futtassa le a `--execute` próbát a 3.9.0-s csúcson a villához képest; kiírja mind SHAs, és ugyanazokat a véglegesítéseket lehet tolni:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Védd le a `stable/v3` és a `develop` ágakat (szabálykészletek + egyesítési várólista), mielőtt az első PR beérkezik.
-5. A nyugalmi állapotban lévő munkafolyamatok az ágak megléte alapján kapcsolnak be: `forward-port.yml` (push a
-   `stable/v3` ágra), `validate-stable-pr.yml` (PR-ok a `stable/v3` ágra) és `nightly-v4-build.yml`
-   (a `develop` ágat buildeli). Az élesítés előtt állítsd be a `secrets.FORWARD_PORT_TOKEN` adattitkot a repositoryban (hogy a CI fusson a
-   forward-port PR-okon); az éjszakai közzététel kikapcsolva marad, amíg a tulajdonos a repository
-   `vars.NIGHTLY_PUBLISH` változóját `true` értékre nem állítja, és az npm Trusted Publishing el nem fogadja a
-   `nightly-v4-build.yml` fájlt. A csatorna feloldását a `scripts/release/dist-tag.mjs` végzi, ugyanaz a
-   feloldó, amelyet az `npm-publish.yml` használ.
-6. Ellenőrizd a csatornákat: az `npm view omniroute dist-tags --json` kimenetében a `latest` = 3.9.0, és nincs
-   `next` / `nightly`, amíg a v4 közzététele meg nem történik.
-7. Visszaállítás, ha szükséges: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   és `npm dist-tag add omniroute@3.8.59 latest`.
+4. Védje meg `stable/v3` és `develop` (a szabálykészletek + összevonási sorát), mielőtt az első PR megérkezne.
+5. Az alvó munkafolyamatok az ágak létezésétől függően kapcsolnak be: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) és `nightly-v4-build.yml` (építi `develop`). Élőbe lépés előtt állítsa be a `secrets.FORWARD_PORT_TOKEN` adattár titkát (így CI PRs előremenő porton fut); az éjszakai közzététel mindaddig kikapcsolva marad, amíg a tulajdonos a `vars.NIGHTLY_PUBLISH` adattárváltozót `true` értékre nem állítja, és az npm Trusted Publishing elfogadja `nightly-v4-build.yml`. A csatorna felbontása `scripts/release/dist-tag.mjs`, ugyanazt a feloldót használja `npm-publish.yml`.
+6. Ellenőrizze a csatornákat: `npm view omniroute dist-tags --json` `latest` = 3.9.0-t mutatja, és nem `next` / `nightly` a v4 közzétételéig.
+7. Visszaállítás, ha szükséges: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` és `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 
