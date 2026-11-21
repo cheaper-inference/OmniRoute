@@ -16,6 +16,29 @@ import { getRuntimePorts } from "@/lib/runtime/ports";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 
 export const DEFAULT_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+/** Node clamps timer delays above this to about 1ms, so never arm a timer past it. */
+export const MAX_TIMER_DELAY_MS = 2_147_483_647;
+
+/** Intervals below one second are meaningless for a background catalog sync. */
+export const MIN_SYNC_INTERVAL_MS = 1_000;
+
+/** Whole-string check for MODEL_SYNC_INTERVAL_HOURS: a signed number, nothing else. */
+const HOURS_SETTING_PATTERN = /^[-+]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+
+/** True only for literals that mean exactly zero: "0", "0.0", "-0", "0e5". */
+function isZeroHoursLiteral(raw: string): boolean {
+  const mantissa = raw.replace(/^[-+]/, "").replace(/[eE][-+]?\d+$/, "");
+  return mantissa.length > 0 && /^0*(?:\.0*)?$/.test(mantissa);
+}
+
+/** Keep a delay inside the timer range; an absent value falls back to the default. */
+function clampTimerDelay(ms: number): number {
+  if (Number.isNaN(ms)) return DEFAULT_INTERVAL_MS;
+  // Infinity here means "longer than the timer can express", not "no value":
+  // clamping it keeps the operator's intent instead of reinstating six hours.
+  return Math.min(Math.max(Math.round(ms), MIN_SYNC_INTERVAL_MS), MAX_TIMER_DELAY_MS);
+}
 /** Cycle-wide in-flight cap. Heap cost is total catalog JSON, not one upstream. */
 export const MODEL_SYNC_CYCLE_CONCURRENCY = 4;
 /** First cycle after boot. Past cleanup's 30s so the two jobs do not overlap. */
@@ -362,10 +385,40 @@ export function startModelSyncScheduler(
     return;
   }
 
-  // Read MODEL_SYNC_INTERVAL_HOURS env override
-  const envHours = parseInt(process.env.MODEL_SYNC_INTERVAL_HOURS ?? "", 10);
-  const effectiveIntervalMs =
-    !isNaN(envHours) && envHours > 0 ? envHours * 60 * 60 * 1000 : intervalMs;
+  // Read MODEL_SYNC_INTERVAL_HOURS env override. Zero or a negative value turns
+  // the background sync off; falling back to the default interval would leave an
+  // operator who asked for "off" with four sync cycles per connection per day.
+  // The whole string has to be a number: a prefix parser reads "0,5" or "0.5h"
+  // as a partial value, and a malformed setting must keep the caller's interval
+  // instead of silently turning syncing off.
+  const rawHours = (process.env.MODEL_SYNC_INTERVAL_HOURS ?? "").trim();
+  const hoursValid = HOURS_SETTING_PATTERN.test(rawHours);
+  const hoursValue = hoursValid ? Number(rawHours) : NaN;
+  // Only an explicit zero or a negative value means "off". A positive literal too
+  // small to represent (1e-324 parses to 0) is a tiny delay, not a request to
+  // disable syncing, so it takes the same below-the-floor path as 0.5 seconds.
+  // The sign has to be read from the literal: -1e309 overflows to -Infinity, and
+  // an operator who wrote a negative number still asked for "off".
+  const offRequested =
+    hoursValid &&
+    (rawHours.startsWith("-") ||
+      (Number.isFinite(hoursValue) && hoursValue === 0 && isZeroHoursLiteral(rawHours)));
+  if (offRequested) {
+    console.log("[ModelSync] Scheduler disabled by MODEL_SYNC_INTERVAL_HOURS");
+    return;
+  }
+  // A delay outside the timer range is not a harmless mistake: Node clamps it to
+  // about 1ms, so a very large hour count would run a sync cycle per millisecond
+  // instead of once every few weeks. Clamp both ends, and treat a value that
+  // rounds below one second as unusable rather than arming a busy loop.
+  const requestedMs = Number.isFinite(hoursValue) ? hoursValue * 60 * 60 * 1000 : NaN;
+  // The floor applies to the delay that will actually be armed: 999.7 ms rounds to
+  // one second and is fine, 999 ms does not and falls back to the caller.
+  const roundedMs = Number.isNaN(requestedMs) ? NaN : Math.round(requestedMs);
+  const chosenMs = Number.isNaN(roundedMs) || roundedMs < MIN_SYNC_INTERVAL_MS
+    ? intervalMs
+    : requestedMs;
+  const effectiveIntervalMs = clampTimerDelay(chosenMs);
   const trustedApiBaseUrl = resolveModelSyncInternalBaseUrl(apiBaseUrl);
 
   console.log(
