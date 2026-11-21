@@ -321,7 +321,17 @@ export function getAggregatedSnapshots(opts: {
   }
 }
 
-export function cleanupOldSnapshots(retentionDays = 90): number {
+const SNAPSHOT_DELETE_BATCH_SIZE = 10_000;
+
+export async function cleanupOldSnapshots(
+  retentionDays = 90,
+  options: { batchSize?: number } = {}
+): Promise<number> {
+  const batchSize = options.batchSize ?? SNAPSHOT_DELETE_BATCH_SIZE;
+  if (!Number.isInteger(batchSize) || batchSize < 1) {
+    throw new RangeError(`batchSize must be a positive integer, got ${batchSize}`);
+  }
+
   const now = Date.now();
   const cleanupThresholdMs = 6 * 60 * 60 * 1000;
 
@@ -333,9 +343,23 @@ export function cleanupOldSnapshots(retentionDays = 90): number {
   const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000).toISOString();
 
   try {
-    const result = db.prepare("DELETE FROM quota_snapshots WHERE created_at < ?").run(cutoffDate);
+    const stmt = db.prepare(
+      `DELETE FROM quota_snapshots
+       WHERE rowid IN (
+         SELECT rowid FROM quota_snapshots
+         WHERE created_at < ?
+         LIMIT ?
+       )`
+    );
+    let deleted = 0;
+    while (true) {
+      const batch = stmt.run(cutoffDate, batchSize).changes;
+      deleted += batch;
+      if (batch < batchSize) break;
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
     lastCleanupAt = now;
-    return result.changes;
+    return deleted;
   } catch (err: any) {
     if (err?.message?.includes("no such table")) {
       return 0;

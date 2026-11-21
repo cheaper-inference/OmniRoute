@@ -163,7 +163,7 @@ test("expired snapshot reused by the current migration is kept", async () => {
   // anything, and the exemption hash addresses the live bytes. Resolving the
   // hash after those writes matches what the pass itself will resolve.
   await cleanup.runAutoCleanup();
-  const reusedSha = cleanup.resolveReusedPreMigrationSha(core.getDbInstance(), dir);
+  const reusedSha = await cleanup.resolveReusedPreMigrationSha(core.getDbInstance(), dir);
   assert.ok(typeof reusedSha === "string" || reusedSha === null);
   if (reusedSha === null) {
     assert.ok(true, "no native read driver here, nothing to exempt");
@@ -274,7 +274,7 @@ test("a reused snapshot seconds past the cutoff still gets the exemption", async
   await cleanup.runAutoCleanup();
   const db = core.getDbInstance();
   const native = db.driver !== "sql.js" && Boolean(db.name) && db.name !== ":memory:";
-  const reusedSha = cleanup.resolveReusedPreMigrationSha(db, dir);
+  const reusedSha = await cleanup.resolveReusedPreMigrationSha(db, dir);
   if (!native) {
     assert.equal(reusedSha, null, "no native read driver here, nothing to exempt");
     return;
@@ -334,7 +334,7 @@ test("periodic phase prunes like the startup phase", async () => {
   assert.equal(listPrimaries(dir).length, 3);
 });
 
-test("failed exemption lookup returns null and leaves a trace", () => {
+test("failed exemption lookup returns null and leaves a trace", async () => {
   const db = core.getDbInstance();
   if (db.driver === "sql.js" || !db.name || db.name === ":memory:") {
     assert.ok(true, "no native read driver here, nothing to resolve");
@@ -349,7 +349,7 @@ test("failed exemption lookup returns null and leaves a trace", () => {
     warnings.push(args);
   };
   try {
-    const sha = cleanup.resolveReusedPreMigrationSha(db, fileMarker);
+    const sha = await cleanup.resolveReusedPreMigrationSha(db, fileMarker);
     assert.equal(sha, null);
     assert.ok(warnings.length > 0, "a failed exemption lookup must warn");
   } finally {

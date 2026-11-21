@@ -317,6 +317,32 @@ runBuildTool(
   { cwd: ROOT, stdio: "inherit" }
 );
 
+const vacuumWorkerSrc = join(ROOT, "src", "lib", "db", "cleanup", "vacuumSnapshotWorker.ts");
+const vacuumWorkerDest = join(DIST_DIR, "src", "lib", "db", "cleanup", "vacuumSnapshotWorker.js");
+const vacuumWorkerScope = join(dirname(vacuumWorkerDest), "package.json");
+if (!existsSync(vacuumWorkerScope)) {
+  mkdirSync(dirname(vacuumWorkerScope), { recursive: true });
+  writeFileSync(vacuumWorkerScope, JSON.stringify({ type: "module" }) + "\n");
+}
+if (!existsSync(vacuumWorkerSrc)) {
+  throw new Error("Required vacuum snapshot worker source is missing");
+}
+console.log("  🔨 Bundling vacuum snapshot worker...");
+mkdirSync(dirname(vacuumWorkerDest), { recursive: true });
+runBuildTool(
+  "esbuild",
+  "esbuild",
+  [
+    "src/lib/db/cleanup/vacuumSnapshotWorker.ts",
+    "--bundle",
+    "--platform=node",
+    "--packages=external",
+    "--format=esm",
+    `--outfile=${vacuumWorkerDest}`,
+  ],
+  { cwd: ROOT, stdio: "inherit" }
+);
+
 const callLogWorkerSrc = join(ROOT, "src", "lib", "usage", "callLogArtifactWorker.ts");
 const callLogWorkerDest = join(DIST_DIR, "src", "lib", "usage", "callLogArtifactWorker.js");
 if (!existsSync(callLogWorkerSrc)) {

@@ -16,7 +16,7 @@ import { isWriteLockError } from "@/lib/usage/usageWriteRetry";
 export const SNAPSHOT_CLEANUP_BACKOFF_MS = [250, 1000] as const;
 
 type CleanupDeps = {
-  cleanup?: () => number;
+  cleanup?: () => number | Promise<number>;
   sleep?: (ms: number) => Promise<void>;
 };
 
@@ -29,7 +29,7 @@ export async function runQuotaSnapshotCleanup(deps: CleanupDeps = {}): Promise<b
   const sleep = deps.sleep ?? defaultSleep;
   for (let attempt = 0; ; attempt++) {
     try {
-      cleanup();
+      await cleanup();
       return true;
     } catch (error) {
       const delay = SNAPSHOT_CLEANUP_BACKOFF_MS[attempt];
