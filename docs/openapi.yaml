@@ -16079,6 +16079,80 @@ paths:
           description: The key lacks the self:usage scope
         "500":
           description: Status could not be built
+  /api/v1/me/quota/{provider}:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › quota"
+      description: >-
+        Self-service quota view for the calling API key (also served at /v1/me/quota/{provider}):
+        the key's position in the Quota Share pools of one provider, plus the schedule windows
+        and per-model caps it is under. Off unless the `QUOTA_SELF_PANEL` feature flag is on
+        (a request that reaches the route gets 404 otherwise). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`;
+        the key is never read from the query string or a cookie. Requires scope `self:usage`.
+        Account-level readings (`total`, `accounts[].dimensions[].account`, `modelWindows`) are
+        included only with scope `self:account-quota` and only for providers in the key's
+        `sharedQuotaProviders` setting. Account bars and model windows are further limited to
+        the connections the key may use when it has a list of allowed connections. Pools are
+        identified by an opaque per-key `ref`. The pool's display name and schedule labels are
+        returned as the administrator wrote them. No pool id, connection id or account identity
+        is returned. A key outside every pool of the provider gets 200 with `pools: []`. Every
+        response of this route carries `Cache-Control: no-store`; a refusal before the route runs,
+        for example by the client API policy or the IP filter, does not.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: >-
+            Provider id or registry alias (for example `claude`, `anthropic`, `cc`, `codex`).
+            Trimmed and lower-cased; must then match `^[a-z0-9][a-z0-9._-]{0,63}$`.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quota view for the calling key
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelfQuotaView"
+        "400":
+          description: Invalid provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key, or the server's environment key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The key lacks the self:usage scope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The QUOTA_SELF_PANEL feature flag is off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: The quota view could not be built (fixed message, no detail)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/me/sessions:
     get:
       tags:
@@ -17373,7 +17447,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
-      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status).
+      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status and /v1/me/quota/{provider}).
     ManagementSessionAuth:
       type: apiKey
       in: cookie
@@ -19523,6 +19597,262 @@ components:
             $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
         accountQuota:
           $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
+    SelfQuotaStatus:
+      type: string
+      enum: [ok, stale, unavailable]
+    SelfQuotaWindow:
+      type: string
+      enum: ["5h", hourly, daily, weekly, monthly]
+    SelfQuotaBar:
+      type: object
+      additionalProperties: false
+      required: [used, status]
+      properties:
+        used:
+          type: [number, "null"]
+        status:
+          $ref: "#/components/schemas/SelfQuotaStatus"
+        reason:
+          type: string
+        resetAt:
+          type: [string, "null"]
+    SelfQuotaShare:
+      type: object
+      additionalProperties: false
+      required: [fairShare, consumed, remaining, status]
+      properties:
+        fairShare:
+          type: number
+        consumed:
+          type: [number, "null"]
+        remaining:
+          type: [number, "null"]
+          description: >-
+            The part of `fairShare` the key has not used, floored at 0. Not a guarantee: the
+            pool can be exhausted first, and the allocation's `cap` is not taken into account.
+        status:
+          $ref: "#/components/schemas/SelfQuotaStatus"
+        reason:
+          type: string
+    SelfQuotaSharedDimension:
+      type: object
+      description: Pool bucket of a countable unit; `limit` is the plan limit times the pool's accounts.
+      additionalProperties: false
+      required: [unit, window, limit, yourShare]
+      properties:
+        unit:
+          type: string
+          enum: [requests, tokens, usd]
+        window:
+          $ref: "#/components/schemas/SelfQuotaWindow"
+        limit:
+          type: number
+        total:
+          $ref: "#/components/schemas/SelfQuotaBar"
+        yourShare:
+          $ref: "#/components/schemas/SelfQuotaShare"
+    SelfQuotaAccountDimension:
+      type: object
+      description: A `percent` window of one account; `limit` is the plan limit.
+      additionalProperties: false
+      required: [unit, window, limit, yourShare]
+      properties:
+        unit:
+          type: string
+          enum: [percent]
+        window:
+          $ref: "#/components/schemas/SelfQuotaWindow"
+        limit:
+          type: number
+        account:
+          $ref: "#/components/schemas/SelfQuotaBar"
+        yourShare:
+          $ref: "#/components/schemas/SelfQuotaShare"
+    SelfQuotaAccount:
+      type: object
+      additionalProperties: false
+      required: [slot, label, dimensions]
+      properties:
+        slot:
+          type: integer
+          minimum: 1
+        label:
+          type: string
+          description: Neutral label by pool order ("Account 1", ...).
+        dimensions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaAccountDimension"
+        modelWindows:
+          type: object
+          additionalProperties: false
+          required: [status, windows]
+          properties:
+            status:
+              $ref: "#/components/schemas/SelfQuotaStatus"
+            reason:
+              type: string
+            windows:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required: [label, usedPercent, resetAt]
+                properties:
+                  label:
+                    type: string
+                  usedPercent:
+                    type: number
+                  resetAt:
+                    type: [string, "null"]
+    SelfQuotaPool:
+      type: object
+      additionalProperties: false
+      required:
+        [ref, name, provider, borrowMode, policy, weight, cap, accountVisible, dimensions, accounts]
+      properties:
+        ref:
+          type: string
+          description: >-
+            Opaque reference to the pool, bound to the calling key and derived with the server's
+            API-key secret. Do not persist it: it changes if that secret is rotated.
+        name:
+          type: string
+          description: The pool's display name, as the administrator wrote it.
+        provider:
+          type: string
+        borrowMode:
+          type: string
+          enum: [saturation]
+        policy:
+          type: string
+          enum: [hard, soft, burst]
+        weight:
+          type: number
+          description: The weight the quota gate applies (equal split when every weight is 0).
+        cap:
+          type: [object, "null"]
+          additionalProperties: false
+          required: [unit, value]
+          properties:
+            unit:
+              type: string
+              enum: [percent, requests, tokens, usd]
+            value:
+              type: number
+        accountVisible:
+          type: boolean
+        dimensions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaSharedDimension"
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaAccount"
+    SelfQuotaBlocks:
+      type: object
+      additionalProperties: false
+      required: [schedules, modelCaps]
+      properties:
+        schedules:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [pool, state, reason, label, retryAfterSeconds, reserves, budget]
+            properties:
+              pool:
+                type: string
+                description: The pool's `ref`.
+              state:
+                type: string
+                enum: [open, closed]
+              reason:
+                type: [string, "null"]
+                enum: [blackout, outside-window, null]
+              label:
+                type: [string, "null"]
+                description: The schedule's label, as the administrator wrote it.
+              retryAfterSeconds:
+                type: [number, "null"]
+              reserves:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: false
+                  required: [window, percent]
+                  properties:
+                    window:
+                      type: string
+                      enum: ["5h", hourly, daily, weekly, monthly, any]
+                    percent:
+                      type: number
+              budget:
+                type: [object, "null"]
+                additionalProperties: false
+                required: [unit, window, exhausted]
+                properties:
+                  unit:
+                    type: string
+                    enum: [requests, tokens, usd]
+                  window:
+                    $ref: "#/components/schemas/SelfQuotaWindow"
+                  exhausted:
+                    type: [boolean, "null"]
+        modelCaps:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [pool, model, unit, window, cap, consumed, reached]
+            properties:
+              pool:
+                type: string
+                description: The pool's `ref`.
+              model:
+                type: string
+              unit:
+                type: string
+                enum: [percent, requests, tokens, usd]
+              window:
+                type: string
+                enum: [hourly]
+              cap:
+                type: number
+              consumed:
+                type: [number, "null"]
+              reached:
+                type: [boolean, "null"]
+    SelfQuotaView:
+      type: object
+      description: >-
+        Self-service quota view of one API key for one provider. Optional fields are omitted
+        when absent, never sent as null unless the field is nullable.
+      additionalProperties: false
+      required: [provider, generatedAt, pools, availableModels, expiresAt, apiBaseUrl, blocks]
+      properties:
+        provider:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        pools:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelfQuotaPool"
+        availableModels:
+          type: array
+          description: The `qtSd/` model ids the key sees in /v1/models.
+          items:
+            type: string
+        expiresAt:
+          type: [string, "null"]
+        apiBaseUrl:
+          type: [string, "null"]
+          description: Configured public API origin, never the request's origin.
+        blocks:
+          $ref: "#/components/schemas/SelfQuotaBlocks"
     ApiKey:
       type: object
       properties:

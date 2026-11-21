@@ -84,7 +84,8 @@ describe("feature-flags-settings count update", () => {
     // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 126;
     // PLUGIN_PERMISSION_MODEL_ENABLED (opt-in plugin sandbox, default off) to 127;
     // COMBO_DECISION_ROUTER_ENABLED (decision auto-router, default off) to 128.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 128);
+    // QUOTA_SELF_PANEL (self-service quota API, default off) to 129.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 129);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
