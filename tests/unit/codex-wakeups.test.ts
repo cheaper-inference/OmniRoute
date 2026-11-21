@@ -437,7 +437,7 @@ test("account validation reports ids that are not active Codex OAuth connections
     connection("claude", { provider: "claude" }),
   ]);
   assert.deepEqual(
-    await service.findUnusableWakeupAccounts(["ok", "inactive", "claude", "missing"], deps),
-    ["inactive", "claude", "missing"]
+    await service.findUnsupportedWakeupAccounts(["ok", "inactive", "claude", "missing"], deps),
+    ["claude", "missing"]
   );
 });
