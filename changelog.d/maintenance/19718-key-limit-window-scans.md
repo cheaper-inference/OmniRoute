@@ -1,0 +1,1 @@
+- **perf(usage):** a request from an API key with USD limits runs fewer database queries: the weekly window start is resolved for one connection instead of every active one, and a window's spend is reused for 2 seconds. ([#19718](https://github.com/cheaper-inference/OmniRoute/pull/19718))

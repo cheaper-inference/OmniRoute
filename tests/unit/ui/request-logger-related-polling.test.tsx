@@ -67,7 +67,7 @@ beforeEach(() => {
   poll = vi.fn(async () => Response.json([selected]));
   fetchMock = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
-    if (url.startsWith("/api/usage/call-logs?correlationId=")) return poll();
+    if (url.startsWith("/api/usage/call-logs?correlationIdExact=")) return poll();
     if (url.startsWith("/api/usage/call-logs?")) {
       return Response.json([selected, active, completed, memory, history, unrelated]);
     }

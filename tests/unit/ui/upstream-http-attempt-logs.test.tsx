@@ -81,7 +81,7 @@ beforeEach(() => {
     "fetch",
     vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/usage/call-logs?correlationId=")) return Response.json(related);
+      if (url.startsWith("/api/usage/call-logs?correlationIdExact=")) return Response.json(related);
       if (url.startsWith("/api/usage/call-logs?"))
         return Response.json(
           url.includes("status=error") ? main.filter((entry) => Number(entry.status) >= 400) : main

@@ -34,6 +34,7 @@ type ModelUsageRow = {
 type PerformanceRow = {
   totalRequests: number | null;
   successCount: number | null;
+  clientAbortCount: number | null;
   avgLatencyMs: number | null;
 };
 
@@ -86,6 +87,7 @@ type HistoricalTargetAggregateRow = {
   metricKey: string | null;
   requests: number | null;
   successCount: number | null;
+  clientAbortCount: number | null;
   avgLatencyMs: number | null;
   lastStatusCode: number | null;
   lastUsedAt: string | null;
@@ -103,6 +105,19 @@ type HistoricalTargetMetricView = {
   lastStatus: "ok" | "error" | null;
   lastUsedAt: string | null;
 };
+
+// A 499 is the client hanging up. It stays in the request count but is neither a success nor a
+// provider fault, so it is left out of the success rate on both sides of the fraction.
+// shortcut: 499 only; a 400 or 429 can be either side's fault, so they need a body classifier.
+const SUCCESS_SQL = "(status >= 200 AND status < 400)";
+const CLIENT_ABORT_SQL = "(status = 499)";
+
+/** Share of judged calls (all minus client aborts) that succeeded; 1 when every call was an abort. */
+function judgedSuccessRatio(total: number, successCount: number, clientAborts: number): number {
+  if (total <= 0) return 0;
+  const judged = total - clientAborts;
+  return judged > 0 ? successCount / judged : 1;
+}
 
 const RANGE_MS: Record<UtilizationTimeRange, number> = {
   "1h": 60 * 60 * 1000,
@@ -339,7 +354,8 @@ function buildPerformance(comboName: string, since: string): ComboHealthMetrics[
     .prepare(
       `SELECT
          COUNT(*) as totalRequests,
-         SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as successCount,
+         SUM(CASE WHEN ${SUCCESS_SQL} THEN 1 ELSE 0 END) as successCount,
+         SUM(CASE WHEN ${CLIENT_ABORT_SQL} THEN 1 ELSE 0 END) as clientAbortCount,
          AVG(duration) as avgLatencyMs
        FROM call_logs
        WHERE ${logicalCallSql()} AND combo_name = ?
@@ -349,11 +365,12 @@ function buildPerformance(comboName: string, since: string): ComboHealthMetrics[
 
   const totalRequests = toSafeNumber(row?.totalRequests);
   const successCount = toSafeNumber(row?.successCount);
+  const clientAbortCount = toSafeNumber(row?.clientAbortCount);
   const avgLatencyMs = toSafeNumber(row?.avgLatencyMs);
 
   return {
     avgLatencyMs: roundNumber(avgLatencyMs),
-    successRate: totalRequests > 0 ? roundNumber(successCount / totalRequests, 4) : 0,
+    successRate: roundNumber(judgedSuccessRatio(totalRequests, successCount, clientAbortCount), 4),
     totalRequests,
   };
 }
@@ -423,7 +440,8 @@ function getHistoricalTargetMetrics(comboName: string, since: string): Historica
            metricScope,
            metricKey,
            COUNT(*) AS requests,
-           SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) AS successCount,
+           SUM(CASE WHEN ${SUCCESS_SQL} THEN 1 ELSE 0 END) AS successCount,
+           SUM(CASE WHEN ${CLIENT_ABORT_SQL} THEN 1 ELSE 0 END) AS clientAbortCount,
            AVG(duration) AS avgLatencyMs,
            MAX(timestamp) AS lastUsedAt
          FROM scoped_logs
@@ -449,6 +467,7 @@ function getHistoricalTargetMetrics(comboName: string, since: string): Historica
          aggregate_metrics.metricKey,
          aggregate_metrics.requests,
          aggregate_metrics.successCount,
+         aggregate_metrics.clientAbortCount,
          aggregate_metrics.avgLatencyMs,
          latest_metrics.lastStatusCode,
          aggregate_metrics.lastUsedAt
@@ -470,10 +489,11 @@ function getHistoricalTargetMetrics(comboName: string, since: string): Historica
 
     const requests = toSafeNumber(row.requests);
     const successCount = toSafeNumber(row.successCount);
+    const clientAbortCount = toSafeNumber(row.clientAbortCount);
     const statusCode = toSafeNumber(row.lastStatusCode);
     const metric = {
       requests,
-      successRate: requests > 0 ? Math.round((successCount / requests) * 100) : 0,
+      successRate: Math.round(judgedSuccessRatio(requests, successCount, clientAbortCount) * 100),
       avgLatencyMs: Math.round(toSafeNumber(row.avgLatencyMs)),
       lastStatus: statusCode > 0 ? (statusCode < 400 ? "ok" : "error") : null,
       lastUsedAt: toNonEmptyString(row.lastUsedAt),
