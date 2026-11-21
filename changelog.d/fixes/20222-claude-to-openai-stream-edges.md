@@ -1,0 +1,1 @@
+- **fix(translator):** Claude to OpenAI streams now keep the cache read in `prompt_tokens`, show the refusal explanation, and close a tool call without input with `{}` arguments. ([#20222](https://github.com/cheaper-inference/OmniRoute/pull/20222))
