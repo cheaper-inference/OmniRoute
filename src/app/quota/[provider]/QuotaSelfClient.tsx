@@ -34,7 +34,7 @@ function deriveScreen(query: SelfServiceQuery<SelfQuotaResponse>, stored: Stored
       status === "idle" || status === "refused" ? ("enter" as const) : ("active" as const),
     // While a refresh is in flight the last answer for the same key stays on screen.
     view: query.status === "ready" || query.status === "loading" ? query.data : null,
-    // Only after `confirm()` ran: before it, an accepted key is still "memory" for one render.
+    // Only after `confirmKey()` ran: before it, an accepted key is still "memory" for one render.
     storageBlocked:
       status === "ready" && stored?.confirmed === true && stored.persistence === "memory",
   };
@@ -45,7 +45,7 @@ function deriveScreen(query: SelfServiceQuery<SelfQuotaResponse>, stored: Stored
  * own: the key lives in the key store, the answer in the query hook.
  */
 export default function QuotaSelfClient({ provider, providerName }: QuotaSelfClientProps) {
-  const { stored, hold, confirm, unpersist, forget } = useStoredApiKey();
+  const { stored, hold, confirmKey, unpersist, forget } = useStoredApiKey();
   const apiKey = stored?.key ?? null;
   const { query, reload } = useSelfServiceQuery({
     path: quotaPath(provider),
@@ -59,10 +59,10 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
   // Storage follows the server's verdict on the current key: kept once accepted, dropped once
   // rejected. Both are mutations of the external key store, not React state.
   useEffect(() => {
-    if (status === "ready") confirm();
+    if (status === "ready") confirmKey();
     // Any refusal (401 or 403): a key that cannot read its quota is not kept for the next visit.
     else if (status === "refused") unpersist();
-  }, [status, confirm, unpersist]);
+  }, [status, confirmKey, unpersist]);
 
   const submitKey = (key: string, remember: boolean) => {
     hold(key, remember);

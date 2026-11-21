@@ -35,7 +35,7 @@ export default function AccountRow({
 
   return (
     <section className="min-w-0 space-y-3">
-      {showLabel ? <h3 className="break-words text-sm font-semibold">{account.label}</h3> : null}
+      {showLabel ? <h3 className="break-words text-sm">{account.label}</h3> : null}
       {withoutReadings ? (
         <p className="min-w-0 break-words text-sm text-text-muted">{t("accountHidden")}</p>
       ) : null}

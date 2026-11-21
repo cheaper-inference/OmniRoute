@@ -104,14 +104,14 @@ describe("createKeyStore", () => {
     assert.equal(session.length, 0);
     assert.equal(device.length, 0);
 
-    store.confirm();
+    store.confirmKey();
     assert.equal(session.getItem(ENTRY), "k1");
     assert.equal(device.getItem(ENTRY), null);
     assert.deepEqual(store.getSnapshot(), { key: "k1", persistence: "session", confirmed: true });
 
     const before = store.getSnapshot();
     const count = notifications();
-    store.confirm();
+    store.confirmKey();
     assert.equal(store.getSnapshot(), before);
     assert.equal(notifications(), count);
     assert.equal(session.getItem(ENTRY), "k1");
@@ -121,13 +121,13 @@ describe("createKeyStore", () => {
   test("remember on this device moves the key to device storage", () => {
     const { session, device, store } = setup();
     store.hold("k1", true);
-    store.confirm();
+    store.confirmKey();
     assert.equal(device.getItem(ENTRY), "k1");
     assert.equal(session.getItem(ENTRY), null);
     assert.deepEqual(brief(store), { key: "k1", persistence: "device" });
 
     store.hold("k2", false);
-    store.confirm();
+    store.confirmKey();
     assert.equal(session.getItem(ENTRY), "k2");
     assert.equal(device.getItem(ENTRY), null);
     assert.deepEqual(brief(store), { key: "k2", persistence: "session" });
@@ -136,7 +136,7 @@ describe("createKeyStore", () => {
   test("confirming a key read from storage leaves it where it is", () => {
     const { session, device, store, notifications } = setup({ device: { [ENTRY]: "k1" } });
     assert.deepEqual(store.getSnapshot(), { key: "k1", persistence: "device", confirmed: true });
-    store.confirm();
+    store.confirmKey();
     assert.equal(device.getItem(ENTRY), "k1");
     assert.equal(session.getItem(ENTRY), null);
     assert.deepEqual(brief(store), { key: "k1", persistence: "device" });
@@ -168,7 +168,7 @@ describe("createKeyStore", () => {
         const store = createKeyStore(areas({ session: mode, device: mode }));
         assert.equal(store.getSnapshot(), null, mode);
         store.hold("k1", remember);
-        store.confirm();
+        store.confirmKey();
         assert.deepEqual(
           store.getSnapshot(),
           { key: "k1", persistence: "memory", confirmed: true },
@@ -234,7 +234,7 @@ describe("createKeyStore", () => {
   test("a tab keeping its key on the device follows the device entry", () => {
     const { device, store } = setup();
     store.hold("k1", true);
-    store.confirm();
+    store.confirmKey();
     assert.deepEqual(brief(store), { key: "k1", persistence: "device" });
 
     device.setItem(ENTRY, "k2");
@@ -296,7 +296,7 @@ describe("createKeyStore", () => {
       for (const mode of ["blocked", "full", "absent"] as const) {
         const store = createKeyStore(areas({ session: mode, device: mode }));
         store.hold("sk-live-1234567890", true);
-        store.confirm();
+        store.confirmKey();
         store.reload();
         store.unpersist();
         store.forget();
