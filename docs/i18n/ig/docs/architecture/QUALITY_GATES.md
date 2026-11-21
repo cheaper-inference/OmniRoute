@@ -15,7 +15,7 @@ nke otu sistemụ ahụ na-adabereghị na ngwá ọrụ ọ bụla, lee
 
 ---
 
-## Ihe ndekọ ọnụ ụzọ ámá na profaịlụ mmebe
+## Profaịlụ ngwa ahịa na mmebe nke ọnụ ụzọ ámá
 
 ### Nbanye onye ochichi
 
@@ -25,9 +25,11 @@ Usoro ọrụ abụọ a na-ekpuchi PRs n'ime alaka main/release, na-akwali na `
 
 PR nkịtị na-agba ọsọ ngwa ngwa. Ụzọ `full-code` na `full-code-e2e` nke iwu nnabata (E2E, ntinye, ihe ngwugwu, Electron anwụrụ ọkụ, Bun SQLite, gburugburu ebe obibi na ndị ahịa protocol) na-agba ọsọ naanị na Mergify kwụ n'ahịrị ma ọ bụ na-agba ọsọ: `gh workflow run ci.yml --ref <branch>`.
 
-Nnata JSON ọ bụla na-achọpụta SHA enyochagoro, ịgba ọsọ na mbọ. CLI ahụ na-ajụ ndakọrịta checkout/event SHA. Nnwale usoro ọrụ na-ejikọ ndị otu amụma na listi `needs` ọrụ mkpebi ka ụzọ ọhụrụ ma ọ bụ wepụrụ enweghị ike ịpụ n'obere. Nnata ndị ahụ na-ekpuchi usoro ọrụ nke ha, ọ bụghị mbipụta, ntinye, ma ọ bụ ihe ntinye nke nyocha ndụmọdụ dị adị. Ịkwalite aha nlele abụọ na iwu alaka bụ mgbanwe nhazi dị iche; ịgbakwunye ọrụ ndị a anaghị echebe alaka ụlọ ọrụ.
+Nnata JSON ọ bụla na-achọpụta SHA enyochagoro, ịgba ọsọ na mbọ. CLI ahụ na-ajụ ndakọrịta checkout/event SHA. Nnwale usoro ọrụ na-ejikọ ndị otu amụma na listi `needs` ọrụ mkpebi ka ụzọ ọhụrụ ma ọ bụ wepụrụ enweghị ike ịpụ n'obere. Nnata ndị ahụ na-ekpuchi usoro ọrụ nke ha, ọ bụghị mbipụta, mbugharị, ma ọ bụ ihe ntinye nke nyocha ndụmọdụ dị adị. Ịkwalite aha nlele abụọ na iwu alaka bụ mgbanwe nhazi dị iche; ịgbakwunye ọrụ ndị a anaghị echebe alaka ụlọ ọrụ.
 
 ### Jikota kwụ n'ahịrị
+
+> **2026-11-19: kwụ n'ahịrị Mergify agwụla** (mkpebi onye nwe). `.mergify.yml` anaghị akọwapụta kwụ n'ahịrị wee jụ iwu Mergify nke jikọtara ma ọ bụ degharịa arịrịọ ịdọrọ. A na-ejikọta ntọhapụ PRs na aka n'okpuru iwu nchekwa nchekwa "Chọọ ọnụ ụzọ ndụ akwụkwọ ndụ na ntọhapụ na-arụ ọrụ" (`Gate / CI` + `Gate / Quality`) ruo mgbe omni-queue na-agba ọsọ na ọnọdụ ndụ, na site na omni-queue mgbe nke ahụ gasịrị ( [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md) ). Ijikwa usoro ọrụ nke Mergify draft nke akọwara n'okpuru ka dị na `ci.yml` na `quality.yml`, mana enweghị usoro Mergify mepere ọzọ.
 
 Ihe akara `queue` na-eziga PR na kwụ n'ahịrị Mergify (`.mergify.yml`). Mergify na-emepe akwụkwọ PR na ngalaba `mergify/merge-queue/`, CI na-eme nhọrọ n'uju ebe ahụ, yana PR izizi jikọtara mgbe `Gate / CI`, `Gate / Quality` na `Merge integrity (changelog + generated skills)` gafere.
 
@@ -37,34 +39,34 @@ Mgbe dequeue gasịrị, ọ bụghị mgbe niile ka ọ na-achọ PR. Kwuo `@me
 
 ### Ihe akaebe echekwabara na mbelata nnabata
 
-`scripts/quality/validate-release-acceptance.mjs` na-ebelata atụmatụ enyere na ngosipụta ya; ọ naghị egosi na atụmatụ ahụ na-ekpuchi pipeline ntọhapụ zuru oke. Akụkọ ya doziri `releaseAcceptance: false` n'ụzọ doro anya, ọbụlagodi mgbe atụmatụ ahụ bụ `VERIFIED`. Usoro ọrụ `release-acceptance.yml` ka na-eji nrụnye onyinyo, ọ bụghị ezigbo ihe nrụpụta, ngwugwu, buut ma ọ bụ nnata nkwalite.
+`scripts/quality/validate-release-acceptance.mjs` na-ebelata atụmatụ enyere na ngosipụta ya; ọ naghị egosi na atụmatụ ahụ na-ekpuchi pipeline ntọhapụ zuru oke. Akụkọ ya doziri `releaseAcceptance: false` n'ụzọ doro anya, ọbụlagodi mgbe atụmatụ ahụ bụ `VERIFIED`. Usoro ọrụ `release-acceptance.yml` ka na-eji ihe ndozi onyinyo, ọ bụghị ezigbo ihe nrụpụta, ngwugwu, buut ma ọ bụ nnata nkwalite.
 
 CLI chọrọ `--evidence-root` iji nyochaa ihe akaebe edobere. A na-edozi faịlụ dị ka `<evidence-root>/<artifact_id>/<member>` na hashed ka SHA-256. Ndekọ PASS na-enweghị ihe akaebe, faịlụ efu ma ọ bụ gbanwere, ụzọ adịghị mma ma ọ bụ symlink na-egbochi nkwenye. Faịlụ na-efu efu abaghị na ndekọ ndekọ na-aga nke ọma. Nlebanya SHA/run/attempt dị ugbu a na-anọọrọ onwe ya: bytes dakọtara enweghị ike ịzọpụta nnata ochie. Iguzosi ike n'ezi ihe faịlụ abụghị ihe akaebe nke izi ezi ogbugbu ma ọ bụ nkwalite arịa.
 
-### Ndepụta ngwaahịa static
+### Ngwaahịa nyocha static
 
-Ndepụta npm-alias mbiputere na ndị otu static-scan bi na `config/quality/gate-manifest.json`. Gbaa `npm run check:gate-manifest` iji kwado aha edemede yana iwu kpọmkwem megide `package.json`; mgbakwunye, mwepụ na ịkpagharị iwu dara ma nko mpaghara yana ọrụ mgbanwe mgbanwe na CI. Utu aha abụghị ọrụ na-arụ ọrụ, ihe atụ matriks ma ọ bụ ikpe ule: Agaghị egosi ọnụọgụ ndị a ka mgbanwe.
+Ndepụta npm-alias mbiputere na ndị otu static-scan bi na `config/quality/gate-manifest.json`. Gbaa `npm run check:gate-manifest` iji kwado aha edemede yana iwu kpọmkwem megide `package.json`; mgbakwunye, mwepu na ịkpagharị iwu dara ma nko mpaghara yana ọrụ mgbanwe mgbanwe na CI. Utu aha abụghị ọrụ na-arụ ọrụ, ihe atụ matriks ma ọ bụ ikpe ule: Agaghị egosi ọnụọgụ ndị a ka mgbanwe.
 
 Jiri `npm run quality:scan -- --list` ma ọ bụ `npm run quality:scan:fast -- --list` nyochaa utu aha ahọpụtara na-emezughị ha. Onye na-agba ọsọ na-akpọ ntinye npm, ya mere, a na-echekwa oge ya (gụnyere Bun ebe ahaziri). Ihe ngosi a na-edekọ utu aha na-abụghị profaịlụ ndị ahụ dị ka akpọọpụtara iche, yana iwu mmezi ka amachibidoro na profaịlụ nyocha naanị ọgụgụ.
 
-Profaịlụ ndị a na-ekpuchi naanị nyocha static. Ha anaghị akwado nnwale ngwaahịa, mkpuchi, nkwakọ ngwaahịa, nlele mpụga ma ọ bụ nnabata ntọhapụ zuru oke nke onye anamachọihe. Ntinye usoro ọrụ na-eji `config/quality/admission-policy.json` na `scripts/quality/admission-verdict.mjs` jikọtara ya. Profaịlụ ndị ntọhapụ-nleba anya ka dị iche; nyochaa akwụkwọ ndenye ego na nnata ha nwere onwe ha. Ekwuwapụtara iwu kwụ ọtọ nke onye nleba anya na `config/quality/release-green-static-profile.json`, gụnyere `audit:deps`, nhọrọ nnwale mutation na nlele ntụgharị asụsụ. Onye na-ebu ibu na-akwado iwu npm megide package.json na nkwuwapụta CI/Quality emebere; ọ na-ajụ ịkpagharị kama ime ihe ngosi shei dị ka arụmụka. Ihe nyocha SKIP/INCOMPLETE achọrọ enweghị ike ịmepụta PASS. Profaịlụ na-edekọ mwepu ya na mpụga na anaghị edochi mkpuchi akwadoro, matrices nwale, ngwugwu ma ọ bụ ihe akaebe mbugharị. Ndepụta prose dị n'okpuru bụ ntụaka, ọ bụghị ihe akaebe na ọnụ ụzọ ámá na-agba ọsọ n'ezie.
+Profaịlụ ndị a na-ekpuchi naanị nyocha static. Ha anaghị akwado nnwale ngwaahịa, mkpuchi, nkwakọ ngwaahịa, nlele mpụga ma ọ bụ nnabata ntọhapụ zuru oke nke onye anamachọihe. Ntinye usoro ọrụ na-eji `config/quality/admission-policy.json` na `scripts/quality/admission-verdict.mjs` jikọtara ya. Profaịlụ ndị ntọhapụ-nleba anya ka dị iche; nyochaa akwụkwọ ndenye ego na nnata ha nwere onwe ha. Ekwuwapụtara iwu kwụ ọtọ nke onye nleba anya na `config/quality/release-green-static-profile.json`, gụnyere `audit:deps`, nhọrọ nnwale mutation na nlele ntụgharị asụsụ. Onye na-ebu ibu na-akwado iwu npm megide package.json na nkwuwapụta CI/Quality emebere; ọ na-ajụ ịkpagharị kama ime ihe ngosi shei dị ka arụmụka. Ihe nyocha SKIP/INCOMPLETE achọrọ enweghị ike iwepụta PASS. Profaịlụ na-edekọ mwepu ya na mpụga na anaghị edochi mkpuchi akwadoro, matrices nwale, ngwugwu ma ọ bụ ihe akaebe mbugharị. Ndepụta prose dị n'okpuru bụ ntụaka, ọ bụghị ihe akaebe na ọnụ ụzọ ámá na-agba ọsọ n'ezie.
 
 Ederede na-ebi n'okpuru `scripts/check/` (ọnụ ụzọ amụma) na `scripts/quality/` (njin ratchet). CI iyi nke eziokwu bu `.github/workflows/ci.yml`.
 
 ### Hapụ PR ụzọ ọsọ ọsọ (`quality.yml`)
 
-`.github/workflows/quality.yml` na-emeju CI na main/release PRs, na-akwali na `main`, zipu na jikọta otu. PRs jiri nleba anya ngwa ngwa emechara ụzọ. E wepụrụ ihe nrụpụta oyiri nwere nkwarụ na-adịgide adịgide; ezigbo nlele build/package/boot na-anọgide na CI. Ụlọ otu na vitest na-agba naanị na CI (`Unit Tests (N/8)` na `Vitest`).
+`.github/workflows/quality.yml` na-emeju CI na main/release PRs, na-akwali na `main`, zipu na jikọta otu. PRs jiri nlele ọsọ-ọsọ emechara ụzọ. E wepụrụ ihe nrụpụta oyiri nwere nkwarụ na-adịgide adịgide; ezigbo nlele build/package/boot na-anọgide na CI. Ụlọ otu na vitest na-agba naanị na CI (`Unit Tests (N/8)` na `Vitest`).
 
-| Job                                              | Oke                                                                                                              | Mgbochi           |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs na docs-niile                                                                       | Ee                |
-| `Fast Quality Gates`                             | Koodu PRs; ndenye ego static, typecheck, typecheck dashboard, ule nkeji emetụtara, ule nwanne echefuru (ndụmọdụ) |
-| `No new ESLint warnings`                         | Koodu PRs; suppressions-mara lint nche                                                                           | Ee, gụnyere ndụdụ |
-| `Merge integrity (changelog + generated skills)` | Ihe na-abụghị nke PRs; Changelog na mekọrịta nka nka                                                             | Ee, gụnyere ndụdụ |
+| Job                                              | Oke                                                                                                                     | Mgbochi           |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs na docs-niile                                                                              | Ee                |
+| `Fast Quality Gates`                             | Koodu PRs; ndenye ego static, typecheck, typecheck dashboard, ule nkeji emetụtara, ule nwanne echefuru echefu (ndụmọdụ) |
+| `No new ESLint warnings`                         | Koodu PRs; suppressions-mara lint nche                                                                                  | Ee, gụnyere ndụdụ |
+| `Merge integrity (changelog + generated skills)` | Ihe na-abụghị nke PRs; Changelog na mekọrịta nka nka                                                                    | Ee, gụnyere ndụdụ |
 
 #### Akọ ule nwanne echefuru echefu
 
-`npm run check:forgotten-sibling-tests` na-agba ọsọ dị ka nzọụkwụ ndụmọdụ nke `Fast Quality Gates` ma na-ejigharị ihe ndozi mbubata n'azụ maapụ mmetụta nnwale. Maka modul mmepụta ọ bụla gbanwere, ọ na-akọ ụgbụ `changed module/symbol -> static consumer -> candidate sibling test` deterministic mgbe ule nwa akwukwo anọghị na ihe dị iche iche nke arịrịọ. A na-edobe nchịkọta Markdown na nsonaazụ JSON dị ka ihe na-arụ ọrụ `forgotten-sibling-tests` maka mmezi tupu mwepụta ọ bụla.
+`npm run check:forgotten-sibling-tests` na-agba ọsọ dị ka nzọụkwụ ndụmọdụ nke `Fast Quality Gates` ma na-ejigharị ihe ndozi mbubata n'azụ maapụ mmetụta ule. Maka modul mmepụta ọ bụla gbanwere, ọ na-akọ ụgbụ `changed module/symbol -> static consumer -> candidate sibling test` deterministic mgbe ule nwa akwukwo anọghị na ihe dị iche iche nke arịrịọ. A na-edobe nchịkọta Markdown na nsonaazụ JSON dị ka ihe na-arụ ọrụ `forgotten-sibling-tests` maka mmezi tupu mwepụta ọ bụla.
 
 Mbupu nke gbọmgbọm na mbubata ike bụ naanị nchọpụta mkpebi; ha anaghị emepụta nchọpụta mgbochi. Mwepu enyochala na-ebi na `config/quality/forgotten-sibling-allowlist.json`. Ntinye ọ bụla ga-enwerịrị aha ule nke ndị ahịa na ndị na-achọ akwụkwọ, nye otu ebumnuche, wee jikọta okwu GitHub ma ọ bụ dọpụta arịrịọ. Ndenye emejọrọ emechie. Ewezuga enweghị ike ịkwụsị ule nwa akwukwo ehichapụ ma ọ bụ ihe dị iche na-agbakwunye `.skip`/`.todo`; nkwuputa na-adighi ike na ihe mkpuchi ndị ọzọ ka bụ nke ọnụ ụzọ `check:test-masking` na-egbochi onwe ya.
 
@@ -151,7 +153,7 @@ Na-agba ọsọ na PR ọ bụla ruo `main`. Ihe mgbochi jikọtara na ọdịda
 | Ederede                        | Na-akwado                                                                                                                                             | Mgbochi                       |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `check:docs-all`               | Meta- ọnụ ụzọ ámá nke na-agba ọsọ okpuru-ọnụ ụzọ 6 dị n'okpuru n'usoro                                                                                | Ee                            |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI na-agbanwe agbanwe; ọnọdụ ntọhapụ nakwa enyo 66 `llm.txt` na mpaghara CHANGELOG atụgharịrị (ụdị PR : enyo kwenyere)               | Ee                            |
+| ↳ `check:docs-sync`            | ndakọrịta ụdị CHANGELOG / OpenAPI ; ọnọdụ ntọhapụ nakwa enyo 66 `llm.txt` na mpaghara CHANGELOG atụgharịrị (ụdị PR : enyo kwenyere)                   | Ee                            |
 | ↳ `check:docs-counts`          | Agụ na prose (ọnụọgụ ndị na-eweta, ọnụ ọgụgụ mbugharị, wdg). Ụdịdị abụọ: `pr` na njirimara PRs, `release` n'ebe ọzọ — hụ "ụkpụrụ ewepụtara" n'okpuru. | Ee                            |
 | ↳ `check:env-doc-sync`         | A na-edekọ env var ọ bụla na `.env.example` na tebụl docs, ma ọzọ                                                                                     | Ee                            |
 | ↳ `check:deprecated-versions`  | Ọnweghị eriri ụdị ebibiri na docs                                                                                                                     | Ee                            |
@@ -179,7 +181,7 @@ A na-emepụta SVGs README na abụọ n'okpuru `docs/diagrams/` (`scripts/docs/
 
 ### Ụkpụrụ ewepụtara: ụdị ụzọ `pr` na `release`
 
-Otu njiri mara PR anaghị ede uru dabere na steeti ntọala ya: onye na-eweta, mbugharị, ngwa MCP na atụmatụ atụmatụ, ọnụọgụ README SVG, foto nke eziokwu. Otu nzọụkwụ na-agbakọ ha niile, `npm run release:refresh-derived`, na-agba ọsọ site na ntọhapụ yana site n'abalị na-enweta ume ọhụrụ PR. Ya mere** n'etiti ntọhapụ ndị isi bụ n'azụ ndụ koodu site imewe** , na ọnụ ụzọ ma ọ bụ ule tụnyere osisi na koodu ndụ ga-acha uhie uhie na PR ọ bụla mgbe nwanne gbakwunyere onye na-eweta ya. Ya mere ọnụ ụzọ ámá ndị na-ekpe ụkpụrụ ewepụtara na-agba ọsọ n'otu n'ime ụdị abụọ, nke `scripts/check/lib/gateMode.mjs` kpebiri (mmeri egwuregwu mbụ):
+Otu njiri mara PR anaghị ede uru dabere na steeti ntọala ya: onye na-eweta, mbugharị, ngwa MCP na atụmatụ atụmatụ, ọnụọgụ README SVG, foto nke eziokwu. Otu nzọụkwụ na-agbakọ ha niile, `npm run release:refresh-derived`, na-agba ọsọ site na ntọhapụ yana site n'abalị na-enweta ume ọhụrụ PR. Ya mere** n'etiti ntọhapụ ndị isi bụ n'azụ ndụ koodu site imewe** , na ọnụ ụzọ ámá ma ọ bụ ule tụnyere osisi na koodu ndụ ga-acha uhie uhie na PR ọ bụla mgbe nwanne gbakwunyere onye na-eweta ya. Ya mere ọnụ ụzọ ámá ndị na-ekpe ụkpụrụ ewepụtara na-agba ọsọ n'otu n'ime ụdị abụọ, nke `scripts/check/lib/gateMode.mjs` kpebiri (mmeri egwuregwu mbụ):
 
 1. `--mode=pr|release` na akara iwu;
 2. mgbanwe gburugburu `OMNIROUTE_GATE_MODE` (`pr` ma ọ bụ `release`);
@@ -249,9 +251,9 @@ Nnwale mpaghara-parity unit (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-complete
 
 Na-ejide otu i18n regression nke ọzọ ọnụ ụzọ ámá enweghị ike ịhụ: a English uru na-dere na nsụgharị ewepụtara na _previous_ English nọrọ n'azụ, otú na-abụghị English ọrụ nọgidere na-agụ obi ike-worded, now-ezighị ezi oyiri.
 
-Nke a bufere n'ezie. edegharịrị `oauthModal.googleOAuthWarning` mgbe onye enyemaka nbanye Antigravity rutere (#5203);** 39 nke 43 mpaghara** nọgidere na-agwa ndị na-arụ ọrụ ederede ka ha "detuo URL zuru ezu wee mado ya n'okpuru" — mmiri na-enweghị ike imecha maka onye na-eweta ya. Achọpụtaghị ya ruo #8463 n'ihi na:
+Nke a bufere n'ezie. edegharịrị `oauthModal.googleOAuthWarning` mgbe onye enyemaka nbanye Antigravity rutere (#5203);** 39 nke 43 mpaghara** nọgidere na-agwa ndị ọrụ ederede ka ha "detuo URL zuru ezu wee mado ya n'okpuru" — usoro nke na-enweghị ike imecha maka onye na-eweta ya. Achọpụtaghị ya ruo #8463 n'ihi na:
 
-- `sync-ui-keys` naanị backfills igodo bụ** anọghị** , ọ dịghị mgbe ndị na-** toro** ;
+- `sync-ui-keys` naanị backfills igodo ndị bụ** anọghị** , ọ dịghị mgbe ndị na-** toro** ;
 - `check-ui-keys-coverage` na-agụ igodo _presence_, yabụ ntụgharị ntụgharị aka ochie ruru ka ekpuchiri ya;
 - `check-translation-drift` tracks the `docs/i18n/<locale>/**.md` documentation mirrors — ọ dịghị mgbe ọ na-agụ `src/i18n/messages/*.json`. Ọ na-arụ ọrụ `docs-sync-strict`: ndụmọdụ na PRs, siri ike na ịkwanye na abalị; ntụgharị ntụgharị na-eme ka enyo nweta ume, ọ bụghị njirimara PR.
 
@@ -262,7 +264,7 @@ Nke a bufere n'ezie. edegharịrị `oauthModal.googleOAuthWarning` mgbe onye en
 1. melite ntụgharị asụsụ emetụtara, ma ọ bụ
 2. tọọ ha na `__MISSING__:<new english>` — oge ojiri gaa wee jee ozi bekee emeziri (`src/i18n/request.ts::deepMergeFallback`, #7258) yana ahịrị igodo maka ntụgharị asụsụ.
 
-Ọ bụrụ na eriri ahụ** pụtara** gbanwere, masịrị** na-emegharị igodo ahụ** : igodo ọhụrụ enweghị ike iketa ntụgharị asụsụ ochie. Nke ahụ bụ ụkpụrụ #8463 ejiri mee ya.
+Ọ bụrụ na eriri ahụ** pụtara** gbanwere, masịrị** na-emegharị igodo ahụ** : igodo ọhụrụ enweghị ike iketa ntụgharị asụsụ ochie. Nke ahụ bụ ụkpụrụ #8463 eji.
 
 ```bash
 npm run i18n:check-value-drift          # strict (what CI runs)

@@ -378,8 +378,7 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ثابتکردن کام�
 تگ قبلی وجود دارد، `package.json` دارای نسخه هدف است، یک issue با برچسب `release-freeze` باز است، هیچ
 issue بازی با عنوان `Release branch not green`
 در یک شاخه انتشار موجود وجود ندارد — شاخهای که وجود ندارد وضعیت ناشناخته `?` را گزارش میکند و هرگز
-سبز نیست — صف `release` در Mergify پیکربندی شده است (G11: `queue_rules`، `checks_timeout`،
-برچسب `queue`)، مجموعهقواعد `release/*` همچنان حذف و force-push را مسدود میکند، و
+سبز نیست — omni-queue درخواست‌های ادغام را در شاخهٔ انتشار ادغام می‌کند (G11: `config/merge-queue/config.json` معتبر است، `bases` آن شعبه انتشار را مدیریت میکند، `mode` `live`، برچسب آن وجود دارد)، مجموعهقواعد `release/*` همچنان حذف و force-push را مسدود میکند، و
 `stable/v3` و `develop` هنوز وجود ندارند)، دو مرحله شاخه، اینکه کدام triggerهای workflow غیرفعال و
 شرطهای `if:` برقرار میشوند (و کدامیک همچنان توسط یک متغیر مخزن محدود میمانند یا
 به مخزن canonical مقید هستند)، dist-tagهای مورد انتظار (`latest` ← 3.9.0 و `next` و

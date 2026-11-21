@@ -42,25 +42,23 @@ flowchart LR
 `main` is niet de dagelijkse integratiebranch. PR's die tegen `main` worden geopend,
 moeten meestal op een andere branch worden gericht voordat ze kunnen worden samengevoegd.
 
-## Releasefreeze (parallelle cycli)
+## Bevriezing vrijgeven (parallelle cycli)
 
-Wanneer een release wordt gereconcilieerd, wordt een markeringsissue met het label `release-freeze`
-geopend. Dat **stopt de ontwikkeling niet**:
+Wanneer een release wordt afgestemd, wordt een markerprobleem met de naam `release-freeze` geopend. Dat** stopt de ontwikkeling niet** :
 
-- De bevroren `release/vX.Y.Z` valt voor die uitgave onder de verantwoordelijkheid van de releasecaptain.
-- De `release/vX+1` van de volgende cyclus wordt afgesplitst van de bevroren tip, zodat bijdragers
-  werk kunnen blijven toevoegen.
-- Open PR's die nog steeds op de bevroren branch zijn gericht, moeten op de
-  actieve (hoogste) `release/v*`-branch worden **gericht**.
+- De bevroren `release/vX.Y.Z` is van de kapitein van dat schip.
+- De `release/vX+1` van de volgende cyclus wordt uit de bevroren punt gesneden, zodat de bijdragers het landingswerk kunnen voortzetten.
+- Open PRs die zich nog steeds op de bevroren tak moeten richten** opnieuw gericht** naar de actieve (hoogste) `release/v*` tak.
 
-Controleer of er een open freeze is voordat je ervan uitgaat dat de gewenste branch kan worden samengevoegd:
+Controleer of er sprake is van een open bevriezing voordat u ervan uitgaat dat de gewenste vertakking kan worden samengevoegd:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Het mergemechanisme (`queue`-label van de eigenaar → Mergify) wordt beschreven in
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Het samenvoegmechanisme (eigenaar `queue` label → Mergify) is gedocumenteerd in [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **19-11-2026: de samenvoegwachtrij voor samenvoegen is buiten gebruik gesteld** (beslissing van de eigenaar). `.mergify.yml` definieert niet langer een wachtrij en weigert de Mergify-opdrachten die een pull-verzoek samenvoegen of herschrijven. Release PRs wordt met de hand samengevoegd onder de repository-regelset "Vereist groene poorten voor de actieve release" (`Gate / CI` + `Gate / Quality`) totdat de omni-queue in de live-modus draait, en daarna via de omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Het `queue` label voegt niets meer samen.
 
 ## Waarom zowel een branch als een tag?
 
