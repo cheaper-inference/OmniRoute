@@ -49,16 +49,21 @@ function originOrNull(value: string): string | null {
   }
 }
 
+/** The two variables above, read from process.env when called. */
+function readProcessEnv(): PublicApiBaseUrlEnv {
+  return {
+    OMNIROUTE_PUBLIC_API_BASE_URL: process.env.OMNIROUTE_PUBLIC_API_BASE_URL,
+    OMNIROUTE_PUBLIC_BASE_URL: process.env.OMNIROUTE_PUBLIC_BASE_URL,
+  };
+}
+
 /**
  * Resolve the public API origin from `env`. The default reads exactly the two variables above
  * from process.env, so callers (and tests) can pass their own values instead. `notice` holds the
  * warn-once state for an invalid API origin (process-wide by default).
  */
 export function resolvePublicApiBaseUrl(
-  env: PublicApiBaseUrlEnv = {
-    OMNIROUTE_PUBLIC_API_BASE_URL: process.env.OMNIROUTE_PUBLIC_API_BASE_URL,
-    OMNIROUTE_PUBLIC_BASE_URL: process.env.OMNIROUTE_PUBLIC_BASE_URL,
-  },
+  env: PublicApiBaseUrlEnv = readProcessEnv(),
   notice: InvalidApiOriginNotice = PROCESS_NOTICE
 ): string | null {
   const apiValue = env.OMNIROUTE_PUBLIC_API_BASE_URL?.trim();
