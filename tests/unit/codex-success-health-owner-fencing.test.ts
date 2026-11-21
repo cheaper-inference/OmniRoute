@@ -6,6 +6,10 @@ const harness = await createChatPipelineHarness("codex-success-health-owner");
 const providers = await import("../../src/lib/db/providers.ts");
 const quotaState = await import("../../src/domain/quotaCacheState.ts");
 const originalFetch = globalThis.fetch;
+const recovery = await import("../../src/sse/services/codexQuotaRecoveryRecheck.ts");
+const fences = await import("../../src/lib/db/codexConnectionFences.ts");
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((done) => {
@@ -32,7 +36,7 @@ test.after(async () => {
   globalThis.fetch = originalFetch;
   await harness.cleanup();
 });
-for (const change of ["none", "owner", "failure"] as const) {
+for (const change of ["none", "owner", "failure", "forced"] as const) {
   test(`full chat success ${change === "none" ? "still grants a current-owner healthy override" : `cannot grant a healthy override after newer ${change} state`}`, async () => {
     const connection = await providers.createProviderConnection({
       provider: "codex",
@@ -43,6 +47,20 @@ for (const change of ["none", "owner", "failure"] as const) {
       email: "original@example.invalid",
       providerSpecificData: { workspaceId: "original", autoFetchModels: false },
     });
+    let rechecks = 0;
+    const blocker = {
+      connectionId: connection.id,
+      windowNames: ["weekly"],
+      observedAts: [Date.now() - 30_000],
+    };
+    const deps = {
+      ownerEpoch: () => fences.readCodexQuotaOwner(connection.id)!.epoch,
+      eligible: async () => true,
+      refresh: async () => {
+        rechecks++;
+      },
+    };
+    await recovery.recheckCodexQuotaRecovery([blocker], deps);
     const started = deferred<void>();
     const release = deferred<Response>();
     globalThis.fetch = async () => {
@@ -52,7 +70,15 @@ for (const change of ["none", "owner", "failure"] as const) {
     const operation = harness.handleChat(
       harness.buildRequest({
         url: "http://localhost/v1/responses",
-        headers: { "x-omniroute-connection-id": connection.id },
+        headers: {
+          "x-omniroute-connection-id": connection.id,
+          ...(change === "forced"
+            ? {
+                "X-Internal-Test": "combo-health-check",
+                [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
+              }
+            : {}),
+        },
         body: { model: "codex/gpt-5.6-sol", input: "offline health owner race", stream: false },
       })
     );
@@ -95,6 +121,17 @@ for (const change of ["none", "owner", "failure"] as const) {
     assert.equal(response.status, 200);
     await response.text();
     await harness.callLogsDb.waitForCallLogSaves(10_000);
-    assert.equal(quotaState.isQuotaHealthy(connection.id), change === "none");
+    assert.equal(
+      quotaState.isQuotaHealthy(connection.id),
+      change === "none" || change === "forced"
+    );
+    if (change === "none" || change === "forced") {
+      await recovery.recheckCodexQuotaRecovery([blocker], deps);
+      assert.equal(
+        rechecks,
+        change === "forced" ? 2 : 1,
+        "only forced live 200 may reopen recovery once"
+      );
+    }
   });
 }

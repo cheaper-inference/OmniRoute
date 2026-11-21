@@ -116,3 +116,19 @@ export function isQuotaHealthy(connectionId: string): boolean {
   const until = getQuotaCacheState().healthyUntil.get(connectionId);
   return until !== undefined && until > Date.now();
 }
+
+export function isStaleCodexReading(
+  provider: string,
+  prior: QuotaCacheEntry | null,
+  observedAt?: number
+): boolean {
+  return (
+    provider === "codex" &&
+    observedAt !== undefined &&
+    prior !== null &&
+    // fetchedAt covers entries with no windows, such as a 429 exhaustion mark.
+    (prior.fetchedAt > observedAt ||
+      (prior.completeAt ?? 0) > observedAt ||
+      Object.values(prior.quotas).some((quota) => (quota.observedAt ?? 0) > observedAt))
+  );
+}

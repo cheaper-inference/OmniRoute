@@ -17,12 +17,19 @@ import { getSettings, resolveProxyForConnection, updateSettings } from "@/lib/db
 import {
   getAllProviderLimitsCache,
   getProviderLimitsCache,
-  setProviderLimitsCache,
   setProviderLimitsCacheBatch,
   type ProviderLimitsCacheEntry,
 } from "@/lib/db/providerLimits";
 import { syncToCloud } from "@/lib/cloudSync";
 import { setQuotaCache } from "@/domain/quotaCache";
+import {
+  registerCodexQuotaRecoveryRefresh,
+  runCodexQuotaRefresh,
+} from "@/sse/services/codexQuotaRecoveryRecheck";
+import {
+  cacheReadObservedAt,
+  persistMergedProviderLimitsCache,
+} from "./providerLimits/cachePersistence";
 import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
 import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
@@ -188,6 +195,9 @@ export function notifyProviderUsageRecorded(
 // this module (and its executors/translator import graph). This module is loaded by
 // the provider-limits route and the background auto-sync scheduler at server boot.
 onUsageRecorded(notifyProviderUsageRecorded);
+registerCodexQuotaRecoveryRefresh((id) =>
+  fetchAndPersistProviderLimits(id, "manual", { allowRotatingRefresh: true })
+);
 
 function hasRetrieveUserQuotaSource(
   provider: string,
@@ -1019,12 +1029,14 @@ async function fetchLiveProviderLimitsWithOptions(
     forceRefresh?: boolean;
     allowRotatingRefresh?: boolean;
     includeResetCredits?: boolean;
+    readStartedAt?: string;
   } = {}
 ): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
   codexFence?: CodexConnectionFence | null;
 }> {
+  const readStartedAt = options.readStartedAt ?? new Date().toISOString();
   let connection = (await getProviderConnectionById(
     connectionId
   )) as unknown as ProviderConnectionLike | null;
@@ -1209,17 +1221,21 @@ async function fetchLiveProviderLimitsWithOptions(
       const data = await syncCodexQuotaObservation(
         connection.id,
         result.usage,
-        connection.providerSpecificData
+        connection.providerSpecificData,
+        readStartedAt
       );
       if (data) connection = { ...connection, providerSpecificData: data };
     }
-    if (isRecord(result.usage.quotas)) {
+    if (!result.usage._stale && !result.usage.message && isRecord(result.usage.quotas)) {
       setQuotaCache(
         connectionId,
         connection.provider,
         result.usage.quotas,
         isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
-        { complete: isCompleteUsageReading(result.usage) }
+        {
+          complete: isCompleteUsageReading(result.usage),
+          ...(connection.provider === "codex" ? { observedAt: Date.parse(readStartedAt) } : {}),
+        }
       );
     }
     connection = await syncExpiredStatusIfNeeded(connection, result.usage);
@@ -1246,15 +1262,17 @@ async function fetchLiveProviderLimitsWithOptions(
   });
 }
 
-function cacheReadObservedAt(
-  connection: ProviderConnectionLike,
-  usage: JsonRecord,
-  readStartedAt: string
-): string | undefined {
-  return connection.provider === "codex" && usage._stale !== true ? readStartedAt : undefined;
+export function fetchAndPersistProviderLimits(
+  connectionId: string,
+  source: SyncSource = "manual",
+  opts: { allowRotatingRefresh?: boolean; includeResetCredits?: boolean } = {}
+) {
+  return runCodexQuotaRefresh(connectionId, () =>
+    persistLiveProviderLimits(connectionId, source, opts)
+  );
 }
 
-export async function fetchAndPersistProviderLimits(
+async function persistLiveProviderLimits(
   connectionId: string,
   source: SyncSource = "manual",
   opts: { allowRotatingRefresh?: boolean; includeResetCredits?: boolean } = {}
@@ -1270,69 +1288,23 @@ export async function fetchAndPersistProviderLimits(
     forceRefresh: source === "manual",
     allowRotatingRefresh: opts.allowRotatingRefresh,
     includeResetCredits: opts.includeResetCredits,
+    readStartedAt,
   });
   return runWithCodexConnectionFence(codexFence ?? null, () => {
     assertCodexOperationCurrent(connectionId);
-    const newCache = toProviderLimitsCacheEntry(
-      usage,
-      source,
-      cacheReadObservedAt(connection, usage, readStartedAt)
-    );
-    const previous = getProviderLimitsCache(connectionId);
-    const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
-
-    // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
-    // Serve the prior entry instead; only successful fetches update the cache.
-    if (cache === previous && newCache.message) {
-      // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
-      // so a cached count — e.g. from before a redeem — must not come back through here.
-      const isClaude = connection.provider === "claude";
-      const bankedResetCredits = isClaude
-        ? newCache.bankedResetCredits
-        : previous.bankedResetCredits;
-      let served = previous;
-      if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
-        const { bankedResetCredits: _cached, ...rest } = previous;
-        served = setProviderLimitsCache(
-          connectionId,
-          bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
-        );
-      }
-      const staleUsage: JsonRecord = {
-        ...usage,
-        quotas: previous.quotas,
-        modelQuotas: previous.modelQuotas,
-        plan: previous.plan ?? usage.plan ?? null,
-        bankedResetCredits,
-        paidCredits: previous.paidCredits,
-        billing: previous.billing,
-        message: null,
-        _stale: true,
-        _staleSince: previous.fetchedAt,
-        _staleReason: newCache.message,
-      };
-      if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
-      return { connection, usage: staleUsage, cache: served };
-    }
-
-    const mergedUsage: JsonRecord = {
-      ...usage,
-      ...(cache.billing ? { billing: cache.billing } : {}),
-    };
-    setProviderLimitsCache(connectionId, cache);
-    if (connection.provider === "codex") {
-      const current = getProviderLimitsCache(connectionId) ?? cache;
-      return {
-        connection,
-        usage: { ...mergedUsage, quotas: current.quotas, fetchedAt: current.fetchedAt },
-        cache: current,
-      };
-    }
-    return { connection, usage: mergedUsage, cache };
+    return persistMergedProviderLimitsCache(connectionId, connection, usage, source, readStartedAt);
   });
 }
 
 async function fetchUsageCacheForSync(connection: ProviderConnectionLike, source: SyncSource) {
+  if (connection.provider === "codex") {
+    const { cache } = await fetchAndPersistProviderLimits(connection.id, source);
+    return {
+      connectionId: connection.id,
+      cache,
+      codexFence: captureCodexConnectionFence(connection as unknown as JsonRecord),
+    };
+  }
   const existingCache = getProviderLimitsCache(connection.id);
   await refreshLiveModelIds(connection.provider);
   const forceRefresh =

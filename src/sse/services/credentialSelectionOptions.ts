@@ -27,6 +27,8 @@ export interface CredentialSelectionOptions {
   _leaseRetryWithLockHeld?: boolean;
   /** Internal: freeze the original policy-valid candidate set across lease race/preflight retry. */
   _leaseCandidateIds?: string[];
+  /** Internal: quota-preflight wrapper owns the final quota rejection side effect. */
+  _deferQuotaLeaseInvalidation?: boolean;
   /** Antigravity account lease (#10011): only the final chat dispatch opts in. */
   reserveAntigravityLease?: boolean;
   routingRequestId?: string | null;

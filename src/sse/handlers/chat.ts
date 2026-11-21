@@ -86,6 +86,7 @@ import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
 import {
   isCodexResponseCurrent,
+  readCodexQuotaOwner,
   runWithCodexResponseFence,
   STALE_CODEX_OPERATION_CODE,
   StaleCodexOperationError,
@@ -198,6 +199,7 @@ import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
 import { maybeMarkChatAccountExhaustedFrom429 } from "../services/chatQuotaExhaustion";
 import { markQuotaHealthy } from "../../domain/quotaCache";
+import { armCodexQuotaRecovery } from "../services/codexQuotaRecoveryRecheck";
 import { resolveForcedConnectionForCredentialPool } from "../services/sessionAffinityPin.ts";
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
 import { generateRequestId } from "../../shared/utils/requestId";
@@ -2438,6 +2440,10 @@ async function handleSingleModelChat(
         if (isCodexResponseCurrent(result.response, true)) {
           clearModelLock(provider, credentials.connectionId, model);
           markQuotaHealthy(credentials.connectionId);
+          if (provider === "codex" && forceLiveComboTest === true) {
+            const owner = readCodexQuotaOwner(credentials.connectionId);
+            if (owner) armCodexQuotaRecovery(credentials.connectionId, owner.epoch);
+          }
         }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (

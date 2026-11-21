@@ -70,6 +70,10 @@ export async function getCodexUsage(
       headers["chatgpt-account-id"] = accountId;
     }
 
+    // The 20 s bound starts when the request is dispatched, after the quota throttle
+    // gate, so a queued read is not aborted before it is sent.
+    const fetchUsage: CodexUsageFetch = (input, init) =>
+      codexUsageFetch(input, { ...init, signal: AbortSignal.timeout(20_000) });
     let response: Response | null;
     if (connectionId) {
       // Keep the gate immediately adjacent to the network boundary, after proxy
@@ -82,11 +86,11 @@ export async function getCodexUsage(
           method: "GET",
           headers,
         },
-        { fetchFn: codexUsageFetch, beforeFetch: throttleQuotaFetch }
+        { fetchFn: fetchUsage, beforeFetch: throttleQuotaFetch }
       );
     } else {
       await throttleQuotaFetch();
-      response = await codexUsageFetch(CODEX_CONFIG.usageUrl, {
+      response = await fetchUsage(CODEX_CONFIG.usageUrl, {
         method: "GET",
         headers,
       });
