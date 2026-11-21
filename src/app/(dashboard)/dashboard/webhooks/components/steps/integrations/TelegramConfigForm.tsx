@@ -1,6 +1,7 @@
 "use client";
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
+import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
 
 export interface TelegramConfig {
@@ -13,9 +14,20 @@ interface TelegramConfigFormProps {
   onChange: (v: TelegramConfig) => void;
   t: (key: string) => string;
   isEditing?: boolean;
+  /** Set by a refused Next: an untouched form is not flagged for being empty. */
+  showRequired?: boolean;
 }
 
-export function TelegramConfigForm({ value, onChange, t, isEditing }: TelegramConfigFormProps) {
+export function TelegramConfigForm({
+  value,
+  onChange,
+  t,
+  isEditing,
+  showRequired,
+}: TelegramConfigFormProps) {
+  const tv = useTranslations("formValidation");
+  // When editing, a blank token keeps the stored one.
+  const tokenRequired = !isEditing;
   return (
     <div className="space-y-4">
       <Input
@@ -25,6 +37,12 @@ export function TelegramConfigForm({ value, onChange, t, isEditing }: TelegramCo
         onChange={(e) => onChange({ ...value, botToken: e.target.value })}
         placeholder={isEditing ? t("secretEditPlaceholder") : t("telegram.botTokenPlaceholder")}
         autoComplete="new-password"
+        required={tokenRequired}
+        error={
+          showRequired && tokenRequired && !value.botToken.trim()
+            ? tv("required", { field: t("telegram.botToken") })
+            : undefined
+        }
         hint={t("telegram.botTokenHint")}
       />
       <Input
@@ -32,6 +50,12 @@ export function TelegramConfigForm({ value, onChange, t, isEditing }: TelegramCo
         value={value.chatId}
         onChange={(e) => onChange({ ...value, chatId: e.target.value })}
         placeholder={t("telegram.chatIdPlaceholder")}
+        required
+        error={
+          showRequired && !value.chatId.trim()
+            ? tv("required", { field: t("telegram.chatId") })
+            : undefined
+        }
         hint={t("telegram.chatIdHint")}
       />
       <Disclosure className="rounded-lg border border-border bg-bg-subtle">
