@@ -3,37 +3,44 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b20",
+    "batchId": "b21",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b20-bdb9a4280c29",
-    "candidateSha": "bdb9a4280c29505d81c7a6f8aaf8c0f7bcfc5937",
-    "baseSha": "696498a9723d54231db8bf2f0028685bba548bf4",
-    "treeSha": "5c54967c9894b6cb2061dc4af0ab7469bcd6dd5e",
+    "candidateRef": "omni-queue/release-v3.8.55/b21-f5c4de4bb0d3",
+    "candidateSha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
+    "baseSha": "76b26b8ead943efd7ae5fa8e65c5551cb392adb1",
+    "treeSha": "83d170dd1b38b6764b502610132142ccf72408a0",
     "prs": [
       {
-        "n": 20792,
-        "head": "5b74cb04139ad322cca9ce455cd210802b254fcf",
-        "title": "feat(ci): omni-queue owner voice and signed merge commits (both off)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:37:00Z"
+        "n": 14667,
+        "head": "8659558510a5799b16bd1ec03635dc561ee95912",
+        "title": "feat(api): list System One decision models on GET /v1/systemone/models",
+        "author": "PixmaNts",
+        "labeledAt": "2026-11-21T03:56:04Z"
       },
       {
-        "n": 20827,
-        "head": "10096b6c6c2a64ad0345af5582df4140fbd4eded",
-        "title": "test(ci): audit only git-tracked files for retired provider asset references",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:38:07Z"
+        "n": 18122,
+        "head": "8ef72f69f96896be79f2213d41609bc54af17a93",
+        "title": "feat(providers): show Muse Code session and weekly usage",
+        "author": "aldoeliacim",
+        "labeledAt": "2026-11-21T03:56:16Z"
       },
       {
-        "n": 20781,
-        "head": "21c3a7a04be1d4cf466fed9caf748a8dc1ab51c4",
-        "title": "feat(plugins): opt-in Node.js permission model for plugin processes",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T00:49:48Z"
+        "n": 19403,
+        "head": "b8705ef21a1cf8b52d9f396a7e0fb6bb08db2056",
+        "title": "fix(translator): 3 fixes in open-sse translator response",
+        "author": "serenity-X",
+        "labeledAt": "2026-11-21T03:56:26Z"
+      },
+      {
+        "n": 19542,
+        "head": "81a5a241fcc7f71bf35b8a0e6298ccef92a17092",
+        "title": "fix(mcp): skip a duplicate skill tool name instead of dropping later skills",
+        "author": "serenity-X",
+        "labeledAt": "2026-11-21T03:56:33Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-21T03:54:16.596Z",
+    "startedAt": "2026-11-21T05:29:43.195Z",
     "attempts": 0,
     "bisect": null
   },
@@ -101,12 +108,15 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "20781": "21c3a7a04be1d4cf466fed9caf748a8dc1ab51c4",
+      "20792": "5b74cb04139ad322cca9ce455cd210802b254fcf",
+      "20827": "10096b6c6c2a64ad0345af5582df4140fbd4eded"
     }
   },
   "counters": {
-    "batchSeq": 20,
-    "ciRuns": 22,
+    "batchSeq": 21,
+    "ciRuns": 23,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 7,
@@ -1485,8 +1495,53 @@
         "20827": "2026-11-20T23:38:07Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44863342862"
+    },
+    {
+      "at": "2026-11-21T05:28:58.506Z",
+      "type": "checks-green",
+      "batchId": "b20",
+      "prs": [
+        20792,
+        20827,
+        20781
+      ],
+      "sha": "bdb9a4280c29505d81c7a6f8aaf8c0f7bcfc5937",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871053098"
+    },
+    {
+      "at": "2026-11-21T05:29:08.574Z",
+      "type": "would-land",
+      "batchId": "b20",
+      "prs": [
+        20792,
+        20827,
+        20781
+      ],
+      "sha": "bdb9a4280c29505d81c7a6f8aaf8c0f7bcfc5937",
+      "detail": "shadow mode: would merge-ff onto 696498a9723d",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871053098"
+    },
+    {
+      "at": "2026-11-21T05:29:46.716Z",
+      "type": "batch-started",
+      "batchId": "b21",
+      "prs": [
+        14667,
+        18122,
+        19403,
+        19542
+      ],
+      "sha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
+      "detail": "4 PR(s) on 76b26b8ead94; window 6",
+      "labeledAt": {
+        "14667": "2026-11-21T03:56:04Z",
+        "18122": "2026-11-21T03:56:16Z",
+        "19403": "2026-11-21T03:56:26Z",
+        "19542": "2026-11-21T03:56:33Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871053098"
     }
   ],
-  "updatedAt": "2026-11-21T05:06:03.720Z",
+  "updatedAt": "2026-11-21T05:29:48.205Z",
   "batchWindow": 6
 }
