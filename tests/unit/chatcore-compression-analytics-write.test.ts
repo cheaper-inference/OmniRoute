@@ -148,6 +148,28 @@ test("a skip row keeps the dispatched engine and reports the configured mode", a
   assert.equal(row!.engine, "stacked");
 });
 
+test("a skip row records the cache-prefix guard's reason instead of the generic one (#297)", async () => {
+  await writeCompressionSkip(
+    {
+      ...baseOpts("ca-req-guard-skip", {
+        cachePrefixGuard: { protectedMessages: 5, skipReason: "tail-shape-invalid" },
+      }),
+      mode: "stacked",
+    },
+    "no_savings"
+  );
+  await writeCompressionSkip(baseOpts("ca-req-plain-skip"), "no_savings");
+  const reason = (requestId: string) =>
+    (
+      coreDb
+        .getDbInstance()
+        .prepare("SELECT skip_reason AS reason FROM compression_analytics WHERE request_id = ?")
+        .get(requestId) as { reason: string }
+    ).reason;
+  assert.equal(reason("ca-req-guard-skip"), "tail-shape-invalid");
+  assert.equal(reason("ca-req-plain-skip"), "no_savings");
+});
+
 test("without reportedMode the dispatched mode and engine are recorded as before", async () => {
   await writeCompressionAnalytics({
     ...baseOpts("ca-req-stacked", { engine: "stacked" }),
