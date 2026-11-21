@@ -1,0 +1,1 @@
+- **feat(routing):** Opt-in `OMNIROUTE_QUOTA_STICKY_ONLY_USED_PERCENT` keeps an account near its quota limit for sessions already pinned to it, so they finish on a warm cache while new sessions route to other accounts.
