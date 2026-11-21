@@ -1,7 +1,7 @@
 ---
 title: "Quota Sharing Engine"
 version: 3.8.40
-lastUpdated: 2026-06-28
+lastUpdated: 2026-11-20
 ---
 
 # Quota Sharing Engine
@@ -53,6 +53,9 @@ consumed        = current rolling value for this key (from QuotaStore.peek)
 remaining       = fairShareAllowed - consumed
 ```
 
+For `percent` dimensions, `consumed` comes from the attribution book instead (see
+[Percent dimensions: per-key attribution](#percent-dimensions-per-key-attribution)).
+
 Then:
 
 - **`policy = hard`**: if `consumed > fairShareAllowed` and mode is strict → **block**.
@@ -63,6 +66,7 @@ Then:
 
 `capValue` + `capUnit` on an allocation is a hard ceiling independent of mode or
 policy. Any dimension where `consumed >= capValue` always **blocks** the request.
+For a `percent` cap, `consumed` is only the part attributed to the key.
 
 ### Multi-dimension check
 
@@ -172,6 +176,222 @@ QuotaDimension {
 
 A request must satisfy all dimensions to be allowed.
 
+### Percent dimensions: per-key attribution
+
+A percent plan reports one usage figure per account and plan window. The provider gives no
+counter per API key.
+
+To split that figure between keys, each pool keeps an attribution book per account and plan
+window. `src/lib/quota/percentLedger.ts` holds the book's rules.
+`src/lib/quota/percentAttribution.ts` turns the book into the numbers that enforcement uses. The
+result is an estimate built from the tokens each key routes.
+
+#### Readings that move the book
+
+The book moves only on the provider's own figure for the requested plan window. These connections
+report one:
+
+| Provider                            | Plan windows   |
+| ----------------------------------- | -------------- |
+| Claude, through an OAuth connection | `5h`, `weekly` |
+| Codex                               | `5h`, `weekly` |
+
+These do not count as a reading:
+
+- a response the provider client marks as stale
+- a Claude window whose percentage the provider did not report
+- another window's figure, or the worst case across windows
+- the rate-limit header fallback
+- a failed read
+
+Other providers, including Claude with an API key, have no book. Each key is charged 0 on their
+percent dimensions, as before this change.
+
+A reading shares the 30-second cache of the saturation signal. A Claude reading is dated by when
+the figure was observed in response headers or read from the usage endpoint, when that time is
+known. Other readings are dated by when that cache entry was built.
+
+#### What the book keeps
+
+Each recorded request adds its tokens, once, to a counter per pool, account and key. A counter
+only grows. The book keeps three things:
+
+- the baseline: the figure when the book opened or the window last turned
+- the last applied figure
+- per key, its token counter at that same moment, called its mark
+
+The book is updated when enforcement or the usage route computes the attribution. Writes are
+compare-and-set on a revision number. A writer that loses retries once on a fresh read.
+
+#### How a key's part is computed
+
+Each key's part is computed when the book is read. The growth of the figure since the baseline is
+split between the keys in proportion to the tokens each one routed since its mark.
+
+Together, those tokens explain at most one point of the figure per
+`QUOTA_PERCENT_MIN_TOKENS_PER_POINT` tokens (default 1,000). The growth they do not explain is
+external. The baseline is external too.
+
+For example, a book opens at 0. Key A then routes 900,000 tokens and key B routes 100,000. At a
+figure of 60, A's part is 54 points and B's part is 6.
+
+A counter below its key's mark has restarted and counts in full. A key without a mark, such as a
+key that joins the pool in the middle of a window, counts all its tokens. A figure that lags the
+tokens causes an error that goes away at the next reading. It does not accumulate.
+
+`QUOTA_PERCENT_MIN_TOKENS_PER_POINT` is read on every attribution. A value that is not a finite
+number of at least 1 falls back to 1,000.
+
+#### How a reading changes the book
+
+The first matching rule applies:
+
+1. **No book yet:** the reading opens the book. Its figure is the baseline and every counter is
+   marked.
+2. **Older reading:** a reading dated before the last applied one is ignored. So is a reading
+   whose reset time is more than 30 minutes earlier than the stored one.
+3. **New provider window:** a reset time more than 30 minutes later than the stored one turns the
+   book. The figure becomes the baseline and every counter is marked again. Keys without a counter
+   leave the book.
+4. **Ended window:** a stored reset time that is not after the reading's data time means that
+   window has ended. The reading turns the book, whatever its figure.
+5. **Higher figure:** only the last figure moves. The baseline and the marks stay.
+6. **Same figure:** the figure, baseline and marks stay. Only a reset time the book lacks is
+   written.
+7. **Lower figure:** a lower figure is never applied as such. It turns the book only when three
+   things hold. It is at least two minutes newer than the last applied reading. Nothing says the
+   window is the same open one. It is more than one point lower.
+
+The window counts as the same open one when three things hold. Both reset times are known. They
+are within 30 minutes of each other. The stored one is still ahead of the reading. A lower figure
+inside that window changes nothing.
+
+A reset time is stored only while it is ahead of the data time of the reading that carries it. A
+higher figure stores its reading's reset time when that one is usable, and keeps the stored one
+otherwise. An equal figure records its reading's reset time only when the book has none. It
+changes nothing else. A lower figure that does not turn the book records no reset time.
+
+#### When the book is used
+
+After a reading, the book is used unless its stored reset time is not after the current time.
+That case arises when a reading taken just before the reset, such as one served from the cache, is
+observed just after it.
+
+Without a usable reading, the stored book is used only while it can still be the current
+window's book. That holds in two cases:
+
+- its reset time is known and still ahead
+- it has no reset time, and the last reading that changed it is at most 15 minutes old
+
+Otherwise nothing is attributed, as when there is no book. A book whose stored reset time has
+passed is never charged.
+
+#### Enforcement
+
+A key's consumption on a percent dimension is its attributed part plus a share of the external
+part. The external part first uses the capacity no allocation claims (100 minus the sum of the
+weights). Only the excess is shared among the keys by weight.
+
+That consumption is compared with the key's fair share as for any other dimension. Strict mode
+still starts when the saturation signal reaches `QUOTA_SATURATION_THRESHOLD` (default 0.5).
+Every number is scaled by the effective limit: the per-account limit times the number of
+accounts in the pool.
+
+An absolute cap with `capUnit: "percent"` counts only the part attributed to the key, scaled the
+same way. Take a per-account limit of 100 and k accounts. A cap of N is then reached when the
+key's part of the serving account's figure reaches N/k points. Each account is checked against its
+own book. For example, with two accounts, a cap of 10 is reached at 5 points of one account's
+figure.
+
+When the store cannot be read, nothing is attributed and every key is charged 0 on that
+dimension. When a book write fails, that attribution uses the book as it was read. A failed token
+write leaves that request's tokens out of the book. None of these failures blocks a request.
+
+#### Usage route
+
+`GET /api/quota/pools/{id}/usage` reports the same numbers through the same function. A percent
+dimension has one entry per pool connection in `accounts`. Its top-level `consumedTotal` and
+`perKey` mirror the first entry.
+
+The route applies the current reading too, so it can advance the book as a request does.
+`internal + external` can differ from `consumedTotal` when there is no usable reading, or when a
+lower figure is not applied.
+
+#### Storage and retention
+
+Both quota stores keep the book. On SQLite, the automatic database cleanup, when enabled, removes
+rows not updated for 60 days. On Redis, the books and counters of a pool connection share one key.
+It expires 60 days after its last token write or book change. A book that does not change is not
+rewritten, so the cutoff is set above the longest plan window. The manual usage-history reset also
+clears the books on SQLite (see Limitations).
+
+#### Limitations
+
+- All growth of the account figure since the baseline is split by the tokens each key routed since
+  then. When that growth happened does not matter.
+- So usage made outside OmniRoute is charged to the keys up to what their tokens allow. That
+  includes usage made before a key's first request of the window, when the book was already open.
+- For example, outside use raises the account 60 points while no key routes. A key then routes
+  30,000 tokens and the figure reaches 60.6.
+- If the book was open before that use, the key's part is 30 points. It also carries 7.65 of
+  external usage, with four keys of weight 25.
+- If the book opened after that use, the 60 points are baseline. The key's part is 0.6 points, and
+  it carries 15 of external usage.
+- A request or a visit to the usage route opens the book. So whether such usage counts as baseline
+  depends on when the book opened.
+- With the default floor, a key that routes 60,000 tokens while outside use raises the account 60
+  points gets all 60 as its own part.
+- With the floor at 50,000, its own part is 1.2 points. The other 58.8 are external and charged by
+  weight, like any external usage.
+- Set `QUOTA_PERCENT_MIN_TOKENS_PER_POINT` close to what one point costs on your plan. Outside use
+  includes traffic on the same account from keys outside the pool.
+- A percent cap applies in every mode. A capped key can be refused while the account is far below
+  the saturation threshold.
+- Take a cap of 10 and 12 points of outside use earlier in the window. A key that routes 20,000
+  tokens is then refused at an account figure of 12.4%.
+- The split is an estimate by token volume. A request counts as its prompt tokens plus its
+  completion tokens. Cache discounts and model prices do not change that count.
+- A request that does not end with status 200 records no tokens. Examples are a stream the client
+  disconnects and an upstream error after usage was consumed.
+- The usage such a request caused is charged to the keys that did record tokens, up to what their
+  tokens allow. The rest is external. It does not move back. A response that reports no token
+  usage records no tokens either.
+- The usage of a request in progress can show up in another active key's part for the whole
+  request. It moves back only when the request ends with status 200.
+- Usage already on the account when a book opens counts as external. This covers an upgrade, a new
+  pool and a new account. Usage in a new window before its first reading counts as external too.
+- Each key starts with its weight share of that usage, after the capacity no allocation claims.
+  With one account at 85% and five keys of weight 20, each starts with 17 of its 20 used.
+- In a pool with several accounts, the serving account's figure is applied to the summed budget.
+  This is unchanged by the book.
+- A lower figure inside a window the provider reports as open is not applied. A reset time that
+  moves back by more than 30 minutes is treated as an old reading.
+- In both cases the book keeps its state until the stored reset time passes. After that, the book
+  is not charged until a reading turns it.
+- The remedy is the manual usage-history reset (`POST /api/settings/purge-usage-history`). It
+  clears the attribution books and their token counters in the SQLite database.
+- The `all` period clears every book and counter. A shorter period first clears the books not
+  written within it. It then clears the counters not written within it, but only for a pool
+  connection that has no book left. A kept book still marks each key against its counter.
+- A book whose figure has not moved is not rewritten, so a shorter period can also clear the
+  current window's book. The next reading then opens a fresh book at the current figure.
+- The reset does not touch a Redis quota store. There a book ends with its window, or expires 60
+  days after its last write.
+- When the provider sends no reset time, a window that resets and refills above the old figure
+  between two readings looks like a higher figure. The book keeps the old baseline and marks.
+- Readings are dated by the local clock. When it runs ahead of the provider's, or a source reports
+  a reset time a little early, the book can turn up to that difference early.
+- The growth in that short span is split by the tokens routed in it. The next window's first
+  reading corrects it. When the turned book holds no reset time, that correction needs a lower
+  figure at least two minutes newer than the last applied reading.
+- Instances that share a Redis store date readings with their own clocks, so keep those clocks in
+  sync. Readings of an instance whose clock runs behind look older and are ignored.
+- When no usable reading arrives after the stored reset time, per-key percent shares and percent
+  caps are not enforced until a reading returns. Without a reset time, this starts 15 minutes
+  after the last reading that changed the book.
+- On the Redis store, a book idle for 60 days can expire between a writer's check and its write.
+  It is then re-created at a revision above 1, which is a valid state.
+
 ---
 
 ## Plan Resolver
@@ -270,6 +490,12 @@ The page hooks:
 - `usePoolUsage` — fetches `GET /api/quota/pools/[id]/usage` on demand.
 - `useLocalStoragePoolMigration` — runs once on mount to migrate legacy LS data.
 
+The keys step of the pool wizard has a `Show usage by member to key holders` box. It sets the
+pool's `memberBreakdown` option (see [Member usage](#member-usage)). Below it, the wizard warns
+that someone who knows what one key used can match a bar to that key. With the box ticked, it says
+so when the step lists fewer than three or more than 20 keys, as the bars then stay hidden. It
+counts the keys in the step and cannot tell which of them can make requests.
+
 ### `/dashboard/costs/quota-share/plans` — Provider plan config
 
 - `ProviderPlanConfigClient.tsx`: dropdown to select a provider, view resolved
@@ -279,15 +505,288 @@ The page hooks:
 
 ---
 
+## Self-Service Quota API (opt-in)
+
+`GET /api/v1/me/quota/{provider}` (also served at `/v1/me/quota/{provider}`) lets an API key
+holder read, with their own key, how much of a shared subscription is theirs and what is
+blocking them. The route is a thin shell over `src/server/selfService/quotaHandler.ts`; the view
+is built by `src/lib/quota/selfView.ts` and its response contract is
+`src/shared/schemas/selfQuota.ts` (`SelfQuotaView` in `docs/openapi.yaml`).
+
+### Enabling and authentication
+
+- Feature flag `QUOTA_SELF_PANEL`, default `false`. While it is off, a request that reaches the
+  route gets 404. With `REQUIRE_API_KEY=true`, the client API policy refuses a missing or invalid
+  key with 401 before the route runs, whatever the flag. A request with no key but a signed-in
+  dashboard session passes that policy and gets the route's own answer. The flag resolves like
+  every other flag (dashboard or REST override, then the environment variable of the same name);
+  see [`FEATURE_FLAGS.md`](../reference/FEATURE_FLAGS.md).
+- Each pool's display name and each schedule's label are returned to the pool's key holders
+  exactly as the administrator wrote them. Before turning the flag on, check that they are fit to
+  be read by those key holders.
+- The key is read from headers only: `Authorization: Bearer <key>` or `x-api-key: <key>`. When
+  both are sent, the first one that validates is used. A key in the query string or a cookie is
+  ignored. The server's environment key is refused (401).
+- The key needs the `self:usage` scope (403 without it).
+- The provider segment is trimmed, lower-cased and checked against
+  `^[a-z0-9][a-z0-9._-]{0,63}$` (400 otherwise), then resolved through the provider registry,
+  so an alias such as `cc` reads the `claude` pools. `claude` and `anthropic` read the same pools.
+
+### What each visibility shows
+
+| Visibility    | Requires                                                                                  | Fields                                                                                                                                                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Own share     | `self:usage`                                                                              | `pools[]` (ref, name, provider, policy, weight, cap), `dimensions[].yourShare`, `accounts[]` with `yourShare` (on a `percent` window without `attributed` and `external`), `blocks`, `availableModels`, `expiresAt`, `apiBaseUrl`                  |
+| Account level | `self:usage` + `self:account-quota`, and the provider in the key's `sharedQuotaProviders` | adds `dimensions[].total`, `accounts[].dimensions[].account` and `accounts[].modelWindows`, `attributed` and `external` on the `yourShare` of a `percent` window, and `members` on a pool with member usage on (see [Member usage](#member-usage)) |
+
+- `sharedQuotaProviders` is a per-key setting (`PUT /api/keys/[id]/self-service`): `null`, the
+  default, means every provider the key reaches; `[]` means none. Each pool's `accountVisible`
+  says which visibility applied to it.
+- Account bars and model windows are shown only for accounts whose connection the key may use.
+  When the key has a list of allowed connections, an account outside it keeps its `Account N`
+  entry without `account` or `modelWindows`. An empty list means no restriction, as for
+  `/v1/me/status`. The pool total (`dimensions[].total`) does not depend on that list.
+- Two figures shown with `self:usage` alone come from other keys' use. A schedule budget's
+  `exhausted` reflects the consumption of every key under that schedule. In a pool whose weights
+  are all zero, the key's `weight` is `100 / number of members`. Both are what enforcement
+  applies to the key.
+- A pool is identified only by `ref`, an opaque value bound to the calling key. Its display name
+  (`name`) is included as the administrator wrote it. A `ref` is derived from the key and the
+  pool with the server's API-key secret (`API_KEY_SECRET`). Clients must not persist it: it
+  changes if that secret is rotated.
+- Accounts are listed as `Account 1`, `Account 2`, … in pool order. No pool id, connection id,
+  account e-mail or account name is returned, and the response goes through the contract schema,
+  which drops any field outside it.
+- Countable units (`requests`, `tokens`, `usd`) are reported as the pool bucket the quota gate
+  enforces: `limit` = plan limit × accounts in the pool, `fairShare` = weight / 100 × `limit`
+  (equal split when every weight is 0), `consumed` = the key's own counter in the quota store,
+  `remaining` = `fairShare` − `consumed`, floored at 0.
+- `blocks.schedules` lists the key's schedule windows (`open`/`closed`, `blackout` or
+  `outside-window`, `retryAfterSeconds`, reserve floors, and whether the window's budget is
+  spent); `blocks.modelCaps` lists its per-model hourly caps with consumption.
+- A key outside every pool of the provider gets 200 with `pools: []`; `availableModels` (the
+  `qtSd/` ids the key sees in `/v1/models`), `expiresAt` and `apiBaseUrl` are still filled.
+- `apiBaseUrl` is `OMNIROUTE_PUBLIC_API_BASE_URL`, then `OMNIROUTE_PUBLIC_BASE_URL`, else
+  `null`. It is never the request's own origin.
+
+### `status` and `reason`
+
+| `status`      | Meaning                                                                                                                                                                                                                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ok`          | A current reading.                                                                                                                                                                                                                                                                                                                       |
+| `stale`       | A cached account reading marked stale, or one whose reset time has passed since it was read. Numbers are kept. One model window whose reset time has passed marks the whole `modelWindows` group `stale`. For the key's own share of a `percent` window: the book was read without an account reading in the gate's cache to confirm it. |
+| `unavailable` | No reading; the numbers are `null`, never `0`. `reason` says why.                                                                                                                                                                                                                                                                        |
+
+| `reason`                          | When                                                                                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `store_unavailable`               | The quota store could not be read, or it cannot read attribution books.                                                                   |
+| `percent_attribution_unavailable` | The key's own share of a `percent` window: no attribution book exists yet for that account and window, or the book does not list the key. |
+| `percent_window_ended`            | The key's own share of a `percent` window: the book belongs to a plan window that has ended.                                              |
+| `account_not_used_by_key`         | The key's own share of a `percent` window: the account's connection is outside the key's allowed connections. Its book is not read.       |
+| `window_not_reported`             | The provider-limits cache has no reading for that plan window.                                                                            |
+| `connection_lookup_failed`        | The account's connection could not be read.                                                                                               |
+| `not_supported`                   | OmniRoute cannot read usage limits for the account's provider.                                                                            |
+| `fetch_failed`                    | No cached reading was usable and the provider-limits refresh failed.                                                                      |
+| `not_available`                   | The reading carries no usage windows, or the account has no reading at all.                                                               |
+
+When the quota store cannot be read, the store-backed fields of `blocks` (a schedule budget's
+`exhausted`, a model cap's `consumed` and `reached`) are `null` as well.
+
+### Errors
+
+Every response of this route, success or error, carries `Cache-Control: no-store`. A refusal
+that happens before the route runs does not carry it, for example the client API policy's 401
+or the IP filter's 403. Errors of the route use the standard error body with a fixed message: 400 (invalid
+provider), 401 (missing or invalid key), 403 (missing `self:usage`), 404 (flag off) and 500
+(`Failed to build quota view`). The 500 covers any failure once the request reaches the route,
+including the key lookup itself; its cause is logged on the server and never returned.
+
+### Limitations
+
+- `remaining` is the part of the key's fair share it has not used. It is not a guarantee. A key
+  may still be served beyond it while the pool has room. Once the pool's total reaches `limit`,
+  every key of the pool is refused, whatever its own `remaining`, and a key without
+  `self:account-quota` cannot see that total.
+- `remaining` does not take the allocation's absolute `cap` into account. Enforcement refuses the
+  key once its own consumption in a window of the cap's unit reaches the cap's value.
+- The account-level bar comes from the provider-limits cache and can lag the enforcement
+  decision by a few minutes. A reading whose reset time has passed is reported as `stale`.
+- Per-model windows (`modelWindows`) are reported only for providers that have a plan-window
+  mapping: Claude and Codex today. For other providers `modelWindows` is still present when
+  account data is shown, with an empty `windows` list.
+- The key's own share of a `percent` window is an estimate. It comes from the attribution book and
+  carries every limitation listed under "Percent dimensions: per-key attribution" above.
+- `consumed` is the number enforcement compares with the fair share. It is `attributed` plus
+  `external`, exactly. `attributed` is the part the book gives the key for the tokens it routed.
+  `external` is the key's part of the account's use that the pool's keys do not account for.
+- Both parts are sent only when the pool's `accountVisible` is true: the key has
+  `self:account-quota` and the provider is in its `sharedQuotaProviders`. A key without it gets
+  `consumed` alone, with the same `status` and `reason`.
+- With both parts and its own weight, a holder can work out the use made outside the pool that is
+  charged to the pool's keys. A holder with the account scope already sees the account total.
+- A key that routed nothing in the window can still read its external charge from `consumed`,
+  because its attributed part is then 0.
+- For example, a book opens at 0, with keys A and B at weight 50 each. Key A routes 900,000 tokens
+  and key B 100,000. The account then reaches 60% of a limit of 100. Then `attributed` is 54 for
+  key A and 6 for key B, and `external` is 0 for both.
+- The view reads the book and never writes its state. It does not open a book, and it never asks
+  the provider for a reading. With the Redis store, a read removes superseded revision fields in
+  the background, as the gate's reads do.
+- The share is `ok` only while the gate's cache holds a reading of the account. Without one it is
+  `stale`, so in a pool with no recent request it shows as possibly out of date.
+- Until a request goes through the pool, the share is unavailable. That request opens the book,
+  and the account's figure at that moment counts as use made outside the pool.
+- In a pool with several accounts, each account entry uses that account's own book and the limit
+  of one account. Enforcement scales both sides by the number of accounts, so the proportion is the
+  same.
+- Per-model windows carry no share for the key. The book keeps no per-model data.
+- Reserve floors of a schedule are not evaluated by the view: a schedule can show as `open`
+  while a request is refused with reason `schedule-reserve`.
+- When two pools of the same key share a connection, enforcement applies one of them, and the
+  view lists both.
+- There is no per-address limit on failed key attempts: behind a reverse proxy callers can share
+  one address (it depends on whether forwarded client addresses are trusted), so a lockout could
+  deny the route to every key holder. With `REQUIRE_API_KEY=true`, an invalid key is refused by
+  the client API policy before the route runs, with that policy's 401 body instead of this
+  route's.
+
+### Member usage
+
+An administrator can let key holders see how a window's use splits between the pool's members.
+The option is the pool's `memberBreakdown`, off by default. It is set in the pool wizard or with
+`PATCH /api/quota/pools/{id}`. `GET /api/quota/pools` and `GET /api/quota/pools/{id}` report it.
+
+A dimension of the view carries `members` only when all of these hold:
+
+- the pool's option is on
+- the pool has at most 20 allocated keys, and at least three of them can make requests: active,
+  not revoked, not banned and not past their expiry
+- the pool's `accountVisible` is true: the key has `self:account-quota` and the provider is in its
+  `sharedQuotaProviders`
+- on a `percent` window, the account's connection is one the key may use
+- the key's own share of that window was read: its `status` is not `unavailable`
+
+Otherwise `members` is absent. It is never an empty list.
+
+- Each slice is `{ slot, consumed, isYou }`. The response schema rejects any other property on a
+  slice, and a list of more than 20 slices. Slices are listed in slot order.
+- There is one slice per allocated key, including a key that can no longer make requests. A
+  member with no use shows a real zero.
+- Slot 1 is always the asking key, with `isYou` true. The other slot numbers are ranks of a keyed
+  hash. It is keyed with `API_KEY_SECRET` and covers the pool, the asking key and the member.
+- So the numbers do not line up between holders. For one holder they stay the same between
+  visits. They can change when a key joins or leaves the pool, or when that secret is rotated.
+- On a countable window a slice is the member's counter in the quota store, the same counter as
+  its own `consumed`.
+- On a `percent` window a slice is the member's `attributed` part, from the same book read as the
+  key's own share. Usage made outside the pool is never split into slices. That charge is split by
+  weight, so slices that carried it would show the weights.
+- Each view reads one value per other member and countable window, in parallel. On a `percent`
+  window the slices cost no read beyond the share's own book read. When one value cannot be read,
+  that window has no `members`, and the key's own share stays.
+- The option and the number of usable keys are read once per pool, and only for a key that may
+  see account data. A failing read of the option or of the usable-key count turns the bars off for
+  that pool. The server logs a warning, and the rest of the view is built.
+
+The bars carry no names or ids. They still tell a key holder things about the other members:
+
+- Holders can still match slices by their values.
+- A stable numbering lets a holder follow one member over time.
+- The number of slices shows how many keys are allocated in the pool.
+- In a pool of three keys, someone who knows what one key used can tell what the last key used.
+- When a pool drops below three usable keys, the bars disappear. Views taken earlier still show
+  what each member used.
+- On a countable window, the pool total minus the slices can show the use of keys that are no
+  longer allocated.
+- A member that shows zero on one account and use on another can show which member uses which
+  account.
+- In a countable pool with the `hard` policy, a slice that stops growing at a member's fair share
+  hints at that member's weight.
+
+### Usage series (`GET /api/v1/me/usage`)
+
+`GET /api/v1/me/usage?range=<range>` (also served at `/v1/me/usage`) returns the usage and cost
+of the calling key's own requests: totals, one entry per UTC day, per day and model, per model
+and per provider. It shares the flag, the authentication rules, the `self:usage` scope,
+`Cache-Control: no-store` and the error behavior of the quota route above. The key is checked
+before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed to build usage`).
+
+- `range` is one of `1d`, `7d`, `30d` (the default) or `90d`. Any other value, an empty value or
+  a repeated parameter is a 400. The set stops at `90d` to bound the cost of a call. The view
+  reads raw usage history only, never the daily summaries, which carry no key.
+- Rows are selected by the calling key's id. The key name column is never matched, and rows
+  recorded without a key id are never counted.
+- Building a series runs five grouped queries over the key's rows in the window. The built
+  series is reused for 60 seconds per key and range, and a reused call runs none. Its
+  `generatedAt` gives its age.
+- The window ends when the series is built. A row stamped later, for example by clock skew, is
+  not counted.
+- `coverage.retentionDays` is the operator's raw usage-history retention setting
+  (`retention.usageHistory` in the database settings). `coverage.truncatedByRetention` is true
+  when the requested range is longer than that setting. It compares the two numbers and does not
+  check whether rows are actually missing.
+- Provider is returned as recorded for the key's own requests. Model is the recorded name after
+  its last `/`, and rows are grouped by it. A combo request whose
+  every target was refused is recorded with the routing label as provider (the combo name, `auto`
+  or `combo`) and the model string the client sent. Other refused requests, for example by an
+  open circuit breaker, a model cooldown or a quota-parked skip, keep the target provider and
+  model.
+- Besides counts and costs, the response carries average latency, success rates and the times of
+  the first and last request.
+- `byModel` lists the 50 provider-and-model pairs with the most requests. With more pairs its
+  entries do not add up to `summary`, and `summary.uniqueModels` counts every recorded model
+  spelling. `byModelTruncated` is then true, and a model whose pairs fall on both sides of the
+  cut shows partial totals.
+- Two costs are reported. `costUsd` is the billed cost, as the usage analytics show it.
+  Flat-rate subscription providers, such as the Claude Code plan, count $0 there. `listPriceUsd`
+  is the same usage priced at list price, subscriptions included. A request whose model has no
+  price row counts its stored cost: a cost the provider reported, or one calculated when the
+  request was recorded. Only a request with neither counts 0, with no marker, so a total can be
+  partial.
+- The response contract is `src/shared/schemas/selfUsage.ts` (`SelfUsageSeries` in
+  `docs/openapi.yaml`).
+
+### Self-service page
+
+With `QUOTA_SELF_PANEL` on, `/quota/{provider}` is a public page. A key holder types an API key
+there and sees that key's pools for the provider. Each pool shows one card per pool window, with
+the pool's use for everyone and the key's own share. Each account of the pool has its own cards,
+with the account's use and the key's share. The account's use appears only when the key may see
+account data. The page also lists the per-model limits of each account and the key's own usage. A
+notice appears when a schedule blocks the key right now. A card lists every per-model cap of the
+key with its use, and marks the ones reached. `{provider}` is a provider id or its alias (`/quota/claude`, `/quota/cc`). An unknown
+provider, and every `/quota/*` path while the flag is off, answer 404. Pools on a custom OpenAI-
+or Anthropic-compatible node have no page. The API still answers for them.
+
+The page has no session. The key is sent only in the `Authorization` header of
+`GET /api/v1/me/quota/{provider}` and `GET /api/v1/me/usage`, never in a URL. A key the server
+accepts is kept in the tab's `sessionStorage`. With "Remember on this device" it is kept in
+`localStorage` instead, and "Forget key" removes it from both. A key the server rejects is
+removed from storage.
+
+A reading the API marks `stale` is shown as possibly out of date. A reading it marks
+`unavailable` is shown with its reason, never as zero.
+
+On percentage plans the page draws the key's own share when the API reports it. It says that the
+number is an estimate and names its two parts. Per-model limits show the account only.
+
+When a window carries `members`, its card also shows a bar with one segment per member, in slot
+order. The asking key's segment uses the accent colour. The other segments cycle through the
+theme's chart colours. A text legend lists every segment with its value, so nothing depends on
+colour. Segments are labelled `You` or `Member N`, where N is the slot.
+
+---
+
 ## Environment Variables
 
-| Variable                           | Default   | Description                                            |
-| ---------------------------------- | --------- | ------------------------------------------------------ |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Driver to use: `sqlite` or `redis`                     |
-| `QUOTA_STORE_REDIS_URL`            | _(empty)_ | Redis URL, e.g. `redis://localhost:6379`               |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` activates strict mode             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; multiplier for soft-policy combo score           |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Days before GC removes old `quota_consumption` buckets |
+| Variable                             | Default   | Description                                                    |
+| ------------------------------------ | --------- | -------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`                 | `sqlite`  | Driver to use: `sqlite` or `redis`                             |
+| `QUOTA_STORE_REDIS_URL`              | _(empty)_ | Redis URL, e.g. `redis://localhost:6379`                       |
+| `QUOTA_SATURATION_THRESHOLD`         | `0.5`     | 0..1; `>= threshold` activates strict mode                     |
+| `QUOTA_PERCENT_MIN_TOKENS_PER_POINT` | `1000`    | Tokens that explain at most one point of a percent plan window |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`     | `0.7`     | 0..1; multiplier for soft-policy combo score                   |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS`   | `14`      | Days before GC removes old `quota_consumption` buckets         |
 
 DB settings (`quotaStore.*`) override env vars.
 
@@ -368,3 +867,7 @@ Three tables added by migrations `078`, `079` and `085`:
 - `provider_plans` — manual provider plan overrides (dimensions JSON per connectionId).
 
 All tables added via idempotent `CREATE TABLE IF NOT EXISTS` migrations.
+
+The percent attribution book adds `quota_percent_ledger` (one row per pool, account and plan
+window) and `quota_percent_ledger_tokens` (one token counter per pool, account and API key).
+`src/lib/db/quotaPercentLedger.ts` reads and writes them.

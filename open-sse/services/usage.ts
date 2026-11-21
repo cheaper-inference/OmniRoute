@@ -44,6 +44,8 @@ import { getCursorUsage } from "./usage/cursor.ts";
 import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
 import { getClaudeUsage, getClaudePlanLabel } from "./usage/claude.ts";
+// Re-exported for the quota saturation cache, which dates Claude plan-window readings.
+export { getClaudeUsageEndpointReadAt } from "./usage/claude.ts";
 import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 // Re-exported para os testes kiro-* (importam de services/usage).
 export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";

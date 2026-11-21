@@ -29,6 +29,7 @@ export const PoolUpdateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   allocations: z.array(PoolAllocationSchema).optional(),
   exclusive: z.boolean().optional(),
+  memberBreakdown: z.boolean().optional(),
   groupId: z.string().optional(),
   connectionIds: z.array(z.string().min(1)).min(1).optional(),
 });

@@ -43,6 +43,8 @@ export interface FairShareInput {
   allocation: FairShareAllocation;
   /** consumedByThisKey[dimensionKeyString] = amount consumed by this key. */
   consumedByThisKey: Record<string, number>;
+  /** capConsumedByThisKey[dimensionKeyString] = amount the absolute cap is checked against. Defaults to consumedByThisKey. */
+  capConsumedByThisKey?: Record<string, number>;
   saturationThreshold: number; // default 0.5
 }
 
@@ -105,7 +107,7 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
     if (
       allocation.capValue !== undefined &&
       allocation.capUnit === dim.key.unit &&
-      consumed >= allocation.capValue
+      (input.capConsumedByThisKey?.[dKey] ?? consumed) >= allocation.capValue
     ) {
       return { kind: "block", reason: "cap-absolute" };
     }
