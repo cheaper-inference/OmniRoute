@@ -123,36 +123,22 @@ Valoarea implicită `KillMode=process` a runnerului lasă procesele `Runner.Work
   a fi încărcat de pe disc.
 - VPS-ul `.15` este destinat exclusiv omologării — nu rulează niciodată runnere CI.
 
-## Culoarul găzduit (agenți de execuție găzduiți de GitHub)
+## Banda găzduită ( alergători găzduiți de GitHub)
 
-Depozitul aparține organizației `cheaper-inference`, pe planul **Team**: **60 de
-joburi găzduite simultan**, partajate de fiecare depozit din organizație, de fiecare verificare PR,
-de fiecare flux de lucru declanșat de un push și de configurația implicită CodeQL. Cifrele de mai jos au fost măsurate pe
-planul **Pro** (40 de joburi găzduite simultan). Măsurat la 2026-10-18 în timpul unei
-campanii de îmbinare (~10 îmbinări/oră pe `release/v3.8.52`): **2.500 de rulări ale fluxurilor de lucru create în
-24 h**, 44 de push-uri către ramură în 6 h, **106 joburi găzduite în coadă**, în timp ce verificările PR au așteptat
-ore întregi, iar PR-urile au fost îmbinate fără acestea. Nouă fluxuri de lucru au fost declanșate la fiecare push către ramură:
+Depozitul aparține organizației `cheaper-inference`, pe** Echipă** plan:** 60 de locuri de muncă găzduite simultan** , partajat de fiecare depozit din organizație, fiecare verificare PR, fiecare flux de lucru declanșat prin push și configurarea implicită a CodeQL. Cifrele de mai jos au fost măsurate pe** Pro** plan (40 de locuri de muncă găzduite simultan). Măsurat pe 2026-10-18 în timpul unei campanii de fuziune (~ 10 merges/hour pe `release/v3.8.52`):** 2.500 de fluxuri de lucru create în 24 de ore** , 44 de împingeri la ramură în 6 ore,** 106 locuri de muncă găzduite în coadă** în timp ce verificările PR au așteptat ore în șir și PRs au fost îmbinate fără ele. Nouă fluxuri de lucru declanșate la fiecare împingere către ramură:
 
-| pentru fiecare push către `release/v*`      | joburi găzduite | rezultat în timpul furtunii                                    | începând cu 2026-10-18                                                            |
-| ------------------------------------------- | --------------: | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `ci.yml` (matrice completă)                 |      până la 30 | anulat de următorul push, 24 din 24 într-o zi                  | nu pornește la push-uri către `release/**` (rulare PR + Release-Green)            |
-| `quality.yml`                               |              ~6 | anulat, 23 din 23                                              | nu pornește la push-uri către `release/**`                                        |
-| `Release-Green` `--quick`                   |               0 | a rulat pe `omni-build`, 97 din 100 anulate                    | slot `omni-release`, nu este anulat niciodată, rularea în așteptare este comasată |
-| `Lock released branch`, `OpenSSF Scorecard` |               2 | câte o rulare în coadă pentru fiecare push                     | o rulare per referință (`tests/unit/build/hosted-lane-concurrency.test.ts`)       |
-| `Release acceptance` (raport în umbră)      |               1 | câte un `npm ci` găzduit per push, niciodată anulat            | neschimbat — candidat pentru un filtru `paths:`                                   |
-| `Publish to Docker Hub` → `Deploy to VPS`   |               2 | anulat la fiecare push; etapa amd64 concurează pe `omni-build` | neschimbat — canalul de implementare al proprietarului                            |
-| Configurația implicită CodeQL (`dynamic`)   |               4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per push | neschimbat — Settings → Code security; `c-cpp`/`python` nu scanează nimic aici    |
+| pe apăsare la `release/v*`                  | locuri de muncă găzduite | rezultatul sub furtună                                            | din 2026-10-18                                                                        |
+| ------------------------------------------- | -----------------------: | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `ci.yml` (matrice completă)                 |               până la 30 | anulat de următoarea împingere, 24 din 24 într-o zi               | nu a pornit pe `release/**` pushs (PR run + Release-Green)                            |
+| `quality.yml`                               |                       ~6 | anulat, 23 din 23                                                 | nu a început pe `release/**` împinge                                                  |
+| `Release-Green` `--quick`                   |                        0 | a rulat pe `omni-build`, a anulat 97 din 100                      | Slotul `omni-release`, nu a fost niciodată anulat, se prăbușește rularea în așteptare |
+| `Lock released branch`, `OpenSSF Scorecard` |                        2 | o alergare la coadă pe apăsare                                    | o rundă per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)                  |
+| `Release acceptance` (raport umbră)         |                        1 | un `npm ci` găzduit per push, niciodată anulat                    | candidat — neschimbat pentru un filtru `paths:`                                       |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                        2 | anulat la apăsare; piciorul amd64 concurează pe `omni-build`      | canalul de implementare al proprietarului — neschimbat                                |
+| Configurare implicită CodeQL (`dynamic`)    |                        4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per apăsare | neschimbat — Setări → Securitate cod; `c-cpp`/`python` scanează nimic aici            |
 
-`tests/unit/build/push-storm-diet.test.ts` fixează declanșatorul la push doar pe `main` pentru `ci.yml` și
-`quality.yml`. Efect secundar: Codecov nu mai primește o încărcare de bază la fiecare push către release (pasul
-este informativ și folosește `continue-on-error`); pragul de acoperire din depozit și comentariul PR nu sunt
-afectate.
+`tests/unit/build/push-storm-diet.test.ts` fixează declanșatorul de apăsare `main` -only al `ci.yml` și `quality.yml`. Efect secundar: Codecov nu mai primește o încărcare de bază pentru fiecare push de lansare (pasul este informațional și `continue-on-error`); poarta de acoperire in-repo și comentariul PR nu sunt afectate.
 
-**Mai multă capacitate autogăzduită nu rezolvă coada găzduită.** Mașina de dezvoltare
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) ar putea găzdui un agent de execuție, dar sesiunile agenților
-îi mențin deja încărcarea la 20–26, containerul agentului nu are un daemon Docker, iar culoarul saturat
-este cel găzduit. Mașina `.113` avea 71 GB liberi și o încărcare de 5–8 în același moment; constrângerea
-sa este bugetul de memorie per listener menționat mai sus (plafon de 6 listenere), nu procesorul. Pârghiile
-rămase țin de proces: integrați PR-urile campaniei prin coada Mergify (`label=queue`, loturile partajează
-o singură rulare CI `merge_group` în locul unei rulări per PR plus una per push), reduceți limbajele din
-configurația implicită CodeQL și filtrați `release-acceptance.yml` după fișierele pe care le citește.
+**O capacitate mai mare de auto-găzduire nu fixează coada găzduită.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) ar putea găzdui un runner, dar sesiunile de agent își păstrează deja încărcarea la 20–26, containerul de agent nu are demon Docker, iar banda saturată este cea găzduită. Cutia `.113` avea 71 GB liber și încărcă 5–8 în același moment; constrângerea sa este bugetul de memorie per ascultător de mai sus (plafonul de 6 ascultători), nu CPU. Pârghiile rămase sunt cele de proces: land campaign PRs prin coada Mergify (`label=queue`, loturile partajează o rulare `merge_group` CI în loc de o rulare per PR plus una pe apăsare), tăiați limbajele de configurare implicită CodeQL și filtrați `release-acceptance.yml` după fișierele pe care le citește.
+
+> **2026-11-19: coada de îmbinare Mergify este retrasă** (decizia proprietarului). `.mergify.yml` nu mai definește o coadă și refuză comenzile Mergify care îmbină sau rescriu o cerere de extragere. Lansările PRs sunt îmbinate manual sub setul de reguli ale depozitului „Necesită porți verzi pentru lansarea activă” (`Gate / CI` + `Gate / Quality`) până când omni-queue rulează în modul live, iar apoi prin omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Pârghia Mergify de mai sus nu mai există.

@@ -46,6 +46,17 @@ export interface TaskRoutingConfig {
   /** Operator-configurable detection patterns — see TaskPatternOverrides. */
   patternOverrides?: TaskPatternOverrides;
   detectionEnabled: boolean;
+  /**
+   * If specified, only intercept when originalModel is one of these IDs or one of their
+   * ":" variants / "/" children.
+   * (#20294)
+   */
+  targetModels?: string[];
+  /**
+   * Models or combos that must never be overridden.
+   * (#20294)
+   */
+  excludedModels?: string[];
   stats: { detected: number; routed: number };
 }
 
@@ -234,6 +245,8 @@ export function getTaskRoutingConfig(): TaskRoutingConfig {
   return {
     ...current,
     taskModelMap: { ...current.taskModelMap },
+    ...(current.targetModels ? { targetModels: [...current.targetModels] } : {}),
+    ...(current.excludedModels ? { excludedModels: [...current.excludedModels] } : {}),
     stats: { ...current.stats },
   };
 }
@@ -385,6 +398,23 @@ export function detectTaskType(body: any): TaskType {
   return "chat";
 }
 
+/** Characters that end a model id segment: a variant (":fast") or a path ("openai/"). */
+const MODEL_SCOPE_BOUNDARY = /[:/]/;
+
+/**
+ * A scoped entry covers the exact id and its variants or children ("auto/dev" ->
+ * "auto/dev:fast", "openai" -> "openai/gpt-4o"), but never a different model it
+ * merely prefixes ("openai/gpt-4o" must not cover "openai/gpt-4o-mini") (#20294).
+ */
+function matchesModelScope(modelId: string, entry: string): boolean {
+  if (modelId === entry) return true;
+  if (!entry || !modelId.startsWith(entry)) return false;
+  return (
+    MODEL_SCOPE_BOUNDARY.test(entry.charAt(entry.length - 1)) ||
+    MODEL_SCOPE_BOUNDARY.test(modelId.charAt(entry.length))
+  );
+}
+
 /**
  * Apply task-aware model override.
  * Returns the original model if routing is disabled or no override found.
@@ -399,6 +429,26 @@ export function applyTaskAwareRouting(
 ): { model: string; taskType: TaskType; wasRouted: boolean } {
   const config = getConfig();
   if (!config.enabled || !config.detectionEnabled) {
+    return { model: originalModel, taskType: "chat", wasRouted: false };
+  }
+
+  const modelId = typeof originalModel === "string" ? originalModel : "";
+
+  // Target model filter: if specified, only intercept matching models (#20294)
+  if (
+    config.targetModels &&
+    config.targetModels.length > 0 &&
+    !config.targetModels.some((m) => matchesModelScope(modelId, m))
+  ) {
+    return { model: originalModel, taskType: "chat", wasRouted: false };
+  }
+
+  // Excluded model filter: models or combos that must never be overridden (#20294)
+  if (
+    config.excludedModels &&
+    config.excludedModels.length > 0 &&
+    config.excludedModels.some((m) => matchesModelScope(modelId, m))
+  ) {
     return { model: originalModel, taskType: "chat", wasRouted: false };
   }
 

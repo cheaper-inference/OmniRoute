@@ -111,6 +111,13 @@ export const CODEX_NATIVE_UNPREFIXED_MODELS = new Set([
   "gpt-6.1-sol-high",
   "gpt-6.1-sol-medium",
   "gpt-6.1-sol-low",
+  "gpt-6.1-terra",
+  "gpt-6.1-terra-ultra",
+  "gpt-6.1-terra-max",
+  "gpt-6.1-terra-xhigh",
+  "gpt-6.1-terra-high",
+  "gpt-6.1-terra-medium",
+  "gpt-6.1-terra-low",
   "gpt-5.6-sol",
   "gpt-5.6-sol-ultra",
   "gpt-5.6-sol-max",
@@ -309,13 +316,35 @@ async function getActiveProviderSet() {
   }
 }
 
+// The lookup scans every connection's model catalog with json_each, so a repeat of the same
+// bare id must not reach the database. Entries are valid for one model-catalog version: every
+// connection or catalog write bumps it. Model ids come from clients, so the map is bounded.
+const SYNCED_PROVIDERS_CACHE_MAX = 1000;
+let syncedProvidersCacheVersion = -1;
+const syncedProvidersCache = new Map<string, string[]>();
+
 async function getActiveSyncedProvidersForModel(modelId: string) {
   try {
+    const { getModelCatalogCacheVersion } = await import("@/lib/db/readCache");
+    const version = getModelCatalogCacheVersion();
+    if (version !== syncedProvidersCacheVersion) {
+      syncedProvidersCache.clear();
+      syncedProvidersCacheVersion = version;
+    }
+    const cached = syncedProvidersCache.get(modelId);
+    if (cached) return cached;
+
     const { getActiveProvidersWithSyncedModel } = await import("@/lib/db/models");
-    const providers = await getActiveProvidersWithSyncedModel(modelId);
-    return providers
+    const providers = (await getActiveProvidersWithSyncedModel(modelId))
       .map(resolveProviderAlias)
       .filter((provider): provider is string => typeof provider === "string");
+    // A write can land while this lookup awaits the query; a concurrent lookup may then already
+    // have moved the map to the new version. Only cache a result read under the current version.
+    if (getModelCatalogCacheVersion() === version) {
+      if (syncedProvidersCache.size >= SYNCED_PROVIDERS_CACHE_MAX) syncedProvidersCache.clear();
+      syncedProvidersCache.set(modelId, providers);
+    }
+    return providers;
   } catch {
     return [];
   }

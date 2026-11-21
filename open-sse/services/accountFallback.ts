@@ -138,7 +138,10 @@ import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUp
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWalletCredits.ts";
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
-import { isCreditsExhaustedForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
+import {
+  isCreditsExhaustedForStatus,
+  quotaTextSignalCountsForStatus,
+} from "./accountFallback/creditsExhaustedForStatus.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
@@ -323,6 +326,13 @@ export const ACCOUNT_SUSPENDED_BILLING_PATTERNS = [
   /\bsuspended\b[\s\S]{0,120}?\b(?:spending limit|billing|invoice|payment)\b/i,
   /\b(?:spending limit|billing|invoice|payment)\b[\s\S]{0,120}?\bsuspended\b/i,
 ];
+
+// DashScope (Alibaba Model Studio) reports an unpaid account as 400/403 with code `Arrearage`
+// or `AccessDenied.Unpurchased`. Both stay true until the owner pays, so the key must park.
+// Anchored on the vendor code or its exact sentence, and only on 400/403: a 429 that quotes
+// "good standing" is a throttle, and generic AccessDenied / model_not_found never match.
+export const DASHSCOPE_DEAD_ACCOUNT_RE =
+  /\barrearage\b|please make sure your account is in good standing|accessdenied\.unpurchased|please make sure you are eligible for using the model/i;
 
 // Context overflow patterns — the prompt exceeds the model's maximum context length.
 // Different providers phrase this differently. Used to decide whether a 400 error
@@ -2144,8 +2154,14 @@ export function checkFallbackError(
   }
 
   if (errorText) {
-    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure
-    if (isAccountDeactivated(errorStr)) {
+    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure.
+    // A 408/429/5xx body that merely quotes a ban phrase is a transient failure, not a ban.
+    if (
+      status !== HTTP_STATUS.REQUEST_TIMEOUT &&
+      status !== HTTP_STATUS.RATE_LIMITED &&
+      status < HTTP_STATUS.SERVER_ERROR &&
+      isAccountDeactivated(errorStr)
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: 365 * 24 * 60 * 60 * 1000, // 1 year = effectively permanent
@@ -2174,6 +2190,23 @@ export function checkFallbackError(
     // treat it like a credits-exhausted account so it stops being retried
     // every few minutes until billing is fixed (see ACCOUNT_SUSPENDED_BILLING_PATTERNS).
     if (isAccountSuspendedForBilling(errorStr)) {
+      return {
+        shouldFallback: true,
+        cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
+        reason: RateLimitReason.QUOTA_EXHAUSTED,
+        creditsExhausted: true,
+      };
+    }
+
+    // DashScope unpaid account (400 Arrearage / 403 AccessDenied.Unpurchased): park the key as
+    // credits_exhausted instead of retrying a dead key every few seconds.
+    if (
+      (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.FORBIDDEN) &&
+      (DASHSCOPE_DEAD_ACCOUNT_RE.test(errorStr) ||
+        DASHSCOPE_DEAD_ACCOUNT_RE.test(
+          `${structuredError?.code ?? ""} ${structuredError?.type ?? ""}`
+        ))
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
@@ -2306,8 +2339,20 @@ export function checkFallbackError(
     // UNCONDITIONALLY (not gated by shouldUseQuotaSignal) because it targets
     // apikey-category providers like ollama-cloud, which the oauth-only
     // shouldUseQuotaSignal gate deliberately excludes from the subscription
-    // check above.
-    if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
+    // check above. On 400 none of these quota TEXT signals counts without a structured
+    // code or an allow-listed provider: the message may quote the caller's own input.
+    const quotaTextCounts = quotaTextSignalCountsForStatus(
+      status,
+      provider,
+      errorStr,
+      structuredError?.code
+    );
+    if (
+      quotaTextCounts &&
+      shouldUseQuotaSignal &&
+      !isCreditsExhausted(errorStr) &&
+      !isDailyQuotaExhausted(errorStr)
+    ) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
         getUpstreamRetryHint,
@@ -2317,14 +2362,17 @@ export function checkFallbackError(
       );
       if (subResult) return subResult;
     }
-    const weeklyResult = buildWeeklyQuotaFallback(errorStr, undefined, provider);
+    const weeklyResult = quotaTextCounts
+      ? buildWeeklyQuotaFallback(errorStr, undefined, provider)
+      : null;
     if (weeklyResult) return weeklyResult;
     // Issue #7071 (session usage cap) is the same sibling gap as #3709 above —
     // runs UNCONDITIONALLY for the same reason: apikey-category providers
     // like ollama-cloud are excluded from the oauth-only shouldUseQuotaSignal
     // gate.
-    const sessionResult =
-      buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr);
+    const sessionResult = quotaTextCounts
+      ? (buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr))
+      : null;
     if (sessionResult) return sessionResult;
 
     const detectedRetryHint = detectRetryHint();
@@ -2336,6 +2384,7 @@ export function checkFallbackError(
         ? "body"
         : undefined;
     if (
+      quotaTextCounts &&
       shouldUseQuotaSignal &&
       quotaResetHintMs &&
       classifyErrorText(errorStr) === RateLimitReason.QUOTA_EXHAUSTED

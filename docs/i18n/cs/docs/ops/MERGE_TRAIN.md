@@ -4,38 +4,22 @@
 
 ---
 
-Od verze v3.8.49 (WS3.2/WS3.4 plánu kvality/rychlosti) je výchozí cestou slučování
-zkontrolovaných PR do `release/vX.Y.Z` **fronta slučování Mergify** (`.mergify.yml`);
-níže zdokumentovaný **ruční merge-train** je ZÁLOŽNÍ postup — používá se během incidentů,
-zmrazení vydání nebo pokud se někdy změní plán Mergify Open Source.
+> **2026-11-19: fronta sloučení Mergify je vyřazena** (rozhodnutí vlastníka). `.mergify.yml` již nedefinuje frontu a odmítá příkazy Mergify, které slučují nebo přepisují požadavek na stažení. Vydání PRs jsou sloučena ručně pod sadou pravidel úložiště "Vyžadovat zelené brány u aktivního vydání" (`Gate / CI` + `Gate / Quality`), dokud omni-queue běží v živém režimu, a poté prostřednictvím omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Části Sloučit níže popisují frontu tak, jak byla.
 
-## Výchozí cesta: fronta Mergify
+Od verze 3.8.49 (WS3.2/WS3.4 plánu quality/velocity ) je výchozí slučovací cesta pro revidované PRs do `release/vX.Y.Z`** Sloučit frontu sloučení** (`.mergify.yml`); a** ruční slučovací vlak** níže je zdokumentováno FALLBACK — používané během incidentů, zamrznutí vydání nebo pokud se plán Mergify Open Source někdy změní.
 
-1. PR je zkontrolován kampaněmi, získá zelený stav a je schválen předslučovací ⭐
-   bránou vlastníka (report + rozhodnutí pro každou položku — viz `/merge-prs`, krok 0.75).
-2. Vlastník (nebo relace jednající na základě rozhodnutí vlastníka) přidá štítek **`queue`**.
-   Tento štítek JE schválením sloučení; Mergify jej pouze provede.
-3. Mergify ověřuje PR zařazené do fronty **sériově** (jeden po druhém) pomocí rychlých
-   kontrol a slučuje je (squash). Dávkové zpracování + automatické půlení vyžaduje
-   placenou úroveň Mergify („Cannot use Merge Queue batch“ u bezplatného plánu, #7220),
-   proto `.mergify.yml` nenastavuje žádný `batch_size`; dávkové zpracování zůstává
-   úlohou níže popsaného ručního slučovacího vlaku. PR, jehož kontroly stále čekají
-   po uplynutí `checks_timeout` (240 min = 2× naměřený p95 pro `quality.yml`), je
-   odebrán z fronty, aby ji nezablokoval.
-4. Po sloučení průběžný workflow kontroly zeleného stavu vydání ověří nový vrchol
-   při pushi a v případě, že kombinace způsobila regresi, otevře problém s uvedením
-   původu (nikdy neprovádí automatický revert).
+## Výchozí cesta: fronta Sloučit
 
-Ochranná pravidla (odpovídají přísným pravidlům č. 21/22 v `CLAUDE.md`):
+1. PR je reviewed/greened podle kampaní a schváleno vlastníkovou bránou ⭐ před sloučením (rozhodnutí + pro jednotlivé položky — viz `/merge-prs` krok 0.75).
+2. Vlastník (nebo relace jednající na základě rozhodnutí vlastníka) aplikuje**`queue`** označení. Štítek IS schválení sloučení; Mergify jej pouze provede.
+3. Mergify ověřuje PRs ve frontě** sériově** (jeden po druhém) proti rychlým branám a spojím (squash). Dávkování automatického půlení + je placená úroveň Mergify („Nelze použít dávku Merge Queue“ u bezplatného plánu, #7220), takže `.mergify.yml` nenastavuje žádné `batch_size`; dávkování zůstává úkolem ručního slučovacího vlaku níže. PR, jehož kontroly stále čekají na zpracování po `checks_timeout` (240 min = 2 × naměřené p95 `quality.yml`), je vyřazeno z fronty namísto zastavení fronty.
+4. Po sloučení ověřuje nepřetržitý zelený pracovní postup nový tip při push a otevře problém s přiřazením, pokud kombinace regrese (nikdy se nevrací automaticky).
 
-- **Probíhá zmrazení vydání** → NEPŘIDÁVEJTE štítky k PR cílícím na zmrazenou větev;
-  nejprve je přesměrujte na aktivní `release/vX+1`.
-- **Rozpracovaný PR jiné relace** → nikdy k němu nepřidávejte štítek; pouze vlastnící
-  relace zařazuje svou práci do fronty.
-- Změny pouze v testech a PR se štítkem `hotfix` již používají omezenou sadu CI
-  kontrol (viz `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); podmínky fronty akceptují
-  libovolnou sadu kontrol, která se skutečně spustila (`#check-failure=0` +
-  `#check-pending=0`).
+Zábradlí (zrcadlo `CLAUDE.md` Hard Rules #21/#22):
+
+- **Uvolněte zmrazení otevřené** → do NOT štítek PRs zacílení na zmrazenou větev; přesměrujte nejprve na aktivní `release/vX+1`.
+- **PR další relace za letu** → nikdy neoznačte; pouze vlastnící relace řadí svou vlastní práci do fronty.
+- Rozdíly pouze pro testy a `hotfix` -labeled PRs již běží snížené CI (viz `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); podmínky fronty přijímají jakoukoli kontrolní sadu, která skutečně proběhla (`#check-failure=0` + `#check-pending=0`).
 
 ## Záložní postup: ruční merge-train
 

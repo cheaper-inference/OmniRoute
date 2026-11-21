@@ -8,7 +8,7 @@ import {
 import {
   generateAntigravityRequestId,
   getAntigravityEnvelopeUserAgent,
-  getAntigravitySessionId,
+  getAntigravityConversationSessionId,
 } from "../../services/antigravityIdentity.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import {
@@ -228,6 +228,23 @@ type GeminiBaseOptions = {
   keepMixedGoogleSearchCallable?: boolean;
 };
 
+const BILLING_LINE_RE = /^x-anthropic-billing-header:[^\n]*(?:\r?\n)?/i;
+
+/**
+ * Drop Claude Code's `x-anthropic-billing-header:` line from a system message. It rotates every
+ * turn, so it breaks the prompt prefix cache, and it means nothing to Gemini. Strip each text part
+ * on its own: extractTextContent joins parts without a separator.
+ */
+function stripBillingLine(content: unknown): unknown {
+  if (typeof content === "string") return content.replace(BILLING_LINE_RE, "");
+  if (!Array.isArray(content)) return content;
+  return content.map((part) =>
+    part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string"
+      ? { ...part, text: (part as { text: string }).text.replace(BILLING_LINE_RE, "") }
+      : part
+  );
+}
+
 // Core: Convert OpenAI request to Gemini format (base for all variants)
 function openaiToGeminiBase(
   model: string,
@@ -261,13 +278,14 @@ function openaiToGeminiBase(
   }
 
   // Generation config
-  if (body.temperature !== undefined) {
+  const allowSampling = !/(?:^|\/)gemini-4(?:$|[-.])/i.test(model);
+  if (allowSampling && body.temperature !== undefined) {
     result.generationConfig.temperature = body.temperature;
   }
-  if (body.top_p !== undefined) {
+  if (allowSampling && body.top_p !== undefined) {
     result.generationConfig.topP = body.top_p;
   }
-  if (body.top_k !== undefined) {
+  if (allowSampling && body.top_k !== undefined) {
     result.generationConfig.topK = body.top_k;
   }
   // `stop: null` is how many OpenAI-compatible clients serialize "no stop"; wrapping it
@@ -475,7 +493,7 @@ function openaiToGeminiBase(
       const content = msg.content;
 
       if (role === "system" && messages.length > 1) {
-        const systemText = typeof content === "string" ? content : extractTextContent(content);
+        const systemText = extractTextContent(stripBillingLine(content));
         if (systemText) {
           if (!result.systemInstruction) {
             result.systemInstruction = {
@@ -665,11 +683,19 @@ function openaiToGeminiBase(
               }
               name = sanitizeToolName(name);
 
-              toolParts.push({
+              const converted = Array.isArray(resp) ? convertOpenAIContentToParts(resp) : [];
+              const media = converted.filter((part) => part.inlineData || part.fileData);
+              const resultData = media.length
+                ? converted
+                    .filter((part) => typeof part.text === "string")
+                    .map((part) => part.text)
+                    .join("\n")
+                : resp;
+              toolParts.push(...media, {
                 functionResponse: {
                   ...(toolNameOptions.stripFunctionCallId ? {} : { id: fid }),
                   name: name,
-                  response: { result: sanitizeFunctionResponseData(resp) },
+                  response: { result: sanitizeFunctionResponseData(resultData) },
                 },
               });
             }
@@ -885,6 +911,26 @@ export function openaiToCloudCodeGeminiRequest(
   return request;
 }
 
+/**
+ * Prepend client system parts to the first user message so they still guide the model's
+ * behavior early in the conversation (#9030). A history that opens with a model turn gets a new
+ * user turn instead: a system text there would read as a model utterance.
+ */
+function prependClientSystemParts(
+  request: CloudCodeEnvelope["request"],
+  clientParts: GeminiPart[]
+) {
+  if (clientParts.length === 0) return;
+  const first = request.contents?.[0];
+  if (first && first.role === "user") {
+    first.parts.unshift(...clientParts);
+  } else if (first) {
+    request.contents.unshift({ role: "user", parts: [...clientParts] });
+  } else {
+    request.contents = [{ role: "user", parts: [...clientParts] }];
+  }
+}
+
 function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   // Fall back to providerSpecificData.projectId — some connections (and post-refresh
   // credentials) store it there rather than at the top level, which otherwise produced a
@@ -910,7 +956,10 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
     project: projectId,
     requestId: generateAntigravityRequestId(),
     request: {
-      sessionId: getAntigravitySessionId(credentials),
+      sessionId: getAntigravityConversationSessionId(
+        credentials,
+        (credentials as { _antigravitySessionKey?: string } | null)?._antigravitySessionKey
+      ),
       contents: cloudCodeRequest.contents,
       systemInstruction: cloudCodeRequest.systemInstruction,
       generationConfig: applyAntigravityGenerationDefaults(cloudCodeRequest.generationConfig),
@@ -934,16 +983,7 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   const defaultPart: GeminiPart = { text: ANTIGRAVITY_DEFAULT_SYSTEM };
   const clientParts = envelope.request.systemInstruction?.parts?.slice() ?? [];
   envelope.request.systemInstruction = { role: "system", parts: [defaultPart] };
-
-  if (clientParts.length > 0) {
-    // Prepend client system parts to the first user message so they still guide
-    // the model's behavior early in the conversation.
-    if (envelope.request.contents && envelope.request.contents.length > 0) {
-      envelope.request.contents[0].parts.unshift(...clientParts);
-    } else {
-      envelope.request.contents = [{ role: "user", parts: [...clientParts] }];
-    }
-  }
+  prependClientSystemParts(envelope.request, clientParts);
 
   // Strip Gemini built-in tool *names* out of functionDeclarations — but only while
   // a native grounding entry (e.g. `{ googleSearch: {} }`) is actually present.
