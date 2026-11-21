@@ -52,6 +52,7 @@ import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
 import { useCodexResetCreditRedemption } from "./useCodexResetCreditRedemption";
+import { useQuotaWindowAlerts } from "./useQuotaWindowAlerts";
 import { PROVIDER_LABEL, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
 import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
@@ -350,6 +351,8 @@ export default function ProviderLimits({
     setLastRefreshedAt,
     confirmAvailabilityChange
   );
+  // Opt-in toasts for low quota windows and reset credits about to expire.
+  useQuotaWindowAlerts({ quotaSnapshot: quotaData, connections, emailsVisible });
 
   // Only the active field is confirmed by this write; all other runtime evidence is retained.
   const handleToggleActive = useCallback(

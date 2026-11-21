@@ -418,6 +418,13 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  // Opt-in dashboard toasts for low quota windows and reset credits about to
+  // expire. Consumes nothing (see src/lib/db/settings.ts); default false there.
+  codexQuotaAlerts: z
+    .object({
+      enabled: z.boolean().optional(),
+    })
+    .optional(),
   responsesPreviousResponseIdMode: z.enum(RESPONSES_PREVIOUS_RESPONSE_ID_MODES).optional(),
   // Routing settings (#134)
   fallbackStrategy: accountFallbackStrategySchema.optional(),
