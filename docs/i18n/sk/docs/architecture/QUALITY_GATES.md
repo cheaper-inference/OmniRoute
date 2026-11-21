@@ -29,17 +29,19 @@ Každý doklad JSON identifikuje odhlásený SHA, spustenie pracovného postupu 
 
 ### Zlúčiť front
 
+> **2026-11-19: Zlučovací front Mergify je vyradený** (rozhodnutie vlastníka). `.mergify.yml` už nedefinuje front a odmieta príkazy Mergify, ktoré spájajú alebo prepisujú požiadavku na stiahnutie. Vydania PRs sú zlúčené ručne pod sadou pravidiel úložiska "Vyžadovať zelené brány pri aktívnom vydaní" (`Gate / CI` + `Gate / Quality`), kým omni-queue beží v živom režime, a potom cez omni-queue ( [OMNI_QUEUE.md](../ops/OMNI_QUEUE.md) ). Spracovanie pracovného toku konceptov Mergify opísané nižšie je stále v `ci.yml` a `quality.yml`, ale už sa neotvára žiadny koncept Mergify.
+
 Označenie `queue` odošle PR do frontu Mergify (`.mergify.yml`). Mergify otvorí koncept PR na vetve `mergify/merge-queue/`, CI tam spustí úplný výber a pôvodný PR sa zlúči, keď prejdú `Gate / CI`, `Gate / Quality` a `Merge integrity (changelog + generated skills)`.
 
-Mergify zapíše svoj súhrn frontu do popisu konceptu a ďalšie aplikácie ho môžu tiež upraviť. Udalosť `pull_request` `edited` na takomto návrhu má svoju vlastnú skupinu súbežnosti (`-queue-edit-<run_id>`), takže nemôže zrušiť skutočný priebeh návrhu a preskočí bránu a maticu. Stále beží iba `Merge integrity`. Úloha vynechanej brány nesie iný názov kontroly, pretože Mergify načíta vynechané `Gate / CI` ako neúspešnú kontrolu a zlikviduje PR.
+Mergify zapíše svoj súhrn frontu do popisu konceptu a ďalšie aplikácie ho môžu tiež upraviť. Udalosť `pull_request` `edited` na takomto návrhu má svoju vlastnú skupinu súbežnosti (`-queue-edit-<run_id>`), takže nemôže zrušiť skutočný priebeh návrhu a preskočí bránu a maticu. Stále beží iba `Merge integrity`. Úloha vynechanej brány nesie iný názov kontroly, pretože Mergify načíta vynechané `Gate / CI` ako neúspešnú kontrolu a odstráni PR.
 
 Po vyradení z frontu nemusí push vždy znova zaradiť PR. Komentujte to `@mergifyio queue`.
 
 ### Zachovaný dôkaz v akceptačnom reduktore
 
-`scripts/quality/validate-release-acceptance.mjs` znižuje dodaný plán a jeho manifesty; nestanovuje, že plán pokrýva celý proces uvoľňovania. Jeho správy explicitne stanovujú `releaseAcceptance: false`, aj keď je plán `VERIFIED`. Pracovný postup `release-acceptance.yml` stále používa tieňové príslušenstvo, nie skutočné potvrdenie o zostavení, balíku, zavádzaní alebo propagácii.
+`scripts/quality/validate-release-acceptance.mjs` znižuje dodaný plán a jeho manifesty; nestanovuje, že plán pokrýva celý proces uvoľňovania. Jeho správy explicitne stanovujú `releaseAcceptance: false`, aj keď je plán `VERIFIED`. Pracovný postup `release-acceptance.yml` stále používa tieňové svietidlá, nie skutočné potvrdenie o zostavení, balíku, zavádzaní alebo propagácii.
 
-CLI vyžaduje `--evidence-root` na overenie zachovaných dôkazov. Súbory sú rozlíšené ako `<evidence-root>/<artifact_id>/<member>` a hašované ako SHA-256. Záznam PASS bez dôkazov, chýbajúci alebo zmenený súbor, nebezpečná cesta alebo symbolický odkaz bráni overeniu. Chýbajúce súbory nie sú ekvivalentom prázdnych úspešných protokolov. Existujúce kontroly SHA/run/attempt zostávajú nezávislé: zhodné bajty nemôžu zachrániť zastaraný príjem. Integrita súboru nie je dôkazom pravosti vykonania alebo propagácie artefaktu.
+CLI vyžaduje `--evidence-root` na overenie zachovaných dôkazov. Súbory sú rozlíšené ako `<evidence-root>/<artifact_id>/<member>` a hašované ako SHA-256. Záznam PASS bez dôkazov, chýbajúci alebo zmenený súbor, nebezpečná cesta alebo symbolický odkaz bránia overeniu. Chýbajúce súbory nie sú ekvivalentom prázdnych úspešných protokolov. Existujúce kontroly SHA/run/attempt zostávajú nezávislé: zhodné bajty nemôžu zachrániť zastaraný príjem. Integrita súboru nie je dôkazom pravosti vykonania alebo propagácie artefaktu.
 
 ### Inventár statického skenovania
 
@@ -47,7 +49,7 @@ Verzovaný inventár npm-alias a členstvo v statickom skenovaní sú dostupné 
 
 Použite `npm run quality:scan -- --list` alebo `npm run quality:scan:fast -- --list` na kontrolu vybratých aliasov bez ich vykonania. Runner vyvolá vstupný bod npm, takže jeho runtime (vrátane Bun ak je nakonfigurované) sa zachová. Manifest zaznamenáva aliasy mimo týchto profilov, ktoré sa vyvolávajú samostatne, a príkazy údržby sú v profiloch skenovania iba na čítanie zakázané.
 
-Tieto profily pokrývajú iba statické skenovanie. Necertifikujú testy produktu, pokrytie, balenie, externé kontroly ani úplné prijatie kandidáta na uvoľnenie. Prijatie pracovného toku používa prepojené `config/quality/admission-policy.json` a `scripts/quality/admission-verdict.mjs`. Profily pozorovateľa uvoľnenia zostávajú oddelené; nezávisle kontrolovať ich príslušné šeky a potvrdenky. Úplné statické príkazy pozorovateľa sú deklarované v `config/quality/release-green-static-profile.json`, vrátane `audit:deps`, výberu testu mutácie a kontroly prekladu. Loader overuje príkazy npm voči package.json a modelovaným deklaráciám CI/Quality ; odmieta drift namiesto spustenia tokenov shellu ako argumentov. Požadovaný výstup skenera SKIP/INCOMPLETE nemôže vytvoriť PASS. Profil zaznamenáva svoje externé vylúčenia a nenahrádza hostené pokrytie, testovacie matrice, balík alebo dôkazy o nasadení. Nižšie uvedený súpis prózy je odkazom, nie dôkazom, že brána skutočne bežala.
+Tieto profily pokrývajú iba statické skenovanie. Necertifikujú testy produktu, pokrytie, balenie, externé kontroly ani úplné prijatie kandidáta na uvoľnenie. Prijatie pracovného toku používa prepojené `config/quality/admission-policy.json` a `scripts/quality/admission-verdict.mjs`. Profily pozorovateľa uvoľnenia zostávajú oddelené; nezávisle kontrolovať ich príslušné šeky a potvrdenky. Úplné statické príkazy pozorovateľa sú deklarované v `config/quality/release-green-static-profile.json`, vrátane `audit:deps`, výberu testu mutácie a kontroly prekladu. Zavádzač overuje príkazy npm voči deklaráciám package.json a modelovaným CI/Quality ; odmieta drift namiesto spustenia tokenov shellu ako argumentov. Požadovaný výstup skenera SKIP/INCOMPLETE nemôže vytvoriť PASS. Profil zaznamenáva svoje externé vylúčenia a nenahrádza hostované pokrytie, testovacie matrice, balík alebo dôkaz o nasadení. Nižšie uvedený súpis prózy je odkazom, nie dôkazom, že brána skutočne bežala.
 
 Skripty fungujú pod `scripts/check/` (politické brány) a `scripts/quality/` (ratchet engine). Zdroj pravdy CI je `.github/workflows/ci.yml`.
 
@@ -66,7 +68,7 @@ Skripty fungujú pod `scripts/check/` (politické brány) a `scripts/quality/` (
 
 `npm run check:forgotten-sibling-tests` beží ako poradný krok `Fast Quality Gates` a opätovne používa prekladač importu za mapou testovacieho vplyvu. Pre každý zmenený produkčný modul hlási deterministické reťazce `changed module/symbol -> static consumer -> candidate sibling test` keď kandidátsky test chýba v rozdiele požiadavky na stiahnutie. Súhrn Markdown a výsledok JSON sa zachovajú ako artefakt pracovného toku `forgotten-sibling-tests` na kalibráciu pred akýmkoľvek zavedením blokovania.
 
-Reexporty sudov a dynamické importy sú len diagnostikou rozlíšenia; nikdy nevytvoria blokujúci nález. Skontrolované výnimky sú zverejnené v `config/quality/forgotten-sibling-allowlist.json`. Každý záznam musí pomenovať test spotrebiteľa a kandidáta, uviesť konkrétne odôvodnenie a prepojiť problém GitHub alebo požiadavku na stiahnutie. Chybné záznamy sa nepodarilo zatvoriť. Výnimky nemôžu potlačiť vymazaný kandidátsky test alebo rozdiel, ktorý pridáva `.skip`/`.todo`; oslabenie tvrdenia a iné maskovanie zostávajú vo vlastníctve nezávisle blokujúcej brány `check:test-masking`.
+Reexporty sudov a dynamické importy sú len diagnostikou rozlíšenia; nikdy nevytvoria blokujúci nález. Skontrolované výnimky sú zverejnené v `config/quality/forgotten-sibling-allowlist.json`. Každý záznam musí pomenovať test spotrebiteľa a kandidáta, uviesť konkrétne zdôvodnenie a prepojiť problém GitHub alebo požiadavku na stiahnutie. Chybné záznamy sa nepodarilo zatvoriť. Výnimky nemôžu potlačiť vymazaný kandidátsky test alebo rozdiel, ktorý pridáva `.skip`/`.todo`; oslabenie tvrdenia a iné maskovanie zostávajú vo vlastníctve nezávisle blokujúcej brány `check:test-masking`.
 
 ### Práca: `lint`
 
@@ -230,7 +232,7 @@ Bez rozlíšiteľného základu (žiadne `BASE_SHA`/`BASE_REF`, žiadne lokálne
 
 | Skript                              | Potvrdzuje                                                                                                                                                                                                        | Blokovanie                |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `check-ui-keys-coverage` (v riadku) | Pokrytie kľúčom UI i18n je ≥ 65 %                                                                                                                                                                                 | Áno (oba režimy)          |
+| `check-ui-keys-coverage` (v riadku) | Pokrytie kľúčom UI i18n je 65 % ≥                                                                                                                                                                                 | Áno (oba režimy)          |
 | `check:ui-icu`                      | Každá správa každého katalógu UI sa kompiluje pomocou `IntlMessageFormat`                                                                                                                                         | Áno (oba režimy)          |
 | `check-ui-value-drift` (v riadku)   | Prepísaná angličtina** hodnotu** nezanechá za sebou žiadny zatuchnutý preklad                                                                                                                                     | Áno (iba režim uvoľnenia) |
 | `check-new-key-coverage` (v riadku) | A** nové** Anglický kľúč je preložený v každom jazyku — a značka `__MISSING__:` je odmietnutá                                                                                                                     | Áno (iba režim uvoľnenia) |
@@ -249,7 +251,7 @@ Testy jednotiek lokálnej parity (`cli-i18n-catalog`, `i18n-pt-br`, `i18n-vi-com
 
 Zachytáva jednu regresiu i18n, ktorú ostatné brány štrukturálne nevidia: anglická hodnota je prepísaná a preklady odvodené z _predchádzajúcej_ angličtiny zostávajú pozadu, takže používatelia, ktorí nie sú v angličtine, pokračujú v čítaní sebavedome formulovanej, teraz nesprávnej kópie.
 
-Toto bolo skutočne odoslané. `oauthModal.googleOAuthWarning` bol prepísaný, keď pristál pomocník na prihlásenie do Antigravity (#5203);** 39 zo 43 miest** stále text oznamujúci operátorom, aby „skopírovali celé URL a prilepili ho nižšie“ — tok, ktorý pre daného poskytovateľa nemožno dokončiť. Až do #8463 to zostalo nepovšimnuté, pretože:
+Toto bolo skutočne odoslané. `oauthModal.googleOAuthWarning` bolo prepísané, keď pristál pomocný prihlasovací program Antigravity (#5203);** 39 zo 43 miest** stále text oznamujúci operátorom, aby „skopírovali celé URL a vložili ho nižšie“ — tok, ktorý pre daného poskytovateľa nemožno dokončiť. Až do #8463 to zostalo nepovšimnuté, pretože:
 
 - `sync-ui-keys` vyplní iba kľúče, ktoré sú** neprítomný** , nikdy také, ktoré sú** zatuchnutý** ;
 - `check-ui-keys-coverage` počíta kľúčovú _prítomnosť_, takže zastaraný preklad sa považuje za pokrytý;
