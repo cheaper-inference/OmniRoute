@@ -4,11 +4,11 @@ import assert from "node:assert/strict";
 const {
   executeWithAnthropicThinkingSignatureRecovery,
   isAnthropicThinkingSignatureError,
+  stripAllThinkingForSignatureRecovery,
   stripHistoricalThinkingForSignatureRecovery,
 } = await import("@omniroute/open-sse/handlers/chatCore/passthroughHelpers.ts");
-const { recoverAnthropicThinkingSignature } = await import(
-  "@omniroute/open-sse/handlers/chatCore/thinkingSignatureRecovery.ts"
-);
+const { recoverAnthropicThinkingSignature } =
+  await import("@omniroute/open-sse/handlers/chatCore/thinkingSignatureRecovery.ts");
 
 function makeHistory() {
   return {
@@ -173,7 +173,11 @@ test("Anthropic thinking-signature recovery contract", async (t) => {
     assert.equal(out.attempted, true);
     assert.equal(out.succeeded, false);
     assert.equal(out.error?.statusCode, 400);
-    assert.equal(parses, 1, "parse the terminal recovery response exactly once");
+    assert.equal(
+      parses,
+      2,
+      "each recovery attempt response is parsed once (conservative + full strip)"
+    );
   });
 
   await t.test("normal same-model traffic is byte-identical and never retried", async () => {
@@ -261,17 +265,22 @@ test("Anthropic thinking-signature recovery contract", async (t) => {
 
     assert.equal(out.retried, true);
     assert.equal(out.result.status, 400);
-    assert.equal(attempts, 2);
+    assert.equal(
+      attempts,
+      3,
+      "initial call + conservative strip + one full-strip escalation, then stop"
+    );
   });
 
-  await t.test("unsafe recovery with only active-cycle thinking sends no retry", async () => {
+  await t.test("foreign-signed block in the active cycle: escalates to full strip", async () => {
     const body = {
+      thinking: { type: "enabled", budget_tokens: 1024 },
       messages: [
         { role: "user", content: [{ type: "text", text: "run" }] },
         {
           role: "assistant",
           content: [
-            { type: "thinking", thinking: "required", signature: "ACTIVE" },
+            { type: "thinking", thinking: "x", signature: "FOREIGN" },
             { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
           ],
         },
@@ -281,19 +290,128 @@ test("Anthropic thinking-signature recovery contract", async (t) => {
         },
       ],
     };
-    let attempts = 0;
+    const snapshot = structuredClone(body);
+    const calls: Array<ReturnType<typeof makeHistory>> = [];
     const out = await executeWithAnthropicThinkingSignatureRecovery({
       provider: "claude",
       body,
-      execute: async () => {
-        attempts += 1;
-        return { status: 400, message: "Invalid signature in thinking block" };
+      execute: async (requestBody) => {
+        calls.push(requestBody as ReturnType<typeof makeHistory>);
+        const hasThinking = JSON.stringify(requestBody).includes('"type":"thinking"');
+        return hasThinking
+          ? { status: 400, message: "Invalid signature in thinking block" }
+          : { status: 200, message: "ok" };
       },
-      getError: (result) => result,
+      getError: (result) => (result.status >= 400 ? result : null),
     });
 
-    assert.equal(out.retried, false);
-    assert.equal(attempts, 1);
-    assert.equal(stripHistoricalThinkingForSignatureRecovery(body), body);
+    assert.equal(out.retried, true);
+    assert.equal(out.result.status, 200);
+    assert.equal(calls.length, 2);
+    assert.equal("thinking" in calls[1], false, "extended thinking disabled for the retry");
+    assert.deepEqual(
+      calls[1].messages[1].content.map((b: { type: string }) => b.type),
+      ["tool_use"]
+    );
+    assert.deepEqual(body, snapshot, "caller body is not mutated");
   });
+
+  await t.test(
+    "full strip drops clear_thinking context edits with thinking, keeps other edits",
+    async () => {
+      const activeCycle = [
+        { role: "user", content: [{ type: "text", text: "run" }] },
+        {
+          role: "assistant",
+          content: [
+            { type: "thinking", thinking: "x", signature: "FOREIGN" },
+            { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
+          ],
+        },
+        {
+          role: "user",
+          content: [{ type: "tool_result", tool_use_id: "toolu_1", content: "ok" }],
+        },
+      ];
+      const body = {
+        thinking: { type: "adaptive" },
+        context_management: {
+          edits: [
+            { type: "clear_thinking_20251015", keep: "all" },
+            { type: "clear_tool_uses_20250919", keep: { type: "tool_uses", value: 3 } },
+          ],
+        },
+        messages: activeCycle,
+      };
+      const snapshot = structuredClone(body);
+      const calls: Array<Record<string, unknown>> = [];
+      const out = await executeWithAnthropicThinkingSignatureRecovery({
+        provider: "claude",
+        body,
+        execute: async (requestBody) => {
+          calls.push(requestBody as Record<string, unknown>);
+          return calls.length === 1
+            ? { status: 400, message: "Invalid signature in thinking block" }
+            : { status: 200, message: "ok" };
+        },
+        getError: (result) => (result.status >= 400 ? result : null),
+      });
+
+      assert.equal(out.result.status, 200);
+      assert.equal(calls.length, 2);
+      assert.equal("thinking" in calls[1], false);
+      assert.deepEqual(calls[1].context_management, {
+        edits: [{ type: "clear_tool_uses_20250919", keep: { type: "tool_uses", value: 3 } }],
+      });
+      assert.deepEqual(body, snapshot, "caller body is not mutated");
+
+      const onlyClearThinking = stripAllThinkingForSignatureRecovery({
+        thinking: { type: "adaptive" },
+        context_management: { edits: [{ type: "clear_thinking_20251015", keep: "all" }] },
+        messages: activeCycle,
+      }) as Record<string, unknown>;
+      assert.equal("thinking" in onlyClearThinking, false);
+      assert.equal(
+        "context_management" in onlyClearThinking,
+        false,
+        "an edits list left empty is dropped with thinking"
+      );
+    }
+  );
+
+  await t.test(
+    "active-cycle thinking: conservative strip is a no-op, full strip is used",
+    async () => {
+      const body = {
+        messages: [
+          { role: "user", content: [{ type: "text", text: "run" }] },
+          {
+            role: "assistant",
+            content: [
+              { type: "thinking", thinking: "required", signature: "ACTIVE" },
+              { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
+            ],
+          },
+          {
+            role: "user",
+            content: [{ type: "tool_result", tool_use_id: "toolu_1", content: "ok" }],
+          },
+        ],
+      };
+      let attempts = 0;
+      const out = await executeWithAnthropicThinkingSignatureRecovery({
+        provider: "claude",
+        body,
+        execute: async () => {
+          attempts += 1;
+          return { status: 400, message: "Invalid signature in thinking block" };
+        },
+        getError: (result) => result,
+      });
+
+      assert.equal(out.retried, true);
+      assert.equal(attempts, 2, "initial call + the full-strip retry");
+      assert.equal(stripHistoricalThinkingForSignatureRecovery(body), body);
+    }
+  );
 });
