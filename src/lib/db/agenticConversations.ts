@@ -77,15 +77,18 @@ export function createAgenticConversation(input: {
   };
 }
 
+/**
+ * SQL behind findAgenticConversationsByFingerprint. Param: the fingerprint hash. Exported so
+ * the migration test can assert its plan reads idx_agentic_conversations_fingerprint_last_seen
+ * (migration 20261117112335) instead of sorting the whole fingerprint bucket.
+ */
+export const RECENT_BY_FINGERPRINT_SQL = `SELECT * FROM agentic_conversations WHERE fingerprint_hash = ? ORDER BY last_seen_at DESC LIMIT 20`;
+
 export function findAgenticConversationsByFingerprint(
   fingerprintHash: string
 ): AgenticConversationRow[] {
   const db = getDbInstance();
-  const rows = db
-    .prepare(
-      `SELECT * FROM agentic_conversations WHERE fingerprint_hash = ? ORDER BY last_seen_at DESC LIMIT 20`
-    )
-    .all(fingerprintHash);
+  const rows = db.prepare(RECENT_BY_FINGERPRINT_SQL).all(fingerprintHash);
   return rows.map(toRow);
 }
 
