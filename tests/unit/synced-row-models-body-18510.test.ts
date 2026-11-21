@@ -71,6 +71,8 @@ function syncedRowBody(provider: string, model: string, contextLength = 128000) 
     capabilities: { tool_calling: true, reasoning: true },
     // The tip publishes a readable name for a synced row that has none (#18354).
     name: resolveModelDisplayName(model),
+    // Every named row advertises its name for codex-registry clients (#19477).
+    metadata: { display_name: resolveModelDisplayName(model) },
     context_length: contextLength,
   };
 }

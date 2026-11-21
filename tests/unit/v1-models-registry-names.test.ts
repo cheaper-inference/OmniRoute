@@ -137,12 +137,25 @@ test("MODEL_CATALOG_INCLUDE_NAMES=false still strips name and leaves every other
     false,
     "no row may carry name when the flag is off"
   );
-  // `created` is the build timestamp, so two builds may straddle a second.
+  assert.equal(
+    withoutNames.some((row) => "display_name" in ((row.metadata ?? {}) as object)),
+    false,
+    "no row may carry metadata.display_name when the flag is off"
+  );
+  // `created` is the build timestamp, so two builds may straddle a second. The
+  // `metadata.display_name` copy of `name` (#19477) goes with `name` itself.
   const strip = (row: CatalogRow) => {
     const { name: _name, created: _created, ...rest } = row;
     void _name;
     void _created;
-    return rest;
+    const { display_name: _displayName, ...metadata } = (rest.metadata ?? {}) as Record<
+      string,
+      unknown
+    >;
+    void _displayName;
+    const { metadata: _metadata, ...body } = rest;
+    void _metadata;
+    return Object.keys(metadata).length > 0 ? { ...body, metadata } : body;
   };
   assert.deepEqual(withNames.map(strip), withoutNames.map(strip));
   assert.deepEqual(
