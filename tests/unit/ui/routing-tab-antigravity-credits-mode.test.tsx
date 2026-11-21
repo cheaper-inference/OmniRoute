@@ -78,4 +78,79 @@ it("retains the last confirmed mode if PATCH is rejected", { timeout: 60_000 }, 
   await waitFor(() => expect(always.disabled).toBe(false));
   expect(retry.checked).toBe(true);
   expect(always.checked).toBe(false);
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
+const unconfirmedLabel = "routingAntigravityCreditsUnconfirmed";
+const recheckLabel = "routingAntigravityCreditsRecheck";
+
+type AmbiguousResponse = "dropped" | "5xx" | "malformed" | "mismatch";
+
+async function renderAmbiguousPatch(outcome: AmbiguousResponse, { failFirstRecheck = false } = {}) {
+  let serverMode = "retry";
+  let refreshes = 0;
+  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url !== "/api/settings") return Response.json([]);
+    if (init?.method === "PATCH") {
+      serverMode = JSON.parse(String(init.body)).antigravityCreditsMode;
+      if (outcome === "dropped") throw new TypeError("response connection lost");
+      if (outcome === "5xx") return Response.json({}, { status: 500 });
+      if (outcome === "malformed") return new Response("not JSON");
+      return Response.json({ antigravityCreditsMode: "retry" });
+    }
+    if (init?.cache === "no-store" && refreshes++ === 0 && failFirstRecheck) {
+      return Response.json({}, { status: 503 });
+    }
+    return Response.json({ antigravityCreditsMode: serverMode });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  render(<RoutingTab />);
+  const group = await screen.findByRole("radiogroup", { name: title });
+  const radio = (mode: keyof typeof optionLabels) =>
+    within(group).getByRole<HTMLInputElement>("radio", { name: optionLabels[mode] });
+  await waitFor(() => expect(radio("retry").checked).toBe(true));
+  fireEvent.click(radio("always"));
+  const settingsCalls = () => fetchMock.mock.calls.filter(([url]) => url === "/api/settings");
+  return { settingsCalls, group, radio };
+}
+
+for (const outcome of ["dropped", "5xx", "malformed", "mismatch"] as const) {
+  it(
+    `requires a fresh read after a ${outcome} PATCH response without retrying the write`,
+    {
+      timeout: 60_000,
+    },
+    async () => {
+      const { settingsCalls, group, radio } = await renderAmbiguousPatch(outcome);
+      expect((await screen.findByRole("alert")).textContent).toContain(unconfirmedLabel);
+      for (const option of within(group).getAllByRole<HTMLInputElement>("radio")) {
+        expect(option.disabled).toBe(true);
+        expect(option.checked).toBe(false);
+      }
+      const recheck = screen.getByRole("button", { name: recheckLabel });
+      expect(settingsCalls()).toHaveLength(2);
+      fireEvent.click(recheck);
+      await waitFor(() => expect(radio("always").checked).toBe(true));
+      expect(radio("always").disabled).toBe(false);
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(settingsCalls()).toHaveLength(3);
+      expect(settingsCalls()[2]).toEqual(["/api/settings", { cache: "no-store" }]);
+    }
+  );
+}
+
+it("stays unknown and editable only after a successful recheck", { timeout: 60_000 }, async () => {
+  const { settingsCalls, radio } = await renderAmbiguousPatch("dropped", {
+    failFirstRecheck: true,
+  });
+  const recheck = await screen.findByRole<HTMLButtonElement>("button", { name: recheckLabel });
+  fireEvent.click(recheck);
+  await waitFor(() => expect(settingsCalls()).toHaveLength(3));
+  await waitFor(() => expect(recheck.disabled).toBe(false));
+  expect(screen.getByRole("alert").textContent).toContain(unconfirmedLabel);
+  expect(radio("always").disabled).toBe(true);
+  expect(radio("retry").checked).toBe(false);
+  fireEvent.click(recheck);
+  await waitFor(() => expect(radio("always").checked).toBe(true));
+  expect(settingsCalls().filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
 });
