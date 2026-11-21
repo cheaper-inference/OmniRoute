@@ -86,10 +86,10 @@ The working directory differs between machines, so the same repository can show 
 paths. Send the project explicitly instead: Claude Code adds any headers listed in
 `ANTHROPIC_CUSTOM_HEADERS` to every model request, and OmniRoute reads two of them:
 
-| Header                     | Value                                                       |
-| -------------------------- | ----------------------------------------------------------- |
-| `x-omniroute-project`      | Project name, e.g. `omniroute`                              |
-| `x-omniroute-project-repo` | Normalized remote, e.g. `github.com/diegosouzapw/OmniRoute` |
+| Header                     | Value                                                            |
+| -------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-project`      | Project name, e.g. `omniroute`                                   |
+| `x-omniroute-project-repo` | Normalized remote, e.g. `github.com/cheaper-inference/OmniRoute` |
 
 Both are only read for attribution; they are never forwarded to the upstream provider.
 

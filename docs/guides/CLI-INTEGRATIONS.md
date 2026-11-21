@@ -270,7 +270,7 @@ The API key is handed to 5dive on **stdin** (`--api-key=-`), so it never appears
 Pointing the profile at an OmniRoute **combo** rather than a single model is what
 gets the fleet provider failover: when the primary endpoint went hard-down mid-turn
 in the run recorded on
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), the agent finished
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), the agent finished
 its remaining steps on the fallback and never surfaced the outage.
 
 ---
