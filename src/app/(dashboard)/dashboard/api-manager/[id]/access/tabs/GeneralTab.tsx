@@ -16,6 +16,9 @@ import {
   type ApiKeyAccessFormState,
 } from "../useApiKeyAccessForm";
 import TabErrorList from "./TabErrorList";
+import McpPermissionControls, {
+  type McpPermissionState,
+} from "../../../components/McpPermissionControls";
 
 interface GeneralTabProps {
   apiKey: ApiKeyAccessData;
@@ -25,6 +28,7 @@ interface GeneralTabProps {
   setIsBanned: (isBanned: boolean) => void;
   setExpiresAt: (expiresAt: string) => void;
   setManageEnabled: (enabled: boolean) => void;
+  setMcpPermission: (field: keyof McpPermissionState, enabled: boolean) => void;
   setSelfUsageEnabled: (enabled: boolean) => void;
   setSelfAccountQuotaEnabled: (enabled: boolean) => void;
   setAllowAllEndpoints: (allowAll: boolean) => void;
@@ -330,6 +334,7 @@ export default function GeneralTab({
   setIsBanned,
   setExpiresAt,
   setManageEnabled,
+  setMcpPermission,
   setSelfUsageEnabled,
   setSelfAccountQuotaEnabled,
   setAllowAllEndpoints,
@@ -350,6 +355,7 @@ export default function GeneralTab({
       <BanToggle formState={formState} setIsBanned={setIsBanned} />
       <ExpirationDateField formState={formState} setExpiresAt={setExpiresAt} />
       <ManagementAccessToggle formState={formState} setManageEnabled={setManageEnabled} />
+      <McpPermissionControls state={formState} onChange={setMcpPermission} />
       <SelfServiceVisibility
         formState={formState}
         setSelfUsageEnabled={setSelfUsageEnabled}

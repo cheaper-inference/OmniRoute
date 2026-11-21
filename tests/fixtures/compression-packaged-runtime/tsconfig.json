@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "include": ["app/**/*.ts"],
+  "extends": "../../../tsconfig.json"
+}

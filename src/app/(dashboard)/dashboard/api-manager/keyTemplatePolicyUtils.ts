@@ -1,3 +1,6 @@
+import { mergeApiKeyPermissionScopes } from "./apiManagerScopes";
+import { MCP_CONNECT_SCOPE } from "@/shared/constants/managementScopes";
+import { COMPRESSION_READ_SCOPE } from "@/shared/constants/mcpScopes";
 import type {
   KeyTemplate,
   KeyTemplateAutoCandidateOverride,
@@ -23,45 +26,12 @@ export const KEY_TEMPLATE_ALL_COMBOS_RULE = "combo/*" as const;
 const SELF_USAGE_SCOPE = "self:usage";
 const SELF_ACCOUNT_QUOTA_SCOPE = "self:account-quota";
 const API_KEY_BYPASS_PROVIDER_QUOTA_SCOPE = "policy:bypass-provider-quota";
-const MANAGEMENT_SCOPE = "manage";
 
 export type AccessEditorTab =
   "general" | "models" | "combos" | "connections" | "limits" | "behaviour";
 
 function hasProviderQuotaBypassScope(scopes: readonly string[] | null | undefined): boolean {
   return Array.isArray(scopes) && scopes.includes(API_KEY_BYPASS_PROVIDER_QUOTA_SCOPE);
-}
-
-function mergeApiKeyPermissionScopes(
-  currentScopes: readonly string[] | null | undefined,
-  options: {
-    manageEnabled: boolean;
-    selfUsageEnabled: boolean;
-    selfAccountQuotaEnabled: boolean;
-    bypassProviderQuotaPolicyEnabled: boolean;
-  }
-): string[] {
-  const scopes = new Set<string>();
-  if (options.manageEnabled) scopes.add(MANAGEMENT_SCOPE);
-  if (options.selfUsageEnabled) scopes.add(SELF_USAGE_SCOPE);
-  if (options.selfUsageEnabled && options.selfAccountQuotaEnabled) {
-    scopes.add(SELF_ACCOUNT_QUOTA_SCOPE);
-  }
-  if (options.bypassProviderQuotaPolicyEnabled) {
-    scopes.add(API_KEY_BYPASS_PROVIDER_QUOTA_SCOPE);
-  }
-  for (const s of currentScopes ?? []) {
-    if (
-      typeof s === "string" &&
-      s !== MANAGEMENT_SCOPE &&
-      s !== SELF_USAGE_SCOPE &&
-      s !== SELF_ACCOUNT_QUOTA_SCOPE &&
-      s !== API_KEY_BYPASS_PROVIDER_QUOTA_SCOPE
-    ) {
-      scopes.add(s);
-    }
-  }
-  return [...scopes];
 }
 
 export function buildModelAccessSavePayload(input: {
@@ -182,6 +152,8 @@ export interface PolicyEditorFormState {
   isActive: boolean;
   isBanned: boolean;
   manageEnabled: boolean;
+  mcpConnectEnabled: boolean;
+  compressionReadEnabled: boolean;
   selfUsageEnabled: boolean;
   selfAccountQuotaEnabled: boolean;
   bypassProviderQuotaPolicyEnabled: boolean;
@@ -341,6 +313,8 @@ function readGeneralForm(
   | "isActive"
   | "isBanned"
   | "manageEnabled"
+  | "mcpConnectEnabled"
+  | "compressionReadEnabled"
   | "selfUsageEnabled"
   | "selfAccountQuotaEnabled"
   | "bypassProviderQuotaPolicyEnabled"
@@ -359,7 +333,11 @@ function readGeneralForm(
   const selfUsageEnabled = scopes.includes(SELF_USAGE_SCOPE);
   const selfAccountQuotaEnabled = scopes.includes(SELF_ACCOUNT_QUOTA_SCOPE);
   const bypassProviderQuotaPolicyEnabled = hasProviderQuotaBypassScope(scopes);
+  const mcpConnectEnabled = scopes.includes(MCP_CONNECT_SCOPE);
+  const compressionReadEnabled = scopes.includes(COMPRESSION_READ_SCOPE);
   const managedScopeSet = new Set([
+    MCP_CONNECT_SCOPE,
+    COMPRESSION_READ_SCOPE,
     "manage",
     SELF_USAGE_SCOPE,
     SELF_ACCOUNT_QUOTA_SCOPE,
@@ -370,6 +348,8 @@ function readGeneralForm(
     isActive: key.isActive !== false,
     isBanned: key.isBanned === true,
     manageEnabled,
+    mcpConnectEnabled,
+    compressionReadEnabled,
     selfUsageEnabled,
     selfAccountQuotaEnabled,
     bypassProviderQuotaPolicyEnabled,
@@ -748,12 +728,21 @@ function writeRatesPolicy(
 function writePermissionsPolicy(
   state: PolicyEditorFormState
 ): Pick<KeyTemplatePolicy["key"], "ipAllowlist" | "scopes" | "proxyId" | "allowedEndpoints"> {
-  const scopes = mergeApiKeyPermissionScopes(state.extraScopes, {
+  const permissions = {
     manageEnabled: state.manageEnabled,
+    mcpConnectEnabled: state.mcpConnectEnabled,
+    compressionReadEnabled: state.compressionReadEnabled,
     selfUsageEnabled: state.selfUsageEnabled,
     selfAccountQuotaEnabled: state.selfAccountQuotaEnabled,
     bypassProviderQuotaPolicyEnabled: state.bypassProviderQuotaPolicyEnabled,
-  });
+  };
+  // Preserve the established template ordering: controlled grants, then unrelated scopes.
+  const scopes = [
+    ...new Set([
+      ...mergeApiKeyPermissionScopes([], permissions),
+      ...mergeApiKeyPermissionScopes(state.extraScopes, permissions),
+    ]),
+  ];
   return {
     ipAllowlist: state.ipAllowlist.filter((ip) => typeof ip === "string" && ip.trim().length > 0),
     scopes,

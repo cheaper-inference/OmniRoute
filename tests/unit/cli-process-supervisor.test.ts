@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import childProcess, { type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
 import fs from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
+import os from "node:os";
 import path from "node:path";
 
 // #4425: the supervisor now waits for the listen port to free up before respawning.
@@ -336,18 +339,37 @@ test("every Bun server spawn (supervisor, --daemon, --no-recovery) uses the shar
   assert.doesNotMatch(serveSrc, /join\(APP_DIR,\s*"open-sse/);
 });
 
-test("#13992: supervised server spawn hides the console window on Windows", () => {
-  const supervisorSrc = fs.readFileSync(
-    path.join(REPO_ROOT, "bin/cli/runtime/processSupervisor.mjs"),
-    "utf8"
+test("#13992: supervised server spawn hides the console window on Windows", async (t) => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "supervisor-spawn-"));
+  const previousDataDir = process.env.DATA_DIR;
+  process.env.DATA_DIR = dataDir;
+  // Intercept only the process boundary; exercise the real start() and its options.
+  const spawn = t.mock.method(
+    childProcess,
+    "spawn",
+    () => new StubChild() as unknown as ChildProcess
   );
+  syncBuiltinESMExports();
+  t.after(() => {
+    spawn.mock.restore();
+    syncBuiltinESMExports();
+    if (previousDataDir === undefined) delete process.env.DATA_DIR;
+    else process.env.DATA_DIR = previousDataDir;
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  });
+  const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
+  const env = { DATA_DIR: dataDir };
+  const serverPath = path.join(dataDir, "server.js");
+  const supervisor = new ServerSupervisor({ serverPath, env, onCrashCallback: undefined });
+  supervisor.start();
 
-  assert.match(
-    supervisorSrc,
-    /spawn\(process\.execPath,\s*buildServerSpawnArgs\([\s\S]*?\),\s*\{[\s\S]*?windowsHide:\s*true[\s\S]*?\}\)/,
-    "the supervised server spawn() must pass windowsHide: true so a tray-mode restart never " +
-      "flashes a visible console on Windows"
-  );
+  assert.equal(spawn.mock.callCount(), 1);
+  const [command, args, options] = spawn.mock.calls[0].arguments;
+  assert.equal(command, process.execPath);
+  assert.ok(args.includes(serverPath));
+  assert.equal(options.cwd, dataDir);
+  assert.equal(options.env, env);
+  assert.equal(options.windowsHide, true, "tray-mode server spawns must not flash a console");
 });
 
 // --- #16030: shutdown intent marker ---

@@ -255,6 +255,57 @@ The applied plan is echoed back in the `X-OmniRoute-Compression: <mode>; source=
 header, where `<source>` is one of `request-header`, `routing-override`, `active-profile`,
 `auto-trigger`, `default`, or `off`.
 
+### Selection and retrieval diagnostics
+
+A valid `x-omniroute-compression` header selects its plan before the auto-trigger threshold.
+A named profile supplies its ordered pipeline; `engine:rtk` selects just RTK, not the profile's
+helper engines. Stored explicit engine choices differ from display maps populated with defaults.
+The existing lossy-engine consent rules, per-engine eligibility and configured intensity still apply.
+Zero savings can be valid when a body lacks the selected engine's supported structure or an earlier
+stage has already removed the reducible content. Output-style injection alone does not measure savings.
+
+CCR references require `omniroute_ccr_retrieve` on the same authenticated principal that stored the
+content. Grant only the required `read:compression` tool scope and, for remote MCP connection,
+`mcp:connect`; preserve normal authentication. Missing tools or scopes are not repaired by granting
+administrative access. Full MCP retrieval retains the existing 256 KiB content bound; oversized blocks
+use the existing ranged retrieval modes. The accessibility filter does not shorten CCR retrievals.
+Generic oversized JSON tool results still use valid previews with explicit truncation marks.
+
+In API Manager, **Connect to MCP** and **Read CCR content** are independent explicit permissions in
+quick creation, the full policy editor and existing-key editing. Enable both for remote CCR retrieval.
+They grant neither `manage` nor `admin`. Saving changes preserves the key identity, secret and unrelated
+scopes. New keys and older templates receive no automatic grants; normal authenticated management
+authorization is still required to edit permissions.
+
+For the Node CLI server, optional `OMNIROUTE_CACHE_DIAGNOSTICS=1` writes bounded private numeric
+observations under the same resolved data directory used by the launcher, even without `DATA_DIR`.
+`OMNIROUTE_TOKEN_BREAKDOWN=1` additionally enables disposable-worker visible-content estimates.
+These are off by default, respect per-key `noLog`, and never persist prompt text, tool names, credentials
+or raw session IDs.
+Only known OpenAI/Codex HTTPS endpoints using Undici are observed. Bundled fetch needs Undici 7.11 or
+newer for body events (verified with Node 24.21.0). Supported Node 22.22.2 bundles Undici 6.x: it logs one
+fixed warning and records `unsupported_body_diagnostics`, null usage/fingerprints, and no token estimate.
+The optional feature does not change the application's supported Node range. Other transports are not
+certified by this bundled-fetch capability check. Encoded responses, oversized frames and missing usage
+are unavailable, not cache misses. Received SSE usage without a terminal event remains `reported` with
+`terminal: false`; check `terminal` before treating the reported usage as complete.
+Per-process keyed body/item/head fingerprints cover captured bytes, not a provider's full rendered
+prompt. Comparisons with an unknown account or session are explicitly marked and can interleave traffic.
+Each run has a private UUID lease. A clean shutdown explicitly closes its lease; rotation retains four
+closed runs and never deletes active or unknown runs. Active/unknown runs are additional, each capped
+at 10 MiB. Crashed writers and stale rotation locks require operator inspection; age and PID existence
+alone never prove that a file is safe to remove, including after PID reuse.
+
+The estimator permits one body up to 8 MiB, no queue, a 5-second deadline and a 1-second recovery
+cooldown. Chunked `o200k_base` work stops cooperatively at 262,144 characters or 1,500 ms; remaining
+characters use a disclosed heuristic. The outer worker deadline bounds slow chunks. A requested 128 MiB
+V8 old-generation limit does not cap the whole heap, external or WASM allocations; Node's
+`--max-old-space-size` flag can override it. Function and native custom tool calls/outputs are counted;
+media payloads are omitted and disclosed. Category/source subtotals describe visible content,
+not exact native Claude tokenization, provider framing or billable per-category usage. No historical
+prompts or unknown counters are backfilled. Neither these observations nor session cache affinity
+guarantee provider cache hits, invoice savings or output quality.
+
 ### API
 
 ```bash
