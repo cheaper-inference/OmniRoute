@@ -16,6 +16,7 @@ import {
   type SelfQuotaResponse,
   type SelfQuotaSharedDimension,
 } from "@/shared/schemas/selfQuota";
+import { selfUsageResponseSchema, type SelfUsageResponse } from "@/shared/schemas/selfUsage";
 import messages from "../../../src/i18n/messages/en.json";
 
 export const KEY = "sk-live-1234567890";
@@ -95,6 +96,72 @@ export function quotaView(over: Partial<SelfQuotaResponse> = {}): SelfQuotaRespo
  * breaks the contract throws instead of testing nothing. */
 export function parsedPool(over: Partial<SelfQuotaPool> = {}): SelfQuotaPool {
   return selfQuotaResponseSchema.parse(quotaView({ pools: [pool(over)] })).pools[0];
+}
+
+type UsageDay = SelfUsageResponse["daily"][number];
+type UsageModelRow = SelfUsageResponse["byModel"][number];
+
+export function usageDay(over: Partial<UsageDay> = {}): UsageDay {
+  return {
+    date: "2026-05-26",
+    requests: 2,
+    promptTokens: 1500,
+    completionTokens: 750,
+    totalTokens: 2250,
+    costUsd: 1.5,
+    listPriceUsd: 3,
+    ...over,
+  };
+}
+
+export function usageModelRow(over: Partial<UsageModelRow> = {}): UsageModelRow {
+  return {
+    model: "claude-sonnet-5",
+    provider: "claude",
+    requests: 4,
+    promptTokens: 3000,
+    completionTokens: 1500,
+    totalTokens: 4500,
+    costUsd: 3,
+    listPriceUsd: 6,
+    avgLatencyMs: 900,
+    successRatePct: 100,
+    lastUsed: "2026-05-27T15:00:00.000Z",
+    ...over,
+  };
+}
+
+/** A usage answer whose defaults parse in `selfUsageResponseSchema` (checked on every build). */
+export function usageSeries(over: Partial<SelfUsageResponse> = {}): SelfUsageResponse {
+  return selfUsageResponseSchema.parse({
+    range: "30d",
+    generatedAt: "2026-05-27T15:30:00.000Z",
+    coverage: {
+      from: "2026-04-28T00:00:00.000Z",
+      to: "2026-05-27T15:30:00.000Z",
+      retentionDays: 90,
+      truncatedByRetention: false,
+    },
+    summary: {
+      requests: 4,
+      promptTokens: 3000,
+      completionTokens: 1500,
+      totalTokens: 4500,
+      costUsd: 3,
+      listPriceUsd: 6,
+      successfulRequests: 4,
+      successRatePct: 100,
+      uniqueModels: 1,
+      avgLatencyMs: 900,
+      firstRequest: "2026-05-26T10:00:00.000Z",
+      lastRequest: "2026-05-27T15:00:00.000Z",
+    },
+    daily: [usageDay(), usageDay({ date: "2026-05-27" })],
+    dailyByModel: [],
+    byModel: [usageModelRow()],
+    byProvider: [],
+    ...over,
+  });
 }
 
 export function jsonResponse(body: unknown, status = 200): Response {

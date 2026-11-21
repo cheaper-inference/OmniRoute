@@ -7,6 +7,8 @@ import { useFormatter, useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
 
+import { UPDATED_AT_FORMAT } from "../lib/quotaFormat";
+
 interface QuotaHeaderProps {
   providerName: string;
   /** `generatedAt` of the answer on screen; the page's reference clock. */
@@ -30,7 +32,7 @@ export default function QuotaHeader({
   const format = useFormatter();
   const updatedAt = generatedAt
     ? t("updatedAt", {
-        time: format.dateTime(new Date(generatedAt), { hour: "numeric", minute: "2-digit" }),
+        time: format.dateTime(new Date(generatedAt), UPDATED_AT_FORMAT),
       })
     : null;
   const hasActions = expiry != null || updatedAt !== null || onRefresh !== null;

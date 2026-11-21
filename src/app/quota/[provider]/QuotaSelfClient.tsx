@@ -8,6 +8,7 @@ import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
 import BlockNotices from "./components/BlockNotices";
 import ExpiryBadge from "./components/ExpiryBadge";
 import KeyForm from "./components/KeyForm";
+import MySpendSection from "./components/MySpendSection";
 import PoolSection from "./components/PoolSection";
 import QuotaHeader from "./components/QuotaHeader";
 import QuotaStatusPanel from "./components/QuotaStatusPanel";
@@ -93,7 +94,8 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
         {view?.pools.map((pool) => (
           <PoolSection key={pool.ref} pool={pool} />
         ))}
-        {/* Task 11 slot: MySpendSection, once the quota answer is ready. */}
+        {/* Only once the quota answer accepted the key (or while it refreshes). */}
+        {view ? <MySpendSection /> : null}
       </div>
     </main>
   );

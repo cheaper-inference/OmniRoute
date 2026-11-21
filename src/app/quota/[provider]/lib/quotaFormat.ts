@@ -14,6 +14,16 @@ export const DATE_TIME_FORMAT: DateTimeFormatOptions = {
   timeStyle: "short",
 };
 
+/** Time of day an answer was produced ("Updated at …"), for `useFormatter().dateTime`. */
+export const UPDATED_AT_FORMAT: DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
+
+/** Month and day of a usage day ("2026-05-27"): read as UTC, so no time zone moves the day. */
+export const USAGE_DAY_FORMAT: DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+};
+
 export type ExpiryView =
   | { kind: "none" }
   | { kind: "unreadable" }
