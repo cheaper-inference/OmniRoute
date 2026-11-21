@@ -644,6 +644,20 @@ export async function createProviderConnection(data: JsonRecord) {
     // oauth connection for the same account.
   }
 
+  // Opt-in: only an explicit `allowOverwrite: false` refuses to replace a stored connection.
+  // Omitted keeps the upsert. The flag is a request switch, never persisted.
+  if (data.allowOverwrite !== undefined) {
+    const { allowOverwrite, ...rest } = data;
+    data = rest;
+    if (allowOverwrite === false && existing) {
+      throw Object.assign(new Error("A connection with this name or key already exists"), {
+        code: "PROVIDER_NAME_CONFLICT",
+        existingId: toStringOrNull(existing.id),
+        existingName: toStringOrNull(existing.name),
+      });
+    }
+  }
+
   if (existing) {
     const existingId = toStringOrNull(existing.id);
     if (!existingId) return null;
@@ -805,11 +819,12 @@ export async function createProviderConnection(data: JsonRecord) {
     connection.rateLimitOverrides = result.sanitized;
   }
 
-  _insertConnectionRow(db, encryptConnectionFields({ ...connection }));
   const providerId = toStringOrNull(data.provider);
-  if (providerId) {
-    reorderConnections(db, providerId);
-  }
+  // One transaction: a failed renumber must not leave a half-renumbered pool behind the new row.
+  db.transaction(() => {
+    _insertConnectionRow(db, encryptConnectionFields({ ...connection }));
+    if (providerId) reorderConnections(db, providerId);
+  })();
   backupDbFile("pre-write");
   invalidateDbCache("connections"); // Bust connections read cache
 
