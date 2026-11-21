@@ -100,3 +100,82 @@ test("handleImageGeneration surfaces MiniMax upstream errors without a network 4
     globalThis.fetch = originalFetch;
   }
 });
+
+test("H3 image generation uses both regional catalogs and preserves partial success", async (t) => {
+  const payload = (format: string) => ({
+    created: 123,
+    data: [
+      {
+        [format]: format === "url" ? "https://example.com/tree.webp" : "aGVsbG8=",
+        size: "2720x1536",
+        revised_prompt: "a sunlit tree",
+      },
+      { error: { code: "1027", message: "image blocked" } },
+    ],
+    output_format: "webp",
+    usage: { generated_images: 1 },
+  });
+  const stub = t.mock.method(globalThis, "fetch", async (_url, init) =>
+    Response.json(payload(JSON.parse(String(init?.body)).response_format))
+  );
+  for (const [provider, region, model, format] of [
+    ["minimax", "io", "MiniMax-H3-Image", "url"],
+    ["minimax-cn", "cn", "MiniMax-H3-Image-Highspeed", "b64_json"],
+  ]) {
+    const models = getImageProvider(provider)?.models.map((entry) => entry.id);
+    assert.ok(models?.includes("MiniMax-H3-Image"));
+    assert.ok(models.includes("MiniMax-H3-Image-Highspeed"));
+    const result = await handleImageGeneration({
+      body: {
+        model: provider + "/" + model,
+        prompt: "a tree",
+        n: 2,
+        size: "16:9",
+        area: "2K",
+        output_format: "webp",
+        response_format: format,
+        output_compression: 75,
+        disable_prompt_enhanced: true,
+      },
+      credentials: { apiKey: "test-key" },
+      log: null,
+    });
+    const [url, init] = stub.mock.calls.at(-1)!.arguments as [string, RequestInit];
+    assert.equal(url, `https://api.minimax.${region}/v1/images/generations`);
+    assert.equal(new Headers(init.headers).get("authorization"), "Bearer test-key");
+    assert.deepEqual(JSON.parse(String(init.body)), {
+      model,
+      prompt: "a tree",
+      n: 2,
+      aspect_ratio: "16:9",
+      area: "2K",
+      response_format: format,
+      output_format: "webp",
+      output_compression: 75,
+      disable_prompt_enhanced: true,
+    });
+    assert.equal(result.success, true);
+    assert.deepEqual(result.data, payload(format));
+  }
+  assert.equal(stub.mock.callCount(), 2);
+});
+
+test("H3 passes pixel dimensions and surfaces a failed image batch", async (t) => {
+  const stub = t.mock.method(globalThis, "fetch", async (_url, init) => {
+    const body = JSON.parse(init.body);
+    assert.equal(body.size, "1024x1024");
+    assert.equal(body.aspect_ratio, undefined);
+    return Response.json({ data: [{ error: { code: "1027", message: "image blocked" } }] });
+  });
+  const args = {
+    body: { model: "minimax/MiniMax-H3-Image", prompt: "a tree", size: "1024x1024" },
+    credentials: { apiKey: "test-key" },
+    log: null,
+  };
+  const result = await handleImageGeneration(args);
+  assert.equal(result.success, false);
+  assert.equal(result.error, "image blocked");
+  const streaming = await handleImageGeneration({ ...args, body: { ...args.body, stream: true } });
+  assert.equal(streaming.status, 400);
+  assert.equal(stub.mock.callCount(), 1);
+});
