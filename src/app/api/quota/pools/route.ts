@@ -61,6 +61,7 @@ export async function POST(request: Request): Promise<Response> {
         ensure,
         created: ensured?.created ?? true,
         updated: ensured?.updated ?? false,
+        borrowMode: pool.borrowMode,
       },
       ipAddress: ctx.ipAddress ?? undefined,
       requestId: ctx.requestId,

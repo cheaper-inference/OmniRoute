@@ -16,6 +16,8 @@ const ALIAS_PREFIXES: ReadonlyArray<{
   // /api/v0/management/*. Normalize here so the policy (and the ALWAYS_PROTECTED entry in
   // routeGuard.ts) sees the same path for both spellings. Still MANAGEMENT, never client API.
   { alias: "/v0/management", canonical: "/api/v0/management", reason: "cliproxy_management_alias" },
+  // Public self-service quota page: only the leading segment's casing is normalized.
+  { alias: "/quota", canonical: "/quota", reason: "public_quota_page" },
 ];
 
 function normalizePathname(rawPath: string): { path: string; reason?: ClassificationReason } {
@@ -94,10 +96,13 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
 
   // Public, ticket-gated device-flow connect pages (e.g. /connect/codex/{token}).
   // Anyone with the shared link completes the provider login in their own browser.
-  if (normalizedPath === "/connect" || normalizedPath.startsWith("/connect/")) {
+  // Public self-service quota page (/quota/{provider}). The visitor authenticates inside the
+  // page with an API key sent to /api/v1/me/*; the page itself carries no data.
+  // normalizePathname sets these reasons only for /connect, /quota and their sub-paths.
+  if (aliasReason === "public_connect_page" || aliasReason === "public_quota_page") {
     return {
       routeClass: "PUBLIC",
-      reason: "public_connect_page",
+      reason: aliasReason,
       normalizedPath,
     };
   }
