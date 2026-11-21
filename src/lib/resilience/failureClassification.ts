@@ -84,6 +84,19 @@ function classificationFor(
   return { type: "unknown", retryable: false };
 }
 
+/**
+ * Read-only projection of the verdict the shared classifier already computes.
+ * It carries no rule of its own: callers that only need the failure type get it
+ * from the same precedence order as the provider-failover path.
+ */
+export function failureVerdictFor(
+  status: number | undefined,
+  message: string | undefined
+): ProviderFailureType {
+  const normalized = (message ?? "").trim().toLowerCase();
+  return classificationFor(status, normalized).type;
+}
+
 export function classifyProviderFailure(input: {
   providerId: string;
   connectionId?: string;

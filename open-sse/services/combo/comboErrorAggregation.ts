@@ -17,6 +17,11 @@
  * strings (ops/PII leak).
  */
 
+import {
+  failureVerdictFor,
+  type ProviderFailureType,
+} from "@/lib/resilience/failureClassification";
+
 import { isOpencodeFreeTierRefusalForProvider } from "../../executors/opencodeGeoBlock.ts";
 
 export type ComboOutcomeKind =
@@ -39,6 +44,26 @@ const KIND_LABELS: Record<ComboOutcomeKind, string> = {
   timeout: "timeout",
   skipped: "skipped",
   upstream: "upstream",
+};
+
+/**
+ * The verdict type from the shared classifier, mapped to a client-facing label.
+ * Every value is `model` on purpose: the presentation guards above already emit
+ * the only non-model labels this site has ever shown (auth, rate_limit, timeout,
+ * provider). Rate-limit and timeout text carried by any other status must stay
+ * labelled `model`, so the guard stays ahead of this projection.
+ */
+const VERDICT_TO_KIND: Record<ProviderFailureType, ComboOutcomeKind> = {
+  authentication_error: "model",
+  permission_error: "model",
+  rate_limit: "model",
+  quota_exhausted: "model",
+  timeout: "model",
+  network_error: "model",
+  provider_5xx: "model",
+  invalid_request: "model",
+  model_unavailable: "model",
+  unknown: "model",
 };
 
 /**
@@ -69,7 +94,7 @@ export function classifyComboOutcome(status: number, errorText: string): ComboOu
   if (status === 429) return "rate_limit";
   if (status === 408 || status === 499) return "timeout";
   if (status >= 500) return "provider";
-  return "model";
+  return VERDICT_TO_KIND[failureVerdictFor(status, text)];
 }
 
 /**
