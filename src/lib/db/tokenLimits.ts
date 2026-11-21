@@ -16,6 +16,7 @@ import { getDbInstance } from "./core";
 import { getBudgetWindow, type BudgetResetInterval } from "@/domain/costRules";
 
 export type TokenLimitScopeType = "model" | "provider" | "global";
+export type TokenLimitResetInterval = BudgetResetInterval | "never";
 
 export interface TokenLimit {
   id: string;
@@ -23,7 +24,7 @@ export interface TokenLimit {
   scopeType: TokenLimitScopeType;
   scopeValue: string;
   tokenLimit: number;
-  resetInterval: BudgetResetInterval;
+  resetInterval: TokenLimitResetInterval;
   resetTime: string;
   enabled: boolean;
   createdAt: string;
@@ -36,7 +37,7 @@ export interface UpsertTokenLimitInput {
   scopeType: TokenLimitScopeType;
   scopeValue?: string;
   tokenLimit: number;
-  resetInterval?: BudgetResetInterval;
+  resetInterval?: TokenLimitResetInterval;
   resetTime?: string;
   enabled?: boolean;
 }
@@ -45,7 +46,7 @@ export interface TokenWindowState {
   windowStart: string;
   didReset: boolean;
   periodStartAt: number;
-  nextResetAt: number;
+  nextResetAt: number | null;
 }
 
 type JsonRecord = Record<string, unknown>;
@@ -70,8 +71,9 @@ function normalizeScopeType(value: unknown): TokenLimitScopeType {
   return "global";
 }
 
-function normalizeResetInterval(value: unknown): BudgetResetInterval {
-  if (value === "daily" || value === "weekly" || value === "monthly") return value;
+function normalizeResetInterval(value: unknown): TokenLimitResetInterval {
+  if (value === "never" || value === "daily" || value === "weekly" || value === "monthly")
+    return value;
   return "monthly";
 }
 
@@ -85,7 +87,7 @@ function ensureSchema() {
       scope_type      TEXT NOT NULL CHECK (scope_type IN ('model', 'provider', 'global')),
       scope_value     TEXT NOT NULL DEFAULT '',
       token_limit     INTEGER NOT NULL CHECK (token_limit > 0),
-      reset_interval  TEXT NOT NULL DEFAULT 'monthly' CHECK (reset_interval IN ('daily', 'weekly', 'monthly')),
+      reset_interval  TEXT NOT NULL DEFAULT 'monthly' CHECK (reset_interval IN ('daily', 'weekly', 'monthly', 'never')),
       reset_time      TEXT,
       enabled         INTEGER NOT NULL DEFAULT 1,
       created_at      TEXT NOT NULL DEFAULT (datetime('now')),
@@ -134,7 +136,7 @@ function rowToTokenLimit(row: unknown): TokenLimit {
 
 /** An id-targeted update that would take another limit's (scope, reset interval) slot. */
 export class TokenLimitConflictError extends Error {
-  constructor(scopeType: TokenLimitScopeType, resetInterval: BudgetResetInterval) {
+  constructor(scopeType: TokenLimitScopeType, resetInterval: TokenLimitResetInterval) {
     super(`This key already has a ${resetInterval} ${scopeType} token limit for that scope.`);
     this.name = "TokenLimitConflictError";
   }
@@ -289,6 +291,11 @@ export function deleteTokenLimit(id: string): boolean {
  * No DB writes. Window math reused from costRules.getBudgetWindow.
  */
 export function resetWindowIfElapsed(limit: TokenLimit, now = Date.now()): TokenWindowState {
+  // Lifetime credit counts all recorded usage for the key and never rolls over.
+  // A stable epoch window preserves the counter through edits and server restarts.
+  if (limit.resetInterval === "never") {
+    return { windowStart: "0", didReset: false, periodStartAt: 0, nextResetAt: null };
+  }
   const window = getBudgetWindow(limit.resetInterval, limit.resetTime, now);
   const windowStart = String(window.periodStartAt);
   return {
