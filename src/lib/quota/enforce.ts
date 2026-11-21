@@ -17,7 +17,7 @@ import type { EnforceDecision, EnforceInput, QuotaStore, RecordConsumptionInput 
 import type { ProviderPlan, QuotaUnit } from "./dimensions";
 import { dimensionKeyToString } from "./dimensions";
 import { decideFairShare } from "./fairShare";
-import { countableConsentBorrow } from "./consentGate";
+import { attributionKeyIds, countableConsentBorrow, percentConsentBorrow } from "./consentGate";
 import { attributePercentDimension, recordPercentTokens } from "./percentAttribution";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
@@ -228,7 +228,8 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
         connectionId: input.connectionId,
         provider: input.provider,
         dimension: { window: dim.window, limit: effectiveLimit },
-        apiKeyIds: [input.apiKeyId],
+        // The requester alone, or every key when another key lends in a consent pool.
+        apiKeyIds: attributionKeyIds(pool, input.apiKeyId, nowMs),
       });
       consumedByThisKey[dimKeyStr] = attribution.consumedByKey[input.apiKeyId] ?? 0;
       capConsumedByThisKey[dimKeyStr] = attribution.internalByKey[input.apiKeyId] ?? 0;
@@ -237,6 +238,14 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
         limit: effectiveLimit,
         consumedTotal: attribution.accountConsumed,
         globalUsedPercent: attribution.globalUsedPercent,
+        ...percentConsentBorrow({
+          pool,
+          requesterKeyId: input.apiKeyId,
+          policy: poolAllocation.policy,
+          limit: effectiveLimit,
+          consumedByKey: attribution.consumedByKey,
+          nowMs,
+        }),
       });
       continue;
     }
