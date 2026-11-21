@@ -1,0 +1,1 @@
+- **feat(routing):** prompt-level combo tags — a leading `[tag]` on the newest user message selects the routing combo (sticky per thread, explicit model ids win, API key combo grants enforced) ([#20711](https://github.com/cheaper-inference/OmniRoute/pull/20711)) — thanks @webxed
