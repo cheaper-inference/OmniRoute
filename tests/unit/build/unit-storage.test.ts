@@ -54,10 +54,20 @@ test(
     assert.match(collect.run!, /--temp-directory=coverage-shard/);
     assert.match(collect.run!, /npm run test:unit:ci:shard/);
     assert.doesNotMatch(collect.run!, /\|\| true|exit 0|--exclude=src/);
-    const upload = steps.find((step) => step.name === "Upload raw shard coverage")!;
-    assert.equal(upload.if, "always()");
-    assert.equal(upload.with?.path, "coverage-shard/*.json");
-    assert.equal(upload.with?.["if-no-files-found"], "error");
+    const packageIndex = steps.findIndex(
+      (step) => step.name === "Package successful shard coverage"
+    );
+    const complete = steps[packageIndex + 1];
+    assert.ok(packageIndex > steps.indexOf(collect));
+    assert.equal(complete.name, "Upload complete shard coverage");
+    assert.equal(complete.if, undefined, "complete evidence is published only on success");
+    assert.equal(complete.with?.path, "coverage-shard-upload/");
+    assert.equal(complete.with?.["if-no-files-found"], "error");
+    const failed = steps.find((step) => step.name === "Preserve raw coverage from failed shards")!;
+    assert.equal(failed.if, "failure()");
+    assert.equal(failed.with?.path, "coverage-shard/*.json");
+    assert.equal(failed.with?.["if-no-files-found"], "error");
+    assert.match(String(failed.with?.name), /^failed-unit-coverage-/);
     const source = read(".github/workflows/ci.yml");
     assert.match(source, /shard: \[1, 2, 3, 4, 5, 6, 7, 8\]/);
     assert.match(source, /--check-coverage/);

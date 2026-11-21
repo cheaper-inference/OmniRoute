@@ -2052,7 +2052,11 @@ async function handleSingleModelChat(
               `${provider}/${model} all connections cooling down (${retryDecision.retryAfterHuman || `retry in ${waitSec}s`}) — waiting ${waitSec}s before retry ${requestRetryAttempt + 1}/${retrySettings.maxRetries}`
             );
 
-            const completed = await waitForCooldownAwareRetry(retryDecision.waitMs, requestSignal);
+            const completed = await waitForCooldownAwareRetry(
+              retryDecision.waitMs,
+              requestSignal,
+              retryDecision.retryAfter
+            );
             if (!completed) {
               log.info(
                 "COOLDOWN_RETRY",
