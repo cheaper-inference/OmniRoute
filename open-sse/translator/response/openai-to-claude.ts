@@ -1,6 +1,7 @@
 import { extractXmlInvokeBlocks } from "../helpers/xmlToolCalls.ts";
 import { register } from "../registry.ts";
-import { mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+import { hasUsageReceipt } from "../../utils/responsesUsage.ts";
+import { trackClaudeClientUsage } from "./claudeClientUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
 import {
@@ -296,83 +297,6 @@ function flushTruncatedClaudeStream(state) {
   return results;
 }
 
-// First numeric value among `candidates`, else 0. Used to read usage fields
-// that upstreams report under either Chat Completions or Responses naming.
-function firstNumber(...candidates: unknown[]): number {
-  for (const value of candidates) {
-    if (typeof value === "number") return value;
-  }
-  return 0;
-}
-
-// Normalize an upstream usage block to prompt/output/cache counters, accepting
-// both OpenAI chat-completions naming (prompt_tokens / completion_tokens /
-// prompt_tokens_details) and Responses naming (input_tokens / output_tokens /
-// input_tokens_details): several OpenAI-compatible upstreams report the latter,
-// and the rest of the pipeline (stream.ts usage aggregation, usageTracking.ts,
-// openai-responses.ts) already reads both.
-function readUsageCounters(usage) {
-  const promptDetails = usage.prompt_tokens_details;
-  const inputDetails = usage.input_tokens_details;
-  return {
-    promptTokens: firstNumber(usage.prompt_tokens, usage.input_tokens),
-    outputTokens: firstNumber(usage.completion_tokens, usage.output_tokens),
-    cacheReadTokens: firstNumber(promptDetails?.cached_tokens ?? inputDetails?.cached_tokens),
-    cacheCreateTokens: firstNumber(
-      promptDetails?.cache_creation_tokens ?? inputDetails?.cache_creation_tokens
-    ),
-    writeInPrompt: (promptDetails ?? inputDetails)?.cache_creation_in_prompt !== false,
-    reasoningTokens: firstNumber(
-      usage.completion_tokens_details?.reasoning_tokens ??
-        usage.output_tokens_details?.reasoning_tokens ??
-        usage.reasoning_tokens
-    ),
-  };
-}
-
-// Harvest the upstream usage block from any chunk, including trailing
-// usage-only chunks that carry `choices: []` (#11817).
-function trackUsageFromChunk(chunk, state) {
-  if (!chunk.usage || typeof chunk.usage !== "object") return;
-  const {
-    promptTokens,
-    outputTokens,
-    cacheReadTokens,
-    cacheCreateTokens,
-    writeInPrompt,
-    reasoningTokens,
-  } = readUsageCounters(chunk.usage);
-
-  // #2215 reports cache creation outside prompt_tokens.
-  const inputTokens = Math.max(
-    0,
-    promptTokens - cacheReadTokens - (writeInPrompt ? cacheCreateTokens : 0)
-  );
-
-  state.usage = {
-    ...mergeCacheCreationFields(state.usage, chunk.usage),
-    input_tokens: inputTokens,
-    output_tokens: outputTokens,
-  };
-
-  // Add cache_read_input_tokens if present
-  if (cacheReadTokens > 0) {
-    state.usage.cache_read_input_tokens = cacheReadTokens;
-  }
-
-  // Add cache_creation_input_tokens if present
-  if (cacheCreateTokens > 0) {
-    state.usage.cache_creation_input_tokens = cacheCreateTokens;
-  }
-
-  // Reasoning is already included in output_tokens — never add it on top. Keep the
-  // count on the shared state so streaming usage accounting (tokens_reasoning) does
-  // not lose it on this pivot; message_delta strips it from the client payload.
-  if (reasoningTokens > 0) {
-    state.usage.reasoning_tokens = reasoningTokens;
-  }
-}
-
 // Client-facing Claude usage: the accounting-only reasoning_tokens is not part of
 // the Anthropic usage shape.
 function toClaudeClientUsage(usage) {
@@ -417,7 +341,7 @@ export function openaiToClaudeResponse(chunk, state) {
 
   const results: Record<string, unknown>[] = [];
   const chunkUsage = chunk?.usage;
-  const hasChunkUsage = chunkUsage && typeof chunkUsage === "object";
+  const hasChunkUsage = hasUsageReceipt(chunkUsage);
 
   // Usage must be harvested BEFORE the choices guard: many OpenAI-compatible
   // upstreams (Fireworks, vLLM, Together, …) deliver the authoritative usage
@@ -434,9 +358,10 @@ export function openaiToClaudeResponse(chunk, state) {
   // (pendingClaudeFinishChoice) holds the terminal emission open until either
   // real usage has arrived or a genuine flush forces it, so the message_delta
   // actually sent to the client carries the correct numbers (#11817 follow-up).
-  if (chunk) trackUsageFromChunk(chunk, state);
+  if (chunk && hasChunkUsage) trackClaudeClientUsage(chunk, state);
 
   const chunkChoice = chunk?.choices?.[0];
+  if (chunk && !chunkChoice && !hasChunkUsage) return null;
   const flushingPendingFinish = !chunkChoice && Boolean(state.pendingClaudeFinishChoice);
   const choice = chunkChoice || state.pendingClaudeFinishChoice;
   if (!choice) return null;
@@ -447,7 +372,9 @@ export function openaiToClaudeResponse(chunk, state) {
   // here replays the trailing fragment a second time, so an OpenAI→Claude
   // client that concatenates input_json_delta into one JSON string receives the
   // final fragment twice and fails to parse the tool input.
-  const delta = flushingPendingFinish ? undefined : choice.delta;
+  const repeatedFinish = !flushingPendingFinish && choice.finish_reason && state.claudeFinishSeen;
+  if (choice.finish_reason) state.claudeFinishSeen = true;
+  const delta = flushingPendingFinish || repeatedFinish ? undefined : choice.delta;
   // First chunk - ALWAYS send message_start first
   if (!state.messageStartSent) {
     state.messageStartSent = true;
@@ -937,7 +864,7 @@ export function openaiToClaudeResponse(chunk, state) {
     state.finishReason = overrideFinishReason;
 
     // Use tracked usage (will be estimated in stream.js if not valid)
-    const finalUsage = toClaudeClientUsage(state.usage);
+    const finalUsage = toClaudeClientUsage(state.claudeUsage ?? state.usage);
     results.push({
       type: "message_delta",
       delta: { stop_reason: openAIFinishReasonToClaudeStopReason(overrideFinishReason) },

@@ -1,9 +1,10 @@
+import { carryComputedUsageTotals } from "./computedUsageTotals.ts";
 import { mergeUsageEvidence } from "./usageEvidence.ts";
 import type { UsageLike } from "./usageTracking.ts";
 
 export function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLike): UsageLike {
-  if (!current) return { ...incoming };
-  return {
+  if (!current) return carryComputedUsageTotals(incoming, { ...incoming });
+  return carryComputedUsageTotals(incoming.total_tokens === undefined ? current : incoming, {
     ...current,
     ...incoming,
     usage_evidence: mergeUsageEvidence(current, incoming),
@@ -21,7 +22,7 @@ export function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLik
       ? { cache_creation_input_tokens: incoming.cache_creation_input_tokens }
       : {}),
     ...(incoming.cache_evidence !== undefined ? { cache_evidence: incoming.cache_evidence } : {}),
-  };
+  });
 }
 
 /** Native output repair without projecting inclusive prompt totals onto fresh input. */

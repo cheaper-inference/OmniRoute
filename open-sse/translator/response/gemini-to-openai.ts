@@ -1,3 +1,4 @@
+import { hasComputedUsageTotal, markComputedUsageTotal } from "../../utils/computedUsageTotals.ts";
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import {
@@ -718,12 +719,16 @@ export function geminiToOpenAIResponse(chunk, state) {
       usageMeta.candidatesTokenCount >= 0
         ? usageMeta.candidatesTokenCount
         : (previousUsage?.completion_tokens ?? 0);
-    const totalTokens =
+    const reportedTotalTokens =
       typeof usageMeta.totalTokenCount === "number" &&
       Number.isFinite(usageMeta.totalTokenCount) &&
       usageMeta.totalTokenCount >= 0
         ? usageMeta.totalTokenCount
-        : (previousUsage?.total_tokens ?? 0);
+        : undefined;
+    const previousReportedTotal = hasComputedUsageTotal(previousUsage, "total_tokens")
+      ? undefined
+      : previousUsage?.total_tokens;
+    const totalTokens = reportedTotalTokens ?? previousReportedTotal ?? 0;
 
     // prompt_tokens = promptTokenCount (includes cached tokens, matching claude-to-openai.js behavior)
     const promptTokens = promptTokenCountRaw;
@@ -762,6 +767,11 @@ export function geminiToOpenAIResponse(chunk, state) {
       // Gemini may omit totalTokenCount; derive it instead of reporting 0.
       total_tokens: totalTokens || promptTokens + completionTokens,
     };
+    if (
+      !totalTokens ||
+      (reportedTotalTokens === undefined && hasComputedUsageTotal(previousUsage, "total_tokens"))
+    )
+      markComputedUsageTotal(state.usage, "total_tokens");
     if (typeof effectiveCachedTokens === "number") {
       state.usage.prompt_tokens_details = {
         cached_tokens: effectiveCachedTokens,

@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve final usage receipts when an SSE stream ends without a blank line, retain reported input in output-only summaries, and replace stale cache counters with explicit zero. Keep independently reported Chat token totals through extraction.

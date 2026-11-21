@@ -1,19 +1,33 @@
 import {
+  carryComputedUsageTotals,
+  hasComputedUsageTotal,
+  markComputedUsageTotal,
+} from "./computedUsageTotals.ts";
+import {
   deriveUsageEvidence,
   hasEstimatedUsageEvidence,
   usableTokenCounter,
+  normalizedTokenCounter,
   type UsageEvidence,
 } from "./usageEvidence.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { estimateInputTokens, estimateOutputTokens, type UsageLike } from "./usageTracking.ts";
 
 function inputCount(usage: UsageLike): number {
-  const value = usage.prompt_tokens ?? usage.input_tokens ?? usage.promptTokenCount;
-  return usableTokenCounter(value) ? value : 0;
+  return (
+    normalizedTokenCounter(usage.prompt_tokens) ??
+    normalizedTokenCounter(usage.input_tokens) ??
+    normalizedTokenCounter(usage.promptTokenCount) ??
+    0
+  );
 }
 function outputCount(usage: UsageLike): number {
-  const value = usage.completion_tokens ?? usage.output_tokens ?? usage.candidatesTokenCount;
-  return usableTokenCounter(value) ? value : 0;
+  return (
+    normalizedTokenCounter(usage.completion_tokens) ??
+    normalizedTokenCounter(usage.output_tokens) ??
+    normalizedTokenCounter(usage.candidatesTokenCount) ??
+    0
+  );
 }
 function finalizeInput(usage: UsageLike, evidence: UsageEvidence, body: unknown): number {
   if (evidence.input.source !== "unknown") return inputCount(usage);
@@ -24,13 +38,27 @@ function finalizeInput(usage: UsageLike, evidence: UsageEvidence, body: unknown)
 }
 function finalizeOutput(usage: UsageLike, evidence: UsageEvidence, chars: number): number {
   const output = outputCount(usage);
-  if (output > 0 || !(chars > 0)) return output;
+  const priorObservedEstimate =
+    evidence.output.source === "estimated" && evidence.output.method === "observed_characters";
+  if (
+    !(chars > 0) ||
+    (output > 0 && evidence.output.source !== "unknown" && !priorObservedEstimate)
+  )
+    return output;
   evidence.output = { source: "estimated", method: "observed_characters" };
   return estimateOutputTokens(chars);
 }
 /** Provider totals may contain modalities not represented by input/output aliases. */
-function finalizedTotal(reported: unknown, input: number, output: number): number {
-  return usableTokenCounter(reported) && reported > 0 ? reported : input + output;
+function finalizeTotal(
+  result: UsageLike,
+  key: "total_tokens" | "totalTokenCount",
+  input: number,
+  output: number
+): void {
+  if (usableTokenCounter(result[key]) && result[key] > 0 && !hasComputedUsageTotal(result, key))
+    return;
+  result[key] = input + output;
+  markComputedUsageTotal(result, key);
 }
 function projectCounts(result: UsageLike, input: number, output: number, format: string): void {
   if (format === FORMATS.CLAUDE || format === FORMATS.OPENAI_RESPONSES) {
@@ -39,7 +67,7 @@ function projectCounts(result: UsageLike, input: number, output: number, format:
   } else if (format === FORMATS.GEMINI || format === FORMATS.ANTIGRAVITY) {
     result.promptTokenCount = input;
     result.candidatesTokenCount = output;
-    result.totalTokenCount = finalizedTotal(result.totalTokenCount, input, output);
+    finalizeTotal(result, "totalTokenCount", input, output);
   } else {
     result.prompt_tokens = input;
     result.completion_tokens = output;
@@ -57,14 +85,14 @@ export function finalizeStreamingUsage(
   contentLength: number,
   targetFormat: string = FORMATS.OPENAI
 ): UsageLike {
-  const result: UsageLike = { ...usage };
+  const result: UsageLike = carryComputedUsageTotals(usage, { ...usage });
   const evidence = deriveUsageEvidence(usage);
   const input = finalizeInput(result, evidence, body);
   const output = finalizeOutput(result, evidence, contentLength);
   projectCounts(result, input, output, targetFormat);
   synchronizeAliases(result, input, output);
   if (result.total_tokens !== undefined || targetFormat === FORMATS.OPENAI)
-    result.total_tokens = finalizedTotal(result.total_tokens, input, output);
+    finalizeTotal(result, "total_tokens", input, output);
   result.usage_evidence = evidence;
   if (hasEstimatedUsageEvidence(evidence)) result.estimated = true;
   else delete result.estimated;

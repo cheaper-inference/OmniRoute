@@ -1,15 +1,15 @@
-import { mergeUsageEvidence } from "./usageEvidence.ts";
+import { carryComputedUsageTotals } from "./computedUsageTotals.ts";
+import { completeTrailingUsagePayload } from "./passthroughTrailingUsage.ts";
+import { deriveUsageEvidence, mergeUsageEvidence } from "./usageEvidence.ts";
 /**
  * Shared per-line drain for translate-mode flush.
  *
  * When a translated stream ends without a closing blank line, the multiline
  * normalizer still holds the final event in its pending tail
  * (`hasPending()` true, `buffer` already cleared at stream.ts flush time).
- * This module replays each held line through the same per-line pipeline as
- * the stream transform, before the existing partial-buffer block runs: a
- * partial tail line without any newline keeps its current buffered handling,
- * since exactly one of the two paths ever holds data (m1 invariant: the
- * normalizer clears `buffer` when it produces the tail).
+ * This module replays held lines and a final line without a newline through
+ * the same pipeline. Exactly one source holds data: the normalizer clears
+ * `buffer` when it produces the held tail.
  */
 import { parseSSELine } from "./streamHelpers.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
@@ -37,6 +37,7 @@ export type TranslateFlushTailContext = {
   pushProviderPayload: (payload: unknown) => void;
   emitFailureAndAbort: (controller: unknown, parsed: unknown) => boolean;
   translateAndEmit: (controller: unknown, parsed: unknown) => void;
+  accumulateContent?: (parsed: unknown) => void;
 };
 
 function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
@@ -53,15 +54,22 @@ function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
     mergeCacheCreationFields(current, extracted)
   );
   if (incoming.prompt_tokens > 0) current.prompt_tokens = incoming.prompt_tokens;
-  if (incoming.completion_tokens > 0) current.completion_tokens = incoming.completion_tokens;
-  if (incoming.total_tokens > 0) current.total_tokens = incoming.total_tokens;
+  if (
+    incoming.completion_tokens > 0 ||
+    (incoming.completion_tokens === 0 && deriveUsageEvidence(extracted).output.source !== "unknown")
+  )
+    current.completion_tokens = incoming.completion_tokens;
+  if (incoming.total_tokens > 0) {
+    current.total_tokens = incoming.total_tokens;
+    carryComputedUsageTotals(extracted, current);
+  }
   if (incoming.input_tokens > 0) current.input_tokens = incoming.input_tokens;
   if (incoming.output_tokens > 0) current.output_tokens = incoming.output_tokens;
-  if (incoming.cache_read_input_tokens > 0)
+  if (incoming.cache_read_input_tokens !== undefined)
     current.cache_read_input_tokens = incoming.cache_read_input_tokens;
-  if (incoming.cache_creation_input_tokens > 0)
+  if (incoming.cache_creation_input_tokens !== undefined)
     current.cache_creation_input_tokens = incoming.cache_creation_input_tokens;
-  if (incoming.cached_tokens > 0) current.cached_tokens = incoming.cached_tokens;
+  if (incoming.cached_tokens !== undefined) current.cached_tokens = incoming.cached_tokens;
   if (incoming.reasoning_tokens > 0) current.reasoning_tokens = incoming.reasoning_tokens;
 }
 
@@ -92,7 +100,9 @@ function drainOneTailLine(
   if (context.emitFailureAndAbort(controller, parsed)) return true;
   if (isSkippedTailLine(parsed, context)) return false;
   context.pushProviderPayload(parsed);
+  completeTrailingUsagePayload(parsed, context.state.usage, context.body, 0, context.targetFormat);
   sanitizeUsagePayloadForRequest(parsed, context.body, context.targetFormat);
+  context.accumulateContent?.(parsed);
   trackTailToolTiming(parsed as JsonRecord, context);
   mergeUsage(context.state, extractUsage(parsed));
   context.translateAndEmit(controller, parsed);

@@ -113,7 +113,7 @@ function usageEstimatedMeta(entry: unknown): unknown {
 test("extraction preserves serializable field evidence and estimates through copies", () => {
   const estimated = extractUsage({ choices: [], usage: { ...USAGE, estimated: true } });
   const reported = extractUsage({ choices: [], usage: { ...USAGE } });
-  const tokenFields = { prompt_tokens: 1200, completion_tokens: 800 };
+  const tokenFields = { prompt_tokens: 1200, completion_tokens: 800, total_tokens: 2000 };
   const evidence = {
     input: { source: "estimated", method: "legacy_estimate" },
     output: { source: "estimated", method: "legacy_estimate" },
