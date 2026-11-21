@@ -1,7 +1,7 @@
 import { parseApiKeyInput } from "./apiKeyInput";
 
 export type KeyPersistence = "memory" | "session" | "device";
-/** `confirmed`: confirm() ran, or the key came from storage. */
+/** `confirmed`: confirmKey() ran, or the key came from storage. */
 export interface StoredKey {
   key: string;
   persistence: KeyPersistence;
@@ -19,7 +19,7 @@ export interface KeyStore {
   /** Memory only; remembers where the key should go once accepted. */
   hold(key: string, remember: boolean): void;
   /** The server accepted the held key: write it where requested. Idempotent. */
-  confirm(): void;
+  confirmKey(): void;
   /**
    * The server rejected the key: remove it from the storages that hold it, keep it in memory.
    * A different key another tab stored is left in place.
@@ -154,7 +154,7 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
       remember = keep;
       commit({ key, persistence: "memory", confirmed: false });
     },
-    confirm() {
+    confirmKey() {
       const held = current();
       if (!held || held.confirmed) return;
       const target: StorageArea = remember ? "device" : "session";

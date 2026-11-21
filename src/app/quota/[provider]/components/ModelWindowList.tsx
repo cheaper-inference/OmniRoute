@@ -29,7 +29,7 @@ export default function ModelWindowList({ modelWindows }: ModelWindowListProps) 
   if (status === "unavailable") {
     return (
       <section className="min-w-0 space-y-1">
-        <h4 className="text-sm font-semibold">{t("modelWindowsTitle")}</h4>
+        <h4 className="text-sm">{t("modelWindowsTitle")}</h4>
         <p className="min-w-0 break-words text-sm text-text-muted">{t(reasonKey(reason))}</p>
       </section>
     );
@@ -42,7 +42,7 @@ export default function ModelWindowList({ modelWindows }: ModelWindowListProps) 
 
   return (
     <section className="min-w-0 space-y-2">
-      <h4 id={titleId} className="text-sm font-semibold">
+      <h4 id={titleId} className="text-sm">
         {t("modelWindowsTitle")}
       </h4>
       <p className="min-w-0 break-words text-xs text-text-muted">{t("modelWindowsNote")}</p>

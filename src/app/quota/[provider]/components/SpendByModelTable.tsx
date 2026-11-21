@@ -37,7 +37,7 @@ export default function SpendByModelTable({ rows }: SpendByModelTableProps) {
 
   return (
     <div className="min-w-0 space-y-2">
-      <h3 className="text-sm font-semibold">{t("spendByModelTitle")}</h3>
+      <h3 className="text-sm">{t("spendByModelTitle")}</h3>
       <Table
         scrollLabel={t("spendTableLabel")}
         aria-label={t("spendTableLabel")}

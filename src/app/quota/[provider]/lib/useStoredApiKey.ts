@@ -35,13 +35,13 @@ const serverSnapshot = () => null;
 /** The self-service API key held in this browser, and the actions that move it. */
 export function useStoredApiKey(): { stored: StoredKey | null } & Pick<
   KeyStore,
-  "hold" | "confirm" | "unpersist" | "forget"
+  "hold" | "confirmKey" | "unpersist" | "forget"
 > {
   const stored = useSyncExternalStore(subscribe, store.getSnapshot, serverSnapshot);
   return {
     stored,
     hold: store.hold,
-    confirm: store.confirm,
+    confirmKey: store.confirmKey,
     unpersist: store.unpersist,
     forget: store.forget,
   };
