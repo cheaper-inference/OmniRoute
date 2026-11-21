@@ -52,6 +52,16 @@ export function clearArtifactReference(relativePath: string, nextState: CallLogD
 // under the limit so each DELETE/SELECT stays valid.
 const DELETE_ID_CHUNK_SIZE = 500;
 
+// Proves "no overflow" through idx_cl_artifact_relpath, without the timestamp sort
+// that selectOverflowArtifactPaths needs (a full scan whenever the rows fit the limit).
+function hasArtifactRowsBeyond(limit: number): boolean {
+  return Boolean(
+    getDbInstance()
+      .prepare("SELECT 1 FROM call_logs WHERE artifact_relpath IS NOT NULL LIMIT 1 OFFSET ?")
+      .get(limit)
+  );
+}
+
 function takeOverflowArtifactSlot(relativePath: string, baseDir: string): boolean {
   if (deleteCallArtifact(relativePath, baseDir)) {
     clearArtifactReference(relativePath, "missing");
@@ -232,6 +242,14 @@ export function cleanupOrphanCallLogFiles(
   }
 }
 
+function takeOverflowArtifactSlots(paths: string[], baseDir: string): number {
+  let progress = 0;
+  for (const relativePath of paths) {
+    if (takeOverflowArtifactSlot(relativePath, baseDir)) progress++;
+  }
+  return progress;
+}
+
 export function cleanupOverflowCallLogFiles(
   baseDir: string | null = getCallLogsDir(),
   maxEntries?: number,
@@ -244,16 +262,13 @@ export function cleanupOverflowCallLogFiles(
 
   try {
     let deleted = 0;
-    while (deleted < maxDeletes) {
+    while (deleted < maxDeletes && hasArtifactRowsBeyond(limit)) {
       const paths = selectOverflowArtifactPaths(
         limit,
         Math.min(DELETE_ID_CHUNK_SIZE, maxDeletes - deleted)
       );
       if (paths.length === 0) break;
-      let progress = 0;
-      for (const relativePath of paths) {
-        if (takeOverflowArtifactSlot(relativePath, baseDir)) progress++;
-      }
+      const progress = takeOverflowArtifactSlots(paths, baseDir);
       deleted += progress;
       if (progress === 0) break;
     }

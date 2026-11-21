@@ -1,0 +1,1 @@
+- **perf(usage):** a stage or status update on a live request no longer re-measures the retained request previews, so each update does less work; payload updates are still measured against the pending-byte ceiling. ([#19720](https://github.com/cheaper-inference/OmniRoute/pull/19720))

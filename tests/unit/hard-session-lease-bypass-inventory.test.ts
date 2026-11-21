@@ -349,7 +349,6 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // Selective provider-account transfer: one read of every connection to build the
     // catalog, the export selection and the import match set. Read-only state, no dispatch.
     "src/lib/transfer/providerTransfer.ts": 1,
-    "src/lib/usage/callLogs.ts": 1,
     // #14728: Claude sibling of codexResetCredits.ts, same shape —
     // isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an ACTIVE
     // exclusive lease defers list/redeem (409 exclusive_lease_active).
