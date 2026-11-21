@@ -16,14 +16,10 @@ import { isLocalEgressHostname } from "./proxyDispatcher.ts";
 export const REAP_MIN_INTERVAL_MS = 30_000;
 export const PROXY_DISPATCHER_EVICT_THRESHOLD = 3;
 export const PROXY_DISPATCHER_FAILURE_WINDOW_MS = 60_000;
-
-type ProxyFailureStreak = {
-  count: number;
-  lastFailureAt: number;
-};
+export const MAX_PROXY_FAILURE_STREAKS = 1024;
 
 const lastReapByScope = new Map<DispatcherPoolScope, number>();
-const proxyFailureStreaks = new Map<string, ProxyFailureStreak>();
+const proxyFailureStreaks = new Map<string, number[]>();
 
 /** Test seam: drop the stored reap timestamps between tests. */
 export function __resetDispatcherReapForTest(): void {
@@ -54,16 +50,36 @@ function parseProxyHost(proxyUrl: string): { hostname: string | null; isLocal: b
   }
 }
 
+function pruneProxyFailureStreaks(now: number): void {
+  for (const [url, timestamps] of proxyFailureStreaks) {
+    const recent = timestamps.filter((ts) => now - ts <= PROXY_DISPATCHER_FAILURE_WINDOW_MS);
+    if (recent.length === 0) {
+      proxyFailureStreaks.delete(url);
+    } else if (recent.length !== timestamps.length) {
+      proxyFailureStreaks.set(url, recent);
+    }
+  }
+}
+
+function setBoundedFailureStreak(proxyUrl: string, timestamps: number[]): void {
+  proxyFailureStreaks.delete(proxyUrl);
+  while (proxyFailureStreaks.size >= MAX_PROXY_FAILURE_STREAKS) {
+    const oldestKey = proxyFailureStreaks.keys().next().value;
+    if (oldestKey === undefined) break;
+    proxyFailureStreaks.delete(oldestKey);
+  }
+  proxyFailureStreaks.set(proxyUrl, timestamps);
+}
+
 export function recordProxyDispatcherFailure(
   proxyUrl: string,
   now: number = Date.now()
 ): boolean {
   if (!proxyUrl) return false;
-  const prev = proxyFailureStreaks.get(proxyUrl);
-  const count =
-    prev && now - prev.lastFailureAt <= PROXY_DISPATCHER_FAILURE_WINDOW_MS ? prev.count + 1 : 1;
+  pruneProxyFailureStreaks(now);
+  const recent = [...(proxyFailureStreaks.get(proxyUrl) ?? []), now];
 
-  if (count >= PROXY_DISPATCHER_EVICT_THRESHOLD) {
+  if (recent.length >= PROXY_DISPATCHER_EVICT_THRESHOLD) {
     proxyFailureStreaks.delete(proxyUrl);
     evictProxyDispatcher(proxyUrl);
     const { hostname, isLocal } = parseProxyHost(proxyUrl);
@@ -71,7 +87,7 @@ export function recordProxyDispatcherFailure(
     return true;
   }
 
-  proxyFailureStreaks.set(proxyUrl, { count, lastFailureAt: now });
+  setBoundedFailureStreak(proxyUrl, recent);
   return false;
 }
 

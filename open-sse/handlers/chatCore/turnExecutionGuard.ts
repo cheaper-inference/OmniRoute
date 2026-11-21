@@ -4,6 +4,7 @@ import { getTurnExecutionOwnership } from "./turnExecutionContext.ts";
 type ActiveTurn = {
   startedAt: number;
   retryCount: number;
+  owner: Set<string> | null;
 };
 
 export type TurnExecutionAcquireResult =
@@ -65,8 +66,8 @@ export function acquireTurnExecution(key: string | null): TurnExecutionAcquireRe
 
   if (existing && ttlMs > 0 && now - existing.startedAt >= ttlMs) {
     activeTurns.delete(key);
-    ownership?.keys.delete(key);
-  } else if (ownership?.keys.has(key)) {
+    existing.owner?.delete(key);
+  } else if (existing && existing.owner === ownership?.keys && ownership?.keys.has(key)) {
     // A re-entry of the request that already holds this key (same-account
     // retry, account rotation, combo leg) is the same turn continuing, not a
     // duplicate: it proceeds under the owner's slot and must not release it.
@@ -81,9 +82,10 @@ export function acquireTurnExecution(key: string | null): TurnExecutionAcquireRe
     };
   }
 
-  const entry: ActiveTurn = { startedAt: now, retryCount: 0 };
+  const owner = ownership?.keys ?? null;
+  const entry: ActiveTurn = { startedAt: now, retryCount: 0, owner };
   activeTurns.set(key, entry);
-  ownership?.keys.add(key);
+  owner?.add(key);
   let released = false;
   return {
     acquired: true,
@@ -91,7 +93,7 @@ export function acquireTurnExecution(key: string | null): TurnExecutionAcquireRe
       if (released) return;
       released = true;
       if (activeTurns.get(key) === entry) {
-        ownership?.keys.delete(key);
+        entry.owner?.delete(key);
         activeTurns.delete(key);
       }
     },

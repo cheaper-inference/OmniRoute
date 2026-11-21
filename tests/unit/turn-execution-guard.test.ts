@@ -188,3 +188,44 @@ test("turn execution guard disables TTL eviction when OMNIROUTE_TURN_GUARD_TTL_M
     Date.now = realNow;
   }
 });
+
+test("turn execution guard blocks re-entry of TTL-evicted owner when another owner holds the slot", () => {
+  process.env.OMNIROUTE_TURN_GUARD_TTL_MS = "1000";
+  const realNow = Date.now;
+  let now = 40_000;
+  Date.now = () => now;
+  try {
+    runWithTurnExecutionOwnership(() => {
+      const firstA = acquireTurnExecution("evicted-owner-key");
+      assert.equal(firstA.acquired, true);
+
+      // TTL expires and request B (in a separate ownership scope) takes the slot.
+      now = 41_000;
+      let handleB: ReturnType<typeof acquireTurnExecution> | null = null;
+      runWithoutTurnExecutionOwnership(() => {
+        runWithTurnExecutionOwnership(() => {
+          handleB = acquireTurnExecution("evicted-owner-key");
+          assert.equal(handleB.acquired, true);
+        });
+      });
+
+      // Request A re-enters after eviction: must NOT enter B's slot.
+      const reentryA = acquireTurnExecution("evicted-owner-key");
+      assert.equal(reentryA.acquired, false);
+
+      // Once B releases, A's next attempt acquires a fresh slot (not a slotless no-op).
+      handleB!.release();
+      const reacquiredA = acquireTurnExecution("evicted-owner-key");
+      assert.equal(reacquiredA.acquired, true);
+      const foreign = runWithoutTurnExecutionOwnership(() =>
+        acquireTurnExecution("evicted-owner-key")
+      );
+      assert.equal(foreign.acquired, false);
+
+      reacquiredA.release();
+      firstA.release();
+    });
+  } finally {
+    Date.now = realNow;
+  }
+});

@@ -8,7 +8,9 @@ import {
   getDispatcherCache,
 } from "../../open-sse/utils/proxyDispatcherCache.ts";
 import {
+  __proxyFailureStreakSizeForTest,
   __resetDispatcherReapForTest,
+  MAX_PROXY_FAILURE_STREAKS,
   PROXY_DISPATCHER_EVICT_THRESHOLD,
   PROXY_DISPATCHER_FAILURE_WINDOW_MS,
   recordProxyDispatcherFailure,
@@ -149,6 +151,58 @@ describe("recordProxyDispatcherFailure() / recordProxyDispatcherSuccess()", () =
     );
     assert.equal(closed, 1);
     assert.equal(getDispatcherCache().has(proxyUrl), false);
+  });
+
+  it("uses a true 60s sliding window rather than pairwise gaps between failures", () => {
+    const proxyUrl = "http://proxy-sliding.example.com:8080";
+    let closed = 0;
+    __cacheProxyDispatcherForTest(proxyUrl, {
+      close: () => {
+        closed += 1;
+        return Promise.resolve();
+      },
+    } as never);
+
+    // 1_000, 60_000, 119_000: pairwise gaps <= 60s, but only 2 failures in [59_000..119_000].
+    assert.equal(recordProxyDispatcherFailure(proxyUrl, 1_000), false);
+    assert.equal(recordProxyDispatcherFailure(proxyUrl, 60_000), false);
+    assert.equal(recordProxyDispatcherFailure(proxyUrl, 119_000), false);
+    assert.equal(closed, 0);
+    assert.equal(getDispatcherCache().has(proxyUrl), true);
+
+    // 119_500 brings 3 failures inside [59_500..119_500] -> evicts.
+    assert.equal(recordProxyDispatcherFailure(proxyUrl, 119_500), true);
+    assert.equal(closed, 1);
+    assert.equal(getDispatcherCache().has(proxyUrl), false);
+  });
+
+  it("prunes expired failure streaks by TTL and bounds map size to MAX_PROXY_FAILURE_STREAKS", () => {
+    assert.equal(MAX_PROXY_FAILURE_STREAKS, 1024);
+
+    for (let i = 0; i < 5; i += 1) {
+      assert.equal(recordProxyDispatcherFailure(`http://stale-${i}.example.com:8080`, 1_000), false);
+    }
+    assert.equal(__proxyFailureStreakSizeForTest(), 5);
+
+    // Advancing past the 60s window prunes all stale entries on the next failure.
+    assert.equal(
+      recordProxyDispatcherFailure(
+        "http://fresh.example.com:8080",
+        1_000 + PROXY_DISPATCHER_FAILURE_WINDOW_MS + 1
+      ),
+      false
+    );
+    assert.equal(__proxyFailureStreakSizeForTest(), 1);
+
+    // Flooding > MAX_PROXY_FAILURE_STREAKS distinct proxies within the window stays bounded.
+    const baseNow = 200_000;
+    for (let i = 0; i < MAX_PROXY_FAILURE_STREAKS + 50; i += 1) {
+      assert.equal(
+        recordProxyDispatcherFailure(`http://flood-${i}.example.com:8080`, baseNow + i),
+        false
+      );
+    }
+    assert.equal(__proxyFailureStreakSizeForTest(), MAX_PROXY_FAILURE_STREAKS);
   });
 });
 
