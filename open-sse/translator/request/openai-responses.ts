@@ -692,12 +692,16 @@ export function openaiResponsesToOpenAIRequest(
     // Skip Responses-only search metadata. tool_search_call/tool_search_result
     // are Codex's dynamic tool-discovery items; web_search_call is emitted by
     // OmniRoute's web-search fallback alongside function_call_output, which
-    // already carries the result for Chat Completions. Replayed metadata has no
-    // lossless Chat representation and must not fail a follow-up turn.
+    // already carries the result for Chat Completions. image_generation_call is
+    // the image the model made on an earlier turn (a base64 result the client
+    // replays). Replayed metadata has no lossless Chat representation and must
+    // not fail a follow-up turn. Other unrepresentable types (item_reference,
+    // mcp_call, computer_call_output) still throw: dropping them loses input.
     if (
       itemType === "tool_search_call" ||
       itemType === "tool_search_result" ||
-      itemType === "web_search_call"
+      itemType === "web_search_call" ||
+      itemType === "image_generation_call"
     ) {
       continue;
     }
@@ -933,6 +937,12 @@ export function openaiResponsesToOpenAIRequest(
       { role: "user", content: `[Unpaired tool result ${toolCallId}]\n${toString(rec.content)}` },
     ];
   });
+
+  // Upstream providers reject messages:[] (see the empty-input placeholder above). Skipped
+  // replay items or dropped tool results can still leave nothing: keep the same placeholder.
+  if (Array.isArray(result.messages) && result.messages.length === 0) {
+    result.messages = [{ role: "user", content: "..." }];
+  }
 
   // Translate tool_choice object format: Responses {type,name} → Chat {type,function:{name}}
   if (
