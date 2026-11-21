@@ -557,6 +557,8 @@ Proxy này:
 
 Các bản nâng cấp WebSocket cho bảng thông tin nhúng được xử lý bởi máy chủ đồng hành trên một cổng chuyên dụng (xem `src/lib/services/embedWsProxy.ts`).
 
+Mọi nâng cấp đều được ủy quyền trước khi đường hầm mở ra, với các quy tắc tương tự như tuyến nhúng HTTP : thiết bị ngang hàng phải là loopback không có tiêu đề chuyển tiếp proxy ngược, `Origin` trình duyệt phải là nguồn gốc của bảng thông tin (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` mở rộng mặc định vòng lặp) và người gọi cần có phiên bảng thông tin hoặc khóa API trong phạm vi quản lý trừ khi tính năng đăng nhập bảng thông tin bị tắt.
+
 **Bảo vệ:** Các tuyến proxy nhúng được phân loại theo `LOCAL_ONLY_API_PREFIXES` và chỉ có thể truy cập được từ loopback. Kẻ tấn công lấy được JWT thông qua đường hầm Cloudflare/Ngrok không thể ủy quyền vào các dịch vụ nhúng.
 
 ---

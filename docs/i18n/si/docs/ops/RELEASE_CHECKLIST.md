@@ -5,243 +5,248 @@
 ---
 
 > **අවසන් වරට යාවත්කාලීන කළේ:** 2026-08-28 — v3.8.51
-> ස්වයංක්රීයකරණය සඳහා Claude Code කුසලතා භාවිත කරන සරල කළ නිකුතු ප්රවාහයකි.
+> ස්වයංක්රීයකරණය සඳහා Claude Code skills භාවිත කරන සරල කළ release ප්රවාහය.
 >
-> **නිකුතු අතරතුර queue/branch එක green තත්ත්වයේ තබා ගන්න:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) බලන්න
-> (`/green-prs` පවුල + `npm run check:release-green` + `/babysit` + රාත්රී ධාවනය). මෙය කාලානුරූපව —
-> විශේෂයෙන්ම මෙම පිරික්සුම් ලැයිස්තුවට **පෙර** — ධාවනය කිරීමෙන් නිකුතු PR එක green තත්ත්වයෙන් ආරම්භ වේ.
+> **Release අතරතුර queue/branch එක green තත්ත්වයේ තබා ගන්න:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) බලන්න
+> (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly). මෙය කලින් කලට ධාවනය කිරීම — විශේෂයෙන්ම **මෙම checklist එකට පෙර** — release PR එක green තත්ත්වයෙන් ආරම්භ වීමට උපකාරී වේ.
 
-## කෙටියෙන්
+## TL;DR
 
 ```bash
-# 1. අනුවාදය ඉහළ නංවා CHANGELOG ජනනය කරන්න (කුසලතාව)
+# 1. අනුවාදය ඉහළ නංවා CHANGELOG ජනනය කරන්න (skill)
 /version-bump-cc patch    # හෝ minor/major
 
-# 2. ගුණාත්මකතා දොරටුව දේශීයව ධාවනය කරන්න
-npm run check              # lint + පරීක්ෂණ
-npm run test:coverage      # සම්පූර්ණ coverage දොරටුව (60/60/60/60)
+# 2. ගුණාත්මකතා පරීක්ෂාව locally ධාවනය කරන්න
+npm run check              # lint + tests
+npm run test:coverage      # සම්පූර්ණ coverage gate (60/60/60/60)
 
-# 3. Build කර smoke පරීක්ෂාව සිදු කරන්න
+# 3. Build සහ smoke පරීක්ෂාව
 npm run build
-npm run test:e2e           # විකල්ප නමුත් නිර්දේශිතයි
+npm run test:e2e           # විකල්පයකි, නමුත් නිර්දේශිතයි
 
-# 4. නිකුතුව ජනනය කරන්න (කුසලතාව)
+# 4. Release එක ජනනය කරන්න (skill)
 /generate-release-cc
 
-# 5. යොදවන්න (කුසලතාව)
+# 5. Deploy කරන්න (skill)
 /deploy-vps-both-cc        # හෝ akamai-cc / local-cc
 
-# 6. නිකුතු සාක්ෂි ග්රහණය කරන්න (කුසලතාව)
+# 6. Release සාක්ෂි රැස් කරන්න (skill)
 /capture-release-evidences-cc
 ```
 
 ## npm Trusted Publishing (v3.8.51 සිට පෙරනිමිය) — ඉල්ලීම මත staged, fallback ලෙස direct
 
 `npm-publish.yml` පෙරනිමියෙන් **npm Trusted Publishing (OIDC)** හරහා publish කරයි:
-`stage-npm` job එක (github-hosted) එම ධාවනය සඳහා කෙටි කාලීන npm
-අක්තපත්රයක් ලබා ගැනීමට GitHub හි id-token එක හුවමාරු කරයි — repository secrets තුළ දිගුකාලීන npm token එකක් නැත, 2FA විමසුමක් නැත, provenance අමුණා ඇත.
-2FA මඟහරින tokens ඉවත් කරමින් පවතින බැවින් npm දැන් අනුමත කරන bypass ක්රමය මෙයයි;
-WS1.3 සහතිකය පවත්වා ගනිමින්, ව්යාපෘතියට v3.8.48 දක්වා තිබූ සම්පූර්ණ ස්වයංක්රීය ප්රවාහය එය යළි ලබා දෙයි
-(කාන්දු වූ token එකකට තනිව publish කළ නොහැක — token එකක්ම නොමැත).
+`stage-npm` job එක (github-hosted) එම ධාවනය සඳහා GitHub හි id-token එක කෙටි කාලීන npm
+අක්තපත්රයකට හුවමාරු කරයි — repository secrets තුළ දිගුකාලීන npm token එකක් නොමැත, 2FA prompt එකක් නොමැත, provenance අමුණා ඇත.
+දැන් විශ්රාම ගන්වමින් පවතින 2FA මඟහරින tokens නිසා ඇති npm sanctions සඳහා මෙය bypass එක වේ;
+එමඟින් WS1.3 guarantee එක පවත්වා ගනිමින්, v3.8.48 දක්වා ව්යාපෘතිය සතුව තිබූ සම්පූර්ණයෙන්ම ස්වයංක්රීය ප්රවාහය නැවත ස්ථාපනය කරයි (කාන්දු වූ token එකකට තනිව publish කළ නොහැක — token එකක් නොමැත).
 
-**එක් වරක් පමණක් කරන සැකසුම (හිමිකරු):** npmjs.com → package `omniroute` → Settings → _Trusted
+**එක් වරක් සිදු කරන setup එක (owner):** npmjs.com → package `omniroute` → Settings → _Trusted
 Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). එය පවතින තුරු ස්වයංක්රීය පියවර `ENEEDAUTH` සමඟ අසාර්ථක වේ:
-`publish_mode=staged` (පහත) හෝ `direct` සමඟ නැවත dispatch කරන්න.
+(environment: none). එය සකස් කර නොමැති තුරු ස්වයංක්රීය පියවර `ENEEDAUTH` සමඟ අසමත් වේ:
+`publish_mode=staged` (පහත) හෝ `direct` භාවිත කර නැවත dispatch කරන්න.
 
 ### Staged publishing (ඉල්ලීම මත — `publish_mode=staged`)
 
-npm-publish workflow එක තවදුරටත් සෘජුව publish නොකරයි: එය pack කළ tarball එක
-boot කර (`check:pack-boot`), ඉන්පසු `npm stage publish` ධාවනය කරයි — එම නිශ්චිත bytes
-registry එකේ රඳවා තැබෙන අතර, හිමිකරු අනුමත කරන තෙක් **install කළ නොහැක**.
-මානව 2FA දොරටුව සාක්ෂියට පෙර නොව, ඊට පසුවට ගෙන ගොස් ඇත.
+npm-publish workflow එක තවදුරටත් සෘජුව publish නොකරයි: එය packed tarball එක
+(`check:pack-boot`) boot කර, පසුව `npm stage publish` ධාවනය කරයි — නිශ්චිත bytes registry එකෙහි
+තැන්පත් කරනු ලැබේ, **owner අනුමත කරන තුරු install කළ නොහැක**. මිනිස් 2FA gate එක
+proof එකට පෙර නොව, පසුවට මාරු කර ඇත.
 
-**Workflow එක green වූ පසු හිමිකරු අනුගමනය කළ යුතු ප්රවාහය:**
+**Workflow එක green වූ පසු Owner ගේ ප්රවාහය:**
 
-1. `npm stage list omniroute` — stage id එක සොයා ගන්න (එය workflow සාරාංශයේද මුද්රණය වේ).
-2. Staged bytes තහවුරු කරන්න (නිර්දේශිතයි): `npm stage download <id>`, ඉන්පසු බාගත්
-   tarball එක තාවකාලික prefix එකකට install කර එය boot කරන්න (`npm run check:pack-boot` මඟින්
-   CI තුළ එම pack→install→boot තීන්දුවම ස්වයංක්රීය කරයි).
-3. `npm stage approve <id>` — 2FA විමසුමම publish කිරීම වේ. `npm stage reject <id>` එය ඉවත දමයි.
-4. Publish කිරීමෙන් පසු ආරක්ෂණය: post-publish verifier එක (v3.8.49 සැලැස්මේ WS1.4)
-   public registry එකෙන් publish කළ අනුවාදය පිරිසිදු container එකකට install කර එය boot කරයි.
+1. `npm stage list omniroute` — stage id එක සොයා ගන්න (එය workflow summary එකෙහිද මුද්රණය වේ).
+2. Staged bytes සත්යාපනය කරන්න (නිර්දේශිතයි): `npm stage download <id>` ධාවනය කර, පසුව
+   බාගත කළ tarball එක තාවකාලික prefix එකකට install කර එය boot කරන්න (`npm run check:pack-boot` CI තුළ
+   එම pack→install→boot verdict එකම ස්වයංක්රීය කරයි).
+3. `npm stage approve <id>` — 2FA prompt එකම publish කිරීම වේ. `npm stage reject <id>` මඟින් එය ඉවත දමන්න.
+4. Publish කිරීමෙන් පසු net: post-publish verifier (v3.8.49 plan හි WS1.4) පිරිසිදු container එකක
+   public registry වෙතින් publish කළ අනුවාදය install කර එය boot කරයි.
 
-**හදිසි fallback එක:** `publish_mode=direct` සමඟ `workflow_dispatch` භාවිත කිරීමෙන් පැරණි
-ක්ෂණික `npm publish` ක්රමය යළි ලබා ගත හැක (staging ක්රියාවලියම වැරදි ලෙස හැසිරේ නම් පමණක් භාවිත කර, හේතුව සටහන් කරන්න).
+**හදිසි fallback:** `workflow_dispatch` සමඟ `publish_mode=direct` භාවිත කිරීමෙන්
+පැරණි ක්ෂණික `npm publish` නැවත සක්රීය වේ (staging එකම වැරදි ලෙස හැසිරෙන විට පමණක් භාවිත කරන්න; හේතුව සටහන් කරන්න).
 
-**එක් වරක් පමණක් කරන ආරක්ෂණ දැඩි කිරීම (හිමිකරු, npmjs.com):** `omniroute` සඳහා
-Trusted Publisher එක stage-only මාදිලියෙන් වින්යාස කරන්න. එවිට කාන්දු වූ දිගුකාලීන token එකකට
-කිසිදු ස්ථානයකින් සෘජුව `npm publish` කළ නොහැක — CI හට stage කිරීම පමණක් කළ හැකි අතර,
-නිකුතුව සිදු කළ හැක්කේ හිමිකරුගේ 2FA මඟින් පමණි.
+**එක් වරක් සිදු කරන hardening එක (owner, npmjs.com):** `omniroute` සඳහා
+Trusted Publisher එක stage-only mode ලෙස configure කරන්න, එවිට කාන්දු වූ දිගුකාලීන token එකකට ඕනෑම තැනක සිට
+`npm publish` සෘජුව කළ නොහැක — CI හට කළ හැක්කේ stage කිරීම පමණි; publish කරන්නේ owner ගේ 2FA මඟින් පමණි.
 
-**බිඳුණු artifact සඳහා ක්රියාමාර්ග සංග්රහය (වෙනස් නොවේ):** පෙරනිමි ක්ෂණික ප්රතිචාරය ලෙස
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` භාවිත කරන්න (මිනිත්තු කිහිපයකින් කළ හැකි, ආපසු හැරවිය හැකි);
-`npm unpublish` භාවිත කළ යුත්තේ පැය 72/no-dependents සීමාව තුළ පමණක් වන අතර, කිසිවිටෙකත් පළමු පියවර ලෙස නොවේ.
-Docker: version tag එකක් කිසිවිටෙක නැවත ලියන්න එපා — rollback කිරීම යනු `latest` අවසන් හොඳ digest එක වෙත නැවත යොමු කිරීමයි.
+**Broken-artifact playbook (වෙනසක් නොමැත):** පෙරනිමි reflex එක ලෙස
+`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` භාවිත කරන්න
+(මිනිත්තු කිහිපයකින්, ආපසු හැරවිය හැක); `npm unpublish` භාවිත කළ යුත්තේ 72h/no-dependents
+window එක තුළ පමණක් වන අතර කිසි විටෙකත් පළමු පියවර ලෙස නොවේ. Docker: version tag එකක් කිසි විටෙක නැවත ලියන්න එපා — rollback යනු
+`latest` අවසන් හොඳ digest එක වෙත නැවත point කිරීමයි.
 
-**Docker Hub `latest` (සෑම stable SemVer publish කිරීමකදීම අවශ්යයි):**
-`docker-publish` workflow එක විසින් **`X.Y.Z` සහ**, මෙය ඉහළම stable SemVer බවට
-`should-promote-latest.sh` එකඟ වන විට, `:latest` යන දෙකම **එකම digest එකෙන්**
-tag කළ යුතුය. Job එකෙන් පසු: Hub `latest` digest එක නව SemVer digest එකට සමාන විය යුතු අතර,
-`last_updated` ඉදිරියට ගොස් තිබිය යුතුය. Git තුළ පමණක් පවතින නිවැරදි කිරීම් පිළිබඳව
-release notes සඳහන් කරන අතරතුර `:latest` පැරණි build එකක තබා නොයන්න.
-Compose quickstarts `:latest` භාවිත කරයි; GitOps විසින් `X.Y.Z` pin කිරීම දිගටම කළ යුතුය.
-[Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) සහ #10317 බලන්න.
+**Docker Hub `latest` (සෑම stable SemVer publish එකකදීම අනිවාර්යයි):** `docker-publish`
+workflow එක **`X.Y.Z`** සහ, `should-promote-latest.sh` මෙය ඉහළම stable SemVer බවට එකඟ වූ විට,
+`:latest` යන දෙකම **එකම digest** සමඟ tag කළ යුතුය. Job එකෙන් පසු: Hub `latest` digest එක නව
+SemVer digest එකට සමාන විය යුතු අතර `last_updated` ද වෙනස් වී තිබිය යුතුය. Release notes මඟින් git හි පමණක් පවතින fixes ගැන සඳහන් කරන අතරතුර
+`:latest` පැරණි build එකක තබා නොගන්න. Compose quickstarts `:latest` භාවිත කරයි; GitOps විසින්
+`X.Y.Z` pin කිරීම දිගටම කළ යුතුය. [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) සහ #10317 බලන්න.
 
-## Hotfix වේගවත් මංතීරුව (ලේබලය `hotfix`)
+**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub හට
+repository එකක් namespaces අතර මාරු කළ නොහැකි බැවින්, `diegosouzapw/omniroute` එහි pull history
+සහ සෑම release එකක්ම තබා ගන්නා අතර, `docker-publish` හි `mirror-org-dockerhub` job එක
+නිකුත් කරන සෑම version එකක්ම (සහ promote කළ විට `:latest`) `ghcr.io/cheaper-inference/omniroute`
+වෙතින් organization repository එකට පිටපත් කරයි. එයට `DOCKERHUB_ORG_USERNAME` /
+`DOCKERHUB_ORG_TOKEN` secrets අවශ්ය වේ; ඒවා නොමැති විට job එක "Docker Hub org
+mirror skipped" warning එකක් සමඟ green තත්ත්වයේ පවතින අතර අනෙකුත් registries සාමාන්ය පරිදි publish වේ. පසුව නිකුත් කළ version එකක් එහි publish කිරීමට **Actions → Mirror Docker image to the Docker Hub org → Run
+workflow** ධාවනය කර `version=X.Y.Z` (සහ ඉහළම stable version සඳහා `promote_latest`) ලබා දෙන්න:
+එය existing images පිටපත් කරයි, නැවත build නොකරයි.
 
-`hotfix` ලෙස ලේබල් කළ PR එකක් බර CI matrix එක (9-shard E2E, coverage ratchet,
-quality-gate, quality-extended) මඟහැර වේගවත්, ඉහළ-සංඥා සහිත ද්වාර තබාගනී: build,
+## Hotfix Fast-Lane (`hotfix` ලේබලය)
+
+`hotfix` ලේබලය සහිත PR එකක් බර CI matrix (9-shard E2E, coverage ratchet,
+quality-gate, quality-extended) මඟහැර, වේගවත් සහ ඉහළ සංඥා-ගුණාත්මක gates: build,
 unit shards, integration, vitest, lint/typecheck, docs-sync, `check:pack-artifact`
-සහ tarball boot-smoke එක (`check:pack-boot`). ඉලක්කය: ~33min වෙනුවට ≤15min තුළ green වීම.
+සහ tarball boot-smoke (`check:pack-boot`) පවත්වාගෙන යයි. ඉලක්කය: ~33min වෙනුවට
+≤15min තුළ green තත්ත්වයට පැමිණීමයි.
 
-**ඇතුළත් වීමේ ප්රතිපත්තිය — හතරම අවශ්යයි (Chromium/VS Code/Node හදිසි මංතීරු අනුව ආකෘතිගත කර ඇත):**
+**ඇතුළත් වීමේ ප්රතිපත්තිය — අවශ්ය කරුණු හතරම (Chromium/VS Code/Node හදිසි lanes ආදර්ශයට ගනිමින්):**
 
-1. **බරපතළකම**: production බිඳ වැටී ඇත — ප්රකාශිත artifact එකක් boot වන විට crash වේ /
-   ආරක්ෂක නිවැරදි කිරීමක් / release එකේ සෑම පරිශීලකයෙකුටම බලපායි. "වැදගත්" යනු "බිඳ වැටී ඇත" නොවේ.
-2. **අධිකාරිය**: `hotfix` ලේබලය යොදන්නේ repository හිමිකරු පමණි. ලේබලයම
-   අනුමැතිය වේ — campaign PR එකකදී කිසිවිටෙකත් ස්වයං-සේවාවක් ලෙස නොයොදන්න.
-3. **සාක්ෂි**: PR body එක පෙර සම්පූර්ණයෙන්-green වූ heavy run එකට (මඟහැරුණු jobs විසින්
-   නැවත වලංගු කරනු ලබන suite එක) සහ fix එකේම අසමත්-වී-ඉන්පසු-සමත් වූ test එකට link කරයි.
-4. **විෂය පථය**: cherry-pick පමණි — අවම fix එක, refactors නැත, අමතර වෙනස්කම් නැත.
+1. **බරපතළත්වය**: production බිඳවැටී ඇත — ප්රකාශිත artifact එකක් boot වීමේදී බිඳවැටීම / security fix එකක් / release එක භාවිත කරන සෑම පරිශීලකයෙකුටම බලපෑමක් ඇත. “වැදගත්” යන්න “බිඳවැටී ඇත” යන්න නොවේ.
+2. **අධිකාරිය**: repository owner පමණක් `hotfix` ලේබලය යෙදිය යුතුය. ලේබලයම අනුමැතියයි — campaign PR එකකදී කිසිවිටෙක තමන් විසින්ම ලේබලය යොදන්න එපා.
+3. **සාක්ෂි**: PR body තුළ, මඟහරින ලද jobs නැවත තහවුරු කරන පෙර සම්පූර්ණයෙන් green වූ heavy run එකට සබැඳියක් සහ fix එකේම failing-then-passing test එකට සබැඳියක් තිබිය යුතුය.
+4. **පරාසය**: cherry-pick-only — අවම fix එක පමණක්, refactors නැත, අමතර වෙනස්කම් නැත.
 
-මඟහැරුණු coverage/ratchet පෘෂ්ඨය release branch එකේ ඊළඟ full run එක මඟින්
-නැවත වලංගු කරයි (අඛණ්ඩ release-green) — මංතීරුව මඟහරින්නේ බලා සිටීම පමණි, validation නොවේ.
-Tests-පමණක් ඇති diffs (`tests/` යටතේ ඇති සියලු files, `tests/e2e/` යටතේ කිසිවක් නැත) කිසිදු label එකක් නොමැතිව
-E2E matrix එක ස්වයංක්රීයව මඟහරියි.
+මඟහරින ලද coverage/ratchet surface එක release branch එකේ ඊළඟ full run මඟින්
+නැවත තහවුරු කෙරේ (continuous release-green) — මෙම lane එක WAITING මඟහරියි,
+validation කිසිවිටෙක මඟහරින්නේ නැත. Tests-only diffs (`tests/` යටතේ ඇති සියලුම
+files, `tests/e2e/` යටතේ කිසිවක් නොමැති) කිසිදු ලේබලයක් නොමැතිව E2E matrix එක
+ස්වයංක්රීයව මඟහරියි.
 
-## සවිස්තරාත්මක පිරික්සුම් ලැයිස්තුව
+## විස්තරාත්මක පිරික්සුම් ලැයිස්තුව
 
-### නිකුතුවට පෙර
+### Release කිරීමට පෙර
 
-- [ ] මෙම නිකුතුව ඉලක්ක කරගත් සියලු PR `release/vX.Y.0` වෙත ඒකාබද්ධ කර ඇත
-- [ ] මෙම අනුවාදය සඳහා විවෘතව ඇති සියලු Linear/issue අයිතම වසා ඇත හෝ ඊළඟ සන්ධිස්ථානයට යොමු කර ඇත
-- [ ] `release/vX.Y.0` ශාඛාවේ CI සාර්ථකයි
-- [ ] කේතයේ `TODO(release)` සලකුණු නොමැත: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker මූලික රූපය යාවත්කාලීනයි (දැනට `node:24.15.0-trixie-slim`)
+- [ ] මෙම release එකට target කර ඇති සියලුම PRs `release/vX.Y.0` වෙත merge කර ඇත
+- [ ] මෙම version එකට අදාළ සියලුම විවෘත Linear/issue items වසා ඇත හෝ මීළඟ milestone වෙත යොමු කර ඇත
+- [ ] `release/vX.Y.0` branch එකේ CI green ය
+- [ ] කේතයේ `TODO(release)` markers නොමැත: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker base image යාවත්කාලීන කර ඇත (දැනට `node:24.15.0-trixie-slim`)
 
-### අනුවාදය සහ වෙනස්කම් සටහන
+### Version සහ Changelog
 
-- [ ] `/version-bump-cc <patch|minor|major>` ධාවනය කරන්න (Claude Code කුසලතාව)
-  - `package.json`, `electron/package.json` හි අනුවාද ඉහළ නංවයි
-  - අවසන් ටැගයේ සිට ඇති git commit මත පදනම්ව `CHANGELOG.md` නැවත ජනනය කරයි
-  - README.md ලාංඡන යාවත්කාලීන කරයි
-- [ ] CHANGELOG.md අතින් සමාලෝචනය කර, අවශ්ය නම් commit පණිවිඩ පිරිසිදු කරන්න
-- [ ] `CHANGELOG.md` හි නවතම semver කොටස `package.json` අනුවාදයට සමාන බව තහවුරු කරන්න
-- [ ] ඉදිරි වැඩ සඳහා `## [Unreleased]` පළමු වෙනස්කම් සටහන් කොටස ලෙස තබා ගන්න
-- [ ] `docs/openapi.yaml` යාවත්කාලීන කරන්න → `info.version` අගය `package.json` අනුවාදයට සමාන විය යුතුය
+- [ ] `/version-bump-cc <patch|minor|major>` ධාවනය කරන්න (Claude Code skill)
+  - `package.json`, `electron/package.json` වල version වැඩි කරයි
+  - අවසන් tag එකෙන් පසු ඇති git commits මත පදනම්ව `CHANGELOG.md` නැවත ජනනය කරයි
+  - README.md badges යාවත්කාලීන කරයි
+- [ ] `CHANGELOG.md` අතින් සමාලෝචනය කර, අවශ්ය නම් commit messages පිරිසිදු කරන්න
+- [ ] `CHANGELOG.md` හි නවතම semver section එක `package.json` version එකට සමාන බව තහවුරු කරන්න
+- [ ] ඉදිරි වැඩ සඳහා `## [Unreleased]` පළමු changelog section එක ලෙස තබා ගන්න
+- [ ] `docs/openapi.yaml` → `info.version` `package.json` version එකට සමාන විය යුතුය
 
-### කේත ගුණාත්මකභාවය
+### කේතයේ ගුණාත්මකභාවය
 
-- [ ] `npm run lint` — දෝෂ 0යි (අනතුරු ඇඟවීම් පෙර සිට පවතී)
-- [ ] `npm run typecheck:core` — දෝෂ රහිතයි
-- [ ] `npm run typecheck:noimplicit:core` — දෝෂ රහිතයි (දැඩි)
-- [ ] `npm run check:cycles:ratchet` — ස්ථිර කළ `metrics.cycles` උපරිම සීමාව තුළ ඇත (සරල `check:cycles` ඕනෑම චක්රයක් සඳහා 1 සමඟ පිටවෙයි, #15281)
-- [ ] `npm run check:any-budget:t11` — අයවැය සීමාව තුළ ඇත
-- [ ] `npm run check:route-validation:t06` — දෝෂ රහිතයි
-- [ ] `npm run check:node-runtime` — සහාය දක්වන අවම runtime අවශ්යතාව සපුරා ඇත (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` හි `SUPPORTED_NODE_RANGE` අනුව; `package.json` හි `engines` සමඟ සමපාතයි)
+- [ ] `npm run lint` — errors 0 (warnings දැනටමත් පැවති ඒවා වේ)
+- [ ] `npm run typecheck:core` — පිරිසිදු
+- [ ] `npm run typecheck:noimplicit:core` — පිරිසිදු (strict)
+- [ ] `npm run check:cycles:ratchet` — frozen `metrics.cycles` ceiling තුළ (bare `check:cycles` ඕනෑම cycle එකක් ඇති විට 1 සමඟ exit වේ, #15281)
+- [ ] `npm run check:any-budget:t11` — budget තුළ
+- [ ] `npm run check:route-validation:t06` — පිරිසිදු
+- [ ] `npm run check:node-runtime` — සහාය දක්වන runtime floor සපුරා ඇත (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` හි `SUPPORTED_NODE_RANGE` අනුව; `package.json` හි `engines` සමඟ සමානුකූල)
 
 ### පරීක්ෂණ
 
 - [ ] `npm run test:unit` — සමත්
-- [ ] `npm run test:vitest` — සමත් (MCP සේවාදායකය, autoCombo, cache)
-- [ ] `npm run test:coverage` — 60/60/60/60 සීමාව සපුරා ඇත (ප්රකාශ/පේළි/ශ්රිත/ශාඛා)
+- [ ] `npm run test:vitest` — සමත් (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — gate 60/60/60/60 සපුරා ඇත (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — සමත් (වෙනස්කම් DB / handlers වෙත බලපාන්නේ නම්)
-- [ ] `npm run test:combo:matrix` — සමත් (combo ක්රමෝපාය න්යාසය: පොදු routing ක්රමෝපාය 19 හිම තේරීම් තීරණ නියත ලෙස තහවුරු කරයි; combo routing, strategy resolution, හෝ fallback තර්කනය වෙනස් කරන විට ධාවනය කරන්න)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **විකල්ප/අතින්** (gate එකක් සහිත සැබෑ upstream smoke පරීක්ෂණය; VPS `root@192.168.0.15` වෙතින් කියවීමට පමණක් හැකි DB snapshot එකක් ලබා ගනී; සැබෑ providers වෙත ඉල්ලීම් යවයි, credits වැය වේ; CI තුළ කිසිවිටෙක ධාවනය නොවේ; gate එක නොමැති විට නිසි ලෙස මඟහරියි)
-- [ ] `npm run test:combo:live:vps` — **විකල්ප/අතින්** (Phase-3 VPS සජීවී smoke පරීක්ෂණය: සරල Node ESM හරහා සජීවී `.15` සේවාදායකයට එරෙහි HTTP අවස්ථා 7ක්; `ssh root@192.168.0.15` අවශ්යයි; `__live_test__*` combos පමණක් සාදා/මකා දමයි; සැබෑ providers වෙත ඉල්ලීම් යවයි; CI තුළ කිසිවිටෙක ධාවනය නොවේ)
+- [ ] `npm run test:combo:matrix` — සමත් (combo strategy matrix: public routing strategies 22කම selection decisions deterministic ලෙස තහවුරු කරයි; combo routing, strategy resolution හෝ fallback logic වෙනස් කරන විට ධාවනය කරන්න)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **විකල්ප/අතින්** (gate මඟින් පාලනය වන real-upstream smoke; VPS `root@192.168.0.15` වෙතින් read-only DB snapshot එකක් ලබා ගනී; සැබෑ providers වෙත සම්බන්ධ වේ, credits වැය වේ; CI තුළ කිසිවිටෙක ධාවනය නොවේ; gate නොමැති විට පිරිසිදුව skip වේ)
+- [ ] `npm run test:combo:live:vps` — **විකල්ප/අතින්** (Phase-3 VPS live smoke: plain Node ESM හරහා live `.15` server වෙත HTTP scenarios 7ක්; `ssh root@192.168.0.15` අවශ්ය වේ; `__live_test__*` combos පමණක් සාදා/මකා දමයි; සැබෑ providers වෙත සම්බන්ධ වේ; CI තුළ කිසිවිටෙක ධාවනය නොවේ)
 - [ ] `npm run test:e2e` — සමත් (UI වෙනස්කම්)
 - [ ] `npm run test:protocols:e2e` — සමත් (MCP/A2A වෙනස්කම්)
 - [ ] `npm run test:ecosystem` — සමත්
 
-### Hooks (Husky මඟින් වලංගු කරන ලදී)
+### Hooks (Husky මඟින් තහවුරු කර ඇත)
 
-Husky hooks `.husky/` තුළ පිහිටා ඇති අතර git මෙහෙයුම්වලදී ස්වයංක්රීයව ධාවනය වේ.
+Husky hooks `.husky/` තුළ පවතින අතර git operations වලදී ස්වයංක්රීයව ධාවනය වේ.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** වේගවත්, නියත gates — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 දින සක්රිය කරන ලදී). හිතාමතාම `test:unit` ඇතුළත් නොකරයි (මන්දගාමීයි; CI `test-unit` කාර්යය මඟින් ආවරණය වේ).
-  - නිකුතු ශාඛා push කිරීමට පෙර `npm run test:unit` අතින් ධාවනය කරන්න.
+- **pre-push:** වේගවත් deterministic gates — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 සක්රීය කරන ලදී). `test:unit` හිතාමතාම ඇතුළත් නොකර ඇත (මන්දගාමීයි; CI `test-unit` job මඟින් ආවරණය වේ).
+  - Release branches push කිරීමට පෙර `npm run test:unit` අතින් ධාවනය කරන්න.
 
-hook එකක් අසමත් වුවහොත්: මූලික ගැටලුව නිවැරදි කරන්න, `--no-verify` භාවිතයෙන් මඟ නොහරින්න.
+Hook එකක් අසමත් වුවහොත්: underlying issue එක නිවැරදි කරන්න, `--no-verify` සමඟ bypass නොකරන්න.
 
-### සම්මත Commits
+### Conventional Commits
 
-නිකුතුවට අදාළ සියලු commit `type(scope): subject` ආකෘතිය අනුගමනය කළ යුතුය.
+Release සඳහා යොමු කරන සියලුම commits `type(scope): subject` ආකෘතිය අනුගමනය කළ යුතුය.
 
-**වලංගු වර්ග:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**වලංගු types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**වලංගු විෂය පථ:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**වලංගු scopes:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-අනුකූලතාව බිඳ දමන වෙනස්කම්: `BREAKING CHANGE:` පාද සටහන එක් කරන්න හෝ scope එකට පසුව `!` යොදන්න (උදා. `feat(api)!: drop /v0`).
+Breaking changes: `BREAKING CHANGE:` footer එකක් හෝ scope එකට පසුව `!` එකක් එක් කරන්න (උදාහරණයක් ලෙස `feat(api)!: drop /v0`).
 
-### ලේඛනගතකරණය
+### ලේඛනაცია
 
-- [ ] `npm run check:docs-sync` සමත් වේ (pre-commit මඟින් ස්වයංක්රීයව ධාවනය වේ)
-- [ ] `npm run check:docs-all` සමත් වේ (සමස්ත පරීක්ෂාව: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 සමඟ පිටවෙයි — කේතය ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` අතර env ගිවිසුම නොවෙනස්ව පවතී
-- [ ] `npm run check:doc-links` 0 සමඟ පිටවෙයි — ප්රතිව්යුහගත කිරීමෙන් පසු බිඳුණු අභ්යන්තර markdown යොමු නොමැත
-- [ ] storage/runtime වෙනස්කම් සඳහා `docs/architecture/ARCHITECTURE.md` සමාලෝචනය කර ඇත
-- [ ] env var සහ මෙහෙයුම් වෙනස්කම් සඳහා `docs/guides/TROUBLESHOOTING.md` සමාලෝචනය කර ඇත
-- [ ] `.env.example` වෙනස් වූයේ නම්: `docs/reference/ENVIRONMENT.md` යාවත්කාලීන කර ඇත
-- [ ] නව විශේෂාංගයට UI එකක් තිබේ නම්: `docs/guides/USER_GUIDE.md` එය සඳහන් කරයි
+- [ ] `npm run check:docs-sync` සාර්ථකව අවසන් වේ (pre-commit මඟින් ස්වයංක්රීයව ධාවනය වේ)
+- [ ] `npm run check:docs-all` සාර්ථකව අවසන් වේ (umbrella: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` 0 ප්රතිදාන කේතයක් සමඟ අවසන් වේ — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ගිවිසුම නොවෙනස්ව පවතී
+- [ ] `npm run check:doc-links` 0 ප්රතිදාන කේතයක් සමඟ අවසන් වේ — ප්රතිව්යුහගත කිරීමෙන් පසු බිඳුණු අභ්යන්තර markdown යොමු නොමැත
+- [ ] `docs/architecture/ARCHITECTURE.md` storage/runtime drift සඳහා සමාලෝචනය කර ඇත
+- [ ] `docs/guides/TROUBLESHOOTING.md` env var සහ operational drift සඳහා සමාලෝචනය කර ඇත
+- [ ] `.env.example` වෙනස් කර ඇත්නම්: `docs/reference/ENVIRONMENT.md` යාවත්කාලීන කර ඇත
+- [ ] නව විශේෂාංගයට UI එකක් තිබේ නම්: `docs/guides/USER_GUIDE.md` තුළ එය සඳහන් කර ඇත
 - [ ] නව විශේෂාංගයට API එකක් තිබේ නම්: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` යාවත්කාලීන කර ඇත
-- [ ] නව විශේෂාංගය module එකක් නම්: ඒ සඳහා වෙන් වූ `docs/<MODULE>.md` පවතී
-- [ ] අනුකූලතාව බිඳ දමන වෙනස්කමක් නම්: `docs/guides/TROUBLESHOOTING.md` හි migration සටහනක් ඇත
+- [ ] නව විශේෂාංගය module එකක් නම්: වෙන් කළ `docs/<MODULE>.md` ගොනුව පවතී
+- [ ] breaking change එකක් නම්: `docs/guides/TROUBLESHOOTING.md` තුළ migration සටහනක් ඇත
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 සමඟ පිටවෙයි — පරිවර්තන තත්ත්වය (`.i18n-state.json`) මූලාශ්ර ලේඛන සමඟ සමමුහුර්තයි (දැඩි ප්රකාරයේ වෙනස් වී ඇති මූලාශ්ර නොමැත; අවසන් මොහොතේ ලේඛන සංශෝධන සඳහා අනතුරු ඇඟවීමේ ප්රකාරයේ උපදේශනය පිළිගත හැකි නමුත්, ටැග් කිරීමට පෙර එය 0 විය යුතුය)
-- [ ] `npm run i18n:check-ui-coverage` 0 සමඟ පිටවෙයි — සෑම UI locale එකක්ම 80% ආවරණ අවම සීමාවේ හෝ ඊට ඉහළින් ඇත
-- [ ] `npm run i18n:sync-ui:dry` ඉලක්ක locale 66 පුරා අස්ථානගත keys 0ක් වාර්තා කරයි (`en` මූලාශ්රය හැර සෑම locale එකක්ම)
-- [ ] මූලාශ්ර ඉංග්රීසි ලේඛන වෙනස් වූයේ නම්, ටැග් කිරීමට පෙර `npm run i18n:run` ධාවනය කරන්න (`.env` තුළ `OMNIROUTE_TRANSLATION_API_KEY` අවශ්යයි)
-- [ ] සුළු පරිවර්තන දායකත්ව ඊළඟ නිකුතුවට කල් දැමිය හැකිය (CHANGELOG තුළ සටහන් කරන්න)
+- [ ] `npm run i18n:check` 0 ප්රතිදාන කේතයක් සමඟ අවසන් වේ — පරිවර්තන තත්ත්වය (`.i18n-state.json`) මූලාශ්ර ලේඛන සමඟ සමමුහුර්තව ඇත (strict mode තුළ drift වූ sources නොමැත; අවසන් මොහොතේ ලේඛන සංශෝධන සඳහා warn-mode උපදේශය පිළිගත හැකි නමුත් tagging කිරීමට පෙර එය 0 විය යුතුය)
+- [ ] `npm run i18n:check-ui-coverage` 0 ප්රතිදාන කේතයක් සමඟ අවසන් වේ — සෑම UI locale එකක්ම 80% coverage floor එකට හෝ ඊට ඉහළින් පවතී
+- [ ] `npm run i18n:sync-ui:dry` සියලුම target locale 66 සඳහා missing keys 0ක් වාර්තා කරයි (`en` source එක හැර සෑම locale එකක්ම)
+- [ ] source English docs වෙනස් කර ඇත්නම්, tagging කිරීමට පෙර `npm run i18n:run` ධාවනය කරන්න (`.env` තුළ `OMNIROUTE_TRANSLATION_API_KEY` අවශ්ය වේ)
+- [ ] සුළු පරිවර්තන දායකත්වයන් ඊළඟ release එක දක්වා කල් දැමිය හැක (CHANGELOG තුළ සටහන් කරන්න)
 
-### දත්ත සමුදා Migrations
+### Database Migrations
 
 - [ ] `src/lib/db/migrations/` තුළ නව ගොනු තිබේ නම්:
-  - [ ] සෑම migration එකක්ම idempotent වේ (`CREATE TABLE IF NOT EXISTS`, ආදිය)
-  - [ ] Migrations transactions තුළ ආවරණය කර ඇත
-  - [ ] නිවැරදිව අංකනය කර ඇත (අනුපිළිවෙළේ හිස්තැන් නොමැත)
-- [ ] නව ස්ථාපනයක පරීක්ෂා කරන්න: `~/.omniroute/omniroute.db` මකා `npm run dev` ධාවනය කරන්න
-- [ ] පවතින ස්ථාපනයක පරීක්ෂා කරන්න: DB උපස්ථ කර, migration ධාවනය කර, schema එක සත්යාපනය කරන්න
-- [ ] migration එක tables නැවත ලියන්නේ නම් WAL ගොනු (`-wal`, `-shm`) නිවැරදිව හසුරුවා ඇත
+  - [ ] සෑම migration එකක්ම idempotent වේ (`CREATE TABLE IF NOT EXISTS` ආදිය)
+  - [ ] Migrations transactions තුළ wrap කර ඇත
+  - [ ] නිවැරදිව අංකනය කර ඇත (අනුක්රමයේ හිස් තැන් නොමැත)
+- [ ] නව installation එකක පරීක්ෂා කරන්න: `~/.omniroute/omniroute.db` මකා `npm run dev` ධාවනය කරන්න
+- [ ] පවතින installation එකක පරීක්ෂා කරන්න: DB backup කර, migration ධාවනය කර, schema සත්යාපනය කරන්න
+- [ ] migration එකක් tables නැවත ලියන්නේ නම් WAL files (`-wal`, `-shm`) නිවැරදිව හසුරුවා ඇත
 
-### සැපයුම්කරුවන්ගේ නාමාවලිය (Zod මඟින් වලංගු කරන ලද)
+### Provider Catalog (Zod-validated)
 
-- [ ] `src/shared/constants/providers.ts` හි Zod schema එක load වන අවස්ථාවේ වලංගු වේ
-  - [ ] සියලු සැපයුම්කරුවන් සතුව අවශ්ය ක්ෂේත්ර (`id`, `label`, `kind`, ආදිය) ඇත
-  - [ ] නව නොමිලේ සැපයුම්කරුවන් සඳහා `freeNote` සපයා ඇත
-  - [ ] OAuth සැපයුම්කරුවන්ගේ `oauthConfig`, `src/lib/oauth/constants/oauth.ts` තුළ ලියාපදිංචි කර ඇත
-- [ ] නව සැපයුම්කරුවෙකු එක් කර ඇත්නම්: ඊට අනුරූප executor එක `open-sse/executors/` තුළ ඇත
-- [ ] OpenAI නොවන ආකෘතියක් නම්: translator එක `open-sse/translator/` තුළ ඇත
-- [ ] Models, `open-sse/config/providerRegistry.ts` තුළ ලියාපදිංචි කර ඇත
-- [ ] `tests/unit/` තුළ ඇති unit tests මඟින් සැපයුම්කරුවන් වර්ගීකරණය සහ routing ආවරණය කරයි
+- [ ] `src/shared/constants/providers.ts` Zod schema එක load වේලාවේ වලංගු වේ
+  - [ ] සියලුම providers සතුව අවශ්ය fields (`id`, `label`, `kind`, ආදිය) ඇත
+  - [ ] නව free providers සඳහා `freeNote` ලබා දී ඇත
+  - [ ] OAuth providers සතුව `src/lib/oauth/constants/oauth.ts` තුළ ලියාපදිංචි කළ `oauthConfig` ඇත
+- [ ] නව provider එකක් එක් කර ඇත්නම්: `open-sse/executors/` තුළ අනුරූප executor එකක් ඇත
+- [ ] OpenAI නොවන format එකක් නම්: `open-sse/translator/` තුළ translator එකක් ඇත
+- [ ] Models `open-sse/config/providerRegistry.ts` තුළ ලියාපදිංචි කර ඇත
+- [ ] provider classification සහ routing ආවරණය කරන unit tests `tests/unit/` තුළ ඇත
 
-### ඩෙස්ක්ටොප් (Electron)
+### Desktop (Electron)
 
-`electron/` වෙනස් වී ඇත්නම්:
+`electron/` වෙනස් කර ඇත්නම්:
 
-- [ ] `npm run electron:smoke:packaged` සාර්ථක වේ
+- [ ] `npm run electron:smoke:packaged` සාර්ථකව අවසන් වේ
 - [ ] `:win`, `:mac`, `:linux` අතරින් අවම වශයෙන් එකක් සඳහා builds පරීක්ෂා කර ඇත
-- [ ] Code signing සහතික කල් ඉකුත් වී නැත (signing සිදු කරන්නේ නම්)
-- [ ] `electron/package.json` අනුවාදය root `package.json` සමඟ ගැළපේ
-- [ ] `stable` වෙත නිකුත් කරන්නේ නම් auto-update channel pointer එක යාවත්කාලීන කර ඇත
+- [ ] Code signing certs කල් ඉකුත් වී නොමැත (signing සිදු කරන්නේ නම්)
+- [ ] `electron/package.json` version එක root `package.json` සමඟ ගැළපේ
+- [ ] `stable` වෙත release කරන්නේ නම් auto-update channel pointer යාවත්කාලීන කර ඇත
 
-### Build සැකැස්ම
+### Build Layout
 
-Repository එක එකිනෙකට වෙනස් output directories තුනක් භාවිත කරයි — ඒවා කිසිවිටෙක පටලවා නොගන්න:
+Repository එක distinct output directories තුනක් භාවිත කරයි — ඒවා කිසිවිටෙක එකිනෙක සමඟ පටලවා නොගන්න:
 
-| Directory | අරමුණ                                                              | නිරීක්ෂණය කරනවාද? |
-| --------- | ------------------------------------------------------------------ | ----------------- |
-| `src/`    | යෙදුමේ source එක (TypeScript / TSX)                                | ඔව්               |
-| `.build/` | Build අතරමැදි ගොනු — `next build` output එක (`distDir`)            | නැත (gitignored)  |
-| `dist/`   | බෙදාහැරිය හැකි npm bundle එක — `assembleStandalone` මඟින් සකසන ලදී | නැත (gitignored)  |
+| Directory | Purpose                                                  | Tracked?        |
+| --------- | -------------------------------------------------------- | --------------- |
+| `src/`    | Application source (TypeScript / TSX)                    | Yes             |
+| `.build/` | Build intermediates — `next build` output (`distDir`)    | No (gitignored) |
+| `dist/`   | Shippable npm bundle — assembled by `assembleStandalone` | No (gitignored) |
 
-> **ක්රියාකරු සටහන:** remote VPS image directory එක තවමත් `/usr/lib/node_modules/omniroute/app/` ලෙස පවතී.
-> වෙනස් වූයේ **repository එක තුළ ඇති** build output එක පමණි (`app/` → `dist/`). Deploy skills මඟින්
-> `dist/` හි අන්තර්ගතය remote `app/` directory එකට rsync කරයි — VPS path වෙනස් කිරීම් අවශ්ය නොවේ.
+> **Operator note:** remote VPS image directory එක තවමත් `/usr/lib/node_modules/omniroute/app/` වේ.  
+> වෙනස් වී ඇත්තේ **in-repo** build output එක පමණි (`app/` → `dist/`). Deploy skills මඟින්  
+> `dist/` contents remote `app/` directory එකට rsync කරයි — VPS path වෙනස්කම් අවශ්ය නොවේ.
 
-**තනි-build ක්රියාවලිය:**
+**Single-build flow:**
 
 ```
 npm run build:release
@@ -251,23 +256,22 @@ npm run build:release
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Deploy කිරීම සඳහා `npm run build` ධාවනය කර ඉන් පසු වෙනම `npm run build:cli` ධාවනය නොකරන්න — එක් command එකකින්
-පිරිසිදු rebuild එකක් සහ sentinel එකක් නිර්මාණය කරන `npm run build:release` භාවිත කරන්න.
+Deploy සඳහා `npm run build` ධාවනය කර ඉන්පසු වෙනම `npm run build:cli` ධාවනය නොකරන්න — එක් විධානයකින් clean rebuild + sentinel සිදු කරන `npm run build:release` භාවිත කරන්න.
 
-### Artifact වලංගුකරණය
+### Artifact Validation
 
 - [ ] `npm run build:release` සාර්ථක වන අතර `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` පිරිසිදුයි — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, හෝ වෙනත් local residue නොමැත
-- [ ] Build කිරීමෙන් පසු `dist/server.js` පවතී
-- [ ] විකල්ප local packaged-runtime smoke පරීක්ෂාව: `npm run dev:candidate -- build` ට පසු `npm run dev:candidate -- validate` මඟින් හුදකලා `DATA_DIR` එකක packed tarball එක boot කර `/api/health` + `/v1/models` පරීක්ෂා කරයි ([දායකත්ව Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) බලන්න)
+- [ ] `npm run check:pack-artifact` clean වේ — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, හෝ වෙනත් local residue නොමැත
+- [ ] build එකෙන් පසු `dist/server.js` පවතී
+- [ ] විකල්ප local packaged-runtime smoke: `npm run dev:candidate -- validate` ධාවනය කිරීමෙන් `npm run dev:candidate -- build` පසු, isolated `DATA_DIR` එකක packed tarball boot කර `/api/health` + `/v1/models` පරීක්ෂා කරයි (මෙය [Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) තුළ බලන්න)
 
-### Tag කිරීම සහ නිකුත් කිරීම
+### Tagging & Release
 
-- [ ] `/generate-release-cc` ධාවනය කරන්න (Claude Code skill):
-  - `vX.Y.Z` tag එක නිර්මාණය කරයි
-  - Tag එක සහ branch එක push කරයි
-  - Changelog අන්තර්ගතය සහිත GitHub Release එකක් විවෘත කරයි
-  - Electron installers අමුණයි (build කර ඇත්නම්)
+- [ ] `/generate-release-cc` (Claude Code skill) ධාවනය කරන්න:
+  - `vX.Y.Z` tag එක සාදයි
+  - tag සහ branch push කරයි
+  - changelog body සමඟ GitHub Release එකක් විවෘත කරයි
+  - Electron installers attach කරයි (build කර ඇත්නම්)
 - [ ] නැතහොත් අතින්:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -275,247 +279,207 @@ Deploy කිරීම සඳහා `npm run build` ධාවනය කර ඉ�
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy කිරීම
+### Deploy
 
-Deploy skills සැහැල්ලු rsync ක්රියාවලිය භාවිත කරයි — `npm pack` නැත, `npm i -g` නැත:
+Deploy skills මඟින් light rsync flow භාවිත කරයි — `npm pack`, `npm i -g` නොමැත:
 
-- [ ] ඉලක්කයට ගැළපෙන deploy skill එක භාවිත කරන්න:
-  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
+- [ ] ඉලක්කයට ගැළපෙන deploy skill භාවිත කරන්න:
+  - `/deploy-vps-local-cc` — දේශීය VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — දෙකම
-- [ ] Deploy කිරීමට පෙර `dist/BUILD_SHA` == `git rev-parse --short HEAD` බව තහවුරු කරන්න
-- [ ] Build එක සැබෑ `node_modules` ඇති ස්ථානයක ධාවනය විය යුතුය (ප්රධාන checkout එක හෝ `npm ci` ක්රියාත්මක කළ worktree එකක් — symlink කළ worktree එකක් නොවේ)
-- [ ] Deploy කළ instance එක smoke test කරන්න:
-  - `/dashboard/health` විවෘත කරන්න → අනුවාද string එක release එක සමඟ ගැළපෙන බව පරීක්ෂා කරන්න
-  - දන්නා සැපයුම්කරුවෙකු වෙත `/v1/chat/completions` request එකක් ධාවනය කරන්න
-  - `/api/monitoring/health` මඟින් `CLOSED` circuit breakers ආපසු ලබාදෙන බව තහවුරු කරන්න
+- [ ] Deploy කිරීමට පෙර, `dist/BUILD_SHA` == `git rev-parse --short HEAD` බව තහවුරු කරන්න
+- [ ] `node_modules` සැබෑවක් වන ස්ථානයක build එක ධාවනය කළ යුතුය (ප්රධාන checkout එක හෝ `npm ci` ධාවනය කළ worktree එකක් — symlink කළ worktree එකක් **නොවේ**)
+- [ ] Deployed instance එක smoke test කරන්න:
+  - `/dashboard/health` විවෘත කර → version string එක release එකට ගැළපේදැයි පරීක්ෂා කරන්න
+  - දන්නා provider එකකට `/v1/chat/completions` request එකක් ධාවනය කරන්න
+  - `/api/monitoring/health` මඟින් `CLOSED` circuit breakers ලබා දෙන බව තහවුරු කරන්න
   - MCP transports ප්රතිචාර දක්වන බව තහවුරු කරන්න (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### නිකුතුවෙන් පසු
+### Release පසු
 
-- [ ] `/capture-release-evidences-cc` ධාවනය කරන්න (Claude Code skill)
-  - නව විශේෂාංගවල WebP screenshots/recordings ග්රහණය කරයි
-  - ඒවා release notes / blog post එකට අමුණයි
-- [ ] නිකුත් කිරීමේ නිවේදනය සමඟ GitHub Discussions / Discord යාවත්කාලීන කරන්න
-- [ ] ඊළඟ අනුවාදය සඳහා milestone එකක් විවෘත කරන්න
-- [ ] තීරණාත්මක නම්: discussion එක pin කරන්න හෝ යෙදුම තුළ පෙන්වන banner එක සඳහා `news.json` තුළ පළ කරන්න
+- [ ] `/capture-release-evidences-cc` (Claude Code skill) ධාවනය කරන්න
+  - නව විශේෂාංගවල WebP screenshots/recordings ලබා ගනී
+  - Release notes / blog post වෙත අමුණයි
+- [ ] Release announcement එක සමඟ GitHub Discussions / Discord යාවත්කාලීන කරන්න
+- [ ] ඊළඟ version එක සඳහා milestone එකක් විවෘත කරන්න
+- [ ] Critical නම්: discussion එක pin කරන්න හෝ in-app banner සඳහා `news.json` තුළ post කරන්න
 
-### Radar පොදු දියත් කිරීමේ gate එක
+### Radar public-launch gate
 
-Radar නිවේදනය හිතාමතාම `active: false` සමඟ commit කර ඇත. පහත සෑම අයිතමයක් සඳහාම සාක්ෂි සැපයීමෙන් පසු activation එක වෙනම
-වෙනස්කමක් ලෙස සිදු කරයි:
+Radar announcement එක හිතාමතාම `active: false` සමඟ commit කර ඇත. Activation යනු පහත සෑම අයිතමයකටම සාක්ෂි ලබා දීමෙන් පසු සිදු කරන වෙනම
+change එකකි:
 
-- [ ] Stacked Radar PR සියල්ල merge කර ඇති අතර release-tip CI හරිත තත්ත්වයේ ඇත
-- [ ] `RADAR_ENABLED` පෙරනිමියෙන් තවමත් අක්රියව තිබියදී OSS Radar routes deploy කර smoke test කරන්න
-- [ ] නම් කරන ලද Radar host එකේ `GET /planos`, `/termos`, `/privacidade`, සහ `/reembolso` smoke test කරන්න
-- [ ] Private service එක තුළ ක්රියාකරුගේ අනන්යතාව/සම්බන්ධතා තොරතුරු/ලිපිනය සහ හිමිකරු අනුමත කළ නීතිමය සමාලෝචනය වාර්තා කරන්න
-- [ ] Stripe Checkout සහ signed webhook එක test mode එකේ පමණක් අත්හදා බලන්න
-- [ ] අනුමත sender/domain එක භාවිතයෙන් එක් encrypted transactional-email delivery එකක් අත්හදා බලන්න
-- [ ] Backup restore එක සහ අධීක්ෂණය යටතේ budget cap එකකට සීමා කළ එක් research run එකක් සාර්ථක බව ඔප්පු කරන්න
-- [ ] Donation සාක්ෂි පිළිගැනීමට පෙර BRL/PIX සමාලෝචන ප්රතිපත්තිය අනුමත කරන්න
-- [ ] ඉහත gates සම්පූර්ණ කිරීමෙන් පසුව පමණක් public Checkout සක්රිය කර, ඉන් පසු නව `news.json` ID එක සක්රිය කරන්න
+- [ ] සියලු stacked Radar PR merge කර ඇති අතර release-tip CI green වේ
+- [ ] `RADAR_ENABLED` පෙරනිමියෙන් off ලෙසම තබාගෙන OSS Radar routes deploy කර smoke test කරන්න
+- [ ] නම් කළ Radar host එකේ `GET /planos`, `/termos`, `/privacidade`, සහ `/reembolso` smoke test කරන්න
+- [ ] Operator identity/contact/address සහ owner-approved legal review private service එක තුළ වාර්තා කරන්න
+- [ ] Test mode පමණක් භාවිත කර Stripe Checkout සහ signed webhook එක පරීක්ෂා කරන්න
+- [ ] අනුමත sender/domain එක සමඟ encrypted transactional-email delivery එකක් පරීක්ෂා කරන්න
+- [ ] Backup restore එකක් සහ supervision යටතේ budget-capped research run එකක් සාර්ථක බව ඔප්පු කරන්න
+- [ ] Donation evidence භාර ගැනීමට පෙර BRL/PIX review policy එක අනුමත කරන්න
+- [ ] පෙර gate සම්පූර්ණ කළ පසු පමණක් public Checkout සක්රීය කරන්න, ඉන්පසු නව `news.json` ID එක සක්රීය කරන්න
 - [ ] Home banner එක localized copy භාවිත කරන බවත්, පැරණි ID එකක් dismiss කළ පසු නව ID එකක් නැවත දිස්වන බවත් තහවුරු කරන්න
 
-## Embedded Services ස්මෝක් පරීක්ෂාව (v3.8.4+)
+## ඇතුළත් සේවා smoke (v3.8.4+)
 
-Embedded Services වෙනස්කම් ඇතුළත් ඕනෑම නිකුතුවක් බෙදාහැරීමට පෙර, පහත දෑ තහවුරු කරන්න:
+ඇතුළත් සේවා වෙනස්කම් ඇතුළත් ඕනෑම නිකුතුවක් නිකුත් කිරීමට පෙර, පහත දෑ සත්යාපනය කරන්න:
 
-### නැවුම්-DB ආරම්භය (migration ගැටීම් හඳුනාගනී — v3.8.4 hotfix එකෙන් පසු එක් කරන ලදී)
+### නැවුම් DB ආරම්භය (සංක්රමණ ගැටීම් හඳුනා ගනී — v3.8.4 hotfix පසුව එක් කරන ලදී)
 
 - [ ] `DATA_DIR=$(mktemp -d) npm start &` — ආරම්භය සඳහා තත්පර 10ක් රැඳී සිටින්න
-- [ ] `curl -s http://127.0.0.1:20128/api/services/9router/status | jq '.tool'` මඟින් `"9router"` ආපසු ලබා දෙයි (404 නොවේ, 500 නොවේ). migration `071_services.sql` යෙදී ඇති බවත් + පේළිය seed කර ඇති බවත් තහවුරු කරයි.
-- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(version_manager);" | grep -E "provider_expose|logs_buffer_path|last_sync_at"` මඟින් පේළි 3ක් ආපසු ලබා දෙයි.
-- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(webhooks);" | grep -E "kind|metadata_encrypted"` මඟින් පේළි 2ක් ආපසු ලබා දෙයි (`070_webhooks_kind_metadata.sql` යෙදී ඇති බව වලංගු කරයි).
-- [ ] `node --import tsx/esm --test tests/unit/db/no-migration-collisions.test.ts` සාර්ථක වේ — අනාගත ගැටීම්වලින් ආරක්ෂා කරයි.
+- [ ] `curl -s http://127.0.0.1:20128/api/services/9router/status | jq '.tool'` මඟින් `"9router"` ලබා දෙයි (404 නොවේ, 500 නොවේ). `071_services.sql` සංක්රමණය යෙදූ බව සහ පේළිය seed කළ බව තහවුරු කරයි.
+- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(version_manager);" | grep -E "provider_expose|logs_buffer_path|last_sync_at"` මඟින් පේළි 3ක් ලබා දෙයි.
+- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(webhooks);" | grep -E "kind|metadata_encrypted"` මඟින් පේළි 2ක් ලබා දෙයි (`070_webhooks_kind_metadata.sql` යෙදූ බව තහවුරු කරයි).
+- [ ] `node --import tsx/esm --test tests/unit/db/no-migration-collisions.test.ts` සාර්ථක වේ — අනාගත ගැටීම්වලට එරෙහිව ආරක්ෂාව සපයයි.
 
 ### 9Router
 
-- [ ] `POST /api/services/9router/install` මිනිත්තු 2කට අඩු කාලයකදී `installedVersion` සමඟ 200 ආපසු ලබා දෙයි
-- [ ] `POST /api/services/9router/start` තත්පර 30කට අඩු කාලයකදී 200 සහ `state: "running"` ආපසු ලබා දෙයි
+- [ ] `POST /api/services/9router/install` මිනිත්තු 2කට අඩු කාලයකදී `installedVersion` සමඟ 200 ලබා දෙයි
+- [ ] `POST /api/services/9router/start` තත්පර 30කට අඩු කාලයකදී 200 සහ `state: "running"` ලබා දෙයි
 - [ ] `GET /api/services/9router/status` මඟින් `health: "healthy"` වාර්තා කරයි
-- [ ] `"model": "9router/auto/..."` සමඟ `POST /v1/chat/completions` මඟින් 200 ආපසු ලබා දෙයි (9Router හරහා අන්තයේ සිට අන්තයට routing)
-- [ ] `GET /dashboard/providers/services/9router/embed/dashboard` මඟින් proxy එක තුළ 9Router ස්වදේශීය UI එක render කරයි (සෘජු `127.0.0.1:port` iframe එකක් නොමැත)
-- [ ] `POST /api/services/9router/rotate-key` මඟින් `{ keyRotated: true }` ආපසු ලබා දෙන අතර සේවාව පිරිසිදුව නැවත ආරම්භ වේ
-- [ ] `POST /api/services/9router/stop` මඟින් 200 සහ `state: "stopped"` ආපසු ලබා දෙයි
-- [ ] `GET /api/services/9router/logs?tail=50` මඟින් මෑත පේළි අඩංගු `snapshot` event එකක් සහිත SSE stream එකක් ආපසු ලබා දෙයි
-- [ ] PATH තුළ `npm` නොමැති පරිසරයක ස්ථාපනය කිරීමේදී හිතකාමී (stack trace නොවන) දෝෂ පණිවිඩයක් සමඟ 500 ආපසු ලබා දෙයි
+- [ ] `"model": "9router/auto/..."` සමඟ `POST /v1/chat/completions` 200 ලබා දෙයි (9Router හරහා අග සිට අග දක්වා routing)
+- [ ] `GET /dashboard/providers/services/9router/embed/dashboard` proxy තුළ 9Router ස්වදේශීය UI එක පෙන්වයි (සෘජු `127.0.0.1:port` iframe එකක් නොවේ)
+- [ ] `POST /api/services/9router/rotate-key` මඟින් `{ keyRotated: true }` ලබා දෙන අතර සේවාව පිරිසිදුව නැවත ආරම්භ වේ
+- [ ] `POST /api/services/9router/stop` 200 සහ `state: "stopped"` ලබා දෙයි
+- [ ] `GET /api/services/9router/logs?tail=50` මෑත පේළි අඩංගු `snapshot` event එකක් සහිත SSE stream එකක් ලබා දෙයි
+- [ ] `PATH` තුළ `npm` නොමැති පරිසරයක ස්ථාපනය කිරීම 500 ලබා දෙන අතර මිත්රශීලී (stack trace නොමැති) දෝෂ පණිවිඩයක් පෙන්වයි
 
 ### CLIProxyAPI
 
-- [ ] `POST /api/services/cliproxy/install` මිනිත්තු 2කට අඩු කාලයකදී 200 ආපසු ලබා දෙයි
-- [ ] `POST /api/services/cliproxy/start` තත්පර 30කට අඩු කාලයකදී 200 සහ `state: "running"` ආපසු ලබා දෙයි
+- [ ] `POST /api/services/cliproxy/install` මිනිත්තු 2කට අඩු කාලයකදී 200 ලබා දෙයි
+- [ ] `POST /api/services/cliproxy/start` තත්පර 30කට අඩු කාලයකදී 200 සහ `state: "running"` ලබා දෙයි
 - [ ] `GET /api/services/cliproxy/status` මඟින් `health: "healthy"` වාර්තා කරයි
-- [ ] `POST /api/services/cliproxy/stop` මඟින් 200 සහ `state: "stopped"` ආපසු ලබා දෙයි
-- [ ] `GET /api/services/cliproxy/logs?tail=50` මඟින් SSE stream එකක් ආපසු ලබා දෙයි
+- [ ] `POST /api/services/cliproxy/stop` 200 සහ `state: "stopped"` ලබා දෙයි
+- [ ] `GET /api/services/cliproxy/logs?tail=50` SSE stream එකක් ලබා දෙයි
 
 ### ආරක්ෂක ප්රතිගමනය
 
-- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/9router/start` මඟින් `403 LOCAL_ONLY` ආපසු ලබා දෙයි
-- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/cliproxy/start` මඟින් `403 LOCAL_ONLY` ආපසු ලබා දෙයි
+- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/9router/start` මඟින් `403 LOCAL_ONLY` ලබා දෙයි
+- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/cliproxy/start` මඟින් `403 LOCAL_ONLY` ලබා දෙයි
 - [ ] `/api/services/*` වෙතින් ලැබෙන දෝෂ ප්රතිචාරවල `err.stack` හෝ නිරපේක්ෂ ගොනු මාර්ග අඩංගු නොවේ
 
-## v3.8.0+ පරීක්ෂණ
+## v3.8.0+ පරීක්ෂා කිරීම්
 
-ඕනෑම v3.8.x නිකුතුවක් බෙදාහැරීමට පෙර, මෙම අමතර අයිතම තහවුරු කරන්න:
+ඕනෑම v3.8.x නිකුතුවක් නිකුත් කිරීමට පෙර, පහත අමතර අයිතම සත්යාපනය කරන්න:
 
-- [ ] `omniroute --tray` macOS මත ආරම්භ වේ (systray2 `~/.omniroute/runtime/` තුළ ස්ථාපනය කර ඇත)
-- [ ] `omniroute --tray` Linux මත ආරම්භ වේ (DISPLAY අවශ්යයි; එය සකසා නොමැති නම් සුමට දෝෂයක්)
+- [ ] `omniroute --tray` macOS මත ආරම්භ වේ (`~/.omniroute/runtime/` තුළ systray2 ස්ථාපනය කර ඇත)
+- [ ] `omniroute --tray` Linux මත ආරම්භ වේ (DISPLAY අවශ්යය; එය සකසා නොමැති නම් graceful දෝෂයක් ලබා දෙයි)
 - [ ] `omniroute --tray` Windows මත ආරම්භ වේ (PowerShell NotifyIcon, අමතර binaries නොමැත)
-- [ ] `omniroute config tray enable` මඟින් ස්වයංක්රීය-ආරම්භක ඇතුළත් කිරීමක් සාදයි; disable මඟින් එය ඉවත් කරයි
-- [ ] `npm install -g omniroute@<this-version>` මඟින් මාරාන්තික පිටවීමකින් තොරව postinstall ධාවනය කරයි
-- [ ] යාවත්කාලීන මාර්ගය විකල්ප dependencies රඳවා ගනී: `omniroute update --apply` සහ ස්වයංක්රීය යාවත්කාලීනකය
-      `npm install -g … --include=optional` ධාවනය කරන බැවින් `optionalDependencies` (better-sqlite3,
-      keytar, tls-client, සහ llmlingua SLM stack එක: `@atjsh/llmlingua-2@2.0.5`,
-      `js-tiktoken`) යාවත්කාලීනයකින් පසුවත් රඳා පවතී. ultra `modelPath` SLM මට්ටමට ද
-      පළමු භාවිතයේදී `${DATA_DIR}/models/llmlingua` වෙත ස්වයංක්රීයව බාගත කරන tinybert model එක අවශ්ය වේ. ඉන්පසු Postinstall
-      (`scripts/build/colocateOptionals.mjs`) මඟින් SLM විකල්ප closure එක `dist/node_modules`
-      තුළ සම-ස්ථානගත කරයි, එවිට worker එක තනි `@huggingface/transformers` ^4.2.0
-      instance එකක් resolve කරයි — standalone trace එක bundle කරන්නේ transformers පමණක් වන අතර, ගතිකව import කරන
-      විකල්ප නොවේ; එබැවින් මෙය නොමැතිව worker එක root එකේ transformers සමඟ llmlingua-2 load
-      කරන අතර SLM මට්ටම නිහඬව fail-open වේ.
-- [ ] `omniroute status` `.env` එකක් නොමැතිව ක්රියා කරයි (CLI token මාර්ගය, loopback පමණි)
-- [ ] `curl http://localhost:20128/api/shutdown` මඟින් 401 ආපසු ලබා දෙයි (සැමවිටම-ආරක්ෂිත route එක)
-- [ ] `curl -H "host: evil.com" http://localhost:20128/api/mcp/sse` මඟින් 401 ආපසු ලබා දෙයි (loopback guard)
-- [ ] පළමු ධාවනයේදී SQLite runtime එක `bundled` ලෙස resolve වේ (bundle කළ binary එක platform එක සඳහා වලංගුය)
+- [ ] `omniroute config tray enable` මඟින් autostart entry එකක් සාදයි; disable කිරීමෙන් එය ඉවත් කරයි
+- [ ] `npm install -g omniroute@<this-version>` fatal exit එකකින් තොරව postinstall ක්රියාත්මක කරයි
+- [ ] Update path එක optional deps රඳවා ගනී: `omniroute update --apply` සහ auto-updater
+      `npm install -g … --include=optional` ක්රියාත්මක කරන බැවින්
+      `optionalDependencies` (better-sqlite3, keytar, tls-client, සහ llmlingua SLM stack: `@atjsh/llmlingua-2@2.0.5`,
+      `js-tiktoken`) update එකකින් පසුවද පවතී. ultra `modelPath` SLM tier එකට
+      tinybert model එකද අවශ්ය වන අතර, එය පළමු භාවිතයේදී `${DATA_DIR}/models/llmlingua` වෙත ස්වයංක්රීයව බාගත වේ. Postinstall
+      (`scripts/build/colocateOptionals.mjs`) පසුව SLM optional closure එක
+      `dist/node_modules` වෙත සම-ස්ථානගත කරයි. එමඟින් worker එක SINGLE `@huggingface/transformers` ^4.2.0
+      instance එකක් විසඳයි — standalone trace bundles තුළ ඇත්තේ transformers පමණක් වන අතර dynamic ලෙස import කරන
+      optionals ඒවායේ නොමැත. එබැවින් මෙය නොමැති විට worker එක root හි transformers භාවිතයෙන් llmlingua-2
+      පූරණය කරන අතර SLM tier එක නිහඬව fail-open වේ.
+- [ ] `.env` නොමැතිව `omniroute status` ක්රියා කරයි (CLI token path, loopback පමණි)
+- [ ] `curl http://localhost:20128/api/shutdown` මඟින් 401 ලබා දෙයි (සෑම විටම ආරක්ෂිත route එකකි)
+- [ ] `curl -H "host: evil.com" http://localhost:20128/api/mcp/sse` මඟින් 401 ලබා දෙයි (loopback guard)
+- [ ] පළමු ධාවනයේදී SQLite runtime එක `bundled` ලෙස විසඳේ (platform සඳහා bundled binary වලංගුය)
 - [ ] `node_modules/better-sqlite3` මකා දැමූ විට SQLite runtime එක `runtime` වෙත fallback වේ
-- [ ] Smart MCP filter එක සැබෑ `playwright-mcp browser_snapshot` ප්රතිදානය සම්පීඩනය කරයි (≥50% අඩු කිරීමක්)
-- [ ] `skills/omniroute*/SKILL.md` ගොනු 10ම raw GitHub URL හරහා පොදුවේ ලබාගත හැකිය
-- [ ] නැවුම් පිහිටුවීමකදී onboarding wizard එක "එය ක්රියා කරන ආකාරය" මට්ටම්-සංචාර පියවර පෙන්වයි
-- [ ] මුල් dashboard එකේ මට්ටම් ආවරණ widget එක වින්යාස කළ/සක්රිය ගණන් පෙන්වයි
+- [ ] Smart MCP filter එක සැබෑ `playwright-mcp browser_snapshot` output එක compress කරයි (අවම වශයෙන් 50% අඩු කිරීමක්)
+- [ ] `skills/omniroute*/SKILL.md` ගොනු 10ම raw GitHub URL හරහා publicly fetch කළ හැක
+- [ ] නැවුම් setup එකකදී onboarding wizard මඟින් "How It Works" tier tour පියවර පෙන්වයි
+- [ ] Home dashboard tier coverage widget එක configured/active ගණන් පෙන්වයි
 
 ---
 
-## 3.9.0 LTS වෙන් කිරීම (3.8.58 හි පෙරහුරු කරන ලදී)
+## 3.9.0 LTS කැපීම (3.8.58 හි පෙරහුරුව)
 
-v3.8.59 ට පසු ඊළඟ අනුවාදය 3.9.0 වන අතර, එහි අග්රය දිගුකාලීන ශාඛා දෙකක් බවට පත්වේ:
-`stable/v3` (v3 LTS පෙළ, npm `latest`) සහ `develop` (v4, 4.0.0 දක්වා ඉහළ නංවා ඇත, npm
-`nightly`). ශාඛා/නාලිකා ආකෘතිය, ඉදිරියට ගෙනයාම සහ ලේබල
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) හි ඇත; සැලැස්ම [ROADMAP](../../ROADMAP.md) හි (අදියර 3) ඇත. වෙන් කිරීම එක් වරක් ක්රියාත්මක වේ;
-3.8.58 මඟින් fork එකක් මත එය මුල සිට අග දක්වා පෙරහුරු කරන අතර, 3.8.59
-[GO/NO-GO පිරික්සුම් ලැයිස්තුව](./LTS_GO_NO_GO.md) සමඟ අවසන් වේ.
+v3.8.59 ට පසු මීළඟ අනුවාදය 3.9.0 වන අතර, එහි තුණ්ඩය දිගුකාලීන ශාඛා දෙකක් බවට පත් වේ: `stable/v3` (v3 LTS රේඛාව, npm `latest`) සහ `develop` (v4, 4.0.0 ට, npm `nightly`). branch/channel ආකෘතිය, ඉදිරි-තොට සහ ලේබල [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; සැලැස්ම [ROADMAP](../../ROADMAP.md) (අදියර 3) හි ඇත. කප්පාදුව එක් වරක් ධාවනය වේ; 3.8.58 එය දෙබලක අවසානයට පෙරහුරු කරන අතර 3.8.59 [GO/NO-GO පිරික්සුම් ලැයිස්තුව](./LTS_GO_NO_GO.md) සමඟ වසා දමයි.
 
-### වියළි ධාවනය (කියවීමට පමණි, ඕනෑම වේලාවක ආරක්ෂිතයි)
+### වියළි ධාවනය (කියවීමට පමණක්, ඕනෑම වේලාවක ආරක්ෂිත)
 
 ```bash
-npm run release:dry-run-lts-cut                       # සැබෑ වෙන් කිරීම: HEAD වෙතින් 3.9.0, පෙර ටැගය v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # මූලාශ්ර commit එක නිශ්චිත කරන්න
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` කිසිවක් ක්රියාත්මක නොකරයි: එය git සහ `gh` කියවා
-සම්පූර්ණ අනුපිළිවෙළ මුද්රණය කරයි — පූර්ව කොන්දේසි (මූලාශ්රය නිරාකරණය වේ, මූලාශ්ර repository එකට සම්පූර්ණ ඉතිහාසය ඇත —
-shallow clone එකකට `stable/v3` push කළ නොහැක, පළමු
-බද්ධ කළ parent එකේදීම ලැබෙන පාර්ශ්වය pack එක ප්රතික්ෂේප කරයි, එබැවින් සම්පූර්ණ clone එකකින් වෙන් කිරීම සිදු කරන්න, නැතහොත් පළමුව `git fetch --unshallow origin` ක්රියාත්මක කරන්න —
-පෙර ටැගය පවතී, `package.json` ඉලක්ක අනුවාදය වේ, `release-freeze` issue එකක් විවෘතව ඇත, පවතින release ශාඛාවක විවෘත
-`Release branch not green` issue එකක් නොමැත —
-නොපවතින ශාඛාවක් හරිත ලෙස නොව, `?` නොදන්නා ලෙස වාර්තා වේ — Mergify `release` පෝලිම වින්යාස කර ඇත (G11: `queue_rules`, `checks_timeout`,
-`queue` ලේබලය), `release/*` ruleset එක තවමත් මකා දැමීම සහ force-push අවහිර කරයි, සහ
-`stable/v3` හා `develop` තවම නොපවතී), ශාඛා පියවර දෙක, සක්රිය නොවූ කාර්යප්රවාහවල කුමන
-ප්රේරක සහ `if:` කොන්දේසි සත්ය වන්නේද (සහ repository විචල්යයකින් තවමත් අවහිර කර ඇති හෝ
-canonical repository එකට නිශ්චිත කර ඇති ඒවා), අපේක්ෂිත dist-tags (`latest` → 3.9.0, `next` සහ
-`nightly` හිස්) සහ ආපසු පෙරළීම. පිටවීම `0` = `RESULT: READY`, `1` = අවහිර කරන පූර්ව කොන්දේසියක්
-අසාර්ථක විය (`✗`), `2` = භාවිත දෝෂයකි. `--advisory <id,...>` මඟින් පරීක්ෂාවක් සඟවා නොගෙන අනතුරු ඇඟවීමක් (`!`)
-දක්වා පහත හෙළයි.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-3.9.0 release freeze එක තවමත් විවෘතව තිබියදී සැබෑ වෙන් කිරීමේ වියළි ධාවනය ක්රියාත්මක කරන්න — ශාඛා
-ටැගයට පසුව සහ අදියර 12c මඟින් freeze එක ඉවත් කිරීමට පෙර නිර්මාණය කෙරේ.
+3.9.0 නිකුතු කැටි කිරීම තවමත් විවෘතව පවතින අතරතුර සැබෑ කප්පාදුවේ වියළි ධාවනය ධාවනය කරන්න — ටැගයට පසුව සහ අදියර 12c කැටි කිරීමට පෙර අතු නිර්මාණය වේ.
 
-### 3.8.58 පෙරහුරුව (fork සඳහා පමණි)
+### 3.8.58 පෙරහුරුව (දෙබලකට පමණි)
 
 ```bash
-# 1. පෙරහුරු පරාමිති සමඟ වත්මන් අග්රය මත වියළි ධාවනයක් සිදු කරන්න
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK remote එකකට එරෙහිව ක්රියාත්මක කරන්න (origin, හෝ URL එක canonical
-#    repository එක වන ඕනෑම remote එකක් ප්රතික්ෂේප කෙරේ; සෑම පියවරකදීම terminal එකේ තහවුරු කිරීම ඉල්ලයි)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. fork එකේ සක්රිය නොවූ කාර්යප්රවාහ අත්හදා බලන්න (වියළි ධාවනය
-#    canonical-repository pin එකක් වාර්තා කරන තැන්වල workflow_dispatch), පසුව ආපසු පෙරළන්න
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop වැඩි කිරීමේ commit එක git plumbing භාවිතයෙන් ගොඩනඟයි (working tree එක ස්පර්ශ නොවේ) සහ
-cycle-open commit එකක් මෙන් එකම ගොනු පහ වැඩි කරයි: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` සහ `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG කොටස සහ එහි i18n පිටපත්, එහි පළමු
-PR එකට පෙර, පසුව `develop` මත විවෘත කෙරේ. script එක කිසිවිටෙක npm dist-tags වෙනස් නොකරයි — ඒවා තාවකාලික පරීක්ෂණ package එකක් මත පෙරහුරු කරන්න.
+සංවර්ධන බම්ප් කැපවීම ගොඩනගා ඇත්තේ git ජලනල (වැඩකරන ගසක් ස්පර්ශ නොවේ) සහ චක්‍ර-විවෘත කැපවීමක් ලෙස එම ගොනු පහම ගැටේ: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` සහ `docs/openapi.yaml`. `[4.0.0]` CHANGELOG කොටස සහ එහි i18n දර්පණ එහි පළමු PR පෙර `develop` මත විවෘත වේ. ස්ක්‍රිප්ටය කිසිවිටෙක වෙනස් නොවේ npm dist-tags — සීරීම් පැකේජයක ඇති ඒවා පෙරහුරු කරන්න.
 
-### PR පෙරදසුන් artifact එක (වරක් ගොඩනඟා, එම bytes ම ප්රවර්ධනය කරන්න)
+### PR පෙරදසුන් කෞතුක වස්තුව (එක් වරක් ගොඩනඟන්න, එකම බයිට් ප්‍රවර්ධනය කරන්න)
 
-`.github/workflows/preview-artifact.yml` මඟින් PR head එකකින් එක් production tarball එකක් ගොඩනඟා
-එම නිශ්චිත build එක වලංගු කරයි (#8084 කොටස (a)). එකම repository එකේ PR සඳහා පමණි; කිසිවක් publish නොකෙරේ.
+`.github/workflows/preview-artifact.yml` PR හිසකින් එක් නිෂ්පාදන තාරබෝලයක් ගොඩනඟන අතර එම නිශ්චිත ගොඩනැගීම වලංගු කරයි (#8084 පෙත්ත (අ)). එකම නිධිය PRs පමණි; කිසිවක් ප්‍රකාශයට පත් නොවේ.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # නැතහොත් `preview-artifact` ලේබලය එක් කරන්න
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # පෙරදසුන් ස්ථාපනය
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-ධාවනය `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ක්රියාත්මක කර, tarball එක
-pack කර, `npm run check:pack-boot` (ව්යාජ secrets, තාවකාලික data dir) ක්රියාත්මක කර, නැවත pack කර,
-digest එක සමාන නොවේ නම් අසාර්ථක වේ; ඉන්පසු `artifact-identity.json` (head SHA, base
-SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
-`scripts/release/artifact-identity.mjs`) වාර්තා කර වෙනම job එකකදී tarball එක සහතික කරයි. පෙරදසුනක්
-ප්රවර්ධනය කිරීම යනු එම tarball එක ස්ථාපනය කිරීමයි: මූලාශ්රයෙන් කිසිවිටෙක නැවත ගොඩනඟන්න එපා.
+දිවීම `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, තාරබෝල ඇසුරුම් කරයි, `npm run check:pack-boot` ධාවනය කරයි (ව්‍යාජ රහස්, කෙටිකාලීන දත්ත dir), නැවත ඇසුරුම් කිරීම සහ ඩයිජෙස්ට් එක සමාන නම් මිස අසාර්ථක වේ, පසුව `artifact-identity.json` වාර්තා කරයි (head SHA, base SHA, lockfile ABI, වේදිකා ගොඩනැගීම , lockfile hah , — `scripts/release/artifact-identity.mjs`) සහ තාරබෝලය වෙනම කාර්යයක සහතික කරයි. පෙරදසුනක් ප්‍රවර්ධනය කිරීම යනු එම තාරබෝල ස්ථාපනය කිරීමයි: කිසිවිටක මූලාශ්‍රයෙන් නැවත ගොඩනඟන්න එපා.
 
-### වෙන් කිරීම (3.9.0, GO පසු)
+### කප්පාදුව (3.9.0, GO පසු)
 
 1. GO [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) හි වාර්තා කර ඇත.
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` මඟින් `RESULT: READY` මුද්රණය කරයි.
-3. වියළි ධාවනය මුද්රණය කරන විධාන භාවිතයෙන් `origin` මත ශාඛා අතින් නිර්මාණය කරන්න —
-   script එක `origin` වෙත push කිරීම ප්රතික්ෂේප කරයි. සමාලෝචනය කළ develop commit එකක් නැවත භාවිත කිරීමට,
-   පළමුව ඔබේ fork එකට එරෙහිව 3.9.0 අග්රය මත `--execute` පෙරහුරුව ක්රියාත්මක කරන්න; එය SHA දෙකම මුද්රණය කරන අතර,
-   එම commits ම push කළ හැක:
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` මුද්‍රණය කරයි.
+3. විධාන මඟින් `origin` මත අතු සාදන්න, වියළි ධාවන මුද්‍රණය — ස්ක්‍රිප්ට් `origin` වෙත තල්ලු කිරීම ප්‍රතික්ෂේප කරයි. සමාලෝචනය කරන ලද සංවර්ධන කැපවීමක් නැවත භාවිතා කිරීමට, පළමුව ඔබේ දෙබලට එරෙහිව 3.9.0 ඉඟිය මත `--execute` පෙරහුරුව ක්‍රියාත්මක කරන්න; එය SHAs දෙකම මුද්‍රණය කරයි, එම කැපවීම් තල්ලු කළ හැක:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. පළමු PR එක ඒකාබද්ධ කිරීමට පෙර `stable/v3` සහ `develop` ආරක්ෂා කරන්න (රීති කට්ටල + ඒකාබද්ධ කිරීමේ පෝලිම).
-5. අක්රිය කාර්ය ප්රවාහ ශාඛා පැවතීම මත සක්රිය වේ: `forward-port.yml` (`stable/v3` වෙත push කිරීම),
-   `validate-stable-pr.yml` (`stable/v3` වෙත PR) සහ `nightly-v4-build.yml`
-   (`develop` ගොඩනඟයි). සජීවී කිරීමට පෙර, `secrets.FORWARD_PORT_TOKEN` repository secret එක සකසන්න (එවිට
-   ඉදිරියට-port කරන PR මත CI ක්රියාත්මක වේ); හිමිකරු repository
-   variable එක වන `vars.NIGHTLY_PUBLISH`, `true` ලෙස සකසා npm Trusted Publishing විසින්
-   `nightly-v4-build.yml` පිළිගන්නා තෙක් රාත්රී ප්රකාශනය අක්රියව පවතී. නාලිකා නිර්ණය `scripts/release/dist-tag.mjs` මඟින් සිදු වේ; එය
-   `npm-publish.yml` භාවිත කරන නිර්ණයකයම වේ.
-6. නාලිකා සත්යාපනය කරන්න: `npm view omniroute dist-tags --json` මඟින් `latest` = 3.9.0 ලෙසත්, v4 ප්රකාශනය වන තෙක්
-   `next` / `nightly` නොමැති බවත් පෙන්වයි.
-7. අවශ්ය නම් ආපසු හැරවීම: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   සහ `npm dist-tag add omniroute@3.8.59 latest`.
+4. පළමු PR ගොඩබෑමට පෙර `stable/v3` සහ `develop` (rulesets + ඒකාබද්ධ පෝලිම) ආරක්ෂා කරන්න.
+5. අක්‍රිය කාර්ය ප්‍රවාහයන් ශාඛා පැවැත්ම අනුව ක්‍රියාත්මක වේ: `forward-port.yml` ( `stable/v3` වෙත තල්ලු කරන්න), `validate-stable-pr.yml` (PRs සිට `stable/v3`) සහ `nightly-v4-build.yml` ( `develop` ගොඩනඟයි). go-live කිරීමට පෙර, `secrets.FORWARD_PORT_TOKEN` ගබඩා රහස සකසන්න (එබැවින් CI ඉදිරියට-port PRs මත ධාවනය වේ); හිමිකරු විසින් ගබඩා විචල්‍යය `vars.NIGHTLY_PUBLISH` `true` ලෙස සකසන තෙක් රාත්‍රී ප්‍රකාශනය ක්‍රියා විරහිත වන අතර npm විශ්වාසනීය ප්‍රකාශනය `nightly-v4-build.yml` පිළිගන්නා ලදී. නාලිකා විභේදනය `scripts/release/dist-tag.mjs` වේ, එකම විසඳුම `npm-publish.yml` භාවිතා කරයි.
+6. නාලිකා සත්‍යාපනය කරන්න: `npm view omniroute dist-tags --json` `latest` = 3.9.0 පෙන්වයි සහ v4 ප්‍රකාශනය කරන තුරු `next` / `nightly` නැත.
+7. ආපසු හැරවීම, අවශ්ය නම්: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` සහ `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 
-## ආපසු හැරවීම
+## ආපසු පෙරළීම
 
 නිකුතුවේ බරපතළ ගැටලුවක් තිබේ නම්:
 
-1. `gh release edit vX.Y.Z --prerelease` (නවතම නිකුතුව නොවන ලෙස සලකුණු කරයි)
-2. `git tag -d vX.Y.Z && git push --delete origin vX.Y.Z` (පරිශීලකයන් තවමත් එය භාවිතයට ගෙන නොමැති නම් පමණි)
+1. `gh release edit vX.Y.Z --prerelease` (නවතම නිකුතුව ලෙස සලකනු නොලැබේ)
+2. `git tag -d vX.Y.Z && git push --delete origin vX.Y.Z` (පරිශීලකයන් විසින් තවමත් භාවිතයට ගෙන නොමැති නම් පමණි)
 3. හෝ: `release/vX.Y.0` මත hotfix එකක් → patch නිකුතුව `vX.Y.(Z+1)`
-4. GitHub Discussions සහ Discord තුළ වහාම දැනුම් දෙන්න
+4. GitHub Discussions සහ Discord හරහා වහාම දැනුම් දෙන්න
 
 ## දැඩි නීති
 
-- කිසිවිටෙකත් `main` වෙත සෘජුව commit නොකරන්න
-- කිසිවිටෙකත් `main` හෝ `release/*` branches වෙත `git push --force` භාවිත නොකරන්න
-- කිසිවිටෙකත් Husky hooks (`--no-verify`) මඟ නොහරින්න
-- කිසිවිටෙකත් secrets, credentials, හෝ `.env` files commit නොකරන්න
-- Coverage අගය ≥60/60/60/60 (statements/lines/functions/branches) ලෙස පවත්වාගත යුතුය
-- `src/`, `open-sse/`, `electron/`, හෝ `bin/` තුළ production code වෙනස් කරන විට සැමවිටම tests ඇතුළත් කරන්න හෝ යාවත්කාලීන කරන්න
+- කිසිවිටෙක `main` වෙත සෘජුව commit නොකරන්න
+- කිසිවිටෙක `main` හෝ `release/*` ශාඛා වෙත `git push --force` භාවිත නොකරන්න
+- කිසිවිටෙක Husky hooks මඟ නොහරින්න (`--no-verify`)
+- කිසිවිටෙක secrets, credentials හෝ `.env` ගොනු commit නොකරන්න
+- Coverage ≥60/60/60/60 (statements/lines/functions/branches) ලෙස පවත්වාගත යුතුය
+- `src/`, `open-sse/`, `electron/` හෝ `bin/` තුළ production code වෙනස් කරන විට සැමවිටම tests එක් කරන්න හෝ යාවත්කාලීන කරන්න
 
 ## ස්වයංක්රීය සමමුහුර්ත පරීක්ෂාව
 
-PR එකක් විවෘත කිරීමට පෙර docs sync guard එක locally ධාවනය කරන්න:
+PR එකක් විවෘත කිරීමට පෙර docs sync guard එක ස්ථානීයව ධාවනය කරන්න:
 
 ```bash
 npm run check:docs-sync
 ```
 
-CI ද `.github/workflows/ci.yml` තුළ මෙම පරීක්ෂාව ධාවනය කරයි (lint job එක).
+CI මඟින්ද මෙම පරීක්ෂාව `.github/workflows/ci.yml` තුළ (lint job) ධාවනය කරයි.

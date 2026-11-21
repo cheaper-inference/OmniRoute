@@ -20,7 +20,7 @@ Cuando un agente IDE (por ejemplo, GitHub Copilot, Cursor, Claude Code) realiza 
 
 Esto significa que puedes:
 
-- **Redirigir a cualquier agente a cualquier proveedor** : Copilot hablando con OpenAI? Rediríjalo a Anthropic Claude, Gemini o cualquiera de los 381 proveedores de OmniRoute.
+- **Redirigir a cualquier agente a cualquier proveedor** : Copilot hablando con OpenAI? Rediríjalo a Anthropic Claude, Gemini o cualquiera de los 394 proveedores de OmniRoute.
 - **Aplicar asignaciones de modelos** : `gemini-3-flash` → `claude-sonnet-4.7` de forma transparente en el nivel del controlador.
 - **Observar todo el tráfico de agentes.** : cada solicitud interceptada se publica en el [Inspector de Tráfico](./TRAFFIC_INSPECTOR.md).
 - **Aplicar resiliencia OmniRoute** : enrutamiento combinado, disyuntores, respaldos y seguimiento de costos también funcionan para el tráfico de agentes IDE.
@@ -545,24 +545,24 @@ Esquemas completos de OpenAPI: `docs/openapi.yaml` → etiqueta `AgentBridge`.
 
 ## §8 Hoja de ruta
 
-### Investigación de Trae
+### investigación trae
 
-Trae es un asistente de programación con IA relativamente nuevo. Antes de implementar un manejador:
+Trae es un asistente de codificación AI relativamente nuevo. Antes de implementar un controlador:
 
-1. Identificar el binario o la extensión en los marketplaces de VS Code / JetBrains o como aplicación independiente
-2. Capturar el tráfico con mitmproxy para descubrir los hosts de la API y la estructura de los endpoints
+1. Identifique el binary/extension en los mercados VS Code/ JetBrains o como una aplicación independiente
+2. Capture el tráfico con mitmproxy para descubrir hosts API y formas de puntos finales
 3. Determinar el mecanismo de autenticación
-4. Evaluar si se debe proceder o no en función de los TOS y de la facilidad para descubrir la API
+4. Evalúe go/no-go según la capacidad de descubrimiento TOS y API
 
-Hasta que finalice la investigación, la tarjeta de Trae en el panel muestra una insignia de "En investigación" con un enlace "Informar sobre la viabilidad". El esqueleto del manejador en `src/mitm/handlers/trae.ts` genera un error estructurado `Aún no implementado`.
+Hasta que se complete la investigación, la tarjeta Trae en el tablero muestra una insignia de "Investigando" con un enlace "Informar de viabilidad". El código auxiliar del controlador en `src/mitm/handlers/trae.ts` arroja un error `Not yet implemented` estructurado.
 
-### Agentes pendientes (requieren MITM — sin compatibilidad con una URL base personalizada)
+### Agentes pendientes (se requiere MITM — no hay soporte URL base personalizado)
 
-Las siguientes herramientas no admiten URL base personalizadas en sus versiones actuales, por lo que MITM es la única vía de interceptación. La evaluación de viabilidad está pendiente:
+Las siguientes herramientas no admiten URLs base personalizado en sus versiones actuales, lo que convierte MITM en la única ruta de interceptación. Pendiente de evaluación de viabilidad:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — independiente de Kiro IDE)
-- **Cowork** (aplicación de escritorio de Anthropic)
+- **Amperio** (Gráfico fuente)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — separado de Kiro IDE)
+- **cotrabajo** (escritorio Anthropic )
 
-Nota: GitHub Copilot CLI ≥v1.0.19 admite `COPILOT_PROVIDER_BASE_URL`; para esa herramienta, utilice la configuración directa en lugar de MITM.
+Nota: GitHub Copilot CLI ≥ v1.0.19 admite el uso de configuración directa `COPILOT_PROVIDER_BASE_URL` — en lugar de MITM para esa herramienta.

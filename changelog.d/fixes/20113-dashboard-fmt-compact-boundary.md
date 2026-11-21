@@ -1,0 +1,1 @@
+- Roll over compact count formatting (`fmtCompact`) to `M` and `B` at rounding boundaries (e.g. 999,950 to `1.0M` and 999,999,999 to `1.0B`) to prevent displaying `1000.0K` or `1000.0M` in analytics and dashboard counts (#20068).

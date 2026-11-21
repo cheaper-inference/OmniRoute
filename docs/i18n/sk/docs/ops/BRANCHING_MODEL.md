@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute používa model vydávania s **paralelnými cyklami**: vyhradenú vetvu `release/vX.Y.Z`
-pre aktívny cyklus, `main` pre publikovanú líniu a nemennú
-značku `vX.Y.Z` pri vydaní daného cyklu. Je očakávané, že commity pribúdajú vo vetvách `release/*` _aj_
-`main` — nejde o omyl.
+OmniRoute používa a** paralelný cyklus** model vydania: vyhradená vetva `release/vX.Y.Z` pre aktívny cyklus, `main` pre publikovaný riadok a nemenný tag `vX.Y.Z` pri odoslaní tohto cyklu. Očakáva sa, že videnie potvrdenia pristane na `release/*` _a_ na `main` — nie je to zámena.
 
-Podrobnosti pre správcov sa nachádzajú v súbore `CLAUDE.md` (Prísne pravidlo č. 21) a
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Táto stránka je verejné
-zhrnutie určené pre prispievateľov.
+Detail správcu žije v `CLAUDE.md` (tvrdé pravidlo #21) a [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Táto stránka je verejným súhrnom pre prispievateľov.
 
 ## Stručný prehľad
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` nie je vetva na každodennú integráciu. PR otvorené voči `main`
 zvyčajne treba pred zlúčením presmerovať.
 
-## Zmrazenie vydania (paralelné cykly)
+## Zmrazenie uvoľnenia (paralelné cykly)
 
-Keď prebieha zosúlaďovanie vydania, otvorí sa označovací issue so štítkom `release-freeze`.
-To **nezastavuje vývoj**:
+Pri zosúlaďovaní vydania sa otvorí problém označenia označený `release-freeze`. To** nezastaví vývoj** :
 
-- Zmrazená vetva `release/vX.Y.Z` patrí počas daného vydania vedúcemu vydania.
-- Vetva ďalšieho cyklu `release/vX+1` sa vytvorí zo zmrazenej špičky, aby prispievatelia mohli
-  pokračovať v začleňovaní zmien.
-- Otvorené PR, ktoré stále cielia na zmrazenú vetvu, treba **presmerovať** na
-  aktívnu (najvyššiu) vetvu `release/v*`.
+- Zmrazená `release/vX.Y.Z` patrí vypúšťaciemu kapitánovi pre túto loď.
+- `release/vX+1` ďalšieho cyklu sa odreže zo zamrznutého hrotu, takže prispievatelia pokračujú v pristávaní.
+- Otvorené PRs, ktoré sa stále zameriavajú na zmrazenú vetvu, by mali byť** presmerovaný** do aktívnej (najvyššej) vetvy `release/v*`.
 
-Predpoklad, že požadovanú vetvu možno zlučovať, si najskôr overte kontrolou otvoreného zmrazenia:
+Pred predpokladaním, že požadovaná vetva je zlúčiteľná, skontrolujte, či nedošlo k otvorenému zmrazeniu:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mechanizmus zlučovania (štítok vlastníka `queue` → Mergify) je zdokumentovaný v
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mechanika zlúčenia (vlastník `queue` label → Mergify) je zdokumentovaná v [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: Zlučovací front Mergify je vyradený** (rozhodnutie vlastníka). `.mergify.yml` už nedefinuje front a odmieta príkazy Mergify, ktoré spájajú alebo prepisujú požiadavku na stiahnutie. Vydania PRs sú zlúčené ručne pod sadou pravidiel úložiska "Vyžadovať zelené brány pri aktívnom vydaní" (`Gate / CI` + `Gate / Quality`), kým omni-queue beží v živom režime, a potom cez omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Označenie `queue` už nič nezlučuje.
 
 ## Prečo vetva aj značka?
 

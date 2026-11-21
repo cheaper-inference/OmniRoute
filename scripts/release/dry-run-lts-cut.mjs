@@ -42,6 +42,13 @@ import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import { load as yamlLoad } from "js-yaml";
 import { resolveDistTag } from "./dist-tag.mjs";
+import {
+  isManagedBase,
+  validateConfig as validateMergeQueueConfig,
+} from "../merge-queue/config.mjs";
+
+/** omni-queue's configuration, read at the cut source (rail gate G11). */
+const MERGE_QUEUE_CONFIG = "config/merge-queue/config.json";
 
 export const CANONICAL_REPO = "cheaper-inference/OmniRoute";
 /** Former names GitHub still redirects to the canonical repository (transfer of 2026-10-21). */
@@ -181,38 +188,45 @@ export function isCanonicalRemoteUrl(url, repo = CANONICAL_REPO) {
 // ── preconditions ───────────────────────────────────────────────────────────
 
 /**
- * Pure: is the Mergify `release` queue (rail gate G11) configured? GitHub's native
- * merge queue was rejected in v3.8.49 (no branch wildcards on a personal-account
- * repo — see the .mergify.yml header), so G11 is the Mergify queue: a
- * `queue_rules` entry named `release` covering `release/vX.Y.Z`, entered through
- * the `queue` label, with a `checks_timeout` so a hung check cannot park the queue.
+ * Pure: does a merge queue land the release PRs (rail gate G11)? The Mergify
+ * `release` queue that G11 checked until 2026-11-19 was retired by the owner that
+ * day (see the .mergify.yml header); the release merge queue is omni-queue
+ * (docs/ops/OMNI_QUEUE.md). G11 holds when `config/merge-queue/config.json` at the
+ * source passes omni-queue's own validator (which requires a queue `label` and a
+ * `checksTimeoutMinutes`, so a hung check cannot park the queue), its `bases`
+ * manage the cut's release branch, and its `mode` is `live`. `shadow` is a
+ * configured queue that lands nothing — release PRs are then merged by hand — so it
+ * is a NO-GO for G11, reported with the mode (`--advisory merge-queue` downgrades it).
  */
-export function evaluateMergifyQueue(yamlText) {
-  if (yamlText == null) return { ok: false, problems: [".mergify.yml missing at the source"] };
-  let doc;
+export function evaluateMergeQueue(jsonText, releaseBranch) {
+  if (jsonText == null) {
+    return { ok: false, problems: [`${MERGE_QUEUE_CONFIG} missing at the source`], label: null };
+  }
+  let raw;
   try {
-    doc = yamlLoad(yamlText) ?? {};
+    raw = JSON.parse(jsonText);
   } catch {
-    return { ok: false, problems: [".mergify.yml is not valid YAML"] };
+    return { ok: false, problems: [`${MERGE_QUEUE_CONFIG} is not valid JSON`], label: null };
   }
-  const rules = Array.isArray(doc.queue_rules) ? doc.queue_rules : [];
-  const release = rules.find((rule) => rule?.name === "release");
-  if (!release) return { ok: false, problems: ["no queue_rules entry named `release`"] };
+  const result = validateMergeQueueConfig(raw);
+  if (!result.ok) {
+    return {
+      ok: false,
+      problems: [`${MERGE_QUEUE_CONFIG} is invalid: ${result.errors.join(", ")}`],
+      label: null,
+    };
+  }
+  const { config } = result;
   const problems = [];
-  const conditions = (release.queue_conditions ?? []).map((c) => String(c).replace(/\s+/g, ""));
-  if (!conditions.some((c) => c.startsWith("base~=") && c.includes("release/"))) {
-    problems.push("queue `release` does not target release/* branches");
+  if (!isManagedBase(config, releaseBranch)) {
+    problems.push(`omni-queue \`bases\` (${config.bases}) does not manage ${releaseBranch}`);
   }
-  const autoMerge = (doc.merge_protections_settings?.auto_merge_conditions ?? []).map((c) =>
-    String(c).replace(/\s+/g, "")
-  );
-  if (!conditions.includes("label=queue") && !autoMerge.includes("label=queue")) {
-    problems.push("queue `release` is not entered through the `queue` label");
+  if (config.mode !== "live") {
+    problems.push(
+      `omni-queue mode is \`${config.mode}\`: it lands nothing, release PRs are merged by hand`
+    );
   }
-  if (release.checks_timeout == null || String(release.checks_timeout).trim() === "") {
-    problems.push("queue `release` has no checks_timeout");
-  }
-  return { ok: problems.length === 0, problems };
+  return { ok: problems.length === 0, problems, label: config.label, mode: config.mode };
 }
 
 function issueList(issues) {
@@ -234,7 +248,7 @@ export function evaluatePreconditions(facts, opts) {
   });
   const freeze = facts.freezeIssues;
   const red = facts.baseRedIssues;
-  const queue = evaluateMergifyQueue(facts.mergifyConfig ?? null);
+  const queue = evaluateMergeQueue(facts.mergeQueueConfig ?? null, opts.sourceBranch);
   const rulesetRules = facts.releaseRulesetRules;
   const missingRules = Array.isArray(rulesetRules)
     ? ["deletion", "non_fast_forward"].filter((r) => !rulesetRules.includes(r))
@@ -317,19 +331,21 @@ export function evaluatePreconditions(facts, opts) {
     },
     check(
       "merge-queue",
-      "G11: Mergify queue `release` active (queue_rules, checks_timeout, `queue` label)",
-      "queue_rules[release] with checks_timeout + label `queue` exists",
+      `G11: omni-queue lands the release PRs of ${opts.sourceBranch} (valid config, mode live, label)`,
+      `${MERGE_QUEUE_CONFIG} valid, bases manage ${opts.sourceBranch}, mode \`live\`, queue label exists`,
       queue.ok && facts.queueLabelExists === true,
       [
         ...queue.problems,
-        facts.queueLabelExists === null
-          ? "label lookup failed"
-          : facts.queueLabelExists
-            ? null
-            : "label `queue` missing",
+        queue.label === null
+          ? null
+          : facts.queueLabelExists === null
+            ? "label lookup failed"
+            : facts.queueLabelExists
+              ? null
+              : `label \`${queue.label}\` missing`,
       ]
         .filter(Boolean)
-        .join("; ") || "configured"
+        .join("; ") || `configured (mode ${queue.mode}, label \`${queue.label}\`)`
     ),
     check(
       "release-ruleset",
@@ -766,6 +782,10 @@ export function createRealIo(cwd) {
         ["ls-remote", "--heads", opts.remote, opts.stableBranch, opts.developBranch],
         { cwd }
       );
+      const mergeQueueConfig = sourceSha
+        ? tryExec("git", ["show", `${sourceSha}:${MERGE_QUEUE_CONFIG}`], { cwd })
+        : null;
+      const queueLabel = evaluateMergeQueue(mergeQueueConfig, opts.sourceBranch).label;
       let remoteBranches = null;
       if (headsOut !== null) {
         remoteBranches = { [opts.stableBranch]: null, [opts.developBranch]: null };
@@ -781,10 +801,10 @@ export function createRealIo(cwd) {
         sourceVersion,
         previousTagExists,
         sourceBranchExists: branchExists(opts.sourceBranch),
-        mergifyConfig: sourceSha
-          ? tryExec("git", ["show", `${sourceSha}:.mergify.yml`], { cwd })
-          : null,
-        queueLabelExists: labelExists(opts.repo, "queue"),
+        mergeQueueConfig,
+        // The label omni-queue reads at the source; without a valid config there is none
+        // to look up (G11 already fails on the config).
+        queueLabelExists: queueLabel ? labelExists(opts.repo, queueLabel) : null,
         releaseRulesetRules: releaseRulesetRules(opts.repo),
         freezeIssues: ghIssues(opts.repo, ["--label", "release-freeze"]),
         baseRedIssues: ghIssues(opts.repo, [

@@ -4,7 +4,7 @@
 
 ---
 
-## Kiirjuhend
+## Kiire algus
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API viitedokumentatsioon
+## API viide
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Tehasfunktsioon, mis loob vaikeväärtustega Plugin-objekti.
+Tehasefunktsioon, mis loob vaikeseadetega pistikprogrammi objekti.
 
 **Parameetrid:**
 
-- `name` (string, kohustuslik) — Plugina nimi kebab-case-vormingus
-- `priority` (number, valikuline, vaikeväärtus: 100) — Väiksema väärtusega käivitatakse esimesena
-- `enabled` (boolean, valikuline, vaikeväärtus: true) — Kas käivitada lubatuna?
-- `onRequest` (function, valikuline) — Käivitatakse enne vestluse töötlejat
-- `onResponse` (function, valikuline) — Käivitatakse pärast vestluse töötlejat
-- `onError` (function, valikuline) — Käivitatakse töötleja vea korral
+- `name` (string, nõutav) — Plugina nimi kebab-kastis
+- `priority` (arv, valikuline, vaikimisi: 100) — Alumine jookseb esimesena
+- `enabled` (tõeväärtus, valikuline, vaikimisi: tõene) — Kas alustada on lubatud?
+- `onRequest` (funktsioon, valikuline) — Töötab enne vestluse töötlejat
+- `onResponse` (funktsioon, valikuline) — Käitab pärast vestluse töötlejat
+- `onError` (funktsioon, valikuline) — Töötab käitleja vea korral
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blokeerib päringu ja tagastab soovi korral kohandatud vastuse.
+Blokeerige päring ja soovi korral tagastage kohandatud vastus.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Muudab päringu sisu enne selle jõudmist teenusepakkujani.
+Muutke päringu keha, enne kui see teenusepakkujani jõuab.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Lisab päringu kontekstile metaandmed.
+Lisage päringu kontekstile metaandmed.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Plugina kontekst (`PluginContext`)
 
-| Väli        | Tüüp                      | Kirjeldus                        |
-| ----------- | ------------------------- | -------------------------------- |
-| `requestId` | `string`                  | Päringu kordumatu identifikaator |
-| `model`     | `string`                  | Taotletud mudeli nimi            |
-| `provider`  | `string`                  | Sihtteenusepakkuja ID            |
-| `body`      | `Record<string, unknown>` | Päringu sisu                     |
-| `headers`   | `Record<string, string>`  | Päringu päised                   |
-| `metadata`  | `Record<string, unknown>` | Muudetavad metaandmed            |
-| `timestamp` | `number`                  | Päringu ajatempel                |
+| Väli         | Tüüp                      | Kirjeldus                         |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | Taotluse kordumatu identifikaator |
+| `model`      | `string`                  | Soovitud mudeli nimi              |
+| `provider`   | `string`                  | Sihtpakkuja ID                    |
+| `body`       | `Record<string, unknown>` | Taotluse keha                     |
+| `headers`    | `Record<string, string>`  | Taotluse päised (vt märkust)      |
+| `metadata`   | `Record<string, unknown>` | Muutuvad metaandmed               |
+| `timestamp`  | `number`                  | Taotlege ajatemplit               |
+| `apiKeyInfo` | `object` (valikuline)     | API võtme metaandmed (vt märkust) |
+
+Kontekst ei kanna kunagi kliendi mandaate: `authorization`, `x-api-key`, `proxy-authorization` ja `cookie` päised eemaldatakse (mis tahes korpuses) ja `apiKeyInfo` säilitab võtme metaandmed (nt `id`, `name` ja `scopes`), kuid mitte võtme väärtust ega selle sõrmejälge `src/lib/plugins/hooks.ts` `redactPluginContext()`. See kehtib `onRequest`, `onResponse` ja `onError` kohta.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Või lihtsate tõeväärtustena (vaikeprioriteet 100):
 
 ## Lubade süsteem
 
-Pluginad töötavad isoleeritud VM-i kontekstis. Juurdepääs välistele ressurssidele nõuab selgesõnalisi lube:
+Pluginad on** pole liivakastis** . Iga aktiivne pistikprogramm töötab eraldi tavalise Node.js alamprotsessina (`loadPlugin()` in `src/lib/plugins/loader.ts`) sama operatsioonisüsteemi kasutaja all kui OmniRoute, ilma VM konteksti ja Node.js loa lipukesteta. Plugina kood võib kasutada `node:fs`, `node:child_process`, `fetch` ja kõiki teisi Node.js API: see võib lugeda ja kirjutada mis tahes faile, mida OmniRoute kasutaja saab (sh andmekataloogi), käivitada programme ja jõuda võrku.
 
-| Luba         | Võimaldab                                                    |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Kirjutuskaitstud `process.env` puhverserver                  |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifesti `requires.permissions` aktsepteerib `network`, `file-read`, `file-write`, `env` ja `exec`, kuid täna on käitusajal mõju ainult `env` :
 
-Ilma vastava loata pole seotud globaalsed objektid liivakastis lihtsalt saadaval.
+| Luba                                         | Mõju täna                                                                                                                                                                                                                                    |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Plugina protsess võtab vastu `PORT`, `HOSTNAME`, `TZ` ja `TMPDIR`. Ilma selleta võtab see vastu ainult `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ja `PLUGIN_NAME` (pluss `SystemRoot` ja `windir` Windows puhul). |
+| `network`, `file-read`, `file-write`, `exec` | Mitte ühtegi. Need on ainult deklaratsioonid: midagi ei blokeerita, kui need puuduvad.                                                                                                                                                       |
+
+Pistikprogrammi installimine on nagu mis tahes muu programmi installimine hosti. Installige ainult pistikprogrammid, mille allikat usaldate.
 
 ## Konfiguratsiooniskeem
 
@@ -194,7 +196,7 @@ Konfiguratsiooniväärtused salvestatakse andmebaasi ja neile pääseb juurde ju
 
 ## Näited
 
-### Päringute logija
+### Taotle logijat
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Kiirusepiiraja
+### Rate Limiter
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minut
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Vastuse teisendaja
+### Vastuse transformer
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

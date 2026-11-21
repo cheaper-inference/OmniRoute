@@ -1,0 +1,1 @@
+- **fix(security):** `OMNIROUTE_BLOCK_BENCHMARK_RANGE=true` makes the strict public-only outbound checks treat 198.18.0.0/15 (RFC 2544 benchmarking) as private; the range stays public by default for fake-IP proxies

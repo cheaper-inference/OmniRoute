@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 کیپچر `open-sse/handlers/chatCore.ts` میں ہوتا ہے (دو سائٹس، دو `cacheReasoningFromAssistantMessage` کال سائٹس پر)۔ ری پلے `open-sse/translator/index.ts` میں اسکیما جبر کے بعد لیکن ڈسپیچ سے پہلے ہوتا ہے۔
+
+ٹول کال کے اندراجات کو `buildToolCallCacheKey()` کے تحت ذخیرہ کیا جاتا ہے، درخواست کے دائرہ کار کا ایک ڈائجسٹ اور ٹول کال آئی ڈی، لہذا وہی آئی ڈی جو کسی اور API کلید یا سیشن کے ذریعے استعمال ہوتی ہے وہ اندراج کو منتخب نہیں کرتی ہے۔ دائرہ کار `buildReasoningCacheScope()` سے آتا ہے : API کلید id، نیز سیشن کلید جب درخواست میں ایک ہو۔ لہذا `tool_call_id` کالم اور ڈیش بورڈ ان اندراجات کے لیے یہ ڈائجسٹ دکھاتے ہیں۔
 
 سادہ (نان ٹول کال) اسسٹنٹ ٹرنز کو مختلف طریقے سے کلید کیا جاتا ہے: `buildAssistantMessageCacheKey()` سیشن کے دائرہ کار کو ہضم کرتا ہے اور اس موڑ تک نارملائزڈ OpenAI-فارمیٹ ٹرانسکرپٹ، کیونکہ DeepSeek `tools` موجود ہونے کے بعد _every_ prior ٹرن کی استدلال کی ضرورت ہوتی ہے۔ جوابات-API اہداف کے لیے (مثال کے طور پر `opencode-go/deepseek-v4-flash`، `/responses` کی طرف روٹ کیا گیا) اپ اسٹریم باڈی `input` لے جاتی ہے، `messages` نہیں، لہذا `translateRequest()` (`open-sse/translator/index.ts`) پیوٹ ٹرانسکرپٹ کی رپورٹ کرتا ہے جسے اس نے کال بیک آپشن کے ذریعے ہضم کیا تھا اور کیپچر سائٹس اسی ٹرانسکرپٹ کو ہضم کرتی ہیں۔ ریسپانس ری پلے پاس ہر سورس فارمیٹ کے لیے OpenAI پیوٹ پر چلتا ہے، اس لیے Anthropic میسجز کلائنٹس (Claude → OpenAI → جوابات) بھی دوبارہ چلائے جاتے ہیں۔
 

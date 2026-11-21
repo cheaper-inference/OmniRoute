@@ -35,57 +35,32 @@ npm run test:e2e           # אופציונלי אך מומלץ
 /capture-release-evidences-cc
 ```
 
-## פרסום מהימן ב-npm (ברירת המחדל מאז v3.8.51) — מדורג לפי בקשה, ישיר כחלופה
+## npm Trusted Publishing (ברירת מחדל מאז v3.8.51) — מבוים לפי בקשה, ישירות כ-fallback
 
-`npm-publish.yml` מפרסם כברירת מחדל באמצעות **פרסום מהימן ב-npm‏ (OIDC)**: משימת
-`stage-npm` (המתארחת ב-GitHub) מחליפה את id-token של GitHub באישור npm קצר־טווח
-עבור אותה הרצה — ללא אסימון npm ארוך־טווח בסודות המאגר, ללא בקשת 2FA, ועם הוכחת מקור מצורפת.
-זהו המעקף ש-npm מאשרת כעת, עם הוצאתם משימוש של אסימונים העוקפים 2FA;
-הוא משחזר את התהליך האוטומטי במלואו שהיה לפרויקט עד v3.8.48, תוך שמירה על
-ההבטחה של WS1.3 (אסימון שדלף אינו יכול לפרסם לבדו — אין אסימון).
+`npm-publish.yml` מפרסם דרך** npm Trusted Publishing (OIDC)** כברירת מחדל: עבודת `stage-npm` (מתארח ב-github) מחליפה את ה-id-token של GitHub עבור אישור npm קצר מועד עבור אותה הפעלה — אין אסימון npm ארוך טווח בסודות המאגר, ללא הנחיה 2FA, מקור מצורף. זה הסנקציות לעקוף npm עכשיו כשאסימונים שמדלגים על 2FA יוצאים לפנסיה; הוא משחזר את הזרימה האוטומטית המלאה שהיה לפרויקט עד v3.8.48 תוך שמירה על ערבות WS1.3 (אסימון דלף לא יכול לפרסם לבד — אין אסימון).
 
-**הגדרה חד־פעמית (בעלים):** npmjs.com ← החבילה `omniroute` ← Settings ← _Trusted
-Publisher_ ← GitHub: בעלים `diegosouzapw`, מאגר `OmniRoute`, תהליך עבודה `npm-publish.yml`
-(סביבה: ללא). עד שהגדרה זו קיימת, השלב האוטומטי נכשל עם `ENEEDAUTH`:
-הפעילו מחדש עם `publish_mode=staged` (להלן) או `direct`.
+**הגדרה חד פעמית (בעלים):** חבילת npmjs.com → `omniroute` → הגדרות → _Trusted Publisher_ → GitHub: בעל `diegosouzapw`, repo `OmniRoute`, זרימת עבודה `npm-publish.yml` (סביבה: אין). עד שזה קיים, השלב האוטומטי נכשל עם `ENEEDAUTH`: שליחה מחדש עם `publish_mode=staged` (למטה) או `direct`.
 
-### פרסום מדורג (לפי בקשה — `publish_mode=staged`)
+### פרסום מבוים (על פי בקשה — `publish_mode=staged`)
 
-תהליך העבודה npm-publish כבר אינו מפרסם ישירות: הוא מאתחל את ה-tarball הארוז
-(`check:pack-boot`) ולאחר מכן מריץ `npm stage publish` — הבתים המדויקים נשמרים במאגר
-הרישום, אך **אינם ניתנים להתקנה** עד לאישור הבעלים. שער ה-2FA האנושי הועבר
-לאחר ההוכחה, ולא לפניה.
+זרימת העבודה של npm-publish כבר לא מפרסמת ישירות: היא מאתחלת את ה-tarball (`check:pack-boot`) ואז מריץ `npm stage publish` — שהבתים המדויקים חונים ברישום,** לא ניתן להתקנה** עד שהבעלים יאשר. שער ה-2FA האנושי עבר ל- AFTER את ההוכחה, לא לפניה.
 
-**תהליך הבעלים לאחר שתהליך העבודה הופך לירוק:**
+**זרימת בעלים לאחר שזרימת העבודה הופכת לירוקה:**
 
-1. `npm stage list omniroute` — מצאו את מזהה השלב (הוא מודפס גם בסיכום תהליך העבודה).
-2. אמתו את הבתים המדורגים (מומלץ): `npm stage download <id>`, לאחר מכן התקינו את
-   ה-tarball שהורד לתחילית זמנית ואתחלו אותו (`npm run check:pack-boot` מבצע אוטומציה
-   של אותה הכרעת אריזה←התקנה←אתחול ב-CI).
-3. `npm stage approve <id>` — בקשת ה-2FA היא הפרסום עצמו. `npm stage reject <id>` מבטל.
-4. רשת ביטחון לאחר הפרסום: מאמת הפוסט־פרסום (WS1.4 בתוכנית v3.8.49) מתקין את
-   הגרסה שפורסמה ממאגר הרישום הציבורי בתוך קונטיינר נקי ומאתחל אותה.
+1. `npm stage list omniroute` — מצא את מזהה השלב (מודפס גם בסיכום זרימת העבודה).
+2. אמת את הבתים המבויים (מומלץ): `npm stage download <id>`, ואז התקן את ה-tarball שהורדת בקידומת זמני ואתחל אותו (`npm run check:pack-boot` הופך את אותה חבילה לאוטומטית → install → boot verdict in CI).
+3. `npm stage approve <id>` — ה-2FA מבקש IS לפרסם. `npm stage reject <id>` משליך.
+4. רשת לאחר פרסום: המאמת לאחר פרסום (WS1.4 של תוכנית v3.8.49) מתקין את הגרסה שפורסמה מהרישום הציבורי במיכל נקי ומפעיל אותה.
 
-**חלופת חירום:** `workflow_dispatch` עם `publish_mode=direct` משחזר את
-`npm publish` המיידי מהתהליך הקודם (השתמשו רק אם תהליך הדירוג עצמו אינו פועל כראוי; תעדו מדוע).
+**חזרה לשעת חירום:** `workflow_dispatch` עם `publish_mode=direct` משחזר את ה- `npm publish` המיידי מדור קודם (השתמש רק אם הבימוי עצמו לא מתנהג בצורה לא נכונה; רשום מדוע).
 
-**הקשחה חד־פעמית (בעלים, npmjs.com):** הגדירו את Trusted Publisher עבור
-`omniroute` במצב דירוג בלבד, כך שאסימון ארוך־טווח שדלף לא יוכל להריץ `npm publish`
-ישירות משום מקום — ה-CI יכול רק לבצע דירוג; רק ה-2FA של הבעלים מבצע הפצה.
+**הקשחה חד פעמית (בעלים, npmjs.com):** להגדיר את ה-Trusted Publisher עבור `omniroute` במצב של שלב בלבד כך שאסימון שדלף לאורך זמן לא יכול `npm publish` ישירות מכל מקום שבו — CI יכול רק לשלב; רק מהדורות 2FA של הבעלים.
 
-**נוהל טיפול בפריט הפצה פגום (ללא שינוי):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"`
-כברירת המחדל לתגובה מיידית (דקות, הפיך); השתמשו ב-`npm unpublish` רק בתוך חלון 72 השעות/ללא תלויים
-ולעולם לא כמהלך ראשון. Docker: לעולם אל תשכתבו תג גרסה — חזרה לאחור מתבצעת
-באמצעות הפניית `latest` מחדש ל-digest התקין האחרון.
+**ספר משחק עם חפצים שבורים (ללא שינוי):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` כרפלקס ברירת המחדל (דקות, הפיך); `npm unpublish` רק בתוך חלון 72h/no-dependents ולעולם לא בתור המהלך הראשון. Docker: לעולם אל תכתוב מחדש תג גרסה — rollback מפנה מחדש `latest` לתקציר הטוב האחרון.
 
-**Docker Hub `latest` (נדרש בכל פרסום SemVer יציב):** תהליך העבודה
-`docker-publish` חייב לתייג **גם** את `X.Y.Z` וגם, כאשר
-`should-promote-latest.sh` מאשר שזוהי גרסת ה-SemVer היציבה הגבוהה ביותר, את `:latest`
-עם **אותו digest**. לאחר המשימה: ה-digest של `latest` ב-Hub זהה ל-digest החדש של
-SemVer והערך `last_updated` התעדכן. אל תשאירו את `:latest` על גרסת build ישנה
-כאשר הערות ההפצה מתארות תיקונים שקיימים רק ב-git. מדריכי ההתחלה המהירה של Compose
-משתמשים ב-`:latest`; ב-GitOps יש להמשיך להצמיד את `X.Y.Z`. ראו
-[ערוצי הפצה של Docker](../guides/DOCKER_GUIDE.md#release-channels) ואת #10317.
+**Docker Hub `latest` (נדרש בכל פרסום SemVer יציב):** זרימת העבודה `docker-publish` חייבת לתייג** שְׁנֵיהֶם** `X.Y.Z` וכאשר `should-promote-latest.sh` מסכים זהו SemVer היציב הגבוה ביותר, `:latest` עם ה** אותו עיכול** . לאחר העבודה: Hub `latest` digest שווה ל- SemVer digest החדש ו- `last_updated` עבר. אל תשאיר `:latest` במבנה ישן יותר בזמן שהערות שחרור מדברות על תיקונים שקיימים רק ב-git. חיבור התחלה מהירה השתמש `:latest`; GitOps צריך להמשיך להצמיד `X.Y.Z`. ראה [ערוצי שחרור Docker](../guides/DOCKER_GUIDE.md#release-channels) ו- #10317.
+
+**מאגר ארגוני Docker Hub (`cheaperinference/omniroute`):** Docker Hub לא יכול להעביר מאגר בין מרחבי שמות, אז `diegosouzapw/omniroute` שומר על היסטוריית המשיכה שלו וכל מהדורה, ועבודת `mirror-org-dockerhub` של `docker-publish` מעתיקה כל גרסה שפורסמה (ו- `:latest` כאשר היא מקודמת) מ- `ghcr.io/cheaper-inference/omniroute` למאגר הארגון. זה צריך את סודות `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; בלעדיהם העבודה נשארת ירוקה עם אזהרת "Docker Hub org mirror dispeded" והרישום האחרים מתפרסמים כרגיל. כדי לפרסם שם גרסה שפורסמה מאוחר יותר, הפעל** פעולות → שיקוף תמונת Docker ל- Docker Hub org → הפעל את זרימת העבודה** עם `version=X.Y.Z` (ו- `promote_latest` לגרסה היציבה הגבוהה ביותר): הוא מעתיק את התמונות הקיימות, ללא בנייה מחדש.
 
 ## מסלול מהיר לתיקון חם (התווית `hotfix`)
 
@@ -111,209 +86,205 @@ quality-gate, quality-extended) ומשאיר את שערי הבדיקה המהי
 
 ## רשימת תיוג מפורטת
 
-### לפני ההפצה
+### טרום שחרור
 
-- [ ] כל בקשות המשיכה (PRs) המיועדות לגרסה זו מוזגו אל `release/vX.Y.0`
-- [ ] כל פריטי Linear/הסוגיות הפתוחים עבור גרסה זו נסגרו או הועברו לאבן הדרך הבאה
-- [ ] ה-CI ירוק בענף `release/vX.Y.0`
+- [ ] כל PRs הממוקדים לגרסה זו ממוזגים ל- `release/vX.Y.0`
+- [ ] כל פריטי Linear/issue הפתוחים עבור גרסה זו נסגרים או נדחפים לאבן הדרך הבאה
+- [ ] CI ירוק על סניף `release/vX.Y.0`
 - [ ] אין סמני `TODO(release)` בקוד: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] תמונת הבסיס של Docker מעודכנת (נכון לעכשיו `node:24.15.0-trixie-slim`)
+- [ ] תמונת בסיס Docker מעודכנת (כרגע `node:24.15.0-trixie-slim`)
 
 ### גרסה ויומן שינויים
 
-- [ ] הריצו `/version-bump-cc <patch|minor|major>` (מיומנות Claude Code)
-  - מעדכן את הגרסה ב-`package.json`, `electron/package.json`
-  - יוצר מחדש את `CHANGELOG.md` מה-commits של git מאז התג האחרון
-  - מעדכן את התגים ב-README.md
-- [ ] סקרו ידנית את CHANGELOG.md ונקו הודעות commit לפי הצורך
-- [ ] ודאו שסעיף ה-semver האחרון ב-`CHANGELOG.md` תואם לגרסה ב-`package.json`
-- [ ] השאירו את `## [Unreleased]` כסעיף הראשון ביומן השינויים עבור עבודה עתידית
-- [ ] עדכנו את `docs/openapi.yaml` ← `info.version` חייב להיות זהה לגרסה ב-`package.json`
+- [ ] הפעל `/version-bump-cc <patch|minor|major>` (מיומנות קוד Claude )
+  - בליטות `package.json`, `electron/package.json`
+  - מחדש `CHANGELOG.md` מ-git commits מאז התג האחרון
+  - מעדכן את תגי README.md
+- [ ] בדוק באופן ידני CHANGELOG.md ונקה הודעות commit במידת הצורך
+- [ ] ודא שהסעיף האחרון ב- `CHANGELOG.md` שווה ל- `package.json`
+- [ ] שמור `## [Unreleased]` כקטע יומן השינויים הראשון לעבודה הקרובה
+- [ ] עדכון `docs/openapi.yaml` → `info.version` חייב להיות שווה לגרסת `package.json`
 
-### איכות הקוד
+### איכות קוד
 
-- [ ] `npm run lint` — 0 שגיאות (האזהרות היו קיימות קודם לכן)
+- [ ] שגיאות `npm run lint` — 0 (האזהרות קיימות מראש)
 - [ ] `npm run typecheck:core` — נקי
 - [ ] `npm run typecheck:noimplicit:core` — נקי (מחמיר)
-- [ ] `npm run check:cycles:ratchet` — בתוך התקרה הקפואה של `metrics.cycles` ‏(`check:cycles` לבדו מסתיים עם קוד 1 בכל מחזור, #15281)
-- [ ] `npm run check:any-budget:t11` — בתוך התקציב
+- [ ] `npm run check:cycles:ratchet` — בתוך תקרת `metrics.cycles` הקפואה ( `check:cycles` חשוף יוצא 1 בכל מחזור, #15281)
+- [ ] `npm run check:any-budget:t11` — במסגרת התקציב
 - [ ] `npm run check:route-validation:t06` — נקי
-- [ ] `npm run check:node-runtime` — סף סביבת הריצה הנתמכת מתקיים (`>=22.22.2 <23`, `>=24.0.0 <27`, לפי `SUPPORTED_NODE_RANGE` ב-`src/shared/utils/nodeRuntimeSupport.ts`; תואם ל-`engines` ב-`package.json`)
+- [ ] רצפת זמן ריצה נתמכת ב-`npm run check:node-runtime` — (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; מיושר עם `package.json` `engines`)
 
-### בדיקות
+### בּוֹחֵן
 
-- [ ] `npm run test:unit` — עובר
-- [ ] `npm run test:vitest` — עובר (שרת MCP, ‏autoCombo, מטמון)
-- [ ] `npm run test:coverage` — סף 60/60/60/60 מתקיים (פקודות/שורות/פונקציות/הסתעפויות)
-- [ ] `npm run test:integration` — עובר (אם השינויים נוגעים במסד הנתונים / מטפלים)
-- [ ] `npm run test:combo:matrix` — עובר (מטריצת אסטרטגיות combo: מוכיחה באופן דטרמיניסטי את החלטות הבחירה של כל 19 אסטרטגיות הניתוב הציבוריות; יש להריץ בעת שינוי ניתוב combo, הכרעת אסטרטגיה או לוגיקת גיבוי)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **אופציונלי/ידני** (בדיקת smoke מול שירותי upstream אמיתיים, המוגנת בשער; טוענת תמונת מצב לקריאה בלבד של מסד הנתונים מ-VPS ‏`root@192.168.0.15`; פונה לספקים אמיתיים, צורכת נקודות זכות; לעולם אינה רצה ב-CI; מדלגת באופן נקי ללא השער)
-- [ ] `npm run test:combo:live:vps` — **אופציונלי/ידני** (בדיקת smoke חיה של VPS בשלב 3: שבעה תרחישי HTTP מול שרת `.15` החי באמצעות Node ESM רגיל; דורשת `ssh root@192.168.0.15`; יוצרת/מוחקת רק צירופי `__live_test__*`; פונה לספקים אמיתיים; לעולם אינה רצה ב-CI)
-- [ ] `npm run test:e2e` — עובר (שינויים בממשק המשתמש)
-- [ ] `npm run test:protocols:e2e` — עובר (שינויים ב-MCP/A2A)
-- [ ] `npm run test:ecosystem` — עובר
+- [ ] `npm run test:unit` — pass
+- [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — gate 60/60/60/60 מרוצה (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (אם שינויים גע ב- DB / מטפלים)
+- [ ] `npm run test:combo:matrix` — pass (מטריצת אסטרטגיית משולבת: מוכיחה את כל 22 החלטות הבחירה של אסטרטגיות ניתוב ציבוריות בצורה דטרמיניסטית; הפעלה בעת נגיעה בניתוב משולב, רזולוציית אסטרטגיה או לוגיקה ניתובת)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (עשן מגודר אמיתי במעלה הזרם; מקור תמונת מצב DB לקריאה בלבד מ- VPS `root@192.168.0.15`; פוגע בספקים אמיתיים, עולה זיכויים; אף פעם לא פועל ב- CI; מדלג בצורה נקייה ללא השער)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS עשן חי: 7 תרחישים HTTP מול שרת `.15` החי דרך ESM Node רגיל; דורש `ssh root@192.168.0.15`; creates/deletes רק שילובים `__live_test__*` ; פוגע בספקים אמיתיים; אף פעם לא פועל ב- CI)
+- [ ] `npm run test:e2e` — pass (UI שינויים)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A שינויים)
+- [ ] `npm run test:ecosystem` — pass
 
-### Hooks (מאומתים באמצעות Husky)
+### הוקס (אומת האסקי)
 
-ה-hooks של Husky נמצאים ב-`.husky/` ורצים אוטומטית בפעולות git.
+האסקי הוקס חיים ב- `.husky/` ופועלים אוטומטית בפעולות Git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** שערים מהירים ודטרמיניסטיים — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (הופעל ב-2026-06-13). אינו כולל בכוונה את `test:unit` (איטי; מכוסה על ידי משימת ה-CI ‏`test-unit`).
-  - הריצו ידנית את `npm run test:unit` לפני דחיפת ענפי הפצה.
+- **התחייבות מראש:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **דחיפה מראש:** שערים דטרמיניסטיים מהירים — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (הופעל 2026-06-13). מוציא בכוונה `test:unit` (איטי; מכוסה על ידי עבודת CI `test-unit` ).
+  - הפעל `npm run test:unit` באופן ידני לפני דחיפת ענפי שחרור.
 
-אם hook נכשל: תקנו את הבעיה הבסיסית, אל תעקפו באמצעות `--no-verify`.
+אם הוק נכשל: תקן את הבעיה הבסיסית, אל תעקוף עם `--no-verify`.
 
-### Conventional Commits
+### התחייבויות קונבנציונליות
 
-כל ה-commits המיועדים להפצה חייבים לעמוד בתבנית `type(scope): subject`.
+כל ההתחייבויות הקשורות לשחרור חייבות להיות בפורמט `type(scope): subject`.
 
-**סוגים תקינים:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**סוגים תקפים:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**תחומים תקינים:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**היקפים תקפים:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain` `authz`
 
-שינויים שוברים: הוסיפו שורת סיום `BREAKING CHANGE:` או `!` אחרי התחום (לדוגמה `feat(api)!: drop /v0`).
+שוברים שינויים: הוסף תחתונה `BREAKING CHANGE:` או `!` אחרי ה-scope (למשל `feat(api)!: drop /v0`).
 
 ### תיעוד
 
-- [ ] `npm run check:docs-sync` עובר (רץ אוטומטית על ידי pre-commit)
-- [ ] `npm run check:docs-all` עובר (בדיקת-על: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` מסתיים עם קוד 0 — החוזה של משתני הסביבה בין הקוד ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` נשאר תקין
-- [ ] `npm run check:doc-links` מסתיים עם קוד 0 — אין הפניות Markdown פנימיות שבורות לאחר הארגון מחדש
-- [ ] `docs/architecture/ARCHITECTURE.md` נסקר לאיתור אי-התאמות באחסון/בסביבת הריצה
-- [ ] `docs/guides/TROUBLESHOOTING.md` נסקר לאיתור אי-התאמות במשתני סביבה ובתפעול
+- [ ] אישורי `npm run check:docs-sync` (הפעלה אוטומטית על ידי התחייבות מראש)
+- [ ] `npm run check:docs-all` passers (מטריה: docs-sync + docs-counts + env-doc-sync + הוצא משימוש-גרסאות + doc-links)
+- [ ] `npm run check:env-doc-sync` exits 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env חוזה שלם
+- [ ] `npm run check:doc-links` יוצא מ-0 — ללא הפניות פנימיות שבורות לאחר ארגון מחדש
+- [ ] `docs/architecture/ARCHITECTURE.md` נבדק עבור storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` נבדק עבור env var וסחיפה תפעולית
 - [ ] אם `.env.example` השתנה: `docs/reference/ENVIRONMENT.md` עודכן
-- [ ] אם לתכונה חדשה יש ממשק משתמש: `docs/guides/USER_GUIDE.md` מציין אותה
-- [ ] אם לתכונה חדשה יש API: ‏`docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` עודכנו
-- [ ] אם התכונה החדשה היא מודול: קיים עבורה `docs/<MODULE>.md` ייעודי
-- [ ] אם מדובר בשינוי שובר: `docs/guides/TROUBLESHOOTING.md` כולל הערת מיגרציה
+- [ ] אם לתכונה חדשה יש UI: `docs/guides/USER_GUIDE.md` מזכיר אותה
+- [ ] אם לתכונה חדשה יש API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` עודכן
+- [ ] אם תכונה חדשה היא מודול: `docs/<MODULE>.md` ייעודי קיים
+- [ ] אם שובר שינוי: `docs/guides/TROUBLESHOOTING.md` יש הערת הגירה
 
 ### i18n
 
-- [ ] `npm run i18n:check` מסתיים עם קוד 0 — מצב התרגום (`.i18n-state.json`) מסונכרן עם מסמכי המקור (אין מקורות שסטו במצב מחמיר; התראה במצב אזהרה קבילה עבור תיקוני תיעוד ברגע האחרון, אך התוצאה צריכה להיות 0 לפני התיוג)
-- [ ] `npm run i18n:check-ui-coverage` מסתיים עם קוד 0 — כל שפת ממשק משתמש נמצאת בסף הכיסוי של 80% או מעליו
-- [ ] `npm run i18n:sync-ui:dry` מדווח על 0 מפתחות חסרים בכל 66 שפות היעד (כל שפה למעט מקור `en`)
-- [ ] אם מסמכי המקור באנגלית השתנו, הריצו `npm run i18n:run` (דורש `OMNIROUTE_TRANSLATION_API_KEY` ב-`.env`) לפני התיוג
-- [ ] ניתן לדחות תרומות תרגום קלות לגרסה הבאה (יש לעקוב אחריהן ב-CHANGELOG)
+- [ ] `npm run i18n:check` יוצא ממצב תרגום — 0 (`.i18n-state.json`) בסנכרון עם מסמכי מקור (ללא מקורות נסחפים במצב קפדני; ייעוץ במצב אזהרה מקובל עבור טאצ'-אפים של מסמכים ברגע האחרון, אך צריך להיות 0 לפני התיוג)
+- [ ] `npm run i18n:check-ui-coverage` יוצא מ-0 — בכל אזור UI בקומה של 80% או מעל הכיסוי
+- [ ] `npm run i18n:sync-ui:dry` מדווח על 0 מפתחות חסרים בכל 66 אזורי היעד (כל אזור מלבד מקור `en` )
+- [ ] אם מסמכי המקור באנגלית השתנו, הפעל `npm run i18n:run` (דורש `OMNIROUTE_TRANSLATION_API_KEY` ב- `.env`) לפני התיוג
+- [ ] ניתן לדחות את תרומות התרגום למהדורה הבאה אם היא משנית (רצועה ב- CHANGELOG)
 
-### מיגרציות של מסד הנתונים
+### העברת מסדי נתונים
 
-- [ ] אם קיימים קבצים חדשים ב-`src/lib/db/migrations/`:
-  - [ ] כל מיגרציה היא אידמפוטנטית (`CREATE TABLE IF NOT EXISTS` וכו')
-  - [ ] המיגרציות עטופות בטרנזקציות
-  - [ ] המספור נכון (ללא פערים ברצף)
-- [ ] בדקו בהתקנה חדשה: מחקו את `~/.omniroute/omniroute.db` והריצו `npm run dev`
-- [ ] בדקו בהתקנה קיימת: גבו את מסד הנתונים, הריצו את המיגרציה ואמתו את הסכמה
-- [ ] קובצי WAL ‏(`-wal`, `-shm`) מטופלים כראוי אם המיגרציה משכתבת טבלאות
+- [ ] אם `src/lib/db/migrations/` יש קבצים חדשים:
+  - [ ] כל הגירה היא אימפוטנטית (`CREATE TABLE IF NOT EXISTS` וכו')
+  - [ ] הגירות עטופות בעסקאות
+  - [ ] ממוספר נכון (ללא פערים ברצף)
+- [ ] בדיקה בהתקנה חדשה: מחק `~/.omniroute/omniroute.db` והפעל `npm run dev`
+- [ ] בדיקה על התקנה קיימת: גיבוי DB, הפעל הגירה, אימות סכימה
+- [ ] קבצי WAL (`-wal`, `-shm`) מטופלים בצורה נכונה אם ההעברה משכתבת טבלאות
 
-### קטלוג ספקים (מאומת באמצעות Zod)
+### קטלוג ספקים (מאומת בזוד)
 
-- [ ] הסכימה של `src/shared/constants/providers.ts` תקפה בזמן הטעינה
-  - [ ] לכל הספקים יש את השדות הנדרשים (`id`, `label`, `kind` וכו׳)
-  - [ ] `freeNote` מוגדר עבור ספקים חינמיים חדשים
-  - [ ] לספקי OAuth יש `oauthConfig` הרשום ב-`src/lib/oauth/constants/oauth.ts`
-- [ ] אם נוסף ספק חדש: קיים executor תואם ב-`open-sse/executors/`
-- [ ] אם הפורמט אינו OpenAI: קיים מתרגם ב-`open-sse/translator/`
-- [ ] המודלים רשומים ב-`open-sse/config/providerRegistry.ts`
-- [ ] בדיקות יחידה ב-`tests/unit/` מכסות את סיווג הספקים והניתוב
+- [ ] סכימת `src/shared/constants/providers.ts` Zod תקפה בזמן הטעינה
+  - [ ] לכל הספקים יש שדות חובה (`id`, `label`, `kind`, וכו')
+  - [ ] `freeNote` סיפק לספקים חדשים בחינם
+  - [ ] לספקי OAuth יש `oauthConfig` רשומים ב- `src/lib/oauth/constants/oauth.ts`
+- [ ] אם ספק חדש נוסף: מבצע מקביל ב- `open-sse/executors/`
+- [ ] אם לא בפורמט OpenAI: מתרגם ב- `open-sse/translator/`
+- [ ] דגמים רשומים ב- `open-sse/config/providerRegistry.ts`
+- [ ] בדיקות יחידות בסיווג ספק כיסוי `tests/unit/` וניתוב
 
 ### שולחן עבודה (Electron)
 
 אם `electron/` השתנה:
 
-- [ ] `npm run electron:smoke:packaged` עובר בהצלחה
-- [ ] ה-builds נבדקו עבור לפחות אחת מהאפשרויות `:win`, `:mac`, `:linux`
-- [ ] אישורי חתימת הקוד לא פגו (אם מתבצעת חתימה)
-- [ ] הגרסה ב-`electron/package.json` תואמת לזו שב-`package.json` הראשי
-- [ ] המצביע לערוץ העדכון האוטומטי עודכן אם ההפצה היא ל-`stable`
+- [ ] `npm run electron:smoke:packaged` עובר
+- [ ] מבנים שנבדקו עבור לפחות אחד מ- `:win`, `:mac`, `:linux`
+- [ ] אישורי חתימת קוד לא פג תוקף (אם חתימה)
+- [ ] גרסת `electron/package.json` תואמת לשורש `package.json`
+- [ ] מצביע ערוץ עדכון אוטומטי עודכן אם משחררים ל- `stable`
 
-### מבנה ה-build
+### בניית פריסה
 
-המאגר משתמש בשלוש תיקיות פלט נפרדות — לעולם אין לערבב ביניהן:
+המאגר משתמש בשלוש ספריות פלט נפרדות — אף פעם לא מערבבים ביניהן:
 
-| תיקייה    | מטרה                                                   | במעקב?          |
-| --------- | ------------------------------------------------------ | --------------- |
-| `src/`    | קוד המקור של היישום (TypeScript / TSX)                 | כן              |
-| `.build/` | תוצרי ביניים של ה-build — פלט `next build` (`distDir`) | לא (gitignored) |
-| `dist/`   | חבילת npm להפצה — מורכבת על ידי `assembleStandalone`   | לא (gitignored) |
+| מַדרִיך   | מַטָרָה                                                     | במעקב?        |
+| --------- | ----------------------------------------------------------- | ------------- |
+| `src/`    | מקור יישום (TypeScript / TSX)                               | כֵּן          |
+| `.build/` | בניית תוצרי ביניים — `next build` (`distDir`)               | לא (בגייגנור) |
+| `dist/`   | חבילת npm — הניתן למשלוח מורכבת על ידי `assembleStandalone` | לא (בגייגנור) |
 
-> **הערה למפעיל:** תיקיית התמונה ב-VPS המרוחק נשארת `/usr/lib/node_modules/omniroute/app/`.
-> רק פלט ה-build **בתוך המאגר** עבר (`app/` → `dist/`). מיומנויות הפריסה מסנכרנות באמצעות rsync את
-> תוכן `dist/` אל תיקיית `app/` המרוחקת — לא נדרשים שינויים בנתיבי ה-VPS.
+> **הערת המפעיל:** ספריית התמונות המרוחקת VPS נשארת `/usr/lib/node_modules/omniroute/app/`. רק את** ב-repo** פלט build הועבר (`app/` → `dist/`). לפרוס מיומנויות rsync תוכן `dist/` לתוך `app/` dir — המרוחק ללא צורך בשינויי נתיב VPS.
 
-**זרימת build יחיד:**
+**זרימה יחידה:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (ניקוי)
-  └─ next build → .build/next/   (תוצרי ביניים)
-  └─ assembleStandalone          (מעתיק standalone + static + public + natives → dist/)
-  └─ writes dist/BUILD_SHA       (סמן HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-אין להריץ `npm run build` ולאחר מכן `npm run build:cli` נפרד לצורך פריסה — יש להשתמש ב-
-`npm run build:release`, שמבצע build נקי מחדש וכותב סמן בפקודה אחת.
+האם NOT להריץ `npm run build` ואחריו `npm run build:cli` נפרד לפריסת — השתמש `npm run build:release` שעושה בנייה מחדש + sentinel בפקודה אחת.
 
-### אימות תוצרי build
+### אימות חפץ
 
-- [ ] `npm run build:release` מסתיים בהצלחה ו-`dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` נקי — ללא `app.__qa_backup`,‏ `scripts/scratch`,‏ `package-lock.json` או שאריות מקומיות אחרות
-- [ ] `dist/server.js` קיים לאחר ה-build
-- [ ] בדיקת smoke מקומית אופציונלית של סביבת הריצה הארוזה: `npm run dev:candidate -- validate` לאחר `npm run dev:candidate -- build` מפעילה את קובץ ה-tarball הארוז עם `DATA_DIR` מבודד ובודקת את `/api/health` ואת `/v1/models` (ראו [נתיב הזהב לתרומה](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` `git rev-parse --short HEAD` `dist/BUILD_SHA` ==
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` או שאריות מקומיות אחרות
+- [ ] `dist/server.js` קיים לאחר בנייה
+- [ ] עשן אופציונלי מקומי ארוז בזמן ריצה: `npm run dev:candidate -- validate` לאחר `npm run dev:candidate -- build` מאתחל את ה-tarball הארוז על `DATA_DIR` מבודד ובודק `/api/health` + `/v1/models` (ראה [תרומה דרך הזהב](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### תיוג והפצה
+### תיוג ושחרור
 
-- [ ] יש להריץ את `/generate-release-cc` (מיומנות Claude Code):
-  - יוצרת את התג `vX.Y.Z`
-  - דוחפת את התג ואת הענף
-  - פותחת GitHub Release עם גוף יומן שינויים
-  - מצרפת מתקיני Electron (אם נבנו)
-- [ ] לחלופין, באופן ידני:
+- [ ] הפעל `/generate-release-cc` (מיומנות קוד Claude ):
+  - יוצר תג `vX.Y.Z`
+  - דוחף תג וענף
+  - פותח GitHub Release עם גוף השינויים
+  - מצרף מתקיני Electron (אם בנויים)
+- [ ] או ידנית:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### פריסה
+### לִפְרוֹס
 
-מיומנויות הפריסה משתמשות בזרימת rsync קלה — ללא `npm pack` וללא `npm i -g`:
+פריס מיומנויות השתמש בזרימת rsync קלה — no `npm pack`, no `npm i -g`:
 
-- [ ] יש להשתמש במיומנות הפריסה התואמת ליעד:
-  - `/deploy-vps-local-cc` — VPS מקומי (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS של Akamai‏ (69.164.221.35)
+- [ ] השתמש במיומנות פריסה התואמת את היעד:
+  - `/deploy-vps-local-cc` — local VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — שניהם
-- [ ] לפני הפריסה, יש לוודא ש-`dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] ה-build חייב לרוץ במקום שבו `node_modules` אמיתי (ה-checkout הראשי או worktree שבו הורץ `npm ci` — לא worktree עם קישור סמלי)
-- [ ] יש לבצע בדיקת smoke למופע שנפרס:
-  - לפתוח את `/dashboard/health` → לבדוק שמחרוזת הגרסה תואמת להפצה
-  - להריץ בקשת `/v1/chat/completions` מול ספק מוכר
-  - לוודא ש-`/api/monitoring/health` מחזיר מפסקי מעגל במצב `CLOSED`
-  - לוודא שתעבורות MCP מגיבות (`/mcp` ב-HTTP,‏ `/mcp-sse` ב-SSE)
+- [ ] לפני הפריסה, אשר `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Build חייב לפעול במקום שבו `node_modules` אמיתי (תשלום ראשי או `npm ci`'d worktree — NOT עץ עבודה עם קישור סימול)
+- [ ] מופע של בדיקת עשן:
+  - פתח `/dashboard/health` → לבדוק את גירסת מחרוזת תואמת שחרור
+  - הפעל בקשת `/v1/chat/completions` נגד ספק מוכר
+  - ודא `/api/monitoring/health` מחזיר מפסקים של `CLOSED`
+  - אשר את תגובת MCP transports (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### לאחר ההפצה
+### לאחר השחרור
 
-- [ ] יש להריץ את `/capture-release-evidences-cc` (מיומנות Claude Code)
-  - לוכדת צילומי מסך/הקלטות WebP של תכונות חדשות
-  - מצרפת אותם להערות ההפצה / לפוסט בבלוג
-- [ ] לעדכן את GitHub Discussions / Discord בהכרזת ההפצה
-- [ ] לפתוח אבן דרך עבור הגרסה הבאה
-- [ ] אם מדובר בעדכון קריטי: להצמיד דיון או לפרסם ב-`news.json` עבור כרזה בתוך היישום
+- [ ] הפעל `/capture-release-evidences-cc` (מיומנות קוד Claude )
+  - לוכד WebP screenshots/recordings של תכונות חדשות
+  - מצרף להערות שחרור/פוסט בבלוג
+- [ ] עדכון GitHub Discussions / Discord עם הודעת שחרור
+- [ ] אבן דרך פתוחה לגרסה הבאה
+- [ ] אם קריטי: הצמד דיון או פוסט ב- `news.json` עבור באנר בתוך האפליקציה
 
-### שער ההשקה הציבורית של Radar
+### שער שיגור פומבי של מכ"ם
 
-הכרזת Radar נכללת במכוון ב-commit עם `active: false`. ההפעלה היא שינוי נפרד
-לאחר שסופקו ראיות לכל הפריטים הבאים:
+הודעת הרדאר בוצעה בכוונה עם `active: false`. ההפעלה היא שינוי נפרד לאחר שהוכחה כל פריט למטה:
 
-- [ ] כל בקשות המשיכה המוערמות של Radar מוזגו וה-CI בקצה ההפצה ירוק
-- [ ] לפרוס ולבצע בדיקת smoke לנתיבי Radar של OSS כאשר `RADAR_ENABLED` עדיין כבוי כברירת מחדל
-- [ ] לבצע בדיקת smoke ל-`GET /planos`,‏ `/termos`,‏ `/privacidade` ו-`/reembolso` במארח Radar שהוגדר
-- [ ] לתעד בשירות הפרטי את זהות המפעיל/פרטי הקשר/הכתובת ואת הבדיקה המשפטית שאושרה על ידי הבעלים
-- [ ] לבדוק את Stripe Checkout ואת ה-webhook החתום במצב בדיקה בלבד
-- [ ] לבדוק מסירה אחת של הודעת דוא״ל מוצפנת לביצוע עסקה באמצעות השולח/הדומיין המאושרים
-- [ ] להוכיח שחזור מגיבוי והרצת מחקר אחת תחת פיקוח ובמגבלת תקציב
-- [ ] לאשר את מדיניות הבדיקה של BRL/PIX לפני קבלת ראיות לתרומה
-- [ ] להפעיל Checkout ציבורי רק לאחר מעבר השערים הקודמים, ולאחר מכן להפעיל את ה-ID החדש ב-`news.json`
-- [ ] לוודא שהכרזה בדף הבית משתמשת בטקסט מותאם לשפה וש-ID חדש מופיע מחדש לאחר ש-ID ישן יותר נסגר
+- [ ] כל ה-Radar PRs המוערמים מתמזגים וה- CI עם קצה השחרור ירוק
+- [ ] פרוס ועשן את מסלולי OSS Radar כאשר `RADAR_ENABLED` עדיין כבוי כברירת מחדל
+- [ ] עשן `GET /planos`, `/termos`, `/privacidade` ו- `/reembolso` על מארח הרדאר הנקרא
+- [ ] מפעיל תקליטים identity/contact/address וביקורת משפטית באישור הבעלים בשירות הפרטי
+- [ ] תרגיל Stripe Checkout וה-webhook החתום במצב בדיקה בלבד
+- [ ] הפעל מסירה אחת מוצפנת של עסקאות דואר אלקטרוני עם ה- sender/domain המאושר
+- [ ] הוכח שחזור גיבוי והרצת מחקר אחת מפוקחת ומוגבלת בתקציב
+- [ ] אשר את מדיניות הסקירה BRL/PIX לפני קבלת ראיות לתרומה
+- [ ] אפשר Checkout ציבורי רק לאחר השערים הקודמים, ולאחר מכן הפעל את ה- `news.json` ID החדש
+- [ ] ודא שבאנר הבית משתמש בעותק מקומי ו- ID חדש מופיע שוב לאחר סגירת ID ישן יותר
 
 ## בדיקות עשן לשירותים מוטמעים (v3.8.4+)
 
@@ -383,111 +354,70 @@ npm run build:release
 
 ---
 
-## חיתוך 3.9.0 LTS (תורגל ב-3.8.58)
+## 3.9.0 חתך LTS (בחזרות ב-3.8.58)
 
-לאחר v3.8.59 הגרסה הבאה היא 3.9.0, והקצה שלה הופך לשני ענפים ארוכי-חיים:
-`stable/v3` (קו ה-LTS של v3, ‏npm `latest`) ו-`develop` (‏v4, מוקפץ ל-4.0.0, ‏npm
-`nightly`). מודל הענפים/ערוצים, ההעברה קדימה והתוויות מתוארים ב-
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); התוכנית נמצאת ב-[מפת הדרכים](../../ROADMAP.md) (שלב 3). החיתוך מתבצע פעם אחת;
-3.8.58 מתרגל אותו מקצה לקצה על fork, ו-3.8.59 נסגרת עם
-[רשימת הבדיקה GO/NO-GO](./LTS_GO_NO_GO.md).
+אחרי v3.8.59 הגרסה הבאה היא 3.9.0, והקצה שלה הופך לשני ענפים ארוכים: `stable/v3` (קו v3 LTS, npm `latest`) ו- `develop` (v4, חבוט ל-4.0.0, npm `nightly`). דגם branch/channel, יציאה קדימה והתוויות נמצאים ב- [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; התוכנית נמצאת ב- [ROADMAP](../../ROADMAP.md) (שלב 3). החתך פועל פעם אחת; 3.8.58 מתאמן עליו מקצה לקצה על מזלג, ו-3.8.59 נסגר עם [רשימת ה-GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### הרצה יבשה (קריאה בלבד, בטוחה בכל עת)
+### ריצה יבשה (לקריאה בלבד, בטוח בכל עת)
 
 ```bash
-npm run release:dry-run-lts-cut                       # החיתוך האמיתי: 3.9.0 מתוך HEAD, התג הקודם v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # קיבוע commit המקור
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` אינו מבצע דבר: הוא קורא את git ואת `gh` ומדפיס את
-הרצף המלא — תנאים מקדימים (המקור מזוהה, למאגר המקור יש היסטוריה מלאה —
-עותק משוכפל רדוד אינו יכול לדחוף את `stable/v3`, הצד המקבל דוחה את החבילה בהורה
-המורכב הראשון, לכן יש לבצע את החיתוך מעותק משוכפל מלא או להריץ תחילה `git fetch --unshallow origin` —
-התג הקודם קיים, `package.json` נמצא בגרסת היעד, קיימת סוגיה פתוחה עם `release-freeze`, אין
-סוגיה פתוחה מסוג `Release branch not green`
-בענף גרסה קיים — ענף שאינו קיים מדווח כ-`?` לא ידוע, ולעולם לא
-כירוק — תור `release` של Mergify מוגדר (G11: ‏`queue_rules`, ‏`checks_timeout`,
-התווית `queue`), מערכת הכללים `release/*` עדיין חוסמת מחיקה ודחיפה כפויה, ו-
-`stable/v3` ו-`develop` עדיין אינם קיימים), שני שלבי הענפים, אילו טריגרים של תהליכי עבודה
-רדומים ואילו תנאי `if:` הופכים לאמת (ואילו נשארים חסומים באמצעות משתנה מאגר או
-מקובעים למאגר הקנוני), תגי ההפצה הצפויים (`latest` ← 3.9.0, ‏`next` ו-
-`nightly` ריקים) והחזרה לאחור. יציאה עם `0` = ‏`RESULT: READY`, עם `1` = תנאי מקדים חוסם
-נכשל (`✗`), עם `2` = שגיאת שימוש. `--advisory <id,...>` מוריד בדיקה לרמת אזהרה (`!`)
-מבלי להסתיר אותה.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-הריצו את ההרצה היבשה של החיתוך האמיתי בזמן שהקפאת הגרסה 3.9.0 עדיין פתוחה — הענפים
-נוצרים לאחר התג ולפני ששלב 12c מסיר את ההקפאה.
+הפעל את ה-dry-run של החתך האמיתי בזמן שהקפאת השחרור של 3.9.0 עדיין פתוחה — הענפים נוצרים לאחר התג ולפני ששלב 12c מרים את ההקפאה.
 
-### תרגול 3.8.58 (ב-fork בלבד)
+### 3.8.58 חזרה (מזלג בלבד)
 
 ```bash
-# 1. הרצה יבשה בקצה הנוכחי עם פרמטרי התרגול
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. ביצוע מול remote של FORK (הפקודה מסרבת להשתמש ב-origin, או בכל remote שכתובת ה-URL שלו היא של המאגר
-#    הקנוני; בכל שלב מתבקש אישור במסוף)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. הפעלת תהליכי העבודה הרדומים ב-fork (באמצעות workflow_dispatch כאשר ההרצה היבשה
-#    מדווחת על קיבוע למאגר הקנוני), ולאחר מכן חזרה לאחור
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-ה-commit שמקפיץ את develop נבנה באמצעות מנגנוני התשתית של git (ללא נגיעה בעץ העבודה) ומקפיץ
-את אותם חמישה קבצים כמו commit של פתיחת מחזור: `package.json`, ‏`open-sse/package.json`,
-‏`electron/package.json`, ‏`package-lock.json` ו-`docs/openapi.yaml`. המקטע `[4.0.0]`
-של CHANGELOG והגרסאות המקבילות שלו בשפות i18n נפתחים לאחר מכן ב-`develop`, לפני ה-PR
-הראשון שלו. הסקריפט לעולם אינו משנה תגי הפצה של npm — תרגלו אותם על חבילת ניסוי.
+ה-Develop Bump commit נבנה עם git plumbing (לא נוגעים בעץ עובד) ונוגע באותם חמישה קבצים כמו commit של מחזור פתוח: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ו- `docs/openapi.yaml`. קטע `[4.0.0]` CHANGELOG ומראות ה-i18n שלו נפתחים ב- `develop` לאחר מכן, לפני PR הראשון שלו. הסקריפט אף פעם לא משתנה npm dist-tags — חזרו על אלה על חבילת שריטה.
 
-### פריט תצוגה מקדימה של PR (בנייה פעם אחת, קידום של אותם בתים)
+### חפץ תצוגה מקדימה PR (בנה פעם אחת, קדם את אותם בתים)
 
-`.github/workflows/preview-artifact.yml` בונה חבילת tar אחת לייצור מראש PR
-ומאמת את אותה בנייה בדיוק (מקטע (a) של #8084). רק PR-ים מאותו מאגר; דבר אינו מתפרסם.
+`.github/workflows/preview-artifact.yml` בונה Tarball ייצור אחד מראש PR ומאמת את המבנה המדויק הזה (#8084 slice (א)). אותו מאגר PRs בלבד; שום דבר לא מתפרסם.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # או הוסיפו את התווית `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # התקנת תצוגה מקדימה
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-ההרצה מבצעת `npm ci`, ‏`npm run build:release`, ‏`npm run check:pack-artifact`, אורזת את
-חבילת ה-tar, מריצה `npm run check:pack-boot` (סודות מזויפים, ספריית נתונים זמנית), אורזת מחדש
-ונכשלת אלא אם התקציר זהה, ולאחר מכן מתעדת את `artifact-identity.json` (‏SHA של הראש, ‏SHA של
-הבסיס, גיבוב קובץ הנעילה, פלטפורמה, ארכיטקטורה, ABI של node, מאגד, מדיניות בנייה —
-`scripts/release/artifact-identity.mjs`) ומאמתת את חבילת ה-tar במשימה נפרדת. קידום
-תצוגה מקדימה פירושו התקנת חבילת ה-tar הזו: לעולם אין לבנות מחדש מקוד המקור.
+הריצה עושה `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, אורזת את ה-tarball, מפעילה `npm run check:pack-boot` (סודות מזויפים, ארעיית נתונים dir), אורזת מחדש ונכשלת אלא אם הדיג'סט זהה, ואז מתעדת `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI ו-bundi attler the — מדיניות `scripts/release/artifact-identity.mjs` עבודה נפרדת. קידום תצוגה מקדימה פירושו התקנת הטרבול הזה: לעולם אל תבנה מחדש מהמקור.
 
-### החיתוך (3.9.0, לאחר GO)
+### החתך (3.9.0, אחרי GO)
 
-1. ‏GO תועד ב-[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO נרשם ב- [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` מדפיס `RESULT: READY`.
-3. צרו את הענפים ב-`origin` ידנית באמצעות הפקודות שההרצה היבשה מדפיסה —
-   הסקריפט מסרב לדחוף ל-`origin`. כדי להשתמש מחדש ב-commit של develop שעבר סקירה, הריצו תחילה את
-   תרגול `--execute` על קצה 3.9.0 מול ה-fork שלכם; הוא מדפיס את שני ערכי ה-SHA, וניתן
-   לדחוף את אותם commits:
+3. צור את הענפים ב- `origin` ביד עם הפקודות ה-dry-run מדפיס — הסקריפט מסרב לדחוף ל- `origin`. כדי לעשות שימוש חוזר ב-Develop commit שנבדק, הפעל תחילה את חזרת `--execute` על קצה 3.9.0 כנגד המזלג שלך; זה מדפיס גם SHAs, וניתן לדחוף את אותם commits:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. הגנו על `stable/v3` ועל `develop` (ערכות כללים + תור מיזוג) לפני שה-PR הראשון מתקבל.
-5. תהליכי העבודה הרדומים מופעלים עם קיום הענף: `forward-port.yml` (דחיפה אל
-   `stable/v3`),‏ `validate-stable-pr.yml` (בקשות משיכה אל `stable/v3`) ו-`nightly-v4-build.yml`
-   (בונה את `develop`). לפני ההשקה, הגדירו את סוד המאגר `secrets.FORWARD_PORT_TOKEN` (כדי שה-CI ירוץ על
-   בקשות משיכה של העברה קדימה); הפרסום הלילי נשאר כבוי עד שהבעלים מגדיר את משתנה המאגר
-   `vars.NIGHTLY_PUBLISH` לערך `true` ו-npm Trusted Publishing מאשר את
-   `nightly-v4-build.yml`. זיהוי הערוץ מתבצע באמצעות `scripts/release/dist-tag.mjs`, אותו
-   מנגנון זיהוי שבו משתמש `npm-publish.yml`.
-6. אמתו את הערוצים: `npm view omniroute dist-tags --json` מציג `latest` = 3.9.0 וללא
-   `next` / `nightly` עד לפרסום v4.
-7. חזרה לאחור, במקרה הצורך: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ו-`npm dist-tag add omniroute@3.8.59 latest`.
+4. הגן על `stable/v3` ו- `develop` (תור המיזוג של ערכות + ) לפני שה- PR הראשון נוחת.
+5. זרימות העבודה הרדומות מופעלות לפי קיום ענף: `forward-port.yml` (דחיפה ל- `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) ו- `nightly-v4-build.yml` (בונה `develop`). לפני ההפעלה, הגדר את סוד מאגר `secrets.FORWARD_PORT_TOKEN` (כך CI רץ על PRs-forward-port); פרסום לילי נשאר כבוי עד שהבעלים מגדיר את משתנה המאגר `vars.NIGHTLY_PUBLISH` ל- `true` ו-npm Trusted Publishing מקבל `nightly-v4-build.yml`. רזולוציית הערוץ היא `scripts/release/dist-tag.mjs`, אותו רזולובר `npm-publish.yml` משתמש בו.
+6. אמת את הערוצים: `npm view omniroute dist-tags --json` מציג את `latest` = 3.9.0 וללא `next` / `nightly` עד לפרסום v4.
+7. החזרה, אם צריך: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ו- `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

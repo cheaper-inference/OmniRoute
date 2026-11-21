@@ -184,31 +184,94 @@ Yaklaşık 30'dan fazla tablonun tam listesi `src/lib/db/migrations/` içindedir
 
 ---
 
-## Geçişler
+## Göçler
 
-OmniRoute, `src/lib/db/migrations/` dizininde **sürümlendirilmiş ve idempotent geçişler** kullanır. Her geçiş, `NNN_description.sql` olarak adlandırılan tek bir SQL dosyasıdır.
+OmniRoute kullanım alanları** sürümlendirilmiş, eş gücü olmayan geçişler** `src/lib/db/migrations/`. Her geçiş tek bir SQL dosyasıdır. İki adlandırma formatı bir arada bulunur; `_omniroute_migrations` kaydedilen sürüm sayısal önektir.
 
-### Geçişlerin Adlandırılması
+### Taşıma Adlandırma
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Biçim                                           | Örnek                                | İçin kullanılır                                                                                                                                        |
+| ----------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NNN_description.sql` (tam olarak 3 hane)       | `241_seen_models.sql`                | Eski seri `001`–`241`. Zaman damgası formatı geldiğinde dondu (`240` ve `241` bundan hemen önce birleştirildi): hiçbir yeni dosya sıralı sayı almıyor. |
+| `YYYYMMDDHHMMSS_description.sql` (14 hane, UTC) | `20261113120000_add_usage_index.sql` | 2026-11-13 tarihinden itibaren oluşturulan her geçiş.                                                                                                  |
 
-### Geçişler Nasıl Çalıştırılır?
+Neden değişiklik: sıralı sayılarda, paralel PRs aynı sonraki sayıyı seçti ve biri hariç tümü birleştirmeden önce yeniden numaralandırmak zorunda kaldı. Bir UTC zaman damgası her PR kendi sürümünü verir.
+
+Zaman damgası formatına ilişkin kurallar ( `npm run check:migration-numbering` tarafından uygulanır, `scripts/check/lib/migrationNaming.mjs` oluşturucuyla paylaşılır):
+
+- Zaman damgası gerçek bir UTC tarihi ve saatidir; `20261113000000` daha erken değildir ve gelecekte 10 dakikadan fazla olmamalıdır.
+- Açıklama, bir harfle başlayan küçük harf `snake_case` (`a-z`, `0-9`, kelimeler arasında tek `_` ), en fazla 80 karakter.
+- Aynı zaman damgasına sahip iki dosya kopyadır.
+- Boşluksuz kural yalnızca eski seriler için geçerlidir: bilinen boşluklar `026`, `055` ve `121` dışında `001` `241` kadar her sayı mevcut olmalıdır. `241` (veya herhangi bir eski dosyanın) silinmesi geçidi başarısız kılar. `001` ve `241` hiçbir zaman `KNOWN_GAPS` izin verilenler listesine eklenemez. Zaman damgalı dosyalar hiçbir zaman boşluk yaratmaz.
+- `src/lib/db/migrations/` her giriş, geçerli küçük harfli `.sql` adına sahip normal bir dosya olmalıdır. Bir dizin, bir sembolik bağlantı, bir `.SQL` veya `.sql.bak` dosyası, gizli bir dosya veya boşluk içeren bir ad, koşucu onu sessizce atlayacağından veya önyükleme sırasında çökeceğinden geçitte başarısız olur.
+
+**Siparişi uygula.** Çalıştırıcı metne göre değil önekin sayısal değerine göre sıralar: önce eski `001`–`241` dosyaları, ardından zaman damgası sırasına göre zaman damgalı dosyalar, ardından `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` ile kayıtlı herhangi bir ad alanı dizinleri ( `ee-001` gibi sürümler). Bekleyen geçiş, sürümü `_omniroute_migrations` olmayan herhangi bir dosyadır; dolayısıyla eski bir daldan yeni bir daldan sonra birleşen geçiş, mevcut veritabanlarında hâlâ geçerlidir.
+
+**Zaman damgası birleştirme sırası değil, oluşturma sırasıdır.** Geçişiniz, geçiş işlemi tarafından oluşturulan bir tabloya veya sütuna bağlıysa** daha yeni** zaman damgası (örneğin, ilk önce birleştirilen başka bir PR biri), yeni bir veritabanı ilk önce sizinkini çalıştırır ve başarısız olur. PR hala açıkken, daha yeni bir zaman damgası alması için dosya adını `npm run db:new-migration` ile yeniden oluşturun veya bağımsız hale getirin. `npm run test:migrations:fresh` her geçişi boş bir veritabanına uygular ve bunu yakalar.
+
+### Birleştirilmiş Taşıma Hiçbir Zaman Silinmez veya Yeniden Adlandırılmaz
+
+Bir geçiş dosyası bir sürüm şubesinde veya `main` olduğunda, zaten homolog ve geliştirici veritabanlarında, VPS yüklemelerinde ve Enterprise senkronizasyonunda çalıştırılmıştır. O andan itibaren:
+
+- **Asla silmeyin.** Yeni yüklemeler şemasını kaybederken yükseltilmiş veritabanları onu korur.
+- **Asla yeniden adlandırmayın.** `_omniroute_migrations` sürüm artık bir dosyayla eşleşmeyeceğinden, onu zaten uygulayan her veritabanı onu yeniden çalıştıracaktır. İdempotent olmayan SQL daha sonra verileri çoğaltır veya önyüklemeyi durdurur.
+- **Farklı bir şemaya mı ihtiyacınız var?** `npm run db:new-migration` ile yeni bir geçiş oluşturun.
+
+Yeniden adlandırma yalnızca henüz birleştirilmemiş bir dosya için güvenlidir; kapının ipuçlarının işaret ettiği durum da budur. Yayın etiketi burada hiçbir şeyi değiştirmez: `release/v*` şubesine yapılan her gönderim, Docker `:next` görüntüsünü yayınlar ve homologda, VPS yüklemelerinde ve Enterprise senkronizasyonunda çalışır; dolayısıyla, herhangi bir `vX.Y.Z` etiketi mevcut olmadan önce birleştirilmiş geçiş gerçek veritabanlarında çalıştırılır. Geçit, etiketlenmiş olsun ya da olmasın, bir temel dosyanın her kaldırılmasında başarısız olur.
+
+- **Birleştirilmiş taşıma işlemini geri alma.** Dosyayı silen bir `git revert` geçitte başarısız olur. Dosyayı saklayın ve yeni bir geçişte şemasını geri alın: `npm run db:new-migration -- <description>`, `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` vb. Yükseltilmiş ve yeni veritabanları daha sonra aynı şemayla sona erer.
+- **Kabul edilen yeniden adlandırma: uyumluluk girişi ve aynı içerik.** Birleştirilmiş bir dosyanın taşınması gerekiyorsa (örneğin, birleştirilmiş iki dosya bir zaman damgasını paylaşır ve çalıştırıcı sürüm çarpışmasıyla durur), sonraki dosyayı SQL dokunmadan yeniden adlandırın ve `src/lib/db/migrationRunner/constants.ts` içindeki `RENAMED_MIGRATION_COMPATIBILITY` `{ fromVersion, fromName, toVersion, toName }` ekleyin. Eski sürümü uygulayan veritabanları, dosyayı yeniden çalıştırmak yerine `_omniroute_migrations` satırlarını taşır. Kapı, böyle bir yeniden adlandırma konusunda uyarıda bulunur ve yeni zaman damgası ne olursa olsun, her zaman değiştirme kontrolünü çalıştırır: yeni yüklemeler dosyayı yeni konumuna uygular, yükseltilmiş veritabanları bunu yapmaz, bu nedenle eskisinin yakınında yeni bir zaman damgası seçin. İçerik değiştiğinde (yeni bir geçişte şema değişikliği hala geçerliyse) veya girişin hedef dosyası diskte değilse, kapı yeniden adlandırmada başarısız olur.
+- **Asla aynı zaman damgası içinde yeniden adlandırmayın.** Zaman damgasını koruyan ve yalnızca açıklamayı değiştiren bir yeniden adlandırma, giriş olsun ya da olmasın, kapıda başarısız olur. `toVersion` `fromVersion` eşit olan bir girişle, koşucu eski `_omniroute_migrations` satırını siler ve dosyayı zaten çalıştırmış olan her veritabanına yeniden uygular. Bir giriş olmadan, koşucu yalnızca sürümü izler: bu veritabanlarındaki dosyayı atlar (yeni içerik hiçbir zaman orada çalışmaz) ve her önyüklemede bir yeniden numaralandırma hatasını günlüğe kaydeder. Başka bir zaman damgası artı bir uyumluluk girişi kullanın veya adı saklayın.
+- **Kapı, yeniden adlandırılan dosyanın tekrar çalışmadığını kontrol eder.** Kapsanan her yeniden adlandırma için kapı, yeni dosya adını `--must-not-apply` ile değiştirme kontrolüne iletir. Denetim, yükseltilmiş veritabanını gerçek çalıştırıcıyla önyükler ve çalıştırıcı bu dosyayı tekrar uygularsa (örneğin, girişin yanlış bir sürümü veya adı olması nedeniyle veya kapının metin ayrıştırıcısının `constants.ts` TypeScript farklı okuması nedeniyle), kapı `migration renomeada rodaria de novo` ile başarısız olur ve sizden girişin eski ve yeni sürümlerini ve adlarını kontrol etmenizi ister.
+
+### Kapı Üsse Karşı Neyi Kontrol Ediyor?
+
+Çekme isteği ve birleştirme kuyruğu çalıştırmalarında `npm run check:migration-numbering`, diskteki `src/lib/db/migrations/` temel daldaki aynı dizinle karşılaştırır. Taban şu sırayladır: `--base-latest-tag`, `--base <ref>`, `MIGRATION_BASE_REF` değişkeni veya `GITHUB_EVENT_NAME`, `pull_request`, `pull_request_target` veya `merge_group` olduğunda, birleştirme işleminin ilk ebeveyni, olay yükünün `merge_group.base_sha` veya `git merge-base HEAD origin/$GITHUB_BASE_REF`. Çözülebilir bir tabanı olmayan bir çekme isteğinde veya birleştirme kuyruğu çalıştırmasında kapı başarısız olur. `--base` olmadan CI dışında `comparação com a base: pulada (sem --base)` yazdırır ve bu kuralları atlar.
+
+`--base-latest-tag` `HEAD` tarihindeki en yeni yayın etiketiyle (semver sırasıyla `vX.Y.Z` ; gecelikler gibi son eklenmiş etiketler sayılmaz) `--base` ile aynı kurallara göre karşılaştırılır. Release-Green (`scripts/quality/validate-release-green.mjs`) kapıyı bu şekilde çalıştırır, çünkü push ve zamanlanmış çalıştırmaların çekme isteği tabanı yoktur ve birleştirme, yeni bir CI çalıştırması olmadan gerçekleşebilir. Tarihte serbest bırakma etiketi bulunmadığından kapı başarısız olur; `git fetch --tags` çalıştırın ( CI, `fetch-depth: 0` ile `actions/checkout` etiketleri getirir).
+
+| Çekme isteğinde değişiklik                                                                                                 | Sonuç                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tabanda bulunan bir dosya `RENAMED_MIGRATION_COMPATIBILITY` girişiyle yeniden adlandırılır                                 | **Uyarı** içerik aynıysa ve değiştirme kontrolü yeni zaman damgası ne olursa olsun çalışıyorsa; yeni konum son şemayı değiştirirse (yeniden adlandırmayı geri alın veya işe gidip geldiği yerde başka bir yeni zaman damgası seçin) veya koşucu, yeniden adlandırılan dosyayı yükseltilmiş bir veritabanına tekrar uygularsa başarısız olur.** Başarısız** içerik değiştiyse. |
+| Tabanda bulunan bir dosya, zaman damgası korunarak yeniden adlandırılır (yalnızca açıklama değişir)                        | **Başarısız** , girişli veya girişsiz: koşucu bunu tekrar uygular (girişle birlikte) veya sürüme göre atlar (girişsiz). Başka bir zaman damgası artı bir uyumluluk girişi kullanın veya adı saklayın.                                                                                                                                                                         |
+| Baz ünitede bulunan bir dosya silinir veya giriş yapılmadan yeniden adlandırılır                                           | **Başarısız** , dosyanın bir yayın etiketinde olup olmadığına bakılmaksızın. Bunu geri almak için dosyayı `git checkout <base> -- src/lib/db/migrations/<file>` ile geri yükleyin; şemasını geri döndürmek için `DROP ... IF EXISTS` ile yeni bir geçiş ekleyin.                                                                                                              |
+| Tabanda bulunan bir dosyanın içeriği farklı                                                                                | **Uyarı** ( GitHub Eylemlerinde bir `::warning` açıklaması) ve değiştirme kontrolü çalıştırılır. Yükseltilen veritabanları düzenlenen dosyayı tekrar uygulamadığından, düzenleme son şemayı değiştirirse başarısız olur: değişikliği yeni bir geçişe koyun. Zararsız bir düzenleme (yorum, `IF NOT EXISTS`) yalnızca uyarır.                                                  |
+| Tabanın en yenisinden daha yeni olmayan bir zaman damgasına sahip bir zaman damgalı dosya eklenir                          | Aşağıda açıklanan geçiş kontrolünü çalıştırır.                                                                                                                                                                                                                                                                                                                                |
+| Tabanın en yeni eski formatlı dosyasının altına bir sayı ile eski formatlı bir `NNN_` dosyası eklenir                      | **Başarısız** , `KNOWN_GAPS` aynı çekme isteğinde düzenlenmiş olsa bile: eski seri dondurulur, geçişi `npm run db:new-migration` ile oluşturun. Tabanın en yenisinin üzerindeki eski formattaki dosyalar ( `release/v*` `main` çekme isteği) kabul edilir.                                                                                                                    |
+| Sıra dışı, düzenlenmiş veya yeniden adlandırılmış bir dosya `INSERT`, `UPDATE`, `DELETE` veya `REPLACE` ifadeleri içeriyor | **Uyarı** : değişim kontrolü verileri karşılaştırmaz, bu nedenle yükseltilmiş ve yeni veritabanlarının uygulanma sırasının sonucu değiştirip değiştirmediğini inceleyin.                                                                                                                                                                                                      |
+
+Değiştirme kontrolünün bir çalıştırması, sıra dışı, düzenlenmiş ve yeniden adlandırılmış dosyaları birlikte kapsar.
+
+Değiştirme kontrolü (`scripts/check/migration-commutation.ts`), gerçek kurulum yoluna sahip iki geçici veritabanı oluşturur:** yükseltilmiş** bir (temel geçişlerle önyükleme yapın, ardından çekme isteğinin geçişleriyle aynı dosyada yeniden başlatın) ve bir** taze** bir (çekme isteğinin geçişlerini içeren bir önyükleme). Ortaya çıkan şemaları karşılaştırır: tablolar ve sütunlar (sütun sırası göz ardı edilerek), UNIQUE / PRIMARY KEY ve FOREIGN KEY kısıtlamaları, her tablonun normalleştirilmiş `CREATE TABLE` metni ( CHECK kısıtlamalarını, harmanlamaları, oluşturulan sütunları ve tablo seçeneklerini kapsar), dizinler, tetikleyiciler ve görünümler. Satır verileri karşılaştırılmaz. Eşleşirlerse, kapı dosyanın bozuk olduğunu ancak gidip geldiğini ve geçtiğini yazdırır. Farklıysa, kapı farkla ve duruma ilişkin bir ipucuyla başarısız olur: sıra dışı bir dosya için adını `npm run db:new-migration` ile yeniden oluşturun; bu, dosya henüz birleştirilmediğinden güvenlidir; düzenlenmiş bir temel dosya için, temel içeriği geri yükleyin ve değişikliği yeni bir geçişe koyun; yeniden adlandırılmış bir dosya için, yeniden adlandırmayı geri alın veya dosyanın gidip geldiği yerde başka bir yeni zaman damgası seçin; asla başka bir adla aynı zaman damgasını seçmeyin. Denetimin kendisi yürütülemezse, kapı CI başarısız olur ve yalnızca yerel olarak uyarır. Düzenlenmiş bir temel dosya için, yükseltilmiş veritabanı, o dosyanın tabanının içeriğiyle oluşturulur ve ikinci önyükleme, sürümü zaten kayıtlı olduğundan onu atlar. Yeniden adlandırılan bir dosya için, yükseltilmiş veritabanı, dosyanın eski adıyla oluşturulur ve ikinci önyükleme, `_omniroute_migrations` satırını, onu yeniden çalıştırmak yerine uyumluluk girdisi aracılığıyla taşır; geçit yeni adı `--must-not-apply` ile iletir, dolayısıyla ikinci önyükleme bunu uygularsa kontrol başarısız olur. Yükseltilmiş yolda bir çekme isteği geçişi uygulanamazsa, yani her temel geçişten sonra (yeni kurulumda da başarısız olsun veya olmasın), kapı `migration do PR não aplica` bildirir ve sizden SQL tabanın mevcut şemasına göre düzeltmenizi ister; dosya daha sonraki bir zaman damgasına sahip başka bir çekme isteği geçişine bağlıysa adını `npm run db:new-migration` ile yeniden oluşturun.
+
+Aynı karşılaştırmayı yerel olarak çalıştırmak için, en son sürümle karşılaştırmak üzere tabanı açıkça iletin; örneğin `npm run check:migration-numbering -- --base origin/<base-branch>` veya `npm run check:migration-numbering -- --base-latest-tag`.
+
+### Open PR `NNN` Geçişini Dönüştürme
+
+Anahtardan önce açılan bir çekme isteği hala `242_add_widgets.sql` gibi sıralı bir dosya taşıyabilir. `241` üzerindeki eski sayılar reddedilir, bu nedenle birleştirmeden önce dönüştürün:
+
+1. **Açıklamayı koruyarak dosyayı oluşturucuyla yeniden adlandırın.** Yeni adı almak için `npm run db:new-migration -- <same description>` çalıştırın, SQL ona taşıyın ve eski `NNN_` dosyasını silin. Açıklama aynı kalmalıdır: aşağıdaki uyumluluk girişi onunla eşleşir.
+2. **Kalıcı bir veritabanı eski numarayı çalıştırıyorsa bir uyumluluk girişi ekleyin.** Saklanan herhangi bir veritabanı (homolog, VPS, katkıda bulunanın kendi kurulumu) `NNN_` dosyasıyla PR bir yapısını çalıştırdıysa, `src/lib/db/migrationRunner/constants.ts` içindeki `RENAMED_MIGRATION_COMPATIBILITY` `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` ekleyin. Bu** `237` `241` geçiş için gereklidir** : bu yuvalar artık kanonik `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` ve `241_seen_models.sql` değerlerini tutar ve böyle bir giriş olmadan, böyle bir veritabanı kanonik geçişi sonsuza kadar atlar ve dönüştürülmüş olanı yeniden çalıştırır. Ayrıca hedef bir zaman damgası olduğunda `242` gibi boş kalan bir yuva için de çalışır. Şüphe duyduğunuzda girişi ekleyin. Bunu dizide nereye eklediğiniz önemli değildir: bir girişin hedef yuvası hala başka bir girişin uzaklaştığı bir satırı tuttuğunda (örneğin, eski bir `usage_history_calculated_cost` satırı `237` taşınmayı beklerken `237` bir PR satırını tutarken), koşucu bu girişin yuva serbest kalana kadar beklemesine izin verir. Yalnızca gerçek bir çakışma, örneğin girişsiz bir satır tarafından tutulan bir yuva veya yuvaları değiştiren iki giriş, `Cannot reconcile ...` ile önyüklemeyi durdurur.
+3. **SQL bağımsız tutun** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), çünkü dönüştürülen geçiş, şemasının zaten mevcut olduğu bir veritabanıyla karşılaşabilir.
+4. **Sürüm anahtarlı özel durumları taşıyın.** PR `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) veya `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`) içindeki eski numarası için bir büyük/küçük harf eklediyse, anahtarı yeni zaman damgasıyla değiştirin.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` yeniden adlandırılmış bir geçişe yönelik testin çalışan bir örneğidir.
+
+### Geçiş Öncesi Şubelere Geri Bildirimler
+
+Bir `YYYYMMDDHHMMSS_` dosyasını asla anahtardan önce gelen bir şubeye (örneğin eski bir `release/v*` şubesi) rastgele seçmeyin veya desteklemeyin. Buradaki çalıştırıcı dosya adlarını metin olarak sıralıyor, böylece zaman damgalı bir dosya yeni bir veritabanında `201_` ve `202_` arasında çalışacak ve oradaki eski kapı 14 basamaklı önekleri anlamıyor. Böyle bir dalda, değişikliği o dalın kendi sonraki `NNN_` dosyası olarak yazın, idempotent, böylece zaman damgalı sürüm daha sonra geldiğinde işlem yapılmaz.
+
+### Taşıma İşlemleri Nasıl Yürür?
 
 Başlangıçta `migrationRunner.ts`:
 
 1. Mevcut değilse `_omniroute_migrations` tablosunu oluşturur
-2. Daha önce uygulanmış geçişleri sorgular
-3. Yeni geçişleri sırayla ve her birini ayrı bir işlem içinde uygular
+2. Halihazırda uygulanmış geçişlere ilişkin sorgular
+3. Tüm yeni geçiş işlemlerini, her biri bir işlemde olmak üzere sırayla uygular
 4. Uygulanan her geçişi zaman damgasıyla kaydeder
 
 ```ts
-// src/lib/db/migrationRunner.ts (basitleştirilmiş)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### İdempotentlik
+### iktidarsızlık
 
-Geçişler **idempotent** olmalıdır — iki kez çalıştırılmaları herhangi bir değişikliğe yol açmamalıdır:
+Göçler olmalı** güçsüz** — bunları iki kez çalıştırması işlem dışı olmalıdır:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-`IF NOT EXISTS`, `IF EXISTS` ve `OR IGNORE` / `OR REPLACE` ifadelerini gerektiği ölçüde kullanın.
+`IF NOT EXISTS`, `IF EXISTS` ve `OR IGNORE` / `OR REPLACE` cümlelerini özgürce kullanın.
 
-### Yeni Bir Geçiş Ekleme
+### Yeni Bir Taşıma Ekleme
 
-1. **Sonraki numarayı belirleyin**: `ls src/lib/db/migrations/ | tail -1`
-2. **Dosyayı oluşturun**: `NNN_my_change.sql`
-3. **Güvenli DDL kullanın**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Verileri dikkatlice tamamlayın**: mevcut satırları işlemek için `UPDATE ... WHERE ...` kullanın
-5. **Bir kopya üzerinde test edin**: test edilmemiş geçişleri üretim ortamında asla çalıştırmayın
+1. **Dosyayı jeneratörle oluşturun** : `npm run db:new-migration -- <description>` (örneğin `npm run db:new-migration -- add combo priority`). Geçerli UTC zamanı ve bir yorum başlığıyla `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` yazar, bu zaman damgası alınırsa bir saniye ileri gider ve hiçbir zaman dosyanın üzerine yazmaz. Numarayı elle seçmeyin.
+2. **Güvenli DDL kullanın** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Verileri dikkatlice doldurun** : mevcut satırları işlemek için `UPDATE ... WHERE ...` kullanın
+4. **Sırayı ve adlandırmayı kontrol edin** : `npm run test:migrations:fresh` (boş bir veritabanındaki tüm geçişler) ve `npm run check:migration-numbering`
+5. **Bir kopya üzerinde test edin** : hiçbir zaman üretimde test edilmemiş geçişleri çalıştırma
+6. **Koddan oluşturulan bir tablonun da geçişe ihtiyacı var** : Eğer bir modül aynı zamanda tabloyu yavaş bir şekilde oluşturuyorsa (`CREATE TABLE IF NOT EXISTS`, kendi kendini iyileştirme yolu olarak tutulur), bir geçişin onu aynı DDL ile oluşturması gerekir. Aksi takdirde, temiz kurulum ve yükseltilmiş kurulum, kod yolunun çalışıp çalışmadığına bağlı olarak farklı şemalarla sonuçlanır. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` ve `open-sse/` tarar ve geçiş olmadan tembel bir `CREATE` başarısız olur (#20557). Örnek: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Örnek:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Geriye dönük uyumsuz değişiklikler** (ör. sütunların kaldırılması) karmaşıktır. OmniRoute sürüm düşürmeyi DESTEKLEMEZ — bir geçiş uygulandıktan sonra şema değişikliği kalıcıdır. Planlamanızı buna göre yapın.
+> **Geriye dönük olarak uyumsuz değişiklikler** (örneğin, sütunların düşürülmesi) zordur. OmniRoute geçiş uygulandığında NOT — sürüm düşürmesini destekliyor mu, şema değişikliği kalıcıdır. Buna göre plan yapın.
 
 ---
 
@@ -406,48 +470,49 @@ Bu komut, SQLite'ın çevrimiçi yedekleme API'sini kullanır — OmniRoute çal
 
 ### WAL Modu
 
-WAL varsayılan olarak etkindir. Yoğun yazma iş yükleri için şunları değerlendirin:
+WAL varsayılan olarak etkindir. Yüksek yazma iş yükleri için şunları göz önünde bulundurun:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Her 1000 sayfada bir checkpoint oluştur
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL sınırı
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
 
-### İndeksler
+OmniRoute `journal_size_limit` ayarlamaz. Bir denetim noktası WAL çerçevelerini ana dosyaya taşır, ancak WAL dosyası ayrılan en büyük boyutunu korur. `OMNIROUTE_WAL_GUARD_MAX_MB` guard yalnızca `wal_checkpoint(RESTART)` uyarır ve çalıştırır; disk boyutunda bir kapak değil.
 
-Performans için temel indeksler (migration'lar tarafından otomatik olarak oluşturulur):
+### Dizinler
 
-- `idx_models_provider` — sağlayıcıya göre model aramaları
-- `idx_combo_targets_combo_id` — combo hedeflerini genişletme
-- `idx_usage_history_api_key_timestamp` — kullanım analizleri
+Performansa yönelik temel dizinler (geçişlerle otomatik olarak oluşturulur):
+
+- sağlayıcıya göre `idx_models_provider` — model aramaları
+- `idx_combo_targets_combo_id` — birleşik hedef genişletme
+- `idx_usage_history_api_key_timestamp` — kullanım analitiği
 - `idx_quota_snapshots_api_key_window` — kota takibi
 - `idx_call_logs_timestamp` — çağrı günlüğü sorguları
 
-Yeni bir indeks eklemek için bir migration oluşturun:
+Yeni bir dizin eklemek için bir geçiş oluşturun:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Bellek Eşlemeli G/Ç
+### Bellek Eşlemeli I/O
 
-Çok büyük veritabanları (>10GB) için bellek eşleme, SQLite pragma aracılığıyla ayarlanabilir:
+Çok büyük veritabanları için (> 10GB), bellek eşlemesi SQLite pragma aracılığıyla ayarlanabilir:
 
 ```sql
--- SQLite pragma aracılığıyla ayarla (core.ts veya çalışma zamanında düzenleyin)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Sıkıştırma
 
-Uzun süre çalışan OmniRoute örnekleri, ara sıra `VACUUM` çalıştırılmasından fayda sağlar:
+Uzun süredir çalışan OmniRoute bulut sunucuları ara sıra `VACUUM` yararlanır:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Trafiğin düşük olduğu zaman aralıklarında ayda bir çalıştırın. (WAL modu ihtiyacı azaltır ancak tamamen ortadan kaldırmaz.)
+Trafiğin düşük olduğu dönemlerde aylık olarak çalıştırın. (WAL modu ihtiyacı azaltır ancak ortadan kaldırmaz.)
 
 ---
 
