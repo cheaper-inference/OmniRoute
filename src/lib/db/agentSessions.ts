@@ -1,5 +1,5 @@
 /**
- * Agent sessions: one aggregate row per coding-agent session (see 229_agent_sessions.sql).
+ * Agent sessions: one aggregate row per coding-agent session (see 234_agent_sessions.sql).
  * Written from inside saveRequestUsage's transaction, so a usage row and its session counters
  * always move together and dedup no-ops never double count.
  */
@@ -189,6 +189,9 @@ export interface ListAgentSessionsFilter {
   client?: string | null;
   /** The client's own session id (agent_sessions.client_session_id). */
   clientSessionId?: string | null;
+  /** Sessions with at least one request through this provider / connection. */
+  provider?: string | null;
+  connectionId?: string | null;
   from?: string | null;
   to?: string | null;
   sort?: "lastSeen" | "firstSeen" | "requests" | "tokens" | "cost";
@@ -300,6 +303,18 @@ function buildSessionFilterSql(filter: ListAgentSessionsFilter): {
     if (filter.apiKeyId !== undefined) {
       add("id = ?", clientSessionRowId(filter.apiKeyId, filter.clientSessionId));
     }
+  }
+  const requestFilters: Array<[string, string | null | undefined]> = [
+    ["provider", filter.provider],
+    ["connection_id", filter.connectionId],
+  ];
+  for (const [column, value] of requestFilters) {
+    if (!value) continue;
+    add(
+      `EXISTS (SELECT 1 FROM usage_history uh
+               WHERE uh.agent_session_id = agent_sessions.id AND uh.${column} = ?)`,
+      value
+    );
   }
   if (filter.from) add("last_seen_at >= ?", filter.from);
   if (filter.to) add("last_seen_at <= ?", filter.to);
