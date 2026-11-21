@@ -3,44 +3,37 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b19",
+    "batchId": "b20",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b19-f6316b6a06f9",
-    "candidateSha": "f6316b6a06f985f1c6dd819752e8980ae449e0b4",
-    "baseSha": "b748429cf5b3aeb142a708fd3e8751b6918b9dc8",
-    "treeSha": "c2deaec894c9e0ce5cf40f31df47c3fddd6ddfc1",
+    "candidateRef": "omni-queue/release-v3.8.55/b20-bdb9a4280c29",
+    "candidateSha": "bdb9a4280c29505d81c7a6f8aaf8c0f7bcfc5937",
+    "baseSha": "696498a9723d54231db8bf2f0028685bba548bf4",
+    "treeSha": "5c54967c9894b6cb2061dc4af0ab7469bcd6dd5e",
     "prs": [
       {
-        "n": 20776,
-        "head": "d7727a7e99d74f1ef9cb8a669e26b5bd2fc4fba0",
-        "title": "fix(security): gate subscription quota text on HTTP 400 behind a structured code",
+        "n": 20792,
+        "head": "5b74cb04139ad322cca9ce455cd210802b254fcf",
+        "title": "feat(ci): omni-queue owner voice and signed merge commits (both off)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:39Z"
+        "labeledAt": "2026-11-20T23:37:00Z"
       },
       {
-        "n": 20819,
-        "head": "035b02bcd111d013904b860c0743d011f37b7cd6",
-        "title": "fix(security): operator-only credential and denied roots for corpus and vault paths (CodeQL #1371, #1372, #1373)",
+        "n": 20827,
+        "head": "10096b6c6c2a64ad0345af5582df4140fbd4eded",
+        "title": "test(ci): audit only git-tracked files for retired provider asset references",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:42Z"
+        "labeledAt": "2026-11-20T23:38:07Z"
       },
       {
-        "n": 20820,
-        "head": "c28fec4e9f7193bea4730b9454107a5f1d79b58a",
-        "title": "fix(security): require the per-process token for the internal admission bypass",
+        "n": 20781,
+        "head": "21c3a7a04be1d4cf466fed9caf748a8dc1ab51c4",
+        "title": "feat(plugins): opt-in Node.js permission model for plugin processes",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:44Z"
-      },
-      {
-        "n": 20824,
-        "head": "46259366085f853b727ae04883fc48c266922ff7",
-        "title": "fix(security): clamp media polling and guard syntx provider rules (CodeQL #1389, #1392)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-20T23:33:50Z"
+        "labeledAt": "2026-11-21T00:49:48Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-21T02:19:45.369Z",
+    "startedAt": "2026-11-21T03:54:16.596Z",
     "attempts": 0,
     "bisect": null
   },
@@ -108,12 +101,16 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "20776": "d7727a7e99d74f1ef9cb8a669e26b5bd2fc4fba0",
+      "20819": "035b02bcd111d013904b860c0743d011f37b7cd6",
+      "20820": "c28fec4e9f7193bea4730b9454107a5f1d79b58a",
+      "20824": "46259366085f853b727ae04883fc48c266922ff7"
     }
   },
   "counters": {
-    "batchSeq": 19,
-    "ciRuns": 21,
+    "batchSeq": 20,
+    "ciRuns": 22,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 7,
@@ -1447,8 +1444,53 @@
       "sha": "b03f265540ae84c22ff404c764b6ff91ef49046e",
       "detail": "conflicting",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
+    },
+    {
+      "at": "2026-11-21T03:53:24.217Z",
+      "type": "checks-green",
+      "batchId": "b19",
+      "prs": [
+        20776,
+        20819,
+        20820,
+        20824
+      ],
+      "sha": "f6316b6a06f985f1c6dd819752e8980ae449e0b4",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44863342862"
+    },
+    {
+      "at": "2026-11-21T03:53:37.707Z",
+      "type": "would-land",
+      "batchId": "b19",
+      "prs": [
+        20776,
+        20819,
+        20820,
+        20824
+      ],
+      "sha": "f6316b6a06f985f1c6dd819752e8980ae449e0b4",
+      "detail": "shadow mode: would merge-ff onto b748429cf5b3",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44863342862"
+    },
+    {
+      "at": "2026-11-21T03:54:19.201Z",
+      "type": "batch-started",
+      "batchId": "b20",
+      "prs": [
+        20792,
+        20827,
+        20781
+      ],
+      "sha": "bdb9a4280c29505d81c7a6f8aaf8c0f7bcfc5937",
+      "detail": "3 PR(s) on 696498a9723d; window 6",
+      "labeledAt": {
+        "20781": "2026-11-21T00:49:48Z",
+        "20792": "2026-11-20T23:37:00Z",
+        "20827": "2026-11-20T23:38:07Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44863342862"
     }
   ],
-  "updatedAt": "2026-11-21T03:22:43.137Z",
+  "updatedAt": "2026-11-21T03:54:20.856Z",
   "batchWindow": 6
 }
