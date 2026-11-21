@@ -28,17 +28,18 @@ security control.
 
 ## Built-in Guardrails
 
-The registry auto-loads six guardrails in priority order on import
+The registry auto-loads these guardrails in priority order on import
 (see `registry.ts` → `registerDefaultGuardrails()`):
 
-| Priority | Name                | Stage(s)       | File                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Priority | Name                | Stage(s)       | File                      |
+| -------- | ------------------- | -------------- | ------------------------- |
+| `1`      | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 Lower priority numbers run **first**.
 
@@ -939,6 +940,64 @@ to the upstream provider or back to the client.
 
 Regression guard: `tests/unit/credential-masker-guardrail.test.ts`.
 
+### Agent Guard (`agentGuard/`)
+
+With `AGENT_GUARD_MODE=monitor`, requests whose model string names the `claude`
+or `anthropic` provider are classified by their client headers; when the client
+is not an official agent, one log line with `tag: "AGENT_GUARD"` is written
+(`warn` for a known third-party agent, `info` for an unidentified client).
+Default `off`: no header is read and nothing is logged. Priority `1`: it only
+reads headers and never changes the payload, so it runs before the media
+bridges.
+
+Official agents are recognised by these headers (compared case-insensitively):
+
+- Claude Code: a `User-Agent` starting with `claude-cli/` or `claude-code/`, or
+  `x-app: cli` together with an `anthropic-beta` header or a `User-Agent` that
+  contains `claude`.
+- Anthropic SDKs: a `User-Agent` starting with `Anthropic/`, `AsyncAnthropic/`,
+  `anthropic-typescript/` or `anthropic-python/`.
+
+The logger's default level in production (`info`) shows both kinds of line.
+With `APP_LOG_LEVEL=warn` only the known third-party lines remain.
+
+Log fields: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`,
+`userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Header
+values and the model string are capped at 200 characters. The referer is logged
+without its query string, fragment and userinfo. The API key, `Authorization`,
+`x-api-key` and cookies are never read.
+
+Files: `src/lib/guardrails/agentGuard/classifier.ts`,
+`src/lib/guardrails/agentGuard/policy.ts`,
+`src/lib/guardrails/agentGuard/guardrail.ts`.
+
+**Limits:**
+
+- Every signal is a client-controlled header. A client that sends
+  `User-Agent: claude-cli/…` is classified as Claude Code. This is observation
+  and deterrence, not access control.
+- It never blocks. There is no `block` mode.
+- The provider is read from the model string before the model is resolved:
+  `provider/model`, a provider alias such as `cc/…`, and quota-share ids
+  (`qtSd/<group>/<provider>/<model>`). Bare model ids, model aliases, combos
+  and later routing normalization are not followed, so those requests are not
+  observed.
+- A caller can skip it per request through the registry disable channels (see
+  [Disabling Guardrails Per-Request](#disabling-guardrails-per-request));
+  skipped requests are not observed.
+- It runs only where `runPreCallHooks` runs (see
+  [Coverage and limits](#coverage-and-limits)).
+- An agent built on an official SDK that sends no `X-Title`, `HTTP-Referer` or
+  own `User-Agent` looks like the SDK; `x-stainless-*` headers alone do not make
+  a client official.
+- Third-party agents are matched by whole-word tokens in `User-Agent`,
+  `X-Title` and `HTTP-Referer` (or `Referer`); unlisted clients show up as
+  `unknown`.
+- Requests from browser-based clients carry the browser's own `User-Agent` and
+  show up as unidentified, unless `X-Title` or the referer carries a known
+  third-party token.
+- One log line per observed request: expect volume on busy instances.
+
 ## Base Contract (`base.ts`)
 
 ```typescript
@@ -1134,6 +1193,7 @@ Environment variables read by the built-in guardrails:
 | `PII_REDACTION_ENABLED`               | `pii-masker`               | When `true`, request PII is redacted (independent of injection mode).                               |
 | `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | With `PII_REDACTION_ENABLED`, mint reversible tokens and restore them in 2xx responses.             |
 | `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Controls response-side masker behavior.                                                             |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` (default) or `monitor`. Also a DB feature flag (DB > ENV).                                    |
 
 The Modality Bridge guardrails read runtime config from the DB-backed settings
 store (`getSettings()`), not env vars. Vision's primary keys are

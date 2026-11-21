@@ -46,16 +46,17 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-128 flags across 6 categories. **Default** is the definition default — the value
+129 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
-### Security (13)
+### Security (14)
 
 | Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `REQUIRE_API_KEY`                       | boolean | `false`  | Require an API key for all incoming requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | Enable input sanitization for all requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `INJECTION_GUARD_MODE`                  | enum    | `off`    | Prompt injection guard mode. Values: `off`, `warn`, `block`, `redact`.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `AGENT_GUARD_MODE`                      | enum    | `off`    | Client-agent observation for `claude`/`anthropic`. Values: `off`, `monitor`. `monitor` logs non-official clients, never blocks; headers can be forged. Only prefixed model ids (`cc/…`, `claude/…`, `anthropic/…`, quota-share ids) are observed, not bare ids or combos.                                                                                                                                                                                                                                                      |
 | `PII_REDACTION_ENABLED`                 | boolean | `false`  | Redact PII from requests (independent of `INPUT_SANITIZER_MODE`).                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | Sanitize PII from provider responses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | Mode for PII response sanitization. Values: `redact`, `warn`, `block`, `off`.                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -291,10 +292,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 128 flags
+    // ... all 129 flags
   ],
   "summary": {
-    "total": 128,
+    "total": 129,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
