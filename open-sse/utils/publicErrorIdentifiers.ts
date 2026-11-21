@@ -163,6 +163,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "lease_unsupported_transport",
   "lmarena_error",
   "lmarena_stream_error",
+  "malformed_tool_call_arguments",
   "m365_model_not_licensed",
   "m365_account_not_licensed",
   "m365_throttled",

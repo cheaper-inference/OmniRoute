@@ -4,6 +4,7 @@ import {
   hasToolCallShim,
 } from "../translator/helpers/toolCallShim.ts";
 import { FORMATS } from "../translator/formats.ts";
+import { MalformedToolCallArgumentsError } from "./chatCore/malformedToolCallArguments.ts";
 import { cacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import {
   buildGeminiThoughtSignatureKey,
@@ -794,11 +795,11 @@ function parseToolCallArguments(rawArguments: unknown): Record<string, unknown> 
     try {
       parsed = JSON.parse(rawArguments);
     } catch (cause) {
-      throw new SyntaxError("Tool-call arguments must be a JSON object", { cause });
+      throw new MalformedToolCallArgumentsError({ cause });
     }
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
-    throw new SyntaxError("Tool-call arguments must be a JSON object");
+    throw new MalformedToolCallArgumentsError();
   return parsed as Record<string, unknown>;
 }
 
