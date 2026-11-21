@@ -78,6 +78,7 @@ import { handleM365ImageGeneration } from "./imageGeneration/providers/m365Image
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
 import { handleRenderhourImageGeneration } from "./imageGeneration/providers/renderhour.ts";
+import { handleMegabrainImageGeneration } from "./imageGeneration/providers/megabrain.ts";
 import {
   fanOutSingleImageCalls,
   IMAGE_FANOUT_MAX_N,
@@ -691,6 +692,18 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "renderhour-image") {
     return handleRenderhourImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
+  }
+
+  if (providerConfig.format === "megabrain-image") {
+    return handleMegabrainImageGeneration({
       model,
       provider,
       providerConfig,
