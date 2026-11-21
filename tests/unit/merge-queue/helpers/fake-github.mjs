@@ -27,6 +27,7 @@
 //
 // Programmable state (plain Maps/arrays of RAW GitHub payloads; mutate freely):
 //   fake.repoInfo                        GET /repos/o/r payload ({default_branch: "main", ...})
+//   GET /user                            {login, type} of the login the request's token acts as
 //   fake.addPull({number?, title, user?, base?, head?, labels?, draft?, ...}) → raw pull
 //   fake.pulls       Map<number, rawPull>      (labels: [{name}] — shared with the issue endpoints)
 //   fake.files       Map<number, [{filename, previous_filename?, status}]>
@@ -414,6 +415,8 @@ export async function startFakeGitHub(options = {}) {
   // ─────────────── routes: [method, RegExp on the repo-relative path, handler] ───────────────
   const routes = [
     ["GET", /^$/, () => json(200, fake.repoInfo)],
+    // GET /user (outside the repository prefix): the login the bearer token acts as.
+    ["GET", /^!\/user$/, () => json(200, user())],
 
     [
       "GET",
