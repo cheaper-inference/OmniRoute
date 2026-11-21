@@ -1,0 +1,5 @@
+{
+  "name": "compression-packaged-runtime-fixture",
+  "private": true,
+  "type": "module"
+}

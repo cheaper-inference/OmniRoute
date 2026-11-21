@@ -314,6 +314,7 @@ function AccessGeneralPanelPanelContent({ context }: { context: AccessFormContex
       setIsBanned={form.setIsBanned}
       setExpiresAt={form.setExpiresAt}
       setManageEnabled={form.setManageEnabled}
+      setMcpPermission={form.setMcpPermission}
       setSelfUsageEnabled={form.setSelfUsageEnabled}
       setSelfAccountQuotaEnabled={form.setSelfAccountQuotaEnabled}
       setAllowAllEndpoints={form.setAllowAllEndpoints}

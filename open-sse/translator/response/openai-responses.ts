@@ -3,7 +3,11 @@
  * Converts streaming chunks from Chat Completions to Responses API events
  */
 import { register } from "../registry.ts";
-import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+import {
+  cacheCreationFields,
+  mergeCacheCreationFields,
+  readCacheWriteUsage,
+} from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { translatorToolCallLifecycle } from "./openai-responses/toolCallLifecycle.ts";
@@ -1537,7 +1541,8 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         responseUsage.input_tokens_details?.cached_tokens ||
         responseUsage.prompt_tokens_details?.cached_tokens ||
         0;
-      const cacheCreationTokens = responseUsage.cache_creation_input_tokens || 0;
+      const reportedCacheCreation = readCacheWriteUsage(responseUsage).total;
+      const cacheCreationTokens = reportedCacheCreation ?? 0;
       const reasoningTokens =
         responseUsage.output_tokens_details?.reasoning_tokens ||
         responseUsage.completion_tokens_details?.reasoning_tokens ||
@@ -1554,6 +1559,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
 
       state.usage = {
         ...mergeCacheCreationFields(state.usage, responseUsage),
+        ...(reportedCacheCreation !== null
+          ? { cache_creation_input_tokens: reportedCacheCreation }
+          : {}),
         ...(responseUsage.provider_credits !== undefined && {
           provider_credits: responseUsage.provider_credits,
         }),

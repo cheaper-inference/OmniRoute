@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { buildApiKeyCreateScopes } from "./apiManagerScopes";
+import { MCP_CONNECT_SCOPE } from "@/shared/constants/managementScopes";
+import { COMPRESSION_READ_SCOPE } from "@/shared/constants/mcpScopes";
 import { anchorReferenceIssues } from "./keyTemplateReferenceIssues";
 import { validateKeyName, type KeyTemplatePolicy } from "./keyTemplatePolicyUtils";
 import type { useKeyTemplateCreation } from "./useKeyTemplateCreation";
@@ -31,11 +33,20 @@ function canSubmitDraft(draft: CreateDraft, focusName: () => void, t: Translate)
 function policyWithQuickPermissions(draft: CreateDraft): KeyTemplatePolicy {
   const scopes = buildApiKeyCreateScopes({
     manageEnabled: draft.newKeyManageEnabled,
+    mcpConnectEnabled: draft.createKeyFormState.mcpConnectEnabled,
+    compressionReadEnabled: draft.createKeyFormState.compressionReadEnabled,
     selfUsageEnabled: draft.newKeySelfUsageEnabled,
     selfAccountQuotaEnabled: draft.newKeyAccountQuotaEnabled,
   });
   const customScopes = draft.draftCreatePolicy.key.scopes.filter(
-    (scope) => !["manage", "self:usage", "self:account-quota"].includes(scope)
+    (scope) =>
+      ![
+        "manage",
+        "self:usage",
+        "self:account-quota",
+        MCP_CONNECT_SCOPE,
+        COMPRESSION_READ_SCOPE,
+      ].includes(scope)
   );
   return {
     ...draft.draftCreatePolicy,

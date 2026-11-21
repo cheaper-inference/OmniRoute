@@ -45,6 +45,7 @@ import {
   foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
+import { applySessionPromptCacheKey } from "./sessionPromptCacheKey.ts";
 
 type LoggerLike =
   | { debug?: (...args: unknown[]) => void; warn?: (tag: string, message: string) => void }
@@ -55,6 +56,7 @@ type CredentialsLike =
   | {
       apiKey?: unknown;
       accessToken?: unknown;
+      connectionId?: unknown;
       providerSpecificData?: Record<string, unknown> | null;
     }
   | null
@@ -359,7 +361,9 @@ type PrepareUpstreamBodyOptions = {
   bypassDefaultToolLimit?: boolean;
   isOpencodeClient?: boolean;
   /** Raw (pre-translation) request body — turn-scoped signals for adaptive effort (#13448). */
-  rawBody?: { messages?: unknown } | undefined;
+  rawBody?: Body | undefined;
+  /** Authenticated key identity supplied by chatCore, never an inbound identity header. */
+  cachePrincipalId?: string | null;
   /** Incoming client request — read for the x-omniroute-effort header (#13448). */
   clientRawRequest?: { headers?: unknown } | undefined;
   /** Opt-in relevance-based tool selection (settings.toolDisclosure); null/absent = off. */
@@ -446,6 +450,31 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
   // (codex.ts/xai.ts) and deleted there; applyFingerprint() strips it at
   // serialization. Removing it here would disable native passthrough (#14496).
   stripInternalBodyFields(bodyToSend, { keepExecutorMarkers: true });
+  return bodyToSend;
+}
+
+function applyPreparedSessionCacheKey(
+  bodyToSend: Body,
+  opts: PrepareUpstreamBodyOptions,
+  finalWireModel: string,
+  connectionCacheOverride: ConnectionCacheOverride | null
+): Body {
+  const { provider, targetFormat, credentials } = opts;
+  if (
+    [FORMATS.OPENAI, FORMATS.CODEX, FORMATS.OPENAI_RESPONSES].includes(targetFormat) &&
+    (provider === "codex" || provider === "openai" || provider?.startsWith("openai-compatible-")) &&
+    providerSupportsCaching(provider, undefined, connectionCacheOverride, finalWireModel) &&
+    !providerRejectsPromptCacheKey(provider, connectionCacheOverride)
+  ) {
+    return applySessionPromptCacheKey(bodyToSend, {
+      rawBody: opts.rawBody,
+      headers: opts.clientRawRequest?.headers,
+      principalId: opts.cachePrincipalId,
+      provider,
+      connectionId: credentials?.connectionId,
+      model: finalWireModel,
+    });
+  }
   return bodyToSend;
 }
 
@@ -543,6 +572,12 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
     log
   );
   const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
+  bodyToSend = applyPreparedSessionCacheKey(
+    bodyToSend,
+    opts,
+    finalWireModel,
+    connectionCacheOverride
+  );
   bodyToSend = await injectPromptCacheKey(
     bodyToSend,
     provider,
