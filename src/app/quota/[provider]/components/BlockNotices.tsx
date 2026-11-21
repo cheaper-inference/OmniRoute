@@ -78,7 +78,7 @@ export default function BlockNotices({ blocks, pools }: BlockNoticesProps) {
           />
         );
       })}
-      {caps.length > 0 ? <ModelCapList caps={caps} /> : null}
+      {caps.length > 0 ? <ModelCapList caps={caps} poolNames={names} /> : null}
     </div>
   );
 }
