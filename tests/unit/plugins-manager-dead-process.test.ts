@@ -10,6 +10,8 @@ import path from "node:path";
 // DATA_DIR must be set before any module that imports core.ts is loaded.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-plugin-dead-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// Keep test plugins out of the user's real plugin folder (~/.omniroute/plugins).
+process.env.OMNIROUTE_PLUGINS_DIR = path.join(TEST_DATA_DIR, "plugins");
 
 const core = await import("../../src/lib/db/core.ts");
 const dbPlugins = await import("../../src/lib/db/plugins.ts");
