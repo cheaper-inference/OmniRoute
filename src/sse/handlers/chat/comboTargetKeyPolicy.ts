@@ -10,6 +10,7 @@
  */
 
 import { isModelBlockedByPatterns } from "@/lib/db/apiKeys";
+import { hasOidcGroupBinding, oidcIdentityForApiKeyId } from "@/lib/db/ssoIdentities";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { isComboNameAllowedForKey } from "@/shared/utils/apiKeyPolicy";
 import { hasApiKeyModelRestrictions } from "@/shared/utils/resolvedModelAccess";
@@ -20,6 +21,7 @@ export type ComboTargetKeyPolicyInfo = {
   disableNonPublicModels?: boolean | null;
   modelAccessMode?: string | null;
   allowedCombos?: string[] | null;
+  id?: string;
 };
 
 export type ComboTargetKeyPolicyOptions = {
@@ -83,6 +85,13 @@ export async function comboTargetPassesKeyModelPolicy(
 ): Promise<boolean> {
   const { apiKey, apiKeyInfo, requestedModelStr, targetModelStr, isModelAllowedForKey } = opts;
   if (!apiKey || !apiKeyInfo) return true;
+
+  const oidcIdentity = apiKeyInfo.id ? oidcIdentityForApiKeyId(apiKeyInfo.id) : null;
+  if (oidcIdentity) {
+    // A combo grant never widens an OIDC group's per-model permission. Check
+    // the binding on every target so group deletion cannot unlock the key.
+    return hasOidcGroupBinding(oidcIdentity) && isModelAllowedForKey(apiKey, targetModelStr);
+  }
 
   if (!hasApiKeyModelRestrictions(apiKeyInfo)) return true;
 

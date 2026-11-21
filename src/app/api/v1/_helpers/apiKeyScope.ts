@@ -1,11 +1,21 @@
+import { decodeJwt } from "jose";
 import { NextResponse } from "next/server";
-import { getApiKeyMetadata, validateApiKey } from "@/lib/db/apiKeys";
-import { extractApiKey } from "@/sse/services/auth";
-import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
-import { CORS_HEADERS, credentialRejectionHeaders } from "@/shared/utils/cors";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+import { getApiKeyMetadata, validateApiKey } from "@/lib/db/apiKeys";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { classifyRoute } from "@/server/authz/classify";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
+import { getOidcInferenceConfig } from "@/server/authz/oidcInference/config";
+import { looksLikeOidcJwt } from "@/server/authz/oidcInference/evaluate";
+import { clientApiPolicy } from "@/server/authz/policies/clientApi";
+import type { AuthRejection } from "@/server/authz/context";
 import { ANONYMOUS_OWNER_ID } from "@/shared/constants/anonymousOwner";
 import { hasManageScope } from "@/shared/constants/managementScopes";
+import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import { CORS_HEADERS, credentialRejectionHeaders } from "@/shared/utils/cors";
+import { extractApiKey } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 
 /**
  * Why `apiKeyId` is null — the lifecycle outcome `getApiKeyRequestScope` already
@@ -32,9 +42,147 @@ export interface ApiKeyRequestScope {
   isSessionAuth: boolean;
 }
 
+function rejectedSsoScope(
+  presentedKey: string | null,
+  isSessionAuth: boolean,
+  status: number,
+  message: string,
+  request: Request
+): ApiKeyRequestScope {
+  return {
+    apiKey: presentedKey,
+    apiKeyId: null,
+    apiKeyMetadata: null,
+    keyState: "invalid",
+    rejection: NextResponse.json(buildErrorBody(status, message), {
+      status,
+      headers: credentialRejectionHeaders(request),
+    }),
+    isSessionAuth,
+  };
+}
+
+type ScopedCredential = { apiKey: string | null; rejection: ApiKeyRequestScope | null };
+
+async function resolveSsoShadowCredential(
+  request: Request,
+  presentedKey: string | null,
+  isSessionAuth: boolean,
+  oid: string,
+  stampedSso: boolean
+): Promise<ScopedCredential> {
+  const stampedOid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+  if (stampedSso && stampedOid !== oid) {
+    return {
+      apiKey: null,
+      rejection: rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request),
+    };
+  }
+  // Re-stamp only after verifying the bearer; client headers are not proof.
+  if (!stampedSso) {
+    request.headers.set(AUTHZ_HEADER_AUTH_KIND, "sso_user");
+    request.headers.set(AUTHZ_HEADER_AUTH_ID, oid);
+  }
+  const rejection = await enforceClientApiRouteAuth(request);
+  if (rejection) {
+    return {
+      apiKey: null,
+      rejection: {
+        apiKey: presentedKey,
+        apiKeyId: null,
+        apiKeyMetadata: null,
+        keyState: "invalid",
+        rejection,
+        isSessionAuth,
+      },
+    };
+  }
+  const apiKey = getSsoShadowSecret(oid);
+  return apiKey
+    ? { apiKey, rejection: null }
+    : {
+        apiKey: null,
+        rejection: rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request),
+      };
+}
+
+async function bearerClaimsConfiguredIssuer(token: string): Promise<boolean> {
+  let claimedIssuer: string | undefined;
+  try {
+    claimedIssuer = decodeJwt(token).iss;
+  } catch {
+    return false;
+  }
+  const config = await getOidcInferenceConfig();
+  return Boolean(config.enabled && config.issuer && claimedIssuer === config.issuer);
+}
+
+async function resolveNonSsoCredential(
+  request: Request,
+  presentedKey: string | null,
+  isSessionAuth: boolean,
+  subjectKind: string
+): Promise<ScopedCredential> {
+  if (subjectKind === "client_api_key") {
+    // Bind ownership to the validated x-api-key, not an unrelated Bearer.
+    const resolved = await resolveClientApiKey(request);
+    return { apiKey: resolved.valid ? resolved.apiKey : presentedKey, rejection: null };
+  }
+  if (presentedKey && (await bearerClaimsConfiguredIssuer(presentedKey))) {
+    return {
+      apiKey: null,
+      rejection: rejectedSsoScope(presentedKey, isSessionAuth, 401, "Invalid API key", request),
+    };
+  }
+  return { apiKey: presentedKey, rejection: null };
+}
+
+async function resolveScopedCredential(
+  request: Request,
+  presentedKey: string | null,
+  isSessionAuth: boolean
+): Promise<ScopedCredential> {
+  // Re-evaluate the bearer at the handler boundary: proxy headers can be forged.
+  const stampedSso = request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user";
+  if (!stampedSso && (!presentedKey || !looksLikeOidcJwt(presentedKey))) {
+    return { apiKey: presentedKey, rejection: null };
+  }
+  const outcome = await clientApiPolicy.evaluate({
+    request,
+    classification: classifyRoute(new URL(request.url).pathname, request.method),
+    requestId: request.headers.get("x-request-id") ?? "route-owned-scope",
+  });
+  if (outcome.allow && outcome.subject.kind === "sso_user") {
+    return resolveSsoShadowCredential(
+      request,
+      presentedKey,
+      isSessionAuth,
+      outcome.subject.id,
+      stampedSso
+    );
+  }
+  if (stampedSso || !outcome.allow) {
+    // A claimed SSO token must not degrade to anonymous or another identity.
+    const denied = outcome.allow ? null : (outcome as AuthRejection);
+    return {
+      apiKey: null,
+      rejection: rejectedSsoScope(
+        presentedKey,
+        isSessionAuth,
+        denied?.status ?? 401,
+        denied?.message ?? "Invalid API key",
+        request
+      ),
+    };
+  }
+  return resolveNonSsoCredential(request, presentedKey, isSessionAuth, outcome.subject.kind);
+}
+
 export async function getApiKeyRequestScope(request: Request): Promise<ApiKeyRequestScope> {
   const isSessionAuth = await isDashboardSessionAuthenticated(request);
-  const apiKey = extractApiKey(request);
+  const credential = await resolveScopedCredential(request, extractApiKey(request), isSessionAuth);
+  if (credential.rejection) return credential.rejection;
+  const apiKey = credential.apiKey;
   if (!apiKey) {
     return {
       apiKey: null,

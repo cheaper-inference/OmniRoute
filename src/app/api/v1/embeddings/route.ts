@@ -7,12 +7,11 @@ import {
   createComboTargetKeyGate,
   resolveKeyConnectionScope,
 } from "@/sse/services/keyConnectionScope";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { v1EmbeddingsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
 import { createEmbeddingResponse, type EmbeddingHandlerOptions } from "@/lib/embeddings/service";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 
@@ -59,15 +58,8 @@ async function postHandler(request, context) {
   }
   const body = validation.data;
 
-  // Auth check — when REQUIRE_API_KEY=false, ignore presented invalid keys
-  // so anonymous access works the same as all other client APIs (#7785).
-  const { apiKey: apiKeyRaw, valid: apiKeyValid } = await resolveClientApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKeyRaw) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
-  }
-  if (isRequireApiKeyEnabled() && apiKeyRaw && !apiKeyValid) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
-  }
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
 
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);

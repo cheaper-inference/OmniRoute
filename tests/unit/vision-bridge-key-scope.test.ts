@@ -177,6 +177,48 @@ test("an unrestricted key keeps the configured bridge model and no key scope (un
   assert.equal(calls[0].config.routeThroughOmniRoute, undefined);
 });
 
+test("group-only key: describe stays inside the group's allowed models", async () => {
+  await seedConnection("groq");
+  await seedConnection("openai");
+  await seedConnection("anthropic");
+  const { createKeyGroup, addGroupPermission, addKeyToGroup } =
+    await import("../../src/lib/db/apiKeyGroups.ts");
+  const apiKeyInfo = await seedKeyInfo({});
+  const group = await createKeyGroup("bridge-group-allow-claude-opus");
+  // Group rules are evaluated against both the bare target and the full
+  // provider-scoped id; permitting both forms keeps the candidate allowed.
+  await addGroupPermission(group.id, "claude-opus-5-5", "allow");
+  await addGroupPermission(group.id, "anthropic/claude-opus-5-5", "allow");
+  await addKeyToGroup(apiKeyInfo.id as string, group.id);
+  const { calls, guardrail } = guardrailWithCapture();
+
+  await guardrail.preCall(imagePayload(), { model: TEXT_MODEL, apiKeyInfo });
+
+  // Before the fix the group-only key read as unrestricted and the default
+  // openai describe model was chosen with no key scope.
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].config.model, "anthropic/claude-opus-5-5");
+  assert.equal(calls[0].config.keyScope?.apiKeyId, apiKeyInfo.id);
+});
+
+test("group-only key without any permitted vision model → bridge skipped", async () => {
+  await seedConnection("groq");
+  await seedConnection("openai");
+  const { createKeyGroup, addGroupPermission, addKeyToGroup } =
+    await import("../../src/lib/db/apiKeyGroups.ts");
+  const apiKeyInfo = await seedKeyInfo({});
+  const group = await createKeyGroup("bridge-group-text-only");
+  await addGroupPermission(group.id, TEXT_MODEL, "allow");
+  await addKeyToGroup(apiKeyInfo.id as string, group.id);
+  const { calls, guardrail } = guardrailWithCapture();
+
+  const result = await guardrail.preCall(imagePayload(), { model: TEXT_MODEL, apiKeyInfo });
+
+  assert.equal(result.block, false);
+  assert.equal(result.modifiedPayload, undefined);
+  assert.equal(calls.length, 0);
+});
+
 test("a request without an API key keeps the configured bridge model (unchanged)", async () => {
   await seedConnection("groq");
   await seedConnection("openai");

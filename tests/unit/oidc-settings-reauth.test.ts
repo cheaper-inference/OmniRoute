@@ -129,6 +129,22 @@ for (const [key, value] of Object.entries(OIDC_IDENTITY_CHANGES)) {
   });
 }
 
+test("partial inference audience PATCH cannot invalidate an enabled OIDC policy", async () => {
+  await seedConfiguredInstance();
+  await settingsDb.updateSettings({
+    oidcInferenceEnabled: true,
+    oidcInferenceIssuer: "https://idp.example/realms/main",
+    oidcInferenceAudience: "omniroute-inference",
+    oidcInferenceRoleMappings: [{ role: "user", keyGroupId: "configured-group" }],
+  });
+
+  const result = await patch({ oidcInferenceAudience: "", currentPassword: PASSWORD });
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error?.code, "OIDC_INFERENCE_INCOMPLETE");
+  const after = (await settingsDb.getSettings()) as Record<string, unknown>;
+  assert.equal(after.oidcInferenceAudience, "omniroute-inference");
+});
+
 test("PATCH of a non-auth setting still needs no currentPassword", async () => {
   await seedConfiguredInstance();
 

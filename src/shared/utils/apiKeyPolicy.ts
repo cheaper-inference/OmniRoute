@@ -28,7 +28,7 @@ import {
 } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
-import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { getSsoShadowSecret, hasOidcGroupBinding } from "@/lib/db/ssoIdentities";
 import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
 import { checkRateLimit, RateLimitRule } from "./rateLimiter";
 import {
@@ -384,7 +384,7 @@ async function validateStandardRoutingTarget(
     }
   }
 
-  const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
+  const hasModelRestrictions = requiresModelPermissionCheck(request, apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions && modelStr.startsWith("auto/")) {
     requestedComboName = modelStr;
   }
@@ -695,6 +695,24 @@ async function resolveBareAutoPolicy(
   return { comboName, rejection: null };
 }
 
+function isOidcShadowRequest(request: Request): boolean {
+  return (
+    request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "sso_user" &&
+    request.headers.get(AUTHZ_HEADER_AUTH_ID)?.startsWith("oidc:") === true
+  );
+}
+
+function requiresModelPermissionCheck(request: Request, info: ApiKeyMetadata): boolean {
+  return hasApiKeyModelRestrictions(info) || isOidcShadowRequest(request);
+}
+
+function oidcGroupBindingRejection(request: Request): Response | null {
+  if (!isOidcShadowRequest(request)) return null;
+  const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID)?.trim();
+  if (oid && hasOidcGroupBinding(oid)) return null;
+  return errorResponse(HTTP_STATUS.FORBIDDEN, "SSO group binding is unavailable");
+}
+
 async function validateModelAccess(context: PolicyContext): Promise<Response | null> {
   const { request, apiKey, apiKeyInfo, modelStr } = context;
   if (!modelStr || apiKeyInfo.allowedQuotas?.length) return null;
@@ -709,7 +727,9 @@ async function validateModelAccess(context: PolicyContext): Promise<Response | n
   if (autoPolicy.rejection) return autoPolicy.rejection;
   let requestedComboName = autoPolicy.comboName;
 
-  const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
+  // OIDC shadow keys carry their model rules in key groups rather than the
+  // key's own allowedModels. Do not skip group evaluation on an 'all' key.
+  const hasModelRestrictions = requiresModelPermissionCheck(request, apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions) {
     if (isVirtualComboModel(modelStr)) {
       requestedComboName = modelStr;
@@ -1107,7 +1127,7 @@ async function validateFalReceiptPolicy(context: PolicyContext) {
   );
 }
 
-export async function enforceApiKeyPolicy(
+async function enforceResolvedApiKeyPolicy(
   request: Request,
   modelStr: string | null,
   options?: EnforceApiKeyPolicyOptions
@@ -1154,7 +1174,10 @@ export async function enforceApiKeyPolicy(
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
-  const accessRejection = await runAccessValidators(context, options);
+  // The validators await combo/model resolution. Recheck the binding after
+  // that work so a deleted or changed group cannot turn the key unrestricted.
+  const accessRejection =
+    (await runAccessValidators(context, options)) ?? oidcGroupBindingRejection(request);
   if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
   const budgetRejection = validateBudgetUnlessDeferred(context, options);
@@ -1167,4 +1190,15 @@ export async function enforceApiKeyPolicy(
   if (rateRejection) return { apiKey, apiKeyInfo, rejection: rateRejection };
 
   return { apiKey, apiKeyInfo, rejection: null };
+}
+
+export async function enforceApiKeyPolicy(
+  request: Request,
+  modelStr: string | null,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<ApiKeyPolicyResult> {
+  // OIDC groups are a security boundary. Never fall back to an unscoped raw JWT.
+  const rejection = oidcGroupBindingRejection(request);
+  if (rejection) return { apiKey: null, apiKeyInfo: null, rejection };
+  return enforceResolvedApiKeyPolicy(request, modelStr, options);
 }
