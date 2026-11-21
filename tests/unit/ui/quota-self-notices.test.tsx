@@ -13,7 +13,7 @@ import {
   type SelfQuotaAccount,
   type SelfQuotaBlocks,
 } from "@/shared/schemas/selfQuota";
-import { account, accountDim, parsedPool, quotaView, renderQuota } from "./quotaSelfHarness";
+import { account, accountDim, parsedPool, pool, quotaView, renderQuota } from "./quotaSelfHarness";
 
 // The shared UI setup mocks next-intl without `useFormatter`; this page runs on the real one.
 vi.mock("next-intl", async (importOriginal) => await importOriginal());
@@ -55,9 +55,9 @@ function modelCap(over: Partial<ModelCap> = {}): ModelCap {
   };
 }
 
-function renderNotices(blocks: Partial<SelfQuotaBlocks>) {
+function renderNotices(blocks: Partial<SelfQuotaBlocks>, pools = [pool()]) {
   const view = selfQuotaResponseSchema.parse(
-    quotaView({ blocks: { schedules: [], modelCaps: [], ...blocks } })
+    quotaView({ pools, blocks: { schedules: [], modelCaps: [], ...blocks } })
   );
   return renderQuota(<BlockNotices blocks={view.blocks} pools={view.pools} />);
 }
@@ -164,6 +164,24 @@ describe("block notices", () => {
       )
     ).toBeTruthy();
     noText(/Limit reached/);
+  });
+
+  it("caps from two pools on one model each name their pool; one pool names none", () => {
+    const sentence = "claude-fable-5: 50 of 50 requests this hour";
+    renderNotices({ modelCaps: [modelCap()] });
+    noText("Pool: Pool A");
+    cleanup();
+
+    renderNotices({ modelCaps: [modelCap(), modelCap({ pool: "qpr_b" })] }, [
+      pool(),
+      pool({ ref: "qpr_b", name: "Pool B" }),
+    ]);
+    const rows = screen.getAllByRole("listitem");
+    expect(rows).toHaveLength(2);
+    expect(within(rows[0]).getByText(sentence)).toBeTruthy();
+    expect(within(rows[0]).getByText("Pool: Pool A")).toBeTruthy();
+    expect(within(rows[1]).getByText(sentence)).toBeTruthy();
+    expect(within(rows[1]).getByText("Pool: Pool B")).toBeTruthy();
   });
 
   it("nothing to show renders nothing", () => {
