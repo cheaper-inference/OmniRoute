@@ -21,7 +21,7 @@ import {
   uploadRenderhourInputs,
   type RenderhourUploadTarget,
 } from "../mediaGeneration/renderhour.ts";
-import { clampPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
 
 type Body = Record<string, unknown>;
 
@@ -113,7 +113,7 @@ async function runVideoJob({
       token,
       request,
       timeoutMs: clampPollTimeoutMs(body.timeout_ms, 900_000),
-      pollIntervalMs: clampPollIntervalMs(body.poll_interval_ms, 5000),
+      pollIntervalMs: clampVideoPollIntervalMs(body.poll_interval_ms, 5000),
       log,
       signal,
     });

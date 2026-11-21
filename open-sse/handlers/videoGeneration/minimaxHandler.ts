@@ -12,7 +12,7 @@
 
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
-import { clampPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
 import { isJsonObject } from "../../utils/kieTask.ts";
 import {
   MAX_CONSECUTIVE_POLL_RETRIES,
@@ -198,7 +198,7 @@ export async function handleMinimaxVideoGeneration({
 }): Promise<VideoResult> {
   const startTime = Date.now();
   const timeoutMs = clampPollTimeoutMs(body.timeout_ms, DEFAULT_TIMEOUT_MS);
-  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
+  const pollIntervalMs = clampVideoPollIntervalMs(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
   const token = credentials?.apiKey || credentials?.accessToken;
 
   const request = buildMinimaxVideoRequestBody(

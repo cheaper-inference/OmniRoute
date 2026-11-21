@@ -57,7 +57,7 @@ import { resolveUcCredential } from "../../../executors/uc/credentials.ts";
 import { mintUcSessionToken } from "../../../executors/uc/clerkAuth.ts";
 import { UC_ORIGIN } from "../../../executors/uc/constants.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
-import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 
 /** Persona signed-upload-URL endpoint (for the image-to-video input image). */
 export const UC_PERSONA_SIGNED_URL = "https://internal-6.pubyar.com/generate-signed-url";
@@ -561,7 +561,7 @@ async function handleUcPersonaVideo(ctx: PersonaContext): Promise<UcVideoResult>
       ? timeoutSeconds * 1000
       : normalizePositiveNumber(process.env.UC_VIDEO_POLL_TIMEOUT_MS, UC_POLL_TIMEOUT_MS_DEFAULT);
   const timeoutMs = clampPollTimeoutMs(body.timeout_ms, defaultTimeoutMs);
-  const pollIntervalMs = clampPollIntervalMs(
+  const pollIntervalMs = clampVideoPollIntervalMs(
     body.poll_interval_ms,
     normalizePositiveNumber(process.env.UC_VIDEO_POLL_INTERVAL_MS, UC_POLL_INTERVAL_MS_DEFAULT)
   );
@@ -704,7 +704,10 @@ async function handleUcDirectVideo(ctx: DirectContext): Promise<UcVideoResult> {
   // Poll status_url until complete or timeout.
   const statusUrl = extracted.statusUrl;
   const timeoutMs = clampPollTimeoutMs(body.timeout_ms, UC_POLL_TIMEOUT_MS_DEFAULT);
-  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, UC_POLL_INTERVAL_MS_DEFAULT);
+  const pollIntervalMs = clampVideoPollIntervalMs(
+    body.poll_interval_ms,
+    UC_POLL_INTERVAL_MS_DEFAULT
+  );
   const deadline = Date.now() + timeoutMs;
   let attempt = 0;
   do {

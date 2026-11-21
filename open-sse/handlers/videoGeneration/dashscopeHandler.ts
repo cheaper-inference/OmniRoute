@@ -3,7 +3,7 @@ import { saveCallLog } from "@/lib/usageDb";
 import { resolveAlibabaProviderMediaBaseUrl } from "@/shared/constants/alibabaProviderRegions";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { sleep } from "../../utils/sleep.ts";
-import { clampPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
 import { abortedVideoResult } from "./abort.ts";
 
 // Shared with the DashScope TTS executor so the engine keeps a single import of this app
@@ -65,7 +65,7 @@ export async function handleDashscopeVideoGeneration({
 }) {
   const startTime = Date.now();
   const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
-  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 2500);
+  const pollIntervalMs = clampVideoPollIntervalMs(body.poll_interval_ms, 2500);
   const token = credentials?.apiKey || credentials?.accessToken;
   const isAlibabaManagedMediaProvider =
     provider === "alibaba" ||

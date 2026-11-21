@@ -25,6 +25,10 @@ import { isUcClerkMintUrl } from "./helpers/ucClerkUrl.ts";
 
 const HUGE_MS = 1e12; // ~31 years
 const INTERVAL_CEILING = 30_000;
+// Video jobs render for minutes; their caller interval ceiling is longer (pollBounds.ts).
+const VIDEO_INTERVAL_CEILING = 120_000;
+const intervalCeilingFor = (name: string) =>
+  /video|runway|dashscope|novita|minimax/i.test(name) ? VIDEO_INTERVAL_CEILING : INTERVAL_CEILING;
 const TIMEOUT_CEILING = 600_000;
 
 const originalFetch = globalThis.fetch;
@@ -266,6 +270,18 @@ function isFailure(result: unknown): boolean {
 
 const HUGE_BODY = { poll_interval_ms: HUGE_MS, timeout_ms: HUGE_MS * 10 };
 
+test("video job preset (agnes): a huge caller max_polls cannot stretch the polling window", async () => {
+  const { result, trace } = await runSite("video job preset (agnes)", {
+    poll_interval_ms: HUGE_MS,
+    max_polls: 1e9,
+  });
+  assert.equal((result as { success: boolean }).success, false);
+  assert.ok(
+    trace.elapsedMs() <= TIMEOUT_CEILING + VIDEO_INTERVAL_CEILING,
+    `polling ran for ${trace.elapsedMs()}ms of virtual time`
+  );
+});
+
 for (const [name, site] of Object.entries(SITES)) {
   test(`${name}: a huge caller poll interval and timeout are clamped to the ceilings`, async () => {
     const { result, trace } = await runSite(name, HUGE_BODY);
@@ -274,12 +290,12 @@ for (const [name, site] of Object.entries(SITES)) {
     assert.ok(trace.sleeps.length > 0, "the handler polled at least once");
     const longest = Math.max(...trace.sleeps);
     assert.ok(
-      longest <= INTERVAL_CEILING,
-      `longest single sleep ${longest}ms > ${INTERVAL_CEILING}`
+      longest <= intervalCeilingFor(name),
+      `longest single sleep ${longest}ms > ${intervalCeilingFor(name)}`
     );
     const window = Math.max(TIMEOUT_CEILING, site.defaultTimeoutMs);
     assert.ok(
-      trace.elapsedMs() <= window + INTERVAL_CEILING,
+      trace.elapsedMs() <= window + intervalCeilingFor(name),
       `polling ran for ${trace.elapsedMs()}ms of virtual time, above the ${window}ms window`
     );
   });
@@ -309,7 +325,10 @@ test("renderhour video: an operator default above the ceiling stays reachable", 
   });
   assert.match(String((result as { error?: unknown }).error), /within 900 s/);
   assert.ok(trace.elapsedMs() > TIMEOUT_CEILING, `elapsed ${trace.elapsedMs()}ms`);
-  assert.ok(trace.elapsedMs() <= 900_000 + INTERVAL_CEILING, `elapsed ${trace.elapsedMs()}ms`);
+  assert.ok(
+    trace.elapsedMs() <= 900_000 + VIDEO_INTERVAL_CEILING,
+    `elapsed ${trace.elapsedMs()}ms`
+  );
 });
 
 // --- UC (injectable sleep) ---------------------------------------------------------------------
@@ -422,11 +441,11 @@ for (const [name, site] of Object.entries(UC_SITES)) {
     assert.ok(clock.sleeps.length > 0, "the handler polled at least once");
     const longest = Math.max(...clock.sleeps);
     assert.ok(
-      longest <= INTERVAL_CEILING,
-      `longest single sleep ${longest}ms > ${INTERVAL_CEILING}`
+      longest <= intervalCeilingFor(name),
+      `longest single sleep ${longest}ms > ${intervalCeilingFor(name)}`
     );
     assert.ok(
-      clock.elapsedMs() <= TIMEOUT_CEILING + INTERVAL_CEILING,
+      clock.elapsedMs() <= TIMEOUT_CEILING + intervalCeilingFor(name),
       `polling ran for ${clock.elapsedMs()}ms of virtual time`
     );
   });

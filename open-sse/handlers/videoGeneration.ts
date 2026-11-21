@@ -30,7 +30,7 @@ import {
 } from "./videoGeneration/job.ts";
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./videoGeneration/abort.ts";
 import { sleep } from "../utils/sleep.ts";
-import { clampPollIntervalMs, clampPollTimeoutMs } from "../utils/pollBounds.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../utils/pollBounds.ts";
 import {
   downloadResultVideo,
   extractRunwayFailureMessage,
@@ -136,7 +136,7 @@ function resolveVideoJobPollingOverrides(body: Record<string, unknown>): {
 } {
   const maxPolls = Number(body.max_polls);
   // 0 marks "not sent": the preset's own interval (2-5 s) then applies.
-  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 0);
+  const pollIntervalMs = clampVideoPollIntervalMs(body.poll_interval_ms, 0);
   return {
     ...(Number.isFinite(maxPolls) && maxPolls > 0 ? { maxPolls: Math.floor(maxPolls) } : {}),
     ...(pollIntervalMs > 0 ? { pollIntervalMs } : {}),
@@ -867,7 +867,7 @@ async function handleKieVideoGeneration({
 }) {
   const startTime = Date.now();
   const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
-  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 2500);
+  const pollIntervalMs = clampVideoPollIntervalMs(body.poll_interval_ms, 2500);
   const token = credentials?.apiKey || credentials?.accessToken;
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
@@ -977,7 +977,7 @@ async function handleRunwayVideoGeneration({
   const ratio = resolveRunwayRatio(body);
   const duration = resolveRunwayDuration(body);
   const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
-  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 5000);
+  const pollIntervalMs = clampVideoPollIntervalMs(body.poll_interval_ms, 5000);
   const submitUrl = buildRunwayApiUrl(
     useImageToVideo ? "/image_to_video" : "/text_to_video",
     providerConfig.baseUrl
