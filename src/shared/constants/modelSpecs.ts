@@ -110,6 +110,12 @@ const AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS = new Map<string, number>([
   ["opencode/glm-5.2", 1000000],
   ["opencode-zen/glm-5.2", 1000000],
   ["opencode-go/glm-5.2", 1000000],
+  ["opencode/glm-5.3", 1000000],
+  ["opencode-zen/glm-5.3", 1000000],
+  ["opencode-go/glm-5.3", 1000000],
+  ["opencode/glm-5.3-flash", 1000000],
+  ["opencode-zen/glm-5.3-flash", 1000000],
+  ["opencode-go/glm-5.3-flash", 1000000],
   ["zenmux/z-ai/glm-5.2", 1000000],
   ["zenmux/z-ai/glm-5.2-free", 1000000],
   // models.dev under-reports Opencode's free Xiaomi MiMo rows at 200000 while

@@ -21,11 +21,28 @@ function modelIds(): string[] {
 
 const DEPRECATED_MIMO_V2_MODELS = ["mimo-v2-pro", "mimo-v2-omni"];
 
-test("opencode-go advertises glm-5.2 (official Go endpoint addition)", () => {
+test("opencode-go advertises glm-5.3 (official Go endpoint addition)", () => {
   assert.ok(
-    modelIds().includes("glm-5.2"),
-    `expected glm-5.2 in opencode-go catalog, got: ${modelIds().join(", ")}`
+    modelIds().includes("glm-5.3"),
+    `expected glm-5.3 in opencode-go catalog, got: ${modelIds().join(", ")}`
   );
+});
+
+test("opencode-go advertises glm-5.3 and glm-5.3-flash with the vendor Go list limits", () => {
+  // Vendor: GET https://opencode.ai/zen/go/v1/models (glm-5.3: 1M context, 131072 output,
+  // efforts low/high/max; glm-5.3-flash: same limits, image and video input).
+  const byId = new Map(
+    (opencode_goProvider.models ?? []).map((m) => [m.id, m as Record<string, unknown>])
+  );
+  for (const id of ["glm-5.3", "glm-5.3-flash"]) {
+    const model = byId.get(id);
+    assert.ok(model, `expected ${id} in opencode-go catalog, got: ${modelIds().join(", ")}`);
+    assert.equal(model.contextLength, 1000000, `${id} context`);
+    assert.equal(model.maxOutputTokens, 131072, `${id} max output`);
+    assert.deepEqual(model.supportedThinkingEfforts, ["low", "high", "max"], `${id} efforts`);
+  }
+  assert.equal(byId.get("glm-5.3-flash")?.supportsVision, true);
+  assert.notEqual(byId.get("glm-5.3")?.supportsVision, true);
 });
 
 test("opencode-go advertises kimi-k2.7-code (live API rejects plain kimi-k2.7 for chat)", () => {
