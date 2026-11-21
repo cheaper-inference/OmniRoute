@@ -20,6 +20,38 @@ import { FORMATS } from "../../translator/formats.ts";
 
 const AGENTROUTER_RESPONSES_MODELS = new Set(["gpt-6-astra", "gpt-6.1-sol", "gpt-5.6-sol"]);
 
+/**
+ * Opt-in (CLAUDE_CLIENT_ANTHROPIC_ENDPOINT): a Claude-format client reaches a provider through the
+ * provider's declared Anthropic alternate, so the OpenAI hub does not drop Claude-only fields.
+ * Returns the connection data with `targetFormat: "claude"`, which the existing alternate
+ * handling turns into the right body format, URL and auth header together. Returns the input
+ * unchanged when the flag is off, the client is not Claude, the connection already chose a
+ * protocol, a model-level format applies, or the provider declares no Anthropic alternate.
+ */
+export function applyClientProtocolAlternate<T>(opts: {
+  provider: string;
+  resolvedModel: string;
+  sourceFormat?: string;
+  customModelTargetFormat: string | undefined;
+  providerSpecificData: T;
+}): T | (Record<string, unknown> & { targetFormat: string }) {
+  const { provider, resolvedModel, sourceFormat, customModelTargetFormat, providerSpecificData } =
+    opts;
+  if (!/^(1|true|yes|on)$/i.test((process.env.CLAUDE_CLIENT_ANTHROPIC_ENDPOINT || "").trim())) {
+    return providerSpecificData;
+  }
+  if (sourceFormat !== FORMATS.CLAUDE || customModelTargetFormat) return providerSpecificData;
+  const existing = (providerSpecificData ?? {}) as { targetFormat?: unknown };
+  if (typeof existing.targetFormat === "string" && existing.targetFormat)
+    return providerSpecificData;
+  const alias = PROVIDER_ID_TO_ALIAS[provider] || provider;
+  if (getModelTargetFormat(alias, resolvedModel)) return providerSpecificData;
+  const candidate = { ...existing, targetFormat: FORMATS.CLAUDE };
+  return resolveAlternateFormat(getRegistryEntry(provider), candidate)
+    ? candidate
+    : providerSpecificData;
+}
+
 export function resolveChatCoreTargetFormat(opts: {
   provider: string;
   resolvedModel: string;

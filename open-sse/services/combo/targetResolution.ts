@@ -104,6 +104,7 @@ import type {
   ResolvedComboTarget,
 } from "./types.ts";
 import type { NativeTurnPin } from "./nativeCodexTurnPin.ts";
+import { deferToolRejectingTargets } from "./toolRejectionTracker.ts";
 
 export interface ResolveComboTargetPipelineDeps {
   body: Record<string, unknown>;
@@ -1048,6 +1049,10 @@ export async function resolveComboTargetPipeline(
       continuity.sticky.stuck
     );
   }
+
+  // Opt-in (OMNIROUTE_TOOL_REJECTION_DEFER): targets that keep rejecting tool requests go last.
+  // Before the reservation transfer, so the in-flight slot follows the target dispatched first.
+  orderedTargets = deferToolRejectingTargets(orderedTargets, body as Record<string, unknown>);
 
   quotaShareRelease = transferInflightReservation(
     traits.inflightReservation,

@@ -183,7 +183,12 @@ export function getGeminiThoughtSignature(toolCallId: unknown) {
 
   pruneExpired();
   const entry = signatures.get(toolCallId);
-  if (entry) return entry.signature;
+  if (entry) {
+    // Recency bump: eviction drops the first key, so a signature still in use must move last.
+    signatures.delete(toolCallId);
+    signatures.set(toolCallId, entry);
+    return entry.signature;
+  }
 
   try {
     const db = getDbInstance();

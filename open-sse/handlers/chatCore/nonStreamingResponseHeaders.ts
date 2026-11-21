@@ -11,6 +11,19 @@
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { attachOmniRouteMetaHeaders as defaultAttachMeta } from "@/domain/omnirouteResponseMeta";
 
+/**
+ * The window resolved before dispatch describes the resolved model (with any combo override).
+ * After a family fallback another model served the response, so its window is unknown here and
+ * the context headers are left out rather than describe the wrong model.
+ */
+export function contextWindowForServedModel(
+  contextLimit: number | null | undefined,
+  servedModel: string,
+  resolvedModel: string
+): number | null {
+  return servedModel === resolvedModel ? (contextLimit ?? null) : null;
+}
+
 export function buildNonStreamingResponseHeaders(
   args: {
     provider: string | null | undefined;
@@ -22,6 +35,8 @@ export function buildNonStreamingResponseHeaders(
     compressionResponseMeta?: string | null | undefined;
     comboStrategy?: string | null | undefined;
     fallbackAttempts?: number;
+    /** Resolved context window; emitted as response headers only when OMNIROUTE_CONTEXT_HEADERS is on. */
+    contextWindow?: number | null;
   },
   deps: { attachOmniRouteMetaHeaders: typeof defaultAttachMeta; now: () => number } = {
     attachOmniRouteMetaHeaders: defaultAttachMeta,
@@ -42,6 +57,9 @@ export function buildNonStreamingResponseHeaders(
     requestId: args.requestId,
     strategy: args.comboStrategy ?? "single",
     ...(args.fallbackAttempts !== undefined ? { fallbackAttempts: args.fallbackAttempts } : {}),
+    ...(/^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_CONTEXT_HEADERS?.trim() ?? "")
+      ? { contextWindow: args.contextWindow }
+      : {}),
   });
   if (args.compressionResponseMeta) {
     responseHeaders[OMNIROUTE_RESPONSE_HEADERS.compression] = args.compressionResponseMeta;
