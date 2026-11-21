@@ -48,6 +48,7 @@ const CATALOG_RELEVANT_FEATURE_FLAGS = new Set([
   // #16929: hides models with no runnable endpoint adapter from /v1/models.
   "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED",
   "MODELS_DEV_EFFORT_TIERS_ENABLED",
+  "CATALOG_PRICING_FIELD_MERGE_ENABLED",
 ]);
 
 /**

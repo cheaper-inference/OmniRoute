@@ -5,6 +5,27 @@ import { transformToOmniRoute } from "../../src/lib/pricingSync.ts";
 // ─── transformToOmniRoute ────────────────────────────────
 
 describe("transformToOmniRoute", () => {
+  test("maps Go source spelling without leaking rates to Zen (#18598)", () => {
+    // Observed LiteLLM fixture, USD/token; tests never fetch the live catalog.
+    const result = transformToOmniRoute({
+      "opencode_go/glm-5.2": {
+        litellm_provider: "opencode_go",
+        input_cost_per_token: 0.0000014,
+        output_cost_per_token: 0.0000044,
+        cache_read_input_token_cost: 0.00000026,
+      },
+    });
+    assert.deepEqual(Object.keys(result), ["opencode-go"]);
+    assert.deepEqual(result["opencode-go"]["glm-5.2"], {
+      input: 1.4,
+      output: 4.4,
+      cached: 0.26,
+    });
+    assert.equal(result.opencode_go, undefined);
+    assert.equal(result["opencode-zen"], undefined);
+    assert.equal(result.opencode, undefined);
+  });
+
   test("converts LiteLLM per-token pricing to OmniRoute per-million format", () => {
     const raw = {
       "openai/gpt-4o": {

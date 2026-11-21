@@ -1,6 +1,7 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+import { CATALOG_PRICING_FIELD_MERGE_FLAG } from "./featureFlagDefinitionsCatalogPricing";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
 import {
@@ -1116,6 +1117,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  CATALOG_PRICING_FIELD_MERGE_FLAG,
 
   // ──────────────── CLI (5) ────────────────
   {

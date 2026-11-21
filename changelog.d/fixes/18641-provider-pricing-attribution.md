@@ -1,0 +1,1 @@
+- **fix(api):** Resolve OpenCode Go pricing attribution while preserving pricing precedence ([#18641](https://github.com/cheaper-inference/OmniRoute/pull/18641)). The `/v1/models` per-field pricing merge and `reasoning` rates are opt-in via `CATALOG_PRICING_FIELD_MERGE_ENABLED` — thanks @trespassmk

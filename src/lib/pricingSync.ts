@@ -13,6 +13,7 @@
 import { getDbInstance } from "./db/core";
 import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
+import { normalizeLiteLLMPricingProviders } from "./litellmPricingProviderAliases";
 import { LITELLM_PROVIDER_MAP, remapHistoricalLitellmRows } from "./litellmProviderMap";
 
 // ─── Types ───────────────────────────────────────────────
@@ -211,7 +212,7 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
     }
   }
 
-  return result;
+  return normalizeLiteLLMPricingProviders(result);
 }
 
 // ─── DB: Synced pricing namespace ────────────────────────
@@ -241,11 +242,12 @@ export function getSyncedPricing(): PricingByProvider {
     return pricingMemo;
   }
 
-  const synced = readStoredPricingRows();
-  remapHistoricalLitellmRows(synced);
-  pricingMemo = synced;
+  // Merge the opencode_go spellings per field first, then re-apply the provider map.
+  const normalized = normalizeLiteLLMPricingProviders(readStoredPricingRows());
+  remapHistoricalLitellmRows(normalized);
+  pricingMemo = normalized;
   pricingMemoVersion = currentVersion;
-  return synced;
+  return pricingMemo;
 }
 
 /** The `pricing_synced` rows as stored: no alias remap, so each model is present once. */

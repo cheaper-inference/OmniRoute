@@ -14,6 +14,8 @@ const localDb = { updatePricing };
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const usageLimits = await import("../../src/lib/usage/apiKeyUsageLimits.ts");
+const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
+const { getUsageStats } = await import("../../src/lib/usage/usageStats.ts");
 
 const NOW = Date.parse("2026-06-19T20:00:00.000Z");
 
@@ -54,6 +56,164 @@ test("API key USD usage limits persist and default off", async () => {
   assert.equal(metadata?.usageLimitEnabled, true);
   assert.equal(metadata?.dailyUsageLimitUsd, 10.5);
   assert.equal(metadata?.weeklyUsageLimitUsd, 50);
+});
+
+test("legacy Go rates count toward API-key USD caps without changing subscription analytics", async (t) => {
+  t.mock.method(Date, "now", () => NOW);
+  core
+    .getDbInstance()
+    .prepare("INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "pricing_synced",
+      "opencode_go",
+      JSON.stringify({ "glm-5.2": { input: 1.4, output: 4.4, cached: 0.26 } })
+    );
+  invalidateDbCache("pricing");
+  const created = await apiKeysDb.createApiKey("Go Key", "machine-go-18598");
+  await apiKeysDb.updateApiKeyPermissions(created.id, {
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 1,
+    weeklyUsageLimitUsd: 1,
+  });
+  await usageHistory.saveRequestUsage({
+    provider: "opencode-go",
+    model: "glm-5.2",
+    apiKeyId: created.id,
+    apiKeyName: "Go Key",
+    tokens: { input: 1_000, output: 100 },
+    success: true,
+    timestamp: new Date(NOW).toISOString(),
+  });
+  const metadata = await apiKeysDb.getApiKeyMetadata(created.key);
+  assert.ok(metadata);
+  const deps = {
+    now: () => NOW,
+    getProviderConnections: async () => [],
+    getAllProviderLimitsCache: () => ({}),
+  };
+  const status = await usageLimits.getApiKeyUsageLimitStatus(metadata, deps);
+  assert.ok(Math.abs(status.dailySpentUsd - 0.00184) < 1e-12);
+  assert.ok(Math.abs(status.weeklySpentUsd - 0.00184) < 1e-12);
+  assert.equal(status.dailyHasUnpricedUsage, false);
+  assert.equal(status.weeklyHasUnpricedUsage, false);
+  assert.equal(status.dailyPricingFailure, false);
+  assert.equal(status.dailyExceeded, false);
+  assert.equal(status.weeklyExceeded, false);
+  const exceeded = await usageLimits.getApiKeyUsageLimitStatus(
+    { ...metadata, dailyUsageLimitUsd: 0.001 },
+    deps
+  );
+  assert.equal(exceeded.dailyExceeded, true);
+  assert.equal(exceeded.weeklyExceeded, false);
+  const rejection = usageLimits.buildApiKeyUsageLimitRejection(
+    new Request("http://localhost/v1/chat/completions"),
+    exceeded,
+    NOW
+  );
+  assert.equal(rejection.status, 429);
+  assert.ok(rejection.headers.get("Retry-After"));
+  const stats = await getUsageStats();
+  for (const bucket of [
+    stats.byProvider["opencode-go"],
+    stats.byModel["glm-5.2 (opencode-go)"],
+    Object.values(stats.byApiKey).find((b) => b.apiKeyId === created.id),
+  ]) {
+    assert.ok(bucket);
+    assert.equal(bucket.requests, 1);
+    assert.equal(bucket.promptTokens, 1_000);
+    assert.equal(bucket.completionTokens, 100);
+    assert.equal(bucket.cost, 0);
+  }
+});
+
+test("missing cloud pricing fails closed but explicit opt-out still enforces priced spend", async () => {
+  const created = await apiKeysDb.createApiKey("Missing Cloud Key", "machine-cloud-18598");
+  await usageHistory.saveRequestUsage({
+    provider: "ollama-cloud",
+    model: "deepseek-v4.1-flash",
+    apiKeyId: created.id,
+    tokens: { input: 1_000, output: 100 },
+    success: true,
+    timestamp: new Date(NOW).toISOString(),
+  });
+  const metadata = {
+    id: created.id,
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 1,
+    weeklyUsageLimitUsd: 1,
+  };
+  const deps = {
+    now: () => NOW,
+    getProviderConnections: async () => [],
+    getAllProviderLimitsCache: () => ({}),
+  };
+  const blocked = await usageLimits.getApiKeyUsageLimitStatus(metadata, {
+    ...deps,
+    getUnpricedUsagePolicy: () => "fail_closed",
+  });
+  assert.equal(blocked.dailyHasUnpricedUsage, true);
+  assert.deepEqual(blocked.dailyUnpricedModels, ["ollama-cloud/deepseek-v4.1-flash"]);
+  assert.equal(blocked.dailyExceeded, true);
+  const rejection = usageLimits.buildApiKeyUsageLimitRejection(
+    new Request("http://localhost/v1/chat/completions"),
+    blocked,
+    NOW
+  );
+  assert.equal(rejection.status, 400);
+  assert.equal(rejection.headers.get("Retry-After"), null);
+  const optedOut = await usageLimits.getApiKeyUsageLimitStatus(metadata, {
+    ...deps,
+    getUnpricedUsagePolicy: () => "count_as_zero",
+  });
+  assert.equal(optedOut.dailyHasUnpricedUsage, true);
+  assert.equal(optedOut.dailyExceeded, false);
+  await localDb.updatePricing({ "synthetic-metered-18598": { paid: { input: 2, output: 0 } } });
+  await usageHistory.saveRequestUsage({
+    provider: "synthetic-metered-18598",
+    model: "paid",
+    apiKeyId: created.id,
+    tokens: { input: 1_000_000, output: 0 },
+    success: true,
+    timestamp: new Date(NOW).toISOString(),
+  });
+  const overage = await usageLimits.getApiKeyUsageLimitStatus(metadata, {
+    ...deps,
+    getUnpricedUsagePolicy: () => "count_as_zero",
+  });
+  assert.equal(overage.dailySpentUsd, 2);
+  assert.equal(overage.dailyExceeded, true);
+});
+
+test("pricing-store failure blocks cloud usage even with count-as-zero opt-out", async (t) => {
+  const created = await apiKeysDb.createApiKey("Broken Pricing Key", "machine-broken-18598");
+  await usageHistory.saveRequestUsage({
+    provider: "ollama-cloud",
+    model: "deepseek-v4.1-flash",
+    apiKeyId: created.id,
+    tokens: { input: 1_000, output: 100 },
+    success: true,
+    timestamp: new Date(NOW).toISOString(),
+  });
+  invalidateDbCache("pricing");
+  const db = core.getDbInstance();
+  const prepare = db.prepare;
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (sql === "SELECT key, value FROM key_value WHERE namespace = ?")
+      throw new Error("synthetic pricing-store failure");
+    return prepare.call(db, sql);
+  });
+  const status = await usageLimits.getApiKeyUsageLimitStatus(
+    { id: created.id, usageLimitEnabled: true, dailyUsageLimitUsd: 1 },
+    {
+      now: () => NOW,
+      getProviderConnections: async () => [],
+      getAllProviderLimitsCache: () => ({}),
+      getUnpricedUsagePolicy: () => "count_as_zero",
+    }
+  );
+  assert.equal(status.dailyPricingFailure, true);
+  assert.equal(status.dailyExceeded, true);
+  assert.equal(status.weeklyExceeded, false);
 });
 
 test("getApiKeyUsageLimitStatus aligns weekly USD spend with provider resetAt when available", async () => {
