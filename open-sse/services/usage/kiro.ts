@@ -208,8 +208,8 @@ function buildKiroUsageAttempts(opts: {
           method: "GET",
           headers: {
             ...authHeaders,
-            "x-amz-user-agent": "aws-sdk-js/1.0.0 KiroIDE",
-            "user-agent": "aws-sdk-js/1.0.0 KiroIDE",
+            "x-amz-user-agent": "KiroIDE-1.4.154-linux",
+            "user-agent": "KiroIDE-1.4.154-linux",
           },
         }),
     },

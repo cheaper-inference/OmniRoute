@@ -443,8 +443,8 @@ export function resetCodeBuddyCnVersionCache(): void {
   codeBuddyVersionInFlight = null;
 }
 
-export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0";
-export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-ide/1.0.0";
+export const KIRO_SDK_USER_AGENT = "KiroIDE-1.4.154-linux";
+export const KIRO_AMZ_USER_AGENT = "KiroIDE-1.4.154-linux";
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 
