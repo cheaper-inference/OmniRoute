@@ -12,6 +12,8 @@
 
 import { execFileSync } from "child_process";
 import path from "path";
+import os from "node:os";
+import { resolveManagedCliSpawn } from "../../../bin/cli/utils/managedCliSpawn.mjs";
 import {
   CLI_INTEGRATION_MANIFEST,
   listCliIntegrationIds,
@@ -83,6 +85,7 @@ const AGENT_DEFINITIONS: Omit<CliAgentInfo, "version" | "installed">[] = BUILT_I
 // ---------------------------------------------------------------------------
 let _cachedAgents: CliAgentInfo[] | null = null;
 let _cacheTimestamp = 0;
+let _managedCacheKey = "";
 const CACHE_TTL_MS = 60_000;
 
 /** Custom agents loaded from settings */
@@ -262,12 +265,21 @@ function detectAgent(
   let installed = false;
 
   try {
-    const probe = resolveVersionProbe(def.binary, def.versionCommand, isCustom);
+    const managed = !isCustom ? resolveManagedCliSpawn(def.id, os.platform()) : null;
+    const probe = managed
+      ? {
+          command: managed.command,
+          args: [
+            ...managed.argsPrefix,
+            ...(CLI_INTEGRATION_MANIFEST[def.id]?.agentBackend?.versionArgs || ["--version"]),
+          ],
+        }
+      : resolveVersionProbe(def.binary, def.versionCommand, isCustom);
     if (!probe) {
       return { ...def, version, installed, isCustom };
     }
 
-    const useShell = shouldUseShellForVersionProbe(probe.command);
+    const useShell = !managed && shouldUseShellForVersionProbe(probe.command);
     // Never put a command with whitespace or shell metacharacters on a shell command line.
     if (useShell && !isShellSafeCommand(probe.command)) {
       return { ...def, version, installed, isCustom };
@@ -297,7 +309,14 @@ function detectAgent(
  */
 export function detectInstalledAgents(): CliAgentInfo[] {
   const now = Date.now();
-  if (_cachedAgents && now - _cacheTimestamp < CACHE_TTL_MS) {
+  const managedCacheKey = JSON.stringify(
+    BUILT_IN_AGENT_IDS.map((id) => resolveManagedCliSpawn(id, os.platform()))
+  );
+  if (
+    _cachedAgents &&
+    managedCacheKey === _managedCacheKey &&
+    now - _cacheTimestamp < CACHE_TTL_MS
+  ) {
     return _cachedAgents;
   }
 
@@ -312,6 +331,7 @@ export function detectInstalledAgents(): CliAgentInfo[] {
     return detectAgent(rest, _custom);
   });
   _cacheTimestamp = now;
+  _managedCacheKey = managedCacheKey;
 
   return _cachedAgents;
 }

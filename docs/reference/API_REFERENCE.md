@@ -1638,15 +1638,24 @@ a manual backup (`PUT`) keep ordinary management auth.
 
 ### CLI Tools
 
-| Endpoint                           | Method | Description         |
-| ---------------------------------- | ------ | ------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Claude CLI status   |
-| `/api/cli-tools/codex-settings`    | GET    | Codex CLI status    |
-| `/api/cli-tools/droid-settings`    | GET    | Droid CLI status    |
-| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI status |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Generic CLI runtime |
+| Endpoint                           | Method    | Description                                                      |
+| ---------------------------------- | --------- | ---------------------------------------------------------------- |
+| `/api/cli-tools/claude-settings`   | GET       | Claude CLI status                                                |
+| `/api/cli-tools/codex-settings`    | GET       | Codex CLI status                                                 |
+| `/api/cli-tools/droid-settings`    | GET       | Droid CLI status                                                 |
+| `/api/cli-tools/openclaw-settings` | GET       | OpenClaw CLI status                                              |
+| `/api/cli-tools/runtime/[toolId]`  | GET       | Generic CLI runtime                                              |
+| `/api/cli-tools/runtime/managed`   | GET, POST | Managed CLI inventory, stable update checks and verified updates |
 
 CLI responses include: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+
+The managed endpoint requires trusted loopback or private-LAN peer locality and management authentication for
+every request. `GET` returns `{items}` with installed/latest versions, source, update
+availability and per-tool errors. `POST {"action":"check"}` returns refreshed inventory;
+`POST {"action":"update","toolId":"codex"}` installs the server-selected stable version
+and returns `{item,effects}`. Versions, package names and paths cannot be selected by the
+caller. Supported runtimes and activation behavior are described in
+[Managed CLI updates](CLI-TOOLS.md#managed-cli-updates).
 
 ### ACP Agents
 

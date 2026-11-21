@@ -9,7 +9,7 @@
  */
 import { spawn } from "child_process";
 import crypto from "crypto";
-import { resolveQoderCliInvocation } from "./qoderCliResolve";
+import { getQoderCliCommand, resolveQoderCliInvocation } from "./qoderCliResolve";
 import { buildQoderCliEnv, killQoderCliProcessTree, type QoderCliRunResult } from "./qoderCliSpawn";
 
 const ACP_PROTOCOL_VERSION = 1;
@@ -110,12 +110,16 @@ class QoderAcpProcess {
   }
 
   private async spawnAndInitialize(): Promise<void> {
-    const { command, useShell } = await resolveQoderCliInvocation(this.options.command);
+    const {
+      command,
+      useShell,
+      argsPrefix = [],
+    } = await resolveQoderCliInvocation(this.options.command);
     const env = buildQoderCliEnv(this.options.token);
 
     // `--tools ""` applies to every ACP session the process creates: OmniRoute only
     // wants plain LM replies, never file-system access or command execution.
-    const args = ["--acp", "--tools", "", "--config-dir", this.options.configDir];
+    const args = [...argsPrefix, "--acp", "--tools", "", "--config-dir", this.options.configDir];
     const child = spawn(command, args, {
       env,
       cwd: this.options.configDir,
@@ -289,7 +293,7 @@ const processes = new Map<string, QoderAcpProcess>();
 function processKey(token: string, configDir: string, command?: string | null): string {
   return crypto
     .createHash("sha256")
-    .update(`${token}\0${configDir}\0${command || ""}`)
+    .update(`${token}\0${configDir}\0${command || getQoderCliCommand()}`)
     .digest("hex");
 }
 

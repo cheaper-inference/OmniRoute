@@ -2,7 +2,9 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { resolve } from "node:path";
-import { getRegisteredAgentById } from "./registry";
+import os from "node:os";
+import { resolveManagedCliSpawn } from "../../../bin/cli/utils/managedCliSpawn.mjs";
+import { BUILT_IN_AGENT_IDS, getRegisteredAgentById } from "./registry";
 import { appendCapped } from "./buffers";
 import { withDeadline } from "./deadline";
 import { buildAcpChildEnv, parseSpawnOptions, type AcpSpawnOptions } from "./launchConfig";
@@ -35,12 +37,19 @@ export class AcpManager extends EventEmitter {
     if (definition.protocol !== "stdio")
       throw new Error("Agent does not declare a stdio launch contract");
     const cwd = resolve(options.cwd || process.cwd());
-    const child = spawn(definition.binary, [...definition.spawnArgs], {
-      stdio: ["pipe", "pipe", "pipe"],
-      cwd,
-      env: buildAcpChildEnv(options.env),
-      shell: false,
-    });
+    const managed = BUILT_IN_AGENT_IDS.includes(definition.id)
+      ? resolveManagedCliSpawn(definition.id, os.platform())
+      : null;
+    const child = spawn(
+      managed?.command || definition.binary,
+      [...(managed?.argsPrefix || []), ...definition.spawnArgs],
+      {
+        stdio: ["pipe", "pipe", "pipe"],
+        cwd,
+        env: buildAcpChildEnv(options.env),
+        shell: false,
+      }
+    );
     const session: AcpSession = {
       id: `acp-${definition.id}-${crypto.randomUUID()}`,
       agentId: definition.id,

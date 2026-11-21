@@ -372,16 +372,20 @@ export async function runFccClaude(opts = {}, claudeArgs = []) {
   });
 
   // Locate the claude binary.
-  const { command, shell } = await resolveClaudeSpawn(process.platform);
+  const { command, shell, argsPrefix = [] } = await resolveClaudeSpawn(process.platform);
 
   console.error(`[fcc-claude] launching ${command} → ${baseUrl}`);
 
-  const child = spawn(command, quoteShellArgsForSpawn(claudeArgs, process.platform, shell), {
-    env,
-    stdio: "inherit",
-    shell,
-    ...(process.platform === "win32" ? { windowsHide: true } : {}),
-  });
+  const child = spawn(
+    command,
+    quoteShellArgsForSpawn([...argsPrefix, ...claudeArgs], process.platform, shell),
+    {
+      env,
+      stdio: "inherit",
+      shell,
+      ...(process.platform === "win32" ? { windowsHide: true } : {}),
+    }
+  );
 
   child.on("error", (err) => {
     if (err.code === "ENOENT") {

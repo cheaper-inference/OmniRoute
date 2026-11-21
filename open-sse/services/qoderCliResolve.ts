@@ -12,6 +12,8 @@
  * `commandPath`, and `shouldUseShellForCommand()` tells us whether it needs cmd.exe.
  */
 import path from "path";
+import { getManagedCliCommand } from "@/shared/services/managedCliRuntime";
+import { resolveManagedCliInvocation } from "@/shared/services/managedCliLaunch";
 import {
   getCliRuntimeStatus,
   getKnownToolPaths,
@@ -20,18 +22,18 @@ import {
 
 export function getQoderCliCommand(): string {
   const explicit = String(process.env.CLI_QODER_BIN || "").trim();
-  return explicit || "qodercli";
+  return explicit || getManagedCliCommand("qoder") || "qodercli";
 }
 
-export type QoderCliInvocation = { command: string; useShell: boolean };
+export type QoderCliInvocation = { command: string; useShell: boolean; argsPrefix?: string[] };
 
 // Resolving through cliRuntime does synchronous fs walks plus a `--version`
 // healthcheck spawn; memoize the result so we don't repeat that on every chat /
 // quota request. The install location is effectively static for a running host.
 const QODER_RESOLVE_TTL_MS = 5 * 60 * 1000;
-// Keyed on the fallback command (which folds in CLI_QODER_BIN) so changing the
-// override — or a test pointing at a fresh stub — invalidates a stale entry
-// instead of spawning a since-deleted binary.
+// The fallback includes the active managed installation as well as CLI_QODER_BIN.
+// Activating an update therefore invalidates the cached executable immediately;
+// existing sessions keep their process while new sessions select the new binary.
 let qoderInvocationCache: (QoderCliInvocation & { key: string; expiresAt: number }) | null = null;
 
 /** Test-only: drop the memoized qodercli command resolution. */
@@ -64,12 +66,18 @@ export async function resolveQoderCliInvocation(
     qoderInvocationCache.key === fallback &&
     qoderInvocationCache.expiresAt > Date.now()
   ) {
-    return { command: qoderInvocationCache.command, useShell: qoderInvocationCache.useShell };
+    return {
+      command: qoderInvocationCache.command,
+      useShell: qoderInvocationCache.useShell,
+      ...(qoderInvocationCache.argsPrefix
+        ? { argsPrefix: [...qoderInvocationCache.argsPrefix] }
+        : {}),
+    };
   }
 
   let command = fallback;
   try {
-    const status = await getStatus("qoder");
+    const status = !explicit ? await getStatus("qoder") : null;
     if (status && status.installed && status.commandPath) {
       command = status.commandPath;
     }
@@ -86,7 +94,10 @@ export async function resolveQoderCliInvocation(
       !path.isAbsolute(command) &&
       !path.basename(command).includes("."));
 
-  const invocation: QoderCliInvocation = { command, useShell };
+  const managed = resolveManagedCliInvocation(command, []);
+  const invocation: QoderCliInvocation = managed
+    ? { command: managed.command, useShell: false, argsPrefix: managed.args }
+    : { command, useShell };
   if (cacheable) {
     qoderInvocationCache = {
       ...invocation,

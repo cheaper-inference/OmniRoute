@@ -18,6 +18,63 @@ OmniRoute integrates with three categories of CLI tools spread across three dedi
 
 Legacy routes redirect via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
+## Managed CLI updates
+
+Open **CLI Code's → CLI runtime updates** at `/dashboard/cli-code/runtimes` on the
+OmniRoute host. The panel shows the executable's installed version, the latest stable
+npm version, its installation source, and the last update-check result. **Check for
+updates** only reads version information. **Check and update installed CLIs** checks
+the supported installed tools and applies available updates sequentially; individual
+tools also have an update action. No update runs on page load or on a background timer.
+
+| Runtime       | Official npm package        | Panel operation                                                                       |
+| ------------- | --------------------------- | ------------------------------------------------------------------------------------- |
+| Codex CLI     | `@openai/codex`             | Check and update                                                                      |
+| Claude Code   | `@anthropic-ai/claude-code` | Check and update                                                                      |
+| Factory Droid | `droid`                     | Check and update                                                                      |
+| Qoder CLI     | `@qoder-ai/qodercli`        | Check and update the existing `qodercli` integration                                  |
+| OpenClaw      | `openclaw`                  | Check only; use OpenClaw's coordinated deployment update for its Gateway and services |
+
+These are the runtimes bundled in OmniRoute's CLI Docker image. An ordinary npm
+installation can discover the corresponding host tools too; detection is labeled
+**external**, not proof that OmniRoute installed the tool. Updating an external tool
+creates an OmniRoute-managed copy and activates it for OmniRoute's new local launches.
+The existing system installation is not overwritten. Missing tools are listed but are
+not installed by a batch update, and arbitrary packages or commands cannot be supplied.
+
+Each candidate is installed under the configured data directory in
+`cli-runtimes/<tool>/versions/`, then its package identity and executable version are
+checked. An atomic `active.json` switch selects a successfully verified candidate. A
+failed download, verification or activation leaves the previous selection in place.
+Previous active directories are retained so an already-running agent can finish using
+its original files; restart that agent session to use the new runtime. Persist the data
+directory when running in Docker so managed versions survive container replacement.
+
+Explicit `CLI_CODEX_BIN`, `CLI_CLAUDE_BIN`, `CLI_DROID_BIN`, `CLI_QODER_BIN` and
+`CLI_OPENCLAW_BIN` selections retain priority. The panel refuses to replace a tool with
+an explicit override. A failed version check remains an error or unknown state rather
+than being reported as up to date. Registry access, npm and a compatible Node.js runtime
+are required on the OmniRoute host; Windows paths containing spaces are supported.
+Claude Code and Droid additionally require stable npm 11.18+ within major 11 or npm 12
+to enforce the staged project’s explicit `allowScripts` policy in strict mode. Older,
+prerelease and unreviewed future-major npm versions are refused before installation;
+update npm separately, then retry. Codex and Qoder remain script-free and do not have
+this extra npm-version requirement. OmniRoute does not upgrade npm automatically.
+
+**Installed version** and **Provider client version** are separate. The latter is the
+identity OmniRoute advertises for its direct Codex/Claude provider calls. A verified
+managed update warms that identity's discovery cache without replacing a dashboard or
+environment override. The panel then requests model discovery for the affected active
+provider connections through the existing provider API. Discovery failures leave its
+previous catalog available and are reported separately from a successful CLI update.
+An updated CLI does not grant models that the account or provider does not permit.
+
+The manager API is `GET /api/cli-tools/runtime/managed` for inventory and `POST` to
+the same path with either `{"action":"check"}` or
+`{"action":"update","toolId":"codex"}`. Both require trusted loopback or private-LAN
+peer locality and management authentication, including when ordinary dashboard login is disabled.
+They remain unavailable through public tunnels or remote management-token bypasses.
+
 ---
 
 ## How It Works

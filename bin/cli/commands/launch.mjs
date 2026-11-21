@@ -6,6 +6,7 @@ import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 import { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";
+import { resolveManagedCliSpawn } from "../utils/managedCliSpawn.mjs";
 
 function stripTrailingSlash(value) {
   let s = String(value);
@@ -177,6 +178,8 @@ function probeWindowsBinary(command) {
  * @returns {Promise<{ command: string, shell: true|undefined }>}
  */
 export async function resolveClaudeSpawn(platform, opts = {}) {
+  const managed = resolveManagedCliSpawn("claude", platform);
+  if (managed) return managed;
   if (platform !== "win32") return { command: "claude", shell: undefined };
   const probe = opts.probe ?? probeWindowsBinary;
   const located = await probe("claude");
@@ -239,15 +242,19 @@ export async function runLaunchCommand(opts = {}, claudeArgs = []) {
     contextWindow,
   });
 
-  const { command, shell } = await resolveClaudeSpawn(process.platform);
+  const { command, shell, argsPrefix = [] } = await resolveClaudeSpawn(process.platform);
 
   return await new Promise((resolve) => {
-    const child = spawn(command, quoteShellArgsForSpawn(claudeArgs, process.platform, shell), {
-      env,
-      stdio: "inherit",
-      shell,
-      ...(process.platform === "win32" ? { windowsHide: true } : {}),
-    });
+    const child = spawn(
+      command,
+      quoteShellArgsForSpawn([...argsPrefix, ...claudeArgs], process.platform, shell),
+      {
+        env,
+        stdio: "inherit",
+        shell,
+        ...(process.platform === "win32" ? { windowsHide: true } : {}),
+      }
+    );
     let settled = false;
     let requestedSignalCode;
     let escalationTimer;
