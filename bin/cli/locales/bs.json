@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] bi izvršio {action}",
     "cancelled": "Otkazano.",
     "jsonOpt": "Izlaz kao JSON",
-    "yesOpt": "Preskoči potvrdu"
+    "yesOpt": "Preskoči potvrdu",
+    "positiveIntegerRequired": "Limit mora biti pozitivan cijeli broj."
   },
   "setup": {
     "title": "OmniRoute Setup",

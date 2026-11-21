@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] {action} ਕੀਤਾ ਜਾਵੇਗਾ",
     "cancelled": "ਰੱਦ ਕੀਤਾ ਗਿਆ।",
     "jsonOpt": "ਆਉਟਪੁੱਟ JSON ਵਜੋਂ ਦਿਓ",
-    "yesOpt": "ਪੁਸ਼ਟੀਕਰਨ ਪ੍ਰੌਂਪਟ ਛੱਡੋ"
+    "yesOpt": "ਪੁਸ਼ਟੀਕਰਨ ਪ੍ਰੌਂਪਟ ਛੱਡੋ",
+    "positiveIntegerRequired": "ਸੀਮਾ ਇੱਕ ਸਕਾਰਾਤਮਕ ਪੂਰਨ ਅੰਕ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।"
   },
   "setup": {
     "title": "OmniRoute ਸੈੱਟਅੱਪ",

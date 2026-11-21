@@ -890,6 +890,57 @@ export function parseQueueTrailers(message) {
   return out;
 }
 
+// ───────────────────────────── workflow jobs ─────────────────────────────
+
+/** Path ending of a real job's html_url: /actions/runs/<run id>/job/<job id>. */
+const WORKFLOW_JOB_PATH_RE = /\/actions\/runs\/(\d+)\/job\/(\d+)$/;
+
+/**
+ * Whether `job` (github.normalizeWorkflowJob), listed by GET /actions/runs/{runId}/jobs, is a REAL
+ * job of workflow run `runId`: one GitHub Actions ran (or skipped) for that run, not a check run
+ * somebody created through the Checks API.
+ *
+ * Measured on real GitHub, 2026-11-19 (rehearsal R3-e): a check run created through
+ * POST /check-runs with any workflow token that has `checks: write` lands in one of the commit's
+ * GitHub Actions check suites, and the jobs listing of the workflow run that owns that suite
+ * LISTS it, with that run's `run_id` and `workflow_name`, but with `html_url`
+ * https://github.com/<repo>/runs/<check run id>, `runner_id` null, no labels and no steps. A real
+ * job's `html_url` is https://github.com/<repo>/actions/runs/<run id>/job/<job id> (also at a
+ * re-run's later attempt), and its job id is its check run's id. A real job that never ran
+ * (skipped) has no runner and no steps either, but keeps that URL form, so the runner alone does
+ * not tell them apart; the URL does.
+ *
+ * So a job counts only when its `htmlUrl`, parsed as a URL, has a path ending in
+ * `/actions/runs/<runId>/job/<job.id>`, its `runId` is `runId` and its check run is its own
+ * (`checkRunId === id`). Defence in depth for green: a `success` with no runner (`runnerId` not a
+ * positive integer) is not counted either. Anything else, a missing or unparsable `html_url`
+ * included, is not a job (fail closed). Pure.
+ * @param {{id?: unknown, runId?: unknown, checkRunId?: unknown, htmlUrl?: unknown,
+ *          runnerId?: unknown, conclusion?: unknown}|null|undefined} job
+ * @param {number} runId  the workflow run whose jobs were listed
+ * @returns {boolean}
+ */
+export function isRealWorkflowJob(job, runId) {
+  if (!job || typeof job !== "object") return false;
+  if (!Number.isSafeInteger(runId) || runId <= 0) return false;
+  const { id } = job;
+  if (!Number.isSafeInteger(id) || id <= 0) return false;
+  if (job.runId !== runId || job.checkRunId !== id) return false;
+  if (typeof job.htmlUrl !== "string" || !job.htmlUrl) return false;
+  let path;
+  try {
+    path = new URL(job.htmlUrl).pathname;
+  } catch {
+    return false;
+  }
+  const match = WORKFLOW_JOB_PATH_RE.exec(path);
+  if (!match || match[1] !== String(runId) || match[2] !== String(id)) return false;
+  if (job.conclusion === "success") {
+    return Number.isSafeInteger(job.runnerId) && job.runnerId > 0;
+  }
+  return true;
+}
+
 // ───────────────────────────── paths ─────────────────────────────
 
 /**

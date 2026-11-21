@@ -557,6 +557,8 @@ Dieser Proxy:
 
 WebSocket Upgrades für das eingebettete Dashboard werden von einem Begleitserver an einem dedizierten Port verwaltet (siehe `src/lib/services/embedWsProxy.ts`).
 
+Jedes Upgrade wird autorisiert, bevor der Tunnel geöffnet wird, mit den gleichen Regeln wie bei der HTTP Einbettungsroute: Der Peer muss ein Loopback ohne Reverse-Proxy-Weiterleitungsheader sein, ein Browser- `Origin` muss ein Dashboard-Ursprung sein (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` erweitern die Loopback-Standardeinstellungen), und der Aufrufer benötigt eine Dashboard-Sitzung oder einen API -Schlüssel für den Verwaltungsbereich, es sei denn, die Dashboard-Anmeldung ist deaktiviert.
+
 **Sicherheit:** Die eingebetteten Proxy-Routen sind unter `LOCAL_ONLY_API_PREFIXES` klassifiziert und können nur über Loopback erreicht werden. Ein Angreifer, der ein JWT über einen Cloudflare/Ngrok Tunnel erhält, kann keine Proxy-Verbindung zu eingebetteten Diensten herstellen.
 
 ---

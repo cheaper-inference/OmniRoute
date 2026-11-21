@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Αναφορά API
+## API Αναφορά
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Συνάρτηση εργοστασίου που δημιουργεί ένα αντικείμενο Plugin με προεπιλεγμένες τιμές.
+Εργοστασιακή λειτουργία που δημιουργεί ένα αντικείμενο Plugin με προεπιλογές.
 
 **Παράμετροι:**
 
-- `name` (string, απαιτείται) — Όνομα plugin σε μορφή kebab-case
-- `priority` (number, προαιρετικό, προεπιλογή: 100) — Η χαμηλότερη τιμή εκτελείται πρώτη
-- `enabled` (boolean, προαιρετικό, προεπιλογή: true) — Να ξεκινά ενεργοποιημένο;
-- `onRequest` (function, προαιρετικό) — Εκτελείται πριν από τον χειριστή συνομιλίας
-- `onResponse` (function, προαιρετικό) — Εκτελείται μετά τον χειριστή συνομιλίας
-- `onError` (function, προαιρετικό) — Εκτελείται σε περίπτωση σφάλματος του χειριστή
+- `name` (string, απαιτείται) — Όνομα πρόσθετου σε θήκη κεμπάπ
+- `priority` (αριθμός, προαιρετικό, προεπιλογή: 100) — Το Lower εκτελείται πρώτα
+- `enabled` (boolean, προαιρετικό, προεπιλογή: true) — Ενεργοποιήθηκε η έναρξη;
+- `onRequest` (συνάρτηση, προαιρετικό) — Εκτελείται πριν από το πρόγραμμα χειρισμού συνομιλίας
+- `onResponse` (συνάρτηση, προαιρετικό) — Εκτελείται μετά το πρόγραμμα χειρισμού συνομιλίας
+- `onError` (συνάρτηση, προαιρετικό) — Εκτελείται με σφάλμα χειριστή
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Αποκλείει το αίτημα και, προαιρετικά, επιστρέφει μια προσαρμοσμένη απόκριση.
+Αποκλείστε το αίτημα και προαιρετικά επιστρέψτε μια προσαρμοσμένη απάντηση.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Τροποποιεί το σώμα του αιτήματος πριν αυτό φτάσει στον πάροχο.
+Τροποποιήστε το σώμα του αιτήματος πριν φτάσει στον πάροχο.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Επισυνάπτει μεταδεδομένα στο περιβάλλον του αιτήματος.
+Επισυνάψτε μεταδεδομένα στο πλαίσιο αιτήματος.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Περιβάλλον Plugin (`PluginContext`)
+## Πλαίσιο προσθήκης (`PluginContext`)
 
-| Πεδίο       | Τύπος                     | Περιγραφή                        |
-| ----------- | ------------------------- | -------------------------------- |
-| `requestId` | `string`                  | Μοναδικό αναγνωριστικό αιτήματος |
-| `model`     | `string`                  | Όνομα ζητούμενου μοντέλου        |
-| `provider`  | `string`                  | ID παρόχου προορισμού            |
-| `body`      | `Record<string, unknown>` | Σώμα αιτήματος                   |
-| `headers`   | `Record<string, string>`  | Κεφαλίδες αιτήματος              |
-| `metadata`  | `Record<string, unknown>` | Μεταβλητά μεταδεδομένα           |
-| `timestamp` | `number`                  | Χρονοσήμανση αιτήματος           |
+| Πεδίο        | Τύπος                     | Περιγραφή                                |
+| ------------ | ------------------------- | ---------------------------------------- |
+| `requestId`  | `string`                  | Μοναδικό αναγνωριστικό αιτήματος         |
+| `model`      | `string`                  | Ζητήθηκε όνομα μοντέλου                  |
+| `provider`   | `string`                  | Στόχος πάροχος ID                        |
+| `body`       | `Record<string, unknown>` | Σώμα αιτήματος                           |
+| `headers`    | `Record<string, string>`  | Κεφαλίδες αιτημάτων (βλ. σημείωση)       |
+| `metadata`   | `Record<string, unknown>` | Μεταβλητά μεταδεδομένα                   |
+| `timestamp`  | `number`                  | Ζητήστε χρονική σήμανση                  |
+| `apiKeyInfo` | `object` (προαιρετικό)    | Μεταδεδομένα κλειδιού API (βλ. σημείωση) |
+
+Το περιβάλλον δεν φέρει ποτέ τα διαπιστευτήρια του πελάτη: οι κεφαλίδες `authorization`, `x-api-key`, `proxy-authorization` και `cookie` αφαιρούνται (οποιοδήποτε περίβλημα) και το `apiKeyInfo` διατηρεί τα μεταδεδομένα του κλειδιού (όπως `id`, `name` και `scopes`) αλλά όχι την τιμή κλειδιού ή το δακτυλικό του αποτύπωμα (`redactPluginContext()` σε `src/lib/plugins/hooks.ts`). Αυτό ισχύει για `onRequest`, `onResponse` και `onError`.
 
 ## Δηλωτικό αρχείο (`plugin.json`)
 
@@ -138,19 +141,18 @@ onRequest: (ctx) => {
 }
 ```
 
-## Σύστημα Δικαιωμάτων
+## Σύστημα αδειών
 
-Τα πρόσθετα εκτελούνται σε περιβάλλον sandboxed VM. Η πρόσβαση σε εξωτερικούς πόρους απαιτεί ρητά δικαιώματα:
+Τα πρόσθετα είναι** δεν έχει άμμο** . Κάθε ενεργό πρόσθετο εκτελείται ως ξεχωριστή, συνηθισμένη θυγατρική διεργασία Node.js (`loadPlugin()` σε `src/lib/plugins/loader.ts`) στον ίδιο χρήστη λειτουργικού συστήματος με OmniRoute, χωρίς πλαίσιο VM και σημαίες άδειας Node.js. Ο κώδικας προσθήκης μπορεί να χρησιμοποιεί `node:fs`, `node:child_process`, `fetch` και κάθε άλλο Node.js API: μπορεί να διαβάσει και να γράψει οποιοδήποτε αρχείο μπορεί ο χρήστης OmniRoute (συμπεριλαμβανομένου του καταλόγου δεδομένων), να εκτελέσει προγράμματα και να φτάσει στο δίκτυο.
 
-| Δικαίωμα     | Παρέχει πρόσβαση σε                                          |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Διακομιστής μεσολάβησης μόνο για ανάγνωση του `process.env`  |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Το `requires.permissions` του μανιφέστου δέχεται `network`, `file-read`, `file-write`, `env` και `exec`, αλλά σήμερα μόνο `env` έχει αποτέλεσμα κατά το χρόνο εκτέλεσης:
 
-Χωρίς κάποιο δικαίωμα, τα αντίστοιχα globals απλώς δεν είναι διαθέσιμα στο sandbox.
+| Αδεια                                        | Επίδραση σήμερα                                                                                                                                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Η διαδικασία προσθήκης λαμβάνει επίσης `PORT`, `HOSTNAME`, `TZ` και `TMPDIR`. Χωρίς αυτό, λαμβάνει μόνο `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` και `PLUGIN_NAME` (συν `SystemRoot` και `windir` στο Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Κανένας. Είναι μόνο δηλώσεις: τίποτα δεν μπλοκάρεται όταν λείπουν.                                                                                                                                                                          |
+
+Η εγκατάσταση ενός πρόσθετου είναι σαν να εγκαθιστάτε οποιοδήποτε άλλο πρόγραμμα στον κεντρικό υπολογιστή. Εγκαταστήστε μόνο προσθήκες των οποίων την πηγή εμπιστεύεστε.
 
 ## Σχήμα Ρυθμίσεων
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## Παραδείγματα
 
-### Καταγραφέας Αιτημάτων
+### Καταγραφικό αιτήματος
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Περιοριστής Ρυθμού
+### Rate Limiter
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 λεπτό
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Μετασχηματιστής Απόκρισης
+### Μετασχηματιστής απόκρισης
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

@@ -557,6 +557,8 @@ Wakala huyu:
 
 uboreshaji wa WebSocket kwa dashibodi iliyopachikwa hushughulikiwa na seva shirikishi kwenye mlango maalum (ona `src/lib/services/embedWsProxy.ts`).
 
+Kila uboreshaji umeidhinishwa kabla ya handaki kufunguka, kwa sheria sawa na njia ya kupachika HTTP : programu rika lazima iwe kitanzi kisicho na kichwa cha usambazaji mbadala cha seva mbadala, kivinjari `Origin` lazima kiwe asili ya dashibodi (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` kupanua chaguo-msingi za kitanzi), na mpigaji simu anahitaji kikao cha dashibodi au ufunguo API wa usimamizi isipokuwa uwezekena na wigo wa dashibodi ya usimamizi.
+
 **Usalama:** Njia za proksi zilizopachikwa zimeainishwa chini ya `LOCAL_ONLY_API_PREFIXES` na zinaweza kufikiwa tu kutoka kwa loopback. Mshambulizi anayepata JWT kupitia handaki ya Cloudflare/Ngrok hawezi kuwa proksi katika huduma zilizopachikwa.
 
 ---

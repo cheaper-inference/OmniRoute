@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-token-limit-catalog-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -31,9 +32,7 @@ test.after(() => {
 });
 
 async function getModel(target = TARGET) {
-  const response = await catalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const response = await getSettledModelCatalogResponse(catalog);
   assert.equal(response.status, 200, "model catalog must be available before projecting limits");
   const body = (await response.json()) as { data: Array<Record<string, unknown>> };
   return body.data.find((model) => model.id === target);

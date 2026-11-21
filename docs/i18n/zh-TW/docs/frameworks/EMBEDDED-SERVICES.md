@@ -556,6 +556,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 嵌入式儀表板的WebSocket升級由專用連接埠上的配套伺服器處理（請參閱`src/lib/services/embedWsProxy.ts`）。
 
+每次 WebSocket 升級都會在隧道開啟前完成授權，並遵循與 HTTP 嵌入路由相同的規則：連線對端必須是回送位址，不得帶有反向代理轉送標頭；瀏覽器的 `Origin` 必須是儀表板來源（`LIVE_WS_ALLOWED_ORIGINS` 和 `LIVE_WS_ALLOWED_HOSTS` 可擴充回送預設值）；除非停用儀表板登入，呼叫端必須持有儀表板工作階段或管理範圍的 API 金鑰。
+
 **安全：**嵌入代理路由屬於`LOCAL_ONLY_API_PREFIXES` ，只能從環回到達。透過Cloudflare/Ngrok隧道取得JWT的攻擊者無法代理到嵌入式服務。
 
 ---

@@ -436,7 +436,7 @@ OmniRoute 會自動重新整理 Token。如果問題持續發生：
 2. **永久修正：** 在 `docker run` 命令中使用 `-p 127.0.0.1:20128:20128`，明確繫結至 IPv4：
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    這會強制使用 IPv4 繫結，也可避免將代理伺服器暴露於主機的所有介面上。
 

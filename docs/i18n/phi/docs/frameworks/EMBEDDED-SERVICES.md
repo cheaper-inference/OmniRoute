@@ -557,6 +557,8 @@ Ang proxy na ito:
 
 Ang mga pag-upgrade WebSocket para sa naka-embed na dashboard ay pinangangasiwaan ng isang kasamang server sa isang nakalaang port (tingnan `src/lib/services/embedWsProxy.ts`).
 
+Ang bawat pag-upgrade ay pinapahintulutan bago magbukas ang tunnel, na may parehong mga panuntunan tulad ng HTTP embed na ruta: ang peer ay dapat na loopback na walang reverse-proxy forwarding header, ang isang browser `Origin` ay dapat na isang dashboard na pinanggalingan (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extend ang loopback defaults), at ang tumatawag ay nangangailangan ng isang dashboard session o isang management-scope API key maliban kung ang dashboard login ay hindi pinagana.
+
 **Seguridad:** Ang mga naka-embed na proxy na ruta ay inuri sa ilalim ng `LOCAL_ONLY_API_PREFIXES` at maaari lamang maabot mula sa loopback. Ang isang attacker na nakakakuha ng JWT sa pamamagitan ng Cloudflare/Ngrok tunnel ay hindi maaaring mag-proxy sa mga naka-embed na serbisyo.
 
 ---

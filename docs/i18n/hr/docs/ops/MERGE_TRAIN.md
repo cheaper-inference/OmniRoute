@@ -4,10 +4,9 @@
 
 ---
 
-Od v3.8.49 (WS3.2/WS3.4 plana kvalitete/brzine) zadani put spajanja
-pregledanih PR-ova u `release/vX.Y.Z` jest **Mergifyjev red za spajanje** (`.mergify.yml`);
-**ručni vlak za spajanje** dokumentiran u nastavku REZERVNA je opcija — koristi se tijekom incidenata,
-zamrzavanja izdanja ili ako se Mergifyjev plan Open Source ikada promijeni.
+> **2026-11-19: Mergify red čekanja za spajanje je povučen** (odluka vlasnika). `.mergify.yml` više ne definira red i odbija naredbe Mergify koje spajaju ili prepisuju zahtjev za povlačenjem. Izdanja PRs spajaju se ručno pod skupom pravila repozitorija "Zahtijevaj zelena vrata na aktivnom izdanju" (`Gate / CI` + `Gate / Quality`) dok se omni-queue ne pokrene u načinu rada uživo, a nakon toga kroz omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Odjeljci Mergify u nastavku opisuju red čekanja kakav je bio.
+
+Od v3.8.49 (WS3.2/WS3.4 quality/velocity plana) zadana staza spajanja za pregledani PRs u `release/vX.Y.Z` je** Mergify red čekanja za spajanje** (`.mergify.yml`); the** ručni merge-train** dokumentiran u nastavku je FALLBACK — koji se koristi tijekom incidenata, zamrzavanja izdanja ili ako se plan Mergify Open Source ikada promijeni.
 
 ## Zadani put: Mergifyjev red čekanja
 
