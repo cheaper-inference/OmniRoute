@@ -30,8 +30,6 @@ const proxyAuth = `Basic ${Buffer.from("test:password").toString("base64")}`;
 let upstream: http2.Http2SecureServer;
 let plainProxy: http.Server;
 let secureProxy: https.Server;
-let secureIpv6Proxy: https.Server;
-let loopbackTls: https.ServerOptions;
 let socksProxy: net.Server;
 let upstreamUrl: string;
 
@@ -43,9 +41,9 @@ function trackSockets(server: net.Server): void {
   });
 }
 
-async function listen(server: net.Server, host = "127.0.0.1"): Promise<number> {
+async function listen(server: net.Server): Promise<number> {
   trackSockets(server);
-  server.listen(0, host);
+  server.listen(0, "127.0.0.1");
   await once(server, "listening");
   return (server.address() as net.AddressInfo).port;
 }
@@ -116,7 +114,7 @@ test.before(async () => {
     ],
   });
   tls.setDefaultCACertificates([...originalCa, pems.cert]);
-  loopbackTls = { key: pems.private, cert: pems.cert };
+  const loopbackTls = { key: pems.private, cert: pems.cert };
   upstream = http2.createSecureServer({ ...loopbackTls, allowHTTP1: true });
   upstream.on("session", (session) => {
     sessions.add(session);
@@ -158,7 +156,7 @@ test.after(async () => {
   for (const session of sessions) session.destroy();
   for (const socket of sockets) socket.destroy();
   await Promise.all(
-    [upstream, plainProxy, secureProxy, secureIpv6Proxy, socksProxy]
+    [upstream, plainProxy, secureProxy, socksProxy]
       .filter(Boolean)
       .map((server) => new Promise<void>((resolve) => server.close(() => resolve())))
   );
@@ -231,24 +229,37 @@ test("HTTPS proxies send DNS SNI and verify IP certificate identity", async () =
   }
 });
 
-test("HTTPS proxies omit SNI for bracketed IPv6 literals", async (context) => {
-  secureIpv6Proxy = https.createServer(loopbackTls);
-  tunnel(secureIpv6Proxy);
-  let port: number;
-  try {
-    port = await listen(secureIpv6Proxy, "::1");
-  } catch (error) {
-    if (!["EADDRNOTAVAIL", "EAFNOSUPPORT"].includes((error as NodeJS.ErrnoException).code ?? "")) {
+test("HTTPS proxies omit SNI and verify identity for bracketed IPv6 literals", async (context) => {
+  const port = (secureProxy.address() as net.AddressInfo).port;
+  const connectTls = tls.connect;
+  let verifiedHost: string | undefined;
+  context.mock.method(tls, "connect", (options: tls.ConnectionOptions) => {
+    if (options.host !== "::1") return connectTls(options);
+
+    // Route TCP through the IPv4 fixture so the TLS check also runs on IPv4-only hosts.
+    // Keep the original TLS options and delegate certificate identity verification.
+    const transport = net.connect(Number(options.port), "127.0.0.1");
+    const verify = options.checkServerIdentity ?? tls.checkServerIdentity;
+    try {
+      return connectTls({
+        ...options,
+        socket: transport,
+        checkServerIdentity(host, certificate) {
+          verifiedHost = host;
+          return verify(host, certificate);
+        },
+      });
+    } catch (error) {
+      transport.destroy();
       throw error;
     }
-    context.skip("IPv6 loopback is unavailable");
-    return;
-  }
+  });
   const [[socket]] = await Promise.all([
-    once(secureIpv6Proxy, "secureConnection") as Promise<[tls.TLSSocket]>,
+    once(secureProxy, "secureConnection") as Promise<[tls.TLSSocket]>,
     request(createProxyDispatcher(`https://test:password@[::1]:${port}?family=ipv6`)),
   ]);
   assert.ok(!socket.servername);
+  assert.equal(verifiedHost, "::1");
 });
 
 test("relay pool and fresh-socket retry honor the startup opt-out", async () => {
