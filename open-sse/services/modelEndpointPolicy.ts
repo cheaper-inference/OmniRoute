@@ -109,15 +109,26 @@ function classifyOpenRouterModel(modelId: string): ModelEndpointDecision | null 
     : null;
 }
 
+const GEMINI_DECISION_IDS = new Set([
+  "gemini-decision-1",
+  "gemini/gemini-decision-1",
+]);
+
+function isDecisionsOnlyModel(provider: string | null | undefined, modelId: string): boolean {
+  return isDecisionsOnlyProvider(provider) ||
+    (provider?.trim().toLowerCase() === "gemini" &&
+      GEMINI_DECISION_IDS.has(modelId.trim().toLowerCase()));
+}
+
 export function getModelEndpointDecision(
   provider: string | null | undefined,
   modelId: string,
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
-  // Decisions-only providers (TypeSafe Jev, #14498) are never chat models, even
-  // when a stored row carries the synthetic `["chat"]` default.
-  if (isDecisionsOnlyProvider(provider)) {
+  // Decisions-only providers and Gemini Decision 1 are never chat models,
+  // including when a stored row has a synthetic ["chat"] endpoint.
+  if (isDecisionsOnlyModel(provider, modelId)) {
     return { kind: "non-chat", chatSelectable: false, reason: "provider-policy" };
   }
   if (provider?.trim().toLowerCase() === "openrouter") {

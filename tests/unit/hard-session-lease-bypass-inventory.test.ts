@@ -76,6 +76,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/v1/audio/transcriptions/route.ts": 3,
     "src/app/api/v1/audio/translations/route.ts": 2,
     "src/app/api/v1/classify/route.ts": 1,
+    // Gemini Decisions route selects only connections allowed by the caller API key.
+    "src/app/api/v1/decisions/route.ts": 1,
     // v3.8.51 #11754: the second resolveImageRouteModel() call (a duplicate
     // of the retirement-check one hoisted before enforceApiKeyPolicy) was
     // removed as dead redundant code, 6->5. #12653 added combo target
@@ -273,6 +275,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
+    // Gemini Decisions route reads project metadata to avoid retrying sibling keys.
+    "src/app/api/v1/decisions/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,

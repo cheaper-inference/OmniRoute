@@ -59,6 +59,7 @@ export interface ProviderConnectionView {
   consecutiveUseCount: number;
   priority: number;
   lastError: string | null;
+  lastErrorAt: string | null;
   lastErrorType: string | null;
   lastErrorSource: string | null;
   errorCode: string | number | null;
@@ -112,6 +113,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
     consecutiveUseCount: toNumber(row.consecutiveUseCount, 0),
     priority: toNumber(row.priority, 999),
     lastError: toStringOrNull(row.lastError),
+    lastErrorAt: toStringOrNull(row.lastErrorAt),
     lastErrorType: toStringOrNull(row.lastErrorType),
     lastErrorSource: toStringOrNull(row.lastErrorSource),
     errorCode:
