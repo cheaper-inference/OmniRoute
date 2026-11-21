@@ -12,7 +12,8 @@ import { scopeGeminiThoughtSignatureNamespace } from "../services/geminiThoughtS
 export function initTranslateStreamState(
   sourceFormat: unknown,
   connectionId: string | null | undefined,
-  model: unknown
+  model: unknown,
+  sessionKey: string | null = null
 ) {
   return {
     ...initState(sourceFormat),
@@ -20,5 +21,7 @@ export function initTranslateStreamState(
     // Raw serving connection id — the Claude thinking store binds entries on it
     // (#17324: signatures are org-scoped; cross-org replay is a hard 400).
     connectionId: typeof connectionId === "string" ? connectionId : null,
+    // Owner session of the Claude thinking store's opt-in per-session caps.
+    sessionKey,
   };
 }

@@ -310,6 +310,11 @@ export function buildReasoningCacheScope(
   return sessionKey ? `${apiKeyScope}\x1f${sessionKey}` : apiKeyScope;
 }
 
+/** The scope when it names a session (api key + session), else null: no session, no per-session bucket. */
+export function sessionScopeOf(scope: string | null | undefined): string | null {
+  return scope?.includes("\x1f") ? scope : null;
+}
+
 /**
  * Cache key for reasoning tied to one tool call. Clients can reuse ids such as `call_0`, so the
  * id only selects an entry inside its scope. Callers with no request context keep the plain id.

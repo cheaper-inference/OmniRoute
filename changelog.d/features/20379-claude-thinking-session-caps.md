@@ -1,0 +1,1 @@
+- **feat(claude):** opt-in `CLAUDE_THINKING_SESSION_CAPS` (default off) caps the signed-thinking replay store per session by turns, tool_use ids, blocks and bytes, evicting whole turns. ([#20379](https://github.com/cheaper-inference/OmniRoute/pull/20379))
