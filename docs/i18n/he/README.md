@@ -93,7 +93,7 @@
 
 [![גרסת npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM חודשי](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![רישיון: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![משיכות Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![הורדות Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -777,7 +777,7 @@ omniroute configure codex          # גם: claude opencode qwen aider goose gemi
   <tr><th align="left">פלטפורמה</th><th align="left">התקנה</th><th align="left">יתרונות מרכזיים</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (גלובלי)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">פקודה אחת, בכל מערכת הפעלה</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (גלובלי)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">אותו tarball מהרישום, התקנות מהירות יותר</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">תמיכה במספר ארכיטקטורות <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">תמיכה במספר ארכיטקטורות <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>מחשב שולחני (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">חלון מקורי + מגש המערכת — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>שורת התפריטים (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">מפקח על השרת ומעדכן אותו אוטומטית — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> מקורי</td><td align="left">Raspberry Pi, שרתי ARM, Apple Silicon</td></tr>
@@ -1101,7 +1101,7 @@ Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` עוקב אחר גרסת ה־SemVer היציבה הגבוהה ביותר ש**פורסמה**. הוא אינו עוקב אחר `main` ב־git. הצמידו את `:X.Y.Z` עבור GitOps. ראו [ערוצי הפצה של Docker](docs/guides/DOCKER_GUIDE.md#release-channels). התמונה מקבעת את **`OMNIROUTE_MEMORY_MB=1024`**. זה מספיק עבור לוח הבקרה וצ'אט קל. **סוכני קידוד** (`POST /v1/responses` מתוך Claude Code, Codex, Grok, …) זקוקים לערימת V8 גדולה בהרבה, אחרת התהליך מסתיים בשגיאת `FATAL ERROR` בנפח של כ־12 GiB תחת שני הקשרים ארוכים חופפים. הגדירו את הקונטיינר כך שנפחו יהיה גדול מהערימה (מאגרי native נמצאים מחוץ ל־V8):
@@ -1115,7 +1115,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 הטבלה המלאה: [מדריך Docker — זיכרון RAM בזמן ריצה](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1323,7 +1323,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
   <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בתיקיות <code>src/</code> ו-<code>open-sse/</code> (ללא <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>מסגרת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 240 הגירות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 244 הגירות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + הטמעות וקטוריות שעברו קוונטיזציה ל-int8, דעיכה מטופסת</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1336,7 +1336,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
   <tr><td nowrap><b>בדיקות</b></td><td>מריץ הבדיקות של Node.js + Vitest — <b>יותר מ-60,000 הצהרות בדיקה סטטיות</b> ביותר מ-8,400 קובצי בדיקות במעקב (יחידה, אינטגרציה, E2E, אבטחה, מערכת אקולוגית)</td></tr>
   <tr><td nowrap><b>פלטפורמות</b></td><td>מחשב שולחני (Electron) · Android (Termux) · PWA (כל דפדפן)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — פרסום npm אוטומטי ל-npm + Docker Hub בעת שחרור</td></tr>
-  <tr><td nowrap><b>קישורים</b></td><td><a href="https://omniroute.online">אתר</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>קישורים</b></td><td><a href="https://omniroute.online">אתר</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

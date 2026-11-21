@@ -378,8 +378,7 @@ e jikọtara malitere, ya mere mee nkewa site na full clone ma ọ bụ buru ụ
 tag gara aga dị, `package.json` bụ ụdị ebumnuche, issue `release-freeze` mepere emepe, ọ nweghị
 issue `Release branch not green` mepere emepe
 n’alaka mwepụta dị adị — alaka na-adịghị adị na-akọ `?` amaghị, ọ dịghị mgbe ọ ga-abụ
-green — ahaziri kwụ `release` nke Mergify (G11: `queue_rules`, `checks_timeout`,
-label `queue`), ruleset `release/*` ka na-egbochi nhichapụ na force-push, na
+green — omni-queue na-ejikọta arịrịọ pull n'ime ngalaba ntọhapụ (G11: `config/merge-queue/config.json` dị irè, `bases` ya jikwaa ngalaba ntọhapụ, `mode` `live`, akara ya dị), ruleset `release/*` ka na-egbochi nhichapụ na force-push, na
 `stable/v3` na `develop` adịghịkwa), nzọụkwụ alaka abụọ ahụ, trigger workflow ndị na-adịghị arụ ọrụ
 na ọnọdụ `if:` ndị ga-aghọ eziokwu (yana ndị variable repository ka na-egbochi ma ọ bụ
 ndị a kpọgidere na repository canonical), dist-tag ndị a tụrụ anya ha (`latest` → 3.9.0, `next` na

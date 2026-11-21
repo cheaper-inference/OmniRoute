@@ -52,7 +52,9 @@ test("#5109: concurrent proxy reachability checks share one TCP probe", async ()
   }
 });
 
-test("#5109: transient unreachable results use a short negative cache", async () => {
+test("#5109: transient unreachable results use a short negative cache", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"] });
+  const cacheTtlMs = 5;
   const proxyUrl = "http://127.0.0.1:1081";
   invalidateProxyHealth(proxyUrl);
 
@@ -62,23 +64,21 @@ test("#5109: transient unreachable results use a short negative cache", async ()
     return probeCount > 1;
   });
 
-  // The negative TTL is 5ms. Wall-clock CI scheduling can pause longer than
-  // that between the initial await and its cache assertion. Advance a test
-  // clock explicitly instead of relying on sleep/timer precision.
-  const realNow = Date.now;
-  let now = realNow();
-  Date.now = () => now;
   try {
-    assert.equal(await isProxyReachable(proxyUrl, 120, 5), false);
+    assert.equal(await isProxyReachable(proxyUrl, 120, cacheTtlMs), false);
     assert.equal(getCachedProxyHealth(proxyUrl), false);
 
-    now += 6;
+    t.mock.timers.tick(cacheTtlMs - 1);
+    assert.equal(await isProxyReachable(proxyUrl, 120, cacheTtlMs), false);
+    assert.equal(probeCount, 1);
 
-    assert.equal(await isProxyReachable(proxyUrl, 120, 5), true);
+    t.mock.timers.tick(1);
+    assert.equal(getCachedProxyHealth(proxyUrl), null);
+
+    assert.equal(await isProxyReachable(proxyUrl, 120, cacheTtlMs), true);
     assert.equal(getCachedProxyHealth(proxyUrl), true);
     assert.equal(probeCount, 2, "failed probes must not poison the proxy for 30 seconds");
   } finally {
-    Date.now = realNow;
     __setProxyHealthTcpCheckForTesting(null);
     invalidateProxyHealth(proxyUrl);
   }

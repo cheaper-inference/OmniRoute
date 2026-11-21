@@ -2,7 +2,7 @@
  * Firecrawl Web Fetch Executor
  *
  * Fetches content from a URL using the Firecrawl scrape API.
- * POST https://api.firecrawl.dev/v1/scrape
+ * POST https://api.firecrawl.dev/v2/scrape
  *
  * Free tier: 1,000 credits/month, no credit card required.
  * Docs: https://docs.firecrawl.dev/api-reference/endpoint/scrape
@@ -24,7 +24,8 @@ function getFirecrawlBaseUrl(credentials?: WebFetchCredentials): string {
   const envBase = process.env.FIRECRAWL_BASE_URL?.trim();
   if (envBase) return envBase.replace(/\/+$/, "");
   const providerData = credentials?.providerSpecificData;
-  const credBase = typeof credentials?.baseUrl === "string" ? credentials.baseUrl : providerData?.baseUrl;
+  const credBase =
+    typeof credentials?.baseUrl === "string" ? credentials.baseUrl : providerData?.baseUrl;
   if (typeof credBase === "string" && credBase.trim()) {
     return credBase.trim().replace(/\/+$/, "");
   }
@@ -56,6 +57,34 @@ function mapFormat(format: WebFetchFormat): string {
     default:
       return "markdown";
   }
+}
+
+/** Firecrawl v2 scrape rejects a `waitFor` delay above this many milliseconds. */
+const FIRECRAWL_V2_MAX_WAIT_MS = 60_000;
+
+/**
+ * Map `wait_for_selector` onto the scrape body.
+ *
+ * v2 `waitFor` is an integer millisecond delay, not a selector: a plain
+ * non-negative integer becomes that delay (clamped to the v2 limit), anything
+ * else goes through the actions list, which waits until the element is visible.
+ * A self-hosted base URL still speaks v1, which takes the string in `waitFor`.
+ */
+function applyWaitForSelector(
+  requestBody: Record<string, unknown>,
+  waitForSelector: string,
+  isDefaultBaseUrl: boolean
+): void {
+  if (!isDefaultBaseUrl) {
+    requestBody.waitFor = waitForSelector;
+    return;
+  }
+  const trimmed = waitForSelector.trim();
+  if (/^\d+$/.test(trimmed)) {
+    requestBody.waitFor = Math.min(Number(trimmed), FIRECRAWL_V2_MAX_WAIT_MS);
+    return;
+  }
+  requestBody.actions = [{ type: "wait", selector: waitForSelector }];
 }
 
 interface FirecrawlScrapeOptions {
@@ -97,12 +126,15 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
   // The `includeMetadata` flag only controls whether we surface metadata
   // in our response (see response parsing below).
 
-  if (depth > 0) {
+  // `depth` stays on our own request schema, but the Firecrawl v2 scrape
+  // endpoint cannot express it: maxDepth moved to the crawl endpoint as
+  // maxDiscoveryDepth. A self-hosted base URL still speaks v1, which accepts it.
+  if (!isDefaultBaseUrl && depth > 0) {
     requestBody.maxDepth = depth;
   }
 
   if (waitForSelector) {
-    requestBody.waitFor = waitForSelector;
+    applyWaitForSelector(requestBody, waitForSelector, isDefaultBaseUrl);
   }
 
   const controller = new AbortController();
@@ -119,7 +151,8 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
       headers.Authorization = `Bearer ${credentials.apiKey}`;
     }
 
-    const response = await fetch(`${baseUrl}/v1/scrape`, {
+    const scrapePath = isDefaultBaseUrl ? "/v2/scrape" : "/v1/scrape";
+    const response = await fetch(`${baseUrl}${scrapePath}`, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),

@@ -4,7 +4,7 @@
 
 ---
 
-## Farawa Cikin Sauri
+## Saurin Farawa
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Manazartar API
+## API Reference
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Aikin factory wanda ke ƙirƙirar abin Plugin tare da tsoffin ƙimomi.
+Aikin masana'anta wanda ke haifar da abin toshewa tare da gazawa.
 
-**Sigogi:**
+**Siga:**
 
-- `name` (string, wajibi) — Sunan plugin a tsarin kebab-case
-- `priority` (number, na zaɓi, tsoho: 100) — Mafi ƙarancin ƙima ne ke fara aiki
-- `enabled` (boolean, na zaɓi, tsoho: true) — A fara a kunne?
-- `onRequest` (function, na zaɓi) — Yana aiki kafin chat handler
-- `onResponse` (function, na zaɓi) — Yana aiki bayan chat handler
-- `onError` (function, na zaɓi) — Yana aiki idan kuskure ya faru a handler
+- `name` (kirtani, da ake buƙata) — Sunan plugin a cikin kebab-case
+- `priority` (lamba, na zaɓi, tsoho: 100) — Ƙananan yana farawa da farko
+- `enabled` (boolean, na zaɓi, tsoho: gaskiya) — An kunna farawa?
+- `onRequest` (aiki, na zaɓi) — Yana gudana kafin mai sarrafa taɗi
+- `onResponse` (aiki, na zaɓi) — Yana gudana bayan mai sarrafa taɗi
+- `onError` (aiki, na zaɓi) — Yana gudana akan kuskuren mai sarrafa
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Toshe buƙatar sannan, idan ana so, a mayar da amsa ta musamman.
+Toshe buƙatun kuma a zaɓi mayar da martani na al'ada.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Gyara jikin buƙatar kafin ya isa ga provider.
+Gyara ƙungiyar buƙatar kafin ta kai ga mai bayarwa.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Mahallin Plugin (`PluginContext`)
+## Ma'anar Plugin (`PluginContext`)
 
-| Fili        | Nau'i                     | Bayani                      |
-| ----------- | ------------------------- | --------------------------- |
-| `requestId` | `string`                  | Mai gano buƙata na musamman |
-| `model`     | `string`                  | Sunan model ɗin da aka nema |
-| `provider`  | `string`                  | ID na provider da aka nufa  |
-| `body`      | `Record<string, unknown>` | Jikin buƙata                |
-| `headers`   | `Record<string, string>`  | Headers na buƙata           |
-| `metadata`  | `Record<string, unknown>` | Metadata mai iya sauyawa    |
-| `timestamp` | `number`                  | Lokacin buƙata              |
+| Filin        | Nau'in                    | Bayani                                 |
+| ------------ | ------------------------- | -------------------------------------- |
+| `requestId`  | `string`                  | Mai gano buƙatun musamman              |
+| `model`      | `string`                  | Sunan samfurin da ake nema             |
+| `provider`   | `string`                  | mai bada manufa ID                     |
+| `body`       | `Record<string, unknown>` | Nemi jiki                              |
+| `headers`    | `Record<string, string>`  | Nemi kanun labarai (duba bayanin kula) |
+| `metadata`   | `Record<string, unknown>` | metadata mai canzawa                   |
+| `timestamp`  | `number`                  | Nemi tambarin lokaci                   |
+| `apiKeyInfo` | `object` (na zaɓi)        | API key metadata (duba bayanin kula)   |
+
+Mahallin bai taɓa ɗaukar takaddun shaidar abokin ciniki ba: ana cire masu kai na `authorization`, `x-api-key`, `proxy-authorization` da `cookie` (kowane casing), kuma `apiKeyInfo` yana adana metadata na maɓalli (kamar `id`, `name` da `scopes`) amma ba ƙima mai mahimmanci ko sawun yatsansa (`redactPluginContext()` a `src/lib/plugins/hooks.ts`). Wannan ya shafi `onRequest`, `onResponse` da `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Ko kuma a matsayin booleans masu sauƙi (tsohon fifiko 100):
 }
 ```
 
-## Tsarin Izini
+## Tsarin izini
 
-Plugins suna aiki a cikin mahallin VM mai killacewa. Samun dama ga albarkatun waje yana buƙatar takamaiman izini:
+Plugins su ne** ba sandboxed** . Kowane plugin mai aiki yana gudana azaman keɓanta, tsarin tsarin yara na Node.js na yau da kullun (`loadPlugin()` a `src/lib/plugins/loader.ts`) ƙarƙashin mai amfani da tsarin aiki ɗaya kamar OmniRoute, ba tare da mahallin VM ba kuma babu tutocin izinin Node.js. Plugin code na iya amfani da `node:fs`, `node:child_process`, `fetch` da kowane Node.js API: yana iya karantawa da rubuta kowane fayil da mai amfani da OmniRoute zai iya (ciki har da kundin bayanan bayanai), gudanar da shirye-shirye kuma isa ga hanyar sadarwa.
 
-| Izini        | Abubuwan da yake ba da dama                                  |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Wakilin `process.env` mai izinin karantawa kawai             |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` mai bayyanawa yana karɓar `network`, `file-read`, `file-write`, `env` da `exec`, amma a yau kawai `env` yana da tasiri a lokacin aiki:
 
-Idan babu izini, globals masu alaƙa da shi ba za su kasance samuwa a cikin sandbox ba.
+| Izini                                        | Tasiri a yau                                                                                                                                                                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Tsarin plugin ɗin kuma yana karɓar `PORT`, `HOSTNAME`, `TZ` da `TMPDIR`. Ba tare da shi ba, yana karɓar `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` da `PLUGIN_NAME` (da `SystemRoot` da `windir` akan Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Babu. Sanarwa ne kawai: babu abin da ke toshe lokacin da suka ɓace.                                                                                                                                                                       |
+
+Shigar da plugin yana kama da shigar da kowane shirin akan mai watsa shiri. Shigar da plugins kawai waɗanda kuka amince da tushen su.
 
 ## Tsarin Config
 
@@ -194,7 +196,7 @@ Ana adana ƙimomin config a cikin ma'ajiyar bayanai kuma ana iya samun damar su 
 
 ## Misalai
 
-### Mai Rubuta Bayanan Request
+### Nemi Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Mai Iyakance Rate
+### Ƙimar iyaka
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // Minti 1
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Mai Sauya Response
+### Response Transformer
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

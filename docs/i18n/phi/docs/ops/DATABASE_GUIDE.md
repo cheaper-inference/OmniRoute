@@ -309,6 +309,7 @@ Gumamit `IF NOT EXISTS`, `IF EXISTS`, at `OR IGNORE` / `OR REPLACE` clause nang 
 3. **Maingat na i-backfill ang data** : gumamit `UPDATE ... WHERE ...` para pangasiwaan ang mga umiiral nang row
 4. **Suriin ang pagkakasunud-sunod at pagpapangalan** : `npm run test:migrations:fresh` (lahat ng paglilipat sa isang walang laman na database) at `npm run check:migration-numbering`
 5. **Subukan sa isang kopya** : hindi kailanman magpatakbo ng mga hindi pa nasusubukang paglilipat sa produksyon
+6. **Ang isang talahanayan na ginawa mula sa code ay nangangailangan din ng paglipat** : kung ang isang module ay lumilikha din ng talahanayan nang tamad (`CREATE TABLE IF NOT EXISTS`, pinananatili bilang isang self-heal path), dapat itong gawin ng isang migration na may parehong DDL. Kung hindi, ang isang malinis na pag-install at isang na-upgrade na pag-install ay magtatapos sa iba't ibang mga schema, depende sa kung tumakbo ang path ng code na iyon. Ini-scan ng `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` at `open-sse/` at nabigo sa isang tamad `CREATE` nang walang paglipat (#20557). Halimbawa: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Halimbawa:
 
