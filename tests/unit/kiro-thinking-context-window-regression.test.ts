@@ -109,3 +109,47 @@ for (const kind of ["none", "text", "thinking"] as const) {
     }
   });
 }
+
+test("Kiro lite compression does not trigger another pass for discarded thinking", async () => {
+  await updateCompressionSettings({ enabled: true, defaultMode: "lite", autoTriggerTokens: 0 });
+  try {
+    const body = fixture("thinking");
+    body.messages[0].content = "check\n\n\n\nthen report";
+    calls.length = 0;
+    const lines: string[] = [];
+    const result = await handleChatCore({
+      body,
+      modelInfo: { provider, model, extendedContext: false },
+      credentials: { accessToken: "offline-placeholder" },
+      clientRawRequest: {
+        endpoint: "/v1/messages",
+        body: structuredClone(body),
+        headers: new Headers({ "content-type": "application/json" }),
+      },
+      isCombo: true,
+      comboName: name,
+      userAgent: "unit-test",
+      log: {
+        debug() {},
+        info(_tag: string, msg: string) {
+          lines.push(msg);
+        },
+        warn() {},
+        error() {},
+      },
+    } as never);
+    assert.equal(result.response?.status, 200);
+    assert.equal(calls.length, 1);
+    assert.ok(
+      !calls[0].includes("check\\n\\n\\n\\nthen report"),
+      "lite should normalize the repeated blank lines"
+    );
+    assert.equal(
+      lines.some((line) => line.includes("Proactive compression triggered")),
+      false,
+      lines.filter((line) => line.includes("triggered")).join("; ")
+    );
+  } finally {
+    await updateCompressionSettings({ enabled: false, defaultMode: "off", autoTriggerTokens: 0 });
+  }
+});

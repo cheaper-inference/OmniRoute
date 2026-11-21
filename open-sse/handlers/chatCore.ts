@@ -1844,7 +1844,10 @@ async function handleChatCoreInner({
           }
           if (result.compressed) {
             body = result.body as typeof body;
-            estimatedTokens = result.stats.compressedTokens;
+            // The compressor measures the whole body, including thinking Kiro discards.
+            estimatedTokens = omitKiroThinking
+              ? estimateTokens(contextMessagesForEstimate(body.messages, true))
+              : result.stats.compressedTokens;
             tokensCompressed = Math.max(
               0,
               result.stats.originalTokens - result.stats.compressedTokens
