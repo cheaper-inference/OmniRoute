@@ -4,6 +4,7 @@ import { saveEvalRun } from "@/lib/db/evals";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { getApiKeyById } from "@/lib/db/apiKeys";
 import { getCombos } from "@/lib/db/combos";
+import { EVAL_DEFAULT_CASE_MODEL } from "@/shared/constants/evals";
 import { getSuite, listSuites, runSuite } from "./evalRunner";
 
 export interface EvalTargetInput {
@@ -178,10 +179,10 @@ function resolveCaseModel(evalCase: Record<string, unknown>, target: EvalTargetI
     typeof evalCase.model === "string" && evalCase.model.trim().length > 0 ? evalCase.model : null;
 
   if (target.type === "model" || target.type === "combo") {
-    return targetId || caseModel || "gpt-4o";
+    return targetId || caseModel || EVAL_DEFAULT_CASE_MODEL;
   }
 
-  return caseModel || "gpt-4o";
+  return caseModel || EVAL_DEFAULT_CASE_MODEL;
 }
 
 /**
