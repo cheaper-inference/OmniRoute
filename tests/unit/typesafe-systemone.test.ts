@@ -232,3 +232,58 @@ test("validateTypesafeProvider maps a probe without sending the key to the error
   assert.equal(invalid.error, "Invalid API key");
   assert.doesNotMatch(JSON.stringify(invalid), /ts_live_key/);
 });
+
+// Hardening (unified decision routing, step 3; pattern from #14239): the client refuses
+// redirects, caps the response body at 64 KB and never falls back to the bare global fetch.
+test("evaluateSystemOneChoice asks the transport to refuse redirects", async () => {
+  let redirect: RequestRedirect | undefined;
+  await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: "hi",
+    criteria: { a: "A" },
+    fetchImpl: async (_url, init) => {
+      redirect = init?.redirect;
+      return new Response(
+        JSON.stringify({
+          answers: {
+            route: { type: "choice", choice: "a", probabilities: { a: 1 }, confidence: 1 },
+          },
+        }),
+        { status: 200 }
+      );
+    },
+  });
+  assert.equal(redirect, "error");
+});
+
+test("evaluateSystemOneChoice refuses a response body larger than 64 KB", async () => {
+  const result = await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: "hi",
+    criteria: { a: "A" },
+    // A valid answer padded past the cap: without the bound it would parse as ok.
+    fetchImpl: async () =>
+      new Response(
+        JSON.stringify({
+          pad: "x".repeat(70 * 1024),
+          answers: {
+            route: { type: "choice", choice: "a", probabilities: { a: 1 }, confidence: 1 },
+          },
+        }),
+        { status: 200 }
+      ),
+  });
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.reason, "invalid_response");
+});
+
+test("evaluateSystemOneChoice leaves through the guarded decision transport, never bare fetch", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(
+    new URL("../../open-sse/services/typesafe/systemOne.ts", import.meta.url),
+    "utf8"
+  );
+  assert.match(source, /from "\.\.\/decision\/transport\.ts"/);
+  assert.doesNotMatch(source, /\?\?\s*fetch\b/);
+});

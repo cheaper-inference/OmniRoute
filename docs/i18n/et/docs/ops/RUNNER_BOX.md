@@ -141,38 +141,22 @@ jõudeoleku kontrolli ja taaskäivituse sama käsuga.
   minutit, kuid kettalt üleslaadimiseks 2 minutit.
 - VPS `.15` on mõeldud ainult homologeerimiseks — sellel ei käitata kunagi CI runnereid.
 
-## Majutatud kanal (GitHubi majutatud käitajad)
+## Hostitud rada (GitHubi hostitud jooksjad)
 
-Repositoorium kuulub organisatsioonile `cheaper-inference`, mis kasutab paketti **Team**: **60
-samaaegset majutatud tööd**, mida jagavad kõik organisatsiooni repositooriumid, kõik PR-i kontrollid,
-iga tõukamisel käivitatav töövoog ja CodeQL-i vaikeseadistus. Allolevad arvud mõõdeti paketi
-**Pro** ajal (40 samaaegset majutatud tööd). Mõõdetud 2026-10-18
-ühendamiskampaania ajal (~10 ühendamist tunnis harus `release/v3.8.52`): **24 tunni jooksul
-loodi 2,500 töövoo käivitust**, 6 tunni jooksul tehti harusse 44 tõukamist, **106 majutatud tööd
-olid järjekorras**, samal ajal kui PR-i kontrollid ootasid tunde ja PR-id ühendati ilma nendeta.
-Igal harusse tõukamisel käivitus üheksa töövoogu:
+Hoidla kuulub `cheaper-inference` organisatsioonile** Meeskond** plaan:** 60 samaaegselt hostitud töökohta** , mida jagavad kõik organisatsiooni hoidlad, iga PR -kontroll, iga tõukekäivitatud töövoog ja CodeQL vaikeseade. Allolevad arvud mõõdeti** Pro** plaan (40 samaaegset hostitud tööd). Mõõdetud 2026-10-18 liitmiskampaania ajal (~ 10 merges/hour kohta `release/v3.8.52`):** 24 tunni jooksul loodud 2500 töövoogu** , 44 tõuget oksale 6 h jooksul,** Järjekorras on 106 hostitud tööd** samal ajal kui PR -tšekid ootasid tunde ja PRs liideti ilma nendeta. Üheksa töövoogu käivitati igal oksale vajutamisel:
 
-| iga tõukamise kohta harusse `release/v*`    | majutatud tööd | tulemus koormustormi ajal                                                        | alates 2026-10-18                                                             |
-| ------------------------------------------- | -------------: | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `ci.yml` (täielik maatriks)                 |        kuni 30 | järgmine tõukamine tühistas; ühe päevaga 24 juhtumit 24-st                       | ei käivitata `release/**` tõukamistel (PR-i käivitus + Release-Green)         |
-| `quality.yml`                               |             ~6 | tühistati, 23 juhtumit 23-st                                                     | ei käivitata `release/**` tõukamistel                                         |
-| `Release-Green` `--quick`                   |              0 | töötas keskkonnas `omni-build`, 100-st tühistati 97                              | `omni-release` pesa, ei tühistata kunagi, ootel käivitused koondatakse        |
-| `Lock released branch`, `OpenSSF Scorecard` |              2 | üks järjekorras olev käivitus iga tõukamise kohta                                | üks käivitus viite kohta (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
-| `Release acceptance` (variraport)           |              1 | üks majutatud `npm ci` iga tõukamise kohta, ei tühistata kunagi                  | muutmata — sobib `paths:` filtriga piiramiseks                                |
-| `Publish to Docker Hub` → `Deploy to VPS`   |              2 | tühistatakse iga tõukamise järel; amd64 haru konkureerib keskkonnas `omni-build` | muutmata — omaniku juurutuskanal                                              |
-| CodeQL-i vaikeseadistus (`dynamic`)         |              4 | `javascript-typescript`, `actions`, `c-cpp`, `python` iga tõukamise kohta        | muutmata — Settings → Code security; `c-cpp`/`python` ei skanni siin midagi   |
+| `release/v*` tõuke kohta                    | hostitud töökohad | tulemus tormi all                                                 | alates 2026-10-18                                                                  |
+| ------------------------------------------- | ----------------: | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `ci.yml` (täismaatriks)                     |           kuni 30 | tühistati järgmise tõukega, 24 24-st päevas                       | ei käivitu `release/**` tõugetel (PR run + Release-Green)                          |
+| `quality.yml`                               |                ~6 | tühistatud, 23/23                                                 | ei käivitunud `release/**` tõugetel                                                |
+| `Release-Green` `--quick`                   |                 0 | jooksis `omni-build` peal, tühistas 97 100-st                     | `omni-release` pesa, kunagi tühistatud, ootel jooks aheneb                         |
+| `Lock released branch`, `OpenSSF Scorecard` |                 2 | üks järjekord tõuke kohta                                         | üks jooks reflektsiooni kohta (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (variaruanne)          |                 1 | üks hostitud `npm ci` tõuke kohta, pole kunagi tühistatud         | muutmata — kandidaat `paths:` filtrile                                             |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                 2 | tühistatud tõuke kohta; amd64 jalg võistleb `omni-build` peal     | muutmata — omaniku juurutuskanal                                                   |
+| CodeQL vaikeseade (`dynamic`)               |                 4 | `javascript-typescript`, `actions`, `c-cpp`, `python` tõuke kohta | muutmata — Seaded → Koodi turvalisus; `c-cpp`/`python` ei skaneeri siin midagi     |
 
-`tests/unit/build/push-storm-diet.test.ts` fikseerib failide `ci.yml` ja
-`quality.yml` ainult `main` harule mõeldud tõukamispäästiku. Kõrvalmõju: Codecov ei saa enam
-iga väljalaskeharusse tõukamise kohta baastaseme üleslaadimist (samm on informatiivne ja kasutab
-`continue-on-error`); hoidlasisene katvuse kontrollvärav ja PR-i kommentaar jäävad puutumata.
+`tests/unit/build/push-storm-diet.test.ts` kinnitab `ci.yml` ja `quality.yml` -only `main`. Kõrvalmõju: Codecov ei saa enam põhiüleslaadimist väljalasketõuke kohta (samm on informatiivne ja `continue-on-error`); reposisene leviala värav ja PR -kommentaar ei muutu.
 
-**Suurem isemajutatud läbilaskevõime ei lahenda majutatud järjekorra probleemi.** Arendusmasin
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) võiks käitajat majutada, kuid agendisessioonid hoiavad
-selle koormuse juba tasemel 20–26, agendikonteineril puudub Dockeri deemon ning küllastunud on
-majutatud kanal. Masinal `.113` oli samal hetkel 71 GB vaba ruumi ja koormus 5–8; selle piirang
-on ülal kirjeldatud kuulajapõhine mälueelarve (ülempiir 6 kuulajat), mitte CPU. Ülejäänud
-hoovad on protsessipõhised: ühendage kampaania PR-id Mergify järjekorra kaudu (`label=queue`,
-partiid jagavad üht `merge_group` CI-käivitust, selle asemel et käivitada üks kord iga PR-i
-kohta ja lisaks üks kord iga tõukamise kohta), vähendage CodeQL-i vaikeseadistuse keelte hulka
-ning filtreerige `release-acceptance.yml` failide järgi, mida see loeb.
+**Suurem isehostitav võimsus ei paranda hostitud järjekorda.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) võib majutada jooksjat, kuid agendiseansside koormus on juba 20–26, agendikonteineris pole Docker deemonit ja küllastunud rada on hostitud. `.113` kastis oli samal hetkel 71 GB vaba ja koormus 5–8; selle piirang on ülaltoodud mälueelarve kuulaja kohta (ülempiir 6 kuulajat), mitte CPU. Ülejäänud hoovad on protsessi hoovad: maandage kampaania PRs läbi ühendamisjärjekorra (`label=queue`, partiid jagavad ühte `merge_group` CI käitamist ühe PR käitamise asemel pluss üks tõuke kohta), kärpige CodeQL vaikeseadekeeli ja filtreerige `release-acceptance.yml` loetavate failide järgi.
+
+> **2026-11-19: Mergify liitmisjärjekord on lõpetatud** (omaniku otsus). `.mergify.yml` ei määratle enam järjekorda ja keeldub ühendamiskäskudest, mis ühendavad või kirjutavad ümber tõmbamistaotluse. Väljalasked PRs liidetakse käsitsi hoidla reeglistiku "Nõua aktiivsel väljalaskmisel rohelisi väravaid" (`Gate / CI` + `Gate / Quality`) alusel, kuni omni-järjekord töötab reaalajas režiimis, ja seejärel omni-järjekorra kaudu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ülaltoodud ühendamise hooba pole enam olemas.

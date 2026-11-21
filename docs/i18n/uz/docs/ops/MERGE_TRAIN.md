@@ -4,32 +4,22 @@
 
 ---
 
-v3.8.49 versiyasidan boshlab (sifat/tezlik rejasining WS3.2/WS3.4 bandlari) tekshiruvdan oʻtgan PRlarni `release/vX.Y.Z` ichiga birlashtirishning standart yoʻli — **Mergify birlashtirish navbati** (`.mergify.yml`);
-quyida hujjatlashtirilgan **qoʻlda boshqariladigan birlashtirish poyezdi** esa ZAXIRA USUL hisoblanadi — u nosozliklar, relizni muzlatish davrlari yoki Mergify Open Source rejasi oʻzgargan taqdirda qoʻllanadi.
+> **19.11.2026: Birlashtirish navbati tugatildi** (egasining qarori). `.mergify.yml` endi navbatni belgilamaydi va tortish so'rovini birlashtiruvchi yoki qayta yozuvchi Birlashtirish buyruqlarini rad etadi. Relizlar PRs qo'lda "Faol relizda yashil eshiklarni talab qilish" (`Gate / CI` + `Gate / Quality`) ombori qoidalari ostida omni navbat jonli rejimda ishlamaguncha va undan keyin omni navbat orqali birlashtiriladi ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Quyidagi Birlashtirish bo'limlari navbatni qanday bo'lsa, shunday tasvirlaydi.
 
-## Standart yoʻl: Mergify navbati
+v3.8.49 ( quality/velocity rejasining WS3.2/WS3.4 ) versiyasidan beri ko'rib chiqilgan PRs `release/vX.Y.Z` ga birlashtirishning standart yo'li** Birlashtirish navbatini birlashtirish** (`.mergify.yml`); the** qo'lda birlashma-poezd** quyida hujjatlashtirilgan FALLBACK — hodisalari, versiyaning muzlashi yoki Merge Open Source rejasi har doim oʻzgarganda foydalaniladi.
 
-1. PR kampaniyalar tomonidan koʻrib chiqiladi/ijobiy holatga keltiriladi va egasining birlashtirishdan oldingi ⭐
-   nazorat bosqichida tasdiqlanadi (hisobot + har bir band boʻyicha qaror — `/merge-prs` dagi 0.75-bosqichga qarang).
-2. Egasi (yoki egasining qarori asosida ish yuritayotgan seans) **`queue`**
-   yorligʻini qoʻllaydi. Yorliqning OʻZI birlashtirishga ruxsatdir; Mergify uni faqat bajaradi.
-3. Mergify navbatdagi PRlarni tezkor nazorat bosqichlari boʻyicha **ketma-ket**
-   (bir vaqtning oʻzida bittadan) tekshiradi va birlashtiradi (squash). Toʻplamlash + avtomatik biseksiya pulli Mergify tarifiga
-   kiradi (bepul tarifda "Cannot use Merge Queue batch", #7220), shuning uchun `.mergify.yml` faylida
-   `batch_size` belgilanmagan; toʻplamlash quyidagi qoʻlda boshqariladigan birlashtirish poyezdining vazifasi boʻlib qoladi. Tekshiruvlari
-   `checks_timeout` dan (240 daqiqa = `quality.yml` uchun oʻlchangan p95 ning 2 baravari) keyin ham kutilayotgan PR
-   navbatni toʻxtatib qoʻymasligi uchun navbatdan chiqariladi.
-4. Birlashtirishdan keyin uzluksiz relizni ijobiy holatda saqlash ish jarayoni push paytida yangi uchni
-   tekshiradi va kombinatsiya regressiyaga olib kelgan boʻlsa, tegishlilik muammosini ochadi (hech qachon avtomatik qaytarmaydi).
+## Standart yoʻl: Birlashtirish navbati
 
-Himoya qoidalari (`CLAUDE.md` dagi 21/22-sonli qatʼiy qoidalarni takrorlaydi):
+1. PR kampaniyalar tomonidan reviewed/greened hisoblanadi va egasining birlashtirishdan oldingi ⭐ darvozasi tomonidan tasdiqlanadi (hisobot + har bir element qarori — `/merge-prs` 0.75-bosqichga qarang).
+2. Egasi (yoki egasining qaroriga ko'ra ish yurituvchi sessiya) qo'llaydi**`queue`** yorliq. Yorliq IS birlashishni tasdiqlash; Birlashtirish faqat uni amalga oshiradi.
+3. Birlashtirish navbatda turgan PRs tasdiqlaydi** ketma-ket** (bir vaqtning o'zida) tezkor darvozalarga qarshi va birlashadi (qovoq). + avtomatik bisektsiyasini to'lash - bu pullik birlashtirish darajasidir (bepul rejada "Birlashtirish navbati to'plamidan foydalanib bo'lmaydi", #7220), shuning uchun `.mergify.yml` `batch_size` o'rnatmaydi; partiyalash quyida qo'lda birlashma-poezd ish bo'lib qoladi. `checks_timeout` (240 min = 2 × `quality.yml` ning oʻlchangan p95 i) dan keyin ham tekshiruvlari kutilayotgan PR navbatni toʻxtatib turish oʻrniga navbatdan chiqariladi.
+4. Birlashtirishdan so'ng, uzluksiz bo'shatish-yashil ish jarayoni push-da yangi maslahatni tasdiqlaydi va agar kombinatsiya regressiyalangan bo'lsa (hech qachon avtomatik ravishda qaytarilmasin) atribut muammosini ochadi.
 
-- **Reliz muzlatilishi faol** → muzlatilgan branchga yoʻnaltirilgan PRlarga yorliq qoʻymang; avval
-  faol `release/vX+1` ga qayta yoʻnaltiring.
-- **Boshqa seansning jarayondagi PRi** → unga hech qachon yorliq qoʻymang; faqat egasi boʻlgan seans
-  oʻz ishini navbatga qoʻyadi.
-- Faqat testlardan iborat difflar va `hotfix` yorligʻi qoʻyilgan PRlar allaqachon qisqartirilgan CIʼni ishga tushiradi (`RELEASE_CHECKLIST.md` → Hotfix Fast-Lane boʻlimiga qarang); navbat shartlari amalda ishga tushgan istalgan
-  tekshiruvlar toʻplamini qabul qiladi (`#check-failure=0` + `#check-pending=0`).
+Guardrails (oyna `CLAUDE.md` Hard Rules #21/#22):
+
+- **Muzlatgichni ochiq qo'ying** → do NOT label PRs muzlatilgan filialni nishonga olish; avval faol `release/vX+1` ga qayta yo'naltiring.
+- **Yana bir seansning parvozdagi PR** → hech qachon uni belgilamaydi; faqat egalik seansi o'z ishini navbatga qo'yadi.
+- Faqat sinovlar uchun farqlar va `hotfix` -labeled PRs allaqachon qisqartirilgan CI ishlaydi (qarang `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); navbat shartlari amalda bajarilgan har qanday tekshiruv to'plamini qabul qiladi (`#check-failure=0` + `#check-pending=0`).
 
 ## Zaxira usul: qoʻlda boshqariladigan birlashtirish poyezdi
 

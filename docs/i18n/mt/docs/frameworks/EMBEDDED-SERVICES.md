@@ -557,6 +557,8 @@ Dan il-prokura:
 
 L-aġġornamenti ta'WebSocket għad-dashboard inkorporat huma mmaniġġjati minn server anëillari fuq port iddedikat (ara `src/lib/services/embedWsProxy.ts`).
 
+Kull titjib huwa awtorizzat qabel ma tiftaħ il-mina, bl-istess regoli bħar-rotta embed HTTP : il-peer għandu jkun loopback mingħajr l-ebda header reverse-proxy forwarding, browser `Origin` għandu jkun oriġini dashboard (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` jestendu l-loopback defaults), u min iċempel jeħtieġ sessjoni dashboard jew ġestjoni-scope dishboard API key un login.
+
 **Sigurtà:** Ir-rotot proxy embed huma kklassifikati taħt `LOCAL_ONLY_API_PREFIXES` u jistgħu jintlaħqu biss minn loopback. Attakkant li jikseb JWT permezz ta' mina Cloudflare/Ngrok ma jistax proxy f'servizzi inkorporati.
 
 ---

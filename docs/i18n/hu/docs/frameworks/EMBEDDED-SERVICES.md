@@ -558,6 +558,8 @@ Ez a proxy:
 
 A beágyazott műszerfal WebSocket frissítéseit egy társszerver kezeli egy dedikált porton (lásd: `src/lib/services/embedWsProxy.ts`).
 
+Minden frissítés engedélyezve van az alagút megnyitása előtt, ugyanazokkal a szabályokkal, mint a HTTP beágyazási útvonal: a társnak visszacsatoltnak kell lennie fordított proxy továbbítási fejléc nélkül, a böngésző `Origin` irányítópult-eredetűnek kell lennie (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` kiterjeszti a visszahurkolási alapértékeket), és a hívónak egy irányítópult-munkamenetre vagy egy dashboard-sco API dashboard key-re van szüksége.
+
 **Biztonság:** A beágyazott proxy útvonalak `LOCAL_ONLY_API_PREFIXES` alá vannak besorolva, és csak visszacsatolásból érhetők el. Az a támadó, aki JWT Cloudflare/Ngrok alagúton keresztül szerez meg, nem tud proxyt beágyazni a beágyazott szolgáltatásokba.
 
 ---
