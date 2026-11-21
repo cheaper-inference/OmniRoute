@@ -5,28 +5,14 @@
  * Follows the established key_value pattern from databaseSettings.ts.
  */
 
-import { getDbInstance } from "./core";
+import type { ProviderParamFilter } from "@/domain/persistence/paramFilterRepository";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { sqliteParamFilterLegacySync as legacySync } from "./repositories/sqliteParamFilterRepository";
 
-const NAMESPACE = "provider_param_filters";
-
-// ── Types ───────────────────────────────────────────────────────────────────
-
-export interface ModelParamFilter {
-  block?: string[];
-  allow?: string[];
-}
-
-export interface ProviderParamFilter {
-  /** Provider-level params to strip from all requests to this provider. */
-  block: string[];
-  /** Provider-level params to re-add after denylist stripping. */
-  allow: string[];
-  /** Model-specific overrides (stricter than provider-level). */
-  models?: Record<string, ModelParamFilter>;
-  /** When true, upstream 400 "Unsupported parameter" errors auto-populate block. */
-  autoLearn?: boolean;
-}
+export type {
+  ModelParamFilter,
+  ProviderParamFilter,
+} from "@/domain/persistence/paramFilterRepository";
 
 // ── Cache ───────────────────────────────────────────────────────────────────
 
@@ -40,84 +26,23 @@ function bumpCacheGeneration(): void {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function parseStoredValue(raw: unknown): unknown {
-  if (typeof raw !== "string") return raw;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return raw;
-  }
-}
-
 function toNormalizedString(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
 
-function toStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((k): k is string => typeof k === "string") : [];
-}
-
-function toModelParamFilter(raw: Record<string, unknown>): ModelParamFilter | null {
-  const block = toStringArray(raw.block);
-  const allow = toStringArray(raw.allow);
-  if (block.length === 0 && allow.length === 0) return null;
-  const filter: ModelParamFilter = {};
-  if (block.length > 0) filter.block = block;
-  if (allow.length > 0) filter.allow = allow;
-  return filter;
-}
-
-function toModelParamFilters(raw: unknown): Record<string, ModelParamFilter> {
-  const models: Record<string, ModelParamFilter> = {};
-  if (!isRecord(raw)) return models;
-  for (const [modelId, val] of Object.entries(raw)) {
-    if (!isRecord(val)) continue;
-    const filter = toModelParamFilter(val);
-    if (filter) models[modelId] = filter;
-  }
-  return models;
-}
-
-function toProviderParamFilter(raw: unknown): ProviderParamFilter | null {
-  if (!isRecord(raw)) return null;
-  const block = toStringArray(raw.block);
-  const allow = toStringArray(raw.allow);
-  const models = toModelParamFilters(raw.models);
-  const autoLearn = typeof raw.autoLearn === "boolean" ? raw.autoLearn : false;
-  return { block, allow, models: Object.keys(models).length > 0 ? models : undefined, autoLearn };
-}
-
 // ── Read ────────────────────────────────────────────────────────────────────
 
-function readNamespace(namespace: string): Record<string, unknown> {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = ?")
-    .all(namespace) as Array<{ key: string; value: string }>;
-
-  const values: Record<string, unknown> = {};
-  for (const row of rows) {
-    values[row.key] = parseStoredValue(row.value);
-  }
-  return values;
-}
-
+// Request translation and executor auto-learn read filters synchronously, so the facade
+// uses the SQLite-only synchronous binding; the Promise repository is the portable
+// persistence contract.
 function loadAllConfigs(): Map<string, ProviderParamFilter> {
-  const raw = readNamespace(NAMESPACE);
   const map = new Map<string, ProviderParamFilter>();
-  for (const [key, value] of Object.entries(raw)) {
-    const parsed = toProviderParamFilter(value);
-    if (parsed) {
-      const canonicalKey = resolveProviderId(key);
-      if (!map.has(canonicalKey) || key === canonicalKey) {
-        map.set(canonicalKey, parsed);
-      }
-      map.set(key, parsed);
+  for (const { provider: key, filter: parsed } of legacySync.list()) {
+    const canonicalKey = resolveProviderId(key);
+    if (!map.has(canonicalKey) || key === canonicalKey) {
+      map.set(canonicalKey, parsed);
     }
+    map.set(key, parsed);
   }
   return map;
 }
@@ -159,20 +84,7 @@ export function setParamFilterConfig(provider: string, config: ProviderParamFilt
   if (!normalizedKey) return;
   const canonical = resolveProviderId(normalizedKey);
 
-  const db = getDbInstance();
-  const stmt = db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
-  );
-
-  // Normalize the filter before persisting
-  const normalized: ProviderParamFilter = {
-    block: config.block ?? [],
-    allow: config.allow ?? [],
-    autoLearn: config.autoLearn ?? false,
-    models: config.models && Object.keys(config.models).length > 0 ? config.models : undefined,
-  };
-
-  stmt.run(NAMESPACE, canonical, JSON.stringify(normalized));
+  legacySync.upsert(canonical, config);
   bumpCacheGeneration();
 }
 
@@ -189,15 +101,11 @@ export function deleteParamFilterConfig(provider: string): void {
   // Legacy rows may sit under an alias key (e.g. "cc"): drop every stored key that
   // resolves to the same provider, or loadAllConfigs() would map it back after a reset.
   const keys = new Set([canonical, normalizedKey]);
-  for (const key of Object.keys(readNamespace(NAMESPACE))) {
+  for (const key of legacySync.listProviderKeys()) {
     if (resolveProviderId(key) === canonical) keys.add(key);
   }
 
-  const db = getDbInstance();
-  const stmt = db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?");
-  db.transaction(() => {
-    for (const key of keys) stmt.run(NAMESPACE, key);
-  })();
+  legacySync.deleteByProviders([...keys]);
   bumpCacheGeneration();
 }
 
