@@ -8217,9 +8217,11 @@ paths:
       tags: [System]
       summary: Inspect connection resilience state
       description: >-
-        Local-only operational view of per-connection cooldowns, provider circuit
-        breakers, model lockouts, and recent breaker transitions. Credential columns
-        are excluded by an explicit database whitelist.
+        Operational view of per-connection cooldowns, provider circuit breakers,
+        model lockouts, and recent breaker transitions. Local-only for anonymous
+        callers; a remote caller needs an authenticated dashboard session or a
+        manage-scope key (default manage-scope bypass). Credential columns are
+        excluded by an explicit database whitelist.
       x-internal: true
       parameters:
         - name: windowMs
