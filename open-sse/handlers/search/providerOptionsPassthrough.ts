@@ -193,6 +193,9 @@ const TAVILY_FIELDS: FieldSchemas = {
   exact_match: z.boolean(),
   include_usage: z.boolean(),
   safe_search: z.boolean(),
+  // 1..720 hours of cache, 0 to always fetch live, -1 to never fetch live.
+  // Anything else (2.5, 721, "720") is dropped rather than sent upstream.
+  max_age_hours: z.union([z.literal(-1), z.literal(0), int(1, 720)]),
 };
 
 export function resolveTavilyPassthrough(
