@@ -111,7 +111,8 @@ export default function AppearanceTab() {
       setUploadError({ target, message: t("failedToReadFile") });
     };
     reader.onload = (event) => {
-      updateSetting(key, event.target?.result as string);
+      // updateSetting catches its own errors; nothing waits for the save.
+      void updateSetting(key, event.target?.result as string);
     };
     reader.readAsDataURL(file);
   };
