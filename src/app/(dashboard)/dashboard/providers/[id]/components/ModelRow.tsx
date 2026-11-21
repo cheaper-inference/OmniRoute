@@ -253,7 +253,14 @@ export function ModelVisibilityToolbar({
 // ---------------------------------------------------------------------------
 
 export interface ModelRowProps {
-  model: { id: string; name?: string; source?: string; isHidden?: boolean };
+  model: {
+    id: string;
+    name?: string;
+    source?: string;
+    isHidden?: boolean;
+    /** Built-in model absent from the provider's authoritative synced catalog. */
+    liveCatalogMissing?: boolean;
+  };
   fullModel: string;
   provider: string;
   alias?: string;
@@ -383,6 +390,18 @@ export default function ModelRow({
           (the actions drop to their own row) instead of spilling into the next card (#19543). */}
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pl-6">
         <ModelSourceBadge source={model.source} />
+        {model.liveCatalogMissing && (
+          <span
+            className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-300"
+            title={providerText(
+              t,
+              "liveCatalogMissingHint",
+              "The provider's live model list no longer includes this model, so requests to it are rejected."
+            )}
+          >
+            {providerText(t, "liveCatalogMissing", "Not in live catalog")}
+          </span>
+        )}
         {onSaveContextWindowOverride && (
           <ContextWindowOverrideField
             editor={contextEditor}

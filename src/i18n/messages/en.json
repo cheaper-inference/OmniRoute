@@ -6147,6 +6147,8 @@
     "modelsNoLongerListed": "{count, plural, one {# model is} other {# models are}} no longer listed by the provider",
     "noNewModelsToImport": "No new models to import — all models are already in the registry or custom models list",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "liveCatalogMissing": "Not in live catalog",
+    "liveCatalogMissingHint": "The provider's live model list no longer includes this model, so requests to it are rejected.",
     "discoveryDegradedStatus": "Model discovery failed {time}",
     "skippingExistingModels": "Skipping {count} existing models",
     "autoSync": "Auto-Sync",

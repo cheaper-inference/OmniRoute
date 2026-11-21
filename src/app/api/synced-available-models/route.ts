@@ -21,10 +21,20 @@ export async function GET(request: Request) {
     if (provider) {
       // The dashboard merges operator-owned custom rows separately. Do not let
       // legacy imports act as evidence that a model still exists upstream.
-      const catalog = await getActiveSyncedCatalog(provider, false);
+      // `liveCatalog` is the catalog request dispatch gates on (custom rows included,
+      // as in lookupModelMeta), so the dashboard's "Not in live catalog" flag decides
+      // authority with the runtime's own inputs (#20065) without changing the listing.
+      const [catalog, runtimeCatalog] = await Promise.all([
+        getActiveSyncedCatalog(provider, false),
+        getActiveSyncedCatalog(provider),
+      ]);
       return Response.json({
         ...catalog,
         models: enrichCursorCatalog(provider, catalog.models),
+        liveCatalog: {
+          authoritative: runtimeCatalog.authoritative,
+          modelIds: runtimeCatalog.models.map((model) => model.id),
+        },
       });
     }
 
