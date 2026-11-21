@@ -1091,8 +1091,8 @@
       }
     },
     "url": {
-      "nonStream": "https://app.chatplayground.ai/api/chat",
-      "stream": "https://app.chatplayground.ai/api/chat"
+      "nonStream": "https://web.chatplayground.ai/api/chat",
+      "stream": "https://web.chatplayground.ai/api/chat"
     }
   },
   "cheaperinference": {
