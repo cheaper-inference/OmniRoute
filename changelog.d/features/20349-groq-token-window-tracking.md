@@ -1,0 +1,1 @@
+- **feat(rate-limit):** Opt-in Groq token-window tracking (`RATE_LIMIT_GROQ_TOKEN_TRACKING`, default off) records Groq `x-ratelimit-*-tokens` headers on the connection learned-limit entry. ([#20349](https://github.com/cheaper-inference/OmniRoute/pull/20349))
