@@ -255,6 +255,37 @@ describe("createKeyStore", () => {
     assert.equal(notifications(), 1);
   });
 
+  test("a new subscriber sees a device key change made while nothing listened", () => {
+    const device = memoryStorage({ [ENTRY]: "k1" });
+    const session = memoryStorage();
+    const store = createKeyStore(areas({ session, device }));
+    const unsubscribe = store.subscribe(() => {});
+    assert.deepEqual(brief(store), { key: "k1", persistence: "device" });
+    unsubscribe();
+
+    // Another tab forgets the key while the page shows nothing that listens.
+    device.removeItem(ENTRY);
+    let notified = 0;
+    store.subscribe(() => {
+      notified += 1;
+    });
+    assert.equal(store.getSnapshot(), null);
+    assert.equal(notified, 1);
+  });
+
+  test("a new subscriber keeps a key held in memory or in this tab's session", () => {
+    const { device, store } = setup();
+    store.hold("k1", false);
+    device.setItem(ENTRY, "k2");
+    store.subscribe(() => {});
+    assert.deepEqual(brief(store), { key: "k1", persistence: "memory" });
+
+    store.confirmKey();
+    device.setItem(ENTRY, "k3");
+    store.subscribe(() => {});
+    assert.deepEqual(brief(store), { key: "k1", persistence: "session" });
+  });
+
   test("reading the snapshot never writes to storage", () => {
     const session = memoryStorage({ [ENTRY]: "not a key" });
     let removals = 0;
