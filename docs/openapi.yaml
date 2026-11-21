@@ -3519,6 +3519,86 @@ paths:
         "404":
           description: Combo not found
 
+  /api/combos/decision-preview:
+    post:
+      tags: [Combos]
+      summary: Preview the decision router menu and optionally test one decision
+      description: >-
+        Builds the menu (unique model ids of the given steps, in order) and the generated
+        cost-rank descriptions that the `decision` auto-router sends at request time. With
+        `prompt`, also runs one decision with the unsaved `decision` block; that call only
+        happens while the `COMBO_DECISION_ROUTER_ENABLED` feature flag is on (otherwise
+        `test.status` is `skipped` with reason `disabled`) and may bill the decider. A
+        `combo-model` decider is skipped (`live_request_only`). Requires management auth.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [models]
+              properties:
+                models:
+                  type: array
+                  maxItems: 200
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 300
+                  description: Combo step model strings (`provider/model`).
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 8000
+                decision:
+                  type: object
+                  additionalProperties: false
+                  required: [decider]
+                  properties:
+                    decider:
+                      type: string
+                      enum: [systemone, http, combo-model]
+                    model:
+                      type: string
+                      maxLength: 200
+                    baseUrl:
+                      type: string
+                      maxLength: 500
+                      description: http(s) URL without credentials, query or fragment.
+                    connectionId:
+                      type: string
+                      maxLength: 200
+                    wire:
+                      type: string
+                      enum: [systemone, openai-chat]
+                    timeoutMs:
+                      type: integer
+                      minimum: 100
+                      maximum: 5000
+                    minConfidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    descriptions:
+                      type: object
+                      maxProperties: 50
+                      additionalProperties:
+                        type: string
+                        maxLength: 1000
+      responses:
+        "200":
+          description: >-
+            `menu` and `generated`; with a prompt also `test` (`status`: `selected`, `skipped`
+            or `failed`, plus a log-safe `reason`, or `choice`, `confidence`, `probabilities`,
+            `backendModel` and `latencyMs`).
+        "400":
+          description: Invalid JSON or body (an `apiKey` field is rejected)
+        "401":
+          description: Management authentication required
+        "500":
+          description: Sanitized error
+
   /api/settings:
     get:
       tags: [Settings]
@@ -16327,7 +16407,8 @@ paths:
         is on (a request that reaches the route gets 404 otherwise). Authenticate with
         `Authorization: Bearer <key>` or `x-api-key: <key>`; the key is never read from the query
         string or a cookie. Requires scope `self:usage`. The key is checked before `range`.
-        Provider and model are returned as recorded. A combo request whose every target was
+        Provider is returned as recorded. Model is the recorded name after its last `/`, and
+        rows are grouped by it. A combo request whose every target was
         refused is recorded with the routing label as provider (the combo name, `auto` or
         `combo`) and the model string the client sent. `costUsd` is the billed cost, where
         flat-rate subscription providers count $0. `listPriceUsd` prices the same usage at list
@@ -20099,7 +20180,18 @@ components:
         subscriptions included. A request whose model has no price row counts its stored cost,
         and only a request with neither counts 0, with no marker.
       additionalProperties: false
-      required: [range, generatedAt, coverage, summary, daily, dailyByModel, byModel, byProvider]
+      required:
+        [
+          range,
+          generatedAt,
+          coverage,
+          summary,
+          daily,
+          dailyByModel,
+          byModel,
+          byModelTruncated,
+          byProvider,
+        ]
       properties:
         range:
           type: string
@@ -20220,6 +20312,11 @@ components:
               avgLatencyMs: { type: number }
               successRatePct: { type: number }
               lastUsed: { type: [string, "null"], format: date-time }
+        byModelTruncated:
+          type: boolean
+          description: >-
+            True when more provider-and-model pairs existed than `byModel` keeps, so a model's
+            totals there may be partial.
         byProvider:
           type: array
           items:

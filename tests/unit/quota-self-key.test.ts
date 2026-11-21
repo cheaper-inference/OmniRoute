@@ -1,7 +1,7 @@
 import test, { describe } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 import { parseApiKeyInput } from "../../src/app/quota/[provider]/lib/apiKeyInput.ts";
 import {
@@ -255,6 +255,37 @@ describe("createKeyStore", () => {
     assert.equal(notifications(), 1);
   });
 
+  test("a new subscriber sees a device key change made while nothing listened", () => {
+    const device = memoryStorage({ [ENTRY]: "k1" });
+    const session = memoryStorage();
+    const store = createKeyStore(areas({ session, device }));
+    const unsubscribe = store.subscribe(() => {});
+    assert.deepEqual(brief(store), { key: "k1", persistence: "device" });
+    unsubscribe();
+
+    // Another tab forgets the key while the page shows nothing that listens.
+    device.removeItem(ENTRY);
+    let notified = 0;
+    store.subscribe(() => {
+      notified += 1;
+    });
+    assert.equal(store.getSnapshot(), null);
+    assert.equal(notified, 1);
+  });
+
+  test("a new subscriber keeps a key held in memory or in this tab's session", () => {
+    const { device, store } = setup();
+    store.hold("k1", false);
+    device.setItem(ENTRY, "k2");
+    store.subscribe(() => {});
+    assert.deepEqual(brief(store), { key: "k1", persistence: "memory" });
+
+    store.confirmKey();
+    device.setItem(ENTRY, "k3");
+    store.subscribe(() => {});
+    assert.deepEqual(brief(store), { key: "k1", persistence: "session" });
+  });
+
   test("reading the snapshot never writes to storage", () => {
     const session = memoryStorage({ [ENTRY]: "not a key" });
     let removals = 0;
@@ -329,6 +360,6 @@ function sourceFiles(dir: string): string[] {
 test("browser storage is reached only through the key hook", () => {
   const offenders = sourceFiles(QUOTA_PAGE_DIR)
     .filter((file) => /\b(sessionStorage|localStorage)\b/.test(readFileSync(file, "utf8")))
-    .map((file) => relative(process.cwd(), file));
+    .map((file) => relative(process.cwd(), file).split(sep).join("/"));
   assert.deepEqual(offenders, ["src/app/quota/[provider]/lib/useStoredApiKey.ts"]);
 });

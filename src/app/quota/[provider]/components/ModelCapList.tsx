@@ -11,12 +11,18 @@ import { useFormatNumber } from "../lib/useFormatNumber";
 
 interface ModelCapListProps {
   caps: SelfQuotaBlocks["modelCaps"];
+  /** Pool ref to pool name, for the pools of this answer. */
+  poolNames: ReadonlyMap<string, string>;
 }
 
-/** Hourly ceilings on single models for this key: how much of each is used, and which is full. */
-export default function ModelCapList({ caps }: ModelCapListProps) {
+/**
+ * Hourly ceilings on single models for this key: how much of each is used, and which is full.
+ * When the caps come from more than one pool, each row also names its pool.
+ */
+export default function ModelCapList({ caps, poolNames }: ModelCapListProps) {
   const t = useTranslations("quotaSelf");
   const number = useFormatNumber();
+  const showPool = new Set(caps.map((cap) => cap.pool)).size > 1;
 
   return (
     <Card padding="md">
@@ -36,6 +42,11 @@ export default function ModelCapList({ caps }: ModelCapListProps) {
                         limit,
                       })}
                 </span>
+                {showPool ? (
+                  <span className="min-w-0 break-words text-text-muted">
+                    {t("modelCapPool", { pool: poolNames.get(cap.pool) ?? cap.pool })}
+                  </span>
+                ) : null}
                 {cap.reached === true ? (
                   <span className="flex min-w-0 items-center gap-2">
                     {/* Decorative: the sentence next to it carries the meaning. */}

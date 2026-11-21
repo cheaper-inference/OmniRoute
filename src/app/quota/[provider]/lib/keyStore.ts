@@ -137,12 +137,23 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
     listeners.forEach((listener) => listener());
   };
 
+  const reload = (): void => {
+    const held = current();
+    // A key kept only in memory or in this tab's session is not another tab's to change.
+    if (held && held.persistence !== "device") return;
+    // A device key follows the device entry; a tab without a key picks one up from it.
+    commit(read("device"));
+    sweep();
+  };
+
   return {
     subscribe(listener) {
       // Subscribing runs outside render: the first read may have found values to clean up.
       current();
       sweep();
       listeners.add(listener);
+      // Another tab may have changed the device entry while nothing listened.
+      reload();
       return () => {
         listeners.delete(listener);
       };
@@ -178,13 +189,6 @@ export function createKeyStore(areas: KeyStorageAreas): KeyStore {
       commit(null);
       sweep();
     },
-    reload() {
-      const held = current();
-      // A key kept only in memory or in this tab's session is not another tab's to change.
-      if (held && held.persistence !== "device") return;
-      // A device key follows the device entry; a tab without a key picks one up from it.
-      commit(read("device"));
-      sweep();
-    },
+    reload,
   };
 }
