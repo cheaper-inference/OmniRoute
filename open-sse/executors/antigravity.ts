@@ -1,6 +1,8 @@
 import { selectHttpResponse } from "../utils/providerHttpAttempts.ts";
 import crypto, { randomUUID } from "crypto";
 import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
+import { cloakUser, outgoing } from "../services/antigravityPromptCloak.ts";
+import { executeViaAgyCli, resolveAgyTransport } from "./agyCliExecutor.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -330,6 +332,12 @@ function asRecord(value: unknown): Record<string, unknown> | null {
  * filter flags, answering with a 429 RESOURCE_EXHAUSTED (port of
  * decolua/9router b566b20, generalized). Only the identity sentence is
  * removed — surrounding instruction text is untouched.
+ *
+ * These four are the older strip: they REMOVE the line. cloak.mjs instead
+ * rewrites the same identities to a wording Antigravity accepts (and adds
+ * eight more signatures it verified later), so cloak's `outgoing()` runs over
+ * whatever this strip leaves. Removal stays first so the historical behavior
+ * of these four (a sentence gone, surrounding text kept) is unchanged.
  */
 const COMPETITIVE_AGENT_PROMPT_PATTERNS: RegExp[] = [
   /\byou are a claude agent\b[^\n]*/i,
@@ -402,6 +410,16 @@ export function normalizeAntigravitySystemInstruction(systemInstruction: unknown
       changed = true;
       promptNormalizeLog.debug("Rewrote harness markers in systemInstruction", { rewrites });
     }
+    // Full cloak.mjs parity: reword every TURNED_AWAY signature Antigravity
+    // still refuses (Hermes, OpenCode, Codex CLI, pi, DeepSeek Harness, the
+    // RFC 2119 line, the Agent SDK identity) and the REWORDED paragraphs.
+    // Whatever the strip above already removed is a no-op here.
+    const cloaked = outgoing(text);
+    if (cloaked !== text) {
+      changed = true;
+      promptNormalizeLog.debug("Cloaked turned-away system prompt lines");
+      text = cloaked;
+    }
     return text === part.text ? part : { ...part, text };
   });
 
@@ -459,20 +477,24 @@ function getAntigravitySafetySettings(safetySettings: unknown): unknown[] | unde
 
 /**
  * Gemini branch (no field whitelist): apply the same systemInstruction
- * normalization the Claude branch gets, leaving every other field untouched.
+ * normalization the Claude branch gets, plus cloakUser over the user turns,
+ * leaving every other field untouched.
  */
 function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, unknown>>(
   request: T
 ): T {
-  if (!asRecord(request.systemInstruction)) return request;
-  const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+  let next = request;
+  if (Array.isArray(request.contents)) {
+    const contents = cloakAntigravityUserContents(request.contents);
+    if (contents !== request.contents) next = { ...next, contents } as T;
+  }
+  if (!asRecord(next.systemInstruction)) return next;
+  const systemInstruction = normalizeAntigravitySystemInstruction(next.systemInstruction);
   if (systemInstruction === undefined) {
-    const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+    const { systemInstruction: _empty, ...withoutSystemInstruction } = next;
     return withoutSystemInstruction as T;
   }
-  return systemInstruction === request.systemInstruction
-    ? request
-    : { ...request, systemInstruction };
+  return systemInstruction === next.systemInstruction ? next : { ...next, systemInstruction };
 }
 
 /** Remove empty `{}` systemInstruction parts only; every other part and field is kept. */
@@ -486,6 +508,17 @@ function dropEmptyAntigravitySystemParts<T extends Record<string, unknown>>(requ
   if (parts.length > 0) return { ...request, systemInstruction: { ...record, parts } };
   const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
   return withoutSystemInstruction as T;
+}
+
+/**
+ * cloakUser over the user turns of a request on the "other models" branch: no
+ * systemInstruction rewrite there, but the contents still reach Antigravity in
+ * a user turn, where Codex's GPT-5 lines are turned away.
+ */
+function cloakAntigravityOtherContents<T extends Record<string, unknown>>(request: T): T {
+  if (!Array.isArray(request.contents)) return request;
+  const contents = cloakAntigravityUserContents(request.contents);
+  return contents === request.contents ? request : ({ ...request, contents } as T);
 }
 
 /**
@@ -538,13 +571,45 @@ export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown
   });
 }
 
+/**
+ * cloakUser over the string text parts of a request's `contents` (cloak.mjs
+ * USER_TURNED_AWAY). Everything a proxy hands Antigravity arrives in a user
+ * turn — the replayed history and rendered tool results included — and since
+ * 11-14 Codex's GPT-5 identity lines there draw the same bare 429 they draw in
+ * the system prompt, reworded through. Only string `text` parts change; every
+ * other part, role and field is kept, and the original reference is returned
+ * when nothing matched (no allocation on the common path).
+ */
+export function cloakAntigravityUserContents(contents: unknown[]): unknown[] {
+  let changed = false;
+  const next = contents.map((content) => {
+    const record = asRecord(content);
+    if (!record || !Array.isArray(record.parts)) return content;
+    let partsChanged = false;
+    const parts = (record.parts as unknown[]).map((part) => {
+      const p = asRecord(part);
+      if (!p || typeof p.text !== "string" || p.text.length === 0) return part;
+      const cloaked = cloakUser(p.text);
+      if (cloaked === p.text) return part;
+      partsChanged = true;
+      return { ...p, text: cloaked };
+    });
+    if (!partsChanged) return content;
+    changed = true;
+    return { ...record, parts };
+  });
+  return changed ? next : contents;
+}
+
 function sanitizeAntigravityGeminiRequest(
   request: Record<string, unknown>
 ): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
 
   if (Array.isArray(request.contents)) {
-    clean.contents = normalizeAntigravityClaudeContents(request.contents);
+    clean.contents = cloakAntigravityUserContents(
+      normalizeAntigravityClaudeContents(request.contents)
+    );
   }
 
   if (asRecord(request.systemInstruction)) {
@@ -968,8 +1033,9 @@ export class AntigravityExecutor extends BaseExecutor {
             normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
           )
         : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
-          // and no identity rewrite, but empty system parts are rejected the same way.
-          dropEmptyAntigravitySystemParts(rawTransformedRequest);
+          // and no identity rewrite, but empty system parts are rejected the same way, and the
+          // user turns still reach Antigravity where Codex's GPT-5 lines are turned away.
+          cloakAntigravityOtherContents(dropEmptyAntigravitySystemParts(rawTransformedRequest));
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
     // Identity labels join (never replace) the caller's own labels (#16618).
@@ -1354,6 +1420,25 @@ export class AntigravityExecutor extends BaseExecutor {
    * exactly the same single call as before (zero extra upstream requests).
    */
   async execute(input: ExecuteInput) {
+    // The ACP transport is opt-in and off by default, so HTTP is unchanged for
+    // every connection that has not asked for it (see agyCliExecutor.ts).
+    if (resolveAgyTransport(input.credentials) === "acp") {
+      const { response, url } = await executeViaAgyCli({
+        model: input.model,
+        body: input.body,
+        stream: input.stream,
+        credentials: input.credentials,
+        signal: input.signal,
+      });
+      return {
+        response,
+        url,
+        headers: {},
+        transformedBody: input.body,
+        transport: "agy-cli",
+      };
+    }
+
     const physicalSendCounter: AntigravityPhysicalSendCounter = { value: 0 };
     await resolveAntigravityClientVersion(getAntigravityClientProfile(input.credentials));
 
