@@ -51,6 +51,25 @@ it.each(["operator", "declared", "inferred"])("preserves %s endpoint declaration
   expect(screen.queryByText("responses")).toBeNull();
 });
 
+// Mistral's OCR card declares `capabilities.ocr`; without `ocr` in the option list
+// the tag could be neither shown nor edited from the dashboard.
+it("renders and edits an ocr endpoint declaration", () => {
+  render(
+    <ModelEndpointTagsEditor
+      provider="mistral"
+      modelId="mistral-ocr-latest"
+      supportedEndpoints={["ocr"]}
+      endpointCapabilitySource="declared"
+      t={(key) => key}
+    />
+  );
+  expect(screen.getByText("ocr")).toBeTruthy();
+  expect(screen.getByText("endpointCapabilitiesDeclared")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "endpointCapabilitiesEdit" }));
+  const checkbox = screen.getByRole("checkbox", { name: "ocr" }) as HTMLInputElement;
+  expect(checkbox.checked).toBe(true);
+});
+
 it.each([
   ["other", "gpt-6-luna"],
   ["openai", "gpt-unknown"],

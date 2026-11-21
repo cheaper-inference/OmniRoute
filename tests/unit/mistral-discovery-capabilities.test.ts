@@ -90,10 +90,10 @@ test("bug 2: declared chat protects a model from embedding id heuristics", () =>
     { id: "text-embedding-guard", capabilities: { completion_chat: true } },
   ]);
   assert.equal(row.modelType, undefined);
-  assert.equal(row.supportedEndpoints, undefined);
+  assert.deepEqual(row.supportedEndpoints, ["chat"]);
 });
 
-test("bug 2: chat-only declarations keep the tip row shape", () => {
+test("bug 2: chat-only declarations carry the declared chat endpoint", () => {
   const [row] = normalizeDiscoveredModels([
     {
       id: "mistral-small-latest",
@@ -101,9 +101,118 @@ test("bug 2: chat-only declarations keep the tip row shape", () => {
       capabilities: { completion_chat: true, function_calling: true },
     },
   ]);
+  assert.deepEqual(row.supportedEndpoints, ["chat"]);
+  assert.equal(row.endpointCapabilitySource, "declared");
+  assert.equal(row.modelType, undefined);
+});
+
+// A card that declares `completion_chat: true` HAS declared its endpoint. Dropping
+// the provenance made the dashboard fall through to the "Assumed" badge for every
+// Mistral chat model, even though Mistral's own model card said `completion_chat`.
+test("a declared chat-only card carries declared provenance, not Assumed", () => {
+  const [row] = normalizeDiscoveredModels(
+    [
+      {
+        id: "mistral-large-latest",
+        object: "model",
+        capabilities: { completion_chat: true, function_calling: true, vision: true },
+        max_context_length: 262144,
+      },
+    ],
+    "mistral"
+  );
+  assert.deepEqual(row.supportedEndpoints, ["chat"]);
+  assert.equal(row.endpointCapabilitySource, "declared");
+});
+
+test("a card with no capabilities object keeps the untrusted row shape", () => {
+  // No declaration at all is NOT evidence: the row must stay provenance-less so the
+  // #16929 gate never arms itself on an id heuristic.
+  const [row] = normalizeDiscoveredModels(
+    [{ id: "mistral-medium-latest", object: "model", max_context_length: 262144 }],
+    "mistral"
+  );
   assert.equal(row.supportedEndpoints, undefined);
   assert.equal(row.endpointCapabilitySource, undefined);
-  assert.equal(row.modelType, undefined);
+});
+
+test("a card past its deprecation date is not discovered", () => {
+  // Mistral keeps retired models in /v1/models and marks them on the card itself:
+  // `deprecation` (date-time) + `deprecation_replacement_model`. `archived` is NOT
+  // the signal — it only exists on FTModelCard (fine-tuned), where it means the
+  // operator archived their own model.
+  const rows = normalizeDiscoveredModels(
+    [
+      {
+        id: "pixtral-large-latest",
+        object: "model",
+        deprecation: "2026-05-31T00:00:00Z",
+        deprecation_replacement_model: "mistral-large-latest",
+        capabilities: { completion_chat: true },
+      },
+      {
+        id: "mistral-large-latest",
+        object: "model",
+        deprecation: null,
+        capabilities: { completion_chat: true },
+      },
+    ],
+    "mistral"
+  );
+  assert.deepEqual(
+    rows.map((row) => row.id),
+    ["mistral-large-latest"]
+  );
+});
+
+test("a future deprecation date is a warning, not a retirement", () => {
+  // Still callable until the date: the row must survive so the lifecycle policy can
+  // report the upcoming shutdown instead of the model silently vanishing.
+  const [row] = normalizeDiscoveredModels(
+    [
+      {
+        id: "mistral-medium-latest",
+        object: "model",
+        deprecation: "2099-01-01T00:00:00Z",
+        capabilities: { completion_chat: true },
+      },
+    ],
+    "mistral"
+  );
+  assert.equal(row.id, "mistral-medium-latest");
+});
+
+test("an unparseable deprecation date keeps the model", () => {
+  const [row] = normalizeDiscoveredModels(
+    [
+      {
+        id: "codestral-latest",
+        object: "model",
+        deprecation: "not-a-date",
+        capabilities: { completion_chat: true },
+      },
+    ],
+    "mistral"
+  );
+  assert.equal(row.id, "codestral-latest");
+});
+
+test("an archived fine-tuned card is not treated as retired", () => {
+  // `archived` on an FTModelCard is the operator's own archive action, not a vendor
+  // retirement — it must not drop the model from discovery.
+  const [row] = normalizeDiscoveredModels(
+    [
+      {
+        id: "ft:open-mistral-7b:587a6b29:20240514:7e773925",
+        object: "model",
+        type: "fine-tuned",
+        archived: true,
+        capabilities: { completion_chat: true },
+      },
+    ],
+    "mistral"
+  );
+  assert.equal(row?.id, "ft:open-mistral-7b:587a6b29:20240514:7e773925");
 });
 
 test("bug 2: cards without capabilities keep the tip row shape", () => {
