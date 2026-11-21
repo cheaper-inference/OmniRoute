@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useLocalOnlyBlocked } from "@/shared/hooks/useLocalOnlyAccess";
+import { detectLocalOnlyRejection } from "@/shared/utils/localOnlyAccess";
 
 export interface ServiceStatus {
   tool: string;
@@ -31,10 +33,16 @@ interface UseServiceStatusResult {
   data: ServiceStatus | null;
   isLoading: boolean;
   error: string | null;
+  /** The status route is local-only for this session: nothing is fetched or polled. */
+  localOnly: boolean;
   mutate: () => void;
 }
 
 const POLL_INTERVAL_MS = 5_000;
+
+export function serviceStatusPath(name: string): string {
+  return `/api/services/${name}/status`;
+}
 
 export function useServiceStatus(name: string): UseServiceStatusResult {
   const [data, setData] = useState<ServiceStatus | null>(null);
@@ -43,13 +51,18 @@ export function useServiceStatus(name: string): UseServiceStatusResult {
   const [tick, setTick] = useState(0);
 
   const mutate = useCallback(() => setTick((n) => n + 1), []);
+  const statusPath = serviceStatusPath(name);
+  const localOnly = useLocalOnlyBlocked(statusPath);
 
   useEffect(() => {
+    if (localOnly) return;
     let cancelled = false;
 
     async function fetchStatus() {
       try {
-        const res = await fetch(`/api/services/${name}/status`);
+        const res = await fetch(statusPath);
+        // Local-only rejection: `localOnly` turns true and this effect stops polling.
+        if (await detectLocalOnlyRejection(res, statusPath)) return;
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = (await res.json()) as ServiceStatus;
         if (!cancelled) {
@@ -71,7 +84,7 @@ export function useServiceStatus(name: string): UseServiceStatusResult {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [name, tick]);
+  }, [statusPath, tick, localOnly]);
 
-  return { data, isLoading, error, mutate };
+  return { data, isLoading: isLoading && !localOnly, error, localOnly, mutate };
 }

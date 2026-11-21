@@ -282,10 +282,9 @@ describe("Claude Web strict stream protocol", () => {
     assert.equal(failures, 0);
   });
 
-  it("fails closed for malformed, unknown, unordered, upstream error, and premature EOF", async () => {
+  it("fails closed for malformed, unordered, upstream error, and premature EOF", async () => {
     const badStreams = [
       'data: {"type":\n\n',
-      frames([{ type: "message_start" }, { type: "future_event" }]),
       frames([
         {
           type: "content_block_delta",
@@ -324,5 +323,45 @@ describe("Claude Web strict stream protocol", () => {
       assert.deepEqual(completions, []);
       assert.equal(failures, 1);
     }
+  });
+
+  it("ignores unknown/unhandled stream events gracefully without breaking text stream", async () => {
+    const events = [
+      { type: "message_start", message: { model: "claude-sonnet-5" } },
+      { type: "telemetry_ping", unknown_field: "foo" },
+      { type: "content_block_start", index: 0, content_block: { type: "text" } },
+      { type: "future_unhandled_event", arbitrary_payload: 123 },
+      {
+        type: "content_block_delta",
+        index: 0,
+        delta: { type: "text_delta", text: "hello world" },
+      },
+      { type: "content_block_stop", index: 0 },
+      { type: "custom_upstream_metadata", data: { test: true } },
+      { type: "message_delta", delta: { stop_reason: "end_turn" } },
+      { type: "message_stop" },
+    ];
+    const completions: Array<{ assistantText: string; stopReason: string }> = [];
+    let failures = 0;
+    const response = await createClaudeWebResponse(byteStream(frames(events)), {
+      model: "claude-sonnet-5",
+      stream: true,
+      responseMetadata: { conversation_id: "conversation-test" },
+      onComplete: (result) => completions.push(result),
+      onFailure: () => {
+        failures += 1;
+      },
+    });
+
+    assert.equal(response.status, 200);
+    const output = await response.text();
+    const parsed = parseSse(output);
+    const deltas = parsed.json.flatMap((chunk) => {
+      const choices = chunk.choices as Array<{ delta?: Record<string, unknown> }> | undefined;
+      return choices?.map((choice) => choice.delta ?? {}) ?? [];
+    });
+    assert.equal(deltas.map((delta) => delta.content ?? "").join(""), "hello world");
+    assert.equal(failures, 0);
+    assert.deepEqual(completions, [{ assistantText: "hello world", stopReason: "end_turn" }]);
   });
 });

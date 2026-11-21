@@ -4,10 +4,9 @@
 
 ---
 
-Siden v3.8.49 (WS3.2/WS3.4 i kvalitets-/hastighetsplanen) er standardbanen for
-sammenslåing av gjennomgåtte PR-er til `release/vX.Y.Z` **Mergify-køen for sammenslåing** (`.mergify.yml`);
-det **manuelle sammenslåingstoget** som er dokumentert nedenfor, er RESERVELØSNINGEN — brukt ved hendelser,
-utgivelsesfrys eller dersom Mergifys Open Source-abonnement noen gang endres.
+> **2026-11-19: Mergify-flettingskøen er trukket tilbake** (eiers vedtak). `.mergify.yml` definerer ikke lenger en kø og nekter Mergify-kommandoene som slår sammen eller omskriver en pull-forespørsel. Release PRs blir slått sammen for hånd under depotregelsettet "Krev grønne porter på den aktive utgivelsen" (`Gate / CI` + `Gate / Quality`) til omni-kø kjører i live-modus, og gjennom omni-kø etter det ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Mergify-delene nedenfor beskriver køen slik den var.
+
+Siden v3.8.49 (WS3.2/WS3.4 av quality/velocity -planen) er standard sammenslåingsbanen for gjennomgått PRs til `release/vX.Y.Z`** Slå sammen sammenslåingskø** (`.mergify.yml`); de** manuell sammenslåing-tog** dokumentert nedenfor er FALLBACK — som brukes under hendelser, utgivelsesfrysninger eller hvis Mergify Open Source-planen noen gang endres.
 
 ## Standardflyt: Mergify-køen
 

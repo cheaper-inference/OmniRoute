@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
+import { focusFirstInvalidField } from "@/shared/utils/focusFirstInvalidField";
 import { Step1ChooseIntegration } from "./steps/Step1ChooseIntegration";
 import {
   Step2ConfigureIntegration,
@@ -17,6 +18,11 @@ import { Step3EventsAndTest } from "./steps/Step3EventsAndTest";
 import { HowItWorksSidebar } from "./HowItWorksSidebar";
 import type { WebhookItem } from "./WebhookCard";
 import type { WebhookKind } from "./shared/IntegrationCard";
+import {
+  webhookErrorText,
+  webhookSecretTooLong,
+  webhookUrlProblem,
+} from "../webhookFieldValidation";
 
 interface AddWebhookWizardProps {
   isOpen: boolean;
@@ -67,15 +73,20 @@ function stateFromWebhook(webhook: WebhookItem | null | undefined): WizardState 
 
 function step2Valid(state: WizardState, isEditing: boolean): boolean {
   const { kind } = state;
-  if (kind === "slack") return state.slack.webhookUrl.trim().length > 0;
+  if (kind === "slack") return webhookUrlProblem(state.slack.webhookUrl) === null;
   if (kind === "telegram") {
     return (
       state.telegram.chatId.trim().length > 0 &&
       (isEditing || state.telegram.botToken.trim().length > 0)
     );
   }
-  if (kind === "discord") return state.discord.webhookUrl.trim().length > 0;
-  if (kind === "custom") return state.custom.endpointUrl.trim().length > 0;
+  if (kind === "discord") return webhookUrlProblem(state.discord.webhookUrl) === null;
+  if (kind === "custom") {
+    return (
+      webhookUrlProblem(state.custom.endpointUrl) === null &&
+      !webhookSecretTooLong(state.custom.secretKey)
+    );
+  }
   return false;
 }
 
@@ -93,6 +104,15 @@ export function AddWebhookWizard({
   const tc = useTranslations("common");
   const [error, setError] = useState<string | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  // Next stays enabled on step 2: a refused click is what flags the fields that need fixing
+  // (inline, by the forms) and moves focus to the first of them.
+  const [showStep2Errors, setShowStep2Errors] = useState(false);
+  const [refusedNext, setRefusedNext] = useState(0);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (refusedNext > 0) focusFirstInvalidField(bodyRef.current);
+  }, [refusedNext]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -100,6 +120,7 @@ export function AddWebhookWizard({
       await Promise.resolve();
       setStep(1);
       setState(stateFromWebhook(editingWebhook));
+      setShowStep2Errors(false);
       setError(null);
       setCreatedId(editingWebhook?.id ?? null);
     })();
@@ -109,6 +130,7 @@ export function AddWebhookWizard({
     if (saving) return;
     setStep(1);
     setState(INITIAL);
+    setShowStep2Errors(false);
     setError(null);
     setCreatedId(null);
     onClose();
@@ -134,6 +156,11 @@ export function AddWebhookWizard({
   // Called when Next is clicked on step 2: create (or update) the webhook so the
   // test button is available at step 3 before the user clicks Finish.
   const handleNextFromStep2 = async () => {
+    if (!step2Valid(state, isEditing)) {
+      setShowStep2Errors(true);
+      setRefusedNext((count) => count + 1);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -144,7 +171,7 @@ export function AddWebhookWizard({
           body: JSON.stringify(buildConfigPayload()),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || t("saveFailed"));
+        if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
       } else {
         const res = await fetch("/api/webhooks", {
           method: "POST",
@@ -152,7 +179,7 @@ export function AddWebhookWizard({
           body: JSON.stringify(buildConfigPayload()),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || t("saveFailed"));
+        if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
         setCreatedId(data.webhook?.id ?? null);
       }
       setStep(3);
@@ -180,7 +207,7 @@ export function AddWebhookWizard({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || t("saveFailed"));
+      if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
       onCreated();
       handleClose();
     } catch (err) {
@@ -189,8 +216,6 @@ export function AddWebhookWizard({
       setSaving(false);
     }
   };
-
-  const canGoNext = step === 1 ? true : step === 2 ? step2Valid(state, isEditing) : true;
 
   const stepTitle =
     step === 1
@@ -230,7 +255,7 @@ export function AddWebhookWizard({
               <Button
                 variant="primary"
                 onClick={() => (step === 2 ? void handleNextFromStep2() : setStep((s) => s + 1))}
-                disabled={!canGoNext || saving}
+                disabled={saving}
                 loading={saving && step === 2}
               >
                 {t("wizard.next")}
@@ -249,7 +274,7 @@ export function AddWebhookWizard({
         </div>
       }
     >
-      <div className="flex gap-6">
+      <div ref={bodyRef} className="flex gap-6">
         <div className="min-w-0 flex-1">
           {error && (
             <Alert
@@ -263,7 +288,10 @@ export function AddWebhookWizard({
           {step === 1 && (
             <Step1ChooseIntegration
               selected={state.kind}
-              onSelect={(kind) => setState((s) => ({ ...s, kind }))}
+              onSelect={(kind) => {
+                setState((s) => ({ ...s, kind }));
+                setShowStep2Errors(false);
+              }}
               t={t}
             />
           )}
@@ -280,6 +308,7 @@ export function AddWebhookWizard({
               onChangeCustom={(v) => setState((s) => ({ ...s, custom: v }))}
               t={t}
               isEditing={isEditing}
+              showRequired={showStep2Errors}
             />
           )}
           {step === 3 && (

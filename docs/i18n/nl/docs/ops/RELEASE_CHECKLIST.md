@@ -355,111 +355,70 @@ Controleer deze aanvullende punten voordat je een v3.8.x-release uitbrengt:
 
 ---
 
-## 3.9.0 LTS-splitsing (geoefend in 3.8.58)
+## 3.9.0 LTS cut (gerepeteerd in 3.8.58)
 
-Na v3.8.59 is de volgende versie 3.9.0 en wordt de topcommit ervan opgesplitst in twee langlevende branches:
-`stable/v3` (de v3 LTS-lijn, npm `latest`) en `develop` (v4, verhoogd naar 4.0.0, npm
-`nightly`). Het branch-/kanaalmodel, de forward-port en labels staan in
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); het plan staat in de [ROADMAP](../../ROADMAP.md) (Fase 3). De splitsing wordt eenmaal uitgevoerd;
-3.8.58 oefent deze van begin tot eind op een fork en 3.8.59 wordt afgesloten met de
-[GO/NO-GO-controlelijst](./LTS_GO_NO_GO.md).
+Na v3.8.59 is de volgende versie 3.9.0, en de tip ervan wordt twee langlevende takken: `stable/v3` (de v3 LTS lijn, npm `latest`) en `develop` (v4, verhoogd naar 4.0.0, npm `nightly`). Het branch/channel model, de forward-port en de labels bevinden zich in [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; het plan ligt in de [ROADMAP](../../ROADMAP.md) (Fase 3). De snede loopt één keer; 3.8.58 repeteert het van begin tot eind op een vork, en 3.8.59 sluit af met de [GO/NO-GO checklist](./LTS_GO_NO_GO.md).
 
-### Proefuitvoering (alleen-lezen, altijd veilig)
+### Droogdraaien (alleen-lezen, altijd veilig)
 
 ```bash
-npm run release:dry-run-lts-cut                       # de echte splitsing: 3.9.0 vanaf HEAD, vorige tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # zet de broncommit vast
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` voert niets uit: het leest git en `gh` en drukt de
-volledige reeks af — voorafgaande voorwaarden (de bron kan worden gevonden, de bronrepository heeft een volledige geschiedenis —
-een ondiepe kloon kan `stable/v3` niet pushen, de ontvangende zijde weigert het pakket bij de eerste
-geënte parent, dus voer de splitsing uit vanuit een volledige kloon of voer eerst `git fetch --unshallow origin` uit — de vorige
-tag bestaat, `package.json` heeft de doelversie, er staat een `release-freeze`-issue open, er staat geen
-`Release branch not green`-issue open
-voor een bestaande releasebranch — een branch die niet bestaat, rapporteert `?` onbekend, nooit
-groen — de Mergify-wachtrij `release` is geconfigureerd (G11: `queue_rules`, `checks_timeout`,
-label `queue`), de regelset `release/*` blokkeert nog steeds verwijdering en geforceerde pushes, en
-`stable/v3` en `develop` bestaan nog niet), de twee branchstappen, welke triggers van slapende workflows
-en `if:`-voorwaarden waar worden (en welke geblokkeerd blijven door een repositoryvariabele of
-vastgezet zijn op de canonieke repository), de verwachte dist-tags (`latest` → 3.9.0, `next` en
-`nightly` leeg) en het terugdraaien. Afsluitcode `0` = `RESULT: READY`, `1` = een blokkerende voorafgaande voorwaarde
-is mislukt (`✗`), `2` = gebruiksfout. `--advisory <id,...>` verlaagt een controle tot een waarschuwing (`!`)
-zonder deze te verbergen.
+`scripts/release/dry-run-lts-cut.mjs` voert niets uit: het leest git en `gh` en drukt de hele reeks — voorwaarden af (bron wordt opgelost, de bronrepository heeft de volledige geschiedenis — een ondiepe kloon kan `stable/v3` niet pushen, de ontvangende kant wijst het pakket af bij de eerste geënte ouder, dus gesneden uit een volledige kloon of `git fetch --unshallow origin` eerste — vorige tag bestaat, `package.json` is de doelversie, een `release-freeze` probleem is open, geen open `Release branch not green` probleem op een bestaande release branch — a branch die niet bestaat rapporteert `?` onbekend, nooit groen — omni-wachtrij brengt de release PRs binnen (G11: `config/merge-queue/config.json` geldig, zijn `bases` beheert de release branch, `mode` `live`, zijn label bestaat), de `release/*` regelset blokkeert nog steeds verwijdering en force-push, en `stable/v3` en `develop` bestaan nog niet), de twee branch-stappen, welke slapende workflow triggers en `if:` voorwaarden waar worden (en die afgesloten blijven door een repositoryvariabele of vastgemaakt aan de canonieke repository), de verwachte dist-tags (`latest` → 3.9.0, `next` en `nightly` leeg) en het terugdraaien. Sluit `0` = `RESULT: READY` af, `1` = een blokkerende voorwaarde is mislukt (`✗`), `2` = gebruiksfout. `--advisory <id,...>` downgradet een cheque naar een waarschuwing (`!`) zonder deze te verbergen.
 
-Voer de proefuitvoering van de echte splitsing uit terwijl de releasefreeze voor 3.9.0 nog actief is — de branches worden
-na de tag en voordat Fase 12c de freeze opheft aangemaakt.
+Voer de echte cut-run uit terwijl de release-bevriezing van 3.9.0 nog open is — de takken worden gemaakt na de tag en voordat Fase 12c de bevriezing opheft.
 
-### 3.8.58-oefening (alleen fork)
+### 3.8.58 repetitie (alleen vork)
 
 ```bash
-# 1. Proefuitvoering op de huidige topcommit met oefenparameters
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Voer uit met een FORK-remote (origin, of elke remote waarvan de URL naar de canonieke
-#    repository verwijst, wordt geweigerd; elke stap vraagt om bevestiging in de terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Test de slapende workflows in de fork (workflow_dispatch wanneer de proefuitvoering
-#    een vastzetting op de canonieke repository rapporteert) en draai daarna terug
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-De commit die de versie van develop verhoogt, wordt met git-plumbing opgebouwd (zonder de werkboom te wijzigen) en verhoogt
-dezelfde vijf bestanden als een commit die een cyclus opent: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` en `docs/openapi.yaml`. De sectie `[4.0.0]` in het
-CHANGELOG en de i18n-equivalenten daarvan worden daarna op `develop` geopend, vóór de eerste
-PR ervan. Het script wijzigt nooit npm-dist-tags — oefen deze met een tijdelijk pakket.
+De ontwikkel bump commit is gebouwd met git plumping (er wordt geen werkende boom aangeraakt) en bumpt dezelfde vijf bestanden als een cyclus-open commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` en `docs/openapi.yaml`. De `[4.0.0]` CHANGELOG sectie en de i18n-spiegels worden daarna geopend op `develop`, vóór de eerste PR. Het script verandert nooit npm dist-tags — repeteer die op een scratch-pakket.
 
-### PR-previewartefact (eenmaal bouwen, exact dezelfde bytes promoveren)
+### PR preview-artefact (één keer bouwen, dezelfde bytes promoten)
 
-`.github/workflows/preview-artifact.yml` bouwt één productietarball vanaf de head van een PR en
-valideert exact die build (deel (a) van #8084). Alleen PR's binnen dezelfde repository; er wordt niets gepubliceerd.
+`.github/workflows/preview-artifact.yml` bouwt één productie-tarball van een PR -kop en valideert die exacte build (#8084 -plak (a)). Alleen PRs met dezelfde repository; er wordt niets gepubliceerd.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # of voeg het label `preview-artifact` toe
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # preview-installatie
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-De uitvoering voert `npm ci`, `npm run build:release` en `npm run check:pack-artifact` uit, pakt de
-tarball in, voert `npm run check:pack-boot` uit (nepgeheimen, tijdelijke datamap), pakt deze opnieuw in en
-mislukt tenzij de digest identiek is, legt vervolgens `artifact-identity.json` vast (head-SHA, base-
-SHA, lockfile-hash, platform, architectuur, node ABI, bundler, buildbeleid —
-`scripts/release/artifact-identity.mjs`) en attesteert de tarball in een afzonderlijke job. Een preview
-promoveren betekent die tarball installeren: bouw nooit opnieuw vanuit de broncode.
+De run doet `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakt de tarball in, voert `npm run check:pack-boot` uit (nepgeheimen, kortstondige gegevensmap), herpakt en mislukt tenzij de samenvatting identiek is, en registreert vervolgens `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI, Bundler, build policy — `scripts/release/artifact-identity.mjs`) en getuigt van de tarball in een aparte taak. Het promoten van een preview betekent het installeren van die tarball: herbouw nooit vanaf de bron.
 
-### De splitsing (3.9.0, na GO)
+### De verlaging (3.9.0, na GO)
 
-1. GO vastgelegd in [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` drukt `RESULT: READY` af.
-3. Maak de branches handmatig aan op `origin` met de opdrachten die de proefuitvoering afdrukt — het
-   script weigert naar `origin` te pushen. Om een beoordeelde develop-commit opnieuw te gebruiken, voert u
-   eerst de `--execute`-oefening op de 3.9.0-topcommit uit tegen uw fork; deze drukt beide SHA's af en
-   dezelfde commits kunnen worden gepusht:
+1. GO opgenomen in [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` drukt `RESULT: READY`.
+3. Maak de vertakkingen op `origin` met de hand met de opdrachten die de dry-run prints — het script weigert naar `origin` te pushen. Om een beoordeelde ontwikkelcommit opnieuw te gebruiken, voer je eerst de `--execute` repetitie op de 3.9.0-tip uit tegen je fork; het drukt beide SHAs af, en dezelfde commits kunnen worden gepusht:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Bescherm `stable/v3` en `develop` (regelsets + samenvoegwachtrij) voordat de eerste PR wordt geïntegreerd.
-5. De slapende workflows worden geactiveerd zodra de branches bestaan: `forward-port.yml` (push naar
-   `stable/v3`), `validate-stable-pr.yml` (PR's naar `stable/v3`) en `nightly-v4-build.yml`
-   (bouwt `develop`). Stel vóór de ingebruikname het repositorygeheim `secrets.FORWARD_PORT_TOKEN` in (zodat CI wordt uitgevoerd voor
-   forward-port-PR's); nachtelijke publicatie blijft uitgeschakeld totdat de eigenaar de repositoryvariabele
-   `vars.NIGHTLY_PUBLISH` instelt op `true` en npm Trusted Publishing
-   `nightly-v4-build.yml` accepteert. Kanaalresolutie wordt afgehandeld door `scripts/release/dist-tag.mjs`, dezelfde
-   resolver die door `npm-publish.yml` wordt gebruikt.
-6. Controleer de kanalen: `npm view omniroute dist-tags --json` toont `latest` = 3.9.0 en geen
-   `next` / `nightly` totdat v4 wordt gepubliceerd.
-7. Terugdraaien, indien nodig: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   en `npm dist-tag add omniroute@3.8.59 latest`.
+4. Bescherm `stable/v3` en `develop` (regelsets + merge wachtrij) voordat de eerste PR landt.
+5. De slapende workflows worden ingeschakeld op basis van het bestaan van de vertakkingen: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) en `nightly-v4-build.yml` (builds `develop`). Voordat u live gaat, stelt u het `secrets.FORWARD_PORT_TOKEN` repositorygeheim in (zodat CI op de forward-port PRs draait); nightly publishing blijft uitgeschakeld totdat de eigenaar de repositoryvariabele `vars.NIGHTLY_PUBLISH` instelt op `true` en npm Trusted Publishing `nightly-v4-build.yml` accepteert. De kanaalresolutie is `scripts/release/dist-tag.mjs`, dezelfde solver `npm-publish.yml` gebruikt.
+6. Controleer de kanalen: `npm view omniroute dist-tags --json` toont `latest` = 3.9.0 en geen `next` / `nightly` totdat v4 publiceert.
+7. Indien nodig terugdraaien: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` en `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 
