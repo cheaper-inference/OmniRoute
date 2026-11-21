@@ -204,6 +204,36 @@ test("invalid CLI limits use the configured locale's positive integer message", 
   }
 });
 
+test("localized P2C latency weight labels preserve the algorithm and range", async (context) => {
+  const { resetForTests, setLocale, t } = await import("../../bin/cli/i18n.mjs");
+  context.after(resetForTests);
+  const { locales } = JSON.parse(readFileSync(join(ROOT, "config", "i18n.json"), "utf8")) as {
+    locales: Array<{ code: string }>;
+  };
+
+  for (const { code } of locales) {
+    if (code === "en") continue;
+
+    assert.equal(setLocale(code), code);
+    const label = t("resilience.config.p2cLatencyWeight");
+    assert.notEqual(label, en.resilience.config.p2cLatencyWeight, `English fallback for ${code}`);
+    assert.doesNotMatch(label, /^__MISSING__:/, `Untranslated label for ${code}`);
+    assert.match(label, /\bP2C\b/u, `Missing P2C name for ${code}`);
+
+    const bounds = label.replace("P2C", "").match(/\p{Decimal_Number}+/gu) ?? [];
+    const numberFormat = new Intl.NumberFormat(code, { useGrouping: false });
+    assert.equal(bounds.length, 2, `Expected two bounds for ${code}`);
+    assert.ok(
+      bounds[0] === "0" || bounds[0] === numberFormat.format(0),
+      `Wrong lower bound for ${code}`
+    );
+    assert.ok(
+      bounds[1] === "20" || bounds[1] === numberFormat.format(20),
+      `Wrong upper bound for ${code}`
+    );
+  }
+});
+
 test("maltese catalog interpolates the saved path", async () => {
   const { resetForTests, t, setLocale } = await import("../../bin/cli/i18n.mjs");
   resetForTests();
