@@ -5,8 +5,9 @@ import { classifyIpScope } from "@/lib/ipUtils";
 import {
   isLoopbackBindHost,
   isPrintableAsciiTarget,
+  isQuotaPanelBasePath,
   isQuotaPanelPath,
-  QUOTA_PANEL_METHODS,
+  QUOTA_PANEL_METHOD_NAMES,
   resolveQuotaPanelListener,
 } from "@/lib/quotaPanelBridge";
 import { getRuntimePorts } from "@/lib/runtime/ports";
@@ -118,11 +119,16 @@ const API_BRIDGE_ROLE: BridgeRole = {
   errorDetail: true,
 };
 
-/** The role of the quota panel port: the self-service quota page, read only. */
+/**
+ * The role of the quota panel port: the self-service quota page, read only.
+ *
+ * A base path that is not empty and not of a supported shape gives a role that refuses every path.
+ */
 export function createQuotaPanelRole(basePath = ""): BridgeRole {
+  const supportedBasePath = basePath === "" || isQuotaPanelBasePath(basePath);
   return {
-    isAllowedPath: (pathname) => isQuotaPanelPath(pathname, basePath),
-    methods: QUOTA_PANEL_METHODS,
+    isAllowedPath: (pathname) => supportedBasePath && isQuotaPanelPath(pathname, basePath),
+    methods: new Set(QUOTA_PANEL_METHOD_NAMES),
     strictTarget: true,
     relayUpgrades: false,
     relayBodies: false,
@@ -131,7 +137,11 @@ export function createQuotaPanelRole(basePath = ""): BridgeRole {
   };
 }
 
-/** True when the role relays this method and target. The path goes through `isRelayablePath`. */
+/**
+ * True when the role relays this method and target. The path goes through `isRelayablePath`.
+ *
+ * This does not cover the body rule of a role (`relayBodies`): `bridgeRequestDecision` does.
+ */
 export function isRelayableRequest(
   role: BridgeRole,
   method: string | undefined,
@@ -147,6 +157,23 @@ function declaresRequestBody(headers: IncomingHttpHeaders): boolean {
   if (headers["transfer-encoding"] !== undefined) return true;
   const length = headers["content-length"];
   return length !== undefined && Number(length) !== 0;
+}
+
+type BridgeRequestDecision = "relay" | "refuse" | "refuse-and-close";
+
+/**
+ * What the bridge does with a request: the body, method and path rules of the role, together.
+ *
+ * A request refused for its body also closes the connection, so its body is not read.
+ */
+function bridgeRequestDecision(
+  role: BridgeRole,
+  method: string | undefined,
+  rawUrl: string,
+  headers: IncomingHttpHeaders
+): BridgeRequestDecision {
+  if (!role.relayBodies && declaresRequestBody(headers)) return "refuse-and-close";
+  return isRelayableRequest(role, method, rawUrl) ? "relay" : "refuse";
 }
 
 function notFoundBody(role: BridgeRole): string {
@@ -291,7 +318,8 @@ function writeUpgradeProxyError(socket: net.Socket, status: number, body: string
   ].join("\r\n");
 
   socket.write(response);
-  socket.end(buffer);
+  // The server socket allows half-open connections: close it fully once the answer is written.
+  socket.end(buffer, () => socket.destroy());
 }
 
 /** Header lines for an upgrade request relayed to the dashboard, from the client's raw headers. */
@@ -392,9 +420,11 @@ export function createApiBridgeServer(
     // uncaughtException that kills the server (#fix-dev-server-aborted).
     attachRequestStreamGuards(req, res);
 
-    const refusedBody = !role.relayBodies && declaresRequestBody(req.headers);
-    if (refusedBody || !isRelayableRequest(role, req.method, req.url || "/")) {
-      res.writeHead(404, { "content-type": "application/json" });
+    const decision = bridgeRequestDecision(role, req.method, req.url || "/", req.headers);
+    if (decision !== "relay") {
+      const headers: http.OutgoingHttpHeaders = { "content-type": "application/json" };
+      if (decision === "refuse-and-close") headers.connection = "close";
+      res.writeHead(404, headers);
       res.end(notFoundBody(role));
       return;
     }

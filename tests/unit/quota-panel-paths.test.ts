@@ -163,7 +163,9 @@ test("under a base path only the prefixed paths are on the allowlist", () => {
 });
 
 test("the relayed methods are GET and HEAD", () => {
-  assert.deepEqual([...panel.QUOTA_PANEL_METHODS].sort(), ["GET", "HEAD"]);
+  assert.deepEqual([...panel.QUOTA_PANEL_METHOD_NAMES].sort(), ["GET", "HEAD"]);
+  assert.equal(Object.isFrozen(panel.QUOTA_PANEL_METHOD_NAMES), true);
+  assert.equal("QUOTA_PANEL_METHODS" in panel, false);
 });
 
 test("a target with a character outside printable ASCII is not printable", () => {

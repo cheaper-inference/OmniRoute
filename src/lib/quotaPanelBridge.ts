@@ -24,8 +24,8 @@ const PANEL_EXACT_PATHS: ReadonlySet<string> = new Set([
 ]);
 const PRINTABLE_ASCII_TARGET = /^[\x21-\x7e]+$/;
 
-/** The methods the quota panel port relays. */
-export const QUOTA_PANEL_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD"]);
+/** The methods the quota panel port relays. Each panel role builds its own set from this list. */
+export const QUOTA_PANEL_METHOD_NAMES: readonly string[] = Object.freeze(["GET", "HEAD"]);
 
 /** True when every character of the request target is printable ASCII, space excluded. */
 export function isPrintableAsciiTarget(rawUrl: string): boolean {
@@ -93,8 +93,11 @@ function resolvePanelBasePath(value: string | undefined): string | null {
   return isQuotaPanelBasePath(trimmed) ? trimmed : null;
 }
 
-/** True for a base path the quota panel role supports: see BASE_PATH_SHAPE. */
-function isQuotaPanelBasePath(basePath: string): boolean {
+/**
+ * True for a base path the quota panel role supports: a leading slash and one or more segments,
+ * with no trailing slash, no empty segment and none of `\ ? # %`.
+ */
+export function isQuotaPanelBasePath(basePath: string): boolean {
   return BASE_PATH_SHAPE.test(basePath);
 }
 

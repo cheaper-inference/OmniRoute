@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import net from "node:net";
 import os from "node:os";
+import { once } from "node:events";
 
 const bridge = await import("../../src/lib/apiBridgeServer.ts");
 
@@ -302,6 +303,17 @@ test("the panel port relays GET and HEAD only", async () => {
         assert.deepEqual(JSON.parse(res.body), NOT_FOUND);
       }
     }
+    // The same methods without a body, so the method rule alone refuses them.
+    for (const method of ["POST", "DELETE", "OPTIONS"]) {
+      for (const path of ["/quota/claude", "/api/v1/me/quota/claude", "/api/v1/me/usage"]) {
+        const response = await raw(
+          panelPort,
+          `${method} ${path} HTTP/1.1\r\nHost: panel.test\r\nConnection: close\r\n\r\n`
+        );
+        assert.match(response, /^HTTP\/1\.1 404 /, `${method} ${path}`);
+        assert.match(response, /\{"error":"not_found","message":"Not found\."\}/, method);
+      }
+    }
     assert.deepEqual(seen, []);
     assert.equal((await call(panelPort, "/quota/claude", { method: "HEAD" })).status, 200);
     assert.deepEqual(
@@ -537,3 +549,92 @@ test(
     );
   }
 );
+
+test("a panel role with an unsupported base path refuses every path", () => {
+  for (const basePath of ["/", "/x/"]) {
+    const role = bridge.createQuotaPanelRole(basePath);
+    for (const path of ["//quota/claude", "/quota/claude", "/x//quota/claude"]) {
+      assert.equal(role.isAllowedPath(path), false, `${basePath} ${path}`);
+      assert.equal(bridge.isRelayableRequest(role, "GET", path), false, `${basePath} ${path}`);
+    }
+  }
+  assert.equal(bridge.createQuotaPanelRole("/x").isAllowedPath("/x/quota/claude"), true);
+});
+
+test("each panel role has its own set of methods", () => {
+  const first = bridge.createQuotaPanelRole();
+  const second = bridge.createQuotaPanelRole();
+  assert.ok(first.methods && second.methods);
+  assert.notEqual(first.methods, second.methods);
+  (first.methods as Set<string>).add("POST");
+  assert.equal(bridge.isRelayableRequest(second, "POST", "/quota/claude"), false);
+  assert.equal(
+    bridge.isRelayableRequest(bridge.createQuotaPanelRole(), "POST", "/quota/claude"),
+    false
+  );
+});
+
+test("a refused upgrade closes the socket even when the client keeps its side open", async () => {
+  const front = bridge.createApiBridgeServer(await closedPort(), bridge.createQuotaPanelRole());
+  const port = await listen(front);
+  const client = net.connect({ port, host: "127.0.0.1", allowHalfOpen: true });
+  const connections = () =>
+    new Promise<number>((resolve, reject) =>
+      front.getConnections((error, count) => (error ? reject(error) : resolve(count)))
+    );
+  try {
+    let data = "";
+    client.setEncoding("utf8");
+    client.on("data", (chunk) => (data += chunk));
+    await once(client, "connect");
+    client.write(
+      "GET /quota/claude HTTP/1.1\r\nHost: panel.test\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n"
+    );
+    const deadline = Date.now() + 1000;
+    while (!/"error":"not_found"/.test(data) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    assert.match(data, /^HTTP\/1\.1 404 /);
+    let count = await connections();
+    while (count > 0 && Date.now() < deadline + 1000) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      count = await connections();
+    }
+    assert.equal(count, 0);
+  } finally {
+    client.destroy();
+    shut(front);
+  }
+});
+
+test("a body refusal closes the connection and the next request on it is not served", async () => {
+  await withPanel(async ({ panelPort, seen }) => {
+    for (const first of [
+      "GET /quota/claude HTTP/1.1\r\nHost: panel.test\r\nContent-Length: 2\r\n\r\n{}",
+      "GET /quota/claude HTTP/1.1\r\nHost: panel.test\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n",
+    ]) {
+      const socket = net.connect(panelPort, "127.0.0.1");
+      let data = "";
+      socket.setEncoding("utf8");
+      socket.on("data", (chunk) => (data += chunk));
+      socket.on("error", () => undefined);
+      const closed = once(socket, "close");
+      await once(socket, "connect");
+      socket.write(first);
+      const deadline = Date.now() + 1000;
+      while (!/"error":"not_found"/.test(data) && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      assert.match(data, /^HTTP\/1\.1 404 /, first);
+      assert.match(data, /\r\nconnection: close\r\n/i, first);
+      if (!socket.destroyed && socket.writable) {
+        socket.write("GET /quota/claude HTTP/1.1\r\nHost: panel.test\r\n\r\n");
+      }
+      const timer = setTimeout(() => socket.destroy(), 1000);
+      await closed;
+      clearTimeout(timer);
+      assert.equal(data.match(/HTTP\/1\.1 /g)?.length, 1, first);
+    }
+    assert.deepEqual(seen, []);
+  });
+});
