@@ -100,9 +100,44 @@ async function loadScheduler(label) {
   return import(`${pathToFileURL(modulePath).href}?case=${label}-${Date.now()}`);
 }
 
+const defaultFetchCalls: string[] = [];
+
+function installEmptySyncFetch(): () => void {
+  const originalFetch = globalThis.fetch;
+  defaultFetchCalls.length = 0;
+  globalThis.fetch = async (input: RequestInfo | URL) => {
+    defaultFetchCalls.push(String(input instanceof Request ? input.url : input));
+    return new Response(JSON.stringify({ data: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+  return () => {
+    globalThis.fetch = originalFetch;
+  };
+}
+
+let defaultFetchRestore: (() => void) | null = null;
+
+type LoadedScheduler = {
+  DEFAULT_INTERVAL_MS: number;
+  MAX_TIMER_DELAY_MS: number;
+  MODEL_SYNC_STAGGER_OFFSET_MS: number;
+  startModelSyncScheduler: (baseUrl: string, intervalMs?: number) => void;
+  stopModelSyncScheduler: () => void;
+};
+
 test.beforeEach(async () => {
   delete process.env.MODEL_SYNC_INTERVAL_HOURS;
   await resetStorage();
+  // The phase callback runs a real sync cycle. Without this every timer test
+  // would fire loopback requests at the placeholder base URL.
+  defaultFetchRestore = installEmptySyncFetch();
+});
+
+test.afterEach(() => {
+  defaultFetchRestore?.();
+  defaultFetchRestore = null;
 });
 
 test.after(async () => {
@@ -447,6 +482,238 @@ test("#13973: phase offset delays the first periodic tick but never changes the 
   }
 });
 
+test("#20865: a non-positive MODEL_SYNC_INTERVAL_HOURS disables the scheduler", async () => {
+  const previousHours = process.env.MODEL_SYNC_INTERVAL_HOURS;
+  const originalFetch = globalThis.fetch;
+
+  try {
+    for (const value of ["0", "-0", "0.0", "0e5", "+0.0e-5", "0e309", "-1", "-1e309", "-1e-324"]) {
+      const timers = installTimerStubs();
+      const fetchCalls: string[] = [];
+      let scheduler: LoadedScheduler | undefined;
+
+      globalThis.fetch = async (url) => {
+        fetchCalls.push(String(url));
+        return new Response(JSON.stringify({ data: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      };
+      process.env.MODEL_SYNC_INTERVAL_HOURS = value;
+
+      try {
+        scheduler = (await loadScheduler(`nonpositive-${value}`)) as LoadedScheduler;
+        scheduler.startModelSyncScheduler("http://127.0.0.1:7777");
+        await flushMicrotasks();
+
+        assert.equal(
+          timers.timeouts.length,
+          0,
+          `no one-shot timer may be armed when MODEL_SYNC_INTERVAL_HOURS=${value}`
+        );
+        assert.equal(
+          timers.intervals.length,
+          0,
+          `no recurring timer may be armed when MODEL_SYNC_INTERVAL_HOURS=${value}`
+        );
+        assert.equal(
+          fetchCalls.length,
+          0,
+          `no sync request may be issued when MODEL_SYNC_INTERVAL_HOURS=${value}`
+        );
+      } finally {
+        scheduler?.stopModelSyncScheduler();
+        globalThis.fetch = originalFetch;
+        timers.restore();
+      }
+    }
+  } finally {
+    if (previousHours === undefined) delete process.env.MODEL_SYNC_INTERVAL_HOURS;
+    else process.env.MODEL_SYNC_INTERVAL_HOURS = previousHours;
+  }
+});
+
+test("#20865: a fractional MODEL_SYNC_INTERVAL_HOURS keeps its value instead of reading as off", async () => {
+  const previousHours = process.env.MODEL_SYNC_INTERVAL_HOURS;
+  const timers = installTimerStubs();
+  let scheduler: LoadedScheduler | undefined;
+  process.env.MODEL_SYNC_INTERVAL_HOURS = "0.5";
+
+  try {
+    scheduler = (await loadScheduler("fractional-hours")) as LoadedScheduler;
+    scheduler.startModelSyncScheduler("http://127.0.0.1:7777");
+    await flushMicrotasks();
+
+    const phase = timers.timeouts.find((t) => t.ms === scheduler.MODEL_SYNC_STAGGER_OFFSET_MS);
+    assert.ok(phase, "expected the scheduler to arm its phase timer for 0.5 hours");
+    // Remove only the phase handle: anything the callback schedules (the startup
+    // cycle) has to run, otherwise the zero-request assertion proves nothing.
+    timers.timeouts.splice(timers.timeouts.indexOf(phase), 1);
+    phase.fn();
+    await drainTimers(timers);
+    // The phase callback starts the first cycle. With no auto-sync connection in
+    // the store it must not touch the network at all -- and the autouse fetch
+    // stub means a regression that does would hit the stub, not a real socket.
+    // The startup cycle probes readiness once and then finds no auto-sync
+    // connection. Any second request would mean it started syncing against the
+    // stub, which is exactly the regression this guards.
+    assert.deepEqual(
+      defaultFetchCalls,
+      ["http://127.0.0.1:20128/api/providers/__readiness_probe__/models"],
+      "an empty cycle must probe readiness and stop there"
+    );
+    assert.equal(timers.intervals.length, 1);
+    assert.equal(timers.intervals[0].ms, 30 * 60 * 1000);
+  } finally {
+    scheduler?.stopModelSyncScheduler();
+    timers.restore();
+    if (previousHours === undefined) delete process.env.MODEL_SYNC_INTERVAL_HOURS;
+    else process.env.MODEL_SYNC_INTERVAL_HOURS = previousHours;
+  }
+});
+
+test("#20865: an unusable MODEL_SYNC_INTERVAL_HOURS never arms a busy-loop timer", async () => {
+  const previousHours = process.env.MODEL_SYNC_INTERVAL_HOURS;
+  // Node's own limit, written out rather than read from the module: if the
+  // exported constant ever regresses past it, the clamp stops working and this
+  // assertion has to notice.
+  const NODE_MAX_TIMER_DELAY_MS = 2_147_483_647;
+  const CUSTOM_FALLBACK_MS = 4_242_000;
+  const UNSAFE_CALLER_MS = 2_147_483_648;
+
+  try {
+    for (const [value, expectedMs, callerMs] of [
+      // Valid exponent form: 1e3 hours is far past the timer limit, so it clamps.
+      ["1e3", NODE_MAX_TIMER_DELAY_MS, undefined],
+      // Malformed settings keep the caller's interval instead of disabling sync.
+      ["Infinity", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      ["0,5", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      ["0.5h", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      // 1e309 is not representable at all, so it is malformed like the others.
+      ["1e309", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      // 1e308 is a valid hour count that overflows when scaled to milliseconds:
+      // that is "as long as the timer allows", not "back to six hours".
+      ["1e308", NODE_MAX_TIMER_DELAY_MS, CUSTOM_FALLBACK_MS],
+      // A positive literal too small to represent parses to zero; it is a tiny
+      // delay, not a request to turn syncing off.
+      ["1e-324", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      // A negative sign only means "off" when the literal itself parses; a
+      // malformed negative setting keeps syncing instead of silently stopping.
+      ["-0.5h", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      ["-Infinity", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      // 999 ms rounds below the one-second floor, so the caller's interval wins.
+      ["0.0002775", CUSTOM_FALLBACK_MS, CUSTOM_FALLBACK_MS],
+      // 999.72 ms rounds to one second: the floor applies to the rounded delay.
+      ["0.0002777", 1_000, undefined],
+      // The fallback itself is clamped: an out-of-range caller interval must not
+      // reach setInterval untouched.
+      ["0.0000000001", NODE_MAX_TIMER_DELAY_MS, UNSAFE_CALLER_MS],
+      // Exactly one second is still a usable period and must be honored.
+      ["0.0002777777777777778", 1_000, undefined],
+    ] as const) {
+      const timers = installTimerStubs();
+      let scheduler: LoadedScheduler | undefined;
+      process.env.MODEL_SYNC_INTERVAL_HOURS = value;
+
+      try {
+        scheduler = (await loadScheduler(`range-${value}`)) as LoadedScheduler;
+        const loaded = scheduler;
+        assert.ok(loaded);
+        assert.equal(loaded.MAX_TIMER_DELAY_MS, NODE_MAX_TIMER_DELAY_MS);
+        loaded.startModelSyncScheduler("http://127.0.0.1:7777", callerMs);
+        await flushMicrotasks();
+
+        const phase = timers.timeouts.find((t) => t.ms === loaded.MODEL_SYNC_STAGGER_OFFSET_MS);
+        assert.ok(phase, `expected the scheduler to arm its phase timer for ${value}`);
+        phase.fn();
+
+        assert.equal(timers.intervals.length, 1);
+        assert.equal(
+          timers.intervals[0].ms,
+          expectedMs,
+          `MODEL_SYNC_INTERVAL_HOURS=${value} must keep the recurring delay inside the timer range`
+        );
+      } finally {
+        scheduler?.stopModelSyncScheduler();
+        timers.restore();
+      }
+    }
+  } finally {
+    if (previousHours === undefined) delete process.env.MODEL_SYNC_INTERVAL_HOURS;
+    else process.env.MODEL_SYNC_INTERVAL_HOURS = previousHours;
+  }
+});
+
+test("#20865: a caller-supplied interval is clamped like the environment value", async () => {
+  const timers = installTimerStubs();
+  const DEFAULT_MS = 21_600_000;
+  let scheduler: LoadedScheduler | undefined;
+
+  try {
+    // No environment override: the caller's interval is what gets clamped.
+    for (const [callerMs, expectedMs] of [
+      [0, 1_000],
+      [-5, 1_000],
+      // Rounding is part of the contract: 1000.4 -> 1000, 1000.6 -> 1001.
+      [999.4, 1_000],
+      [999.5, 1_000],
+      [1_000.4, 1_000],
+      [1_000.6, 1_001],
+      [Number.NaN, DEFAULT_MS],
+      // "Longer than a timer can express" clamps to the maximum, it does not
+      // quietly become six hours.
+      [Number.POSITIVE_INFINITY, 2_147_483_647],
+    ] as const) {
+      timers.timeouts.length = 0;
+      timers.intervals.length = 0;
+      scheduler?.stopModelSyncScheduler();
+      scheduler = (await loadScheduler(`caller-${String(callerMs)}`)) as LoadedScheduler;
+      assert.ok(scheduler);
+      scheduler.startModelSyncScheduler("http://127.0.0.1:7777", callerMs);
+      await flushMicrotasks();
+
+      const phase = timers.timeouts.find((t) => t.ms === scheduler?.MODEL_SYNC_STAGGER_OFFSET_MS);
+      assert.ok(phase, `expected a phase timer for caller interval ${String(callerMs)}`);
+      phase.fn();
+
+      assert.equal(timers.intervals.length, 1);
+      assert.equal(
+        timers.intervals[0].ms,
+        expectedMs,
+        `caller interval ${String(callerMs)} must never reach setInterval unclamped`
+      );
+    }
+  } finally {
+    scheduler?.stopModelSyncScheduler();
+    timers.restore();
+  }
+});
+
+test("#20865: a leading plus sign in MODEL_SYNC_INTERVAL_HOURS stays valid", async () => {
+  const previousHours = process.env.MODEL_SYNC_INTERVAL_HOURS;
+  process.env.MODEL_SYNC_INTERVAL_HOURS = "  +4  ";
+  const timers = installTimerStubs();
+  let scheduler: LoadedScheduler | undefined;
+
+  try {
+    scheduler = (await loadScheduler("plus-sign")) as LoadedScheduler;
+    assert.ok(scheduler);
+    scheduler.startModelSyncScheduler("http://127.0.0.1:7777");
+    await flushMicrotasks();
+
+    const phase = timers.timeouts.find((t) => t.ms === scheduler?.MODEL_SYNC_STAGGER_OFFSET_MS);
+    assert.ok(phase);
+    phase.fn();
+    assert.equal(timers.intervals.length, 1);
+    assert.equal(timers.intervals[0].ms, 4 * 60 * 60 * 1000);
+  } finally {
+    scheduler?.stopModelSyncScheduler();
+    timers.restore();
+    if (previousHours === undefined) delete process.env.MODEL_SYNC_INTERVAL_HOURS;
+    else process.env.MODEL_SYNC_INTERVAL_HOURS = previousHours;
+  }
+});
+
 test("modelSyncScheduler skips empty cycles and tolerates failing sync requests", async () => {
   const timers = installTimerStubs();
   const originalFetch = globalThis.fetch;
@@ -505,14 +772,52 @@ test("test 12: default interval is 6h; env hours override; no-arg uses default",
   assert.equal(DEFAULT_INTERVAL_MS, 6 * 60 * 60 * 1000);
 });
 
-test("test 12: MODEL_SYNC_INTERVAL_HOURS still wins over default", () => {
-  const source = fs.readFileSync(
-    path.join(process.cwd(), "src/shared/services/modelSyncScheduler.ts"),
-    "utf8"
-  );
-  assert.match(source, /MODEL_SYNC_INTERVAL_HOURS/);
-  assert.match(source, /envHours \* 60 \* 60 \* 1000/);
+test("test 12: MODEL_SYNC_INTERVAL_HOURS still wins over default", async () => {
+  const previousHours = process.env.MODEL_SYNC_INTERVAL_HOURS;
+  process.env.MODEL_SYNC_INTERVAL_HOURS = "2";
+  const timers = installTimerStubs();
+  let scheduler: LoadedScheduler | undefined;
+
+  try {
+    scheduler = (await loadScheduler("env-wins-over-default")) as LoadedScheduler;
+    assert.ok(scheduler);
+    // A caller-supplied interval must lose to the operator's setting.
+    scheduler.startModelSyncScheduler("http://127.0.0.1:7777", 5_000);
+    await flushMicrotasks();
+
+    const phase = timers.timeouts.find((t) => t.ms === scheduler?.MODEL_SYNC_STAGGER_OFFSET_MS);
+    assert.ok(phase);
+    phase.fn();
+    assert.equal(timers.intervals.length, 1);
+    assert.equal(timers.intervals[0].ms, 2 * 60 * 60 * 1000);
+  } finally {
+    scheduler?.stopModelSyncScheduler();
+    timers.restore();
+    if (previousHours === undefined) delete process.env.MODEL_SYNC_INTERVAL_HOURS;
+    else process.env.MODEL_SYNC_INTERVAL_HOURS = previousHours;
+  }
 });
+
+async function drainTimers(timers: {
+  timeouts: Array<{ fn: () => void; cleared: boolean }>;
+}): Promise<void> {
+  for (let round = 0; round < 12; round += 1) {
+    await flushMicrotasks();
+    const pending = timers.timeouts.splice(0, timers.timeouts.length);
+    if (pending.length === 0) return;
+    for (const handle of pending) {
+      if (!handle.cleared) handle.fn();
+    }
+  }
+  await flushMicrotasks();
+  // Silently stopping would let a caller assert "no requests" while work is still
+  // queued. Leaving timers behind after the budget is a failure, not a quiet exit.
+  assert.equal(
+    timers.timeouts.length,
+    0,
+    "timers kept rescheduling after the drain budget; the cycle never settled"
+  );
+}
 
 async function flushMicrotasks(times = 20) {
   for (let i = 0; i < times; i++) {
