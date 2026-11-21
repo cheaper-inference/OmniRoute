@@ -297,8 +297,8 @@ interface QuotaCacheView {
 function normalizeStatus(value: string | null): string {
   return (value || "").trim().toLowerCase();
 }
-function isTerminalConnectionStatus(connection: ProviderConnectionView): boolean {
-  const status = normalizeStatus(connection.testStatus);
+export function isTerminalConnectionStatus(connection: { testStatus?: string | null }): boolean {
+  const status = normalizeStatus(connection.testStatus ?? null);
   return status === "credits_exhausted" || status === "banned" || status === "expired";
 }
 

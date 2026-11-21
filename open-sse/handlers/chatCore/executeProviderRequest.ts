@@ -160,6 +160,8 @@ export type ExecuteProviderRequestDeps = {
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
   requestUpstreamStartTimeoutMs?: number;
+  /** Antigravity: another account can take this request (see ExecuteInput). */
+  accountFailoverAvailable?: boolean;
   stream: boolean;
   streamController: { signal: AbortSignal };
   targetFormat: string;
@@ -208,6 +210,7 @@ export async function executeProviderRequest(
     settings,
     skipUpstreamRetry,
     requestUpstreamStartTimeoutMs,
+    accountFailoverAvailable = false,
     stream,
     streamController,
     targetFormat,
@@ -409,6 +412,7 @@ export async function executeProviderRequest(
                         clientResponseFormat,
                         onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
+                        accountFailoverAvailable,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
                       });
@@ -620,6 +624,9 @@ export async function executeProviderRequest(
                             clientResponseFormat,
                             onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
+                            // Same-account recovery cannot switch accounts, so a 503 here keeps
+                            // the executor's wait-and-retry instead of failing the reopen.
+                            accountFailoverAvailable: false,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
                           });
