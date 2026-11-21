@@ -11,10 +11,18 @@ type Step = {
   run?: string;
   with?: Record<string, unknown>;
 };
-type Workflow = { jobs: Record<string, { steps: Step[] }> };
+type Workflow = {
+  jobs: Record<string, { steps: Step[]; "timeout-minutes"?: number }>;
+};
 const root = new URL("../../../", import.meta.url);
 const read = (file: string) => readFileSync(fileURLToPath(new URL(file, root)), "utf8");
 const workflow = load(read(".github/workflows/ci.yml")) as Workflow;
+
+test("the shard deadline includes setup, test execution and raw coverage publication", () => {
+  // Tests finished before the old 25-minute cap, but finalizing the raw
+  // coverage upload exceeded it. Retain a finite whole-job budget.
+  assert.equal(workflow.jobs["test-unit"]["timeout-minutes"], 35);
+});
 
 test(
   "unit preparation reclaims only disposable hosted Linux SDK storage",
