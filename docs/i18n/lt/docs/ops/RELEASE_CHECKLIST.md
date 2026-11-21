@@ -355,111 +355,70 @@ Prieš išleidžiant bet kurią v3.8.x versiją, patikrinkite šiuos papildomus 
 
 ---
 
-## 3.9.0 LTS atskyrimas (surepetuotas 3.8.58 versijoje)
+## 3.9.0 LTS pjūvis (repetuota 3.8.58)
 
-Po v3.8.59 kita versija yra 3.9.0, o jos viršūnė tampa dviem ilgalaikėmis šakomis:
-`stable/v3` (v3 LTS linija, npm `latest`) ir `develop` (v4, versija pakeista į 4.0.0, npm
-`nightly`). Šakų / kanalų modelis, perkėlimas pirmyn ir žymos aprašyti
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); planas pateiktas [ROADMAP](../../ROADMAP.md) (3 etapas). Atskyrimas vykdomas vieną kartą;
-3.8.58 versijoje jis nuo pradžios iki galo surepetuojamas šakotame repozitorijoje, o 3.8.59 užbaigiama naudojant
-[GO/NO-GO kontrolinį sąrašą](./LTS_GO_NO_GO.md).
+Po v3.8.59 kita versija yra 3.9.0, o jos galas tampa dviem ilgalaikėmis šakomis: `stable/v3` (v3 LTS linija, npm `latest`) ir `develop` (v4, 4.0.0, npm `nightly`). branch/channel modelis, prievadas ir etiketės yra [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; planas yra [ROADMAP](../../ROADMAP.md) (3 fazė). Pjūvis vyksta vieną kartą; 3.8.58 repetuoja iki galo ant šakutės, o 3.8.59 užbaigia su [GO/NO-GO kontroliniu sąrašu](./LTS_GO_NO_GO.md).
 
-### Bandomasis vykdymas (tik skaitymas, saugu bet kada)
+### Sausas veikimas (tik skaitomas, saugus bet kuriuo metu)
 
 ```bash
-npm run release:dry-run-lts-cut                       # tikrasis atskyrimas: 3.9.0 iš HEAD, ankstesnė žyma v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # užfiksuoti šaltinio įsipareigojimą
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` nieko nevykdo: jis nuskaito git ir `gh` bei išspausdina
-visą seką — išankstines sąlygas (šaltinis išsprendžiamas, šaltinio repozitorijoje yra visa istorija —
-paviršinis klonas negali išsiųsti `stable/v3`, priimančioji pusė atmeta paketą ties pirmuoju
-prijungtu pirminiu įsipareigojimu, todėl pirmiausia atskirkite iš viso klono arba įvykdykite `git fetch --unshallow origin` —
-ankstesnė žyma egzistuoja, `package.json` nurodyta tikslinė versija, `release-freeze` problema atidaryta, nėra atidarytos
-`Release branch not green` problemos
-esamoje leidimo šakoje — neegzistuojanti šaka pateikia `?` nežinomą būseną, niekada
-žalią — sukonfigūruota Mergify `release` eilė (G11: `queue_rules`, `checks_timeout`,
-žyma `queue`), `release/*` taisyklių rinkinys vis dar blokuoja ištrynimą ir priverstinį išsiuntimą, o
-`stable/v3` ir `develop` dar neegzistuoja), abu šakų veiksmus, kurie neaktyvių darbo eigų
-paleidikliai ir `if:` sąlygos tampa teisingi (ir kurie lieka apriboti repozitorijos kintamuoju arba
-pririšti prie kanoninės repozitorijos), numatomas platinimo žymas (`latest` → 3.9.0, `next` ir
-`nightly` tuščios) ir atšaukimą. Baigties kodas `0` = `RESULT: READY`, `1` = neįvykdyta blokuojanti išankstinė
-sąlyga (`✗`), `2` = naudojimo klaida. `--advisory <id,...>` patikrą pakeičia į įspėjimą (`!`)
-jos neslėpdamas.
+`scripts/release/dry-run-lts-cut.mjs` nieko nevykdo: nuskaito git ir `gh` ir spausdina visą seką — išankstinės sąlygos (šaltinis išsprendžia, šaltinio saugykla turi visą istoriją — seklus klonas negali stumti `stable/v3`, priimančioji pusė atmeta paketą pirmoje įskiepytoje pirminėje dalyje, todėl iškirpta iš ankstesnio klono arba `git fetch --unshallow origin` versija yra pirma — problema atidaryta, nėra atviros `release-freeze` problemos esamoje leidimo šakoje `package.json` filialas — kuris neegzistuoja, praneša `Release branch not green` `?`, niekada žalias — visa eilė nukreipia leidimą PRs (G11: `config/merge-queue/config.json` galioja, jos `bases` tvarko leidimo šaką, `mode` `live`, jos etiketė egzistuoja ir vis dar blokuoja `stable/v3`, ir panaikinimą). `release/*` dar neegzistuoja), du atšakos žingsniai, kurie neveikiančios darbo `if:` `develop` tampa teisingi (ir kurie lieka apriboti saugyklos kintamuoju arba prisegti prie kanoninės saugyklos), numatomos dist-žymos (`latest` → 3.9.0, `next` ir `nightly` tuščias) ir atšaukimas. Išeiti iš `0` = `RESULT: READY`, `1` = a blokavimo išankstinė sąlyga nepavyko (`✗`), `2` = naudojimo klaida. `--advisory <id,...>` pažemina čekį į įspėjimą (`!`) jo neslėpdamas.
 
-Tikrojo atskyrimo bandomąjį vykdymą atlikite, kol 3.9.0 leidimo įšaldymas vis dar galioja — šakos
-sukuriamos po žymos ir prieš 12c etapui panaikinant įšaldymą.
+Vykdykite tikrąjį pjūvio sausąjį paleidimą, kol 3.9.0 išleidimo užšaldymas vis dar atidarytas, — šakos sukuriamos po žymos ir prieš 12c etapui panaikinant užšalimą.
 
-### 3.8.58 repeticija (tik šakotoje repozitorijoje)
+### 3.8.58 repeticija (tik šakutė)
 
 ```bash
-# 1. Bandomasis vykdymas dabartinėje viršūnėje su repeticijos parametrais
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Vykdyti naudojant ŠAKOTOS REPOZITORIJOS nuotolinę saugyklą (`origin` arba bet kokia nuotolinė saugykla, kurios URL yra kanoninė
-#    repozitorija, atmetama; prieš kiekvieną veiksmą terminale prašoma patvirtinimo)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Išbandyti neaktyvias darbo eigas šakotoje repozitorijoje (`workflow_dispatch` ten, kur bandomasis vykdymas
-#    praneša apie pririšimą prie kanoninės repozitorijos), tada atšaukti pakeitimus
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-`develop` versijos pakeitimo įsipareigojimas kuriamas naudojant git vidinius mechanizmus (darbinis medis neliečiamas) ir pakeičia
-tuos pačius penkis failus kaip ciklo atidarymo įsipareigojimas: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` ir `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG skiltis ir jos i18n atitikmenys vėliau atidaromi šakoje `develop`, prieš jos pirmąją
-PR. Scenarijus niekada nekeičia npm platinimo žymų — jas repetuokite naudodami bandomąjį paketą.
+Kūrimo įtaisas yra sukurtas naudojant git santechniką (nepaliečiamas joks darbinis medis) ir sujungiami tie patys penki failai, kaip ir ciklo atidarymas: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` ir `docs/openapi.yaml`. `[4.0.0]` CHANGELOG sekcija ir jos i18n veidrodžiai atidaromi `develop` vėliau, prieš pirmąjį PR. Scenarijus niekada —.
 
-### PR peržiūros artefaktas (sukurkite vieną kartą, platinkite tuos pačius baitus)
+### PR peržiūros artefaktas (sukurti vieną kartą, reklamuoti tuos pačius baitus)
 
-`.github/workflows/preview-artifact.yml` sukuria vieną produkcinį tar archyvą iš PR viršūnės ir
-patikrina būtent tą rinkinį (#8084 dalis (a)). Tik tos pačios repozitorijos PR; niekas nepublikuojama.
+`.github/workflows/preview-artifact.yml` sukuria vieną gamybos tarballą iš PR galvutės ir patvirtina tą tikslią konstrukciją (#8084 skiltis (a)). Tik ta pati saugykla PRs ; nieko neskelbiama.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # arba pridėkite žymą `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # peržiūros diegimas
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Vykdymo metu atliekama `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, supakuojamas
-tar archyvas, vykdoma `npm run check:pack-boot` (netikros slaptosios reikšmės, laikinas duomenų katalogas), archyvas iš naujo
-supakuojamas ir vykdymas nutraukiamas, jei kontrolinė suma nėra identiška; tada įrašomas `artifact-identity.json` (viršūnės SHA, bazės
-SHA, užrakto failo maiša, platforma, architektūra, node ABI, pakavimo įrankis, kūrimo politika —
-`scripts/release/artifact-identity.mjs`), o tar archyvas patvirtinamas atskiroje užduotyje. Peržiūros
-platinimas reiškia to tar archyvo diegimą: niekada nekurkite jo iš naujo iš šaltinio.
+Vykdymas atlieka `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, supakuoja tarbolą, paleidžia `npm run check:pack-boot` (netikros paslaptys, trumpalaikių duomenų katalogas), iš naujo supakuoja ir nepavyksta, nebent santrauka yra identiška, tada įrašomas `artifact-identity.json` (head SHA, bazinis SHA, užrakto ABI, maišos politika, de platforma qzler, — `scripts/release/artifact-identity.mjs`) ir atestuoja tarbalą atskirame darbe. Reklamuoti peržiūrą reiškia įdiegti tą tarbalą: niekada nekurkite iš šaltinio.
 
-### Atskyrimas (3.9.0, po GO)
+### Pjūvis (3.9.0, po GO)
 
-1. GO užregistruotas [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` išspausdina `RESULT: READY`.
-3. Rankiniu būdu sukurkite šakas `origin`, naudodami bandomojo vykdymo išspausdintas komandas —
-   scenarijus atsisako siųsti į `origin`. Norėdami pakartotinai panaudoti peržiūrėtą develop įsipareigojimą, pirmiausia
-   paleiskite `--execute` repeticiją 3.9.0 viršūnėje savo šakotoje repozitorijoje; ji išspausdins abi SHA, o
-   tuos pačius įsipareigojimus bus galima išsiųsti:
+1. GO įrašytas į [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` spausdina `RESULT: READY`.
+3. Sukurkite `origin` šakas ranka naudodami komandas sausas paleidimas spausdina — scenarijus atsisako stumti į `origin`. Norėdami pakartotinai panaudoti peržiūrėtą kūrimo įsipareigojimą, pirmiausia paleiskite `--execute` repeticiją su 3.9.0 antgaliu; spausdina ir SHAs, ir tuos pačius įsipareigojimus galima nustumti:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Apsaugokite `stable/v3` ir `develop` (taisyklių rinkiniai + sujungimo eilė) prieš priimant pirmąjį PR.
-5. Neaktyvios darbo eigos įjungiamos atsiradus šakoms: `forward-port.yml` (siuntimas į
-   `stable/v3`), `validate-stable-pr.yml` (PR į `stable/v3`) ir `nightly-v4-build.yml`
-   (kuriama `develop`). Prieš paleidimą nustatykite saugyklos slaptąjį raktą `secrets.FORWARD_PORT_TOKEN` (kad CI būtų vykdomas
-   perkėlimo pirmyn PR); naktinis publikavimas liks išjungtas, kol savininkas nustatys saugyklos
-   kintamąjį `vars.NIGHTLY_PUBLISH` į `true`, o npm patikimas publikavimas priims
-   `nightly-v4-build.yml`. Kanalas nustatomas naudojant `scripts/release/dist-tag.mjs` – tą patį
-   nustatymo mechanizmą naudoja `npm-publish.yml`.
-6. Patikrinkite kanalus: `npm view omniroute dist-tags --json` turi rodyti `latest` = 3.9.0, o
-   `next` / `nightly` neturi būti, kol nepublikuota v4.
-7. Jei reikia atšaukti pakeitimus: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   ir `npm dist-tag add omniroute@3.8.59 latest`.
+4. Apsaugokite `stable/v3` ir `develop` (taisyklės + sujungimo eilė), kol pasirodys pirmasis PR.
+5. Neveikiančios darbo eigos įsijungia pagal šakos egzistavimą: `forward-port.yml` (stumti į `stable/v3`), `validate-stable-pr.yml` (PRs į `stable/v3`) ir `nightly-v4-build.yml` (kuria `develop`). Prieš pradėdami naudoti, nustatykite `secrets.FORWARD_PORT_TOKEN` saugyklos paslaptį (taigi CI veikia per prievadą PRs); naktinis paskelbimas išjungiamas, kol savininkas nustato saugyklos kintamąjį `vars.NIGHTLY_PUBLISH` į `true` ir npm Patikima leidyba priima `nightly-v4-build.yml`. Kanalo skiriamoji geba yra `scripts/release/dist-tag.mjs`, tą patį `npm-publish.yml` naudoja.
+6. Patikrinkite kanalus: `npm view omniroute dist-tags --json` rodo `latest` = 3.9.0 ir ne `next` / `nightly`, kol nebus paskelbta v4.
+7. Atšaukimas, jei reikia: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` ir `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

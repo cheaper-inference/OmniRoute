@@ -42,25 +42,23 @@ flowchart LR
 `main` mhijiex il-fergħa ta’ integrazzjoni ta’ kuljum. PRs miftuħa kontra `main`
 normalment ikollhom bżonn jiġu mmirati mill-ġdid qabel il-merge.
 
-## Iffriżar tar-rilaxx (ċikli paralleli)
+## Rilaxx iffriżar (ċikli paralleli)
 
-Meta rilaxx ikun qed jiġi rrikonċiljat, tinfetaħ issue markatur bit-tikketta `release-freeze`.
-Dan **ma jwaqqafx l-iżvilupp**:
+Meta rilaxx ikun qed jiġi rikonċiljat, tinfetaħ kwistjoni ta' markar bit-tikketta `release-freeze`. Dik** ma jwaqqafx l-iżvilupp** :
 
-- Il-`release/vX.Y.Z` iffriżata tkun taħt ir-responsabbiltà tal-kaptan tar-rilaxx għal dak ir-rilaxx.
-- Il-`release/vX+1` taċ-ċiklu li jmiss tinħoloq mit-tip iffriżat sabiex il-kontributuri jkunu jistgħu jkomplu
-  jdaħħlu xogħol.
-- PRs miftuħa li għadhom jimmiraw lejn il-fergħa ffriżata għandhom jiġu **mmirati mill-ġdid** lejn il-fergħa
-  attiva (l-ogħla) `release/v*`.
+- Iż `release/vX.Y.Z` ffriżata hija tal-kaptan tar-rilaxx għal dak il-vapur.
+- `release/vX+1` taċ-ċiklu li jmiss tinqata’ mill-ponta ffriżata sabiex il-kontributuri jibqgħu jaħdmu l-inżul.
+- Miftuħ PRs li xorta jimmiraw il-fergħa iffriżata għandha tkun** immirati mill-ġdid** sal-fergħa attiva (l-ogħla) `release/v*`.
 
-Iċċekkja jekk hemmx iffriżar miftuħ qabel tassumi li l-fergħa li trid tista’ tiġi merged:
+Iċċekkja għal iffriżar miftuħ qabel ma tassumi li l-fergħa li trid hija magħquda:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Il-mekkaniżmi tal-merge (it-tikketta `queue` tas-sid → Mergify) huma dokumentati f’
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Merge mechanics (sid `queue` label → Mergify) huma dokumentati [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: il-kju ta' amalgamazzjoni Mergify huwa rtirat** (deċiżjoni tas-sid). `.mergify.yml` m'għadux jiddefinixxi kju u jirrifjuta l-kmandi Mergify li jingħaqdu jew jiktbu mill-ġdid pull request. Ir-rilaxx PRs huma magħquda bl-idejn taħt ir-regoli tar-repożitorju "Jeħtieġu gradi ħodor fuq ir-rilaxx attiv" (`Gate / CI` + `Gate / Quality`) sakemm omni-queue jaħdem fil-modalità ħaj, u permezz ta 'omni-queue wara dak ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). It-tikketta `queue` m'għadhiex tgħaqqad xejn.
 
 ## Għaliex kemm fergħa kif ukoll tag?
 

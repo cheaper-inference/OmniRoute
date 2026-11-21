@@ -19,18 +19,8 @@
  * them.
  */
 
-// Split from one /^(?:.*codex.*|gpt-(?:[6-9]|5\.[5-9]).*)$/i, which backtracked in O(n^2) on a
-// long client model id (CodeQL js/polynomial-redos). Same accept set: that pattern's `.` never
-// matched a line terminator, so an id holding one stays rejected.
-const CODEX_FAMILY = /codex/i;
-const RESPONSES_ONLY_GPT_PREFIX = /^gpt-(?:[6-9]|5\.[5-9])/i;
-const LINE_TERMINATOR = /[\n\r\u2028\u2029]/;
+const GITHUB_RESPONSES_ONLY_GPT_PREFIX = /^gpt-(?:[6-9]|5\.[5-9])/i;
 const NON_RESPONSES_FAMILY = /claude|gemini/i;
-
-function isResponsesOnlyModelId(modelId: string): boolean {
-  if (LINE_TERMINATOR.test(modelId)) return false;
-  return CODEX_FAMILY.test(modelId) || RESPONSES_ONLY_GPT_PREFIX.test(modelId);
-}
 
 export function inferGithubUnsyncedTargetFormat(
   providerId: string,
@@ -40,8 +30,14 @@ export function inferGithubUnsyncedTargetFormat(
     return undefined;
   }
   const bareModelId = modelId.replace(/^(?:github|gh|ghe-copilot)\//i, "");
-  if (!isResponsesOnlyModelId(bareModelId) || NON_RESPONSES_FAMILY.test(bareModelId)) {
+  if (/[\n\r\u2028\u2029]/.test(bareModelId) || NON_RESPONSES_FAMILY.test(bareModelId)) {
     return undefined;
   }
-  return "openai-responses";
+  if (
+    bareModelId.toLowerCase().includes("codex") ||
+    GITHUB_RESPONSES_ONLY_GPT_PREFIX.test(bareModelId)
+  ) {
+    return "openai-responses";
+  }
+  return undefined;
 }

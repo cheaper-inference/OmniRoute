@@ -355,111 +355,70 @@ Før en v3.8.x-udgivelse frigives, skal disse yderligere punkter verificeres:
 
 ---
 
-## 3.9.0 LTS-udskæring (afprøvet i 3.8.58)
+## 3.9.0 LTS cut (øvet i 3.8.58)
 
-Efter v3.8.59 er den næste version 3.9.0, og dens spids bliver til to langlivede branches:
-`stable/v3` (v3 LTS-linjen, npm `latest`) og `develop` (v4, opgraderet til 4.0.0, npm
-`nightly`). Branch-/kanalmodellen, forward-port og labels findes i
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); planen findes i [ROADMAP](../../ROADMAP.md) (fase 3). Udskæringen køres én gang;
-3.8.58 afprøver den fra ende til anden på en fork, og 3.8.59 afsluttes med
-[GO/NO-GO-tjeklisten](./LTS_GO_NO_GO.md).
+Efter v3.8.59 er den næste version 3.9.0, og dens spids bliver to langlivede grene: `stable/v3` (v3 LTS linjen, npm `latest`) og `develop` (v4, stødt til 4.0.0, npm `nightly`). branch/channel modellen, forward-porten og etiketterne er i [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; planen er i [ROADMAP](../../ROADMAP.md) (fase 3). Snittet løber en gang; 3.8.58 øver det ende mod ende på en gaffel, og 3.8.59 lukker med [GO/NO-GO tjeklisten](./LTS_GO_NO_GO.md).
 
-### Prøvekørsel (skrivebeskyttet, sikker når som helst)
+### Tørløb (skrivebeskyttet, sikkert til enhver tid)
 
 ```bash
-npm run release:dry-run-lts-cut                       # den rigtige udskæring: 3.9.0 fra HEAD, forrige tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fastlås kildecommit
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` udfører intet: det læser git og `gh` og udskriver hele
-sekvensen — forudsætninger (kilden kan opløses, kilderepositoriet har fuld historik —
-en shallow clone kan ikke pushe `stable/v3`, den modtagende side afviser pakken ved den første
-grafted parent, så foretag udskæringen fra en fuld klon, eller kør først `git fetch --unshallow origin` — det forrige
-tag findes, `package.json` har målversionen, en `release-freeze`-issue er åben, der er ingen åben
-`Release branch not green`-issue
-på en eksisterende release-branch — en branch, der ikke findes, rapporterer `?` ukendt, aldrig
-grøn — Mergifys `release`-kø er konfigureret (G11: `queue_rules`, `checks_timeout`,
-label `queue`), `release/*`-regelsættet blokerer stadig sletning og force-push, og
-`stable/v3` og `develop` findes endnu ikke), de to branch-trin, hvilke udløsere for inaktive workflows
-og `if:`-betingelser der bliver sande (og hvilke der fortsat er blokeret af en repositorievariabel eller
-fastlåst til det kanoniske repositorium), de forventede dist-tags (`latest` → 3.9.0, `next` og
-`nightly` tomme) samt tilbagerulningen. Afslutningskode `0` = `RESULT: READY`, `1` = en blokerende forudsætning
-mislykkedes (`✗`), `2` = brugsfejl. `--advisory <id,...>` nedgraderer et tjek til en advarsel (`!`)
-uden at skjule det.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-Kør prøvekørslen for den rigtige udskæring, mens release freeze for 3.9.0 stadig er aktiv — branchene
-oprettes efter tagget og før fase 12c ophæver fastfrysningen.
+Kør det rigtige snits tørløb, mens 3.9.0-frigivelsesfrysningen stadig er åben — grenene oprettes efter mærket og før fase 12c løfter frysepunktet.
 
-### 3.8.58-afprøvning (kun fork)
+### 3.8.58 øve (kun gaffel)
 
 ```bash
-# 1. Prøvekørsel på den aktuelle spids med afprøvningsparametre
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Udfør mod en FORK-remote (origin eller enhver remote, hvis URL er det kanoniske
-#    repositorium, afvises; hvert trin beder om bekræftelse i terminalen)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Afprøv de inaktive workflows i forken (workflow_dispatch, hvor prøvekørslen
-#    rapporterer en fastlåsning til det kanoniske repositorium), og rul derefter tilbage
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Develop-opgraderingscommittet bygges med Git-plumbing (intet working tree berøres) og opgraderer
-de samme fem filer som et commit, der åbner en cyklus: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` og `docs/openapi.yaml`. `[4.0.0]`-
-sektionen i CHANGELOG og dens i18n-spejlinger åbnes efterfølgende på `develop`, før dens første
-PR. Scriptet ændrer aldrig npm-dist-tags — afprøv dem på en midlertidig pakke.
+Development bump commit er bygget med git plumbing (intet arbejdstræ berøres) og bumper de samme fem filer som en cycle-open commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` og `docs/openapi.yaml`. `[4.0.0]` CHANGELOG sektionen og dens i18n-spejle åbnes på `develop` bagefter, før dens første PR. Scriptet ændrer aldrig npm dist-tags — øver dem på en scratch-pakke.
 
-### PR-preview-artifakt (byg én gang, promover de samme bytes)
+### PR preview artefakt (byg én gang, promover de samme bytes)
 
-`.github/workflows/preview-artifact.yml` bygger én produktionstarball fra et PR-head og
-validerer præcis dette build (#8084 del (a)). Kun PR'er fra samme repositorium; intet publiceres.
+`.github/workflows/preview-artifact.yml` bygger en produktions-tarball fra et PR -hoved og validerer den nøjagtige build (#8084 slice (a)). Kun samme lager PRs ; intet er offentliggjort.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # eller tilføj labelen `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # preview-installation
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Kørslen udfører `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakker
-tarballen, kører `npm run check:pack-boot` (falske secrets, midlertidig datamappe), pakker igen og
-mislykkes, medmindre digest-værdien er identisk, hvorefter den registrerer `artifact-identity.json` (head-SHA, base-
-SHA, lockfile-hash, platform, arkitektur, Node ABI, bundler, build-politik —
-`scripts/release/artifact-identity.mjs`) og attesterer tarballen i et separat job. Promovering
-af en preview betyder installation af denne tarball: genbyg aldrig fra kildekoden.
+Kørslen udfører `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakker tarballen, kører `npm run check:pack-boot` (falske hemmeligheder, flygtige data dir), pakker om og mislykkes, medmindre digest er identisk, og optager derefter `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI `scripts/release/artifact-identity.mjs` — et separat job. At promovere en forhåndsvisning betyder at installere denne tarball: genopbygg aldrig fra kilden.
 
-### Udskæringen (3.9.0, efter GO)
+### Snittet (3.9.0, efter GO)
 
-1. GO registreret i [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO optaget i [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` udskriver `RESULT: READY`.
-3. Opret branchene på `origin` manuelt med de kommandoer, som prøvekørslen udskriver —
-   scriptet nægter at pushe til `origin`. For at genbruge et gennemgået develop-commit skal du først køre
-   `--execute`-afprøvningen på 3.9.0-spidsen mod din fork; den udskriver begge SHA'er, og
-   de samme commits kan pushes:
+3. Opret grenene på `origin` i hånden med kommandoerne dry-run prints — scriptet nægter at skubbe til `origin`. For at genbruge en gennemgået udviklingsindsats skal du først køre `--execute` øvelsen på 3.9.0-spidsen mod din gaffel; den udskriver både SHAs, og de samme commits kan skubbes:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Beskyt `stable/v3` og `develop` (regelsæt + fletningskø), før den første PR lander.
-5. De inaktive workflows aktiveres, når branchene findes: `forward-port.yml` (push til
-   `stable/v3`), `validate-stable-pr.yml` (PR'er til `stable/v3`) og `nightly-v4-build.yml`
-   (bygger `develop`). Før idriftsættelse skal repository-hemmeligheden `secrets.FORWARD_PORT_TOKEN` angives (så CI kører på
-   forward-port-PR'er); natlig publicering forbliver deaktiveret, indtil ejeren angiver repository-variablen
-   `vars.NIGHTLY_PUBLISH` til `true`, og npm Trusted Publishing accepterer
-   `nightly-v4-build.yml`. Kanalbestemmelsen foretages af `scripts/release/dist-tag.mjs`, den samme
-   resolver, som `npm-publish.yml` bruger.
-6. Verificer kanalerne: `npm view omniroute dist-tags --json` viser `latest` = 3.9.0 og ingen
-   `next` / `nightly`, før v4 publiceres.
-7. Tilbagerulning om nødvendigt: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   og `npm dist-tag add omniroute@3.8.59 latest`.
+4. Beskyt `stable/v3` og `develop` (regelsæt + merge queue) før den første PR lander.
+5. De sovende arbejdsgange tænder efter filialeksistens: `forward-port.yml` (push til `stable/v3`), `validate-stable-pr.yml` (PRs til `stable/v3`) og `nightly-v4-build.yml` (bygger `develop`). Inden start, skal du indstille `secrets.FORWARD_PORT_TOKEN` lagerhemmeligheden (så CI kører på forward-port PRs); natlig udgivelse forbliver slukket, indtil ejeren indstiller lagervariablen `vars.NIGHTLY_PUBLISH` til `true`, og npm Trusted Publishing accepterer `nightly-v4-build.yml`. Kanalopløsningen er `scripts/release/dist-tag.mjs`, den samme resolver `npm-publish.yml` bruger.
+6. Bekræft kanalerne: `npm view omniroute dist-tags --json` viser `latest` = 3.9.0 og ingen `next` / `nightly` indtil v4 udgives.
+7. Tilbageføring, hvis nødvendigt: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` og `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 
