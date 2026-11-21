@@ -7,8 +7,11 @@
  *
  * The decision runs in src/proxy.ts, before rendering starts: the root loading.tsx wraps every
  * page in a Suspense boundary, so once its fallback streams the status is already 200 and a
- * notFound() thrown by the page can only swap the screen. Rewriting to the not-found route from
- * the proxy is what makes the HTTP status a real 404. The page repeats the same check.
+ * notFound() thrown by the page can only swap the screen. The proxy answers the 404 itself. It
+ * does not rewrite to the not-found route: the framework resolves a rewrite against the origin
+ * it derives for the request, and treats it as a request to another server when that origin
+ * differs (a loopback bind address, or the scheme a TLS proxy forwards). The page repeats the
+ * same check.
  */
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -17,8 +20,7 @@ import { selfQuotaProviderSegmentSchema } from "@/shared/schemas/selfQuota";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 
 const QUOTA_PANEL_FLAG = "QUOTA_SELF_PANEL";
-/** The App Router's internal not-found route; rendering it answers with status 404. */
-const QUOTA_PANEL_NOT_FOUND_PATH = "/_not-found";
+const QUOTA_PANEL_NOT_FOUND_BODY = "Not Found";
 /** Only the lowercase spelling has a route; any other casing already falls to the native 404. */
 const QUOTA_PANEL_PATH = /^\/quota\/([^/]+)\/?$/;
 
@@ -56,8 +58,8 @@ export function resolveQuotaPanelPage(segment: string): QuotaPanelPage | null {
 }
 
 /**
- * For src/proxy.ts. A rewrite to the not-found route for a /quota/<segment> that must not
- * exist; null for every other request.
+ * For src/proxy.ts. A 404 for a /quota/<segment> that must not exist. Null for every other
+ * request.
  */
 export function quotaPanelGateResponse(request: NextRequest): NextResponse | null {
   const match = QUOTA_PANEL_PATH.exec(request.nextUrl.pathname);
@@ -71,8 +73,8 @@ export function quotaPanelGateResponse(request: NextRequest): NextResponse | nul
   }
   if (segment !== null && resolveQuotaPanelPage(segment)) return null;
 
-  const url = request.nextUrl.clone();
-  url.pathname = QUOTA_PANEL_NOT_FOUND_PATH;
-  url.search = "";
-  return NextResponse.rewrite(url);
+  return new NextResponse(QUOTA_PANEL_NOT_FOUND_BODY, {
+    status: 404,
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+  });
 }

@@ -42,8 +42,15 @@ function gate(pathname: string) {
   return quotaPanelGateResponse(new NextRequest("http://localhost" + pathname));
 }
 
-function rewrittenTo(res: Response | null): string | null {
-  return res?.headers.get("x-middleware-rewrite") ?? null;
+/** The gate's own 404: answered here, with no rewrite or redirect for the framework to follow. */
+async function assertPlainNotFound(res: Response | null, label: string): Promise<void> {
+  assert.ok(res, `${label}: the gate answers`);
+  assert.equal(res.status, 404, label);
+  assert.equal(res.headers.get("x-middleware-rewrite"), null, `${label}: no rewrite`);
+  assert.equal(res.headers.get("x-middleware-next"), null, `${label}: not passed on`);
+  assert.equal(res.headers.get("location"), null, `${label}: no redirect`);
+  assert.equal(res.headers.get("cache-control"), "no-store", label);
+  assert.equal(await res.text(), "Not Found", label);
 }
 
 test("flag off: no provider has a page", async () => {
@@ -86,8 +93,8 @@ test("flag on: anything outside the registry or the segment shape has no page", 
   });
 });
 
-test("the gate rewrites only a /quota/<segment> that must not exist", async () => {
-  await withFlag("true", () => {
+test("the gate answers 404 only for a /quota/<segment> that must not exist", async () => {
+  await withFlag("true", async () => {
     for (const p of [
       "/quota/claude",
       "/quota/claude/",
@@ -102,16 +109,29 @@ test("the gate rewrites only a /quota/<segment> that must not exist", async () =
     ]) {
       assert.equal(gate(p), null, p);
     }
-    for (const p of ["/quota/nope", "/quota/..%2Fx", "/quota/%E0%A4%A"]) {
-      const target = rewrittenTo(gate(p));
-      assert.ok(target?.endsWith("/_not-found"), `${p} → ${target}`);
+    for (const p of ["/quota/nope", "/quota/nope/", "/quota/..%2Fx", "/quota/%E0%A4%A"]) {
+      await assertPlainNotFound(gate(p), p);
     }
-    // NextURL keeps the request's trailing slash on the cloned URL. With the default
-    // trailingSlash: false the framework redirects /quota/nope/ before the proxy runs.
-    assert.equal(rewrittenTo(gate("/quota/nope/")), "http://localhost/_not-found/");
   });
-  await withFlag(undefined, () => {
-    assert.equal(rewrittenTo(gate("/quota/claude?key=abc")), "http://localhost/_not-found");
+  await withFlag(undefined, async () => {
+    await assertPlainNotFound(gate("/quota/claude?key=abc"), "flag off");
+  });
+});
+
+test("the gate's 404 does not depend on the address or scheme the request claims", async () => {
+  await withFlag(undefined, async () => {
+    // A rewrite would be resolved against the request's origin. Behind a TLS proxy, or with the
+    // server bound to a loopback address, that origin is not the one the server listens on.
+    for (const origin of [
+      "http://127.0.0.1:20128",
+      "https://localhost:20128",
+      "http://[::1]:20128",
+    ]) {
+      const request = new NextRequest(`${origin}/quota/claude`, {
+        headers: { "x-forwarded-proto": "https", "x-forwarded-host": "panel.example.net" },
+      });
+      await assertPlainNotFound(quotaPanelGateResponse(request), origin);
+    }
   });
 });
 
@@ -130,8 +150,7 @@ test("a flag read that throws counts as off: the page answers 404", async () => 
   };
   try {
     assert.equal(resolveQuotaPanelPage("claude"), null);
-    const target = rewrittenTo(gate("/quota/claude"));
-    assert.ok(target?.endsWith("/_not-found"), `rewrite target: ${target}`);
+    await assertPlainNotFound(gate("/quota/claude"), "flag read throws");
     assert.equal(logged.length, 2, "each failed flag read is logged");
   } finally {
     process.env = originalEnv;
@@ -142,9 +161,7 @@ test("a flag read that throws counts as off: the page answers 404", async () => 
 test("proxy() answers a disabled panel like a missing route, never with a login redirect", async () => {
   await withFlag(undefined, async () => {
     const res = await proxy(new NextRequest("http://localhost/quota/claude"));
-    const target = rewrittenTo(res);
-    assert.ok(target?.endsWith("/_not-found"), `rewrite target: ${target}`);
-    assert.equal(res.headers.get("location"), null);
+    await assertPlainNotFound(res, "proxy()");
   });
 });
 
