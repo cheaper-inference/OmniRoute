@@ -13,6 +13,7 @@ const core = await import("../../src/lib/db/core.ts");
 const { setModelCapabilityOverride } = await import("../../src/lib/db/modelCapabilityOverrides.ts");
 const { updateCompressionSettings } = await import("../../src/lib/db/compression.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+const { estimateTokens } = await import("../../open-sse/services/contextManager.ts");
 
 const TEST_PROVIDER = "test-compaction-prov";
 const TEST_MODEL = "test-compaction-model";
@@ -131,6 +132,81 @@ test("aligns reactive compaction ceiling to max_input_tokens so dead band [cap, 
     result.success,
     true,
     `expected request to succeed via last-resort compaction to input cap, got error: ${
+      (result as { error?: string }).error
+    }`
+  );
+});
+
+test("last-resort shrinks messages when system tokens overflow a body the tools-only target would keep", async () => {
+  // Messages stay under both the 70% proactive threshold and `ceiling - tools`.
+  // A top-level system field is outside compressContext, so one tools-only pass
+  // no-ops and the gate 400s. The budget has to come from this request's own
+  // breakdown. The 4000 cap is the test override, not a catalog change.
+  const turns = [];
+  for (let i = 0; i < 12; i++) {
+    turns.push({ role: "user", content: `u${i} ` + "m".repeat(280) });
+    turns.push({ role: "assistant", content: `a${i} ` + "m".repeat(280) });
+  }
+  const system = "S".repeat(10_400);
+  const messageTokens = estimateTokens(turns);
+  const systemTokens = estimateTokens(system);
+  const ceiling = 4000;
+  const oldToolsOnlyTarget = ceiling - 1;
+  assert.ok(
+    messageTokens < Math.floor(ceiling * 0.7),
+    `messages must stay under the proactive threshold, got ${messageTokens}`
+  );
+  assert.ok(
+    messageTokens < oldToolsOnlyTarget,
+    `messages must fit the old tools-only target, got ${messageTokens}`
+  );
+  assert.ok(
+    messageTokens + systemTokens >= ceiling,
+    `system must push the body over the cap, got messages=${messageTokens} system=${systemTokens}`
+  );
+
+  const result = await handleChatCore({
+    body: {
+      model: TEST_MODEL,
+      messages: turns,
+      system,
+      stream: false,
+    },
+    modelInfo: {
+      provider: TEST_PROVIDER,
+      model: TEST_MODEL,
+      extendedContext: false,
+    },
+    credentials: {
+      apiKey: "sk-test",
+      providerSpecificData: {
+        baseUrl: "https://test-compaction.example.test",
+      },
+    },
+    clientRawRequest: {
+      endpoint: "/v1/chat/completions",
+      body: {
+        model: TEST_MODEL,
+        messages: turns,
+        system,
+        stream: false,
+      },
+      headers: new Headers({ accept: "application/json" }),
+    },
+    userAgent: "unit-test",
+    isCombo: false,
+    log: {
+      debug() {},
+      info() {},
+      warn() {},
+      error() {},
+    },
+  });
+
+  assert.equal(
+    result.success,
+    true,
+    `expected system overflow to compact to the live input cap, got error: ${
       (result as { error?: string }).error
     }`
   );
