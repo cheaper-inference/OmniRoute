@@ -21,7 +21,7 @@ export const DASHBOARD_SESSION_CLAIM = "authenticated";
 export const SESSIONS_VALID_AFTER_SETTING = "sessionsValidAfter";
 /** Ids (`jti`) of sessions that signed out before they expired, kept until their own expiry. */
 export const REVOKED_SESSIONS_SETTING = "revokedDashboardSessions";
-const MAX_REVOKED_SESSIONS = 500;
+export const DASHBOARD_SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
 export type RevokedSession = { jti: string; exp: number };
 
@@ -30,12 +30,22 @@ export type RevokedSession = { jti: string; exp: number };
  * issue time and an id, which is what `verifyDashboardSessionToken` needs to honour a password
  * change or a sign-out before the 30 days are up.
  */
-export async function mintDashboardSessionToken(secret: Uint8Array): Promise<string> {
+export async function mintDashboardSessionToken(
+  secret: Uint8Array,
+  session?: { jti: string; iat: number }
+): Promise<string> {
+  if (session && (!session.jti || !Number.isFinite(session.iat))) {
+    throw new Error("Invalid dashboard session refresh identity");
+  }
+  const jti = session?.jti ?? crypto.randomUUID();
+  const exp = Math.floor(Date.now() / 1000) + DASHBOARD_SESSION_MAX_AGE_SECONDS;
+  const { reserveDashboardSessionExpiry } = await import("@/lib/db/dashboardSessions");
+  reserveDashboardSessionExpiry(jti, exp);
   return new SignJWT({ [DASHBOARD_SESSION_CLAIM]: true })
     .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setJti(crypto.randomUUID())
-    .setExpirationTime("30d")
+    .setIssuedAt(session?.iat ?? Math.floor(Date.now() / 1000))
+    .setJti(jti)
+    .setExpirationTime(exp)
     .sign(secret);
 }
 
@@ -53,7 +63,7 @@ export function addRevokedSession(
       entry.exp > nowSeconds &&
       entry.jti !== session.jti
   );
-  return [...kept, session].slice(-MAX_REVOKED_SESSIONS);
+  return [...kept, session];
 }
 
 /**
@@ -62,8 +72,13 @@ export function addRevokedSession(
  * stay valid until the first password change. Fails closed: if the settings cannot be read the
  * session is not trusted.
  */
-async function isDashboardSessionEnded(payload: JWTPayload): Promise<boolean> {
+async function isDashboardSessionEnded(payload: JWTPayload, token: string): Promise<boolean> {
   try {
+    // The per-session record is read directly so a sign-out is never delayed by a cache TTL.
+    // The password cutoff and the legacy revoked list are written through updateSettings(),
+    // which busts the settings read cache, so the cached read keeps this hot path cheap.
+    const { isDashboardSessionRevoked } = await import("@/lib/db/dashboardSessions");
+    if (isDashboardSessionRevoked(payload, token)) return true;
     const { getCachedSettings } = await import("@/lib/db/readCache");
     const settings = (await getCachedSettings()) as Record<string, unknown>;
 
@@ -84,6 +99,23 @@ async function isDashboardSessionEnded(payload: JWTPayload): Promise<boolean> {
   }
 }
 
+/** Signature-only validation for logout: persistence failures must not look like
+ * an absent session and accidentally acknowledge an unpersisted revocation. */
+export async function readSignedDashboardSessionToken(
+  token: string | null | undefined,
+  secret: Uint8Array | null = getDashboardJwtSecret()
+): Promise<JWTPayload | null> {
+  if (!token || typeof token !== "string" || !secret || secret.length === 0) return null;
+  try {
+    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
+    return payload[DASHBOARD_SESSION_CLAIM] === true && Number.isFinite(payload.exp)
+      ? payload
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function getDashboardJwtSecret(): Uint8Array | null {
   const secret = process.env.JWT_SECRET?.trim();
   return secret ? new TextEncoder().encode(secret) : null;
@@ -101,9 +133,9 @@ export async function verifyDashboardSessionToken(
 ): Promise<JWTPayload | null> {
   if (!token || typeof token !== "string" || !secret || secret.length === 0) return null;
   try {
-    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
-    if (payload[DASHBOARD_SESSION_CLAIM] === true) {
-      return (await isDashboardSessionEnded(payload)) ? null : payload;
+    const payload = await readSignedDashboardSessionToken(token, secret);
+    if (payload) {
+      return (await isDashboardSessionEnded(payload, token)) ? null : payload;
     }
     return null;
   } catch {
@@ -149,7 +181,7 @@ export async function verifyMfaPendingToken(
       return null;
     }
     // A password change since the first factor was accepted voids the pending login too.
-    return (await isDashboardSessionEnded(payload)) ? null : payload;
+    return (await isDashboardSessionEnded(payload, token)) ? null : payload;
   } catch {
     return null;
   }
