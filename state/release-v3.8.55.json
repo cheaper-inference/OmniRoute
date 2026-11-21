@@ -3,81 +3,48 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b23",
+    "batchId": "b24",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b23-0563eb2ec52b",
-    "candidateSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
-    "baseSha": "5b6c0af52deb06d6f278adad542f988f58afc9e4",
-    "treeSha": "c74518f7610ed53955ea3c3b5f319ad45e27fd99",
+    "candidateRef": "omni-queue/release-v3.8.55/b24-3927e06e015a",
+    "candidateSha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
+    "baseSha": "5ffa68e835442a12ed1204a2eebf4076c298aecb",
+    "treeSha": "a7b6541c028fa5dc84fab3fa752418f355870251",
     "prs": [
       {
-        "n": 20823,
-        "head": "6441b5b6f3587b771547c106caf91229fa556cfb",
-        "title": "test(security): pin linear model id parsing (CodeQL #1325, #1324, #1296)",
+        "n": 20866,
+        "head": "b470798f230961a9607d905f60c5ea6a17f9e29b",
+        "title": "docs(ci): AGENTS.md — landing on a release branch through omni-queue, sync-back by pull request",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T10:59:16Z"
+        "labeledAt": "2026-11-21T11:20:21Z"
       },
       {
-        "n": 20825,
-        "head": "2a48a0a823bf12139867cc9cf8b70814302c2689",
-        "title": "fix(security): bound caller grep regex in CCR and pin compression regex bounds (CodeQL #1349, #1301, #1302)",
+        "n": 20867,
+        "head": "38d38c282537d6433be817567f3b28bb23510b7f",
+        "title": "fix(security): clamp caller polling values at the remaining media handlers (CodeQL #1389)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-21T10:59:23Z"
+        "labeledAt": "2026-11-21T13:25:28Z"
+      },
+      {
+        "n": 20940,
+        "head": "321ffbe2c2e3753004937f3f63a1dbf1069caade",
+        "title": "chore(quality): end the temporary codeqlAlerts ceiling (103 -> 6)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-21T18:09:50Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-21T18:03:58.692Z",
+    "startedAt": "2026-11-21T19:41:54.078Z",
     "attempts": 0,
-    "bisect": {
-      "rootBatchId": "b22",
-      "segments": [
-        [
-          {
-            "n": 20823,
-            "head": "6441b5b6f3587b771547c106caf91229fa556cfb",
-            "title": "test(security): pin linear model id parsing (CodeQL #1325, #1324, #1296)",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-21T10:59:16Z"
-          },
-          {
-            "n": 20825,
-            "head": "2a48a0a823bf12139867cc9cf8b70814302c2689",
-            "title": "fix(security): bound caller grep regex in CCR and pin compression regex bounds (CodeQL #1349, #1301, #1302)",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-21T10:59:23Z"
-          }
-        ],
-        [
-          {
-            "n": 20826,
-            "head": "7c50da1952cbead2b6773af66e7a5dcc56d07f02",
-            "title": "fix(api): let a remote dashboard read resilience state and skill executions",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-21T10:59:55Z"
-          },
-          {
-            "n": 20834,
-            "head": "997e83f68562c0c13d9ba65a8350201062dfea64",
-            "title": "fix(dashboard): validate the access-token, webhook and eval-suite forms inline",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-21T11:00:01Z"
-          },
-          {
-            "n": 20835,
-            "head": "9acef5ae62ca95180c2b220df2a746ab3b5cc209",
-            "title": "fix(dashboard): show a clear notice for local-only features on a remote session",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-21T11:00:06Z"
-          }
-        ]
-      ],
-      "culprits": [],
-      "landed": [],
-      "steps": 0,
-      "hang": false
-    }
+    "bisect": null
   },
   "baseChecks": [
+    {
+      "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
+      "ref": "omni-queue/release-v3.8.55/b23-0563eb2ec52b",
+      "status": "green",
+      "startedAt": "2026-11-21T18:03:58.692Z",
+      "signatures": []
+    },
     {
       "baseSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
       "ref": "omni-queue/release-v3.8.55/basecheck-6d3f1d3f70e1-r1",
@@ -144,12 +111,14 @@
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
-      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee"
+      "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
+      "20823": "6441b5b6f3587b771547c106caf91229fa556cfb",
+      "20825": "2a48a0a823bf12139867cc9cf8b70814302c2689"
     }
   },
   "counters": {
-    "batchSeq": 23,
-    "ciRuns": 27,
+    "batchSeq": 24,
+    "ciRuns": 28,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1776,8 +1745,79 @@
         "20825": "2026-11-21T10:59:23Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44933350434"
+    },
+    {
+      "at": "2026-11-21T19:41:05.548Z",
+      "type": "checks-green",
+      "batchId": "b23",
+      "prs": [
+        20823,
+        20825
+      ],
+      "sha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
+    },
+    {
+      "at": "2026-11-21T19:41:16.937Z",
+      "type": "would-land",
+      "batchId": "b23",
+      "prs": [
+        20823,
+        20825
+      ],
+      "sha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
+      "detail": "shadow mode: would merge-ff onto 5b6c0af52deb",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
+    },
+    {
+      "at": "2026-11-21T19:41:22.025Z",
+      "type": "pr-dequeued",
+      "batchId": "b22",
+      "prs": [
+        20826
+      ],
+      "detail": "withdrawn: already merged",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
+    },
+    {
+      "at": "2026-11-21T19:41:22.025Z",
+      "type": "pr-dequeued",
+      "batchId": "b22",
+      "prs": [
+        20834
+      ],
+      "detail": "withdrawn: already merged",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
+    },
+    {
+      "at": "2026-11-21T19:41:22.025Z",
+      "type": "pr-dequeued",
+      "batchId": "b22",
+      "prs": [
+        20835
+      ],
+      "detail": "withdrawn: already merged",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
+    },
+    {
+      "at": "2026-11-21T19:41:57.288Z",
+      "type": "batch-started",
+      "batchId": "b24",
+      "prs": [
+        20866,
+        20867,
+        20940
+      ],
+      "sha": "3927e06e015aa0912d9899fc8391bb3d52ccb1c8",
+      "detail": "3 PR(s) on 5ffa68e83544; window 3",
+      "labeledAt": {
+        "20866": "2026-11-21T11:20:21Z",
+        "20867": "2026-11-21T13:25:28Z",
+        "20940": "2026-11-21T18:09:50Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44942209661"
     }
   ],
-  "updatedAt": "2026-11-21T19:06:54.086Z",
+  "updatedAt": "2026-11-21T19:41:59.067Z",
   "batchWindow": 3
 }
