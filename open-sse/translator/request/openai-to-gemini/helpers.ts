@@ -144,8 +144,11 @@ export function escapeHistoricalContextAttribute(value: string): string {
     .replaceAll(">", "&gt;");
 }
 
+// `<` and `>` are escaped so a tool result cannot close or reopen the context block (tag
+// breakout). `&` is left alone: it cannot open or close a tag, and escaping it rewrote the
+// result the model reads (`a && b` became `a &amp;&amp; b`).
 export function escapeHistoricalContextContent(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return value.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
 export function buildHistoricalToolResultContext(name: string, response: unknown): string {
