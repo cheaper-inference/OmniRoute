@@ -973,7 +973,8 @@
       "description": "Gestionează configurația de reziliență",
       "threshold": "Pragul de eșecuri",
       "resetTimeout": "Timp de resetare în ms",
-      "baseCooldown": "Perioada de așteptare de bază în ms"
+      "baseCooldown": "Perioada de așteptare de bază în ms",
+      "p2cLatencyWeight": "Greutatea latenței P2C, de la 0 (dezactivat) la 20"
     }
   },
   "nodes": {

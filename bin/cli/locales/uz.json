@@ -973,7 +973,8 @@
       "description": "Barqarorlik konfiguratsiyasini boshqarish",
       "threshold": "Nosozlik chegarasi",
       "resetTimeout": "Qayta tiklash kutish vaqti, ms",
-      "baseCooldown": "Asosiy sovish vaqti, ms"
+      "baseCooldown": "Asosiy sovish vaqti, ms",
+      "p2cLatencyWeight": "P2C kechikish og'irligi, 0 (o'chirilgan) dan 20 gacha"
     }
   },
   "nodes": {

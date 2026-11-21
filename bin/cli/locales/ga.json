@@ -973,7 +973,8 @@
       "description": "Bainistigh cumraíocht athléimneachta",
       "threshold": "Tairseach teipthe",
       "resetTimeout": "Athshocraigh am an tamaill i ms",
-      "baseCooldown": "Bun-am fuaraithe i ms"
+      "baseCooldown": "Bun-am fuaraithe i ms",
+      "p2cLatencyWeight": "Meáchan na moille P2C, ó 0 (as) go 20"
     }
   },
   "nodes": {

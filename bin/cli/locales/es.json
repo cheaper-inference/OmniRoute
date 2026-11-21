@@ -973,7 +973,8 @@
       "description": "Gestionar la configuración de resiliencia",
       "threshold": "Umbral de fallos",
       "resetTimeout": "Tiempo de espera de restablecimiento en ms",
-      "baseCooldown": "Tiempo de espera base en ms"
+      "baseCooldown": "Tiempo de espera base en ms",
+      "p2cLatencyWeight": "Peso de la latencia de P2C, de 0 (desactivado) a 20"
     }
   },
   "nodes": {

@@ -973,7 +973,8 @@
       "description": "Veerkrachtconfiguratie beheren",
       "threshold": "Drempelwaarde voor fouten",
       "resetTimeout": "Resettime-out in ms",
-      "baseCooldown": "Basiscooldown in ms"
+      "baseCooldown": "Basiscooldown in ms",
+      "p2cLatencyWeight": "P2C latentiegewicht, 0 (uit) tot 20"
     }
   },
   "nodes": {

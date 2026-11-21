@@ -973,7 +973,8 @@
       "description": "மீள்திறன் உள்ளமைவை நிர்வகி",
       "threshold": "தோல்வி வரம்பு",
       "resetTimeout": "மீட்டமைப்பு காலாவதி நேரம் (ms)",
-      "baseCooldown": "அடிப்படை கூல்டவுன் (ms)"
+      "baseCooldown": "அடிப்படை கூல்டவுன் (ms)",
+      "p2cLatencyWeight": "P2C தாமத எடை, 0 (ஆஃப்) முதல் 20 வரை"
     }
   },
   "nodes": {

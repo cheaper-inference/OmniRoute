@@ -973,7 +973,8 @@
       "description": "Upravljaj konfiguracijom otpornosti",
       "threshold": "Prag neuspjeha",
       "resetTimeout": "Reset timeout u ms",
-      "baseCooldown": "Osnovno vrijeme hlađenja u ms"
+      "baseCooldown": "Osnovno vrijeme hlađenja u ms",
+      "p2cLatencyWeight": "P2C težina kašnjenja, 0 (isključeno) do 20"
     }
   },
   "nodes": {

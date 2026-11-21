@@ -973,7 +973,8 @@
       "description": "રેઝિલિયન્સ રૂપરેખાંકન મેનેજ કરો",
       "threshold": "નિષ્ફળતાની સીમા",
       "resetTimeout": "રીસેટ સમયસમાપ્તિ ms માં",
-      "baseCooldown": "મૂળ કૂલડાઉન ms માં"
+      "baseCooldown": "મૂળ કૂલડાઉન ms માં",
+      "p2cLatencyWeight": "P2C લેટન્સી વેઇટ, 0 (બંધ) થી 20"
     }
   },
   "nodes": {

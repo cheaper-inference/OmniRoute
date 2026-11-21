@@ -973,7 +973,8 @@
       "description": "लवचिकता कॉन्फिग व्यवस्थापित करा",
       "threshold": "अपयश मर्यादा",
       "resetTimeout": "रीसेट टाइमआउट (ms मध्ये)",
-      "baseCooldown": "मूलभूत कूलडाउन (ms मध्ये)"
+      "baseCooldown": "मूलभूत कूलडाउन (ms मध्ये)",
+      "p2cLatencyWeight": "P2C लेटन्सी वेट, 0 (बंद) ते 20"
     }
   },
   "nodes": {

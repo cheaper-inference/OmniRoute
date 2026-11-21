@@ -973,7 +973,8 @@
       "description": "స్థితిస్థాపకత కాన్ఫిగ్ను నిర్వహించండి",
       "threshold": "వైఫల్య పరిమితి",
       "resetTimeout": "రీసెట్ గడువు (msలో)",
-      "baseCooldown": "ప్రాథమిక కూల్డౌన్ (msలో)"
+      "baseCooldown": "ప్రాథమిక కూల్డౌన్ (msలో)",
+      "p2cLatencyWeight": "P2C జాప్యం బరువు, 0 (ఆఫ్) నుండి 20"
     }
   },
   "nodes": {

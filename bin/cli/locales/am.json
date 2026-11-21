@@ -973,7 +973,8 @@
       "description": "የመቋቋም ውቅረትን ያስተዳድሩ",
       "threshold": "የውድቀት ገደብ",
       "resetTimeout": "የዳግም ማስጀመሪያ ጊዜ ገደብ በms",
-      "baseCooldown": "መሠረታዊ የማቀዝቀዣ ጊዜ በms"
+      "baseCooldown": "መሠረታዊ የማቀዝቀዣ ጊዜ በms",
+      "p2cLatencyWeight": "P2C የመዘግየት ክብደት፣ 0 (ጠፍቷል) እስከ 20"
     }
   },
   "nodes": {

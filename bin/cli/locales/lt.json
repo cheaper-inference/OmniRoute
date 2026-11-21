@@ -973,7 +973,8 @@
       "description": "Tvarkyti atsparumo konfigūraciją",
       "threshold": "Gedimų slenkstis",
       "resetTimeout": "Nustatymo iš naujo skirtasis laikas, ms",
-      "baseCooldown": "Bazinis atvėsimo laikotarpis, ms"
+      "baseCooldown": "Bazinis atvėsimo laikotarpis, ms",
+      "p2cLatencyWeight": "P2C delsos svoris, nuo 0 (išjungta) iki 20"
     }
   },
   "nodes": {

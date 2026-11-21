@@ -973,7 +973,8 @@
       "description": "Gerenciar configuração de resiliência",
       "threshold": "Limiar de falhas",
       "resetTimeout": "Timeout de reset em ms",
-      "baseCooldown": "Cooldown base em ms"
+      "baseCooldown": "Cooldown base em ms",
+      "p2cLatencyWeight": "Peso da latência do P2C, de 0 (desativado) a 20"
     }
   },
   "nodes": {
