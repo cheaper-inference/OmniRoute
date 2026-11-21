@@ -100,10 +100,7 @@ test("the Port Modes example uses a port that opens a listener", () => {
     panel.resolveQuotaPanelListener({ QUOTA_PANEL_PORT: port }, UNSPLIT_PORTS).kind,
     "listen"
   );
-  assert.match(
-    networkSection,
-    new RegExp(`→ Page: http://${host.replace(/\./g, "\\.")}:${port}/quota/<provider> `)
-  );
+  assert.ok(networkSection.includes(`→ Page: http://${host}:${port}/quota/<provider> `));
 });
 
 test("the section says the port is off unless QUOTA_PANEL_PORT is set, on the default host", () => {
