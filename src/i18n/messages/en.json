@@ -1609,7 +1609,7 @@
       "checking": "Checking URL...",
       "ok": "URL is valid",
       "blockedPrivate": "URL is a blocked private address",
-      "invalidUrl": "Invalid URL format"
+      "invalidUrl": "Enter a valid URL that starts with https:// or http://"
     },
     "custom": {
       "endpointUrl": "Endpoint URL",
@@ -11086,6 +11086,8 @@
     "suiteLatestRunsHint": "Most recent evaluation runs for this suite.",
     "saving": "Saving",
     "suiteBuilderCaseModelLabel": "Model (optional)",
+    "suiteBuilderCaseModelHint": "Used when a run targets \"{target}\". If empty, the case runs on {fallback}.",
+    "suiteBuilderCasePromptRequired": "Add a system prompt or a user prompt",
     "evalControlsTitle": "Evaluation Controls",
     "suiteBuilderEditTitle": "Edit Eval Suite",
     "suiteBuilderCaseStrategyLabel": "Validation Strategy",
@@ -16719,5 +16721,9 @@
     "recoveryHelp": "Recovery reuses the original payload and key. After reload, restore the exact endpoint, connection, transport and input. New generation starts a separate billable request. Up to 20 receipts are kept in this tab.",
     "streamIncomplete": "The stream ended without a complete final event. Upstream completion is unknown.",
     "streamError": "The upstream stream reported an error. Received files remain available."
+  },
+  "formValidation": {
+    "required": "{field} is required",
+    "maxLength": "{field} can have at most {max, number} characters (currently {count, number})"
   }
 }
