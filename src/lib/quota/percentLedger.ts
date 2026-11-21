@@ -418,3 +418,46 @@ export async function observeLedger(
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Preview: read and apply in memory, never write
+// ---------------------------------------------------------------------------
+
+/**
+ * What a read-only look at the book finds: a usable book (`confirmed` when a reading was applied
+ * to it in memory), no book, a book whose window ended, or a read that failed.
+ */
+export type LedgerPreview =
+  | { kind: "book"; snapshot: BookSnapshot; confirmed: boolean }
+  | { kind: "none" | "ended" | "failed" };
+
+/**
+ * The book as observeLedger would leave it, from one store read and without any write. A missing
+ * book is never opened, the reading is applied in memory only (applyReading is pure) and nothing
+ * is committed, so looking at a book never moves its baseline. Never throws.
+ */
+export async function previewLedger(
+  store: Pick<QuotaStore, "ledgerRead">,
+  key: LedgerKey,
+  reading: PlanWindowReading | null,
+  nowMs: number
+): Promise<LedgerPreview> {
+  let first: LedgerSnapshot;
+  try {
+    first = await store.ledgerRead(key);
+  } catch {
+    return { kind: "failed" };
+  }
+  try {
+    if (!first?.state) return { kind: "none" }; // a missing book is never opened here
+    if (!reading) {
+      const usable = usableWithoutReading(first, nowMs);
+      return usable ? { kind: "book", snapshot: usable, confirmed: false } : { kind: "ended" };
+    }
+    const { state } = applyReading(first, reading, nowMs); // pure: nothing is committed
+    const usable = usableAfterReading({ state, counters: first.counters }, nowMs);
+    return usable ? { kind: "book", snapshot: usable, confirmed: true } : { kind: "ended" };
+  } catch {
+    return { kind: "failed" };
+  }
+}

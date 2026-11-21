@@ -668,3 +668,17 @@ export async function getPlanWindowReading(
     return null;
   }
 }
+
+/**
+ * The plan-window reading the cache already holds for a connection+dim, as a copy, or null when
+ * nothing is cached or the cached entry has no plan reading. Never reads the provider, never
+ * fills the cache and never joins a pending fetch.
+ */
+export function peekPlanWindowReading(
+  connectionId: string,
+  provider: string,
+  dim: { unit: QuotaUnit; window: QuotaWindow }
+): PlanWindowReading | null {
+  const plan = _cache.get(cacheKey(connectionId, provider, dim))?.plan;
+  return plan ? { ...plan } : null;
+}
