@@ -1,0 +1,1 @@
+- **fix(kiro):** Exclude discarded Claude assistant thinking blocks from context estimates so requests that fit do not fail with a false context overflow. — thanks @bufftop25

@@ -22,6 +22,7 @@ import {
 } from "./chatCore/failureUsage.ts";
 import { buildRequestTranslationErrorResult } from "./chatCore/requestTranslationError.ts";
 import {
+  contextMessagesForEstimate,
   estimateCalibratedFinalInputTokens,
   estimateFinalInputTokenBreakdown,
 } from "./chatCore/contextEstimation.ts";
@@ -1329,6 +1330,7 @@ async function handleChatCoreInner({
   const compressionBody = body
     ? adaptBodyForCompression(body as Record<string, unknown>).body
     : null;
+  const omitKiroThinking = sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.KIRO;
   const allMessages = compressionBody?.messages || body?.contents || body?.request?.contents || [];
   let cavemanOutputModeApplied = false;
   let cavemanOutputModeIntensity: string | null = null;
@@ -1372,7 +1374,7 @@ async function handleChatCoreInner({
   // Strict model proofs cannot invoke auxiliary compression providers or prewarmers.
   // This trusted in-process fence is never accepted from a client header/body.
   if (!validationExecutorFence && body && Array.isArray(allMessages) && allMessages.length > 0) {
-    let estimatedTokens = estimateTokens(allMessages);
+    let estimatedTokens = estimateTokens(contextMessagesForEstimate(allMessages, omitKiroThinking));
     const compressionSettingsResult = await resolveCompressionSettings(log);
     const compressionSettings: CompressionConfig | null = compressionSettingsResult.settings;
     // #8034 — operator-named model/endpoint exclusions bypass the whole pipeline, exactly
@@ -1653,7 +1655,7 @@ async function handleChatCoreInner({
               cavemanOutputModeApplied = true;
               cavemanOutputModeIntensity =
                 outputStyleResult.appliedStyles?.map((s) => `${s.id}:${s.level}`).join(",") ?? null;
-              estimatedTokens = estimateTokens(body?.messages ?? body?.input ?? []);
+              estimatedTokens = estimateTokens(contextMessagesForEstimate(body?.messages ?? body?.input ?? [], omitKiroThinking));
               log?.debug?.("COMPRESSION", "Output styles applied");
             } else if (
               outputStyleResult.skippedReason &&
@@ -1846,7 +1848,10 @@ async function handleChatCoreInner({
           }
           if (result.compressed) {
             body = result.body as typeof body;
-            estimatedTokens = result.stats.compressedTokens;
+            // The compressor measures the whole body, including thinking Kiro discards.
+            estimatedTokens = omitKiroThinking
+              ? estimateTokens(contextMessagesForEstimate(body.messages, true))
+              : result.stats.compressedTokens;
             tokensCompressed = Math.max(
               0,
               result.stats.originalTokens - result.stats.compressedTokens
@@ -2126,7 +2131,8 @@ async function handleChatCoreInner({
   // calibrated guard total, and the last-resort compaction log below all read
   // the same numbers, so the full-body scan runs once instead of three times.
   let finalInputBreakdown = estimateFinalInputTokenBreakdown(
-    body as Record<string, unknown> | null | undefined
+    body as Record<string, unknown> | null | undefined,
+    omitKiroThinking
   );
   // #14931: scaled by the learned actual/estimated ratio (factor 1.0 cold).
   let finalEstimatedInputTokens = estimateCalibratedFinalInputTokens(
@@ -2167,7 +2173,8 @@ async function handleChatCoreInner({
           })
         : lastResortResult.body;
       finalInputBreakdown = estimateFinalInputTokenBreakdown(
-        body as Record<string, unknown>
+        body as Record<string, unknown>,
+        omitKiroThinking
       );
       finalEstimatedInputTokens = estimateCalibratedFinalInputTokens(
         body,

@@ -11,6 +11,19 @@ function asJsonRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
 }
 
+// Measurement only: Claude→Kiro drops historical assistant thinking blocks on translation.
+// Do not rewrite the request or discount similarly named fields inside tool arguments.
+export function contextMessagesForEstimate(messages: unknown, omitKiroThinking: boolean): unknown {
+  if (!omitKiroThinking || !Array.isArray(messages)) return messages;
+  return messages.map((message) => {
+    if (message?.role !== "assistant" || !Array.isArray(message.content)) return message;
+    return {
+      ...message,
+      content: message.content.filter((block: unknown) => asJsonRecord(block)?.type !== "thinking"),
+    };
+  });
+}
+
 export type FinalInputTokenBreakdown = {
   messages: number;
   tools: number;
@@ -20,7 +33,8 @@ export type FinalInputTokenBreakdown = {
 };
 
 export function estimateFinalInputTokenBreakdown(
-  requestBody: JsonRecord | null | undefined
+  requestBody: JsonRecord | null | undefined,
+  omitKiroThinking = false
 ): FinalInputTokenBreakdown {
   const adapted = requestBody ? adaptBodyForCompression(requestBody).body : null;
   const nestedRequest = asJsonRecord(requestBody?.request);
@@ -34,7 +48,7 @@ export function estimateFinalInputTokenBreakdown(
         ? requestBody.input
         : []);
   const breakdown = {
-    messages: estimateTokens(messages),
+    messages: estimateTokens(contextMessagesForEstimate(messages, omitKiroThinking)),
     tools: Array.isArray(requestBody?.tools) ? estimateTokens(requestBody.tools) : 0,
     system: estimateTokens(requestBody?.system),
     instructions: estimateTokens(requestBody?.instructions),
