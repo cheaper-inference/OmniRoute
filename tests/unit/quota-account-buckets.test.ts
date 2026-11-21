@@ -13,8 +13,16 @@
  * (no real Date.now() on the tested path).
  */
 
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
+
+import {
+  CLAUDE_USAGE_SUCCESS_TTL_MS,
+  _resetClaudeUsagePollingState,
+  getClaudeUsage,
+  observeClaudeUsageHeaders,
+} from "../../open-sse/services/usage/claude.ts";
+import { _resetClaudeOauthUsageCooldown } from "../../open-sse/services/claudeUsageCooldown.ts";
 
 import {
   isBucketSaturated,
@@ -33,6 +41,8 @@ const NOW = Date.UTC(2026, 5, 24, 12, 0, 0);
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const FUTURE_ISO = new Date(NOW + ONE_HOUR_MS).toISOString(); // window still open
 const PAST_ISO = new Date(NOW - ONE_HOUR_MS).toISOString(); // window already reset
+
+const originalFetch = globalThis.fetch;
 
 function makeQuota(used: number, resetAt: string | null): UsageQuotaSlim {
   return { used, total: 100, resetAt };
@@ -324,7 +334,15 @@ test("model window: every reading replaces the connection's model windows", () =
 
   updateAccountBuckets("conn-rep", fableReading(), NOW);
   updateAccountBuckets("conn-rep", { quotas: {}, modelQuotas: {} } as never, NOW);
-  assert.equal(isModelWindowSaturated("conn-rep", FABLE, NOW), false, "window no longer listed");
+  assert.equal(isModelWindowSaturated("conn-rep", FABLE, NOW), true, "incomplete reading: kept");
+
+  const complete = {
+    quotas: { "session (5h)": makeQuota(100, FUTURE_ISO) },
+    modelQuotas: {},
+    quotasComplete: true,
+  };
+  updateAccountBuckets("conn-rep", complete as never, NOW);
+  assert.equal(isModelWindowSaturated("conn-rep", FABLE, NOW), false, "complete, not listed");
 
   updateAccountBuckets("conn-rep", fableReading(), NOW);
   updateAccountBuckets("conn-rep", { quotas: {} }, NOW);
@@ -340,6 +358,37 @@ test("model window: a complete reading keeps the model windows it reports", () =
   };
   updateAccountBuckets("conn-complete", usage as never, NOW);
   assert.equal(isModelWindowSaturated("conn-complete", FABLE, NOW), true);
+});
+
+test("model window: a reading built from response headers keeps the model windows", async () => {
+  mock.timers.enable({ apis: ["Date"], now: NOW });
+  try {
+    _resetClaudeUsagePollingState();
+    _resetClaudeOauthUsageCooldown();
+    updateAccountBuckets("conn-headers", fableReading(), NOW);
+    globalThis.fetch = (async () =>
+      Response.json({
+        five_hour: { utilization: 3, resets_at: "2099-01-01T05:00:00Z" },
+        seven_day: { utilization: 20, resets_at: "2099-01-07T00:00:00Z" },
+      })) as typeof fetch;
+    await getClaudeUsage("tok-bucket-headers");
+    mock.timers.tick(CLAUDE_USAGE_SUCCESS_TTL_MS + 1);
+    globalThis.fetch = (async () => new Response("rate limited", { status: 429 })) as typeof fetch;
+    observeClaudeUsageHeaders(
+      "tok-bucket-headers",
+      new Headers({ "anthropic-ratelimit-unified-7d-utilization": "0.3" })
+    );
+
+    const reading = await getClaudeUsage("tok-bucket-headers");
+    assert.equal(reading._source, "response-headers");
+    updateAccountBuckets("conn-headers", reading as ClaudeUsageResult, Date.now());
+    assert.equal(isModelWindowSaturated("conn-headers", FABLE, Date.now()), true);
+  } finally {
+    globalThis.fetch = originalFetch;
+    _resetClaudeUsagePollingState();
+    _resetClaudeOauthUsageCooldown();
+    mock.timers.reset();
+  }
 });
 
 test("model window: entries without weekly_scoped Claude metadata are ignored", () => {

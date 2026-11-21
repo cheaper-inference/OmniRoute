@@ -200,8 +200,8 @@ export function recordUsage(
  *
  * The model-scoped weekly windows come from `modelQuotas` and saturate only when
  * Claude reports them as an active exhaustion (the same rule credential
- * selection applies). Every reading that carries `modelQuotas` replaces the
- * connection's model buckets.
+ * selection applies). A listed window that is no longer exhausted clears its bucket.
+ * A model bucket the reading does not list is cleared only by a complete reading.
  *
  * Fail-open: a null/undefined result, a missing `quotas` map, or any malformed
  * quota entry is silently skipped.
@@ -268,9 +268,9 @@ export function isModelWindowSaturated(
 
 /**
  * Record the exhausted model-scoped weekly windows of one reading and drop this
- * connection's model buckets the reading did not record. A reading without
- * `modelQuotas` carries no model evidence and leaves the model buckets as they are.
- * Returns the window keys written.
+ * connection's model buckets for the windows the reading lists as not exhausted.
+ * A bucket the reading does not list is left to the complete-reading sweep of the caller.
+ * A reading without `modelQuotas` carries no model evidence. Returns the window keys written.
  */
 function recordModelWindows(
   connectionId: string,
@@ -281,12 +281,14 @@ function recordModelWindows(
   if (!modelQuotas || typeof modelQuotas !== "object" || Array.isArray(modelQuotas)) {
     return written;
   }
+  const listed = new Set<string>();
   for (const [name, window] of Object.entries(modelQuotas)) {
     const metadata = window?.claudeQuota;
     if (!window || !isClaudeQuotaMetadata(metadata) || metadata.kind !== "weekly_scoped") continue;
-    if (!isActiveClaudeExhaustion(window, nowMs)) continue;
     const label = /^weekly (.+) \(7d\)$/.exec(name)?.[1] ?? name;
     const windowKey = `${MODEL_WINDOW_PREFIX}${label}`;
+    listed.add(windowKey);
+    if (!isActiveClaudeExhaustion(window, nowMs)) continue;
     _buckets.set(
       storeKey(connectionId, windowKey),
       { saturated: true, resetsAtMs: parseResetAtMs(window.resetAt), claudeQuota: { ...metadata } },
@@ -294,10 +296,8 @@ function recordModelWindows(
     );
     written.add(windowKey);
   }
-  const base = storeKey(connectionId, "");
-  const prefix = storeKey(connectionId, MODEL_WINDOW_PREFIX);
-  for (const key of [..._buckets.keys()]) {
-    if (key.startsWith(prefix) && !written.has(key.slice(base.length))) _buckets.delete(key);
+  for (const windowKey of listed) {
+    if (!written.has(windowKey)) _buckets.delete(storeKey(connectionId, windowKey));
   }
   return written;
 }
