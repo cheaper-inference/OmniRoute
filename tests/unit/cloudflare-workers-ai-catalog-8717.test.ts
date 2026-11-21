@@ -24,14 +24,24 @@ const DEAD_CLOUDFLARE_MODEL_IDS = [
 
 const LIVE_CLOUDFLARE_MODEL_IDS = [
   "@cf/mistral/mistral-7b-instruct-v0.2-lora",
-  "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
   "@cf/qwen/qwen2.5-coder-32b-instruct",
   "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "@cf/zai-org/glm-4.7-flash",
+  "@cf/google/gemma-4-26b-a4b-it",
+  "@cf/openai/gpt-oss-120b",
+  "@cf/openai/gpt-oss-20b",
+  "@cf/qwen/qwen3.8-27b",
+  "@cf/meta/llama-4-scout-17b-16e-instruct",
+  "@cf/mistralai/mistral-small-3.1-24b-instruct",
+] as const;
+
+// Sweep 2026-11-16: planned_deprecation_date 2026-11-20, or Workers Paid only (kimi-k2.6,
+// 403 code 5035 on the Free plan) — none of them may be advertised as a free model.
+const RETIRED_OR_PAID_CLOUDFLARE_MODEL_IDS = [
+  "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
   "@cf/meta/llama-3.2-3b-instruct",
   "@cf/qwen/qwq-32b",
-  "@cf/zai-org/glm-4.7-flash",
   "@cf/moonshotai/kimi-k2.6",
-  "@cf/google/gemma-4-26b-a4b-it",
 ] as const;
 
 function cloudflareCatalogIds(): string[] {
@@ -98,4 +108,13 @@ test("#8717: 30M monthlyTokens budget moves to live Llama 3.3 70B FP8 Fast", () 
   );
   assert.equal(withBudget.length, 1);
   assert.equal(withBudget[0].modelId, "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+});
+
+test("cloudflare-ai free catalog and registry drop deprecated and Workers-Paid-only ids", () => {
+  const catalog = cloudflareCatalogIds();
+  const registry = cloudflareRegistryIds();
+  for (const id of RETIRED_OR_PAID_CLOUDFLARE_MODEL_IDS) {
+    assert.equal(catalog.includes(id), false, `${id} must not be in freeModelCatalog`);
+    assert.equal(registry.includes(id), false, `${id} must not be in the cloudflare-ai registry`);
+  }
 });

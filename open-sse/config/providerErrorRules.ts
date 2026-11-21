@@ -312,6 +312,22 @@ function buildCloudflareAiRules(): ProviderErrorRule[] {
         return { reason: "quota_exhausted", scope: "connection" };
       },
     },
+    {
+      // HTTP 403 + code 5035: "Model X is not available on the Workers Free plan".
+      // The gate is per MODEL — the same token keeps serving every free model — so
+      // only the model is locked. cloudflare-ai is not in
+      // HONORS_RULE_LOCK_SCOPE_PROVIDERS; markAccountUnavailable consumes this
+      // match directly (Cloudflare branch) instead of the generic apikey-403
+      // connection cooldown. The gate lasts until the account upgrades, so the
+      // 6h cooldown is only clamped down by the model-lockout maxCooldownMs.
+      id: "cloudflare-ai-model-requires-paid-plan",
+      match: ({ status, body }) => {
+        if (status !== 403) return null;
+        const text = JSON.stringify(body ?? "").toLowerCase();
+        if (!text.includes("not available on the workers free plan")) return null;
+        return { reason: "auth_error", scope: "model", cooldownMs: 6 * 60 * 60 * 1000 };
+      },
+    },
   ];
 }
 
