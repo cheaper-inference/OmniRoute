@@ -141,6 +141,20 @@ export function gemini38ThinkingConfig(
 }
 
 type NativeGeminiThinking = { thinkingLevel: GeminiThinkingLevel; includeThoughts: boolean };
+type NativeGeminiThinkingConfig = Omit<NativeGeminiThinking, "includeThoughts"> &
+  Partial<Pick<NativeGeminiThinking, "includeThoughts">>;
+
+function nativeGeminiThinkingConfig(
+  model: string,
+  body: JsonRecord,
+  config: NativeGeminiThinking | null
+): NativeGeminiThinkingConfig | null {
+  // Preserve the legacy Gemini 4 tier translator's opt-out: omit the summary flag
+  // when a client declines it, while effort "none" explicitly sets it to false.
+  return config?.includeThoughts && isGemini4PlusModel(model) && clientDeclinedThoughts(body)
+    ? { thinkingLevel: config.thinkingLevel }
+    : config;
+}
 
 const NATIVE_GEMINI_EFFORT_LEVELS: ReadonlyMap<string, GeminiThinkingLevel> = new Map<
   string,
@@ -204,8 +218,9 @@ function nativeGeminiDefault(
   supported: readonly GeminiThinkingLevel[],
   configured: GeminiThinkingLevel | undefined
 ): NativeGeminiThinking | null {
-  const thinkingLevel = configured && supported.includes(configured) ? configured : supported[0];
-  return thinkingLevel ? { thinkingLevel, includeThoughts: true } : null;
+  return configured && supported.includes(configured)
+    ? { thinkingLevel: configured, includeThoughts: true }
+    : null;
 }
 
 // Same lookup order as extractExplicitThinkingLevel in openai-to-gemini.ts.
@@ -241,16 +256,14 @@ function nativeGeminiRequestControls(
   if (enabledBudget) return enabledBudget;
 
   const fromEffort = nativeGeminiEffort(
-    body.reasoning_effort ?? toRecord(body.reasoning).effort,
+    body.reasoning_effort ?? toRecord(body.reasoning).effort ?? toRecord(body.output_config).effort,
     supported
   );
   if (fromEffort) return fromEffort;
 
   if (body.thinking === false || thinking.type === "disabled") {
-    const thinkingLevel = supported.includes("minimal") ? "minimal" : defaultLevel;
-    return thinkingLevel && supported.includes(thinkingLevel)
-      ? { thinkingLevel, includeThoughts: false }
-      : null;
+    const thinkingLevel = supported.includes("minimal") ? "minimal" : supported[0];
+    return thinkingLevel ? { thinkingLevel, includeThoughts: false } : null;
   }
 
   const fromBudget = nativeGeminiBudget(thinking.budget_tokens ?? thinking.budgetTokens, supported);
@@ -265,41 +278,48 @@ function nativeGeminiRequestControls(
 export function resolveNativeGeminiThinking(
   model: string,
   body: JsonRecord
-): NativeGeminiThinking | null {
-  const supported = nativeGeminiLevels(model);
+): NativeGeminiThinkingConfig | null {
+  const { levels: supported, defaultLevel } = getNativeGeminiThinkingSpec(model);
   if (supported.length === 0) return null;
   const explicit = explicitNativeGeminiLevel(body, supported);
-  if (explicit) return { thinkingLevel: explicit, includeThoughts: true };
-  return nativeGeminiRequestControls(
+  return nativeGeminiThinkingConfig(
+    model,
     body,
-    supported,
-    getNativeGeminiThinkingSpec(model).defaultLevel
+    explicit
+      ? { thinkingLevel: explicit, includeThoughts: true }
+      : nativeGeminiRequestControls(body, supported, defaultLevel)
   );
 }
 
 /**
  * Claude-format counterpart of resolveNativeGeminiThinking. Keeps that path's contract:
- * budget_tokens beats output_config.effort, and without a positive control nothing is
- * resolved, so budget 0 stays the dynamic-thinking sentinel (#6813) and a request with no
- * knob stays on the upstream default.
+ * budget_tokens beats output_config.effort, and budget 0 stays the dynamic-thinking
+ * sentinel (#6813). With no control, only a fixed-tier id supplies a default level.
  */
 export function resolveClaudeNativeGeminiThinking(
   model: string,
   body: JsonRecord
-): NativeGeminiThinking | null {
-  const supported = nativeGeminiLevels(model);
+): NativeGeminiThinkingConfig | null {
+  const { levels: supported, fixedTier } = getNativeGeminiThinkingSpec(model);
   if (supported.length === 0) return null;
   const explicit = explicitNativeGeminiLevel(body, supported);
-  if (explicit) return { thinkingLevel: explicit, includeThoughts: true };
-
-  const thinking = toRecord(body.thinking);
-  if (thinking.type === "enabled" && typeof thinking.budget_tokens === "number") {
-    return thinking.budget_tokens > 0
-      ? nativeGeminiBudget(thinking.budget_tokens, supported)
-      : null;
-  }
-  const fromEffort = nativeGeminiEffort(toRecord(body.output_config).effort, supported);
-  return fromEffort?.includeThoughts ? fromEffort : null;
+  const resolve = (): NativeGeminiThinking | null => {
+    if (explicit) return { thinkingLevel: explicit, includeThoughts: true };
+    const thinking = toRecord(body.thinking);
+    if (thinking.type === "enabled" && typeof thinking.budget_tokens === "number") {
+      return thinking.budget_tokens > 0
+        ? nativeGeminiBudget(thinking.budget_tokens, supported)
+        : null;
+    }
+    const fromEffort = nativeGeminiEffort(toRecord(body.output_config).effort, supported);
+    if (fromEffort && (fromEffort.includeThoughts || isGemini4PlusModel(model))) return fromEffort;
+    if (fixedTier && (body.thinking === false || thinking.type === "disabled")) {
+      const thinkingLevel = supported.includes("minimal") ? "minimal" : supported[0];
+      return thinkingLevel ? { thinkingLevel, includeThoughts: false } : null;
+    }
+    return nativeGeminiDefault(supported, fixedTier);
+  };
+  return nativeGeminiThinkingConfig(model, body, resolve());
 }
 
 // Default config (passthrough = backward compatible)
