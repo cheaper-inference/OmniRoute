@@ -90,6 +90,13 @@ test("gemini API-key provider lists gemini-4-carbon", () => {
   assert.equal(m.supportsVision, true);
 });
 
+test("gemini-4-carbon is recognized as a thinkingLevel model", async () => {
+  const { isGeminiThinkingLevelModel } = await import("../../open-sse/services/thinkingBudget.ts");
+  assert.equal(isGeminiThinkingLevelModel("gemini-4-carbon"), true);
+  assert.equal(isGeminiThinkingLevelModel("antigravity/gemini-4-carbon-high"), true);
+  assert.equal(isGeminiThinkingLevelModel("vertex/gemini-4-carbon"), true);
+});
+
 test("Carbon shares the Gemini 4 quota family with Argon", () => {
   for (const id of TIERS) assert.equal(getAntigravityQuotaFamily(`agy/${id}`), "argon");
 });
