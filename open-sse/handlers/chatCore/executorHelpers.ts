@@ -46,6 +46,7 @@ export function resolveAccountSemaphoreMaxConcurrency(
   rateLimitProtectionEnabled = true
 ): number | null {
   const rateLimitOverride = toFiniteNumberOrNull(credentials?.rateLimitMaxConcurrent);
+  if (toFiniteNumberOrNull(credentials?.maxConcurrent) === -1) return -1;
   if (rateLimitProtectionEnabled && rateLimitOverride !== null && rateLimitOverride > 0) {
     return rateLimitOverride;
   }
