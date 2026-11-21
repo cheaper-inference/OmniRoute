@@ -15,6 +15,7 @@ const {
   resolveModelOrError,
   checkPipelineGates,
   executeChatWithBreaker,
+  runWithProviderProxyContext,
   handleNoCredentials,
   safeResolveProxy,
   safeLogEvents,
@@ -24,6 +25,7 @@ const { getCircuitBreaker, resetAllCircuitBreakers, STATE } =
   await import("../../src/shared/utils/circuitBreaker.ts");
 // DATA_DIR must be fixed before these modules load; keep this test seam dynamic.
 const { setTlsClientForTest } = await import("../../open-sse/utils/proxyFetch.ts");
+const { resolveProxyForRequest } = await import("../../open-sse/utils/proxyFetch.ts");
 const { resolveChatCoreTargetFormat } =
   await import("../../open-sse/handlers/chatCore/targetFormat.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
@@ -684,6 +686,27 @@ test("executeChatWithBreaker converts proxy fast-fail errors", async () => {
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test("native-host ZCode bypasses the ambient proxy context while gateway keeps it", async () => {
+  const proxy = { type: "http", host: "127.0.0.1", port: 3128 };
+  const readRoute = () => resolveProxyForRequest("https://api.z.ai/v1/messages").source;
+
+  assert.equal(
+    await runWithProviderProxyContext("zcode-start", proxy, readRoute, "native-host"),
+    "direct",
+    "local app-server inference must use the native host egress without proxy fast-fail"
+  );
+  assert.equal(
+    await runWithProviderProxyContext("zcode-start", proxy, readRoute, "gateway"),
+    "context",
+    "gateway transport must retain its configured proxy route"
+  );
+  assert.equal(
+    await runWithProviderProxyContext("openai", proxy, readRoute, "app-server"),
+    "context",
+    "the native-host bypass must not affect other providers"
+  );
 });
 
 test("executeChatWithBreaker preserves account TLS scope when a proxy bypasses to direct", async () => {

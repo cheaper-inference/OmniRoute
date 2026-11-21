@@ -125,7 +125,7 @@ function EmptyConnectionsActions({
         <>
           <PrimaryAddButton
             providerId={providerId}
-            providerSupportsPat={providerSupportsPat}
+            providerSupportsPat={providerSupportsPat && providerId !== "zcode"}
             onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
             t={t}
           />

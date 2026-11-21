@@ -64,6 +64,7 @@ import {
   isQuotaExhaustedForRequest,
   getQuotaCache,
   isQuotaRefusalMarked,
+  isQuotaScopeApplicable,
 } from "../../../src/domain/quotaCache.ts";
 
 /**
@@ -250,7 +251,8 @@ export async function expandTargetsByQuotaAwareConnections(
           connectionId,
           provider,
           target.modelStr || null,
-          connection?.providerSpecificData
+          connection?.providerSpecificData,
+          typeof connection?.authType === "string" ? connection.authType : undefined
         )
       );
       if (
@@ -1061,18 +1063,28 @@ function scoreQuotaWeightedWithCredits(
  */
 function overlayQuotaSnapshot<
   T extends {
-    target: { connectionId?: string | null; modelStr: string };
+    target: ResolvedComboTarget;
     remainingPercent: number;
     paidCreditsBacked?: boolean;
   },
->(scored: T[]): (T & { stale: boolean })[] {
+>(scored: T[], connectionById: Map<string, Record<string, unknown>>): (T & { stale: boolean })[] {
   const now = Date.now();
   return scored.map((entry) => {
     const connectionId = entry.target.connectionId ?? "";
-    const marked = connectionId
+    const connection = connectionById.get(connectionId);
+    const provider = getResetAwareProvider(entry.target);
+    const scoped =
+      connectionId &&
+      (!provider ||
+        isQuotaScopeApplicable(
+          connectionId,
+          provider,
+          typeof connection?.authType === "string" ? connection.authType : undefined
+        ));
+    const marked = scoped
       ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
       : null;
-    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
+    const fetchedAt = scoped ? getQuotaSnapshotFetchedAt(connectionId) : null;
     return {
       ...entry,
       remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
@@ -1125,7 +1137,7 @@ export async function orderTargetsByQuotaWeighted(
       scoreQuotaWeightedWithCredits(quota, target, connection, config, scoring, scoreNow),
   });
 
-  const withSnapshot = overlayQuotaSnapshot(scoredTargets);
+  const withSnapshot = overlayQuotaSnapshot(scoredTargets, connectionById);
 
   // A used-up subscription window drops a target only when nothing can absorb
   // the request. Codex accounts with paid credits still serve it, and the

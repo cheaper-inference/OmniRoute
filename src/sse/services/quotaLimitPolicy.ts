@@ -1,4 +1,8 @@
-import { DEFAULT_QUOTA_THRESHOLD_PERCENT, getQuotaWindowStatus } from "@/domain/quotaCache";
+import {
+  DEFAULT_QUOTA_THRESHOLD_PERCENT,
+  getQuotaWindowStatus,
+  isQuotaScopeApplicable,
+} from "@/domain/quotaCache";
 import { defersQuotaCutoff } from "@/lib/providers/quotaCutoffOptIns";
 import { applyCodexWindowPolicy } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { toNumber } from "@/shared/utils/numeric";
@@ -57,10 +61,12 @@ export function resolveQuotaLimitPolicy(
 }
 export function evaluateQuotaLimitPolicy(
   provider: string,
-  connection: { id: string; providerSpecificData: JsonRecord },
+  connection: { id: string; providerSpecificData: JsonRecord; authType?: string | null },
   requestedModel: string | null = null
 ): { blocked: boolean; reasons: string[]; resetAt: string | null } {
   if (defersQuotaCutoff(provider, connection.providerSpecificData, requestedModel))
+    return { blocked: false, reasons: [], resetAt: null };
+  if (!isQuotaScopeApplicable(connection.id, provider, connection.authType))
     return { blocked: false, reasons: [], resetAt: null };
   const policy = resolveQuotaLimitPolicy(provider, connection.providerSpecificData);
   // GitHub local AI Credits cutoff (fail-open) seeds the reasons, independent of the windows.

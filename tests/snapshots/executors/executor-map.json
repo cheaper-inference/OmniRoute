@@ -710,6 +710,26 @@
       "configSource": "<custom-config>",
       "provider": "zcode"
     },
+    "zcode-cn-individual": {
+      "className": "ZcodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "zcode-cn-individual"
+    },
+    "zcode-cn-start": {
+      "className": "ZcodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "zcode-cn-start"
+    },
+    "zcode-individual": {
+      "className": "ZcodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "zcode-individual"
+    },
+    "zcode-start": {
+      "className": "ZcodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "zcode-start"
+    },
     "zed-hosted": {
       "className": "ZedHostedExecutor",
       "configSource": "zed-hosted",
@@ -731,6 +751,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 146,
+  "keyCount": 150,
   "sharedInstances": []
 }

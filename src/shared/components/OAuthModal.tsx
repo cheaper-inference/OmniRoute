@@ -115,7 +115,7 @@ type OAuthModalProps = {
   onSuccess?: () => void;
   onClose: () => void;
   idcConfig?: unknown;
-  reauthConnection?: null | { id?: string };
+  reauthConnection?: null | { id?: string; providerSpecificData?: Record<string, unknown> };
 };
 
 type DevicePollResult =
@@ -207,6 +207,9 @@ function LegacyOAuthModal({
   // github only: gate the device-code flow behind the policy-ambiguous disclosure.
   // Flipped to true when the user clicks "I understand — Connect" in CopilotPolicyStep.
   const [copilotPolicyAcknowledged, setCopilotPolicyAcknowledged] = useState(false);
+  const [zcodeRegion, setZcodeRegion] = useState(
+    reauthConnection?.providerSpecificData?.family === "bigmodel" ? "bigmodel" : "zai"
+  );
   // #8046 follow-up: structured diagnosis for the LAN-IP loopback mismatch, rendered
   // by its own step instead of as prose inside the generic red error step.
   const [loopbackHint, setLoopbackHint] = useState<PkceLoopbackMismatchHint | null>(null);
@@ -436,6 +439,64 @@ function LegacyOAuthModal({
         setError(null);
 
         const grokWantsBrowser = provider === "grok-cli" && (opts?.grokBrowser ?? grokBrowserMode);
+
+        if (provider === "zcode") {
+          invalidateDeviceFlow();
+          const runId = deviceFlowRunRef.current;
+          setIsDeviceCode(true);
+          setDeviceData(null);
+          setStep("waiting");
+          const response = await fetch("/api/oauth/zcode/login/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ family: zcodeRegion, connectionId: reauthConnection?.id }),
+          });
+          const data = (await parseResponseBody(response)) as Record<string, unknown>;
+          if (runId !== deviceFlowRunRef.current) return;
+          if (!response.ok)
+            throw new Error(getErrorMessage(data, response.status, t("errorAuthorizationFailed")));
+          if (
+            typeof data.sessionId !== "string" ||
+            typeof data.authorizeUrl !== "string" ||
+            !Number.isFinite(Number(data.expiresAt)) ||
+            !Number.isFinite(Number(data.pollIntervalSec))
+          ) {
+            throw new Error(t("errorAuthorizationFailed"));
+          }
+          const loginUrl = new URL(data.authorizeUrl);
+          if (loginUrl.protocol !== "https:") throw new Error(t("errorAuthorizationFailed"));
+          setDeviceData({ verification_uri: loginUrl.href });
+          window.open(loginUrl.href, "oauth_verify");
+          const deadline = Number(data.expiresAt);
+          const interval = positiveNumberOr(data.pollIntervalSec, 5);
+          setPolling(true);
+          setDeviceCodeExpiresAt(deadline);
+          while (Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+            if (runId !== deviceFlowRunRef.current) return;
+            if (Date.now() >= deadline) break;
+            const pollResponse = await fetch("/api/oauth/zcode/login/poll", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ sessionId: data.sessionId }),
+            });
+            const result = (await parseResponseBody(pollResponse)) as Record<string, unknown>;
+            if (runId !== deviceFlowRunRef.current) return;
+            if (result.status === "ok" && pollResponse.ok) {
+              setPolling(false);
+              setStep("success");
+              onSuccess?.();
+              return;
+            }
+            if (!pollResponse.ok || result.status !== "pending") {
+              throw new Error(
+                getErrorMessage(result, pollResponse.status, t("errorAuthorizationFailed"))
+              );
+            }
+          }
+          if (runId === deviceFlowRunRef.current) throw new Error(t("errorAuthorizationTimeout"));
+          return;
+        }
 
         // Device code flow
         if (DEVICE_CODE_PROVIDERS.has(provider) && !grokWantsBrowser) {
@@ -688,6 +749,7 @@ function LegacyOAuthModal({
           }
         }
       } catch (err) {
+        setPolling(false);
         setError(err.message);
         setStep("error");
       }
@@ -705,6 +767,7 @@ function LegacyOAuthModal({
       invalidateDeviceFlow,
       grokBrowserMode,
       copilotPolicyAcknowledged,
+      zcodeRegion,
       t,
     ]
   );
@@ -781,14 +844,23 @@ function LegacyOAuthModal({
       setPolling(false);
       // #8688: show GitLab Duo OAuth app / env setup before authorize error. Every other
       // provider restarts at "waiting", or a paste-first reopen would show the last success.
-      setStep(provider === "gitlab-duo" ? "gitlab-duo-setup" : "waiting");
+      setStep(
+        provider === "gitlab-duo"
+          ? "gitlab-duo-setup"
+          : provider === "zcode"
+            ? "zcode-region"
+            : "waiting"
+      );
+      setZcodeRegion(
+        reauthConnection?.providerSpecificData?.family === "bigmodel" ? "bigmodel" : "zai"
+      );
     }
   }
 
   useEffect(() => {
     if (!isOpen || !provider || flowStartedRef.current) return;
     const startsInPasteMode = PASTE_FIRST_PROVIDERS.has(provider);
-    const startsInGitlabDuoSetup = provider === "gitlab-duo";
+    const startsInGitlabDuoSetup = provider === "gitlab-duo" || provider === "zcode";
     if (startsInGitlabDuoSetup) {
       // Auto-start is skipped — setStep("gitlab-duo-setup") already happened
       // in the render-time adjustment above (#8688).
@@ -1164,6 +1236,36 @@ function LegacyOAuthModal({
                 onClose={handleClose}
               />
             )}
+            {provider === "zcode" && step === "zcode-region" && (
+              <div className="flex flex-col gap-4">
+                <p className="text-sm text-text-muted">
+                  Choose the service for this account. You can add more accounts later.
+                </p>
+                <fieldset className="flex flex-col gap-3">
+                  <legend className="mb-2 font-medium">Account service</legend>
+                  {[
+                    { value: "zai", label: "Z.ai (international)" },
+                    { value: "bigmodel", label: "BigModel (China)" },
+                  ].map((option) => (
+                    <label key={option.value} className="flex items-center gap-2">
+                      {/* kit-exception: the UI kit has no radio-group control for region selection */}
+                      <input
+                        type="radio"
+                        name="zcode-region"
+                        value={option.value}
+                        checked={zcodeRegion === option.value}
+                        disabled={Boolean(reauthConnection?.id)}
+                        onChange={() => setZcodeRegion(option.value)}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </fieldset>
+                <Button onClick={() => void startOAuthFlow()} fullWidth>
+                  Continue to sign in
+                </Button>
+              </div>
+            )}
 
             {/* GHE Copilot: collect the GitHub Enterprise base URL before starting */}
             {provider === "ghe-copilot" && step === "ghe-config" && (
@@ -1191,14 +1293,31 @@ function LegacyOAuthModal({
             )}
 
             {/* Device Code Flow - Waiting */}
-            {step === "waiting" && isDeviceCode && deviceData && (
-              <OAuthDeviceCodePanel
-                deviceData={deviceData}
-                verificationUrl={deviceVerificationUrl}
-                secondsRemaining={deviceCodeSecondsRemaining}
-                polling={polling}
-              />
-            )}
+            {step === "waiting" &&
+              isDeviceCode &&
+              deviceData &&
+              (provider === "zcode" && !deviceData.user_code ? (
+                <div className="flex flex-col gap-3 text-center">
+                  <p>
+                    Open the link to sign in. This window will update when authorization finishes.
+                  </p>
+                  <a
+                    href={deviceVerificationUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="break-all text-primary hover:underline"
+                  >
+                    Open sign-in link
+                  </a>
+                </div>
+              ) : (
+                <OAuthDeviceCodePanel
+                  deviceData={deviceData}
+                  verificationUrl={deviceVerificationUrl}
+                  secondsRemaining={deviceCodeSecondsRemaining}
+                  polling={polling}
+                />
+              ))}
 
             {/* Manual Input Step */}
             {step === "input" && !isDeviceCode && (

@@ -14,6 +14,14 @@ import { readZcodeIndividualCodingPlanApiKey } from "./zcode/profileAuth.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts";
 import { isInstanceDraining as isDraining } from "../utils/drainStatus.ts";
+import { createHash } from "node:crypto";
+import { NativeZcodeHostClient } from "./zcode/nativeHostClient.ts";
+import { NativeZcodeSessionBridge, NativeSessionError } from "./zcode/nativeSession.ts";
+import { nativeZcodeHosts } from "./zcode/nativeHostManager.ts";
+
+import { normalizeZcodeResponseText } from "./zcode/responseText.ts";
+
+const nativeBridges = new Map<string, NativeZcodeSessionBridge>();
 
 const ZCODE_URL = "zcode://app-server/stdio";
 const ACCOUNT_PROVIDER_ID = "account:zai-individual-coding-plan";
@@ -23,6 +31,7 @@ const ACCOUNT_PROVIDER_ID = "account:zai-individual-coding-plan";
 // profile is not enabled, and the gateway transport reads its key.
 const BUILTIN_PROVIDER_ID = "builtin:zai-coding-plan";
 const DEFAULT_TURN_TIMEOUT_MS = 600_000;
+const NATIVE_FALLBACK_MAX_TOKENS = 128_000;
 const ZCODE_MODEL_ALLOWLIST = new Set(ZCODE_MODELS.map((model) => model.id));
 const DEFAULT_ZCODE_MODEL = ZCODE_MODELS[0]?.id || "glm-5.2";
 /**
@@ -46,6 +55,7 @@ type JsonRecord = Record<string, unknown>;
 type ZcodeCommand = { command: string; args: string[] };
 type ZcodeModelResolution = { ok: true; model: string } | { ok: false; error: string };
 export interface ZcodeExecutorOptions {
+  provider?: string;
   command?: string;
   args?: string[];
   cwd?: string;
@@ -77,9 +87,7 @@ function findNativeModelEntry(
   providerId?: string
 ): NativeModelEntry | null {
   const providers = asRecord(view).providers;
-  // An explicit pin selects exactly that profile. Otherwise prefer the Individual
-  // Plan account and fall back to the builtin Coding Plan profile; other profiles
-  // (Start Plan, custom providers) are never picked implicitly.
+  // Preserve the app-server's Individual account then builtin profile fallback.
   const allowed = providerId ? [providerId] : [ACCOUNT_PROVIDER_ID, BUILTIN_PROVIDER_ID];
   for (const id of allowed) {
     const provider = (Array.isArray(providers) ? providers : [])
@@ -107,8 +115,9 @@ export function resolveZcodeSelection(
 ): ZcodeTurnSelection {
   const found = findNativeModelEntry(view, model, providerId);
   if (!found) {
-    throw new Error(
-      `ZCode Coding Plan model "${model}" is not enabled in the native provider registry.`
+    throw new NativeSessionError(
+      `ZCode Coding Plan model "${model}" is not supported or not enabled in the native provider registry.`,
+      400
     );
   }
   const optionSpecs = asRecord(asRecord(found.record.config).optionSpecs);
@@ -309,6 +318,10 @@ function defaultCommand(): ZcodeCommand {
 }
 
 function completion(model: string, result: JsonRecord): JsonRecord {
+  const normalized = normalizeZcodeResponseText(
+    typeof result.text === "string" ? result.text : "",
+    typeof result.reasoning === "string" ? result.reasoning : ""
+  );
   const toolCalls = (Array.isArray(result.toolCalls) ? result.toolCalls : []).map((value) => {
     const call = asRecord(value);
     if (typeof call.id !== "string" || typeof call.name !== "string")
@@ -337,7 +350,8 @@ function completion(model: string, result: JsonRecord): JsonRecord {
         index: 0,
         message: {
           role: "assistant",
-          content: typeof result.text === "string" ? result.text : "",
+          content: normalized.content,
+          ...(normalized.reasoning ? { reasoning_content: normalized.reasoning } : {}),
           ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
         },
         finish_reason: finishReason,
@@ -347,7 +361,10 @@ function completion(model: string, result: JsonRecord): JsonRecord {
       prompt_tokens: promptTokens,
       completion_tokens: completionTokens,
       total_tokens: Number(nativeUsage.totalTokens ?? promptTokens + completionTokens),
-      prompt_tokens_details: { cached_tokens: Number(nativeUsage.cacheReadTokens || 0) },
+      prompt_tokens_details: {
+        cached_tokens: Number(nativeUsage.cacheReadTokens || 0),
+        cache_creation_tokens: Number(nativeUsage.cacheWriteTokens || 0),
+      },
       completion_tokens_details: { reasoning_tokens: Number(nativeUsage.reasoningTokens || 0) },
     },
   };
@@ -371,6 +388,7 @@ function modelResponse(model: string, result: JsonRecord, stream: boolean): Resp
           delta: {
             role: "assistant",
             content: message.content,
+            ...(message.reasoning_content ? { reasoning_content: message.reasoning_content } : {}),
             ...(toolCalls ? { tool_calls: toolCalls } : {}),
           },
           finish_reason: null,
@@ -423,7 +441,7 @@ function errorText(error: unknown): string {
  * (the transport-level "Request was cancelled." DOMException, the protocol's
  * own "ZCode RPC request canceled"), which are NOT model-request cancellations.
  */
-function isZcodeRequestCancelled(error: unknown): boolean {
+export function isZcodeRequestCancelled(error: unknown): boolean {
   if (errorText(error).trim() === ZCODE_REQUEST_CANCELLED_MESSAGE) return true;
   const nativeError = asRecord(error);
   const data = asRecord(nativeError.data);
@@ -549,15 +567,73 @@ function boundMaxOutputTokens(request: JsonRecord, nativeMaxTokens: number | und
   request.maxOutputTokens = Math.min(callerMax ?? nativeMaxTokens, nativeMaxTokens);
 }
 
-/** The configured ZCode transport, or null when ZCODE_TRANSPORT names neither. */
-function resolveZcodeTransport(): "gateway" | "app-server" | null {
-  const transport = (process.env.ZCODE_TRANSPORT || "app-server").trim().toLowerCase();
-  return transport === "gateway" || transport === "app-server" ? transport : null;
+/** Retain tool-call identities while reusing the validated message content. */
+function nativeCallerMessages(body: JsonRecord, request: JsonRecord) {
+  const preparedMessages = request.messages as JsonRecord[];
+  return (Array.isArray(body.messages) ? body.messages : []).map((value, index) => ({
+    ...asRecord(value),
+    content: preparedMessages[index].content,
+  }));
+}
+
+/** Bind session reuse to the caller's credential identity without storing the credential. */
+function nativeCallerIdentity(input: ExecuteInput): string {
+  const identity = Object.entries(input.clientHeaders || {})
+    .filter(([name]) => ["authorization", "x-api-key"].includes(name.toLowerCase()))
+    .map(([name, value]) => [name.toLowerCase(), value])
+    .sort();
+  return createHash("sha256").update(JSON.stringify(identity)).digest("hex");
+}
+
+async function prepareNativeCliProfile(serverRoot: string): Promise<void> {
+  // Configure the isolated CLI before materialization; the session bridge
+  // separately injects the internal caller-tools MCP server for Start.
+  const fs = await import("node:fs/promises");
+  const directory = join(serverRoot, "..", "cli");
+  const path = join(directory, "config.json");
+  await fs.mkdir(directory, { recursive: true, mode: 0o700 });
+  let current: JsonRecord = {};
+  try {
+    const value: unknown = JSON.parse(await fs.readFile(path, "utf8"));
+    if (!value || typeof value !== "object" || Array.isArray(value))
+      throw new Error("Invalid CLI config");
+    current = value as JsonRecord;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT")
+      throw new NativeSessionError("Native ZCode CLI profile is invalid", 503);
+  }
+  const profile = {
+    ...current,
+    features: { ...asRecord(current.features), mcp: false, subagent: false, memory: false },
+    mcp: { ...asRecord(current.mcp), servers: {} },
+    plugins: { ...asRecord(current.plugins), enabled: false },
+    hooks: { ...asRecord(current.hooks), enabled: false },
+  };
+  if (JSON.stringify(current) !== JSON.stringify(profile)) {
+    const temporary = await fs.mkdtemp(join(directory, ".omniroute-"));
+    try {
+      const staged = join(temporary, "config.json");
+      await fs.writeFile(staged, JSON.stringify(profile), { mode: 0o600, flag: "wx" });
+      await fs.rename(staged, path);
+    } finally {
+      await fs.rm(temporary, { recursive: true, force: true }).catch(() => undefined);
+    }
+  }
+  const saved = asRecord(JSON.parse(await fs.readFile(path, "utf8")));
+  const features = asRecord(saved.features);
+  if (
+    ["mcp", "subagent", "memory"].some((key) => features[key] !== false) ||
+    asRecord(saved.plugins).enabled !== false ||
+    asRecord(saved.hooks).enabled !== false ||
+    JSON.stringify(asRecord(saved.mcp).servers) !== "{}"
+  )
+    throw new NativeSessionError("Native ZCode simple profile readback failed", 503);
 }
 
 export class ZcodeExecutor extends BaseExecutor {
   constructor(private readonly options: ZcodeExecutorOptions = {}) {
-    super("zcode", { id: "zcode", baseUrl: ZCODE_URL, format: "openai" });
+    const provider = options.provider || "zcode";
+    super(provider, { id: provider, baseUrl: ZCODE_URL, format: "openai" });
   }
   buildUrl(): string {
     return ZCODE_URL;
@@ -566,49 +642,244 @@ export class ZcodeExecutor extends BaseExecutor {
     return null;
   }
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
+    if (
+      input.credentials.accessToken &&
+      input.credentials.connectionId !== "noauth" &&
+      input.credentials.authType !== "oauth"
+    )
+      return errorResponse(401, "The selected ZCode account needs a complete OAuth login");
     const resolution = resolveZcodeModel(input.model);
     if (!resolution.ok)
       return errorResponse(400, "error" in resolution ? resolution.error : "Invalid ZCode model");
-    const transport = resolveZcodeTransport();
-    if (!transport) return errorResponse(400, "Invalid ZCODE_TRANSPORT");
+    const transport = (
+      input.credentials.authType === "oauth"
+        ? "native-host"
+        : process.env.ZCODE_TRANSPORT || "app-server"
+    )
+      .trim()
+      .toLowerCase();
+    if (!["gateway", "app-server", "native-host"].includes(transport))
+      return errorResponse(400, "Invalid ZCODE_TRANSPORT");
     let request: JsonRecord;
     try {
       request = await prepareZcodeRequest(input.body, resolution.model, input.signal);
     } catch (error) {
       return errorResponse(400, sanitizeErrorMessage(errorText(error)));
     }
+    if (transport === "native-host") return this.executeNative(input, resolution.model, request);
     if (transport === "gateway") return this.executeGateway(input, resolution.model, request);
     return this.executeAppServer(input, resolution.model, request);
   }
-  // Opt-in direct HTTP transport: only the Individual Coding Plan credential.
-  private async executeGateway(
+
+  /** Reuse a native session bridge only within the same account host. */
+  private nativeBridge(serverRoot: string): NativeZcodeSessionBridge {
+    let bridge = nativeBridges.get(serverRoot);
+    if (!bridge) {
+      bridge = new NativeZcodeSessionBridge({
+        clientFactory: () => new NativeZcodeHostClient({ serverRoot }),
+        workspaceRoot: join(serverRoot, "caller-workspaces"),
+        reuseWorkspaces: true,
+        timeoutMs: this.turnTimeoutMs(),
+      });
+      nativeBridges.set(serverRoot, bridge);
+    }
+    return bridge;
+  }
+
+  /** Run one buffered native step; caller tools stay outside the native host. */
+  private async executeNative(
     input: ExecuteInput,
     model: string,
     request: JsonRecord
   ): Promise<ExecutorExecuteResult> {
-    const providerId =
-      this.options.providerId || process.env.ZCODE_PROVIDER_ID || ACCOUNT_PROVIDER_ID;
-    if (providerId !== ACCOUNT_PROVIDER_ID && providerId !== BUILTIN_PROVIDER_ID) {
-      return errorResponse(
-        503,
-        "Direct ZCode streaming currently requires the Individual Coding Plan; Start Plan needs its official host runtime-auth callback."
-      );
-    }
-    let apiKey: string;
+    const individual = this.options.provider?.endsWith("individual") === true;
+    if (
+      individual &&
+      (request.messages as JsonRecord[]).some((message) => typeof message.content !== "string")
+    )
+      return errorResponse(400, "Native ZCode text requests require text messages");
+    const deadline = Date.now() + this.turnTimeoutMs();
+    const controller = new AbortController();
+    const onAbort = () => controller.abort(new NativeSessionError("ZCode request cancelled", 499));
+    const timer = setTimeout(
+      () => controller.abort(new NativeSessionError("ZCode native request timed out", 504)),
+      Math.max(1, deadline - Date.now())
+    );
+    input.signal?.addEventListener("abort", onAbort, { once: true });
+    if (input.signal?.aborted) onAbort();
+    const budget = () => ({
+      timeoutMs: Math.max(1, deadline - Date.now()),
+      signal: controller.signal,
+    });
+    // Capture cancellation only while an operation is actually awaited. A
+    // later cleanup abort cannot replace a quota/error or a completed answer.
+    const waitNative = async <T>(operation: () => Promise<T>): Promise<T> => {
+      controller.signal.throwIfAborted();
+      let listener: () => void;
+      const aborted = new Promise<never>((_resolve, reject) => {
+        listener = () => reject(controller.signal.reason);
+        controller.signal.addEventListener("abort", listener, { once: true });
+      });
+      try {
+        return await Promise.race([operation(), aborted]);
+      } finally {
+        controller.signal.removeEventListener("abort", listener!);
+      }
+    };
+    let client: NativeZcodeHostClient | undefined;
+    let modelRequestStarted = false;
     try {
-      apiKey = await readZcodeIndividualCodingPlanApiKey(providerId);
+      // The suffix selects only the local runtime profile. Billing and the
+      // coding-session caller scope keep the original connection identity.
+      const originalConnectionId = input.credentials.connectionId;
+      const oauth = asRecord(input.credentials).authType === "oauth";
+      const credentials =
+        oauth && originalConnectionId
+          ? {
+              ...input.credentials,
+              connectionId: `${originalConnectionId}:${individual ? "plain-individual" : "plain-start"}`,
+            }
+          : input.credentials;
+      let serverRoot: string;
+      if (oauth)
+        serverRoot = await waitNative(() =>
+          nativeZcodeHosts.ensure(credentials, input.onCredentialsRefreshed)
+        );
+      else {
+        if (
+          !process.env.ZCODE_NATIVE_SERVER_ROOT ||
+          process.env.ZCODE_NATIVE_CONNECTION_ID !== (originalConnectionId || "noauth")
+        )
+          return errorResponse(503, "No native ZCode host is assigned to this account");
+        serverRoot = process.env.ZCODE_NATIVE_SERVER_ROOT;
+      }
+      await waitNative(() => prepareNativeCliProfile(serverRoot));
+      const workspacePath = join(serverRoot, "model-workspace");
+      if (individual)
+        await waitNative(async () => {
+          const fs = await import("node:fs/promises");
+          await fs.mkdir(workspacePath, { recursive: true, mode: 0o700 });
+        });
+      const clientFactory = () => new NativeZcodeHostClient({ serverRoot });
+      const nativeClient = clientFactory();
+      client = nativeClient;
+      const body = asRecord(input.body);
+      await waitNative(() => nativeClient.start(budget()));
+      const view = await waitNative(() =>
+        nativeClient.call("model-selection", "getView", [], budget())
+      );
+      const providerId = individual
+        ? "account:zai-individual-coding-plan"
+        : "account:zai-start-plan";
+      const family = input.credentials.providerSpecificData?.family;
+      const selection = resolveZcodeSelection(
+        view,
+        model,
+        family === "bigmodel" ? providerId.replace("zai", "bigmodel") : providerId
+      );
+      if (individual) {
+        boundMaxOutputTokens(
+          request,
+          resolveZcodeMaxTokens(view, model, selection.providerId) ?? NATIVE_FALLBACK_MAX_TOKENS
+        );
+        const result = await waitNative(() => {
+          modelRequestStarted = true;
+          return nativeClient.call(
+            "zcode-agent",
+            "generateWorkspaceText",
+            [
+              {
+                workspacePath,
+                workspaceIdentity: workspacePath,
+                selection,
+                ...request,
+                querySource: "omniroute",
+                requestTimeoutMs: budget().timeoutMs,
+              },
+            ],
+            budget()
+          );
+        });
+        return {
+          response: modelResponse(model, asRecord(result), Boolean(input.stream)),
+          url: "zcode://native-host/model",
+          headers: {},
+          transformedBody: body,
+          transport: "local-zcode-model",
+        };
+      }
+      const sessionBridge = this.nativeBridge(serverRoot);
+      const messages = nativeCallerMessages(body, request);
+      if (
+        messages.some((message) => typeof message.content !== "string" && message.content != null)
+      )
+        return errorResponse(400, "Native ZCode sessions currently require text messages");
+      const caller = nativeCallerIdentity(input);
+      const connectionId = input.credentials.connectionId || "noauth";
+      // The bridge owns generation cancellation and preserves an answer while
+      // finishing cleanup. End the preflight timer before handing it control.
+      controller.signal.throwIfAborted();
+      clearTimeout(timer);
+      input.signal?.removeEventListener("abort", onAbort);
+      const result = await sessionBridge.execute({
+        scope: `${connectionId}:${selection.providerId}:${selection.modelId}:${caller}`,
+        selection,
+        messages,
+        tools: request.tools as Array<{
+          name: string;
+          description?: string;
+          inputSchema: JsonRecord;
+        }>,
+        signal: input.signal,
+        deadline,
+      });
+      return {
+        response: modelResponse(model, result, Boolean(input.stream)),
+        url: "zcode://native-host/session",
+        headers: {},
+        transformedBody: body,
+        transport: "local-zcode-session",
+      };
     } catch (error) {
-      input.log?.warn?.(
-        "ZCODE_GATEWAY",
-        error instanceof Error ? error.name : "Profile credential unavailable"
-      );
+      const message = sanitizeErrorMessage(errorText(error));
+      const nativeError = asRecord(error);
+      if (individual && modelRequestStarted && nativeError.providerReason === "unusual_activity")
+        return errorResponse(
+          502,
+          "ZCode text-generation request context was rejected by upstream",
+          {
+            type: "upstream_response_failed",
+            code: "upstream_response_failed",
+          }
+        );
+      if (
+        individual &&
+        (isZcodeRequestCancelled(error) ||
+          isZcodeRequestCancelled({ code: nativeError.providerCode }))
+      )
+        return errorResponse(502, message, {
+          type: UPSTREAM_REQUEST_CANCELLED_CODE,
+          code: UPSTREAM_REQUEST_CANCELLED_CODE,
+        });
+      const quotaCode = nativeError.providerCode ?? nativeError.code;
+      if (modelRequestStarted && (quotaCode === 1310 || quotaCode === "1310"))
+        return errorResponse(429, message, {
+          type: "rate_limit_error",
+          code: "insufficient_quota",
+          reason: "quota_exhausted",
+        });
       return errorResponse(
-        401,
-        "The selected Individual Coding Plan credential is unavailable or its local config is not safely readable."
+        error instanceof NativeSessionError ? error.status : client ? 502 : 503,
+        message
       );
+    } finally {
+      await client?.close().catch(() => undefined);
+      clearTimeout(timer);
+      input.signal?.removeEventListener("abort", onAbort);
     }
-    return executeZcodeGateway({ ...input, model }, request, { apiKey });
   }
+
+  /** Preserve the legacy app-server inference and scoped quota error handling. */
   private async executeAppServer(
     input: ExecuteInput,
     model: string,
@@ -654,7 +925,7 @@ export class ZcodeExecutor extends BaseExecutor {
         url: ZCODE_URL,
         headers: {},
         transformedBody: {
-          model,
+          model: model,
           buffered: true,
           tools: (request.tools as unknown[]).length,
         },
@@ -672,6 +943,35 @@ export class ZcodeExecutor extends BaseExecutor {
     } finally {
       await client.close().catch(() => undefined);
     }
+  }
+  // Opt-in direct HTTP transport: only the Individual Coding Plan credential.
+  private async executeGateway(
+    input: ExecuteInput,
+    model: string,
+    request: JsonRecord
+  ): Promise<ExecutorExecuteResult> {
+    const providerId =
+      this.options.providerId || process.env.ZCODE_PROVIDER_ID || ACCOUNT_PROVIDER_ID;
+    if (providerId !== ACCOUNT_PROVIDER_ID && providerId !== BUILTIN_PROVIDER_ID) {
+      return errorResponse(
+        503,
+        "Direct ZCode streaming currently requires the Individual Coding Plan; Start Plan needs its official host runtime-auth callback."
+      );
+    }
+    let apiKey: string;
+    try {
+      apiKey = await readZcodeIndividualCodingPlanApiKey(providerId);
+    } catch (error) {
+      input.log?.warn?.(
+        "ZCODE_GATEWAY",
+        error instanceof Error ? error.name : "Profile credential unavailable"
+      );
+      return errorResponse(
+        401,
+        "The selected Individual Coding Plan credential is unavailable or its local config is not safely readable."
+      );
+    }
+    return executeZcodeGateway({ ...input, model }, request, { apiKey });
   }
   // The signed-in account can hydrate after initialize while custom providers
   // are already ready. Wait for the exact model; never substitute a provider.

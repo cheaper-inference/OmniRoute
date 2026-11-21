@@ -62,6 +62,46 @@ test("ZCode waits for the signed-in provider to finish native registry hydration
   assert.equal(views, 2);
 });
 
+test("ZCode fails closed when an explicitly pinned provider registry is unavailable", async () => {
+  const { ZcodeExecutor } = await import("../../open-sse/executors/zcode.ts");
+  const executor = new ZcodeExecutor({
+    providerId: "builtin:zai-start-plan",
+    clientFactory: () => ({
+      async start() {},
+      async close() {},
+      async call() {
+        throw new Error("registry unavailable");
+      },
+    }),
+  });
+  const result = await executor.execute({
+    model: "glm-5.3-flash",
+    body: { messages: [{ role: "user", content: "hi" }] },
+    credentials: {},
+    stream: false,
+  });
+  assert.equal(("response" in result ? result.response : result).status, 502);
+});
+
+test("ZCode never substitutes the local account for a selected OAuth connection", async () => {
+  const { ZcodeExecutor } = await loadZcodeExecutor();
+  let started = false;
+  const executor = new ZcodeExecutor({
+    clientFactory: () => {
+      started = true;
+      throw new Error("must not use local account");
+    },
+  });
+  const result = await executor.execute({
+    model: "glm-5.3-flash",
+    body: requestBody(),
+    stream: false,
+    credentials: { accessToken: "synthetic-oauth", connectionId: "account-1" },
+  });
+  assert.equal(("response" in result ? result.response : result).status, 401);
+  assert.equal(started, false);
+});
+
 /** Live-shaped registry view: optionSpecs carry the native maxOutputTokens bound. */
 function boundedSelectionView() {
   return {
