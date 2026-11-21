@@ -22,7 +22,7 @@ import { NextResponse } from "next/server";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { GroupRenameSchema } from "@/shared/schemas/quota";
-import { renameGroup, deleteGroup, getGroup } from "@/lib/db/quotaGroups";
+import { getQuotaGroupRepository } from "@/lib/db/quotaGroups";
 import { getPoolsByGroup } from "@/lib/db/quotaPools";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +41,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       return NextResponse.json(buildErrorBody(400, parsed.error.message), { status: 400 });
     }
 
-    const updated = renameGroup(id, parsed.data.name);
+    const updated = await getQuotaGroupRepository().rename(id, parsed.data.name);
     if (!updated) {
       return NextResponse.json(buildErrorBody(404, "Group not found"), { status: 404 });
     }
@@ -60,7 +60,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       }
     }
 
-    const group = getGroup(id);
+    const group = await getQuotaGroupRepository().findById(id);
     return NextResponse.json({ group });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to rename group";
@@ -76,7 +76,7 @@ export async function DELETE(request: Request, { params }: RouteParams): Promise
     const { id } = await params;
     let existed: boolean;
     try {
-      existed = deleteGroup(id);
+      existed = await getQuotaGroupRepository().deleteById(id);
     } catch (err) {
       // deleteGroup throws when the group is protected ('group-demo') or when
       // pools still reference it — both map to 409 Conflict.
