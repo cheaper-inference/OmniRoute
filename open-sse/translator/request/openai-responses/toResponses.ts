@@ -516,7 +516,8 @@ export function openaiToOpenAIResponsesRequest(
           type: "function",
           name,
           description: toString(fn.description),
-          parameters: fn.parameters,
+          // Responses requires `parameters`; Chat lets a zero-argument tool omit it.
+          parameters: fn.parameters ?? { type: "object", properties: {} },
           // Omitted strict is non-strict on Chat but strict-normalized on Responses.
           strict: chatStrictForResponses(fn),
           ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"
