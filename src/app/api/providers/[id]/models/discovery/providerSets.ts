@@ -1,5 +1,6 @@
 export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   "modal",
+  "infomaniak",
   "reka",
   "empower",
   "nous-research",

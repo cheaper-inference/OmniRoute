@@ -7,6 +7,7 @@ import { CODEX_ULTRAFAST_MODEL_LABEL } from "@/lib/providers/codexServiceTierMod
 // (AddApiKeyModal / EditConnectionModal) out of the god-component in later phases.
 import { LOCAL_PROVIDERS, isSelfHostedChatProvider } from "@/shared/constants/providers";
 import { MODAL_DEFAULT_VALIDATION_MODEL_ID } from "@/shared/constants/modal";
+import { INFOMANIAK_BASE_URL_EXAMPLE } from "@/shared/constants/infomaniak";
 import {
   MODEL_COMPAT_PROTOCOL_KEYS,
   type ModelCompatProtocolKey,
@@ -353,6 +354,8 @@ export const CONFIGURABLE_BASE_URL_PROVIDERS = new Set([
   // the international apihub.agnes-ai.com default. Same always-on field as
   // #7447 Kimi/Moonshot so Add-connection can point at api.agnes-ai.cn.
   "agnes",
+  // Infomaniak AI Tools: the endpoint path carries the account's product id.
+  "infomaniak",
 ]);
 
 export const DEFAULT_PROVIDER_BASE_URLS: Record<string, string> = {
@@ -474,6 +477,7 @@ const BUILTIN_BASE_URL_PLACEHOLDER_EXAMPLES: Readonly<Record<string, string>> = 
   agnes: "https://api.agnes-ai.cn/v1",
   // #12704 — shows the Modal app URL shape the validator demands.
   modal: "https://<workspace>--<app>.modal.run/v1",
+  infomaniak: INFOMANIAK_BASE_URL_EXAMPLE,
 };
 
 // These ids have no literal example: the placeholder is their configured default URL.

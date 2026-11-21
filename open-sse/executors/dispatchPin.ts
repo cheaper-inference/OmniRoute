@@ -5,6 +5,7 @@ import {
 } from "@/shared/network/outboundUrlGuard";
 import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { getGuardedDispatcher } from "../utils/connectGuardDispatcher.ts";
+import { REDIRECT_STATUSES, redirectHopOptions } from "../utils/redirectHop.ts";
 import {
   hasAmbientProxyContext,
   isDirectFetchContext,
@@ -110,35 +111,7 @@ function dispatchOnce(
   return fetch(url, { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit);
 }
 
-const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
-const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret/i;
-const BODY_HEADERS = ["content-type", "content-length", "content-encoding", "content-language"];
-
-/** Request options for the next hop: drops credentials across origins, applies Fetch method rules. */
-function redirectHopOptions(
-  options: RequestInit,
-  status: number,
-  fromUrl: string,
-  toUrl: string
-): RequestInit {
-  const headers = new Headers(options.headers);
-  if (new URL(toUrl).origin !== new URL(fromUrl).origin) {
-    for (const name of [...headers.keys()]) {
-      if (CREDENTIAL_HEADER.test(name)) headers.delete(name);
-    }
-  }
-  const method = (options.method || "GET").toUpperCase();
-  const switchesToGet = status === 303 ? method !== "HEAD" : status <= 302 && method === "POST";
-  if (!switchesToGet) return { ...options, headers: Object.fromEntries(headers.entries()) };
-  for (const name of BODY_HEADERS) headers.delete(name);
-  return {
-    ...options,
-    method: "GET",
-    body: undefined,
-    headers: Object.fromEntries(headers.entries()),
-  };
-}
 
 /**
  * Follows redirects by hand: an auto-followed redirect would reach a Location target

@@ -110,7 +110,9 @@ Deno.serve(async (request) => {
     "proxy-authenticate", "proxy-authorization", "transfer-encoding", "te", "trailer", "upgrade",
     "x-relay-target", "x-relay-path", "x-relay-auth",
   ].forEach(h => headers.delete(h));
-  const init = { method: request.method, headers };
+  // manual: hand a 3xx back to OmniRoute, whose dispatch policy (guards, redirect: "error")
+  // decides; a followed 307/308 would re-send the body, even to an http:// target.
+  const init = { method: request.method, headers, redirect: "manual" };
   if (request.method !== "GET" && request.method !== "HEAD") {
     init.body = request.body;
     init.duplex = "half";
