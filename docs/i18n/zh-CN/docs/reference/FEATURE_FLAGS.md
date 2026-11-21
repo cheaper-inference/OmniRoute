@@ -39,24 +39,25 @@
 
 ## 标志目录
 
-6 个类别共 126 个标志。**默认值**是定义默认值 — 在不存在数据库覆盖值或环境变量时使用的值。
+6 个类别共 127 个标志。**默认值**是定义默认值 — 在不存在数据库覆盖值或环境变量时使用的值。
 
-### 安全性（12）
+### 安全性（13）
 
-| Key                                     | Type    | Default  | Description                                                                                                                                                                                                   |
-| --------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REQUIRE_API_KEY`                       | boolean | `false`  | 要求所有传入请求提供 API 密钥。                                                                                                                                                                               |
-| `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | 为所有请求启用输入清理。                                                                                                                                                                                      |
-| `INJECTION_GUARD_MODE`                  | enum    | `off`    | 提示注入防护模式。取值：`off`、`warn`、`block`、`redact`。                                                                                                                                                    |
-| `PII_REDACTION_ENABLED`                 | boolean | `false`  | 从请求中删除个人身份信息（独立于 `INPUT_SANITIZER_MODE`）。                                                                                                                                                   |
-| `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | 清理提供者响应中的个人身份信息。                                                                                                                                                                              |
-| `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | 个人身份信息响应清理模式。取值：`redact`、`warn`、`block`、`off`。                                                                                                                                            |
-| `PII_REVERSIBLE_VAULT_ENABLED`          | boolean | `false`  | 可逆个人身份信息保险库：启用 `PII_REDACTION_ENABLED` 后，请求中的个人身份信息会变为按请求生成的替代令牌，而不是占位符，并且 2xx 响应（SSE 和 JSON）会恢复为原始内容。                                         |
-| `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | 旧版别名：此标志的控制面板开关所保存的值会在环境变量之前读取；在任一位置设置为 `false`、`0`、`no` 或 `off`，都会关闭出站 URL 防护的主机检查，效果与 `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 相同。            |
-| `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | 允许经过身份验证的控制面板用户显示已存储的 API 密钥，而不是只能看到掩码后的值。                                                                                                                               |
-| `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | 在 AUTH 日志行中包含账户前缀（例如“使用 <provider> 账户：abc12345...”）。默认禁用，以便从共享/多租户进程日志中删除账户标识符。独立于调试模式；切换调试模式不会显示此信息。                                    |
-| `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | 启用 OIDC 后，禁用密码登录，使用户只能通过 OIDC 单点登录进行身份验证。禁用时（默认），密码登录和 OIDC 均可用。                                                                                                |
-| `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | 在成功读取 API 密钥元数据和发现信息时写入的 `api_key.auth.touch` 审计日志行中记录调用方的 IP 地址和用户代理（#17982）。默认关闭：这些日志行仍会记录使用了哪个密钥、时间以及访问路径，但不记录 IP 或用户代理。 |
+| Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`                       | boolean | `false`  | 要求所有传入请求提供 API 密钥。                                                                                                                                                                                                                                                                                                                                  |
+| `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | 为所有请求启用输入清理。                                                                                                                                                                                                                                                                                                                                         |
+| `INJECTION_GUARD_MODE`                  | enum    | `off`    | 提示注入防护模式。取值：`off`、`warn`、`block`、`redact`。                                                                                                                                                                                                                                                                                                       |
+| `PII_REDACTION_ENABLED`                 | boolean | `false`  | 从请求中删除个人身份信息（独立于 `INPUT_SANITIZER_MODE`）。                                                                                                                                                                                                                                                                                                      |
+| `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | 清理提供者响应中的个人身份信息。                                                                                                                                                                                                                                                                                                                                 |
+| `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | 个人身份信息响应清理模式。取值：`redact`、`warn`、`block`、`off`。                                                                                                                                                                                                                                                                                               |
+| `PII_REVERSIBLE_VAULT_ENABLED`          | boolean | `false`  | 可逆个人身份信息保险库：启用 `PII_REDACTION_ENABLED` 后，请求中的个人身份信息会变为按请求生成的替代令牌，而不是占位符，并且 2xx 响应（SSE 和 JSON）会恢复为原始内容。                                                                                                                                                                                            |
+| `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | 旧版别名：此标志的控制面板开关所保存的值会在环境变量之前读取；在任一位置设置为 `false`、`0`、`no` 或 `off`，都会关闭出站 URL 防护的主机检查，效果与 `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 相同。                                                                                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | 允许经过身份验证的控制面板用户显示已存储的 API 密钥，而不是只能看到掩码后的值。                                                                                                                                                                                                                                                                                  |
+| `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | 在 AUTH 日志行中包含账户前缀（例如“使用 <provider> 账户：abc12345...”）。默认禁用，以便从共享/多租户进程日志中删除账户标识符。独立于调试模式；切换调试模式不会显示此信息。                                                                                                                                                                                       |
+| `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | 启用 OIDC 后，禁用密码登录，使用户只能通过 OIDC 单点登录进行身份验证。禁用时（默认），密码登录和 OIDC 均可用。                                                                                                                                                                                                                                                   |
+| `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | 在成功读取 API 密钥元数据和发现信息时写入的 `api_key.auth.touch` 审计日志行中记录调用方的 IP 地址和用户代理（#17982）。默认关闭：这些日志行仍会记录使用了哪个密钥、时间以及访问路径，但不记录 IP 或用户代理。                                                                                                                                                    |
+| `PLUGIN_PERMISSION_MODEL_ENABLED`       | boolean | `false`  | 在Node.js权限模型下运行每个插件进程，源自其清单声明的权限：文件读取仅限于插件目录（加上`file-read`或`file-write`的数据目录），文件仅使用`file-write`写入插件数据目录，仅使用`exec`子进程，并且没有工作线程、本机插件或WASI。网络访问不受限制。适用于更改后激活的插件。参见[`PLUGIN_SDK.md`](../frameworks/PLUGIN_SDK.md#%E6%9D%83%E9%99%90%E7%B3%BB%E7%BB%9F) 。 |
 
 ### 网络（32）
 
@@ -275,10 +276,10 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... 所有 126 个标志
+    // ... 所有 127 个标志
   ],
   "summary": {
-    "total": 126,
+    "total": 127,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

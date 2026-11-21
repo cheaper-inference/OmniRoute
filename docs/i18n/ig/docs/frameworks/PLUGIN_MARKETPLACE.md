@@ -214,7 +214,7 @@ URL nke na-ada n'ụdị ọ bụla anaghị ewepụ arịrịọ — ebe a na-e
 
 ### Mwepu ngwa mgbakwunye
 
-> **A naghị etinye ihe nrụnye n'ájá.** Nwatakịrị bụ usoro Node.js nkịtị na-agba ọsọ dị ka onye ọrụ OmniRoute, na-enweghị ọnọdụ VM na enweghị ọkọlọtọ ikike Node.js, yabụ ngwa mgbakwunye koodu nwere ike ịgụ ma dee faịlụ ọ bụla onye ọrụ nwere ike, mee mmemme wee rute netwọkụ. `requires.permissions` na-ekpebi naanị ụdị mgbanwe gburugburu ebe nwa na-enweta; A naghị etinye ikike ndị ọzọ. Wụnye naanị plugins ị tụkwasịrị obi. Oke usoro dị n'okpuru nwere mkpọka na kpọgidere; ọ bughi ókè-ala nche.
+> **Ejighi ndabara tinye ihe mgbakwunye.** Nwatakịrị bụ usoro Node.js nkịtị na-agba ọsọ dị ka onye ọrụ OmniRoute, na-enweghị ọnọdụ VM na enweghị ọkọlọtọ ikike Node.js, yabụ ngwa mgbakwunye koodu nwere ike ịgụ ma dee faịlụ ọ bụla onye ọrụ nwere ike, mee mmemme wee rute netwọkụ. `requires.permissions` na-ekpebi naanị ụdị mgbanwe gburugburu ebe nwa na-enweta; A naghị etinye ikike ndị ọzọ. Ọkọlọtọ Nwepu-na `PLUGIN_PERMISSION_MODEL_ENABLED` (gbanyụọ na ndabara) na-agba ngwa mgbakwunye ọ bụla n'okpuru ụdị ikike Node.js wuru site na ikike ndị ahụ, ewezuga `network`, nke Node.js enweghị ike igbochi (lee [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#sistem%E1%BB%A5-ikike) ). Wụnye naanị plugins ị tụkwasịrị obi. Oke usoro dị n'okpuru nwere mkpọka na kpọgidere; ọ bughi ókè-ala nche.
 
 - **Kewapụ usoro** — `loadPlugin()` (`src/lib/plugins/loader.ts`) na-ewepụta ngwa mgbakwunye ọ bụla na usoro Node.js nwa dị iche ma na-ekwurịta okwu n'elu IPC. Oku nko nwere oge nkwụsị na mmụba `SIGTERM` → `SIGKILL`.
 - **Ndepụta ikike Env** — nwa ahụ na-enweta naanị ndenye aha aha nke mgbanwe gburugburu ebe obibi; A na-enye ntọala sara mbara naanị mgbe ihe ngosi ahụ rịọrọ ikike `env`.

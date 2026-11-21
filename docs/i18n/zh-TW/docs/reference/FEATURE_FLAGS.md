@@ -43,24 +43,25 @@
 
 ## 旗標目錄
 
-分為 6 個類別的 126 個旗標。**預設值**是定義中的預設值 — 在不存在 DB 覆寫值或環境變數時使用的值。
+分為 6 個類別的 127 個旗標。**預設值**是定義中的預設值 — 在不存在 DB 覆寫值或環境變數時使用的值。
 
-### 安全性 (12)
+### 安全性 (13)
 
-| Key                                     | Type    | Default  | Description                                                                                                                                                                                                           |
-| --------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REQUIRE_API_KEY`                       | boolean | `false`  | 要求所有傳入要求都提供 API 金鑰。                                                                                                                                                                                     |
-| `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | 啟用所有要求的輸入清理。                                                                                                                                                                                              |
-| `INJECTION_GUARD_MODE`                  | enum    | `off`    | 提示注入防護模式。值：`off`、`warn`、`block`、`redact`。                                                                                                                                                              |
-| `PII_REDACTION_ENABLED`                 | boolean | `false`  | 從要求中移除個人識別資訊（獨立於 `INPUT_SANITIZER_MODE`）。                                                                                                                                                           |
-| `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | 清理提供者回應中的個人識別資訊。                                                                                                                                                                                      |
-| `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | 個人識別資訊回應清理模式。值：`redact`、`warn`、`block`、`off`。                                                                                                                                                      |
-| `PII_REVERSIBLE_VAULT_ENABLED`          | boolean | `false`  | 可逆個人識別資訊保存庫：啟用 `PII_REDACTION_ENABLED` 後，要求中的個人識別資訊會變成每個要求專用的替代權杖，而不是預留位置；2xx 回應（SSE 和 JSON）則會還原為原始內容。                                                |
-| `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | 舊版別名：此旗標儀表板切換按鈕中儲存的值會優先於環境變數讀取；任一方設定為 `false`、`0`、`no` 或 `off` 時，都會關閉輸出 URL 防護的主機檢查，效果同 `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`。                          |
-| `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | 允許已驗證的儀表板使用者顯示已儲存的 API 金鑰，而不只是查看遮罩值。                                                                                                                                                   |
-| `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | 在 AUTH 記錄行中包含帳戶前綴（例如「Using <provider> account: abc12345...」）。預設停用，以便從共用／多租戶處理程序記錄中移除帳戶識別碼。此設定獨立於偵錯模式；切換偵錯模式不會顯示此資訊。                           |
-| `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | 啟用 OIDC 時，停用密碼登入，讓使用者只能透過 OIDC 單一登入進行驗證。停用時（預設），密碼登入和 OIDC 皆可使用。                                                                                                        |
-| `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | 在成功的 API 金鑰中繼資料和探索讀取（#17982）所寫入的 `api_key.auth.touch` 稽核記錄列中，記錄呼叫者的 IP 位址和使用者代理程式。預設為關閉：這些記錄仍會記錄使用了哪個金鑰、時間及路徑，但不包含 IP 或使用者代理程式。 |
+| Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`                       | boolean | `false`  | 要求所有傳入要求都提供 API 金鑰。                                                                                                                                                                                                                                                                                                                                |
+| `INPUT_SANITIZER_ENABLED`               | boolean | `true`   | 啟用所有要求的輸入清理。                                                                                                                                                                                                                                                                                                                                         |
+| `INJECTION_GUARD_MODE`                  | enum    | `off`    | 提示注入防護模式。值：`off`、`warn`、`block`、`redact`。                                                                                                                                                                                                                                                                                                         |
+| `PII_REDACTION_ENABLED`                 | boolean | `false`  | 從要求中移除個人識別資訊（獨立於 `INPUT_SANITIZER_MODE`）。                                                                                                                                                                                                                                                                                                      |
+| `PII_RESPONSE_SANITIZATION`             | boolean | `false`  | 清理提供者回應中的個人識別資訊。                                                                                                                                                                                                                                                                                                                                 |
+| `PII_RESPONSE_SANITIZATION_MODE`        | enum    | `redact` | 個人識別資訊回應清理模式。值：`redact`、`warn`、`block`、`off`。                                                                                                                                                                                                                                                                                                 |
+| `PII_REVERSIBLE_VAULT_ENABLED`          | boolean | `false`  | 可逆個人識別資訊保存庫：啟用 `PII_REDACTION_ENABLED` 後，要求中的個人識別資訊會變成每個要求專用的替代權杖，而不是預留位置；2xx 回應（SSE 和 JSON）則會還原為原始內容。                                                                                                                                                                                           |
+| `OUTBOUND_SSRF_GUARD_ENABLED`           | boolean | `true`   | 舊版別名：此旗標儀表板切換按鈕中儲存的值會優先於環境變數讀取；任一方設定為 `false`、`0`、`no` 或 `off` 時，都會關閉輸出 URL 防護的主機檢查，效果同 `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`。                                                                                                                                                                     |
+| `ALLOW_API_KEY_REVEAL`                  | boolean | `false`  | 允許已驗證的儀表板使用者顯示已儲存的 API 金鑰，而不只是查看遮罩值。                                                                                                                                                                                                                                                                                              |
+| `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | 在 AUTH 記錄行中包含帳戶前綴（例如「Using <provider> account: abc12345...」）。預設停用，以便從共用／多租戶處理程序記錄中移除帳戶識別碼。此設定獨立於偵錯模式；切換偵錯模式不會顯示此資訊。                                                                                                                                                                      |
+| `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | 啟用 OIDC 時，停用密碼登入，讓使用者只能透過 OIDC 單一登入進行驗證。停用時（預設），密碼登入和 OIDC 皆可使用。                                                                                                                                                                                                                                                   |
+| `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | 在成功的 API 金鑰中繼資料和探索讀取（#17982）所寫入的 `api_key.auth.touch` 稽核記錄列中，記錄呼叫者的 IP 位址和使用者代理程式。預設為關閉：這些記錄仍會記錄使用了哪個金鑰、時間及路徑，但不包含 IP 或使用者代理程式。                                                                                                                                            |
+| `PLUGIN_PERMISSION_MODEL_ENABLED`       | boolean | `false`  | 在Node.js權限模型下運行每個插件進程，源自其清單聲明的權限：檔案讀取僅限於插件目錄（加上`file-read`或`file-write`的資料目錄），檔案僅使用`file-write`寫入插件資料目錄，僅使用`exec`子進程，並且沒有工作線程、本機插件或WASI。網路存取不受限制。適用於更改後啟用的插件。參見[`PLUGIN_SDK.md`](../frameworks/PLUGIN_SDK.md#%E6%AC%8A%E9%99%90%E7%B3%BB%E7%B5%B1) 。 |
 
 ### 網路 (32)
 
@@ -278,10 +279,10 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... 所有 126 個旗標
+    // ... 所有 127 個旗標
   ],
   "summary": {
-    "total": 126,
+    "total": 127,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -143,16 +143,26 @@ onRequest: (ctx) => {
 
 ## 權限系統
 
-插件有**未沙盒化**。每個活動插件在與OmniRoute相同的作業系統使用者下作為單獨的普通Node.js子程序（ `src/lib/plugins/loader.ts`中的`loadPlugin()` ）運行，沒有VM上下文，也沒有Node.js權限標誌。插件程式碼可以使用`node:fs`、 `node:child_process`、 `fetch`和其他Node.js API：它可以讀寫OmniRoute用戶可以存取的任何檔案（包括資料目錄）、運行程式並存取網路。
+預設插件是**未沙盒化**。每個活動插件在與OmniRoute相同的作業系統使用者下作為單獨的普通Node.js子程序（ `src/lib/plugins/loader.ts`中的`loadPlugin()` ）運行，沒有VM上下文，也沒有Node.js權限標誌。插件程式碼可以使用`node:fs`、 `node:child_process`、 `fetch`和其他Node.js API：它可以讀寫OmniRoute用戶可以存取的任何檔案（包括資料目錄）、運行程式並存取網路。
 
-清單的`requires.permissions`接受`network`、 `file-read`、 `file-write`、 `env`和`exec`，但現在只有`env`在運行時有效：
+清單的`requires.permissions`接受`network`、 `file-read`、 `file-write`、 `env`和`exec`。使用預設設置，只有`env`在運行時有效。
 
-| 允許                                         | 今天生效                                                                                                                                                                                                         |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`                                        | 插件程序也接收`PORT`、 `HOSTNAME`、 `TZ`和`TMPDIR`。如果沒有它，它只會接收`PATH`、 `HOME`、 `USER`、 `LANG`、 `LC_ALL`、 `NODE_ENV`、 `PLUGIN_ENTRY`和`PLUGIN_NAME` （加上Windows上的`SystemRoot`和`windir` ）。 |
-| `network`, `file-read`, `file-write`, `exec` | 沒有任何。它們只是聲明：當它們丟失時，任何東西都不會被阻止。                                                                                                                                                     |
+### 選擇加入權限模型 (`PLUGIN_PERMISSION_MODEL_ENABLED`)
 
-安裝插件就像在主機上安裝任何其他程式一樣。僅安裝您信任來源的插件。
+`PLUGIN_PERMISSION_MODEL_ENABLED`功能標誌（類別`security`，**預設關閉**）使用[Node.js權限模型](https://nodejs.org/api/permissions.html)（`--permission`，被每個支援的Node.js行接受：22.22 +、 24 和 26 ）啟動每個插件進程。這些標誌是由`buildPermissionModelArgs()`在`src/lib/plugins/permissionModel.ts`中根據清單建構的。該標誌是在插件啟動時讀取的，因此它適用於更改後啟動的插件；停用並啟動正在運行的插件以應用它。
+
+插件資料目錄是插件根目錄旁邊的`plugin-data/<plugin-name>` （預設為`~/.omniroute/plugin-data/<plugin-name>` ， `getPluginDataDir()`）。啟用該標誌後，其路徑將作為`PLUGIN_DATA_DIR`傳遞給插件。
+
+| 允許         | 標記關閉（預設）                                                                                                                                                                                                 | 標記開啟                                                                                                                                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| （沒有任何） | OmniRoute使用者的全部權限。                                                                                                                                                                                      | 檔案僅在插件目錄內讀取。沒有檔案寫入，沒有子進程，沒有工作線程，沒有本機插件，沒有WASI。                                                                             |
+| `env`        | 插件程序也接收`PORT`、 `HOSTNAME`、 `TZ`和`TMPDIR`。如果沒有它，它只會接收`PATH`、 `HOME`、 `USER`、 `LANG`、 `LC_ALL`、 `NODE_ENV`、 `PLUGIN_ENTRY`和`PLUGIN_NAME` （加上Windows上的`SystemRoot`和`windir` ）。 | 與國旗關閉時相同。                                                                                                                                                   |
+| `file-read`  | 無（僅聲明）。                                                                                                                                                                                                   | 插件資料目錄也變得可讀（如果遺失，則會建立）。                                                                                                                       |
+| `file-write` | 無（僅聲明）。                                                                                                                                                                                                   | 插件資料目錄變得可讀可寫（`--allow-fs-write`）。其他都不可寫。                                                                                                       |
+| `exec`       | 無（僅聲明）。                                                                                                                                                                                                   | 允許子進程（`--allow-child-process`）。 Node.js透過`NODE_OPTIONS`將權限標誌傳遞給Node.js子進程，但任何其他程式的運作都不受限制，因此`exec`有效地解除了檔案系統限制。 |
+| `network`    | 無（僅聲明）。                                                                                                                                                                                                   | 沒有任何。 Node.js權限模型不限制出站網路訪問，因此`network`仍然是聲明並且從不強制執行。                                                                              |
+
+開啟該標誌會破壞那些讀取自己目錄以外的檔案的插件（例如從父`node_modules`解析的模組）、在其資料目錄之外的任何地方寫入或在不聲明`exec`情況下產生進程。即使插件上有標誌，也會保持網路存取並以OmniRoute用戶身份運行，因此僅安裝您信任來源的插件。
 
 ## 設定結構描述
 

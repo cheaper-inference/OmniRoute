@@ -183,7 +183,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
 
 ### 插件執行隔離
 
-> **插件不是沙盒的。**子進程是一個以OmniRoute用戶身份運行的普通Node.js進程，沒有VM上下文，也沒有Node.js權限標誌，因此插件程式碼可以讀取和寫入用戶可以運行的程式並存取網路的任何檔案。 `requires.permissions`只決定子程序接收哪些環境變數；其他權限不強制執行。僅安裝您信任的插件。下面的進程邊界包含崩潰和掛起；它不是安全邊界。
+> **外掛預設不在沙箱中執行。** 子程序是以 OmniRoute 使用者身分執行的普通 Node.js 程序，沒有 VM 執行環境，也沒有 Node.js 權限旗標。因此，外掛程式碼可以讀寫該使用者能存取的任何檔案、執行程式並存取網路。`requires.permissions` 只決定傳給子程序的環境變數，其他權限不會強制執行。選擇性功能旗標 `PLUGIN_PERMISSION_MODEL_ENABLED` 預設關閉。啟用後，每個外掛依其宣告的權限在 Node.js 權限模型下執行，但 Node.js 無法限制 `network`（請參閱 [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#%E6%AC%8A%E9%99%90%E7%B3%BB%E7%B5%B1)）。請只安裝您信任的外掛。下述的程序隔離可以限制當機和停滯的影響，但不構成安全邊界。
 
 - **行程隔離**— `loadPlugin()` (`src/lib/plugins/loader.ts`) 在單獨的Node.js子程序中產生每個插件，並透過IPC進行通訊。 Hook 呼叫會因`SIGTERM` → `SIGKILL`升級而逾時。
 - **環境白名單**—子程序僅接收一組允許的環境變數；僅當清單請求`env`權限時才會授予更廣泛的集。

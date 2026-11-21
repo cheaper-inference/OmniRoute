@@ -214,7 +214,7 @@ A URL ti o kuna boya Layer ko ni fa fifalẹ ibeere — aaye ọja ni idakẹj�
 
 ### Pilogi ipinya ipaniyan
 
-> **Awọn afikun kii ṣe apoti iyanrin.** Ọmọ naa jẹ ilana Node.js lasan ti n ṣiṣẹ bi olumulo OmniRoute, laisi ipo VM ko si awọn asia igbanilaaye Node.js, nitorinaa koodu itanna le ka ati kọ faili eyikeyi ti olumulo le, ṣiṣe awọn eto ati de nẹtiwọki. `requires.permissions` nikan pinnu iru awọn oniyipada ayika ti ọmọ gba; awọn igbanilaaye miiran ko ni ipa. Fi sori ẹrọ awọn afikun nikan ti o gbẹkẹle. Aala ilana ni isalẹ ni awọn ipadanu ati awọn idorikodo; kì í ṣe ààlà ààbò.
+> **Awọn afikun kii ṣe apoti iyanrin nipasẹ aiyipada.** Ọmọ naa jẹ ilana Node.js lasan ti n ṣiṣẹ bi olumulo OmniRoute, laisi ipo VM ko si awọn asia igbanilaaye Node.js, nitorinaa koodu itanna le ka ati kọ faili eyikeyi ti olumulo le, ṣiṣe awọn eto ati de nẹtiwọki. `requires.permissions` nikan pinnu iru awọn oniyipada ayika ti ọmọ gba; awọn igbanilaaye miiran ko ni ipa. Ijade-in `PLUGIN_PERMISSION_MODEL_ENABLED` ẹya asia (pa nipasẹ aiyipada) nṣiṣẹ ohun itanna kọọkan labẹ awoṣe igbanilaaye Node.js ti a ṣe lati awọn igbanilaaye wọnyẹn, ayafi `network`, eyiti Node.js ko le ni ihamọ (wo [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#gbigbanilaaye-system) ). Fi sori ẹrọ awọn afikun nikan ti o gbẹkẹle. Aala ilana ni isalẹ ni awọn ipadanu ati awọn idorikodo; kì í ṣe ààlà ààbò.
 
 - **Iyapa ilana** — `loadPlugin()` (`src/lib/plugins/loader.ts`) fa ohun itanna kọọkan sinu ilana ọmọ Node.js lọtọ ati ibaraẹnisọrọ lori IPC. Awọn ipe kio ni akoko idaduro pẹlu `SIGTERM` → `SIGKILL` escalation.
 - **Env iyọọda akojọ** — ọmọ gba nikan ohun idasilẹ ṣeto ti ayika oniyipada; Eto ti o gbooro ni a funni nikan nigbati ifihan ba beere fun igbanilaaye `env`.
