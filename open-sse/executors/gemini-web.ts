@@ -595,7 +595,19 @@ export class GeminiWebExecutor extends BaseExecutor {
 
     let browser: any = null;
     let context: import("playwright").BrowserContext | null = null;
-    let abortBrowser: (() => void) | null = null;
+    let contextClosing: Promise<void> | undefined;
+    const closeContext = () => {
+      const owned = context;
+      if (!owned) return;
+      // Cancellation can start cleanup while a browser operation is still pending.
+      // The finalizer awaits the same close before releasing the browser lease.
+      return (contextClosing ??= Promise.resolve()
+        .then(() => owned.close())
+        .catch(() => undefined));
+    };
+    const abortBrowser = () => {
+      void closeContext();
+    };
     try {
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
@@ -604,19 +616,30 @@ export class GeminiWebExecutor extends BaseExecutor {
       const launchChromium = getStableLauncher(chromium);
       const { acquireGeminiBrowser } = await import("./gemini-web/browserLease.ts");
       browser = await acquireGeminiBrowser(launchChromium);
-      abortBrowser = () => {
-        void context?.close().catch(() => {});
-      };
       signal?.addEventListener("abort", abortBrowser, { once: true });
 
-      // #15076: apply the proxy configured for gemini-web (provider/global scope). Resolved per
-      // context so the shared leased browser needs no invalidation when the proxy changes.
-      const { resolvePlaywrightProxy } = await import("../services/browserPool.ts");
-      const proxy = await resolvePlaywrightProxy("gemini-web");
+      // #15076: apply the proxy configured for gemini-web. Resolved per context so the
+      // shared leased browser needs no invalidation when the proxy changes. The account's
+      // own assignment wins over the provider proxy, matching the non-browser path; a dead
+      // account pool fails closed instead of silently egressing from the host IP.
+      const { resolvePlaywrightProxyForConnection } = await import("../services/browserPool.ts");
+      const proxy = await resolvePlaywrightProxyForConnection(
+        "gemini-web",
+        credentials.connectionId
+      );
+      // Proxy resolution can outlive cancellation. Re-check before allocating a context.
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
       context = await browser.newContext({
         userAgent: GEMINI_USER_AGENT,
         ...(proxy ? { proxy } : {}),
       });
+      // If cancellation landed during creation, stop before touching the page.
+      // The finalizer closes the newly assigned context.
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
@@ -918,14 +941,8 @@ export class GeminiWebExecutor extends BaseExecutor {
         transformedBody: body,
       };
     } finally {
-      if (abortBrowser) signal?.removeEventListener("abort", abortBrowser);
-      // #13382: close this request's context. The Chromium process stays
-      // warm until it has been idle.
-      try {
-        await context?.close();
-      } catch {
-        /* ignore close errors */
-      }
+      signal?.removeEventListener("abort", abortBrowser);
+      await closeContext();
       if (browser) {
         const { releaseGeminiBrowser } = await import("./gemini-web/browserLease.ts");
         await releaseGeminiBrowser(browser);

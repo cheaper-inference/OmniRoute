@@ -230,6 +230,52 @@ interface ResolvePlaywrightProxyDeps {
   resolveProxy?: (providerId: string) => Promise<ProxyRecord | null | undefined>;
 }
 
+function toPlaywrightProxy(
+  p: ProxyRecord
+): NonNullable<import("playwright").LaunchOptions["proxy"]> {
+  const scheme = p.type === "socks5" || p.type === "https" ? p.type : "http";
+  // Build explicitly instead of a conditional object spread: the spread form
+  // widens username/password to `{}` under the LaunchOptions["proxy"] type,
+  // tripping typecheck once browserPool.ts is pulled into typecheck-core scope.
+  const proxy: NonNullable<import("playwright").LaunchOptions["proxy"]> = {
+    server: `${scheme}://${p.host}:${p.port}`,
+  };
+  if (p.username) {
+    proxy.username = String(p.username);
+    proxy.password = p.password == null ? "" : String(p.password);
+  }
+  return proxy;
+}
+
+/**
+ * Narrow an untyped lookup result into a ProxyRecord.
+ *
+ * The settings layer hands the payload back as `unknown`; casting it straight to
+ * ProxyRecord would let a record with no host, or a port that is not a number, reach
+ * Playwright, which then builds `http://undefined:undefined` and fails the request with
+ * a misleading error. Validate the two fields the URL depends on instead.
+ */
+function toProxyRecord(value: unknown): ProxyRecord | null {
+  if (!value || typeof value !== "object") return null;
+  const rec = value as Record<string, unknown>;
+  const host = typeof rec.host === "string" ? rec.host.trim() : "";
+  // Only numbers and numeric strings are ports. Number() alone would also accept
+  // `true` (1) and `[3128]` (3128), which are not port values anyone can configure.
+  const rawPort = rec.port;
+  const port =
+    typeof rawPort === "number"
+      ? rawPort
+      : typeof rawPort === "string"
+        ? Number(rawPort)
+        : Number.NaN;
+  if (!host || !Number.isInteger(port) || port <= 0 || port > 65535) return null;
+  const record: ProxyRecord = { host, port };
+  if (typeof rec.type === "string") record.type = rec.type;
+  if (typeof rec.username === "string") record.username = rec.username;
+  if (typeof rec.password === "string") record.password = rec.password;
+  return record;
+}
+
 // Exported for tests (deps injection avoids mock.module()).
 export async function resolvePlaywrightProxy(
   providerKey: string,
@@ -238,28 +284,44 @@ export async function resolvePlaywrightProxy(
   try {
     const resolver =
       deps?.resolveProxy ??
-      (async (id: string) => {
+      (async (id: string): Promise<ProxyRecord | null> => {
         const { resolveProxyForProvider } = await import("../../src/lib/db/proxies");
-        return resolveProxyForProvider(id);
+        return (await resolveProxyForProvider(id)) as ProxyRecord | null;
       });
     const p = await resolver(providerKey);
     if (!p?.host) return undefined;
-    const scheme = p.type === "socks5" ? "socks5" : "http";
-    // Build explicitly instead of a conditional object spread: the spread form
-    // widens username/password to `{}` under the LaunchOptions["proxy"] type,
-    // tripping typecheck once browserPool.ts is pulled into typecheck-core scope.
-    const proxy: NonNullable<import("playwright").LaunchOptions["proxy"]> = {
-      server: `${scheme}://${p.host}:${p.port}`,
-    };
-    if (p.username) {
-      proxy.username = String(p.username);
-      proxy.password = p.password == null ? "" : String(p.password);
-    }
-    return proxy;
+    return toPlaywrightProxy(p);
   } catch (err) {
     throw new Error(
       `[BrowserPool] Proxy resolution failed for ${providerKey}; refusing direct connection (fail-closed): ${
         err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
+}
+
+// Account, provider and global fallback are resolved together by the settings layer.
+export async function resolvePlaywrightProxyForConnection(
+  providerKey: string,
+  connectionId: string | null | undefined
+): Promise<import("playwright").LaunchOptions["proxy"] | undefined> {
+  try {
+    const { resolveProxyForBrowserContext } = await import("../../src/lib/db/settings");
+    const value = await resolveProxyForBrowserContext(
+      providerKey,
+      connectionId?.trim() || undefined
+    );
+    if (value === null) return undefined;
+    const proxy = toProxyRecord(value);
+    if (!proxy) throw new Error("Assigned browser proxy has an invalid host or port");
+    if (proxy.type === "socks5" && (proxy.username || proxy.password)) {
+      throw new Error("This browser does not support authenticated SOCKS5 proxies");
+    }
+    return toPlaywrightProxy(proxy);
+  } catch (error) {
+    throw new Error(
+      `[BrowserPool] Proxy resolution failed for ${providerKey}; refusing direct connection (fail-closed): ${
+        error instanceof Error ? error.message : String(error)
       }`
     );
   }

@@ -1,0 +1,1 @@
+- **fix(gemini-web):** use the selected account's proxy for the browser context. An unavailable assigned proxy now stops the request instead of silently switching egress, while an explicit Proxy Off setting still allows a direct connection. ([#20739](https://github.com/cheaper-inference/OmniRoute/pull/20739))

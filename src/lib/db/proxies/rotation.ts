@@ -864,6 +864,30 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
   }
 }
 
+// Browser routing must distinguish an empty scope from an assigned but unusable pool.
+export function resolveRequiredProxyForScope(
+  db: ReturnType<typeof getDbInstance>,
+  scope: ProxyScope,
+  scopeId: string | null
+) {
+  const resolved = resolveScopePoolInternal(db, scope, scopeId, {
+    rotationScopeId: normalizeRotationScopeId(scope, scopeId),
+    scopeIdFilter: scopeId,
+    matchAnyScopeId: scope === "global",
+  });
+  if (resolved) return resolved;
+  const assigned =
+    scope === "global"
+      ? db.prepare("SELECT 1 FROM proxy_assignments WHERE scope = 'global' LIMIT 1").get()
+      : db
+          .prepare("SELECT 1 FROM proxy_assignments WHERE scope = ? AND scope_id IS ? LIMIT 1")
+          .get(scope, scopeId);
+  if (assigned) {
+    throw new Error(`PROXY_ASSIGNED_UNAVAILABLE: ${scope} proxy pool has no usable member`);
+  }
+  return null;
+}
+
 export async function resolveProxyForScopeFromRegistry(scope: string, scopeId?: string | null) {
   try {
     const db = getDbInstance();

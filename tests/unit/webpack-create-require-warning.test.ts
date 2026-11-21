@@ -70,6 +70,7 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
       entry: entries,
       externals: [
         "../../src/lib/db/proxies",
+        "../../src/lib/db/settings",
         "@/shared/utils/runtimeTimeouts",
         "better-sqlite3",
         "bun:sqlite",
@@ -140,6 +141,11 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
 
 test("Webpack does not warn while parsing optional runtime modules", async () => {
   const warnings = await compileRuntimeRequireModules();
+  assert.deepEqual(
+    warnings.filter((warning) => warning.includes("Module not found")),
+    [],
+    "the isolated compile must resolve or externalize each dependency"
+  );
   const runtimeModuleWarnings = warnings.filter(
     (warning) =>
       warning.includes("module.createRequire failed parsing argument") ||

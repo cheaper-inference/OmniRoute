@@ -68,6 +68,22 @@ describe("resolvePlaywrightProxy", () => {
     assert.deepStrictEqual(proxy, { server: "http://proxy.example.com:8080" });
   });
 
+  it("preserves HTTPS for provider-scoped browser proxies", async () => {
+    for (const provider of ["claude-web", "chatgpt-web"]) {
+      const proxy = await resolveBrowserContextProxy(
+        "context-key",
+        { proxyProviderKey: provider },
+        {
+          resolveProxy: async (id) => {
+            assert.equal(id, provider);
+            return { type: "https", host: "proxy.example.com", port: 443 };
+          },
+        }
+      );
+      assert.deepEqual(proxy, { server: "https://proxy.example.com:443" });
+    }
+  });
+
   it("formats socks5 proxy server string", async () => {
     const proxy = await resolvePlaywrightProxy("gemini-web", {
       resolveProxy: async () => ({ type: "socks5", host: "socks.example.com", port: 1080 }),
@@ -206,5 +222,33 @@ describe("acquireBrowserContext proxy lookup failure", () => {
       await shutdownPool("test-cleanup");
       fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
+  });
+});
+
+describe("call-site contract", () => {
+  // The helpers are unit tested, but nothing would catch the executor passing the
+  // wrong field (or none) into them. mock.module() is unusable under this runner, so
+  // pin the call site by reading the source.
+  it("gemini-web passes credentials.connectionId to the connection-scoped resolver", () => {
+    const src = fs.readFileSync(
+      path.join(process.cwd(), "open-sse/executors/gemini-web.ts"),
+      "utf8"
+    );
+    const call = src.match(
+      /resolvePlaywrightProxyForConnection\(\s*"gemini-web",\s*([\s\S]*?)\)\s*;/
+    );
+    assert.ok(call, "gemini-web no longer calls resolvePlaywrightProxyForConnection");
+    assert.match(call[1], /credentials\.connectionId/);
+  });
+
+  it("resolves the account proxy before creating the browser context", () => {
+    const src = fs.readFileSync(
+      path.join(process.cwd(), "open-sse/executors/gemini-web.ts"),
+      "utf8"
+    );
+    const resolverAt = src.indexOf("resolvePlaywrightProxyForConnection(");
+    const contextAt = src.indexOf("browser.newContext({", resolverAt);
+    assert.ok(resolverAt > 0, "resolver call missing");
+    assert.ok(contextAt > resolverAt, "newContext must come after the proxy lookup");
   });
 });
