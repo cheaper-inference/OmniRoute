@@ -176,3 +176,63 @@ test("a share parses with and without its two parts", () => {
   assert.equal(parsed.attributed, 10);
   assert.equal(parsed.external, 25);
 });
+
+test("member slices: at least three, and only three fields each", () => {
+  const share = { fairShare: 50, consumed: 10, remaining: 40, status: "ok" };
+  const response = (members?: unknown[]) => {
+    const extra = members === undefined ? {} : { members };
+    return {
+      provider: "claude",
+      generatedAt: "2026-05-27T15:30:00.000Z",
+      pools: [
+        {
+          ref: "qpr_x",
+          name: "p",
+          provider: "claude",
+          borrowMode: "saturation",
+          policy: "hard",
+          weight: 50,
+          cap: null,
+          accountVisible: true,
+          dimensions: [{ unit: "tokens", window: "daily", limit: 100, yourShare: share, ...extra }],
+          accounts: [
+            {
+              slot: 1,
+              label: "Account 1",
+              dimensions: [
+                { unit: "percent", window: "5h", limit: 100, yourShare: share, ...extra },
+              ],
+            },
+          ],
+        },
+      ],
+      availableModels: [],
+      expiresAt: null,
+      apiBaseUrl: null,
+      blocks: { schedules: [], modelCaps: [] },
+    };
+  };
+  const three = [
+    { slot: 1, consumed: 10, isYou: true },
+    { slot: 2, consumed: 0, isYou: false },
+    { slot: 3, consumed: 5, isYou: false },
+  ];
+
+  const parsed = selfQuotaResponseSchema.parse(response(three));
+  assert.deepEqual(parsed.pools[0].dimensions[0].members, three);
+  assert.deepEqual(parsed.pools[0].accounts[0].dimensions[0].members, three);
+
+  assert.equal(selfQuotaResponseSchema.safeParse(response(three.slice(0, 2))).success, false);
+  // A slice is strict: an id or a weight riding along is rejected, never passed on.
+  const carrying = three.map((m) => ({ ...m, apiKeyId: "key-b", weight: 30 }));
+  assert.equal(selfQuotaResponseSchema.safeParse(response(carrying)).success, false);
+  for (const bad of [{ slot: 0 }, { slot: 1.5 }, { consumed: -1 }, { isYou: "yes" }]) {
+    const members = [{ ...three[0], ...bad }, three[1], three[2]];
+    assert.equal(selfQuotaResponseSchema.safeParse(response(members)).success, false);
+  }
+
+  // The shape without members still parses, and gains no members key.
+  const old = selfQuotaResponseSchema.parse(response());
+  assert.equal("members" in old.pools[0].dimensions[0], false);
+  assert.equal("members" in old.pools[0].accounts[0].dimensions[0], false);
+});

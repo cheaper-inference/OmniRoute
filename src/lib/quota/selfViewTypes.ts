@@ -67,6 +67,8 @@ export interface QuotaSelfViewDeps {
     provider: string,
     dim: { unit: QuotaUnit; window: QuotaWindow }
   ) => PlanWindowReading | null;
+  /** The pool's member usage option (quota_pools.member_breakdown). */
+  getPoolMemberBreakdown?: (poolId: string) => boolean;
 }
 
 /** A pool the key is allocated in, resolved for one provider. Internal ids stay here. */
@@ -82,4 +84,6 @@ export interface SelfViewPoolContext {
   accountVisible: boolean;
   /** The pool connections whose account data this key may see (empty when none). */
   accountConnectionIds: string[];
+  /** The pool's member usage option, as stored. */
+  memberBreakdown: boolean;
 }

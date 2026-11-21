@@ -28,10 +28,17 @@ import type {
   SelfQuotaAccount,
   SelfQuotaAccountDimension,
   SelfQuotaBar,
+  SelfQuotaMemberSlice,
   SelfQuotaStatus,
 } from "@/shared/schemas/selfQuota";
 import type { QuotaDimension } from "./dimensions";
-import { percentShareKey, percentShareOf, type PercentShares } from "./selfViewPercent";
+import { buildMemberSlices, membersAllowed } from "./selfViewMembers";
+import {
+  percentShareKey,
+  percentShareOf,
+  type PercentShares,
+  type PercentShareState,
+} from "./selfViewPercent";
 import type { AccountQuotaEntryLike, SelfViewPoolContext } from "./selfViewTypes";
 
 type CachedWindow = NonNullable<AccountQuotaEntryLike["quotas"]>[string];
@@ -126,9 +133,37 @@ function modelWindowsOf(provider: string, state: EntryState, now: number): Model
   return { status, windows };
 }
 
-/** The percent shares of the pool, read by the caller from the attribution books. */
+/**
+ * The percent shares of the pool, read by the caller from the attribution books, with the asking
+ * key and the server secret the member slots are keyed with.
+ */
 export interface SelfViewPercentInput {
   shares: PercentShares;
+  viewerApiKeyId: string;
+  secret: string;
+}
+
+/** Each member's attributed part, for an account the key may see and a share that was read. */
+function percentMembers(
+  ctx: SelfViewPoolContext,
+  connectionId: string,
+  state: PercentShareState | undefined,
+  percent: SelfViewPercentInput | undefined
+): SelfQuotaMemberSlice[] | undefined {
+  if (!percent || !state || state.status === "unavailable") return undefined;
+  if (!membersAllowed(ctx) || !ctx.accountConnectionIds.includes(connectionId)) return undefined;
+  const attributed = state.memberAttributed;
+  return buildMemberSlices({
+    poolId: ctx.pool.id,
+    viewerApiKeyId: percent.viewerApiKeyId,
+    secret: percent.secret,
+    consumed: ctx.pool.allocations.map((a) => ({
+      apiKeyId: a.apiKeyId,
+      consumed: Object.prototype.hasOwnProperty.call(attributed, a.apiKeyId)
+        ? attributed[a.apiKeyId]
+        : null,
+    })),
+  });
 }
 
 function accountDimension(
@@ -139,16 +174,16 @@ function accountDimension(
   now: number,
   percent: SelfViewPercentInput | undefined
 ): SelfQuotaAccountDimension {
+  const share = percent?.shares.get(percentShareKey(connectionId, dim.window));
   const dimension: SelfQuotaAccountDimension = {
     unit: "percent",
     window: dim.window,
     limit: dim.limit,
-    yourShare: percentShareOf(
-      (ctx.effectiveWeight / 100) * dim.limit,
-      percent?.shares.get(percentShareKey(connectionId, dim.window))
-    ),
+    yourShare: percentShareOf((ctx.effectiveWeight / 100) * dim.limit, share),
   };
   if (state) dimension.account = accountBar(ctx.provider, dim, state, now);
+  const members = percentMembers(ctx, connectionId, share, percent);
+  if (members) dimension.members = members;
   return dimension;
 }
 

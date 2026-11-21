@@ -119,6 +119,8 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
     resolvePublicApiBaseUrl: () => null,
     // No cached plan-window reading by default, so no test depends on the gate's cache.
     peekPlanWindowReading: () => null,
+    // Member usage slices off by default, as for a pool the admin never changed.
+    getPoolMemberBreakdown: () => false,
     ...rest,
   };
 }
@@ -145,6 +147,7 @@ export function ctx(over: Partial<SelfViewPoolContext> = {}): SelfViewPoolContex
     effectiveWeight: 50,
     connectionIds: ["conn-secret-1"],
     accountVisible: true,
+    memberBreakdown: false,
     ...over,
   };
   return {

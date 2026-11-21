@@ -54,6 +54,7 @@ import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
 import { buildSelfViewBlocks } from "./selfViewBlocks";
+import { attachCountableMembers } from "./selfViewMembers";
 import { readPercentShares } from "./selfViewPercent";
 import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type {
@@ -81,6 +82,7 @@ type CoreDeps = Required<
     | "listQuotaKeyModels"
     | "resolvePublicApiBaseUrl"
     | "peekPlanWindowReading"
+    | "getPoolMemberBreakdown"
   >
 > & { secret: string };
 
@@ -175,6 +177,13 @@ const DEFAULT_DEPS_LOADERS: Array<{
       peekPlanWindowReading: (await import("./saturationSignals")).peekPlanWindowReading,
     }),
   },
+  {
+    keys: ["getPoolMemberBreakdown"],
+    load: async () => ({
+      getPoolMemberBreakdown: (await import("@/lib/db/quotaMemberBreakdown"))
+        .getPoolMemberBreakdown,
+    }),
+  },
 ];
 
 async function normalizeDeps(deps: QuotaSelfViewDeps): Promise<CoreDeps> {
@@ -242,6 +251,7 @@ async function resolvePoolContext(
       accountVisible,
       input.allowedConnections
     ),
+    memberBreakdown: deps.getPoolMemberBreakdown(pool.id),
   };
 }
 
@@ -382,6 +392,8 @@ async function buildPoolView(
     if (!isCountableDimension(dim)) continue;
     dimensions.push(await buildSharedDimension(ctx, dim, store, input.apiKeyId));
   }
+  const secret = deps.secret;
+  await attachCountableMembers({ ctx, dimensions, store, apiKeyId: input.apiKeyId, secret });
   const shares = await readPercentShares({
     ctx,
     apiKeyId: input.apiKeyId,
@@ -404,7 +416,7 @@ async function buildPoolView(
       ctx,
       await resolvePoolAccountEntries(ctx, input, deps),
       deps.now(),
-      { shares }
+      { shares, viewerApiKeyId: input.apiKeyId, secret }
     ),
   };
 }

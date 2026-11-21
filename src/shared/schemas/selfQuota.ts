@@ -43,6 +43,15 @@ const share = z.object({
   external: z.number().optional(),
 });
 
+// One member's use of a window, without id, name or weight. Strict: an extra key is rejected.
+const memberSlice = z
+  .object({
+    slot: z.number().int().positive(),
+    consumed: z.number().nonnegative(),
+    isYou: z.boolean(),
+  })
+  .strict();
+
 // Pool bucket; limit = plan limit x accounts.
 const sharedDimension = z.object({
   unit: z.enum(["requests", "tokens", "usd"]),
@@ -50,6 +59,7 @@ const sharedDimension = z.object({
   limit: z.number(),
   total: bar.optional(),
   yourShare: share,
+  members: z.array(memberSlice).min(3).optional(),
 });
 
 // One account; limit = plan limit.
@@ -59,6 +69,7 @@ const accountDimension = z.object({
   limit: z.number(),
   account: bar.optional(),
   yourShare: share,
+  members: z.array(memberSlice).min(3).optional(),
 });
 
 const account = z.object({
@@ -138,6 +149,7 @@ export const selfQuotaResponseSchema = z.object({
 export type SelfQuotaStatus = z.infer<typeof selfQuotaStatusSchema>;
 export type SelfQuotaBar = z.infer<typeof bar>;
 export type SelfQuotaShare = z.infer<typeof share>;
+export type SelfQuotaMemberSlice = z.infer<typeof memberSlice>;
 export type SelfQuotaSharedDimension = z.infer<typeof sharedDimension>;
 export type SelfQuotaAccountDimension = z.infer<typeof accountDimension>;
 export type SelfQuotaAccount = z.infer<typeof account>;
