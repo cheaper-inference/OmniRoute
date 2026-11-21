@@ -7,23 +7,20 @@ import { fileURLToPath } from "node:url";
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
 function readHomePage(): string {
-  return readFileSync(
-    join(repoRoot, "src/app/(dashboard)/home/page.tsx"),
-    "utf8",
-  );
+  return readFileSync(join(repoRoot, "src/app/(dashboard)/home/page.tsx"), "utf8");
 }
 
 function readReadinessCard(): string {
   return readFileSync(
     join(repoRoot, "src/app/(dashboard)/dashboard/FirstRunReadinessCard.tsx"),
-    "utf8",
+    "utf8"
   );
 }
 
 function readEnKeys(): string[] {
-  const en = JSON.parse(
-    readFileSync(join(repoRoot, "src/i18n/messages/en.json"), "utf8"),
-  ) as { home: Record<string, string> };
+  const en = JSON.parse(readFileSync(join(repoRoot, "src/i18n/messages/en.json"), "utf8")) as {
+    home: Record<string, string>;
+  };
   return Object.keys(en.home);
 }
 
@@ -73,5 +70,31 @@ describe("home page first-run readiness card", () => {
     ]) {
       assert.ok(keys.includes(key), `Missing home.${key}`);
     }
+  });
+});
+
+describe("home page usage widgets", () => {
+  it("gates each block on its own setting and defaults to showing it", () => {
+    const source = readHomePage();
+    assert.match(source, /showStats=\{settings\.showUsageStatsOnHome !== false\}/);
+    assert.match(source, /showHeatmap=\{settings\.showActivityHeatmapOnHome !== false\}/);
+    assert.match(
+      source,
+      /settings\.showProviderQuotaOnHome !== false \? \(\s*<LazyProviderQuotaWidget/
+    );
+  });
+
+  it("loads the usage and quota blocks lazily, on the client", () => {
+    const page = readHomePage();
+    assert.doesNotMatch(page, /from "\.\/HomeUsageWidgets"/);
+    assert.doesNotMatch(page, /from "\.\/ProviderQuotaWidget"/);
+
+    const lazy = readFileSync(
+      join(repoRoot, "src/app/(dashboard)/home/LazyHomeWidgets.tsx"),
+      "utf8"
+    );
+    assert.match(lazy, /^"use client";/);
+    assert.match(lazy, /import\("\.\/HomeUsageWidgets"\)/);
+    assert.match(lazy, /import\("\.\/ProviderQuotaWidget"\)/);
   });
 });

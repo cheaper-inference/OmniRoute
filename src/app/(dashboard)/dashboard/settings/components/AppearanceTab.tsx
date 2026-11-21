@@ -40,6 +40,9 @@ export default function AppearanceTab() {
   } | null>(null);
   const showQuickStartOnHome = settings.showQuickStartOnHome !== false;
   const showProviderTopologyOnHome = settings.showProviderTopologyOnHome !== false;
+  const showUsageStatsOnHome = settings.showUsageStatsOnHome !== false;
+  const showActivityHeatmapOnHome = settings.showActivityHeatmapOnHome !== false;
+  const showProviderQuotaOnHome = settings.showProviderQuotaOnHome !== false;
   const autoRefreshProviderQuota = settings.autoRefreshProviderQuota === true;
   const autoRefreshProviderQuotaInterval = Number.isFinite(
     settings.autoRefreshProviderQuotaInterval
@@ -257,6 +260,72 @@ export default function AppearanceTab() {
                   ariaLabel={getSettingsLabel("homeProviderTopology", "Provider Topology")}
                   onChange={async (checked) => {
                     await updateSetting("showProviderTopologyOnHome", checked);
+                  }}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="flex items-start justify-between gap-4 px-4 py-3">
+                <div>
+                  <p className="font-medium">
+                    {getSettingsLabel("homeUsageStats", "Usage and statistics")}
+                  </p>
+                  <p className="text-sm text-text-muted">
+                    {getSettingsLabel(
+                      "homeUsageStatsDesc",
+                      "Show the token, cost, error and combo usage cards on the Home page."
+                    )}
+                  </p>
+                </div>
+                <Toggle
+                  checked={showUsageStatsOnHome}
+                  ariaLabel={getSettingsLabel("homeUsageStats", "Usage and statistics")}
+                  onChange={async (checked) => {
+                    await updateSetting("showUsageStatsOnHome", checked);
+                  }}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="flex items-start justify-between gap-4 px-4 py-3">
+                <div>
+                  <p className="font-medium">
+                    {getSettingsLabel("homeActivityHeatmap", "Activity heatmap")}
+                  </p>
+                  <p className="text-sm text-text-muted">
+                    {getSettingsLabel(
+                      "homeActivityHeatmapDesc",
+                      "Show the activity heatmap below the usage cards. Needs usage and statistics."
+                    )}
+                  </p>
+                </div>
+                <Toggle
+                  checked={showActivityHeatmapOnHome}
+                  ariaLabel={getSettingsLabel("homeActivityHeatmap", "Activity heatmap")}
+                  onChange={async (checked) => {
+                    await updateSetting("showActivityHeatmapOnHome", checked);
+                  }}
+                  disabled={loading || !showUsageStatsOnHome}
+                />
+              </div>
+
+              <div className="flex items-start justify-between gap-4 px-4 py-3">
+                <div>
+                  <p className="font-medium">
+                    {getSettingsLabel("homeProviderQuotaWidget", "Provider quota")}
+                  </p>
+                  <p className="text-sm text-text-muted">
+                    {getSettingsLabel(
+                      "homeProviderQuotaWidgetDesc",
+                      "Show the quota of every connected provider on the Home page."
+                    )}
+                  </p>
+                </div>
+                <Toggle
+                  checked={showProviderQuotaOnHome}
+                  ariaLabel={getSettingsLabel("homeProviderQuotaWidget", "Provider quota")}
+                  onChange={async (checked) => {
+                    await updateSetting("showProviderQuotaOnHome", checked);
                   }}
                   disabled={loading}
                 />

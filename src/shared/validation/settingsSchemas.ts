@@ -289,6 +289,9 @@ export const updateSettingsSchema = z.object({
   pinProviderQuotaToHome: z.boolean().optional(),
   showQuickStartOnHome: z.boolean().optional(),
   showProviderTopologyOnHome: z.boolean().optional(),
+  showUsageStatsOnHome: z.boolean().optional(),
+  showActivityHeatmapOnHome: z.boolean().optional(),
+  showProviderQuotaOnHome: z.boolean().optional(),
   localOnlyManageScopeBypassEnabled: z.boolean().optional(),
   // Layer 1 of the spawn-capable guard (Hard Rules #15/#17): reject any bypass
   // prefix that overlaps a SPAWN_CAPABLE_PREFIXES path or a
