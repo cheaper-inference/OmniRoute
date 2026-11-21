@@ -18,6 +18,7 @@ import {
   COMBO_NON_CHAT_STRATEGIES,
 } from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
+import { decisionRoutingConfigSchema } from "@omniroute/open-sse/services/decision/schema.ts";
 
 // ──── Combo Schemas ────
 
@@ -261,6 +262,16 @@ export const comboRuntimeConfigSchema = z
         timeoutMs: z.coerce.number().int().min(100).max(30_000).optional(),
       })
       .strict()
+      .optional(),
+    // `decision` auto-router strategy (open-sse/services/autoCombo/decisionStrategy.ts).
+    // Strict: the credential is a connectionId reference, never a stored apiKey.
+    decision: decisionRoutingConfigSchema.optional(),
+    // Virtual/auto combos keep their router knobs under `config.auto`; only its decision
+    // block is validated here, the rest stays as free-form as before.
+    auto: z
+      .object({ decision: decisionRoutingConfigSchema.optional() })
+      .passthrough()
+      .nullable()
       .optional(),
     compositeTiers: compositeTiersSchema.optional(),
     resetAwareSessionWeight: z.coerce.number().min(0).max(100).optional(),
@@ -628,6 +639,17 @@ export const reorderCombosSchema = z
 export const testComboSchema = z.object({
   comboName: z.string().trim().min(1, "comboName is required"),
 });
+
+// POST /api/combos/decision-preview - Menu descriptions and an optional test decision for an
+// unsaved `decision` auto-router combo (dashboard combo builder).
+export const decisionPreviewSchema = z
+  .object({
+    decision: decisionRoutingConfigSchema.optional(),
+    // Combo step model strings (`provider/model`); combo refs and wildcards are not sent.
+    models: z.array(z.string().trim().min(1).max(300)).max(200),
+    prompt: z.string().trim().min(1).max(8_000).optional(),
+  })
+  .strict();
 
 // POST /api/combos/duplicate - Resolve an auto-combo template (e.g. "auto/best-coding")
 // into a static, editable combo snapshot.
