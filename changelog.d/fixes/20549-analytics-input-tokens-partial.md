@@ -1,0 +1,1 @@
+- Show the exact known fresh-input subtotal as partial when Analytics cache-read coverage is incomplete or inconsistent, instead of hiding all Input Tokens. Preserve unknown stored counters and exclude malformed measurements from the subtotal. (#20549 — thanks @KiaroSama)

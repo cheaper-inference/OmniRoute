@@ -123,7 +123,15 @@ export default function TokenBreakdownCards({
       label: t("inputTokens"),
       icon: "input",
       value: tokens.inputTokens,
-      hint: tokens.inputTokens === null ? t("inputSplitUnavailable") : t("inputTokensHint"),
+      suffix: tokens.inputTokensPartial ? partial : "",
+      hint: [
+        tokens.inputTokens === null ? t("inputSplitUnavailable") : t("inputTokensHint"),
+        tokens.inputTokensUnsplit === null
+          ? ""
+          : t("inputTokensUnsplitHint", { amount: fmtCompact(tokens.inputTokensUnsplit) }),
+      ]
+        .filter(Boolean)
+        .join(" "),
     },
     {
       key: "cached-input",

@@ -141,6 +141,13 @@ describe("Analytics token cards", () => {
     expect(count("Total Tokens", "11,000")).toBeTruthy();
   });
 
+  it("labels the exact known fresh-input subtotal as partial", () => {
+    renderCards({ ...summary, cachedInputTokensComplete: false, knownFreshInputTokens: 550 });
+    expect(count("Input Tokens", "550+ (Partial)").textContent).toBe("550+ (Partial)");
+    expect(count("Total Input Tokens", "10,000")).toBeTruthy();
+    expect(screen.queryByText(en.analytics.inputSplitUnavailable)).toBeNull();
+  });
+
   it("shows measured zero but does not clamp contradictory provider counts", () => {
     const view = renderCards({ ...summary, cachedInputTokens: 10_000 });
     expect(count("Input Tokens", "0").textContent).toBe("0");
@@ -159,5 +166,35 @@ describe("Analytics token cards", () => {
     expect(count(localized.analytics.cachedInputTokens, "6,000")).toBeTruthy();
     expect(screen.getByText(localized.analytics.inputTokensHint)).toBeTruthy();
     expect(screen.queryByText("analytics.cachedInputTokens")).toBeNull();
+  });
+});
+
+describe("partial input unsplit hint", () => {
+  const partial = {
+    promptTokens: 1800,
+    cachedInputTokens: 400,
+    knownFreshInputTokens: 550,
+    cachedInputTokensComplete: false,
+  };
+  it("appends the measured remainder to the input description", () => {
+    renderCards(partial);
+    const input = screen.getByRole("group", { name: "Input Tokens" });
+    expect(within(input).getByText(/~850 not split \(cache read unknown\)/)).toBeTruthy();
+  });
+  it("uses compact formatting for the remainder", () => {
+    renderCards({ ...partial, promptTokens: 2950 });
+    expect(
+      within(screen.getByRole("group", { name: "Input Tokens" })).getByText(/~2\.0K not split/)
+    ).toBeTruthy();
+  });
+  it.each([
+    { ...partial, cachedInputTokensComplete: true },
+    { ...partial, cachedInputTokens: 1250 },
+    { ...partial, cachedInputTokens: 1300 },
+    { ...partial, cachedInputTokens: null },
+    { ...partial, knownFreshInputTokens: 0 },
+  ])("omits the hint when no positive partial remainder is known (%j)", (value) => {
+    renderCards(value);
+    expect(screen.queryByText(/not split \(cache read unknown\)/)).toBeNull();
   });
 });

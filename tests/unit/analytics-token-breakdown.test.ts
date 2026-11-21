@@ -14,6 +14,8 @@ test("splits inclusive prompt totals without double counting cache reads", () =>
       totalTokens: 110,
       totalInputTokens: 100,
       inputTokens: 40,
+      inputTokensPartial: false,
+      inputTokensUnsplit: null,
       cachedInputTokens: 60,
       outputTokens: 10,
       cacheComplete: true,
@@ -93,5 +95,86 @@ test("cache writes remain in input, not in the cache-read bucket", () => {
   assert.equal(
     value.inputTokens! + value.cachedInputTokens! + value.outputTokens!,
     value.totalTokens
+  );
+});
+
+test("incomplete or inconsistent cache coverage retains only measured fresh input", () => {
+  for (const cache of [
+    { cachedInputTokens: 400, cachedInputTokensComplete: false },
+    { cachedInputTokens: 2000, cachedInputTokensComplete: true },
+  ]) {
+    const result = getAnalyticsTokenBreakdown({
+      promptTokens: 1800,
+      completionTokens: 10,
+      ...cache,
+      knownFreshInputTokens: 550,
+    });
+    assert.equal(result.inputTokens, 550);
+    assert.equal(result.inputTokensPartial, true);
+    assert.equal(result.totalTokens, 1810);
+  }
+});
+
+test("exact coverage takes precedence over a known fresh-input subtotal", () => {
+  const result = getAnalyticsTokenBreakdown({
+    promptTokens: 1000,
+    cachedInputTokens: 400,
+    cachedInputTokensComplete: true,
+    knownFreshInputTokens: 550,
+  });
+  assert.equal(result.inputTokens, 600);
+  assert.equal(result.inputTokensPartial, false);
+});
+
+test("absent, empty, and malformed known parts do not invent a fresh-input total", () => {
+  for (const knownFreshInputTokens of [undefined, null, 0, -1, 0.5, NaN, Infinity]) {
+    const result = getAnalyticsTokenBreakdown({
+      promptTokens: 1000,
+      cachedInputTokensComplete: false,
+      knownFreshInputTokens,
+    });
+    assert.equal(result.inputTokens, null);
+    assert.equal(result.inputTokensPartial, false);
+  }
+});
+
+test("a known subtotal cannot exceed the inclusive input total", () => {
+  const result = getAnalyticsTokenBreakdown({
+    promptTokens: 100,
+    cachedInputTokensComplete: false,
+    knownFreshInputTokens: 110,
+  });
+  assert.equal(result.inputTokens, null);
+  assert.equal(result.inputTokensPartial, false);
+});
+
+test("partial input exposes only a positive measured unsplit remainder", () => {
+  const partial = {
+    promptTokens: 1800,
+    cachedInputTokens: 400,
+    knownFreshInputTokens: 550,
+    cachedInputTokensComplete: false,
+  };
+  assert.equal(getAnalyticsTokenBreakdown(partial).inputTokensUnsplit, 850);
+  assert.equal(
+    getAnalyticsTokenBreakdown({ ...partial, cachedInputTokensComplete: true }).inputTokensUnsplit,
+    null
+  );
+  for (const cachedInputTokens of [1250, 1300, undefined, null]) {
+    assert.equal(
+      getAnalyticsTokenBreakdown({ ...partial, cachedInputTokens }).inputTokensUnsplit,
+      null
+    );
+  }
+  for (const promptTokens of [undefined, null, 0]) {
+    assert.equal(getAnalyticsTokenBreakdown({ ...partial, promptTokens }).inputTokensUnsplit, null);
+  }
+  assert.equal(
+    getAnalyticsTokenBreakdown({ ...partial, knownFreshInputTokens: 0 }).inputTokensUnsplit,
+    null
+  );
+  assert.equal(
+    getAnalyticsTokenBreakdown({ ...partial, cachedInputTokens: 0 }).inputTokensUnsplit,
+    1250
   );
 });
