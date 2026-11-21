@@ -32,7 +32,7 @@ import {
 } from "../../services/apiKeyRotator.ts";
 import { isModelUnavailableError } from "../../services/modelFamilyFallback.ts";
 import { hasPerModelQuota } from "../../services/accountFallback.ts";
-import { mergeConnectionProviderSpecificData } from "@/lib/db/providers";
+import { getProviderConnectionById, mergeConnectionProviderSpecificData } from "@/lib/db/providers";
 
 type KeyHealthLog = {
   warn?: (tag: string, message: string) => void;
@@ -44,11 +44,35 @@ const CREDENTIAL_FAILURE_PATTERNS = [
   /\bapi[\s_-]?key\s+(?:is\s+)?(?:invalid|incorrect|expired|missing|revoked|not\s+valid)\b/i,
   /\bauthentication[\s_-]+(?:failed|error|required)\b/i,
   /\b(?:invalid|expired|missing|revoked)\s+(?:token|credentials?|bearer)\b/i,
-  /\bunauthorized\b/i,
   /\bnot\s+authenticated\b/i,
-  /\bforbidden\b/i,
-  /\baccess\s+denied\b/i,
 ];
+
+// Persist the apiKeyHealth slice only (never the whole per-request providerSpecificData copy, which
+// carries request-local keys), and patch only THIS key's entry into the CURRENT stored map, so a
+// concurrent update to a sibling key is not overwritten by a stale snapshot.
+// Patch only this key's health into the CURRENT stored data. The request's own snapshot of
+// providerSpecificData can be minutes old (a stream holds it), and writing it back whole
+// would erase anything saved since (verification URLs, refreshed tokens, sibling key health).
+function persistKeyHealth(
+  connId: string,
+  keyId: string,
+  updated: KeyHealth,
+  log?: KeyHealthLog
+): void {
+  void (async () => {
+    const current = await getProviderConnectionById(connId);
+    const stored = (current?.providerSpecificData as Record<string, unknown> | undefined)
+      ?.apiKeyHealth as Record<string, KeyHealth> | undefined;
+    await mergeConnectionProviderSpecificData(connId, {
+      apiKeyHealth: { ...stored, [keyId]: updated },
+    });
+  })().catch((err: unknown) => {
+    log?.error?.(
+      "DB",
+      `Failed to persist apiKeyHealth: ${err instanceof Error ? err.message : String(err)}`
+    );
+  });
+}
 
 function isModelCapabilityFailure(status: number, failureDetail: string): boolean {
   if (!failureDetail) return false;
@@ -65,25 +89,6 @@ function isCredentialFailure(status: number, failureDetail: string): boolean {
   return CREDENTIAL_FAILURE_PATTERNS.some((pattern) => pattern.test(failureDetail));
 }
 
-/**
- * Persist the apiKeyHealth slice only. `creds.providerSpecificData` is a per-request copy that
- * carries request-local keys (ccSessionId, targetFormat, apiType, the rotated selectedKeyId), so
- * writing the whole object stored one request's values on the shared connection and overwrote
- * concurrent edits with a stale snapshot. The merge runs in a transaction on the stored row.
- */
-function persistKeyHealth(
-  connId: string,
-  apiKeyHealth: Record<string, KeyHealth>,
-  log?: KeyHealthLog
-): void {
-  mergeConnectionProviderSpecificData(connId, { apiKeyHealth }).catch((err: unknown) => {
-    log?.error?.(
-      "DB",
-      `Failed to persist apiKeyHealth: ${err instanceof Error ? err.message : String(err)}`
-    );
-  });
-}
-
 export function recordKeyHealthStatus(
   status: number,
   creds: Record<string, unknown> | null | undefined,
@@ -92,9 +97,9 @@ export function recordKeyHealthStatus(
   failureDetail = "",
   retryAfterMs?: number | null
 ): void {
-  // CLIProxyAPI owns a shared external credential pool. Its auth failures cannot be
+  // CLIProxyAPI and Dario own a shared external credential pool. Its auth failures cannot be
   // attributed to the native OmniRoute connection selected before proxy dispatch.
-  if (transport === "cliproxyapi") return;
+  if (transport === "cliproxyapi" || transport === "dario") return;
 
   const connId = creds?.connectionId as string | undefined;
   if (!connId) return;
@@ -125,7 +130,7 @@ export function recordKeyHealthStatus(
     const prevStatus = health?.[currentKeyId]?.status;
     const prevFailures = health?.[currentKeyId]?.failures ?? 0;
     if (updatedHealth.status !== prevStatus || updatedHealth.failures !== prevFailures) {
-      persistKeyHealth(connId, { ...health, [currentKeyId]: updatedHealth }, log);
+      persistKeyHealth(connId, currentKeyId, updatedHealth, log);
     }
   } else if (status === 402) {
     // 402 "Insufficient account balance" is terminal for this key on
@@ -150,7 +155,7 @@ export function recordKeyHealthStatus(
 
     const prevStatus = health?.[currentKeyId]?.status;
     if (updatedHealth.status !== prevStatus) {
-      persistKeyHealth(connId, { ...health, [currentKeyId]: updatedHealth }, log);
+      persistKeyHealth(connId, currentKeyId, updatedHealth, log);
     }
   } else if (status === 429) {
     // Per-key cooldown (#14573): a rate limit hits ONE key, not the credential
@@ -176,13 +181,13 @@ export function recordKeyHealthStatus(
 
     const prevCooldown = health?.[currentKeyId]?.cooldownUntil ?? null;
     if (updatedHealth.cooldownUntil !== prevCooldown) {
-      persistKeyHealth(connId, { ...health, [currentKeyId]: updatedHealth }, log);
+      persistKeyHealth(connId, currentKeyId, updatedHealth, log);
     }
   } else if (status >= 200 && status < 300) {
     const updatedHealth = recordKeySuccess(connId, currentKeyId);
     const prevStatus = health?.[currentKeyId]?.status;
     if (prevStatus === "warning" || prevStatus === "invalid") {
-      persistKeyHealth(connId, { ...health, [currentKeyId]: updatedHealth }, log);
+      persistKeyHealth(connId, currentKeyId, updatedHealth, log);
     }
   }
 }
