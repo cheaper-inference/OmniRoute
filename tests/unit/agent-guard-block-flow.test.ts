@@ -44,6 +44,7 @@ const CLAUDE = "anthropic/claude-opus-5";
 const BARE = "claude-opus-5";
 const OTHER = "openai/gpt-4.1";
 const OTHER2 = "openai/gpt-4.1-mini";
+const OTHER3 = "openai/gpt-4.1-nano";
 
 const originalFetch = globalThis.fetch;
 const calls: string[] = [];
@@ -244,6 +245,43 @@ test("block: a mixed combo skips its Claude target and answers from the next one
   assert.deepEqual([(await chat("guard-mixed", CLI)).status, tried()], [200, ["anthropic"]]);
 });
 
+test("block: a refused protected priority target is skipped and the next step answers", async () => {
+  await combosDb.createCombo({
+    name: "guard-protected",
+    strategy: "priority",
+    models: [
+      {
+        kind: "model",
+        providerId: "anthropic",
+        model: CLAUDE,
+        fallbackOnlyOnQuotaExhaustion: true,
+      },
+      OTHER,
+    ],
+  });
+  block();
+  const res = await chat("guard-protected", KILO);
+  assert.deepEqual([res.status, tried()], [200, ["openai"]], String(await codeOf(res)));
+  assert.equal(getCircuitBreaker("anthropic").getStatus().failureCount, 0);
+});
+
+test("block: an unguarded shadow target leaves the foreground refusal as the policy error", async () => {
+  await combosDb.createCombo({
+    name: "guard-shadow",
+    strategy: "priority",
+    models: [CLAUDE],
+    config: { shadowRouting: { enabled: true, targets: [OTHER] } },
+  });
+  block();
+  const res = await chat("guard-shadow", KILO);
+  assert.deepEqual([res.status, await codeOf(res)], [403, "client_agent_not_allowed"]);
+  // The shadow copy runs in the background: wait for it so it ends inside this test.
+  for (let i = 0; i < 250 && !calls.includes("openai"); i++) {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  assert.deepEqual(tried(), ["openai"], "the shadow target was dispatched");
+});
+
 test("block: a combo of only Claude targets fails with the policy error, and so does the retry", async () => {
   await combosDb.createCombo({
     name: "guard-claude-only",
@@ -380,12 +418,19 @@ test("block: a fusion combo reached through the safety-net redirect has its judg
   await combosDb.createCombo({
     name: "auto/guard-net-fusion",
     strategy: "fusion",
-    models: [OTHER],
+    models: [OTHER, OTHER3],
     config: { judgeModel: CLAUDE },
   });
   await combosDb.createCombo({ name: "guard-net-outer", strategy: "priority", models: [OTHER2] });
   await settingsDb.updateSettings({ globalFallbackModel: "auto/guard-net-fusion" });
   failingOpenAIModel = "gpt-4.1-mini";
+  // Guard off: the redirect runs the fallback combo, its panel member and its judge.
+  const open = await chat("guard-net-outer", KILO);
+  assert.deepEqual(
+    [openaiModels.includes("gpt-4.1"), calls.includes("anthropic")],
+    [true, true],
+    JSON.stringify([open.status, calls, openaiModels])
+  );
   block();
   const res = await chat("guard-net-outer", KILO);
   // Claude never called, and no panel member of the fallback fusion combo dispatched.
@@ -396,6 +441,34 @@ test("block: a fusion combo reached through the safety-net redirect has its judg
   );
   assert.ok(openaiModels.includes("gpt-4.1-mini"), JSON.stringify(openaiModels)); // outer ran
   assert.equal(res.ok, false);
+});
+
+test("block + strict: the trusted live test keeps its exemption through the safety-net redirect", async () => {
+  await combosDb.createCombo({
+    name: "auto/guard-net-live",
+    strategy: "fusion",
+    models: [OTHER, OTHER3],
+    config: { judgeModel: CLAUDE },
+  });
+  await combosDb.createCombo({
+    name: "guard-net-live-outer",
+    strategy: "priority",
+    models: [OTHER2],
+  });
+  await settingsDb.updateSettings({ globalFallbackModel: "auto/guard-net-live" });
+  failingOpenAIModel = "gpt-4.1-mini";
+  block("true");
+  const trusted = {
+    "x-internal-test": "combo-health-check",
+    [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
+  };
+  const res = await chat("guard-net-live-outer", trusted);
+  // A panel member of the fallback fusion combo ran, and so did its Claude judge.
+  assert.deepEqual(
+    [res.status, openaiModels.some((m) => m !== "gpt-4.1-mini"), calls.includes("anthropic")],
+    [200, true, true],
+    JSON.stringify([res.status, await codeOf(res), calls, openaiModels])
+  );
 });
 
 test("block + strict: the trusted live test still reaches a Claude target and judge; the forged test header does not", async () => {

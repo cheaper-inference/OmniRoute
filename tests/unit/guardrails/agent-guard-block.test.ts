@@ -1,5 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+const dataDir = mkdtempSync(join(tmpdir(), "agent-guard-block-"));
+process.env.DATA_DIR = dataDir;
 const core = await import("../../../src/lib/db/core.ts");
 const flagsDb = await import("../../../src/lib/db/featureFlags.ts");
 const { wouldRefuseAgent } = await import("../../../src/lib/guardrails/agentGuard/enforcement.ts");
@@ -38,6 +44,7 @@ test.after(() => {
   delete process.env.AGENT_GUARD_STRICT;
   flagsDb.clearAllFeatureFlagOverrides();
   core.resetDbInstance();
+  rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 test("off and monitor: no header is read, nothing is refused, nothing is logged", () => {
   for (const mode of ["off", "monitor"]) {
@@ -371,6 +378,34 @@ test("the decision follows the provider it is given, not the model string", () =
     })?.status,
     403
   );
+});
+test("combo: a check that records no state, as for a shadow target, keeps the policy error", async () => {
+  setMode("block");
+  const request = req(KILO);
+  const { calls, log } = capture();
+  gate.agentGuardRefusal({ request, provider: "claude", log: quiet() });
+  const shadow = { request, provider: "claude", recordState: false, log };
+  assert.equal(gate.agentGuardRefusal(shadow)?.status, 403, "still decided");
+  assert.equal(gate.agentGuardRefusal({ ...shadow, provider: "glm" }), null);
+  assert.equal(calls.length, 0, "the claude line was already written for this request");
+  const settled = gate.settleAgentGuardCombo(
+    request,
+    Response.json({ error: { message: "all targets were skipped" } }, { status: 503 }),
+    "openai"
+  );
+  assert.deepEqual(
+    [settled.status, (await settled.json()).error.code],
+    [403, "client_agent_not_allowed"]
+  );
+  // A shadow check that is the first to see the request still writes its line.
+  const fresh = capture();
+  gate.agentGuardRefusal({
+    request: req(KILO),
+    provider: "claude",
+    recordState: false,
+    log: fresh.log,
+  });
+  assert.equal(fresh.calls.length, 1);
 });
 test("combo: the policy error replaces the combo's own error only when a target was refused and none was admitted", async () => {
   setMode("block");

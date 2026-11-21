@@ -398,6 +398,19 @@ function breakerCountsAsFailure(error: unknown): boolean {
   return !isLocalStreamLifecycleError(error);
 }
 
+/** The trusted live combo test's agent guard exemption, also when a safety-net redirect carries it. */
+function hasAgentGuardLiveTestExemption(options: {
+  forceLiveComboTest?: boolean;
+  agentGuardTrustedLiveTest?: boolean;
+}): boolean {
+  return options.forceLiveComboTest === true || options.agentGuardTrustedLiveTest === true;
+}
+
+/** A combo target's traffic type: shadow targets meet the agent guard without recording state. */
+function trafficTypeOf(target: { trafficType?: "production" | "shadow" } | undefined) {
+  return target?.trafficType;
+}
+
 function logBreakerStateChange(name: string, from: string, to: string): void {
   log.info("CIRCUIT", `${name}: ${from} → ${to}`);
 }
@@ -1161,6 +1174,7 @@ async function handleChatImplementation(
         allowedConnectionIds?: string[] | null;
         executionKey?: string | null;
         providerId?: string | null;
+        trafficType?: "production" | "shadow";
       }
     ) => {
       const preflightDecision = await evaluateComboTargetPreflight({
@@ -1196,7 +1210,10 @@ async function handleChatImplementation(
         modelInfo,
         comboTargetCredentialProviderId(target)
       );
-      if (agentGuardRefusal({ request, provider, modelStr: modelString, apiKeyInfo })) return false;
+      // A shadow target is checked without touching the foreground request's guard state.
+      const recordState = trafficTypeOf(target) !== "shadow";
+      if (agentGuardRefusal({ request, provider, modelStr: modelString, apiKeyInfo, recordState }))
+        return "agent_guard_refused" as const;
       const resolvedModel = modelInfo.model || modelString;
       const githubGate = await ghComboGate(comboPreselectedCredentials, provider, resolvedModel);
       if (githubGate !== null) return githubGate;
@@ -1297,6 +1314,7 @@ async function handleChatImplementation(
           effectiveComboStrategy?: string | null;
           modelAbortSignal?: AbortSignal | null;
           fallbackAttempts?: number;
+          trafficType?: "production" | "shadow";
         }
       ) =>
         handleSingleModelChat(
@@ -1347,6 +1365,7 @@ async function handleChatImplementation(
             // entry (trackPendingRequest(false) never runs) — live incident,
             // log id 1784418258231-14961a.
             modelAbortSignal: target?.modelAbortSignal ?? null,
+            trafficType: trafficTypeOf(target),
             comboStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
           },
@@ -1632,6 +1651,10 @@ async function handleSingleModelChat(
     /** Accounts an earlier target of this combo request stalled on (comboStalledConnections.ts). */
     comboStalledConnections?: ComboStalledConnections | null;
     fallbackAttempts?: number;
+    /** A shadow target's dispatch: the agent guard decides without recording request state. */
+    trafficType?: "production" | "shadow";
+    /** Carries the trusted live combo test's agent guard exemption alone, without breaker bypass. */
+    agentGuardTrustedLiveTest?: boolean;
   } = {},
   comboStrategy: string | null = null,
   isCombo: boolean = false
@@ -1668,6 +1691,8 @@ async function handleSingleModelChat(
     // A combo target redirected here keeps sharing its outer combo request's record.
     const sNetStalledConnections: ComboStalledConnections =
       runtimeOptions.comboStalledConnections ?? new Map();
+    // The trusted live test keeps its agent guard exemption through the redirect.
+    const sNetTrustedLiveTest = hasAgentGuardLiveTestExemption(runtimeOptions);
     // Same judge pre-check as the main combo path; this combo runs with `settings: {}`.
     const sNetJudgeRefusal = agentGuardFusionJudgeRefusal({
       request,
@@ -1675,6 +1700,7 @@ async function handleSingleModelChat(
       settings: {},
       apiKeyInfo,
       sourceFormat: sNetSourceFormat,
+      trustedLiveTest: sNetTrustedLiveTest,
     });
     if (sNetJudgeRefusal) return sNetJudgeRefusal;
     const sNetResponse = await handleComboChat({
@@ -1704,6 +1730,7 @@ async function handleSingleModelChat(
           {
             sessionId: "", // safety-net redirect doesn't have session context
             forceLiveComboTest: false,
+            agentGuardTrustedLiveTest: sNetTrustedLiveTest,
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
@@ -1781,7 +1808,8 @@ async function handleSingleModelChat(
     modelStr,
     apiKeyInfo,
     sourceFormat,
-    trustedLiveTest: forceLiveComboTest,
+    trustedLiveTest: hasAgentGuardLiveTestExemption(runtimeOptions),
+    recordState: runtimeOptions.trafficType !== "shadow",
   });
   if (agentRefusal) return agentRefusal;
   // #14780: a probe must not leave a conversation on a signed-in account. Decided here,

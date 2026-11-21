@@ -1033,6 +1033,9 @@ handler makes the decision instead:
    request fails with the policy error when at least one target was refused and
    no target got past the guard. The combo keeps its own error when a top-level
    entry names another known provider, by a prefix or by the step's provider id.
+   A refused priority target with `fallbackOnlyOnQuotaExhaustion` is skipped the
+   same way and does not stop the combo. A shadow target is checked and logged, but it never
+   counts as a target that got past the guard.
 7. A `fusion` combo fails before the panel runs when the judge the fusion
    service will use would be refused. That judge comes from the combo's
    configuration or from the global combo defaults. The same check runs when a
@@ -1053,7 +1056,8 @@ handler makes the decision instead:
   second OmniRoute instance behind the first sees the first one's headers.
 - `AGENT_GUARD_STRICT` refuses every client on those providers that is not
   Claude Code or an official SDK. That includes browser-based clients and the
-  dashboard playground. The dashboard combo live test is exempt.
+  dashboard playground. The dashboard combo live test is exempt, also through
+  the safety-net redirect.
 - Some features build their own chat request instead of passing the client's
   request on. Four of them send it back through OmniRoute's `/v1/...` routes:
   - batch jobs (`src/lib/batches/dispatch.ts`)

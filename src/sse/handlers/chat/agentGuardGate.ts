@@ -54,6 +54,11 @@ type GateTarget = {
   apiKeyInfo?: { id?: unknown } | null;
   sourceFormat?: string | null;
   trustedLiveTest?: boolean;
+  /**
+   * `false` decides and logs but leaves the request's refused and admitted marks alone. A shadow
+   * target uses it, so it cannot change how the foreground combo settles.
+   */
+  recordState?: boolean;
   log?: AgentGuardLogger;
 };
 
@@ -141,9 +146,11 @@ function buildRefusal(sourceFormat: string | null | undefined): Response {
 
 /**
  * The refusal for this target, or null when it may be dispatched. Records the
- * outcome on the request so a combo can settle its final error.
+ * outcome on the request so a combo can settle its final error, unless
+ * `recordState` is false.
  */
 export function agentGuardRefusal(target: GateTarget): Response | null {
+  const recordState = target.recordState !== false;
   try {
     if (target.trustedLiveTest === true) return null;
     if (resolveAgentGuardMode() !== "block") return null;
@@ -151,20 +158,14 @@ export function agentGuardRefusal(target: GateTarget): Response | null {
     if (!request || typeof request !== "object") return null;
     const state = stateFor(request);
     const decision = decideAgentEnforcement(headersOf(request), target.provider);
-    if (!decision) {
-      state.admitted = true;
-      return null;
-    }
-    recordDecision(target, state, decision);
-    if (decision.action !== "block") {
-      state.admitted = true;
-      return null;
-    }
-    state.refused = true;
-    return buildRefusal(target.sourceFormat);
+    if (decision) recordDecision(target, state, decision);
+    const refused = decision?.action === "block";
+    if (recordState && refused) state.refused = true;
+    if (recordState && !refused) state.admitted = true;
+    return refused ? buildRefusal(target.sourceFormat) : null;
   } catch (error) {
     reportFailOpen(target.log, error);
-    markAdmittedIfTracked(target.request);
+    if (recordState) markAdmittedIfTracked(target.request);
     return null;
   }
 }
