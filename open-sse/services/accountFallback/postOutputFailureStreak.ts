@@ -16,6 +16,30 @@ export const POST_OUTPUT_FAILURE_STREAK_WINDOW_MS = 10 * 60_000;
 
 const streaks = new Map<string, { count: number; lastAt: number }>();
 
+/** How often idle streaks are swept; an idle entry lives at most window + interval. */
+const SWEEP_INTERVAL_MS = 60_000;
+let sweepTimer: ReturnType<typeof setInterval> | null = null;
+
+function stopSweep(): void {
+  if (sweepTimer) clearInterval(sweepTimer);
+  sweepTimer = null;
+}
+
+/** Drop streaks whose last failure left the window; a connection never used again would keep one forever. */
+function sweepIdleStreaks(): void {
+  const now = Date.now();
+  for (const [key, entry] of streaks) {
+    if (now - entry.lastAt > POST_OUTPUT_FAILURE_STREAK_WINDOW_MS) streaks.delete(key);
+  }
+  if (streaks.size === 0) stopSweep();
+}
+
+function ensureSweep(): void {
+  if (sweepTimer) return;
+  sweepTimer = setInterval(sweepIdleStreaks, SWEEP_INTERVAL_MS);
+  sweepTimer.unref?.(); // never keep the process alive for bookkeeping
+}
+
 function streakKey(provider: string, connectionId: string, model: string): string {
   return `${provider}\u0000${connectionId}\u0000${model}`;
 }
@@ -39,6 +63,7 @@ export function postOutputFailureReachesLockout(
     return true;
   }
   streaks.set(key, { count, lastAt: now });
+  ensureSweep();
   return false;
 }
 
@@ -52,7 +77,13 @@ export function clearPostOutputFailureStreak(
   streaks.delete(streakKey(provider, connectionId, model));
 }
 
+/** Number of tracked streaks (exported for tests). */
+export function getPostOutputFailureStreakCount(): number {
+  return streaks.size;
+}
+
 /** Test helper. */
 export function resetPostOutputFailureStreaks(): void {
   streaks.clear();
+  stopSweep();
 }

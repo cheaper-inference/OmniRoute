@@ -120,6 +120,30 @@ describe("thinkingReplay capability declaration (modelCompatOverrides)", () => {
     assert.equal(out.thinking?.type, "enabled");
   });
 
+  test('"none": a past assistant turn that ends in thinking keeps that block', () => {
+    const provider = "anthropic-compatible-none-trailing-node";
+    mergeModelCompatOverride(provider, MODEL, { thinkingReplay: "none" });
+    const body = buildToolLoopBody(MODEL);
+    body.messages.unshift(
+      { role: "user", content: [{ type: "text", text: "earlier" }] },
+      {
+        role: "assistant",
+        content: [{ type: "text", text: "earlier answer" }, { ...UNSIGNED_THINKING }],
+      }
+    );
+    const out = prepareClaudeRequest(
+      body as Parameters<typeof prepareClaudeRequest>[0],
+      provider,
+      false,
+      MODEL
+    ) as unknown as ToolLoopBody;
+    const pastTurn = out.messages.find((m) => m.role === "assistant");
+    assert.deepEqual(pastTurn?.content, [
+      { type: "text", text: "earlier answer" },
+      UNSIGNED_THINKING,
+    ]);
+  });
+
   test('"text": plain thinking precursor, never redacted_thinking', () => {
     const provider = "anthropic-compatible-text-node";
     mergeModelCompatOverride(provider, MODEL, { thinkingReplay: "text" });

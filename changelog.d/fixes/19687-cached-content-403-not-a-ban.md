@@ -1,0 +1,1 @@
+- **fix(providers):** a Gemini 403 "CachedContent not found" no longer bans an Antigravity CLI account. One request that names a missing cache now fails that request only, and the account stays active. ([#19687](https://github.com/cheaper-inference/OmniRoute/pull/19687))
