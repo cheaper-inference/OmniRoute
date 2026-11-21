@@ -7,8 +7,11 @@ import { ensureCliConfigWriteAllowed } from "@/shared/services/cliRuntime";
 import { cliBackupMutationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { CLI_TOOLS } from "@/shared/constants/cliTools";
 
-const VALID_TOOLS = ["claude", "codex", "droid", "grok-build", "openclaw", "cline", "kilo", "qwen"];
+// Every registered CLI tool id: setup writers back up under their registry id, so a fixed list
+// here left list/restore/delete answering 400 for tools such as pi, smelt or omp.
+const VALID_TOOLS = Object.keys(CLI_TOOLS);
 
 // GET /api/cli-tools/backups?tool=claude — list backups
 export async function GET(request) {
