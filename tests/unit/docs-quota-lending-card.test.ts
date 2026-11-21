@@ -6,7 +6,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
@@ -14,6 +14,7 @@ import { renderToString } from "react-dom/server";
 import {
   LENDING_DURATIONS,
   LENDING_UNTIL_FORMAT,
+  buildLendingSubmission,
   describeLending,
   lendingBorrowRows,
   lendingCardKind,
@@ -174,6 +175,29 @@ test("the key paragraph names the PATCH the page sends, with the key only in the
   has("The body carries the pool's opaque `ref` from the view, the percentage and the deadline.");
 });
 
+test("the save sentences match what the page does after a press", () => {
+  // Pinned through the page in tests/unit/ui/quota-self-lending.test.tsx: "two presses send one
+  // request" and "a second press on Withdraw while the first is pending sends nothing".
+  has(
+    "Each press sends one `PATCH /api/v1/me/quota/{provider}` request, and a second press sends nothing while the first is pending."
+  );
+  has("The answer is the rebuilt quota view, and the page shows it with no second read.");
+  // Pinned through the page in tests/unit/ui/quota-self-lending.test.tsx: "two saves at once are
+  // followed by one read" and "two saves one after the other send no read".
+  has("When two saves overlap, the page reads the quota once after the last answer.");
+  has("The page does not keep the consent in browser storage.");
+  const dir = "src/app/quota/[provider]";
+  const lendingFiles = ["lib", "components"].flatMap((sub) =>
+    readdirSync(path.join(ROOT, dir, sub))
+      .filter((name) => /lending/i.test(name))
+      .map((name) => `${dir}/${sub}/${name}`)
+  );
+  assert.ok(lendingFiles.length >= 5);
+  for (const file of lendingFiles) {
+    assert.ok(!/Storage/.test(read(file)), `${file} names a browser storage`);
+  }
+});
+
 test("the documented percentage bounds are the PATCH schema's", () => {
   has(
     "There the key holder sets a whole percentage from 0 to 100 of the key's idle share to lend."
@@ -209,6 +233,20 @@ test("the deadline and ended-consent sentences match the rules", () => {
   has("The card shows the stored deadline with its time zone named.");
   assert.equal(LENDING_UNTIL_FORMAT.timeZoneName, "short");
   has("A consent whose deadline has passed is shown as ended.");
+  has("With 0% no deadline is sent.");
+  const now = Date.parse("2026-05-27T15:30:00.000Z");
+  const lending = describeLending({
+    lendingPercent: 40,
+    lendingUntil: now + 3_600_000,
+    lendingActive: true,
+  });
+  for (const deadline of ["keep", "24h", "none"] as const) {
+    assert.deepEqual(buildLendingSubmission({ percent: "0", deadline }, lending, now), {
+      ok: true,
+      lendingPercent: 0,
+      lendingUntil: null,
+    });
+  }
   assert.equal(
     describeLending({ lendingPercent: 40, lendingUntil: 1, lendingActive: false }).kind,
     "ended"
@@ -219,7 +257,9 @@ test("the documented cards are the ones lendingCardKind picks", () => {
   has("A pool in `saturation` mode whose key stores a percentage above 0 shows a withdrawal only.");
   has("A pool in `saturation` mode with a stored 0 shows no lending card.");
   // Pinned through the page in tests/unit/ui/quota-self-lending.test.tsx (the withdrawal test).
-  has("After a save, the card keeps its message until the quota is read again.");
+  has(
+    "After a save, a card that the returned view no longer needs stays with its message until the page's view changes again."
+  );
   has("Its Withdraw button sends 0 with no deadline.");
   assert.equal(catalog.lendingWithdraw, "Withdraw");
   assert.equal(lendingCardKind({ borrowMode: "consent", lendingPercent: 0 }), "full");
@@ -266,12 +306,13 @@ test("each documented refusal class is the text and reload the page picks for th
   assert.ok(gone.text.startsWith("This pool is no longer available"));
   assert.deepEqual([gone.button, gone.reloads], [true, 0]);
 
-  has("A 400 asks the holder to check the percentage and the deadline.");
-  for (const code of [400]) {
-    const rejected = await outcomeOf(status(code));
-    assert.ok(rejected.text.includes("Check the percentage and the deadline"), String(code));
-    assert.deepEqual([rejected.button, rejected.reloads], [false, 0]);
-  }
+  has("A 400 or another 4xx answer asks the holder to check the percentage and the deadline.");
+  const rejected = await outcomeOf(status(400));
+  assert.ok(rejected.text.includes("Check the percentage and the deadline"));
+  assert.deepEqual([rejected.button, rejected.reloads], [false, 0]);
+  const otherClientError = await outcomeOf(status(422));
+  assert.equal(otherClientError.text, rejected.text);
+  assert.deepEqual([otherClientError.button, otherClientError.reloads], [false, 0]);
 
   has(
     "A 429 asks the holder to wait, with the seconds of `Retry-After` when the answer gives them."
@@ -303,4 +344,7 @@ test("each documented refusal class is the text and reload the page picks for th
   has("A failed save does not remove the key by itself.");
   const client = read("src/app/quota/[provider]/lib/useLendingSave.ts");
   assert.ok(!/Storage|unpersist|forget/i.test(client.replace(/^\s*(\*|\/\/).*$/gm, "")));
+  // Pinned through the page in tests/unit/ui/quota-self-lending-errors.test.tsx: "a 403 on save
+  // followed by a refused reload runs the page's own refusal".
+  has("When the reload after it is refused, the page removes the key as on any refused read.");
 });

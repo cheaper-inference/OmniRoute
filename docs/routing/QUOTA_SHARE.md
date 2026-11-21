@@ -868,22 +868,24 @@ own figure. A figure the view does not report reads as not available, not as zer
 
 A pool in `saturation` mode whose key stores a percentage above 0 shows a withdrawal only. It says
 that the stored percentage has no effect there. Its Withdraw button sends 0 with no deadline. A
-pool in `saturation` mode with a stored 0 shows no lending card. After a save, the card keeps its
-message until the quota is read again.
+pool in `saturation` mode with a stored 0 shows no lending card. After a save, a card that the
+returned view no longer needs stays with its message until the page's view changes again.
 
 Nothing is saved until the holder presses Save or Withdraw. Each press sends one
 `PATCH /api/v1/me/quota/{provider}` request, and a second press sends nothing while the first is
 pending. The body carries the pool's opaque `ref` from the view, the percentage and the deadline.
-The answer is the rebuilt quota view, and the page shows it with no second read. The page does not
-keep the consent in browser storage.
+The answer is the rebuilt quota view, and the page shows it with no second read. When two saves
+overlap, the page reads the quota once after the last answer. The page does not keep the consent
+in browser storage.
 
 A refused change is explained on the card by a text chosen from the HTTP status. The error body is
 not read. A 401 says the key was not accepted and reloads the quota. A 403 says the pool is not
 taking lending changes, and a 404 says the pool is gone. Both offer a button that reloads the
-quota. A 400 asks the holder to check the percentage and the deadline. A 429 asks the
-holder to wait, with the seconds of `Retry-After` when the answer gives them. A 5xx answer, a 408
-or a network failure says the change may not have been saved, and keeps the typed values. An
-answer outside the contract reloads the quota. A failed save does not remove the key by itself.
+quota. A 400 or another 4xx answer asks the holder to check the percentage and the deadline. A
+429 asks the holder to wait, with the seconds of `Retry-After` when the answer gives them. A 5xx
+answer, a 408 or a network failure says the change may not have been saved, and keeps the typed
+values. An answer outside the contract reloads the quota. A failed save does not remove the key by
+itself.
 When the reload after it is refused, the page removes the key as on any refused read.
 
 A reading the API marks `stale` is shown as possibly out of date. A reading it marks
