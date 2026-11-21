@@ -29,6 +29,8 @@ CIおよび Quality Gates ワークフローはそれぞれ、安定した判定
 
 ### キューをマージする
 
+> **2026-11-19: Mergify のマージキューを廃止しました**（オーナーの判断）。`.mergify.yml` はキューを定義せず、プルリクエストをマージまたは書き換える Mergify のコマンドを拒否します。omni-queue が live モードで動作するまでは、リリースブランチへのプルリクエストをリポジトリのルールセット「Require green gates on the active release」（`Gate / CI` + `Gate / Quality`）に従って手動でマージします。その後は omni-queue を通じてマージします（[OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)）。以下で説明する Mergify のドラフトを処理するワークフローは `ci.yml` と `quality.yml` に残っていますが、Mergify のドラフトは作成されなくなりました。
+
 `queue`ラベルは、 PR Mergify キュー (`.mergify.yml`) に送信します。 Mergify は`mergify/merge-queue/`ブランチ上でドラフトPRを開き、 CIそこで完全な選択を実行し、 `Gate / CI`、 `Gate / Quality` 、 `Merge integrity (changelog + generated skills)`が通過すると元のPRがマージされます。
 
 Mergify はキューの概要をドラフトの説明に書き込み、他のアプリもそれを編集できます。このようなドラフトの`pull_request` `edited`イベントは独自の同時実行グループ (`-queue-edit-<run_id>`) を使用するため、ドラフトの実際の実行をキャンセルできず、ゲートとマトリックスをスキップします。 `Merge integrity`だけがまだ実行されます。 Mergify はスキップされた`Gate / CI`失敗したチェックとして読み取り、 PRデキューするため、スキップされたゲート ジョブには別のチェック名が付けられます。

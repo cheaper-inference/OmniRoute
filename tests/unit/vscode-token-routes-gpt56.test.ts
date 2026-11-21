@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogRouteResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(
   path.join(os.tmpdir(), "omniroute-vscode-token-routes-gpt56-")
@@ -14,6 +15,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const vscodeRawModelsRoute =
   await import("../../src/app/api/v1/vscode/raw/[token]/models/route.ts");
 
@@ -60,8 +62,10 @@ test("vscode models route preserves gateway-owned Ollama Cloud effort tiers", as
   );
   const vscodeModelsRoute = await import("../../src/app/api/v1/vscode/[token]/models/route.ts");
 
-  const response = await vscodeModelsRoute.GET(
-    new Request(`http://localhost/api/v1/vscode/${encodeURIComponent(key.key)}/models`)
+  const response = await getSettledModelCatalogRouteResponse(v1ModelsCatalog, () =>
+    vscodeModelsRoute.GET(
+      new Request(`http://localhost/api/v1/vscode/${encodeURIComponent(key.key)}/models`)
+    )
   );
   const body = (await response.json()) as {
     data?: Array<{
@@ -105,8 +109,10 @@ test("vscode raw models route exposes native GPT-5.6 IDs and effort tiers", asyn
     "machine-vscode-raw-models-codex"
   );
 
-  const response = await vscodeRawModelsRoute.GET(
-    new Request(`http://localhost/api/v1/vscode/raw/${encodeURIComponent(key.key)}/models`)
+  const response = await getSettledModelCatalogRouteResponse(v1ModelsCatalog, () =>
+    vscodeRawModelsRoute.GET(
+      new Request(`http://localhost/api/v1/vscode/raw/${encodeURIComponent(key.key)}/models`)
+    )
   );
   const body = (await response.json()) as { data?: RawModel[] };
   const models = body.data ?? [];
