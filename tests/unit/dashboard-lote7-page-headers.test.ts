@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// F4 (KEA-7886, lote 7 pendência 12): six lote-7 pages had no page title of their own — only the
+// F4 (KEA-7886, batch 7 backlog 12): six batch-7 pages had no page title of their own — only the
 // shell top bar, which is hidden below lg and now hides itself next to a PageHeader. Each page
 // renders a kit PageHeader titled like its sidebar entry (same keys the shell title used).
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");

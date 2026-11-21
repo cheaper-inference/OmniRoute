@@ -1006,7 +1006,7 @@ test("AntigravityExecutor.execute bounds a persistent short-retry 429 instead of
     assert.equal(result.response.status, 429);
 
     // Bounded: switchAuth declines same-URL retries → 2 explicitly configured endpoints
-    // × 1 attempt each = 2 attempts total (#9351).
+    // × 1 attempt each = 2 attempts total (
     assert.equal(calls.length, 2);
     const physicalSends = telemetry.filter((line) => line.includes("[Antigravity] PhysicalSend"));
     assert.equal(physicalSends.length, calls.length);

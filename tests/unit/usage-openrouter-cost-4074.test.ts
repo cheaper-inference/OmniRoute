@@ -9,7 +9,7 @@
  *
  * Contract pinned here:
  * - the internal normalized field is `cost_usd` (distinct from xAI's
- *   `cost_in_usd_ticks`); precedence is ticks > cost_usd > token × pricing;
+ * `cost_in_usd_ticks`); precedence is ticks > cost_usd > token × pricing;
  * - clients receive `usage.cost` as a bare number on OpenAI-format responses,
  *   only when the upstream sent it — no estimate is ever injected into the body;
  * - Claude / Gemini / Responses usage shapes are untouched.

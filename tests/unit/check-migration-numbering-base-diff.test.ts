@@ -272,7 +272,7 @@ test("e2e: without a base outside CI the comparison is skipped with one line", (
   const { dir } = makeRepo();
   const r = gate(dir, []);
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /comparação com a base: pulada \(sem --base\)/);
+  assert.match(r.stdout, /comparison with the base: skipped \(no --base\)/);
 });
 
 test("e2e: deleting a merged date-named migration fails against the base", () => {
@@ -281,7 +281,7 @@ test("e2e: deleting a merged date-named migration fails against the base", () =>
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1, r.stdout);
   assert.match(r.stderr, new RegExp(BASE_STAMP_FILE.replace(".", "\\.")));
-  assert.match(r.stderr, /já mesclada não pode ser apagada nem renomeada/);
+  assert.match(r.stderr, /a merged migration cannot be deleted or renamed/);
   assert.match(r.stderr, /npm run db:new-migration/);
 });
 
@@ -290,8 +290,8 @@ test("e2e: renaming a merged migration fails and names the new file", () => {
   fs.renameSync(path.join(mig, BASE_STAMP_FILE), path.join(mig, "20261113000200_base_feature.sql"));
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /já mesclada não pode ser apagada nem renomeada/);
-  assert.match(r.stderr, /renomeada para 20261113000200_base_feature\.sql/);
+  assert.match(r.stderr, /a merged migration cannot be deleted or renamed/);
+  assert.match(r.stderr, /renamed to 20261113000200_base_feature\.sql/);
 });
 
 test("e2e: deleting a merged old-format migration fails against the base too", () => {
@@ -300,7 +300,7 @@ test("e2e: deleting a merged old-format migration fails against the base too", (
   fs.rmSync(path.join(mig, victim));
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1);
-  assert.match(r.stderr, new RegExp(`${victim.replace(".", "\\.")}.*já mesclada`));
+  assert.match(r.stderr, new RegExp(`${victim.replace(".", "\\.")}.*a merged migration`));
 });
 
 test("e2e: editing a merged migration is a non-blocking warning (annotation in Actions)", () => {
@@ -314,7 +314,7 @@ test("e2e: editing a merged migration is a non-blocking warning (annotation in A
   assert.equal(fs.existsSync(record), true, "the commutation checker must run for an edit");
   assert.match(
     local.stdout,
-    /conteúdo alterado.*20261113000100_base_feature\.sql|20261113000100_base_feature\.sql.*conteúdo alterado/
+    /changed content.*20261113000100_base_feature\.sql|20261113000100_base_feature\.sql.*changed content/
   );
   const actions = gate(dir, ["--base", base], { GITHUB_ACTIONS: "true", FAKE_EXIT: "0" });
   assert.equal(actions.status, 0, actions.stderr);
@@ -340,7 +340,7 @@ test("e2e: an out-of-order migration that commutes passes with a note", () => {
   const record = path.join(tmpRoot, `record-${repoCounter}.json`);
   const r = gate(dir, ["--base", base], { FAKE_EXIT: "0", FAKE_RECORD: record });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /20261113000050_older\.sql.*fora de ordem, mas comuta/);
+  assert.match(r.stdout, /20261113000050_older\.sql.*out of order, but commutes/);
   // Contract: base-dir holds the base files (content from git), head-dir the disk copy.
   const seen = JSON.parse(fs.readFileSync(record, "utf-8"));
   assert.equal(seen.base.includes("20261113000050_older.sql"), false);
@@ -355,11 +355,11 @@ test("e2e: an out-of-order migration that does not commute fails with the diff",
   fs.writeFileSync(path.join(mig, "20261113000050_older.sql"), "SELECT 1;\n");
   const r = gate(dir, ["--base", base], {
     FAKE_EXIT: "1",
-    FAKE_OUTPUT: "tabela older_t: só no caminho novo",
+    FAKE_OUTPUT: "older_t table: only on new path",
   });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /tabela older_t: só no caminho novo/);
-  assert.match(r.stderr, /regere o nome com npm run db:new-migration/);
+  assert.match(r.stderr, /older_t table: only on new path/);
+  assert.match(r.stderr, /regenerate the name with npm run db:new-migration/);
 });
 
 test("e2e: a broken commutation checker fails in CI and only warns outside CI", () => {
@@ -367,10 +367,10 @@ test("e2e: a broken commutation checker fails in CI and only warns outside CI", 
   fs.writeFileSync(path.join(mig, "20261113000050_older.sql"), "SELECT 1;\n");
   const local = gate(dir, ["--base", base], { FAKE_EXIT: "2" });
   assert.equal(local.status, 0, local.stderr);
-  assert.match(local.stdout + local.stderr, /comutação/);
+  assert.match(local.stdout + local.stderr, /commutation/);
   const ci = gate(dir, ["--base", base], { FAKE_EXIT: "2", CI: "true" });
   assert.equal(ci.status, 1, ci.stdout);
-  assert.match(ci.stderr, /comutação/);
+  assert.match(ci.stderr, /commutation/);
   const missing = gate(dir, ["--base", base], {
     CI: "true",
     MIGRATION_COMMUTATION_SCRIPT: path.join(tmpRoot, "does-not-exist.mjs"),
@@ -393,7 +393,7 @@ test("e2e: pull_request on a merge ref uses the merge's first parent as the base
   assert.equal(skipped.status, 0, skipped.stderr);
   const pr = gate(dir, [], { GITHUB_EVENT_NAME: "pull_request", GITHUB_ACTIONS: "true" });
   assert.equal(pr.status, 1, pr.stdout);
-  assert.match(pr.stderr, /já mesclada não pode ser apagada nem renomeada/);
+  assert.match(pr.stderr, /a merged migration cannot be deleted or renamed/);
 });
 
 test("e2e: pull_request without a merge commit uses merge-base with origin/<base>", () => {
@@ -408,7 +408,7 @@ test("e2e: pull_request without a merge commit uses merge-base with origin/<base
     GITHUB_BASE_REF: "main",
   });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /já mesclada/);
+  assert.match(r.stderr, /a merged migration/);
 });
 
 test("e2e: merge_group reads merge_group.base_sha from the event payload", () => {
@@ -423,14 +423,14 @@ test("e2e: merge_group reads merge_group.base_sha from the event payload", () =>
     GITHUB_EVENT_PATH: payload,
   });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /já mesclada/);
+  assert.match(r.stderr, /a merged migration/);
 });
 
 test("e2e: a PR event without a resolvable base fails closed", () => {
   const { dir } = makeRepo();
   const r = gate(dir, [], { GITHUB_EVENT_NAME: "pull_request", GITHUB_ACTIONS: "true" });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /base não resolvida/);
+  assert.match(r.stderr, /base unresolved/);
 });
 
 test("e2e: MIGRATION_BASE_REF selects the base and an unknown --base ref fails", () => {
@@ -438,7 +438,7 @@ test("e2e: MIGRATION_BASE_REF selects the base and an unknown --base ref fails",
   fs.rmSync(path.join(mig, BASE_STAMP_FILE));
   const byEnv = gate(dir, [], { MIGRATION_BASE_REF: base });
   assert.equal(byEnv.status, 1, byEnv.stdout);
-  assert.match(byEnv.stderr, /já mesclada/);
+  assert.match(byEnv.stderr, /a merged migration/);
   const unknown = gate(dir, ["--base", "no-such-ref"]);
   assert.equal(unknown.status, 1, unknown.stdout);
   assert.match(unknown.stderr, /no-such-ref/);
@@ -482,11 +482,11 @@ function assertStrictRemovalMessage(stderr: string, name: string) {
   assert.match(
     stderr,
     new RegExp(
-      `${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}: migration já mesclada não pode ser apagada nem renomeada`
+      `${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}: a merged migration cannot be deleted or renamed`
     )
   );
-  assert.match(stderr, /homologação, Docker :next, VPS, sync do Enterprise/);
-  assert.match(stderr, /npm run db:new-migration -- <descrição>/);
+  assert.match(stderr, /homologation, Docker :next, VPS, Enterprise sync/);
+  assert.match(stderr, /npm run db:new-migration -- <description>/);
   assert.match(stderr, /DROP \.\.\. IF EXISTS/);
   assert.match(stderr, /RENAMED_MIGRATION_COMPATIBILITY/);
 }
@@ -585,7 +585,7 @@ test("e2e: a covered rename to a stamp newer than the base runs the commutation 
   const r = gate(dir, ["--base", base], {
     FAKE_EXIT: "1",
     FAKE_RECORD: record,
-    FAKE_OUTPUT: "tabela base_t: só no caminho novo",
+    FAKE_OUTPUT: "base_t table: only in new path",
   });
   assert.equal(r.status, 1, r.stdout);
   assert.equal(fs.existsSync(record), true, "a covered rename must run the commutation checker");
@@ -595,13 +595,13 @@ test("e2e: a covered rename to a stamp newer than the base runs the commutation 
   assert.equal(seen.base.includes(renamed), false);
   assert.equal(seen.head.includes(renamed), true);
   assert.equal(seen.head.includes(BASE_STAMP_FILE), false);
-  assert.match(r.stderr, /tabela base_t: só no caminho novo/);
+  assert.match(r.stderr, /base_t table: only in new path/);
   assert.match(
     r.stderr,
-    /renomeadas: 20261113000100_base_feature\.sql → 20261113000200_base_feature\.sql/
+    /renamed: 20261113000100_base_feature\.sql → 20261113000200_base_feature\.sql/
   );
-  assert.match(r.stderr, /desfaça a renomeação/);
-  assert.doesNotMatch(r.stderr, /mantenha o carimbo antigo/);
+  assert.match(r.stderr, /undo the rename/);
+  assert.doesNotMatch(r.stderr, /keep the old stamp/);
   assert.doesNotMatch(r.stderr, /regere o nome/);
 });
 
@@ -621,8 +621,8 @@ test("e2e: a covered rename whose content changed fails", () => {
   ]);
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /20261113000100_base_feature\.sql.*conteúdo/);
-  assert.match(r.stderr, /migration nova/);
+  assert.match(r.stderr, /20261113000100_base_feature\.sql.*content/);
+  assert.match(r.stderr, /new migration/);
 });
 
 test("e2e: a rename without an entry fails and points at the compatibility table", () => {
@@ -632,7 +632,7 @@ test("e2e: a rename without an entry fails and points at the compatibility table
   fs.renameSync(path.join(mig, BASE_STAMP_FILE), path.join(mig, "20261113000200_base_feature.sql"));
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /renomeada para 20261113000200_base_feature\.sql/);
+  assert.match(r.stderr, /renamed to 20261113000200_base_feature\.sql/);
   assertStrictRemovalMessage(r.stderr, BASE_STAMP_FILE);
 });
 
@@ -665,7 +665,7 @@ test("e2e: two RENAMED_MIGRATION_COMPATIBILITY declarations fail closed (B-4)", 
   );
   const r = gate(dir, ["--base", base], { FAKE_EXIT: "0" });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /RENAMED_MIGRATION_COMPATIBILITY.*2 declarações/);
+  assert.match(r.stderr, /RENAMED_MIGRATION_COMPATIBILITY.*2 declarations/);
 });
 
 test("parser: RENAMED_MIGRATION_COMPATIBILITY text parse equals the real TS array", async () => {
@@ -734,16 +734,16 @@ test("parser: declarations inside string literals are ignored; zero or two real 
   // Only the decoy: there is no real declaration.
   assert.throws(
     () => lib.parseRenamedMigrationCompatibility(`const NOTE = \`${fake}\`;\n`),
-    /não encontrado/
+    /not found/
   );
   // Not at the start of a line.
   assert.throws(
     () => lib.parseRenamedMigrationCompatibility(`void 0; ${real}\n`),
-    /não encontrado/
+    /not found/
   );
   assert.throws(
     () => lib.parseRenamedMigrationCompatibility(`${fake};\n${real}\n`),
-    /2 declarações/
+    /2 declarations/
   );
 });
 
@@ -771,8 +771,8 @@ test("e2e (real checker): emptying a merged migration fails because the schemas 
   const r = gateReal(dir, ["--base", base], { GITHUB_ACTIONS: "true" });
   assert.equal(r.status, 1, `${r.stdout}\n${r.stderr}`);
   assert.match(r.stderr, /v1_t1/);
-  assert.match(r.stderr, /não reaplicam/);
-  assert.match(r.stderr, /migration nova/);
+  assert.match(r.stderr, /do not reapply/);
+  assert.match(r.stderr, /new migration/);
 });
 
 test("e2e (real checker): a harmless edit of a merged migration only warns", () => {
@@ -879,16 +879,16 @@ test("e2e (real checker): a covered rename to a newer stamp that changes the sch
     .split("\n")
     .filter((line) => line.startsWith("    → "))
     .join("\n");
-  assert.match(gateHints, /desfaça a renomeação/);
-  assert.doesNotMatch(gateHints, /mantenha o carimbo antigo/);
+  assert.match(gateHints, /undo the rename/);
+  assert.doesNotMatch(gateHints, /keep the old stamp/);
   assert.doesNotMatch(r.stderr, /regere o nome/);
 });
 
 // --- Renames that keep the version, and renames the runner would run again (R2B-1, R2B-2) ----
 
 const SAME_SLOT_MESSAGE =
-  "o runner trata a mesma versão com outro nome como migration nova e a aplicaria de novo nos " +
-  "bancos que já a rodaram; use outro carimbo + entrada de compatibilidade, ou mantenha o nome";
+  "the runner treats the same version under a different name as a new migration and would apply it again in " +
+  "databases that already ran it; use another timestamp + compatibility entry, or keep the name";
 
 const escapeRe = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -957,12 +957,12 @@ test("e2e: a rename that keeps the timestamp fails even with a compatibility ent
   assert.match(
     r.stderr,
     new RegExp(
-      `✗ ${escapeRe(BASE_STAMP_FILE)}: renomeada para ${escapeRe(sameSlot)} mantendo a versão ` +
+      `✗ ${escapeRe(BASE_STAMP_FILE)}: renamed to ${escapeRe(sameSlot)} while keeping version ` +
         `20261113000100`
     )
   );
   assert.match(r.stderr, new RegExp(escapeRe(SAME_SLOT_MESSAGE)));
-  assert.doesNotMatch(r.stdout, /coberta pela entrada/);
+  assert.doesNotMatch(r.stdout, /covered by input/);
   assert.equal(fs.existsSync(record), false, "the gate fails before the commutation check");
 });
 
@@ -974,7 +974,7 @@ test("e2e: a rename that keeps the timestamp without an entry fails with the sam
   assert.equal(r.status, 1, r.stdout);
   assert.match(r.stderr, new RegExp(escapeRe(SAME_SLOT_MESSAGE)));
   // Without an entry the runner skips it by version and flags the renumbering on every boot.
-  assert.match(r.stderr, /Sem entrada, o runner a pula pela versão/);
+  assert.match(r.stderr, /Without an entry, the runner skips it by version/);
 });
 
 test("e2e: the removal hint asks for a new timestamp, never the same one", () => {
@@ -982,8 +982,8 @@ test("e2e: the removal hint asks for a new timestamp, never the same one", () =>
   fs.rmSync(path.join(mig, BASE_STAMP_FILE));
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /use um carimbo novo, diferente do antigo/);
-  assert.doesNotMatch(r.stderr, /use um carimbo vizinho do antigo/);
+  assert.match(r.stderr, /use a new timestamp, different from the old one/);
+  assert.doesNotMatch(r.stderr, /use a stamp next to the old one/);
 });
 
 test("e2e: a covered rename passes --must-not-apply <target> to the commutation checker (C2)", () => {
@@ -1032,19 +1032,19 @@ test("e2e: a renamed migration the checker saw applied again gets its own title 
   ]);
   const r = gate(dir, ["--base", base], {
     FAKE_EXIT: "1",
-    FAKE_OUTPUT: `migration ${renamed}: aplicada de novo no banco atualizado`,
+    FAKE_OUTPUT: `migration ${renamed}: applied again to the updated database`,
   });
   assert.equal(r.status, 1, r.stdout);
   assert.match(
     r.stderr,
-    /✗ migration renomeada rodaria de novo \(renomeadas: 20261113000100_base_feature\.sql → 20261113000200_base_feature\.sql\)/
+    /✗ commutation check \(renamed: 20261113000100_base_feature\.sql → 20261113000200_base_feature\.sql\)/
   );
-  assert.match(r.stderr, /aplicada de novo no banco atualizado/);
+  assert.match(r.stderr, /applied again on the updated database/);
   assert.match(
     r.stderr,
-    /o runner não reconhece a renomeação; confira a entrada em RENAMED_MIGRATION_COMPATIBILITY \(versão e nome antigos e novos\)/
+    /the runner does not recognize the rename; check the entry in RENAMED_MIGRATION_COMPATIBILITY \(old and new version and name\)/
   );
-  assert.doesNotMatch(r.stderr, /banco atualizado e banco novo divergem/);
+  assert.doesNotMatch(r.stderr, /updated database and new database diverge/);
   assert.doesNotMatch(r.stderr, /regere o nome/);
 });
 
@@ -1064,10 +1064,10 @@ test("e2e: the applied-again phrase fails the gate even when the checker exits 0
   ]);
   const r = gate(dir, ["--base", base], {
     FAKE_EXIT: "0",
-    FAKE_OUTPUT: `migration ${renamed}: aplicada de novo no banco atualizado`,
+    FAKE_OUTPUT: `migration ${renamed}: applied again to the updated database`,
   });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /✗ migration renomeada rodaria de novo/);
+  assert.match(r.stderr, /✗ renamed migration would run again/);
   assert.doesNotMatch(r.stdout, /mesmo schema/);
   assert.doesNotMatch(r.stdout, /\[check-migration-numbering\] OK/);
 });
@@ -1146,16 +1146,16 @@ test("e2e (real checker): a rename covered only by an entry the parser misreads 
     }),
   });
   // Precondition: the text parser reads the decoy as a covering entry.
-  assert.match(r.stdout, /coberta pela entrada de RENAMED_MIGRATION_COMPATIBILITY/);
+  assert.match(r.stdout, /covered by RENAMED_MIGRATION_COMPATIBILITY entry/);
   assert.equal(r.status, 1, `${r.stdout}\n${r.stderr}`);
-  assert.match(r.stderr, /aplicada de novo no banco atualizado/);
+  assert.match(r.stderr, /applied again on the updated database/);
   assert.match(r.stderr, new RegExp(escapeRe(renamed)));
-  assert.match(r.stderr, /✗ migration renomeada rodaria de novo/);
+  assert.match(r.stderr, /✗ renamed migration would run again/);
 });
 
 // --- A PR migration that does not apply after the base (A2-R1, R2B-3) ------------------------
 
-const NOT_AFTER_BASE = "não aplica depois de todas as migrations da base";
+const NOT_AFTER_BASE = "does not apply after all base migrations";
 
 test("e2e: a PR migration that fails only on the upgraded path gets the neutral SQL hint (C1)", () => {
   const { dir, mig, base } = makeRepo();
@@ -1167,15 +1167,15 @@ test("e2e: a PR migration that fails only on the upgraded path gets the neutral 
   assert.equal(r.status, 1, r.stdout);
   assert.match(
     r.stderr,
-    /✗ migration do PR não aplica \(fora de ordem: 20261113000050_older\.sql\)/
+    /✗ PR migration does not apply \(out of order: 20261113000050_older\.sql\)/
   );
   assert.match(
     r.stderr,
-    /corrija o SQL contra o schema atual da base; se ela depende de outra migration do PR com carimbo maior, regere o nome com npm run db:new-migration/
+    /fix the SQL against the current schema of the base; if it depends on another PR migration with a larger timestamp, regenerate the name with npm run db:new-migration/
   );
-  assert.doesNotMatch(r.stderr, /renomear é seguro/);
-  assert.doesNotMatch(r.stderr, /mudar o nome ou a ordem não resolve/);
-  assert.doesNotMatch(r.stderr, /banco atualizado e banco novo divergem/);
+  assert.doesNotMatch(r.stderr, /renaming is safe/);
+  assert.doesNotMatch(r.stderr, /changing the name or order does not resolve/);
+  assert.doesNotMatch(r.stderr, /updated database and new database diverge/);
 });
 
 // --- Old-format files added into the frozen series (V1-6) ------------------------------------
@@ -1209,7 +1209,7 @@ test("e2e: an old-format file in a known gap fails against the base", () => {
   fs.writeFileSync(path.join(mig, "121_sneaky.sql"), "SELECT 1;\n");
   const r = gate(dir, ["--base", base]);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /121_sneaky\.sql.*série antiga está congelada/);
+  assert.match(r.stderr, /121_sneaky\.sql.*legacy series is frozen/);
   assert.match(r.stderr, /npm run db:new-migration/);
 });
 
@@ -1271,19 +1271,19 @@ test("e2e: a PR migration that fails on both paths is reported as broken SQL, no
   const r = gate(dir, ["--base", base], {
     FAKE_EXIT: "1",
     FAKE_OUTPUT:
-      "migration 20261113000050_older.sql: não aplica depois de todas as migrations da base\n" +
-      "migration 20261113000050_older.sql: não aplica em nenhum dos dois caminhos (syntax error)",
+      "migration 20261113000050_older.sql: does not apply after all base migrations\n" +
+      "migration 20261113000050_older.sql: does not apply to either path (syntax error)",
   });
   assert.equal(r.status, 1, r.stdout);
   assert.match(
     r.stderr,
-    /✗ migration do PR não aplica \(fora de ordem: 20261113000050_older\.sql\)/
+    /✗ PR migration does not apply \(out of order: 20261113000050_older\.sql\)/
   );
-  assert.match(r.stderr, /não aplica em nenhum dos dois caminhos \(syntax error\)/);
-  assert.match(r.stderr, /corrija o SQL contra o schema atual da base/);
-  assert.doesNotMatch(r.stderr, /renomear é seguro/);
-  assert.doesNotMatch(r.stderr, /mudar o nome ou a ordem não resolve/);
-  assert.doesNotMatch(r.stderr, /banco atualizado e banco novo divergem/);
+  assert.match(r.stderr, /does not apply to either path \(syntax error\)/);
+  assert.match(r.stderr, /fix the SQL against the current schema of the base/);
+  assert.doesNotMatch(r.stderr, /renaming is safe/);
+  assert.doesNotMatch(r.stderr, /changing the name or order does not resolve/);
+  assert.doesNotMatch(r.stderr, /updated database and new database diverge/);
 });
 
 test("e2e: an out-of-order migration with DML gets a warning", () => {
@@ -1296,7 +1296,7 @@ test("e2e: an out-of-order migration with DML gets a warning", () => {
   assert.equal(r.status, 0, r.stderr);
   assert.match(
     r.stdout,
-    /::warning file=src\/lib\/db\/migrations\/20261113000050_older\.sql::.*DML.*não compara dados/
+    /::warning file=src\/lib\/db\/migrations\/20261113000050_older\.sql::.*DML.*does not compare data/
   );
 });
 
@@ -1321,7 +1321,7 @@ test("e2e: --base-latest-tag picks the highest semver release tag in HEAD's hist
   assert.equal(r.status, 0, r.stderr);
   assert.match(
     r.stdout,
-    new RegExp(`comparação com a base ${ten.slice(0, 12)} \\(tag v1\\.10\\.0\\)`)
+    new RegExp(`comparison with the base ${ten.slice(0, 12)} \\(tag v1\\.10\\.0\\)`)
   );
 });
 
@@ -1332,7 +1332,7 @@ test("e2e: --base-latest-tag compares like --base (a removal since the tag fails
   git(dir, ["commit", "-q", "-am", "drop a published migration"]);
   const r = gate(dir, ["--base-latest-tag"]);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /já mesclada não pode ser apagada/);
+  assert.match(r.stderr, /a merged migration cannot be deleted/);
   assert.match(r.stdout, /\(tag v2\.0\.0\)/);
 });
 
@@ -1349,7 +1349,7 @@ test("e2e: --base-latest-tag falls back to the highest vX.Y.Z-ee.N tag (Enterpri
   assert.equal(r.status, 0, r.stderr);
   assert.match(
     r.stdout,
-    new RegExp(`comparação com a base ${ee.slice(0, 12)} \\(tag v3\\.8\\.54-ee\\.1\\)`)
+    new RegExp(`comparison with the base ${ee.slice(0, 12)} \\(tag v3\\.8\\.54-ee\\.1\\)`)
   );
 
   const pure = commitFile(dir, "20261113000400_pure.sql", "SELECT 1;\n");
@@ -1358,7 +1358,7 @@ test("e2e: --base-latest-tag falls back to the highest vX.Y.Z-ee.N tag (Enterpri
   assert.equal(withPure.status, 0, withPure.stderr);
   assert.match(
     withPure.stdout,
-    new RegExp(`comparação com a base ${pure.slice(0, 12)} \\(tag v1\\.0\\.0\\)`)
+    new RegExp(`comparison with the base ${pure.slice(0, 12)} \\(tag v1\\.0\\.0\\)`)
   );
 });
 
@@ -1372,13 +1372,13 @@ test("e2e: --base-latest-tag tells a divergence to fix forward, never to rename"
   const record = path.join(tmpRoot, `record-tag-mode-${repoCounter}.json`);
   const r = gate(dir, ["--base-latest-tag"], {
     FAKE_EXIT: "1",
-    FAKE_OUTPUT: "tabela t: coluna x só existe no caminho atualizado",
+    FAKE_OUTPUT: "table t: column x only exists in updated path",
     FAKE_RECORD: record,
   });
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stderr, /comparação com a tag v1\.0\.0: esses arquivos já estão mesclados/);
-  assert.match(r.stderr, /corrija para frente com uma migration nova/);
-  assert.doesNotMatch(r.stderr, /renomear é seguro/);
+  assert.match(r.stderr, /comparison with the tag v1\.0\.0: these files are already merged/);
+  assert.match(r.stderr, /fix forward with a new migration/);
+  assert.doesNotMatch(r.stderr, /renaming is safe/);
   assert.doesNotMatch(r.stderr, /regere o nome/);
   const seen = JSON.parse(fs.readFileSync(record, "utf-8")) as { argv: string[] };
   assert.ok(seen.argv.includes("--merged-base"), `argv: ${seen.argv.join(" ")}`);
@@ -1387,11 +1387,11 @@ test("e2e: --base-latest-tag tells a divergence to fix forward, never to rename"
   const prRecord = path.join(tmpRoot, `record-pr-mode-${repoCounter}.json`);
   const pr = gate(dir, ["--base", "v1.0.0"], {
     FAKE_EXIT: "1",
-    FAKE_OUTPUT: "tabela t: coluna x só existe no caminho atualizado",
+    FAKE_OUTPUT: "table t: column x only exists in updated path",
     FAKE_RECORD: prRecord,
   });
   assert.equal(pr.status, 1, pr.stdout);
-  assert.match(pr.stderr, /regere o nome com npm run db:new-migration/);
+  assert.match(pr.stderr, /regenerate the name with npm run db:new-migration/);
   const prSeen = JSON.parse(fs.readFileSync(prRecord, "utf-8")) as { argv: string[] };
   assert.equal(prSeen.argv.includes("--merged-base"), false);
 });
@@ -1402,7 +1402,7 @@ test("e2e: --base-latest-tag without any release tag fails closed", () => {
   const r = gate(dir, ["--base-latest-tag"]);
   assert.equal(r.status, 1, r.stdout);
   assert.match(r.stderr, /--base-latest-tag/);
-  assert.match(r.stderr, /nenhuma tag de release/);
+  assert.match(r.stderr, /no release tag/);
   const both = gate(dir, ["--base-latest-tag", "--base", "HEAD"]);
   assert.equal(both.status, 1, both.stdout);
 });

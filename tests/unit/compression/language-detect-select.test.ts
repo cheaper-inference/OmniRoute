@@ -27,7 +27,7 @@ test("detector still recognizes genuine non-English text (>=2 native keywords)",
 });
 
 test("auto-detect uses the detected pt-BR pack, not the mangling English pack (B-LANG-DORMANT)", () => {
-  // pt-BR prose with an article the English `articles` rule would delete ("a configuração").
+  // pt-BR prose with an article the English `articles` rule would delete ("the configuration").
   const text =
     "Por favor, você poderia revisar a configuração do arquivo? Obrigado pela ajuda com isso.";
   const res = cavemanCompress({ messages: [{ role: "user", content: text }] } as Record<

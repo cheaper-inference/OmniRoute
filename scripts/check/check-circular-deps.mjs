@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 // scripts/check/check-circular-deps.mjs
-// Gate: dpdm circular-deps cross-check (segunda opinião complementar ao check-cycles.mjs).
+// Gate: dpdm circular-deps cross-check (second opinion complementary to check-cycles.mjs).
 //
-// check-cycles.mjs usa AST-TS próprio mas cobre apenas 5 sub-árvores + somente
+// check-cycles.mjs uses its own AST-TS but covers only 5 sub-trees + only
 // imports relativos. Este script usa dpdm (v4) que rastreia path-aliases via
-// tsconfig.json e cobre entrypoints de alto risco.
+// tsconfig.json and covers high-risk entry points.
 //
-// Advisory nesta versão: exit 0 sempre; imprime `circularDeps=N` para baseline.
-// Direção da catraca: down (não pode subir). Adicionar ao quality-baseline.json
-// como `{ value: N, direction: "down" }` após a primeira run verde no CI.
+// Advisory in this version: exit 0 always; prints `circularDeps=N` for baseline.
+// Direction of the turnstile: down (cannot go up). Add to quality-baseline.json
+// as `{ value: N, direction: "down" }` after the first green run on the CI.
 //
-// Escopo limitado a 4 entrypoints principais para manter o tempo de análise
+// Scope limited to 4 main entrypoints to keep analysis time down
 // abaixo de 60s. dpdm rastreia transitivamente todas as deps de cada entry.
-// Cobrir mais entries aumenta o tempo sem proporcional ganho (as deps core se
+// Covering more entries increases the time without proportional gain (the core deps are
 // repetem via transitividade).
 //
-// Nota: dpdm pode reportar mais ciclos que check-cycles.mjs porque conta
-// permutações de paths que passam pelo mesmo SCC, não apenas SCCs únicos.
-// Isso é esperado — ferramentas diferentes, métricas complementares.
+// Note: dpdm may report more cycles than check-cycles.mjs because it counts
+// permutations of paths that pass through the same SCC, not just unique SCCs.
+// This is expected — different tools, complementary metrics.
 
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -44,10 +44,10 @@ const DPDM_BIN = resolve(projectRoot, "node_modules/dpdm/lib/bin/dpdm.js");
 const TSCONFIG = resolve(projectRoot, "tsconfig.json");
 
 /**
- * Parseia a saída JSON do dpdm e retorna a contagem de ciclos.
- * Função exportada para ser testada isoladamente sem executar o dpdm.
+ * Parses the JSON output from dpdm and returns the cycle count.
+ * Function exported to be tested in isolation without running dpdm.
  *
- * @param {string} jsonStr - string com o JSON de saída do dpdm (campo "circulars").
+ * @param {string} jsonStr - String containing the JSON output from dpdm ("circulars" field).
  * @returns {{ count: number, circulars: string[][] }}
  */
 export function parseDpdmOutput(jsonStr) {
@@ -62,9 +62,9 @@ export function parseDpdmOutput(jsonStr) {
 }
 
 /**
- * Executa o dpdm e retorna a string JSON bruta do arquivo de saída.
+ * Executes dpdm and returns the raw JSON string from the output file.
  *
- * @returns {string} conteúdo JSON do arquivo temporário.
+ * @returns {string} JSON content of the temporary file.
  */
 function runDpdm() {
   if (!existsSync(DPDM_BIN)) {
@@ -130,8 +130,8 @@ function main() {
     process.exit(1);
   }
 
-  // Advisory mode: always exit 0. Catraca pode ser adicionada no quality-baseline.json
-  // após baseline ser estabelecida.
+  // Advisory mode: always exit 0. Turnstile can be added to quality-baseline.json
+  // after baseline is established.
   console.log(`[circular-deps] circularDeps=${result.count}`);
   console.log(
     `[circular-deps] Advisory — add to quality-baseline.json: { "value": ${result.count}, "direction": "down" }`
@@ -139,5 +139,5 @@ function main() {
   process.exit(0);
 }
 
-// Permite que o módulo seja importado em testes sem executar main().
+// Allows the module to be imported in tests without running main().
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();

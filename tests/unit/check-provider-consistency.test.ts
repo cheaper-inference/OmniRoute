@@ -23,7 +23,7 @@ test("flags a registry id that is not a canonical provider (hallucinated/half-re
 
 test("allowlisted ids are not flagged", () => {
   assert.deepEqual(
-    findOrphanRegistryIds(["openai", "krutrim"], isKnown, { krutrim: "pré-existente" }),
+    findOrphanRegistryIds(["openai", "krutrim"], isKnown, { krutrim: "pre-existing" }),
     []
   );
 });

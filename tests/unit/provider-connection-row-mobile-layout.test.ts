@@ -124,7 +124,7 @@ test("custom model add and edit forms share the two-column phone grid", () => {
 
 test("toggle thumb is vertically centred in its track", () => {
   // KEA-7886: Toggle renders the kit Switch, whose thumb is absolutely positioned in the track,
-  // so "centred" is geometry: top === (track height - 2 × 1px border - thumb height) / 2, for
+  // so "centered" is geometry: top === (track height - 2 × 1px border - thumb height) / 2, for
   // the kit default and for the kit `sm` size that Toggle size="xs"|"sm" renders.
   const toggle = read("src/shared/components/Toggle.tsx");
   assert.match(toggle, /from "@omniroute\/ui-kit\/switch"/);

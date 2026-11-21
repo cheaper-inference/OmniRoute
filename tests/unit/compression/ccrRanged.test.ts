@@ -10,7 +10,7 @@ test.beforeEach(() => resetCcrStore());
 
 const block = ["a ok", "b ERROR", "c ok", "d ERROR"].join("\n");
 
-test("sem mode → bloco inteiro (backward-compat)", () => {
+test("no mode → integer block (backward-compat)", () => {
   const h = storeBlock(block, "p1");
   assert.deepEqual(handleCcrRetrieve({ hash: h }, "p1"), { content: block });
 });
@@ -32,7 +32,7 @@ test("scoping preservado: principal errado → not found", () => {
   assert.match((r as { error: string }).error, /not found/i);
 });
 
-test("grep ReDoS via handler → erro (não crash)", () => {
+test("grep ReDoS via handler → error (not crash)", () => {
   const h = storeBlock(block, "p1");
   const r = handleCcrRetrieve({ hash: h, mode: "grep", pattern: "(a+)+$" }, "p1");
   assert.ok("error" in r);

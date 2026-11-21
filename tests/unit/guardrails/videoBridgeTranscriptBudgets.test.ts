@@ -47,7 +47,7 @@ test("rejects a cue whose raw text exceeds the maximum input code units", () => 
 });
 
 test("rejects a cue whose UTF-8 encoding exceeds the maximum per-cue size", () => {
-  // Each "é" (U+00E9) is 1 code unit but 2 UTF-8 bytes, so this trips the byte
+  // Each "é" (U 00E9) is 1 code unit but 2 UTF-8 bytes, so this trips the byte
   // budget while staying well under the code-unit budget.
   const wideText = "é".repeat(VIDEO_TRANSCRIPT_MAX_CUE_UTF8_BYTES / 2 + 1);
   assert.throws(

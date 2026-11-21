@@ -199,7 +199,7 @@ test("runCostCommand --since/--until envia startDate/endDate na query", async ()
   assert.ok(!capturedUrl.includes("range="));
 });
 
-test("runCostCommand --limit trunca resultado", async () => {
+test("runCostCommand --limit truncates result", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockFetch() as any;
 

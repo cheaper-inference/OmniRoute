@@ -56,11 +56,11 @@ const eslintConfig = [
       parser: tseslint.parser,
     },
   },
-  // Pacote 4 (plano mestre testes+CI, 2026-07-04) — zero-warning policy: TODA regra roda
-  // como "error" e a dívida pré-existente vive congelada por arquivo+regra em
+  // Package 4 (master test+CI plan, 2026-07-04) — zero-warning policy: EVERY rule runs
+  // as "error" and pre-existing debt is frozen per file+rule in
   // config/quality/eslint-suppressions.json (ESLint bulk suppressions nativo). Violação
-  // NOVA = vermelho no ato (lint-staged no pre-commit + job lint-guard no fast path);
-  // o drift de +41/+88 warnings/ciclo que era rebaselinado às cegas na release morre no
+  // NEW = red immediately (lint-staged in pre-commit + lint-guard job on fast path);
+  // o drift de 41/ 88 warnings/ciclo que era rebaselinado às cegas na release morre no
   // PR que o introduz. Aperto do baseline: npx eslint . --prune-suppressions
   // --suppressions-location config/quality/eslint-suppressions.json (na release).
   {
@@ -73,7 +73,7 @@ const eslintConfig = [
       "import/no-anonymous-default-export": "error",
     },
   },
-  // FASE-02: Security rules (strict everywhere)
+  // PHASE-02: Security rules (strict everywhere)
   {
     rules: {
       "no-eval": "error",
@@ -114,10 +114,10 @@ const eslintConfig = [
     },
   },
   // i18n: ham toLowerCase().includes() arama pattern'ini engelle
-  // (Türkçe İ/ı karakterlerini bozar — matchesSearch kullanılmalı).
-  // "warn" (error değil): kuralın eklendiği anda kod tabanında zaten bu pattern'i
-  // kullanan ~19 satır var; aşamalı temizlik için uyarı seviyesinde tutuluyor
-  // (proje politikası: 0 error, warning'ler tolere edilir).
+  // (breaks the İ/ı characters of Turkish — matchesSearch should be used).
+  // "warn" (not error): when the rule was added there were already ~19 lines in the codebase
+  // using this pattern; kept at warning level for gradual cleanup
+  // (project policy: 0 errors, warnings are tolerated).
   {
     files: ["src/app/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}"],
     rules: {
@@ -127,7 +127,7 @@ const eslintConfig = [
           selector:
             "CallExpression[callee.property.name='includes'][callee.object.callee.property.name='toLowerCase']",
           message:
-            "Türkçe-güvenli arama için matchesSearch() kullan (@/shared/utils/turkishText). Ham toLowerCase().includes() İ/ı karakterlerini bozar.",
+            "Use matchesSearch() for Turkish-safe search (@/shared/utils/turkishText). Raw toLowerCase().includes() breaks the İ/ı characters.",
         },
         TO_NUMBER_RESTRICTION,
       ],
@@ -247,7 +247,7 @@ const eslintConfig = [
       "_references/**",
       "_mono_repo/**",
       // _cache/ e _trash/ — caches locais e a lixeira local (gitignored por /_*/). O ESLint 10
-      // não lê o .gitignore; sem estas linhas, `eslint .` no checkout principal desce em cópias
+      // does not read .gitignore; without these lines, `eslint .` in the main checkout descends into copies
       // inteiras do repositório guardadas ali.
       "_cache/**",
       "_trash/**",

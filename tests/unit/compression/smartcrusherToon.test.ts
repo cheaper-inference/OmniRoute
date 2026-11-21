@@ -10,7 +10,7 @@ import { GCF_FENCE_OPEN } from "../../../open-sse/services/compression/engines/h
 
 const toonFavorable = Array.from({ length: 40 }, (_, i) => ({ id: i, ok: true }));
 
-test("best-of-N: usa a fence do encoder menor e nunca regride vs JSON", () => {
+test("best-of-N: uses the smaller encoder fence and never regresses vs JSON", () => {
   const chosen = pickSmallestEncoding(toonFavorable);
   const json = JSON.stringify(toonFavorable);
   assert.ok(chosen.length < json.length, "deve encolher vs JSON");
@@ -27,7 +27,7 @@ test("se TOON vence, tryCompactJson emite fence toon e round-trip restaura", () 
   assert.deepEqual(JSON.parse(text), toonFavorable);
 });
 
-test("empate/GCF-favorável: round-trip lossless via a fence escolhida", () => {
+test("tie/GCF-favorable: lossless round-trip via the chosen fence", () => {
   const gcfFavorable = Array.from({ length: 10 }, (_, i) => ({
     id: i,
     deep: { a: { b: [i, i + 1] }, label: `row-${i}` },
@@ -43,7 +43,7 @@ test("empate/GCF-favorável: round-trip lossless via a fence escolhida", () => {
   }
 });
 
-test("nunca aumenta vs JSON (gate preservado): array < minRows → no-op", () => {
+test("never increases vs JSON (gate preserved): array < minRows → no-op", () => {
   const tiny = [{ a: 1 }];
   assert.equal(tryCompactJson(JSON.stringify(tiny), 8), null);
 });

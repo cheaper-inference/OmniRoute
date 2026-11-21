@@ -61,7 +61,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("runOAuthStatus filtra apenas conexões oauth/oauth2", async () => {
+test("runOAuthStatus filters only oauth/oauth2 connections", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
     assert.ok(url.includes("/api/providers"));
@@ -148,7 +148,7 @@ test("runOAuthStatus tolerates an out-of-contract 200 payload (#11236)", async (
   assert.ok(!warning.includes("at /"), "warning must not leak a stack trace");
 });
 
-test("runOAuthRevoke com --yes chama endpoint de revogação", async () => {
+test("runOAuthRevoke with --yes calls revocation endpoint", async () => {
   let capturedUrl = "";
   let capturedMethod = "";
   const origFetch = globalThis.fetch;
@@ -258,7 +258,7 @@ test("runOAuthStart rejects retired Windsurf instead of starting a public OAuth 
   assert.equal(fetchCalled, false);
 });
 
-test("providers lista provedores OAuth conhecidos", async () => {
+test("providers lists known OAuth providers", async () => {
   const { PROVIDERS_WITH_OAUTH_TEST } = await import("../../bin/cli/commands/oauth.mjs").catch(
     () => ({ PROVIDERS_WITH_OAUTH_TEST: null })
   );

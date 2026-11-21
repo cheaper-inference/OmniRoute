@@ -2,7 +2,7 @@
  * tests/unit/reasoning-placeholder-strip.test.ts
  *
  * Live incident: streamed assistant text was losing the spaces BETWEEN words
- * (e.g. "Bilden är en riktig JPEG nu" -> "Bildenärenriktig JPEG nu") on the
+ * (e.g. "Image är en riktig JPEG nu" -> "Bilden är riktig JPEG nu") on the
  * Responses-API / Claude streaming paths. Root cause: stripInternalReasoning
  * Placeholder() (open-sse/utils/reasoningPlaceholder.ts, added by #8081/#8162)
  * is called on every individual `delta.content` chunk, and it unconditionally

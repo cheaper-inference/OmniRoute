@@ -14,7 +14,7 @@
  *    bug, not a flaky upstream. It carried no `.status`, so chatCore's default
  *    mapped it to 502 → the connection got cooled down as "rate limited", the
  *    provider breaker counted it, and `processSingleItemWithRetry` (which
- *    retries 429/502/504 up to 200×/24h) span forever. It must surface as a
+ * retries 429/502/504 up to 200×/24h) span forever. It must surface as a
  *    terminal internal 500 carrying a stable error code, and every resilience
  *    layer must treat that code as request-scoped: no cooldown, no breaker.
  */

@@ -12,7 +12,7 @@
 // merge result — so comparing it against origin/<base> catches the eat BEFORE
 // the merge lands, in the PR that would cause it.
 //
-// Policy (Princípio Zero): this only ever ADDS work for the maintainer side —
+// Policy (Principle Zero): this only ever ADDS work for the maintainer side —
 // quality.yml runs it blocking for own-origin PRs and report-only for forks.
 // The release captain's reconciliation rewrites the CHANGELOG legitimately,
 // but that happens on the release PR (PR → main, ci.yml), which does not run

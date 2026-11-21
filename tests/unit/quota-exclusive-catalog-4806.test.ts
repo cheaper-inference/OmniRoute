@@ -2,13 +2,13 @@
  * tests/unit/quota-exclusive-catalog-4806.test.ts
  *
  * Regression for #4806 — "[BUG] Cota Exclusiva: modelos virtuais param de
- * listar após ativação".
+ * list after activation".
  *
  * When an API key is scoped to a quota pool (allowedQuotas non-empty — the
  * "Cota exclusiva" state), GET /v1/models must list that pool's
  * qtSd/<group>/<provider>/<model> virtual models. Clients such as Claude
  * Desktop build their model picker from /v1/models, so an empty list shows
- * "0 modelo encontrado" and the key cannot be used.
+ * "0 model found" and the key cannot be used.
  *
  * Root cause (before the fix): getUnifiedModelsResponse filtered the *base*
  * catalog list with filterModelsToQuotaPools(), but the base list never

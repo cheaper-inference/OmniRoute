@@ -1,4 +1,4 @@
-// Verificacao de cobertura do plano da mesh.
+// Verification of mesh plan coverage.
 // Envs: BOT_URL, BOT_TOKEN. Uso: node verify-coverage.mjs <plano.json>
 import { readFileSync } from "node:fs";
 import { env } from "node:process";

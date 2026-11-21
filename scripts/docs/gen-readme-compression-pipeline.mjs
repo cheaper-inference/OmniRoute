@@ -54,7 +54,7 @@ const TITLE =
 const DESC =
   "Animated token funnel on an 8 s loop: five token dots leave the client, four evaporate at engines along the way, the survivor and the untouched code token reach the provider while the twelve engine cells light up in sequence.";
 
-// Engine cells: 46 × 86 on a 50 px pitch from x=302, top y=168 (unchanged geometry).
+
 const CELL_X0 = 302;
 const CELL_PITCH = 50;
 const CELL_W = 46;

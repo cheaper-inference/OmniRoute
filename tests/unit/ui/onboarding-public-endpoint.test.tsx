@@ -107,7 +107,7 @@ it("renders the public API URL instead of rebuilding an internal apiPort URL", a
 });
 
 // F4 (KEA-7886, lote 3): the page had no h1 (the step title was an h2) and the 6-step stepper
-// (6 × 32 px dots + 5 × 32 px connectors + gaps) overflowed both sides at 390 px.
+// (6 × 32 px dots 5 × 32 px connectors gaps) overflowed both sides at 390 px.
 it("names the page with one h1 (the step title) and keeps the stepper narrow below sm", async () => {
   await act(async () => {
     root.render(<OnboardingWizard />);

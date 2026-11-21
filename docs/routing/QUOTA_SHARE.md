@@ -96,11 +96,11 @@ Effective rolling value:
 
 ```
 effectiveBucketIndex = floor(nowMs / windowMs)
-bucketStartMs        = effectiveBucketIndex × windowMs
+bucketStartMs = effectiveBucketIndex × windowMs
 elapsed              = nowMs - bucketStartMs
 weight               = 1 - elapsed / windowMs
 
-effective = prev × weight + curr
+effective = prev × weight curr
 ```
 
 **Precision**: ~99% accurate. The error is at most 1% of the window size at the

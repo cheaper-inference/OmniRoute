@@ -148,10 +148,10 @@ describe("OmniglyphContextPage", () => {
     expect(img!.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
     // Gates
     expect(text).toContain("claude-fable-5");
-    // A cópia do gate deixou de dizer "direct Anthropic" quando os wires OpenAI
-    // nativos entraram: transporte direto é condição de TODO provider, e o que
-    // restringe a rota ao Anthropic é o recibo de fidelidade de bytes, não o
-    // rótulo do transporte.
+    // The gate copy stopped saying "direct Anthropic" when the OpenAI wires
+    // natives entered: direct transport is a condition of EVERY provider, and what
+    // restrict the route to Anthropic is the byte loyalty receipt, not the
+    // shipping label.
     expect(text).toContain("direct provider");
     // Config control
     expect(container.querySelector('[data-testid="omniglyph-enable-toggle"]')).toBeTruthy();
@@ -253,7 +253,7 @@ describe("OmniglyphContextPage", () => {
     }
   });
 
-  it("carrega o perfil salvo e faz PATCH só do perfil, sem reescrever o mapa de engines", async () => {
+  it("loads the saved profile and PATCH only the profile, without rewriting the engine map", async () => {
     const puts: CapturedPut[] = [];
     const json = (body: unknown, status = 200) =>
       new Response(JSON.stringify(body), {
@@ -310,7 +310,7 @@ describe("OmniglyphContextPage", () => {
 
     expect(puts.length).toBe(1);
     expect(puts[0]!.body).toEqual({ omniglyph: { profile: "passthrough" } });
-    // O perfil vive fora do mapa `engines`: mandá-lo junto reescreveria o mapa inteiro.
+    // The profile lives outside the `engines` map: sending it along would rewrite the entire map.
     expect(puts[0]!.body.engines).toBeUndefined();
   });
 });

@@ -21,7 +21,7 @@ test.after(() => {
   } catch {}
 });
 
-test("nativeDeps.mjs pode ser importado sem erro", async () => {
+test("nativeDeps.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/runtime/nativeDeps.mjs");
   assert.equal(typeof mod.ensureRuntimeDir, "function");
   assert.equal(typeof mod.getRuntimeNodeModules, "function");
@@ -32,7 +32,7 @@ test("nativeDeps.mjs pode ser importado sem erro", async () => {
   assert.equal(typeof mod.buildEnvWithRuntime, "function");
 });
 
-test("ensureRuntimeDir cria diretório e package.json", async () => {
+test("ensureRuntimeDir creates directory and package.json", async () => {
   const { ensureRuntimeDir } = await import("../../bin/cli/runtime/nativeDeps.mjs");
   const dir = ensureRuntimeDir();
   const { existsSync } = await import("node:fs");
@@ -40,19 +40,19 @@ test("ensureRuntimeDir cria diretório e package.json", async () => {
   assert.ok(existsSync(join(dir, "package.json")), "package.json deve existir");
 });
 
-test("getRuntimeNodeModules retorna caminho dentro do DATA_DIR", async () => {
+test("getRuntimeNodeModules returns path within DATA_DIR", async () => {
   const { getRuntimeNodeModules } = await import("../../bin/cli/runtime/nativeDeps.mjs");
   const nm = getRuntimeNodeModules();
   assert.ok(nm.startsWith(tmpDir), "node_modules deve estar dentro do tmpDir");
   assert.ok(nm.endsWith("node_modules"), "path deve terminar com node_modules");
 });
 
-test("hasModule retorna false para módulo inexistente", async () => {
+test("hasModule returns false for non-existent module", async () => {
   const { hasModule } = await import("../../bin/cli/runtime/nativeDeps.mjs");
   assert.equal(hasModule("definitely-not-installed-xyz"), false);
 });
 
-test("isBetterSqliteBinaryValid retorna false quando binário não existe", async () => {
+test("isBetterSqliteBinaryValid returns false when binary does not exist", async () => {
   const { isBetterSqliteBinaryValid } = await import("../../bin/cli/runtime/nativeDeps.mjs");
   assert.equal(isBetterSqliteBinaryValid(), false);
 });
@@ -71,7 +71,7 @@ test("buildEnvWithRuntime preserva NODE_PATH existente", async () => {
   assert.ok(env.NODE_PATH.includes("/existing/path"), "NODE_PATH original deve ser preservado");
 });
 
-test("isBetterSqliteBinaryValid rejeita binário com magic bytes válidos mas ABI incompatível (regressão #2493)", async () => {
+test("isBetterSqliteBinaryValid rejects binary with valid magic bytes but incompatible ABI (regression #2493)", async () => {
   // Regression for upstream 9router#2493: a binary that only "looks" native (correct ELF/Mach-O/PE
   // header) but was built for a different Node ABI (NODE_MODULE_VERSION) must NOT be reported as
   // valid — loading it crashes the process (segfault) instead of triggering a rebuild.
@@ -107,7 +107,7 @@ test("isBetterSqliteBinaryValid rejeita binário com magic bytes válidos mas AB
   });
 });
 
-test("isBetterSqliteBinaryValid aceita um binário nativo real e carregável", async () => {
+test("isBetterSqliteBinaryValid accepts a real, loadable native binary", async () => {
   const { getRuntimeNodeModules, isBetterSqliteBinaryValid } =
     await import("../../bin/cli/runtime/nativeDeps.mjs");
   const { existsSync, copyFileSync } = await import("node:fs");
@@ -138,7 +138,7 @@ test("isBetterSqliteBinaryValid aceita um binário nativo real e carregável", a
   });
 });
 
-test("commands/runtime.mjs pode ser importado sem erro", async () => {
+test("commands/runtime.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/runtime.mjs");
   assert.equal(typeof mod.registerRuntime, "function");
 });

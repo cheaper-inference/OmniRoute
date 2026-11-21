@@ -137,7 +137,7 @@ test("context combos list busca /api/context/combos", async () => {
   assert.ok(capturedUrl.includes("/api/context/combos"));
 });
 
-test("context-eng.mjs pode ser importado sem erro", async () => {
+test("context-eng.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/context-eng.mjs");
   assert.equal(typeof mod.registerContextEng, "function");
 });

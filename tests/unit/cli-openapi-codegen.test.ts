@@ -30,14 +30,14 @@ test("api-commands/ tem pelo menos 20 tag files gerados", () => {
   assert.ok(files.length >= 20, `esperado >=20 arquivos, encontrado ${files.length}`);
 });
 
-test("tags esperadas estão presentes (combos, providers, api-keys, settings)", () => {
+test("expected tags are present (combos, providers, api-keys, settings)", () => {
   const files = readdirSync(API_COMMANDS_DIR);
   for (const expected of ["combos.mjs", "providers.mjs", "api-keys.mjs", "settings.mjs"]) {
     assert.ok(files.includes(expected), `${expected} deve estar presente`);
   }
 });
 
-test("registerApiCommands registra comando 'api' com subcomandos de tags", async () => {
+test("registerApiCommands register 'api' command with tag subcommands", async () => {
   const { registerApiCommands, API_TAGS } = await import("../../bin/cli/api-commands/registry.mjs");
   const { Command } = await import("commander");
   const prog = new Command().exitOverride();
@@ -48,7 +48,7 @@ test("registerApiCommands registra comando 'api' com subcomandos de tags", async
   assert.ok(apiCmd.commands.length >= API_TAGS.length, "deve ter subcomandos para todos os tags");
 });
 
-test("API_TAGS contém pelo menos 20 entradas", async () => {
+test("API_TAGS contains at least 20 entries", async () => {
   const { API_TAGS } = await import("../../bin/cli/api-commands/registry.mjs");
   assert.ok(Array.isArray(API_TAGS));
   assert.ok(API_TAGS.length >= 20, `esperado >=20 tags, encontrado ${API_TAGS.length}`);
@@ -56,18 +56,18 @@ test("API_TAGS contém pelo menos 20 entradas", async () => {
   assert.ok(API_TAGS.includes("providers"), "'providers' deve estar em API_TAGS");
 });
 
-test("combos.mjs registra operações de combos com flags corretas", async () => {
+test("combos.mjs records combos operations with correct flags", async () => {
   const { Command } = await import("commander");
-  // Importar diretamente o módulo de combos
+  // Directly import the combos module
   const combosPath = join(API_COMMANDS_DIR, "combos.mjs");
   const src = readFileSync(combosPath, "utf8");
-  // Deve ter operações CRUD
+  // Must have CRUD operations
   assert.ok(src.includes("export function register_combos"), "deve exportar register_combos");
   assert.ok(src.includes("apiFetch"), "deve usar apiFetch");
   assert.ok(src.includes("emit"), "deve usar emit");
 });
 
-test("arquivos gerados têm cabeçalho AUTO-GENERATED", () => {
+test("generated files have AUTO-GENERATED header", () => {
   const files = readdirSync(API_COMMANDS_DIR).filter((f) => f.endsWith(".mjs"));
   for (const file of files.slice(0, 5)) {
     const src = readFileSync(join(API_COMMANDS_DIR, file), "utf8");

@@ -528,7 +528,7 @@ These run on a cron schedule (and `workflow_dispatch`), never on PRs. All are ad
 | `nightly-property`     | fast-check property tests with a random seed + high run count                                                                                       | **Advisory** |
 | `nightly-resilience`   | heap-growth gate, chaos fault-injection, k6 load/soak                                                                                               | **Advisory** |
 | `nightly-llm-security` | promptfoo injection guard (block mode) + garak probes (skipped without a provider secret)                                                           | **Advisory** |
-| `nightly-schemathesis` | OpenAPI contract fuzzing (schemathesis) against a live OmniRoute using `docs/openapi.yaml` — surfaces spec violations / unhandled 500s (Fase 8 B.4) | **Advisory** |
+| `nightly-schemathesis` | OpenAPI contract fuzzing (schemathesis) against a live OmniRoute using `docs/openapi.yaml` — surfaces spec violations / unhandled 500s (Phase 8 B.4) | **Advisory** |
 | `nightly-mutation`     | Stryker mutation-testing score over the fast unit lane — surviving mutants surface weak asserts                                                     | **Advisory** |
 | `nightly-compat`       | Node engine compatibility matrix across the supported `engines.node` ranges                                                                         | **Advisory** |
 
@@ -648,7 +648,7 @@ git add quality-baseline.json
 
 The `--update` flag writes the current measured values into `quality-baseline.json`.
 Banking an improvement is release/nightly work, not a feature PR's: `--require-tighten`
-(Fase 6A.5) fails an un-banked improvement only in release mode (push, schedule, the release PR,
+(Phase 6A.5) fails an un-banked improvement only in release mode (push, schedule, the release PR,
 local runs). In a feature PR (`pr` gate mode) it prints the improvement as information and
 passes; a regression fails in both modes. During the velocity phase it is advisory everywhere
 (`_policy.requireTighten: false`). See
@@ -788,7 +788,7 @@ decomposition into a growth allowance for whoever edits the file next.
 
 |          |                                                                                                        |
 | -------- | ------------------------------------------------------------------------------------------------------ |
-| Runs on  | `schedule` (3×/day) + `workflow_dispatch` — deliberately **not** `push`                                |
+| Runs on | `schedule` (3×/day) `workflow_dispatch` — deliberately **not** `push` |
 | Measures | the highest `release/vX.Y.Z`, same resolution + injection guard as `release-green`                     |
 | Writes   | `check:file-size --update` and `check:complexity-ratchets --update` (both shrink-only by construction) |
 | Verifies | `npm run check:ratchet-bank` (`scripts/quality/verify-ratchet-bank.mjs`)                               |
@@ -871,7 +871,7 @@ allowlist is a false sense of quality.
 ## Agent tooling: LSP-in-the-loop (opt-in)
 
 Beyond the CI gates, OmniRoute ships an **opt-in** `agent-lsp` scaffold
-(a project-level `.mcp.json`, Fase 7 Task 15). Create `.mcp.json`
+(a project-level `.mcp.json`, Phase 7 Task 15). Create `.mcp.json`
 to expose a TypeScript language server to coding agents, so they resolve symbols /
 diagnostics **before** writing code — a compile-before-claim companion to
 `typecheck:core` that cuts "invented symbol" errors at the source. It is intentionally
@@ -880,7 +880,7 @@ connection error and never breaks sessions.
 
 ---
 
-## Rationalization Backlog (ROI review — Fase 9 Onda 3)
+## Rationalization Backlog (ROI review — Phase 9 Wave 3)
 
 This inventory was reconciled against `ci.yml` on 2026-06-17 (the prior version omitted
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,

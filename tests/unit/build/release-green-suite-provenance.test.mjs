@@ -75,7 +75,7 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
     executable(
       "npm",
       `
-      if(process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");
+      if(process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violations (baseline 0)\\n[cognitive-complexity] OK — 0 violations (baseline 0)");
       if(process.argv[3] === "check:workflows") console.log("workflowAuditState=MEASURED\\nworkflowFindings=0\\nprovenanceRunnerFindings=0\\nscheduledGuardFindings=0");
     `
     );

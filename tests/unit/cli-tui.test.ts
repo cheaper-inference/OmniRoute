@@ -41,7 +41,7 @@ for (const { file, export: exp } of COMPONENTS) {
   });
 }
 
-test("tui-components/theme.jsx exporta objeto theme", async () => {
+test("tui-components/theme.jsx exports theme object", async () => {
   const { theme } = await import("../../bin/cli/tui-components/theme.jsx");
   assert.ok(theme && typeof theme === "object");
   assert.ok(typeof theme.primary === "string");
@@ -61,7 +61,7 @@ test("tui/InterfaceMenu.jsx existe e exporta showInterfaceMenu", () => {
   assert.ok(hasExport(path, "showInterfaceMenu"), "deve exportar showInterfaceMenu");
 });
 
-test("tui/tabs/ tem as 7 tabs esperadas", () => {
+test("tui/tabs/ has the expected 7 tabs", () => {
   const tabs = ["Overview", "Combos", "Providers", "Keys", "Logs", "Health", "Cost"];
   for (const tab of tabs) {
     const path = join(TUI, "tabs", `${tab}.jsx`);

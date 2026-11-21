@@ -6,7 +6,7 @@ import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-test("cliToken.mjs pode ser importado sem erro", async () => {
+test("cliToken.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/utils/cliToken.mjs");
   assert.equal(typeof mod.getCliToken, "function");
   assert.equal(typeof mod.CLI_TOKEN_HEADER, "string");
@@ -44,11 +44,11 @@ test("getCliToken returns an empty string when machine-id derivation is unavaila
   assert.equal(deriveCliToken(throwingModule, "test-salt"), "");
 });
 
-test("getCliToken retorna string de 64 chars ou string vazia", async () => {
+test("getCliToken returns string of 64 chars or empty string", async () => {
   const { getCliToken } = await import("../../bin/cli/utils/cliToken.mjs");
   const token = await getCliToken();
   assert.ok(typeof token === "string");
-  // Pode ser "" se node-machine-id falhar, ou 64 chars se funcionar
+  // Can be "" if node-machine-id fails, or 64 chars if it works
   // (HMAC-SHA256 digest hex — see #10148 cliToken hardening).
   assert.ok(token === "" || token.length === 64, `expected 0 or 64 chars, got ${token.length}`);
 });
@@ -56,13 +56,13 @@ test("getCliToken retorna string de 64 chars ou string vazia", async () => {
 test("getCliToken deriva token de 64 chars sob o node puro que a CLI usa", async () => {
   const mod = await import("node-machine-id");
   const machineIdSync = mod.machineIdSync ?? mod.default?.machineIdSync;
-  // Sem machine-id nesta plataforma não há token a derivar — nada a afirmar.
+  // Without machine-id on this platform there is no token to derive — nothing to assert.
   if (typeof machineIdSync !== "function") return;
 
-  // Precisa rodar em `node` puro, sem o loader tsx/esm: o tsx resolve os named
+  // Needs to run on pure `node`, without the tsx/esm loader: tsx resolves named
   // exports de um CJS e mascara o bug de interop. `omniroute` roda sob node puro,
   // onde `const { machineIdSync } = await import(...)` dava undefined, o catch
-  // zerava o token e TODA requisição de management saía sem autenticação.
+  // reset the token and EVERY management request left without authentication.
   const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
   const entry = pathToFileURL(join(repoRoot, "bin/cli/utils/cliToken.mjs")).href;
   const out = execFileSync(
@@ -78,14 +78,14 @@ test("getCliToken deriva token de 64 chars sob o node puro que a CLI usa", async
   assert.equal(out.trim(), "64", `expected a derived 64-char token, got length ${out.trim()}`);
 });
 
-test("getCliToken retorna mesmo valor em chamadas repetidas (cache)", async () => {
+test("getCliToken returns same value on repeated calls (cache)", async () => {
   const { getCliToken } = await import("../../bin/cli/utils/cliToken.mjs");
   const t1 = await getCliToken();
   const t2 = await getCliToken();
   assert.equal(t1, t2);
 });
 
-test("getCliToken respeita rotação de OMNIROUTE_CLI_SALT", async () => {
+test("getCliToken respects rotation of OMNIROUTE_CLI_SALT", async () => {
   const mod = await import("node-machine-id");
   const machineIdSync = mod.machineIdSync ?? mod.default?.machineIdSync;
   if (typeof machineIdSync !== "function") return;
@@ -97,8 +97,8 @@ test("getCliToken respeita rotação de OMNIROUTE_CLI_SALT", async () => {
     const withDefaultSalt = await getCliToken();
     process.env.OMNIROUTE_CLI_SALT = "rotated-salt-for-test";
     const withRotatedSalt = await getCliToken();
-    // docs/security/CLI_TOKEN.md promete que a rotação alcança os processos CLI;
-    // o SALT hardcoded ignorava a env var e devolvia sempre o mesmo token.
+    // docs/security/CLI_TOKEN.md promises that rotation reaches CLI processes;
+    // hardcoded SALT ignored the env var and always returned the same token.
     assert.notEqual(withRotatedSalt, withDefaultSalt);
     // HMAC-SHA256 digest hex = 64 chars (#10148 cliToken hardening).
     assert.equal(withRotatedSalt.length, 64);
@@ -108,7 +108,7 @@ test("getCliToken respeita rotação de OMNIROUTE_CLI_SALT", async () => {
   }
 });
 
-test("getCliToken produz apenas hex lowercase se não-vazio", async () => {
+test("getCliToken only produces hex lowercase if non-empty", async () => {
   const { getCliToken } = await import("../../bin/cli/utils/cliToken.mjs");
   const token = await getCliToken();
   if (token.length > 0) {
@@ -121,7 +121,7 @@ test("OMNIROUTE_CLI_TOKEN env sobrescreve token gerado em apiFetch", async () =>
   const orig = process.env.OMNIROUTE_CLI_TOKEN;
   process.env.OMNIROUTE_CLI_TOKEN = "test-override-token-12345";
   try {
-    // Re-import api.mjs não funciona por cache ESM — validamos apenas que env é lido.
+    // Re-import api.mjs does not work via ESM cache — we only validate that env is read.
     assert.equal(process.env.OMNIROUTE_CLI_TOKEN, "test-override-token-12345");
   } finally {
     if (orig === undefined) delete process.env.OMNIROUTE_CLI_TOKEN;
@@ -249,29 +249,29 @@ test("apiFetch refuses redirects while carrying a local machine token", async ()
 
 // --- testes server-side: isLoopback ---
 
-test("isLoopback aceita 127.0.0.1", async () => {
+test("isLoopback accepts 127.0.0.1", async () => {
   const { isLoopback } = await import("../../src/lib/middleware/cliTokenAuth");
   assert.ok(isLoopback("127.0.0.1"));
 });
 
-test("isLoopback aceita ::1", async () => {
+test("isLoopback accepts ::1", async () => {
   const { isLoopback } = await import("../../src/lib/middleware/cliTokenAuth");
   assert.ok(isLoopback("::1"));
 });
 
-test("isLoopback aceita ::ffff:127.0.0.1 (IPv4-mapped)", async () => {
+test("isLoopback accepts ::ffff:127.0.0.1 (IPv4-mapped)", async () => {
   const { isLoopback } = await import("../../src/lib/middleware/cliTokenAuth");
   assert.ok(isLoopback("::ffff:127.0.0.1"));
 });
 
-test("isLoopback rejeita IP público", async () => {
+test("isLoopback rejects public IP", async () => {
   const { isLoopback } = await import("../../src/lib/middleware/cliTokenAuth");
   assert.ok(!isLoopback("192.168.1.100"));
   assert.ok(!isLoopback("10.0.0.1"));
   assert.ok(!isLoopback("8.8.8.8"));
 });
 
-test("token derivado de machine-id diferente produz hash diferente", () => {
+test("token derived from different machine-id produces different hash", () => {
   const SALT = "omniroute-cli-auth-v1";
   // Mirror the production derivation (#10148): HMAC-SHA256(machineId, SALT) hex.
   const hash = (mid: string) =>
@@ -286,7 +286,7 @@ test("token derivado de machine-id diferente produz hash diferente", () => {
   assert.match(t2, /^[0-9a-f]{64}$/);
 });
 
-test("OMNIROUTE_DISABLE_CLI_TOKEN desabilita auth (estrutura verificada)", async () => {
+test("OMNIROUTE_DISABLE_CLI_TOKEN disables auth (verified structure)", async () => {
   const { readFileSync } = await import("node:fs");
   const { join, dirname } = await import("node:path");
   const { fileURLToPath } = await import("node:url");

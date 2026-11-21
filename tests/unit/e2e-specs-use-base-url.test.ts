@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// F4 (KEA-7886, lote 6 pendência 18): four Playwright specs navigated to the absolute
+// F4 (KEA-7886, batch 6 backlog 18): four Playwright specs navigated to the absolute
 // http://localhost:20128/... and failed with ERR_CONNECTION_REFUSED whenever the suite ran
 // against another port (DASHBOARD_PORT/PORT feed playwright.config.ts baseURL). Specs navigate
 // with paths so page.goto/request.get resolve against the configured baseURL.

@@ -4,13 +4,13 @@ import { Command } from "commander";
 import { registerModels } from "../../bin/cli/commands/models.mjs";
 import { registerModelValidation } from "../../bin/cli/commands/model-validation.mjs";
 
-test("completion.mjs pode ser importado sem erro", async () => {
+test("completion.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/completion.mjs");
   assert.equal(typeof mod.registerCompletion, "function");
   assert.equal(typeof mod.runCompletionCommand, "function");
 });
 
-test("runCompletionCommand bash retorna 0 e string não-vazia", async () => {
+test("runCompletionCommand bash returns 0 and non-empty string", async () => {
   const chunks: string[] = [];
   const orig = process.stdout.write.bind(process.stdout);
   (process.stdout as any).write = (c: string | Uint8Array) => {
@@ -30,7 +30,7 @@ test("runCompletionCommand bash retorna 0 e string não-vazia", async () => {
   assert.match(out, /^\s*models\).*compgen -W ""/m, "legacy calls must not invent subcommands");
 });
 
-test("runCompletionCommand zsh contém compdef", async () => {
+test("runCompletionCommand zsh contains compdef", async () => {
   const chunks: string[] = [];
   const orig = process.stdout.write.bind(process.stdout);
   (process.stdout as any).write = (c: string | Uint8Array) => {
@@ -66,7 +66,7 @@ test("runCompletionCommand fish retorna 0", async () => {
   assert.ok(out.includes("omniroute"), "fish script should mention omniroute");
 });
 
-test("runCompletionCommand shell inválido retorna 1", async () => {
+test("invalid shell runCompletionCommand returns 1", async () => {
   const orig = process.stderr.write.bind(process.stderr);
   (process.stderr as any).write = () => true;
   try {
@@ -98,7 +98,7 @@ test("completion scripts incluem combos/providers/models no cache dinamicamente"
   );
 });
 
-test("completion scripts expõem os alvos de execução e configuração", async () => {
+test("completion scripts expose execution and configuration targets", async () => {
   const { runCompletionCommand } = await import("../../bin/cli/commands/completion.mjs");
   const expected = ["connect", "contexts", "configure", "launch", "launch-codex", "run", "repair"];
 

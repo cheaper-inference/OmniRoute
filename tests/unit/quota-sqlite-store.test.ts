@@ -134,7 +134,7 @@ test("sqliteQuotaStore: bucket rotation applies decay from prev bucket", async (
   assert.equal(curr, 0, "curr bucket should be empty");
   assert.equal(prev, 1000, "prev bucket should have 1000");
 
-  // The sliding window formula: prev × (1 - elapsed/window) + curr
+  // The sliding window formula: prev × (1 - elapsed/window) curr
   // When elapsed is small (just started current bucket), prev contributes a lot
   const currentBucketStartMs = currentBucket * windowMs;
   const elapsed = nowMs - currentBucketStartMs;

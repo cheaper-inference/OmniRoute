@@ -1,4 +1,4 @@
-// Characterization tests — src/lib/guardrails (rail 3.8.55, Task 12 "caracterização B").
+// Characterization tests — src/lib/guardrails (rail 3.8.55, Task 12 "characterization B").
 //
 // Pins the public surface of the guardrails barrel and the observable behavior of its most
 // used entry points (default registry wiring, PII masker opt-in, prompt-injection guard,

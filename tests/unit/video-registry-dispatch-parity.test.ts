@@ -5,22 +5,22 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Страж соответствия реестра и диспетчера видео.
+ * Registry and video manager compliance guard.
  *
- * `GET /v1/videos/generations` рекламирует всё, что лежит в VIDEO_PROVIDERS без
- * пометки `unsupported`. Диспетчер `handleVideoGeneration` умеет меньше: он
- * разбирает `providerConfig.format` цепочкой ветвлений плюс job-пресетами, а на
- * незнакомом формате отвечает `Unsupported video format`. Пока списки
- * расходятся, каталог обещает модели, которые исполнитель гарантированно
- * отвергает с 400 — независимо от ключей и баланса. Живая проверка 2026-08-30:
- * `minimax/MiniMax-Hailuo-02`, `pollinations/default` и `nanogpt/default`
- * отдавали ровно этот 400, будучи в выдаче каталога.
+ * `GET /v1/videos/generations` advertises everything that is in VIDEO_PROVIDERS without
+ * marks `unsupported`. The `handleVideoGeneration` manager can do less: it
+ * parses `providerConfig.format` with a chain of branches plus job presets, and on
+ * if the format is unfamiliar, it responds with `Unsupported video format`. Bye lists
+ * diverge, the catalog promises models that the performer is guaranteed
+ * rejects from 400 - regardless of keys and balance. Live check 2026-08-30:
+ * `minimax/MiniMax-Hailuo-02`, `pollinations/default` and `nanogpt/default`
+ * they gave exactly this 400, being in the catalog issue.
  *
- * Разбор идёт по тексту диспетчера, а не вызовом: неизвестный формат виден до
- * первого сетевого запроса, а живой вызов каждого провайдера в юнит-тесте либо
- * уходит в сеть, либо виснет на ретраях. Цена — тест надо поправить, если
- * цепочку `format === "..."` заменят на другую конструкцию; тогда счётчик
- * распознанных форматов упадёт до нуля и страж ниже скажет об этом прямо.
+ * Parsing is carried out according to the dispatcher text, and not by calling: an unknown format is visible until
+ * the first network request, and a live call to each provider in a unit test or
+ * goes online or hangs on retrays. Price - the test needs to be corrected if
+ * the `format === "..."` chain will be replaced with another construction; then the counter
+ * recognized formats will drop to zero and the guard below will say this directly.
  */
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -32,7 +32,7 @@ function readSource(relativePath: string) {
   return fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
 }
 
-/** Форматы, для которых у диспетчера есть собственная ветка. */
+/** Formats for which the dispatcher has its own branch. */
 function branchFormats() {
   const source = readSource("open-sse/handlers/videoGeneration.ts");
   return new Set(
@@ -40,7 +40,7 @@ function branchFormats() {
   );
 }
 
-/** Форматы, которые обслуживает общий submit → poll конвейер job-пресетов. */
+/** Formats served by the common submit → poll pipeline of job presets. */
 function jobPresetFormats() {
   const source = readSource("open-sse/handlers/videoGeneration/job.ts");
   const block = source.slice(source.indexOf("VIDEO_JOB_PRESETS"));

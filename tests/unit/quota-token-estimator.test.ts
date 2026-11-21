@@ -17,7 +17,7 @@ test("estimateChatTokenCost: sums message content strings", () => {
     ],
   });
   assert.ok(cost.inputTokens > 0);
-  // total = input × 1.1 (over-provision) + output budget
+  // total = input × 1.1 (over-provision) output budget
   assert.equal(cost.totalTokens, Math.ceil(cost.inputTokens * 1.1) + cost.outputTokens);
 });
 

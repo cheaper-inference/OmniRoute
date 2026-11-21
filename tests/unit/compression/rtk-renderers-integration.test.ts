@@ -34,7 +34,7 @@ test("enableRenderers true ⇒ git diff is rendered through processRtkText", () 
 });
 
 test("fail-open: renderer error keeps prior result", () => {
-  // entrada que detecta git-diff mas é benigna; renderer não deve lançar nem alterar incorretamente
+  // entry that detects git-diff but is benign; renderer should not throw or alter incorrectly
   const r = processRtkText("not really a diff", {
     command: "git diff",
     config: { enabled: true, enableRenderers: true },

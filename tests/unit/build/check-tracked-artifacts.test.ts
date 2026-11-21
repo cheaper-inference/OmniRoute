@@ -86,7 +86,7 @@ test("checkTrackedArtifacts: private root underscore dirs are flagged", () => {
 
 test("checkTrackedArtifacts: ANY future root underscore dir is flagged (generic rule)", () => {
   const result = checkTrackedArtifacts([
-    "_nova-pasta-futura/qualquer/arquivo.md",
+    "_new-future-folder/any/file.md",
     "_scratch/notes.txt",
   ]);
   assert.equal(result.length, 2);

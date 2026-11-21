@@ -103,7 +103,7 @@ export const NATIVE_ASSET_ENTRIES = [
     dest: ["node_modules", "onnxruntime-node", "bin"],
   },
   {
-    // TPROXY IP_TRANSPARENT addon (Fase 3 / Epic A). Built by build-tproxy-native
+    // TPROXY IP_TRANSPARENT addon (Phase 3 / Epic A). Built by build-tproxy-native
     // before assembly; Linux-only + opt-in, so the source is absent on non-Linux
     // builds → syncNativeAssetsToDir skips it gracefully. The runtime loader
     // (transparentSocket.ts) resolves it cwd-relative to this same dest.

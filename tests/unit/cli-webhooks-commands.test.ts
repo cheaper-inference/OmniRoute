@@ -49,7 +49,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("runWebhooksList retorna lista de webhooks", async () => {
+test("runWebhooksList returns list of webhooks", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
     assert.ok(url.includes("/api/webhooks"));
@@ -111,7 +111,7 @@ test("runWebhooksAdd envia url, events e secret", async () => {
   assert.equal(capturedBody.enabled, true);
 });
 
-test("runWebhooksAdd não expõe secret na saída (mascarado)", async () => {
+test("runWebhooksAdd does not expose secret in output (masked)", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((_url: string) => {
     return Promise.resolve(makeResp(WEBHOOK));
@@ -136,7 +136,7 @@ test("runWebhooksAdd não expõe secret na saída (mascarado)", async () => {
   assert.ok(out.includes("***") || !out.includes("s3cr3t"));
 });
 
-test("runWebhooksUpdate envia apenas campos fornecidos", async () => {
+test("runWebhooksUpdate sends only provided fields", async () => {
   let capturedBody: any = null;
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
@@ -196,7 +196,7 @@ test("runWebhooksTest envia event no body", async () => {
   assert.equal(capturedBody.event, "budget.exceeded");
 });
 
-test("webhooks events lista todos tipos de evento conhecidos", async () => {
+test("webhooks events list all known event types", async () => {
   const EVENT_TYPES = [
     "request.completed",
     "request.failed",

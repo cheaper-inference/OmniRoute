@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 // scripts/check/check-mutation-ratchet.mjs
-// Catraca de mutationScore (Quality Gate v2 / Fase 9 T5 — Onda 2, Task 3).
+// MutationScore ratchet (Quality Gate v2 / Phase 9 T5 — Wave 2, Task 3).
 //
 // Mirrors check-bundle-size.mjs: ADVISORY by default (always exit 0), BLOCKING only
-// with --ratchet — and even then exits 1 SE — E SOMENTE SE — um módulo medido REGREDIU
-// vs o baseline (direction: UP, o score só pode subir). Skip gracioso (exit 0) quando
-// não há mutation.json (ex.: o nightly não rodou) ou não há baseline para o módulo —
-// falta de dados NUNCA bloqueia, só uma regressão medida bloqueia.
+// with --ratchet — and even then exits 1 IF — AND ONLY IF — a measured module REGRESSED
+// vs the baseline (direction: UP, the score can only go up). Graceful skip (exit 0) when
+// there is no mutation.json (e.g. the nightly did not run) or there is no baseline for the module —
+// Lack of data NEVER blocks; only a measured regression blocks.
 //
-// Score por módulo = COVERED score = detected / (detected + survived), onde
-// detected = Killed + Timeout. NoCoverage é EXCLUÍDO do denominador (é uma lacuna de
-// cobertura, não um sinal de qualidade-de-teste) — mesmo denominador que a radiografia
+// Score per module = COVERED score = detected / (detected survived), where
+// detected = Killed Timeout. NoCoverage is EXCLUDED from the denominator (it is a gap of
+// coverage, not a sign of test quality) — same denominator as the X-ray
 // (scripts/quality/mutation-radiography.mjs).
 //
 // O nightly divide o `mutate` em batches paralelos (um reports/mutation/mutation.json
-// por job). Este script roda DENTRO de cada job sobre o report daquele batch e compara
-// só os módulos presentes nele. Aceita vários paths para uso local/agregado.
+// per job). This script runs INSIDE each job on the report for that batch and compares
+// only the modules present in it. Accepts multiple paths for local/aggregated use.
 //
 // Uso:
 //   node scripts/check/check-mutation-ratchet.mjs                 (advisory; report default)
@@ -44,12 +44,12 @@ const DETECTED = new Set(["Killed", "Timeout"]);
 const SURVIVED = new Set(["Survived"]);
 
 /**
- * Avalia o score MEDIDO de um módulo contra o baseline. Direction: UP (o score só
- * pode subir — menor = regressão), com tolerância anti-flake `eps`: só conta como
- * regressão uma queda MAIOR que `eps` pontos.
+ * Evaluates the MEASURED score of a module against the baseline. Direction: UP (the score only
+ * can increase — lower = regression), with anti-flake tolerance `eps`: only counts as
+ * regression if there is a drop GREATER than `eps` points.
  * @param {number} current
  * @param {number} baseline
- * @param {number} [eps] tolerância anti-flake em pontos percentuais
+ * @param {number} [eps] anti-flake tolerance in percentage points
  * @returns {{ regressed: boolean, improved: boolean }}
  */
 export function evaluateMutationRatchet(current, baseline, eps = MUTATION_RATCHET_EPS) {
@@ -60,10 +60,10 @@ export function evaluateMutationRatchet(current, baseline, eps = MUTATION_RATCHE
 }
 
 /**
- * Covered mutation score de um arquivo: detected/(detected+survived)*100.
+ * Covered mutation score of a file: detected/(detected+survived)*100.
  * NoCoverage/Ignored/RuntimeError/CompileError ficam fora do denominador.
  * @param {{mutants?: Array<{status: string}>}} fileData
- * @returns {number|null} score em %, ou null se não houver mutantes cobertos
+ * @returns {number|null} score in %, or null if there are no covered mutants
  */
 export function mutationScoreForFile(fileData) {
   let detected = 0;
@@ -77,14 +77,14 @@ export function mutationScoreForFile(fileData) {
 }
 
 /**
- * Score por arquivo a partir de um ou mais reports (batches). Arquivos sem mutante
- * coberto (score null) são omitidos.
+ * Score per file from one or more reports (batches). Files without mutants
+ * covered (score null) are omitted.
  *
- * ⭐ Sibling batches que fatiam o MESMO arquivo (auth.ts split em a1:1-1109 + a2:1110-2218
+ * ⭐ Sibling batches that split the SAME file (auth.ts split into a1:1-1109 + a2:1110-2218
  * por mutation range; accountFallback em b1/b2) carregam fatias DISJUNTAS dos mutantes
- * daquele arquivo. O score verdadeiro do arquivo precisa de TODAS as fatias juntas, então
- * unimos `files[<arquivo>].mutants` entre os reports ANTES de pontuar — não sobrescrever
- * (senão a última fatia venceria e reportaria só metade do arquivo).
+ * of that file. The true score of the file needs ALL the slices together, so
+ * we combine `files[<arquivo>].mutants` between reports BEFORE scoring — do not overwrite
+ * (Otherwise, the last slice would expire and only report half of the file).
  * @param {object|object[]} reportOrReports parsed mutation.json (ou array)
  * @returns {Record<string, number>}
  */
@@ -105,9 +105,9 @@ export function measureMutationScores(reportOrReports) {
 }
 
 /**
- * Lê metrics["mutationScore.<path>"].value do quality-baseline.json.
- * Retorna {} se o arquivo ou as chaves estiverem ausentes (sem baseline não há
- * ratchet possível — o caller trata como SKIP gracioso, exit 0).
+ * Reads metrics["mutationScore.<path>"].value from quality-baseline.json.
+ * Returns {} if the file or keys are missing (without a baseline, there is no
+ * ratchet possible — the caller treats it as a graceful SKIP, exit 0).
  * @param {string} baselinePath
  * @returns {Record<string, number>}
  */

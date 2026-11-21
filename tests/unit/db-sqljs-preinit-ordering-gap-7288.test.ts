@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 // Regression guard for #7288 / #7494 — a startup step reaching
 // `getDbInstance()` before `preInitSqlJs()` had run threw the misleading
-// "sql.js WASM ainda não foi pré-inicializado" error for an EXISTING DB file
+// "sql.js WASM has not yet been pre-initialized" error for an EXISTING DB file
 // when both synchronous drivers (better-sqlite3, node:sqlite) failed.
 //
 // NOTE on approach: an earlier version of this fix added a top-level
@@ -160,7 +160,7 @@ test(
     }
 
     // Acceptance criterion (#7288): "an existing storage.sqlite still boots
-    // via the sql.js fallback (no 'ainda não foi pré-inicializado')". A
+    // via the sql.js fallback (no 'has not yet been pre-initialized')".
     // literal directory can't be opened by ANY driver — including sql.js's
     // own fs.readFileSync — so a residual, *different* I/O error here (e.g.
     // EISDIR) is expected and is not the ordering-gap bug under test: what

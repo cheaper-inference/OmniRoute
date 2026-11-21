@@ -1,29 +1,29 @@
 #!/usr/bin/env node
 // scripts/check/check-codeql-ratchet.mjs
-// Catraca de alertas CodeQL (Task 7.3 — Fase 7).
+// CodeQL alert gate (Task 7.3 — Phase 7).
 //
-// Usa a GitHub API via `gh` CLI para buscar alertas de code-scanning abertos e
-// não-dismissed (respeita Hard Rule #14: alertas dismissed não contam).
+// Uses the GitHub API via the `gh` CLI to fetch open and
+// non-dismissed (adheres to Hard Rule #14: dismissed alerts do not count).
 //
-// Saída (stdout):
-//   codeqlAlerts=N        — contagem de alertas CodeQL abertos, não-dismissed
-//   codeqlAlerts=SKIP reason=binary-absent   — `gh` não está no PATH
-//   codeqlAlerts=SKIP reason=no-auth         — `gh` presente mas sem autenticação
+// Output (stdout):
+//   codeqlAlerts=N        — count of open, non-dismissed CodeQL alerts
+//   codeqlAlerts=SKIP reason=binary-absent   — `gh` is not in the PATH
+// codeqlAlerts=SKIP reason=no-auth — `gh` present but no authentication
 //   codeqlAlerts=SKIP reason=api-error:<code>  — erro da API GitHub
 //
-// RATCHET BLOQUEANTE (default): lê metrics.codeqlAlerts.value de
-// config/quality/quality-baseline.json e SAI 1 SE — E SOMENTE SE — a contagem
-// MEDIDA for MAIOR que o baseline (regressão real, mais alertas CodeQL abertos).
-// Qualquer falha de MEDIÇÃO (gh ausente / sem auth / sem repo / erro de API) é um
-// SKIP gracioso que SAI 0 — nunca bloqueia o build por falta de infraestrutura.
-// Direction: down (a contagem só pode CAIR). Suporta --update para ratchetar.
+// BLOCKING RATCHET (default): reads metrics.codeqlAlerts.value from
+// config/quality/quality-baseline.json and RETURNS 1 IF — AND ONLY IF — the MEASUREMENT count
+// MEASUREMENT is GREATER than the baseline (actual regression, more open CodeQL alerts).
+// Any MEASUREMENT failure (gh missing / no auth / no repo / API error) is a
+// Graceful SKIP that EXITS 0 — never blocks the build due to lack of infrastructure.
+// Direction: down (the count can only GO DOWN). Supports --update for ratcheting.
 //
 // Uso:
 //   node scripts/check/check-codeql-ratchet.mjs
 //   node scripts/check/check-codeql-ratchet.mjs --json    # imprime array de alertas
-//   node scripts/check/check-codeql-ratchet.mjs --quiet   # suprime logs de diagnóstico
-//   node scripts/check/check-codeql-ratchet.mjs --update  # ratcheta o baseline (queda)
-//   node scripts/check/check-codeql-ratchet.mjs --advisory  # nunca falha (modo coletor)
+// node scripts/check/check-codeql-ratchet.mjs --quiet
+//   node scripts/check/check-codeql-ratchet.mjs --update  # ratchets the baseline (drop)
+//   node scripts/check/check-codeql-ratchet.mjs --advisory  # never fails (collector mode)
 
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -33,8 +33,8 @@ import { pathToFileURL } from "node:url";
 const QUIET = process.argv.includes("--quiet");
 const PRINT_JSON = process.argv.includes("--json");
 const UPDATE = process.argv.includes("--update");
-// --advisory: nunca falha pela contagem (modo coletor legado). Sem esta flag o
-// gate é BLOQUEANTE: sai 1 numa regressão real (medida > baseline).
+// --advisory: never fails due to the count (legacy collector mode). Without this flag, the
+// the gate is BLOCKING: exits with 1 in a real regression (measurement > baseline).
 const ADVISORY = process.argv.includes("--advisory");
 
 const ROOT = process.cwd();
@@ -49,7 +49,7 @@ const BASELINE_PATH = path.resolve(
 // ---------------------------------------------------------------------------
 
 /**
- * Conta alertas CodeQL abertos e não-dismissed a partir do JSON da GitHub API.
+ * Counts open and non-dismissed CodeQL alerts from the GitHub API JSON.
  *
  * A GitHub API /code-scanning/alerts retorna um array de:
  * {
@@ -62,9 +62,9 @@ const BASELINE_PATH = path.resolve(
  *   ...
  * }
  *
- * Hard Rule #14: alertas com `state="dismissed"` NÃO contam, independente da razão.
+ * Hard Rule #14: Alerts with `state="dismissed"` DO NOT count, regardless of the reason.
  * Filtramos por state="open" E tool.name contendo "CodeQL" (case-insensitive).
- * Alertas de outras ferramentas (ex: Semgrep) são ignorados.
+ * Alerts from other tools (e.g. Semgrep) are ignored.
  *
  * @param {Array|null} alerts - Array de alertas da API GitHub
  * @returns {{ alertCount: number, bySeverity: Record<string, number>, byRule: Record<string, number> }}
@@ -79,14 +79,14 @@ export function parseCodeQLAlerts(alerts) {
   const byRule = {};
 
   for (const alert of alerts) {
-    // Ignorar alertas não-CodeQL (outras ferramentas de code scanning)
+    // Ignore non-CodeQL alerts (other code scanning tools)
     const toolName = alert?.tool?.name ?? "";
     if (!toolName.toLowerCase().includes("codeql")) continue;
 
-    // Hard Rule #14: alertas dismissed não contam
+    // Hard Rule #14: Dismissed alerts don't count
     if (alert.state === "dismissed") continue;
 
-    // Só alertas abertos
+    
     if (alert.state !== "open") continue;
 
     alertCount++;
@@ -108,13 +108,13 @@ export function parseCodeQLAlerts(alerts) {
 }
 
 /**
- * Avalia a contagem MEDIDA de alertas CodeQL contra o baseline.
- * Direction: down (a contagem só pode CAIR — mais alertas = regressão).
+ * Evaluates the MEASURED count of CodeQL alerts against the baseline.
+ * Direction: down (the count can only GO DOWN — more alerts = regression).
  *
  * Exported for unit testing — espelha evaluateDeadCode em check-dead-code.mjs.
  *
- * @param {number} current  - Contagem de alertas medida agora.
- * @param {number} baseline - Contagem congelada em quality-baseline.json.
+ * @param {number} current  - Alert count measured now.
+ * @param {number} baseline - Count frozen in quality-baseline.json.
  * @returns {{ regressed: boolean, improved: boolean }}
  */
 export function evaluateCodeqlRatchet(current, baseline) {
@@ -129,10 +129,10 @@ export function evaluateCodeqlRatchet(current, baseline) {
 // ---------------------------------------------------------------------------
 
 /**
- * Detecta o owner/repo do repositório atual usando `gh repo view`.
- * Retorna null se `gh` não estiver disponível ou não autenticado.
+ * Detects the owner/repo of the current repository using `gh repo view`.
+ * Returns null if `gh` is not available or not authenticated.
  *
- * @param {string} ghBin - Caminho para o binário gh
+ * @param {string} ghBin - Path to the gh binary
  * @returns {string|null} "owner/repo" ou null
  */
 export function detectRepo(ghBin) {
@@ -156,10 +156,10 @@ export function detectRepo(ghBin) {
 // ---------------------------------------------------------------------------
 
 /**
- * Detecta se o binário `gh` está disponível no PATH.
- * Usa `which` (Unix) sem interpolação de shell — Hard Rule #13.
+ * Detects whether the `gh` binary is available in the PATH.
+ * Uses `which` (Unix) without shell interpolation — Hard Rule
  *
- * @returns {string|null} Caminho absoluto para o binário, ou null se ausente.
+ * @returns {string|null} Absolute path to the binary, or null if absent.
  */
 export function findGhCli() {
   try {
@@ -171,10 +171,10 @@ export function findGhCli() {
       return result.stdout.trim();
     }
   } catch {
-    // which não disponível
+    // which not available
   }
 
-  // Fallback: tentar executar diretamente para verificar ENOENT
+  // Fallback: Try to run directly to check for ENOENT
   try {
     const result = spawnSync("gh", ["--version"], {
       encoding: "utf8",
@@ -195,9 +195,9 @@ export function findGhCli() {
 
 /**
  * Busca alertas CodeQL abertos via `gh api`.
- * Pagina automaticamente (GitHub retorna max 100 por página).
+ * Automatically paginates (GitHub returns a maximum of 100 per page).
  *
- * @param {string} ghBin - Caminho para o binário gh
+ * @param {string} ghBin - Path to the gh binary
  * @param {string} repo  - "owner/repo"
  * @returns {Array} Array de alertas
  */
@@ -210,7 +210,7 @@ function fetchCodeQLAlerts(ghBin, repo) {
     const endpoint = `/repos/${repo}/code-scanning/alerts?state=open&tool_name=CodeQL&per_page=${perPage}&page=${page}`;
 
     if (!QUIET) {
-      process.stderr.write(`[codeql-ratchet] Buscando alertas: página ${page} ...\n`);
+      process.stderr.write(`[codeql-ratchet] Fetching alerts: page ${page} ...\n`);
     }
 
     let stdout;
@@ -223,7 +223,7 @@ function fetchCodeQLAlerts(ghBin, repo) {
     } catch (err) {
       const errMsg = String(err.stderr ?? err.message ?? "");
 
-      // Sem autenticação
+      
       if (
         errMsg.includes("authentication") ||
         errMsg.includes("401") ||
@@ -248,12 +248,12 @@ function fetchCodeQLAlerts(ghBin, repo) {
       return { error: "parse-error", message: String(parseErr.message ?? parseErr) };
     }
 
-    // A API retorna null quando não há mais páginas (ou array vazio)
+    // The API returns null when there are no more pages (or an empty array)
     if (!Array.isArray(page_alerts) || page_alerts.length === 0) break;
 
     allAlerts.push(...page_alerts);
 
-    // Se retornou menos que perPage, chegamos à última página
+    // If it returned less than perPage, we have reached the last page
     if (page_alerts.length < perPage) break;
 
     page++;
@@ -267,9 +267,9 @@ function fetchCodeQLAlerts(ghBin, repo) {
 // ---------------------------------------------------------------------------
 
 /**
- * Lê metrics.codeqlAlerts.value do quality-baseline.json.
- * Retorna null se o arquivo ou a métrica estiverem ausentes (modo coletor puro:
- * sem baseline não há ratchet, só emissão da contagem).
+ * Reads metrics.codeqlAlerts.value from quality-baseline.json.
+ * Returns null if the file or metric is missing (pure collector mode:
+ * without a baseline, there is no ratchet, only the count is output).
  *
  * @returns {number|null}
  */
@@ -287,22 +287,22 @@ function readBaselineCodeqlValue() {
 }
 
 /**
- * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
- * Define process.exitCode = 1 numa regressão real (medida > baseline) salvo
- * --advisory. Ratcheta o baseline com --update quando a contagem cai.
+ * Applies the ratchet (direction:down) to the measured count vs. the baseline.
+ * Sets process.exitCode = 1 in an actual regression (measurement > baseline) except
+ * --advisory. Ratchets the baseline with --update when the count drops.
  *
- * Exported for unit testing (drives o efeito em process.exitCode).
+ * Exported for unit testing (drives the effect in process.exitCode).
  *
- * @param {number} alertCount - Contagem MEDIDA (medição bem-sucedida).
+ * @param {number} alertCount - MEASURED count (successful measurement).
  */
 export function applyRatchet(alertCount) {
   const baselineValue = readBaselineCodeqlValue();
 
-  // Sem baseline → modo coletor puro (emite a contagem, não falha).
+  // No baseline → pure collector mode (outputs the count, does not fail).
   if (baselineValue === null) {
     if (!QUIET) {
       process.stderr.write(
-        "[codeql-ratchet] baseline ausente (metrics.codeqlAlerts) — modo coletor, sem ratchet.\n"
+        "[codeql-ratchet] Baseline missing (metrics.codeqlAlerts) — collector mode, no ratchet.\n"
       );
     }
     process.exitCode = 0;
@@ -315,21 +315,21 @@ export function applyRatchet(alertCount) {
     const baselineJson = JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8"));
     baselineJson.metrics.codeqlAlerts.value = alertCount;
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(baselineJson, null, 2) + "\n");
-    console.log(`[codeql-ratchet] baseline ratcheado: ${alertCount} (era ${baselineValue})`);
+    console.log(`[codeql-ratchet] ratcheted baseline: ${alertCount} (was ${baselineValue})`);
   }
 
   if (regressed && !ADVISORY) {
     process.stderr.write(
-      `[codeql-ratchet] REGRESSÃO — ${alertCount} alertas CodeQL abertos > baseline ${baselineValue}\n` +
-        "  → Corrija os novos alertas em Security → Code scanning, ou rode\n" +
-        "    'node scripts/check/check-codeql-ratchet.mjs --update' se a contagem caiu legitimamente.\n"
+      `[codeql-ratchet] REGRESSION — ${alertCount} open CodeQL alerts > baseline ${baselineValue}\n` +
+        "  → Fix the new alerts in Security → Code scanning, or run\n" +
+        "    'node scripts/check/check-codeql-ratchet.mjs --update' if the count has legitimately dropped.\n"
     );
     process.exitCode = 1;
     return;
   }
 
   if (!QUIET) {
-    const verdict = regressed ? "ADVISORY — regressão ignorada (--advisory)" : "OK — sem regressão";
+    const verdict = regressed ? "ADVISORY — regression ignored (--advisory)" : "OK — no regression";
     process.stderr.write(
       `[codeql-ratchet] ${verdict} — ${alertCount} alertas (baseline ${baselineValue})\n`
     );
@@ -348,22 +348,22 @@ function main() {
     console.log("codeqlAlerts=SKIP reason=binary-absent");
     if (!QUIET) {
       process.stderr.write(
-        "[codeql-ratchet] SKIP — `gh` CLI não encontrado no PATH.\n" +
+        "[codeql-ratchet] SKIP — `gh` CLI not found in PATH.\n" +
           "[codeql-ratchet] Instale via: https://cli.github.com/\n" +
-          "[codeql-ratchet] ADVISORY — este gate sai 0 (ratchet entra no CI da Fase 7 INT).\n"
+          "[codeql-ratchet] ADVISORY — This gate exits 0 (ratchet enters Phase 7 INT CI).\n"
       );
     }
     process.exitCode = 0;
     return;
   }
 
-  // Detectar repositório
+  
   const repo = detectRepo(ghBin);
   if (!repo) {
     console.log("codeqlAlerts=SKIP reason=no-repo");
     if (!QUIET) {
       process.stderr.write(
-        "[codeql-ratchet] SKIP — não foi possível detectar o repositório GitHub.\n" +
+        "[codeql-ratchet] SKIP — Could not detect GitHub repository.\n" +
           "[codeql-ratchet] Execute dentro de um repositório GitHub com `gh` autenticado.\n"
       );
     }
@@ -372,10 +372,10 @@ function main() {
   }
 
   if (!QUIET) {
-    process.stderr.write(`[codeql-ratchet] Repositório detectado: ${repo}\n`);
+    process.stderr.write(`[codeql-ratchet] Repository detected: ${repo}\n`);
   }
 
-  // Buscar alertas
+  // Fetch alerts
   const result = fetchCodeQLAlerts(ghBin, repo);
 
   // Tratar erros da API com skip gracioso
@@ -398,7 +398,7 @@ function main() {
 
   const { alertCount, bySeverity, byRule } = parseCodeQLAlerts(result);
 
-  // Emitir em formato KEY=VALUE para o coletor de métricas (collect-metrics.mjs)
+  // Output in KEY=VALUE format for the metrics collector (collect-metrics.mjs)
   console.log(`codeqlAlerts=${alertCount}`);
 
   if (!QUIET) {
@@ -414,16 +414,16 @@ function main() {
         .join(", ") || "nenhum";
 
     process.stderr.write(
-      `[codeql-ratchet] Alertas CodeQL abertos (não-dismissed): ${alertCount}\n`
+      `[codeql-ratchet] Open CodeQL alerts (not dismissed): ${alertCount}\n`
     );
     if (alertCount > 0) {
       process.stderr.write(`[codeql-ratchet]   Por severidade: ${severitySummary}\n`);
-      process.stderr.write(`[codeql-ratchet]   Top regras: ${topRules}\n`);
+      process.stderr.write(`[codeql-ratchet]   Top rules: ${topRules}\n`);
     }
   }
 
-  // Medição bem-sucedida → aplica o ratchet (bloqueante salvo --advisory).
-  // Qualquer falha de MEDIÇÃO acima já retornou com exit 0 (skip gracioso).
+  // Successful measurement → applies the ratchet (blocker except --advisory).
+  // Any MEASUREMENT failure above has already returned with exit 0 (graceful skip).
   applyRatchet(alertCount);
 }
 

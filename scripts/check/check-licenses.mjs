@@ -2,19 +2,19 @@
 // scripts/check/check-licenses.mjs
 // Gate de license compliance — PLANO-QUALITY-GATES-FASE7.md, Task 20.
 //
-// Política: OmniRoute é MIT. Dependências de PRODUÇÃO com licença fora da allowlist SPDX
-// e sem exceção registrada em .license-allowlist.json => FALHA (policy violation).
-// devDependencies com licença não-padrão => advisory (impressas, não falham).
+// Policy: OmniRoute is MIT. PRODUCTION dependencies with a license outside the SPDX allowlist
+// and with no exception registered in .license-allowlist.json => FAIL (policy violation).
+// devDependencies with non-standard license => advisory (printed, do not fail).
 //
 // Ferramenta: license-checker-rseidelsohn v4+ (node_modules/.bin/license-checker-rseidelsohn).
 //
 // Uso:
 //   node scripts/check/check-licenses.mjs            # modo normal
-//   node scripts/check/check-licenses.mjs --verbose  # lista todos os pacotes classificados
+//   node scripts/check/check-licenses.mjs --verbose  # lists all classified packages
 //   node scripts/check/check-licenses.mjs --json     # emite o raw JSON do license-checker
 //
-// Sair com código 0 = tudo OK (ou apenas advisory).
-// Sair com código 1 = violação de política em dep de produção.
+// Exit with code 0 = everything OK (or just advisory).
+// Exit with code 1 = policy violation in production dept.
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -148,7 +148,7 @@ function main() {
   try {
     licenseData = runLicenseChecker();
   } catch (err) {
-    console.error("[check-licenses] Falha ao rodar license-checker-rseidelsohn:");
+    console.error("[check-licenses] Failed to run license-checker-rseidelsohn:");
     console.error(err.message ?? err);
     process.exitCode = 1;
     return;
@@ -193,15 +193,15 @@ function main() {
   const total = Object.keys(licenseData).length;
 
   // Print summary
-  console.log(`[check-licenses] Escaneados ${total} pacotes de produção.`);
+  console.log(`[check-licenses] Scanned ${total} production packages.`);
   console.log(`  Permitidos: ${allowedCount}`);
-  console.log(`  Exceções registradas: ${exceptions.length}`);
-  console.log(`  Violações de política: ${violations.length}`);
+  console.log(`  Exceptions logged: ${exceptions.length}`);
+  console.log(`  Policy violations: ${violations.length}`);
 
   // Print exceptions (informational)
   if (exceptions.length > 0) {
     console.log(
-      "\n[check-licenses] Exceções registradas (não bloqueantes, revisar periodicamente):"
+      "\n[check-licenses] Exceptions recorded (non-blocking, review periodically):"
     );
     for (const { pkgKey, license } of exceptions) {
       const baseName = stripVersion(pkgKey);
@@ -216,7 +216,7 @@ function main() {
 
   // Print advisory (devDep non-standard — empty here since we run --production)
   if (advisory.length > 0) {
-    console.log("\n[check-licenses] Advisory (devDeps com licença não-padrão):");
+    console.log("\n[check-licenses] Advisory (devDeps with non-standard license):");
     for (const { pkgKey, license } of advisory) {
       console.log(`  ℹ  ${pkgKey}: ${license}`);
     }
@@ -225,23 +225,23 @@ function main() {
   // Print violations and fail
   if (violations.length > 0) {
     console.error(
-      "\n[check-licenses] ❌ VIOLAÇÕES DE POLÍTICA — deps de produção com licença não permitida:"
+      "\n[check-licenses] ❌ POLICY VIOLATIONS — production deps with non-permitted license:"
     );
     for (const { pkgKey, license, reason } of violations) {
       console.error(`  ✗ ${pkgKey}: ${license}`);
       console.error(`    → ${reason}`);
     }
     console.error(
-      "\nAdicione a licença à allowlist 'allowed' em .license-allowlist.json (se SPDX-permissiva)\n" +
-        "ou registre uma exceção por-pacote em 'exceptions' com justificativa e 'reviewAt'.\n" +
-        "NÃO mascare copyleft forte sem registrar a justificativa. Ver PLANO-QUALITY-GATES-FASE7.md § Task 20."
+      "\nAdd the license to the 'allowed' allowlist in .license-allowlist.json (if SPDX-permissive)\n"
+        "or log a per-package exception in 'exceptions' with justification and 'reviewAt'.\n"
+        "DO NOT override strong copyleft without recording the justification. See PLAN-QUALITY-GATES-PHASE7.md § Task 20."
     );
     process.exitCode = 1;
     return;
   }
 
   console.log(
-    "\n[check-licenses] ✅ Todos os pacotes de produção estão em conformidade com a política de licenças."
+    "\n[check-licenses] ✅ All production packages comply with the licensing policy."
   );
 }
 

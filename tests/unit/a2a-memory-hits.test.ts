@@ -1,5 +1,5 @@
 /**
- * Task D2 (Orchestration Canvas Fase 2, PR-C): `collectMemoryHits` records WHICH memories were
+ * Task D2 (Orchestration Canvas Phase 2, PR-C): `collectMemoryHits` records WHICH memories were
  * consulted for an A2A task, as pure observability — the hits are never injected into the
  * skill's prompt or behavior, only mirrored into `task.metadata.memoryHits` and a
  * `memory_hits` history event.
@@ -332,7 +332,7 @@ test("executeA2ATaskWithState never leaks memoryHits into task.input.metadata or
 });
 
 /**
- * Task C2 (Orchestration Canvas Fase 3, PR-C): the recall is best-effort, so it must also be
+ * Task C2 (Orchestration Canvas Phase 3, PR-C): the recall is best-effort, so it must also be
  * BOUNDED. Without a deadline a slow memory backend (the HTTP `genericBackend` defaults to a
  * 30s timeout) delays the start of every A2A task. The deadline is injectable through
  * `MemoryHitsDeps.timeoutMs` so these tests cost milliseconds, not 1.5s of wall clock.

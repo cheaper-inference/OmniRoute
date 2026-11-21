@@ -123,7 +123,7 @@ function runWithExtras(extraSpec: string | null): RunResult {
   }
 }
 
-test("sem a env, o runner só enxerga o diretório core (comportamento atual)", async () => {
+test("without the env, the runner only sees the core directory (current behavior)", async () => {
   const r = runWithExtras(null);
   assert.deepEqual(
     r.rows.map((x) => x.version),
@@ -132,7 +132,7 @@ test("sem a env, o runner só enxerga o diretório core (comportamento atual)", 
   assert.ok(r.tables.includes("core_one") && r.tables.includes("core_two"));
 });
 
-test("migration de diretório extra é aplicada e gravada com versão namespaced", async () => {
+test("extra directory migration is applied and written with namespaced version", async () => {
   const eeDir = mkTempDir("mig-ee-");
   writeMigrations(eeDir, { "001_ee_lending.sql": "CREATE TABLE ee_lending (id INTEGER);" });
 
@@ -140,34 +140,34 @@ test("migration de diretório extra é aplicada e gravada com versão namespaced
 
   assert.ok(
     r.tables.includes("ee_lending"),
-    `a migration do diretório extra deve ter rodado; count=${r.count} ` +
+    `the migration of the extra directory must have run; count=${r.count} ` +
       `rows=${JSON.stringify(r.rows)} tabelas=${r.tables.join(", ")}`
   );
   assert.deepEqual(
     r.rows.map((x) => x.version),
     ["001", "002", "ee-001"],
-    "o número do diretório extra é gravado prefixado pelo namespace e depois das core"
+    "the extra directory number is written prefixed by the namespace and after the core"
   );
   assert.equal(r.rows.at(-1)?.name, "ee_lending");
 });
 
-test("o mesmo número em core e em diretório extra NÃO colide — ambas rodam", async () => {
+test("the same number in core and extra directory DOES NOT collide — both run", async () => {
   const eeDir = mkTempDir("mig-collide-");
-  // Mesmo prefixo numérico de uma migration core: é exatamente o caso que hoje
-  // faz uma das duas ser silenciosamente considerada já aplicada.
+  // Same numeric prefix as a core migration: this is exactly the case that today
+  // causes one of the two to be silently considered already applied.
   writeMigrations(eeDir, { "002_ee_same_slot.sql": "CREATE TABLE ee_same_slot (id INTEGER);" });
 
   const r = runWithExtras(`ee=${eeDir}`);
 
-  assert.ok(r.tables.includes("core_two"), "a core 002 deve ter rodado");
-  assert.ok(r.tables.includes("ee_same_slot"), "a extra 002 deve ter rodado também");
+  assert.ok(r.tables.includes("core_two"), "core 002 must have run");
+  assert.ok(r.tables.includes("ee_same_slot"), "extra 002 must have run too");
   assert.deepEqual(
     r.rows.map((x) => x.version),
     ["001", "002", "ee-002"]
   );
 });
 
-test("dois namespaces extras coexistem, cada um no seu espaço de versão", async () => {
+test("two extra namespaces coexist, each in its own version space", async () => {
   const a = mkTempDir("mig-nsa-");
   const b = mkTempDir("mig-nsb-");
   writeMigrations(a, { "001_from_a.sql": "CREATE TABLE from_a (id INTEGER);" });
@@ -182,7 +182,7 @@ test("dois namespaces extras coexistem, cada um no seu espaço de versão", asyn
   );
 });
 
-test("número duplicado DENTRO de um namespace extra é erro (não pode ser pulado em silêncio)", async () => {
+test("duplicate number WITHIN an extra namespace is error (cannot be silently skipped)", async () => {
   const eeDir = mkTempDir("mig-dup-");
   writeMigrations(eeDir, {
     "003_first.sql": "CREATE TABLE ee_first (id INTEGER);",
@@ -192,22 +192,22 @@ test("número duplicado DENTRO de um namespace extra é erro (não pode ser pula
   assert.throws(
     () => runWithExtras(`ee=${eeDir}`),
     /collision/i,
-    "duas migrations com o mesmo número no mesmo namespace têm que estourar"
+    "two migrations with the same number in the same namespace have to burst"
   );
 });
 
-test("spec malformada estoura em vez de ignorar o diretório", async () => {
+test("malformed spec overflows instead of ignoring directory", async () => {
   const eeDir = mkTempDir("mig-malformed-");
   writeMigrations(eeDir, { "001_x.sql": "CREATE TABLE x (id INTEGER);" });
 
   assert.throws(
     () => runWithExtras(eeDir), // sem "namespace="
     /OMNIROUTE_EXTRA_MIGRATIONS_DIRS/,
-    "entrada sem namespace= é configuração inválida, não um diretório a ignorar"
+    "entry without namespace= is invalid configuration, not a directory to ignore"
   );
 });
 
-test("namespace inválido estoura (só minúsculas/dígitos, começando por letra)", async () => {
+test("invalid namespace overflows (only lowercase/digits, starting with letter)", async () => {
   const eeDir = mkTempDir("mig-badns-");
   writeMigrations(eeDir, { "001_x.sql": "CREATE TABLE x (id INTEGER);" });
 
@@ -218,39 +218,39 @@ test("namespace inválido estoura (só minúsculas/dígitos, começando por letr
   );
 });
 
-test("diretório configurado que não existe estoura (schema faltando em silêncio é o bug)", async () => {
+test("configured directory that does not exist overflows (silently missing schema is the bug)", async () => {
   const missing = path.join(os.tmpdir(), `mig-nao-existe-${process.pid}`);
   assert.throws(
     () => runWithExtras(`ee=${missing}`),
     /does not exist/i,
-    "um diretório explicitamente configurado e ausente é erro de configuração"
+    "an explicitly configured and missing directory is a configuration error"
   );
 });
 
-test("arquivos que não casam NNN_nome.sql são ignorados, como no diretório core", async () => {
+test("files that do not match NNN_nome.sql are ignored, as in the core directory", async () => {
   const eeDir = mkTempDir("mig-junk-");
   writeMigrations(eeDir, {
     "001_ok.sql": "CREATE TABLE ee_ok (id INTEGER);",
-    "README.md": "# não é migration",
+    "README.md": "# is not migration",
     "rascunho.sql": "CREATE TABLE nope (id INTEGER);",
   });
 
   const r = runWithExtras(`ee=${eeDir}`);
 
   assert.ok(r.tables.includes("ee_ok"));
-  assert.ok(!r.tables.includes("nope"), "arquivo .sql sem prefixo numérico não deve rodar");
+  assert.ok(!r.tables.includes("nope"), ".sql file without numeric prefix should not run");
   assert.deepEqual(
     r.rows.map((x) => x.version),
     ["001", "002", "ee-001"]
   );
 });
 
-test("diretório core ausente não impede as migrations dos extras", async () => {
-  // O runner devolve [] assim que MIGRATIONS_DIR não existe. Os extras são um
-  // conjunto independente: um core ausente não pode fazê-los desaparecer em
-  // silêncio — é a mesma falha de "schema some sem avisar" que isto previne.
-  // MIGRATIONS_DIR é lido a cada chamada por fs.existsSync, então basta remover
-  // o diretório durante o teste e recriá-lo depois.
+test("missing core directory does not prevent migrations of extras", async () => {
+  // The runner returns [] as soon as MIGRATIONS_DIR does not exist. Extras are a
+  // independent set: a missing core cannot make them disappear into
+  // silence — it's the same "schema disappears without warning" glitch that this prevents.
+  // MIGRATIONS_DIR is read with every call by fs.existsSync, so just remove
+  // the directory during testing and recreate it later.
   const eeDir = mkTempDir("mig-extra-only-");
   writeMigrations(eeDir, { "001_ee_solo.sql": "CREATE TABLE ee_solo (id INTEGER);" });
 
@@ -272,7 +272,7 @@ test("diretório core ausente não impede as migrations dos extras", async () =>
   }
 });
 
-test("rodar duas vezes não reaplica as migrations do diretório extra", async () => {
+test("running twice does not reapply migrations from the extra directory", async () => {
   const eeDir = mkTempDir("mig-idem-");
   writeMigrations(eeDir, { "001_ee_idem.sql": "CREATE TABLE ee_idem (id INTEGER);" });
 
@@ -282,8 +282,8 @@ test("rodar duas vezes não reaplica as migrations do diretório extra", async (
   try {
     const first = runMigrations(db as never, { isNewDb: true });
     const second = runMigrations(db as never);
-    assert.equal(first, 3, "primeira execução aplica core 001/002 + ee-001");
-    assert.equal(second, 0, "segunda execução não tem nada pendente");
+    assert.equal(first, 3, "first run applies core 001/002 ee-001");
+    assert.equal(second, 0, "second run has nothing pending");
   } finally {
     db.close();
     if (prev === undefined) delete process.env.OMNIROUTE_EXTRA_MIGRATIONS_DIRS;

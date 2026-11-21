@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 // ═════════════════════════════════════════════════════
-//  FASE-07/08/09: UX, LLM Advanced, E2E Hardening Tests
+// PHASE-07/08/09: UX, LLM Advanced, E2E Hardening Tests
 // ═════════════════════════════════════════════════════
 
 // ─── Policy Engine Tests ──────────────────────────

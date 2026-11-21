@@ -34,7 +34,7 @@ test.after(async () => {
   }
 });
 
-test("sem CONDUCTOR_HUB_URL o card continua válido, com as skills estáticas e zero conductor-*", async () => {
+test("without CONDUCTOR_HUB_URL the card remains valid, with static skills and zero conductor-*", async () => {
   const res = await GET(makeCardRequest());
   const card = await res.json();
   assert.equal(typeof card.name, "string");

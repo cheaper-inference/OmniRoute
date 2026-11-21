@@ -5,34 +5,34 @@
 #
 # POR QUE ESTE WRAPPER EXISTE
 # ---------------------------
-# O OmniRoute expõe um proxy WebSocket para a API de Responses do Codex em
+
 #   ws(s)://<host>/v1/responses
 # A Codex CLI sabe falar esse transporte quando o provider tem
-# `supports_websockets = true` + `wire_api = "responses"`. Mas há DOIS detalhes
-# que quebram o uso ingênuo:
+# `supports_websockets = true` + `wire_api = "responses"`. But there are TWO details
+# that break naive use:
 #
-#  1) A Codex CLI valida o NOME do modelo no cliente. Ids com prefixo de provider
+#1) The Codex CLI validates the model NAME on the client. Ids with provider prefix
 #     (ex.: "codex/gpt-5.5") são REJEITADOS ("model is not supported ... ChatGPT
-#     account"). É preciso mandar o id "puro" -> "gpt-5.5". (O OmniRoute, no
+#     account"). Send the "pure" id -> "gpt-5.5". (OmniRoute, in the
 #     bridge WS, re-resolve "gpt-5.5" -> provider codex internamente.)
 #
-#  2) A Codex CLI v0.136 carrega TAMBÉM "$CWD/.codex/config.toml" como config
-#     "project-local". Se você rodar de um diretório que tenha um .codex (ex.:
-#     /root, onde mora a config da Cloud), o `model` daquele arquivo SOBRESCREVE
-#     o `model` do seu CODEX_HOME -> você acaba mandando o modelo errado.
-#     Por isso forçamos model + model_provider via `-c` (precedência máxima),
-#     que vence qualquer config de arquivo (user-level OU project-local).
+#2) Codex CLI v0.136 ALSO loads "$CWD/.codex/config.toml" as config
+# "project-local". If you run from a directory that has a .codex (e.g.:
+# /root, where the Cloud config lives), the `model` of that file OVERWRITE
+#     the `model` of your CODEX_HOME -> you end up sending the wrong model.
+#     That is why we force model + model_provider via `-c` (highest precedence),
+# which beats any file config (user-level OR project-local).
 #
-# Além disso, no modo `exec` (headless) a CLI exige um diretório "confiável" ou
+# Additionally, in `exec` (headless) mode the CLI requires a "trusted" directory or
 # a flag --skip-git-repo-check; o wrapper adiciona a flag automaticamente.
 #
 # USO
 # ---
-#   codex-ws "sua pergunta"          # abre a TUI interativa (precisa de terminal)
-#   codex-ws exec "Responda: PONG"   # one-shot headless (CI/validação)
+# codex-ws "your question" # opens the interactive TUI (needs terminal)
+# codex-ws exec "Reply: PONG" # headless one-shot (CI/validation)
 #   codex-ws --help                  # repassa flags pra Codex CLI
 #
-# Variáveis de ambiente (todas com default; sobrescreva exportando antes):
+# Environment variables (all with default; override by exporting first):
 #   OMNIROUTE_WS_BASE   base URL do OmniRoute local   (default abaixo)
 #   OMNIROUTE_WS_MODEL  modelo codex (id puro)        (default "gpt-5.5")
 #   OMNIROUTE_LOCAL_KEY API key (qualquer valor se REQUIRE_API_KEY=false)
@@ -41,22 +41,22 @@
 
 set -euo pipefail
 
-# ---- Configuração (com defaults seguros) ------------------------------------
+# ---- Configuration (with safe defaults) ------------------------------------
 OMNIROUTE_WS_BASE="${OMNIROUTE_WS_BASE:-http://127.0.0.1:20128/v1}"  # base do OmniRoute local
 OMNIROUTE_WS_MODEL="${OMNIROUTE_WS_MODEL:-gpt-5.5}"                  # id PURO (sem "codex/")
 CODEX_WS_HOME="${CODEX_WS_HOME:-$HOME/.codex-ws}"                    # CODEX_HOME isolado da Cloud
 
-# A Codex CLI lê a key Bearer da env var nomeada em `env_key`. Mantemos um nome
-# próprio para não colidir com OPENAI_API_KEY da config da Cloud.
+# The Codex CLI reads the Bearer key from the env var named in `env_key`. We keep a name
+# to avoid colliding with OPENAI_API_KEY in the Cloud config.
 export OMNIROUTE_LOCAL_KEY="${OMNIROUTE_LOCAL_KEY:-local}"
 
-# CODEX_HOME isolado: a Codex CLI usa ESTE diretório como config "user-level",
+# CODEX_HOME isolated: Codex CLI uses THIS directory as "user-level" config,
 # deixando a sua ~/.codex (Cloud) totalmente intacta.
 export CODEX_HOME="$CODEX_WS_HOME"
 
 # ---- Garante que a config do CODEX_HOME exista (auto-bootstrap) --------------
-# Só o bloco [model_providers.*] precisa estar aqui; model/model_provider são
-# forçados via -c logo abaixo (por causa do detalhe #2 do cabeçalho).
+# Only the [model_providers.*] block needs to be here; model/model_provider are
+# forced via -c below (because of detail #2 in the header).
 if [ ! -f "$CODEX_HOME/config.toml" ]; then
   mkdir -p "$CODEX_HOME"
   cat > "$CODEX_HOME/config.toml" <<EOF
@@ -66,25 +66,25 @@ model_provider = "omniroute-local"
 
 [model_providers.omniroute-local]
 name = "OmniRoute Local (WS)"
-base_url = "$OMNIROUTE_WS_BASE"   # a URL WebSocket é derivada desta base pela CLI
-wire_api = "responses"            # único valor suportado desde fev/2026
+base_url = "$OMNIROUTE_WS_BASE"   # the WebSocket URL is derived from this base by the CLI
+wire_api = "responses"            # only supported value since Feb/2026
 supports_websockets = true        # <- liga o transporte Responses-over-WebSocket
-env_key = "OMNIROUTE_LOCAL_KEY"   # a CLI lê a key Bearer desta env var
+env_key = "OMNIROUTE_LOCAL_KEY" # the CLI reads the Bearer key from this env var
 
-# Marca o HOME como diretório confiável para o modo exec.
+# Mark HOME as a trusted directory for exec mode.
 [projects."$HOME"]
 trust_level = "trusted"
 EOF
 fi
 
-# ---- Overrides de precedência máxima ----------------------------------------
-# Vencem qualquer config de arquivo (inclusive a project-local da Cloud em
-# $CWD/.codex/config.toml). É o que garante o modelo certo no transporte certo.
+# ---- highest-precedence overrides ----------------------------------------
+# Any file config (including the Cloud project-local in
+# $CWD/.codex/config.toml). This is what guarantees the right model on the right transport.
 overrides=(-c model="$OMNIROUTE_WS_MODEL" -c model_provider="omniroute-local")
 
 # ---- Dispatch ---------------------------------------------------------------
-# No modo headless (`exec`) injeta --skip-git-repo-check (senão a CLI recusa
-# rodar fora de um repo git "confiável"). O `shift` remove o "exec" duplicado.
+# In headless mode (`exec`) inject --skip-git-repo-check (otherwise the CLI refuses
+# run out of a "trusted" git repo). `shift` removes the duplicate "exec".
 if [ "${1:-}" = "exec" ]; then
   shift
   exec codex exec --skip-git-repo-check "${overrides[@]}" "$@"

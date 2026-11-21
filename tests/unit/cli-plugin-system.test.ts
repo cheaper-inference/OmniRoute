@@ -15,7 +15,7 @@ test("bin/cli/plugins.mjs exporta discoverPlugins, loadPlugins, buildPluginConte
   assert.equal(typeof mod.buildPluginContext, "function");
 });
 
-test("discoverPlugins retorna array vazio se nenhum plugin instalado (diretório não existe)", async () => {
+test("discoverPlugins returns empty array if no plugin installed (directory does not exist)", async () => {
   const { discoverPlugins } = await import("../../bin/cli/plugins.mjs");
   const orig = process.env.OMNIROUTE_PLUGIN_PATH;
   process.env.OMNIROUTE_PLUGIN_PATH = join(tmpdir(), `no-such-dir-${Date.now()}`);
@@ -28,7 +28,7 @@ test("discoverPlugins retorna array vazio se nenhum plugin instalado (diretório
   }
 });
 
-test("discoverPlugins descobre plugin com package.json válido", async () => {
+test("discoverPlugins discovers plugin with valid package.json", async () => {
   const { discoverPlugins } = await import("../../bin/cli/plugins.mjs");
   const pluginDir = join(tmpdir(), `omniroute-plugins-test-${Date.now()}`);
   const pkgDir = join(pluginDir, "omniroute-cmd-test-hello");
@@ -88,7 +88,7 @@ test("discoverPlugins ignora pacotes sem prefixo omniroute-cmd-", async () => {
   }
 });
 
-test("loadPlugins não quebra CLI quando plugin tem erro de load (try/catch)", async () => {
+test("loadPlugins does not break CLI when plugin has load error (try/catch)", async () => {
   const { loadPlugins } = await import("../../bin/cli/plugins.mjs");
   const pluginDir = join(tmpdir(), `omniroute-plugins-test-${Date.now()}`);
   const pkgDir = join(pluginDir, "omniroute-cmd-broken");
@@ -109,7 +109,7 @@ test("loadPlugins não quebra CLI quando plugin tem erro de load (try/catch)", a
   const { Command } = await import("commander");
   const prog = new Command();
   try {
-    // Deve não lançar exceção
+    // Must not throw exception
     await assert.doesNotReject(async () => loadPlugins(prog));
   } finally {
     if (orig === undefined) delete process.env.OMNIROUTE_PLUGIN_PATH;
@@ -120,7 +120,7 @@ test("loadPlugins não quebra CLI quando plugin tem erro de load (try/catch)", a
   }
 });
 
-test("loadPlugins carrega plugin válido e chama register()", async () => {
+test("loadPlugins loads valid plugin and calls register()", async () => {
   const { loadPlugins } = await import("../../bin/cli/plugins.mjs");
   const pluginDir = join(tmpdir(), `omniroute-plugins-test-${Date.now()}`);
   const pkgDir = join(pluginDir, "omniroute-cmd-valid");
@@ -134,7 +134,7 @@ test("loadPlugins carrega plugin válido e chama register()", async () => {
       main: "index.mjs",
     })
   );
-  // Plugin que adiciona um comando 'testcmd'
+  // Plugin that adds a 'testcmd' command
   writeFileSync(
     join(pkgDir, "index.mjs"),
     `export function register(program) { program.command('testcmd-from-plugin'); }`

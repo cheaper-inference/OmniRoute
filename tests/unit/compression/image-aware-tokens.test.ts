@@ -22,7 +22,7 @@ const DENSE_CLAUDE_BODY = {
   messages: [{ role: "user", content: [{ type: "text", text: "oi" }] }],
 };
 
-test("estimateCompressionTokens é image-aware: encolhe de verdade numa página omniglyph real", async () => {
+test("estimateCompressionTokens is image-aware: actually shrinks on a real omniglyph page", async () => {
   const encoded = new TextEncoder().encode(JSON.stringify(DENSE_CLAUDE_BODY));
   const result = await transformAnthropicMessages({ body: encoded, model: "claude-fable-5" });
   assert.ok(
@@ -43,21 +43,21 @@ test("estimateCompressionTokens é image-aware: encolhe de verdade numa página 
     `naive-char=${naiveCharEstimate} image-aware=${imageAwareEstimate} original-text=${originalTextEstimate}`
   );
 
-  // O estimador ciente de imagem deve ser MUITO menor que o char-count ingênuo do
-  // próprio base64 (prova que o base64 não é contado por char).
+  // The image-aware estimator must be MUCH smaller than the naive char-count of the
+  // own base64 (proves that base64 is not counted by char).
   assert.ok(
     imageAwareEstimate < naiveCharEstimate,
     `esperado image-aware (${imageAwareEstimate}) < naive-char (${naiveCharEstimate})`
   );
-  // E deve representar encolhimento real frente ao texto original (não só frente ao
-  // próprio char-count do PNG).
+  // And it must represent real shrinkage compared to the original text (not just compared to the
+  // PNG's own char-count).
   assert.ok(
     imageAwareEstimate < originalTextEstimate,
     `esperado image-aware (${imageAwareEstimate}) < original-text (${originalTextEstimate})`
   );
 });
 
-test("regressão: corpo sem imagem estima o MESMO valor de antes (char-count puro)", () => {
+test("regression: body without image estimates the SAME value as before (pure char-count)", () => {
   const plainBody = {
     model: "claude-sonnet-5",
     max_tokens: 128,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // scripts/check/check-cognitive-complexity.mjs
-// Ratchet bloqueante para complexidade cognitiva (sonarjs/cognitive-complexity).
+// Blocking ratchet for cognitive complexity (sonarjs/cognitive-complexity).
 // Shares ESLint walk with check-complexity via complexityEslintReport.mjs.
 import fs from "node:fs";
 import path from "node:path";
@@ -24,7 +24,7 @@ const BASELINE_PATH = path.resolve(
 );
 
 /**
- * Avalia a contagem atual de violações cognitivas contra o baseline.
+ * Evaluates the current count of cognitive violations against the baseline.
  * @param {number} current
  * @param {number} baseline
  * @returns {{ regressed: boolean, improved: boolean }}
@@ -39,7 +39,7 @@ export function evaluateCognitiveComplexity(current, baseline) {
 function main() {
   if (!fs.existsSync(BASELINE_PATH)) {
     process.stderr.write(
-      `[cognitive-complexity] FAIL — ${path.basename(BASELINE_PATH)} ausente.\n`
+      `[cognitive-complexity] FAIL — ${path.basename(BASELINE_PATH)} missing.\n`
     );
     process.exit(2);
   }
@@ -48,7 +48,7 @@ function main() {
   const baselineMetric = baselineJson.metrics && baselineJson.metrics.cognitiveComplexity;
   if (!baselineMetric || typeof baselineMetric.value !== "number") {
     process.stderr.write(
-      "[cognitive-complexity] FAIL — metrics.cognitiveComplexity ausente em quality-baseline.json.\n"
+      "[cognitive-complexity] FAIL — metrics.cognitiveComplexity missing in quality-baseline.json.\n"
     );
     process.exit(2);
   }
@@ -70,20 +70,20 @@ function main() {
   if (UPDATE && improved) {
     baselineJson.metrics.cognitiveComplexity.value = count;
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(baselineJson, null, 2) + "\n");
-    console.log(`[cognitive-complexity] baseline ratcheado: ${count} (era ${baselineValue})`);
+    console.log(`[cognitive-complexity] ratcheted baseline: ${count} (was ${baselineValue})`);
   }
 
   if (regressed) {
     process.stderr.write(
-      `[cognitive-complexity] REGRESSÃO — ${count} violações > baseline ${baselineValue}\n` +
-        `  → Quebre as funções complexas em helpers menores, ou rode\n` +
-        `    'node scripts/check/check-cognitive-complexity.mjs --update' se a contagem caiu legitimamente.\n`
+      `[cognitive-complexity] REGRESSION — ${count} violations > baseline ${baselineValue}\n` +
+        ` → Break complex functions into smaller helpers, or run\n`
+        `    'node scripts/check/check-cognitive-complexity.mjs --update' if the count has legitimately dropped.\n`
     );
     process.exit(1);
   }
 
   if (!QUIET) {
-    console.log(`[cognitive-complexity] OK — ${count} violações (baseline ${baselineValue})`);
+    console.log(`[cognitive-complexity] OK — ${count} violations (baseline ${baselineValue})`);
   }
 
   process.exit(0);

@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { shouldAutoSyncOnOpen, AUTO_SYNC_STALE_MS } from "../../src/lib/radar/autoSync.ts";
 
 // Pure staleness rule that powers the Radar page's sync-on-open behaviour
-// (spec: dados atualizados a cada abrir da página).
+// (spec: data updated every time the page is opened).
 
 const NOW = Date.parse("2026-08-06T12:00:00.000Z");
 

@@ -76,9 +76,9 @@ describe("retrieval/scoring — getRelevanceScore (literal string match, no RegE
     assert.equal(getRelevanceScore(mem, "   "), 0);
   });
   it("scores +20 for a full-phrase hit and +3 per token occurrence", () => {
-    // content "hello world": phrase +20, 1× "hello" +3 = 23
+    // content "hello world": phrase 20, 1× "hello" 3 = 23
     assert.equal(getRelevanceScore(mem, "hello"), 23);
-    // metadata holds "greeting": phrase +20, 1× "greeting" +3 = 23
+    // metadata holds "greeting": phrase 20, 1× "greeting" 3 = 23
     assert.equal(getRelevanceScore(mem, "greeting"), 23);
   });
   it("returns 0 when nothing matches", () => {

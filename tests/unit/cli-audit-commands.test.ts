@@ -99,7 +99,7 @@ test("runAuditTail --source all mescla compliance e mcp", async () => {
   assert.ok(parsed.some((e: any) => e.source === "mcp"));
 });
 
-test("runAuditTail --source compliance retorna apenas compliance", async () => {
+test("runAuditTail --source compliance returns only compliance", async () => {
   let capturedUrls: string[] = [];
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
@@ -160,7 +160,7 @@ test("runAuditStats consulta endpoint stats do mcp", async () => {
   assert.equal(parsed.totalCalls, 150);
 });
 
-test("runAuditGet busca entrada por id", async () => {
+test("runAuditGet searches input by id", async () => {
   let capturedUrl = "";
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {

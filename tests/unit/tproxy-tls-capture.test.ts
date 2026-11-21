@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — TLS-terminating capture for TPROXY (decrypt 2/N).
+ * Phase 3 / Epic A — TLS-terminating capture for TPROXY (decrypt 2/N).
  *
  * The decrypt engine TLS-terminates an intercepted client socket with a per-SNI
  * leaf from the dynamic CA (#4173), feeds the plaintext to Node's HTTP parser,

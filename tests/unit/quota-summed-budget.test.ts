@@ -14,8 +14,8 @@
  *     scaling at two levels:
  *
  *   Level A (unit — decideFairShare): feed decideFairShare directly with
- *     limit = planLimit × 1  → consumption > L  → BLOCK (single-account baseline)
- *     limit = planLimit × 2  → same consumption  → ALLOW (2-account summed budget)
+ * limit = planLimit × 1 → consumption > L → BLOCK (single-account baseline)
+ * limit = planLimit × 2 → same consumption → ALLOW (2-account summed budget)
  *     This mirrors exactly what enforce.ts injects after the accountCount multiply.
  *
  *   Level B (snapshot shape): build the dimensionsInfo array as enforce.ts does and

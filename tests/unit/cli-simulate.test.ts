@@ -88,7 +88,7 @@ test("runSimulateCommand exibe tabela com provedores do combo", async () => {
   assert.ok(stdout.includes("openai") || stdout.includes("Provider"));
 });
 
-test("runSimulateCommand --output json retorna simulatedPath completo", async () => {
+test("runSimulateCommand --output json returns full simulatedPath", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockFetch() as any;
 
@@ -158,7 +158,7 @@ test("runSimulateCommand --combo filtra por nome do combo", async () => {
   assert.equal(parsed[0].provider, "openai");
 });
 
-test("runSimulateCommand quando servidor offline emite mensagem e sai com 3", async () => {
+test("runSimulateCommand when offline server issues message and exits with 3", async () => {
   const origFetch = globalThis.fetch;
   const exitCodes: (number | string)[] = [];
   const origExit = process.exit.bind(process);

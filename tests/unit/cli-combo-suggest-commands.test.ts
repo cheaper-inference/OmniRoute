@@ -79,7 +79,7 @@ test("combo suggest --weights passa pesos no body", async () => {
   assert.equal(args.weights.cost, 0.3);
 });
 
-test("combo suggest --switch chama /api/combos/switch com melhor combo", async () => {
+test("combo suggest --switch calls /api/combos/switch with best combo", async () => {
   const urls: string[] = [];
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: any, opts: any) => {

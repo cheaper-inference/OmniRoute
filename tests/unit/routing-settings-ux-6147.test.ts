@@ -1,6 +1,6 @@
 // #6147 — routing/settings UX clarity. Pure-function guards for two of the three
 // sub-fixes:
-//   1. Weighted effective-share % (weight ÷ Σweights), incl. total===0 and sum≠100.
+//%20%20%201.%20Weighted%20effective-share%20%%20(weight%20%C3%B7%20%CE%A3weights),%20incl.%20total===0%20and%20sum%E2%89%A0100.
 //   3. Opt-in base-URL override eligibility predicate for built-in providers.
 // (Item 2 is a display-only label rename with no pure seam — manual verification.)
 import { test } from "node:test";

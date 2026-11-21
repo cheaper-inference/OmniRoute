@@ -98,7 +98,7 @@ test("parseCognitiveCount reads the gate's count (en + pt)", () => {
     797
   );
   assert.equal(
-    parseCognitiveCount("[cognitive-complexity] REGRESSÃO — 801 violações > baseline 797"),
+    parseCognitiveCount("[cognitive-complexity] REGRESSION — 801 violations > baseline 797"),
     801
   );
   assert.equal(parseCognitiveCount("no number"), null);
@@ -106,14 +106,14 @@ test("parseCognitiveCount reads the gate's count (en + pt)", () => {
 
 test("parseCognitiveCount ignores the cyclomatic count in the combined ratchets output (#7009)", () => {
   // `check:complexity-ratchets` runs ONE shared ESLint walk and prints BOTH ratchets.
-  // The cyclomatic "N violações" summary is emitted FIRST, so a bare `\\d+ violações`
+  // The cyclomatic "N violations" summary is emitted FIRST, so a bare `\\d violations`
   // regex captured 2056 (cyclomatic) instead of 890 (cognitive) — a phantom drift in
   // every pre-flight report. Prefer the unambiguous machine-readable `cognitiveComplexity=N`.
   const combined = [
     "complexity=2056",
     "cognitiveComplexity=890",
-    "[complexity] OK — 2056 violações (baseline 2056)",
-    "[cognitive-complexity] OK — 890 violações (baseline 890)",
+    "[complexity] OK — 2056 violations (baseline 2056)",
+    "[cognitive-complexity] OK — 890 violations (baseline 890)",
   ].join("\n");
   assert.equal(parseCognitiveCount(combined), 890);
 });
@@ -661,7 +661,7 @@ test("firstFailureLine still recognises every legitimate failure marker", () => 
     ["src/x.ts(10,5): error TS2322: Type 'string' is not assignable.", /error TS2322/],
     ["✗ db-rules: raw sqlite handle left open", /db-rules/],
     ["Error: ENOENT: no such file or directory, open 'dist/server.js'", /ENOENT/],
-    ["[cognitive-complexity] REGRESSÃO — 801 violações > baseline 797", /REGRESS/],
+    ["[cognitive-complexity] REGRESSION — 801 violations > baseline 797", /REGRESS/],
     ["[file-size] REGRESSED: open-sse/router.ts 1204 > cap 1100", /REGRESSED/],
   ];
   for (const [out, expected] of cases) {

@@ -50,7 +50,7 @@ test("PoolWizard.tsx: step 1 (Conta) is present", () => {
   assert.ok(wizardSrc.includes("step === 1"), "Expected step === 1 block for Conta step");
 });
 
-test("PoolWizard.tsx: step 2 (Limite) is present", () => {
+test("PoolWizard.tsx: step 2 (Limit) is present", () => {
   assert.ok(wizardSrc.includes("step === 2"), "Expected step === 2 block for Limite step");
 });
 

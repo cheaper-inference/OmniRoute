@@ -1,29 +1,29 @@
 #!/usr/bin/env node
 // scripts/check/check-model-lifecycle.mjs
-// Gate anti-drift (#11503): as três tabelas mantidas à mão que decidem roteamento —
+// Gate anti-drift (
 // FITNESS_TABLE (open-sse/services/autoCombo/taskFitness.ts, camada 4 do task fitness) e
 // BUILT_IN_ALIASES (open-sse/services/modelDeprecation.ts, reescreve `body.model` em toda
-// request), além de DEFAULT_DEGRADATION_MAP (backgroundTaskDetector.ts) — apodrecem em
-// silêncio quando o fornecedor aposenta um modelo. Em
-// release/v3.8.51 o resultado foi uma inversão de ranking (modelo morto 0.98 vs flagship
-// vivo 0.50) e aliases apontando para ids obsoletos. Este gate compara as três contra o snapshot de
-// ciclo de vida em config/quality/model-lifecycle.json (sem rede; regenerar com
+// request), in addition to DEFAULT_DEGRADATION_MAP (backgroundTaskDetector.ts) — they rot in
+// silence when the vendor retires a model. In
+// release/v3.8.51 the result was a reversal of the ranking (dead model 0.98 vs. flagship
+// live 0.50) and aliases pointing to obsolete IDs. This gate compares the three against the snapshot of
+// lifecycle in config/quality/model-lifecycle.json (no network; regenerate with
 // `npm run quality:refresh-model-lifecycle`).
 //
-// Quatro checagens, todas somadas antes do exit — nenhuma aborta as outras:
-//   (a) nenhum padrão do FITNESS_TABLE pontua um id aposentado que o catálogo roteia;
-//   (b) nenhum alvo de BUILT_IN_ALIASES está aposentado ou ausente do catálogo;
-//   (c) todo id aposentado ainda presente no REGISTRY tem encaminhamento em
+
+//   (a) no FITNESS_TABLE pattern scores a retired ID that the catalog routes;
+//   (b) no BUILT_IN_ALIASES target is retired or absent from the catalog;
+//   (c) every retired ID still present in the REGISTRY has forwarding in
 //       BUILT_IN_ALIASES ou consta em `allowedRetiredInCatalog` (a catraca a queimar);
-//   (d) nenhuma linha de DEFAULT_DEGRADATION_MAP (open-sse/services/backgroundTaskDetector.ts)
-//       tem origem ou destino aposentado. A origem aposentada é linha morta: checkLifecycle
-//       devolve 410 antes de resolveBackgroundTaskRedirect rodar. O destino aposentado é o
-//       normalmente rejeitado com 410 quando o ciclo de vida é validado novamente após o
-//       redirecionamento; a resolução de alias ainda pode convertê-lo em um id aceito.
+//   (d) no line in DEFAULT_DEGRADATION_MAP (open-sse/services/backgroundTaskDetector.ts)
+//       has a retired source or destination. The retired source is a dead end: checkLifecycle
+//       returns 410 before resolveBackgroundTaskRedirect runs. The retired destination is the
+
+//       redirection; alias resolution can still convert it into an accepted ID.
 //
-// (a) é deliberadamente restrita aos ids ROTEÁVEIS: linhas versionadas legítimas como
-// `gpt-4o` também casam com ids aposentados que o catálogo nunca serviu
-// (`gpt-4o-audio-preview`), e esses não podem inverter decisão de roteamento nenhuma.
+// (a) is deliberately restricted to ROUTABLE IDs: legitimate versioned lines such as
+// `gpt-4o` also match retired IDs that the catalog never served
+// (`gpt-4o-audio-preview`), and these cannot override any routing decision.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -33,7 +33,7 @@ const ROOT = process.cwd();
 const SNAPSHOT_PATH = path.join(ROOT, "config/quality/model-lifecycle.json");
 const TASK_TYPES = ["coding", "review", "planning", "analysis", "debugging", "documentation"];
 
-/** Ids de modelo que o catálogo consegue rotear (id + aliases de cada modelo). */
+/** Model IDs that the catalog can route (ID + aliases for each model). */
 export function collectCatalogIds(registry) {
   const ids = new Set();
   for (const entry of Object.values(registry ?? {})) {
@@ -47,7 +47,7 @@ export function collectCatalogIds(registry) {
   return [...ids];
 }
 
-/** Um id do catálogo está aposentado quando sua forma nua (sem prefixo `vendor/`) está. */
+/** A catalog id is retired when its bare form (without `vendor/` prefix) is. */
 export function isRetiredId(id, retiredIds) {
   const lower = String(id).toLowerCase();
   if (retiredIds.has(lower)) return true;
@@ -55,7 +55,7 @@ export function isRetiredId(id, retiredIds) {
   return slash !== -1 && retiredIds.has(lower.slice(slash + 1));
 }
 
-/** (a) Linhas do FITNESS_TABLE que ainda pontuam um modelo aposentado e roteável. */
+/** (a) FITNESS_TABLE rows that still score a retired and routable model. */
 export function findRetiredFitnessRows(routableRetiredIds, scoreFor, taskTypes = TASK_TYPES) {
   const violations = [];
   for (const id of routableRetiredIds) {
@@ -71,7 +71,7 @@ export function findRetiredFitnessRows(routableRetiredIds, scoreFor, taskTypes =
   return violations;
 }
 
-/** (b) Alvos de alias aposentados ou fora do catálogo. */
+/** (b) Retired or out-of-print alias targets. */
 export function findBadAliasTargets(aliases, catalogIds, retiredIds) {
   const catalog = new Set([...catalogIds].map((id) => id.toLowerCase()));
   const violations = [];
@@ -86,7 +86,7 @@ export function findBadAliasTargets(aliases, catalogIds, retiredIds) {
   return violations;
 }
 
-/** (c) Ids aposentados que o catálogo ainda roteia sem encaminhamento nem allowlist. */
+/** (c) Retired IDs that the catalog still routes without forwarding or allowlist. */
 export function findUnforwardedRetiredIds(routableRetiredIds, aliases, allowlist) {
   const allowed = new Set((allowlist ?? []).map((id) => String(id).toLowerCase()));
   return routableRetiredIds
@@ -94,7 +94,7 @@ export function findUnforwardedRetiredIds(routableRetiredIds, aliases, allowlist
     .map((id) => `${id} is retired but still routable with no BUILT_IN_ALIASES forward`);
 }
 
-/** (d) Linhas de DEFAULT_DEGRADATION_MAP com origem ou destino aposentado. */
+/** (d) DEFAULT_DEGRADATION_MAP rows with a retired source or destination. */
 export function findRetiredDegradationRows(degradationMap, retiredIds) {
   const violations = [];
   for (const [source, target] of Object.entries(degradationMap ?? {})) {
@@ -121,8 +121,8 @@ export function readSnapshot(snapshotPath = SNAPSHOT_PATH) {
 }
 
 async function loadProductionTables() {
-  // Nenhum gate pode migrar o banco do operador: taskFitness.ts importa src/lib/db/core.ts,
-  // então DATA_DIR aponta para um diretório descartável ANTES do import dinâmico.
+  // No gate can migrate the operator's database: taskFitness.ts imports src/lib/db/core.ts,
+  // so DATA_DIR points to a disposable directory BEFORE the dynamic import.
   process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-lifecycle-gate-"));
   const [
     { REGISTRY },

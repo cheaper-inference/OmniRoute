@@ -737,6 +737,6 @@ test("real-clock parallel priced image burst persists every physical attempt", a
   assert.equal(hits.length, 20);
   assert.equal((await callLogRows("/v1/images/generations")).length, 20);
   assert.equal(usageRows().length, 20);
-  // The quota API rounds the Decimal total; avoid binary multiplication residue.
+  // The API quota rounds the Decimal total; avoid binary multiplication residue.
   assert.equal((await spendOf(key.key)).weeklySpentUsd, 20.005);
 });

@@ -8,7 +8,7 @@ import path from "node:path";
 // Point that probe at the no-op port 0 so the restart tests don't open real sockets.
 process.env.PORT = "0";
 
-// Stub para o processSupervisor: testa a lógica de restart/backoff/MITM sem processos reais.
+// Stub for processSupervisor: tests restart/backoff/MITM logic without real processes.
 
 class StubChild extends EventEmitter {
   pid = 99999;
@@ -24,7 +24,7 @@ function makeChildFactory(exitCodes: (number | null)[]) {
   return () => {
     const child = new StubChild();
     const code = exitCodes[calls++] ?? null;
-    // Emite exit no próximo tick para simular processo assíncrono
+    // Issue exit on the next tick to simulate asynchronous process
     setImmediate(() => child.emit("exit", code));
     return child;
   };
@@ -45,7 +45,7 @@ test("detectMitmCrash retorna false com menos de 2 sinais", async () => {
   assert.ok(!detectMitmCrash([]));
 });
 
-// --- ServerSupervisor: lógica de restart ---
+// --- ServerSupervisor: restart logic ---
 
 test("ServerSupervisor.handleExit com code=0 espontâneo reinicia em vez de sair (#4425)", async () => {
   const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
@@ -110,7 +110,7 @@ test("ServerSupervisor.handleExit com isShuttingDown=true chama process.exit ime
   assert.equal(exits[0], 1);
 });
 
-test("ServerSupervisor.handleExit incrementa restartCount e chama start() após delay", async () => {
+test("ServerSupervisor.handleExit increments restartCount and calls start() after delay", async () => {
   const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
 
   let startCalls = 0;
@@ -154,7 +154,7 @@ test("ServerSupervisor.handleExit exibe crash log ao reiniciar", async () => {
   await new Promise((r) => setTimeout(r, 1100)); // drain the scheduled restart timer
 });
 
-test("ServerSupervisor chama onCrashCallback após maxRestarts atingido", async () => {
+test("ServerSupervisor calls onCrashCallback after maxRestarts reached", async () => {
   const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
 
   let callbackCalled = false;
@@ -225,7 +225,7 @@ test("ServerSupervisor reseta restartCount após viver >= RESTART_RESET_MS (#442
 
 // --- Node.js v24 compat: process.exit() must receive a number (#3748) ---
 
-test("ServerSupervisor.handleExit com string code não passa string para process.exit (#3748)", async () => {
+test("ServerSupervisor.handleExit with string code does not pass string to process.exit (#3748)", async () => {
   const { ServerSupervisor } = await import("../../bin/cli/runtime/processSupervisor.mjs");
 
   const exits: Array<number | string | undefined> = [];
@@ -268,7 +268,7 @@ test("writePidFile/readPidFile/cleanupPidFile operam por service", async () => {
   writePidFile("mitm", 99999);
   assert.equal(readPidFile("mitm"), 99999);
 
-  // Services são independentes
+  
   assert.equal(readPidFile("server"), 12345);
 
   cleanupPidFile("server");

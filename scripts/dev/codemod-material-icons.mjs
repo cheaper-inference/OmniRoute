@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Codemod: <span className="material-symbols-outlined ..." ...>name</span>  →  <Icon name="name" ... />
-// Só converte o padrão simples (className como string literal). Spans com className dinâmico
-// (cn(...), template com ${}) ou com style={} ficam para conversão manual e são listados em
-// `leftovers` (linha do `<span`, mesmo quando a tag abre em várias linhas → exit 2). Spans
-// multi-linha com className estático (incl. {`…`} sem ${}) são normalizados e convertidos.
-// O import entra DEPOIS do prólogo de diretivas ("use client" atrás de docblock/comentários).
+// Only converts the simple pattern (className as string literal). Spans with dynamic className
+// (cn(...), template with ${}) or with style={} are for manual conversion and are listed in
+// `leftovers` (`<span` line, even when the tag opens on multiple lines → exit 2). Spans
+// multi-line with static className (incl. {`…`} without ${}) are normalized and converted.
+// The import comes AFTER the directive prologue ("use client" behind docblock/comments).
 // `title="…"` vira `ariaLabel` (role="img" + aria-label); o tooltip de hover some — o lote
 // recoloca `title` no wrapper quando o tooltip importava.
-// `pointer-events-none` (e `shrink-0`) é descartado do span porque o adapter já o recoloca.
+// `pointer-events-none` (and `shrink-0`) is discarded from the span because the adapter already replaces it.
 //   node scripts/dev/codemod-material-icons.mjs src/app/\(dashboard\)/dashboard/health [--write]
 import fs from "node:fs";
 import path from "node:path";
@@ -195,7 +195,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const write = args.includes("--write");
   const targets = args.filter((a) => !a.startsWith("--"));
   if (!targets.length) {
-    console.error("uso: codemod-material-icons.mjs <dir|arquivo>... [--write]");
+    console.error("usage: codemod-material-icons.mjs <dir|file>... [--write]");
     process.exit(1);
   }
   let total = 0;

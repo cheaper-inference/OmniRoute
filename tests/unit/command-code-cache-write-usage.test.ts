@@ -108,7 +108,7 @@ test("Command Code cache-write cost is billed once, at the cache_creation rate",
     outputTokens: 0,
     inputTokenDetails: { noCacheTokens: 10, cacheReadTokens: 60, cacheWriteTokens: 30 },
   });
-  // $/1M: 10 fresh × 1 + 60 read × 0.1 + 30 write × 2 = 10 + 6 + 60 = 76 → 76e-6
+  // $/1M: 10 fresh × 1 60 read × 0.1 30 write × 2 = 10 6 60 = 76 → 76e-6
   const cost = computeCostFromPricing(
     { input: 1, cached: 0.1, output: 5, cache_creation: 2 },
     usage as unknown as Record<string, unknown>

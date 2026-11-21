@@ -19,7 +19,7 @@ import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
 
-// Slot geometry inside a 173 × 158 tile: the request leaves (26,79), the four targets sit at
+// Slot geometry inside a 173 × 158 tile: the request leaves (26.79), the four targets sit at
 // SLOT_Y; tracks end at the slot edge, dots stop just before it.
 const SLOT_Y = [43.5, 67.5, 91.5, 115.5];
 const SLOT_X = 112;

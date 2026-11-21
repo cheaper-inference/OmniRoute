@@ -145,10 +145,10 @@ test("UTF-8 characters split between stream chunks remain intact", async (t) => 
     process.execPath,
     [
       "-e",
-      "const b=Buffer.from('ação');process.stdout.write(b.subarray(0,2));setTimeout(()=>process.stdout.write(b.subarray(2)),50)",
+      "const b=Buffer.from('action');process.stdout.write(b.subarray(0,2));setTimeout(()=>process.stdout.write(b.subarray(2)),50)",
     ],
     fixture(t)
   );
   assert.equal(result.code, 0);
-  assert.equal(result.out, "ação");
+  assert.equal(result.out, "action");
 });

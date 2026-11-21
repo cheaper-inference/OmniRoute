@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 // scripts/check/check-fetch-targets.mjs  v2
-// Gate anti-alucinação: todo fetch("/api/...") em src/ (client-side) deve
+// Anti-hallucination gate: every fetch("/api/...") in src/ (client-side) must
 // resolver para um route.ts real em src/app/api/. Mata rotas inventadas.
 //
-// Três subchecks (6A.7):
-//  1. Paths estáticos literais:        fetch("/api/foo")  → rota deve existir
-//  2. Prefixo de template literal:     fetch(`/api/x/${id}`) → prefixo estático deve ter
-//                                      ao menos uma rota filha/irmã
-//  3. Método HTTP literal:             fetch("/api/foo", { method: "POST" }) → route.ts
-//                                      deve exportar POST (inclui re-exports)
+// Three subchecks (6A.7):
+//  1. Literal static paths:        fetch("/api/foo")  → route must exist
+//  2. Template literal prefix:     fetch(`/api/x/${id}`) → static prefix must have
+// at least one daughter/sister route
+//  3. Literal HTTP method:             fetch("/api/foo", { method: "POST" }) → route.ts
+//                                      must export POST (includes re-exports)
 //
 // Escopo (v2): todo src/**/*.{ts,tsx} client-side
-//   Excluídos: src/app/api/**, src/lib/db/**, *.test.ts, *.spec.ts, node_modules
+// Deleted: src/app/api/**, src/lib/db/**, *.test.ts, *.spec.ts, node_modules
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -21,15 +21,15 @@ const cwd = process.cwd();
 const SRC = path.join(cwd, "src");
 const API = path.join(cwd, "src/app/api");
 
-// Paths que o checker não resolve estaticamente (allowlist com justificativa):
-//  - /api/v1/* é a superfície OpenAI-compat (proxy), não rotas internas do dashboard.
+// Paths that the checker does not resolve statically (allowlist with justification):
+//  - /api/v1/* is the OpenAI-compat surface (proxy), not internal dashboard routes.
 const IGNORE = [
-  /^\/api\/v1\//, // superfície OpenAI-compat
+  /^\/api\/v1\//, // OpenAI-compat surface
 ];
 
-// Mismatches src/**→rota PRÉ-EXISTENTES ou não-resolvíveis estaticamente.
-// Congelados para a catraca ficar verde e bloquear qualquer nova rota inventada.
-// NÃO adicione novos sem justificativa — esse é o ponto do gate.
+// Mismatches src/**→PRE-EXISTING or statically unresolvable routes.
+// Frozen so that the gate turns green and blocks any new routes that are created.
+// DO NOT add new ones without justification — that's the whole point of the gate.
 //
 // Format for stale-enforcement: entries must match the string produced by
 // the checkers below (i.e. the raw apiPath or prefix string, not the file+arrow).
@@ -278,7 +278,7 @@ function main() {
       const routeSource = fs.readFileSync(path.join(cwd, routeFile), "utf8");
       if (!routeExportsMethod(routeSource, method)) {
         console.error(
-          `[check-fetch-targets] ✗ método ${method} não exportado: ${path.relative(cwd, f)} → ${apiPath} (em ${routeFile})`
+          `[check-fetch-targets] ✗ ${method} method not exported: ${path.relative(cwd, f)} → ${apiPath} (in ${routeFile})`
         );
         process.exitCode = 1;
         liveMissesMethod.add(key);

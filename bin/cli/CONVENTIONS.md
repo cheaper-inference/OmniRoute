@@ -213,7 +213,7 @@ Commands that mutate state (delete, reset, `--force`) **must**:
 - Use `tests/unit/cli-*.test.ts` naming. Prefer `node:test` for CLI suites
   (no extra deps).
 - Coverage target: ≥60% for `bin/cli/commands/`, ≥75% for `bin/cli/` overall
-  after Fase 8.
+  after Phase 8.
 
 ## 12. References
 

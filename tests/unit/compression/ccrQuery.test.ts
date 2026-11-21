@@ -7,7 +7,7 @@ import {
 
 const block = ["l1 ok", "l2 ERROR foo", "l3 ok", "l4 ERROR bar", "l5 ok"].join("\n");
 
-test("full / ausente → texto inteiro (backward-compat)", () => {
+test("full/missing → full text (backward-compat)", () => {
   assert.deepEqual(queryBlock(block, {}), { content: block });
   assert.deepEqual(queryBlock(block, { mode: "full" }), { content: block });
 });
@@ -28,7 +28,7 @@ test("lines:start-end 1-indexed inclusive, clamp", () => {
   assert.ok("error" in queryBlock(block, { mode: "lines", start: 3, end: 1 }));
 });
 
-test("grep casa linhas; unique deduplica", () => {
+test("grep matches lines; unique deduplicates", () => {
   const r = queryBlock(block, { mode: "grep", pattern: "ERROR" });
   assert.deepEqual(r, { content: "l2 ERROR foo\nl4 ERROR bar" });
   const dup = ["x ERR", "x ERR", "y ERR"].join("\n");
@@ -42,7 +42,7 @@ test("grep ReDoS rejeitado por safe-regex", () => {
   assert.match((r as { error: string }).error, /backtrack|unsafe|reject/i);
 });
 
-test("grep regex inválido → erro; pattern grande → erro", () => {
+test("invalid grep regex → error; large pattern → error", () => {
   assert.ok("error" in queryBlock(block, { mode: "grep", pattern: "[" }));
   assert.ok("error" in queryBlock(block, { mode: "grep", pattern: "a".repeat(600) }));
 });
@@ -63,6 +63,6 @@ test("stats → JSON lines/chars/bytes", () => {
   assert.equal(s.bytes, Buffer.byteLength(block, "utf8"));
 });
 
-test("queryBlock nunca lança (fail-safe)", () => {
+test("queryBlock never throws (fail-safe)", () => {
   assert.doesNotThrow(() => queryBlock(block, { mode: "head", n: -5 }));
 });

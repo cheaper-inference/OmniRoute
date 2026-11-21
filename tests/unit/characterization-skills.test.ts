@@ -1,4 +1,4 @@
-// Characterization tests — src/lib/skills (rail 3.8.55, Task 12 "caracterização B").
+// Characterization tests — src/lib/skills (rail 3.8.55, Task 12 "characterization B").
 //
 // The skills subsystem has no barrel: external code imports individual modules (registry,
 // executor, providerSettings, toolLoopTypes, interception, …). This file pins the export

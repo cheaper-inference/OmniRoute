@@ -111,7 +111,7 @@ test("sync initialize chama POST /api/sync/initialize", async () => {
   assert.equal(capturedMethod, "POST");
 });
 
-test("sync.mjs pode ser importado sem erro", async () => {
+test("sync.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/sync.mjs");
   assert.equal(typeof mod.registerSync, "function");
 });

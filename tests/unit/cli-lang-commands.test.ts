@@ -28,7 +28,7 @@ test.after(() => {
 
 // ── i18n.mjs security ─────────────────────────────────────────────────────────
 
-test("normalize rejeita path traversal com ../", async () => {
+test("normalize rejects path traversal with ../", async () => {
   const { resetForTests, setLocale, getLocale } = await import("../../bin/cli/i18n.mjs");
   resetForTests();
   setLocale("../etc/passwd");
@@ -37,7 +37,7 @@ test("normalize rejeita path traversal com ../", async () => {
   resetForTests();
 });
 
-test("normalize rejeita código com caracteres especiais", async () => {
+test("normalize rejects code with special characters", async () => {
   const { resetForTests, setLocale, getLocale } = await import("../../bin/cli/i18n.mjs");
   resetForTests();
   setLocale("pt;rm -rf /");
@@ -46,7 +46,7 @@ test("normalize rejeita código com caracteres especiais", async () => {
   resetForTests();
 });
 
-test("normalize aceita código válido com hífen (pt-BR)", async () => {
+test("normalize accepts valid code with hyphen (pt-BR)", async () => {
   const { resetForTests, setLocale, getLocale } = await import("../../bin/cli/i18n.mjs");
   resetForTests();
   setLocale("pt-BR");
@@ -55,7 +55,7 @@ test("normalize aceita código válido com hífen (pt-BR)", async () => {
   resetForTests();
 });
 
-test("normalize converte underscore para hífen (pt_BR → pt-BR)", async () => {
+test("normalize converts underscore to hyphen (pt_BR → pt-BR)", async () => {
   const { resetForTests, setLocale, getLocale } = await import("../../bin/cli/i18n.mjs");
   resetForTests();
   setLocale("pt_BR");
@@ -89,7 +89,7 @@ test("runConfigLangGetCommand retorna 0 e imprime o locale ativo", async () => {
   }
 });
 
-test("runConfigLangGetCommand --json retorna objeto com code e name", async () => {
+test("runConfigLangGetCommand --json returns object with code and name", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangGetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -113,7 +113,7 @@ test("runConfigLangGetCommand --json retorna objeto com code e name", async () =
 
 // ── config lang list ───────────────────────────────────────────────────────────
 
-test("runConfigLangListCommand --json lista locales com campo active", async () => {
+test("runConfigLangListCommand --json list locales with active field", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangListCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -141,7 +141,7 @@ test("runConfigLangListCommand --json lista locales com campo active", async () 
 
 // ── config lang set ────────────────────────────────────────────────────────────
 
-test("runConfigLangSetCommand salva locale no .env e chama setLocale imediatamente", async () => {
+test("runConfigLangSetCommand saves locale in .env and calls setLocale immediately", async () => {
   const { resetForTests, setLocale, getLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangSetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -165,7 +165,7 @@ test("runConfigLangSetCommand salva locale no .env e chama setLocale imediatamen
   }
 });
 
-test("runConfigLangSetCommand retorna 1 para código desconhecido", async () => {
+test("runConfigLangSetCommand returns 1 for unknown code", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangSetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -184,7 +184,7 @@ test("runConfigLangSetCommand retorna 1 para código desconhecido", async () => 
   }
 });
 
-test("runConfigLangSetCommand retorna 1 quando code não fornecido", async () => {
+test("runConfigLangSetCommand returns 1 when code not provided", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangSetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -203,7 +203,7 @@ test("runConfigLangSetCommand retorna 1 quando code não fornecido", async () =>
   }
 });
 
-test("runConfigLangSetCommand retorna 0 quando já ativo (sem --force)", async () => {
+test("runConfigLangSetCommand returns 0 when already active (without --force)", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangSetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -222,7 +222,7 @@ test("runConfigLangSetCommand retorna 0 quando já ativo (sem --force)", async (
   }
 });
 
-test("runConfigLangSetCommand --force salva mesmo quando locale já ativo", async () => {
+test("runConfigLangSetCommand --force saves even when locale already active", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangSetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();
@@ -248,7 +248,7 @@ test("runConfigLangSetCommand --force salva mesmo quando locale já ativo", asyn
 
 // ── upsertEnvLine (testado indiretamente via set) ─────────────────────────────
 
-test("runConfigLangSetCommand atualiza chave sem duplicar quando já existe", async () => {
+test("runConfigLangSetCommand updates key without duplication when it already exists", async () => {
   const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
   const { runConfigLangSetCommand } = await import("../../bin/cli/commands/config.mjs");
   resetForTests();

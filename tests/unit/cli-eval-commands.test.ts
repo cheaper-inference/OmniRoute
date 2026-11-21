@@ -57,7 +57,7 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("runEvalSuitesList retorna lista de suites", async () => {
+test("runEvalSuitesList returns list of suites", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = ((url: string) => {
     assert.ok(url.includes("/api/evals/suites"));

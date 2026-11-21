@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
-# Cria uma worktree isolada seguindo o protocolo obrigatório do AGENTS.md
+# Create an isolated worktree following the mandatory AGENTS.md protocol
 # (Git Workflow → "Worktree isolation" / Hard Rule #19), incluindo os dois
-# passos que são fáceis de esquecer e falham em silêncio:
+# steps that are easy to forget and fail silently:
 #
-#   1. node_modules por HARD LINK (`cp -al`), nunca symlink — um symlink que
+# 1. node_modules by HARD LINK (`cp -al`), never symlink — a symlink that
 #      resolve fora da raiz mata o Turbopack com um FATAL que culpa a
-#      "filesystem root" e não a worktree (incidente 2026-07-31, #9043).
-#   2. `.husky/_` copiado — é gitignored, então uma worktree nova NÃO o tem, e
-#      `core.hooksPath=.husky/_` aponta para um diretório inexistente: TODOS os
-#      hooks de pre-commit ficam mudos, sem aviso nenhum. Foi assim que 59
+# "filesystem root" and not the worktree (incident 2026-07-31, #9043).
+#2. `.husky/_` copied — it's gitignored, so a new worktree DOESN'T have it, and
+# `core.hooksPath=.husky/_` points to a non-existent directory: ALL
+# pre-commit hooks are silent, without any warning. That's how 59
 #      commits com identidade trocada passaram pelo gate entre 29/08 e 02/09
 #      (ver .mailmap e scripts/check/check-git-identity.sh).
 #
-# Concorrência: várias sessões criam worktrees ao mesmo tempo no mesmo .git.
-# Sem exclusão mútua, invocações paralelas disputam .git/config ("could not lock
-# config file", exit 255) depois que `git branch` já rodou, deixando a branch sem
+# Concurrency: multiple sessions create worktrees at the same time in the same .git.
+# Without mutual exclusion, parallel invocations fight over .git/config ("could not lock
+# config file", exit 255) after `git branch` has already run, leaving the branch without
 # worktree (campanha 2026-10: 3 de 6 falharam). Por isso o script:
-#   - serializa as invocações com um lock em <git-common-dir>/omniroute-new-worktree.lock
-#     (flock; fallback por mkdir quando flock não existe), esperando até
-#     NEW_WORKTREE_LOCK_WAIT segundos (padrão 600) com aviso visível;
+#   - serializes invocations with a lock in <git-common-dir>/omniroute-new-worktree.lock
+# (flock; fallback by mkdir when flock does not exist), waiting until
+# NEW_WORKTREE_LOCK_WAIT seconds (default 600) with visible warning;
 #   - se `git worktree add` falhar depois de criar a branch, remove a branch
-#     (só a que ESTA execução criou) e avisa — repetir o comando basta.
+# (only the one that THIS execution created) and warns — repeating the command is enough.
 #
 # Uso:  scripts/dev/new-worktree.sh <branch> [base-branch]
 # Ex.:  scripts/dev/new-worktree.sh fix/12345-algo release/v3.8.51
-# Env:  NEW_WORKTREE_LOCK_WAIT  segundos de espera pelo lock (padrão 600)
-#       NEW_WORKTREE_NO_FLOCK   força o fallback por mkdir (usado nos testes)
+# Env: NEW_WORKTREE_LOCK_WAIT seconds to wait for lock (default 600)
+#       NEW_WORKTREE_NO_FLOCK   forces the mkdir fallback (used in tests)
 
 set -euo pipefail
 
@@ -39,12 +39,12 @@ if [ -z "$BRANCH" ]; then
 fi
 
 # O checkout PRINCIPAL, mesmo quando este script roda de dentro de outra worktree:
-# `--show-toplevel` devolveria a worktree atual, e a nova nasceria aninhada nela.
+# `--show-toplevel` would return the current worktree, and the new one would be born nested within it.
 COMMON_DIR=$(git rev-parse --path-format=absolute --git-common-dir)
 MAIN=$(dirname "$COMMON_DIR")
 cd "$MAIN"
 
-# ---- exclusão mútua entre invocações paralelas ------------------------------
+# ---- mutual exclusion between parallel invocations ------------------------------
 LOCK="$COMMON_DIR/omniroute-new-worktree.lock"
 LOCK_WAIT="${NEW_WORKTREE_LOCK_WAIT:-600}"
 MKDIR_LOCK=""
@@ -68,7 +68,7 @@ acquire_lock() {
     fi
     return 0
   fi
-  # Fallback sem flock: mkdir é atômico em qualquer sistema de arquivos POSIX.
+  # Non-flock fallback: mkdir is atomic on any POSIX filesystem.
   local dir="$LOCK.d" waited=0
   until mkdir "$dir" 2>/dev/null; do
     if [ "$waited" -eq 0 ]; then
@@ -85,24 +85,24 @@ acquire_lock() {
 }
 acquire_lock
 
-# Sem base explícita, usa a release ativa (maior release/* por semver) — nunca
-# `main` e nunca "a branch em que eu estou", conforme a Hard Rule #19.
+# No explicit basis, uses the active release (highest release/* by semver) — never
+# `main` and never "the branch I'm on", as per Hard Rule #19.
 if [ -z "$BASE" ]; then
   BASE=$(git ls-remote --heads origin 'refs/heads/release/*' \
     | sed 's#.*refs/heads/##' | sort -V | tail -1)
-  [ -z "$BASE" ] && { echo "não consegui resolver a release ativa; passe a base explicitamente" >&2; exit 1; }
-  echo "base não informada — usando a release ativa: $BASE"
+  [ -z "$BASE" ] && { echo "I was unable to resolve the active release; pass the base explicitly" >&2; exit 1; }
+  echo "base not specified — using the active release: $BASE"
 fi
 
 DIR=".claude/worktrees/${BRANCH##*/}"
-[ -e "$DIR" ] && { echo "já existe: $DIR" >&2; exit 1; }
+[ -e "$DIR" ] && { echo "already exists: $DIR" >&2; exit 1; }
 
 git fetch origin "$BASE" --quiet
 
-# ---- criação com rollback da branch ----------------------------------------
-# `git worktree add -b` cria a branch ANTES da worktree; se a worktree falhar, a
-# branch sobra e o próximo `-b` morre com "already exists". Só removemos a branch
-# que esta execução criou, e só enquanto nenhuma worktree a tiver em uso.
+# ---- creation with branch rollback ----------------------------------------
+# `git worktree add -b` creates the branch BEFORE the worktree; if the worktree fails, the
+# branch lingers and the next `-b` dies with "already exists". We only remove the branch
+# that this run created, and only while no worktree is using it.
 BRANCH_PREEXISTED=0
 git show-ref --verify --quiet "refs/heads/$BRANCH" && BRANCH_PREEXISTED=1
 
@@ -114,9 +114,9 @@ rollback_branch() {
     return 0
   fi
   if git branch -D "$BRANCH" >/dev/null 2>&1; then
-    echo "rollback: branch $BRANCH removida (a worktree não chegou a existir) — basta repetir o comando" >&2
+    echo "rollback: branch $BRANCH removed (the worktree never existed) — just repeat the command" >&2
   else
-    echo "rollback: não consegui remover a branch $BRANCH; remova com 'git branch -D $BRANCH' antes de repetir" >&2
+    echo "rollback: unable to remove branch $BRANCH; remove with 'git branch -D $BRANCH' before retrying" >&2
   fi
 }
 
@@ -125,48 +125,48 @@ git worktree add "$DIR" -b "$BRANCH" "origin/$BASE"
 ADD_RC=$?
 set -e
 if [ "$ADD_RC" -ne 0 ]; then
-  echo "git worktree add falhou (rc=$ADD_RC)" >&2
+  echo "git worktree add failed (rc=$ADD_RC)" >&2
   rollback_branch
   exit "$ADD_RC"
 fi
 
-# `.husky/_` PRIMEIRO: é minúsculo e é o que decide se os gates locais rodam.
-# Copiar node_modules antes seria arriscar abortar (set -e) numa árvore de ~10 GB
-# e deixar a worktree sem hook nenhum — exatamente o defeito que este script existe
-# para impedir.
+# `.husky/_` FIRST: it is tiny and decides whether local gates run.
+# Copying node_modules first would risk aborting (set -e) on a ~10 GB tree
+# and leave the worktree without any hook — exactly the flaw this script exists
+# to prevent.
 if [ -d "$MAIN/.husky/_" ]; then
   cp -a "$MAIN/.husky/_" "$DIR/.husky/_"
 else
-  echo "AVISO: .husky/_ não existe no checkout principal — rode 'npm install' lá primeiro" >&2
+  echo "WARNING: .husky/_ does not exist in the main checkout — run 'npm install' there first" >&2
 fi
 
 # node_modules: hard links, ~5s e disco quase zero (inodes compartilhados).
-# Um `cp -al SRC DEST` com DEST já existente aninharia SRC DENTRO dele
-# (node_modules/node_modules), então DEST não pode existir aqui.
+# A `cp -al SRC DEST` with DEST already existing would nest SRC INSIDE it
+# (node_modules/node_modules), so DEST cannot exist here.
 if [ -d "$MAIN/node_modules/node_modules" ]; then
-  echo "AVISO: $MAIN/node_modules/node_modules existe — resíduo de um cp -al aninhado." >&2
-  echo "       Ele infla a cópia e esgota o limite de hard links; convém removê-lo." >&2
+  echo "WARNING: $MAIN/node_modules/node_modules exists — residue of a nested cp -al." >&2
+  echo " It inflates the copy and exhausts the hard link limit; you may want to remove it." >&2
 fi
 if [ -d "$MAIN/node_modules" ]; then
-  # Falha parcial (limite de hard links, disco) não pode derrubar a worktree inteira:
-  # os hooks já estão no lugar e o npm install continua sendo uma saída válida.
+  # Partial failure (limit of hard links, disk) cannot bring down the entire worktree:
+  # the hooks are already in place and npm install remains a valid output.
   if cp -al "$MAIN/node_modules" "$DIR/node_modules" 2>"$DIR/.cp-node-modules.log"; then
     echo "node_modules: $(ls "$DIR/node_modules" | wc -l) entradas (hard links)"
     rm -f "$DIR/.cp-node-modules.log"
   else
-    echo "AVISO: a cópia de node_modules falhou parcialmente (veja $DIR/.cp-node-modules.log)." >&2
-    echo "       Primeiras linhas:" >&2
+    echo "WARNING: Copying node_modules partially failed (see $DIR/.cp-node-modules.log)." >&2
+    echo "First lines:" >&2
     head -3 "$DIR/.cp-node-modules.log" >&2
   fi
 else
-  echo "AVISO: node_modules não existe no checkout principal — rode 'npm install' lá primeiro" >&2
+  echo "WARNING: node_modules does not exist in the main checkout — run 'npm install' there first" >&2
 fi
 
-# Verificação: o hook precisa estar REALMENTE ativo, não apenas presente.
-# Sem core.hooksPath o git usa <git-common-dir>/hooks; numa worktree `.git` é só um ponteiro.
+# Verification: the hook needs to be REALLY active, not just present.
+# Without core.hooksPath git uses <git-common-dir>/hooks; in a worktree `.git` is just a pointer.
 HOOKS_PATH=$(git -C "$DIR" config --get core.hooksPath \
   || echo "$(git -C "$DIR" rev-parse --path-format=absolute --git-common-dir)/hooks")
-# Como o git ao rodar o hook: caminho absoluto vale como está; relativo parte da worktree.
+# Like git when running the hook: absolute path is valid as is; relative part of the worktree.
 case "$HOOKS_PATH" in
   /*) HOOKS_DIR="$HOOKS_PATH" ;;
   *) HOOKS_DIR="$DIR/$HOOKS_PATH" ;;
@@ -174,7 +174,7 @@ esac
 if [ -x "$HOOKS_DIR/pre-commit" ]; then
   echo "hooks: ativos ($HOOKS_PATH/pre-commit)"
 else
-  echo "AVISO: pre-commit NÃO está ativo em $HOOKS_DIR — os gates locais não vão rodar" >&2
+  echo "WARNING: pre-commit is NOT active in $HOOKS_DIR — local gates will not run" >&2
   exit 1
 fi
 

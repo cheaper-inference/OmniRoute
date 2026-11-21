@@ -4,9 +4,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-// Quarentena de flakes de concorrência (plano melhorias v3.8.46, P0.3).
-// Os arquivos em tests/unit/serial/ falham sob contenção de CPU (--test-concurrency>1
-// com a suíte inteira) mas passam isolados — classe glm-3580 / quota-division /
+// Concurrency flake quarantine (improvements plan v3.8.46, P0.3).
+// Files in tests/unit/serial/ fail under CPU contention (--test-concurrency>1
+// with the entire suite) but pass in isolation — class glm-3580 / quota-division /
 // provider-health-autopilot, que custava re-runs de ~28min por rodada de CI.
 // Este guard garante que a quarentena continua ligada em TODOS os runners.
 
@@ -16,7 +16,7 @@ const scripts: Record<string, string> = pkg.scripts;
 
 const SERIAL_GLOB = 'tests/unit/serial/**/*.test.ts';
 
-test("test:unit:serial existe e roda o diretório de quarentena com concurrency=1", () => {
+test("test:unit:serial exists and runs the quarantine directory with concurrency=1", () => {
   const s = scripts["test:unit:serial"];
   assert.ok(s, "script test:unit:serial deve existir");
   assert.ok(s.includes("--test-concurrency=1"), "quarentena deve rodar serial");
@@ -47,15 +47,15 @@ test("todos os runners paralelos terminam com o passo serial", () => {
   }
 });
 
-test("os globs paralelos NÃO capturam tests/unit/serial/ (sem dupla execução)", () => {
+test("parallel globs do NOT capture tests/unit/serial/ (no double execution)", () => {
   const parallel = scripts["test:unit"].split("&& npm run test:unit:serial")[0];
   assert.ok(!parallel.includes("serial"), "parte paralela não deve referenciar serial/");
-  // o glob de subdiretórios é uma brace-list explícita — 'serial' não pode entrar nela
+  // the subdirectory glob is an explicit brace-list — 'serial' cannot go into it
   const braceList = parallel.match(/tests\/unit\/\{([^}]+)\}/)?.[1] ?? "";
   assert.ok(!braceList.split(",").includes("serial"), "brace-list não deve conter 'serial'");
 });
 
-test("a quarentena contém os 3 flakes conhecidos e os gates de discovery/TIA a conhecem", () => {
+test("the quarantine contains the 3 known flakes and the discovery/TIA gates know it", () => {
   const files = readdirSync(path.join(ROOT, "tests/unit/serial"));
   for (const f of [
     "glm-coding-plan-monthly-3580.test.ts",

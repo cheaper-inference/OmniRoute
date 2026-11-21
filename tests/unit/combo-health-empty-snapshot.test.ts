@@ -1,6 +1,6 @@
 // tests/unit/combo-health-empty-snapshot.test.ts — pattern db-quota-snapshots.test.ts:7-26 :
-// isolation DB réelle, zéro mock (mock.module indisponible sous tsx/ESM ; sans polyfill+isolateDataDir,
-// DATA_DIR tombe sur ~/.omniroute réel → flaky).
+// isolation DB real, zero mock (mock.module indisponible under tsx/ESM ; sans polyfill isolateDataDir,
+// DATA_DIR tombe sur ~/.omniroute real → flaky).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";

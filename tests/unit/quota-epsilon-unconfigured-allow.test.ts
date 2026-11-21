@@ -10,7 +10,7 @@
  *   consumedTotal >= effectiveLimit
  * and effectiveLimit ≈ EPSILON, so ANY recorded consumption trips it — for hard,
  * soft AND burst policies. planRegistry.ts documents the intent ("Sliding window /
- * fair-share devem tratar limit=0 como 'manual obrigatório'") but enforce.ts never
+ * fair-share should treat limit=0 as 'manual required'") but enforce.ts never
  * implemented the guard.
  *
  * Expected: an unconfigured (EPSILON) dimension is NOT enforced — the pool stays

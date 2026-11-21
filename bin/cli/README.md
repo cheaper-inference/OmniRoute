@@ -24,7 +24,7 @@ bin/cli/
 ├── locales/
 │   ├── en.json             ← English strings (source of truth, 42 locales)
 │   ├── pt-BR.json          ← Portuguese (Brazil) — fully translated
-│   └── {locale}.json       ← 41 additional locales (ar, az, de, es, fr, ja, zh-CN, …)
+│ └── {locale}.json ← 41 additional locales (ar, az, de, es, fr, ja, zh-CN, …)
 ├── scripts/
 │   └── generate-locales.mjs ← scaffold new locale files from config/i18n.json
 └── commands/
@@ -126,7 +126,7 @@ omniroute config lang get             # show currently active locale
 
 ```bash
 omniroute --lang de providers list    # run in German, not persisted
-OMNIROUTE_LANG=ja omniroute status    # same effect via env
+OMNIROUTE_LANG=ja omniroute status # same effect via env
 ```
 
 **Adding a new locale**: add entry to `config/i18n.json`, then run:

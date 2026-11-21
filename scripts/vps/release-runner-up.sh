@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Liga a VM self-hosted (VPS 113) e aguarda seus runners ficarem online, para a fase
-# de release usar runners dedicados (anti-fila). Falha => o caller cai no GitHub-hosted.
+# Turn on the self-hosted VM (VPS 113) and wait for your runners to come online, for the phase
+# of release use dedicated runners (anti-queue). Failed => the caller falls on GitHub-hosted.
 #
 # Uso:  scripts/vps/release-runner-up.sh [timeout_seg]
-# Saída: exit 0 + seta a repo-var USE_VPS_RUNNER=true  quando >=1 runner omni-release online
-#        exit 1 + seta USE_VPS_RUNNER=false            em qualquer falha/timeout (fallback)
+# Output: exit 0 + arrow to repo-var USE_VPS_RUNNER=true when >=1 runner omni-release online
+# exit 1 + arrow USE_VPS_RUNNER=false on any failure/timeout (fallback)
 #
-# Pré-requisitos no host que roda o /generate-release:
-#   - chave SSH autorizada em root@$PVE_HOST (Proxmox) e root@$VPS_HOST (a VM)
-#   - gh autenticado com admin no repo (para ler runners + setar a variable)
+
+# - SSH key authorized on root@$PVE_HOST (Proxmox) and root@$VPS_HOST (the VM)
+# - gh authenticated with admin in the repo (to read runners + set the variable)
 set -uo pipefail
 
 PVE_HOST="${PVE_HOST:-192.168.0.100}"   # Proxmox host
@@ -26,7 +26,7 @@ fallback() {
 }
 
 echo "[release-runner] ligando VM $VM_ID no Proxmox $PVE_HOST..."
-$SSH "root@$PVE_HOST" "qm start $VM_ID" 2>/dev/null || true   # ok se já estiver rodando
+$SSH "root@$PVE_HOST" "qm start $VM_ID" 2>/dev/null || true # ok if already running
 
 echo "[release-runner] aguardando runners '$LABEL' ficarem online (timeout ${TIMEOUT}s)..."
 deadline=$(( $(date +%s) + TIMEOUT ))
@@ -37,9 +37,9 @@ while [ "$(date +%s)" -lt "$deadline" ]; do
   if [ "${online:-0}" -ge 1 ]; then
     echo "[release-runner] ✅ $online runner(s) '$LABEL' online — usando a VPS."
     gh variable set USE_VPS_RUNNER --repo "$REPO" --body "true" >/dev/null 2>&1 \
-      || fallback "não consegui setar USE_VPS_RUNNER"
+      || fallback "I couldn't set USE_VPS_RUNNER"
     exit 0
   fi
   sleep 6
 done
-fallback "runners não ficaram online a tempo"
+fallback "runners did not come online in time"

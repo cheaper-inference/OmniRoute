@@ -12,7 +12,7 @@ import {
 } from "../../scripts/check/check-docs-symbols.mjs";
 import { reportStaleEntries } from "../../scripts/check/lib/allowlist.mjs";
 
-// Tipos explícitos (não `any`) para as exports do .mjs — mantém o test em 0 warnings de
+// Explicit types (not `any`) for .mjs exports — keeps the test at 0 warnings
 // no-explicit-any (catraca 3482) usando `as <Type>`.
 const resolve = resolveApiDocPathToRoute as (apiPath: string, routeFiles: Set<string>) => boolean;
 const extract = extractDocApiPaths as (src: string) => string[];

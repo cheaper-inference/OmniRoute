@@ -245,7 +245,7 @@ Supports **22 routing strategies** (see `src/shared/constants/routingStrategies.
 | `reset-window`      | Reset window-based routing                                                |
 | `expiry-first`      | Spend the account whose quota would expire unused first                   |
 | `headroom`          | Most remaining quota headroom first                                       |
-| `quota-weighted`    | Skip exhausted accounts, then draw by leftover quota ÷ in-flight load     |
+| `quota-weighted` | Skip exhausted accounts, then draw by leftover quota ÷ in-flight load |
 | `strict-random`     | Truly uniform (no quality weighting)                                      |
 | `auto`              | Use 16-factor scoring (`autoCombo/`)                                      |
 | `lkgp`              | Last known good provider first                                            |

@@ -409,7 +409,7 @@ describe("useOrchestrationSnapshot", () => {
 
     // Same failure, same payload on the next tick: with a pinned staleSince, the
     // content key (which serializes `sources`) must stay identical, so the hook
-    // keeps returning the SAME snapshot object — the Fase 2 stability contract
+    // keeps returning the SAME snapshot object — the Phase 2 stability contract
     // that an ever-advancing staleSince was defeating.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(5_100);

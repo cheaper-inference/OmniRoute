@@ -1,5 +1,5 @@
 /**
- * Task B2 (Orchestration Canvas Fase 2): the cloud-agent and A2A task writers must publish
+ * Task B2 (Orchestration Canvas Phase 2): the cloud-agent and A2A task writers must publish
  * `agent.task.updated` on every write, best-effort (a throwing listener must never break the
  * write path). Covers:
  *   (a) A2ATaskManager.createTask / updateTask / cleanupExpired (TTL branch)

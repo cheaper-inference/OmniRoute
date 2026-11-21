@@ -202,8 +202,8 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
     await renderComponent();
     await clickDelete();
 
-    // O componente busca dados auxiliares na montagem, então o que importa é
-    // que NENHUMA chamada de DELETE tenha saído — não que fetch nunca rodou.
+    // The component looks for auxiliary data in the assembly, so what matters is
+    // that NO DELETE call has been issued — not that fetch has never run.
     const deletes = fetchMock.mock.calls.filter(
       ([, init]) => (init as RequestInit | undefined)?.method === "DELETE"
     );

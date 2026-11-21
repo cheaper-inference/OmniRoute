@@ -1,6 +1,6 @@
 /**
  * qwen-token-plan-quota-fetcher.test.ts — Qwen Cloud / Alibaba Model Studio personal
- * Token Plan quota fetcher (issue #9603, Problema 1: quota is missing).
+ * Token Plan quota fetcher (issue #9603, Problem 1: quota is missing).
  *
  * Fixtures captured live (2026-08-13) from home.qwencloud.com/billing/subscription/
  * token-plan-individual — console gateway POST cs-data.qwencloud.com/data/api.json

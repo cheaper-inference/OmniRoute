@@ -1,5 +1,5 @@
-// Helper único para enviar replies/notes no bridge do bot da mesh.
-// Lê BOT_URL e BOT_TOKEN do ambiente (nunca embutidos).
+// Single helper for sending replies/notes on the mesh bot bridge.
+// Reads BOT_URL and BOT_TOKEN from the environment (never hardcoded).
 // Uso: BOT_URL=... BOT_TOKEN=... node scripts/ad-hoc/mesh-send.mjs <cmd> <json-file|->
 // cmd: reply | note
 import { readFileSync } from "node:fs";

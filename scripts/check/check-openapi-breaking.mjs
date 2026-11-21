@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 // scripts/check/check-openapi-breaking.mjs
-// Catraca de breaking-change na API pública (Fase 8 B.4 — backlog opcional).
+// Breaking-change gate in the public API (Phase 8 B.4 — optional backlog).
 //
 // Diffa a spec do PR (docs/openapi.yaml na working tree = HEAD) contra
-// a MESMA spec no branch base, via `oasdiff breaking`. Pega regressões de contrato:
-// endpoint removido, parâmetro novo obrigatório, campo de resposta removido, enum
-// estreitado, etc. — mudanças que quebram clientes existentes.
+// the same spec on the base branch, via `oasdiff breaking`. Catches contract regressions:
+// endpoint removed, new mandatory parameter, response field removed, enum
+// narrowed, etc. — changes that break existing clients.
 //
-// Complementa os gates anti-alucinação existentes:
+// Complements the existing anti-hallucination gates:
 //   • check-openapi-routes.mjs   — toda `path` na spec resolve a uma rota real.
 //   • check-openapi-coverage.mjs — % de rotas reais documentadas (ratchet).
-// Nenhum dos dois compara DUAS versões da spec; este sim.
+// Neither of them compares TWO versions of the spec; this one does.
 //
 // A required (--ratchet) measurement fails closed: exit 1 is measured regression,
 // exit 2 is INCOMPLETE (missing tool/base/spec/report/baseline). Advisory mode
@@ -35,14 +35,14 @@ const SPEC_REL = "docs/openapi.yaml";
 const SPEC_PATH = path.join(ROOT, "docs", "openapi.yaml");
 
 /**
- * Deriva o branch base de release a partir de uma versão semver
- * (ex.: "3.8.29" → "origin/release/v3.8.29"). Mantém o default sincronizado com
+ * Derives the release base branch from a SemVer version
+ * (e.g.: "3.8.29" → "origin/release/v3.8.29"). Keeps the default synchronized with
  * o ciclo de release SEM hard-code: o version-bump atualiza package.json a cada
- * ciclo, então o default nunca fica stale (era "origin/release/v3.8.27" fixo).
+ * cycle, so the default never becomes stale (it used to be "origin/release/v3.8.27" fixed).
  * Ignora sufixos de prerelease/build (ex.: "3.8.29-dev.2" → v3.8.29).
  *
  * @param {string|null|undefined} version
- * @returns {string|null} branch base (sem `origin/` ausente) ou null se não-semver
+ * @returns {string|null} base branch (without `origin/` missing) or null if not semver
  */
 export function releaseBranchForVersion(version) {
   const m = String(version ?? "")
@@ -70,12 +70,12 @@ const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
 /**
  * Conta breaking changes no JSON emitido por `oasdiff breaking --format json`.
  *
- * O oasdiff emite um array de objetos (ou array vazio quando não há breaking
- * change). Cada objeto tem a forma:
+ * oasdiff outputs an array of objects (or an empty array when there are no breaking
+ * change). Each object has the form:
  * [
  *   {
  *     id: string,          // ex.: "api-path-removed-without-deprecation"
- *     text: string,        // descrição legível
+ *     text: string,        // human-readable description
  *     level: number,       // 3 = ERR, 2 = WARN, 1 = INFO
  *     operation: string,   // ex.: "GET"
  *     path: string,        // ex.: "/api/bar"
@@ -91,7 +91,7 @@ const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
  * @returns {{ count: number, byId: Record<string, number>, byPath: Record<string, number>, items: Array }}
  */
 export function parseOasdiffBreaking(oasdiffJson) {
-  // null, undefined ou array vazio = nenhum breaking change.
+  // null, undefined or empty array = no breaking change.
   if (
     oasdiffJson === null ||
     oasdiffJson === undefined ||
@@ -100,7 +100,7 @@ export function parseOasdiffBreaking(oasdiffJson) {
     return { count: 0, byId: {}, byPath: {}, items: [] };
   }
 
-  // Defensivo: qualquer coisa que não seja array é tratada como "sem dados".
+  // Defensive: anything other than an array is treated as "no data".
   if (!Array.isArray(oasdiffJson)) {
     return { count: 0, byId: {}, byPath: {}, items: [] };
   }
@@ -131,17 +131,17 @@ export function parseOasdiffBreaking(oasdiffJson) {
 // ---------------------------------------------------------------------------
 
 /**
- * Avalia a contagem MEDIDA de breaking changes contra o baseline.
- * Direction: down (a contagem só pode CAIR — mais breaking changes = regressão).
+ * Evaluates the MEASURED count of breaking changes against the baseline.
+ * Direction: down (the count can only GO DOWN — more breaking changes = regression).
  *
- * Uma medição ausente (current null/undefined) OU um baseline ausente
+ * A missing measurement (current null/undefined) OR a missing baseline
  * (baseline null/undefined) → { regressed:false, skipped:true }: sem uma das
- * duas pontas não há ratchet possível. O caller exige medição completa no modo
- * obrigatório (exit 2 com --ratchet).
+ * Two ends — no ratchet possible. The caller requires full measurement in
+ * mandatory (exit 2 with --ratchet).
  *
  * @param {object} args
- * @param {number|null} args.current  - Breaking changes medidos agora (null = sem medição).
- * @param {number|null} args.baseline - Contagem congelada em quality-baseline.json (null = sem baseline).
+ * @param {number|null} args.current  - Breaking changes measured now (null = no measurement).
+ * @param {number|null} args.baseline - Count frozen in quality-baseline.json (null = no baseline).
  * @returns {{ regressed: boolean, skipped: boolean }}
  */
 export function evaluateOpenapiRatchet({ current, baseline }) {
@@ -152,9 +152,9 @@ export function evaluateOpenapiRatchet({ current, baseline }) {
 }
 
 /**
- * Lê metrics.openapiBreaking.value do quality-baseline.json.
- * Retorna null se o arquivo ou a métrica estiverem ausentes/inválidos (sem
- * baseline não há ratchet possível — o caller trata como INCOMPLETE no modo obrigatório).
+ * Reads metrics.openapiBreaking.value from quality-baseline.json.
+ * Returns null if the file or metric is missing/invalid (without
+ * baseline, no ratchet is possible — the caller treats it as INCOMPLETE in required mode).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -177,10 +177,10 @@ export function readBaselineOpenapiValue(baselinePath = BASELINE_PATH) {
 // ---------------------------------------------------------------------------
 
 /**
- * Detecta se o binário `oasdiff` está disponível no PATH.
- * Usa `which` (Unix) sem interpolação de shell — Hard Rule #13.
+ * Detects whether the `oasdiff` binary is available in the PATH.
+ * Uses `which` (Unix) without shell interpolation — Hard Rule #13.
  *
- * @returns {string|null} Caminho para o binário, ou null se ausente.
+ * @returns {string|null} Path to the binary, or null if absent.
  */
 export function findOasdiff() {
   try {
@@ -192,17 +192,17 @@ export function findOasdiff() {
       return result.stdout.trim();
     }
   } catch {
-    // which não disponível
+    // which not available
   }
 
-  // Fallback: tentar executar diretamente para distinguir ENOENT de "existe".
+  // Fallback: try to run directly to distinguish ENOENT from "exists".
   try {
     const result = spawnSync("oasdiff", ["--version"], {
       encoding: "utf8",
       timeout: 5_000,
     });
     if (result.error?.code === "ENOENT") return null;
-    if (result.status !== null) return "oasdiff"; // encontrado no PATH
+    if (result.status !== null) return "oasdiff"; // found in PATH
   } catch {
     // noop
   }
@@ -215,13 +215,13 @@ export function findOasdiff() {
 // ---------------------------------------------------------------------------
 
 /**
- * Extrai a spec base via `git show <BASE_REF>:<SPEC_REL>` para um arquivo temp.
- * Retorna o caminho do temp (chamador é responsável por limpar), ou null se a
- * spec não pôde ser resolvida (ref ausente em clone shallow, ou arquivo não
- * existia naquele ref). NUNCA lança — falha → null → medição indisponível.
+ * Extracts the base spec via `git show<BASE_REF>:<SPEC_REL>` to a temp file.
+ * Returns the path of the temp file (the caller is responsible for cleaning it up), or null if the
+ * spec could not be resolved (ref missing in shallow clone, or file did not
+ * existed at that ref). NEVER throws — failure → null → measurement unavailable.
  *
  * @param {string} baseRef
- * @returns {string|null} caminho do arquivo temp com a spec base, ou null.
+ * @returns {string|null} path of the temp file with the base spec, or null.
  */
 export function resolveBaseSpec(baseRef) {
   let stdout;
@@ -234,7 +234,7 @@ export function resolveBaseSpec(baseRef) {
       stdio: ["ignore", "pipe", "ignore"], // descarta stderr ruidoso do git
     });
   } catch {
-    // ref desconhecido (shallow clone), arquivo inexistente no base, etc.
+    // unknown ref (shallow clone), file does not exist in base, etc.
     return null;
   }
 
@@ -262,22 +262,22 @@ function incomplete(reason) {
 }
 
 function main() {
-  // 1) HEAD spec precisa existir (working tree).
+  // 1) HEAD spec must exist (working tree).
   if (!fs.existsSync(SPEC_PATH)) {
     incomplete("head-spec-absent");
     if (!QUIET) {
-      process.stderr.write(`[openapi-breaking] SKIP — spec não encontrada: ${SPEC_PATH}\n`);
+      process.stderr.write(`[openapi-breaking] SKIP — spec not found: ${SPEC_PATH}\n`);
     }
     return;
   }
 
-  // 2) Binário oasdiff precisa estar no PATH.
+  // 2) The oasdiff binary needs to be in the PATH.
   const oasdiffBin = findOasdiff();
   if (!oasdiffBin) {
     incomplete("binary-absent");
     if (!QUIET) {
       process.stderr.write(
-        "[openapi-breaking] SKIP — oasdiff não encontrado no PATH.\n" +
+        "[openapi-breaking] SKIP — oasdiff not found in PATH.\n" +
           "[openapi-breaking] Instale via: https://github.com/oasdiff/oasdiff\n" +
           "[openapi-breaking] Required measurements must complete before acceptance.\n"
       );
@@ -321,9 +321,9 @@ function main() {
   }
 
   try {
-    // 4) Rodar `oasdiff breaking --format json <baseTmp> <headSpec>`.
-    //    oasdiff sai 0 por padrão mesmo com breaking changes (só com --fail-on
-    //    é que sai 1). Qualquer erro de execução é medição incompleta.
+    // 4) Run `oasdiff breaking --format json<baseTmp> <headSpec>`.
+    //    oasdiff exits 0 by default even with breaking changes (only with --fail-on
+    //    does it exit 1). Any execution error is an incomplete measurement.
     const args = ["breaking", "--format", "json", baseTmp, SPEC_PATH];
 
     if (!QUIET) {
@@ -356,11 +356,11 @@ function main() {
       try {
         parsed = JSON.parse(trimmed);
       } catch (parseErr) {
-        // JSON inesperado não é uma medição válida.
+        // Unexpected JSON is not a valid measurement.
         incomplete("parse-error");
         if (!QUIET) {
           process.stderr.write(
-            `[openapi-breaking] SKIP — JSON do oasdiff não parseável: ${parseErr.message}\n` +
+            `[openapi-breaking] SKIP — oasdiff JSON not parsable: ${parseErr.message}\n` +
               `[openapi-breaking] stdout (primeiros 500): ${trimmed.slice(0, 500)}\n`
           );
         }
@@ -383,7 +383,7 @@ function main() {
 
     const { count, byId, byPath, items } = parseOasdiffBreaking(parsed);
 
-    // Emitir KEY=VALUE para o coletor de métricas.
+    // Issue KEY=VALUE to the metrics collector.
     console.log(`openapiBreaking=${count}`);
 
     if (!QUIET) {
@@ -405,7 +405,7 @@ function main() {
         if (items.length > 20) {
           process.stderr.write(`[openapi-breaking]   … +${items.length - 20} more\n`);
         }
-        // Pista de mitigação: por path.
+        // Mitigation hint: by path.
         const topPaths = Object.entries(byPath)
           .sort(([, a], [, b]) => b - a)
           .slice(0, 5)
@@ -414,14 +414,14 @@ function main() {
         process.stderr.write(`[openapi-breaking]   affected paths: ${topPaths}\n`);
         if (RATCHET) {
           process.stderr.write(
-            "[openapi-breaking] Se a quebra é intencional (major bump), documente no PR e\n" +
+            "[openapi-breaking] If the break is intentional (major bump), document it in PR and\n"
               "[openapi-breaking] re-baseline metrics.openapiBreaking em config/quality/quality-baseline.json\n" +
-              "[openapi-breaking] com justificativa + issue de tracking; senão, ajuste a spec.\n"
+              "[openapi-breaking] with justification + tracking issue; otherwise, adjust the spec.\n"
           );
         } else {
           process.stderr.write(
-            "[openapi-breaking] ADVISORY — passe --ratchet para BLOQUEAR uma regressão. Se a quebra é\n" +
-              "[openapi-breaking] intencional (major bump), documente no PR; senão, ajuste a spec.\n"
+            "[openapi-breaking] ADVISORY — Pass --ratchet to BLOCK a regression. If the break is\n" +
+              "[openapi-breaking] intentional (major bump), document it in the PR; otherwise, adjust the spec.\n"
           );
         }
       } else {
@@ -431,10 +431,10 @@ function main() {
       }
     }
 
-    // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
+    // Successful measurement → applies the ratchet (blocking only with --ratchet).
     applyRatchet(count);
   } finally {
-    // Limpa o arquivo temp da spec base.
+    // Clears the temp file of the base spec.
     try {
       fs.unlinkSync(baseTmp);
     } catch {
@@ -444,11 +444,11 @@ function main() {
 }
 
 /**
- * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
- * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → INCOMPLETE (exit 2).
+ * Applies the ratchet (direction:down) to the measured count vs. the baseline.
+ * Without --ratchet: advisory (exit 0). With --ratchet: exit 1 in an actual regression
+ * (measurement > baseline). Baseline absent → INCOMPLETE (exit 2).
  *
- * @param {number} count - Contagem MEDIDA de breaking changes (medição bem-sucedida).
+ * @param {number} count - MEASURED count of breaking changes (successful measurement).
  */
 function applyRatchet(count) {
   if (!RATCHET) {
@@ -466,7 +466,7 @@ function applyRatchet(count) {
     incomplete("baseline-unresolved");
     if (!QUIET) {
       process.stderr.write(
-        "[openapi-breaking] baseline ausente (metrics.openapiBreaking) — medição INCOMPLETE, sai 2.\n"
+        "[openapi-breaking] baseline missing (metrics.openapiBreaking) — measurement INCOMPLETE, exit 2.\n"
       );
     }
     return;
@@ -474,8 +474,8 @@ function applyRatchet(count) {
 
   if (regressed) {
     process.stderr.write(
-      `[openapi-breaking] REGRESSÃO — ${count} breaking change(s) > baseline ${baselineValue}\n` +
-        "  → Ajuste a spec para não quebrar clientes existentes. Se a quebra é intencional\n" +
+      `[openapi-breaking] REGRESSION — ${count} breaking change(s) > baseline ${baselineValue}\n` +
+        "  → Adjust the spec so as not to break existing clients. If the breaking change is intentional\n" +
         "    (major bump), re-baseline metrics.openapiBreaking em\n" +
         "    config/quality/quality-baseline.json com justificativa + issue de tracking.\n"
     );
@@ -485,7 +485,7 @@ function applyRatchet(count) {
 
   if (!QUIET) {
     process.stderr.write(
-      `[openapi-breaking] OK — sem regressão (${count} breaking change(s), baseline ${baselineValue}).\n`
+      `[openapi-breaking] OK — no regression (${count} breaking change(s), baseline ${baselineValue}).\n`
     );
   }
   process.exitCode = 0;

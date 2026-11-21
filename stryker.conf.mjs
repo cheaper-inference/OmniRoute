@@ -3,7 +3,7 @@
 // Stryker 10 picks the first of stryker.conf.{json,js,mjs,cjs} / stryker.config.* it finds;
 // this is the only one in the repo — do not add a stryker.conf.json next to it.
 //
-// Mutation testing for the ~8 critical modules (Task 11 — Fase 7).
+// Mutation testing for the ~8 critical modules (Task 11 — Phase 7).
 // NIGHTLY ONLY — DO NOT run on every PR. Mutation testing is expensive:
 //   - Each mutant requires a full test suite execution.
 //   - The 8 modules produce ~200–500 mutants; est. 30–90 min per run.
@@ -44,7 +44,7 @@ const REPO_ROOT = path.dirname(fileURLToPath(import.meta.url));
 // the prior 120min scheduled run also timed out). #4078 made concurrency safe but the
 // tap-runner re-spawns a node process per test file PER MUTANT, so spawn cost dominates and
 // 15k mutants does not fit.
-// 2026-06-18 (Onda 3 / Fase 9 T5 re-add): the combo.ts god-file was split into 11 small
+// 2026-06-18 (Wave 3 / Phase 9 T5 re-add): the combo.ts god-file was split into 11 small
 // leaf modules under open-sse/services/combo/ (PRs #4162/#4175/#4186/#4196/#4204). The
 // routing LOGIC that justified combo.ts being in `mutate` now lives in those leaves, so the
 // 10 well-covered combo/* leaves are ADDED back to `mutate` here (comboStructure/autoStrategy/
@@ -70,9 +70,9 @@ const REPO_ROOT = path.dirname(fileURLToPath(import.meta.url));
 // ALL 15 chatCore leaves are now mutated.
 // STILL EXCLUDED (follow-ups, NOT in `mutate` yet):
 //   - combo.ts + chatCore.ts barrels: their handleComboChat/handleChatCore CORES were not
-//     split (out of scope — Fase 3 ChatCoreContext refactor). The barrels are now thin-ish
+//     split (out of scope — Phase 3 ChatCoreContext refactor). The barrels are now thin-ish
 //     but still large; keep excluded until the cores are split.
-// See project memory: Quality Gate v2 / Fase 9 (project-combo-split).
+// See project memory: Quality Gate v2 / Phase 9 (project-combo-split).
 const MUTATE = [
   "open-sse/services/accountFallback.ts",
   "src/sse/services/auth.ts",

@@ -85,12 +85,12 @@ test("telemetry export chama /api/telemetry/summary?format=jsonl", async () => {
   assert.ok(capturedUrl.includes("period=7d"));
 });
 
-test("fmtMetric formata números grandes corretamente", async () => {
+test("fmtMetric formats large numbers correctly", async () => {
   const { registerTelemetry } = await import("../../bin/cli/commands/telemetry.mjs");
   assert.equal(typeof registerTelemetry, "function");
 });
 
-test("telemetry summary converte objeto metrics em linhas", async () => {
+test("telemetry summary converts metrics object to lines", async () => {
   const metrics = {
     total_requests: { value: 150000, delta: 0.12, trend: "up" },
     error_rate: { value: 0.005, delta: -0.002, trend: "down" },
@@ -106,7 +106,7 @@ test("telemetry summary converte objeto metrics em linhas", async () => {
   assert.equal(rows[1].metric, "error_rate");
 });
 
-test("telemetry.mjs pode ser importado sem erro", async () => {
+test("telemetry.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/telemetry.mjs");
   assert.equal(typeof mod.registerTelemetry, "function");
 });

@@ -230,7 +230,7 @@ test("4: all connections UNKNOWN -> candidate fully excluded (empty safe set)", 
   );
 });
 
-// 5. account selezionato al dispatch è uno di quelli verificati SAFE — proven
+// 5. account selection for dispatch is one of the main SAFE checks — provenance
 // at the pool-filter level: the returned candidate's `allowedConnectionIds`
 // is rewritten to exactly the safe subset, which is the same field
 // `autoStrategy.ts` (open-sse/services/combo/autoStrategy.ts:315-331)

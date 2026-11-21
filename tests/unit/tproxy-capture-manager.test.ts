@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — TPROXY capture-mode manager (decrypt 4a/N).
+ * Phase 3 / Epic A — TPROXY capture-mode manager (decrypt 4a/N).
  *
  * The manager is the singleton lifecycle a (local-only) route drives: it gates on
  * native-addon availability, builds the dynamic CA, wires the injected trust-store

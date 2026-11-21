@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 // ═════════════════════════════════════════════════════
-//  FASE-04: Error Handling & Observability Tests
+// PHASE-04: Error Handling & Observability Tests
 //  Tests for circuitBreaker, requestTimeout, correlationId
 // ═════════════════════════════════════════════════════
 

@@ -259,7 +259,7 @@ base_probe_ready() {
   return 0
 }
 
-# A gate run's failure signature: the lines it marks as violations — the ✗/✖/×/FAIL/✘
+
 # markers the check:* scripts print, plus tsc's `error TS1234` diagnostics (the
 # typecheck gates, e.g. dashboard-typecheck, print no marker prefix at all). The
 # train's red counts as INHERITED only when every violation line also appears on the
@@ -270,7 +270,7 @@ base_probe_ready() {
 # and the agent-skills dry-run lists bare slugs under GENERATED (`    + omni-auth`); neither
 # prints a marker, so a base-red there was UNCLASSIFIABLE although a diff of the two
 # sorted line sets is exactly the discriminator. A red with none of these stays fail-closed.
-GATE_ERROR_RE='^[[:space:]]*(✗|✖|×|FAIL|✘)|error TS[0-9]+|^[[:space:]]*- [^[:space:]]+\.md \([a-z-]+\)|^[[:space:]]*\+ [a-z0-9][a-z0-9_-]*$'
+
 gate_violations() {
   grep -aE "$GATE_ERROR_RE" "$1" 2>/dev/null | sed 's/^[[:space:]]*//' | sort -u
 }

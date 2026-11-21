@@ -41,7 +41,7 @@ bytes and matches against known platform magics:
 | --------------------- | ------------- | ----------- |
 | Linux                 | `7F 45 4C 46` | `elf`       |
 | macOS 64-bit BE       | `FE ED FA CF` | `macho`     |
-| macOS 64-bit LE       | `CF FA ED FE` | `macho-le`  |
+| macOS 64-bit LE | `CF FA ED FE` | `macho-le` |
 | macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
 | Windows               | `4D 5A` (MZ)  | `pe`        |
 

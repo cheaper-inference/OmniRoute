@@ -20,7 +20,7 @@ function makeCmd(baseUrl = "http://localhost:20128") {
   return { optsWithGlobals: () => ({ baseUrl }) };
 }
 
-test("open.mjs pode ser importado sem erro", async () => {
+test("open.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/open.mjs");
   assert.equal(typeof mod.registerOpen, "function");
 });
@@ -46,7 +46,7 @@ test("RESOURCES inclui todos os recursos principais", async () => {
   assert.ok(resources.length > 10);
 });
 
-test("URL base dashboard é /dashboard quando sem recurso", () => {
+test("Dashboard base URL is /dashboard when without resource", () => {
   const base = "http://localhost:20128";
   const url = `${base}/dashboard`;
   assert.ok(url.includes("/dashboard"));

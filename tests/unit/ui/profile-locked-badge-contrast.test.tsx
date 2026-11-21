@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * F4 (KEA-7886, lote 8 pendência): locked badge tiles on /dashboard/profile were dimmed with a
+ * F4 (KEA-7886, batch 8 pending): locked badge tiles on /dashboard/profile were dimmed with a
  * tile-wide `opacity-50 grayscale`, which dragged the badge name and description under AA
  * (36 axe color-contrast nodes). The locked look now lives in the border, the surface, a dimmed
  * glyph and a lock mark; the text keeps full token ink and the state is announced.

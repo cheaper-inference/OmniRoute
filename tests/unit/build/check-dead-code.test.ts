@@ -4,16 +4,16 @@ import assert from "node:assert/strict";
 import { parseKnipMetrics } from "../../../scripts/check/check-dead-code.mjs";
 
 // ---------------------------------------------------------------------------
-// Fixtures — JSON sintético com formato do knip --reporter json
+// Fixtures — synthetic JSON with knip format --reporter json
 // O reporter emite: { issues: Array<{ file, exports?, files?, types?, ... }> }
 // ---------------------------------------------------------------------------
 
-/** Retorna um JSON vazio válido (nenhum problema encontrado). */
+/** Returns a valid empty JSON (no problems found). */
 function makeEmptyReport() {
   return { issues: [] };
 }
 
-/** Arquivo com 2 exports mortos e 1 tipo morto. */
+/** File with 2 dead exports and 1 dead type. */
 function makeReportWithExports() {
   return {
     issues: [
@@ -31,7 +31,7 @@ function makeReportWithExports() {
   };
 }
 
-/** Arquivo morto (inteiro não importado em lugar nenhum). */
+/** Archive file (entire not imported anywhere). */
 function makeReportWithDeadFile() {
   return {
     issues: [
@@ -43,7 +43,7 @@ function makeReportWithDeadFile() {
   };
 }
 
-/** Misto: 1 arquivo morto + 3 exports mortos em outro arquivo. */
+/** Mixed: 1 archive file + 3 exports archived in another file. */
 function makeReportMixed() {
   return {
     issues: [
@@ -65,7 +65,7 @@ function makeReportMixed() {
   };
 }
 
-/** Múltiplos tipos de dead exports: types, nsExports, nsTypes, enumMembers. */
+/** Multiple types of dead exports: types, nsExports, nsTypes, enumMembers. */
 function makeReportAllExportTypes() {
   return {
     issues: [
@@ -86,12 +86,12 @@ function makeReportAllExportTypes() {
 // Testes
 // ---------------------------------------------------------------------------
 
-test("parseKnipMetrics: report vazio retorna tudo zero", () => {
+test("parseKnipMetrics: empty report returns all zero", () => {
   const result = parseKnipMetrics(makeEmptyReport());
   assert.deepEqual(result, { deadExports: 0, deadFiles: 0, deadTotal: 0 });
 });
 
-test("parseKnipMetrics: conta exports mortos e tipos mortos corretamente", () => {
+test("parseKnipMetrics: counts dead exports and dead types correctly", () => {
   const result = parseKnipMetrics(makeReportWithExports());
   // 2 exports + 1 type = 3 deadExports, 0 deadFiles
   assert.equal(result.deadExports, 3);
@@ -99,30 +99,30 @@ test("parseKnipMetrics: conta exports mortos e tipos mortos corretamente", () =>
   assert.equal(result.deadTotal, 3);
 });
 
-test("parseKnipMetrics: conta arquivos mortos corretamente", () => {
+test("parseKnipMetrics: counts archive files correctly", () => {
   const result = parseKnipMetrics(makeReportWithDeadFile());
   assert.equal(result.deadExports, 0);
   assert.equal(result.deadFiles, 1);
   assert.equal(result.deadTotal, 1);
 });
 
-test("parseKnipMetrics: relatório misto — arquivos mortos + exports mortos", () => {
+test("parseKnipMetrics: mixed report — archive files + archive exports", () => {
   const result = parseKnipMetrics(makeReportMixed());
-  // 1 arquivo morto + (2 exports + 1 nsExport) = 4 total
+  // 1 archive file + (2 exports + 1 nsExport) = 4 total
   assert.equal(result.deadExports, 3);
   assert.equal(result.deadFiles, 1);
   assert.equal(result.deadTotal, 4);
 });
 
-test("parseKnipMetrics: soma todos os tipos de dead export (exports/types/nsExports/nsTypes/enumMembers/namespaceMembers)", () => {
+test("parseKnipMetrics: sum all dead export types (exports/types/nsExports/nsTypes/enumMembers/namespaceMembers)", () => {
   const result = parseKnipMetrics(makeReportAllExportTypes());
-  // 1 de cada tipo × 6 tipos = 6 deadExports
+  // 1 of each type × 6 types = 6 deadExports
   assert.equal(result.deadExports, 6);
   assert.equal(result.deadFiles, 0);
   assert.equal(result.deadTotal, 6);
 });
 
-test("parseKnipMetrics: null retorna zeros (input inválido)", () => {
+test("parseKnipMetrics: null returns zeros (invalid input)", () => {
   const result = parseKnipMetrics(null);
   assert.deepEqual(result, { deadExports: 0, deadFiles: 0, deadTotal: 0 });
 });
@@ -132,8 +132,8 @@ test("parseKnipMetrics: input sem campo issues retorna zeros", () => {
   assert.deepEqual(result, { deadExports: 0, deadFiles: 0, deadTotal: 0 });
 });
 
-test("parseKnipMetrics: entry sem campos de export não incrementa contador", () => {
-  // Arquivo que aparece na lista mas sem exports mortos e sem files
+test("parseKnipMetrics: entry without export fields does not increment counter", () => {
+  // File that appears in the list but with no dead exports and no files
   const report = {
     issues: [
       { file: "src/lib/clean.ts" },
@@ -143,13 +143,13 @@ test("parseKnipMetrics: entry sem campos de export não incrementa contador", ()
   assert.deepEqual(result, { deadExports: 0, deadFiles: 0, deadTotal: 0 });
 });
 
-test("parseKnipMetrics: deadTotal == deadExports + deadFiles sempre", () => {
+test("parseKnipMetrics: deadTotal == deadExports + deadFiles always", () => {
   const report = makeReportMixed();
   const result = parseKnipMetrics(report);
   assert.equal(result.deadTotal, result.deadExports + result.deadFiles);
 });
 
-test("parseKnipMetrics: múltiplos arquivos mortos no mesmo relatório", () => {
+test("parseKnipMetrics: multiple archives in the same report", () => {
   const report = {
     issues: [
       { file: "src/lib/orphan1.ts", files: [{ name: "src/lib/orphan1.ts" }] },

@@ -77,7 +77,7 @@ job was cancelled.
 ```json
 {
   "model": "gc/grok-tts",
-  "input": "Olá, este é um teste",
+  "input": "Hello, this is a test",
   "voice": "eve",
   "language": "pt-BR",
   "response_format": "mp3"

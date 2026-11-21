@@ -1,5 +1,5 @@
 // tests/unit/combo/combo-context.test.ts
-// Unit tests for the first extracted combo phase (god-file decomposition fase 1):
+// Unit tests for the first extracted combo phase (god-file decomposition phase 1):
 // createComboContext (combo/context.ts) + phaseComboSetup (combo/comboSetup.ts).
 // The pinning-ON path (getLastSessionModel) is covered end-to-end by the existing combo
 // characterization suite (combo-sessionless-pin-3825, combo-config, etc.); here we exercise

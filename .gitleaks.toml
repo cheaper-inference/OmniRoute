@@ -1,30 +1,30 @@
-# .gitleaks.toml — Configuração do gitleaks para OmniRoute
+# .gitleaks.toml — gitleaks configuration for OmniRoute
 # Task 7.18 — PLANO-QUALITY-GATES-FASE7.md
 #
-# Estende as regras padrão do gitleaks com allowlists específicas do projeto.
+# Extends the default gitleaks rules with project-specific allowlists.
 #
-# INSTRUÇÕES para allowlists:
-#   Findings legítimos (fixtures de teste, creds OAuth públicas já cobertas pelo
-#   check-public-creds.mjs, valores de exemplo em docs) devem ser registrados abaixo
-#   em [[allowlist]] com um comentário explicativo obrigatório.
-#
-#   NÃO adicione uma entrada de allowlist sem justificativa. Cada entrada é revisada
-#   a cada release (stale-enforcement). Regra: se o finding é um valor real que o
-#   sistema usa em produção, é um verdadeiro positivo — não allowliste, corrija.
-#
-# Referência: docs/security/PUBLIC_CREDS.md (credenciais OAuth públicas conhecidas)
-#             CLAUDE.md Hard Rule #11 (resolvePublicCred obrigatório)
 
-# Herdar TODAS as regras padrão do gitleaks. ATENÇÃO: um config customizado
-# SEM [extend].useDefault = true (e sem [[rules]] próprias) resulta em ZERO
-# regras — o gitleaks SUBSTITUI o ruleset padrão pelo arquivo, não o estende
-# automaticamente. Sem esta seção, `gitleaks --config .gitleaks.toml` nunca
+#   Legitimate findings (test fixtures, public OAuth creds already covered by
+#   check-public-creds.mjs, example values in docs) must be recorded below
+#   in [[allowlist]] with a mandatory explanatory comment.
+#
+#   Do NOT add an allowlist entry without justification. Each entry is reviewed
+#   every release (stale-enforcement). Rule: if the finding is a real value that the
+#   system uses in production, it is a true positive — do not allowlist it, fix it.
+#
+
+#             CLAUDE.md Hard Rule #11 (resolvePublicCred required)
+
+# Inherit ALL default gitleaks rules. WARNING: a custom config
+
+# rules — gitleaks REPLACES the default ruleset with the file, it does not extend it
+# automatically. Without this section, `gitleaks --config .gitleaks.toml` never
 # detecta nada (todo finding vira 0), tornando o gate inerte. Com useDefault,
-# a allowlist abaixo é aplicada POR CIMA das ~170 regras padrão.
+# the allowlist below is applied ON TOP OF the ~170 default rules.
 [extend]
   useDefault = true
 
-# Para desabilitar uma regra específica, usar:
+# To disable a specific rule, use:
 # [[rules]]
 #   id = "rule-id"
 #   [rules.allowlist]
@@ -32,7 +32,7 @@
 
 # ---------------------------------------------------------------------------
 # Allowlist global do projeto
-# Entradas aqui são ignoradas em TODAS as varreduras.
+
 # ---------------------------------------------------------------------------
 [allowlist]
   description = "OmniRoute project-level allowlist — fixtures, test vectors, public OAuth creds"
@@ -47,28 +47,28 @@
     '''\.nyc_output''',
   ]
 
-  # Commits específicos a ignorar (ex: commit que introduziu fixtures de teste)
+  
   # commits = []
 
-  # Regexes de stopwords — linhas que contêm estes padrões são ignoradas.
-  # Usar apenas para falsos positivos comprovados com justificativa abaixo.
+  # Stopword regexes — lines containing these patterns are ignored.
+  # Use only for proven false positives with justification below.
   # stopwords = []
 
-  # Regexes de targets (paths de arquivos) que podem ser allowlistados por regra.
-  # Ver [[allowlist]] por-regra abaixo para granularidade.
+  # Target regexes (file paths) that can be allowlisted per rule.
+  # See the per-rule [[allowlist]] below for granularity.
 
 # ---------------------------------------------------------------------------
-# Allowlist por-regra (adicionar conforme necessário durante o stale review)
+# Per-rule allowlist (add as needed during the stale review)
 # ---------------------------------------------------------------------------
 #
-# Exemplo (REMOVER / SUBSTITUIR por entradas reais quando necessário):
+# Example (REMOVE / REPLACE with real entries when needed):
 #
 # [[rules]]
-#   # Allowlistar fixtures de teste que contêm tokens OAuth de exemplo/inválidos
-#   # Adicionado: 2026-06-13 | Revisar em: v3.9.0 | Justificativa: valores não-reais de teste
+#   # Allowlist test fixtures containing example/invalid OAuth tokens
+#   # Added: 2026-06-13 | Review by: v3.9.0 | Justification: non-real test values
 #   id = "github-fine-grained-pat"
 #   [rules.allowlist]
-#     description = "Test fixture PATs — valores sintéticos, não funcionais"
+#     description = "Test fixture PATs — synthetic, non-functional values"
 #     paths = [
 #       '''tests/fixtures/''',
 #       '''tests/unit/''',
@@ -77,20 +77,20 @@
 
 [[rules]]
   # Falsos-positivos comprovados do generic-api-key — zerados em 2026-07-13 (WS6/D3,
-  # plano v3.8.49). Revisar em v3.9.0. Nenhum é credencial: dois são NOMES DE CAMPO
-  # de métricas de latência; o terceiro é o valor PÚBLICO de um beta header da API
-  # da Anthropic (documentado publicamente, não é segredo).
+  
+  
+  # of Anthropic (publicly documented, not a secret).
   id = "generic-api-key"
   [rules.allowlist]
-    description = "Field names + public Anthropic beta-header value (não são segredos)"
+    description = "Field names + public Anthropic beta-header value (not secrets)"
     regexes = [
       '''latencyP\d{2}Ms''',
       '''interleaved-thinking-2025-05-14''',
       # v3.8.49 pre-flight (2026-07-28). Nenhum dos dois e credencial:
-      # - chave de localStorage do banner de patrocinio (#8723; #10200 bumpou v1->v2,
+      # - localStorage key of the sponsorship banner (#8723; #10200 bumped v1->v2,
       #   generalizado para -v\d+ no round 3 de base-reds #9985), so um identificador de UI;
       # - x-api-key PUBLICO do Firefly web (documentado em open-sse/utils/publicCreds.ts:207);
-      #   as duas ocorrencias sinalizadas estao em COMENTARIOS JSDoc, o runtime le de resolvePublicCred().
+      #   both flagged occurrences are in JSDoc COMMENTS; runtime reads from resolvePublicCred().
       '''omniroute-kimi-sponsor-banner-dismissed-v\d+''',
       # CheaperInference sponsor banner localStorage key (upstream #11196 /
       # eb5797370). Same UI-identifier pattern as the kimi banner above, not a

@@ -1,4 +1,4 @@
-// Characterization tests — src/lib/memory (rail 3.8.55, Task 12 "caracterização B").
+// Characterization tests — src/lib/memory (rail 3.8.55, Task 12 "characterization B").
 //
 // Purpose: pin the PUBLIC surface and the observable behavior of the memory subsystem as it
 // is TODAY, before the v4 extraction moves it out of the core. These tests describe what the

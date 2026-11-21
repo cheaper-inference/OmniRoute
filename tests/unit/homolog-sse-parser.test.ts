@@ -9,8 +9,8 @@ test("parseSseChunk separa eventos data: e detecta [DONE]", () => {
 });
 
 test("parseSseChunk acha data: mesmo precedido de comment-lines SSE no mesmo bloco", () => {
-  // Formato real da VPS (v3.8.47): trailers de telemetria como comments (`: x-omniroute-*`)
-  // no MESMO bloco do data: [DONE] — o parser não pode olhar só o início do bloco.
+  // VPS real format (v3.8.47): telemetry trailers as comments (`:x-omniroute-*`)
+  // in the SAME block as the data: [DONE] — the parser cannot look at just the beginning of the block.
   const chunk =
     'data: {"choices":[{"delta":{"content":"OK"}}]}\n\n' +
     ": x-omniroute-cache-hit=false\n: x-omniroute-latency-ms=67\ndata: [DONE]\n\n";
@@ -18,7 +18,7 @@ test("parseSseChunk acha data: mesmo precedido de comment-lines SSE no mesmo blo
   assert.deepEqual(events, ['{"choices":[{"delta":{"content":"OK"}}]}', "[DONE]"]);
 });
 
-test("summarizeStream exige >=1 delta de conteúdo e terminador [DONE]", () => {
+test("summarizeStream requires >=1 content delta and terminator [DONE]", () => {
   const good = summarizeStream(['{"choices":[{"delta":{"content":"OK"}}]}', "[DONE]"]);
   assert.equal(good.ok, true);
   const noDone = summarizeStream(['{"choices":[{"delta":{"content":"OK"}}]}']);

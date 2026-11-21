@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Desliga a VM self-hosted (VPS 113) ao fim do release e volta o CI para o GitHub-hosted.
-# Idempotente: seguro chamar mesmo que a VM já esteja desligada.
+# Idempotent: safe to call even if the VM is already turned off.
 #
 # Uso:  scripts/vps/release-runner-down.sh
 set -uo pipefail
@@ -21,7 +21,7 @@ if [ "$(gh variable get VPS_ALWAYS_ON --repo "$REPO" 2>/dev/null)" = "true" ]; t
   exit 0
 fi
 
-# 1) Volta o CI para ubuntu-latest ANTES de derrubar a VM (evita jobs presos).
+
 echo "[release-runner] USE_VPS_RUNNER=false (CI volta ao GitHub-hosted)."
 gh variable set USE_VPS_RUNNER --repo "$REPO" --body "false" >/dev/null 2>&1 || true
 
@@ -29,5 +29,5 @@ gh variable set USE_VPS_RUNNER --repo "$REPO" --body "false" >/dev/null 2>&1 || 
 echo "[release-runner] desligando VM $VM_ID (graceful)..."
 $SSH "root@$PVE_HOST" "qm shutdown $VM_ID --timeout 120" 2>/dev/null \
   || $SSH "root@$PVE_HOST" "qm stop $VM_ID" 2>/dev/null \
-  || echo "[release-runner] ⚠️  não consegui desligar a VM $VM_ID — verifique manualmente."
+  || echo "[release-runner] ⚠️ unable to shut down VM $VM_ID — please check manually."
 echo "[release-runner] pronto."

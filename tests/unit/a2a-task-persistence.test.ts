@@ -1,5 +1,5 @@
 /**
- * Task C2 (Orchestration Canvas Fase 2, PR-B2): `A2ATaskManager` writes every task lifecycle
+ * Task C2 (Orchestration Canvas Phase 2, PR-B2): `A2ATaskManager` writes every task lifecycle
  * transition to the `a2a_tasks` / `a2a_task_events` history tables through the `A2APersistence`
  * DI seam (best-effort — a throwing persistence layer must never break the in-memory task write
  * path), and purges history rows older than the retention window at most once per 24h.

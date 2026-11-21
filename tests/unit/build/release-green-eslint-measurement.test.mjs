@@ -224,7 +224,7 @@ function observe(lintOutput, lintCode = 0, collectionCode = 0) {
       `
       const fs = require("node:fs");
       const script = process.argv[3];
-      if(script === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");
+      if(script === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violations (baseline 0)\\n[cognitive-complexity] OK — 0 violations (baseline 0)");
       if(script === "check:workflows") console.log("workflowAuditState=MEASURED\\nworkflowFindings=0\\nprovenanceRunnerFindings=0\\nscheduledGuardFindings=0");
       if(script === "quality:collect") {
         fs.writeFileSync("collector-invoked", "yes");

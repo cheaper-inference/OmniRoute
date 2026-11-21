@@ -76,7 +76,7 @@ Procedure (summary — see the `green-prs` skill for details):
    - **HARD** → fix **on the contributor's branch** via co-authorship (preserves the author's "Merged" status),
      re-run until all HARDs are cleared.
    - **DRIFT** → leave it; it will be rebaselined at release.
-4. **Report** a PR × (verdict, HARD reds, fixed?, DRIFT, release-green now?) table.
+4. **Report** to PR × (verdict, HARD reds, fixed?, DRIFT, release-green now?) table.
 
 Can **prepare** the queue without merging; only merges when explicitly requested — and never closes a PR.
 

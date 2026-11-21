@@ -27,23 +27,23 @@ const ENTRY: RegistryEntry = {
   ],
 };
 
-test("retorna a alternativa quando targetFormat da conexao casa", () => {
+test("returns the alternative when targetFormat of the home connection", () => {
   const alt = resolveAlternateFormat(ENTRY, { targetFormat: "claude" });
   assert.equal(alt?.format, "claude");
   assert.equal(alt?.authHeader, "x-api-key");
 });
 
-test("retorna null quando targetFormat nao casa com nenhuma alternativa", () => {
+test("returns null when targetFormat does not match any alternative", () => {
   assert.equal(resolveAlternateFormat(ENTRY, { targetFormat: "gemini" }), null);
 });
 
-test("retorna null quando a conexao nao tem targetFormat", () => {
+test("returns null when the connection does not have targetFormat", () => {
   assert.equal(resolveAlternateFormat(ENTRY, {}), null);
   assert.equal(resolveAlternateFormat(ENTRY, null), null);
   assert.equal(resolveAlternateFormat(ENTRY, undefined), null);
 });
 
-test("retorna null quando a entry nao declara alternativas", () => {
+test("returns null when the entry does not declare alternatives", () => {
   assert.equal(
     resolveAlternateFormat({ ...ENTRY, alternateFormats: undefined }, { targetFormat: "claude" }),
     null
@@ -51,35 +51,35 @@ test("retorna null quando a entry nao declara alternativas", () => {
   assert.equal(resolveAlternateFormat(null, { targetFormat: "claude" }), null);
 });
 
-test("ignora targetFormat que nao e string nao-vazia", () => {
+test("ignores targetFormat which is not a non-empty string", () => {
   assert.equal(resolveAlternateFormat(ENTRY, { targetFormat: 42 }), null);
   assert.equal(resolveAlternateFormat(ENTRY, { targetFormat: "" }), null);
 });
 
-// Task 2: getTargetFormat honra o override da conexao.
-test("getTargetFormat: sem override da conexao usa o formato padrao do registry", () => {
+// Task 2: getTargetFormat honors the connection override.
+test("getTargetFormat: without connection override uses the registry's default format", () => {
   assert.equal(getTargetFormat("xiaomi-mimo", null), "openai");
 });
 
-test("getTargetFormat: override da conexao troca o formato quando declarado", () => {
+test("getTargetFormat: connection override changes the format when declared", () => {
   assert.equal(getTargetFormat("xiaomi-mimo", { targetFormat: "claude" }), "claude");
 });
 
-test("getTargetFormat: override desconhecido cai no formato padrao", () => {
+test("getTargetFormat: unknown override falls into default format", () => {
   assert.equal(getTargetFormat("xiaomi-mimo", { targetFormat: "gemini" }), "openai");
 });
 
-// Task 3: resolucao de base URL honra a alternativa.
+// Task 3: base URL resolution honors the alternative.
 //
-// Reproduz a precedencia implementada em BaseExecutor.resolveBaseUrl. Nao
-// instanciamos o executor real aqui porque getRegistryEntry() le do registry
+// Reproduces the precedence implemented in BaseExecutor.resolveBaseUrl. No
+// we instantiate the real executor here because getRegistryEntry() le do registry
 // estatico de providers (chaveado por provider id) e nenhuma entry real
-// declara alternateFormats ainda (isso e a Task 5) — nao ha como injetar uma
+// still declare alternateFormats (this is Task 5) — there is no way to inject one
 // entry fake no registry sem sair do escopo desta task. O contrato de
-// precedencia (manual > alternativa > default) e o mesmo aplicado no
-// producao; tests/unit/refactor-resolveBaseUrl.test.ts ja cobre o caminho
-// real (instanciando BaseExecutor) para os casos sem alternativa, e
-// permanece verde apos a mudanca desta task.
+// precedence (manual > alternative > default) and the same applied in
+// production; tests/unit/refactor-resolveBaseUrl.test.ts already covers the path
+// real (instantiating BaseExecutor) for cases with no alternative, and
+// remains green after changing this task.
 function precedence(psd: unknown, entry: unknown, configBaseUrl: string) {
   const psdBaseUrl = (psd as { baseUrl?: unknown } | null)?.baseUrl;
   if (typeof psdBaseUrl === "string" && psdBaseUrl) return psdBaseUrl;
@@ -98,7 +98,7 @@ const ENTRY_WITH_ALT = {
   ],
 } as never;
 
-test("resolveBaseUrl: baseUrl manual da conexao vence a alternativa", () => {
+test("resolveBaseUrl: manual baseUrl of the connection wins over the alternative", () => {
   const url = precedence(
     { baseUrl: "https://manual.example.com/v1", targetFormat: "claude" },
     ENTRY_WITH_ALT,
@@ -107,7 +107,7 @@ test("resolveBaseUrl: baseUrl manual da conexao vence a alternativa", () => {
   assert.equal(url, "https://manual.example.com/v1");
 });
 
-test("resolveBaseUrl: alternativa vence o baseUrl padrao", () => {
+test("resolveBaseUrl: alternative beats the default baseUrl", () => {
   const url = precedence(
     { targetFormat: "claude" },
     ENTRY_WITH_ALT,
@@ -116,19 +116,19 @@ test("resolveBaseUrl: alternativa vence o baseUrl padrao", () => {
   assert.equal(url, "https://alt.example.com/anthropic/v1/messages");
 });
 
-test("resolveBaseUrl: sem override usa o baseUrl padrao", () => {
+test("resolveBaseUrl: without override uses the default baseUrl", () => {
   const url = precedence({}, ENTRY_WITH_ALT, "https://default.example.com/v1");
   assert.equal(url, "https://default.example.com/v1");
 });
 
-// Task 4: auth header e headers extras honram a alternativa.
+// Task 4: auth header and extra headers honor the alternative.
 //
 // Mesma limitacao da Task 3: nenhuma entry real do registry declara
-// alternateFormats ainda, entao reproduzimos a escolha de authHeader
+// alternateFormats still, so we reproduce the choice of authHeader
 // implementada em DefaultExecutor.buildHeaders (default.ts) sem instanciar o
-// executor inteiro. O teste de regressao abaixo (via DefaultExecutor real)
-// cobre o caminho sem alternativa para garantir que a nova chamada a
-// resolveAlternateFormat nao alterou o comportamento por-default existente.
+// entire executor. The regression test below (via real DefaultExecutor)
+// covers the path with no alternative to ensure that the new call to
+// resolveAlternateFormat did not change the existing default behavior.
 function pickAuthHeader(entry: unknown, psd: unknown) {
   const alt = resolveAlternateFormat(entry as never, psd);
   return alt?.authHeader || (entry as { authHeader?: string } | null)?.authHeader || "bearer";
@@ -147,7 +147,7 @@ const ENTRY_AUTH = {
   ],
 } as never;
 
-test("authHeader: formato alternativo troca bearer por x-api-key", () => {
+test("authHeader: alternative format replaces bearer with x-api-key", () => {
   assert.equal(pickAuthHeader(ENTRY_AUTH, { targetFormat: "claude" }), "x-api-key");
 });
 
@@ -155,20 +155,20 @@ test("authHeader: sem override mantem o header da entry", () => {
   assert.equal(pickAuthHeader(ENTRY_AUTH, {}), "bearer");
 });
 
-test("alternativa carrega headers extras do protocolo", () => {
+test("alternative loads extra protocol headers", () => {
   const alt = resolveAlternateFormat(ENTRY_AUTH, { targetFormat: "claude" });
   assert.equal(alt?.headers?.["Anthropic-Version"], "2023-06-01");
 });
 
-// Regression via producao real: com um targetFormat que NAO casa com nenhuma
-// alternativa declarada, buildHeaders cai no authHeader "bearer" padrao da
-// entry, provando que a nova chamada a resolveAlternateFormat nao regrediu o
-// caminho default. (Ate a Task 5, xiaomi-mimo nao declarava alternateFormats
-// nenhuma — agora declara a variante "claude", ver
+// Regression via real production: with a targetFormat that DOES NOT match any
+// alternative declared, buildHeaders falls into the default authHeader "bearer"
+// entry, proving that the new call to resolveAlternateFormat did not regress the
+// default path. (Until Task 5, xiaomi-mimo did not declare alternateFormats
+// none — now declares the "claude" variant, see
 // tests/unit/xiaomi-providers-registry.test.ts para a cobertura end-to-end
-// do caminho COM alternativa, incluindo o caso "claude" que este teste
-// cobria antes.)
-test("DefaultExecutor.buildHeaders: targetFormat que nao casa mantem o authHeader padrao", () => {
+// of the alternative COM path, including the "claude" case that this test
+// covered before.)
+test("DefaultExecutor.buildHeaders: targetFormat that does not match maintains the default authHeader", () => {
   const executor = new DefaultExecutor("xiaomi-mimo");
   const headers = executor.buildHeaders(
     {
@@ -181,13 +181,13 @@ test("DefaultExecutor.buildHeaders: targetFormat que nao casa mantem o authHeade
   assert.equal(headers["x-api-key"], undefined);
 });
 
-test("getAlternateFormats: provedor com alternativas retorna a lista", () => {
+test("getAlternateFormats: provider with alternatives returns the list", () => {
   const list = getAlternateFormats("xiaomi-mimo");
   assert.equal(list.length, 1);
   assert.equal(list[0].format, "claude");
 });
 
-test("getAlternateFormats: provedor sem alternativas retorna lista vazia", () => {
+test("getAlternateFormats: provider without alternatives returns empty list", () => {
   assert.deepEqual(getAlternateFormats("xai"), []);
   assert.deepEqual(getAlternateFormats(null), []);
   assert.deepEqual(getAlternateFormats(undefined), []);

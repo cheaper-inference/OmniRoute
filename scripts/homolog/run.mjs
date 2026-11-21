@@ -20,7 +20,7 @@ if (!BASE || !process.env.HOMOLOG_ADMIN_PASSWORD) {
 }
 fs.rmSync("homolog-report", { recursive: true, force: true });
 // raw/ fica FORA do merge CTRF: `ctrf merge` tenta mesclar qualquer *.json com
-// chave "results" e quebra no output cru do promptfoo.
+// "results" key and breaks into promptfoo's raw output.
 fs.mkdirSync("homolog-report/raw", { recursive: true });
 const layers = []; // {name, ok, detail}
 const record = (name, ok, detail = "") => {
@@ -28,24 +28,24 @@ const record = (name, ok, detail = "") => {
   console.log(`${ok ? "✅" : "❌"} ${name}${detail ? ` — ${detail}` : ""}`);
 };
 
-// ── L0 saúde/paridade ────────────────────────────────────────────────────
+// ── L0 health/parity ────────────────────────────────────────────────────
 const expectedVersion =
   process.env.HOMOLOG_EXPECT_VERSION || JSON.parse(fs.readFileSync("package.json", "utf8")).version;
 const healthRes = await fetch(`${BASE}/api/monitoring/health`);
 const health = await healthRes.json().catch(() => ({}));
 const parity = evaluateParity(health, { expectedVersion, httpStatus: healthRes.status });
-record("L0 saúde/paridade", parity.ok, parity.failures.join("; "));
+record("L0 health/parity", parity.ok, parity.failures.join("; "));
 if (!parity.ok) {
   console.error("Deploy divergente — abortando.");
   writeSummary(layers, BASE, expectedVersion);
   process.exit(1);
 }
 
-// ── chave efêmera ────────────────────────────────────────────────────────
+// ── ephemeral key ──────────────────────────── ────────────────────────────
 const eph = await createEphemeralKey(BASE, process.env.HOMOLOG_ADMIN_PASSWORD);
 process.env.HOMOLOG_API_KEY = eph.key;
 try {
-  // modelo de smoke = 1º do tier crítico presente no catálogo
+  // smoke model = 1st critical-tier model present in the catalog
   const models = (
     await (
       await fetch(`${BASE}/v1/models`, { headers: { Authorization: `Bearer ${eph.key}` } })
@@ -105,7 +105,7 @@ try {
       `${pfCtrf.results.summary.passed}/${pfCtrf.results.summary.tests} providers OK`
     );
   } catch (err) {
-    // gerador/eval quebrando é falha da camada — o run continua para o L4 e o cleanup
+    // generator/eval breaking is a failure of the layer — the run continues to L4 and the cleanup
     record("L2 providers reais", false, err.message);
   }
 
@@ -122,11 +122,11 @@ try {
 } finally {
   await eph
     .revoke()
-    .then(() => record("cleanup: key efêmera revogada", true))
-    .catch((e) => record("cleanup: key efêmera revogada", false, e.message));
+    .then(() => record("cleanup: ephemeral key revoked", true))
+    .catch((e) => record("cleanup: ephemeral key revoked", false, e.message));
 }
 
-// ── L5 relatório unificado ───────────────────────────────────────────────
+// ── L5 unified report ─────────────────────────────────────────────────
 spawnSync(
   "npx",
   ["junit-to-ctrf", "homolog-report/httpyac-junit.xml", "-o", "homolog-report/api-ctrf.json"],
@@ -158,12 +158,12 @@ function writeSummary(rows, base, version) {
   const md = [
     "# Homologação — relatório",
     "",
-    `Alvo: ${base} · versão esperada: ${version}`,
+    `Target: ${base} · expected version: ${version}`,
     "",
-    "| camada | resultado | detalhe |",
+    "| layer | result | detail |",
     "|---|---|---|",
     ...rows.map((l) => `| ${l.name} | ${l.ok ? "✅" : "❌"} | ${l.detail} |`),
   ].join("\n");
   fs.writeFileSync("homolog-report/summary.md", md);
-  console.log(`\n${md}\n\nRelatório: homolog-report/ (CTRF unificado: homolog-ctrf.json)`);
+  console.log(`\n${md}\n\nReport: homolog-report/ (unified CTRF: homolog-ctrf.json)`);
 }

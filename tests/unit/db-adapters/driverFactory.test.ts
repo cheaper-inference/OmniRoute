@@ -42,7 +42,7 @@ describe("driverFactory", () => {
     const nodePath = runtimeRequire("node:path") as typeof NodePath;
     assert.equal(nodePath.basename("/tmp/omniroute.sqlite"), "omniroute.sqlite");
   });
-  test("tryOpenSync retorna adapter síncrono ou null", () => {
+  test("tryOpenSync returns synchronous adapter or null", () => {
     const adapter = tryOpenSync(":memory:");
     if (adapter) {
       assert.ok(["better-sqlite3", "node:sqlite", "bun:sqlite"].includes(adapter.driver));
@@ -513,7 +513,7 @@ describe("driverFactory", () => {
     );
   });
 
-  test("openDatabaseAsync sempre retorna um adapter válido", async () => {
+  test("openDatabaseAsync always returns a valid adapter", async () => {
     const adapter = await openDatabaseAsync(":memory:");
     assert.ok(["better-sqlite3", "node:sqlite", "bun:sqlite", "sql.js"].includes(adapter.driver));
 
@@ -532,12 +532,12 @@ describe("driverFactory", () => {
     adapter1.close();
   });
 
-  test("getSqlJsAdapter retorna null para path não inicializado", () => {
+  test("getSqlJsAdapter returns null for uninitialized path", () => {
     const unique = `not_initialized_${Date.now()}`;
     assert.equal(getSqlJsAdapter(unique), null);
   });
 
-  test("getSqlJsAdapter retorna adapter após preInitSqlJs", async () => {
+  test("getSqlJsAdapter returns adapter after preInitSqlJs", async () => {
     const path = `sqljs_get_test_${Date.now()}`;
     await preInitSqlJs(path);
     const adapter = getSqlJsAdapter(path);
@@ -546,7 +546,7 @@ describe("driverFactory", () => {
     adapter!.close();
   });
 
-  test("openDatabaseAsync suporta operações CRUD completas", async (t) => {
+  test("openDatabaseAsync supports full CRUD operations", async (t) => {
     const os = await import("node:os");
     const path = await import("node:path");
     const fs = await import("node:fs");
@@ -629,7 +629,7 @@ describe("driverFactory", () => {
     a.close();
   });
 
-  test("cross-driver: escreve com adapter sync, relê com sql.js", async (t) => {
+  test("cross-driver: writes with adapter sync, relays with sql.js", async (t) => {
     const os = await import("node:os");
     const path = await import("node:path");
     const fs = await import("node:fs");

@@ -29,10 +29,10 @@ const SCRIPT_PATH = fileURLToPath(
 );
 
 // ---------------------------------------------------------------------------
-// Fixtures — JSON sintético com formato do osv-scanner --format json
+// Fixtures — Synthetic JSON with osv-scanner format --format json
 // ---------------------------------------------------------------------------
 
-/** Resultado vazio (nenhuma vulnerabilidade encontrada). */
+/** Empty result (no vulnerabilities found). */
 function makeEmptyResult() {
   return { results: [] };
 }
@@ -58,7 +58,7 @@ function makeResultOnePkg(vulnCount: number) {
   };
 }
 
-/** Dois pacotes em dois resultados, sem groups. */
+/** Two packages in two results, no groups. */
 function makeResultTwoPkgs() {
   return {
     results: [
@@ -85,7 +85,7 @@ function makeResultTwoPkgs() {
   };
 }
 
-/** Pacote com groups para deduplicação. */
+/** Package with groups for deduplication. */
 function makeResultWithGroups() {
   return {
     results: [
@@ -93,7 +93,7 @@ function makeResultWithGroups() {
         packages: [
           {
             package: { name: "pkg-c", version: "3.0.0", ecosystem: "npm" },
-            // 3 vulnerabilidades mas apenas 2 grupos (1 foi deduplicado)
+            // 3 vulnerabilities but only 2 groups (1 was deduplicated)
             vulnerabilities: [
               { id: "GHSA-ccc-1", aliases: [], affected: [] },
               { id: "GHSA-ccc-2", aliases: [], affected: [] },
@@ -146,7 +146,7 @@ function makeResultWithDbSeverity() {
 }
 
 // ---------------------------------------------------------------------------
-// parseOsvJson — input inválido
+// parseOsvJson — invalid input
 // ---------------------------------------------------------------------------
 
 test("parseOsvJson: null retorna vulnCount=0", () => {
@@ -160,21 +160,21 @@ test("parseOsvJson: undefined retorna vulnCount=0", () => {
   assert.equal(result.vulnCount, 0);
 });
 
-test("parseOsvJson: objeto sem results retorna vulnCount=0", () => {
+test("parseOsvJson: object without results returns vulnCount=0", () => {
   const result = parseOsvJson({ other: [] } as unknown as { results: never[] });
   assert.equal(result.vulnCount, 0);
 });
 
-test("parseOsvJson: results não-array retorna vulnCount=0", () => {
+test("parseOsvJson: non-array results returns vulnCount=0", () => {
   const result = parseOsvJson({ results: "invalid" } as unknown as { results: never[] });
   assert.equal(result.vulnCount, 0);
 });
 
 // ---------------------------------------------------------------------------
-// parseOsvJson — resultado vazio
+// parseOsvJson — empty result
 // ---------------------------------------------------------------------------
 
-test("parseOsvJson: results vazio retorna vulnCount=0", () => {
+test("parseOsvJson: empty results returns vulnCount=0", () => {
   const result = parseOsvJson(makeEmptyResult());
   assert.equal(result.vulnCount, 0);
   assert.deepEqual(result.bySeverity, {});
@@ -188,7 +188,7 @@ test("parseOsvJson: result sem packages retorna vulnCount=0", () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseOsvJson — contagem básica
+// parseOsvJson — basic counting
 // ---------------------------------------------------------------------------
 
 test("parseOsvJson: 1 pacote com 1 vuln retorna vulnCount=1", () => {
@@ -207,7 +207,7 @@ test("parseOsvJson: 2 pacotes em 2 results retorna vulnCount=3 (2+1)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseOsvJson — deduplicação via groups
+// parseOsvJson — deduplication via groups
 // ---------------------------------------------------------------------------
 
 test("parseOsvJson: usa groups.length quando groups tem menos entradas que vulnerabilities", () => {
@@ -216,13 +216,13 @@ test("parseOsvJson: usa groups.length quando groups tem menos entradas que vulne
   assert.equal(result.vulnCount, 2);
 });
 
-test("parseOsvJson: usa vulnerabilities.length quando groups está ausente", () => {
-  // Sem groups => conta vulnerabilities diretamente
+test("parseOsvJson: uses vulnerabilities.length when groups is missing", () => {
+  // No groups => counts vulnerabilities directly
   const result = parseOsvJson(makeResultOnePkg(5));
   assert.equal(result.vulnCount, 5);
 });
 
-test("parseOsvJson: groups vazio não causa deduplicação (usa vulnerabilities)", () => {
+test("parseOsvJson: empty groups does not cause deduplication (uses vulnerabilities)", () => {
   const json = {
     results: [
       {
@@ -233,7 +233,7 @@ test("parseOsvJson: groups vazio não causa deduplicação (usa vulnerabilities)
               { id: "GHSA-d-1", aliases: [], affected: [] },
               { id: "GHSA-d-2", aliases: [], affected: [] },
             ],
-            groups: [], // vazio — não deve deduplicar
+            groups: [], // empty — should not deduplicate
           },
         ],
       },
@@ -250,16 +250,16 @@ test("parseOsvJson: groups vazio não causa deduplicação (usa vulnerabilities)
 test("parseOsvJson: coleta severidade de database_specific.severity", () => {
   const result = parseOsvJson(makeResultWithDbSeverity());
   assert.equal(result.vulnCount, 3);
-  assert.ok("HIGH" in result.bySeverity, "deve ter HIGH");
-  assert.ok("CRITICAL" in result.bySeverity, "deve ter CRITICAL");
-  assert.ok("LOW" in result.bySeverity, "deve ter LOW (normalizado para uppercase)");
+  assert.ok("HIGH" in result.bySeverity, "must have HIGH");
+  assert.ok("CRITICAL" in result.bySeverity, "must have CRITICAL");
+  assert.ok("LOW" in result.bySeverity, "must have LOW (normalized to uppercase)");
 });
 
 test("parseOsvJson: vuln sem severidade conta como UNKNOWN", () => {
   const json = makeResultOnePkg(1);
   // Vuln sem database_specific.severity e sem severity array
   const result = parseOsvJson(json);
-  assert.ok("UNKNOWN" in result.bySeverity, "vuln sem severidade deve ser UNKNOWN");
+  assert.ok("UNKNOWN" in result.bySeverity, "vuln without severity must be UNKNOWN");
 });
 
 // ---------------------------------------------------------------------------
@@ -270,7 +270,7 @@ test("extractSeverity: null retorna UNKNOWN", () => {
   assert.equal(extractSeverity(null), "UNKNOWN");
 });
 
-test("extractSeverity: objeto vazio retorna UNKNOWN", () => {
+test("extractSeverity: empty object returns UNKNOWN", () => {
   assert.equal(extractSeverity({}), "UNKNOWN");
 });
 
@@ -284,12 +284,12 @@ test("extractSeverity: normaliza database_specific.severity para uppercase", () 
   assert.equal(extractSeverity(vuln), "CRITICAL");
 });
 
-test("extractSeverity: usa severity[0].type quando database_specific ausente", () => {
+test("extractSeverity: uses severity[0].type when database_specific missing", () => {
   const vuln = { severity: [{ type: "CVSS_V3", score: "CVSS:3.1/AV:N/AC:L" }] };
   assert.equal(extractSeverity(vuln), "CVSS_V3");
 });
 
-test("extractSeverity: database_specific.severity tem precedência sobre severity[]", () => {
+test("extractSeverity: database_specific.severity takes precedence over severity[]", () => {
   const vuln = {
     database_specific: { severity: "HIGH" },
     severity: [{ type: "CVSS_V2", score: "AV:N/AC:L/Au:N/C:P/I:P/A:P" }],
@@ -297,7 +297,7 @@ test("extractSeverity: database_specific.severity tem precedência sobre severit
   assert.equal(extractSeverity(vuln), "HIGH");
 });
 
-test("extractSeverity: severity array vazio retorna UNKNOWN", () => {
+test("extractSeverity: empty severity array returns UNKNOWN", () => {
   const vuln = { severity: [] };
   assert.equal(extractSeverity(vuln), "UNKNOWN");
 });
@@ -307,7 +307,7 @@ test("extractSeverity: severity[0] sem type retorna UNKNOWN", () => {
   assert.equal(extractSeverity(vuln), "UNKNOWN");
 });
 
-test("extractSeverity: database_specific.severity vazia retorna UNKNOWN", () => {
+test("extractSeverity: empty database_specific.severity returns UNKNOWN", () => {
   const vuln = { database_specific: { severity: "" } };
   assert.equal(extractSeverity(vuln), "UNKNOWN");
 });
@@ -323,25 +323,25 @@ test("evaluateVulnRatchet: medida == baseline passa (10 vs 10)", () => {
   assert.equal(r.improved, false);
 });
 
-test("evaluateVulnRatchet: uma a mais que o baseline é regressão (11 vs 10)", () => {
+test("evaluateVulnRatchet: one more than the baseline is regression (11 vs 10)", () => {
   const r = evaluate(11, 10);
   assert.equal(r.regressed, true, "a single new vulnerability must block");
   assert.equal(r.improved, false);
 });
 
-test("evaluateVulnRatchet: menos que o baseline é melhoria", () => {
+test("evaluateVulnRatchet: less than baseline is improvement", () => {
   const r = evaluate(5, 10);
   assert.equal(r.regressed, false);
   assert.equal(r.improved, true);
 });
 
-test("evaluateVulnRatchet: zero contra baseline não-zero é melhoria máxima", () => {
+test("evaluateVulnRatchet: zero against non-zero baseline is maximum improvement", () => {
   const r = evaluate(0, 13);
   assert.equal(r.regressed, false);
   assert.equal(r.improved, true);
 });
 
-test("evaluateVulnRatchet: comparação inteira estrita — qualquer aumento regride", () => {
+test("evaluateVulnRatchet: strict integer comparison — any increase regresses", () => {
   assert.equal(evaluate(11, 10).regressed, true);
   assert.equal(evaluate(10, 10).regressed, false);
   assert.equal(evaluate(9, 10).regressed, false);
@@ -362,29 +362,29 @@ function withTmpBaseline(content: string | null, fn: (p: string) => void) {
   }
 }
 
-test("readBaselineVulnValue: lê metrics.vulnCount.value", () => {
+test("readBaselineVulnValue: read metrics.vulnCount.value", () => {
   withTmpBaseline(JSON.stringify({ metrics: { vulnCount: { value: 10 } } }), (p) => {
     assert.equal(readBaseline(p), 10);
   });
 });
 
-test("readBaselineVulnValue: arquivo ausente retorna null (SKIP gracioso)", () => {
+test("readBaselineVulnValue: missing file returns null (graceful SKIP)", () => {
   assert.equal(readBaseline("/tmp/does-not-exist-99999/quality-baseline.json"), null);
 });
 
-test("readBaselineVulnValue: métrica ausente retorna null", () => {
+test("readBaselineVulnValue: missing metric returns null", () => {
   withTmpBaseline(JSON.stringify({ metrics: {} }), (p) => {
     assert.equal(readBaseline(p), null);
   });
 });
 
-test("readBaselineVulnValue: value não-numérico retorna null", () => {
+test("readBaselineVulnValue: non-numeric value returns null", () => {
   withTmpBaseline(JSON.stringify({ metrics: { vulnCount: { value: "10" } } }), (p) => {
     assert.equal(readBaseline(p), null);
   });
 });
 
-test("readBaselineVulnValue: JSON inválido retorna null (não lança)", () => {
+test("readBaselineVulnValue: Invalid JSON returns null (does not throw)", () => {
   withTmpBaseline("{ not valid json", (p) => {
     assert.equal(readBaseline(p), null);
   });
@@ -394,7 +394,7 @@ test("readBaselineVulnValue: JSON inválido retorna null (não lança)", () => {
 // --ratchet end-to-end: a missing required measurement is incomplete and blocks. Runs the script with an empty PATH so osv-scanner is unresolvable.
 // ---------------------------------------------------------------------------
 
-test("--ratchet com osv-scanner ausente reporta INCOMPLETE e sai 2", () => {
+test("--ratchet with osv-scanner missing reports INCOMPLETE and exits 2", () => {
   const res = spawnSync(process.execPath, [SCRIPT_PATH, "--ratchet", "--quiet"], {
     encoding: "utf8",
     // Empty PATH → `which`/`osv-scanner` unresolvable → findOsvScanner() returns null.

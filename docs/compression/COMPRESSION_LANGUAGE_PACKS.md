@@ -29,7 +29,7 @@ Current shipped packs (verified against `rules/` directory contents):
 | Italian             | `rules/it/`    | `context`, `dedup`, `filler`, `structural`, `ultra` |
 | German              | `rules/de/`    | `context`, `filler`, `structural`                   |
 | French              | `rules/fr/`    | `context`, `filler`, `structural`                   |
-| Japanese            | `rules/ja/`    | `context`, `filler`, `structural`                   |
+| Japanese | `rules/ja/` | `context`, `filler`, `structural` |
 
 > **Parity note:** `en`, `es`, `pt-BR`, `id`, and `it` packs have the full 5 categories; `de`, `fr`, `ja` ship 3 categories. The missing `dedup` and `ultra` categories silently fall back to the English built-ins. Contributions welcome to add `dedup.json` and `ultra.json` for the smaller packs.
 >

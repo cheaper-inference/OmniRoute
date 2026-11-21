@@ -398,7 +398,7 @@ Most "free tokens per month" figures in this space are sums of per-model labels.
 | **RPM / RPD / RPH**     | Requests per minute / day / hour                                           |
 | **TPM / TPD**           | Tokens per minute / day                                                    |
 | **Documented grant**    | Provider publishes an explicit daily/monthly token cap (defensible budget) |
-| **Theoretical ceiling** | `rate-limit × 24/7 × 30d` — a maximum, not a granted budget                |
+| **Theoretical ceiling** | `rate-limit × 24/7 × 30d` — a maximum, not a granted budget |
 | **Neuron**              | Cloudflare compute unit (~1 output token)                                  |
 
 > Generated from per-provider research on 2026-06-05. Re-run the research workflow (see `_tasks/features-v3.8.12`) to refresh.

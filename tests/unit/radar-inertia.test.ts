@@ -191,15 +191,15 @@ test("Radar inertia — flag off means zero behavioral delta", async (t) => {
   await t.test(
     "computeFreeModelTotals() is unchanged with the Radar module imported alongside it",
     () => {
-      // Radar é importado no escopo de módulo acima (getRadarCatalog,
+      // Radar is imported in the module scope above (getRadarCatalog,
       // baselineToMergedEntries). Se o Radar mutasse FREE_MODEL_BUDGETS ou
-      // qualquer estado compartilhado do catálogo, os totais deixariam de
-      // derivar da fonte — é isso que este teste prova.
+      // any shared state of the catalog, the totals would no longer
+      // derive from the source — that's what this test proves.
       //
-      // As asserções comparam os totais contra valores RECOMPUTADOS a partir de
-      // FREE_MODEL_BUDGETS, e não contra números cravados: o catálogo cresce a
-      // cada release do OmniRoute, e um total fixo quebraria o teste pelo motivo
-      // errado (catálogo mudou) em vez do certo (Radar mutou o catálogo).
+      // Assertions compare totals against RECOMPUTED values from
+      // FREE_MODEL_BUDGETS, and not against fixed numbers: the catalog grows by
+      // each OmniRoute release, and a fixed total would break the test for the reason
+      // wrong (catalog changed) instead of right (Radar mutated the catalog).
       const totals = computeFreeModelTotals();
 
       const esperadoModelCount = FREE_MODEL_BUDGETS.length;

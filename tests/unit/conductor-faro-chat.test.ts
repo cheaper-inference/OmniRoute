@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-// Invariantes de segurança/UX do chat com voz (componentes React: vitest-ui advisory + dashboard-typecheck).
+// Voice chat security/UX invariants (React components: vitest-ui advisory dashboard-typecheck).
 const CHAT = "src/app/(dashboard)/dashboard/conductor/FaroChat.tsx";
 
 function src(): string {
   return fs.readFileSync(path.join(process.cwd(), CHAT), "utf8");
 }
 
-test("client fala SÓ com o OmniRoute: /api/conductor/ask + /api/v1/audio/* (nunca Faro/hub direto)", () => {
+test("client ONLY talks to OmniRoute: /api/conductor/ask + /api/v1/audio/* (never direct Faro/hub)", () => {
   const s = src();
   assert.match(s, /"use client"/);
   assert.match(s, /\/api\/conductor\/ask/);
@@ -20,7 +20,7 @@ test("client fala SÓ com o OmniRoute: /api/conductor/ask + /api/v1/audio/* (nun
   assert.ok(!s.includes("CONDUCTOR_"), "nenhuma env do Conductor no client");
 });
 
-test("pending do Faro → botões Sim/Não que enviam 'sim'/'não' (trava de confirmação é do motor do Faro)", () => {
+test("Faro pending → Yes/No buttons that send 'yes'/'no' (confirmation lock is from the Faro engine)", () => {
   const s = src();
   assert.match(s, /pending/);
   assert.match(s, /"sim"/);

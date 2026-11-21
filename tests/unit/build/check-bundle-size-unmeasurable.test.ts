@@ -4,7 +4,7 @@
 //
 // Four SKIP paths returned exit 0 under `--ratchet`, each with a comment saying
 // so explicitly — e.g. check-bundle-size.mjs:252 "SKIP sai 0 mesmo com --ratchet
-// (erro de medição nunca bloqueia)". A ratchet that cannot take a measurement and
+// (measurement error never blocks)". A ratchet that cannot take a measurement and
 // then reports OK is not a ratchet: it converts "unknown" into "verified", and it
 // does so silently, because every one of those branches printed an informational
 // line and exited 0. The step in ci.yml is even labelled "Bundle size (ratchet,

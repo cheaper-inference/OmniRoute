@@ -1,5 +1,5 @@
 /**
- * Fase 3 / Epic A — OS trust-store install for the TPROXY dynamic CA (decrypt 4b/N).
+ * Phase 3 / Epic A — OS trust-store install for the TPROXY dynamic CA (decrypt 4b/N).
  *
  * Installs the dynamic CA into the trust store under a DEDICATED slot
  * (`omniroute-tproxy-ca.crt`) so it never clobbers the static MITM cert slot.

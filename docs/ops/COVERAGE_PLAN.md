@@ -157,7 +157,7 @@ Themes for Phases 6-7:
 
 Update `npm run test:coverage` thresholds only after the project actually exceeds the next milestone with a comfortable buffer.
 
-**Current gate:** `npm run test:coverage` enforces **60 statements / 60 lines / 60 functions / 60 branches** (the metric was rebased in Quality-Gates Fase 6A.1 — the earlier 82.58% baseline was inflated because it counted test files and excluded `open-sse`). The `test:coverage:legacy` command preserves the old 50/50/50 metric for historical comparison.
+**Current gate:** `npm run test:coverage` enforces **60 statements / 60 lines / 60 functions / 60 branches** (the metric was rebased in Quality-Gates Phase 6A.1 — the earlier 82.58% baseline was inflated because it counted test files and excluded `open-sse`). The `test:coverage:legacy` command preserves the old 50/50/50 metric for historical comparison.
 
 For ad-hoc threshold checks against the latest report use:
 

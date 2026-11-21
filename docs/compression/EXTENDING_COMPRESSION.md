@@ -251,7 +251,7 @@ open-sse/services/compression/rules/
 ├── es/  (same structure)
 ├── fr/  (same structure)
 ├── de/  (same structure)
-├── ja/  (same structure)
+├── ja/ (same structure)
 └── pt-BR/ (same structure)
 ```
 

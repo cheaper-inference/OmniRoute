@@ -253,7 +253,7 @@ test(
 
 test("redisQuotaStore: sliding window decay formula is correct", async () => {
   // Unit test for the math without real Redis.
-  // We verify that: effective = prev × (1 - elapsed/window) + curr
+  // We verify that: effective = prev × (1 - elapsed/window) curr
   // by inspecting the expected values directly.
 
   const { WINDOW_MS } = await import("../../src/lib/quota/dimensions.ts");

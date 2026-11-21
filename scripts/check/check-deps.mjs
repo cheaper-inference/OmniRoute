@@ -1,28 +1,28 @@
 #!/usr/bin/env node
 // scripts/check/check-deps.mjs
-// Gate anti-slopsquatting: toda dependência em QUALQUER package.json do repo deve
-// estar numa allowlist commitada (dependency-allowlist.json). Uma dep nova exige
-// adição EXPLÍCITA à allowlist — assim um agente não consegue introduzir um pacote
-// alucinado/typosquatted silenciosamente (CSA 2026: 19,7% do código IA cita pacotes
-// inexistentes; 43% dos nomes alucinados reaparecem, registráveis por atacantes).
-// A revisão humana ao adicionar à allowlist é o ponto de controle.
+// Anti-squatting gate: every dependency in ANY package.json in the repo must
+// be on a committed allowlist (dependency-allowlist.json). A new dependency requires
+// EXPLICIT addition to the allowlist — so an agent cannot introduce a package
+// hallucinated/typosquatted silently (CSA 2026: 19.7% of AI code cites packages
+// that do not exist; 43% of hallucinated names reappear, registrable by attackers).
+// Human review when adding to the allowlist is the control point.
 //
 // 6A.8: Expandido de 2 manifests hardcoded (package.json + electron/package.json)
-// para descoberta automática de TODOS os package.json do repo, excluindo:
+// for automatic discovery of ALL package.json files in the repo, excluding:
 //   - node_modules/ (dep tree)
 //   - .next/, .build/, dist/, dist-electron/ (build artefatos)
 //   - .claude/ (worktrees de agentes)
-//   - _references/, _mono_repo/ (código de referência não pertencente ao repo)
-//   - qualquer diretório _* na RAIZ (repositórios/artefatos privados; AGENTS.md)
-// Isso garante que workspaces novos (opencode-plugin, opencode-provider, open-sse, etc.)
-// sejam automaticamente cobertos sem edição do script.
+//   - _references/, _mono_repo/ (reference code not belonging to the repo)
+//   - any _* directory in the ROOT (private repositories/artifacts; AGENTS.md)
+// This ensures that new workspaces (opencode-plugin, opencode-provider, open-sse, etc.)
+// are automatically covered without editing the script.
 //
-// Task 7.8: Anti-slopsquatting completo — para deps NOVAS (fora da allowlist),
-// dois sub-checks adicionais ANTES de falhar:
+// Task 7.8: Full anti-squatting — for NEW deps (not on the allowlist),
+// two additional sub-checks BEFORE failing:
 //   (a) a dep EXISTE no npm registry (npm view <pkg> version)
-//   (b) foi publicada há ≥72h (age-cooldown contra typosquatting de nomes alucinados)
-// Ambas as chamadas são tolerantes a falha de rede: se o registry estiver inacessível,
-// emite aviso mas não bloqueia — o gate principal (allowlist) ainda captura a dep nova.
+//   (b) it was published ≥72h ago (age-cooldown against hallucinated-name typosquatting)
+// Both calls are tolerant of network failures: if the registry is inaccessible,
+// a warning is issued but no blocking occurs — the main gate (allowlist) still captures the new dependency.
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -78,7 +78,7 @@ export function discoverManifests(root) {
   return out.sort();
 }
 
-/** Nomes de deps no manifesto que não estão na allowlist (de-dup, ordem preservada). */
+/** Names of deps in the manifest that are not on the allowlist (de-dup, order preserved). */
 export function findUnapprovedDeps(depNames, allowlist) {
   const seen = new Set();
   const out = [];
@@ -222,7 +222,7 @@ export function auditNewDepsRegistry(newDeps, minAgeHours = 72, nowMs = Date.now
 function main() {
   if (!fs.existsSync(ALLOWLIST_PATH)) {
     console.error(
-      `[check-deps] FAIL — ${path.basename(ALLOWLIST_PATH)} ausente. Gere com:\n` +
+      `[check-deps] FAIL — ${path.basename(ALLOWLIST_PATH)} missing. Generate with:\n` +
         `  node -e "require('./scripts/check/check-deps.mjs')" (ou veja o passo de bootstrap no PLANO)`
     );
     process.exit(1);
@@ -247,36 +247,36 @@ function main() {
     // Failures here do NOT add extra exit(1) calls — the allowlist gate already
     // fails; these are purely informational addenda to the error output.
     console.error(
-      `[check-deps] ${unapproved.length} dependência(s) FORA da allowlist:\n` +
+      `[check-deps] ${unapproved.length} dependenc(y/ies) OUTSIDE the allowlist:\n` +
         unapproved.map((d) => "  ✗ " + d).join("\n") +
-        `\n  → confirme que o pacote é legítimo (existe no registry, publisher conhecido, não é typosquat)\n` +
-        `    e adicione o nome a dependency-allowlist.json ("allowed"). Esse é o ponto de revisão humana.`
+        `\n  → Confirm that the package is legitimate (exists in the registry, known publisher, not typosquat)\n` +
+        `    and add the name to dependency-allowlist.json ("allowed"). This is the point of human review.`
     );
 
     // Registry audit (Task 7.8) — runs only when there are new deps.
     // Failures are non-fatal on network errors; registry check is advisory enrichment
     // (the allowlist gate above is the hard block).
-    console.error(`[check-deps] Verificando deps novas no registry npm (Task 7.8)…`);
+    console.error(`[check-deps] Checking new deps in the npm registry (Task 7.8)…`);
     const { notFound, tooNew, offline } = auditNewDepsRegistry(unapproved);
 
     if (offline.length) {
       console.warn(
-        `[check-deps] WARN — registry npm inacessível (offline?); ` +
-          `não foi possível verificar: ${offline.join(", ")}`
+        `[check-deps] WARN — npm registry unreachable (offline?); ` +
+          `unable to check: ${offline.join(", ")}`
       );
     }
     if (notFound.length) {
       console.error(
-        `[check-deps] BLOQUEIO EXTRA — ${notFound.length} dep(s) NÃO encontrada(s) no registry npm ` +
-          `(provável nome alucinado — NÃO adicionar à allowlist!):\n` +
-          notFound.map((d) => `  ✗✗ ${d} (não existe no registry)`).join("\n")
+        `[check-deps] EXTRA BLOCK — ${notFound.length} dep(s) NOT found in the npm registry ` +
+          `(likely hallucinated name — DO NOT add to the allowlist!):\n` +
+          notFound.map((d) => `  ✗✗ ${d} (does not exist in the registry)`).join("\n")
       );
     }
     if (tooNew.length) {
       console.error(
-        `[check-deps] BLOQUEIO EXTRA — ${tooNew.length} dep(s) publicada(s) há <72h ` +
-          `(age-cooldown anti-slopsquatting — aguarde 72h após publicação):\n` +
-          tooNew.map((d) => `  ✗✗ ${d.name} (publicada há ~${d.ageHours}h)`).join("\n")
+        `[check-deps] EXTRA BLOCK — ${tooNew.length} dep(s) published <72h ago ` +
+          `(age-cooldown anti-slopsquatting — wait 72h after publication):\n` +
+          tooNew.map((d) => `  ✗✗ ${d.name} (published ~${d.ageHours}h ago)`).join("\n")
       );
     }
 
@@ -285,8 +285,8 @@ function main() {
   if (process.exitCode === 1) return; // stale entries already logged
   const manifests = discoverManifests(ROOT);
   console.log(
-    `[check-deps] OK — ${allowlist.size} dependências na allowlist, ` +
-      `${manifests.length} manifests escaneados, nenhuma nova dep`
+    `[check-deps] OK — ${allowlist.size} dependencies on the allowlist, ` +
+      `${manifests.length} manifests scanned, no new dep`
   );
 }
 

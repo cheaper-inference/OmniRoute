@@ -178,7 +178,7 @@ test("XaiExecutor caps Responses input after expanding a long chat history", () 
     messages.push({ role: "tool", tool_call_id: `c${i}a`, content: "ra" });
     messages.push({ role: "tool", tool_call_id: `c${i}b`, content: "rb" });
   }
-  // 300 turns × (1 user + 2 function_call + 2 function_call_output) = 1500 input items
+  // 300 turns × (1 user 2 function_call 2 function_call_output) = 1500 input items
   const out = executor.transformRequest(
     "grok-4.6",
     { model: "grok-4.6", messages },

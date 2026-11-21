@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // scripts/check/check-test-masking.mjs
-// Gate anti test-masking (a preocupação nº1 do CLAUDE.md: "subagente não pode
-// enfraquecer/remover asserts pra ficar verde"). Para cada arquivo de teste MODIFICADO
-// num PR, compara a contagem de asserts base vs HEAD: sinaliza REMOÇÃO LÍQUIDA de asserts
-// e NOVAS tautologias `assert.ok(true)`. Heurístico mas alto-sinal. Espelha o plumbing
+// Anti test-masking gate (the #1 concern in CLAUDE.md: "a subagent cannot
+// weaken/remove asserts to go green"). For each MODIFIED test file
+// in a PR, compares the assert count base vs HEAD: flags NET REMOVAL of asserts
+// and NEW tautologies `assert.ok(true)`. Heuristic but high-signal. Mirrors the plumbing
 // de check-pr-test-policy.mjs (diff base...HEAD); no-op fora de contexto de PR.
 //
-// v2 (6A.10): acrescenta 3 novos subchecks:
-//   1. Arquivos de teste DELETADOS: --diff-filter=MDR com detecção de rename.
-//   2. Aumento líquido de .skip/.todo/.only/{skip:true}: esconde asserts sem remover.
+// v2 (6A.10): adds 3 new subchecks:
+//   1. DELETED test files: --diff-filter=MDR with rename detection.
+//   2. Net increase of .skip/.todo/.only/{skip:true}: hides asserts without removing.
 //   3. Tautologias extras: expect(true).toBe(true), assert.equal(1,1), assert.ok(true).
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -18,7 +18,7 @@ const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
 const PROD_SRC_RE = /\.(ts|tsx|mts|cts)$/;
 
-/** Conta chamadas de assert.*( / assert( / expect( . */
+/** Counts calls to assert.*( / assert( / expect( . */
 export function countAssertions(src) {
   const a = (src.match(/\bassert\b\s*[.(]/g) || []).length;
   const e = (src.match(/\bexpect\s*\(/g) || []).length;
@@ -33,7 +33,7 @@ export function countTautologies(src) {
 /**
  * (6A.10 subcheck 2) Conta marcadores de skip/todo/only que silenciam testes:
  *   - .skip(, .todo(, .only(        — em qualquer runner (node:test, jest, vitest)
- *   - { skip: true }                — opção de objeto node:test
+ *   - { skip: true }                — node:test object option
  */
 export function countSkips(src) {
   const modifiers = (src.match(/\.\s*(?:skip|todo|only)\s*\(/g) || []).length;
@@ -42,37 +42,37 @@ export function countSkips(src) {
 }
 
 /**
- * Skips condicionais por modo de gate (plano 2026-11-13, "derivados só na release"). Cada helper
- * abaixo deixa um teste afirmar tudo em modo release e, num PR de feature, pular só o que o
- * refresh da release reescreve. Nenhum é `.skip(` nem `{ skip: true }`, então countSkips() não
- * os vê; este contador existe para o gate listar o efeito numa linha própria em vez de responder
- * só "OK". Aprovado pelo dono em 2026-11-14 como report-only (não reprova).
+ * Conditional skips per gate mode (plan 2026-11-13, "derived only in release"). Each helper
+ * below lets a test assert everything in release mode and, in a feature PR, skip only what the
+ * that the release refresh rewrites. None is `.skip(` or `{ skip: true }`, so countSkips() does not
+ * see them; this counter exists so the gate lists the effect on its own line instead of answering
+ * only "OK". Approved by the owner on 2026-11-14 as report-only (does not fail).
  */
 export const MODE_SKIP_HELPERS = Object.freeze([
   {
     name: "releaseOnlyUnlessTouched",
     call: true,
-    effect: "artefato gerado comparado em modo release; num PR só quando o PR o edita",
+    effect: "generated artifact compared in release mode; in a PR only when the PR edits it",
   },
   {
     name: "localeParityOptions",
     call: true,
-    effect: "paridade de chaves entre idiomas afirmada só em modo release",
+    effect: "key parity between languages asserted only in release mode",
   },
   {
     name: "localeParityIsReleaseOnly",
     call: false,
-    effect: "chave ausente num idioma julgada só em modo release",
+    effect: "missing key in a language judged only in release mode",
   },
   {
     name: "placeholderParityDeferred",
     call: true,
-    effect: "placeholder de valor inglês que o PR reescreveu fica para o refresh da release",
+    effect: "English value placeholder rewritten by the PR is left for the release refresh",
   },
   {
     name: "announceMirrorPlan",
     call: true,
-    effect: "espelhos docs/i18n afirmados num PR só quando estão em dia",
+    effect: "docs/i18n mirrors asserted in a PR only when they are up to date",
   },
 ]);
 
@@ -104,8 +104,8 @@ export function countModeConditionalSkips(src) {
 }
 
 /**
- * Linhas de relatório (REPORT-ONLY) para aumento líquido de skips condicionais por modo.
- * Cada entrada: { file, baseModeSkips?, headModeSkips?, headModeHelpers? } (default 0 / []).
+ * Report lines (REPORT-ONLY) for a net increase of conditional skips per mode.
+ * Each entry: { file, baseModeSkips?, headModeSkips?, headModeHelpers? } (default 0 / []).
  */
 export function evaluateModeConditionalSkips(perFile) {
   const effects = new Map(MODE_SKIP_HELPERS.map((h) => [h.name, h.effect]));
@@ -117,7 +117,7 @@ export function evaluateModeConditionalSkips(perFile) {
     if (delta <= 0) continue;
     const helpers = (f.headModeHelpers ?? []).map((name) => `${name} — ${effects.get(name)}`);
     lines.push(
-      `${f.file}: ${delta} novo(s) skip(s) condicional(is) por modo de gate` +
+      `${f.file}: ${delta} new conditional skip(s) per gate mode` +
         (helpers.length ? ` (${helpers.join("; ")})` : "")
     );
   }
@@ -125,11 +125,11 @@ export function evaluateModeConditionalSkips(perFile) {
 }
 
 /**
- * (6A.10 subcheck 3) Conta tautologias que mantêm os asserts no texto mas nunca
+ * (6A.10 subcheck 3) Counts tautologies that keep asserts in the text but never
  * verificam nada real:
  *   - expect(true).toBe(true)
  *   - assert.equal(1, 1)  / assert.strictEqual(1, 1)
- *   - assert.ok(true)     (já coberto por countTautologies; incluído aqui para completude)
+ *   - assert.ok(true)     (already covered by countTautologies; included here for completeness)
  */
 export function countExtendedTautologies(src) {
   let count = 0;
@@ -329,26 +329,26 @@ export function findReimplementedConditions(prodSources, testSource, testImports
 }
 
 /**
- * (6A.10 subcheck 1) Sinaliza arquivos de teste DELETADOS ou renomeados-e-não-
- * substituídos. Recebe lista de paths de arquivos de teste que foram deletados
+ * (6A.10 subcheck 1) Flags DELETED or renamed-and-not-
+ * replaced test files. Receives a list of paths of test files that were deleted
  * (filtro D do git diff --diff-filter=MDR).
  *
  * `deletionAllowlist` (`_deletedWithReplacement` no test-masking-allowlist.json)
- * isenta uma deleção de três formas, cada uma com sua própria verificação:
- *   1. `replacement` (path string) — o substituto declarado existe no HEAD e é
- *      ele próprio um arquivo de teste — o caso "reescrito em outro path sem
- *      rename detectável" (conteúdo novo demais para o -M do git).
- *   2. `sourceRemoved` (array de paths) — feature removida por completo: TODOS
- *      os arquivos de produção listados precisam estar ausentes no HEAD (sem
- *      substituto porque não há mais código a testar). Usar apenas quando a
- *      remoção do código-fonte está confirmada na mesma commit/PR.
- *   3. `strayFromCommit` (hash) + `reason` (não-vazio) — o arquivo entrou no
- *      repositório POR ACIDENTE no commit declarado (ex.: um commit de docs
- *      que varreu artefatos de worktree de outra sessão, caso f4e93f339d) e a
- *      deleção devolve o arquivo ao seu fluxo dono (um PR/issue aberto). O
- *      gate verifica via git que o commit declarado é exatamente o que ADICIONOU
- *      o arquivo; o `reason` deve nomear o PR/issue dono para a revisão humana.
- * Qualquer entrada cuja condição declarada não se verifique continua flagada.
+ * exempts a deletion in three ways, each with its own verification:
+ *   1. `replacement` (path string) — the declared replacement exists in HEAD and is
+ *      itself a test file — the "rewritten at another path without
+ *      a detectable rename" case (too much new content for git's -M).
+ *   2. `sourceRemoved` (array of paths) — feature removed entirely: ALL
+ *      listed production files must be absent in HEAD (no
+ *      replacement because there is no code left to test). Use only when the
+ *      source removal is confirmed in the same commit/PR.
+ *   3. `strayFromCommit` (hash) + `reason` (non-empty) — the file came in on a
+ *      into the repository BY ACCIDENT in the declared commit (e.g. a docs commit
+ *      that swept up worktree artifacts of another session, case f4e93f339d) and the
+ *      deletion returns the file to its owner flow (an open PR/issue). The
+ * gate verifies via git that the declared commit is exactly the one that ADDED
+ *      the file; the `reason` must name the owning PR/issue for human review.
+ * Any entry whose declared condition does not hold remains flagged.
  */
 export function evaluateDeletedFiles(
   deletedPaths,
@@ -363,7 +363,7 @@ export function evaluateDeletedFiles(
     if (entry && typeof entry.replacement === "string") {
       if (TEST_RE.test(entry.replacement) && fileExists(entry.replacement)) continue;
       flags.push(
-        `${f}: deleção allowlistada mas o substituto declarado (${entry.replacement}) não existe ou não é arquivo de teste`
+        `${f}: allowlisted deletion but the declared replacement (${entry.replacement}) does not exist or is not a test file`
       );
       continue;
     }
@@ -371,14 +371,14 @@ export function evaluateDeletedFiles(
       const stillPresent = entry.sourceRemoved.filter((p) => fileExists(p));
       if (stillPresent.length === 0) continue;
       flags.push(
-        `${f}: deleção allowlistada como feature removida mas ${stillPresent.join(", ")} ainda existe(m) no HEAD`
+        `${f}: allowlisted deletion as removed feature but ${stillPresent.join(", ")} still exists in HEAD`
       );
       continue;
     }
     if (entry && typeof entry.strayFromCommit === "string" && entry.strayFromCommit.trim()) {
       if (typeof entry.reason !== "string" || !entry.reason.trim()) {
         flags.push(
-          `${f}: deleção allowlistada como stray mas sem \`reason\` — nomeie o PR/issue dono do arquivo`
+          `${f}: allowlisted deletion as stray but without \`reason\` — name the PR/issue that owns the file`
         );
         continue;
       }
@@ -386,21 +386,21 @@ export function evaluateDeletedFiles(
       const declared = entry.strayFromCommit.trim();
       if (actual && (actual === declared || actual.startsWith(declared))) continue;
       flags.push(
-        `${f}: deleção allowlistada como stray de ${declared} mas o commit que adicionou o arquivo é ${actual ?? "desconhecido"}`
+        `${f}: allowlisted deletion as stray from ${declared} but the commit that added the file is ${actual ?? "unknown"}`
       );
       continue;
     }
     flags.push(
-      `${f}: arquivo de teste deletado — revisão humana obrigatória (mascaramento alto-sinal)`
+      `${f}: deleted test file — human review required (high-signal masking)`
     );
   }
   return flags;
 }
 
 /**
- * (subcheck 1, forma 3) Hash COMPLETO do commit que adicionou `path` (o add
+ * (subcheck 1, form 3) FULL hash of the commit that added `path` (the add
  * mais recente — cobre o caso deletado-e-readicionado). `null` quando o git
- * não conhece o path.
+ * does not know the path.
  */
 function lookupAddedByCommit(path) {
   try {
@@ -447,15 +447,15 @@ export function partitionDeletedRenamed(nameStatusOutput) {
 }
 
 /**
- * Avalia por-arquivo: flag em remoção líquida de asserts, nova tautologia,
- * aumento líquido de skips, ou nova tautologia extendida.
+ * Evaluates per-file: flags net removal of asserts, a new tautology,
+ * net increase of skips, or a new extended tautology.
  *
- * Cada entrada de perFile deve ter:
+ * Each perFile entry must have:
  *   { file, baseAsserts, headAsserts, baseTaut, headTaut,
  *     baseSkips, headSkips, baseExtTaut, headExtTaut }
  *
- * Os campos de skip e extTaut são opcionais (default 0) para compatibilidade
- * com chamadas legadas que só passam baseAsserts/headAsserts/baseTaut/headTaut.
+ * The skip and extTaut fields are optional (default 0) for compatibility
+ * with legacy callers that only pass baseAsserts/headAsserts/baseTaut/headTaut.
  */
 /**
  * (#6634) `check-test-masking.test.ts` legitimately embeds tautology-pattern string
@@ -491,17 +491,17 @@ export function evaluateMasking(perFile, assertReductionAllowlist = new Set()) {
     // The tautology / skip / deletion signals below are NEVER allowlisted.
     if (f.headAsserts < f.baseAsserts && !assertReductionAllowlist.has(f.file))
       flags.push(
-        `${f.file}: asserts ${f.baseAsserts} → ${f.headAsserts} (REMOÇÃO de ${f.baseAsserts - f.headAsserts} — enfraquecimento?)`
+        `${f.file}: asserts ${f.baseAsserts} → ${f.headAsserts} (REMOVAL of ${f.baseAsserts - f.headAsserts} — weakening?)`
       );
     if (!isSelfTestFixture && f.headTaut > f.baseTaut)
-      flags.push(`${f.file}: nova(s) ${f.headTaut - f.baseTaut} tautologia(s) assert.ok(true)`);
+      flags.push(`${f.file}: ${f.headTaut - f.baseTaut} new assert.ok(true) tautologies`);
     if (headSkips > baseSkips)
       flags.push(
-        `${f.file}: ${headSkips - baseSkips} novo(s) .skip/.todo/.only (asserts silenciados sem remoção)`
+        `${f.file}: ${headSkips - baseSkips} new .skip/.todo/.only (asserts silenced without removal)`
       );
     if (!isSelfTestFixture && headExtTaut > baseExtTaut)
       flags.push(
-        `${f.file}: nova(s) ${headExtTaut - baseExtTaut} tautologia(s) estendida(s) (expect(true).toBe(true) / assert.equal(1,1))`
+        `${f.file}: ${headExtTaut - baseExtTaut} new extended tautologies (expect(true).toBe(true) / assert.equal(1,1))`
       );
   }
   return flags;
@@ -544,7 +544,7 @@ export function scanBareTautologies(testFiles, readFile) {
     if (count > 0) {
       flags.push(
         `${file}: ${count} tautologia(s) pura(s) (expect(true).toBe(true) / assert.equal(1,1)) — ` +
-          "substitua por um assert real do comportamento observável"
+          "replace with a real assert of observable behavior"
       );
     }
   }
@@ -609,7 +609,7 @@ function main() {
       `[test-masking] ${absoluteTautFlags.length} tautologia(s) pura(s) encontradas ` +
         `(scan absoluto — roda com ou sem contexto de PR):\n` +
         absoluteTautFlags.map((f) => "  ✗ " + f).join("\n") +
-        `\n  → substitua por um assert real do comportamento observável.`
+        `\n  → replace with a real assert of observable behavior.`
     );
     process.exit(1);
   }
@@ -617,15 +617,15 @@ function main() {
   const base = resolveBase();
   if (!base) {
     console.log(
-      "[test-masking] sem base ref (não é PR) — pulando checks de diff (scan absoluto de tautologias OK)."
+      "[test-masking] no base ref (not a PR) — skipping diff checks (absolute tautology scan OK)."
     );
     return;
   }
 
-  // (6A.10 subcheck 1) Arquivos de teste deletados/renomeados via MDR filter.
-  // Renames test→test são RELOCAÇÕES (substituição) e passam pela verificação de
-  // redução de asserts abaixo (gutting-via-rename ainda flaga); só deleções reais
-  // e renames test→não-teste contam como remoção de teste.
+  // (6A.10 subcheck 1) Deleted/renamed test files via MDR filter.
+  // test→test renames are RELOCATIONS (replacements) and go through the assert-
+  // reduction check below (gutting-via-rename still flags); only real deletions
+  // and test→non-test renames count as test removal.
   const { deletedTests, renames } = partitionDeletedRenamed(
     git(["diff", "--name-status", "-M", "--diff-filter=DR", `${base}...HEAD`])
   );
@@ -658,7 +658,7 @@ function main() {
     });
   }
 
-  // Arquivos de teste modificados (subcheck original + skips + extTaut)
+  // Modified test files (original subcheck + skips + extTaut)
   const changed = git(["diff", "--name-only", "--diff-filter=M", `${base}...HEAD`])
     .split("\n")
     .map((s) => s.trim())
@@ -681,13 +681,13 @@ function main() {
   const maxChangedTests = Number(process.env.TEST_MASKING_MAX_CHANGED_TESTS || 300);
   if (shouldSkipDiffSubchecks(changed.length + renamePerFile.length, maxChangedTests)) {
     console.log(
-      `[test-masking] ${changed.length} teste(s) modificado(s) + ${renamePerFile.length} ` +
+      `[test-masking] ${changed.length} modified test(s) + ${renamePerFile.length} ` +
         `renomeado(s) excede o teto de ${maxChangedTests} — pulando os subchecks de diff.\n` +
-        `  Um diff desse tamanho é um PR de release (base = main, merge-base = fork do ciclo ` +
-        `anterior por causa do squash), não uma unidade revisável.\n` +
-        `  Cada um desses arquivos já passou por este mesmo gate no PR de origem.\n` +
-        `  O scan absoluto de tautologias rodou sobre TODOS os testes rastreados e está OK.\n` +
-        `  Para forçar a análise completa: TEST_MASKING_MAX_CHANGED_TESTS=999999`
+        `  A diff of this size is a release PR (base = main, merge-base = the fork of the previous cycle ` +
+        `because of the squash), not a reviewable unit.\n` +
+        `  Each of these files already passed this same gate in the originating PR.\n` +
+        `  The absolute tautology scan ran over ALL tracked tests and is OK.\n` +
+        `  To force the full analysis: TEST_MASKING_MAX_CHANGED_TESTS=999999`
     );
     return;
   }
@@ -752,9 +752,9 @@ function main() {
       const src = fs.readFileSync(tf, "utf8");
       for (const hit of findReimplementedConditions(prodSources, src, extractImports(src))) {
         reimplementedFlags.push(
-          `${tf}: re-implementa a condição \`${hit.condition}\`` +
+          `${tf}: re-implements the condition \`${hit.condition}\`` +
             (hit.owner ? ` (dona: ${hit.owner})` : "") +
-            " — asserte através do import real em vez de copiar a condição"
+            " — assert through the real import instead of copying the condition"
         );
       }
     }
@@ -762,22 +762,22 @@ function main() {
   if (reimplementedFlags.length) {
     console.warn(
       `[test-masking] (report-only) ${reimplementedFlags.length} teste(s) re-implementam ` +
-        `condição de produção em vez de importar o símbolo dono (classe #6216):\n` +
+        `production condition instead of importing the owning symbol (class #6216):\n` +
         reimplementedFlags.map((f) => "  ⚠ " + f).join("\n") +
-        `\n  → importe o símbolo/função dono e asserte através dele (evita contrato duplicado ` +
-        `que diverge silenciosamente). Report-only por enquanto — não falha o gate.`
+        `\n  → import the owning symbol/function and assert through it (avoids a duplicate contract ` +
+        `that silently diverges). Report-only for now — does not fail the gate.`
     );
   }
 
-  // Report-only: skips condicionais por modo de gate não reprovam (a decisão de bloqueá-los é
-  // do dono), mas nunca ficam escondidos atrás de um "OK" simples.
+  // Report-only: conditional skips per gate mode do not fail (the decision to block them is
+  // the owner's), but they never stay hidden behind a simple "OK".
   const modeSkipLines = evaluateModeConditionalSkips(perFile);
   if (modeSkipLines.length) {
     console.warn(
       `[test-masking] (report-only) ${modeSkipLines.length} teste(s) ganharam skip condicional por modo de gate:\n` +
         modeSkipLines.map((f) => "  ⚠ " + f).join("\n") +
-        `\n  → em modo release cada um afirma tudo, como antes (plano 2026-11-13, aprovado pelo dono ` +
-        `em 2026-11-14). Report-only — não falha o gate.`
+        `\n  → in release mode each one asserts everything, as before (plan 2026-11-13, approved by the owner ` +
+        `on 2026-11-14). Report-only — does not fail the gate.`
     );
   }
 
@@ -792,12 +792,12 @@ function main() {
     console.error(
       `[test-masking] ${allFlags.length} sinal(is) de enfraquecimento de teste:\n` +
         allFlags.map((f) => "  ✗ " + f).join("\n") +
-        `\n  → se a redução é legítima (refator/consolidação), explique no PR; senão, restaure os asserts.`
+        `\n  → if the reduction is legitimate (refactor/consolidation), explain in the PR; otherwise, restore the asserts.`
     );
     process.exit(1);
   }
   console.log(
-    `[test-masking] OK — ${changed.length} modificado(s), ${renames.length} renomeado(s) (relocação), ` +
+    `[test-masking] OK — ${changed.length} modified, ${renames.length} renamed (relocation), ` +
       `${deletedTests.length} deletado(s) — sem enfraquecimento`
   );
 }

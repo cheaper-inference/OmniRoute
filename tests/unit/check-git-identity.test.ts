@@ -92,7 +92,7 @@ test("rejects the maintainer's e-mail carrying another person's name", () => {
   });
   assert.equal(r.status, 1);
   assert.match(r.stderr, /AUTHOR combina o e-mail do mantenedor/);
-  assert.match(r.stderr, /COMMITTER não é a identidade desta máquina/);
+  assert.match(r.stderr, /COMMITTER is not the identity of this machine/);
 });
 
 test("rejects the retired legacy e-mail — the 2026-08-29 window's exact signature", () => {
@@ -128,7 +128,7 @@ test("rejects a committer that is not this machine's identity", () => {
     committerEmail: "houminxi@gmail.com",
   });
   assert.equal(r.status, 1);
-  assert.match(r.stderr, /COMMITTER não é a identidade desta máquina/);
+  assert.match(r.stderr, /COMMITTER is not the identity of this machine/);
 });
 
 test("rejects the 2026-08-13 window: neither name nor e-mail is the maintainer's", () => {
@@ -141,5 +141,5 @@ test("rejects the 2026-08-13 window: neither name nor e-mail is the maintainer's
     committerEmail: "bakryun0718@proton.me",
   });
   assert.equal(r.status, 1);
-  assert.match(r.stderr, /COMMITTER não é a identidade desta máquina/);
+  assert.match(r.stderr, /COMMITTER is not the identity of this machine/);
 });

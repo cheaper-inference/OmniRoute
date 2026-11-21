@@ -468,7 +468,7 @@ export function readNormalizedSchema(db: QueryableDb): NormalizedSchema {
 
   // Only the CONTENT of the ledger is excluded; the table itself stays in the comparison.
   if (!schema.tables[LEDGER_TABLE]) {
-    throw new Error(`a tabela ${LEDGER_TABLE} não existe depois do boot`);
+    throw new Error(`table ${LEDGER_TABLE} does not exist after boot`);
   }
   return schema;
 }
@@ -478,7 +478,7 @@ const FAILED_MIGRATION_LINE = /^\[Migration\] FAILED: (\S+) — ([\s\S]*)$/;
 
 class MigrationFailedError extends Error {
   constructor(readonly failure: MigrationFailure) {
-    super(`a migration ${failure.file} falhou ao ser aplicada: ${failure.message}`);
+    super(`a migration ${failure.file} failed to be applied: ${failure.message}`);
   }
 }
 
@@ -574,7 +574,7 @@ export function readAppliedMigrations(db: ProbeDb, probeInstalled: boolean): str
     .get(PROBE_TRIGGER, LEDGER_TABLE);
   if (!trigger) {
     throw new Error(
-      `o gatilho ${PROBE_TRIGGER} sumiu de ${LEDGER_TABLE} durante o boot: não há como saber ` +
+      `the trigger ${PROBE_TRIGGER} disappeared from ${LEDGER_TABLE} during boot: there is no way of knowing ` +
         "quais migrations o boot aplicou"
     );
   }
@@ -589,20 +589,20 @@ export function removeLedgerInsertProbe(db: ProbeDb): void {
 async function main(): Promise<void> {
   const outputFile = process.argv[2];
   if (!outputFile) {
-    throw new Error("uso: migrationSchemaBoot.ts <arquivo-de-saída.json>");
+    throw new Error("usage: migrationSchemaBoot.ts <output-file.json>");
   }
   const migrationsDir = process.env.OMNIROUTE_MIGRATIONS_DIR;
   if (!process.env.DATA_DIR || !migrationsDir) {
-    throw new Error("DATA_DIR e OMNIROUTE_MIGRATIONS_DIR são obrigatórios no processo de boot");
+    throw new Error("DATA_DIR and OMNIROUTE_MIGRATIONS_DIR are mandatory in the boot process");
   }
   const core = await import("../../../src/lib/db/core.ts");
   const { tryOpenSync } = await import("../../../src/lib/db/adapters/driverFactory.ts");
   const sqliteFile = core.SQLITE_FILE;
-  if (!sqliteFile) throw new Error("SQLITE_FILE indisponível: o boot exige o modo local");
+  if (!sqliteFile) throw new Error("SQLITE_FILE unavailable: boot requires local mode");
   const openSide = (): ProbeDb & { close: () => void } => {
     const side = tryOpenSync(sqliteFile);
     if (!side) {
-      throw new Error(`nenhum driver SQLite síncrono abre ${sqliteFile} para a sonda do ledger`);
+      throw new Error(`no synchronous SQLite driver opens ${sqliteFile} for ledger probe`);
     }
     return side as unknown as ProbeDb & { close: () => void };
   };
@@ -664,7 +664,7 @@ if (invokedDirectly) {
         process.exit(MIGRATION_FAILED_EXIT_CODE);
       }
       const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
-      process.stderr.write(`[migration-schema-boot] boot falhou: ${message}\n`);
+      process.stderr.write(`[migration-schema-boot] boot failed: ${message}\n`);
       process.exit(1);
     }
   );

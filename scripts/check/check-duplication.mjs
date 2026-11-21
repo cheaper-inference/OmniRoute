@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // scripts/check/check-duplication.mjs
-// Catraca de duplicação de código. Roda jscpd@4 (PINADO — o v5 é um rewrite Rust com
-// CLI/JSON incompatíveis) sobre src+open-sse e compara a % atual contra um baseline
-// congelado (duplication-baseline.json). Falha se a duplicação SUBIR. Ataca a assinatura
-// nº1 de slop de IA (GitClear 2026: duplicação 4-8x na era IA) — no nosso caso, o
-// copy-paste dos executors (48/50 sobrescrevem execute() inteiro). --update ratcheta.
+// Code duplication ratchet. Runs jscpd@4 (PINRED — v5 is a Rust rewrite with
+// Incompatible CLI/JSON) on src+open-sse and compares the current % against a frozen
+// frozen (duplication-baseline.json). Fails if duplication INCREASES. Targets the
+// #1 AI slop (GitClear 2026: 4-8x duplication in the IA era) — in our case, the
+// copy-paste of executors (48/50 overwrite the entire execute()). --update ratchet.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -18,7 +18,7 @@ const BASELINE_PATH = path.resolve(
     : path.join(ROOT, "config/quality/duplication-baseline.json")
 );
 const UPDATE = process.argv.includes("--update");
-const EPS = 0.05; // tolerância de ruído de float (jscpd é determinístico; isto é margem)
+const EPS = 0.05; // float noise tolerance (jscpd is deterministic; this is margin)
 // Use local binary (pinned in package.json devDependencies — no registry download at CI time)
 const JSCPD_BIN = path.join(ROOT, "node_modules", ".bin", "jscpd");
 const JSCPD_FIXED_ARGS = [
@@ -33,7 +33,7 @@ const JSCPD_FIXED_ARGS = [
   "**/*.test.ts,**/*.test.tsx,**/__tests__/**",
 ];
 
-/** Avalia a % atual contra o baseline. */
+/** Evaluates the current % against the baseline. */
 export function evaluateDuplication(current, baseline, eps = EPS) {
   return {
     regressed: current > baseline + eps,
@@ -50,7 +50,7 @@ function measureDuplicationPct() {
 
 function main() {
   if (!fs.existsSync(BASELINE_PATH)) {
-    console.error(`[duplication] FAIL — ${path.basename(BASELINE_PATH)} ausente.`);
+    console.error(`[duplication] FAIL — ${path.basename(BASELINE_PATH)} missing.`);
     process.exit(2);
   }
   const baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8"));
@@ -60,11 +60,11 @@ function main() {
   if (UPDATE && improved) {
     baseline.percentage = current;
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(baseline, null, 2) + "\n");
-    console.log(`[duplication] baseline ratcheado: ${current}% (era ${baseline.percentage}%)`);
+    console.log(`[duplication] ratcheted baseline: ${current}% (was ${baseline.percentage}%)`);
   }
   if (regressed) {
     console.error(
-      `[duplication] REGRESSÃO — ${current}% > baseline ${baseline.percentage}% (+${EPS} tolerância)\n` +
+      `[duplication] REGRESSION — ${current}% > baseline ${baseline.percentage}% (+${EPS} tolerance)\n` +
         `  → extraia o trecho duplicado (helper compartilhado) ou ajuste duplication-baseline.json com justificativa.`
     );
     process.exit(1);

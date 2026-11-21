@@ -1,31 +1,31 @@
 #!/usr/bin/env node
 // scripts/check/check-test-discovery.mjs
-// Gate 6A.1 — test discovery: todo arquivo *.test.ts|tsx / *.spec.ts|tsx do repo deve
+// Gate 6A.1 — test discovery: every *.test.ts|tsx / *.spec.ts|tsx file in the repo must
 // ser COLETADO por pelo menos um runner que efetivamente RODA via npm script ou CI.
 //
-// WHY: a auditoria 2026-06-09 encontrou ≈135 testes em subdiretórios de tests/unit/
-// que nenhum runner coleta (o glob `tests/unit/*.test.ts` é top-level-only), incluindo
-// tests/unit/authz/routeGuard.test.ts (Hard Rules #15/#17) — cujos asserts JÁ FALHAM,
-// apodrecidos sem ninguém ver. Teste que não roda é o falso verde definitivo: todo o
+// WHY: audit 2026-06-09 found ≈135 tests in subdirectories of tests/unit/
+// that no runner collects (the `tests/unit/*.test.ts` glob is top-level-only), including
+// tests/unit/authz/routeGuard.test.ts (Hard Rules #15/#17) — whose asserts ALREADY FAIL,
+// rotting without anyone seeing. Test that doesn't run is the definitive false green: all
 // investimento anti test-masking protege asserts que nem executam.
 //
 // Modelo: COLLECTORS declara explicitamente o glob de cada runner REAL + as fontes
-// (package.json / ci.yml / vitest configs) onde o padrão deve aparecer textualmente
-// (drift-check: mudou o glob na fonte sem atualizar aqui → o gate falha pedindo sync).
+// (package.json / ci.yml / vitest configs) where the pattern should appear verbatim
+// (drift-check: changed the glob in the source without updating here → the gate fails asking for sync).
 // "Coletado" = casado pelo glob de um runner executado por script npm ou job de CI.
-// Includes de config que NENHUM script executa (ex.: vitest.config.ts sem filtro) NÃO
-// contam — config morta não roda teste.
+// Config includes that NO script executes (e.g. vitest.config.ts without filter) NO
+// count — dead config does not run test.
 //
-// Catraca: órfãos pré-existentes ficam congelados em test-discovery-baseline.json
-// (dívida visível, decrescente). Órfão NOVO → fail. Entrada do baseline que deixou de
-// ser órfã (religada/deletada) → fail pedindo remoção (stale-allowlist enforcement).
-// --update regrava o baseline com o estado atual (use só para REMOVER religados;
-// adições novas devem ser corrigidas, não congeladas — esse é o ponto do gate).
+// Ratchet: pre-existing orphans are frozen in test-discovery-baseline.json
+// (visible, decreasing debt). Orphan NEW → fail. Baseline entry that is no longer
+// be orphaned (relinked/deleted) → fail requesting removal (stale-allowlist enforcement).
+// --update rewrites the baseline with the current state (use only to REMOVE relinks;
+// new additions should be fixed, not frozen — that's the point of the gate).
 //
-// Limitações documentadas:
-//  - Vitest exclude deve ser literal; expressões dinâmicas falham fechadas.
-//  - Quarentena tem coletor separado e nunca conta como execução ativa/saudável.
-//  - @omniroute/* ficam fora do walk (têm CI próprio: opencode-*-ci.yml).
+// Documented limitations:
+// - Vitest exclude must be literal; dynamic expressions fail closed.
+// - Quarantine has a separate collector and never counts as active/healthy execution.
+// - @omniroute/* are outside the walk (they have their own CI: opencode-*-ci.yml).
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -39,47 +39,47 @@ const BASELINE_PATH = path.resolve(
 );
 const UPDATE = process.argv.includes("--update");
 
-// Raízes varridas em busca de arquivos de teste.
+// Roots scanned for test files.
 const WALK_ROOTS = ["tests", "src", "open-sse", "electron", "bin"];
 const WALK_EXCLUDE = new Set(["node_modules", ".next", "dist", "coverage", ".git"]);
 const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx|mjs)$/;
 
-// Runners REAIS e seus globs. `sources`: arquivos onde `anchor` (default: o próprio
-// glob) deve aparecer textualmente — se o runner mudar, este gate exige o sync.
+// REAL runners and their globs. `sources`: files where `anchor` (default: itself
+// glob) must appear textually — if the runner changes, this gate requires sync.
 export const COLLECTORS = [
   // Node native runner — test:unit / test:unit:fast / shards / test:coverage. O CI
-  // (test-unit ×8) agora chama o npm script test:unit:ci:shard
-  // (fonte única, plano mestre testes+CI QW-d) — o wiring é ancorado pelo NOME do script
-  // nos workflows (entrada dedicada abaixo), e os globs vivem SÓ no package.json.
+  // (test-unit ×8) now calls the npm script test:unit:ci:shard
+  // (single source, master plan CI QW-d tests) — wiring is anchored by script NAME
+  // in workflows (dedicated entry below), and globs live ONLY in package.json.
   { glob: "tests/unit/*.test.ts", sources: ["package.json"] },
   // Node native runner — subdiretórios religados pela 6A.1c (2026-06-09). Braces
-  // explícitos para NÃO incluir tests/unit/autoCombo/** (testes vitest — importam
-  // "vitest" e explodem no node runner) NEM tests/unit/dashboard/** (invocação própria
-  // abaixo). Subdir novo: adicione aqui E nos scripts (o drift-check + o gate de
-  // órfãos forçam a manutenção em sincronia).
+  // explicit to NOT include tests/unit/autoCombo/** (vitest tests — matter
+  // "vitest" and explode in the node runner) NOR tests/unit/dashboard/** (own invocation
+  // below). New subdir: add here AND in the scripts (the drift-check + the
+  // orphans force keeping in sync).
   {
     glob: "tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts",
     sources: ["package.json"],
   },
-  // Node native runner — tests/unit/dashboard/** roda numa invocação separada com o hook
-  // COMPLETO do tsx (--import tsx): o grafo dos componentes de dashboard puxa
-  // @lobehub/icons, cujo build es/ faz require() interno de arquivos com sintaxe ESM —
+  // Node native runner — tests/unit/dashboard/** runs in a separate invocation with the hook
+  // tsx COMPLETE (--import tsx): the dashboard components graph pulls
+  // @lobehub/icons, whose build es/ does internal require() for files with ESM syntax —
   // sem o patch CJS do tsx isso estoura "Unexpected token 'export'" (visto no Node
-  // 24.18 do CI; no 24.16 local vira um crawl de ~60s/arquivo). O resto da suíte roda
-  // sob tsx/esm (~-50% de bootstrap por processo). Plano mestre testes+CI, QW-b.
+  // 24.18 of the IC; on local 24.16 it becomes a crawl of ~60s/file). The rest of the suite rotates
+  // under tsx/esm (~-50% bootstrap per process). Master plan tests+CI, QW-b.
   { glob: "tests/unit/dashboard/**/*.test.ts", sources: ["package.json"] },
-  // Quarentena de flakes de concorrência (plano melhorias v3.8.46, P0.3): arquivos
-  // sensíveis a contenção de CPU/timing (classe glm-3580 / quota-division /
+  // Concurrency flake quarantine (improvements plan v3.8.46, P0.3): files
+  // sensitive to CPU/timing contention (class glm-3580 / quota-division /
   // provider-health-autopilot) rodam num passo dedicado --test-concurrency=1 ao FIM
-  // de cada runner. Fora dos globs paralelos acima por diretório próprio.
+  // of each runner. Out of the above parallel globs by own directory.
   { glob: "tests/unit/serial/**/*.test.ts", sources: ["package.json"] },
-  // Órfãos religados (plano mestre QW-c): arquivos .test.mjs (top-level + db/ + feature-triage/) — fora do glob
-  // *.test.ts histórico, nunca rodava em job nenhum (53 casos recuperados).
+  // Rewired orphans (QW-c master plan): .test.mjs files (top-level + db/ + feature-triage/) — outside glob
+  // *.test.ts history, never ran in any job (53 cases recovered).
   { glob: "tests/unit/**/*.test.mjs", sources: ["package.json"] },
-  // Wiring CI→npm script (fonte única): os jobs de unit do ci.yml DEVEM invocar o script
-  // canônico (o fast-unit do quality.yml saiu em 2026-10-26: duplicava o test-unit do
+  // Wiring CI→npm script (single source): ci.yml unit jobs MUST invoke the script
+  // canonical (the quality.yml fast-unit came out on 2026-10-26: it duplicated the
   // ci.yml em todo PR) — se renomearem/inlinarem, este gate
-  // exige o sync (substitui as âncoras textuais de glob que existiam nos workflows).
+  test-unit // requires sync (replaces the glob textual anchors that existed in the workflows).
   {
     glob: "tests/unit/*.test.ts",
     sources: ["package.json", ".github/workflows/ci.yml"],
@@ -150,7 +150,7 @@ export const COLLECTORS = [
     sources: ["vitest.config.ts"],
     anchors: { "vitest.config.ts": "src/lib/skills/__tests__/**/*.test.ts" },
   },
-  // Playwright — test:e2e: o script chama o runner sem glob (assim `npm run test:e2e -- <spec>`
+  // Playwright — test:e2e: the script calls the runner without a glob (like this `npm run test:e2e -- <spec>`
   // filtra de verdade) e a coleta vem do playwright.config.ts (testDir ./tests/e2e +
   // testMatch **/*.spec.ts).
   {
@@ -161,13 +161,13 @@ export const COLLECTORS = [
       "playwright.config.ts": 'testDir: "./tests/e2e"',
     },
   },
-  // Runners custom — test:ecosystem / test:protocols:e2e (spawnam vitest com o arquivo)
+  // Runners custom — test:ecosystem / test:protocols:e2e (spawn vitest with the file)
   { glob: "tests/e2e/ecosystem.test.ts", sources: ["scripts/dev/run-ecosystem-tests.mjs"] },
   {
     glob: "tests/e2e/protocol-clients.test.ts",
     sources: ["scripts/dev/run-protocol-clients-tests.mjs"],
   },
-  // Playwright — suíte de homologação real (npm run homolog, L4 UI): run.mjs invoca
+  // Playwright — real homologation suite (npm run homolog, L4 UI): run.mjs invokes
   // `playwright test -c tests/homolog/ui/playwright.config.ts` (testMatch **/*.spec.ts).
   {
     glob: "tests/homolog/ui/*.spec.ts",
@@ -186,14 +186,14 @@ export function globToRegExp(glob) {
     if (c === "*") {
       if (glob[i + 1] === "*") {
         if (glob[i + 2] === "/") {
-          re += "(?:.*/)?"; // "**/" — zero ou mais diretórios
+          re = "(?:.*/)?"; // "**/" — zero or more directories
           i += 2;
         } else {
           re += ".*"; // "**" solto
           i += 1;
         }
       } else {
-        re += "[^/]*"; // "*" não atravessa "/"
+        re += "[^/]*"; // "*" does not cross "/"
       }
     } else if (c === "{") {
       const end = glob.indexOf("}", i);
@@ -210,7 +210,7 @@ export function globToRegExp(glob) {
   return new RegExp("^" + re + "$");
 }
 
-/** Arquivos de teste não casados por NENHUM glob de collector (ordem preservada). */
+/** Test files not matched by NO collector globs (order preserved). */
 export function findOrphans(files, globs) {
   const collectors = globs.map((entry) => {
     const collector = typeof entry === "string" ? { glob: entry } : entry;
@@ -229,9 +229,9 @@ export function findOrphans(files, globs) {
 }
 
 /**
- * Compara os órfãos atuais com o baseline congelado.
- *  - newOrphans: órfão atual fora do baseline → teste novo que NÃO RODA (fail).
- *  - stale: entrada do baseline que não é mais órfã (religada/deletada) → remova (fail).
+ * Compares current orphans to the frozen baseline.
+ * - newOrphans: current orphan outside the baseline → new test that DOESN'T RUN (fail).
+ * - stale: baseline entry that is no longer orphaned (relinked/deleted) → remove (fail).
  */
 export function evaluateAgainstBaseline(orphans, baselineList) {
   const baseSet = new Set(baselineList);
@@ -243,8 +243,8 @@ export function evaluateAgainstBaseline(orphans, baselineList) {
 }
 
 /**
- * Drift-check: cada glob declarado (ou seu anchor por fonte) deve aparecer textualmente
- * em TODAS as suas fontes. Retorna mensagens de drift.
+ * Drift-check: each declared glob (or its anchor per source) must appear textually
+ * in ALL your sources. Returns drift messages.
  */
 export function findCollectorDrift(collectors, contents) {
   const drift = [];
@@ -254,7 +254,7 @@ export function findCollectorDrift(collectors, contents) {
       const body = contents[source];
       if (body === undefined || !body.includes(anchor)) {
         drift.push(
-          `glob "${c.glob}" (anchor "${anchor}") não encontrado em ${source} — o runner mudou? Sincronize COLLECTORS em check-test-discovery.mjs`
+          `glob "${c.glob}" (anchor "${anchor}") not found in ${source} — has the runner changed? Sync COLLECTORS in check-test-discovery.mjs`
         );
       }
     }
@@ -296,7 +296,7 @@ function main() {
   }
   const drift = findCollectorDrift(COLLECTORS, contents);
 
-  // 2) órfãos vs baseline
+  // 2) orphans vs baseline
   const files = collectTestFiles();
   const modeled = COLLECTORS.map((collector) => {
     const config = collector.sources.find((source) => /^vitest.*\.config\.ts$/.test(source));
@@ -324,8 +324,8 @@ function main() {
   const orphans = inactive.filter((file) => quarantineErrors.length || !quarantined.has(file));
   if (!fs.existsSync(BASELINE_PATH) && !UPDATE) {
     console.error(
-      `[test-discovery] FAIL — ${path.basename(BASELINE_PATH)} ausente. Bootstrap:\n` +
-        `  node scripts/check/check-test-discovery.mjs --update  (gera o baseline com os órfãos atuais)`
+      `[test-discovery] FAIL — ${path.basename(BASELINE_PATH)} missing. Bootstrap:\n` +
+        ` node scripts/check/check-test-discovery.mjs --update (generates baseline with current orphans)`
     );
     process.exit(2);
   }
@@ -333,7 +333,7 @@ function main() {
     ? JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8"))
     : {
         _comment:
-          "Catraca de test-discovery (check-test-discovery.mjs). Cada entrada e um arquivo de teste que NENHUM runner coleta (ele nunca roda) — divida congelada na auditoria 6A.1 (2026-06-09). So pode DIMINUIR: religue o teste (ajustando o glob do runner ou movendo o arquivo) e remova a entrada via --update. NAO adicione novos orfaos — corrija o runner.",
+          "Test-discovery ratchet (check-test-discovery.mjs). Each entry is a test file that NO runner collects (it never runs) — split frozen in audit 6A.1 (2026-06-09). You can only DECREASE: reconnect the test (by adjusting the runner glob or moving the file) and remove the entry via --update. DO NOT add new orphans — fix the runner.",
         orphans: [],
       };
   const { newOrphans, stale } = evaluateAgainstBaseline(orphans, baseline.orphans || []);
@@ -348,7 +348,7 @@ function main() {
     baseline.orphans = orphans;
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(baseline, null, 2) + "\n");
     console.log(
-      `[test-discovery] baseline regravado: ${orphans.length} órfão(s) (${stale.length} removido(s), ${newOrphans.length} adicionado(s) — adições devem ser corrigidas, não congeladas)`
+      `[test-discovery] baseline rewritten: ${orphans.length} orphan(s) (${stale.length} removed, ${newOrphans.length} added — additions should be fixed, not frozen)`
     );
     return;
   }
@@ -357,21 +357,21 @@ function main() {
   for (const d of drift) problems.push(`  ✗ [drift] ${d}`);
   for (const o of newOrphans) {
     problems.push(
-      `  ✗ [órfão NOVO] ${o} — nenhum runner coleta este arquivo (ele NUNCA roda). Mova-o para um path coletado ou ajuste o runner.`
+      ` ✗ [NEW orphan] ${o} — no runner picks up this file (it NEVER runs). Move it to a collected path or adjust the runner.`
     );
   }
   for (const s of stale) {
     problems.push(
-      `  ✗ [stale] ${s} — não é mais órfão (religado/removido). Remova do baseline: node scripts/check/check-test-discovery.mjs --update`
+      ` ✗ [stale] ${s} — no longer orphaned (relinked/removed). Remove from baseline: node scripts/check/check-test-discovery.mjs --update`
     );
   }
 
   if (problems.length) {
-    console.error(`[test-discovery] ${problems.length} problema(s):\n` + problems.join("\n"));
+    console.error(`[test-discovery] ${problems.length} problem(s):\n` + problems.join("\n"));
     process.exit(1);
   }
   console.log(
-    `[test-discovery] OK — ${files.length} arquivos de teste, ${COLLECTORS.length} collectors, ${quarantined.size} arquivo(s) inventariado(s) em quarentena (não é PASS ativo), ${(baseline.orphans || []).length} órfão(s) congelado(s) (dívida rastreada, só decresce)`
+    `[test-discovery] OK — ${files.length} test files, ${COLLECTORS.length} collectors, ${quarantined.size} quarantined inventoried file(s) (not active PASS), ${(baseline.orphans || []).length} frozen orphan(s) (debt tracked, only decreasing)`
   );
 }
 

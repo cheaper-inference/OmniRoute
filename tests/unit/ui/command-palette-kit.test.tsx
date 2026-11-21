@@ -218,7 +218,7 @@ describe("CommandPalette on the kit Dialog", () => {
     expect(row.querySelector(".ci-command__icon svg")).not.toBeNull();
   });
 
-  // F4 (F1 checkpoint pendência): the palette has no DialogTrigger and its search field takes
+  // F4 (F1 checkpoint pending): the palette has no DialogTrigger and its search field takes
   // focus itself, so Radix had nothing to return focus to and Escape left it on <body>.
   it(
     "returns focus to the opener when Escape closes the palette",

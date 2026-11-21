@@ -72,7 +72,7 @@ test("resilience lockouts busca /api/resilience/model-cooldowns", async () => {
   assert.ok(capturedUrl.includes("/api/resilience/model-cooldowns"));
 });
 
-test("resilience reset envia provider e body correto", async () => {
+test("resilience reset sends correct provider and body", async () => {
   let capturedBody: any = null;
   let capturedMethod = "";
   const origFetch = globalThis.fetch;
@@ -117,7 +117,7 @@ test("resilience profile set usa JSON-RPC tools/call", async () => {
   assert.equal(capturedCall.params.arguments.profile, "balanced");
 });
 
-test("resilience.mjs pode ser importado sem erro", async () => {
+test("resilience.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/resilience.mjs");
   assert.equal(typeof mod.registerResilience, "function");
 });

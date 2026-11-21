@@ -1,30 +1,30 @@
 #!/usr/bin/env node
 // scripts/check/check-vuln-ratchet.mjs
-// Catraca de vulnerabilidades de dependências via osv-scanner (Task 7.2 — Fase 7).
+// Ratchet dependency vulnerabilities via osv-scanner (Task 7.2 — Phase 7).
 //
-// Saída (stdout):
+// Output (stdout):
 //   vulnCount=N         — total de vulnerabilidades encontradas (todos os severities)
-//   vulnCount=SKIP reason=<r>        — medição indisponível em modo advisory (exit 0)
-//   vulnCount=INCOMPLETE reason=<r>  — medição indisponível com --ratchet (exit 2);
+// vulnCount=SKIP reason=<r> — measurement unavailable in advisory mode (exit 0)
+// vulnCount=INCOMPLETE reason=<r> — measurement unavailable with --ratchet (exit 2);
 //                                      <r> = binary-absent | invalid-report | parse-error | …
 //
 // Advisory mode reports findings without blocking. With --ratchet, exit 1 means
 // a measured regression and exit 2 means INCOMPLETE (tool/report/baseline missing).
 // An unavailable measurement never establishes zero vulnerabilities.
 //
-// NB (variância de CVE): osv mede contra um banco de CVEs que cresce de forma
-// contínua. Um PR que NÃO toca dependências pode subitamente medir vulnCount >
-// baseline porque um novo CVE foi divulgado nas deps existentes — isso é o
-// comportamento ESPERADO de um gate de CVE bloqueante, não uma regressão de
-// produto. O remédio é (a) bumpar a dep afetada (preferível) ou, se não houver
+// NB (CVE variance): osv measures against a bank of CVEs that grows
+// continuous. A PR that does NOT touch dependencies can suddenly measure vulnCount >
+// baseline because a new CVE was released in existing deps — this is what
+// EXPECTED behavior of a blocking CVE gate, not a regression of
+// product. The remedy is (a) to bump the affected area (preferable) or, if there is no
 // fix, (b) re-baseline metrics.vulnCount com justificativa + issue de tracking.
-// Ver docs/security/SUPPLY_CHAIN.md → "Variância de CVE".
+// See docs/security/SUPPLY_CHAIN.md → "CVE variance".
 //
 // Uso:
 //   node scripts/check/check-vuln-ratchet.mjs
 //   node scripts/check/check-vuln-ratchet.mjs --json    # imprime JSON bruto do osv-scanner
-//   node scripts/check/check-vuln-ratchet.mjs --quiet   # suprime logs de diagnóstico
-//   node scripts/check/check-vuln-ratchet.mjs --ratchet  # exit 1 numa regressão, exit 2 se INCOMPLETE
+//   node scripts/check/check-vuln-ratchet.mjs --quiet   # suppress diagnostic logs
+// node scripts/check/check-vuln-ratchet.mjs --ratchet # exit 1 in a regression, exit 2 if INCOMPLETE
 
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -44,7 +44,7 @@ const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
 /**
  * Conta vulnerabilidades no JSON emitido por `osv-scanner --format json`.
  *
- * Formato do osv-scanner v1+:
+ * Format of osv-scanner v1+:
  * {
  *   results: [
  *     {
@@ -61,12 +61,12 @@ const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
  *   ]
  * }
  *
- * Contagem: cada entrada em `vulnerabilities[]` de cada package conta como 1 vuln.
+ * Count: each entry in `vulnerabilities[]` of each package counts as 1 vuln.
  * Se `groups` estiver presente e tiver menos entradas que `vulnerabilities`, usamos
- * `groups.length` para deduplificar (mesma vuln em múltiplos pacotes conta 1x por
- * grupo). Caso contrário, contamos `vulnerabilities.length`.
+ * `groups.length` to deduplicate (same vuln in multiple packages counts 1x per
+ * group). Otherwise we count `vulnerabilities.length`.
  *
- * @param {object|null} osvJson - Objeto JSON parseado do osv-scanner
+ * @param {object|null} osvJson - JSON object parsed from osv-scanner
  * @returns {{ vulnCount: number, bySeverity: Record<string, number> }}
  */
 export function parseOsvJson(osvJson) {
@@ -103,10 +103,10 @@ export function parseOsvJson(osvJson) {
 }
 
 /**
- * Extrai a severidade de uma entrada de vulnerabilidade do osv-scanner.
+ * Extracts the severity of a vulnerability entry from osv-scanner.
  * Tenta database_specific.severity, depois severity[0].type, depois "UNKNOWN".
  *
- * @param {object} vuln - Entrada de vulnerabilidade do osv-scanner
+ * @param {object} vuln - osv-scanner vulnerability entry
  * @returns {string}
  */
 export function extractSeverity(vuln) {
@@ -134,11 +134,11 @@ export function extractSeverity(vuln) {
 // ---------------------------------------------------------------------------
 
 /**
- * Avalia a contagem MEDIDA de vulnerabilidades contra o baseline.
- * Direction: down (a contagem só pode CAIR — mais vulns = regressão).
+ * Evaluates the MEASURE count of vulnerabilities against the baseline.
+ * Direction: down (the count can only DOWN — more vulns = regression).
  *
- * @param {number} current  - Contagem de vulnerabilidades medida agora.
- * @param {number} baseline - Contagem congelada em quality-baseline.json.
+ * @param {number} current - Vulnerability count measured now.
+ * @param {number} baseline - Frozen count in quality-baseline.json.
  * @returns {{ regressed: boolean, improved: boolean }}
  */
 export function evaluateVulnRatchet(current, baseline) {
@@ -149,9 +149,9 @@ export function evaluateVulnRatchet(current, baseline) {
 }
 
 /**
- * Lê metrics.vulnCount.value do quality-baseline.json.
- * Retorna null se o arquivo ou a métrica estiverem ausentes (sem baseline não há
- * ratchet possível — o caller trata como INCOMPLETE no modo obrigatório).
+ * Reads metrics.vulnCount.value from quality-baseline.json.
+ * Returns null if the file or metric is missing (without baseline there is no
+ * possible ratchet — the caller treats it as INCOMPLETE in mandatory mode).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -174,10 +174,10 @@ export function readBaselineVulnValue(baselinePath = BASELINE_PATH) {
 // ---------------------------------------------------------------------------
 
 /**
- * Detecta se o binário `osv-scanner` está disponível no PATH.
- * Usa `which` (Unix) sem interpolação de shell — Hard Rule #13.
+ * Detects whether the `osv-scanner` binary is available in the PATH.
+ * Uses `which` (Unix) without shell interpolation — Hard Rule
  *
- * @returns {string|null} Caminho absoluto para o binário, ou null se ausente.
+ * @returns {string|null} Absolute path to the binary, or null if absent.
  */
 export function findOsvScanner() {
   try {
@@ -189,10 +189,10 @@ export function findOsvScanner() {
       return result.stdout.trim();
     }
   } catch {
-    // which não disponível — tentar command -v via sh
+    // which not available — try command -v via sh
   }
 
-  // Fallback: tentar executar diretamente para verificar ENOENT
+  // Fallback: try to execute directly to check ENOENT
   try {
     const result = spawnSync("osv-scanner", ["--version"], {
       encoding: "utf8",
@@ -212,14 +212,14 @@ export function findOsvScanner() {
 // ---------------------------------------------------------------------------
 
 /**
- * Executa o osv-scanner sobre o lockfile/diretório.
+ * Runs osv-scanner on the lockfile/directory.
  * Usa execFileSync sem shell interpolation (Hard Rule #13).
  *
- * Falhas de execução ou formato retornam { skip: true, reason }; o modo obrigatório
- * as reporta como INCOMPLETE. Exit 1 do scanner é um resultado com findings;
- * 127/128 e sinais não são medições. Ver https://google.github.io/osv-scanner/output/.
+ * Execution or format failures return { skip: true, reason }; the mandatory mode
+ * reports them as INCOMPLETE. Exit 1 of the scanner is a result with findings;
+ *127/128 and signals are not measurements. See https://google.github.io/osv-scanner/output/.
  *
- * @param {string} osvBin - Caminho para o binário osv-scanner
+ * @param {string} osvBin - Path to the osv-scanner binary
  * @returns {{ json: object } | { skip: true, reason: string }}
  */
 function runOsvScanner(osvBin) {
@@ -238,11 +238,11 @@ function runOsvScanner(osvBin) {
       timeout: 120_000, // 2 min
     });
   } catch (err) {
-    // osv-scanner sai com código != 0 quando encontra vulnerabilidades;
-    // o JSON ainda vai no stdout.
+    // osv-scanner exits with code != 0 when it finds vulnerabilities;
+    // the JSON still goes on stdout.
     stdout = err.stdout ? String(err.stdout) : "";
     if (err.status !== 1 || err.signal || err.killed || !stdout.trim()) {
-      process.stderr.write(`[vuln-ratchet] ERRO ao executar osv-scanner: ${err.message}\n`);
+      process.stderr.write(`[vuln-ratchet] ERROR when running osv-scanner: ${err.message}\n`);
       return { skip: true, reason: "osv-error" };
     }
   }
@@ -308,7 +308,7 @@ function main() {
 
   const { vulnCount, bySeverity } = parseOsvJson(osvJson);
 
-  // Emitir em formato KEY=VALUE para o coletor de métricas (collect-metrics.mjs)
+  // Send in KEY=VALUE format to the metrics collector (collect-metrics.mjs)
   console.log(`vulnCount=${vulnCount}`);
 
   if (!QUIET) {
@@ -321,22 +321,22 @@ function main() {
     );
   }
 
-  // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
+  // Measurement successful → applies ratchet (blocking only with --ratchet).
   applyRatchet(vulnCount);
 }
 
 /**
- * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
- * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → INCOMPLETE (exit 2).
+ * Applies the ratchet (direction:down) on the measured count vs the baseline.
+ * Without --ratchet: advisory (exit 0). With --ratchet: exit 1 in a real regression
+ * (measurement > baseline). Missing baseline → INCOMPLETE (exit 2).
  *
- * @param {number} vulnCount - Contagem MEDIDA (medição bem-sucedida).
+ * @param {number} vulnCount - MEASURED count (successful measurement).
  */
 function applyRatchet(vulnCount) {
   if (!RATCHET) {
     if (!QUIET) {
       process.stderr.write(
-        "[vuln-ratchet] ADVISORY — não falha pela contagem (passe --ratchet para bloquear regressão).\n"
+        "[vuln-ratchet] ADVISORY — does not fail by count (pass --ratchet to block regression).\n"
       );
     }
     process.exitCode = 0;
@@ -352,10 +352,10 @@ function applyRatchet(vulnCount) {
   const { regressed } = evaluateVulnRatchet(vulnCount, baselineValue);
   if (regressed) {
     process.stderr.write(
-      `[vuln-ratchet] REGRESSÃO — ${vulnCount} vulnerabilidades > baseline ${baselineValue}\n` +
-        "  → Bumpe a(s) dep(s) afetada(s) (preferível). Se não houver fix, re-baseline\n" +
+      `[vuln-ratchet] REGRESSION — ${vulnCount} vulnerabilities > baseline ${baselineValue}\n` +
+        " → Bump the affected dep(s) (preferable). If there is no fix, re-baseline\n" +
         "    metrics.vulnCount em config/quality/quality-baseline.json com justificativa\n" +
-        "    + issue de tracking. Ver docs/security/SUPPLY_CHAIN.md → 'Variância de CVE'.\n"
+        "    + tracking issue. See docs/security/SUPPLY_CHAIN.md → 'CVE variance'.\n"
     );
     process.exitCode = 1;
     return;
@@ -363,7 +363,7 @@ function applyRatchet(vulnCount) {
 
   if (!QUIET) {
     process.stderr.write(
-      `[vuln-ratchet] OK — sem regressão (${vulnCount} vulns, baseline ${baselineValue}).\n`
+      `[vuln-ratchet] OK — no regression (${vulnCount} vulns, baseline ${baselineValue}).\n`
     );
   }
   process.exitCode = 0;

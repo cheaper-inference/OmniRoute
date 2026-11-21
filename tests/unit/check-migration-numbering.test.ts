@@ -254,28 +254,28 @@ test("date-and-time migration names are accepted and counted separately", () => 
 
 const INVALID_EXAMPLES: Array<[string, RegExp]> = [
   ["240_x.sql", /depois do corte/],
-  ["0239_x.sql", /4 dígito/],
-  ["1000_x.sql", /4 dígito/],
+  ["0239_x.sql", /4 digit/],
+  ["1000_x.sql", /4 digit/],
   ["000_x.sql", /000/],
-  ["2026111312000_x.sql", /13 dígito/],
-  ["202611131200000_x.sql", /15 dígito/],
-  ["20261332120000_x.sql", /não é uma data/],
-  ["20261131120000_x.sql", /não é uma data/],
-  ["20270229120000_x.sql", /não é uma data/],
-  ["20261113246000_x.sql", /não é uma data/],
-  ["20261113240000_x.sql", /não é uma data/],
-  ["20261113126000_x.sql", /não é uma data/],
-  ["20261113120060_x.sql", /não é uma data/],
-  ["20261100120000_x.sql", /não é uma data/],
-  ["20261113120000_Add-Col.sql", /fora do padrão/],
-  ["20261113120000_add__col.sql", /fora do padrão/],
-  ["20261113120000_add_col_.sql", /fora do padrão/],
-  ["20261113120000_2fa.sql", /fora do padrão/],
-  ["20261113120000_.sql", /fora do padrão/],
+  ["2026111312000_x.sql", /13 digit/],
+  ["202611131200000_x.sql", /15 digit/],
+  ["20261332120000_x.sql", /not a date/],
+  ["20261131120000_x.sql", /not a date/],
+  ["20270229120000_x.sql", /not a date/],
+  ["20261113246000_x.sql", /not a date/],
+  ["20261113240000_x.sql", /not a date/],
+  ["20261113126000_x.sql", /not a date/],
+  ["20261113120060_x.sql", /not a date/],
+  ["20261100120000_x.sql", /not a date/],
+  ["20261113120000_Add-Col.sql", /nonstandard/],
+  ["20261113120000_add__col.sql", /nonstandard/],
+  ["20261113120000_add_col_.sql", /nonstandard/],
+  ["20261113120000_2fa.sql", /nonstandard/],
+  ["20261113120000_.sql", /nonstandard/],
   ["20261113120000-x.sql", /separador/],
   ["20261113120000x.sql", /separador/],
   ["20261121120000_future.sql", /no futuro/],
-  ["20261112235959_before_cut.sql", /anterior ao corte/],
+  ["20261112235959_before_cut.sql", /before cut/],
   ["add_index.sql", /sem prefixo/],
 ];
 
@@ -292,7 +292,7 @@ test("a too-long description is rejected", () => {
   const name = `20261113120000_${"a".repeat(81)}.sql`;
   const verdict = classifyMigrationFilename(name, { now: NOW });
   assert.equal(verdict.kind, "invalid");
-  assert.match((verdict as { reason: string }).reason, /81 caracteres/);
+  assert.match((verdict as { reason: string }).reason, /81 characters/);
   assert.equal(
     classifyMigrationFilename(`20261113120000_${"a".repeat(80)}.sql`, { now: NOW }).kind,
     "timestamp"
@@ -419,13 +419,13 @@ test("every real filename classifies as legacy or timestamp, never invalid", () 
 });
 
 test("normalizeMigrationDescription produces the snake_case the gate accepts", () => {
-  assert.equal(normalizeMigrationDescription("Add Usage índice!"), "add_usage_indice");
+  assert.equal(normalizeMigrationDescription("Add Usage index!"), "add_usage_indice");
   assert.equal(normalizeMigrationDescription("  --call-logs  pending  "), "call_logs_pending");
   assert.equal(normalizeMigrationDescription("x".repeat(200)).length, 80);
   assert.equal(normalizeMigrationDescription(`${"a".repeat(79)}-b`), "a".repeat(79));
-  assert.throws(() => normalizeMigrationDescription("  !!  "), /vazia/);
-  assert.throws(() => normalizeMigrationDescription(""), /vazia/);
-  assert.throws(() => normalizeMigrationDescription("2fa table"), /começar com letra/);
+  assert.throws(() => normalizeMigrationDescription(" !! "), /empty/);
+  assert.throws(() => normalizeMigrationDescription(""), /empty/);
+  assert.throws(() => normalizeMigrationDescription("2fa table"), /start with letter/);
 });
 
 test("the gate script exits 0 on the real tree and prints both counts", async () => {
@@ -485,16 +485,16 @@ test("gate main() end-to-end: accepts a new timestamp file, rejects bad names an
     assert.equal(r.status, 1);
     assert.match(
       r.stderr,
-      new RegExp(`${ABOVE_TOP}_too_late\\.sql — número antigo ${ABOVE_TOP} depois do corte`)
+      new RegExp(`${ABOVE_TOP}_too_late\\.sql — old number ${ABOVE_TOP} after cut`)
     );
-    assert.match(r.stderr, /npm run db:new-migration -- <descricao>/);
+    assert.match(r.stderr, /npm run db:new-migration -- <description>/);
     fs.rmSync(path.join(dir, `${ABOVE_TOP}_too_late.sql`));
 
     const top = realFilenames().find((f) => f.startsWith(`${LEGACY_TOP}_`))!;
     fs.rmSync(path.join(dir, top));
     r = gate();
     assert.equal(r.status, 1);
-    assert.match(r.stderr, new RegExp(`faixa antiga truncada: faltando ${LEGACY_TOP}`));
+    assert.match(r.stderr, new RegExp(`truncated old range: missing ${LEGACY_TOP}`));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -512,11 +512,11 @@ test("the real migrations dir holds only regular files with valid .sql names", (
 });
 
 const BAD_ENTRY_NAMES: Array<[string, RegExp]> = [
-  ["20261113000100_x.SQL", /maiúscula/],
-  ["20261113000100_x.sql ", /espaço/],
+  ["20261113000100_x.SQL", /uppercase/],
+  ["20261113000100_x.sql", /space/],
   ["20261113000100_x.sql.bak", /depois de \.sql/],
   [".hidden.sql", /oculto/],
-  ["README.md", /só aceita arquivos \.sql/],
+  ["README.md", /only accepts \.sql/ files],
 ];
 
 for (const [name, reason] of BAD_ENTRY_NAMES) {
@@ -550,7 +550,7 @@ test("gate main() rejects directories, symlinks and non-.sql entries in the migr
           fs.mkdirSync(path.join(dir, "20261113000100_dir.sql"));
           fs.writeFileSync(path.join(dir, "20261113000100_dir.sql", "inner.sql"), "-- x\n");
         },
-        /20261113000100_dir\.sql — é um diretório/,
+        /20261113000100_dir\.sql — is a directory/,
       ],
       [
         "20261113000100_link.sql",
@@ -559,17 +559,17 @@ test("gate main() rejects directories, symlinks and non-.sql entries in the migr
             path.join(dir, "001_initial_schema.sql"),
             path.join(dir, "20261113000100_link.sql")
           ),
-        /20261113000100_link\.sql — é um link simbólico/,
+        /20261113000100_link\.sql — is a symbolic link/,
       ],
       [
         "20261113000100_up.SQL",
         () => fs.writeFileSync(path.join(dir, "20261113000100_up.SQL"), "-- x\n"),
-        /20261113000100_up\.SQL — .*maiúscula/,
+        /20261113000100_up\.SQL — .*uppercase/,
       ],
       [
         "20261113000100_sp.sql ",
         () => fs.writeFileSync(path.join(dir, "20261113000100_sp.sql "), "-- x\n"),
-        /espaço/,
+        /space/,
       ],
       [
         "20261113000100_bak.sql.bak",
@@ -628,8 +628,8 @@ test("gate hints: truncated range says restore (never allowlist); future stamp s
       r.stderr,
       new RegExp(`git checkout <base> -- src/lib/db/migrations/${LEGACY_TOP}_\\*`)
     );
-    assert.match(r.stderr, /nunca libere na allowlist/);
-    assert.doesNotMatch(r.stderr, /adicione o número às allowlists/);
+    assert.match(r.stderr, /never release in the allowlist/);
+    assert.doesNotMatch(r.stderr, /add number to allowlists/);
     fs.writeFileSync(path.join(dir, top), "-- copy\n");
 
     const future = `${formatMigrationTimestamp(new Date(Date.now() + 60 * 60 * 1000))}_later.sql`;
@@ -637,8 +637,8 @@ test("gate hints: truncated range says restore (never allowlist); future stamp s
     r = gate();
     assert.equal(r.status, 1);
     assert.match(r.stderr, /no futuro/);
-    assert.match(r.stderr, /confira o relógio \(NTP\/timedatectl\)/);
-    assert.doesNotMatch(r.stderr, /renomeie o arquivo colidente/);
+    assert.match(r.stderr, /check the clock \(NTP\/timedatectl\)/);
+    assert.doesNotMatch(r.stderr, /rename the colliding file/);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

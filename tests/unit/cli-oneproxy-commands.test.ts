@@ -109,7 +109,7 @@ test("oneproxy pool chama /api/settings/oneproxy?include=pool", async () => {
   assert.ok(capturedUrl.includes("include=pool"));
 });
 
-test("oneproxy.mjs pode ser importado sem erro", async () => {
+test("oneproxy.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/oneproxy.mjs");
   assert.equal(typeof mod.registerOneProxy, "function");
 });

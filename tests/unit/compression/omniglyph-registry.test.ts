@@ -4,7 +4,7 @@ import { registerBuiltinCompressionEngines } from "../../../open-sse/services/co
 import { getCompressionEngine } from "../../../open-sse/services/compression/engines/registry.ts";
 import { ENGINE_CATALOG } from "../../../open-sse/services/compression/engineCatalog.ts";
 
-test("omniglyph registrada nos builtins e no catálogo (single mode, por último)", () => {
+test("omniglyph registered in the builtins and in the catalog (single mode, last)", () => {
   registerBuiltinCompressionEngines();
   const engine = getCompressionEngine("omniglyph");
   assert.ok(engine, "engine registrada");

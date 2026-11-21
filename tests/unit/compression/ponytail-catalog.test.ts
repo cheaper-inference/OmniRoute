@@ -3,7 +3,7 @@
  *
  * Verifies:
  *   - Ponytail is registered with lite/full/ultra levels
- *   - i18n maps exist for pt-BR, vi, ja, id
+ * - i18n maps exist for pt-BR, vi, ja, id
  *   - Each level contains the SHARED_BOUNDARIES suffix
  *   - Each level contains the core YAGNI/rung-check concept
  */

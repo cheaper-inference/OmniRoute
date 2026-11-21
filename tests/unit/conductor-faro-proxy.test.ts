@@ -35,13 +35,13 @@ test("repassa a mensagem ao /ask com o token server-side e devolve text+pending"
   assert.deepEqual(calls[0].body, { message: "como está a frota?" });
 });
 
-test("pending null passa como null (sem confirmação pendente)", async () => {
+test("pending null passes as null (no pending confirmation)", async () => {
   const { impl } = fakeFaro({ text: "oi", pending: null });
   const r = await askFaro("oi", { fetchImpl: impl });
   assert.deepEqual(r, { ok: true, text: "oi", pending: null });
 });
 
-test("Faro fora do ar / erro HTTP → degradado {ok:false} sem lançar nem vazar corpo", async () => {
+test("Faro down / HTTP error → degraded {ok:false} without throwing or leaking body", async () => {
   const failing = (async () => {
     throw new Error("ECONNREFUSED");
   }) as unknown as typeof fetch;
@@ -53,7 +53,7 @@ test("Faro fora do ar / erro HTTP → degradado {ok:false} sem lançar nem vazar
   assert.ok(!JSON.stringify(denied).includes("segredo interno"));
 });
 
-test("URL default do Faro é loopback :7920 quando a env não está setada", async () => {
+test("Faro's default URL is loopback :7920 when the env is not set", async () => {
   delete process.env.CONDUCTOR_SPOKESPERSON_URL;
   const { impl, calls } = fakeFaro({ text: "x", pending: null });
   await askFaro("oi", { fetchImpl: impl });

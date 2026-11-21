@@ -1,20 +1,20 @@
 #!/usr/bin/env sh
 # Guard de identidade de commit — previne misattribution de autoria.
 #
-# Contexto (ver .mailmap na raiz): este checkout já produziu DUAS janelas de
+# Context (see .mailmap at the root): this checkout has already produced TWO windows of
 # commits com autoria trocada, ambas por um override de identidade deixado para
-# trás por uma sessão automatizada:
+
 #   1. 2026-08-13..26 — nome "Xiangzhe" + e-mail de @backryun (237 commits)
 #   2. 2026-08-29..09-02 — nome "Markus Hartung" + e-mail do mantenedor (59 commits)
 #
-# Este gate NÃO impõe uma identidade única: contribuidores commitam normalmente
+# This gate DOES NOT impose a single identity: contributors commit normally
 # com a sua, e creditar um contribuidor via `--author` continua funcionando.
-# Ele bloqueia apenas as duas assinaturas do defeito:
-#   (a) um COMMITTER que não é a identidade desta máquina (pega ambas as janelas);
+# It only blocks the two signatures of the defect:
+#   (a) a COMMITTER who is not the identity of this machine (takes both windows);
 #   (b) um AUTHOR com o e-mail do mantenedor sob o nome de outra pessoa;
 #   (c) um e-mail explicitamente aposentado (`omniroute.legacyEmail`).
 #
-# Ativação — opcional e por máquina; sem ela o gate é inerte:
+
 #   git config --global omniroute.expectedName  "diegosouzapw"
 #   git config --global omniroute.expectedEmail "8016841+diegosouzapw@users.noreply.github.com"
 #   git config --global --add omniroute.legacyEmail "diegosouzapw@users.noreply.github.com"
@@ -23,7 +23,7 @@ expected_name=$(git config --get omniroute.expectedName 2>/dev/null)
 expected_email=$(git config --get omniroute.expectedEmail 2>/dev/null)
 legacy_emails=$(git config --get-all omniroute.legacyEmail 2>/dev/null)
 
-# Sem configuração nesta máquina o gate não opina — contribuidores não são afetados.
+# Without configuration on this machine, the gate does not take a stance — contributors are not affected.
 [ -z "$expected_email" ] && exit 0
 
 an=$(git var GIT_AUTHOR_IDENT    2>/dev/null | sed 's/ <.*//')
@@ -33,23 +33,23 @@ ce=$(git var GIT_COMMITTER_IDENT 2>/dev/null | sed 's/.*<//; s/>.*//')
 
 fail=0
 
-# (a) O COMMITTER é quem executa o commit — nesta máquina, sempre o dono dela.
-#     Um override de identidade esquecido por uma sessão aparece exatamente aqui,
+# (a) The COMMITTER is the person who performs the commit — on this machine, it is always the owner.
+
 #     e foi o que passou despercebido nas duas janelas: em agosto NEM o nome NEM
-#     o e-mail eram do mantenedor, então checar só o e-mail dele não bastaria.
+#     the email was from the maintainer, so checking only their email would not be enough.
 if [ "$ce" != "$expected_email" ] || { [ -n "$expected_name" ] && [ "$cn" != "$expected_name" ]; }; then
-  echo "🛑 COMMITTER não é a identidade desta máquina: $cn <$ce>" >&2
+  echo "🛑 COMMITTER is not the identity of this machine: $cn <$ce>" >&2
   fail=1
 fi
 
-# (b) O AUTHOR pode ser um contribuidor (crédito via --author), mas nunca pode
+# (b) The AUTHOR may be a contributor (credit via --author), but can never
 #     carregar o e-mail do mantenedor sob o nome de outra pessoa.
 if [ -n "$expected_name" ] && [ "$ae" = "$expected_email" ] && [ "$an" != "$expected_name" ]; then
   echo "🛑 AUTHOR combina o e-mail do mantenedor com outro nome: $an <$ae>" >&2
   fail=1
 fi
 
-# (c) e-mails aposentados que já causaram misattribution.
+# (c) Retired email addresses that have already caused misattribution.
 for legacy in $legacy_emails; do
   if [ "$ae" = "$legacy" ]; then
     echo "🛑 AUTHOR usa e-mail aposentado: $an <$ae>" >&2
@@ -65,11 +65,11 @@ done
 
 cat >&2 <<MSG
 
-   Identidade esperada nesta máquina: $expected_name <$expected_email>
-   Corrija com:
+   Expected identity on this machine: $expected_name <$expected_email>
+   Correct with:
      git config --global user.name  "$expected_name"
      git config --global user.email "$expected_email"
-   Para creditar um contribuidor, use o E-MAIL DELE (nunca o seu):
+   To credit a contributor, use THEIR EMAIL (never yours):
      git commit --author="Nome <email-do-contribuidor>"
 MSG
 exit 1

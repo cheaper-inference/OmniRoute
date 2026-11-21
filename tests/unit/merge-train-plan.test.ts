@@ -206,7 +206,7 @@ test("--plan documents the inherited-red classification", async () => {
 });
 
 // Behavioral guard for the INHERITED classifier (merge-batch rework 2026-09-23). The
-// first version only recognised ✗/✖/×/FAIL/✘ marker lines, so a gate that reports
+// first version only recognized ✗/✖/×/FAIL/✘ marker lines, so a gate that reports
 // errors any other way (tsc's `error TS2322` for dashboard-typecheck) produced an EMPTY
 // violation set on both sides — and an empty `comm` diff read as "inherited", even when
 // the train ADDED a brand-new type error. The classifier must fail CLOSED.

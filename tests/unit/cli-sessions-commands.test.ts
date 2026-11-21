@@ -99,7 +99,7 @@ test("sessions current chama /api/sessions?current=true", async () => {
   assert.ok(capturedUrl.includes("current=true"));
 });
 
-test("sessions.mjs pode ser importado sem erro", async () => {
+test("sessions.mjs can be imported without error", async () => {
   const mod = await import("../../bin/cli/commands/sessions.mjs");
   assert.equal(typeof mod.registerSessions, "function");
 });

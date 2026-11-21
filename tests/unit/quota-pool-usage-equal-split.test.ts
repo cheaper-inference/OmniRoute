@@ -74,7 +74,7 @@ test("enforce.ts is still the shape the stores are mirroring", () => {
 // Level B — logic: the fallback corrects fairShare and the borrowing flag
 //
 // Replicates the per-key math from poolUsageWithDimensions:
-//   fairShare = (effectiveWeight / 100) × planDim.limit
+// fairShare = (effectiveWeight / 100) × planDim.limit
 //   deficit   = consumed - fairShare
 //   borrowing = consumed > fairShare
 // ---------------------------------------------------------------------------

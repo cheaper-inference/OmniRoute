@@ -1228,7 +1228,7 @@ same process on one port, so there is no separate CLI-only package today.
 
 <div align="center">
 
-<sub>Snapshot do painel em 2026-10-18 · Catálogo bruto: YT 1.352 | TT 334 | IG 290 · Frescor (dias): YT 5 | TT 48 | IG 49</sub>
+<sub>Dashboard snapshot from 2026-10-18 · Raw catalog: YT 1,352 | TT 334 | IG 290 · Freshness (days): YT 5 | TT 48 | IG 49</sub>
 
 <table>
   <tr>
@@ -1272,7 +1272,7 @@ same process on one port, so there is no separate CLI-only package today.
 
 </div>
 
-**Ranking completo (URLs canônicas deduplicadas, `v > 0`, maior alcance):**
+**Full ranking (deduplicated canonical URLs, `v > 0`, greatest reach):**
 
 | #1                                                                                     | #2                                                                                  | #3                                                                                      | #4                                                                                    | #5                                                                                                  |
 | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -1282,7 +1282,7 @@ same process on one port, so there is no separate CLI-only package today.
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [nikothetech — TikTok](https://www.tiktok.com/@nikothetech/video/7671890769665477918) — **610,803** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **509,281** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** | [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** |
 
-Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 visualizações conhecidas** (`v > 0`) · **1.210 canais/perfis por rede**. O painel bruto contém 1.976 linhas (YouTube 1.352 = 740 longos + 612 Shorts · TikTok 334 · Instagram 290); nenhuma duplicata restou após a normalização pela URL canônica, que mantém a maior contagem por vídeo. A coleta do YouTube está congelada em 2026-10-13 (quota da API esgotada de 14 a 18/10) e TikTok/Instagram desde 2026-09-02 (sem créditos de coleta); 76 vídeos ainda não têm contagem de views.
+Canonical metrics as of 2026-10-18: **1,976 unique videos** · **20,220,289 known views** (`v > 0`) · **1,210 channels/profiles per network**. The raw dashboard has 1,976 rows (YouTube 1,352 = 740 long-form + 612 Shorts · TikTok 334 · Instagram 290); no duplicates remain after normalization by canonical URL, which keeps the highest count per video. YouTube collection is frozen at 2026-10-13 (API quota exhausted 14–18 Oct) and TikTok/Instagram since 2026-09-02 (no collection credits); 76 videos still have no view count.
 
 > 🎬 **Made a video about OmniRoute?** Open an [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) or [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) with the link — we'll feature it here.
 
