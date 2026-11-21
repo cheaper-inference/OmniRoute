@@ -68,6 +68,25 @@ function propsOf(schema: JsonRecord): JsonRecord {
   return schema.properties as JsonRecord;
 }
 
+test("invalid-regex stripper invokes its predicate and counts removed patterns", () => {
+  const schema = {
+    type: "object",
+    properties: {
+      broken: { type: "string", pattern: "[" },
+      supported: { type: "string", pattern: "^ok$" },
+      lookaround: { type: "string", pattern: "^(?=ok).+$" },
+    },
+  };
+  const stats = { removed: 0 };
+  const clean = stripInvalidRegexPatterns(schema, stats) as JsonRecord;
+  const properties = clean.properties as JsonRecord;
+  assert.deepEqual(properties.broken, { type: "string" });
+  assert.deepEqual(properties.supported, { type: "string", pattern: "^ok$" });
+  assert.deepEqual(properties.lookaround, { type: "string", pattern: "^(?=ok).+$" });
+  assert.equal(stats.removed, 1, "invalid pattern must increment the metric exactly once");
+  assert.equal(((schema.properties as JsonRecord).broken as JsonRecord).pattern, "[");
+});
+
 test("openrouter: malformed pattern removed, valid pattern kept", () => {
   const normalized = normalizeToolSchemasForProvider("openrouter", [findFilesTool()]);
   const params = paramsOf(normalized[0]);

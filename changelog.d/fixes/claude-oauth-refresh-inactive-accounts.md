@@ -1,0 +1,1 @@
+- **fix(auth):** continue background token health-check and OAuth credential refresh for inactive connections (`isActive: false`), preserving their disabled routing state while preventing rotating refresh token expiration on quota-exhausted Claude accounts.
