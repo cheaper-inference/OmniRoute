@@ -1,0 +1,1 @@
+- **fix(usage):** Persist provider-reported `buyer_cost_micro` on call logs without forwarding it to clients or changing token accounting ([#20291](https://github.com/cheaper-inference/OmniRoute/pull/20291)) — thanks @KiaroSama
