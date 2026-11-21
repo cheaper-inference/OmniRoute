@@ -451,7 +451,9 @@ test("the panel listener has its own connection limit and timeouts", async () =>
     assert.equal(server.headersTimeout, panel.QUOTA_PANEL_HEADERS_TIMEOUT_MS);
     assert.equal(server.requestTimeout, panel.QUOTA_PANEL_REQUEST_TIMEOUT_MS);
     assert.equal(server.keepAliveTimeout, panel.QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS);
-    // The server checks the header and request timeouts on this interval (30 s by default).
+    // The interval is passed as a server option, and the server keeps the value it was given.
+    // The test "server options reach the bridge server" in quota-panel-bridge.test.ts shows
+    // that the option makes the header timeout apply.
     assert.equal(panel.QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS, 1_000);
     assert.equal(
       (server as http.Server & { connectionsCheckingInterval?: number })

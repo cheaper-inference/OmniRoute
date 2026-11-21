@@ -677,3 +677,27 @@ test("a refused upgrade handles an error on its socket", async () => {
     shut(front);
   }
 });
+
+test("server options reach the bridge server: a short check interval enforces the header timeout", async () => {
+  const front = bridge.createApiBridgeServer(await closedPort(), bridge.createQuotaPanelRole(), {
+    connectionsCheckingInterval: 50,
+  });
+  front.headersTimeout = 200;
+  const port = await listen(front);
+  const client = net.connect(port, "127.0.0.1");
+  client.on("error", () => undefined);
+  client.resume(); // Read the server's answer, so its close reaches the client.
+  try {
+    await once(client, "connect");
+    const started = Date.now();
+    client.write("GET /quo"); // Part of the request line, then nothing.
+    const closed = once(client, "close").then(() => Date.now() - started);
+    const bound = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000));
+    const elapsed = await Promise.race([closed, bound]);
+    assert.notEqual(elapsed, null, "the socket is still open after 2000 ms");
+    assert.ok((elapsed as number) >= 190, `closed after ${elapsed} ms, before the timeout`);
+  } finally {
+    client.destroy();
+    shut(front);
+  }
+});

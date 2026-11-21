@@ -418,11 +418,16 @@ declare global {
   var __omnirouteQuotaPanelServer: http.Server | null | undefined;
 }
 
+/**
+ * Creates the bridge server for a role. `serverOptions`, when given, is passed to
+ * `http.createServer`. Without it the server is created with the defaults.
+ */
 export function createApiBridgeServer(
   dashboardPort: number,
-  role: BridgeRole = API_BRIDGE_ROLE
+  role: BridgeRole = API_BRIDGE_ROLE,
+  serverOptions?: http.ServerOptions
 ): http.Server {
-  const server = http.createServer((req, res) => {
+  const handleRequest: http.RequestListener = (req, res) => {
     // Absorb client-abort errors (browser closes the socket during navigation/
     // HMR/bfcache) on the request/response streams so they never surface as an
     // uncaughtException that kills the server (#fix-dev-server-aborted).
@@ -438,7 +443,10 @@ export function createApiBridgeServer(
     }
 
     proxyRequest(req, res, dashboardPort, role);
-  });
+  };
+  const server = serverOptions
+    ? http.createServer(serverOptions, handleRequest)
+    : http.createServer(handleRequest);
   server.requestTimeout = API_BRIDGE_TIMEOUTS.serverRequestTimeoutMs;
   server.headersTimeout = API_BRIDGE_TIMEOUTS.serverHeadersTimeoutMs;
   server.keepAliveTimeout = API_BRIDGE_TIMEOUTS.serverKeepAliveTimeoutMs;
@@ -474,14 +482,14 @@ export function startQuotaPanelListener(
 
   const { port, host, basePath } = decision;
   const { dashboardPort } = ports;
-  const server = createApiBridgeServer(dashboardPort, createQuotaPanelRole(basePath));
+  // The server checks the header and request timeouts on this interval.
+  const server = createApiBridgeServer(dashboardPort, createQuotaPanelRole(basePath), {
+    connectionsCheckingInterval: QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS,
+  });
   server.maxConnections = QUOTA_PANEL_MAX_CONNECTIONS;
   server.headersTimeout = QUOTA_PANEL_HEADERS_TIMEOUT_MS;
   server.requestTimeout = QUOTA_PANEL_REQUEST_TIMEOUT_MS;
   server.keepAliveTimeout = QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS;
-  // Read by the server when it starts listening, so it is set before `listen`.
-  (server as http.Server & { connectionsCheckingInterval: number }).connectionsCheckingInterval =
-    QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS;
   let listening = false;
   server.on("error", (error: NodeJS.ErrnoException) => {
     if (listening) {
