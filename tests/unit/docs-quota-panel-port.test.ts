@@ -186,6 +186,15 @@ test("the section states the methods, the body rule and the upgrade rule", () =>
   ]) {
     assert.ok(sectionText.includes(sentence), sentence);
   }
+  const [, firstPrefix, secondPrefix] = match(
+    sectionText,
+    /Request headers whose names begin with `([a-z-]+)` or `([a-z-]+)` are not relayed, and the request is relayed without them\./
+  );
+  assert.deepEqual([firstPrefix, secondPrefix], [...panel.QUOTA_PANEL_DROPPED_HEADER_PREFIXES]);
+  assert.deepEqual(bridge.createQuotaPanelRole().droppedHeaderPrefixes, [
+    firstPrefix,
+    secondPrefix,
+  ]);
 });
 
 test("the section states the port clashes, and the live WebSocket default matches the code", () => {

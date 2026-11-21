@@ -7,6 +7,7 @@ import {
   isPrintableAsciiTarget,
   isQuotaPanelBasePath,
   isQuotaPanelPath,
+  QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
   QUOTA_PANEL_HEADERS_TIMEOUT_MS,
   QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS,
   QUOTA_PANEL_MAX_CONNECTIONS,
@@ -112,6 +113,8 @@ export interface BridgeRole {
   notFoundMessage: string;
   /** When false, the 502 and 504 bodies carry no `detail`. */
   errorDetail: boolean;
+  /** Request headers whose lower-case name starts with one of these are not relayed. */
+  droppedHeaderPrefixes: readonly string[];
 }
 
 const API_BRIDGE_ROLE: BridgeRole = {
@@ -122,6 +125,7 @@ const API_BRIDGE_ROLE: BridgeRole = {
   relayBodies: true,
   notFoundMessage: "API port only serves OpenAI-compatible routes.",
   errorDetail: true,
+  droppedHeaderPrefixes: [],
 };
 
 /**
@@ -140,6 +144,7 @@ export function createQuotaPanelRole(basePath = ""): BridgeRole {
     relayBodies: false,
     notFoundMessage: "Not found.",
     errorDetail: false,
+    droppedHeaderPrefixes: QUOTA_PANEL_DROPPED_HEADER_PREFIXES,
   });
 }
 
@@ -239,12 +244,21 @@ function resolveClientPolicy(remoteAddress: string | undefined): ClientPolicy {
   return { kind: "remote", peer };
 }
 
+/**
+ * The headers relayed to the dashboard. A header whose lower-case name starts with one of
+ * `droppedHeaderPrefixes` is left out. `Host` and the forwarding headers are then set.
+ */
 export function buildBridgeRequestHeaders(
   headers: IncomingHttpHeaders,
   remoteAddress: string | undefined,
-  dashboardPort: number
+  dashboardPort: number,
+  droppedHeaderPrefixes: readonly string[] = []
 ): IncomingHttpHeaders {
   const relayed: IncomingHttpHeaders = { ...headers, host: `127.0.0.1:${dashboardPort}` };
+  for (const name of Object.keys(relayed)) {
+    const lower = name.toLowerCase();
+    if (droppedHeaderPrefixes.some((prefix) => lower.startsWith(prefix))) delete relayed[name];
+  }
   const policy = resolveClientPolicy(remoteAddress);
   if (policy.kind === "remote") {
     for (const name of FORWARDING_HEADERS) delete relayed[name];
@@ -269,7 +283,12 @@ function proxyRequest(
       port: dashboardPort,
       method: req.method,
       path: req.url,
-      headers: buildBridgeRequestHeaders(req.headers, req.socket.remoteAddress, dashboardPort),
+      headers: buildBridgeRequestHeaders(
+        req.headers,
+        req.socket.remoteAddress,
+        dashboardPort,
+        role.droppedHeaderPrefixes
+      ),
       timeout: proxyTimeoutMs,
     },
     (targetRes) => {

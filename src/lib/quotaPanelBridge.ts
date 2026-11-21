@@ -26,6 +26,12 @@ const PANEL_EXACT_PATHS: ReadonlySet<string> = new Set([
 ]);
 const PRINTABLE_ASCII_TARGET = /^[\x21-\x7e]+$/;
 
+/** Request headers whose lower-case name starts with one of these are not relayed by the panel. */
+export const QUOTA_PANEL_DROPPED_HEADER_PREFIXES: readonly string[] = Object.freeze([
+  "x-middleware-",
+  "x-invoke-",
+]);
+
 /** The methods the quota panel port relays. Each panel role builds its own set from this list. */
 export const QUOTA_PANEL_METHOD_NAMES: readonly string[] = Object.freeze(["GET", "HEAD"]);
 

@@ -701,3 +701,41 @@ test("server options reach the bridge server: a short check interval enforces th
     shut(front);
   }
 });
+
+test("the panel port does not relay x-middleware- and x-invoke- request headers", async () => {
+  const dropped = {
+    "x-middleware-prefetch": "1",
+    "x-middleware-subrequest": "a",
+    "X-Middleware-Rewrite": "/dashboard",
+    "x-invoke-path": "/dashboard",
+  };
+  const kept = {
+    rsc: "1",
+    "next-router-state-tree": "%5B%22%22%5D",
+    "next-router-prefetch": "1",
+    "next-router-segment-prefetch": "/_tree",
+    "next-url": "/quota/claude",
+    accept: "text/x-component",
+    authorization: "Bearer sk-test",
+  };
+  const droppedNames = Object.keys(dropped).map((name) => name.toLowerCase());
+  await withPanel(async ({ panelPort, seen }) => {
+    const res = await call(panelPort, "/quota/claude", { headers: { ...dropped, ...kept } });
+    assert.equal(res.status, 200);
+    assert.equal(seen.length, 1);
+    for (const name of droppedNames) assert.equal(seen[0].headers[name], undefined, name);
+    for (const [name, value] of Object.entries(kept)) {
+      assert.equal(seen[0].headers[name], value, name);
+    }
+  });
+  // The API role relays the same headers as before.
+  await withBridge(
+    (mainPort) => bridge.createApiBridgeServer(mainPort),
+    async ({ bridgePort, seen }) => {
+      const res = await call(bridgePort, "/v1/models", { headers: { ...dropped, ...kept } });
+      assert.equal(res.status, 200);
+      for (const name of droppedNames) assert.ok(seen[0].headers[name], name);
+      assert.equal(seen[0].headers.rsc, "1");
+    }
+  );
+});

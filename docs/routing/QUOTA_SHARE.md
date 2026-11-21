@@ -481,8 +481,10 @@ connection is closed with no answer. A request that declares a body answers 404 
 connection is closed. Upgrade requests are refused and their connection is closed. A path with a
 dot segment or a fragment marker is refused, as on the API port. So is a request target with a
 character outside printable ASCII. A raw control character in the target is answered 400 by the
-HTTP parser, before this port's own check. The dashboard, the login page, the management API and
-the inference routes cannot be reached through this port.
+HTTP parser, before this port's own check. Request headers whose names begin with
+`x-middleware-` or `x-invoke-` are not relayed, and the request is relayed without them. The
+dashboard, the login page, the management API and the inference routes cannot be reached through
+this port.
 
 The 404 body is `{"error":"not_found","message":"Not found."}`. A failed relay answers 502
 (`api_bridge_unavailable`) or 504 (`api_bridge_timeout`) with no `detail` field.
