@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { availableParallelism } from "node:os";
 import path from "path";
 import { isolatedDataDirEnv } from "./tests/_setup/vitestDataDir";
 
@@ -15,7 +16,8 @@ export default defineConfig({
     env: isolatedDataDirEnv(),
     globalSetup: ["./tests/_setup/vitestDataDir.ts"],
     pool: "threads",
-    maxWorkers: 20,
+    // The hosted CI runners have at most four CPUs. Match that capacity for jsdom workers.
+    maxWorkers: process.env.CI === "true" ? Math.min(availableParallelism(), 4) : 20,
     fileParallelism: true,
     maxConcurrency: 20,
     include: [
