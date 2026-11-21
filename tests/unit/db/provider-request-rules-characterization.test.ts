@@ -181,6 +181,13 @@ test("param filters: a canonical row wins over a legacy alias row", () => {
   paramFilters.deleteParamFilterConfig("__cache_reset__");
   assert.deepEqual(paramFilters.getParamFilterConfig("claude")?.block, ["canonical"]);
   assert.deepEqual(paramFilters.getParamFilterConfig("cc")?.block, ["canonical"]);
+  // Rows come back in key order; an alias that sorts after its canonical id must not win.
+  insertRaw("provider_param_filters", "codex", JSON.stringify({ block: ["canonical"] }));
+  insertRaw("provider_param_filters", "cx", JSON.stringify({ block: ["alias"] }));
+  paramFilters.deleteParamFilterConfig("__cache_reset__");
+  assert.deepEqual(paramFilters.getParamFilterConfig("codex")?.block, ["canonical"]);
+  assert.deepEqual(paramFilters.getParamFilterConfig("cx")?.block, ["canonical"]);
+  assert.deepEqual(paramFilters.loadParamFilterConfigs().get("cx")?.block, ["alias"]);
 });
 
 test("param filters: writes store canonical keys and delete removes every alias row", () => {
