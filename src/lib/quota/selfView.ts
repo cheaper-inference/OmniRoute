@@ -201,14 +201,20 @@ function gateEffectiveWeight(pool: QuotaPool, allocation: PoolAllocation): numbe
   return allocations.length > 0 ? 100 / allocations.length : 0;
 }
 
+/**
+ * The key's allocation is taken from the pool as read here, not from the earlier allocation list.
+ * A pool the key is no longer allocated in gives no context.
+ */
 async function resolvePoolContext(
   input: QuotaSelfViewInput,
   deps: CoreDeps,
-  poolId: string,
-  allocation: PoolAllocation
+  poolId: string
 ): Promise<SelfViewPoolContext | null> {
   const pool = deps.getPool(poolId);
   if (!pool) return null;
+  const allocations: PoolAllocation[] = Array.isArray(pool.allocations) ? pool.allocations : [];
+  const allocation = allocations.find((a) => a.apiKeyId === input.apiKeyId);
+  if (!allocation) return null;
 
   const connectionProvider = await deps.resolveConnectionProvider(pool.connectionId);
   const plan = deps.resolvePlan(pool.connectionId, connectionProvider);
@@ -263,10 +269,10 @@ async function resolvePoolContexts(
 ): Promise<SelfViewPoolContext[]> {
   const contexts: SelfViewPoolContext[] = [];
   const seen = new Set<string>();
-  for (const { poolId, allocation } of deps.listAllocationsForApiKey(input.apiKeyId)) {
+  for (const { poolId } of deps.listAllocationsForApiKey(input.apiKeyId)) {
     if (seen.has(poolId)) continue;
     seen.add(poolId);
-    const context = await resolvePoolContext(input, deps, poolId, allocation);
+    const context = await resolvePoolContext(input, deps, poolId);
     if (context) contexts.push(context);
   }
   return contexts.sort(
