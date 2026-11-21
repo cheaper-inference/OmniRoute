@@ -8,14 +8,25 @@ process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-embeddings-nvidia-"
 
 const { handleEmbedding } = await import("../../open-sse/handlers/embeddings.ts");
 
-// Issue #1378: NVIDIA NIM asymmetric embedding models (e.g. nvidia/nv-embedqa-e5-v5)
-// require an `input_type` parameter ("query" | "passage"); without it the upstream
-// returns 400 "'input_type' parameter is required". OmniRoute must inject the
-// registered model-level default when the client omits input_type, and must respect
-// a client-supplied input_type when present.
+// Verified asymmetric NVIDIA NIM models require input_type. The handler defaults
+// queries to "query"; clients indexing passages must send "passage" explicitly.
 
-function captureFetch(captured: { body?: Record<string, unknown> }) {
-  return async (url: unknown, options: { headers?: unknown; body?: unknown } = {}) => {
+const verifiedIds = [
+  "nvidia/nemotron-3.5-embed-8b",
+  "nvidia/nemotron-3.5-embed-1b",
+  "nvidia/nemotron-3-embed-1b",
+  "nvidia/llama-nemotron-embed-1b-v2",
+  "nvidia/nv-embedqa-e5-v5",
+];
+
+interface Captured {
+  body?: Record<string, unknown>;
+  url?: string;
+}
+
+function captureFetch(captured: Captured) {
+  return async (url: unknown, options: { body?: unknown } = {}) => {
+    captured.url = String(url);
     captured.body = JSON.parse(String(options.body || "{}"));
     return new Response(
       JSON.stringify({
@@ -27,82 +38,60 @@ function captureFetch(captured: { body?: Record<string, unknown> }) {
   };
 }
 
-test("handleEmbedding injects NVIDIA asymmetric default input_type when client omits it", async () => {
+async function callWithModel(model: string, inputType?: string) {
+  const captured: Captured = {};
   const originalFetch = globalThis.fetch;
-  const captured: { body?: Record<string, unknown> } = {};
   globalThis.fetch = captureFetch(captured) as typeof fetch;
-
   try {
     const result = await handleEmbedding({
       body: {
-        model: "nvidia/nvidia/nv-embedqa-e5-v5",
+        model,
         input: "What is the capital of France?",
+        ...(inputType === undefined ? {} : { input_type: inputType }),
       },
       credentials: { apiKey: "nvidia-key" },
       log: null,
     });
-
-    assert.equal(result.success, true);
-    // The model-level default input_type must be forwarded to the upstream body.
-    assert.equal(
-      captured.body?.input_type,
-      "query",
-      "expected NVIDIA asymmetric model default input_type to be injected"
-    );
+    return { result, captured };
   } finally {
     globalThis.fetch = originalFetch;
   }
-});
+}
 
-test("handleEmbedding respects a client-supplied input_type (does not overwrite)", async () => {
-  const originalFetch = globalThis.fetch;
-  const captured: { body?: Record<string, unknown> } = {};
-  globalThis.fetch = captureFetch(captured) as typeof fetch;
-
-  try {
-    const result = await handleEmbedding({
-      body: {
-        model: "nvidia/nvidia/nv-embedqa-e5-v5",
-        input: "Paris is the capital of France.",
-        input_type: "passage",
-      },
-      credentials: { apiKey: "nvidia-key" },
-      log: null,
-    });
-
-    assert.equal(result.success, true);
-    assert.equal(
-      captured.body?.input_type,
-      "passage",
-      "expected client-supplied input_type to be respected, not overwritten by the default"
-    );
-  } finally {
-    globalThis.fetch = originalFetch;
+test("default input_type applies for every verified NVIDIA model", async () => {
+  for (const model of verifiedIds) {
+    const { result, captured } = await callWithModel(model);
+    assert.equal(result.success, true, model);
+    assert.equal(captured.url, "https://integrate.api.nvidia.com/v1/embeddings", model);
+    assert.equal(captured.body?.model, model, model);
+    assert.equal(captured.body?.input_type, "query", model);
   }
 });
 
-test("handleEmbedding does not inject input_type for symmetric models without a default", async () => {
-  const originalFetch = globalThis.fetch;
-  const captured: { body?: Record<string, unknown> } = {};
-  globalThis.fetch = captureFetch(captured) as typeof fetch;
+test("double-prefixed model IDs reach the same registry entry and default", async () => {
+  for (const [model, normalized] of [
+    ["nvidia/nvidia/nv-embedqa-e5-v5", "nvidia/nv-embedqa-e5-v5"],
+    ["nvidia/nvidia/nemotron-3.5-embed-8b", "nvidia/nemotron-3.5-embed-8b"],
+  ]) {
+    const { result, captured } = await callWithModel(model);
+    assert.equal(result.success, true, model);
+    assert.equal(captured.body?.model, normalized, model);
+    assert.equal(captured.body?.input_type, "query", model);
+  }
+});
 
-  try {
-    const result = await handleEmbedding({
-      body: {
-        model: "openai/text-embedding-3-small",
-        input: "hello world",
-      },
-      credentials: { apiKey: "openai-key" },
-      log: null,
-    });
+test("client input_type wins", async () => {
+  for (const model of ["nvidia/nemotron-3.5-embed-8b", "nvidia/nvidia/nv-embedqa-e5-v5"]) {
+    const { result, captured } = await callWithModel(model, "passage");
+    assert.equal(result.success, true, model);
+    assert.equal(captured.body?.input_type, "passage", model);
+  }
+});
 
-    assert.equal(result.success, true);
-    assert.equal(
-      "input_type" in (captured.body || {}),
-      false,
-      "symmetric models without a default must not receive an injected input_type"
-    );
-  } finally {
-    globalThis.fetch = originalFetch;
+test("unlisted NVIDIA and non-NVIDIA models are untouched", async () => {
+  for (const model of ["nvidia/nv-embedqa-mistral-7b-v2", "openai/text-embedding-3-small"]) {
+    const { result, captured } = await callWithModel(model);
+    assert.equal(result.success, true, model);
+    assert.equal("input_type" in (captured.body || {}), false, model);
   }
 });
