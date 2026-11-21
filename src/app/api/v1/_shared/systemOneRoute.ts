@@ -70,7 +70,8 @@ function resolveEnabledTarget(
       rejection: errorResponse(
         HTTP_STATUS.BAD_REQUEST,
         `Unknown decisions model: ${model ?? "(missing)"}. Use "typesafe/<model>", ` +
-          `a bare jev-* alias, "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
+          `a bare jev-* alias, "lunaroute/<model>", ` +
+          `"openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
           `"cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI ` +
           `(needs the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag), ` +
           `or "ollama-local/<model>" for a local Ollama ` +

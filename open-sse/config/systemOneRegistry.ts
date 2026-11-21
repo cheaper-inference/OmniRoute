@@ -49,7 +49,42 @@ const OLLAMA_LOCAL_SYSTEMONE_PREFIX = "ollama-local/";
 /** Plain Ollama model tags (`qwen3:8b`, `library/llama3.2:latest`); no whitespace or control chars. */
 const OLLAMA_LOCAL_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/;
 
-export type SystemOneBackend = "typesafe" | "openrouter" | "cloudflare" | "ollama-local";
+export const LUNAROUTE_SYSTEM_ONE_PROVIDER_ID = "lunaroute";
+export const LUNAROUTE_SYSTEM_ONE_BASE_URL = "https://gw.lunaroute.com";
+export const LUNAROUTE_SYSTEM_ONE_URL = `${LUNAROUTE_SYSTEM_ONE_BASE_URL}/v1/systemone`;
+/** The catalog can publish synced decision models under the provider's short alias too. */
+const LUNAROUTE_SYSTEM_ONE_PREFIXES = [`${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/`, "lr/"];
+
+export const LUNAROUTE_SYSTEM_ONE_MODELS = [
+  {
+    id: "clef-flash",
+    name: "Clef Flash",
+    contextLength: 8_192,
+    maxInputTokens: 8_192,
+    maxOutputTokens: 2_048,
+    supportsVision: true,
+  },
+  {
+    id: "djev",
+    name: "djev",
+    contextLength: 32_768,
+    maxInputTokens: 32_768,
+    maxOutputTokens: 1_024,
+    supportsVision: true,
+  },
+] as const;
+
+/** Return every statically discoverable System One model for the unified catalog. */
+export function getAllSystemOneModels() {
+  return LUNAROUTE_SYSTEM_ONE_MODELS.map((model) => ({
+    ...model,
+    id: `${LUNAROUTE_SYSTEM_ONE_PROVIDER_ID}/${model.id}`,
+    provider: LUNAROUTE_SYSTEM_ONE_PROVIDER_ID,
+  }));
+}
+
+export type SystemOneBackend =
+  "typesafe" | "openrouter" | "cloudflare" | "ollama-local" | "lunaroute";
 
 export interface SystemOneTarget {
   backend: SystemOneBackend;
@@ -132,6 +167,17 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
   if (cloudflare !== undefined) return cloudflare;
   const ollamaLocal = resolveOllamaLocalTarget(trimmed);
   if (ollamaLocal !== undefined) return ollamaLocal;
+  const lunaroutePrefix = LUNAROUTE_SYSTEM_ONE_PREFIXES.find((p) => trimmed.startsWith(p));
+  if (lunaroutePrefix) {
+    const upstreamModel = trimmed.slice(lunaroutePrefix.length);
+    if (!LUNAROUTE_SYSTEM_ONE_MODELS.some((model) => model.id === upstreamModel)) return null;
+    return {
+      backend: "lunaroute",
+      provider: LUNAROUTE_SYSTEM_ONE_PROVIDER_ID,
+      upstreamModel,
+      upstreamUrl: LUNAROUTE_SYSTEM_ONE_URL,
+    };
+  }
   if (/^jev[-/]/i.test(trimmed)) {
     return {
       backend: "typesafe",
