@@ -66,20 +66,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     if (!parsed.success) {
       return NextResponse.json(buildErrorBody(400, parsed.error.message), { status: 400 });
     }
-    const auditMetadata = updateAuditMetadata(id, parsed.data);
-
-    // Capture prev allocations BEFORE the update so we know which keys are leaving.
-    // Only needed when `exclusive` is explicitly present in the request body.
     const exclusivePresent = body !== null && typeof body === "object" && "exclusive" in body;
-    const prevApiKeyIds: string[] = [];
-    if (exclusivePresent) {
-      const existingPool = getPool(id);
-      if (existingPool) {
-        for (const alloc of existingPool.allocations) {
-          prevApiKeyIds.push(alloc.apiKeyId);
-        }
-      }
-    }
 
     // Combos must be reconciled when the pool's group OR connection set changes,
     // since the qtSd/ combo name embeds <groupSlug>/<provider>. Each provider in a
@@ -99,6 +86,14 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       }
     }
 
+    // The previous mode and the previous keys are read with no await before the synchronous
+    // write, so no other request can change the pool in between.
+    const auditMetadata = updateAuditMetadata(id, parsed.data);
+    // Keys allocated before the update, to know which keys are leaving.
+    // Only needed when `exclusive` is explicitly present in the request body.
+    const prevApiKeyIds: string[] = exclusivePresent
+      ? (getPool(id)?.allocations ?? []).map((alloc) => alloc.apiKeyId)
+      : [];
     const pool = updatePool(id, parsed.data);
     if (!pool) {
       return NextResponse.json(buildErrorBody(404, "Pool not found"), { status: 404 });
