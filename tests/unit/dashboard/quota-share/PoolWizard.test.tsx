@@ -62,7 +62,7 @@ function pickConnection() {
 }
 
 const memberBreakdownBox = () =>
-  screen.getByRole("checkbox", { name: /wizardMemberBreakdownLabel/ }) as HTMLInputElement;
+  screen.getByRole("checkbox", { name: /memberBreakdownLabel/ }) as HTMLInputElement;
 
 function goToKeysStep() {
   pickConnection();
@@ -207,19 +207,19 @@ describe("PoolWizard on the kit Wizard", () => {
     addKey();
     addKey();
     fireEvent.click(memberBreakdownBox());
-    expect(screen.getByText("wizardMemberBreakdownTooFew")).toBeTruthy();
+    expect(screen.getByText("memberBreakdownTooFew")).toBeTruthy();
 
     addKey();
-    expect(screen.queryByText("wizardMemberBreakdownTooFew")).toBeNull();
+    expect(screen.queryByText("memberBreakdownTooFew")).toBeNull();
   });
 
   it("the warning is always shown next to the option", () => {
     render(<PoolWizard {...props()} />);
     goToKeysStep();
 
-    expect(screen.getByText("wizardMemberBreakdownWarning")).toBeTruthy();
+    expect(screen.getByText("memberBreakdownWarning")).toBeTruthy();
     fireEvent.click(memberBreakdownBox());
-    expect(screen.getByText("wizardMemberBreakdownWarning")).toBeTruthy();
+    expect(screen.getByText("memberBreakdownWarning")).toBeTruthy();
   });
 
   it("keeps the wizard open and shows the failure next to the actions", async () => {

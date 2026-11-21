@@ -75,17 +75,17 @@ test("the update schema takes a boolean and nothing else", () => {
 
 test("the wizard strings are the planned English text", () => {
   const strings = EN.quotaShare as Record<string, string>;
-  assert.equal(strings.wizardMemberBreakdownLabel, "Show usage by member to key holders");
+  assert.equal(strings.memberBreakdownLabel, "Show usage by member to key holders");
   assert.equal(
-    strings.wizardMemberBreakdownHint,
+    strings.memberBreakdownHint,
     "On the self-service page, each key holder sees how much every other key used, without names. The bars need three or more keys and a key that may see account usage."
   );
   assert.equal(
-    strings.wizardMemberBreakdownWarning,
+    strings.memberBreakdownWarning,
     "The bars carry no names. Someone who knows what one key used can match a bar to that key. In a pool of three keys that also reveals the last one."
   );
   assert.equal(
-    strings.wizardMemberBreakdownTooFew,
+    strings.memberBreakdownTooFew,
     "This pool has fewer than three keys, so the bars stay hidden."
   );
 });

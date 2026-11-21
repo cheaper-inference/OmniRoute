@@ -29,21 +29,17 @@ export default function MemberBreakdownField({
         label={
           <span className="flex min-w-0 flex-col">
             <span className="text-sm font-semibold text-text-main">
-              {t("wizardMemberBreakdownLabel")}
+              {t("memberBreakdownLabel")}
             </span>
             <span className="mt-0.5 break-words text-xs text-text-muted">
-              {t("wizardMemberBreakdownHint")}
+              {t("memberBreakdownHint")}
             </span>
           </span>
         }
       />
-      <p className="mt-1 break-words text-xs text-text-muted">
-        {t("wizardMemberBreakdownWarning")}
-      </p>
+      <p className="mt-1 break-words text-xs text-text-muted">{t("memberBreakdownWarning")}</p>
       {checked && keyCount < MIN_MEMBER_KEYS && (
-        <p className="mt-1 break-words text-xs text-text-main">
-          {t("wizardMemberBreakdownTooFew")}
-        </p>
+        <p className="mt-1 break-words text-xs text-text-main">{t("memberBreakdownTooFew")}</p>
       )}
     </div>
   );
