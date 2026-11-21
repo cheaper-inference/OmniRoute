@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **Verileri dikkatlice doldurun** : mevcut satırları işlemek için `UPDATE ... WHERE ...` kullanın
 4. **Sırayı ve adlandırmayı kontrol edin** : `npm run test:migrations:fresh` (boş bir veritabanındaki tüm geçişler) ve `npm run check:migration-numbering`
 5. **Bir kopya üzerinde test edin** : hiçbir zaman üretimde test edilmemiş geçişleri çalıştırma
+6. **Koddan oluşturulan bir tablonun da geçişe ihtiyacı var** : Eğer bir modül aynı zamanda tabloyu yavaş bir şekilde oluşturuyorsa (`CREATE TABLE IF NOT EXISTS`, kendi kendini iyileştirme yolu olarak tutulur), bir geçişin onu aynı DDL ile oluşturması gerekir. Aksi takdirde, temiz kurulum ve yükseltilmiş kurulum, kod yolunun çalışıp çalışmadığına bağlı olarak farklı şemalarla sonuçlanır. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` ve `open-sse/` tarar ve geçiş olmadan tembel bir `CREATE` başarısız olur (#20557). Örnek: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Örnek:
 

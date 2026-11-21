@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Držite poruke sustava usred razgovora na mjestu",
     "requireUserLastMessageDescription": "Za uzvodne izvore koji odbijaju pretpopunjavanje pomoćnika: ispustite pomoćne okrete na kraju (bez tool_use) prije slanja. Model može regenerirati svoj prethodni odgovor.",
     "requireUserLastMessageLabel": "Zahtijevajte da razgovor završi korisničkom porukom",
+    "strictChatHistoryDescription": "Popravlja prekinute nizove poziva alata i spaja uzastopne poruke asistenta prije slanja pružateljima usluga kompatibilnima s OpenAI koji primjenjuju stroga pravila.",
+    "strictChatHistoryLabel": "Popravak povijesti razgovora za stroge pružatelje usluga",
     "bulkPasteAdded": "{count, plural, one {dodan 1 ključ} few {dodana # ključa} other {dodano # ključeva}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {preskočen 1 duplikat} few {preskočena # duplikata} other {preskočeno # duplikata}}",
     "bulkPasteHint": "Zalijepite jedan API ključ po retku. Prazni reci se ignoriraju, a duplikati se preskaču.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Ukloni ključ"
   },
   "plugins": {
-    "privilegesWarningTitle": "Dodaci se pokreću s punim privilegijama",
-    "privilegesWarningBody": "Dodatak radi kao obični Node.js proces s istim pristupom kao i OmniRoute: može čitati datoteke, pokretati programe i koristiti mrežu, bez obzira na dopuštenja koja deklarira njegov manifest. Instalirajte samo dodatke kojima vjerujete.",
     "title": "Dodaci",
     "description": "Instalirajte dodatke i upravljajte njima kako biste proširili funkcionalnost sustava OmniRoute",
     "loading": "Učitavanje dodataka...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Skeniraj dodatke",
     "noPlugins": "Nema instaliranih dodataka",
     "noPluginsDescription": "Postavite direktorije dodataka u ~/.omniroute/plugins/ i kliknite Skeniraj.",
+    "privilegesWarningTitle": "Dodaci se pokreću s punim privilegijama",
+    "privilegesWarningBody": "Dodatak radi kao obični Node.js proces s istim pristupom kao i OmniRoute: može čitati datoteke, pokretati programe i koristiti mrežu, bez obzira na dopuštenja koja deklarira njegov manifest. Instalirajte samo dodatke kojima vjerujete.",
     "activate": "Aktiviraj",
     "deactivate": "Deaktiviraj",
     "uninstall": "Deinstaliraj",

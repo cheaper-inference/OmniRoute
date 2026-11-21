@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Dole ne iyakar ta zama cikakkiyar lamba wadda ta fi sifili.",
     "error": "Kuskure: {message}",
     "serverOffline": "Sabar OmniRoute ba ta kan layi. Kunna ta da: omniroute serve",
     "authRequired": "Ana buƙatar tantancewa. Saita OMNIROUTE_API_KEY ko gudanar da: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] za a {action}",
     "cancelled": "An soke.",
     "jsonOpt": "Fitar da sakamako a matsayin JSON",
-    "yesOpt": "Tsallake tambayar tabbatarwa"
+    "yesOpt": "Tsallake tambayar tabbatarwa",
+    "positiveIntegerRequired": "Dole ne iyakar ta zama cikakkiyar lamba wadda ta fi sifili."
   },
   "setup": {
     "title": "Saitin OmniRoute",

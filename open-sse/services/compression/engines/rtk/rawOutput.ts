@@ -106,10 +106,14 @@ export function maybePersistRtkRawOutput(
   const maxBytes = Math.max(1024, Math.floor(options.maxBytes ?? 1_048_576));
   const redaction = redactRtkRawOutput(safeUtf8Slice(raw, maxBytes));
   const now = Date.now();
-  const commandSlug = (options.command || "tool-output")
+  const normalizedCommand = (options.command || "tool-output")
     .replace(/[^A-Za-z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 48);
+    .replace(/^_+/, "");
+  let slugEnd = normalizedCommand.length;
+  while (slugEnd > 0 && normalizedCommand[slugEnd - 1] === "_") {
+    slugEnd -= 1;
+  }
+  const commandSlug = normalizedCommand.slice(0, Math.min(slugEnd, 48));
   const id = safeId(`${now}:${commandSlug}:${raw.length}:${redaction.text}`);
   const dir = bucketDir(id);
   const fileName = `${now}-${commandSlug || "tool-output"}-${id}.log`;

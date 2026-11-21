@@ -4,10 +4,9 @@
 
 ---
 
-A partire dalla v3.8.49 (WS3.2/WS3.4 del piano qualità/velocità), il percorso di merge predefinito per le
-PR revisionate in `release/vX.Y.Z` è la **coda di merge di Mergify** (`.mergify.yml`);
-il **merge train manuale** documentato di seguito è il FALLBACK, usato durante incidenti,
-freeze delle release o nel caso in cui il piano Open Source di Mergify dovesse cambiare.
+> **2026-11-19: la coda di unione Mergify è stata ritirata** (decisione del proprietario). `.mergify.yml` non definisce più una coda e rifiuta i comandi Mergify che uniscono o riscrivono una richiesta pull. Le versioni PRs vengono unite manualmente secondo il set di regole del repository "Richiedi porte verdi sulla versione attiva" (`Gate / CI` + `Gate / Quality`) finché la coda omnidirezionale non viene eseguita in modalità live, quindi tramite la coda omnidirezionale ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Le sezioni Mergify seguenti descrivono la coda così com'era.
+
+Dalla versione 3.8.49 (WS3.2/WS3.4 del piano quality/velocity ) il percorso di unione predefinito per PRs esaminato in `release/vX.Y.Z` è il** Unisci la coda di unione** (`.mergify.yml`); IL** treno di fusione manuale** di seguito è documentato FALLBACK — utilizzato durante incidenti, blocchi di rilascio o se il piano Mergify Open Source cambia mai.
 
 ## Percorso predefinito: la coda di Mergify
 

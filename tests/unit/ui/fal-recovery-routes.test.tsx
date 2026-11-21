@@ -1,6 +1,6 @@
 import React, { type ButtonHTMLAttributes, type PropsWithChildren } from "react";
 import { afterAll, afterEach, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -60,60 +60,82 @@ afterAll(async () => {
   core.resetDbInstance();
 });
 
-async function loadPanel(value = '{"input_image_url":"https://example.com/source.png"}') {
+async function loadPanel(
+  definitionLoaded: Promise<void>,
+  value = '{"input_image_url":"https://example.com/source.png"}'
+) {
   fireEvent.change(screen.getByRole("textbox", { name: "falNative.endpoint" }), {
     target: { value: endpoint },
   });
-  fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[0]);
+  await act(async () => {
+    fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[0]);
+    await definitionLoaded;
+  });
+  fireEvent.change(screen.getByLabelText("falNative.input"), { target: { value } });
   await waitFor(() =>
     expect(
       (screen.getByRole("button", { name: /falNative.(run|newGeneration)/ }) as HTMLButtonElement)
         .disabled
     ).toBe(false)
   );
-  fireEvent.change(screen.getByLabelText("falNative.input"), { target: { value } });
 }
 
 for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
   test(`real panel and routes recover ${failure} with one generation POST across rapid clicks, reload and GETs`, async () => {
     let generations = 0;
     let browserPosts = 0;
+    let browserGets = 0;
+    let definitionsLoaded = 0;
     const sentKeys: string[] = [];
+    const definitions = Array.from({ length: 2 }, () => Promise.withResolvers<void>());
+    const posts = Array.from({ length: 3 }, () => Promise.withResolvers<void>());
+    const refreshes = Array.from({ length: 2 }, () => Promise.withResolvers<void>());
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-        if (url.startsWith("/api/providers/"))
+        if (url.startsWith("/api/providers/")) {
+          definitions[definitionsLoaded++]?.resolve();
           return Response.json({ ...definition, capabilities: falCapabilities(definition) });
+        }
         if (url === "/api/v1/fal/run") {
-          browserPosts++;
+          const post = browserPosts++;
           sentKeys.push(new Headers(init?.headers).get("Idempotency-Key")!);
-          const response = await run.POST(
-            new Request(`http://localhost${url}`, {
-              ...init,
-              headers: {
-                ...Object.fromEntries(new Headers(init?.headers)),
-                Authorization: `Bearer ${key.key}`,
-              },
-            })
-          );
-          if (browserPosts === 1) {
-            if (failure === "disconnect-without-response")
-              throw new TypeError("Connection lost after acceptance");
-            return new Response("proxy body unavailable", {
-              status: 502,
-              headers: { "X-Request-ID": response.headers.get("X-Request-ID")! },
-            });
+          try {
+            const response = await run.POST(
+              new Request(`http://localhost${url}`, {
+                ...init,
+                headers: {
+                  ...Object.fromEntries(new Headers(init?.headers)),
+                  Authorization: `Bearer ${key.key}`,
+                },
+              })
+            );
+            if (post === 0) {
+              if (failure === "disconnect-without-response")
+                throw new TypeError("Connection lost after acceptance");
+              return new Response("proxy body unavailable", {
+                status: 502,
+                headers: { "X-Request-ID": response.headers.get("X-Request-ID")! },
+              });
+            }
+            return response;
+          } finally {
+            posts[post]?.resolve();
           }
-          return response;
         }
         if (url.startsWith("/api/v1/fal/jobs/")) {
+          const get = browserGets++;
           const id = url.split("/").at(-1)!.split("?")[0];
-          return jobs.GET(
-            new Request(`http://localhost${url}`, {
-              headers: { Authorization: `Bearer ${key.key}` },
-            }),
-            { params: Promise.resolve({ id }) }
-          );
+          try {
+            return await jobs.GET(
+              new Request(`http://localhost${url}`, {
+                headers: { Authorization: `Bearer ${key.key}` },
+              }),
+              { params: Promise.resolve({ id }) }
+            );
+          } finally {
+            refreshes[get]?.resolve();
+          }
         }
         if (url === `https://queue.fal.run/${endpoint}`) {
           generations++;
@@ -130,10 +152,13 @@ for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
       })
     );
     const mounted = render(<FalNativePanel connectionId={connectionId} />);
-    await loadPanel();
+    await loadPanel(definitions[0].promise);
     const button = screen.getByRole("button", { name: "falNative.run" });
-    fireEvent.click(button);
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      fireEvent.click(button);
+      await posts[0].promise;
+    });
     await screen.findByRole("alert");
     expect(generations).toBe(1);
     expect(browserPosts).toBe(1);
@@ -144,21 +169,30 @@ for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
     expect(sessionStorage.getItem(sessionStorage.key(0)!)).not.toContain("source.png");
     mounted.unmount();
     render(<FalNativePanel connectionId={connectionId} />);
-    await loadPanel('{"input_image_url":"https://example.com/changed.png"}');
+    await loadPanel(
+      definitions[1].promise,
+      '{"input_image_url":"https://example.com/changed.png"}'
+    );
     fireEvent.click(screen.getByRole("button", { name: "falNative.recover" }));
     await screen.findByText("falNative.recoveryMismatch");
     expect(browserPosts).toBe(1);
     fireEvent.change(screen.getByLabelText("falNative.input"), {
       target: { value: '{"input_image_url":"https://example.com/source.png"}' },
     });
-    fireEvent.click(screen.getByRole("button", { name: "falNative.recover" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "falNative.recover" }));
+      await posts[1].promise;
+    });
     await waitFor(() =>
       expect((screen.getByLabelText("falNative.job") as HTMLInputElement).value).not.toBe("")
     );
     await waitFor(() => expect(screen.queryByText("falNative.submissionUnknown")).toBeNull());
     expect(sentKeys[1]).toBe(sentKeys[0]);
-    for (let i = 0; i < 2; i++) {
-      fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[1]);
+    for (const refresh of refreshes) {
+      await act(async () => {
+        fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[1]);
+        await refresh.promise;
+      });
       await screen.findByRole("link", { name: "result.glb" });
       await waitFor(() =>
         expect(
@@ -168,8 +202,11 @@ for (const failure of ["non-json-with-header", "disconnect-without-response"]) {
       );
     }
     expect(generations).toBe(1);
-    fireEvent.click(screen.getByRole("button", { name: "falNative.newGeneration" }));
-    await waitFor(() => expect(generations).toBe(2));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "falNative.newGeneration" }));
+      await posts[2].promise;
+    });
+    expect(generations).toBe(2);
     expect(sentKeys[2]).not.toBe(sentKeys[0]);
   });
 }

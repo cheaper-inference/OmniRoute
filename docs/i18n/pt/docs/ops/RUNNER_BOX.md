@@ -120,35 +120,22 @@ O `KillMode=process` predefinido do runner deixa `Runner.Worker → npm → next
   a chegar ao tmpfs e 2 minutos a ser carregado a partir do disco.
 - O VPS `.15` destina-se apenas a homologação — nunca executa runners de CI.
 
-## Faixa alojada (runners alojados pelo GitHub)
+## Via alojada (executores alojados no GitHub)
 
-O repositório pertence à organização `cheaper-inference`, no plano **Team**: **60 tarefas alojadas em simultâneo**, partilhadas por todos os repositórios da organização, todas as verificações de PR,
-todos os workflows acionados por `push` e a configuração predefinida do CodeQL. Os valores abaixo foram medidos no
-plano **Pro** (40 tarefas alojadas em simultâneo). Medido em 2026-10-18 durante uma
-campanha de merges (~10 merges/hora em `release/v3.8.52`): **2.500 execuções de workflows criadas em
-24 h**, 44 pushes para o branch em 6 h, **106 tarefas alojadas em fila** enquanto as verificações de PR aguardavam
-durante horas e os PRs eram integrados sem elas. Nove workflows eram acionados em cada push para o branch:
+O repositório pertence à organização `cheaper-inference`, no** Equipa** plano:** 60 trabalhos alojados simultâneos** , partilhado por todos os repositórios da organização, todas as verificações PR, todos os fluxos de trabalho acionados por push e a configuração padrão do CodeQL. Os números abaixo foram medidos no** Pró** plano (40 trabalhos alojados simultâneos). Medido em 18/10/2026 durante uma campanha de fusão (~ 10 merges/hour em `release/v3.8.52`):** 2.500 execuções de workflow criadas em 24 horas** , 44 empurrões para o ramo em 6 h,** 106 trabalhos alojados na fila** enquanto as verificações PR esperaram horas e PRs foi fundido sem elas. Nove workflows disparados em cada push para o branch:
 
-| por push para `release/v*`                     | tarefas alojadas | resultado durante a sobrecarga                                 | desde 2026-10-18                                                                           |
-| ---------------------------------------------- | ---------------: | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `ci.yml` (matriz completa)                     |           até 30 | cancelado pelo push seguinte, 24 de 24 num dia                 | não é iniciado em pushes para `release/**` (execução de PR + Release-Green)                |
-| `quality.yml`                                  |               ~6 | cancelado, 23 de 23                                            | não é iniciado em pushes para `release/**`                                                 |
-| `Release-Green` `--quick`                      |                0 | executado em `omni-build`, 97 de 100 cancelados                | slot `omni-release`, nunca cancelado, a execução pendente é consolidada                    |
-| `Lock released branch`, `OpenSSF Scorecard`    |                2 | uma execução em fila por push                                  | uma execução por ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)                  |
-| `Release acceptance` (relatório sombra)        |                1 | um `npm ci` alojado por push, nunca cancelado                  | sem alterações — candidato a um filtro `paths:`                                            |
-| `Publish to Docker Hub` → `Deploy to VPS`      |                2 | cancelado por push; a etapa amd64 compete em `omni-build`      | sem alterações — canal de implementação do proprietário                                    |
-| configuração predefinida do CodeQL (`dynamic`) |                4 | `javascript-typescript`, `actions`, `c-cpp`, `python` por push | sem alterações — Definições → Segurança do código; `c-cpp`/`python` não analisam nada aqui |
+| por push para `release/v*`                  | trabalhos alojados | resultado sob a tempestade                                     | desde 2026/10/18                                                                        |
+| ------------------------------------------- | -----------------: | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `ci.yml` (matriz completa)                  |             até 30 | cancelado no próximo push, 24 de 24 num dia                    | não iniciado em pushes `release/**` (PR run + Release-Green)                            |
+| `quality.yml`                               |                 ~6 | cancelado, 23 de 23                                            | não iniciado em pushes `release/**`                                                     |
+| `Release-Green` `--quick`                   |                  0 | correu em `omni-build`, cancelou 97 em 100                     | slot `omni-release`, nunca cancelado, execução pendente colapsa                         |
+| `Lock released branch`, `OpenSSF Scorecard` |                  2 | uma execução na fila por push                                  | uma execução por referência (`tests/unit/build/hosted-lane-concurrency.test.ts`)        |
+| `Release acceptance` (relatório sombra)     |                  1 | um `npm ci` hospedado por push, nunca cancelado                | candidato — inalterado para um filtro `paths:`                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                  2 | cancelado por push; perna amd64 compete no `omni-build`        | canal de implantação do proprietário — inalterado                                       |
+| configuração padrão CodeQL (`dynamic`)      |                  4 | `javascript-typescript`, `actions`, `c-cpp`, `python` por push | Configurações — inalteradas Código → segurança; `c-cpp`/`python` não verifica nada aqui |
 
-`tests/unit/build/push-storm-diet.test.ts` fixa o acionador por push apenas em `main` de `ci.yml` e
-`quality.yml`. Efeito secundário: o Codecov deixa de receber um carregamento base por push para um release (o
-passo é informativo e usa `continue-on-error`); o controlo de cobertura no repositório e o comentário no PR não são
-afetados.
+`tests/unit/build/push-storm-diet.test.ts` fixa o gatilho `main` -only de `ci.yml` e `quality.yml`. Efeito colateral: O Codecov já não recebe um upload base por push de lançamento (o passo é informativo e `continue-on-error`); o portão de cobertura in-repo e o comentário PR não são afetados.
 
-**Mais capacidade autoalojada não resolve a fila alojada.** A devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) poderia alojar um runner, mas as sessões dos agentes já
-mantêm a respetiva carga entre 20–26, o contentor do agente não tem um daemon do Docker e a faixa saturada é
-a alojada. A máquina `.113` tinha 71 GB livres e uma carga entre 5–8 no mesmo momento; a respetiva limitação
-é o orçamento de memória por listener indicado acima (limite máximo de 6 listeners), não a CPU. As restantes opções
-são processuais: integrar os PRs da campanha através da fila do Mergify (`label=queue`; os lotes partilham
-uma execução de CI `merge_group` em vez de uma execução por PR mais uma por push), reduzir as linguagens da
-configuração predefinida do CodeQL e filtrar `release-acceptance.yml` pelos ficheiros que lê.
+**Mais capacidade auto-hospedada não corrige a fila alojada.** O devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) poderia hospedar um executor, mas as sessões do agente já mantêm a sua carga entre 20 e 26, o contentor do agente não tem daemon Docker e a via saturada é a hospedada. A caixa `.113` tinha 71 GB livres e transportava 5–8 no mesmo momento; a sua restrição é o orçamento de memória por ouvinte acima (teto de 6 ouvintes), e não CPU. As restantes alavancas são de processo: enviar a campanha PRs através da fila Mergify (`label=queue`, os lotes partilham uma execução `merge_group` CI em vez de uma execução por PR mais uma por push), cortar os idiomas de configuração padrão CodeQL e filtrar `release-acceptance.yml` pelos ficheiros que lê.
+
+> **19/11/2026: a fila de fusão do Mergify foi desativada** (decisão do proprietário). `.mergify.yml` já não define uma fila e recusa os comandos Mergify que fundem ou reescrevem um pull request. A versão PRs é fundida manualmente sob o conjunto de regras do repositório "Exigir portões verdes na versão ativa" (`Gate / CI` + `Gate / Quality`) até que a omni-queue seja executada no modo ao vivo, e através da omni-queue depois disso ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). A alavanca Mergify acima já não existe.

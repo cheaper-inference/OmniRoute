@@ -4,7 +4,7 @@
 
 ---
 
-## Ātrā sākšana
+## Ātrais sākums
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Rūpnīcas funkcija, kas izveido Plugin objektu ar noklusējuma vērtībām.
+Rūpnīcas funkcija, kas izveido spraudņa objektu ar noklusējuma iestatījumiem.
 
 **Parametri:**
 
-- `name` (string, obligāts) — Spraudņa nosaukums kebab-case formātā
-- `priority` (number, neobligāts, noklusējums: 100) — Mazāka vērtība tiek izpildīta vispirms
-- `enabled` (boolean, neobligāts, noklusējums: true) — Vai sākt iespējotā stāvoklī?
-- `onRequest` (function, neobligāts) — Tiek izpildīta pirms tērzēšanas apstrādātāja
-- `onResponse` (function, neobligāts) — Tiek izpildīta pēc tērzēšanas apstrādātāja
-- `onError` (function, neobligāts) — Tiek izpildīta apstrādātāja kļūdas gadījumā
+- `name` (virkne, obligāta) — Spraudņa nosaukums kebab-case
+- `priority` (numurs, neobligāts, noklusējuma: 100) — Vispirms tiek palaists zemākais
+- `enabled` (būla, neobligāts, noklusējuma: true) — Sākt iespējot?
+- `onRequest` (funkcija, izvēles) — Darbojas pirms tērzēšanas apstrādātāja
+- `onResponse` (funkcija, izvēles) — Darbojas pēc tērzēšanas apstrādātāja
+- `onError` (funkcija, izvēles) — Darbojas apdarinātāja kļūdas gadījumā
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Bloķē pieprasījumu un pēc izvēles atgriež pielāgotu atbildi.
+Bloķējiet pieprasījumu un pēc izvēles atgrieziet pielāgotu atbildi.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Maina pieprasījuma pamattekstu, pirms tas sasniedz nodrošinātāju.
+Mainiet pieprasījuma pamattekstu, pirms tas sasniedz pakalpojumu sniedzēju.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Pievieno metadatus pieprasījuma kontekstam.
+Pievienojiet metadatus pieprasījuma kontekstam.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Spraudņa konteksts (`PluginContext`)
 
-| Lauks       | Tips                      | Apraksts                            |
-| ----------- | ------------------------- | ----------------------------------- |
-| `requestId` | `string`                  | Unikāls pieprasījuma identifikators |
-| `model`     | `string`                  | Pieprasītā modeļa nosaukums         |
-| `provider`  | `string`                  | Mērķa nodrošinātāja ID              |
-| `body`      | `Record<string, unknown>` | Pieprasījuma pamatteksts            |
-| `headers`   | `Record<string, string>`  | Pieprasījuma galvenes               |
-| `metadata`  | `Record<string, unknown>` | Maināmi metadati                    |
-| `timestamp` | `number`                  | Pieprasījuma laikspiedols           |
+| Lauks        | Tips                      | Apraksts                                |
+| ------------ | ------------------------- | --------------------------------------- |
+| `requestId`  | `string`                  | Unikāls pieprasījuma identifikators     |
+| `model`      | `string`                  | Pieprasītā modeļa nosaukums             |
+| `provider`   | `string`                  | Mērķa nodrošinātājs ID                  |
+| `body`       | `Record<string, unknown>` | Pieprasījuma struktūra                  |
+| `headers`    | `Record<string, string>`  | Pieprasījuma galvenes (skatiet piezīmi) |
+| `metadata`   | `Record<string, unknown>` | Maināmi metadati                        |
+| `timestamp`  | `number`                  | Pieprasīt laikspiedolu                  |
+| `apiKeyInfo` | `object` (pēc izvēles)    | API atslēgas metadati (skatiet piezīmi) |
+
+Konteksts nekad nesatur klienta akreditācijas datus: `authorization`, `x-api-key`, `proxy-authorization` un `cookie` galvenes tiek noņemtas (jebkurš korpuss), un `apiKeyInfo` saglabā atslēgas metadatus (piemēram, `id`, `name` un `scopes`), bet ne atslēgas vērtību vai tās pirkstu nospiedumu `src/lib/plugins/hooks.ts` `redactPluginContext()` in). Tas attiecas uz `onRequest`, `onResponse` un `onError`.
 
 ## Manifests (`plugin.json`)
 
@@ -140,17 +143,16 @@ Vai kā vienkāršas Būla vērtības (noklusējuma prioritāte ir 100):
 
 ## Atļauju sistēma
 
-Spraudņi darbojas izolētā VM kontekstā. Piekļuvei ārējiem resursiem ir nepieciešamas nepārprotami piešķirtas atļaujas:
+Spraudņi ir** nav smilškastes** . Katrs aktīvais spraudnis darbojas kā atsevišķs, parasts Node.js pakārtots process (`loadPlugin()` in `src/lib/plugins/loader.ts`) ar to pašu operētājsistēmas lietotāju kā OmniRoute, bez VM konteksta un bez Node.js atļauju karodziņiem. Spraudņa kods var izmantot `node:fs`, `node:child_process`, `fetch` un visus citus Node.js API: tas var lasīt un rakstīt jebkuru failu, ko OmniRoute lietotājs var (ieskaitot datu direktoriju), palaist programmas un sasniegt tīklu.
 
-| Atļauja      | Piešķir piekļuvi                                             |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Tikai lasāms `process.env` starpniekobjekts                  |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifesta `requires.permissions` pieņem `network`, `file-read`, `file-write`, `env` un `exec`, taču šodien izpildlaikā darbojas tikai `env` :
 
-Bez attiecīgās atļaujas atbilstošie globālie objekti smilškastē vienkārši nav pieejami.
+| Atļauja                                      | Efekts šodien                                                                                                                                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Spraudņa process saņem arī `PORT`, `HOSTNAME`, `TZ` un `TMPDIR`. Bez tā tas saņem tikai `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` un `PLUGIN_NAME` (kā arī `SystemRoot` un `windir` uz Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nav. Tās ir tikai deklarācijas: nekas netiek bloķēts, ja to trūkst.                                                                                                                                                         |
+
+Spraudņa instalēšana ir tāda pati kā jebkuras citas programmas instalēšana resursdatorā. Instalējiet tikai tādus spraudņus, kuru avotam uzticaties.
 
 ## Konfigurācijas shēma
 
@@ -194,7 +196,7 @@ Konfigurācijas vērtības tiek saglabātas datubāzē un ir pieejamas informāc
 
 ## Piemēri
 
-### Pieprasījumu žurnalētājs
+### Pieprasīt reģistrētāju
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Ātruma ierobežotājs
+### Likmes ierobežotājs
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minūte
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Atbildes pārveidotājs
+### Atbildes transformators
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

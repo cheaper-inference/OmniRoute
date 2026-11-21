@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "සීමාව ධන නිඛිලයක් විය යුතුය.",
     "error": "දෝෂය: {message}",
     "serverOffline": "OmniRoute සේවාදායකය නොබැඳියි. එය ආරම්භ කිරීමට: omniroute serve",
     "authRequired": "සත්යාපනය අවශ්යයි. OMNIROUTE_API_KEY සකසන්න හෝ මෙය ධාවනය කරන්න: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} කරනු ඇත",
     "cancelled": "අවලංගු කරන ලදී.",
     "jsonOpt": "JSON ලෙස ප්රතිදානය කරන්න",
-    "yesOpt": "තහවුරු කිරීමේ විමසුම මඟ හරින්න"
+    "yesOpt": "තහවුරු කිරීමේ විමසුම මඟ හරින්න",
+    "positiveIntegerRequired": "සීමාව ධන නිඛිලයක් විය යුතුය."
   },
   "setup": {
     "title": "OmniRoute පිහිටුවීම",

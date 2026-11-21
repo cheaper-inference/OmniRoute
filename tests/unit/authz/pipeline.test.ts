@@ -311,6 +311,21 @@ test("runAuthzPipeline rejects oversized API bodies before auth", async () => {
   );
 });
 
+test("runAuthzPipeline rejects oversized /a2a JSON-RPC bodies before auth (#19832)", async () => {
+  for (const url of ["http://localhost/a2a", "http://localhost/A2A"]) {
+    const response = await pipeline.runAuthzPipeline(
+      request(url, {
+        method: "POST",
+        headers: { "content-length": String(99 * 1024 * 1024) },
+      }),
+      { enforce: true }
+    );
+
+    assert.equal(response.status, 413, `${url} must be capped by the body-size guard`);
+    assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  }
+});
+
 test("runAuthzPipeline rejects oversized rewritten alias API bodies before auth", async () => {
   const response = await pipeline.runAuthzPipeline(
     request("http://localhost/v1/chat/completions", {

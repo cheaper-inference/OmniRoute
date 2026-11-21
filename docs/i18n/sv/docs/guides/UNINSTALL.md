@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Valfritt) Ta bort avbildningen
+docker rmi cheaperinference/omniroute:latest
+# Äldre installationer drog det gamla namnet:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

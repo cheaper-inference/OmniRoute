@@ -10,6 +10,8 @@ import { hasSelfAccountQuotaScope } from "@/shared/constants/selfServiceScopes";
 export const INTERNAL_USAGE_COMMAND = "@@om-usage";
 export const USAGE_COMMAND_DISABLED_MESSAGE = "Usage command is disabled for this API key.";
 const USAGE_COMMAND_AUTH_REQUIRED_MESSAGE = "Usage command requires an authenticated API key.";
+const NO_PERSONAL_QUOTA_TEXT =
+  "Personal quota\nNo personal usage limits configured for this API key.";
 const LOCAL_USAGE_MODEL = "omniroute/local-usage";
 const TEXT_PLAIN_HEADERS = { "Content-Type": "text/plain; charset=utf-8" } as const;
 
@@ -568,6 +570,7 @@ function appendQuotaBlock(
  *   shared accounts ({@link canReadSharedAccountQuota}). Every other key gets
  *   `provider: null` and `providers: []`.
  * - In contrast, text output (`buildUsageCommandText` / terminal `@@om-usage`)
+ *   follows the same access rule (personal quota only for other keys) and
  *   renders cutoff-adjusted remaining percentages (`NN% left`) via
  *   {@link effectiveRemainingPercent}, where the configured cutoff reserve
  *   reads as 0% left.
@@ -635,6 +638,12 @@ export async function buildUsageCommandText(
     });
     const now = resolvedDeps.now();
     sections.push(["Personal quota", buildApiKeyUsageLimitPercentText(status, now)].join("\n"));
+  }
+
+  // Same rule as the JSON form: the shared provider accounts are not read for a
+  // key that may not see them, so the text carries the personal quota only.
+  if (!canReadSharedAccountQuota(metadata.scopes)) {
+    return sections.length > 0 ? sections.join("\n\n") : NO_PERSONAL_QUOTA_TEXT;
   }
 
   const snapshot = selectUsageSnapshot(

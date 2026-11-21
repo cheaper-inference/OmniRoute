@@ -557,6 +557,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 組み込みダッシュボードのWebSocketアップグレードは、専用ポート上のコンパニオン サーバーによって処理されます ( `src/lib/services/embedWsProxy.ts`参照)。
 
+すべてのアップグレードはトンネルが開く前に承認され、 HTTP埋め込みルートと同じルールが適用されます。ピアはリバース プロキシ転送ヘッダーのないループバックである必要があり、ブラウザー`Origin`ダッシュボード起点である必要があり (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS`ループバックのデフォルトを拡張します)、ダッシュボード ログインが無効になっていない限り、呼び出し元にはダッシュボード セッションまたは管理スコープのAPIキーが必要です。
+
 **安全：**埋め込みプロキシ ルートは`LOCAL_ONLY_API_PREFIXES`に分類され、ループバックからのみ到達できます。 Cloudflare/Ngrokトンネル経由でJWTを取得した攻撃者は、組み込みサービスにプロキシすることはできません。
 
 ---
