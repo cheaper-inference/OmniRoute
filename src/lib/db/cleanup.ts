@@ -514,20 +514,33 @@ export async function cleanupCcrBlocks(): Promise<CleanupResult> {
  * Delete closed quota-share buckets. The sliding window reads only the current and the
  * previous bucket, so a row not updated for two of the longest windows (monthly) is dead
  * for every window. No retention setting: the cutoff follows the window table.
+ *
+ * The percent attribution book (quota_percent_ledger and its token counters) ages out with
+ * the same cutoff. A book is not rewritten while the account bar does not move, so the cutoff
+ * must exceed the longest plan window; two monthly windows does.
  */
 export async function cleanupQuotaConsumption(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
+  const cutoffIso = new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString();
 
   try {
-    await deleteFromTableBeforeInBatches(
-      { table: "quota_consumption", column: "updated_at", cutoff: "epochMs" },
-      new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString(),
-      { progress: result }
+    for (const table of [
+      "quota_consumption",
+      "quota_percent_ledger",
+      "quota_percent_ledger_tokens",
+    ]) {
+      await deleteFromTableBeforeInBatches(
+        { table, column: "updated_at", cutoff: "epochMs" },
+        cutoffIso,
+        { progress: result }
+      );
+    }
+    console.log(
+      `[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets and idle percent ledger rows`
     );
-    console.log(`[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets`);
   } catch (err: unknown) {
     console.error(
-      `[Cleanup] Error cleaning quota_consumption (${result.deleted} rows deleted):`,
+      `[Cleanup] Error cleaning quota_consumption and percent ledger (${result.deleted} rows deleted):`,
       err
     );
     result.errors++;
@@ -881,6 +894,9 @@ export interface ResetUsageHistoryResult extends CleanupResult {
   deletedCompressionRunTelemetry: number;
   deletedRoutingDecisions: number;
   deletedQuotaConsumption: number;
+  /** Percent attribution books and their token counters (quota share on percent plans). */
+  deletedQuotaPercentLedger: number;
+  deletedQuotaPercentLedgerTokens: number;
   /**
    * Always 0. `token_ledger` is the transfer record behind token balances and
    * idempotency keys, not usage analytics, so a usage reset never deletes it.
@@ -976,6 +992,18 @@ const RESET_TARGETS: Array<
     resultKey: "deletedQuotaConsumption",
   },
   {
+    table: "quota_percent_ledger",
+    column: "updated_at",
+    cutoff: "epochMs",
+    resultKey: "deletedQuotaPercentLedger",
+  },
+  {
+    table: "quota_percent_ledger_tokens",
+    column: "updated_at",
+    cutoff: "epochMs",
+    resultKey: "deletedQuotaPercentLedgerTokens",
+  },
+  {
     table: "conversation_turn_nodes",
     column: "last_seen_at",
     cutoff: "iso",
@@ -1014,6 +1042,8 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deletedCompressionRunTelemetry: 0,
     deletedRoutingDecisions: 0,
     deletedQuotaConsumption: 0,
+    deletedQuotaPercentLedger: 0,
+    deletedQuotaPercentLedgerTokens: 0,
     deletedTokenLedger: 0,
     deletedConversationTurnNodes: 0,
     deletedAgenticConversations: 0,
