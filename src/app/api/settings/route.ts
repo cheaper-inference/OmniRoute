@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveAntigravityCreditsMode } from "@omniroute/open-sse/services/antigravityCredits.ts";
 import {
   getSettings,
   getSettingsRevision,
@@ -220,6 +221,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         ...maskSecretSettings(safeSettings),
+        antigravityCreditsMode: resolveAntigravityCreditsMode(settings.antigravityCreditsMode),
         settingsRevision,
         hasPassword: hasManagementPasswordConfigured(settings),
         runtimePorts,
@@ -683,6 +685,7 @@ export async function PATCH(request: Request) {
     const response = NextResponse.json(
       {
         ...maskSecretSettings(safeSettings),
+        antigravityCreditsMode: resolveAntigravityCreditsMode(settings.antigravityCreditsMode),
         settingsRevision,
         ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}),
       },
