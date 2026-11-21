@@ -13426,7 +13426,15 @@
     "dismiss": "Dismiss",
     "allocationsHeading": "Allocations",
     "wizardRemoveDimension": "Remove dimension",
-    "wizardRemoveKey": "Remove key"
+    "wizardRemoveKey": "Remove key",
+    "borrowModeLabel": "Borrowing",
+    "borrowModeSaturation": "By saturation",
+    "borrowModeConsent": "By consent",
+    "borrowModeSaturationHint": "A key may pass its share while the account is below the saturation threshold.",
+    "borrowModeConsentHint": "A key may pass its share only within the idle share other keys agreed to lend. Key holders give that consent themselves.",
+    "lendingBadge": "lends {percent}%",
+    "lendingBadgeUntil": "lends {percent}% until {date}",
+    "lendingBadgeExpired": "lending expired"
   },
   "plugins": {
     "title": "Plugins",

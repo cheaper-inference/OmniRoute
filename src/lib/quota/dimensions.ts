@@ -54,6 +54,7 @@ export const QuotaPoolSchema = z.object({
   groupId: z.string().optional(),
   createdAt: z.string().datetime(),
   allocations: z.array(PoolAllocationSchema).default([]),
+  borrowMode: BorrowModeSchema.default("saturation"),
 });
 export type QuotaPool = z.infer<typeof QuotaPoolSchema>;
 
