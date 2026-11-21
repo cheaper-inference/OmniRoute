@@ -22,13 +22,11 @@ import {
   type ReclaimStopReason,
 } from "./reclaimFreedPages";
 import {
-  collectCallLogArtifactsBefore,
   deleteAllFromTable,
-  deleteCallLogArtifacts,
-  deleteFromTableBefore,
   deleteFromTableBeforeInBatches,
   deleteWhereInBatches,
   deleteWholeDaysBefore,
+  executeUsageReset,
   tableExists,
   type DeleteByPeriodTarget,
 } from "./cleanup/usagePurge";
@@ -1106,43 +1104,17 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     errors: 0,
   };
 
-  try {
-    let artifactsToDelete: string[] = [];
+  const cutoffIso =
+    period === "all"
+      ? null
+      : new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
+  await executeUsageReset(period, cutoffIso, RESET_TARGETS, result);
 
-    if (period === "all") {
-      for (const target of RESET_TARGETS) {
-        (result[target.resultKey] as number) = await deleteAllFromTable(target.table);
-      }
-    } else {
-      const cutoffIso = new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
-      artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso);
-      for (const target of RESET_TARGETS) {
-        if (target.allOnly) continue;
-        (result[target.resultKey] as number) = target.keptWhileBooked
-          ? deleteUnbookedPercentCountersBefore(cutoffIso)
-          : await deleteFromTableBefore(target, cutoffIso);
-      }
-    }
-
-    let artifactResult: { deletedArtifacts: number; errors: number };
-    if (period === "all") {
-      artifactResult = purgeCallLogArtifactDirectory();
-    } else {
-      artifactResult = deleteCallLogArtifacts(artifactsToDelete);
-    }
-    result.deletedCallLogArtifacts = artifactResult.deletedArtifacts;
-    result.deletedArtifacts = artifactResult.deletedArtifacts;
-    result.errors += artifactResult.errors;
-
-    result.deleted = RESET_TARGETS.reduce((sum, t) => sum + (result[t.resultKey] as number), 0);
-
+  if (result.errors === 0) {
     console.log(
       `[Cleanup] Reset usage/log data (period=${period}): ${result.deleted} row(s), ` +
         `${result.deletedCallLogArtifacts} call log artifact(s)`
     );
-  } catch (err: unknown) {
-    console.error("[Cleanup] Error resetting usage history:", err);
-    result.errors++;
   }
 
   return result;

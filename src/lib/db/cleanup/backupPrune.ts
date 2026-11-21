@@ -14,7 +14,6 @@ import path from "path";
 import { fileURLToPath } from "node:url";
 import { fork } from "node:child_process";
 
-import { hashFileSync } from "../backupFileHash";
 import type { SqliteAdapter } from "../adapters/types";
 import {
   collectBackupFamilies,
@@ -46,17 +45,20 @@ export function resolveVacuumSnapshotWorker(): { workerFile: string; execArgv: s
 function isVacuumWorkerResult(value: unknown): value is VacuumSnapshotWorkerResult {
   if (!value || typeof value !== "object") return false;
   const result = value as Partial<VacuumSnapshotWorkerResult>;
-  return typeof result.ok === "boolean";
+  return (
+    typeof result.ok === "boolean" &&
+    (result.sha256 === undefined || typeof result.sha256 === "string")
+  );
 }
 
-export async function runVacuumSnapshotInChild(
+export async function runVacuumSnapshotWithHashInChild(
   job: VacuumSnapshotJob,
   options: {
     workerFile?: string;
     execArgv?: string[];
     timeoutMs?: number;
   } = {}
-): Promise<boolean> {
+): Promise<VacuumSnapshotWorkerResult> {
   const resolved = options.workerFile
     ? { workerFile: options.workerFile, execArgv: options.execArgv ?? [] }
     : resolveVacuumSnapshotWorker();
@@ -81,7 +83,7 @@ export async function runVacuumSnapshotInChild(
     child.once("close", (code) => {
       clearTimeout(timer);
       if (!failure && code === 0 && result) {
-        resolve(result.ok);
+        resolve(result);
       } else {
         reject(failure ?? new Error("Vacuum snapshot worker exited without a result"));
       }
@@ -93,6 +95,18 @@ export async function runVacuumSnapshotInChild(
       }
     });
   });
+}
+
+export async function runVacuumSnapshotInChild(
+  job: VacuumSnapshotJob,
+  options: {
+    workerFile?: string;
+    execArgv?: string[];
+    timeoutMs?: number;
+  } = {}
+): Promise<boolean> {
+  const result = await runVacuumSnapshotWithHashInChild(job, options);
+  return result.ok;
 }
 
 /**
@@ -115,9 +129,9 @@ export async function resolveReusedPreMigrationSha(
     const tempDir = fs.mkdtempSync(path.join(backupDir, ".cleanup-resolve-"));
     const tempPath = path.join(tempDir, "snapshot.sqlite");
     try {
-      const created = await runVacuumSnapshotInChild({ sqliteFile, tempPath }, options);
-      if (!created) return null;
-      return hashFileSync(tempPath);
+      const snapshot = await runVacuumSnapshotWithHashInChild({ sqliteFile, tempPath }, options);
+      if (!snapshot.ok || !snapshot.sha256) return null;
+      return snapshot.sha256;
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }

@@ -1,3 +1,4 @@
+import { hashFileSync } from "../backupFileHash";
 import { tryOpenSync } from "../adapters/driverFactory";
 
 export interface VacuumSnapshotJob {
@@ -7,6 +8,7 @@ export interface VacuumSnapshotJob {
 
 export interface VacuumSnapshotWorkerResult {
   ok: boolean;
+  sha256?: string;
   unavailable?: boolean;
 }
 
@@ -24,7 +26,8 @@ process.once("message", (job: VacuumSnapshotJob) => {
     reader.exec(`VACUUM INTO '${job.tempPath.replace(/'/g, "''")}'`);
     reader.close();
     reader = null;
-    const result: VacuumSnapshotWorkerResult = { ok: true };
+    const sha256 = hashFileSync(job.tempPath);
+    const result: VacuumSnapshotWorkerResult = { ok: true, sha256 };
     process.send?.(result, () => {
       process.disconnect?.();
     });
