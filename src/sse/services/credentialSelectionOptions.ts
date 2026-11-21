@@ -18,6 +18,8 @@ export interface CredentialSelectionOptions {
   explicitConnectionPin?: boolean;
   excludeConnectionIds?: string[] | null;
   sessionKey?: string | null;
+  /** Candidate availability checks must not create, touch or replace session bindings. */
+  affinityReadOnly?: boolean;
   sessionAffinityTtlMs?: number | null;
   reserveOAuthSession?: boolean;
   lease?: CredentialLeaseSelectionContext;

@@ -194,6 +194,21 @@ function getFirstInputText(body: unknown): string | null {
 }
 
 /**
+ * Claude Code carries its chat id inside a JSON-encoded `metadata.user_id`.
+ * Account/device ids are not sessions, so only `session_id` counts; opaque user
+ * ids, oversized values and malformed JSON return null and keep the prompt
+ * fallback.
+ */
+function extractClaudeCodeSessionKey(userId: unknown): string | null {
+  if (typeof userId !== "string" || userId.length > SESSION_KEY_MAX_INPUT_LEN) return null;
+  try {
+    return normalizeSessionKey(asRecord(JSON.parse(userId)).session_id, "claude-session");
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Derives the stable connection-affinity key for a request.
  *
  * @param body - Parsed request body containing explicit session identifiers or recognized text.
@@ -225,6 +240,9 @@ export function extractSessionAffinityKey(
     normalizeSessionKey(record.session_id, "session") ??
     normalizeSessionKey(record.prompt_cache_key, "prompt-cache");
   if (explicitKey) return explicitKey;
+
+  const claudeSession = extractClaudeCodeSessionKey(metadata.user_id);
+  if (claudeSession) return claudeSession;
 
   const inputText = getFirstInputText(body);
   if (!inputText) return null;
@@ -324,6 +342,28 @@ function logSharedSessionAffinitySelection(
       "AUTH",
       `shared affinity winner unavailable for session_key=${formatSessionKeyForLog(sessionKey)} provider=${provider}; keeping connection ${selected.id.slice(0, 8)} without changing the shared pin`
     );
+}
+
+/**
+ * Read-only variant of the selection below, for combo availability probes: picks
+ * the bound connection when it is in the pool, else the LRU one, without
+ * creating, touching or replacing any binding and without updating LRU state.
+ * A probe sees one candidate at a time, so a scoped miss is not evidence that
+ * the previously bound account is unavailable globally.
+ */
+export async function peekSessionAffinityConnection<T extends SessionAffinityConnection>(
+  provider: string,
+  sessionKey: string | null | undefined,
+  connections: T[],
+  ttlMs = 0
+): Promise<T | null> {
+  if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
+  const existing = await getSessionAffinityStore().get(sessionKey, provider, ttlMs);
+  return (
+    resolveSessionAffinityConnection(existing, connections, provider) ??
+    [...connections].sort(compareLruConnections)[0] ??
+    null
+  );
 }
 
 /**

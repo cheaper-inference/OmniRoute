@@ -197,6 +197,7 @@ import {
   isForcedConnectionMissingFromPool,
   resolveForcedConnectionForCredentialPool,
   resolveSessionAffinityTtlMs,
+  peekSessionAffinityConnection,
   selectSessionAffinityConnection,
   planSessionAffinityConnection,
   syncSessionAffinityRuntimeFields,
@@ -1986,15 +1987,23 @@ export async function getProviderCredentials(
       ? connection
       : options.lease
         ? affinityPlan?.connection
-        : await selectSessionAffinityConnection(
-            provider,
-            options.sessionKey,
-            allOrderedConnections,
-            sessionAffinityTtlMs
-          );
+        : options.affinityReadOnly === true
+          ? await peekSessionAffinityConnection(
+              provider,
+              options.sessionKey,
+              allOrderedConnections,
+              sessionAffinityTtlMs
+            )
+          : await selectSessionAffinityConnection(
+              provider,
+              options.sessionKey,
+              allOrderedConnections,
+              sessionAffinityTtlMs
+            );
     if (affinityConnection) {
       connection = affinityConnection;
-      if (options.lease) commitSelectionSideEffects = affinityPlan?.commit;
+      if (options.lease && !options.affinityReadOnly)
+        commitSelectionSideEffects = affinityPlan?.commit;
       else syncSessionAffinityRuntimeFields(connectionsRaw, connection);
     } else if (options.sessionKey) {
       // Selection falls back to LRU, so a miss means affinity is off or no candidate is left.
