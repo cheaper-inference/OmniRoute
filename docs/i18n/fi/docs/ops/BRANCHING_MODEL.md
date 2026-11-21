@@ -39,25 +39,23 @@ flowchart LR
 `main` ei ole päivittäinen integraatiohaara. `main`-haaraan kohdistetut PR:t
 on yleensä kohdistettava uudelleen ennen yhdistämistä.
 
-## Julkaisujäädytys (rinnakkaiset syklit)
+## Vapauta jäädytys (rinnakkaisjaksot)
 
-Kun julkaisua sovitetaan yhteen, avataan `release-freeze`-merkinnällä varustettu
-merkintäissue. Tämä **ei pysäytä kehitystä**:
+Kun julkaisua sovitetaan, `release-freeze` -merkkiongelma avataan. Että** ei pysäytä kehitystä** :
 
-- Jäädytetty `release/vX.Y.Z` kuuluu kyseisen julkaisun julkaisuvastaavalle.
-- Seuraavan syklin `release/vX+1` luodaan jäädytetystä kärjestä, jotta kontribuoijat voivat jatkaa
-  työnsä yhdistämistä.
-- Avoimet PR:t, jotka edelleen kohdistuvat jäädytettyyn haaraan, tulee **kohdistaa uudelleen**
-  aktiiviseen (suurimman versionumeron omaavaan) `release/v*`-haaraan.
+- Jäätynyt `release/vX.Y.Z` kuuluu aluksen vapautuskapteenille.
+- Seuraavan syklin `release/vX+1` leikataan jäätyneestä kärjestä, jotta avustajat jatkavat laskeutumistyötä.
+- Avoin PRs, joka edelleen kohdistuu jäätyneeseen oksaan, pitäisi olla** uudelleen kohdistettu** aktiiviseen (korkeimpaan) `release/v*` -haaraan.
 
-Tarkista avoin jäädytys ennen kuin oletat haluamasi haaran olevan yhdistettävissä:
+Tarkista, onko avoin jäädytys, ennen kuin oletat, että haluamasi haara on yhdistettävissä:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Yhdistämismekaniikka (omistajan `queue`-merkintä → Mergify) on dokumentoitu tiedostossa
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Yhdistämismekaniikka (omistaja `queue` label → Mergify) on dokumentoitu [MERGE_TRAIN.md](./MERGE_TRAIN.md) -tiedostossa.
+
+> **19.11.2026: Mergify-yhdistämisjono on poistettu käytöstä** (omistajan päätös). `.mergify.yml` ei enää määritä jonoa ja hylkää yhdistämiskomennot, jotka yhdistävät tai kirjoittavat uudelleen vetopyynnön. Julkaisut PRs yhdistetään käsin arkiston sääntöjoukon "Vaadi vihreät portit aktiivisessa julkaisussa" (`Gate / CI` + `Gate / Quality`) mukaisesti, kunnes omni-queue toimii live-tilassa, ja omni-jonon kautta sen jälkeen ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` -tunniste ei enää yhdistä mitään.
 
 ## Miksi tarvitaan sekä haara että tunniste?
 

@@ -4,10 +4,9 @@
 
 ---
 
-Tangu v3.8.49 (WS3.2/WS3.4 ya mpango wa quality/velocity), njia chaguo-msingi ya kuunganisha
-PR zilizokaguliwa kwenye `release/vX.Y.Z` ni **foleni ya uunganishaji ya Mergify** (`.mergify.yml`);
-**treni ya uunganishaji ya mikono** iliyoelezwa hapa chini ni NJIA MBADALA — hutumika wakati wa matukio,
-vipindi vya kusitisha matoleo, au ikiwa mpango wa Mergify Open Source utabadilika.
+> **2026-11-19: foleni ya kuunganisha ya Mergify imesimamishwa** (uamuzi wa mmiliki). `.mergify.yml` haifafanui tena foleni na inakataa amri za Mergify zinazounganisha au kuandika upya ombi la kuvuta. Toleo la PRs huunganishwa kwa mkono chini ya mpangilio wa kanuni wa hazina "Inahitaji milango ya kijani kwenye toleo amilifu" (`Gate / CI` + `Gate / Quality`) hadi omni-foleni iendeshe katika hali ya moja kwa moja, na kupitia omni-foleni baada ya hapo ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Sehemu za Mergify hapa chini zinaelezea foleni jinsi ilivyokuwa.
+
+Kwa kuwa v3.8.49 (WS3.2/WS3.4 ya mpango wa quality/velocity ) njia chaguo-msingi ya kuunganisha kwa PRs iliyopitiwa hadi `release/vX.Y.Z` ni** Unganisha foleni ya kuunganisha** (`.mergify.yml`); ya** mwongozo wa kuunganisha-treni** iliyoorodheshwa hapa chini ni FALLBACK — inayotumiwa wakati wa matukio, kutolewa kusimamishwa, au ikiwa mpango wa Mergify Open Source utabadilika.
 
 ## Njia chaguo-msingi: foleni ya Mergify
 
