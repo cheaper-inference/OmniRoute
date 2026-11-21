@@ -182,6 +182,57 @@ export function getQuotaCacheInvalidator(provider: string): QuotaCacheInvalidato
 }
 
 /** Test-only: drop every entry so a suite cannot leak registrations. */
+/**
+ * Per-provider read of the last cached quota snapshot, with no network call. Lets
+ * preflight skip waiting for a refresh when the last reading is recent and far
+ * from every cutoff (see `servableQuotaSnapshot`). Registered by bespoke fetchers
+ * next to their invalidator; providers without one always fetch.
+ */
+export type QuotaCachePeek = (
+  connectionId: string,
+  connection?: Record<string, unknown>
+) => { quota: QuotaInfo; fetchedAt: number } | null;
+
+const quotaCachePeekRegistry = new Map<string, QuotaCachePeek>();
+
+export function registerQuotaCachePeek(provider: string, peek: QuotaCachePeek): void {
+  quotaCachePeekRegistry.set(provider, peek);
+}
+
+function getQuotaCachePeek(provider: string): QuotaCachePeek | undefined {
+  return quotaCachePeekRegistry.get(provider) || quotaCachePeekRegistry.get(provider.toLowerCase());
+}
+
+const MAX_STALE_HEADROOM_PERCENT = 100;
+const DEFAULT_STALE_MAX_AGE_MS = 120_000;
+const MAX_STALE_MAX_AGE_MS = 15 * 60_000;
+
+/**
+ * Percentage points every window must stay ABOVE its own cutoff for preflight to
+ * decide on the last cached reading instead of waiting for a refresh. 0 (default)
+ * disables the shortcut: preflight waits for the fetcher exactly as before.
+ */
+export function resolveQuotaPreflightStaleHeadroomPercent(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_QUOTA_PREFLIGHT_STALE_HEADROOM_PERCENT?.trim();
+  if (!raw) return 0;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.min(n, MAX_STALE_HEADROOM_PERCENT);
+}
+
+/** Oldest cached reading the shortcut may use (default 120 s, capped at 15 min). */
+export function resolveQuotaPreflightStaleMaxAgeMs(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_QUOTA_PREFLIGHT_STALE_MAX_AGE_MS?.trim();
+  if (!raw) return DEFAULT_STALE_MAX_AGE_MS;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return DEFAULT_STALE_MAX_AGE_MS;
+  return Math.min(Math.round(n), MAX_STALE_MAX_AGE_MS);
+}
+
 export function __resetQuotaCacheInvalidatorsForTests(): void {
   quotaCacheInvalidatorRegistry.clear();
 }
@@ -553,6 +604,57 @@ export function resolveDynamicQuotaFetcher(
   return fetchNewApiAggregatorQuota;
 }
 
+/**
+ * The cached snapshot preflight may decide on without waiting, or null to fetch.
+ * Only a real, recent, windowed reading qualifies, and only when EVERY scoped
+ * window clears its own cutoff by the configured headroom, so a burst cannot
+ * cross the cutoff between two refreshes unnoticed. Near a cutoff, on a stale
+ * fallback, an exhausted or reset window, or a paid-credits decision, the
+ * request still waits for a fresh read exactly as before.
+ */
+function servableQuotaSnapshot(
+  provider: string,
+  connectionId: string,
+  connection: Record<string, unknown>,
+  thresholds: PreflightQuotaThresholds | undefined,
+  scope: QuotaCutoffScope,
+  env: Record<string, string | undefined> = process.env
+): QuotaInfo | null {
+  const headroom = resolveQuotaPreflightStaleHeadroomPercent(env);
+  if (headroom <= 0) return null;
+  const peek = getQuotaCachePeek(provider);
+  if (!peek) return null;
+  if (isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, scope.requestedModel))
+    return null;
+
+  let snapshot: ReturnType<QuotaCachePeek>;
+  try {
+    snapshot = peek(connectionId, connection);
+  } catch {
+    return null;
+  }
+  if (!snapshot) return null;
+  const { quota, fetchedAt } = snapshot;
+  const now = Date.now();
+  if (!Number.isFinite(fetchedAt) || now - fetchedAt > resolveQuotaPreflightStaleMaxAgeMs(env))
+    return null;
+  if (quota.stale || quota.limitReached || !quota.windows) return null;
+
+  const scoped = Object.entries(windowsForScope(quota.windows, scope));
+  if (scoped.length === 0) return null;
+  for (const [windowName, info] of scoped) {
+    if (!Number.isFinite(info.percentUsed)) return null;
+    if (info.resetAt && new Date(info.resetAt).getTime() <= now) return null;
+    const cutoff = resolveOrDefault(
+      thresholds?.resolveMinRemainingPercent,
+      windowName,
+      DEFAULT_MIN_REMAINING_PERCENT
+    );
+    if (remainingPercentFrom(info.percentUsed) - cutoff < headroom) return null;
+  }
+  return evaluateQuotaCutoff(quota, thresholds, scope).proceed ? quota : null;
+}
+
 export async function preflightQuota(
   provider: string,
   connectionId: string,
@@ -579,11 +681,24 @@ export async function preflightQuota(
     }
   }
 
-  let quota: QuotaInfo | null = null;
-  try {
-    quota = await fetcher(connectionId, connection);
-  } catch {
-    return evaluateQuotaCutoff(null, thresholds, scope);
+  let quota: QuotaInfo | null = servableQuotaSnapshot(
+    provider,
+    connectionId,
+    connection,
+    thresholds,
+    scope
+  );
+  if (quota) {
+    // Decide now on the recent reading; refresh in the background so the next
+    // request sees new data. The fetcher shares an in-flight read and keeps its
+    // own TTL, so this adds no upstream calls when the snapshot is still fresh.
+    void fetcher(connectionId, connection).catch(() => null);
+  } else {
+    try {
+      quota = await fetcher(connectionId, connection);
+    } catch {
+      return evaluateQuotaCutoff(null, thresholds, scope);
+    }
   }
 
   if (!quota) {
