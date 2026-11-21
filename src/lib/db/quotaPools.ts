@@ -231,7 +231,7 @@ interface PoolConnectionRow {
 function getConnectionIds(poolId: string, fallbackConnectionId: string): string[] {
   const rows = getDb()
     .prepare<PoolConnectionRow>(
-      "SELECT connection_id FROM quota_pool_connections WHERE pool_id = ? ORDER BY created_at ASC"
+      "SELECT connection_id FROM quota_pool_connections WHERE pool_id = ? ORDER BY created_at ASC, rowid ASC"
     )
     .all(poolId);
   if (rows.length > 0) {
@@ -279,7 +279,7 @@ function batchBuildPools(rows: PoolRow[]): QuotaPool[] {
   // Batch connections: 1 query for all pools
   const connRows = db
     .prepare<{ pool_id: string; connection_id: string }>(
-      `SELECT pool_id, connection_id FROM quota_pool_connections WHERE pool_id IN (${ph}) ORDER BY created_at ASC`
+      `SELECT pool_id, connection_id FROM quota_pool_connections WHERE pool_id IN (${ph}) ORDER BY created_at ASC, rowid ASC`
     )
     .all(...poolIds);
   const connsByPool = new Map<string, string[]>();
@@ -541,11 +541,19 @@ export function ensurePool(input: PoolCreate): EnsurePoolResult {
   return { pool: updated, created: false, updated: true };
 }
 
+/** True when both lists name the same connections, in any order. */
+function sameMemberSet(current: string[], submitted: string[]): boolean {
+  const left = new Set(current);
+  const right = new Set(submitted);
+  return left.size === right.size && [...left].every((connectionId) => right.has(connectionId));
+}
+
 /**
  * Update an existing pool's name, allocations, and/or member connections.
  * Returns updated pool, or null if pool not found.
  * When `connectionIds` is provided, the join table is replaced atomically and
- * connection_id (primary) is synced to connectionIds[0].
+ * connection_id (primary) is synced to connectionIds[0]. The pool's schedules are deleted only
+ * when the set of member connections changes.
  */
 export function updatePool(id: string, input: PoolUpdate): QuotaPool | null {
   if (deletingPools.has(id)) return null;
@@ -576,12 +584,15 @@ export function updatePool(id: string, input: PoolUpdate): QuotaPool | null {
 
     if (input.connectionIds !== undefined && input.connectionIds.length > 0) {
       const newPrimary = input.connectionIds[0];
-      // Replace join rows.
+      const membersChanged = !sameMemberSet(
+        getConnectionIds(id, existing.connection_id),
+        input.connectionIds
+      );
+      // Replace join rows, so the stored order follows the submitted list.
       database.prepare("DELETE FROM quota_pool_connections WHERE pool_id = ?").run(id);
       // Time-aware windows have no FK cascade (same reason as the model-cap
-      // table): drop them here so a deleted pool leaves no orphan schedule that
-      // a recycled pool id could inherit.
-      deleteSchedulesForPool(id);
+      // table). A new set of members drops them. The same members in any order keep them.
+      if (membersChanged) deleteSchedulesForPool(id);
       const insertConn = database.prepare(
         "INSERT OR IGNORE INTO quota_pool_connections (pool_id, connection_id) VALUES (?, ?)"
       );
