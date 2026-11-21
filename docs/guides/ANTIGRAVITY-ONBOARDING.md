@@ -65,7 +65,7 @@ uses credits for Antigravity and Antigravity CLI:
   after an eligible quota-exhausted HTTP 429.
 - **Always (credits first)** (`always`): request credits on the first request. This can consume
   paid credits immediately, including during credit-balance checks. Review Google's terms and
-  [account-enforcement risks](../security/STEALTH_GUIDE.md) before enabling credit use.
+  the risk of account enforcement before enabling credit use.
 
 A saved choice, including **Disabled**, applies without restarting and overrides
 `ANTIGRAVITY_CREDITS`. Before you save a choice, the dashboard shows the effective value inherited
