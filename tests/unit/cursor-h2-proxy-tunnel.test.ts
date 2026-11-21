@@ -12,9 +12,11 @@
  *   - and that proxy resolution honours the request proxy context.
  */
 import assert from "node:assert/strict";
-import { EventEmitter } from "node:events";
+import { EventEmitter, once } from "node:events";
 import net from "node:net";
 import test from "node:test";
+import tls from "node:tls";
+import selfsigned from "selfsigned";
 
 import {
   buildConnectRequest,
@@ -292,4 +294,57 @@ test("an https:// proxy receives a TLS ClientHello before any CONNECT bytes", as
   } finally {
     await new Promise<void>((resolve) => proxy.close(() => resolve()));
   }
+});
+
+test("an HTTPS proxy verifies the endpoint identity and sends SNI for DNS names only", async (t) => {
+  const pems = await selfsigned.generate([{ name: "commonName", value: "cursor-proxy.test" }], {
+    keySize: 2048,
+    algorithm: "sha256",
+    extensions: [{ name: "subjectAltName", altNames: [{ type: 7, ip: "127.0.0.1" }] }],
+  });
+  const originalCa = tls.getCACertificates("default");
+  tls.setDefaultCACertificates([...originalCa, pems.cert]);
+  t.after(() => tls.setDefaultCACertificates(originalCa));
+
+  const cert = { key: pems.private, cert: pems.cert };
+  const context = tls.createSecureContext(cert);
+  const seenSni: string[] = [];
+  const proxy = tls.createServer(
+    {
+      ...cert,
+      SNICallback(hostname, callback) {
+        seenSni.push(hostname);
+        callback(null, context);
+      },
+    },
+    (client) => {
+      client.once("data", () => client.write("HTTP/1.1 200 Connection established\r\n\r\n"));
+    }
+  );
+  const peers = new Set<net.Socket>();
+  proxy.on("connection", (peer) => {
+    peers.add(peer);
+    peer.once("close", () => peers.delete(peer));
+  });
+  t.after(async () => {
+    for (const peer of peers) peer.destroy();
+    await new Promise<void>((resolve) => proxy.close(() => resolve()));
+  });
+
+  proxy.listen(0, "127.0.0.1");
+  await once(proxy, "listening");
+  const port = (proxy.address() as net.AddressInfo).port;
+  const options = { targetHost: "api5.cursor.sh", targetPort: 443, timeoutMs: 5_000 };
+  const socket = await createProxyTunnelSocket({
+    ...options,
+    proxyUrl: `https://127.0.0.1:${port}`,
+  });
+  socket.destroy();
+  assert.deepEqual(seenSni, []);
+
+  await assert.rejects(
+    createProxyTunnelSocket({ ...options, proxyUrl: `https://localhost:${port}` }),
+    { code: "ERR_TLS_CERT_ALTNAME_INVALID" }
+  );
+  assert.deepEqual(seenSni, ["localhost"]);
 });
