@@ -792,7 +792,11 @@ export class VolcengineConsoleAutoLoginService {
         if (risk) parts.push("blocked by risk-control slider");
         if (IDENTITY_URL_PATTERN.test(session.page.url())) {
           const dump = await this.dumpPageHtml(session);
-          if (dump) parts.push(`identityPageHtml=${dump}`);
+          if (dump) {
+            parts.push(`identityPageHtml=${dump}`);
+            const { unlink } = await import("fs/promises");
+            await unlink(dump);
+          }
         }
       }
     } catch {
@@ -805,9 +809,14 @@ export class VolcengineConsoleAutoLoginService {
   private async dumpPageHtml(session: ActiveSession): Promise<string | null> {
     try {
       const { writeFile } = await import("fs/promises");
-      const path = `/tmp/omniroute-volc-select-identity-${session.sessionId.slice(0, 8)}.html`;
-      await writeFile(path, await session.page.content(), "utf8");
-      return path;
+      const { tmpdir } = await import("os");
+      const { join } = await import("path");
+      const dumpPath = join(
+        tmpdir(),
+        `omniroute-volc-select-identity-${session.sessionId.substring(0, 8)}.html`
+      );
+      await writeFile(dumpPath, await session.page.content(), { encoding: "utf8", mode: 0o600 });
+      return dumpPath;
     } catch {
       return null;
     }
