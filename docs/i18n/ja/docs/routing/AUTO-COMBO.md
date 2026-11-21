@@ -498,6 +498,7 @@ curl -X POST http://localhost:20128/api/combos \
 - `lkgp` — 最後に正常であることが確認されたプロバイダーを最優先
 - `nadir` — プール内のどのモデルがプロンプトに必要かを [Nadir](https://getnadir.com) の判定 API に
   問い合わせます。オプトイン方式で、障害時には `rules` にフォールバックします
+- `decision` —構成されたディサイダー (TypeSafe System One、独自の決定URL、またはコンボ独自のモデルの 1 つ) に、プール内のどのモデルがリクエストに適合するかを尋ねます。デフォルトオフの`COMBO_DECISION_ROUTER_ENABLED`フラグの背後で、 `rules`へのフェールオープン
 
 ### ルーター戦略の詳細
 
@@ -722,6 +723,60 @@ Nadir ダッシュボードに記録されます。完全なセットアップ�
 
 ---
 
+#### 7. `decision` —プラガブル ディサイダーがモデルを選択します
+
+`decision`尋ねます**決定者**プール内のどのモデルがリクエストに適合するかを判断し、プールをそのモデルに絞り込み、 `rules`に接続を選択させます (クォータ、ヘルス、コストは引き続きアカウントを選択します)。決定子は、ルーターのノブが`config` (ダッシュボードに書き込まれる内容) の上部にある場合、または`config.auto.decision` `config.auto.routerStrategy`の隣にある場合、コンボの決定ブロック— `config.decision`に設定されます。
+
+| `decider`     | 誰が答えるのか                                                                                                 | ニーズ                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `systemone`   | TypeSafeシステム 1 (`POST https://api.typesafe.ai/v1/systemone`)、デフォルト モデル`jev-latest`                | `typesafe`接続または env キー          |
+| `http`        | `baseUrl`での独自の決定者: `wire: "systemone"` (`{baseUrl}/v1/systemone`) または`"openai-chat"` (チャット完了) | `baseUrl` + `model`;キーはオプション   |
+| `combo-model` | プロバイダー モデルの 1 つ。フュージョン ジャッジのようにプロセス内で呼び出されます。                          | `model`を`provider/model` (コンボなし) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+フィールド (保存時とリクエスト時に厳密なスキーマによって検証されます):
+
+- `decider` — `systemone`、 `http`または`combo-model`。
+- `model` — TypeSafeモデル、 URLの意思決定モデル、またはコンボモデル呼び出しの`provider/model` (最大 200 文字)。
+- `baseUrl` — `http`のみ: `http(s)` URL最大 500 文字で、認証情報、クエリ、またはフラグメントは含まれません。このOmniRouteを指すURL (ループバック+ `PORT`) は拒否されます。
+- `wire` — `http`のみ: `systemone` (デフォルト) または`openai-chat`。
+- `connectionId` —キーが使用される保存された接続 (呼び出し元のAPIキーの許可された接続内でのみ)。これがないと、 `systemone` `typesafe`接続を読み取り、すべてのネットワーク ディサイダーは`OMNIROUTE_DECISION_API_KEY`にフォールバックします。 `apiKey`フィールドはありません。キーがコンボに格納されることはありません。
+- `timeoutMs` —整数、100 ～ 5000、デフォルトは 2000。
+- `minConfidence` — 0–1;信頼性の低い答えは`rules`にフォールバックします (信頼性がないことを報告するディサイダーは 0 としてカウントされます)。
+- `descriptions` —最大 50 エントリ (キーは最大 300、テキストは最大 1000 文字)、モデル ID または`provider/model`によってキー化されます。 unset エントリは、生成されたコストランクの説明を取得します。
+
+**フラグ。** `COMBO_DECISION_ROUTER_ENABLED` (デフォルトは`false`) はすべてのディサイダーをゲートします。オフの間、 `decision`コンボは資格情報を読み取らず、呼び出しも行わず、 `rules`でルーティングします。ログには`fallback (disabled)`と書かれています。保存されたキーだけではオンになることはありません。決定ブロックのないコンボはまったく影響を受けません。
+
+**箱から出るもの。**最後のユーザー メッセージのテキスト (最大 8000 文字、 chat/Claude `messages`または Responses `input`) とその説明を含むモデル ID のメニューのみ。システムプロンプト、応答`instructions`、ツール、履歴、ヘッダー、またはアカウントデータは決して含まれません。ネットワーク呼び出しは、再試行なし、リダイレクトなし、および 64 KB応答制限なしでプロバイダーのアウトバウンド ガードを通過します。 `combo-model`呼び出しは非ストリーミング、ツール不要の`temperature: 0`で、256 トークンのバジェットがあります。決定コール内で開始された決定は拒否されます。
+
+**失敗時の動作**フェールオープン: あらゆる障害は`rules`決定で解決され、理由は`decision(<decider>): fallback (<reason>)`となります`<reason>`は次のいずれかです。 `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. タイムアウト、 HTTPエラー、またはネットワーク エラーの後、エンドポイントは 30 秒間スキップされます。 選択が成功すると、 `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`と表示されます。 URL、キー、プロンプト、または上流の本文がログに到達しません。
+
+コンボ ビルダーは、ルーター戦略が`decision`の場合に、生成された説明をプレースホルダーとして使用してこれらのフィールドを表示します。**テストの決定**未保存の設定 (同じフラグ) で`POST /api/combos/decision-preview` 1 回呼び出すボタン。
+
+**いつ使用するか**: 混合難易度トラフィック。特に Nadir ではなく、選択した分類子によってリクエストごとに層を選択します。
+
+**エイリアス**: `decision` (エイリアスなし)
+
+---
+
 ### カスタムルーターストラテジー
 
 公開 API を介して、独自の `RouterStrategy` 実装を登録できます。
@@ -775,6 +830,7 @@ registerStrategy("my-custom", new MyCustomStrategy());
 | 厳格なSLO                    | `sla-aware` | p95、エラー率、コストのしきい値でフィルタリング |
 | マルチターンチャット         | `lkgp`      | セッションの固定性                              |
 | 難易度が混在する場合         | `nadir`     | プロンプトごとにモデル階層を選択                |
+| 独自の分類子                 | `decision`  | 決定者がモデルを選択します                      |
 
 SLA対応フィールド:
 

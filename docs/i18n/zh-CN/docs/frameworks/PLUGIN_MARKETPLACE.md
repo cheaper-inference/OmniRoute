@@ -64,18 +64,19 @@ Dashboard (/dashboard/plugins)
 
 所有端点都需要管理身份验证（`requireManagementAuth`）**和**仅环回— `/api/plugins`和`/api/plugins/`列在`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) 中。
 
-| 端点                             | 方法   | 描述                                     |
-| -------------------------------- | ------ | ---------------------------------------- |
-| `/api/plugins`                   | GET    | 列出已安装的插件（可选`?status=`过滤器） |
-| `/api/plugins`                   | POST   | 从插件源目录安装插件                     |
-| `/api/plugins/scan`              | POST   | 扫描插件目录并注册新插件                 |
-| `/api/plugins/marketplace`       | GET    | 列出市场目录条目                         |
-| `/api/plugins/[name]`            | GET    | 获取已安装插件的详细信息                 |
-| `/api/plugins/[name]`            | DELETE | 卸载插件                                 |
-| `/api/plugins/[name]/activate`   | POST   | 激活（加载+注册钩子）                    |
-| `/api/plugins/[name]/deactivate` | POST   | 停用（触发`onDeactivate`，注销钩子）     |
-| `/api/plugins/[name]/config`     | GET    | 获取插件配置+配置模式                    |
-| `/api/plugins/[name]/config`     | PUT    | 更新插件配置（根据架构进行验证）         |
+| 端点                               | 方法   | 描述                                     |
+| ---------------------------------- | ------ | ---------------------------------------- |
+| `/api/plugins`                     | GET    | 列出已安装的插件（可选`?status=`过滤器） |
+| `/api/plugins`                     | POST   | 从插件源目录安装插件                     |
+| `/api/plugins/scan`                | POST   | 扫描插件目录并注册新插件                 |
+| `/api/plugins/marketplace`         | GET    | 列出市场目录条目                         |
+| `/api/plugins/marketplace/install` | POST   | 按名称安装市场插件                       |
+| `/api/plugins/[name]`              | GET    | 获取已安装插件的详细信息                 |
+| `/api/plugins/[name]`              | DELETE | 卸载插件                                 |
+| `/api/plugins/[name]/activate`     | POST   | 激活（加载+注册钩子）                    |
+| `/api/plugins/[name]/deactivate`   | POST   | 停用（触发`onDeactivate`，注销钩子）     |
+| `/api/plugins/[name]/config`       | GET    | 获取插件配置+配置模式                    |
+| `/api/plugins/[name]/config`       | PUT    | 更新插件配置（根据架构进行验证）         |
 
 `GET /api/plugins` `status`过滤器接受`installed` / `active` / `inactive` / `error`之一。无效值返回`400`。
 
@@ -97,7 +98,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path`必须是**绝对**目录路径**在插件源目录内**： `plugin-sources`位于插件根目录旁边，因此默认情况下为`~/.omniroute/plugin-sources/` ，或者设置该变量时为`<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` （ `src/lib/plugins/installSource.ts`中的`getPluginSourcesDir()` ）。首先复制或克隆插件。当路径包含`..`或空字节、位于该目录外部、通过符号链接在其外部解析、包含目标位于其外部的符号链接或者目录不存在时，将使用`400`拒绝安装。源目录必须包含有效的`plugin.json` （或者是其中一个的父目录）。成功后，响应是`201`以及已安装的插件行。
 
-与其他插件路由不同，即使禁用登录（`requireLogin=false`），此路由也需要管理凭据（仪表板会话或管理范围的API密钥）：安装代码永远不是匿名操作。
+与其他插件路由不同，即使禁用登录（`requireLogin=false`），此路由也需要管理凭据（仪表板会话或管理范围的API密钥）：安装代码永远不是匿名操作。这同样适用于`POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`)。
 
 ### 浏览市场
 
@@ -115,7 +116,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config`根据插件的`configSchema` （在清单中声明）验证每个提供的值： `number`字段尊重`min`/`max`， `select`字段必须与声明的`enum`匹配。允许通过架构中不存在的键。
+`PUT .../config`使用`src/lib/plugins/manifest.ts`中的`configSchema`根据插件的`validatePluginConfig()` （在清单中声明）验证主体：每个键都必须在架构中声明，值必须与声明的类型匹配， `number`字段遵循`min`/`max`，而`select`字段必须与声明的`enum`匹配。任何违规都会返回`400`并且不存储任何内容。声明没有`configSchema`插件没有可配置的键，因此使用`400`拒绝请求（“插件没有声明任何可配置的键”）。
 
 ## 配置
 
@@ -170,7 +171,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
 
 ### 插件执行隔离
 
-> **插件不是沙盒的。**子进程是一个以OmniRoute用户身份运行的普通Node.js进程，没有VM上下文，也没有Node.js权限标志，因此插件代码可以读取和写入用户可以运行的程序并访问网络的任何文件。 `requires.permissions`只决定子进程接收哪些环境变量；其他权限不强制执行。仅安装您信任的插件。下面的进程边界包含崩溃和挂起；它不是安全边界。
+> **插件默认不在沙箱中运行。** 子进程是以 OmniRoute 用户身份运行的普通 Node.js 进程，既没有 VM 上下文，也没有 Node.js 权限标志。因此，插件代码可以读写该用户能够访问的任何文件、运行程序并访问网络。`requires.permissions` 只决定向子进程传递哪些环境变量，其他权限不会强制执行。可选的 `PLUGIN_PERMISSION_MODEL_ENABLED` 功能标志默认关闭。启用后，每个插件根据所声明的权限在 Node.js 权限模型下运行，但 Node.js 无法限制 `network`（参见 [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#%E6%9D%83%E9%99%90%E7%B3%BB%E7%BB%9F)）。请仅安装您信任的插件。下述进程隔离能够限制崩溃和挂起的影响，但不构成安全边界。
 
 - **进程隔离**— `loadPlugin()` (`src/lib/plugins/loader.ts`) 在单独的Node.js子进程中生成每个插件，并通过IPC进行通信。 Hook 调用会因`SIGTERM` → `SIGKILL`升级而超时。
 - **环境白名单**—子进程仅接收一组允许的环境变量；仅当清单请求`env`权限时才会授予更广泛的集。

@@ -528,6 +528,7 @@ Saqlanadigan `strategy: "auto"` kombolari `config.routerStrategy` (yoki eski
 - `lkgp` — avval oxirgi maʼlum yaxshi provayder
 - `nadir` — puldagi qaysi model prompt uchun kerakligini [Nadir](https://getnadir.com) qaror API’sidan
   soʻraydi; ixtiyoriy ravishda yoqiladi, xatolik yuz bersa `rules` strategiyasiga ochiq qaytadi
+- `decision` — konfiguratsiya qilingan qaror qabul qiluvchidan so'rang (TypeSafe System One, o'zingizning qaroringiz URL yoki kombinatning o'z modellaridan biri) hovuzdagi qaysi model so'rovga mos kelishini; sukut bo'yicha o'chirilgan `COMBO_DECISION_ROUTER_ENABLED` bayrog'ining orqasida, `rules` uchun muvaffaqiyatsiz ochiq
 
 ### Marshrutizator strategiyalari batafsil
 
@@ -752,6 +753,60 @@ va eng ilgʻor modelni) oʻz ichiga olgan puldagi murakkabligi aralash trafik uc
 
 ---
 
+#### 7. `decision` — pluggable hal qiluvchi modelni tanlaydi
+
+`decision` so'radi a** hal qiluvchi** hovuzdagi qaysi model so'rovga mos keladi, keyin hovuzni o'sha modelga toraytiradi va `rules` ulanishni tanlashga imkon beradi (kvota, sog'liq va narx hali ham hisobni tanlaydi). Router tugmalari `config` tepasida (boshqaruv paneli nima yozadi) yoki `config.auto.routerStrategy` yonida `config.auto.decision` o'tirganda hal qiluvchi — `config.decision` kombinatsiyasining qaror blokida o'rnatiladi:
+
+| `decider`     | Kim javob beradi                                                                                | Ehtiyojlar                                   |
+| ------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standart model `jev-latest`  | `typesafe` ulanishi yoki env kaliti          |
+| `http`        | `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) yoki `"openai-chat"` (chat yakunlari) | `baseUrl` + `model`; kalit ixtiyoriy         |
+| `combo-model` | provayder modellaringizdan biri, termoyadroviy sudya kabi jarayonda chaqiriladi                 | `model` sifatida `provider/model` (kombosiz) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Maydonlar (saqlashda qat'iy sxema bilan tasdiqlangan va so'rov vaqtida yana):
+
+- `decider` — `systemone`, `http` yoki `combo-model`.
+- `model` — TypeSafe modeli, URL da qaror modeli yoki birlashgan model chaqiruvining `provider/model` (200 belgigacha).
+- faqat `baseUrl` — `http` : `http(s)` URL 500 belgigacha, hisob maʼlumotlari, soʻrovlar yoki fragmentlarsiz. Bu OmniRoute ga ishora qiluvchi URL (loopback + `PORT`) rad etiladi.
+- faqat `wire` — `http` : `systemone` (standart) yoki `openai-chat`.
+- `connectionId` — kaliti ishlatiladigan saqlangan ulanish (faqat chaqiruvchi API kalitining ruxsat etilgan ulanishlari ichida). Busiz `systemone` `typesafe` ulanishini o'qiydi va har bir tarmoq qarori `OMNIROUTE_DECISION_API_KEY` ga qaytadi. `apiKey` maydoni mavjud emas: kalit hech qachon kombinatda saqlanmaydi.
+- `timeoutMs` — butun soni, 100–5000, standart 2000.
+- `minConfidence` — 0–1; Ishonch darajasi past bo'lgan javob `rules` ga qaytadi (ishonch yo'qligi haqida xabar bergan qarorchi 0 deb hisoblanadi).
+- `descriptions` — 50 tagacha yozuvlar (300 tagacha kalit, 1000 tagacha matn), model identifikatori yoki `provider/model` bilan kalitlangan; sozlanmagan yozuvlar ishlab chiqarilgan xarajat darajasi tavsifini oladi.
+
+**Bayroq.** `COMBO_DECISION_ROUTER_ENABLED` (standart `false`) har bir qaror qabul qiluvchiga eshik beradi. U o'chirilgan bo'lsa, `decision` kombinatsiyasi hisob ma'lumotlarini o'qimaydi, qo'ng'iroq qilmaydi va `rules` bilan yo'naltiradi; jurnalda `fallback (disabled)` deyiladi. Saqlangan kalitning o'zi uni hech qachon yoqmaydi. Qaror bloki bo'lmagan kombinatsiyalar umuman ta'sir qilmaydi.
+
+**Qutidan nima qoldiradi.** Faqat oxirgi foydalanuvchi xabarining matni (8000 belgigacha; chat/Claude `messages` yoki Responses `input`) va ularning tavsiflari bilan model identifikatorlari menyusi. Hech qachon tizim so'rovi, Responses `instructions`, asboblar, tarix, sarlavhalar yoki hisob ma'lumotlari. Tarmoq qo'ng'iroqlari qayta urinishlarsiz, qayta yo'naltirishlarsiz va 64 KB javob chegarasisiz provayderning chiqish qo'riqchisi orqali o'tadi. `combo-model` qo'ng'irog'i oqimsiz, asboblarsiz, `temperature: 0`, 256 tokenli byudjet bilan; qaror chaqiruvi ichida boshlangan qaror rad etiladi.
+
+**Muvaffaqiyatsiz xatti-harakatlar** ishlamay ochiq: har qanday nosozlik `rules` qaroriga to'g'ri keladi va sabab `decision(<decider>): fallback (<reason>)` o'qiydi, `<reason>` biri bilan `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. Vaqt tugashi, HTTP xatosi yoki tarmoq xatosidan so'ng oxirgi nuqta 30 soniya davomida o'tkazib yuboriladi. Muvaffaqiyatli tanlov `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` o'qiydi. Hech qanday URL, kalit, tezkor yoki yuqori oqim jismlari jurnalga etib bormaydi.
+
+Router strategiyasi `decision` bo'lganda, birlashtirilgan quruvchi bu maydonlarni ko'rsatadi, to'ldiruvchi sifatida yaratilgan tavsiflar va** Sinov qarori** saqlanmagan sozlamalar bilan bir marta `POST /api/combos/decision-preview` ni chaqiradigan tugma (bir xil bayroq).
+
+**Qachon foydalanish kerak** : Nodir tomonidan emas, balki siz tanlagan klassifikator tomonidan har bir soʻrov boʻyicha tanlanishi kerak boʻlgan aralash qiyin trafik.
+
+**Taxallus** : `decision` (taxallussiz)
+
+---
+
 ### Maxsus yoʻnaltiruvchi strategiyalar
 
 Ommaviy API orqali oʻzingizning `RouterStrategy` implementatsiyangizni roʻyxatdan oʻtkazishingiz mumkin:
@@ -805,6 +860,7 @@ Soʻngra undan foydalaning:
 | Qatʼiy SLO talablar       | `sla-aware` | p95/xato/xarajat chegaralari bo‘yicha filtrlaydi |
 | Ko‘p bosqichli chat       | `lkgp`      | Sessiyaga bog‘liqlik                             |
 | Aralash murakkablik       | `nadir`     | Har bir so‘rov uchun model darajasini tanlaydi   |
+| O'z tasniflagichi         | `decision`  | Sizning qaroringiz modelni tanlaydi              |
 
 SLA-aware maydonlari:
 

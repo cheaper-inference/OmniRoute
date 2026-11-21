@@ -143,16 +143,26 @@ onRequest: (ctx) => {
 
 ## 許可制度
 
-Plugins are **not sandboxed**. Each active plugin runs as a separate, ordinary Node.js child process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user as OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`, `node:child_process`, `fetch` and every other Node.js API: it can read and write any file the OmniRoute user can (including the data directory), run programs and reach the network.
+既定では、プラグインは**サンドボックス化されません**。有効なプラグインは、通常の独立した Node.js 子プロセス（`src/lib/plugins/loader.ts` の `loadPlugin()`）として、OmniRoute と同じ OS ユーザーで動作します。VM コンテキストや Node.js の権限フラグは使われません。プラグインのコードは `node:fs`、`node:child_process`、`fetch` など、任意の Node.js API を使用できます。そのため、OmniRoute ユーザーに権限があるファイル（データディレクトリを含む）の読み書きや、プログラムの実行、ネットワークへのアクセスが可能です。
 
-マニフェストの`requires.permissions` `network`、 `file-read`、 `file-write`、 `env`および`exec`を受け入れますが、現在実行時に影響を与えるのは`env`のみです。
+マニフェストの`requires.permissions` 、 `network`、 `file-read`、 `file-write`、 `env` 、および`exec`を受け入れます。デフォルト設定では、実行時に`env`のみが影響します。
 
-| 許可                                         | 今日の影響                                                                                                                                                                                                                                                     |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`                                        | プラグイン プロセスは、 `PORT`、 `HOSTNAME`、 `TZ`および`TMPDIR`も受け取ります。これがないと、 `PATH`、 `HOME`、 `USER`、 `LANG`、 `LC_ALL`、 `NODE_ENV`、 `PLUGIN_ENTRY`および`PLUGIN_NAME` (さらにWindows上の`SystemRoot`および`windir` ) のみを受信します。 |
-| `network`, `file-read`, `file-write`, `exec` | なし。これらは宣言のみです。これらが欠落していても何もブロックされません。                                                                                                                                                                                     |
+### オプトイン許可モデル (`PLUGIN_PERMISSION_MODEL_ENABLED`)
 
-プラグインのインストールは、ホストに他のプログラムをインストールするのと似ています。ソースが信頼できるプラグインのみをインストールしてください。
+`PLUGIN_PERMISSION_MODEL_ENABLED`機能フラグ (カテゴリ`security`、**デフォルトではオフになっています**) は、 [Node.js権限モデル](https://nodejs.org/api/permissions.html)(`--permission`、サポートされているすべてのNode.js行: 22.22 +、24 および 26) で各プラグイン プロセスを開始します。フラグは、 `src/lib/plugins/permissionModel.ts`内の`buildPermissionModelArgs()`によってマニフェストから構築されます。このフラグはプラグインがアクティブ化されるときに読み取られるため、変更後にアクティブ化されたプラグインに適用されます。実行中のプラグインを非アクティブにしてからアクティブにして適用します。
+
+プラグイン データ ディレクトリは、プラグイン ルートの隣の`plugin-data/<plugin-name>`です (デフォルトでは`~/.omniroute/plugin-data/<plugin-name>` 、 `getPluginDataDir()`)。フラグをオンにすると、そのパスは`PLUGIN_DATA_DIR`としてプラグインに渡されます。
+
+| 許可         | フラグオフ (デフォルト)                                                                                                                                                                                                                                        | フラグを立てます                                                                                                                                                                                                              |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| （なし）     | OmniRouteユーザーの完全な権限。                                                                                                                                                                                                                                | ファイルはプラグイン ディレクトリ内でのみ読み取ります。ファイルの書き込み、子プロセス、ワーカー スレッド、ネイティブ アドオン、 WASIはありません。                                                                            |
+| `env`        | プラグイン プロセスは、 `PORT`、 `HOSTNAME`、 `TZ`および`TMPDIR`も受け取ります。これがないと、 `PATH`、 `HOME`、 `USER`、 `LANG`、 `LC_ALL`、 `NODE_ENV`、 `PLUGIN_ENTRY`および`PLUGIN_NAME` (さらにWindows上の`SystemRoot`および`windir` ) のみを受信します。 | フラグをオフにした場合と同じです。                                                                                                                                                                                            |
+| `file-read`  | なし (宣言のみ)。                                                                                                                                                                                                                                              | プラグイン データ ディレクトリも読み取り可能になります (見つからない場合は作成されます)。                                                                                                                                     |
+| `file-write` | なし (宣言のみ)。                                                                                                                                                                                                                                              | プラグイン データ ディレクトリが読み取りおよび書き込み可能 (`--allow-fs-write`) になります。他に書き込み可能なものはありません。                                                                                              |
+| `exec`       | なし (宣言のみ)。                                                                                                                                                                                                                                              | 子プロセスは許可されます (`--allow-child-process`)。 Node.js 、 `NODE_OPTIONS`を介して子Node.jsプロセスに許可フラグを渡しますが、他のプログラムは制限なく実行されるため、 `exec`ファイル システムの制限を効果的に解除します。 |
+| `network`    | なし (宣言のみ)。                                                                                                                                                                                                                                              | なし。 Node.js権限モデルは送信ネットワーク アクセスを制限しないため、 `network`宣言のままであり、強制されることはありません。                                                                                                 |
+
+フラグをオンにすると、独自のディレクトリ外のファイル (たとえば、親`node_modules`から解決されたモジュール) を読み取ったり、データ ディレクトリ以外の場所に書き込んだり、 `exec`宣言せずにプロセスを生成したりするプラグインが中断されます。フラグを設定しても、プラグインはネットワーク アクセスを維持し、 OmniRouteユーザーとして実行されるため、信頼できるソースのプラグインのみをインストールしてください。
 
 ## 設定スキーマ
 

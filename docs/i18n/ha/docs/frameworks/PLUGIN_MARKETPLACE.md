@@ -83,18 +83,19 @@ ga jerin farko.
 
 Duk wuraren ƙarewa suna buƙatar auth gudanarwa (`requireManagementAuth`)** kuma** An jera madogara-kawai — `/api/plugins` da `/api/plugins/` a cikin `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Ƙarshen Ƙarshe                   | Hanya  | Bayani                                                              |
-| -------------------------------- | ------ | ------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Jerin abubuwan da aka shigar (fitar `?status=` na zaɓi)             |
-| `/api/plugins`                   | POST   | Shigar da plugin daga kundin tushen tushen plugin                   |
-| `/api/plugins/scan`              | POST   | Bincika kundin adireshin plugin ɗin kuma yi rajistar sabbin plugins |
-| `/api/plugins/marketplace`       | GET    | Lissafin shigarwar kasida ta kasuwa                                 |
-| `/api/plugins/[name]`            | GET    | Samun bayanan plugin ɗin da aka shigar                              |
-| `/api/plugins/[name]`            | DELETE | Cire plugin                                                         |
-| `/api/plugins/[name]/activate`   | POST   | Kunna (saukar da ƙugiya masu rijistar + )                           |
-| `/api/plugins/[name]/deactivate` | POST   | Kashe (wuta `onDeactivate`, unregister hooks)                       |
-| `/api/plugins/[name]/config`     | GET    | Samun plugin config + config schema                                 |
-| `/api/plugins/[name]/config`     | PUT    | Sabunta saitin plugin (an inganta shi da tsari)                     |
+| Ƙarshen Ƙarshe                     | Hanya  | Bayani                                                              |
+| ---------------------------------- | ------ | ------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Jerin abubuwan da aka shigar (fitar `?status=` na zaɓi)             |
+| `/api/plugins`                     | POST   | Shigar da plugin daga kundin tushen tushen plugin                   |
+| `/api/plugins/scan`                | POST   | Bincika kundin adireshin plugin ɗin kuma yi rajistar sabbin plugins |
+| `/api/plugins/marketplace`         | GET    | Lissafin shigarwar kasida ta kasuwa                                 |
+| `/api/plugins/marketplace/install` | POST   | Sanya plugin ɗin kasuwa da suna                                     |
+| `/api/plugins/[name]`              | GET    | Samun bayanan plugin ɗin da aka shigar                              |
+| `/api/plugins/[name]`              | DELETE | Cire plugin                                                         |
+| `/api/plugins/[name]/activate`     | POST   | Kunna (saukar da ƙugiya masu rijistar + )                           |
+| `/api/plugins/[name]/deactivate`   | POST   | Kashe (wuta `onDeactivate`, unregister hooks)                       |
+| `/api/plugins/[name]/config`       | GET    | Samun plugin config + config schema                                 |
+| `/api/plugins/[name]/config`       | PUT    | Sabunta saitin plugin (an inganta shi da tsari)                     |
 
 Tacewar `GET /api/plugins` `status` tana karɓar ɗayan `installed` / `active` / `inactive` / `error`. Ƙimar mara aiki tana mayar da `400`.
 
@@ -116,7 +117,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 Dole ne `path` ta kasance** cikakke** hanyar zuwa directory** a cikin kundin tushen tushen plugin** : `plugin-sources` kusa da tushen plugin, don haka `~/.omniroute/plugin-sources/` ta tsohuwa, ko `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` lokacin da aka saita wannan canjin (`getPluginSourcesDir()` a `src/lib/plugins/installSource.ts`). Kwafi ko clone da plugin a can farko. Ana ƙi shigarwar tare da `400` lokacin da hanyar ta ƙunshi `..` ko babu byte, yana kwance a wajen waccan directory, yana warwarewa a wajensa ta hanyar alamar alama, yana ƙunshe da alamar alamar wanda manufarsa ke wajensa, ko lokacin da directory ɗin ba ya wanzu. Dole ne littafin tushen tushen ya ƙunshi ingantaccen `plugin.json` (ko kuma ya zama iyayen ɗaya). A cikin nasara amsar ita ce `201` tare da layin plugin ɗin da aka shigar.
 
-Ba kamar sauran hanyoyin plugin ɗin ba, wannan yana buƙatar takardar shaidar gudanarwa (zaman dashboard ko maɓallin API mai sarrafa-scoped) koda lokacin da aka kashe shiga (`requireLogin=false`): shigar da lambar ba wani aiki ne da ba a san shi ba.
+Ba kamar sauran hanyoyin plugin ɗin ba, wannan yana buƙatar takardar shaidar gudanarwa (zaman dashboard ko maɓallin API mai sarrafa-scoped) koda lokacin da aka kashe shiga (`requireLogin=false`): shigar da lambar ba wani aiki ne da ba a san shi ba. Hakanan ya shafi `POST /api/plugins/marketplace/install` (jiki `{ "name": "<plugin>" }`).
 
 ### Yi lilo a kasuwa
 
@@ -134,7 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` yana inganta kowace ƙimar da aka bayar akan `configSchema` ɗin plugin (an bayyana a cikin bayyanuwa): filayen `number` suna girmama `min`/`max`, filayen `select` dole ne su dace da ayyana `enum`. Maɓallan da ba a cikin tsarin ana ba su izinin shiga.
+`PUT .../config` yana inganta jiki akan `configSchema` na plugin (an bayyana a cikin bayyani) tare da `validatePluginConfig()` daga `src/lib/plugins/manifest.ts`: kowane maɓalli dole ne a bayyana shi a cikin tsari, ƙimar dole ne ta dace da nau'in da aka ayyana, filayen `number` suna girmama `min`/`max`, kuma filayen `select` dole ne su dace da `enum` da aka ayyana. Duk wani cin zarafi ya dawo `400` kuma ba a adana komai. Plugin da ke bayyana babu `configSchema` ba shi da maɓallai masu daidaitawa, don haka an ƙi buƙatar da `400` ("Plugin baya bayyana kowane maɓallan daidaitawa").
 
 ## Saitawa
 
@@ -218,7 +219,7 @@ URL da ta gaza ko wanne Layer baya soke buƙatun — wurin kasuwa a shiru ya fa�
 
 ### Warewa aiwatar da plugin
 
-> **Plugins ba a cikin akwatin yashi ba.** Yaro tsari ne Node.js na yau da kullun yana gudana azaman mai amfani OmniRoute, ba tare da mahallin VM ba kuma babu tutocin izini Node.js, don haka lambar plugin ɗin zata iya karantawa da rubuta kowane fayil ɗin da mai amfani zai iya, gudanar da shirye-shirye kuma isa hanyar sadarwa. `requires.permissions` kawai ya yanke shawarar waɗanne canjin yanayi ne yaron ya karɓa; sauran izini ba a tilasta su. Sanya plugins ɗin da kuka dogara kawai. Iyakar aikin da ke ƙasa ya ƙunshi hadarurruka da rataye; ba iyakar tsaro ba ce.
+> **Plugins ba a cikin akwatin yashi ta tsohuwa.** Yaro tsari ne Node.js na yau da kullun yana gudana azaman mai amfani OmniRoute, ba tare da mahallin VM ba kuma babu tutocin izini Node.js, don haka lambar plugin ɗin zata iya karantawa da rubuta kowane fayil ɗin da mai amfani zai iya, gudanar da shirye-shirye kuma isa hanyar sadarwa. `requires.permissions` kawai ya yanke shawarar waɗanne canjin yanayi ne yaron ya karɓa; sauran izini ba a tilasta su. Tutar fasalin ficewa na `PLUGIN_PERMISSION_MODEL_ENABLED` (kashe ta tsohuwa) tana gudanar da kowane plugin a ƙarƙashin ƙirar izinin Node.js da aka gina daga waɗannan izini, sai dai `network`, wanda Node.js ba zai iya ƙuntatawa ba (duba [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#tsarin-izini) ). Sanya plugins ɗin da kuka dogara kawai. Iyakar aikin da ke ƙasa ya ƙunshi hadarurruka da rataye; ba iyakar tsaro ba ce.
 
 - **Tsari warewa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) yana haifar da kowane plugins a cikin wani tsari na Node.js na daban kuma yana sadarwa akan IPC. Kiran ƙugiya yana da lokacin ƙarewa tare da haɓaka `SIGTERM` → `SIGKILL`.
 - **Jerin izini na Env** — yaron yana karɓar jeri kawai na masu canjin yanayi; Ana ba da mafi girman saiti ne kawai lokacin da bayyananniyar ta nemi izinin `env`.

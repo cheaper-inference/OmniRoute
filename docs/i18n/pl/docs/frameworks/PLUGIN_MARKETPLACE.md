@@ -1,4 +1,9 @@
+# Plugin Marketplace (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/PLUGIN_MARKETPLACE.md) · 🇪🇹 [am](../../../am/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇦🇿 [az](../../../az/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇩🇰 [da](../../../da/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇩🇪 [de](../../../de/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇬🇷 [el](../../../el/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇪🇸 [es](../../../es/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇪🇪 [et](../../../et/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇱 [he](../../../he/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇩 [id](../../../id/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇹 [it](../../../it/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇰🇭 [km](../../../km/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇲🇲 [my](../../../my/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇳🇴 [no](../../../no/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [or](../../../or/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇱🇰 [si](../../../si/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇮🇳 [te](../../../te/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇹🇭 [th](../../../th/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/PLUGIN_MARKETPLACE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/PLUGIN_MARKETPLACE.md)
+
 ---
+
 title: "Marketplace wtyczek"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -84,18 +89,19 @@ ciało odpowiedzi, `listMarketplacePlugins()` loguje ostrzeżenie i wraca do lis
 
 Wszystkie punkty końcowe wymagają autoryzacji zarządzania (`requireManagementAuth`)** I** są przeznaczone wyłącznie do pętli zwrotnej. — `/api/plugins` i `/api/plugins/` są wymienione w `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Punkt końcowy                    | Metoda | Opis                                                             |
-| -------------------------------- | ------ | ---------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Lista zainstalowanych wtyczek (opcjonalny filtr `?status=` )     |
-| `/api/plugins`                   | POST   | Zainstaluj wtyczkę z katalogu źródeł wtyczek                     |
-| `/api/plugins/scan`              | POST   | Zeskanuj katalog wtyczek i zarejestruj nowe wtyczki              |
-| `/api/plugins/marketplace`       | GET    | Lista wpisów katalogu Marketplace                                |
-| `/api/plugins/[name]`            | GET    | Pobierz szczegółowe informacje o zainstalowanej wtyczce          |
-| `/api/plugins/[name]`            | DELETE | Odinstaluj wtyczkę                                               |
-| `/api/plugins/[name]/activate`   | POST   | Aktywuj (załaduj haki rejestru + )                               |
-| `/api/plugins/[name]/deactivate` | POST   | Dezaktywuj (odpal `onDeactivate`, wyrejestruj hooki)             |
-| `/api/plugins/[name]/config`     | GET    | Pobierz schemat konfiguracji wtyczki +                           |
-| `/api/plugins/[name]/config`     | PUT    | Zaktualizuj konfigurację wtyczki (sprawdzoną pod kątem schematu) |
+| Punkt końcowy                      | Metoda | Opis                                                             |
+| ---------------------------------- | ------ | ---------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Lista zainstalowanych wtyczek (opcjonalny filtr `?status=` )     |
+| `/api/plugins`                     | POST   | Zainstaluj wtyczkę z katalogu źródeł wtyczek                     |
+| `/api/plugins/scan`                | POST   | Zeskanuj katalog wtyczek i zarejestruj nowe wtyczki              |
+| `/api/plugins/marketplace`         | GET    | Lista wpisów katalogu Marketplace                                |
+| `/api/plugins/marketplace/install` | POST   | Zainstaluj wtyczkę Marketplace według nazwy                      |
+| `/api/plugins/[name]`              | GET    | Pobierz szczegółowe informacje o zainstalowanej wtyczce          |
+| `/api/plugins/[name]`              | DELETE | Odinstaluj wtyczkę                                               |
+| `/api/plugins/[name]/activate`     | POST   | Aktywuj (załaduj haki rejestru + )                               |
+| `/api/plugins/[name]/deactivate`   | POST   | Dezaktywuj (odpal `onDeactivate`, wyrejestruj hooki)             |
+| `/api/plugins/[name]/config`       | GET    | Pobierz schemat konfiguracji wtyczki +                           |
+| `/api/plugins/[name]/config`       | PUT    | Zaktualizuj konfigurację wtyczki (sprawdzoną pod kątem schematu) |
 
 Filtr `GET /api/plugins` `status` akceptuje jeden z `installed` / `active` / `inactive` / `error`. Nieprawidłowa wartość zwraca `400`.
 
@@ -117,7 +123,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` musi być** absolutny** ścieżka do katalogu** w katalogu źródeł wtyczek** : `plugin-sources` obok katalogu głównego wtyczki, więc domyślnie `~/.omniroute/plugin-sources/` lub `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` gdy ta zmienna jest ustawiona (`getPluginSourcesDir()` w `src/lib/plugins/installSource.ts`). Najpierw skopiuj lub sklonuj tam wtyczkę. Instalacja zostaje odrzucona za pomocą `400`, gdy ścieżka zawiera `..` lub bajt zerowy, leży poza tym katalogiem, jest rozpoznawana poza nim poprzez dowiązanie symboliczne, zawiera dowiązanie symboliczne, którego cel znajduje się poza nim lub gdy katalog nie istnieje. Katalog źródłowy musi zawierać prawidłowy `plugin.json` (lub być jego rodzicem). Jeśli się powiedzie, odpowiedzią będzie `201` z zainstalowanym wierszem wtyczki.
 
-W przeciwieństwie do innych tras wtyczek, ta wymaga poświadczeń zarządzania (sesja pulpitu nawigacyjnego lub klucz API o zakresie zarządzania), nawet jeśli logowanie jest wyłączone (`requireLogin=false`): instalowanie kodu nigdy nie jest działaniem anonimowym.
+W przeciwieństwie do innych tras wtyczek, ta wymaga poświadczeń zarządzania (sesja pulpitu nawigacyjnego lub klucz API o zakresie zarządzania), nawet jeśli logowanie jest wyłączone (`requireLogin=false`): instalowanie kodu nigdy nie jest działaniem anonimowym. To samo dotyczy `POST /api/plugins/marketplace/install` (ciało `{ "name": "<plugin>" }`).
 
 ### Przeglądaj rynek
 
@@ -135,7 +141,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` sprawdza każdą podaną wartość względem `configSchema` wtyczki (zadeklarowanego w manifeście): pola `number` honorują `min`/`max`, pola `select` muszą odpowiadać zadeklarowanemu `enum`. Klucze, których nie ma w schemacie, są dozwolone.
+`PUT .../config` sprawdza treść wtyczki względem `configSchema` wtyczki (zadeklarowanego w manifeście) za pomocą `validatePluginConfig()` z `src/lib/plugins/manifest.ts`: każdy klucz musi być zadeklarowany w schemacie, wartości muszą odpowiadać zadeklarowanemu typowi, pola `number` honorują `min`/`max`, a pola `select` muszą pasować do zadeklarowanego `enum`. Każde naruszenie zwraca `400` i nic nie jest zapisywane. Wtyczka, która deklaruje brak `configSchema` nie ma konfigurowalnych kluczy, więc żądanie z `400` jest odrzucane („Wtyczka nie deklaruje żadnych konfigurowalnych kluczy”).
 
 ## Konfiguracja
 
@@ -190,7 +196,7 @@ URL które nie powiedzie się w żadnej warstwie, nie przerywa żądania. — ry
 
 ### Izolacja wykonania wtyczki
 
-> **Wtyczki nie są piaskownicą.** Dziecko to zwykły proces Node.js działający jako użytkownik OmniRoute, bez kontekstu VM i bez flag uprawnień Node.js, więc kod wtyczki może czytać i zapisywać dowolny plik, który może czytać użytkownik, uruchamiać programy i łączyć się z siecią. `requires.permissions` decyduje tylko, które zmienne środowiskowe otrzyma dziecko; pozostałe uprawnienia nie są egzekwowane. Instaluj tylko wtyczki, którym ufasz. Granica procesu poniżej zawiera awarie i zawieszenia; nie jest to granica bezpieczeństwa.
+> **Wtyczki nie są domyślnie piaskownicą.** Dziecko to zwykły proces Node.js działający jako użytkownik OmniRoute, bez kontekstu VM i bez flag uprawnień Node.js, więc kod wtyczki może czytać i zapisywać dowolny plik, który może czytać użytkownik, uruchamiać programy i łączyć się z siecią. `requires.permissions` decyduje tylko, które zmienne środowiskowe otrzyma dziecko; pozostałe uprawnienia nie są egzekwowane. Opcjonalna flaga funkcji `PLUGIN_PERMISSION_MODEL_ENABLED` (domyślnie wyłączona) uruchamia każdą wtyczkę w ramach modelu uprawnień Node.js zbudowanego na podstawie tych uprawnień, z wyjątkiem `network`, którego Node.js nie może ograniczać (patrz [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#system-uprawnie%C5%84) ). Instaluj tylko wtyczki, którym ufasz. Granica procesu poniżej zawiera awarie i zawieszenia; nie jest to granica bezpieczeństwa.
 
 - **Izolacja procesu** — `loadPlugin()` (`src/lib/plugins/loader.ts`) tworzy każdą wtyczkę w oddzielnym procesie potomnym Node.js i komunikuje się przez IPC. Wywołania hooków mają limit czasu z eskalacją `SIGTERM` → `SIGKILL`.
 - **Lista dozwolonych kopert** — dziecko otrzymuje tylko dozwolony zestaw zmiennych środowiskowych; szerszy zestaw jest przyznawany tylko wtedy, gdy manifest żąda pozwolenia `env`.

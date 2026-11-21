@@ -523,6 +523,7 @@ Lagrede kombinasjoner med `strategy: "auto"` kan angi `config.routerStrategy` (e
 - `lkgp` — sist kjente gode leverandør først
 - `nadir` — spør beslutnings-API-et til [Nadir](https://getnadir.com) hvilken modell i poolen
   ledeteksten trenger. Krever aktivt samtykke og faller åpent tilbake til `rules`
+- `decision` — spør en konfigurert bestemmer (TypeSafe System One, din egen beslutning URL, eller en av komboens egne modeller) hvilken modell i bassenget som passer forespørselen; bak standard-off `COMBO_DECISION_ROUTER_ENABLED` flagget, fail-open til `rules`
 
 ### Ruterstrategier i detalj
 
@@ -748,6 +749,60 @@ og en avansert modell), når du vil redusere kostnaden ved alltid å bruke den m
 
 ---
 
+#### 7. `decision` — pluggbar avgjørelse velger modellen
+
+spør `decision` a** bestemmer** hvilken modell i bassenget som passer forespørselen, begrenser deretter bassenget til den modellen og lar `rules` velge tilkoblingen (kvote, helse og kostnad fortsatt velge kontoen). Avgjørelsen settes i kombinasjonens beslutningsblokk — `config.decision` når ruterknappene sitter på toppen av `config` (hva dashbordet skriver), eller `config.auto.decision` ved siden av `config.auto.routerStrategy`:
+
+| `decider`     | Hvem svarer                                                                                                               | Behov                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standardmodell `jev-latest`                            | en `typesafe` tilkobling eller env-nøkkelen      |
+| `http`        | din egen avgjørelse på `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) eller `"openai-chat"` (chatfullføringer) | `baseUrl` + `model`; nøkkel valgfri              |
+| `combo-model` | en av leverandørmodellene dine, kalt inn i prosessen som fusjonsdommeren                                                  | `model` som `provider/model` (ingen kombinasjon) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Felter (validert av et strengt skjema ved lagring og igjen på forespørselstidspunkt):
+
+- `decider` — `systemone`, `http` eller `combo-model`.
+- `model` — TypeSafe modellen, beslutningsmodellen på URL din eller `provider/model` til en kombinasjonsmodell-anrop (opptil 200 tegn).
+- `baseUrl` — kun `http` : en `http(s)` URL opptil 500 tegn, uten legitimasjon, spørring eller fragment. En URL som peker på denne OmniRoute (loopback + `PORT`) blir avvist.
+- `wire` — kun `http` : `systemone` (standard) eller `openai-chat`.
+- `connectionId` — den lagrede tilkoblingen hvis nøkkel brukes (bare innenfor den anropende API nøkkelens tillatte tilkoblinger). Uten den leser `systemone` en `typesafe` -tilkobling og hver nettverksbeslutning faller tilbake til `OMNIROUTE_DECISION_API_KEY`. Det er ikke noe `apiKey` felt: en nøkkel lagres aldri i en kombinasjon.
+- `timeoutMs` — heltall, 100–5000, standard 2000.
+- `minConfidence` — 0–1; et svar med lavere konfidens faller tilbake til `rules` (en avgjørelse som rapporterer manglende konfidens teller som 0).
+- `descriptions` — opptil 50 oppføringer (tast opptil 300, tekst opptil 1000 tegn), tastet inn av modell-ID eller `provider/model`; uaktiverte oppføringer får en generert kostnadsrangeringsbeskrivelse.
+
+**Flagg.** `COMBO_DECISION_ROUTER_ENABLED` (standard `false`) porterer hver avgjører. Mens den er av, leser en `decision` kombinasjon ingen legitimasjon, ringer ikke og ruter med `rules`; loggen sier `fallback (disabled)`. En lagret nøkkel alene slår den aldri på. Kombinasjoner uten beslutningsblokk påvirkes ikke i det hele tatt.
+
+**Hva forlater boksen.** Bare teksten til den siste brukermeldingen (opptil 8000 tegn; chat/Claude `messages` eller Responses `input`) og menyen med modell-ID-er med deres beskrivelser. Aldri systemmeldingen, svar `instructions`, verktøy, historikk, overskrifter eller kontodata. Nettverksanrop går gjennom leverandørens utgående vakt uten gjenforsøk, ingen omdirigeringer og et svartak på 64 KB. `combo-model` -anropet er ikke-streaming, verktøyfritt, `temperature: 0`, med et budsjett på 256 token; en beslutning startet i en beslutningssamtale avvises.
+
+**Feiladferd** er feilåpen: enhver feil løser seg etter `rules` -avgjørelsen, og årsaken er `decision(<decider>): fallback (<reason>)`, med `<reason>` en av `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` eller `no_user_text`. Etter en tidsavbrudd, HTTP feil eller nettverksfeil hoppes endepunktet over i 30 s. Et vellykket valg leser `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ingen URL, nøkkel, forespørsel eller oppstrøms kropp når loggen.
+
+Kombinasjonsbyggeren viser disse feltene når ruterstrategien er `decision`, med de genererte beskrivelsene som plassholdere og en** Testbeslutning** knapp som kaller `POST /api/combos/decision-preview` én gang med de ulagrede innstillingene (samme flagg).
+
+**Når du skal bruke** : Trafikk med blandet vanskelighetsgrad der du vil at nivået skal velges per forespørsel av en klassifisering du velger, ikke spesifikt av Nadir.
+
+**Alias** : `decision` (ingen alias)
+
+---
+
 ### Egendefinerte ruterstrategier
 
 Du kan registrere din egen implementasjon av `RouterStrategy` via det offentlige API-et:
@@ -801,6 +856,7 @@ Bruk den deretter:
 | Strenge SLO-er               | `sla-aware` | Filtrerer etter terskler for p95/feil/kostnader |
 | Flertrinnssamtale            | `lkgp`      | Øktkonsistens                                   |
 | Varierende vanskelighetsgrad | `nadir`     | Velger modellnivå per ledetekst                 |
+| Egen klassifiserer           | `decision`  | Din avgjører velger modellen                    |
 
 SLA-bevisste felt:
 

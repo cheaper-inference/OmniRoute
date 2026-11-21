@@ -485,6 +485,7 @@ curl -X POST http://localhost:20128/api/combos \
 - `lkgp`——优先使用最后一个已知良好的提供者
 - `nadir`——询问 [Nadir](https://getnadir.com) 的决策 API，确定池中的哪个模型适合该
   提示词；需主动启用，失败时开放回退至 `rules`
+- `decision` —询问配置的决策者（TypeSafe System One、您自己的决策URL或组合自己的模型之一）池中的哪个模型适合请求；在默认关闭`COMBO_DECISION_ROUTER_ENABLED`标志后面，失败打开到`rules`
 
 ### 路由器策略详解
 
@@ -709,6 +710,60 @@ class LKGPStrategyImpl implements RouterStrategy {
 
 ---
 
+#### 7. `decision` —可插入决策器选择模型
+
+`decision`问一个**决定者**池中的哪个模型适合请求，然后将池缩小到该模型，并让`rules`选择连接（配额、运行状况和成本仍然选择帐户）。当路由器旋钮位于`config` （仪表板所写的内容）顶部或`config.auto.routerStrategy`旁边的`config.auto.decision`时，决策器在组合的决策块— `config.decision`中设置：
+
+| `decider`     | 谁回答                                                                                                  | 需求                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `systemone`   | TypeSafe系统一（`POST https://api.typesafe.ai/v1/systemone`），默认型号`jev-latest`                     | `typesafe`连接或 env key             |
+| `http`        | 您自己的`baseUrl`决策者： `wire: "systemone"` (`{baseUrl}/v1/systemone`) 或`"openai-chat"` （聊天完成） | `baseUrl` + `model`;关键可选         |
+| `combo-model` | 您的提供者模型之一，像融合法官一样在过程中调用                                                          | `model`为`provider/model` （无组合） |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+字段（在保存时通过严格模式验证，并在请求时再次验证）：
+
+- `decider` — `systemone`、 `http`或`combo-model`。
+- `model` — TypeSafe模型、 URL处的决策模型或组合模型调用的`provider/model` （最多 200 个字符）。
+- 仅限`baseUrl` — `http` ： `http(s)` URL最多 500 个字符，没有凭证、查询或片段。指向此OmniRoute （环回+ `PORT`）的URL被拒绝。
+- 仅`wire` — `http` ： `systemone` （默认）或`openai-chat`。
+- `connectionId` —使用其密钥的存储连接（仅在调用API密钥的允许连接内）。如果没有它， `systemone`会读取`typesafe`连接，并且每个网络决策者都会回退到`OMNIROUTE_DECISION_API_KEY`。没有`apiKey`字段：密钥永远不会存储在组合中。
+- `timeoutMs` —整数，100–5000，默认 2000。
+- `minConfidence` — 0–1；置信度较低的答案会回退到`rules` （报告没有置信度的决策者计为 0）。
+- `descriptions` —最多 50 个条目（密钥最多 300 个，文本最多 1000 个字符），由型号 id 或`provider/model`键入；未设置的条目会获得生成的成本排名描述。
+
+**旗帜。** `COMBO_DECISION_ROUTER_ENABLED` （默认`false`）控制每个决策者。当它关闭时， `decision`组合不会读取凭证，不会进行呼叫并使用`rules`进行路由；日志显示`fallback (disabled)`。单独存储的钥匙永远不会打开它。没有决策块的组合根本不受影响。
+
+**盒子里剩下什么。**仅最后一条用户消息的文本（最多 8000 个字符； chat/Claude `messages`或 Responses `input`）以及模型 ID 菜单及其描述。绝不是系统提示、响应`instructions`、工具、历史记录、标题或帐户数据。网络调用通过提供者出站防护，无需重试，无需重定向，并且有 64 个KB响应上限。 `combo-model`调用是非流式、免工具的`temperature: 0`，预算为 256 个代币；在决策调用中开始的决策被拒绝。
+
+**失败行为**是失败开放的：任何失败都会解决`rules`决策，原因为`decision(<decider>): fallback (<reason>)`，其中`<reason>`之一 `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. 超时、 HTTP错误或网络错误后，端点将被跳过 30 秒。 成功的选择读取`decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`。 没有URL、键、提示或上游正文到达日志。
+
+当路由器策略为`decision`时，组合构建器显示这些字段，并使用生成的描述作为占位符和**测试决策**使用未保存的设置调用`POST /api/combos/decision-preview`一次的按钮（相同标志）。
+
+**何时使用**：混合难度流量，您希望由您选择的分类器（而不是专门由 Nadir）根据请求选择层。
+
+**别名**： `decision` （无别名）
+
+---
+
 ### 自定义路由策略
 
 你可以通过公共 API 注册自己的 `RouterStrategy` 实现：
@@ -762,6 +817,7 @@ registerStrategy("my-custom", new MyCustomStrategy());
 | 严格的 SLO       | `sla-aware` | 按 p95/错误率/成本阈值进行筛选 |
 | 多轮对话         | `lkgp`      | 会话粘性                       |
 | 混合难度         | `nadir`     | 根据每个提示选择模型层级       |
+| 自己的分类器     | `decision`  | 您的决策者选择模型             |
 
 SLA 感知字段：
 

@@ -519,6 +519,7 @@ curl -X POST http://localhost:20128/api/combos \
 - `lkgp` — הספק האחרון שידוע כתקין נבחר ראשון
 - `nadir` — פנייה ל-API קבלת ההחלטות של [Nadir](https://getnadir.com), כדי לקבוע לאיזה מודל במאגר
   זקוקה ההנחיה; מחייב הפעלה מפורשת, ובמקרה של כשל חוזר ל-`rules`
+- `decision` — שאל מחליט מוגדר (TypeSafe System One, ההחלטה שלך URL, או אחד מהדגמים של המשולב עצמו) איזה דגם בבריכה מתאים לבקשה; מאחורי דגל ברירת המחדל `COMBO_DECISION_ROUTER_ENABLED`, fail-open ל- `rules`
 
 ### אסטרטגיות הנתב בפירוט
 
@@ -744,6 +745,60 @@ API ההחלטות של [Nadir](https://getnadir.com) (`POST /v1/bucket`) ומנ
 
 ---
 
+#### 7. `decision` — pluggable decisioner בוחר את הדגם
+
+`decision` שואל את א** מחליט** איזה דגם במאגר מתאים לבקשה, ואז מצמצם את המאגר למודל הזה ונותן ל- `rules` לבחור את החיבור (מכסה, בריאות ועלות עדיין לבחור את החשבון). המחליט מוגדר בבלוק ההחלטה של המשולב — `config.decision` כאשר כפתורי הנתב יושבים בחלק העליון של `config` (מה שלוח המחוונים כותב), או `config.auto.decision` ליד `config.auto.routerStrategy`:
+
+| `decider`     | מי עונה                                                                                                     | צרכים                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), דגם ברירת המחדל `jev-latest`             | חיבור `typesafe` או מפתח env            |
+| `http`        | מחליט משלך ב- `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) או `"openai-chat"` (השלמות של צ'אט) | `baseUrl` + `model`; מפתח אופציונלי     |
+| `combo-model` | אחד מדגמי הספקים שלך, שנקרא בתהליך כמו שופט ההיתוך                                                          | `model` as `provider/model` (ללא שילוב) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+שדות (אומת על ידי סכימה קפדנית בשמירה ושוב בזמן בקשה):
+
+- `decider` — `systemone`, `http` או `combo-model`.
+- `model` — TypeSafe model, מודל ההחלטה ב- URL שלך, או `provider/model` של קריאה משולבת-מודל (עד 200 תווים).
+- `baseUrl` — `http` בלבד: `http(s)` URL עד 500 תווים, ללא אישורים, שאילתה או קטע. URL המצביע על OmniRoute זה (loopback + `PORT`) מסורבת.
+- `wire` — `http` בלבד: `systemone` (ברירת מחדל) או `openai-chat`.
+- `connectionId` — החיבור המאוחסן שהמפתח שלו משמש (רק בתוך החיבורים המותרים של מפתח API המתקשר). בלעדיו, `systemone` קורא חיבור `typesafe` וכל מחליט רשת נופל בחזרה ל- `OMNIROUTE_DECISION_API_KEY`. אין שדה `apiKey` : מפתח לעולם לא מאוחסן בשילוב.
+- מספר שלם `timeoutMs` —, 100–5000, ברירת מחדל 2000.
+- `minConfidence` — 0–1; תשובה בעלת ביטחון נמוך יותר נופלת ל- `rules` (מחליט שמדווח על אי ביטחון נחשב כ-0).
+- `descriptions` — עד 50 ערכים (מפתח עד 300, טקסט עד 1000 תווים), מקודדים על ידי מזהה דגם או `provider/model`; ערכים לא מוגדרים מקבלים תיאור דירוג עלות שנוצר.
+
+**דֶגֶל.** `COMBO_DECISION_ROUTER_ENABLED` (ברירת מחדל `false`) משער כל מחליט. בזמן שהוא כבוי, שילוב של `decision` לא קורא אישורים, לא מבצע שיחה ומנתב עם `rules`; היומן אומר `fallback (disabled)`. מפתח מאוחסן לבדו לעולם לא מדליק אותו. שילובים ללא חסימת החלטה אינם מושפעים כלל.
+
+**מה יוצא מהקופסה.** רק הטקסט של הודעת המשתמש האחרונה (עד 8000 תווים; chat/Claude `messages` או Responses `input`) והתפריט של מזהי המודל עם התיאורים שלהם. אף פעם לא הנחית המערכת, תגובות `instructions`, כלים, היסטוריה, כותרות או נתוני חשבון. שיחות רשת עוברות דרך השמירה היוצאת של הספק ללא ניסיונות חוזרים, ללא הפניות מחדש ומכסת תגובה של 64 KB. שיחת `combo-model` אינה זורמת, ללא כלים, `temperature: 0`, עם תקציב של 256 אסימונים; החלטה שהתחילה בשיחת החלטה נדחתה.
+
+**התנהגות כישלון** הוא כשל פתוח: כל כשל פותר את החלטת `rules`, והסיבה היא `decision(<decider>): fallback (<reason>)`, עם `<reason>` אחד מ `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. לאחר פסק זמן, שגיאת HTTP או שגיאת רשת, נקודת הקצה מדלגת למשך 30 שניות. בחירה מוצלחת קורא `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. שום URL, מפתח, הנחיה או גוף במעלה הזרם לא מגיע ליומן.
+
+בונה המשולב מציג שדות אלה כאשר אסטרטגיית הנתב היא `decision`, עם התיאורים שנוצרו כמצייני מיקום ו-** החלטת מבחן** כפתור שקורא ל- `POST /api/combos/decision-preview` פעם אחת עם ההגדרות שלא נשמרו (אותו דגל).
+
+**מתי להשתמש** : תנועה בדרגת קושי מעורבת שבה אתה רוצה שהדרג ייבחר לפי בקשה על ידי מסווג שתבחר, לא על ידי Nadir ספציפית.
+
+**כינוי** : `decision` (ללא כינוי)
+
+---
+
 ### אסטרטגיות נתב מותאמות אישית
 
 ניתן לרשום מימוש `RouterStrategy` משלכם באמצעות ה-API הציבורי:
@@ -797,6 +852,7 @@ registerStrategy("my-custom", new MyCustomStrategy());
 | יעדי SLO מחמירים | `sla-aware` | מסננת לפי ספי p95/שגיאות/עלות           |
 | צ'אט מרובה סבבים | `lkgp`      | הצמדת הסשן                              |
 | רמת קושי משתנה   | `nadir`     | בוחרת את רמת המודל עבור כל פרומפט       |
+| מסווג משלו       | `decision`  | המחליט שלך בוחר את הדגם                 |
 
 שדות מודעי-SLA:
 

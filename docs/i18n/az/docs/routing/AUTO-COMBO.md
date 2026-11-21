@@ -537,6 +537,7 @@ Saxlanılan `strategy: "auto"` kombinasiyaları `config.routerStrategy` (və ya 
 - `lkgp` — ilk olaraq son məlum yaxşı provayder
 - `nadir` — hovuzdakı hansı modelin sorğu üçün lazım olduğunu [Nadir](https://getnadir.com) qərar API-sindən
   soruşur; qoşulma istəyə bağlıdır, nasazlıq zamanı `rules` strategiyasına açıq keçid edir
+- `decision` — konfiqurasiya edilmiş qərar verəndən (TypeSafe System One, öz qərarınız URL və ya kombinasiyanın öz modellərindən biri) hovuzdakı hansı modelin sorğuya uyğun olduğunu soruşun; defolt-off `COMBO_DECISION_ROUTER_ENABLED` bayrağının arxasında, `rules`-də uğursuz
 
 ### Yönləndirici strategiyalarının təfərrüatları
 
@@ -761,6 +762,60 @@ model) əhatə edən hovuzda qarışıq çətinlikli trafik üçün, həmişə q
 
 ---
 
+#### 7. `decision` — qoşula bilən qərar verən modeli seçir
+
+`decision` soruşur a** qərar verən** hovuzdakı hansı model sorğuya uyğun gəlir, sonra hovuzu həmin modelə daraldır və `rules` əlaqəni seçməyə imkan verir (kvota, sağlamlıq və xərc hələ də hesabı seçir). Yönləndirici düymələri `config` nin yuxarısında (iş panelində yazılanlar) və ya `config.auto.routerStrategy` yanında `config.auto.decision` oturduqda qərar verən kombinin qərar blokunda — `config.decision` təyin edilir:
+
+| `decider`     | Kim cavab verir                                                                                                      | Ehtiyaclar                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standart model `jev-latest`                       | `typesafe` bağlantısı və ya env açarı        |
+| `http`        | `baseUrl`-da öz qərarınız: `wire: "systemone"` (`{baseUrl}/v1/systemone`) və ya `"openai-chat"` (chat tamamlamaları) | `baseUrl` + `model`; açar isteğe bağlıdır    |
+| `combo-model` | provayder modellərinizdən biri, qaynaşma hakimi kimi prosesdə çağırılır                                              | `model` kimi `provider/model` (kombo yoxdur) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Sahələr (saxlama zamanı ciddi sxemlə təsdiqlənir və sorğu zamanı yenidən):
+
+- `decider` — `systemone`, `http` və ya `combo-model`.
+- `model` — TypeSafe modeli, URL-də qərar modeli və ya birləşmiş model çağırışının `provider/model` (200 simvola qədər).
+- yalnız `baseUrl` — `http` : 500 simvola qədər `http(s)` URL, etimadnamə, sorğu və ya fraqment olmadan. Bu OmniRoute (döngü + `PORT`) işarə edən URL rədd edilir.
+- yalnız `wire` — `http` : `systemone` (standart) və ya `openai-chat`.
+- `connectionId` — açarı istifadə edilən saxlanılan əlaqə (yalnız zəng edən API açarının icazə verilən əlaqələri daxilində). Onsuz, `systemone` `typesafe` bağlantısını oxuyur və hər bir şəbəkə qərarçısı `OMNIROUTE_DECISION_API_KEY` ə qayıdır. `apiKey` sahəsi yoxdur: açar heç vaxt kombinasiyada saxlanmır.
+- `timeoutMs` — tam, 100–5000, standart 2000.
+- `minConfidence` — 0–1; aşağı inamlı cavab `rules` -ə qayıdır (etibarsızlığı bildirən qərar verən 0 kimi sayılır).
+- `descriptions` — 50-yə qədər giriş (300-ə qədər açar, 1000 simvola qədər mətn), model id və ya `provider/model` ilə açar; təyin edilməmiş qeydlər yaradılan qiymət dərəcəsi təsvirini əldə edir.
+
+**bayraq.** `COMBO_DECISION_ROUTER_ENABLED` (defolt `false`) hər bir qərar verənin qapısını açır. O, söndürüldükdə, `decision` kombo heç bir etimadnaməni oxumur, zəng etmir və `rules` ilə marşrutlaşdırır; log `fallback (disabled)` deyir. Yalnız saxlanılan açar onu heç vaxt açmır. Qərar bloku olmayan kombinlər ümumiyyətlə təsirlənmir.
+
+**Qutudan nə qalır.** Yalnız son istifadəçi mesajının mətni (8000 simvola qədər; chat/Claude `messages` və ya Cavablar `input`) və onların təsviri ilə model identifikatorlarının menyusu. Heç vaxt sistem sorğusu, Cavablar `instructions`, alətlər, tarixçə, başlıqlar və ya hesab məlumatları. Şəbəkə zəngləri təkrar cəhdlər, yönləndirmələr və 64 KB cavab həddi olmadan provayderin gedən mühafizəçisindən keçir. `combo-model` zəngi yayımlanmır, alətsizdir, `temperature: 0`, 256-token büdcəsi ilə; qərar qəbulu daxilində başlayan qərar qəbul edilməz.
+
+**Uğursuz davranış** uğursuzdur: hər hansı bir uğursuzluq `rules` qərarı ilə həll olunur və səbəb `decision(<decider>): fallback (<reason>)` oxuyur, `<reason>` biri ilə `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. Taymout, HTTP xətası və ya şəbəkə xətası baş verdikdən sonra son nöqtə 30 saniyə ərzində atlanır. Uğurlu seçim `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` oxuyur. Heç URL, açar, operativ və ya yuxarı orqan loga çatmır.
+
+Kombinə qurucu bu sahələri marşrutlaşdırıcı strategiyası `decision` olduqda, yer tutucular kimi yaradılan təsvirlərlə göstərir.** Test qərarı** saxlanmamış parametrlərlə (eyni bayraq) bir dəfə `POST /api/combos/decision-preview` çağıran düymə.
+
+**Nə vaxt istifadə etməli** : Nadir tərəfindən deyil, seçdiyiniz klassifikator tərəfindən hər sorğuya görə seçilmiş səviyyənin seçilməsini istədiyiniz qarışıq çətinlik trafiki.
+
+**ləqəb** : `decision` (ləqəb yoxdur)
+
+---
+
 ### Fərdi marşrutlaşdırma strategiyaları
 
 İctimai API vasitəsilə öz `RouterStrategy` implementasiyanızı qeydiyyatdan keçirə bilərsiniz:
@@ -814,6 +869,7 @@ Sonra onu istifadə edin:
 | Sərt SLO-lar                | `sla-aware` | p95/xəta/xərc hədlərinə əsasən filtrləyir |
 | Çoxgedişli söhbət           | `lkgp`      | Sessiya sabitliyi                         |
 | Qarışıq mürəkkəblik         | `nadir`     | Hər sorğu üçün model səviyyəsini seçir    |
+| Öz təsnifatçısı             | `decision`  | Qərar verəniniz modeli seçir              |
 
 SLA-nı nəzərə alan sahələr:
 

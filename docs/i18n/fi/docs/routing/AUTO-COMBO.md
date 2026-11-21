@@ -523,6 +523,7 @@ Tallennetut `strategy: "auto"`-kombot voivat asettaa kohteen `config.routerStrat
 - `lkgp` — viimeisin tunnetusti toimiva palveluntarjoaja ensin
 - `nadir` — kysyy [Nadirin](https://getnadir.com) päätös-API:lta, minkä joukon mallin
   kehote tarvitsee; erikseen käyttöön otettava, ja virhetilanteessa siirrytään avoimesti käyttämään `rules`-strategiaa
+- `decision` — kysy määritetyltä päättäjältä (TypeSafe System One, oma päätös URL tai jokin yhdistelmän omista malleista), mikä poolin malli sopii pyyntöön; oletuksena pois päältä `COMBO_DECISION_ROUTER_ENABLED` lipun takana, vika-open `rules` lle
 
 ### Reititinstrategiat yksityiskohtaisesti
 
@@ -748,6 +749,60 @@ ja edistyneimmän mallin), kun haluat vähentää aina edistyneimmän mallin kä
 
 ---
 
+#### 7. `decision` — kytkettävä päättäjä valitsee mallin
+
+`decision` kysyy a** päättäjä** mikä poolin malli sopii pyyntöön, kaventaa poolin kyseiseen malliin ja antaa `rules` valita yhteyden (kiintiö, kunto ja hinta valitsevat silti tilin). Päättäjä asetetaan yhdistelmän päätöslohkoon — `config.decision` kun reitittimen nupit ovat `config` yläosassa (mitä kojelauta kirjoittaa), tai `config.auto.decision` `config.auto.routerStrategy` vieressä:
+
+| `decider`     | Kuka vastaa                                                                                                                   | Tarpeita                                       |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), oletusmalli `jev-latest`                                   | `typesafe` -liitäntä tai env-näppäin           |
+| `http`        | oma päättäjäsi osoitteessa `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) tai `"openai-chat"` (chatin päättymiset) | `baseUrl` + `model`; avain valinnainen         |
+| `combo-model` | yksi palveluntarjoajasi malleista, kutsutaan prosessissa kuten fuusiotuomari                                                  | `model` kuin `provider/model` (ei yhdistelmää) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Kentät (tarkistaa tiukka kaava tallennuksen yhteydessä ja uudelleen pyynnöstä):
+
+- `decider` — `systemone`, `http` tai `combo-model`.
+- `model` — TypeSafe malli, URL n päätösmalli tai yhdistelmämallikutsun `provider/model` (enintään 200 merkkiä).
+- `baseUrl` — vain `http` : `http(s)` URL enintään 500 merkkiä ilman valtuustietoja, kyselyä tai fragmenttia. URL joka osoittaa tähän OmniRoute (loopback + `PORT`), hylätään.
+- `wire` — vain `http` : `systemone` (oletus) tai `openai-chat`.
+- `connectionId` — tallennettu yhteys, jonka näppäintä käytetään (vain kutsuvan API -näppäimen sallittujen yhteyksien sisällä). Ilman sitä `systemone` lukee `typesafe` -yhteyden ja jokainen verkon päättäjä palaa arvoon `OMNIROUTE_DECISION_API_KEY`. `apiKey` kenttää ei ole: avainta ei koskaan tallenneta yhdistelmään.
+- `timeoutMs` — kokonaisluku, 100–5000, oletusarvo 2000.
+- `minConfidence` — 0–1; alhaisemman luotettavuuden omaava vastaus putoaa takaisin arvoon `rules` (epäluottamukselliseksi ilmoittava päättäjä lasketaan 0:ksi).
+- `descriptions` — enintään 50 merkintää (avain enintään 300, teksti enintään 1000 merkkiä), näppäilty mallitunnuksella tai `provider/model` llä; unset-merkinnät saavat luodun kustannussijoituskuvauksen.
+
+**Lippu.** `COMBO_DECISION_ROUTER_ENABLED` (oletus `false`) portit jokaisen päättäjän. Kun se on pois päältä, `decision` yhdistelmä ei lue valtuustietoja, ei soita ja reitittää `rules`:llä; lokissa lukee `fallback (disabled)`. Pelkästään tallennettu avain ei koskaan käynnistä sitä. Yhdistelmät ilman päätöslohkoa eivät vaikuta lainkaan.
+
+**Mitä jättää laatikosta.** Vain viimeisimmän käyttäjäviestin teksti (enintään 8000 merkkiä; chat/Claude `messages` tai Responses `input`) ja mallitunnusten valikko kuvauksineen. Ei koskaan järjestelmäkehotetta, Responses `instructions`, työkaluja, historiaa, otsikoita tai tilitietoja. Verkkopuhelut menevät palveluntarjoajan lähtevän suojan kautta ilman uudelleenyrityksiä, uudelleenohjausta ja 64 KB vastausrajaa. `combo-model` -kutsu on ei-suoratoisto, työkaluvapaa, `temperature: 0`, jonka budjetti on 256; päätöskutsussa aloitettu päätös hylätään.
+
+**Epäonnistunut käyttäytyminen** on epäonnistunut: mikä tahansa vika ratkaisee `rules` -päätöksen ja syy on `decision(<decider>): fallback (<reason>)`, `<reason>` lla yksi seuraavista: `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion` tai `low_confidence`, `single_option` `no_user_text` Aikakatkaisun, HTTP -virheen tai verkkovirheen jälkeen päätepiste ohitetaan 30 sekunniksi. Onnistunut valinta lukee `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Mikään URL, avain, kehote tai ylävirran runko ei pääse tukkiin.
+
+Yhdistelmärakennusohjelma näyttää nämä kentät, kun reitittimen strategia on `decision`, luodut kuvaukset paikkamerkkeinä ja** Testipäätös** painike, joka kutsuu `POST /api/combos/decision-preview` tä kerran tallentamattomilla asetuksilla (sama lippu).
+
+**Milloin käyttää** : sekavaikeusasteinen liikenne, jossa haluat valita tason pyyntökohtaisesti valitsemasi luokituksen mukaan, ei nimenomaan Nadirin.
+
+**Alias** : `decision` (ei aliasta)
+
+---
+
 ### Mukautetut reititysstrategiat
 
 Voit rekisteröidä oman `RouterStrategy`-toteutuksesi julkisen API:n kautta:
@@ -801,6 +856,7 @@ Käytä sitä sitten näin:
 | Tiukat SLO:t             | `sla-aware` | Suodattaa p95-/virhe-/kustannuskynnysten mukaan  |
 | Monivuoroinen keskustelu | `lkgp`      | Istunnon pysyvyys                                |
 | Vaihteleva vaikeustaso   | `nadir`     | Valitsee mallitaso kullekin kehotteelle          |
+| Oma luokitin             | `decision`  | Päättäjäsi valitsee mallin                       |
 
 SLA-tietoinen kentät:
 

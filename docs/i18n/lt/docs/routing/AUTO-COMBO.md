@@ -525,6 +525,7 @@ Išsaugotuose `strategy: "auto"` deriniuose `config.routerStrategy` (arba senesn
 - `lkgp` — pirmiausia paskutinis žinomas tinkamai veikęs teikėjas
 - `nadir` — paklausia [Nadir](https://getnadir.com) sprendimų API, kurio telkinio modelio reikia
   užklausai; pasirenkama funkcija, o nesėkmės atveju atviruoju režimu grįžtama prie `rules`
+- `decision` — paklauskite sukonfigūruoto sprendžiančiojo (TypeSafe System One, jūsų paties sprendimo URL arba vieno iš kombinuotųjų modelių), kuris modelis telkinyje atitinka užklausą; už numatytosios išjungtos `COMBO_DECISION_ROUTER_ENABLED` vėliavėlės, nepavyksta atidaryti į `rules`
 
 ### Išsami informacija apie maršrutizatoriaus strategijas
 
@@ -750,6 +751,60 @@ ir pažangiausią modelį), kai norite sumažinti išlaidas, patiriamas visada n
 
 ---
 
+#### 7. `decision` — prijungiamas sprendėjas pasirenka modelį
+
+`decision` klausia a** sprendėjas** kuris modelis telkinyje atitinka užklausą, tada susiaurina telkinį iki to modelio ir leidžia `rules` pasirinkti ryšį (kvota, sveikata ir kaina vis tiek pasirenka paskyrą). Sprendimas nustatomas derinio sprendimo bloke — `config.decision` kai maršruto parinktuvo rankenėlės yra `config` viršuje (ką rašo prietaisų skydelis), arba `config.auto.decision` šalia `config.auto.routerStrategy`:
+
+| `decider`     | Kas atsako                                                                                                                 | Poreikiai                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), numatytasis modelis `jev-latest`                        | `typesafe` jungtis arba env klavišas       |
+| `http`        | jūsų pačių sprendimas `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) arba `"openai-chat"` (pokalbių užbaigimai) | `baseUrl` + `model`; raktas neprivalomas   |
+| `combo-model` | vienas iš jūsų teikėjo modelių, iškviestas kaip sintezės teisėjas                                                          | `model` kaip `provider/model` (be derinio) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Laukai (patvirtinti pagal griežtą schemą išsaugant ir dar kartą paprašius):
+
+- `decider` — `systemone`, `http` arba `combo-model`.
+- `model` — TypeSafe modelis, sprendimo modelis jūsų URL arba kombinuoto modelio iškvietimo `provider/model` (iki 200 simbolių).
+- `baseUrl` — tik `http` : `http(s)` URL iki 500 simbolių, be kredencialų, užklausos ar fragmento. URL nukreipiantis į šį OmniRoute (atgalinis + `PORT`), atmetamas.
+- `wire` — tik `http` : `systemone` (numatytasis) arba `openai-chat`.
+- `connectionId` — saugomas ryšys, kurio raktas naudojamas (tik skambinamojo API klavišo leidžiamų jungčių viduje). Be jo `systemone` nuskaito `typesafe` ryšį ir kiekvienas tinklo sprendėjas grįžta į `OMNIROUTE_DECISION_API_KEY`. Nėra `apiKey` lauko: raktas niekada nėra saugomas kombinacijoje.
+- `timeoutMs` — sveikasis skaičius, 100–5000, numatytoji 2000.
+- `minConfidence` — 0–1; mažesnio pasitikėjimo atsakymas grįžta į `rules` (sprendėjas, kuris praneša, kad nepasitiki, skaičiuojamas kaip 0).
+- `descriptions` — iki 50 įrašų (raktas iki 300, tekstas iki 1000 simbolių), pažymėtas modelio ID arba `provider/model`; nenustatyti įrašai gauna sugeneruotą išlaidų rango aprašymą.
+
+**Vėliava.** `COMBO_DECISION_ROUTER_ENABLED` (numatytasis `false`) užkerta kiekvieną sprendimą. Kol jis išjungtas, `decision` derinys neskaito kredencialų, neskambina ir nukreipia su `rules`; žurnale sakoma `fallback (disabled)`. Vien tik saugomas raktas jo neįsijungia. Kombinacijos be sprendimų bloko visiškai neturi įtakos.
+
+**Kas palieka dėžutę.** Tik paskutinio vartotojo pranešimo tekstas (iki 8000 simbolių; chat/Claude `messages` arba Responses `input`) ir modelių id meniu su jų aprašymais. Niekada sistema neprašo, atsakymai `instructions`, įrankiai, istorija, antraštės ar paskyros duomenys. Tinklo skambučiai vyksta per teikėjo išsiunčiamąją apsaugą be jokių bandymų, peradresavimų ir 64 KB atsako ribos. `combo-model` skambutis netransliuojamas, be įrankių, `temperature: 0`, kurio biudžetas yra 256 žetonai; atmetamas sprendimas, priimtas priimant sprendimą.
+
+**Nesėkmės elgesys** yra nesėkmingas: bet `cooldown` gedimas pašalinamas iki `rules` sprendimo, o priežastis `recursion` `decision(<decider>): fallback (<reason>)`, o `<reason>` yra vienas iš `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `network_error`, `low_confidence`, `single_option` `no_user_text` Po skirtojo laiko, HTTP klaidos arba tinklo klaidos galutinis taškas praleidžiamas 30 s. Sėkmingas pasirinkimas skaito `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Joks URL, raktas, raginimas ar prieš srovę korpusas nepasiekia žurnalo.
+
+Kombinuotojo kūrimo priemonė rodo šiuos laukus, kai maršrutizatoriaus strategija yra `decision`, o sugeneruoti aprašai yra vietos rezervavimo ženklai ir** Bandomasis sprendimas** mygtukas, kuris vieną kartą iškviečia `POST /api/combos/decision-preview` su neišsaugotais nustatymais (ta pati vėliavėlė).
+
+**Kada naudoti** : mišraus sunkumo srautas, kai norite, kad pakopa būtų pasirinkta pagal užklausą pagal pasirinktą klasifikatorių, o ne konkrečiai Nadirą.
+
+**Pseudonimas** : `decision` (be slapyvardžio)
+
+---
+
 ### Pasirinktinės maršruto parinkimo strategijos
 
 Galite užregistruoti savo `RouterStrategy` realizaciją naudodami viešąją API:
@@ -803,6 +858,7 @@ Tada ją naudokite:
 | Griežti SLO reikalavimai   | `sla-aware` | Filtruoja pagal p95 / klaidų / sąnaudų ribines vertes |
 | Kelių žinučių pokalbis     | `lkgp`      | Sesijos susiejimas                                    |
 | Mišrus sudėtingumas        | `nadir`     | Kiekvienai užklausai parenka modelio lygį             |
+| Nuosavas klasifikatorius   | `decision`  | Jūsų sprendėjas pasirenka modelį                      |
 
 SLA atsižvelgiantys laukai:
 

@@ -501,6 +501,7 @@ Kombiso `strategy: "auto"` echekwara nwere ike ịtọ `config.routerStrategy` (
 - `lkgp` — onye na-eweta ọrụ ikpeazụ a maara na ọ dị mma ga-ebu ụzọ
 - `nadir` — jụọ API mkpebi nke [Nadir](https://getnadir.com) ụdị model dị n'ọdọ ahụ nke
   prompt chọrọ; a ga-ahọrọ ịgbanye ya, ma ọ bụrụ na ọ daa, ọ ga-emeghe laghachi na `rules`
+- `decision` — jụọ onye nhazi ahazi (TypeSafe System One, mkpebi nke gị URL, ma ọ bụ otu n'ime ụdị nke combo) nke ihe nlereanya na ọdọ mmiri dabara na arịrịọ ahụ; n'azụ ọkọlọtọ `COMBO_DECISION_ROUTER_ENABLED` na-apụ apụ, ada-emeghe na `rules`
 
 ### Nkọwa zuru ezu banyere atụmatụ router
 
@@ -725,6 +726,60 @@ na model frontier), ebe iji frontier mgbe niile bụ ọnụ ahịa ịchọrọ
 
 ---
 
+#### 7. `decision` — pluggable decisionr na-ahọrọ ihe nlereanya
+
+`decision` jụrụ a** onye na-ekpebi** nke nlereanya na ọdọ mmiri dabara na arịrịọ, wee warara ọdọ mmiri na nlereanya na-ahapụ `rules` họrọ njikọ (oke, ahụike na ọnụ ahịa ka na-ahọrọ akaụntụ). A na-edobe onye na-ekpebi ihe na mkpebi combo ngọngọ — `config.decision` mgbe eriri rawụta nọ ọdụ n'elu `config` (ihe dashboard dere), ma ọ bụ `config.auto.decision` n'akụkụ `config.auto.routerStrategy`:
+
+| `decider`     | Onye zara                                                                                                                 | Mkpa                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `systemone`   | TypeSafe Sistemụ Otu (`POST https://api.typesafe.ai/v1/systemone`), ụdị `jev-latest` nke ndabara                          | njikọ `typesafe` ma ọ bụ igodo env                |
+| `http`        | onye na-ekpebi nke gị na `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ma ọ bụ `"openai-chat"` (mmecha nkata) | `baseUrl` + `model`; isi nhọrọ                    |
+| `combo-model` | otu n'ime ndị na-eweta gị ụdị, a na-akpọ na usoro dị ka fusion ọkàikpe                                                    | `model` dị ka `provider/model` (enweghị ngwakọta) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Ubi (nke atụmatụ siri ike kwadobere na nchekwa na oge ọzọ n'oge arịrịọ):
+
+- `decider` — `systemone`, `http` ma ọ bụ `combo-model`.
+- `model` — TypeSafe nlereanya, ihe nlereanya mkpebi na gị URL, ma ọ bụ `provider/model` nke a combo-model oku (ihe ruru 200 mkpụrụedemede).
+- `baseUrl` — `http` naanị: `http(s)` URL ruru mkpụrụedemede 500, na-enweghị nzere, ajụjụ ma ọ bụ iberibe. Ajụrụ URL na-atụ aka na OmniRoute a (loopback + `PORT`).
+- `wire` — `http` naanị: `systemone` (ndabere) ma ọ bụ `openai-chat`.
+- `connectionId` — njikọ echekwara nke ejiri igodo ya (naanị n'ime njikọ anabatara igodo API ). Na-enweghị ya, `systemone` na-agụ njikọ `typesafe` na onye ọ bụla na-ekpebi netwọk ga-adaghachi na `OMNIROUTE_DECISION_API_KEY`. Enweghị ogige `apiKey` : anaghị echekwa igodo na ngwakọta.
+- `timeoutMs` — integer, 100–5000, ndabara 2000.
+- `minConfidence` — 0–1; Azịza ntụkwasị obi dị ala na-adaghachi na `rules` (onye na-ekpebi nke na-akọ enweghị ntụkwasị obi dị ka 0).
+- `descriptions` — ruru ndenye 50 (igodo ruo 300, ederede ruo mkpụrụedemede 1000), nke ejiri ụdị id ma ọ bụ `provider/model` tinye ya; ndenye ewepụrụ na-enweta nkọwa ọkwa ọnụ ahịa ewepụtara.
+
+**Ọkọlọtọ.** `COMBO_DECISION_ROUTER_ENABLED` (ndabara `false`) ga-eghe onye ọ bụla na-ekpebi. Mgbe ọ na-agbanyụ, `decision` combo na-agụ enweghị nzere, ọ dịghị akpọ oku na ụzọ na `rules`; ndekọ na-ekwu `fallback (disabled)`. Naanị igodo echekwara anaghị agbanwuo ya. Combos na-enweghị ngọngọ mkpebi anaghị emetụta ma ọlị.
+
+**Gịnị na-ahapụ igbe.** Naanị ederede ozi onye ọrụ ikpeazụ (ihe ruru mkpụrụedemede 8000; chat/Claude `messages` ma ọ bụ azịza `input`) na menu nke ids nlereanya na nkọwa ha. Ọ dịghị mgbe usoro ahụ ozugbo, azịza `instructions`, ngwaọrụ, akụkọ ihe mere eme, nkụnye eji isi mee ma ọ bụ data akaụntụ. Oku netwọkụ na-aga site na onye na-eche nche na-apụ apụ na-enweghị nyochagharị, enweghị ntụgharị na okpu nzaghachi 64 KB. Oku `combo-model` na-abụghị nkwanye, enweghị ngwá ọrụ, `temperature: 0`, na mmefu ego 256-token; Ajụjụ mkpebi malitere n'ime oku mkpebi.
+
+**Omume ọdịda** bụ ọdịda `low_confidence` emeghe `http_error` ọdịda `no_user_text` `invalid_response` na `out_of_menu` `cooldown` mkpebi `rules`, ihe kpatara `not_configured` `missing_credential` `timeout` `refused` `decision(<decider>): fallback (<reason>)`, `recursion` na `<reason>` `network_error` `single_option` `disabled` Mgbe oge gwụchara, njehie HTTP ma ọ bụ njehie netwọk a na-amafe ebe njedebe maka 30 s. Nhọrọ na-aga nke ọma na-agụ `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ọ nweghị URL, igodo, ngwa ngwa ma ọ bụ ahụ dị elu na-erute ndekọ ahụ.
+
+Onye na-ewu ihe na-arụkọ ọrụ ọnụ na-egosi mpaghara ndị a mgbe atụmatụ rawụta bụ `decision`, yana nkọwa ndị emepụtara dị ka ndị na-edebe ebe na a.** Nnwale mkpebi** bọtịnụ na-akpọ `POST /api/combos/decision-preview` otu ugboro yana ntọala echekwara (otu ọkọlọtọ).
+
+**Mgbe iji** : okporo ụzọ siri ike agwakọta ebe ịchọrọ ịhọrọ ọkwa n'otu arịrịọ site na nhazi ọkwa ị họọrọ, ọ bụghị nke Nadir kpọmkwem.
+
+**Aha aha** : `decision` (enweghị utu aha)
+
+---
+
 ### Atụmatụ router ahaziri iche
 
 Ị nwere ike idebanye mmejuputa `RouterStrategy` nke gị site na public API:
@@ -778,6 +833,7 @@ Mgbe ahụ jiri ya:
 | SLO ndị siri ike            | `sla-aware` | Na-enyocha site n’oke p95/mperi/ọnụ ahịa                 |
 | Mkparịta ụka ọtụtụ ntụgharị | `lkgp`      | Ịrapara na nnọkọ                                         |
 | Ogo isi ike dị iche iche    | `nadir`     | Na-ahọrọ ọkwa model maka prompt ọ bụla                   |
+| Nkewa nkeonwe               | `decision`  | Onye na-ekpebi gị na-ahọrọ ihe nlereanya                 |
 
 Fịldụ SLA-aware:
 

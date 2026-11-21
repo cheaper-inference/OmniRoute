@@ -82,18 +82,19 @@ turinį, `listMarketplacePlugins()` užregistruoja įspėjimą ir grįžta prie 
 
 Visiems galiniams taškams reikalingas valdymo autentifikavimas (`requireManagementAuth`)** ir** yra tik grįžtamojo ryšio — `/api/plugins` ir `/api/plugins/` yra išvardyti `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Galutinis taškas                 | Metodas | Aprašymas                                                            |
-| -------------------------------- | ------- | -------------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | Įdiegtų papildinių sąrašas (pasirenkamas `?status=` filtras)         |
-| `/api/plugins`                   | POST    | Įdiekite papildinį iš papildinio šaltinių katalogo                   |
-| `/api/plugins/scan`              | POST    | Nuskaitykite įskiepių katalogą ir užregistruokite naujus papildinius |
-| `/api/plugins/marketplace`       | GET     | Išvardykite prekyvietės katalogo įrašus                              |
-| `/api/plugins/[name]`            | GET     | Gaukite išsamią įdiegto papildinio informaciją                       |
-| `/api/plugins/[name]`            | DELETE  | Pašalinkite papildinį                                                |
-| `/api/plugins/[name]/activate`   | POST    | Suaktyvinti (įkelti + registro kabliukus)                            |
-| `/api/plugins/[name]/deactivate` | POST    | Išjungti (uždegti `onDeactivate`, išregistruoti kabliukus)           |
-| `/api/plugins/[name]/config`     | GET     | Gaukite papildinio config + config schemą                            |
-| `/api/plugins/[name]/config`     | PUT     | Atnaujinti papildinio konfigūraciją (patvirtinta pagal schemą)       |
+| Galutinis taškas                   | Metodas | Aprašymas                                                            |
+| ---------------------------------- | ------- | -------------------------------------------------------------------- |
+| `/api/plugins`                     | GET     | Įdiegtų papildinių sąrašas (pasirenkamas `?status=` filtras)         |
+| `/api/plugins`                     | POST    | Įdiekite papildinį iš papildinio šaltinių katalogo                   |
+| `/api/plugins/scan`                | POST    | Nuskaitykite įskiepių katalogą ir užregistruokite naujus papildinius |
+| `/api/plugins/marketplace`         | GET     | Išvardykite prekyvietės katalogo įrašus                              |
+| `/api/plugins/marketplace/install` | POST    | Įdiekite prekyvietės papildinį pagal pavadinimą                      |
+| `/api/plugins/[name]`              | GET     | Gaukite išsamią įdiegto papildinio informaciją                       |
+| `/api/plugins/[name]`              | DELETE  | Pašalinkite papildinį                                                |
+| `/api/plugins/[name]/activate`     | POST    | Suaktyvinti (įkelti + registro kabliukus)                            |
+| `/api/plugins/[name]/deactivate`   | POST    | Išjungti (uždegti `onDeactivate`, išregistruoti kabliukus)           |
+| `/api/plugins/[name]/config`       | GET     | Gaukite papildinio config + config schemą                            |
+| `/api/plugins/[name]/config`       | PUT     | Atnaujinti papildinio konfigūraciją (patvirtinta pagal schemą)       |
 
 Filtras `GET /api/plugins` `status` priima vieną iš `installed` / `active` / `inactive` / `error`. Netinkama reikšmė grąžina `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` turi būti an** absoliutus** kelias į katalogą** įskiepių šaltinių kataloge** : `plugin-sources` šalia papildinio šaknies, taigi `~/.omniroute/plugin-sources/` pagal numatytuosius nustatymus arba `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` kai šis kintamasis nustatytas (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Pirmiausia ten nukopijuokite arba klonuokite papildinį. Diegimas atmetamas naudojant `400` kai kelyje yra `..` arba nulinis baitas, jis yra už šio katalogo ribų, išsprendžiamas už jo ribų naudojant simbolinę nuorodą, yra simbolio nuoroda, kurios tikslas yra už jo ribų, arba kai katalogo nėra. Šaltinio kataloge turi būti galiojantis `plugin.json` (arba jis turi būti pirminis). Sėkmės atveju atsakymas yra `201` su įdiegto papildinio eilute.
 
-Skirtingai nuo kitų įskiepių maršrutų, šiam reikalingas valdymo kredencialas (prietaisų skydelio seansas arba valdymo apimties API raktas), net kai prisijungimas išjungtas (`requireLogin=false`): kodo įdiegimas niekada nėra anoniminis veiksmas.
+Skirtingai nuo kitų įskiepių maršrutų, šiam reikalingas valdymo kredencialas (prietaisų skydelio seansas arba valdymo apimties API raktas), net kai prisijungimas išjungtas (`requireLogin=false`): kodo įdiegimas niekada nėra anoniminis veiksmas. Tas pats pasakytina ir apie `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Naršykite turgavietėje
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` patikrina kiekvieną pateiktą reikšmę pagal papildinio `configSchema` (nurodytas manifeste): `number` laukai turi atitikti `min`/`max`, `select` laukai turi atitikti deklaruotą `enum`. Leidžiami raktai, kurių nėra schemoje.
+`PUT .../config` patvirtina turinį pagal papildinio `configSchema` (deklaruotą manifeste) su `validatePluginConfig()` iš `src/lib/plugins/manifest.ts`: kiekvienas raktas turi būti deklaruotas schemoje, reikšmės turi atitikti deklaruotą tipą, `number` laukai turi atitikti `min`/`max`, o `select` laukai turi atitikti deklaruotą `enum`. Bet koks pažeidimas grąžina `400` ir nieko neišsaugoma. Papildinys, kuris deklaruoja, kad nėra `configSchema` neturi konfigūruojamų raktų, todėl užklausa atmetama naudojant `400` ("Papildinys nedeklaruoja jokių konfigūruojamų raktų").
 
 ## Konfigūracija
 
@@ -216,7 +217,7 @@ Jei URL nepavyksta bet kurio sluoksnio, prašymas neatšaukiamas. — prekyviet�
 
 ### Papildinio vykdymo izoliavimas
 
-> **Papildiniai nėra smėlio dėžės.** Vaikas yra įprastas Node.js procesas, veikiantis kaip OmniRoute vartotojas, be VM konteksto ir Node.js leidimo vėliavėlių, todėl papildinio kodas gali nuskaityti ir rašyti bet kokį vartotojo galimą failą, paleisti programas ir pasiekti tinklą. `requires.permissions` tik nusprendžia, kokius aplinkos kintamuosius gauna vaikas; kiti leidimai nevykdomi. Įdiekite tik tuos papildinius, kuriais pasitikite. Toliau pateiktoje proceso riboje yra gedimų ir užstrigimų; tai nėra saugumo riba.
+> **Papildiniai pagal numatytuosius nustatymus nėra smėlio dėžės.** Vaikas yra įprastas Node.js procesas, veikiantis kaip OmniRoute vartotojas, be VM konteksto ir Node.js leidimo vėliavėlių, todėl papildinio kodas gali nuskaityti ir rašyti bet kokį vartotojo galimą failą, paleisti programas ir pasiekti tinklą. `requires.permissions` tik nusprendžia, kokius aplinkos kintamuosius gauna vaikas; kiti leidimai nevykdomi. Pasirinktos `PLUGIN_PERMISSION_MODEL_ENABLED` funkcijos vėliavėlė (pagal numatytuosius nustatymus išjungta) paleidžia kiekvieną papildinį pagal Node.js leidimo modelį, sukurtą iš tų leidimų, išskyrus `network`, kurio Node.js negali apriboti (žr. [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#leidim%C5%B3-sistema) ). Įdiekite tik tuos papildinius, kuriais pasitikite. Toliau pateiktoje proceso riboje yra gedimų ir užstrigimų; tai nėra saugumo riba.
 
 - **Proceso izoliacija** — `loadPlugin()` (`src/lib/plugins/loader.ts`) sukuria kiekvieną papildinį atskirame Node.js antriniame procese ir bendrauja per IPC. Pakabinamų skambučių skirtasis laikas baigiasi su `SIGTERM` → `SIGKILL` eskalavimu.
 - **Env leidimų sąrašas** — vaikas gauna tik leistiną aplinkos kintamųjų rinkinį; platesnis rinkinys suteikiamas tik tada, kai manifeste prašoma `env` leidimo.

@@ -529,6 +529,7 @@ Combos persistidos com `strategy: "auto"` podem definir `config.routerStrategy` 
 - `lkgp` — o último provedor reconhecidamente íntegro primeiro
 - `nadir` — consulta a API de decisão da [Nadir](https://getnadir.com) para determinar qual modelo do pool
   é necessário para o prompt; requer adesão explícita e, em caso de falha, recorre a `rules`
+- `decision` — consulte um decisor configurado (TypeSafe System One, uma URL própria ou um dos modelos do combo) para escolher o modelo do pool que atende à solicitação. Requer a flag `COMBO_DECISION_ROUTER_ENABLED`, desativada por padrão. Em caso de falha, o combo volta a `rules`.
 
 ### Estratégias do roteador em detalhes
 
@@ -754,6 +755,60 @@ intermediário e um de ponta), quando usar sempre o modelo de ponta representa o
 
 ---
 
+#### 7. `decision` — um decisor configurável escolhe o modelo
+
+A estratégia `decision` pergunta a um **decisor** qual modelo do pool atende à solicitação. Em seguida, limita o pool a esse modelo e usa `rules` para escolher a conexão. Cota, integridade e custo continuam a determinar a conta. Configure o decisor em `config.decision` quando as opções de roteamento ficam no primeiro nível de `config`, como no painel, ou em `config.auto.decision`, ao lado de `config.auto.routerStrategy`:
+
+| `decider`     | Quem responde                                                                                                       | Requisitos                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), cujo modelo padrão é `jev-latest`                | Uma conexão `typesafe` ou a chave definida no ambiente |
+| `http`        | Seu decisor, em `baseUrl`. Use `wire: "systemone"` (`{baseUrl}/v1/systemone`) ou `"openai-chat"` (Chat Completions) | `baseUrl` e `model`. A chave é opcional                |
+| `combo-model` | Um dos seus modelos de provedor, chamado no próprio processo, como o modelo avaliador da estratégia de fusão        | `model` no formato `provider/model` (sem combo)        |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Um esquema estrito valida estes campos ao salvar e a cada solicitação:
+
+- `decider` — `systemone`, `http` ou `combo-model`.
+- `model` — modelo do TypeSafe, modelo de decisão da sua URL ou `provider/model` para chamadas a um modelo do combo. Limite de 200 caracteres.
+- `baseUrl` — somente para `http`. URL `http(s)` de até 500 caracteres, sem credenciais, parâmetros de consulta ou fragmento. URLs que apontam para a própria instância do OmniRoute (loopback + `PORT`) são recusadas.
+- `wire` — somente para `http`. Aceita `systemone` (padrão) ou `openai-chat`.
+- `connectionId` — conexão armazenada cuja chave será usada. Ela precisa estar entre as conexões permitidas para a chave de API que fez a chamada. Sem esse campo, `systemone` consulta uma conexão `typesafe` e todos os decisores de rede recorrem a `OMNIROUTE_DECISION_API_KEY` como alternativa. O esquema não aceita o campo `apiKey`. O combo nunca armazena uma chave.
+- `timeoutMs` — inteiro de 100 a 5000. Padrão de 2000.
+- `minConfidence` — de 0 a 1. Se a confiança ficar abaixo do mínimo, o combo volta a `rules`. Se o decisor não informar a confiança, ela é considerada zero.
+- `descriptions` — até 50 entradas, indexadas por ID do modelo ou por `provider/model`. As chaves podem ter até 300 caracteres, e os textos, até 1000. Para entradas sem descrição, o sistema gera uma com base no custo do modelo.
+
+**Flag.** `COMBO_DECISION_ROUTER_ENABLED` (padrão `false`) controla o acesso a todos os decisores. Com a flag desativada, um combo `decision` não lê credenciais, não faz chamadas ao decisor e usa `rules`. O log registra `fallback (disabled)`. Salvar uma chave não ativa a flag. Combos sem bloco de decisão continuam operando como antes.
+
+**Dados enviados ao decisor.** Apenas o texto da última mensagem do usuário (até 8000 caracteres, em `messages` no chat e no Claude ou em `input` na Responses API) e a lista de IDs de modelos com suas descrições. Prompt do sistema, `instructions` da Responses API, ferramentas, histórico, cabeçalhos e dados da conta ficam fora do envio. A proteção de saída dos provedores controla as chamadas de rede, que têm limite de resposta de 64 KB, sem novas tentativas ou redirecionamentos. A chamada `combo-model` usa `temperature: 0` e tem limite de 256 tokens. Ela dispensa streaming e ferramentas. O sistema recusa iniciar uma decisão dentro de outra chamada de decisão.
+
+**Comportamento em caso de falha.** O combo volta a `rules` e registra `decision(<decider>): fallback (<reason>)`. O código `<reason>` pode ser `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` ou `no_user_text`. Se houver timeout, erro HTTP ou erro de rede, o sistema deixa de consultar o endpoint por 30 segundos. Quando a escolha funciona, o log registra `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. O log exclui URL, chave, prompt e corpo da resposta do provedor.
+
+O editor de combos exibe esses campos quando a estratégia é `decision`. O editor mostra as descrições geradas como sugestões e oferece o botão **Testar decisão**. O botão chama `POST /api/combos/decision-preview` uma vez com as configurações ainda não salvas. A mesma flag controla o teste.
+
+**Quando usar**: em tráfego com solicitações de diferentes níveis de dificuldade, quando você quer escolher, por solicitação, o nível do modelo por meio de um classificador que você mesmo configura.
+
+**Alias**: `decision` (sem alias alternativo)
+
+---
+
 ### Estratégias de roteador personalizadas
 
 Você pode registrar sua própria implementação de `RouterStrategy` por meio da API pública:
@@ -807,6 +862,7 @@ Em seguida, use-a:
 | SLOs rigorosos            | `sla-aware` | Filtra por limites de p95/erro/custo       |
 | Chat com múltiplos turnos | `lkgp`      | Afinidade de sessão                        |
 | Dificuldade variada       | `nadir`     | Escolhe o nível do modelo para cada prompt |
+| Classificador próprio     | `decision`  | O decisor configurado escolhe o modelo     |
 
 Campos compatíveis com SLA:
 

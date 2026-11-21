@@ -522,6 +522,7 @@ Các combo `strategy: "auto"` được lưu trữ có thể đặt `config.route
 - `lkgp` — ưu tiên nhà cung cấp hoạt động tốt gần nhất
 - `nadir` — yêu cầu API quyết định của [Nadir](https://getnadir.com) xác định mô hình nào trong nhóm mà
   prompt cần; cần chủ động bật, khi lỗi sẽ chuyển sang `rules`
+- `decision` — hỏi người quyết định được định cấu hình (TypeSafe System One, quyết định của riêng bạn URL hoặc một trong các mô hình riêng của tổ hợp) mô hình nào trong nhóm phù hợp với yêu cầu; đằng sau cờ `COMBO_DECISION_ROUTER_ENABLED` tắt mặc định, không mở được `rules`
 
 ### Chi tiết các chiến lược router
 
@@ -748,6 +749,60 @@ và một mô hình frontier), khi bạn muốn cắt giảm chi phí do luôn s
 
 ---
 
+#### 7. Bộ quyết định có thể cắm `decision` — chọn mô hình
+
+`decision` hỏi một** người quyết định** mô hình nào trong nhóm phù hợp với yêu cầu, sau đó thu hẹp nhóm theo mô hình đó và để `rules` chọn kết nối (hạn ngạch, tình trạng và chi phí vẫn chọn tài khoản). Bộ quyết định được đặt trong khối quyết định của tổ hợp — `config.decision` khi các núm của bộ định tuyến nằm ở đầu `config` (nội dung bảng điều khiển ghi) hoặc `config.auto.decision` bên cạnh `config.auto.routerStrategy`:
+
+| `decider`     | Ai trả lời                                                                                                                                | Nhu cầu                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), mô hình mặc định `jev-latest`                                          | kết nối `typesafe` hoặc khóa env                |
+| `http`        | người quyết định của riêng bạn tại `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) hoặc `"openai-chat"` (hoàn thành trò chuyện) | `baseUrl` + `model`; phím tùy chọn              |
+| `combo-model` | một trong những mô hình nhà cung cấp của bạn, được gọi trong quá trình như thẩm phán tổng hợp                                             | `model` như `provider/model` (không có kết hợp) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Các trường (được xác thực bằng lược đồ nghiêm ngặt khi lưu và lưu lại vào thời điểm yêu cầu):
+
+- `decider` — `systemone`, `http` hoặc `combo-model`.
+- mô hình `model` — TypeSafe, mô hình quyết định tại URL của bạn hoặc `provider/model` của lệnh gọi mô hình kết hợp (tối đa 200 ký tự).
+- `baseUrl` — `http` only: `http(s)` URL tối đa 500 ký tự, không có thông tin xác thực, truy vấn hoặc đoạn. Một URL trỏ vào OmniRoute này (loopback + `PORT`) bị từ chối.
+- `wire` — `http` chỉ: `systemone` (mặc định) hoặc `openai-chat`.
+- `connectionId` — kết nối được lưu trữ có khóa được sử dụng (chỉ bên trong các kết nối được phép của khóa API đang gọi). Không có nó, `systemone` sẽ đọc kết nối `typesafe` và mọi người quyết định mạng sẽ quay trở lại `OMNIROUTE_DECISION_API_KEY`. Không có trường `apiKey` : khóa không bao giờ được lưu trong tổ hợp.
+- số nguyên `timeoutMs` —, 100–5000, mặc định là 2000.
+- `minConfidence` — 0–1; câu trả lời có độ tin cậy thấp hơn sẽ quay trở lại `rules` (bộ quyết định báo cáo không có độ tin cậy được tính là 0).
+- `descriptions` — tối đa 50 mục (khóa tối đa 300, văn bản tối đa 1000 ký tự), được khóa theo id mẫu hoặc `provider/model`; các mục nhập chưa được đặt sẽ nhận được mô tả xếp hạng chi phí được tạo.
+
+**Lá cờ.** `COMBO_DECISION_ROUTER_ENABLED` (mặc định `false`) cổng vào mọi người quyết định. Khi nó tắt, tổ hợp `decision` không đọc thông tin xác thực, không thực hiện cuộc gọi và định tuyến với `rules`; nhật ký ghi `fallback (disabled)`. Một chìa khóa được lưu trữ một mình sẽ không bao giờ bật nó lên. Các combo không có khối quyết định sẽ không bị ảnh hưởng gì cả.
+
+**Những gì rời khỏi hộp.** Chỉ văn bản của tin nhắn người dùng cuối cùng (tối đa 8000 ký tự; chat/Claude `messages` hoặc Phản hồi `input`) và menu id mẫu cùng với mô tả của chúng. Không bao giờ có lời nhắc hệ thống, Phản hồi `instructions`, công cụ, lịch sử, tiêu đề hoặc dữ liệu tài khoản. Các cuộc gọi mạng đi qua bộ bảo vệ gửi đi của nhà cung cấp mà không cần thử lại, không chuyển hướng và giới hạn phản hồi 64 KB. Cuộc gọi `combo-model` không phát trực tuyến, không có công cụ, `temperature: 0`, với ngân sách 256 mã thông báo; một quyết định bắt đầu bên trong một cuộc gọi quyết định bị từ chối.
+
+**Hành vi thất bại** không mở được: mọi lỗi đều được giải quyết theo quyết định `rules` và lý do là `decision(<decider>): fallback (<reason>)`, với `<reason>` một trong các `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` hoặc `no_user_text`. Sau khi hết thời gian chờ, lỗi HTTP hoặc lỗi mạng, điểm cuối sẽ bị bỏ qua trong 30 giây. Một lượt chọn thành công sẽ đọc `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Không có nội dung URL, key, nhắc nhở hoặc ngược dòng nào đạt được nhật ký.
+
+Trình tạo kết hợp hiển thị các trường này khi chiến lược bộ định tuyến là `decision`, với các mô tả được tạo dưới dạng phần giữ chỗ và** Quyết định kiểm tra** nút gọi `POST /api/combos/decision-preview` một lần với cài đặt chưa được lưu (cùng một cờ).
+
+**Khi nào nên sử dụng** : lưu lượng truy cập có độ khó hỗn hợp trong đó bạn muốn trình phân loại bạn chọn chọn cấp theo yêu cầu chứ không phải bởi Nadir cụ thể.
+
+**Bí danh** : `decision` (không có bí danh)
+
+---
+
 ### Chiến lược bộ định tuyến tùy chỉnh
 
 Bạn có thể đăng ký phần triển khai `RouterStrategy` của riêng mình thông qua API công khai:
@@ -801,6 +856,7 @@ Sau đó sử dụng chiến lược này:
 | SLO nghiêm ngặt               | `sla-aware` | Lọc theo ngưỡng p95/lỗi/chi phí              |
 | Trò chuyện nhiều lượt         | `lkgp`      | Duy trì tính nhất quán trong phiên           |
 | Độ khó hỗn hợp                | `nadir`     | Chọn cấp độ mô hình cho từng prompt          |
+| Trình phân loại riêng         | `decision`  | Người quyết định của bạn chọn mô hình        |
 
 Các trường nhận biết SLA:
 
