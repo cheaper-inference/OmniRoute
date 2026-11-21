@@ -3,16 +3,16 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "basecheck-6d3f1d3f70e1",
+    "batchId": "basecheck-6d3f1d3f70e1-r1",
     "kind": "base-check",
-    "candidateRef": "omni-queue/release-v3.8.55/basecheck-6d3f1d3f70e1",
+    "candidateRef": "omni-queue/release-v3.8.55/basecheck-6d3f1d3f70e1-r1",
     "candidateSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
     "baseSha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
     "treeSha": null,
     "prs": [],
     "stage": "testing",
-    "startedAt": "2026-11-21T12:12:23.294Z",
-    "attempts": 0,
+    "startedAt": "2026-11-21T16:17:27.540Z",
+    "attempts": 1,
     "bisect": null,
     "pendingRed": {
       "batchId": "b22",
@@ -144,7 +144,7 @@
   },
   "counters": {
     "batchSeq": 22,
-    "ciRuns": 25,
+    "ciRuns": 26,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1703,8 +1703,26 @@
       "sha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
       "detail": "b22 red on a base with no verdict: testing the bare base",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44902690362"
+    },
+    {
+      "at": "2026-11-21T16:17:27.539Z",
+      "type": "checks-timeout",
+      "batchId": "basecheck-6d3f1d3f70e1",
+      "prs": [],
+      "sha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
+      "detail": "no verdict after 240 min",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44923728342"
+    },
+    {
+      "at": "2026-11-21T16:17:36.063Z",
+      "type": "infra-retry",
+      "batchId": "basecheck-6d3f1d3f70e1-r1",
+      "prs": [],
+      "sha": "6d3f1d3f70e1753d1836655951886f63f74c0bdc",
+      "detail": "retry 1/1: checks timed out after 240 min",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44923728342"
     }
   ],
-  "updatedAt": "2026-11-21T15:29:40.880Z",
+  "updatedAt": "2026-11-21T16:17:53.389Z",
   "batchWindow": 6
 }
