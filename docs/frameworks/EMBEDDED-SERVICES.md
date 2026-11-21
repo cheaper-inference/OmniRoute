@@ -52,6 +52,107 @@ All eight follow the same supervisory model:
 - OmniRoute injects an ephemeral API key into the child's environment and rotates it without downtime (where applicable)
 - All management routes (`/api/services/*`) are **LOCAL_ONLY** — accessible only from loopback (hard rule #17)
 
+### Managed proxy cores
+
+The Custom proxy host field also accepts a V2Ray source link. Select **sing-box** or **Xray**
+explicitly, then click Save. Typing never downloads or starts a core. Save verifies the official
+release archive (or the explicitly selected custom executable), validates native configuration, starts a distinct localhost SOCKS listener, and
+only then writes the proxy registry assignment. Failed activation restores the previous managed
+configuration and process. `STORAGE_ENCRYPTION_KEY` is required; source links are encrypted.
+
+Managed files live under `DATA_DIR/services/managed-proxy/`, separate from TPROXY. There is one
+owned process per selected core, up to 100 listeners. No autostart or global routing default is
+changed. Successful Save remembers activation for this managed core only; application startup
+restores enabled saved cores using the already verified binary, never a boot-time download.
+Explicit Stop clears that activation flag. A missing version can be installed by re-saving a source.
+An existing damaged version fails verification before any download: remove only that managed version
+directory and re-save, preserving sources and other versions. Reimport a verified custom binary to
+repair its managed copy.
+Registry deletion removes the source and listener locally; ordinary endpoint edits are rejected for
+managed rows so the saved source cannot silently drift from its routed listener.
+
+| Source format                         | sing-box                                                          | Xray                                                              |
+| ------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Supported conversion                                              | Supported conversion                                              |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Supported conversion                                              | Rejected; use a compatible core                                   |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Supported for VLESS/VMess/Trojan                                  | Supported for VLESS/VMess/Trojan                                  |
+| XHTTP URI transport                   | Rejected                                                          | Supported conversion                                              |
+| Native outbound JSON                  | Selected core's allowed proxy protocols/options, checked natively | Selected core's allowed proxy protocols/options, checked natively |
+
+Unknown wire options, insecure TLS flags, external plugins, local file-path options and unsupported
+combinations are rejected rather than silently discarded. Native objects are outbound definitions,
+not whole-core configurations; control/direct/bypass outbounds are not accepted. WireGuard on
+sing-box 1.14 uses endpoints, so it is not accepted as a native outbound. This is not an all-format
+converter; SSR, legacy whole-base64 Shadowsocks links, arbitrary Clash objects and transport
+variants absent from the table need a separately supported source format.
+
+`/api/services/managed-proxy` is authenticated and loopback-only: GET lists redacted metadata,
+POST saves `{core,name,sourceLink,id?,assignment?,fragment?}`. PATCH accepts explicit lifecycle,
+version-selection, custom-binary, unsaved-test, and subscription-preview actions described below.
+The host's trusted peer-stamp pipeline must be present. Native core diagnostics are suppressed
+because they can contain credentials; lifecycle events use the existing structured application
+file logger without source links or upstream payloads. Attach only sanitized application logs for
+support. The default versions remain pinned to sing-box 1.14.3 and Xray 26.3.27 with release-asset
+SHA-256 manifests. The optional controls below do not change an installation until explicitly used.
+
+#### Version selection and custom cores
+
+In **Settings → Proxy → Managed cores**, select a configuration family first. **Check available
+versions** reads stable GitHub releases from `SagerNet/sing-box`, `XTLS/Xray-core`, or, for the Xray
+family, `GFW-knocker/Xray-core` (Mahsa Core). The latter is the core linked by
+[MahsaNG's official README](https://github.com/GFW-knocker/MahsaNG#build-from-source), not the
+Android application. Only the current platform's exact release asset with a published SHA-256
+digest is offered. Choosing **Install and use selected version** downloads that asset, verifies
+its digest, and runs the existing native configuration check before replacing a running core.
+A failure restores the previous binary selection and running process. Saved proxy identities,
+ports, sources, assignments, and enabled/stopped intent remain unchanged. There is no automatic
+core update task.
+
+**Import and use custom core** requires an absolute executable path on the OmniRoute server,
+its expected SHA-256 digest, and explicit acknowledgement that the executable can run code with
+OmniRoute's permissions. The executable is copied to a private, content-addressed directory;
+symlink sources and linked managed-directory descendants are rejected. Each later use verifies
+the copied executable against the operator-supplied digest, independently of official archive
+hashes. A matching digest proves integrity, not that custom code is safe or compatible. Choose
+the sing-box or Xray configuration family matching that executable. Invalid native configuration
+or startup failure does not replace the previously running selection. A dormant selection with
+no saved sources is checked natively when a source is tested or saved.
+
+#### Test before saving and subscription preview
+
+The managed tab and Custom proxy modal can test an unsaved source. This explicitly prepares the
+selected binary if needed, validates its config, starts a separate temporary localhost SOCKS
+listener, and requests `https://api.ipify.org?format=json` through that listener. The result is
+an egress IP and elapsed request time. It does not save a source, create an assignment, stop the
+saved core, or verify access to an AI provider. The temporary process and plaintext config are
+cleaned up after success or failure; native diagnostics and source credentials are not returned.
+No test runs merely because a source is typed.
+
+**Load or refresh subscription** accepts a public HTTPS feed URL, performs a DNS-pinned bounded
+fetch without redirects, and previews supported nodes. Plain/base64 URI lists and compatible
+native outbound objects can be selected; incompatible nodes are counted rather than silently
+rewritten. Arbitrary Clash conversion is not added by this feature. Select a node, then test or
+save it through the same explicit actions as a pasted source. Preview URLs and credentials are
+not persisted. Refresh is manual and does not enable periodic synchronization; the existing
+**Subscriptions** tab remains a separate workflow.
+
+#### Fragmentation
+
+TLS ClientHello fragmentation is opt-in for the Xray configuration family, including Mahsa.
+It supports TLS or REALITY over TCP/raw, WebSocket, or HTTPUpgrade. Unsupported core/transport
+combinations are rejected before installation or saving. Length accepts one value or an ascending
+range within 1–4096 bytes; interval accepts 0–1000 milliseconds. Each listener gets its own
+generated freedom dialer. User-supplied dialer references remain forbidden. Fragmentation is not
+exposed for sing-box in these controls and does not guarantee connectivity through filtering.
+
+All advanced operations use the existing authenticated, loopback-only
+`/api/services/managed-proxy` endpoint. PATCH actions are `releases` (`core`, `distribution`),
+`update` (`core`, `distribution`, `version`), `custom` (`core`, `path`, `sha256`,
+`acknowledgeUntrustedCode: true`), `test` (`core`, `sourceLink`, optional `fragment`), and
+`subscription` (`core`, `url`), in addition to `start` and `stop`. The optional `fragment` value
+is `{packets:"tlshello",length:"100-200",interval:"10-20"}`. Source references:
+`src/lib/services/managedProxy/{selection,catalog,update,testSource,testRuntime,subscription,fragment}.ts`.
+
 ### Key decisions (from design plan)
 
 | Decision                              | Value                                                                    |

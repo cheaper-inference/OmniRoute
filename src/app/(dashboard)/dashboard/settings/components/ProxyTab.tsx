@@ -8,8 +8,15 @@ import ProxyPoolTab from "./proxy/ProxyPoolTab";
 import FreePoolTab from "./proxy/FreePoolTab";
 import DocumentationTab from "./proxy/DocumentationTab";
 import SubscriptionTab from "./proxy/SubscriptionTab";
+import ManagedProxyTab from "./proxy/ManagedProxyTab";
 
-type TabId = "global-config" | "proxy-pool" | "free-pool" | "documentation" | "subscriptions";
+type TabId =
+  | "global-config"
+  | "proxy-pool"
+  | "free-pool"
+  | "documentation"
+  | "subscriptions"
+  | "managed-cores";
 
 const TABS: Array<{ id: TabId; labelKey: string; fallback: string }> = [
   { id: "global-config", labelKey: "proxyGlobalConfigTab", fallback: "Global config" },
@@ -17,8 +24,10 @@ const TABS: Array<{ id: TabId; labelKey: string; fallback: string }> = [
   { id: "free-pool", labelKey: "freePoolTab", fallback: "Free pool" },
   { id: "documentation", labelKey: "proxyDocumentationTab", fallback: "Documentation" },
   { id: "subscriptions", labelKey: "proxySubscriptionsTab", fallback: "Subscriptions" },
+  { id: "managed-cores", labelKey: "proxyManagedCoresTab", fallback: "Managed cores" },
 ];
 
+/** Render proxy settings sections with the active tab synchronized to the URL query. */
 export default function ProxyTab() {
   const t = useTranslations("settings");
   const searchParams = useSearchParams();
@@ -70,6 +79,9 @@ export default function ProxyTab() {
       </TabsContent>
       <TabsContent value="subscriptions">
         <SubscriptionTab />
+      </TabsContent>
+      <TabsContent value="managed-cores">
+        <ManagedProxyTab />
       </TabsContent>
     </Tabs>
   );
