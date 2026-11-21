@@ -106,6 +106,28 @@ export async function ensureDbReadyForBoot(
 
 export { isBackgroundServicesDisabled };
 
+/**
+ * The batch rate-limit E2E server needs the batch polling worker, but must not
+ * enable the broad collection of production background schedulers just to get
+ * it. This is deliberately narrower than the normal startup path: it is only
+ * available to the development custom server under the existing explicit E2E
+ * open-bootstrap mode, with a second test-harness-only opt-in.
+ */
+export function shouldStartE2EBatchProcessor(env: NodeJS.ProcessEnv = process.env): boolean {
+  return (
+    isBackgroundServicesDisabled(env) &&
+    env.NODE_ENV === "development" &&
+    env.OMNIROUTE_E2E_BOOTSTRAP_MODE === "open" &&
+    env.OMNIROUTE_E2E_ENABLE_BATCH_PROCESSOR === "1"
+  );
+}
+
+async function startBatchProcessor(): Promise<void> {
+  const { initBatchProcessor } = await import("@omniroute/open-sse/services/batchProcessor");
+  initBatchProcessor();
+  console.log("[STARTUP] Batch processor started");
+}
+
 async function ensureSecrets(): Promise<void> {
   let getPersistedSecret = (_key: string): string | null => null;
   let persistSecret = (_key: string, _value: string): void => {};
@@ -725,9 +747,9 @@ export async function registerNodejs(): Promise<void> {
         `[STARTUP] Cloud/model sync background bootstrap ${cloudSyncInitialized ? "initialized" : "skipped"}`
       );
     }
-    const { initBatchProcessor } = await import("@omniroute/open-sse/services/batchProcessor");
-    initBatchProcessor();
-    console.log("[STARTUP] Batch processor started");
+    await startBatchProcessor();
+  } else if (shouldStartE2EBatchProcessor()) {
+    await startBatchProcessor();
   }
 
   try {
