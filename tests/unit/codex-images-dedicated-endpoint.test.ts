@@ -24,6 +24,9 @@ const imageRoute = await import("../../src/app/api/v1/images/generations/route.t
 const imageEditRoute = await import("../../src/app/api/v1/images/edits/route.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const { handleImageGeneration } = await import("../../open-sse/handlers/imageGeneration.ts");
+// Load the handler only after the test storage environment is initialized above.
+const { handleCodexImagesApi } =
+  await import("../../open-sse/handlers/imageGeneration/providers/codexImages.ts");
 const { getAllImageModels } = await import("../../open-sse/config/imageRegistry.ts");
 
 const originalFetch = globalThis.fetch;
@@ -168,6 +171,77 @@ test("Codex GPT Image generation fans out n>1, sums usage, and honors response_f
   ]);
   assert.equal(result.data.usage.output_tokens, 858);
   assert.equal(result.data.usage.total_tokens, 896);
+});
+
+test("Codex Images holds batch slots through response reads and drops cancelled waiters", async () => {
+  const firstWaveStarted = Promise.withResolvers<void>();
+  const releaseResponses = Promise.withResolvers<void>();
+  const seen = new Map<string, number>();
+  let active = 0;
+  let peak = 0;
+  globalThis.fetch = async (_url, init) => {
+    const { prompt } = JSON.parse(String(init?.body));
+    seen.set(prompt, (seen.get(prompt) ?? 0) + 1);
+    active++;
+    if (active === 4) firstWaveStarted.resolve();
+    peak = Math.max(peak, active);
+    const response = imagesResponse("ZmxhcmU=");
+    const text = response.text.bind(response);
+    response.text = async () => {
+      try {
+        await releaseResponses.promise;
+        return await text();
+      } finally {
+        active--;
+      }
+    };
+    return response;
+  };
+  const run = (prompt: string, signal: AbortSignal | null = null, requestedCount = 3) =>
+    handleCodexImagesApi({
+      model: "gpt-image-2",
+      provider: "codex",
+      baseUrl: "https://chatgpt.com/backend-api/codex/responses",
+      body: { prompt },
+      token: "test-token",
+      workspaceId: null,
+      requestedCount,
+      referenceImages: [],
+      startTime: Date.now(),
+      log: null,
+      signal,
+      logPath: "/v1/images/generations",
+    });
+  const running = [run("first"), run("second")];
+  const abort = new AbortController();
+  const cancelled = run("cancelled", abort.signal);
+  const queued = [run("third"), run("fourth"), run("fifth")];
+  try {
+    const full = await run("overflow");
+    assert.equal(full.success === false && full.status, 429);
+    await firstWaveStarted.promise;
+    assert.deepEqual(
+      [...seen],
+      [
+        ["first", 2],
+        ["second", 2],
+      ]
+    );
+    abort.abort();
+    const result = await cancelled;
+    assert.equal(result.success === false && result.status, 499);
+  } finally {
+    abort.abort();
+    releaseResponses.resolve();
+    await Promise.allSettled([...running, ...queued, cancelled]);
+  }
+  for (const result of await Promise.all([...running, ...queued])) {
+    assert.ok(result.success);
+    assert.equal(result.data.data.length, 3);
+  }
+  assert.equal(peak, 4);
+  assert.equal(seen.has("cancelled"), false);
+  assert.equal(seen.has("overflow"), false);
 });
 
 test("Codex Images errors keep the free-plan guard, retryable access errors, and sanitization", async () => {

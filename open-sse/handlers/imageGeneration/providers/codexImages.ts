@@ -14,6 +14,7 @@
 
 import { randomUUID } from "crypto";
 import { getCodexClientVersion, getCodexUserAgent } from "../../../config/codexClient.ts";
+import { acquire } from "../../../services/accountSemaphore.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import {
   isCodexChatGptModelAccessError,
@@ -48,6 +49,12 @@ const OUTPUT_MIME_BY_FORMAT: Readonly<Record<string, string>> = {
   webp: "image/webp",
 };
 const MAX_CODEX_IMAGES_PER_REQUEST = 10;
+const IMAGE_BATCH_CONCURRENCY = 2;
+const IMAGES_PER_BATCH_WAVE = 2;
+// Generation and edit routes can load distinct copies of this module.
+const gateKey = Symbol.for("omniroute.codexImages.acquireBatchSlot");
+const gateHolder = globalThis as typeof globalThis & { [gateKey]?: typeof acquire };
+const acquireBatchSlot = (gateHolder[gateKey] ??= acquire);
 
 /** GPT Image models are image-only: they are served by the Images routes, never a tool call. */
 export function isCodexImagesApiModel(model: unknown): boolean {
@@ -106,26 +113,7 @@ function readImagesResponse(raw: string): CodexImagesOutcome {
   };
 }
 
-/**
- * Serve a Codex image generation or reference-image edit through the dedicated Images
- * routes. Called by handleCodexImageGeneration after its prompt, credential, and
- * free-plan guards, so account selection and retry semantics stay shared with the
- * hosted-tool path.
- */
-export async function handleCodexImagesApi({
-  model,
-  provider,
-  baseUrl,
-  body,
-  token,
-  workspaceId,
-  requestedCount,
-  referenceImages,
-  startTime,
-  log,
-  signal,
-  logPath,
-}: {
+type CodexImagesOptions = {
   model: string;
   provider: string;
   baseUrl: string;
@@ -138,7 +126,11 @@ export async function handleCodexImagesApi({
   log: ImageLog;
   signal: AbortSignal | null;
   logPath: string;
-}) {
+};
+
+/** Bound active batches before encoding reference images or collecting upstream responses. */
+export async function handleCodexImagesApi(options: CodexImagesOptions) {
+  const { provider, model, requestedCount, startTime, signal, logPath } = options;
   if (requestedCount > MAX_CODEX_IMAGES_PER_REQUEST) {
     return saveImageErrorResult({
       provider,
@@ -149,6 +141,61 @@ export async function handleCodexImagesApi({
       path: logPath,
     });
   }
+  let release: () => void;
+  try {
+    release = await acquireBatchSlot("codex-images:batch", {
+      maxConcurrency: IMAGE_BATCH_CONCURRENCY,
+      maxQueueSize: 4,
+      timeoutMs: 30_000,
+      signal,
+    });
+  } catch (err) {
+    if (signal?.aborted) return cancelledImageRequest(options);
+    const { code } = err as { code?: string };
+    if (code !== "SEMAPHORE_QUEUE_FULL" && code !== "SEMAPHORE_TIMEOUT") throw err;
+    return saveImageErrorResult({
+      provider,
+      model,
+      status: 429,
+      startTime,
+      error: "Codex Images is busy. Retry shortly.",
+      path: logPath,
+    });
+  }
+  try {
+    if (signal?.aborted) return cancelledImageRequest(options);
+    return await executeCodexImageBatch(options);
+  } finally {
+    release();
+  }
+}
+
+function cancelledImageRequest({ provider, model, startTime, logPath }: CodexImagesOptions) {
+  return saveImageErrorResult({
+    provider,
+    model,
+    status: 499,
+    startTime,
+    error: "Image generation aborted by client",
+    path: logPath,
+  });
+}
+
+async function executeCodexImageBatch(options: CodexImagesOptions) {
+  const {
+    model,
+    provider,
+    baseUrl,
+    body,
+    token,
+    workspaceId,
+    requestedCount,
+    referenceImages,
+    startTime,
+    log,
+    signal,
+    logPath,
+  } = options;
   const isEdit = referenceImages.length > 0;
   const url = codexImagesUrl(baseUrl, isEdit ? "edits" : "generations");
   const prompt = String(body.prompt);
@@ -195,13 +242,14 @@ export async function handleCodexImagesApi({
     log.info("IMAGE", `${provider}/${model} (codex-images) | prompt: ${promptSummary}`);
   }
 
+  const serializedBody = JSON.stringify(upstreamBody);
   const fetchOne = async (): Promise<CodexImagesOutcome> => {
     let response: Response;
     try {
       response = await fetch(url, {
         method: "POST",
         headers: { ...headers, "x-codex-image-turn-id": randomUUID() },
-        body: JSON.stringify(upstreamBody),
+        body: serializedBody,
         signal,
       });
     } catch (err) {
@@ -243,29 +291,33 @@ export async function handleCodexImagesApi({
     return readImagesResponse(raw);
   };
 
-  const outcomes = await Promise.all(Array.from({ length: requestedCount }, () => fetchOne()));
-
   const collected: string[] = [];
   let created: number | null = null;
   let outputFormat: string | null = null;
   let usage: unknown = undefined;
-  for (const outcome of outcomes) {
-    if (isFailure(outcome)) {
-      return saveImageErrorResult({
-        provider,
-        model,
-        status: outcome.status,
-        startTime,
-        error: outcome.error,
-        requestBody: requestBodyForLog,
-        path: logPath,
-        ...(outcome.retryable ? { retryable: true } : {}),
-      });
+  for (let offset = 0; offset < requestedCount; offset += IMAGES_PER_BATCH_WAVE) {
+    if (signal?.aborted) return cancelledImageRequest(options);
+    const count = Math.min(IMAGES_PER_BATCH_WAVE, requestedCount - offset);
+    const outcomes = await Promise.all(Array.from({ length: count }, fetchOne));
+    if (signal?.aborted) return cancelledImageRequest(options);
+    for (const outcome of outcomes) {
+      if (isFailure(outcome)) {
+        return saveImageErrorResult({
+          provider,
+          model,
+          status: outcome.status,
+          startTime,
+          error: outcome.error,
+          requestBody: requestBodyForLog,
+          path: logPath,
+          ...(outcome.retryable ? { retryable: true } : {}),
+        });
+      }
+      collected.push(...outcome.images);
+      created = created ?? outcome.created;
+      outputFormat = outputFormat ?? outcome.outputFormat;
+      usage = sumUsage(usage, outcome.usage);
     }
-    collected.push(...outcome.images);
-    created = created ?? outcome.created;
-    outputFormat = outputFormat ?? outcome.outputFormat;
-    usage = sumUsage(usage, outcome.usage);
   }
 
   // Same envelope rules as the hosted-tool path (#12268): bytes in b64_json unless the

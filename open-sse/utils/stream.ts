@@ -1004,6 +1004,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   const nativeClaudeUsage = createNativeClaudeUsageTracker(body);
   const nativeContent = createGeneratedContentTracker();
   const observedContentLength = () => nativeContent.getLength();
+  const getNativeUsage = () => nativeClaudeUsage.getUsage(observedContentLength());
   const observeProviderPayload = (payload: unknown) => {
     nativeClaudeUsage.observe(payload);
     nativeContent.observe(payload);
@@ -1014,7 +1015,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     resolveStreamAccountingUsage({
       usage: state?.usage ?? usage,
       native: nativeContent.hasObserved(),
-      nativeUsage: nativeClaudeUsage.getUsage(observedContentLength()),
+      nativeUsage: getNativeUsage,
       body,
       contentLength: observedContentLength(),
       format:
@@ -1026,7 +1027,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     const changed =
       !hasPriorInputForTrailingUsage(payload, usage) &&
       sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
-    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+    return repairClaudeFinalWireUsage(payload, getAccountingUsage) || changed;
   };
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";

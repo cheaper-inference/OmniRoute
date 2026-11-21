@@ -7,8 +7,41 @@ import { createGeneratedContentTracker } from "../../open-sse/utils/streamGenera
 import { estimateOutputTokens } from "../../open-sse/utils/usageTracking.ts";
 import { readStreamPartialUsage } from "../../open-sse/utils/streamPartialUsage.ts";
 import { resolveTrailingUsageSummary } from "../../open-sse/utils/passthroughTrailingUsage.ts";
+import { repairClaudeFinalWireUsage } from "../../open-sse/utils/streamUsageMerge.ts";
+import { resolveStreamAccountingUsage } from "../../open-sse/utils/streamAccountingUsage.ts";
 
 test.after(() => resetDbInstance());
+
+test("wire repair does not calculate a receipt before a Claude message_delta", () => {
+  let calculations = 0;
+  const getReceipt = () => {
+    calculations++;
+    return { completion_tokens: 37 };
+  };
+  const text = { type: "content_block_delta", delta: { type: "text_delta", text: "hello" } };
+  const end = { type: "message_delta", usage: { output_tokens: 0 } };
+  assert.equal(repairClaudeFinalWireUsage(text, getReceipt), false);
+  assert.equal(calculations, 0);
+  assert.equal(repairClaudeFinalWireUsage(end, getReceipt), true);
+  assert.equal(end.usage.output_tokens, 37);
+  assert.equal(calculations, 1);
+});
+
+test("non-native accounting uses the translated receipt without building a native receipt", () => {
+  const usage = resolveStreamAccountingUsage({
+    usage: { prompt_tokens: 11, completion_tokens: 37 },
+    native: false,
+    nativeUsage() {
+      throw new Error("non-native receipt must not be built");
+    },
+    body: null,
+    contentLength: 10,
+    format: FORMATS.OPENAI,
+  });
+  assert.equal(usage?.prompt_tokens, 11);
+  assert.equal(usage?.completion_tokens, 37);
+});
+
 const body = { messages: [{ role: "user", content: "A synthetic accounting request" }] };
 const modes = ["translate", "passthrough"] as const;
 const encodeEvents = (events: unknown[]) =>
