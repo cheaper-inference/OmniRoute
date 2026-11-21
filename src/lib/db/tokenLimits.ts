@@ -315,10 +315,15 @@ export function getWindowUsage(limit: TokenLimit, now = Date.now()): number {
   return toNumber(asRecord(row).tokens_used);
 }
 
+/** Newest reset-audit rows kept per limit (the table has no reader; this bounds its growth). */
+const RESET_LOG_KEEP_PER_LIMIT = 100;
+
 /**
  * Atomically add `tokens` to the counter for (limitId, windowStart) and return
  * the new running total. Uses UPSERT (no read-then-write) so concurrent
- * increments under WAL cannot lose updates.
+ * increments under WAL cannot lose updates. Counter rows of older windows of the
+ * same limit are dropped: rollover detection reads the prior row before this runs,
+ * and enforcement only reads the current window.
  */
 export function incrementWindowTokens(
   limitId: string,
@@ -338,6 +343,10 @@ export function incrementWindowTokens(
        RETURNING tokens_used`
     )
     .get({ limitId, windowStart, tokens: delta });
+  db.prepare("DELETE FROM api_key_token_counters WHERE limit_id = ? AND window_start < ?").run(
+    limitId,
+    windowStart
+  );
   return toNumber(asRecord(row).tokens_used);
 }
 
@@ -349,4 +358,10 @@ export function logTokenLimitReset(limitId: string, prevTokens: number, windowSt
     `INSERT INTO api_key_token_limit_reset_logs (limit_id, reset_at, prev_tokens, window_start)
      VALUES (?, datetime('now'), ?, ?)`
   ).run(limitId, Math.max(0, Math.floor(toNumber(prevTokens))), windowStart);
+  db.prepare(
+    `DELETE FROM api_key_token_limit_reset_logs
+     WHERE limit_id = @limitId
+       AND id <= (SELECT id FROM api_key_token_limit_reset_logs
+                  WHERE limit_id = @limitId ORDER BY id DESC LIMIT 1 OFFSET @keep)`
+  ).run({ limitId, keep: RESET_LOG_KEEP_PER_LIMIT });
 }
