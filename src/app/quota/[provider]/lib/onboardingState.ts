@@ -93,3 +93,20 @@ export function deriveOnboardingState(input: {
     desktopModelsJson: models.length > 0 ? buildDesktopInferenceModels(models, longContext) : null,
   };
 }
+
+/**
+ * Every generated text with the key left out, as one string. It changes exactly when a text
+ * changes for a reason other than the key, so it tells when a copy status is out of date.
+ */
+export function onboardingTextFingerprint(
+  input: Parameters<typeof deriveOnboardingState>[0]
+): string {
+  const keyless = deriveOnboardingState({
+    ...input,
+    apiKey: null,
+    choices: { ...input.choices, includeKey: false },
+  });
+  return [keyless.settingsJson, keyless.localExports ?? "", keyless.desktopModelsJson ?? ""].join(
+    "\n"
+  );
+}

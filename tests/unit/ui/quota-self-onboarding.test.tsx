@@ -125,11 +125,12 @@ describe("self-service quota page: tool setup card", () => {
 
   it("the card sends no request of its own", async () => {
     const calls = await openCard();
+    const before = calls.map((call) => call.url);
     fireEvent.click(includeKey());
     fireEvent.click(screen.getByRole("button", { name: "Copy settings" }));
     await storageEffects();
+    expect(calls.map((call) => call.url)).toEqual(before);
     expect(callsTo(calls, QUOTA)).toHaveLength(1);
-    expect(calls.every((call) => call.url.startsWith("/api/v1/me/"))).toBe(true);
     expect(calls.every((call) => !call.url.includes(KEY))).toBe(true);
   });
 

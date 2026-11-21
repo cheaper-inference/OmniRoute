@@ -143,16 +143,26 @@ describe("self-service quota page: Shell and Claude Desktop tabs", () => {
     ).toBeNull();
   });
 
-  it("shell: the lines are the Claude Code settings, for every choice", async () => {
-    await openCard();
-    fireEvent.click(includeKey());
-    fireEvent.click(screen.getByLabelText("Use the 1M context window"));
-    const settings = screen.getByRole("region", { name: "Claude Code settings" }).textContent;
-    fireEvent.click(tab("Shell"));
-    const shell = screen.getByRole("region", { name: "Shell variables for the public address" });
-    expect(shell.textContent).toBe(buildShellExports(JSON.parse(settings ?? "").env));
-    expect(shell.textContent).toContain(`export ANTHROPIC_AUTH_TOKEN='${KEY}'`);
-  });
+  it.each([
+    { withKey: false, longContext: false },
+    { withKey: true, longContext: false },
+    { withKey: false, longContext: true },
+    { withKey: true, longContext: true },
+  ])(
+    "shell: the lines are the Claude Code settings (key $withKey, 1M $longContext)",
+    async ({ withKey, longContext }) => {
+      await openCard();
+      if (withKey) fireEvent.click(includeKey());
+      if (longContext) fireEvent.click(screen.getByLabelText("Use the 1M context window"));
+      const settings = screen.getByRole("region", { name: "Claude Code settings" }).textContent;
+      fireEvent.click(tab("Shell"));
+      const shell = screen.getByRole("region", { name: "Shell variables for the public address" });
+      expect(shell.textContent).toBe(buildShellExports(JSON.parse(settings ?? "").env));
+      expect((shell.textContent ?? "").includes(`export ANTHROPIC_AUTH_TOKEN='${KEY}'`)).toBe(
+        withKey
+      );
+    }
+  );
 
   it("shell: a plain http address with a port adds the local network block for this page's host", async () => {
     await openCard({ apiBaseUrl: "http://gw.example.net:20128" });

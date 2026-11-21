@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { deriveOnboardingState } from "../../src/app/quota/[provider]/lib/onboardingState.ts";
+import {
+  deriveOnboardingState,
+  onboardingTextFingerprint,
+} from "../../src/app/quota/[provider]/lib/onboardingState.ts";
 
 const SONNET = "qtSd/team/claude/claude-sonnet-5";
 const OPUS = "qtSd/team/claude/claude-opus-4-8";
@@ -179,4 +182,44 @@ test("past the cap the listing stops at 40 and the tiers are still found", () =>
   assert.equal(state.models.includes(lastSorted), false);
   assert.equal(state.mainModel, "qtSd/team/claude/m-44");
   assert.equal(JSON.parse(state.settingsJson).env.ANTHROPIC_DEFAULT_HAIKU_MODEL, lastSorted);
+});
+
+test("the text fingerprint never holds the key and ignores it", () => {
+  const withKey = { ...input, choices: { ...off, includeKey: true } };
+  const fingerprint = onboardingTextFingerprint(withKey);
+  assert.equal(fingerprint.includes(KEY), false);
+  assert.equal(fingerprint, onboardingTextFingerprint({ ...input, apiKey: null }));
+});
+
+test("the text fingerprint follows the base URL and the 1M choice", () => {
+  const base = onboardingTextFingerprint(input);
+  assert.notEqual(
+    base,
+    onboardingTextFingerprint({ ...input, apiBaseUrl: "https://other.example.net" })
+  );
+  assert.notEqual(
+    base,
+    onboardingTextFingerprint({ ...input, choices: { ...off, longContext: true } })
+  );
+});
+
+test("the text fingerprint follows a default model the listing does not show", () => {
+  const filler = Array.from(
+    { length: 44 },
+    (_, index) => `qtSd/team/claude/model-${String(index).padStart(2, "0")}`
+  );
+  const withOpus = (opus: string) => ({
+    ...input,
+    availableModels: ["qtSd/team/claude/zz-claude-sonnet-5", ...filler, opus],
+  });
+  const first = withOpus("qtSd/team/claude/aa-claude-opus-4-7");
+  const second = withOpus("qtSd/team/claude/aa-claude-opus-4-8");
+  const a = deriveOnboardingState(first);
+  const b = deriveOnboardingState(second);
+  // What the card lists is the same in both: only a tier default past the listing differs.
+  assert.deepEqual(a.models, b.models);
+  assert.equal(a.mainModel, b.mainModel);
+  assert.equal(a.totalModels, b.totalModels);
+  assert.notEqual(a.settingsJson, b.settingsJson);
+  assert.notEqual(onboardingTextFingerprint(first), onboardingTextFingerprint(second));
 });

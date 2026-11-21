@@ -6,7 +6,7 @@ import { Alert } from "@omniroute/ui-kit/alert";
 
 import Card from "@/shared/components/Card";
 
-import { deriveOnboardingState } from "../lib/onboardingState";
+import { deriveOnboardingState, onboardingTextFingerprint } from "../lib/onboardingState";
 import { useStoredApiKey } from "../lib/useStoredApiKey";
 import OnboardingOptions from "./OnboardingOptions";
 import OnboardingTabs from "./OnboardingTabs";
@@ -42,7 +42,7 @@ export default function OnboardingCard({
     typeof window === "undefined" ? "" : window.location.hostname
   );
 
-  const state = deriveOnboardingState({
+  const input = {
     provider,
     availableModels,
     apiBaseUrl,
@@ -54,19 +54,12 @@ export default function OnboardingCard({
       keyPlaceholder: t("onboardingKeyPlaceholder"),
       baseUrlPlaceholder: t("onboardingBaseUrlPlaceholder"),
     },
-  });
-
-  // Choices and server values only, never the key: any change of the generated text gives each
-  // tab a fresh copy status. The base URL is the published address or the placeholder.
-  const resetKey = [
-    includeKey,
-    state.mainModel ?? "",
-    state.longContext,
-    state.models.length,
-    state.models.join(","),
-    state.baseUrlKnown,
-    state.baseUrl,
-  ].join("|");
+  };
+  const state = deriveOnboardingState(input);
+  // The choice plus the texts without the key: any change of a generated text gives each tab a
+  // fresh copy status, and the key never enters this value.
+  const resetKey = `${includeKey}|${onboardingTextFingerprint(input)}`;
+  const keyShown = includeKey && Boolean(stored?.key);
 
   return (
     <Card padding="md">
@@ -91,7 +84,7 @@ export default function OnboardingCard({
           state={state}
           providerName={providerName}
           resetKey={resetKey}
-          includeKey={includeKey}
+          includeKey={keyShown}
         />
       </section>
     </Card>
