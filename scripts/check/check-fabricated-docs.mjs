@@ -128,6 +128,7 @@ const ENV_VAR_ALLOWLIST = new Set([
   "AUTO_UPDATE_HOST_REPO_DIR", // docker-compose self-update mount (DOCKER_GUIDE.md)
   "LINUX_GPG_KEY", // electron AppImage signing key, CI/build only (ELECTRON_GUIDE.md)
   "BRANCH_LOCK_TOKEN", // release branch-protection ops token (QUALITY_GATE_PLAYBOOK.md)
+  "GHCR_LEGACY_TOKEN", // repository secret, not an env var: docker-org-mirror.yml passes it to the script as MIRROR_TOKEN (RELEASE_CHECKLIST.md)
   "NEXT_LOCALE", // next-intl locale cookie name (I18N.md)
   // Telegram Mini App integration (proposal TELEGRAM-MINIAPP.md, not yet implemented): env vars named in the feasibility analysis but no code reads them yet.
   "TELEGRAM_WEBHOOK_URL", // proposal-only: Telegram webhook public endpoint (TELEGRAM-MINIAPP.md, future feature)
