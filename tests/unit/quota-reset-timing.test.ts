@@ -165,7 +165,11 @@ test("parseRetryAfterHeader resolves seconds and HTTP dates and rejects unusable
 
   for (const value of [
     "0",
+    "-0",
     "-1",
+    "-3000",
+    "-9999",
+    "  -3000  ",
     "90garbage",
     "garbage",
     "9999999999999",
