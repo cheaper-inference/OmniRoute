@@ -366,6 +366,17 @@ export function unblock(key: string): void {
   cleanupGateIfIdle(key);
 }
 
+/**
+ * Release the quota block on one provider account's gate. Called by the quota
+ * recovery paths: a QUOTA_EXHAUSTED 429 parks the gate until the upstream reset,
+ * so once recovery is proven (usage poll, headroom snapshot, manual release) the
+ * gate must open too, or every request waits out the queue timeout.
+ */
+export function unblockAccount({ provider, accountKey }: AccountSemaphoreKeyParts): void {
+  if (!provider || !accountKey) return;
+  unblock(buildAccountSemaphoreKey({ provider, accountKey }));
+}
+
 export function getStats(): Record<string, AccountSemaphoreStatsEntry> {
   const stats: Record<string, AccountSemaphoreStatsEntry> = {};
   for (const [key, gate] of gates) {

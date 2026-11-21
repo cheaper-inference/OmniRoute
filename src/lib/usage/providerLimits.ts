@@ -1,4 +1,7 @@
-import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import {
+  releaseRecoveredAccountGate,
+  syncCodexQuotaObservation,
+} from "@/lib/db/providers/codexAccountRecovery";
 import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
 import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
@@ -665,6 +668,9 @@ export async function maybeClearRecoveredQuotaState(
     console.warn("[ProviderLimits] Failed to clear recovered quota state:", dbError);
     return connection;
   }
+
+  // The quota 429 that wrote this state also blocked the in-memory account gate.
+  if (cleared) releaseRecoveredAccountGate(connection);
 
   if (cleared && verifiedResetRecovery) {
     // Only quota-family locks belong to this reset. Preserve auth, capacity,
