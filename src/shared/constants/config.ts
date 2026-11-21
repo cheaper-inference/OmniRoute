@@ -76,6 +76,7 @@ export const PROVIDER_ENDPOINTS = {
   gisoo: "https://gisoo.pro/api/v1/chat/completions",
   paraloncloud: "https://paraloncloud.com/v1/chat/completions",
   empiriolabs: "https://api.empiriolabs.ai/v1/chat/completions",
+  "fal-openrouter": "https://fal.run/openrouter/router/openai/v1/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
   anthropic: "https://api.anthropic.com/v1/messages",
   gemini: "https://generativelanguage.googleapis.com/v1beta/models",
