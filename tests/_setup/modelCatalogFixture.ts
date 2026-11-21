@@ -11,25 +11,34 @@ function isColdBuildTimeout(response: Response): boolean {
   return response.status === 503 && response.headers.get("x-omniroute-catalog") === "build-timeout";
 }
 
-export async function getSettledModelCatalogResponse(
+export function getSettledModelCatalogResponse(
   catalog: Catalog,
   request = new Request("http://localhost/api/v1/models")
 ): Promise<Response> {
-  const response = await catalog.getUnifiedModelsResponse(request);
+  return getSettledModelCatalogRouteResponse(catalog, () =>
+    catalog.getUnifiedModelsResponse(request)
+  );
+}
+
+export async function getSettledModelCatalogRouteResponse(
+  catalog: Catalog,
+  read: () => Promise<Response>
+): Promise<Response> {
+  const response = await read();
   if (!isColdBuildTimeout(response)) return response;
 
   // These fixtures validate catalog contents. Let the cold build finish
   // after a loaded runner reaches the endpoint's response deadline.
   let runs = catalog.__getCatalogBuilderRunsForTest();
   await catalog.__flushCatalogBackgroundRefreshForTest();
-  let settled = await catalog.getUnifiedModelsResponse(request);
+  let settled = await read();
   const rereadRuns = catalog.__getCatalogBuilderRunsForTest();
   if (isColdBuildTimeout(settled) && rereadRuns === runs + 1) {
     // Invalidation can make the first result uncacheable. Settle the single
     // replacement the reread already started, then require a cache hit.
     runs = rereadRuns;
     await catalog.__flushCatalogBackgroundRefreshForTest();
-    settled = await catalog.getUnifiedModelsResponse(request);
+    settled = await read();
   }
   assert.equal(
     catalog.__getCatalogBuilderRunsForTest(),

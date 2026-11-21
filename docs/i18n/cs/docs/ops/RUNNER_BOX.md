@@ -130,33 +130,22 @@ a to jen tehdy, když je nečinný**, přičemž kontrolu nečinnosti a restart 
   minut, zatímco jeho nahrání z disku trvalo 2 minuty.
 - VPS `.15` je určen výhradně pro homologaci — nikdy na něm neběží CI runnery.
 
-## Hostovaná kapacita (běhová prostředí hostovaná GitHubem)
+## Hostovaná dráha (běžci hostovaní na GitHubu)
 
-Repozitář patří organizaci `cheaper-inference` s tarifem **Team**: **60 souběžných hostovaných úloh**, sdílených všemi repozitáři organizace, všemi kontrolami PR, všemi pracovními postupy spouštěnými při pushi a výchozím nastavením CodeQL. Níže uvedená čísla byla naměřena na tarifu **Pro** (40 souběžných hostovaných úloh). Měřeno 2026-10-18 během
-kampaně slučování (~10 sloučení za hodinu do `release/v3.8.52`): **2 500 běhů pracovních postupů vytvořených za
-24 h**, 44 pushů do větve za 6 h, **106 hostovaných úloh ve frontě**, zatímco kontroly PR čekaly
-hodiny a PR byly sloučeny bez nich. Při každém pushi do větve se spustilo devět pracovních postupů:
+Úložiště patří organizaci `cheaper-inference`, na** Tým** plán:** 60 souběžně hostovaných úloh** , sdílené každým úložištěm v organizaci, každou kontrolou PR, každým pracovním postupem spouštěným push a výchozím nastavením CodeQL. Níže uvedená čísla byla naměřena na** Pro** plán (40 souběžně hostovaných úloh). Měřeno 2026-10-18 během slučovací kampaně (~ 10 merges/hour na `release/v3.8.52`):** Za 24 hodin bylo vytvořeno 2 500 pracovních postupů** , 44 zatlačení na větev za 6 h,** 106 hostovaných úloh ve frontě** zatímco kontroly PR čekaly hodiny a PRs byly sloučeny bez nich. Devět pracovních postupů spuštěných při každém zatlačení na pobočku:
 
-| při každém pushi do `release/v*`            | hostované úlohy | výsledek během náporu                                         | od 2026-10-18                                                                 |
-| ------------------------------------------- | --------------: | ------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `ci.yml` (úplná matice)                     |           až 30 | zrušeno následujícím pushem, 24 z 24 za den                   | nespouští se při pushích do `release/**` (běh PR + Release-Green)             |
-| `quality.yml`                               |              ~6 | zrušeno, 23 z 23                                              | nespouští se při pushích do `release/**`                                      |
-| `Release-Green` `--quick`                   |               0 | běželo na `omni-build`, zrušeno 97 ze 100                     | slot `omni-release`, nikdy se neruší, čekající běhy se slučují                |
-| `Lock released branch`, `OpenSSF Scorecard` |               2 | jeden běh ve frontě na každý push                             | jeden běh na každý ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)   |
-| `Release acceptance` (stínový report)       |               1 | jedno hostované `npm ci` na každý push, nikdy se neruší       | beze změny — kandidát na filtr `paths:`                                       |
-| `Publish to Docker Hub` → `Deploy to VPS`   |               2 | ruší se při každém pushi; větev amd64 soupeří na `omni-build` | beze změny — kanál vlastníka pro nasazení                                     |
-| Výchozí nastavení CodeQL (`dynamic`)        |               4 | `javascript-typescript`, `actions`, `c-cpp`, `python` na push | beze změny — Nastavení → Zabezpečení kódu; `c-cpp`/`python` zde nic neskenují |
+| za stisknutí `release/v*`                   | hostované úlohy | výsledek pod bouří                                                 | od 18.10.2026                                                                   |
+| ------------------------------------------- | --------------: | ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `ci.yml` (úplná matice)                     |           do 30 | zrušeno dalším stisknutím, 24 z 24 za den                          | nespuštěno na `release/**` push (PR spustit + Release-Green)                    |
+| `quality.yml`                               |              ~6 | zrušeno, 23 z 23                                                   | nezačal na pushech `release/**`                                                 |
+| `Release-Green` `--quick`                   |               0 | běžel na `omni-build`, zrušeno 97 ze 100                           | `omni-release` slot, nikdy nezrušen, čekající běh kolabuje                      |
+| `Lock released branch`, `OpenSSF Scorecard` |               2 | jedno spuštění ve frontě na jedno stisknutí                        | jeden běh na referenci (`tests/unit/build/hosted-lane-concurrency.test.ts`)     |
+| `Release acceptance` (stínová zpráva)       |               1 | jeden hostovaný `npm ci` na push, nikdy zrušen                     | nezměněný — kandidát na filtr `paths:`                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |               2 | zrušeno po stisknutí; amd64 leg soutěží na `omni-build`            | nezměněný distribuční kanál vlastníka —                                         |
+| výchozí nastavení CodeQL (`dynamic`)        |               4 | `javascript-typescript`, `actions`, `c-cpp`, `python` za stisknutí | beze změny — Nastavení → Zabezpečení kódu; `c-cpp`/`python` zde nic nenaskenuje |
 
-`tests/unit/build/push-storm-diet.test.ts` ukotvuje trigger `ci.yml` a
-`quality.yml` pro push pouze do `main`. Vedlejší efekt: Codecov již nedostává základní nahrání při každém pushi do release větve (tento
-krok je pouze informativní a používá `continue-on-error`); kontrola pokrytí v repozitáři ani komentář k PR
-nejsou ovlivněny.
+`tests/unit/build/push-storm-diet.test.ts` připíná spoušť `main` -only `ci.yml` a `quality.yml`. Vedlejší efekt: Codecov již nedostává základní upload za vydání push (krok je informativní a `continue-on-error`); brána pokrytí in-repo a komentář PR nejsou ovlivněny.
 
-**Větší kapacita na vlastních běhových prostředích nevyřeší frontu hostovaných úloh.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) by mohl hostovat běhové prostředí, ale relace agentů již
-udržují jeho zátěž na hodnotách 20–26, kontejner agenta nemá démona Dockeru a přetížená je
-hostovaná kapacita. Server `.113` měl ve stejnou chvíli 71 GB volného místa a zátěž 5–8; jeho omezením
-je výše uvedený paměťový rozpočet na každý listener (maximum 6 listenerů), nikoli CPU. Zbývající možnosti
-jsou procesní: slučovat PR kampaně prostřednictvím fronty Mergify (`label=queue`, dávky sdílejí
-jeden běh CI `merge_group` namísto jednoho běhu na každý PR a dalšího na každý push), omezit jazyky
-ve výchozím nastavení CodeQL a filtrovat `release-acceptance.yml` podle souborů, které čte.
+**Větší kapacita vlastního hostování neopraví hostovanou frontu.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) by mohl hostit běžce, ale relace agenta si již udržují zátěž na 20–26, kontejner agenta nemá žádného démona Docker a saturovaný pruh je hostovaný. Krabice `.113` měla 71 GB volného a zatížení 5–8 ve stejném okamžiku; jeho omezením je výše rozpočtu paměti na posluchače (strop 6 posluchačů), nikoli CPU. Zbývající páky jsou procesní: přiložte kampaň PRs přes frontu Mergify (`label=queue`, dávky sdílejí jedno spuštění `merge_group` CI místo jednoho spuštění na PR plus jedno na push), ořízněte jazyky výchozího nastavení CodeQL a filtrujte `release-acceptance.yml` podle souborů, které čte.
+
+> **2026-11-19: fronta sloučení Mergify je vyřazena** (rozhodnutí vlastníka). `.mergify.yml` již nedefinuje frontu a odmítá příkazy Mergify, které slučují nebo přepisují požadavek na stažení. Vydání PRs jsou sloučena ručně pod sadou pravidel úložiště "Vyžadovat zelené brány u aktivního vydání" (`Gate / CI` + `Gate / Quality`), dokud omni-queue běží v živém režimu, a poté prostřednictvím omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Páka Sloučit výše již neexistuje.
