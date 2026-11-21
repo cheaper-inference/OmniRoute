@@ -33,6 +33,7 @@ import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import { getKnownPlan } from "@/lib/quota/planRegistry";
 import { quotaModelName } from "@/lib/quota/quotaModelNaming";
 import type {
+  BorrowMode,
   Policy,
   PoolAllocation,
   QuotaDimension,
@@ -40,6 +41,7 @@ import type {
   QuotaWindow,
 } from "@/lib/quota/dimensions";
 import type { QuotaPool } from "@/lib/db/quotaPools";
+import BorrowModeField from "./BorrowModeField";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types (mirror what CreatePoolModal/EditAllocationsModal expect)
@@ -153,7 +155,13 @@ type WizardSetters = {
   setError: Dispatch<SetStateAction<string | null>>;
   setSaving: Dispatch<SetStateAction<boolean>>;
   setGroupId: Dispatch<SetStateAction<string>>;
+  setBorrowMode: Dispatch<SetStateAction<BorrowMode>>;
 };
+
+/** The edited pool's borrow mode. A pool read without one is in saturation mode. */
+function poolBorrowMode(pool: QuotaPool): BorrowMode {
+  return pool.borrowMode === "consent" ? "consent" : "saturation";
+}
 
 // Render-time state adjustment (react-hooks/set-state-in-effect): reload the editable
 // dimensions when the primary connection changes. Lives in a hook so the component's
@@ -215,6 +223,7 @@ function useWizardOpenCloseAdjustment({
     set.setError(null);
     set.setSaving(false);
     set.setGroupId(initialGroupId);
+    set.setBorrowMode("saturation");
   }
   if (changed && open && editPool) {
     // Opening in edit mode: pre-fill from the existing pool. Preserves the pool's
@@ -230,6 +239,7 @@ function useWizardOpenCloseAdjustment({
     set.setGroupId(editPool.groupId ?? initialGroupId);
     set.setAllocations(editPool.allocations ?? []);
     set.setExclusive(editPoolExclusive ?? false);
+    set.setBorrowMode(poolBorrowMode(editPool));
     set.setEditDimensions(
       existingPlan && existingPlan.dimensions.length > 0 ? [...existingPlan.dimensions] : []
     );
@@ -267,6 +277,7 @@ export default function PoolWizard({
   const [connectionIds, setConnectionIds] = useState<string[]>([]);
   const [poolName, setPoolName] = useState("");
   const [defaultPolicy, setDefaultPolicy] = useState<Policy>("hard");
+  const [borrowMode, setBorrowMode] = useState<BorrowMode>("saturation");
 
   // ── Step 2 state ──────────────────────────────────────────────────────────
   const [editDimensions, setEditDimensions] = useState<QuotaDimension[]>([]);
@@ -341,6 +352,7 @@ export default function PoolWizard({
     setError,
     setSaving,
     setGroupId,
+    setBorrowMode,
   });
   // Keep the group Select on a real, selectable option (create mode) — self-
   // extinguishing state adjustment during render (react-hooks/set-state-in-effect).
@@ -475,6 +487,7 @@ export default function PoolWizard({
             name: effectivePoolName,
             allocations: [],
             groupId: resolvedGroupId,
+            borrowMode,
           }),
         });
         if (!createRes.ok) {
@@ -527,6 +540,7 @@ export default function PoolWizard({
             connectionIds,
             allocations,
             exclusive,
+            borrowMode,
           }),
         });
         if (!editPatchRes.ok) {
@@ -741,6 +755,11 @@ export default function PoolWizard({
                   }))}
                 />
               </div>
+            )}
+
+            {/* Borrow mode */}
+            {connectionIds.length > 0 && (
+              <BorrowModeField value={borrowMode} onChange={setBorrowMode} />
             )}
           </div>
         )}

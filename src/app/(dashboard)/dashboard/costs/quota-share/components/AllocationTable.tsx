@@ -13,15 +13,35 @@ import {
 } from "@omniroute/ui-kit/table";
 import Badge from "@/shared/components/Badge";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
+import LendingBadge from "./LendingBadge";
+
+/** An allocation as the admin routes return it, with the key holder's lending consent. */
+export type LendingAllocation = PoolAllocation & {
+  lendingPercent?: number;
+  lendingUntil?: number | null;
+};
 
 interface AllocationTableProps {
-  allocations: PoolAllocation[];
+  allocations: LendingAllocation[];
   usage: PoolUsageSnapshot | null;
   /** Map from apiKeyId to display name */
   keyLabels: Record<string, string>;
+  /** Whether the pool lends by consent: only then is a lending badge shown. */
+  consentMode: boolean;
 }
 
-export default function AllocationTable({ allocations, usage, keyLabels }: AllocationTableProps) {
+/** The usage snapshot time, the "now" a lending deadline is judged at. */
+function snapshotTimeMs(usage: PoolUsageSnapshot | null): number | null {
+  const ms = usage ? Date.parse(usage.generatedAt) : Number.NaN;
+  return Number.isFinite(ms) ? ms : null;
+}
+
+export default function AllocationTable({
+  allocations,
+  usage,
+  keyLabels,
+  consentMode,
+}: AllocationTableProps) {
   const t = useTranslations("quotaShare");
 
   if (allocations.length === 0) {
@@ -34,6 +54,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
 
   // Build per-key consumption lookup from first dimension (primary)
   const primaryDim = usage?.dimensions?.[0];
+  const nowMs = snapshotTimeMs(usage);
 
   return (
     // PoolCard's Card is the frame around this table (#19620).
@@ -82,6 +103,13 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                     >
                       {t("borrowingIndicator")}
                     </Badge>
+                  )}
+                  {consentMode && (
+                    <LendingBadge
+                      percent={alloc.lendingPercent}
+                      until={alloc.lendingUntil}
+                      nowMs={nowMs}
+                    />
                   )}
                 </div>
               </TableCell>

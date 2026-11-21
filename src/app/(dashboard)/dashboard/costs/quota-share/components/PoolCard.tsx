@@ -10,7 +10,7 @@ import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import type { QuotaPool } from "@/lib/quota/dimensions";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 import DimensionBar from "./DimensionBar";
-import AllocationTable from "./AllocationTable";
+import AllocationTable, { type LendingAllocation } from "./AllocationTable";
 import BurnRateChart from "./BurnRateChart";
 import StackedAllocationBar from "./StackedAllocationBar";
 import AccountQuotaRow from "./AccountQuotaRow";
@@ -18,7 +18,7 @@ import PoolSchedulesCard from "./PoolSchedulesCard";
 import UsageLogCard from "./UsageLogCard";
 
 export interface PoolCardProps {
-  pool: QuotaPool;
+  pool: Omit<QuotaPool, "allocations"> & { allocations: LendingAllocation[] };
   usage: PoolUsageSnapshot | null;
   /** Map from apiKeyId to display name */
   keyLabels: Record<string, string>;
@@ -165,7 +165,12 @@ export default function PoolCard({
       {/* Allocation table */}
       <div className="mb-3">
         <h4 className="text-[10px] uppercase text-text-muted mb-1.5">{t("allocationsHeading")}</h4>
-        <AllocationTable allocations={pool.allocations} usage={usage} keyLabels={keyLabels} />
+        <AllocationTable
+          allocations={pool.allocations}
+          usage={usage}
+          keyLabels={keyLabels}
+          consentMode={pool.borrowMode === "consent"}
+        />
       </div>
 
       {/* Account quota row — read-only upstream quota per connection */}

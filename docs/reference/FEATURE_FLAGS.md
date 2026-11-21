@@ -46,10 +46,10 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-128 flags across 6 categories. **Default** is the definition default — the value
+129 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
-### Security (13)
+### Security (14)
 
 | Key                                     | Type    | Default  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -66,6 +66,7 @@ used when neither a DB override nor an environment variable is present.
 | `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | When OIDC is enabled, disable password login so users can only authenticate via OIDC Single Sign-On. When disabled (default), both password login and OIDC are available.                                                                                                                                                                                                                                                                                                                                                      |
 | `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | Record the caller's IP address and user-agent on the `api_key.auth.touch` audit-log rows written for successful API-key metadata and discovery reads (#17982). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent.                                                                                                                                                                                                                                                  |
 | `PLUGIN_PERMISSION_MODEL_ENABLED`       | boolean | `false`  | Run each plugin process under the Node.js permission model, derived from the permissions its manifest declares: file reads limited to the plugin directory (plus its data directory with `file-read` or `file-write`), file writes only in the plugin data directory with `file-write`, child processes only with `exec`, and no worker threads, native addons or WASI. Network access is not restricted. Applies to plugins activated after the change. See [`PLUGIN_SDK.md`](../frameworks/PLUGIN_SDK.md#permission-system). |
+| `QUOTA_SELF_PANEL`                      | boolean | `false`  | Let an API key read its own quota-share position: enables `GET /v1/me/quota/{provider}` for keys with the `self:usage` scope. Pool names and schedule labels are shown to those keys as written. Off by default: the route answers 404.                                                                                                                                                                                                                                                                                        |
 
 ### Network (32)
 
@@ -291,10 +292,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 128 flags
+    // ... all 129 flags
   ],
   "summary": {
-    "total": 128,
+    "total": 129,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
