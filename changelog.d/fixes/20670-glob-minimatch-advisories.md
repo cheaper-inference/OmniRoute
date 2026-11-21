@@ -1,0 +1,1 @@
+- **fix(deps):** Route every `glob` to the root version and every `minimatch` at or above 9 to `^11.0.4`, clearing GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249 from the dev tooling in the root lockfile ([#20670](https://github.com/cheaper-inference/OmniRoute/pull/20670))

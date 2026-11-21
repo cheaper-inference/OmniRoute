@@ -378,8 +378,7 @@ tuismitheoir grafáilte, mar sin déan an gearradh ó chlón iomlán nó rith `g
 tá an chlib roimhe seo ann, is é `package.json` an spriocleagan, tá saincheist `release-freeze` oscailte, níl aon
 saincheist oscailte `Release branch not green`
 ar bhrainse eisiúna atá ann cheana — tuairiscíonn brainse nach bhfuil ann `?` anaithnid, agus ní
-glas riamh — tá scuaine `release` Mergify cumraithe (G11: `queue_rules`, `checks_timeout`,
-lipéad `queue`), cuireann an tacar rialacha `release/*` bac fós ar scriosadh agus ar bhrú éigeantach, agus
+glas riamh — cumascann omni-queue iarratais tarraingthe isteach sa bhrainse eisiúna (G11: tá `config/merge-queue/config.json` bailí, bainistíonn a `bases` an brainse eisiúna, tá `mode` socraithe ar `live`, agus tá a lipéad ann), cuireann an tacar rialacha `release/*` bac fós ar scriosadh agus ar bhrú éigeantach, agus
 níl `stable/v3` ná `develop` ann fós), an dá chéim brainse, cé na truicear sreafa oibre díomhaoine
 agus na coinníollacha `if:` a éiríonn fíor (agus cé acu a fhanann faoi ghlas ag athróg stórais nó
 pionnáilte leis an stór canónach), na dist-tags a bhfuiltear ag súil leo (`latest` → 3.9.0, `next` agus

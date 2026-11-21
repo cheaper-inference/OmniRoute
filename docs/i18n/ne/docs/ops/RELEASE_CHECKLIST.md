@@ -412,8 +412,7 @@ shallow clone ले `stable/v3` push गर्न सक्दैन, receiving
 पूर्ण clone बाट कट गर्नुहोस् वा पहिले `git fetch --unshallow origin` चलाउनुहोस् — अघिल्लो
 ट्याग अवस्थित छ, `package.json` लक्ष्य संस्करण हो, `release-freeze` issue खुला छ, अवस्थित release branch मा
 खुला `Release branch not green` issue छैन
-— अवस्थित नभएको शाखाले `?` अज्ञात देखाउँछ, कहिल्यै green होइन — Mergify `release` queue कन्फिगर गरिएको छ
-(G11: `queue_rules`, `checks_timeout`, label `queue`), `release/*` ruleset ले अझै deletion र force-push रोक्छ,
+— अवस्थित नभएको शाखाले `?` अज्ञात देखाउँछ, कहिल्यै green होइन — omni-queue रिलिज शाखामा पुल अनुरोधहरू मर्ज गर्दछ (G11: `config/merge-queue/config.json` मान्य, यसको `bases` रिलीज शाखा व्यवस्थापन गर्दछ, `mode` `live`, यसको लेबल अवस्थित छ), `release/*` ruleset ले अझै deletion र force-push रोक्छ,
 र `stable/v3` तथा `develop` अझै अवस्थित छैनन्), दुई शाखा चरणहरू, dormant-workflow
 triggers र `if:` conditions मध्ये कुन true हुन्छन् (र कुन repository variable द्वारा gated रहन्छन् वा
 canonical repository मा pinned हुन्छन्), अपेक्षित dist-tags (`latest` → 3.9.0, `next` र

@@ -1,0 +1,1 @@
+- **fix(sse):** keep tool-result media as Gemini media parts and omit sampling parameters removed by Gemini 4. ([#20204](https://github.com/cheaper-inference/OmniRoute/pull/20204))

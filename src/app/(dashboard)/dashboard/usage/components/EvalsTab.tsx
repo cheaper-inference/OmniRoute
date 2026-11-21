@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Field } from "@omniroute/ui-kit/field";
@@ -20,6 +20,9 @@ import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { focusFirstInvalidField } from "@/shared/utils/focusFirstInvalidField";
+import { EVAL_DEFAULT_CASE_MODEL } from "@/shared/constants/evals";
+import { hasSuiteDraftErrors, validateSuiteDraft, type SuiteDraftErrors } from "./evalSuiteDraft";
 
 type EvalTargetType = "suite-default" | "model" | "combo";
 
@@ -458,6 +461,10 @@ export default function EvalsTab() {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [suiteDraft, setSuiteDraft] = useState<EvalSuiteDraft>(createEmptySuiteDraft());
   const [savingSuite, setSavingSuite] = useState(false);
+  // Set by a refused save: the builder then flags the fields inline (an untouched form is not
+  // flagged for being empty) and `refusedSaves` moves focus to the first of them.
+  const [showSuiteErrors, setShowSuiteErrors] = useState(false);
+  const [refusedSaves, setRefusedSaves] = useState(0);
   const [deletingSuiteId, setDeletingSuiteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -661,29 +668,17 @@ export default function EvalsTab() {
 
   async function handleSaveSuite() {
     const suiteName = suiteDraft.name.trim();
-    if (!suiteName) {
-      notify.warning(t("suiteBuilderNameRequired"));
-      return;
-    }
 
     if (suiteDraft.cases.length === 0) {
       notify.warning(t("suiteBuilderCasesRequired"));
       return;
     }
 
-    const invalidCaseIndex = suiteDraft.cases.findIndex((draftCase) => {
-      const hasMessage =
-        draftCase.systemPrompt.trim().length > 0 || draftCase.userPrompt.trim().length > 0;
-      return (
-        !draftCase.name.trim() ||
-        !draftCase.expectedValue.trim() ||
-        !hasMessage ||
-        !draftCase.model.trim()
-      );
-    });
-
-    if (invalidCaseIndex >= 0) {
-      notify.warning(t("suiteBuilderCaseInvalid", { index: invalidCaseIndex + 1 }));
+    // Each missing field is flagged next to itself by the builder; a toast would only repeat
+    // it away from the field. A case's model is optional (see evalSuiteDraft.ts).
+    if (hasSuiteDraftErrors(validateSuiteDraft(suiteDraft))) {
+      setShowSuiteErrors(true);
+      setRefusedSaves((count) => count + 1);
       return;
     }
 
@@ -704,7 +699,8 @@ export default function EvalsTab() {
           return {
             ...(draftCase.id.startsWith("draft-") ? {} : { id: draftCase.id }),
             name: draftCase.name.trim(),
-            model: draftCase.model.trim(),
+            // Omitted when empty: the save schema takes a missing model, not an empty one.
+            ...(draftCase.model.trim() ? { model: draftCase.model.trim() } : {}),
             input: {
               messages,
             },
@@ -739,6 +735,7 @@ export default function EvalsTab() {
       await refreshDashboard();
       setExpanded(result?.suite?.id || suiteDraft.id || null);
       setIsBuilderOpen(false);
+      setShowSuiteErrors(false);
       setSuiteDraft(createEmptySuiteDraft());
       notify.success(
         isEditing ? t("suiteBuilderUpdated") : t("suiteBuilderCreated"),
@@ -1858,10 +1855,13 @@ export default function EvalsTab() {
         onClose={() => {
           if (savingSuite) return;
           setIsBuilderOpen(false);
+          setShowSuiteErrors(false);
           setSuiteDraft(createEmptySuiteDraft());
         }}
         onSave={() => void handleSaveSuite()}
         saving={savingSuite}
+        errors={showSuiteErrors ? validateSuiteDraft(suiteDraft) : null}
+        focusInvalidRequest={refusedSaves}
         t={t}
       />
       {confirmDialog}
@@ -1925,6 +1925,8 @@ function SuiteBuilderModal({
   onClose,
   onSave,
   saving,
+  errors,
+  focusInvalidRequest,
   t,
 }: {
   draft: EvalSuiteDraft;
@@ -1933,9 +1935,19 @@ function SuiteBuilderModal({
   onClose: () => void;
   onSave: () => void;
   saving: boolean;
+  /** The draft's problems once a save was refused; `null` before that. */
+  errors: SuiteDraftErrors | null;
+  /** Bumped on each refused save: focus (and scroll) goes to the first flagged field. */
+  focusInvalidRequest: number;
   t: (key: string, values?: Record<string, unknown>) => string;
 }) {
+  const tv = useTranslations("formValidation");
   const editableStrategies = STRATEGIES.filter((strategy) => strategy.name !== "custom");
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (focusInvalidRequest > 0) focusFirstInvalidField(bodyRef.current);
+  }, [focusInvalidRequest]);
 
   function updateCase(caseId: string, patch: Partial<EvalCaseDraft>) {
     onChange({
@@ -2001,13 +2013,15 @@ function SuiteBuilderModal({
       title={draft.id ? t("suiteBuilderEditTitle") : t("suiteBuilderCreateTitle")}
       onClose={onClose}
     >
-      <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto pr-1">
+      <div ref={bodyRef} className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto pr-1">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             label={t("suiteBuilderNameLabel")}
             value={draft.name}
             onChange={(event) => onChange({ ...draft, name: event.target.value })}
             placeholder={t("suiteBuilderNamePlaceholder")}
+            required
+            error={errors?.name ? t("suiteBuilderNameRequired") : undefined}
           />
           <Input
             label={t("suiteBuilderDescriptionLabel")}
@@ -2033,6 +2047,8 @@ function SuiteBuilderModal({
           const selectedStrategy = editableStrategies.find(
             (strategy) => strategy.name === draftCase.strategy
           );
+          const caseErrors = errors?.cases[draftCase.id];
+          const promptErrorId = `suite-case-${draftCase.id}-prompt-error`;
 
           return (
             <Card key={draftCase.id} className="p-4">
@@ -2071,12 +2087,22 @@ function SuiteBuilderModal({
                   value={draftCase.name}
                   onChange={(event) => updateCase(draftCase.id, { name: event.target.value })}
                   placeholder={t("suiteBuilderCaseNamePlaceholder")}
+                  required
+                  error={
+                    caseErrors?.name
+                      ? tv("required", { field: t("suiteBuilderCaseNameLabel") })
+                      : undefined
+                  }
                 />
                 <Input
                   label={t("suiteBuilderCaseModelLabel")}
                   value={draftCase.model}
                   onChange={(event) => updateCase(draftCase.id, { model: event.target.value })}
                   placeholder={t("suiteBuilderCaseModelPlaceholder")}
+                  hint={t("suiteBuilderCaseModelHint", {
+                    target: t("targetSuiteDefaults"),
+                    fallback: EVAL_DEFAULT_CASE_MODEL,
+                  })}
                 />
                 <Input
                   label={t("suiteBuilderCaseTagsLabel")}
@@ -2130,9 +2156,18 @@ function SuiteBuilderModal({
                 <Field
                   label={t("suiteBuilderCaseUserPromptLabel")}
                   htmlFor={`suite-case-${draftCase.id}-userPrompt`}
+                  error={
+                    caseErrors?.prompt ? (
+                      <span id={promptErrorId} role="alert">
+                        {t("suiteBuilderCasePromptRequired")}
+                      </span>
+                    ) : undefined
+                  }
                 >
                   <Textarea
                     id={`suite-case-${draftCase.id}-userPrompt`}
+                    error={Boolean(caseErrors?.prompt)}
+                    aria-describedby={caseErrors?.prompt ? promptErrorId : undefined}
                     value={draftCase.userPrompt}
                     onChange={(event) =>
                       updateCase(draftCase.id, { userPrompt: event.target.value })
@@ -2149,6 +2184,12 @@ function SuiteBuilderModal({
                   }
                   placeholder={getExpectedPlaceholder(draftCase.strategy)}
                   hint={getExpectedHint(draftCase.strategy)}
+                  required
+                  error={
+                    caseErrors?.expectedValue
+                      ? tv("required", { field: t("suiteBuilderCaseExpectedLabel") })
+                      : undefined
+                  }
                 />
               </div>
             </Card>

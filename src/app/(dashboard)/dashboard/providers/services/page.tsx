@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import Icon from "@/shared/components/Icon";
+import { ServiceLocalOnlyGate } from "./components/ServiceLocalOnlyGate";
 import { CliproxyServiceTab } from "./tabs/CliproxyServiceTab";
 import { NinerouterServiceTab } from "./tabs/NinerouterServiceTab";
 import { MuxServiceTab } from "./tabs/MuxServiceTab";
@@ -16,7 +17,15 @@ import { OpencodeServerServiceTab } from "./tabs/OpencodeServerServiceTab";
 import { SingboxServiceTab } from "./tabs/SingboxServiceTab";
 
 type Tab =
-  "cliproxy" | "9router" | "mux" | "bifrost" | "dario" | "openwa" | "llmlingua" | "opencode-server" | "singbox";
+  | "cliproxy"
+  | "9router"
+  | "mux"
+  | "bifrost"
+  | "dario"
+  | "openwa"
+  | "llmlingua"
+  | "opencode-server"
+  | "singbox";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "cliproxy", label: "CLIProxyAPI", icon: "swap_horiz" },
@@ -68,7 +77,7 @@ export default function ServicesPage() {
 
         {TABS.map((tab) => (
           <TabsContent key={tab.id} value={tab.id} className="pt-4">
-            {panels[tab.id]}
+            <ServiceLocalOnlyGate name={tab.id}>{panels[tab.id]}</ServiceLocalOnlyGate>
           </TabsContent>
         ))}
       </Tabs>

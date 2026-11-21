@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] would {action}",
     "cancelled": "Cancelled.",
     "jsonOpt": "Output as JSON",
-    "yesOpt": "Skip confirmation prompt"
+    "yesOpt": "Skip confirmation prompt",
+    "positiveIntegerRequired": "Limit must be a positive integer."
   },
   "setup": {
     "title": "OmniRoute Setup",
@@ -972,7 +973,8 @@
       "description": "Manage resilience config",
       "threshold": "Failure threshold",
       "resetTimeout": "Reset timeout in ms",
-      "baseCooldown": "Base cooldown in ms"
+      "baseCooldown": "Base cooldown in ms",
+      "p2cLatencyWeight": "p2c latency weight, 0 (off) to 20"
     }
   },
   "nodes": {

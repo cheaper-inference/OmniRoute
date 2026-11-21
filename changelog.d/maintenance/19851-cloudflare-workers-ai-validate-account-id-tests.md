@@ -1,0 +1,1 @@
+- **test(providers):** regression tests for the Cloudflare Workers AI "Check" button sending the Account ID to `/api/providers/validate` (#19304, fixed in #19384) ([#19851](https://github.com/cheaper-inference/OmniRoute/pull/19851)) — thanks @rafacpti23

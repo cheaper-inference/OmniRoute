@@ -1,0 +1,1 @@
+- **cache**: Do not store upstream refusals, obsolescence notices, or content filter blocks in semantic cache (#19619).

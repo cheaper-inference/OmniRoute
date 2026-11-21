@@ -95,6 +95,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Keselamatan & Pengangkutan
+
+pengesahan WebDAV menguatkuasakan penjejakan kegagalan setiap IP dan kunci keluar (10 percubaan yang gagal dalam tetingkap 60 saat mencetuskan kunci keluar 5 minit dengan `429 Too Many Requests` dan `Retry-After`). Oleh kerana WebDAV menghantar bukti kelayakan pengesahan Asas, menamatkan TLS (atau penghalaan melalui terowong selamat seperti Tailscale atau Cloudflare Tunnel) amat disyorkan apabila mengakses titik akhir WebDAV di luar gelung balik.
+
 ### Sumber konteks mengikut kekunci API (pilihan)
 
 Konfigurasi Obsidian boleh diskopkan **mengikut kekunci API** melalui jadual

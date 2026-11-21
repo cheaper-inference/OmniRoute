@@ -355,111 +355,70 @@ Qabel tippubblika kwalunkwe rilaxx v3.8.x, ivverifika wkoll dawn il-punti:
 
 ---
 
-## Qtugħ ta’ 3.9.0 LTS (ippruvat f’3.8.58)
+## 3.9.0 LTS cut (pprovat fi 3.8.58)
 
-Wara v3.8.59 il-verżjoni li jmiss hija 3.9.0, u l-ponta tagħha ssir żewġ fergħat b’ħajja twila:
-`stable/v3` (il-linja v3 LTS, npm `latest`) u `develop` (v4, miżjuda għal 4.0.0, npm
-`nightly`). Il-mudell tal-fergħat/kanali, il-forward-port u t-tikketti jinsabu f’
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); il-pjan jinsab fir-[ROADMAP](../../ROADMAP.md) (Fażi 3). Il-qtugħ jitħaddem darba;
-3.8.58 jippruvah mill-bidu sal-aħħar fuq fork, u 3.8.59 tagħlaq bil-
-[lista ta’ kontroll GO/NO-GO](./LTS_GO_NO_GO.md).
+Wara v3.8.59 il-verżjoni li jmiss hija 3.9.0, u l-ponta tagħha ssir żewġ fergħat ta 'ħajja twila: `stable/v3` (il-linja v3 LTS, npm `latest`) u `develop` (v4, bumped to 4.0.0, npm `nightly`). Il-mudell branch/channel, forward-port u t-tikketti huma fi [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; il-pjanta tinsab fiż [ROADMAP](../../ROADMAP.md) (Fażi 3). Il-qatgħa tmur darba; 3.8.58 jippruvaha tarf sa tarf fuq furketta, u 3.8.59 jagħlaq bil- [lista ta 'kontroll GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Prova mingħajr bidliet (qari biss, sikura fi kwalunkwe ħin)
+### Dry-run (qari biss, sikur f'kull ħin)
 
 ```bash
-npm run release:dry-run-lts-cut                       # il-qtugħ reali: 3.9.0 minn HEAD, it-tikketta preċedenti v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # waħħal il-commit tas-sors
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ma jesegwixxi xejn: jaqra git u `gh` u jistampa
-s-sekwenza kollha — il-prekundizzjonijiet (is-sors jiġi solvut, ir-repożitorju tas-sors għandu storja sħiħa —
-klonu baxx ma jistax jimbotta `stable/v3`, in-naħa riċeventi tirrifjuta l-pakkett mal-ewwel
-ġenitur imlaqqam, għalhekk wettaq il-qtugħ minn klonu sħiħ jew l-ewwel ħaddem `git fetch --unshallow origin` —
-it-tikketta preċedenti teżisti, `package.json` għandu l-verżjoni fil-mira, issue `release-freeze` hija miftuħa, ma hemm ebda
-issue miftuħa `Release branch not green`
-fuq fergħa tar-rilaxx eżistenti — fergħa li ma teżistix tirrapporta `?` mhux magħruf, qatt
-ħadra — il-kju `release` ta’ Mergify huwa kkonfigurat (G11: `queue_rules`, `checks_timeout`,
-it-tikketta `queue`), ir-ruleset `release/*` għadu jimblokka t-tħassir u l-force-push, u
-`stable/v3` u `develop` għadhom ma jeżistux), iż-żewġ passi tal-fergħat, liema triggers ta’
-workflows inattivi u kundizzjonijiet `if:` isiru veri (u liema jibqgħu mrażżna minn varjabbli tar-repożitorju jew
-imwaħħla mar-repożitorju kanoniku), id-dist-tags mistennija (`latest` → 3.9.0, `next` u
-`nightly` vojta) u r-rollback. Ħruġ `0` = `RESULT: READY`, `1` = prekundizzjoni li timblokka
-falliet (`✗`), `2` = żball fl-użu. `--advisory <id,...>` ibaxxi kontroll għal twissija (`!`)
-mingħajr ma jaħbih.
+`scripts/release/dry-run-lts-cut.mjs` ma jesegwixxi xejn: jaqra git u `gh` u jistampa s-sekwenza sħiħa — prekundizzjonijiet (sors jirrisolvi, ir-repożitorju tas-sors għandu storja sħiħa — klonu baxx ma jistax jimbotta `stable/v3`, in-naħa li tirċievi tiċħad il-pakkett fl-ewwel ġenitur imlaqqam, għalhekk maqtugħ minn klonu sħiħ jew `git fetch --unshallow origin` verżjoni preċedenti hija l-ewwel — tikketta `package.json` `release-freeze` issue hija miftuħa, l-ebda kwistjoni `Release branch not green` miftuħa fuq fergħa ta 'rilaxx eżistenti — fergħa li ma teżistix tirrapporta `?` mhux magħruf, qatt aħdar — omni-queue arts ir-rilaxx PRs (G11: `config/merge-queue/config.json` valid, `bases` tagħha jimmaniġġja l-fergħa ta' rilaxx, `mode` `live`, it-tikketta tagħha teżisti d-delizzjoni, u `release/*` -regoli tagħha għadhom jeżistu), `stable/v3` u `develop` għadhom ma jeżistux), iż-żewġ passi tal-fergħat, liema fluss tax-xogħol inattiv jqajjem u kundizzjonijiet `if:` isiru vera (u li jibqgħu gated minn varjabbli repożitorju jew imqabbda mar-repożitorju kanoniku), id-dist-tags mistennija (`latest` → 3.9.0, `next` u `nightly` vojta). Ħruġ `0` = `RESULT: READY`, `1` = prekundizzjoni imblukkar falliet (`✗`), `2` = usage error. `--advisory <id,...>` inaqqas kontroll għal twissija (`!`) mingħajr ma jaħbiha.
 
-Ħaddem il-prova mingħajr bidliet tal-qtugħ reali waqt li r-release freeze ta’ 3.9.0 tkun għadha miftuħa — il-fergħat
-jinħolqu wara t-tikketta u qabel ma Fażi 12c tneħħi l-freeze.
+Mexxi l-dry-run tal-qatgħa reali waqt li l-iffriżar tar-rilaxx 3.9.0 għadu miftuħ — il-fergħat jinħolqu wara t-tikketta u qabel il-Fażi 12c tneħħi l-iffriżar.
 
-### Prova ta’ 3.8.58 (fuq fork biss)
+### 3.8.58 prova (furketta biss)
 
 ```bash
-# 1. Prova mingħajr bidliet fuq il-ponta attwali bil-parametri tal-prova
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Esegwixxi kontra remote ta’ FORK (origin, jew kwalunkwe remote li l-URL tiegħu huwa r-repożitorju
-#    kanoniku, jiġi rrifjutat; kull pass jitlob konferma fit-terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Ittestja l-workflows inattivi fil-fork (workflow_dispatch fejn il-prova mingħajr bidliet
-#    tirrapporta twaħħil mar-repożitorju kanoniku), imbagħad agħmel rollback
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Il-commit taż-żieda tal-verżjoni ta’ develop jinbena bil-plumbing ta’ git (ma tintmess ebda working tree) u jżid il-verżjoni
-fl-istess ħames fajls bħal commit tal-ftuħ taċ-ċiklu: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` u `docs/openapi.yaml`. It-taqsima `[4.0.0]`
-taċ-CHANGELOG u l-kopji i18n tagħha jinfetħu fuq `develop` wara, qabel l-ewwel
-PR tagħha. L-iskript qatt ma jibdel id-dist-tags ta’ npm — ippruvahom fuq pakkett temporanju.
+Il-bump commit tal-iżvilupp huwa mibni bil-plumbing git (l-ebda siġra tax-xogħol ma tintmiss) u jgħolli l-istess ħames fajls bħala ċiklu-open commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` u `docs/openapi.yaml`. Is-sezzjoni `[4.0.0]` CHANGELOG l-mirja i18n tagħha jinfetħu fuq `develop` wara, qabel l-ewwel PR tagħha. L-iscript qatt ma jinbidel npm dist-tags — rehease dawk fuq scratch package.
 
-### Artifact ta’ previżjoni tal-PR (ibni darba, ippromwovi l-istess bytes)
+### PR preview artifact (ibni darba, tippromwovi l-istess bytes)
 
-`.github/workflows/preview-artifact.yml` jibni tarball wieħed tal-produzzjoni minn ras PR u
-jivvalida eżattament dak il-build (parti (a) ta’ #8084). PRs tal-istess repożitorju biss; ma jiġi ppubblikat xejn.
+`.github/workflows/preview-artifact.yml` jibni tarball ta' produzzjoni wieħed minn ras PR u jivvalida dik il-bini eżatt ( slice #8084 (a)). L-istess repożitorju PRs biss; xejn mhu ppubblikat.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # jew żid it-tikketta `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # installazzjoni tal-previżjoni
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-L-eżekuzzjoni tagħmel `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, tippakkja t-
-tarball, tħaddem `npm run check:pack-boot` (sigrieti foloz, direttorju tad-data temporanju), terġa’ tippakkja u
-tfalli sakemm id-digest ma jkunx identiku, imbagħad tirreġistra `artifact-identity.json` (SHA tar-ras, SHA tal-bażi,
-hash tal-lockfile, pjattaforma, arkitettura, ABI ta’ node, bundler, politika tal-build —
-`scripts/release/artifact-identity.mjs`) u tiċċertifika t-tarball f’job separat. Il-promozzjoni
-ta’ previżjoni tfisser l-installazzjoni ta’ dak it-tarball: qatt terġa’ tibni mis-sors.
+Il-ġirja tagħmel `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, tippakkja t-tarball, tmexxi `npm run check:pack-boot` (sigrieti foloz, data effimera dir), terġa' tippakkja u tfalli sakemm id-diġest ma jkunx identiku, imbagħad jirreġistra `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, ABI, bundle build, — `scripts/release/artifact-identity.mjs` build policy ) u tiċċertifika t-tarball f'impjieg separat. Il-promozzjoni ta' preview tfisser l-installazzjoni ta' dak it-tarball: qatt ma terġa' tibni mis-sors.
 
-### Il-qtugħ (3.9.0, wara GO)
+### Il-qatgħa (3.9.0, wara GO)
 
-1. GO rreġistrat f’[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` jistampa `RESULT: READY`.
-3. Oħloq il-fergħat fuq `origin` manwalment bil-kmandi li tistampa l-prova mingħajr bidliet — l-
-   iskritt jirrifjuta li jimbotta lejn `origin`. Biex terġa’ tuża commit ta’ develop li jkun ġie rieżaminat, ħaddem il-
-   prova `--execute` fuq il-ponta ta’ 3.9.0 kontra l-fork tiegħek l-ewwel; din tistampa ż-żewġ SHAs, u
-   l-istess commits jistgħu jiġu mbuttati:
+1. GO recorded in [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` prints `RESULT: READY`.
+3. Oħloq il-fergħat fuq `origin` bl-idejn bil-kmandi l-prints dry-run — l-iskrittura tirrifjuta li timbotta għal `origin`. Biex tuża mill-ġdid impenn ta 'żvilupp rivedut, mexxi l-prova `--execute` fuq il-ponta 3.9.0 mal-furketta tiegħek l-ewwel; jistampa kemm SHAs, u l-istess commits jistgħu jiġu mbuttati:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Ipproteġi `stable/v3` u `develop` (settijiet ta’ regoli + kju tal-merge) qabel ma jasal l-ewwel PR.
-5. Il-workflows inattivi jinxtegħlu skont l-eżistenza tal-branch: `forward-port.yml` (push lejn
-   `stable/v3`), `validate-stable-pr.yml` (PRs lejn `stable/v3`) u `nightly-v4-build.yml`
-   (jibni `develop`). Qabel it-tnedija, issettja s-secret tar-repożitorju `secrets.FORWARD_PORT_TOKEN` (sabiex is-CI jitħaddem fuq
-   PRs ta’ forward-port); il-pubblikazzjoni ta’ filgħaxija tibqa’ mitfija sakemm is-sid jissettja l-varjabbli tar-repożitorju
-   `vars.NIGHTLY_PUBLISH` għal `true` u npm Trusted Publishing jaċċetta
-   `nightly-v4-build.yml`. Ir-riżoluzzjoni tal-kanal tinsab f’`scripts/release/dist-tag.mjs`, l-istess
-   resolver li juża `npm-publish.yml`.
-6. Ivverifika l-kanali: `npm view omniroute dist-tags --json` juri `latest` = 3.9.0 u l-ebda
-   `next` / `nightly` sakemm tiġi ppubblikata v4.
-7. Treġġigħ lura, jekk ikun meħtieġ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   u `npm dist-tag add omniroute@3.8.59 latest`.
+4. Ipproteġi `stable/v3` u `develop` (rulesets + merge queue) qabel ma l-ewwel PR jinżel.
+5. Il-flussi tax-xogħol inattivi jinxtegħlu skont l-eżistenza tal-fergħa: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) u `nightly-v4-build.yml` (builds `develop`). Qabel ma tibda taħdem, issettja s-sigriet tar-repożitorju `secrets.FORWARD_PORT_TOKEN` (hekk CI jimxi fuq il-port forward PRs); il-pubblikazzjoni ta' kull filgħaxija tibqa' off sakemm is-sid jistabbilixxi l-varjabbli tar-repożitorju `vars.NIGHTLY_PUBLISH` għal `true` u npm Trusted Publishing jaċċetta `nightly-v4-build.yml`. Ir-riżoluzzjoni tal-kanal hija `scripts/release/dist-tag.mjs`, l-istess resolver juża `npm-publish.yml`.
+6. Ivverifika l-kanali: `npm view omniroute dist-tags --json` juri `latest` = 3.9.0 u l-ebda `next` / `nightly` sakemm v4 tippubblika.
+7. Rollback, jekk meħtieġ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` u `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

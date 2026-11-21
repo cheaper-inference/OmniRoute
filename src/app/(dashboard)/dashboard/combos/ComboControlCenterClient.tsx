@@ -24,6 +24,7 @@ import {
   type ComboControlCenterTarget,
   type ComboControlCenterTargetHealth,
 } from "@/lib/combos/controlCenter";
+import { runtimeConfigLabel } from "@/lib/combos/runtimeConfigLabels";
 import { getProviderDisplayName } from "@/lib/display/names";
 
 type TimeRange = "1h" | "24h" | "7d" | "30d";
@@ -528,7 +529,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
                   key={key}
                   className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2"
                 >
-                  <span className="text-sm text-text-muted">{key}</span>
+                  <span className="text-sm text-text-muted">{runtimeConfigLabel(key, t)}</span>
                   <RuntimeConfigValue value={value} />
                 </div>
               ))

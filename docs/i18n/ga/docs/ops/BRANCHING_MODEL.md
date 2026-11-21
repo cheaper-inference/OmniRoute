@@ -42,25 +42,23 @@ flowchart LR
 Ní hé `main` an brainse comhtháthaithe laethúil. De ghnáth, ní mór PRanna a osclaítear in aghaidh `main`
 a athdhíriú roimh chumasc.
 
-## Reo eisiúna (timthriallta comhthreomhara)
+## Reo scaoileadh (timthriallta comhthreomhara)
 
-Nuair a bhíonn eisiúint á réiteach, osclaítear saincheist mharcála ar a bhfuil an lipéad `release-freeze`.
-**Ní chuireann sé sin stop leis an bhforbairt**:
+Nuair a bhíonn scaoileadh á réiteach, osclaítear saincheist marcála lipéadaithe `release-freeze`. Sin** ní stopann forbairt** :
 
-- Is leis an gcaptaen eisiúna don eisiúint sin an `release/vX.Y.Z` reoite.
-- Cruthaítear `release/vX+1` an chéad timthrialla eile ón mbarr reoite ionas gur féidir le rannchuiditheoirí leanúint orthu
-  ag tabhairt oibre i dtír.
-- Ba cheart PRanna oscailte atá fós dírithe ar an mbrainse reoite a **athdhíriú** ar an
-  mbrainse gníomhach (is airde) `release/v*`.
+- Baineann an `release/vX.Y.Z` reoite leis an gcaptaen scaoileadh don long sin.
+- Gearrtar `release/vX+1` an chéad timthrialla eile ón rinn reoite ionas go gcoimeádann na rannpháirtithe obair tuirlingthe.
+- Ba chóir go mbeadh PRs oscailte a dhíríonn ar an mbrainse reoite fós** retargeted** go dtí an brainse gníomhach (is airde) `release/v*`.
 
-Seiceáil an bhfuil reo oscailte ann sula nglacann tú leis gur féidir an brainse atá uait a chumasc:
+Seiceáil le haghaidh reo oscailte sula nglacfaidh tú leis go bhfuil an brainse atá uait in cumasctha:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Tá na meicnicí cumaisc (lipéad `queue` an úinéara → Mergify) doiciméadaithe in
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Tá meicnic chumaisc (úinéir `queue` lipéad → Mergify) doiciméadaithe i [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: tá scuaine an chumaisc Mergify ar scor** (cinneadh an úinéara). Ní shainíonn `.mergify.yml` scuaine a thuilleadh agus diúltaíonn sé do na horduithe Mergify a chumasc nó a athscríobhann iarratas tarraingthe. Déantar scaoileadh PRs a chumasc de láimh faoin tacar rialacha stórtha "Éiligh geataí glasa ar an scaoileadh gníomhach" (`Gate / CI` + `Gate / Quality`) go dtí go ritheann omni-scuaine i mód beo, agus trí scuaine omni ina dhiaidh sin ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ní chumasc an lipéad `queue` faic a thuilleadh.
 
 ## Cén fáth a bhfuil brainse agus clib araon ann?
 

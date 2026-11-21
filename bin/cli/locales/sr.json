@@ -12,7 +12,8 @@
     "dryRun": "[пробно покретање] би {action}",
     "cancelled": "Отказано.",
     "jsonOpt": "Прикажи као JSON",
-    "yesOpt": "Прескочи потврду"
+    "yesOpt": "Прескочи потврду",
+    "positiveIntegerRequired": "Ограничење мора бити позитиван цео број."
   },
   "setup": {
     "title": "OmniRoute подешавање",
