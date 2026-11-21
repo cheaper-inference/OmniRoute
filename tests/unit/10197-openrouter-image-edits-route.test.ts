@@ -187,3 +187,20 @@ test("#10197 v1 image edit POST surfaces openrouter rate-limit sentinel", async 
   assert.match(body.error.message, /All accounts rate limited/);
   assert.ok(!body.error.message.includes("at /"));
 });
+
+test("malformed edit control precedes missing OpenRouter credentials", async () => {
+  const response = await imageEditRoute.POST(
+    new Request("http://localhost/api/v1/images/edits", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "openrouter/openai/gpt-image-2.5-sunburst",
+        prompt: "edit this",
+        image: REF_A,
+        background: false,
+      }),
+    })
+  );
+  assert.equal(response.status, 400);
+  assert.match(await response.text(), /Invalid image edit background/);
+});

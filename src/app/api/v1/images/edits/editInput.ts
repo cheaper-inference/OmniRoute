@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  parseImageEditControls,
+  type ImageEditControls,
+} from "@omniroute/open-sse/handlers/imageGeneration/editControls.ts";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { getImageModelEntry } from "@omniroute/open-sse/config/imageRegistry.ts";
 import {
@@ -10,6 +14,7 @@ import { getBodySizeLimit, readRequestBodyWithLimit } from "@/shared/middleware/
 import * as log from "@/sse/utils/logger";
 
 export interface EditInput {
+  controls: ImageEditControls;
   options?: Record<string, unknown>;
   prompt: string;
   model: string | null;
@@ -75,6 +80,13 @@ async function readMultipartOptions(formData: FormData): Promise<Record<string, 
   return options;
 }
 
+function readMultipartControls(formData: FormData): ImageEditControls {
+  return parseImageEditControls({
+    quality: formData.get("quality") ?? undefined,
+    background: formData.get("background") ?? undefined,
+  });
+}
+
 async function readMultipartImage(formData: FormData): Promise<EditInput> {
   const options = await readMultipartOptions(formData);
   const promptRaw = formData.get("prompt");
@@ -100,6 +112,7 @@ async function readMultipartImage(formData: FormData): Promise<EditInput> {
   const firstImage = images[0] ?? null;
   return {
     options,
+    controls: readMultipartControls(formData),
     prompt,
     model,
     size,
@@ -156,6 +169,7 @@ export async function readEditInput(request: Request): Promise<EditInput | null>
         ? {
             ...extracted,
             options: parsed.data,
+            controls: parseImageEditControls(parsed.data),
             hasMask: Object.hasOwn(parsed.data, "mask") || Object.hasOwn(parsed.data, "mask_url"),
           }
         : null;
