@@ -51,6 +51,32 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+type KeptAnswer = { data: string; closedByServer: boolean };
+
+/**
+ * Sends the bytes on a connection the client keeps alive. Resolves when the bridge closes the
+ * socket, or after `boundMs`, when the client closes it itself.
+ */
+function keptAlive(port: number, bytes: string, boundMs = 4000): Promise<KeptAnswer> {
+  return new Promise((resolve) => {
+    const socket = net.connect(port, "127.0.0.1");
+    let data = "";
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      socket.destroy();
+    }, boundMs);
+    socket.setEncoding("utf8");
+    socket.on("connect", () => socket.write(bytes));
+    socket.on("data", (chunk) => (data += chunk));
+    socket.on("error", () => {});
+    socket.on("close", () => {
+      clearTimeout(timer);
+      resolve({ data, closedByServer: !timedOut });
+    });
+  });
+}
+
 async function withPanel(fn: (ctx: Ctx) => Promise<void>, options: Options = {}): Promise<void> {
   const seen: Seen[] = [];
   // A request is listed here as soon as its headers reach the main port, before its body.
@@ -80,6 +106,8 @@ async function withPanel(fn: (ctx: Ctx) => Promise<void>, options: Options = {})
   const front = options.apiRole
     ? bridge.createApiBridgeServer(mainPort)
     : bridge.createApiBridgeServer(mainPort, tuned);
+  // Longer than any bound of these tests, so a socket that closes was closed by an answer.
+  front.keepAliveTimeout = 60_000;
   const panelPort = await listen(front);
   try {
     await fn({ panelPort, seen, started });
@@ -93,7 +121,11 @@ const BODY =
 const JSON_TYPE = "Content-Type: application/json";
 const length = (body: string) => `Content-Length: ${Buffer.byteLength(body)}`;
 function request(line: string, headers: string[], body = ""): string {
-  const lines = [`${line} HTTP/1.1`, "Host: panel.test", ...headers, "Connection: close"];
+  return keepAliveRequest(line, [...headers, "Connection: close"], body);
+}
+/** A request without `Connection: close`, so only the bridge can close its connection. */
+function keepAliveRequest(line: string, headers: string[], body = ""): string {
+  const lines = [`${line} HTTP/1.1`, "Host: panel.test", ...headers];
   return `${lines.join("\r\n")}\r\n\r\n${body}`;
 }
 const NOT_FOUND_BODY = /\{"error":"not_found","message":"Not found\."\}/;
@@ -105,7 +137,12 @@ test("a JSON PATCH of the quota view is relayed with exactly the declared bytes"
         panelPort,
         request(
           `PATCH ${path}`,
-          [JSON_TYPE, length(BODY), "Authorization: Bearer sk-live-1234567890"],
+          [
+            JSON_TYPE,
+            length(BODY),
+            "Authorization: Bearer sk-live-1234567890",
+            "X-Middleware-Subrequest: x",
+          ],
           BODY
         )
       );
@@ -122,6 +159,8 @@ test("a JSON PATCH of the quota view is relayed with exactly the declared bytes"
     assert.equal(seen[0].headers["transfer-encoding"], undefined);
     assert.equal(seen[0].headers["content-type"], "application/json");
     assert.equal(seen[0].headers.authorization, "Bearer sk-live-1234567890");
+    // The role's request header rule applies to the write as to every other request.
+    assert.equal(seen[0].headers["x-middleware-subrequest"], undefined);
     assert.equal(new URL(`http://${seen[0].headers.host}`).hostname, "127.0.0.1");
   });
 });
@@ -223,14 +262,17 @@ test("a PATCH outside the rule answers 404 and nothing reaches the main port", a
   });
 });
 
-test("a refused PATCH that declares a body closes its connection", async () => {
+test("a refused PATCH that declares a body closes a kept-alive connection", async () => {
   await withPanel(async ({ panelPort, seen }) => {
-    const res = await raw(
+    const head = ["Content-Type: text/plain", length(BODY)];
+    const answer = await keptAlive(
       panelPort,
-      request("PATCH /api/v1/me/quota/claude", ["Content-Type: text/plain", length(BODY)], BODY)
+      keepAliveRequest("PATCH /api/v1/me/quota/claude", head, BODY)
     );
-    assert.match(res, /^HTTP\/1\.1 404 /);
-    assert.match(res, /\r\nconnection: close\r\n/i);
+    assert.match(answer.data, /^HTTP\/1\.1 404 /);
+    assert.match(answer.data, NOT_FOUND_BODY);
+    assert.match(answer.data, /\r\nconnection: close\r\n/i);
+    assert.equal(answer.closedByServer, true);
     assert.deepEqual(seen, []);
   });
 });
@@ -263,14 +305,15 @@ test("a body shorter than its declared length is refused after the wait", async 
   await withPanel(
     async ({ panelPort, seen, started }) => {
       const begun = Date.now();
-      const res = await raw(
+      const answer = await keptAlive(
         panelPort,
-        request("PATCH /api/v1/me/quota/claude", [JSON_TYPE, "Content-Length: 10"], "1234")
+        keepAliveRequest("PATCH /api/v1/me/quota/claude", [JSON_TYPE, "Content-Length: 10"], "1234")
       );
       const elapsed = Date.now() - begun;
-      assert.match(res, /^HTTP\/1\.1 404 /);
-      assert.match(res, NOT_FOUND_BODY);
-      assert.match(res, /\r\nconnection: close\r\n/i);
+      assert.match(answer.data, /^HTTP\/1\.1 404 /);
+      assert.match(answer.data, NOT_FOUND_BODY);
+      assert.match(answer.data, /\r\nconnection: close\r\n/i);
+      assert.equal(answer.closedByServer, true);
       assert.ok(elapsed >= 100, `answered after ${elapsed} ms`);
       assert.ok(elapsed < 1500, `answered after ${elapsed} ms`);
       assert.deepEqual(seen, []);
