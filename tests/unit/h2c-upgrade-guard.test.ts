@@ -5,6 +5,7 @@ import http from "node:http";
 import net from "node:net";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { PassThrough, type Duplex } from "node:stream";
 import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
 
@@ -18,7 +19,7 @@ const h2cGuard = require("../../scripts/dev/h2c-upgrade-guard.cjs") as {
   handleH2cUpgrade: (
     server: http.Server,
     req: http.IncomingMessage,
-    socket: net.Socket,
+    socket: Duplex,
     head: Buffer
   ) => boolean;
 };
@@ -90,7 +91,7 @@ async function startServer(opts?: {
     });
   });
   server.on("upgrade", (req, socket, head) => {
-    if (h2cGuard.handleH2cUpgrade(server, req, socket as net.Socket, head)) return;
+    if (h2cGuard.handleH2cUpgrade(server, req, socket, head)) return;
     opts?.onUnclaimedUpgrade?.(req);
     socket.destroy();
   });
@@ -194,6 +195,24 @@ describe("h2c upgrade guard — isCleartextH2cUpgrade", () => {
       h2cGuard.isCleartextH2cUpgrade({ headers: { upgrade: "h2c" } }, { encrypted: true }),
       false
     );
+  });
+
+  it("leaves TLS alone when the upgrade event delivers a wrapped stream", (t) => {
+    const underlying = Object.assign(new net.Socket(), { encrypted: true });
+    const stream = new PassThrough();
+    t.after(() => {
+      stream.destroy();
+      underlying.destroy();
+    });
+    const request = new http.IncomingMessage(underlying);
+    request.headers = { upgrade: "h2c" };
+    const server = http.createServer();
+    const unshift = t.mock.method(stream, "unshift", () => false);
+    const emit = t.mock.method(server, "emit", () => false);
+
+    assert.equal(h2cGuard.handleH2cUpgrade(server, request, stream, Buffer.alloc(0)), false);
+    assert.equal(unshift.mock.callCount(), 0);
+    assert.equal(emit.mock.callCount(), 0);
   });
 });
 

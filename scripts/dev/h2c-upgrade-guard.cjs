@@ -128,13 +128,14 @@ function serializeRequestHead(req) {
  *
  * @param {import("node:http").Server} server
  * @param {import("node:http").IncomingMessage} req
- * @param {import("node:net").Socket} socket
+ * @param {import("node:stream").Duplex} socket
  * @param {Buffer} head bytes Node already read past the request head (start of the body)
  * @returns {boolean} true when the request was re-injected (the caller must stop),
  *   false when it is not an h2c upgrade (the caller continues unchanged).
  */
 function handleH2cUpgrade(server, req, socket, head) {
-  if (!isCleartextH2cUpgrade(req, socket)) return false;
+  // The upgrade event can expose a Duplex wrapper over the TLS socket.
+  if (req?.socket?.encrypted || !isCleartextH2cUpgrade(req, socket)) return false;
   const requestHead = serializeRequestHead(req);
   socket.unshift(head && head.length > 0 ? Buffer.concat([requestHead, head]) : requestHead);
   server.emit("connection", socket);
