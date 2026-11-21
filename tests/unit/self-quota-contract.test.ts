@@ -134,3 +134,45 @@ test("the response schema drops leaked keys at every nesting level", () => {
   const json = JSON.stringify(parsed);
   for (const value of Object.values(leak)) assert.ok(!json.includes(value));
 });
+
+test("a share parses with and without its two parts", () => {
+  const response = (share: Record<string, unknown>) => ({
+    provider: "claude",
+    generatedAt: "2026-05-27T15:30:00.000Z",
+    pools: [
+      {
+        ref: "qpr_x",
+        name: "p",
+        provider: "claude",
+        borrowMode: "saturation",
+        policy: "hard",
+        weight: 50,
+        cap: null,
+        accountVisible: false,
+        dimensions: [],
+        accounts: [
+          {
+            slot: 1,
+            label: "Account 1",
+            dimensions: [{ unit: "percent", window: "5h", limit: 100, yourShare: share }],
+          },
+        ],
+      },
+    ],
+    availableModels: [],
+    expiresAt: null,
+    apiBaseUrl: null,
+    blocks: { schedules: [], modelCaps: [] },
+  });
+  const shareOf = (parsed: ReturnType<typeof selfQuotaResponseSchema.parse>) =>
+    parsed.pools[0].accounts[0].dimensions[0].yourShare;
+
+  const plain = { fairShare: 50, consumed: 35, remaining: 15, status: "stale" };
+  assert.deepEqual(shareOf(selfQuotaResponseSchema.parse(response(plain))), plain);
+
+  const parts = { ...plain, attributed: 10, external: 25 };
+  const parsed = shareOf(selfQuotaResponseSchema.parse(response(parts)));
+  assert.deepEqual(parsed, parts);
+  assert.equal(parsed.attributed, 10);
+  assert.equal(parsed.external, 25);
+});

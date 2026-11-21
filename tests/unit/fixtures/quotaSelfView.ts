@@ -44,7 +44,7 @@ export type MakeDepsOverrides = Partial<QuotaSelfViewDeps> & {
   /** Merged into the plan of every pool. */
   plan?: Partial<Omit<ProviderPlan, "dimensions">> & { dimensions?: LooseDimension[] };
   /** Merged into the quota store stub. */
-  store?: Partial<Pick<QuotaStore, "peek" | "poolConsumedTotal">>;
+  store?: Partial<Pick<QuotaStore, "peek" | "poolConsumedTotal" | "ledgerRead">>;
 };
 
 const CONNECTION_PROVIDERS: Record<string, string> = {
@@ -82,7 +82,8 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
       ? { ...p, allocations: [alloc("key-b", 50), alloc("key-c", 50)], ...poolOver }
       : { ...p, ...poolOver }
   );
-  const store: Pick<QuotaStore, "peek" | "poolConsumedTotal"> = {
+  const store: Pick<QuotaStore, "peek" | "poolConsumedTotal"> &
+    Partial<Pick<QuotaStore, "ledgerRead">> = {
     peek: async () => 120,
     poolConsumedTotal: async () => 400,
     ...storeOver,
@@ -116,6 +117,8 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
     listQuotaKeyModels: async () => [],
     // No public API origin by default, so no test depends on the environment.
     resolvePublicApiBaseUrl: () => null,
+    // No cached plan-window reading by default, so no test depends on the gate's cache.
+    peekPlanWindowReading: () => null,
     ...rest,
   };
 }

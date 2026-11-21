@@ -14,6 +14,8 @@
  * provider-limits snapshot behind /v1/me/status, sharing its refresh tracker and 60 s floor), and
  * are asked for only when the pool's `accountVisible` is true, only for the pool's own non-empty
  * connection ids, and never with an empty list (which would mean every active connection).
+ * The key's part of each percent window comes from selfViewPercent.ts, which reads the
+ * attribution books and the gate's cached readings without writing a book or calling a provider.
  *
  * `blocks` (selfViewBlocks.ts) lists the schedule windows and per-model caps the key is under,
  * each naming its pool only by `ref`. `availableModels` is the list of `qtSd/` model ids the key
@@ -52,6 +54,7 @@ import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
 import { buildSelfViewBlocks } from "./selfViewBlocks";
+import { readPercentShares } from "./selfViewPercent";
 import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type {
   AccountQuotaEntryLike,
@@ -77,6 +80,7 @@ type CoreDeps = Required<
     | "listModelCapsForApiKey"
     | "listQuotaKeyModels"
     | "resolvePublicApiBaseUrl"
+    | "peekPlanWindowReading"
   >
 > & { secret: string };
 
@@ -163,6 +167,13 @@ const DEFAULT_DEPS_LOADERS: Array<{
       const { resolvePublicApiBaseUrl } = await import("@/server/origin/publicApiBaseUrl");
       return { resolvePublicApiBaseUrl: () => resolvePublicApiBaseUrl() };
     },
+  },
+  {
+    // Only looks at the quota gate's cache: the view never reads the provider.
+    keys: ["peekPlanWindowReading"],
+    load: async () => ({
+      peekPlanWindowReading: (await import("./saturationSignals")).peekPlanWindowReading,
+    }),
   },
 ];
 
@@ -371,6 +382,14 @@ async function buildPoolView(
     if (!isCountableDimension(dim)) continue;
     dimensions.push(await buildSharedDimension(ctx, dim, store, input.apiKeyId));
   }
+  const shares = await readPercentShares({
+    ctx,
+    apiKeyId: input.apiKeyId,
+    allowedConnections: input.allowedConnections,
+    store,
+    now: deps.now(),
+    peekReading: deps.peekPlanWindowReading,
+  });
   return {
     ref: ctx.ref,
     name: ctx.pool.name,
@@ -384,7 +403,8 @@ async function buildPoolView(
     accounts: buildSelfViewAccounts(
       ctx,
       await resolvePoolAccountEntries(ctx, input, deps),
-      deps.now()
+      deps.now(),
+      { shares }
     ),
   };
 }

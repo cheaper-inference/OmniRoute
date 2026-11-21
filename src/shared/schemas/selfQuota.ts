@@ -6,7 +6,8 @@
  *
  * `reason` values: store_unavailable, percent_attribution_unavailable, window_not_reported,
  * plus the ones resolveAccountQuotaEntries already emits (connection_lookup_failed,
- * not_supported, fetch_failed, not_available).
+ * not_supported, fetch_failed, not_available). Percent shares also report percent_window_ended
+ * and account_not_used_by_key.
  */
 
 import { z } from "zod";
@@ -37,6 +38,9 @@ const share = z.object({
   remaining: z.number().nullable(),
   status: selfQuotaStatusSchema,
   reason: z.string().optional(),
+  // Percent windows only, with status ok or stale: attributed + external = consumed.
+  attributed: z.number().optional(),
+  external: z.number().optional(),
 });
 
 // Pool bucket; limit = plan limit x accounts.
