@@ -51,7 +51,7 @@ const SMALL_DROP = 0.01;
  */
 const UNTIMED_BOOK_CURRENT_MS = 15 * 60_000;
 
-type Transition = "keep" | "rise" | "turn";
+type Transition = "keep" | "equal" | "rise" | "turn";
 
 /** The part of the state a transition rewrites. */
 type Book = Pick<LedgerState, "last" | "baseline" | "resetAt" | "keys">;
@@ -131,7 +131,7 @@ function hasStoredWindowEnded(state: LedgerState, reading: PlanWindowReading): b
  *   3. a reset time over 30 minutes ahead of the stored one: turn;
  *   3b. the stored reset time is not after the reading's data time (that window ended): turn;
  *   4. a higher figure: rise;
- *   5. an equal figure: keep;
+ *   5. an equal figure: keep, but record a reset time the book lacks (see applyReading);
  *   6 to 9. a lower figure: see classifyDrop.
  */
 function classify(state: LedgerState, reading: PlanWindowReading, g: number): Transition {
@@ -140,7 +140,7 @@ function classify(state: LedgerState, reading: PlanWindowReading, g: number): Tr
   if (shift !== null && shift > RESET_JITTER_MS) return "turn";
   if (hasStoredWindowEnded(state, reading)) return "turn";
   if (g - state.last > EPSILON) return "rise";
-  if (g >= state.last - EPSILON) return "keep";
+  if (g >= state.last - EPSILON) return "equal";
   return classifyDrop(state, reading, g, shift);
 }
 
@@ -179,11 +179,26 @@ function risenBook(state: LedgerState, reading: PlanWindowReading, g: number): B
 }
 
 /**
+ * Row 5: an equal figure keeps the book. When the book has no reset time and the reading has one
+ * ahead, only that reset time is stored. The last data time stays, so a later drop still waits.
+ */
+function learnedResetTime(
+  state: LedgerState,
+  reading: PlanWindowReading,
+  nowMs: number
+): { state: LedgerState; changed: boolean } {
+  const resetAt = resetAhead(reading);
+  if (state.resetAt !== null || resetAt === null) return { state, changed: false };
+  return { state: { ...state, rev: state.rev + 1, resetAt, updatedAt: nowMs }, changed: true };
+}
+
+/**
  * Apply one plan-window reading to the book. Returns the same `snapshot.state` object with
  * `changed: false` when the reading changes nothing (old, equal, or a drop that is not a turn).
  * A stored reset time that is no longer ahead of the reading ends the window: that reading turns
  * the book whatever its figure. A state only ever stores a reset time ahead of the reading that
- * carried it, so a reset time is recorded only when the state changes.
+ * carried it. Opening, turning and rising record it. An equal figure records it only when the
+ * book has none, and changes nothing else. A drop that is not a turn never records one.
  * The returned state may share its key map with the input state: callers must not edit a state
  * in place.
  */
@@ -195,6 +210,7 @@ export function applyReading(
   const g = clamp01(reading.used);
   const { state, counters } = snapshot;
   const transition = state ? classify(state, reading, g) : "turn";
+  if (state && transition === "equal") return learnedResetTime(state, reading, nowMs);
   if (state && transition === "keep") return { state, changed: false };
 
   const book =

@@ -339,7 +339,8 @@ The first matching rule applies:
 4. **Ended window:** a stored reset time that is not after the reading's data time means that
    window has ended. The reading turns the book, whatever its figure.
 5. **Higher figure:** only the last figure moves. The baseline and the marks stay.
-6. **Same figure:** nothing changes and nothing is written.
+6. **Same figure:** the figure, baseline and marks stay. Only a reset time the book lacks is
+   written.
 7. **Lower figure:** a lower figure is never applied as such. It turns the book only when three
    things hold. It is at least two minutes newer than the last applied reading. Nothing says the
    window is the same open one. It is more than one point lower.
@@ -350,8 +351,8 @@ inside that window changes nothing.
 
 A reset time is stored only while it is ahead of the data time of the reading that carries it. A
 higher figure stores its reading's reset time when that one is usable, and keeps the stored one
-otherwise. A reset time is recorded only when the book changes, so an equal figure with a new reset
-time records nothing.
+otherwise. An equal figure records its reading's reset time only when the book has none. It
+changes nothing else. A lower figure that does not turn the book records no reset time.
 
 #### When the book is used
 
@@ -457,10 +458,11 @@ clears the books on SQLite (see Limitations).
   is not charged until a reading turns it.
 - The remedy is the manual usage-history reset (`POST /api/settings/purge-usage-history`). It
   clears the attribution books and their token counters in the SQLite database.
-- The `all` period clears every book. A shorter period clears only the books and counters not
-  written within it. A book whose figure has not moved is not rewritten, so a shorter period can
-  also clear the current window's book. The next reading then opens a fresh book at the current
-  figure.
+- The `all` period clears every book and counter. A shorter period first clears the books not
+  written within it. It then clears the counters not written within it, but only for a pool
+  connection that has no book left. A kept book still marks each key against its counter.
+- A book whose figure has not moved is not rewritten, so a shorter period can also clear the
+  current window's book. The next reading then opens a fresh book at the current figure.
 - The reset does not touch a Redis quota store. There a book ends with its window, or expires 60
   days after its last write.
 - When the provider sends no reset time, a window that resets and refills above the old figure
@@ -714,8 +716,8 @@ write, although its name reads as read-only.
   A body with `lendingPercent` 0 is accepted in either mode.
 - `lendingUntil` is optional: epoch milliseconds, or `null` for no deadline. It must be in the
   future and at most 8640000000000000. A value below 100000000000 reads as seconds and is refused.
-- Any other field is refused. A body longer than 4096 characters, or with a declared length above
-  4096 bytes, is refused.
+- Any other field is refused. A body longer than 4096 bytes is refused. The read stops at that
+  size, so a longer body is never held whole.
 
 The checks run in the order of this table. Every refusal uses the standard error body with a
 fixed message. A refusal by one of these checks writes nothing.
@@ -817,7 +819,8 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
   (`retention.usageHistory` in the database settings). `coverage.truncatedByRetention` is true
   when the requested range is longer than that setting. It compares the two numbers and does not
   check whether rows are actually missing.
-- Provider and model are returned as recorded for the key's own requests. A combo request whose
+- Provider is returned as recorded for the key's own requests. Model is the recorded name after
+  its last `/`, and rows are grouped by it. A combo request whose
   every target was refused is recorded with the routing label as provider (the combo name, `auto`
   or `combo`) and the model string the client sent. Other refused requests, for example by an
   open circuit breaker, a model cooldown or a quota-parked skip, keep the target provider and
@@ -826,7 +829,8 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
   the first and last request.
 - `byModel` lists the 50 provider-and-model pairs with the most requests. With more pairs its
   entries do not add up to `summary`, and `summary.uniqueModels` counts every recorded model
-  spelling.
+  spelling. `byModelTruncated` is then true, and a model whose pairs fall on both sides of the
+  cut shows partial totals.
 - Two costs are reported. `costUsd` is the billed cost, as the usage analytics show it.
   Flat-rate subscription providers, such as the Claude Code plan, count $0 there. `listPriceUsd`
   is the same usage priced at list price, subscriptions included. A request whose model has no

@@ -51,6 +51,29 @@ test("a pool of another provider is left out even when the key is allocated in i
   assert.equal(codex.provider, "codex");
 });
 
+test("the allocation comes from the pool as read, and a pool the key left is skipped", async () => {
+  const base = makeDeps();
+  const deps = {
+    ...base,
+    // An older allocation list: the key's weight there is 10 and it is still in Pool B.
+    listAllocationsForApiKey: (apiKeyId: string) =>
+      base.listAllocationsForApiKey!(apiKeyId).map((entry) => ({
+        ...entry,
+        allocation: { ...entry.allocation, weight: 10, policy: "soft" as const },
+      })),
+    getPool: (poolId: string) => {
+      const pool = base.getPool!(poolId);
+      if (!pool || pool.name !== "Pool B") return pool;
+      return { ...pool, allocations: pool.allocations.filter((a) => a.apiKeyId !== "key-a") };
+    },
+  };
+  const view = await buildQuotaSelfView(input(), deps);
+  assert.deepEqual(
+    view.pools.map((p) => [p.name, p.weight, p.policy]),
+    [["Pool A", 50, "hard"]]
+  );
+});
+
 test("a countable window uses the pool bucket and the gate's limit (plan limit x accounts)", async () => {
   const deps = makeDeps({
     pool: {

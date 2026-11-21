@@ -100,7 +100,16 @@ test("an admin edit that echoes tampered lending fields leaves the stored consen
 });
 
 test("what the admin routes return carries the mode and the consent, read-only", async () => {
-  const pool = JSON.parse(JSON.stringify(getPool(id)));
+  const local = createPool({
+    connectionId: "conn-admin-lending-read",
+    name: "shared-read",
+    allocations: [
+      { apiKeyId: "a", weight: 60, policy: "hard" },
+      { apiKeyId: "b", weight: 40, policy: "hard" },
+    ],
+  }).id;
+  setAllocationLending(local, "a", { lendingPercent: 30, lendingUntil: UNTIL });
+  const pool = JSON.parse(JSON.stringify(getPool(local)));
   assert.equal(pool.borrowMode, "saturation");
   assert.deepEqual(
     pool.allocations.find((a: { apiKeyId: string }) => a.apiKeyId === "a"),
@@ -108,8 +117,8 @@ test("what the admin routes return carries the mode and the consent, read-only",
   );
 
   const res = await poolIdRoute.GET(
-    await makeManagementSessionRequest(`http://localhost/api/quota/pools/${id}`),
-    { params: Promise.resolve({ id }) }
+    await makeManagementSessionRequest(`http://localhost/api/quota/pools/${local}`),
+    { params: Promise.resolve({ id: local }) }
   );
   assert.equal(res.status, 200);
   const body = (await res.json()) as { pool: typeof pool };

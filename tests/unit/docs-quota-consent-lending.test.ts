@@ -199,11 +199,11 @@ test("the PATCH text, limits and error table are the handler's", () => {
       `It must be in the future and at most ${LENDING_UNTIL_MAX_MS}. A value below ${LENDING_UNTIL_MIN_MS} reads as seconds and is refused.`
     )
   );
-  assert.match(handlerSource, /SELF_LENDING_MAX_BODY_CHARS = 4096;/);
-  assert.match(handlerSource, /content-length/);
+  assert.match(handlerSource, /SELF_LENDING_MAX_BODY_BYTES = 4096;/);
+  assert.match(handlerSource, /readRequestBodyWithLimit\(request, SELF_LENDING_MAX_BODY_BYTES\)/);
   assert.ok(
     consentProse.includes(
-      "A body longer than 4096 characters, or with a declared length above 4096 bytes, is refused."
+      "A body longer than 4096 bytes is refused. The read stops at that size, so a longer body is never held whole."
     )
   );
   assert.match(handlerSource, /body\.lendingPercent > 0 && !isConsentPool\(ctx\.pool\)/);

@@ -63,13 +63,15 @@ test("commit is compare-and-set on the revision", () => {
 });
 
 test("an unreadable key map degrades to no key entry and leaves the rest as stored", () => {
+  const broken = { ...K, poolId: "broken" };
+  assert.equal(commitPercentLedger(broken, state(1, { last: 0.7, resetAt: NOW + DAY })), true);
   core
     .getDbInstance()
-    .prepare("UPDATE quota_percent_ledger SET keys_json = '{' WHERE pool_id = 'p1'")
+    .prepare("UPDATE quota_percent_ledger SET keys_json = '{' WHERE pool_id = 'broken'")
     .run();
   assert.deepEqual(
-    readPercentLedger(K).state,
-    state(2, { last: 0.7, resetAt: NOW + DAY, keys: {} })
+    readPercentLedger(broken).state,
+    state(1, { last: 0.7, resetAt: NOW + DAY, keys: {} })
   );
 });
 
@@ -226,4 +228,27 @@ test("a period reset clears only the books and counters not written within that 
   assert.deepEqual(readPercentLedger(idle), { state: null, counters: {} });
   assert.deepEqual(readPercentLedger(live).state, state(1));
   assert.equal(readPercentLedger(live).counters.a.tokens, 10);
+});
+
+test("a period reset keeps an idle counter while a book of its pool connection is kept", async () => {
+  const booked = { poolId: "p-booked", connectionId: "c-booked", window: "5h" } as const;
+  const loose = { poolId: "p-loose", connectionId: "c-loose", window: "5h" } as const;
+  assert.equal(commitPercentLedger(booked, state(1, { keys: { k: { startTokens: 0 } } })), true);
+  addPercentLedgerTokens(booked.poolId, booked.connectionId, "k", 40, NOW - 2 * DAY);
+  addPercentLedgerTokens(booked.poolId, booked.connectionId, "l", 10, NOW);
+  addPercentLedgerTokens(loose.poolId, loose.connectionId, "k", 40, NOW - 2 * DAY);
+
+  const result = await cleanup.resetUsageHistory("1d");
+  assert.deepEqual(
+    [result.deletedQuotaPercentLedger, result.deletedQuotaPercentLedgerTokens],
+    [0, 1]
+  );
+  const kept = readPercentLedger(booked);
+  assert.equal(kept.state?.rev, 1);
+  assert.deepEqual(
+    [kept.counters.k?.tokens, kept.counters.l?.tokens],
+    [40, 10],
+    "the book still marks key k, so its counter stays"
+  );
+  assert.deepEqual(readPercentLedger(loose).counters, {});
 });

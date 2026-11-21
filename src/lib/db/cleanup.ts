@@ -926,7 +926,11 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   Throws on an invalid period.
  */
 const RESET_TARGETS: Array<
-  DeleteByPeriodTarget & { resultKey: keyof ResetUsageHistoryResult; allOnly?: boolean }
+  DeleteByPeriodTarget & {
+    resultKey: keyof ResetUsageHistoryResult;
+    allOnly?: boolean;
+    keptWhileBooked?: boolean;
+  }
 > = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
   {
@@ -1002,6 +1006,7 @@ const RESET_TARGETS: Array<
     column: "updated_at",
     cutoff: "epochMs",
     resultKey: "deletedQuotaPercentLedgerTokens",
+    keptWhileBooked: true,
   },
   {
     table: "conversation_turn_nodes",
@@ -1018,6 +1023,27 @@ const RESET_TARGETS: Array<
     allOnly: true,
   },
 ];
+
+/**
+ * Deletes the per-key token counters written before the cutoff, except those of a pool
+ * connection that still has a book. A kept book marks each key against its counter, so the
+ * counter stays with it. The reset runs this after the books, so it sees what is left.
+ */
+function deleteUnbookedPercentCountersBefore(cutoffIso: string): number {
+  // One migration creates both tables, so the counters never exist without the books.
+  if (!tableExists("quota_percent_ledger_tokens")) return 0;
+  return getDbInstance()
+    .prepare(
+      `DELETE FROM quota_percent_ledger_tokens
+       WHERE updated_at < ?
+         AND NOT EXISTS (
+           SELECT 1 FROM quota_percent_ledger book
+           WHERE book.pool_id = quota_percent_ledger_tokens.pool_id
+             AND book.connection_id = quota_percent_ledger_tokens.connection_id
+         )`
+    )
+    .run(new Date(cutoffIso).getTime()).changes;
+}
 
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
   if (!isResetUsageHistoryPeriod(period)) {
@@ -1066,7 +1092,9 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
       artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso);
       for (const target of RESET_TARGETS) {
         if (target.allOnly) continue;
-        (result[target.resultKey] as number) = deleteFromTableBefore(target, cutoffIso);
+        (result[target.resultKey] as number) = target.keptWhileBooked
+          ? deleteUnbookedPercentCountersBefore(cutoffIso)
+          : deleteFromTableBefore(target, cutoffIso);
       }
     });
 
