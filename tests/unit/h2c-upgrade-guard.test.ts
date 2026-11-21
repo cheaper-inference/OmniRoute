@@ -214,6 +214,24 @@ describe("h2c upgrade guard — isCleartextH2cUpgrade", () => {
     assert.equal(unshift.mock.callCount(), 0);
     assert.equal(emit.mock.callCount(), 0);
   });
+
+  it("forwards the request and receiver to an explicit WebSocket policy", (t) => {
+    const server = http.createServer();
+    const socket = new net.Socket();
+    t.after(() => socket.destroy());
+    const request = new http.IncomingMessage(socket);
+    request.headers = { upgrade: "websocket" };
+    const policy = t.mock.fn((_request: http.IncomingMessage) => false);
+    const { shouldUpgradeCallback } = h2cGuard.withH2cUpgradeGuard({
+      shouldUpgradeCallback: policy,
+    });
+
+    assert.ok(shouldUpgradeCallback);
+    assert.equal(shouldUpgradeCallback.call(server, request), false);
+    assert.equal(policy.mock.callCount(), 1);
+    assert.equal(policy.mock.calls[0].this, server);
+    assert.deepEqual(policy.mock.calls[0].arguments, [request]);
+  });
 });
 
 describe("h2c upgrade guard — real sockets", () => {
@@ -349,7 +367,7 @@ describe("h2c upgrade guard — real sockets", () => {
     assert.equal(seenUpgrade, "websocket");
   });
 
-  it("preserves an explicit server policy that declines WebSocket upgrades", async (t) => {
+  it("routes WebSocket upgrades according to the Node server's callback support", async () => {
     let socketServer: http.Server | undefined;
     const { server, port } = await startServer({
       serverOptions: {
@@ -359,19 +377,20 @@ describe("h2c upgrade guard — real sockets", () => {
         },
       },
     });
-    if (!("shouldUpgradeCallback" in server)) {
-      t.skip("Node version has no upgrade callback");
-      return;
-    }
-
     const socket = net.connect(port, "127.0.0.1");
     const read = createReader(socket);
     socket.write(websocketRequest);
     const res = await read();
     socket.destroy();
-    assert.equal(res?.status, 200);
-    assert.equal((JSON.parse(res!.body) as Echo).upgrade, "websocket");
-    assert.equal(socketServer, server);
+    if ("shouldUpgradeCallback" in server) {
+      assert.ok(res);
+      assert.equal(res.status, 200);
+      assert.equal((JSON.parse(res.body) as Echo).upgrade, "websocket");
+      assert.equal(socketServer, server);
+    } else {
+      assert.equal(res, null, "older Node versions dispatch to the upgrade listener");
+      assert.equal(socketServer, undefined);
+    }
   });
 
   it("serves a bodiless h2c request via the legacy upgrade-event fallback", async () => {
