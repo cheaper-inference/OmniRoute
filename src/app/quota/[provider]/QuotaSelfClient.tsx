@@ -14,6 +14,7 @@ import QuotaHeader from "./components/QuotaHeader";
 import QuotaStatusPanel from "./components/QuotaStatusPanel";
 import type { StoredKey } from "./lib/keyStore";
 import { quotaPath } from "./lib/selfServiceClient";
+import { useLendingSave } from "./lib/useLendingSave";
 import { useSelfServiceQuery, type SelfServiceQuery } from "./lib/useSelfServiceQuery";
 import { useStoredApiKey } from "./lib/useStoredApiKey";
 
@@ -46,13 +47,14 @@ function deriveScreen(query: SelfServiceQuery<SelfQuotaResponse>, stored: Stored
 export default function QuotaSelfClient({ provider, providerName }: QuotaSelfClientProps) {
   const { stored, hold, confirmKey, unpersist, forget } = useStoredApiKey();
   const apiKey = stored?.key ?? null;
-  const { query, reload } = useSelfServiceQuery({
+  const { query, reload, adopt } = useSelfServiceQuery({
     path: quotaPath(provider),
     apiKey,
     // A module constant: the hook re-requests when the schema reference changes.
     schema: selfQuotaResponseSchema,
     refetchOnReturn: true,
   });
+  const lending = useLendingSave({ path: quotaPath(provider), apiKey, adopt, reload });
   const { status, keyFormMode, view, storageBlocked } = deriveScreen(query, stored);
 
   // Storage follows the server's verdict on the current key: kept once accepted, dropped once
@@ -92,7 +94,7 @@ export default function QuotaSelfClient({ provider, providerName }: QuotaSelfCli
         <QuotaStatusPanel query={query} providerName={providerName} onRetry={reload} />
         {view ? <BlockNotices blocks={view.blocks} pools={view.pools} /> : null}
         {view?.pools.map((pool) => (
-          <PoolSection key={pool.ref} pool={pool} />
+          <PoolSection key={pool.ref} pool={pool} lending={lending} />
         ))}
         {/* Only once the quota answer accepted the key (or while it refreshes). */}
         {view ? <MySpendSection /> : null}

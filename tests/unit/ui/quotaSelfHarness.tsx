@@ -20,6 +20,8 @@ import { selfUsageResponseSchema, type SelfUsageResponse } from "@/shared/schema
 import messages from "../../../src/i18n/messages/en.json";
 
 export const KEY = "sk-live-1234567890";
+/** A pool reference that matches the PATCH body schema. */
+export const LENDING_REF = "qpr_0123456789abcdef0123456789abcdef";
 
 export function renderQuota(ui: React.ReactElement, timeZone = "UTC") {
   return render(
@@ -69,6 +71,9 @@ export function pool(over: Partial<SelfQuotaPool> = {}): SelfQuotaPool {
     name: "Pool A",
     provider: "claude",
     borrowMode: "saturation",
+    lendingPercent: 0,
+    lendingUntil: null,
+    lendingActive: false,
     policy: "hard",
     weight: 50,
     cap: null,
@@ -173,7 +178,11 @@ export function jsonResponse(body: unknown, status = 200): Response {
 
 export interface FetchCall {
   url: string;
+  /** Upper case, `GET` when the caller set none. */
+  method: string;
   headers: Headers;
+  /** The body when it is a string, else null. */
+  body: string | null;
 }
 
 export type FetchRoute = (call: FetchCall) => Response | Promise<Response>;
@@ -186,7 +195,12 @@ export function stubFetch(routes: Record<string, FetchRoute>): FetchCall[] {
   const calls: FetchCall[] = [];
   vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    const call: FetchCall = { url, headers: new Headers(init?.headers) };
+    const call: FetchCall = {
+      url,
+      method: (init?.method ?? "GET").toUpperCase(),
+      headers: new Headers(init?.headers),
+      body: typeof init?.body === "string" ? init.body : null,
+    };
     calls.push(call);
     const prefix = Object.keys(routes).find((candidate) => url.startsWith(candidate));
     if (!prefix) return new Response(null, { status: 404 });
@@ -195,7 +209,10 @@ export function stubFetch(routes: Record<string, FetchRoute>): FetchCall[] {
   return calls;
 }
 
-/** Calls whose URL starts with `prefix` (tests never count calls in total). */
-export function callsTo(calls: FetchCall[], prefix: string): FetchCall[] {
-  return calls.filter((call) => call.url.startsWith(prefix));
+/** Calls whose URL starts with `prefix`, and with `method` when given (tests never count calls in
+ * total). */
+export function callsTo(calls: FetchCall[], prefix: string, method?: string): FetchCall[] {
+  return calls.filter(
+    (call) => call.url.startsWith(prefix) && (method === undefined || call.method === method)
+  );
 }

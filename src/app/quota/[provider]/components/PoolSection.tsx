@@ -9,13 +9,17 @@ import { accountRowIsEmpty, hasDrawnAccountReading } from "../lib/quotaText";
 import AccountRow from "./AccountRow";
 import PoolFacts from "./PoolFacts";
 import WindowCard from "./WindowCard";
+import LendingCard from "./LendingCard";
+import type { LendingActions } from "../lib/useLendingSave";
 
 interface PoolSectionProps {
   pool: SelfQuotaPool;
+  /** Saves the holder's lending choice. Without it the pool shows no lending card. */
+  lending?: LendingActions;
 }
 
 /** One Quota Share pool the key belongs to. */
-export default function PoolSection({ pool }: PoolSectionProps) {
+export default function PoolSection({ pool, lending }: PoolSectionProps) {
   const t = useTranslations("quotaSelf");
   const { accounts, dimensions } = pool;
   // An account with no window and nothing else to show gets no row (not a bare heading).
@@ -56,6 +60,7 @@ export default function PoolSection({ pool }: PoolSectionProps) {
         ))}
         {lagNote ? <p className="text-xs text-text-muted">{t("accountLagNote")}</p> : null}
         {noWindows ? <p className="text-sm text-text-muted">{t("noWindows")}</p> : null}
+        <LendingCard pool={pool} lending={lending} />
       </section>
     </Card>
   );
