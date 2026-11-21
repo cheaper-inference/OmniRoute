@@ -27,7 +27,7 @@ export default function BorrowModeField({ value, onChange }: BorrowModeFieldProp
 
   return (
     <div>
-      <span className="mb-1 block text-xs uppercase text-text-muted">{t("borrowModeLabel")}</span>
+      <span className="ci-eyebrow mb-1 block">{t("borrowModeLabel")}</span>
       <SegmentedControl
         semantics="radio"
         aria-label={t("borrowModeLabel")}
