@@ -29,7 +29,7 @@ import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
-import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
+import { readBuyerCostMicro, sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError, readErrorBodyText } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
@@ -128,6 +128,7 @@ export interface ProviderLegInput {
 function buildReceipt(
   input: ProviderLegInput,
   params: {
+    buyerCostMicro?: number | null;
     httpStatus: number;
     errorType: string | null;
     usage: ProviderLegUsage | null;
@@ -141,6 +142,7 @@ function buildReceipt(
 ): ProviderLegReceipt {
   return {
     index: input.phase === "initial" ? 0 : 1,
+    buyerCostMicro: params.buyerCostMicro ?? null,
     connectionId: params.connectionId,
     provider: input.provider ?? "unknown",
     model: params.model,
@@ -284,8 +286,13 @@ function finishOk(
     requestUrl?: string;
   }
 ): NonStreamingProviderLegResult {
+  const buyerCostMicro = readBuyerCostMicro(params.responseBody);
   const failed = bufferedResponsesFailure(input, params, { legError, extractUsage, buildReceipt });
-  if (failed) return failed;
+  if (failed) {
+    failed.buyerCostMicro = buyerCostMicro;
+    failed.receipt.buyerCostMicro = buyerCostMicro ?? null;
+    return failed;
+  }
   // F-02: restore + sanitize + translate is the only success tail.
   // Fallback/retry must not skip this with responseToolNameMap: null.
   const restoreClaudeNames = params.sourceFormat === "claude" && params.targetFormat === "claude";
@@ -338,6 +345,7 @@ function finishOk(
     connectionId: params.connectionId,
   });
   const receipt = buildReceipt(input, {
+    buyerCostMicro,
     httpStatus: 200,
     errorType: null,
     usage,
@@ -356,6 +364,7 @@ function finishOk(
     providerRequest: input.translatedBody ?? {},
     usage,
     billingUsage,
+    buyerCostMicro,
     responsePayloadFormat: params.responsePayloadFormat,
     looksLikeSSE: params.looksLikeSSE,
     connectionId: params.connectionId,
@@ -850,7 +859,9 @@ export async function runNonStreamingProviderLeg(
     } catch {
       // usage extraction from error body is best-effort
     }
+    const buyerCostMicro = readBuyerCostMicro(parsedErrorBody);
     const receipt = buildReceipt(input, {
+      buyerCostMicro,
       httpStatus: statusCode,
       errorType: upstreamErrorCode ?? null,
       usage,
@@ -878,6 +889,7 @@ export async function runNonStreamingProviderLeg(
       upstreamHttpSelection,
       result: errorResult as ChatCoreErrorResult,
       upstreamDiagnostic: executorResult.upstreamDiagnostic,
+      buyerCostMicro,
       receipt,
       usage,
     };
@@ -1081,6 +1093,7 @@ export async function runNonStreamingProviderLeg(
       trustedEmptyTurn: hasTrustedEmptyTurn(executorResult.response),
     })
   ) {
+    const buyerCostMicro = readBuyerCostMicro(responseBody);
     const errMsg = "Provider returned empty content";
     if (allowModelFallback) {
       const triedModels = new Set<string>([currentModel]);
@@ -1184,7 +1197,15 @@ export async function runNonStreamingProviderLeg(
               usage: null,
             };
           } else {
+            let buyerCostMicro: number | null | undefined;
+            try {
+              const fallbackBody = JSON.parse(await readErrorBodyText(fallbackResult.response));
+              buyerCostMicro = readBuyerCostMicro(fallbackBody);
+            } catch {
+              // An unreadable fallback body has no known charge; never reuse the original's.
+            }
             const receipt = buildReceipt(input, {
+              buyerCostMicro,
               httpStatus: 502,
               errorType: "empty_content",
               usage: null,
@@ -1198,14 +1219,16 @@ export async function runNonStreamingProviderLeg(
             const errorResult = legError(502, errMsg, new Error(errMsg));
             return {
               kind: "error",
-              upstreamHttpSelection,
+              upstreamHttpSelection: fallbackResult.upstreamHttpSelection ?? null,
               result: errorResult as ChatCoreErrorResult,
+              buyerCostMicro,
               receipt,
               usage: null,
             };
           }
         } catch {
           const receipt = buildReceipt(input, {
+            buyerCostMicro,
             httpStatus: 502,
             errorType: "empty_content",
             usage: null,
@@ -1221,12 +1244,14 @@ export async function runNonStreamingProviderLeg(
             kind: "error",
             upstreamHttpSelection,
             result: errorResult as ChatCoreErrorResult,
+            buyerCostMicro,
             receipt,
             usage: null,
           };
         }
       } else {
         const receipt = buildReceipt(input, {
+          buyerCostMicro,
           httpStatus: 502,
           errorType: "empty_content",
           usage: null,
@@ -1242,12 +1267,14 @@ export async function runNonStreamingProviderLeg(
           kind: "error",
           upstreamHttpSelection,
           result: errorResult as ChatCoreErrorResult,
+          buyerCostMicro,
           receipt,
           usage: null,
         };
       }
     } else {
       const receipt = buildReceipt(input, {
+        buyerCostMicro,
         httpStatus: 502,
         errorType: "empty_content",
         usage: null,
@@ -1263,6 +1290,7 @@ export async function runNonStreamingProviderLeg(
         kind: "error",
         upstreamHttpSelection,
         result: errorResult as ChatCoreErrorResult,
+        buyerCostMicro,
         receipt,
         usage: null,
       };

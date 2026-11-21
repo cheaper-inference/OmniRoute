@@ -2,6 +2,8 @@
  * Token Usage Tracking - Extract, normalize, estimate and log token usage
  */
 
+export { readBuyerCostMicro } from "./buyerCostMicro.ts";
+import { stripBuyerCostMicro } from "./buyerCostMicro.ts";
 import { appendRequestLog } from "@/lib/usageDb";
 import { cacheCreationFields, readCacheWriteUsage } from "./cacheWriteUsage.ts";
 import {
@@ -649,6 +651,15 @@ export function sanitizeProviderUsageForRequest(
  * Returns true only when the payload was changed and must be re-serialized.
  */
 export function sanitizeUsagePayloadForRequest(
+  payload: UsagePayloadLike | null | undefined,
+  body: unknown,
+  targetFormat: string | null = null
+): boolean {
+  const stripped = stripBuyerCostMicro(payload);
+  return sanitizeTokenUsagePayloadForRequest(payload, body, targetFormat) || stripped;
+}
+
+function sanitizeTokenUsagePayloadForRequest(
   payload: UsagePayloadLike | null | undefined,
   body: unknown,
   targetFormat: string | null = null
