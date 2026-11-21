@@ -91,15 +91,9 @@ function finalImageRetryFailure(
 /**
  * Image generation is non-idempotent, so account rotation stays deliberately
  * narrower than chat failover. Antigravity's explicit exhausted-quota signal
- * is safe to retry on another account; an ordinary 429 is not evidence that a
- * different account helps and must not cause account rotation.
+ * and Google Flow quota exhaustion are safe to retry on another account.
  */
-export function isAntigravityImageQuotaExhausted(
-  provider: string,
-  result: ImageGenerationResult
-): boolean {
-  if (provider !== "antigravity" || Number(result.status) !== 429) return false;
-
+export function isMediaQuotaExhausted(provider: string, result: ImageGenerationResult): boolean {
   let errorText = "";
   try {
     errorText =
@@ -108,7 +102,31 @@ export function isAntigravityImageQuotaExhausted(
     return false;
   }
 
-  return classify429(errorText) === "quota_exhausted";
+  if (Number(result.status) === 429) {
+    if (provider === "antigravity") {
+      return classify429(errorText) === "quota_exhausted";
+    }
+    if (
+      provider === "googleflow-web" ||
+      provider === "googleflow" ||
+      provider === "gflow" ||
+      provider === "flow"
+    ) {
+      return (
+        errorText.includes("quota exhausted") ||
+        errorText.includes("credits remaining") ||
+        errorText.includes("Бонусы")
+      );
+    }
+  }
+  return false;
+}
+
+export function isAntigravityImageQuotaExhausted(
+  provider: string,
+  result: ImageGenerationResult
+): boolean {
+  return isMediaQuotaExhausted(provider, result);
 }
 
 async function defaultSelectNextCredentials(
@@ -224,7 +242,7 @@ export async function executeImageWithCredentialFallback({
     const shouldTryAnotherAccount =
       Number(lastResult.status) === 401 ||
       lastResult.retryable === true ||
-      isAntigravityImageQuotaExhausted(provider, lastResult);
+      isMediaQuotaExhausted(provider, lastResult);
     if (lastResult.success || !shouldTryAnotherAccount || !connectionId) {
       return { credentials: lastCredentials, result: lastResult };
     }

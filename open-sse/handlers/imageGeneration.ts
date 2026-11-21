@@ -78,6 +78,7 @@ import { handleM365ImageGeneration } from "./imageGeneration/providers/m365Image
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
 import { handleRenderhourImageGeneration } from "./imageGeneration/providers/renderhour.ts";
+import { handleGoogleFlowWebImageGeneration } from "./imageGeneration/providers/googleflowWeb.ts";
 import {
   fanOutSingleImageCalls,
   IMAGE_FANOUT_MAX_N,
@@ -419,6 +420,9 @@ export async function handleImageGeneration({
   // established Fal request shape; a preparer selects the schema-driven native path.
   prepareFalInput = null,
   onCredentialsRefreshed = undefined,
+  // Session-cookie providers (googleflow-web) hand back a rotated cookie; the route persists it
+  // through the provider-connection DB module.
+  onSessionCookieRotated = undefined,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -826,6 +830,18 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "sdwebui") {
     return handleSDWebUIImageGeneration({ model, provider, providerConfig, body, log });
+  }
+
+  if (providerConfig.format === "googleflow-web" || provider === "googleflow-web") {
+    return handleGoogleFlowWebImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      onSessionCookieRotated,
+      log,
+    });
   }
 
   if (providerConfig.format === "comfyui") {
