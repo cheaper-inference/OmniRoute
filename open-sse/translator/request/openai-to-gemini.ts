@@ -228,6 +228,23 @@ type GeminiBaseOptions = {
   keepMixedGoogleSearchCallable?: boolean;
 };
 
+const BILLING_LINE_RE = /^x-anthropic-billing-header:[^\n]*(?:\r?\n)?/i;
+
+/**
+ * Drop Claude Code's `x-anthropic-billing-header:` line from a system message. It rotates every
+ * turn, so it breaks the prompt prefix cache, and it means nothing to Gemini. Strip each text part
+ * on its own: extractTextContent joins parts without a separator.
+ */
+function stripBillingLine(content: unknown): unknown {
+  if (typeof content === "string") return content.replace(BILLING_LINE_RE, "");
+  if (!Array.isArray(content)) return content;
+  return content.map((part) =>
+    part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string"
+      ? { ...part, text: (part as { text: string }).text.replace(BILLING_LINE_RE, "") }
+      : part
+  );
+}
+
 // Core: Convert OpenAI request to Gemini format (base for all variants)
 function openaiToGeminiBase(
   model: string,
@@ -261,13 +278,14 @@ function openaiToGeminiBase(
   }
 
   // Generation config
-  if (body.temperature !== undefined) {
+  const allowSampling = !/(?:^|\/)gemini-4(?:$|[-.])/i.test(model);
+  if (allowSampling && body.temperature !== undefined) {
     result.generationConfig.temperature = body.temperature;
   }
-  if (body.top_p !== undefined) {
+  if (allowSampling && body.top_p !== undefined) {
     result.generationConfig.topP = body.top_p;
   }
-  if (body.top_k !== undefined) {
+  if (allowSampling && body.top_k !== undefined) {
     result.generationConfig.topK = body.top_k;
   }
   // `stop: null` is how many OpenAI-compatible clients serialize "no stop"; wrapping it
@@ -475,7 +493,7 @@ function openaiToGeminiBase(
       const content = msg.content;
 
       if (role === "system" && messages.length > 1) {
-        const systemText = typeof content === "string" ? content : extractTextContent(content);
+        const systemText = extractTextContent(stripBillingLine(content));
         if (systemText) {
           if (!result.systemInstruction) {
             result.systemInstruction = {
@@ -665,11 +683,19 @@ function openaiToGeminiBase(
               }
               name = sanitizeToolName(name);
 
-              toolParts.push({
+              const converted = Array.isArray(resp) ? convertOpenAIContentToParts(resp) : [];
+              const media = converted.filter((part) => part.inlineData || part.fileData);
+              const resultData = media.length
+                ? converted
+                    .filter((part) => typeof part.text === "string")
+                    .map((part) => part.text)
+                    .join("\n")
+                : resp;
+              toolParts.push(...media, {
                 functionResponse: {
                   ...(toolNameOptions.stripFunctionCallId ? {} : { id: fid }),
                   name: name,
-                  response: { result: sanitizeFunctionResponseData(resp) },
+                  response: { result: sanitizeFunctionResponseData(resultData) },
                 },
               });
             }
@@ -941,8 +967,12 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   if (clientParts.length > 0) {
     // Prepend client system parts to the first user message so they still guide
     // the model's behavior early in the conversation.
-    if (envelope.request.contents && envelope.request.contents.length > 0) {
-      envelope.request.contents[0].parts.unshift(...clientParts);
+    const first = envelope.request.contents?.[0];
+    if (first && first.role === "user") {
+      first.parts.unshift(...clientParts);
+    } else if (first) {
+      // History opens with a model turn: a system text there would read as a model utterance.
+      envelope.request.contents.unshift({ role: "user", parts: [...clientParts] });
     } else {
       envelope.request.contents = [{ role: "user", parts: [...clientParts] }];
     }
