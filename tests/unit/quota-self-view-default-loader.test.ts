@@ -37,6 +37,7 @@ const connectionId = (connection as { id?: string }).id ?? "";
 
 setProviderLimitsCache(connectionId, {
   quotas: { "session (5h)": { usedPercentage: 37, remainingPercentage: 63, resetAt } },
+  modelQuotas: { "weekly Opus (7d)": { usedPercentage: 21, remainingPercentage: 79, resetAt } },
   plan: null,
   message: null,
   fetchedAt: new Date(nowMs).toISOString(),
@@ -64,6 +65,10 @@ test("the default account lookup serves a fresh cached reading without a refresh
   assert.equal(view.pools.length, 2);
   for (const pool of view.pools) {
     assert.deepEqual(pool.accounts[0].dimensions[0].account, { used: 37, status: "ok", resetAt });
+    assert.deepEqual(pool.accounts[0].modelWindows, {
+      status: "ok",
+      windows: [{ label: "weekly Opus (7d)", usedPercent: 21, resetAt }],
+    });
   }
   assert.equal(defaultQuotaRefreshTracker.lastAttempt.has(connectionId), false);
   assert.equal(defaultQuotaRefreshTracker.inFlight.size, 0);

@@ -117,7 +117,8 @@ const DEFAULT_DEPS_LOADERS: Array<{
   },
   {
     // Same sources and process-wide refresh tracker as /v1/me/status, so the 60 s refresh
-    // floor per connection holds across both routes.
+    // floor per connection holds across both routes. Only this view asks for the model-scoped
+    // windows, which feed `modelWindows`.
     keys: ["resolveAccountQuotaEntries"],
     load: async () => {
       const [providers, limitsCache, limits] = await Promise.all([
@@ -127,14 +128,18 @@ const DEFAULT_DEPS_LOADERS: Array<{
       ]);
       return {
         resolveAccountQuotaEntries: (metadata) =>
-          resolveAccountQuotaEntries(metadata, {
-            now: Date.now,
-            getProviderConnectionById: providers.getProviderConnectionById,
-            getProviderConnections: providers.getProviderConnections,
-            getProviderLimitsCache: limitsCache.getProviderLimitsCache,
-            fetchAndPersistProviderLimits: limits.fetchAndPersistProviderLimits,
-            quotaRefreshTracker: defaultQuotaRefreshTracker,
-          }),
+          resolveAccountQuotaEntries(
+            metadata,
+            {
+              now: Date.now,
+              getProviderConnectionById: providers.getProviderConnectionById,
+              getProviderConnections: providers.getProviderConnections,
+              getProviderLimitsCache: limitsCache.getProviderLimitsCache,
+              fetchAndPersistProviderLimits: limits.fetchAndPersistProviderLimits,
+              quotaRefreshTracker: defaultQuotaRefreshTracker,
+            },
+            { includeModelQuotas: true }
+          ),
       };
     },
   },
