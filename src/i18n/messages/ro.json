@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Păstrați mesajele sistemului de la mijlocul conversației în loc",
     "requireUserLastMessageDescription": "Pentru amontele care resping completarea prealabilă a asistentului: renunțați la viraje ale asistentului (fără tool_use) înainte de a trimite. Modelul își poate regenera răspunsul anterior.",
     "requireUserLastMessageLabel": "Solicitați ca conversația să se încheie cu un mesaj de utilizator",
+    "strictChatHistoryDescription": "Repară secvențele întrerupte de apeluri la instrumente și îmbină mesajele consecutive ale asistentului înainte de a le trimite către furnizori compatibili cu OpenAI care aplică reguli stricte.",
+    "strictChatHistoryLabel": "Repararea istoricului conversației pentru furnizori stricți",
     "bulkPasteAdded": "{count, plural, one {1 cheie adăugată} other {# chei adăugate}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicat omis} other {# duplicate omise}}",
     "bulkPasteHint": "Lipește câte o cheie API pe fiecare rând. Rândurile goale sunt ignorate, iar cheile duplicate sunt omise.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Elimină cheia"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pluginurile rulează cu privilegii complete",
-    "privilegesWarningBody": "Un plugin rulează ca un proces Node.js obișnuit, cu același acces ca și OmniRoute: poate citi fișiere, rula programe și poate folosi rețeaua, indiferent de permisiunile pe care manifestul său le declară. Instalați numai pluginuri în care aveți încredere.",
     "title": "Pluginuri",
     "description": "Instalați și gestionați pluginuri pentru a extinde funcționalitatea OmniRoute",
     "loading": "Se încarcă pluginurile...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Căutați pluginuri",
     "noPlugins": "Nu există pluginuri instalate",
     "noPluginsDescription": "Plasați directoarele pluginurilor în ~/.omniroute/plugins/ și faceți clic pe „Scanare”.",
+    "privilegesWarningTitle": "Pluginurile rulează cu privilegii complete",
+    "privilegesWarningBody": "Un plugin rulează ca un proces Node.js obișnuit, cu același acces ca și OmniRoute: poate citi fișiere, rula programe și poate folosi rețeaua, indiferent de permisiunile pe care manifestul său le declară. Instalați numai pluginuri în care aveți încredere.",
     "activate": "Activați",
     "deactivate": "Dezactivați",
     "uninstall": "Dezinstalați",

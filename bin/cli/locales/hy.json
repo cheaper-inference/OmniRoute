@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Սահմանը պետք է լինի դրական ամբողջ թիվ։",
     "error": "Սխալ՝ {message}",
     "serverOffline": "OmniRoute սերվերն անցանց է։ Գործարկեք այն հետևյալ հրամանով՝ omniroute serve",
     "authRequired": "Պահանջվում է նույնականացում։ Սահմանեք OMNIROUTE_API_KEY-ը կամ գործարկեք՝ omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] կկատարվեր՝ {action}",
     "cancelled": "Չեղարկված է։",
     "jsonOpt": "Արտածել JSON ձևաչափով",
-    "yesOpt": "Բաց թողնել հաստատման հարցումը"
+    "yesOpt": "Բաց թողնել հաստատման հարցումը",
+    "positiveIntegerRequired": "Սահմանը պետք է լինի դրական ամբողջ թիվ։"
   },
   "setup": {
     "title": "OmniRoute-ի կարգավորում",

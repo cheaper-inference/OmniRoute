@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Ограничението трябва да е положително цяло число.",
     "error": "Грешка: {message}",
     "serverOffline": "Сървърът OmniRoute е офлайн. Стартирайте с: omniroute serve",
     "authRequired": "Необходима е автентикация. Задайте OMNIROUTE_API_KEY или изпълнете: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[симулация] ще извърши: {action}",
     "cancelled": "Отменено.",
     "jsonOpt": "Изход като JSON",
-    "yesOpt": "Пропускане на потвърждение"
+    "yesOpt": "Пропускане на потвърждение",
+    "positiveIntegerRequired": "Ограничението трябва да е положително цяло число."
   },
   "setup": {
     "title": "Настройка на OmniRoute",

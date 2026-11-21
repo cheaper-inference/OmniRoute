@@ -16,6 +16,7 @@ import {
   summarizeSettledGrowth,
   withRawSnapshotCleanup,
 } from "../../scripts/perf/messages-route-memory-profile.ts";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const SCRIPT = new URL("../../scripts/perf/messages-route-memory-profile.ts", import.meta.url);
 
@@ -62,6 +63,8 @@ test("JON-562 worker environment is an allowlist and drops credential-shaped var
     LINEAR_API_KEY: "must-not-cross",
     OPENAI_API_KEY: "must-not-cross",
     OMNIROUTE_MANAGEMENT_TOKEN: "must-not-cross",
+    NODE_OPTIONS: "--no-warnings",
+    OMNIROUTE_CI_SYNC_TSX_CACHE: "/tmp/operator-tsx-cache",
   });
 
   assert.deepEqual(env, {
@@ -280,6 +283,7 @@ test(
       child = spawn(
         process.execPath,
         [
+          ...nativeCoverageArgs(),
           "--import",
           "tsx/esm",
           // fileURLToPath, not SCRIPT.pathname: URL pathname is not a spawnable entry path on
@@ -346,6 +350,7 @@ test(
       const result = spawnSync(
         process.execPath,
         [
+          ...nativeCoverageArgs(),
           "--expose-gc",
           "--import",
           "tsx/esm",

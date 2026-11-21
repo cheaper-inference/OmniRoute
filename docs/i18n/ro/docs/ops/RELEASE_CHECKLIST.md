@@ -355,111 +355,70 @@ Anunțul Radar este comis în mod intenționat cu `active: false`. Activarea est
 
 ---
 
-## Separarea 3.9.0 LTS (repetată în 3.8.58)
+## 3.9.0 LTS cut (repetată în 3.8.58)
 
-După v3.8.59, următoarea versiune este 3.9.0, iar vârful acesteia devine baza pentru două ramuri cu durată lungă de viață:
-`stable/v3` (linia v3 LTS, npm `latest`) și `develop` (v4, incrementată la 4.0.0, npm
-`nightly`). Modelul de ramuri/canale, portarea înainte și etichetele sunt descrise în
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); planul se află în [ROADMAP](../../ROADMAP.md) (Faza 3). Separarea se execută o singură dată;
-3.8.58 o repetă integral pe un fork, iar 3.8.59 se încheie cu
-[lista de verificare GO/NO-GO](./LTS_GO_NO_GO.md).
+După v3.8.59, următoarea versiune este 3.9.0, iar vârful său devine două ramuri cu viață lungă: `stable/v3` (linia v3 LTS, npm `latest`) și `develop` (v4, crescută la 4.0.0, npm `nightly`). Modelul branch/channel, forward-portul și etichetele sunt în [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; planul este în [ROADMAP](../../ROADMAP.md) (Faza 3). Tăierea rulează o dată; 3.8.58 îl repetă cap la cap pe o furcă, iar 3.8.59 se închide cu [lista de verificare GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Simulare (doar în citire, sigură oricând)
+### Funcționare uscată (numai citire, în siguranță în orice moment)
 
 ```bash
-npm run release:dry-run-lts-cut                       # separarea reală: 3.9.0 din HEAD, eticheta anterioară v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fixează commitul sursă
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` nu execută nimic: citește git și `gh` și afișează
-întreaga secvență — precondițiile (sursa poate fi rezolvată, depozitul sursă are istoricul complet —
-o clonă superficială nu poate trimite `stable/v3`, partea care primește respinge pachetul la primul
-părinte grefat, așadar efectuați separarea dintr-o clonă completă sau rulați mai întâi `git fetch --unshallow origin` —
-eticheta anterioară există, `package.json` conține versiunea țintă, este deschis un tichet
-`release-freeze`, nu există niciun tichet deschis `Release branch not green`
-pe o ramură de lansare existentă — o ramură care nu există raportează `?` necunoscut, niciodată
-verde — coada Mergify `release` este configurată (G11: `queue_rules`, `checks_timeout`,
-eticheta `queue`), setul de reguli `release/*` încă blochează ștergerea și trimiterea forțată, iar
-`stable/v3` și `develop` nu există încă), cei doi pași pentru ramuri, ce declanșatoare ale fluxurilor de lucru
-inactive și ce condiții `if:` devin adevărate (și care rămân blocate de o variabilă a depozitului sau
-fixate la depozitul canonic), etichetele dist așteptate (`latest` → 3.9.0, `next` și
-`nightly` goale) și revenirea. Codul de ieșire `0` = `RESULT: READY`, `1` = o precondiție
-blocantă a eșuat (`✗`), `2` = eroare de utilizare. `--advisory <id,...>` retrogradează o verificare la avertisment (`!`)
-fără a o ascunde.
+`scripts/release/dry-run-lts-cut.mjs` nu execută nimic: citește git și `gh` și tipărește întreaga secvență — precondiții (sursa se rezolvă, depozitul sursă are istoric complet — o clonă superficială nu poate împinge `stable/v3`, partea care primește respinge pachetul la primul părinte altoit, deci tăiat dintr-o clonă completă sau versiunea anterioară `git fetch --unshallow origin` este prima —, eticheta anterioară `package.json` există Problema `release-freeze` este deschisă, nicio problemă `Release branch not green` deschisă pe o ramură de lansare existentă — o ramură care nu există raportează `?` necunoscut, niciodată verde — omni-queue aterizează lansarea PRs (G11: `config/merge-queue/config.json` valid, `bases` său gestionează ramura de lansare, `mode` `live`, eticheta ei există încă și regulile de blocare- `release/*` ) `stable/v3` și `develop` nu există încă), cei doi pași de ramificație, care declanșează fluxul de lucru inactiv și condițiile `if:` devin adevărate (și care rămân blocate de o variabilă de depozit sau fixate în depozitul canonic), dist-tag-urile așteptate (`latest` → 3.9.0, `next` și `nightly` empty) și rollback-ul. Ieșire `0` = `RESULT: READY`, `1` = o condiție preliminară de blocare eșuată (`✗`), eroare de utilizare `2` =. `--advisory <id,...>` downgrade o verificare la un avertisment (`!`) fără a o ascunde.
 
-Rulați simularea separării reale cât timp blocarea lansării 3.9.0 este încă activă — ramurile sunt
-create după etichetă și înainte ca Faza 12c să ridice blocarea.
+Rulați secvența tăieturii reale în timp ce înghețarea versiunii 3.9.0 este încă deschisă — ramurile sunt create după etichetă și înainte ca Faza 12c să ridice înghețarea.
 
-### Repetiția 3.8.58 (doar pe fork)
+### 3.8.58 repetiție (doar furcă)
 
 ```bash
-# 1. Simulare pe vârful curent, cu parametrii repetiției
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Executați pe o destinație remote de tip FORK (origin sau orice destinație remote al cărei URL este cel al
-#    depozitului canonic este refuzată; fiecare pas solicită confirmare în terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Exercitați fluxurile de lucru inactive în fork (workflow_dispatch acolo unde simularea
-#    raportează o fixare la depozitul canonic), apoi reveniți
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commitul de incrementare pentru develop este construit prin mecanismele interne git (fără a modifica arborele de lucru) și incrementează
-aceleași cinci fișiere ca un commit de deschidere a ciclului: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` și `docs/openapi.yaml`. Secțiunea `[4.0.0]`
-din CHANGELOG și copiile sale i18n sunt deschise ulterior pe `develop`, înainte de primul său
-PR. Scriptul nu modifică niciodată etichetele dist npm — repetați aceste operațiuni pe un pachet de test.
+Comitarea bump de dezvoltare este construită cu git plumbing (nu este atins niciun arbore de lucru) și creează aceleași cinci fișiere ca și un commit de ciclu deschis: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` și `docs/openapi.yaml`. Secțiunea `[4.0.0]` CHANGELOG și oglinzile sale i18n sunt deschise pe `develop` după aceea, înainte de primul său PR. Scriptul nu se schimbă niciodată npm dist-tags — le repetă pe un pachet scratch.
 
-### Artefact de previzualizare pentru PR (construiți o singură dată, promovați aceiași octeți)
+### Artefact de previzualizare PR (construiți o dată, promovați aceiași octeți)
 
-`.github/workflows/preview-artifact.yml` construiește o arhivă tar de producție din capul unui PR și
-validează exact acea construcție (segmentul (a) din #8084). Sunt acceptate doar PR-uri din același depozit; nu se publică nimic.
+`.github/workflows/preview-artifact.yml` construiește un tarball de producție dintr-un cap PR și validează exact acea construcție (#8084 slice (a)). Numai PRs din același depozit; nimic nu este publicat.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # sau adăugați eticheta `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # instalare de previzualizare
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Rularea execută `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, împachetează
-arhiva tar, execută `npm run check:pack-boot` (secrete fictive, director de date efemer), reîmpachetează și
-eșuează dacă rezumatul nu este identic, apoi înregistrează `artifact-identity.json` (SHA-ul capului, SHA-ul bazei,
-hashul fișierului de blocare, platforma, arhitectura, ABI-ul node, instrumentul de împachetare, politica de construire —
-`scripts/release/artifact-identity.mjs`) și atestă arhiva tar într-un job separat. Promovarea
-unei previzualizări înseamnă instalarea acelei arhive tar: nu reconstruiți niciodată din sursă.
+Executarea face `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, împachetează tarball-ul, rulează `npm run check:pack-boot` (secrete false, director de date efemere), reambalează și eșuează `scripts/release/artifact-identity.mjs` cu excepția cazului în care digest-ul este identic, apoi înregistrează `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, build policy, node ABI— ) și atestă tarball-ul într-o lucrare separată. Promovarea unei previzualizări înseamnă instalarea tarball-ului: niciodată nu reconstruiți din sursă.
 
-### Separarea (3.9.0, după GO)
+### Tăierea (3.9.0, după GO)
 
-1. GO este consemnat în [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` afișează `RESULT: READY`.
-3. Creați manual ramurile pe `origin`, folosind comenzile afișate de simulare — scriptul
-   refuză să trimită către `origin`. Pentru a reutiliza un commit develop revizuit, executați mai întâi
-   repetiția cu `--execute` pe vârful 3.9.0, folosind forkul dumneavoastră; aceasta afișează ambele SHA-uri, iar
-   aceleași commituri pot fi trimise:
+1. GO înregistrată în [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` imprimă `RESULT: READY`.
+3. Creați ramurile pe `origin` manual cu comenzile the dry-run prints — scriptul refuză să împingă la `origin`. Pentru a reutiliza un commit de dezvoltare revizuit, rulați mai întâi repetiția `--execute` pe vârful 3.9.0 pe furca; imprimă ambele SHAs și aceleași comiteri pot fi împinse:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Protejați `stable/v3` și `develop` (seturi de reguli + coadă de îmbinare) înainte de integrarea primului PR.
-5. Fluxurile de lucru inactive se activează în funcție de existența ramurii: `forward-port.yml` (push către
-   `stable/v3`), `validate-stable-pr.yml` (PR-uri către `stable/v3`) și `nightly-v4-build.yml`
-   (construiește `develop`). Înainte de lansare, setați secretul depozitului `secrets.FORWARD_PORT_TOKEN` (astfel încât CI să ruleze pentru
-   PR-urile de propagare); publicarea nocturnă rămâne dezactivată până când proprietarul setează variabila
-   depozitului `vars.NIGHTLY_PUBLISH` la `true`, iar npm Trusted Publishing acceptă
-   `nightly-v4-build.yml`. Rezolvarea canalului este realizată de `scripts/release/dist-tag.mjs`, același
-   resolver utilizat de `npm-publish.yml`.
-6. Verificați canalele: `npm view omniroute dist-tags --json` afișează `latest` = 3.9.0 și niciun
-   `next` / `nightly` până la publicarea v4.
-7. Revenire, dacă este necesar: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   și `npm dist-tag add omniroute@3.8.59 latest`.
+4. Protejați `stable/v3` și `develop` (seturile de reguli + merge queue) înainte ca primul PR să aterizeze.
+5. Fluxurile de lucru latente se activează în funcție de existența ramurilor: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) și `nightly-v4-build.yml` (builds `develop`). Înainte de lansare, setați secretul depozitului `secrets.FORWARD_PORT_TOKEN` (deci CI rulează pe forward-port PRs); publicarea nocturnă rămâne dezactivată până când proprietarul setează variabila de depozit `vars.NIGHTLY_PUBLISH` la `true` și npm Trusted Publishing acceptă `nightly-v4-build.yml`. Rezoluția canalului este `scripts/release/dist-tag.mjs`, același rezolutor pe care îl folosește `npm-publish.yml`.
+6. Verificați canalele: `npm view omniroute dist-tags --json` arată `latest` = 3.9.0 și nu `next` / `nightly` până la publicarea v4.
+7. Rollback, dacă este necesar: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` și `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

@@ -148,36 +148,22 @@ komanda.
   minutes, o jo įkėlimas iš disko — 2 minutes.
 - `.15` VPS skirtas tik homologacijai — jame niekada nevykdomi CI vykdytojai.
 
-## Priglobtų vykdyklių kanalas („GitHub“ priglobti vykdykliai)
+## Priglobta juosta („GitHub“ priglobti bėgikai)
 
-Saugykla priklauso organizacijai `cheaper-inference`, kuri naudoja **Team** planą: **60
-vienu metu vykdomų priglobtų užduočių**, kuriomis dalijasi visos organizacijos saugyklos, visos PR patikros,
-visos `push` įvykio paleidžiamos darbo eigos ir numatytoji „CodeQL“ konfigūracija. Toliau pateikti skaičiai išmatuoti naudojant
-**Pro** planą (40 vienu metu vykdomų priglobtų užduočių). Išmatuota 2026-10-18 per
-sujungimų kampaniją (~10 sujungimų per valandą šakoje `release/v3.8.52`): per
-24 val. **sukurta 2 500 darbo eigų vykdymų**, per 6 val. į šaką atlikti 44 `push`, **106 priglobtos užduotys laukė eilėje**, o PR patikros
-laukė valandų valandas ir PR buvo sujungiami be jų. Kiekvienas `push` į šaką paleisdavo devynias darbo eigas:
+Saugykla priklauso `cheaper-inference` organizacijai** Komanda** planas:** 60 vienu metu priglobtų darbų** , kuria naudojasi kiekviena organizacijos saugykla, kiekvienas PR patikrinimas, kiekviena iš karto suaktyvinta darbo eiga ir numatytoji CodeQL sąranka. Žemiau pateikti skaičiai buvo išmatuoti** Pro** planą (40 vienu metu teikiamų prieglobos darbų). Išmatuota 2026-10-18 per sujungimo kampaniją (~ 10 merges/hour on `release/v3.8.52`):** Per 24 valandas sukurta 2500 darbo eigos** , 44 pastūmimai prie šakos per 6 val.** Eilėje stovėjo 106 priglobti darbai** PR čekiai laukė valandų valandas, o PRs buvo sujungti be jų. Devynios darbo eigos suaktyvinamos kiekvieną kartą paspaudus šaką:
 
-| per vieną `push` į `release/v*`               | priglobtos užduotys | rezultatas apkrovos metu                                                       | nuo 2026-10-18                                                                           |
-| --------------------------------------------- | ------------------: | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| `ci.yml` (visa matrica)                       |              iki 30 | atšaukė kitas `push`, 24 iš 24 per dieną                                       | nepaleidžiama atliekant `push` į `release/**` (PR vykdymas + Release-Green)              |
-| `quality.yml`                                 |                  ~6 | atšaukta, 23 iš 23                                                             | nepaleidžiama atliekant `push` į `release/**`                                            |
-| `Release-Green` `--quick`                     |                   0 | vykdyta aplinkoje `omni-build`, atšaukta 97 iš 100                             | `omni-release` vieta, niekada neatšaukiama, laukiantis vykdymas sujungiamas              |
-| `Lock released branch`, `OpenSSF Scorecard`   |                   2 | po vieną eilėje laukiantį vykdymą kiekvienam `push`                            | vienas vykdymas kiekvienai nuorodai (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
-| `Release acceptance` (šešėlinė ataskaita)     |                   1 | po vieną priglobtą `npm ci` kiekvienam `push`, niekada neatšaukiama            | nepakeista — tinka pritaikyti `paths:` filtrą                                            |
-| `Publish to Docker Hub` → `Deploy to VPS`     |                   2 | atšaukiama po kiekvieno `push`; amd64 etapas konkuruoja aplinkoje `omni-build` | nepakeista — savininko diegimo kanalas                                                   |
-| Numatytoji „CodeQL“ konfigūracija (`dynamic`) |                   4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kiekvienam `push`        | nepakeista — Settings → Code security; `c-cpp`/`python` čia nieko nenuskaito             |
+| per stūmimą į `release/v*`                  | priimamų darbų | rezultatas po audros                                                | nuo 2026-10-18                                                                 |
+| ------------------------------------------- | -------------: | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `ci.yml` (visa matrica)                     |         iki 30 | atšaukta kitą kartą, 24 iš 24 per dieną                             | nepaleistas naudojant `release/**` stūmimus (PR run + Release-Green)           |
+| `quality.yml`                               |             ~6 | atšauktas, 23 iš 23                                                 | nepradėjo `release/**` stūmimų                                                 |
+| `Release-Green` `--quick`                   |              0 | važiavo `omni-build`, atšaukė 97 iš 100                             | `omni-release` lizdas, niekada neatšauktas, laukiantis paleidimas žlunga       |
+| `Lock released branch`, `OpenSSF Scorecard` |              2 | vienas bėgimas eilėje per stūmimą                                   | vienas bėgimas už nuorodą (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (šešėlinė ataskaita)   |              1 | vienas priglobtas `npm ci` per paspaudimą, niekada nebuvo atšauktas | nepakitęs — kandidatas į `paths:` filtrą                                       |
+| `Publish to Docker Hub` → `Deploy to VPS`   |              2 | atšauktas per stūmimą; amd64 koja varžosi su `omni-build`           | nepakitęs — savininko diegimo kanalas                                          |
+| CodeQL numatytoji sąranka (`dynamic`)       |              4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per stūmimą   | nepakeistas — Nustatymai → Kodo apsauga; `c-cpp`/`python` čia nieko nenuskaito |
 
-`tests/unit/build/push-storm-diet.test.ts` užfiksuoja, kad `ci.yml` ir
-`quality.yml` `push` paleidiklis veiktų tik šakoje `main`. Šalutinis poveikis: „Codecov“ nebegauna bazinio įkėlimo po kiekvieno `push` į leidimo šaką (šis
-žingsnis yra informacinis ir naudoja `continue-on-error`); saugykloje esantis aprėpties slenkstis ir PR komentaras
-lieka nepaveikti.
+`tests/unit/build/push-storm-diet.test.ts` prisega `main` -only stūmimo gaiduką `ci.yml` ir `quality.yml`. Šalutinis poveikis: „Codecov“ nebegauna bazinio įkėlimo per vieną leidimą (veiksmas yra informacinis ir `continue-on-error`); atpirkimo aprėpties vartai ir PR komentaras neturi įtakos.
 
-**Didesni savarankiškai priglobti pajėgumai neišsprendžia priglobtų užduočių eilės problemos.** Kūrimo kompiuteryje
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) būtų galima priglobti vykdyklį, tačiau agentų seansai jau
-palaiko 20–26 apkrovą, agento konteineryje nėra „Docker“ tarnybos, o perpildytas būtent
-priglobtų vykdyklių kanalas. Tuo pačiu metu `.113` kompiuteryje buvo 71 GB laisvos vietos ir 5–8 apkrova; jį riboja
-pirmiau nurodytas vienam klausytojui tenkančios atminties biudžetas (ne daugiau kaip 6 klausytojai), o ne CPU. Likusios priemonės
-yra procesinės: kampanijos PR sujungti per „Mergify“ eilę (`label=queue`; paketai bendrai naudoja
-vieną `merge_group` CI vykdymą, užuot vykdžius po vieną kiekvienam PR ir dar po vieną kiekvienam `push`), sumažinti numatytosios „CodeQL“
-konfigūracijos kalbų skaičių ir filtruoti `release-acceptance.yml` pagal failus, kuriuos ji skaito.
+**Didesnis savarankiško prieglobos pajėgumas nepataiso prieglobos eilės.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) gali talpinti bėgiką, tačiau agento seansai jau palaiko 20–26 apkrovą, agento konteineris neturi Docker demono, o prisotinta juosta yra priglobta. `.113` dėžėje tuo pačiu momentu buvo 71 GB laisva ir 5–8 apkrova; jo apribojimas yra aukščiau nurodytas vienam klausytojui skirtas atminties biudžetas (6 klausytojų lubos), o ne CPU. Likę svertai yra proceso svertai: nukreipkite kampaniją PRs per sujungimo eilę (`label=queue`, paketai dalijasi vienu `merge_group` CI paleidimu, o ne po vieną paleidimą per PR plius vienas per paspaudimą), apkarpykite CodeQL numatytosios sąrankos kalbas ir filtruokite `release-acceptance.yml` pagal skaitomus failus.
+
+> **2026-11-19: sujungimo eilė panaikinta** (savininko sprendimas). `.mergify.yml` nebeapibrėžia eilės ir atmeta sujungimo komandas, kurios sujungia arba perrašo ištraukimo užklausą. Leidimas PRs yra sujungiamas rankomis pagal saugyklos taisyklių rinkinį „Reikalauti žaliųjų vartų aktyviam leidimui“ (`Gate / CI` + `Gate / Quality`), kol visa eilė paleidžiama tiesioginiu režimu, o po to per visą eilę ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Aukščiau esančios sujungimo svirties nebėra.

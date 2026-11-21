@@ -355,114 +355,70 @@ Pred izdajo katere koli različice v3.8.x preverite še naslednje:
 
 ---
 
-## Izdaja 3.9.0 LTS (preizkušena v 3.8.58)
+## 3.9.0 LTS cut (preizkušeno v 3.8.58)
 
-Po v3.8.59 je naslednja različica 3.9.0, njen vrh pa postane izhodišče za dve dolgoročni veji:
-`stable/v3` (linija v3 LTS, npm `latest`) in `develop` (v4, zvišana na 4.0.0, npm
-`nightly`). Model vej/kanalov, prenos sprememb naprej in oznake so opisani v
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); načrt je v dokumentu [ROADMAP](../../ROADMAP.md) (3. faza). Izdaja se izvede enkrat;
-3.8.58 jo v celoti preizkusi na razcepu, 3.8.59 pa se zaključi s
-[seznamom preverjanj GO/NO-GO](./LTS_GO_NO_GO.md).
+Po v3.8.59 je naslednja različica 3.9.0, njen vrh pa postaneta dve dolgoživi veji: `stable/v3` (linija v3 LTS, npm `latest`) in `develop` (v4, povečana na 4.0.0, npm `nightly`). Model branch/channel, vrata za posredovanje in oznake so v [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; načrt je v [ROADMAP](../../ROADMAP.md) (faza 3). Rez teče enkrat; 3.8.58 vadi od konca do konca na vilicah, 3.8.59 pa se zapre s [kontrolnim seznamom GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Poskusni zagon (samo za branje, vedno varen)
+### Delovanje na suho (samo za branje, varno kadar koli)
 
 ```bash
-npm run release:dry-run-lts-cut                       # dejanska izdaja: 3.9.0 iz HEAD, prejšnja oznaka v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pripni izvorno potrditev
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ne izvede ničesar: bere podatke iz git in `gh` ter izpiše
-celotno zaporedje — predpogoje (izvor je mogoče razrešiti, izvorni repozitorij ima celotno zgodovino —
-plitvi klon ne more potisniti veje `stable/v3`, saj prejemna stran zavrne paket pri prvem
-cepljenem nadrejenem elementu, zato izdajo izvedite iz polnega klona ali najprej zaženite
-`git fetch --unshallow origin` — prejšnja oznaka obstaja, `package.json` vsebuje ciljno različico,
-odprta je težava `release-freeze`, na obstoječi izdajni veji ni odprte težave
-`Release branch not green` — veja, ki ne obstaja, je prikazana kot neznana `?`, nikoli
-kot zelena — čakalna vrsta Mergify `release` je konfigurirana (G11: `queue_rules`, `checks_timeout`,
-oznaka `queue`), nabor pravil `release/*` še vedno preprečuje brisanje in vsiljeno potiskanje ter
-veji `stable/v3` in `develop` še ne obstajata), koraka za obe veji, kateri sprožilci nedejavnih
-delovnih tokov in pogoji `if:` postanejo izpolnjeni (ter kateri ostanejo omejeni s spremenljivko
-repozitorija ali pripeti na kanonični repozitorij), pričakovane oznake distribucije (`latest` → 3.9.0,
-`next` in `nightly` sta prazni) ter povrnitev. Izhodna koda `0` = `RESULT: READY`, `1` = blokirajoči
-predpogoj ni izpolnjen (`✗`), `2` = napaka pri uporabi. `--advisory <id,...>` spremeni preverjanje
-v opozorilo (`!`), ne da bi ga skril.
+`scripts/release/dry-run-lts-cut.mjs` ne izvede ničesar: prebere git in `gh` ter natisne celotno zaporedje predpogojev — (vir razreši, izvorno skladišče ima polno zgodovino — plitek klon ne more potisniti `stable/v3`, sprejemna stran zavrne paket pri prvem cepljenem staršu, zato izreži iz polnega klona ali `git fetch --unshallow origin` prvi — prejšnja oznaka obstaja, `package.json` je ciljna različica, težava `release-freeze` je odprta, ni odprte `Release branch not green` težava na obstoječi izdajni veji — veja, ki ne obstaja, poroča `?` neznano, nikoli zeleno — omni-queue pristane na izdaji PRs (G11: `config/merge-queue/config.json` veljaven, njegov `bases` upravlja izdajno vejo, `mode` `live`, njena oznaka obstaja), nabor pravil `release/*` še vedno blokira brisanje in prisilno potiskanje, `stable/v3` in `develop` pa še ne obstajata), dva koraka veje, ki sprožilci mirovanja poteka dela in pogoji `if:` postanejo resnični (in ostanejo omejeni s spremenljivko repozitorija ali so pripeti na kanonični repozitorij), pričakovane oznake dist (`latest` → 3.9.0, `next` in `nightly` prazno) in povrnitev nazaj. Izhod `0` = `RESULT: READY`, `1` = predpogoj blokiranja ni uspel (`✗`), napaka pri uporabi `2` =. `--advisory <id,...>` zniža preverjanje na opozorilo (`!`), ne da bi ga skril.
 
-Poskusni zagon dejanske izdaje izvedite, ko je zamrznitev izdaje 3.9.0 še vedno aktivna — veje se
-ustvarijo po oznaki in preden faza 12c odpravi zamrznitev.
+Zaženite suhi zagon pravega reza, medtem ko je zamrznitev izdaje 3.9.0 še odprta — so veje ustvarjene po oznaki in preden faza 12c odpravi zamrznitev.
 
-### Preizkus z različico 3.8.58 (samo na razcepu)
+### 3.8.58 vaja (samo vilice)
 
 ```bash
-# 1. Poskusni zagon na trenutnem vrhu s parametri preizkusa
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Izvedba na oddaljenem RAZCEPU (origin oziroma vsak oddaljeni repozitorij, katerega URL
-#    je kanonični repozitorij, je zavrnjen; vsak korak zahteva potrditev v terminalu)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Preizkus nedejavnih delovnih tokov v razcepu (workflow_dispatch tam, kjer poskusni zagon
-#    sporoči pripetje na kanonični repozitorij), nato povrnitev
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Potrditev zvišanja različice na veji develop je ustvarjena z nizkonivojskimi orodji git (delovno drevo
-ostane nedotaknjeno) in zviša različico v istih petih datotekah kot potrditev začetka cikla:
-`package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` in
-`docs/openapi.yaml`. Razdelek `[4.0.0]` v dnevniku CHANGELOG in njegove zrcalne različice i18n
-se nato odprejo na veji `develop`, še pred njeno prvo zahtevo PR. Skript nikoli ne spremeni
-oznak distribucije npm — preizkusite jih na začasnem paketu.
+Razvijanje bump commit je zgrajeno z git plumbing (nobenega delujočega drevesa se ne dotakne) in naleti na istih pet datotek kot ciklično odprto commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` in `docs/openapi.yaml`. Razdelek `[4.0.0]` CHANGELOG in njegova ogledala i18n se odprejo na `develop` zatem, pred njegovim prvim PR. Skript nikoli ne spremeni npm dist-tags — rehearse tistih na scratch paketu.
 
-### Artefakt predogleda PR (zgradite enkrat, promovirajte iste bajte)
+### artefakt predogleda PR (sestavi enkrat, promovira iste bajte)
 
-`.github/workflows/preview-artifact.yml` iz vrha zahteve PR zgradi en produkcijski arhiv tar in
-preveri točno to gradnjo (del (a) težave #8084). Podprte so samo zahteve PR iz istega
-repozitorija; nič se ne objavi.
+`.github/workflows/preview-artifact.yml` zgradi en produkcijski arhiv iz glave PR in potrdi to natančno zgradbo (rezina #8084 (a)). Samo PRs v istem skladišču; nič ni objavljeno.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ali dodajte oznako `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # namestitev predogleda
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Zagon izvede `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, zapakira arhiv tar,
-zažene `npm run check:pack-boot` (lažne skrivnosti, kratkotrajen imenik s podatki), ga znova
-zapakira in ne uspe, če izvlečka nista enaka, nato pa zabeleži `artifact-identity.json` (SHA vrha,
-SHA osnove, zgoščena vrednost zaklepne datoteke, platforma, arhitektura, ABI okolja node,
-pakirnik, pravilnik gradnje — `scripts/release/artifact-identity.mjs`) ter v ločenem opravilu
-potrdi izvor arhiva tar. Promoviranje predogleda pomeni namestitev tega arhiva tar: nikoli ga
-znova ne zgradite iz izvorne kode.
+Zagon izvede `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, zapakira tarball, zažene `npm run check:pack-boot` (lažne skrivnosti, imenik kratkotrajnih podatkov), ponovno zapakira in ne uspe, razen če je povzetek identičen, nato zabeleži `artifact-identity.json` (glava SHA, osnova SHA, zgoščena datoteka ključavnice, platforma, arch, vozlišče ABI, povezovalnik, pravilnik gradnje — `scripts/release/artifact-identity.mjs`) in potrdi tarball v ločenem opravilu. Spodbujanje predogleda pomeni namestitev tega arhiva: nikoli ne zgradite znova iz izvorne kode.
 
-### Izdaja (3.9.0, po odločitvi GO)
+### Rez (3.9.0, po GO)
 
-1. Odločitev GO je zabeležena v [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` izpiše `RESULT: READY`.
-3. Veji na `origin` ustvarite ročno z ukazi, ki jih izpiše poskusni zagon — skript zavrne
-   potiskanje na `origin`. Če želite ponovno uporabiti pregledano potrditev za vejo develop,
-   najprej izvedite preizkus z možnostjo `--execute` na vrhu različice 3.9.0 proti svojemu
-   razcepu; izpiše oba SHA, iste potrditve pa lahko nato potisnete:
+1. GO posneto v [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` natisne `RESULT: READY`.
+3. Ročno ustvarite veje na `origin` z ukazi suhi zagon natisne — skript noče potisniti v `origin`. Če želite ponovno uporabiti pregledano razvojno potrditev, najprej zaženite `--execute` na konici 3.9.0 proti svoji vilici; natisne oba SHAs in iste objave je mogoče potisniti:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Zaščitite `stable/v3` in `develop` (nabori pravil + čakalna vrsta za združevanje), preden se združi prvi PR.
-5. Neaktivni delovni tokovi se vklopijo ob obstoju veje: `forward-port.yml` (potisk v
-   `stable/v3`), `validate-stable-pr.yml` (PR-ji za `stable/v3`) in `nightly-v4-build.yml`
-   (gradnje veje `develop`). Pred uvedbo nastavite skrivnost repozitorija `secrets.FORWARD_PORT_TOKEN` (da se CI izvaja za
-   PR-je za prenos sprememb naprej); nočno objavljanje ostane izklopljeno, dokler lastnik ne nastavi spremenljivke repozitorija
-   `vars.NIGHTLY_PUBLISH` na `true` in npm Trusted Publishing ne sprejme
-   `nightly-v4-build.yml`. Razreševanje kanala izvaja `scripts/release/dist-tag.mjs`, isti
-   razreševalnik, ki ga uporablja `npm-publish.yml`.
-6. Preverite kanale: `npm view omniroute dist-tags --json` prikaže `latest` = 3.9.0 in brez
-   `next` / `nightly`, dokler ni objavljena različica v4.
-7. Povrnitev, če je potrebna: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   in `npm dist-tag add omniroute@3.8.59 latest`.
+4. Zaščitite `stable/v3` in `develop` (čakalna vrsta združevanja nizov pravil + ), preden pristane prvi PR.
+5. Mirujoči poteki dela se vklopijo glede na obstoj veje: `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) in `nightly-v4-build.yml` (builds `develop`). Pred objavo nastavite skrivnost repozitorija `secrets.FORWARD_PORT_TOKEN` (tako da CI deluje na vratih PRs naprej); nočno objavljanje ostane izklopljeno, dokler lastnik ne nastavi spremenljivke skladišča `vars.NIGHTLY_PUBLISH` na `true` in npm Trusted Publishing ne sprejme `nightly-v4-build.yml`. Ločljivost kanala je `scripts/release/dist-tag.mjs`, isti razreševalec, ki ga uporablja `npm-publish.yml`.
+6. Preverite kanale: `npm view omniroute dist-tags --json` prikazuje `latest` = 3.9.0 in ne `next` / `nightly` dokler ne objavi v4.
+7. Povrnitev, če je potrebno: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` in `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

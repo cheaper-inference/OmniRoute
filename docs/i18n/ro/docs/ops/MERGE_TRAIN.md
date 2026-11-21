@@ -4,10 +4,9 @@
 
 ---
 
-Începând cu v3.8.49 (WS3.2/WS3.4 din planul de calitate/viteză), calea implicită de integrare pentru
-PR-urile revizuite în `release/vX.Y.Z` este **coada de integrare Mergify** (`.mergify.yml`);
-**trenul de integrare manual** documentat mai jos este soluția DE REZERVĂ — utilizată în timpul incidentelor,
-al înghețărilor de release sau dacă planul Mergify Open Source se modifică vreodată.
+> **2026-11-19: coada de îmbinare Mergify este retrasă** (decizia proprietarului). `.mergify.yml` nu mai definește o coadă și refuză comenzile Mergify care îmbină sau rescriu o cerere de extragere. Lansările PRs sunt îmbinate manual sub setul de reguli ale depozitului „Necesită porți verzi pentru lansarea activă” (`Gate / CI` + `Gate / Quality`) până când omni-queue rulează în modul live, iar apoi prin omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Secțiunile Mergify de mai jos descriu coada așa cum a fost.
+
+De la v3.8.49 (WS3.2/WS3.4 al planului quality/velocity ) calea implicită de îmbinare pentru PRs revizuit în `release/vX.Y.Z` este** Îmbinați coada de îmbinare** (`.mergify.yml`); cel** tren de îmbinare manuală** documentat mai jos este FALLBACK — utilizat în timpul incidentelor, înghețarilor de lansare sau dacă planul Mergify Open Source se schimbă vreodată.
 
 ## Calea implicită: coada Mergify
 
