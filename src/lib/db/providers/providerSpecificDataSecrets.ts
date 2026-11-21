@@ -46,6 +46,15 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
   "awsSecretAccessKey",
   "sessionToken",
   "awsSessionToken",
+  // Devin Desktop password-login credentials (src/lib/oauth/providers/devin-desktop.ts
+  // `passwordLogin`). `devinAuth1Token` is a long-lived credential that mints fresh
+  // ide tokens on demand, so plaintext on disk is equivalent to the account itself;
+  // `devinSessionToken` and `devinIdeToken` are the live session/bearer pair.
+  // Declaring them here covers at-rest encryption AND the provider-API response
+  // sanitizer + audit summary in one place.
+  "devinAuth1Token",
+  "devinSessionToken",
+  "devinIdeToken",
   "openCodeGoAuthCookie",
   "opencodeGoAuthCookie",
   "authCookie",

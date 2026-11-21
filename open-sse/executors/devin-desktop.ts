@@ -12,6 +12,9 @@ import { gunzipSync } from "node:zlib";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { BaseExecutor, mergeUpstreamExtraHeaders, type ExecuteInput } from "./base.ts";
+import type { ExecutorLog, ProviderCredentials } from "./base.ts";
+import { getAccessToken } from "../services/tokenRefresh.ts";
+import { hasDevinAuth1Credential } from "../services/tokenRefresh/providers/devinDesktop.ts";
 
 export const DEVIN_DESKTOP_BASE_URL = "https://server.codeium.com";
 const DEVIN_DESKTOP_CHAT_PATH = "/exa.api_server_pb.ApiServerService/GetChatMessage";
@@ -555,6 +558,38 @@ export class DevinDesktopExecutor extends BaseExecutor {
 
   buildUrl(): string {
     return DEVIN_DESKTOP_CHAT_URL;
+  }
+
+  /**
+   * Renew a Devin Desktop connection.
+   *
+   * There is no OAuth refresh_token: a Devin Auth password login stores a
+   * long-lived `auth1_…` credential that mints a fresh ide_token on demand. Only
+   * those connections are renewable — an `import_token` connection has no auth1
+   * and returns null, which the caller already treats as "cannot self-heal".
+   *
+   * Without this override the base implementation returned null for every Devin
+   * connection, so a 401 could only be cured by re-adding the account, and the
+   * manual refresh route answered 502 ("provider returned no new token").
+   */
+  async refreshCredentials(credentials: ProviderCredentials, log?: ExecutorLog | null) {
+    const providerSpecificData = credentials?.providerSpecificData as
+      Record<string, unknown> | undefined;
+    if (!hasDevinAuth1Credential(providerSpecificData)) {
+      log?.warn?.(
+        "TOKEN_REFRESH",
+        "Devin Desktop: no auth1 credential stored — re-authenticate to enable refresh"
+      );
+      return null;
+    }
+    // Delegate to the one refresh implementation so the cache/dedup layer, the
+    // rotation guard and the onPersist hook all apply exactly as they do for the
+    // health-check sweep and the manual refresh route.
+    return (await getAccessToken(
+      "devin-desktop",
+      { ...credentials, providerSpecificData },
+      log
+    )) as Partial<ProviderCredentials> | null;
   }
 
   buildHeaders(_credentials: { accessToken?: string; apiKey?: string }): Record<string, string> {

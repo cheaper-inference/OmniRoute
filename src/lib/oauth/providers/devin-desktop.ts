@@ -1,4 +1,5 @@
 import { DEVIN_DESKTOP_CONFIG } from "../constants/oauth";
+import { devinAuth } from "../services/devinAuth";
 
 /** Prefix the Devin CLI puts in front of the session token it mints at sign-in. */
 export const DEVIN_SESSION_TOKEN_PREFIX = "devin-session-token$";
@@ -46,8 +47,15 @@ function mapTokens(tokens: { accessToken: string; authMethod?: string }) {
 }
 
 /**
- * Devin Desktop: import-token stays the default flow; the Devin CLI browser sign-in is an
- * additional method (same capability flag grok-cli uses for its browser login).
+ * Devin Desktop provider.
+ *
+ * Three auth paths share this provider:
+ *  - `import_token` (default): paste an existing ide_token.
+ *  - browser PKCE: the Devin CLI browser sign-in (`supportsBrowserPkce`).
+ *  - `password` (added): Devin Auth email+password login, which also yields a
+ *    long-lived `auth1_token` usable for refresh without the password.
+ *
+ * The password path never persists the password — only the resulting tokens.
  */
 export const devinDesktop = {
   config: DEVIN_DESKTOP_CONFIG,
@@ -59,7 +67,33 @@ export const devinDesktop = {
   // The Devin CLI uses a 96-byte verifier (128 base64url chars).
   pkceVerifierBytes: 96,
 
+  /** Actions beyond the generic flow, dispatched by the oauth route. */
+  actions: ["password-login"] as const,
+
   validateImportToken,
+
+  /**
+   * Devin Auth email+password sign-in. Returns the same token shape as
+   * `importToken`, so persistence is identical; the auth1_token rides along in
+   * providerSpecificData so a reconnect can refresh without the password.
+   */
+  async passwordLogin(email: string, password: string) {
+    const result = await devinAuth.loginWithPassword(email, password);
+    return {
+      accessToken: result.ideToken,
+      refreshToken: null as string | null,
+      expiresIn: null as number | null,
+      email: result.email ?? undefined,
+      name: result.email ?? undefined,
+      providerSpecificData: {
+        devinAuth1Token: result.auth1Token,
+        devinSessionToken: result.sessionToken,
+        devinAccountId: result.accountId ?? undefined,
+        devinOrgId: result.orgId ?? undefined,
+        devinIdeToken: result.ideToken,
+      },
+    };
+  },
 
   buildAuthUrl(
     config: DevinDesktopConfig,

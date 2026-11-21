@@ -4,6 +4,7 @@
  * re-exported from there, so existing imports keep working.
  */
 import { parseTokenExpiryMs } from "@omniroute/open-sse/utils/tokenExpiry.ts";
+import { hasDevinAuth1Credential } from "@omniroute/open-sse/services/tokenRefresh/providers/devinDesktop.ts";
 
 // The parser lives in the engine (open-sse → src boundary ratchet); re-exported so existing
 // imports from this module keep working.
@@ -27,8 +28,47 @@ export function getEffectiveTokenExpiryMs(conn: any): number {
  * connections is normal rather than broken — unlike `antigravity`/`gemini`, whose
  * flows always mint one.
  */
+/**
+ * Connections whose refresh path is CONDITIONAL on stored metadata rather than on
+ * a refresh token.
+ *
+ * Devin Desktop is refresh-capable only for connections created by the Devin Auth
+ * password login: those persist a long-lived `auth1_…` credential in
+ * providerSpecificData and renew without the password. A connection created by
+ * plain `import_token` carries no auth1 and genuinely cannot be renewed (#8228) —
+ * so the sweep must not force it to `no_refresh_token`.
+ *
+ * The predicate itself lives next to the refresh implementation so the sweep, the
+ * executor and the refresh gate cannot drift apart.
+ */
+export function hasConditionalRefreshCredential(conn: Record<string, any>): boolean {
+  if (conn.provider !== "devin-desktop") return false;
+  const data = conn.providerSpecificData;
+  if (!data || typeof data !== "object") return false;
+  return hasDevinAuth1Credential(data as Record<string, unknown>);
+}
+
 function issuesRefreshLessLongLivedTokens(provider: unknown): boolean {
   return typeof provider === "string" && provider.toLowerCase() === "claude";
+}
+
+/**
+ * A Devin Desktop connection with no `auth1_…` credential is an `import_token` row: it
+ * genuinely cannot renew (#8228), so the sweep must not force it into
+ * `no_refresh_token`.
+ */
+function devinConnectionCannotRenew(conn: any): boolean {
+  return conn.provider === "devin-desktop" && !hasConditionalRefreshCredential(conn);
+}
+
+/**
+ * Whether a connection renews WITHOUT an OAuth refresh token by design, so a missing
+ * refresh token is normal and only a known PAST expiry justifies condemning it:
+ * `claude setup-token` (1-year, refresh-less) and Devin Desktop password logins
+ * (they mint from a stored `auth1_…` credential instead).
+ */
+function renewsWithoutRefreshToken(provider: unknown): boolean {
+  return provider === "devin-desktop" || issuesRefreshLessLongLivedTokens(provider);
 }
 
 /**
@@ -70,18 +110,21 @@ export function shouldMarkRefreshCapableExpired(
   if (!supportsRefresh) return false;
   // Cursor access-token-only imports: refresh is optional (deep-control stores one).
   if (conn.provider === "cursor") return false;
+  // A Devin Desktop import_token row carries no auth1 credential and cannot renew.
+  if (devinConnectionCannotRenew(conn)) return false;
   // Never clobber a terminal/specific state, nor the request path's `unavailable` cooldown.
   if (conn.testStatus && conn.testStatus !== "active") return false;
   // API-key-only connections do not need refresh tokens at all.
   if (conn.apiKey && conn.apiKey.length > 0) return false;
-  // A refresh-less connection whose KNOWN token expiry is still in the future
-  // is still usable — condemning it now would kill grants that are
-  // intermittently refresh-less (kimi-coding device flow: 15-minute tokens,
-  // refresh token sometimes absent — #16984) well before the token stops
-  // working. Wait for the actual expiry; the request path surfaces the 401
-  // when the token really dies.
+  // A connection whose KNOWN token expiry is still in the future is still usable —
+  // condemning it now would kill grants that are intermittently refresh-less
+  // (kimi-coding device flow: 15-minute tokens, refresh token sometimes absent —
+  // #16984) well before the token stops working. Wait for the actual expiry; the
+  // request path surfaces the 401 when the token really dies.
   const expiryMs = getEffectiveTokenExpiryMs(conn);
   if (expiryMs > nowMs) return false;
-  if (!issuesRefreshLessLongLivedTokens(conn.provider)) return true;
+  // Refresh-less-by-design connections renew from a stored credential rather than an
+  // OAuth refreshToken, so they are condemned only when a known expiry has passed.
+  if (!renewsWithoutRefreshToken(conn.provider)) return true;
   return expiryMs > 0 && expiryMs <= nowMs;
 }

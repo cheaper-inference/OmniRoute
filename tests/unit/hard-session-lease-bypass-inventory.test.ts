@@ -207,7 +207,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // fenced chat pipeline, so it never selects a connection itself (class C).
     "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
-    "src/app/api/oauth/[provider]/[action]/route.ts": 4,
+    "src/app/api/oauth/[provider]/[action]/route.ts": 5,
+    // The fifth read is `password-login` (Devin Desktop): behind the same management
+    // guard as `token`/`device-flow`, it reads the rows only to match a re-auth target
+    // by email/connectionId so a second sign-in updates instead of duplicating. No
+    // selection and no dispatch — the upstream call is the password exchange itself,
+    // not a provider request (class C).
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
     "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
