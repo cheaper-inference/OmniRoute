@@ -309,6 +309,7 @@ Verwenden Sie die Klauseln `IF NOT EXISTS`, `IF EXISTS` und `OR IGNORE` / `OR RE
 3. **Daten sorgfältig auffüllen** : Verwenden Sie `UPDATE ... WHERE ...`, um vorhandene Zeilen zu verarbeiten
 4. **Reihenfolge und Benennung prüfen** : `npm run test:migrations:fresh` (alle Migrationen auf einer leeren Datenbank) und `npm run check:migration-numbering`
 5. **Testen Sie es an einer Kopie** : Führen Sie niemals ungetestete Migrationen in der Produktion durch
+6. **Eine aus Code erstellte Tabelle erfordert ebenfalls eine Migration** : Wenn ein Modul die Tabelle auch verzögert erstellt (`CREATE TABLE IF NOT EXISTS`, als Selbstreparaturpfad beibehalten), muss sie bei einer Migration mit demselben DDL erstellt werden. Andernfalls weisen eine Neuinstallation und eine aktualisierte Installation unterschiedliche Schemata auf, je nachdem, ob dieser Codepfad ausgeführt wurde. `tests/unit/db/lazy-table-migration-guard.test.ts` scannt `src/` und `open-sse/` und schlägt bei einem verzögerten `CREATE` ohne Migration (#20557) fehl. Beispiel: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Beispiel:
 

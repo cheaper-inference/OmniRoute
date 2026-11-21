@@ -123,11 +123,11 @@ Use \`listProviders\` to see your configured ones.`;
     return `## Codebase Investigation
 
 I can use CodeGraph to explore the OmniRoute codebase. Just ask me:
-- "Busca la función handleChatCore"
-- "Quién llama a sanitizeMessage?"
-- "Qué funciones hay en combo.ts?"
-- "Dame contexto del archivo chatCore.ts"
-- "Lista los archivos TypeScript indexados"
+- "Search for the handleChatCore function"
+- "Who calls sanitizeMessage?"
+- "What functions are in combo.ts?"
+- "Give me context for the chatCore.ts file"
+- "List the indexed TypeScript files"
 
 Use these search terms naturally and I'll query the CodeGraph index.`;
   }
@@ -252,34 +252,34 @@ function classifyIntent(text: string): { tool: string; args: Record<string, unkn
 // ── Help Response ────────────────────────────────────────────────────────────
 
 function getHelpResponse(): string {
-  return `## OmniRoute Copilot — Comandos disponibles
+  return `## OmniRoute Copilot — Available commands
 
-### Configuración
-- "Lista los providers" → \`listProviders\`
-- "Lista mis combos" → \`listCombos\`
-- "Crea un combo..." → \`createCombo\` (te pediré detalles)
-- "Lista las API keys" → \`listApiKeys\`
-- "Crea una API key para desarrollo" → \`createApiKey\`
-- "Revoca la key abc123" → \`revokeApiKey\`
-- "Lista los grupos" → \`listKeyGroups\`
+### Configuration
+- "List the providers" → \`listProviders\`
+- "List my combos" → \`listCombos\`
+- "Create a combo..." → \`createCombo\` (I'll ask you for details)
+- "List the API keys" → \`listApiKeys\`
+- "Create an API key for development" → \`createApiKey\`
+- "Revoke the key abc123" → \`revokeApiKey\`
+- "List the groups" → \`listKeyGroups\`
 
-### CodeGraph (investigar el código)
-- "Busca la función handleChatCore" → \`searchCodeGraph\`
-- "Quién llama a sanitizeMessage?" → \`findCallers\`
-- "Qué funciones hay en combo.ts?" → \`getFileContext\`
-- "Lista los archivos indexados" → \`listCodeGraphFiles\`
+### CodeGraph (investigate code)
+- "Search for the handleChatCore function" → \`searchCodeGraph\`
+- "Who calls sanitizeMessage?" → \`findCallers\`
+- "What functions are in combo.ts?" → \`getFileContext\`
+- "List the indexed files" → \`listCodeGraphFiles\`
 
 ### CLI
-- "CLI health" → ejecuta \`omniroute health\`
-- "CLI list-combos" → ejecuta \`omniroute list-combos\`
-- "CLI set-budget 10" → ejecuta \`omniroute set-budget 10\`
+- "CLI health" → runs \`omniroute health\`
+- "CLI list-combos" → runs \`omniroute list-combos\`
+- "CLI set-budget 10" → runs \`omniroute set-budget 10\`
 
-### Conocimiento
-- "Cómo funciona OmniRoute?" → explica la arquitectura
-- "Qué son los combos?" → explica routing
-- "Cómo debuggeo un error?" → troubleshooting
+### Knowledge
+- "How does OmniRoute work?" → explains the architecture
+- "What are combos?" → explains routing
+- "How do I debug an error?" → troubleshooting
 
-### Tools disponibles:\n\n${getCopilotToolDescriptions()}`;
+### Available tools:\n\n${getCopilotToolDescriptions()}`;
 }
 
 // ── createApiKey ─────────────────────────────────────────────────────────────
@@ -374,14 +374,14 @@ export async function processCopilotChat(
   // Handle tools that need more info from the user
   if (intent.tool === "createCombo" && !userText.includes("{") && !userText.includes("target")) {
     return {
-      message: `Para crear un combo, necesito algunos detalles:
+      message: `To create a combo, I need some details:
 
-1. **Nombre** del combo (ej: "mi-combo-fallback")
-2. **Estrategia** (priority, weighted, round-robin, cost-optimized, auto)
-3. **Targets** — los proveedores/modelos en orden
+1. **Name** of the combo (e.g. "my-combo-fallback")
+2. **Strategy** (priority, weighted, round-robin, cost-optimized, auto)
+3. **Targets** — the providers/models in order
 
-Puedes decirme algo como:
-> Crea un combo llamado "fallback-claude" con estrategia priority y targets: [{"provider":"claude-code","model":"claude-sonnet-4"},{"provider":"openai","model":"gpt-4o"}]`,
+You can tell me something like:
+> Create a combo named "fallback-claude" with strategy priority and targets: [{"provider":"claude-code","model":"claude-sonnet-4"},{"provider":"openai","model":"gpt-4o"}]`,
     };
   }
 

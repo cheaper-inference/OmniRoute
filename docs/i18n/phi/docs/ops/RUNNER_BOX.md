@@ -145,33 +145,20 @@ bawat pagkakataon, at kapag idle lamang**, na nasa iisang command ang pag-check 
 
 ## Naka-host na lane (mga runner na naka-host sa GitHub)
 
-Ang repository ay pag-aari ng organisasyong `cheaper-inference`, na nasa **Team** plan: **60
-magkakasabay na naka-host na job**, na pinagsasaluhan ng bawat repository sa organisasyon, bawat pagsusuri sa PR,
-bawat workflow na nati-trigger ng push, at ng default setup ng CodeQL. Ang mga numero sa ibaba ay sinukat noong nasa
-**Pro** plan pa (40 magkakasabay na naka-host na job). Sinukat noong 2026-10-18 habang may
-merge campaign (~10 merge/oras sa `release/v3.8.52`): **2,500 workflow run ang ginawa sa loob ng
-24 oras**, 44 push sa branch sa loob ng 6 na oras, **106 naka-host na job ang nakapila** habang naghintay nang
-ilang oras ang mga pagsusuri sa PR at na-merge ang mga PR nang wala ang mga ito. Siyam na workflow ang tumakbo sa bawat push sa branch:
+Ang repositoryo ay kabilang sa `cheaper-inference` organization, sa** Koponan** plano:** 60 kasabay na naka-host na mga trabaho** , ibinahagi ng bawat repository sa organisasyon, bawat PR check, bawat push-triggered na daloy ng trabaho at default na setup ng CodeQL. Ang mga figure sa ibaba ay sinusukat sa** Pro** plano (40 kasabay na naka-host na mga trabaho). Sinukat noong 2026-10-18 sa panahon ng isang merge campaign (~ 10 merges/hour on `release/v3.8.52`):** 2,500 workflow run ang ginawa sa loob ng 24 h** , 44 pushes sa branch sa loob ng 6 na oras,** 106 na naka-host na trabaho ang nakapila** habang ang mga PR check ay naghihintay ng ilang oras at PRs ay pinagsama nang wala ang mga ito. Siyam na daloy ng trabaho ang ginawa sa bawat pagtulak sa sangay:
 
-| kada push sa `release/v*`                   | mga naka-host na job | kinalabasan sa panahon ng dagsa                                     | mula 2026-10-18                                                                        |
-| ------------------------------------------- | -------------------: | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `ci.yml` (buong matrix)                     |          hanggang 30 | kinansela ng susunod na push, 24 sa 24 sa isang araw                | hindi sinisimulan sa mga push sa `release/**` (PR run + Release-Green)                 |
-| `quality.yml`                               |                   ~6 | kinansela, 23 sa 23                                                 | hindi sinisimulan sa mga push sa `release/**`                                          |
-| `Release-Green` `--quick`                   |                    0 | tumakbo sa `omni-build`, kinansela ang 97 sa 100                    | `omni-release` slot, hindi kailanman kinakansela, pinagsasama ang nakabinbing run      |
-| `Lock released branch`, `OpenSSF Scorecard` |                    2 | isang nakapilang run kada push                                      | isang run kada ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)                |
-| `Release acceptance` (shadow report)        |                    1 | isang naka-host na `npm ci` kada push, hindi kailanman kinansela    | walang pagbabago — kandidato para sa `paths:` filter                                   |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                    2 | kinansela kada push; nakikipag-agawan ang amd64 leg sa `omni-build` | walang pagbabago — deployment channel ng may-ari                                       |
-| CodeQL default setup (`dynamic`)            |                    4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kada push     | walang pagbabago — Settings → Code security; walang nasusuri rito ang `c-cpp`/`python` |
+| bawat push sa `release/v*`                  | naka-host na mga trabaho | kinalabasan sa ilalim ng bagyo                                              | mula noong 2026-10-18                                                             |
+| ------------------------------------------- | -----------------------: | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `ci.yml` (buong matrix)                     |              hanggang 30 | kinansela ng susunod na push, 24 sa 24 sa isang araw                        | hindi nagsimula sa `release/**` pushes (PR run + Release-Green)                   |
+| `quality.yml`                               |                       ~6 | kinansela, 23 ng 23                                                         | hindi nagsimula sa `release/**` pushes                                            |
+| `Release-Green` `--quick`                   |                        0 | tumakbo sa `omni-build`, kinansela ang 97 sa 100                            | `omni-release` slot, hindi kailanman kinansela, nakabinbing pagbagsak ng pagtakbo |
+| `Lock released branch`, `OpenSSF Scorecard` |                        2 | isang nakapila na takbo bawat push                                          | isang run bawat ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)          |
+| `Release acceptance` (ulat ng anino)        |                        1 | isang naka-host na `npm ci` bawat push, hindi nakansela                     | hindi nabagong kandidato — para sa isang filter `paths:`                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                        2 | kinansela bawat push; Ang amd64 leg ay nakikipagkumpitensya sa `omni-build` | hindi nabago ang deploy channel ng may-ari ng —                                   |
+| default na setup CodeQL (`dynamic`)         |                        4 | `javascript-typescript`, `actions`, `c-cpp`, `python` bawat push            | hindi nabagong — Mga Setting → Seguridad ng code; `c-cpp`/`python` scan wala dito |
 
-Tinitiyak ng `tests/unit/build/push-storm-diet.test.ts` na para lang sa `main` ang push trigger ng `ci.yml` at
-`quality.yml`. Side effect: hindi na nakakatanggap ang Codecov ng batayang upload kada release push (ang
-step ay para lamang sa impormasyon at may `continue-on-error`); hindi naaapektuhan ang coverage gate sa repo at ang komento sa PR.
+Pini-pin `tests/unit/build/push-storm-diet.test.ts` ang `main` -only push trigger ng `ci.yml` at `quality.yml`. Side effect: Ang Codecov ay hindi na nakakatanggap ng base upload sa bawat release push (ang hakbang ay impormasyon at `continue-on-error`); hindi naaapektuhan ang in-repo coverage gate at PR comment.
 
-**Hindi maaayos ng mas malaking self-hosted capacity ang pila ng mga naka-host na job.** Ang devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) ay maaaring mag-host ng runner, ngunit pinananatili na ng mga agent session
-ang load nito sa 20–26, walang Docker daemon ang agent container, at ang naka-host na lane ang
-punô. Ang `.113` box ay may 71 GB na libreng espasyo at load na 5–8 sa parehong sandali; ang limitasyon nito
-ay ang badyet sa memory kada listener na nasa itaas (hanggang 6 na listener), hindi ang CPU. Ang natitirang mga opsyon
-ay nasa proseso: i-merge ang mga PR ng campaign sa pamamagitan ng Mergify queue (`label=queue`, nagsasalo ang
-mga batch sa isang `merge_group` CI run sa halip na tig-isang run kada PR at isa pa kada push), bawasan ang mga
-wika sa default setup ng CodeQL, at i-filter ang `release-acceptance.yml` ayon sa mga file na binabasa nito.
+**Hindi naaayos ng mas maraming self-host na kapasidad ang naka-host na pila.** Ang devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) ay maaaring mag-host ng isang runner, ngunit ang mga session ng ahente ay nagpapanatili na ng load nito sa 20–26, ang lalagyan ng ahente ay walang Docker daemon, at ang saturated lane ang naka-host. Ang `.113` box ay may 71 GB na libre at nag-load ng 5–8 sa parehong sandali; ang hadlang nito ay ang per-listener memory budget sa itaas (ceiling 6 listeners), hindi CPU. Ang mga natitirang lever ay mga proseso: land campaign PRs sa pamamagitan ng Mergify queue (`label=queue`, ang mga batch ay nagbabahagi ng isang `merge_group` CI run sa halip na isang run bawat PR at isa bawat push), i-trim ang CodeQL default-setup na mga wika, at i-filter `release-acceptance.yml` ng mga file na binabasa nito.
+
+> **2026-11-19: ang Megify merge queue ay itinigil na** (desisyon ng may-ari). Hindi na tinukoy `.mergify.yml` ang isang queue at tinatanggihan ang mga utos ng Mergify na nagsasama o muling nagsusulat ng isang pull request. Ang release PRs ay pinagsama-sama sa pamamagitan ng kamay sa ilalim ng repository ruleset na "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) hanggang sa tumakbo ang omni-queue sa live mode, at sa pamamagitan ng omni-queue pagkatapos noon ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ang Mergify lever sa itaas ay wala na.

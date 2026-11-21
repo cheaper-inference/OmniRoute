@@ -42,6 +42,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "crof",
   "freebuff",
   "fb",
+  "mistral",
   "clinepass",
   "nanogpt",
   "nan",

@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Na zaɓi) Cire image
+docker rmi cheaperinference/omniroute:latest
+# Tsofaffin shigarwa sun ja sunan gado:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

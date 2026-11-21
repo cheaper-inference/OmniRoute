@@ -167,12 +167,13 @@ export function formatFreeBudget(params: {
   creditTokens?: number;
 }): string {
   const { freeType, monthlyTokens = 0, creditTokens = 0 } = params;
+  const quota = "(usage-based quota)";
 
   switch (freeType) {
     case "recurring-daily":
-      return `${fmtTokens(monthlyTokens)} tokens/day`;
+      return monthlyTokens > 0 ? `${fmtTokens(monthlyTokens)} tokens/day` : quota;
     case "recurring-monthly":
-      return `${fmtTokens(monthlyTokens)} tokens/month`;
+      return monthlyTokens > 0 ? `${fmtTokens(monthlyTokens)} tokens/month` : quota;
     case "recurring-credit":
       return `${fmtTokens(creditTokens)} credits`;
     case "recurring-uncapped":
@@ -253,6 +254,14 @@ export interface ModelDisplayNameParams {
 function stripFreeMarkers(text: string): { text: string; wasFree: boolean } {
   let cleaned = text.trim();
   let wasFree = false;
+  // An upstream free glyph may sit anywhere in the model name — parenthesised
+  // at the end (`QwQ 32B (🆓)`) or inside a variant tag (`FP8 Fast 🆓 ~150`).
+  // Remove it wherever it appears so the plugin prefix stays the only one.
+  const withoutGlyph = cleaned.replace(/\s{0,8}\(🆓\)\s{0,8}|\s{0,8}🆓\s{0,8}/g, " ");
+  if (withoutGlyph.length !== cleaned.length) {
+    wasFree = true;
+    cleaned = withoutGlyph.trim();
+  }
   const withoutPrefix = cleaned.replace(/^\[free\]\s{0,8}/i, "");
   if (withoutPrefix.length !== cleaned.length) {
     wasFree = true;
@@ -270,6 +279,21 @@ function stripFreeMarkers(text: string): { text: string; wasFree: boolean } {
     }
   }
   return { text: cleaned.length > 0 ? cleaned : text.trim(), wasFree };
+}
+
+/**
+ * Apply the inferred-free marker as a single leading label. An upstream `Free`
+ * in the name can leave a full `🆓 ` prefix on the built name, and older rows
+ * carried a trailing ` (free, inferred)` suffix; both are removed so exactly
+ * one marker remains, at the head. `label` is passed in by the caller (never
+ * imported here) to keep the free-signals -> naming dependency acyclic.
+ */
+export function withInferredFreeLabel(name: string, label: string): string {
+  let cleaned = name.trim();
+  cleaned = cleaned.replace(/^🆓\??\s{0,8}/, "");
+  cleaned = cleaned.replace(/\s{0,8}\(free,\s*inferred\)\s{0,8}$/i, "").trim();
+  if (cleaned.startsWith(label)) return cleaned;
+  return `${label}${cleaned}`;
 }
 
 /**

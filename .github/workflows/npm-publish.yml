@@ -44,9 +44,8 @@ on:
         required: false
         default: "auto"
         type: string
-    secrets:
-      NPM_TOKEN:
-        required: true
+    # No secrets: the default publish path is Trusted Publishing (OIDC). The DIRECT
+    # emergency fallback reads secrets.NPM_TOKEN only on a manual workflow_dispatch.
 
 # Least-privilege default: read-only at the top level; each publish job grants the
 # id-token (npm provenance) / packages (GitHub Packages) writes it needs (Scorecard
@@ -260,10 +259,6 @@ jobs:
         if: steps.resolve.outputs.skip != 'true'
         run: git fetch --no-tags --depth=50 origin +refs/heads/main:refs/remotes/origin/main
 
-      - name: Validate npm package artifact
-        if: steps.resolve.outputs.skip != 'true'
-        run: npm run check:pack-artifact
-
       # Pack ONCE. Up to v3.8.54 this job ran `npm pack` on the same dist/ four times per
       # attempt — inside check:pack-boot, inside check:install-upgrade, for the stage-npm
       # hand-off and inside the GitHub Packages publish — and `npm pack` is single-threaded:
@@ -271,6 +266,8 @@ jobs:
       # 44304134021). Every consumer below now uses this one file, so the bytes the gates
       # boot are byte-for-byte the bytes stage-npm publishes; the sha256 recorded here is
       # re-checked before the upload and again in stage-npm after the download.
+      # It runs BEFORE the pack-artifact validation (#20644), so that gate checks this file
+      # instead of a second `npm pack --dry-run` of its own (12-22 min on the v3.8.54 runs).
       - name: Pack the release tarball once
         id: pack
         if: steps.resolve.outputs.skip != 'true'
@@ -282,7 +279,7 @@ jobs:
           rm -f "$TARBALL"
           STARTED=$(date +%s)
           # --ignore-scripts: prepublishOnly would re-run build:cli-api && build:cli,
-          # rebuilding bytes this job has already built and validated.
+          # rebuilding bytes this job has already built.
           npm pack --ignore-scripts
           test -f "$TARBALL" || { echo "expected $TARBALL to exist after npm pack" >&2; ls -la ./*.tgz || true; exit 1; }
           SHA256=$(sha256sum "$TARBALL" | cut -d' ' -f1)
@@ -291,6 +288,17 @@ jobs:
             echo "path=$GITHUB_WORKSPACE/$TARBALL"
             echo "sha256=$SHA256"
           } >> "$GITHUB_OUTPUT"
+
+      # Validates the tarball packed above (OMNIROUTE_PACKED_TARBALL, #20644): its own file
+      # list, packed size (the PACK_ARTIFACT_MAX_PACKED_BYTES budget), required runtime
+      # paths, MCP closure, leaked tests, locale catalog chunks, package.json name/version
+      # and dist/BUILD_SHA provenance — the bytes that are booted and published, not a
+      # second dry-run pack. Without the variable the gate still packs the tree itself.
+      - name: Validate npm package artifact
+        if: steps.resolve.outputs.skip != 'true'
+        env:
+          OMNIROUTE_PACKED_TARBALL: ${{ steps.pack.outputs.path }}
+        run: npm run check:pack-artifact
 
       - name: Generate CycloneDX SBOM (npm)
         if: steps.resolve.outputs.skip != 'true'
@@ -380,7 +388,7 @@ jobs:
       # hosted one (16 GB is not enough for build:cli's next-build fallback — see
       # this job's runs-on comment). So this job proves the bytes and hands them
       # over; a tiny hosted job does the upload. No re-pack: the file handed over is the
-      # one packed after "Validate npm package artifact" and proven by both gates above.
+      # one packed once above, validated by check:pack-artifact and proven by both gates.
       - name: Confirm the proven tarball is unchanged before the hand-off
         if: steps.resolve.outputs.skip != 'true'
         env:
@@ -801,6 +809,132 @@ jobs:
       # plugin publishes answered E404.
       - name: Publish @omniroute/opencode-plugin-v2 to npm
         working-directory: "@omniroute/opencode-plugin-v2"
+        run: |
+          set -euo pipefail
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          PKG_NAME=$(node -p "require('./package.json').name")
+          # Same hardened skip-check as the main job (no --silent flag).
+          PUBLISHED="$(npm view "${PKG_NAME}@${PKG_VERSION}" version 2>/dev/null || true)"
+          if [ "$PUBLISHED" = "$PKG_VERSION" ]; then
+            echo "⚠️ ${PKG_NAME}@${PKG_VERSION} is already published on npm — skipping."
+            exit 0
+          fi
+          npm publish --provenance --access public --ignore-scripts
+          echo "✅ Published ${PKG_NAME}@${PKG_VERSION}"
+
+  publish-opencode-provider:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          # Full history needed for auto-bump: git diff against previous release tag
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: ${{ env.NPM_PUBLISH_NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Auto-bump provider version if provider changed since last release
+        id: bump
+        working-directory: "@omniroute/opencode-provider"
+        env:
+          CURRENT_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          PKG_NAME=$(node -p "require('./package.json').name")
+
+          # Exit 0 when npm has ${PKG_NAME}@$1, 1 when it definitely does not (no output, or
+          # npm's E404). Any other answer is a registry failure: it fails the step instead of
+          # reading as "not published" (the `npm view ... || true` it replaces did).
+          npm_has_version() {
+            local out err rc=0
+            err=$(mktemp)
+            out=$(npm view "${PKG_NAME}@$1" version 2>"$err") || rc=$?
+            if [ "$rc" -eq 0 ] && [ "$out" = "$1" ]; then rm -f "$err"; return 0; fi
+            if [ "$rc" -eq 0 ] && [ -z "$out" ]; then rm -f "$err"; return 1; fi
+            if [ "$rc" -ne 0 ] && grep -q 'code E404' "$err"; then rm -f "$err"; return 1; fi
+            echo "::error::npm view ${PKG_NAME}@$1 was inconclusive (exit $rc): ${out}" >&2
+            cat "$err" >&2
+            exit 1
+          }
+
+          # 1) Skip if current version is not yet published (no bump needed)
+          if ! npm_has_version "$PKG_VERSION"; then
+            echo "✅ ${PKG_NAME}@${PKG_VERSION} is new — no bump needed."
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 2) Find the previous release tag (exclude the current one)
+          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname \
+            | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag to compare — skipping bump."
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 3) Check if provider dir actually changed since that tag. The step runs inside the
+          # plugin folder and git resolves pathspecs against the current directory, so the
+          # folder is "." here (the repo-root path matched nothing and no change was ever seen).
+          if git diff --quiet "$PREV_TAG" -- .; then
+            echo "⏭️ No provider changes since $PREV_TAG — nothing to publish."
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 4) Auto-bump the patch version past every version npm already has. The bump only
+          # exists in this job's workspace (the committed manifest keeps the old version), so a
+          # later release with plugin changes starts from the same manifest: a single bump
+          # recomputed a version an earlier release had published, and the publish step below
+          # skipped it without publishing the change.
+          # Every candidate is looked up before it can be selected; 50 taken candidates fail.
+          NEW_VERSION=""
+          for _ in $(seq 1 50); do
+            npm version patch --no-git-tag-version --allow-same-version
+            CANDIDATE=$(node -p "require('./package.json').version")
+            if ! npm_has_version "$CANDIDATE"; then
+              NEW_VERSION="$CANDIDATE"
+              break
+            fi
+            echo "${PKG_NAME}@${CANDIDATE} is already on npm — bumping again."
+          done
+          if [ -z "$NEW_VERSION" ]; then
+            echo "::error::${PKG_NAME}: no unpublished patch version within 50 bumps of ${PKG_VERSION}."
+            exit 1
+          fi
+          echo "bumped=true" >> "$GITHUB_OUTPUT"
+          echo "📦 Auto-bumped ${PKG_NAME} from ${PKG_VERSION} to ${NEW_VERSION}"
+
+      - name: Install provider dependencies
+        working-directory: "@omniroute/opencode-provider"
+        run: npm install --no-audit --no-fund
+
+      - name: Build provider
+        working-directory: "@omniroute/opencode-provider"
+        run: npm run clean && npm run build
+
+      - name: Test provider
+        working-directory: "@omniroute/opencode-provider"
+        run: npm test
+
+      # Trusted Publishing (OIDC), like the plugins: no NODE_AUTH_TOKEN. The package needs its
+      # own Trusted Publisher on npmjs.com (cheaper-inference/OmniRoute, npm-publish.yml, no
+      # environment, "npm publish" allowed); without it this step answers E404 and only this
+      # job fails — no other publish job depends on it. Until 2026-11 the provider had no
+      # publish job at all: 0.1.0 was published by hand in 2026-05.
+      - name: Publish @omniroute/opencode-provider to npm
+        working-directory: "@omniroute/opencode-provider"
         run: |
           set -euo pipefail
           PKG_VERSION=$(node -p "require('./package.json').version")
