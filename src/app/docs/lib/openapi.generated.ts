@@ -1239,6 +1239,17 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: true,
   },
   {
+    path: "/api/v1/systemone/models",
+    method: "GET",
+    summary: "List live System One decisions models",
+    description:
+      "Live catalog of the decisions models `POST /api/v1/systemone` accepts, read from the configured connections on every call (never cached). `typesafe/<model>` entries come from the TypeSafe API (`GET /v1/models`, needs an active TypeSafe connection); `openrouter/<vendor>/<model>` entries come from OpenRouter's public catalog filtered by `output_modalities=decisions` (needs an active OpenRouter connection). Every returned `id` can be sent unchanged as the `model` of `POST /api/v1/systemone`. The API key's endpoint category, budget, connection scope and model allow/deny rules apply; a model the key may not use is not listed.",
+    tag: "Decisions",
+    tags: ["Decisions"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
     path: "/api/v1/text-to-speech/{voiceId}",
     method: "POST",
     summary: "ElevenLabs text-to-speech",
