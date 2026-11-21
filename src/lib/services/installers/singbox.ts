@@ -167,7 +167,7 @@ function assetPlatformArch(): {
   if (platform === "freebsd") {
     throw new InstallError(
       `sing-box has no pinned checksum for platform "${platform}"`,
-      "sing-box não tem checksum verificado para esta plataforma (FreeBSD).",
+      "sing-box has no verified checksum for this platform (FreeBSD).",
       500
     );
   }
@@ -184,7 +184,7 @@ async function downloadToFile(url: string, dest: string): Promise<void> {
   if (!res.ok || !res.body) {
     throw new InstallError(
       `sing-box download failed: HTTP ${res.status} for ${url}`,
-      "Falha ao baixar o binário do sing-box. Verifique a conexão e tente novamente.",
+      "Failed to download the sing-box binary. Check your connection and try again.",
       503
     );
   }
@@ -231,14 +231,14 @@ async function downloadRealBinary(
   if (!expectedSha256) {
     throw new InstallError(
       `No pinned sing-box checksum for ${key} (only ${Object.keys(checksums).join(", ")} are verified)`,
-      `sing-box não tem checksum verificado para ${key}.`,
+      `sing-box has no verified checksum for ${key}.`,
       500
     );
   }
   if (version !== SINGBOX_PINNED_VERSION) {
     throw new InstallError(
       `sing-box version "${version}" has no pinned checksum — only ${SINGBOX_PINNED_VERSION} is verified`,
-      `Apenas a versão fixada do sing-box (${SINGBOX_PINNED_VERSION}) tem checksum verificado.`,
+      `Only the pinned version of sing-box (${SINGBOX_PINNED_VERSION}) has a verified checksum.`,
       400
     );
   }
@@ -255,7 +255,7 @@ async function downloadRealBinary(
     fs.unlinkSync(archivePath);
     throw new InstallError(
       `sing-box checksum mismatch for ${fileName}: expected ${expectedSha256}, got ${actualSha256}`,
-      "Falha na verificação de integridade do binário do sing-box baixado.",
+      "Integrity verification failed for the downloaded sing-box binary.",
       500
     );
   }
@@ -270,7 +270,7 @@ async function downloadRealBinary(
   if (!fs.existsSync(binaryPath)) {
     throw new InstallError(
       `sing-box binary not found at ${binaryPath} after extraction`,
-      "Binário do sing-box não encontrado após a extração do pacote.",
+      "sing-box binary not found after extracting the package.",
       500
     );
   }

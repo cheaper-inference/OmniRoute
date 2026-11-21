@@ -58,7 +58,12 @@ function climb(tm: A2ATaskManager, a2aId: string, target: TaskState): void {
   }
 }
 
-function ensureMirrored(tm: A2ATaskManager, index: Map<string, string>, conductorId: string, payload: Record<string, unknown>): string {
+function ensureMirrored(
+  tm: A2ATaskManager,
+  index: Map<string, string>,
+  conductorId: string,
+  payload: Record<string, unknown>
+): string {
   const known = index.get(conductorId);
   if (known && tm.getTask(known)) return known;
   const mode = typeof payload.mode === "string" ? payload.mode : "?";
@@ -87,7 +92,11 @@ function conductorMeta(tm: A2ATaskManager, a2aId: string): Record<string, unknow
 }
 
 /** Applies one hub event to the mirror. Never throws for event-shaped input. */
-export function applyConductorEvent(tm: A2ATaskManager, index: Map<string, string>, ev: ConductorEvent): void {
+export function applyConductorEvent(
+  tm: A2ATaskManager,
+  index: Map<string, string>,
+  ev: ConductorEvent
+): void {
   const target = conductorStateFor(ev.type);
   if (!target) return;
   const conductorId = typeof ev.payload.task_id === "string" ? ev.payload.task_id : null;
@@ -96,7 +105,8 @@ export function applyConductorEvent(tm: A2ATaskManager, index: Map<string, strin
   const a2aId = ensureMirrored(tm, index, conductorId, ev.payload);
   const meta = conductorMeta(tm, a2aId);
   if (meta) {
-    if (ev.type === "task.scheduled" && typeof ev.payload.runner_id === "string") meta.runner = ev.payload.runner_id;
+    if (ev.type === "task.scheduled" && typeof ev.payload.runner_id === "string")
+      meta.runner = ev.payload.runner_id;
     if (ev.type === "task.input_required") meta.input_required = true;
     if (ev.type === "task.completed" || ev.type === "task.failed") {
       const manifest = (ev.payload.manifest ?? {}) as Record<string, unknown>;
@@ -212,22 +222,27 @@ export function createConductorBridge(opts: ConductorBridgeOptions): ConductorBr
       abort = new AbortController();
       try {
         const since = opts.cursor.get() ?? "0";
-        const res = await doFetch(`${opts.hubUrl}/v1/events?last_event_id=${encodeURIComponent(since)}`, {
-          headers: { authorization: `Bearer ${opts.token}`, accept: "text/event-stream" },
-          signal: abort.signal,
-        });
-        if (!res.ok) throw new Error(`hub respondeu HTTP ${res.status}`);
+        const res = await doFetch(
+          `${opts.hubUrl}/v1/events?last_event_id=${encodeURIComponent(since)}`,
+          {
+            headers: { authorization: `Bearer ${opts.token}`, accept: "text/event-stream" },
+            signal: abort.signal,
+          }
+        );
+        if (!res.ok) throw new Error(`hub responded with HTTP ${res.status}`);
         state = "connected";
         attempt = 0;
-        log(`conectado ao hub (last_event_id=${since})`);
+        log(`connected to hub (last_event_id=${since})`);
         await readStream(res); // resolves when the hub closes the stream
-        throw new Error("stream encerrado pelo hub");
+        throw new Error("stream closed by hub");
       } catch (err) {
         if (!running) break;
         state = "reconnecting";
         const wait = Math.min(backoffBase * 2 ** attempt, BACKOFF_CAP_MS);
         attempt++;
-        log(`conexão caiu (${err instanceof Error ? err.message : String(err)}) — reconectando em ${wait}ms`);
+        log(
+          `connection dropped (${err instanceof Error ? err.message : String(err)}) — reconnecting in ${wait}ms`
+        );
         await new Promise((resolve) => setTimeout(resolve, wait));
       }
     }

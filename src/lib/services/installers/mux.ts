@@ -107,7 +107,7 @@ export async function install(version = "latest"): Promise<InstallResult> {
   if (!installedVersion) {
     throw new InstallError(
       "Could not read installed version from node_modules/mux/package.json",
-      "Mux instalado mas versão não pôde ser lida.",
+      "Mux is installed, but its version could not be read.",
       500
     );
   }

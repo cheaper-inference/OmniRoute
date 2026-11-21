@@ -1,0 +1,1 @@
+- Translate accidental Portuguese and German API errors, installer messages, logs and SQLite fallback errors into clear English across provider validation, service routes and installers (#20756).

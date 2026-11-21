@@ -13,6 +13,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-browser-exec-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -34,6 +35,9 @@ const { resolveChatGptWebChromeExecutable } =
   await import("../../open-sse/utils/chatgptWebExecutorAdapter.ts");
 const { validateChatGptWebCodexProvider } =
   await import("../../src/lib/providers/validation/chatgptWebCodex.ts");
+// The validator's import chain opens storage.sqlite in TEST_DATA_DIR. Release that handle
+// before cleanup, as the other DATA_DIR tests do, or Windows rmSync fails with EPERM.
+const { closeDbInstance } = await import("../../src/lib/db/core.ts");
 
 // Any program that exists on the server, standing in for a caller-chosen executable.
 const NOT_A_BROWSER = path.join(TEST_DATA_DIR, "not-a-browser");
@@ -44,6 +48,7 @@ test.after(() => {
     if (savedEnv[k] === undefined) delete process.env[k];
     else process.env[k] = savedEnv[k];
   }
+  closeDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
@@ -113,4 +118,67 @@ test("codex validation honours allowLocalSpawn=false: a remote caller never reac
   });
   assert.equal(result.valid, false);
   assert.match(String(result.error), /local/i, "must say the browser check needs a local request");
+});
+
+// Error strings returned by the validator are rendered in the dashboard. They must be English:
+// the old German wording shipped to English-only operators. Each assertion also rejects the
+// distinctive legacy phrase so a partial revert is caught.
+test("codex validation: the missing-cookie error is English, not the legacy German phrase", async () => {
+  // "cookie:" decodes to an empty cookie without throwing, reaching the missing-cookie check.
+  const result = await validateChatGptWebCodexProvider({ apiKey: "cookie:" });
+  assert.equal(result.valid, false);
+  assert.equal(
+    result.error,
+    "A fresh ChatGPT cookie or a saved browser state is required for browser validation."
+  );
+  assert.doesNotMatch(
+    String(result.error),
+    /Browserprüfung|für die|frischer ChatGPT-Cookie|Browserzustand|erforderlich/i
+  );
+});
+
+test("codex validation: the bad-tunnel error is English, not the legacy German phrase", async () => {
+  const result = await validateChatGptWebCodexProvider({
+    apiKey: "__Secure-next-auth.session-token=test-cookie",
+    providerSpecificData: { runtimeKey: "runtime-key", tunnelId: "not-a-tunnel-id" },
+  });
+  assert.equal(result.valid, false);
+  assert.equal(
+    result.error,
+    "Tunnel ID and runtime key must both be configured with valid values."
+  );
+  assert.doesNotMatch(
+    String(result.error),
+    /Tunnel-ID und Runtime-Key|müssen gemeinsam gültig konfiguriert/i
+  );
+});
+
+test("codex validation: the no-Chrome error is English, not the legacy German phrase", async () => {
+  const source = fs.readFileSync(
+    path.join(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "../../src/lib/providers/validation/chatgptWebCodex.ts"
+    ),
+    "utf8"
+  );
+  assert.match(source, /No supported Chrome or Chromium was found\./);
+  assert.doesNotMatch(source, /Kein unterstütztes Chrome oder Chromium gefunden\./);
+
+  // Drive the real branch when this host has no operator-configured browser. CI images
+  // with Chrome at a hardcoded POSIX path would otherwise reach the browser launch.
+  if (!detectChromeExecutable()) {
+    const result = await validateChatGptWebCodexProvider({
+      apiKey: "__Secure-next-auth.session-token=test-cookie",
+      allowLocalSpawn: true,
+    });
+    assert.equal(result.valid, false);
+    assert.equal(
+      result.error,
+      "No supported Chrome or Chromium was found. Install Chromium or configure the browser path."
+    );
+    assert.doesNotMatch(
+      String(result.error),
+      /Kein unterstütztes Chrome|Installiere Chromium|Browserpfad/i
+    );
+  }
 });
