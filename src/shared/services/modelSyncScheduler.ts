@@ -238,11 +238,15 @@ async function getAutoSyncConnections(): Promise<
 export async function syncConnectionModels(
   connectionId: string,
   provider: string,
-  baseUrl: string
+  baseUrl: string,
+  options: { mode?: "import" | "sync" } = {}
 ): Promise<boolean> {
   try {
+    // `mode=import` keeps the catalog-import semantics the API-key create path
+    // had before it moved to this shared helper.
+    const query = options.mode === "import" ? "?mode=import" : "";
     const res = await fetchModelSyncInternal(
-      `${baseUrl}/api/providers/${connectionId}/sync-models`,
+      `${baseUrl}/api/providers/${connectionId}/sync-models${query}`,
       {
         method: "POST",
         redirect: "error",

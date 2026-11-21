@@ -5,6 +5,7 @@ import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import { LocalOnlyNotice } from "@/shared/components/LocalOnlyNotice";
 import { useServiceStatus } from "../hooks/useServiceStatus";
 
 function StateDot({ state, health }: { state: string; health: string }) {
@@ -28,7 +29,9 @@ interface ServiceStatusCardProps {
 
 export function ServiceStatusCard({ name }: ServiceStatusCardProps) {
   const t = useTranslations("embeddedServices");
-  const { data, isLoading, error } = useServiceStatus(name);
+  const { data, isLoading, error, localOnly } = useServiceStatus(name);
+
+  if (localOnly) return <LocalOnlyNotice />;
 
   if (isLoading && !data) {
     return (

@@ -61,20 +61,24 @@ async function uploadOneImageRef(
   if (ref.startsWith("https://r2.syntx.ai/") || /^https?:\/\//i.test(ref)) return ref;
   if (!ref.startsWith("data:")) return null;
   const decoded = decodeDataUrlBounded(ref);
-  if (!decoded) return null;
+  if (!decoded || decoded.bytes.byteLength === 0) {
+    throw new SyntxMediaError("Could not decode image reference for SYNTX image generation", 400);
+  }
   const ext =
     decoded.mime.includes("jpeg") || decoded.mime.includes("jpg")
       ? "jpg"
       : decoded.mime.includes("webp")
         ? "webp"
         : "png";
-  return uploadSyntxMediaFile({
+  const uploaded = await uploadSyntxMediaFile({
     token,
     bytes: decoded.bytes,
     filename: `reference.${ext}`,
     mimeType: decoded.mime,
     fetchImpl,
   });
+  if (!uploaded) throw new SyntxMediaError("SYNTX rejected the image reference upload", 502);
+  return uploaded;
 }
 
 async function collectUploadedImageRefs(

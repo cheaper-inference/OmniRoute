@@ -21,6 +21,7 @@ import type {
   QuotaStore,
 } from "../../src/lib/quota/types.ts";
 import type { LedgerStore } from "../../src/lib/quota/percentLedger.ts";
+import { runFakeLedgerScript } from "./helpers/fakeRedisLedgerScripts.ts";
 
 // DATA_DIR must be set before any DB module is imported.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-ledger-stores-"));
@@ -40,7 +41,12 @@ test.after(() => {
 // ─── In-memory stand-in for the ioredis client ──────────────────────────────
 
 const hashes = new Map<string, Map<string, string>>();
-const calls: Array<{ method: string; args: unknown[] }> = [];
+/** Every command the store sends. `inScript` marks a command run by a script, not sent alone. */
+const calls: Array<{ method: string; args: unknown[]; inScript: boolean }> = [];
+let scriptDepth = 0;
+function record(method: string, args: unknown[]): void {
+  calls.push({ method, args, inScript: scriptDepth > 0 });
+}
 /**
  * One-shot hooks run inside the next hgetall / hincrbyfloat, before it acts (to interleave another
  * writer). A hook that returns a promise is awaited first; one that returns nothing is not, so a
@@ -48,7 +54,6 @@ const calls: Array<{ method: string; args: unknown[] }> = [];
  */
 type Hook = () => void | Promise<void>;
 let beforeNextHgetall: Hook | null = null;
-let beforeNextHincrbyfloat: Hook | null = null;
 
 /** Run a hook; returns its promise only when it has one, so a plain hook adds no await. */
 function runHook(hook: Hook | null): Promise<void> | undefined {
@@ -72,7 +77,7 @@ function hashOf(key: string): Map<string, string> {
 
 const fake = {
   async hgetall(key: string): Promise<Record<string, string>> {
-    calls.push({ method: "hgetall", args: [key] });
+    record("hgetall", [key]);
     const hook = beforeNextHgetall;
     beforeNextHgetall = null;
     const pending = runHook(hook);
@@ -80,37 +85,33 @@ const fake = {
     return Object.fromEntries(hashes.get(key) ?? []);
   },
   async hset(key: string, field: string, value: string): Promise<number> {
-    calls.push({ method: "hset", args: [key, field, value] });
+    record("hset", [key, field, value]);
     const hash = hashOf(key);
     const created = hash.has(field) ? 0 : 1;
     hash.set(field, value);
     return created;
   },
   async hsetnx(key: string, field: string, value: string): Promise<number> {
-    calls.push({ method: "hsetnx", args: [key, field, value] });
+    record("hsetnx", [key, field, value]);
     const hash = hashOf(key);
     if (hash.has(field)) return 0;
     hash.set(field, value);
     return 1;
   },
   async hincrbyfloat(key: string, field: string, increment: number): Promise<string> {
-    calls.push({ method: "hincrbyfloat", args: [key, field, increment] });
-    const hook = beforeNextHincrbyfloat;
-    beforeNextHincrbyfloat = null;
-    const pending = runHook(hook);
-    if (pending) await pending;
+    record("hincrbyfloat", [key, field, increment]);
     const hash = hashOf(key);
     const next = Number(hash.get(field) ?? "0") + increment;
     hash.set(field, String(next));
     return String(next);
   },
   async hdel(key: string, ...fields: string[]): Promise<number> {
-    calls.push({ method: "hdel", args: [key, ...fields] });
+    record("hdel", [key, ...fields]);
     const hash = hashes.get(key);
     return fields.filter((f) => hash?.delete(f)).length;
   },
   async expire(key: string, seconds: number): Promise<number> {
-    calls.push({ method: "expire", args: [key, seconds] });
+    record("expire", [key, seconds]);
     return hashes.has(key) ? 1 : 0;
   },
   async incrbyfloat(): Promise<string> {
@@ -119,8 +120,14 @@ const fake = {
   async mget(...keys: string[]): Promise<Array<string | null>> {
     return keys.map(() => null);
   },
-  async eval(): Promise<unknown> {
-    return null;
+  async eval(script: string, numkeys: number, ...args: unknown[]): Promise<unknown> {
+    record("eval", [script, numkeys, ...args]);
+    scriptDepth += 1;
+    try {
+      return await runFakeLedgerScript(fake, script, numkeys, args);
+    } finally {
+      scriptDepth -= 1;
+    }
   },
   async del(): Promise<number> {
     return 0;
@@ -599,6 +606,61 @@ test("redis: one hash per pool connection, old revisions removed, 60-day TTL", a
   );
 });
 
+test("redis: each book write sets the hash expiry in the same call as the write", async () => {
+  const redis = redisWithFakeClient();
+  const K = keyOf("p-redis-atomic-expiry");
+  const hashKey = `${process.env.REDIS_KEY_PREFIX?.trim() || "omniroute:"}quota-ledger:${K.poolId}:c`;
+  const TTL = 5_184_000;
+  const sentAlone = () => calls.filter((c) => !c.inScript && c.method !== "hgetall");
+  const runByScript = () => {
+    const ran = calls.filter((c) => c.inScript);
+    assert.ok(
+      ran.every((c) => c.args[0] === hashKey),
+      "the script writes the book's hash"
+    );
+    return ran.map((c) => [c.method, c.args[1]]);
+  };
+
+  calls.length = 0;
+  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 10_000, T0);
+  assert.deepEqual(
+    sentAlone().map((c) => c.method),
+    ["eval"],
+    "the token write and its expiry are one call"
+  );
+  assert.match(String(sentAlone()[0].args[0]), /"EXPIRE", KEYS\[1\]/);
+  assert.deepEqual(runByScript(), [
+    ["hset", "u:a"],
+    ["hincrbyfloat", "t:a"],
+    ["expire", TTL],
+  ]);
+
+  calls.length = 0;
+  assert.equal((await obs(redis, K, 0.1, 0))?.state.rev, 1);
+  assert.deepEqual(
+    sentAlone().map((c) => c.method),
+    ["eval"],
+    "the commit and its expiry are one call"
+  );
+  assert.match(String(sentAlone()[0].args[0]), /"EXPIRE", KEYS\[1\]/);
+  assert.deepEqual(runByScript(), [
+    ["hsetnx", "s:5h:1"],
+    ["expire", TTL],
+  ]);
+
+  // The removal of the superseded revision stays a separate best-effort call.
+  calls.length = 0;
+  assert.equal((await obs(redis, K, 0.3, 1))?.state.rev, 2);
+  assert.deepEqual(
+    sentAlone().map((c) => c.method),
+    ["eval", "hdel"]
+  );
+  assert.deepEqual(runByScript(), [
+    ["hsetnx", "s:5h:2"],
+    ["expire", TTL],
+  ]);
+});
+
 test("redis: a revision field removed after the check cannot be won a second time", async () => {
   const redis = redisWithFakeClient();
   const K = keyOf("p-redis-resurrect");
@@ -666,30 +728,6 @@ test("redis: a commit overtaken before its confirmation is re-read, never applie
   );
   // Both keys routed after the book opened: the growth of 0.15 is split 50_000 : 30_000.
   assertParts(out, { a: 0.09375, b: 0.05625 }, 0.1, "after the spurious loss");
-});
-
-test("redis: a read between the two commands of a token write counts the tokens at the next one", async () => {
-  const redis = redisWithFakeClient();
-  const K = keyOf("p-redis-split-token-write");
-  const at = (m: number) => T0 + m * MIN;
-  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 10_000, T0);
-  await obs(redis, K, 0.1, 0);
-  // The write stores the last-write time, then increments the tokens: observe in between.
-  const seen: { mid: LedgerSnapshot | null } = { mid: null };
-  beforeNextHincrbyfloat = async () => {
-    const snap = await redis.ledgerRead(K);
-    assert.deepEqual(snap.counters.a, { tokens: 10_000, updatedAt: at(1) });
-    seen.mid = await obs(redis, K, 0.15, 2);
-  };
-  await redis.ledgerRecordTokens(K.poolId, K.connectionId, "a", 50_000, at(1));
-  const between = seen.mid;
-  assert.ok(between, "the interleaving ran");
-  assertParts(between, {}, 0.15, "nothing to explain the rise yet");
-  assert.deepEqual(between.state.keys, { a: { startTokens: 10_000 } });
-
-  const after = await obs(redis, K, 0.2, 3);
-  assertParts(after, { a: 0.1 }, 0.1, "the new tokens explain the growth since the baseline");
-  assert.deepEqual(after?.state.keys, { a: { startTokens: 10_000 } }, "the mark did not move");
 });
 
 test("redis: a stored field that is not a usable book is skipped and removed", async () => {
