@@ -148,11 +148,19 @@ export function escapeHistoricalContextContent(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-export function buildHistoricalToolResultContext(name: string, response: unknown): string {
+export function buildHistoricalToolResultContext(
+  name: string,
+  response: unknown,
+  isError = false
+): string {
   const source = escapeHistoricalContextAttribute(name || "unknown");
   const rawResult =
     typeof response === "string" ? response : stringifyHistoricalToolArguments(response);
-  const result = escapeHistoricalContextContent(rawResult);
+  // Same marker claude-to-openai uses: the context text has no is_error field, so the failure
+  // stays visible to the model in the text itself.
+  const result = escapeHistoricalContextContent(
+    isError ? `[tool_error: true]\n${rawResult}` : rawResult
+  );
   return [
     `<previous_tool_result_context source="${source}">`,
     result,
