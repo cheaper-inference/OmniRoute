@@ -442,10 +442,12 @@ before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed
 ### Self-service page
 
 With `QUOTA_SELF_PANEL` on, `/quota/{provider}` is a public page. A key holder types an API key
-there and sees that key's pools for the provider. Each pool shows one card per window, with the
-account bar (when the key may see account data) and the key's own share. The page also lists the
-per-model limits of each account, notices for a schedule block or a per-model cap, and the key's
-own usage. `{provider}` is a provider id or its alias (`/quota/claude`, `/quota/cc`). An unknown
+there and sees that key's pools for the provider. Each pool shows one card per pool window, with
+the pool's use for everyone and the key's own share. Each account of the pool has its own cards,
+with the account's use and the key's share. The account's use appears only when the key may see
+account data. The page also lists the per-model limits of each account and the key's own usage. A
+notice appears when a schedule blocks the key right now. A card lists every per-model cap of the
+key with its use, and marks the ones reached. `{provider}` is a provider id or its alias (`/quota/claude`, `/quota/cc`). An unknown
 provider, and every `/quota/*` path while the flag is off, answer 404. Pools on a custom OpenAI-
 or Anthropic-compatible node have no page. The API still answers for them.
 
