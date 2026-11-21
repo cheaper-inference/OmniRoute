@@ -9,6 +9,10 @@ export type QuotaWindow = z.infer<typeof QuotaWindowSchema>;
 export const PolicySchema = z.enum(["hard", "soft", "burst"]);
 export type Policy = z.infer<typeof PolicySchema>;
 
+/** How a pool lets a key pass its share: on account headroom, or only within lent capacity. */
+export const BorrowModeSchema = z.enum(["saturation", "consent"]);
+export type BorrowMode = z.infer<typeof BorrowModeSchema>;
+
 export const QuotaDimensionSchema = z.object({
   unit: QuotaUnitSchema,
   window: QuotaWindowSchema,
