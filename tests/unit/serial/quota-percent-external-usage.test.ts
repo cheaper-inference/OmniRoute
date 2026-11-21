@@ -27,6 +27,7 @@ import type { EnforceDecision } from "../../../src/lib/quota/types.ts";
 // ── Set DATA_DIR BEFORE any DB import (resolved as module-level constant) ───
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-external-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.QUOTA_STORE_DRIVER = "sqlite";
 
 const providerPlans = await import("../../../src/lib/db/providerPlans.ts");
 const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
