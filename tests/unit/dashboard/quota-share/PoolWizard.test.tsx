@@ -9,6 +9,8 @@ vi.mock("next-intl", () => ({
 
 const { default: PoolWizard } =
   await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/PoolWizard");
+const { default: MemberBreakdownField } =
+  await import("../../../../src/app/(dashboard)/dashboard/costs/quota-share/components/MemberBreakdownField");
 
 type WizardProps = React.ComponentProps<typeof PoolWizard>;
 
@@ -310,5 +312,27 @@ describe("PoolWizard on the kit Wizard", () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockFetch.mock.calls[0][0]).toBe("/api/quota/pools/pool-1");
     expect(requestsTo("PATCH")).toHaveLength(1);
+  });
+});
+
+describe("MemberBreakdownField", () => {
+  afterEach(() => cleanup());
+
+  const field = (checked: boolean, keyCount: number) =>
+    render(<MemberBreakdownField checked={checked} onChange={() => {}} keyCount={keyCount} />);
+
+  it("says the bars stay hidden above 20 keys, only when the option is on", () => {
+    field(true, 21);
+    expect(screen.getByText("memberBreakdownTooMany")).toBeTruthy();
+    expect(screen.queryByText("memberBreakdownTooFew")).toBeNull();
+    cleanup();
+
+    field(true, 20);
+    expect(screen.queryByText("memberBreakdownTooMany")).toBeNull();
+    expect(screen.queryByText("memberBreakdownTooFew")).toBeNull();
+    cleanup();
+
+    field(false, 21);
+    expect(screen.queryByText("memberBreakdownTooMany")).toBeNull();
   });
 });

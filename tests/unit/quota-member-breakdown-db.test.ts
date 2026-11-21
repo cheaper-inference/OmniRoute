@@ -12,11 +12,13 @@ import { fileURLToPath } from "node:url";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-member-breakdown-db-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "member-breakdown-db-test-secret";
 
 const core = await import("../../src/lib/db/core.ts");
 const { createPool, updatePool } = await import("../../src/lib/db/quotaPools.ts");
-const { getPoolMemberBreakdown, setPoolMemberBreakdown, withMemberBreakdown } =
+const { countUsablePoolKeys, getPoolMemberBreakdown, setPoolMemberBreakdown, withMemberBreakdown } =
   await import("../../src/lib/db/quotaMemberBreakdown.ts");
+const apiKeys = await import("../../src/lib/db/apiKeys.ts");
 const { PoolUpdateSchema } = await import("../../src/shared/schemas/quota.ts");
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -78,7 +80,7 @@ test("the wizard strings are the planned English text", () => {
   assert.equal(strings.memberBreakdownLabel, "Show usage by member to key holders");
   assert.equal(
     strings.memberBreakdownHint,
-    "On the self-service page, each key holder sees how much every other key used, without names. The bars need three or more keys and a key that may see account usage."
+    "On the self-service page, each key holder sees how much every other key used, without names. The bars need from 3 to 20 keys and a key that may see account usage."
   );
   assert.equal(
     strings.memberBreakdownWarning,
@@ -88,4 +90,66 @@ test("the wizard strings are the planned English text", () => {
     strings.memberBreakdownTooFew,
     "This pool has fewer than three keys, so the bars stay hidden."
   );
+  assert.equal(
+    strings.memberBreakdownTooMany,
+    "This pool has more than 20 keys, so the bars stay hidden."
+  );
+  const keys = Object.keys(strings);
+  assert.equal(keys.indexOf("memberBreakdownTooMany"), keys.indexOf("memberBreakdownTooFew") + 1);
+});
+
+const NOW_MS = Date.parse("2026-05-27T15:30:00.000Z");
+
+/** A pool over three fresh keys plus `extra` ids, and the three key ids. */
+async function poolOfThree(tag: string, extra: string[] = []) {
+  const ids: string[] = [];
+  for (const n of [1, 2, 3]) {
+    ids.push((await apiKeys.createApiKey(`usable-${tag}-${n}`, `machine-usable-${tag}-${n}`)).id);
+  }
+  const created = createPool({
+    connectionId: `conn-usable-${tag}`,
+    name: `Usable ${tag}`,
+    allocations: [...ids, ...extra].map((apiKeyId) => ({ apiKeyId, weight: 25, policy: "hard" })),
+  });
+  return { poolId: created.id, ids };
+}
+
+test("usable keys are counted among the pool's allocations", async () => {
+  const { poolId } = await poolOfThree("all");
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 3);
+  assert.equal(countUsablePoolKeys("no-such-pool", NOW_MS), 0);
+});
+
+test("an allocation without a key row is not usable", async () => {
+  const { poolId } = await poolOfThree("ghost", ["no-such-key"]);
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 3);
+});
+
+test("a disabled key is not usable", async () => {
+  const { poolId, ids } = await poolOfThree("disabled");
+  await apiKeys.updateApiKeyPermissions(ids[0], { isActive: false });
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 2);
+});
+
+test("a revoked key is not usable, even if marked active again", async () => {
+  const { poolId, ids } = await poolOfThree("revoked");
+  await apiKeys.revokeApiKey(ids[0]);
+  await apiKeys.updateApiKeyPermissions(ids[0], { isActive: true });
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 2);
+});
+
+test("a banned key is not usable", async () => {
+  const { poolId, ids } = await poolOfThree("banned");
+  await apiKeys.updateApiKeyPermissions(ids[0], { isBanned: true });
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 2);
+});
+
+test("a key past its expiry, or expiring at the instant, is not usable", async () => {
+  const { poolId, ids } = await poolOfThree("expired");
+  await apiKeys.setApiKeyExpiry(ids[0], new Date(NOW_MS + 1).toISOString());
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 3);
+  await apiKeys.setApiKeyExpiry(ids[0], new Date(NOW_MS).toISOString());
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 2);
+  await apiKeys.setApiKeyExpiry(ids[0], new Date(NOW_MS - 60_000).toISOString());
+  assert.equal(countUsablePoolKeys(poolId, NOW_MS), 2);
 });

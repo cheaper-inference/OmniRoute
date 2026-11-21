@@ -1,15 +1,17 @@
 "use client";
 
 /**
- * Pool wizard option: show key holders anonymous usage bars for the other members of the pool.
- * The privacy warning is always visible. The "too few keys" note appears when the option is on
- * and the pool has fewer than three keys, because the self-service view then sends no bars.
+ * Pool wizard option: show key holders usage bars, without names, for the other members of the
+ * pool. The privacy warning is always visible. When the option is on, a note appears for a pool
+ * with fewer than three keys or more than 20, because the self-service view then sends no bars.
+ * The wizard counts the keys of its form: it cannot tell which of them can make requests.
  */
 
 import { useTranslations } from "next-intl";
 import Checkbox from "@/shared/components/Checkbox";
 
 const MIN_MEMBER_KEYS = 3;
+const MAX_MEMBER_KEYS = 20;
 
 export default function MemberBreakdownField({
   checked,
@@ -40,6 +42,9 @@ export default function MemberBreakdownField({
       <p className="mt-1 break-words text-xs text-text-muted">{t("memberBreakdownWarning")}</p>
       {checked && keyCount < MIN_MEMBER_KEYS && (
         <p className="mt-1 break-words text-xs text-text-main">{t("memberBreakdownTooFew")}</p>
+      )}
+      {checked && keyCount > MAX_MEMBER_KEYS && (
+        <p className="mt-1 break-words text-xs text-text-main">{t("memberBreakdownTooMany")}</p>
       )}
     </div>
   );

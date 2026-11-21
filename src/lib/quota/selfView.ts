@@ -54,7 +54,7 @@ import { PolicySchema, type Policy, type QuotaDimension } from "./dimensions";
 import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
 import { buildSelfViewBlocks } from "./selfViewBlocks";
-import { attachCountableMembers } from "./selfViewMembers";
+import { attachCountableMembers, readMemberBreakdown } from "./selfViewMembers";
 import { readPercentShares } from "./selfViewPercent";
 import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type {
@@ -83,6 +83,7 @@ type CoreDeps = Required<
     | "resolvePublicApiBaseUrl"
     | "peekPlanWindowReading"
     | "getPoolMemberBreakdown"
+    | "countUsablePoolKeys"
   >
 > & { secret: string };
 
@@ -178,11 +179,14 @@ const DEFAULT_DEPS_LOADERS: Array<{
     }),
   },
   {
-    keys: ["getPoolMemberBreakdown"],
-    load: async () => ({
-      getPoolMemberBreakdown: (await import("@/lib/db/quotaMemberBreakdown"))
-        .getPoolMemberBreakdown,
-    }),
+    keys: ["getPoolMemberBreakdown", "countUsablePoolKeys"],
+    load: async () => {
+      const m = await import("@/lib/db/quotaMemberBreakdown");
+      return {
+        getPoolMemberBreakdown: m.getPoolMemberBreakdown,
+        countUsablePoolKeys: m.countUsablePoolKeys,
+      };
+    },
   },
 ];
 
@@ -251,7 +255,13 @@ async function resolvePoolContext(
       accountVisible,
       input.allowedConnections
     ),
-    memberBreakdown: deps.getPoolMemberBreakdown(pool.id),
+    ...readMemberBreakdown({
+      poolId: pool.id,
+      accountVisible,
+      nowMs: deps.now(),
+      getOption: deps.getPoolMemberBreakdown,
+      countUsable: deps.countUsablePoolKeys,
+    }),
   };
 }
 

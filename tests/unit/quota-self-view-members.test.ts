@@ -7,7 +7,7 @@
  * Slot 1 is the asking key. The other slots come from a keyed hash per asking key and pool.
  */
 
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 
 import type { LedgerKey, LedgerSnapshot, LedgerState } from "../../src/lib/quota/types.ts";
@@ -28,6 +28,20 @@ import type { MakeDepsOverrides } from "./fixtures/quotaSelfView.ts";
 // the arithmetic below.
 const savedFloor = process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
 delete process.env.QUOTA_PERCENT_MIN_TOKENS_PER_POINT;
+
+// Server-side warnings of the view are captured: the view's modules build their logger on import.
+const { logger } = await import("../../src/shared/utils/logger.ts");
+const warnings: Array<{ obj: unknown; msg: unknown }> = [];
+const realChild = logger.child.bind(logger);
+mock.method(logger, "child", (...args: Parameters<typeof logger.child>) => {
+  const child = realChild(...args);
+  if ((args[0] as { module?: string })?.module === "quota:self-view") {
+    (child as unknown as { warn: (obj: unknown, msg: unknown) => void }).warn = (obj, msg) => {
+      warnings.push({ obj, msg });
+    };
+  }
+  return child;
+});
 
 const { buildQuotaSelfView } = await import("../../src/lib/quota/selfView.ts");
 const { buildMemberSlices } = await import("../../src/lib/quota/selfViewMembers.ts");
@@ -398,4 +412,134 @@ test("a percent window sends no slices to a key without account data", async () 
   });
   near(v.pools[0].accounts[0].dimensions[0].yourShare.consumed, 54);
   assert.equal(JSON.stringify(v).includes('"members"'), false);
+});
+
+// ── Usable keys, ceiling, failing reads, two holders ────────────────────────
+
+const FOUR = [...THREE, alloc("key-d", 10)];
+
+test("the floor counts keys that can make requests, read once per pool at the view's instant", async () => {
+  const asked: Array<[string, number]> = [];
+  const count = (n: number) => (poolId: string, nowMs: number) => {
+    asked.push([poolId, nowMs]);
+    return n;
+  };
+  const two = await view(on({ countUsablePoolKeys: count(2) }));
+  assert.equal(JSON.stringify(two).includes('"members"'), false);
+  assert.deepEqual(asked.sort(), [
+    ["pool-a-id", NOW],
+    ["pool-b-id", NOW],
+  ]);
+  asked.length = 0;
+  const dim = (await view(on({ countUsablePoolKeys: count(3) }))).pools[0].dimensions[0];
+  assert.equal(dim.members?.length, 3);
+});
+
+test("three usable keys and a dead one give four slices", async () => {
+  const use: Record<string, number> = { ...usage, "key-d": 7 };
+  const v = await view(
+    on({
+      pool: { allocations: FOUR },
+      countUsablePoolKeys: () => 3,
+      store: { peek: async (id: string) => use[id] },
+    })
+  );
+  const members = v.pools[0].dimensions[0].members;
+  assert.deepEqual(
+    members?.map((m) => m.consumed).sort((a, b) => a - b),
+    [0, 7, 120, 300]
+  );
+});
+
+test("the usable-key count is not read when the option is off or account data is hidden", async () => {
+  let reads = 0;
+  const counted = () => {
+    reads += 1;
+    return 3;
+  };
+  await view(on({ getPoolMemberBreakdown: () => false, countUsablePoolKeys: counted }));
+  await view(on({ countUsablePoolKeys: counted }), { scopes: [SELF_USAGE_SCOPE] });
+  assert.equal(reads, 0);
+});
+
+function many(n: number) {
+  const keys = ["key-a", ...Array.from({ length: n - 1 }, (_, i) => `member-${i + 1}`)];
+  return keys.map((id) => alloc(id, 1));
+}
+
+test("the bars exist for at most 20 allocated keys, in a countable window", async () => {
+  const countable = (n: number) =>
+    view(on({ pool: { allocations: many(n) }, store: { peek: async () => 1 } }));
+  assert.equal((await countable(20)).pools[0].dimensions[0].members?.length, 20);
+  const over = await countable(21);
+  assert.equal(JSON.stringify(over).includes('"members"'), false);
+  assert.equal(over.pools[0].dimensions[0].yourShare.consumed, 1);
+});
+
+test("the bars exist for at most 20 allocated keys, in a percent window", async () => {
+  const percent = (n: number) =>
+    view(
+      on({ plan: PERCENT_PLAN, pool: { allocations: many(n) }, getQuotaStore: async () => book })
+    );
+  assert.equal((await percent(20)).pools[0].accounts[0].dimensions[0].members?.length, 20);
+  const over = await percent(21);
+  assert.equal(JSON.stringify(over).includes('"members"'), false);
+  assert.equal(over.pools[0].accounts[0].dimensions[0].yourShare.status, "stale");
+});
+
+test("a failing read of the option or of the usable keys counts as off and is logged", async () => {
+  const failing: MakeDepsOverrides[] = [
+    {
+      getPoolMemberBreakdown: () => {
+        throw new Error("db down");
+      },
+    },
+    {
+      countUsablePoolKeys: () => {
+        throw new Error("db down");
+      },
+    },
+  ];
+  for (const over of failing) {
+    warnings.length = 0;
+    const v = await view(on(over));
+    assert.equal(v.pools.length, 2);
+    assert.equal(v.pools[0].dimensions[0].yourShare.consumed, 120);
+    assert.equal(JSON.stringify(v).includes('"members"'), false);
+    const logged = warnings.map((w) => (w.obj as { poolId?: string }).poolId).sort();
+    assert.deepEqual(logged, ["pool-a-id", "pool-b-id"]);
+    assert.equal(JSON.stringify(warnings).includes("db down"), true);
+  }
+});
+
+test("two holders of the same pool get the same values in different slot orders", async () => {
+  const keys = ["key-a", "key-b", ...Array.from({ length: 10 }, (_, i) => `member-${i + 1}`)];
+  // Each member's use is unique, so the order of the values names the order of the members.
+  const use = Object.fromEntries(keys.map((id, i) => [id, (i + 1) * 10]));
+  const deps = on({
+    pool: { allocations: keys.map((id) => alloc(id, 1)) },
+    store: { peek: async (id: string) => use[id] },
+  });
+  const as = async (apiKeyId: string) =>
+    (await view(deps, { apiKeyId })).pools[0].dimensions[0].members ?? [];
+  const forA = await as("key-a");
+  const forB = await as("key-b");
+  for (const [members, own] of [
+    [forA, use["key-a"]],
+    [forB, use["key-b"]],
+  ] as const) {
+    assert.equal(members.length, keys.length);
+    assert.deepEqual(
+      members.filter((m) => m.isYou),
+      [{ slot: 1, consumed: own, isYou: true }]
+    );
+    assert.equal(members[0].isYou, true);
+  }
+  const shared = (members: typeof forA) =>
+    members
+      .map((m) => m.consumed)
+      .filter((value) => value !== use["key-a"] && value !== use["key-b"]);
+  assert.equal(shared(forA).length, 10);
+  assert.deepEqual([...shared(forA)].sort(), [...shared(forB)].sort());
+  assert.notDeepEqual(shared(forA), shared(forB));
 });

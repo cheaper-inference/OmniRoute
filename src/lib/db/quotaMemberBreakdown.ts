@@ -37,6 +37,24 @@ export function setPoolMemberBreakdown(poolId: string, enabled: boolean): boolea
   return result.changes > 0;
 }
 
+/**
+ * How many keys allocated in the pool can make requests at `nowMs`: active, not banned, not
+ * revoked and not expired. The rule is the one the key queries of apiKeys.ts apply
+ * (getExclusiveLeaseConnectionIds), so an expiry at or before the instant counts as expired.
+ * An allocation without a key row is not counted.
+ */
+export function countUsablePoolKeys(poolId: string, nowMs: number): number {
+  const row = getDb()
+    .prepare<{ n: number }>(
+      `SELECT COUNT(DISTINCT a.api_key_id) AS n FROM quota_allocations a
+       INNER JOIN api_keys k ON k.id = a.api_key_id
+       WHERE a.pool_id = ? AND k.is_active != 0 AND k.is_banned != 1 AND k.revoked_at IS NULL
+       AND (k.expires_at IS NULL OR k.expires_at > ?)`
+    )
+    .get(poolId, new Date(nowMs).toISOString());
+  return row?.n ?? 0;
+}
+
 /** Adds `memberBreakdown` to each pool with a single query. */
 export function withMemberBreakdown<T extends { id: string }>(
   pools: T[]

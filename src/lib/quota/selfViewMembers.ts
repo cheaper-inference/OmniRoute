@@ -1,9 +1,11 @@
 /**
  * selfViewMembers.ts — the member usage slices of the self-service quota view.
  *
- * A dimension carries `members` only when the pool's option is on, the pool has three or more
- * distinct keys, the asking key may see account data (`ctx.accountVisible`) and the key's own
- * reading of that window is available. A slice is `{ slot, consumed, isYou }` and nothing else.
+ * A dimension carries `members` only when the pool's option is on, three or more of the pool's
+ * keys can make requests, the pool has at most 20 allocated keys, the asking key may see account
+ * data (`ctx.accountVisible`) and the key's own reading of that window is available. The slices
+ * list every allocated key, also one that stopped working. A slice is `{ slot, consumed, isYou }`
+ * and nothing else. A failing read of the option or of the usable-key count counts as off.
  *
  * Slot 1 is the asking key. The other members are ranked by HMAC-SHA256 with the server secret
  * over (context, pool id, asking key id, member id), so the numbering is stable for one asking
@@ -16,15 +18,49 @@
  */
 
 import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
+import { createLogger } from "@/shared/utils/logger";
 import type { SelfQuotaMemberSlice, SelfQuotaSharedDimension } from "@/shared/schemas/selfQuota";
 import { readViewStore, type ViewStore } from "./selfViewStore";
 import type { SelfViewPoolContext } from "./selfViewTypes";
 
+/** Usable keys the pool needs for the bars. */
 const MIN_MEMBERS_FOR_BREAKDOWN = 3;
+/** Allocated keys above which the bars are not sent: each one costs a read per window. */
+const MAX_MEMBERS_FOR_BREAKDOWN = 20;
 const MEMBER_SLOT_CONTEXT = "quota-member-slot:v1";
 const MEMBER_SLOT_DIGEST_LENGTH = 32;
 
 type MemberValue = { apiKeyId: string; consumed: number | null };
+
+const log = createLogger("quota:self-view");
+
+/**
+ * The pool's option and, when it is on, how many of its keys can make requests. Nothing is read
+ * when the key may not see account data. A failing read counts as off, with a server-side warning.
+ */
+export function readMemberBreakdown(input: {
+  poolId: string;
+  accountVisible: boolean;
+  nowMs: number;
+  getOption: (poolId: string) => boolean;
+  countUsable: (poolId: string, nowMs: number) => number;
+}): { memberBreakdown: boolean; usableMemberCount: number } {
+  const off = { memberBreakdown: false, usableMemberCount: 0 };
+  if (!input.accountVisible) return off;
+  try {
+    if (!input.getOption(input.poolId)) return off;
+    return {
+      memberBreakdown: true,
+      usableMemberCount: input.countUsable(input.poolId, input.nowMs),
+    };
+  } catch (err) {
+    log.warn(
+      { err: (err as Error)?.message, poolId: input.poolId },
+      "self-service quota view: member breakdown lookup failed"
+    );
+    return off;
+  }
+}
 
 function assignMemberSlots({
   poolId,
@@ -95,11 +131,16 @@ export function buildMemberSlices(input: {
     .sort((a, b) => a.slot - b.slot);
 }
 
-/** The pool option is on, the key may see account data, and the pool has three or more distinct keys. */
+/**
+ * The pool option is on, the key may see account data, three or more keys can make requests,
+ * and the pool has from three to 20 distinct allocated keys.
+ */
 export function membersAllowed(ctx: SelfViewPoolContext): boolean {
   if (!ctx.memberBreakdown || !ctx.accountVisible) return false;
+  if (ctx.usableMemberCount < MIN_MEMBERS_FOR_BREAKDOWN) return false;
   const allocations = Array.isArray(ctx.pool.allocations) ? ctx.pool.allocations : [];
-  return new Set(allocations.map((a) => a.apiKeyId)).size >= MIN_MEMBERS_FOR_BREAKDOWN;
+  const allocated = new Set(allocations.map((a) => a.apiKeyId)).size;
+  return allocated >= MIN_MEMBERS_FOR_BREAKDOWN && allocated <= MAX_MEMBERS_FOR_BREAKDOWN;
 }
 
 /** The members of one countable dimension: the asking key's share, the others read in parallel. */

@@ -69,6 +69,8 @@ export interface QuotaSelfViewDeps {
   ) => PlanWindowReading | null;
   /** The pool's member usage option (quota_pools.member_breakdown). */
   getPoolMemberBreakdown?: (poolId: string) => boolean;
+  /** How many keys allocated in the pool can make requests at `nowMs`. */
+  countUsablePoolKeys?: (poolId: string, nowMs: number) => number;
 }
 
 /** A pool the key is allocated in, resolved for one provider. Internal ids stay here. */
@@ -84,6 +86,11 @@ export interface SelfViewPoolContext {
   accountVisible: boolean;
   /** The pool connections whose account data this key may see (empty when none). */
   accountConnectionIds: string[];
-  /** The pool's member usage option, as stored. */
+  /**
+   * The pool's member usage option, as stored. False when the key may not see account data
+   * (it is not read then) or when the read failed.
+   */
   memberBreakdown: boolean;
+  /** The pool's keys that can make requests, read only when `memberBreakdown` is true. */
+  usableMemberCount: number;
 }

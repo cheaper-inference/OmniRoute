@@ -121,6 +121,9 @@ export function makeDeps(over: MakeDepsOverrides = {}): QuotaSelfViewDeps {
     peekPlanWindowReading: () => null,
     // Member usage slices off by default, as for a pool the admin never changed.
     getPoolMemberBreakdown: () => false,
+    // Every allocated key can make requests by default.
+    countUsablePoolKeys: (poolId) =>
+      new Set(pools.find((p) => p.id === poolId)?.allocations.map((a) => a.apiKeyId)).size,
     ...rest,
   };
 }
@@ -148,6 +151,7 @@ export function ctx(over: Partial<SelfViewPoolContext> = {}): SelfViewPoolContex
     connectionIds: ["conn-secret-1"],
     accountVisible: true,
     memberBreakdown: false,
+    usableMemberCount: 0,
     ...over,
   };
   return {
