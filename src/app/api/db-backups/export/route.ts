@@ -2,18 +2,27 @@ import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import os from "os";
+import { z } from "zod";
 import { getDbInstance, SQLITE_FILE } from "@/lib/db/core";
+import { stripPortableHistory } from "@/lib/db/backup";
 import {
   CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   requireOperatorCredential,
 } from "@/lib/api/operatorCredential";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
+/** `?portable=true` is the remote-sync opt-in; anything else in `portable` is a 400. */
+const exportQuerySchema = z.object({ portable: z.enum(["true", "false"]).optional() });
+
 /**
  * GET /api/db-backups/export — Download the current database as a .sqlite file.
  *
  * Uses SQLite's native backup API to create a consistent snapshot,
  * then streams it as a downloadable attachment.
+ *
+ * By default the snapshot is the complete database (the dashboard export). `?portable=true`
+ * is the opt-in used only by `omniroute sync remote`: it empties `usage_history` and
+ * `call_logs` in the exported copy before streaming it (#20418).
  *
  * 🔒 Operator-only: dashboard session, local CLI, or login disabled. API keys (any scope)
  *    and `oma_` access tokens get 403 — the file carries every stored credential.
@@ -25,6 +34,11 @@ export async function GET(request: Request) {
     forbiddenMessage: CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   });
   if (operatorVerdict.ok === false) return operatorVerdict.response;
+  const query = exportQuerySchema.safeParse(Object.fromEntries(new URL(request.url).searchParams));
+  if (!query.success) {
+    return NextResponse.json({ error: "Invalid export query" }, { status: 400 });
+  }
+  const portable = query.data.portable === "true";
   try {
     if (!SQLITE_FILE || !fs.existsSync(SQLITE_FILE)) {
       return NextResponse.json({ error: "Database file not found" }, { status: 404 });
@@ -42,6 +56,9 @@ export async function GET(request: Request) {
     const db = getDbInstance();
     try {
       await db.backup(tmpPath);
+      // #20418: remote sync only. backup() has no table filter, so the copy is scrubbed in
+      // place; the default export is never touched.
+      if (portable) await stripPortableHistory(tmpPath);
     } catch (backupError) {
       fs.rmSync(tmpDir, { recursive: true, force: true });
       throw backupError;
