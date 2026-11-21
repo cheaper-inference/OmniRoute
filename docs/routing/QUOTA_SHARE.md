@@ -369,10 +369,11 @@ clears the books on SQLite (see Limitations).
   is not charged until a reading turns it.
 - The remedy is the manual usage-history reset (`POST /api/settings/purge-usage-history`). It
   clears the attribution books and their token counters in the SQLite database.
-- The `all` period clears every book. A shorter period clears only the books and counters not
-  written within it. A book whose figure has not moved is not rewritten, so a shorter period can
-  also clear the current window's book. The next reading then opens a fresh book at the current
-  figure.
+- The `all` period clears every book and counter. A shorter period first clears the books not
+  written within it. It then clears the counters not written within it, but only for a pool
+  connection that has no book left. A kept book still marks each key against its counter.
+- A book whose figure has not moved is not rewritten, so a shorter period can also clear the
+  current window's book. The next reading then opens a fresh book at the current figure.
 - The reset does not touch a Redis quota store. There a book ends with its window, or expires 60
   days after its last write.
 - When the provider sends no reset time, a window that resets and refills above the old figure

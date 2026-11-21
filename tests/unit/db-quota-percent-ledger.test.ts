@@ -227,3 +227,26 @@ test("a period reset clears only the books and counters not written within that 
   assert.deepEqual(readPercentLedger(live).state, state(1));
   assert.equal(readPercentLedger(live).counters.a.tokens, 10);
 });
+
+test("a period reset keeps an idle counter while a book of its pool connection is kept", async () => {
+  const booked = { poolId: "p-booked", connectionId: "c-booked", window: "5h" } as const;
+  const loose = { poolId: "p-loose", connectionId: "c-loose", window: "5h" } as const;
+  assert.equal(commitPercentLedger(booked, state(1, { keys: { k: { startTokens: 0 } } })), true);
+  addPercentLedgerTokens(booked.poolId, booked.connectionId, "k", 40, NOW - 2 * DAY);
+  addPercentLedgerTokens(booked.poolId, booked.connectionId, "l", 10, NOW);
+  addPercentLedgerTokens(loose.poolId, loose.connectionId, "k", 40, NOW - 2 * DAY);
+
+  const result = await cleanup.resetUsageHistory("1d");
+  assert.deepEqual(
+    [result.deletedQuotaPercentLedger, result.deletedQuotaPercentLedgerTokens],
+    [0, 1]
+  );
+  const kept = readPercentLedger(booked);
+  assert.equal(kept.state?.rev, 1);
+  assert.deepEqual(
+    [kept.counters.k?.tokens, kept.counters.l?.tokens],
+    [40, 10],
+    "the book still marks key k, so its counter stays"
+  );
+  assert.deepEqual(readPercentLedger(loose).counters, {});
+});
