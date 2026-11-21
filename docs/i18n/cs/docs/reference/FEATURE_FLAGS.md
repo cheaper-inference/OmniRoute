@@ -44,7 +44,7 @@ Příznak typu boolean se považuje za **povolený**, pokud je jeho efektivní h
 
 ## Katalog příznaků
 
-127 příznaků v 6 kategoriích. **Výchozí hodnota** je výchozí hodnota definice — hodnota
+128 příznaků v 6 kategoriích. **Výchozí hodnota** je výchozí hodnota definice — hodnota
 použitá, pokud není přítomno přepsání z DB ani proměnná prostředí.
 
 ### Zabezpečení (13)
@@ -123,7 +123,7 @@ hodnotou `fail_closed`. Neplatné hodnoty výčtu a nečitelná úložiště př
 bezpečnému uzavření. Žádná z voleb opt-out neuvolňuje kontrolu účtovaných výdajů ani selhání
 vyhledávání cen. Vynucování a zpráva pro správce vyhodnocují stejnou efektivní zásadu.
 
-### Runtime (62)
+### Runtime (63)
 
 | Klíč                                           | Typ     | Výchozí | Restart | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------- | ------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -189,6 +189,7 @@ vyhledávání cen. Vynucování a zpráva pro správce vyhodnocují stejnou efe
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |         | Umožnit, aby `POST /v1/systemone` obsluhoval rozhodovací modely `cloudflare-ai/<jev\|clef\|clef-flash>` (alias `cf/`) v Cloudflare Workers AI prostřednictvím existujícího připojení `cloudflare-ai` (#16676). Jev v Cloudflare čerpá kredity AI Gateway; Clef čerpá neurony Workers AI. Ve výchozím nastavení vypnuto: tato ID modelů jsou odmítnuta stavem 400 a bez volání upstreamu.                                                                                                                                                                                                                                                                                                                      |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |         | Umožnit, aby `POST /v1/systemone` obsluhoval rozhodovací modely `ollama-local/<model>` v místním Ollama nakonfigurovaném v existujícím připojení `ollama-local` (jeho základní URL, nikdy pole požadavku) (#14667). Platí vlastní omezení Ollamy ještě před jakýmkoli voláním upstreamu: 2–26 kandidátů na otázku typu choice/score, nejvýše 64 otázek, žádná pole pro vzorkování chatu, pouze nezpracované obrázky base64. Ve výchozím nastavení vypnuto: tato ID modelů jsou odmítnuta stavem 400 a bez volání upstreamu.                                                                                                                                                                                   |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |         | Umožnit kombům, které používají strategii `jev`, dotázat se TypeSafe System One (Jev), který z jejich modelů má odpovědět na každý požadavek (#15279). Každý směrovaný požadavek pak odešle omezený výňatek konverzace na api.typesafe.ai a čerpá placené používání TypeSafe z nakonfigurovaného připojení `typesafe`; samotný uložený klíč TypeSafe tuto funkci nikdy nezapne. Ve výchozím nastavení vypnuto: komba jev neprovádějí žádné volání TypeSafe a zachovávají pořadí preferencí operátora.                                                                                                                                                                                                         |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |         | Nechte automatická komba, která používají strategii routeru `decision` zeptat se svého nakonfigurovaného rozhodce, který model by měl odpovědět na každý požadavek: TypeSafe System One, URL rozhodnutí operátora (System One nebo OpenAI chat wire) nebo jeden z vlastních modelů komba v procesu. Každý směrovaný požadavek pak odešle poslední uživatelskou zprávu (maximálně 8000 znaků) a nabídku modelu tomuto rozhodujícímu subjektu, což může být placené volání třetí strany; samotný uložený klíč jej nikdy nezapne. Ve výchozím nastavení vypnuto: rozhodovací kombinace nečtou žádné pověření, neprovádějí žádné hovory a směrují se strategií `rules`.                                           |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Umožní, aby automatické webové vyhledávání (bez explicitního `provider`) použilo prostřednictvím `codex-search` připojený účet Codex (ChatGPT): jako poslední možnost před poskytovateli bez klíče, pokud nelze použít žádného vyhledávacího poskytovatele s přihlašovacími údaji, a jako záložní alternativu (#17933). Každé takové vyhledávání spotřebuje kvótu předplatného ChatGPT a trvá přibližně 10–40 s. Ve výchozím nastavení vypnuto: `codex-search` se spustí pouze tehdy, když jej požadavek explicitně uvede.                                                                                                                                                                                    |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | Při úvodním nastavení Antigravity / Code Assist se účet, jehož odpověď `loadCodeAssist` uvádí `ineligibleTiers` a jako výchozí neoznačuje žádnou povolenou úroveň, nastaví s `legacy-tier` namísto jeho `currentTier` (#18060), což odpovídá pořadí `fetch_project_id` v Antigravity-Manager. Na skutečném omezeném účtu zatím nepotvrzeno. Ve výchozím nastavení vypnuto: takový účet se i nadále nastaví s jeho `currentTier`.                                                                                                                                                                                                                                                                              |
 
@@ -287,10 +288,10 @@ Vrací každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

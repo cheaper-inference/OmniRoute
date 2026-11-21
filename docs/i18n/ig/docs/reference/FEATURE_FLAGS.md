@@ -43,7 +43,7 @@ A na-ewere boolean flag dị ka nke **agbanyere** mgbe uru ya dị irè bụ `"t
 
 ## Katalọgụ ọkọlọtọ
 
-Ọkọlọtọ 127 gafee ụdị 6.** Ọdabara** bụ nkọwapụta nke ndabara — uru a na-eji mgbe ọ na-enweghị DB na-agbagha ma ọ bụ mgbanwe gburugburu ebe obibi adịghị.
+Ọkọlọtọ 128 gafee ụdị 6.** Ọdabara** bụ nkọwapụta nke ndabara — uru a na-eji mgbe ọ na-enweghị DB na-agbagha ma ọ bụ mgbanwe gburugburu ebe obibi adịghị.
 
 ### Nchekwa (13)
 
@@ -116,7 +116,7 @@ A na-ewere boolean flag dị ka nke **agbanyere** mgbe uru ya dị irè bụ `"t
 
 Mgbe ahaziri `UNPRICED_USAGE_BUDGET_POLICY` nke ọma (DB override tupu gburugburu), ọ na-ebute ụzọ karịa `USAGE_LIMIT_IGNORE_UNPRICED`. Na-enweghị uru enum pụtara ìhè, ọpụpụ boolean nke dị elu na-ahọrọ `count_as_zero`; ma ọ bụghị na ndabara bụ `fail_closed`. Ụkpụrụ nọmba na ezighi ezi yana nchekwa ọkọlọtọ enweghị ike ịgụta emechiri emechi. Ọ dịghịkwa ịpụpụ izu ike mmefu ọnụ ahịa ma ọ bụ nyocha ọnụahịa dara ada. Ndị mmanye na mkpesa onye nchịkwa na-edozi otu amụma dị irè.
 
-### Oge ịgba ọsọ (62)
+### Oge ịgba ọsọ (63)
 
 | Igodo                                          | Ụdị     | Ọdabara | Malitegharịa ekwentị | Nkọwa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------------------------------- | ------- | ------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -182,6 +182,7 @@ Mgbe ahaziri `UNPRICED_USAGE_BUDGET_POLICY` nke ọma (DB override tupu gburugbu
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |                      | Ka `POST /v1/systemone` jee ozi ụdị mkpebi `cloudflare-ai/<jev\|clef\|clef-flash>` (alias `cf/`) na Cloudflare Ndị ọrụ AI site na njikọ `cloudflare-ai` dị ugbu a (#16676). Jev na Cloudflare na-adọta kredit AI Gateway; Clef na-adọta ndị ọrụ AI neurons. Gbanyụọ na ndabara: ajụrụ ids ụdị ahụ site na iji 400 na enweghị oku elu.                                                                                                                                                                                                                                                                                                                             |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |                      | Ka `POST /v1/systemone` jee ụdị mkpebi `ollama-local/<model>` na mpaghara Ollama ahaziri na njikọ `ollama-local` dị adị (isi URL ya, ọ nweghị ebe arịrịọ) (#14667). Oke Ollama nke onwe ya na-etinye tupu oku ọ bụla na-aga elu: 2-26 ndị na-aga ajụjụ choice/score, n'ọtụtụ ajụjụ 64, enweghị ebe nlele nkata, raw base64 oyiyi. Gbanyụọ na ndabara: ajụrụ ids ụdị ahụ site na iji 400 na enweghị oku elu.                                                                                                                                                                                                                                                       |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |                      | Ka combos ndị na-eji atụmatụ `jev` jụọ TypeSafe System One (Jev) nke n'ime ụdị ha kwesịrị ịza arịrịọ ọ bụla (#15279). Arịrịọ ọ bụla achụpụrụ wee zipụ akụkụ mkparịta ụka ahụ na api.typesafe.ai wee dọta ojiji TypeSafe akwụ ụgwọ na njikọ `typesafe` ahaziri; igodo TypeSafe echekwara naanị ya anaghị agbanwuo ya. Gbanyụọ na ndabara: jev combos anaghị akpọ TypeSafe ma debe usoro mmasị onye ọrụ.                                                                                                                                                                                                                                                            |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |                      | Ka combos akpaaka ndị na-eji usoro `decision` rawụta ajụjụ jụọ onye haziri ahazi nke ụdị kwesịrị ịza arịrịọ ọ bụla: TypeSafe System One, onye ọrụ mkpebi URL (System One ma ọ bụ OpenAI nkata waya), ma ọ bụ otu n'ime ụdị combo nke na-eme. Arịrịọ ọ bụla ewepụrụ wee zipụ ozi onye ọrụ ikpeazụ (karịa mkpụrụedemede 8000) yana menu ihe nlereanya nye onye kpebiri, nke nwere ike ịbụ oku ndị ọzọ akwụ ụgwọ; igodo echekwara naanị ya anaghị agbanwuo ya. Gbanyụọ na ndabara: mkpebi combos agụghị nzere ọ bụla, emela oku na ụzọ na usoro `rules`.                                                                                                             |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                      | Ka ịchọọ webụ akpaka (enweghị `provider` doro anya) jiri akaụntụ Codex (ChatGPT) ejikọrọ site na `codex-search`: dị ka ebe ikpeazụ n'ihu ndị na-eweta igodo na-enweghị isi mgbe ọ nweghị onye na-achọ ihe nchọta nwere ike iji ya, yana dị ka onye na-akụda ụzọ ọzọ (#17933). Ọchịchọ ọ bụla dị otú ahụ na-emefu oke ndenye aha ChatGPT wee were ihe dịka 10–40 s. Gbanyụọ na ndabara: `codex-search` na-agba naanị mgbe arịrịọ kpọrọ ya aha nke ọma.                                                                                                                                                                                                             |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |                      | Maka Antigravity / Code Assist onboarding, akaụntụ nke azịza `loadCodeAssist` depụtara `ineligibleTiers` wee gosi ọkwa enweghị ikike dị ka ndabara na bọọdụ `legacy-tier` kama `currentTier` (#18060), dabara n'usoro Antigravity-Manage `fetch_project_id`. Ekwenyebeghị na akaụntụ amachibidoro. Gbanyụọ na ndabara: akaụntụ dị otú ahụ na-eji `currentTier` abanye n'ụgbọ mmiri.                                                                                                                                                                                                                                                                               |
 
@@ -254,10 +255,10 @@ Na-eweghachi ọkọlọtọ ọ bụla nwere uru, isi mmalite ya na nchịkọt
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -42,7 +42,7 @@ Boolean zastavica se smatra **omogućenom** kada je njena efektivna vrijednost `
 
 ## Katalog zastavica
 
-127 zastavica u 6 kategorija. **Zadano** je zadana definicija — vrijednost
+128 zastavica u 6 kategorija. **Zadano** je zadana definicija — vrijednost
 koja se koristi kada nisu prisutni ni DB zamjena ni varijabla okruženja.
 
 ### Sigurnost (13)
@@ -122,7 +122,7 @@ odbijaju zahtjev. Nijedna opcija za isključivanje ne ublažava naplaćenu potro
 dohvatanje podataka o cijenama. Pravila primjene i izvještaj administratora koriste istu efektivnu
 politiku.
 
-### Izvršavanje (62)
+### Izvršavanje (63)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -188,6 +188,7 @@ politiku.
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |         | Omogući da `POST /v1/systemone` poslužuje modele za donošenje odluka `cloudflare-ai/<jev\|clef\|clef-flash>` (alias `cf/`) na Cloudflare Workers AI putem postojeće veze `cloudflare-ai` (#16676). Jev na Cloudflareu troši kredite AI Gatewaya; Clef troši neurone Workers AI-ja. Podrazumijevano isključeno: ti ID-jevi modela odbijaju se sa 400 i bez poziva uzvodno.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |         | Omogući da `POST /v1/systemone` poslužuje modele za donošenje odluka `ollama-local/<model>` na lokalnom Ollama okruženju konfigurisanom u postojećoj vezi `ollama-local` (njegov osnovni URL, nikada polje zahtjeva) (#14667). Primjenjuju se vlastita ograničenja Ollame prije svakog poziva uzvodno: 2–26 kandidata po pitanju izbora/bodovanja, najviše 64 pitanja, bez polja za uzorkovanje razgovora, samo neobrađene base64 slike. Podrazumijevano isključeno: ti ID-jevi modela odbijaju se sa 400 i bez poziva uzvodno.                                                                                                                                                                                                                                                  |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |         | Omogući kombinacijama koje koriste strategiju `jev` da pitaju TypeSafe System One (Jev) koji od njihovih modela treba da odgovori na svaki zahtjev (#15279). Svaki usmjereni zahtjev tada šalje ograničeni izvod razgovora na api.typesafe.ai i troši plaćenu TypeSafe upotrebu na konfigurisanoj vezi `typesafe`; samo sačuvani TypeSafe ključ nikada ga ne uključuje. Podrazumijevano isključeno: kombinacije jev ne upućuju TypeSafe poziv i zadržavaju redoslijed prioriteta operatora.                                                                                                                                                                                                                                                                                      |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |         | Neka automatske kombinacije koje koriste `decision` strategiju rutera pitaju svog konfigurisanog odlučivača koji model treba da odgovori na svaki zahtev: TypeSafe System One, odluka operatera URL (System One ili OpenAI žica za ćaskanje) ili jedan od sopstvenih modela kombinacije u procesu. Svaki preusmereni zahtev zatim šalje poslednju korisničku poruku (najviše 8000 karaktera) i meni modela tom odlučivaču, što može biti plaćeni poziv treće strane; pohranjeni ključ ga nikada ne uključuje. Isključeno prema zadanim postavkama: kombinacije odluka ne čitaju vjerodajnice, ne upućuju pozive i usmjeravaju sa `rules` strategijom.                                                                                                                            |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Omogućava da automatska web pretraga (bez eksplicitnog `provider`) koristi povezani Codex (ChatGPT) račun putem `codex-search`: kao krajnju opciju ispred provajdera bez ključa kada nijedan provajder pretrage s vjerodajnicama nije dostupan, te kao alternativu za prebacivanje u slučaju neuspjeha (#17933). Svaka takva pretraga troši kvotu ChatGPT pretplate i traje približno 10–40 s. Isključeno prema zadanim postavkama: `codex-search` se izvršava samo kada ga zahtjev izričito navede.                                                                                                                                                                                                                                                                             |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | Za uvođenje Antigravity / Code Assist, račun čiji odgovor `loadCodeAssist` navodi `ineligibleTiers` i ne označava nijedan dozvoljeni nivo kao zadani uvodi se s `legacy-tier` umjesto svog `currentTier` (#18060), u skladu s redoslijedom `fetch_project_id` u Antigravity-Manageru. Još nije potvrđeno na stvarnom ograničenom računu. Isključeno prema zadanim postavkama: takav račun nastavlja uvođenje sa svojim `currentTier`.                                                                                                                                                                                                                                                                                                                                            |
 
@@ -278,10 +279,10 @@ Vraća svaku oznaku s efektivnom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... svih 127 oznaka
+    // ... svih 128 oznaka
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

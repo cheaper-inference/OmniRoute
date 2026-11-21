@@ -514,6 +514,7 @@ Püsivad `strategy: "auto"` kombinatsioonid võivad määrata võtme `config.rou
 - `lkgp` — viimane teadaolevalt toimiv teenusepakkuja esimesena
 - `nadir` — küsib [Nadiri](https://getnadir.com) otsustus-API-lt, millist kogumis olevat mudelit
   viip vajab; nõuab selgesõnalist lubamist ja tõrke korral kasutab strateegiat `rules`
+- `decision` — küsige konfigureeritud otsustajalt (TypeSafe System One, teie enda otsus URL või mõni kombinatsiooni enda mudelitest), milline kogumis olev mudel päringule sobib; vaikimisi väljalülitatud `COMBO_DECISION_ROUTER_ENABLED` lipu taga, tõrkeavatud `rules`-le
 
 ### Ruuteri strateegiad üksikasjalikult
 
@@ -739,6 +740,60 @@ mudeleid (väike, keskmine ja tippmudel), kui soovite vähendada alati tippmudel
 
 ---
 
+#### 7. `decision` — ühendatav otsustaja valib mudeli
+
+`decision` küsib a** otsustaja** milline kogumi mudel päringule sobib, siis kitsendab kogu selle mudeli järgi ja laseb `rules` valida ühenduse (kvoot, tervis ja kulu valivad siiski konto). Otsustaja määratakse kombinatsiooni otsustusplokis — `config.decision` kui ruuteri nupud asuvad `config` (mida armatuurlaud kirjutab) ülaosas või `config.auto.decision` `config.auto.routerStrategy` kõrval:
+
+| `decider`     | Kes vastab                                                                                                                     | Vajadused                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), vaikemudel `jev-latest`                                     | `typesafe` -ühendus või env-võti                   |
+| `http`        | teie ise otsustaja `baseUrl` juures: `wire: "systemone"` (`{baseUrl}/v1/systemone`) või `"openai-chat"` (vestluse lõpetamised) | `baseUrl` + `model`; võti valikuline               |
+| `combo-model` | üks teie teenusepakkuja mudelitest, mida kutsutakse protsessis nagu fusioonikohtunik                                           | `model` kui `provider/model` (mitte kombineeritud) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Väljad (kinnitatakse range skeemiga salvestamisel ja uuesti päringu ajal):
+
+- `decider` — `systemone`, `http` või `combo-model`.
+- `model` — TypeSafe mudel, teie URL otsustusmudel või kombineeritud mudeli kutse `provider/model` (kuni 200 tähemärki).
+- `baseUrl` — ainult `http` : `http(s)` URL kuni 500 tähemärki, ilma mandaatide, päringu või fragmendita. Sellele OmniRoute (loopback + `PORT`) osutavast URL keeldutakse.
+- `wire` — ainult `http` : `systemone` (vaikimisi) või `openai-chat`.
+- `connectionId` — salvestatud ühendus, mille võtit kasutatakse (ainult helistava API klahvi lubatud ühenduste sees). Ilma selleta loeb `systemone` `typesafe` ühendust ja iga võrgu otsustaja langeb tagasi väärtusele `OMNIROUTE_DECISION_API_KEY`. `apiKey` -välja pole: võtit ei salvestata kunagi kombinatsiooni.
+- `timeoutMs` — täisarv, 100–5000, vaikimisi 2000.
+- `minConfidence` — 0–1; madalama usaldusväärsusega vastus langeb tagasi `rules` (mitteusaldusväärsuse otsustaja loetakse 0-ks).
+- `descriptions` — kuni 50 kirjet (klahv kuni 300, tekst kuni 1000 tähemärki), mis on sisestatud mudeli ID või `provider/model` abil; määramata kirjed saavad genereeritud kuluasetuse kirjelduse.
+
+**Lipp.** `COMBO_DECISION_ROUTER_ENABLED` (vaikimisi `false`) väravad iga otsustaja. Kui see on välja lülitatud, ei loe `decision` kombo mandaati, ei helista ja suunab marsruuti `rules`; logi ütleb `fallback (disabled)`. Ainult salvestatud võti ei lülita seda kunagi sisse. Otsustusplokita kombinatsioone ei mõjuta see üldse.
+
+**Mis jääb kastist välja.** Ainult viimase kasutajateate tekst (kuni 8000 tähemärki; chat/Claude `messages` või Responses `input`) ja mudeli ID-de menüü koos nende kirjeldustega. Mitte kunagi ei küsi süsteem, vastused `instructions`, tööriistad, ajalugu, päised või konto andmed. Võrgukõned läbivad teenusepakkuja väljamineva valve ilma korduskatseteta, ümbersuunamisteta ja 64 KB vastusepiiranguta. `combo-model` -kutse on mittevoogedastus, tööriistavaba, `temperature: 0`, 256-märgise eelarvega; otsustuskutse raames alustatud otsus lükatakse tagasi.
+
+**Ebaõnnestunud käitumine** on tõrkevaba: iga rike lahendab `rules` otsuse ja põhjus on `decision(<decider>): fallback (<reason>)`, `<reason>` puhul `recursion` üks `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `low_confidence` või `single_option` `no_user_text` Pärast ajalõpu, HTTP -tõrget või võrgutõrget jäetakse lõpp-punkt 30 sekundiks vahele. Edukas valik loeb `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ükski URL, võti, viip või ülesvoolu keha ei jõua logini.
+
+Komboehitaja näitab neid välju, kui ruuteri strateegia on `decision` koos genereeritud kirjeldustega kohahoidjatena ja** Testi otsus** nupp, mis kutsub `POST /api/combos/decision-preview` üks kord välja salvestamata sätetega (sama lipp).
+
+**Millal kasutada** : erineva raskusastmega liiklus, kus soovite, et astme valiks päringu alusel teie valitud klassifikaator, mitte konkreetselt Nadir.
+
+**Alias** : `decision` (ilma varjunimeta)
+
+---
+
 ### Kohandatud marsruutimisstrateegiad
 
 Avaliku API kaudu saate registreerida oma `RouterStrategy` teostuse:
@@ -792,6 +847,7 @@ Seejärel kasutage seda:
 | Ranged SLO-d               | `sla-aware` | Filtreerib p95/veamäära/kulu lävendite järgi |
 | Mitmevooruline vestlus     | `lkgp`      | Seansi püsivus                               |
 | Erinev raskusaste          | `nadir`     | Valib iga viiba jaoks sobiva mudelitaseme    |
+| Oma klassifikaator         | `decision`  | Teie otsustaja valib mudeli                  |
 
 SLA-teadlikud väljad:
 

@@ -44,7 +44,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 ## Bayraq kataloqu
 
-6 kateqoriya üzrə 127 bayraq.** Defolt** defolt tərifdir — nə DB ləğvi, nə də mühit dəyişəni mövcud olmadıqda istifadə edilən dəyərdir.
+6 kateqoriya üzrə 128 bayraq.** Defolt** defolt tərifdir — nə DB ləğvi, nə də mühit dəyişəni mövcud olmadıqda istifadə edilən dəyərdir.
 
 ### Təhlükəsizlik (13)
 
@@ -117,7 +117,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 `UNPRICED_USAGE_BUDGET_POLICY` açıq şəkildə konfiqurasiya edildikdə (mühitdən əvvəl DB ləğv edilir), `USAGE_LIMIT_IGNORE_UNPRICED` üzərində üstünlük təşkil edir. Heç bir açıq enum dəyəri olmadan, yuxarı məntiqi imtina seçimi `count_as_zero`; əks halda defolt `fail_closed`. Yanlış enum dəyərləri və oxunmayan xüsusiyyət-bayraq yaddaşı bağlanmadı. Nə imtina qiymətli xərcləri, nə də uğursuz qiymət axtarışını rahatlaşdırmır. İcra və idarəçi hesabatı eyni effektiv siyasəti həll edir.
 
-### İcra müddəti (62)
+### İcra müddəti (63)
 
 | Açar                                           | Növ     | Defolt  | Yenidən başladın | Təsvir                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ------- | ------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -183,6 +183,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |                  | `POST /v1/systemone` mövcud `cloudflare-ai` əlaqəsi (#16676) vasitəsilə Cloudflare İşçi AI üzərində `cloudflare-ai/<jev\|clef\|clef-flash>` qərar modellərinə (ləqəb `cf/`) xidmət etsin. Jev on Cloudflare AI Gateway kreditlərini çəkir; Clef İşçilərin AI neyronlarını çəkir. Defolt olaraq söndürülür: bu model identifikatorları 400 və yuxarı zəng olmadan rədd edilir.                                                                                                                                                                                                                                                                                                                         |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |                  | Qoy `POST /v1/systemone` mövcud `ollama-local` bağlantısında konfiqurasiya edilmiş yerli Ollama üzərində `ollama-local/<model>` qərar modellərinə xidmət etsin (onun əsası URL, heç vaxt sorğu sahəsi deyil) (#14667). Ollama-nin öz məhdudiyyətləri istənilən yuxarı zəngdən əvvəl tətbiq olunur: choice/score sualına 2-26 namizəd, ən çoxu 64 sual, söhbət seçmə sahələri yoxdur, yalnız xam baza64 şəkillər. Defolt olaraq söndürülür: bu model identifikatorları 400 və yuxarı zəng olmadan rədd edilir.                                                                                                                                                                                         |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |                  | Qoy `jev` strategiyasından istifadə edən kombinlər TypeSafe System One (Jev) modellərindən hansının hər sorğuya cavab verməsini soruşsun (#15279). Hər yönləndirilmiş sorğu daha sonra söhbətin məhdud bir hissəsini api.typesafe.ai saytına göndərir və konfiqurasiya edilmiş `typesafe` bağlantısında ödənişli TypeSafe istifadəsini çəkir; yalnız saxlanılan TypeSafe açarı onu heç vaxt açmır. Defolt olaraq söndürülür: jev kombinləri heç bir TypeSafe zəngi etmir və operatorun üstünlük sırasını saxlayır.                                                                                                                                                                                    |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |                  | `decision` marşrutlaşdırıcı strategiyasından istifadə edən avtomatik kombinlərə icazə verin ki, konfiqurasiya edilmiş qərar verən şəxsdən hansı modelin hər sorğuya cavab verməsini soruşsun: TypeSafe System One, operator qərarı URL (System One və ya OpenAI chat teli) və ya prosesdə olan kombinasiyanın öz modellərindən biri. Hər yönləndirilmiş sorğu daha sonra sonuncu istifadəçi mesajını (ən çoxu 8000 simvol) və model menyusunu qərar verən şəxsə göndərir ki, bu da üçüncü tərəfin ödənişli zəngi ola bilər; yalnız saxlanılan açar onu heç vaxt açmır. Defolt olaraq söndürülür: qərar kombinasiyaları etimadnaməni oxumur, zəng etmə və `rules` strategiyası ilə marşrutlaşdırın.    |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                  | Avtomatik veb axtarışına (açıq `provider` yoxdur) `codex-search` vasitəsilə qoşulmuş Codex (ChatGPT) hesabından istifadə etməyə icazə verin: heç bir etimadnaməli axtarış provayderi istifadə edilə bilməyəndə açarsız təminatçıları qabaqlayan son çarə kimi və əvəzetmə alternativi (#17933) kimi. Hər bir belə axtarış ChatGPT abunə kvotası sərf edir və təxminən 10-40 saniyə çəkir. Defolt olaraq söndürülür: `codex-search` yalnız sorğu onu açıq şəkildə adlandırdıqda işləyir.                                                                                                                                                                                                               |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |                  | Antigravity / Code Assist-in işə salınması üçün `loadCodeAssist` cavabında `ineligibleTiers` siyahıları olan və icazə verilən səviyyəni defolt olaraq qeyd edən hesab `currentTier` (#18060) əvəzinə Antigravity-Manager `fetch_project_id` əmrinə uyğun `legacy-tier` ilə işləyir. Həqiqi məhdudlaşdırılmış hesabda hələ təsdiqlənməyib. Defolt olaraq söndürülür: belə hesab öz `currentTier` ilə qoşulmağa davam edir.                                                                                                                                                                                                                                                                             |
 
@@ -255,10 +256,10 @@ Hər bir bayrağı effektiv dəyəri, mənbəyi və xülasəsi ilə qaytarır.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

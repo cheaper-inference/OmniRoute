@@ -38,7 +38,7 @@ Flag boolean huwa kkunsidrat **attivat** meta l-valur effettiv tiegħu jkun `"tr
 
 ## Katalgu tal-Bandiera
 
-127 bandiera fuq 6 kategoriji.** Default** hija d-definizzjoni default — il-valur użat meta la DB override u lanqas varjabbli ambjentali ma jkunu preżenti.
+128 bandiera fuq 6 kategoriji.** Default** hija d-definizzjoni default — il-valur użat meta la DB override u lanqas varjabbli ambjentali ma jkunu preżenti.
 
 ### Sigurtà (13)
 
@@ -111,7 +111,7 @@ Flag boolean huwa kkunsidrat **attivat** meta l-valur effettiv tiegħu jkun `"tr
 
 Meta `UNPRICED_USAGE_BUDGET_POLICY` jiġi kkonfigurat b'mod espliċitu (DB override qabel l-ambjent), jieħu preċedenza fuq `USAGE_LIMIT_IGNORE_UNPRICED`. Bla ebda valur enum espliċitu, l-opt-out boolean upstream jagħżel `count_as_zero`; inkella l-inadempjenza hija `fail_closed`. Valuri ta' enum invalidi u ħażna ta' karatteristika-bandiera li ma tinqarax ifallu magħluqa. La l-opt-out ma ttaffi l-infiq bi prezz jew ħarsa tal-prezzijiet falluta. L-infurzar u r-rapport tal-amministratur isolvu l-istess politika effettiva.
 
-### Runtime (62)
+### Runtime (63)
 
 | Ewlenin                                        | Tip     | Default | Ibda mill-ġdid | Deskrizzjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -177,6 +177,7 @@ Meta `UNPRICED_USAGE_BUDGET_POLICY` jiġi kkonfigurat b'mod espliċitu (DB overr
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |                | Ħalli `POST /v1/systemone` jservi l-mudelli tad-deċiżjonijiet `cloudflare-ai/<jev\|clef\|clef-flash>` (alias `cf/`) fuq Cloudflare Workers AI permezz tal-konnessjoni eżistenti `cloudflare-ai` (#16676). Jev fuq Cloudflare jiġbed AI Gateway credits; Clef jiġbed Ħaddiema AI newroni. Mitfi b'mod awtomatiku: dawk l-ids tal-mudell huma rrifjutati b'400 u bl-ebda sejħa upstream.                                                                                                                                                                                                                                                                                                                       |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |                | Ħalli `POST /v1/systemone` jservi mudelli ta' deċiżjonijiet `ollama-local/<model>` fuq iż- Ollama lokali kkonfigurat fil-konnessjoni `ollama-local` eżistenti ( URL bażi tagħha, qatt qasam ta' talba) (#14667). Il-limiti ta' Ollama stess japplikaw qabel kwalunkwe sejħa upstream: 2-26 kandidat għal kull mistoqsija choice/score, l-iktar 64 mistoqsija, l-ebda kamp ta' kampjunar ta' chat, immaġini prima base64 biss. Mitfi b'mod awtomatiku: dawk l-ids tal-mudell huma rrifjutati b'400 u bl-ebda sejħa upstream.                                                                                                                                                                                  |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |                | Ħalli combos li jużaw l-istrateġija `jev` jistaqsu TypeSafe System One (Jev) liema mill-mudelli tagħhom għandhom iwieġbu kull talba (#15279). Kull talba indirizzata mbagħad tibgħat silta bounded tal-konversazzjoni lil api.typesafe.ai u tiġbed l-użu TypeSafe imħallas fuq il-konnessjoni `typesafe` konfigurata; ċavetta TypeSafe maħżuna waħedha qatt ma tixgħelha. Mitfi b'mod awtomatiku: jev combos ma jagħmlu l-ebda sejħa TypeSafe u jżommu l-ordni tal-preferenza tal-operatur.                                                                                                                                                                                                                  |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |                | Ħalli l-combos awtomatiċi li jużaw l-istrateġija tar-router `decision` jistaqsu lid-decider konfigurat tagħhom liema mudell għandu jwieġeb għal kull talba: TypeSafe System One, deċiżjoni tal-operatur URL (System One jew OpenAI chat wire), jew wieħed mill-mudelli tal-combo stess fil-proċess. Kull talba indirizzata mbagħad tibgħat l-aħħar messaġġ tal-utent (l-iktar 8000 karattru) u l-menu tal-mudell lil dak id-deċiżur, li jista 'jkun sejħa mħallsa ta' parti terza; ċavetta maħżuna waħedha qatt ma tixgħelha. Mitfi b'mod awtomatiku: combos tad-deċiżjonijiet ma jaqraw l-ebda kredenzjali, ma jagħmlu l-ebda sejħa u rotta bl-istrateġija `rules`.                                         |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                | Ħalli tfittxija awtomatika fuq il-web (l-ebda `provider` espliċita) tuża kont Codex (ChatGPT) konness permezz `codex-search`: bħala l-aħħar għażla qabel il-fornituri mingħajr ċavetta meta l-ebda fornitur ta' tfittxija b'kredenzjali ma jkun jista' jintuża, u bħala s-sostitut ta' failover (#17933). Kull tfittxija bħal din tonfoq kwota ta 'abbonament ChatGPT u tieħu madwar 10-40 s. Mitfi b'mod awtomatiku: `codex-search` jaħdem biss meta talba issemmih b'mod espliċitu.                                                                                                                                                                                                                        |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |                | Għall-onboarding Antigravity / Code Assist, kont li t-tweġiba `loadCodeAssist` tiegħu telenka `ineligibleTiers` u mmarka l-ebda saff permess bħala onboards default `legacy-tier` minflok `currentTier` (#18060), li jaqbel mal-ordni `fetch_project_id` Antigravity-Manager. Għadu mhux ikkonfermat fuq kont ristrett reali. Mitfi b'mod awtomatiku: kont bħal dan iżomm abbord maż `currentTier` tiegħu .                                                                                                                                                                                                                                                                                                  |
 
@@ -249,10 +250,10 @@ Jirritorna kull bandiera bil-valur effettiv tagħha, is-sors, u sommarju.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

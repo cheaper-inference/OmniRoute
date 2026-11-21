@@ -536,6 +536,7 @@ Maaaring itakda ng mga naka-persist na `strategy: "auto"` combo ang `config.rout
 - `lkgp` — inuuna ang huling provider na nalamang maayos
 - `nadir` — tinatanong ang decision API ng [Nadir](https://getnadir.com) kung aling model sa pool ang
   kailangan ng prompt; opt-in, at nagfa-fail-open sa `rules`
+- `decision` — magtanong sa isang naka-configure na tagapasya (TypeSafe System One, sarili mong desisyon URL, o isa sa mga sariling modelo ng combo) kung aling modelo sa pool ang akma sa kahilingan; sa likod ng default-off `COMBO_DECISION_ROUTER_ENABLED` flag, fail-open sa `rules`
 
 ### Mga strategy ng router nang detalyado
 
@@ -761,6 +762,60 @@ at isang frontier model), kung saan gusto mong bawasan ang gastos ng palaging pa
 
 ---
 
+#### 7. Pinipili `decision` — pluggable decider ang modelo
+
+tanong `decision` a** nagpapasya** kung aling modelo sa pool ang akma sa kahilingan, pagkatapos ay paliitin ang pool sa modelong iyon at hayaan ang `rules` na pumili ng koneksyon (quota, kalusugan at gastos pa rin ang pumili ng account). Ang desisyon ay nakatakda sa bloke ng desisyon ng combo — `config.decision` kapag ang mga knob ng router ay nakaupo sa tuktok ng `config` (kung ano ang isinusulat ng dashboard), o `config.auto.decision` sa tabi ng `config.auto.routerStrategy`:
+
+| `decider`     | Sino ang sumasagot                                                                                                            | Pangangailangan                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), default na modelo `jev-latest`                             | isang `typesafe` na koneksyon o ang env key    |
+| `http`        | sarili mong desisyon sa `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) o `"openai-chat"` (mga pagkumpleto ng chat) | `baseUrl` + `model`; opsyonal na key           |
+| `combo-model` | isa sa iyong mga modelo ng provider, na tinatawag sa proseso tulad ng fusion judge                                            | `model` bilang `provider/model` (walang combo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Mga Field (na-validate ng mahigpit na schema sa pag-save at muli sa oras ng kahilingan):
+
+- `decider` — `systemone`, `http` o `combo-model`.
+- `model` — TypeSafe model, ang modelo ng desisyon sa iyong URL, o ang `provider/model` ng isang combo-model na tawag (hanggang 200 character).
+- `baseUrl` — `http` lang: isang `http(s)` URL hanggang 500 character, walang mga kredensyal, query o fragment. Ang URL na tumuturo sa OmniRoute na ito (loopback + `PORT`) ay tinanggihan.
+- `wire` — `http` lang: `systemone` (default) o `openai-chat`.
+- `connectionId` — ang naka-imbak na koneksyon na ang key ay ginagamit (sa loob lamang ng mga pinahihintulutang koneksyon ng API key sa pagtawag). Kung wala ito, `systemone` ay nagbabasa ng isang `typesafe` na koneksyon at ang bawat network decider ay bumabalik sa `OMNIROUTE_DECISION_API_KEY`. Walang field `apiKey` : hindi kailanman iniimbak ang isang susi sa isang combo.
+- `timeoutMs` — integer, 100–5000, default 2000.
+- `minConfidence` — 0–1; ang isang mas mababang kumpiyansa na sagot ay bumabalik sa `rules` (isang nagpapasya na nag-uulat na walang kumpiyansa ay binibilang bilang 0).
+- `descriptions` — hanggang sa 50 entry (key hanggang 300, text hanggang 1000 character), na na-key ng model id o `provider/model`; ang mga hindi nakatakdang entry ay nakakakuha ng nabuong paglalarawan sa ranggo ng gastos.
+
+**Bandila.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) ay nagbibigay-daan sa bawat nagpapasya. Habang naka-off ito, ang `decision` combo ay hindi nagbabasa ng kredensyal, hindi gumagawa ng tawag at mga ruta na may `rules`; sabi ng log `fallback (disabled)`. Ang isang naka-imbak na susi lamang ay hindi kailanman ino-on ito. Ang mga combo na walang block ng desisyon ay hindi maaapektuhan.
+
+**Ano ang umalis sa kahon.** Tanging ang text ng huling mensahe ng user (hanggang sa 8000 character; chat/Claude `messages` o Mga Tugon `input`) at ang menu ng mga model id kasama ng kanilang mga paglalarawan. Huwag kailanman i-prompt ng system, Mga Tugon `instructions`, mga tool, kasaysayan, mga header o data ng account. Ang mga tawag sa network ay dumaan sa provider ng outbound guard na walang mga muling pagsubok, walang mga pag-redirect at isang 64 KB response cap. Ang `combo-model` na tawag ay non-streaming, tool-free, `temperature: 0`, na may 256-token na badyet; ang isang desisyon na sinimulan sa loob ng isang desisyon na tawag ay tinanggihan.
+
+**Pag-uugali ng pagkabigo** ay fail-open: ang anumang kabiguan ay nalutas sa `rules` na desisyon, at ang dahilan ay nagbabasa ng `decision(<decider>): fallback (<reason>)`, na may `<reason>` isa sa `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` o `no_user_text`. Pagkatapos ng timeout, HTTP error o network error ang endpoint ay nilaktawan ng 30 s. Ang isang matagumpay na pagpili ay nagbabasa ng `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Walang URL, key, prompt o upstream body ang nakakarating sa log.
+
+Ipinapakita ng tagabuo ng combo ang mga field na ito kapag ang diskarte ng router ay `decision`, kasama ang mga nabuong paglalarawan bilang mga placeholder at isang** Pagpapasya sa pagsubok** button na tumatawag sa `POST /api/combos/decision-preview` nang isang beses kasama ang mga hindi naka-save na setting (parehong bandila).
+
+**Kailan gagamitin** : pinaghalong pinaghirapang trapiko kung saan mo gustong piliin ang tier sa bawat kahilingan ng isang classifier na pipiliin mo, hindi ng partikular na Nadir.
+
+**alyas** : `decision` (walang alias)
+
+---
+
 ### Mga custom na router strategy
 
 Maaari mong irehistro ang sarili mong implementasyon ng `RouterStrategy` sa pamamagitan ng pampublikong API:
@@ -814,6 +869,7 @@ Pagkatapos, gamitin ito:
 | Mahihigpit na SLO      | `sla-aware` | Sinasala ayon sa mga threshold ng p95/error/gastos |
 | Multi-turn na chat     | `lkgp`      | Pagpapanatili ng session                           |
 | Magkakaibang kahirapan | `nadir`     | Pinipili ang tier ng modelo para sa bawat prompt   |
+| Sariling classifier    | `decision`  | Ang iyong nagpapasya ang pumili ng modelo          |
 
 Mga field na SLA-aware:
 

@@ -521,6 +521,7 @@ curl -X POST http://localhost:20128/api/combos \
 - `lkgp` — በመጀመሪያ የመጨረሻው የሚታወቀው ጥሩ provider
 - `nadir` — በስብስቡ ውስጥ promptው የትኛውን model እንደሚፈልግ የ[Nadir](https://getnadir.com) ውሳኔ APIን ይጠይቃል፤
   በምርጫ የሚነቃ ሲሆን፣ ካልተሳካ ወደ `rules` በክፍት ሁኔታ ይመለሳል
+- `decision` — የተዋቀረ መወሰኛን ይጠይቁ (TypeSafe ስርዓት አንድ ፣ የእራስዎ ውሳኔ URL፣ ወይም ከኮምቦው ሞዴሎች ውስጥ አንዱ) በገንዳው ውስጥ ያለው ሞዴል ከጥያቄው ጋር የሚስማማው ፣ ከነባሪው-ጠፍቷል `COMBO_DECISION_ROUTER_ENABLED` ባንዲራ ጀርባ፣ አልተሳካም-ክፍት ለ `rules`
 
 ### የRouter ስትራቴጂዎች በዝርዝር
 
@@ -746,6 +747,60 @@ host፣ የተበላሸ ምላሽ ወይም ከpool ውጭ የሆነ ምርጫ �
 
 ---
 
+#### 7. `decision` — pluggable decider ሞዴሉን ይመርጣል
+
+`decision` ይጠይቃል ሀ** ወሳኙ** በገንዳው ውስጥ ያለው የትኛው ሞዴል ከጥያቄው ጋር እንደሚስማማ፣ ከዚያም ገንዳውን ወደዚያ ሞዴል በማጥበብ `rules` ግንኙነቱን እንዲመርጥ ያስችለዋል (ኮታ፣ ጤና እና ወጪ አሁንም መለያውን ይምረጡ)። ራውተር ማዞሪያዎች በ `config` (ዳሽቦርዱ የሚፅፈውን) ወይም `config.auto.decision` ከ `config.auto.routerStrategy` ቀጥሎ ሲቀመጡ፣ ወሳኙ በኮምቦው ውሳኔ የማገጃ — `config.decision` ተቀናብሯል።
+
+| `decider`     | ማን ይመልስ                                                                                             | ያስፈልገዋል                                |
+| ------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `systemone`   | TypeSafe ስርዓት አንድ (`POST https://api.typesafe.ai/v1/systemone`)፣ ነባሪ ሞዴል `jev-latest`               | የ `typesafe` ግንኙነት ወይም የኢንቪ ቁልፍ        |
+| `http`        | የራስዎ ውሳኔ በ `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ወይም `"openai-chat"` (ቻት ማጠናቀቅ) | `baseUrl` + `model`; ቁልፍ አማራጭ          |
+| `combo-model` | ከአቅራቢዎ ሞዴሎች አንዱ፣ በሂደት ላይ እንደ ውህድ ዳኛ ይባላል                                                            | `model` እንደ `provider/model` (ጥምር የለም) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+መስኮች (በማዳን ላይ በጥብቅ ንድፍ የተረጋገጠ እና በጥያቄ ጊዜ እንደገና)
+
+- `decider` — `systemone`, `http` ወይም `combo-model`.
+- `model` — TypeSafe ሞዴል፣ በእርስዎ URL ላይ ያለው የውሳኔ ሞዴል፣ ወይም የጥምር ሞዴል ጥሪ `provider/model` (እስከ 200 ቁምፊዎች)።
+- `baseUrl` — `http` ብቻ፡ አንድ `http(s)` URL እስከ 500 ቁምፊዎች፣ ያለ ምስክርነቶች፣ መጠይቅ ወይም ቁርጥራጭ። ወደዚህ OmniRoute (loopback + `PORT`) የሚያመለክት URL ውድቅ ተደርጓል።
+- `wire` — `http` ብቻ `systemone` (ነባሪ) ወይም `openai-chat`.
+- `connectionId` — የተከማቸ ግንኙነት ቁልፉ ጥቅም ላይ የዋለ (በጥሪ API ቁልፍ ውስጥ በተፈቀዱ ግንኙነቶች ውስጥ ብቻ)። ያለ እሱ፣ `systemone` የ `typesafe` ግንኙነትን ያነባል እና እያንዳንዱ የአውታረ መረብ ወሳጅ ወደ `OMNIROUTE_DECISION_API_KEY` ይመለሳል። `apiKey` መስክ የለም፡ ቁልፉ መቼም ቢሆን በጥምረት ውስጥ አይከማችም።
+- `timeoutMs` — ኢንቲጀር፣ 100–5000፣ ነባሪ 2000።
+- `minConfidence` — 0–1; ዝቅተኛ እምነት ያለው መልስ ወደ `rules` ይመለሳል (መተማመን እንደሌለ የሚዘግብ 0 እንደ 0 ይቆጠራል)።
+- `descriptions` — እስከ 50 ግቤቶች (ቁልፍ እስከ 300፣ እስከ 1000 ቁምፊዎች ጽሑፍ)፣ በሞዴል መታወቂያ ወይም `provider/model` የተቆለፈ; ያልተስተካከሉ ግቤቶች የመነጨ የወጪ-ደረጃ መግለጫ ያገኛሉ።
+
+**ባንዲራ** `COMBO_DECISION_ROUTER_ENABLED` (ነባሪ `false`) እያንዳንዱን ቆራጭ በሮች ያደርጋል። ጠፍቶ እያለ፣ የ `decision` ጥምር ምንም ምስክርነት አያነብም፣ ጥሪ አያደርግም እና ከ `rules` ጋር ይጓዛል። መዝገቡ `fallback (disabled)` ይላል . የተከማቸ ቁልፍ ብቻውን አያበራውም። ያለ ውሳኔ እገዳዎች ኮምቦዎች ምንም አይነኩም.
+
+**ከሳጥኑ የሚወጣው.** የመጨረሻው የተጠቃሚ መልእክት ጽሁፍ ብቻ (እስከ 8000 ቁምፊዎች፣ chat/Claude `messages` ወይም ምላሾች `input`) እና የሞዴል መታወቂያዎች ዝርዝር ከገለፃቸው ጋር። ስርዓቱ በጭራሽ አይጠይቅ፣ ምላሾች `instructions`፣ መሳሪያዎች፣ ታሪክ፣ ራስጌዎች ወይም የመለያ ውሂብ። የአውታረ መረብ ጥሪዎች በአገልግሎት አቅራቢው ወደ ውጪ ጠባቂ በኩል ይሄዳሉ ምንም ሙከራዎች፣ ምንም ማዘዋወር እና 64 KB ምላሽ ካፕ። የ `combo-model` ጥሪው የማይተላለፍ፣ ከመሳሪያ ነፃ፣ `temperature: 0`፣ ከ256-ቶከን በጀት ጋር ነው። በውሳኔ ጥሪ ውስጥ የተጀመረ ውሳኔ ውድቅ ተደርጓል።
+
+**የሽንፈት ባህሪ** አልተሳካም-ክፍት ነው፡ የትኛውም ውድቀት `rules` ውሳኔ መፍትሄ ይሰጣል፣ እና ምክንያቱ `decision(<decider>): fallback (<reason>)` ያነባል፣ ከ `<reason>` አንዱ `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. ከተወሰነ ጊዜ በኋላ HTTP ስህተት ወይም የአውታረ መረብ ስህተት የመጨረሻው ነጥብ ለ 30 ሰከንድ ተዘልሏል. የተሳካ ምርጫ `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` ያነባል። ምንም URL፣ ቁልፍ ፣ መጠየቂያ ወይም የላይኛው አካል ወደ ምዝግብ ማስታወሻው አልደረሰም።
+
+ጥምር ገንቢው እነዚህን መስኮች የሚያሳየው የራውተር ስትራቴጂ `decision` ሲሆን በተፈጠሩት መግለጫዎች እንደ ቦታ ያዥ እና** የሙከራ ውሳኔ** ካልተቀመጡ ቅንብሮች (ተመሳሳይ ባንዲራ) ጋር `POST /api/combos/decision-preview` አንድ ጊዜ የሚደውል አዝራር።
+
+**መቼ መጠቀም** ፦የተደባለቀ አስቸጋሪ ትራፊክ የምትፈልገው ደረጃ በናዲር ሳይሆን በመረጥከው ክላሲፋየር በጥያቄ እንድትመረጥ ነው።
+
+**ተለዋጭ ስም** `decision` (ቅፅል ስም የለውም)
+
+---
+
 ### ብጁ የማዞሪያ ስልቶች
 
 የራስዎን `RouterStrategy` ትግበራ በይፋዊ APIው በኩል መመዝገብ ይችላሉ፦
@@ -799,6 +854,7 @@ registerStrategy("my-custom", new MyCustomStrategy());
 | ጥብቅ SLOዎች      | `sla-aware` | በp95/ስህተት/ወጪ ገደቦች መሠረት ያጣራል  |
 | ባለብዙ-ዙር ውይይት   | `lkgp`      | የክፍለ ጊዜ ቋሚነት                 |
 | የተቀላቀለ አስቸጋሪነት | `nadir`     | ለእያንዳንዱ ጥያቄ የሞዴል ደረጃውን ይመርጣል |
+| የራሱ ክላሲፋየር     | `decision`  | ውሳኔ ሰጪዎ ሞዴሉን ይመርጣል           |
 
 SLAን የሚያገናዝቡ መስኮች፦
 

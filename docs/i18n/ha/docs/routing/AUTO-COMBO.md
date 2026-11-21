@@ -520,6 +520,7 @@ Combos da aka adana masu `strategy: "auto"` za su iya saita `config.routerStrate
 - `lkgp` — fara da mai samarwa na ƙarshe da aka sani yana aiki yadda ya kamata
 - `nadir` — tambayi API na yanke shawara na [Nadir](https://getnadir.com) wane model ne a cikin jerin
   prompt ɗin ke buƙata; sai an zaɓi shiga, kuma idan ya gaza a koma ga `rules`
+- `decision` — tambayi mai yanke hukunci (TypeSafe System One, naka yanke shawara URL, ko ɗaya daga cikin nau'in haɗin kai) wanda samfurin a cikin tafkin ya dace da buƙatar; a bayan tutar-kashe `COMBO_DECISION_ROUTER_ENABLED`, kasa-buɗe zuwa `rules`
 
 ### Cikakken bayani kan dabarun router
 
@@ -745,6 +746,60 @@ da samfurin mafi ci gaba), inda kake son rage kuɗin amfani da samfurin mafi ci 
 
 ---
 
+#### 7. `decision` — pluggable yanke shawara ya ɗauki samfurin
+
+`decision` ta tambaya a** mai yanke hukunci** wane samfurin a cikin tafkin ya dace da buƙatun, sa'an nan kuma ya rage tafkin zuwa wannan samfurin kuma ya bar `rules` ya zaɓi haɗin (ƙididdiga, lafiya da farashi har yanzu zabar asusun). An saita mai yanke hukunci a cikin tsarin yanke shawara na haɗin haɗin — `config.decision` lokacin da kullin na'ura mai ba da hanya tsakanin hanyoyin sadarwa ke zaune a saman `config` (abin da dashboard ɗin ya rubuta), ko `config.auto.decision` kusa da `config.auto.routerStrategy`:
+
+| `decider`     | Wanene ya amsa                                                                                                  | Bukatu                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), tsoho samfurin `jev-latest`                  | haɗin `typesafe` ko maɓallin env       |
+| `http`        | Mai yanke hukunci a `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ko `"openai-chat"` (kammala taɗi) | `baseUrl` + `model`; maɓalli na zaɓi   |
+| `combo-model` | ɗaya daga cikin samfuran ku, wanda ake kira a cikin tsari kamar alƙalin fusion                                  | `model` as `provider/model` (ba combo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Filaye (tabbataccen tsari mai tsauri akan adanawa da sake lokacin buƙata):
+
+- `decider` — `systemone`, `http` or `combo-model`.
+- `model` — TypeSafe samfuri, ƙirar yanke shawara a URL, ko `provider/model` na kiran ƙirar ƙira (har zuwa haruffa 200).
+- `baseUrl` — `http` kawai: `http(s)` URL har zuwa haruffa 500, ba tare da takaddun shaida, tambaya ko guntu ba. An ƙi URL mai nuni ga wannan OmniRoute (loopback + `PORT`).
+- `wire` — `http` kawai: `systemone` (tsoho) ko `openai-chat`.
+- `connectionId` — haɗin da aka adana wanda aka yi amfani da maɓalli (cikin maɓallin kiran API kawai da aka yarda da haɗin haɗin). Ba tare da shi ba, `systemone` yana karanta haɗin `typesafe` kuma kowane mai yanke shawara na cibiyar sadarwa yana komawa zuwa `OMNIROUTE_DECISION_API_KEY`. Babu filin `apiKey` : maɓalli ba ya taɓa adanawa a cikin haɗin gwiwa.
+- — `timeoutMs` 100-5000, tsoho 2000.
+- `minConfidence` — 0–1; Amsar ƙarancin amincewa tana komawa zuwa `rules` (mai yanke shawara wanda ba ya bayar da rahoton rashin amincewa yana ƙidaya kamar 0).
+- `descriptions` — har zuwa shigarwar 50 (maɓalli har zuwa 300, rubutu har zuwa haruffa 1000), maɓalli ta hanyar id ko `provider/model`; shigarwar da ba a saita ba suna samun bayanin ƙimar ƙimar da aka samar.
+
+**Tuta** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) tana kofa ga kowane mai yanke hukunci. Yayin da yake kashewa, haɗakar `decision` ba ta karanta takardar shaidar ba, ba ta yin kira da hanyoyi tare da `rules`; gungu yana cewa `fallback (disabled)`. Maɓallin da aka adana shi kaɗai ba ya kunna shi. Combos ba tare da toshe yanke shawara ba ya shafa kwata-kwata.
+
+**Abin da ya bar akwatin.** Sai kawai rubutun saƙon mai amfani na ƙarshe (har zuwa haruffa 8000; chat/Claude `messages` ko Amsoshi `input`) da menu na ids samfuri tare da kwatancensu. Kada a taɓa tsarin ya faɗakar da martani, Amsoshi `instructions`, kayan aiki, tarihi, kanun labarai ko bayanan asusu. Kiran hanyar sadarwa yana tafiya ta hanyar mai badawa mai fita mai fita ba tare da sake gwadawa ba, babu juyar da kai da madaidaicin amsa 64 KB. Kiran `combo-model` ba yawo ba ne, ba shi da kayan aiki, `temperature: 0`, tare da kasafin kuɗi na 256-alama; An ƙi yanke shawara da aka fara a cikin kiran yanke shawara.
+
+**Halin gazawa** ya `low_confidence`-bude `http_error` `invalid_response` `cooldown` gazawa ta yanke hukuncin `rules` `not_configured` `missing_credential` `timeout` `network_error` `no_user_text` `decision(<decider>): fallback (<reason>)`, `refused` da `<reason>` `out_of_menu` `recursion` `single_option` `disabled` Bayan ƙarewar lokaci, kuskuren HTTP ko kuskuren hanyar sadarwa an tsallake ƙarshen ƙarshen har tsawon s30. Zaɓi mai nasara yana karanta `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Babu URL, maɓalli, faɗakarwa ko jikin sama da ya isa wurin log ɗin.
+
+Maginin haɗin gwiwar yana nuna waɗannan filayen lokacin da dabarun na'ura mai ba da hanya tsakanin hanyoyin sadarwa shine `decision`, tare da bayanan da aka samar a matsayin masu riƙe da wuri da** Gwajin yanke shawara** maɓallin da ke kiran `POST /api/combos/decision-preview` sau ɗaya tare da saitunan da ba a adana ba (tuta ɗaya).
+
+**Lokacin amfani** : cakuɗen zirga-zirgar zirga-zirga inda kuke son zaɓin matakin kowane buƙatu ta mai ƙira da kuka zaɓa, ba ta Nadir musamman ba.
+
+**Laƙabi** : `decision` (ba alias)
+
+---
+
 ### Dabarun router na musamman
 
 Za ka iya rajistar naka aiwatarwar `RouterStrategy` ta hanyar API na jama'a:
@@ -798,6 +853,7 @@ Sannan ka yi amfani da ita:
 | Tsauraran SLOs           | `sla-aware` | Yana tacewa bisa iyakokin p95/kuskure/farashi             |
 | Hira mai zantuka da yawa | `lkgp`      | Mannewar zaman                                            |
 | Wahala iri-iri           | `nadir`     | Yana zaɓar matakin samfurin da ya dace da kowace umarni   |
+| Nasu classifier          | `decision`  | Mai yanke shawara ya zaɓi samfurin                        |
 
 Filayen da suka dogara da SLA:
 

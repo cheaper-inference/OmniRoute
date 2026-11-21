@@ -525,6 +525,7 @@ Trajno pohranjene kombinacije sa `strategy: "auto"` mogu postaviti `config.route
 - `lkgp` — posljednji poznati pouzdani pružatelj usluge ima prednost
 - `nadir` — pita [Nadirov](https://getnadir.com) API za odlučivanje koji je model iz skupa potreban
   upitu; uključuje se po želji, a u slučaju pogreške nastavlja s `rules`
+- `decision` — pitajte konfiguriranog odlučivača (TypeSafe System One, vaša vlastita odluka URL ili jedan od vlastitih modela kombinacije) koji model u skupu odgovara zahtjevu; iza default-off `COMBO_DECISION_ROUTER_ENABLED` zastavice, fail-open na `rules`
 
 ### Detalji strategija usmjerivača
 
@@ -750,6 +751,60 @@ i vršni model), kada želite smanjiti trošak stalnog korištenja vršnog model
 
 ---
 
+#### 7. `decision` — pluggable odlučujući odabir modela
+
+`decision` pita a** odlučujući** koji model u skupu odgovara zahtjevu, zatim sužava skup na taj model i dopušta `rules` da izabere vezu (kvota, zdravlje i cijena i dalje biraju račun). Odlučivač je postavljen u bloku odluke kombinacije — `config.decision` kada se gumbi usmjerivača nalaze na vrhu `config` (ono što nadzorna ploča piše), ili `config.auto.decision` pored `config.auto.routerStrategy`:
+
+| `decider`     | Tko odgovara                                                                                                                  | Potrebe                                        |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), zadani model `jev-latest`                                  | `typesafe` veza ili env ključ                  |
+| `http`        | vaš vlastiti odlučujući na `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ili `"openai-chat"` (završeci razgovora) | `baseUrl` + `model`; ključ po izboru           |
+| `combo-model` | jedan od vaših modela pružatelja usluga, pozvan u proces kao sudac fuzije                                                     | `model` kao `provider/model` (bez kombinacije) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Polja (potvrđena strogom shemom pri spremanju i ponovno u trenutku zahtjeva):
+
+- `decider` — `systemone`, `http` ili `combo-model`.
+- `model` — TypeSafe model, model odluke na vašem URL ili `provider/model` poziva kombiniranog modela (do 200 znakova).
+- `baseUrl` — samo `http` : `http(s)` URL do 500 znakova, bez vjerodajnica, upita ili fragmenta. URL koji pokazuje na ovaj OmniRoute (povratna petlja + `PORT`) je odbijen.
+- `wire` — samo `http` : `systemone` (zadano) ili `openai-chat`.
+- `connectionId` — pohranjena veza čiji se ključ koristi (samo unutar dopuštenih veza pozivajućeg ključa API ). Bez toga, `systemone` čita `typesafe` vezu i svaki mrežni odlučujući se vraća na `OMNIROUTE_DECISION_API_KEY`. Ne postoji `apiKey` polje: ključ se nikada ne pohranjuje u kombinaciji.
+- `timeoutMs` — cijeli broj, 100–5000, zadano 2000.
+- `minConfidence` — 0–1; odgovor s nižim pouzdanjem vraća se na `rules` (odlučivač koji prijavljuje da nema povjerenja računa se kao 0).
+- `descriptions` — do 50 unosa (ključ do 300, tekst do 1000 znakova), ključano prema ID-u modela ili `provider/model`; nepostavljeni unosi dobivaju generirani opis ranga troškova.
+
+**Zastava.** `COMBO_DECISION_ROUTER_ENABLED` (zadano `false`) zatvara svaki odlučujući. Dok je isključena, `decision` kombinacija ne čita vjerodajnice, ne upućuje pozive i usmjerava sa `rules`; zapisnik kaže `fallback (disabled)`. Sam pohranjeni ključ nikada ga ne uključuje. To uopće ne utječe na kombinacije bez bloka odluke.
+
+**Što napušta kutiju.** Samo tekst zadnje korisničke poruke (do 8000 znakova; chat/Claude `messages` ili Odgovori `input`) i izbornik ID modela s njihovim opisima. Nikada upit sustava, odgovori `instructions`, alati, povijest, zaglavlja ili podaci o računu. Mrežni pozivi prolaze kroz izlaznu zaštitu pružatelja usluga bez ponovnih pokušaja, bez preusmjeravanja i ograničenjem odgovora od 64 KB. `combo-model` poziv je bez strujanja, bez alata, `temperature: 0`, s proračunom od 256 tokena; odluka započeta unutar poziva odluke je odbijena.
+
+**Ponašanje pri neuspjehu** je fail-open: svaki kvar se rješava odlukom `rules`, a razlog glasi `decision(<decider>): fallback (<reason>)`, sa `<reason>` jednim od `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` ili `no_user_text`. Nakon vremenskog ograničenja, HTTP pogreške ili mrežne pogreške krajnja se točka preskače 30 s. Uspješan izbor glasi `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Nijedan URL, ključ, prompt ili uzvodno tijelo ne dolazi do dnevnika.
+
+Combo builder prikazuje ova polja kada je strategija usmjerivača `decision`, s generiranim opisima kao rezerviranim mjestima i** Test odluka** gumb koji jednom poziva `POST /api/combos/decision-preview` s nespremljenim postavkama (ista oznaka).
+
+**Kada koristiti** : promet s mješovitom težinom gdje želite da razinu izabere po zahtjevu klasifikator koji odaberete, a ne posebno Nadir.
+
+**Alias** : `decision` (bez pseudonima)
+
+---
+
 ### Prilagođene strategije usmjerivača
 
 Putem javnog API-ja možete registrirati vlastitu implementaciju sučelja `RouterStrategy`:
@@ -803,6 +858,7 @@ Zatim je upotrijebite:
 | Strogi SLO-ovi           | `sla-aware` | Filtrira prema pragovima p95/pogrešaka/troškova |
 | Višekružni razgovor      | `lkgp`      | Postojanost sesije                              |
 | Mješovita složenost      | `nadir`     | Odabire razinu modela za svaki upit             |
+| Vlastiti klasifikator    | `decision`  | Osoba koja odlučuje odabire model               |
 
 Polja za strategiju svjesnu SLA-a:
 

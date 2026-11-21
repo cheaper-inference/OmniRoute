@@ -482,6 +482,7 @@ Pastāvīgi saglabātām `strategy: "auto"` kombinācijām var iestatīt `config
 - `lkgp` — vispirms pēdējais zināmais darbspējīgais nodrošinātājs
 - `nadir` — vaicā [Nadir](https://getnadir.com) lēmumu API, kurš kopas modelis ir nepieciešams
   uzvednei; izvēles funkcija, kļūmes gadījumā brīvi pārslēdzas uz `rules`
+- `decision` — jautājiet konfigurētam noteicējam (TypeSafe System One, jūsu pašu lēmums URL vai kāds no paša kombinācijas modeļiem), kurš modelis pūlā atbilst pieprasījumam; aiz noklusējuma izslēgtā `COMBO_DECISION_ROUTER_ENABLED` karoga, atteices atvērts uz `rules`
 
 ### Detalizēti par maršrutētāja stratēģijām
 
@@ -707,6 +708,60 @@ un vismodernāko modeli), ja vēlaties samazināt izmaksas, ko rada vienmēr vis
 
 ---
 
+#### 7. `decision` — pluggable Decisioners izvēlas modeli
+
+`decision` jautā a** lēmējs** kurš modelis pūlā atbilst pieprasījumam, pēc tam sašaurina kopu līdz šim modelim un ļauj `rules` izvēlēties savienojumu (kvota, veselība un izmaksas joprojām izvēlas kontu). Izlēmējs tiek iestatīts kombinācijas lēmumu blokā — `config.decision`, kad maršrutētāja pogas atrodas `config` augšdaļā (ko raksta informācijas panelis) vai `config.auto.decision` blakus `config.auto.routerStrategy`:
+
+| `decider`     | Kurš atbild                                                                                                                | Vajadzības                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), noklusējuma modelis `jev-latest`                        | `typesafe` savienojums vai env atslēga         |
+| `http`        | pats izlemjat vietnē `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) vai `"openai-chat"` (tērzēšanas pabeigšana) | `baseUrl` + `model`; atslēga nav obligāta      |
+| `combo-model` | viens no jūsu nodrošinātāja modeļiem, kas tiek izsaukts procesā, piemēram, kodolsintēzes tiesnesis                         | `model` kā `provider/model` (bez kombinācijas) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Lauki (apstiprināti ar stingru shēmu, saglabājot un vēlreiz pēc pieprasījuma):
+
+- `decider` — `systemone`, `http` vai `combo-model`.
+- `model` — TypeSafe modelis, lēmuma modelis jūsu URL vai kombinētā modeļa izsaukuma `provider/model` (līdz 200 rakstzīmēm).
+- `baseUrl` — tikai `http` : `http(s)` URL līdz 500 rakstzīmēm, bez akreditācijas datiem, vaicājuma vai fragmenta. URL kas norāda uz šo OmniRoute (cilpas + `PORT`), tiek noraidīts.
+- `wire` — tikai `http` : `systemone` (noklusējums) vai `openai-chat`.
+- `connectionId` — saglabātais savienojums, kura atslēga tiek izmantota (tikai izsaucošā API atslēgas atļautajos savienojumos). Bez tā `systemone` nolasa `typesafe` savienojumu, un katrs tīkla noteicējs atgriežas pie `OMNIROUTE_DECISION_API_KEY`. Nav `apiKey` lauka: atslēga nekad netiek saglabāta kombinācijā.
+- `timeoutMs` — skaitlis, 100–5000, noklusējuma 2000.
+- `minConfidence` — 0–1; zemākas ticamības atbilde tiek atgriezta uz `rules` (lēmējs, kurš ziņo par neuzticību, tiek uzskatīts par 0).
+- `descriptions` — līdz 50 ierakstiem (atslēga līdz 300, teksts līdz 1000 rakstzīmēm), kas ievadīti pēc modeļa id vai `provider/model`; atiestatītie ieraksti saņem ģenerētu izmaksu ranga aprakstu.
+
+**Karogs.** `COMBO_DECISION_ROUTER_ENABLED` (noklusējuma `false`) vārti katru lēmēju. Kamēr tas ir izslēgts, `decision` kombinācija nenolasa akreditācijas datus, neveic zvanu un maršrutē ar `rules`; žurnālā rakstīts `fallback (disabled)`. Tikai saglabāta atslēga to nekad neieslēdz. Kombinācijas bez lēmuma bloka netiek ietekmētas vispār.
+
+**Kas atstāj kastīti.** Tikai pēdējā lietotāja ziņojuma teksts (līdz 8000 rakstzīmēm; chat/Claude `messages` vai Responses `input`) un modeļu ID izvēlne ar to aprakstiem. Nekad netiek rādīta sistēmas uzvedne, atbildes `instructions`, rīki, vēsture, galvenes vai konta dati. Tīkla zvani notiek caur pakalpojumu sniedzēja izejošo aizsargu bez atkārtojumiem, bez novirzīšanas un 64 KB atbildes ierobežojuma. `combo-model` izsaukums nav straumēts, bez rīkiem, `temperature: 0`, ar 256 marķieru budžetu; lēmums, kas sākts lēmuma aicinājuma ietvaros, tiek noraidīts.
+
+**Neveiksmes uzvedība** ir atvērta kļūmei: jebkura kļūme tiek atrisināta ar `rules` lēmumu, un iemesls ir `decision(<decider>): fallback (<reason>)` `recursion` bet `<reason>` ir viens no `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `low_confidence` `single_option` `no_user_text`. . Pēc taimauta, HTTP kļūdas vai tīkla kļūdas beigu punkts tiek izlaists 30 s. Veiksmīga izvēle skan `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Neviens URL, taustiņš, uzvedne vai augšējais korpuss nesasniedz žurnālu.
+
+Kombinācijas veidotājs parāda šos laukus, ja maršrutētāja stratēģija ir `decision`, ar ģenerētajiem aprakstiem kā vietturi un** Pārbaudes lēmums** poga, kas vienreiz izsauc `POST /api/combos/decision-preview` ar nesaglabātajiem iestatījumiem (tas pats karodziņš).
+
+**Kad lietot** : jauktas sarežģītības datplūsma, kur vēlaties, lai līmenis tiktu izvēlēts katram pieprasījumam, izmantojot jūsu izvēlēto klasifikatoru, nevis tieši Nadiru.
+
+**Alias** : `decision` (bez aizstājvārda)
+
+---
+
 ### Pielāgotas maršrutētāja stratēģijas
 
 Varat reģistrēt savu `RouterStrategy` implementāciju, izmantojot publisko API:
@@ -760,6 +815,7 @@ Pēc tam izmantojiet to:
 | Stingri SLO              | `sla-aware` | Filtrē pēc p95/kļūdu/izmaksu sliekšņiem            |
 | Vairāku kārtu tērzēšana  | `lkgp`      | Sesijas piesaiste                                  |
 | Dažādas grūtības pakāpes | `nadir`     | Katram vaicājumam izvēlas atbilstošu modeļa līmeni |
+| Savs klasifikators       | `decision`  | Jūsu lēmējs izvēlas modeli                         |
 
 SLA apzinīgas stratēģijas lauki:
 

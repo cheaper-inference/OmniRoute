@@ -44,7 +44,7 @@ Tõeväärtusega lipp loetakse **lubatuks**, kui selle tegelik väärtus on `"tr
 
 ## Lipu kataloog
 
-127 lippu 6 kategoorias.** Vaikimisi** on definitsiooni vaikeväärtus —, mida kasutatakse siis, kui DB alistamist ega keskkonnamuutujat pole.
+128 lippu 6 kategoorias.** Vaikimisi** on definitsiooni vaikeväärtus —, mida kasutatakse siis, kui DB alistamist ega keskkonnamuutujat pole.
 
 ### Turvalisus (13)
 
@@ -117,7 +117,7 @@ Tõeväärtusega lipp loetakse **lubatuks**, kui selle tegelik väärtus on `"tr
 
 Kui `UNPRICED_USAGE_BUDGET_POLICY` on selgesõnaliselt konfigureeritud (DB alistamine enne keskkonda), on see `USAGE_LIMIT_IGNORE_UNPRICED` suhtes ülimuslik. Ilma selgesõnalise enum väärtuseta valib ülesvoolu tõeväärtuse loobumine `count_as_zero`; muidu on vaikimisi `fail_closed`. Vale loendi väärtused ja loetamatu funktsioonilipu salvestustõrke sulgemine. Kumbki loobumine ei leevenda hinnakulusid ega ebaõnnestunud hinnaotsingut. Jõustamine ja administraatori aruanne lahendavad sama tõhusa poliitika.
 
-### Kestus (62)
+### Kestus (63)
 
 | Võti                                           | Tüüp       | Vaikimisi | Taaskäivitage | Kirjeldus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------------------------- | ---------- | --------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -183,6 +183,7 @@ Kui `UNPRICED_USAGE_BUDGET_POLICY` on selgesõnaliselt konfigureeritud (DB alist
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | tõeväärtus | `false`   |               | Las `POST /v1/systemone` teenindab `cloudflare-ai/<jev\|clef\|clef-flash>` -otsuste mudeleid (alias `cf/`) Cloudflare Workers AI olemasoleva `cloudflare-ai` ühenduse (#16676) kaudu. Jev on Cloudflare tõmbab AI Gateway krediiti; Klahv tõmbab tööliste AI neuroneid. Vaikimisi väljas: nende mudeli ID-de andmisest keeldutakse 400-ga ja ülesvoolu kutsumata.                                                                                                                                                                                                                                                                                                                                   |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | tõeväärtus | `false`   |               | Las `POST /v1/systemone` teenindab `ollama-local/<model>` -otsuste mudeleid kohalikus Ollama mis on konfigureeritud olemasolevas `ollama-local` ühenduses (selle alus URL, mitte kunagi päringuväli) (#14667). Ollama enda piirangud kehtivad enne ülesvoolu suunatud kõnet: 2–26 kandidaati choice/score küsimuse kohta, maksimaalselt 64 küsimust, vestluse näidisvälju pole, ainult töötlemata base64-pildid. Vaikimisi väljas: nende mudeli ID-de andmisest keeldutakse 400-ga ja ülesvoolu kutsumata.                                                                                                                                                                                          |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | tõeväärtus | `false`   |               | Laske `jev` strateegiat kasutavatel kombinatsioonidel küsida TypeSafe System One’ilt (Jev), milline nende mudel peaks igale päringule vastama (#15279). Iga suunatud päring saadab seejärel piiratud väljavõtte vestlusest aadressile api.typesafe.ai ja juhib konfigureeritud `typesafe` ühendusele tasulise TypeSafe kasutuse; ainult salvestatud TypeSafe klahv ei lülita seda kunagi sisse. Vaikimisi väljas: jev-kombinatsioonid ei tee TypeSafe kõnet ja säilitavad operaatori eelistuste järjekorra.                                                                                                                                                                                         |
+| `COMBO_DECISION_ROUTER_ENABLED`                | tõeväärtus | `false`   |               | Laske `decision` ruuteri strateegiat kasutavatel automaatkombinatsioonidel küsida oma konfigureeritud otsustajalt, milline mudel peaks igale päringule vastama: TypeSafe System One, operaatori otsuse URL (System One või OpenAI vestluskaabel) või mõni kombineeritud mudelitest. Seejärel saadab iga suunatud päring sellele otsustajale viimase kasutajateate (maksimaalselt 8000 tähemärki) ja mudelimenüü, mis võib olla tasuline kolmanda osapoole kõne; üksi salvestatud võti ei lülita seda kunagi sisse. Vaikimisi väljas: otsustuskombinatsioonid ei loe mandaati, ei helista ja marsruudivad `rules` -strateegiaga.                                                                     |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | tõeväärtus | `false`   |               | Laske automaatsel veebiotsingul (ilma selgesõnalise `provider`) kasutada `codex-search` kaudu ühendatud Codex (ChatGPT) kontot: viimase abinõuna võtmeta pakkujatest ees, kui ükski mandaadiga otsinguteenuse pakkuja pole kasutatav, ja tõrkesiirde alternatiivina (#17933). Iga selline otsing kulutab ChatGPT tellimiskvoodi ja võtab aega umbes 10–40 sekundit. Vaikimisi väljas: `codex-search` töötab ainult siis, kui päring nimetab selle selgesõnaliselt.                                                                                                                                                                                                                                  |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | tõeväärtus | `false`   |               | Antigravity / Code Assisti sisselülitamiseks on konto, mille `loadCodeAssist` vastuses on `ineligibleTiers` ja mis märgib vaiketasemeks `legacy-tier` asemel `currentTier` (#18060), mis vastab Antigravity-Manager `fetch_project_id` järjestusele. Päris piiratud kontol pole veel kinnitatud. Vaikimisi väljas: selline konto jätkab oma `currentTier` kasutamist.                                                                                                                                                                                                                                                                                                                               |
 
@@ -255,10 +256,10 @@ Tagastab iga lipu koos selle tegeliku väärtuse, allika ja kokkuvõttega.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

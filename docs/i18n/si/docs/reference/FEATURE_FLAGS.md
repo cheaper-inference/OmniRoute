@@ -45,7 +45,7 @@ boolean ෆ්ලෑගයක බලපැවැත්වෙන අගය `"true
 
 ## ධජ නාමාවලිය
 
-කාණ්ඩ 6ක් පුරා ධජ 127ක්. **පෙරනිමිය** යනු අර්ථ දැක්වීමේ පෙරනිමි අගයයි — DB override එකක් හෝ පරිසර විචල්යයක් නොමැති විට භාවිත වන අගයයි.
+කාණ්ඩ 6ක් පුරා ධජ 128ක්. **පෙරනිමිය** යනු අර්ථ දැක්වීමේ පෙරනිමි අගයයි — DB override එකක් හෝ පරිසර විචල්යයක් නොමැති විට භාවිත වන අගයයි.
 
 ### ආරක්ෂාව (13)
 
@@ -121,7 +121,7 @@ boolean ෆ්ලෑගයක බලපැවැත්වෙන අගය `"true
 upstream boolean opt-out එක `count_as_zero` තෝරයි; එසේ නොමැතිනම් පෙරනිමිය
 `fail_closed` වේ. අවලංගු enum අගයන් සහ කියවිය නොහැකි feature-flag ගබඩාව fail closed වේ. කිසිදු opt-out එකක් මිල නියම කළ වියදම හෝ අසාර්ථක pricing lookup එක ලිහිල් නොකරයි. Enforcement සහ පරිපාලක වාර්තාව එකම effective policy එක විසඳයි.
 
-### ධාවන කාලය (62)
+### ධාවන කාලය (63)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -187,6 +187,7 @@ upstream boolean opt-out එක `count_as_zero` තෝරයි; එසේ න�
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |         | පවතින `cloudflare-ai` connection එක හරහා Cloudflare Workers AI මත `cloudflare-ai/<jev\|clef\|clef-flash>` decisions models (alias `cf/`) සපයන්න `POST /v1/systemone` වෙත ඉඩ දෙන්න (#16676). Cloudflare මත Jev මඟින් AI Gateway credits භාවිත කරයි; Clef මඟින් Workers AI neurons භාවිත කරයි. පෙරනිමියෙන් අක්රියයි: එම model ids 400 පිළිතුරක් සමඟ ප්රතික්ෂේප කරනු ලබන අතර upstream call එකක් සිදු නොවේ.                                                                                                                                                                                                                                                                                                                                         |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |         | පවතින `ollama-local` connection එකේ වින්යාස කර ඇති local Ollama මත `ollama-local/<model>` decisions models සපයන්න `POST /v1/systemone` වෙත ඉඩ දෙන්න (එහි base URL එක භාවිත වන අතර request field එකක් කිසිවිටෙක නොවේ) (#14667). ඕනෑම upstream call එකකට පෙර Ollama හිම සීමා අදාළ වේ: එක් choice/score question එකකට candidates 2-26ක්, උපරිම questions 64ක්, chat sampling fields නොමැතිව, raw base64 images පමණි. පෙරනිමියෙන් අක්රියයි: එම model ids 400 පිළිතුරක් සමඟ ප්රතික්ෂේප කරනු ලබන අතර upstream call එකක් සිදු නොවේ.                                                                                                                                                                                                                    |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |         | `jev` strategy භාවිත කරන combos හට, සෑම request එකකටම ඔවුන්ගේ කුමන models පිළිතුරු දිය යුතුදැයි TypeSafe System One (Jev) වෙතින් විමසීමට ඉඩ දෙන්න (#15279). එවිට route කරන සෑම request එකක්ම conversation එකේ සීමා කළ excerpt එකක් api.typesafe.ai වෙත යවන අතර, වින්යාස කර ඇති `typesafe` connection මත ගෙවන TypeSafe usage භාවිත කරයි; ගබඩා කර ඇති TypeSafe key එකක් පමණක් මෙය කිසිවිටෙක සක්රිය නොකරයි. පෙරනිමියෙන් අක්රියයි: jev combos කිසිදු TypeSafe call එකක් නොකර operatorගේ preference order එක තබා ගනී.                                                                                                                                                                                                                                |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |         | `decision` රවුටර උපාය මාර්ගය භාවිතා කරන ස්වයංක්‍රීය සංයෝජන ඔවුන්ගේ වින්‍යාසගත තීරණය කරන්නාගෙන් එක් එක් ඉල්ලීමට පිළිතුරු දිය යුත්තේ කුමන මාදිලිය දැයි විමසීමට ඉඩ දෙන්න: TypeSafe System One, operator decision URL (System One හෝ OpenAI chat wire) හෝ ක්‍රියාවලියේ පවතින combo ගේම මාදිලිවලින් එකක්. සෑම ගමන් කරන ලද ඉල්ලීමක්ම අවසාන පරිශීලක පණිවිඩය (උපරිම වශයෙන් අක්ෂර 8000) සහ ආදර්ශ මෙනුව එම තීරණය කරන්නා වෙත යවයි, එය ගෙවන තෙවන පාර්ශවීය ඇමතුමක් විය හැකිය; ගබඩා කර ඇති යතුරක් පමණක් එය කිසි විටෙකත් ක්‍රියාත්මක නොවේ. පෙරනිමියෙන් ක්‍රියාවිරහිතයි: තීරණ සංයෝජන අක්තපත්‍ර කිසිවක් නොකියයි, ඇමතුම් නොගෙන `rules` උපාය මාර්ගය සමඟ ගමන් කරන්න.                                                                                                |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | ස්වයංක්රීය වෙබ් සෙවීමකට (පැහැදිලි `provider` එකක් නොමැති විට) සම්බන්ධිත Codex (ChatGPT) ගිණුමක් `codex-search` හරහා භාවිත කිරීමට ඉඩ දෙයි: අක්තපත්ර සහිත සෙවුම් provider එකක් භාවිත කළ නොහැකි විට, keyless providers වලට පෙර අවසාන විකල්පය ලෙසත්, failover විකල්පය ලෙසත් (#17933). මෙවැනි සෑම සෙවුමක්ම ChatGPT subscription quota භාවිත කරන අතර තත්පර 10–40ක් පමණ ගත වේ. පෙරනිමියෙන් අක්රියයි: ඉල්ලීමක එය පැහැදිලිව සඳහන් කළ විට පමණක් `codex-search` ක්රියාත්මක වේ.                                                                                                                                                                                                                                                                             |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | Antigravity / Code Assist onboarding සඳහා, `loadCodeAssist` පිළිතුරේ `ineligibleTiers` ලැයිස්තුගත කර ඇති සහ අවසර ලත් tier එකක් default ලෙස සලකුණු කර නොමැති ගිණුමක්, එහි `currentTier` වෙනුවට `legacy-tier` සමඟ onboard කරයි (#18060). මෙය Antigravity-Manager හි `fetch_project_id` අනුපිළිවෙළට ගැළපේ. සැබෑ සීමා කළ ගිණුමක් මත තවම තහවුරු කර නැත. පෙරනිමියෙන් අක්රියයි: එවැනි ගිණුමක් එහි `currentTier` සමඟ onboarding දිගටම සිදු කරයි.                                                                                                                                                                                                                                                                                                        |
 
@@ -286,10 +287,10 @@ DB අතික්රමණයක් පවතින අතරතුර `DELETE`
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... ධජ 127ම
+    // ... ධජ 128ම
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

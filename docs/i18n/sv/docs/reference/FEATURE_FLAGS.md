@@ -44,7 +44,7 @@ En boolesk flagga anses vara **aktiverad** när dess effektiva värde är `"true
 
 ## Flagga katalog
 
-127 flaggor i 6 kategorier.** Standard** är definitionen standard — värdet som används när varken en DB åsidosättning eller en miljövariabel är närvarande.
+128 flaggor i 6 kategorier.** Standard** är definitionen standard — värdet som används när varken en DB åsidosättning eller en miljövariabel är närvarande.
 
 ### Säkerhet (13)
 
@@ -117,7 +117,7 @@ En boolesk flagga anses vara **aktiverad** när dess effektiva värde är `"true
 
 När `UNPRICED_USAGE_BUDGET_POLICY` är explicit konfigurerad (DB åsidosätt före miljö) har det företräde framför `USAGE_LIMIT_IGNORE_UNPRICED`. Utan något explicit uppräkningsvärde väljer den booleska opt-out uppströms `count_as_zero`; annars är standardvärdet `fail_closed`. Ogiltiga uppräkningsvärden och oläsbar funktionsflaggalagring misslyckades. Varken att välja bort minskar prissatta utgifter eller en misslyckad prissökning. Verkställighet och administratörsrapport löser samma effektiva policy.
 
-### Körtid (62)
+### Körtid (63)
 
 | Nyckel                                         | Typ        | Standard | Starta om | Beskrivning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ---------- | -------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -183,6 +183,7 @@ När `UNPRICED_USAGE_BUDGET_POLICY` är explicit konfigurerad (DB åsidosätt f�
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | booleskt   | `false`  |           | Låt `POST /v1/systemone` tjäna `cloudflare-ai/<jev\|clef\|clef-flash>` -beslutsmodellerna (alias `cf/`) på Cloudflare Workers AI genom den befintliga `cloudflare-ai` anslutningen (#16676). Jev på Cloudflare drar AI Gateway-krediter; Clef ritar Workers AI neuroner. Av som standard: dessa modell-ID nekas med ett 400 och inget uppströmssamtal.                                                                                                                                                                                                                                                                                                                                                         |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | booleskt   | `false`  |           | Låt `POST /v1/systemone` tjäna `ollama-local/<model>` -beslutsmodeller på den lokala Ollama som är konfigurerad i den befintliga `ollama-local` anslutningen (dess bas URL, aldrig ett begärandefält) (#14667). Ollama egna gränser gäller före alla uppströmssamtal: 2-26 kandidater per choice/score fråga, högst 64 frågor, inga chattsamplingsfält, endast råa base64-bilder. Av som standard: dessa modell-ID nekas med ett 400 och inget uppströmssamtal.                                                                                                                                                                                                                                                |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | booleskt   | `false`  |           | Låt kombinationer som använder `jev` strategin fråga TypeSafe System One (Jev) vilken av deras modeller som ska svara på varje begäran (#15279). Varje dirigerad begäran skickar sedan ett avgränsat utdrag av konversationen till api.typesafe.ai och drar betald TypeSafe användning på den konfigurerade `typesafe` anslutningen; endast en lagrad TypeSafe nyckel slår aldrig på den. Av som standard: jev combos ringer inga TypeSafe samtal och behåller operatörens preferensordning.                                                                                                                                                                                                                   |
+| `COMBO_DECISION_ROUTER_ENABLED`                | booleskt   | `false`  |           | Låt autokombinationer som använder `decision` -routerstrategin fråga sin konfigurerade avgörare vilken modell som ska svara på varje förfrågan: TypeSafe System One, ett operatörsbeslut URL (System One eller OpenAI chattråd), eller en av kombinationens egna modeller på gång. Varje dirigerad förfrågan skickar sedan det sista användarmeddelandet (högst 8000 tecken) och modellmenyn till den avgöraren, vilket kan vara ett betalsamt tredjepartssamtal; en lagrad nyckel slår aldrig på den. Av som standard: beslutskombinationer läser inga referenser, ring inga samtal och dirigera med `rules` -strategin.                                                                                      |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | booleskt   | `false`  |           | Låt en automatisk webbsökning (ingen explicit `provider`) använda ett anslutet Codex (ChatGPT)-konto genom `codex-search`: som sista utväg före de nyckellösa leverantörerna när ingen legitimerad sökleverantör är användbar, och som alternativ för failover (#17933). Varje sådan sökning spenderar ChatGPT prenumerationskvot och tar cirka 10–40 s. Av som standard: `codex-search` körs endast när en begäran namnger det uttryckligen.                                                                                                                                                                                                                                                                  |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | booleskt   | `false`  |           | För Antigravity / Code Assist onboarding, ett konto vars `loadCodeAssist` svar listar `ineligibleTiers` och markerar ingen tillåten nivå som standard onboards med `legacy-tier` istället för dess `currentTier` (#18060), som matchar Antigravity-Manager `fetch_project_id` -ordningen. Ännu inte bekräftat på ett riktigt begränsat konto. Av som standard: ett sådant konto fortsätter med sin `currentTier`.                                                                                                                                                                                                                                                                                              |
 
@@ -255,10 +256,10 @@ Returnerar varje flagga med dess effektiva värde, källa och en sammanfattning.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

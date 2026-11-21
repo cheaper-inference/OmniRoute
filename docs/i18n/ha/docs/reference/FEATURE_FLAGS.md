@@ -44,7 +44,7 @@ Ana ɗaukar alamar boolean a matsayin **mai aiki** idan ƙimarta mai aiki ita ce
 
 ## Tuta Catalog
 
-Tutoci 127 a cikin rukunan 6.** Tsohuwar** ita ce ma'anar tsohowar — ƙimar da ake amfani da ita lokacin da DB ba ta soke ko canjin yanayi ba.
+Tutoci 128 a cikin rukunan 6.** Tsohuwar** ita ce ma'anar tsohowar — ƙimar da ake amfani da ita lokacin da DB ba ta soke ko canjin yanayi ba.
 
 ### Tsaro (13)
 
@@ -117,7 +117,7 @@ Tutoci 127 a cikin rukunan 6.** Tsohuwar** ita ce ma'anar tsohowar — ƙimar da
 
 Lokacin da aka saita `UNPRICED_USAGE_BUDGET_POLICY` a sarari (DB override kafin muhalli), yana ɗaukar fifiko akan `USAGE_LIMIT_IGNORE_UNPRICED`. Ba tare da ƙayyadadden ƙimar ƙima ba, zaɓin zaɓin boolean na sama yana zaɓar `count_as_zero`; in ba haka ba tsoho shine `fail_closed`. Ƙimar ƙididdiga mara inganci da ma'ajiya ta tuta ta kasa rufe. Babu ficewa yana sassauta farashin kashe kuɗi ko gazawar binciken farashi. Ƙaddamarwa da rahoton mai gudanarwa suna warware wannan ingantacciyar manufa.
 
-### Lokacin gudu (62)
+### Lokacin gudu (63)
 
 | Maɓalli                                        | Nau'in  | Tsohuwar | Sake kunnawa | Bayani                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | -------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -183,6 +183,7 @@ Lokacin da aka saita `UNPRICED_USAGE_BUDGET_POLICY` a sarari (DB override kafin 
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false`  |              | Bari `POST /v1/systemone` ta yi hidima ga samfuran yanke shawara na `cloudflare-ai/<jev\|clef\|clef-flash>` (alias `cf/`) akan Cloudflare Ma'aikata AI ta hanyar haɗin `cloudflare-ai` da ake ciki (#16676). Jev a kan Cloudflare ya zana ƙofofin AI Gateway; Clef yana zana Ma'aikata AI neurons. Kashe ta tsohuwa: waɗannan nau'ikan ids an ƙi su tare da 400 kuma babu kira na sama.                                                                                                                                                                                                                                                                                                                |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false`  |              | Bari `POST /v1/systemone` ta yi amfani da samfuran yanke shawara `ollama-local/<model>` akan Ollama na gida da aka saita a cikin haɗin `ollama-local` da ke wanzu (tushen URL, ba filin nema ba) (#14667). Ana amfani da iyakokin Ollama na kansa kafin kowane kira na sama: 'yan takara 2-26 a kowace tambayar choice/score, aƙalla tambayoyi 64, babu filayen yin hira, raw base64 hotuna kawai. Kashe ta tsohuwa: waɗannan nau'ikan ids an ƙi su tare da 400 kuma babu kira na sama.                                                                                                                                                                                                                |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false`  |              | Bari combos masu amfani da dabarun `jev` su tambayi TypeSafe System One (Jev) wanne daga cikin ƙirarsu ya kamata ya amsa kowace buƙata (#15279). Kowane buƙatun da aka yi watsi da shi sannan ya aika da iyakataccen yanki na tattaunawar zuwa api.typesafe.ai kuma ya zana amfani da TypeSafe da aka biya akan haɗin `typesafe` da aka saita; maɓallin TypeSafe da aka adana shi kaɗai ba ya kunna shi. Kashe ta tsohuwa: jev combos ba sa kiran TypeSafe kuma kiyaye odar zaɓin mai aiki.                                                                                                                                                                                                            |
+| `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false`  |              | Bari combos auto da ke amfani da dabarun na'ura mai ba da hanya tsakanin hanyoyin sadarwa `decision` su tambayi wanda aka tsara su wane samfurin ya kamata ya amsa kowane buƙatu: TypeSafe System One, shawarar ma'aikaci URL (System One ko OpenAI chat waya), ko ɗayan samfuran haɗin gwiwar da ake aiwatarwa. Duk buƙatun da aka yi watsi da shi sannan aika saƙon mai amfani na ƙarshe (aƙalla haruffa 8000) da menu na ƙirar zuwa ga mai yanke hukunci, wanda ƙila ya zama kiran ɓangare na uku da aka biya; maɓalli da aka adana shi kaɗai ba ya kunna shi. Kashe ta tsohuwa: yanke shawarar combos ba karanta takaddun shaida, kada ku yi kira da hanya tare da dabarun `rules`.                |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false`  |              | Bari binciken gidan yanar gizo ta atomatik (babu `provider` bayyananne) ya yi amfani da asusun Codex (ChatGPT) da aka haɗa ta hanyar `codex-search`: azaman makoma ta ƙarshe a gaban masu samar da maɓalli lokacin da babu ingantaccen mai ba da bincike da za a iya amfani da shi, kuma azaman mai gazawa (#17933). Kowane irin wannan bincike yana kashe adadin kuɗin kuɗin ChatGPT kuma yana ɗaukar kusan 10-40 s. Kashe ta tsohuwa: `codex-search` yana gudana ne kawai lokacin da buƙatu ya sanya masa suna a sarari.                                                                                                                                                                             |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false`  |              | Don Antigravity / Code Assist onboarding, asusun da amsar `loadCodeAssist` ya jera `ineligibleTiers` kuma ya yi alamar babu izini a matsayin tsoho akan allo tare da `legacy-tier` maimakon `currentTier` (#18060), wanda ya dace da odar Antigravity-Manage `fetch_project_id`. Har yanzu ba a tabbatar da taƙaicen asusu na gaske ba. Kashe ta tsohuwa: irin wannan asusu yana ci gaba da shiga tare da `currentTier` ɗin sa.                                                                                                                                                                                                                                                                        |
 
@@ -255,10 +256,10 @@ Yana dawo da kowace tuta tare da ingantaccen ƙimarta, tushenta, da taƙaice.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 127 flags
+    // ... all 128 flags
   ],
   "summary": {
-    "total": 127,
+    "total": 128,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
