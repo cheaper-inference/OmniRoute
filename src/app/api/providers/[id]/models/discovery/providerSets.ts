@@ -143,6 +143,9 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // ParalonCloud — GET https://paraloncloud.com/v1/models is key-gated; the registry
   // seed is only the offline fallback.
   "paraloncloud",
+  // Pareto Inference serves its catalog from a public /v1/models; live discovery picks up
+  // new models without a release, and the registry seed stays as the offline fallback.
+  "pareto",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {
