@@ -1,0 +1,1 @@
+- **fix(conversations):** `resolveTurnDisplayContent` now falls back to the call-log artifact's top-level `requestBody` when `pipeline.clientRawRequest.body` is absent, so conversation tree turn previews populate even when detailed pipeline logging is disabled ([#20623](https://github.com/cheaper-inference/OmniRoute/issues/20623)) — thanks @zerafachris

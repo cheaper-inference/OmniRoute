@@ -149,7 +149,13 @@ export function resolveTurnDisplayContent(
     const { artifact, state } = readCallArtifact(relPath);
     if (state !== "ready") continue;
     const pipeline = asRecord(artifact?.pipeline);
-    indexTurns(result, turnsFromBody(asRecord(pipeline?.clientRawRequest)?.body));
+    // Pipeline body first: requestBody also passes through truncateForLog, which swaps a body
+    // over CHAT_LOG_MAX_BODY_KB for a turn-less summary. requestBody is the fallback for
+    // artifacts written with detailed pipeline logging off (#20623).
+    indexTurns(
+      result,
+      turnsFromBody(asRecord(pipeline?.clientRawRequest)?.body ?? artifact?.requestBody)
+    );
     indexTurns(result, turnsFromClientResponse(pipeline?.clientResponse));
     indexTurns(result, turnsFromProviderRequest(asRecord(pipeline?.providerRequest)?.body));
   }
