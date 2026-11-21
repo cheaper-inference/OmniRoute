@@ -378,6 +378,17 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["gemini-4"],
   },
 
+  // ── Gemini 4 Carbon ─────────────────────────────────────────────
+  "gemini-4-carbon": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    defaultThinkingBudget: 8192,
+    thinkingBudgetCap: 24576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+  },
+
   // ── Gemini 4 Hydrogen ────────────────────────────────────────────
   "gemini-4-hydrogen": {
     maxOutputTokens: 65536,

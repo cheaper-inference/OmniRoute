@@ -40,6 +40,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "minimax",
   "minimax-cn",
   "crof",
+  "mistral",
   "clinepass",
   "nanogpt",
   "nan",
