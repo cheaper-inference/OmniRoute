@@ -139,6 +139,8 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   "qwen-cloud-token-plan",
   // AgentRouter (New-API) console System Access Token + New-Api-User id (providerSpecificData)
   "agentrouter",
+  // TokenHarbor API key → /api/cli/free-tier (:free + Pass %) + /api/cli/balance (USD)
+  "tokenharbor",
   // OpenRouter API key → /key limits + /credits account balance
   "openrouter",
   // LLM Gateway API key (llmgtwy_…) → GET /v1/key DevPass allowance

@@ -99,6 +99,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "agentrouter",
   // TokenRouter wallet + per-key quota (optional Management Key in consoleApiKey)
   "tokenrouter",
+  // TokenHarbor weekly :free allowance + Pass window + USD balance (GET /api/cli/free-tier, /api/cli/balance)
+  "tokenharbor",
   // Kilo Code personal USD balance (GET /api/profile/balance, existing OAuth token)
   "kilocode",
   // MegaBrain plan session + weekly limits (GET /api/profile/limits, OAuth token or mb-v1 key)

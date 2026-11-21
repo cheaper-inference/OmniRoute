@@ -267,6 +267,41 @@ function quotaUsageRecord(
   return hasOllamaPurchasedCredits(record, provider) ? null : record;
 }
 
+type QuotaWindowMap = Record<string, { percentUsed: number; resetAt: string | null }>;
+
+/**
+ * Keep only the quota windows that govern the requested model: Antigravity scopes by model
+ * family (gemini / claude), TokenHarbor by `:free` vs paid. Other providers keep every window.
+ */
+function scopeQuotaWindowsToRequest(
+  windows: QuotaWindowMap,
+  context: UsageToQuotaContext
+): QuotaWindowMap {
+  const requestedFamily =
+    isAntigravityProvider(context.provider) && context.requestedModel
+      ? getAntigravityQuotaFamily(context.requestedModel)
+      : null;
+  if (requestedFamily === "gemini" || requestedFamily === "claude") {
+    return Object.fromEntries(
+      Object.entries(windows).filter(([key]) => {
+        if (key.endsWith("_weekly")) {
+          return antigravityWeeklyWindowMatchesFamily(key, requestedFamily);
+        }
+        return getAntigravityQuotaFamily(key) === requestedFamily;
+      })
+    );
+  }
+  if (context.provider === "tokenharbor" && context.requestedModel) {
+    // TokenHarbor's weekly `free` window covers only `:free` models; paid models draw on
+    // the Pass window / USD balance, so a spent free allowance must not exhaust them.
+    const wantsFree = context.requestedModel.endsWith(":free");
+    return Object.fromEntries(
+      Object.entries(windows).filter(([key]) => (key === "free") === wantsFree)
+    );
+  }
+  return windows;
+}
+
 export function convertUsageToQuotaInfo(
   usage: unknown,
   context: UsageToQuotaContext = {}
@@ -307,21 +342,7 @@ export function convertUsageToQuotaInfo(
     return reportsUnlimited ? { used: 0, total: 0, percentUsed: 0, unlimited: true } : null;
   }
 
-  const requestedFamily =
-    isAntigravityProvider(context.provider) && context.requestedModel
-      ? getAntigravityQuotaFamily(context.requestedModel)
-      : null;
-  const providerScopedWindows =
-    requestedFamily === "gemini" || requestedFamily === "claude"
-      ? Object.fromEntries(
-          Object.entries(windows).filter(([key]) => {
-            if (key.endsWith("_weekly")) {
-              return antigravityWeeklyWindowMatchesFamily(key, requestedFamily);
-            }
-            return getAntigravityQuotaFamily(key) === requestedFamily;
-          })
-        )
-      : windows;
+  const providerScopedWindows = scopeQuotaWindowsToRequest(windows, context);
   if (Object.keys(providerScopedWindows).length === 0) return null;
 
   const normalized = normalizeQuotaWindows(providerScopedWindows, context);

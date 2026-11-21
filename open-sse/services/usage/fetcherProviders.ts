@@ -110,6 +110,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "agentrouter",
   // TokenRouter Management API (optional Management Key in consoleApiKey)
   "tokenrouter",
+  // TokenHarbor weekly :free allowance + Pass window + USD balance (GET /api/cli/*)
+  "tokenharbor",
   "kilocode",
   // StepFun account balance (GET /v1/accounts; base URL override selects
   // China vs international platform, mirroring the chat path)
