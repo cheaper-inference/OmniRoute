@@ -15,9 +15,10 @@
  * A row whose model has no price row counts its stored cost (reported by the provider or
  * calculated when recorded). Only a row with neither counts 0, with no marker.
  *
- * Provider and model are returned as recorded for the key's own requests (a combo request whose
- * every target was refused carries the routing label as provider and the client's model
- * string). `retentionDays` is the operator's raw usage-history retention setting
+ * Provider is returned as recorded for the key's own requests. Model is the recorded string after
+ * `normalizeModelName`, which keeps the part after the last "/", and rows are grouped by it. A
+ * combo request whose every target was refused carries the routing label as provider and the
+ * client's model string. `retentionDays` is the operator's raw usage-history retention setting
  * (`retention.usageHistory`). The reused queries also return `uniqueAccounts`, `uniqueApiKeys`,
  * `serviceTier` and the raw cost inputs; they are read here and never copied into the result.
  * No SQL lives in this module.
