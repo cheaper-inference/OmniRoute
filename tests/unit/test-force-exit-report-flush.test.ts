@@ -38,6 +38,8 @@ function runForceExit(files: string[]) {
           "--import",
           "tsx/esm",
           "--import",
+          "./open-sse/utils/setupPolyfill.ts",
+          "--import",
           "./tests/_setup/isolateDataDir.ts",
           "--test",
           "--test-force-exit",
@@ -77,4 +79,12 @@ test("force-exit runs every test when the top-level await precedes the first tes
   ]);
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual({ tests, pass, fail }, { tests: 3, pass: 3, fail: 0 });
+});
+
+test("force-exit runs every Perplexity research test after setup completes (#18045)", () => {
+  const { result, tests, pass, fail } = runForceExit([
+    "tests/unit/perplexity-research-tool.test.ts",
+  ]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual({ tests, pass, fail }, { tests: 26, pass: 26, fail: 0 });
 });
