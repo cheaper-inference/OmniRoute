@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCachedRawProviderConnections, getCachedSettings } from "@/lib/db/readCache";
-import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import { getProviderLimitsDisplayMap } from "@/lib/usage/quotaDisplay";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { buildConnectionQuotaAvailability } from "@/lib/usage/availability";
 
@@ -11,7 +11,7 @@ export async function GET() {
       getCachedRawProviderConnections(),
       getCachedSettings(),
     ]);
-    const caches = getAllProviderLimitsCache();
+    const caches = getProviderLimitsDisplayMap();
     const policy = resolveResilienceSettings(settings).quotaPreflight;
     return NextResponse.json(
       {

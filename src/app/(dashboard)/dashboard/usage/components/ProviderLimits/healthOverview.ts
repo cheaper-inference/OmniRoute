@@ -126,6 +126,7 @@ export interface HealthCell {
   scopeId?: string;
   window: "fiveHour" | "overall" | null;
   awaitingSync: boolean;
+  quotaUnknown?: boolean;
   quotaIgnored?: boolean;
 }
 export interface HealthAccount {
@@ -248,7 +249,7 @@ function quotaScope(
   return { scope: "account" };
 }
 function shouldDisplayQuota(connection: HealthConnection, quota: HealthQuota): boolean {
-  if (quota.isCredits || quota.isResetCredits || quota.fractionReported === false) return false;
+  if (quota.isCredits || quota.isResetCredits) return false;
   if (connection.provider === "codex" && ["reserve_session", "reserve_weekly"].includes(quota.name))
     return false;
   if (/^(extra_usage|banked_reset_credits)$/.test(quota.name)) return false;
@@ -282,6 +283,7 @@ function buildHealthCell(
     scopeId: scopeId || undefined,
     window: normalizeHealthWindow(quota, data?.raw?.fetchedAt),
     awaitingSync,
+    quotaUnknown: quota.fractionReported === false,
     quotaIgnored: decisions.some(({ decision }) =>
       decision.allowanceReasons.some(
         (reason) =>
