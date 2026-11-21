@@ -1,0 +1,1 @@
+- **fix(gemini):** a trailing `<` or partial `<think` prefix at the end of a Gemini stream is now delivered as text instead of being dropped. ([#20206](https://github.com/cheaper-inference/OmniRoute/pull/20206))
