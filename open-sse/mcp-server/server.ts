@@ -118,6 +118,7 @@ import { getDbInstance, ensureDbInitialized } from "../../src/lib/db/core.ts";
 import { isMcpScopeEnforcementEnabled } from "../../src/shared/utils/featureFlags.ts";
 import { toSafeMcpErrorMessage } from "./errorMessage.ts";
 import { registerRadarCatalogTool } from "./radarCatalog.ts";
+import { installScopeFilteredToolsList, recordToolScopes } from "./scopeToolsList.ts";
 import type { TextToolResult } from "./toolResult.ts";
 export { getMcpModelsCatalog } from "./catalog.ts";
 
@@ -191,6 +192,7 @@ function withScopeEnforcement(
   handler: (args: unknown, extra?: McpToolExtraLike) => Promise<TextToolResult>,
   toolScopes?: readonly string[]
 ) {
+  recordToolScopes(toolName, toolScopes);
   return async (args: unknown, extra?: McpToolExtraLike): Promise<TextToolResult> => {
     const scopeContext = resolveCallerScopeContext(extra, Array.from(MCP_ALLOWED_SCOPES));
     const scopeCheck = evaluateToolScopes(
@@ -1027,6 +1029,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     // Skills not loaded yet — skip dynamic registration until next reconnect
   }
 
+  installScopeFilteredToolsList(server, Array.from(MCP_ALLOWED_SCOPES));
   return server;
 }
 
