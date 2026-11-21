@@ -23,7 +23,7 @@ const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuit
 const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
 const { clearAllModelLockouts, getAllModelLockouts, recordModelLockoutFailure } =
   await import("../../open-sse/services/accountFallback.ts");
-const { probeLockedModel } =
+const { probeLockedModel, QUOTA_PROBE_MAX_OUTPUT_TOKENS } =
   await import("../../src/lib/credentialHealth/quotaRevalidationProbe.ts");
 const { runSingleModelTest } = await import("../../src/lib/api/modelTestRunner.ts");
 const { getAllKeyHealth } = await import("../../open-sse/services/apiKeyRotator.ts");
@@ -117,7 +117,7 @@ function mockUpstream(respond: () => Response) {
   return bodies;
 }
 
-test("the probe reaches upstream as a one-token request for the locked model", async () => {
+test("the probe reaches upstream with the smallest cap upstreams accept, for the locked model", async () => {
   const connId = await createConnection();
   lock(connId, "gpt-4o");
   const bodies = mockUpstream(
@@ -137,7 +137,7 @@ test("the probe reaches upstream as a one-token request for the locked model", a
   assert.equal(bodies.length, 1, "exactly one upstream request");
   assert.equal(bodies[0].model, "gpt-4o", "the locked model is what reaches upstream");
   const cap = bodies[0].max_tokens ?? bodies[0].max_completion_tokens;
-  assert.equal(cap, 1, "a one-token request");
+  assert.equal(cap, QUOTA_PROBE_MAX_OUTPUT_TOKENS, "the probe's small answer cap");
 });
 
 test("a 429 for the model keeps its lock and writes no connection-wide cooldown", async () => {

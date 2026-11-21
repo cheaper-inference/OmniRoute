@@ -27,6 +27,8 @@ import {
   probeLockedModel,
   type DailyRevalidationVerdict,
 } from "@/lib/credentialHealth/quotaRevalidationProbe";
+import { lockProviderAliases } from "@/lib/credentialHealth/lockProviderAliases";
+import { releasePersistedFamilyLock } from "@/lib/credentialHealth/quotaProbeRecoveryRelease";
 
 import {
   MAX_DAILY_REVALIDATIONS_PER_SWEEP,
@@ -62,7 +64,14 @@ export type DailyRevalidationProbe = (
 const lastProbedAt = new Map<string, number>();
 
 function candidateKey(candidate: DailyRevalidationCandidate): string {
-  return `${candidate.provider}\u0000${candidate.connectionId}\u0000${candidate.model ?? ""}`;
+  // A family lock is installed under EVERY spelling its provider answers to
+  // (`agy` AND `antigravity`, see lockAntigravityFamilyModel), so those keys are one
+  // lock set: they get one probe and one throttle entry, not two of each for one quota.
+  const providerKey =
+    candidate.scope === "quota_family"
+      ? (lockProviderAliases(candidate.provider)[0] ?? candidate.provider)
+      : candidate.provider;
+  return `${providerKey}\u0000${candidate.connectionId}\u0000${candidate.model ?? ""}`;
 }
 
 function pruneProbed(nowMs: number, intervalMs: number): void {
@@ -74,6 +83,7 @@ function pruneProbed(nowMs: number, intervalMs: number): void {
 /** The connection fields that decide whether its locks may be probed. */
 type DailyRevalidationConnection = {
   id: string;
+  provider?: string | null;
   isActive?: boolean | null;
   healthCheckInterval?: number | null;
 };
@@ -85,19 +95,21 @@ type DailyRevalidationConnection = {
  * probed from here: a pinned request to an inactive connection is the explicit
  * re-activation probe, and the capped auto-disabled retest is the only path that
  * may bring such a connection back.
+ *
+ * Keyed by id so the sweep also learns each connection's OWN provider spelling.
  */
-function eligibleConnectionIds(
+function eligibleConnections(
   connections: readonly DailyRevalidationConnection[] | null | undefined
-): Set<string> {
-  const ids = new Set<string>();
+): Map<string, DailyRevalidationConnection> {
+  const byId = new Map<string, DailyRevalidationConnection>();
   for (const connection of Array.isArray(connections) ? connections : []) {
     if (!connection || typeof connection.id !== "string" || connection.id.length === 0) continue;
     if (connection.isActive !== true) continue;
     const interval = connection.healthCheckInterval;
     if (typeof interval === "number" && interval <= 0) continue;
-    ids.add(connection.id);
+    byId.set(connection.id, connection);
   }
-  return ids;
+  return byId;
 }
 
 /**
@@ -126,9 +138,10 @@ function isEnabled(): boolean {
 }
 
 /**
- * The store's locks as the selector expects them, one per provider/connection/model:
- * a model can hold more than one lock key (quota family + exact), but it gets one
- * probe, and the throttle below is keyed the same way.
+ * The store's locks as the selector expects them, one per provider/connection/model.
+ * A family key and an exact key are distinct entities (`family:gemini` covers the
+ * bucket, `exact:gemini-3-pro` covers one model), so each keeps its own probe and its
+ * own throttle entry — clearing one never clears the other.
  */
 function toCandidates(nowMs: number): DailyRevalidationCandidate[] {
   const byKey = new Map<string, DailyRevalidationCandidate>();
@@ -146,6 +159,7 @@ function toCandidate(lock: ModelLockoutInfo, nowMs: number): DailyRevalidationCa
     provider: lock.provider,
     connectionId: lock.connectionId,
     model: lock.model,
+    scope: lock.scope,
     reason: lock.reason,
     until: lock.until,
     lockedAt: Date.parse(lock.lockedAt),
@@ -165,13 +179,13 @@ function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Eligible connection ids, or null when they cannot be read (then nothing is probed). */
-async function readEligibleConnectionIds(
+/** Eligible connections by id, or null when they cannot be read (then nothing is probed). */
+async function readEligibleConnections(
   load: () => Promise<DailyRevalidationConnection[]>,
   logger: DailyRevalidationLogger
-): Promise<Set<string> | null> {
+): Promise<Map<string, DailyRevalidationConnection> | null> {
   try {
-    return eligibleConnectionIds(await load());
+    return eligibleConnections(await load());
   } catch (error) {
     // Unreadable connections: probe nothing, the safe direction.
     logger.warn?.(
@@ -181,12 +195,18 @@ async function readEligibleConnectionIds(
   }
 }
 
+/** Release the connection-row record of a recovered family lock; injected so a sweep is testable without a DB. */
+export type DailyRevalidationFamilyRelease = (
+  candidate: DailyRevalidationCandidate
+) => Promise<boolean>;
+
 /** Probe one due lock; true when it recovered and its lock was cleared. */
 async function revalidateOne(
   candidate: DailyRevalidationCandidate,
   probe: DailyRevalidationProbe,
   nowMs: number,
-  logger: DailyRevalidationLogger
+  logger: DailyRevalidationLogger,
+  releaseFamilyLock: DailyRevalidationFamilyRelease
 ): Promise<boolean> {
   const key = candidateKey(candidate);
   // Recorded before the probe: a probe that throws must not be retried in a
@@ -205,7 +225,18 @@ async function revalidateOne(
 
   if (verdict !== "recovered") return false;
 
-  clearModelLock(candidate.provider, candidate.connectionId, candidate.model);
+  // The same family is installed under every spelling the provider answers to
+  // (`agy` AND `antigravity`), so a recovery has to clear all of them or the sibling
+  // spelling keeps the family parked.
+  for (const alias of lockProviderAliases(candidate.provider)) {
+    clearModelLock(alias, candidate.connectionId, candidate.model);
+  }
+  // A family lock lives on the connection row too; the in-memory clear alone would be
+  // rehydrated back on the next credential read. Both family providers persist it, and
+  // the release is scoped to the family this lock recorded.
+  if (candidate.scope === "quota_family") {
+    await releaseFamilyLock(candidate);
+  }
   lastProbedAt.delete(key);
   logger.info?.(
     `[quota-daily] ${candidate.provider}/${candidate.model} answered again; lock cleared early`
@@ -234,6 +265,12 @@ export async function runDailyQuotaRevalidation(
     /** Connections the locks belong to; production reads the active ones. */
     loadConnections?: () => Promise<DailyRevalidationConnection[]>;
     probe?: DailyRevalidationProbe;
+    /**
+     * Drops the connection-row record of a recovered family lock (Codex scope cooldown,
+     * Antigravity family cooldown). Injected so a sweep is testable without a DB; tests
+     * override it to assert the release happens for family locks only.
+     */
+    releaseFamilyLock?: DailyRevalidationFamilyRelease;
     limit?: number;
     logger?: DailyRevalidationLogger;
   } = {}
@@ -251,25 +288,34 @@ export async function runDailyQuotaRevalidation(
   };
   const probe: DailyRevalidationProbe =
     deps.probe ?? ((candidate) => probeLockedModel(candidate, { logger, nowMs }));
+  const releaseFamilyLock: DailyRevalidationFamilyRelease =
+    deps.releaseFamilyLock ?? ((candidate) => releasePersistedFamilyLock(candidate, logger));
 
   pruneProbed(nowMs, 24 * 60 * 60 * 1000);
 
-  const eligible = await readEligibleConnectionIds(
+  const eligible = await readEligibleConnections(
     deps.loadConnections ?? loadActiveConnections,
     logger
   );
   if (!eligible) return result;
 
   const limit = deps.limit ?? MAX_DAILY_REVALIDATIONS_PER_SWEEP;
-  const candidates = toCandidates(nowMs).filter((candidate) =>
-    eligible.has(candidate.connectionId)
-  );
+  const candidates = toCandidates(nowMs)
+    .filter((candidate) => eligible.has(candidate.connectionId))
+    // The lock records the spelling that failed; the probe must ask through the
+    // connection's OWN provider, or a pinned request can name a provider id the
+    // connection does not carry (`agy` vs `antigravity`).
+    .map((candidate) => {
+      const connectionProvider = eligible.get(candidate.connectionId)?.provider;
+      return connectionProvider ? { ...candidate, provider: connectionProvider } : candidate;
+    });
   const due = selectDailyRevalidations(candidates, nowMs, limit, { enabled: true });
   result.selected = due.length;
 
   for (const candidate of due) {
     result.probed += 1;
-    if (await revalidateOne(candidate, probe, nowMs, logger)) result.recovered += 1;
+    if (await revalidateOne(candidate, probe, nowMs, logger, releaseFamilyLock))
+      result.recovered += 1;
   }
 
   return result;

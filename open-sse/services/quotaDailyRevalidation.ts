@@ -21,11 +21,20 @@
  * the store, so this stays testable without a clock, a database or a network.
  */
 
+/**
+ * Which key namespace the lock lives in. A `quota_family` lock covers a whole quota
+ * bucket, so its stored `model` is the BUCKET name (`codex`/`spark` or
+ * `family:gemini`), not a callable model id: the probe has to resolve one first.
+ */
+export type DailyRevalidationLockScope = "exact" | "quota_family";
+
 /** A locked model as the selector sees it. */
 export type DailyRevalidationCandidate = {
   provider: string;
   connectionId: string;
   model: string | null | undefined;
+  /** The lock's key namespace; absent on callers written before family locks were probed. */
+  scope?: DailyRevalidationLockScope;
   /** The lock's reason (e.g. `quota_exhausted`), reused when a probe refreshes it. */
   reason?: string;
   /** Epoch ms the lock expires at. */

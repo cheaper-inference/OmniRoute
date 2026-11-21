@@ -1242,6 +1242,12 @@ export type ModelLockoutInfo = {
   failureCount: number;
   lockedAt: string;
   until: number;
+  /**
+   * Which key namespace this lock lives in. `quota_family` locks cover a whole quota
+   * bucket, so `model` is the bucket name (`codex`/`spark`, `family:gemini`) and not a
+   * callable model id — a probe has to resolve a concrete model first.
+   */
+  scope: exactModelLock.LockoutScope;
 };
 
 /**
@@ -1254,7 +1260,7 @@ export function getAllModelLockouts(): ModelLockoutInfo[] {
     cleanupModelLockKey(key, now);
   }
   for (const [key, entry] of modelLockouts) {
-    const { provider, connectionId, model } = exactModelLock.parseModelLockKey(key);
+    const { provider, connectionId, model, scope } = exactModelLock.parseModelLockKey(key);
     active.push({
       provider,
       connectionId,
@@ -1264,6 +1270,7 @@ export function getAllModelLockouts(): ModelLockoutInfo[] {
       failureCount: entry.failureCount,
       lockedAt: new Date(entry.lockedAt).toISOString(),
       until: entry.until,
+      scope,
     });
   }
   return active;

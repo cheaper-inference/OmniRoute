@@ -122,7 +122,11 @@ test("the probe is a minimal, failure-isolated request to the locked model on it
   assert.equal(request.modelId, `${PROVIDER}/gemini-3-pro`, "the locked model, not a test model");
   assert.equal(request.connectionId, "conn-req", "pinned to the locked connection");
   assert.equal(request.maxOutputTokens, QUOTA_PROBE_MAX_OUTPUT_TOKENS);
-  assert.equal(QUOTA_PROBE_MAX_OUTPUT_TOKENS, 1, "one token is enough to prove the quota");
+  assert.equal(
+    QUOTA_PROBE_MAX_OUTPUT_TOKENS,
+    16,
+    "16 is the floor some upstreams accept: a smaller cap answers 400 and the lock never recovers"
+  );
   assert.equal(request.acceptEmptyOutput, true);
   assert.equal(request.isolateFailures, true, "a probe failure must never reach the connection");
 });
@@ -319,6 +323,149 @@ test("the once-a-day throttle holds per locked model", async () => {
   assert.equal(runner.calls.length, 1, "no second probe within the day");
   await sweep(start + DAY + 60_000);
   assert.equal(runner.calls.length, 2, "probed again once a full day has passed");
+});
+
+test("a quota answer refreshes the SAME lock scope it was probed for", async () => {
+  // A family lock refreshed under the exact key would write a second, phantom entry and
+  // leave the real one parked: the refresh has to reuse the candidate's own scope.
+  recordModelLockoutFailure(
+    PROVIDER,
+    "conn-scope",
+    "gemini-3-pro",
+    "quota_exhausted",
+    429,
+    3_000,
+    null,
+    {
+      exactCooldownMs: 50 * DAY,
+      scope: "quota_family",
+    }
+  );
+  const familyKey = getAllModelLockouts().find(
+    (entry) => entry.connectionId === "conn-scope" && entry.model === "family:gemini"
+  );
+  assert.ok(familyKey, "sanity: the family lock exists");
+
+  await probeLockedModel(
+    {
+      provider: PROVIDER,
+      connectionId: "conn-scope",
+      model: "family:gemini",
+      scope: "quota_family",
+      reason: familyKey.reason,
+      until: familyKey.until,
+      lockedAt: Date.parse(familyKey.lockedAt),
+    },
+    {
+      resolveModel: async () => ({ model: "gemini-3-pro" }),
+      runModelTest: async (options) => overQuota(options.modelId, { retryAfter: 6 * 24 * 3600 }),
+      logger: silent,
+    }
+  );
+
+  const locks = getAllModelLockouts().filter((entry) => entry.connectionId === "conn-scope");
+  assert.deepEqual(
+    locks.map((entry) => entry.model),
+    ["family:gemini", "family:gemini"],
+    "the family lock is refreshed under both spellings and no exact:family:gemini phantom"
+  );
+  assert.deepEqual(
+    locks.map((entry) => entry.provider).sort(),
+    ["agy", "antigravity"],
+    "one quota keeps one deadline: the sibling spelling is refreshed too, not left stale"
+  );
+});
+
+test("a family lock is probed through a real model of its own family", async () => {
+  recordModelLockoutFailure(
+    PROVIDER,
+    "conn-family",
+    "gemini-3-pro",
+    "quota_exhausted",
+    429,
+    3_000,
+    null,
+    {
+      exactCooldownMs: 7 * DAY,
+      scope: "quota_family",
+    }
+  );
+  const familyLock = getAllModelLockouts().find(
+    (entry) => entry.connectionId === "conn-family" && entry.scope === "quota_family"
+  );
+  assert.ok(familyLock, "sanity: a family lock exists");
+
+  const runner = scriptedRunner((options) => ok(options.modelId));
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: activeConnections("conn-family"),
+    probe: (candidate) =>
+      probeLockedModel(candidate, {
+        runModelTest: runner.runModelTest,
+        loadSyncedModels: async () => [],
+        logger: silent,
+      }),
+    logger: silent,
+  });
+
+  assert.equal(result.recovered, 1);
+  assert.equal(runner.calls.length, 1);
+  assert.match(
+    runner.calls[0].modelId,
+    /gemini|flash|pro/,
+    "a concrete model of the gemini family reaches upstream, not the bucket name"
+  );
+  assert.equal(
+    runner.calls[0].modelId.includes("family:"),
+    false,
+    "the bucket name is never sent upstream"
+  );
+  assert.equal(
+    lockOf("conn-family", "family:gemini"),
+    undefined,
+    "the recovered family is unlocked"
+  );
+});
+
+test("a family lock with no resolvable model spends no upstream request", async () => {
+  recordModelLockoutFailure(
+    "antigravity",
+    "conn-unresolvable",
+    "gemini-3-pro",
+    "quota_exhausted",
+    429,
+    3_000,
+    null,
+    {
+      exactCooldownMs: 7 * DAY,
+      scope: "quota_family",
+    }
+  );
+  const before = frozenLockOf("conn-unresolvable", "family:gemini");
+  assert.ok(before, "sanity: the family lock exists");
+
+  const warnings: string[] = [];
+  let calls = 0;
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: activeConnections("conn-unresolvable"),
+    probe: (candidate) =>
+      probeLockedModel(candidate, {
+        resolveModel: async () => ({ unavailable: "no chat model of this family is known" }),
+        runModelTest: async (options) => {
+          calls += 1;
+          return ok(options.modelId);
+        },
+        logger: { warn: (msg) => warnings.push(msg) },
+      }),
+    logger: silent,
+  });
+
+  assert.equal(calls, 0, "an unresolvable bucket must not buy a request");
+  assert.equal(result.recovered, 0);
+  assert.deepEqual(frozenLockOf("conn-unresolvable", "family:gemini"), before);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /skipping/);
 });
 
 test("a failure-isolated probe stays isolated even when probeCanDisable is opted in", async () => {

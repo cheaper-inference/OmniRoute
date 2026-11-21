@@ -253,6 +253,144 @@ test("unreadable connections make the pass probe nothing", async () => {
   assert.equal(getAllModelLockouts().length, 1);
 });
 
+test("a recovered family lock also releases its persisted deadline; an exact lock does not", async () => {
+  // A family lock is stored on the connection row as well and rehydrated on every
+  // credential read, so clearing only the in-memory entry would restore it right away.
+  recordModelLockoutFailure(
+    "antigravity",
+    "conn-family",
+    "gemini-3-pro",
+    "quota_exhausted",
+    429,
+    3_000,
+    null,
+    {
+      exactCooldownMs: 5 * DAY,
+      scope: "quota_family",
+    }
+  );
+  recordModelLockoutFailure("openai", "conn-exact-only", "gpt-4o", "429", 429, 3_000, null, {
+    exactCooldownMs: 5 * DAY,
+    scope: "exact",
+  });
+
+  const released: string[] = [];
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: async () => [
+      { id: "conn-family", isActive: true, healthCheckInterval: null },
+      { id: "conn-exact-only", isActive: true, healthCheckInterval: null },
+    ],
+    probe: async () => "recovered",
+    releaseFamilyLock: async (candidate) => {
+      released.push(`${candidate.provider}/${candidate.model}`);
+      return true;
+    },
+  });
+
+  assert.equal(result.recovered, 2);
+  assert.deepEqual(
+    released,
+    ["antigravity/family:gemini"],
+    "only the family lock has a connection-row record to release"
+  );
+  assert.deepEqual(getAllModelLockouts(), [], "both recovered locks (and their keys) are gone");
+});
+
+test("an inconclusive or still-locked family probe never releases the persisted deadline", async () => {
+  recordModelLockoutFailure(
+    "antigravity",
+    "conn-family-keeplock",
+    "claude-opus-4-6-thinking",
+    "quota_exhausted",
+    429,
+    3_000,
+    null,
+    {
+      exactCooldownMs: 5 * DAY,
+      scope: "quota_family",
+    }
+  );
+
+  let releases = 0;
+  await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: async () => [
+      { id: "conn-family-keeplock", isActive: true, healthCheckInterval: null },
+    ],
+    probe: async () => "unknown",
+    releaseFamilyLock: async () => {
+      releases += 1;
+      return true;
+    },
+  });
+  assert.equal(releases, 0);
+  assert.ok(
+    getAllModelLockouts().some((entry) => entry.model === "family:claude"),
+    "the family lock survives an inconclusive probe"
+  );
+});
+
+test("an Antigravity family lock installed under both spellings is probed once and both are cleared", async () => {
+  // `lockAntigravityFamilyModel()` writes the SAME family under `agy` AND `antigravity`,
+  // so one quota appears as two lock keys. Probing both spends two requests on one
+  // question, and clearing only the probed spelling leaves the family parked for the
+  // next credential read.
+  const until = Date.now() + 5 * DAY;
+  for (const alias of ["agy", "antigravity"]) {
+    recordModelLockoutFailure(
+      alias,
+      "conn-pair",
+      "claude-opus-4-6-thinking",
+      "quota_exhausted",
+      429,
+      3_000,
+      null,
+      {
+        exactCooldownMs: until - Date.now(),
+        scope: "quota_family",
+      }
+    );
+  }
+  assert.equal(
+    getAllModelLockouts().filter((entry) => entry.connectionId === "conn-pair").length,
+    2,
+    "sanity: the family is installed under both spellings"
+  );
+
+  const probes: string[] = [];
+  const result = await runDailyQuotaRevalidation({
+    enabled: true,
+    loadConnections: async () => [
+      {
+        id: "conn-pair",
+        provider: "antigravity",
+        isActive: true,
+        healthCheckInterval: null,
+      },
+    ],
+    probe: async (candidate) => {
+      probes.push(`${candidate.provider}/${candidate.model}`);
+      return "recovered";
+    },
+    releaseFamilyLock: async () => true,
+    logger: {},
+  });
+
+  assert.equal(result.probed, 1, "one quota is one probe, not one per spelling");
+  assert.deepEqual(
+    probes,
+    ["antigravity/family:claude"],
+    "one probe, asked through the connection's own provider spelling"
+  );
+  assert.equal(result.recovered, 1);
+  assert.deepEqual(
+    getAllModelLockouts(),
+    [],
+    "both spellings of the recovered family are released"
+  );
+});
+
 test("a sweep cadence of 0 (sweep turned off) makes no probe even with the flag on", async () => {
   lockProviderModel("antigravity", "conn-h", "gemini-3-pro");
 

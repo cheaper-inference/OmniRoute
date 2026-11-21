@@ -8,7 +8,7 @@
  * executor all apply). A credential check would not do: a key that still
  * authenticates says nothing about whether this model's quota window reopened.
  *
- * Cost: one request with a one-token answer cap per locked model per day, and only
+ * Cost: one request with a small answer cap per locked model per day, and only
  * when the operator turned QUOTA_DAILY_REVALIDATION on.
  *
  * Outcome → effect, scoped to this provider + connection + model only:
@@ -17,6 +17,11 @@
  *                                   answer's reset hint through the existing parsers;
  *   - anything else (timeout, 5xx, 4xx, skipped probe) → "unknown": the lock stays
  *                                   exactly as it was and the outcome is logged.
+ *
+ * A `quota_family` lock stores the bucket name (`codex`/`spark`,
+ * `family:gemini`), which is not a callable model: `quotaProbeModelResolution.ts`
+ * turns it into a concrete model of the same family first. Without one the probe is
+ * skipped, because a bucket name only ever buys a 4xx.
  *
  * The probe runs failure-isolated (`isolateFailures`), so no answer it gets can put
  * a connection-wide cooldown (`rateLimitedUntil`), a terminal status or a lock on a
@@ -31,12 +36,27 @@ import {
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import type { DailyRevalidationCandidate } from "@omniroute/open-sse/services/quotaDailyRevalidation.ts";
 import type { RunSingleModelTestOptions, SingleModelTestResult } from "@/lib/api/modelTestRunner";
+import {
+  resolveQuotaProbeModel,
+  type QuotaProbeModelResolution,
+  type QuotaProbeModelResolverDeps,
+} from "@/lib/credentialHealth/quotaProbeModelResolution";
+import { lockProviderAliases } from "@/lib/credentialHealth/lockProviderAliases";
 
 /** What one probe concluded. Only `recovered` unlocks the model. */
 export type DailyRevalidationVerdict = "recovered" | "still-locked" | "unknown";
 
-/** The answer cap of a probe request: the upstream only has to accept it. */
-export const QUOTA_PROBE_MAX_OUTPUT_TOKENS = 1;
+/**
+ * The answer cap of a probe request: the upstream only has to accept it.
+ *
+ * 16, not 1: several upstreams reject a smaller output budget outright with HTTP
+ * 400, and a 400 reads as "unknown", so the lock could never recover early there.
+ * OpenCode Zen 400s any `max_output_tokens` below 16 (see
+ * `open-sse/executors/opencodeMuseSpark.ts`), and the Responses-shaped providers
+ * share the same floor. The extra tokens are never generated in practice — the
+ * probe's one-word answer costs 1–2 — so this stays a rounding error.
+ */
+export const QUOTA_PROBE_MAX_OUTPUT_TOKENS = 16;
 
 /** A probe that hangs longer than this proves nothing either way. */
 export const QUOTA_PROBE_TIMEOUT_MS = 30_000;
@@ -54,15 +74,20 @@ async function runModelTestInProcess(
   return runSingleModelTest(options);
 }
 
-/** The request a probe sends: this model, on this connection, one token, failure-isolated. */
+/**
+ * The request a probe sends: this model, on this connection, a small answer cap,
+ * failure-isolated. `model` is the CONCRETE model — for a family lock it is the one
+ * `resolveQuotaProbeModel()` picked, never the bucket name the lock stores.
+ */
 export function buildQuotaProbeRequest(
-  candidate: DailyRevalidationCandidate
+  candidate: DailyRevalidationCandidate,
+  model: string = String(candidate.model ?? "")
 ): RunSingleModelTestOptions {
   return {
     providerId: candidate.provider,
     // Always prefixed: a bare model id that itself contains "/" would otherwise be
     // read as `<provider>/<model>` and routed to the wrong provider.
-    modelId: `${candidate.provider}/${candidate.model ?? ""}`,
+    modelId: `${candidate.provider}/${model}`,
     connectionId: candidate.connectionId,
     timeoutMs: QUOTA_PROBE_TIMEOUT_MS,
     streamChat: true,
@@ -104,9 +129,18 @@ function resolveProbeRetryHint(
 }
 
 /**
- * Refresh the lock of this exact model from a quota answer. Without a parseable
- * reset the lock is simply kept as it is. Exact scope only: a quota-family write
- * would park the connection's sibling models, which this probe never touches.
+ * Refresh the lock from a quota answer. Without a parseable reset the lock is
+ * simply kept as it is. Two rules, both learned from how the locks are written:
+ *
+ *   - the write reuses the lock's OWN scope. An `exact` lock must not grow into a
+ *     family lock (that would park the connection's siblings), and a family lock
+ *     refreshed under the exact key would write a second, phantom entry that never
+ *     releases the real one.
+ *   - a family lock is installed under every spelling its provider answers to, so
+ *     the refresh writes all of them. Refreshing one spelling and leaving the other
+ *     on the old deadline would keep the family parked past the reset the upstream
+ *     just announced.
+ *
  * Returns whether a refresh was written.
  */
 export function refreshLockFromQuotaAnswer(
@@ -117,21 +151,25 @@ export function refreshLockFromQuotaAnswer(
   if (!candidate.model) return false;
   const hint = resolveProbeRetryHint(result, candidate.provider, nowMs);
   if (!hint) return false;
-  recordModelLockoutFailure(
-    candidate.provider,
-    candidate.connectionId,
-    candidate.model,
-    candidate.reason || (result.isQuota ? "quota_exhausted" : "rate_limit"),
-    typeof result.statusCode === "number" ? result.statusCode : 429,
-    hint.retryAfterMs,
-    null,
-    {
-      exactCooldownMs: hint.retryAfterMs,
-      scope: "exact",
-      exactCooldownIsUpstreamReset: retryHintBypassesMaxCooldownMs(hint.provenance),
-      authoritativeBodyReset: isAuthoritativeRetryHintSource(hint.provenance),
-    }
-  );
+  const scope = candidate.scope ?? "exact";
+  const providers = scope === "quota_family" ? lockProviderAliases(candidate.provider) : [];
+  for (const provider of providers.length > 0 ? providers : [candidate.provider]) {
+    recordModelLockoutFailure(
+      provider,
+      candidate.connectionId,
+      candidate.model,
+      candidate.reason || (result.isQuota ? "quota_exhausted" : "rate_limit"),
+      typeof result.statusCode === "number" ? result.statusCode : 429,
+      hint.retryAfterMs,
+      null,
+      {
+        exactCooldownMs: hint.retryAfterMs,
+        scope,
+        exactCooldownIsUpstreamReset: retryHintBypassesMaxCooldownMs(hint.provenance),
+        authoritativeBodyReset: isAuthoritativeRetryHintSource(hint.provenance),
+      }
+    );
+  }
   return true;
 }
 
@@ -141,16 +179,37 @@ function describeCandidate(candidate: DailyRevalidationCandidate): string {
 
 /**
  * Probe one locked model with a minimal real request and act on that model's
- * answer only. Clearing a recovered lock is the runner's job.
+ * answer only. A family lock is probed through a concrete model of its own family;
+ * with none available nothing is sent upstream. Clearing a recovered lock is the
+ * runner's job.
  */
 export async function probeLockedModel(
   candidate: DailyRevalidationCandidate,
-  deps: { runModelTest?: QuotaProbeModelTest; logger?: QuotaProbeLogger; nowMs?: number } = {}
+  deps: {
+    runModelTest?: QuotaProbeModelTest;
+    logger?: QuotaProbeLogger;
+    nowMs?: number;
+    /** Overrides the catalog read used to resolve a family lock to a real model. */
+    resolveModel?: (candidate: DailyRevalidationCandidate) => Promise<QuotaProbeModelResolution>;
+    loadSyncedModels?: QuotaProbeModelResolverDeps["loadSyncedModels"];
+  } = {}
 ): Promise<DailyRevalidationVerdict> {
   if (!candidate.model) return "unknown";
-  const runModelTest = deps.runModelTest ?? runModelTestInProcess;
   const logger = deps.logger ?? { warn: (msg: string) => console.warn(msg) };
-  const result = await runModelTest(buildQuotaProbeRequest(candidate));
+  const resolveModel =
+    deps.resolveModel ??
+    ((target: DailyRevalidationCandidate) =>
+      resolveQuotaProbeModel(target, { loadSyncedModels: deps.loadSyncedModels }));
+  const resolved = await resolveModel(candidate);
+  if ("unavailable" in resolved) {
+    logger.warn?.(
+      `[quota-daily] skipping the probe of ${describeCandidate(candidate)}: ${resolved.unavailable}`
+    );
+    return "unknown";
+  }
+
+  const runModelTest = deps.runModelTest ?? runModelTestInProcess;
+  const result = await runModelTest(buildQuotaProbeRequest(candidate, resolved.model));
   const verdict = classifyQuotaProbeResult(result);
   if (verdict === "still-locked") {
     const refreshed = refreshLockFromQuotaAnswer(candidate, result, deps.nowMs ?? Date.now());
