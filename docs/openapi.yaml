@@ -3519,6 +3519,86 @@ paths:
         "404":
           description: Combo not found
 
+  /api/combos/decision-preview:
+    post:
+      tags: [Combos]
+      summary: Preview the decision router menu and optionally test one decision
+      description: >-
+        Builds the menu (unique model ids of the given steps, in order) and the generated
+        cost-rank descriptions that the `decision` auto-router sends at request time. With
+        `prompt`, also runs one decision with the unsaved `decision` block; that call only
+        happens while the `COMBO_DECISION_ROUTER_ENABLED` feature flag is on (otherwise
+        `test.status` is `skipped` with reason `disabled`) and may bill the decider. A
+        `combo-model` decider is skipped (`live_request_only`). Requires management auth.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [models]
+              properties:
+                models:
+                  type: array
+                  maxItems: 200
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 300
+                  description: Combo step model strings (`provider/model`).
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 8000
+                decision:
+                  type: object
+                  additionalProperties: false
+                  required: [decider]
+                  properties:
+                    decider:
+                      type: string
+                      enum: [systemone, http, combo-model]
+                    model:
+                      type: string
+                      maxLength: 200
+                    baseUrl:
+                      type: string
+                      maxLength: 500
+                      description: http(s) URL without credentials, query or fragment.
+                    connectionId:
+                      type: string
+                      maxLength: 200
+                    wire:
+                      type: string
+                      enum: [systemone, openai-chat]
+                    timeoutMs:
+                      type: integer
+                      minimum: 100
+                      maximum: 5000
+                    minConfidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    descriptions:
+                      type: object
+                      maxProperties: 50
+                      additionalProperties:
+                        type: string
+                        maxLength: 1000
+      responses:
+        "200":
+          description: >-
+            `menu` and `generated`; with a prompt also `test` (`status`: `selected`, `skipped`
+            or `failed`, plus a log-safe `reason`, or `choice`, `confidence`, `probabilities`,
+            `backendModel` and `latencyMs`).
+        "400":
+          description: Invalid JSON or body (an `apiKey` field is rejected)
+        "401":
+          description: Management authentication required
+        "500":
+          description: Sanitized error
+
   /api/settings:
     get:
       tags: [Settings]
