@@ -24,11 +24,12 @@ for (const theme of ["light", "dark"] as const) {
     await expect(group).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(group).toHaveAttribute("aria-expanded", "true");
-    await expect(sidebar.getByRole("link", { name: "Caveman", exact: true })).toBeVisible();
+    const caveman = sidebar.getByRole("link", { name: "Caveman Prompt compression", exact: true });
+    await expect(caveman).toBeVisible();
     await page.keyboard.press("Space");
     await expect(group).toHaveAttribute("aria-expanded", "false");
     await sidebar.getByRole("searchbox").fill("Caveman");
-    await expect(sidebar.getByRole("link", { name: "Caveman", exact: true })).toBeVisible();
+    await expect(caveman).toBeVisible();
     await sidebar.getByRole("searchbox").fill("");
     await expect(group).toHaveAttribute("aria-expanded", "false");
     // The shell Header owns the single collapse/expand trigger (trilha G).
@@ -63,7 +64,9 @@ for (const theme of ["light", "dark"] as const) {
         .poll(() => sidebar.evaluate((element) => element.scrollWidth <= element.clientWidth))
         .toBe(true);
       await sidebar.getByRole("searchbox").fill("Caveman");
-      await expect(sidebar.getByRole("link", { name: "Caveman", exact: true })).toBeVisible();
+      await expect(
+        sidebar.getByRole("link", { name: "Caveman Prompt compression", exact: true })
+      ).toBeVisible();
       await sidebar.evaluate((element) => element.setAttribute("data-navigation-a11y", ""));
       const results = await new AxeBuilder({ page })
         .include("[data-navigation-a11y]")

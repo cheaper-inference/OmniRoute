@@ -532,13 +532,18 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={item.label}
+              aria-label={collapsed ? item.label : undefined}
               title={title}
             >
               {content}
             </a>
           ) : (
-            <Link href={item.href} prefetch={false} aria-label={item.label} title={title}>
+            <Link
+              href={item.href}
+              prefetch={false}
+              aria-label={collapsed ? item.label : undefined}
+              title={title}
+            >
               {content}
             </Link>
           )}
@@ -616,7 +621,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
           <Link
             href="/home"
             prefetch={false}
-            aria-label={brandName}
+            aria-label={collapsed ? brandName : undefined}
             title={`${brandName} v${APP_CONFIG.version}`}
             className={cn(
               "flex min-w-0 items-center rounded-control focus-visible:outline-2 focus-visible:outline-offset-4",
