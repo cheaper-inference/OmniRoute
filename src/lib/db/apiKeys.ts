@@ -287,8 +287,11 @@ export interface ApiKeyLookupOptions {
 // LRU cache for API key validation (valid keys only)
 const _keyValidationCache = new Map<string, { valid: boolean; timestamp: number }>();
 const _keyMetadataCache = new Map<string, CacheEntry<ApiKeyMetadata>>();
+// Keys with no row at all: hash -> time seen. Own map, so a flood of bad keys cannot evict valid entries.
+const _unknownKeyCache = new Map<string, number>();
 const _lastUsedUpdateCache = new Map<string, number>();
 const CACHE_TTL = 60 * 1000; // 1 minute TTL
+const UNKNOWN_KEY_TTL = 30 * 1000;
 const LAST_USED_UPDATE_TTL = 5 * 60 * 1000;
 const MAX_CACHE_SIZE = 1000;
 const EXCLUSIVE_LEASE_SCOPE = "lease:exclusive";
@@ -320,6 +323,7 @@ let _stmtDeleteKey: ApiKeysStatements["deleteKey"] | null = null;
 function invalidateCaches() {
   _keyValidationCache.clear();
   _keyMetadataCache.clear();
+  _unknownKeyCache.clear();
   clearModelPermissionCache();
   _lastUsedUpdateCache.clear();
 }
@@ -818,6 +822,8 @@ export async function createApiKey(
   };
 
   const stmt = getPreparedStatements(db);
+  const keyHash = await hashKey(apiKey.key);
+  _unknownKeyCache.delete(keyHash);
   // The secret is stored through the enc:v1: envelope (reversible for the admin reveal and
   // the operator export); auth matches key_hash only. See apiKeys/secretAtRest.ts.
   stmt.insertKey.run(
@@ -833,7 +839,7 @@ export async function createApiKey(
     0,
     apiKey.createdAt,
     apiKey.key.slice(0, 12),
-    await hashKey(apiKey.key),
+    keyHash,
     JSON.stringify(scopes),
     apiKey.expiresAt
   );
@@ -1499,6 +1505,9 @@ export async function validateApiKey(
     return cached.valid;
   }
 
+  const unknownAt = options.bypassCache ? undefined : _unknownKeyCache.get(cacheKey);
+  if (unknownAt !== undefined && now - unknownAt < UNKNOWN_KEY_TTL) return false;
+
   // A Redis hit never authorizes on its own (GHSA-66vh-35g3-78qv): eviction on regenerate/revoke
   // is best-effort and a late SET can resurrect an evicted entry, so the entry could keep a
   // retired credential valid for its whole TTL. SQLite is the source of truth for identity and
@@ -1508,7 +1517,13 @@ export async function validateApiKey(
   const stmt = getPreparedStatements(db);
   const row = lookupByKeyHash(db, stmt.validateKey, hashedKey);
 
-  if (!row) return false;
+  if (!row) {
+    if (!options.bypassCache) {
+      evictIfNeeded(_unknownKeyCache);
+      _unknownKeyCache.set(cacheKey, now);
+    }
+    return false;
+  }
 
   const isBanned = parseIsBanned(row.is_banned ?? row.isBanned);
   if (isBanned) return false;

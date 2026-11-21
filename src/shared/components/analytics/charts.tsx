@@ -108,6 +108,9 @@ export function StatCard({
 
 export type CompactStatSection = {
   title: string;
+  /** One plain sentence under the title saying what the figures count. */
+  description?: string;
+  testId?: string;
   items: Array<{ icon: string; label: string; value: any; tooltip?: string; color?: string }>;
   /** On mobile use 1 column instead of 2 — useful when values can be long (model names, etc.) */
   wideValues?: boolean;
@@ -118,11 +121,14 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
     <Card className="px-5 py-4">
       <div className="flex flex-col gap-3">
         {sections.map((section, si) => (
-          <div key={si}>
+          <div key={si} data-testid={section.testId}>
             {si > 0 && <div className="border-t border-border mb-3" />}
             <div className="text-[10px] uppercase font-semibold tracking-widest text-text-muted mb-2">
               {section.title}
             </div>
+            {section.description && (
+              <p className="text-xs text-text-muted -mt-1 mb-2">{section.description}</p>
+            )}
             <div
               className={
                 section.wideValues

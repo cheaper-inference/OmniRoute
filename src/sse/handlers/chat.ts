@@ -1,4 +1,4 @@
-import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -1203,7 +1203,7 @@ async function handleChatImplementation(
         resolvedModel,
         {
           connectionRestrictionSources: restrictions.sources,
-          requireToolCalling: hasQoderCallerTools(body),
+          requireToolCalling: requiresQoderHttpTransport(body),
           sessionKey: sessionAffinityKey,
           preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
           ...(target?.allowRateLimitedConnection ? { allowRateLimitedConnections: true } : {}),
@@ -1675,8 +1675,10 @@ async function handleSingleModelChat(
             // A probe stays a probe through the redirect, so each target is gated as one.
             automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
-            forcedConnectionId: runtimeOptions?.forcedConnectionId ?? null,
-            allowedConnectionIds: null,
+            // The redirected combo's own target pin and allow-list win over the caller's pin.
+            forcedConnectionId:
+              resolvedTarget?.connectionId ?? runtimeOptions?.forcedConnectionId ?? null,
+            allowedConnectionIds: resolvedTarget?.allowedConnectionIds ?? null,
             comboStepId: null,
             comboExecutionKey: null,
             skipUpstreamRetry: resolvedTarget?.failoverBeforeRetry === true,
@@ -1944,7 +1946,7 @@ async function handleSingleModelChat(
           model,
           {
             connectionRestrictionSources: restrictions.sources,
-            requireToolCalling: hasQoderCallerTools(body),
+            requireToolCalling: requiresQoderHttpTransport(body),
             sessionKey: museOwner ? null : occupancySessionKey,
             preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,
@@ -2184,16 +2186,23 @@ async function handleSingleModelChat(
         requestBody = { ...body, model: modelStr };
       }
       if (!runtimeOptions.reasoningDecision && runtimeOptions.reasoningIntent) {
-        const connectionRouting = await applyConnectionReasoningRule({
-          requestBody,
-          provider,
-          effectiveModel,
-          credentials,
-          apiKeyInfo,
-          reasoningIntent: runtimeOptions.reasoningIntent,
-          reasoningDecision: runtimeOptions.reasoningDecision,
-          requestRoutingTags: runtimeOptions.reasoningRequestTags,
-        }).catch(agyLease.releasingRethrow(leaseId));
+        let connectionRouting;
+        try {
+          connectionRouting = await applyConnectionReasoningRule({
+            requestBody,
+            provider,
+            effectiveModel,
+            credentials,
+            apiKeyInfo,
+            reasoningIntent: runtimeOptions.reasoningIntent,
+            reasoningDecision: runtimeOptions.reasoningDecision,
+            requestRoutingTags: runtimeOptions.reasoningRequestTags,
+          }).catch(agyLease.releasingRethrow(leaseId));
+        } catch (error) {
+          // The slot was taken above; a rule-store error must not keep the account occupied.
+          releaseOAuthSession();
+          throw error;
+        }
         if (connectionRouting.response) {
           releaseOAuthSession();
           agyLease.release(leaseId);
@@ -2434,10 +2443,12 @@ async function handleSingleModelChat(
         correlationId: rotationAttributionOn ? (runtimeOptions?.correlationId ?? null) : null,
       });
 
+      // An in-pipeline account rotation rewrites refreshedCredentials, not credentials.
+      const servedConnectionId = refreshedCredentials?.connectionId || credentials.connectionId;
       if (result.success) {
         if (isCodexResponseCurrent(result.response, true)) {
-          clearModelLock(provider, credentials.connectionId, model);
-          markQuotaHealthy(credentials.connectionId);
+          clearModelLock(provider, servedConnectionId, model);
+          markQuotaHealthy(servedConnectionId);
         }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
@@ -2453,7 +2464,7 @@ async function handleSingleModelChat(
         if (telemetry) telemetry.endPhase();
         const successResponse = withRoutingTelemetry(
           museOwner ? muse.museRecordOutput(museOwner, result.response) : result.response,
-          credentials?.connectionId
+          servedConnectionId
         );
         if (requestBody.stream === true) {
           return inheritResponsePolicies(
