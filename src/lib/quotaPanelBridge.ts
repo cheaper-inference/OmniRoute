@@ -8,6 +8,8 @@
  * list is consulted.
  */
 
+import net from "net";
+
 const PANEL_PATH_PATTERNS: readonly RegExp[] = [
   /^\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/,
   /^\/api\/v1\/me\/quota\/[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/,
@@ -50,6 +52,20 @@ export function isQuotaPanelPath(pathname: string, basePath = ""): boolean {
 /** The address the quota panel listener binds when QUOTA_PANEL_HOST is empty. */
 export const QUOTA_PANEL_DEFAULT_HOST = "127.0.0.1";
 
+/** The most connections the quota panel listener holds at a time. */
+export const QUOTA_PANEL_MAX_CONNECTIONS = 256;
+/** The time a client of the quota panel listener has to send the request headers. */
+export const QUOTA_PANEL_HEADERS_TIMEOUT_MS = 10_000;
+/** The time a client of the quota panel listener has to send the whole request. */
+export const QUOTA_PANEL_REQUEST_TIMEOUT_MS = 30_000;
+/** The time an idle kept-alive connection of the quota panel listener stays open. */
+export const QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS = 5_000;
+/**
+ * How often the quota panel listener checks the header and request timeouts. The HTTP server
+ * checks them every 30 seconds by default, which would let them run past their values.
+ */
+export const QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS = 1_000;
+
 export type QuotaPanelListenerDecision =
   | { kind: "off" }
   | { kind: "refused"; warning: string }
@@ -68,7 +84,22 @@ const BASE_PATH_WARNING = `OMNIROUTE_BASE_PATH has a shape the quota panel port 
 const PORT_DIGITS = /^[0-9]{1,5}$/;
 // A leading slash and one or more segments, with no trailing slash and no empty segment.
 const BASE_PATH_SHAPE = /^(?:\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*)+$/;
-const LOOPBACK_BIND_HOSTS: ReadonlySet<string> = new Set(["127.0.0.1", "::1", "localhost"]);
+// The first segments of application routes. A base path that starts with one of them is refused,
+// so the allowlist never lines up with another route of the application.
+const RESERVED_BASE_SEGMENTS: ReadonlySet<string> = new Set([
+  "api",
+  "v1",
+  "v1beta",
+  "_next",
+  "quota",
+  "dashboard",
+  "docs",
+  "login",
+]);
+const LOOPBACK_BIND_HOSTS: ReadonlySet<string> = new Set(["::1", "localhost"]);
+// 127.0.0.0/8, written as four decimal octets, alone or in its IPv4-mapped IPv6 form.
+const LOOPBACK_IPV4 = /^(?:::ffff:)?127(?:\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$/;
+const BRACKETED = /^\[(.+)\]$/;
 // Same default and same reading as the live dashboard WebSocket server
 // (src/server/ws/liveServer.ts). That module starts its server on import, so it is not imported.
 const LIVE_WS_DEFAULT_PORT = 20132;
@@ -95,10 +126,20 @@ function resolvePanelBasePath(value: string | undefined): string | null {
 
 /**
  * True for a base path the quota panel role supports: a leading slash and one or more segments,
- * with no trailing slash, no empty segment and none of `\ ? # %`.
+ * with no trailing slash, no empty segment and none of `\ ? # %`. The first segment must not be
+ * the first segment of an application route (`RESERVED_BASE_SEGMENTS`, in any case).
  */
 export function isQuotaPanelBasePath(basePath: string): boolean {
-  return BASE_PATH_SHAPE.test(basePath);
+  if (!BASE_PATH_SHAPE.test(basePath)) return false;
+  const firstSegment = basePath.split("/")[1].toLowerCase();
+  return !RESERVED_BASE_SEGMENTS.has(firstSegment);
+}
+
+/** The bind address as `listen` takes it: an IPv6 literal loses its brackets. */
+function resolvePanelHost(value: string | undefined): string {
+  const host = (value || "").trim() || QUOTA_PANEL_DEFAULT_HOST;
+  const inner = BRACKETED.exec(host)?.[1];
+  return inner !== undefined && net.isIPv6(inner) ? inner : host;
 }
 
 /**
@@ -120,11 +161,14 @@ export function resolveQuotaPanelListener(
   if (port === liveWsPort(env)) return { kind: "refused", warning: LIVE_WS_CLASH_WARNING };
   const basePath = resolvePanelBasePath(env.OMNIROUTE_BASE_PATH);
   if (basePath === null) return { kind: "refused", warning: BASE_PATH_WARNING };
-  const host = (env.QUOTA_PANEL_HOST || "").trim() || QUOTA_PANEL_DEFAULT_HOST;
-  return { kind: "listen", port, host, basePath };
+  return { kind: "listen", port, host: resolvePanelHost(env.QUOTA_PANEL_HOST), basePath };
 }
 
-/** True for the loopback spellings of a bind address, case insensitive. */
+/**
+ * True for a loopback bind address, case insensitive: `localhost`, `::1`, and the whole
+ * 127.0.0.0/8 range, also in its IPv4-mapped IPv6 form.
+ */
 export function isLoopbackBindHost(host: string): boolean {
-  return LOOPBACK_BIND_HOSTS.has(host.toLowerCase());
+  const lower = host.toLowerCase();
+  return LOOPBACK_BIND_HOSTS.has(lower) || LOOPBACK_IPV4.test(lower);
 }

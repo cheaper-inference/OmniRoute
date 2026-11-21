@@ -7,7 +7,12 @@ import {
   isPrintableAsciiTarget,
   isQuotaPanelBasePath,
   isQuotaPanelPath,
+  QUOTA_PANEL_HEADERS_TIMEOUT_MS,
+  QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS,
+  QUOTA_PANEL_MAX_CONNECTIONS,
   QUOTA_PANEL_METHOD_NAMES,
+  QUOTA_PANEL_REQUEST_TIMEOUT_MS,
+  QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS,
   resolveQuotaPanelListener,
 } from "@/lib/quotaPanelBridge";
 import { getRuntimePorts } from "@/lib/runtime/ports";
@@ -122,19 +127,20 @@ const API_BRIDGE_ROLE: BridgeRole = {
 /**
  * The role of the quota panel port: the self-service quota page, read only.
  *
- * A base path that is not empty and not of a supported shape gives a role that refuses every path.
+ * A base path that is not empty and not supported (see `isQuotaPanelBasePath`) gives a role that
+ * refuses every path. The role object is frozen.
  */
 export function createQuotaPanelRole(basePath = ""): BridgeRole {
   const supportedBasePath = basePath === "" || isQuotaPanelBasePath(basePath);
-  return {
-    isAllowedPath: (pathname) => supportedBasePath && isQuotaPanelPath(pathname, basePath),
+  return Object.freeze({
+    isAllowedPath: (pathname: string) => supportedBasePath && isQuotaPanelPath(pathname, basePath),
     methods: new Set(QUOTA_PANEL_METHOD_NAMES),
     strictTarget: true,
     relayUpgrades: false,
     relayBodies: false,
     notFoundMessage: "Not found.",
     errorDetail: false,
-  };
+  });
 }
 
 /**
@@ -317,6 +323,8 @@ function writeUpgradeProxyError(socket: net.Socket, status: number, body: string
     "",
   ].join("\r\n");
 
+  // A reset while the answer is written closes the socket here.
+  socket.on("error", () => socket.destroy());
   socket.write(response);
   // The server socket allows half-open connections: close it fully once the answer is written.
   socket.end(buffer, () => socket.destroy());
@@ -450,7 +458,8 @@ export function createApiBridgeServer(
  * Starts the quota panel listener when QUOTA_PANEL_PORT asks for it.
  *
  * Returns null when the variable is unset or refused. A bind failure logs a warning and leaves
- * the returned server not listening. Nothing here throws.
+ * the returned server not listening, and it is not retried. Nothing here throws. The listener
+ * has its own connection limit and client timeouts (`QUOTA_PANEL_*` in quotaPanelBridge.ts).
  */
 export function startQuotaPanelListener(
   env: Record<string, string | undefined> = process.env,
@@ -466,20 +475,31 @@ export function startQuotaPanelListener(
   const { port, host, basePath } = decision;
   const { dashboardPort } = ports;
   const server = createApiBridgeServer(dashboardPort, createQuotaPanelRole(basePath));
+  server.maxConnections = QUOTA_PANEL_MAX_CONNECTIONS;
+  server.headersTimeout = QUOTA_PANEL_HEADERS_TIMEOUT_MS;
+  server.requestTimeout = QUOTA_PANEL_REQUEST_TIMEOUT_MS;
+  server.keepAliveTimeout = QUOTA_PANEL_KEEP_ALIVE_TIMEOUT_MS;
+  // Read by the server when it starts listening, so it is set before `listen`.
+  (server as http.Server & { connectionsCheckingInterval: number }).connectionsCheckingInterval =
+    QUOTA_PANEL_TIMEOUT_CHECK_INTERVAL_MS;
+  let listening = false;
   server.on("error", (error: NodeJS.ErrnoException) => {
-    if (error?.code === "EADDRINUSE") {
+    if (listening) {
+      console.warn("[Quota Panel] Listener error:", error?.code || error?.message || error);
+    } else if (error?.code === "EADDRINUSE") {
       console.warn(`[Quota Panel] Port ${port} is already in use. The quota panel port stays off.`);
-      return;
+    } else {
+      console.warn("[Quota Panel] Failed to start:", error?.message || error);
     }
-    console.warn("[Quota Panel] Failed to start:", error?.message || error);
   });
-  if (!isLoopbackBindHost(host)) {
-    console.warn(
-      `[Quota Panel] Bound to ${host}. This port serves plain HTTP and the page sends API keys. Put a TLS reverse proxy in front of it.`
-    );
-  }
   server.listen(port, host, () => {
+    listening = true;
     console.log(`[Quota Panel] Listening on ${host}:${port} -> dashboard:${dashboardPort}`);
+    if (!isLoopbackBindHost(host)) {
+      console.warn(
+        `[Quota Panel] Bound to ${host}. This port serves plain HTTP and the page sends API keys. Put a TLS reverse proxy in front of it.`
+      );
+    }
   });
   return server;
 }

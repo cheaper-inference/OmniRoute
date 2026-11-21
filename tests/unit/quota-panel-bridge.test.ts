@@ -638,3 +638,42 @@ test("a body refusal closes the connection and the next request on it is not ser
     assert.deepEqual(seen, []);
   });
 });
+
+test("the panel role object is frozen", () => {
+  assert.equal(Object.isFrozen(bridge.createQuotaPanelRole()), true);
+  assert.equal(Object.isFrozen(bridge.createQuotaPanelRole("/x")), true);
+});
+
+test("a panel role whose base path names an application route refuses every path", () => {
+  for (const basePath of ["/api", "/V1", "/_next", "/Quota", "/dashboard/x"]) {
+    const role = bridge.createQuotaPanelRole(basePath);
+    for (const path of [`${basePath}/quota/claude`, "/quota/claude", `${basePath}/v1/me/usage`]) {
+      assert.equal(role.isAllowedPath(path), false, `${basePath} ${path}`);
+    }
+  }
+  assert.equal(bridge.createQuotaPanelRole("/apiary").isAllowedPath("/apiary/quota/claude"), true);
+});
+
+test("a refused upgrade handles an error on its socket", async () => {
+  const front = bridge.createApiBridgeServer(await closedPort(), bridge.createQuotaPanelRole());
+  let listeners = -1;
+  let destroyed = false;
+  // Runs after the bridge's own upgrade handler, on the same socket.
+  front.on("upgrade", (_req, socket) => {
+    listeners = socket.listenerCount("error");
+    socket.emit("error", Object.assign(new Error("read ECONNRESET"), { code: "ECONNRESET" }));
+    destroyed = socket.destroyed;
+  });
+  const port = await listen(front);
+  try {
+    const response = await raw(
+      port,
+      "GET /quota/claude HTTP/1.1\r\nHost: panel.test\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n"
+    );
+    assert.ok(listeners >= 1, `error listeners: ${listeners}`);
+    assert.equal(destroyed, true);
+    assert.ok(response === "" || /^HTTP\/1\.1 404 /.test(response), response);
+  } finally {
+    shut(front);
+  }
+});
