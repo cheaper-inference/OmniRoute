@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Il-limitu għandu jkun numru sħiħ pożittiv.",
     "error": "Żball: {message}",
     "serverOffline": "is-servizz OmniRoute huwa offline. Bda' b: omniroute serve",
     "authRequired": "Jintalab awtentikazzjoni. Agħżel OMNIROUTE_API_KEY jew skurri: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] se jaġixx {action}",
     "cancelled": "Kkanċellat.",
     "jsonOpt": "Output bħala JSON",
-    "yesOpt": "Qabżu l-prompt ta' konferma"
+    "yesOpt": "Qabżu l-prompt ta' konferma",
+    "positiveIntegerRequired": "Il-limitu għandu jkun numru sħiħ pożittiv."
   },
   "setup": {
     "title": "Twaqqif ta' OmniRoute",

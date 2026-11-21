@@ -127,21 +127,22 @@ CPU。每个 OmniRoute 单元都带有一个 drop-in 配置
   分钟，而从磁盘上传只需 2 分钟。
 - `.15` VPS 仅用于验收环境——绝不运行 CI 运行器。
 
-## 托管通道（GitHub-hosted runners）
+## 托管车道（GitHub 托管的跑步者）
 
-该仓库属于 `cheaper-inference` 组织，使用 **Team** 计划：**60 个并发托管作业**，由组织内的所有仓库、所有 PR 检查、所有由推送触发的工作流以及 CodeQL 的默认设置共享。下文数据是在 **Pro** 计划（40 个并发托管作业）下测得的。2026-10-18 在一次合并活动期间（`release/v3.8.52` 上约每小时合并 10 次）测得：**24 小时内创建了 2,500 次工作流运行**，6 小时内向该分支推送了 44 次，**106 个托管作业排队等待**，与此同时，PR 检查等待了数小时，并且 PR 在未完成这些检查的情况下被合并。每次推送到该分支时都会触发九个工作流：
+该存储库属于`cheaper-inference`组织，位于**团队**计划：** 60 个并发托管作业**，由组织中的每个存储库、每个PR检查、每个推送触发的工作流程和CodeQL的默认设置共享。下面的数字是在**专业版**计划（40 个并发托管作业）。在 2026 年 10 月 18 日合并活动期间测量（~ 10 merges/hour on `release/v3.8.52`）：** 24 小时内创建了 2,500 个工作流程运行**, 44 在 6 小时内推送到分支，** 106 个托管作业排队**而PR检查等待了几个小时，而PRs在没有它们的情况下就被合并了。每次推送到分支时都会触发九个工作流程：
 
-| 每次推送到 `release/v*`                     | 托管作业数 | 风暴期间的结果                                                     | 自 2026-10-18 起                                                            |
-| ------------------------------------------- | ---------: | ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| `ci.yml`（完整矩阵）                        |    最多 30 | 被下一次推送取消，一天内 24 次全部取消                             | 不再因推送到 `release/**` 而启动（PR 运行 + Release-Green）                 |
-| `quality.yml`                               |         ~6 | 被取消，23 次全部取消                                              | 不再因推送到 `release/**` 而启动                                            |
-| `Release-Green` `--quick`                   |          0 | 在 `omni-build` 上运行，100 次中有 97 次被取消                     | 使用 `omni-release` 槽位，永不取消，待处理的运行会合并                      |
-| `Lock released branch`、`OpenSSF Scorecard` |          2 | 每次推送产生一个排队运行                                           | 每个 ref 一次运行（`tests/unit/build/hosted-lane-concurrency.test.ts`）     |
-| `Release acceptance`（影子报告）            |          1 | 每次推送产生一个托管的 `npm ci`，且永不取消                        | 未更改——适合添加 `paths:` 过滤器                                            |
-| `Publish to Docker Hub` → `Deploy to VPS`   |          2 | 每次推送都会取消；amd64 执行分支在 `omni-build` 上争用资源         | 未更改——所有者的部署通道                                                    |
-| CodeQL 默认设置（`dynamic`）                |          4 | 每次推送运行 `javascript-typescript`、`actions`、`c-cpp`、`python` | 未更改——Settings → Code security；`c-cpp`/`python` 在此处没有任何可扫描内容 |
+| 每次推送到`release/v*`                      |   托管工作 | 暴风雨下的结果                                                   | 自2026年10月18日起                                                   |
+| ------------------------------------------- | ---------: | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `ci.yml` （全矩阵）                         | 最多 30 个 | 被下次推送取消，一天 24 中的 24                                  | 未在`release/**`推送上启动（PR run + Release-Green）                 |
+| `quality.yml`                               |         ~6 | 已取消，23 中的 23                                               | 未开始`release/**`推送                                               |
+| `Release-Green` `--quick`                   |          0 | 在`omni-build`上运行，取消了100个中的97个                        | `omni-release`插槽，从未取消，挂起的运行崩溃                         |
+| `Lock released branch`, `OpenSSF Scorecard` |          2 | 每次推送一次排队运行                                             | 每个裁判跑一局（`tests/unit/build/hosted-lane-concurrency.test.ts`） |
+| `Release acceptance` （影子报告）           |          1 | 每次推送都有一个托管`npm ci` ，从未取消                          | `paths:`过滤器的未更改—候选者                                        |
+| `Publish to Docker Hub` → `Deploy to VPS`   |          2 | 每次推送取消； amd64 赛段在`omni-build`上比赛                    | 未更改—所有者的部署通道                                              |
+| CodeQL默认设置 (`dynamic`)                  |          4 | `javascript-typescript`、 `actions`、 `c-cpp`、 `python`每次推送 | 未更改—设置→代码安全； `c-cpp`/`python`此处不扫描任何内容            |
 
-`tests/unit/build/push-storm-diet.test.ts` 固定了 `ci.yml` 和 `quality.yml` 仅在推送到 `main` 时触发的配置。副作用：Codecov 不再针对每次发布分支推送接收基础上传（该步骤仅供参考，并设有 `continue-on-error`）；仓库内的覆盖率门禁和 PR 评论不受影响。
+`tests/unit/build/push-storm-diet.test.ts`固定`ci.yml`和`quality.yml`的`main` -only推动触发器。副作用：Codecov 不再接收每次发布推送的基础上传（该步骤是信息性的和`continue-on-error`）； in-repo 覆盖门和PR评论不受影响。
 
-**增加自托管容量无法解决托管队列问题。** devbox
-（`devbox-vm-06-dev002`，24 vCPU / 54 GB）可以托管一个 runner，但 agent 会话已经使其负载保持在 20–26，agent 容器没有 Docker daemon，而且饱和的是托管通道。在同一时刻，`.113` 主机有 71 GB 可用空间，负载为 5–8；其限制是上述每个 listener 的内存预算（上限为 6 个 listener），而不是 CPU。剩余的调节手段属于流程层面：通过 Mergify 队列合入活动 PR（`label=queue`，批次共享一次 `merge_group` CI 运行，而不是每个 PR 运行一次、每次推送再运行一次）、精简 CodeQL 默认设置中的语言，并根据 `release-acceptance.yml` 所读取的文件为其添加过滤条件。
+**更多的自托管容量并不能修复托管队列。** devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) 可以托管一个运行器，但代理会话已经将其负载保持在 20-26，代理容器没有Docker守护进程，并且饱和通道是托管的。 `.113`盒子有 71 个GB空闲，同时负载 5-8 个；它的约束是上面每个侦听器的内存预算（上限为 6 个侦听器），而不是CPU。其余的杠杆是流程杠杆：通过 Mergify 队列进行PRs登陆（`label=queue`，批次共享一次`merge_group` CI运行，而不是每个PR运行一次，每次推送运行一次），修剪CodeQL默认设置语言，并按其读取的文件过滤`release-acceptance.yml` 。
+
+> **2026-11-19：Mergify 合并队列退役**（所有者的决定）。 `.mergify.yml`不再定义队列并拒绝合并或重写拉取请求的 Mergify 命令。版本PRs在存储库规则集“活动版本上需要绿色门”(`Gate / CI` + `Gate / Quality`) 下手动合并，直到全队列在实时模式下运行，然后通过全队列 ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 进行合并。上面的 Mergify 杠杆不再存在。
