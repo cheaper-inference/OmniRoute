@@ -4,10 +4,9 @@
 
 ---
 
-自 v3.8.49（品質／速度計畫的 WS3.2/WS3.4）起，經審查的 PR 合併至
-`release/vX.Y.Z` 的預設路徑是 **Mergify 合併佇列**（`.mergify.yml`）；
-下方記錄的**手動合併列車**則是備援方案——用於事故期間、
-發布凍結期間，或 Mergify 開放原始碼方案未來有所變更時。
+> **2026-11-19：Mergify 合併隊列退役**（所有者的決定）。 `.mergify.yml`不再定義佇列並拒絕合併或重寫拉取請求的 Mergify 指令。版本PRs在儲存庫規則集「活動版本上需要綠色閘門」(`Gate / CI` + `Gate / Quality`) 下手動合併，直到全佇列在即時模式下運行，然後透過全佇列 ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 進行合併。下面的合併部分按原樣描述了隊列。
+
+從 v3.8.49（ quality/velocity計畫的WS3.2/WS3.4 ）開始，審核PRs到`release/vX.Y.Z`的預設合併路徑是**Mergify合併佇列**(`.mergify.yml`);這**手動合併列車**以下記錄的是在事件、發布凍結或 Mergify 開源計劃發生變化期間使用的FALLBACK — 。
 
 ## 預設路徑：Mergify 佇列
 
