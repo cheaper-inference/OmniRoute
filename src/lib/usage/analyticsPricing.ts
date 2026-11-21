@@ -203,25 +203,70 @@ export function computeUsageRowCost(
   flatRateAsZero = true,
   pricingContext?: PricingResolutionContext
 ): number {
+  return splitUsageRowCost(
+    input,
+    pricingByProvider,
+    providerAliasMap,
+    normalizeModelName,
+    computeCostFromPricing,
+    flatRateAsZero,
+    pricingContext
+  ).total;
+}
+
+/**
+ * The same cost, split by where the number came from:
+ * - `reported`: an amount the provider itself billed (`provider_cost_usd` —
+ *   credit-metered upstreams, OpenRouter's `usage.cost`);
+ * - `estimated`: a figure priced against the model catalog, either now from
+ *   token counts or at request time (the `calculated_cost_usd` snapshot);
+ * - `unknown`: the stored cost of an archived rollup, which mixes both kinds
+ *   and keeps no record of which was which.
+ * `total` is always `reported + estimated + unknown`.
+ */
+export interface UsageRowCostSplit {
+  total: number;
+  reported: number;
+  estimated: number;
+  unknown: number;
+}
+
+function emptyCostSplit(): UsageRowCostSplit {
+  return { total: 0, reported: 0, estimated: 0, unknown: 0 };
+}
+
+export function splitUsageRowCost(
+  input: object,
+  pricingByProvider: PricingByProvider,
+  providerAliasMap: Record<string, string>,
+  normalizeModelName: (model: string) => string,
+  computeCostFromPricing: ComputeCostFromPricing,
+  flatRateAsZero = true,
+  pricingContext?: PricingResolutionContext
+): UsageRowCostSplit {
   // Concrete query rows have no index signature; widen only at this boundary.
   const row = input as Record<string, unknown>;
   const provider = toStringValue(row.provider);
   const model = toStringValue(row.model);
-  if (!provider || !model) return 0;
+  if (!provider || !model) return emptyCostSplit();
+  if (flatRateAsZero && isFlatRateProvider(provider)) return emptyCostSplit();
   const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
   const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
   const storedCost = toNumber(row.storedCost ?? row.stored_cost);
 
-  if (flatRateAsZero && isFlatRateProvider(provider)) return 0;
-  if (isAggregated) {
-    // New rollups preserve the exact API-equivalent value calculated before
-    // cache/reasoning token dimensions are discarded. Legacy zero-cost rows
-    // fall through to the best available input/output-token estimate.
-    if (storedCost > 0) return storedCost;
+  // New rollups preserve the exact API-equivalent value calculated before
+  // cache/reasoning token dimensions are discarded, but not its provenance.
+  // Legacy zero-cost rollups fall through to the input/output-token estimate.
+  if (isAggregated && storedCost > 0) {
+    return { total: storedCost, reported: 0, estimated: 0, unknown: storedCost };
   }
 
-  // Reported-cost rows are excluded from the cost* token sums upstream.
+  // Reported-cost rows are excluded from the cost* token sums upstream. Of the
+  // stored cost, only the provider_cost_usd share is a bill; the remainder is a
+  // calculated_cost_usd catalog snapshot.
   const rawStoredCost = isAggregated ? 0 : storedCost;
+  const reportedCost = toNumber(row.reportedCost ?? row.reported_cost);
+  const reported = Math.min(Math.max(reportedCost, 0), rawStoredCost);
   const pricing = resolveModelPricing(
     pricingByProvider,
     providerAliasMap,
@@ -231,19 +276,22 @@ export function computeUsageRowCost(
     serviceTier,
     pricingContext
   );
-  if (!pricing) return rawStoredCost;
-
-  return (
-    rawStoredCost +
-    computeCostFromPricing(pricing, getPriceableTokens(row), {
-      provider,
-      model,
-      serviceTier,
-      flatRateAsZero,
-      // Analytics rows sum many requests: no per-request long-context tier (#19429).
-      aggregatedTokens: true,
-    })
-  );
+  const priced = pricing
+    ? computeCostFromPricing(pricing, getPriceableTokens(row), {
+        provider,
+        model,
+        serviceTier,
+        flatRateAsZero,
+        // Analytics rows sum many requests: no per-request long-context tier (#19429).
+        aggregatedTokens: true,
+      })
+    : 0;
+  return {
+    total: rawStoredCost + priced,
+    reported,
+    estimated: rawStoredCost - reported + priced,
+    unknown: 0,
+  };
 }
 
 export function computeUsageRowStandardCost(

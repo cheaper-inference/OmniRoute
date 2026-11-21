@@ -109,6 +109,79 @@ test("GET /api/usage/analytics returns summary with aggregated metrics", async (
   assert.ok(body.summary.streak > 0);
 });
 
+test("GET /api/usage/analytics splits the cost into reported and estimated parts", async () => {
+  await seedAnalyticsData();
+  // A row whose cost the provider reported: its tokens are excluded from the
+  // cost* sums upstream, so the stored amount is the whole cost of the row.
+  core
+    .getDbInstance()
+    .prepare(
+      `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp, provider_cost_usd)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run("grok-cli", "grok-4.7", "gc-conn", 0, 0, 1, 400, new Date().toISOString(), 1.25);
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.costReported, 1.25);
+  assertClose(
+    body.summary.costReported + body.summary.costEstimated + body.summary.costUnknown,
+    body.summary.totalCost
+  );
+  assertClose(body.summary.costEstimated, EXPECTED_TOTAL_COST);
+  assert.equal(body.summary.costUnknown, 0);
+});
+
+test("GET /api/usage/analytics counts a stored calculated_cost_usd as estimated", async () => {
+  await seedAnalyticsData();
+  // calculated_cost_usd (migration 237) is a catalog price snapshot taken at
+  // request time, not an amount the provider billed.
+  core
+    .getDbInstance()
+    .prepare(
+      `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp, calculated_cost_usd)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run("openai", "gpt-4o", "calc-conn", 1000, 100, 1, 400, new Date().toISOString(), 0.75);
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.summary.costReported, 0);
+  assert.equal(body.summary.costUnknown, 0);
+  assertClose(body.summary.costEstimated, EXPECTED_TOTAL_COST + 0.75);
+  assertClose(body.summary.totalCost, EXPECTED_TOTAL_COST + 0.75);
+});
+
+test("GET /api/usage/analytics reports archived rollup cost as unknown provenance", async () => {
+  const db = core.getDbInstance();
+  const { getUserDatabaseSettings } = await import("../../src/lib/db/databaseSettings.ts");
+  const olderDate = new Date();
+  olderDate.setDate(olderDate.getDate() - getUserDatabaseSettings().retention.usageHistory - 1);
+  db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp, provider_cost_usd)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run("grok-cli", "grok-4.7", "gc-conn", 0, 0, 1, 400, new Date().toISOString(), 1.25);
+  db.prepare(
+    `INSERT INTO daily_usage_summary (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run("openai", "gpt-4o", olderDate.toISOString().split("T")[0], 3, 100, 10, 2);
+
+  const response = await analyticsRoute.GET(
+    makeRequest("http://localhost/api/usage/analytics?range=all")
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.costUnknown, 2);
+  assertClose(body.summary.costReported, 1.25);
+  assert.equal(body.summary.costEstimated, 0);
+  assertClose(body.summary.totalCost, 3.25);
+});
+
 test("GET /api/usage/analytics includes dailyTrend array with cost data", async () => {
   await seedAnalyticsData();
 

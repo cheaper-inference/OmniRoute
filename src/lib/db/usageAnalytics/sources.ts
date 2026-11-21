@@ -41,10 +41,12 @@ export interface UnifiedSourceResult {
  * Stored cost and priceable tokens of a raw usage_history row. A row carrying a
  * provider-reported cost or catalogue-priced snapshot uses that cost; tokens
  * remain available for display, but are never priced again. Rows without a
- * stored cost are priced from their tokens as before.
+ * stored cost are priced from their tokens as before. `reported_cost` keeps the
+ * provider-billed share apart from the calculated_cost_usd estimate.
  */
 const RAW_COST_COLUMNS = `
           COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost,
+          COALESCE(provider_cost_usd, 0.0) as reported_cost,
           CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END as cost_tokens_input,
           CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END as cost_tokens_output,
           CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END as cost_tokens_cache_read,
@@ -54,10 +56,12 @@ const RAW_COST_COLUMNS = `
 /**
  * The same columns for a daily_usage_summary row. Its `total_cost` is already
  * priced at rollup time; a legacy zero-cost summary falls back to its
- * input/output totals (see computeUsageRowCost in the analytics route).
+ * input/output totals (see computeUsageRowCost in the analytics route). The
+ * rollup keeps no provenance, so none of it counts as provider-reported.
  */
 const SUMMARY_COST_COLUMNS = `
           COALESCE(total_cost, 0.0) as stored_cost,
+          0.0 as reported_cost,
           total_input_tokens as cost_tokens_input,
           total_output_tokens as cost_tokens_output,
           0 as cost_tokens_cache_read,
