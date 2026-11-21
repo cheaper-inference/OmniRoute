@@ -465,56 +465,47 @@ Il 5% delle richieste (configurabile) viene instradato verso provider casuali a 
 
 ## API
 
-Non esiste **alcun endpoint dedicato `POST /api/combos/auto`** — Auto-Combo viene utilizzato in due modi:
+C'è** nessun endpoint `POST /api/combos/auto` dedicato** — Auto-Combo viene consumato in due modi:
 
-1. **Configurazione zero (consigliato):** invia una qualsiasi richiesta di completamento chat con `model: "auto"` o `model: "auto/<variant>"`. La factory virtuale crea la combo per ogni richiesta: non sono necessarie persistenza né chiamate API.
+1. **Zero-config (consigliato):** Invia qualsiasi richiesta di completamento della chat con `model: "auto"` o `model: "auto/<variant>"`. La fabbrica virtuale crea la combo per richiesta — senza persistenza, non sono necessarie chiamate API.
 
-2. **Combo persistente con `strategy: "auto"`:** crea una normale combo tramite `POST /api/combos` e imposta `strategy: "auto"` insieme a `config.auto.weights` / `config.auto.candidatePool`. Viene utilizzato lo stesso motore di scoring; la combo viene archiviata in `combos` ed è riutilizzabile tramite ID.
+2. **Combo persistente con `strategy: "auto"`:** Crea una combo regolare tramite `POST /api/combos` e imposta `strategy: "auto"` più `config.auto.weights` / `config.auto.candidatePool`. Viene utilizzato lo stesso motore di punteggio; la combo è memorizzata in `combos` e riutilizzabile da ID.
 
-Per il rilevamento, `GET /api/combos/auto` elenca ogni variante con il relativo pool di candidati risolto, oltre a `context_length` / `max_output_tokens`, ovvero il valore MASSIMO tra le finestre del pool di candidati. I client (ad es. il plugin opencode) devono pubblicizzare questi valori anziché `0`: un contesto pari a zero disabilita completamente la compattazione automatica di opencode, consentendo alle sessioni di crescere finché l'eliminazione della cronologia da parte del gateway non distrugge il contesto. Pubblicizzare il valore MASSIMO è sicuro perché il pre-filtro del contesto di Auto-Combo instrada le richieste sovradimensionate verso candidati con finestre ampie.
+Per la scoperta, `GET /api/combos/auto` elenca ogni variante con il relativo pool di candidati risolto più `context_length` / `max_output_tokens` — MAX nelle finestre del pool di candidati. I client (ad esempio il plugin opencode) devono pubblicizzare questi valori invece di `0`: un contesto zero disabilita completamente la compattazione automatica di opencode, consentendo alle sessioni di crescere finché l'eliminazione della cronologia del gateway non distrugge il contesto. MAX è sicuro da pubblicizzare perché il prefiltro del contesto di combinazione automatica instrada le richieste sovradimensionate ai candidati con una finestra di grandi dimensioni.
 
 ```bash
-# Utilizzo senza configurazione (nessuna creazione di combo)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo automatica persistente tramite il normale endpoint delle combo
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Strategie del router automatico
+### Strategie di router automatici
 
-Le combo persistenti con `strategy: "auto"` possono impostare `config.routerStrategy` (o la precedente
-`config.auto.routerStrategy`) su uno dei seguenti valori:
+Le combo `strategy: "auto"` persistenti possono impostare `config.routerStrategy` (o legacy `config.auto.routerStrategy`) su uno tra:
 
-- `rules` — scoring ponderato predefinito
-- `score` — seleziona il punteggio ponderato configurato più alto. In caso di parità esatta viene mantenuto
-  l'ordine configurato dei candidati; il parametro `explorationRate` esistente esegue il campionamento dall'intero pool ordinato.
-- `cost` / `eco` — provider integro più economico
+- `rules` — punteggio ponderato predefinito
+- `score` — seleziona il punteggio ponderato configurato più alto. I legami esatti preservano l'ordine dei candidati configurato; i campioni `explorationRate` esistenti dall'intero pool classificato.
+- `cost` / `eco` — fornitore sano più economico
 - `latency` / `fast` — latenza p95 più bassa con penalità di affidabilità
-- `sla-aware` / `sla` — preferisce i candidati che soddisfano gli SLO relativi alla latenza p95, al tasso di errore e, facoltativamente,
-  ai costi
-- `lkgp` — dà la priorità all'ultimo provider funzionante noto
-- `nadir` — chiede all'API decisionale di [Nadir](https://getnadir.com) quale modello del pool sia necessario per il
-  prompt; è facoltativo e, in caso di errore, ripiega su `rules`
+- `sla-aware` / `sla` — preferiscono i candidati che soddisfano la latenza p95, il tasso di errore e il costo opzionale SLOs
+- `lkgp` — prima l'ultimo buon fornitore conosciuto
+- `nadir` — chiede la decisione di [Nadir](https://getnadir.com) API di quale modello nel pool ha bisogno il prompt; opt-in, fail-open a `rules`
+- `decision` — chiede a un decisore configurato (TypeSafe System One, la tua decisione URL o uno dei modelli della combo) quale modello nel pool si adatta alla richiesta; dietro il flag `COMBO_DECISION_ROUTER_ENABLED` predefinito, fail-open su `rules`
 
 ### Strategie del router in dettaglio
 
-Il motore Auto-Combo espone 7 implementazioni collegabili di **RouterStrategy**, che
-puoi sostituire tramite `config.routerStrategy` (o il precedente `config.auto.routerStrategy`).
-Ogni strategia sceglie un provider dal pool di candidati in base a un `RoutingContext`
-(tipo di attività, indicazioni relative a strumenti/visione, stima dei token, policy SLA facoltativa,
-ultimo provider funzionante noto facoltativo).
+Il motore di auto-combo espone 7 collegabili**RouterStrategy** implementazioni che puoi scambiare tramite `config.routerStrategy` (o `config.auto.routerStrategy` legacy). Ciascuna strategia sceglie un fornitore dal pool di candidati, dato uno `RoutingContext` (tipo di attività, suggerimenti tool/vision, stima del token, politica SLA opzionale, ultimo fornitore valido noto opzionale).
 
-#### 1. `rules` (predefinita) — scoring ponderato a 16 fattori
+#### 1. `rules` (predefinito) — Punteggio ponderato su 16 fattori
 
-Avvolge il motore di scoring esistente. Esclude i candidati del circuit breaker
-in stato `OPEN`, quindi esegue `scorePool()` con il tipo di attività corrente e `getTaskFitness()`,
-selezionando il provider con il punteggio più alto.
+Avvolge il motore di punteggio esistente. Filtra i candidati `OPEN` per gli interruttori automatici, quindi esegue `scorePool()` con il tipo di attività corrente e `getTaskFitness()`, selezionando il fornitore con il punteggio più alto.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -534,16 +525,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Quando utilizzarla**: impostazione predefinita. Usala quando desideri un compromesso equilibrato tra tutti i segnali.
+**Quando usarlo** : Predefinito. Da utilizzare quando si desidera un compromesso equilibrato tra tutti i segnali.
 
-**Alias**: `rules` (nessun alias)
+**Alias** : `rules` (nessun alias)
 
 ---
 
-#### 2. `cost` / `eco` — provider integro più economico
+#### 2. `cost` / `eco` — fornitore sano più economico
 
-Ordina il pool di candidati in base a `costPer1MTokens` (in ordine crescente) e seleziona il più economico.
-Esclude prima i candidati in stato `OPEN`.
+Ordina il pool di candidati in base a `costPer1MTokens` (ascendente) e sceglie il più economico. Filtra prima i candidati `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -558,16 +548,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Quando utilizzarla**: carichi di lavoro sensibili ai costi, elaborazione batch o processi in background.
+**Quando usarlo** : carichi di lavoro sensibili ai costi, elaborazione batch o processi in background.
 
-**Alias**: `cost`, `eco`
+**Alias** : `cost`, `eco`
 
 ---
 
 #### 3. `latency` / `fast` — latenza p95 più bassa con penalità di affidabilità
 
-Ordina in base a `p95LatencyMs + (errorRate * 1000)`. La penalità relativa al tasso di errore garantisce
-che i provider inaffidabili vengano classificati più in basso, anche quando la loro latenza nominale è ridotta.
+Ordina per `p95LatencyMs + (errorRate * 1000)`. La penalizzazione del tasso di errore garantisce che i fornitori inaffidabili siano classificati più in basso anche se la loro latenza nominale è bassa.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -584,28 +573,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Quando utilizzarla**: carichi di lavoro sensibili alla latenza, come chat in tempo reale, completamento automatico o
-assistenti di programmazione interattivi.
+**Quando usarlo** : carichi di lavoro sensibili alla latenza come chat in tempo reale, completamento automatico o assistenti di codifica interattivi.
 
-**Alias**: `latency`, `fast`
+**Alias** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — conformità agli SLO di latenza/errori/costi
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO
 
-Assegna un punteggio a ogni candidato in base a quanto soddisfa la policy SLO configurata:
+Assegna un punteggio a ciascun candidato in base al grado di soddisfazione della politica SLO configurata:
 
-| Fattore             | Peso | Formula                                                |
-| ------------------- | ---- | ------------------------------------------------------ |
-| Punteggio latenza   | 35%  | `threshold / max(value, ε)`                            |
-| Punteggio errori    | 35%  | `threshold / max(value, ε)`                            |
-| Punteggio integrità | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)      |
-| Punteggio costo     | 10%  | `threshold / max(value, ε)` o inverso normalizzato     |
-| Punteggio stabilità | 5%   | deviazione standard della latenza normalizzata inversa |
+| Fattore                | Peso | Formula                                            |
+| ---------------------- | ---- | -------------------------------------------------- |
+| Punteggio di latenza   | 35%  | `threshold / max(value, ε)`                        |
+| Punteggio di errore    | 35%  | `threshold / max(value, ε)`                        |
+| Punteggio sulla salute | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)  |
+| Punteggio di costo     | 10%  | `threshold / max(value, ε)` o normalizzato inverso |
+| Punteggio di stabilità | 5%   | latenza normalizzata inversa stddev                |
 
-Quando `hardConstraints: true`, i candidati vengono ordinati principalmente in base al **punteggio di violazione**
-(quanto superano eventuali SLO), quindi in base al punteggio composito. In caso contrario, viene usato
-solo il punteggio composito.
+Quando `hardConstraints: true`, i candidati vengono ordinati principalmente per** punteggio di violazione** (di quanto superano qualsiasi SLO), quindi per punteggio composito. Altrimenti è solo il punteggio composito.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -614,12 +600,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... assegna un punteggio a ogni candidato rispetto alla policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Campi SLA** (impostati nella configurazione combo):
+**campi SLA** (impostato nella configurazione combinata):
 
 ```json
 {
@@ -634,17 +620,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Quando utilizzarla**: carichi di lavoro di produzione con budget rigorosi per latenza, tasso di errore o costi.
+**Quando usarlo** : carichi di lavoro di produzione con latenza, tasso di errore o budget di costo rigorosi.
 
-**Alias**: `sla-aware`, `sla`
+**Alias** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — prima l'ultimo provider noto come funzionante
+#### 5. `lkgp` — l'ultimo buon fornitore conosciuto per primo
 
-Prova per primo **l'ultimo provider noto come funzionante** (se impostato), quindi esegue il fallback alla
-strategia `rules`. Utile per l'affinità di sessione: lo stesso provider gestisce
-le richieste successive di una conversazione.
+Prova il** ultimo buon fornitore conosciuto** (se impostato) prima, poi torna alla strategia `rules`. Utile per la persistenza della sessione — lo stesso provider gestisce le richieste di follow-up in una conversazione.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -665,27 +649,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Fallback alla strategia rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Quando utilizzarla**: conversazioni multi-turn in cui si desidera che lo stesso provider gestisca
-le richieste successive (ad esempio, per la cache, la continuità del contesto o la coerenza dei prezzi).
+**Quando usarlo** : conversazioni a più turni in cui si desidera che lo stesso provider gestisca le richieste di follow-up (ad esempio, per la memorizzazione nella cache, la continuità del contesto o la coerenza dei prezzi).
 
-**Alias**: `lkgp` (nessun alias)
+**Alias** : `lkgp` (nessun alias)
 
 ---
 
-#### 6. `nadir` — scelta del modello basata sul prompt tramite Nadir
+#### 6. `nadir` — scelta del modello con riconoscimento del prompt tramite Nadir
 
-Tutte le strategie precedenti classificano i candidati in base ai propri dati di telemetria; nessuna di esse legge
-la richiesta. `nadir` invia l'ultimo turno dell'utente insieme agli ID dei modelli del pool
-all'API decisionale di [Nadir](https://getnadir.com) (`POST /v1/bucket`) e instrada la richiesta al modello
-selezionato da Nadir da quel menu (`simple` → il modello compatibile più economico, `complex` → quello
-di frontiera). La connessione che serve quel modello viene comunque scelta da `rules`, quindi quota,
-integrità e costo continuano a determinare quale account utilizzare.
+Ogni strategia di cui sopra classifica i candidati in base alla propria telemetria; nessuno di loro legge la richiesta. `nadir` invia l'ultimo turno dell'utente più gli ID del modello del pool alla decisione di [Nadir](https://getnadir.com) API (`POST /v1/bucket`) e instrada al modello che Nadir seleziona da quel menu (`simple` → il modello più economico, `complex` → quello di frontiera). La connessione che serve quel modello viene ancora scelta da `rules`, quindi quota, salute e costi continuano a decidere quale account.
 
 ```json
 {
@@ -701,34 +679,75 @@ integrità e costo continuano a determinare quale account utilizzare.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` e `OMNIROUTE_NADIR_BASE_URL` sono valori di fallback dell'ambiente per le due
-stringhe. `baseUrl` è necessario solo per un'istanza Nadir self-hosted (una parte finale `/v1` è accettata).
-Le chiamate senza chiave vengono indirizzate al livello anonimo di Nadir, con limitazione della frequenza per IP. Con una chiave
-([creane una](https://app.getnadir.com/dashboard/api-keys)), ogni decisione viene
-registrata nella dashboard Nadir. Configurazione e verifica complete:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` e `OMNIROUTE_NADIR_BASE_URL` sono fallback env per le due stringhe. `baseUrl` è necessario solo per un Nadir self-hosted (è tollerato uno `/v1` finale). Le chiamate senza chiave arrivano al livello anonimo di Nadir, che ha una velocità limitata per IP. Con una chiave ( [creane una](https://app.getnadir.com/dashboard/api-keys) ), ogni decisione viene registrata nella dashboard Nadir. Configurazione e verifica complete: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Dati inviati all'esterno: il testo dell'ultimo messaggio dell'utente (i primi 16.000 caratteri), gli ID dei
-modelli candidati e un tag di canale `source: "omniroute"`. Non vengono inviati prompt di sistema, cronologia, strumenti o
-header.
+Cosa lascia la scatola: il testo dell'ultimo messaggio dell'utente (primi 16k caratteri), gli ID del modello candidato e un tag del canale `source: "omniroute"`. Nessun prompt di sistema, cronologia, strumenti o intestazioni.
 
-Il comportamento in caso di errore è fail-open: un timeout (valore predefinito di 2000 ms), una risposta non 2xx, un host
-irraggiungibile, una risposta non valida o una selezione non presente nel pool vengono risolti tramite la decisione di `rules`
-e il motivo viene preceduto da `NadirStrategy: fallback (…)`. Dopo una chiamata non riuscita, la
-strategia ignora la rete per 30 s, quindi un'interruzione comporta un solo timeout ogni 30 s anziché
-uno per richiesta. Gli eventi di routing riportano `strategy: "nadir"` solo quando è stato effettivamente Nadir
-a effettuare la scelta.
+Il comportamento di errore è fail-open: un timeout (default 2000 ms), uno non-2xx, un host irraggiungibile, una risposta non valida o una selezione esterna al pool si risolve nella decisione `rules` e il motivo ha il prefisso `NadirStrategy: fallback (…)`. Dopo una chiamata fallita, la strategia salta la rete per 30 s, quindi un'interruzione costa un timeout ogni 30 s anziché uno per richiesta. Gli eventi di routing riportano `strategy: "nadir"` solo quando Nadir ha effettivamente effettuato la scelta.
 
-**Quando utilizzarla**: traffico con livelli di difficoltà diversi su un pool che comprende più fasce di modelli (uno piccolo, uno intermedio
-e uno di frontiera), quando si desidera ridurre il costo derivante dall'uso costante del modello di frontiera.
+**Quando usarlo** : traffico a difficoltà mista su un pool che abbraccia livelli di modello (un modello piccolo, medio e di frontiera), dove sempre-frontiera è il costo che si desidera ridurre.
 
-**Alias**: `nadir` (nessun alias)
+**Alias** : `nadir` (nessun alias)
 
 ---
 
-### Strategie router personalizzate
+#### 7. Il decisore collegabile `decision` — sceglie il modello
 
-È possibile registrare la propria implementazione di `RouterStrategy` tramite l'API pubblica:
+`decision` chiede a** decisore** quale modello nel pool si adatta alla richiesta, quindi restringe il pool a quel modello e consente `rules` di scegliere la connessione (quota, salute e costi scelgono comunque l'account). Il decisore è impostato nel blocco decisionale della combo — `config.decision` quando le manopole del router si trovano nella parte superiore di `config` (ciò che scrive il dashboard) o `config.auto.decision` accanto a `config.auto.routerStrategy`:
+
+| `decider`     | Chi risponde                                                                                                        | Esigenze                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), modello predefinito `jev-latest`                 | una connessione `typesafe` o la chiave env           |
+| `http`        | il tuo decisore su `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) o `"openai-chat"` (completamenti chat) | `baseUrl` + `model`; chiave facoltativa              |
+| `combo-model` | uno dei vostri modelli di provider, chiamato in causa come il giudice della fusione                                 | `model` come `provider/model` (nessuna combinazione) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Campi (convalidati da uno schema rigoroso al momento del salvataggio e nuovamente al momento della richiesta):
+
+- `decider` — `systemone`, `http` o `combo-model`.
+- `model` — TypeSafe modello, il modello decisionale nel tuo URL o `provider/model` di una chiamata di modello combinato (fino a 200 caratteri).
+- `baseUrl` — `http` solo: an `http(s)` URL fino a 500 caratteri, senza credenziali, query o frammento. Uno URL che punta a questo OmniRoute (loopback + `PORT`) viene rifiutato.
+- `wire` — `http` solo: `systemone` (predefinito) o `openai-chat`.
+- `connectionId` — la connessione memorizzata di cui viene utilizzata la chiave (solo all'interno delle connessioni consentite della chiave API chiamante). Senza di essa, `systemone` legge una connessione `typesafe` e ogni decisore di rete ricorre a `OMNIROUTE_DECISION_API_KEY`. Non esiste un campo `apiKey` : una chiave non viene mai memorizzata in una combo.
+- `timeoutMs` — intero, 100–5000, predefinito 2000.
+- `minConfidence` — 0–1; una risposta con minore confidenza ricade su `rules` (un decisore che riporta nessuna confidenza conta come 0).
+- `descriptions` — fino a 50 voci (chiave fino a 300, testo fino a 1000 caratteri), digitate per ID modello o `provider/model`; le voci non impostate ricevono una descrizione della classificazione dei costi generata.
+
+**Bandiera.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) blocca ogni decisore. Mentre è disattivato, una combo `decision` non legge credenziali, non effettua chiamate e instrada con `rules`; il registro dice `fallback (disabled)`. Una chiave memorizzata da sola non lo accende mai. Le combo senza blocco decisionale non sono influenzate affatto.
+
+**Ciò che lascia la scatola.** Solo il testo dell'ultimo messaggio dell'utente (fino a 8000 caratteri; chat/Claude `messages` o Risposte `input`) e il menu degli ID modello con le relative descrizioni. Mai il prompt del sistema, le risposte `instructions`, gli strumenti, la cronologia, le intestazioni o i dati dell'account. Le chiamate di rete passano attraverso la guardia in uscita del provider senza tentativi, senza reindirizzamenti e con un limite di risposta di 64 KB. La chiamata `combo-model` non è in streaming, non richiede strumenti, `temperature: 0`, con un budget di 256 token; una decisione avviata all'interno di una chiamata decisionale viene rifiutata.
+
+**Comportamento fallimentare** è fail-open: qualsiasi errore si risolve nella decisione `rules` e il motivo si legge `decision(<decider>): fallback (<reason>)`, con `<reason>` uno tra `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` o `no_user_text`. Dopo un timeout, un errore HTTP o un errore di rete, l'endpoint viene saltato per 30 s. Una scelta di successo legge `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Nessuno URL, chiave, prompt o corpo upstream raggiunge il log.
+
+Il combo builder mostra questi campi quando la strategia del router è `decision`, con le descrizioni generate come segnaposto e un** Decisione di prova** pulsante che chiama `POST /api/combos/decision-preview` una volta con le impostazioni non salvate (stesso flag).
+
+**Quando usarlo** : traffico a difficoltà mista in cui desideri che il livello venga selezionato per richiesta da un classificatore scelto, non specificamente da Nadir.
+
+**Alias** : `decision` (nessun alias)
+
+---
+
+### Strategie di router personalizzate
+
+Puoi registrare la tua implementazione `RouterStrategy` tramite API pubblico:
 
 ```ts
 import {
@@ -741,7 +760,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Inserisci qui la tua logica di routing
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -756,7 +775,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Quindi utilizzarla:
+Quindi usalo:
 
 ```json
 {
@@ -769,18 +788,19 @@ Quindi utilizzarla:
 
 ---
 
-### Guida alla selezione della strategia router
+### Guida alla scelta della strategia del router
 
-| Caso d'uso           | Strategia   | Motivo                                         |
-| -------------------- | ----------- | ---------------------------------------------- |
-| Carico bilanciato    | `rules`     | Predefinita — considera tutti i fattori        |
-| Ridurre i costi      | `cost`      | Sceglie sempre l'opzione più economica         |
-| Ridurre la latenza   | `latency`   | Sceglie il provider affidabile più veloce      |
-| SLO rigorosi         | `sla-aware` | Filtra in base alle soglie p95/errori/costi    |
-| Chat multi-turno     | `lkgp`      | Persistenza della sessione                     |
-| Difficoltà variabile | `nadir`     | Sceglie il livello del modello per ogni prompt |
+| Caso d'uso                   | Strategia   | Motivo                                             |
+| ---------------------------- | ----------- | -------------------------------------------------- |
+| Carico di lavoro equilibrato | `rules`     | — predefinito considera tutti i fattori            |
+| Ridurre al minimo i costi    | `cost`      | Scegli sempre il più economico                     |
+| Minimizza la latenza         | `latency`   | Sceglie il fornitore affidabile più veloce         |
+| SLOs rigoroso                | `sla-aware` | Filtra per soglie p95/error/cost                   |
+| Chat a più turni             | `lkgp`      | Appiccicosità della sessione                       |
+| Difficoltà mista             | `nadir`     | Seleziona il livello del modello in base al prompt |
+| Proprio classificatore       | `decision`  | Chi decide sceglie il modello                      |
 
-Campi SLA-aware:
+Campi compatibili con SLA:
 
 ```json
 {

@@ -88,18 +88,19 @@ inițială.
 
 Toate punctele finale necesită autentificare de gestionare (`requireManagementAuth`)** şi** sunt doar pentru buclă inversă — `/api/plugins` și `/api/plugins/` sunt listate în `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Punct final                      | Metodă | Descriere                                                                 |
-| -------------------------------- | ------ | ------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Listați pluginurile instalate (filtru `?status=` opțional)                |
-| `/api/plugins`                   | POST   | Instalați un plugin din directorul surse de plugin                        |
-| `/api/plugins/scan`              | POST   | Scanați directorul de pluginuri și înregistrați noi pluginuri             |
-| `/api/plugins/marketplace`       | GET    | Listați intrările din catalogul pieței                                    |
-| `/api/plugins/[name]`            | GET    | Obțineți detalii despre pluginul instalat                                 |
-| `/api/plugins/[name]`            | DELETE | Dezinstalează un plugin                                                   |
-| `/api/plugins/[name]/activate`   | POST   | Activați (încărcați cârligele de înregistrare + )                         |
-| `/api/plugins/[name]/deactivate` | POST   | Dezactivați (declanșați `onDeactivate`, anulați înregistrarea cârligelor) |
-| `/api/plugins/[name]/config`     | GET    | Obțineți schema de configurare a pluginului +                             |
-| `/api/plugins/[name]/config`     | PUT    | Actualizați configurația pluginului (validat în funcție de schemă)        |
+| Punct final                        | Metodă | Descriere                                                                 |
+| ---------------------------------- | ------ | ------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Listați pluginurile instalate (filtru `?status=` opțional)                |
+| `/api/plugins`                     | POST   | Instalați un plugin din directorul surse de plugin                        |
+| `/api/plugins/scan`                | POST   | Scanați directorul de pluginuri și înregistrați noi pluginuri             |
+| `/api/plugins/marketplace`         | GET    | Listați intrările din catalogul pieței                                    |
+| `/api/plugins/marketplace/install` | POST   | Instalați un plugin de piață după nume                                    |
+| `/api/plugins/[name]`              | GET    | Obțineți detalii despre pluginul instalat                                 |
+| `/api/plugins/[name]`              | DELETE | Dezinstalează un plugin                                                   |
+| `/api/plugins/[name]/activate`     | POST   | Activați (încărcați cârligele de înregistrare + )                         |
+| `/api/plugins/[name]/deactivate`   | POST   | Dezactivați (declanșați `onDeactivate`, anulați înregistrarea cârligelor) |
+| `/api/plugins/[name]/config`       | GET    | Obțineți schema de configurare a pluginului +                             |
+| `/api/plugins/[name]/config`       | PUT    | Actualizați configurația pluginului (validat în funcție de schemă)        |
 
 Filtrul `GET /api/plugins` `status` acceptă unul dintre `installed` / `active` / `inactive` / `error`. O valoare nevalidă returnează `400`.
 
@@ -121,7 +122,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` trebuie să fie un** absolut** cale către un director** în directorul surselor pluginului** : `plugin-sources` lângă rădăcina pluginului, deci `~/.omniroute/plugin-sources/` în mod implicit, sau `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` când acea variabilă este setată (`getPluginSourcesDir()` în `src/lib/plugins/installSource.ts`). Copiați sau clonați pluginul acolo mai întâi. Instalarea este refuzată cu `400` când calea conține `..` sau un octet nul, se află în afara acelui director, se rezolvă în afara lui printr-un link simbolic, conține un link simbolic a cărui țintă este în afara acestuia sau când directorul nu există. Directorul sursă trebuie să conțină un `plugin.json` valid (sau să fie părinte al unuia). La succes, răspunsul este `201` cu rândul de plugin instalat.
 
-Spre deosebire de celelalte rute de plugin, aceasta necesită acreditările de gestionare (o sesiune de tablou de bord sau o cheie API gestionată) chiar și atunci când autentificarea este dezactivată (`requireLogin=false`): instalarea codului nu este niciodată o acțiune anonimă.
+Spre deosebire de celelalte rute de plugin, aceasta necesită acreditările de gestionare (o sesiune de tablou de bord sau o cheie API gestionată) chiar și atunci când autentificarea este dezactivată (`requireLogin=false`): instalarea codului nu este niciodată o acțiune anonimă. Același lucru este valabil și pentru `POST /api/plugins/marketplace/install` (corp `{ "name": "<plugin>" }`).
 
 ### Navigați pe piață
 
@@ -139,7 +140,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validează fiecare valoare furnizată în raport cu `configSchema` pluginului (declarat în manifest): câmpurile `number` onorează `min`/`max`, câmpurile `select` trebuie să se potrivească cu `enum` declarat. Cheile care nu sunt prezente în schemă sunt permise.
+`PUT .../config` validează corpul față de `configSchema` ul pluginului (declarat în manifest) cu `validatePluginConfig()` din `src/lib/plugins/manifest.ts`: fiecare cheie trebuie să fie declarată în schemă, valorile trebuie să se potrivească cu tipul declarat, câmpurile `number` onorează `min`/`max` și câmpurile `select` trebuie să se potrivească cu `enum` declarat. Orice încălcare returnează `400` și nimic nu este stocat. Un plugin care declară că nu `configSchema` nu are chei configurabile, deci cererea este refuzată cu `400` ("Pluginul nu declară nicio cheie configurabilă").
 
 ## Configurare
 
@@ -219,14 +220,14 @@ Un URL care nu reușește niciunul dintre straturi nu anulează cererea — pia�
 
 ### Izolarea execuției pluginului
 
-> **Pluginurile nu sunt sandbox.** Copilul este un proces Node.js obișnuit care rulează ca utilizator OmniRoute, fără context VM și fără steaguri de permisiune Node.js, astfel încât codul pluginului poate citi și scrie orice fișier pe care utilizatorul îl poate, rula programe și ajunge în rețea. `requires.permissions` decide doar ce variabile de mediu primește copilul; celelalte permisiuni nu sunt aplicate. Instalați numai pluginuri în care aveți încredere. Limita procesului de mai jos conține blocări și blocări; nu este o limită de securitate.
+> **Pluginurile nu sunt sandbox în mod implicit.** Copilul este un proces Node.js obișnuit care rulează ca utilizator OmniRoute, fără context VM și fără steaguri de permisiune Node.js, astfel încât codul pluginului poate citi și scrie orice fișier pe care utilizatorul îl poate, rula programe și ajunge în rețea. `requires.permissions` decide doar ce variabile de mediu primește copilul; celelalte permisiuni nu sunt aplicate. Indicatorul caracteristicii `PLUGIN_PERMISSION_MODEL_ENABLED` de înscriere (dezactivat în mod implicit) rulează fiecare plugin sub modelul de permisiuni Node.js construit din acele permisiuni, cu excepția `network`, pe care Node.js nu îl poate restricționa (vezi [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Instalați numai pluginuri în care aveți încredere. Limita procesului de mai jos conține blocări și blocări; nu este o limită de securitate.
 
 - **Izolarea procesului** — `loadPlugin()` (`src/lib/plugins/loader.ts`) generează fiecare plugin într-un proces secundar Node.js separat și comunică prin IPC. Apelurile Hook au un timeout cu escaladare `SIGTERM` → `SIGKILL`.
 - **Lista permisă pentru Env** — copilul primește doar un set de variabile de mediu permis; setul mai larg este acordat numai atunci când manifestul solicită permisiunea `env`.
 - **Instalați reținerea sursei** — `POST /api/plugins` citește doar din directorul surselor pluginului (vezi „Instalarea de pe o cale locală”): calea este canonizată cu `realpath`, trebuie să rămână strict în acel director, iar un arbore sursă care poartă o legătură simbolică care scapă este refuzat înainte de a fi copiat ceva.
 - **Reținerea căii** — install/upgrade/uninstall afirmă că directorul pluginului și `manifest.main` se rezolvă** în** rădăcina pluginului gestionat înainte de orice copiere sau ștergere recursivă (protejează împotriva căilor DB modificate și traversării `../` în `manifest.main`). Activarea rezolvă legăturile simbolice prin `realpath` și refuză să încarce un punct de intrare care iese din directorul pluginului.
 - **Pin de integritate opțional** — un manifest poate declara un câmp `integrity` (`sha256-<base64>`, format SRI ). Când este prezent, încărcătorul verifică hash-ul fișierului de intrare la momentul încărcării și refuză să se activeze în caz de nepotrivire. Este opțiunea de detectare a falsificării,** nu** o limită de securitate: nu limitează ceea ce poate face un plugin încărcat.
-- **Fără acreditări de client în hooks** — contextul transmis la `onRequest`, `onResponse` și `onError` are antetele `authorization`, `x-api-key`, `proxy-authorization` și `cookie` eliminate, iar înregistrarea cheii API nu poartă nicio valoare a cheii (`redactPluginContext()` în `src/lib/plugins/hooks.ts`).
+- **Fără acreditări de client în hooks** — contextul transmis la `onRequest`, `onResponse` și `onError` are anteturile `authorization`, `x-api-key`, `proxy-authorization` și `cookie` eliminate, iar înregistrarea cheii API nu poartă nicio valoare a cheii (`redactPluginContext()` în `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 

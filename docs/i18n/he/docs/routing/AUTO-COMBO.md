@@ -484,55 +484,47 @@ curl -X POST http://localhost:20128/api/combos \
 
 ## API
 
-**אין נקודת קצה ייעודית מסוג `POST /api/combos/auto`** — ניתן להשתמש ב-Auto-Combo בשתי דרכים:
+יֵשׁ** אין נקודת קצה ייעודית `POST /api/combos/auto`** — Auto-Combo נצרך בשתי דרכים:
 
-1. **ללא הגדרות (מומלץ):** שלחו כל בקשת השלמת צ'אט עם `model: "auto"` או `model: "auto/<variant>"`. המפעל הווירטואלי בונה את הקומבו עבור כל בקשה — ללא שמירה מתמשכת וללא צורך בקריאות API.
+1. **אפס תצורה (מומלץ):** שלח כל בקשה להשלמת צ'אט עם `model: "auto"` או `model: "auto/<variant>"`. המפעל הווירטואלי בונה את המשולב לפי בקשה — ללא התמדה, אין צורך בשיחות API.
 
-2. **קומבו מתמשך עם `strategy: "auto"`:** צרו קומבו רגיל באמצעות `POST /api/combos` והגדירו `strategy: "auto"` יחד עם `config.auto.weights` / `config.auto.candidatePool`. נעשה שימוש באותו מנגנון ניקוד; הקומבו נשמר ב-`combos` וניתן לשימוש חוזר לפי מזהה.
+2. **שילוב מתמשך עם `strategy: "auto"`:** צור שילוב רגיל באמצעות `POST /api/combos` והגדר `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. נעשה שימוש באותו מנוע ניקוד; המשולבת מאוחסנת ב- `combos` וניתנת לשימוש חוזר על ידי ID.
 
-לצורך גילוי, `GET /api/combos/auto` מציג כל וריאנט עם מאגר המועמדים שנפתר עבורו, וכן `context_length` / `max_output_tokens` — ערך ה-MAX מבין חלונות מאגר המועמדים. לקוחות (לדוגמה, תוסף opencode) חייבים לפרסם ערכים אלה במקום `0`: הקשר בגודל אפס משבית לחלוטין את הדחיסה האוטומטית של opencode, ובכך מאפשר להפעלות לגדול עד שמחיקת ההיסטוריה של השער משמידה את ההקשר. בטוח לפרסם את ערך ה-MAX משום שמסנן ההקשר המקדים של הקומבו האוטומטי מנתב בקשות גדולות מדי למועמדים בעלי חלון גדול.
+לצורך גילוי, `GET /api/combos/auto` מפרטת כל וריאנט עם מאגר המועמדים שנפתרו בתוספת `context_length` / `max_output_tokens` — את MAX על פני חלונות מאגר המועמדים. לקוחות (למשל התוסף opencode) חייבים לפרסם את הערכים האלה במקום `0`: הקשר אפס משבית לחלוטין את הדחיסה האוטומטית של opencode, ונותן להפעלות לגדול עד שטיהור ההיסטוריה של השער הורס את ההקשר. את MAX בטוח לפרסם מכיוון שהמסנן המקדים של ההקשר המשולב האוטומטי מנתב בקשות גדולות מדי למועמדים עם חלונות גדולים.
 
 ```bash
-# שימוש ללא הגדרות (ללא יצירת קומבו)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# קומבו אוטומטי מתמשך דרך נקודת הקצה הרגילה של קומבואים
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### אסטרטגיות הנתב האוטומטי
+### אסטרטגיות נתב אוטומטי
 
-קומבואים מתמשכים עם `strategy: "auto"` יכולים להגדיר את `config.routerStrategy` (או את האפשרות הישנה
-`config.auto.routerStrategy`) לאחד מהערכים הבאים:
+שילובי `strategy: "auto"` מתמשכים יכולים להגדיר `config.routerStrategy` (או מדור קודם `config.auto.routerStrategy`) לאחד מה:
 
-- `rules` — ניקוד משוקלל המוגדר כברירת מחדל
-- `score` — בוחר את הניקוד המשוקלל המוגדר הגבוה ביותר. במקרה של שוויון מדויק נשמר
-  סדר המועמדים שהוגדר; ה-`explorationRate` הקיים דוגם מתוך המאגר המדורג המלא.
-- `cost` / `eco` — הספק התקין הזול ביותר
-- `latency` / `fast` — זמן ההשהיה הנמוך ביותר באחוזון 95, עם קנס על חוסר אמינות
-- `sla-aware` / `sla` — העדפת מועמדים שעומדים ביעדי SLO של זמן השהיה באחוזון 95, שיעור שגיאות ועלות אופציונלית
-- `lkgp` — הספק האחרון שידוע כתקין נבחר ראשון
-- `nadir` — פנייה ל-API קבלת ההחלטות של [Nadir](https://getnadir.com), כדי לקבוע לאיזה מודל במאגר
-  זקוקה ההנחיה; מחייב הפעלה מפורשת, ובמקרה של כשל חוזר ל-`rules`
+- `rules` — ניקוד משוקלל ברירת מחדל
+- `score` — בוחר את הציון המשוקלל המוגדר הגבוה ביותר. קשרים מדויקים משמרים את סדר המועמדים המוגדר; דגימות `explorationRate` הקיימות מהמאגר המדורג המלא.
+- `cost` / `eco` — הספק הבריא הזול ביותר
+- `latency` / `fast` — השהייה הנמוכה ביותר ב-p95 עם עונש אמינות
+- `sla-aware` / `sla` — מעדיפים מועמדים העומדים ב-p95 חביון, שיעור שגיאות ועלות אופציונלית SLOs
+- `lkgp` — ספק טוב אחרון ידוע ראשון
+- `nadir` — לשאול את החלטתו של [נדיר](https://getnadir.com) API לאיזה דגם במאגר נדרשת ההנחיה; opt-in, fail-open to `rules`
+- `decision` — שאל מחליט מוגדר (TypeSafe System One, ההחלטה שלך URL, או אחד מהדגמים של המשולב עצמו) איזה דגם בבריכה מתאים לבקשה; מאחורי דגל ברירת המחדל `COMBO_DECISION_ROUTER_ENABLED`, fail-open ל- `rules`
 
-### אסטרטגיות הנתב בפירוט
+### אסטרטגיות נתב בפירוט
 
-מנוע הקומבו האוטומטי חושף 7 מימושים מודולריים של **RouterStrategy**, שאותם
-ניתן להחליף באמצעות `config.routerStrategy` (או האפשרות הישנה `config.auto.routerStrategy`).
-כל אסטרטגיה בוחרת ספק אחד ממאגר המועמדים, בהינתן `RoutingContext`
-(סוג משימה, רמזים לשימוש בכלים/ראייה, הערכת מספר טוקנים, מדיניות SLA אופציונלית וספק אופציונלי
-שהוא האחרון שידוע כתקין).
+המנוע האוטו-קומבו חושף 7 ניתנים לחיבור**RouterStrategy** יישומים שאתה יכול להחליף באמצעות `config.routerStrategy` (או ה- `config.auto.routerStrategy` מדור קודם). כל אסטרטגיה בוחרת ספק אחד ממאגר המועמדים, בהינתן `RoutingContext` (סוג משימה, רמזים tool/vision, אומדן סמלי, מדיניות SLA אופציונלית, ספק אחרון ידוע-טוב אופציונלי).
 
-#### 1. `rules` (ברירת מחדל) — ניקוד משוקלל לפי 16 גורמים
+#### 1. `rules` (ברירת מחדל) — ניקוד משוקלל של 16 גורמים
 
-עוטף את מנגנון הניקוד הקיים. מסנן מועמדים שמפסק המעגל שלהם במצב `OPEN`,
-ולאחר מכן מפעיל את `scorePool()` עם סוג המשימה הנוכחי ועם `getTaskFitness()`,
-ובוחר את הספק בעל הניקוד הגבוה ביותר.
+עוטף את מנוע הניקוד הקיים. מסנן מועמדים למפסקים `OPEN`, ואז מריץ `scorePool()` עם סוג המשימה הנוכחי ו- `getTaskFitness()`, בוחר את הספק בעל הניקוד הגבוה ביותר.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -552,16 +544,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**מתי להשתמש**: ברירת המחדל. השתמשו כאשר נדרש איזון בין כל האותות.
+**מתי להשתמש** : ברירת מחדל. השתמש כאשר אתה רוצה פשרה מאוזנת בין כל האותות.
 
-**כינוי**: `rules` (ללא כינוי נוסף)
+**כינוי** : `rules` (ללא כינוי)
 
 ---
 
-#### 2. `cost` / `eco` — הספק התקין הזול ביותר
+#### 2. `cost` / `eco` — הספק הבריא הזול ביותר
 
-ממיין את מאגר המועמדים לפי `costPer1MTokens` (בסדר עולה) ובוחר את הזול ביותר.
-תחילה מסוננים מועמדים במצב `OPEN`.
+ממיין את מאגר המועמדים לפי `costPer1MTokens` (עולה) ובוחר את הזול ביותר. מסנן תחילה את מועמדי `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -576,16 +567,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**מתי להשתמש**: עומסי עבודה רגישים לעלות, עיבוד באצווה או משימות רקע.
+**מתי להשתמש** : עומסי עבודה רגישים לעלות, עיבוד אצווה או עבודות רקע.
 
-**כינויים**: `cost`, `eco`
+**כינויים** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — זמן ההשהיה הנמוך ביותר באחוזון 95, עם קנס על חוסר אמינות
+#### 3. `latency` / `fast` — הנמוך ביותר ב-p95 עם עונש אמינות
 
-ממיין לפי `p95LatencyMs + (errorRate * 1000)`. הקנס על שיעור השגיאות מבטיח
-שספקים בלתי אמינים ידורגו נמוך יותר, גם אם זמן ההשהיה הנומינלי שלהם נמוך.
+ממיין לפי `p95LatencyMs + (errorRate * 1000)`. העונש על שיעור השגיאות מבטיח שספקים לא אמינים מדורגים נמוך יותר גם אם האחזור הנומינלי שלהם נמוך.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -602,28 +592,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**מתי להשתמש**: עומסי עבודה רגישים לזמן השהיה, כגון צ'אט בזמן אמת, השלמה אוטומטית או
-עוזרי תכנות אינטראקטיביים.
+**מתי להשתמש** : עומסי עבודה רגישים לאיחור כמו צ'אט בזמן אמת, השלמה אוטומטית או עוזרי קידוד אינטראקטיביים.
 
-**כינויים**: `latency`, `fast`
+**כינויים** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — עמידה ביעדי SLO של זמן השהיה/שגיאות/עלות
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO
 
-מעניק לכל מועמד ניקוד לפי מידת עמידתו במדיניות ה-SLO שהוגדרה:
+ציון כל מועמד לפי כמה הוא עומד במדיניות SLO שהוגדרה:
 
-| גורם        | משקל | נוסחה                                             |
-| ----------- | ---- | ------------------------------------------------- |
-| ציון השהיה  | 35%  | `threshold / max(value, ε)`                       |
-| ציון שגיאות | 35%  | `threshold / max(value, ε)`                       |
-| ציון תקינות | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| ציון עלות   | 10%  | `threshold / max(value, ε)` או נרמול הפוך         |
-| ציון יציבות | 5%   | סטיית תקן מנורמלת באופן הפוך של ההשהיה            |
+| גוֹרֵם      | מִשׁקָל | נוּסחָה                                           |
+| ----------- | ------- | ------------------------------------------------- |
+| ציון חביון  | 35%     | `threshold / max(value, ε)`                       |
+| ציון שגיאה  | 35%     | `threshold / max(value, ε)`                       |
+| ציון בריאות | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
+| ציון עלות   | 10%     | `threshold / max(value, ε)` או הפוך מנורמל        |
+| ציון יציבות | 5%      | חביון הפוך מנורמל stddev                          |
 
-כאשר `hardConstraints: true`, המועמדים ממוינים תחילה לפי **ציון החריגה**
-(מידת החריגה שלהם מ-SLO כלשהו), ולאחר מכן לפי הציון המשוקלל. אחרת, המיון מתבצע
-רק לפי הציון המשוקלל.
+כאשר `hardConstraints: true`, המועמדים ממוינים בעיקר לפי** ציון הפרה** (כמה הם עולים על כל SLO), ואז לפי ציון מורכב. אחרת זה רק הציון המרוכב.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -632,12 +619,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... מחשב ציון לכל מועמד ביחס למדיניות: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**שדות SLA** (מוגדרים בתצורת השילוב):
+**שדות SLA** (מוגדר בתצורת המשולבת):
 
 ```json
 {
@@ -652,17 +639,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**מתי להשתמש**: עומסי עבודה בסביבת ייצור עם תקציבי השהיה, שיעור שגיאות או עלות מחמירים.
+**מתי להשתמש** : עומסי ייצור עם זמן אחזור קפדני, שיעור שגיאות או תקציבי עלויות.
 
-**כינויים**: `sla-aware`, `sla`
+**כינויים** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — הספק התקין האחרון הידוע קודם
+#### 5. `lkgp` — ספק טוב אחרון ידוע ראשון
 
-מנסה תחילה את **הספק התקין האחרון הידוע** (אם הוגדר), ולאחר מכן חוזר לאסטרטגיית
-`rules`. שימושי לשמירת עקביות בהפעלה — אותו ספק מטפל בבקשות
-המשך בשיחה.
+מנסה את** הספק הטוב האחרון הידוע** (אם מוגדר) תחילה, ואז נופל בחזרה לאסטרטגיית `rules`. שימושי עבור דביקות הפגישה — אותו ספק מטפל בבקשות מעקב בשיחה.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -683,27 +668,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // חזרה לאסטרטגיית rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**מתי להשתמש**: שיחות מרובות תורות שבהן רוצים שאותו ספק יטפל
-בבקשות המשך (למשל, לצורך אחסון במטמון, רציפות ההקשר או עקביות בתמחור).
+**מתי להשתמש** : שיחות מרובות פניות שבהן אתה רוצה שאותו ספק יטפל בבקשות מעקב (למשל, לשמירה במטמון, המשכיות הקשר או עקביות תמחור).
 
-**כינוי**: `lkgp` (ללא כינוי נוסף)
+**כינוי** : `lkgp` (ללא כינוי)
 
 ---
 
-#### 6. `nadir` — בחירת מודל מבוססת-הנחיה באמצעות Nadir
+#### 6. דגם `nadir` — מודע לבחירה דרך Nadir
 
-כל אחת מהאסטרטגיות שלעיל מדרגת את המועמדים לפי נתוני הטלמטריה שלה; אף אחת מהן אינה קוראת
-את הבקשה. `nadir` שולחת את התור האחרון של המשתמש יחד עם מזהי המודלים במאגר אל
-API ההחלטות של [Nadir](https://getnadir.com) (`POST /v1/bucket`) ומנתבת למודל
-ש-Nadir בוחרת מתוך התפריט הזה (`simple` → המודל המסוגל הזול ביותר, `complex` → המודל
-המתקדם ביותר). החיבור שמשרת את המודל הזה עדיין נבחר על ידי `rules`, כך שמכסה,
-תקינות ועלות ממשיכות לקבוע באיזה חשבון להשתמש.
+כל אסטרטגיה למעלה מדרגת את המועמדים לפי הטלמטריה שלהם; אף אחד מהם לא קורא את הבקשה. `nadir` שולחת את תור המשתמש האחרון בתוספת מזהי המודל של הבריכה להחלטה של [Nadir](https://getnadir.com) API (`POST /v1/bucket`) ומנתבת לדגם שנדיר בוחר מהתפריט הזה (`simple` → הדגם הכי זול בעל יכולת, `complex` → הגבולית). החיבור שמשרת את המודל הזה עדיין נבחר לפי `rules`, אז המכסה, הבריאות והעלות ממשיכים להחליט איזה חשבון.
 
 ```json
 {
@@ -719,34 +698,75 @@ API ההחלטות של [Nadir](https://getnadir.com) (`POST /v1/bucket`) ומנ
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` ו-`OMNIROUTE_NADIR_BASE_URL` משמשים כערכי גיבוי ממשתני הסביבה עבור שתי
-המחרוזות. `baseUrl` נדרש רק עבור Nadir באירוח עצמי (סיומת `/v1` מתקבלת).
-קריאות ללא מפתח מגיעות למסלול האנונימי של Nadir, שמוגבל בקצב לפי כתובת IP. עם מפתח
-([צרו אחד](https://app.getnadir.com/dashboard/api-keys)), כל החלטה
-נרשמת בלוח הבקרה שלכם ב-Nadir. להגדרה ולאימות מלאים:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` ו- `OMNIROUTE_NADIR_BASE_URL` הם env fallbacks עבור שתי המחרוזות. יש צורך `baseUrl` רק עבור Nadir שמתארח בעצמו (נסבל `/v1` נגרר). שיחות ללא מפתח נוחתות בשכבה האנונימית של Nadir, המוגבלת בתעריף לכל IP. עם מפתח ( [צור אחד](https://app.getnadir.com/dashboard/api-keys) ), כל החלטה נרשמת ללוח המחוונים של Nadir שלך. הגדרה ואימות מלאים: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-מה יוצא מהמערכת: הטקסט של הודעת המשתמש האחרונה (16 אלף התווים הראשונים), מזהי
-המודלים המועמדים ותג ערוץ `source: "omniroute"`. לא נשלחים הנחיית מערכת, היסטוריה, כלים או
-כותרות.
+מה משאיר את התיבה: הטקסט האחרון של הודעת המשתמש (16 אלף תווים ראשונים), מזהי המודל המועמד ותג ערוץ `source: "omniroute"`. אין הנחיה מערכתית, היסטוריה, כלים או כותרות.
 
-התנהגות הכשל היא fail-open: חריגה מזמן ההמתנה (ברירת המחדל היא 2000 מילישניות), תגובת non-2xx, מארח שאינו נגיש,
-תגובה פגומה או בחירה שאינה נמצאת במאגר מובילות להחלטה של `rules`,
-ולסיבה נוספת הקידומת `NadirStrategy: fallback (…)`. לאחר קריאה שנכשלה,
-האסטרטגיה מדלגת על הרשת למשך 30 שניות, כך שהשבתה עולה בחריגה אחת מזמן ההמתנה בכל 30 שניות במקום
-אחת לכל בקשה. אירועי ניתוב מדווחים על `strategy: "nadir"` רק כאשר Nadir אכן ביצעה
-את הבחירה.
+התנהגות הכשל היא כישלון פתוח: פסק זמן (ברירת מחדל 2000 ms), non-2xx, מארח בלתי ניתן להשגה, תגובה שגויה או בחירה מחוץ למאגר פותרים את החלטת `rules` והסיבה היא קידומת `NadirStrategy: fallback (…)`. לאחר שיחה כושלת האסטרטגיה מדלגת על הרשת למשך 30 שניות, כך שהפסקה עולה פסק זמן אחד לכל 30 שניות במקום אחד לכל בקשה. אירועי ניתוב מדווחים על `strategy: "nadir"` רק כאשר Nadir באמת עשה את הבחירה.
 
-**מתי להשתמש**: תעבורה ברמות קושי מעורבות במאגר המשתרע על פני שכבות מודלים (מודל קטן, בינוני
-ומתקדם ביותר), כאשר רוצים לצמצם את העלות של שימוש קבוע במודל המתקדם ביותר.
+**מתי להשתמש** : תנועה בדרגת קושי מעורבת בבריכה המשתרעת על פני שכבות דגם (דגם קטן, בינוני וגבולי), כאשר תמיד-frontier היא העלות שאתה רוצה לחתוך.
 
-**כינוי**: `nadir` (ללא כינוי נוסף)
+**כינוי** : `nadir` (ללא כינוי)
+
+---
+
+#### 7. `decision` — pluggable decisioner בוחר את הדגם
+
+`decision` שואל את א** מחליט** איזה דגם במאגר מתאים לבקשה, ואז מצמצם את המאגר למודל הזה ונותן ל- `rules` לבחור את החיבור (מכסה, בריאות ועלות עדיין לבחור את החשבון). המחליט מוגדר בבלוק ההחלטה של המשולב — `config.decision` כאשר כפתורי הנתב יושבים בחלק העליון של `config` (מה שלוח המחוונים כותב), או `config.auto.decision` ליד `config.auto.routerStrategy`:
+
+| `decider`     | מי עונה                                                                                                     | צרכים                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), דגם ברירת המחדל `jev-latest`             | חיבור `typesafe` או מפתח env            |
+| `http`        | מחליט משלך ב- `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) או `"openai-chat"` (השלמות של צ'אט) | `baseUrl` + `model`; מפתח אופציונלי     |
+| `combo-model` | אחד מדגמי הספקים שלך, שנקרא בתהליך כמו שופט ההיתוך                                                          | `model` as `provider/model` (ללא שילוב) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+שדות (אומת על ידי סכימה קפדנית בשמירה ושוב בזמן בקשה):
+
+- `decider` — `systemone`, `http` או `combo-model`.
+- `model` — TypeSafe model, מודל ההחלטה ב- URL שלך, או `provider/model` של קריאה משולבת-מודל (עד 200 תווים).
+- `baseUrl` — `http` בלבד: `http(s)` URL עד 500 תווים, ללא אישורים, שאילתה או קטע. URL המצביע על OmniRoute זה (loopback + `PORT`) מסורבת.
+- `wire` — `http` בלבד: `systemone` (ברירת מחדל) או `openai-chat`.
+- `connectionId` — החיבור המאוחסן שהמפתח שלו משמש (רק בתוך החיבורים המותרים של מפתח API המתקשר). בלעדיו, `systemone` קורא חיבור `typesafe` וכל מחליט רשת נופל בחזרה ל- `OMNIROUTE_DECISION_API_KEY`. אין שדה `apiKey` : מפתח לעולם לא מאוחסן בשילוב.
+- מספר שלם `timeoutMs` —, 100–5000, ברירת מחדל 2000.
+- `minConfidence` — 0–1; תשובה בעלת ביטחון נמוך יותר נופלת ל- `rules` (מחליט שמדווח על אי ביטחון נחשב כ-0).
+- `descriptions` — עד 50 ערכים (מפתח עד 300, טקסט עד 1000 תווים), מקודדים על ידי מזהה דגם או `provider/model`; ערכים לא מוגדרים מקבלים תיאור דירוג עלות שנוצר.
+
+**דֶגֶל.** `COMBO_DECISION_ROUTER_ENABLED` (ברירת מחדל `false`) משער כל מחליט. בזמן שהוא כבוי, שילוב של `decision` לא קורא אישורים, לא מבצע שיחה ומנתב עם `rules`; היומן אומר `fallback (disabled)`. מפתח מאוחסן לבדו לעולם לא מדליק אותו. שילובים ללא חסימת החלטה אינם מושפעים כלל.
+
+**מה יוצא מהקופסה.** רק הטקסט של הודעת המשתמש האחרונה (עד 8000 תווים; chat/Claude `messages` או Responses `input`) והתפריט של מזהי המודל עם התיאורים שלהם. אף פעם לא הנחית המערכת, תגובות `instructions`, כלים, היסטוריה, כותרות או נתוני חשבון. שיחות רשת עוברות דרך השמירה היוצאת של הספק ללא ניסיונות חוזרים, ללא הפניות מחדש ומכסת תגובה של 64 KB. שיחת `combo-model` אינה זורמת, ללא כלים, `temperature: 0`, עם תקציב של 256 אסימונים; החלטה שהתחילה בשיחת החלטה נדחתה.
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network error the endpoint is skipped for 30 s. A successful pick reads `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL, key, prompt or upstream body reaches the log.
+
+בונה המשולב מציג שדות אלה כאשר אסטרטגיית הנתב היא `decision`, עם התיאורים שנוצרו כמצייני מיקום ו-** החלטת מבחן** כפתור שקורא ל- `POST /api/combos/decision-preview` פעם אחת עם ההגדרות שלא נשמרו (אותו דגל).
+
+**מתי להשתמש** : תעבורה בדרגת קושי מעורבת שבה אתה רוצה שהדרג ייבחר לפי בקשה על ידי מסווג שתבחר, לא על ידי Nadir ספציפית.
+
+**כינוי** : `decision` (ללא כינוי)
 
 ---
 
 ### אסטרטגיות נתב מותאמות אישית
 
-ניתן לרשום מימוש `RouterStrategy` משלכם באמצעות ה-API הציבורי:
+אתה יכול לרשום יישום `RouterStrategy` משלך דרך API הציבורי:
 
 ```ts
 import {
@@ -759,7 +779,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // לוגיקת הניתוב שלכם כאן
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -774,7 +794,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-לאחר מכן השתמשו בה:
+לאחר מכן השתמש בו:
 
 ```json
 {
@@ -789,16 +809,17 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### מדריך לבחירת אסטרטגיית נתב
 
-| תרחיש שימוש      | אסטרטגיה    | סיבה                                    |
-| ---------------- | ----------- | --------------------------------------- |
-| עומס עבודה מאוזן | `rules`     | ברירת מחדל — מביאה בחשבון את כל הגורמים |
-| מזעור עלויות     | `cost`      | תמיד בוחרת באפשרות הזולה ביותר          |
-| מזעור השהיה      | `latency`   | בוחרת בספק האמין המהיר ביותר            |
-| יעדי SLO מחמירים | `sla-aware` | מסננת לפי ספי p95/שגיאות/עלות           |
-| צ'אט מרובה סבבים | `lkgp`      | הצמדת הסשן                              |
-| רמת קושי משתנה   | `nadir`     | בוחרת את רמת המודל עבור כל פרומפט       |
+| מקרה שימוש         | אִסטרָטֶגִיָה | לְנַמֵק                                |
+| ------------------ | ------------- | -------------------------------------- |
+| עומס עבודה מאוזן   | `rules`       | ברירת מחדל — לוקח בחשבון את כל הגורמים |
+| מזעור עלות         | `cost`        | תמיד בוחר הכי זול                      |
+| צמצם את זמן האחזור | `latency`     | בוחר את הספק האמין המהיר ביותר         |
+| SLOs קפדני         | `sla-aware`   | מסננים לפי ספי p95/error/cost          |
+| צ'אט מרובה פניות   | `lkgp`        | דביקות הפגישה                          |
+| קושי מעורב         | `nadir`       | בוחר את שכבת הדגם לכל הנחיה            |
+| מסווג משלו         | `decision`    | המחליט שלך בוחר את הדגם                |
 
-שדות מודעי-SLA:
+שדות המודעים ל-SLA:
 
 ```json
 {

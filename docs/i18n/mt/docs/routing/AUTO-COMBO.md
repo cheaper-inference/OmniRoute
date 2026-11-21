@@ -458,22 +458,22 @@ Dan ifisser li **ż-żieda ta’ fornitur ġdid b’`auto/*` attivat tespandi aw
 
 ## API
 
-Ma hemm **l-ebda endpoint dedikat `POST /api/combos/auto`** — Auto-Combo jintuża b’żewġ modi:
+Hemm** ebda endpoint dedikat `POST /api/combos/auto`** — Auto-Combo jiġi kkunsmat f'żewġ modi:
 
-1. **Mingħajr konfigurazzjoni (rakkomandat):** Ibgħat kwalunkwe talba ta’ chat completion b’`model: "auto"` jew `model: "auto/<variant>"`. Il-fabbrika virtwali tibni l-combo għal kull talba — mingħajr persistenza u mingħajr il-ħtieġa ta’ sejħiet tal-API.
+1. **Zero-config (rakkomandat):** Ibgħat kwalunkwe talba għat-tlestija taċ-chat ma' `model: "auto"` jew `model: "auto/<variant>"`. Il-fabbrika virtwali tibni l-combo għal kull talba — l-ebda persistenza, l-ebda sejħiet API meħtieġa.
 
-2. **Combo persistenti bi `strategy: "auto"`:** Oħloq combo regolari permezz ta’ `POST /api/combos` u ssettja `strategy: "auto"` flimkien ma’ `config.auto.weights` / `config.auto.candidatePool`. Jintuża l-istess mekkaniżmu ta’ valutazzjoni; il-combo jinħażen f’`combos` u jista’ jerġa’ jintuża permezz tal-ID.
+2. **Combo persistenti ma `strategy: "auto"`:** Oħloq combo regolari permezz ta `POST /api/combos` u ssettja `strategy: "auto"` flimkien ma' `config.auto.weights` / `config.auto.candidatePool`. L-istess magna tal-punteġġ tintuża; il-combo hija maħżuna `combos` u tista 'terġa' tintuża minn ID.
 
-Għall-iskoperta, `GET /api/combos/auto` jelenka kull varjant bil-pool ta’ kandidati riżolt tiegħu flimkien ma’ `context_length` / `max_output_tokens` — il-MASSIMU fost it-twieqi tal-pool ta’ kandidati. Il-klijenti (eż. il-plugin opencode) iridu jirreklamaw dawn il-valuri minflok `0`: kuntest żero jiddiżattiva kompletament l-awtokompattazzjoni ta’ opencode, u jippermetti lis-sessjonijiet jikbru sakemm it-tindif tal-istorja mill-gateway jeqred il-kuntest. Huwa sikur li jiġi rreklamat il-MASSIMU għax il-prefiltru tal-kuntest tal-auto-combo jidderieġi talbiet kbar wisq lejn kandidati bi twieqi kbar.
+Għall-iskoperta, `GET /api/combos/auto` telenka kull varjant bil-grupp ta' kandidati solvuti tiegħu flimkien ma' `context_length` / `max_output_tokens` — iż- MAX fit-twieqi tal-grupp ta' kandidati. Il-klijenti (eż. il-plugin opencode) iridu jirreklamaw dawn il-valuri minflok `0`: kuntest żero jiddiżattiva kompletament l-awtokompattazzjoni tal-opencode, u jħalli s-sessjonijiet jikbru sakemm it-tindif tal-istorja tal-gateway jeqred il-kuntest. MAX huwa sikur biex tirreklama minħabba li l-kuntest auto-combo pre-filtru jindirizza talbiet kbar lil kandidati ta 'tieqa kbira.
 
 ```bash
-# Użu mingħajr konfigurazzjoni (mingħajr ħolqien ta’ combo)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo awtomatiku persistenti permezz tal-endpoint regolari tal-combos
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -481,33 +481,24 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Strateġiji tar-router awtomatiku
 
-Combos persistenti bi `strategy: "auto"` jistgħu jissettjaw `config.routerStrategy` (jew il-forma legata
-`config.auto.routerStrategy`) għal waħda minn dawn:
+Combos `strategy: "auto"` persistenti jistgħu jissettjaw `config.routerStrategy` (jew `config.auto.routerStrategy` legacy ) għal waħda minn:
 
-- `rules` — valutazzjoni ponderata awtomatika
-- `score` — jagħżel l-ogħla punteġġ ponderat ikkonfigurat. F’każ ta’ parità eżatta tinżamm l-ordni
-  kkonfigurata tal-kandidati; l-`explorationRate` eżistenti jieħu kampjun mill-pool ikklassifikat kollu.
-- `cost` / `eco` — l-orħos fornitur li jkun f’saħħtu
-- `latency` / `fast` — l-inqas latenza p95 b’penali għall-affidabbiltà
-- `sla-aware` / `sla` — jippreferi kandidati li jissodisfaw il-latenza p95, ir-rata ta’ żbalji, u SLOs
-  tal-ispejjeż mhux obbligatorji
-- `lkgp` — l-aħħar fornitur magħruf li kien tajjeb l-ewwel
-- `nadir` — jistaqsi lill-API tad-deċiżjonijiet ta’ [Nadir](https://getnadir.com) liema mudell fil-pool
-  jeħtieġ il-prompt; jeħtieġ attivazzjoni espliċita, u f’każ ta’ ħsara jmur lura għal `rules`
+- `rules` — default peżat punteġġ
+- `score` — jagħżel l-ogħla punteġġ peżat konfigurat. Ir-rabtiet eżatti jippreservaw l-ordni kandidat konfigurat; il-kampjuni `explorationRate` eżistenti mill-ġabra kklassifikata sħiħa.
+- `cost` / `eco` — irħas fornitur b'saħħtu
+- `latency` / `fast` — l-inqas latenza p95 b'penali ta 'affidabbiltà
+- `sla-aware` / `sla` — jippreferu kandidati li jissodisfaw il-latency p95, ir-rata ta' żball, u l-ispiża fakultattiva SLOs
+- `lkgp` — l-aħħar fornitur tajjeb magħruf l-ewwel
+- `nadir` — staqsi d-decizjoni ta [Nadir](https://getnadir.com) API liema mudell fil-pool il-pront bzonn; opt-in, fail-open għal `rules`
+- `decision` — staqsi decider konfigurat (TypeSafe System One, id-deċiżjoni tiegħek stess URL, jew wieħed mill-mudelli tal-combo stess) liema mudell fil-pool jaqbel mat-talba; wara l-bandiera default-off `COMBO_DECISION_ROUTER_ENABLED`, fail-open għal `rules`
 
-### L-istrateġiji tar-router fid-dettall
+### Strateġiji tar-router fid-dettall
 
-Il-mekkaniżmu tal-auto-combo jesponi 7 implimentazzjonijiet **RouterStrategy** li jistgħu jiġu pplaggjati u li
-tista’ taqleb bejniethom permezz ta’ `config.routerStrategy` (jew il-forma legata `config.auto.routerStrategy`).
-Kull strateġija tagħżel fornitur wieħed mill-pool ta’ kandidati, skont `RoutingContext`
-(it-tip tal-kompitu, indikazzjonijiet dwar għodod/viżjoni, stima tat-tokens, politika SLA mhux obbligatorja, u
-l-aħħar fornitur magħruf li kien tajjeb, jekk ikun hemm).
+Il-magna auto-combo tesponi 7 pluggable**RouterStrategy** implimentazzjonijiet li tista' tpartit permezz ta' `config.routerStrategy` (jew il-legacy `config.auto.routerStrategy`). Kull strateġija tagħżel fornitur wieħed mill-grupp ta' kandidati, mogħtija `RoutingContext` (tip ta' ħidma, ħjiel tool/vision, stima tat-token, politika SLA fakultattiva, fornitur mhux obbligatorju tal-aħħar magħruf tajjeb).
 
-#### 1. `rules` (awtomatiku) — valutazzjoni ponderata b’16-il fattur
+#### 1. `rules` (default) — 16-fattur peżat punteġġ
 
-Jinkapsula l-mekkaniżmu ta’ valutazzjoni eżistenti. Jiffiltra l-kandidati tas-circuit-breaker
-li jkunu `OPEN`, imbagħad iħaddem `scorePool()` bit-tip attwali tal-kompitu u `getTaskFitness()`,
-u jagħżel il-fornitur bl-ogħla punteġġ.
+Tiġbor il-magna tal-punteġġ eżistenti. Jiffiltra l-kandidati `OPEN` circuit-breaker, imbagħad imexxi `scorePool()` bit-tip tal-kompitu attwali u `getTaskFitness()`, billi jagħżel il-fornitur bl-ogħla punteġġ.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -527,16 +518,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Meta għandek tużaha**: Awtomatika. Użaha meta tkun trid kompromess ibbilanċjat bejn is-sinjali kollha.
+**Meta tuża** : Default. Uża meta trid kompromess ibbilanċjat bejn is-sinjali kollha.
 
-**Alias**: `rules` (l-ebda alias)
+**Alias** : `rules` (l-ebda alias)
 
 ---
 
-#### 2. `cost` / `eco` — l-orħos fornitur li jkun f’saħħtu
+#### 2. `cost` / `eco` — irħas fornitur b'saħħtu
 
-Jissortja l-pool ta’ kandidati skont `costPer1MTokens` (f’ordni axxendenti) u jagħżel l-orħos wieħed.
-L-ewwel jiffiltra l-kandidati li jkunu `OPEN`.
+Issortja l-grupp tal-kandidati bi `costPer1MTokens` (li jogħla) u jagħżel l-irħas. Iffiltra l-kandidati `OPEN` l-ewwel.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -551,17 +541,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Meta għandek tużaha**: Workloads sensittivi għall-ispejjeż, ipproċessar f’lottijiet, jew
-kompiti fl-isfond.
+**Meta tuża** : Tagħbijiet ta' xogħol sensittivi għall-ispejjeż, ipproċessar tal-lott, jew impjiegi fl-isfond.
 
-**Aliases**: `cost`, `eco`
+**Psewdonimi** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — l-inqas latenza p95 b’penali għall-affidabbiltà
+#### 3. `latency` / `fast` — l-inqas latenza p95 b'penali ta 'affidabilità
 
-Jissortja skont `p95LatencyMs + (errorRate * 1000)`. Il-penali għar-rata ta’ żbalji tiżgura li
-fornituri mhux affidabbli jiġu kklassifikati aktar ’l isfel anki jekk il-latenza nominali tagħhom tkun baxxa.
+Sorts by `p95LatencyMs + (errorRate * 1000)`. Il-penali tar-rata tal-iżbalji tiżgura li fornituri mhux affidabbli jiġu kklassifikati aktar baxxi anki jekk il-latenza nominali tagħhom tkun baxxa.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -578,28 +566,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Meta għandek tużaha**: Workloads sensittivi għal-latenza bħal chat f’ħin reali, awtokompletar, jew
-assistenti interattivi għall-ipprogrammar.
+**Meta tuża** : Tagħbijiet ta' xogħol sensittivi għal latency bħal chat f'ħin reali, autocomplete, jew assistenti tal-kodifikazzjoni interattivi.
 
-**Aliases**: `latency`, `fast`
+**Psewdonimi** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — konformità mal-SLOs tal-latenza/żbalji/spejjeż
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO konformità
 
-Jagħti punteġġ lil kull kandidat skont kemm jissodisfa tajjeb il-politika SLO kkonfigurata:
+Punteġġi kull kandidat skond kemm jissodisfa tajjeb il-politika SLO konfigurata:
 
-| Fattur                 | Piż | Formula                                                    |
-| ---------------------- | --- | ---------------------------------------------------------- |
-| Punteġġ tal-latenza    | 35% | `threshold / max(value, ε)`                                |
-| Punteġġ tal-iżbalji    | 35% | `threshold / max(value, ε)`                                |
-| Punteġġ tas-saħħa      | 15% | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)          |
-| Punteġġ tal-ispiża     | 10% | `threshold / max(value, ε)` jew normalizzat b’mod invers   |
-| Punteġġ tal-istabbiltà | 5%  | devjazzjoni standard tal-latenza normalizzata b’mod invers |
+| Fattur                | Piż | Formula                                            |
+| --------------------- | --- | -------------------------------------------------- |
+| Punteġġ ta' latenza   | 35% | `threshold / max(value, ε)`                        |
+| Punteġġ ta' żball     | 35% | `threshold / max(value, ε)`                        |
+| Punteġġ tas-saħħa     | 15% | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)  |
+| Punteġġ tal-ispiża    | 10% | `threshold / max(value, ε)` jew invers normalizzat |
+| Punteġġ ta' stabbiltà | 5%  | latenza normalizzata inversa stddev                |
 
-Meta `hardConstraints: true`, il-kandidati jiġu magħżula primarjament skont il-**punteġġ tal-ksur**
-(kemm jaqbżu xi SLO), u mbagħad skont il-punteġġ kompost. Inkella jintuża biss
-il-punteġġ kompost.
+Meta `hardConstraints: true`, kandidati huma magħżula primarjament minn** punteġġ ta' ksur** (kemm jaqbżu kwalunkwe SLO), imbagħad b'punteġġ kompost. Inkella huwa biss il-punteġġ kompost.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -608,12 +593,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... jagħti punteġġ lil kull kandidat skont il-politika: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Oqsma tal-SLA** (issettjati fil-konfigurazzjoni combo):
+**SLA għelieqi** (issettjat fuq il-konfigurazzjoni kombo):
 
 ```json
 {
@@ -628,17 +613,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Meta għandek tużah**: Workloads tal-produzzjoni b’baġits stretti għal-latenza, ir-rata tal-iżbalji jew l-ispiża.
+**Meta tuża** : Il-piżijiet tax-xogħol tal-produzzjoni b'latency stretti, rata ta 'żbalji, jew baġits tal-ispejjeż.
 
-**Aliases**: `sla-aware`, `sla`
+**Psewdonimi** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — l-aħħar fornitur magħruf bħala tajjeb l-ewwel
+#### 5. `lkgp` — l-aħħar fornitur tajjeb magħruf l-ewwel
 
-L-ewwel jipprova l-**aħħar fornitur magħruf bħala tajjeb** (jekk ikun issettjat), u mbagħad jaqleb
-għall-istrateġija `rules`. Utli għall-persistenza tas-sessjoni — l-istess fornitur jieħu ħsieb
-it-talbiet ta’ segwitu f’konverżazzjoni.
+Jipprova l-** l-aħħar fornitur tajjeb magħruf** (jekk issettjat) l-ewwel, imbaghad jaqa lura ghall-strategija `rules`. Utli għal sessjoni li twaħħal — l-istess fornitur jimmaniġġa t-talbiet ta 'segwitu f'konversazzjoni.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -659,27 +642,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Aqleb għall-istrateġija rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Meta għandek tużah**: Konverżazzjonijiet b’diversi skambji fejn trid li l-istess fornitur jieħu ħsieb
-it-talbiet ta’ segwitu (eż., għall-caching, għall-kontinwità tal-kuntest jew għall-konsistenza fil-prezzijiet).
+**Meta tuża** : Konversazzjonijiet b'ħafna dawriet fejn trid li l-istess fornitur jieħu ħsieb it-talbiet ta' segwitu (eż., għal caching, kontinwità tal-kuntest, jew konsistenza tal-prezzijiet).
 
-**Alias**: `lkgp` (mingħajr alias)
+**Alias** : `lkgp` (l-ebda alias)
 
 ---
 
-#### 6. `nadir` — għażla ta’ mudell konxja tal-prompt permezz ta’ Nadir
+#### 6. `nadir` — għażla ta 'mudell konxju fil-pront permezz ta' Nadir
 
-Kull strateġija ta’ hawn fuq tikklassifika l-kandidati skont it-telemetrija tagħha stess; l-ebda waħda minnhom ma taqra
-t-talba. `nadir` jibgħat l-aħħar skambju tal-utent flimkien mal-IDs tal-mudelli fil-pool lill-API
-tad-deċiżjonijiet ta’ [Nadir](https://getnadir.com) (`POST /v1/bucket`) u jidderieġi lejn il-mudell
-li Nadir jagħżel minn dak il-menu (`simple` → l-orħos mudell kapaċi, `complex` → il-mudell
-tal-ogħla livell). Il-konnessjoni li sservi dak il-mudell xorta tintgħażel minn `rules`, għalhekk il-kwota,
-is-saħħa u l-ispiża jibqgħu jiddeċiedu liema kont jintuża.
+Kull strateġija hawn fuq tikklassifika l-kandidati bit-telemetrija tagħhom stess; ħadd minnhom ma jaqra t-talba. `nadir` jibgħat l-aħħar dawran tal-utent flimkien mal-ids tal-mudell tal-pool lid-deċiżjoni ta’ [Nadir](https://getnadir.com) API (`POST /v1/bucket`) u r-rotot għall-mudell li Nadir jagħżel minn dak il-menu (`simple` → l-orħos mudell kapaċi, `complex` → dak tal-fruntiera). Il-konnessjoni li sservi dak il-mudell għadha tinġabar minn `rules`, għalhekk il-kwota, is-saħħa u l-ispiża jibqgħu jiddeċiedu liema kont.
 
 ```json
 {
@@ -695,34 +672,75 @@ is-saħħa u l-ispiża jibqgħu jiddeċiedu liema kont jintuża.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` u `OMNIROUTE_NADIR_BASE_URL` huma alternattivi mill-ambjent għaż-żewġ
-strings. `baseUrl` huwa meħtieġ biss għal Nadir ospitat minnek stess (`/v1` fl-aħħar huwa aċċettat).
-Talbiet mingħajr ċavetta jidħlu fil-livell anonimu ta’ Nadir, li għandu limitu ta’ rata għal kull IP. B’ċavetta
-([oħloq waħda](https://app.getnadir.com/dashboard/api-keys)), kull deċiżjoni tiġi
-rreġistrata fid-dashboard ta’ Nadir tiegħek. Għall-konfigurazzjoni u l-verifika sħaħ:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` u `OMNIROUTE_NADIR_BASE_URL` huma env fallbacks għaż-żewġ kordi. `baseUrl` huwa meħtieġ biss għal Nadir self-hosted ( `/v1` ta' wara huwa tollerat). Is-sejħiet mingħajr ċavetta jinżlu fuq il-livell anonimu ta' Nadir, li huwa limitat bir-rata għal IP. B'ċavetta ( [oħloq waħda](https://app.getnadir.com/dashboard/api-keys) ), kull deċiżjoni tiġi illoggjata fid-dashboard ta' Nadir tiegħek. Setup sħiħ u verifika: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Dak li joħroġ mis-sistema: it-test tal-aħħar messaġġ tal-utent (l-ewwel 16k karattru), l-IDs
-tal-mudelli kandidati u tag tal-kanal `source: "omniroute"`. Ma jintbagħtu ebda prompt tas-sistema, storja, għodod jew
-headers.
+Dak li jħalli l-kaxxa: it-test tal-aħħar messaġġ tal-utent (l-ewwel 16k karattru), l-ids tal-mudell kandidat u tikketta tal-kanal `source: "omniroute"`. Ebda sistema fil-pront, storja, għodda jew headers.
 
-L-imġiba f’każ ta’ falliment hija fail-open: timeout (default ta’ 2000 ms), status mhux 2xx, host
-li ma jistax jintlaħaq, rispons ifformattjat ħażin jew għażla barra mill-pool iwasslu għad-deċiżjoni ta’ `rules`
-u r-raġuni tingħata l-prefiss `NadirStrategy: fallback (…)`. Wara sejħa falluta, l-istrateġija
-taqbeż in-network għal 30 s, biex qtugħ jiswa timeout wieħed kull 30 s minflok
-wieħed għal kull talba. L-avvenimenti tar-routing jirrapportaw `strategy: "nadir"` biss meta Nadir ikun effettivament għamel
-l-għażla.
+L-imġieba ta' falliment hija fail-open: timeout (default 2000 ms), non-2xx, host li ma jintlaħaqx, rispons ħażin jew għażla barra l-grupp jirriżolvi għad-deċiżjoni `rules` u r-raġuni hija prefissata `NadirStrategy: fallback (…)`. Wara sejħa falluta l-istrateġija taqbeż in-netwerk għal 30 s, għalhekk qtugħ jiswa timeout wieħed għal kull 30 s aktar milli wieħed għal kull talba. L-avvenimenti tar-rotot jirrappurtaw `strategy: "nadir"` biss meta Nadir fil-fatt għamel l-għażla.
 
-**Meta għandek tużah**: traffiku b’livelli ta’ diffikultà mħallta fuq pool li jkopri diversi livelli ta’ mudelli (mudell żgħir, wieħed intermedju
-u mudell tal-ogħla livell), fejn trid tnaqqas l-ispiża li tiġi mill-użu kostanti tal-mudell tal-ogħla livell.
+**Meta tuża** : traffiku b'diffikultà mħallta fuq pool li jifrex fuq saffi tal-mudell (mudell żgħir, medju u ta' fruntiera), fejn dejjem-fruntiera hija l-ispiża li trid tnaqqas.
 
-**Alias**: `nadir` (mingħajr alias)
+**Alias** : `nadir` (l-ebda alias)
 
 ---
 
-### Strateġiji personalizzati tar-router
+#### 7. `decision` — pluggable decider jiġbor il-mudell
 
-Tista’ tirreġistra l-implimentazzjoni tiegħek ta’ `RouterStrategy` permezz tal-API pubblika:
+`decision` jistaqsi a** deċiżjoni** liema mudell fil-pool jaqbel mat-talba, imbagħad iddejjaq il-pool għal dak il-mudell u ħalli `rules` jagħżel il-konnessjoni (kwota, saħħa u spiża xorta jagħżlu l-kont). Id-deċiżur huwa ssettjat fil-blokk tad-deċiżjoni tal-combo — `config.decision` meta l-pumi tar-router joqogħdu fin-naħa ta’ fuq ta’ `config` (dak li jikteb id-dashboard), jew `config.auto.decision` ħdejn `config.auto.routerStrategy`:
+
+| `decider`     | Min iwieġeb                                                                                                                             | Bżonnijiet                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), mudell default `jev-latest`                                          | konnessjoni `typesafe` jew iċ-ċavetta env     |
+| `http`        | id-decider tiegħek stess fi `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) jew `"openai-chat"` (kompletazzjonijiet taċ-chat) | `baseUrl` + `model`; ċavetta fakultattiva     |
+| `combo-model` | wieħed mill-mudelli tal-fornitur tiegħek, imsejjaħ fil-proċess bħall-imħallef tal-fużjoni                                               | `model` bħala `provider/model` (l-ebda kombo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Oqsma (validati minn skema stretta meta tissejvja u għal darb'oħra fil-ħin tat-talba):
+
+- `decider` — `systemone`, `http` jew `combo-model`.
+- `model` — TypeSafe model, il-mudell tad-deċiżjoni URL tiegħek, jew iż- `provider/model` ta' sejħa ta' mudell combo (sa 200 karattru).
+- `baseUrl` — `http` biss: `http(s)` URL sa 500 karattru, mingħajr kredenzjali, mistoqsija jew framment. A URL li tipponta lejn dan OmniRoute (loopback + `PORT`) hija rrifjutata.
+- `wire` — `http` biss: `systemone` (default) jew `openai-chat`.
+- `connectionId` — il-konnessjoni maħżuna li ċ-ċavetta tagħha tintuża (biss ġewwa l-konnessjonijiet permessi taċ-ċavetta API li ssejjaħ). Mingħajrha, `systemone` jaqra konnessjoni `typesafe` u kull decider tan-netwerk jaqa' lura għal `OMNIROUTE_DECISION_API_KEY`. M'hemm l-ebda qasam `apiKey` : ċavetta qatt ma tinħażen f'combo.
+- `timeoutMs` — integer, 100–5000, default 2000.
+- `minConfidence` — 0–1; tweġiba b'kunfidenza aktar baxxa taqa' lura għal `rules` (deċiżur li jirrapporta l-ebda kunfidenza jgħodd bħala 0).
+- `descriptions` — sa 50 daħla (ċavetta sa 300, test sa 1000 karattru), imdaħħla b'id tal-mudell jew `provider/model`; entrati mhux stabbiliti jiksbu deskrizzjoni ġenerata tal-grad tal-ispiża.
+
+**Bandiera.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gates every decider. Waqt li tkun mitfija, `decision` combo ma taqra l-ebda kredenzjali, ma tagħmel l-ebda sejħa u rotta `rules`; il-log jghid `fallback (disabled)`. Ċavetta maħżuna waħedha qatt ma tixgħelha. Combos mingħajr blokk ta 'deċiżjoni ma huma affettwati xejn.
+
+**Dak li jħalli l-kaxxa.** It-test tal-aħħar messaġġ tal-utent biss (sa 8000 karattru; chat/Claude `messages` jew Responses `input`) u l-menu tal-mudell ids bid-deskrizzjonijiet tagħhom. Qatt is-sistema fil-pront, Rispons `instructions`, għodod, storja, headers jew data tal-kont. Is-sejħiet tan-netwerk jgħaddu mill-gwardja 'l barra tal-fornitur mingħajr ebda prova mill-ġdid, l-ebda direzzjoni mill-ġdid u limitu ta' rispons ta '64 KB. Is-sejħa `combo-model` mhix streaming, mingħajr għodda, `temperature: 0`, b'baġit ta' 256 token; deċiżjoni mibdija fi ħdan sejħa għal deċiżjoni tiġi rrifjutata.
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network error the endpoint is skipped for 30 s. A successful pick reads `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL, key, prompt or upstream body reaches the log.
+
+Il-combo builder juri dawn l-oqsma meta l-istrateġija tar-router hija `decision`, bid-deskrizzjonijiet iġġenerati bħala placeholders u a** Deċiżjoni tat-test** buttuna li ssejjaħ `POST /api/combos/decision-preview` darba bis-settings mhux salvati (l-istess bandiera).
+
+**Meta tuża** : traffiku b'diffikultà mħallta fejn trid li l-livell jintgħażel għal kull talba minn klassifikatur li tagħżel, mhux minn Nadir speċifikament.
+
+**Alias** : `decision` (l-ebda alias)
+
+---
+
+### Strateġiji custom router
+
+Tista' tirreġistra l-implimentazzjoni tiegħek ta' `RouterStrategy` permezz ta' API pubbliku:
 
 ```ts
 import {
@@ -735,7 +753,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Il-loġika tar-routing tiegħek hawnhekk
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -750,7 +768,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Imbagħad użaha:
+Imbagħad użah:
 
 ```json
 {
@@ -763,18 +781,19 @@ Imbagħad użaha:
 
 ---
 
-### Gwida għall-għażla tal-istrateġija tar-router
+### Gwida tal-għażla tal-istrateġija tar-router
 
-| Każ ta’ użu                | Strateġija  | Raġuni                                           |
-| -------------------------- | ----------- | ------------------------------------------------ |
-| Piż tax-xogħol ibbilanċjat | `rules`     | Predefinita — tqis il-fatturi kollha             |
-| Imminimizza l-ispiża       | `cost`      | Dejjem tagħżel l-orħos għażla                    |
-| Imminimizza l-latenza      | `latency`   | Tagħżel l-aktar fornitur veloċi u affidabbli     |
-| SLOs stretti               | `sla-aware` | Tiffiltra skont il-limiti ta’ p95/żbalji/spejjeż |
-| Taħdita b’diversi skambji  | `lkgp`      | Żżomm l-istess fornitur matul is-sessjoni        |
-| Diffikultà mħallta         | `nadir`     | Tagħżel il-livell tal-mudell għal kull prompt    |
+| Każ ta' użu           | Strateġija  | Raġuni                                       |
+| --------------------- | ----------- | -------------------------------------------- |
+| Xogħol bilanċjat      | `rules`     | Default — jikkunsidra l-fatturi kollha       |
+| Jimminimizza l-ispiża | `cost`      | Dejjem jagħżel l-irħas                       |
+| Minimizza latency     | `latency`   | Jagħżel l-iktar fornitur affidabbli          |
+| Strict SLOs           | `sla-aware` | Filtri minn p95/error/cost thresholds        |
+| Chat b'ħafna dawriet  | `lkgp`      | Twaħħal is-sessjoni                          |
+| Diffikultà mħallta    | `nadir`     | Jagħżel il-livell tal-mudell għal kull pront |
+| Klassifikatur stess   | `decision`  | Id-deċiżjoni tiegħek jagħżel il-mudell       |
 
-Oqsma konxji tal-SLA:
+Oqsma konxji mill-SLA:
 
 ```json
 {

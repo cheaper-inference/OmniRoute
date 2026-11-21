@@ -84,18 +84,19 @@ sākotnējo sarakstu.
 
 Visiem galapunktiem ir nepieciešama pārvaldības autentifikācija (`requireManagementAuth`)** un** ir tikai atgriezeniskās saites — `/api/plugins` un `/api/plugins/` ir norādīti `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Galapunkts                       | Metode | Apraksts                                                          |
-| -------------------------------- | ------ | ----------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Uzskaitiet instalētos spraudņus (izvēles `?status=` filtrs)       |
-| `/api/plugins`                   | POST   | Instalējiet spraudni no spraudņa avotu direktorijas               |
-| `/api/plugins/scan`              | POST   | Skenējiet spraudņu direktoriju un reģistrējiet jaunus spraudņus   |
-| `/api/plugins/marketplace`       | GET    | Uzskaitiet tirgus laukuma kataloga ierakstus                      |
-| `/api/plugins/[name]`            | GET    | Iegūstiet informāciju par instalēto spraudni                      |
-| `/api/plugins/[name]`            | DELETE | Atinstalējiet spraudni                                            |
-| `/api/plugins/[name]/activate`   | POST   | Aktivizēt (ielādēt + reģistra āķus)                               |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivizēt (aizdedzināt `onDeactivate`, atcelt āķu reģistrāciju) |
-| `/api/plugins/[name]/config`     | GET    | Iegūt spraudņa konfigurācijas + konfigurācijas shēmu              |
-| `/api/plugins/[name]/config`     | PUT    | Atjaunināt spraudņa konfigurāciju (validēta saskaņā ar shēmu)     |
+| Galapunkts                         | Metode | Apraksts                                                          |
+| ---------------------------------- | ------ | ----------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Uzskaitiet instalētos spraudņus (izvēles `?status=` filtrs)       |
+| `/api/plugins`                     | POST   | Instalējiet spraudni no spraudņa avotu direktorijas               |
+| `/api/plugins/scan`                | POST   | Skenējiet spraudņu direktoriju un reģistrējiet jaunus spraudņus   |
+| `/api/plugins/marketplace`         | GET    | Uzskaitiet tirgus laukuma kataloga ierakstus                      |
+| `/api/plugins/marketplace/install` | POST   | Instalējiet Marketplace spraudni pēc nosaukuma                    |
+| `/api/plugins/[name]`              | GET    | Iegūstiet informāciju par instalēto spraudni                      |
+| `/api/plugins/[name]`              | DELETE | Atinstalējiet spraudni                                            |
+| `/api/plugins/[name]/activate`     | POST   | Aktivizēt (ielādēt + reģistra āķus)                               |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktivizēt (aizdedzināt `onDeactivate`, atcelt āķu reģistrāciju) |
+| `/api/plugins/[name]/config`       | GET    | Iegūt spraudņa konfigurācijas + konfigurācijas shēmu              |
+| `/api/plugins/[name]/config`       | PUT    | Atjaunināt spraudņa konfigurāciju (validēta saskaņā ar shēmu)     |
 
 Filtrs `GET /api/plugins` `status` pieņem vienu no `installed` / `active` / `inactive` / `error`. Nederīga vērtība atgriež `400`.
 
@@ -117,7 +118,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` ir jābūt an** absolūts** ceļš uz direktoriju** spraudņa avotu direktorijā** : `plugin-sources` blakus spraudņa saknei, tātad `~/.omniroute/plugin-sources/` pēc noklusējuma vai `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`, ja šis mainīgais ir iestatīts (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Vispirms nokopējiet vai klonējiet spraudni tur. Instalēšana tiek atteikta ar `400` ja ceļš satur `..` vai nulles baitu, atrodas ārpus šī direktorija, tiek atrisināts ārpus tā, izmantojot simbolisko saiti, satur simbolu saiti, kuras mērķis atrodas ārpus tā, vai ja direktorija neeksistē. Avota direktorijā ir jābūt derīgam `plugin.json` (vai jābūt tā vecākam). Ja tas ir izdevies, atbilde ir `201` ar instalēto spraudņa rindu.
 
-Atšķirībā no citiem spraudņu maršrutiem, šim ir nepieciešami pārvaldības akreditācijas dati (informācijas paneļa sesija vai pārvaldības tvēruma API atslēga) pat tad, ja pieteikšanās ir atspējota (`requireLogin=false`): koda instalēšana nekad nav anonīma darbība.
+Atšķirībā no citiem spraudņu maršrutiem, šim ir nepieciešami pārvaldības akreditācijas dati (informācijas paneļa sesija vai pārvaldības tvēruma API atslēga) pat tad, ja pieteikšanās ir atspējota (`requireLogin=false`): koda instalēšana nekad nav anonīma darbība. Tas pats attiecas uz `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Pārlūkojiet tirgu
 
@@ -135,7 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` pārbauda katru norādīto vērtību, salīdzinot ar spraudņa `configSchema` (norādīts manifestā): `number` lauki ievēro `min`/`max`, `select` laukiem ir jāatbilst deklarētajam `enum`. Atslēgas, kas nav iekļautas shēmā, ir atļautas.
+`PUT .../config` pārbauda pamattekstu pret spraudņa `configSchema` (deklarētais manifestā) ar `validatePluginConfig()` no `src/lib/plugins/manifest.ts`: katrai atslēgai ir jābūt deklarētai shēmā, vērtībām jāatbilst deklarētajam veidam, `number` laukiem ir jāatbilst `min`/`max`, un `select` laukiem jāatbilst deklarētajam `enum`. Jebkurš pārkāpums atgriež `400` un nekas netiek saglabāts. Spraudnim, kas paziņo, ka nav `configSchema` nav konfigurējamu atslēgu, tāpēc pieprasījums tiek noraidīts ar `400` ("Spraudnis nedeklarē nevienu konfigurējamu taustiņu").
 
 ## Konfigurācija
 
@@ -215,13 +216,13 @@ URL, kas neizdodas nevienā no slāņiem, neatceļ pieprasījumu. — tirgus klu
 
 ### Spraudņa izpildes izolācija
 
-> **Spraudņi nav smilškastes.** Bērns ir parasts Node.js process, kas darbojas kā OmniRoute lietotājs, bez VM konteksta un bez Node.js atļauju karodziņiem, tāpēc spraudņa kods var lasīt un rakstīt jebkuru failu, ko lietotājs var, palaist programmas un sasniegt tīklu. `requires.permissions` tikai izlemj, kādus vides mainīgos bērns saņem; pārējās atļaujas netiek izpildītas. Instalējiet tikai spraudņus, kuriem uzticaties. Tālāk norādītā procesa robeža ietver avārijas un uzkaras; tā nav drošības robeža.
+> **Pēc noklusējuma spraudņi netiek ievietoti smilškastes režīmā.** Bērns ir parasts Node.js process, kas darbojas kā OmniRoute lietotājs, bez VM konteksta un bez Node.js atļauju karodziņiem, tāpēc spraudņa kods var lasīt un rakstīt jebkuru failu, ko lietotājs var, palaist programmas un sasniegt tīklu. `requires.permissions` tikai izlemj, kādus vides mainīgos bērns saņem; pārējās atļaujas netiek izpildītas. Izvēles `PLUGIN_PERMISSION_MODEL_ENABLED` funkcijas karodziņš (pēc noklusējuma izslēgts) palaiž katru spraudni saskaņā ar Node.js atļauju modeli, kas izveidots no šīm atļaujām, izņemot `network`, ko Node.js nevar ierobežot (skatiet [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Instalējiet tikai spraudņus, kuriem uzticaties. Tālāk norādītā procesa robeža ietver avārijas un uzkaras; tā nav drošības robeža.
 
 - **Procesa izolācija** — `loadPlugin()` (`src/lib/plugins/loader.ts`) izveido katru spraudni atsevišķā Node.js bērnprocesā un sazinās, izmantojot IPC. Āķa zvaniem ir noildze ar `SIGTERM` → `SIGKILL` eskalāciju.
 - **Env atļaušanas saraksts** — bērns saņem tikai atļauto vides mainīgo kopu; plašāka kopa tiek piešķirta tikai tad, ja manifestā tiek pieprasīta `env` atļauja.
 - **Instalējiet avota ierobežošanu** — `POST /api/plugins` lasa tikai no spraudņa avotu direktorija (skatiet sadaļu "Instalēšana no vietējā ceļa"): ceļš ir kanonizēts ar `realpath`, tam ir stingri jāpaliek šajā direktorijā, un avota koks, kas satur simbolisku saiti, kas no tā tiek izvadīts, tiek noraidīts, pirms kaut kas tiek kopēts.
-- **Ceļa ierobežošana** — install/upgrade/uninstall apgalvo, ka spraudņa direktorijs un `manifest.main` tiek atrisināti** ietvaros** pārvaldītā spraudņa sakne pirms jebkuras kopēšanas vai rekursīvas dzēšanas (aizsargā pret manipulētiem DB ceļiem un `../` šķērsošanu `manifest.main`). Aktivizēšana atrisina simboliskās saites, izmantojot `realpath`, un atsakās ielādēt ieejas punktu, kas iziet no spraudņa direktorijas.
-- **Papildu integritātes tapa** — manifestā var būt norādīts `integrity` (`sha256-<base64>`, SRI formāts) lauks. Ja ir, ielādētājs pārbauda ievades faila jaucējkodu ielādes laikā un atsakās aktivizēt neatbilstības gadījumā. Tā ir izvēles viltojuma noteikšana,** nē** drošības robeža: tas neierobežo to, ko var darīt ielādēts spraudnis.
+- **Ceļa ierobežošana** — install/upgrade/uninstall apgalvo, ka spraudņa direktorijs un `manifest.main` tiek atrisināti** ietvaros** pārvaldītā spraudņa sakne pirms jebkuras kopēšanas vai rekursīvas dzēšanas (aizsargā pret manipulētiem DB ceļiem un `../` šķērsošanu `manifest.main`). Aktivizēšana atrisina simboliskās saites, izmantojot `realpath`, un atsakās ielādēt ieejas punktu, kas iziet no spraudņa direktorija.
+- **Izvēles integritātes tapa** — manifestā var būt norādīts `integrity` (`sha256-<base64>`, SRI formāts) lauks. Ja ir, ielādētājs pārbauda ievades faila jaucējkodu ielādes laikā un atsakās aktivizēt neatbilstības gadījumā. Tā ir izvēles viltojuma noteikšana,** nē** drošības robeža: tas neierobežo to, ko var darīt ielādēts spraudnis.
 - **Nav klientu akreditācijas datu** — kontekstam, kas nodots `onRequest`, `onResponse` un `onError` ir noņemtas galvenes `authorization`, `x-api-key`, `proxy-authorization` un `cookie`, un atslēgas API ierakstam nav atslēgas vērtības (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifests (`plugin.json`)

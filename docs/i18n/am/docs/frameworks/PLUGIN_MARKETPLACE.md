@@ -82,18 +82,19 @@ Dashboard (/dashboard/plugins)
 
 ሁሉም የመጨረሻ ነጥቦች የአስተዳደር ማረጋገጫ ያስፈልጋቸዋል (`requireManagementAuth`)** እና** loopback-ብቻ — `/api/plugins` እና `/api/plugins/` በ `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ተዘርዝረዋል።
 
-| የመጨረሻ ነጥብ                        | ዘዴ     | መግለጫ                                     |
-| -------------------------------- | ------ | ---------------------------------------- |
-| `/api/plugins`                   | GET    | የተጫኑ ተሰኪዎችን ይዘርዝሩ (አማራጭ `?status=` ማጣሪያ) |
-| `/api/plugins`                   | POST   | ተሰኪን ከተሰኪው ምንጮች ማውጫ ጫን                   |
-| `/api/plugins/scan`              | POST   | የተሰኪውን ማውጫ ይቃኙ እና አዲስ ተሰኪዎችን ይመዝግቡ       |
-| `/api/plugins/marketplace`       | GET    | የገበያ ቦታ ካታሎግ ግቤቶችን ይዘርዝሩ                 |
-| `/api/plugins/[name]`            | GET    | የተጫኑ ተሰኪ ዝርዝሮችን ያግኙ                      |
-| `/api/plugins/[name]`            | DELETE | ተሰኪን ያራግፉ                                |
-| `/api/plugins/[name]/activate`   | POST   | አግብር ( + መመዝገቢያ መንጠቆዎችን ይጫኑ)             |
-| `/api/plugins/[name]/deactivate` | POST   | አቦዝን (እሳት `onDeactivate`፣ መንጠቆዎችን አስወጣ)  |
-| `/api/plugins/[name]/config`     | GET    | ተሰኪ ውቅረት + config schema ያግኙ             |
-| `/api/plugins/[name]/config`     | PUT    | የፕለጊን ውቅረትን ያዘምኑ (በእቅድ የተረጋገጠ)           |
+| የመጨረሻ ነጥብ                          | ዘዴ     | መግለጫ                                     |
+| ---------------------------------- | ------ | ---------------------------------------- |
+| `/api/plugins`                     | GET    | የተጫኑ ተሰኪዎችን ይዘርዝሩ (አማራጭ `?status=` ማጣሪያ) |
+| `/api/plugins`                     | POST   | ተሰኪን ከተሰኪው ምንጮች ማውጫ ጫን                   |
+| `/api/plugins/scan`                | POST   | የተሰኪውን ማውጫ ይቃኙ እና አዲስ ተሰኪዎችን ይመዝግቡ       |
+| `/api/plugins/marketplace`         | GET    | የገበያ ቦታ ካታሎግ ግቤቶችን ይዘርዝሩ                 |
+| `/api/plugins/marketplace/install` | POST   | የገበያ ቦታ ተሰኪን በስም ይጫኑ                     |
+| `/api/plugins/[name]`              | GET    | የተጫኑ ተሰኪ ዝርዝሮችን ያግኙ                      |
+| `/api/plugins/[name]`              | DELETE | ተሰኪን ያራግፉ                                |
+| `/api/plugins/[name]/activate`     | POST   | አግብር ( + መመዝገቢያ መንጠቆዎችን ይጫኑ)             |
+| `/api/plugins/[name]/deactivate`   | POST   | አቦዝን (እሳት `onDeactivate`፣ መንጠቆዎችን አስወጣ)  |
+| `/api/plugins/[name]/config`       | GET    | ተሰኪ ውቅረት + config schema ያግኙ             |
+| `/api/plugins/[name]/config`       | PUT    | የፕለጊን ውቅረትን ያዘምኑ (በእቅድ የተረጋገጠ)           |
 
 የ `GET /api/plugins` `status` ማጣሪያ ከ `installed` / `active` / `inactive` / `error` አንዱን ይቀበላል። ልክ ያልሆነ እሴት `400` ይመልሳል።
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` አንድ መሆን አለበት** ፍጹም** ወደ ማውጫ የሚወስደው መንገድ** በፕለጊን ምንጮች ማውጫ ውስጥ** : `plugin-sources` ከተሰኪው ስር ቀጥሎ፣ ስለዚህ `~/.omniroute/plugin-sources/` በነባሪ፣ ወይም ያ ተለዋዋጭ ሲዘጋጅ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`)። መጀመሪያ እዚያ ያለውን ፕለጊን ይቅዱ ወይም ይቅዱ። መንገዱ `..` ወይም ባዶ ባይት ሲይዝ፣ ከማውጫው ውጪ ሲተኛ፣ ከሱ ውጪ በሲምሊንክ ሲፈታ፣ ኢላማው ውጭ የሆነ ሲምሊንክ ሲይዝ ወይም ማውጫው ከሌለ በ `400` መጫኑ ውድቅ ይሆናል። የምንጭ ማውጫው ትክክለኛ `plugin.json` (ወይም የአንድ ወላጅ መሆን) መያዝ አለበት። በስኬት ላይ ምላሹ ከተጫነው ተሰኪ ረድፍ ጋር `201` ነው።
 
-ከሌሎቹ ፕለጊን መንገዶች በተለየ ይህ የአስተዳደር ምስክርነት ያስፈልገዋል (የዳሽቦርድ ክፍለ ጊዜ ወይም የአስተዳደር-ወሰን API ቁልፍ) መግባት ቢሰናከልም (`requireLogin=false`)፡ ኮድ መጫን መቼም የማይታወቅ ተግባር ነው።
+ከሌሎቹ ፕለጊን መንገዶች በተለየ ይህ የአስተዳደር ምስክርነት ያስፈልገዋል (የዳሽቦርድ ክፍለ ጊዜ ወይም የአስተዳደር-ወሰን API ቁልፍ) መግባት ቢሰናከልም (`requireLogin=false`)፡ ኮድ መጫን መቼም የማይታወቅ ተግባር ነው። በ `POST /api/plugins/marketplace/install` (አካል `{ "name": "<plugin>" }`) ላይም ተመሳሳይ ነው።
 
 ### የገበያ ቦታውን ያስሱ
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` እያንዳንዱን የቀረበውን ዋጋ በተሰኪው `configSchema` ያጸድቃል (በአንጸባራቂው ውስጥ ተገልጿል) `number` መስኮች `min`/`max` ን ያከብራሉ፣ `select` መስኮች ከተገለጸው `enum` ጋር መዛመድ አለባቸው። በእቅዱ ውስጥ የማይገኙ ቁልፎች ተፈቅደዋል።
+`PUT .../config` ሰውነቱን ከፕለጊኑ `configSchema` (በማኒፌስቱ ውስጥ የተገለጸውን) በ `validatePluginConfig()` ከ `src/lib/plugins/manifest.ts` ያፀድቃል፡ እያንዳንዱ ቁልፍ በእቅዱ ውስጥ መታወጅ አለበት፣ እሴቶቹ ከተገለጸው አይነት ጋር መዛመድ አለባቸው፣ `number` መስኮች `min`/`max` ን ያከብራሉ፣ እና `select` መስኮች ከተገለጸው `enum` ጋር መዛመድ አለባቸው። ማንኛውም ጥሰት `400` ይመልሳል እና ምንም ነገር አይከማችም። ምንም `configSchema` እንደሌለ የሚገልጽ ፕለጊን ምንም የሚዋቀሩ ቁልፎች የሉትም፣ ስለዚህ ጥያቄው በ `400` ("ፕለጊን ምንም አይነት የሚዋቀሩ ቁልፎችን አያውጅም") ውድቅ ተደርጓል።
 
 ## ውቅር
 
@@ -213,13 +214,13 @@ installationን በአንድነት ያንቀሳቅሳል።
 
 ### ተሰኪ ማስፈጸሚያ ማግለል።
 
-> **ተሰኪዎች በማጠሪያ የተቀመጡ አይደሉም።** ልጁ እንደ OmniRoute ተጠቃሚ የሚሄድ ተራ Node.js ሂደት ነው፣ ምንም VM አውድ እና Node.js ፍቃድ ባንዲራ የለውም፣ ስለዚህ ፕለጊን ኮድ ተጠቃሚው የሚችለውን ማንኛውንም ፋይል ማንበብ እና መፃፍ፣ ፕሮግራሞችን ማስኬድ እና አውታረ መረቡ ላይ መድረስ ይችላል። `requires.permissions` ልጁ የሚቀበለው የትኞቹን የአካባቢ ተለዋዋጮች ብቻ ነው የሚወስነው; ሌሎች ፍቃዶች አይተገበሩም. የሚያምኗቸውን ፕለጊኖች ብቻ ይጫኑ። ከታች ያለው የሂደት ወሰን ብልሽቶችን እና ማንጠልጠያዎችን ይይዛል; የደህንነት ወሰን አይደለም.
+> **ተሰኪዎች በነባሪነት ማጠሪያ አይደሉም።** ልጁ እንደ OmniRoute ተጠቃሚ የሚሄድ ተራ Node.js ሂደት ነው፣ ምንም VM አውድ እና Node.js ፍቃድ ባንዲራ የለውም፣ ስለዚህ ፕለጊን ኮድ ተጠቃሚው የሚችለውን ማንኛውንም ፋይል ማንበብ እና መፃፍ፣ ፕሮግራሞችን ማስኬድ እና አውታረ መረቡ ላይ መድረስ ይችላል። `requires.permissions` ልጁ የሚቀበለው የትኞቹን የአካባቢ ተለዋዋጮች ብቻ ነው የሚወስነው; ሌሎች ፍቃዶች አይተገበሩም. የመርጦ መግቢያ `PLUGIN_PERMISSION_MODEL_ENABLED` ባህሪ ባንዲራ (በነባሪ ጠፍቷል) እያንዳንዱን ተሰኪ ከዚ ፍቃዶች በተሰራው Node.js ፍቃድ ሞዴል ስር ይሰራል፣ ከ `network` በስተቀር፣ Node.js ሊገድበው አይችልም ( [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ይመልከቱ)። የሚያምኗቸውን ፕለጊኖች ብቻ ይጫኑ። ከታች ያለው የሂደት ወሰን ብልሽቶችን እና ማንጠልጠያዎችን ይይዛል; የደህንነት ወሰን አይደለም.
 
 - **የማግለል ሂደት** — `loadPlugin()` (`src/lib/plugins/loader.ts`) እያንዳንዱን ፕለጊን በተለየ Node.js ልጅ ሂደት ያፈልቃል እና በ IPC ላይ ይገናኛል። መንጠቆ ጥሪዎች ከ `SIGTERM` → `SIGKILL` መጨመር ጋር ጊዜ ያለፈባቸው ናቸው።
 - **የኢንቪ የተፈቀደ ዝርዝር** — ልጁ የሚቀበለው የተፈቀደላቸው የአካባቢ ተለዋዋጮች ስብስብ ብቻ ነው። ሰፊው ስብስብ የሚሰጠው አንጸባራቂው የ `env` ፍቃድ ሲጠይቅ ብቻ ነው።
 - **የምንጭ መያዣን ጫን** — `POST /api/plugins` የሚነበበው ከተሰኪው የመረጃ ምንጮች ማውጫ ብቻ ነው ("ከአካባቢው ዱካ ጫን" የሚለውን ይመልከቱ)፡ መንገዱ በ `realpath` ቀኖናዊ ነው፣ በዚያ ማውጫ ውስጥ በጥብቅ መቆየት አለበት፣ እና ያመለጠ ሲምሊንክ የያዘ የምንጭ ዛፍ ምንም ነገር ከመቅዳት በፊት ውድቅ ተደርጓል።
 - **የመንገዱን መያዣ** — install/upgrade/uninstall የፕለጊን ማውጫ እና `manifest.main` እንደሚፈቱ አስረግጡ** ውስጥ** የሚተዳደረው plugin root ከማንኛውም ቅጂ ወይም ተደጋጋሚ መሰረዝ በፊት (ከተጣደፉ DB ዱካዎች እና `../` መሻገርን በ `manifest.main` ይከላከላል)። ማግበር ሲምሊንኮችን በ `realpath` ይፈታል እና ከተሰኪው ማውጫ ያመለጠውን የመግቢያ ነጥብ ለመጫን ፈቃደኛ አይሆንም።
-- **አማራጭ የአቋም ፒን** — አንጸባራቂ `integrity` (`sha256-<base64>`፣ SRI ቅርጸት) መስክ ሊያውጅ ይችላል። በሚገኝበት ጊዜ፣ ጫኚው የመግቢያ ፋይልን hash በጭነት ጊዜ ያረጋግጣል እና አለመመጣጠን ላይ ለማንቃት ፈቃደኛ አይሆንም። መርጦ መግባት ማጭበርበር ነው፣** አይደለም** የደህንነት ወሰን፡ የተጫነ ተሰኪ ማድረግ የሚችለውን አይገድብም።
+- **አማራጭ የአቋም ፒን** — አንጸባራቂ `integrity` (`sha256-<base64>`፣ SRI ቅርጸት) መስክ ሊያውጅ ይችላል። በሚገኝበት ጊዜ፣ ጫኚው የመግቢያ ፋይልን hash በጭነት ጊዜ ያረጋግጣል እና አለመመጣጠን ላይ ለማንቃት ፈቃደኛ አይሆንም። መርጦ መግባቱ ማበላሸት ነው፣** አይደለም** የደህንነት ወሰን፡ የተጫነ ተሰኪ ማድረግ የሚችለውን አይገድብም።
 - **መንጠቆ ውስጥ ምንም የደንበኛ ምስክርነቶች** — ወደ `onRequest`፣ `onResponse` እና `onError` የተላለፈው አውድ `authorization`፣ `x-api-key`፣ `proxy-authorization` እና `cookie` ራስጌዎች ተወግደዋል እና API ቁልፍ መዝገብ ምንም ቁልፍ እሴት የለውም (`redactPluginContext()` በ `src/lib/plugins/hooks.ts`)።
 
 ## አንጸባራቂ (`plugin.json`)

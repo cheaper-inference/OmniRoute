@@ -82,18 +82,19 @@ tijelo, `listMarketplacePlugins()` bilježi upozorenje i vraća se na početni p
 
 Sve krajnje točke zahtijevaju autorizaciju upravljanja (`requireManagementAuth`)** i** su samo povratna petlja — `/api/plugins` i `/api/plugins/` navedeni su u `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Krajnja točka                    | metoda | Opis                                                        |
-| -------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Popis instaliranih dodataka (opcijski `?status=` filter)    |
-| `/api/plugins`                   | POST   | Instalirajte dodatak iz direktorija izvora dodataka         |
-| `/api/plugins/scan`              | POST   | Skenirajte direktorij dodataka i registrirajte nove dodatke |
-| `/api/plugins/marketplace`       | GET    | Popis unosa kataloga tržišta                                |
-| `/api/plugins/[name]`            | GET    | Dobijte pojedinosti instaliranog dodatka                    |
-| `/api/plugins/[name]`            | DELETE | Deinstalirajte dodatak                                      |
-| `/api/plugins/[name]/activate`   | POST   | Aktiviraj (učitaj kuke + registra)                          |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiviraj (isključi `onDeactivate`, odjavi kuke)          |
-| `/api/plugins/[name]/config`     | GET    | Nabavite shemu konfiguracije dodatka +                      |
-| `/api/plugins/[name]/config`     | PUT    | Ažuriranje konfiguracije dodatka (provjereno prema shemi)   |
+| Krajnja točka                      | metoda | Opis                                                        |
+| ---------------------------------- | ------ | ----------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Popis instaliranih dodataka (opcijski `?status=` filter)    |
+| `/api/plugins`                     | POST   | Instalirajte dodatak iz direktorija izvora dodataka         |
+| `/api/plugins/scan`                | POST   | Skenirajte direktorij dodataka i registrirajte nove dodatke |
+| `/api/plugins/marketplace`         | GET    | Popis unosa kataloga tržišta                                |
+| `/api/plugins/marketplace/install` | POST   | Instalirajte dodatak za tržište po imenu                    |
+| `/api/plugins/[name]`              | GET    | Dobijte pojedinosti instaliranog dodatka                    |
+| `/api/plugins/[name]`              | DELETE | Deinstalirajte dodatak                                      |
+| `/api/plugins/[name]/activate`     | POST   | Aktiviraj (učitaj kuke + registra)                          |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiviraj (isključi `onDeactivate`, odjavi kuke)          |
+| `/api/plugins/[name]/config`       | GET    | Nabavite shemu konfiguracije dodatka +                      |
+| `/api/plugins/[name]/config`       | PUT    | Ažuriranje konfiguracije dodatka (provjereno prema shemi)   |
 
 `GET /api/plugins` `status` filtar prihvaća jedan od `installed` / `active` / `inactive` / `error`. Nevažeća vrijednost vraća `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` mora biti an** apsolutni** put do imenika** unutar direktorija izvora dodataka** : `plugin-sources` pored korijena dodatka, dakle `~/.omniroute/plugin-sources/` prema zadanim postavkama ili `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` kada je ta varijabla postavljena (`getPluginSourcesDir()` u `src/lib/plugins/installSource.ts`). Najprije tamo kopirajte ili klonirajte dodatak. Instalacija se odbija sa `400` kada staza sadrži `..` ili null bajt, leži izvan tog direktorija, rješava se izvan njega kroz simboličku vezu, sadrži simboličku vezu čiji je cilj izvan njega ili kada direktorij ne postoji. Izvorni direktorij mora sadržavati važeći `plugin.json` (ili biti roditelj jednog). Nakon uspjeha odgovor je `201` s redom instaliranog dodatka.
 
-Za razliku od drugih smjerova dodatka, ovaj zahtijeva vjerodajnicu za upravljanje (sesija nadzorne ploče ili API ključ s opsegom upravljanja) čak i kada je prijava onemogućena (`requireLogin=false`): instaliranje koda nikada nije anonimna radnja.
+Za razliku od drugih smjerova dodatka, ovaj zahtijeva vjerodajnicu za upravljanje (sesija nadzorne ploče ili API ključ s opsegom upravljanja) čak i kada je prijava onemogućena (`requireLogin=false`): instaliranje koda nikada nije anonimna radnja. Isto se odnosi i na `POST /api/plugins/marketplace/install` (tijelo `{ "name": "<plugin>" }`).
 
 ### Pregledajte tržište
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` provjerava svaku danu vrijednost prema `configSchema` dodatka (deklarisanom u manifestu): `number` polja poštuju `min`/`max`, `select` polja moraju odgovarati deklariranom `enum`. Ključevi koji nisu prisutni u shemi su dopušteni.
+`PUT .../config` potvrđuje tijelo u odnosu na `configSchema` dodatka (deklariran u manifestu) sa `validatePluginConfig()` iz `src/lib/plugins/manifest.ts`: svaki ključ mora biti deklariran u shemi, vrijednosti moraju odgovarati deklariranom tipu, `number` polja poštuju `min`/`max`, a `select` polja moraju odgovarati deklariranom `enum`. Svako kršenje vraća `400` i ništa se ne pohranjuje. Dodatak koji izjavljuje da nema `configSchema` nema konfigurabilne ključeve, pa se zahtjev odbija sa `400` ("Dodatak ne izjavljuje nikakve konfigurabilne ključeve").
 
 ## Konfiguracija
 
@@ -212,7 +213,7 @@ URL koji ne uspije bilo koji sloj ne prekida zahtjev — tržište se tiho vrać
 
 ### Izolacija izvođenja dodataka
 
-> **Dodaci nisu u sandboxu.** Dijete je običan Node.js proces koji se izvodi kao OmniRoute korisnik, bez VM konteksta i Node.js oznaka dopuštenja, tako da kod dodatka može čitati i pisati bilo koju datoteku koju korisnik može, pokretati programe i doseći mrežu. `requires.permissions` samo odlučuje koje varijable okruženja dijete prima; ostale se dozvole ne provode. Instalirajte samo dodatke kojima vjerujete. Granica procesa ispod sadrži padove i zastoje; to nije sigurnosna granica.
+> **Dodaci prema zadanim postavkama nisu u sandboxu.** Dijete je običan Node.js proces koji se izvodi kao OmniRoute korisnik, bez VM konteksta i Node.js oznaka dopuštenja, tako da kod dodatka može čitati i pisati bilo koju datoteku koju korisnik može, pokretati programe i doseći mrežu. `requires.permissions` samo odlučuje koje varijable okruženja dijete prima; ostale se dozvole ne provode. Oznaka značajke opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` (isključena prema zadanim postavkama) pokreće svaki dodatak pod Node.js modelom dopuštenja izgrađenim od tih dopuštenja, osim `network`, koji Node.js ne može ograničiti (pogledajte [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Instalirajte samo dodatke kojima vjerujete. Granica procesa ispod sadrži padove i zastoje; to nije sigurnosna granica.
 
 - **Izolacija procesa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) pokreće svaki dodatak u zasebnom procesu djeteta Node.js i komunicira preko IPC. Hook pozivi imaju vremensko ograničenje s `SIGTERM` → `SIGKILL` eskalacijom.
 - **Env popis dopuštenih** — dijete prima samo dopušteni skup varijabli okoline; širi skup se odobrava samo kada manifest zahtijeva dopuštenje `env`.

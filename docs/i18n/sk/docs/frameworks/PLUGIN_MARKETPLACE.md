@@ -84,20 +84,21 @@ upozornenie a použije počiatočný zoznam.
 
 Všetky koncové body vyžadujú autorizáciu správy (`requireManagementAuth`)** a** sú len pre spätnú slučku — `/api/plugins` a `/api/plugins/` sú uvedené v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Koncový bod                      | Metóda | Popis                                                            |
-| -------------------------------- | ------ | ---------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Zoznam nainštalovaných doplnkov (voliteľný filter `?status=` )   |
-| `/api/plugins`                   | POST   | Nainštalujte doplnok z adresára zdrojov doplnkov                 |
-| `/api/plugins/scan`              | POST   | Naskenujte adresár doplnkov a zaregistrujte nové doplnky         |
-| `/api/plugins/marketplace`       | GET    | Zoznam položiek katalógu trhovísk                                |
-| `/api/plugins/[name]`            | GET    | Získajte podrobnosti o nainštalovanom doplnku                    |
-| `/api/plugins/[name]`            | DELETE | Odinštalujte doplnok                                             |
-| `/api/plugins/[name]/activate`   | POST   | Aktivovať (načítať háčiky registra + )                           |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivovať (vystreliť `onDeactivate`, zrušiť registráciu hákov) |
-| `/api/plugins/[name]/config`     | GET    | Získajte schému konfigurácie pluginu +                           |
-| `/api/plugins/[name]/config`     | PUT    | Aktualizujte konfiguráciu doplnku (overené podľa schémy)         |
+| Koncový bod                        | Metóda | Popis                                                            |
+| ---------------------------------- | ------ | ---------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Zoznam nainštalovaných doplnkov (voliteľný filter `?status=` )   |
+| `/api/plugins`                     | POST   | Nainštalujte doplnok z adresára zdrojov doplnku                  |
+| `/api/plugins/scan`                | POST   | Naskenujte adresár doplnkov a zaregistrujte nové doplnky         |
+| `/api/plugins/marketplace`         | GET    | Zoznam položiek katalógu trhovísk                                |
+| `/api/plugins/marketplace/install` | POST   | Nainštalujte si doplnok Marketplace podľa názvu                  |
+| `/api/plugins/[name]`              | GET    | Získajte podrobnosti o nainštalovanom doplnku                    |
+| `/api/plugins/[name]`              | DELETE | Odinštalujte doplnok                                             |
+| `/api/plugins/[name]/activate`     | POST   | Aktivovať (načítať háčiky registra + )                           |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktivovať (vystreliť `onDeactivate`, zrušiť registráciu hákov) |
+| `/api/plugins/[name]/config`       | GET    | Získajte schému konfigurácie pluginu +                           |
+| `/api/plugins/[name]/config`       | PUT    | Aktualizujte konfiguráciu doplnku (overené podľa schémy)         |
 
-Filter `GET /api/plugins` `status` akceptuje jednu z možností `installed` / `active` / `inactive` / `error`. Neplatná hodnota vráti `400`.
+Filter `GET /api/plugins` `status` akceptuje jeden z `installed` / `active` / `inactive` / `error`. Neplatná hodnota vráti `400`.
 
 ### Zoznam nainštalovaných doplnkov
 
@@ -115,9 +116,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` musí byť an** absolútne** cestu k adresáru** v adresári zdrojov doplnku** : `plugin-sources` vedľa koreňa pluginu, takže `~/.omniroute/plugin-sources/` predvolene, alebo `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` keď je táto premenná nastavená (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Najprv tam skopírujte alebo naklonujte doplnok. Inštalácia je odmietnutá pomocou `400`, keď cesta obsahuje `..` alebo nulový bajt, leží mimo tohto adresára, rieši sa mimo neho prostredníctvom symbolického odkazu, obsahuje symbolický odkaz, ktorého cieľ je mimo neho, alebo ak adresár neexistuje. Zdrojový adresár musí obsahovať platné `plugin.json` (alebo byť rodičom jedného). Po úspechu je odpoveď `201` s riadkom nainštalovaného pluginu.
+`path` musí byť an** absolútne** cestu k adresáru** v adresári zdrojov pluginov** : `plugin-sources` vedľa koreňového adresára doplnku, takže predvolene `~/.omniroute/plugin-sources/` alebo `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` keď je táto premenná nastavená (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Najprv tam skopírujte alebo naklonujte doplnok. Inštalácia je odmietnutá pomocou `400`, keď cesta obsahuje `..` alebo nulový bajt, leží mimo tohto adresára, rieši sa mimo neho prostredníctvom symbolického odkazu, obsahuje symbolický odkaz, ktorého cieľ je mimo neho, alebo ak adresár neexistuje. Zdrojový adresár musí obsahovať platné `plugin.json` (alebo byť rodičom jedného). Po úspechu je odpoveď `201` s riadkom nainštalovaného pluginu.
 
-Na rozdiel od iných trás doplnkov, táto vyžaduje poverenie na správu (reláciu dashboardu alebo kľúč API v rozsahu správy), aj keď je prihlásenie zakázané (`requireLogin=false`): inštalácia kódu nikdy nie je anonymná akcia.
+Na rozdiel od iných trás doplnkov, táto vyžaduje poverenie na správu (reláciu dashboardu alebo kľúč API v rozsahu správy), aj keď je prihlásenie zakázané (`requireLogin=false`): inštalácia kódu nikdy nie je anonymná akcia. To isté platí pre `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Prehľadávať trhovisko
 
@@ -135,7 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` overí každú poskytnutú hodnotu oproti `configSchema` doplnku (deklarovanému v manifeste): polia `number` rešpektujú `min`/`max`, polia `select` sa musia zhodovať s deklarovaným `enum`. Kľúče, ktoré sa nenachádzajú v schéme, sú povolené.
+`PUT .../config` overí telo oproti `configSchema` doplnku (deklarované v manifeste) pomocou `validatePluginConfig()` z `src/lib/plugins/manifest.ts`: každý kľúč musí byť deklarovaný v schéme, hodnoty musia zodpovedať deklarovanému typu, polia `number` rešpektujú `min`/`max` a polia `select` sa musia zhodovať s deklarovaným `enum`. Akékoľvek porušenie vráti `400` a nič sa neuloží. Doplnok, ktorý nedeklaruje žiadne `configSchema` nemá žiadne konfigurovateľné kľúče, takže požiadavka je odmietnutá pomocou `400` („Plugin nedeklaruje žiadne konfigurovateľné kľúče“).
 
 ## Konfigurácia
 
@@ -214,14 +215,14 @@ URL ktorá zlyhá na niektorej z vrstiev, nezruší požiadavku — trh sa ticho
 
 ### Izolácia spustenia pluginu
 
-> **Doplnky nie sú v karanténe.** Dieťa je obyčajný proces Node.js ktorý beží ako používateľ OmniRoute, bez kontextu VM a bez príznakov povolenia Node.js, takže kód zásuvného modulu môže čítať a zapisovať akýkoľvek súbor, ktorý môže používateľ, spúšťať programy a dostať sa do siete. `requires.permissions` rozhoduje len o tom, ktoré premenné prostredia dieťa dostane; ostatné povolenia sa nevynucujú. Inštalujte iba doplnky, ktorým dôverujete. Nižšie uvedená hranica procesu obsahuje zlyhania a zamrznutia; nie je to hranica bezpečnosti.
+> **Doplnky nie sú v predvolenom nastavení v karanténe.** Dieťa je obyčajný proces Node.js ktorý beží ako používateľ OmniRoute, bez kontextu VM a bez príznakov povolenia Node.js, takže kód zásuvného modulu môže čítať a zapisovať akýkoľvek súbor, ktorý môže používateľ, spúšťať programy a dostať sa do siete. `requires.permissions` rozhoduje len o tom, ktoré premenné prostredia dieťa dostane; ostatné povolenia sa nevynucujú. Príznak aktivácie funkcie `PLUGIN_PERMISSION_MODEL_ENABLED` (štandardne vypnutý) spúšťa každý doplnok podľa modelu povolení Node.js zostaveného z týchto povolení, okrem `network`, ktoré Node.js nemôže obmedziť (pozri [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Inštalujte iba doplnky, ktorým dôverujete. Nižšie uvedená hranica procesu obsahuje zlyhania a zamrznutia; nie je to hranica bezpečnosti.
 
 - **Procesná izolácia** — `loadPlugin()` (`src/lib/plugins/loader.ts`) vytvorí každý doplnok v samostatnom podradenom procese Node.js a komunikuje cez IPC. Hook hovory majú časový limit s eskaláciou `SIGTERM` → `SIGKILL`.
 - **Env zoznam povolených** — dieťa dostane iba povolenú množinu premenných prostredia; širšia množina je udelená iba vtedy, keď manifest vyžaduje povolenie `env`.
 - **Nainštalujte zdrojový obal** — `POST /api/plugins` číta iba z adresára zdrojov pluginov (pozri "Inštalácia z lokálnej cesty"): cesta je kanonizovaná pomocou `realpath`, musí zostať striktne v tomto adresári a zdrojový strom nesúci symbolický odkaz, ktorý z neho uniká, je odmietnutý skôr, ako sa čokoľvek skopíruje.
 - **Obmedzenie cesty** — install/upgrade/uninstall tvrdí, že adresár pluginu a `manifest.main` sa vyriešia** v rámci** spravovaný koreň pluginu pred akoukoľvek kópiou alebo rekurzívnym odstránením (chráni pred narušenými cestami DB a prechodom `../` v `manifest.main`). Aktivácia vyrieši symbolické odkazy cez `realpath` a odmietne načítať vstupný bod, ktorý unikne z adresára pluginu.
 - **Voliteľný kolík integrity** — manifest môže deklarovať pole `integrity` (formát `sha256-<base64>`, SRI ). Ak je prítomný, zavádzač overí hodnotu hash súboru záznamu v čase načítania a odmietne sa aktivovať v prípade nesúladu. Ide o voliteľnú detekciu manipulácie,** nie** bezpečnostná hranica: neobmedzuje to, čo dokáže načítaný doplnok.
-- **Žiadne prihlasovacie údaje klienta v hákoch** — kontext odovzdaný do `onRequest`, `onResponse` a `onError` má odstránené hlavičky `authorization`, `x-api-key`, `proxy-authorization` a `cookie` a záznam kľúča API nenesie žiadnu kľúčovú hodnotu (`redactPluginContext()` v `src/lib/plugins/hooks.ts`).
+- **Žiadne prihlasovacie údaje klienta v hákoch** — kontext odovzdaný do `onRequest`, `onResponse` a `onError` má odstránené hlavičky `authorization`, `x-api-key`, `proxy-authorization` a `cookie` a záznam kľúča API nenesie žiadnu hodnotu kľúča (`redactPluginContext()` v `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 

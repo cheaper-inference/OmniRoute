@@ -478,56 +478,47 @@ See tähendab, et **uue pakkujaga `auto/*` lubatud lisamine laieneb automaatselt
 
 ## API
 
-**Spetsiaalset lõpp-punkti `POST /api/combos/auto` ei ole** — Auto-Combo kasutamiseks on kaks võimalust:
+On olemas** pole spetsiaalset `POST /api/combos/auto` lõpp-punkti** — Auto-Combo kasutatakse kahel viisil:
 
-1. **Nullkonfiguratsioon (soovitatav):** saatke suvaline vestluse lõpetamise päring väärtusega `model: "auto"` või `model: "auto/<variant>"`. Virtuaalne tehas loob kombinatsiooni iga päringu jaoks eraldi — püsivat salvestamist ega API-kutseid pole vaja.
+1. **Nullkonfiguratsioon (soovitatav):** Saatke mis tahes vestluse lõpetamise taotlus `model: "auto"` või `model: "auto/<variant>"` abil. Virtuaalne tehas loob kombinatsiooni päringu järgi — ilma püsivuseta, API -kõnesid pole vaja.
 
-2. **Püsiv kombinatsioon väärtusega `strategy: "auto"`:** looge tavaline kombinatsioon lõpp-punkti `POST /api/combos` kaudu ning määrake `strategy: "auto"` koos väärtustega `config.auto.weights` / `config.auto.candidatePool`. Kasutatakse sama hindamismootorit; kombinatsioon salvestatakse tabelisse `combos` ja seda saab ID alusel korduvalt kasutada.
+2. **Püsiv kombinatsioon `strategy: "auto"`:** Looge `POST /api/combos` kaudu tavaline kombinatsioon ja määrake `strategy: "auto"` pluss `config.auto.weights` / `config.auto.candidatePool`. Kasutatakse sama hindamismootorit; Kombo on salvestatud `combos` ja ID korduvkasutatav.
 
-Avastamiseks loetleb `GET /api/combos/auto` kõik variandid koos nende lahendatud kandidaatide kogumiga ning väärtustega `context_length` / `max_output_tokens` — kandidaatide kogumi kontekstiakende MAKSIMUM. Kliendid (nt opencode'i plugin) peavad reklaamima neid väärtusi, mitte väärtust `0`: nullkontekst keelab opencode'i automaatse tihendamise täielikult, võimaldades seanssidel kasvada seni, kuni lüüsi ajaloopuhastus konteksti hävitab. MAKSIMUMI reklaamimine on ohutu, sest automaatkombinatsiooni konteksti eelfilter suunab liiga suured päringud suure kontekstiaknaga kandidaatidele.
+Avastamiseks loetleb `GET /api/combos/auto` kõik variandid koos selle lahendatud kandidaatide kogumiga pluss `context_length` / `max_output_tokens` — MAX üle kandidaatide kogumi akende. Kliendid (nt avatud koodi plugin) peavad neid väärtusi `0` asemel reklaamima: nullkontekst keelab täielikult Opencode'i automaatse tihendamise, lastes seanssidel kasvada, kuni lüüsi ajaloo puhastamine konteksti hävitab. MAX on reklaamimine ohutu, kuna automaatse kombineeritud konteksti eelfilter suunab suuremahulised taotlused suure akna kandidaatidele.
 
 ```bash
-# Nullkonfiguratsiooniga kasutamine (kombinatsiooni ei looda)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Püsiv automaatkombinatsioon tavalise kombinatsioonide lõpp-punkti kaudu
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Automaatruuteri strateegiad
+### Automaatse ruuteri strateegiad
 
-Püsivad `strategy: "auto"` kombinatsioonid võivad määrata võtme `config.routerStrategy` (või pärandvõtme
-`config.auto.routerStrategy`) üheks järgmistest:
+Püsivad `strategy: "auto"` kombod võivad seada `config.routerStrategy` (või pärand `config.auto.routerStrategy`) ühele järgmistest:
 
-- `rules` — vaikimisi kaalutud hindamine
-- `score` — valib suurima konfigureeritud kaalutud skoori. Täpsete viikide korral säilitatakse konfigureeritud
-  kandidaatide järjekord; olemasolev `explorationRate` teeb valimi kogu järjestatud kogumist.
-- `cost` / `eco` — odavaim töökorras teenusepakkuja
-- `latency` / `fast` — väikseim p95 latentsus koos töökindlustrahviga
-- `sla-aware` / `sla` — eelistab kandidaate, mis vastavad p95 latentsuse, veamäära ja valikuliste
-  kulude SLO-de nõuetele
-- `lkgp` — viimane teadaolevalt toimiv teenusepakkuja esimesena
-- `nadir` — küsib [Nadiri](https://getnadir.com) otsustus-API-lt, millist kogumis olevat mudelit
-  viip vajab; nõuab selgesõnalist lubamist ja tõrke korral kasutab strateegiat `rules`
+- `rules` — vaikimisi kaalutud punktiarvestus
+- `score` — valib kõrgeima konfigureeritud kaalutud skoori. Täpsed sidemed säilitavad konfigureeritud kandidaatide järjestuse; olemasolevad `explorationRate` proovid kogu järjestatud kogust.
+- `cost` / `eco` — odavaim tervislik pakkuja
+- `latency` / `fast` — madalaim p95 latentsus koos töökindlustrahviga
+- `sla-aware` / `sla` — eelistab kandidaate, mis vastavad p95 latentsusele, veamäärale ja valikulistele kuludele SLOs
+- `lkgp` — viimane teadaolev hea pakkuja esimene
+- `nadir` — küsida [Nadiri](https://getnadir.com) otsust API millist mudelit basseinis kiire vajab; opt-in, tõrkeavatud `rules`-le
+- `decision` — küsige konfigureeritud otsustajalt (TypeSafe System One, teie enda otsus URL või mõni kombinatsiooni enda mudelitest), milline kogumis olev mudel päringule sobib; vaikimisi väljalülitatud `COMBO_DECISION_ROUTER_ENABLED` lipu taga, tõrkeavatud `rules`-le
 
 ### Ruuteri strateegiad üksikasjalikult
 
-Automaatkombinatsiooni mootor pakub 7 ühendatavat **RouterStrategy** teostust, mida
-saate vahetada võtme `config.routerStrategy` (või pärandvõtme `config.auto.routerStrategy`) kaudu.
-Iga strateegia valib kandidaatide kogumist ühe teenusepakkuja, lähtudes objektist `RoutingContext`
-(ülesande tüüp, tööriista-/nägemisvihjed, hinnanguline sõnemite arv, valikuline SLA-poliitika, valikuline
-viimane teadaolevalt toimiv teenusepakkuja).
+Automaatselt kombineeritud mootor paljastab 7 ühendatavat**RouterStrategy** teostused, mida saate `config.routerStrategy` (või pärand `config.auto.routerStrategy`) kaudu vahetada. Iga strateegia valib kandidaatide hulgast ühe pakkuja, kellele antakse `RoutingContext` (ülesande tüüp, tool/vision -vihjed, tunnusprognoos, valikuline SLA poliitika, valikuline viimane teadaolevalt hea pakkuja).
 
-#### 1. `rules` (vaikimisi) — 16 teguriga kaalutud hindamine
+#### 1. `rules` (vaikimisi) — 16-teguriline kaalutud punktiarvestus
 
-Ümbritseb olemasolevat hindamismootorit. Filtreerib välja kaitselüliti olekuga `OPEN`
-kandidaadid, seejärel käivitab `scorePool()` praeguse ülesandetüübi ja funktsiooniga `getTaskFitness()`,
-valides suurima skooriga teenusepakkuja.
+Mähib olemasoleva punktimootori. Filtreerib välja `OPEN` kaitselüliti kandidaadid, seejärel käivitab `scorePool()` praeguse ülesande tüübiga ja `getTaskFitness()`, valides parima tulemuse saanud pakkuja.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -547,16 +538,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: vaikimisi. Kasutage siis, kui soovite kõigi signaalide vahel tasakaalustatud kompromissi.
+**Millal kasutada** : Vaikimisi. Kasutage, kui soovite kõigi signaalide vahel tasakaalustatud kompromissi.
 
-**Alias**: `rules` (alias puudub)
+**Alias** : `rules` (ilma varjunimeta)
 
 ---
 
-#### 2. `cost` / `eco` — odavaim töökorras teenusepakkuja
+#### 2. `cost` / `eco` — odavaim tervislik pakkuja
 
-Sordib kandidaatide kogumi väärtuse `costPer1MTokens` järgi (kasvavalt) ja valib odavaima.
-Esmalt filtreerib välja olekuga `OPEN` kandidaadid.
+Sorteerib kandidaatide kogumi `costPer1MTokens` (kasvavalt) järgi ja valib odavaima. Filtreerib esmalt `OPEN` kandidaadid.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -571,16 +561,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: kulutundlikud töökoormused, pakktöötlus või taustatööd.
+**Millal kasutada** : kulutundlikud töökoormused, paketttöötlus või taustatööd.
 
-**Aliased**: `cost`, `eco`
+**Varjunimed** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — väikseim p95 latentsus koos töökindlustrahviga
+#### 3. `latency` / `fast` — madalaim p95 latentsus koos usaldusväärsuse trahviga
 
-Sordib valemi `p95LatencyMs + (errorRate * 1000)` järgi. Veamäära trahv tagab,
-et ebausaldusväärsed teenusepakkujad paigutatakse madalamale isegi siis, kui nende nominaalne latentsus on väike.
+Sorteerib `p95LatencyMs + (errorRate * 1000)` järgi. Veamäära trahv tagab, et ebausaldusväärsed pakkujad on madalamal kohal isegi siis, kui nende nominaalne latentsusaeg on madal.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -597,28 +586,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: latentsustundlikud töökoormused, nagu reaalajas vestlus, automaatteksti lõpetamine või
-interaktiivsed programmeerimisabilised.
+**Millal kasutada** : latentsustundlikud töökoormused, nagu reaalajas vestlus, automaatne täitmine või interaktiivsed kodeerimisabilised.
 
-**Aliased**: `latency`, `fast`
+**Varjunimed** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — vastavus latentsuse/veamäära/kulude SLO-dele
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO vastavus
 
-Hindab iga kandidaati selle järgi, kui hästi see vastab konfigureeritud SLO-poliitikale:
+Hindab iga kandidaati selle järgi, kui hästi see vastab konfigureeritud SLO poliitikale:
 
-| Tegur             | Kaal | Valem                                                    |
-| ----------------- | ---- | -------------------------------------------------------- |
-| Latentsuse skoor  | 35%  | `threshold / max(value, ε)`                              |
-| Vea skoor         | 35%  | `threshold / max(value, ε)`                              |
-| Tervise skoor     | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
-| Kulude skoor      | 10%  | `threshold / max(value, ε)` või pööratud normaliseeritud |
-| Stabiilsuse skoor | 5%   | latentsuse standardhälbe pööratud normaliseeritud        |
+| tegur            | Kaal | Valem                                                |
+| ---------------- | ---- | ---------------------------------------------------- |
+| Latentsuskoormus | 35%  | `threshold / max(value, ε)`                          |
+| Vea skoor        | 35%  | `threshold / max(value, ε)`                          |
+| Tervise skoor    | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)    |
+| Kuluskoor        | 10%  | `threshold / max(value, ε)` või pöördnormaliseeritud |
+| Stabiilsusskoor  | 5%   | pöördvõrdeline normaliseeritud latentsusaeg stddev   |
 
-Kui `hardConstraints: true`, sorditakse kandidaadid esmalt **rikkumise skoori**
-(kui palju nad mõnda SLO-d ületavad) ja seejärel koondskoori järgi. Vastasel juhul
-kasutatakse ainult koondskoori.
+Kui `hardConstraints: true`, sorteeritakse kandidaadid peamiselt nende järgi** rikkumise skoor** (kui palju need ületavad mis tahes SLO), seejärel liitskoori järgi. Muidu on see vaid koondskoor.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -627,12 +613,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... hindab iga kandidaati eeskirjade alusel: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA väljad** (määratakse kombineeritud konfiguratsioonis):
+**SLA väljad** (seatud kombineeritud konfiguratsioonis):
 
 ```json
 {
@@ -647,17 +633,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Millal kasutada**: rangete latentsus-, veamäära- või kulupiirangutega tootmiskoormuste puhul.
+**Millal kasutada** : range latentsus-, veamäära- või kulueelarvega tootmiskoormused.
 
-**Aliased**: `sla-aware`, `sla`
+**Varjunimed** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — esmalt viimane teadaolevalt töötav pakkuja
+#### 5. `lkgp` — viimane teadaolev hea pakkuja esimene
 
-Proovib esmalt **viimast teadaolevalt töötavat pakkujat** (kui see on määratud), seejärel kasutab
-varuvariandina strateegiat `rules`. Kasulik seansi sidususe tagamiseks — sama pakkuja teenindab
-vestluse jätkupäringuid.
+Proovib** viimane teadaolev hea pakkuja** (kui see on määratud) esmalt, siis läheb tagasi `rules` strateegia juurde. Kasulik seansi kleepuvuse korral — sama pakkuja käsitleb vestluse järeltaotlusi.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -678,27 +662,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Varuvariandina kasutatakse strateegiat rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Millal kasutada**: mitme vooruga vestluste puhul, kus soovite, et sama pakkuja teenindaks
-jätkupäringuid (nt vahemällu salvestamise, konteksti järjepidevuse või hinnastamise ühtsuse tõttu).
+**Millal kasutada** : mitme pöördega vestlused, kus soovite, et sama teenusepakkuja tegeleks järelpäringutega (nt vahemällu salvestamiseks, konteksti järjepidevuse või hindade järjepidevuse jaoks).
 
-**Alias**: `lkgp` (alias puudub)
+**Alias** : `lkgp` (ilma varjunimeta)
 
 ---
 
-#### 6. `nadir` — viibast lähtuv mudelivalik Nadiri kaudu
+#### 6. `nadir` — kiireteadlik mudelivalik Nadiri kaudu
 
-Kõik eespool kirjeldatud strateegiad järjestavad kandidaate oma telemeetria alusel; ükski neist ei loe
-päringut. `nadir` saadab viimase kasutajavooru koos kogumi mudeli-ID-dega
-[Nadiri](https://getnadir.com) otsustus-API-le (`POST /v1/bucket`) ja suunab päringu mudelile,
-mille Nadir sellest valikust valib (`simple` → odavaim sobiv mudel, `complex` → kõige võimekam
-tippmudel). Seda mudelit teenindav ühendus valitakse endiselt strateegiaga `rules`, seega määravad
-konto valiku jätkuvalt kvoot, seisund ja kulu.
+Iga ülaltoodud strateegia järjestab kandidaadid nende enda telemeetria järgi; ükski neist ei loe palvet. `nadir` saadab viimase kasutaja pöörde pluss basseini mudeli ID-d [Nadiri](https://getnadir.com) otsusele API (`POST /v1/bucket`) ja suunab mudelile, mille Nadir sellest menüüst valib (`simple` → odavaim võimalik mudel, `complex` → piiriäärne mudel). Seda mudelit teenindava ühenduse valib endiselt `rules`, nii et kvoot, tervis ja kulud määravad jätkuvalt, milline konto.
 
 ```json
 {
@@ -714,34 +692,75 @@ konto valiku jätkuvalt kvoot, seisund ja kulu.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` ja `OMNIROUTE_NADIR_BASE_URL` on nende kahe stringi
-keskkonnamuutujapõhised varuvariandid. `baseUrl` on vajalik ainult isemajutatud Nadiri puhul
-(lõpus olev `/v1` on lubatud). Võtmeta kutsed suunatakse Nadiri anonüümsesse teenusekihti, millele
-rakendatakse IP-põhist kiirusepiirangut. Võtme kasutamisel
-([looge võti](https://app.getnadir.com/dashboard/api-keys)) logitakse iga otsus teie Nadiri
-juhtpaneelile. Täielikud seadistus- ja kontrollimisjuhised:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` ja `OMNIROUTE_NADIR_BASE_URL` on kahe stringi env-varundid. `baseUrl` on vajalik ainult ise hostitava Nadiri jaoks (tagasi `/v1` on lubatud). Võtmeta kõned maanduvad Nadiri anonüümsele tasemele, mille kiirus on IP kohta piiratud. Võtmega ( [loo üks](https://app.getnadir.com/dashboard/api-keys) ) logitakse iga otsus teie Nadiri armatuurlauale. Täielik seadistamine ja kinnitamine: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Mis süsteemist väljub: viimase kasutajasõnumi tekst (esimesed 16 000 märki), kandidaatmudelite
-ID-d ja kanali silt `source: "omniroute"`. Süsteemiviipa, ajalugu, tööriistu ega päiseid ei saadeta.
+Kastist välja jääb: viimase kasutajateate tekst (esimesed 16 000 tähemärki), kandidaatmudeli ID-d ja `source: "omniroute"` kanali silt. Ei mingit süsteemiviipa, ajalugu, tööriistu ega päiseid.
 
-Tõrke korral jätkatakse tööd: ajalõpp (vaikimisi 2000 ms), muu kui 2xx-vastus, kättesaamatu
-host, vigane vastus või kogumiväline valik lahendatakse strateegia `rules`
-otsusega ning põhjuse ette lisatakse `NadirStrategy: fallback (…)`. Pärast nurjunud kutset jätab
-strateegia võrgupäringud 30 sekundiks vahele, mistõttu põhjustab katkestus ühe ajalõpu iga 30 sekundi
-järel, mitte ühe iga päringu kohta. Marsruutimissündmused kajastavad väärtust `strategy: "nadir"`
-ainult siis, kui valiku tegi tegelikult Nadir.
+Rikke käitumine on tõrkeotsus: ajalõpp (vaikimisi 2000 ms), non-2xx, kättesaamatu host, valesti vormindatud vastus või valik väljaspool kogumit lahendab `rules` otsuse ja põhjuse eesliide on `NadirStrategy: fallback (…)`. Pärast ebaõnnestunud kõnet jätab strateegia võrgu 30 sekundiks vahele, nii et katkestus maksab ühe ajalõpu 30 sekundi kohta, mitte ühe päringu kohta. Marsruutimise sündmused teatavad `strategy: "nadir"` ainult siis, kui Nadir tegelikult valiku tegi.
 
-**Millal kasutada**: erineva raskusastmega liikluse puhul mudelikogumis, mis hõlmab eri tasemete
-mudeleid (väike, keskmine ja tippmudel), kui soovite vähendada alati tippmudeli kasutamise kulu.
+**Millal kasutada** : erineva raskusastmega liiklus basseinis, mis hõlmab mudelitasemeid (väike, keskmine ja piiripealne mudel), kus alati piiril on kulu, mida soovite vähendada.
 
-**Alias**: `nadir` (alias puudub)
+**Alias** : `nadir` (ilma varjunimeta)
 
 ---
 
-### Kohandatud marsruutimisstrateegiad
+#### 7. `decision` — ühendatav otsustaja valib mudeli
 
-Avaliku API kaudu saate registreerida oma `RouterStrategy` teostuse:
+`decision` küsib a** otsustaja** milline kogumi mudel päringule sobib, siis kitsendab kogu selle mudeli järgi ja laseb `rules` valida ühenduse (kvoot, tervis ja kulu valivad siiski konto). Otsustaja määratakse kombinatsiooni otsustusplokis — `config.decision` kui ruuteri nupud asuvad `config` (mida armatuurlaud kirjutab) ülaosas või `config.auto.decision` `config.auto.routerStrategy` kõrval:
+
+| `decider`     | Kes vastab                                                                                                                     | Vajadused                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), vaikemudel `jev-latest`                                     | `typesafe` -ühendus või env-võti                   |
+| `http`        | teie ise otsustaja `baseUrl` juures: `wire: "systemone"` (`{baseUrl}/v1/systemone`) või `"openai-chat"` (vestluse lõpetamised) | `baseUrl` + `model`; võti valikuline               |
+| `combo-model` | üks teie teenusepakkuja mudelitest, mida kutsutakse protsessis nagu fusioonikohtunik                                           | `model` kui `provider/model` (mitte kombineeritud) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Väljad (kinnitatakse range skeemiga salvestamisel ja uuesti päringu ajal):
+
+- `decider` — `systemone`, `http` või `combo-model`.
+- `model` — TypeSafe mudel, teie URL otsustusmudel või kombineeritud mudeli kutse `provider/model` (kuni 200 tähemärki).
+- `baseUrl` — ainult `http` : `http(s)` URL kuni 500 tähemärki, ilma mandaatide, päringu või fragmendita. Sellele OmniRoute (loopback + `PORT`) osutavast URL keeldutakse.
+- `wire` — ainult `http` : `systemone` (vaikimisi) või `openai-chat`.
+- `connectionId` — salvestatud ühendus, mille võtit kasutatakse (ainult helistava API klahvi lubatud ühenduste sees). Ilma selleta loeb `systemone` `typesafe` ühendust ja iga võrgu otsustaja langeb tagasi väärtusele `OMNIROUTE_DECISION_API_KEY`. `apiKey` -välja pole: võtit ei salvestata kunagi kombinatsiooni.
+- `timeoutMs` — täisarv, 100–5000, vaikimisi 2000.
+- `minConfidence` — 0–1; madalama usaldusväärsusega vastus langeb tagasi `rules` (mitteusaldusväärsuse otsustaja loetakse 0-ks).
+- `descriptions` — kuni 50 kirjet (klahv kuni 300, tekst kuni 1000 tähemärki), mis on sisestatud mudeli ID või `provider/model` abil; määramata kirjed saavad genereeritud kuluasetuse kirjelduse.
+
+**Lipp.** `COMBO_DECISION_ROUTER_ENABLED` (vaikimisi `false`) väravad iga otsustaja. Kui see on välja lülitatud, ei loe `decision` kombo mandaati, ei helista ja suunab marsruuti `rules`; logi ütleb `fallback (disabled)`. Ainult salvestatud võti ei lülita seda kunagi sisse. Otsustusplokita kombinatsioone ei mõjuta see üldse.
+
+**Mis karbist välja jääb.** Ainult viimase kasutajateate tekst (kuni 8000 tähemärki; chat/Claude `messages` või Responses `input`) ja mudeli ID-de menüü koos nende kirjeldustega. Mitte kunagi ei küsi süsteem, vastused `instructions`, tööriistad, ajalugu, päised või konto andmed. Võrgukõned läbivad teenusepakkuja väljamineva valve ilma korduskatseteta, ümbersuunamisteta ja 64 KB vastusepiiranguta. `combo-model` -kutse on mittevoogedastus, tööriistavaba, `temperature: 0`, 256-märgise eelarvega; otsustuskutse raames alustatud otsus lükatakse tagasi.
+
+**Ebaõnnestunud käitumine** on tõrkeotsus: iga rike lahendab `rules` otsuse ja põhjus on `decision(<decider>): fallback (<reason>)`, `<reason>` puhul `recursion` üks `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `low_confidence` või `single_option` `no_user_text` Pärast ajalõpu, HTTP -tõrget või võrgutõrget jäetakse lõpp-punkt 30 sekundiks vahele. Edukas valik loeb `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ükski URL, võti, viip või ülesvoolu keha ei jõua logini.
+
+Komboehitaja näitab neid välju, kui ruuteri strateegia on `decision` koos genereeritud kirjeldustega kohahoidjatena ja** Testi otsus** nupp, mis kutsub `POST /api/combos/decision-preview` üks kord välja salvestamata sätetega (sama lipp).
+
+**Millal kasutada** : erineva raskusastmega liiklus, kus soovite, et astme valiks teie valitud klassifikaator, mitte konkreetselt Nadir.
+
+**Alias** : `decision` (ilma varjunimeta)
+
+---
+
+### Kohandatud ruuteri strateegiad
+
+Saate registreerida oma `RouterStrategy` rakenduse avaliku API kaudu:
 
 ```ts
 import {
@@ -754,7 +773,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Teie marsruutimisloogika
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -782,16 +801,17 @@ Seejärel kasutage seda:
 
 ---
 
-### Marsruutimisstrateegia valimise juhend
+### Ruuteri strateegia valiku juhend
 
-| Kasutusjuht                | Strateegia  | Põhjus                                       |
-| -------------------------- | ----------- | -------------------------------------------- |
-| Tasakaalustatud töökoormus | `rules`     | Vaikimisi — arvestab kõiki tegureid          |
-| Kulude minimeerimine       | `cost`      | Valib alati odavaima                         |
-| Latentsuse minimeerimine   | `latency`   | Valib kiireima usaldusväärse teenusepakkuja  |
-| Ranged SLO-d               | `sla-aware` | Filtreerib p95/veamäära/kulu lävendite järgi |
-| Mitmevooruline vestlus     | `lkgp`      | Seansi püsivus                               |
-| Erinev raskusaste          | `nadir`     | Valib iga viiba jaoks sobiva mudelitaseme    |
+| Kasutusjuhtum              | strateegia  | Põhjus                               |
+| -------------------------- | ----------- | ------------------------------------ |
+| Tasakaalustatud töökoormus | `rules`     | Vaikimisi — arvestab kõiki tegureid  |
+| Minimeerige kulud          | `cost`      | Valib alati kõige odavama            |
+| Minimeeri latentsusaeg     | `latency`   | Valib kiireima usaldusväärse pakkuja |
+| Range SLOs                 | `sla-aware` | Filtrid p95/error/cost lävede järgi  |
+| Mitme pöördega vestlus     | `lkgp`      | Seansi kleepuvus                     |
+| Segatud raskusaste         | `nadir`     | Valib iga viipa järgi mudeli astme   |
+| Oma klassifikaator         | `decision`  | Teie otsustaja valib mudeli          |
 
 SLA-teadlikud väljad:
 

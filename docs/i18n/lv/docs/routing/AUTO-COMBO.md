@@ -446,22 +446,22 @@ Tas nozīmē, ka **jauna pakalpojumu sniedzēja pievienošana ar `auto/*` iespē
 
 ## API
 
-**Nav atsevišķa `POST /api/combos/auto` galapunkta** — Auto-Combo tiek izmantots divos veidos:
+Ir** nav īpaša `POST /api/combos/auto` galapunkta** — Auto-Combo tiek patērēts divos veidos:
 
-1. **Bez konfigurācijas (ieteicams):** nosūtiet jebkuru tērzēšanas pabeigšanas pieprasījumu ar `model: "auto"` vai `model: "auto/<variant>"`. Virtuālā fabrika izveido kombināciju katram pieprasījumam — nav nepieciešama ne pastāvīga saglabāšana, ne API izsaukumi.
+1. **Nulles konfigurācija (ieteicams):** Nosūtiet jebkuru tērzēšanas pabeigšanas pieprasījumu, izmantojot `model: "auto"` vai `model: "auto/<variant>"`. Virtuālā rūpnīca izveido kombināciju katram pieprasījumam — bez noturības, nav nepieciešami API zvani.
 
-2. **Pastāvīgi saglabāta kombinācija ar `strategy: "auto"`:** izveidojiet parastu kombināciju, izmantojot `POST /api/combos`, un iestatiet `strategy: "auto"`, kā arī `config.auto.weights` / `config.auto.candidatePool`. Tiek izmantots tas pats vērtēšanas dzinis; kombinācija tiek saglabāta `combos` un ir atkārtoti izmantojama pēc ID.
+2. **Pastāvīga kombinācija ar `strategy: "auto"`:** Izveidojiet parastu kombināciju, izmantojot `POST /api/combos`, un iestatiet `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Tiek izmantots tas pats vērtēšanas dzinējs; Kombinācija tiek glabāta `combos` un atkārtoti lietojama ar ID.
 
-Atklāšanai `GET /api/combos/auto` uzskaita katru variantu ar tā atrisināto kandidātu kopu, kā arī `context_length` / `max_output_tokens` — MAKSIMĀLO vērtību starp kandidātu kopas logiem. Klientiem (piemēram, opencode spraudnim) jānorāda šīs vērtības, nevis `0`: nulles konteksts pilnībā atspējo opencode automātisko saspiešanu, ļaujot sesijām augt, līdz vārtejas vēstures tīrīšana iznīcina kontekstu. MAKSIMĀLO vērtību norādīt ir droši, jo auto-combo konteksta priekšfiltrs novirza pārāk lielus pieprasījumus kandidātiem ar lieliem logiem.
+Atklāšanai `GET /api/combos/auto` uzskaita visus variantus ar tā atrisināto kandidātu kopu un `context_length` / `max_output_tokens` — MAX pāri kandidātu kopas logiem. Klientiem (piemēram, atvērtā koda spraudnim) ir jāreklamē šīs vērtības `0` vietā: nulles konteksts pilnībā atspējo Opencode automātisko sablīvēšanos, ļaujot sesijām augt, līdz vārtejas vēstures tīrīšana iznīcina kontekstu. MAX ir droši reklamēt, jo automātiskais kombinētais konteksta priekšfiltrs novirza liela izmēra pieprasījumus liela loga kandidātiem.
 
 ```bash
-# Lietošana bez konfigurācijas (bez kombinācijas izveides)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Pastāvīgi saglabāta automātiskā kombinācija, izmantojot parasto kombināciju galapunktu
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -469,33 +469,24 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Automātiskā maršrutētāja stratēģijas
 
-Pastāvīgi saglabātām `strategy: "auto"` kombinācijām var iestatīt `config.routerStrategy` (vai mantoto
-`config.auto.routerStrategy`) uz kādu no šīm vērtībām:
+Pastāvīgās `strategy: "auto"` kombinācijas var iestatīt `config.routerStrategy` (vai mantoto `config.auto.routerStrategy`) uz vienu no:
 
-- `rules` — noklusējuma svērtā vērtēšana
-- `score` — atlasa visaugstāko konfigurēto svērto vērtējumu. Precīzu neizšķirtu rezultātu gadījumā tiek saglabāta konfigurētā
-  kandidātu secība; esošais `explorationRate` veic atlasi no visas sarindotās kopas.
-- `cost` / `eco` — lētākais darbspējīgais nodrošinātājs
-- `latency` / `fast` — mazākais p95 latentums ar uzticamības sodu
-- `sla-aware` / `sla` — dod priekšroku kandidātiem, kuri atbilst p95 latentuma, kļūdu īpatsvara un neobligātajiem
-  izmaksu SLO
-- `lkgp` — vispirms pēdējais zināmais darbspējīgais nodrošinātājs
-- `nadir` — vaicā [Nadir](https://getnadir.com) lēmumu API, kurš kopas modelis ir nepieciešams
-  uzvednei; izvēles funkcija, kļūmes gadījumā brīvi pārslēdzas uz `rules`
+- `rules` — noklusējuma svērtais punktu skaits
+- `score` — atlasa augstāko konfigurēto svērto punktu skaitu. Precīzās saites saglabā konfigurēto kandidātu secību; esošie `explorationRate` paraugi no pilna ranga kopas.
+- `cost` / `eco` — lētākais veselīgais pakalpojumu sniedzējs
+- `latency` / `fast` — zemākais p95 latentums ar uzticamības sodu
+- `sla-aware` / `sla` — dod priekšroku kandidātiem, kas atbilst p95 latentumam, kļūdu līmenim un izvēles maksai SLOs
+- `lkgp` — pēdējais zināmais labs pakalpojumu sniedzējs pirmais
+- `nadir` — jautāt [Nadira](https://getnadir.com) lēmumu API kurš modelis baseinā ir nepieciešams; opt-in, fail-open uz `rules`
+- `decision` — jautājiet konfigurētam noteicējam (TypeSafe System One, jūsu pašu lēmums URL vai kāds no paša kombinētajiem modeļiem), kurš modelis pūlā atbilst pieprasījumam; aiz noklusējuma izslēgtā `COMBO_DECISION_ROUTER_ENABLED` karoga, atteices atvērts uz `rules`
 
-### Detalizēti par maršrutētāja stratēģijām
+### Detalizēti maršrutētāja stratēģijas
 
-Auto-combo dzinis nodrošina 7 pievienojamas **RouterStrategy** implementācijas, kuras
-varat mainīt, izmantojot `config.routerStrategy` (vai mantoto `config.auto.routerStrategy`).
-Katra stratēģija no kandidātu kopas izvēlas vienu nodrošinātāju, ņemot vērā `RoutingContext`
-(uzdevuma tipu, rīku/redzes norādes, marķieru skaita novērtējumu, neobligātu SLA politiku, neobligātu
-pēdējo zināmo darbspējīgo nodrošinātāju).
+Automātiski kombinētais dzinējs atklāj 7 pievienojamus**RouterStrategy** implementācijas, kuras varat apmainīt, izmantojot `config.routerStrategy` (vai mantoto `config.auto.routerStrategy`). Katra stratēģija izvēlas vienu nodrošinātāju no kandidātu kopas, ņemot vērā `RoutingContext` (uzdevuma veids, tool/vision padomi, marķiera aprēķins, izvēles SLA politika, izvēles pēdējais zināmais-labais nodrošinātājs).
 
-#### 1. `rules` (noklusējums) — 16 faktoru svērtā vērtēšana
+#### 1. `rules` (noklusējuma) — 16 faktoru svērtā vērtēšana
 
-Ietver esošo vērtēšanas dzini. Izfiltrē `OPEN` jaudas slēdža
-kandidātus, pēc tam izpilda `scorePool()` ar pašreizējo uzdevuma tipu un `getTaskFitness()`,
-izvēloties nodrošinātāju ar augstāko vērtējumu.
+Iesaiņo esošo vērtēšanas dzinēju. Izfiltrē `OPEN` ķēdes pārtraucēju kandidātus, pēc tam izpilda `scorePool()` ar pašreizējo uzdevuma veidu un `getTaskFitness()`, izvēloties labāko nodrošinātāju.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -515,16 +506,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kad izmantot**: pēc noklusējuma. Izmantojiet, ja vēlaties līdzsvarotu kompromisu starp visiem signāliem.
+**Kad lietot** : Noklusējums. Izmantojiet, ja vēlaties līdzsvarotu kompromisu starp visiem signāliem.
 
-**Aizstājvārds**: `rules` (nav aizstājvārda)
+**Alias** : `rules` (bez aizstājvārda)
 
 ---
 
-#### 2. `cost` / `eco` — lētākais darbspējīgais nodrošinātājs
+#### 2. `cost` / `eco` — lētākais veselīgais pakalpojumu sniedzējs
 
-Kārto kandidātu kopu pēc `costPer1MTokens` (augošā secībā) un izvēlas lētāko.
-Vispirms izfiltrē `OPEN` kandidātus.
+Sakārto kandidātu kopu pēc `costPer1MTokens` (augošā secībā) un izvēlas lētāko. Vispirms filtrē `OPEN` kandidātus.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -539,16 +529,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kad izmantot**: pret izmaksām jutīgām slodzēm, pakešapstrādei vai fona uzdevumiem.
+**Kad lietot** : izmaksu ziņā jutīgas darba slodzes, pakešu apstrāde vai fona darbi.
 
-**Aizstājvārdi**: `cost`, `eco`
+**Pseidonīmi** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — mazākais p95 latentums ar uzticamības sodu
+#### 3. `latency` / `fast` — zemākais p95 latentums ar uzticamības sodu
 
-Kārto pēc `p95LatencyMs + (errorRate * 1000)`. Kļūdu īpatsvara sods nodrošina,
-ka neuzticami nodrošinātāji tiek ierindoti zemāk pat tad, ja to nominālais latentums ir mazs.
+Kārtot pēc `p95LatencyMs + (errorRate * 1000)`. Kļūdu līmeņa sods nodrošina, ka neuzticami pakalpojumu sniedzēji tiek novērtēti zemāk, pat ja to nominālais latentums ir zems.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -565,28 +554,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kad izmantot**: pret latentumu jutīgām slodzēm, piemēram, reāllaika tērzēšanai, automātiskajai pabeigšanai vai
-interaktīviem programmēšanas asistentiem.
+**Kad lietot** : latentuma jutīgas darba slodzes, piemēram, reāllaika tērzēšana, automātiskā pabeigšana vai interaktīvie kodēšanas palīgi.
 
-**Aizstājvārdi**: `latency`, `fast`
+**Pseidonīmi** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — atbilstība latentuma/kļūdu/izmaksu SLO
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO atbilstība
 
-Novērtē katru kandidātu pēc tā, cik labi tas atbilst konfigurētajai SLO politikai:
+Vērtē katru kandidātu pēc tā, cik labi tas atbilst konfigurētajai SLO politikai:
 
-| Faktors                  | Svars | Formula                                               |
-| ------------------------ | ----- | ----------------------------------------------------- |
-| Latences novērtējums     | 35%   | `threshold / max(value, ε)`                           |
-| Kļūdu novērtējums        | 35%   | `threshold / max(value, ε)`                           |
-| Veselības novērtējums    | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)     |
-| Izmaksu novērtējums      | 10%   | `threshold / max(value, ε)` vai apgriezti normalizēts |
-| Stabilitātes novērtējums | 5%    | apgriezti normalizēta latences standartnovirze        |
+| Faktors               | Svars | Formula                                               |
+| --------------------- | ----- | ----------------------------------------------------- |
+| Latenta rādītājs      | 35%   | `threshold / max(value, ε)`                           |
+| Kļūdu rezultāts       | 35%   | `threshold / max(value, ε)`                           |
+| Veselības rādītājs    | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)     |
+| Izmaksu rādītājs      | 10%   | `threshold / max(value, ε)` vai apgriezti normalizēts |
+| Stabilitātes rādītājs | 5%    | apgrieztā normalizētā latentuma stddev                |
 
-Ja `hardConstraints: true`, kandidāti galvenokārt tiek kārtoti pēc **pārkāpuma novērtējuma**
-(cik lielā mērā tie pārsniedz kādu SLO), pēc tam — pēc saliktā novērtējuma. Pretējā gadījumā
-tiek izmantots tikai saliktais novērtējums.
+Kad `hardConstraints: true`, kandidāti tiek kārtoti galvenokārt pēc** pārkāpumu rezultāts** (cik tālu tie pārsniedz jebkuru SLO), pēc tam pēc saliktā rezultāta. Pretējā gadījumā tas ir tikai salikts rezultāts.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -595,12 +581,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... novērtē katru kandidātu atbilstoši politikai: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA lauki** (iestatāmi kombinācijas konfigurācijā):
+**SLA lauki** (iestatīts kombinētajā konfigurācijā):
 
 ```json
 {
@@ -615,17 +601,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kad izmantot**: Produkcijas darba slodzēm ar stingriem latences, kļūdu biežuma vai izmaksu ierobežojumiem.
+**Kad lietot** : ražošanas darba slodze ar stingriem latentuma, kļūdu līmeņa vai izmaksu budžetiem.
 
-**Aizstājvārdi**: `sla-aware`, `sla`
+**Pseidonīmi** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — vispirms pēdējais zināmais labais nodrošinātājs
+#### 5. `lkgp` — pēdējais zināmais labs pakalpojumu sniedzējs pirmais
 
-Vispirms mēģina izmantot **pēdējo zināmo labo nodrošinātāju** (ja tas ir iestatīts), pēc tam
-atkāpjas uz stratēģiju `rules`. Noder sesijas piesaistei — viens un tas pats nodrošinātājs
-apstrādā sarunas turpmākos pieprasījumus.
+Izmēģina** pēdējais zināmais labs pakalpojumu sniedzējs** (ja iestatīts) vispirms, tad atgriežas pie `rules` stratēģijas. Noderīga sesijas nelokāmība — viens un tas pats pakalpojumu sniedzējs apstrādā pēcpārbaudes pieprasījumus sarunā.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -646,27 +630,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Atkāpšanās uz stratēģiju rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kad izmantot**: Vairāku kārtu sarunām, kurās vēlaties, lai viens un tas pats nodrošinātājs
-apstrādātu turpmākos pieprasījumus (piemēram, kešatmiņas, konteksta nepārtrauktības vai cenu konsekvences dēļ).
+**Kad lietot** : vairākas kārtas sarunas, kurās vēlaties, lai viens un tas pats pakalpojumu sniedzējs apstrādātu papildu pieprasījumus (piemēram, kešatmiņas saglabāšanai, konteksta nepārtrauktībai vai cenu konsekvencei).
 
-**Aizstājvārds**: `lkgp` (nav aizstājvārda)
+**Alias** : `lkgp` (bez aizstājvārda)
 
 ---
 
-#### 6. `nadir` — uzvedni ņemoša vērā modeļa izvēle, izmantojot Nadir
+#### 6. `nadir` — tūlītēja modeļa izvēle, izmantojot Nadir
 
-Katra iepriekš minētā stratēģija sarindo kandidātus pēc saviem telemetrijas datiem; neviena no tām
-nelasa pieprasījumu. `nadir` nosūta pēdējo lietotāja ziņojumu kopā ar pūla modeļu ID uz
-[Nadir](https://getnadir.com) lēmumu API (`POST /v1/bucket`) un maršrutē uz modeli,
-kuru Nadir atlasa no šī saraksta (`simple` → lētākais prasībām atbilstošais modelis, `complex` →
-vismodernākais modelis). Savienojums, kas apkalpo šo modeli, joprojām tiek izvēlēts ar `rules`, tāpēc kvota,
-veselības stāvoklis un izmaksas turpina noteikt, kurš konts tiks izmantots.
+Katra iepriekšminētā stratēģija sarindo kandidātus pēc viņu pašu telemetrijas; neviens no viņiem pieprasījumu neizlasa. `nadir` nosūta pēdējo lietotāja gājienu un kopas modeļa ID uz [Nadira](https://getnadir.com) lēmumu API (`POST /v1/bucket`) un maršruti uz modeli, kuru Nadirs izvēlas no šīs izvēlnes (`simple` → lētākais spējīgais modelis, `complex` → robežšķirtne). Savienojumu, kas apkalpo šo modeli, joprojām izvēlas `rules`, tāpēc kvota, veselība un izmaksas joprojām nosaka, kurš konts.
 
 ```json
 {
@@ -682,34 +660,75 @@ veselības stāvoklis un izmaksas turpina noteikt, kurš konts tiks izmantots.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` un `OMNIROUTE_NADIR_BASE_URL` ir vides mainīgo rezerves vērtības abām
-virknēm. `baseUrl` ir nepieciešams tikai pašmitinātam Nadir (beigu `/v1` ir pieļaujams).
-Izsaukumi bez atslēgas nonāk Nadir anonīmajā līmenī, kuram pieprasījumu biežums ir ierobežots pēc IP adreses. Izmantojot atslēgu
-([izveidojiet to](https://app.getnadir.com/dashboard/api-keys)), katrs lēmums tiek
-reģistrēts jūsu Nadir informācijas panelī. Pilna iestatīšana un pārbaude:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` un `OMNIROUTE_NADIR_BASE_URL` ir abu virkņu env atkāpšanās varianti. `baseUrl` ir nepieciešams tikai pašviesinātam Nadiram (tiek pieļauta beigu `/v1` ). Bezatslēgas zvani nonāk Nadiras anonīmajā līmenī, kura ātrums ir ierobežots par IP. Izmantojot atslēgu ( [izveidot vienu](https://app.getnadir.com/dashboard/api-keys) ), katrs lēmums tiek reģistrēts jūsu Nadir informācijas panelī. Pilna iestatīšana un pārbaude: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Kas tiek nosūtīts ārpus sistēmas: pēdējā lietotāja ziņojuma teksts (pirmās 16 tūkst. rakstzīmes), kandidātu
-modeļu ID un kanāla tags `source: "omniroute"`. Netiek nosūtīta sistēmas uzvedne, vēsture, rīki vai
-galvenes.
+Kas atstāj lodziņu: pēdējā lietotāja ziņojuma teksts (pirmie 16 000 rakstzīmju), kandidāta modeļa ID un `source: "omniroute"` kanāla atzīme. Nav sistēmas uzvednes, vēstures, rīku vai galvenes.
 
-Kļūmes gadījumā tiek izmantota atvērtas kļūmes pieeja: taimauts (pēc noklusējuma 2000 ms), atbilde, kas nav 2xx, nesasniedzams
-resursdators, nepareizi formatēta atbilde vai izvēle ārpus pūla tiek atrisināta ar `rules`
-lēmumu, un iemeslam tiek pievienots prefikss `NadirStrategy: fallback (…)`. Pēc neveiksmīga izsaukuma
-stratēģija 30 s neveic tīkla pieprasījumus, tāpēc darbības pārtraukums izraisa vienu taimautu katrās 30 s, nevis
-vienu katram pieprasījumam. Maršrutēšanas notikumi uzrāda `strategy: "nadir"` tikai tad, ja Nadir faktiski veica
-izvēli.
+Kļūmes darbība ir atvērta kļūmei: taimauts (noklusējuma 2000 ms), non-2xx, nesasniedzams saimniekdators, nepareizi veidota atbilde vai atlase ārpus kopas nosaka `rules` lēmumu, un iemesls ir prefikss `NadirStrategy: fallback (…)`. Pēc neveiksmīga zvana stratēģija izlaiž tīklu 30 s, tāpēc pārtraukums maksā vienu taimautu 30 s, nevis vienu pieprasījumu. Maršrutēšanas notikumi ziņo `strategy: "nadir"` tikai tad, kad Nadirs faktiski izdarījis izvēli.
 
-**Kad izmantot**: Dažādas sarežģītības datplūsmai pūlā, kas aptver vairākus modeļu līmeņus (mazu, vidēju
-un vismodernāko modeli), ja vēlaties samazināt izmaksas, ko rada vienmēr vismodernākā modeļa izmantošana.
+**Kad lietot** : jauktas grūtības pakāpes satiksme baseinā, kas aptver modeļu līmeņus (mazs, vidējs un robežmodelis), kur vienmēr robeža ir izmaksas, kuras vēlaties samazināt.
 
-**Aizstājvārds**: `nadir` (nav aizstājvārda)
+**Alias** : `nadir` (bez aizstājvārda)
+
+---
+
+#### 7. `decision` — pluggable Decisioners izvēlas modeli
+
+`decision` jautā a** lēmējs** kurš modelis pūlā atbilst pieprasījumam, pēc tam sašaurina kopu līdz šim modelim un ļauj `rules` izvēlēties savienojumu (kvota, veselība un izmaksas joprojām izvēlas kontu). Izlēmējs tiek iestatīts kombinācijas lēmumu blokā — `config.decision`, kad maršrutētāja pogas atrodas `config` augšdaļā (ko raksta informācijas panelis) vai `config.auto.decision` blakus `config.auto.routerStrategy`:
+
+| `decider`     | Kurš atbild                                                                                                                | Vajadzības                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), noklusējuma modelis `jev-latest`                        | `typesafe` savienojums vai env atslēga         |
+| `http`        | pats izlemjat vietnē `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) vai `"openai-chat"` (tērzēšanas pabeigšana) | `baseUrl` + `model`; atslēga nav obligāta      |
+| `combo-model` | viens no jūsu nodrošinātāja modeļiem, kas tiek izsaukts procesā, piemēram, kodolsintēzes tiesnesis                         | `model` kā `provider/model` (bez kombinācijas) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Lauki (apstiprināti ar stingru shēmu, saglabājot un vēlreiz pēc pieprasījuma):
+
+- `decider` — `systemone`, `http` vai `combo-model`.
+- `model` — TypeSafe modelis, lēmuma modelis jūsu URL vai kombinētā modeļa izsaukuma `provider/model` (līdz 200 rakstzīmēm).
+- `baseUrl` — tikai `http` : `http(s)` URL līdz 500 rakstzīmēm, bez akreditācijas datiem, vaicājuma vai fragmenta. URL kas norāda uz šo OmniRoute (cilpas + `PORT`), tiek noraidīts.
+- `wire` — tikai `http` : `systemone` (noklusējums) vai `openai-chat`.
+- `connectionId` — saglabātais savienojums, kura atslēga tiek izmantota (tikai izsaucošā API atslēgas atļautajos savienojumos). Bez tā `systemone` nolasa `typesafe` savienojumu, un katrs tīkla noteicējs atgriežas pie `OMNIROUTE_DECISION_API_KEY`. Nav `apiKey` lauka: atslēga nekad netiek saglabāta kombinācijā.
+- `timeoutMs` — skaitlis, 100–5000, noklusējuma 2000.
+- `minConfidence` — 0–1; zemākas ticamības atbilde tiek atgriezta uz `rules` (lēmējs, kurš ziņo par neuzticību, tiek uzskatīts par 0).
+- `descriptions` — līdz 50 ierakstiem (atslēga līdz 300, teksts līdz 1000 rakstzīmēm), kas ievadīti pēc modeļa id vai `provider/model`; atiestatītie ieraksti saņem ģenerētu izmaksu ranga aprakstu.
+
+**Karogs.** `COMBO_DECISION_ROUTER_ENABLED` (noklusējuma `false`) vārti katru lēmēju. Kamēr tas ir izslēgts, `decision` kombinācija nenolasa akreditācijas datus, neveic zvanu un maršrutē ar `rules`; žurnālā rakstīts `fallback (disabled)`. Tikai saglabāta atslēga to nekad neieslēdz. Kombinācijas bez lēmuma bloka netiek ietekmētas vispār.
+
+**Kas atstāj kastīti.** Tikai pēdējā lietotāja ziņojuma teksts (līdz 8000 rakstzīmēm; chat/Claude `messages` vai Responses `input`) un modeļu ID izvēlne ar to aprakstiem. Nekad netiek rādīta sistēmas uzvedne, atbildes `instructions`, rīki, vēsture, galvenes vai konta dati. Tīkla zvani notiek caur pakalpojumu sniedzēja izejošo aizsargu bez atkārtojumiem, bez novirzīšanas un 64 KB atbildes ierobežojuma. `combo-model` izsaukums nav straumēts, bez rīkiem, `temperature: 0`, ar 256 marķieru budžetu; lēmums, kas sākts lēmuma aicinājuma ietvaros, tiek noraidīts.
+
+**Neveiksmes uzvedība** ir atvērta kļūmei: jebkura kļūme tiek atrisināta ar `rules` lēmumu, un iemesls ir `decision(<decider>): fallback (<reason>)` `recursion` bet `<reason>` ir viens no `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `low_confidence` `single_option` `no_user_text`. . Pēc taimauta, HTTP kļūdas vai tīkla kļūdas beigu punkts tiek izlaists 30 s. Veiksmīga izvēle skan `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Neviens URL, taustiņš, uzvedne vai augšējais korpuss nesasniedz žurnālu.
+
+Kombinācijas veidotājs parāda šos laukus, ja maršrutētāja stratēģija ir `decision`, ar ģenerētajiem aprakstiem kā vietturi un** Pārbaudes lēmums** poga, kas vienreiz izsauc `POST /api/combos/decision-preview` ar nesaglabātajiem iestatījumiem (tas pats karodziņš).
+
+**Kad lietot** : jauktas sarežģītības datplūsma, kur vēlaties, lai līmenis tiktu izvēlēts katram pieprasījumam, izmantojot jūsu izvēlēto klasifikatoru, nevis tieši Nadiru.
+
+**Alias** : `decision` (bez aizstājvārda)
 
 ---
 
 ### Pielāgotas maršrutētāja stratēģijas
 
-Varat reģistrēt savu `RouterStrategy` implementāciju, izmantojot publisko API:
+Jūs varat reģistrēt savu `RouterStrategy` ieviešanu, izmantojot publisko API:
 
 ```ts
 import {
@@ -722,7 +741,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Jūsu maršrutēšanas loģika šeit
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -752,16 +771,17 @@ Pēc tam izmantojiet to:
 
 ### Maršrutētāja stratēģijas izvēles ceļvedis
 
-| Lietojuma gadījums       | Stratēģija  | Iemesls                                            |
-| ------------------------ | ----------- | -------------------------------------------------- |
-| Līdzsvarota darba slodze | `rules`     | Noklusējums — ņem vērā visus faktorus              |
-| Izmaksu samazināšana     | `cost`      | Vienmēr izvēlas lētāko                             |
-| Latentuma samazināšana   | `latency`   | Izvēlas ātrāko uzticamo pakalpojumu sniedzēju      |
-| Stingri SLO              | `sla-aware` | Filtrē pēc p95/kļūdu/izmaksu sliekšņiem            |
-| Vairāku kārtu tērzēšana  | `lkgp`      | Sesijas piesaiste                                  |
-| Dažādas grūtības pakāpes | `nadir`     | Katram vaicājumam izvēlas atbilstošu modeļa līmeni |
+| Lietošanas gadījums           | stratēģija  | Iemesls                                       |
+| ----------------------------- | ----------- | --------------------------------------------- |
+| Sabalansēta darba slodze      | `rules`     | Noklusējuma — ņem vērā visus faktorus         |
+| Samaziniet izmaksas           | `cost`      | Vienmēr izvēlas lētāko                        |
+| Samaziniet latentumu          | `latency`   | Izvēlas ātrāko uzticamo pakalpojumu sniedzēju |
+| Stingra SLOs                  | `sla-aware` | Filtri pēc p95/error/cost sliekšņiem          |
+| Vairāku apgriezienu tērzēšana | `lkgp`      | Sesijas lipīgums                              |
+| Jauktas grūtības pakāpes      | `nadir`     | Katrai uzvednei izvēlas modeļa līmeni         |
+| Savs klasifikators            | `decision`  | Jūsu lēmējs izvēlas modeli                    |
 
-SLA apzinīgas stratēģijas lauki:
+SLA zināmie lauki:
 
 ```json
 {

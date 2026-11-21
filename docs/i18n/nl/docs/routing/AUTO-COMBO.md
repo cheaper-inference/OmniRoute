@@ -493,56 +493,47 @@ Dit betekent dat **het toevoegen van een nieuwe provider waarvoor `auto/*` is in
 
 ## API
 
-Er is **geen specifiek `POST /api/combos/auto`-endpoint** — Auto-Combo wordt op twee manieren gebruikt:
+Er is** geen speciaal `POST /api/combos/auto` eindpunt** — Auto-Combo wordt op twee manieren gebruikt:
 
-1. **Zonder configuratie (aanbevolen):** Verstuur een willekeurig verzoek voor chatvoltooiing met `model: "auto"` of `model: "auto/<variant>"`. De virtuele factory bouwt de combo per verzoek — persistentie en API-aanroepen zijn niet nodig.
+1. **Zero-config (aanbevolen):** Stuur elk chatvoltooiingsverzoek met `model: "auto"` of `model: "auto/<variant>"`. De virtuele fabriek bouwt de combo per verzoek — geen persistentie, geen API -oproepen nodig.
 
-2. **Persistente combo met `strategy: "auto"`:** Maak een reguliere combo via `POST /api/combos` en stel `strategy: "auto"` in, samen met `config.auto.weights` / `config.auto.candidatePool`. Dezelfde score-engine wordt gebruikt; de combo wordt opgeslagen in `combos` en kan via ID opnieuw worden gebruikt.
+2. **Aanhoudende combo met `strategy: "auto"`:** Maak een normale combo via `POST /api/combos` en stel `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Er wordt gebruik gemaakt van dezelfde score-engine; de combo wordt opgeslagen in `combos` en kan opnieuw worden gebruikt door ID.
 
-Voor detectie geeft `GET /api/combos/auto` elke variant weer met de herleide kandidatenpool plus `context_length` / `max_output_tokens` — de MAXIMUMWAARDE van de vensters in de kandidatenpool. Clients (zoals de opencode-plug-in) moeten deze waarden publiceren in plaats van `0`: een context van nul schakelt de automatische compactie van opencode volledig uit, waardoor sessies blijven groeien totdat het opschonen van de geschiedenis door de gateway de context vernietigt. Het is veilig om de MAXIMUMWAARDE te publiceren, omdat het contextvoorfilter van de auto-combo te grote verzoeken naar kandidaten met een groot venster routeert.
+Ter ontdekking vermeldt `GET /api/combos/auto` elke variant met de opgeloste kandidatenpool plus `context_length` / `max_output_tokens` — de MAX in de vensters van de kandidatenpool. Clients (bijvoorbeeld de opencode plug-in) moeten deze waarden adverteren in plaats van `0`: een nulcontext schakelt de automatische compressie van opencode volledig uit, waardoor sessies kunnen groeien totdat de geschiedenisopschoning van de gateway de context vernietigt. MAX is veilig om te adverteren omdat het automatische combo-contextvoorfilter grote verzoeken naar kandidaten met een groot venster routeert.
 
 ```bash
-# Gebruik zonder configuratie (geen combo aanmaken)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Persistente auto-combo via het reguliere combo-endpoint
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Strategieën voor de automatische router
+### Strategieën voor automatische routers
 
-Persistente combo's met `strategy: "auto"` kunnen `config.routerStrategy` (of het verouderde
-`config.auto.routerStrategy`) instellen op een van de volgende waarden:
+Aanhoudende `strategy: "auto"` combo's kunnen `config.routerStrategy` (of oudere `config.auto.routerStrategy`) instellen op een van:
 
-- `rules` — standaard gewogen scoreberekening
-- `score` — selecteert de hoogste geconfigureerde gewogen score. Bij exacte gelijke scores blijft de geconfigureerde
-  volgorde van kandidaten behouden; de bestaande `explorationRate` neemt steekproeven uit de volledige gerangschikte pool.
-- `cost` / `eco` — goedkoopste gezonde provider
-- `latency` / `fast` — laagste p95-latentie met een betrouwbaarheidsstraf
-- `sla-aware` / `sla` — geeft de voorkeur aan kandidaten die voldoen aan SLO's voor p95-latentie, foutpercentage en optionele
-  kosten
-- `lkgp` — eerst de laatst bekende werkende provider
-- `nadir` — vraagt de beslissings-API van [Nadir](https://getnadir.com) welk model in de pool nodig is voor de
-  prompt; opt-in, valt bij fouten terug op `rules`
+- `rules` — standaard gewogen score
+- `score` — selecteert de hoogst geconfigureerde gewogen score. Exacte banden behouden de geconfigureerde kandidaatvolgorde; de bestaande `explorationRate` monsters uit de volledig gerangschikte pool.
+- `cost` / `eco` — goedkoopste gezonde aanbieder
+- `latency` / `fast` — laagste p95-latentie met betrouwbaarheidsboete
+- `sla-aware` / `sla` — geven de voorkeur aan kandidaten die voldoen aan p95-latentie, foutenpercentage en optionele kosten SLOs
+- `lkgp` — laatst bekende goede aanbieder eerst
+- `nadir` — vraag [Nadir](https://getnadir.com) 's beslissing API welk model in de pool de prompt nodig heeft; opt-in, fail-open naar `rules`
+- `decision` — vraag een geconfigureerde beslisser (TypeSafe System One, uw eigen beslissing URL of een van de eigen modellen van de combo) welk model in de pool bij het verzoek past; achter de standaard-off `COMBO_DECISION_ROUTER_ENABLED` vlag, fail-open naar `rules`
 
 ### Routerstrategieën in detail
 
-De auto-combo-engine biedt 7 verwisselbare **RouterStrategy**-implementaties die
-je kunt wisselen via `config.routerStrategy` (of het verouderde `config.auto.routerStrategy`).
-Elke strategie kiest één provider uit de kandidatenpool op basis van een `RoutingContext`
-(taaktype, aanwijzingen voor tools/vision, tokenschatting, optioneel SLA-beleid, optionele
-laatst bekende werkende provider).
+De auto-combo-motor stelt 7 plug-in beschikbaar**RouterStrategy** implementaties die u kunt uitwisselen via `config.routerStrategy` (of de oudere `config.auto.routerStrategy`). Elke strategie kiest één provider uit de kandidatenpool, op basis van een `RoutingContext` (taaktype, tool/vision -hints, tokenschatting, optioneel SLA beleid, optionele laatst bekende goede provider).
 
-#### 1. `rules` (standaard) — gewogen scoreberekening met 16 factoren
+#### 1. `rules` (standaard) — gewogen score met 16 factoren
 
-Omsluit de bestaande score-engine. Filtert kandidaten met een circuitbreakerstatus
-van `OPEN` weg en voert vervolgens `scorePool()` uit met het huidige taaktype en `getTaskFitness()`,
-waarbij de provider met de hoogste score wordt gekozen.
+Omhult de bestaande score-engine. Filtert `OPEN` -stroomonderbrekerkandidaten uit, voert vervolgens `scorePool()` uit met het huidige taaktype en `getTaskFitness()` en kiest de best scorende provider.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -562,16 +553,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer te gebruiken**: Standaard. Gebruik dit wanneer je een evenwichtige afweging tussen alle signalen wilt.
+**Wanneer te gebruiken** : Standaard. Gebruik dit wanneer u een evenwichtige afweging tussen alle signalen wilt.
 
-**Alias**: `rules` (geen alias)
+**Alias** : `rules` (geen alias)
 
 ---
 
-#### 2. `cost` / `eco` — goedkoopste gezonde provider
+#### 2. `cost` / `eco` — goedkoopste gezonde aanbieder
 
-Sorteert de kandidatenpool op `costPer1MTokens` (oplopend) en kiest de goedkoopste.
-Filtert eerst kandidaten met de status `OPEN` weg.
+Sorteert de kandidatenpool op `costPer1MTokens` (oplopend) en kiest de goedkoopste. Filtert eerst `OPEN` kandidaten eruit.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -586,16 +576,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer te gebruiken**: Kostengevoelige workloads, batchverwerking of achtergrondtaken.
+**Wanneer te gebruiken** : kostengevoelige werklasten, batchverwerking of achtergrondtaken.
 
-**Aliassen**: `cost`, `eco`
+**Aliassen** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — laagste p95-latentie met betrouwbaarheidsstraf
+#### 3. `latency` / `fast` — laagste p95-latentie met betrouwbaarheidsboete
 
-Sorteert op `p95LatencyMs + (errorRate * 1000)`. De straf voor het foutpercentage zorgt ervoor
-dat onbetrouwbare providers lager worden gerangschikt, zelfs als hun nominale latentie laag is.
+Sorteert op `p95LatencyMs + (errorRate * 1000)`. De foutmarge zorgt ervoor dat onbetrouwbare providers lager worden gerangschikt, zelfs als hun nominale latentie laag is.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -612,28 +601,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer te gebruiken**: Latentiegevoelige workloads, zoals realtimechat, automatisch aanvullen of
-interactieve programmeerassistenten.
+**Wanneer te gebruiken** : Latentiegevoelige workloads zoals realtime chat, automatisch aanvullen of interactieve codeerassistenten.
 
-**Aliassen**: `latency`, `fast`
+**Aliassen** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — naleving van SLO's voor latentie/fouten/kosten
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO naleving
 
-Geeft elke kandidaat een score op basis van hoe goed deze voldoet aan het geconfigureerde SLO-beleid:
+Geeft elke kandidaat een score op basis van hoe goed deze voldoet aan het geconfigureerde SLO beleid:
 
-| Factor            | Gewicht | Formule                                                   |
-| ----------------- | ------- | --------------------------------------------------------- |
-| Latentiescore     | 35%     | `threshold / max(value, ε)`                               |
-| Foutscore         | 35%     | `threshold / max(value, ε)`                               |
-| Gezondheidsscore  | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)         |
-| Kostenscore       | 10%     | `threshold / max(value, ε)` of omgekeerd genormaliseerd   |
-| Stabiliteitsscore | 5%      | omgekeerd genormaliseerde standaardafwijking van latentie |
+| Factor            | Gewicht | Formule                                                 |
+| ----------------- | ------- | ------------------------------------------------------- |
+| Latentiescore     | 35%     | `threshold / max(value, ε)`                             |
+| Foutscore         | 35%     | `threshold / max(value, ε)`                             |
+| Gezondheidsscore  | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)       |
+| Kostenscore       | 10%     | `threshold / max(value, ε)` of omgekeerd genormaliseerd |
+| Stabiliteitsscore | 5%      | inverse genormaliseerde latentie stddev                 |
 
-Wanneer `hardConstraints: true` is ingesteld, worden kandidaten primair gesorteerd op **overtredingsscore**
-(de mate waarin ze een SLO overschrijden) en vervolgens op samengestelde score. Anders wordt alleen
-de samengestelde score gebruikt.
+Bij `hardConstraints: true` worden de kandidaten primair gesorteerd op** overtredingsscore** (hoe ver ze elke SLO overschrijden), en vervolgens op basis van een samengestelde score. Anders is het slechts de samengestelde score.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -642,12 +628,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... scoort elke kandidaat aan de hand van het beleid: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA-velden** (ingesteld in de combinatieconfiguratie):
+**SLA velden** (ingesteld op de combo-configuratie):
 
 ```json
 {
@@ -662,17 +648,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer gebruiken**: Productieworkloads met strikte budgetten voor latentie, foutpercentages of kosten.
+**Wanneer te gebruiken** : Productieworkloads met strikte latentie-, foutpercentage- of kostenbudgetten.
 
-**Aliassen**: `sla-aware`, `sla`
+**Aliassen** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — laatst bekende goede provider eerst
+#### 5. `lkgp` — laatst bekende goede aanbieder eerst
 
-Probeert eerst de **laatst bekende goede provider** (indien ingesteld) en valt daarna terug op de
-`rules`-strategie. Nuttig voor sessieaffiniteit — dezelfde provider verwerkt
-vervolgverzoeken in een gesprek.
+Probeert de** laatst bekende goede aanbieder** (indien ingesteld) eerst, en valt dan terug op de `rules` strategie. Handig voor sessiekleverigheid. — dezelfde provider handelt vervolgverzoeken af in een gesprek.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -693,27 +677,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Terugvallen op de rules-strategie
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Wanneer gebruiken**: Gesprekken met meerdere beurten waarbij je wilt dat dezelfde provider
-vervolgverzoeken verwerkt (bijvoorbeeld voor caching, contextcontinuïteit of consistente prijzen).
+**Wanneer te gebruiken** : gesprekken met meerdere beurten waarbij u wilt dat dezelfde provider vervolgverzoeken afhandelt (bijvoorbeeld voor caching, contextcontinuïteit of prijsconsistentie).
 
-**Alias**: `lkgp` (geen alias)
+**Alias** : `lkgp` (geen alias)
 
 ---
 
 #### 6. `nadir` — promptbewuste modelkeuze via Nadir
 
-Elke bovenstaande strategie rangschikt de kandidaten op basis van de eigen telemetrie; geen enkele leest
-het verzoek. `nadir` stuurt de laatste gebruikersbeurt plus de model-ID's van de pool naar
-de beslissings-API van [Nadir](https://getnadir.com) (`POST /v1/bucket`) en routeert naar het model
-dat Nadir uit dat aanbod selecteert (`simple` → het goedkoopste geschikte model, `complex` → het
-grensverleggende model). De verbinding die dat model aanbiedt, wordt nog steeds door `rules` gekozen, zodat quota,
-gezondheid en kosten blijven bepalen welk account wordt gebruikt.
+Elke bovenstaande strategie rangschikt de kandidaten op basis van hun eigen telemetrie; geen van hen leest het verzoek. `nadir` stuurt de laatste gebruikersbeurt plus de model-ID's van de pool naar [Nadir](https://getnadir.com) 's beslissing API (`POST /v1/bucket`) en routeert naar het model dat Nadir uit dat menu selecteert (`simple` → het goedkoopste geschikte model, `complex` → het grensmodel). De verbinding die dat model bedient, wordt nog steeds gekozen door `rules`, dus quota, status en kosten blijven bepalen welk account.
 
 ```json
 {
@@ -729,34 +707,75 @@ gezondheid en kosten blijven bepalen welk account wordt gebruikt.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` en `OMNIROUTE_NADIR_BASE_URL` zijn omgevingsvariabelen die als terugvaloptie voor de twee
-tekenreeksen dienen. `baseUrl` is alleen nodig voor een zelfgehoste Nadir (een afsluitende `/v1` wordt geaccepteerd).
-Aanroepen zonder sleutel komen terecht in de anonieme laag van Nadir, waarvoor een frequentielimiet per IP geldt. Met een sleutel
-([maak er een aan](https://app.getnadir.com/dashboard/api-keys)) wordt elke beslissing
-in je Nadir-dashboard geregistreerd. Volledige configuratie en verificatie:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` en `OMNIROUTE_NADIR_BASE_URL` zijn env-fallbacks voor de twee strings. `baseUrl` is alleen nodig voor een zelfgehoste Nadir (een volgende `/v1` wordt getolereerd). Keyless-gesprekken komen terecht op het anonieme niveau van Nadir, dat per IP beperkt is. Met een sleutel ( [maak er één aan](https://app.getnadir.com/dashboard/api-keys) ) wordt elke beslissing vastgelegd in uw Nadir-dashboard. Volledige installatie en verificatie: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Wat de omgeving verlaat: de tekst van het laatste gebruikersbericht (de eerste 16.000 tekens), de model-ID's van de kandidaten
-en een kanaaltag `source: "omniroute"`. Geen systeemprompt, geschiedenis, tools of
-headers.
+Wat de doos verlaat: de tekst van het laatste gebruikersbericht (eerste 16k tekens), de ID's van het kandidaatmodel en een `source: "omniroute"` -kanaaltag. Geen systeemprompt, geschiedenis, tools of headers.
 
-Het foutgedrag is fail-open: een time-out (standaard 2000 ms), een niet-2xx-respons, een onbereikbare
-host, een onjuist opgemaakte respons of een selectie buiten de pool resulteert in de `rules`-beslissing,
-waarbij de reden wordt voorafgegaan door `NadirStrategy: fallback (…)`. Na een mislukte aanroep slaat de
-strategie het netwerk gedurende 30 s over, zodat een storing één time-out per 30 s kost in plaats van
-één per verzoek. Routeringsgebeurtenissen rapporteren alleen `strategy: "nadir"` wanneer Nadir daadwerkelijk
-de keuze heeft gemaakt.
+Het faalgedrag is fail-open: een time-out (standaard 2000 ms), een non-2xx, een onbereikbare host, een misvormd antwoord of een selectie buiten de pool leidt tot de `rules` -beslissing en de reden wordt voorafgegaan door `NadirStrategy: fallback (…)`. Na een mislukte oproep slaat de strategie het netwerk gedurende 30 seconden over, zodat een storing één time-out per dertig seconden kost in plaats van één per verzoek. Routeringsgebeurtenissen rapporteren alleen `strategy: "nadir"` wanneer Nadir daadwerkelijk de keuze heeft gemaakt.
 
-**Wanneer gebruiken**: verkeer met uiteenlopende moeilijkheidsgraden in een pool met verschillende modellagen (een klein, een middelgroot
-en een grensverleggend model), wanneer je de kosten van het altijd gebruiken van het grensverleggende model wilt verlagen.
+**Wanneer te gebruiken** : verkeer met gemengde moeilijkheidsgraad op een pool die modelniveaus omvat (een klein, een midden- en een grensmodel), waarbij altijd-grens de kosten zijn die u wilt besparen.
 
-**Alias**: `nadir` (geen alias)
+**Alias** : `nadir` (geen alias)
+
+---
+
+#### 7. `decision` — plug-in beslisser kiest het model
+
+`decision` vraagt a** beslisser** welk model in de pool bij het verzoek past, beperkt vervolgens de pool tot dat model en laat `rules` de verbinding kiezen (quota, gezondheid en kosten kiezen nog steeds het account). De beslisser wordt ingesteld in het beslissingsblok — `config.decision` van de combo wanneer de routerknoppen bovenaan `config` zitten (wat het dashboard schrijft), of `config.auto.decision` naast `config.auto.routerStrategy`:
+
+| `decider`     | Wie antwoordt                                                                                                           | Behoeften                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standaardmodel `jev-latest`                          | een `typesafe` verbinding of de env-sleutel |
+| `http`        | uw eigen beslisser bij `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) of `"openai-chat"` (chat-aanvullingen) | `baseUrl` + `model`; sleutel optioneel      |
+| `combo-model` | een van uw providermodellen, ingeschakeld als de fusierechter                                                           | `model` als `provider/model` (geen combo)   |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Velden (gevalideerd door een strikt schema bij opslaan en opnieuw op verzoek):
+
+- `decider` — `systemone`, `http` of `combo-model`.
+- `model` — TypeSafe model, het beslissingsmodel op uw URL, of de `provider/model` van een combo-modelaanroep (maximaal 200 tekens).
+- `baseUrl` — alleen `http` : een `http(s)` URL van maximaal 500 tekens, zonder inloggegevens, query of fragment. Een URL die naar deze OmniRoute (loopback + `PORT`) wijst, wordt geweigerd.
+- `wire` — alleen `http` : `systemone` (standaard) of `openai-chat`.
+- `connectionId` — de opgeslagen verbinding waarvan de sleutel wordt gebruikt (alleen binnen de toegestane verbindingen van de aanroepende API sleutel). Zonder dit leest `systemone` een `typesafe` -verbinding en valt elke netwerkbeslisser terug naar `OMNIROUTE_DECISION_API_KEY`. Er is geen `apiKey` veld: een sleutel wordt nooit in een combo opgeslagen.
+- `timeoutMs` — geheel getal, 100–5000, standaard 2000.
+- `minConfidence` — 0–1; een antwoord met minder vertrouwen valt terug op `rules` (een beslisser die geen vertrouwen rapporteert, telt als 0).
+- `descriptions` — maximaal 50 vermeldingen (sleutel tot 300, tekst tot 1000 tekens), ingetoetst op model-ID of `provider/model`; niet-ingestelde vermeldingen krijgen een gegenereerde kostenrangschikkingsbeschrijving.
+
+**Vlag.** `COMBO_DECISION_ROUTER_ENABLED` (standaard `false`) poort elke beslisser. Terwijl het uit staat, leest een `decision` combo geen referentie, voert geen oproep uit en routeert met `rules`; het logboek zegt `fallback (disabled)`. Een opgeslagen sleutel alleen zet hem nooit aan. Combo's zonder beslissingsblok worden helemaal niet beïnvloed.
+
+**Wat verlaat de doos.** Alleen de tekst van het laatste gebruikersbericht (maximaal 8000 tekens; chat/Claude `messages` of Responses `input`) en het menu met model-ID's met hun beschrijvingen. Nooit de systeemprompt, Reacties `instructions`, tools, geschiedenis, headers of accountgegevens. Netwerkoproepen gaan via de uitgaande bewaker van de provider zonder nieuwe pogingen, geen omleidingen en een responslimiet van 64 KB. De `combo-model` aanroep is niet-streaming, zonder gereedschap, `temperature: 0`, met een budget van 256 token; een beslissing die binnen een beslissingsoproep is gestart, wordt geweigerd.
+
+**Mislukkingsgedrag** is fail-open: elke fout wordt opgelost volgens de `rules` -beslissing, en de reden luidt `decision(<decider>): fallback (<reason>)`, met `<reason>` een van `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` of `no_user_text`. Na een time-out, HTTP fout of netwerkfout wordt het eindpunt gedurende 30 seconden overgeslagen. Een succesvolle keuze luidt `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Geen enkele URL, sleutel-, prompt- of stroomopwaartse instantie bereikt het logboek.
+
+De combobouwer toont deze velden wanneer de routerstrategie `decision` is, met de gegenereerde beschrijvingen als tijdelijke aanduidingen en a** Testbeslissing** knop die `POST /api/combos/decision-preview` één keer aanroept met de niet-opgeslagen instellingen (dezelfde vlag).
+
+**Wanneer te gebruiken** : verkeer met gemengde moeilijkheidsgraad waarbij u wilt dat het niveau per verzoek wordt gekozen door een classificatie die u kiest, niet specifiek door Nadir.
+
+**Alias** : `decision` (geen alias)
 
 ---
 
 ### Aangepaste routerstrategieën
 
-Je kunt je eigen `RouterStrategy`-implementatie registreren via de openbare API:
+U kunt uw eigen `RouterStrategy` implementatie registreren via de openbare API:
 
 ```ts
 import {
@@ -769,7 +788,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Je routeringslogica komt hier
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -784,7 +803,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Gebruik deze vervolgens:
+Gebruik het dan:
 
 ```json
 {
@@ -799,14 +818,15 @@ Gebruik deze vervolgens:
 
 ### Selectiegids voor routerstrategieën
 
-| Gebruikssituatie          | Strategie   | Reden                                        |
-| ------------------------- | ----------- | -------------------------------------------- |
-| Evenwichtige werklast     | `rules`     | Standaard — houdt rekening met alle factoren |
-| Kosten minimaliseren      | `cost`      | Kiest altijd de goedkoopste                  |
-| Latentie minimaliseren    | `latency`   | Kiest de snelste betrouwbare provider        |
-| Strikte SLO's             | `sla-aware` | Filtert op drempels voor p95/fouten/kosten   |
-| Chat met meerdere beurten | `lkgp`      | Sessiegebondenheid                           |
-| Gemengde moeilijkheid     | `nadir`     | Kiest per prompt het juiste modelniveau      |
+| Gebruiksgeval               | Strategie   | Reden                                        |
+| --------------------------- | ----------- | -------------------------------------------- |
+| Evenwichtige werklast       | `rules`     | Standaard — houdt rekening met alle factoren |
+| Minimaliseer de kosten      | `cost`      | Kiest altijd de goedkoopste                  |
+| Minimaliseer de latentie    | `latency`   | Kiest de snelste betrouwbare aanbieder       |
+| Strikte SLOs                | `sla-aware` | Filtert op p95/error/cost -drempels          |
+| Chat met meerdere beurten   | `lkgp`      | Sessie plakkerigheid                         |
+| Gemengde moeilijkheidsgraad | `nadir`     | Kiest de modellaag per prompt                |
+| Eigen classificatie         | `decision`  | Uw beslisser kiest het model                 |
 
 SLA-bewuste velden:
 

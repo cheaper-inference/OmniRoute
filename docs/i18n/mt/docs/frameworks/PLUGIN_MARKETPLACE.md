@@ -87,18 +87,19 @@ li mhuwiex `200`, jew jirritorna kontenut mhux rikonoxxut,
 
 L-endpoints kollha jeħtieġu awtorizzazzjoni tal-ġestjoni (`requireManagementAuth`)** u** huma loopback-only — `/api/plugins` u `/api/plugins/` huma elenkati fi `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Metodu | Deskrizzjoni                                                    |
-| -------------------------------- | ------ | --------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Lista plugins installati (filtru `?status=` mhux obbligatorju)  |
-| `/api/plugins`                   | POST   | Installa plugin mid-direttorju tas-sorsi tal-plugin             |
-| `/api/plugins/scan`              | POST   | Skennja d-direttorju tal-plugins u rreġistra plugins ġodda      |
-| `/api/plugins/marketplace`       | GET    | Elenka l-entrati fil-katalgu tas-suq                            |
-| `/api/plugins/[name]`            | GET    | Ikseb id-dettalji tal-plugin installat                          |
-| `/api/plugins/[name]`            | DELETE | Iddiżinstalla plugin                                            |
-| `/api/plugins/[name]/activate`   | POST   | Attiva (tagħbija + reġistru ganċi)                              |
-| `/api/plugins/[name]/deactivate` | POST   | Iddiżattiva (fire `onDeactivate`, unregister hooks)             |
-| `/api/plugins/[name]/config`     | GET    | Ikseb plugin config + config schema                             |
-| `/api/plugins/[name]/config`     | PUT    | Aġġorna l-konfigurazzjoni tal-plugin (validata kontra l-iskema) |
+| Endpoint                           | Metodu | Deskrizzjoni                                                    |
+| ---------------------------------- | ------ | --------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Lista plugins installati (filtru `?status=` mhux obbligatorju)  |
+| `/api/plugins`                     | POST   | Installa plugin mid-direttorju tas-sorsi tal-plugin             |
+| `/api/plugins/scan`                | POST   | Skennja d-direttorju tal-plugins u rreġistra plugins ġodda      |
+| `/api/plugins/marketplace`         | GET    | Elenka l-entrati fil-katalgu tas-suq                            |
+| `/api/plugins/marketplace/install` | POST   | Installa plugin tas-suq bl-isem                                 |
+| `/api/plugins/[name]`              | GET    | Ikseb id-dettalji tal-plugin installat                          |
+| `/api/plugins/[name]`              | DELETE | Iddiżinstalla plugin                                            |
+| `/api/plugins/[name]/activate`     | POST   | Attiva (tagħbija + reġistru ganċi)                              |
+| `/api/plugins/[name]/deactivate`   | POST   | Iddiżattiva (fire `onDeactivate`, unregister hooks)             |
+| `/api/plugins/[name]/config`       | GET    | Ikseb plugin config + config schema                             |
+| `/api/plugins/[name]/config`       | PUT    | Aġġorna l-konfigurazzjoni tal-plugin (validata kontra l-iskema) |
 
 Il-filtru `GET /api/plugins` `status` jaċċetta wieħed minn `installed` / `active` / `inactive` / `error`. Valur invalidu jirritorna `400`.
 
@@ -120,7 +121,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` trid tkun an** assoluta** mogħdija għal direttorju** ġewwa d-direttorju tas-sorsi tal-plugin** : `plugin-sources` ħdejn l-għerq tal-plugin, għalhekk `~/.omniroute/plugin-sources/` b'mod awtomatiku, jew `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` meta dik il-varjabbli tkun issettjata (`getPluginSourcesDir()` `src/lib/plugins/installSource.ts`). Ikkopja jew ikklonja l-plugin hemm l-ewwel. L-installazzjoni tiġi rrifjutata `400` meta l-mogħdija jkun fiha `..` jew byte null, tinsab barra dak id-direttorju, issolvi barra minnu permezz ta' symlink, ikun fiha symlink li l-mira tiegħu tkun barra minnu, jew meta d-direttorju ma jeżistix. Id-direttorju tas-sors għandu jkun fih `plugin.json` validu (jew ikun ġenitur ta' wieħed). Fuq suċċess ir-rispons huwa `201` bir-ringiela tal-plugin installat.
 
-B'differenza mir-rotot tal-plugins l-oħra, din teħtieġ il-kredenzjali tal-ġestjoni (sessjoni dashboard jew ċavetta API b'ambitu ta' ġestjoni) anki meta l-login huwa diżattivat (`requireLogin=false`): l-installazzjoni tal-kodiċi qatt ma hija azzjoni anonima.
+B'differenza mir-rotot tal-plugins l-oħra, din teħtieġ il-kredenzjali tal-ġestjoni (sessjoni dashboard jew ċavetta API b'ambitu ta' ġestjoni) anki meta l-login huwa diżattivat (`requireLogin=false`): l-installazzjoni tal-kodiċi qatt ma hija azzjoni anonima. L-istess japplika għal `POST /api/plugins/marketplace/install` (korp `{ "name": "<plugin>" }`).
 
 ### Fittex is-suq
 
@@ -138,7 +139,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` jivvalida kull valur ipprovdut kontra `configSchema` tal-plugin (iddikjarat fil-manifest): `number` fields jonoraw `min`/`max`, `select` fields għandhom jaqblu maż `enum` iddikjarat . Ċwievet mhux preżenti fl-iskema huma permessi.
+`PUT .../config` jivvalida l-korp kontra `configSchema` tal-plugin (iddikjarat fil-manifest) `validatePluginConfig()` minn `src/lib/plugins/manifest.ts`: kull ċavetta għandha tiġi ddikjarata fl-iskema, il-valuri għandhom jaqblu mat-tip iddikjarat, `number` fields jonoraw `min`/`max`, u `select` fields għandhom jaqblu `enum` ddikjarat . Kwalunkwe ksur jirritorna `400` u xejn ma jinħażen. Plugin li ma jiddikjara l-ebda `configSchema` m'għandux ċwievet konfigurabbli, għalhekk it-talba tiġi rrifjutata `400` ("Plugin ma jiddikjara l-ebda ċwievet konfigurabbli").
 
 ## Konfigurazzjoni
 
@@ -218,13 +219,13 @@ A URL li tfalli kwalunkwe saff ma abort it-talba — is-suq skiet jaqa lura għa
 
 ### Iżolament tal-eżekuzzjoni tal-plugin
 
-> **Il-plugins mhumiex sandboxed.** It-tifel huwa proċess Node.js ordinarju li jaħdem bħala l-utent OmniRoute, mingħajr l-ebda kuntest VM u l-ebda bnadar ta 'permess Node.js, għalhekk il-kodiċi tal-plugin jista' jaqra u jikteb kwalunkwe fajl li l-utent jista ', imexxi programmi u jilħaq in-netwerk. `requires.permissions` jiddeċiedi biss liema varjabbli ambjentali jirċievi t-tifel; il-permessi l-oħra mhumiex infurzati. Installa biss plugins li tafda. Il-konfini tal-proċess hawn taħt fih ħabtiet u hang; mhuwiex konfini tas-sigurtà.
+> **Il-plugins mhumiex sandboxed awtomatikament.** It-tifel huwa proċess Node.js ordinarju li jaħdem bħala l-utent OmniRoute, mingħajr l-ebda kuntest VM u l-ebda bnadar ta 'permess Node.js, għalhekk il-kodiċi tal-plugin jista' jaqra u jikteb kwalunkwe fajl li l-utent jista ', imexxi programmi u jilħaq in-netwerk. `requires.permissions` jiddeċiedi biss liema varjabbli ambjentali jirċievi t-tifel; il-permessi l-oħra mhumiex infurzati. Il-bandiera tal-karatteristika `PLUGIN_PERMISSION_MODEL_ENABLED` opt-in (off awtomatikament) tmexxi kull plugin taħt il-mudell tal-permess Node.js mibni minn dawk il-permessi, ħlief `network`, li Node.js ma jistax jirrestrinġi (ara [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Installa biss plugins li tafda. Il-konfini tal-proċess hawn taħt fih ħabtiet u hang; mhuwiex konfini tas-sigurtà.
 
 - **Iżolament tal-proċess** — `loadPlugin()` (`src/lib/plugins/loader.ts`) ibid kull plugin fi proċess separat Node.js child u jikkomunika fuq IPC. Is-sejħiet tal-ganċ għandhom timeout b'eskalazzjoni `SIGTERM` → `SIGKILL`.
 - **Env lista ta' permessi** — it-tifel jirċievi biss sett allowlisted ta' varjabbli ambjentali; is-sett usa' jingħata biss meta l-manifest jitlob il-permess `env`.
 - **Installa konteniment tas-sors** — `POST /api/plugins` jaqra biss mid-direttorju tas-sorsi tal-plugin (ara "Installa minn mogħdija lokali"): il-mogħdija hija canonicalized `realpath`, trid tibqa' strettament ġewwa dak id-direttorju, u siġra tas-sors li ġġorr symlink li taħrab minnha tiġi rrifjutata qabel ma tiġi kkupjata xi ħaġa.
-- **Konteniment tal-mogħdija** — install/upgrade/uninstall jasserixxu li d-direttorju tal-plugin u `manifest.main` isolvu** fi ħdan** l-għerq tal-plugin ġestit qabel kwalunkwe kopja jew tħassir rikorsiv (gwardji kontra mogħdijiet DB imbagħbsa u traversal `../` `manifest.main`). L-attivazzjoni ssolvi symlinks permezz ta' `realpath` u tirrifjuta li tgħabbi punt ta' dħul li jaħrab mid-direttorju tal-plugin.
-- **Pin ta 'integrità fakultattiv** — manifest jista' jiddikjara qasam `integrity` (`sha256-<base64>`, SRI format). Meta jkun preżenti, il-loader jivverifika l-hash tal-fajl tad-dħul fil-ħin tat-tagħbija u jirrifjuta li jattiva fuq nuqqas ta 'qbil. Hija skoperta ta' tbagħbis opt-in,** le** fruntiera tas-sigurtà: ma tillimitax dak li jista 'jagħmel plugin mgħobbi.
+- **Konteniment tal-mogħdija** — install/upgrade/uninstall jasserixxu li d-direttorju tal-plugin u `manifest.main` isolvu** fi ħdan** l-għerq tal-plugin amministrat qabel kwalunkwe kopja jew tħassir rikorsiv (gwardji kontra mogħdijiet DB imbagħbsa u traversal `../` `manifest.main`). L-attivazzjoni ssolvi symlinks permezz ta' `realpath` u tirrifjuta li tgħabbi punt ta' dħul li jaħrab mid-direttorju tal-plugin.
+- **Pin ta 'integrità fakultattiv** — manifest jista' jiddikjara qasam `integrity` (`sha256-<base64>`, SRI format). Meta jkun preżenti, il-loader jivverifika l-hash tal-fajl tad-dħul fil-ħin tat-tagħbija u jirrifjuta li jattiva fuq nuqqas ta 'qbil. Hija skoperta ta' tbagħbis opt-in,** le** limitu ta' sigurtà: ma tillimitax dak li jista' jagħmel plugin mgħobbi.
 - **L-ebda kredenzjali tal-klijent fil-ganċijiet** — il-kuntest mgħoddi lil `onRequest`, `onResponse` u `onError` għandu l-headers `authorization`, `x-api-key`, `proxy-authorization` u `cookie` imneħħija, u r-rekord ewlieni API ma jġorr l-ebda valur ewlieni (`redactPluginContext()` `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)

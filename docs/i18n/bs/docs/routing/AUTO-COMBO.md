@@ -551,56 +551,47 @@ To znači da **dodavanje novog pružaoca s omogućenim `auto/*` automatski proš
 
 ## API
 
-**Ne postoji namjenska krajnja tačka `POST /api/combos/auto`** — Auto-Combo se koristi na dva načina:
+Postoji** nema namjenske krajnje `POST /api/combos/auto`** — Auto-Combo se troši na dva načina:
 
-1. **Bez konfiguracije (preporučeno):** Pošaljite bilo koji zahtjev za dovršavanje razgovora s `model: "auto"` ili `model: "auto/<variant>"`. Virtuelna fabrika izrađuje combo za svaki zahtjev — nije potrebno trajno pohranjivanje niti pozivanje API-ja.
+1. **Zero-config (preporučeno):** Pošaljite bilo koji zahtjev za završetak razgovora sa `model: "auto"` ili `model: "auto/<variant>"`. Virtuelna fabrika pravi kombinaciju po zahtevu — bez postojanosti, nema potrebe za API pozivima.
 
-2. **Trajno pohranjeni combo sa `strategy: "auto"`:** Kreirajte obični combo putem `POST /api/combos` i postavite `strategy: "auto"` uz `config.auto.weights` / `config.auto.candidatePool`. Koristi se isti mehanizam bodovanja; combo se pohranjuje u `combos` i može se ponovo koristiti putem ID-a.
+2. **Trajna kombinacija sa `strategy: "auto"`:** Napravite redovnu kombinaciju preko `POST /api/combos` i postavite `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Koristi se isti motor za bodovanje; kombinacija je pohranjena u `combos` i ID.
 
-Za otkrivanje, `GET /api/combos/auto` prikazuje svaku varijantu s njenim razriješenim skupom kandidata, kao i `context_length` / `max_output_tokens` — MAKSIMUM kroz prozore skupa kandidata. Klijenti (npr. dodatak opencode) moraju oglašavati ove vrijednosti umjesto `0`: nulti kontekst u potpunosti onemogućava automatsku kompakciju u opencodeu, čime se sesijama omogućava da rastu sve dok čišćenje historije na pristupniku ne uništi kontekst. MAKSIMUM je sigurno oglašavati jer predfilter konteksta automatskog comboa usmjerava prevelike zahtjeve prema kandidatima s velikim prozorom.
+Za otkrivanje, `GET /api/combos/auto` navodi svaku varijantu sa svojim riješenim skupom kandidata plus `context_length` / `max_output_tokens` — MAX preko prozora grupe kandidata. Klijenti (npr. dodatak za opencode) moraju reklamirati ove vrijednosti umjesto `0`: nulti kontekst u potpunosti onemogućuje automatsko sažimanje otvorenog koda, puštajući sesije da rastu sve dok čišćenje historije gatewaya ne uništi kontekst. MAX je siguran za reklamiranje jer predfilter konteksta auto-kombo usmjerava prevelike zahtjeve kandidatima s velikim prozorima.
 
 ```bash
-# Korištenje bez konfiguracije (bez kreiranja comboa)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Trajno pohranjeni automatski combo putem uobičajene krajnje tačke za comboe
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Strategije automatskog usmjerivača
+### Strategije automatskog rutera
 
-Trajno pohranjeni comboi sa `strategy: "auto"` mogu postaviti `config.routerStrategy` (ili zastarjeli
-`config.auto.routerStrategy`) na jednu od sljedećih vrijednosti:
+Trajne `strategy: "auto"` kombinacije mogu postaviti `config.routerStrategy` (ili naslijeđeni `config.auto.routerStrategy`) na jedno od:
 
-- `rules` — zadano ponderisano bodovanje
-- `score` — odabire najviši konfigurirani ponderisani rezultat. Potpuno jednaki rezultati zadržavaju konfigurirani
-  redoslijed kandidata; postojeći `explorationRate` uzorkuje iz cijelog rangiranog skupa.
-- `cost` / `eco` — najjeftiniji ispravni pružalac
-- `latency` / `fast` — najniža p95 latencija uz penal za pouzdanost
-- `sla-aware` / `sla` — daje prednost kandidatima koji zadovoljavaju SLO-ove za p95 latenciju, stopu grešaka i opcionalno
-  troškove
-- `lkgp` — prvo posljednji poznati ispravni pružalac
-- `nadir` — pita API za donošenje odluka servisa [Nadir](https://getnadir.com) koji je model iz skupa
-  potreban upitu; zahtijeva izričito uključivanje, a u slučaju greške prelazi na `rules`
+- `rules` — zadano ponderirano bodovanje
+- `score` — bira najviši konfigurisani ponderisani rezultat. Tačne veze čuvaju konfigurisani redosled kandidata; postojeći `explorationRate` uzorci iz pune rangirane grupe.
+- `cost` / `eco` — najjeftiniji zdrav provajder
+- `latency` / `fast` — najniža p95 latencija sa kaznom pouzdanosti
+- `sla-aware` / `sla` — preferiraju kandidate koji zadovoljavaju p95 kašnjenje, stopu greške i opcionu cijenu SLOs
+- `lkgp` — prvi poznati dobar provajder
+- `nadir` — pitajte [Nadirovu](https://getnadir.com) odluku API koji model u bazenu je potreban; opt-in, fail-open za `rules`
+- `decision` — pitajte konfigurirani odlučivač (TypeSafe System One, vaša vlastita odluka URL ili jedan od vlastitih modela kombinacije) koji model u grupi odgovara zahtjevu; iza zastave `COMBO_DECISION_ROUTER_ENABLED` default-off, neuspješno otvaranje za `rules`
 
-### Detaljan pregled strategija usmjerivača
+### Detaljne strategije rutera
 
-Mehanizam automatskog comboa pruža 7 zamjenjivih implementacija interfejsa **RouterStrategy** koje
-možete mijenjati putem `config.routerStrategy` (ili zastarjelog `config.auto.routerStrategy`).
-Svaka strategija bira jednog pružaoca iz skupa kandidata na osnovu objekta `RoutingContext`
-(vrsta zadatka, naznake za alate/viziju, procjena broja tokena, opcionalna SLA pravila, opcionalni
-posljednji poznati ispravni pružalac).
+Auto-combo motor izlaže 7 priključnih**RouterStrategy** implementacije koje možete zamijeniti putem `config.routerStrategy` (ili naslijeđenog `config.auto.routerStrategy`). Svaka strategija bira jednog provajdera iz grupe kandidata, dajući `RoutingContext` (tip zadatka, tool/vision nagoveštaji, procena tokena, opciona SLA politika, opcioni poslednji poznati-dobri provajder).
 
-#### 1. `rules` (zadano) — ponderisano bodovanje sa 16 faktora
+#### 1. `rules` (podrazumevano) — 16-faktorski ponderisano bodovanje
 
-Obuhvata postojeći mehanizam bodovanja. Filtrira kandidate prekidača strujnog kola sa stanjem `OPEN`,
-a zatim pokreće `scorePool()` s trenutnom vrstom zadatka i funkcijom `getTaskFitness()`,
-birajući pružaoca s najboljim rezultatom.
+Omotava postojeći mehanizam za bodovanje. Filtrira kandidate za `OPEN` prekidače, zatim pokreće `scorePool()` s trenutnim tipom zadatka i `getTaskFitness()`, birajući provajdera s najboljim rezultatom.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -620,16 +611,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada koristiti**: Zadana opcija. Koristite kada želite uravnotežen kompromis između svih signala.
+**Kada koristiti** : Podrazumevano. Koristite kada želite uravnotežen kompromis za sve signale.
 
-**Alias**: `rules` (nema aliasa)
+**Alias** : `rules` (bez pseudonima)
 
 ---
 
-#### 2. `cost` / `eco` — najjeftiniji ispravni pružalac
+#### 2. `cost` / `eco` — najjeftiniji zdrav provajder
 
-Sortira skup kandidata prema `costPer1MTokens` (uzlazno) i bira najjeftinijeg.
-Prvo filtrira kandidate sa stanjem `OPEN`.
+Sortira grupu kandidata po `costPer1MTokens` (uzlazno) i bira najjeftinije. Prvo filtrira `OPEN` kandidate.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -644,16 +634,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada koristiti**: Radna opterećenja osjetljiva na troškove, grupna obrada ili pozadinski poslovi.
+**Kada koristiti** : Radna opterećenja osjetljiva na troškove, grupna obrada ili poslovi u pozadini.
 
-**Aliasi**: `cost`, `eco`
+**Aliasi** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — najniža p95 latencija uz penal za pouzdanost
+#### 3. `latency` / `fast` — najniža latencija p95 sa kaznom pouzdanosti
 
-Sortira prema `p95LatencyMs + (errorRate * 1000)`. Penal za stopu grešaka osigurava
-da nepouzdani pružaoci budu niže rangirani čak i ako je njihova nominalna latencija niska.
+Sortiraj prema `p95LatencyMs + (errorRate * 1000)`. Kazna za stopu greške osigurava da su nepouzdani provajderi niže rangirani čak i ako je njihova nominalna latencija mala.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -670,28 +659,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada koristiti**: Radna opterećenja osjetljiva na latenciju, kao što su razgovor u stvarnom vremenu, automatsko dovršavanje ili
-interaktivni pomoćnici za programiranje.
+**Kada koristiti** : Radna opterećenja osjetljiva na kašnjenje kao što su ćaskanje u realnom vremenu, autodovršavanje ili interaktivni pomoćnici za kodiranje.
 
-**Aliasi**: `latency`, `fast`
+**Aliasi** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — usklađenost sa SLO-ovima za latenciju/greške/troškove
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO usklađenost
 
-Boduje svakog kandidata prema tome koliko dobro zadovoljava konfigurirana SLO pravila:
+Boduje svakog kandidata po tome koliko dobro zadovoljava konfigurisanu SLO politiku:
 
-| Faktor             | Težina | Formula                                               |
-| ------------------ | ------ | ----------------------------------------------------- |
-| Ocjena latencije   | 35%    | `threshold / max(value, ε)`                           |
-| Ocjena grešaka     | 35%    | `threshold / max(value, ε)`                           |
-| Ocjena zdravlja    | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)     |
-| Ocjena troška      | 10%    | `threshold / max(value, ε)` ili obrnuto normalizirano |
-| Ocjena stabilnosti | 5%     | obrnuto normalizirana standardna devijacija latencije |
+| Faktor               | Težina | Formula                                                |
+| -------------------- | ------ | ------------------------------------------------------ |
+| Rezultat kašnjenja   | 35%    | `threshold / max(value, ε)`                            |
+| Rezultat greške      | 35%    | `threshold / max(value, ε)`                            |
+| Zdravstveni rezultat | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)      |
+| Ocena troškova       | 10%    | `threshold / max(value, ε)` ili inverzno normalizirano |
+| Skor stabilnosti     | 5%     | inverzna normalizirana latencija stddev                |
 
-Kada je `hardConstraints: true`, kandidati se prvenstveno sortiraju prema **ocjeni kršenja**
-(koliko premašuju neki SLO), a zatim prema kompozitnoj ocjeni. U suprotnom se koristi samo
-kompozitna ocjena.
+Kada `hardConstraints: true`, kandidati se sortiraju prvenstveno po** rezultat prekršaja** (koliko daleko premašuju bilo koji SLO), zatim prema kompozitnom rezultatu. Inače je to samo kompozitni rezultat.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -700,12 +686,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... ocjenjuje svakog kandidata prema pravilima: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA polja** (postavljaju se u combo konfiguraciji):
+**SLA polja** (podešeno na combo konfiguraciji):
 
 ```json
 {
@@ -720,17 +706,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada koristiti**: Produkcijska radna opterećenja sa strogim budžetima za latenciju, stopu grešaka ili troškove.
+**Kada koristiti** : Proizvodna radna opterećenja sa strogim kašnjenjem, stopom grešaka ili budžetima troškova.
 
-**Aliasi**: `sla-aware`, `sla`
+**Aliasi** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — prvo posljednji poznati ispravni pružalac
+#### 5. `lkgp` — prvi poznati dobar provajder
 
-Prvo pokušava koristiti **posljednjeg poznatog ispravnog pružaoca** (ako je postavljen), a zatim kao rezervu
-koristi strategiju `rules`. Korisno za vezivanje sesije — isti pružalac obrađuje
-naknadne zahtjeve u razgovoru.
+Pokušava** posljednji poznati dobar provajder** (ako je postavljeno) prvo, zatim se vraća na `rules` strategiju. Korisno za ljepljivost sesije — isti provajder obrađuje zahtjeve za praćenje u razgovoru.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -751,27 +735,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Rezervno koristi strategiju rules
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kada koristiti**: Razgovori u više koraka u kojima želite da isti pružalac obrađuje
-naknadne zahtjeve (npr. radi keširanja, kontinuiteta konteksta ili dosljednosti cijena).
+**Kada koristiti** : Višestruki razgovori u kojima želite da isti provajder obrađuje naknadne zahtjeve (npr. za keširanje, kontinuitet konteksta ili konzistentnost cijena).
 
-**Alias**: `lkgp` (bez aliasa)
+**Alias** : `lkgp` (bez pseudonima)
 
 ---
 
-#### 6. `nadir` — odabir modela putem Nadira uzimajući u obzir prompt
+#### 6. `nadir` — izbor modela koji je svestan brze upotrebe preko Nadira
 
-Svaka od prethodnih strategija rangira kandidate prema vlastitoj telemetriji; nijedna od njih ne čita
-zahtjev. `nadir` šalje posljednju korisničku poruku zajedno s ID-ovima modela iz skupa
-[Nadirovom](https://getnadir.com) API-ju za donošenje odluka (`POST /v1/bucket`) i usmjerava na model
-koji Nadir odabere iz tog menija (`simple` → najjeftiniji model odgovarajućih mogućnosti, `complex` →
-najnapredniji model). Vezu koja opslužuje taj model i dalje odabire `rules`, tako da kvota,
-zdravlje i trošak i dalje određuju koji se račun koristi.
+Svaka gore navedena strategija rangira kandidate po sopstvenoj telemetriji; niko od njih ne čita zahtjev. `nadir` šalje posljednje skretanje korisnika plus ID-ove modela bazena [Nadirovoj](https://getnadir.com) odluci API (`POST /v1/bucket`) i rute do modela koji Nadir odabere iz tog izbornika (`simple` → najjeftiniji model, `complex` → granični). Konekciju koja opslužuje taj model još uvijek bira `rules`, tako da kvota, zdravlje i trošak odlučuju koji račun.
 
 ```json
 {
@@ -787,34 +765,75 @@ zdravlje i trošak i dalje određuju koji se račun koristi.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` i `OMNIROUTE_NADIR_BASE_URL` su rezervne varijable okruženja za ova dva
-stringa. `baseUrl` je potreban samo za samostalno hostovani Nadir (završni `/v1` je podržan).
-Pozivi bez ključa završavaju na Nadirovom anonimnom nivou, čija je učestalost ograničena po IP adresi. Uz ključ
-([kreirajte ga](https://app.getnadir.com/dashboard/api-keys)), svaka odluka se
-bilježi na vašoj Nadir kontrolnoj ploči. Kompletno postavljanje i provjera:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` i `OMNIROUTE_NADIR_BASE_URL` su env rezervni za dva niza. `baseUrl` je potreban samo za samo-hostovani Nadir (završni `/v1` se toleriše). Pozivi bez ključa dolaze na Nadirov anonimni nivo, koji je ograničen na stopu po IP. Sa ključem ( [kreirajte ga](https://app.getnadir.com/dashboard/api-keys) ), svaka odluka se evidentira na vašoj Nadir kontrolnoj tabli. Potpuno podešavanje i verifikacija: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Šta napušta sistem: tekst posljednje korisničke poruke (prvih 16k znakova), ID-ovi modela
-kandidata i oznaka kanala `source: "omniroute"`. Ne šalju se sistemski prompt, historija, alati ni
-zaglavlja.
+Ono što ostavlja okvir: tekst posljednje korisničke poruke (prvih 16.000 znakova), ID-ovi modela kandidata i `source: "omniroute"` oznaka kanala. Nema sistemskih prompta, istorije, alata ili zaglavlja.
 
-Ponašanje pri grešci je fail-open: istek vremena (zadano 2000 ms), odgovor koji nije 2xx, nedostupan
-host, neispravan odgovor ili odabir izvan skupa rezultira odlukom strategije `rules`,
-a razlog dobija prefiks `NadirStrategy: fallback (…)`. Nakon neuspjelog poziva
-strategija preskače mrežu 30 s, tako da prekid rada uzrokuje jedno čekanje na istek vremena svakih 30 s, umjesto
-jednog po zahtjevu. Događaji usmjeravanja prijavljuju `strategy: "nadir"` samo kada je Nadir zaista donio
-odluku.
+Ponašanje neuspjeha je otvaranje pri kvaru: vremensko ograničenje (podrazumevano 2000 ms), non-2xx, nedostupni host, neispravan odgovor ili odabir izvan spremišta rješava se na `rules` odluku, a razlog ima prefiks `NadirStrategy: fallback (…)`. Nakon neuspjelog poziva, strategija preskače mrežu na 30 s, tako da prekid košta jedan timeout u 30 s, a ne jedan po zahtjevu. Događaji rutiranja prijavljuju `strategy: "nadir"` samo kada je Nadir zaista napravio izbor.
 
-**Kada koristiti**: saobraćaj različitih nivoa složenosti u skupu koji obuhvata više nivoa modela (mali, srednji
-i najnapredniji model), kada želite smanjiti trošak stalnog korištenja najnaprednijeg modela.
+**Kada koristiti** : promet mješovite težine na grupi koja se proteže na nivoe modela (mali, srednji i granični model), gdje je uvijek granica trošak koji želite smanjiti.
 
-**Alias**: `nadir` (bez aliasa)
+**Alias** : `nadir` (bez pseudonima)
+
+---
+
+#### 7. `decision` — pluggable odlučivač bira model
+
+`decision` pita a** odlučujući** koji model u grupi odgovara zahtjevu, zatim sužava skup na taj model i dopušta `rules` da izabere vezu (kvota, zdravlje i trošak i dalje biraju račun). Odlučujući se postavlja u blok odlučivanja kombinacije — `config.decision` kada se ruterska dugmad nalaze na vrhu `config` (ono što kontrolna ploča piše), ili `config.auto.decision` pored `config.auto.routerStrategy`:
+
+| `decider`     | Ko odgovara                                                                                                                | Potrebe                                        |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), zadani model `jev-latest`                               | `typesafe` vezu ili env ključ                  |
+| `http`        | vaš vlastiti odluči na `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ili `"openai-chat"` (završetak razgovora) | `baseUrl` + `model`; ključ opciono             |
+| `combo-model` | jedan od modela vašeg provajdera, pozvan u procesu kao sudija za fuziju                                                    | `model` kao `provider/model` (bez kombinacije) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Polja (potvrđena strogom šemom prilikom spremanja i ponovo u vrijeme zahtjeva):
+
+- `decider` — `systemone`, `http` ili `combo-model`.
+- `model` — TypeSafe model, model odluke na vašem URL ili `provider/model` poziva kombiniranog modela (do 200 znakova).
+- `baseUrl` — samo `http` : `http(s)` URL do 500 znakova, bez vjerodajnica, upita ili fragmenta. URL koji pokazuje na ovaj OmniRoute (loopback + `PORT`) je odbijen.
+- `wire` — samo `http` : `systemone` (zadano) ili `openai-chat`.
+- `connectionId` — pohranjena veza čiji se ključ koristi (samo unutar dozvoljenih veza pozivajućeg API ključa). Bez toga, `systemone` čita `typesafe` vezu i svaki mrežni odlučivač se vraća na `OMNIROUTE_DECISION_API_KEY`. Ne postoji polje `apiKey` : ključ se nikada ne pohranjuje u kombinaciji.
+- `timeoutMs` — cijeli broj, 100–5000, zadano 2000.
+- `minConfidence` — 0–1; odgovor sa nižom pouzdanošću se vraća na `rules` (odlučivač koji prijavljuje nepouzdanje računa se kao 0).
+- `descriptions` — do 50 unosa (ključ do 300, tekst do 1000 znakova), unesenih po ID-u modela ili `provider/model`; nepostavljeni unosi dobijaju generisani opis ranga troškova.
+
+**Zastava.** `COMBO_DECISION_ROUTER_ENABLED` (podrazumevano `false`) otvara svakog odlučujućeg. Dok je isključena, `decision` kombinacija ne čita akreditive, ne upućuje pozive i usmjerava sa `rules`; dnevnik kaže `fallback (disabled)`. Pohranjeni ključ ga nikada ne uključuje. Kombinacije bez bloka odlučivanja uopće nisu pogođene.
+
+**Šta ostavlja kutiju.** Samo tekst posljednje korisničke poruke (do 8000 znakova; chat/Claude `messages` ili Odgovori `input`) i meni ID-ova modela sa njihovim opisima. Nikada sistemski prompt, odgovori `instructions`, alati, istorija, zaglavlja ili podaci o nalogu. Mrežni pozivi prolaze kroz odlaznu zaštitu provajdera bez ponovnih pokušaja, bez preusmjeravanja i ograničenja odgovora od 64 KB. `combo-model` poziv je ne-streaming, bez alata, `temperature: 0`, sa budžetom od 256 tokena; odluka započeta unutar poziva za odlučivanje je odbijena.
+
+**Ponašanje kod neuspjeha** je otvoren za grešku: svaki neuspjeh rješava se odlukom `rules`, a razlog glasi `decision(<decider>): fallback (<reason>)`, sa `<reason>` jednim od `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion` ili `low_confidence`, `single_option` `no_user_text` Nakon isteka vremena, HTTP greške ili mrežne greške krajnja tačka se preskače na 30 s. Uspješan odabir glasi `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Nijedan URL, ključ, prompt ili uzvodno tijelo ne dopire do dnevnika.
+
+Kombinovani graditelj prikazuje ova polja kada je strategija rutera `decision`, sa generisanim opisima kao čuvarima mesta i** Odluka o testiranju** dugme koje poziva `POST /api/combos/decision-preview` jednom sa nesačuvanim postavkama (ista oznaka).
+
+**Kada koristiti** : promet mješovite težine gdje želite da se nivo po zahtjevu odabere od strane klasifikatora koji odaberete, a ne posebno Nadira.
+
+**Alias** : `decision` (bez pseudonima)
 
 ---
 
 ### Prilagođene strategije rutera
 
-Možete registrirati vlastitu implementaciju `RouterStrategy` putem javnog API-ja:
+Možete registrirati vlastitu implementaciju `RouterStrategy` putem javnog API:
 
 ```ts
 import {
@@ -827,7 +846,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Vaša logika usmjeravanja ovdje
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -842,7 +861,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Zatim je koristite:
+Zatim ga koristite:
 
 ```json
 {
@@ -857,16 +876,17 @@ Zatim je koristite:
 
 ### Vodič za odabir strategije rutera
 
-| Slučaj upotrebe          | Strategija  | Razlog                                        |
-| ------------------------ | ----------- | --------------------------------------------- |
-| Uravnoteženo opterećenje | `rules`     | Zadano — uzima u obzir sve faktore            |
-| Minimiziranje troškova   | `cost`      | Uvijek bira najjeftinijeg pružaoca            |
-| Minimiziranje latencije  | `latency`   | Bira najbržeg pouzdanog pružaoca              |
-| Strogi SLO-ovi           | `sla-aware` | Filtrira prema pragovima p95/grešaka/troškova |
-| Razgovor u više koraka   | `lkgp`      | Vezanost za sesiju                            |
-| Mješovita složenost      | `nadir`     | Bira nivo modela za svaki upit                |
+| Slučaj upotrebe                 | Strategija  | Razlog                                  |
+| ------------------------------- | ----------- | --------------------------------------- |
+| Izbalansirano radno opterećenje | `rules`     | Default — uzima u obzir sve faktore     |
+| Minimizirajte troškove          | `cost`      | Uvek bira najjeftinije                  |
+| Minimizirajte kašnjenje         | `latency`   | Bira najbržeg pouzdanog provajdera      |
+| Strogi SLOs                     | `sla-aware` | Filtrira prema p95/error/cost pragovima |
+| Chat sa više krugova            | `lkgp`      | Lepljivost sesije                       |
+| Mješovita težina                | `nadir`     | Bira nivo modela po upitu               |
+| Vlastiti klasifikator           | `decision`  | Vaš odlučivač bira model                |
 
-Polja svjesna SLA zahtjeva:
+SLA-svjesna polja:
 
 ```json
 {

@@ -82,18 +82,19 @@ innhold, logger `listMarketplacePlugins()` en advarsel og faller tilbake til sta
 
 Alle endepunkter krever administrasjonsgodkjenning (`requireManagementAuth`)** og** er loopback-bare — `/api/plugins` og `/api/plugins/` er oppført i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endepunkt                        | Metode | Beskrivelse                                             |
-| -------------------------------- | ------ | ------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Liste installerte plugins (valgfritt `?status=` filter) |
-| `/api/plugins`                   | POST   | Installer en plugin fra plugin-kildekatalogen           |
-| `/api/plugins/scan`              | POST   | Skann plugin-katalogen og registrer nye plugins         |
-| `/api/plugins/marketplace`       | GET    | List markedsplasskatalogoppføringer                     |
-| `/api/plugins/[name]`            | GET    | Få installert plugin-detaljer                           |
-| `/api/plugins/[name]`            | DELETE | Avinstaller en plugin                                   |
-| `/api/plugins/[name]/activate`   | POST   | Aktiver (last inn + registerkroker)                     |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiver (fire `onDeactivate`, avregistrer kroker)     |
-| `/api/plugins/[name]/config`     | GET    | Få plugin config + config skjema                        |
-| `/api/plugins/[name]/config`     | PUT    | Oppdater plugin-konfigurasjon (validert mot skjema)     |
+| Endepunkt                          | Metode | Beskrivelse                                             |
+| ---------------------------------- | ------ | ------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Liste installerte plugins (valgfritt `?status=` filter) |
+| `/api/plugins`                     | POST   | Installer en plugin fra plugin-kildekatalogen           |
+| `/api/plugins/scan`                | POST   | Skann plugin-katalogen og registrer nye plugins         |
+| `/api/plugins/marketplace`         | GET    | List markedsplasskatalogoppføringer                     |
+| `/api/plugins/marketplace/install` | POST   | Installer en markedsplass-plugin etter navn             |
+| `/api/plugins/[name]`              | GET    | Få installert plugin-detaljer                           |
+| `/api/plugins/[name]`              | DELETE | Avinstaller en plugin                                   |
+| `/api/plugins/[name]/activate`     | POST   | Aktiver (last inn + registerkroker)                     |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiver (fire `onDeactivate`, avregistrer kroker)     |
+| `/api/plugins/[name]/config`       | GET    | Få plugin config + config skjema                        |
+| `/api/plugins/[name]/config`       | PUT    | Oppdater plugin-konfigurasjon (validert mot skjema)     |
 
 `GET /api/plugins` `status` filteret godtar en av `installed` / `active` / `inactive` / `error`. En ugyldig verdi returnerer `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` må være en** absolutt** banen til en katalog** inne i plugin-kildekatalogen** : `plugin-sources` ved siden av plugin-roten, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` når den variabelen er satt (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopier eller klon plugin-en der først. Installasjonen avvises med `400` når banen inneholder `..` eller en nullbyte, ligger utenfor den katalogen, løses utenfor den gjennom en symbolkobling, inneholder en symbolkobling hvis mål er utenfor den, eller når katalogen ikke eksisterer. Kildekatalogen må inneholde en gyldig `plugin.json` (eller være en forelder til en). Ved suksess er svaret `201` med den installerte plugin-raden.
 
-I motsetning til de andre plugin-rutene, krever denne administrasjonslegitimasjonen (en dashbord-økt eller en API -nøkkel med administreringsomfang) selv når pålogging er deaktivert (`requireLogin=false`): å installere kode er aldri en anonym handling.
+I motsetning til de andre plugin-rutene, krever denne administrasjonslegitimasjonen (en dashbord-økt eller en API -nøkkel med administreringsomfang) selv når pålogging er deaktivert (`requireLogin=false`): å installere kode er aldri en anonym handling. Det samme gjelder for `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Bla gjennom markedsplassen
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validerer hver oppgitt verdi mot pluginens `configSchema` (erklært i manifestet): `number` feltene respekterer `min`/`max`, `select` -feltene må samsvare med det deklarerte `enum`. Nøkler som ikke er til stede i skjemaet tillates gjennom.
+`PUT .../config` validerer kroppen mot pluginens `configSchema` (erklært i manifestet) med `validatePluginConfig()` fra `src/lib/plugins/manifest.ts`: hver nøkkel må deklareres i skjemaet, verdiene må samsvare med den deklarerte typen, `number` -feltene respektere `min`/`max`, og `select` feltene må samsvare med den deklarerte `enum`. Ethvert brudd returnerer `400` og ingenting lagres. En plugin som erklærer ingen `configSchema` har ingen konfigurerbare nøkler, så forespørselen blir avvist med `400` ("Plugin deklarerer ikke noen konfigurerbare nøkler").
 
 ## Konfigurasjon
 
@@ -212,14 +213,14 @@ En URL som mislykkes i begge lagene avbryter ikke forespørselen — markedsplas
 
 ### Isolering av plugin-utførelse
 
-> **Plugins er ikke i sandkasse.** Barnet er en vanlig Node.js prosess som kjører som OmniRoute brukeren, uten VM kontekst og ingen Node.js tillatelsesflagg, så plugin-kode kan lese og skrive hvilken som helst fil som brukeren kan, kjøre programmer og nå nettverket. `requires.permissions` bestemmer bare hvilke miljøvariabler barnet mottar; de andre tillatelsene håndheves ikke. Installer kun plugins du stoler på. Prosessgrensen nedenfor inneholder krasj og henger; det er ikke en sikkerhetsgrense.
+> **Programtillegg er ikke satt i sandkasse som standard.** Barnet er en vanlig Node.js prosess som kjører som OmniRoute brukeren, uten VM kontekst og ingen Node.js tillatelsesflagg, så plugin-kode kan lese og skrive hvilken som helst fil som brukeren kan, kjøre programmer og nå nettverket. `requires.permissions` bestemmer bare hvilke miljøvariabler barnet mottar; de andre tillatelsene håndheves ikke. Opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` -funksjonsflagget (av som standard) kjører hver plugin under Node.js -tillatelsesmodellen bygget fra disse tillatelsene, bortsett fra `network`, som Node.js ikke kan begrense (se [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Installer kun plugins du stoler på. Prosessgrensen nedenfor inneholder krasj og henger; det er ikke en sikkerhetsgrense.
 
 - **Prosessisolasjon** — `loadPlugin()` (`src/lib/plugins/loader.ts`) skaper hvert plugin i en separat Node.js underordnet prosess og kommuniserer over IPC. Hook-anrop har en tidsavbrudd med `SIGTERM` → `SIGKILL` eskalering.
 - **Env tillatelsesliste** — barnet mottar bare et godkjent sett med miljøvariabler; det bredere settet gis bare når manifestet ber om `env` tillatelse.
 - **Installer kildebegrensning** — `POST /api/plugins` leser kun fra plugin-kildekatalogen (se "Installer fra en lokal bane"): banen er kanonisert med `realpath`, må holde seg strengt inne i den katalogen, og et kildetre som har en symbolkobling som unnslipper den, blir avvist før noe kopieres.
-- **Inneslutning av stien** — install/upgrade/uninstall hevder at plugin-katalogen og `manifest.main` løser seg** innenfor** den administrerte plugin-roten før kopiering eller rekursiv sletting (beskytter mot manipulerte DB -baner og `../` -kryssing i `manifest.main`). Aktivering løser symbolkoblinger via `realpath` og nekter å laste inn et inngangspunkt som unnslipper plugin-katalogen.
+- **Inneslutning av stien** — install/upgrade/uninstall hevder at plugin-katalogen og `manifest.main` løser seg** innenfor** den administrerte plugin-roten før kopiering eller rekursiv sletting (beskytter mot manipulerte DB -baner og `../` -gjennomgang i `manifest.main`). Aktivering løser symbolkoblinger via `realpath` og nekter å laste inn et inngangspunkt som unnslipper plugin-katalogen.
 - **Valgfri integritetspinne** — et manifest kan erklære et `integrity` (`sha256-<base64>`, SRI format) felt. Når den er tilstede, verifiserer lasteren hash for oppføringsfilen ved lastetid og nekter å aktiveres ved mismatch. Det er opt-in sabotasjedeteksjon,** ikke** en sikkerhetsgrense: den begrenser ikke hva en lastet plugin kan gjøre.
-- **Ingen klientlegitimasjon i kroker** — konteksten som sendes til `onRequest`, `onResponse` og `onError` har `authorization`, `x-api-key`, `proxy-authorization` og `cookie` -overskriftene fjernet, og API nøkkelposten har ingen nøkkelverdi (`redactPluginContext()` i `src/lib/plugins/hooks.ts`).
+- **Ingen klientlegitimasjon i kroker** — konteksten sendt til `onRequest`, `onResponse` og `onError` har `authorization`, `x-api-key`, `proxy-authorization` og `cookie` -overskriftene fjernet, og API nøkkelposten har ingen nøkkelverdi (`redactPluginContext()` i `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
