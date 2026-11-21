@@ -65,7 +65,6 @@ export interface FairShareDecision {
   kind: "allow" | "block";
   reason: "ok" | "fair-share" | "cap-absolute" | "global-saturated";
   penalized?: boolean;
-  retryAfterMs?: number;
   /** The dimension and ceiling of a share refusal. Not set for an absolute cap. */
   blocked?: BlockedDimension;
 }
@@ -159,13 +158,14 @@ export function decideFairShare(input: FairShareInput): FairShareDecision {
       // effectivePolicy is normalized (unknown → hard), so these cases are
       // exhaustive and an unknown policy is enforced as hard.
       switch (effectivePolicy) {
-        case "hard":
+        case "hard": {
           // Hard: block once consumed >= fair_share (plus what is lent, in a consent pool)
           const ceiling = fairShare + (dim.borrowAvailable ?? 0);
           if (consumed >= ceiling) {
             return blockAt("fair-share", dim, consumed, ceiling);
           }
           break;
+        }
 
         case "soft":
           // Soft: allow but penalise if above fair_share

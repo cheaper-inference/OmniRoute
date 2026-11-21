@@ -170,3 +170,15 @@ test("the refusal reaches the wire with Retry-After and the same public code", a
   assert.equal(body.error.code, "quota_share_blocked");
   assert.match(body.error.message, /resets at 2026-11-20T18:00:00\.000Z/);
 });
+
+test("Retry-After lands strictly after the reset instant", () => {
+  assert.deepEqual(
+    [
+      retryAfterSecondsFor(NOW + 30_000, NOW),
+      retryAfterSecondsFor(NOW + 30_001, NOW),
+      retryAfterSecondsFor(NOW + 29_999, NOW),
+      retryAfterSecondsFor(NOW + 1, NOW),
+    ],
+    [31, 31, 30, 1]
+  );
+});

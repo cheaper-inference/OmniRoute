@@ -1,5 +1,5 @@
 /**
- * selfViewLending.ts — the lending fields of the self-service quota view.
+ * selfViewLending.ts: the lending fields of the self-service quota view.
  *
  * `selfLendingFields` reports the key's own consent and the pool's borrow mode. Consent counts as
  * active only in a consent pool, with a percentage above 0 and a deadline not yet reached.

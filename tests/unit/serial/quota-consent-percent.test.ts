@@ -140,7 +140,7 @@ await test("quota-consent-percent", async (t) => {
         `Quota share limit reached for your API key on claude. The 5h window resets at ${resetAt}.`
       );
       const retryAfter = Number(result.response.headers.get("Retry-After"));
-      const expected = Math.ceil((Date.parse(resetAt) - before) / 1000);
+      const expected = Math.floor((Date.parse(resetAt) - before) / 1000) + 1;
       assert.ok(retryAfter > 0 && retryAfter <= expected && expected - retryAfter < 30);
     }
   );

@@ -82,8 +82,11 @@ export function blockResetSuffix(
     : `. Enough ${blocked.window} usage is expected to clear by ${iso}.`;
 }
 
-/** Whole seconds until the reset, at least 1, or undefined when the reset is not known. */
+/**
+ * Whole seconds that end strictly after the reset, or undefined when the reset is not known.
+ * At the reset instant itself the gate still refuses, so a client waits one second past it at most.
+ */
 export function retryAfterSecondsFor(resetAtMs: number | null, nowMs: number): number | undefined {
   if (resetAtMs === null || !Number.isFinite(resetAtMs)) return undefined;
-  return Math.max(1, Math.ceil((resetAtMs - nowMs) / 1000));
+  return Math.max(1, Math.floor((resetAtMs - nowMs) / 1000) + 1);
 }

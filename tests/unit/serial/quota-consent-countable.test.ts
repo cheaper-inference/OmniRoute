@@ -36,11 +36,15 @@ test.after(() => {
 
 const PROV = "claude";
 
+/** Provider usage fetches, one per saturation read while the saturation cache is cleared. */
+let usageFetches = 0;
+
 function mockUsage(byConn: Record<string, { fiveHour?: number; weekly?: number }>) {
   sat._clearSaturationCache();
   sat.__setAnthropicSaturationDepsForTests({
     loadConnection: async (id: string) => ({ id, accessToken: "tok", authType: "oauth" }),
     fetchUsage: async (conn: Record<string, unknown>) => {
+      usageFetches += 1;
       const u = byConn[String(conn.id)] ?? {};
       return {
         quotas: {
@@ -58,14 +62,12 @@ const ALLOCATIONS: PoolAllocation[] = [
   { apiKeyId: "c", weight: 0, policy: "hard" },
 ];
 
+/** Reads of a refused hard key in a saturation pool, measured on the gate before consent lending. */
+const READS_PRE_CHANGE = { peek: 1, poolConsumedTotal: 1, saturation: 1 };
+
 /** Manual one-dimension tokens plan + a pool on that connection in the given borrow mode. */
-function mk(conn: string, mode: "saturation" | "consent") {
-  providerPlans.upsertPlan(
-    conn,
-    PROV,
-    [{ unit: "tokens", window: "daily", limit: 1000 }],
-    "manual"
-  );
+function mk(conn: string, mode: "saturation" | "consent", window: "daily" | "5h" = "daily") {
+  providerPlans.upsertPlan(conn, PROV, [{ unit: "tokens", window, limit: 1000 }], "manual");
   return quotaPools.createPool({
     connectionId: conn,
     name: conn,
@@ -108,6 +110,14 @@ async function countReads<T>(fn: () => Promise<T>) {
   }
 }
 
+/** The two store reads plus the saturation reads. A cleared cache sends each one to the mock. */
+async function countAllReads<T>(fn: () => Promise<T>) {
+  sat._clearSaturationCache();
+  const fetchesBefore = usageFetches;
+  const { result, reads } = await countReads(fn);
+  return { result, reads: { ...reads, saturation: usageFetches - fetchesBefore } };
+}
+
 mockUsage({});
 
 await test("quota-consent-countable", async (t) => {
@@ -132,13 +142,44 @@ await test("quota-consent-countable", async (t) => {
         await burn(conn, "c", 50);
       }
       for (const key of ["a", "b", "c"]) {
-        const lentRun = await countReads(() => ask("c-sat-lent", key));
-        const plainRun = await countReads(() => ask("c-sat-plain", key));
+        const lentRun = await countAllReads(() => ask("c-sat-lent", key));
+        const plainRun = await countAllReads(() => ask("c-sat-plain", key));
         assert.deepEqual(lentRun.result, plainRun.result);
         assert.equal(lentRun.result.kind, "allow");
-        // One countable dimension: the requester's own peek and the pool total, nothing else.
-        assert.deepEqual(lentRun.reads, { peek: 1, poolConsumedTotal: 1 });
-        assert.deepEqual(plainRun.reads, { peek: 1, poolConsumedTotal: 1 });
+        // One countable dimension: the requester's own peek, the saturation read and the pool total.
+        assert.deepEqual(lentRun.reads, { peek: 1, poolConsumedTotal: 1, saturation: 1 });
+        assert.deepEqual(plainRun.reads, { peek: 1, poolConsumedTotal: 1, saturation: 1 });
+      }
+    }
+  );
+
+  await t.test(
+    "saturation pool: a refused hard key makes the same reads with or without stored consent",
+    async () => {
+      // A 5h window, because the mocked provider reports plan usage for 5h and weekly only.
+      const lent = mk("c-satb-lent", "saturation", "5h");
+      setAllocationLending(lent.id, "b", { lendingPercent: 50, lendingUntil: null });
+      mk("c-satb-plain", "saturation", "5h");
+      // A saturated account puts the pool in strict mode, so a hard key stops at its share.
+      mockUsage({
+        "c-satb-lent": { fiveHour: 90, weekly: 90 },
+        "c-satb-plain": { fiveHour: 90, weekly: 90 },
+      });
+      try {
+        for (const conn of ["c-satb-lent", "c-satb-plain"]) await burn(conn, "a", 600);
+        const lentRun = await countAllReads(() => ask("c-satb-lent", "a"));
+        const plainRun = await countAllReads(() => ask("c-satb-plain", "a"));
+        assert.equal(lentRun.result.kind, "block");
+        assert.equal(plainRun.result.kind, "block");
+        assert.equal(
+          lentRun.result.kind === "block" ? lentRun.result.reason : "",
+          plainRun.result.kind === "block" ? plainRun.result.reason : ""
+        );
+        // The same reads the gate made before consent lending existed.
+        assert.deepEqual(lentRun.reads, READS_PRE_CHANGE);
+        assert.deepEqual(plainRun.reads, READS_PRE_CHANGE);
+      } finally {
+        mockUsage({});
       }
     }
   );
