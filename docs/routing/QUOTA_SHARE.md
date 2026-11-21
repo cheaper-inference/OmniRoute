@@ -461,17 +461,77 @@ A reading the API marks `stale` is shown as possibly out of date. A reading it m
 `unavailable` is shown with its reason, never as zero. On percentage plans the key's own share is
 not calculated yet, and the page says so.
 
+### Dedicated port for the page
+
+`QUOTA_PANEL_PORT` opens a second listener that serves only the self-service page. It is off
+unless the variable is set. `QUOTA_PANEL_HOST` is the bind address and defaults to `127.0.0.1`.
+
+The listener relays these paths to the main port and answers 404 for every other path:
+
+| Path                                                                     | Serves                                 |
+| ------------------------------------------------------------------------ | -------------------------------------- |
+| `/quota/{provider}`                                                      | The page                               |
+| `/api/v1/me/quota/{provider}`, `/v1/me/quota/{provider}`                 | The quota view the page reads          |
+| `/api/v1/me/usage`, `/v1/me/usage`                                       | The usage series the page reads        |
+| `/_next/static/`                                                         | Scripts, styles and fonts of the build |
+| `/favicon.ico`, `/favicon.svg`, `/icon-512.png`, `/apple-touch-icon.png` | Icons                                  |
+
+Only `GET` and `HEAD` are relayed. Any other method answers 404, and so does a request that
+declares a body. Upgrade requests are refused and their connection is closed. A path with a dot
+segment or a fragment marker is refused, as on the API port. So is a request target with a
+character outside printable ASCII. The dashboard, the login page, the management API and the
+inference routes cannot be reached through this port.
+
+The 404 body is `{"error":"not_found","message":"Not found."}`. A failed relay answers 502
+(`api_bridge_unavailable`) or 504 (`api_bridge_timeout`) with no `detail` field.
+
+The listener does not read `QUOTA_SELF_PANEL`, and it does not turn the page on. While the flag
+is off, the page and its API answer 404 on the main port, and the listener relays that answer.
+
+The port serves plain HTTP and the page sends API keys. Keep the default bind address and put a
+reverse proxy with TLS in front of it. A bind address other than loopback logs this notice:
+
+```text
+[Quota Panel] Bound to <host>. This port serves plain HTTP and the page sends API keys. Put a TLS reverse proxy in front of it.
+```
+
+A loopback peer that sends no forwarding header counts as local on the main port. So a proxy on
+the same host must send `X-Forwarded-For`. A proxy on a private address is trusted for that
+header only with `OMNIROUTE_TRUST_PROXY=private` (or `lan`). Any other peer is reported by the
+address of its connection, and the forwarding headers it sent are dropped.
+
+The listener uses the timeouts of the API port (`API_BRIDGE_*`). It also starts when `API_PORT`
+is not set. `QUOTA_PANEL_PORT` must be a port from 1 to 65535, written in digits only. It must
+differ from the dashboard port and the API port. While the live WebSocket server is on, it must
+also differ from `LIVE_WS_PORT` (default 20132). Any other value opens nothing and logs a
+warning. A port that is already in use does the same. A warning about a refused value names the
+variable and does not repeat the value.
+
+With `OMNIROUTE_BASE_PATH` set, the listener expects every path above under that prefix. Use the
+same `OMNIROUTE_BASE_PATH` at build time and at run time. Write it with a leading slash and no
+trailing slash, for example `/omniroute`. Another shape, including `/` and `/omniroute/`, leaves
+the port off with a warning, although the build accepts those forms.
+
+Limitations:
+
+- `/quota/{provider}/` with a trailing slash answers 404 on this port.
+- The service worker and the web app manifest are not served on this port.
+- A custom favicon set in the dashboard is not shown on this port.
+- Container setups are not covered by this section.
+
 ---
 
 ## Environment Variables
 
-| Variable                           | Default   | Description                                            |
-| ---------------------------------- | --------- | ------------------------------------------------------ |
-| `QUOTA_STORE_DRIVER`               | `sqlite`  | Driver to use: `sqlite` or `redis`                     |
-| `QUOTA_STORE_REDIS_URL`            | _(empty)_ | Redis URL, e.g. `redis://localhost:6379`               |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`     | 0..1; `>= threshold` activates strict mode             |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`     | 0..1; multiplier for soft-policy combo score           |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`      | Days before GC removes old `quota_consumption` buckets |
+| Variable                           | Default     | Description                                                        |
+| ---------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `QUOTA_STORE_DRIVER`               | `sqlite`    | Driver to use: `sqlite` or `redis`                                 |
+| `QUOTA_STORE_REDIS_URL`            | _(empty)_   | Redis URL, e.g. `redis://localhost:6379`                           |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`       | 0..1; `>= threshold` activates strict mode                         |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`       | 0..1; multiplier for soft-policy combo score                       |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`        | Days before GC removes old `quota_consumption` buckets             |
+| `QUOTA_PANEL_PORT`                 | _(unset)_   | Dedicated port for the self-service page. Unset means no listener. |
+| `QUOTA_PANEL_HOST`                 | `127.0.0.1` | Bind address for that port                                         |
 
 DB settings (`quotaStore.*`) override env vars.
 
