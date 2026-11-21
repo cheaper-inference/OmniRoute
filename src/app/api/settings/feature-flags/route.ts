@@ -51,6 +51,7 @@ function flagPayload(
     source,
     requiresRestart: definition.requiresRestart,
     warningLevel: definition.warningLevel,
+    envOnly: definition.envOnly === true,
   };
 }
 
@@ -175,6 +176,19 @@ export async function PUT(request: NextRequest) {
 
   const authError = await authorizeProtectedFeatureFlagWrite(request, [key]);
   if (authError) return authError;
+
+  // Env-only flags are read with process.env by their consumers, so a stored
+  // override would be reported by this API and ignored by the runtime (#20778).
+  if (definition.envOnly) {
+    return NextResponse.json(
+      {
+        error:
+          `${key} is an environment-only feature flag; set it in the process environment ` +
+          `and restart. The dashboard cannot override it.`,
+      },
+      { status: 400 }
+    );
+  }
 
   const enumError = rejectInvalidEnumValue(definition, key, value);
   if (enumError) return enumError;

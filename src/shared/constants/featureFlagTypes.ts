@@ -11,4 +11,10 @@ export interface FeatureFlagDefinition {
   enumValues?: string[];
   requiresRestart: boolean;
   warningLevel?: "info" | "caution" | "danger";
+  /**
+   * The consumers of this key read the environment directly. A dashboard
+   * override cannot reach them, so the API refuses one instead of storing a
+   * value nothing reads.
+   */
+  envOnly?: boolean;
 }

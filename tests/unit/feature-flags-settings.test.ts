@@ -573,8 +573,10 @@ describe("resolveFeatureFlag", () => {
     });
 
     it("returns true for '1'", () => {
-      setFeatureFlagOverride("SKILLS_SANDBOX_NETWORK_ENABLED", "1");
-      assert.ok(isFeatureFlagEnabled("SKILLS_SANDBOX_NETWORK_ENABLED"));
+      // SKILLS_SANDBOX_NETWORK_ENABLED is environment-only (its consumers read
+      // process.env), so it can no longer stand in for a DB-backed boolean.
+      setFeatureFlagOverride("COMBO_AUTO_PRUNE_STALE_STEPS", "1");
+      assert.ok(isFeatureFlagEnabled("COMBO_AUTO_PRUNE_STALE_STEPS"));
     });
 
     it("returns true for 'yes'", () => {
