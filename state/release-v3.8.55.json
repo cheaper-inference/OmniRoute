@@ -132,13 +132,11 @@
       "18677": "97a3dda84747f8039df0f63896c96780d978ebde",
       "18737": "68cf0df31246015e2b33caa70a72cc1808f471e8",
       "18786": "267b99c512dbac09b2fe8876c9a9ec9b7913ab9f",
-      "18804": "a140f9b78053705ef57686e6fc4b484d380c1776",
       "19132": "beed91198d6f1f34a82955166724b2f61fa22ff0",
       "19149": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
       "19167": "5a3523ee5d9dc3a3fe610ed93b4c5ccb048bbca0",
       "19305": "1f33f0e10883549e4374ac38d47e87c94936bc5c",
       "19306": "4afb0ca62e19eb94155c5b9c2b78bf4b91ae1dee",
-      "19403": "b8705ef21a1cf8b52d9f396a7e0fb6bb08db2056",
       "19542": "81a5a241fcc7f71bf35b8a0e6298ccef92a17092"
     }
   },
@@ -1723,6 +1721,6 @@
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44923728342"
     }
   ],
-  "updatedAt": "2026-11-21T16:17:53.389Z",
+  "updatedAt": "2026-11-21T17:11:33.777Z",
   "batchWindow": 6
 }
