@@ -856,19 +856,19 @@ export default function AddApiKeyModal({
                 />
                 {validationCapabilities && (
                   <div className="grid grid-cols-2 gap-2 text-xs text-text-muted">
-                    <div>Browser: bereit</div>
-                    <div>Storage-State: geprüft</div>
-                    <div>ChatGPT-Anmeldung: bestätigt</div>
-                    <div>Temporary Chat: bereit</div>
+                    <div>Browser: ready</div>
+                    <div>Storage-State: checked</div>
+                    <div>ChatGPT login: confirmed</div>
+                    <div>Temporary Chat: ready</div>
                     <div>
                       Pro:{" "}
-                      {validationCapabilities.proAvailable === true ? "verfügbar" : "nicht erkannt"}
+                      {validationCapabilities.proAvailable === true ? "available" : "not detected"}
                     </div>
                     <div>
-                      Toolmodus:{" "}
+                      Tool mode:{" "}
                       {formData.tunnelId.trim() && formData.runtimeKey.trim()
-                        ? "konfiguriert"
-                        : "global oder read-only"}
+                        ? "configured"
+                        : "global or read-only"}
                     </div>
                   </div>
                 )}

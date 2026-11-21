@@ -449,7 +449,7 @@ export function FreeBudgetView({
             <Icon name="lock_open" size={14} className="text-success" />
             <span className="text-[11px] font-semibold text-success">{labels.noApiKey}</span>
             <span className="text-[10.5px] text-text-muted">
-              ({keylessModels.length}个模型 · {keylessProviders.length}个提供者)
+              ({keylessModels.length} models · {keylessProviders.length} providers)
             </span>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">

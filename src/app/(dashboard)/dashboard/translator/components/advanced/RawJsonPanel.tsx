@@ -257,10 +257,10 @@ export default function RawJsonPanel({
 
   return (
     <Collapsible
-      title={tr("advancedRawJsonTitle", "Raw JSON (auto-detecção + Monaco)")}
+      title={tr("advancedRawJsonTitle", "Raw JSON (auto-detection + Monaco)")}
       subtitle={tr(
         "advancedRawJsonSubtitle",
-        "Cole um request JSON; o formato é detectado automaticamente."
+        "Paste a JSON request; the format is detected automatically."
       )}
       icon="code"
       defaultOpen={defaultOpen || forceOpen}

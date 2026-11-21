@@ -294,7 +294,7 @@ export default function SubscriptionTab() {
         const parsed = JSON.parse(raw) as { code?: string; detail?: string };
         if (parsed?.code) {
           const base = t(`proxySubscription.error.${parsed.code}`);
-          return parsed.detail ? `${base}（${parsed.detail}）` : base;
+          return parsed.detail ? `${base} (${parsed.detail})` : base;
         }
       } catch {
         // plain diagnostic string — show as-is

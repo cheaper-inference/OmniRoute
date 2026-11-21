@@ -339,8 +339,8 @@ export default function QdrantConfigCard() {
 
       {!qdrant.enabled && !searchValidated && (
         <p className="-mt-2 mb-4 text-xs text-warning">
-          Execute um teste de busca bem-sucedido antes de ativar. Ele valida o modelo de embedding e
-          a dimensão da coleção.
+          Run a successful search test before enabling. It validates the embedding model and the
+          collection dimension.
         </p>
       )}
 
@@ -358,15 +358,15 @@ export default function QdrantConfigCard() {
         <div className="mb-4 rounded-lg border border-border/50 bg-bg-subtle p-3 text-xs text-text-muted">
           {health.collection.exists ? (
             <>
-              Coleção compatível com vetores de dimensão{" "}
+              Collection compatible with vectors of dimension{" "}
               <strong>{health.collection.vectorSize}</strong>
-              {health.collection.vectorName ? ` (vetor: ${health.collection.vectorName})` : ""}. O
-              modelo configurado deve gerar a mesma dimensão.
+              {health.collection.vectorName ? ` (vector: ${health.collection.vectorName})` : ""}.
+              The configured model must produce the same dimension.
             </>
           ) : (
             <>
-              A coleção ainda não existe. Ela será criada na primeira gravação com o modelo
-              validado.
+              The collection does not exist yet. It will be created on the first write with the
+              validated model.
             </>
           )}
         </div>

@@ -172,8 +172,11 @@ export default function PipelineView({
 
   return (
     <Collapsible
-      title={tr("advancedPipelineTitle", "Pipeline OpenAI intermediário")}
-      subtitle={tr("advancedPipelineSubtitle", "Visualize cada passo da tradução (hub-and-spoke).")}
+      title={tr("advancedPipelineTitle", "Intermediate OpenAI pipeline")}
+      subtitle={tr(
+        "advancedPipelineSubtitle",
+        "Visualize each step of the translation (hub-and-spoke)."
+      )}
       icon="route"
       defaultOpen={defaultOpen || forceOpen}
       className="border-border"
@@ -198,7 +201,7 @@ export default function PipelineView({
                 <span>
                   {tr(
                     "pipelineVisualizationHint",
-                    "Envie um request pelo Chat Tester para ver o pipeline em tempo real. Abaixo: exemplo estático."
+                    "Send a request through Chat Tester to see the pipeline in real time. Below: static example."
                   )}
                 </span>
               </div>
