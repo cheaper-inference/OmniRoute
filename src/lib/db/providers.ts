@@ -1192,6 +1192,9 @@ export {
   stripCodexChildCooldownsFromConnection,
   hasCodexScopeCooldown,
   liftCodexScopeCooldownOnHeadroom,
+  readCodexUnsupportedModels,
+  persistCodexUnsupportedModel,
+  clearCodexUnsupportedModel,
 } from "./providers/codexAccountState";
 
 /**
