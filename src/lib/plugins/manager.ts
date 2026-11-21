@@ -15,6 +15,8 @@ import { logger } from "../../../open-sse/utils/logger.ts";
 import { getDefaultPluginDir, scanPluginDir } from "./scanner";
 import { getPluginSourcesDir, resolvePluginInstallSource } from "./installSource";
 import { loadPlugin, type LoadedPlugin } from "./loader";
+import { getPluginDataDir } from "./permissionModel";
+import { isPluginPermissionModelEnabled } from "../../shared/utils/featureFlags";
 import { registerHook, unregisterHooks, emitHook, type HookHandler, type Plugin } from "./hooks";
 import {
   insertPlugin,
@@ -426,7 +428,11 @@ class PluginManager {
     }
 
     try {
-      const loaded = await loadPlugin(entryPoint, manifest);
+      const loaded = await loadPlugin(entryPoint, manifest, {
+        permissionModel: isPluginPermissionModelEnabled(),
+        pluginDir: resolvedPluginDir,
+        dataDir: getPluginDataDir(this.pluginDir, name),
+      });
 
       const hookNames: LifecycleHookName[] = [
         "onRequest",
