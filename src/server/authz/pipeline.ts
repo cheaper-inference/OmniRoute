@@ -22,6 +22,7 @@ import {
 import { validateBrowserMutationOrigin } from "../origin/publicOrigin";
 import { classifyRoute } from "./classify";
 import { validateDashboardCsrfToken } from "./csrf";
+import { managedProxyDeletionDestination } from "./managedProxyDeletionDispatch";
 import {
   classifyStampedPeerLocality,
   resolveStampedPeer,
@@ -266,6 +267,11 @@ function isBodySizeGuardedPath(pathname: string): boolean {
   return pathname.startsWith("/api/") || pathname === "/a2a" || pathname.startsWith("/a2a/");
 }
 
+/**
+ * Classify requests, replace trusted headers, and apply request-size and CORS handling.
+ * With enforcement enabled, check policy and origins before stamping the subject or
+ * rewriting eligible loopback deletions to the managed-core handler.
+ */
 export async function runAuthzPipeline(
   request: NextRequest,
   options: AuthzPipelineOptions = {}
@@ -445,7 +451,7 @@ export async function runAuthzPipeline(
   const policy = POLICIES[classification.routeClass];
   const outcome = await policy.evaluate({ request, classification, requestId });
 
-  if (!outcome.allow) {
+  if (outcome.allow === false) {
     if (managementDashboardRoute) {
       return dashboardLoginRedirect(request, requestId);
     }
@@ -498,7 +504,14 @@ export async function runAuthzPipeline(
 
   stampSubject(requestHeaders, outcome.subject);
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const deletionDestination = managedProxyDeletionDestination(
+    request,
+    guardedPathname,
+    requestHeaders
+  );
+  const response = deletionDestination
+    ? NextResponse.rewrite(deletionDestination, { request: { headers: requestHeaders } })
+    : NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
   response.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
   // Only relax CORS for a CLIENT_API request whose credential actually
