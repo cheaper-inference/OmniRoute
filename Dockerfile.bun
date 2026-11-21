@@ -70,13 +70,19 @@ LABEL org.opencontainers.image.title="omniroute" \
 
 WORKDIR /app
 
+# `apt-get upgrade` pulls the trixie security fixes published since the oven/bun base image
+# was built, as the Node base stage does; without it 3.8.54-bun shipped apt, libapt-pkg7.0
+# and zlib1g with a fix available. Only what the runtime uses is installed, matching the
+# Node runner: the healthcheck is `bun healthcheck.mjs` and the database is bun:sqlite, so
+# curl (which pulled the Kerberos libraries) and the sqlite3 CLI are not.
 RUN apt-get update \
+  && apt-get upgrade -y \
   && apt-get install -y --no-install-recommends \
      libsecret-1-0 \
      ca-certificates \
-     curl \
-     sqlite3 \
   && rm -rf /var/lib/apt/lists/*
+
+RUN bun -e "import { Database } from 'bun:sqlite'; const db = new Database(':memory:'); db.query('SELECT 1 AS ok').get(); db.close(); console.log('bun:sqlite runtime smoke: OK');"
 
 ENV NODE_ENV=production
 ENV PORT=20128
