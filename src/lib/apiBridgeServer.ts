@@ -2,6 +2,11 @@ import http from "http";
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
 import net from "net";
 import { classifyIpScope } from "@/lib/ipUtils";
+import {
+  isPrintableAsciiTarget,
+  isQuotaPanelPath,
+  QUOTA_PANEL_METHODS,
+} from "@/lib/quotaPanelBridge";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { warnIfNonLoopbackWithoutApiKey } from "@/lib/startup/nonLoopbackApiKeyGuard";
 import { getTrustProxyMode } from "@/server/origin/trustProxyMode";
@@ -69,10 +74,85 @@ export function hasDotSegment(pathname: string): boolean {
  * validated would not be the path the server behind the bridge resolves. A marker after
  * the `?` belongs to the query for every parser and is left alone.
  */
-export function isRelayablePath(rawUrl: string): boolean {
+export function isRelayablePath(
+  rawUrl: string,
+  isAllowedPath: (pathname: string) => boolean = isOpenAiCompatiblePath
+): boolean {
   const pathname = rawUrl.split("?")[0] || "/";
   if (pathname.includes("#")) return false;
-  return !hasDotSegment(pathname) && isOpenAiCompatiblePath(pathname);
+  return !hasDotSegment(pathname) && isAllowedPath(pathname);
+}
+
+/**
+ * What one listener of the bridge relays.
+ *
+ * Every listener shares the path guard, the client address handling, the timeouts and the
+ * relay itself. Listeners differ only in the fields of their role.
+ */
+export interface BridgeRole {
+  /** Allowlist, matched against the raw path without the query. */
+  isAllowedPath: (pathname: string) => boolean;
+  /** Methods relayed, upper case. `null` relays every method. */
+  methods: ReadonlySet<string> | null;
+  /** When true, a target with a character outside printable ASCII is refused. */
+  strictTarget: boolean;
+  /** When false, every upgrade request is refused. */
+  relayUpgrades: boolean;
+  /** When false, a request that declares a body is refused. */
+  relayBodies: boolean;
+  /** The `message` of the 404 body. It never says why the request was refused. */
+  notFoundMessage: string;
+  /** When false, the 502 and 504 bodies carry no `detail`. */
+  errorDetail: boolean;
+}
+
+const API_BRIDGE_ROLE: BridgeRole = {
+  isAllowedPath: isOpenAiCompatiblePath,
+  methods: null,
+  strictTarget: false,
+  relayUpgrades: true,
+  relayBodies: true,
+  notFoundMessage: "API port only serves OpenAI-compatible routes.",
+  errorDetail: true,
+};
+
+/** The role of the quota panel port: the self-service quota page, read only. */
+export function createQuotaPanelRole(basePath = ""): BridgeRole {
+  return {
+    isAllowedPath: (pathname) => isQuotaPanelPath(pathname, basePath),
+    methods: QUOTA_PANEL_METHODS,
+    strictTarget: true,
+    relayUpgrades: false,
+    relayBodies: false,
+    notFoundMessage: "Not found.",
+    errorDetail: false,
+  };
+}
+
+/** True when the role relays this method and target. The path goes through `isRelayablePath`. */
+export function isRelayableRequest(
+  role: BridgeRole,
+  method: string | undefined,
+  rawUrl: string
+): boolean {
+  if (role.strictTarget && !isPrintableAsciiTarget(rawUrl)) return false;
+  if (role.methods && !role.methods.has(method ?? "")) return false;
+  return isRelayablePath(rawUrl, role.isAllowedPath);
+}
+
+/** True when the request declares a body, by a non-zero length or any transfer coding. */
+function declaresRequestBody(headers: IncomingHttpHeaders): boolean {
+  if (headers["transfer-encoding"] !== undefined) return true;
+  const length = headers["content-length"];
+  return length !== undefined && Number(length) !== 0;
+}
+
+function notFoundBody(role: BridgeRole): string {
+  return JSON.stringify({ error: "not_found", message: role.notFoundMessage });
+}
+
+function relayErrorBody(role: BridgeRole, error: string, detail: string): string {
+  return JSON.stringify(role.errorDetail ? { error, detail } : { error });
 }
 
 function requestWantsStreaming(req: IncomingMessage): boolean {
@@ -141,7 +221,12 @@ export function buildBridgeRequestHeaders(
   return relayed;
 }
 
-function proxyRequest(req: IncomingMessage, res: ServerResponse, dashboardPort: number): void {
+function proxyRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  dashboardPort: number,
+  role: BridgeRole
+): void {
   const proxyTimeoutMs = getProxyTimeoutMs(req);
   const targetReq = http.request(
     {
@@ -170,22 +255,18 @@ function proxyRequest(req: IncomingMessage, res: ServerResponse, dashboardPort: 
     if (res.headersSent) return;
     res.writeHead(504, { "content-type": "application/json" });
     res.end(
-      JSON.stringify({
-        error: "api_bridge_timeout",
-        detail: `Proxy request timed out after ${proxyTimeoutMs}ms`,
-      })
+      relayErrorBody(
+        role,
+        "api_bridge_timeout",
+        `Proxy request timed out after ${proxyTimeoutMs}ms`
+      )
     );
   });
 
   targetReq.on("error", (error) => {
     if (res.headersSent) return;
     res.writeHead(502, { "content-type": "application/json" });
-    res.end(
-      JSON.stringify({
-        error: "api_bridge_unavailable",
-        detail: String(error.message || error),
-      })
-    );
+    res.end(relayErrorBody(role, "api_bridge_unavailable", String(error.message || error)));
   });
 
   req.on("aborted", () => {
@@ -297,40 +378,32 @@ declare global {
   var __omnirouteApiBridgeStarted: boolean | undefined;
 }
 
-export function createApiBridgeServer(dashboardPort: number): http.Server {
+export function createApiBridgeServer(
+  dashboardPort: number,
+  role: BridgeRole = API_BRIDGE_ROLE
+): http.Server {
   const server = http.createServer((req, res) => {
     // Absorb client-abort errors (browser closes the socket during navigation/
     // HMR/bfcache) on the request/response streams so they never surface as an
     // uncaughtException that kills the server (#fix-dev-server-aborted).
     attachRequestStreamGuards(req, res);
 
-    if (!isRelayablePath(req.url || "/")) {
+    const refusedBody = !role.relayBodies && declaresRequestBody(req.headers);
+    if (refusedBody || !isRelayableRequest(role, req.method, req.url || "/")) {
       res.writeHead(404, { "content-type": "application/json" });
-      res.end(
-        JSON.stringify({
-          error: "not_found",
-          message: "API port only serves OpenAI-compatible routes.",
-        })
-      );
+      res.end(notFoundBody(role));
       return;
     }
 
-    proxyRequest(req, res, dashboardPort);
+    proxyRequest(req, res, dashboardPort, role);
   });
   server.requestTimeout = API_BRIDGE_TIMEOUTS.serverRequestTimeoutMs;
   server.headersTimeout = API_BRIDGE_TIMEOUTS.serverHeadersTimeoutMs;
   server.keepAliveTimeout = API_BRIDGE_TIMEOUTS.serverKeepAliveTimeoutMs;
   server.setTimeout(API_BRIDGE_TIMEOUTS.serverSocketTimeoutMs);
   server.on("upgrade", (req, socket, head) => {
-    if (!isRelayablePath(req.url || "/")) {
-      writeUpgradeProxyError(
-        socket,
-        404,
-        JSON.stringify({
-          error: "not_found",
-          message: "API port only serves OpenAI-compatible routes.",
-        })
-      );
+    if (!role.relayUpgrades || !isRelayableRequest(role, req.method, req.url || "/")) {
+      writeUpgradeProxyError(socket, 404, notFoundBody(role));
       return;
     }
 
