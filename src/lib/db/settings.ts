@@ -454,7 +454,11 @@ export async function updateSettings(
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));
   });
   tx();
-  invalidateDbCache("settings"); // Bust the read cache immediately
+  // learnedRateLimits is runtime-only (no catalog reader): keep the /v1/models cache for it.
+  const updateKeys = Object.keys(updates);
+  const skipModelCatalog =
+    updateKeys.length > 0 && updateKeys.every((k) => k === "learnedRateLimits");
+  invalidateDbCache("settings", undefined, { skipModelCatalog }); // Bust the read cache immediately
 
   // Bust proxy resolution cache when proxy toggle settings change
   const PROXY_TOGGLE_KEYS = ["proxyEnabled", "perKeyProxyEnabled"];
