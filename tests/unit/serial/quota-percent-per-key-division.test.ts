@@ -21,6 +21,10 @@ import type { PoolAllocation } from "../../../src/lib/db/quotaPools.ts";
 // ── Set DATA_DIR BEFORE any DB import (resolved as module-level constant) ───
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-percent-division-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// Every expected value below assumes the default floor.
+const FLOOR_ENV = "QUOTA_PERCENT_MIN_TOKENS_PER_POINT";
+const savedFloor = process.env[FLOOR_ENV];
+delete process.env[FLOOR_ENV];
 
 const providerPlans = await import("../../../src/lib/db/providerPlans.ts");
 const quotaPools = await import("../../../src/lib/db/quotaPools.ts");
@@ -32,6 +36,8 @@ test.after(() => {
   sat.__setAnthropicSaturationDepsForTests(null);
   sat._clearSaturationCache();
   core.resetDbInstance();
+  if (savedFloor === undefined) delete process.env[FLOOR_ENV];
+  else process.env[FLOOR_ENV] = savedFloor;
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

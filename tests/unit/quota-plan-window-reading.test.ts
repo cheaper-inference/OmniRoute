@@ -303,9 +303,12 @@ test("an unknown or unparseable data time falls back to the cache entry build ti
       throw new Error("cache unavailable");
     }
   );
+  const before = Date.now();
   assert.equal(await getSaturation("t5", "claude", DIM), 0.6); // the value never depends on the data time
   const failed = await getPlanWindowReading("t5", "claude", DIM);
-  assert.ok(failed !== null && failed.fetchedAt <= Date.now());
+  const after = Date.now();
+  assert.ok(failed !== null, "the reading survives a failed endpoint-time lookup");
+  assert.ok(failed.fetchedAt >= before && failed.fetchedAt <= after, String(failed.fetchedAt));
 });
 
 test("a data time ahead of the local clock is clamped to the build time", async () => {
