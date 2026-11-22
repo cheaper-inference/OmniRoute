@@ -123,6 +123,17 @@ describe("Caveman language packs", () => {
     assert.ok(text.includes("src/auth.ts"));
   });
 
+  // Regression: a rule whose replacement ends with a word AND whose pattern swallows the
+  // trailing whitespace glues that word onto the next token ("açıklaTeşekkürler").
+  it("Turkish question→imperative keeps the word boundary after the replacement", () => {
+    const trRules = getRulesForContext("user", "lite", "tr");
+    const { text } = applyRulesToText("şu hatayı anlatır mısın? Teşekkürler.", trRules);
+
+    assert.ok(text.includes("anlat"), `expected the imperative, got ${JSON.stringify(text)}`);
+    assert.ok(!/anlat\p{L}/u.test(text), `replacement glued to the next word: ${JSON.stringify(text)}`);
+    assert.ok(!text.toLowerCase().includes("teşekkür"), "pleasantry should be dropped");
+  });
+
   it("builds localized output mode instructions", () => {
     const config = { enabled: true, intensity: "full" as const, autoClarity: true };
 

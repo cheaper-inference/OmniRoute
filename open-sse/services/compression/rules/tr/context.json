@@ -54,17 +54,24 @@
     },
     {
       "name": "tr_question_to_directive",
-      "pattern": "(?<![\\p{L}\\p{N}_])(?:açıklar mısın|açıklayabilir misin|anlatır mısın|anlatabilir misin|gösterir misin|gösterebilir misin|yardımcı olabilir misin)(?![\\p{L}\\p{N}_])\\??\\s*",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:açıklar mısın|açıklayabilir misin|anlatır mısın|anlatabilir misin|gösterir misin|gösterebilir misin|yardımcı olabilir misin)(?![\\p{L}\\p{N}_])\\??",
       "flags": "giu",
-      "replacement": "açıkla",
+      "replacement": "",
       "replacementMap": {
         "açıklar mısın": "açıkla",
+        "açıklar mısın?": "açıkla",
         "açıklayabilir misin": "açıkla",
+        "açıklayabilir misin?": "açıkla",
         "anlatır mısın": "anlat",
+        "anlatır mısın?": "anlat",
         "anlatabilir misin": "anlat",
+        "anlatabilir misin?": "anlat",
         "gösterir misin": "göster",
+        "gösterir misin?": "göster",
         "gösterebilir misin": "göster",
-        "yardımcı olabilir misin": "yardım et"
+        "gösterebilir misin?": "göster",
+        "yardımcı olabilir misin": "yardım et",
+        "yardımcı olabilir misin?": "yardım et"
       },
       "context": "user",
       "category": "context",
