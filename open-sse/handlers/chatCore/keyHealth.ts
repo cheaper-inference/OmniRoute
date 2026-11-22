@@ -331,6 +331,145 @@ function beginOutcome(
   }
 }
 
+/**
+ * The credential failed. The verdict is recorded as soon as the wording proves it, not when the
+ * failure ladder reaches "invalid": a later response may no longer carry the wording.
+ */
+function recordAuthFailure(
+  status: number,
+  failureDetail: string,
+  ctx: {
+    connId: string;
+    currentKeyId: string;
+    creds: Record<string, unknown> | null | undefined;
+    generation: string;
+    requestSeq?: number;
+    keyIds: string[];
+    storedHealth: Record<string, KeyHealth>;
+    log?: KeyHealthLog;
+  }
+): void {
+    beginOutcome(ctx.connId, ctx.currentKeyId, ctx.creds, ctx.generation, ctx.requestSeq);
+    const verdict = isCredentialVerdict(status, failureDetail);
+    const updatedHealth = recordKeyFailure(ctx.connId, ctx.currentKeyId);
+    ctx.log?.warn?.(
+      "AUTH",
+      `${status} on connection ${ctx.connId.slice(0, 8)} - key marked as failed (failure #${updatedHealth.failures})`
+    );
+
+    // The verdict is recorded as soon as the wording proves it, not when the failure
+    // ladder reaches "invalid": a later response may no longer carry the wording.
+    if (verdict) {
+      markKeyRejected(ctx.connId, ctx.currentKeyId, new Date().toISOString());
+      if (isDecisiveVerdict(status, failureDetail)) {
+        // The derived predicate exists to answer "can this connection serve at all" — ask
+        // it now, not only when the ladder reaches `invalid`, or a key the wording proved
+        // dead keeps the connection selectable for another round.
+        publishConnectionUnusable(
+          ctx.connId,
+          ctx.creds,
+          ctx.keyIds,
+          ctx.storedHealth,
+          SAFE_AUTH_FAILURE_MESSAGE,
+          "upstream_auth_error"
+        );
+      }
+    }
+
+    persistConnectionHealth(ctx.connId, ctx.currentKeyId, ctx.log);
+
+    if (updatedHealth.status === "invalid") {
+      publishConnectionUnusable(
+        ctx.connId,
+        ctx.creds,
+        ctx.keyIds,
+        ctx.storedHealth,
+        SAFE_AUTH_FAILURE_MESSAGE,
+        "upstream_auth_error"
+      );
+    }
+}
+
+type HealthRecordContext = {
+  connId: string;
+  currentKeyId: string;
+  creds: Record<string, unknown> | null | undefined;
+  generation: string;
+  requestSeq?: number;
+  keyIds: string[];
+  storedHealth: Record<string, KeyHealth>;
+  log?: KeyHealthLog;
+};
+
+function recordSuccess(ctx: HealthRecordContext): void {
+  beginOutcome(ctx.connId, ctx.currentKeyId, ctx.creds, ctx.generation, ctx.requestSeq);
+  // A served request proves this key works; the verdict and the cached block go away.
+  const previous = getKeyHealthEntry(ctx.connId, ctx.currentKeyId);
+  const wasRejected = Boolean(previous?.rejectedAt);
+  const wasWarned = previous?.status;
+  const wasCooling = Boolean(previous?.cooldownUntil);
+  markKeyRejected(ctx.connId, ctx.currentKeyId, null);
+  recordKeySuccess(ctx.connId, ctx.currentKeyId);
+
+  if (wasRejected || wasCooling || wasWarned === "warning" || wasWarned === "invalid") {
+    persistConnectionHealth(ctx.connId, ctx.currentKeyId, ctx.log);
+  }
+  if (getCredentialHealth(ctx.connId)?.status === "error") {
+    setCredentialHealth(
+      ctx.connId,
+      connectionProvider(ctx.creds, ctx.connId),
+      "active",
+      undefined,
+      undefined,
+      "inference"
+    );
+  }
+}
+
+function recordInsufficientBalance(ctx: HealthRecordContext): void {
+  // "Insufficient account balance" is terminal for this key on single-credential
+  // providers (#5239). openai-compatible / per-model-quota gateways multiplex many
+  // upstreams behind one key: a 402 there is a per-model billing signal, so the key
+  // stays usable for sibling models.
+  const provider = connectionProvider(ctx.creds, ctx.connId);
+  if (hasPerModelQuota(provider)) return;
+
+  beginOutcome(ctx.connId, ctx.currentKeyId, ctx.creds, ctx.generation, ctx.requestSeq);
+  recordKeyTerminal(ctx.connId, ctx.currentKeyId);
+  markKeyRejected(ctx.connId, ctx.currentKeyId, new Date().toISOString());
+  ctx.log?.error?.(
+    "AUTH",
+    `402 on connection ${ctx.connId.slice(0, 8)} - key ${ctx.currentKeyId} marked invalid (insufficient balance)`
+  );
+
+  persistConnectionHealth(ctx.connId, ctx.currentKeyId, ctx.log);
+  publishConnectionUnusable(
+    ctx.connId,
+    ctx.creds,
+    ctx.keyIds,
+    ctx.storedHealth,
+    "upstream reports no remaining balance for this account",
+    "insufficient_balance"
+  );
+}
+
+function recordRateLimit(ctx: HealthRecordContext, retryAfterMs?: number | null): void {
+  // Per-key cooldown (#14573): a rate limit hits ONE key, never the credential, and
+  // sibling keys keep serving. Per-model-quota gateways treat 429 as a model signal,
+  // mirroring the 402 rule.
+  const provider = connectionProvider(ctx.creds ?? {}, ctx.connId);
+  if (hasPerModelQuota(provider)) return;
+
+  beginOutcome(ctx.connId, ctx.currentKeyId, ctx.creds, ctx.generation, ctx.requestSeq);
+  const cooldownMs = ctx.retryAfterMs && ctx.retryAfterMs > 0 ? ctx.retryAfterMs : DEFAULT_KEY_COOLDOWN_MS;
+  recordKeyCooldown(ctx.connId, ctx.currentKeyId, cooldownMs);
+  ctx.log?.warn?.(
+    "AUTH",
+    `429 on connection ${ctx.connId.slice(0, 8)} - key ${ctx.currentKeyId} cooling for ${Math.ceil(cooldownMs / 1000)}s`
+  );
+  persistConnectionHealth(ctx.connId, ctx.currentKeyId, ctx.log, true);
+}
+
 export function recordKeyHealthStatus(
   status: number,
   creds: Record<string, unknown> | null | undefined,
@@ -370,124 +509,47 @@ export function recordKeyHealthStatus(
   // one already applied describes a state that is gone: a retry, a slower sibling, or an
   // attempt made with material since replaced. Status does not matter — a stale 429 must
   // not cool a key a fresher success just cleared, and a stale 401 must not re-block it.
+  const ctx = {
+    connId,
+    currentKeyId,
+    creds,
+    generation,
+    requestSeq,
+    keyIds,
+    storedHealth,
+    log,
+  };
+
   if (requestSeq !== undefined) {
     const applied = getKeyHealthEntry(connId, currentKeyId)?.lastSeq;
     if (applied !== undefined && requestSeq <= applied) return;
   }
 
   if (isCredentialFailure(status, failureDetail)) {
-    beginOutcome(connId, currentKeyId, creds, generation, requestSeq);
-    const verdict = isCredentialVerdict(status, failureDetail);
-    const updatedHealth = recordKeyFailure(connId, currentKeyId);
-    log?.warn?.(
-      "AUTH",
-      `${status} on connection ${connId.slice(0, 8)} - key marked as failed (failure #${updatedHealth.failures})`
-    );
-
-    // The verdict is recorded as soon as the wording proves it, not when the failure
-    // ladder reaches "invalid": a later response may no longer carry the wording.
-    if (verdict) {
-      markKeyRejected(connId, currentKeyId, new Date().toISOString());
-      if (isDecisiveVerdict(status, failureDetail)) {
-        // The derived predicate exists to answer "can this connection serve at all" — ask
-        // it now, not only when the ladder reaches `invalid`, or a key the wording proved
-        // dead keeps the connection selectable for another round.
-        publishConnectionUnusable(
-          connId,
-          creds,
-          keyIds,
-          storedHealth,
-          SAFE_AUTH_FAILURE_MESSAGE,
-          "upstream_auth_error"
-        );
-      }
-    }
-
-    persistConnectionHealth(connId, currentKeyId, log);
-
-    if (updatedHealth.status === "invalid") {
-      publishConnectionUnusable(
-        connId,
-        creds,
-        keyIds,
-        storedHealth,
-        SAFE_AUTH_FAILURE_MESSAGE,
-        "upstream_auth_error"
-      );
-    }
+    recordAuthFailure(status, failureDetail, {
+      connId,
+      currentKeyId,
+      creds,
+      generation,
+      requestSeq,
+      keyIds,
+      storedHealth,
+      log,
+    });
     return;
   }
 
   if (status === 402) {
-    // "Insufficient account balance" is terminal for this key on single-credential
-    // providers (#5239). openai-compatible / per-model-quota gateways multiplex many
-    // upstreams behind one key: a 402 there is a per-model billing signal, so the key
-    // stays usable for sibling models.
-    const provider = connectionProvider(creds, connId);
-    if (hasPerModelQuota(provider)) return;
-
-    beginOutcome(connId, currentKeyId, creds, generation, requestSeq);
-    recordKeyTerminal(connId, currentKeyId);
-    markKeyRejected(connId, currentKeyId, new Date().toISOString());
-    log?.error?.(
-      "AUTH",
-      `402 on connection ${connId.slice(0, 8)} - key ${currentKeyId} marked invalid (insufficient balance)`
-    );
-
-    persistConnectionHealth(connId, currentKeyId, log);
-    publishConnectionUnusable(
-      connId,
-      creds,
-      keyIds,
-      storedHealth,
-      "upstream reports no remaining balance for this account",
-      "insufficient_balance"
-    );
+    recordInsufficientBalance(ctx);
     return;
   }
 
   if (status === 429) {
-    // Per-key cooldown (#14573): a rate limit hits ONE key, never the credential, and
-    // sibling keys keep serving. Per-model-quota gateways treat 429 as a model signal,
-    // mirroring the 402 rule.
-    const provider = connectionProvider(creds ?? {}, connId);
-    if (hasPerModelQuota(provider)) return;
-
-    beginOutcome(connId, currentKeyId, creds, generation, requestSeq);
-    const cooldownMs = retryAfterMs && retryAfterMs > 0 ? retryAfterMs : DEFAULT_KEY_COOLDOWN_MS;
-    recordKeyCooldown(connId, currentKeyId, cooldownMs);
-    log?.warn?.(
-      "AUTH",
-      `429 on connection ${connId.slice(0, 8)} - key ${currentKeyId} cooling for ${Math.ceil(cooldownMs / 1000)}s`
-    );
-    persistConnectionHealth(connId, currentKeyId, log, true);
+    recordRateLimit(ctx, retryAfterMs);
     return;
   }
 
-  if (status >= 200 && status < 300) {
-    beginOutcome(connId, currentKeyId, creds, generation, requestSeq);
-    // A served request proves this key works; the verdict and the cached block go away.
-    const previous = getKeyHealthEntry(connId, currentKeyId);
-    const wasRejected = Boolean(previous?.rejectedAt);
-    const wasWarned = previous?.status;
-    const wasCooling = Boolean(previous?.cooldownUntil);
-    markKeyRejected(connId, currentKeyId, null);
-    recordKeySuccess(connId, currentKeyId);
-
-    if (wasRejected || wasCooling || wasWarned === "warning" || wasWarned === "invalid") {
-      persistConnectionHealth(connId, currentKeyId, log);
-    }
-    if (getCredentialHealth(connId)?.status === "error") {
-      setCredentialHealth(
-        connId,
-        connectionProvider(creds, connId),
-        "active",
-        undefined,
-        undefined,
-        "inference"
-      );
-    }
-  }
+  if (status >= 200 && status < 300) recordSuccess(ctx);
 }
 
 /**
