@@ -18,7 +18,7 @@ export const FREE_TIER_BUDGETS: Record<string, number> = {
   nara: 210_000_000,
   "cloudflare-ai": 122_000_000,
   doubao: 60_000_000,
-  groq: 30_000_000,
+  groq: 24_000_000,
   "api-airforce": 24_000_000,
   bluesminds: 7_200_000,
   sambanova: 6_000_000,

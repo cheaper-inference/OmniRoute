@@ -113,6 +113,9 @@ const REASONING_UNSUPPORTED_PATTERNS = [
   // Groq returns HTTP 400 if reasoning_effort is forwarded.
   "llama-3.3-70b-versatile",
   "llama-4-scout-17b-16e-instruct",
+  // Groq Compound and Compound Mini (#12134), dropped from the catalog when Groq retired them
+  // on 2026-09-21 (#21020); matches both ids.
+  "groq/compound",
 ];
 
 /** Catalog/API surface types that are not chat completions. */

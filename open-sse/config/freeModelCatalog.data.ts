@@ -197,17 +197,17 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "glm-cn", modelId: "glm-4.7-flash", displayName: "GLM-4.7-Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "zhipu-flash-free", tos: "ok" },
   { provider: "glm-cn", modelId: "glm-signup-bonus", displayName: "Z.AI — 20M signup bonus", monthlyTokens: 0, creditTokens: 20000000, freeType: "one-time-initial", poolKey: "zhipu-signup", tos: "ok" },
   // evidence: public-page https://console.groq.com/docs/rate-limits (2026-09-02) — "Free Plan Limits":
-  // 200K TPD per model for the five chat models below; "Rate limits apply at the organization level".
+  // 200K TPD per model for the chat models below; "Rate limits apply at the organization level".
   // 200K × 30 = 6M per model; the cap is per model, so each row counts on its own (poolKey null).
   // hardStopGuaranteed: same page — "When you exceed rate limits, our API returns a 429 Too Many Requests";
   // https://console.groq.com/docs/billing-faqs — the Free tier has no payment method on file ("To upgrade
   // from the Free tier to the Developer tier, you'll need to provide a valid payment method").
   // Retired from the free tier (https://console.groq.com/docs/deprecations): llama-4-scout and qwen3-32b
-  // (2026-07-17), llama-3.3-70b-versatile (2026-08-16) — deliberately absent below.
+  // (2026-07-17), llama-3.3-70b-versatile (2026-08-16), qwen3.6-27b (2026-09-14, successor
+  // qwen3.8-27b; #21020) — deliberately absent below.
   { provider: "groq", modelId: "openai/gpt-oss-120b", displayName: "GPT-OSS 120B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
   { provider: "groq", modelId: "openai/gpt-oss-20b", displayName: "GPT-OSS 20B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
   { provider: "groq", modelId: "openai/gpt-oss-safeguard-20b", displayName: "GPT-OSS Safeguard 20B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
-  { provider: "groq", modelId: "qwen/qwen3.6-27b", displayName: "Qwen3.6 27B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
   { provider: "groq", modelId: "qwen/qwen3.8-27b", displayName: "Qwen3.8 27B", monthlyTokens: 6000000, creditTokens: 0, freeType: "recurring-daily", poolKey: null, tos: "caution", hardStopGuaranteed: true },
   { provider: "huggingchat", modelId: "baidu/ERNIE-4.5-VL-424B-A47B-Base-PT", displayName: "ERNIE 4.5 VL 424B A47B Base PT", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },
   { provider: "huggingchat", modelId: "CohereLabs/c4ai-command-r7b-12-2024", displayName: "Command R7B 12-2024", monthlyTokens: 500000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "huggingchat", tos: "caution" },

@@ -43,7 +43,6 @@ test("groq free plan: 200K TPD per model × 30 = 6M per model, each cap independ
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
     "openai/gpt-oss-safeguard-20b",
-    "qwen/qwen3.6-27b",
     "qwen/qwen3.8-27b",
   ]);
   for (const m of rows("groq")) {
@@ -52,11 +51,12 @@ test("groq free plan: 200K TPD per model × 30 = 6M per model, each cap independ
     assert.equal(m.freeType, "recurring-daily");
     assert.equal(m.hardStopGuaranteed, true);
   }
-  // retired from the free tier on 2026-07-17 / 2026-08-16 (console.groq.com/docs/deprecations)
+  // retired from the free tier on 2026-07-17 / 2026-08-16 / 2026-09-14 (console.groq.com/docs/deprecations)
   for (const dead of [
     "llama-3.3-70b-versatile",
     "meta-llama/llama-4-scout-17b-16e-instruct",
     "qwen/qwen3-32b",
+    "qwen/qwen3.6-27b",
   ]) {
     assert.ok(!ids("groq").includes(dead), `${dead} must not be in the free catalog`);
   }
@@ -115,7 +115,7 @@ test("mistral keeps its 1B pool only with a dated console verification on record
 test("legacy provider-level catalog agrees with the per-model catalog for the re-audited providers", () => {
   assert.equal(FREE_TIER_BUDGETS.gemini, undefined);
   assert.equal(FREE_TIER_BUDGETS["ollama-cloud"], undefined);
-  assert.equal(FREE_TIER_BUDGETS.groq, 30_000_000);
+  assert.equal(FREE_TIER_BUDGETS.groq, 24_000_000);
   assert.equal(FREE_TIER_BUDGETS.nara, 210_000_000);
 });
 
