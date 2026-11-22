@@ -64,6 +64,13 @@ import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPo
 import { RequestBodyTooLargeError } from "@/shared/middleware/bodySizeGuard";
 import { readEditInput, type EditInput } from "./editInput.ts";
 import {
+  dispatchBuiltinOpenAIEdit,
+  isBuiltinOpenAIEditModel,
+  isBuiltinOpenAIEditProvider,
+  openAIEditReferenceError,
+  runDirectBuiltinOpenAIEdit,
+} from "./openAIEdit.ts";
+import {
   CHATGPT_WEB_RETIRED_ERROR_CODE,
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
@@ -249,8 +256,7 @@ interface EditComboTarget {
  * Decide whether a prefix-resolved combo target can service an image edit, and
  * return the credential key to resolve it with. Mirrors postHandler's provider
  * branches: codex-responses, fal-ai edit models, adobe-firefly, syntx, leonardo,
- * built-in openrouter, and custom OpenAI-compatible nodes are edit-capable; every other
- * built-in provider is not (it exposes no OpenAI-compatible edit endpoint).
+ * built-in OpenAI and OpenRouter, and custom OpenAI-compatible nodes are edit-capable.
  */
 function classifyImageEditTarget(
   resolvedModel: string,
@@ -258,6 +264,9 @@ function classifyImageEditTarget(
   providerConfig: ReturnType<typeof getImageProvider> | null
 ): { credKey: string } | null {
   if (providerConfig) {
+    if (isBuiltinOpenAIEditProvider(providerConfig)) {
+      return isBuiltinOpenAIEditModel(parsed.model) ? { credKey: providerConfig.id } : null;
+    }
     if (
       providerConfig.format === "codex-responses" ||
       providerConfig.format === "adobe-firefly-image" ||
@@ -468,6 +477,10 @@ async function dispatchImageEditTarget(
     })) as ImageComboDispatchResult;
   }
 
+  if (isBuiltinOpenAIEditProvider(providerConfig)) {
+    return dispatchBuiltinOpenAIEdit(parsed.model, providerConfig.baseUrl, credentials, ctx);
+  }
+
   // Custom OpenAI-compatible node: forward to {base_url}/images/edits.
   const slash = modelStr.indexOf("/");
   const customProviderId = slash > 0 ? modelStr.slice(0, slash) : null;
@@ -562,6 +575,14 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     strategy: projected.combo.strategy,
     targets: editTargets,
   });
+  const openAIReferenceError = openAIEditReferenceError(ctx.imageInputCount);
+  if (
+    openAIReferenceError &&
+    editTargets.every((target) => isBuiltinOpenAIEditProvider(target.providerConfig))
+  ) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, openAIReferenceError);
+  }
+
   const run = await runImageComboTargets(orderedTargets, {
     resolveProvider: (target) => ({ provider: target.credKey, model: target.parsed.model }),
     resolveCredentials: (_provider, target) =>
@@ -736,6 +757,29 @@ async function postHandler(request: Request, _context?: unknown) {
   const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
   const prepareFalInput = getFalCompatibilityPreparer();
   const falNative = prepareFalInput !== null;
+  if (isBuiltinOpenAIEditProvider(providerConfig)) {
+    if (!isBuiltinOpenAIEditModel(parsed.model)) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Unsupported OpenAI image edit model: ${resolvedModel}`
+      );
+    }
+    const result = await runDirectBuiltinOpenAIEdit(
+      parsed.model,
+      providerConfig.baseUrl,
+      input,
+      allowedConnections,
+      resolvedModel,
+      editAccounting(accounting, providerConfig.id, parsed.model, null)
+    );
+    if (result instanceof Response) return result;
+    if (result.success) return jsonResponse(result.data);
+    return jsonResponse(
+      toJsonErrorPayload(result.error, "Image edit provider error"),
+      result.status
+    );
+  }
+
   // Firefly nano/gpt-image, fal edit models and Antigravity Gemini image accept multiple
   // reference images; other non-Codex stay at 1.
   const isGeminiImageEdit =
@@ -1134,7 +1178,7 @@ async function postHandler(request: Request, _context?: unknown) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `Image edit is not supported for built-in provider "${parsed.provider}". ` +
-        `Use adobe-firefly, syntx, codex, leonardo, or a custom OpenAI-compatible image provider.`
+        `Use openai, adobe-firefly, syntx, codex, leonardo, or a custom OpenAI-compatible image provider.`
     );
   }
 
