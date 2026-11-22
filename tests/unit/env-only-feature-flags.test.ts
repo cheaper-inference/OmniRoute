@@ -15,6 +15,7 @@ process.env.JWT_SECRET = "env-only-flags-session-secret";
 
 const flags = await import("../../src/shared/utils/featureFlags.ts");
 const flagsDb = await import("../../src/lib/db/featureFlags.ts");
+const { closeDbInstance } = await import("../../src/lib/db/core.ts");
 const route = await import("../../src/app/api/settings/feature-flags/route.ts");
 const { FEATURE_FLAG_DEFINITIONS } = await import(
   "../../src/shared/constants/featureFlagDefinitions.ts"
@@ -117,13 +118,18 @@ function collectSourceFiles(roots: string[] = SCAN_ROOTS): SourceFile[] {
   return files;
 }
 
-/** `const SOME_KEY = "THE_FLAG"` aliases, so a resolver call through an alias counts. */
-function collectAliases(sources: SourceFile[]): Map<string, string> {
+/**
+ * `const SOME_KEY = "THE_FLAG"` aliases, so a resolver call through an alias
+ * counts. Scoped per file: two modules can reuse the same identifier for
+ * different flags, and a tree-wide map would resolve one file's call through
+ * another file's binding.
+ */
+function collectAliases(source: SourceFile): Map<string, string> {
   const aliases = new Map<string, string>();
-  for (const { text } of sources) {
-    for (const match of text.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*["']([A-Z0-9_]+)["']/g)) {
-      aliases.set(match[1], match[2]);
-    }
+  for (const match of source.text.matchAll(
+    /const\s+([A-Za-z_$][\w$]*)\s*=\s*["']([A-Z0-9_]+)["']/g
+  )) {
+    aliases.set(match[1], match[2]);
   }
   return aliases;
 }
@@ -141,7 +147,7 @@ function classifySources(
   sources: SourceFile[],
   indirect: IndirectResolver[] = INDIRECT_RESOLVERS
 ) {
-  const aliases = collectAliases(sources);
+  const aliasesByFile = new Map(sources.map((source) => [source.file, collectAliases(source)]));
   const resolverKeys = new Set<string>();
   const envKeys = new Set<string>();
   const helperPattern = new RegExp(
@@ -155,26 +161,31 @@ function classifySources(
     }
     // The symbol string alone is not proof. Two ways the binding can drift:
     // the alias is repointed, or the resolver is called with a different
-    // constant while the alias keeps its old value. Check both the constant's
-    // value and the call expression that consumes it.
-    if (aliases.get(alias) !== key) {
-      throw new Error(
-        `${alias} no longer resolves to ${key} (found ${aliases.get(alias) ?? "nothing"})`
-      );
-    }
+    // constant while the alias keeps its old value. Both are checked in the
+    // file that actually contains the call: an identically named constant in
+    // another module must not satisfy this one.
     const callPattern = new RegExp(call);
-    if (!sources.some((source) => callPattern.test(source.text))) {
+    const callSite = sources.find((source) => callPattern.test(source.text));
+    if (!callSite) {
       throw new Error(`${via} no longer reads ${key} through ${alias}`);
+    }
+    const callSiteAliases = aliasesByFile.get(callSite.file);
+    const bound = callSiteAliases?.get(alias);
+    if (bound !== key) {
+      throw new Error(
+        `${alias} no longer resolves to ${key} in ${callSite.file} (found ${bound ?? "nothing"})`
+      );
     }
     resolverKeys.add(key);
   }
 
-  for (const { text } of sources) {
+  for (const { file, text } of sources) {
+    const aliases = aliasesByFile.get(file);
     for (const match of text.matchAll(helperPattern)) {
       const literal = match[1];
       const alias = match[2];
       if (literal) resolverKeys.add(literal);
-      else if (alias && aliases.has(alias)) resolverKeys.add(aliases.get(alias)!);
+      else if (alias && aliases?.has(alias)) resolverKeys.add(aliases.get(alias)!);
     }
     for (const match of text.matchAll(
       new RegExp(`(?:${ENV_READER_HELPERS.join("|")})\\s*\\(\\s*(?:["']([A-Z0-9_]+)["']|([A-Za-z_$][\\w$]*))`, "g")
@@ -182,7 +193,7 @@ function classifySources(
       const literal = match[1];
       const alias = match[2];
       if (literal) envKeys.add(literal);
-      else if (alias && aliases.has(alias)) envKeys.add(aliases.get(alias)!);
+      else if (alias && aliases?.has(alias)) envKeys.add(aliases.get(alias)!);
     }
     for (const match of text.matchAll(/(?:process\.env|\benv)\s*\.\s*([A-Z0-9_]{3,})/g)) {
       envKeys.add(match[1]);
@@ -227,6 +238,9 @@ test.before(async () => {
 });
 
 test.after(() => {
+  // Override writes and route calls open the store; close it before the
+  // directory disappears so the handle does not outlive the test.
+  closeDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true });
 });
 
@@ -251,6 +265,10 @@ test("a resolver-backed key keeps honouring a stored override", () => {
 
 test("a stored override cannot outrank the environment for an env-only key", () => {
   const key = "PRICING_SYNC_ENABLED";
+  // The invoking shell may export the flag; clear it so the default-source
+  // assertion below tests the resolver instead of the ambient environment.
+  const previousEnv = process.env[key];
+  delete process.env[key];
   flagsDb.setFeatureFlagOverride(key, "true");
   try {
     const resolved = flags.resolveAllFeatureFlags().find((entry) => entry.key === key);
@@ -267,6 +285,7 @@ test("a stored override cannot outrank the environment for an env-only key", () 
     );
   } finally {
     delete process.env[key];
+    if (previousEnv !== undefined) process.env[key] = previousEnv;
     flagsDb.removeFeatureFlagOverride(key);
   }
 });
@@ -345,6 +364,24 @@ test("the scanner sees every read form a consumer can be written in", () => {
     "ENV_HELPER_READ",
     "ENV_OBJECT_READ",
   ]);
+});
+
+test("an alias in one file does not resolve a call in another file", () => {
+  // Two modules bind the same identifier to different flags. A tree-wide alias
+  // map lets the last binding win, which credits a.ts's resolver call to
+  // ENV_ONLY and hides the real environment read in b.ts.
+  const definitions = [{ key: "DB_BACKED" }, { key: "ENV_ONLY" }];
+  const sources: SourceFile[] = [
+    {
+      file: "a.ts",
+      text: `const KEY = "DB_BACKED"; export const v = isFeatureFlagEnabled(KEY);`,
+    },
+    {
+      file: "b.ts",
+      text: `const KEY = "ENV_ONLY"; export const x = process.env.ENV_ONLY;`,
+    },
+  ];
+  assert.deepEqual(findUnmarkedEnvReads(sources, definitions, []), ["ENV_ONLY"]);
 });
 
 test("the scanner covers the file types and trees the real consumers live in", () => {
