@@ -297,6 +297,8 @@ export function shouldRecordProviderBreakerFailure(args: {
    * HTTP 200). Overrides the `isStreamReadinessFailure` exemption only; every other
    * AND-term below still gates the trip. */
   isStreamEarlyEof?: boolean;
+  /** Opt-in flag allowing stream readiness timeouts to count toward the provider breaker. */
+  trackStreamReadinessInCircuitBreaker?: boolean;
   status: number;
   sameProviderNext: boolean;
   skipProviderBreaker?: boolean;
@@ -309,7 +311,9 @@ export function shouldRecordProviderBreakerFailure(args: {
 }): boolean {
   return (
     !args.providerCircuitOpen &&
-    (!args.isStreamReadinessFailure || args.isStreamEarlyEof === true) &&
+    (!args.isStreamReadinessFailure ||
+      args.isStreamEarlyEof === true ||
+      args.trackStreamReadinessInCircuitBreaker === true) &&
     // Overloaded 502 (STREAM_EARLY_EOF wrapping "Overloaded") must not trip
     // the whole-provider breaker. The status=529 check is defense in depth:
     // 529 is not in PROVIDER_BREAKER_FAILURE_STATUSES today, but a later

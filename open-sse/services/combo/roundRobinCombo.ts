@@ -30,8 +30,7 @@ import {
   resolveTargetFingerprint,
 } from "../comboAgentMiddleware.ts";
 import {
-  resolveComboConfig,
-  getDefaultComboConfig,
+  resolveComboSetupConfig,
   resolveComboQueueDepth,
 } from "../comboConfig.ts";
 import { getHiddenModelsByProvider } from "@/models";
@@ -98,7 +97,6 @@ import {
 } from "./agenticStallFailover.ts";
 import { holdAttemptResponse } from "./truncatedStreamFailover.ts";
 import {
-  TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
   classifyQualityFailure,
   COMBO_LOOP_SAFETY_TIMEOUT_MS,
@@ -158,6 +156,7 @@ import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { recordRoundRobinFailureTracking } from "./roundRobinBreaker.ts";
 
 /**
  * Handle round-robin combo: each request goes to the next model in circular order.
@@ -192,17 +191,7 @@ export async function handleRoundRobinCombo({
   perTargetAdmission = null,
   heldAttempt = {},
 }: HandleRoundRobinOptions): Promise<Response> {
-  const config = settings
-    ? resolveComboConfig(combo, settings)
-    : {
-        ...getDefaultComboConfig(),
-        ...(combo.config || {}),
-        // See resolveComboConfig's failoverBeforeRetryExplicit comment in
-        // comboConfig.ts (no `settings` here, so only the combo's own config
-        // can opt in).
-        failoverBeforeRetryExplicit:
-          (combo.config as Record<string, unknown> | undefined)?.failoverBeforeRetry === true,
-      };
+  const config = resolveComboSetupConfig(combo, settings);
   // #9158: clamp combo-level concurrency to a sane bound — a config carrying a
   // huge or negative value would otherwise open an unbounded semaphore and
   // flood targets (or deadlock at 0).
@@ -1300,19 +1289,27 @@ export async function handleRoundRobinCombo({
             );
           }
 
-          if (
-            !isStreamReadinessFailure &&
-            !isTokenLimitBreach &&
-            !scopedFailure &&
-            TRANSIENT_FOR_SEMAPHORE.includes(result.status) &&
-            targetCooldownMs > 0
-          ) {
-            semaphore.markRateLimited(semaphoreKey, targetCooldownMs);
-            log.warn(
-              "COMBO-RR",
-              `${modelStr} error ${result.status}, cooldown ${targetCooldownMs}ms`
-            );
-          }
+          const nextRrTarget =
+            offset + 1 < modelCount ? filteredTargets[rrTargetIndexAt(offset + 1)] : undefined;
+          recordRoundRobinFailureTracking({
+            provider,
+            nextProvider: nextRrTarget?.provider,
+            isStreamReadinessFailure,
+            isStreamEarlyEof,
+            trackStreamReadiness: Boolean(config.trackStreamReadinessInCircuitBreaker),
+            result,
+            skipProviderBreaker: fallbackResult.skipProviderBreaker,
+            requestScopedFailure: scopedFailure,
+            isTokenLimitBreach,
+            errorText,
+            structuredErrorCode: structuredError?.code,
+            connectionId: targetWithConnection.connectionId,
+            profile,
+            targetCooldownMs,
+            semaphoreKey,
+            modelStr,
+            log,
+          });
 
           if (isAllAccountsRateLimited) {
             log.info(

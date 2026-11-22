@@ -1135,6 +1135,9 @@ export async function executeTargetAttempt(
       shouldRecordProviderBreakerFailure({
         isStreamReadinessFailure,
         isStreamEarlyEof,
+        trackStreamReadinessInCircuitBreaker: Boolean(
+          deps.config?.trackStreamReadinessInCircuitBreaker
+        ),
         status: result.status,
         sameProviderNext,
         skipProviderBreaker: fallbackResult.skipProviderBreaker,
