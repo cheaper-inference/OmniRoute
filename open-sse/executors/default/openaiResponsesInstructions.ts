@@ -52,11 +52,16 @@ function toInputItems(input: unknown): unknown[] {
 export function hoistOpenAIResponsesInstructionsToInput<T>(body: T): T {
   if (!isRecord(body)) return body;
   if (Array.isArray(body.messages)) return body;
+  if (body.input === undefined) return body;
   if (hasStatefulResponsesContinuation(body)) return body;
 
   const instructions = body.instructions;
-  if (typeof instructions !== "string" || instructions.trim().length === 0) {
+  if (typeof instructions !== "string") {
     return body;
+  }
+  if (instructions.trim().length === 0) {
+    const { instructions: _dropped, ...rest } = body;
+    return rest as T;
   }
 
   const developerItem = {

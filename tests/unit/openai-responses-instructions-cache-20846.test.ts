@@ -20,12 +20,10 @@ test("#20846 DefaultExecutor moves top-level instructions into input as a leadin
     stream: true,
   };
 
-  const result = executor.transformRequest(
-    "gpt-6.2-sol",
-    inputBody,
-    true,
-    {}
-  ) as Record<string, unknown>;
+  const result = executor.transformRequest("gpt-6.2-sol", inputBody, true, {}) as Record<
+    string,
+    unknown
+  >;
 
   assert.equal("instructions" in result, false);
   assert.deepEqual(result.input, [
@@ -63,12 +61,10 @@ test("#20846 translated Chat Completions system prompt is moved from instruction
 
   assert.equal(translated.instructions, systemPrompt);
 
-  const result = executor.transformRequest(
-    "gpt-6.2-sol",
-    translated,
-    true,
-    {}
-  ) as Record<string, unknown>;
+  const result = executor.transformRequest("gpt-6.2-sol", translated, true, {}) as Record<
+    string,
+    unknown
+  >;
 
   assert.equal("instructions" in result, false);
   const input = result.input as Array<Record<string, unknown>>;
@@ -150,12 +146,10 @@ test("#20846 Chat Completions bodies and non-OpenAI providers are left unchanged
     instructions: "Ignored on chat body",
     messages: [{ role: "user", content: "Hi" }],
   };
-  const chatResult = openaiExecutor.transformRequest(
-    "gpt-5.4",
-    chatBody,
-    true,
-    {}
-  ) as Record<string, unknown>;
+  const chatResult = openaiExecutor.transformRequest("gpt-5.4", chatBody, true, {}) as Record<
+    string,
+    unknown
+  >;
   assert.equal(chatResult.instructions, "Ignored on chat body");
   assert.equal(chatResult.input, undefined);
 
@@ -172,4 +166,35 @@ test("#20846 Chat Completions bodies and non-OpenAI providers are left unchanged
   ) as Record<string, unknown>;
   assert.equal(otherResult.instructions, "Keep on other providers");
   assert.equal((otherResult.input as unknown[]).length, 1);
+});
+
+test("#20846 body without input is left unchanged and blank instructions are dropped without adding a message", () => {
+  const executor = new DefaultExecutor("openai");
+
+  const withoutInput = executor.transformRequest(
+    "gpt-6.2-sol",
+    {
+      model: "gpt-6.2-sol",
+      instructions: "Be concise.",
+    },
+    true,
+    {}
+  ) as Record<string, unknown>;
+  assert.equal(withoutInput.instructions, "Be concise.");
+  assert.equal("input" in withoutInput, false);
+
+  for (const blank of ["", " \n\t "]) {
+    const withBlank = executor.transformRequest(
+      "gpt-6.2-sol",
+      {
+        model: "gpt-6.2-sol",
+        instructions: blank,
+        input: "Hello",
+      },
+      true,
+      {}
+    ) as Record<string, unknown>;
+    assert.equal("instructions" in withBlank, false);
+    assert.equal(withBlank.input, "Hello");
+  }
 });
