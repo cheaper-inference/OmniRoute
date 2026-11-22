@@ -46,6 +46,14 @@ ingress:
   #    hosts:
   #      - omniroute.example.com
 
+networkPolicy:
+  # Default-deny Ingress + Egress on the OmniRoute pod, allowing ports
+  # 20128/20132 from ingress controller pods only, DNS (53 UDP/TCP) to
+  # kube-system, and HTTPS (443/TCP) to public upstream model providers.
+  enabled: true
+  # Additional egress rules (e.g. in-cluster Redis or internal Ollama service).
+  extraEgress: []
+
 # ── Persistence ─────────────────────────────────────────────────────────
 persistence:
   enabled: true
