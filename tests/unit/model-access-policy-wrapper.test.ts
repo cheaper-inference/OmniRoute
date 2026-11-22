@@ -151,3 +151,37 @@ test("a group deny on the requested alias still applies when the resolved target
     false
   );
 });
+
+test("a group allow on a provider node's public prefix admits its node-id resolution (#20972)", async () => {
+  const nodes = await import("../../src/lib/db/providers/nodes.ts");
+  const node = await nodes.createProviderNode({
+    type: "openai-compatible",
+    name: "Evidence node",
+    prefix: "ev",
+    baseUrl: "http://127.0.0.1:9/v1",
+  });
+  const key = await apiKeys.createApiKey("Node prefix allow", "machine-policy-node-prefix");
+  await apiKeys.updateApiKeyPermissions(key.id, {
+    modelAccessMode: "restricted",
+    allowedModels: ["ev/evidence-model"],
+  });
+  const group = groups.createKeyGroup("Node prefix policy");
+  groups.addGroupPermission(group.id, "ev/evidence-model", "allow");
+  assert.equal(groups.addKeyToGroup(key.id, group.id), true);
+
+  assert.equal(
+    await apiKeys.isModelAllowedForKey(key.key, "ev/evidence-model", `${node.id}/evidence-model`),
+    true
+  );
+  assert.equal(
+    await apiKeys.isModelAllowedForKey(key.key, "ev/other-model", `${node.id}/other-model`),
+    false
+  );
+
+  groups.addGroupPermission(group.id, "evidence-model", "deny", node.id);
+  apiKeys.resetApiKeyState();
+  assert.equal(
+    await apiKeys.isModelAllowedForKey(key.key, "ev/evidence-model", `${node.id}/evidence-model`),
+    false
+  );
+});

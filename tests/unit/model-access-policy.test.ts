@@ -282,3 +282,110 @@ test("a fully qualified group denial applies even when the short model is grante
   );
   assert.deepEqual(decision, { allowed: false, reason: "permissions" });
 });
+
+type GroupRule = { pattern: string; access: "allow" | "deny"; provider?: string };
+
+/** Mirrors checkKeyModelAccess: exact or `*` patterns, optional provider scope, deny first. */
+function groupRules(rules: GroupRule[]): ModelAccessLookups["checkGroupAccess"] {
+  return (_keyId, modelId, provider) => {
+    const matches = (rule: GroupRule) =>
+      (rule.pattern === "*" || rule.pattern === modelId) &&
+      (!rule.provider || rule.provider === provider);
+    const deniedBy = rules.find((rule) => rule.access === "deny" && matches(rule)) ?? null;
+    if (deniedBy) return { allowed: false, deniedBy };
+    return { allowed: rules.some((rule) => rule.access === "allow" && matches(rule)), deniedBy };
+  };
+}
+
+/** An OpenAI-compatible provider node: clients send the prefix, dispatch resolves the node id. */
+const NODE_PREFIX = "ev";
+const NODE_PREFIX_MODEL = `${NODE_PREFIX}/evidence-model`;
+const NODE_ID = "openai-compatible-chat-0f8e6b1a-4c2d-4e7f-9a3b-5d6c7e8f9a0b";
+const NODE_ID_MODEL = `${NODE_ID}/evidence-model`;
+const nodePrefixLookup: ModelAccessLookups["getProviderNodePrefix"] = (providerId) =>
+  providerId === NODE_ID ? NODE_PREFIX : null;
+
+test("a group allow on the provider-node prefix admits the node-id resolution (#20972)", async () => {
+  const decision = await evaluateModelAccess(
+    restricted({ allowedModels: [NODE_PREFIX_MODEL] }),
+    { modelId: NODE_PREFIX_MODEL, resolvedModelId: NODE_ID_MODEL },
+    lookups({
+      checkGroupAccess: groupRules([{ pattern: NODE_PREFIX_MODEL, access: "allow" }]),
+      getProviderNodePrefix: nodePrefixLookup,
+    })
+  );
+  assert.deepEqual(decision, { allowed: true, reason: "permissions" });
+});
+
+test("a group deny on the provider-node prefix form blocks the node-id resolution", async () => {
+  // A combo target reaches the group check only as the resolved node id.
+  for (const modelId of [NODE_PREFIX_MODEL, "evidence-combo"]) {
+    const decision = await evaluateModelAccess(
+      restricted({ allowedModels: [modelId] }),
+      { modelId, resolvedModelId: NODE_ID_MODEL },
+      lookups({
+        checkGroupAccess: groupRules([
+          { pattern: "*", access: "allow" },
+          { pattern: NODE_PREFIX_MODEL, access: "deny" },
+        ]),
+        getProviderNodePrefix: nodePrefixLookup,
+      })
+    );
+    assert.deepEqual(decision, { allowed: false, reason: "permissions" }, modelId);
+  }
+});
+
+test("a group deny on the provider-node id form blocks a prefix-admitted request", async () => {
+  for (const deny of [
+    { pattern: NODE_ID_MODEL, access: "deny" as const },
+    { pattern: "evidence-model", access: "deny" as const, provider: NODE_ID },
+  ]) {
+    const decision = await evaluateModelAccess(
+      restricted({ allowedModels: [NODE_PREFIX_MODEL] }),
+      { modelId: NODE_PREFIX_MODEL, resolvedModelId: NODE_ID_MODEL },
+      lookups({
+        checkGroupAccess: groupRules([{ pattern: NODE_PREFIX_MODEL, access: "allow" }, deny]),
+        getProviderNodePrefix: nodePrefixLookup,
+      })
+    );
+    assert.deepEqual(decision, { allowed: false, reason: "permissions" }, JSON.stringify(deny));
+  }
+});
+
+test("a node-id resolution with no allow on the node or its prefix is still refused", async () => {
+  const decision = await evaluateModelAccess(
+    restricted({ allowedModels: ["evidence-combo"] }),
+    { modelId: "evidence-combo", resolvedModelId: NODE_ID_MODEL },
+    lookups({
+      checkGroupAccess: groupRules([{ pattern: "evidence-combo", access: "allow" }]),
+      getProviderNodePrefix: nodePrefixLookup,
+    })
+  );
+  assert.deepEqual(decision, { allowed: false, reason: "permissions" });
+});
+
+test("a resolved target without a group allow of its own is still refused for a non-node alias", async () => {
+  const decision = await evaluateModelAccess(
+    restricted({ allowedModels: ["friendly"] }),
+    { modelId: "friendly", resolvedModelId: "openai/private-model" },
+    lookups({
+      checkGroupAccess: groupRules([{ pattern: "friendly", access: "allow" }]),
+      getProviderNodePrefix: () => null,
+    })
+  );
+  assert.deepEqual(decision, { allowed: false, reason: "permissions" });
+});
+
+test("a group allow on either the short or the full form admits the requested id", async () => {
+  for (const rule of [
+    { pattern: "openai/public-model", access: "allow" as const },
+    { pattern: "public-model", access: "allow" as const, provider: "openai" },
+  ]) {
+    const decision = await evaluateModelAccess(
+      restricted(),
+      { modelId: "openai/public-model" },
+      lookups({ checkGroupAccess: groupRules([rule]), getProviderNodePrefix: unexpectedRead })
+    );
+    assert.deepEqual(decision, { allowed: true, reason: "permissions" }, JSON.stringify(rule));
+  }
+});
