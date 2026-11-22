@@ -10,6 +10,7 @@ import type {
   CompressionWorkerMessage,
 } from "./compressionWorkerProtocol.ts";
 import type { CompressionResult } from "./types.ts";
+import { ultraEngine } from "./engines/cavemanAdapter.ts";
 
 // #13154 follow-up: `applyCompression`'s sync/in-process "stacked" branch runs every body
 // through `adaptBodyForCompression` first (Responses `input[]` and Kiro `conversationState`
@@ -45,9 +46,11 @@ parentPort.on("message", (job: CompressionWorkerJob) => {
         step,
       } satisfies CompressionWorkerMessage);
     const result =
-      job.mode === "stacked"
-        ? runStackedJob(job, onEngineStep)
-        : applyCompression(job.body, job.mode, job.options);
+      job.options?.engineStep === "ultra"
+        ? ultraEngine.apply(job.body, job.options)
+        : job.mode === "stacked"
+          ? runStackedJob(job, onEngineStep)
+          : applyCompression(job.body, job.mode, job.options);
     parentPort.postMessage({
       id: job.id,
       type: "result",

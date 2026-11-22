@@ -460,6 +460,11 @@ export const ultraEngine: CompressionEngine = {
       ),
     };
   },
+  async applyAsync(body, options) {
+    // Adaptive stacks can contain stateful engines that cannot move to a worker together.
+    const { runCompressionInWorker } = await import("../compressionWorkerPool.ts");
+    return runCompressionInWorker(body, "ultra", { ...options, engineStep: "ultra" });
+  },
   compress(body, config) {
     return this.apply(body, { stepConfig: config });
   },
