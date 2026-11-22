@@ -44,31 +44,31 @@ test("raw HTTP guard rejects high-risk unsupported methods before Next.js handle
       label: "key groups QUERY",
       method: "QUERY",
       url: "/api/keys/groups",
-      allow: "GET, POST",
+      allow: "GET, HEAD, POST",
     },
     {
       label: "key groups PATCH",
       method: "PATCH",
       url: "/api/keys/groups",
-      allow: "GET, POST",
+      allow: "GET, HEAD, POST",
     },
     {
       label: "key group detail POST",
       method: "POST",
       url: "/api/keys/groups/group-1",
-      allow: "GET, PUT, DELETE",
+      allow: "GET, HEAD, PUT, DELETE",
     },
     {
       label: "key group members PUT",
       method: "PUT",
       url: "/api/keys/groups/group-1/keys",
-      allow: "GET, POST, DELETE",
+      allow: "GET, HEAD, POST, DELETE",
     },
     {
       label: "key group permissions PATCH",
       method: "PATCH",
       url: "/api/keys/groups/group-1/permissions",
-      allow: "GET, POST, DELETE",
+      allow: "GET, HEAD, POST, DELETE",
     },
     {
       label: "key detail QUERY",
@@ -126,7 +126,26 @@ test("raw HTTP guard allows documented methods through", () => {
     false
   );
   assert.equal(
+    maybeHandleDisallowedMethod({ method: "HEAD", url: "/api/keys/groups" }, response),
+    false
+  );
+  assert.equal(
     maybeHandleDisallowedMethod({ method: "POST", url: "/api/keys/groups" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "HEAD", url: "/api/keys/groups/group-1" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod({ method: "HEAD", url: "/api/keys/groups/group-1/keys" }, response),
+    false
+  );
+  assert.equal(
+    maybeHandleDisallowedMethod(
+      { method: "HEAD", url: "/api/keys/groups/group-1/permissions" },
+      response
+    ),
     false
   );
   assert.equal(
