@@ -16,6 +16,20 @@ import { scanStatusLists, statusListNames } from "../helpers/statusListScan";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-key-health-scope-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
+const core = await import("../../src/lib/db/core.ts");
+const {
+  createProviderConnection,
+  getProviderConnectionById,
+  updateProviderConnection,
+  mergeConnectionProviderSpecificData,
+  setConnectionRateLimitUntil,
+  parseCooldownUntilMs,
+} = await import("../../src/lib/db/providers.ts");
+const { recordKeyHealthStatus } = await import("../../open-sse/handlers/chatCore/keyHealth.ts");
+const { recordKeyCooldown, resolveKeyForRequest, removeConnectionHealth } =
+  await import("../../open-sse/services/apiKeyRotator.ts");
+const auth = await import("../../src/sse/services/auth.ts");
+
 test("the parked-status vocabulary keeps its dependency-free home", () => {
   const leafSource = fs.readFileSync(
     path.join(process.cwd(), "src/shared/utils/parkedStatus.ts"),
@@ -303,19 +317,6 @@ test("an ISO cooldown deadline counts as limited", async () => {
   assert.equal(isConnectionRateLimited(conn.id), false, "an elapsed deadline is not limited");
 });
 
-const core = await import("../../src/lib/db/core.ts");
-const {
-  createProviderConnection,
-  getProviderConnectionById,
-  updateProviderConnection,
-  mergeConnectionProviderSpecificData,
-  setConnectionRateLimitUntil,
-  parseCooldownUntilMs,
-} = await import("../../src/lib/db/providers.ts");
-const { recordKeyHealthStatus } = await import("../../open-sse/handlers/chatCore/keyHealth.ts");
-const { recordKeyCooldown, resolveKeyForRequest, removeConnectionHealth } =
-  await import("../../open-sse/services/apiKeyRotator.ts");
-const auth = await import("../../src/sse/services/auth.ts");
 
 test.after(() => {
   core.resetDbInstance();
