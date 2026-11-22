@@ -8,6 +8,7 @@
  * and Arena-normalized model names (e.g., "kimi-k2.6" vs "kimi-k2").
  */
 
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { NOAUTH_PROVIDERS, OAUTH_PROVIDERS, APIKEY_PROVIDERS } from "@/shared/constants/providers";
 import { providerHasFreeModels } from "@/shared/utils/freeModels";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry";
@@ -367,16 +368,11 @@ function groupConnectionsByProvider(
   return byProvider;
 }
 
-// Terminal connection statuses — mirrors `isTerminalConnectionStatus`
-// (`src/sse/services/auth.ts`). A connection in one of these states stays
-// unavailable until credentials/settings change; it never self-recovers.
-const TERMINAL_CONNECTION_STATUSES = new Set(["credits_exhausted", "banned", "expired"]);
-
 /**
  * Pure predicate: is at least one of a provider's connections usable *right now*?
  *
- * A connection is usable when it is neither terminal (`testStatus` ∉
- * {credits_exhausted, banned, expired}) nor currently rate-limited
+ * A connection is usable when its `testStatus` is not a parked status (see
+ * `@/shared/utils/parkedStatus`) and it is not currently rate-limited
  * (`rateLimitedUntil` null or in the past — lazy recovery, matching the
  * Connection Cooldown rule in CLAUDE.md).
  *
@@ -399,7 +395,7 @@ export function isProviderUsable(
  */
 function classifyConnection(conn: ConnectionState, now: number): ProviderHealthState {
   const status = (conn.testStatus || "").trim().toLowerCase();
-  if (TERMINAL_CONNECTION_STATUSES.has(status)) return "down";
+  if (TERMINAL_TEST_STATUSES.has(status)) return "down";
   if (conn.rateLimitedUntil) {
     const until = new Date(conn.rateLimitedUntil).getTime();
     if (Number.isFinite(until) && until > now) return "degraded";

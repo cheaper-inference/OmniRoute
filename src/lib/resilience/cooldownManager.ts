@@ -3,11 +3,12 @@
  * transient reason (connection cooldown, model lockout) and to lift those states in bulk,
  * instead of opening each provider page.
  *
- * Terminal states (banned / expired / credits_exhausted) are listed but never cleared here:
+ * Terminal states (see @/shared/utils/parkedStatus) are listed but never cleared here:
  * they need new credentials or an explicit operator reset, not a cooldown lift.
  */
 
 import { getRawProviderConnections } from "@/lib/db/providers";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { clearAccountError } from "@/sse/services/auth";
 import {
   clearModelLock,
@@ -36,7 +37,6 @@ const COLUMNS = [
 ];
 
 const CONNECTION_LIMIT = 1000;
-const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
 
 export type CooldownStatus =
   "terminal" | "cooling_down" | "model_locked" | "unavailable" | "healthy";
@@ -95,7 +95,7 @@ function deriveStatus(
   cooldownRemainingMs: number,
   lockoutCount: number
 ): CooldownStatus {
-  if (testStatus && TERMINAL_STATUSES.has(testStatus)) return "terminal";
+  if (isParkedTestStatus(testStatus)) return "terminal";
   if (cooldownRemainingMs > 0) return "cooling_down";
   if (lockoutCount > 0) return "model_locked";
   if (testStatus === "unavailable") return "unavailable";
@@ -201,7 +201,7 @@ export async function clearConnectionCooldowns(
   for (const row of targets) {
     const id = String(row.id);
     const testStatus = text(row.testStatus)?.trim().toLowerCase() ?? null;
-    if (testStatus && TERMINAL_STATUSES.has(testStatus)) {
+    if (isParkedTestStatus(testStatus)) {
       result.skippedTerminal += 1;
       continue;
     }

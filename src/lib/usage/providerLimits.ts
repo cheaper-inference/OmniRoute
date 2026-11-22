@@ -1,3 +1,4 @@
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
 import { syncCodexPlanFromUsage } from "@/lib/usage/codexPlanSync";
@@ -342,16 +343,8 @@ export function quotaPathShouldMarkExpired(
   return true;
 }
 
-const TERMINAL_STATUSES_FOR_QUOTA_RECOVERY = new Set([
-  "credits_exhausted",
-  "banned",
-  "expired",
-  "deactivated",
-]);
-
 function isTerminalStatusForQuotaRecovery(testStatus: string | null | undefined): boolean {
-  if (!testStatus) return false;
-  return TERMINAL_STATUSES_FOR_QUOTA_RECOVERY.has(testStatus);
+  return isParkedTestStatus(testStatus);
 }
 
 function reportedQuotaRemaining(value: JsonRecord): number | null {

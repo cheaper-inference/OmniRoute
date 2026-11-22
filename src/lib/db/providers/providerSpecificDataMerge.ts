@@ -1,7 +1,8 @@
 import { getDbInstance } from "../core";
-import { encryptConnectionFields } from "../encryption";
+import { encryptConnectionFields, decryptConnectionFields } from "../encryption";
 import { invalidateDbCache } from "../readCache";
 import { parseProviderSpecificData } from "../webSessionDedup";
+import { mergeKeyHealthDelta, type KeyHealthMergeOptions } from "./keyHealthDelta";
 
 interface StatementLike<TRow = unknown> {
   get: (...params: unknown[]) => TRow | undefined;
@@ -23,14 +24,17 @@ interface DbLike {
  */
 export async function mergeConnectionProviderSpecificData(
   id: string,
-  patch: Record<string, unknown>
+  patch: Record<string, unknown>,
+  options: KeyHealthMergeOptions = {}
 ): Promise<void> {
   const db = getDbInstance() as unknown as DbLike;
   // Transaction so a concurrent merge cannot lose a key: the SELECT and
   // UPDATE must observe the same row version (codex account-state precedent).
   db.transaction(() => {
     const row = db
-      .prepare("SELECT provider_specific_data FROM provider_connections WHERE id = ?")
+      .prepare(
+        "SELECT api_key, access_token, provider_specific_data FROM provider_connections WHERE id = ?"
+      )
       .get(id);
     if (!row) return;
 
@@ -38,6 +42,25 @@ export async function mergeConnectionProviderSpecificData(
       (row as { provider_specific_data?: unknown }).provider_specific_data
     );
     const merged = { ...existing, ...patch };
+    if (options.mergeApiKeyHealth && patch.apiKeyHealth && typeof patch.apiKeyHealth === "object") {
+      // An inference outcome owns one key, not the sibling snapshot captured at
+      // dispatch. Merge its delta against the row read inside this transaction.
+      const raw = row as { api_key?: unknown; access_token?: unknown };
+      const credentials: { apiKey?: string; accessToken?: string; providerSpecificData?: unknown } =
+        options.matchKeyGeneration
+          ? decryptConnectionFields({
+              apiKey: raw.api_key as string | undefined,
+              accessToken: raw.access_token as string | undefined,
+              providerSpecificData: existing ?? undefined,
+            })
+          : {};
+      merged.apiKeyHealth = mergeKeyHealthDelta(
+        (credentials.providerSpecificData ?? existing) as Record<string, unknown> | null,
+        patch.apiKeyHealth,
+        credentials,
+        options
+      );
+    }
     // A patch carrying a declared secret field in plaintext (a quota fetcher refreshing
     // a console cookie, an executor minting a bearer) is enveloped exactly like a
     // full-row write; values already stored as envelopes are left as they are.

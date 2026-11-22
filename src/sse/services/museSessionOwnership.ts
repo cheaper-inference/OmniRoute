@@ -1,3 +1,4 @@
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import {
   museScopeHasRecordedItems,
   pruneIdleMuseOwnershipScopes,
@@ -51,7 +52,7 @@ export function museClaimCandidates(
       unavailable:
         !allowUnavailable &&
         (isAccountUnavailable(connection.rateLimitedUntil) ||
-          ["banned", "expired", "credits_exhausted"].includes(
+          TERMINAL_TEST_STATUSES.has(
             String(connection.testStatus || "").toLowerCase()
           ) ||
           isModelLocked("muse-code", connection.id, model)),

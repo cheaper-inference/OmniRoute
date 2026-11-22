@@ -6,6 +6,11 @@ import {
   isCredentialHealthy,
   setCredentialHealth,
 } from "../../src/lib/credentialHealth/cache.ts";
+import {
+  recordKeyHealthStatus,
+  __setKeyHealthPersistenceSink,
+} from "../../open-sse/handlers/chatCore/keyHealth.ts";
+import { getAllKeyHealth, removeConnectionHealth } from "../../open-sse/services/apiKeyRotator.ts";
 import { persistConnectionTestHealth } from "../../src/app/api/providers/[id]/test/connectionTestHealth.ts";
 
 const options = () => ({
@@ -21,6 +26,7 @@ const options = () => ({
     rateLimitedUntil: "2099-01-01T00:00:00.000Z",
   },
   latest: {},
+  probeStartedAt: "2026-10-14T00:00:30.000Z",
   result: { valid: true },
   diagnosis: { type: "ok", source: "upstream", code: null },
   operatorDisabled: false,
@@ -221,5 +227,166 @@ test(
       if (previous === undefined) delete process.env[PASSIVE_ENV];
       else process.env[PASSIVE_ENV] = previous;
     }
+  }
+);
+
+test("a rejected recovery write leaves the in-memory key rejection untouched", async () => {
+  const input = options();
+  const credentials = { connectionId: input.connectionId, apiKey: "recovery-fixture" };
+  __setKeyHealthPersistenceSink(() => {});
+  try {
+    recordKeyHealthStatus(401, credentials, undefined, undefined, "", null, 1);
+    recordKeyHealthStatus(401, credentials, undefined, undefined, "", null, 2);
+    const before = structuredClone(getAllKeyHealth()[`${input.connectionId}:primary`]);
+    await assert.rejects(
+      persistConnectionTestHealth({
+        ...input,
+        connection: { ...input.connection, apiKey: "recovery-fixture" },
+        latest: { providerSpecificData: { apiKeyHealth: { primary: before } } },
+        persist: async () => {
+          throw new Error("Synthetic recovery commit failure");
+        },
+      }),
+      /Synthetic recovery commit failure/
+    );
+    assert.deepEqual(getAllKeyHealth()[`${input.connectionId}:primary`], before);
+    assert.equal(isCredentialHealthy(input.connectionId), false);
+  } finally {
+    __setKeyHealthPersistenceSink(null);
+    removeConnectionHealth(input.connectionId);
+  }
+});
+
+test(
+  "an account-deactivated verdict is terminal even on an unparked connection",
+  { timeout: 2000 },
+  async () => {
+    const input = options();
+    const unparked = { ...input.connection, testStatus: "error" };
+    let update: Record<string, unknown> = {};
+    await persistConnectionTestHealth({
+      ...input,
+      connection: unparked,
+      result: { valid: false, error: "Account deactivated" },
+      diagnosis: { type: "account_deactivated", source: "account", code: "account_deactivated" },
+      persist: async (_id, fields) => {
+        update = fields;
+      },
+    });
+    assert.equal(
+      update.rateLimitedUntil,
+      unparked.rateLimitedUntil,
+      "a deactivated account must not be scheduled for a 30s retry"
+    );
+    assert.equal(update.testStatus, "error");
+  }
+);
+
+test(
+  "a failed probe on a parked row writes no cooldown of its own",
+  { timeout: 2000 },
+  async () => {
+    // The transaction restores the stored deadline. When the parked row has none, the handler must
+    // not invent one: a 30s window here would be the second owner this series removed.
+    const input = options();
+    const parked = { ...input.connection, testStatus: "deactivated", rateLimitedUntil: null };
+    let update: Record<string, unknown> = {};
+    await persistConnectionTestHealth({
+      ...input,
+      connection: parked,
+      result: { valid: false, error: "probe failed" },
+      diagnosis: { type: "upstream_error", source: "upstream", code: "500" },
+      persist: async (_id, fields) => {
+        update = fields;
+      },
+    });
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(update, "rateLimitedUntil"),
+      false,
+      "a parked row's cooldown belongs to the transaction, not to the probe handler"
+    );
+  }
+);
+
+test(
+  "a transient failure on an unparked connection still gets the short retry window",
+  { timeout: 2000 },
+  async () => {
+    const input = options();
+    const unparked = { ...input.connection, testStatus: "error", rateLimitedUntil: null };
+    let update: Record<string, unknown> = {};
+    await persistConnectionTestHealth({
+      ...input,
+      connection: unparked,
+      result: { valid: false, error: "Transient network failure" },
+      diagnosis: { type: "network_error", source: "upstream", code: "network_error" },
+      persist: async (_id, fields) => {
+        update = fields;
+      },
+    });
+    assert.equal(update.testStatus, "error");
+    const waitMs = Date.parse(String(update.rateLimitedUntil)) - Date.now();
+    assert.ok(waitMs > 25_000 && waitMs < 35_000, `expected a 30s retry window, got ${waitMs}ms`);
+  }
+);
+
+test(
+  "the probe write path asks for parked-verdict preservation only on failure",
+  { timeout: 2000 },
+  async () => {
+    const input = options();
+    const seen: Array<Record<string, unknown> | undefined> = [];
+    const persist = async (
+      _id: string,
+      _fields: Record<string, unknown>,
+      opts?: Record<string, unknown>
+    ) => {
+      seen.push(opts);
+    };
+    await persistConnectionTestHealth({
+      ...input,
+      result: { valid: false, error: "Account deactivated" },
+      diagnosis: { type: "account_deactivated", source: "account", code: "account_deactivated" },
+      persist,
+    });
+    await persistConnectionTestHealth({
+      ...input,
+      result: { valid: true },
+      diagnosis: { type: "ok", source: "upstream", code: null },
+      persist,
+    });
+    assert.equal(seen[0]?.probeHealthWrite?.outcome, "failure");
+    assert.equal(seen[1]?.probeHealthWrite?.outcome, "success");
+    assert.equal(seen[1]?.probeHealthWrite?.startedAt, input.probeStartedAt);
+  }
+);
+
+test(
+  "the probe write carries the fresh row, not the pre-probe snapshot",
+  { timeout: 2000 },
+  async () => {
+    const input = options();
+    let update: Record<string, unknown> = {};
+    await persistConnectionTestHealth({
+      ...input,
+      // Snapshot taken before the probe: healthy, no cooldown.
+      connection: { ...input.connection, testStatus: "active", rateLimitedUntil: null, lastError: null },
+      // Row read after the probe: parked by real traffic while the probe ran.
+      latest: {
+        ...input.connection,
+        testStatus: "deactivated",
+        rateLimitedUntil: "2099-05-05T00:00:00.000Z",
+        lastError: "Account deactivated",
+      },
+      result: { valid: true },
+      diagnosis: { type: "ok", source: "upstream", code: null },
+      clearErrorState: false,
+      persist: async (_id, fields) => {
+        update = fields;
+      },
+    });
+    assert.equal(update.testStatus, "deactivated");
+    assert.equal(update.rateLimitedUntil, "2099-05-05T00:00:00.000Z");
+    assert.equal(update.lastError, "Account deactivated");
   }
 );

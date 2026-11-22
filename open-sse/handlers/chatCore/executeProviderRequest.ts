@@ -41,6 +41,7 @@ import {
 } from "../../config/codexTurnState.ts";
 import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
+import { readErrorBodyText } from "../../utils/error.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
 import {
@@ -61,6 +62,7 @@ import {
 } from "../../services/rateLimitManager.ts";
 import { acquireMany as acquireConcurrencyGates } from "../../services/accountSemaphore.ts";
 import { rethrowAdmissionError, remainingQueueBudgetMs } from "./queueBudget.ts";
+import { nextRequestSeq } from "./keyHealth.ts";
 import { deduplicate } from "../../services/requestDedup.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
@@ -151,9 +153,10 @@ export type ExecuteProviderRequestDeps = {
   recordKeyHealthStatus: (
     status: number,
     creds: Record<string, unknown> | null | undefined,
-    transport?: string,
-    failureDetail?: string,
-    retryAfterMs?: number | null
+    transport: string | undefined,
+    failureDetail: string | undefined,
+    retryAfterMs: number | null | undefined,
+    requestSeq: number
   ) => void;
   requestedModel: string;
   resilienceSettings: ResilienceSettings;
@@ -171,6 +174,43 @@ export type ExecuteProviderRequestDeps = {
   upstreamStream: boolean;
   userAgent: string | undefined;
 };
+
+/**
+ * Build the per-response key-health callback. `requestSeq` is claimed once, before the
+ * upstream call, so a response that finishes after a newer attempt was already recorded
+ * still reports the order its request was dispatched in — and cannot pass as proof of
+ * recovery, nor install a stale verdict over a fresher one.
+ *
+ * Exported for its own unit test; production call sites are all in this module.
+ */
+export function makeResponseKeyHealthRecorder(
+  record: ExecuteProviderRequestDeps["recordKeyHealthStatus"],
+  requestSeq: number
+) {
+  return (
+    response: Response,
+    creds: Record<string, unknown>,
+    transport?: string,
+    failureDetail = ""
+  ) => {
+    if (!isCodexResponseCurrent(response, response.ok)) return;
+    runWithCodexResponseFence(
+      response,
+      () =>
+        record(
+          response.status,
+          creds,
+          transport,
+          failureDetail,
+          response.status === HTTP_STATUS.RATE_LIMITED
+            ? parseRetryAfterMs(response.headers.get("retry-after"))
+            : null,
+          requestSeq
+        ),
+      response.ok
+    );
+  };
+}
 
 // Resolve early (the loop's own signal checks then end the request) when the client leaves.
 function sleepUnlessAborted(ms: number, signal: AbortSignal): Promise<void> {
@@ -235,28 +275,6 @@ export async function executeProviderRequest(
     userAgent: _userAgent,
   } = deps;
   const body = rawBody;
-  const recordResponseKeyHealth = (
-    response: Response,
-    creds: Record<string, unknown>,
-    transport?: string,
-    failureDetail = ""
-  ) => {
-    if (!isCodexResponseCurrent(response, response.ok)) return;
-    runWithCodexResponseFence(
-      response,
-      () =>
-        recordKeyHealthStatus(
-          response.status,
-          creds,
-          transport,
-          failureDetail,
-          response.status === HTTP_STATUS.RATE_LIMITED
-            ? parseRetryAfterMs(response.headers.get("retry-after"))
-            : null
-        ),
-      response.ok
-    );
-  };
   const execute = async () => {
     // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
     // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
@@ -296,6 +314,9 @@ export async function executeProviderRequest(
 
     let releaseRawResultAccountSemaphore = () => {};
     try {
+      // Built at the dispatch site of each attempt (see the recorder bindings below): that is the
+      // only place the dispatch sequence is stamped, and both read sites follow it.
+      let recordResponseKeyHealth: ReturnType<typeof makeResponseKeyHealthRecorder>;
       const rawResult: ChatCoreExecutorResult = await (async () => {
         let attempts = 0;
         const isModelScopeForRequest = isModelScope();
@@ -411,6 +432,11 @@ export async function executeProviderRequest(
                   execute: (signal) =>
                     runWithCapture(providerRequestCapture, () => {
                       noteUpstreamDispatch();
+                      // Captured immediately before dispatch, after the concurrency gates.
+                      recordResponseKeyHealth = makeResponseKeyHealthRecorder(
+                        recordKeyHealthStatus,
+                        nextRequestSeq()
+                      );
                       return executor.execute({
                         model: modelToCall,
                         body: bodyToSend,
@@ -516,13 +542,14 @@ export async function executeProviderRequest(
               (res.response.ok ||
                 res.response.status === HTTP_STATUS.UNAUTHORIZED ||
                 res.response.status === HTTP_STATUS.FORBIDDEN ||
+                res.response.status === HTTP_STATUS.PAYMENT_REQUIRED ||
                 res.response.status === HTTP_STATUS.RATE_LIMITED) &&
               executionConnectionId &&
               !(await shouldIsolateProbeFailures())
             ) {
               const failureDetail = res.response.ok
                 ? ""
-                : await readResponseTextWithinCap(res.response.clone()).catch(() => "");
+                : await readErrorBodyText(res.response.clone()).catch(() => "");
               recordResponseKeyHealth(res.response, execCreds, res.transport, failureDetail);
             }
 
@@ -622,6 +649,11 @@ export async function executeProviderRequest(
                       execute: (signal) =>
                         runWithCapture(providerRequestCapture, () => {
                           noteUpstreamDispatch();
+                          // Captured immediately before dispatch, after the concurrency gates.
+                          recordResponseKeyHealth = makeResponseKeyHealthRecorder(
+                            recordKeyHealthStatus,
+                            nextRequestSeq()
+                          );
                           return executor.execute({
                             model: modelToCall,
                             body,

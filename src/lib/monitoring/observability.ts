@@ -1,3 +1,4 @@
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import {
   createCodexAccountPool,
   getCodexParentAccountDiagnostic,
@@ -274,11 +275,8 @@ function limitMonitors(monitors: QuotaMonitorSnapshot[], maxItems = 8): QuotaMon
  * in-memory probe-cache gauge reports failed=0 (expired / quota / banned).
  */
 const STICKY_DB_NON_OK_TEST_STATUS = new Set([
+  ...TERMINAL_TEST_STATUSES,
   "error",
-  "expired",
-  "credits_exhausted",
-  "banned",
-  "deactivated",
   "unavailable",
 ]);
 

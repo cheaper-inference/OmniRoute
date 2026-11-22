@@ -980,6 +980,9 @@ export async function testSingleConnection(
   options: ConnectionTestOptions = {}
 ) {
   const connection = await getCachedProviderConnectionById(connectionId);
+  // Timestamp the probe before it runs: a verdict parked while it is in flight is newer
+  // evidence than anything the probe can report, and the write path compares the two.
+  const probeStartedAt = new Date().toISOString();
 
   if (!connection) {
     return { valid: false, error: "Connection not found", diagnosis: null, latencyMs: 0 };
@@ -1127,7 +1130,7 @@ export async function testSingleConnection(
   // hard statement and no poller may overrule it. Once it elapses, the next probe
   // clears it normally.
   const clearErrorState = shouldClearErrorStateOnValidProbe(
-    connection as { rateLimitedUntil?: string | null },
+    latest as { rateLimitedUntil?: string | null },
     result.valid
   );
   await persistConnectionTestHealth({
@@ -1135,6 +1138,7 @@ export async function testSingleConnection(
     provider,
     connection,
     latest,
+    probeStartedAt,
     result,
     diagnosis,
     operatorDisabled,

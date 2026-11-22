@@ -1,3 +1,4 @@
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { createHash } from "crypto";
 
 import { getProviderConnections, updateProviderConnection } from "@/lib/db/providers";
@@ -103,7 +104,6 @@ export interface ExecuteProviderAutopilotActionInput {
   confirm?: boolean;
 }
 
-const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
 const OPEN_BREAKER_STATES = new Set(["OPEN", "HALF_OPEN"]);
 
 function toString(value: unknown): string | null {
@@ -198,7 +198,7 @@ function isTerminalConnection(connection: JsonRecord): boolean {
   const status = toString(connection.testStatus)?.toLowerCase();
   const errorType = toString(connection.lastErrorType)?.toLowerCase();
   return Boolean(
-    (status && TERMINAL_STATUSES.has(status)) || (errorType && TERMINAL_STATUSES.has(errorType))
+    (status && TERMINAL_TEST_STATUSES.has(status)) || (errorType && TERMINAL_TEST_STATUSES.has(errorType))
   );
 }
 

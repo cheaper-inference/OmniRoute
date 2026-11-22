@@ -23,8 +23,11 @@ import { findChatGptConnectionByRegistration } from "./chatgpt";
 import { sanitizeMergedConnectionOverrides } from "./providers/connectionUpdateSanitize";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
 import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
+import { mergeKeyHealthDelta } from "./providers/keyHealthDelta";
+import { parseCooldownUntilMs as parseStoredCooldown } from "./providers/rateLimit";
 import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
 import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
 import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
@@ -1003,6 +1006,14 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
 export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
+  /** Probe recovery patches only observed key-health entries, never sibling snapshots. */
+  mergeApiKeyHealth?: boolean;
+  /**
+   * A probe reports on the row it read before the probe ran. Everything this write decides
+   * about verdicts is derived from that context and the row read inside this transaction:
+   * a verdict parked while the probe was in flight survives.
+   */
+  probeHealthWrite?: { outcome: "success" | "failure"; startedAt: string };
   expectedCodexFence?: CodexConnectionFence;
   /** Internal token rotation: the exact version committed by this write, never a later reread. */
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
@@ -1061,6 +1072,15 @@ function buildMergedConnectionUpdate(
     ...data,
     updatedAt: new Date().toISOString(),
   };
+  if (opts?.mergeApiKeyHealth) {
+    const currentData = toRecord(existingCamel.providerSpecificData);
+    const delta = toRecord(data.providerSpecificData);
+    merged.providerSpecificData = {
+      ...currentData,
+      ...delta,
+      apiKeyHealth: mergeKeyHealthDelta(currentData, delta.apiKeyHealth, {}, opts),
+    };
+  }
   merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
     data,
     normalizeConnectionProviderSpecificData(
@@ -1071,17 +1091,82 @@ function buildMergedConnectionUpdate(
     )
   );
   sanitizeMergedConnectionOverrides(merged);
+  // A probe result carries the row it read before the probe started. The row read inside this
+  // transaction is fresher: a verdict parked while the probe was in flight must survive it.
+  const probeWrite = opts?.probeHealthWrite;
+  if (probeWrite) {
+    const parked = isParkedTestStatus(existingCamel.testStatus);
+    const parkedAt = parseStoredCooldown(
+      existingCamel.lastErrorAt as string | number | null | undefined
+    );
+    const probeStartedAt = parseStoredCooldown(probeWrite.startedAt);
+    // A verdict stamped no earlier than the probe start is newer evidence than the probe's own
+    // result. When either stamp cannot be read, treat the verdict as newer: a probe may only
+    // clear a verdict it can prove predates it.
+    const timingKnown = parkedAt !== null && probeStartedAt !== null;
+    const parkedDuringProbe = parked && (!timingKnown || parkedAt >= probeStartedAt);
+    if (parked && probeWrite.outcome === "failure") {
+      // A failed probe never replaces a parked verdict, whichever status it would write: it
+      // observed one request, not the ban. Its own diagnosis still lands in the error fields.
+      const genericFailure = String(merged.testStatus ?? "").toLowerCase() === "error";
+      merged.testStatus = existingCamel.testStatus;
+      if (genericFailure) {
+        // The retry window a generic failure would write is outranked by the parked cooldown.
+        merged.rateLimitedUntil = existingCamel.rateLimitedUntil ?? merged.rateLimitedUntil;
+      }
+    }
+    if (parkedDuringProbe) {
+      // A verdict parked while the probe was in flight outlives it, evidence included: the probe
+      // reports on a row that no longer exists. Without its stamp the verdict could never be
+      // cleared by a later probe, and the operator would see a block with no reason.
+      merged.testStatus = existingCamel.testStatus;
+      merged.isActive = existingCamel.isActive;
+      if (parkedAt !== null) {
+        // Only a verdict that carries its own stamp has evidence worth protecting; without one
+        // there is nothing to preserve and the probe's own report is the better record.
+        for (const field of [
+          "lastError",
+          "lastErrorAt",
+          "lastErrorType",
+          "lastErrorSource",
+          "errorCode",
+        ]) {
+          if (existingCamel[field] !== undefined) merged[field] = existingCamel[field];
+        }
+      }
+    }
+    if (probeWrite.outcome === "success") {
+      // A passing probe proves the credential authenticates; it does not overrule a quota
+      // statement, and a later incoming deadline still wins.
+      const storedUntil = parseStoredCooldown(
+        existingCamel.rateLimitedUntil as string | number | null | undefined
+      );
+      const incomingUntil = parseStoredCooldown(
+        merged.rateLimitedUntil as string | number | null | undefined
+      );
+      const storedIsFuture = storedUntil !== null && storedUntil > Date.now();
+      const incomingOutranks =
+        storedUntil !== null && incomingUntil !== null && incomingUntil >= storedUntil;
+      if (storedIsFuture && !incomingOutranks) {
+        merged.rateLimitedUntil = existingCamel.rateLimitedUntil;
+      }
+    }
+  }
   // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
   // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
   // so that sweep never retests it, whenever the flag is turned on.
   if (typeof data.isActive === "boolean") {
+    // The marker records what this write actually does, which a probe rule may have just
+    // overridden: keeping the caller's value would erase the ban marker on a row it left
+    // disabled and parked.
+    const nextIsActive = typeof merged.isActive === "boolean" ? merged.isActive : data.isActive;
     merged.providerSpecificData = applyAutomaticDisableMarker(
       merged.providerSpecificData,
       existingCamel.isActive,
-      data.isActive,
+      nextIsActive,
       undefined,
       {
-        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+        stampAutomatic: nextIsActive === false && isRetestAutoDisabledEnabled(),
         permanentBan: opts?.permanentBan === true,
       }
     );
@@ -1315,6 +1400,7 @@ export {
 } from "./providers/nodes";
 export {
   setConnectionRateLimitUntil,
+  parseCooldownUntilMs,
   markConnectionRateLimitedUntil,
   clearConnectionRateLimit,
   getEffectiveQuotaUsage,

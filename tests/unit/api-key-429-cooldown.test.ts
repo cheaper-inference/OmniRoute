@@ -187,7 +187,7 @@ describe("recordKeyHealthStatus 429 handling", () => {
     const conn = "kh-429-cool";
     recordKeyHealthStatus(
       429,
-      creds(conn, { selectedKeyId: "extra_0" }),
+      creds(conn, { selectedKeyId: "extra_0", extraApiKeys: ["extra-fixture"] }),
       noopLog,
       undefined,
       "",
@@ -277,7 +277,7 @@ describe("chatCore wiring (source-locked)", () => {
     assert.notEqual(i, -1, "streaming recordResponseKeyHealth call site must exist");
     assert.match(
       executeSrc,
-      /runWithCodexResponseFence\(\s*response,\s*\(\) =>\s*recordKeyHealthStatus\(\s*response\.status,/,
+      /runWithCodexResponseFence\(\s*response,\s*\(\) =>\s*record\(\s*response\.status,/,
       "the shared health recorder must preserve the response owner fence"
     );
     // Only the condition head counts — comments inside the block must not satisfy this.

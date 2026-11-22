@@ -1,3 +1,4 @@
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import pino from "pino";
 
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
@@ -74,8 +75,9 @@ function retryAfter(until: string | null | undefined, now: number): number | nul
   return Math.max(0, timestamp - now);
 }
 
-function isTerminalStatus(status: string): boolean {
-  return status === "credits_exhausted" || status === "banned" || status === "expired";
+/** Exported so the terminal vocabulary this panel reports is pinned by a test. */
+export function isTerminalStatus(status: string): boolean {
+  return isParkedTestStatus(status);
 }
 
 function buildProviderExplanation(provider: string): {

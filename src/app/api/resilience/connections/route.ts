@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getRawProviderConnections, getProviderConnectionsCount } from "@/lib/db/providers";
 import { getAllCircuitBreakerStatuses } from "@/shared/utils/circuitBreaker";
 import { resolveProviderId } from "@/shared/constants/providers";
-import { TERMINAL_CONNECTION_STATUSES } from "@/lib/quota/connectionRecovery";
+import { PARKED_EXCEPT_QUOTA_EXHAUSTION } from "@/shared/utils/parkedStatus";
 import { resolveProviderAvailability } from "@/lib/providerAvailability";
 import { sanitizeErrorMessage, buildErrorBody } from "@omniroute/open-sse/utils/error";
 import {
@@ -102,7 +102,7 @@ function toConnectionState(
   const provider = String(row.provider ?? "");
   const breaker = breakersMap.get(resolveProviderId(provider)) ?? null;
   const lockouts = lockoutsMap.get(String(row.id ?? "")) ?? [];
-  const testStatus = row.testStatus ? String(row.testStatus).trim().toLowerCase() : null; // normalize to match TERMINAL_CONNECTION_STATUSES
+  const testStatus = row.testStatus ? String(row.testStatus).trim().toLowerCase() : null; // normalize to match PARKED_EXCEPT_QUOTA_EXHAUSTION
   const rateLimitedUntil = row.rateLimitedUntil ? String(row.rateLimitedUntil) : null;
   // cooldownUntilMs() handles both ISO strings and numeric epoch TEXT (#3954)
   const rawCooldown = rateLimitedUntil ? cooldownUntilMs(rateLimitedUntil) - now : 0;
@@ -110,7 +110,7 @@ function toConnectionState(
 
   // Derive connection status for UI badge (terminal states take priority over cooldown)
   let connectionStatus: ConnectionState["connectionStatus"] = "healthy";
-  if (testStatus && TERMINAL_CONNECTION_STATUSES.has(testStatus)) {
+  if (testStatus && PARKED_EXCEPT_QUOTA_EXHAUSTION.has(testStatus)) {
     connectionStatus = "terminal"; // permanent unavailability takes priority
   } else if (breaker?.state === "OPEN") {
     connectionStatus = "circuit_open";

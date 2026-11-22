@@ -1,4 +1,5 @@
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { mayWriteCodexConnection } from "@/lib/db/codexConnectionFences";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
@@ -298,8 +299,7 @@ function normalizeStatus(value: string | null): string {
   return (value || "").trim().toLowerCase();
 }
 function isTerminalConnectionStatus(connection: ProviderConnectionView): boolean {
-  const status = normalizeStatus(connection.testStatus);
-  return status === "credits_exhausted" || status === "banned" || status === "expired";
+  return isParkedTestStatus(connection.testStatus);
 }
 
 // OpenRouter's paid balance and catalogued free-access models are billed

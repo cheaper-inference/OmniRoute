@@ -1,3 +1,4 @@
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { getCachedClaudeQuotaScopeDecision } from "../../services/claudeQuotaScopeBridge.ts";
 import { cooldownUntilMs, isCreditsExhausted, lockModel } from "../../services/accountFallback.ts";
 import { SUBSCRIPTION_QUOTA_COOLDOWN_MS } from "../../services/quotaTextCooldowns.ts";
@@ -53,7 +54,7 @@ export async function handleClaudeQuotaFailure(input: ClaudeQuotaFailure): Promi
   const connection = await input.deps.readConnection(input.connectionId);
   if (!connection) return true;
   const status = typeof connection.testStatus === "string" ? connection.testStatus : "";
-  if (["banned", "expired", "deactivated", "credits_exhausted"].includes(status)) {
+  if (isParkedTestStatus(status)) {
     return true;
   }
   // DB reads expose nullable fields as unknown. Narrow them before passing

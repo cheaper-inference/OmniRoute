@@ -21,6 +21,7 @@
  * when to schedule it, so importing this module in tests never spawns a timer.
  */
 
+import { PARKED_EXCEPT_QUOTA_EXHAUSTION } from "@/shared/utils/parkedStatus";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
@@ -31,18 +32,6 @@ import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
  * proactive recovery.
  */
 export const RECOVERABLE_COOLDOWN_STATUS = "unavailable";
-
-/**
- * Terminal connection statuses that must NEVER be auto-recovered — they stay
- * unavailable until credentials/settings change or an operator resets them.
- * Mirrors `isTerminalConnectionStatus` (src/sse/services/auth.ts) and
- * `TERMINAL_STATUSES` (src/lib/db/providers.ts::clearStaleCrashCooldowns).
- *
- * NOTE: `credits_exhausted` is NOT terminal for metered providers (Antigravity,
- * Gemini) whose quotas reset on a time window. It is recovered by a separate
- * periodic probe — see `isCreditsExhaustedReprobeCandidate` below.
- */
-export const TERMINAL_CONNECTION_STATUSES = new Set<string>(["banned", "expired"]);
 
 /**
  * Status that marks an account as out of metered credits. Unlike terminal
@@ -149,7 +138,9 @@ export function isRecoverableCooldownConnection(
   }
   const status = normalizeStatus(connection.testStatus);
   if (!RECOVERABLE_TRANSIENT_STATUSES.has(status)) return false;
-  if (TERMINAL_CONNECTION_STATUSES.has(status)) return false; // defensive; transient statuses are never terminal
+  // Deliberately narrower than the routing gate: metered quotas reset on a time window, so
+  // `credits_exhausted` recovers through the periodic reprobe below rather than staying parked.
+  if (PARKED_EXCEPT_QUOTA_EXHAUSTION.has(status)) return false; // defensive; transient statuses are never terminal
   // Not stale noise: Google still blocks the account until it is verified, and a passing
   // connection test (which drops the stored link) is what clears this label.
   if (connection.verificationPending === true) return false;

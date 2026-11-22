@@ -11,7 +11,8 @@ export type RegisteredConnectionStore = {
   getProviderConnectionById: (id: string) => Promise<unknown>;
   mergeConnectionProviderSpecificData: (
     id: string,
-    patch: Record<string, unknown>
+    patch: Record<string, unknown>,
+    options?: { mergeApiKeyHealth?: boolean }
   ) => Promise<void>;
 };
 
