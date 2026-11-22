@@ -1,0 +1,1 @@
+- **feat(sse):** Opt-in identity sanitizer (`OMNIROUTE_SANITIZE_IDENTITY=1`) neutralises "OpenClaw"/"OmniRoute" in system-prompt text and tool descriptions sent upstream; user/assistant/tool messages, tool names, schemas, paths and commands stay untouched ([#20992](https://github.com/cheaper-inference/OmniRoute/pull/20992)) — thanks @edosulai
