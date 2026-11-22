@@ -1395,17 +1395,22 @@ function buildAgnesImageRequestBody(model, body) {
 function appendOpenAIImageGenerationOptions(
   upstreamBody: Record<string, unknown>,
   body: Record<string, unknown>
-): void {
+): string | undefined {
   if (body.complexity !== undefined) upstreamBody.complexity = body.complexity;
   if (body.moderation !== undefined) upstreamBody.moderation = body.moderation;
-  if (body.output_compression === undefined || typeof body.output_format !== "string") return;
+  if (typeof body.output_format !== "string") return;
 
   // The Images API only accepts a compression percentage for JPEG and WebP.
   // Send the format with compression so the request does not use the PNG default.
   const format = body.output_format.trim().toLowerCase();
+  const compression = body.output_compression;
+  if (format === "gif" && compression != null) {
+    return "GIF output does not support streaming, partial images or output_compression";
+  }
+  if (typeof compression !== "number" || !Number.isFinite(compression)) return;
   if (format === "jpeg" || format === "webp") {
     upstreamBody.output_format = format;
-    upstreamBody.output_compression = body.output_compression;
+    upstreamBody.output_compression = compression;
   }
 }
 
@@ -1458,7 +1463,10 @@ async function handleOpenAIImageGeneration({
     if (imageUrl && OPENAI_IMAGE_TO_IMAGE_MODELS.has(model)) {
       upstreamBody.image_url = imageUrl;
     }
-    if (provider === "openai") appendOpenAIImageGenerationOptions(upstreamBody, body);
+    if (provider === "openai") {
+      const optionError = appendOpenAIImageGenerationOptions(upstreamBody, body);
+      if (optionError) return { success: false, status: 400, error: optionError };
+    }
   }
 
   // Build headers
