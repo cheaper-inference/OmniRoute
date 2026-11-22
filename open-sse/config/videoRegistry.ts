@@ -411,6 +411,23 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     ],
   },
 
+  // WaveSpeedAI async prediction API, handled by the "wavespeed-video-job" preset: the model id
+  // is the submit path (POST /api/v3/<model id>) and the request body is the model's own input
+  // (prompt, duration, aspect_ratio, resolution, ...).
+  wavespeed: {
+    id: "wavespeed",
+    baseUrl: "https://api.wavespeed.ai",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "wavespeed-video-job",
+    models: [
+      { id: "google/veo3.1-fast/text-to-video", name: "Veo 3.1 Fast (WaveSpeedAI)" },
+      { id: "kwaivgi/kling-v4.0/text-to-video", name: "Kling 4.0 (WaveSpeedAI)" },
+      { id: "bytedance/seedance-2.5/text-to-video", name: "Seedance 2.5 (WaveSpeedAI)" },
+      { id: "alibaba/wan-3.0/text-to-video", name: "Wan 3.0 (WaveSpeedAI)" },
+    ],
+  },
+
   novita: {
     id: "novita",
     // Novita's async video APIs are per-model: the model id IS the submit path

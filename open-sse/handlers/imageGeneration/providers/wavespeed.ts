@@ -1,0 +1,234 @@
+// WaveSpeedAI (api.wavespeed.ai) image generation.
+// Family: wavespeed-image | Provider: wavespeed
+//
+// Async prediction API: POST /api/v3/<model id> -> { data: { id } }; GET
+// /api/v3/predictions/<id>/result until data.status is "completed", then data.outputs holds
+// the image URLs. The submit is sent exactly once: a second POST starts a second prediction.
+
+import { mapImageSize } from "../../../translator/image/sizeMapper.ts";
+import { sleep } from "../../../utils/sleep.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
+import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import {
+  normalizeProviderImagePayload,
+  saveImageErrorResult,
+  saveImageSuccessResult,
+} from "../../imageGeneration.ts";
+import {
+  MAX_CONSECUTIVE_POLL_RETRIES,
+  isRetryablePollStatus,
+} from "../../videoGeneration/pollRetry.ts";
+import {
+  WAVESPEED_BASE_URL,
+  buildWavespeedResultUrl,
+  buildWavespeedSubmitUrl,
+  pickWavespeedModelInput,
+  readWavespeedFailure,
+} from "../../mediaGeneration/wavespeed.ts";
+
+const DEFAULT_TIMEOUT_MS = 300_000;
+const DEFAULT_POLL_INTERVAL_MS = 1000;
+
+// How each catalog model takes its output dimensions. An OpenAI `size` ("1024x1024") is
+// translated for these models only; for any other model id it is left out, because the name of
+// the size input is not known.
+const WAVESPEED_PIXEL_SIZE_MODELS = new Set(["wavespeed-ai/z-image/turbo"]);
+const WAVESPEED_ASPECT_RATIO_MODELS = new Set([
+  "bytedance/seedream-v5.0-pro",
+  "google/nano-banana-pro/text-to-image",
+]);
+
+const OPENAI_SIZE_PATTERN = /^(\d+)x(\d+)$/i;
+
+class WavespeedImageError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/** The WaveSpeedAI model input for an OpenAI-style image request. */
+export function buildWavespeedImageInput(
+  model: string,
+  body: Record<string, unknown>
+): Record<string, unknown> {
+  const input = pickWavespeedModelInput(body);
+  input.prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
+
+  const size = typeof body.size === "string" ? body.size.trim() : "";
+  const openAiSize = OPENAI_SIZE_PATTERN.exec(size);
+  // Anything that is not "WxH" is already a native value (z-image takes "1024*1024").
+  if (!openAiSize) return input;
+
+  delete input.size;
+  if (WAVESPEED_PIXEL_SIZE_MODELS.has(model)) {
+    input.size = `${openAiSize[1]}*${openAiSize[2]}`;
+  } else if (WAVESPEED_ASPECT_RATIO_MODELS.has(model) && input.aspect_ratio === undefined) {
+    input.aspect_ratio = mapImageSize(size);
+  }
+  return input;
+}
+
+async function readJson(response: Response): Promise<unknown> {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+function upstreamErrorText(payload: unknown, fallback: string): string {
+  if (typeof payload === "string") return payload || fallback;
+  const message = (payload as { message?: unknown } | null)?.message;
+  return typeof message === "string" && message ? message : fallback;
+}
+
+async function submitWavespeedPrediction({ url, token, input, signal }): Promise<string> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+    ...(signal ? { signal } : {}),
+  });
+  const payload = await readJson(response);
+
+  if (!response.ok) {
+    throw new WavespeedImageError(
+      response.status,
+      upstreamErrorText(payload, `WaveSpeedAI request failed (${response.status})`)
+    );
+  }
+  const failure = readWavespeedFailure(payload);
+  if (failure) throw new WavespeedImageError(failure.status, failure.message);
+
+  const id = (payload as { data?: { id?: unknown } } | null)?.data?.id;
+  if (typeof id !== "string" || !id) {
+    throw new WavespeedImageError(502, "WaveSpeedAI did not return a prediction id");
+  }
+  return id;
+}
+
+async function pollWavespeedPrediction({ url, token, body, log, signal }): Promise<string[]> {
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, DEFAULT_TIMEOUT_MS);
+  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
+  const deadline = Date.now() + timeoutMs;
+  let transientFailures = 0;
+
+  while (Date.now() < deadline) {
+    await sleep(pollIntervalMs, signal);
+    if (signal?.aborted) throw new WavespeedImageError(499, "Request aborted");
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      ...(signal ? { signal } : {}),
+    });
+    const payload = await readJson(response);
+
+    if (!response.ok) {
+      // The prediction is already running upstream: a throttled or briefly unavailable
+      // status read must not discard it.
+      if (
+        isRetryablePollStatus(response.status) &&
+        transientFailures < MAX_CONSECUTIVE_POLL_RETRIES
+      ) {
+        transientFailures += 1;
+        continue;
+      }
+      throw new WavespeedImageError(
+        response.status,
+        upstreamErrorText(payload, `WaveSpeedAI result request failed (${response.status})`)
+      );
+    }
+    transientFailures = 0;
+
+    const failure = readWavespeedFailure(payload);
+    if (failure) throw new WavespeedImageError(failure.status, failure.message);
+
+    const data = (payload as { data?: { status?: unknown; outputs?: unknown } } | null)?.data;
+    if (data?.status === "completed") {
+      return Array.isArray(data.outputs)
+        ? data.outputs.filter((output): output is string => typeof output === "string")
+        : [];
+    }
+
+    if (log) log.info("IMAGE", `wavespeed polling status: ${String(data?.status || "pending")}`);
+  }
+
+  throw new WavespeedImageError(504, `WaveSpeedAI polling timed out after ${timeoutMs}ms`);
+}
+
+export async function handleWavespeedImageGeneration({
+  model,
+  provider,
+  providerConfig,
+  body,
+  credentials,
+  log,
+  signal = null,
+}) {
+  const startTime = Date.now();
+  const token = credentials?.apiKey || credentials?.accessToken;
+  if (!token) {
+    return { success: false, status: 401, error: "WaveSpeedAI API key is required" };
+  }
+
+  const baseUrl = providerConfig?.baseUrl || WAVESPEED_BASE_URL;
+  const input = buildWavespeedImageInput(model, body);
+
+  if (log) {
+    const promptPreview = String(input.prompt).slice(0, 60);
+    log.info("IMAGE", `${provider}/${model} (wavespeed) | prompt: "${promptPreview}..."`);
+  }
+
+  try {
+    const predictionId = await submitWavespeedPrediction({
+      url: buildWavespeedSubmitUrl(baseUrl, model),
+      token,
+      input,
+      signal,
+    });
+    const outputs = await pollWavespeedPrediction({
+      url: buildWavespeedResultUrl(baseUrl, predictionId),
+      token,
+      body,
+      log,
+      signal,
+    });
+
+    const images = await normalizeProviderImagePayload({ data: outputs }, body, log, "url");
+    if (images.length === 0) {
+      throw new WavespeedImageError(502, "WaveSpeedAI returned no image output");
+    }
+    return saveImageSuccessResult({
+      provider,
+      model,
+      startTime,
+      requestBody: input,
+      responseBody: { images_count: images.length },
+      images,
+    });
+  } catch (err) {
+    const aborted = Boolean(signal?.aborted);
+    const status = aborted ? 499 : err instanceof WavespeedImageError ? err.status : 502;
+    const message = aborted
+      ? "Request aborted"
+      : sanitizeErrorMessage((err as Error)?.message || err);
+    if (log) log.error("IMAGE", `${provider} error ${status}: ${String(message).slice(0, 200)}`);
+    return saveImageErrorResult({
+      provider,
+      model,
+      status,
+      startTime,
+      error: err instanceof WavespeedImageError ? message : `Image provider error: ${message}`,
+      requestBody: input,
+    });
+  }
+}

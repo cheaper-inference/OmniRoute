@@ -23,6 +23,14 @@ import {
   parseRetryAfterMs,
 } from "./pollRetry.ts";
 import { abortedVideoResult } from "./abort.ts";
+import {
+  WAVESPEED_BASE_URL,
+  WAVESPEED_RESULT_PATH,
+  WAVESPEED_SUBMIT_PATH,
+  encodeWavespeedModelPath,
+  pickWavespeedModelInput,
+  readWavespeedFailureMessage,
+} from "../mediaGeneration/wavespeed.ts";
 
 interface LogLike {
   info?: (tag: string, msg: string, meta?: unknown) => void;
@@ -89,6 +97,12 @@ export type VideoJobPreset = {
     method: "POST";
     /** may contain {model} — substituted before POST */
     path: string;
+    /**
+     * Encodes the model id for the submit path. Defaults to `encodeURIComponent`, which
+     * turns a slash-separated id into one path segment; a provider whose model id IS the
+     * path (WaveSpeedAI: /api/v3/<owner>/<model>/<task>) supplies a per-segment encoder.
+     */
+    encodeModel?: (model: string) => string;
     buildBody: (params: {
       model?: string;
       prompt?: string;
@@ -127,6 +141,12 @@ export type VideoJobPreset = {
   resultNeedsAuth?: boolean;
   /** format reported alongside the downloaded artifact */
   resultFormat?: string;
+  /**
+   * Reads a failure out of a submit or poll response that arrived with HTTP 2xx (an error
+   * envelope, or a failed job's reason). A returned message ends the job with that message
+   * instead of the generic "Video job failed"; null means the response reports no failure.
+   */
+  readFailure?: (payload: unknown) => string | null;
   maxPolls: number;
   pollIntervalMs: number;
 };
@@ -318,6 +338,37 @@ const VIDEO_JOB_PRESETS: Record<string, VideoJobPreset> = {
     maxPolls: 120,
     pollIntervalMs: 5000,
   },
+  // WaveSpeedAI prediction API (https://wavespeed.ai/docs). POST /api/v3/<model id> takes the
+  // model's own input and answers { code, message, data: { id, status } }; GET
+  // /api/v3/predictions/{id}/result moves data.status through created → processing →
+  // completed | failed, with public file URLs in data.outputs or the reason in data.error.
+  // Some failures arrive as HTTP 200 with a non-200 envelope `code`, hence readFailure.
+  "wavespeed-video-job": {
+    id: "wavespeed-video-job",
+    displayName: "WaveSpeedAI",
+    authHeaderName: "Authorization",
+    authScheme: "bearer",
+    baseUrlFallback: WAVESPEED_BASE_URL,
+    submit: {
+      method: "POST",
+      path: WAVESPEED_SUBMIT_PATH,
+      encodeModel: encodeWavespeedModelPath,
+      buildBody: ({ prompt, duration, extras }) => ({
+        ...pickWavespeedModelInput(extras),
+        ...(prompt !== undefined ? { prompt } : {}),
+        ...(typeof duration === "number" ? { duration } : {}),
+      }),
+    },
+    taskIdPath: "data.id",
+    poll: { pathTemplate: WAVESPEED_RESULT_PATH },
+    statusPath: "data.status",
+    statusDone: ["completed"],
+    statusFailed: ["failed"],
+    resultPath: "data.outputs",
+    readFailure: readWavespeedFailureMessage,
+    maxPolls: 600,
+    pollIntervalMs: 1000,
+  },
 };
 
 /** Resolve a configured job preset; null when the preset is unknown/none. */
@@ -479,7 +530,8 @@ async function runVideoJobGeneration({
     ),
   });
 
-  const submitPath = preset.submit.path.replace("{model}", encodeURIComponent(model));
+  const encodeModel = preset.submit.encodeModel ?? encodeURIComponent;
+  const submitPath = preset.submit.path.replace("{model}", encodeModel(model));
   const submitUrl = `${baseUrl}${submitPath}`; // baseUrl never ends with "/"
   const submitResult = await fetchJson(submitUrl, {
     method: preset.submit.method,
@@ -491,6 +543,10 @@ async function runVideoJobGeneration({
   if (signal?.aborted) return abortedVideoResult();
   if (submitResult.ok === false) {
     return { success: false, status: submitResult.status, error: submitResult.error };
+  }
+  const submitFailure = preset.readFailure?.(submitResult.data);
+  if (submitFailure) {
+    return { success: false, status: 502, error: sanitizeErrorMessage(submitFailure) };
   }
 
   // preset.taskIdPath comes first; the rest only run when a provider omits the
@@ -546,6 +602,11 @@ async function runVideoJobGeneration({
       return { success: false, status: pollResult.status, error: pollResult.error };
     }
     consecutiveRetries = 0;
+
+    const pollFailure = preset.readFailure?.(pollResult.data);
+    if (pollFailure) {
+      return { success: false, status: 502, error: sanitizeErrorMessage(pollFailure) };
+    }
 
     const status =
       readPath(pollResult.data, preset.statusPath) ??

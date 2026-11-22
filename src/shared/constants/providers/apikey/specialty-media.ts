@@ -350,6 +350,20 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     apiHint:
       "deAPI serves images, video, text-to-speech, transcription and embeddings through its OpenAI-compatible gateway at https://oai.deapi.ai/v1 (no chat/completions). Model ids are deAPI's native ids (Flux1schnell, Ltx2_3_22B_Dist_INT8, Kokoro, WhisperLargeV3, Bge_M3_FP16, ...) — there are no dall-e-3 / tts-1 / whisper-1 aliases.",
   },
+  wavespeed: {
+    id: "wavespeed",
+    serviceKinds: [],
+    alias: "wavespeed",
+    name: "WaveSpeedAI",
+    icon: "image",
+    color: "#0F172A",
+    textIcon: "WS",
+    website: "https://wavespeed.ai",
+    authHint:
+      "Use your WaveSpeedAI API key from wavespeed.ai/accesskey. OmniRoute sends it as Authorization: Bearer <key>.",
+    apiHint:
+      "WaveSpeedAI serves image and video generation through its prediction API at https://api.wavespeed.ai/api/v3 (no chat/completions). Address a model as wavespeed/<model id>, e.g. wavespeed/wavespeed-ai/z-image/turbo or wavespeed/google/veo3.1-fast/text-to-video. Request fields other than model, n and response_format are forwarded as the model's input (aspect_ratio, resolution, duration, seed, ...).",
+  },
   "cursor-api": {
     id: "cursor-api",
     serviceKinds: ["llm"],

@@ -34,6 +34,8 @@ export const SINGLE_IMAGE_FANOUT_FORMATS: ReadonlySet<string> = new Set([
   "freepik-image",
   "nvidia-nim",
   "cloudflare-ai-image",
+  // One WaveSpeedAI prediction per call: the catalog models take no image-count input.
+  "wavespeed-image",
 ]);
 
 // OpenAI documents `n` as 1-10 for the images API. Larger requests are clamped, not rejected.
