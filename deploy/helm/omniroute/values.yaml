@@ -49,9 +49,11 @@ ingress:
 networkPolicy:
   # Default-deny Ingress + Egress on the OmniRoute pod, allowing ports
   # 20128/20132 from ingress controller pods only, DNS (53 UDP/TCP) to
-  # kube-system, and HTTPS (443/TCP) to public upstream model providers.
+  # kube-system DNS pods + NodeLocal DNSCache (169.254.20.10/32), and HTTPS
+  # (443/TCP) to public upstream model providers.
   enabled: true
-  # Additional egress rules (e.g. in-cluster Redis or internal Ollama service).
+  # Additional egress rules (e.g. in-cluster Redis, internal Ollama service, or
+  # a custom NodeLocal DNSCache -localip listener on UDP/TCP 53).
   extraEgress: []
 
 # ── Persistence ─────────────────────────────────────────────────────────

@@ -23,11 +23,20 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { load as yamlLoad, loadAll as yamlLoadAll } from "js-yaml";
+import { dump as yamlDump, load as yamlLoad, loadAll as yamlLoadAll } from "js-yaml";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (rel) => readFileSync(path.join(ROOT, rel), "utf8");
@@ -54,7 +63,218 @@ function findKubectl() {
   return null;
 }
 
+function findGo() {
+  for (const candidate of ["go", "/opt/homebrew/bin/go", "/usr/local/bin/go"]) {
+    try {
+      execFileSync(candidate, ["version"], { stdio: "ignore" });
+      return candidate;
+    } catch {
+      // continue probing
+    }
+  }
+  return null;
+}
+
 const KUBECTL = findKubectl();
+const GO_BIN = findGo();
+
+/**
+ * Evaluates `deploy/helm/omniroute/templates/networkpolicy.yaml` against a
+ * synthetic Helm `.Values` object using Go's `text/template` engine (the exact
+ * template engine Helm v3 uses) when `go` is installed, with a deterministic JS
+ * fallback when `go` is absent.
+ */
+function renderHelmNetworkPolicy(templateContent, values) {
+  const fullValues = {
+    service: { port: 20128, liveWsPort: 20132 },
+    ...values,
+  };
+
+  if (GO_BIN) {
+    const dir = mkdtempSync(path.join(tmpdir(), "omniroute-helm-tpl-"));
+    try {
+      const goSrc = `package main
+import (
+\t"bytes"
+\t"encoding/json"
+\t"fmt"
+\t"os"
+\t"strings"
+\t"text/template"
+)
+func toYAML(v any, indent int) string {
+\tpad := strings.Repeat(" ", indent)
+\tswitch x := v.(type) {
+\tcase []any:
+\t\tvar out []string
+\t\tfor _, item := range x {
+\t\t\tm, ok := item.(map[string]any)
+\t\t\tif !ok {
+\t\t\t\tout = append(out, fmt.Sprintf("%s- %v", pad, item))
+\t\t\t\tcontinue
+\t\t\t}
+\t\t\tfirst := true
+\t\t\tfor k, val := range m {
+\t\t\t\tprefix := pad + "  "
+\t\t\t\tif first {
+\t\t\t\t\tprefix = pad + "- "
+\t\t\t\t\tfirst = false
+\t\t\t\t}
+\t\t\t\tswitch sub := val.(type) {
+\t\t\t\tcase []any, map[string]any:
+\t\t\t\t\tout = append(out, fmt.Sprintf("%s%s:\\n%s", prefix, k, toYAML(sub, indent+4)))
+\t\t\t\tdefault:
+\t\t\t\t\tout = append(out, fmt.Sprintf("%s%s: %v", prefix, k, val))
+\t\t\t\t}
+\t\t\t}
+\t\t}
+\t\treturn strings.Join(out, "\\n")
+\tcase map[string]any:
+\t\tvar out []string
+\t\tfor k, val := range x {
+\t\t\tswitch sub := val.(type) {
+\t\t\tcase []any, map[string]any:
+\t\t\t\tout = append(out, fmt.Sprintf("%s%s:\\n%s", pad, k, toYAML(sub, indent+2)))
+\t\t\tdefault:
+\t\t\t\tout = append(out, fmt.Sprintf("%s%s: %v", pad, k, val))
+\t\t\t}
+\t\t}
+\t\treturn strings.Join(out, "\\n")
+\tdefault:
+\t\treturn fmt.Sprintf("%s%v", pad, v)
+\t}
+}
+func main() {
+\ttplBytes, err := os.ReadFile(os.Args[1])
+\tif err != nil { panic(err) }
+\tvalBytes, err := os.ReadFile(os.Args[2])
+\tif err != nil { panic(err) }
+\tvar vals map[string]any
+\tif err := json.Unmarshal(valBytes, &vals); err != nil { panic(err) }
+\tfuncs := template.FuncMap{
+\t\t"dict": func() map[string]any { return map[string]any{} },
+\t\t"default": func(def, given any) any {
+\t\t\tif given == nil { return def }
+\t\t\treturn given
+\t\t},
+\t\t"hasKey": func(m map[string]any, k string) bool {
+\t\t\tif m == nil { return false }
+\t\t\t_, ok := m[k]
+\t\t\treturn ok
+\t\t},
+\t\t"index": func(m map[string]any, k string) any {
+\t\t\tif m == nil { return nil }
+\t\t\treturn m[k]
+\t\t},
+\t\t"include": func(name string, _ any) string {
+\t\t\tswitch name {
+\t\t\tcase "omniroute.fullname":
+\t\t\t\treturn "omniroute"
+\t\t\tcase "omniroute.labels":
+\t\t\t\treturn "app.kubernetes.io/name: omniroute\\napp.kubernetes.io/instance: omniroute"
+\t\t\tcase "omniroute.selectorLabels":
+\t\t\t\treturn "app.kubernetes.io/name: omniroute\\napp.kubernetes.io/instance: omniroute"
+\t\t\tdefault:
+\t\t\t\treturn ""
+\t\t\t}
+\t\t},
+\t\t"nindent": func(spaces int, s string) string {
+\t\t\tpad := strings.Repeat(" ", spaces)
+\t\t\tlines := strings.Split(strings.TrimRight(s, "\\n"), "\\n")
+\t\t\tfor i, l := range lines {
+\t\t\t\tlines[i] = pad + l
+\t\t\t}
+\t\t\treturn "\\n" + strings.Join(lines, "\\n")
+\t\t},
+\t\t"toYaml": func(v any) string {
+\t\t\treturn toYAML(v, 0)
+\t\t},
+\t}
+\tt, err := template.New("networkpolicy.yaml").Funcs(funcs).Option("missingkey=zero").Parse(string(tplBytes))
+\tif err != nil {
+\t\tfmt.Fprintln(os.Stderr, err)
+\t\tos.Exit(1)
+\t}
+\tvar buf bytes.Buffer
+\tif err := t.Execute(&buf, map[string]any{"Values": vals}); err != nil {
+\t\tfmt.Fprintln(os.Stderr, err)
+\t\tos.Exit(1)
+\t}
+\tos.Stdout.Write(buf.Bytes())
+}
+`;
+      writeFileSync(path.join(dir, "render.go"), goSrc);
+      writeFileSync(path.join(dir, "networkpolicy.yaml"), templateContent);
+      writeFileSync(path.join(dir, "values.json"), JSON.stringify(fullValues));
+      const res = spawnSync(
+        GO_BIN,
+        [
+          "run",
+          path.join(dir, "render.go"),
+          path.join(dir, "networkpolicy.yaml"),
+          path.join(dir, "values.json"),
+        ],
+        { encoding: "utf8", timeout: 15_000 }
+      );
+      if (res.status !== 0) {
+        throw new Error(`Helm Go template render failed: ${res.stderr || res.stdout}`);
+      }
+      return res.stdout;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  // Deterministic JS fallback when Go is absent in CI
+  if (
+    /\.Values\.networkPolicy\.enabled/.test(templateContent) &&
+    fullValues.networkPolicy == null
+  ) {
+    throw new Error("nil pointer evaluating interface {}.enabled");
+  }
+  const np = fullValues.networkPolicy ?? {};
+  const enabled = Object.prototype.hasOwnProperty.call(np, "enabled") ? Boolean(np.enabled) : true;
+  if (!enabled) return "";
+  let out = templateContent
+    .replace(/\{\{-?\s*\/\*[\s\S]*?\*\/\s*-?\}\}\n?/g, "")
+    .replace(/\{\{-?\s*\$np\s*:=\s*\.Values\.networkPolicy\s*\|\s*default\s+dict\s*-?\}\}\n?/g, "")
+    .replace(/\{\{-?\s*\$npEnabled\s*:=\s*true\s*-?\}\}\n?/g, "")
+    .replace(
+      /\{\{-?\s*if\s+hasKey\s+\$np\s+"enabled"\s*-?\}\}[\s\S]*?\{\{-?\s*end\s*-?\}\}\n?/g,
+      ""
+    )
+    .replace(/^\s*\{\{-?\s*if\s+\$npEnabled\s*-?\}\}\n?/m, "")
+    .replace(/\{\{\s*include\s+"omniroute\.fullname"\s+\.\s*\}\}/g, "omniroute")
+    .replace(
+      /\{\{-?\s*include\s+"omniroute\.labels"\s+\.\s*\|\s*nindent\s+4\s*\}\}/g,
+      "\n    app.kubernetes.io/name: omniroute\n    app.kubernetes.io/instance: omniroute"
+    )
+    .replace(
+      /\{\{-?\s*include\s+"omniroute\.selectorLabels"\s+\.\s*\|\s*nindent\s+6\s*\}\}/g,
+      "\n      app.kubernetes.io/name: omniroute\n      app.kubernetes.io/instance: omniroute"
+    )
+    .replace(/\{\{\s*\.Values\.service\.port\s*\}\}/g, String(fullValues.service.port))
+    .replace(/\{\{\s*\.Values\.service\.liveWsPort\s*\}\}/g, String(fullValues.service.liveWsPort));
+  const extra = np.extraEgress;
+  if (Array.isArray(extra) && extra.length > 0) {
+    const dumped = yamlDump(extra)
+      .trimEnd()
+      .split("\n")
+      .map((l) => `    ${l}`)
+      .join("\n");
+    out = out.replace(
+      /\{\{-?\s*with\s+\(index\s+\$np\s+"extraEgress"\)\s*\}\}[\s\S]*?\{\{-?\s*end\s*\}\}/,
+      `\n${dumped}`
+    );
+  } else {
+    out = out.replace(
+      /\n?\s*\{\{-?\s*with\s+\(index\s+\$np\s+"extraEgress"\)\s*\}\}[\s\S]*?\{\{-?\s*end\s*\}\}/,
+      ""
+    );
+  }
+  out = out.replace(/\n?\{\{-?\s*end\s*\}\}\s*$/, "\n");
+  return out;
+}
 
 // ── 1. F4 & F6: REQUIRE_API_KEY default true in Kustomize + Helm (#21008) ────
 
@@ -435,4 +655,97 @@ test("kubectl kustomize renders valid hardened manifests for base, k8s, and k3s"
     const mainPolicy = policies.find((p) => (p.spec?.ingress ?? []).length > 0) ?? policies[0];
     assertBaselineNetworkPolicy(mainPolicy, `rendered ${target}`);
   }
+});
+
+// ── 5. Behavioral Helm NetworkPolicy template render (--reuse-values & toggles) ─
+
+test("Helm NetworkPolicy template renders cleanly when networkPolicy is absent (--reuse-values) and honors enabled:false (#21014)", () => {
+  const tpl = read("deploy/helm/omniroute/templates/networkpolicy.yaml");
+
+  // 1. Missing `.Values.networkPolicy` (simulates `helm upgrade --reuse-values` from older chart)
+  const renderedMissingMap = renderHelmNetworkPolicy(tpl, {});
+  const missingDocs = yamlLoadAll(renderedMissingMap).filter((d) => d && typeof d === "object");
+  assert.equal(
+    missingDocs.length,
+    1,
+    "missing .Values.networkPolicy must default to rendering 1 NetworkPolicy"
+  );
+  assertBaselineNetworkPolicy(
+    missingDocs[0],
+    "Helm networkpolicy.yaml (--reuse-values missing map)"
+  );
+
+  // 2. Explicit `networkPolicy.enabled: false` must disable rendering completely
+  const renderedDisabled = renderHelmNetworkPolicy(tpl, { networkPolicy: { enabled: false } });
+  const disabledDocs = yamlLoadAll(renderedDisabled).filter((d) => d && typeof d === "object");
+  assert.equal(disabledDocs.length, 0, "networkPolicy.enabled=false must emit zero manifests");
+
+  // 3. Present map `{}` without `enabled` key defaults to enabled
+  const renderedEmptyMap = renderHelmNetworkPolicy(tpl, { networkPolicy: {} });
+  const emptyMapDocs = yamlLoadAll(renderedEmptyMap).filter((d) => d && typeof d === "object");
+  assert.equal(emptyMapDocs.length, 1, "networkPolicy: {} must default to enabled");
+  assertBaselineNetworkPolicy(emptyMapDocs[0], "Helm networkpolicy.yaml (empty map)");
+
+  // 4. `extraEgress` appends custom egress rules cleanly
+  const renderedExtra = renderHelmNetworkPolicy(tpl, {
+    networkPolicy: {
+      enabled: true,
+      extraEgress: [
+        {
+          to: [{ ipBlock: { cidr: "169.254.25.10/32" } }],
+          ports: [
+            { protocol: "UDP", port: 53 },
+            { protocol: "TCP", port: 53 },
+          ],
+        },
+      ],
+    },
+  });
+  const extraDocs = yamlLoadAll(renderedExtra).filter((d) => d && typeof d === "object");
+  assert.equal(extraDocs.length, 1);
+  assert.equal(
+    extraDocs[0].spec?.egress?.length,
+    3,
+    "networkPolicy.extraEgress must append custom egress rule alongside baseline DNS + HTTPS rules"
+  );
+});
+
+test("KUBERNETES_DEPLOYMENT_GUIDE.md documents --reuse-values, scale-out controller namespaces, and custom NodeLocal DNSCache IPs (#21014)", () => {
+  const guide = read("docs/ops/KUBERNETES_DEPLOYMENT_GUIDE.md");
+
+  assert.match(
+    guide,
+    /--reuse-values[\s\S]{0,600}config\.requireApiKey=true/,
+    "deployment guide must warn that --reuse-values does not merge new chart defaults"
+  );
+
+  // Scale-out section must name the exact namespaces permitted by the baseline NetworkPolicy
+  const scaleOutIdx = guide.indexOf("### Scale-out");
+  assert.ok(scaleOutIdx !== -1, "expected ### Scale-out section in KUBERNETES_DEPLOYMENT_GUIDE.md");
+  const scaleOutSection = guide.slice(scaleOutIdx, scaleOutIdx + 1800);
+  assert.match(
+    scaleOutSection,
+    /ingress-nginx.*namespace.*`ingress-nginx`|`ingress-nginx`\s+namespace/i,
+    "Scale-out section must state that ingress-nginx is only admitted from namespace `ingress-nginx` by default"
+  );
+  assert.match(
+    scaleOutSection,
+    /`kube-system`\s+or\s+`traefik`/,
+    "Scale-out section must state that Traefik is only admitted from `kube-system` or `traefik` namespaces by default"
+  );
+  assert.match(
+    scaleOutSection,
+    /other\s+namespace/i,
+    "Scale-out section must note that controllers in other namespaces also require an additive NetworkPolicy or overlay peer"
+  );
+
+  // Troubleshooting section must cover custom NodeLocal DNSCache listener IPs
+  const troubleIdx = guide.indexOf("## 8. Troubleshooting");
+  assert.ok(troubleIdx !== -1, "expected ## 8. Troubleshooting section");
+  const troubleSection = guide.slice(troubleIdx);
+  assert.match(
+    troubleSection,
+    /169\.254\.20\.10\/32/,
+    "Troubleshooting must mention default NodeLocal DNSCache listener 169.254.20.10/32 and custom listener override"
+  );
 });
