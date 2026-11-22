@@ -1264,15 +1264,11 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - name: Install Bun (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          powershell -c "iwr bun.sh/install.ps1 -useb | iex"
-          echo "$env:USERPROFILE\.bun\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-      - name: Install Bun (non-Windows)
-        if: runner.os != 'Windows'
-        run: npm install -g bun
+      # #21014: npm-ci-retry above already provisions the exact lockfile-pinned
+      # bun@1.4.2 binary via @oven/bun-* optionalDependencies (AGENTS.md:348) —
+      # never execute remote install scripts or unpinned global installs.
+      - name: Verify lockfile-pinned Bun binary
+        run: npx --no-install bun --version
       - run: npm run test:bun:db
 
   test-vitest:
