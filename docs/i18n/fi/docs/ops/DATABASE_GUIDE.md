@@ -309,6 +309,7 @@ Käytä lauseita `IF NOT EXISTS`, `IF EXISTS` ja `OR IGNORE` / `OR REPLACE` runs
 3. **Täytä tiedot huolellisesti** : käytä `UPDATE ... WHERE ...` olemassa olevien rivien käsittelyyn
 4. **Tarkista järjestys ja nimeäminen** : `npm run test:migrations:fresh` (kaikki migraatiot tyhjässä tietokannassa) ja `npm run check:migration-numbering`
 5. **Testaa kopiota** : älä koskaan suorita testaamattomia siirtoja tuotannossa
+6. **Myös koodista luotu taulukko tarvitsee siirron** : jos moduuli myös luo taulukon laiskasti (`CREATE TABLE IF NOT EXISTS`, pidetään itsekorjauspoluna), siirron on luotava se samalla DDL llä. Muuten puhdas asennus ja päivitetty asennus päätyvät erilaisiin skeemoihin riippuen siitä, suoritettiinko kyseinen koodipolku. `tests/unit/db/lazy-table-migration-guard.test.ts` skannaa `src/` ja `open-sse/` ja epäonnistuu laiskalla `CREATE` llä ilman siirtoa (#20557). Esimerkki: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Esimerkki:
 

@@ -4,8 +4,9 @@
 
 ---
 
-v3.8.49 versiyasından (keyfiyyət/sürət planının WS3.2/WS3.4 mərhələlərindən) etibarən nəzərdən keçirilmiş PR-lərin `release/vX.Y.Z` budağına birləşdirilməsi üçün standart yol **Mergify birləşdirmə növbəsidir** (`.mergify.yml`);
-aşağıda sənədləşdirilmiş **əl ilə birləşdirmə qatarı** isə EHTİYAT VARİANTIDIR — insidentlər, reliz dondurmaları zamanı və ya Mergify Open Source planı nə vaxtsa dəyişərsə istifadə olunur.
+> **11-19-2026: Birləşdirmə növbəsi ləğv edildi** (sahibinin qərarı). `.mergify.yml` artıq növbə təyin etmir və çəkmə sorğusunu birləşdirən və ya yenidən yazan Birləşdirmə əmrlərini rədd edir. Buraxılış PRs "Aktiv buraxılışda yaşıl qapılar tələb olun" (`Gate / CI` + `Gate / Quality`) repozitoriya qaydaları altında əl ilə birləşdirilir, omni-növbə canlı rejimdə və ondan sonra omni-növbə vasitəsilə ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Aşağıdakı Birləşdirmə bölmələri növbəni olduğu kimi təsvir edir.
+
+v3.8.49 ( quality/velocity planının WS3.2/WS3.4 ) versiyasından bəri nəzərdən keçirilən PRs üçün `release/vX.Y.Z` -yə defolt birləşmə yolu** Birləşmə növbəsini birləşdirin** (`.mergify.yml`); the** əl ilə birləşmə qatarı** aşağıda sənədləşdirilmiş FALLBACK — hadisələr zamanı, buraxılışların dondurulması və ya Merge Açıq Mənbə planı dəyişdikdə istifadə olunur.
 
 ## Standart yol: Mergify növbəsi
 

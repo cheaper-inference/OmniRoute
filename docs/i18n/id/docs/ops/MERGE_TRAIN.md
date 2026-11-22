@@ -4,10 +4,9 @@
 
 ---
 
-Sejak v3.8.49 (WS3.2/WS3.4 dari rencana kualitas/kecepatan), jalur penggabungan default untuk
-PR yang telah ditinjau ke dalam `release/vX.Y.Z` adalah **antrean penggabungan Mergify** (`.mergify.yml`);
-**merge-train manual** yang didokumentasikan di bawah merupakan JALUR CADANGAN — digunakan selama insiden,
-pembekuan rilis, atau jika paket Open Source Mergify berubah.
+> **19-11-2026: antrean penggabungan Mergify dihentikan** (keputusan pemilik). `.mergify.yml` tidak lagi mendefinisikan antrian dan menolak perintah Mergify yang menggabungkan atau menulis ulang permintaan tarik. Rilis PRs digabungkan secara manual di bawah aturan repositori "Memerlukan gerbang hijau pada rilis aktif" (`Gate / CI` + `Gate / Quality`) hingga omni-queue berjalan dalam mode langsung, dan melalui omni-queue setelah itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Bagian Gabungkan di bawah menggambarkan antrean sebagaimana adanya.
+
+Sejak v3.8.49 (WS3.2/WS3.4 dari paket quality/velocity ) jalur penggabungan default untuk PRs yang ditinjau ke `release/vX.Y.Z` adalah** Gabungkan antrian penggabungan** (`.mergify.yml`); itu** kereta gabungan manual** yang didokumentasikan di bawah ini adalah FALLBACK — yang digunakan selama insiden, rilis terhenti, atau jika paket Mergify Open Source berubah.
 
 ## Jalur default: antrean Mergify
 

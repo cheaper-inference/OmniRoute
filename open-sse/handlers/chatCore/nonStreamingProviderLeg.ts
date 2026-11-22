@@ -568,7 +568,7 @@ export async function runNonStreamingProviderLeg(
       typeof error === "object" &&
       (error as { code?: unknown }).code === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
     const preResponseTimeout =
-      provider === "antigravity" &&
+      (provider === "antigravity" || provider === "agy") &&
       failureStatus === 504 &&
       !!error &&
       typeof error === "object" &&

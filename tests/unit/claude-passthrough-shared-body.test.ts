@@ -193,3 +193,42 @@ test("passthrough to the anthropic API-key provider keeps native user blocks", (
   const types = out.messages[0].content.map((b: Record<string, unknown>) => b.type);
   assert.deepEqual(types, ["search_result", "text"]);
 });
+
+// Hoisting a marked system/developer message re-anchors its cache_control on the
+// preceding block (#9436). On the caller's shared block, the next combo leg found that
+// block already marked, kept the hoisted marker too, and sent 5 breakpoints (Bedrock 400).
+for (const isClaudeCodeSemanticPassthrough of [false, true]) {
+  test(`combo replay keeps 4 cache_control breakpoints after hoisting (cc=${isClaudeCodeSemanticPassthrough})`, () => {
+    const eph = { type: "ephemeral" };
+    const shared = {
+      model: "x",
+      max_tokens: 8,
+      system: [0, 1, 2].map((i) => ({ type: "text", text: `Rule ${i}.`, cache_control: eph })),
+      messages: [
+        { role: "user", content: [{ type: "text", text: "Say hi." }] },
+        { role: "assistant", content: [{ type: "text", text: "Hi." }] },
+        { role: "system", content: [{ type: "text", text: "Be brief.", cache_control: eph }] },
+        { role: "user", content: [{ type: "text", text: "Reply with ok." }] },
+      ],
+    };
+    const provider = "anthropic-compatible-test";
+    const markers = (b: Record<string, unknown>) =>
+      JSON.stringify([b.system, b.messages, b.tools]).split('"cache_control"').length - 1;
+    const legs = [1, 2].map(() =>
+      buildClaudePassthroughBody({
+        body: { ...shared },
+        provider,
+        clientHeaders: {},
+        isClaudeCodeSemanticPassthrough,
+        effectiveModel: "claude-haiku-4-5",
+        targetFormat: "claude",
+        preserveCacheControl: true,
+        normalizeClaudeUpstreamMessages: ((p: Record<string, unknown>, o?: object) =>
+          normalizeClaudeUpstreamMessages(p, { ...o, provider })) as never,
+        applyReasoningRuleDirective: (b: unknown) => b,
+      })
+    );
+    assert.deepEqual(legs.map(markers), [4, 4]);
+    assert.equal(shared.messages[1].content[0].cache_control, undefined, "caller's block mutated");
+  });
+}

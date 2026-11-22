@@ -211,14 +211,13 @@ export async function executeWebSearch(
       typeof input.provider_options?.baseUrl === "string" &&
       input.provider_options.baseUrl.trim().length > 0
     ) {
-      credentials = {
-        providerSpecificData: { baseUrl: input.provider_options.baseUrl.trim() },
-      };
+      // The caller URL stays caller input (public hosts only), not operator config.
+      credentials = {};
     }
     if (!credentials) {
       throw new WebSearchExecutionError(
         providerConfig.authType === "none"
-          ? `Search provider ${providerConfig.id} is not configured. Set its base URL in the dashboard or pass provider_options.baseUrl.`
+          ? `Search provider ${providerConfig.id} is not configured. Set its base URL in the dashboard, or pass a public provider_options.baseUrl.`
           : `No credentials configured for search provider: ${providerConfig.id}. Add an API key for "${providerConfig.id}" in the dashboard.`,
         400
       );

@@ -73,6 +73,7 @@ import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProvide
 import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
+import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
 import {
   attachMuseCodeToolNameMap,
@@ -1005,13 +1006,17 @@ export class DefaultExecutor extends BaseExecutor {
       this.ensureThinkingBudget(withDefaults as Record<string, unknown>, model);
     }
 
-    // 9router#1480: native Moonshot providers 400 when a prior assistant turn lacks
-    // reasoning_content. Scope to Moonshot ids, or a registry entry opting in via
-    // `requiresReasoningContentEcho` (e.g. `bai`'s DeepSeek resale, #13599).
+    // 9router#1480: native Moonshot and DeepSeek providers 400 when a prior assistant turn lacks
+    // reasoning_content (#20260). Scope to Moonshot/DeepSeek ids, or a registry entry opting in via
+    // `requiresReasoningContentEcho` (e.g. `bai`'s DeepSeek resale, #13599). The field is
+    // OpenAI-chat only: a Claude alternate (DeepSeek's /anthropic endpoint) carries thinking as
+    // content blocks, so the placeholder stays off that wire.
     const reasoningEcho =
-      this.provider === "kimi" ||
-      this.provider === "moonshot" ||
-      !!getRegistryEntry(this.provider)?.requiresReasoningContentEcho;
+      targetFormat !== "claude" &&
+      (this.provider === "kimi" ||
+        this.provider === "moonshot" ||
+        this.provider === "deepseek" ||
+        !!getRegistryEntry(this.provider)?.requiresReasoningContentEcho);
     if (reasoningEcho) {
       const outboundModel =
         typeof (withDefaults as Record<string, unknown>)?.model === "string"
@@ -1041,7 +1046,7 @@ export class DefaultExecutor extends BaseExecutor {
       if (aliases) attachMuseCodeToolNameMap(withDefaults, aliases);
     }
 
-    return applyRegistryBodyRepairs(this.provider, withDefaults);
+    return applyRegistryBodyRepairs(this.provider, withDefaults, credentials?.providerSpecificData);
   }
 
   // Reasoning models (ClinePass, OpenRouter, etc.) leave content empty when the reasoning
@@ -1163,7 +1168,8 @@ export class DefaultExecutor extends BaseExecutor {
       result = await super.execute(input);
     } catch (err) {
       if (session) {
-        pool.reportCooldown(session);
+        // A client abort says nothing about the session: do not cool a healthy one down.
+        if (!isLocalStreamLifecycleError(err)) pool.reportCooldown(session);
         session.release();
       }
       throw err;

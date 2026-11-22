@@ -60,7 +60,7 @@ export interface LegacyModel {
   limit: {
     context: number;
     input?: number;
-    output: number;
+    output?: number;
   };
   status: "alpha" | "beta" | "deprecated" | "active";
   options: {

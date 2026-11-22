@@ -2,6 +2,8 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
   isClaudeCodeClient,
+  providerUsesAutomaticPrefixCaching,
+  providerHonorsOpenAIFormatCacheControl,
   providerSupportsCaching,
   isDeterministicStrategy,
   shouldPreserveCacheControl,
@@ -646,6 +648,18 @@ describe("Cache Control Policy", () => {
       assert.equal(result.byStrategy.priority.inputTokens, 4500);
       assert.equal(result.byStrategy.priority.cachedTokens, 1800);
       assert.equal(result.byStrategy.priority.cacheCreationTokens, 900);
+    });
+  });
+
+  describe("mistral automatic prefix caching", () => {
+    test("counts as a caching provider with automatic prefix caching", () => {
+      assert.equal(providerSupportsCaching("mistral", "openai"), true);
+      assert.equal(providerSupportsCaching("mistral", "openai-responses"), true);
+      assert.equal(providerUsesAutomaticPrefixCaching("mistral"), true);
+    });
+
+    test("never forwards explicit cache_control markers to Mistral", () => {
+      assert.equal(providerHonorsOpenAIFormatCacheControl("mistral"), false);
     });
   });
 });
