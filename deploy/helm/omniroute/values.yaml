@@ -157,8 +157,10 @@ podSecurityContext:
 
 containerSecurityContext:
   allowPrivilegeEscalation: false
-  # The app writes to DATA_DIR and Next.js needs a writable cache dir.
-  readOnlyRootFilesystem: false
+  # DATA_DIR, /tmp, and /app/.build/next/cache are mounted as writable volumes
+  # in templates/deployment.yaml. Set false only if using runtime
+  # OMNIROUTE_BASE_PATH bundle rewriting instead of a build-arg image.
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
       - ALL
