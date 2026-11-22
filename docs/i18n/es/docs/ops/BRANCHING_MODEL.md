@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute utiliza un modelo de lanzamientos de **ciclos paralelos**: una rama
-dedicada `release/vX.Y.Z` para el ciclo activo, `main` para la línea publicada y
-una etiqueta inmutable `vX.Y.Z` cuando se publica ese ciclo. Es normal ver que los
-commits lleguen tanto a `release/*` _como_ a `main`; no se trata de una confusión.
+OmniRoute usa un** ciclo paralelo** modelo de lanzamiento: una rama `release/vX.Y.Z` dedicada para el ciclo activo, `main` para la línea publicada y una etiqueta `vX.Y.Z` inmutable cuando se envía ese ciclo. Ver que las confirmaciones aterrizan en `release/*` _y_ en `main` se espera que — no sea una confusión.
 
-Los detalles para los mantenedores se encuentran en `CLAUDE.md` (Regla estricta
-n.º 21) y [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Esta página es el
-resumen público dirigido a los colaboradores.
+Los detalles del mantenedor se encuentran en `CLAUDE.md` (regla estricta #21) y [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Esta página es el resumen público para los contribuyentes.
 
 ## De un vistazo
 
@@ -42,27 +37,23 @@ flowchart LR
 `main` no es la rama de integración diaria. Por lo general, los PR abiertos
 contra `main` deben redirigirse antes de integrarlos.
 
-## Congelación de lanzamiento (ciclos paralelos)
+## Liberar congelación (ciclos paralelos)
 
-Cuando se está conciliando un lanzamiento, se abre una incidencia marcadora con
-la etiqueta `release-freeze`. Esto **no detiene el desarrollo**:
+Cuando se concilia una versión, se abre una emisión de marcador denominada `release-freeze`. Eso** no detiene el desarrollo** :
 
-- La rama congelada `release/vX.Y.Z` queda a cargo del responsable de ese
-  lanzamiento.
-- El siguiente ciclo, `release/vX+1`, se crea desde la punta congelada para que
-  los colaboradores puedan seguir integrando trabajo.
-- Los PR abiertos que aún apunten a la rama congelada deben **redirigirse** a la
-  rama `release/v*` activa (la de versión más alta).
+- El `release/vX.Y.Z` congelado pertenece al capitán liberado de ese barco.
+- El `release/vX+1` del siguiente ciclo se corta de la punta congelada para que los contribuyentes sigan trabajando.
+- Abrir PRs que todavía apunta a la rama congelada debe ser** reorientado** a la rama `release/v*` activa (más alta).
 
-Comprueba si hay una congelación abierta antes de asumir que la rama que deseas
-se puede integrar:
+Verifique si hay una congelación abierta antes de asumir que la rama que desea se puede fusionar:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Los mecanismos de integración (etiqueta `queue` del propietario → Mergify) están
-documentados en [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+La mecánica de fusión (propietario `queue` etiqueta → Mergify) está documentada en [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: se retira la cola de combinación Mergify** (decisión del propietario). `.mergify.yml` ya no define una cola y rechaza los comandos Mergify que fusionan o reescriben una solicitud de extracción. Las versiones PRs se fusionan manualmente bajo el conjunto de reglas del repositorio "Requerir puertas verdes en la versión activa" (`Gate / CI` + `Gate / Quality`) hasta que omni-queue se ejecuta en modo en vivo, y luego a través de omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). La etiqueta `queue` ya no fusiona nada.
 
 ## ¿Por qué se usan tanto una rama como una etiqueta?
 

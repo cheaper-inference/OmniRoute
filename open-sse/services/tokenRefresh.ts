@@ -24,7 +24,6 @@ import {
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
   NO_REFRESH_NEEDED,
-  type RefreshLogger,
 } from "./tokenRefresh/shared.ts";
 import {
   getRefreshCacheKey,
@@ -263,19 +262,13 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
   if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
   if (provider === "copilot-m365-web") return refreshM365Token(token, creds, log, proxy);
-  return refreshActiveAccessToken(provider, token, creds, log, proxy);
+  return refreshActiveAccessToken(provider, token, log, proxy);
 }
 
 /**
  * Refresh OAuth access token using refresh token
  */
-async function refreshActiveAccessToken(
-  provider,
-  refreshToken,
-  credentials,
-  log,
-  proxyConfig: unknown = null
-) {
+async function refreshActiveAccessToken(provider, refreshToken, log, proxyConfig: unknown = null) {
   const config = PROVIDERS[provider];
 
   const refreshEndpoint = config?.refreshUrl || config?.tokenUrl;

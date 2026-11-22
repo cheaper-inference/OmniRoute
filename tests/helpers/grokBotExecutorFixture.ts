@@ -357,6 +357,20 @@ export function makeInput(
   };
 }
 
+export function assistantRow(seq: string, content: string) {
+  return {
+    seq,
+    updatedSeq: seq,
+    body: Buffer.from(
+      JSON.stringify({
+        kind: "send-message",
+        clientNonce: null,
+        message: { type: "text", content },
+      })
+    ).toString("base64"),
+  };
+}
+
 export function terminal(name: "submit_answer", content: string): WatchEvent {
   return { entry: { kind: "tool-call", tool: { name, callId: "submit-1", content } } };
 }

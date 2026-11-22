@@ -41,6 +41,10 @@ const NON_RETRYABLE_TRANSPORT_STATUSES = new Set([499, 429, 401, 400]);
 const NON_RETRYABLE_ERROR_TYPES = new Set([
   "lease_error",
   "account_semaphore_capacity",
+  // A verdict on the model's answer is reached again on a replay, so retrying only
+  // costs a second remote turn. "bridge_rejected" is deliberately absent: it also fires
+  // when the bridge never recorded a call, which is an arrival race a retry can win.
+  "bridge_not_called",
   UPSTREAM_RESPONDED_ERROR_TYPE,
 ]);
 

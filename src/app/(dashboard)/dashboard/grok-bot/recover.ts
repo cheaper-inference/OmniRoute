@@ -97,7 +97,8 @@ export async function fillBlobBodies<T extends OmittedTranscriptRow>(
   const pending = rows
     .map((row, index) => ({ row, index }))
     .filter(
-      ({ row }) => !(typeof row.body === "string" && row.body !== "") && typeof row.blobHash === "string"
+      ({ row }) =>
+        !(typeof row.body === "string" && row.body !== "") && typeof row.blobHash === "string"
     );
   await mapLimited(pending, concurrency, async ({ row, index }) => {
     const body = await readBlob(row.blobHash as string);

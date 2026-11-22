@@ -305,9 +305,7 @@ test("a blob read does not follow a redirect out of the network", async () => {
       release: () => {},
       frames: readerFrames([{ rows: { entries: [{ seq: "8", blobHash: "abc123def456ghij" }] } }]),
       recover: async () => ({
-        instructions: [
-          { relPath: "blobs/abc123def456ghij", url: "https://blob.example/body" },
-        ],
+        instructions: [{ relPath: "blobs/abc123def456ghij", url: "https://blob.example/body" }],
       }),
       fetchBlob: async (_url, init) => {
         inits.push(init);
@@ -325,9 +323,7 @@ test("a blob read does not follow a redirect out of the network", async () => {
 });
 
 test("a recovery read is cancellable", async () => {
-  const { grokBotRead } = await import(
-    "../../../src/app/(dashboard)/dashboard/grok-bot/read.ts"
-  );
+  const { grokBotRead } = await import("../../../src/app/(dashboard)/dashboard/grok-bot/read.ts");
   const controller = new AbortController();
   controller.abort();
   let seen: RequestInit | undefined;

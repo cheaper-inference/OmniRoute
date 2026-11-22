@@ -6,6 +6,11 @@ import {
 } from "./grok-bot-protocol.ts";
 import { GrokWatchFrameReader, type WatchFrame, type LiveAgent } from "./grok-bot-watch-frame.ts";
 
+/** A refusal that must never be mistaken for an answer. */
+function incompleteTurn(message: string): Error {
+  return Object.assign(new Error(message), { errorType: "incomplete_turn" });
+}
+
 type WatchLog = { warn?: (...args: unknown[]) => void } | null;
 
 function traceLive(live: LiveAgent | undefined): string {
@@ -42,8 +47,6 @@ class GrokWatchSession {
   private readonly parts: string[] = [];
   private submitted: string | null = null;
   private generation = 0;
-  private readonly pendingSeqs = new Set<string>();
-  private readonly pendingAcks = new Set<string>();
   private readonly cursor = { ack: "0" };
   private staleTimer: ReturnType<typeof setTimeout> | null = null;
   private staleAbort: AbortController | null = null;
@@ -63,8 +66,6 @@ class GrokWatchSession {
       agentId,
       messageId,
       parts: this.parts,
-      pendingSeqs: this.pendingSeqs,
-      pendingAcks: this.pendingAcks,
       cursor: this.cursor,
       onRunning: (running) => {
         if (running) this.seenRunning = true;
@@ -88,9 +89,7 @@ class GrokWatchSession {
         await sleepUnlessAborted(grokReconnectDelayMs(this.reconnectAttempt), this.signal);
       }
       if (!this.seenRunning) throw new Error("watch stream ended before the agent started running");
-      throw Object.assign(new Error("turn ended without explicit completion"), {
-        errorType: "incomplete_turn",
-      });
+      throw incompleteTurn("turn ended without explicit completion");
     } finally {
       // Reconnects retain their window; every terminal return/throw releases it.
       this.stopStale();
@@ -106,6 +105,17 @@ class GrokWatchSession {
     return this.parts.filter((part) => !part.startsWith("\u0000submit:"));
   }
 
+  /**
+   * Refuse a turn that is not complete, or return the text it did produce.
+   * Both settlement paths ask the same question, so they ask it in one place.
+   */
+  private settle(missing: string, empty: string): string {
+    if (this.frames.hasMissingRows()) throw incompleteTurn(missing);
+    const real = this.realParts();
+    if (real.length) return real.join("");
+    throw incompleteTurn(empty);
+  }
+
   private watchSignal(): AbortSignal {
     const remaining = this.deadline - Date.now();
     const timeout = AbortSignal.timeout(Math.min(WATCH_READ_TIMEOUT_MS, remaining));
@@ -116,17 +126,13 @@ class GrokWatchSession {
   }
 
   private watchPayload() {
-    const missing = [...this.pendingAcks].map(BigInt);
-    const lowest = missing.length ? missing.reduce((min, seq) => (seq < min ? seq : min)) : null;
-    const rewound =
-      lowest === null ? this.cursor.ack : lowest > BigInt(0) ? String(lowest - BigInt(1)) : "0";
     return {
       cursors: [
         {
           agentId: this.agentId,
           sessionId: EMPTY_SESSION_ID,
           generation: this.generation,
-          afterUpdatedSeq: rewound,
+          afterUpdatedSeq: this.frames.cursorForReconnect(),
         },
       ],
       includeUnlistedAgents: false,
@@ -158,35 +164,29 @@ class GrokWatchSession {
   private settlement(ended: boolean): string | null {
     if (this.submitted !== null) return this.submitted;
     if (!ended) return null;
-    if (this.pendingSeqs.size > 0) {
-      throw Object.assign(new Error("turn ended with transcript rows still missing"), {
-        errorType: "incomplete_turn",
-      });
-    }
-    const real = this.realParts();
-    if (real.length) return real.join("");
-    throw Object.assign(new Error("turn became idle without explicit completion"), {
-      errorType: "incomplete_turn",
-    });
+    return this.settle(
+      "turn ended with transcript rows still missing",
+      "turn became idle without explicit completion"
+    );
   }
 
   private handleError(error: unknown): string | null {
     if (this.staleAbort?.signal.aborted) {
       this.stopStale();
-      const real = this.realParts();
-      if (real.length) return real.join("");
-      throw Object.assign(new Error("turn became stale without explicit completion"), {
-        errorType: "incomplete_turn",
-      });
+      if (this.submitted !== null) return this.submitted;
+      return this.settle(
+        "turn became stale with transcript rows still missing",
+        "turn became stale without explicit completion"
+      );
     }
     const type = (error as { errorType?: unknown }).errorType;
     if (type === "incomplete_turn") throw error;
     if (type === "watch_resync") {
       this.stopStale();
-      this.generation = (error as { generation: number }).generation;
+      const generation = (error as { generation: number }).generation;
+      this.frames.resetRows(generation !== this.generation);
+      this.generation = generation;
       this.cursor.ack = "0";
-      this.pendingSeqs.clear();
-      this.pendingAcks.clear();
       this.reconnectAttempt += 1;
       return null;
     }

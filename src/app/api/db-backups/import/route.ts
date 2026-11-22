@@ -19,6 +19,10 @@ import {
 import { getSettings } from "@/lib/db/settings";
 import { setSystemPromptConfig } from "@omniroute/open-sse/services/systemPrompt.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import {
+  readRequestBodyWithLimit,
+  RequestBodyTooLargeError,
+} from "@/shared/middleware/bodySizeGuard";
 
 const DEFAULT_MAX_UPLOAD_MB = 100;
 // Hard ceiling so a misconfigured/hostile value can't ask the route to buffer an
@@ -59,7 +63,7 @@ function badRequest(error: string): Response {
 
 type Upload = { fileBuffer: Buffer; fileName: string; dryRun: boolean };
 
-async function readUpload(request: Request): Promise<Upload | Response> {
+export async function readUpload(request: Request): Promise<Upload | Response> {
   const url = new URL(request.url);
   const queryDryRun = isDryRunValue(url.searchParams.get("dryRun"));
   const contentType = request.headers.get("content-type") || "";
@@ -76,13 +80,35 @@ async function readUpload(request: Request): Promise<Upload | Response> {
   }
 
   // Direct binary transfer to bypass Reverse Proxy / Next.js FormData parsing errors under chunked encoding (Bug #770)
-  const buffer = await request.arrayBuffer();
-  if (!buffer || buffer.byteLength === 0) return badRequest("No file content provided.");
+  // Counted while streaming: a body without Content-Length skips the pipeline's
+  // header check entirely, so this branch still needs a real ceiling.
+  let buffer: Uint8Array;
+  try {
+    buffer = await readRequestBodyWithLimit(request, resolveMaxUploadSizeBytes());
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return tooLargeResponse();
+    }
+    throw error;
+  }
+  if (buffer.byteLength === 0) return badRequest("No file content provided.");
   return {
     fileBuffer: Buffer.from(buffer),
     fileName: url.searchParams.get("filename") || "import.sqlite",
     dryRun: queryDryRun,
   };
+}
+
+function tooLargeResponse(): Response {
+  const maxUploadSize = resolveMaxUploadSizeBytes();
+  return NextResponse.json(
+    {
+      error:
+        `File too large. Maximum allowed size is ${maxUploadSize / (1024 * 1024)} MB. ` +
+        `Set OMNIROUTE_DB_IMPORT_MAX_MB to raise it, or VACUUM the database before exporting.`,
+    },
+    { status: 413 }
+  );
 }
 
 function validateUploadShape(fileName: string, fileSize: number): Response | null {
@@ -91,10 +117,7 @@ function validateUploadShape(fileName: string, fileSize: number): Response | nul
   }
   const maxUploadSize = resolveMaxUploadSizeBytes();
   if (fileSize > maxUploadSize) {
-    return badRequest(
-      `File too large. Maximum allowed size is ${maxUploadSize / (1024 * 1024)} MB. ` +
-        `Set OMNIROUTE_DB_IMPORT_MAX_MB to raise it, or VACUUM the database before exporting.`
-    );
+    return tooLargeResponse();
   }
   if (fileSize < 4096) return badRequest("File too small to be a valid SQLite database.");
   return null;

@@ -12,7 +12,8 @@
     "dryRun": "[הרצה-יבשה] הפעולה שהייתה מתבצעת: {action}",
     "cancelled": "בוטל.",
     "jsonOpt": "פלט בפורמט JSON",
-    "yesOpt": "דילוג על בקשת האישור"
+    "yesOpt": "דילוג על בקשת האישור",
+    "positiveIntegerRequired": "הגבלה חייבת להיות מספר שלם חיובי."
   },
   "setup": {
     "title": "הגדרת OmniRoute",

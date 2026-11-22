@@ -4,10 +4,9 @@
 
 ---
 
-Kemgbe v3.8.49 (WS3.2/WS3.4 nke atụmatụ ogo/ọsọ), ụzọ ndabara e si ejikọta
-PR ndị a nyochara n'ime `release/vX.Y.Z` bụ **ahịrị njikọta Mergify** (`.mergify.yml`);
-**ụgbọ-njikọta aka** e dere n'okpuru bụ ụzọ NDABERE — a na-eji ya n'oge nsogbu,
-mgbochi mwepụta, ma ọ bụ ọ bụrụ na atụmatụ Mergify Open Source agbanwe mgbe ọ bụla.
+> **2026-11-19: kwụ n'ahịrị Mergify agwụla** (mkpebi onye nwe). `.mergify.yml` anaghị akọwapụta kwụ n'ahịrị wee jụ iwu Mergify nke jikọtara ma ọ bụ degharịa arịrịọ ịdọrọ. A na-ejikọta ntọhapụ PRs na aka n'okpuru iwu nchekwa nchekwa "Chọọ ọnụ ụzọ ndụ akwụkwọ ndụ na ntọhapụ na-arụ ọrụ" (`Gate / CI` + `Gate / Quality`) ruo mgbe omni-queue na-agba ọsọ na ọnọdụ ndụ, na site na omni-queue mgbe nke ahụ gasịrị ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ngalaba Mergify dị n'okpuru na-akọwa kwụ n'ahịrị ka ọ dị.
+
+Ebe ọ bụ na v3.8.49 (WS3.2/WS3.4 nke atụmatụ quality/velocity ) ụzọ njikọ ndabara maka PRs tụlere n'ime `release/vX.Y.Z` bụ** Mekọrịta kwụ n'ahịrị ọnụ** (`.mergify.yml`); nke** ntuziaka jikota-ụgbọ okporo ígwè** Edere n'okpuru bụ FALLBACK — a na-eji n'oge ihe omume, ntọhapụ freezes, ma ọ bụ ọ bụrụ na atụmatụ Mergify Open Source na-agbanwe agbanwe.
 
 ## Ụzọ ndabara: kwụ Mergify
 

@@ -1,6 +1,9 @@
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { UPSTREAM_RESPONDED_ERROR_TYPE } from "../utils/diagnostics.ts";
 import {
   getUnreadTimeout,
+  hasReadableAnswer,
+  isUnavailableSentinel,
   namesAClientTool,
   sseChunk,
   sseFinish,
@@ -8,11 +11,13 @@ import {
   type StartedBridge,
 } from "./grok-bot-protocol.ts";
 
-export type StreamTurn = {
+type StreamTurn = {
   model: string;
   id: string;
   collect: Promise<string>;
   startedBridge: StartedBridge | null;
+  /** Whether the request asked for a bridge, so the sentinel means the same in both shapes. */
+  bridgeRequested: boolean;
   clientToolList: unknown[];
   turnController: AbortController | null;
   signal: AbortSignal | null | undefined;
@@ -88,20 +93,44 @@ class GrokTurnStream {
     this.emit(controller, sseFinish(model, id, "tool_calls"));
   }
 
+  /** One frame and one end for a bridge turn whose tool the model never called. */
+  private refuseBridge(controller: ReadableStreamDefaultController<Uint8Array>): void {
+    this.emit(controller, {
+      error: { message: "Request bridge tool was not called", type: "bridge_not_called" },
+    });
+  }
+
   private emitSuccess(controller: ReadableStreamDefaultController<Uint8Array>, text: string): void {
-    const { model, id, startedBridge, clientToolList } = this.turn;
+    const { model, id, startedBridge, clientToolList, bridgeRequested } = this.turn;
     if (startedBridge?.invocations?.length) {
+      // A recorded invocation is the substantive result of the turn; the sentinel the
+      // model appends afterwards must not throw it away.
       this.emitCalls(controller, text);
+    } else if (bridgeRequested && isUnavailableSentinel(text)) {
+      // The buffered shape refuses this sentinel; delivering it as an answer would
+      // hand the caller a token it was told to treat as "no tool" instead. Like the
+      // no-answer refusal below, this frame carries no content, so the readiness gate
+      // may report it to a client as an early end of stream.
+      this.refuseBridge(controller);
     } else if (
       startedBridge &&
       clientToolList.length > 0 &&
       namesAClientTool(text ?? "", clientToolList)
     ) {
+      this.refuseBridge(controller);
+    } else if (!hasReadableAnswer(text)) {
+      // A turn that produced no readable answer must not look like a finished one.
+      // The type matches the buffered path, which the same-account retry classifier
+      // reads as final; the streaming readiness gate judges this frame by its shape
+      // instead, so a client stream may still surface it as an early end of stream.
       this.emit(controller, {
-        error: { message: "Request bridge tool was not called", type: "bridge_not_called" },
+        error: {
+          message: "turn finished without an answer",
+          type: UPSTREAM_RESPONDED_ERROR_TYPE,
+        },
       });
     } else {
-      if (text) this.emit(controller, sseChunk(model, text, id));
+      this.emit(controller, sseChunk(model, text, id));
       this.emit(controller, sseFinish(model, id));
     }
     this.done(controller);

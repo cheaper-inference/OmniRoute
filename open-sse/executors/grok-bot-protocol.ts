@@ -1,3 +1,4 @@
+import { stripAnsiCodes } from "../utils/streamHelpers.ts";
 import { randomUUID } from "node:crypto";
 import { PROVIDERS } from "../config/constants.ts";
 import { readConnectFrames } from "../utils/connectFrames.ts";
@@ -171,12 +172,192 @@ export function remoteMcpServers(): Record<
   return servers;
 }
 
+/**
+ * An answer the caller can actually read. Rather than listing the characters that
+ * carry no content - a list that was repeatedly one code point short, since control,
+ * format and combining characters come in blocks and siblings - ask whether any
+ * code point of a visible class is present after the escapes are gone.
+ */
+const READABLE_CODE_POINT = /[\p{L}\p{N}\p{P}\p{S}]/u;
+
+/** Letterlike code points that occupy a position without drawing anything. */
+const INVISIBLE_LETTERFORM = /[\u115f\u1160\u2800\u3164\uffa0]/gu;
+
+export function hasReadableAnswer(text: string): boolean {
+  return READABLE_CODE_POINT.test(stripAnsiCodes(text).replace(INVISIBLE_LETTERFORM, ""));
+}
+
+/** The token the prompt tells the model to send when it has no usable bridge tool. */
+export const UNAVAILABLE_SENTINEL = "TOOL_UNAVAILABLE";
+
+/** Everything an answer needs to be read: letters and digits. */
+const TOKEN_NOISE = /[^\p{L}\p{N}]/gu;
+
+/**
+ * Small capitals carry no compatibility decomposition, so NFKC leaves them alone. Only
+ * the letters the token is spelled with are mapped; anything else stays as it is.
+ */
+const SMALL_CAPITALS = new Map<string, string>([
+  ["\u1D00", "A"],
+  ["\u0299", "B"],
+  ["\u1D07", "E"],
+  ["\u026A", "I"],
+  ["\u029F", "L"],
+  ["\u0274", "N"],
+  ["\u1D0F", "O"],
+  ["\u1D1B", "T"],
+  ["\u1D1C", "U"],
+  ["\u1D20", "V"],
+  ["\uA7AE", "I"],
+  ["\uA7AD", "L"],
+]);
+
+function foldSmallCapitals(text: string): string {
+  let folded = "";
+  for (const character of text) folded += SMALL_CAPITALS.get(character) ?? character;
+  return folded;
+}
+
+/**
+ * Whether a reply says nothing but that sentinel.
+ *
+ * Models decorate instruction tokens - backticks, bold, underscores, a full stop, quotes -
+ * and they change the case, so the comparison keeps only the letters and digits of the
+ * token and folds case. Decoration cannot survive that, including an underscore run,
+ * which is why separators are not part of the comparison. A reply that carries any other
+ * word is not the sentinel.
+ *
+ * Folding covers what Unicode gives a compatibility decomposition - fullwidth, mathematical
+ * and circled letters - plus the small capitals the token is spelled with, which have none.
+ * Enclosing forms with no decomposition (negative squared, negative circled, regional
+ * indicators, keycaps) are pasted from pickers rather than typed and stay distinct.
+ */
+const SENTINEL_SKELETON = UNAVAILABLE_SENTINEL.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+
+const ESCAPE_SEQUENCES = [
+  // Seven-bit: CSI with its parameters and intermediates, then the final byte.
+  /\u001b\[[0-9;:<=>?]*[\x20-\x2f]*[\x40-\x7e]/g,
+  // Seven-bit strings: OSC ends with BEL or ST, the others with ST.
+  /\u001b\][^\u0007\u001b]*(?:\u0007|\u001b\\)?/g,
+  /\u001b[P^_X][^\u001b]*\u001b\\?/g,
+  // Eight-bit forms of the same.
+  /\u009b[0-9;:<=>?]*[\x20-\x2f]*[\x40-\x7e]/g,
+  /\u009d[^\u0007\u009c]*[\u0007\u009c]?/g,
+  /\u0090[^\u009c]*\u009c?/g,
+  // Any other escape: introducers, intermediates, one final byte.
+  /\u001b[\x20-\x2f]*[\x30-\x7e]/g,
+];
+
+/**
+ * The text with every escape sequence removed, including the families the shared helper does
+ * not know: C1 introducers, string sequences, and two- and three-byte designators.
+ */
+function escapeFree(text: string): string {
+  return ESCAPE_SEQUENCES.reduce((value, pattern) => value.replace(pattern, ""), text);
+}
+
+/** The same text with the letters kept, for an escape that swallowed one of them. */
+function escapeKept(text: string): string {
+  return text.replace(/[\p{M}\p{Cf}]/gu, "");
+}
+
+const CONTROL_CHARACTER = /[\u0000-\u001f\u007f-\u009f]/;
+
+export function isUnavailableSentinel(text: string): boolean {
+  const letters = stripAnsiCodes(text)
+    // A combining mark would compose with the token's own letters under NFKC and make a
+    // different word, so marks and format characters go first.
+    .replace(/[\p{M}\p{Cf}]/gu, "")
+    // Compatibility forms - fullwidth, mathematical, circled - are the same letters.
+    .normalize("NFKC")
+    // Normalisation can itself introduce marks (halfwidth voiced marks, Arabic ligature
+    // forms), which would otherwise drop letters that are visible on screen.
+    .replace(/[\p{M}\p{Cf}]/gu, "")
+    .replace(INVISIBLE_LETTERFORM, "")
+    .replace(TOKEN_NOISE, "")
+    // A numbered paragraph or a footnote around the token is decoration too - in any
+    // script, so this is every numeric character and not just the ASCII digits.
+    .replace(/\p{N}/gu, "");
+  // Small capitals have to be folded before the case fold, which maps them elsewhere.
+  if (foldSmallCapitals(letters).toUpperCase() === SENTINEL_SKELETON) return true;
+  if (!CONTROL_CHARACTER.test(text)) return false;
+  // An escape sequence can swallow a letter of the token and leave the rest looking like an
+  // answer, so the letters alone are compared as well. Only a digit is dropped here, not a
+  // letter: a numbered paragraph in front of the token is still the token.
+  const readings = [escapeFree(text), escapeKept(text)].map((value) =>
+    foldSmallCapitals(
+      value
+        .replace(/[\p{M}\p{Cf}]/gu, "")
+        .normalize("NFKC")
+        .replace(INVISIBLE_LETTERFORM, "")
+    )
+      .replace(/[^\p{L}]/gu, "")
+      .toUpperCase()
+  );
+  return readings.includes(SENTINEL_SKELETON);
+}
+
+// A claim is either a first-person statement of intent ("I will use lookup") or a past-tense
+// report ("I used search"), which is what a shipped case pins. A bare imperative - "Use the
+// date as the key", "Call web_search(query)" - is an instruction or ordinary prose, not a
+// claim that a tool ran.
+// A claim is a first-person statement ("I will use lookup", "I'll call it", "I'm going to
+// query"), a past-tense report ("I used search"), or the equivalent in Chinese. A bare
+// imperative - "Use the date as the key", "Call web_search(query)" - is an instruction or
+// ordinary prose, not a claim that a tool ran.
+// A claim is a first-person statement ("I will use lookup", "I'll call it", "I'm going to
+// query"), a past-tense report ("I used search"), or the equivalent in Chinese. A bare
+// imperative - "Use the date as the key", "Call web_search(query)" - is an instruction or
+// ordinary prose, not a claim that a tool ran.
+const CLAIM_FIRST_PERSON =
+  "(?:I|we)(?:(?:\\s+|')?(?:will|would|can|could|should|may|might|shall|m|ll)\\s*)?" +
+  "(?:going to\\s+)?(?:use|call|run|invoke|query|execute|fetch)";
+const CLAIM_PAST =
+  "used|using|called|calling|invoked|invoking|queried|executed|executing|ran|" +
+  "\u8c03\u7528|\u4f7f\u7528|\u901a\u8fc7";
+const LATIN_WORD = "\\p{Script=Latin}\\p{N}_";
+const QUOTE = "[\\u0060'\\u2018\\u2019\\u201c\\u201d]";
+// An article in front makes the name a noun rather than the thing that was used ("I used the
+// search results"), so it is only allowed when the name is quoted, which reads as the tool.
+// Chinese verbs glue straight to the name, optionally with the completed-aspect particle, so
+// an empty gap is allowed after them.
+const CLAIM_GLUE = `(?:(?:\\s+(?:the|a|an))?\\s*${QUOTE}\\s*|\\s+|(?:\\u4e86)?(?<=[\\u4e00-\\u9fff]))`;
+// Negated and qualified claims are not claims: "I haven't used search yet", "I used
+// search-based ranking", "I used the search results".
+const CLAIM_NEGATED = /(?:n't|not|never)\s+\S*\s*$/iu;
+const CLAIM_ENDS_HERE =
+  /^(?:$|[\s.,;:!?)\]}`'"\u2018\u2019\u201c\u201d]|\s*(?:to|for|and|then|but|so|because|which|that|it|in|on|at|with|from|by|if|when|while|twice|again|first|now|earlier|yesterday)(?![\p{Script=Latin}\p{N}_])|\s*(?:\u4e86|\u5de5\u5177))/iu;
+
+/** Where the name stands as the object of a claim verb, as [start, end) offsets. */
+function claimCandidates(haystack: string, name: string): Array<[number, number]> {
+  const escaped = name.normalize("NFKC").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `(?:^|[^${LATIN_WORD}])(?:${CLAIM_FIRST_PERSON}|${CLAIM_PAST})${CLAIM_GLUE}${escaped}(?![${LATIN_WORD}])`,
+    "giu"
+  );
+  return [...haystack.matchAll(pattern)].map((match) => {
+    const end = match.index + match[0].length;
+    return [end - name.length, end] as [number, number];
+  });
+}
+
 export function namesAClientTool(text: string, tools: unknown[]): boolean {
-  for (const tool of tools) {
+  // A tool name on its own is not a claim: "The date is 2026-11-22." is a real answer when a
+  // client tool happens to be called `date`, and so is "The search tool is optional". Only an
+  // answer that says it used the tool counts.
+  const haystack = text.normalize("NFKC");
+  return tools.some((tool) => {
     const name = (tool as { function?: { name?: unknown } })?.function?.name;
-    if (typeof name === "string" && name && text.includes(name)) return true;
-  }
-  return false;
+    return (
+      typeof name === "string" &&
+      name.length > 0 &&
+      claimCandidates(haystack, name).some(
+        ([start, end]) =>
+          !CLAIM_NEGATED.test(haystack.slice(Math.max(0, start - 16), start)) &&
+          CLAIM_ENDS_HERE.test(haystack.slice(end))
+      )
+    );
+  });
 }
 
 type ChatMessage = {

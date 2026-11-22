@@ -272,7 +272,12 @@ function imessageCard(identity: CardIdentity, source: Message | undefined): Tran
   const body = stringValue(source?.draft?.body);
   return body === ""
     ? null
-    : { ...identity, kind: "imessage", recipient: stringValue(source?.draft?.recipient_name), body };
+    : {
+        ...identity,
+        kind: "imessage",
+        recipient: stringValue(source?.draft?.recipient_name),
+        body,
+      };
 }
 
 function structuredCard(
@@ -683,9 +688,7 @@ function applyDeletions(next: TranscriptState, deletions: readonly unknown[]) {
     if (typeof item.updatedSeq === "string") next.cursor = bigger(next.cursor, item.updatedSeq);
     deleted.push(deletion);
     next.visible = next.visible.filter((held) => !transcriptDeletionMatches([deletion], held));
-    next.cards = (next.cards ?? []).filter(
-      (held) => !transcriptDeletionMatches([deletion], held)
-    );
+    next.cards = (next.cards ?? []).filter((held) => !transcriptDeletionMatches([deletion], held));
     next.permissions = next.permissions.filter(
       (held) => !transcriptDeletionMatches([deletion], held)
     );

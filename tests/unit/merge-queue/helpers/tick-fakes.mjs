@@ -129,11 +129,16 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
     branchRules: new Map(),
     /**
      * ids of check runs on a SHA that are NOT jobs of any workflow run (a check run created with
-     * a token through POST /check-runs, filed by GitHub in an Actions suite of that commit):
-     * listWorkflowRunJobs never lists them. Every other check run of a workflow run's suite is a
-     * job of that run.
+     * a token through POST /check-runs, filed by GitHub in an Actions suite of that commit).
+     * listWorkflowRunJobs lists them among the jobs of the run whose suite holds them, as GitHub
+     * does (measured 2026-11-19): `htmlUrl` …/runs/<check run id>, no runner. Every other check
+     * run of a workflow run's suite is a job of that run (htmlUrl …/actions/runs/<run>/job/<id>).
      */
     nonJobs: new Set(),
+    /** test switch: false = listWorkflowRunJobs leaves gh.nonJobs out of the listing */
+    nonJobsListed: true,
+    /** ids of check runs listed as jobs (job URL form) but without a runner, whatever they report */
+    runnerless: new Set(),
   };
 
   const write = (method, args) => {
@@ -279,9 +284,12 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
       );
     },
     /**
-     * GET /actions/runs/{id}/jobs?filter=all as GitHub answers it: every job of every attempt of
-     * the run, each with the id of its check run (the check runs of the run's suite, except
-     * gh.nonJobs). 404 for an unknown run.
+     * GET /actions/runs/{id}/jobs?filter=all as GitHub answers it (normalized like
+     * github.normalizeWorkflowJob): every check run of the run's suite, every attempt. A job's id
+     * is its check run's id; a job that ran has a runner, one never started (queued) or skipped
+     * has none. A check run of gh.nonJobs is listed too (unless gh.nonJobsListed is false) in the
+     * shape GitHub gives an API-created check run: `htmlUrl` …/runs/<id>, no runner. 404 for an
+     * unknown run.
      */
     async listWorkflowRunJobs(runId) {
       read("listWorkflowRunJobs", [runId]);
@@ -295,15 +303,22 @@ export function createFakeGitHub({ readOnly = false, calls = null, client = "app
       const jobs = [];
       for (const list of gh.checkRuns.values()) {
         for (const cr of list) {
-          if (cr.checkSuiteId !== run.checkSuiteId || gh.nonJobs.has(cr.id)) continue;
+          if (cr.checkSuiteId !== run.checkSuiteId) continue;
+          const forged = gh.nonJobs.has(cr.id);
+          if (forged && !gh.nonJobsListed) continue;
+          const ran = cr.status !== "queued" && cr.conclusion !== "skipped";
           jobs.push({
-            id: 70_000_000 + cr.id,
+            id: cr.id,
             runId,
             runAttempt: run.runAttempt ?? 1,
             name: cr.name,
             status: cr.status,
             conclusion: cr.conclusion,
             checkRunId: cr.id,
+            htmlUrl: forged
+              ? `https://github.com/${REPOSITORY}/runs/${cr.id}`
+              : `https://github.com/${REPOSITORY}/actions/runs/${runId}/job/${cr.id}`,
+            runnerId: !forged && ran && !gh.runnerless.has(cr.id) ? 1_000_000_000 + cr.id : null,
           });
         }
       }

@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
-  grokReconnectDelayMs,
-  watchGrokBotTurn,
-} from "../../open-sse/executors/grok-bot-watch.ts";
+import { grokReconnectDelayMs, watchGrokBotTurn } from "../../open-sse/executors/grok-bot-watch.ts";
 import type { Transport } from "../../open-sse/executors/grok-bot-protocol.ts";
 
 test("the reconnect delay backs off and stops at a ceiling", () => {

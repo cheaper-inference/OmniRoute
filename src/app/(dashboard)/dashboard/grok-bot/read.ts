@@ -1,7 +1,4 @@
-import {
-  frameConnectJson,
-  readConnectFrames,
-} from "../../../../../open-sse/utils/connectFrames";
+import { frameConnectJson, readConnectFrames } from "../../../../../open-sse/utils/connectFrames";
 
 const SERVICE = "aiserver.v1.GrokBotService";
 const BASE = "https://api2.cursor.sh";

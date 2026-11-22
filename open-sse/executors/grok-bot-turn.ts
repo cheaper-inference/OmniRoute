@@ -17,10 +17,13 @@ import {
   toolCallBody,
   type BridgeController,
   type BridgeTurnOptions,
+  hasReadableAnswer,
+  isUnavailableSentinel,
   type StartedBridge,
   type Transport,
 } from "./grok-bot-protocol.ts";
 import { createGrokTurnStream } from "./grok-bot-stream.ts";
+import { UPSTREAM_RESPONDED_ERROR_TYPE } from "../utils/diagnostics.ts";
 import { watchGrokBotTurn } from "./grok-bot-watch.ts";
 
 type ClientTool = { function?: { name?: string; description?: string; parameters?: unknown } };
@@ -170,6 +173,7 @@ export class GrokBotTurn {
         id: this.id,
         collect,
         startedBridge: this.startedBridge,
+        bridgeRequested: Boolean(this.bridge),
         clientToolList: this.clientToolList,
         turnController: this.turnController,
         signal: this.input.signal,
@@ -362,7 +366,9 @@ export class GrokBotTurn {
       (this.startTimer as { unref?: () => void }).unref?.();
     }
     const turn = this.turnSignal();
-    return turn ? AbortSignal.any([turn, this.startController.signal]) : this.startController.signal;
+    return turn
+      ? AbortSignal.any([turn, this.startController.signal])
+      : this.startController.signal;
   }
 
   private stopStartDeadline(): void {
@@ -423,16 +429,18 @@ export class GrokBotTurn {
 
   private async nonStream(collect: Promise<string>): Promise<Response> {
     const text = await collect;
-    if (this.bridge && text?.trim() === "TOOL_UNAVAILABLE") {
+    if (this.startedBridge?.invocations?.length) {
+      // A recorded invocation is the substantive result of the turn; the sentinel the
+      // model appends afterwards must not throw it away.
+      return this.json(
+        toolCallBody(this.model, this.id, this.startedBridge.invocations, text || null)
+      );
+    }
+    if (this.bridge && text !== undefined && isUnavailableSentinel(text)) {
       return errResponse(
         HTTP_STATUS.BAD_GATEWAY ?? 502,
         "Request bridge tool was not called",
         "bridge_not_called"
-      );
-    }
-    if (this.startedBridge?.invocations?.length) {
-      return this.json(
-        toolCallBody(this.model, this.id, this.startedBridge.invocations, text || null)
       );
     }
     let answer = text;
@@ -440,15 +448,39 @@ export class GrokBotTurn {
       try {
         answer = this.bridgeCall(this.challenge() ?? "");
       } catch (error) {
-        return errResponse(
-          HTTP_STATUS.BAD_GATEWAY ?? 502,
-          sanitizeErrorMessage(error),
-          "bridge_rejected"
-        );
+        return this.bridgeFailure(error, text);
       }
     }
-    if (!answer) return bridgeError("turn finished without an answer");
+    if (!hasReadableAnswer(answer)) {
+      // The upstream answered but produced nothing readable. Reporting it as an
+      // upstream response rather than a transport error is what stops the same-account
+      // retry classifier from paying twice for the same verdict.
+      return errResponse(
+        HTTP_STATUS.BAD_GATEWAY ?? 502,
+        "turn finished without an answer",
+        UPSTREAM_RESPONDED_ERROR_TYPE
+      );
+    }
     return this.json(chatCompletionBody(this.model, answer, this.id));
+  }
+
+  /**
+   * A rejected bridge call. An unreadable answer is the more specific failure, and the
+   * streamed shape reports it as an upstream response, so say the same thing here.
+   */
+  private bridgeFailure(error: unknown, text: string | undefined): Response {
+    if (!hasReadableAnswer(text ?? "")) {
+      return errResponse(
+        HTTP_STATUS.BAD_GATEWAY ?? 502,
+        "turn finished without an answer",
+        UPSTREAM_RESPONDED_ERROR_TYPE
+      );
+    }
+    return errResponse(
+      HTTP_STATUS.BAD_GATEWAY ?? 502,
+      sanitizeErrorMessage(error),
+      "bridge_rejected"
+    );
   }
 
   private failureResponse(error: unknown): Response {

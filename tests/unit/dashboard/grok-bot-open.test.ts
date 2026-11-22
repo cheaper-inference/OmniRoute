@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { openTranscript, transcriptStep } from "../../../src/app/(dashboard)/dashboard/grok-bot/open";
+import {
+  openTranscript,
+  transcriptStep,
+} from "../../../src/app/(dashboard)/dashboard/grok-bot/open";
 import { nextTranscriptRequest } from "../../../src/app/(dashboard)/dashboard/grok-bot/transcript";
 
 async function* frames(values: unknown[]): AsyncIterable<unknown> {

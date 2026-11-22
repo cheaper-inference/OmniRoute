@@ -35,7 +35,10 @@ test("the watch request body carries the five-byte Connect frame header", async 
   assert.ok(sentBody instanceof Uint8Array, "body must be bytes, not a JSON string");
   const bytes = sentBody as Uint8Array;
   assert.equal(bytes[0], 0, "flag byte");
-  const declared = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(1, false);
+  const declared = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(
+    1,
+    false
+  );
   assert.equal(declared, bytes.length - 5, "declared length must match the JSON that follows");
   const json = new TextDecoder().decode(bytes.subarray(5));
   assert.deepEqual(JSON.parse(json), { afterUpdatedSeq: "0" });

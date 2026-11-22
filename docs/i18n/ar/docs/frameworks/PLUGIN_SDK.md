@@ -4,7 +4,7 @@
 
 ---
 
-## البدء السريع
+## بداية سريعة
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-دالة إنشاء تُنشئ كائن Plugin باستخدام القيم الافتراضية.
+وظيفة المصنع التي تقوم بإنشاء كائن مكون إضافي مع الإعدادات الافتراضية.
 
-**المعاملات:**
+**حدود:**
 
-- `name` (string، مطلوب) — اسم الإضافة بصيغة kebab-case
-- `priority` (number، اختياري، القيمة الافتراضية: 100) — تُنفَّذ القيمة الأقل أولًا
-- `enabled` (boolean، اختياري، القيمة الافتراضية: true) — هل تبدأ الإضافة مفعّلة؟
-- `onRequest` (function، اختياري) — تُنفَّذ قبل معالج المحادثة
-- `onResponse` (function، اختياري) — تُنفَّذ بعد معالج المحادثة
-- `onError` (function، اختياري) — تُنفَّذ عند حدوث خطأ في المعالج
+- `name` (سلسلة، مطلوبة) اسم البرنامج المساعد — في حالة الكباب
+- `priority` (الرقم، اختياري، الافتراضي: 100) يتم تشغيل — Lower أولاً
+- `enabled` (منطقي، اختياري، افتراضي: صحيح) — هل تم تمكين البدء؟
+- `onRequest` (وظيفة، اختيارية) — يتم تشغيله قبل معالج الدردشة
+- `onResponse` (وظيفة، اختيارية) — يتم تشغيله بعد معالج الدردشة
+- `onError` (وظيفة، اختيارية) — يعمل عند حدوث خطأ في المعالج
 
 ### `blockRequest(response?): BlockingHookResult`
 
-احظر الطلب وأعِد استجابة مخصصة اختياريًا.
+قم بحظر الطلب وإرجاع استجابة مخصصة اختياريًا.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-عدّل نص الطلب قبل وصوله إلى المزوّد.
+قم بتعديل نص الطلب قبل أن يصل إلى الموفر.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-أرفق بيانات وصفية بسياق الطلب.
+إرفاق بيانات التعريف بسياق الطلب.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## سياق الإضافة (`PluginContext`)
+## سياق البرنامج المساعد (`PluginContext`)
 
-| الحقل       | النوع                     | الوصف                      |
-| ----------- | ------------------------- | -------------------------- |
-| `requestId` | `string`                  | معرّف فريد للطلب           |
-| `model`     | `string`                  | اسم النموذج المطلوب        |
-| `provider`  | `string`                  | معرّف المزوّد المستهدف     |
-| `body`      | `Record<string, unknown>` | نص الطلب                   |
-| `headers`   | `Record<string, string>`  | ترويسات الطلب              |
-| `metadata`  | `Record<string, unknown>` | بيانات وصفية قابلة للتعديل |
-| `timestamp` | `number`                  | الطابع الزمني للطلب        |
+| مجال         | يكتب                      | وصف                                             |
+| ------------ | ------------------------- | ----------------------------------------------- |
+| `requestId`  | `string`                  | معرف الطلب الفريد                               |
+| `model`      | `string`                  | اسم الموديل المطلوب                             |
+| `provider`   | `string`                  | موفر الهدف ID                                   |
+| `body`       | `Record<string, unknown>` | هيئة الطلب                                      |
+| `headers`    | `Record<string, string>`  | رؤوس الطلبات (انظر الملاحظة)                    |
+| `metadata`   | `Record<string, unknown>` | البيانات الوصفية القابلة للتغيير                |
+| `timestamp`  | `number`                  | طلب الطابع الزمني                               |
+| `apiKeyInfo` | `object` (اختياري)        | البيانات التعريفية الرئيسية API (انظر الملاحظة) |
+
+لا يحمل السياق أبدًا بيانات اعتماد العميل: تتم إزالة الرؤوس `authorization` و `x-api-key` و `proxy-authorization` و `cookie` (أي غلاف)، ويحتفظ `apiKeyInfo` بالبيانات الوصفية للمفتاح (مثل `id` و `name` و `scopes`) ولكن ليس قيمة المفتاح أو بصمة إصبعه (`redactPluginContext()` في `src/lib/plugins/hooks.ts`). وهذا ينطبق على `onRequest` و `onResponse` و `onError`.
 
 ## ملف البيان (`plugin.json`)
 
@@ -140,17 +143,16 @@ onRequest: (ctx) => {
 
 ## نظام الأذونات
 
-تعمل الإضافات ضمن سياق آلة افتراضية معزولة. يتطلب الوصول إلى الموارد الخارجية أذونات صريحة:
+الإضافات هي** ليس في وضع الحماية** . يعمل كل مكون إضافي نشط كعملية فرعية منفصلة وعادية لـ Node.js (`loadPlugin()` في `src/lib/plugins/loader.ts`) تحت نفس مستخدم نظام التشغيل مثل OmniRoute، بدون سياق VM ولا إشارات إذن Node.js. يمكن أن يستخدم رمز البرنامج المساعد `node:fs` و `node:child_process` و `fetch` وكل Node.js API الأخرى: يمكنه قراءة وكتابة أي ملف يستطيع مستخدم OmniRoute (بما في ذلك دليل البيانات)، تشغيل البرامج والوصول إلى الشبكة.
 
-| الإذن        | ما يتيحه                                                     |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | وكيل `process.env` للقراءة فقط                               |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+يقبل `requires.permissions` الخاص بالبيان `network` `file-read` و `file-write` و `env` و `exec`، ولكن اليوم `env` فقط له تأثير في وقت التشغيل:
 
-من دون إذن، لا تكون العناصر العامة المقابلة متاحة ببساطة داخل البيئة المعزولة.
+| إذن                                          | تأثير اليوم                                                                                                                                                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | تتلقى عملية البرنامج المساعد أيضًا `PORT` `HOSTNAME` و `TZ` و `TMPDIR`. بدونها، فإنه يتلقى فقط `PATH` `HOME` و `USER` و `LANG` و `LC_ALL` و `NODE_ENV` و `PLUGIN_ENTRY` و `PLUGIN_NAME` (بالإضافة إلى `SystemRoot` و `windir` على Windows). |
+| `network`, `file-read`, `file-write`, `exec` | لا أحد. إنها إعلانات فقط: لا يتم حظر أي شيء عندما يكون مفقودًا.                                                                                                                                                                             |
+
+يشبه تثبيت البرنامج الإضافي تثبيت أي برنامج آخر على المضيف. قم بتثبيت المكونات الإضافية التي تثق بمصدرها فقط.
 
 ## مخطط الإعدادات
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## أمثلة
 
-### مسجّل الطلبات
+### مسجل الطلب
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // دقيقة واحدة
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### محوّل الاستجابة
+### محول الاستجابة
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

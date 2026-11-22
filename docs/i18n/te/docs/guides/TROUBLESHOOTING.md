@@ -466,7 +466,7 @@ v3.8.0కు _ముందు_ దిగుమతి చేసిన కనె�
 2. **శాశ్వత పరిష్కారం:** మీ `docker run` కమాండ్లో `-p 127.0.0.1:20128:20128`ను ఉపయోగించడం ద్వారా IPv4కు స్పష్టంగా బైండ్ చేయండి:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ఇది IPv4 బైండ్ను నిర్బంధిస్తుంది, అలాగే అన్ని హోస్ట్ ఇంటర్ఫేస్లపై ప్రాక్సీ బహిర్గతం కాకుండా నివారిస్తుంది.
 

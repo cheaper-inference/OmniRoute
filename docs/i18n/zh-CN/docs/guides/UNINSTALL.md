@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # （可选）移除镜像
+docker rmi cheaperinference/omniroute:latest
+# 较旧的安装提取了旧名称：
 docker rmi diegosouzapw/omniroute:latest
 ```
 

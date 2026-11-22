@@ -205,7 +205,7 @@ function handleBridgeMcpRequest(
   });
 }
 
-export type StartedBridgeTurn = {
+type StartedBridgeTurn = {
   /** Public URL in path-nonce form: `<publicBase>/grok-bridge/<nonce>/mcp`. */
   url: string;
   nonce: string;
@@ -221,7 +221,7 @@ export type StartedBridgeTurn = {
   close: (reason: BridgeCloseReason) => boolean;
 };
 
-export type StartBridgeTurnOptions = {
+type StartBridgeTurnOptions = {
   publicBaseUrl: string;
   registry?: GrokBotBridgeRegistry;
   /** Turn-scoped cancel: abort converges on the registry "cancel" close (spec step 9). */

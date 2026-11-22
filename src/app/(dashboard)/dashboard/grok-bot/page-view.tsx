@@ -55,7 +55,7 @@ function ComputerCard({ state }: { state: PageState }) {
       ) : (
         <p className="text-sm text-text-muted">{computerRegion.empty}</p>
       )}
-        </Card>
+    </Card>
   );
 }
 
@@ -112,9 +112,7 @@ function FanoutCard({
               aria-label={account.name}
               checked={fanout.includes(account.id)}
               onChange={(event) =>
-                onToggle((current) =>
-                  toggleFanout(current, account.id, event.target.checked)
-                )
+                onToggle((current) => toggleFanout(current, account.id, event.target.checked))
               }
             />
             <span className="truncate">{account.name}</span>
@@ -126,16 +124,7 @@ function FanoutCard({
 }
 
 export function DetailsPanel({ state }: { state: PageState }) {
-  const {
-    t,
-    accountRegion,
-    skillRegion,
-    accounts,
-    skills,
-    routines,
-    fanout,
-    setFanout,
-  } = state;
+  const { t, accountRegion, skillRegion, accounts, skills, routines, fanout, setFanout } = state;
   return (
     <aside className="grid gap-3 border-b border-border p-3 md:grid-cols-2">
       <FanoutCard

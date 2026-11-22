@@ -1,11 +1,6 @@
 import { grokBotRead, grokBotReadStream } from "./read";
 import { isPrivateHost } from "@/shared/network/privateHost";
-import {
-  blobReadPaths,
-  fillBlobBodies,
-  fillOmittedBodies,
-  RECOVERY_CONCURRENCY,
-} from "./recover";
+import { blobReadPaths, fillBlobBodies, fillOmittedBodies, RECOVERY_CONCURRENCY } from "./recover";
 import { backlogged, bufferPressure } from "./pressure";
 import {
   transcriptConnectedFrame,
@@ -49,7 +44,6 @@ function queueGate(controller: ReadableStreamDefaultController<Uint8Array>): () 
 /** One frame must not turn into an unbounded number of upstream requests. */
 /** A presigned body is a transcript row, not a download; refuse anything larger. */
 const BLOB_TEXT_LIMIT = 1024 * 1024;
-
 
 /**
  * The body URL comes from the service, but it is fetched by this process, so it is

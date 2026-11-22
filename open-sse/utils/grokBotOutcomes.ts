@@ -63,7 +63,6 @@ export function grokBotCardOutcome(
   return "unknown";
 }
 
-
 export function grokBotRefusal(answer: unknown): { failureCode: string; message: string } | null {
   const body = record(answer);
   const refusal = body && record(body.refusal);

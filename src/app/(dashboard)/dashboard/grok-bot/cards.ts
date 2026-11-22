@@ -100,4 +100,3 @@ export function draftDiscard(input: { agentId: string; entryId: string }): Draft
   if (input.agentId === "" || input.entryId === "") return null;
   return { agentId: input.agentId, entryId: input.entryId, sessionId: "" };
 }
-

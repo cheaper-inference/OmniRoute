@@ -123,9 +123,10 @@ test("sidebar visibility drops stale entries from saved settings", () => {
     false
   );
   assert.equal((allSidebarItemIds as string[]).includes("settings"), false);
-  assert.deepEqual(sidebarVisibility.normalizeHiddenSidebarItems(["auto-combo" as any, "logs"]), [
-    "logs",
-  ]);
+  assert.deepEqual(
+    sidebarVisibility.normalizeHiddenSidebarItems(["auto-combo" as unknown as never, "logs"]),
+    ["logs"]
+  );
 });
 
 test("help sidebar exposes changelog after docs and issues", () => {
