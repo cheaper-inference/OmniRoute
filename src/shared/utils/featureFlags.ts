@@ -66,15 +66,37 @@ export function resolveAllFeatureFlags(): Array<{
   });
 }
 
+let lastWarnedRequireApiKeyDbOverride: string | null = null;
+
 // Backward-compatible wrappers
 /**
  * REQUIRE_API_KEY ignores case and surrounding whitespace, unlike the generic
  * `isFeatureFlagEnabled`, so the gate agrees with the startup exposure warnings
  * that read the same value (see requireApiKeyValue.mjs).
+ *
+ * #21014: if `process.env.REQUIRE_API_KEY` is enabled (e.g. Docker/K8s default)
+ * while a DB feature-flag override disables it, emit a deduplicated `[SECURITY]`
+ * warning so the silent downgrade is always observable in server logs.
  */
 export function isRequireApiKeyEnabled(): boolean {
   try {
-    return isRequireApiKeyValueEnabled(resolveFeatureFlag("REQUIRE_API_KEY"));
+    const dbOverride = getFeatureFlagOverride("REQUIRE_API_KEY");
+    const enabled = isRequireApiKeyValueEnabled(resolveFeatureFlag("REQUIRE_API_KEY"));
+    if (
+      dbOverride !== undefined &&
+      !enabled &&
+      isRequireApiKeyValueEnabled(process.env.REQUIRE_API_KEY)
+    ) {
+      if (lastWarnedRequireApiKeyDbOverride !== dbOverride) {
+        lastWarnedRequireApiKeyDbOverride = dbOverride;
+        console.warn(
+          `[SECURITY] REQUIRE_API_KEY is enabled in the environment, but a database feature-flag override (${JSON.stringify(dbOverride)}) has disabled API-key enforcement on /v1/* endpoints. Remove or re-enable the REQUIRE_API_KEY database override unless anonymous inference access is intentional.`
+        );
+      }
+    } else {
+      lastWarnedRequireApiKeyDbOverride = null;
+    }
+    return enabled;
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve REQUIRE_API_KEY, defaulting to required:",
