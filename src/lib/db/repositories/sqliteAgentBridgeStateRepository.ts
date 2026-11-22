@@ -49,54 +49,74 @@ function getSync(agentId: string): AgentBridgeStateRow | null {
   return row ? mapRow(row) : null;
 }
 
+function insertStateSync(db: ReturnType<typeof getDbInstance>, row: AgentBridgeStatePatch): void {
+  db.prepare(
+    `INSERT INTO agent_bridge_state
+         (agent_id, dns_enabled, cert_trusted, setup_completed, last_started_at, last_error)
+       VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(
+    row.agent_id,
+    row.dns_enabled !== undefined ? (row.dns_enabled ? 1 : 0) : 0,
+    row.cert_trusted !== undefined ? (row.cert_trusted ? 1 : 0) : 0,
+    row.setup_completed !== undefined ? (row.setup_completed ? 1 : 0) : 0,
+    row.last_started_at ?? null,
+    row.last_error ?? null
+  );
+}
+
+const BOOL_UPDATE_COLUMNS: ReadonlyArray<
+  readonly [
+    keyof Pick<AgentBridgeStatePatch, "dns_enabled" | "cert_trusted" | "setup_completed">,
+    string,
+  ]
+> = [
+  ["dns_enabled", "dns_enabled = ?"],
+  ["cert_trusted", "cert_trusted = ?"],
+  ["setup_completed", "setup_completed = ?"],
+];
+
+const TEXT_UPDATE_COLUMNS: ReadonlyArray<
+  readonly [keyof Pick<AgentBridgeStatePatch, "last_started_at" | "last_error">, string]
+> = [
+  ["last_started_at", "last_started_at = ?"],
+  ["last_error", "last_error = ?"],
+];
+
+function updateStateSync(db: ReturnType<typeof getDbInstance>, row: AgentBridgeStatePatch): void {
+  const fields: string[] = [];
+  const values: (string | number | null)[] = [];
+
+  for (const [key, clause] of BOOL_UPDATE_COLUMNS) {
+    const value = row[key];
+    if (value !== undefined) {
+      fields.push(clause);
+      values.push(value ? 1 : 0);
+    }
+  }
+  for (const [key, clause] of TEXT_UPDATE_COLUMNS) {
+    const value = row[key];
+    if (value !== undefined) {
+      fields.push(clause);
+      values.push(value);
+    }
+  }
+
+  if (fields.length === 0) return;
+
+  values.push(row.agent_id);
+  db.prepare(`UPDATE agent_bridge_state SET ${fields.join(", ")} WHERE agent_id = ?`).run(
+    ...values
+  );
+}
+
 function upsertSync(row: AgentBridgeStatePatch): void {
   const db = getDbInstance();
   const existing = getSync(row.agent_id);
 
   if (!existing) {
-    db.prepare(
-      `INSERT INTO agent_bridge_state
-         (agent_id, dns_enabled, cert_trusted, setup_completed, last_started_at, last_error)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(
-      row.agent_id,
-      row.dns_enabled !== undefined ? (row.dns_enabled ? 1 : 0) : 0,
-      row.cert_trusted !== undefined ? (row.cert_trusted ? 1 : 0) : 0,
-      row.setup_completed !== undefined ? (row.setup_completed ? 1 : 0) : 0,
-      row.last_started_at ?? null,
-      row.last_error ?? null
-    );
+    insertStateSync(db, row);
   } else {
-    const fields: string[] = [];
-    const values: (string | number | null)[] = [];
-
-    if (row.dns_enabled !== undefined) {
-      fields.push("dns_enabled = ?");
-      values.push(row.dns_enabled ? 1 : 0);
-    }
-    if (row.cert_trusted !== undefined) {
-      fields.push("cert_trusted = ?");
-      values.push(row.cert_trusted ? 1 : 0);
-    }
-    if (row.setup_completed !== undefined) {
-      fields.push("setup_completed = ?");
-      values.push(row.setup_completed ? 1 : 0);
-    }
-    if (row.last_started_at !== undefined) {
-      fields.push("last_started_at = ?");
-      values.push(row.last_started_at);
-    }
-    if (row.last_error !== undefined) {
-      fields.push("last_error = ?");
-      values.push(row.last_error);
-    }
-
-    if (fields.length === 0) return;
-
-    values.push(row.agent_id);
-    db.prepare(`UPDATE agent_bridge_state SET ${fields.join(", ")} WHERE agent_id = ?`).run(
-      ...values
-    );
+    updateStateSync(db, row);
   }
 }
 
