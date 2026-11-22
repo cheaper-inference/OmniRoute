@@ -21,9 +21,13 @@ import {
 import { resolveAllFeatureFlags } from "@/shared/utils/featureFlags";
 import { getCcAliasGlobalState } from "@/lib/db/ccDiscoveryAliases";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { getSettings } from "@/lib/db/settings";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import { isAutoEnableActive } from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
 
 const ACTIVE_VALUES = new Set(["true", "1", "yes"]);
 const CC_DISCOVERY_ALIASES_FLAG_KEY = "EXPOSE_CC_DISCOVERY_ALIASES";
+const RATE_LIMIT_AUTO_ENABLE_FLAG_KEY = "RATE_LIMIT_AUTO_ENABLE";
 
 function isActive(value: string): boolean {
   return ACTIVE_VALUES.has(value);
@@ -66,6 +70,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const resolved = resolveAllFeatureFlags();
+    // One read for the flag below: the limiter's auto-enable verdict lives in
+    // the persisted request-queue settings, with the env variable as an
+    // override.
+    const autoEnableActive = isAutoEnableActive(
+      resolveResilienceSettings(await getSettings()).requestQueue
+    );
+    const autoEnableEnvSet = (process.env[RATE_LIMIT_AUTO_ENABLE_FLAG_KEY] ?? "").trim().length > 0;
 
     const flags = resolved.map(({ key, effectiveValue, source, definition, ...provenance }) => {
       // Flags whose gate resolves with env-wins-over-db precedence (the
@@ -82,6 +93,18 @@ export async function GET(request: NextRequest) {
       if (key === ADAPTIVE_VIRTUAL_LANES_FLAG_KEY) {
         const state = resolveAdaptiveVirtualLanesFlag();
         return flagPayload(definition, state.enabled ? "true" : "false", state.source);
+      }
+      // RATE_LIMIT_AUTO_ENABLE is an env override on top of a dashboard
+      // setting, not a pure env switch: the limiter falls back to
+      // requestQueue.autoEnableApiKeyProviders when the variable is unset
+      // (open-sse/services/rateLimitManager/autoProtection.ts:22-28). Report
+      // what the limiter actually does, including that fallback.
+      if (key === RATE_LIMIT_AUTO_ENABLE_FLAG_KEY) {
+        return flagPayload(
+          definition,
+          autoEnableActive ? "true" : "false",
+          autoEnableEnvSet ? "env" : "db"
+        );
       }
       return { ...flagPayload(definition, effectiveValue, source), ...provenance };
     });
@@ -182,9 +205,10 @@ export async function PUT(request: NextRequest) {
   if (definition.envOnly) {
     return NextResponse.json(
       {
-        error:
+        error: sanitizeErrorMessage(
           `${key} is an environment-only feature flag; set it in the process environment ` +
-          `and restart. The dashboard cannot override it.`,
+            `and restart. The dashboard cannot override it.`
+        ),
       },
       { status: 400 }
     );
