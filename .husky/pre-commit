@@ -19,5 +19,7 @@ npm run check:any-budget:t11
 # kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down
 node scripts/check/check-type-scale-ratchet.mjs --ratchet --quiet
 node scripts/check/check-tracked-artifacts.mjs
+# Pre-commit secret scan across all staged changes (gracefully skips only if gitleaks is not installed; #21014)
+node scripts/check/check-secrets.mjs --staged --quiet
 # vendored kit must stay byte-identical to the pinned upstream commit; skips with a warning where the private clone is absent
 npm run --silent check:ui-kit-snapshot

@@ -800,7 +800,7 @@
     },
     {
       "name": "audit:electron",
-      "command": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
+      "command": "npm --prefix electron audit --audit-level=high",
       "disposition": "separately-invoked"
     },
     {

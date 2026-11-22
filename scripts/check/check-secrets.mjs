@@ -32,23 +32,57 @@ const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
 const PRINT_JSON = process.argv.includes("--json");
 const RATCHET = process.argv.includes("--ratchet");
+const STAGED = process.argv.includes("--staged");
 const GITLEAKS_CONFIG = path.join(ROOT, ".gitleaks.toml");
 const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
 
-// Source directories to scan for secrets. We deliberately scope to the
-// production/source trees instead of scanning the whole working dir:
-//   • `gitleaks dir .` (and `detect --no-git --source .`) WALKS the entire tree
-//     and READS every file — including a real `node_modules/` (90k+ files) when
-//     present (CI runs `npm ci`). gitleaks has no traversal-exclude flag: the
-//     `.gitleaks.toml [allowlist].paths` list filters FINDINGS *after* each file
-//     is read, so it does NOT speed up the walk. The full walk blows past the
-//     timeout in CI (confirmed: ETIMEDOUT) → the gate silently never produces a
-//     value. Scoping the scan to the source dirs keeps it fast (~6s) while still
-//     covering every place an embedded secret would actually be a risk (the same
-//     dirs Hard Rule #8 governs: src/open-sse/electron/bin, plus scripts/).
-//   • We also drop git-history mode (scanning 4500+ commits is slow and grows
-//     unbounded); the current working tree is what ships.
-const SECRET_SCAN_DIRS = ["src", "open-sse", "bin", "electron", "scripts"];
+// Source/deployment/CI/config directories to scan for secrets (#21014). We still
+// avoid walking `.` directly because `gitleaks dir .` traverses `node_modules/`
+// (90k+ files) before `[allowlist].paths` filters findings, causing CI timeouts.
+// Staged pre-commit scans (`--staged`) use `gitleaks git --pre-commit --staged`,
+// which inspects the git index across ALL repository paths (including root files).
+export const SECRET_SCAN_DIRS = [
+  "src",
+  "open-sse",
+  "bin",
+  "electron",
+  "scripts",
+  "packages",
+  "@omniroute",
+  "deploy",
+  "docker",
+  ".github",
+  "config",
+  "contrib",
+  "examples",
+  "skills",
+];
+
+/**
+ * Monta os argumentos do `gitleaks git` para o scan de pre-commit (`--staged`),
+ * cobrindo 100% dos arquivos staged no índice do git com redaction ativa (#21014).
+ *
+ * @param {string | null} [configPath]
+ * @returns {string[]}
+ */
+export function buildStagedGitleaksArgs(configPath = GITLEAKS_CONFIG) {
+  const args = [
+    "git",
+    "--pre-commit",
+    "--staged",
+    "--redact",
+    "--report-format",
+    "json",
+    "--report-path",
+    "-",
+    "--no-banner",
+  ];
+  if (configPath && fs.existsSync(configPath)) {
+    args.push("--config", configPath);
+  }
+  args.push(".");
+  return args;
+}
 
 // ---------------------------------------------------------------------------
 // Pure parsing function (exported for tests)
@@ -198,15 +232,22 @@ function main() {
   const gitleaksBin = findGitleaks();
 
   if (!gitleaksBin) {
-    console.log("secretFindings=SKIP reason=binary-absent");
+    if (!STAGED || !QUIET) {
+      console.log("secretFindings=SKIP reason=binary-absent");
+    }
     if (!QUIET) {
       process.stderr.write(
         "[check-secrets] SKIP — gitleaks não encontrado no PATH.\n" +
           "[check-secrets] Instale via: https://github.com/gitleaks/gitleaks\n" +
-          "[check-secrets] SKIP gracioso — sai 0 mesmo com --ratchet (binário ausente nunca bloqueia).\n"
+          "[check-secrets] SKIP gracioso — sai 0 mesmo com --ratchet/--staged (binário ausente nunca bloqueia).\n"
       );
     }
     process.exitCode = 0;
+    return;
+  }
+
+  if (STAGED) {
+    runStagedPreCommitScan(gitleaksBin);
     return;
   }
 
@@ -322,6 +363,79 @@ function main() {
 
   // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
   applyRatchet(findingCount);
+}
+
+/**
+ * Executa o scan pre-commit sobre todos os arquivos staged (`gitleaks git --pre-commit --staged`)
+ * e bloqueia o commit (exit 1) se qualquer segredo for detectado (#21014).
+ *
+ * @param {string} gitleaksBin
+ */
+function runStagedPreCommitScan(gitleaksBin) {
+  const args = buildStagedGitleaksArgs(GITLEAKS_CONFIG);
+  let stdout = "";
+  try {
+    stdout = execFileSync(gitleaksBin, args, {
+      cwd: ROOT,
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+      timeout: 60_000,
+    });
+  } catch (err) {
+    stdout = err.stdout ? String(err.stdout) : "";
+    const stderr = err.stderr ? String(err.stderr) : "";
+    if (err.status === 1 && stdout.trim()) {
+      // Expected when gitleaks detects staged findings
+    } else {
+      process.stderr.write(`[check-secrets --staged] ERRO ao executar gitleaks: ${err.message}\n`);
+      if (stderr)
+        process.stderr.write(`[check-secrets --staged] stderr: ${stderr.slice(0, 500)}\n`);
+      process.exit(2);
+    }
+  }
+
+  let findings = [];
+  const trimmed = stdout.trim();
+  if (trimmed && trimmed !== "null") {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) findings = parsed;
+    } catch (parseErr) {
+      process.stderr.write(
+        `[check-secrets --staged] ERRO ao parsear JSON do gitleaks: ${parseErr.message}\n`
+      );
+      process.exit(2);
+    }
+  }
+
+  if (PRINT_JSON) {
+    process.stdout.write(JSON.stringify(findings, null, 2) + "\n");
+  }
+
+  const { findingCount } = parseGitleaksJson(findings);
+  if (!QUIET) {
+    console.log(`stagedSecretFindings=${findingCount}`);
+  }
+
+  if (findingCount > 0) {
+    process.stderr.write(
+      `[check-secrets] BLOQUEADO — ${findingCount} segredo(s) detectado(s) nos arquivos staged:\n`
+    );
+    for (const item of findings.slice(0, 20)) {
+      if (!item || typeof item !== "object") continue;
+      const rule = item.RuleID ?? item.ruleId ?? "unknown";
+      const file = item.File ?? item.file ?? "unknown";
+      const line = item.StartLine ?? "?";
+      process.stderr.write(`  • [${rule}] ${file}:${line}\n`);
+    }
+    process.stderr.write(
+      "  → Remova o segredo antes do commit (ou registre um falso-positivo comprovado em .gitleaks.toml).\n"
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  process.exitCode = 0;
 }
 
 /**

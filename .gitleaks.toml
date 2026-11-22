@@ -37,14 +37,16 @@
 [allowlist]
   description = "OmniRoute project-level allowlist — fixtures, test vectors, public OAuth creds"
 
-  # Paths a ignorar completamente (node_modules, builds, etc.)
+  # Paths a ignorar completamente (node_modules, builds, etc.).
+  # #21014: ancorar em fronteiras de segmento de path para que arquivos como
+  # `src/distributed.ts` ou `src/coverageHelper.ts` nunca sejam ignorados por acidente.
   paths = [
-    '''node_modules''',
-    '''\.next''',
-    '''dist''',
-    '''\.git''',
-    '''coverage''',
-    '''\.nyc_output''',
+    '''(^|[/\\])node_modules([/\\]|$)''',
+    '''(^|[/\\])\.next([/\\]|$)''',
+    '''(^|[/\\])dist([/\\]|$)''',
+    '''(^|[/\\])\.git([/\\]|$)''',
+    '''(^|[/\\])coverage([/\\]|$)''',
+    '''(^|[/\\])\.nyc_output([/\\]|$)''',
   ]
 
   # Commits específicos a ignorar (ex: commit que introduziu fixtures de teste)

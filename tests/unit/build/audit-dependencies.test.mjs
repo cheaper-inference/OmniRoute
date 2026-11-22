@@ -10,7 +10,7 @@ import {
 } from "../../../scripts/quality/audit-dependencies.mjs";
 
 const result = (counts = {}) => ({
-  status: counts.critical ? 1 : 0,
+  status: counts.critical || counts.high ? 1 : 0,
   stdout: JSON.stringify({
     auditReportVersion: 2,
     metadata: {
@@ -87,10 +87,34 @@ test("missing lockfiles are incomplete evidence", () => {
   assert.equal(report.results.length, 5);
 });
 
-test("high advisories remain visible under the existing warning policy", () => {
+test("high advisories block under the hardened high-severity policy (#21014)", (t) => {
   const r = evaluateAuditResult(result({ high: 2 }));
-  assert.equal(r.state, "PASS");
+  assert.equal(r.state, "FAIL");
   assert.equal(r.counts.high, 2);
+
+  const moderateOnly = evaluateAuditResult(result({ moderate: 3 }));
+  assert.equal(moderateOnly.state, "PASS");
+  assert.equal(moderateOnly.counts.moderate, 3);
+
+  const root = mkdtempSync(join(tmpdir(), "dependency-audit-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  for (const scope of AUDIT_SCOPES) {
+    mkdirSync(join(root, scope), { recursive: true });
+    writeFileSync(join(root, scope, "package-lock.json"), "{}");
+  }
+  const calls = [];
+  const report = auditDependencies({
+    root,
+    run: (_cmd, args, options) => {
+      calls.push(args);
+      return result(options.cwd.endsWith("electron") ? { high: 1 } : {});
+    },
+  });
+  assert.equal(report.policy.blockingSeverity, "high");
+  assert.equal(report.ok, false);
+  assert.equal(report.complete, true);
+  assert.ok(calls.every((args) => args.includes("--audit-level=high")));
+  assert.equal(report.results.find((rec) => rec.scope === "electron").state, "FAIL");
 });
 
 test("an invocation failure retains the other package receipts and cannot pass", (t) => {
