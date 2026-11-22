@@ -1,0 +1,132 @@
+# Baseline NetworkPolicy (#20998 / #21014).
+#
+# Selecting the omniroute pod with policyTypes [Ingress, Egress] places it into
+# default-deny for both directions: any traffic not matched below is dropped by
+# the cluster CNI. Node-originated kubelet probes (/healthz startup/readiness
+# and tcpSocket liveness) remain exempt per the Kubernetes NetworkPolicy spec.
+#
+# Cross-namespace peer podSelectors deliberately use `matchExpressions` rather
+# than `matchLabels`: Kustomize's `labels` transformer (`includeSelectors: true`
+# in kustomization.yaml) rewrites existing `app.kubernetes.io/name` keys inside
+# `ingress.from.podSelector.matchLabels` and `egress.to.podSelector.matchLabels`
+# to `omniroute`, which would silently break ingress and DNS resolution.
+#
+# Custom ingress controller namespaces: IngressClass (`nginx` / `traefik`) is
+# cluster-scoped, so if your ingress controller runs outside `ingress-nginx`,
+# `kube-system`, or `traefik` (e.g. `ingress-public`), add a peer to
+# `ingress[0].from` in your operator overlay using `matchExpressions`:
+#
+#   - namespaceSelector:
+#       matchLabels:
+#         kubernetes.io/metadata.name: ingress-public
+#     podSelector:
+#       matchExpressions:
+#         - key: app.kubernetes.io/name
+#           operator: In
+#           values: ["ingress-nginx"]
+#         - key: app.kubernetes.io/component
+#           operator: In
+#           values: ["controller"]
+#
+# Operators using in-cluster dependencies (e.g. Redis for QUOTA_STORE_DRIVER,
+# an internal Ollama service, or a custom NodeLocal DNSCache listener IP)
+# should similarly add a narrow overlay patch on `egress[]`.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: omniroute
+  labels:
+    app.kubernetes.io/name: omniroute
+    app.kubernetes.io/component: server
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: omniroute
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow HTTP (20128) and live-ws (20132) from the cluster ingress controller
+    # pods ONLY — paired namespaceSelector + podSelector prevents arbitrary pods
+    # in kube-system or sibling namespaces from reaching OmniRoute directly.
+    - from:
+        # Generic k8s overlay (deploy/kubernetes/overlays/k8s -> ingress-nginx controller)
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["ingress-nginx"]
+              - key: app.kubernetes.io/component
+                operator: In
+                values: ["controller"]
+        # k3s overlay (deploy/kubernetes/overlays/k3s -> bundled Traefik in kube-system)
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["traefik"]
+        # Standalone Traefik namespace layout
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["traefik"]
+      ports:
+        - protocol: TCP
+          port: 20128
+        - protocol: TCP
+          port: 20132
+  egress:
+    # 1. Cluster DNS resolution (CoreDNS / kube-dns / NodeLocal DNSCache).
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchExpressions:
+              - key: k8s-app
+                operator: In
+                values: ["kube-dns", "coredns", "node-local-dns"]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["coredns"]
+        # Standard Kubernetes NodeLocal DNSCache link-local listener (port 53 only;
+        # patch in an overlay if your cluster customizes the localdns IP).
+        - ipBlock:
+            cidr: 169.254.20.10/32
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # 2. Upstream LLM model providers over public HTTPS (443/TCP) only.
+    #    Blocks RFC1918 private networks, loopback, CGNAT, IANA benchmarking
+    #    (198.18.0.0/15), and link-local / cloud instance metadata (169.254.0.0/16).
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+              - 100.64.0.0/10
+              - 127.0.0.0/8
+              - 198.18.0.0/15
+      ports:
+        - protocol: TCP
+          port: 443

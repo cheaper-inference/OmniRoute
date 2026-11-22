@@ -46,6 +46,14 @@ ingress:
   #    hosts:
   #      - omniroute.example.com
 
+networkPolicy:
+  # Default-deny Ingress + Egress on the OmniRoute pod, allowing ports
+  # 20128/20132 from ingress controller pods only, DNS (53 UDP/TCP) to
+  # kube-system, and HTTPS (443/TCP) to public upstream model providers.
+  enabled: true
+  # Additional egress rules (e.g. in-cluster Redis or internal Ollama service).
+  extraEgress: []
+
 # ── Persistence ─────────────────────────────────────────────────────────
 persistence:
   enabled: true
@@ -79,8 +87,9 @@ secrets:
 config:
   dataDir: /app/data
   logLevel: info
-  # Turn this on before exposing /v1/* outside the cluster.
-  requireApiKey: false
+  # Require an API key on /v1/* by default (#21008 / #20998). Set false only
+  # for an intentionally keyless cluster that is not reachable externally.
+  requireApiKey: true
   # Comma-separated origins allowed to open the dashboard live WebSocket.
   liveWsAllowedOrigins: "http://localhost:20128,http://127.0.0.1:20128"
   # Graceful-shutdown budget for the in-flight SSE drain only — the WAL
@@ -148,8 +157,10 @@ podSecurityContext:
 
 containerSecurityContext:
   allowPrivilegeEscalation: false
-  # The app writes to DATA_DIR and Next.js needs a writable cache dir.
-  readOnlyRootFilesystem: false
+  # DATA_DIR, /tmp, and /app/.build/next/cache are mounted as writable volumes
+  # in templates/deployment.yaml. Set false only if using runtime
+  # OMNIROUTE_BASE_PATH bundle rewriting instead of a build-arg image.
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
       - ALL

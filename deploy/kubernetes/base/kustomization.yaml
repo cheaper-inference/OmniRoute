@@ -20,5 +20,6 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - networkpolicy.yaml
   # secret.example.yaml is deliberately NOT listed: create the Secret out of
   # band (see the comment header in that file) so real values never enter git.
