@@ -57,6 +57,13 @@ spec:
                 name: omniroute-config
             - secretRef:
                 name: omniroute-secrets
+          env:
+            # Redirect runtime Agent Skills apply-mode writes (`POST /api/agent-skills/generate`
+            # with dryRun=false) onto the writable DATA_DIR volume so readOnlyRootFilesystem
+            # pods do not fail with EROFS on /app/skills, while bundled SKILL.md catalog
+            # reads remain intact at /app/skills (#21014).
+            - name: OMNIROUTE_SKILLS_OUTPUT_DIR
+              value: /app/data/skills
           volumeMounts:
             - name: data
               mountPath: /app/data

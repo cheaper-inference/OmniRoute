@@ -57,10 +57,12 @@ spec:
             {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with .Values.extraEnv }}
           env:
+            - name: OMNIROUTE_SKILLS_OUTPUT_DIR
+              value: {{ printf "%s/skills" (.Values.config.dataDir | trimSuffix "/") | quote }}
+            {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
           {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: data
