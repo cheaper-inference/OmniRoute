@@ -99,9 +99,10 @@ export function isConnectionRateLimited(connectionId: string): boolean {
   const db = getDbInstance() as unknown as DbLike;
   const row = db
     .prepare("SELECT rate_limited_until FROM provider_connections WHERE id = ?")
-    .get(connectionId) as { rate_limited_until?: number | null } | undefined;
-  if (!row?.rate_limited_until) return false;
-  return Date.now() < row.rate_limited_until;
+    .get(connectionId) as { rate_limited_until?: number | string | null } | undefined;
+  const deadline = parseCooldownUntilMs(row?.rate_limited_until);
+  if (deadline === null) return false;
+  return Date.now() < deadline;
 }
 
 /**

@@ -34,6 +34,16 @@ export function mergeKeyHealthDelta(
         (key): key is string => typeof key === "string" && key.trim().length > 0
       )
     : [];
+  if (
+    options.matchKeyGeneration &&
+    !credentials.accessToken &&
+    !credentials.apiKey &&
+    !extras.length
+  ) {
+    // Matching needs the row's credential material. With none supplied every delta would be dropped,
+    // and a silent drop reads exactly like a healthy connection.
+    throw new Error("mergeKeyHealthDelta: matchKeyGeneration requires the connection credentials");
+  }
   for (const [id, incoming] of Object.entries(healthEntries(patch))) {
     if (options.matchKeyGeneration) {
       const match = /^extra_(\d+)$/.exec(id);

@@ -5,6 +5,7 @@
 // Only the apiKeyHealth slice may be written. A persisted sticky key in cooldown must also not
 // be handed back by the rotator.
 import test from "node:test";
+import { credentialFingerprint } from "../../src/shared/utils/credentialFingerprint.ts";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -254,6 +255,52 @@ test("the scan reads the tree it claims to read", async () => {
     !files.some((file) => /\.(test|spec|d)\.tsx?$/.test(file)),
     "test and declaration files are excluded by the shared walker"
   );
+});
+
+test("generation matching without credentials fails loudly instead of dropping every delta", async () => {
+  const { mergeKeyHealthDelta } = await import("../../src/lib/db/providers/keyHealthDelta.ts");
+  assert.throws(
+    () =>
+      mergeKeyHealthDelta(
+        { apiKeyHealth: { primary: { status: "ok", failures: 0 } } },
+        { primary: { status: "invalid", failures: 1, generation: "abc" } },
+        {},
+        { matchKeyGeneration: true }
+      ),
+    /matchKeyGeneration requires the connection credentials/
+  );
+  // Supplying the row's own material lets the same call through.
+  const merged = mergeKeyHealthDelta(
+    null,
+    { primary: { status: "invalid", failures: 1, generation: credentialFingerprint("sk-live") } },
+    { apiKey: "sk-live" },
+    { matchKeyGeneration: true }
+  );
+  assert.equal(merged.primary?.status, "invalid");
+});
+
+test("an ISO cooldown deadline counts as limited", async () => {
+  const { createProviderConnection, updateProviderConnection } = await import(
+    "../../src/lib/db/providers.ts"
+  );
+  const { isConnectionRateLimited } = await import("../../src/lib/db/providers/rateLimit.ts");
+  const conn = await createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "IsoTail",
+    apiKey: "sk-iso",
+    isActive: true,
+  });
+  // The dashboard writes ISO text into the same column the chat path writes epoch milliseconds to.
+  await updateProviderConnection(conn.id, {
+    rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+  });
+  assert.equal(isConnectionRateLimited(conn.id), true, "an ISO deadline is still a deadline");
+
+  await updateProviderConnection(conn.id, {
+    rateLimitedUntil: new Date(Date.now() - 60_000).toISOString(),
+  });
+  assert.equal(isConnectionRateLimited(conn.id), false, "an elapsed deadline is not limited");
 });
 
 const core = await import("../../src/lib/db/core.ts");

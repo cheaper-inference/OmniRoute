@@ -1079,7 +1079,12 @@ function buildMergedConnectionUpdate(
     merged.providerSpecificData = {
       ...currentData,
       ...delta,
-      apiKeyHealth: mergeKeyHealthDelta(currentData, delta.apiKeyHealth, {}, opts),
+      apiKeyHealth: mergeKeyHealthDelta(
+        currentData,
+        delta.apiKeyHealth,
+        { apiKey: existingCamel.apiKey, accessToken: existingCamel.accessToken },
+        opts
+      ),
     };
   }
   merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
