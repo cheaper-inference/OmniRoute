@@ -1625,6 +1625,14 @@ export async function getProviderCredentials(
 
       if (earliest) {
         const earliestConn = earliestCandidate?.connection;
+        // #20969: a model-only lock leaves the connection active, so connection.lastError is
+        // unset; the upstream message and status live on the lock entry. A non-429 upstream
+        // (e.g. 400 "credit balance is too low") keeps its status so the client can tell
+        // "add credit" from "wait". A 429 lock (or a lock without metadata) stays 429.
+        const earliestModelLock =
+          allBlockedByModelCooldown && earliestConn && requestedModel
+            ? getModelLockoutInfo(provider, earliestConn.id, requestedModel)
+            : null;
         log.warn(
           "AUTH",
           allBlockedByModelCooldown
@@ -1655,8 +1663,10 @@ export async function getProviderCredentials(
           allRateLimited: true,
           retryAfter: earliest,
           retryAfterHuman: formatRetryAfter(earliest),
-          lastError: earliestConn?.lastError || null,
-          lastErrorCode: allBlockedByModelCooldown ? 429 : earliestConn?.errorCode || null,
+          lastError: earliestModelLock?.lastError || earliestConn?.lastError || null,
+          lastErrorCode: allBlockedByModelCooldown
+            ? (earliestModelLock?.errorCode ?? 429)
+            : earliestConn?.errorCode || null,
           cooldownScope: allBlockedByModelCooldown ? "model" : "connection",
           cooldownModel: allBlockedByModelCooldown ? requestedModel : null,
           ...copilotRejectionFlag(provider, requestedModel, connections, connectionFilterStatus),
