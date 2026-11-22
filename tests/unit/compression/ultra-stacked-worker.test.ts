@@ -42,12 +42,17 @@ test("adaptive Ultra in a mixed stack runs in a worker with unchanged output", a
     return original.apply(this, args);
   };
   try {
-    const actual = await applyCompressionAsync(body, "stacked", { config });
+    const steps: string[] = [];
+    const actual = await applyCompressionAsync(body, "stacked", {
+      config,
+      onEngineStep: (step) => steps.push(step.engine),
+    });
     assert.ok(posted > 0, "Ultra must not execute on the gateway thread");
     assert.deepEqual(actual.body, expected.body);
     assert.equal(actual.compressed, expected.compressed);
     assert.deepEqual(actual.body.messages[0], body.messages[0]);
     assert.equal(actual.stats?.compressedTokens, expected.stats?.compressedTokens);
+    assert.ok(steps.includes("ultra"), "progress callbacks must stay on the gateway thread");
   } finally {
     Worker.prototype.postMessage = original;
   }
