@@ -200,11 +200,16 @@ async function fixBetterSqliteBinary() {
     try {
       const { execSync } = await import("node:child_process");
 
-      // --offline --no-audit --no-fund: the rebuild uses the installed tree only
-      // — no registry metadata, no tarball fetch, no audit round-trip.
+      // better-sqlite3 13.x sets `"gypfile": false` with no `install` hook and
+      // omits Android prebuilds, so `npm rebuild` is a no-op on Termux/Android.
+      // Invoke its explicit `"build-release"` script (`node-gyp clean &&
+      // node-gyp rebuild --release --force_build=1`) inside `plan.packageDir`
+      // using npm's bundled node-gyp on PATH. --offline --no-audit --no-fund
+      // ensures the build uses the installed tree only (no registry round-trip).
       const rebuildCmd = isAndroid
-        ? "npm rebuild better-sqlite3 --build-from-source --offline --no-audit --no-fund"
+        ? "npm run build-release --offline --no-audit --no-fund"
         : "npm rebuild better-sqlite3 --offline --no-audit --no-fund";
+      const rebuildCwd = isAndroid ? plan.packageDir : plan.cwd;
 
       const env = { ...plan.env };
       if (isAndroid) {
@@ -215,7 +220,7 @@ async function fixBetterSqliteBinary() {
       }
 
       execSync(rebuildCmd, {
-        cwd: plan.cwd,
+        cwd: rebuildCwd,
         stdio: "inherit",
         timeout: isAndroid ? 600_000 : 300_000, // ARM compilation is slower
         env,
@@ -259,6 +264,11 @@ async function fixBetterSqliteBinary() {
   } else if (process.platform === "darwin") {
     console.warn(`     cd ${hintCwd} && npm rebuild better-sqlite3`);
     console.warn("     If build tools are missing: xcode-select --install");
+  } else if (isAndroid) {
+    const androidPkgDir =
+      plan.action === "rebuild" ? plan.packageDir : join(ROOT, "node_modules", "better-sqlite3");
+    console.warn(`     cd "${androidPkgDir}" && npm run build-release`);
+    console.warn("     If build tools are missing: pkg install python clang make");
   } else {
     console.warn(`     cd ${hintCwd} && npm rebuild better-sqlite3`);
   }

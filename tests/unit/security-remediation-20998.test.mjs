@@ -41,7 +41,7 @@
 // and tests/unit/runtime/postinstall-warmup-no-install.test.mjs (sandboxed npm).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 import { AUDIT_SCOPES } from "../../scripts/quality/audit-dependencies.mjs";
 
@@ -308,7 +308,11 @@ test("postinstall: the SQLite repair never runs `npm install better-sqlite3`", (
 
 test("postinstall: every executed rebuild command is offline, audit-free and install-free", () => {
   for (const command of rebuildCommands()) {
-    assert.match(command, /^npm rebuild better-sqlite3( |$)/, `not a rebuild: ${command}`);
+    assert.match(
+      command,
+      /^npm (run build-release|rebuild better-sqlite3)( |$)/,
+      `not an in-place build/rebuild command: ${command}`
+    );
     assert.doesNotMatch(command, /\bnpm (install|i|add)\b/, `registry install: ${command}`);
     assert.match(command, /--offline/, `must not reach the registry: ${command}`);
     assert.match(command, /--no-audit/, `audit is a network round-trip: ${command}`);
@@ -317,17 +321,49 @@ test("postinstall: every executed rebuild command is offline, audit-free and ins
   }
 });
 
-test("postinstall: the Android branch rebuilds the locked package from source", () => {
+test("postinstall: the Android branch invokes better-sqlite3's explicit source-build script", () => {
+  // better-sqlite3 13.x sets `"gypfile": false` with no `install` hook, so
+  // `npm rebuild --build-from-source` exits without compiling on Android/Termux.
+  // Running `npm run build-release` inside `plan.packageDir` invokes `node-gyp
+  // rebuild --release --force_build=1` via npm's bundled node-gyp on PATH.
   const [android, other] = rebuildCommands();
-  assert.match(android, /--build-from-source/, "Termux must compile for its own ABI");
-  assert.doesNotMatch(other, /--build-from-source/, "other platforms keep the plain rebuild");
+  assert.equal(
+    android,
+    "npm run build-release --offline --no-audit --no-fund",
+    "Termux/Android must run better-sqlite3's explicit build-release script offline"
+  );
+  assert.equal(
+    other,
+    "npm rebuild better-sqlite3 --offline --no-audit --no-fund",
+    "other platforms keep the plain offline rebuild"
+  );
+
+  const installedManifest = new URL("node_modules/better-sqlite3/package.json", ROOT);
+  if (existsSync(installedManifest)) {
+    const sqlitePkg = JSON.parse(readFileSync(installedManifest, "utf8"));
+    assert.equal(
+      typeof sqlitePkg.scripts?.["build-release"],
+      "string",
+      "installed better-sqlite3 must expose scripts['build-release']"
+    );
+    assert.match(
+      sqlitePkg.scripts["build-release"],
+      /\bnode-gyp\s+rebuild\b/,
+      "better-sqlite3 build-release must invoke node-gyp rebuild"
+    );
+  }
 });
 
 test("postinstall: exactly one spawn site, and it runs the planned rebuild", () => {
   const calls = POSTINSTALL.match(/execSync\(/g) ?? [];
   assert.equal(calls.length, 1, "the hook must have a single, guarded spawn site");
   assert.match(POSTINSTALL, /execSync\(rebuildCmd, \{/, "the spawn must use the guarded command");
-  assert.match(POSTINSTALL, /cwd: plan\.cwd/, "the cwd must come from the planner, not dist/");
+  assert.match(
+    POSTINSTALL,
+    /const rebuildCwd = isAndroid \? plan\.packageDir : plan\.cwd;/,
+    "Android build-release runs in plan.packageDir; non-Android runs in plan.cwd"
+  );
+  assert.match(POSTINSTALL, /cwd: rebuildCwd,/, "the cwd must come from the planner, not dist/");
   assert.doesNotMatch(
     POSTINSTALL,
     /cwd: join\(ROOT, "dist"\)/,
@@ -425,6 +461,19 @@ test("ci: the markdownlint step stays advisory", () => {
     /\|\| true\s*$/,
     "docs-lint is warning-first by repo policy; pinning the tool must not make it blocking"
   );
+});
+
+test("ci: the Vale prose lint step stays independent of npm-ci-retry failures", () => {
+  const job = docsLintJob();
+  const valeIdx = job.indexOf("- name: Vale prose lint (Microsoft style, advisory)");
+  assert.notEqual(valeIdx, -1, "Vale prose lint step must exist in docs-lint");
+  const valeStep = job.slice(valeIdx);
+  assert.match(
+    valeStep,
+    /^- name: Vale prose lint \(Microsoft style, advisory\)\n\s+if: \$\{\{ !cancelled\(\) \}\}/,
+    "Vale must carry `if: ${{ !cancelled() }}` so an npm-ci-retry failure does not skip it"
+  );
+  assert.match(valeStep, /continue-on-error: true/);
 });
 
 test("markdownlint-cli2 is an exact-pinned devDependency present in the lockfile", () => {
