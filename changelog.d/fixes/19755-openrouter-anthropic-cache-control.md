@@ -1,0 +1,1 @@
+- **fix(cache):** Claude Code requests to OpenRouter `anthropic/*` models keep their prompt-cache breakpoints (4 at most), so those turns write and read the prompt cache instead of paying full input price. Other OpenRouter families are unchanged. ([#19755](https://github.com/cheaper-inference/OmniRoute/pull/19755))

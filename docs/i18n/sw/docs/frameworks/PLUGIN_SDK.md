@@ -4,7 +4,7 @@
 
 ---
 
-## Kuanza Haraka
+## Anza Haraka
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Marejeleo ya API
+## API Rejea
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Kitendakazi cha kiwanda kinachounda kipengee cha Plugin kwa kutumia thamani chaguomsingi.
+Chaguo za kukokotoa za kiwandani zinazounda kipengee cha programu-jalizi na chaguo-msingi.
 
 **Vigezo:**
 
-- `name` (string, lazima) — Jina la programu-jalizi katika muundo wa kebab-case
-- `priority` (number, si lazima, chaguomsingi: 100) — Thamani ya chini hutekelezwa kwanza
-- `enabled` (boolean, si lazima, chaguomsingi: true) — Ianze ikiwa imewezeshwa?
-- `onRequest` (function, si lazima) — Hutekelezwa kabla ya kishughulikia gumzo
-- `onResponse` (function, si lazima) — Hutekelezwa baada ya kishughulikia gumzo
-- `onError` (function, si lazima) — Hutekelezwa kishughulikia kinapokumbana na hitilafu
+- `name` (kamba, inahitajika) — Jina la programu-jalizi katika kesi ya kebab
+- `priority` (idadi, hiari, chaguo-msingi: 100) — Chini inaendesha kwanza
+- `enabled` (boolean, hiari, chaguo-msingi: kweli) — Je, Umewasha?
+- `onRequest` (kazi, hiari) — Huendesha kabla ya kidhibiti cha gumzo
+- `onResponse` (kazi, hiari) — Huendesha baada ya kidhibiti cha gumzo
+- `onError` (kazi, hiari) — Huendesha hitilafu ya kidhibiti
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Zuia ombi na, kwa hiari, urejeshe jibu maalum.
+Zuia ombi na urudishe jibu maalum kwa hiari.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Rekebisha kiini cha ombi kabla hakijafika kwa mtoa huduma.
+Rekebisha shirika la ombi kabla ya kumfikia mtoa huduma.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Ambatisha metadata kwenye muktadha wa ombi.
+Ambatisha metadata kwa muktadha wa ombi.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Muktadha wa Programu-jalizi (`PluginContext`)
+## Muktadha wa programu-jalizi (`PluginContext`)
 
-| Sehemu      | Aina                      | Maelezo                             |
-| ----------- | ------------------------- | ----------------------------------- |
-| `requestId` | `string`                  | Kitambulisho cha kipekee cha ombi   |
-| `model`     | `string`                  | Jina la modeli iliyoombwa           |
-| `provider`  | `string`                  | Kitambulisho cha mtoa huduma lengwa |
-| `body`      | `Record<string, unknown>` | Kiini cha ombi                      |
-| `headers`   | `Record<string, string>`  | Vichwa vya ombi                     |
-| `metadata`  | `Record<string, unknown>` | Metadata inayoweza kubadilishwa     |
-| `timestamp` | `number`                  | Muhuri wa muda wa ombi              |
+| Shamba       | Aina                      | Maelezo                              |
+| ------------ | ------------------------- | ------------------------------------ |
+| `requestId`  | `string`                  | Kitambulisho cha ombi la kipekee     |
+| `model`      | `string`                  | Umeomba jina la mfano                |
+| `provider`   | `string`                  | Mtoa huduma lengwa ID                |
+| `body`       | `Record<string, unknown>` | Omba mwili                           |
+| `headers`    | `Record<string, string>`  | Omba vichwa (angalia dokezo)         |
+| `metadata`   | `Record<string, unknown>` | Metadata inayoweza kubadilishwa      |
+| `timestamp`  | `number`                  | Omba muhuri wa muda                  |
+| `apiKeyInfo` | `object` (si lazima)      | API metadata muhimu (angalia dokezo) |
+
+Muktadha huwa haubebi kitambulisho cha mteja: vichwa vya `authorization`, `x-api-key`, `proxy-authorization` na `cookie` huondolewa (casing yoyote), na `apiKeyInfo` huhifadhi metadata ya ufunguo (kama vile `id`, `name` na `scopes`) lakini si thamani kuu au alama ya kidole chake (`redactPluginContext()` katika `src/lib/plugins/hooks.ts`). Hii inatumika kwa `onRequest`, `onResponse` na `onError`.
 
 ## Manifesti (`plugin.json`)
 
@@ -140,17 +143,16 @@ Au kama thamani rahisi za boolean (kipaumbele chaguomsingi ni 100):
 
 ## Mfumo wa Ruhusa
 
-Programu-jalizi huendeshwa katika muktadha wa VM uliotengwa. Ufikiaji wa rasilimali za nje unahitaji ruhusa dhahiri:
+Plugins ni** sio sandbox** . Kila programu-jalizi inayotumika huendeshwa kama mchakato tofauti, wa kawaida wa mtoto Node.js (`loadPlugin()` in `src/lib/plugins/loader.ts`) chini ya mtumiaji wa mfumo wa uendeshaji sawa na OmniRoute, bila muktadha VM na bendera za ruhusa za Node.js. Nambari ya programu-jalizi inaweza kutumia `node:fs`, `node:child_process`, `fetch` na kila Node.js API: inaweza kusoma na kuandika faili yoyote ambayo mtumiaji wa OmniRoute anaweza (pamoja na saraka ya data), kuendesha programu na kufikia mtandao.
 
-| Ruhusa       | Hutoa ufikiaji                                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proksi ya `process.env` ya kusoma pekee                      |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` ya faili ya maelezo inakubali `network`, `file-read`, `file-write`, `env` na `exec`, lakini leo ni `env` pekee inayo athari wakati wa utekelezaji:
 
-Bila ruhusa, vipengele vya kimataifa vinavyohusika havipatikani kabisa katika mazingira yaliyotengwa.
+| Ruhusa                                       | Athari leo                                                                                                                                                                                                                                       |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | Mchakato wa programu-jalizi pia hupokea `PORT`, `HOSTNAME`, `TZ` na `TMPDIR`. Bila hivyo, inapokea tu `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` na `PLUGIN_NAME` (pamoja na `SystemRoot` na `windir` juu ya Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Hakuna. Ni matamko pekee: hakuna kinachozuiwa yanapokosekana.                                                                                                                                                                                    |
+
+Kusakinisha programu-jalizi ni kama kusakinisha programu nyingine yoyote kwenye seva pangishi. Sakinisha programu-jalizi ambazo unaamini chanzo chake.
 
 ## Muundo wa Usanidi
 
@@ -194,7 +196,7 @@ Thamani za usanidi huhifadhiwa katika kanzidata na zinaweza kufikiwa kupitia uku
 
 ## Mifano
 
-### Kirekodi Maombi
+### Omba Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Kidhibiti cha Kiwango
+### Kiwango cha Kikomo
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // dakika 1
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Kigeuza Majibu
+### Kibadilishaji cha Majibu
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

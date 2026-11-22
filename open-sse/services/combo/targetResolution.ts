@@ -501,6 +501,11 @@ async function orderByStrategy(
       log,
       buildAutoCandidates: deps.buildAutoCandidates,
       apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
+      decisionRuntime: {
+        signal: deps.signal,
+        dispatch: deps.handleSingleModelWithTimeout,
+        allCombos: deps.allCombos,
+      },
     });
     if ("earlyResponse" in autoResult) return { earlyResponse: autoResult.earlyResponse };
     return {

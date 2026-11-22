@@ -557,6 +557,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 שדרוגי WebSocket עבור לוח המחוונים המוטבע מטופלים על ידי שרת נלווה ביציאה ייעודית (ראה `src/lib/services/embedWsProxy.ts`).
 
+כל שדרוג מאושר לפני פתיחת המנהרה, עם אותם כללים כמו מסלול ההטמעה HTTP : ה-peer חייב להיות loopback ללא כותרת העברת פרוקסי לאחור, דפדפן `Origin` חייב להיות מקור של לוח המחוונים (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` להרחיב את ברירות המחדל של loopback), והמתקשר צריך הפעלה של לוח המחוונים או מפתח API בהיקף ניהול, אלא אם כן לוח המחוונים אינו זמין.
+
 **בִּטָחוֹן:** מסלולי ההטמעה פרוקסי מסווגים תחת `LOCAL_ONLY_API_PREFIXES` וניתן להגיע אליהם רק דרך loopback. תוקף שמשיג JWT דרך מנהרת Cloudflare/Ngrok לא יכול לבצע פרוקסי לשירותים משובצים.
 
 ---

@@ -923,15 +923,17 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
   const { db, logEntry, buildDetailArtifact } = prepared;
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
+    let published = false;
     try {
       // A skipped write ends like a failed one: detail_state "missing" (see finally below).
       const artifactResult = hasRoomForCallLogArtifact()
         ? await writeCallArtifactAsync(buildDetailArtifact())
         : null;
-      if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
+      if (artifactResult) published = publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
-      // A null result or a thrown write must not strand the export cursor.
-      failPendingCallLogDetail(db, id);
+      // A null result, a thrown write or a publish that lost its pending window must not strand
+      // the export cursor. A successful publish already left 'pending', so it needs no UPDATE.
+      if (!published) failPendingCallLogDetail(db, id);
     }
   }
 

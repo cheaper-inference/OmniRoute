@@ -4,10 +4,9 @@
 
 ---
 
-Depuis la v3.8.49 (WS3.2/WS3.4 du plan qualité/vélocité), le chemin de fusion par défaut des
-PR examinées vers `release/vX.Y.Z` est la **file de fusion Mergify** (`.mergify.yml`) ;
-le **train de fusion manuel** décrit ci-dessous est la SOLUTION DE REPLI — utilisée pendant les incidents,
-les gels de version, ou si jamais l’offre Open Source de Mergify venait à changer.
+> **19/11/2026 : la file d'attente de fusion Mergify est supprimée** (décision du propriétaire). `.mergify.yml` ne définit plus de file d'attente et refuse les commandes Mergify qui fusionnent ou réécrivent une pull request. Les versions PRs sont fusionnées manuellement selon l'ensemble de règles du référentiel "Exiger des portes vertes sur la version active" (`Gate / CI` + `Gate / Quality`) jusqu'à ce que la file d'attente omni s'exécute en mode live, et via la file d'attente omni après cela ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Les sections Mergify ci-dessous décrivent la file d'attente telle qu'elle était.
+
+Depuis la v3.8.49 (WS3.2/WS3.4 du plan quality/velocity ), le chemin de fusion par défaut pour PRs révisé dans `release/vX.Y.Z` est le** Fusionner la file d'attente de fusion** (`.mergify.yml`); le** train de fusion manuel** documenté ci-dessous est le FALLBACK — utilisé lors d'incidents, de blocages de versions ou si le plan Mergify Open Source change un jour.
 
 ## Chemin par défaut : la file d’attente Mergify
 
