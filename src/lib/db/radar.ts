@@ -15,7 +15,9 @@
  *
  * Tables (migration 153):
  *   - radar_local_model_state: operator-owned display/enabled overrides and
- *     deletion tombstones, keyed by provider + model ID.
+ *     deletion tombstones, keyed by provider + model ID. Persistence lives in
+ *     `repositories/sqliteRadarLocalModelStateRepository.ts`; the exports below
+ *     are synchronous compatibility facades.
  *
  * Tables (migration 144):
  *   - radar_offers_cache: single-row signed live offers feed cache.
@@ -29,8 +31,15 @@
  * provider connection credentials.
  */
 
+import type {
+  RadarLocalMergeState,
+  RadarLocalModelOverridePatch,
+  RadarLocalModelState,
+  RadarLocalModelStateRepository,
+} from "@/domain/persistence/radarLocalModelStateRepository";
 import { getDbInstance } from "./core";
 import { encrypt, decrypt } from "./encryption";
+import { radarRepositories } from "./repositories/radarRepositories";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -77,33 +86,11 @@ export interface RadarIntelCache {
   fetchedAt: string;
 }
 
-export interface RadarLocalModelState {
-  provider: string;
-  modelId: string;
-  displayName: string | null;
-  enabled: boolean | null;
-  tombstoned: boolean;
-  updatedAt: string;
-}
-
-export interface RadarLocalModelOverridePatch {
-  displayName?: string | null;
-  enabled?: boolean | null;
-}
-
-export interface RadarLocalMergeState {
-  localOverrides: Map<string, { displayName?: string; enabled?: boolean }>;
-  tombstones: Set<string>;
-}
-
-interface RadarLocalModelStateRow {
-  provider: string;
-  model_id: string;
-  display_name: string | null;
-  enabled: number | null;
-  tombstoned: number;
-  updated_at: string;
-}
+export type {
+  RadarLocalMergeState,
+  RadarLocalModelOverridePatch,
+  RadarLocalModelState,
+} from "@/domain/persistence/radarLocalModelStateRepository";
 
 // ---------------------------------------------------------------------------
 // radar_feed_cache
@@ -351,110 +338,21 @@ export function setRadarIntelCache(entry: {
 // ---------------------------------------------------------------------------
 // radar_local_model_state
 // ---------------------------------------------------------------------------
+//
+// Persistence lives behind RadarLocalModelStateRepository. These exports stay
+// synchronous (SQLite-only legacy access) because the management route and the
+// Radar catalog merge call them synchronously.
 
-const RADAR_PROVIDER_PATTERN = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
-const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/;
+const localModelState = radarRepositories.legacySync.localModelState;
 
-function normalizeRadarIdentity(
-  provider: unknown,
-  modelId: unknown
-): { provider: string; modelId: string } | null {
-  const normalizedProvider = typeof provider === "string" ? provider.trim() : "";
-  const normalizedModelId = typeof modelId === "string" ? modelId.trim() : "";
-  if (!RADAR_PROVIDER_PATTERN.test(normalizedProvider)) return null;
-  if (
-    normalizedModelId.length < 1 ||
-    normalizedModelId.length > 200 ||
-    CONTROL_CHARACTER_PATTERN.test(normalizedModelId)
-  ) {
-    return null;
-  }
-  return { provider: normalizedProvider, modelId: normalizedModelId };
-}
-
-function normalizeDisplayName(value: unknown): string | null | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return null;
-  if (typeof value !== "string") return undefined;
-  const normalized = value.trim();
-  if (
-    normalized.length < 1 ||
-    normalized.length > 160 ||
-    CONTROL_CHARACTER_PATTERN.test(normalized)
-  ) {
-    return undefined;
-  }
-  return normalized;
-}
-
-function rowToRadarLocalModelState(row: RadarLocalModelStateRow): RadarLocalModelState {
-  return {
-    provider: row.provider,
-    modelId: row.model_id,
-    displayName: row.display_name,
-    enabled: row.enabled === null ? null : row.enabled === 1,
-    tombstoned: row.tombstoned === 1,
-    updatedAt: row.updated_at,
-  };
-}
-
-function readRadarLocalModelStateRow(
-  provider: string,
-  modelId: string
-): RadarLocalModelStateRow | null {
-  return (
-    (getDbInstance()
-      .prepare(
-        `SELECT provider, model_id, display_name, enabled, tombstoned, updated_at
-         FROM radar_local_model_state WHERE provider = ? AND model_id = ?`
-      )
-      .get(provider, modelId) as RadarLocalModelStateRow | undefined) ?? null
-  );
-}
-
-function persistRadarLocalModelState(input: {
-  provider: string;
-  modelId: string;
-  displayName: string | null;
-  enabled: boolean | null;
-  tombstoned: boolean;
-}): void {
-  const db = getDbInstance();
-  if (input.displayName === null && input.enabled === null && !input.tombstoned) {
-    db.prepare("DELETE FROM radar_local_model_state WHERE provider = ? AND model_id = ?").run(
-      input.provider,
-      input.modelId
-    );
-    return;
-  }
-
-  db.prepare(
-    `INSERT INTO radar_local_model_state
-       (provider, model_id, display_name, enabled, tombstoned, updated_at)
-     VALUES (?, ?, ?, ?, ?, datetime('now'))
-     ON CONFLICT(provider, model_id) DO UPDATE SET
-       display_name = excluded.display_name,
-       enabled = excluded.enabled,
-       tombstoned = excluded.tombstoned,
-       updated_at = excluded.updated_at`
-  ).run(
-    input.provider,
-    input.modelId,
-    input.displayName,
-    input.enabled === null ? null : input.enabled ? 1 : 0,
-    input.tombstoned ? 1 : 0
-  );
+/** Async persistence contract for operator-owned local model state. */
+export function getRadarLocalModelStateRepository(): RadarLocalModelStateRepository {
+  return radarRepositories.localModelState;
 }
 
 /** List every persisted override/tombstone for UI editing and restore controls. */
 export function listRadarLocalModelState(): RadarLocalModelState[] {
-  const rows = getDbInstance()
-    .prepare(
-      `SELECT provider, model_id, display_name, enabled, tombstoned, updated_at
-       FROM radar_local_model_state ORDER BY provider, model_id`
-    )
-    .all() as RadarLocalModelStateRow[];
-  return rows.map(rowToRadarLocalModelState);
+  return localModelState.list();
 }
 
 /**
@@ -466,57 +364,12 @@ export function setRadarLocalModelOverride(
   modelId: unknown,
   patch: RadarLocalModelOverridePatch
 ): boolean {
-  const identity = normalizeRadarIdentity(provider, modelId);
-  if (!identity || !patch || typeof patch !== "object") return false;
-  const keys = Object.keys(patch);
-  if (
-    keys.length === 0 ||
-    keys.some((key) => key !== "displayName" && key !== "enabled") ||
-    (Object.hasOwn(patch, "enabled") &&
-      patch.enabled !== null &&
-      typeof patch.enabled !== "boolean")
-  ) {
-    return false;
-  }
-
-  const normalizedDisplayName = normalizeDisplayName(patch.displayName);
-  if (Object.hasOwn(patch, "displayName") && normalizedDisplayName === undefined) return false;
-
-  const db = getDbInstance();
-  db.transaction(() => {
-    const current = readRadarLocalModelStateRow(identity.provider, identity.modelId);
-    persistRadarLocalModelState({
-      ...identity,
-      displayName: Object.hasOwn(patch, "displayName")
-        ? (normalizedDisplayName ?? null)
-        : (current?.display_name ?? null),
-      enabled: Object.hasOwn(patch, "enabled")
-        ? (patch.enabled ?? null)
-        : current?.enabled === null || current?.enabled === undefined
-          ? null
-          : current.enabled === 1,
-      tombstoned: current?.tombstoned === 1,
-    });
-  })();
-  return true;
+  return localModelState.setOverride(provider, modelId, patch);
 }
 
 /** Clear both editable fields while preserving an independent tombstone. */
 export function clearRadarLocalModelOverride(provider: unknown, modelId: unknown): boolean {
-  const identity = normalizeRadarIdentity(provider, modelId);
-  if (!identity) return false;
-
-  const db = getDbInstance();
-  db.transaction(() => {
-    const current = readRadarLocalModelStateRow(identity.provider, identity.modelId);
-    persistRadarLocalModelState({
-      ...identity,
-      displayName: null,
-      enabled: null,
-      tombstoned: current?.tombstoned === 1,
-    });
-  })();
-  return true;
+  return localModelState.clearOverride(provider, modelId);
 }
 
 /** Hide or restore one model without modifying its editable local fields. */
@@ -525,36 +378,10 @@ export function setRadarModelTombstone(
   modelId: unknown,
   tombstoned: boolean
 ): boolean {
-  const identity = normalizeRadarIdentity(provider, modelId);
-  if (!identity || typeof tombstoned !== "boolean") return false;
-
-  const db = getDbInstance();
-  db.transaction(() => {
-    const current = readRadarLocalModelStateRow(identity.provider, identity.modelId);
-    persistRadarLocalModelState({
-      ...identity,
-      displayName: current?.display_name ?? null,
-      enabled:
-        current?.enabled === null || current?.enabled === undefined ? null : current.enabled === 1,
-      tombstoned,
-    });
-  })();
-  return true;
+  return localModelState.setTombstone(provider, modelId, tombstoned);
 }
 
 /** Convert persisted rows into the exact read-time merge structures. */
 export function getRadarLocalMergeState(): RadarLocalMergeState {
-  const localOverrides = new Map<string, { displayName?: string; enabled?: boolean }>();
-  const tombstones = new Set<string>();
-
-  for (const state of listRadarLocalModelState()) {
-    const key = `${state.provider}:${state.modelId}`;
-    const override: { displayName?: string; enabled?: boolean } = {};
-    if (state.displayName !== null) override.displayName = state.displayName;
-    if (state.enabled !== null) override.enabled = state.enabled;
-    if (Object.keys(override).length > 0) localOverrides.set(key, override);
-    if (state.tombstoned) tombstones.add(key);
-  }
-
-  return { localOverrides, tombstones };
+  return localModelState.getMergeState();
 }
