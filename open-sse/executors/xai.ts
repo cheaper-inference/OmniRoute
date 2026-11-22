@@ -4,6 +4,7 @@ import { getModelTargetFormat } from "../config/providerModels.ts";
 import { isResponsesEndpointPath } from "../utils/responsesEndpoint.ts";
 import { chatRequestToXaiResponses } from "@/lib/providers/xai/translators/openai-chat.ts";
 import { capXaiRequestHistory } from "../services/xaiMessageCap.ts";
+import { applyStreamUsageOptions } from "./streamUsageOptions.ts";
 import { flattenNamespaceToolName } from "../translator/request/openai-responses/namespaceFlatten.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -186,6 +187,7 @@ function normalizeXaiResponsesBodyShape(out: JsonRecord): void {
     delete out.tool_choice;
     delete out.parallel_tool_calls;
   }
+  delete out.stream_options;
   if (Array.isArray(out.input)) out.input = normalizeXaiResponsesInput(out.input);
 }
 
@@ -393,7 +395,15 @@ export class XaiExecutor extends BaseExecutor {
       if (effort) out.reasoning_effort = effort;
     }
 
-    return capXaiRequestHistory(out);
+    // xAI only streams a usage chunk when asked (#8).
+    const bodyDisablesStream = out.stream !== undefined && out.stream !== true;
+    const disableStreamOptions = credentials?.providerSpecificData?.disableStreamOptions;
+    const effectiveStream = stream && !bodyDisablesStream;
+    let withUsage = applyStreamUsageOptions(out, effectiveStream, disableStreamOptions);
+    if (effectiveStream && !disableStreamOptions) {
+      withUsage = { ...withUsage, stream: true };
+    }
+    return capXaiRequestHistory(withUsage);
   }
 }
 
