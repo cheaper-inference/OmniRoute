@@ -136,6 +136,7 @@ const REQUIRED_BLOCKED_CIDRS = [
   "169.254.0.0/16",
   "100.64.0.0/10",
   "127.0.0.0/8",
+  "198.18.0.0/15",
 ];
 
 function selectedAppNames(podSelector) {
@@ -200,8 +201,17 @@ function assertBaselineNetworkPolicy(policy, label) {
     controllerNames.includes("traefik"),
     `${label}: must allow traefik controller pods (k3s overlay)`
   );
+  const nginxPeer = peers.find((p) => selectedAppNames(p.podSelector).includes("ingress-nginx"));
+  const nginxComponents = (nginxPeer?.podSelector?.matchExpressions ?? [])
+    .filter((e) => e.key === "app.kubernetes.io/component" && e.operator === "In")
+    .flatMap((e) => e.values ?? []);
+  assert.deepEqual(
+    nginxComponents,
+    ["controller"],
+    `${label}: ingress-nginx peer must require app.kubernetes.io/component=controller`
+  );
 
-  // Egress: (1) DNS 53 UDP+TCP to kube-system DNS, (2) HTTPS 443 TCP to public IPs only.
+  // Egress: (1) DNS 53 UDP+TCP to kube-system DNS + NodeLocal DNSCache, (2) HTTPS 443 TCP to public IPs only.
   const egressRules = policy.spec?.egress ?? [];
   assert.equal(
     egressRules.length,
@@ -218,20 +228,38 @@ function assertBaselineNetworkPolicy(policy, label) {
     `${label}: DNS rule must allow UDP/53 and TCP/53`
   );
   assert.ok(
-    (dnsRule.to ?? []).length >= 1,
-    `${label}: DNS rule must scope destination to kube-system`
+    (dnsRule.to ?? []).length >= 2,
+    `${label}: DNS rule must include kube-system DNS pods and NodeLocal DNSCache listener`
   );
+  let sawNodeLocalPodLabel = false;
+  let sawNodeLocalIpBlock = false;
   for (const dest of dnsRule.to) {
+    if (dest.ipBlock) {
+      assert.equal(
+        dest.ipBlock.cidr,
+        "169.254.20.10/32",
+        `${label}: DNS ipBlock must only allow the /32 NodeLocal DNSCache listener`
+      );
+      sawNodeLocalIpBlock = true;
+      continue;
+    }
     assert.equal(
       dest.namespaceSelector?.matchLabels?.["kubernetes.io/metadata.name"],
       "kube-system",
-      `${label}: DNS egress must be scoped to kube-system namespace`
+      `${label}: DNS egress pod rule must be scoped to kube-system namespace`
     );
     assert.ok(
       dest.podSelector && !selectedAppNames(dest.podSelector).includes("omniroute"),
       `${label}: DNS podSelector must target DNS pods without omniroute label corruption`
     );
+    for (const expr of dest.podSelector?.matchExpressions ?? []) {
+      if (expr.key === "k8s-app" && (expr.values ?? []).includes("node-local-dns")) {
+        sawNodeLocalPodLabel = true;
+      }
+    }
   }
+  assert.ok(sawNodeLocalPodLabel, `${label}: DNS rule must include k8s-app=node-local-dns`);
+  assert.ok(sawNodeLocalIpBlock, `${label}: DNS rule must include 169.254.20.10/32 listener`);
 
   const httpsRule = egressRules.find((r) => (r.ports ?? []).some((p) => p.port === 443));
   assert.ok(httpsRule, `${label}: must include HTTPS egress rule on port 443 for model providers`);
@@ -280,11 +308,20 @@ test("Helm chart ships enabled-by-default NetworkPolicy template matching base (
   const tplPath = path.join(ROOT, "deploy/helm/omniroute/templates/networkpolicy.yaml");
   assert.ok(existsSync(tplPath), "deploy/helm/omniroute/templates/networkpolicy.yaml must exist");
   const tpl = read("deploy/helm/omniroute/templates/networkpolicy.yaml");
-  assert.match(tpl, /if \.Values\.networkPolicy\.enabled/);
+  assert.doesNotMatch(
+    tpl,
+    /\.Values\.networkPolicy\.enabled/,
+    "Helm template must guard .Values.networkPolicy for --reuse-values upgrades"
+  );
+  assert.match(tpl, /\.Values\.networkPolicy \| default dict/);
+  assert.match(tpl, /hasKey \$np "enabled"/);
   assert.match(tpl, /kind:\s*NetworkPolicy/);
   assert.match(tpl, /- Ingress/);
   assert.match(tpl, /- Egress/);
   assert.match(tpl, /ingress-nginx/);
+  assert.match(tpl, /app\.kubernetes\.io\/component/);
+  assert.match(tpl, /node-local-dns/);
+  assert.match(tpl, /169\.254\.20\.10\/32/);
   assert.match(tpl, /traefik/);
   for (const cidr of REQUIRED_BLOCKED_CIDRS) {
     assert.ok(tpl.includes(cidr), `Helm NetworkPolicy template must exclude ${cidr}`);
@@ -306,6 +343,13 @@ test("k8s base Deployment enforces readOnlyRootFilesystem: true with emptyDir mo
   );
   assert.equal(container.securityContext?.allowPrivilegeEscalation, false);
   assert.deepEqual(container.securityContext?.capabilities?.drop, ["ALL"]);
+
+  const npmCacheEnv = (container.env ?? []).find((e) => e.name === "npm_config_cache");
+  assert.equal(
+    npmCacheEnv?.value,
+    "/tmp/npm-cache",
+    "Deployment must point npm_config_cache at writable /tmp/npm-cache under readOnlyRootFilesystem"
+  );
 
   // Verify next.config.mjs still uses .build/next so the cache mount path stays accurate.
   const nextCfg = read("next.config.mjs");
@@ -340,6 +384,8 @@ test("Helm chart enforces readOnlyRootFilesystem: true and mounts emptyDir volum
   );
 
   const deployTpl = read("deploy/helm/omniroute/templates/deployment.yaml");
+  assert.match(deployTpl, /name:\s*npm_config_cache/, "Helm Deployment must set npm_config_cache");
+  assert.match(deployTpl, /value:\s*\/tmp\/npm-cache/, "Helm Deployment npm_config_cache path");
   assert.match(deployTpl, /mountPath:\s*\/tmp/, "Helm Deployment must mount /tmp");
   assert.match(
     deployTpl,

@@ -57,6 +57,11 @@ spec:
                 name: omniroute-config
             - secretRef:
                 name: omniroute-secrets
+          env:
+            # Keep npm's cache on the writable /tmp emptyDir so embedded service
+            # installers (9router / bifrost) do not fail on read-only /home/node/.npm.
+            - name: npm_config_cache
+              value: /tmp/npm-cache
           volumeMounts:
             - name: data
               mountPath: /app/data
