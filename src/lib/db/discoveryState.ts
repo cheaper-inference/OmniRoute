@@ -10,53 +10,32 @@
  *
  * The record is display state only: it never touches the connection columns
  * that drive routing (`lastError`, `lastErrorType`, `testStatus`).
+ *
+ * Persistence lives behind DiscoveryStateRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) for the providers list route, the
+ * discovery outcome recorder and the connection-deletion cleanup; this facade
+ * stamps the attempt time.
  */
 
-import { getDbInstance } from "./core";
+import type {
+  DiscoveryStateEntry,
+  DiscoveryStateRecord,
+  DiscoveryStateRepository,
+  DiscoveryStateStatus,
+} from "@/domain/persistence/modelDiscoveryRepositories";
+import { modelDiscoveryRepositories } from "./repositories/modelDiscoveryRepositories";
 
-const DISCOVERY_STATE_NAMESPACE = "discoveryState";
+export type {
+  DiscoveryStateEntry,
+  DiscoveryStateRecord,
+  DiscoveryStateStatus,
+} from "@/domain/persistence/modelDiscoveryRepositories";
 
-export type DiscoveryStateStatus = "healthy" | "degraded";
+const legacy = modelDiscoveryRepositories.legacySync.discoveryState;
 
-export interface DiscoveryStateRecord {
-  /** Outcome of the last discovery attempt: "healthy" or "degraded". */
-  status: DiscoveryStateStatus;
-  /** Sanitized cause of the failure, or null when the discovery succeeded. */
-  cause: string | null;
-  /** ISO timestamp of the attempt the record describes. */
-  at: string;
-}
-
-/** One connection whose stored outcome is read or deleted. */
-export interface DiscoveryStateEntry {
-  provider: string;
-  id: string;
-}
-
-function discoveryStateKey(providerId: string, connectionId: string): string {
-  return `${providerId}:${connectionId}`;
-}
-
-function toRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-/**
- * Parse a stored entry. A row that cannot be read (corrupted JSON, an
- * unexpected shape, an unreadable date) is treated as absent: an unknown
- * outcome must never be mistaken for a healthy one.
- */
-function parseDiscoveryState(raw: unknown): DiscoveryStateRecord | null {
-  const record = toRecord(raw);
-  if (!record) return null;
-  const status = record.status;
-  if (status !== "healthy" && status !== "degraded") return null;
-  const cause = typeof record.cause === "string" && record.cause.length > 0 ? record.cause : null;
-  const at = typeof record.at === "string" ? record.at : "";
-  if (!at || !Number.isFinite(Date.parse(at))) return null;
-  return { status, cause, at };
+/** Async persistence contract; it stores records as given and never stamps the time. */
+export function getDiscoveryStateRepository(): DiscoveryStateRepository {
+  return modelDiscoveryRepositories.discoveryState;
 }
 
 /**
@@ -68,17 +47,12 @@ export function saveDiscoveryState(
   connectionId: string,
   outcome: { status: DiscoveryStateStatus; cause: string | null }
 ): void {
-  const db = getDbInstance();
   const record: DiscoveryStateRecord = {
     status: outcome.status,
     cause: outcome.cause,
     at: new Date().toISOString(),
   };
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    DISCOVERY_STATE_NAMESPACE,
-    discoveryStateKey(providerId, connectionId),
-    JSON.stringify(record)
-  );
+  legacy.save(providerId, connectionId, record);
 }
 
 /**
@@ -89,56 +63,15 @@ export function saveDiscoveryState(
 export function getDiscoveryStatesForConnections(
   entries: DiscoveryStateEntry[]
 ): Map<string, DiscoveryStateRecord> {
-  const states = new Map<string, DiscoveryStateRecord>();
-  if (entries.length === 0) return states;
-
-  const db = getDbInstance();
-  const placeholders = entries.map(() => "?").join(",");
-  const rows = db
-    .prepare(`SELECT key, value FROM key_value WHERE namespace = ? AND key IN (${placeholders})`)
-    .all(
-      DISCOVERY_STATE_NAMESPACE,
-      ...entries.map((entry) => discoveryStateKey(entry.provider, entry.id))
-    );
-
-  for (const row of rows) {
-    const record = toRecord(row);
-    if (!record) continue;
-    const key = typeof record.key === "string" ? record.key : null;
-    if (!key) continue;
-    let parsedValue: unknown = null;
-    try {
-      parsedValue = JSON.parse(typeof record.value === "string" ? record.value : "");
-    } catch {
-      parsedValue = null;
-    }
-    const state = parseDiscoveryState(parsedValue);
-    if (state) states.set(key, state);
-  }
-  return states;
+  return legacy.findForConnections(entries);
 }
 
 /** Drop the stored outcomes of the given connections. */
 export function deleteDiscoveryStatesForConnections(entries: DiscoveryStateEntry[]): number {
-  if (entries.length === 0) return 0;
-
-  const db = getDbInstance();
-  let changes = 0;
-  for (const entry of entries) {
-    const result = db
-      .prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?")
-      .run(DISCOVERY_STATE_NAMESPACE, discoveryStateKey(entry.provider, entry.id));
-    changes += Number(result.changes || 0);
-  }
-  return changes;
+  return legacy.removeForConnections(entries);
 }
 
 /** Drop every stored outcome of a provider. */
 export function deleteDiscoveryStatesForProvider(providerId: string): number {
-  const db = getDbInstance();
-  const keyPrefix = `${providerId}:`;
-  const result = db
-    .prepare("DELETE FROM key_value WHERE namespace = ? AND substr(key, 1, ?) = ?")
-    .run(DISCOVERY_STATE_NAMESPACE, keyPrefix.length, keyPrefix);
-  return Number(result.changes || 0);
+  return legacy.removeForProvider(providerId);
 }
