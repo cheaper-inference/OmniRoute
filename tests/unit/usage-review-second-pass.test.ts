@@ -6,6 +6,7 @@ import { hasUsageReceipt, normalizeResponsesUsage } from "../../open-sse/utils/r
 import { resolvePartialStreamUsage } from "../../open-sse/utils/streamPartialUsage.ts";
 import { deriveUsageEvidence } from "../../open-sse/utils/usageEvidence.ts";
 import { geminiToOpenAIResponse } from "../../open-sse/translator/response/gemini-to-openai.ts";
+import { trackClaudeClientUsage } from "../../open-sse/translator/response/claudeClientUsage.ts";
 import { createSSEStream } from "../../open-sse/utils/stream.ts";
 import { createResponsesApiTransformStream } from "../../open-sse/transformer/responsesTransformer.ts";
 import { openaiToOpenAIResponsesResponse } from "../../open-sse/translator/response/openai-responses.ts";
@@ -18,6 +19,24 @@ import type { UsageLike } from "../../open-sse/utils/usageTracking.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 test.after(() => resetDbInstance());
 const body = { messages: [{ role: "user", content: "Synthetic prompt" }] };
+
+test("Claude cache-read evidence keeps a valid zero when the primary alias is invalid", () => {
+  const state: { usage?: UsageLike; claudeAccountingUsage?: UsageLike } = {};
+  trackClaudeClientUsage(
+    {
+      usage: {
+        prompt_tokens: 50_000,
+        completion_tokens: 7,
+        prompt_tokens_details: { cached_tokens: -1 },
+        input_tokens_details: { cached_tokens: 0 },
+      },
+    },
+    state
+  );
+  assert.equal(state.usage?.cache_read_input_tokens, 0);
+  assert.equal(state.usage?.input_tokens, 50_000);
+  assert.equal(state.claudeAccountingUsage?.usage_evidence?.cacheRead.source, "reported");
+});
 
 for (const total of [undefined, 97]) {
   test(`Gemini terminal updates only computed totals, reported=${total}`, () => {

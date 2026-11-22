@@ -1,6 +1,6 @@
 import { extractUsage, type UsageLike } from "../../utils/usageTracking.ts";
 import { mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
-import { mergeUsageEvidence } from "../../utils/usageEvidence.ts";
+import { mergeUsageEvidence, normalizedTokenCounter } from "../../utils/usageEvidence.ts";
 import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
 
 type UsageState = {
@@ -11,9 +11,22 @@ type UsageState = {
 };
 
 function extractClaudeAccounting(raw: UsageLike, previous: UsageLike | undefined) {
+  const cacheRead = [
+    raw.prompt_tokens_details?.cached_tokens,
+    raw.input_tokens_details?.cached_tokens,
+    raw.prompt_cache_hit_tokens,
+    raw.cached_tokens,
+    raw.cache_read_input_tokens,
+  ]
+    .map(normalizedTokenCounter)
+    .find((value) => value !== undefined);
   const incoming = extractUsage({
     usage: {
       ...raw,
+      prompt_tokens_details:
+        cacheRead === undefined
+          ? raw.prompt_tokens_details
+          : { ...raw.prompt_tokens_details, cached_tokens: cacheRead },
       prompt_tokens: raw.prompt_tokens ?? raw.input_tokens ?? previous?.prompt_tokens ?? 0,
       completion_tokens: raw.completion_tokens ?? raw.output_tokens ?? previous?.completion_tokens,
     },
