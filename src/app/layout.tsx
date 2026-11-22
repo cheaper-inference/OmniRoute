@@ -84,6 +84,10 @@ export default async function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <head>
+        {/* OmniRoute ships its own dark theme. Dark Reader's dark-theme detection adds and removes
+            nodes in <head> even on sites it is disabled for, which races React's hoisted elements
+            ("removeChild ... parentNode is null" when a route is hidden). Opt out entirely. */}
+        <meta name="darkreader-lock" />
         {/* #16245: seed React's $RT so Suspense reveals while the tab is hidden. */}
         <script dangerouslySetInnerHTML={{ __html: HIDDEN_TAB_REVEAL_SCRIPT }} />
         {/* Pre-hydration cleanup: browser extensions (Bitdefender's
