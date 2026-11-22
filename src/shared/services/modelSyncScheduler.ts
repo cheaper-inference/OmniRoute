@@ -14,6 +14,7 @@ import { getSettings, updateSettings } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 export const DEFAULT_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
@@ -154,10 +155,31 @@ const globalState = globalThis as typeof globalThis & {
   __omnirouteModelSyncInternalAuthToken?: string;
 };
 
-let schedulerTimer: NodeJS.Timeout | null = null;
-/** Pending one-shot that arms `schedulerTimer` after the phase offset. */
-let phaseTimer: NodeJS.Timeout | null = null;
-let isRunning = false;
+interface SchedulerTimers {
+  /** Recurring interval, armed once the phase offset elapses. */
+  timer: NodeJS.Timeout | null;
+  /** Pending one-shot that arms `timer` after the phase offset. */
+  phase: NodeJS.Timeout | null;
+  /** Pending first cycle; must be cancellable like the others. */
+  startup: NodeJS.Timeout | null;
+  /** Cycle-wide in-flight guard, shared so two module copies cannot both run one. */
+  running: boolean;
+}
+
+/**
+ * Timers live in the process store, not in module scope. A bundled server chunk
+ * can load a second copy of this module, and a route reading its own copy would
+ * report a running scheduler as stopped. `processSingleton` exists for exactly
+ * that; the internal auth token above uses the same trick.
+ */
+function schedulerTimers(): SchedulerTimers {
+  return getProcessStore<SchedulerTimers>("modelSyncScheduler.timers", () => ({
+    timer: null,
+    phase: null,
+    startup: null,
+    running: false,
+  }));
+}
 let internalAuthToken: string | null = null;
 
 function getInternalAuthToken(): string {
@@ -332,11 +354,12 @@ async function mapWithConcurrencySettled<T, R>(
  * Run one full model-sync cycle across all auto-sync connections.
  */
 async function runSyncCycle(apiBaseUrl: string): Promise<void> {
-  if (isRunning) {
+  const cycleState = schedulerTimers();
+  if (cycleState.running) {
     console.log("[ModelSync] Skipping cycle — previous run still in progress");
     return;
   }
-  isRunning = true;
+  cycleState.running = true;
   const start = Date.now();
 
   try {
@@ -367,24 +390,12 @@ async function runSyncCycle(apiBaseUrl: string): Promise<void> {
       // Non-critical
     }
   } finally {
-    isRunning = false;
+    cycleState.running = false;
   }
 }
 
-/**
- * Start the model sync scheduler.
- * @param apiBaseUrl — internal base URL to call OmniRoute's own API
- * @param intervalMs — sync interval in milliseconds (default: 6h)
- */
-export function startModelSyncScheduler(
-  apiBaseUrl = getModelSyncInternalBaseUrl(),
-  intervalMs = DEFAULT_INTERVAL_MS
-): void {
-  if (schedulerTimer || phaseTimer) {
-    console.log("[ModelSync] Scheduler already running — skipping start");
-    return;
-  }
-
+/** Resolve the operator's interval before any scheduler timers are armed. */
+function resolveModelSyncIntervalMs(intervalMs: number): number | null {
   // Read MODEL_SYNC_INTERVAL_HOURS env override. Zero or a negative value turns
   // the background sync off; falling back to the default interval would leave an
   // operator who asked for "off" with four sync cycles per connection per day.
@@ -403,22 +414,46 @@ export function startModelSyncScheduler(
     hoursValid &&
     (rawHours.startsWith("-") ||
       (Number.isFinite(hoursValue) && hoursValue === 0 && isZeroHoursLiteral(rawHours)));
-  if (offRequested) {
-    console.log("[ModelSync] Scheduler disabled by MODEL_SYNC_INTERVAL_HOURS");
-    return;
-  }
+  if (offRequested) return null;
+
   // A delay outside the timer range is not a harmless mistake: Node clamps it to
   // about 1ms, so a very large hour count would run a sync cycle per millisecond
   // instead of once every few weeks. Clamp both ends, and treat a value that
   // rounds below one second as unusable rather than arming a busy loop.
-  const requestedMs = Number.isFinite(hoursValue) ? hoursValue * 60 * 60 * 1000 : NaN;
+  // A valid literal whose scaled value overflows is "as long as the timer allows",
+  // not a malformed setting: keep the overflow so the clamp below lands on the max.
+  const requestedMs = Number.isNaN(hoursValue) ? NaN : hoursValue * 60 * 60 * 1000;
   // The floor applies to the delay that will actually be armed: 999.7 ms rounds to
   // one second and is fine, 999 ms does not and falls back to the caller.
   const roundedMs = Number.isNaN(requestedMs) ? NaN : Math.round(requestedMs);
-  const chosenMs = Number.isNaN(roundedMs) || roundedMs < MIN_SYNC_INTERVAL_MS
-    ? intervalMs
-    : requestedMs;
-  const effectiveIntervalMs = clampTimerDelay(chosenMs);
+  const chosenMs =
+    Number.isNaN(roundedMs) || roundedMs < MIN_SYNC_INTERVAL_MS ? intervalMs : requestedMs;
+  return clampTimerDelay(chosenMs);
+}
+
+/**
+ * Start the model sync scheduler and report whether it is scheduled or running.
+ * @param apiBaseUrl — internal base URL to call OmniRoute's own API
+ * @param intervalMs — sync interval in milliseconds (default: 6h)
+ */
+export function startModelSyncScheduler(
+  apiBaseUrl = getModelSyncInternalBaseUrl(),
+  intervalMs = DEFAULT_INTERVAL_MS
+): boolean {
+  const timers = schedulerTimers();
+  if (timers.timer || timers.phase) {
+    console.log("[ModelSync] Scheduler already running — skipping start");
+    return true;
+  }
+
+  const effectiveIntervalMs = resolveModelSyncIntervalMs(intervalMs);
+  if (effectiveIntervalMs === null) {
+    // Nothing is armed here, including the one-shot Codex catalog revalidation below:
+    // turning model syncing off must leave the process free of model-sync timers, which
+    // #20865 pins. A disabled install therefore skips that single revalidation on upgrade.
+    console.log("[ModelSync] Scheduler disabled by MODEL_SYNC_INTERVAL_HOURS");
+    return false;
+  }
   const trustedApiBaseUrl = resolveModelSyncInternalBaseUrl(apiBaseUrl);
 
   console.log(
@@ -427,11 +462,12 @@ export function startModelSyncScheduler(
   );
 
   // Serve traffic first; cleanup's first pass is +30s, so stay past that window.
-  const startupDelay = setTimeout(
-    () => runSyncCycle(trustedApiBaseUrl),
-    MODEL_SYNC_STARTUP_DELAY_MS
-  );
-  startupDelay.unref?.();
+  timers.startup = setTimeout(() => {
+    timers.startup = null;
+    // Returned for callers that invoke this handle directly (tests); Node discards a timer callback's return value.
+    return runSyncCycle(trustedApiBaseUrl);
+  }, MODEL_SYNC_STARTUP_DELAY_MS);
+  timers.startup.unref?.();
 
   // Codex-only: revalidate catalog only on first-start or app upgrade (not every boot).
   void import("./codexCatalogRevalidation")
@@ -445,26 +481,46 @@ export function startModelSyncScheduler(
   // Then run on the regular interval, phase-shifted against cleanup.ts's
   // own 6h scheduler (#13973). The period stays `effectiveIntervalMs`; only
   // the moment the interval is armed moves.
-  phaseTimer = setTimeout(() => {
-    phaseTimer = null;
-    schedulerTimer = setInterval(() => runSyncCycle(trustedApiBaseUrl), effectiveIntervalMs);
-    schedulerTimer.unref?.();
+  timers.phase = setTimeout(() => {
+    timers.phase = null;
+    timers.timer = setInterval(() => runSyncCycle(trustedApiBaseUrl), effectiveIntervalMs);
+    timers.timer.unref?.();
   }, MODEL_SYNC_STAGGER_OFFSET_MS);
-  phaseTimer.unref?.();
+  timers.phase.unref?.();
+  return true;
+}
+
+/**
+ * Whether the scheduler currently owns a timer.
+ *
+ * Callers that report status must ask the scheduler instead of keeping their own
+ * copy: the boot path (instrumentation -> initCloudSync) starts it directly, so a
+ * route-local flag would answer "not initialized" for every process that never
+ * received a POST.
+ */
+export function isModelSyncSchedulerRunning(): boolean {
+  const timers = schedulerTimers();
+  return timers.timer !== null || timers.phase !== null;
 }
 
 /**
  * Stop the model sync scheduler.
  */
 export function stopModelSyncScheduler(): void {
-  if (phaseTimer) {
-    clearTimeout(phaseTimer);
-    phaseTimer = null;
+  const timers = schedulerTimers();
+  if (timers.startup) {
+    clearTimeout(timers.startup);
+    timers.startup = null;
     console.log("[ModelSync] Scheduler stopped");
   }
-  if (schedulerTimer) {
-    clearInterval(schedulerTimer);
-    schedulerTimer = null;
+  if (timers.phase) {
+    clearTimeout(timers.phase);
+    timers.phase = null;
+    console.log("[ModelSync] Scheduler stopped");
+  }
+  if (timers.timer) {
+    clearInterval(timers.timer);
+    timers.timer = null;
     console.log("[ModelSync] Scheduler stopped");
   }
 }
