@@ -108,6 +108,41 @@ test("aliases: set and delete bump the model-catalog cache version", async () =>
   assert.ok(catalogVersion() > v2);
 });
 
+test("aliases: a write and its catalog invalidation land in the same synchronous turn", async () => {
+  const before = catalogVersion();
+  const pending = models.setModelAlias("timing", "p/m");
+  try {
+    assert.deepEqual(kvRows("modelAliases"), [{ key: "timing", value: JSON.stringify("p/m") }]);
+    assert.equal(catalogVersion(), before + 1, "no caller may see the row with a stale catalog");
+  } finally {
+    await pending;
+  }
+});
+
+test("aliases: delete removes the row and reads the managed names before yielding", async (t) => {
+  await models.setModelAlias("timing", "p/m");
+  await models.markManagedModelAlias("timing");
+  const db = core.getDbInstance();
+  const prepare = db.prepare.bind(db);
+  const statements: string[] = [];
+  t.mock.method(db, "prepare", (sql: string) => {
+    statements.push(sql);
+    return prepare(sql);
+  });
+  const pending = models.deleteModelAlias("timing");
+  try {
+    assert.ok(statements.some((sql) => sql.startsWith("DELETE FROM key_value")));
+    assert.ok(
+      statements.some((sql) => sql.startsWith("SELECT value") && sql.includes("managedModelAlias")),
+      "the managed-name snapshot is taken before the first suspension"
+    );
+  } finally {
+    await pending;
+    t.mock.restoreAll();
+  }
+  assert.deepEqual(await models.getManagedModelAliasNames(), new Set());
+});
+
 test("aliases: managed marker writes only on change and is cleared on delete", async () => {
   assert.deepEqual(await models.getManagedModelAliasNames(), new Set());
   assert.deepEqual(kvRows("managedModelAliasNames"), []);

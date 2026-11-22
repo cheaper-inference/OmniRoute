@@ -7,10 +7,12 @@ import { getKeyValue } from "./shared";
 import { finishModelCatalogWriteWithBackup } from "./modelCatalogWriteSignals";
 import { modelCatalogRepositories } from "../repositories/modelCatalogRepositories";
 
-// Global aliases and the managed-name marker persist through ModelAliasRepository; this
-// facade owns the pre-write backup, the model-catalog cache invalidation, clearing the
-// managed marker on delete and the provider cascade below. Resolve the repository at
-// call time so the composition root stays the only binding.
+// Global aliases and the managed-name marker persist behind ModelAliasRepository. This
+// facade keeps the original async shape and suspension points over the SQLite-only legacy
+// access, so each write, its pre-write backup and the model-catalog cache invalidation
+// still run in the same turn; it also owns marker cleanup on delete and the provider
+// cascade below.
+const legacy = modelCatalogRepositories.legacySync.aliases;
 
 /** Async persistence contract; it never backs up or invalidates caches on its own. */
 export function getModelAliasRepository(): ModelAliasRepository {
@@ -18,16 +20,16 @@ export function getModelAliasRepository(): ModelAliasRepository {
 }
 
 export async function getModelAliases() {
-  return getModelAliasRepository().list();
+  return legacy.list();
 }
 
 export async function setModelAlias(alias: string, model: unknown) {
-  await getModelAliasRepository().set(alias, model);
+  legacy.set(alias, model);
   finishModelCatalogWriteWithBackup();
 }
 
 export async function deleteModelAlias(alias: string) {
-  await getModelAliasRepository().remove(alias);
+  legacy.remove(alias);
   await unmarkManagedModelAlias(alias);
   finishModelCatalogWriteWithBackup();
 }
@@ -40,23 +42,37 @@ export async function deleteModelAlias(alias: string) {
 // hand-created custom alias that happens to already point at a model's full id is never
 // silently claimed (and later pruned) as if OmniRoute had generated it.
 
+async function getManagedModelAliasNamesRow(): Promise<string[]> {
+  return legacy.readManagedNames();
+}
+
 /**
  * The set of alias names OmniRoute has generated/adopted itself during a managed
  * provider model sync (OpenRouter + OpenAI/Anthropic-compatible custom providers).
  * Only these are eligible for sync-triggered pruning.
  */
 export async function getManagedModelAliasNames(): Promise<Set<string>> {
-  return getModelAliasRepository().listManagedNames();
+  return new Set(await getManagedModelAliasNamesRow());
+}
+
+async function writeManagedModelAliasNames(names: Set<string>): Promise<void> {
+  legacy.writeManagedNames(names);
 }
 
 /** Record that `alias` was generated/adopted by OmniRoute's own sync logic. */
 export async function markManagedModelAlias(alias: string): Promise<void> {
-  await getModelAliasRepository().markManaged(alias);
+  const names = await getManagedModelAliasNames();
+  if (names.has(alias)) return;
+  names.add(alias);
+  await writeManagedModelAliasNames(names);
 }
 
 /** Clear the managed marker for `alias` (called whenever an alias row is deleted). */
 export async function unmarkManagedModelAlias(alias: string): Promise<void> {
-  await getModelAliasRepository().unmarkManaged(alias);
+  const names = await getManagedModelAliasNames();
+  if (!names.has(alias)) return;
+  names.delete(alias);
+  await writeManagedModelAliasNames(names);
 }
 
 /**

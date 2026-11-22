@@ -60,6 +60,18 @@ test("alias repository: Promise CRUD without cache invalidation or marker cleanu
   assert.equal(readCache.getModelCatalogCacheVersion(), version);
 });
 
+test("alias legacy sync shares the store with the Promise repository", async () => {
+  const legacy = modelCatalogRepositories.legacySync.aliases;
+  legacy.set("sync", ["p/a", "p/b"]);
+  assert.deepEqual(await aliases.list(), { sync: ["p/a", "p/b"] });
+  await aliases.markManaged("sync");
+  assert.deepEqual(legacy.readManagedNames(), ["sync"]);
+  legacy.writeManagedNames(new Set(["x", "y"]));
+  assert.deepEqual(await aliases.listManagedNames(), new Set(["x", "y"]));
+  legacy.remove("sync");
+  assert.deepEqual(legacy.list(), {});
+});
+
 test("alias facade: delete through the facade clears the marker and invalidates", async () => {
   await aliasFacade.setModelAlias("a", "p/m");
   await aliasFacade.markManagedModelAlias("a");

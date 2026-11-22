@@ -7,7 +7,10 @@ import {
   sqliteDiscoveryResultLegacySync,
   sqliteDiscoveryResultRepository,
 } from "./sqliteDiscoveryResultRepository";
-import { sqliteModelAliasRepository } from "./sqliteModelAliasRepository";
+import {
+  sqliteModelAliasLegacySync,
+  sqliteModelAliasRepository,
+} from "./sqliteModelAliasRepository";
 import {
   sqliteServiceModelLegacySync,
   sqliteServiceModelRepository,
@@ -18,6 +21,7 @@ export interface ModelCatalogRepositories {
   discoveryResults: DiscoveryResultRepository;
   serviceModels: ServiceModelRepository;
   legacySync: {
+    aliases: typeof sqliteModelAliasLegacySync;
     discoveryResults: typeof sqliteDiscoveryResultLegacySync;
     serviceModels: typeof sqliteServiceModelLegacySync;
   };
@@ -26,15 +30,17 @@ export interface ModelCatalogRepositories {
 /**
  * SQLite-only composition root. There is deliberately no backend selection.
  * Discovery results and service model lists are read synchronously by existing
- * routes, the service supervisor and the provider manifest, so that access stays
- * explicitly separate from the Promise contract instead of pretending to be
- * backend-neutral. Model aliases were already async and need no sync path.
+ * routes, the service supervisor and the provider manifest. The alias facade is
+ * async but runs each write and its backup/cache invalidation in one turn. That
+ * synchronous access stays explicitly separate from the Promise contract instead
+ * of pretending to be backend-neutral.
  */
 export const modelCatalogRepositories: ModelCatalogRepositories = {
   aliases: sqliteModelAliasRepository,
   discoveryResults: sqliteDiscoveryResultRepository,
   serviceModels: sqliteServiceModelRepository,
   legacySync: {
+    aliases: sqliteModelAliasLegacySync,
     discoveryResults: sqliteDiscoveryResultLegacySync,
     serviceModels: sqliteServiceModelLegacySync,
   },
