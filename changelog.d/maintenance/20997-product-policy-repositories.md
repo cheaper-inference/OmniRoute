@@ -1,0 +1,1 @@
+- **refactor(db):** Move feature-flag overrides and PII masking settings behind Promise-based repositories while preserving the `feature_flags` / `pii_settings` key layout, defaults and fallbacks, flag-definition validation, the DB > env > default evaluation order, the short read caches and their invalidation, and model-catalog invalidation (#20997 — thanks @xiaoyaner0201).
