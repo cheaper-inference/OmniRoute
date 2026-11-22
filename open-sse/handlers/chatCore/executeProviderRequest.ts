@@ -81,6 +81,7 @@ import { resolveProviderId } from "@/shared/constants/providers";
 import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
+import { sanitizeIdentity } from "../../services/identitySanitizer.ts";
 import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 
 export type ChatCoreExecutorResult = {
@@ -273,6 +274,8 @@ export async function executeProviderRequest(
     // (kiro user-fold, antigravity Cloud Code envelope) are covered by the
     // gated PRE-translation pass before translateRequest instead.
     bodyToSend = injectSystemPromptPostTranslation(bodyToSend, { targetFormat, provider });
+    // Opt-in (OMNIROUTE_SANITIZE_IDENTITY=1): neutralise harness names in system text + tool descriptions.
+    bodyToSend = sanitizeIdentity(bodyToSend);
 
     updatePendingScope(pendingScope, {
       providerRequest: bodyToSend,
