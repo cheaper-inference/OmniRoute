@@ -72,7 +72,10 @@ export async function persistProbeResult(args: {
     const health = data.apiKeyHealth as Record<string, KeyHealth> | undefined;
     recoverKeyHealth(connectionId, "primary", {
       ...data,
-      apiKeyHealth: { ...health, primary: recovery.source.apiKeyHealth?.primary },
+      apiKeyHealth: {
+        ...health,
+        primary: (recovery.source.apiKeyHealth as Record<string, KeyHealth> | undefined)?.primary,
+      },
     });
   }
   if (valid) setCredentialHealth(connectionId, provider, "active");

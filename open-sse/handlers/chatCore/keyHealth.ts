@@ -461,7 +461,7 @@ function recordRateLimit(ctx: HealthRecordContext, retryAfterMs?: number | null)
   if (hasPerModelQuota(provider)) return;
 
   beginOutcome(ctx.connId, ctx.currentKeyId, ctx.creds, ctx.generation, ctx.requestSeq);
-  const cooldownMs = ctx.retryAfterMs && ctx.retryAfterMs > 0 ? ctx.retryAfterMs : DEFAULT_KEY_COOLDOWN_MS;
+  const cooldownMs = retryAfterMs && retryAfterMs > 0 ? retryAfterMs : DEFAULT_KEY_COOLDOWN_MS;
   recordKeyCooldown(ctx.connId, ctx.currentKeyId, cooldownMs);
   ctx.log?.warn?.(
     "AUTH",
