@@ -121,14 +121,12 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "cerebras", modelId: "zai-glm-4.7", displayName: "GLM 4.7", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution" },
   { provider: "cerebras", modelId: "gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution" },
   // #8717: drop dead Workers AI ids (400/403/410). Keep Neurons/day budget on fp8-fast.
+  // #21007: deepseek-r1-distill-qwen-32b, llama-3.2-3b-instruct, qwq-32b and kimi-k2.6 retired
+  // on 2026-11-20 (HTTP 410).
   { provider: "cloudflare-ai", modelId: "@cf/mistral/mistral-7b-instruct-v0.2-lora", displayName: "Mistral 7B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
   { provider: "cloudflare-ai", modelId: "@cf/qwen/qwen2.5-coder-32b-instruct", displayName: "Qwen 2.5 Coder 32B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
-  { provider: "cloudflare-ai", modelId: "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", displayName: "DeepSeek R1 Distill 32B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
   { provider: "cloudflare-ai", modelId: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", displayName: "Llama 3.3 70B (FP8 Fast 🆓 ~150 resp/day)", monthlyTokens: 30000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
-  { provider: "cloudflare-ai", modelId: "@cf/meta/llama-3.2-3b-instruct", displayName: "Llama 3.2 3B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
-  { provider: "cloudflare-ai", modelId: "@cf/qwen/qwq-32b", displayName: "QwQ 32B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
   { provider: "cloudflare-ai", modelId: "@cf/zai-org/glm-4.7-flash", displayName: "GLM 4.7 Flash (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
-  { provider: "cloudflare-ai", modelId: "@cf/moonshotai/kimi-k2.6", displayName: "Kimi K2.6 (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
   { provider: "cloudflare-ai", modelId: "@cf/google/gemma-4-26b-a4b-it", displayName: "Gemma 4 26B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
   { provider: "cohere", modelId: "command-a-reasoning-08-2025", displayName: "Command A Reasoning (Aug 2025)", monthlyTokens: 800000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "cohere", tos: "caution" },
   { provider: "cohere", modelId: "command-a-vision-07-2025", displayName: "Command A Vision (Jul 2025)", monthlyTokens: 800000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "cohere", tos: "caution" },

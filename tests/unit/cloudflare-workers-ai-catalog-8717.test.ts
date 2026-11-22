@@ -20,17 +20,19 @@ const DEAD_CLOUDFLARE_MODEL_IDS = [
   "@cf/meta/llama-3.1-8b-instruct",
   "@cf/google/gemma-3-12b-it",
   "@cf/qwen/qwen2.5-coder-15b-instruct",
+  // Retired on 2026-11-20, requests return HTTP 410 (#21007):
+  // https://developers.cloudflare.com/changelog/post/2026-11-05-planned-model-deprecations/
+  "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+  "@cf/meta/llama-3.2-3b-instruct",
+  "@cf/qwen/qwq-32b",
+  "@cf/moonshotai/kimi-k2.6",
 ] as const;
 
 const LIVE_CLOUDFLARE_MODEL_IDS = [
   "@cf/mistral/mistral-7b-instruct-v0.2-lora",
-  "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
   "@cf/qwen/qwen2.5-coder-32b-instruct",
   "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-  "@cf/meta/llama-3.2-3b-instruct",
-  "@cf/qwen/qwq-32b",
   "@cf/zai-org/glm-4.7-flash",
-  "@cf/moonshotai/kimi-k2.6",
   "@cf/google/gemma-4-26b-a4b-it",
 ] as const;
 

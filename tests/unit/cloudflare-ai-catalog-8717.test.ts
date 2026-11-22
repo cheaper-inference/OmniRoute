@@ -17,12 +17,8 @@ test("Cloudflare Workers AI free catalog matches registry active models", () => 
   const expectedModels = [
     "@cf/mistral/mistral-7b-instruct-v0.2-lora",
     "@cf/qwen/qwen2.5-coder-32b-instruct",
-    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
     "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "@cf/meta/llama-3.2-3b-instruct",
-    "@cf/qwen/qwq-32b",
     "@cf/zai-org/glm-4.7-flash",
-    "@cf/moonshotai/kimi-k2.6",
     "@cf/google/gemma-4-26b-a4b-it",
   ];
 
@@ -36,6 +32,11 @@ test("Cloudflare Workers AI free catalog matches registry active models", () => 
     "@cf/meta/llama-3.1-8b-instruct",
     "@cf/google/gemma-3-12b-it",
     "@cf/qwen/qwen2.5-coder-15b-instruct",
+    // Retired on 2026-11-20, HTTP 410 (#21007)
+    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+    "@cf/meta/llama-3.2-3b-instruct",
+    "@cf/qwen/qwq-32b",
+    "@cf/moonshotai/kimi-k2.6",
   ];
 
   for (const id of deadModels) {
@@ -63,10 +64,9 @@ test("Cloudflare Workers AI registry models carry their documented context windo
   const expectedContext: Record<string, number> = {
     "@cf/mistral/mistral-7b-instruct-v0.2-lora": 15000,
     "@cf/qwen/qwen2.5-coder-32b-instruct": 32768,
-    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b": 80000,
     "@cf/meta/llama-3.3-70b-instruct-fp8-fast": 24000,
-    "@cf/meta/llama-3.2-3b-instruct": 80000,
-    "@cf/qwen/qwq-32b": 24000,
+    "@cf/zai-org/glm-4.7-flash": 131072,
+    "@cf/google/gemma-4-26b-a4b-it": 262144,
   };
 
   for (const [id, contextLength] of Object.entries(expectedContext)) {
