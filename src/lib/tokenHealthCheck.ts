@@ -10,7 +10,7 @@
  * updates the DB, and logs the result.
  */
 
-import { PARKED_EXCEPT_QUOTA_EXHAUSTION } from "@/shared/utils/parkedStatus";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import {
   getProviderConnections,
   getProviderConnectionById,
@@ -659,7 +659,7 @@ export async function checkConnection(conn: any) {
   // quota exhaustion is what this sweep exists to refresh, so it is not terminal here.
   if (
     typeof conn.testStatus === "string" &&
-    PARKED_EXCEPT_QUOTA_EXHAUSTION.has(conn.testStatus.toLowerCase()) &&
+    isParkedTestStatus(conn.testStatus) &&
     !isRecoverableGithubCopilotNoRefresh &&
     !isRecoverableCursorExpired &&
     !isRecoverableExpiredWithRetryBudget

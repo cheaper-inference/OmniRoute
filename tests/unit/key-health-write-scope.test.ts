@@ -241,6 +241,36 @@ test("the status-list scan itself sees a list and ignores a row list", async () 
   assert.deepEqual(rows, [], "a row list and a presentation list are not decisions");
 });
 
+test("a padded status is parked everywhere, not only where it is trimmed", async () => {
+  const { museClaimCandidates } = await import("../../src/sse/services/museSessionOwnership.ts");
+  const rows = [{ id: "muse-padded", authType: "oauth", testStatus: " Deactivated ", rateLimitedUntil: null }];
+  assert.equal(museClaimCandidates(rows, "muse-code")[0]?.unavailable, true);
+});
+
+test("a credential swap drops the cached gate verdict for that connection", async () => {
+  const { createProviderConnection, updateProviderConnection } = await import(
+    "../../src/lib/db/providers.ts"
+  );
+  const cache = await import("../../src/lib/credentialHealth/cache.ts");
+  const conn = await createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "Swap",
+    apiKey: "sk-first",
+    isActive: true,
+  });
+  cache.setCredentialHealth(conn.id, "openai", "error", "Invalid API key", "upstream_auth_error");
+  assert.equal(cache.isCredentialHealthy(conn.id), false, "precondition: the verdict is cached");
+
+  await updateProviderConnection(conn.id, { apiKey: "sk-second" });
+
+  assert.equal(
+    cache.getCredentialHealth(conn.id),
+    undefined,
+    "the cached verdict describes a key this connection no longer carries"
+  );
+});
+
 const core = await import("../../src/lib/db/core.ts");
 const {
   createProviderConnection,

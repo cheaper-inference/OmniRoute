@@ -1,4 +1,4 @@
-import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import {
   museScopeHasRecordedItems,
   pruneIdleMuseOwnershipScopes,
@@ -52,9 +52,7 @@ export function museClaimCandidates(
       unavailable:
         !allowUnavailable &&
         (isAccountUnavailable(connection.rateLimitedUntil) ||
-          TERMINAL_TEST_STATUSES.has(
-            String(connection.testStatus || "").toLowerCase()
-          ) ||
+          isParkedTestStatus(connection.testStatus) ||
           isModelLocked("muse-code", connection.id, model)),
     }));
 }

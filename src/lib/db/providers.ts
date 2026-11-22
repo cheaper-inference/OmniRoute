@@ -29,6 +29,7 @@ import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredCon
 import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
 import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
+import { removeCredentialHealth } from "@/lib/credentialHealth/cache";
 import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
 import { readNewConnectionProxyDefault } from "./newConnectionProxy.mjs";
@@ -1174,6 +1175,9 @@ function buildMergedConnectionUpdate(
   return merged;
 }
 
+/** Fields whose change makes a cached credential verdict describe a different key. */
+const CREDENTIAL_FIELDS = ["apiKey", "accessToken", "refreshToken", "extraApiKeys"] as const;
+
 export async function updateProviderConnection(
   id: string,
   data: JsonRecord,
@@ -1216,6 +1220,11 @@ export async function updateProviderConnection(
   if (committedFence) opts?.onCodexFenceCommitted?.(committedFence);
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
+  // The combo gate answers from a cached verdict with a five-minute TTL. A credential swap makes
+  // that verdict describe a key the connection no longer carries, so the cache entry goes with it.
+  if (CREDENTIAL_FIELDS.some((field) => Object.prototype.hasOwnProperty.call(data, field))) {
+    removeCredentialHealth(id);
+  }
   bumpProxyConfigGeneration();
 
   // Zero is the internal move-to-top sentinel. Explicit positive priorities
