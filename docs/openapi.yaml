@@ -7995,7 +7995,10 @@ paths:
       tags: [System]
       summary: List registered background jobs
       x-loopback-only: true
-      description: Local-only runtime administration. Returns each registered job and its latest run.
+      description: >-
+        Local-only runtime administration. Returns each registered job and its latest run.
+        The LOCAL_ONLY tier admits loopback and private-LAN peers; public clients are
+        rejected with 403 LOCAL_ONLY.
       x-internal: true
       responses:
         "200":
@@ -9606,7 +9609,8 @@ paths:
       description: >-
         Upgrade to WebSocket. On connect, server sends `{type:"snapshot", data:[...]}`.
         Subsequent events: `{type:"new", data:{...}}`, `{type:"update", data:{...}}`,
-        `{type:"clear"}`. LOCAL_ONLY.
+        `{type:"clear"}`. LOCAL_ONLY: loopback and private-LAN peers only; public
+        clients are rejected with 403 LOCAL_ONLY.
       responses:
         "101":
           description: WebSocket upgrade successful
@@ -9870,7 +9874,8 @@ paths:
       description: >-
         Accepts a serialized InterceptedRequest from the CJS MITM server for requests
         that do not go through TypeScript handlers (e.g., passthrough hosts). Requires
-        INSPECTOR_INTERNAL_INGEST_TOKEN header. LOCAL_ONLY.
+        INSPECTOR_INTERNAL_INGEST_TOKEN header. LOCAL_ONLY: loopback and private-LAN
+        peers only; public clients are rejected with 403 LOCAL_ONLY.
       security: []
       requestBody:
         required: true
