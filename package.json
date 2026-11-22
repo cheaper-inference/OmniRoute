@@ -31,6 +31,7 @@
     "bin/cli/runtime/",
     "scripts/postinstall.mjs",
     "scripts/build/postinstallSupport.mjs",
+    "scripts/build/sqliteRebuildPlan.mjs",
     "scripts/build/runtime-env.mjs",
     "scripts/build/colocateOptionals.mjs",
     "scripts/build/sync-env.mjs",
