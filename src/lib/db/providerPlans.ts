@@ -5,72 +5,29 @@
  * detected). dimensions_json is a JSON-serialized QuotaDimension[] array.
  * getPlan() and listPlans() parse it back to objects on read.
  *
- * All SQL is via prepared statements (Hard Rule #5).
+ * SQL lives in the SQLite repository, via prepared statements (Hard Rule #5).
  * Part of: Group B — Quota Sharing Engine (plan 22, frente F2).
  */
 
-import { getDbInstance } from "./core";
+import type {
+  ProviderPlan,
+  ProviderPlanRepository,
+  QuotaDimension,
+} from "@/domain/persistence/providerNodeRepositories";
+import { providerNodeRepositories } from "./repositories/providerNodeRepositories";
 
-// ---------------------------------------------------------------------------
-// Local type shapes (aligned with src/lib/quota/dimensions.ts — merged by F7)
-// ---------------------------------------------------------------------------
+// Type shapes live with the repository contract (aligned with src/lib/quota/dimensions.ts).
+export type { ProviderPlan, QuotaDimension } from "@/domain/persistence/providerNodeRepositories";
 
-type QuotaUnit = "percent" | "requests" | "tokens" | "usd";
-type QuotaWindow = "5h" | "hourly" | "daily" | "weekly" | "monthly";
+/**
+ * Persistence lives behind ProviderPlanRepository. The exports below stay synchronous
+ * (SQLite-only legacy access) because quota enforcement resolves plans without awaiting.
+ */
+const legacy = providerNodeRepositories.legacySync.plans;
 
-export interface QuotaDimension {
-  unit: QuotaUnit;
-  window: QuotaWindow;
-  limit: number;
-}
-
-export interface ProviderPlan {
-  connectionId: string | null;
-  provider: string;
-  dimensions: QuotaDimension[];
-  source: "auto" | "manual";
-}
-
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
-interface StatementLike<TRow = unknown> {
-  all: (...params: unknown[]) => TRow[];
-  get: (...params: unknown[]) => TRow | undefined;
-  run: (...params: unknown[]) => { changes: number };
-}
-
-interface DbLike {
-  prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
-}
-
-function getDb(): DbLike {
-  return getDbInstance() as unknown as DbLike;
-}
-
-interface PlanRow {
-  connection_id: string;
-  provider: string;
-  dimensions_json: string;
-  source: string;
-  updated_at: string;
-}
-
-function rowToPlan(row: PlanRow): ProviderPlan {
-  let dimensions: QuotaDimension[] = [];
-  try {
-    dimensions = JSON.parse(row.dimensions_json) as QuotaDimension[];
-  } catch {
-    // Malformed JSON — return empty dimensions rather than throwing
-    dimensions = [];
-  }
-  return {
-    connectionId: row.connection_id,
-    provider: row.provider,
-    dimensions,
-    source: row.source as "auto" | "manual",
-  };
+/** Async persistence contract. */
+export function getProviderPlanRepository(): ProviderPlanRepository {
+  return providerNodeRepositories.plans;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,27 +39,14 @@ function rowToPlan(row: PlanRow): ProviderPlan {
  * Parses dimensions_json into a typed QuotaDimension array.
  */
 export function getPlan(connectionId: string): ProviderPlan | null {
-  const row = getDb()
-    .prepare<PlanRow>(
-      `SELECT connection_id, provider, dimensions_json, source, updated_at
-       FROM provider_plans WHERE connection_id = ?`
-    )
-    .get(connectionId);
-  if (!row) return null;
-  return rowToPlan(row);
+  return legacy.findByConnectionId(connectionId);
 }
 
 /**
  * List all provider plans stored in the DB.
  */
 export function listPlans(): ProviderPlan[] {
-  const rows = getDb()
-    .prepare<PlanRow>(
-      `SELECT connection_id, provider, dimensions_json, source, updated_at
-       FROM provider_plans ORDER BY provider ASC`
-    )
-    .all();
-  return rows.map(rowToPlan);
+  return legacy.list();
 }
 
 /**
@@ -120,21 +64,7 @@ export function upsertPlan(
   dimensions: QuotaDimension[],
   source: "auto" | "manual"
 ): void {
-  const now = new Date().toISOString();
-  const dimensionsJson = JSON.stringify(dimensions);
-
-  getDb()
-    .prepare(
-      `INSERT INTO provider_plans (connection_id, provider, dimensions_json, source, updated_at)
-       VALUES (?, ?, ?, ?, ?)
-       ON CONFLICT(connection_id)
-       DO UPDATE SET
-         provider = excluded.provider,
-         dimensions_json = excluded.dimensions_json,
-         source = excluded.source,
-         updated_at = excluded.updated_at`
-    )
-    .run(connectionId, provider, dimensionsJson, source, now);
+  legacy.upsert(connectionId, provider, dimensions, source, new Date().toISOString());
 }
 
 /**
@@ -142,8 +72,5 @@ export function upsertPlan(
  * Returns true if a row was deleted, false if not found.
  */
 export function deletePlan(connectionId: string): boolean {
-  const result = getDb()
-    .prepare("DELETE FROM provider_plans WHERE connection_id = ?")
-    .run(connectionId);
-  return result.changes > 0;
+  return legacy.delete(connectionId);
 }
