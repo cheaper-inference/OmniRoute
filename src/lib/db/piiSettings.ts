@@ -28,7 +28,11 @@ export type { PiiSettings } from "@/domain/persistence/productPolicyRepositories
 
 const CACHE_TTL_MS = 1000;
 
-const legacy = productPolicyRepositories.legacySync.piiSettings;
+// Resolved per call, never at module load (see db/featureFlags.ts: core.ts sits
+// in the same import cycle through the shared flag resolver).
+function legacy() {
+  return productPolicyRepositories.legacySync.piiSettings;
+}
 
 let cache: { db: object; value: PiiSettings; expiresAt: number } | null = null;
 
@@ -45,13 +49,13 @@ export function getPiiSettings(): PiiSettings {
   const db = getDbInstance();
   const now = Date.now();
   if (cache && cache.db === db && cache.expiresAt > now) return cache.value;
-  const value = legacy.get();
+  const value = legacy().get();
   cache = { db, value, expiresAt: now + CACHE_TTL_MS };
   return value;
 }
 
 export function setPiiSettings(update: PiiSettingsUpdate): PiiSettings {
-  legacy.update(update);
+  legacy().update(update);
   clearPiiSettingsCache();
   return getPiiSettings();
 }

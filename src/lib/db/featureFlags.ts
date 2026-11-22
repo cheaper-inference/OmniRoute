@@ -17,7 +17,11 @@ import { getDbInstance } from "./core";
 import { finishModelCatalogWriteWithoutBackup } from "./models/modelCatalogWriteSignals";
 import { productPolicyRepositories } from "./repositories/productPolicyRepositories";
 
-const legacy = productPolicyRepositories.legacySync.featureFlagOverrides;
+// Resolved per call, never at module load: core.ts reaches this module through
+// the shared flag resolver, so an eager read here would run inside that cycle.
+function legacy() {
+  return productPolicyRepositories.legacySync.featureFlagOverrides;
+}
 
 /** Async persistence contract; it never touches caches on its own. */
 export function getFeatureFlagOverrideRepository(): FeatureFlagOverrideRepository {
@@ -66,7 +70,7 @@ const CATALOG_RELEVANT_FEATURE_FLAGS = new Set([
  * Returns all feature flag overrides as a key→value map.
  */
 export function getFeatureFlagOverrides(): Record<string, string> {
-  return legacy.list();
+  return legacy().list();
 }
 
 /**
@@ -79,7 +83,7 @@ export function getFeatureFlagOverride(key: string): string | undefined {
   const now = Date.now();
   const cached = cache.get(key);
   if (cached && cached.expiresAt > now) return cached.value;
-  const value = legacy.find(key);
+  const value = legacy().find(key);
   cache.set(key, { value, expiresAt: now + OVERRIDE_CACHE_TTL_MS });
   return value;
 }
@@ -101,7 +105,7 @@ export function setFeatureFlagOverride(key: string, value: string): void {
       `Invalid value "${value}" for enum flag ${key}. Allowed: ${definition.enumValues.join(", ")}`
     );
   }
-  legacy.set(key, value);
+  legacy().set(key, value);
   clearFeatureFlagOverrideCache(key);
   if (CATALOG_RELEVANT_FEATURE_FLAGS.has(key)) {
     finishModelCatalogWriteWithoutBackup();
@@ -113,7 +117,7 @@ export function setFeatureFlagOverride(key: string, value: string): void {
  * behaviour.
  */
 export function removeFeatureFlagOverride(key: string): void {
-  legacy.remove(key);
+  legacy().remove(key);
   clearFeatureFlagOverrideCache(key);
   if (CATALOG_RELEVANT_FEATURE_FLAGS.has(key)) {
     finishModelCatalogWriteWithoutBackup();
@@ -124,8 +128,8 @@ export function removeFeatureFlagOverride(key: string): void {
  * Removes all stored feature flag overrides.
  */
 export function clearAllFeatureFlagOverrides(): void {
-  const hadRelevantOverride = legacy.hasAny(Array.from(CATALOG_RELEVANT_FEATURE_FLAGS));
-  legacy.clear();
+  const hadRelevantOverride = legacy().hasAny(Array.from(CATALOG_RELEVANT_FEATURE_FLAGS));
+  legacy().clear();
   clearFeatureFlagOverrideCache();
   if (hadRelevantOverride) {
     finishModelCatalogWriteWithoutBackup();

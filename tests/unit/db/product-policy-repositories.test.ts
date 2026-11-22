@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "product-policy-repositories-"));
 process.env.DATA_DIR = dataDir;
@@ -137,4 +138,42 @@ test("PII settings repository returns independent values and leaves the facade c
   assert.deepEqual(piiFacade.getPiiSettings().enabledTypes, null, "facade cache still serves");
   piiFacade.clearPiiSettingsCache();
   assert.deepEqual(piiFacade.getPiiSettings().enabledTypes, ["phone"]);
+});
+
+// core.ts reaches the flag facade through the shared flag resolver, so these
+// modules sit in one import cycle. Each must load first in a fresh process
+// without touching a binding of the cycle before it has initialized.
+test("every product-policy module loads first in a fresh process", () => {
+  const entries = [
+    "src/lib/db/repositories/productPolicyRepositories.ts",
+    "src/lib/db/repositories/sqliteFeatureFlagOverrideRepository.ts",
+    "src/lib/db/repositories/sqlitePiiSettingsRepository.ts",
+    "src/lib/db/featureFlags.ts",
+    "src/lib/db/piiSettings.ts",
+  ];
+  for (const entry of entries) {
+    const probeDir = fs.mkdtempSync(path.join(os.tmpdir(), "product-policy-import-"));
+    try {
+      const child = spawnSync(
+        process.execPath,
+        [
+          "--import",
+          "tsx/esm",
+          "--input-type=module",
+          "-e",
+          `await import(${JSON.stringify(`./${entry}`)}); console.log("LOADED");`,
+        ],
+        {
+          cwd: process.cwd(),
+          env: { ...process.env, DATA_DIR: probeDir, DISABLE_SQLITE_AUTO_BACKUP: "true" },
+          encoding: "utf8",
+          timeout: 120_000,
+        }
+      );
+      assert.equal(child.status, 0, `${entry}\n${child.stdout}\n${child.stderr}`);
+      assert.match(child.stdout, /LOADED/, entry);
+    } finally {
+      fs.rmSync(probeDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  }
 });
