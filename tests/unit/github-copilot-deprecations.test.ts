@@ -83,8 +83,7 @@ test("Copilot static catalog and fallback contain exactly the approved fifteen m
     "claude-fable-5.1",
     "claude-opus-5",
     "claude-sonnet-5",
-    // claude-sonnet-5-5 joined the curated catalog on the release tip (#15035).
-    "claude-sonnet-5-5",
+    "claude-sonnet-5.5",
     "claude-opus-4.8-fast",
     "claude-opus-4.8",
     "claude-haiku-4.5",

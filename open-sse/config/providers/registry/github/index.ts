@@ -127,7 +127,7 @@ export const githubProvider: RegistryEntry = {
       supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
     },
     {
-      id: "claude-sonnet-5-5",
+      id: "claude-sonnet-5.5",
       name: "Claude Sonnet 5.5",
       targetFormat: "claude",
       contextLength: 1000000,

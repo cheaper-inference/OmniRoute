@@ -46,7 +46,7 @@ export const GITHUB_COPILOT_STATIC_FALLBACK_MODELS: readonly string[] = Object.f
   "claude-fable-5.1",
   "claude-opus-5",
   "claude-sonnet-5",
-  "claude-sonnet-5-5",
+  "claude-sonnet-5.5",
   "claude-opus-4.8-fast",
   "claude-opus-4.8",
   "claude-haiku-4.5",
