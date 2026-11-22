@@ -92,6 +92,17 @@ function upsert(entry: FreeProxyWrite, now: string): { id: string; action: "crea
   return { id, action: "created" };
 }
 
+function poolStateFilter(options?: FreeProxyFilters): string {
+  let sql = "";
+  if (options?.onlyInPool) {
+    sql += " AND in_pool = 1";
+  }
+  if (options?.onlyNotInPool) {
+    sql += " AND in_pool = 0";
+  }
+  return sql;
+}
+
 function buildFreeProxyFilter(options?: FreeProxyFilters): { sql: string; params: unknown[] } {
   let sql = " WHERE 1=1";
   const params: unknown[] = [];
@@ -111,12 +122,7 @@ function buildFreeProxyFilter(options?: FreeProxyFilters): { sql: string; params
     sql += " AND quality_score >= ?";
     params.push(options.minQuality);
   }
-  if (options?.onlyInPool) {
-    sql += " AND in_pool = 1";
-  }
-  if (options?.onlyNotInPool) {
-    sql += " AND in_pool = 0";
-  }
+  sql += poolStateFilter(options);
   if (options?.search) {
     sql += " AND host LIKE ?";
     params.push(`%${options.search}%`);

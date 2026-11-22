@@ -19,6 +19,17 @@ function toRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" ? (value as JsonRecord) : {};
 }
 
+function mapValidationFields(r: JsonRecord) {
+  return {
+    qualityScore: typeof r.quality_score === "number" ? r.quality_score : null,
+    latencyMs: typeof r.latency_ms === "number" ? r.latency_ms : null,
+    anonymity: typeof r.anonymity === "string" ? r.anonymity : null,
+    googleAccess: r.google_access === 1 || r.google_access === true,
+    lastValidated: typeof r.last_validated === "string" ? r.last_validated : null,
+    countryCode: typeof r.country_code === "string" ? r.country_code : null,
+  };
+}
+
 function mapOneproxyRow(row: unknown): OneproxyProxyRecord {
   const r = toRecord(row);
   return {
@@ -31,12 +42,7 @@ function mapOneproxyRow(row: unknown): OneproxyProxyRecord {
     notes: typeof r.notes === "string" ? r.notes : null,
     status: typeof r.status === "string" ? r.status : "active",
     source: typeof r.source === "string" ? r.source : "oneproxy",
-    qualityScore: typeof r.quality_score === "number" ? r.quality_score : null,
-    latencyMs: typeof r.latency_ms === "number" ? r.latency_ms : null,
-    anonymity: typeof r.anonymity === "string" ? r.anonymity : null,
-    googleAccess: r.google_access === 1 || r.google_access === true,
-    lastValidated: typeof r.last_validated === "string" ? r.last_validated : null,
-    countryCode: typeof r.country_code === "string" ? r.country_code : null,
+    ...mapValidationFields(r),
     createdAt: typeof r.created_at === "string" ? r.created_at : "",
     updatedAt: typeof r.updated_at === "string" ? r.updated_at : "",
   };
