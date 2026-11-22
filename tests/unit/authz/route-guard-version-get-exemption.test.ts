@@ -131,11 +131,16 @@ describe("isLocalOnlyPath - GET exemption for /api/system/version (#5083)", () =
   //                              their getLatestVersion() runs `npm view` (execFile)
   //   /api/version-manager/status, /check-update - GET only reports the CLIProxyAPI
   //                              install state; install/start/restart/stop stay local-only
+  //   /api/skills/executions - GET lists stored skill_executions rows (two SQLite reads,
+  //                              no spawn); POST runs a skill, reaches the sandbox
+  //                              container spawn and stays local-only (GHSA-jx89-f37j-pq89,
+  //                              KEA-9359; see remote-readonly-resilience-skill-executions.test.ts)
   test("LOCAL_ONLY_API_GET_EXEMPTIONS holds exactly the reviewed paths", () => {
     assert.deepEqual([...LOCAL_ONLY_API_GET_EXEMPTIONS].sort(), [
       "/api/mcp/audit",
       "/api/mcp/audit/stats",
       "/api/services/cliproxy/status",
+      "/api/skills/executions",
       "/api/system/version",
       "/api/tunnels/cloudflared",
       "/api/version-manager/check-update",

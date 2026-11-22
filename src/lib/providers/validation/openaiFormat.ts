@@ -3,7 +3,7 @@
 // byte-identical to the original inline defs.
 import { randomUUID } from "node:crypto";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
-import { COMMAND_CODE_VERSION } from "@omniroute/open-sse/executors/commandCode.ts";
+import { buildCommandCodeCliHeaders } from "@omniroute/open-sse/executors/commandCode.ts";
 import {
   COMMAND_CODE_ZDR_HEADER,
   applyCommandCodeZdrHeader,
@@ -238,16 +238,7 @@ export async function validateCommandCodeProvider({ apiKey, providerSpecificData
   // because API access is restricted to Provider tier. Fallback to probing /alpha/generate.
   try {
     const alphaUrl = `${baseUrl}/alpha/generate`;
-    const alphaHeaders: Record<string, string> = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "x-command-code-version": COMMAND_CODE_VERSION,
-      "x-cli-environment": "external",
-      "x-project-slug": "pi-cc",
-      "x-taste-learning": "false",
-      "x-co-flag": "false",
-      "x-session-id": randomUUID(),
-    };
+    const alphaHeaders = buildCommandCodeCliHeaders(apiKey, randomUUID());
     applyCustomUserAgent(alphaHeaders, providerSpecificData);
     applyCommandCodeZdrHeader(alphaHeaders, providerSpecificData);
 
