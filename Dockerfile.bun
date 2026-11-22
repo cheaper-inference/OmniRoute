@@ -83,6 +83,19 @@ ENV PORT=20128
 ENV HOSTNAME=0.0.0.0
 ENV OMNIROUTE_MEMORY_MB=1024
 
+# #20998 — same posture as the Node Dockerfile (#13679): default the PUBLISHED
+# Bun image to requiring an API key. A bare `docker run -p 20128:20128 …` of a
+# published Bun tag (`-bun` / `-web-bun`) passes no `--env-file .env`, so without
+# this default the anonymous /v1 LLM proxy would be both keyless AND
+# world-reachable. This does NOT change the npm/CLI local-dev default
+# (`REQUIRE_API_KEY` stays `"false"` in featureFlagDefinitions.ts) — only the
+# shipped deployment artifact's posture. Compose paths are unaffected: they load
+# the operator's own `.env` (env_file:), which overrides this ENV, and already
+# bind loopback-only by default (#12568). runner-web inherits this stage, so both
+# Bun tags are covered. Override with `-e REQUIRE_API_KEY=false` for an
+# intentionally keyless deployment.
+ENV REQUIRE_API_KEY=true
+
 ENV DATA_DIR=/app/data
 RUN mkdir -p /app/data
 
