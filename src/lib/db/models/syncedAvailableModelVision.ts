@@ -18,8 +18,13 @@
 import type { SqliteAdapter } from "../adapters/types";
 import { getDbInstance } from "../core";
 import { getModelCatalogCacheVersion } from "../readCache";
-import { getKeyValue } from "./shared";
+import { syncedAvailableModelRepositories } from "../repositories/syncedAvailableModelRepositories";
 import { normalizeSyncedAvailableModels } from "./synced";
+
+// Reads the `syncedAvailableModels` rows through the SQLite-only legacy access of
+// SyncedAvailableModelRepository: capability resolution is synchronous, and an
+// injected database must still be honored.
+const legacy = syncedAvailableModelRepositories.legacySync.syncedModels;
 
 /** Provider → set of model ids with at least one connection's synced row saying supportsVision:true. */
 export type SyncedAvailableModelVisionMap = ReadonlyMap<string, ReadonlySet<string>>;
@@ -56,11 +61,8 @@ function readVerdictDirect(
   providerId: string,
   modelId: string
 ): boolean | null {
-  const rows = db
-    .prepare("SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND key LIKE ?")
-    .all(`${providerId}:%`);
-  for (const row of rows) {
-    const { value } = getKeyValue(row);
+  const values = legacy.listProviderCatalogValues(db, providerId);
+  for (const value of values) {
     if (collectVisionModelIds(providerId, value).includes(modelId)) return true;
   }
   return null;
@@ -71,12 +73,9 @@ function readVerdictDirect(
 function buildVisionVerdicts(
   db: SyncedAvailableModelVisionDatabase
 ): SyncedAvailableModelVisionMap {
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = 'syncedAvailableModels'")
-    .all();
+  const rows = legacy.listAllCatalogs(db);
   const verdicts = new Map<string, Set<string>>();
-  for (const row of rows) {
-    const { key, value } = getKeyValue(row);
+  for (const { key, value } of rows) {
     if (!key || !value) continue;
     const rowProviderId = key.split(":")[0];
     if (!rowProviderId) continue;
@@ -121,12 +120,9 @@ export function listSyncedAvailableModelVision(
 ): SyncedAvailableModelVisionMap {
   try {
     const db = options.getDatabase?.() ?? getDbInstance();
-    const rows = db
-      .prepare("SELECT key, value FROM key_value WHERE namespace = 'syncedAvailableModels'")
-      .all();
+    const rows = legacy.listAllCatalogs(db);
     const result = new Map<string, Set<string>>();
-    for (const row of rows) {
-      const { key, value } = getKeyValue(row);
+    for (const { key, value } of rows) {
       if (!key || !value) continue;
       const providerId = key.split(":")[0];
       if (!providerId) continue;

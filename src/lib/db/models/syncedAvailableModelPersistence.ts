@@ -1,9 +1,20 @@
 /** Canonical comparison and write helpers for connection-scoped synced model catalogs. */
 
+import type { SyncedAvailableModelRepository } from "@/domain/persistence/syncedAvailableModelRepository";
 import { backupDbFile } from "../backup";
-import { getDbInstance } from "../core";
 import { invalidateModelCatalogCache } from "../readCache";
-import { getKeyValue } from "./shared";
+import { syncedAvailableModelRepositories } from "../repositories/syncedAvailableModelRepositories";
+
+// Connection catalogs persist behind SyncedAvailableModelRepository. These helpers keep
+// their original sync/async shape over the SQLite-only legacy access, so every write,
+// its pre-write backup and the model-catalog cache invalidation still run in the same
+// turn; canonical comparison and the post-sync reconcile stay here.
+const legacy = syncedAvailableModelRepositories.legacySync.syncedModels;
+
+/** Async persistence contract; it never backs up or invalidates caches on its own. */
+export function getSyncedAvailableModelRepository(): SyncedAvailableModelRepository {
+  return syncedAvailableModelRepositories.syncedModels;
+}
 
 type ModelNormalizer<T> = (models: unknown) => T[];
 
@@ -84,14 +95,7 @@ export function finishSyncedAvailableModelsWrite(): void {
  * Returns the number of connection-scoped synced model lists removed.
  */
 export async function deleteSyncedAvailableModelsForProvider(providerId: string): Promise<number> {
-  const db = getDbInstance();
-  const keyPrefix = `${providerId}:`;
-  const result = db
-    .prepare(
-      "DELETE FROM key_value WHERE namespace = 'syncedAvailableModels' AND substr(key, 1, ?) = ?"
-    )
-    .run(keyPrefix.length, keyPrefix);
-  const changes = Number(result.changes || 0);
+  const changes = legacy.removeProviderCatalogs(providerId);
   if (changes > 0) finishSyncedAvailableModelsWrite();
   return changes;
 }
@@ -101,11 +105,7 @@ export function persistCanonicalSyncedAvailableModels<T>(
   normalizedModels: T[],
   normalizeModels: ModelNormalizer<T>
 ): boolean {
-  const db = getDbInstance();
-  const existingRow = db
-    .prepare("SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND key = ?")
-    .get(key);
-  const existingValue = getKeyValue(existingRow).value;
+  const existingValue = legacy.readConnectionCatalog(key);
   let existingModels: T[] | null = null;
   if (existingValue !== null) {
     try {
@@ -123,13 +123,9 @@ export function persistCanonicalSyncedAvailableModels<T>(
   if (unchanged) return false;
 
   if (normalizedModels.length === 0) {
-    db.prepare("DELETE FROM key_value WHERE namespace = 'syncedAvailableModels' AND key = ?").run(
-      key
-    );
+    legacy.removeConnectionCatalog(key);
   } else {
-    db.prepare(
-      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('syncedAvailableModels', ?, ?)"
-    ).run(key, JSON.stringify(normalizedModels));
+    legacy.writeConnectionCatalog(key, JSON.stringify(normalizedModels));
   }
   finishSyncedAvailableModelsWrite();
   // Skip when no declared window changed: the reconcile would only re-scan for nothing.
