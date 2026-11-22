@@ -1,0 +1,172 @@
+{
+  "language": "tr",
+  "category": "ultra",
+  "rules": [
+    {
+      "name": "tr_leader_phrases",
+      "pattern": "^(?:şimdi|hemen|bakalım|kontrol edeyim|inceleyeyim|deneyeyim|şöyle yapalım)\\s+(?=[\\p{L}])",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "terse",
+      "minIntensity": "full",
+      "description": "Drop 'şimdi/bakalım' style openers at sentence start."
+    },
+    {
+      "name": "tr_ultra_database",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:veri tabanı|veritabanı|veri tabanları|veritabanları)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "DB",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "veritabanı → DB"
+    },
+    {
+      "name": "tr_ultra_config",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:yapılandırma|yapılandırmalar)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "config",
+      "replacementMap": {
+        "yapılandırma": "config",
+        "yapılandırmalar": "configs"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "yapılandırma → config"
+    },
+    {
+      "name": "tr_ultra_function",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:fonksiyon|fonksiyonlar|işlev|işlevler)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "fn",
+      "replacementMap": {
+        "fonksiyon": "fn",
+        "fonksiyonlar": "fns",
+        "işlev": "fn",
+        "işlevler": "fns"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "fonksiyon/işlev → fn"
+    },
+    {
+      "name": "tr_ultra_request",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:istek|istekler|talep|talepler)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "req",
+      "replacementMap": {
+        "istek": "req",
+        "istekler": "reqs",
+        "talep": "req",
+        "talepler": "reqs"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "istek/talep → req"
+    },
+    {
+      "name": "tr_ultra_response",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:yanıt|yanıtlar|cevap|cevaplar)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "res",
+      "replacementMap": {
+        "yanıt": "res",
+        "cevap": "res"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "yanıt/cevap → res"
+    },
+    {
+      "name": "tr_ultra_implementation",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:gerçekleştirim|gerçekleştirimler)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "impl",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "gerçekleştirim → impl"
+    },
+    {
+      "name": "tr_ultra_application",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:uygulama|uygulamalar)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "app",
+      "replacementMap": {
+        "uygulama": "app",
+        "uygulamalar": "apps"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "uygulama → app"
+    },
+    {
+      "name": "tr_ultra_authentication",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:kimlik doğrulama|kimlik doğrulaması|kimlik doğrulamalar)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "auth",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "kimlik doğrulama → auth"
+    },
+    {
+      "name": "tr_ultra_authorization",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:yetkilendirme|yetki kontrolü|yetkilendirmeler)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "authz",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "yetkilendirme → authz"
+    },
+    {
+      "name": "tr_ultra_dependency",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:bağımlılık|bağımlılıklar)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "dep",
+      "replacementMap": {
+        "bağımlılık": "dep",
+        "bağımlılıklar": "deps"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "bağımlılık → dep"
+    },
+    {
+      "name": "tr_ultra_parameter",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:parametre|parametreler)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "param",
+      "replacementMap": {
+        "parametre": "param",
+        "parametreler": "params"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "parametre → param"
+    },
+    {
+      "name": "tr_ultra_variable",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:değişken|değişkenler)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "var",
+      "replacementMap": {
+        "değişken": "var",
+        "değişkenler": "vars"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "description": "değişken → var"
+    }
+  ]
+}

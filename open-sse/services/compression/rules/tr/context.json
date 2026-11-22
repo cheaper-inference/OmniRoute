@@ -1,0 +1,95 @@
+{
+  "language": "tr",
+  "category": "context",
+  "rules": [
+    {
+      "name": "tr_context_setup",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:işte kod|kod aşağıda|aşağıdaki kod|kod şu şekilde|kod burada)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "Kod: ",
+      "context": "user",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Collapse code introduction framing to a label."
+    },
+    {
+      "name": "tr_error_report",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:şu hatayı alıyorum|şu hatayı veriyor|bu hatayı alıyorum|şu hata çıkıyor|hata mesajı şu)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "Hata: ",
+      "context": "user",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Collapse error report framing to a label."
+    },
+    {
+      "name": "tr_expected_behavior",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:beklenen davranış|beklediğim davranış|şunu bekliyorum|beklenen sonuç)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "Beklenen: ",
+      "context": "user",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Collapse expected-behavior framing to a label."
+    },
+    {
+      "name": "tr_intent",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:amacım|yapmak istediğim şey|hedefim|ulaşmak istediğim şey)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "Amaç: ",
+      "context": "user",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Collapse intent declaration to a label."
+    },
+    {
+      "name": "tr_already_tried",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:şunu denedim|şunları denedim|denedim ama|denedim ve)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "Denenen: ",
+      "context": "user",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Collapse attempted steps to a label."
+    },
+    {
+      "name": "tr_question_to_directive",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:açıklar mısın|açıklayabilir misin|anlatır mısın|anlatabilir misin|gösterir misin|gösterebilir misin|yardımcı olabilir misin)(?![\\p{L}\\p{N}_])\\??\\s*",
+      "flags": "giu",
+      "replacement": "açıkla",
+      "replacementMap": {
+        "açıklar mısın": "açıkla",
+        "açıklayabilir misin": "açıkla",
+        "anlatır mısın": "anlat",
+        "anlatabilir misin": "anlat",
+        "gösterir misin": "göster",
+        "gösterebilir misin": "göster",
+        "yardımcı olabilir misin": "yardım et"
+      },
+      "context": "user",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Turn the Turkish question form into its imperative, keeping the verb."
+    },
+    {
+      "name": "tr_background_removal",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:bildiğiniz gibi|bildiğin gibi|daha önce konuştuğumuz gibi|bahsettiğim gibi|söylediğim gibi)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Drop the context restatement preamble."
+    },
+    {
+      "name": "tr_scope_note",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:şunu belirteyim ki|not olarak|dikkat edilmesi gereken)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "NB: ",
+      "context": "all",
+      "category": "context",
+      "minIntensity": "lite",
+      "description": "Collapse a scope note to a short label."
+    }
+  ]
+}

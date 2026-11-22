@@ -27,11 +27,12 @@ Current shipped packs (verified against `rules/` directory contents):
 | Portuguese (Brazil) | `rules/pt-BR/` | `context`, `dedup`, `filler`, `structural`, `ultra` |
 | Indonesian          | `rules/id/`    | `context`, `dedup`, `filler`, `structural`, `ultra` |
 | Italian             | `rules/it/`    | `context`, `dedup`, `filler`, `structural`, `ultra` |
+| Turkish             | `rules/tr/`    | `context`, `dedup`, `filler`, `structural`, `ultra` |
 | German              | `rules/de/`    | `context`, `filler`, `structural`                   |
 | French              | `rules/fr/`    | `context`, `filler`, `structural`                   |
 | Japanese            | `rules/ja/`    | `context`, `filler`, `structural`                   |
 
-> **Parity note:** `en`, `es`, `pt-BR`, `id`, and `it` packs have the full 5 categories; `de`, `fr`, `ja` ship 3 categories. The missing `dedup` and `ultra` categories silently fall back to the English built-ins. Contributions welcome to add `dedup.json` and `ultra.json` for the smaller packs.
+> **Parity note:** `en`, `es`, `pt-BR`, `id`, `it`, and `tr` packs have the full 5 categories; `de`, `fr`, `ja` ship 3 categories. The missing `dedup` and `ultra` categories silently fall back to the English built-ins. Contributions welcome to add `dedup.json` and `ultra.json` for the smaller packs.
 >
 > The `pt-BR` pack is based on **[Troglodita](https://github.com/leninejunior/troglodita)** by Lenine Júnior — a compression system designed from scratch for Brazilian Portuguese grammar (pleonasm reduction, PT-BR filler removal, technical abbreviations for the dev BR community).
 >
@@ -56,12 +57,12 @@ Compression settings can include:
     "enabled": true,
     "defaultLanguage": "en",
     "autoDetect": true,
-    "enabledPacks": ["en", "pt-BR", "es", "id", "de", "fr", "ja"]
+    "enabledPacks": ["en", "pt-BR", "es", "id", "de", "fr", "ja", "tr"]
   },
   "cavemanConfig": {
     "language": "en",
     "autoDetectLanguage": true,
-    "enabledLanguagePacks": ["en", "pt-BR", "es", "id", "de", "fr", "ja"]
+    "enabledLanguagePacks": ["en", "pt-BR", "es", "id", "de", "fr", "ja", "tr"]
   }
 }
 ```
@@ -104,7 +105,7 @@ curl -X POST http://localhost:20128/api/compression/preview \
 
 ## SHARED_BOUNDARIES (v3.8.0)
 
-All 6 language packs received a `SHARED_BOUNDARIES` clause in v3.8.0 that is applied at every
+Every language pack received a `SHARED_BOUNDARIES` clause in v3.8.0 that is applied at every
 Caveman intensity (LITE, FULL, ULTRA). It instructs the engine to preserve these patterns verbatim,
 regardless of surrounding filler removal:
 

@@ -246,7 +246,7 @@ curl -X PUT $OMNIROUTE_URL/api/settings/compression \
 
 ## Language packs (Caveman)
 
-Caveman supports language-aware rules for pt-BR, es, de, fr, ja:
+Caveman supports language-aware rules for en, pt-BR, es, de, fr, ja, id, it, hu, ru, tr and zh:
 
 ```bash
 curl -X PUT $OMNIROUTE_URL/api/settings/compression \

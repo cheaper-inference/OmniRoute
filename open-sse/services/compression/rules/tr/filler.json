@@ -1,0 +1,126 @@
+{
+  "language": "tr",
+  "category": "filler",
+  "rules": [
+    {
+      "name": "tr_polite_framing",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:lütfen|rica ediyorum|rica ederim|mümkünse|eğer mümkünse|zahmet olmazsa|acaba)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Remove Turkish polite request framing while keeping the requested action."
+    },
+    {
+      "name": "tr_pleasantries",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:merhaba|selam|günaydın|iyi günler|iyi akşamlar|teşekkürler|teşekkür ederim|sağ ol|sağ olun|kolay gelsin|eline sağlık|görüşürüz|hoşça kal)(?![\\p{L}\\p{N}_])[,!.]?\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop greetings and farewells that carry no information."
+    },
+    {
+      "name": "tr_hedging",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:sanırım|sanıyorum|galiba|muhtemelen|bana göre|bence|zannedersem|görünüşe göre|öyle görünüyor ki)(?![\\p{L}\\p{N}_])\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Remove Turkish hedging whose technical claim stays in the sentence."
+    },
+    {
+      "name": "tr_filler_adverbs",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:aslında|esasen|temel olarak|gerçekten|hakikaten|basitçe|kısacası|işte|tabii ki|elbette|kesinlikle|bir şekilde|bir anlamda)(?![\\p{L}\\p{N}_])\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop Turkish filler adverbs that add no meaning."
+    },
+    {
+      "name": "tr_self_reference",
+      "pattern": "^(?:ben\\s+)?(?:şunu\\s+)?(?:yapmaya çalışıyorum|anlamaya çalışıyorum|çözmeye çalışıyorum|kurmaya çalışıyorum|anlamadım)\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop the self-referential opener in a user request."
+    },
+    {
+      "name": "tr_verbose_instructions",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:detaylı bir açıklama ver|ayrıntılı olarak açıkla|ayrıntılı açıkla|kapsamlı bir şekilde anlat|uzun uzun anlat|detaylıca anlat)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "açıkla",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Collapse the verbose explanation request to the bare action."
+    },
+    {
+      "name": "tr_excessive_gratitude",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:çok teşekkür ederim|şimdiden teşekkürler|teşekkürü borç bilirim|minnettarım)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop repeated gratitude phrases."
+    },
+    {
+      "name": "tr_softeners",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:vaktin olduğunda|müsait olduğunda|uygun olduğunda|sakıncası yoksa|sorun değilse)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop conditional softeners around a request."
+    },
+    {
+      "name": "tr_qualifier_removal",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:biraz|birazcık|oldukça|epey|fazlaca|bir hayli)\\s+(?=[\\p{L}])",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop degree qualifiers in front of an adjective."
+    },
+    {
+      "name": "tr_uncertainty_fillers",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:herhalde|sanki|bir bakıma|aşağı yukarı|az çok)(?![\\p{L}\\p{N}_])\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop Turkish uncertainty fillers."
+    },
+    {
+      "name": "tr_assistant_fillers",
+      "pattern": "^(?:İşte|işte|Aşağıda|aşağıda|Burada|burada)\\s+(?:bir\\s+|bu\\s+)?",
+      "flags": "giu",
+      "replacement": "",
+      "context": "assistant",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop the assistant's introductory filler."
+    },
+    {
+      "name": "tr_permission_openers",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:rica etsem|müsaadenle|izin verirsen|istersen)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Drop permission-seeking openers."
+    }
+  ]
+}

@@ -89,6 +89,11 @@ export const CAVEMAN_INSTRUCTION_BY_LANGUAGE = {
     full: `回答干脆紧凑。可用短句。所有技术内容、代码、错误、URL 和标识符保持原样。${SHARED_BOUNDARIES}`,
     ultra: `回答极度紧凑。用简短技术表述和常见缩写如 DB/auth/config/req/res/fn。绝不缩写代码符号、API 名、错误串、URL 或标识符。${SHARED_BOUNDARIES}`,
   },
+  tr: {
+    lite: `Kısa yanıtla. Dolgu sözleri, nezaket kalıplarını, tereddüt belirten ifadeleri çıkar. Tam cümleleri, teknik terimleri, kodu, hataları, URL'leri ve tanımlayıcıları birebir koru. ${SHARED_BOUNDARIES}`,
+    full: `Akıllı mağara insanı gibi kısa ve yoğun yanıtla. Dolgu sözleri, nezaket kalıplarını ve tereddüt içeren ifadeleri çıkar. Eksik cümleler olabilir; kısa eş anlamlıları seç. Tüm teknik içeriği, kodu, hataları, URL'leri ve tanımlayıcıları birebir koru. ${SHARED_BOUNDARIES}`,
+    ultra: `Aşırı kısa yanıtla. Azami sıkıştırma. Telgraf üslubu. Yaygın kısaltmaları kullan (DB/auth/config/req/res/fn/impl), bağlaçları at, nedensellik için oku kullan (X → Y). Tek sözcük yetiyorsa tek sözcük yaz. Kod sembollerini, API adlarını, hata metinlerini, URL'leri ve tanımlayıcıları asla kısaltma. ${SHARED_BOUNDARIES}`,
+  },
 } as const;
 
 const CAVEMAN_OUTPUT_MARKER = "[OmniRoute Caveman Output Mode]";

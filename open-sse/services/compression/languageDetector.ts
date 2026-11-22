@@ -24,6 +24,11 @@ const LANGUAGE_HINTS: Record<string, RegExp[]> = {
   id: [
     /(?<![\p{L}\p{N}])(?:saya|kamu|anda|dengan|untuk|yang|tidak|bisa|terima\s+kasih|dari)(?![\p{L}\p{N}])/iu,
   ],
+  // Türkçe ipuçları: yalnız Türkçeye özgü yazımlar seçildi. "bir", "var", "yok"
+  // gibi İngilizce/Almanca metinle çakışabilecek kısa sözcükler listeye alınmadı.
+  tr: [
+    /(?<![\p{L}\p{N}])(?:lütfen|dosya|hata|nasıl|neden|çalışmıyor|düzelt|değişken|veritabanı|yapılandırma|fonksiyon|bağımlılık|değil|için|şu|çünkü)(?![\p{L}\p{N}])/iu,
+  ],
 };
 
 /**

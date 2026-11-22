@@ -234,7 +234,7 @@ in the strategy selector via its `id`. Test integration by composing it in a sta
 
 ## Creating Language Packs
 
-Caveman-style compression uses **language-specific rule packs** to handle fillers, hedging, and verbose patterns in each natural language. OmniRoute ships with **6 language packs**: `en`, `es`, `fr`, `de`, `ja`, `pt-BR`.
+Caveman-style compression uses **language-specific rule packs** to handle fillers, hedging, and verbose patterns in each natural language. OmniRoute ships with **11 language packs**: `en`, `es`, `fr`, `de`, `ja`, `pt-BR`, `id`, `it`, `hu`, `ru`, `tr`, plus a `zh` input-side pack.
 
 ### Pack Structure
 
@@ -252,6 +252,7 @@ open-sse/services/compression/rules/
 ├── fr/  (same structure)
 ├── de/  (same structure)
 ├── ja/  (same structure)
+├── tr/  (same structure)
 └── pt-BR/ (same structure)
 ```
 

@@ -515,7 +515,7 @@ together and are injected in catalog order.
 
 | Style                          | `id`            | What it does                                                                                                                                                                                                                           | Instruction languages                         |
 | ------------------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Terse prose                    | `terse-prose`   | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse prose                    | `terse-prose`   | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi, tr |
 | Less code                      | `less-code`     | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
 | Ponytail (lazy senior dev)     | `ponytail`      | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
 | I have ADHD (action-first)     | `i-have-adhd`   | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
@@ -605,7 +605,7 @@ with the `[OmniRoute Output Styles]` marker, where the legacy `applyCavemanOutpu
 injector wrote `[OmniRoute Caveman Output Mode]`. Below the marker, the text matches the
 legacy injection in en, pt-BR, es, de, fr, it, ru, id and vi; in ja and zh it carries one
 extra space before the boundaries clause. `terse-prose` translates into pt-BR, es, de,
-fr, it, ru, zh, ja, id and vi, so a request whose resolved language is `hu` gets the
+fr, it, ru, zh, ja, id, vi and tr, so a request whose resolved language is `hu` gets the
 English text where the legacy injector used its Hungarian one.
 
 Output-style language selection (`resolveOutputStyleLanguage()` in
@@ -614,7 +614,7 @@ latest user message in the request's `messages` array that has text (string cont
 the `text` of its content parts) and runs the Caveman engine's detector
 (`detectCompressionLanguage()`) on it. The detector returns `zh` for text with Han
 characters and no kana; otherwise it returns whichever of `it`, `pt-BR`, `es`, `de`,
-`fr`, `ru`, `ja`, `hu` and `id` has the most hint matches, and `en` when none match —
+`fr`, `ru`, `ja`, `hu`, `id` and `tr` has the most hint matches, and `en` when none match —
 text it cannot classify gets English, never `defaultLanguage`, and `vi` is never
 detected although the styles ship `vi` text. A Responses API body keeps its turns in
 `input`, which is not sampled, so it gets `defaultLanguage`, then English. When no user

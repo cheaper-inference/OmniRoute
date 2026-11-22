@@ -1,0 +1,126 @@
+{
+  "language": "tr",
+  "category": "structural",
+  "rules": [
+    {
+      "name": "tr_purpose_phrase",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:amacıyla|maksadıyla|gayesiyle|hedefiyle)(?![\\p{L}\\p{N}_])\\s*",
+      "flags": "giu",
+      "replacement": "için ",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "description": "Replace the long purpose conjunction with its short form."
+    },
+    {
+      "name": "tr_redundant_reference",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:söz konusu|bahsi geçen|adı geçen)(?![\\p{L}\\p{N}_])\\s+",
+      "flags": "giu",
+      "replacement": "bu ",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "description": "Replace the long demonstrative with `bu`."
+    },
+    {
+      "name": "tr_place_redundancy",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:içerisinde|dahilinde|sınırları içinde)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "içinde",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "description": "Replace the long locative with its short form."
+    },
+    {
+      "name": "tr_connectors",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:bunun yanı sıra|buna ek olarak|ek olarak|ilaveten)(?![\\p{L}\\p{N}_])[,]?\\s*",
+      "flags": "giu",
+      "replacement": "ayrıca ",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "description": "Collapse a long connector to one word."
+    },
+    {
+      "name": "tr_necessity",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:gerekmektedir|gerekmekte|zaruridir)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "gerekli",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "description": "Collapse the formal necessity mood to a short form."
+    },
+    {
+      "name": "tr_causal_connector",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:bu nedenle|bu sebeple|bundan dolayı|bu yüzden)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "bu yüzden",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "description": "Normalize causal connectors to one form."
+    },
+    {
+      "name": "tr_emphasis",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:çok fazla|son derece|fevkalade|müthiş derecede|aşırı derecede)(?![\\p{L}\\p{N}_])\\s+(?=[\\p{L}])",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "full",
+      "description": "Drop the intensifier in front of an adjective."
+    },
+    {
+      "name": "tr_list_conjunction",
+      "pattern": ",?\\s*(?:ve ayrıca|ayrıca da|ve bunun yanında)\\s*",
+      "flags": "giu",
+      "replacement": ", ",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "full",
+      "description": "Collapse the list conjunction to a comma."
+    },
+    {
+      "name": "tr_redundant_directive",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:unutmayın ki|unutmayın|aklınızda olsun ki|dikkat edin ki)(?![\\p{L}\\p{N}_])\\s*",
+      "flags": "giu",
+      "replacement": "",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "full",
+      "description": "Drop the directive wrapping a warning."
+    },
+    {
+      "name": "tr_recommendation",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:tavsiye ederim ki|öneririm ki|tavsiyem şu ki|şunu öneririm)(?![\\p{L}\\p{N}_])\\s*[:.]?\\s*",
+      "flags": "giu",
+      "replacement": "Öneri: ",
+      "context": "assistant",
+      "category": "structural",
+      "minIntensity": "full",
+      "description": "Collapse recommendation framing to a label."
+    },
+    {
+      "name": "tr_possibility",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:olası görünüyor|ihtimal dahilinde|mümkün görünüyor)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "belki",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "full",
+      "description": "Collapse the possibility phrase to one word."
+    },
+    {
+      "name": "tr_frame_verb",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:bulunmaktadır|yer almaktadır)(?![\\p{L}\\p{N}_])",
+      "flags": "giu",
+      "replacement": "var",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "full",
+      "description": "Collapse the formal existence verb to its short form."
+    }
+  ]
+}

@@ -9,10 +9,10 @@ import {
 import { applyRulesToText } from "../../../open-sse/services/compression/caveman.ts";
 import { getRulesForContext } from "../../../open-sse/services/compression/cavemanRules.ts";
 
-const LANGUAGES = ["pt-BR", "es", "de", "fr", "ja", "id", "hu"];
+const LANGUAGES = ["pt-BR", "es", "de", "fr", "ja", "id", "hu", "tr"];
 
 describe("Caveman language packs", () => {
-  it("ships 7 language packs with at least 15 rules each", () => {
+  it("ships 8 language packs with at least 15 rules each", () => {
     for (const language of LANGUAGES) {
       const rules = loadAllRulesForLanguage(language, { refresh: true });
       assert.ok(rules.length >= 15, `${language} expected 15+ rules, got ${rules.length}`);
@@ -39,6 +39,7 @@ describe("Caveman language packs", () => {
     assert.equal(detectCompressionLanguage("このコードを修正してください"), "ja");
     assert.equal(detectCompressionLanguage("bisa tolong jelaskan tentang database ini"), "id");
     assert.equal(detectCompressionLanguage("kérlek javítsd ezt a hibát a kódban"), "hu");
+    assert.equal(detectCompressionLanguage("lütfen bu dosyadaki hatayı düzelt"), "tr");
   });
 
   it("applies non-English rule packs to golden samples", () => {
@@ -109,6 +110,19 @@ describe("Caveman language packs", () => {
     assert.ok(text.includes("src/auth.ts"));
   });
 
+  it("applies Turkish rules without touching technical terms", () => {
+    const trRules = getRulesForContext("user", "ultra", "tr");
+    const { text } = applyRulesToText(
+      "Lütfen veritabanı ve yapılandırma hatasını src/auth.ts dosyasında düzelt.",
+      trRules
+    );
+
+    assert.ok(!text.toLowerCase().includes("lütfen"));
+    assert.ok(text.includes("DB"));
+    assert.ok(text.includes("config"));
+    assert.ok(text.includes("src/auth.ts"));
+  });
+
   it("builds localized output mode instructions", () => {
     const config = { enabled: true, intensity: "full" as const, autoClarity: true };
 
@@ -119,5 +133,6 @@ describe("Caveman language packs", () => {
     assert.match(buildCavemanOutputInstruction(config, "ja"), /回答/);
     assert.match(buildCavemanOutputInstruction(config, "id"), /Jawab/);
     assert.match(buildCavemanOutputInstruction(config, "hu"), /Válaszolj/);
+    assert.match(buildCavemanOutputInstruction(config, "tr"), /Kısa|mağara/);
   });
 });

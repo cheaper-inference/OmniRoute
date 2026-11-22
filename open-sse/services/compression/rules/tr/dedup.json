@@ -1,0 +1,56 @@
+{
+  "language": "tr",
+  "category": "dedup",
+  "rules": [
+    {
+      "name": "tr_repeated_context",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:daha önce konuştuğumuz gibi|yukarıda bahsettiğimiz gibi|bahsettiğim gibi|dediğim gibi|hatırlarsan)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "Yukarı bkz. ",
+      "context": "all",
+      "category": "dedup",
+      "minIntensity": "lite",
+      "description": "Replace a reference to earlier context with a compact pointer."
+    },
+    {
+      "name": "tr_repeated_question",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:aynı soruyu tekrar soruyorum|bunu daha önce sormuştum|aynı soru)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "[aynı soru] ",
+      "context": "user",
+      "category": "dedup",
+      "minIntensity": "lite",
+      "description": "Collapse repeated-question framing."
+    },
+    {
+      "name": "tr_reestablished_context",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:yukarıdaki koda dönersek|yukarıdaki konuya dönersek|konuya dönersek|kaldığımız yerden devam edersek)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "Re: ",
+      "context": "all",
+      "category": "dedup",
+      "minIntensity": "lite",
+      "description": "Collapse context re-establishment framing."
+    },
+    {
+      "name": "tr_summary_replacement",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:özetle|kısaca özetlersek|özet olarak|toparlarsak|sonuç olarak)(?![\\p{L}\\p{N}_])[,.:]?\\s*",
+      "flags": "giu",
+      "replacement": "Özet: ",
+      "context": "assistant",
+      "category": "dedup",
+      "minIntensity": "lite",
+      "description": "Collapse summary framing to a label."
+    },
+    {
+      "name": "tr_restating",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:başka bir deyişle|diğer bir deyişle|yani demek istediğim|şöyle ki)(?![\\p{L}\\p{N}_])[,.]?\\s*",
+      "flags": "giu",
+      "replacement": "yani ",
+      "context": "all",
+      "category": "dedup",
+      "minIntensity": "full",
+      "description": "Collapse restatement framing to one word."
+    }
+  ]
+}
