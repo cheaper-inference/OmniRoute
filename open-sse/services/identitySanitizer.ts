@@ -3,6 +3,8 @@
 // Never touches user/assistant/tool messages, tool names, or tool-call arguments.
 // Paths/commands (~/.openclaw, `openclaw ...`, lowercase tokens) are left as-is on purpose.
 
+import { isUrlHostOrSubdomain } from "../utils/urlHost.ts";
+
 type Json = unknown;
 type Rec = Record<string, unknown>;
 
@@ -65,29 +67,32 @@ function stripMarkers(s: string): string {
   return out + s.slice(i);
 }
 
+const URL_RE = /https?:\/\/[^\s)"<>`\]]+/g;
+
 function stripUrls(s: string): string {
-  if (s.indexOf(".openclaw.ai") < 0) return s;
-  return s.replace(
-    /https?:\/\/(?:docs|community|www)?\.?openclaw\.ai[^\s)"<>`\]]*/g,
-    "(link omitted)"
-  );
+  if (s.indexOf("openclaw.ai") < 0) return s;
+  return s.replace(URL_RE, (u) => (isUrlHostOrSubdomain(u, "openclaw.ai") ? "(link omitted)" : u));
 }
 
-export function sanitizeText(s: string): string {
-  if (s.length < 8) return s;
-  const lower =
-    s.indexOf("OpenClaw") >= 0 ||
-    s.indexOf("OmniRoute") >= 0 ||
-    s.indexOf("openclaw") >= 0 ||
-    s.indexOf("OPENCLAW") >= 0;
-  if (!lower) return s;
+// Fenced blocks and inline code spans (commands, paths) are never rewritten.
+const CODE_RE = /(```[\s\S]*?```|`[^`\n]*`)/;
+
+function sanitizeProse(s: string): string {
   let t = stripMarkers(s);
   t = stripUrls(t);
   for (const [a, b] of LITERALS) if (t.indexOf(a) >= 0) t = t.split(a).join(b);
   t = wordSweep(t, "OpenClaw", "the platform");
   t = wordSweep(t, "OmniRoute", "the gateway");
-  t = wordSweep(t, "OPENCLAW", "PLATFORM");
-  return t;
+  return wordSweep(t, "OPENCLAW", "PLATFORM");
+}
+
+export function sanitizeText(s: string): string {
+  if (s.length < 8) return s;
+  if (!/OpenClaw|OmniRoute|openclaw|OPENCLAW/.test(s)) return s;
+  return s
+    .split(CODE_RE)
+    .map((part, i) => (i % 2 ? part : sanitizeProse(part)))
+    .join("");
 }
 
 function textBlocks(v: Json): Json {
@@ -114,70 +119,71 @@ function textBlocks(v: Json): Json {
   return v;
 }
 
-// Only `description` strings; names/required/type/enum untouched.
+// Keywords whose value is instance data, not a schema: never rewritten.
+const INSTANCE_KEYS = new Set(["enum", "const", "default", "examples", "example"]);
+// Keywords whose value maps arbitrary names -> schemas (a name may collide with a keyword).
+const NAME_MAP_KEYS = new Set(["properties", "patternProperties", "$defs", "definitions"]);
+
+function mapRec(v: Rec, fn: (k: string, x: Json) => Json): Rec {
+  let out: Rec | null = null;
+  for (const k of Object.keys(v)) {
+    const r = fn(k, v[k]);
+    if (r !== v[k]) (out ??= { ...v })[k] = r;
+  }
+  return out ?? v;
+}
+
+function schemaKey(k: string, x: Json, depth: number): Json {
+  if (INSTANCE_KEYS.has(k)) return x;
+  if (k === "description" && typeof x === "string") return sanitizeText(x);
+  if (NAME_MAP_KEYS.has(k) && isRec(x)) return mapRec(x, (_n, sub) => schemaDesc(sub, depth + 1));
+  return isRec(x) || Array.isArray(x) ? schemaDesc(x, depth + 1) : x;
+}
+
+// Only schema-position `description` strings; names/required/type/enum/default untouched.
 function schemaDesc(v: Json, depth = 0): Json {
   if (depth > 40) return v;
   if (Array.isArray(v)) {
-    let changed = false;
-    const out = v.map((x) => {
-      const r = schemaDesc(x, depth + 1);
-      if (r !== x) changed = true;
-      return r;
-    });
-    return changed ? out : v;
+    const out = v.map((x) => schemaDesc(x, depth + 1));
+    return out.some((x, i) => x !== v[i]) ? out : v;
   }
-  if (!isRec(v)) return v;
-  let out: Rec | null = null;
-  for (const k of Object.keys(v)) {
-    const x = v[k];
-    let r: Json = x;
-    if (k === "description" && typeof x === "string") r = sanitizeText(x);
-    else if (isRec(x) || Array.isArray(x)) r = schemaDesc(x, depth + 1);
-    if (r !== x) {
-      if (!out) out = { ...v };
-      out[k] = r;
-    }
-  }
-  return out ?? v;
+  return isRec(v) ? mapRec(v, (k, x) => schemaKey(k, x, depth)) : v;
+}
+
+function systemRoles(list: Json[]): Json[] {
+  const out = list.map((x) => {
+    if (!isRec(x) || (x.role !== "system" && x.role !== "developer")) return x;
+    const c = textBlocks(x.content);
+    return c === x.content ? x : { ...x, content: c };
+  });
+  return out.some((x, i) => x !== list[i]) ? out : list;
+}
+
+function kiroTools(cs: Json): Json {
+  if (!isRec(cs) || !isRec(cs.currentMessage) || !isRec(cs.currentMessage.userInputMessage))
+    return cs;
+  const uim = cs.currentMessage.userInputMessage;
+  const ctx = uim.userInputMessageContext;
+  if (!isRec(ctx) || !Array.isArray(ctx.tools)) return cs;
+  const t = schemaDesc(ctx.tools);
+  if (t === ctx.tools) return cs;
+  return {
+    ...cs,
+    currentMessage: {
+      ...cs.currentMessage,
+      userInputMessage: { ...uim, userInputMessageContext: { ...ctx, tools: t } },
+    },
+  };
 }
 
 function sanitizeOne(body: Rec): Rec {
   let out: Rec | null = null;
   const set = (k: string, v: Json) => {
-    if (v !== body[k]) {
-      if (!out) out = { ...body };
-      out[k] = v;
-    }
+    if (v !== body[k]) (out ??= { ...body })[k] = v;
   };
 
-  if (Array.isArray(body.messages)) {
-    let ch = false;
-    const m = body.messages.map((x) => {
-      if (isRec(x) && (x.role === "system" || x.role === "developer")) {
-        const c = textBlocks(x.content);
-        if (c !== x.content) {
-          ch = true;
-          return { ...x, content: c };
-        }
-      }
-      return x;
-    });
-    if (ch) set("messages", m);
-  }
-  if (Array.isArray(body.input)) {
-    let ch = false;
-    const m = body.input.map((x) => {
-      if (isRec(x) && (x.role === "system" || x.role === "developer")) {
-        const c = textBlocks(x.content);
-        if (c !== x.content) {
-          ch = true;
-          return { ...x, content: c };
-        }
-      }
-      return x;
-    });
-    if (ch) set("input", m);
-  }
+  if (Array.isArray(body.messages)) set("messages", systemRoles(body.messages));
+  if (Array.isArray(body.input)) set("input", systemRoles(body.input));
   if (body.system !== undefined) set("system", textBlocks(body.system));
   if (typeof body.instructions === "string") set("instructions", sanitizeText(body.instructions));
   for (const k of ["systemInstruction", "system_instruction"]) {
@@ -189,22 +195,8 @@ function sanitizeOne(body: Rec): Rec {
   }
   if (Array.isArray(body.tools)) set("tools", schemaDesc(body.tools));
   // Kiro: tool specs live under conversationState.currentMessage.userInputMessage.userInputMessageContext.tools
-  const cs = body.conversationState;
-  if (isRec(cs) && isRec(cs.currentMessage) && isRec(cs.currentMessage.userInputMessage)) {
-    const uim = cs.currentMessage.userInputMessage;
-    const ctx = uim.userInputMessageContext;
-    if (isRec(ctx) && Array.isArray(ctx.tools)) {
-      const t = schemaDesc(ctx.tools);
-      if (t !== ctx.tools)
-        set("conversationState", {
-          ...cs,
-          currentMessage: {
-            ...cs.currentMessage,
-            userInputMessage: { ...uim, userInputMessageContext: { ...ctx, tools: t } },
-          },
-        });
-    }
-  }
+  if (body.conversationState !== undefined)
+    set("conversationState", kiroTools(body.conversationState));
   return out ?? body;
 }
 
