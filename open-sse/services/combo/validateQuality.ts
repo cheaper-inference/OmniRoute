@@ -15,6 +15,7 @@ import {
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { normalizeStreamFailurePayload } from "../../utils/streamErrorFormat.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
+import { hasAnyReasoningSignal } from "../../utils/reasoningFields.ts";
 import { evaluateResponseValidation, type ResponseValidationConfig } from "./responseValidation.ts";
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
@@ -360,6 +361,50 @@ function describeStreamingFailure(failure: StreamingUpstreamFailure | null): str
 type StreamingPeekOutcome = "content" | "error" | null;
 
 /**
+ * Separate "usable output" from "the model is still thinking" inside an OpenAI
+ * chat-completions chunk.
+ *
+ * `hasOpenAICompatibleStreamValue` (streamHelpers) answers a single question —
+ * "is this a known payload with value?" — and counts `reasoning_content` as
+ * value. That is right for payload detection, but wrong as a combo verdict: a
+ * model that burns the entire output budget thinking emits reasoning chunks and
+ * then closes with `finish_reason: "length"` and `content: ""`, which used to be
+ * accepted on the first reasoning chunk (no failover, empty turn for the client).
+ *
+ * Records the terminal `finish_reason` as a side effect so the closing branch can
+ * tell a truncated reasoning-only turn from a completed one.
+ */
+function classifyOpenAiChatChunk(
+  parsed: Record<string, unknown>,
+  onFinishReason: (reason: string) => void
+): "content" | "reasoning" | null {
+  const choices = Array.isArray(parsed.choices) ? parsed.choices : [];
+  let reasoning = false;
+  let usable = false;
+  for (const choice of choices) {
+    if (!isRecord(choice)) continue;
+    if (typeof choice.finish_reason === "string" && choice.finish_reason) {
+      onFinishReason(choice.finish_reason);
+    }
+    const delta = isRecord(choice.delta) ? choice.delta : null;
+    if (!delta) continue;
+    if (typeof delta.refusal === "string" && delta.refusal.length > 0) {
+      usable = true;
+    } else if (Array.isArray(delta.content)) {
+      if (delta.content.length > 0) usable = true;
+    } else if (typeof delta.content === "string" && delta.content.length > 0) {
+      usable = true;
+    } else if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) {
+      usable = true;
+    } else if (hasAnyReasoningSignal(delta)) {
+      reasoning = true;
+    }
+  }
+  if (usable) return "content";
+  return reasoning ? "reasoning" : null;
+}
+
+/**
  * Validate that a successful (HTTP 200) non-streaming response actually contains
  * meaningful content. Returns { valid: true } or { valid: false, reason }.
  *
@@ -460,6 +505,11 @@ export async function validateResponseQuality(
     };
     // #7285: OpenAI-shape lifecycle tracking, parallel to `sse` above.
     const openAi: OpenAiLifecycleFlags = { hasChoicePayload: false, hasTerminalMarker: false };
+    // Reasoning-only tracking: the model may spend the whole output budget
+    // thinking and close with `finish_reason: length` and no content. The peek
+    // must not call that a success on the first reasoning chunk.
+    let sawReasoningOnly = false;
+    let terminalFinishReason: string | null = null;
     // User log 1784230812441-bf3789: the previous `!sawAnyBytes` gate below let
     // ANY byte — even unparseable garbage with no SSE framing at all — pass
     // combo failover through. These two flags are tracked in parallel to
@@ -568,6 +618,17 @@ export async function validateResponseQuality(
         }
 
         if (isTerminalUsageOnlyChunk(parsed, eventType)) sawTerminator = true;
+
+        if (Array.isArray(parsed.choices)) {
+          const openAiVerdict = classifyOpenAiChatChunk(parsed, (reason) => {
+            terminalFinishReason = reason;
+          });
+          if (openAiVerdict === "content") return "content";
+          if (openAiVerdict === "reasoning") {
+            sawReasoningOnly = true;
+            continue;
+          }
+        }
 
         if (isKnownNonClaudeStreamPayload(parsed, eventType)) {
           return "content";
@@ -747,16 +808,36 @@ export async function validateResponseQuality(
             return { valid: false, reason: "streaming openai truncated without finish_reason" };
           }
 
+          // Reasoning-only turn hit the output ceiling: the model spent the
+          // whole budget thinking (finish_reason=length/max_tokens) and closed
+          // with content="" and no tool_calls. Forwarding it hands the caller an
+          // empty assistant message — the exact shape of the 2026-11-20
+          // incident (1024 reasoning-only tokens, finish=length) — so fail over
+          // to the next combo target instead. Mirrors the non-streaming #3587
+          // arm below. A reasoning-only turn that stopped any other way keeps
+          // the historical pass-through behavior.
+          if (sawReasoningOnly) {
+            if (terminalFinishReason === "length" || terminalFinishReason === "max_tokens") {
+              log.warn?.(
+                "COMBO",
+                "Streaming OpenAI-shape response spent its whole output budget on reasoning with no content — marking as invalid for combo failover"
+              );
+              return {
+                valid: false,
+                reason: "streaming reasoning-only turn truncated at the output ceiling",
+              };
+            }
+            return { valid: true, clonedResponse: buildReplayResponse(reader) };
+          }
+
           // Issue #10404: an OpenAI-shape stream that DOES reach a terminal
           // marker (finish_reason / [DONE]) but never carried any real
           // content, reasoning, or tool_calls in any chunk — an upstream
           // that burns the whole generation budget and returns
           // completion_tokens:0 with an HTTP 200. Real content exits early
-          // via `isKnownNonClaudeStreamPayload` detecting content/reasoning/
-          // tool_calls (`hasOpenAICompatibleStreamValue`),
-          // so a tool_calls-only stream already exits early via the
-          // `outcome === "content"` branch above and never reaches here —
-          // this branch only fires on genuinely empty completions.
+          // via the `outcome === "content"` branch above, so a tool_calls-only
+          // stream never reaches here — this branch only fires on genuinely
+          // empty completions.
           if (openAi.hasChoicePayload && openAi.hasTerminalMarker) {
             if (permitsEmptyTurn())
               return { valid: true, clonedResponse: buildReplayResponse(reader) };
@@ -846,6 +927,13 @@ export async function validateResponseQuality(
           errMsg.includes("used already"))
       ) {
         return { valid: false, reason: "stream locked or disturbed" };
+      }
+      // Reasoning-only bytes are still buffered, never forwarded: a read failure
+      // after them keeps the historical pass-through verdict (replay the prefix)
+      // instead of failing over. Failover is reserved for the clean close at the
+      // output ceiling, handled in the done branch above.
+      if (sawReasoningOnly) {
+        return { valid: true, clonedResponse: buildReplayResponse(reader) };
       }
       if (preContentTransportRecovery) {
         const disposition = classifyPreContentReadFailure(streamErr);

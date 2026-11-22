@@ -21,6 +21,7 @@ import {
   normalizeComboStep,
 } from "../../../src/lib/combos/steps.ts";
 import { getProviderByAlias, getProviderById } from "../../../src/shared/constants/providers.ts";
+import { getObservedOutputCeiling } from "../../../src/shared/constants/observedOutputCeilings.ts";
 import { resolveSearchProvider } from "../../config/searchRegistry.ts";
 import { estimateTokens } from "../contextManager.ts";
 import { containsMediaKind } from "../../utils/mediaParts.ts";
@@ -35,7 +36,11 @@ import { parseModel, stripContextWindowSuffix } from "../model.ts";
 import { dedupeTargetsByExecutionKey, isRecord } from "./comboData.ts";
 import { isComboModelVisible } from "./comboVisibility.ts";
 import { getTargetProvider, MAX_COMBO_DEPTH } from "./comboPredicates.ts";
-import { evaluateContextLimit, getModelContextOverrideValue } from "./contextOverrideGate.ts";
+import {
+  evaluateContextLimit,
+  getModelContextOverrideSource,
+  getModelContextOverrideValue,
+} from "./contextOverrideGate.ts";
 import {
   normalizeModelEntry,
   orderTargetsForWeightedFallback,
@@ -547,6 +552,58 @@ function exceedsKnownOutputLimit(
   return maxOutputTokens < requestedOutputTokens;
 }
 
+/**
+ * A ceiling measured on the live upstream (OBSERVED_OUTPUT_CEILINGS) is a hard
+ * plan-level cap that also pays for reasoning tokens. Asking for the whole cap
+ * leaves zero headroom for the visible answer: the model can spend every token
+ * thinking and stop with `finish_reason: "length"` and no content at all —
+ * measured on devin-desktop/swe-2-flash-medium, where a `max_completion_tokens:
+ * 1024` agentic turn returned 1024 reasoning tokens, 0 content characters and
+ * `has_content = 0`, killing the client turn. Catalog `maxOutputTokens` keeps
+ * the exact-equality exemption above: a client that sends a model's documented
+ * cap is not asking for an impossible reply, but a measured cap is proof.
+ */
+function exhaustsObservedOutputCeiling(
+  requestedOutputTokens: number,
+  observedCeiling: number | null
+): boolean {
+  if (requestedOutputTokens <= 0 || observedCeiling === null) return false;
+  return observedCeiling <= requestedOutputTokens;
+}
+
+function observedOutputCeilingFor(target: ResolvedComboTarget): number | null {
+  return getObservedOutputCeiling(target.providerId || target.provider || null, target.modelStr);
+}
+
+/**
+ * Move targets whose measured output ceiling has no headroom for the requested
+ * budget behind the ones that do, IN PLACE, without removing any of them.
+ *
+ * A measured ceiling is a hard plan cap that also pays for reasoning tokens, so
+ * a request asking for the whole cap can end with `finish_reason: "length"` and
+ * no visible content at all (devin-desktop/swe-2-flash-medium: 1024 requested,
+ * 1024 reasoning, 0 content — the client turn ended empty, TothBoost 31/32).
+ * Demoting instead of rejecting keeps a combo whose only members are capped
+ * answering short requests, and keeps the capped target as the #6238 last-resort
+ * tier when every other member is runtime-unavailable.
+ */
+function demoteZeroHeadroomTargets(
+  compatible: ResolvedComboTarget[],
+  requestedOutputTokens: number
+): void {
+  if (requestedOutputTokens <= 0 || compatible.length < 2) return;
+  const withHeadroom: ResolvedComboTarget[] = [];
+  const zeroHeadroom: ResolvedComboTarget[] = [];
+  for (const target of compatible) {
+    const ceiling = observedOutputCeilingFor(target);
+    if (exhaustsObservedOutputCeiling(requestedOutputTokens, ceiling)) zeroHeadroom.push(target);
+    else withHeadroom.push(target);
+  }
+  if (withHeadroom.length === 0 || zeroHeadroom.length === 0) return;
+  compatible.length = 0;
+  compatible.push(...withHeadroom, ...zeroHeadroom);
+}
+
 function hasKnownCompatibleContextLimit(
   target: ResolvedComboTarget,
   requirements: RequestCompatibilityRequirements
@@ -577,12 +634,20 @@ const OVERRIDE_REJECT_TRUST_MARGIN = 5;
  * that rejected it is a heuristic known to overstate repetitive content by a
  * similar multiple — so a near-boundary override rejection is more likely
  * estimate noise than a genuine overflow.
+ *
+ * Only a `manual` (operator-declared) override carries that trust. An
+ * `auto:discovery` override is a machine measurement of the same upstream
+ * window a catalog entry describes, so it must not outrank a sibling that is
+ * known to FIT this request: doing so routed a measured 465k-token request to
+ * a 262k-window target (1.78x over, well inside the 5x trust margin), which
+ * then had to purge 66% of the conversation via `purify_history` to fit.
  */
 function isNearBoundaryOverrideReject(
   target: ResolvedComboTarget,
   requirements: RequestCompatibilityRequirements
 ): boolean {
   if (requirements.requiredContextTokens <= 0) return false;
+  if (getModelContextOverrideSource(target.modelStr) !== "manual") return false;
   const override = getModelContextOverrideValue(target.modelStr);
   if (override == null || override <= 0) return false;
   if (override >= requirements.requiredContextTokens) return false;
@@ -894,6 +959,7 @@ export function filterTargetsByRequestCompatibility(
     const reasons = targetReasons.get(target) || [];
     return !reasons.some(isHardReason);
   });
+  demoteZeroHeadroomTargets(compatible, requirements.requestedOutputTokens);
   const hadKnownTooSmallContextTarget = rejected.some((entry) =>
     entry.reasons.includes("context_window")
   );

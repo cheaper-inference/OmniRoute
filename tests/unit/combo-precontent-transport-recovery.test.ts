@@ -534,7 +534,6 @@ for (const phase of [
 
 const boundaries: Array<[string, string]> = [
   ["text", frame({ choices: [{ delta: { content: "hello" } }] })],
-  ["reasoning", frame({ choices: [{ delta: { reasoning_content: "thinking" } }] })],
   [
     "encrypted reasoning item",
     frame({
@@ -602,6 +601,32 @@ for (const [name, prefix] of boundaries) {
     assert.doesNotMatch(JSON.stringify(warnings), /must-stay-private/);
   });
 }
+// The combo peek now reads PAST `reasoning_content`: a turn that only thinks and
+// then closes at the output ceiling (`finish_reason: length`, `content: ""`) must
+// fail over instead of passing (2026-11-20 incident). The cost of that decision is
+// that a read failure arriving after reasoning lands inside the peek, so this case
+// gets its own expectation: the verdict is still a pass-through (a sibling request
+// is never replayed), but the failing read is consumed by the peek, so the caller's
+// branch surfaces the error instead of the buffered prefix.
+test("quality passes an ECONNRESET that lands after reasoning-only output", async () => {
+  const prefix = frame({ choices: [{ delta: { reasoning_content: "thinking" } }] });
+  assertScannerVeto(prefix, true);
+  const source = cut(prefix, coded("ECONNRESET", "no usable content secret=must-stay-private"));
+  const result = await validateResponseQuality(
+    source.clone(),
+    true,
+    quiet,
+    null,
+    null,
+    false,
+    true
+  );
+  assert.equal(result.valid, true);
+  assert.equal(result.upstreamFailure, undefined);
+  await rejectReturnedStream(source);
+  void result.clonedResponse?.body?.cancel().catch(noop);
+  assert.doesNotMatch(JSON.stringify(result), /must-stay-private/);
+});
 for (const route of ["priority", "round-robin", "runtime", "pin"] as const) {
   test(`${route}: useful output preserves its payload and vetoes coded Cursor errors`, () =>
     assertRouteVeto(route, boundaries[0][1], 0));

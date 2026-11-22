@@ -3373,13 +3373,22 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (summaryToolCalls.length > 0) {
                   message.tool_calls = summaryToolCalls;
                 }
-                // Hardening: log empty assistant response after tool completion
-                // for observability — helps diagnose Copilot "Sorry, no response was returned"
+                // Observability only: a tool-call turn with no prose is the NORMAL
+                // shape for an agent (the model is choosing a tool, not writing).
+                // Kept at debug level so real empty answers stay visible in logs
+                // instead of drowning under thousands of expected tool-only turns
+                // (734 such warns in one day, all false positives).
                 if (summaryHasToolCalls && !content.trim() && !reasoning.trim()) {
-                  console.warn(
-                    `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
+                  console.debug(
+                    `[STREAM] Tool-only assistant turn (no prose) (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
                   );
-                } else if (summaryHasToolCalls && !content.trim() && reasoning.trim()) {
+                }
+                // The OpenAI schema allows `content: null` on a tool-call turn, but some
+                // OpenAI-compatible clients (devin-desktop among them) read that as "the
+                // assistant returned nothing" and show an empty reply. Keep `content` a
+                // string whenever the turn carries tool calls — the calls live in
+                // `tool_calls`, so an empty string loses no information.
+                if (summaryHasToolCalls && !content.trim()) {
                   message.content = "";
                 }
 
@@ -3796,6 +3805,11 @@ export function createSSEStream(options: StreamOptions = {}) {
               const hasToolCalls = normalizedToolCalls.length > 0;
               if (hasToolCalls) {
                 message.tool_calls = normalizedToolCalls;
+                // See the passthrough branch above: a tool-call turn must not send
+                // `content: null`, or clients like devin-desktop render an empty reply.
+                if (!content.trim()) {
+                  message.content = "";
+                }
               }
               // Same rule as the passthrough branch: the translators record the
               // upstream's terminal reason on state.finishReason — keep it when it

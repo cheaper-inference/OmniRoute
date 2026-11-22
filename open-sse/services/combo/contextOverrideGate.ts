@@ -23,6 +23,7 @@
  */
 
 import { getResolvedModelContextOverride } from "../../../src/lib/modelCapabilities";
+import { getModelContextOverrideRecord } from "../../../src/lib/db/modelContextOverrides.ts";
 import { parseModel } from "../model.ts";
 
 /**
@@ -104,6 +105,40 @@ function resolveContextOverrideVerdict(
 export function getModelContextOverrideValue(modelStr: string | undefined): number | null {
   if (!modelStr) return null;
   return lookupOverrideWithEffortInheritance(modelStr);
+}
+
+/** Where a persisted context override came from. */
+export type ModelContextOverrideSourceKind = "manual" | "auto:discovery" | null;
+
+/**
+ * Source of the persisted override for `modelStr` (effort-suffix inheritance
+ * included), or `null` when the model has no override at all.
+ *
+ * The distinction matters at routing time: `manual` is an operator declaring
+ * real capacity, while `auto:discovery` is a machine measurement that is exactly
+ * as fallible as the catalog number it replaced. Only the former earns the
+ * #13870 "the chars/4 estimate is probably inflated" trust — see
+ * `isNearBoundaryOverrideReject` in comboStructure.ts. A discovered window that
+ * really is too small must lose to a sibling that is known to fit, otherwise a
+ * large request is routed to the small model and the compaction pass has to
+ * purge most of the conversation to make it fit.
+ */
+export function getModelContextOverrideSource(
+  modelStr: string | undefined
+): ModelContextOverrideSourceKind {
+  if (!modelStr) return null;
+  const parsed = parseModel(modelStr);
+  const modelId = typeof parsed.model === "string" ? parsed.model.trim() : "";
+  if (!modelId) return null;
+  const provider = parsed.provider || parsed.providerAlias || null;
+  if (!provider) return null;
+
+  const record = getModelContextOverrideRecord(provider, modelId);
+  if (record) return record.source;
+
+  const base = stripTrailingEffortSuffix(modelId);
+  if (!base || base === modelId) return null;
+  return getModelContextOverrideRecord(provider, base)?.source ?? null;
 }
 
 /**

@@ -12,6 +12,12 @@ import { gunzipSync } from "node:zlib";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { BaseExecutor, mergeUpstreamExtraHeaders, type ExecuteInput } from "./base.ts";
+import {
+  getObservedOutputCeiling,
+  OBSERVED_OUTPUT_CEILINGS,
+} from "../../src/shared/constants/observedOutputCeilings.ts";
+
+export const DEVIN_DESKTOP_PROVIDER_ID = "devin-desktop";
 
 export const DEVIN_DESKTOP_BASE_URL = "https://server.codeium.com";
 const DEVIN_DESKTOP_CHAT_PATH = "/exa.api_server_pb.ApiServerService/GetChatMessage";
@@ -30,6 +36,64 @@ const CONNECT_COMPRESSED_FLAG = 0x01;
 const CONNECT_END_STREAM_FLAG = 0x02;
 const MAX_CONNECT_FRAME_BYTES = 16 * 1024 * 1024;
 const MAX_AUTH_RESPONSE_BYTES = 1024 * 1024;
+
+/**
+ * Output ceilings observed on the live Devin upstream, per model.
+ *
+ * The Connect GetChatMessage request carries no output-token field (verified
+ * against the descriptor shipped with the installed Devin bundle), so the
+ * response budget is chosen server-side. For `swe-2-flash-medium` the account
+ * plan truncates every reply at exactly 1024 completion tokens, even though the
+ * model advertises `max_output_tokens = 131072` in Devin's own model config.
+ * Measured over 1186 calls / 10 accounts: 40 turns stopped at exactly 1024 and
+ * none ever exceeded it, with 32 of 34 same-day hits ending mid-sentence.
+ *
+ * Two consequences are handled here:
+ *   1. The system prompt tells the model the per-turn budget so it ends answers
+ *      on purpose instead of being cut mid-word;
+ *   2. A response that reaches the ceiling with `stopReason` "stop" is reported
+ *      to the client as `finish_reason: "length"` (it *was* truncated).
+ *
+ * The same numbers live in `OBSERVED_OUTPUT_CEILINGS`
+ * (`src/shared/constants/observedOutputCeilings.ts`) so capability resolution
+ * and the combo compatibility filter see them too — otherwise a request asking
+ * for 16k output keeps landing here and comes back truncated.
+ *
+ * Add an entry only with live evidence — a guessed cap would silently rewrite
+ * healthy `stop` turns into `length` and drop the target from large-output
+ * requests.
+ */
+export const DEVIN_DESKTOP_OBSERVED_OUTPUT_CEILINGS: Readonly<Record<string, number>> =
+  Object.freeze(
+    Object.fromEntries(
+      OBSERVED_OUTPUT_CEILINGS.filter(
+        (row) => row.provider === DEVIN_DESKTOP_PROVIDER_ID && row.model !== "*"
+      ).map((row) => [row.model, row.maxOutputTokens])
+    )
+  );
+
+/** Known per-turn output ceiling for `model`, or null when none is proven. */
+export function resolveDevinDesktopOutputCeiling(model: string): number | null {
+  return getObservedOutputCeiling(DEVIN_DESKTOP_PROVIDER_ID, model);
+}
+
+/**
+ * Append the per-turn output budget to the upstream system prompt.
+ *
+ * Without this the model plans answers that need more than the server allows and
+ * gets cut mid-sentence; with it, long work is split across turns and tool calls
+ * instead of being written as one oversized reply.
+ */
+export function applyDevinDesktopOutputBudgetGuidance(systemPrompt: string, model: string): string {
+  const ceiling = resolveDevinDesktopOutputCeiling(model);
+  if (ceiling === null) return systemPrompt;
+  const guidance = [
+    `Output budget: this deployment truncates any single response at ${ceiling} tokens.`,
+    "Keep every reply under that limit — short prose plus tool calls rather than long explanations,",
+    "and split work that needs more room across several turns.",
+  ].join(" ");
+  return systemPrompt ? `${systemPrompt}\n\n${guidance}` : guidance;
+}
 
 export function resolveDevinDesktopVersion(): string {
   const override = process.env.DEVIN_DESKTOP_VERSION?.trim() ?? "";
@@ -682,7 +746,7 @@ export class DevinDesktopExecutor extends BaseExecutor {
       apiKey,
       userJwt,
       model,
-      systemPrompt: converted.systemPrompt,
+      systemPrompt: applyDevinDesktopOutputBudgetGuidance(converted.systemPrompt, model),
       prompts: converted.prompts,
       sessionId,
       cascadeId,
@@ -887,6 +951,17 @@ export class DevinDesktopExecutor extends BaseExecutor {
             return;
           }
 
+          const upstreamFinishReason = finishReason(stopReason, toolCallIndexes.size > 0);
+          // The upstream reports "stop" even when it cut the answer at the account's
+          // output ceiling. Tell the client the truth so it can continue instead of
+          // treating a half sentence as a finished answer.
+          const outputCeiling = resolveDevinDesktopOutputCeiling(model);
+          const truncatedAtCeiling =
+            outputCeiling !== null &&
+            usage !== null &&
+            usage.outputTokens >= outputCeiling &&
+            upstreamFinishReason === "stop";
+
           const finalPayload: Record<string, unknown> = {
             id: responseId,
             object: "chat.completion.chunk",
@@ -896,7 +971,7 @@ export class DevinDesktopExecutor extends BaseExecutor {
               {
                 index: 0,
                 delta: {},
-                finish_reason: finishReason(stopReason, toolCallIndexes.size > 0),
+                finish_reason: truncatedAtCeiling ? "length" : upstreamFinishReason,
               },
             ],
           };
