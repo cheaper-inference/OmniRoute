@@ -1009,6 +1009,13 @@ export const checkKnownPath = async (commandPath: string) => {
 
 type KnownPathResult = Awaited<ReturnType<typeof checkKnownPath>>;
 
+function matchManagedCliSelection(
+  matchedPath: string | null,
+  managed: ManagedCliSelection | null
+): ManagedCliSelection | undefined {
+  return managed && matchedPath === managed.installation.command ? managed : undefined;
+}
+
 export const locateCommandCandidate = async (
   commands: string[],
   env: Record<string, string | undefined>,
@@ -1034,7 +1041,7 @@ export const locateCommandCandidate = async (
         installed: true,
         commandPath: match.commandPath,
         reason: match.reason,
-        managed: match.commandPath === managedCommand ? (managed ?? undefined) : undefined,
+        managed: matchManagedCliSelection(match.commandPath, managed),
       };
     }
     bestKnownPathFailure = bestFailure;

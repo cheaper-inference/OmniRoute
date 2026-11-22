@@ -112,6 +112,17 @@ function runtimeReason(item: ManagedCliRuntimeItem, blocked: string | null): str
   return item.updateAvailable ? "update_available" : "up_to_date";
 }
 
+function isManagedCliUpdateAvailable(
+  installedVersion: string | null,
+  latestVersion: string | null
+): boolean {
+  return Boolean(
+    installedVersion &&
+    latestVersion &&
+    compareManagedCliVersions(latestVersion, installedVersion) > 0
+  );
+}
+
 function runtimeSource(
   override: boolean,
   managed: boolean,
@@ -221,11 +232,7 @@ class ManagedCliRuntimeManager {
       runnable: Boolean(detected.runnable),
       source: runtimeSource(override, selectedManaged, detected.installed),
       commandPath: detected.commandPath ?? null,
-      updateAvailable: Boolean(
-        installedVersion &&
-        latestVersion &&
-        compareManagedCliVersions(latestVersion, installedVersion) > 0
-      ),
+      updateAvailable: isManagedCliUpdateAvailable(installedVersion, latestVersion),
       canUpdate: false,
       checkedAt: checked?.checkedAt ?? null,
       error: detectionError ?? checked?.error ?? null,
