@@ -64,6 +64,7 @@ import {
 } from "../config/codexIdentity.ts";
 import { trackRequestDevice } from "./chatCore/deviceTracking.ts";
 import { getCombosCached } from "./chatCore/comboContextCache.ts";
+import { resolveComboNoLogForRequest } from "./chatCore/comboNoLog.ts";
 import { resolveConnectionUpstreamOverrides } from "./chatCore/connectionUpstreamOverrides.ts";
 import {
   buildRegisteredProviderRequest,
@@ -630,10 +631,18 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
-  // before agent-context extraction so a header-only no-log request also drops
-  // prompt-derived project/branch fields from usage attribution.
-  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  // Existing API-key and per-request opt-outs, plus the combo-level opt-out.
+  // Resolved before agent-context extraction so a combo-only no-log request
+  // also drops prompt-derived project/branch fields from usage attribution.
+  // The combo lookup only runs for combo requests, so a plain model call pays
+  // no extra cache/DB work here.
+  const comboNoLog = await resolveComboNoLogForRequest({
+    comboName,
+    comboId: routingComboId,
+    getCombos: getCombosCached,
+  });
+  const requestNoLog = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const noLogEnabled = requestNoLog || comboNoLog;
   const agentContext = resolveUsageAgentContext(
     body,
     clientRawRequest?.headers,

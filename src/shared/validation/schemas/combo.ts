@@ -335,6 +335,9 @@ export const comboRuntimeConfigSchema = z
       })
       .strict()
       .optional(),
+    // Withhold request/response message content from call logs for this combo.
+    // Absent or false preserves the current logging behaviour.
+    noLog: z.boolean().optional(),
     // Context window requirements for combo target filtering and sorting.
     // minContextWindow: filters out models with context windows below this threshold.
     // maxContextWindow: filters out models with context windows above this threshold.
