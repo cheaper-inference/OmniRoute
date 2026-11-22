@@ -202,6 +202,7 @@ const nextConfig = {
   // accept for image-bearing requests; tune via env if a deployment needs
   // more.
   experimental: {
+    agentUpgrade: "security",
     // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
     // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
     ...macosDevExperimentalOverrides(),
