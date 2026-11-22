@@ -58,7 +58,7 @@ export const anthropicProvider: RegistryEntry = {
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
-      id: "claude-opus-4.7",
+      id: "claude-opus-4-7",
       name: "Claude Opus 4.7",
       // Opus 4.7+ rejects non-default temperature/top_p/top_k with a 400 (sampling fixed;
       // reasoning via output_config.effort). Mirrors the dashed `claude` registry ids.
@@ -68,7 +68,7 @@ export const anthropicProvider: RegistryEntry = {
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
-      id: "claude-opus-4.8",
+      id: "claude-opus-4-8",
       name: "Claude Opus 4.8",
       contextLength: 1048576,
       // Opus 4.7+ (incl. 4.8, Fable 5) reject non-default sampling with a 400. Mirrors claude-opus-4.7.
@@ -78,13 +78,13 @@ export const anthropicProvider: RegistryEntry = {
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
-      id: "claude-opus-4.6",
+      id: "claude-opus-4-6",
       name: "Claude Opus 4.6",
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high", "max"],
     },
     {
-      id: "claude-opus-4.5",
+      id: "claude-opus-4-5",
       name: "Claude Opus 4.5",
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high"],
@@ -103,9 +103,9 @@ export const anthropicProvider: RegistryEntry = {
       supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
-    { id: "claude-sonnet-4.6", name: "Claude Sonnet 4.6" },
-    { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5" },
-    { id: "claude-haiku-4.5", name: "Claude Haiku 4.5" },
+    { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6" },
+    { id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5" },
+    { id: "claude-haiku-4-5", name: "Claude Haiku 4.5" },
     {
       id: "claude-haiku-5-5",
       name: "Claude Haiku 5.5",
