@@ -11,6 +11,121 @@ import { getRulesForContext } from "../../../open-sse/services/compression/cavem
 
 const LANGUAGES = ["pt-BR", "es", "de", "fr", "ja", "id", "hu", "tr"];
 
+// Gerçekçi Türkçe geliştirme istekleri; her örnek beklenen kuralı ve ölçülebilir kısalmayı sabitler.
+const TURKISH_DEVELOPER_PROMPTS = [
+  {
+    prompt: "Lütfen şu bağlantı hatasını açıklar mısın? Teşekkürler.",
+    rule: "tr_question_to_directive",
+  },
+  {
+    prompt: "Lütfen, aşağıdaki kod çalıştırılınca ödeme servisi 500 hatası veriyor.",
+    rule: "tr_context_setup",
+  },
+  {
+    prompt: "Şu hatayı alıyorum: TypeError: Cannot read properties of undefined.",
+    rule: "tr_error_report",
+  },
+  {
+    prompt: "Lütfen beklenen davranış şu: boş yanıt yerine 404 dönmeli.",
+    rule: "tr_expected_behavior",
+  },
+  {
+    prompt: "Amacım şu endpoint için önbelleği devre dışı bırakmak.",
+    rule: "tr_intent",
+  },
+  {
+    prompt: "Şunu denedim: cache temizliği yaptım ama dosyadaki hata sürüyor.",
+    rule: "tr_already_tried",
+  },
+  {
+    prompt: "Bildiğiniz gibi, bu dosya Redis bağlantısını yönetiyor.",
+    rule: "tr_background_removal",
+  },
+  {
+    prompt: "Not olarak: yapılandırma yalnız test ortamında değişmeli.",
+    rule: "tr_scope_note",
+  },
+  {
+    prompt: "Daha önce konuştuğumuz gibi, bu dosyadaki hata tekrar oluşuyor.",
+    rule: "tr_background_removal",
+  },
+  {
+    prompt: "Aynı soruyu tekrar soruyorum: bu hata neden 500 dönüyor?",
+    rule: "tr_repeated_question",
+  },
+  {
+    prompt: "Lütfen, yukarıdaki koda dönersek dosyadaki null kontrolü eksik.",
+    rule: "tr_reestablished_context",
+  },
+  {
+    prompt: "Başka bir deyişle, yapılandırma dosyası istek başına yükleniyor.",
+    rule: "tr_restating",
+  },
+  {
+    prompt: "Aslında veritabanı bağlantısı çok yavaş; sorgu süresini nasıl ölçerim?",
+    rule: "tr_filler_adverbs",
+  },
+  {
+    prompt: "Şunu çözmeye çalışıyorum: dosyadaki değişken neden tanımsız?",
+    rule: "tr_self_reference",
+  },
+  {
+    prompt: "Detaylı bir açıklama ver: bu hata neden yalnız test ortamında oluşuyor?",
+    rule: "tr_verbose_instructions",
+  },
+  {
+    prompt: "Teşekkürü borç bilirim; şu dosyadaki hatayı bugün düzeltebilir miyiz?",
+    rule: "tr_excessive_gratitude",
+  },
+  {
+    prompt: "Müsait olduğunda yapılandırma dosyasını gözden geçirir misin?",
+    rule: "tr_softeners",
+  },
+  {
+    prompt: "Lütfen hata ayıklama amacıyla dosya günlüğünü etkinleştir.",
+    rule: "tr_purpose_phrase",
+  },
+  {
+    prompt: "Bu nedenle servis bazen çalışmıyor; hata kaydını nerede bulurum?",
+    rule: "tr_causal_connector",
+  },
+  {
+    prompt: "Fonksiyonun veritabanı parametresini yapılandırma dosyasında güncelle.",
+    rule: "tr_ultra_database",
+  },
+] as const;
+
+// Yirmi gerçekçi Türkçe isteğinde algılamayı, kural kapsamını ve toplam karakter tasarrufunu ölçer.
+it("measures Turkish compression on 20 realistic developer prompts", (t) => {
+  const rules = getRulesForContext("user", "ultra", "tr");
+  let inputChars = 0;
+  let outputChars = 0;
+
+  assert.equal(TURKISH_DEVELOPER_PROMPTS.length, 20);
+  for (const [index, sample] of TURKISH_DEVELOPER_PROMPTS.entries()) {
+    const detected = detectCompressionLanguage(sample.prompt);
+    assert.equal(detected, "tr", `prompt ${index + 1} was detected as ${detected}`);
+
+    const result = applyRulesToText(sample.prompt, rules);
+    assert.ok(result.text.trim().length > 0, `prompt ${index + 1} compressed to empty text`);
+    assert.ok(
+      result.appliedRules.includes(sample.rule),
+      `prompt ${index + 1} did not apply ${sample.rule}: ${JSON.stringify(result.text)}`
+    );
+    inputChars += Array.from(sample.prompt).length;
+    outputChars += Array.from(result.text).length;
+  }
+
+  const reductionPct = ((inputChars - outputChars) / inputChars) * 100;
+  t.diagnostic(
+    `20 prompt ölçümü: giriş=${inputChars} karakter, çıkış=${outputChars} karakter, tasarruf=${reductionPct.toFixed(1)}%`
+  );
+  assert.ok(
+    reductionPct >= 5,
+    `20 Turkish prompts should save at least 5% characters; measured ${reductionPct.toFixed(1)}% (${inputChars} → ${outputChars})`
+  );
+});
+
 describe("Caveman language packs", () => {
   it("ships 8 language packs with at least 15 rules each", () => {
     for (const language of LANGUAGES) {
