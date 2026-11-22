@@ -10,6 +10,8 @@ import {
   PII_CUSTOM_PATTERN_LIMITS,
   PII_REQUEST_TYPE_ALIASES,
   PII_TEMPLATES,
+  resolveInitialPiiSelection,
+  serializePiiSelectionForSave,
 } from "@/shared/constants/piiTypes";
 
 type PatternType = "regex" | "wildcard";
@@ -48,7 +50,7 @@ export default function PiiMaskingCard() {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
   const [data, setData] = useState<PiiSettingsPayload | null>(null);
-  const [selected, setSelected] = useState<string[]>([...PII_BUILTIN_TYPES]);
+  const [selected, setSelected] = useState<string[]>(() => resolveInitialPiiSelection(null));
   const [patterns, setPatterns] = useState<CustomPattern[]>([]);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [sample, setSample] = useState("");
@@ -59,7 +61,7 @@ export default function PiiMaskingCard() {
 
   const apply = (payload: PiiSettingsPayload) => {
     setData(payload);
-    setSelected(payload.enabledTypes ?? [...PII_BUILTIN_TYPES]);
+    setSelected(resolveInitialPiiSelection(payload.enabledTypes));
     setPatterns(payload.customPatterns ?? []);
   };
 
@@ -85,12 +87,11 @@ export default function PiiMaskingCard() {
     setSaving(true);
     setStatus(null);
     try {
-      const allSelected = PII_BUILTIN_TYPES.every((type) => selected.includes(type));
       const res = await fetch("/api/settings/pii", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          enabledTypes: allSelected ? null : selected,
+          enabledTypes: serializePiiSelectionForSave(selected),
           customPatterns: patterns,
         }),
       });

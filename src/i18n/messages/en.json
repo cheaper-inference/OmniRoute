@@ -9857,6 +9857,7 @@
         "usa": "USA",
         "gdpr": "GDPR (EU)",
         "popia": "POPIA (South Africa)",
+        "russian": "Russian",
         "full": "Full"
       },
       "builtinTypes": "Built-in types",
@@ -9883,7 +9884,12 @@
         "za_id": "South African ID numbers",
         "za_phone": "South African phone numbers",
         "za_vat": "South African VAT numbers",
-        "za_tax_ref": "South African tax references"
+        "za_tax_ref": "South African tax references",
+        "phone_ru": "Russian phone numbers",
+        "passport_ru": "Russian internal passports",
+        "snils_ru": "Russian SNILS numbers",
+        "inn_ru": "Russian INN tax IDs",
+        "vin": "Vehicle Identification Numbers (VIN)"
       },
       "customPatterns": "Custom patterns",
       "customPatternsDesc": "Matches are replaced with [CUSTOM_REDACTED]. Up to {max} patterns. Patterns that risk catastrophic backtracking are refused.",
