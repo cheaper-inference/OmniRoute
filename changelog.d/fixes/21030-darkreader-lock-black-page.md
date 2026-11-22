@@ -1,0 +1,1 @@
+- **fix(ui):** the dashboard no longer loads as a black page in Firefox with the Dark Reader extension installed (even when it is turned off for the site); the root layout opts out with `<meta name="darkreader-lock" />` ([#21030](https://github.com/cheaper-inference/OmniRoute/pull/21030)) — thanks @hartmark
