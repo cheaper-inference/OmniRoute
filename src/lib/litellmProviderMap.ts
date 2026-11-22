@@ -43,6 +43,8 @@ export const LITELLM_PROVIDER_MAP: Record<string, string[]> = {
   gemini: ["gemini"],
   bedrock_converse: ["kr"],
   cloudflare: ["cf"],
+  // LiteLLM uses an underscore; OmniRoute's Copilot provider is github (alias gh).
+  github_copilot: ["github", "gh"],
   // #18598: LiteLLM's bucket uses an underscore; the registry alias is `opencode-go`.
   opencode_go: ["opencode-go"],
   // stability-ai has no chat-completions registry entry (image-only:
