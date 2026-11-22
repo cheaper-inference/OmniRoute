@@ -637,9 +637,9 @@ test("v1 image edit POST rejects excessive or malformed Codex reference sets", a
   assert.match(malformedTypesBody.error.message, /Invalid reference image/i);
 });
 
-test("v1 image edit POST keeps non-Codex providers single-reference", async () => {
+test("v1 image edit POST keeps OpenRouter single-reference", async () => {
   const formData = new FormData();
-  formData.set("model", "openai/gpt-image-2");
+  formData.set("model", "openrouter/openai/gpt-5.4-image-2");
   formData.set("prompt", "combine these references");
   formData.set("image", new File([VALID_PNG_BYTES], "reference-1.png", { type: "image/png" }));
   formData.append("image[]", new File([VALID_PNG_BYTES], "reference-2.png", { type: "image/png" }));
