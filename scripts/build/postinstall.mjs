@@ -209,7 +209,8 @@ async function fixBetterSqliteBinary() {
       const rebuildCmd = isAndroid
         ? "npm run build-release --offline --no-audit --no-fund"
         : "npm rebuild better-sqlite3 --offline --no-audit --no-fund";
-      const rebuildCwd = isAndroid ? plan.packageDir : plan.cwd;
+      const rebuildCwd =
+        plan.action === "rebuild" ? (isAndroid ? plan.packageDir : plan.cwd) : ROOT;
 
       const env = { ...plan.env };
       if (isAndroid) {

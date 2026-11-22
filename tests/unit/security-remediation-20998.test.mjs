@@ -360,8 +360,8 @@ test("postinstall: exactly one spawn site, and it runs the planned rebuild", () 
   assert.match(POSTINSTALL, /execSync\(rebuildCmd, \{/, "the spawn must use the guarded command");
   assert.match(
     POSTINSTALL,
-    /const rebuildCwd = isAndroid \? plan\.packageDir : plan\.cwd;/,
-    "Android build-release runs in plan.packageDir; non-Android runs in plan.cwd"
+    /const rebuildCwd =\s*plan\.action === "rebuild" \? \(isAndroid \? plan\.packageDir : plan\.cwd\) : ROOT;/,
+    "rebuildCwd must guard on plan.action === 'rebuild' and select packageDir on Android, cwd elsewhere"
   );
   assert.match(POSTINSTALL, /cwd: rebuildCwd,/, "the cwd must come from the planner, not dist/");
   assert.doesNotMatch(
