@@ -435,6 +435,9 @@ export const updateSettingsSchema = z.object({
         planWeights: z
           .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
           .optional(),
+        /** expiry-first: "rate" (default) or "deadline" (nearest reset first while quota lasts). */
+        expiryFirstOrder: z.enum(["rate", "deadline"]).optional(),
+        expiryFirstDeadlineTieMinutes: z.number().finite().min(0).max(1440).optional(),
       })
     )
     .optional(),

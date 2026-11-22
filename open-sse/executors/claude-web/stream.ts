@@ -397,7 +397,9 @@ function dispatchProtocolEvent(
     case "error":
       return protocolFailure(state, "Upstream reported a stream error");
     default:
-      return protocolFailure(state, "Unknown Claude Web stream event");
+      // Fail-open: ignore unknown events gracefully so newly introduced
+      // upstream telemetry / metadata events do not disrupt active text streams.
+      return null;
   }
 }
 

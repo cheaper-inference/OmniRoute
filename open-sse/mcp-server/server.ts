@@ -990,38 +990,46 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
       const toolName = skillToMcpToolName(skill);
       if (RESERVED_MCP_NAMES.has(toolName)) continue;
 
-      server.registerTool(
-        toolName,
-        {
-          description: skill.description,
-          inputSchema: z.object({}).passthrough(),
-        },
-        withScopeEnforcement(
+      // One bad skill (e.g. a duplicate tool name) must not stop the later skills.
+      try {
+        server.registerTool(
           toolName,
-          async (args, extra) => {
-            const apiKeyId = (await resolveMcpToolOwnerId(extra)) ?? "mcp";
-            try {
-              const execution = await skillExecutor.execute(
-                skill.name,
-                (args ?? {}) as Record<string, unknown>,
-                { apiKeyId }
-              );
-              return {
-                content: [
-                  { type: "text" as const, text: JSON.stringify(execution.output, null, 2) },
-                ],
-              };
-            } catch (err) {
-              const msg = toSafeMcpErrorMessage(err, "Skill execution failed");
-              return {
-                content: [{ type: "text" as const, text: `Error: ${msg}` }],
-                isError: true,
-              };
-            }
+          {
+            description: skill.description,
+            inputSchema: z.object({}).passthrough(),
           },
-          ["execute:skills"]
-        )
-      );
+          withScopeEnforcement(
+            toolName,
+            async (args, extra) => {
+              const apiKeyId = (await resolveMcpToolOwnerId(extra)) ?? "mcp";
+              try {
+                const execution = await skillExecutor.execute(
+                  skill.name,
+                  (args ?? {}) as Record<string, unknown>,
+                  { apiKeyId }
+                );
+                return {
+                  content: [
+                    { type: "text" as const, text: JSON.stringify(execution.output, null, 2) },
+                  ],
+                };
+              } catch (err) {
+                const msg = toSafeMcpErrorMessage(err, "Skill execution failed");
+                return {
+                  content: [{ type: "text" as const, text: `Error: ${msg}` }],
+                  isError: true,
+                };
+              }
+            },
+            ["execute:skills"]
+          )
+        );
+      } catch (err) {
+        console.error(
+          `[MCP] Skipping skill tool ${toolName} (duplicate or invalid):`,
+          toSafeMcpErrorMessage(err, "registration failed")
+        );
+      }
     }
   } catch {
     // Skills not loaded yet — skip dynamic registration until next reconnect
