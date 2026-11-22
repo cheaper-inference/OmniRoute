@@ -1,84 +1,42 @@
 /**
  * Database module: Webhooks
  * CRUD operations for webhook event subscriptions
+ *
+ * Rows live behind WebhookRepository; this facade owns ids, generated secrets and
+ * default values, and keeps every export synchronous (SQLite-only legacy access).
  */
 
-import { getDbInstance } from "./core";
+import type {
+  Webhook,
+  WebhookChanges,
+  WebhookKind,
+  WebhookRepository,
+} from "@/domain/persistence/webhookRepositories";
 import crypto from "crypto";
+import { webhookRepositories } from "./repositories/webhookRepositories";
 
-export type WebhookKind = "slack" | "telegram" | "discord" | "custom";
+export type { Webhook, WebhookKind } from "@/domain/persistence/webhookRepositories";
 
-export interface Webhook {
-  id: string;
-  url: string;
-  events: string[];
-  secret: string | null;
-  enabled: boolean;
-  description: string;
-  created_at: string;
-  last_triggered_at: string | null;
-  last_status: number | null;
-  failure_count: number;
-  kind: WebhookKind;
-  metadata_encrypted: string | null;
-}
+const legacy = webhookRepositories.legacySync.webhooks;
 
-interface WebhookRow {
-  id: string;
-  url: string;
-  events: string;
-  secret: string | null;
-  enabled: number;
-  description: string;
-  created_at: string;
-  last_triggered_at: string | null;
-  last_status: number | null;
-  failure_count: number;
-  kind: string;
-  metadata_encrypted: string | null;
-}
-
-function rowToWebhook(row: WebhookRow): Webhook {
-  return {
-    ...row,
-    kind: (row.kind as WebhookKind) || "custom",
-    events: JSON.parse(row.events || '["*"]'),
-    enabled: row.enabled === 1,
-  };
-}
-
-interface CountResult {
-  cnt: number;
+/** Async persistence contract; it never generates ids, secrets or defaults on its own. */
+export function getWebhookRepository(): WebhookRepository {
+  return webhookRepositories.webhooks;
 }
 
 export function getWebhooks(options?: { limit?: number; offset?: number }): {
   webhooks: Webhook[];
   total: number;
 } {
-  const db = getDbInstance();
-  const limit = options?.limit;
-  const offset = options?.offset ?? 0;
-  let sql = "SELECT * FROM webhooks ORDER BY created_at DESC";
-  const params: unknown[] = [];
-  if (limit !== undefined) {
-    sql += " LIMIT ? OFFSET ?";
-    params.push(limit, offset);
-  }
-  const rows = db.prepare(sql).all(...params) as WebhookRow[];
-  const total = (db.prepare("SELECT count(*) as cnt FROM webhooks").get() as CountResult).cnt;
-  return { webhooks: rows.map(rowToWebhook), total };
+  return legacy.list(options);
 }
 
 export function getWebhook(id: string): Webhook | null {
-  const db = getDbInstance();
-  const row = db.prepare("SELECT * FROM webhooks WHERE id = ?").get(id) as WebhookRow | undefined;
-  return row ? rowToWebhook(row) : null;
+  return legacy.findById(id);
 }
 
 export function getEnabledWebhooks(): Webhook[] {
-  const db = getDbInstance();
-  const rows = db.prepare("SELECT * FROM webhooks WHERE enabled = 1").all() as WebhookRow[];
-  return rows.map(rowToWebhook);
+  return legacy.listEnabled();
 }
 
 export function createWebhook(data: {
@@ -89,23 +47,19 @@ export function createWebhook(data: {
   kind?: WebhookKind;
   metadataEncrypted?: string | null;
 }): Webhook {
-  const db = getDbInstance();
   const id = crypto.randomUUID();
   const secret = data.secret || `whsec_${crypto.randomBytes(24).toString("hex")}`;
   const kind = data.kind || "custom";
 
-  db.prepare(
-    `INSERT INTO webhooks (id, url, events, secret, description, kind, metadata_encrypted)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(
+  legacy.insert({
     id,
-    data.url,
-    JSON.stringify(data.events || ["*"]),
+    url: data.url,
+    events: data.events || ["*"],
     secret,
-    data.description || "",
+    description: data.description || "",
     kind,
-    data.metadataEncrypted ?? null
-  );
+    metadataEncrypted: data.metadataEncrypted ?? null,
+  });
 
   return getWebhook(id)!;
 }
@@ -122,73 +76,33 @@ export function updateWebhook(
     metadataEncrypted: string | null;
   }>
 ): Webhook | null {
-  const db = getDbInstance();
   const existing = getWebhook(id);
   if (!existing) return null;
 
-  const fields: string[] = [];
-  const values: any[] = [];
+  const changes: WebhookChanges = {
+    url: data.url,
+    events: data.events,
+    secret: data.secret,
+    enabled: data.enabled,
+    description: data.description,
+    kind: data.kind,
+    metadataEncrypted: data.metadataEncrypted,
+  };
+  if (Object.values(changes).every((value) => value === undefined)) return existing;
 
-  if (data.url !== undefined) {
-    fields.push("url = ?");
-    values.push(data.url);
-  }
-  if (data.events !== undefined) {
-    fields.push("events = ?");
-    values.push(JSON.stringify(data.events));
-  }
-  if (data.secret !== undefined) {
-    fields.push("secret = ?");
-    values.push(data.secret);
-  }
-  if (data.enabled !== undefined) {
-    fields.push("enabled = ?");
-    values.push(data.enabled ? 1 : 0);
-  }
-  if (data.description !== undefined) {
-    fields.push("description = ?");
-    values.push(data.description);
-  }
-  if (data.kind !== undefined) {
-    fields.push("kind = ?");
-    values.push(data.kind);
-  }
-  if (data.metadataEncrypted !== undefined) {
-    fields.push("metadata_encrypted = ?");
-    values.push(data.metadataEncrypted);
-  }
-
-  if (fields.length === 0) return existing;
-
-  values.push(id);
-  db.prepare(`UPDATE webhooks SET ${fields.join(", ")} WHERE id = ?`).run(...values);
+  legacy.update(id, changes);
 
   return getWebhook(id);
 }
 
 export function deleteWebhook(id: string): boolean {
-  const db = getDbInstance();
-  const result = db.prepare("DELETE FROM webhooks WHERE id = ?").run(id);
-  return (result as any).changes > 0;
+  return legacy.deleteById(id);
 }
 
 export function recordWebhookDelivery(id: string, status: number, success: boolean): void {
-  const db = getDbInstance();
-  if (success) {
-    db.prepare(
-      `UPDATE webhooks SET last_triggered_at = datetime('now'), last_status = ?, failure_count = 0 WHERE id = ?`
-    ).run(status, id);
-  } else {
-    db.prepare(
-      `UPDATE webhooks SET last_triggered_at = datetime('now'), last_status = ?, failure_count = failure_count + 1 WHERE id = ?`
-    ).run(status, id);
-  }
+  legacy.recordDeliveryResult(id, status, success);
 }
 
 export function disableWebhooksWithHighFailures(threshold = 10): number {
-  const db = getDbInstance();
-  const result = db
-    .prepare(`UPDATE webhooks SET enabled = 0 WHERE failure_count >= ? AND enabled = 1`)
-    .run(threshold);
-  return (result as any).changes;
+  return legacy.disableFailing(threshold);
 }
