@@ -272,6 +272,7 @@ export function getPublishedBaseUrl(
 export function surfaceTargetFormatForNpm(npm: string | null | undefined): string | null {
   if (npm === "@ai-sdk/openai") return "openai-responses";
   if (npm === "@ai-sdk/anthropic") return "claude";
+  if (npm === "@ai-sdk/google") return "gemini";
   return null;
 }
 

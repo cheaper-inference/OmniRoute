@@ -316,6 +316,53 @@ test("flag on: a per-model provider.api overrides the section api and routes to 
     goExecutor.buildUrl("glm-5.1", true, undefined, customGoCreds),
     "https://opencode.ai/inference/go/v1/chat/completions"
   );
+
+  // Catalog-only Google SDK model (no registry row) maps `@ai-sdk/google` to `gemini` format.
+  configurePublishedCatalogForTests({
+    "opencode-go": {
+      id: "opencode-go",
+      api: PUBLISHED_GO_BASE,
+      models: {
+        "catalog-only-gemini": {
+          provider: { npm: "@ai-sdk/google", api: goGeminiBase },
+        },
+      },
+    },
+  });
+  assert.equal(
+    goExecutor.buildUrl("catalog-only-gemini", false),
+    `${goGeminiBase}/models/catalog-only-gemini:generateContent`
+  );
+  assert.equal(
+    goExecutor.buildUrl("catalog-only-gemini", true),
+    `${goGeminiBase}/models/catalog-only-gemini:streamGenerateContent?alt=sse`
+  );
+
+  // An opencode-zen connection with a Go `baseUrl` override uses the Go surface across
+  // URL routing, headers, request preparation, and retry handling.
+  const zenExecutor = new OpencodeExecutor("opencode-zen");
+  const goOverrideCalls = stubGlobalFetch();
+  const goOverrideInput = {
+    model: "deepseek-v4-flash-free",
+    body: {
+      model: "deepseek-v4-flash-free",
+      messages: [{ role: "user", content: "hi" }],
+      stream: false,
+    },
+    stream: false,
+    credentials: {
+      apiKey: "go-real-key",
+      providerSpecificData: { baseUrl: "https://opencode.ai/inference/go/v1" },
+    },
+  };
+  const goOverrideResult = (await zenExecutor.execute(goOverrideInput)) as {
+    url: string;
+    headers: Record<string, string>;
+    transformedBody: Record<string, unknown>;
+  };
+  assert.equal(goOverrideResult.url, "https://opencode.ai/inference/go/v1/chat/completions");
+  assert.equal(goOverrideCalls[0]?.headers.Authorization, "Bearer go-real-key");
+  assert.equal("tools" in (goOverrideResult.transformedBody ?? {}), false);
 });
 
 // 6. Flag on: the catalog read goes through the registered proxy-aware transport.
