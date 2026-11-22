@@ -77,7 +77,7 @@ test("trusted LAN peers require credentials and can manage runtimes after authen
     },
     update: async () => {
       calls += 1;
-      return item;
+      return { ...item, activated: true };
     },
     effects: () => ({ runtimeCacheInvalidated: true, clientVersionRefreshed: true }),
   };
@@ -122,7 +122,7 @@ test("read, check, and update require authentication even when dashboard login i
         },
         update: async () => {
           calls += 1;
-          return item;
+          return { ...item, activated: true };
         },
       }
     );
@@ -164,7 +164,7 @@ test("only a fixed tool ID can reach installation; versions and package argument
     const response = await handleManagedCliRequest(await authenticated(body), {
       update: async () => {
         calls += 1;
-        return item;
+        return { ...item, activated: true };
       },
     });
     assert.equal(response.status, 400, JSON.stringify(body));
@@ -174,7 +174,7 @@ test("only a fixed tool ID can reach installation; versions and package argument
     {
       update: async () => {
         calls += 1;
-        return item;
+        return { ...item, activated: true };
       },
     }
   );
@@ -189,10 +189,10 @@ test("successful installation returns its actual status and applies effects once
     {
       update: async (id) => {
         calls.push(id);
-        return item;
+        return { ...item, activated: true };
       },
       effects: (updated) => {
-        assert.equal(updated, item);
+        assert.deepEqual(updated, item);
         calls.push("effects");
         return { runtimeCacheInvalidated: true, clientVersionRefreshed: true };
       },
@@ -219,6 +219,25 @@ test("installation failure preserves the failure status and never runs success e
   );
   assert.equal(response.status, 409);
   assert.equal((await response.json()).error.details.code, "UPDATE_BUSY");
+  assert.equal(effects, 0);
+});
+
+test("a no-op managed update returns inventory without running activation effects", async () => {
+  let effects = 0;
+  const response = await handleManagedCliRequest(
+    await authenticated({ action: "update", toolId: "codex" }),
+    {
+      update: async () => ({ ...item, activated: false }),
+      effects: () => {
+        effects += 1;
+        return { runtimeCacheInvalidated: true, clientVersionRefreshed: true };
+      },
+    }
+  );
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.activated, false);
+  assert.equal(payload.item.installedVersion, item.installedVersion);
   assert.equal(effects, 0);
 });
 

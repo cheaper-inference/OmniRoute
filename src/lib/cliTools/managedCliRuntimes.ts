@@ -45,11 +45,14 @@ export interface ManagedCliRuntimeItem {
   reason: string | null;
 }
 
+type ManagedCliUpdateResult = ManagedCliRuntimeItem & { activated: boolean };
+
 export interface ManagedCliDetectedRuntime {
   installed: boolean;
   runnable: boolean;
   commandPath?: string | null;
   version?: string | null;
+  managed?: boolean;
 }
 
 export interface ManagedCliRuntimeDependencies {
@@ -201,11 +204,13 @@ class ManagedCliRuntimeManager {
       this.platform() === "win32"
         ? path.win32.normalize(command).toLowerCase()
         : path.resolve(command);
-    const selectedManaged = Boolean(
-      managed &&
-      detected.commandPath &&
-      normalizeCommandPath(managed.command) === normalizeCommandPath(detected.commandPath)
-    );
+    const selectedManaged =
+      detected.managed ??
+      Boolean(
+        managed &&
+        detected.commandPath &&
+        normalizeCommandPath(managed.command) === normalizeCommandPath(detected.commandPath)
+      );
     const item: ManagedCliRuntimeItem = {
       id: definition.id,
       name: definition.name,
@@ -244,7 +249,7 @@ class ManagedCliRuntimeManager {
   async installAndActivate(
     definition: ManagedCliDefinition,
     latestVersion: string
-  ): Promise<ManagedCliInstallation> {
+  ): Promise<ManagedCliInstallation | null> {
     const pointer: ManagedCliPointer = {
       version: latestVersion,
       installationId: `${latestVersion}-${randomUUID()}`,
@@ -283,12 +288,11 @@ class ManagedCliRuntimeManager {
           502
         );
       }
-      if (hasManagedCliOverride(definition, this.env()))
-        throw new ManagedCliRuntimeError(
-          "explicit_override",
-          BLOCK_MESSAGES.explicit_override,
-          409
-        );
+      // External installations can change while the candidate is downloaded and probed.
+      const selected = await this.inventory(definition, false);
+      const blocked = blockedReason(selected, definition);
+      if (blocked) throw new ManagedCliRuntimeError(blocked, BLOCK_MESSAGES[blocked], 409);
+      if (compareManagedCliVersions(latestVersion, selected.installedVersion!) <= 0) return null;
       try {
         await this.activate(this.root(), definition, pointer);
         activated = true;
@@ -316,7 +320,7 @@ class ManagedCliRuntimeManager {
     }
   }
 
-  async updateManagedCliRuntime(toolId: string): Promise<ManagedCliRuntimeItem> {
+  async updateManagedCliRuntime(toolId: string): Promise<ManagedCliUpdateResult> {
     const definition = getManagedCliDefinition(toolId);
     if (!definition)
       throw new ManagedCliRuntimeError("unsupported_tool", "Unsupported CLI tool.", 404);
@@ -343,12 +347,13 @@ class ManagedCliRuntimeManager {
       if (!checked.latestVersion)
         throw new ManagedCliRuntimeError("check_failed", checked.error!, 502);
       if (compareManagedCliVersions(checked.latestVersion, current.installedVersion!) <= 0)
-        return this.inventory(definition, false);
+        return { ...(await this.inventory(definition, false)), activated: false };
       log.info(
         { toolId: definition.id, version: checked.latestVersion },
         "Installing managed CLI update"
       );
       const candidate = await this.installAndActivate(definition, checked.latestVersion);
+      if (!candidate) return { ...(await this.inventory(definition, false)), activated: false };
       log.info(
         { toolId: definition.id, version: candidate.version },
         "Managed CLI update activated"
@@ -356,6 +361,7 @@ class ManagedCliRuntimeManager {
       return {
         ...current,
         ...checked,
+        activated: true,
         installedVersion: candidate.version,
         installed: true,
         runnable: true,

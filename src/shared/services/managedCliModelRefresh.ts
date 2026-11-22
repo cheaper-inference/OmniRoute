@@ -95,10 +95,12 @@ export async function refreshManagedCliProviderModels(
 }
 
 function isFreshModelDiscovery(payload: Record<string, unknown>): boolean {
+  const clientVersion = asRecord(asRecord(payload.discovery).clientVersion);
   return (
     payload.source === "api" &&
     !payload.failure &&
     !payload.degraded &&
+    !clientVersion.degraded &&
     Array.isArray(payload.models) &&
     payload.models.length > 0
   );

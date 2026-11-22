@@ -52,6 +52,24 @@ test("failed and degraded model discovery cannot be reported as refreshed", asyn
   });
 });
 
+test("Codex discovery with a degraded client version does not count as refreshed", async () => {
+  const fetchMock: typeof fetch = async (input) => {
+    if (input === "/api/providers") {
+      return Response.json({ connections: [{ id: "codex-active", provider: "codex" }] });
+    }
+    return Response.json({
+      source: "api",
+      models: [{ id: "new-model" }],
+      discovery: { clientVersion: { degraded: true } },
+    });
+  };
+  assert.deepEqual(await refreshManagedCliProviderModels("codex", fetchMock), {
+    attempted: 1,
+    refreshed: 0,
+    failed: 1,
+  });
+});
+
 test("tools without live model discovery do not request provider data", async () => {
   let calls = 0;
   const fetchMock: typeof fetch = async () => {

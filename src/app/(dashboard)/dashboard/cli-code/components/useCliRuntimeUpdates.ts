@@ -176,8 +176,10 @@ async function updateCandidates(
       const next = readUpdatedItem(data, candidate.id);
       if (!current()) return;
       setItems((previous) => previous.map((item) => (item.id === next.id ? next : item)));
-      if (next.installedVersion !== candidate.installedVersion) result.updated += 1;
-      await refreshModels(candidate.id, controller.signal, current, result);
+      if (data.activated === true) {
+        result.updated += 1;
+        await refreshModels(candidate.id, controller.signal, current, result);
+      }
     } catch (failure) {
       if (!current()) return;
       result.failed += 1;

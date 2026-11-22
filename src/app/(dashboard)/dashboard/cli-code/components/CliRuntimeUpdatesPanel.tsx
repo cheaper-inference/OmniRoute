@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
@@ -50,10 +50,11 @@ function statusOf(item: ManagedCliRuntimeItem): {
 }
 
 function CheckedTime({ value, t }: { value: string | null; t: Translate }) {
+  const locale = useLocale();
   if (!value || !Number.isFinite(new Date(value).getTime())) return <>{t("neverChecked")}</>;
   return (
     <time dateTime={value} dir="ltr" className="tabular-nums">
-      {new Date(value).toLocaleString("en-GB", { hour12: false })}
+      {new Date(value).toLocaleString(locale, { hour12: false })}
     </time>
   );
 }

@@ -18,6 +18,18 @@ async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
   return ensureManagedCliDirectories(root, "codex");
 }
 
+async function contend<T>(count: number, acquire: () => Promise<T>) {
+  for (let round = 0; round < 3; round += 1) {
+    const attempts = await Promise.allSettled(Array.from({ length: count }, acquire));
+    const winners = attempts.filter((result) => result.status === "fulfilled");
+    for (const result of attempts) {
+      if (result.status === "rejected") assert.equal(result.reason.code, "update_in_progress");
+    }
+    if (winners.length > 0) return winners;
+  }
+  return [];
+}
+
 test("abandoned empty lock and recovery files cannot permanently block updates", async (t) => {
   const toolDir = await fixture(t);
   await fs.writeFile(path.join(toolDir, "update.lock"), "");
@@ -94,15 +106,9 @@ test("concurrent recovery attempts retain exactly one live owner", async (t) => 
   const toolDir = await fixture(t);
   await fs.writeFile(path.join(toolDir, "update.lock"), "");
   await fs.writeFile(path.join(toolDir, "update.lock.recovery"), "");
-  const attempts = await Promise.allSettled(
-    Array.from({ length: 16 }, () => acquireManagedCliFileLock(toolDir))
-  );
-  const winners = attempts.filter((result) => result.status === "fulfilled");
+  const winners = await contend(16, () => acquireManagedCliFileLock(toolDir));
   try {
     assert.equal(winners.length, 1);
-    for (const result of attempts) {
-      if (result.status === "rejected") assert.equal(result.reason.code, "update_in_progress");
-    }
     await assert.rejects(acquireManagedCliFileLock(toolDir), { code: "update_in_progress" });
   } finally {
     await Promise.all(winners.map((winner) => winner.value()));
@@ -132,9 +138,10 @@ try {
   const { acquireManagedCliFileLock } = await import(process.argv[1]);
   await acquireManagedCliFileLock(process.argv[2]);
   log("INFO", "ready");
-} catch {
+} catch (error) {
   log("ERROR", "lock failed");
-  process.exit(1);
+  process.exitCode = error.code === "update_in_progress" ? 75 : 1;
+  process.stdin.pause();
 }
 `;
 
@@ -144,6 +151,33 @@ async function killWorker(worker: ChildProcess) {
   worker.kill("SIGKILL");
   await exited;
 }
+
+test(
+  "a reused Linux PID cannot keep an unrelated lock claim alive",
+  {
+    skip: process.platform !== "linux",
+  },
+  async (t) => {
+    const toolDir = await fixture(t);
+    const worker = spawn(process.execPath, ["-e", "process.stdin.resume()"], {
+      stdio: ["pipe", "ignore", "ignore"],
+    });
+    t.after(() => killWorker(worker));
+    await once(worker, "spawn");
+    const directory = path.join(toolDir, "update-locks");
+    await fs.mkdir(directory);
+    const bootId = (await fs.readFile("/proc/sys/kernel/random/boot_id", "utf8")).trim();
+    const claim = path.join(directory, `${worker.pid}-${Date.now()}-${randomUUID()}-1`);
+    await fs.writeFile(claim, `${bootId}:0`);
+    const release = await acquireManagedCliFileLock(toolDir);
+    try {
+      await assert.rejects(fs.stat(claim), { code: "ENOENT" });
+      assert.equal(worker.exitCode, null);
+    } finally {
+      await release();
+    }
+  }
+);
 
 async function startWorker(
   toolDir: string,
@@ -172,7 +206,13 @@ async function startWorker(
     };
     const timer = setTimeout(() => fail(new Error("Lock worker did not reach its stage")), 10_000);
     worker.once("error", fail);
-    worker.once("exit", () => fail(new Error("Lock worker exited before acquiring")));
+    worker.once("exit", (code) =>
+      fail(
+        Object.assign(new Error("Lock worker exited before acquiring"), {
+          code: code === 75 ? "update_in_progress" : undefined,
+        })
+      )
+    );
     worker.stdout!.on("data", (chunk: Buffer) => {
       if (chunk.toString().includes(`"message":"${stage}"`)) {
         clearTimeout(timer);
@@ -189,10 +229,7 @@ for (const stage of ["choosing", "ready"] as const) {
     const worker = await startWorker(toolDir, stage, t);
     await assert.rejects(acquireManagedCliFileLock(toolDir), { code: "update_in_progress" });
     await killWorker(worker);
-    const attempts = await Promise.allSettled(
-      Array.from({ length: 8 }, () => acquireManagedCliFileLock(toolDir))
-    );
-    const winners = attempts.filter((result) => result.status === "fulfilled");
+    const winners = await contend(8, () => acquireManagedCliFileLock(toolDir));
     try {
       assert.equal(winners.length, 1, "only one worker may recover an abandoned claim");
       await assert.rejects(acquireManagedCliFileLock(toolDir), { code: "update_in_progress" });
@@ -206,10 +243,7 @@ test("independent processes cannot reclaim a crashed owner's lock simultaneously
   const toolDir = await fixture(t);
   const previous = await startWorker(toolDir, "ready", t);
   await killWorker(previous);
-  const attempts = await Promise.allSettled(
-    Array.from({ length: 4 }, () => startWorker(toolDir, "ready", t))
-  );
-  const winners = attempts.filter((result) => result.status === "fulfilled");
+  const winners = await contend(4, () => startWorker(toolDir, "ready", t));
   try {
     assert.equal(winners.length, 1);
     await assert.rejects(acquireManagedCliFileLock(toolDir), { code: "update_in_progress" });

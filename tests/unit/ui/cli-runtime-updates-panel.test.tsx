@@ -61,6 +61,7 @@ function updated(item = available()) {
       updateAvailable: false,
       reason: "up_to_date",
     },
+    activated: true,
     effects: { clientVersionRefreshed: true, runtimeCacheInvalidated: true },
   };
 }
@@ -98,6 +99,15 @@ describe("CLI runtime updates panel", () => {
     );
     return view;
   }
+
+  it("formats the checked time in the dashboard locale", async () => {
+    const checkedAt = "2026-11-05T13:17:00.000Z";
+    inventory = [available({ checkedAt })];
+    const view = await mount();
+    const time = view.container.querySelector("time");
+    expect(time?.getAttribute("datetime")).toBe(checkedAt);
+    expect(time?.textContent).toBe(new Date(checkedAt).toLocaleString("en", { hour12: false }));
+  });
 
   beforeEach(() => {
     inventory = [runtime()];
@@ -178,6 +188,17 @@ describe("CLI runtime updates panel", () => {
     await waitFor(() =>
       expect(fetchMock.mock.calls.filter(([url]) => url === IDENTITY_PATH)).toHaveLength(2)
     );
+  });
+
+  it("keeps a no-op response without refreshing provider models", async () => {
+    inventory = [available()];
+    await mount();
+    onRuntimeRequest = () => response({ ...updated(), activated: false });
+    fireEvent.click(screen.getByRole("button", { name: "Update Codex CLI" }));
+    await screen.findByText(
+      "Finished. CLIs updated: 0. Updates not confirmed: 0. Failed checks: 0."
+    );
+    expect(refreshModels).not.toHaveBeenCalled();
   });
 
   it("checks and then installs supported detected updates sequentially", async () => {

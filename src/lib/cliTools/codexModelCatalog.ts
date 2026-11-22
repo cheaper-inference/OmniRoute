@@ -192,7 +192,11 @@ export async function loadBundledCodexCatalog(codexHome: string): Promise<CodexM
   }
 
   // Managed Windows wrappers resolve to their verified Node/native entry without a shell.
-  const invocation = resolveManagedCliInvocation(located.commandPath, BUNDLED_CATALOG_ARGS);
+  const invocation = resolveManagedCliInvocation(
+    located.commandPath,
+    BUNDLED_CATALOG_ARGS,
+    located.managed
+  );
   const command = invocation?.command ?? located.commandPath;
   const args = invocation?.args ?? BUNDLED_CATALOG_ARGS;
   const { stdout } = await execFileAsync(command, args, {

@@ -17,5 +17,13 @@ export function resolveManagedCliSpawn(toolId, platform = process.platform) {
     platform
   );
   if (!installation) return null;
-  return { ...buildManagedCliInvocation(installation, definition, { platform }), shell: undefined };
+  try {
+    return {
+      ...buildManagedCliInvocation(installation, definition, { platform }),
+      shell: undefined,
+    };
+  } catch {
+    // A corrupt or unsupported managed entry must not suppress external discovery.
+    return null;
+  }
 }

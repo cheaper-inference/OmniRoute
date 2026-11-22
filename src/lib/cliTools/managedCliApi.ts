@@ -110,8 +110,15 @@ async function handleManagedCliPost(
   if (!getManagedCliDefinition(parsed.data.toolId)) {
     return noStore(createErrorResponse({ status: 404, message: "Unsupported managed CLI tool" }));
   }
-  const item = await (dependencies.update ?? updateManagedCliRuntime)(parsed.data.toolId);
-  const effects = (dependencies.effects ?? applyManagedCliUpdateEffects)(item);
-  log.info({ toolId: item.id, version: item.installedVersion }, "Managed CLI update completed");
-  return noStore(NextResponse.json({ item, effects }));
+  const { activated, ...item } = await (dependencies.update ?? updateManagedCliRuntime)(
+    parsed.data.toolId
+  );
+  const effects = activated
+    ? (dependencies.effects ?? applyManagedCliUpdateEffects)(item)
+    : { runtimeCacheInvalidated: false, clientVersionRefreshed: false };
+  log.info(
+    { toolId: item.id, version: item.installedVersion, activated },
+    "Managed CLI update completed"
+  );
+  return noStore(NextResponse.json({ item, effects, activated }));
 }

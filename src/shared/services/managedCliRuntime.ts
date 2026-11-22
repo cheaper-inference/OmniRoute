@@ -26,6 +26,11 @@ export interface ManagedCliInstallation {
   executableEntryPath: string;
 }
 
+export interface ManagedCliSelection {
+  definition: ManagedCliDefinition;
+  installation: ManagedCliInstallation;
+}
+
 export const MANAGED_CLI_STABLE_VERSION = core.MANAGED_CLI_STABLE_VERSION;
 export const assertManagedCliPath: (root: string, candidate: string) => void =
   core.assertManagedCliPath;
@@ -61,8 +66,13 @@ export function readManagedCliInstallation(
 }
 
 /** Synchronous and side-effect free: callers keep explicit executable overrides. */
-export function getManagedCliCommand(toolId: string): string | null {
+export function getManagedCliSelection(toolId: string): ManagedCliSelection | null {
   const definition = getManagedCliDefinition(toolId);
   if (!definition || hasManagedCliOverride(definition)) return null;
-  return readManagedCliInstallation(toolId)?.command ?? null;
+  const installation = readManagedCliInstallation(toolId);
+  return installation ? { definition, installation } : null;
+}
+
+export function getManagedCliCommand(toolId: string): string | null {
+  return getManagedCliSelection(toolId)?.installation.command ?? null;
 }

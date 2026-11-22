@@ -16,7 +16,11 @@ import { AcpManager } from "../../src/lib/acp/manager.ts";
 import { detectInstalledAgents, setCustomAgents } from "../../src/lib/acp/registry.ts";
 import { getManagedCliDefinition } from "../../src/shared/services/managedCliRuntimeCore.mjs";
 import { resolveManagedCliInvocation } from "../../src/shared/services/managedCliLaunch.ts";
-import { getCliRuntimeStatus } from "../../src/shared/services/cliRuntime.ts";
+import {
+  getCliRuntimeStatus,
+  getLookupEnv,
+  locateCommandCandidate,
+} from "../../src/shared/services/cliRuntime.ts";
 import {
   getQoderCliCommand,
   resolveQoderCliInvocation,
@@ -134,12 +138,9 @@ test("Windows managed native executables are spawned directly without cmd.exe", 
   assert.equal(spec.shell, undefined);
 });
 
-test("unrecognized Windows entry formats fail closed instead of invoking a shell", () => {
+test("unrecognized managed Windows entries leave standalone launchers free to fall back", () => {
   activate("codex", "1.2.3", "win32", Buffer.from("#!/bin/sh\n"));
-  assert.throws(
-    () => resolveManagedCliSpawn("codex", "win32"),
-    /Unsupported managed CLI executable/
-  );
+  assert.equal(resolveManagedCliSpawn("codex", "win32"), null);
 });
 
 test("runtime status reports an unsupported managed Windows entry as not runnable", async () => {
@@ -170,6 +171,19 @@ test("managed runtime probes do not replace an explicit override", () => {
   const installed = activate("codex", "1.2.3");
   process.env.CLI_CODEX_BIN = installed.command;
   assert.equal(resolveManagedCliInvocation(installed.command, ["--version"]), null);
+});
+
+test("a managed command already selected for discovery stays shell-free across activation", async () => {
+  mock.method(os, "platform", () => "win32");
+  const installed = activate("codex", "1.2.3", "win32");
+  const located = await locateCommandCandidate(["codex"], getLookupEnv(), "codex");
+  assert.equal(located.commandPath, installed.command);
+  activate("codex", "1.2.4", "win32");
+  assert.deepEqual(resolveManagedCliInvocation(installed.command, ["--version"], located.managed), {
+    command: process.execPath,
+    args: [installed.entry, "--version"],
+    useShell: false,
+  });
 });
 
 test("standalone launcher modules resolve the same managed pointer without a TypeScript loader", () => {
@@ -365,8 +379,17 @@ test("Qoder ACP routes new sessions to an activated runtime without interrupting
   const old = activate("qoder", "1.2.3");
   const options = { token: "test-only", configDir: dataDir, cwd: dataDir, timeoutMs: 5000 };
   const first = runQoderAcpPrompt({ ...options, prompt: "hold" });
-  await firstStarted;
+  let startupTimeout: ReturnType<typeof setTimeout> | undefined;
   try {
+    await Promise.race([
+      firstStarted,
+      first.then(() => {
+        throw new Error("First ACP turn ended before it received the startup prompt");
+      }),
+      new Promise<never>((_resolve, reject) => {
+        startupTimeout = setTimeout(() => reject(new Error("First ACP turn did not start")), 5000);
+      }),
+    ]);
     const next = activate("qoder", "1.2.4");
     const second = await runQoderAcpPrompt({ ...options, prompt: "next" });
     assert.equal(second.ok, true);
@@ -377,7 +400,8 @@ test("Qoder ACP routes new sessions to an activated runtime without interrupting
       process.platform === "win32" ? [old.entry, next.entry] : [old.command, next.command]
     );
   } finally {
+    clearTimeout(startupTimeout);
     releaseFirst();
-    assert.equal((await first).ok, true, "activation preserves the in-flight turn");
   }
+  assert.equal((await first).ok, true, "activation preserves the in-flight turn");
 });

@@ -30,6 +30,8 @@ const PROCESS_STARTED_AT = Math.floor(performance.timeOrigin);
 const LEGACY_TIMESTAMP_TOLERANCE_MS = 1_000;
 const CLAIM_NAME =
   /^(\d+)-(?:(\d{1,16})-)?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})-(.+)$/;
+const LINUX_OWNER_IDENTITY = /^[a-f0-9-]{36}:\d+$/;
+let linuxBootId: string | undefined;
 
 function updateInProgress(): ManagedCliRuntimeError {
   return new ManagedCliRuntimeError(
@@ -57,6 +59,35 @@ function ownerIsAlive(pid: number, startedAt?: number, modifiedAt?: number): boo
     return true;
   } catch (error) {
     return (error as NodeJS.ErrnoException).code !== "ESRCH";
+  }
+}
+
+async function readLinuxOwnerIdentity(pid: number): Promise<string | null> {
+  if (process.platform !== "linux") return null;
+  try {
+    linuxBootId ??= (await fs.readFile("/proc/sys/kernel/random/boot_id", "utf8")).trim();
+    const stat = await fs.readFile(`/proc/${pid}/stat`, "utf8");
+    // Field 22 is the process start in clock ticks. The command can include spaces or parentheses.
+    const startTicks = stat.slice(stat.lastIndexOf(")") + 2).split(/\s+/)[19];
+    const identity = `${linuxBootId}:${startTicks}`;
+    return LINUX_OWNER_IDENTITY.test(identity) ? identity : null;
+  } catch {
+    return null;
+  }
+}
+
+async function claimOwnerWasReused(file: string, pid: number): Promise<boolean> {
+  if (process.platform !== "linux" || pid === process.pid) return false;
+  try {
+    const stat = await fs.lstat(file);
+    if (!stat.isFile() || stat.size === 0 || stat.size > 128) return false;
+    const recorded = await fs.readFile(file, "utf8");
+    if (!LINUX_OWNER_IDENTITY.test(recorded)) return false;
+    const observed = await readLinuxOwnerIdentity(pid);
+    return observed !== null && observed !== recorded;
+  } catch {
+    // An empty, older, or just-renamed claim still uses the conservative PID check.
+    return false;
   }
 }
 
@@ -107,9 +138,10 @@ async function readLockClaims(directory: string): Promise<LockClaim[]> {
     if (!Number.isSafeInteger(pid) || pid < 1) continue;
     const startedAt = match[2] ? Number(match[2]) : undefined;
     const modifiedAt = await legacyClaimModifiedAt(directory, name, pid, startedAt);
-    if (!ownerIsAlive(pid, startedAt, modifiedAt)) {
+    const claimPath = path.join(directory, name);
+    if (!ownerIsAlive(pid, startedAt, modifiedAt) || (await claimOwnerWasReused(claimPath, pid))) {
       // Every claim has a unique name that is never reused by a newer owner.
-      await fs.unlink(path.join(directory, name)).catch(() => {});
+      await fs.unlink(claimPath).catch(() => {});
       continue;
     }
     // A live choosing marker must remain a blocker even if it was renamed after
@@ -124,8 +156,8 @@ async function readLockClaims(directory: string): Promise<LockClaim[]> {
 
 /**
  * Bakery ordering gives server workers exclusive ownership without a mutable
- * recovery sentinel. PID, process epoch, nonce and phase are atomic filenames,
- * so a crash cannot leave unidentifiable or partially written ownership metadata.
+ * recovery sentinel. Atomic claim names carry the PID, process epoch, nonce and phase.
+ * Optional Linux claim contents distinguish PID reuse without weakening empty claims.
  */
 export async function acquireManagedCliFileLock(toolDir: string): Promise<() => Promise<void>> {
   await respectLegacyOwner(toolDir);
@@ -143,8 +175,13 @@ export async function acquireManagedCliFileLock(toolDir: string): Promise<() => 
     );
   };
   try {
+    const identity = await readLinuxOwnerIdentity(process.pid);
     const handle = await fs.open(choosing, "wx", 0o600);
-    await handle.close();
+    try {
+      if (identity) await handle.writeFile(identity);
+    } finally {
+      await handle.close();
+    }
     const claims = await readLockClaims(directory);
     const ticket =
       claims.reduce((max, claim) => (claim.ticket && claim.ticket > max ? claim.ticket : max), 0n) +

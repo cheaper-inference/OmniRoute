@@ -126,6 +126,21 @@ test("inventory reports the external runtime actually selected after a managed c
   assert.equal(readManagedCliInstallation("codex", f.root, "linux")?.version, "1.1.0");
 });
 
+test("inventory reports the selected managed runtime even if the pointer changed during detection", async (t) => {
+  const f = await fixture(t, {
+    detect: async () => ({
+      installed: true,
+      runnable: true,
+      commandPath: "/newly-active/codex",
+      version: "1.2.0",
+      managed: true,
+    }),
+  });
+  const [row] = await f.manager.listManagedCliRuntimes();
+  assert.equal(row.source, "managed");
+  assert.equal(row.commandPath, "/newly-active/codex");
+});
+
 test("an inspection error retains the known managed location without claiming it is runnable", async (t) => {
   const f = await fixture(t);
   await f.manager.updateManagedCliRuntime("codex");
@@ -162,11 +177,34 @@ test("equal and older registry versions never downgrade or reinstall", async (t)
   for (const version of ["1.0.0", "0.9.9"]) {
     f.setLatest(version);
     const result = await f.manager.updateManagedCliRuntime("codex");
+    assert.equal(result.activated, false);
     assert.equal(result.installedVersion, "1.0.0");
     assert.equal(result.source, "external");
     assert.equal(result.updateAvailable, false);
   }
   assert.equal(f.installs.length, 0);
+});
+
+test("an external upgrade during verification prevents a managed downgrade", async (t) => {
+  let version = "1.0.0";
+  const f = await fixture(t, {
+    detect: async () => ({
+      installed: true,
+      runnable: true,
+      commandPath: "/external/codex",
+      version,
+    }),
+    probe: async (candidate) => {
+      version = "1.2.0";
+      return candidate.version;
+    },
+  });
+  const result = await f.manager.updateManagedCliRuntime("codex");
+  assert.equal(result.installedVersion, "1.2.0");
+  assert.equal(result.source, "external");
+  assert.equal(result.activated, false);
+  assert.equal(readManagedCliInstallation("codex", f.root, "linux"), null);
+  assert.deepEqual(await fs.readdir(path.join(f.root, "codex", "versions")), []);
 });
 
 for (const failure of ["install", "verification", "activation"] as const) {
