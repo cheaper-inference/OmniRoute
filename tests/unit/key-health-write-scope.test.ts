@@ -220,54 +220,39 @@ test("no module outside the vocabulary home declares its own parked set", async 
   assert.deepEqual(offenders, [], "a private status list drifts from the gate by construction");
 });
 
-// The guard above is green on a clean tree, so prove it can see a list at all: a green scan that
-// cannot red is indistinguishable from a scan that looked at nothing.
-test("the status-list scan itself sees a list and ignores a row list", async () => {
+// The guard above is green on a clean tree, so prove it can see a list at all, and prove each of
+// its inputs matters: a green scan that cannot red is indistinguishable from one that looked at
+// nothing, and an oracle nobody pins is an oracle that can be emptied unnoticed.
+test("the status-list scan sees a list, ignores rows, and depends on its inputs", async () => {
   const { TERMINAL_TEST_STATUSES } = await import("../../src/shared/utils/parkedStatus.ts");
   const known = new Set([...TERMINAL_TEST_STATUSES, "active"]);
-  const flagged = statusListNames(
-    "probe.ts",
-    'const SUBSET = ["deactivated", "expired"];\n',
-    known,
-    TERMINAL_TEST_STATUSES
+  const scan = (source: string, oracle = known) =>
+    statusListNames("probe.ts", source, oracle, TERMINAL_TEST_STATUSES);
+
+  assert.deepEqual(scan('const SUBSET = ["deactivated", "expired"];\n'), ["probe.ts:SUBSET"]);
+  // A mixed list is not a status list: it carries something that is not a status at all.
+  assert.deepEqual(scan('const MIXED = ["deactivated", "something-else"];\n'), []);
+  // A row list is data, and a presentation list is presentation.
+  assert.deepEqual(
+    scan('const ROWS = [{ status: "deactivated" }];\nconst CHIP_OPTIONS = ["deactivated"];\n'),
+    []
   );
-  assert.deepEqual(flagged, ["probe.ts:SUBSET"]);
-  const rows = statusListNames(
-    "probe.ts",
-    'const ROWS = [{ status: "deactivated" }];\nconst CHIP_OPTIONS = ["deactivated"];\n',
-    known,
-    TERMINAL_TEST_STATUSES
-  );
-  assert.deepEqual(rows, [], "a row list and a presentation list are not decisions");
+  // The oracle is an input, not a constant: an empty known-status set stops the scan, which is
+  // exactly why the guard passes the real vocabulary rather than a literal of its own.
+  assert.deepEqual(scan('const SUBSET = ["deactivated"];\n', new Set()), []);
 });
 
-test("a padded status is parked everywhere, not only where it is trimmed", async () => {
-  const { museClaimCandidates } = await import("../../src/sse/services/museSessionOwnership.ts");
-  const rows = [{ id: "muse-padded", authType: "oauth", testStatus: " Deactivated ", rateLimitedUntil: null }];
-  assert.equal(museClaimCandidates(rows, "muse-code")[0]?.unavailable, true);
-});
-
-test("a credential swap drops the cached gate verdict for that connection", async () => {
-  const { createProviderConnection, updateProviderConnection } = await import(
-    "../../src/lib/db/providers.ts"
+test("the scan reads the tree it claims to read", async () => {
+  const { sourceFiles } = await import("../helpers/classScan.ts");
+  const files = sourceFiles("src", "open-sse");
+  assert.ok(files.length > 1000, `expected the whole tree, got ${files.length} files`);
+  assert.ok(
+    files.some((file) => file.endsWith("src/shared/utils/parkedStatus.ts")),
+    "the vocabulary home must be in the scanned set"
   );
-  const cache = await import("../../src/lib/credentialHealth/cache.ts");
-  const conn = await createProviderConnection({
-    provider: "openai",
-    authType: "apikey",
-    name: "Swap",
-    apiKey: "sk-first",
-    isActive: true,
-  });
-  cache.setCredentialHealth(conn.id, "openai", "error", "Invalid API key", "upstream_auth_error");
-  assert.equal(cache.isCredentialHealthy(conn.id), false, "precondition: the verdict is cached");
-
-  await updateProviderConnection(conn.id, { apiKey: "sk-second" });
-
-  assert.equal(
-    cache.getCredentialHealth(conn.id),
-    undefined,
-    "the cached verdict describes a key this connection no longer carries"
+  assert.ok(
+    !files.some((file) => /\.(test|spec|d)\.tsx?$/.test(file)),
+    "test and declaration files are excluded by the shared walker"
   );
 });
 

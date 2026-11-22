@@ -9,6 +9,10 @@ function inferErrorType(connection: ConnectionRowConnection, isCooldown: boolean
   if (isCooldown) return "upstream_rate_limited";
   if (connection.testStatus === "banned") return "banned";
   if (connection.testStatus === "credits_exhausted") return "credits_exhausted";
+  // The other parked verdicts carry no error type of their own, so the row would show whatever the
+  // last failure said. Name them here, the way the model-health endpoint already does.
+  if (connection.testStatus === "deactivated") return "account_deactivated";
+  if (connection.testStatus === "expired") return "expired";
   if (connection.lastErrorType) return connection.lastErrorType;
 
   const code = Number(connection.errorCode);
