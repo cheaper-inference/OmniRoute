@@ -3,7 +3,7 @@ import { isJsonObject } from "../../utils/kieTask.ts";
 
 const imageFormatSchema = z.enum(["png", "jpeg", "webp", "gif", "svg"]);
 const outputOptionsSchema = z.object({
-  output_format: imageFormatSchema.nullable().optional(),
+  output_format: z.string().trim().toLowerCase().pipe(imageFormatSchema).nullable().optional(),
   frame_count: z.number().int().min(2).max(16).nullable().optional(),
   frame_duration_ms: z.number().int().min(20).nullable().optional(),
   background: z.enum(["auto", "opaque", "transparent"]).nullable().optional(),

@@ -1,6 +1,13 @@
-import test from "node:test";
+import test, { after } from "node:test";
 import assert from "node:assert/strict";
 import { handleImageGeneration } from "../../open-sse/handlers/imageGeneration.ts";
+import { shutdownDbInstance } from "../../src/lib/db/core.ts";
+import { closeCallLogSaves } from "../../src/lib/usage/callLogs.ts";
+
+after(async () => {
+  await closeCallLogSaves();
+  await shutdownDbInstance();
+});
 
 const PNG = Buffer.from("89504e470d0a1a0a00000000", "hex").toString("base64");
 const GIF = Buffer.from("GIF89a\x01\x00\x01\x00").toString("base64");
@@ -66,10 +73,10 @@ for (const [format, hex, mime] of [
     "image/svg+xml",
   ],
 ]) {
-  test(`forwards ${format} and reports its actual container`, async () => {
+  test(`normalizes ${format} and reports its actual container`, async () => {
     const bytes = Buffer.from(hex, "hex").toString("base64");
     const { sent, result } = await generate(
-      { output_format: format },
+      { output_format: ` ${format.toUpperCase()} ` },
       { data: [{ b64_json: bytes }] }
     );
     assert.equal(sent?.output_format, format);
@@ -152,7 +159,7 @@ for (const fields of [
   { output_format: "gif", partial_images: { toString: 42 } },
   { output_format: "gif", partial_images: "0" },
   { output_format: "gif", stream: "true" },
-  { output_format: "gif", output_compression: 80 },
+  { output_format: " GIF ", output_compression: 80 },
 ]) {
   test(`rejects invalid format controls before inference: ${JSON.stringify(fields)}`, async () => {
     const { result, sent } = await generate(fields);
