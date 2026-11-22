@@ -1,45 +1,26 @@
 /**
  * Database module: InspectorCustomHosts
- * CRUD operations for inspector_custom_hosts table.
+ * Synchronous compatibility facade for the inspector_custom_hosts table.
+ *
+ * Persistence lives in `repositories/sqliteInspectorCustomHostRepository.ts`.
+ * These exports stay synchronous (SQLite-only legacy access) because the
+ * traffic-inspector routes, DNS provisioning/repair, config import/export and
+ * the per-request intercept hook call them synchronously.
  */
 
-import { getDbInstance } from "./core.ts";
+import type { InspectorCustomHostRepository } from "@/domain/persistence/agentBridgeRepositories";
 import type { InspectorCustomHostRow } from "./_rowTypes.ts";
+import { agentBridgeRepositories } from "./repositories/agentBridgeRepositories";
 
-// SQLite stores booleans as integers
-interface InspectorCustomHostDbRow {
-  host: string;
-  enabled: number;
-  label: string | null;
-  kind: string;
-  added_at: string;
-  last_seen_at: string | null;
-}
+const customHosts = agentBridgeRepositories.legacySync.customHosts;
 
-function mapRow(row: InspectorCustomHostDbRow): InspectorCustomHostRow {
-  return {
-    host: row.host,
-    enabled: row.enabled === 1,
-    label: row.label,
-    kind: row.kind as "llm" | "app" | "custom",
-    added_at: row.added_at,
-    last_seen_at: row.last_seen_at,
-  };
+/** Async persistence contract for Traffic Inspector custom capture hosts. */
+export function getInspectorCustomHostRepository(): InspectorCustomHostRepository {
+  return agentBridgeRepositories.customHosts;
 }
 
 export function listCustomHosts(opts?: { enabledOnly?: boolean }): InspectorCustomHostRow[] {
-  const db = getDbInstance();
-  const enabledOnly = opts?.enabledOnly === true;
-
-  const rows = enabledOnly
-    ? (db
-        .prepare("SELECT * FROM inspector_custom_hosts WHERE enabled = 1 ORDER BY host ASC")
-        .all() as InspectorCustomHostDbRow[])
-    : (db
-        .prepare("SELECT * FROM inspector_custom_hosts ORDER BY host ASC")
-        .all() as InspectorCustomHostDbRow[]);
-
-  return rows.map(mapRow);
+  return customHosts.list(opts);
 }
 
 export function addCustomHost(
@@ -47,31 +28,19 @@ export function addCustomHost(
   kind: "llm" | "app" | "custom" = "custom",
   label?: string
 ): void {
-  const db = getDbInstance();
-  const now = new Date().toISOString();
-  db.prepare(
-    `INSERT OR IGNORE INTO inspector_custom_hosts (host, enabled, label, kind, added_at)
-     VALUES (?, 1, ?, ?, ?)`
-  ).run(host, label ?? null, kind, now);
+  customHosts.add(host, kind, label);
 }
 
 export function removeCustomHost(host: string): void {
-  const db = getDbInstance();
-  db.prepare("DELETE FROM inspector_custom_hosts WHERE host = ?").run(host);
+  customHosts.remove(host);
 }
 
 export function toggleCustomHost(host: string, enabled: boolean): void {
-  const db = getDbInstance();
-  db.prepare("UPDATE inspector_custom_hosts SET enabled = ? WHERE host = ?").run(
-    enabled ? 1 : 0,
-    host
-  );
+  customHosts.setEnabled(host, enabled);
 }
 
 export function touchLastSeen(host: string): void {
-  const db = getDbInstance();
-  const now = new Date().toISOString();
-  db.prepare("UPDATE inspector_custom_hosts SET last_seen_at = ? WHERE host = ?").run(now, host);
+  customHosts.touchLastSeen(host);
 }
 
 /**
@@ -80,9 +49,5 @@ export function touchLastSeen(host: string): void {
  * intercepts so that Mode 2 (Custom Hosts) entries appear in the "Custom" profile.
  */
 export function isCustomHost(host: string): boolean {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT 1 AS found FROM inspector_custom_hosts WHERE host = ? AND enabled = 1")
-    .get(host) as { found: number } | undefined;
-  return row !== undefined;
+  return customHosts.isEnabledCustomHost(host);
 }
