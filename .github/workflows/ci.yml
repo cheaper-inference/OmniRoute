@@ -663,8 +663,20 @@ jobs:
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
+      # #20998: markdownlint-cli2 is now a lockfile-pinned devDependency, so this
+      # job needs the same installed tree as every other ci.yml job. PR-only cache,
+      # same rule as the lint job: a candidate push (omni-queue/**) is a fresh ref
+      # and must write no Actions cache (tests/unit/merge-queue/workflows.test.mjs).
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          cache: ${{ github.event_name == 'pull_request' }}
       - name: markdownlint (docs + root, advisory)
-        run: npx --yes markdownlint-cli2 "docs/**/*.md" "*.md" "!docs/i18n" "!docs/research" || true
+        # #20998: run the lockfile-pinned local binary (devDependency
+        # markdownlint-cli2, exact pin) instead of `npx --yes markdownlint-cli2`,
+        # which downloaded and executed whatever version the registry served that
+        # day — no lockfile entry, no integrity verification. The install above
+        # restores the same pinned tree every other ci.yml job uses.
+        run: ./node_modules/.bin/markdownlint-cli2 "docs/**/*.md" "*.md" "!docs/i18n" "!docs/research" || true
       - name: Vale prose lint (Microsoft style, advisory)
         # Non-fatal: a Vale/reviewdog setup error must not turn this advisory job red.
         continue-on-error: true

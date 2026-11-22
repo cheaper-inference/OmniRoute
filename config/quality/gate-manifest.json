@@ -470,7 +470,7 @@
     },
     {
       "name": "lint:md",
-      "command": "npx --yes markdownlint-cli2 \"docs/**/*.md\" \"*.md\" \"!docs/i18n\" \"!docs/research\"",
+      "command": "markdownlint-cli2 \"docs/**/*.md\" \"*.md\" \"!docs/i18n\" \"!docs/research\"",
       "disposition": "separately-invoked"
     },
     {
