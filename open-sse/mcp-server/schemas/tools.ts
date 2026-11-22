@@ -1542,6 +1542,82 @@ export const agentSkillsCoverageTool: McpToolDefinition<
 
 export { toolSearchInput, toolSearchOutput, toolSearchTool } from "./toolSearch.ts";
 
+// --- Vision / image / video tools (filekit) ---
+export const filekitVisionAnalyzeOutput = z.object({ result: z.string() });
+export const filekitVisionAnalyzeTool: McpToolDefinition<
+  z.ZodTypeAny,
+  typeof filekitVisionAnalyzeOutput
+> = {
+  name: "vision_analyze",
+  description:
+    "Analyze an image with a vision model. Provide a local image path, a context (screenshot/diagram/design/chart/general) and an optional question. Returns a detailed text analysis.",
+  inputSchema: z.object({}),
+  outputSchema: filekitVisionAnalyzeOutput,
+  scopes: ["execute:completions"],
+  auditLevel: "basic",
+  phase: 2,
+  sourceEndpoints: ["/v1/chat/completions"],
+};
+
+export const filekitImageGenerateOutput = z.object({ result: z.string() });
+export const filekitImageGenerateTool: McpToolDefinition<
+  z.ZodTypeAny,
+  typeof filekitImageGenerateOutput
+> = {
+  name: "image_generate",
+  description:
+    "Generate images from a text prompt using an OmniRoute image model. Saves results under ~/ai-edited/images and returns the file paths. Attach them to chat with attach_file.",
+  inputSchema: z.object({}),
+  outputSchema: filekitImageGenerateOutput,
+  scopes: ["execute:completions"],
+  auditLevel: "basic",
+  phase: 2,
+  sourceEndpoints: ["/v1/images/generations"],
+};
+
+export const filekitVideoCutOutput = z.object({ result: z.string() });
+export const filekitVideoCutTool: McpToolDefinition<z.ZodTypeAny, typeof filekitVideoCutOutput> = {
+  name: "video_cut",
+  description: "Cut/trim a local video with ffmpeg (start + duration). Returns the output path.",
+  inputSchema: z.object({}),
+  outputSchema: filekitVideoCutOutput,
+  scopes: ["execute:completions"],
+  auditLevel: "basic",
+  phase: 2,
+  sourceEndpoints: [],
+};
+
+export const filekitVideoSpeedOutput = z.object({ result: z.string() });
+export const filekitVideoSpeedTool: McpToolDefinition<
+  z.ZodTypeAny,
+  typeof filekitVideoSpeedOutput
+> = {
+  name: "video_speed",
+  description: "Change local video playback speed (0.25x-4x) with ffmpeg. Returns the output path.",
+  inputSchema: z.object({}),
+  outputSchema: filekitVideoSpeedOutput,
+  scopes: ["execute:completions"],
+  auditLevel: "basic",
+  phase: 2,
+  sourceEndpoints: [],
+};
+
+export const filekitVideoResizeOutput = z.object({ result: z.string() });
+export const filekitVideoResizeTool: McpToolDefinition<
+  z.ZodTypeAny,
+  typeof filekitVideoResizeOutput
+> = {
+  name: "video_resize",
+  description:
+    "Resize a local video for reels/tiktok/youtube/square or custom dimensions with ffmpeg. Returns the output path.",
+  inputSchema: z.object({}),
+  outputSchema: filekitVideoResizeOutput,
+  scopes: ["execute:completions"],
+  auditLevel: "basic",
+  phase: 2,
+  sourceEndpoints: [],
+};
+
 export const MCP_TOOLS = [
   toolSearchTool,
   getHealthTool,
@@ -1583,6 +1659,11 @@ export const MCP_TOOLS = [
   agentSkillsGetTool,
   agentSkillsCoverageTool,
   pickFastestModelTool,
+  filekitVisionAnalyzeTool,
+  filekitImageGenerateTool,
+  filekitVideoCutTool,
+  filekitVideoSpeedTool,
+  filekitVideoResizeTool,
 ] as const;
 
 export const MCP_ESSENTIAL_TOOLS = MCP_TOOLS.filter((t) => t.phase === 1);

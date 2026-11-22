@@ -68,6 +68,18 @@ import {
   handleOneproxyStats,
 } from "./tools/advancedTools.ts";
 import { handlePickFastestModel } from "./tools/pickFastestModel.ts";
+import {
+  handleVisionAnalyze,
+  visionAnalyzeInput,
+  handleImageGenerate,
+  imageGenerateInput,
+  handleVideoCut,
+  videoCutInput,
+  handleVideoSpeed,
+  videoSpeedInput,
+  handleVideoResize,
+  videoResizeInput,
+} from "./tools/filekitTools.ts";
 import { registerPerplexityResearchTool } from "./tools/perplexityResearch.ts";
 // #15159 M-01 — "file = register + wrap. handle* -> tools/canonical/*.ts".
 // These twelve handlers used to be defined inline below `withScopeEnforcement`,
@@ -665,6 +677,69 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     },
     withScopeEnforcement("omniroute_oneproxy_stats", (args) =>
       handleOneproxyStats(oneproxyStatsInput.parse(args))
+    )
+  );
+
+  // ── Vision / image / video tools ─────────────
+  const filekitText = (text: string) => ({ content: [{ type: "text" as const, text }] });
+
+  server.registerTool(
+    "vision_analyze",
+    {
+      description:
+        "Analyze a local image with a vision model. Provide path, context (screenshot/diagram/design/chart/general) and an optional question.",
+      inputSchema: visionAnalyzeInput,
+    },
+    withScopeEnforcement("vision_analyze", async (args) =>
+      filekitText(await handleVisionAnalyze(visionAnalyzeInput.parse(args ?? {})))
+    )
+  );
+
+  server.registerTool(
+    "image_generate",
+    {
+      description:
+        "Generate images from a text prompt using an OmniRoute image model. Saves to ~/ai-edited/images and returns paths.",
+      inputSchema: imageGenerateInput,
+    },
+    withScopeEnforcement("image_generate", async (args) =>
+      filekitText(await handleImageGenerate(imageGenerateInput.parse(args ?? {})))
+    )
+  );
+
+  server.registerTool(
+    "video_cut",
+    {
+      description:
+        "Cut/trim a local video with ffmpeg (start + duration). Returns the output path.",
+      inputSchema: videoCutInput,
+    },
+    withScopeEnforcement("video_cut", async (args) =>
+      filekitText(await handleVideoCut(videoCutInput.parse(args ?? {})))
+    )
+  );
+
+  server.registerTool(
+    "video_speed",
+    {
+      description:
+        "Change local video playback speed (0.25x-4x) with ffmpeg. Returns the output path.",
+      inputSchema: videoSpeedInput,
+    },
+    withScopeEnforcement("video_speed", async (args) =>
+      filekitText(await handleVideoSpeed(videoSpeedInput.parse(args ?? {})))
+    )
+  );
+
+  server.registerTool(
+    "video_resize",
+    {
+      description:
+        "Resize a local video for reels/tiktok/youtube/square or custom dimensions with ffmpeg. Returns the output path.",
+      inputSchema: videoResizeInput,
+    },
+    withScopeEnforcement("video_resize", async (args) =>
+      filekitText(await handleVideoResize(videoResizeInput.parse(args ?? {})))
     )
   );
 
