@@ -22,9 +22,11 @@ data:
   # Set this to your real ingress host before exposing the dashboard.
   LIVE_WS_ALLOWED_ORIGINS: "http://localhost:20128,http://127.0.0.1:20128"
   APP_LOG_LEVEL: "info"
-  # Require an API key on /v1/* — strongly recommended once the Service is
-  # reachable beyond the cluster.
-  REQUIRE_API_KEY: "false"
+  # Require an API key on /v1/* by default (#21008 / #20998): both overlays
+  # ship an Ingress resource, so a keyless base would expose anonymous /v1/*
+  # inference outside the cluster. Patch to "false" in a private overlay only
+  # when keyless access is explicitly intended.
+  REQUIRE_API_KEY: "true"
   # Graceful shutdown budget for in-flight SSE only. It bounds the request
   # drain, not the WAL checkpoint that closeDbInstance() runs afterwards — the
   # checkpoint has no timeout, which is why terminationGracePeriodSeconds (300)
