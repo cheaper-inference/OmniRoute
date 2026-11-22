@@ -1,0 +1,1 @@
+- **fix(api):** allow `POST /api/keys/groups` through `http-method-guard.cjs` before the generic `/api/keys/{id}` rule ([#20971](https://github.com/cheaper-inference/OmniRoute/issues/20971) — thanks @zerafachris)
