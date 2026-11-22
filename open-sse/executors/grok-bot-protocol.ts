@@ -181,6 +181,11 @@ export function remoteMcpServers(): Record<
 const READABLE_CODE_POINT = /[\p{L}\p{N}\p{P}\p{S}]/u;
 
 /** Letterlike code points that occupy a position without drawing anything. */
+/** A string sequence that is never closed: the introducer and everything after it are damaged. */
+const UNTERMINATED_STRING = /[\u001b][\]P^_X]|[\u0090\u0098\u009d\u009e\u009f]/gu;
+
+/** Symbols whose compatibility form is letters: the trademark, service mark, numero, degree. */
+const LETTER_BEARING_SYMBOL = /[\u2122\u2120\u2116\u2103\u2109]/gu;
 const INVISIBLE_LETTERFORM = /[\u115f\u1160\u2800\u3164\uffa0]/gu;
 
 export function hasReadableAnswer(text: string): boolean {
@@ -230,20 +235,24 @@ function foldSmallCapitals(text: string): string {
  * Folding covers what Unicode gives a compatibility decomposition - fullwidth, mathematical
  * and circled letters - plus the small capitals the token is spelled with, which have none.
  * Enclosing forms with no decomposition (negative squared, negative circled, regional
- * indicators, keycaps) are pasted from pickers rather than typed and stay distinct.
+ * indicators) are pasted from pickers rather than typed and stay distinct; a keycap's combining
+ * enclosing mark is stripped, so a keycap spelling is refused like any other decoration.
  */
 const SENTINEL_SKELETON = UNAVAILABLE_SENTINEL.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
 
-const ESCAPE_SEQUENCES = [
-  // Seven-bit: CSI with its parameters and intermediates, then the final byte.
+const STRING_SEQUENCES = [
+  // Seven-bit strings. A string can be closed at either width, or not closed at all, and an
+  // unterminated one must still lose its introducer so the text after it stays readable.
+  /\u001b\](?:[^\u0007\u001b\u009c]*)(?:\u0007|\u009c|\u001b\\?)?/g,
+  /\u001b[P^_X](?:[^\u001b\u009c]*)(?:\u009c|\u001b\\?)?/g,
+  // Eight-bit forms of the same, with the same tolerance for the other terminator.
+  /\u009d(?:[^\u0007\u001b\u009c]*)(?:\u0007|\u009c|\u001b\\?)?/g,
+  /[\u0098\u009e\u009f\u0090](?:[^\u001b\u009c]*)(?:\u009c|\u001b\\?)?/g,
+];
+const CONTROL_SEQUENCES = [
+  // CSI with its parameters and intermediates, then the final byte, at either width.
   /\u001b\[[0-9;:<=>?]*[\x20-\x2f]*[\x40-\x7e]/g,
-  // Seven-bit strings: OSC ends with BEL or ST, the others with ST.
-  /\u001b\][^\u0007\u001b]*(?:\u0007|\u001b\\)?/g,
-  /\u001b[P^_X][^\u001b]*\u001b\\?/g,
-  // Eight-bit forms of the same.
   /\u009b[0-9;:<=>?]*[\x20-\x2f]*[\x40-\x7e]/g,
-  /\u009d[^\u0007\u009c]*[\u0007\u009c]?/g,
-  /\u0090[^\u009c]*\u009c?/g,
   // Any other escape: introducers, intermediates, one final byte.
   /\u001b[\x20-\x2f]*[\x30-\x7e]/g,
 ];
@@ -253,12 +262,81 @@ const ESCAPE_SEQUENCES = [
  * not know: C1 introducers, string sequences, and two- and three-byte designators.
  */
 function escapeFree(text: string): string {
-  return ESCAPE_SEQUENCES.reduce((value, pattern) => value.replace(pattern, ""), text);
+  const withoutStrings = STRING_SEQUENCES.reduce(
+    (value, pattern) => value.replace(pattern, ""),
+    text
+  );
+  // Removing a payload leaves its introducer next to the token, and a lone ESC before a word is
+  // such a leftover, while a two-byte escape starts a single character. An eight-bit introducer
+  // is left for the control pass, which knows how to read it.
+  const withoutStrands = withoutStrings.replace(
+    /\u001b(?=[A-Za-z]{2,})|[\u0090\u0098\u009e\u009f]/gu,
+    ""
+  );
+  return CONTROL_SEQUENCES.reduce((value, pattern) => value.replace(pattern, ""), withoutStrands);
+}
+
+/**
+ * The same text read the other way round: a two-byte escape is consumed before a stranded
+ * introducer is considered, so \`ESC c\` stays a reset and does not become a stray introducer
+ * in front of a word.
+ */
+function escapeFreeStrict(text: string): string {
+  const withoutControls = CONTROL_SEQUENCES.reduce(
+    (value, pattern) => value.replace(pattern, ""),
+    text
+  );
+  const withoutStrands = withoutControls.replace(
+    /\u001b(?=[A-Za-z]{2,})|[\u0090\u0098\u009e\u009f]/gu,
+    ""
+  );
+  return STRING_SEQUENCES.reduce((value, pattern) => value.replace(pattern, ""), withoutStrands);
 }
 
 /** The same text with the letters kept, for an escape that swallowed one of them. */
 function escapeKept(text: string): string {
   return text.replace(/[\p{M}\p{Cf}]/gu, "");
+}
+
+/**
+ * Whether the token is the only word of the reply. Escape families that swallow their payload
+ * leave the token as a run of letters beside residue too short to be prose, which is how a
+ * cross-width string sequence is caught without teaching the strip every terminator pairing.
+ */
+function tokenStandsAlone(text: string, least = 1): boolean {
+  // The annotation is what keeps filter's callback typed: without it the parameter widens to the
+  // intersection of the two array element types and shows up as never.
+  const words: string[] =
+    escapeFree(text)
+      .replace(/[\u0000-\u001f\u007f-\u009f]/gu, " ")
+      .match(/[\p{L}\p{N}_]+/gu) ?? [];
+  const runs = words
+    // A word is a word in any script: a sentence of Chinese or Cyrillic words is content, and
+    // measuring only the Latin letters in it would leave the token looking alone.
+    // A Latin run that short is residue from an escape, but a script written without spaces
+    // makes two characters a word: refusing "你好" beside the token refuses an answer.
+    .filter((run) => {
+      const count = (run.match(/[\p{L}\p{N}]/gu) ?? []).length;
+      // Two characters are a word only in a script that writes words without spaces; in a
+      // spaced script a run that short is residue, whatever the code point's block.
+      const unspaced =
+        /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]+$/u.test(
+          run
+        );
+      return count >= 3 || (count >= 2 && unspaced);
+    })
+    .map((run) => run.replace(/[^A-Za-z0-9]/g, "").toUpperCase());
+  return runs.length >= least && runs.every((run) => run === SENTINEL_SKELETON);
+}
+
+/** The letters of a fragment, read the way the whole-text comparison reads them. */
+function fragmentLetters(fragment: string): string {
+  return fragment
+    .replace(/[\p{M}\p{Cf}]/gu, "")
+    .normalize("NFKC")
+    .replace(/[\p{M}\p{Cf}]/gu, "")
+    .replace(/[^\p{L}]/gu, "")
+    .toUpperCase();
 }
 
 const CONTROL_CHARACTER = /[\u0000-\u001f\u007f-\u009f]/;
@@ -268,6 +346,11 @@ export function isUnavailableSentinel(text: string): boolean {
     // A combining mark would compose with the token's own letters under NFKC and make a
     // different word, so marks and format characters go first.
     .replace(/[\p{M}\p{Cf}]/gu, "")
+    // A trademark or numero sign expands into letters under NFKC, but it is decoration.
+    .replace(LETTER_BEARING_SYMBOL, "")
+    // A Roman numeral or another numeric letterform expands into letters under NFKC, so the
+    // numerals have to go before it runs, not only after.
+    .replace(/\p{N}/gu, "")
     // Compatibility forms - fullwidth, mathematical, circled - are the same letters.
     .normalize("NFKC")
     // Normalisation can itself introduce marks (halfwidth voiced marks, Arabic ligature
@@ -275,36 +358,50 @@ export function isUnavailableSentinel(text: string): boolean {
     .replace(/[\p{M}\p{Cf}]/gu, "")
     .replace(INVISIBLE_LETTERFORM, "")
     .replace(TOKEN_NOISE, "")
-    // A numbered paragraph or a footnote around the token is decoration too - in any
-    // script, so this is every numeric character and not just the ASCII digits.
+    // A numbered paragraph or a footnote around the token is decoration too, in any script.
+    // Numerals go before the normalisation and again after it: a squared abbreviation expands
+    // into a digit beside a letter, which the first pass cannot see.
     .replace(/\p{N}/gu, "");
   // Small capitals have to be folded before the case fold, which maps them elsewhere.
   if (foldSmallCapitals(letters).toUpperCase() === SENTINEL_SKELETON) return true;
+  // Saying it twice is still saying nothing else, and a space between them carries no escape.
+  if (tokenStandsAlone(text, 2)) return true;
+  // A string sequence with no terminator leaves the text after it unreadable, and the token is
+  // the one thing that must not be handed back through it.
+  for (const match of text.matchAll(UNTERMINATED_STRING)) {
+    const after = text.slice(match.index + match[0].length);
+    // A string is closed by what its own family accepts: a BEL closes an OSC and nothing else,
+    // an ST closes every family at either width. One shared terminator set reads a closed string
+    // as open, and reads a DCS closed with a BEL as closed when it is not.
+    const opensOsc = match[0].startsWith("\u001b]") || match[0].startsWith("\u009d");
+    const closed = opensOsc ? /[\u0007\u009c]|\u001b\\/u : /[\u009c]|\u001b\\/u;
+    if (closed.test(after)) continue;
+    // Only what stands behind the introducer is read through it, so the token has to be there.
+    if (fragmentLetters(after).includes(SENTINEL_SKELETON.slice(0, 8))) return true;
+  }
   if (!CONTROL_CHARACTER.test(text)) return false;
+  if (tokenStandsAlone(text)) return true;
   // An escape sequence can swallow a letter of the token and leave the rest looking like an
   // answer, so the letters alone are compared as well. Only a digit is dropped here, not a
   // letter: a numbered paragraph in front of the token is still the token.
-  const readings = [escapeFree(text), escapeKept(text)].map((value) =>
+  const readings = [escapeFree(text), escapeFreeStrict(text), escapeKept(text)].map((value) =>
     foldSmallCapitals(
       value
         .replace(/[\p{M}\p{Cf}]/gu, "")
+        .replace(LETTER_BEARING_SYMBOL, "")
         .normalize("NFKC")
         .replace(INVISIBLE_LETTERFORM, "")
     )
       .replace(/[^\p{L}]/gu, "")
       .toUpperCase()
   );
-  return readings.includes(SENTINEL_SKELETON);
+  return readings.some((value) => value === SENTINEL_SKELETON);
 }
 
 // A claim is either a first-person statement of intent ("I will use lookup") or a past-tense
 // report ("I used search"), which is what a shipped case pins. A bare imperative - "Use the
 // date as the key", "Call web_search(query)" - is an instruction or ordinary prose, not a
 // claim that a tool ran.
-// A claim is a first-person statement ("I will use lookup", "I'll call it", "I'm going to
-// query"), a past-tense report ("I used search"), or the equivalent in Chinese. A bare
-// imperative - "Use the date as the key", "Call web_search(query)" - is an instruction or
-// ordinary prose, not a claim that a tool ran.
 // A claim is a first-person statement ("I will use lookup", "I'll call it", "I'm going to
 // query"), a past-tense report ("I used search"), or the equivalent in Chinese. A bare
 // imperative - "Use the date as the key", "Call web_search(query)" - is an instruction or
@@ -317,19 +414,42 @@ const CLAIM_PAST =
   "\u8c03\u7528|\u4f7f\u7528|\u901a\u8fc7";
 const LATIN_WORD = "\\p{Script=Latin}\\p{N}_";
 const QUOTE = "[\\u0060'\\u2018\\u2019\\u201c\\u201d]";
-// An article in front makes the name a noun rather than the thing that was used ("I used the
-// search results"), so it is only allowed when the name is quoted, which reads as the tool.
+// An article in front makes the name a common noun rather than the thing that was used ("I used
+// the search results"), so behind an article only a tool noun counts ("I used the search tool");
+// otherwise the name is the value the answer used and the reply is prose.
 // Chinese verbs glue straight to the name, optionally with the completed-aspect particle, so
 // an empty gap is allowed after them.
-const CLAIM_GLUE = `(?:(?:\\s+(?:the|a|an))?\\s*${QUOTE}\\s*|\\s+|(?:\\u4e86)?(?<=[\\u4e00-\\u9fff]))`;
+const CLAIM_GLUE = `(?:(?:\\s+(?:the|a|an))?\\s*${QUOTE}\\s*|\\s+(?:the|a|an)\\s+|\\s+|(?:\\u4e86)?(?<=[\\u4e00-\\u9fff])\\s*)`;
 // Negated and qualified claims are not claims: "I haven't used search yet", "I used
 // search-based ranking", "I used the search results".
-const CLAIM_NEGATED = /(?:n't|not|never)\s+\S*\s*$/iu;
+/** A negation reaches the verb only inside the same clause and not across a subordinator. */
+function negatedBefore(window: string): boolean {
+  const clause = window.split(/[.!?;:,]/u).pop() ?? "";
+  const negator =
+    /(?:n't|\bnot\b|\bnever\b|\u6ca1\u6709|\u6ca1|\u4e0d\u8981|\u4e0d|\u522b|\u672a|\u65e0)/u.exec(
+      clause
+    );
+  if (!negator) return false;
+  const between = clause.slice(negator.index + negator[0].length);
+  return !/\b(?:that|which|because|when|while|although|though|but|so|since|after|how many|and|forgot\w*|forgotten)\b/iu.test(
+    between
+  );
+}
+//   The article form is narrower: "I used the search tool" names the tool, and "I used the date
+//   for the header" names a value, so only the tool nouns count behind an article.
+const CLAIM_AFTER_ARTICLE =
+  /^(?:$|[.,;:!?)\]}`'"\u2018\u2019\u201c\u201d\uff09\u3002\uff0c\uff01\uff1f\uff1b\uff1a]|[\u2013\u2014]|\s*(?:tool|function|api|call|method|command|endpoint)(?![\p{Script=Latin}\p{N}_]))/iu;
 const CLAIM_ENDS_HERE =
-  /^(?:$|[\s.,;:!?)\]}`'"\u2018\u2019\u201c\u201d]|\s*(?:to|for|and|then|but|so|because|which|that|it|in|on|at|with|from|by|if|when|while|twice|again|first|now|earlier|yesterday)(?![\p{Script=Latin}\p{N}_])|\s*(?:\u4e86|\u5de5\u5177))/iu;
+  /^(?:$|[.,;:!?)\]}`'"\u2018\u2019\u201c\u201d\uff09\u3002\uff0c\uff01\uff1f\uff1b\uff1a]|\s*(?:tool|function|api|call|method|command|endpoint)(?![\p{Script=Latin}\p{N}_])|\s*(?:(?:\d+|a few|many|several)\s+times|to|for|and|then|but|so|because|which|that|it|in|on|at|with|from|by|if|when|while|twice|again|first|now|earlier|yesterday|today|tonight|just|already|immediately|once|via|per|through|after|before|until|during|across|about|every|each)(?![\p{Script=Latin}\p{N}_])|\s*\(|\s+[-\u2013\u2014]\s+|\s*(?:\u4e86|\u5de5\u5177))/iu;
+
+/** A line break opens a new clause only when the next word starts one. */
+function breakOpensClause(tail: string): boolean {
+  // No `i` flag here on purpose: under it, \p{Lu} also matches a lower-case letter.
+  return /^\s*\n\s*\p{Lu}/u.test(tail);
+}
 
 /** Where the name stands as the object of a claim verb, as [start, end) offsets. */
-function claimCandidates(haystack: string, name: string): Array<[number, number]> {
+function claimCandidates(haystack: string, name: string): Array<[number, number, boolean]> {
   const escaped = name.normalize("NFKC").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp(
     `(?:^|[^${LATIN_WORD}])(?:${CLAIM_FIRST_PERSON}|${CLAIM_PAST})${CLAIM_GLUE}${escaped}(?![${LATIN_WORD}])`,
@@ -337,7 +457,10 @@ function claimCandidates(haystack: string, name: string): Array<[number, number]
   );
   return [...haystack.matchAll(pattern)].map((match) => {
     const end = match.index + match[0].length;
-    return [end - name.length, end] as [number, number];
+    const afterArticle = /\s(?:the|a|an)\s/iu.test(
+      match[0].slice(0, match[0].length - name.length)
+    );
+    return [end - name.length, end, afterArticle] as [number, number, boolean];
   });
 }
 
@@ -352,9 +475,17 @@ export function namesAClientTool(text: string, tools: unknown[]): boolean {
       typeof name === "string" &&
       name.length > 0 &&
       claimCandidates(haystack, name).some(
-        ([start, end]) =>
-          !CLAIM_NEGATED.test(haystack.slice(Math.max(0, start - 16), start)) &&
-          CLAIM_ENDS_HERE.test(haystack.slice(end))
+        ([start, end, afterArticle]) =>
+          (!negatedBefore(haystack.slice(Math.max(0, start - 48), start)) &&
+            (afterArticle ? CLAIM_AFTER_ARTICLE : CLAIM_ENDS_HERE).test(
+              haystack
+                .slice(end)
+                .replace(
+                  /^\s*(?:\p{L}{4,}ly|just|already|once|immediately|again|twice|yesterday|earlier|then|now|first)(?![\p{Script=Latin}\p{N}_])/iu,
+                  ""
+                )
+            )) ||
+          breakOpensClause(haystack.slice(end))
       )
     );
   });

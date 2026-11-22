@@ -1,3 +1,4 @@
+import { isUnavailableSentinel } from "../../open-sse/executors/grok-bot-protocol.ts";
 import { isRetryablePreOutputTransportError } from "../../src/sse/services/sameAccountTransportRetry.ts";
 import { before, after, describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
@@ -15,6 +16,54 @@ import {
 } from "../helpers/grokBotExecutorFixture.ts";
 before(prepareExecutorFixture);
 after(cleanupExecutorFixture);
+
+describe("GrokBotExecutor sentinel predicate", () => {
+  // Each row is the input that changes an answer when the mechanism named in its label is
+  // withdrawn, so the case stands for that mechanism and not for a spelling.
+  const refused: Array<[string, string]> = [
+    ["an unterminated osc hides the token", "\u001b]0;t TOOL_UNAVAILABLE"],
+    ["an unterminated device control string hides the token", "\u001bPabc TOOL_UNAVAILABLE"],
+    ["an unterminated eight-bit introducer hides the token", "\u0090abc TOOL_UNAVAILABLE"],
+    ["a roman numeral is decoration", "TOOL_UNAVAILABLE\u216b"],
+    ["a closed device control string hides the token", "\u001bPabc\u009cTOOL_UNAVAILABLE"],
+    [
+      "a doubled token with roman numeral decoration",
+      "TOOL_UNAVAILABLE TOOL_UNAVAILABLE \u2160\u2161",
+    ],
+    [
+      "a doubled token with superscript decoration",
+      "TOOL_UNAVAILABLE TOOL_UNAVAILABLE \u00b2\u00b3",
+    ],
+    ["a doubled token with fullwidth letters", "TOOL_UNAVAILABLE TOOL_UNAVAILABLE \uff21\uff22"],
+    ["a lower-case spelling inside a title", "\u001b]0;t tool_unavailable"],
+  ];
+  const delivered: Array<[string, string]> = [
+    [
+      "the token stands before a bare introducer",
+      "I could not reach the bridge, so I replied TOOL_UNAVAILABLE\u001b]",
+    ],
+    ["a title closed with an st in front of the token", "\u001b]0;t TOOL_UNAVAILABLE\u001b\\"],
+    [
+      "a two-character word in a script without spaces is content",
+      "\u0007TOOL_UNAVAILABLE \u4f60\u597d",
+    ],
+    [
+      "a doubled token beside a word in a script without spaces",
+      "TOOL_UNAVAILABLE TOOL_UNAVAILABLE \u4f60\u597d",
+    ],
+  ];
+
+  for (const [label, input] of refused) {
+    it(`refuses a reply where ${label}`, () => {
+      assert.equal(isUnavailableSentinel(input), true, JSON.stringify(input));
+    });
+  }
+  for (const [label, input] of delivered) {
+    it(`delivers a reply where ${label}`, () => {
+      assert.equal(isUnavailableSentinel(input), false, JSON.stringify(input));
+    });
+  }
+});
 
 describe("GrokBotExecutor answer shape", () => {
   let t: FakeTransport;
@@ -100,6 +149,8 @@ describe("GrokBotExecutor answer shape", () => {
     "!!!",
     "\u4f60\u597d",
     "\u001b[31mred\u001b[0m",
+    "\u8fd9\u4e2a\u63a5\u53e3\u4e0d\u53ef\u7528\u3002\n\u8bf7\u8fd4\u56de TOOL_UNAVAILABLE\u3002",
+    "\u041f\u0440\u0438\u0432\u0435\u0442.\n\u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u044e TOOL_UNAVAILABLE.",
     "\u{1f642}",
     "42",
   ]) {
@@ -284,7 +335,27 @@ describe("GrokBotExecutor answer shape", () => {
       ["an 8-bit control sequence with an intermediate", "\u009b1 qTOOL_UNAVAILABLE"],
       ["a bel-terminated command string", "\u001b]0;t\u0007TOOL_UNAVAILABLE"],
       ["a bel-terminated 8-bit command string", "\u009d0;t\u0007TOOL_UNAVAILABLE"],
+      ["a bel-terminated command string holding a word", "\u009d0;title\u0007TOOL_UNAVAILABLE"],
       ["a device control string", "\u001bPq\u001b\\TOOL_UNAVAILABLE"],
+      ["an sos introducer behind an escape", "\u001b\u0098x\u009cTOOL_UNAVAILABLE"],
+      ["a cross-width string terminator", "\u001bPq\u009cTOOL_UNAVAILABLE"],
+      ["the token twice", "TOOL_UNAVAILABLE\nTOOL_UNAVAILABLE"],
+      ["the token twice with no control character", "TOOL_UNAVAILABLE TOOL_UNAVAILABLE"],
+      ["a device control string holding a word", "\u001bPabc\u001b\\TOOL_UNAVAILABLE"],
+      ["an sos holding a word", "\u0098abc\u009cTOOL_UNAVAILABLE"],
+      ["a keycap on the last letter", "TOOL_UNAVAILABL\u20e3E"],
+      ["a trademark sign", "TOOL_UNAVAILABLE\u2122"],
+      ["a numero sign in front", "\u2116 TOOL_UNAVAILABLE"],
+      ["a degree sign after", "TOOL_UNAVAILABLE\u2103"],
+      ["a string sequence that never closes", "\u001b]0;tTOOL_UNAVAILABLE"],
+      ["a device control string that never closes", "\u001bPabcTOOL_UNAVAILABLE"],
+      ["an eight-bit string that never closes", "\u0090abcTOOL_UNAVAILABLE"],
+      ["a device control string closed at the other width", "\u001bPabc\u009cTOOL_UNAVAILABLE"],
+      ["two tokens split by a reset", "\u001b[0mTOOL_UNAVAILABLE \u001b[0mTOOL_UNAVAILABLE"],
+      // A stray BEL is not an introducer, so the escape families leave it and the one letter
+      // beside it in place: the token is still the only word of the reply.
+      ["a stray bel and one letter", "\u0007t TOOL_UNAVAILABLE"],
+      ["a stray bel and two letters", "\u0007tt TOOL_UNAVAILABLE"],
     ] as const) {
       it(`refuses the sentinel padded with ${label} in the ${streamed ? "streamed" : "buffered"} shape`, async () => {
         executor.setBridgeControllerForTests(null);
@@ -315,6 +386,7 @@ describe("GrokBotExecutor answer shape", () => {
     for (const sentence of [
       "If discovery finds nothing, reply TOOL_UNAVAILABLE and stop.",
       "TOOL_UNAVAILABLE sorry",
+      "note TOOL_UNAVAILABLE\u0007",
       "No search was needed: the value is 42.",
     ]) {
       it(`delivers a longer reply containing the token in the ${streamed ? "streamed" : "buffered"} shape`, async () => {
@@ -455,7 +527,9 @@ describe("GrokBotExecutor answer shape", () => {
     });
   }
 
-  for (const [prose, shouldRefuse] of [
+  // One table for both shapes: a reply that reports a call the bridge never recorded has to
+  // earn the same verdict whether the client asked for a stream or not.
+  const claimVectors = [
     ["I researched the topic and found the answer.", false],
     ["It was already covered earlier.", false],
     ["We put the results together.", false],
@@ -468,6 +542,35 @@ describe("GrokBotExecutor answer shape", () => {
     ["I read the file already.", false],
     ["The search tool is optional.", false],
     ["I used the search results to answer.", false],
+    ["I used search results.", false],
+    ["I used search today.", true],
+    ["I used search via the bridge.", true],
+    ["I used search 3 times before answering.", true],
+    ["I used search \u2014 it returned BTC at 96k.", true],
+    ["I used search\nHere is what I found:", true],
+    ["I used search before answering.", true],
+    ["I can't count how many times I used search.", true],
+    ["I can't verify it by hand and I used search.", true],
+    ["\u6211\u4f7f\u7528\u4e86search\u3002", true],
+    ["\u6211\u8c03\u7528\u4e86 search\u3002", true],
+    ["\u6211\u6ca1\u6709\u4f7f\u7528search\u3002", false],
+    ["\u4e0d\u8981\u4f7f\u7528 search\u3002", false],
+    ["\u4f60\u4f7f\u7528\u4e86 search\uff0c\u5bf9\u5417", true],
+    ["I used the date for the header.", false],
+    ["I used query parameters in the URL.", false],
+    ["I used date\nas the column header.", false],
+    ["I used the search\nresults to answer.", false],
+    ["I used search\u2013based ranking.", false],
+    ["I'm not sure if I used search, but the value looks right.", false],
+    ["I used search extensively to cross-check the figures.", true],
+    ["We used search extensively.", true],
+    ["I used search frequently.", true],
+    ["Do not worry: I used search to find the answer.", true],
+    ["I have not forgotten that I used search yesterday.", true],
+    ["I used the search tool to look it up.", true],
+    ["I haven't used search to find it yet.", false],
+    ["I used some search results.", false],
+    ['I used search(query="BTC") before answering.', true],
     ["I used the date as the key.", false],
     ["I haven't used search yet.", false],
     ["I used search-based ranking.", false],
@@ -482,42 +585,58 @@ describe("GrokBotExecutor answer shape", () => {
     ["I'll use search to check that.", true],
     ["I'm going to use search.", true],
     ["It was \u901a\u8fc7search\u63a5\u53e3\u83b7\u53d6\u6570\u636e\u7684\u3002", false],
-  ] as const) {
-    it(`${shouldRefuse ? "refuses" : "delivers"} a reply whose client tool name appears ${shouldRefuse ? "as a whole word" : "inside a longer word"}`, async () => {
-      executor.setBridgeControllerForTests({
-        async start() {
-          return {
-            url: "https://bridge.example.com/grok-bridge/abcdefghijklmnopqrstuv/mcp",
-            invocations: [],
-          };
-        },
-        async stop() {},
+  ] as const;
+
+  for (const streamed of [true, false]) {
+    for (const [prose, shouldRefuse] of claimVectors) {
+      it(`${shouldRefuse ? "refuses" : "delivers"} a reply whose client tool name appears ${shouldRefuse ? "as a whole word" : "inside a longer word"}`, async () => {
+        executor.setBridgeControllerForTests({
+          async start() {
+            return {
+              url: "https://bridge.example.com/grok-bridge/abcdefghijklmnopqrstuv/mcp",
+              invocations: [],
+            };
+          },
+          async stop() {},
+        });
+        t.watchEvents = [
+          { agent: { isRunningTurn: true } },
+          { agent: { isRunningTurn: false }, rows: { entries: [assistantRow("1", prose)] } },
+        ];
+        const input = makeInput([{ role: "user", content: "hi" }], streamed, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "test-challenge",
+        });
+        (input.body as { tools?: unknown[] }).tools = [
+          { type: "function", function: { name: "search", description: "s", parameters: {} } },
+          { type: "function", function: { name: "read", description: "r", parameters: {} } },
+          { type: "function", function: { name: "get", description: "g", parameters: {} } },
+          { type: "function", function: { name: "date", description: "d", parameters: {} } },
+          { type: "function", function: { name: "lookup", description: "l", parameters: {} } },
+        ];
+        const response = (await executor.execute(input)) as Response;
+        if (!streamed) {
+          // The buffered shape reports the same verdict as the streamed one, and it arrives as a
+          // body rather than a frame.
+          if (shouldRefuse) {
+            assert.equal(response.status, 502);
+            assert.match(await response.text(), /"type":"bridge_not_called"/);
+          } else {
+            assert.equal(response.status, 200);
+            assert.deepEqual(JSON.parse(await response.text()).choices[0].message.content, prose);
+          }
+          return;
+        }
+        assert.equal(response.status, 200);
+        const text = await readStream(response);
+        if (shouldRefuse) {
+          assert.match(text, /"type":"bridge_not_called"/);
+          assert.deepEqual(streamedContents(text), []);
+        } else {
+          assert.deepEqual(streamedContents(text), [prose]);
+        }
       });
-      t.watchEvents = [
-        { agent: { isRunningTurn: true } },
-        { agent: { isRunningTurn: false }, rows: { entries: [assistantRow("1", prose)] } },
-      ];
-      const input = makeInput([{ role: "user", content: "hi" }], true, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      });
-      (input.body as { tools?: unknown[] }).tools = [
-        { type: "function", function: { name: "search", description: "s", parameters: {} } },
-        { type: "function", function: { name: "read", description: "r", parameters: {} } },
-        { type: "function", function: { name: "get", description: "g", parameters: {} } },
-        { type: "function", function: { name: "date", description: "d", parameters: {} } },
-        { type: "function", function: { name: "lookup", description: "l", parameters: {} } },
-      ];
-      const response = (await executor.execute(input)) as Response;
-      assert.equal(response.status, 200);
-      const text = await readStream(response);
-      if (shouldRefuse) {
-        assert.match(text, /"type":"bridge_not_called"/);
-        assert.deepEqual(streamedContents(text), []);
-      } else {
-        assert.deepEqual(streamedContents(text), [prose]);
-      }
-    });
+    }
   }
 
   it("treats a bridge verdict as final while a transport 502 stays retryable", () => {

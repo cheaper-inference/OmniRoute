@@ -18,6 +18,7 @@ import {
   type BridgeController,
   type BridgeTurnOptions,
   hasReadableAnswer,
+  namesAClientTool,
   isUnavailableSentinel,
   type StartedBridge,
   type Transport,
@@ -427,6 +428,19 @@ export class GrokBotTurn {
     });
   }
 
+  /**
+   * A reply that reports calling a client tool the bridge never recorded. The streamed shape
+   * refuses it, and the buffered shape has to earn the same verdict.
+   */
+  private reportsUnrecordedCall(text: string): boolean {
+    return (
+      this.bridge !== undefined &&
+      this.startedBridge !== null &&
+      this.clientToolList.length > 0 &&
+      namesAClientTool(text, this.clientToolList)
+    );
+  }
+
   private async nonStream(collect: Promise<string>): Promise<Response> {
     const text = await collect;
     if (this.startedBridge?.invocations?.length) {
@@ -436,7 +450,15 @@ export class GrokBotTurn {
         toolCallBody(this.model, this.id, this.startedBridge.invocations, text || null)
       );
     }
-    if (this.bridge && text !== undefined && isUnavailableSentinel(text)) {
+    // One verdict for a reply that never used the bridge: it is the sentinel, or it reports
+    // calling a client tool the bridge never recorded. The streamed shape refuses both and the
+    // buffered shape used to report the second as a retryable rejection, so the same reply
+    // carried two verdicts and could be paid for twice.
+    if (
+      this.bridge &&
+      text !== undefined &&
+      (isUnavailableSentinel(text) || this.reportsUnrecordedCall(text))
+    ) {
       return errResponse(
         HTTP_STATUS.BAD_GATEWAY ?? 502,
         "Request bridge tool was not called",
