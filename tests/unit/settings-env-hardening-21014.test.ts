@@ -20,9 +20,12 @@ import os from "node:os";
 import path from "node:path";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
+const ORIG_DATA_DIR = process.env.DATA_DIR;
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-21014-settings-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
+const { getExistingDbInstance } = await import("../../src/lib/db/singleton.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { setFeatureFlagOverride, removeFeatureFlagOverride } =
   await import("../../src/lib/db/featureFlags.ts");
 const { isRequireApiKeyEnabled } = await import("../../src/shared/utils/featureFlags.ts");
@@ -49,10 +52,21 @@ function captureWarns(fn: () => void): string[] {
 }
 
 after(() => {
-  if (ORIG_REQUIRE_API_KEY === undefined) delete process.env.REQUIRE_API_KEY;
-  else process.env.REQUIRE_API_KEY = ORIG_REQUIRE_API_KEY;
-  removeFeatureFlagOverride("REQUIRE_API_KEY");
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  try {
+    removeFeatureFlagOverride("REQUIRE_API_KEY");
+    resetDbInstance();
+    assert.equal(
+      getExistingDbInstance(),
+      null,
+      "DB handle must be closed via resetDbInstance() before removing TEST_DATA_DIR"
+    );
+  } finally {
+    if (ORIG_REQUIRE_API_KEY === undefined) delete process.env.REQUIRE_API_KEY;
+    else process.env.REQUIRE_API_KEY = ORIG_REQUIRE_API_KEY;
+    if (ORIG_DATA_DIR === undefined) delete process.env.DATA_DIR;
+    else process.env.DATA_DIR = ORIG_DATA_DIR;
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  }
 });
 
 test("startup guard warns loudly when DB override disables env REQUIRE_API_KEY=true on non-loopback (#21014)", () => {
@@ -134,6 +148,25 @@ test(".env.example ships blank INITIAL_PASSWORD and blank MACHINE_ID_SALT with g
     /^MACHINE_ID_SALT=endpoint-proxy-salt\s*$/m,
     "literal MACHINE_ID_SALT=endpoint-proxy-salt must not remain in .env.example"
   );
+  assert.doesNotMatch(
+    envExample,
+    /falls back\s*\n#\s*to `endpoint-proxy-salt` only when no `\.env`/,
+    ".env.example must not claim fallback happens only when .env is absent"
+  );
+  assert.match(
+    envExample,
+    /does not overwrite an existing blank `MACHINE_ID_SALT=`/i,
+    ".env.example must document that env:sync does not overwrite an existing blank MACHINE_ID_SALT= entry"
+  );
+
+  const envDoc = fs.readFileSync(path.join(REPO_ROOT, "docs/reference/ENVIRONMENT.md"), "utf8");
+  const saltDocLine = envDoc.split("\n").find((l) => l.startsWith("| `MACHINE_ID_SALT`"));
+  assert.ok(saltDocLine, "ENVIRONMENT.md must document MACHINE_ID_SALT");
+  assert.match(
+    saltDocLine,
+    /does not overwrite an existing blank `MACHINE_ID_SALT=`/i,
+    "ENVIRONMENT.md must document the existing blank MACHINE_ID_SALT= caveat for manual .env copies"
+  );
 });
 
 test("syncEnv against real .env.example leaves INITIAL_PASSWORD blank and generates unique random MACHINE_ID_SALT (#21014)", () => {
@@ -148,8 +181,28 @@ test("syncEnv against real .env.example leaves INITIAL_PASSWORD blank and genera
     assert.match(
       generatedEnv,
       /^MACHINE_ID_SALT=omniroute-[0-9a-f]{16}$/m,
-      "syncEnv must auto-generate a cryptographic omniroute-<16-hex> MACHINE_ID_SALT"
+      "syncEnv must auto-generate a cryptographic omniroute-<16-hex> MACHINE_ID_SALT when creating .env"
     );
+
+    // Pre-copied .env with an existing blank `MACHINE_ID_SALT=` is intentionally preserved by syncEnv
+    // (documented caveat in .env.example and ENVIRONMENT.md).
+    const tmpManualCopy = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-env-sync-manual-"));
+    try {
+      fs.copyFileSync(
+        path.join(REPO_ROOT, ".env.example"),
+        path.join(tmpManualCopy, ".env.example")
+      );
+      fs.copyFileSync(path.join(REPO_ROOT, ".env.example"), path.join(tmpManualCopy, ".env"));
+      syncEnv({ rootDir: tmpManualCopy, quiet: true });
+      const manualEnv = fs.readFileSync(path.join(tmpManualCopy, ".env"), "utf8");
+      assert.match(
+        manualEnv,
+        /^MACHINE_ID_SALT=$/m,
+        "syncEnv leaves an already-present blank MACHINE_ID_SALT= untouched after manual cp .env.example .env"
+      );
+    } finally {
+      fs.rmSync(tmpManualCopy, { recursive: true, force: true });
+    }
   } finally {
     fs.rmSync(tmpInstall, { recursive: true, force: true });
   }
