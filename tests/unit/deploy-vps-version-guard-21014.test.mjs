@@ -51,6 +51,11 @@ test("deploy-vps.yml pins npm global install to expected package.json version wi
   );
   assert.match(
     workflow,
+    /^concurrency:\s*\n(?:\s*#.*\n)*\s*group:\s*deploy-vps\s*\n(?:\s*#.*\n)*\s*cancel-in-progress:\s*false\s*$/m,
+    "deploy-vps.yml must define workflow-level concurrency (group: deploy-vps, cancel-in-progress: false) to serialize VPS deploys"
+  );
+  assert.match(
+    workflow,
     /EXPECTED_VERSION:\s*\$\{\{\s*steps\.version\.outputs\.expected\s*\}\}/,
     "Deploy via SSH must bind EXPECTED_VERSION from steps.version.outputs.expected"
   );
@@ -156,6 +161,21 @@ test("Resolve expected OmniRoute version selects workflow_run.head_sha or github
   });
   assert.equal(badSemver.status, 1, "non-semver package.json version must fail closed");
   assert.equal(badSemver.githubOutput, "");
+
+  for (const multilineVersion of ["3.8.55\nexpected=3.8.54", "3.8.55\n3.8.54"]) {
+    const multilineRun = runCase({
+      eventName: "workflow_run",
+      workflowRunSha: "aaaa1111bbbb2222cccc3333dddd4444eeee5555",
+      dispatchSha: "5ffa68e835442a12ed1204a2eebf4076c298aecb",
+      pkgVersion: multilineVersion,
+    });
+    assert.equal(
+      multilineRun.status,
+      1,
+      `multiline package.json version (${JSON.stringify(multilineVersion)}) must fail closed before writing GITHUB_OUTPUT`
+    );
+    assert.equal(multilineRun.githubOutput, "");
+  }
 });
 
 test("Deploy via SSH script enforces INSTALLED_VERSION == EXPECTED_VERSION before restarting PM2 (#21014)", () => {
