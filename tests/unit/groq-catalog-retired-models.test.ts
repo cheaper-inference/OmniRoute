@@ -14,6 +14,8 @@ const RETIRED_GROQ_IDS = [
   "meta-llama/llama-4-scout-17b-16e-instruct",
   "qwen/qwen3-32b",
   "llama-3.3-70b-versatile",
+  "groq/compound",
+  "qwen/qwen3.6-27b",
 ];
 
 const declaredIds = () => groqProvider.models.map((m) => m.id);
@@ -48,11 +50,12 @@ test("groq catalog keeps the live GPT-OSS chat models", () => {
   }
 });
 
-test("retired non-reasoning Llama ids stay reasoning-denied after leaving the catalog (#3258)", () => {
+test("retired non-reasoning Llama and Compound ids stay reasoning-denied after leaving the catalog (#3258, #12134)", () => {
   // Enterprise keys and live discovery can still reach these ids; dropping the registry
   // declaration must not flip them back to the optimistic reasoning-capable default.
   assert.equal(supportsReasoning("groq/llama-3.3-70b-versatile"), false);
   assert.equal(supportsReasoning("groq/meta-llama/llama-4-scout-17b-16e-instruct"), false);
+  assert.equal(supportsReasoning("groq/groq/compound"), false);
   // Reasoning models on Groq are untouched.
   assert.equal(supportsReasoning("groq/openai/gpt-oss-120b"), true);
 });
