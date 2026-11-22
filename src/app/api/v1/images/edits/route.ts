@@ -68,6 +68,8 @@ import {
   isBuiltinOpenAIEditModel,
   isBuiltinOpenAIEditProvider,
   openAIEditReferenceError,
+  openAIEditReferenceLimit,
+  readBuiltinOpenAIEditMask,
   runDirectBuiltinOpenAIEdit,
 } from "./openAIEdit.ts";
 import {
@@ -297,7 +299,8 @@ function classifyImageEditTarget(
 async function dispatchImageEditTarget(
   target: EditComboTarget,
   credentials: unknown,
-  ctx: ImageEditContext
+  ctx: ImageEditContext,
+  openAIMask?: Buffer
 ): Promise<ImageComboDispatchResult> {
   const { parsed, providerConfig, modelStr } = target;
   const { prompt, size, responseFormat, images, imageBytes, imageMime, request } = ctx;
@@ -478,7 +481,14 @@ async function dispatchImageEditTarget(
   }
 
   if (isBuiltinOpenAIEditProvider(providerConfig)) {
-    return dispatchBuiltinOpenAIEdit(parsed.model, providerConfig.baseUrl, credentials, ctx);
+    return dispatchBuiltinOpenAIEdit(
+      parsed.model,
+      providerConfig.baseUrl,
+      credentials,
+      ctx,
+      ctx.accounting.apiKeyInfo?.id ?? undefined,
+      openAIMask
+    );
   }
 
   // Custom OpenAI-compatible node: forward to {base_url}/images/edits.
@@ -549,6 +559,26 @@ async function resolveEditComboTargets(
   return editTargets;
 }
 
+function prepareOpenAIComboEdit(
+  orderedTargets: EditComboTarget[],
+  editTargets: EditComboTarget[],
+  ctx: ImageEditContext
+): Buffer | Response | undefined {
+  if (orderedTargets.length === 0) {
+    const limit = Math.max(
+      ...editTargets.map(({ parsed }) => openAIEditReferenceLimit(parsed.model))
+    );
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      openAIEditReferenceError(ctx.imageInputCount, limit)
+    );
+  }
+
+  return orderedTargets.some(({ providerConfig }) => isBuiltinOpenAIEditProvider(providerConfig))
+    ? readBuiltinOpenAIEditMask(ctx)
+    : undefined;
+}
+
 async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): Promise<Response> {
   const combo = await getComboByName(comboName);
   if (!combo) {
@@ -573,15 +603,15 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     comboName,
     endpoint: "image-edits",
     strategy: projected.combo.strategy,
-    targets: editTargets,
+    // Skip DALL-E 2 when a later GPT Image target can accept the references.
+    targets: editTargets.filter(
+      ({ parsed, providerConfig }) =>
+        !isBuiltinOpenAIEditProvider(providerConfig) ||
+        ctx.imageInputCount <= openAIEditReferenceLimit(parsed.model)
+    ),
   });
-  const openAIReferenceError = openAIEditReferenceError(ctx.imageInputCount);
-  if (
-    openAIReferenceError &&
-    editTargets.every((target) => isBuiltinOpenAIEditProvider(target.providerConfig))
-  ) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, openAIReferenceError);
-  }
+  const openAIMask = prepareOpenAIComboEdit(orderedTargets, editTargets, ctx);
+  if (openAIMask instanceof Response) return openAIMask;
 
   const run = await runImageComboTargets(orderedTargets, {
     resolveProvider: (target) => ({ provider: target.credKey, model: target.parsed.model }),
@@ -603,7 +633,7 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
           credentials,
           projected.combo.strategy || "priority"
         ),
-        () => dispatchImageEditTarget(target, credentials, ctx)
+        () => dispatchImageEditTarget(target, credentials, ctx, openAIMask)
       ),
     onSuccess: async (credentials) => {
       await clearRecoveredProviderState(credentials as never);

@@ -9,17 +9,28 @@ process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET ||= "openai-edits-test-key-secret";
 
 const { POST } = await import("../../src/app/api/v1/images/edits/route.ts");
-const { createApiKey, resetApiKeyState } = await import("../../src/lib/db/apiKeys.ts");
+const { createApiKey, resetApiKeyState, updateApiKeyPermissions } =
+  await import("../../src/lib/db/apiKeys.ts");
 const { createCombo } = await import("../../src/lib/db/combos.ts");
-const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
-const { resetDbInstance, shutdownDbInstance } = await import("../../src/lib/db/core.ts");
+const { createProviderConnection, updateProviderConnection } =
+  await import("../../src/lib/db/providers.ts");
+const { getDbInstance, resetDbInstance, shutdownDbInstance } =
+  await import("../../src/lib/db/core.ts");
 const { closeCallLogSaves, getCallLogs, waitForCallLogSaves } =
   await import("../../src/lib/usage/callLogs.ts");
+
+const { createProxy, assignProxyToScope } = await import("../../src/lib/db/proxies.ts");
+const { resolveProxyForRequest } = await import("../../open-sse/utils/proxyFetch.ts");
+const { getImageModelEntry } = await import("../../open-sse/config/imageRegistry.ts");
 
 const MODEL = "openai/gpt-image-2.6-flare";
 const ENDPOINT = "https://api.openai.com/v1/images/edits";
 const API_KEY = "openai-edits-fixture";
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]);
+const MASK_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=",
+  "base64"
+);
 const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
 const UPSTREAM_RESPONSE = { created: 1234, data: [{ b64_json: "aW1hZ2U=" }] };
 
@@ -36,13 +47,20 @@ function seedConnection(overrides: Record<string, unknown> = {}) {
 }
 
 function mockUpstream(t: TestContext) {
-  const calls: Array<{ url: string; method?: string; auth: string | null; form: FormData }> = [];
+  const calls: Array<{
+    url: string;
+    method?: string;
+    auth: string | null;
+    proxyUrl: string | null;
+    form: FormData;
+  }> = [];
   t.mock.method(globalThis, "fetch", async (url: URL | string, init: RequestInit = {}) => {
     assert.ok(Buffer.isBuffer(init.body), "multipart uses an explicit-boundary Buffer");
     calls.push({
       url: String(url),
       method: init.method,
       auth: new Headers(init.headers).get("authorization"),
+      proxyUrl: resolveProxyForRequest(String(url)).proxyUrl,
       form: await new Response(init.body, { headers: init.headers }).formData(),
     });
     return Response.json(UPSTREAM_RESPONSE);
@@ -130,7 +148,7 @@ test("multipart edits preserve both reference files and an uploaded mask", async
   body.set("response_format", "url");
   body.append("image[]", new Blob([PNG], { type: "image/png" }), "reference.png");
   body.append("image[]", new Blob([JPEG], { type: "image/jpeg" }), "reference.jpg");
-  body.set("mask", new Blob([PNG], { type: "image/png" }), "mask.png");
+  body.set("mask", new Blob([MASK_PNG], { type: "image/png" }), "mask.png");
   await expectImage(body);
 
   assert.equal(calls.length, 1);
@@ -143,7 +161,7 @@ test("multipart edits preserve both reference files and an uploaded mask", async
   assert.equal(references.length, 2);
   await expectFile(references[0], "\\.png", "image/png", PNG);
   await expectFile(references[1], "\\.jpg", "image/jpeg", JPEG);
-  await expectFile(form.get("mask"), "mask\\.png", "image/png", PNG);
+  await expectFile(form.get("mask"), "mask\\.png", "image/png", MASK_PNG);
 });
 
 test("DALL-E 2 retains response_format and honors the connection's endpoint override", async (t) => {
@@ -226,7 +244,7 @@ test("image edit Combos forward native controls and enforce the OpenAI reference
       model: "openai-edits",
       quality: "low",
       background: "opaque",
-      mask: dataUrl(),
+      mask: dataUrl(MASK_PNG),
     })
   );
   assert.equal(calls.length, 1);
@@ -234,7 +252,7 @@ test("image edit Combos forward native controls and enforce the OpenAI reference
   assert.equal(calls[0].auth, "Bearer " + API_KEY);
   assert.equal(calls[0].form.get("quality"), "low");
   assert.equal(calls[0].form.get("background"), "opaque");
-  await expectFile(calls[0].form.get("mask"), "mask\\.png", "image/png", PNG);
+  await expectFile(calls[0].form.get("mask"), "mask\\.png", "image/png", MASK_PNG);
 
   const response = await POST(
     request(
@@ -299,6 +317,125 @@ test("OpenAI chat and generation-only models cannot reach the edit endpoint", as
     const response = await POST(request(jsonBody({ model })));
     assert.equal(response.status, 400);
     assert.match((await response.json()).error.message, /Unsupported OpenAI image edit model/);
+  }
+  assert.equal(calls.length, 0);
+});
+
+test("all built-in GPT Image edit models advertise image input", () => {
+  for (const model of ["gpt-image-2", "gpt-image-1.5", "gpt-image-1-mini"]) {
+    assert.deepEqual(getImageModelEntry("openai/" + model)?.inputModalities, ["text", "image"]);
+  }
+});
+
+test("DALL-E 2 rejects a second reference in direct requests and DALL-E-only Combos", async (t) => {
+  await seedConnection();
+  await createCombo({ name: "dalle-edits", strategy: "priority", models: ["openai/dall-e-2"] });
+  const calls = mockUpstream(t);
+
+  for (const model of ["openai/dall-e-2", "dalle-edits"]) {
+    const response = await POST(request(jsonBody({ model, images: [dataUrl()] })));
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).error.message, /DALL-E 2.*one reference image/);
+  }
+  assert.equal(calls.length, 0);
+});
+
+test("a Combo skips DALL-E 2 and uses the next GPT Image target for two references", async (t) => {
+  await seedConnection();
+  await createCombo({
+    name: "mixed-openai-edits",
+    strategy: "priority",
+    models: ["openai/dall-e-2", MODEL],
+  });
+  const calls = mockUpstream(t);
+
+  await expectImage(jsonBody({ model: "mixed-openai-edits", images: [dataUrl()] }));
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].form.get("model"), "gpt-image-2.6-flare");
+  assert.equal(calls[0].form.getAll("image[]").length, 2);
+});
+
+test("direct and Combo edits apply the caller key's proxy and preserve the unkeyed account proxy", async (t) => {
+  const connection = await seedConnection();
+  await updateProviderConnection(connection.id, { proxyEnabled: true, perKeyProxyEnabled: true });
+  getDbInstance()
+    .prepare(
+      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('settings', 'perKeyProxyEnabled', 'true')"
+    )
+    .run();
+  const accountProxy = await createProxy({
+    name: "Account relay",
+    type: "vercel",
+    host: "account-relay.test",
+    port: 443,
+  });
+  const keyProxy = await createProxy({
+    name: "Key relay",
+    type: "vercel",
+    host: "key-relay.test",
+    port: 443,
+  });
+  assert.ok(accountProxy && keyProxy);
+  await assignProxyToScope("account", connection.id, accountProxy.id);
+  const caller = await createApiKey("proxy caller", "proxy-test-machine");
+  await updateApiKeyPermissions(caller.id, { proxyId: keyProxy.id });
+  await createCombo({ name: "proxy-edits", strategy: "priority", models: [MODEL] });
+  const calls = mockUpstream(t);
+
+  for (const model of [MODEL, "proxy-edits"]) {
+    await expectImage(jsonBody({ model }), caller.key);
+    await expectImage(jsonBody({ model }));
+  }
+  assert.deepEqual(
+    calls.map(({ proxyUrl }) => proxyUrl),
+    [
+      "https://key-relay.test",
+      "https://account-relay.test",
+      "https://key-relay.test",
+      "https://account-relay.test",
+    ]
+  );
+});
+
+test("multipart PNG masks declared as binary are forwarded with image/png", async (t) => {
+  await seedConnection();
+  const calls = mockUpstream(t);
+  const body = new FormData();
+  body.set("model", MODEL);
+  body.set("prompt", "add a red hat");
+  body.set("image", new Blob([PNG], { type: "image/png" }), "reference.png");
+  body.set("mask", new Blob([MASK_PNG], { type: "application/octet-stream" }), "mask.dat");
+
+  await expectImage(body);
+  assert.equal(calls.length, 1);
+  await expectFile(calls[0].form.get("mask"), "mask\\.png", "image/png", MASK_PNG);
+});
+
+test("malformed or unsupported supplied masks cannot produce unmasked OpenAI edits", async (t) => {
+  await seedConnection();
+  await createProviderConnection({
+    provider: "openrouter",
+    authType: "apikey",
+    name: "openrouter-edits-test",
+    apiKey: "openrouter-edits-fixture",
+    isActive: true,
+    testStatus: "active",
+  });
+  await createCombo({
+    name: "masked-openai-edits",
+    strategy: "priority",
+    models: [MODEL, "openrouter/openai/gpt-5.4-image-2"],
+  });
+  const calls = mockUpstream(t);
+
+  for (const [model, options] of [
+    [MODEL, { mask: dataUrl(JPEG) }],
+    [MODEL, { mask: "data:image/png;base64,not-base64" }],
+    ["masked-openai-edits", { mask_url: "https://example.test/mask.png" }],
+  ] as const) {
+    const response = await POST(request(jsonBody({ model, ...options })));
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).error.message, /mask.*PNG/);
   }
   assert.equal(calls.length, 0);
 });

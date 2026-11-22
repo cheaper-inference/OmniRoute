@@ -1564,6 +1564,7 @@ export async function handleOpenAIImageEdit({
   baseUrl,
   images,
   options,
+  mask,
 }: {
   model: string;
   provider: string;
@@ -1586,6 +1587,7 @@ export async function handleOpenAIImageEdit({
   baseUrl?: string | null;
   images?: Array<{ bytes: Buffer; mime?: string | null }> | null;
   options?: Record<string, unknown> | null;
+  mask?: Buffer;
 }) {
   const startTime = Date.now();
   const defaultUrl = resolveImageBaseUrl(
@@ -1625,7 +1627,7 @@ export async function handleOpenAIImageEdit({
     partBuffers,
     boundary,
     { bytes: imageBytes, mime: imageMime },
-    nativeOpenAI ? { images, mask: options?.mask } : undefined
+    nativeOpenAI ? { images, mask } : undefined
   );
   const headers: Record<string, string> = {
     "Content-Type": `multipart/form-data; boundary=${boundary}`,

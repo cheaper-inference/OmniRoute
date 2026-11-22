@@ -11,7 +11,6 @@ const EXTENSIONS = new Map([
 
 // Only allow a media-type token in the multipart header.
 const IMAGE_MIME = /^image\/[a-z0-9][a-z0-9.+-]*$/;
-const MASK_DATA_URL = /^data:(image\/[a-z0-9][a-z0-9.+-]*);base64,([a-z0-9+/]+={0,2})$/i;
 
 function appendImagePart(appendFile: AppendFile, name: string, filename: string, image: ImagePart) {
   const candidate = image.mime?.trim().toLowerCase() || "";
@@ -23,7 +22,7 @@ function appendNativeOpenAIEditFiles(
   appendFile: AppendFile,
   fallback: ImagePart,
   images?: ImagePart[] | null,
-  mask?: unknown
+  mask?: Buffer
 ) {
   const referenceImages = images?.filter(
     (image) => Buffer.isBuffer(image.bytes) && image.bytes.length
@@ -34,13 +33,7 @@ function appendNativeOpenAIEditFiles(
     appendImagePart(appendFile, field, "image", reference);
   }
 
-  const match = typeof mask === "string" ? MASK_DATA_URL.exec(mask.trim()) : null;
-  if (match) {
-    const bytes = Buffer.from(match[2], "base64");
-    if (bytes.length && bytes.toString("base64") === match[2]) {
-      appendImagePart(appendFile, "mask", "mask", { mime: match[1], bytes });
-    }
-  }
+  if (mask) appendFile("mask", "mask.png", "image/png", mask);
 }
 
 export function appendNativeOpenAIEditOptions(
@@ -74,7 +67,7 @@ export function finishOpenAIEditMultipart(
   parts: Buffer[],
   boundary: string,
   image: ImagePart,
-  native?: { images?: ImagePart[] | null; mask?: unknown }
+  native?: { images?: ImagePart[] | null; mask?: Buffer }
 ): Buffer {
   const crlf = "\r\n";
   const appendFile: AppendFile = (name, filename, mime, bytes) => {

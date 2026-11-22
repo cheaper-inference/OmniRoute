@@ -250,9 +250,9 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     format: "openai", // native OpenAI format
     models: [
       { id: "dall-e-3", name: "DALL·E 3" },
-      { id: "gpt-image-2", name: "GPT Image 2" },
-      { id: "gpt-image-1.5", name: "GPT Image 1.5" },
-      { id: "gpt-image-1-mini", name: "GPT Image 1 Mini" },
+      { id: "gpt-image-2", name: "GPT Image 2", inputModalities: ["text", "image"] },
+      { id: "gpt-image-1.5", name: "GPT Image 1.5", inputModalities: ["text", "image"] },
+      { id: "gpt-image-1-mini", name: "GPT Image 1 Mini", inputModalities: ["text", "image"] },
       { id: "dall-e-2", name: "DALL·E 2", inputModalities: ["text", "image"] },
       {
         id: "gpt-image-2.6-flare",

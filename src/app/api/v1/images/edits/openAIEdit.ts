@@ -3,6 +3,7 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { resolveProxyForConnection } from "@/lib/db/settings";
+import { hasPngImageSignature, parseDataUrl } from "@/lib/images/imageRouteModel";
 import {
   runImageRequestWithAccounting,
   type ImageRequestAccounting,
@@ -25,7 +26,7 @@ import type { EditInput } from "./editInput.ts";
 
 type OpenAIEditInput = Pick<
   EditInput,
-  "options" | "prompt" | "size" | "responseFormat" | "images" | "imageInputCount"
+  "options" | "prompt" | "size" | "responseFormat" | "images" | "imageInputCount" | "hasMask"
 >;
 
 type OpenAIEditCredentials = NonNullable<
@@ -44,23 +45,37 @@ export function isBuiltinOpenAIEditModel(model: string | null): boolean {
   return Boolean(model && (/^gpt-image-/i.test(model) || model === "dall-e-2"));
 }
 
-export function openAIEditReferenceError(count: number): string | null {
-  return count > MAX_OPENAI_EDIT_REFERENCES
-    ? `OpenAI image edit supports at most ${MAX_OPENAI_EDIT_REFERENCES} reference images`
-    : null;
+export function openAIEditReferenceLimit(model: string | null): number {
+  return model === "dall-e-2" ? 1 : MAX_OPENAI_EDIT_REFERENCES;
+}
+
+export function openAIEditReferenceError(count: number, limit: number): string | null {
+  if (count <= limit) return null;
+  return limit === 1
+    ? "DALL-E 2 image edit supports only one reference image"
+    : `OpenAI image edit supports at most ${limit} reference images`;
+}
+
+export function readBuiltinOpenAIEditMask(
+  input: Pick<OpenAIEditInput, "hasMask" | "options">
+): Buffer | Response | undefined {
+  if (!input.hasMask) return undefined;
+  const mask = parseDataUrl(input.options?.mask);
+  if (mask && hasPngImageSignature(mask.bytes)) return mask.bytes;
+  return errorResponse(
+    HTTP_STATUS.BAD_REQUEST,
+    "OpenAI image edit requires the mask to be an inline PNG image."
+  );
 }
 
 export async function dispatchBuiltinOpenAIEdit(
   model: string,
   baseUrl: string,
   credentials: unknown,
-  input: OpenAIEditInput
+  input: OpenAIEditInput,
+  apiKeyId?: string,
+  mask?: Buffer
 ) {
-  const referenceError = openAIEditReferenceError(input.imageInputCount);
-  if (referenceError) {
-    return { success: false as const, status: HTTP_STATUS.BAD_REQUEST, error: referenceError };
-  }
-
   const openAICredentials = credentials as OpenAIEditCredentials;
   const firstReference = input.images[0];
   const editImage = () =>
@@ -73,6 +88,7 @@ export async function dispatchBuiltinOpenAIEdit(
       imageBytes: firstReference.bytes,
       imageMime: firstReference.mime,
       images: input.images,
+      mask,
       size: input.size,
       responseFormat: input.responseFormat,
       options: input.options ?? {},
@@ -84,7 +100,7 @@ export async function dispatchBuiltinOpenAIEdit(
 
   let proxyInfo = null;
   try {
-    proxyInfo = await resolveProxyForConnection(connectionId);
+    proxyInfo = await resolveProxyForConnection(connectionId, apiKeyId);
   } catch {
     log.debug("PROXY", "Failed to resolve proxy for image provider: openai");
   }
@@ -103,8 +119,13 @@ export async function runDirectBuiltinOpenAIEdit(
   resolvedModel: string,
   accounting: ImageRequestAccounting
 ) {
-  const referenceError = openAIEditReferenceError(input.imageInputCount);
+  const referenceError = openAIEditReferenceError(
+    input.imageInputCount,
+    openAIEditReferenceLimit(model)
+  );
   if (referenceError) return errorResponse(HTTP_STATUS.BAD_REQUEST, referenceError);
+  const mask = readBuiltinOpenAIEditMask(input);
+  if (mask instanceof Response) return mask;
 
   const credentials = await getProviderCredentialsWithQuotaPreflight(
     "openai",
@@ -123,7 +144,14 @@ export async function runDirectBuiltinOpenAIEdit(
   }
 
   const result = await runImageRequestWithAccounting({ ...accounting, credentials }, () =>
-    dispatchBuiltinOpenAIEdit(model, baseUrl, credentials, input)
+    dispatchBuiltinOpenAIEdit(
+      model,
+      baseUrl,
+      credentials,
+      input,
+      accounting.apiKeyInfo?.id ?? undefined,
+      mask
+    )
   );
   if (result.success) await clearRecoveredProviderState(credentials);
   return result;
