@@ -58,6 +58,10 @@ export const SECRET_SCAN_DIRS = [
   "skills",
 ];
 
+// Dedicated non-1 exit code for `gitleaks git --staged` findings so operational/config
+// errors (which gitleaks exits 1 on) can never be confused with a clean empty report (#21014).
+export const STAGED_FINDINGS_EXIT_CODE = 99;
+
 /**
  * Monta os argumentos do `gitleaks git` para o scan de pre-commit (`--staged`),
  * cobrindo 100% dos arquivos staged no índice do git com redaction ativa (#21014).
@@ -71,6 +75,8 @@ export function buildStagedGitleaksArgs(configPath = GITLEAKS_CONFIG) {
     "--pre-commit",
     "--staged",
     "--redact",
+    "--exit-code",
+    String(STAGED_FINDINGS_EXIT_CODE),
     "--report-format",
     "json",
     "--report-path",
@@ -374,6 +380,7 @@ function main() {
 function runStagedPreCommitScan(gitleaksBin) {
   const args = buildStagedGitleaksArgs(GITLEAKS_CONFIG);
   let stdout = "";
+  let sawFindingsExitCode = false;
   try {
     stdout = execFileSync(gitleaksBin, args, {
       cwd: ROOT,
@@ -384,8 +391,9 @@ function runStagedPreCommitScan(gitleaksBin) {
   } catch (err) {
     stdout = err.stdout ? String(err.stdout) : "";
     const stderr = err.stderr ? String(err.stderr) : "";
-    if (err.status === 1 && stdout.trim()) {
-      // Expected when gitleaks detects staged findings
+    if (err.status === STAGED_FINDINGS_EXIT_CODE) {
+      // Expected only when gitleaks detects staged findings (--exit-code 99)
+      sawFindingsExitCode = true;
     } else {
       process.stderr.write(`[check-secrets --staged] ERRO ao executar gitleaks: ${err.message}\n`);
       if (stderr)
@@ -413,6 +421,12 @@ function runStagedPreCommitScan(gitleaksBin) {
   }
 
   const { findingCount } = parseGitleaksJson(findings);
+  if (sawFindingsExitCode && findingCount === 0) {
+    process.stderr.write(
+      `[check-secrets --staged] ERRO: gitleaks saiu com código ${STAGED_FINDINGS_EXIT_CODE} sem findings parseáveis.\n`
+    );
+    process.exit(2);
+  }
   if (!QUIET) {
     console.log(`stagedSecretFindings=${findingCount}`);
   }

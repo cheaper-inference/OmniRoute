@@ -222,6 +222,11 @@ test(".gitleaks.toml anchors path exclusions on directory segments and covers ex
   const stagedArgs = buildStagedGitleaksArgs(path.join(ROOT, ".gitleaks.toml"));
   assert.ok(stagedArgs.includes("git") && stagedArgs.includes("--staged"));
   assert.ok(stagedArgs.includes("--pre-commit") && stagedArgs.includes("--redact"));
+  const exitCodeFlagIdx = stagedArgs.indexOf("--exit-code");
+  assert.ok(
+    exitCodeFlagIdx !== -1 && stagedArgs[exitCodeFlagIdx + 1] === "99",
+    "buildStagedGitleaksArgs must pass --exit-code 99 so findings are distinct from gitleaks exit-1 errors"
+  );
 
   const preCommit = stripHashComments(read(".husky/pre-commit"));
   assert.match(
@@ -229,6 +234,54 @@ test(".gitleaks.toml anchors path exclusions on directory segments and covers ex
     /node\s+scripts\/check\/check-secrets\.mjs\s+--staged\b/,
     ".husky/pre-commit must run check-secrets.mjs --staged"
   );
+});
+
+test("check-secrets.mjs --staged treats only exit 99 as findings and fails closed (exit 2) on exit 1 with empty report (#21014)", (t) => {
+  const tmpBin = fs.mkdtempSync(path.join(os.tmpdir(), "gitleaks-stub-21014-"));
+  t.after(() => fs.rmSync(tmpBin, { recursive: true, force: true }));
+
+  const writeStubGitleaks = (body) => {
+    const stubPath = path.join(tmpBin, "gitleaks");
+    fs.writeFileSync(stubPath, `#!/bin/sh\n${body}\n`, { mode: 0o755 });
+  };
+
+  const runStaged = () =>
+    spawnSync(process.execPath, [path.join(ROOT, "scripts/check/check-secrets.mjs"), "--staged"], {
+      cwd: ROOT,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: `${tmpBin}:${process.env.PATH}`,
+      },
+    });
+
+  // 1. Operational/config error where gitleaks exits 1 and writes `[]` (or `null`) to stdout:
+  // must fail closed with exit 2 — NEVER pass silently with exit 0!
+  writeStubGitleaks('printf "[]\\n"\nprintf "fatal: bad git index\\n" >&2\nexit 1');
+  const errEmptyArray = runStaged();
+  assert.equal(
+    errEmptyArray.status,
+    2,
+    "gitleaks exit 1 with [] stdout must fail closed with exit 2 (never exit 0)"
+  );
+  assert.match(errEmptyArray.stderr, /ERRO ao executar gitleaks/);
+
+  writeStubGitleaks('printf "null\\n"\nexit 1');
+  const errNull = runStaged();
+  assert.equal(errNull.status, 2, "gitleaks exit 1 with null stdout must fail closed with exit 2");
+
+  // 2. Findings detected via configured --exit-code 99 -> exits 1 (blocks commit)
+  writeStubGitleaks(
+    'printf \'[{"RuleID":"github-pat","File":"secret.env","StartLine":1}]\\n\'\nexit 99'
+  );
+  const leakDetected = runStaged();
+  assert.equal(leakDetected.status, 1, "gitleaks exit 99 with findings must exit 1 (BLOQUEADO)");
+  assert.match(leakDetected.stderr, /BLOQUEADO/);
+
+  // 3. Clean staged scan (exit 0, empty array) -> exits 0
+  writeStubGitleaks('printf "[]\\n"\nexit 0');
+  const cleanScan = runStaged();
+  assert.equal(cleanScan.status, 0, "clean gitleaks exit 0 must exit 0");
 });
 
 test("live gitleaks (when installed) catches secrets in src/distributed.ts and staged commits while ignoring dist/ (#21014)", (t) => {

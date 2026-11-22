@@ -73,12 +73,15 @@ test("falls back to local PATH `node-gyp` (never `npx --yes`) when bundled scrip
 });
 
 test("resolveBundledNodeGyp locates node-gyp relative to realpath(npm)", () => {
+  const expectedGyp = path.resolve(
+    "/opt/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js"
+  );
   const found = resolveBundledNodeGyp({
     whichNpm: () => "/usr/local/bin/npm",
     realpath: () => "/opt/node/lib/node_modules/npm/bin/npm-cli.js",
-    exists: (p) => p === "/opt/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js",
+    exists: (p) => p === expectedGyp,
   });
-  assert.equal(found, "/opt/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js");
+  assert.equal(found, expectedGyp);
 });
 
 test("a node-gyp / toolchain failure is non-fatal (built:false with a reason)", () => {
