@@ -347,7 +347,7 @@ test("GET reports the limiter's auto-enable verdict, not the catalog default", a
     };
     const flag = payload.flags.find((entry) => entry.key === "RATE_LIMIT_AUTO_ENABLE");
     assert.equal(flag?.effectiveValue, "true");
-    assert.equal(flag?.source, "db");
+    assert.equal(flag?.source, "default", "an inherited default is not a stored override");
 
     process.env.RATE_LIMIT_AUTO_ENABLE = "false";
     const forced = await route.GET(request());

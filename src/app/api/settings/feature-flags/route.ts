@@ -72,11 +72,16 @@ export async function GET(request: NextRequest) {
     const resolved = resolveAllFeatureFlags();
     // One read for the flag below: the limiter's auto-enable verdict lives in
     // the persisted request-queue settings, with the env variable as an
-    // override.
-    const autoEnableActive = isAutoEnableActive(
-      resolveResilienceSettings(await getSettings()).requestQueue
-    );
+    // override. `source` still reports what the operator configured: a value
+    // inherited from the shipped default is "default", not "db", or the
+    // summary would count an override nobody stored.
+    const settingsRecord = (await getSettings()) as unknown as {
+      resilienceSettings?: { requestQueue?: { autoEnableApiKeyProviders?: unknown } };
+    };
+    const autoEnableActive = isAutoEnableActive(resolveResilienceSettings(settingsRecord as never).requestQueue);
     const autoEnableEnvSet = (process.env[RATE_LIMIT_AUTO_ENABLE_FLAG_KEY] ?? "").trim().length > 0;
+    const autoEnableConfigured =
+      typeof settingsRecord?.resilienceSettings?.requestQueue?.autoEnableApiKeyProviders === "boolean";
 
     const flags = resolved.map(({ key, effectiveValue, source, definition, ...provenance }) => {
       // Flags whose gate resolves with env-wins-over-db precedence (the
@@ -103,7 +108,7 @@ export async function GET(request: NextRequest) {
         return flagPayload(
           definition,
           autoEnableActive ? "true" : "false",
-          autoEnableEnvSet ? "env" : "db"
+          autoEnableEnvSet ? "env" : autoEnableConfigured ? "db" : "default"
         );
       }
       return { ...flagPayload(definition, effectiveValue, source), ...provenance };
