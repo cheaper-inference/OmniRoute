@@ -8,6 +8,7 @@
  * message_delta events, the one event type repairClaudeFinalWireUsage changes.
  */
 import { hasPriorInputForTrailingUsage } from "./passthroughTrailingUsage.ts";
+import { stripBuyerCostMicro } from "./buyerCostMicro.ts";
 import { repairClaudeFinalWireUsage } from "./streamUsageMerge.ts";
 import {
   createRequestUsageBasis,
@@ -29,11 +30,13 @@ export function createUsageGuard(
 ): StreamUsageGuard {
   const basis = createRequestUsageBasis(body);
   const sanitizePassthrough = (payload: unknown): boolean => {
+    const strippedCost = stripBuyerCostMicro(payload);
     const changed =
       !hasPriorInputForTrailingUsage(payload, getUsage()) &&
       sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat, basis);
-    if ((payload as { type?: string } | null)?.type !== "message_delta") return changed;
-    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+    if ((payload as { type?: string } | null)?.type !== "message_delta")
+      return changed || strippedCost;
+    return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed || strippedCost;
   };
   return { basis, sanitizePassthrough };
 }

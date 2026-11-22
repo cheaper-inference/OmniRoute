@@ -1,9 +1,3 @@
-import { withBuyerCostMicro, type StreamCompletePayload } from "./streamCompletePayload.ts";
-import {
-  readBuyerCostMicro,
-  stripBuyerCostMicro,
-  registerStreamBuyerCost,
-} from "./buyerCostMicro.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
@@ -129,6 +123,12 @@ import { createSSEOutputSink } from "./sseOutputSink.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { drainTranslateFlushTail } from "./translateFlushTail.ts";
 import { restoreResponsesToolNames } from "../translator/helpers/responsesToolNameRestore.ts";
+import { withBuyerCostMicro, type StreamCompletePayload } from "./streamCompletePayload.ts";
+import {
+  readBuyerCostMicro,
+  stripBuyerCostMicro,
+  registerStreamBuyerCost,
+} from "./buyerCostMicro.ts";
 
 function isLateOutputProbeEnabled(): boolean {
   try {
@@ -981,13 +981,16 @@ export function createSSEStream(options: StreamOptions = {}) {
   const observedContentLength = () => nativeContent.getLength();
   const observeBuyerCostMicro = (payload: unknown) => {
     const reportedCost = readBuyerCostMicro(payload);
-    if (reportedCost !== undefined) buyerCostMicro = reportedCost;
+    if (reportedCost === undefined) return false;
+    buyerCostMicro = reportedCost;
+    return true;
   };
   const observeProviderPayload = (payload: unknown) => {
-    observeBuyerCostMicro(payload);
+    const reportedBuyerCost = observeBuyerCostMicro(payload);
     nativeClaudeUsage.observe(payload);
     nativeContent.observe(payload);
     providerPayloadCollector.push(payload);
+    if (reportedBuyerCost && mode === STREAM_MODE.TRANSLATE) stripBuyerCostMicro(payload);
   };
   // Accounting uses native receipt evidence rather than a client projection.
   const getAccountingUsage = (): UsageLike | null =>
@@ -1004,11 +1007,6 @@ export function createSSEStream(options: StreamOptions = {}) {
     projectStreamingClientUsage(getAccountingUsage(), targetFormat, sourceFormat);
   // One usage basis per stream, so per-chunk usage does not redo the body work (#20086).
   const usageGuard = createUsageGuard(body, clientResponseFormat, () => usage, getAccountingUsage);
-
-  const sanitizePassthroughUsage = (payload: unknown) => {
-    const stripped = stripBuyerCostMicro(payload);
-    return usageGuard.sanitizePassthrough(payload) || stripped;
-  };
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -1831,7 +1829,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type.startsWith("content_block") ||
                     parsed.type === "ping" ||
                     parsed.type === "error");
-                if (sanitizePassthroughUsage(parsed)) {
+                if (usageGuard.sanitizePassthrough(parsed)) {
                   output = `data: ${JSON.stringify(parsed)}\n\n`;
                   injectedUsage = true;
                 }
@@ -2987,7 +2985,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               },
               pushProviderPayload: observeProviderPayload,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: sanitizePassthroughUsage,
+              sanitizeUsagePayload: usageGuard.sanitizePassthrough,
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
@@ -3080,7 +3078,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     );
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 }
-                if (sanitizePassthroughUsage(bufferedPayload))
+                if (usageGuard.sanitizePassthrough(bufferedPayload))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
@@ -3524,7 +3522,6 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
               observeProviderPayload(parsed);
-              stripBuyerCostMicro(parsed);
               // Extract usage from remaining buffer — if the usage-bearing event
               // (e.g. response.completed) is the last SSE line, it ends up here
               // in the flush handler where extractUsage was not called.
