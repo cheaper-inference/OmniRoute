@@ -119,6 +119,12 @@ function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
 // Protocol tokens of Claude frames that METADATA_KEYS does not cover: a redaction hit on
 // one would corrupt it (`tool_use_id` links a result to its call, `encrypted_index` and a
 // `redacted_thinking` block are opaque blobs the client sends back verbatim).
+// Paths are joined with "/", so a key that itself contains one would forge a different path
+// and share another field's redaction window. Escape with the JSON-pointer pair instead.
+function escapePathSegment(key: string): string {
+  return key.replace(/~/g, "~0").replace(/\//g, "~1");
+}
+
 const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 
 // Redact every other string of a Claude frame in place (search results, citations, tool
@@ -136,7 +142,7 @@ function redactClaudeFrameStrings(
   for (const key of Object.keys(obj)) {
     if (CLAUDE_OPAQUE_KEYS.has(key)) continue;
     if (streamed.some((entry) => entry.holder === obj && entry.field === key)) continue;
-    const childPath = path ? `${path}/${key}` : key;
+    const childPath = path ? `${path}/${escapePathSegment(key)}` : escapePathSegment(key);
     // Only the keys that can carry a credential take the window. Other metadata (id, signature,
     // request_id) passes through verbatim: holding it would delay a protocol field.
     const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
@@ -599,7 +605,7 @@ export function createSseTextTransform(
             for (const key of Object.keys(obj)) {
               // Every ancestor joins the path, so `usage_evidence.x` and
               // `usage.usage_evidence.x` never share one window.
-              const childPath = path ? `${path}/${key}` : key;
+              const childPath = path ? `${path}/${escapePathSegment(key)}` : escapePathSegment(key);
               if (inMetadata) {
                 sanitizeMetadataChild(
                   deps,
