@@ -1811,10 +1811,10 @@ async function handleFalAIImageGeneration({
   // An explicit gif/svg is no longer downgraded to PNG on the legacy body (the native
   // schema adapter below owns its endpoint's formats and replaces this body entirely).
   const preserved = schemaInput ? null : prepareFalPreservedOutputOptions(body);
-  if (preserved && "error" in preserved) {
-    return { success: false, status: 400, error: preserved.error };
+  if (preserved) {
+    if ("error" in preserved) return { success: false, status: 400, error: preserved.error };
+    Object.assign(upstreamBody, preserved.options);
   }
-  if (preserved) Object.assign(upstreamBody, preserved.options);
 
   if (model.includes("flux-pro/v1.1") && !model.includes("ultra")) {
     upstreamBody.image_size = mapFalImageSize(body.size, "landscape_4_3");
