@@ -7,7 +7,8 @@
  *
  * `reason` values: store_unavailable, percent_attribution_unavailable, window_not_reported,
  * plus the ones resolveAccountQuotaEntries already emits (connection_lookup_failed,
- * not_supported, fetch_failed, not_available).
+ * not_supported, fetch_failed, not_available). Percent shares also report percent_window_ended
+ * and account_not_used_by_key.
  */
 
 import { z } from "zod";
@@ -44,10 +45,26 @@ const share = z.object({
   remaining: z.number().nullable(),
   status: selfQuotaStatusSchema,
   reason: z.string().optional(),
+  // Percent windows only, with status ok or stale, for a key with the account scope:
+  // attributed + external = consumed.
+  attributed: z.number().optional(),
+  external: z.number().optional(),
   // What the key may use above its share now, lent by other keys (an aggregate). Set only in a
   // consent pool. null when it does not apply to the key's policy or cannot be read.
   borrowAvailable: z.number().nullable().optional(),
 });
+
+/** The most member slices a dimension carries: the view sends none for a larger pool. */
+export const MAX_MEMBER_SLICES = 20;
+
+// One member's use of a window, without id, name or weight. Strict: an extra key is rejected.
+const memberSlice = z
+  .object({
+    slot: z.number().int().positive(),
+    consumed: z.number().nonnegative(),
+    isYou: z.boolean(),
+  })
+  .strict();
 
 // Pool bucket; limit = plan limit x accounts.
 const sharedDimension = z.object({
@@ -56,6 +73,7 @@ const sharedDimension = z.object({
   limit: z.number(),
   total: bar.optional(),
   yourShare: share,
+  members: z.array(memberSlice).min(3).max(MAX_MEMBER_SLICES).optional(),
 });
 
 // One account; limit = plan limit.
@@ -65,6 +83,7 @@ const accountDimension = z.object({
   limit: z.number(),
   account: bar.optional(),
   yourShare: share,
+  members: z.array(memberSlice).min(3).max(MAX_MEMBER_SLICES).optional(),
 });
 
 const account = z.object({
@@ -175,6 +194,7 @@ export type SelfLendingPatch = z.infer<typeof selfLendingPatchSchema>;
 export type SelfQuotaStatus = z.infer<typeof selfQuotaStatusSchema>;
 export type SelfQuotaBar = z.infer<typeof bar>;
 export type SelfQuotaShare = z.infer<typeof share>;
+export type SelfQuotaMemberSlice = z.infer<typeof memberSlice>;
 export type SelfQuotaSharedDimension = z.infer<typeof sharedDimension>;
 export type SelfQuotaAccountDimension = z.infer<typeof accountDimension>;
 export type SelfQuotaAccount = z.infer<typeof account>;

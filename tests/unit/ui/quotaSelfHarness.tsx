@@ -12,6 +12,7 @@ import {
   selfQuotaResponseSchema,
   type SelfQuotaAccount,
   type SelfQuotaAccountDimension,
+  type SelfQuotaMemberSlice,
   type SelfQuotaPool,
   type SelfQuotaResponse,
   type SelfQuotaSharedDimension,
@@ -69,6 +70,11 @@ export function accountDim(
     },
     ...over,
   };
+}
+
+/** Member slices in slot order: slot = index + 1, and the first one is the asking key. */
+export function memberSlices(consumed: number[]): SelfQuotaMemberSlice[] {
+  return consumed.map((value, index) => ({ slot: index + 1, consumed: value, isYou: index === 0 }));
 }
 
 export function account(over: Partial<SelfQuotaAccount> = {}): SelfQuotaAccount {

@@ -7,8 +7,10 @@
  * "not_available".
  *
  * Each `percent` plan dimension (limit above Number.EPSILON) becomes one account dimension with
- * the plan limit of ONE account. The key's own share of it is not attributed yet, so `yourShare`
- * is always `unavailable` / `percent_attribution_unavailable` with null numbers.
+ * the plan limit of ONE account. The key's own share of it comes from the attribution book, read
+ * by the caller (selfViewPercent.ts) and passed in as `percent`. Without it, or without a state
+ * for that account and window, `yourShare` is `unavailable` / `percent_attribution_unavailable`
+ * with null numbers.
  *
  * Account-level data (the `account` bar and `modelWindows`) comes only from the cached
  * provider-limits entries the caller passes in (`entries`); `entries === null` means the key may
@@ -27,9 +29,17 @@ import type {
   SelfQuotaAccount,
   SelfQuotaAccountDimension,
   SelfQuotaBar,
+  SelfQuotaMemberSlice,
   SelfQuotaStatus,
 } from "@/shared/schemas/selfQuota";
 import type { QuotaDimension } from "./dimensions";
+import { buildMemberSlices, membersAllowed } from "./selfViewMembers";
+import {
+  percentShareKey,
+  percentShareOf,
+  type PercentShares,
+  type PercentShareState,
+} from "./selfViewPercent";
 import type {
   AccountQuotaEntryLike,
   CachedQuotaWindow,
@@ -42,7 +52,6 @@ type ModelWindows = NonNullable<SelfQuotaAccount["modelWindows"]>;
 
 const NOT_AVAILABLE = "not_available";
 const WINDOW_NOT_REPORTED = "window_not_reported";
-const PERCENT_ATTRIBUTION_UNAVAILABLE = "percent_attribution_unavailable";
 
 /** Reasons resolveAccountQuotaEntries emits; anything else is reported as not_available. */
 const KNOWN_ENTRY_REASONS: ReadonlySet<string> = new Set([
@@ -140,25 +149,57 @@ function modelWindowsOf(provider: string, state: EntryState, now: number): Model
   return { status, windows };
 }
 
+/**
+ * The percent shares of the pool, read by the caller from the attribution books, with the asking
+ * key and the server secret the member slots are keyed with.
+ */
+export interface SelfViewPercentInput {
+  shares: PercentShares;
+  viewerApiKeyId: string;
+  secret: string;
+}
+
+/** Each member's attributed part, for an account the key may see and a share that was read. */
+function percentMembers(
+  ctx: SelfViewPoolContext,
+  connectionId: string,
+  state: PercentShareState | undefined,
+  percent: SelfViewPercentInput | undefined
+): SelfQuotaMemberSlice[] | undefined {
+  if (!percent || !state || state.status === "unavailable") return undefined;
+  if (!membersAllowed(ctx) || !ctx.accountConnectionIds.includes(connectionId)) return undefined;
+  const attributed = state.memberAttributed;
+  return buildMemberSlices({
+    poolId: ctx.pool.id,
+    viewerApiKeyId: percent.viewerApiKeyId,
+    secret: percent.secret,
+    consumed: ctx.pool.allocations.map((a) => ({
+      apiKeyId: a.apiKeyId,
+      consumed: Object.prototype.hasOwnProperty.call(attributed, a.apiKeyId)
+        ? attributed[a.apiKeyId]
+        : null,
+    })),
+  });
+}
+
 function accountDimension(
   ctx: SelfViewPoolContext,
+  connectionId: string,
   dim: PercentDimension,
   state: EntryState | null,
-  now: number
+  now: number,
+  percent: SelfViewPercentInput | undefined
 ): SelfQuotaAccountDimension {
+  const share = percent?.shares.get(percentShareKey(connectionId, dim.window));
   const dimension: SelfQuotaAccountDimension = {
     unit: "percent",
     window: dim.window,
     limit: dim.limit,
-    yourShare: {
-      fairShare: (ctx.effectiveWeight / 100) * dim.limit,
-      consumed: null,
-      remaining: null,
-      status: "unavailable",
-      reason: PERCENT_ATTRIBUTION_UNAVAILABLE,
-    },
+    yourShare: percentShareOf((ctx.effectiveWeight / 100) * dim.limit, share, ctx.accountVisible),
   };
   if (state) dimension.account = accountBar(ctx.provider, dim, state, now);
+  const members = percentMembers(ctx, connectionId, share, percent);
+  if (members) dimension.members = members;
   return dimension;
 }
 
@@ -166,11 +207,15 @@ function isPercentDimension(dim: QuotaDimension): dim is PercentDimension {
   return dim.unit === "percent" && dim.limit > Number.EPSILON;
 }
 
-/** entries = null when account data is hidden for this key; `now` is the view's clock (ms). */
+/**
+ * entries = null when account data is hidden for this key; `now` is the view's clock (ms);
+ * `percent` carries the key's percent shares (absent: every share is not counted yet).
+ */
 export function buildSelfViewAccounts(
   ctx: SelfViewPoolContext,
   entries: AccountQuotaEntryLike[] | null,
-  now: number
+  now: number,
+  percent?: SelfViewPercentInput
 ): SelfQuotaAccount[] {
   const visibleConnections = new Set(ctx.accountConnectionIds);
   const byConnection = new Map<string, AccountQuotaEntryLike>();
@@ -187,7 +232,9 @@ export function buildSelfViewAccounts(
     const account: SelfQuotaAccount = {
       slot: index + 1,
       label: `Account ${index + 1}`,
-      dimensions: percentDimensions.map((dim) => accountDimension(ctx, dim, state, now)),
+      dimensions: percentDimensions.map((dim) =>
+        accountDimension(ctx, connectionId, dim, state, now, percent)
+      ),
     };
     if (state) account.modelWindows = modelWindowsOf(ctx.provider, state, now);
     return account;

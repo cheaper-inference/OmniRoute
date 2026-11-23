@@ -51,6 +51,7 @@ export default function AccountRow({
               readingLabel={t("barAccount")}
               share={dimension.yourShare}
               policy={policy}
+              members={dimension.members}
             />
           ))}
         </div>

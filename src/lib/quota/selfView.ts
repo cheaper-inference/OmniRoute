@@ -18,6 +18,8 @@
  * provider-limits snapshot behind /v1/me/status, sharing its refresh tracker and 60 s floor), and
  * are asked for only when the pool's `accountVisible` is true, only for the pool's own non-empty
  * connection ids, and never with an empty list (which would mean every active connection).
+ * The key's part of each percent window comes from selfViewPercent.ts, which reads the
+ * attribution books and the gate's cached readings without writing a book or calling a provider.
  *
  * `blocks` (selfViewBlocks.ts) lists the schedule windows and per-model caps the key is under,
  * each naming its pool only by `ref`. `availableModels` is the list of `qtSd/` model ids the key
@@ -58,6 +60,8 @@ import { buildPoolRef } from "./selfPoolRef";
 import { buildSelfViewAccounts } from "./selfViewAccounts";
 import { buildSelfViewBlocks } from "./selfViewBlocks";
 import { selfBorrowAvailable, selfLendingFields } from "./selfViewLending";
+import { attachCountableMembers, readMemberBreakdown } from "./selfViewMembers";
+import { readPercentShares } from "./selfViewPercent";
 import { loadViewStore, readViewStore, type ViewStore } from "./selfViewStore";
 import type {
   AccountQuotaEntryLike,
@@ -83,6 +87,9 @@ type CoreDeps = Required<
     | "listModelCapsForApiKey"
     | "listQuotaKeyModels"
     | "resolvePublicApiBaseUrl"
+    | "peekPlanWindowReading"
+    | "getPoolMemberBreakdown"
+    | "countUsablePoolKeys"
   >
 > & { secret: string };
 
@@ -175,6 +182,23 @@ const DEFAULT_DEPS_LOADERS: Array<{
       return { resolvePublicApiBaseUrl: () => resolvePublicApiBaseUrl() };
     },
   },
+  {
+    // Only looks at the quota gate's cache: the view never reads the provider.
+    keys: ["peekPlanWindowReading"],
+    load: async () => ({
+      peekPlanWindowReading: (await import("./saturationSignals")).peekPlanWindowReading,
+    }),
+  },
+  {
+    keys: ["getPoolMemberBreakdown", "countUsablePoolKeys"],
+    load: async () => {
+      const m = await import("@/lib/db/quotaMemberBreakdown");
+      return {
+        getPoolMemberBreakdown: m.getPoolMemberBreakdown,
+        countUsablePoolKeys: m.countUsablePoolKeys,
+      };
+    },
+  },
 ];
 
 async function normalizeDeps(deps: QuotaSelfViewDeps): Promise<CoreDeps> {
@@ -244,6 +268,13 @@ async function resolvePoolContext(
       accountVisible,
       input.allowedConnections
     ),
+    ...readMemberBreakdown({
+      poolId: pool.id,
+      accountVisible,
+      nowMs: deps.now(),
+      getOption: deps.getPoolMemberBreakdown,
+      countUsable: deps.countUsablePoolKeys,
+    }),
   };
 }
 
@@ -410,6 +441,16 @@ async function buildPoolView(
     if (!isCountableDimension(dim)) continue;
     dimensions.push(await buildSharedDimension(ctx, dim, store, input.apiKeyId, nowMs));
   }
+  const secret = deps.secret;
+  await attachCountableMembers({ ctx, dimensions, store, apiKeyId: input.apiKeyId, secret });
+  const shares = await readPercentShares({
+    ctx,
+    apiKeyId: input.apiKeyId,
+    allowedConnections: input.allowedConnections,
+    store,
+    now: deps.now(),
+    peekReading: deps.peekPlanWindowReading,
+  });
   return {
     ref: ctx.ref,
     name: ctx.pool.name,
@@ -423,7 +464,8 @@ async function buildPoolView(
     accounts: buildSelfViewAccounts(
       ctx,
       await resolvePoolAccountEntries(ctx, input, deps),
-      deps.now()
+      deps.now(),
+      { shares, viewerApiKeyId: input.apiKeyId, secret }
     ),
   };
 }

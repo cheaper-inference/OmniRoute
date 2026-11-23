@@ -6,9 +6,10 @@
 
 import type { PoolAllocation, QuotaPool } from "@/lib/db/quotaPools";
 import type { ModelCap } from "@/lib/db/quotaModelCaps";
-import type { ProviderPlan } from "./dimensions";
+import type { ProviderPlan, QuotaUnit, QuotaWindow } from "./dimensions";
 import type { QuotaSchedule } from "./schedules";
-import type { QuotaStore } from "./types";
+import type { ViewStore } from "./selfViewStore";
+import type { PlanWindowReading } from "./types";
 
 /** One entry of resolveAccountQuotaEntries, reduced to the fields the view reads. */
 export interface AccountQuotaEntryLike {
@@ -57,7 +58,7 @@ export interface QuotaSelfViewDeps {
   getPool?: (poolId: string) => QuotaPool | null;
   resolveConnectionProvider?: (connectionId: string) => Promise<string>;
   resolvePlan?: (connectionId: string, provider: string) => ProviderPlan;
-  getQuotaStore?: () => Promise<Pick<QuotaStore, "peek" | "poolConsumedTotal">>;
+  getQuotaStore?: () => Promise<ViewStore>;
   resolveAccountQuotaEntries?: (m: {
     allowedConnections: string[];
     sharedQuotaProviders: string[] | null;
@@ -66,6 +67,16 @@ export interface QuotaSelfViewDeps {
   listModelCapsForApiKey?: (poolId: string, apiKeyId: string) => ModelCap[];
   listQuotaKeyModels?: (allowedQuotas: string[]) => Promise<string[]>;
   resolvePublicApiBaseUrl?: () => string | null;
+  /** The plan-window reading the quota gate's cache holds, never fetched (saturationSignals). */
+  peekPlanWindowReading?: (
+    connectionId: string,
+    provider: string,
+    dim: { unit: QuotaUnit; window: QuotaWindow }
+  ) => PlanWindowReading | null;
+  /** The pool's member usage option (quota_pools.member_breakdown). */
+  getPoolMemberBreakdown?: (poolId: string) => boolean;
+  /** How many keys allocated in the pool can make requests at `nowMs`. */
+  countUsablePoolKeys?: (poolId: string, nowMs: number) => number;
 }
 
 /** A pool the key is allocated in, resolved for one provider. Internal ids stay here. */
@@ -81,4 +92,11 @@ export interface SelfViewPoolContext {
   accountVisible: boolean;
   /** The pool connections whose account data this key may see (empty when none). */
   accountConnectionIds: string[];
+  /**
+   * The pool's member usage option, as stored. False when the key may not see account data
+   * (it is not read then) or when the read failed.
+   */
+  memberBreakdown: boolean;
+  /** The pool's keys that can make requests, read only when `memberBreakdown` is true. */
+  usableMemberCount: number;
 }

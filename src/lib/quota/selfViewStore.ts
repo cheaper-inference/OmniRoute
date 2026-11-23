@@ -9,8 +9,12 @@
 import { createLogger } from "@/shared/utils/logger";
 import type { QuotaStore } from "./types";
 
-/** The two read-only store methods the view uses. */
-export type ViewStore = Pick<QuotaStore, "peek" | "poolConsumedTotal">;
+/**
+ * The read-only store methods the view uses. `ledgerRead` (the percent attribution book) is
+ * optional: a store without it reports percent shares as store_unavailable.
+ */
+export type ViewStore = Pick<QuotaStore, "peek" | "poolConsumedTotal"> &
+  Partial<Pick<QuotaStore, "ledgerRead">>;
 
 const log = createLogger("quota:self-view");
 
