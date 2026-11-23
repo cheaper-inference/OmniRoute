@@ -45,6 +45,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync, execFileSync } from "node:child_process";
 import { FREE_MODEL_BUDGETS } from "../../../open-sse/config/freeModelCatalog.data.ts";
+import {
+  grantsFreeAccess as catalogGrantsFreeAccess,
+  resolveFreeQuotaUnit,
+} from "../../../open-sse/config/freeModelCatalog.ts";
 
 const key = "fixture/new-model";
 const seed = [
@@ -182,7 +186,7 @@ test("malformed policy identities are errors instead of waived entries", () => {
   }
 });
 
-test("real catalog has a precise disposition for every recurring-uncapped identity", () => {
+test("real catalog has a precise disposition for every identity that needs evidence", () => {
   const policy = JSON.parse(
     readFileSync(
       new URL("../../../config/quality/free-catalog-evidence.json", import.meta.url),
@@ -200,6 +204,8 @@ test("real catalog has a precise disposition for every recurring-uncapped identi
       seed: frozen.entries,
       previousDebt: frozen.entries.map((e) => `${e.provider}/${e.modelId}`),
       today: new Date().toISOString().slice(0, 10),
+      grantsFreeAccess: catalogGrantsFreeAccess,
+      unitOf: resolveFreeQuotaUnit,
     }),
     []
   );
@@ -335,3 +341,143 @@ test(
     }
   }
 );
+
+// Re-audit of 2026-11: every row with a quota, and every free row new against the base, needs
+// dated evidence; quota and credit records quote the page and name the quota unit.
+const quotaRow = {
+  provider: "fixture",
+  modelId: "quota-model",
+  freeType: "recurring-daily",
+  monthlyTokens: 6_000_000,
+  creditTokens: 0,
+  poolKey: null,
+  tos: "caution",
+};
+const creditRow = {
+  provider: "fixture",
+  modelId: "credit-model",
+  freeType: "one-time-initial",
+  monthlyTokens: 0,
+  creditTokens: 1_000_000,
+  poolKey: null,
+  tos: "caution",
+};
+const grantsFreeAccess = (freeType) => freeType !== "discontinued";
+const unitOf = () => "tokens";
+const quotaOptions = { seed: [], previousDebt: [], today: "2026-11-23", grantsFreeAccess, unitOf };
+const recordFor = (r, extra) => ({
+  ...evidence,
+  provider: r.provider,
+  modelId: r.modelId,
+  catalogHash: catalogFingerprint(r),
+  checkedAt: "2026-11-23",
+  ...extra,
+});
+const policyWith = (...records) => ({ schemaVersion: 1, debt: [], evidence: records });
+
+test("a row with a monthly quota requires evidence even when it is not uncapped", () => {
+  const errors = validateCatalogEvidence([quotaRow], policyWith(), quotaOptions);
+  assert.ok(errors.includes("fixture/quota-model: missing evidence"), JSON.stringify(errors));
+});
+
+test("a quota record must quote the page and name the provider's quota unit", () => {
+  const ok = recordFor(quotaRow, {
+    claim: "recurring-quota",
+    quotaUnit: "tokens",
+    excerpt: "200K tokens per day on the free plan.",
+  });
+  assert.deepEqual(validateCatalogEvidence([quotaRow], policyWith(ok), quotaOptions), []);
+  const noExcerpt = { ...ok };
+  delete noExcerpt.excerpt;
+  assert.ok(
+    validateCatalogEvidence([quotaRow], policyWith(noExcerpt), quotaOptions).some((e) =>
+      e.includes("missing excerpt")
+    )
+  );
+  assert.ok(
+    validateCatalogEvidence(
+      [quotaRow],
+      policyWith({ ...ok, excerpt: "x".repeat(301) }),
+      quotaOptions
+    ).some((e) => e.includes("excerpt longer than 300"))
+  );
+  assert.ok(
+    validateCatalogEvidence(
+      [quotaRow],
+      policyWith({ ...ok, quotaUnit: "requests" }),
+      quotaOptions
+    ).some((e) => e.includes("quota unit does not match"))
+  );
+  assert.ok(
+    validateCatalogEvidence(
+      [quotaRow],
+      policyWith({ ...ok, claim: "recurring-free-access" }),
+      quotaOptions
+    ).some((e) => e.includes("wrong evidence claim"))
+  );
+});
+
+test("a free row new against the base needs evidence, even with only a signup credit", () => {
+  const baseKeys = new Set(["fixture/other"]);
+  const errors = validateCatalogEvidence([creditRow], policyWith(), { ...quotaOptions, baseKeys });
+  assert.ok(errors.includes("fixture/credit-model: missing evidence"), JSON.stringify(errors));
+  const credit = recordFor(creditRow, {
+    claim: "signup-credit",
+    excerpt: "New accounts receive a one-time trial credit.",
+  });
+  assert.deepEqual(
+    validateCatalogEvidence([creditRow], policyWith(credit), { ...quotaOptions, baseKeys }),
+    []
+  );
+});
+
+test("a credit-only row already in the base is not required to carry evidence", () => {
+  const baseKeys = new Set(["fixture/credit-model"]);
+  assert.deepEqual(
+    validateCatalogEvidence([creditRow], policyWith(), { ...quotaOptions, baseKeys }),
+    []
+  );
+});
+
+test("evidence of a row that became discontinued is stale", () => {
+  const ok = recordFor(quotaRow, {
+    claim: "recurring-quota",
+    quotaUnit: "tokens",
+    excerpt: "200K tokens per day on the free plan.",
+  });
+  const retired = { ...quotaRow, freeType: "discontinued", monthlyTokens: 0 };
+  assert.ok(
+    validateCatalogEvidence([retired], policyWith(ok), quotaOptions).some((e) =>
+      e.includes("stale evidence")
+    )
+  );
+});
+
+test("the fingerprint ignores absent gates (old hashes hold) and moves when gates change", () => {
+  // Hash of the fixture row under the algorithm before `gates` existed.
+  assert.equal(
+    catalogFingerprint(row),
+    "432a928975e73e5d6f271350265cd0d818edd1358cd15796a8d1c9c7ef52809c"
+  );
+  assert.equal(catalogFingerprint({ ...row, gates: [] }), catalogFingerprint(row));
+  const card = catalogFingerprint({ ...row, gates: ["card"] });
+  assert.notEqual(card, catalogFingerprint(row));
+  assert.notEqual(card, catalogFingerprint({ ...row, gates: ["card", "phone"] }));
+  assert.equal(
+    catalogFingerprint({ ...row, gates: ["phone", "card"] }),
+    catalogFingerprint({ ...row, gates: ["card", "phone"] })
+  );
+  const frozen = JSON.parse(
+    readFileSync(
+      new URL("../../../config/quality/free-catalog-legacy-seed.json", import.meta.url),
+      "utf8"
+    )
+  );
+  const seeded = frozen.entries.find(
+    (e) => e.provider === "sealion" && e.modelId === "aisingapore/Gemma-SEA-LION-v4-27B-IT"
+  );
+  const live = FREE_MODEL_BUDGETS.find(
+    (m) => m.provider === seeded.provider && m.modelId === seeded.modelId
+  );
+  assert.equal(catalogFingerprint(live), seeded.catalogHash);
+});
