@@ -1057,3 +1057,44 @@ test("a 429 on the post-refresh retry is cached as transient, not as an auth fai
     Date.now = realNow;
   }
 });
+
+test("a refresh rejected outright is cached as an auth failure, not as transient", async () => {
+  const connectionId = `sn-deadref-${Date.now()}`;
+  invalidateSensenovaQuotaCache(connectionId);
+  let poolCalls = 0;
+  let tokenCalls = 0;
+
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url === SENSENOVA_TOKEN_URL) {
+      tokenCalls += 1;
+      return jsonResponse({ error: "invalid_grant", message: "refresh token revoked" }, 400);
+    }
+    poolCalls += 1;
+    return jsonResponse({ code: 16, message: "Invalid access token" }, 401);
+  }) as typeof fetch;
+
+  const connection = {
+    providerSpecificData: {
+      [SENSENOVA_PSD_ACCESS_TOKEN]: "revoked-access",
+      [SENSENOVA_PSD_ACCESS_EXPIRES_AT]: Date.now() + 3_600_000,
+      [SENSENOVA_PSD_REFRESH_TOKEN]: "dead-refresh",
+    },
+  };
+
+  assert.equal(await fetchSensenovaQuota(connectionId, connection), null);
+  const callsAfterFirst = poolCalls;
+  assert.equal(tokenCalls, 1);
+
+  // Six seconds on, the auth window (5s) has expired: a dead credential is re-checked, which is
+  // how an operator's fix gets picked up. A transient label would have held this back for 30s.
+  const realNow = Date.now;
+  const base = realNow();
+  Date.now = () => base + 6_000;
+  try {
+    assert.equal(await fetchSensenovaQuota(connectionId, connection), null);
+    assert.ok(poolCalls > callsAfterFirst, "a rejected credential must be re-read after the auth window");
+  } finally {
+    Date.now = realNow;
+  }
+});

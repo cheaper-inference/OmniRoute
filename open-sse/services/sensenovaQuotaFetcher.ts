@@ -110,6 +110,9 @@ const latestRefreshTokens = new Map<string, string>();
  * that started before the bump must not publish its result: the credential it
  * used has been replaced in the meantime. */
 const invalidationSeq = new Map<string, number>();
+/** Why the last exchange for a connection failed. A rejected credential and a transport
+ * failure look the same to the caller (no session) but must not share a cache window. */
+const lastRefreshFailure = new Map<string, "auth" | "transient">();
 /** Access tokens this process obtained but could not write to the row (locked or
  * read-only database). Kept apart from the connection object on purpose: the CAS
  * fence compares that object, so writing these into it would make every later
@@ -344,14 +347,28 @@ async function exchangeRefreshToken(
     body: body.toString(),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
-  if (!response || !response.ok) return null;
+  if (!response) {
+    lastRefreshFailure.set(connectionId, "transient");
+    return null;
+  }
+  if (!response.ok) {
+    // 400 invalid_grant / 401: the credential itself is dead. Anything else is the endpoint
+    // having a bad day, and the short auth window would just make us retry a struggling host.
+    const dead = response.status === 400 || response.status === 401;
+    lastRefreshFailure.set(connectionId, dead ? "auth" : "transient");
+    return null;
+  }
 
   const payload = (await response.json()) as {
     access_token?: string;
     refresh_token?: string;
     expires_in?: number;
   };
-  if (!payload.access_token) return null;
+  if (!payload.access_token) {
+    lastRefreshFailure.set(connectionId, "transient");
+    return null;
+  }
+  lastRefreshFailure.delete(connectionId);
 
   // An invalidation that lands while this exchange is in flight means the
   // credential was replaced under it: the tokens it just obtained describe the
@@ -534,7 +551,7 @@ async function readPoolUsagePayload(
   if (!latestRefresh) return { payload: null, reason: "auth" };
 
   const retried = await startRefresh(connectionId, psd, latestRefresh);
-  if (!retried) return { payload: null, reason: "transient" };
+  if (!retried) return { payload: null, reason: lastRefreshFailure.get(connectionId) ?? "transient" };
 
   const second = await requestPoolUsage(connectionId, retried.accessToken);
   if (second.status === "ok") return { payload: second.payload, reason: "transient" };
