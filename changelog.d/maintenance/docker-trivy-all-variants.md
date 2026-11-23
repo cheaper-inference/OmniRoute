@@ -1,0 +1,1 @@
+- **ci(docker):** Docker publish scans every published variant with Trivy: base, `-web`, `-bun` and `-web-bun`. Before, only the base image was scanned. A CRITICAL or HIGH finding with a published fix fails the scan job; findings with no fix are only counted in the job summary
