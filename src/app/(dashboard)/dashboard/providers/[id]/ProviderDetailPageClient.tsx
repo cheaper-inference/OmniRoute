@@ -48,6 +48,7 @@ import { useProviderSettings } from "./hooks/useProviderSettings";
 import { useProviderModels } from "./hooks/useProviderModels";
 import { useCommandCodeAuth } from "./hooks/useCommandCodeAuth";
 import { useConnectionAutoSync } from "./hooks/useConnectionAutoSync";
+import { useConnectionHealthCheck } from "./hooks/useConnectionHealthCheck";
 import { useExternalLinkFlow } from "./hooks/useExternalLinkFlow";
 import { useAuthFileHandlers } from "./hooks/useAuthFileHandlers";
 import { useModelImportHandlers } from "./hooks/useModelImportHandlers";
@@ -411,6 +412,12 @@ export default function ProviderDetailPageClient() {
     async () => {
       await Promise.all([fetchConnections(), fetchProviderModelMeta()]);
     }
+  );
+  const handleToggleConnectionHealthCheck = useConnectionHealthCheck(
+    connections,
+    setConnections,
+    notify,
+    t
   );
 
   // ── model-related effects (loading gate) ────────────────────────────────
@@ -808,6 +815,7 @@ export default function ProviderDetailPageClient() {
                 handleToggleCodexPaidCredits={handleToggleCodexPaidCredits}
                 canAutoSync={!usesCuratedModelsOnly && compatibleSupportsModelImport}
                 handleToggleConnectionAutoSync={handleToggleConnectionAutoSync}
+                handleToggleConnectionHealthCheck={handleToggleConnectionHealthCheck}
                 handleToggleCliproxyapiMode={handleToggleCliproxyapiMode}
                 handleSetUpstreamProxyMode={handleSetUpstreamProxyMode}
                 upstreamProxyMode={upstreamProxyMode}

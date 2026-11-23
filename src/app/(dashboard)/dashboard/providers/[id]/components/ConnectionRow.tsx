@@ -118,6 +118,7 @@ export default function ConnectionRow({
   onToggleClaudeExtraUsage,
   onToggleCodexPaidCredits,
   onToggleAutoSync,
+  onToggleHealthCheck,
   onToggleCodex5h,
   onToggleCodexWeekly,
   onToggleCliproxyapiMode,
@@ -275,6 +276,9 @@ export default function ConnectionRow({
   const effectiveUpstreamProxyMode = upstreamProxyMode ?? "native";
   const autoSyncEnabled = !!(connection.providerSpecificData as Record<string, unknown> | undefined)
     ?.autoSync;
+  const healthCheckEnabled =
+    (connection.providerSpecificData as Record<string, unknown> | undefined)?.autoHealthCheck ===
+    true;
   // One clock for the whole row: the age of the last catalog sync and the age
   // of the last discovery outcome both read from it, so the two never
   // disagree — and the row never calls Date.now() while rendering.
@@ -509,6 +513,25 @@ export default function ConnectionRow({
                     : t("autoSyncNeverSynced")}
                 </span>
               </>
+            )}
+            {onToggleHealthCheck && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon="health_and_safety"
+                onClick={() => onToggleHealthCheck?.(!healthCheckEnabled)}
+                disabled={connection.isActive === false}
+                aria-pressed={healthCheckEnabled}
+                data-testid="connection-health-check-toggle"
+                className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed ${
+                  healthCheckEnabled
+                    ? "bg-success/15 text-success hover:bg-success/25"
+                    : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
+                }`}
+                title={t("healthCheckTooltip")}
+              >
+                {t("healthCheckShort")}
+              </Button>
             )}
             {discoveryFailed && discoveryAgeLabel && (
               <span

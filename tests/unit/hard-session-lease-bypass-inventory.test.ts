@@ -391,6 +391,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/vscode/tagModels.ts": 1,
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
+    // #11777: the scheduled model health check lists opted-in connections and fences each
+    // one with isConnectionUnavailableToAuxiliaryActivity before probing it.
+    "src/shared/services/modelHealthCheckScheduler.ts": 1,
     "src/shared/services/modelSyncScheduler.ts": 1,
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
@@ -449,6 +452,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "src/lib/usage/providerLimits.ts",
         "src/lib/vncSession/service.ts",
         "src/lib/warmupScheduler.ts",
+        "src/shared/services/modelHealthCheckScheduler.ts",
         "src/shared/services/modelSyncScheduler.ts",
         "src/sse/services/auth.ts",
       ].includes(file)
@@ -561,6 +565,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/usage/grokResetCredits.ts",
     "src/lib/vncSession/service.ts",
     "src/lib/warmupScheduler.ts",
+    "src/shared/services/modelHealthCheckScheduler.ts",
     "src/shared/services/modelSyncScheduler.ts",
   ].map((file) => fs.readFileSync(path.join(REPO_ROOT, file), "utf8"));
   const unfencedUsageRefreshSource = fs.readFileSync(
