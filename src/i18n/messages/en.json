@@ -133,6 +133,12 @@
     "saveError": "Could not save the service mode. Please try again."
   },
   "common": {
+    "apiKeyBanReason": {
+      "unknown": "No reason recorded",
+      "prompt_injection": "Suspected prompt injection",
+      "compromised_key": "Suspected key compromise",
+      "policy_violation": "Policy violation"
+    },
     "usageEvidence": {
       "compressedTokens": "{count} tokens compressed",
       "reported": "reported",
@@ -2642,14 +2648,8 @@
     "apiManagerTimezonePlaceholder": "America/Sao_Paulo",
     "noLogPayloadPrivacy": "No-Log Payload Privacy",
     "bannedStatus": "Banned Status",
-    "banReason": {
-      "label": "Ban reason (optional)",
-      "keepCurrent": "Leave reason unchanged",
-      "unknown": "No reason recorded",
-      "prompt_injection": "Suspected prompt injection",
-      "compromised_key": "Suspected key compromise",
-      "policy_violation": "Policy violation"
-    },
+    "banReasonLabel": "Ban reason (optional)",
+    "banReasonKeepCurrent": "Leave reason unchanged",
     "managementApiAccess": "Management API Access",
     "expirationDate": "Expiration Date",
     "managementAccess": "Management Access",

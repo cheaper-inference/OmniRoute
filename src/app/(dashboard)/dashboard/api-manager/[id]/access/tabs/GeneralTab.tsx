@@ -120,6 +120,7 @@ function BanToggle({
   setBanReason,
 }: GeneralSectionProps<"setIsBanned" | "setBanReason">) {
   const t = useTranslations("apiManager");
+  const common = useTranslations("common");
 
   return (
     <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-error/20 bg-error/5">
@@ -132,13 +133,13 @@ function BanToggle({
         {formState.isBanned && (
           <Select
             className="mt-2"
-            label={t("banReason.label")}
-            placeholder={t("banReason.keepCurrent")}
+            label={t("banReasonLabel")}
+            placeholder={t("banReasonKeepCurrent")}
             placeholderDisabled={false}
             value={formState.banReason ?? ""}
             options={API_KEY_BAN_REASONS.map((reason) => ({
               value: reason,
-              label: t(`banReason.${reason}`),
+              label: common(`apiKeyBanReason.${reason}`),
             }))}
             onChange={(event) => setBanReason(parseApiKeyBanReason(event.target.value))}
           />

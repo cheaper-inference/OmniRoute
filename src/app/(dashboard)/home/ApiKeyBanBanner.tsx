@@ -8,10 +8,11 @@ import Icon from "@/shared/components/Icon";
 import type { ApiKeyBanSummary } from "@/lib/db/apiKeys/banSummary";
 
 const REFRESH_MS = 60_000;
+const REQUEST_TIMEOUT_MS = 10_000;
 
 export default function ApiKeyBanBanner() {
   const t = useTranslations("home");
-  const key = useTranslations("apiManager");
+  const common = useTranslations("common");
   const [summary, setSummary] = useState<ApiKeyBanSummary | null>(null);
 
   useEffect(() => {
@@ -21,9 +22,9 @@ export default function ApiKeyBanBanner() {
       if (pending || document.hidden) return;
       pending = true;
       try {
-        const response = await fetch("/api/keys/bans", {
+        const response = await fetch("/api/monitoring/api-key-bans", {
           credentials: "same-origin",
-          signal: controller.signal,
+          signal: AbortSignal.any([controller.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)]),
         });
         const next = response.ok ? await response.json() : null;
         if (!controller.signal.aborted) setSummary(Array.isArray(next?.keys) ? next : null);
@@ -59,7 +60,10 @@ export default function ApiKeyBanBanner() {
           <ul className="mt-1.5 space-y-0.5 break-words">
             {summary.keys.map(({ id, name, reason }) => (
               <li key={id}>
-                {t("apiKeyBanEntry", { name, reason: key(`banReason.${reason ?? "unknown"}`) })}
+                {t("apiKeyBanEntry", {
+                  name,
+                  reason: common(`apiKeyBanReason.${reason ?? "unknown"}`),
+                })}
               </li>
             ))}
             {remaining > 0 && <li>{t("apiKeyBanMore", { count: remaining })}</li>}

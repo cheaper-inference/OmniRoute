@@ -3239,7 +3239,7 @@ paths:
         "503":
           description: Management authentication backend temporarily unavailable
 
-  /api/keys/bans:
+  /api/monitoring/api-key-bans:
     get:
       tags: [API Keys]
       summary: Summarize banned API keys

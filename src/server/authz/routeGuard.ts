@@ -180,8 +180,6 @@ export const LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES: ReadonlyArray<string> = [
 ];
 
 export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
-  // Key names and security decisions are management information, including in open mode.
-  "/api/keys/bans",
   "/api/shutdown",
   // Skill writers. generate with prune=true deletes every non-catalog directory under
   // skills/ on the host; the two install routes register a global, enabled, auto-mode
@@ -296,6 +294,8 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
  * both GHSA-mghq-58h3-qcqj and GHSA-v7g9-7f55-5g46 missed.
  */
 export const ALWAYS_PROTECTED_API_PATTERNS: ReadonlyArray<RegExp> = [
+  // Key names and security decisions are management information, including in open mode.
+  /^\/api\/monitoring\/api-key-bans\/?$/,
   // `export` hands the caller the raw token; `apply-local` writes it into the
   // host's CLI config (~/.codex/auth.json and the Claude equivalent). The second
   // does not disclose the credential, but "anonymous" is still the wrong

@@ -5,7 +5,13 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ApiKeyBanBanner from "../../../src/app/(dashboard)/home/ApiKeyBanBanner";
 import messages from "../../../src/i18n/messages/en.json";
+import namespaces from "../../../src/i18n/routeNamespaces.generated.json";
 
+const homeMessages = Object.fromEntries(
+  Object.entries(messages).filter(([name]) => namespaces.home.includes(name))
+);
+
+vi.unmock("next-intl");
 vi.mock("next/link", () => ({ default: "a" }));
 
 let root: Root;
@@ -14,7 +20,7 @@ let container: HTMLDivElement;
 async function showBanner() {
   await act(async () => {
     root.render(
-      <NextIntlClientProvider locale="en" timeZone="UTC" messages={messages}>
+      <NextIntlClientProvider locale="en" timeZone="UTC" messages={homeMessages}>
         <ApiKeyBanBanner />
       </NextIntlClientProvider>
     );
@@ -32,6 +38,7 @@ describe("API key ban banner", () => {
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 
@@ -75,6 +82,41 @@ describe("API key ban banner", () => {
     });
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(container.textContent).toBe("");
+  });
+
+  it("clears stale details after a stalled refresh times out", async () => {
+    const deadline = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValue(deadline.signal);
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          total: 1,
+          keys: [{ id: "fixture-1", name: "Example key", reason: "policy_violation" }],
+        })
+      )
+      .mockImplementationOnce(
+        (_url: string, options: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            options.signal?.addEventListener("abort", () => reject(options.signal?.reason), {
+              once: true,
+            });
+          })
+      )
+      .mockResolvedValueOnce(Response.json({ total: 0, keys: [] }));
+    vi.stubGlobal("fetch", fetch);
+    await showBanner();
+    expect(container.textContent).toContain("Policy violation");
+
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+      deadline.abort();
+    });
+    expect(container.textContent).toBe("");
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(fetch).toHaveBeenCalledTimes(3);
   });
 
   it("stays hidden with no actual bans", async () => {

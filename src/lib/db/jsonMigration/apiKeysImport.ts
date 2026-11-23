@@ -93,7 +93,11 @@ function applyStricterLifecycle(values: ColumnValues, existing: ColumnValues) {
  */
 export function getApiKeyImportColumns(db: SqliteAdapter): string[] {
   ensureApiKeyFallbackColumns(db);
-  return getTableColumns(db, "api_keys");
+  // Generic settings imports can restore the flag but cannot set attributed
+  // ban metadata. Writing a reason requires the API key management route.
+  return getTableColumns(db, "api_keys").filter(
+    (column) => column !== "ban_reason" && column !== "banned_at"
+  );
 }
 
 export function importApiKeyRecord(db: SqliteAdapter, columns: string[], apiKey: JsonRecord) {

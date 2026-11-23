@@ -1182,11 +1182,14 @@ export async function updateApiKeyPermissions(
     updates.push(
       "banned_at = CASE WHEN @isBanned = 0 THEN NULL WHEN is_banned = 1 THEN banned_at ELSE @banTime END"
     );
-    const reason = parseApiKeyBanReason(normalized.banReason);
-    if (!normalized.isBanned || reason !== null) {
-      updates.push("ban_reason = @banReason");
-      params.banReason = normalized.isBanned ? reason : null;
-    }
+    params.banReason = parseApiKeyBanReason(normalized.banReason);
+    updates.push(
+      `ban_reason = CASE
+        WHEN @isBanned = 0 THEN NULL
+        WHEN @banReason IS NOT NULL THEN @banReason
+        WHEN is_banned = 1 THEN ban_reason
+        ELSE NULL END`
+    );
   }
 
   if (normalized.expiresAt !== undefined) {

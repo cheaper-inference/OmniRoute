@@ -12,14 +12,18 @@ process.env.API_KEY_SECRET = "isolated-ban-summary-test-secret";
 
 const core = await import("../../src/lib/db/core.ts");
 const keys = await import("../../src/lib/db/apiKeys.ts");
+const { createAccessToken } = await import("../../src/lib/db/accessTokens.ts");
 const { getApiKeyBanSummary } = await import("../../src/lib/db/apiKeys/banSummary.ts");
-const { GET } = await import("../../src/app/api/keys/bans/route.ts");
+const { GET } = await import("../../src/app/api/monitoring/api-key-bans/route.ts");
 const { PATCH } = await import("../../src/app/api/keys/[id]/route.ts");
+const { getApiKeyImportColumns, importApiKeyRecord } =
+  await import("../../src/lib/db/jsonMigration/apiKeysImport.ts");
+const { isAlwaysProtectedPath } = await import("../../src/server/authz/routeGuard.ts");
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
 const { updateKeyPermissionsSchema } = await import("../../src/shared/validation/schemas/keys.ts");
 
 function request(token?: string): Request {
-  return new Request("http://localhost/api/keys/bans", {
+  return new Request("http://localhost/api/monitoring/api-key-bans", {
     headers: token ? { authorization: `Bearer ${token}` } : {},
   });
 }
@@ -45,6 +49,19 @@ test("the ban reason accepts only defined categories and requires a ban update",
       .success,
     false
   );
+});
+
+test("the protected route is separate from API key identifiers", () => {
+  assert.equal(isAlwaysProtectedPath("/api/monitoring/api-key-bans"), true);
+  assert.equal(isAlwaysProtectedPath("/api/monitoring/api-key-bans-history"), false);
+  assert.equal(isAlwaysProtectedPath("/api/keys/bans"), false);
+});
+
+test("a fresh database returns an empty summary before a key is created", async () => {
+  const { secret } = createAccessToken({ name: "Management fixture", scope: "read" });
+  const response = await GET(request(secret));
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { total: 0, keys: [] });
 });
 
 test("the authenticated summary shows recorded bans and only safe fields", async () => {
@@ -89,8 +106,32 @@ test("the authenticated summary shows recorded bans and only safe fields", async
   assert.ok(!Object.hasOwn((await keys.getApiKeyById(known.id))!, "banReason"));
   await keys.updateApiKeyPermissions(known.id, { isBanned: false });
   assert.equal((await (await GET(request(manager.key))).json()).total, 1);
+  core
+    .getDbInstance()
+    .prepare("UPDATE api_keys SET ban_reason = 'compromised_key' WHERE id = ?")
+    .run(known.id);
   await keys.updateApiKeyPermissions(known.id, { isBanned: true });
   assert.equal(getApiKeyBanSummary().keys.find((key) => key.id === known.id)?.reason, null);
+});
+
+test("generic JSON imports can preserve a ban without assigning its reason", async () => {
+  const key = await keys.createApiKey("Import fixture", "import-fixture");
+  const db = core.getDbInstance();
+  const columns = getApiKeyImportColumns(db);
+  importApiKeyRecord(db, columns, {
+    id: key.id,
+    isBanned: true,
+    banReason: "prompt_injection",
+    bannedAt: "2026-01-01T00:00:00.000Z",
+  });
+  assert.equal(getApiKeyBanSummary().keys.find((item) => item.id === key.id)?.reason, null);
+
+  await keys.updateApiKeyPermissions(key.id, { isBanned: true, banReason: "policy_violation" });
+  importApiKeyRecord(db, columns, { id: key.id, isBanned: false, banReason: "prompt_injection" });
+  assert.equal(
+    getApiKeyBanSummary().keys.find((item) => item.id === key.id)?.reason,
+    "policy_violation"
+  );
 });
 
 test("a legacy banned key keeps its state and gains no guessed reason on upgrade", () => {
