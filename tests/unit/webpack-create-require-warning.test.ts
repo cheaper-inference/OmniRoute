@@ -70,6 +70,10 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
       entry: entries,
       externals: [
         "../../src/lib/db/proxies",
+        // browserPool.ts resolves the account-scoped proxy and its blocking guard
+        // through dynamic imports; the isolated compile has no repo tree for them.
+        "../../src/lib/db/settings",
+        "../../src/lib/db/proxies/guards",
         "@/shared/utils/runtimeTimeouts",
         "better-sqlite3",
         "bun:sqlite",
