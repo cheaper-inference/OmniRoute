@@ -78,6 +78,18 @@ test("label helper is idempotent and leaves combos, unresolvable owners and name
   assert.equal(labelCatalogModelNames([combo])[0], combo);
 });
 
+test("OpenRouter rows keep the vendor prefix only when stripping it would collide", () => {
+  const rows = [
+    { id: "openrouter/meta/llama-3", owned_by: "openrouter", name: "Meta: Llama 3" },
+    { id: "openrouter/acme/llama-3", owned_by: "openrouter", name: "Acme: Llama 3" },
+    { id: "openrouter/anthropic/claude-x", owned_by: "openrouter", name: "Anthropic: Claude X" },
+  ];
+  assert.deepEqual(
+    labelCatalogModelNames(rows).map((m) => m.name),
+    ["Meta: Llama 3 · OpenRouter", "Acme: Llama 3 · OpenRouter", "Claude X · OpenRouter"]
+  );
+});
+
 test("catalogProviderInName defaults to false and is accepted by the settings schema", async () => {
   assert.equal((await settingsDb.getSettings()).catalogProviderInName, false);
   const parsed = schemas.updateSettingsSchema.safeParse({ catalogProviderInName: true });

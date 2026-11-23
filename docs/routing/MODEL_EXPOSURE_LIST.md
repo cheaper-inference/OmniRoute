@@ -87,7 +87,7 @@ Like the lists above, it only changes advertisement:
 
 An opt-in boolean, `false` by default, for clients that only show a model's `name` and so cannot
 tell which provider a row routes to (#20369, #4516). When it is `true`, every provider row's `name`
-in the public listing ends with ` · <Provider>`, for example `Claude Haiku 5.5 · OpenRouter`.
+in the public listing ends with ` · <Provider>`, for example `Claude Haiku 5.5 · OpenRouter`. This label needs the `MODEL_CATALOG_INCLUDE_NAMES` flag to be enabled, which is its default. When that flag is disabled, the listing removes `name` from every row, so the suffix does not appear even when `catalogProviderInName` is true.
 
 Toggle it in **Settings → Routing → Models API listing**, or with
 `PATCH /api/settings {"catalogProviderInName": true}`.

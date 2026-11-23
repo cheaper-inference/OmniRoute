@@ -995,10 +995,17 @@ async function buildUnifiedModelsResponseCore(
         (c) => buildComboCatalogMetadata(c, getVisibleComboTargets(c))
       );
       const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
-      return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
-        ...corsHeaders,
-        ...diagnosticHeaders,
-      });
+      return finalizeCatalogResponse(
+        request,
+        quotaFinal,
+        () => undefined,
+        {
+          ...corsHeaders,
+          ...diagnosticHeaders,
+        },
+        undefined,
+        { providerInName: settings.catalogProviderInName === true }
+      );
     }
 
     // #4164: advertise the built-in zero-setup `auto/*` combos at the very top.

@@ -38,7 +38,10 @@ export function resolveCatalogProviderLabel(providerKey: string): string {
   return name || providerKey;
 }
 
-export function labelCatalogModelName<T extends Row>(model: T): T {
+export function labelCatalogModelName<T extends Row>(
+  model: T,
+  options: { keepVendor?: boolean } = {}
+): T {
   if (model.owned_by === "combo") return model;
   const baseName = typeof model.name === "string" ? model.name.trim() : "";
   if (!baseName) return model;
@@ -67,12 +70,27 @@ export function labelCatalogModelName<T extends Row>(model: T): T {
     }
   }
   // OpenRouter publishes names as "Vendor: Model".
-  if (providerKey === "openrouter") name = name.replace(/^[^:/]{1,40}:\s+/, "");
+  if (providerKey === "openrouter" && !options.keepVendor) {
+    name = name.replace(/^[^:/]{1,40}:\s+/, "");
+  }
   name = name.trim();
   if (!name) return model;
   return { ...model, name: `${name}${suffix}` };
 }
 
+/**
+ * Label every row, but keep OpenRouter's `Vendor: ` prefix on rows whose vendor-stripped
+ * label would collide with another row's name (`Meta: Llama` / `Acme: Llama` would both
+ * become `Llama · OpenRouter`). Non-colliding rows are labeled exactly as before.
+ */
 export function labelCatalogModelNames<T extends Row>(models: T[]): T[] {
-  return models.map((model) => labelCatalogModelName(model));
+  const labeled = models.map((model) => labelCatalogModelName(model));
+  const counts = new Map<string, number>();
+  for (const row of labeled) {
+    if (typeof row.name === "string") counts.set(row.name, (counts.get(row.name) ?? 0) + 1);
+  }
+  return labeled.map((row, index) => {
+    const collides = typeof row.name === "string" && (counts.get(row.name) ?? 0) > 1;
+    return collides ? labelCatalogModelName(models[index], { keepVendor: true }) : row;
+  });
 }
