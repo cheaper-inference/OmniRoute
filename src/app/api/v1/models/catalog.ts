@@ -287,6 +287,7 @@ export async function getUnifiedModelsResponse(
           settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
         hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
         exposeCombosOnly: buildFlags.combosOnly,
+        providerInName: settingsForAuth?.catalogProviderInName === true,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
         revealHidden: buildFlags.revealHidden,
       }
@@ -2360,7 +2361,8 @@ async function buildUnifiedModelsResponseCore(
         ...corsHeaders,
         ...diagnosticHeaders,
       },
-      enrichmentSnapshot
+      enrichmentSnapshot,
+      { providerInName: settings.catalogProviderInName === true }
     );
   } catch (error) {
     console.log("Error fetching models:", error);

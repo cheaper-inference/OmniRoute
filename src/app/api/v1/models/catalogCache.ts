@@ -102,6 +102,8 @@ export type CatalogCacheOptions = {
   hideNoThinkVariants?: boolean;
   /** Public listing advertises only combos (`settings.exposeCombosOnly`). */
   exposeCombosOnly?: boolean;
+  /** Provider label appended to every row's name (`settings.catalogProviderInName`). */
+  providerInName?: boolean;
   /** Management-only build that keeps operator-hidden models (`/api/models/catalog`). */
   revealHidden?: boolean;
   /**
@@ -290,7 +292,8 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
   // (the public /v1/models default) stays byte-identical.
   const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
   const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
-  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
+  const providerInName = catalogSettings?.providerInName ? "|providerInName" : "";
+  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}${providerInName}`;
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last

@@ -339,6 +339,9 @@ export async function getSettings() {
     // Opt-in: the public /v1/models listing advertises only combos (user combos +
     // auto/*). Catalog-only — explicit provider/model ids still route.
     exposeCombosOnly: false,
+    // Opt-in: end every provider row's `name` with " · <Provider>" in /v1/models so
+    // name-only clients show which route a row uses. Default off = output unchanged.
+    catalogProviderInName: false,
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap

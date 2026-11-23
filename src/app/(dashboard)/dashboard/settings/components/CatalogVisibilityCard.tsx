@@ -10,14 +10,21 @@ type VisibilitySettings = {
   hideAutoCombos: boolean;
   hideNoThinkVariants: boolean;
   exposeCombosOnly: boolean;
+  catalogProviderInName: boolean;
 };
-const FLAGS = ["hideAutoCombos", "hideNoThinkVariants", "exposeCombosOnly"] as const;
+const FLAGS = [
+  "hideAutoCombos",
+  "hideNoThinkVariants",
+  "exposeCombosOnly",
+  "catalogProviderInName",
+] as const;
 
 function visibilitySettings(value: Partial<VisibilitySettings>): VisibilitySettings {
   return {
     hideAutoCombos: value.hideAutoCombos === true,
     hideNoThinkVariants: value.hideNoThinkVariants === true,
     exposeCombosOnly: value.exposeCombosOnly === true,
+    catalogProviderInName: value.catalogProviderInName === true,
   };
 }
 
@@ -84,9 +91,17 @@ export default function CatalogVisibilityCard() {
             label={
               key === "exposeCombosOnly"
                 ? t("exposeCombosOnly")
-                : `${common("hide")} ${key === "hideAutoCombos" ? "auto/*" : "no-think/*"}`
+                : key === "catalogProviderInName"
+                  ? t("catalogProviderInName")
+                  : `${common("hide")} ${key === "hideAutoCombos" ? "auto/*" : "no-think/*"}`
             }
-            description={key === "exposeCombosOnly" ? t("exposeCombosOnlyDesc") : undefined}
+            description={
+              key === "exposeCombosOnly"
+                ? t("exposeCombosOnlyDesc")
+                : key === "catalogProviderInName"
+                  ? t("catalogProviderInNameDesc")
+                  : undefined
+            }
             checked={value?.[key] ?? false}
             disabled={loading || saving || !value}
             onChange={(checked) => void save(key, checked)}
