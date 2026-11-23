@@ -5,12 +5,10 @@
  * import-only-free filter and the OpenRouter catalog cannot drift apart.
  *
  * Precedence, strongest first:
- *  1. An explicit boolean flag (`isFree` / `is_free` / `free`, top-level or inside `pricing`)
- *     is the provider's own verdict and wins both ways: `false` vetoes a zero price.
- *  2. A `:free` id suffix.
- *  3. Zero per-token price (`prompt`/`completion` or `input`/`output`) with no positive price
- *     anywhere else in `pricing` (per-request, per-image, per-second, audio, ...).
- *  4. A `free` tag, under the same no-positive-price condition.
+ *  1. Any explicit false flag or positive price in `pricing` vetoes free evidence.
+ *  2. An explicit true flag (`isFree` / `is_free` / `free`, top-level or in `pricing`).
+ *  3. A `:free` id suffix, zero prompt/input and completion/output prices, or a `free` tag.
+ * Unknown or malformed fields alone do not establish free evidence.
  */
 
 type JsonRecord = Record<string, unknown>;
@@ -79,15 +77,14 @@ function hasFreeTag(entry: JsonRecord): boolean {
 /**
  * Conservative paid-price veto for decisions that can initiate billable traffic.
  * An explicit paid flag or any positive price trumps an optimistic free marker.
- * This is opt-in for providers whose static free model list proved unsafe.
+ * Used both by the shared free predicate and by callers whose static-catalog or
+ * badge heuristics must also be vetoed by live paid evidence.
  */
 export function hasPayloadPaidEvidence(entry: unknown): boolean {
   const record = asRecord(entry);
   if (!record) return false;
   const pricing = asRecord(record.pricing);
-  // A contradictory pair of flags must fail closed even if another field says
-  // isFree=true. The normal free predicate preserves its historical precedence;
-  // the paid veto used by billing-sensitive providers examines every flag.
+  // A contradictory pair of flags must fail closed even if another field says isFree=true.
   const explicitlyPaid = [record, pricing].some(
     (source) => source && FREE_FLAG_KEYS.some((key) => source[key] === false)
   );
@@ -96,15 +93,13 @@ export function hasPayloadPaidEvidence(entry: unknown): boolean {
 
 export function hasPayloadFreeEvidence(entry: unknown): boolean {
   const record = asRecord(entry);
-  if (!record) return false;
+  if (!record || hasPayloadPaidEvidence(record)) return false;
   const pricing = asRecord(record.pricing);
 
   const flag = explicitFreeFlag(record, pricing);
   if (flag !== null) return flag;
 
   if (typeof record.id === "string" && record.id.endsWith(":free")) return true;
-
-  if (pricing && hasPositivePrice(pricing)) return false;
 
   if (pricing) {
     const prompt = firstPrice(pricing, ["prompt", "input"]);
