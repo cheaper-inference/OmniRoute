@@ -291,7 +291,8 @@ test("modal ledger spend counts in the daily, weekly and 5h windows; the 5h rese
     weeklyUsageLimitUsd: 1,
     fiveHourUsageLimitUsd: 1,
   });
-  const now = Date.now();
+  // The two-hour-old sample must remain in the observation's Fortaleza day and week.
+  const now = Date.UTC(2026, 10, 18, 15);
   const at = new Date(now - 2 * HOUR_MS).toISOString();
   costLedger.recordLedgerEntry({
     apiKeyId: key.id,
