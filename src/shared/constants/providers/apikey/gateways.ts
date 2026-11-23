@@ -95,7 +95,7 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     hasFree: true,
     freeNote:
-      "39 model ids carry a :free suffix and 31 of them bill at zero (public /api/pricing); no card at signup. Per-account RPM/RPD is unpublished — 429 on cap.",
+      "Free-account ids carry a :free suffix; the public /api/pricing feed marks which bill at zero (31 of 38 today) and the shelf rotates. No card at signup. Per-account RPM/RPD is unpublished — 429 on cap.",
     website: "https://crowllm.com",
     apiHint:
       "Create an API key at https://crowllm.com/sign-up, then paste it here as a Bearer token.",
