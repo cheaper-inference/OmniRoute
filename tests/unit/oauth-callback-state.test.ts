@@ -61,7 +61,7 @@ test("#20576: OAuthModal attaches no relay listener for a manual-only provider",
     new URL("../../src/shared/components/OAuthModal.tsx", import.meta.url),
     "utf8"
   );
-  const effectStart = modal.indexOf("if (!acceptsRelayedCallback(provider)) return;");
+  const effectStart = modal.indexOf("if (!authData || !acceptsRelayedCallback(provider)) return;");
   assert.ok(effectStart > 0, "listener effect gates on acceptsRelayedCallback");
   // The gate runs before any relay channel is opened.
   for (const listener of [
@@ -73,7 +73,7 @@ test("#20576: OAuthModal attaches no relay listener for a manual-only provider",
     assert.ok(at > effectStart, `${listener} comes after the gate`);
   }
   // The auth tab opens without an opener so /callback shows the URL to copy.
-  assert.match(modal, /MANUAL_CALLBACK_ONLY_PROVIDERS\.has\(provider\) \? "noopener" : undefined/);
+  assert.match(modal, /window\.open\(authUrl, "oauth_auth", "noopener"\)/);
 });
 
 // #20580: Zed Hosted needs no state because its access token is RSA-encrypted to the attempt's
