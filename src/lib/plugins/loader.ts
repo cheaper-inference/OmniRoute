@@ -10,14 +10,15 @@
 
 import { spawn } from "child_process";
 import type { ChildProcess } from "child_process";
-import { writeFile, readFile } from "fs/promises";
+import { writeFile, readFile, mkdir, realpath } from "fs/promises";
 import { rmSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 import { tmpdir } from "os";
 import { randomUUID, createHash } from "crypto";
 import { logger } from "../../../open-sse/utils/logger.ts";
 import type { PluginManifestWithDefaults, Permission } from "./manifest";
 import type { Plugin, PluginContext, PluginResult } from "./index";
+import { buildPermissionModelArgs } from "./permissionModel";
 
 const log = logger("PLUGIN_LOADER");
 
@@ -58,6 +59,14 @@ export interface LoadedPlugin {
 }
 
 export interface LoadPluginOptions {
+  /** Run the plugin host under the Node.js permission model (PLUGIN_PERMISSION_MODEL_ENABLED).
+   *  Off when omitted: the host is spawned exactly as without the flag. */
+  permissionModel?: boolean;
+  /** Directory the plugin may read under the permission model (default: the entry's dir). */
+  pluginDir?: string;
+  /** Plugin data directory, opened by `file-read` / `file-write` under the permission model. */
+  dataDir?: string;
+
   /** Per-call IPC hook timeout in ms. Defaults to DEFAULT_HOOK_TIMEOUT (10s); injectable
    *  so tests can exercise the timeout paths without waiting out the production value. */
   hookTimeoutMs?: number;
@@ -245,7 +254,21 @@ export async function loadPlugin(
     PLUGIN_NAME: manifest.name,
   };
 
-  const child = spawn(process.execPath, ["--no-warnings", hostScriptPath, entryPoint], {
+  // Opt-in sandbox: with the flag off the argv below is exactly ["--no-warnings", host, entry].
+  let permissionArgs: string[] = [];
+  if (options.permissionModel === true) {
+    try {
+      const sandbox = await preparePermissionModel(hostScriptPath, entryPoint, manifest, options);
+      permissionArgs = sandbox.args;
+      env.PLUGIN_DATA_DIR = sandbox.dataDir;
+    } catch (err) {
+      removeHostScript(hostScriptPath);
+      throw err;
+    }
+  }
+
+  const hostArgs = ["--no-warnings", ...permissionArgs, hostScriptPath, entryPoint];
+  const child = spawn(process.execPath, hostArgs, {
     windowsHide: true,
     env,
     // #8395: stdout/stderr must be piped (not "ignore") so the plugin's own
@@ -432,6 +455,34 @@ export async function loadPlugin(
   };
 
   return { name: manifest.name, manifest, plugin, cleanup };
+}
+
+/**
+ * Resolve the Node.js permission-model flags for one plugin host. Paths are canonicalized
+ * because the permission model checks real paths; the data directory is created only when
+ * the manifest declares a permission that opens it.
+ */
+async function preparePermissionModel(
+  hostScriptPath: string,
+  entryPoint: string,
+  manifest: PluginManifestWithDefaults,
+  options: LoadPluginOptions
+): Promise<{ args: string[]; dataDir: string }> {
+  const permissions = manifest.requires.permissions;
+  const pluginDir = await realpath(options.pluginDir ?? dirname(entryPoint));
+  let dataDir = options.dataDir ?? join(pluginDir, "data");
+  if (permissions.includes("file-write") || permissions.includes("file-read")) {
+    await mkdir(dataDir, { recursive: true });
+    dataDir = await realpath(dataDir);
+  }
+  const args = buildPermissionModelArgs({
+    hostScriptPath: await realpath(hostScriptPath),
+    pluginDir,
+    dataDir,
+    permissions,
+  });
+  log.info("loader.permission_model", { name: manifest.name, args });
+  return { args, dataDir };
 }
 
 /**

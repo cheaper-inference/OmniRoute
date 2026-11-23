@@ -934,6 +934,14 @@ to the upstream provider or back to the client.
   pattern. Header-shaped keys (`authorization`, `x-api-key`, `api-key`,
   `apikey`) are redacted structurally (value only, scheme prefix like
   `Bearer `/`Basic ` preserved) rather than via the generic text regex.
+- A value behind a label is masked even when it has no provider prefix:
+  `DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…`
+  (labels: `password`, `passwd`, `secret`, `secret_key`, `secret_access_key`,
+  `api_key`, `access_token`, `refresh_token`, `auth_token`, with any prefix such
+  as `DB_`). The label and separator stay and the value becomes
+  `[REDACTED:secret]`. The value needs 12 or more characters, so prose such as
+  `password: required` stays readable; a value that starts with `$` or `%` (a
+  variable reference) is left alone.
 - The guardrail never blocks; it only rewrites (`modifiedPayload` /
   `modifiedResponse`) and annotates (`meta.credentialsRedacted`, `meta.count`).
 

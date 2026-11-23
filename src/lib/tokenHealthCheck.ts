@@ -820,6 +820,10 @@ export async function checkConnection(conn: any) {
           ...providerSpecificData,
           copilotToken: copilotResult.token,
           copilotTokenExpiresAt: copilotResult.expiresAt,
+          ...(copilotResult.endpoints?.api ? { copilotApiUrl: copilotResult.endpoints.api } : {}),
+          ...(copilotResult.endpoints?.proxy
+            ? { copilotProxyUrl: copilotResult.endpoints.proxy }
+            : {}),
         };
       }
 
