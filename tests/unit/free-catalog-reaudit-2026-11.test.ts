@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+
+import {
+  catalogFingerprint,
+  validateCatalogEvidence,
+} from "../../scripts/check/freeCatalogEvidence.mjs";
 
 import {
   FREE_MODEL_BUDGETS,
   FREE_QUOTA_UNIT,
   RETIRED_FREE_ROWS,
+  grantsFreeAccess,
+  resolveFreeQuotaUnit,
   computePublicFreeHeadline,
   computeRowSumMirror,
   freeTypesInBucket,
@@ -346,4 +354,65 @@ test("the ledger keeps the last quota of every retired pool row, with its reason
   // quota (owner decision 2026-11-21, PL) stay out of the ledger.
   for (const p of ["llm7", "ainative", "stepfun", "predibase"])
     assert.ok(!RETIRED_FREE_ROWS.some((r) => r.provider === p), p);
+});
+
+// --- Ledger rows of the corrected pools and dated evidence ----------------------------------
+
+test("dead ids of corrected pools keep their last listed quota in the ledger", () => {
+  const expect: Array<[string, number, string, number]> = [
+    ["xkiro", 150_000_000, "id-retired", 29],
+    ["xkiro", 150_000_000, "paid-only", 1],
+    ["groq", 6_000_000, "id-retired", 1],
+    ["bazaarlink", 3_600_000, "id-retired", 31],
+    ["api-airforce", 24_000_000, "id-retired", 2],
+    ["openrouter", 1_200_000, "id-retired", 1],
+    ["sambanova", 6_000_000, "id-retired", 3],
+  ];
+  for (const [provider, tokens, reason, n] of expect) {
+    const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === provider && r.reason === reason);
+    assert.equal(ledger.length, n, `${provider} ${reason}`);
+    for (const r of ledger) {
+      assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
+      const row = rows(provider).find((m) => m.modelId === r.modelId);
+      assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      assert.equal(r.poolKey, row?.poolKey);
+    }
+  }
+  assert.deepEqual(
+    RETIRED_FREE_ROWS.filter((r) => r.reason === "paid-only" && r.provider === "xkiro").map(
+      (r) => r.modelId
+    ),
+    ["deepseek/deepseek-v4-flash"]
+  );
+  // Rows that never carried a quota stay out of the ledger.
+  for (const p of ["onomeo", "routeway", "requesty", "aion", "agentrouter", "cloudflare-ai"])
+    assert.ok(!RETIRED_FREE_ROWS.some((r) => r.provider === p), p);
+});
+
+test("every free row with a quota carries dated evidence that matches its economics", () => {
+  const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, import.meta.url), "utf8"));
+  const policy = read("../../config/quality/free-catalog-evidence.json");
+  const seed = read("../../config/quality/free-catalog-legacy-seed.json");
+  const key = (m: { provider: string; modelId: string }) => `${m.provider}/${m.modelId}`;
+  // The base is this catalog without the row the re-audit added, so that row counts as new.
+  const added = new Set(["openrouter/google/gemma-4-31b-it:free"]);
+  const baseKeys = new Set(FREE_MODEL_BUDGETS.map(key).filter((k) => !added.has(k)));
+  assert.deepEqual(
+    validateCatalogEvidence(FREE_MODEL_BUDGETS, policy, {
+      seed: seed.entries,
+      previousDebt: seed.entries.map(key),
+      today: new Date().toISOString().slice(0, 10),
+      baseKeys,
+      grantsFreeAccess,
+      unitOf: resolveFreeQuotaUnit,
+    }),
+    []
+  );
+  const quota = policy.evidence.filter((e: { claim: string }) => e.claim === "recurring-quota");
+  assert.equal(quota.length, 40);
+  for (const e of quota) {
+    assert.equal(e.checkedAt, "2026-11-23", key(e));
+    const row = FREE_MODEL_BUDGETS.find((m) => key(m) === key(e));
+    assert.equal(e.catalogHash, row && catalogFingerprint(row));
+  }
 });
