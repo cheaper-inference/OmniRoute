@@ -625,6 +625,9 @@ export function invalidateSensenovaQuotaCache(connectionId: string): void {
   // otherwise keep replaying the superseded token.
   latestRefreshTokens.delete(connectionId);
   memoryAccessTokens.delete(connectionId);
+  // A reason recorded for the replaced credential says nothing about the new one.
+  lastRefreshFailure.delete(connectionId);
+  inflightRefresh.delete(connectionId);
   // Not the bounded LRU: an evicted entry would reset the sequence to 0 and let a
   // fetch that started before this invalidation look current again. One entry per
   // connection is bounded by the connections themselves.
