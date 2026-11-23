@@ -45,7 +45,7 @@ import {
   type CodexPersistedQuotaState,
 } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import { selectAntigravityQuotaWindowNames } from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
-import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+import { isClaudeExtraUsageBypassingQuota } from "./claudeExtraUsageCap";
 import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
@@ -759,7 +759,7 @@ function isQuotaFilterBypassed(
   if (provider === "codex") getQuotaCache(connectionId); // expire a replaced owner's override
   if (isQuotaHealthy(connectionId)) return true;
   if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return true;
-  if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return true;
+  if (isClaudeExtraUsageBypassingQuota(connectionId, provider, providerSpecificData)) return true;
   // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
   // Codex preflight checks the credit balance before dispatch; cooldowns remain separate.
   return isCodexPaidCreditsEnabled(provider, providerSpecificData, requestedModel);

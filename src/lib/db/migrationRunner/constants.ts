@@ -43,6 +43,18 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "daily_usage_evidence",
   },
   {
+    fromVersion: "238",
+    fromName: "call_logs_artifact_overflow_order_index",
+    toVersion: "20261115151606",
+    toName: "call_logs_artifact_overflow_order_index",
+  },
+  {
+    fromVersion: "239",
+    fromName: "xp_audit_log_created_at_index",
+    toVersion: "20261115153452",
+    toName: "xp_audit_log_created_at_index",
+  },
+  {
     fromVersion: "240",
     fromName: "skills_unique_owner_name_version",
     toVersion: "20261115153725",
