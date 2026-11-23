@@ -771,3 +771,190 @@ test("withDeadlineSignal wraps a Next-style proxied request without throwing", a
   // The deadline token mechanism still resolves the controller downstream.
   assert.equal(getDeadlineController({ headers: wrappedReq.headers }), deadlineController);
 });
+
+test("slow handler forwards a 1 MB chunk and frames the cut after a clean event boundary", async () => {
+  // Create a 1 MB chunk ending cleanly on an SSE event boundary ("\n\n")
+  const largeData = new Uint8Array(1024 * 1024);
+  largeData.fill(65); // "A"
+  largeData[largeData.length - 2] = 0x0a;
+  largeData[largeData.length - 1] = 0x0a;
+
+  let sent = false;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (!sent) {
+        sent = true;
+        controller.enqueue(largeData);
+      } else {
+        controller.error(new Error("upstream cut after complete event"));
+      }
+    },
+  });
+
+  const slowHandler = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response(stream, {
+            status: 200,
+            headers: { "Content-Type": "text/event-stream" },
+          })
+        ),
+      30
+    );
+  });
+
+  const result = await withEarlyStreamKeepalive(slowHandler, { thresholdMs: 10, intervalMs: 20 });
+  assert.equal(result.status, 200);
+
+  const reader = result.body!.getReader();
+  let receivedBytes = 0;
+  let sawErrorFrame = false;
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) {
+      receivedBytes += value.byteLength;
+      const text = decoder.decode(value);
+      if (text.includes("event: error") || text.includes("Upstream stream error")) {
+        sawErrorFrame = true;
+      }
+    }
+  }
+
+  assert.ok(receivedBytes >= 1024 * 1024, "large chunk must be forwarded completely");
+  assert.equal(sawErrorFrame, true, "clean boundary before cut must emit in-band error frame");
+});
+
+test("slow handler ending on mid-event cut propagates error without in-band frame", async () => {
+  // Chunk ends mid-line (no \n\n)
+  const partial = new TextEncoder().encode("data: unfinished payload without boundary");
+
+  let sent2 = false;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (!sent2) {
+        sent2 = true;
+        controller.enqueue(partial);
+      } else {
+        controller.error(new Error("upstream connection reset mid-frame"));
+      }
+    },
+  });
+
+  const slowHandler = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response(stream, {
+            status: 200,
+            headers: { "Content-Type": "text/event-stream" },
+          })
+        ),
+      30
+    );
+  });
+
+  const result = await withEarlyStreamKeepalive(slowHandler, { thresholdMs: 10, intervalMs: 20 });
+  const reader = result.body!.getReader();
+  const readAll = async () => {
+    while (true) {
+      const { done } = await reader.read();
+      if (done) return;
+    }
+  };
+
+  // A quiet EOF would hide the cut: the reader must reject with the keepalive's own message.
+  await assert.rejects(readAll(), /Upstream stream failed before completion/);
+});
+
+test("slow handler reads the stream tail without a per-byte array copy", async () => {
+  // The tail tracker used to shift a 4-slot array once per forwarded byte
+  // (tail.copyWithin(0, 1)), so one multi-megabyte chunk cost millions of
+  // synchronous calls on the event loop. Count them on a 256 KiB chunk.
+  const chunk = new Uint8Array(256 * 1024).fill(65);
+  chunk[chunk.length - 2] = 0x0a;
+  chunk[chunk.length - 1] = 0x0a;
+
+  let sent = false;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (!sent) {
+        sent = true;
+        controller.enqueue(chunk);
+      } else {
+        controller.error(new Error("upstream cut after complete event"));
+      }
+    },
+  });
+  const slowHandler = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response(stream, { status: 200, headers: { "Content-Type": "text/event-stream" } })
+        ),
+      30
+    );
+  });
+
+  const originalCopyWithin = Array.prototype.copyWithin;
+  let copies = 0;
+  Array.prototype.copyWithin = function (
+    this: unknown[],
+    target: number,
+    start: number,
+    end?: number
+  ) {
+    copies += 1;
+    return originalCopyWithin.call(this, target, start, end);
+  } as unknown as typeof originalCopyWithin;
+  try {
+    const result = await withEarlyStreamKeepalive(slowHandler, { thresholdMs: 10, intervalMs: 20 });
+    await result.text();
+  } finally {
+    Array.prototype.copyWithin = originalCopyWithin;
+  }
+
+  assert.ok(
+    copies < 64,
+    `tail inspection made ${copies} array copies for one ${chunk.length}-byte chunk`
+  );
+});
+
+test("slow handler finds an event boundary that arrives in 1-byte chunks", async () => {
+  // Chunks under four bytes take the per-byte path of the tail tracker. Here the closing
+  // "\n\n" arrives as two 1-byte chunks, so the cut after it must still get the in-band
+  // error frame instead of rejecting the reader.
+  const encoder = new TextEncoder();
+  const chunks = [encoder.encode('data: {"a":1}'), encoder.encode("\n"), encoder.encode("\n")];
+  let index = 0;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (index < chunks.length) {
+        controller.enqueue(chunks[index++]);
+      } else {
+        controller.error(new Error("upstream cut after complete event"));
+      }
+    },
+  });
+  const slowHandler = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response(stream, { status: 200, headers: { "Content-Type": "text/event-stream" } })
+        ),
+      30
+    );
+  });
+
+  const result = await withEarlyStreamKeepalive(slowHandler, { thresholdMs: 10, intervalMs: 20 });
+  const text = await result.text();
+
+  assert.match(text, /data: \{"a":1\}\n\n/);
+  assert.ok(
+    text.includes("event: error") || text.includes("Upstream stream error"),
+    "a cut after a boundary split across chunks must still emit the in-band error frame"
+  );
+});

@@ -1,0 +1,1 @@
+- **fix(sse):** Estimate large text in one linear pass and inspect only the trailing bytes of forwarded keepalive chunks. ([#20430](https://github.com/cheaper-inference/OmniRoute/pull/20430))

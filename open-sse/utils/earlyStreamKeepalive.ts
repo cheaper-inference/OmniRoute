@@ -701,9 +701,17 @@ export async function withEarlyStreamKeepalive(
             // Last four forwarded bytes. A finished SSE event ends in \n\n (or \r\n\r\n).
             const tail = [0, 0, 0, 0];
             const noteTail = (value: Uint8Array) => {
-              for (let i = 0; i < value.byteLength; i++) {
-                tail.copyWithin(0, 1);
-                tail[3] = value[i];
+              const len = value.byteLength;
+              if (len >= 4) {
+                tail[0] = value[len - 4];
+                tail[1] = value[len - 3];
+                tail[2] = value[len - 2];
+                tail[3] = value[len - 1];
+              } else {
+                for (let i = 0; i < len; i++) {
+                  tail.copyWithin(0, 1);
+                  tail[3] = value[i];
+                }
               }
             };
             const endedOnEventBoundary = () => {
