@@ -16,23 +16,26 @@ export default function ApiKeyBanBanner() {
   const [summary, setSummary] = useState<ApiKeyBanSummary | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
-    let pending = false;
+    let mounted = true;
+    let pending: AbortController | null = null;
     async function refresh() {
       if (pending || document.hidden) return;
-      pending = true;
+      const request = new AbortController();
+      pending = request;
+      const timeout = window.setTimeout(() => request.abort(), REQUEST_TIMEOUT_MS);
       try {
         const response = await fetch("/api/monitoring/api-key-bans", {
           credentials: "same-origin",
-          signal: AbortSignal.any([controller.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)]),
+          signal: request.signal,
         });
         const next = response.ok ? await response.json() : null;
-        if (!controller.signal.aborted) setSummary(Array.isArray(next?.keys) ? next : null);
+        if (mounted) setSummary(Array.isArray(next?.keys) ? next : null);
       } catch {
         // A failed refresh must not leave security data visible after access is lost.
-        if (!controller.signal.aborted) setSummary(null);
+        if (mounted) setSummary(null);
       } finally {
-        pending = false;
+        window.clearTimeout(timeout);
+        pending = null;
       }
     }
 
@@ -40,7 +43,8 @@ export default function ApiKeyBanBanner() {
     const timer = window.setInterval(refresh, REFRESH_MS);
     document.addEventListener("visibilitychange", refresh);
     return () => {
-      controller.abort();
+      mounted = false;
+      pending?.abort();
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", refresh);
     };

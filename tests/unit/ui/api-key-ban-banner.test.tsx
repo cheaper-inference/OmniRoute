@@ -38,7 +38,7 @@ describe("API key ban banner", () => {
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
-    vi.restoreAllMocks();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -85,8 +85,7 @@ describe("API key ban banner", () => {
   });
 
   it("clears stale details after a stalled refresh times out", async () => {
-    const deadline = new AbortController();
-    vi.spyOn(AbortSignal, "timeout").mockReturnValue(deadline.signal);
+    vi.useFakeTimers();
     const fetch = vi
       .fn()
       .mockResolvedValueOnce(
@@ -110,7 +109,7 @@ describe("API key ban banner", () => {
 
     await act(async () => {
       document.dispatchEvent(new Event("visibilitychange"));
-      deadline.abort();
+      await vi.advanceTimersByTimeAsync(10_000);
     });
     expect(container.textContent).toBe("");
     await act(async () => {
