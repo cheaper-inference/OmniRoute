@@ -19,11 +19,15 @@ export interface MetadataWindow {
   holds: (path: string) => boolean;
   /** Take the tail held under `path`, masked as a standalone value. */
   release: (path: string) => string;
+  /** Bytes currently held under `path`, so the queue can be charged for them up front. */
+  heldBytes?: (path: string) => number;
 }
 
 type Frame = object;
 type Owner = { holder: Record<string, unknown>; key: string; frame: Frame };
-type Entry = { kind: "text"; text: string } | { kind: "frame"; frame: Frame; render: () => string };
+type Entry =
+  | { kind: "text"; text: string; size: number }
+  | { kind: "frame"; frame: Frame; render: () => string; size: number };
 type Sink = (text: string) => void;
 
 export interface MetadataHold {
@@ -61,15 +65,17 @@ export function createMetadataHold(window: MetadataWindow, maxDeferredBytes: num
       if (head.kind === "frame" && owned(head.frame)) return;
       queue.shift();
       const text = head.kind === "text" ? head.text : head.render();
-      queuedBytes -= text.length;
+      // Debited by what was charged at push: a folded tail was charged through
+      // `heldBytes`, so re-measuring here would debit bytes never charged.
+      queuedBytes -= head.size;
       sink(text);
     }
     queuedBytes = 0;
   };
 
-  const push = (entry: Entry, size: number) => {
+  const push = (entry: Entry) => {
     queue.push(entry);
-    queuedBytes += size;
+    queuedBytes += entry.size;
     // Fail closed like every other buffer of the credential transform: writing the frames
     // out early would release a fragment that the next frame could still complete.
     if (queuedBytes > maxDeferredBytes)
@@ -97,7 +103,7 @@ export function createMetadataHold(window: MetadataWindow, maxDeferredBytes: num
     write(text, sink) {
       drain(sink);
       if (queue.length === 0) sink(text);
-      else push({ kind: "text", text }, text.length);
+      else push({ kind: "text", text, size: text.length });
     },
     writeFrame(frame, render, sink) {
       drain(sink);
@@ -105,8 +111,11 @@ export function createMetadataHold(window: MetadataWindow, maxDeferredBytes: num
         sink(render());
         return;
       }
-      // Sized as it stands; the folded tail only replaces bytes already counted by the window.
-      push({ kind: "frame", frame, render }, render().length);
+      // Charge the frame as it will be written: its bytes now plus every tail that will be
+      // folded into it, so the ceiling covers what the queue can actually hold.
+      let tails = 0;
+      for (const [path, owner] of owners) if (owner.frame === frame) tails += window.heldBytes?.(path) ?? 0;
+      push({ kind: "frame", frame, render, size: render().length + tails });
     },
     releaseAll(sink) {
       for (const path of Array.from(owners.keys())) releasePath(path);

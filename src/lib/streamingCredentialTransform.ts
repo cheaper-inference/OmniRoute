@@ -363,7 +363,7 @@ export function createMetadataBufferStore(maxPaths: number): MetadataBufferStore
         return;
       }
       if (!buffers.has(path) && buffers.size >= maxPaths)
-        throw new Error("[PII] Credential stream choice limit exceeded");
+        throw new Error("[PII] Credential metadata path limit exceeded");
       buffers.set(path, value);
     },
     takeAll: () => Array.from(buffers.entries()),
@@ -757,7 +757,12 @@ function createMetadataWindow(
     store.set(path, rest);
     return redactOutsideDataUrls(raw.slice(0, emitLength));
   };
-  return { process, holds: (path) => store.get(path).length > 0, release };
+  return {
+    process,
+    holds: (path) => store.get(path).length > 0,
+    release,
+    heldBytes: (path: string) => store.get(path).length,
+  };
 }
 
 /**

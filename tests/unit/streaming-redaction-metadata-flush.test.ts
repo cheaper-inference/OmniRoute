@@ -119,13 +119,27 @@ function evidenceValues(value: unknown, inEvidence = false): string[] {
   return found;
 }
 
+function allStrings(value: unknown): string[] {
+  if (typeof value === "string") return [value];
+  if (!value || typeof value !== "object") return [];
+  return Object.values(value as Record<string, unknown>).flatMap(allStrings);
+}
+
+// Nested too: the leak this guards against is a path map folded into `usage_evidence`, so a
+// top-level-only scan would pass while the client received exactly the shape it rejects.
 function assertNoBarePathMap(events: SseEvent[]): void {
-  for (const { json } of events) {
-    if (!json) continue;
-    for (const key of Object.keys(json)) {
-      assert.ok(!key.includes("/"), `a bare metadata path map reached the client: ${key}`);
+  const walk = (value: unknown, where: string): void => {
+    if (Array.isArray(value)) {
+      value.forEach((child, index) => walk(child, `${where}[${index}]`));
+      return;
     }
-  }
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      assert.ok(!key.includes("/"), `a bare metadata path map reached the client: ${where}.${key}`);
+      walk(child, `${where}.${key}`);
+    }
+  };
+  for (const { json } of events) if (json) walk(json, "frame");
 }
 
 function contentOf(output: string): string {
@@ -292,7 +306,7 @@ test("a credential split across two metadata frames is still masked", async () =
   // value must sit in a chat chunk (with its `choices` envelope) before `[DONE]`.
   const events = sseEvents(text);
   assertNoBarePathMap(events);
-  for (const value of events.flatMap((e) => evidenceValues(e.json))) {
+  for (const value of events.flatMap((e) => allStrings(e.json))) {
     assert.ok(!value.includes(key.slice(0, 6)), `a key fragment was emitted: ${value}`);
     assert.ok(!value.includes(key.slice(6, 30)), `a key fragment was emitted: ${value}`);
   }
@@ -568,8 +582,9 @@ test("without a metadata window, excluded metadata labels never reach the proces
     }),
     "data: [DONE]\n\n",
   ]);
-  assert.ok(!seen.includes("openai"), `provider label reached the processor: ${seen}`);
-  assert.ok(!seen.includes("gpt-x"), `model label reached the processor: ${seen}`);
+  const leaked = (label: string) => seen.some((value) => value.includes(label));
+  assert.ok(!leaked("openai"), `provider label reached the processor: ${seen}`);
+  assert.ok(!leaked("gpt-x"), `model label reached the processor: ${seen}`);
   assert.ok(out.includes('"provider":"openai"'), "the label must pass through untouched");
 });
 
