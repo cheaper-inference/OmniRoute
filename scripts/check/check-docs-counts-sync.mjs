@@ -61,6 +61,7 @@ import {
   locateNumberClaims,
   locateSvgCanonicalClaims,
   locateVersionClaims,
+  lineOf,
 } from "./lib/derivedClaims.mjs";
 import {
   evaluatePrDiff,
@@ -597,6 +598,221 @@ export function makeInstructionCountFreeValidator(file) {
   };
 }
 
+// --- Row-sum figure placement ---------------------------------------------------------------
+// Owner decisions D47 and D48 (2026-11-21). The big figure (rowSum:total: every row added up,
+// ended offers included, the way other catalogs count) is public, printed first, and never
+// travels alone: it carries its label and the real figure (headline:steady) sits in the same
+// block — or, on a one-line surface (a `#` heading, an `alt="…"` text), on the same line. The
+// row sum of the live catalog (rowSum:live) belongs to the method page. package.json and llm.txt
+// carry no token figure at all; MCP/A2A outputs carry the real figure only. These rules are
+// invariants: they run in both modes.
+
+/** Files that must carry the big figure (filled by the PR that writes the D47 block). */
+export const ROW_SUM_REQUIRED_FILES = [];
+// Trees whose *.ts sources produce MCP/A2A output text. Test files are not outputs: a test that
+// pins "the output never says ~11.4B as others count" has to spell the string.
+const ROW_SUM_FORBIDDEN_TREES = ["open-sse/mcp-server", "src/lib/a2a"];
+
+function listOutputSources(root, dir) {
+  const out = [];
+  const walk = (rel) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(path.join(root, rel), { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const child = `${rel}/${e.name}`;
+      if (e.isDirectory()) {
+        if (e.name !== "node_modules" && e.name !== "__tests__") walk(child);
+      } else if (e.name.endsWith(".ts") && !/\.(?:test|spec)\.ts$/.test(e.name)) {
+        out.push(child);
+      }
+    }
+  };
+  walk(dir);
+  return out.sort();
+}
+
+/** Files that never carry a row-sum figure: package.json, llm.txt and the MCP/A2A sources. */
+export const ROW_SUM_FORBIDDEN_FILES = [
+  "package.json",
+  "llm.txt",
+  ...ROW_SUM_FORBIDDEN_TREES.flatMap((dir) => listOutputSources(ROOT, dir)),
+];
+/** Files that carry no free-token figure of any kind. */
+export const TOKEN_FIGURE_FREE_FILES = ["package.json", "llm.txt"];
+/**
+ * The big figure is public. `false` is the exit rule (spec §5.3): it leaves every surface the
+ * gate reads, and ROW_SUM_REQUIRED_FILES is emptied in the same PR. Flipped only by a recorded
+ * owner decision.
+ */
+export const ROW_SUM_TOTAL_PUBLIC = true;
+
+const ROW_SUM_PAIR_DISTANCE = 600;
+// Figures quoted from other catalogs never appear in these documents; comparisons stay generic.
+const QUOTED_FIGURE = /(?<![\d.,])10[.,]1\s?B/;
+const COMPARISON_WINDOW = 120;
+const COMPARISON = /\b(?:more\s+than|mais\s+que|supera|beats)\b/i;
+
+function altSpans(content) {
+  const spans = [];
+  for (const m of content.matchAll(/\balt\s*=\s*(?:"[^"]*"|'[^']*')/g)) {
+    spans.push({ start: m.index, end: m.index + m[0].length });
+  }
+  return spans;
+}
+
+/** The one-line surface around `index` (an alt text or a `#` line), or null. */
+function oneLineSurface(content, index, alts) {
+  const alt = alts.find((a) => index >= a.start && index < a.end);
+  if (alt) return { kind: "alt text", ...alt };
+  const start = content.lastIndexOf("\n", index - 1) + 1;
+  const nl = content.indexOf("\n", index);
+  const end = nl === -1 ? content.length : nl;
+  return content.slice(start, end).trimStart().startsWith("#")
+    ? { kind: "heading", start, end }
+    : null;
+}
+
+const gap = (a, b) => (b.start >= a.end ? b.start - a.end : a.start >= b.end ? a.start - b.end : 0);
+
+/**
+ * Placement rules of the row-sum figures in one free-tier document (D47/D48):
+ * (1) every rowSum:total has a headline:steady within 600 characters (same line / same alt text
+ *     on a one-line surface); (2) outside the method page it comes through its label
+ *     (`via` label or short); rowSum:live needs a real figure within 600 characters and stays off
+ *     one-line surfaces; (4) no figure quoted from other catalogs and no comparison word in the
+ *     120 characters after a row-sum figure; (6) with `totalPublic: false` the big figure and
+ *     the share from ended offers fail everywhere.
+ *
+ * @param {string} content
+ * @param {{ totalPublic?: boolean, methodPage?: boolean }} [opts]
+ */
+export function checkRowSumPlacement(content, opts = {}) {
+  const totalPublic = opts.totalPublic ?? ROW_SUM_TOTAL_PUBLIC;
+  const methodPage = opts.methodPage ?? false;
+  const claims = locateFreeTokenClaims(content);
+  const steady = claims.filter((c) => c.key === "headline:steady");
+  const alts = altSpans(content);
+  const problems = [];
+  const at = (c) => `"${c.text}" (line ${lineOf(content, c.start)})`;
+  const realNear = (c) => steady.some((r) => gap(c, r) <= ROW_SUM_PAIR_DISTANCE);
+
+  for (const c of claims) {
+    if (c.key === "rowSum:total") {
+      if (!totalPublic) {
+        problems.push(`${at(c)}: the big figure is retired (ROW_SUM_TOTAL_PUBLIC = false)`);
+        continue;
+      }
+      const surface = oneLineSurface(content, c.start, alts);
+      if (surface) {
+        if (!steady.some((r) => r.start >= surface.start && r.end <= surface.end)) {
+          problems.push(
+            `${at(c)}: big figure on a one-line surface (${surface.kind}) without the real figure on the same line`
+          );
+        }
+      } else if (!realNear(c)) {
+        problems.push(`${at(c)}: big figure without the real figure in the same block`);
+      }
+      if (!methodPage && c.via === "method") {
+        problems.push(
+          `${at(c)}: big figure without its label ("counted the way other catalogs count" or "as others count")`
+        );
+      }
+    } else if (c.key === "rowSum:live") {
+      const surface = oneLineSurface(content, c.start, alts);
+      if (surface) {
+        problems.push(`${at(c)}: live row sum on a one-line surface (${surface.kind})`);
+      } else if (!realNear(c)) {
+        problems.push(`${at(c)}: live row sum without the real figure in the same block`);
+      }
+    } else if (c.key === "retiredShare" && !totalPublic) {
+      problems.push(`${at(c)}: share from ended offers left after the big figure was retired`);
+    }
+    if (c.key.startsWith("rowSum:")) {
+      const after = content.slice(c.end, c.end + COMPARISON_WINDOW);
+      if (COMPARISON.test(after)) {
+        problems.push(
+          `${at(c)}: comparison word next to a row-sum figure; comparisons stay generic`
+        );
+      }
+    }
+  }
+  const quoted = content.match(QUOTED_FIGURE);
+  if (quoted) {
+    problems.push(
+      `"${quoted[0]}" (line ${lineOf(content, quoted.index)}): a figure quoted from other catalogs`
+    );
+  }
+  if (problems.length) return { ok: false, detail: problems.join("; ") };
+  const rowSums = claims.filter((c) => c.key.startsWith("rowSum:")).length;
+  return {
+    ok: true,
+    detail: rowSums
+      ? `${rowSums} row-sum figure(s) paired with the real figure`
+      : "no row-sum figure in this file",
+  };
+}
+
+function rowSumPlacementChecks() {
+  const invariant = (label, files, validate) => ({
+    label,
+    actual: ROW_SUM_TOTAL_PUBLIC ? "D47/D48 rules, big figure public" : "D47/D48 exit rule",
+    docKey: "free-token figures",
+    strict: true,
+    scope: "invariant",
+    files,
+    validate,
+  });
+  const forbidden = (content) => {
+    const found = locateFreeTokenClaims(content).filter(
+      (c) => c.key.startsWith("rowSum:") || (!ROW_SUM_TOTAL_PUBLIC && c.key === "retiredShare")
+    );
+    return found.length
+      ? {
+          ok: false,
+          detail: `row-sum figure(s) ${found.map((c) => `"${c.text}" (line ${lineOf(content, c.start)})`).join(", ")} — this file carries the real figure only`,
+        }
+      : { ok: true, detail: "no row-sum figure" };
+  };
+  const figureFree = (content) => {
+    const found = locateFreeTokenClaims(content);
+    return found.length
+      ? {
+          ok: false,
+          detail: `free-token figure(s) ${found.map((c) => `"${c.text}" (${c.key}, line ${lineOf(content, c.start)})`).join(", ")} — this file carries no token figure`,
+        }
+      : { ok: true, detail: "no free-token figure" };
+  };
+  const required = (content) => {
+    if (!ROW_SUM_TOTAL_PUBLIC) return { ok: true, detail: "big figure retired — not required" };
+    return locateFreeTokenClaims(content).some((c) => c.key === "rowSum:total")
+      ? { ok: true, detail: "big figure present" }
+      : { ok: false, detail: "missing the big figure (rowSum:total) this file must carry" };
+  };
+  return [
+    invariant(
+      "Row-sum figure placement (free-tier docs)",
+      ["README.md", "docs/getting-started/FREE-TIERS-GUIDE.md"],
+      (content) => checkRowSumPlacement(content, { methodPage: false })
+    ),
+    invariant(
+      "Row-sum figure placement (method page)",
+      ["docs/reference/FREE_TIERS.md"],
+      (content) => checkRowSumPlacement(content, { methodPage: true })
+    ),
+    invariant(
+      "Row-sum figure kept out (package.json, llm.txt, MCP/A2A outputs)",
+      ROW_SUM_FORBIDDEN_FILES,
+      forbidden
+    ),
+    invariant("No free-token figure (package.json, llm.txt)", TOKEN_FIGURE_FREE_FILES, figureFree),
+    invariant("Row-sum figure required (headline block files)", ROW_SUM_REQUIRED_FILES, required),
+  ];
+}
+
 // --- Derived-check plumbing (PR diff + release refresh) ------------------------
 // A derived check keeps its release validator untouched and adds the locator its validator
 // reads (`extract`) plus the rewrite that brings a file to the live value (`plan`).
@@ -792,6 +1008,7 @@ function assembleChecks(facts) {
       files: ["package.json"],
       validate: makePackageDescriptionValidator(),
     },
+    ...rowSumPlacementChecks(),
     numericClaimCheck({
       label: "DB migrations count",
       claimId: "database-migrations",
