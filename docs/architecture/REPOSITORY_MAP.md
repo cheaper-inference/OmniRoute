@@ -33,7 +33,7 @@ OmniRoute/
 ├── examples/         # Example plugins and quickstart clients
 ├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
 ├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
-├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note, Muse bridge
 ├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
 ├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
 ├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
@@ -606,6 +606,7 @@ The main image is the root `Dockerfile`; see [DOCKER_GUIDE.md](../guides/DOCKER_
 | `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                            |
 | `contrib/windows/`      | `.bat` launchers for running from a Windows checkout                                                                           |
 | `contrib/session-sync/` | README for a third-party session-sync browser extension — see [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+| `contrib/muse-bridge/`  | OpenAI-compatible bridge for Muse (muse.ai) web accounts - see [MUSE_WEB_BRIDGE.md](../providers/MUSE_WEB_BRIDGE.md)           |
 
 ## `examples/`
 
