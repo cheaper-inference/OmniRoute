@@ -316,6 +316,8 @@ test("a cache clear during an in-flight lookup is not undone when it fails", asy
 });
 
 test("a stale successful lookup does not populate the cache", async () => {
+  const originalWarn = console.warn;
+  console.warn = () => {};
   clearAntigravityVersionCaches();
   let release: () => void = () => {};
   const gate = new Promise<void>((resolve) => {
@@ -331,11 +333,15 @@ test("a stale successful lookup does not populate the cache", async () => {
   const version = await pending;
 
   assert.equal(version, "9.9.9", "the caller still receives what it resolved");
-  assert.equal(
-    getCachedAntigravityIdeVersion(),
-    ANTIGRAVITY_IDE_FALLBACK_VERSION,
-    "a lookup started before the clear must not fill the cache"
-  );
+  try {
+    assert.equal(
+      getCachedAntigravityIdeVersion(),
+      ANTIGRAVITY_IDE_FALLBACK_VERSION,
+      "a lookup started before the clear must not fill the cache"
+    );
+  } finally {
+    console.warn = originalWarn;
+  }
 });
 
 test("a settled stale lookup does not free the slot a newer lookup owns", async () => {
