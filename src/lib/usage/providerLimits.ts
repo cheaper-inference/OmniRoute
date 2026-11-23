@@ -1,5 +1,6 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
+import { syncCodexPlanFromUsage } from "@/lib/usage/codexPlanSync";
 import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   captureCodexConnectionFence,
@@ -23,7 +24,7 @@ import {
 } from "@/lib/db/providerLimits";
 import { syncToCloud } from "@/lib/cloudSync";
 import { setQuotaCache } from "@/domain/quotaCache";
-import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
+import { trackCapAndBuildClaudeExtraUsageUpdate } from "@/domain/claudeExtraUsageCap";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
 import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
 import {
@@ -91,6 +92,7 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   "minimax",
   "minimax-cn",
   "crof",
+  "mistral",
   "nanogpt",
   "nan",
   "apmix",
@@ -722,7 +724,7 @@ async function syncClaudeExtraUsageStateIfNeeded(
   connection: ProviderConnectionLike,
   usage: JsonRecord
 ): Promise<ProviderConnectionLike> {
-  const update = buildClaudeExtraUsageConnectionUpdate(connection, usage);
+  const update = trackCapAndBuildClaudeExtraUsageUpdate(connection, usage);
   if (!update) return connection;
 
   await updateProviderConnection(connection.id, update);
@@ -1212,6 +1214,10 @@ async function fetchLiveProviderLimitsWithOptions(
         connection.providerSpecificData
       );
       if (data) connection = { ...connection, providerSpecificData: data };
+      connection = await syncCodexPlanFromUsage(connection, result.usage, (id, fields) => {
+        assertCodexOperationCurrent(connectionId);
+        return mergeConnectionProviderSpecificData(id, fields);
+      });
     }
     if (isRecord(result.usage.quotas)) {
       setQuotaCache(

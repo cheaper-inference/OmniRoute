@@ -1,0 +1,1 @@
+- fix(backup): `backup auto enable --encrypt` now requires `--key-file` and scheduled encrypted backups use it instead of silently skipping every run (#20494)

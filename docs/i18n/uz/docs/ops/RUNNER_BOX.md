@@ -152,37 +152,22 @@ ishga tushirish bitta buyruq ichida bajarilsin.
   davom etgan.
 - `.15` VPS faqat homologatsiya uchun — unda CI runnerlari hech qachon ishlamaydi.
 
-## Host qilingan yoʻlak (GitHub tomonidan host qilinadigan runnerlar)
+## Xost yo'lak (GitHub tomonidan joylashtirilgan yuguruvchilar)
 
-Repozitoriy `cheaper-inference` tashkilotiga tegishli va **Team** tarifida: **bir vaqtda 60 ta host qilingan vazifa**, ular tashkilotdagi barcha repozitoriylar, barcha PR tekshiruvlari,
-push orqali ishga tushiriladigan barcha workflow’lar va CodeQL’ning standart sozlamasi tomonidan birgalikda ishlatiladi.
-Quyidagi ko‘rsatkichlar **Pro** tarifida (bir vaqtda 40 ta host qilingan vazifa) o‘lchangan.
-2026-10-18 kuni birlashtirish kampaniyasi vaqtida (`release/v3.8.52` da soatiga ~10 ta birlashtirish)
-oʻlchandi: **24 soatda 2 500 ta workflow ishga tushirilishi yaratildi**, 6 soatda branch’ga 44 ta push qilindi,
-PR tekshiruvlari soatlab kutib turgan va PR’lar ularsiz birlashtirilgan paytda **106 ta host qilingan vazifa navbatda turdi**.
-Branch’ga har bir push qilinganda toʻqqizta workflow ishga tushdi:
+Ombor `cheaper-inference` tashkilotiga tegishli, on** Jamoa** reja:** Bir vaqtning o'zida 60 ta ish o'rinlari** , tashkilotdagi har bir ombor, har bir PR tekshiruvi, har bir push orqali ishga tushirilgan ish jarayoni va CodeQL ning standart sozlamalari tomonidan baham ko'riladi. Quyidagi raqamlar bo'yicha o'lchandi** Pro** reja (bir vaqtning o'zida 40 ta ish joyi). Birlashtirish kampaniyasi davomida 2026-10-18 da o‘lchandi ( `release/v3.8.52` bo‘yicha ~ 10 merges/hour ):** 24 soat ichida 2500 ta ish jarayoni yaratildi** , 6 soat ichida filialga 44 ta surish,** 106 ta mezbon ish o‘rinlari navbatda turibdi** PR cheklari esa soatlab kutgan va PRs ularsiz birlashtirilgan. Filialga har bir bosishda to‘qqizta ish oqimi ishga tushiriladi:
 
-| `release/v*` ga har bir push uchun          | host qilingan vazifalar | yuklama paytidagi natija                                                      | 2026-10-18 dan beri                                                                                 |
-| ------------------------------------------- | ----------------------: | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ci.yml` (toʻliq matritsa)                  |              30 tagacha | keyingi push tomonidan bekor qilindi, bir kunda 24 tadan 24 tasi              | `release/**` pushlarida ishga tushmaydi (PR ishga tushirilishi + Release-Green)                     |
-| `quality.yml`                               |                      ~6 | bekor qilindi, 23 tadan 23 tasi                                               | `release/**` pushlarida ishga tushmaydi                                                             |
-| `Release-Green` `--quick`                   |                       0 | `omni-build` da ishladi, 100 tadan 97 tasi bekor qilindi                      | `omni-release` sloti, hech qachon bekor qilinmaydi, kutilayotgan ishga tushirishlar birlashtiriladi |
-| `Lock released branch`, `OpenSSF Scorecard` |                       2 | har bir push uchun navbatda bitta ishga tushirish                             | har bir ref uchun bitta ishga tushirish (`tests/unit/build/hosted-lane-concurrency.test.ts`)        |
-| `Release acceptance` (yashirin hisobot)     |                       1 | har bir push uchun bitta host qilingan `npm ci`, hech qachon bekor qilinmaydi | oʻzgarishsiz — `paths:` filtri uchun nomzod                                                         |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | har bir pushda bekor qilinadi; amd64 bosqichi `omni-build` da raqobatlashadi  | oʻzgarishsiz — egasining deploy kanali                                                              |
-| CodeQL standart sozlamasi (`dynamic`)       |                       4 | har bir push uchun `javascript-typescript`, `actions`, `c-cpp`, `python`      | oʻzgarishsiz — Sozlamalar → Kod xavfsizligi; `c-cpp`/`python` bu yerda hech narsani skanerlamaydi   |
+| `release/v*` ga surish uchun                | mezbonlik qilgan ish o'rinlari | bo'ron ostidagi natija                                                             | 2026-10-18 dan                                                                                     |
+| ------------------------------------------- | -----------------------------: | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `ci.yml` (to'liq matritsa)                  |                       30 gacha | keyingi surish bilan bekor qilingan, bir kunda 24 dan 24 tasi                      | `release/**` pushlarida boshlanmagan (PR run + Release-Green)                                      |
+| `quality.yml`                               |                             ~6 | bekor qilingan, 23/23                                                              | `release/**` pushlarda boshlanmagan                                                                |
+| `Release-Green` `--quick`                   |                              0 | `omni-build` ustida ishladi, 100 dan 97 tasini bekor qildi                         | `omni-release` uyasi, hech qachon bekor qilinmagan, kutilayotgan ishga tushadi                     |
+| `Lock released branch`, `OpenSSF Scorecard` |                              2 | har bir surish uchun bir navbatli yugurish                                         | har bir ref uchun bitta yugurish (`tests/unit/build/hosted-lane-concurrency.test.ts`)              |
+| `Release acceptance` (soya hisoboti)        |                              1 | bir surish boshiga mezbon `npm ci`, bekor hech qachon                              | `paths:` filtri uchun o'zgarmagan — nomzodi                                                        |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                              2 | har bir surish uchun bekor qilingan; amd64 oyog'i `omni-build` bo'yicha bellashadi | o'zgarmagan — egasining joylashtirish kanali                                                       |
+| CodeQL standart sozlamalari (`dynamic`)     |                              4 | `javascript-typescript`, `actions`, `c-cpp`, `python` boshiga surish               | o'zgarmagan — sozlamalari → Code xavfsizligi; `c-cpp`/`python` bu yerda hech narsani skanerlamaydi |
 
-`tests/unit/build/push-storm-diet.test.ts` `ci.yml` va `quality.yml` fayllarining faqat `main` uchun
-push triggerini kafolatlaydi. Yon taʼsir: Codecov endi har bir release push uchun bazaviy yuklashni olmaydi
-(qadam faqat axborot uchun va `continue-on-error`); repozitoriy ichidagi qamrov nazorati va PR izohi
-taʼsirlanmagan.
+`tests/unit/build/push-storm-diet.test.ts` `ci.yml` va `quality.yml` ning `main` -only surish tetikini pin qiladi. Yon ta'siri: Codecov endi har bir reliz uchun asosiy yuklashni olmaydi (qadam ma'lumot va `continue-on-error`); in-repo qamrovi darvozasi va PR sharhiga ta'sir qilmaydi.
 
-**Koʻproq self-hosted quvvat host qilingan navbat muammosini hal qilmaydi.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) runner’ni host qilishi mumkin edi, ammo agent seanslari uning
-yuklamasini allaqachon 20–26 darajasida ushlab turibdi, agent konteynerida Docker daemon’i yoʻq va
-toʻyingan yoʻlak host qilingan yoʻlakdir. Xuddi shu paytda `.113` serverida 71 GB boʻsh joy va 5–8 yuklama
-bor edi; uning cheklovi CPU emas, balki yuqoridagi har bir listener uchun xotira byudjetidir
-(eng koʻpi 6 ta listener). Qolgan choralar jarayonga oid: kampaniya PR’larini Mergify navbati orqali
-birlashtirish (`label=queue`, paketlar har bir PR uchun bittadan va har bir push uchun bittadan CI ishga
-tushirish oʻrniga bitta `merge_group` CI ishga tushirishini baham koʻradi), CodeQL standart sozlamasidagi
-tillarni qisqartirish va `release-acceptance.yml` faylini u oʻqiydigan fayllar boʻyicha filtrlash.
+**Ko'proq o'z-o'zidan joylashtirilgan sig'im mezbonlik navbatini tuzatmaydi.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) yuguruvchini joylashtirishi mumkin edi, lekin agent seanslari allaqachon o'z yukini 20–26 darajasida ushlab turadi, agent konteynerida Docker demoni yo'q va to'yingan chiziq hosting hisoblanadi. `.113` qutisi 71 GB bo'sh edi va bir vaqtning o'zida 5-8 yuklaydi; uning cheklovi CPU emas, yuqoridagi har bir tinglovchi uchun xotira byudjeti (shift 6 tinglovchi). Qolgan tutqichlar jarayondir: birlashtirish navbati orqali yer kampaniyasi PRs (`label=queue`, to‘plamlar har PR uchun bir yugurish o‘rniga bitta `merge_group` CI ishini taqsimlaydi va har bir surish uchun bitta), CodeQL standart sozlash tillarini qisqartiradi va `release-acceptance.yml` o‘qigan fayllar bo‘yicha filtrlaydi.
+
+> **19.11.2026: Birlashtirish navbati tugatildi** (egasining qarori). `.mergify.yml` endi navbatni belgilamaydi va tortish so'rovini birlashtiruvchi yoki qayta yozuvchi Birlashtirish buyruqlarini rad etadi. Relizlar PRs qo'lda "Faol relizda yashil eshiklarni talab qilish" (`Gate / CI` + `Gate / Quality`) ombori qoidalari ostida omni navbat jonli rejimda ishlamaguncha va undan keyin omni navbat orqali birlashtiriladi ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Yuqoridagi Birlashtirish dastagi endi mavjud emas.

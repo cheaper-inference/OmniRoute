@@ -4,7 +4,7 @@
  *
  * Flow:
  *   1. Flatten the OpenAI-shaped `messages[]` into a single prompt string.
- *   2. Spawn `auggie --print --quiet --model <model>` and pipe the prompt on stdin.
+ *   2. Spawn `auggie --print --model <model>` and pipe the prompt on stdin.
  *   3. Relay stdout chunks as OpenAI-compatible SSE deltas (stream=true) or
  *      buffer them into a single chat.completion JSON body (stream=false).
  *   4. Kill the subprocess on abort / stream close.
@@ -195,8 +195,8 @@ export function resolveAuggieModel(model: unknown): AuggieModelResolution {
  * resolveAuggieModel(). The trailing `--` marks the end of options so no
  * later positional value can be reinterpreted as a flag.
  */
-function buildAuggieArgs(model: string): string[] {
-  return ["--print", "--quiet", "--model", model, "--"];
+export function buildAuggieArgs(model: string): string[] {
+  return ["--print", "--model", model, "--"];
 }
 
 /**
@@ -350,6 +350,7 @@ function buildAuggieQuotaErrorResponse(message: string): Response {
 // cliNotFoundMessage() as the `error` handlers already do. See #12645.
 const CLI_NOT_FOUND_STDERR_PATTERNS = [
   /is not recognized as an internal or external command/i,
+  /reconhecido como um comando interno/i,
   /command not found/i,
   // dash/POSIX `sh` shells report a missing executable as `<name>: not found`
   // (no literal "command"), e.g. "sh: 1: auggie: not found".

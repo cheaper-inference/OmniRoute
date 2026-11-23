@@ -394,4 +394,36 @@ describe("RequestLoggerDetail clears its copied-state timers on unmount", () => 
     unmount();
     expect(pending.size).toBe(0);
   });
+
+  // Same leak in PayloadSection (the Payloads tab), seen in CI on 2026-11-19 as
+  // "window is not defined" from RequestLoggerDetail.sections.tsx after "copies one payload
+  // section through the same helper" had finished.
+  const payloadCopyButton = () =>
+    screen.getByRole("button", {
+      name: detail.copyTitle.replace("{title}", detail.payload.providerResponse),
+    });
+
+  it("copying a payload section leaves no reset timer behind after unmount", async () => {
+    const pending = trackResetTimers();
+    const onCopy = vi.fn(async () => true);
+    const { unmount } = renderDetail({ onCopy });
+    openTab(detail.tabPayloads);
+    fireEvent.click(payloadCopyButton());
+    await waitFor(() => expect(pending.size).toBe(1));
+    unmount();
+    expect(pending.size).toBe(0);
+  });
+
+  it("copying a payload section twice restarts its reset timer instead of stacking one", async () => {
+    const pending = trackResetTimers();
+    const onCopy = vi.fn(async () => true);
+    renderDetail({ onCopy });
+    openTab(detail.tabPayloads);
+    fireEvent.click(payloadCopyButton());
+    await waitFor(() => expect(pending.size).toBe(1));
+    fireEvent.click(payloadCopyButton());
+    await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(2));
+    await act(async () => {});
+    expect(pending.size).toBe(1);
+  });
 });

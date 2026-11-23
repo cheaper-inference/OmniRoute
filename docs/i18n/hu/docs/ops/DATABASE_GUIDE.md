@@ -309,6 +309,7 @@ Bőségesen használja `IF NOT EXISTS`, `IF EXISTS` és `OR IGNORE` / `OR REPLAC
 3. **Gondosan töltse ki az adatokat** : használja `UPDATE ... WHERE ...` a meglévő sorok kezelésére
 4. **Ellenőrizze a sorrendet és az elnevezést** : `npm run test:migrations:fresh` (minden migráció üres adatbázison) és `npm run check:migration-numbering`
 5. **Teszt egy másolaton** : soha ne futtasson teszteletlen migrációt éles környezetben
+6. **A kódból létrehozott táblát is át kell költöztetni** : ha egy modul lustán is létrehozza a táblát (`CREATE TABLE IF NOT EXISTS`, öngyógyító útvonalként tartva), akkor a migrációnak ugyanazzal a DDL vel kell létrehoznia. Ellenkező esetben a tiszta telepítés és a frissített telepítés különböző sémákkal végződik, attól függően, hogy a kód elérési útja lefutott-e. `tests/unit/db/lazy-table-migration-guard.test.ts` megvizsgálja `src/` és `open-sse/`, és meghiúsul egy áttelepítés nélküli lusta `CREATE` (#20557). Példa: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Példa:
 

@@ -16,15 +16,16 @@ import { isEncryptionEnabled } from "@/lib/db/encryption";
 import { parseAndValidateWebhookUrl } from "@/shared/network/outboundUrlGuardPolicy";
 
 import { WEBHOOK_EVENT_VALUES } from "@/lib/webhooks/eventDescriptions";
+import { WEBHOOK_SECRET_MAX_LENGTH, WEBHOOK_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 const WEBHOOK_KINDS = ["slack", "telegram", "discord", "custom"] as const;
 const WEBHOOK_EVENT_VALUES_WITH_WILDCARD = ["*", ...WEBHOOK_EVENT_VALUES] as const;
 
 const updateWebhookSchema = z
   .object({
-    url: z.string().min(1).max(2000).optional(),
+    url: z.string().min(1).max(WEBHOOK_URL_MAX_LENGTH).optional(),
     events: z.array(z.enum(WEBHOOK_EVENT_VALUES_WITH_WILDCARD)).optional(),
-    secret: z.string().max(500).optional(),
+    secret: z.string().max(WEBHOOK_SECRET_MAX_LENGTH).optional(),
     description: z.string().max(1000).optional(),
     enabled: z.boolean().optional(),
     kind: z.enum(WEBHOOK_KINDS).optional(),

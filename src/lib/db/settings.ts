@@ -166,9 +166,34 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
   }
 }
 
+/**
+ * Merge stored rows over the defaults. `databaseSettings` rows go first and only fill keys the
+ * defaults already know (#20191), so a `settings` row for the same key always wins.
+ */
+function applyStoredSettingRows(settings: Record<string, unknown>, rows: unknown[]): void {
+  const isFallbackRow = (row: unknown) => toRecord(row).namespace === "databaseSettings";
+  const ordered = [...rows.filter(isFallbackRow), ...rows.filter((row) => !isFallbackRow(row))];
+  for (const row of ordered) {
+    const record = toRecord(row);
+    const key = typeof record.key === "string" ? record.key : null;
+    const rawValue = typeof record.value === "string" ? record.value : null;
+    if (!key || rawValue === null || key.startsWith("_")) continue;
+    if (isFallbackRow(row) && !(key in settings)) continue;
+    try {
+      settings[key] = JSON.parse(rawValue);
+    } catch {
+      settings[key] = rawValue;
+    }
+  }
+}
+
 export async function getSettings() {
   const db = getDbInstance();
-  const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'").all();
+  const rows = db
+    .prepare(
+      "SELECT namespace, key, value FROM key_value WHERE namespace IN ('settings', 'databaseSettings')"
+    )
+    .all() as Array<{ namespace?: string; key?: string; value?: string }>;
   const settings: Record<string, unknown> = {
     cloudEnabled: false,
     tailscaleEnabled: false,
@@ -281,8 +306,11 @@ export async function getSettings() {
     // Operators flip the kill-switch to false (or drop the prefix) via the
     // Settings UI; the change hot-reloads through `applyRuntimeSettings` →
     // `applyAuthzBypassSection` → `getAuthzBypassSnapshot()`.
+    // `/api/resilience/connections` is read-only JSON (no spawn): bypassable by
+    // default so Resilience > Connections loads on a remote dashboard. An install
+    // that already stored its own list keeps that list.
     localOnlyManageScopeBypassEnabled: true,
-    localOnlyManageScopeBypassPrefixes: ["/api/mcp/"],
+    localOnlyManageScopeBypassPrefixes: ["/api/mcp/", "/api/resilience/connections"],
     customBannedSignals: [],
     autoDisableBannedScope: "all",
     proxyEnabled: true,
@@ -349,17 +377,7 @@ export async function getSettings() {
     // override: resolution falls back to the env var, then the captured pin.
     cliVersionOverrides: {},
   };
-  for (const row of rows) {
-    const record = toRecord(row);
-    const key = typeof record.key === "string" ? record.key : null;
-    const rawValue = typeof record.value === "string" ? record.value : null;
-    if (!key || rawValue === null || key.startsWith("_")) continue;
-    try {
-      settings[key] = JSON.parse(rawValue);
-    } catch {
-      settings[key] = rawValue;
-    }
-  }
+  applyStoredSettingRows(settings, rows);
 
   for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
     if (typeof settings[encryptedKey] === "string") {

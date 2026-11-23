@@ -478,6 +478,8 @@ export const opencode_goProvider: RegistryEntry = {
       name: "DeepSeek V4.1 Flash",
       contextLength: 1000000,
       maxOutputTokens: 384000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "high", "max"],
     },
     // Go exposes deepseek-flash as an alias of the same 1M DeepSeek V4.1 Flash.
     // This ID is imported from live catalogs and needs its own metadata row.
@@ -486,6 +488,8 @@ export const opencode_goProvider: RegistryEntry = {
       name: "DeepSeek V4.1 Flash",
       contextLength: 1000000,
       maxOutputTokens: 384000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "high", "max"],
     },
     {
       id: "claude-haiku-5-5",

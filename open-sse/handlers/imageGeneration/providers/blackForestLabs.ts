@@ -7,11 +7,11 @@
 
 import { mapImageSize } from "../../../translator/image/sizeMapper.ts";
 import { sleep } from "../../../utils/sleep.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import {
   extractImageInputs,
   isHttpUrl,
-  normalizePositiveNumber,
   normalizeProviderImagePayload,
   normalizeRequestedImageFormat,
   parseSizeToDimensions,
@@ -180,8 +180,8 @@ export async function handleBlackForestLabsImageGeneration({
 }
 
 async function pollBlackForestLabsResult({ pollingUrl, token, body, log }) {
-  const timeoutMs = normalizePositiveNumber(body.timeout_ms, 300000);
-  const pollIntervalMs = normalizePositiveNumber(body.poll_interval_ms, 1500);
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
+  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 1500);
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {

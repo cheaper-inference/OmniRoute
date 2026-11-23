@@ -27,13 +27,9 @@
 
 ---
 
-## Ātrā palaišana
+## Ātrais skrējiens
 
-> **Pašmitināšana ar vienu komandu?** Skatiet
-> [pašmitināšanas rokasgrāmatu](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (publicēts attēls +
-> Redis, pieejams tikai lokāli, bez profila izvēles). Tālāk aprakstītā ātrā palaišana ir
-> viena konteinera risinājums lietotājiem, kuri jau izmanto Redis citur.
+> **Pašapkalpošanās vienā komandā?** Skatiet [Self-Host Guide](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (publicēts attēls + Redis, tikai cilpa, nav profila izvēles). Tālāk sniegtā Quick Run ir viena konteinera ceļš lietotājiem, kuri jau izmanto Redis citur.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Ar vides failu
 
 ```bash
-# Vispirms nokopējiet un rediģējiet .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,16 +235,16 @@ Produkcijas steks darbojas paralēli izstrādes compose videi (atšķiras kontei
 
 ## Dockerfile posmi
 
-Repozitorijā ir iekļauts vairākposmu Dockerfile (`Dockerfile`). Ir pieejami četri posmi; izvēlieties savam lietošanas gadījumam atbilstošo `target`.
+Repozitorijs nosūta daudzpakāpju Dockerfile (`Dockerfile`). Ir pakļauti četri posmi; izvēlieties savam lietošanas gadījumam pareizo `target`.
 
-| Posms         | Bāzes attēls          | Mērķis                                                                                                                                                                                                                                                                                                                          |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Instalē atkarības (`npm ci --legacy-peer-deps`) un izpilda `npm run build` (pēc noklusējuma izmanto Turbopack — skatiet tālāk sadaļu par būvēšanas laika resursiem)                                                                                                                                                             |
-| `runner-base` | `node:26-trixie-slim` | Produkcijas izpildlaika vide ar Next.js savrupo izvadi. **Pakalpojumu sniedzēju CLI nav iekļauti.**                                                                                                                                                                                                                             |
-| `runner-cli`  | `runner-base`         | Pievieno `git`, `docker.io`, `docker-compose` un globālos CLI: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Izvēlieties šo aģentu darbplūsmām.**                                                                                                                                                        |
-| `runner-web`  | `runner-base`         | Pievieno Playwright un Chromium pārlūku (`--with-deps`) tīmekļa sesiju pakalpojumu sniedzējiem: `gemini-web`, `claude-web`, `claude-turnstile`. **Izvēlieties šo, ja izmantojat šos pakalpojumu sniedzējus** — bez tā parastais attēls pieprasījuma laikā nedarbojas (skatiet piezīmi par `-web` sadaļā par laidienu kanāliem). |
+| Skatuves      | Pamata attēls         | Mērķis                                                                                                                                                                                                                                                                                                                 |
+| ------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Instalē deps (`npm ci --legacy-peer-deps`) un palaiž `npm run build` (Turbopack pēc noklusējuma — skatiet tālāk sadaļu Būvlaika resursi)                                                                                                                                                                               |
+| `runner-base` | `node:26-trixie-slim` | Ražošanas laiks ar Next.js atsevišķu izvadi.** Neviens pakalpojumu sniedzējs CLIs nav komplektēts.**                                                                                                                                                                                                                   |
+| `runner-cli`  | `runner-base`         | Pievieno `git`, `docker.io`, `docker-compose` un globālo CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Izvēlieties šo aģentu darbplūsmām.**                                                                                                                                               |
+| `runner-web`  | `runner-base`         | Pievieno Playwright + Chromium pārlūkprogrammu (`--with-deps`) tīmekļa sesiju nodrošinātājiem: `gemini-web`, `claude-web`, `claude-turnstile`.** Izvēlieties šo, kad izmantojat šos pakalpojumu sniedzējus** — vienkāršais attēls pēc pieprasījuma neizdodas bez tā (skatiet `-web` piezīmi sadaļā Izlaišanas kanāli). |
 
-Konkrētu mērķi var manuāli būvēt šādi:
+Manuāli izveidojiet konkrētu mērķi:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Būvēšanas laika resursi
+### Veidošanas laika resursi
 
-Trīs būvēšanas argumenti nosaka `builder` posma resursu patēriņu. Tie attiecas tikai uz būvēšanas laiku —
-`OMNIROUTE_MEMORY_MB` (tālāk) ir atsevišķs izpildlaika iestatījums.
+Trīs būves args kontrolē `builder` skatuves izmaksas. Tie ir tikai izveides laikā, — `OMNIROUTE_MEMORY_MB` (zemāk) ir atsevišķa izpildlaika poga.
 
-| Būvēšanas arguments         | Noklusējums | Ietekme                                                                                     |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`         | `0` būvē ar webpack: mazāks maksimālais atmiņas patēriņš, bet lēnāk. `1` iespējo Turbopack. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`      | V8 kaudzes ierobežojums (`--max-old-space-size`) palaistajam `next build`.                  |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`         | Nodod vērtību `CIRCLE_NODE_TOTAL`; Next lapu datu apkopošanai atvasina `workers = N - 1`.   |
+| Veidot arg                  | Noklusējums | Efekts                                                                                |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`         | `0` veido ar tīmekļa pakotni: mazāka maksimālā atmiņa, lēnāka. `1` izvēlas Turbopack. |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`      | V8 kaudzes griesti (`--max-old-space-size`) radītajam `next build`.                   |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`         | Baro `CIRCLE_NODE_TOTAL`; Tālāk tiek iegūts `workers = N - 1` lapas datu apkopošanai. |
 
-`OMNIROUTE_BUILD_WORKERS` ir parametrs, ko palielināt jaudīgā būvēšanas vidē un ko
-pārbaudīt, ja ierobežotu resursu vidē būvēšana pārtrūkst **pēc** `✓ Compiled successfully`. Katrs
-lapu datu darbinieks ir atsevišķs process, tāpat kā pats vecākprocess `next build`;
-reālā VPS reprodukcijā (problēma #7518) katra procesa maksimālais RSS tika izmērīts
-~4,5 GB apjomā neatkarīgi no `NODE_OPTIONS` kaudzes karoga (Turbopack kompilē,
-izmantojot vietējo/Rust atmiņu ārpus V8 kaudzes). Noklusējuma vērtība `2` (→ 1 darbinieks, kopā 2
-procesi) ir paredzēta 16 GB / 4 vCPU GitHub mitinātajiem izpildītājiem, kurus
-izmanto publicēšanas konveijers. Ar `8` (→ 7 darbinieki) šim izpildītājam beidzās atmiņa, un
-buildkit pārtrauca darbību ar `ResourceExhausted: ... cannot allocate memory`;
-arī `3` (→ 2 darbinieki) neietilpa atmiņā, kad katra procesa RSS tika mērīts
-tieši, nevis aplēsts. `tests/unit/docker-build-memory-budget.test.ts`
-veic aprēķinus, izmantojot izmērīto vērtību, un izraisa kļūmi, ja kāds no parametriem
-pārsniedz izpildītāja iespējas.
+`OMNIROUTE_BUILD_WORKERS` ir tas, kurš jāaudzina par lielu celtnieku, un tas, kuram ir aizdomas, kad ierobežota konstrukcija nomirst** pēc** `✓ Compiled successfully`. Katrs lapas datu darbinieks ir savs process, tāpat arī pats vecākais `next build` ; dzīvā VPS reprodukcija (izdevums #7518) mērīja katra procesa maksimumu RSS pie ~ 4,5 GB neatkarīgi no `NODE_OPTIONS` kaudzes karoga (Turbopack apkopo native/Rust atmiņā ārpus V8 kaudzes). Noklusējuma `2` (→ 1 darbinieks, kopā 2 procesi) izmērs ir paredzēts 16 GB /4 vCPU GitHub mitinātajiem skrējējiem, ko izmanto publicēšanas konveijers. Pie `8` (→ 7 darbinieki) šim skrējējam pietrūka atmiņas, un buildkit neizdevās soli ar `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 darbinieki) joprojām neatbilst, kad katra procesa RSS tika mērīts tieši, nevis secināts. `tests/unit/docker-build-memory-budget.test.ts` veic aritmētiku pret izmērīto skaitli un neizdodas, ja kāda no pogām pārspēj skrējēju.
 
-Turbopack kompilē, izmantojot vietējo Rust atmiņu, kas atrodas **ārpus** V8 kaudzes, tāpēc
-`OMNIROUTE_BUILD_MEMORY_MB` to neierobežo. Resursdatorā ar atmiņas ierobežojumu OOM
-iznīcinātājs pārtrauc būvēšanu ar SIGKILL bez jebkāda kļūdas teksta — tā vienkārši
-apstājas `Creating an optimized production build` procesa vidū, kas drīzāk izskatās pēc
-iestrēgšanas, nevis atmiņas izsīkuma. Tāpēc `Dockerfile` pēc noklusējuma izmanto webpack
-(`OMNIROUTE_USE_TURBOPACK=0`), atšķirībā no `npm run dev` / `npm run build`, kur
-Turbopack ir noklusējuma izvēle kodā: vienkārša komanda `docker build .` bez būvēšanas argumentiem (ko
-izpilda Railway un citi viena klikšķa mitināšanas pakalpojumi) nedrīkst klusi pārtrūkt
-būvēšanas vidē ar ierobežotu atmiņu. Publicētajos attēlos parametrs `OMNIROUTE_USE_TURBOPACK=0`
-jau tiek tieši nodots failā `docker-publish.yml`. Būvēšanas vidē ar pietiekamu RAM apjomu iespējojiet
-Turbopack, lai būvēšana būtu ātrāka:
+Turbopack apkopo dzimtajā Rust atmiņā, kas dzīvo** ārpusē** V8 kaudze, tāpēc `OMNIROUTE_BUILD_MEMORY_MB` to nesaista. Uz resursdatora ar atmiņas griestiem OOM slepkava pēc tam SIGKILLed bez kļūdas teksta. — tas vienkārši apstājas `Creating an optimized production build` vidū, kas drīzāk skan kā pakārts, nevis atmiņas trūkums. Tāpēc `Dockerfile` noklusējuma iestatījums ir tīmekļa pakotne (`OMNIROUTE_USE_TURBOPACK=0`), atšķirībā no `npm run dev` / `npm run build`, kur Turbopack ir noklusētais kods: tukšs `docker build .` bez build arg (ko palaiž Railway un citi viena klikšķa saimnieki) nedrīkst klusi nomirt veidotājā ar ierobežotu atmiņu. Publicētie attēli jau skaidri iziet `OMNIROUTE_USE_TURBOPACK=0` `docker-publish.yml`. Būvējam ar daudz RAM izvēlieties Turbopack, lai ātrāk veidotu:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` ir iespējots, tāpēc `next build` palaiž vecākprocesu **un** darbinieka
-procesu, un katrs no tiem atsevišķi ievēro `OMNIROUTE_BUILD_MEMORY_MB`. Iestatiet konteinera
-ierobežojumu aptuveni virs divkāršas šīs vērtības, nevis vienas.
+`webpackBuildWorker` ir iespējots, tāpēc `next build` vada vecāku** un** strādnieku process un katrs godina `OMNIROUTE_BUILD_MEMORY_MB` atsevišķi. Konteinera griestu izmērs ir aptuveni divas reizes lielāks par šo vērtību, nevis vienu reizi.
 
-Mērījumi šajā koka versijā (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Mērīts uz šī koka (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Komplektētājs | Konteinera ierobežojums | Rezultāts                                  |
-| ------------- | ----------------------- | ------------------------------------------ |
-| Turbopack     | 8 GiB / 16 GiB          | Abos gadījumos klusi pārtraukts OOM dēļ    |
-| webpack       | 8 GiB                   | Būvēšanas darbinieks pārtraukts ar SIGKILL |
-| webpack       | 12 GiB                  | Izdevās, maksimums sasniedza 11,1 GiB      |
+| Bundler         | Konteineru griesti | Rezultāts                             |
+| --------------- | ------------------ | ------------------------------------- |
+| Turbopack       | 8 GiB / 16 GiB     | OOM-nogalināja abos, klusi            |
+| tīmekļa pakotne | 8 GiB              | celt strādnieks SIGKILLed             |
+| tīmekļa pakotne | 12 GiB             | izdevās, sasniedza maksimumu 11,1 GiB |
 
-### Izpildlaika noklusējumi
+### Izpildlaika noklusējuma iestatījumi
 
-`runner-base` eksportētie noklusējumi: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+`runner-base` eksportētie noklusējuma iestatījumi: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Atmiņas darbība Docker vidē:
+Atmiņas uzvedība Docker:
 
-- Attēls iestata `OMNIROUTE_MEMORY_MB=1024` un no tā atvasina `NODE_OPTIONS=--max-old-space-size=1024`.
-- Faktisko servera procesu palaiž savrupais palaidējs, kas nolasa `OMNIROUTE_MEMORY_MB` un pievieno `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node izmanto pēdējo atkārtoto `--max-old-space-size` vērtību, tāpēc `OMNIROUTE_MEMORY_MB` iestatīšana nosaka faktisko Docker kaudzes ierobežojumu.
-- Tā kā attēls to vienmēr iestata, palaidēja paša RAM kalibrētā atkāpšanās vērtība Docker vidē nekad netiek izmantota. Palieliniet to tieši atbilstoši darba slodzei (skatiet tabulu tālāk). `2048` joprojām ir par maz programmēšanas aģentu `/v1/responses` pieprasījumiem.
+- Attēls nosaka `OMNIROUTE_MEMORY_MB=1024` un no tā iegūst `NODE_OPTIONS=--max-old-space-size=1024`.
+- Faktisko servera procesu sāk atsevišķs palaidējs, kas nolasa `OMNIROUTE_MEMORY_MB` un pievieno `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Mezgls izmanto pēdējo atkārtoto `--max-old-space-size` vērtību, tāpēc `OMNIROUTE_MEMORY_MB` iestatīšana kontrolē efektīvo Docker kaudzes ierobežojumu.
+- Tā kā attēls vienmēr to nosaka, paša palaišanas programmas RAM kalibrētais atkāpšanās punkts nekad netiek lietots zem Docker. Palieliniet to tieši darba slodzei (tabula zemāk). `2048` joprojām ir pārāk mazs kodēšanas aģentam `/v1/responses`.
 
-### Izpildlaika RAM programmēšanas aģentiem
+### Izpildlaika RAM kodēšanas aģentiem
 
-Docker noklusējuma 1 GiB ir minimums informācijas panelim un vienkāršai tērzēšanai, nevis produkcijas vides apjoms. Gari `POST /v1/responses` pieprasījumu ķermeņi (simtiem ziņojumu, desmitiem rīku) saspiešanas laikā atmiņā saglabā vairākus grafus. Divi vienlaicīgi ~3 MiB / ~750k marķieru pieprasījumi ir izraisījuši V8 avāriju ar **12 GiB** vecās paaudzes telpu (`FATAL ERROR: Reached heap limit`), kā arī sasnieguši 16 GiB cgroup OOM ierobežojumu. Skatiet [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+1 GiB Docker noklusējuma vērtība ir dashboard/light-chat grīda, nevis ražošanas apjoms. Garie `POST /v1/responses` korpusi (simtiem ziņojumu, desmitiem rīku) saspiešanas laikā saglabā vairākus atmiņā esošos grafikus. Divi pārklājoši ~ 3 MiB / ~ 750k marķiera pieprasījumi ir pārtraucuši V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) un arī trāpīja 16 GiB cgroup OOM. Skatiet [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Iestatiet **cgroup `--memory` lielāku par kaudzes apjomu** — vietējie buferi, SQLite un saspiešanas starprezultāti atrodas ārpus V8.
+Izmērs** cgroup `--memory` virs kaudzes** — vietējie buferi, SQLite un saspiešanas starpprodukti atrodas ārpus V8.
 
-| Darba slodze                                       | `OMNIROUTE_MEMORY_MB`       | Konteiners / cgroup           | Piezīmes                                                                                                           |
-| -------------------------------------------------- | --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Informācijas panelis, viena vienkārša tērzēšana    | `1024` (attēla noklusējums) | ≥2 GiB                        |                                                                                                                    |
-| Viens programmēšanas aģents (Claude/Codex/Grok)    | `8192`                      | ≥10 GiB                       | Tipiska vienas sesijas `/v1/responses` slodze                                                                      |
-| Divi vienlaicīgi gari `/v1/responses` pieprasījumi | `10240`–`12288`             | ≥12–16 GiB                    | Novērota V8 avārija ar ~12 GiB kaudzi                                                                              |
-| Trīs vai vairāk vienlaicīgi gari konteksti         | nedarbiniet vienā procesā   | izpildiet secīgi / vairāk RAM | Pēc noklusējuma atļauts 1 smags aktīvs pieprasījums; šī skaita palielināšana bez papildu RAM atkal izraisa avāriju |
+| Darba slodze                                 | `OMNIROUTE_MEMORY_MB`       | Konteiners/cgrupa       | Piezīmes                                                                                                |
+| -------------------------------------------- | --------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| Informācijas panelis, viena viegla tērzēšana | `1024` (attēla noklusējums) | ≥2 GiB                  |                                                                                                         |
+| Viens kodēšanas aģents (Claude/Codex/Grok)   | `8192`                      | ≥10 GiB                 | Tipisks vienas sesijas `/v1/responses`                                                                  |
+| Divas vienlaikus garas `/v1/responses`       | `10240`–`12288`             | ≥12–16 GiB              | Izmērītais V8 pārtraukums pie ~ 12 GiB kaudzes                                                          |
+| Trīs + vienlaicīgi garie konteksti           | nedariet vienu procesu      | serializēt / vairāk RAM | Noklusējuma smagsvara uzņemšana ir 1 lidojuma laikā; paaugstinot to bez RAM, atkal tiek ieviests aborts |
 
-`omniroute serve` uz fiziskas sistēmas kalibrē aptuveni 35% RAM (ierobežojot diapazonā `[512, 4096]`), ja `OMNIROUTE_MEMORY_MB` **nav iestatīts**. Docker vienmēr iestata `1024`, tāpēc oficiālajā attēlā šī kalibrēšana nekad netiek veikta.
+`omniroute serve` uz tukša metāla kalibrē ~ 35% no RAM (saspiests `[512, 4096]`), kad `OMNIROUTE_MEMORY_MB` ir** atiestatīts** . Docker vienmēr iestata `1024`, lai kalibrēšana nekad netiktu veikta oficiālajā attēlā.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Kritiskie vides mainīgie
@@ -364,23 +335,13 @@ Papildus noklusējuma iestatījumiem, kas dokumentēti failā [ENVIRONMENT.md](.
 | `PROD_DASHBOARD_PORT`         | Resursdatora puses informācijas paneļa ports failam `docker-compose.prod.yml`                                                                                                                                                                                                                                | `20130`                           |
 | `CLIPROXYAPI_PORT`            | Resursdatora puses ports `cliproxyapi` blakuskonteineram                                                                                                                                                                                                                                                     | `8317`                            |
 
-## Reversais starpniekserveris apakšceļā (Traefik / nginx)
+## Reversais starpniekserveris apakšceļā (Traefik/nginx)
 
-Next.js `basePath` tiek kompilēts savrupajā pakotnē. OmniRoute saglabā iekļauto
-vērtību kontrolfailā lietotnes saknē (tas tiek ierakstīts `npm run build` laikā un nolasīts,
-izmantojot `scripts/docker/ensure-docker-base-path.mjs`) un konteinera palaišanas laikā
-salīdzina to ar `OMNIROUTE_BASE_PATH`. Ja šīs vērtības atšķiras un attēls ir
-būvēts domēna saknei, ieejas punkts pārraksta savrupos manifestus,
-iegultās `basePath`/`assetPrefix` literāļu vērtības (Next 16 renderē SSR resursu URL,
-izmantojot tikai `assetPrefix`, tāpēc labošanas rīks tajā atspoguļo apakšceļu), iekļautos
-`/_next/static` resursu URL (klienta atsauču manifestus, multivides importus, iepriekš renderētās
-kļūdu lapas) un klienta `process.env` aizstājēju, pirms tiek palaists
-`node dev/run-standalone.mjs`.
+Next.js `basePath` ir apkopots atsevišķā komplektā. OmniRoute ieraksta izcepto vērtību sargdatnē lietotnes saknē (rakstīta `npm run build` laikā; lasa `scripts/docker/ensure-docker-base-path.mjs`) un salīdzina to ar `OMNIROUTE_BASE_PATH` kad konteiners sākas. Ja tie atšķiras un attēls ir izveidots domēna saknei, ievades punkts pārraksta savrupos manifestus, iegultos `basePath`/`assetPrefix` literāļus (nākamie 16 atveido SSR īpašumu URLs no `assetPrefix` tikai — ielāps atspoguļo apakšceļu tajā), iestrādāto `/_next/static` URLs, preferences, imports, renderered lapas) un klients `process.env` shim pirms `node dev/run-standalone.mjs` palaišanas.
 
-### Compose būvējums (ieteicams)
+### Rakstīt būvējumu (ieteicams)
 
-Iestatiet abus mainīgos failā `.env`, pēc tam veiciet atkārtotu būvēšanu, lai attēla un izpildlaika
-konfigurācijas sakristu:
+Iestatiet abus mainīgos `.env` un pēc tam izveidojiet no jauna, lai attēls un izpildlaiks sakristu:
 
 ```bash
 # .env
@@ -392,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` pārsūta `OMNIROUTE_BASE_PATH` gan kā Docker būvēšanas argumentu, gan kā
-izpildlaika vides mainīgo.
+`docker-compose.yml` pārsūta `OMNIROUTE_BASE_PATH` kā Docker build-arg un kā izpildlaika vides mainīgo.
 
-### Iepriekš būvēts saknes attēls + izpildlaika apakšceļš
+### Iepriekš izveidots saknes attēla + izpildlaika apakšceļš
 
-Publicētie `diegosouzapw/omniroute:*` attēli ir būvēti domēna saknei. Joprojām varat
-izpildlaikā iestatīt `OMNIROUTE_BASE_PATH`; konteiners palaišanas laikā vienreiz izlabo pakotni.
-Savienojiet to pārī ar atbilstošo publisko izcelsmes adresi:
+Publicētie `cheaperinference/omniroute:*` attēli ir izveidoti domēna saknei. Jūs joprojām varat iestatīt `OMNIROUTE_BASE_PATH` izpildlaikā; konteiners vienreiz ielāpi komplektu palaišanas laikā. Savienojiet to ar atbilstošu publisko izcelsmi:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Konfigurējiet reverso starpniekserveri tā, lai tas pārsūtītu **pilnu** ārējo ceļu (nenoņemiet
-prefiksu). Traefik ir jāmaršrutē `PathPrefix(`/omniroute`)` uz konteineru bez
-`StripPrefix`, lai Next.js saņemtu `/omniroute/...` un nodrošinātu resursus no
-`/omniroute/_next/...`.
+Konfigurējiet apgriezto starpniekserveri, lai pārsūtītu** pilns** ārējais ceļš (nenoņemiet prefiksu). Traefik ir jānovirza `PathPrefix(`/omniroute `)` uz konteineru bez `StripPrefix`, lai Next.js saņemtu `/omniroute/...` un apkalpotu līdzekļus no `/omniroute/_next/...`.
 
-Docker veselības pārbaude pārbauda vienkāršoto `/healthz` dzīves cikla galapunktu, kam pievienots
-aktīvais `OMNIROUTE_BASE_PATH` prefikss. `/api/monitoring/health` joprojām ir pieejams
-diagnostikai, ko veic cilvēki vai informācijas paneļi; lai konteinera HEALTHCHECK atkal novirzītu uz to
-(piemēram, padziļinātai veselības stāvokļa kontrolei), iestatiet `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Šis ceļš veic **padziļinātu** pārbaudi (DB + uzraudzības kopsavilkums) — tas ir piemērots Docker
-retajām `HEALTHCHECK` pārbaudēm, ja izvēlaties to atkal iespējot, bet **nav** piemērots Kubernetes `livenessProbe`
-intervāliem.
+Docker veselības pārbaude pārbauda vieglā `/healthz` dzīves cikla beigu punktu, kura prefikss ir aktīvs `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` paliek pieejams human/dashboard diagnostikai; lai novirzītu konteineru HEALTHCHECK atpakaļ uz to (piemēram, lai nodrošinātu dziļu veselības aizsardzību), iestatiet `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Šis ceļš ir a** dziļi** pārbaudiet (DB + monitoringa kopsavilkums) — piemērots Docker retajam `HEALTHCHECK`, ja atkal izvēlaties, bet** nē** par Kubernetes `livenessProbe` intervāliem.
 
 Orķestratoriem (Kubernetes, Nomad u.c.):
 
-| Pārbaude                    | Ieteicams                                                                   | Nav ieteicams                                                             |
-| --------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Dzīvīgums                   | HTTP `GET /livez` vai TCP galvenajā portā (`PORT`, pēc noklusējuma `20128`) | `/api/monitoring/health` kā dzīvīguma pārbaude                            |
-| Gatavība                    | HTTP `GET /healthz`                                                         | Īsi taimauti, kas aizņemtu notikumu cilpu uzskata par nereaģējošu procesu |
-| Padziļināta / melnās kastes | `/api/monitoring/health`                                                    | —                                                                         |
+| Zonde               | Dod priekšroku                                                          | Izvairieties                                                   |
+| ------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Dzīvīgums           | HTTP `GET /livez` vai TCP galvenajā portā (`PORT`, noklusējuma `20128`) | `/api/monitoring/health` kā dzīvīgums                          |
+| Gatavība            | HTTP `GET /healthz`                                                     | Īsi noildzes, kas uzskata, ka notikumu cikls aizņemts kā miris |
+| Dziļa / melnā kaste | `/api/monitoring/health`                                                | —                                                              |
 
-`/healthz` ziņo par procesa dzīves ciklu (`ok` / `starting` / `stopping`). `/livez` pārbauda
-tikai to, vai process darbojas (200 ikreiz, kad apdarinātāju var izpildīt; tas negaida
-gatavību). Abi joprojām darbojas tajā pašā Node notikumu cilpā, kurā tiek apstrādāti pieprasījumi, tāpēc
-CPU intensīva kataloga vai saspiešanas apstrāde var tos aizkavēt — aizņemts ≠ nereaģējošs. Ja HTTP
-pārbaudēm iestājas taimauts, dodiet priekšroku TCP dzīvīguma pārbaudei. Pilnīgi norādījumi par pārbaudēm:
-[Uzraudzības ceļvedis — ieteikumi Kubernetes pārbaudēm](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` ziņo par procesa dzīves ciklu (`ok` / `starting` / `stopping`). `/livez` ir process-alive tikai (200 vienmēr, kad apstrādātājs var palaist; tas negaida gatavību). Abi joprojām darbojas tajā pašā Node notikumu cilpā kā pieprasījumu apstrāde, tāpēc ar CPU saistīts katalogs vai saspiešanas darbs var aizkavēt tos — aizņemts ≠ dead. Ja HTTP zondes taimauts, dodiet priekšroku TCP dzīvīgumam. Pilnas zondes norādes: [uzraudzības rokasgrāmata — Kubernetes zondes ieteikumi](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose ar Caddy (HTTPS Auto-TLS)
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-OmniRoute var droši padarīt pieejamu, izmantojot Caddy automātisko SSL nodrošināšanu. Pārliecinieties, ka jūsu domēna DNS A ieraksts norāda uz jūsu servera IP adresi.
+OmniRoute var droši eksponēt, izmantojot Caddy automātisko SSL nodrošināšanu. Pārliecinieties, vai jūsu domēna DNS A ieraksts norāda uz jūsu servera IP.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Pārlūkprogrammai paredzētais avots OAuth atzvaniem, informācijas paneļa saitēm un ģenerētajiem publiskajiem URL.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Iekšējais serveru savstarpējās saziņas URL ieplānotajiem uzdevumiem / pašpieprasījumiem.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -471,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy iestata standarta pārsūtīšanas galvenes augšupstraumes konteineram. OmniRoute izmanto
-`NEXT_PUBLIC_BASE_URL` kā kanonisko publisko avotu OAuth atzvaniem un ģenerētajām publiskajām
-saitēm; autentificēta rakstīšana informācijas panelī izmanto viena avota pieprasījumus kopā ar sesijai piesaistītu CSRF
-aizsardzību. Iespējojiet `OMNIROUTE_TRUST_PROXY` tikai sarežģītākos izvietojumos, kuros apzināti
-vēlaties, lai OmniRoute noteiktu publisko avotu no uzticamām pārsūtītajām galvenēm, nevis no tiešas
-konfigurācijas.
+Caddy iestata standarta pārsūtīšanas galvenes augšpus konteineram. OmniRoute izmanto `NEXT_PUBLIC_BASE_URL` kā kanonisko publisko izcelsmi OAuth atzvanīšanai un ģenerētajām publiskajām saitēm; autentificēta informācijas paneļa rakstīšana izmanto vienas izcelsmes pieprasījumus, kā arī sesijas CSRF aizsardzību. Iespējojiet `OMNIROUTE_TRUST_PROXY` tikai uzlabotajām izvietošanām, kurās apzināti vēlaties, lai OmniRoute publisko izcelsmi iegūtu no uzticamām pārsūtītajām galvenēm, nevis precīzas konfigurācijas.
 
 ## Cloudflare Quick Tunnel
 
@@ -493,49 +432,51 @@ Galapunktu tuneļu paneļus (Cloudflare, Tailscale, ngrok) var parādīt vai pas
 - Docker attēli ietver sistēmas CA saknes un nodod tās pārvaldītajam `cloudflared`, tādējādi novēršot TLS uzticamības kļūmes, kad tunelis tiek inicializēts konteinerā.
 - Iestatiet `CLOUDFLARED_BIN=/absolute/path/to/cloudflared`, ja vēlaties, lai OmniRoute izmantotu esošu bināro failu, nevis to lejupielādētu.
 
-## Attēlu tagi
+## Attēlu atzīmes
 
-| Attēls                   | Tags     | Izmērs | Apraksts                                                         |
-| ------------------------ | -------- | ------ | ---------------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | Augstākā **publicētā** stabilā SemVer versija (nevis git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Fiksējiet šīs klases tagu GitOps vajadzībām                      |
+| Attēls                       | Tag      | Izmērs   | Apraksts                                                   |
+| ---------------------------- | -------- | -------- | ---------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB | Augstākais** publicēts** stabils SemVer (nevis git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB | Piespraudiet šīs klases tagu GitOps                        |
 
-Vairāku platformu manifests: vietējie `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker automātiski atlasa atbilstošo arhitektūru; norādiet `--platform linux/amd64`, ja ARM resursdatoros nepieciešams piespiedu kārtā izmantot AMD64 emulāciju.
+Vieni un tie paši attēli tiek publicēti trīs krātuvēs ar vienādiem arhitektūras īssavilkumiem: `cheaperinference/omniroute` (Docker Hub, Cheaper Inference organizācija, sākot no 3.8.53), `ghcr.io/cheaper-inference/omniroute` un mantotajā `diegosouzapw/omniroute`, kas saglabā savu piesaistes vēsturi un joprojām saņem katru izlaidumu. Esošie `diegosouzapw/omniroute` izvietojumi tiek pastāvīgi atjaunināti; attēla nosaukuma maiņa nav obligāta. Tālāk norādītais `:next` / `:next-web` pirmsizlaides kanāls ir publicēts tikai `diegosouzapw/omniroute` un GHCR.
 
-### Laidienu kanāli
+Vairāku platformu manifests: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker automātiski atlasa atbilstošo arhitektūru; nododiet `--platform linux/amd64`, ja nepieciešams piespiest AMD64 emulāciju ARM saimniekiem.
 
-OmniRoute publicē atsevišķus Docker kanālus stabilajiem laidieniem, aktīvā laidiena zara testēšanai un izstrādes būvējumiem.
+### Izlaiduma kanāli
 
-| Kanāls                          | Avots                                         | Mainīgums                    | Ieteicamais lietojums                                                                                                        |
-| ------------------------------- | --------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Parakstīts/versijots laidiens                 | Nemainīgs                    | Produkcijas izvietojumi, kuros tiek fiksēts konkrēts laidiens                                                                |
-| `:latest` / `:latest-web`       | Augstākā **publicētā** stabilā SemVer versija | Mainīga stabilā norāde       | Seko stabilajiem laidieniem **pēc** SemVer publicēšanas uzdevuma — **neseko** `main` vai nepublicētiem `release/v*` komitiem |
-| `:next` / `:next-web`           | Pašreizējais noklusējuma `release/v*` zars    | Mainīga pirmslaidiena norāde | Tādu labojumu testēšana, kas ir iekļauti aktīvajā laidiena zarā, bet vēl nav iekļauti stabilā laidienā                       |
-| `:main` / `:main-web`           | `main` zars                                   | Mainīga izstrādes norāde     | Tikai izstrādei un integrācijas testēšanai                                                                                   |
+OmniRoute publicē atsevišķus Docker kanālus stabiliem laidieniem, aktīvai izlaišanas filiāles testēšanai un izstrādes būvējumiem.
+
+| Kanāls                          | Avots                                       | Mainīgums                      | Ieteicamā lietošana                                                                                                          |
+| ------------------------------- | ------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | Signed/versioned izlaidums                  | Nemainīgs                      | Ražošanas izvietošana, kas piestiprina precīzu laidienu                                                                      |
+| `:latest` / `:latest-web`       | Augstākais** publicēts** stabils SemVer     | Mainīgs stabils rādītājs       | Seko stabiliem izlaidumiem** pēc** SemVer publicēt darbu — dara** nē** izsekot `main` vai neizlaisto `release/v*` apņemšanos |
+| `:next` / `:next-web`           | Pašreizējā noklusējuma `release/v*` filiāle | Maināms pirmsizlaides rādītājs | Tiek pārbaudīti labojumi, kas ir nonākuši aktīvā laidiena zarā, bet vēl nav stabilā laidienā                                 |
+| `:main` / `:main-web`           | `main` filiāle                              | Mainīgs attīstības rādītājs    | Tikai izstrādes un integrācijas testēšana                                                                                    |
 
 #### Tīmekļa sesiju nodrošinātāji: `-web` attēli
 
-Katram iepriekš norādītajam kanālam ir arī `-web` tags (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), kas veidots no `runner-web` posma — tas ir tas pats attēls, papildināts ar Playwright un Chromium pārlūkprogrammu. Parastais attēls tiek piegādāts **bez** Chromium; `gemini-web`, `claude-web` un `claude-turnstile` tas ir nepieciešams.
+Katrs iepriekš minētais kanāls darbojas kā `-web` tags (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), kas izveidots no `runner-web` stadijas — vienāda attēla plus Playwright un Chromium pārlūkprogrammas. Vienkāršais attēls tiek nosūtīts** bez** hroms; `gemini-web`, `claude-web` un `claude-turnstile` tas ir vajadzīgs.
 
-Kļūme tiek atlikta un nenotiek palaišanas laikā: šie nodrošinātāji uzskaita savus modeļus un informācijas panelī tiek rādīti kā savienoti, bet tikai pirmais pieprasījums beidzas ar kļūmi
+Kļūme tiek atlikta, nevis palaišanas laiks: šie pakalpojumu sniedzēji uzskaita savus modeļus un parāda kā savienotus informācijas panelī, un tikai pirmais pieprasījums neizdodas
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Ja izmantojat šos nodrošinātājus, lejupielādējiet tā kanāla `-web` tagu, kuru jau izmantojat — nekas cits nemainās. npm/CLI instalācijā (bez Docker attēla) trūkstošais komponents ir pārlūkprogrammas binārais fails: resursdatorā izpildiet `npx playwright install chromium`.
+Ja izmantojat šos pakalpojumu sniedzējus, izvelciet tā kanāla `-web` tagu, kuru jau izmantojat — nekas cits nemainās. npm/CLI instalācijā (nav Docker attēla) līdzvērtīgs trūkstošais elements ir pārlūkprogrammas binārais fails: palaidiet `npx playwright install chromium` resursdatorā.
 
-#### Pirmslaidiena kanāla izmantošana
+#### Pirmsizlaides kanāla izmantošana
 
-Kanāls `next` tiek atkārtoti būvēts pēc katras izmaiņu nosūtīšanas uz pašreizējo noklusējuma `release/v*` zaru un tiek publicēts gan AMD64, gan ARM64 arhitektūrai. Vecāki uzturēšanas zari to nevar pārrakstīt. Šis kanāls nodrošina izgūstamu attēlu ar labojumiem, kas ir sapludināti aktīvajā laidiena zarā, pirms tiek izveidots nākamais stabilais tags.
+`next` kanāls tiek pārbūvēts katrā nospiešanas reizē uz pašreizējo noklusējuma `release/v*` atzaru un tiek publicēts gan AMD64 gan ARM64. Vecākas apkopes filiāles to nevar pārrakstīt. Kanāls nodrošina izvelkamu attēlu labojumiem, kas ir sapludināti aktīvajā izlaišanas zarā, pirms tiek izgriezts nākamais stabilais tags.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Izmantojot Docker Compose, pārrakstiet atlasītajā profilā izmantoto attēla tagu, pēc tam izgūstiet attēlu un izveidojiet pakalpojumu no jauna:
+Izmantojot Docker Compose, ignorējiet attēla tagu, ko izmanto atlasītais profils, pēc tam izvelciet un izveidojiet pakalpojumu no jauna:
 
 ```yaml
 services:
@@ -548,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Drošība un atgriešanās pie iepriekšējās versijas
+#### Drošība un atgriešana
 
-`next` ir mainīgs pirmsizlaides kanāls. Tas var mainīties pēc jebkuras izmaiņu nosūtīšanas uz aktīvo laidiena zaru un **nav paredzēts lietošanai produkcijas vidē**. Konkrētas būvējuma versijas novērtēšanas laikā fiksējiet attēla jaucējkopsavilkumu:
+`next` ir peldošs pirmsizlaides kanāls. Tas var mainīties jebkurā nospiežot uz aktīvās atbrīvošanas filiāli un ir** netiek atbalstīts izmantošanai ražošanā** . Piespraudiet attēla īssavilkumu, izvērtējot konkrētu būvējumu:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Pirms testēšanas izveidojiet OmniRoute datu sējuma vai piesaistītā datu direktorija dublējumu. Lai atgrieztos pie iepriekšējās versijas, atjaunojiet iepriekš izmantoto stabilo versiju vai jaucējkopsavilkumu un izveidojiet konteineru no jauna:
+Pirms testēšanas dublējiet OmniRoute datu apjomu vai saistītu datu direktoriju. Lai atgrieztu atpakaļ, atjaunojiet iepriekš izmantoto stabilo versiju vai iznīciniet un izveidojiet konteineru no jauna:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Laidiena zara būvējums nekad nevar pārvietot `latest`; stabilo norādi drīkst atjaunināt tikai atbilstoša stabila semantiskā versija. `next` attēliem tiek saglabāta laidiena attēlu pārbaude un bloķējošā KRITISKO ievainojamību pārbaude.
+Atbrīvošanas atzara konstrukcija nekad nevar pārvietot `latest`; tikai piemērota stabila semantiskā versija var veicināt stabilu rādītāju. `next` attēli saglabā atbrīvošanas attēla pārbaudi un bloķē KRITISKĀS ievainojamības vārtus.
 
-**`latest` negarantē Git repozitorija aktuālāko stāvokli.** Labojumi, kas sapludināti zarā `main` vai aktīvajā `release/v*` zarā, **nav** iekļauti `:latest`, kamēr nav publicēts stabils SemVer attēls un publicēšanas uzdevums nav atjauninājis `:latest` (tas pats jaucējkopsavilkums kā attiecīgajai SemVer versijai). Ja šķiet, ka `latest` ir iesaldēts, lai gan GitHub jau ir redzams labojums, izgūstiet `:next`, lai testētu laidiena zaru, vai gaidiet SemVer tagu.
+**`latest` nav valūtas garantija git.** Apvienotie labojumi `main` vai aktīvajā `release/v*` atzarā ir** nē** `:latest` līdz tiek publicēts stabils SemVer attēls un publicēšanas uzdevums reklamē `:latest` (tāds pats īssavilkums kā šim SemVer). Ja `latest` izskatās iesaldēts, bet GitHub jau parāda labojumu, velciet `:next`, lai pārbaudītu izlaišanas atzaru, vai gaidiet SemVer tagu.
 
-| Jūsu mērķis                                                                                | Izmantojiet                                        |
-| ------------------------------------------------------------------------------------------ | -------------------------------------------------- |
-| GitOps / produkcijas vide, kurā nedrīkst būt neparedzētu izmaiņu                           | Fiksējiet `:X.Y.Z` (vai attēla jaucējkopsavilkumu) |
-| Sekot publicētajiem stabilajiem laidieniem un pieņemt atkārtotu izveidi pēc katra laidiena | `:latest`                                          |
-| Testēt neizlaistas `release/v*` izmaiņas                                                   | `:next` (ne produkcijas videi)                     |
-| Testēt `main`                                                                              | `:main` (ne produkcijas videi)                     |
+| Jūs vēlaties                                                                  | Izmantot                                     |
+| ----------------------------------------------------------------------------- | -------------------------------------------- |
+| GitOps / ražošana, kas nedrīkst dreifēt                                       | Piespraust `:X.Y.Z` (vai attēla īssavilkumu) |
+| Sekojiet publicētajiem staļļiem un pieņemiet atkārtotu izveidi katrā laidienā | `:latest`                                    |
+| Izmēģināt neizlaistās `release/v*` saistības                                  | `:next` (nav ražošana)                       |
+| Pārbaudi `main`                                                               | `:main` (nav ražošana)                       |
 
 ## Informācijas paneļa atjauninājumi Docker vidē
 

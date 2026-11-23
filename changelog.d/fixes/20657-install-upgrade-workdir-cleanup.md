@@ -1,0 +1,1 @@
+- **fix(ci):** `check:install-upgrade` now removes its work directory (two full installs of the package) after every run, passing or failing, instead of leaving it on the runner ([#20657](https://github.com/cheaper-inference/OmniRoute/pull/20657))
