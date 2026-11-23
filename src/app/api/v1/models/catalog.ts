@@ -287,6 +287,7 @@ export async function getUnifiedModelsResponse(
           settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
         hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
         exposeCombosOnly: buildFlags.combosOnly,
+        leanCatalog: settingsForAuth?.leanCatalog === true,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
         revealHidden: buildFlags.revealHidden,
       }
@@ -385,8 +386,15 @@ async function buildUnifiedModelsResponseCore(
     const capabilityResolutionSnapshot = createModelCapabilityResolutionSnapshot();
     const { aliasToProviderId, providerIdToAlias } = buildAliasMaps();
     const _qp = new URL(request.url).searchParams.get("prefix");
+    // Lean catalog: real provider ids only, so the dual alias+canonical rows collapse
+    // to canonical. An explicit ?prefix= still wins.
+    const leanCatalog = settings.leanCatalog === true;
     const prefixMode =
-      _qp === "alias" || _qp === "canonical" || _qp === "dual" ? _qp : getModelsCatalogPrefixMode();
+      _qp === "alias" || _qp === "canonical" || _qp === "dual"
+        ? _qp
+        : leanCatalog
+          ? "canonical"
+          : getModelsCatalogPrefixMode();
     const includeAlias = prefixMode !== "canonical";
     const includeCanonical = prefixMode !== "alias";
     const modelsDevEffortTiers = isModelsDevEffortTiersEnabled(); // #15944, default off
@@ -409,7 +417,8 @@ async function buildUnifiedModelsResponseCore(
     // hideAutoCombos — which only unadvertises ids that still route when sent
     // explicitly — a disabled router rejects every auto/* id with a 400, so
     // listing them offers the client a choice that cannot succeed.
-    const hideAuto = settings.hideAutoCombos === true || settings.autoRoutingEnabled === false;
+    const hideAuto =
+      settings.hideAutoCombos === true || settings.autoRoutingEnabled === false || leanCatalog;
     const shouldHidePaid = (
       providerKey: string,
       modelId: string,
@@ -958,7 +967,8 @@ async function buildUnifiedModelsResponseCore(
       prefixMode,
       aliasToProviderId,
       isSyntheticVariantHidden,
-      hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      hideNoThinkVariants: settings.hideNoThinkVariants === true || leanCatalog,
+      disableEffortVariants: leanCatalog,
       allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.

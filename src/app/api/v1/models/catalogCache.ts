@@ -102,6 +102,8 @@ export type CatalogCacheOptions = {
   hideNoThinkVariants?: boolean;
   /** Public listing advertises only combos (`settings.exposeCombosOnly`). */
   exposeCombosOnly?: boolean;
+  /** Lean catalog (`settings.leanCatalog`): auto/no-think/effort ids and dual prefixes dropped. */
+  leanCatalog?: boolean;
   /** Management-only build that keeps operator-hidden models (`/api/models/catalog`). */
   revealHidden?: boolean;
   /**
@@ -290,7 +292,8 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
   // (the public /v1/models default) stays byte-identical.
   const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
   const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
-  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
+  const lean = catalogSettings?.leanCatalog ? "|lean" : "";
+  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}${lean}`;
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last

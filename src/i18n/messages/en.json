@@ -9724,6 +9724,8 @@
     "qdrantCollection": "Collection",
     "catalogVisibilityHint": "Hidden model IDs remain callable with the same access permissions.",
     "exposeCombosOnly": "List only combos in /v1/models",
+    "leanCatalog": "Lean catalog in /v1/models",
+    "leanCatalogDesc": "One switch for a clean list: hides auto/*, no-think/* and effort-suffix ids (-low/-medium/-high) and lists each model once under its canonical provider prefix. Your own combos stay. Hidden ids keep routing when sent explicitly.",
     "exposeCombosOnlyDesc": "Clients that auto-discover models see your combos (and auto/* unless hidden) instead of raw provider models. Explicit provider/model ids keep routing.",
     "catalogScopeTitle": "Models API listing",
     "catalogScopeDesc": "What GET /v1/models advertises for this key. Narrowing the list never changes what the key can call.",

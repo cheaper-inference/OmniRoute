@@ -209,6 +209,8 @@ export async function applyCatalogPostFilters(
     prefixMode: string;
     aliasToProviderId: Record<string, string>;
     hideNoThinkVariants?: boolean;
+    /** Lean catalog: suppress effort-suffix variants like the OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS flag. */
+    disableEffortVariants?: boolean;
     /** Raw settings.blockedProviders; blocked gateways never carry mirrors. */
     blockedProviders?: unknown;
     authorizeSyntheticModel?: CatalogVariantAuthorizer;
@@ -224,6 +226,8 @@ export async function applyCatalogPostFilters(
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
   let finalModels = models;
+  const effortVariantsDisabled =
+    ctx.disableEffortVariants === true || isDisableThinkingLevelVariantsEnabled();
   const authorizeSyntheticModel =
     ctx.authorizeSyntheticModel ?? (await resolveCatalogVariantAuthorizer(request));
   const authorizeEffortVariant = composeEffortVariantAuthorizer(
@@ -254,7 +258,7 @@ export async function applyCatalogPostFilters(
   // suffixed ids (claudeEffortVariant.ts), this just makes them selectable in catalog-only
   // clients (OpenCode) that can't set a reasoning_effort config the way VS Code does.
   // Gated like the synced-effort pass below: OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS suppresses -low/-medium/-high catalog variants.
-  if (!isDisableThinkingLevelVariantsEnabled()) {
+  if (!effortVariantsDisabled) {
     const beforeClaudeEffortVariants = finalModels;
     finalModels = await filterUnauthorizedAppendedVariants(
       beforeClaudeEffortVariants,
@@ -354,7 +358,7 @@ export async function applyCatalogPostFilters(
   // #7694: advertise `<provider>/<model>-<tier>` variants for synced models that
   // captured `reasoning.supported_efforts` at sync time (capabilities.effort_tiers).
   // Derived from the already key-filtered list; skips codex/kimi (own suffix mechanism).
-  if (!isDisableThinkingLevelVariantsEnabled()) {
+  if (!effortVariantsDisabled) {
     const beforeSyncedEffortVariants = finalModels;
     finalModels = await filterUnauthorizedAppendedVariants(
       beforeSyncedEffortVariants,

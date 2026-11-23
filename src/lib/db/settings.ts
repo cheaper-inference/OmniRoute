@@ -339,6 +339,10 @@ export async function getSettings() {
     // Opt-in: the public /v1/models listing advertises only combos (user combos +
     // auto/*). Catalog-only — explicit provider/model ids still route.
     exposeCombosOnly: false,
+    // Opt-in "lean catalog" (#9418): one switch that applies hideAutoCombos +
+    // hideNoThinkVariants + no effort-suffix variants + canonical-only prefixes to
+    // /v1/models. Catalog-only — hidden ids still route when sent explicitly.
+    leanCatalog: false,
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap

@@ -236,6 +236,7 @@ export const updateSettingsSchema = z.object({
   hideAutoCombos: z.boolean().optional(),
   hideNoThinkVariants: z.boolean().optional(),
   exposeCombosOnly: z.boolean().optional(),
+  leanCatalog: z.boolean().optional(),
   // STRICT_ZERO_COST (opt-in, default "off"): stricter than hidePaidModels — a
   // candidate must be keyless (no credential exists, so no request against it
   // can ever be billed) OR pass a live, fresh, hard-stop-guaranteed quota
