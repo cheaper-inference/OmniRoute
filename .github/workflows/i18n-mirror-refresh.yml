@@ -281,6 +281,19 @@ jobs:
           fi
           exit "$FAILED"
 
+      - name: Check translated mirror content
+        if: steps.drift.outputs.files != ''
+        env:
+          OMNIROUTE_GATE_MODE: pr
+        run: |
+          node --import tsx/esm --test \
+            tests/unit/cli-env-quality-docs-mirrors.test.ts \
+            tests/unit/cycle-docs-mirror-contract.test.ts \
+            tests/unit/docs/remote-token-privilege-locales.test.ts \
+            tests/unit/docs/route-guard-import-locales.test.ts \
+            tests/unit/docs/vision-key-scope-locales.test.ts \
+            tests/unit/resilience-pre-dispatch-docs-mirrors.test.ts
+
       - name: Commit and open or update the refresh PR
         if: steps.drift.outputs.refresh == 'true'
         env:
