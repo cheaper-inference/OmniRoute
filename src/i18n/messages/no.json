@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Begrenset til {count, plural, one {# kombinasjon} other {# kombinasjoner}}.",
     "preservedComboRules": "{count, plural, one {# lagret oppføring finnes} other {# lagrede oppføringer finnes}} ikke i denne kombinasjonslisten (for eksempel rutingsregler) og beholdes som lagret.",
     "preservedComboRuleHint": "Beholdes som lagret. Denne oppføringen er ikke en kombinasjon i listen ovenfor, så den kan bare endres via API-et.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# navngitt kombinasjon er unntatt fra} other {# navngitte kombinasjoner er unntatt fra}} denne nøkkelens blokkerte modeller. Fjern en kombinasjon for å bruke de blokkerte modellene på den.",
+    "removeNamedCombo": "Fjern {name}",
     "apiManagerCustomRateLimits": "Egendefinerte satsgrenser",
     "apiManagerCustomRateLimitsDesc": "Overstyr globale standardgrenser. La stå tomt for å bruke standardinnstillinger.",
     "apiManagerRateLimitRequestsPlaceholder": "Forespørsler",

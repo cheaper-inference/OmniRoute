@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "{count, plural, one {#개 조합} other {#개 조합}}으로 제한됨.",
     "preservedComboRules": "{count, plural, one {저장된 항목 #개가} other {저장된 항목 #개가}} 이 콤보 목록에 없지만(예: 라우팅 규칙) 저장된 상태로 유지됩니다.",
     "preservedComboRuleHint": "저장된 상태로 유지됩니다. 이 항목은 위 목록에 있는 콤보가 아니므로 API를 통해서만 변경할 수 있습니다.",
+    "namedCombosSkipBlockedModels": "{count, plural, other {이름이 지정된 콤보 #개는}} 이 키의 차단된 모델에서 제외됩니다. 차단된 모델을 적용하려면 콤보를 삭제하세요.",
+    "removeNamedCombo": "{name} 삭제",
     "apiManagerCustomRateLimits": "사용자 정의 속도 제한",
     "apiManagerCustomRateLimitsDesc": "전역 기본 제한을 재정의합니다. 기본값을 사용하려면 비워 두세요.",
     "apiManagerRateLimitRequestsPlaceholder": "요청사항",

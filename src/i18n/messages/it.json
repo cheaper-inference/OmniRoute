@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Limitato a {count, plural, one {# combinazione} other {# combinazioni}}.",
     "preservedComboRules": "Questo elenco combinato non include {count, plural, one {# voce memorizzata} other {# voci memorizzate}} (ad esempio, regole di instradamento), il cui contenuto salvato verrà mantenuto senza modifiche.",
     "preservedComboRuleHint": "Mantenuta così come memorizzata. Questa voce non corrisponde a una combinazione nell'elenco precedente, quindi può essere modificata solo tramite l'API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# combinazione con nome è esente dai} other {# combinazioni con nome sono esenti dai}} modelli bloccati di questa chiave. Rimuovi una combinazione per applicarvi i modelli bloccati.",
+    "removeNamedCombo": "Rimuovi {name}",
     "apiManagerCustomRateLimits": "Limiti di velocità personalizzati",
     "apiManagerCustomRateLimitsDesc": "Sostituisci i limiti predefiniti globali. Lascia vuoto per utilizzare le impostazioni predefinite.",
     "apiManagerRateLimitRequestsPlaceholder": "Richieste",

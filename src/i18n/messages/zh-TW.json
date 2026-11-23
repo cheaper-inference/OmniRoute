@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "僅限用於 {count, plural, one {# 個組合} other {# 個組合}}。",
     "preservedComboRules": "{count, plural, one {# 個已儲存的項目} other {# 個已儲存的項目}}不在此組合清單中（例如路由規則），並將依已儲存的內容保留。",
     "preservedComboRuleHint": "依已儲存的內容保留。此項目不是上述清單中的組合，因此只能透過 API 變更。",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# 個已命名組合免受} other {# 個已命名組合免受}}此金鑰的已封鎖模型限制。移除組合即可對其套用已封鎖模型。",
+    "removeNamedCombo": "移除 {name}",
     "apiManagerCustomRateLimits": "自定義費率限制",
     "apiManagerCustomRateLimitsDesc": "覆蓋全域性預設限制。留空以使用預設值。",
     "apiManagerRateLimitRequestsPlaceholder": "要求",

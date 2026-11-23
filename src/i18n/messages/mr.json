@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "{count, plural, one {# कॉम्बोपुरते मर्यादित} other {# कॉम्बोजपुरते मर्यादित}}.",
     "preservedComboRules": "{count, plural, one {# संग्रहित नोंद या कॉम्बो सूचीमध्ये नाही} other {# संग्रहित नोंदी या कॉम्बो सूचीमध्ये नाहीत}} (उदाहरणार्थ, राउटिंग नियम) आणि जतन केल्याप्रमाणे ठेवल्या जातील.",
     "preservedComboRuleHint": "संग्रहित केल्याप्रमाणे ठेवले आहे. ही नोंद वरील सूचीमधील कॉम्बो नसल्यामुळे ती फक्त API द्वारे बदलता येऊ शकते.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# नामांकित कॉम्बोला} other {# नामांकित कॉम्बोना}} या कीच्या ब्लॉक केलेल्या मॉडेल्समधून सूट दिली आहे. ब्लॉक केलेले मॉडेल्स लागू करण्यासाठी कॉम्बो काढून टाका.",
+    "removeNamedCombo": "{name} काढा",
     "apiManagerCustomRateLimits": "सानुकूल दर मर्यादा",
     "apiManagerCustomRateLimitsDesc": "जागतिक डीफॉल्ट मर्यादा ओव्हरराइड करा. डीफॉल्ट वापरण्यासाठी रिकामे सोडा.",
     "apiManagerRateLimitRequestsPlaceholder": "विनंत्या",

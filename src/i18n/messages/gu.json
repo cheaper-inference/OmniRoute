@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "{count, plural, one {# સંયોજન} other {# સંયોજનો}} સુધી મર્યાદિત.",
     "preservedComboRules": "{count, plural, one {# સંગ્રહિત એન્ટ્રી} other {# સંગ્રહિત એન્ટ્રીઓ}} આ કૉમ્બો સૂચિમાં નથી (ઉદાહરણ તરીકે, રૂટિંગ નિયમો) અને સાચવ્યા પ્રમાણે જ રાખવામાં આવશે.",
     "preservedComboRuleHint": "સંગ્રહિત છે તેમ જ રાખ્યું છે. આ એન્ટ્રી ઉપરની સૂચિમાં કૉમ્બો નથી, તેથી તેને ફક્ત API દ્વારા જ બદલી શકાય છે.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# નામાંકિત કૉમ્બો મુક્ત છે} other {# નામાંકિત કૉમ્બો મુક્ત છે}} આ કીના બ્લૉક કરેલા મૉડલ્સમાંથી. તેના પર બ્લૉક કરેલા મૉડલ્સ લાગુ કરવા માટે કોઈ કૉમ્બો દૂર કરો.",
+    "removeNamedCombo": "{name} દૂર કરો",
     "apiManagerCustomRateLimits": "કસ્ટમ દર મર્યાદાઓ",
     "apiManagerCustomRateLimitsDesc": "વૈશ્વિક ડિફૉલ્ટ મર્યાદાઓને ઓવરરાઇડ કરો. ડિફૉલ્ટનો ઉપયોગ કરવા માટે ખાલી છોડો.",
     "apiManagerRateLimitRequestsPlaceholder": "વિનંતીઓ",

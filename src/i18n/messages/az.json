@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "{count, plural, one {# kombinasiya} other {# kombinasiya}} ilə məhdudlaşdırılıb.",
     "preservedComboRules": "Bu kombinasiya siyahısında olmayan {count, plural, one {# saxlanmış qeyd} other {# saxlanmış qeyd}} (məsələn, marşrutlaşdırma qaydaları) saxlanıldığı kimi qorunacaq.",
     "preservedComboRuleHint": "Saxlanıldığı kimi qorunur. Bu qeyd yuxarıdakı siyahıda yer alan kombinasiya deyil, buna görə də yalnız API vasitəsilə dəyişdirilə bilər.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# adlandırılmış kombinasiya} other {# adlandırılmış kombinasiya}} bu açarın bloklanmış modellərindən istisnadır. Bloklanmış modelləri ona tətbiq etmək üçün kombinasiyanı silin.",
+    "removeNamedCombo": "{name} Sil",
     "apiManagerCustomRateLimits": "Fərdi tarif limitləri",
     "apiManagerCustomRateLimitsDesc": "Qlobal standart limitləri ləğv edin. Defoltları istifadə etmək üçün boş buraxın.",
     "apiManagerRateLimitRequestsPlaceholder": "Sorğular",

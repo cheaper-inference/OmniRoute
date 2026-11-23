@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "A dín rẹ̀ mọ́ sí {count, plural, one {# àkójọpọ̀} other {# àkójọpọ̀}}.",
     "preservedComboRules": "{count, plural, one {Àkọọlẹ̀ # tí a fipamọ́ kò sí nínú àtòjọ àkójọpọ̀ yìí (fún àpẹẹrẹ, òfin ìdarí), a ó sì pa á mọ́ bí a ti fipamọ́ ọ.} other {Àwọn àkọọlẹ̀ # tí a fipamọ́ kò sí nínú àtòjọ àkójọpọ̀ yìí (fún àpẹẹrẹ, àwọn òfin ìdarí), a ó sì pa wọ́n mọ́ bí a ti fipamọ́ wọn.}}",
     "preservedComboRuleHint": "A pa á mọ́ bí a ti fipamọ́ ọ. Àkọọlẹ̀ yìí kì í ṣe àkójọpọ̀ nínú àtòjọ òkè, nítorí náà API nìkan ni a lè fi yí i padà.",
+    "namedCombosSkipBlockedModels": "{count, plural, other {Àpapọ̀ oníorúkọ # kò sí lábẹ́}} àwọn àwòṣe dídènà ti kọ́kọ́rọ́ yìí. Yọ àpapọ̀ kan kúrò láti lo àwọn àwòṣe dídènà mọ́ ọn.",
+    "removeNamedCombo": "Yọ {name} kúrò",
     "apiManagerCustomRateLimits": "Àwọn Òpin Oṣùwọ̀n Àkànṣe",
     "apiManagerCustomRateLimitsDesc": "Rọ́pò àwọn òpin àiyipada àgbáyé. Fi sílẹ̀ ní òfo láti lo àwọn àiyipada.",
     "apiManagerRateLimitRequestsPlaceholder": "Àwọn Ìbéèrè",

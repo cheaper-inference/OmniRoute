@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Omezeno na {count, plural, one {# kombinaci} few {# kombinace} other {# kombinací}}.",
     "preservedComboRules": "{count, plural, one {# uložená položka není} few {# uložené položky nejsou} other {# uložených položek není}} v tomto seznamu kombinací (například pravidla směrování) a {count, plural, one {bude zachována tak, jak je uložena} few {budou zachovány tak, jak jsou uloženy} other {budou zachovány tak, jak jsou uloženy}}.",
     "preservedComboRuleHint": "Zachováno tak, jak je uloženo. Tato položka není kombinací ve výše uvedeném seznamu, takže ji lze změnit pouze prostřednictvím API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# s názvem combo je osvobozeno od} other {# pojmenovaná komba jsou osvobozena od}} blokované modely tohoto klíče. Odeberte kombinaci, abyste na ni použili blokované modely.",
+    "removeNamedCombo": "Odebrat {name}",
     "apiManagerCustomRateLimits": "Vlastní limity sazeb",
     "apiManagerCustomRateLimitsDesc": "Přepsat globální výchozí limity. Chcete-li použít výchozí hodnoty, ponechte prázdné.",
     "apiManagerRateLimitRequestsPlaceholder": "Žádosti",

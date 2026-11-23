@@ -409,13 +409,21 @@ function buildValidBlockedModels(
   return blockedModels.filter((id) => typeof id === "string" && id.length > 0 && id.length < 200);
 }
 
+function isValidComboName(name: unknown): name is string {
+  return typeof name === "string" && name.trim().length > 0 && name.length < 200;
+}
+
+/**
+ * "All" saves combo/* plus the combos the key names. A named combo is what lets its
+ * targets skip the key's blockedModels (comboTargetKeyPolicy.ts), so dropping the
+ * names on an unrelated save would break those combos.
+ */
 function buildValidCombos(formState: ApiKeyAccessFormState): string[] {
-  const allowedCombos = formState.allowAllCombos
-    ? [ALL_COMBOS_ACCESS_RULE]
-    : formState.selectedCombos;
-  return allowedCombos.filter(
-    (name) => typeof name === "string" && name.trim().length > 0 && name.length < 200
+  if (!formState.allowAllCombos) return formState.selectedCombos.filter(isValidComboName);
+  const named = formState.selectedCombos.filter(
+    (name) => isValidComboName(name) && name !== ALL_COMBOS_ACCESS_RULE
   );
+  return [ALL_COMBOS_ACCESS_RULE, ...new Set(named)];
 }
 
 function isConnectionId(id: unknown): id is string {

@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Ierobežots līdz {count, plural, one {# kombinācijai} other {# kombinācijām}}.",
     "preservedComboRules": "{count, plural, one {# saglabāts ieraksts nav} other {# saglabāti ieraksti nav}} šajā kombināciju sarakstā (piemēram, maršrutēšanas noteikumi) un tiks saglabāti nemainīti.",
     "preservedComboRuleHint": "Paturēts saglabātajā veidā. Šis ieraksts nav kombinācija iepriekš minētajā sarakstā, tāpēc to var mainīt tikai, izmantojot API.",
+    "namedCombosSkipBlockedModels": "{count, plural, zero {# nosauktu kombināciju ir atbrīvotas no} one {# nosaukta kombinācija ir atbrīvota no} other {# nosauktas kombinācijas ir atbrīvotas no}} šīs atslēgas bloķētajiem modeļiem. Noņemiet kombināciju, lai tai piemērotu bloķētos modeļus.",
+    "removeNamedCombo": "Noņemt {name}",
     "apiManagerCustomRateLimits": "Pielāgoti pieprasījumu ātruma ierobežojumi",
     "apiManagerCustomRateLimitsDesc": "Pārrakstīt globālos noklusējuma ierobežojumus. Atstājiet tukšu, lai izmantotu noklusējuma vērtības.",
     "apiManagerRateLimitRequestsPlaceholder": "Pieprasījumi",

@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Beschränkt auf {count, plural, one {# Kombination} other {# Kombinationen}}.",
     "preservedComboRules": "{count, plural, one {# gespeicherter Eintrag ist} other {# gespeicherte Einträge sind}} nicht in dieser Kombinationsliste enthalten (zum Beispiel Routingregeln) und {count, plural, one {bleibt wie gespeichert erhalten} other {bleiben wie gespeichert erhalten}}.",
     "preservedComboRuleHint": "Bleibt wie gespeichert erhalten. Dieser Eintrag ist keine Kombination aus der obigen Liste und kann daher nur über die API geändert werden.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# benannte Kombination ist ausgenommen von} other {# benannte Kombinationen sind ausgenommen von}} den blockierten Modellen dieses Schlüssels. Entfernen Sie eine Kombination, um die blockierten Modelle darauf anzuwenden.",
+    "removeNamedCombo": "{name} entfernen",
     "apiManagerCustomRateLimits": "Benutzerdefinierte Tariflimits",
     "apiManagerCustomRateLimitsDesc": "Überschreiben Sie globale Standardgrenzen. Lassen Sie das Feld leer, um die Standardeinstellungen zu verwenden.",
     "apiManagerRateLimitRequestsPlaceholder": "Anfragen",

@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "מוגבל ל-{count, plural, one {# שילוב} other {# שילובים}}.",
     "preservedComboRules": "{count, plural, one {# רשומה שמורה אינה מופיעה ברשימת השילובים הזו (לדוגמה, כללי ניתוב) ותישמר כפי שנשמרה.} other {# רשומות שמורות אינן מופיעות ברשימת השילובים הזו (לדוגמה, כללי ניתוב) ויישמרו כפי שנשמרו.}}",
     "preservedComboRuleHint": "נשמר כפי שאוחסן. רשומה זו אינה שילוב שמופיע ברשימה שלמעלה, ולכן ניתן לשנות אותה רק דרך ה-API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# שילוב בעל שם פטור} other {# שילובים בעלי שם פטורים}} מהמודלים החסומים של מפתח זה. הסר שילוב כדי להחיל עליו את המודלים החסומים.",
+    "removeNamedCombo": "הסר את {name}",
     "apiManagerCustomRateLimits": "מגבלות תעריף מותאמות אישית",
     "apiManagerCustomRateLimitsDesc": "עוקף מגבלות ברירת מחדל גלובליות. השאר ריק כדי להשתמש בברירות המחדל.",
     "apiManagerRateLimitRequestsPlaceholder": "בקשות",

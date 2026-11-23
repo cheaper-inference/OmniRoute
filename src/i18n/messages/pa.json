@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "{count, plural, one {# ਕੌਂਬੋ} other {# ਕੌਂਬੋਆਂ}} ਤੱਕ ਸੀਮਿਤ।",
     "preservedComboRules": "{count, plural, one {# ਸਟੋਰ ਕੀਤੀ ਐਂਟਰੀ} other {# ਸਟੋਰ ਕੀਤੀਆਂ ਐਂਟਰੀਆਂ}} ਇਸ ਕੌਂਬੋ ਸੂਚੀ ਵਿੱਚ ਨਹੀਂ {count, plural, one {ਹੈ} other {ਹਨ}} (ਉਦਾਹਰਨ ਵਜੋਂ ਰਾਊਟਿੰਗ ਨਿਯਮ) ਅਤੇ {count, plural, one {ਇਸਨੂੰ} other {ਇਨ੍ਹਾਂ ਨੂੰ}} ਸੁਰੱਖਿਅਤ ਕੀਤੇ ਅਨੁਸਾਰ ਹੀ ਰੱਖਿਆ ਜਾਵੇਗਾ।",
     "preservedComboRuleHint": "ਸਟੋਰ ਕੀਤੇ ਅਨੁਸਾਰ ਰੱਖੀ ਗਈ। ਇਹ ਐਂਟਰੀ ਉਪਰੋਕਤ ਸੂਚੀ ਵਿੱਚ ਕੌਂਬੋ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਸਿਰਫ਼ API ਰਾਹੀਂ ਹੀ ਬਦਲਿਆ ਜਾ ਸਕਦਾ ਹੈ।",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# ਨਾਮੀ ਕੰਬੋ ਇਸ ਕੁੰਜੀ ਦੇ ਬਲਾਕ ਕੀਤੇ ਮਾਡਲਾਂ ਤੋਂ ਛੋਟ ਪ੍ਰਾਪਤ ਹੈ।} other {# ਨਾਮੀ ਕੰਬੋ ਇਸ ਕੁੰਜੀ ਦੇ ਬਲਾਕ ਕੀਤੇ ਮਾਡਲਾਂ ਤੋਂ ਛੋਟ ਪ੍ਰਾਪਤ ਹਨ।}} ਬਲਾਕ ਕੀਤੇ ਮਾਡਲਾਂ ਨੂੰ ਇਸ ਉੱਤੇ ਲਾਗੂ ਕਰਨ ਲਈ ਕੋਈ ਕੰਬੋ ਹਟਾਓ।",
+    "removeNamedCombo": "{name} ਨੂੰ ਹਟਾਓ",
     "apiManagerCustomRateLimits": "ਕਸਟਮ ਦਰ ਸੀਮਾਵਾਂ",
     "apiManagerCustomRateLimitsDesc": "ਗਲੋਬਲ ਡਿਫੌਲਟ ਸੀਮਾਵਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰੋ। ਡਿਫੌਲਟ ਵਰਤਣ ਲਈ ਖਾਲੀ ਛੱਡੋ।",
     "apiManagerRateLimitRequestsPlaceholder": "ਬੇਨਤੀਆਂ",

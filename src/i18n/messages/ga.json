@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Teoranta do {count, plural, one {# comhcheangal} other {# comhcheangail}}.",
     "preservedComboRules": "{count, plural, one {Níl # iontráil stóráilte ar an liosta comhcheangal seo (mar shampla rialacha ródaithe) agus coimeádfar í mar a sábháladh í.} other {Níl # iontrálacha stóráilte ar an liosta comhcheangal seo (mar shampla rialacha ródaithe) agus coimeádfar iad mar a sábháladh iad.}}",
     "preservedComboRuleHint": "Coimeádfar mar atá sí stóráilte. Ní comhcheangal í an iontráil seo sa liosta thuas, mar sin ní féidir í a athrú ach tríd an API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {Tá # theaglaim ainmnithe díolmhaithe ó} other {Tá # theaglaim ainmnithe díolmhaithe ó}} shamhlacha blocáilte na heochrach seo. Bain teaglaim chun na samhlacha blocáilte a chur i bhfeidhm uirthi.",
+    "removeNamedCombo": "Bain {name}",
     "apiManagerCustomRateLimits": "Teorainneacha Ráta Saincheaptha",
     "apiManagerCustomRateLimitsDesc": "Sáraigh na teorainneacha réamhshocraithe domhanda. Fág bán chun na réamhshocruithe a úsáid.",
     "apiManagerRateLimitRequestsPlaceholder": "Iarratais",

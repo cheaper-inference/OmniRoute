@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Begränsad till {count, plural, one {# kombination} other {# kombinationer}}.",
     "preservedComboRules": "{count, plural, one {# lagrad post finns} other {# lagrade poster finns}} inte i den här kombinationslistan (till exempel routningsregler) och kommer att behållas i sparat skick.",
     "preservedComboRuleHint": "Behålls i lagrat skick. Den här posten är inte en kombination i listan ovan och kan därför endast ändras via API:et.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# namngiven kombination är undantagen från} other {# namngivna kombinationer är undantagna från}} den här nyckelns blockerade modeller. Ta bort en kombination för att tillämpa de blockerade modellerna på den.",
+    "removeNamedCombo": "Ta bort {name}",
     "apiManagerCustomRateLimits": "Anpassade prisgränser",
     "apiManagerCustomRateLimitsDesc": "Åsidosätt globala standardgränser. Lämna tomt om du vill använda standardinställningarna.",
     "apiManagerRateLimitRequestsPlaceholder": "Förfrågningar",

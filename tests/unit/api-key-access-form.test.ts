@@ -8,7 +8,7 @@
  *   throttle / maxSessions <= 0 or non-numbers -> 0; USD limits > 0 -> String(value), else "".
  * - save: sanitized name; Claude Code family patterns are stripped from blockedModels and only
  *   re-added (in the blocked-family order) while "cc/*" is selected in restricted mode; combos
- *   "All" -> ["combo/*"], restrict keeps the list verbatim (even empty, #12267); connections
+ *   "All" -> ["combo/*", ...named combos], restrict keeps the list verbatim (even empty, #12267); connections
  *   filtered to UUIDs; throttle clamped to 0..300000 and floored; maxSessions floored;
  *   mergeApiKeyPermissionScopes keeps unknown scopes in stored order; USD strings -> number | null.
  *
@@ -316,6 +316,32 @@ test("initial state: combo/* selects All and is dropped from the explicit combo 
   const restrictedEmpty = createInitialFormState({ id: "k", name: "k", allowedCombos: [] });
   assert.equal(restrictedEmpty.allowAllCombos, false);
   assert.deepEqual(restrictedEmpty.selectedCombos, []);
+});
+
+test("Save keeps combos named next to combo/*: they are what lets combo targets skip blockedModels", () => {
+  // A key that allows every combo and also names two of them. Saving the page unchanged
+  // used to persist ["combo/*"] only, so the named combos' targets fell under blockedModels
+  // (cc/*, codex/*) and every one of them was skipped before dispatch.
+  const stored: ApiKeyAccessData = {
+    ...keyUnrestricted,
+    blockedModels: ["codex/*"],
+    allowedCombos: ["combo/*", "codex-sol", "claude-opus-5.5"],
+  };
+  const state = createInitialFormState(stored);
+  assert.equal(state.allowAllCombos, true);
+  assert.deepEqual(state.selectedCombos, ["codex-sol", "claude-opus-5.5"]);
+
+  const body = buildApiKeyAccessPayload(state, stored);
+  assert.deepEqual(body.allowedCombos, ["combo/*", "codex-sol", "claude-opus-5.5"]);
+});
+
+test("Save under All writes combo/* once and drops blank or oversized names", () => {
+  const state: ApiKeyAccessFormState = {
+    ...createInitialFormState(keyUnrestricted),
+    selectedCombos: ["combo/*", "codex-sol", " ", "x".repeat(200), "codex-sol"],
+  };
+  const body = buildApiKeyAccessPayload(state, keyUnrestricted);
+  assert.deepEqual(body.allowedCombos, ["combo/*", "codex-sol"]);
 });
 
 test("initial state: throttle and max sessions clamp non-positive values to 0 only", () => {

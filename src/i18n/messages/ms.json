@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Terhad kepada {count, plural, one {# kombo} other {# kombo}}.",
     "preservedComboRules": "{count, plural, one {# entri tersimpan} other {# entri tersimpan}} tidak terdapat dalam senarai kombo ini (contohnya peraturan penghalaan) dan akan dikekalkan seperti yang disimpan.",
     "preservedComboRuleHint": "Dikekalkan seperti yang disimpan. Entri ini bukan kombo dalam senarai di atas, jadi ia hanya boleh diubah melalui API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# kombo bernama dikecualikan daripada} other {# kombo bernama dikecualikan daripada}} model disekat kunci ini. Alih keluar kombo untuk menggunakan model disekat padanya.",
+    "removeNamedCombo": "Alih keluar {name}",
     "apiManagerCustomRateLimits": "Had Kadar Tersuai",
     "apiManagerCustomRateLimitsDesc": "Gantikan had lalai global. Biarkan kosong untuk menggunakan lalai.",
     "apiManagerRateLimitRequestsPlaceholder": "Permintaan",

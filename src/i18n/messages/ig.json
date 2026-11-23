@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Amachibidoro ya na {count, plural, one {# ngwakọta} other {# ngwakọta}}.",
     "preservedComboRules": "{count, plural, one {# ntinye echekwara adịghị} other {# ntinye echekwara adịghị}} na ndepụta ngwakọta a (dịka ọmụmaatụ, iwu ntụgharị ụzọ), a ga-edobekwa ha dịka e si chekwaa ha.",
     "preservedComboRuleHint": "Edobere dịka e si chekwaa ya. Ntinye a abụghị ngwakọta dị na ndepụta dị n'elu, ya mere enwere ike ịgbanwe ya naanị site na API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# ngwakọta nwere aha ka ewepụrụ na} other {# ngwakọta nwere aha ka ewepụrụ na}} ụdị ndị egbochiri nke igodo a. Wepụ ngwakọta iji tinye ụdị ndị egbochiri na ya.",
+    "removeNamedCombo": "Wepụ {name}",
     "apiManagerCustomRateLimits": "Oke Ọsọ Ahaziri",
     "apiManagerCustomRateLimitsDesc": "Dochie oke ndabara zuru ụwa ọnụ. Hapụ ya oghere iji ndabara.",
     "apiManagerRateLimitRequestsPlaceholder": "Arịrịọ",

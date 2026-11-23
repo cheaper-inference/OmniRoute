@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "مقتصر على {count, plural, one {# تركيبة} other {# تركيبات}}.",
     "preservedComboRules": "{count, plural, one {هناك إدخال واحد مخزّن غير موجود} other {هناك # إدخالات مخزّنة غير موجودة}} في قائمة المجموعات هذه (مثل قواعد التوجيه)، وسيُحتفظ بها كما حُفظت.",
     "preservedComboRuleHint": "تم الاحتفاظ به كما هو مخزّن. هذا الإدخال ليس مجموعة ضمن القائمة أعلاه، لذا لا يمكن تغييره إلا من خلال API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# تركيبة مسمّاة مستثناة من} other {# تركيبات مسمّاة مستثناة من}} النماذج المحظورة لهذا المفتاح. أزِل تركيبة لتطبيق النماذج المحظورة عليها.",
+    "removeNamedCombo": "إزالة {name}",
     "apiManagerCustomRateLimits": "حدود معدل الطلبات المخصصة لمدير الـ API",
     "apiManagerCustomRateLimitsDesc": "تجاوز الحدود الافتراضية العالمية. اتركه فارغًا لاستخدام الإعدادات الافتراضية.",
     "apiManagerRateLimitRequestsPlaceholder": "الطلبات",

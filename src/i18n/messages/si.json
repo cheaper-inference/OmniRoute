@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "{count, plural, one {# සංයෝජනයකට} other {# සංයෝජනවලට}} සීමා කර ඇත.",
     "preservedComboRules": "{count, plural, one {ගබඩා කළ ඇතුළත් කිරීම #ක්} other {ගබඩා කළ ඇතුළත් කිරීම් #ක්}} මෙම සංයෝජන ලැයිස්තුවේ නොමැති අතර (උදාහරණයක් ලෙස මාර්ගගත කිරීමේ නීති), ඒවා සුරැකූ ආකාරයෙන්ම තබා ගනු ඇත.",
     "preservedComboRuleHint": "ගබඩා කළ ආකාරයෙන්ම තබා ඇත. මෙම ඇතුළත් කිරීම ඉහත ලැයිස්තුවේ සංයෝජනයක් නොවන බැවින්, එය වෙනස් කළ හැක්කේ API හරහා පමණි.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {නම් කරන ලද # සංයෝජනයක්} other {නම් කරන ලද # සංයෝජන}} මෙම යතුරේ අවහිර කළ මාදිලිවලින් නිදහස් කර ඇත. අවහිර කළ මාදිලි ඊට යෙදීමට සංයෝජනයක් ඉවත් කරන්න.",
+    "removeNamedCombo": "{name} ඉවත් කරන්න",
     "apiManagerCustomRateLimits": "අභිරුචි අනුපාත සීමා",
     "apiManagerCustomRateLimitsDesc": "ගෝලීය පෙරනිමි සීමා අතික්රමණය කරන්න. පෙරනිමි භාවිත කිරීමට හිස්ව තබන්න.",
     "apiManagerRateLimitRequestsPlaceholder": "ඉල්ලීම්",

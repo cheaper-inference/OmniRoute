@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Beperkt tot {count, plural, one {# combo} other {# combo's}}.",
     "preservedComboRules": "{count, plural, one {# opgeslagen vermelding staat niet in deze keuzelijst (bijvoorbeeld routeringsregels) en blijft ongewijzigd opgeslagen.} other {# opgeslagen vermeldingen staan niet in deze keuzelijst (bijvoorbeeld routeringsregels) en blijven ongewijzigd opgeslagen.}}",
     "preservedComboRuleHint": "Blijft ongewijzigd opgeslagen. Deze vermelding is geen optie in de bovenstaande keuzelijst en kan daarom alleen via de API worden gewijzigd.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# benoemde combo is vrijgesteld van} other {# benoemde combo's zijn vrijgesteld van}} de geblokkeerde modellen van deze sleutel. Verwijder een combo om de geblokkeerde modellen erop toe te passen.",
+    "removeNamedCombo": "{name} verwijderen",
     "apiManagerCustomRateLimits": "Aangepaste tarieflimieten",
     "apiManagerCustomRateLimitsDesc": "Overschrijf de algemene standaardlimieten. Laat leeg om standaardinstellingen te gebruiken.",
     "apiManagerRateLimitRequestsPlaceholder": "Verzoeken",

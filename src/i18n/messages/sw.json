@@ -2625,6 +2625,8 @@
     "restrictedComboCount": "Imezuiwa kwa {count, plural, one {mchanganyiko #} other {michanganyiko #}}.",
     "preservedComboRules": "{count, plural, one {Kipengee # kilichohifadhiwa hakipo katika orodha hii ya mchanganyiko (kwa mfano, kanuni za uelekezaji) na kitaendelea kuhifadhiwa kama kilivyo.} other {Vipengee # vilivyohifadhiwa havipo katika orodha hii ya mchanganyiko (kwa mfano, kanuni za uelekezaji) na vitaendelea kuhifadhiwa kama vilivyo.}}",
     "preservedComboRuleHint": "Kimehifadhiwa kama kilivyo. Kipengee hiki si mchanganyiko katika orodha iliyo hapo juu, kwa hivyo kinaweza kubadilishwa kupitia API pekee.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {Mchanganyiko # wenye jina haujajumuishwa kwenye} other {Michanganyiko # yenye majina haijajumuishwa kwenye}} miundo iliyozuiwa ya ufunguo huu. Ondoa mchanganyiko ili kutumia miundo iliyozuiwa kwake.",
+    "removeNamedCombo": "Ondoa {name}",
     "apiManagerCustomRateLimits": "Vikomo vya Viwango Maalum",
     "apiManagerCustomRateLimitsDesc": "Batilisha mipaka chaguomsingi ya kimataifa. Acha tupu ili kutumia chaguomsingi.",
     "apiManagerRateLimitRequestsPlaceholder": "Maombi",
