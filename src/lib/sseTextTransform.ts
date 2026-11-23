@@ -266,6 +266,131 @@ export function checkIfSnapshot(json: any): boolean {
 
 const fallbackDecoder = new TextDecoder();
 
+/** Shared inputs for the payload walk; built once per frame so the branches stay small. */
+type SanitizeDeps = {
+  root: any;
+  processor: (
+    text: string,
+    field: FieldCategory,
+    isStopSignal?: boolean,
+    index?: string | number,
+    isSnapshot?: boolean,
+    fieldName?: string
+  ) => string;
+  isStopSignal: boolean;
+  isSnapshot: boolean;
+  processToolArgs: boolean;
+  redact: (
+    holder: any,
+    key: string,
+    childPath: string,
+    parentKey: string,
+    compositeKey: string
+  ) => void;
+};
+
+type SanitizeDescend = (
+  obj: any,
+  currentChoiceIdx: number,
+  currentToolIdx: number,
+  parentKey: string,
+  inMetadata: boolean,
+  path: string
+) => void;
+
+/** Metadata subtree: strings take the path-keyed window, objects keep descending. */
+function sanitizeMetadataChild(
+  deps: SanitizeDeps,
+  obj: any,
+  key: string,
+  childPath: string,
+  parentKey: string,
+  compositeKey: string,
+  choiceIdx: number,
+  toolIdx: number,
+  descend: SanitizeDescend
+): void {
+  const value = obj[key];
+  if (typeof value === "string") deps.redact(obj, key, childPath, parentKey, compositeKey);
+  else if (typeof value === "object") descend(value, choiceIdx, toolIdx, key, true, childPath);
+}
+
+/**
+ * Wire alias for a streamed string field. Chat and generic text envelopes keep their own
+ * names; native Responses/Gemini retain format-specific buffer/flush routing.
+ */
+function answerFieldAlias(root: any, key: string): string | undefined {
+  const chatAlias = Array.isArray(root.choices);
+  const reasoningAlias =
+    key === "reasoning_content" &&
+    !Array.isArray(root.candidates) &&
+    !String(root.type ?? "").startsWith("response.");
+  return chatAlias || reasoningAlias ? key : undefined;
+}
+
+/** One string field of the answer payload; returns whether it went through the processor. */
+function sanitizeAnswerString(
+  deps: SanitizeDeps,
+  obj: any,
+  key: string,
+  parentKey: string,
+  childPath: string,
+  compositeKey: string
+): boolean {
+  const value = obj[key];
+  const field =
+    key === "delta" && obj === deps.root && isResponsesToolArgsDelta(deps.root)
+      ? "toolArgs"
+      : classifyField(key, parentKey);
+  if (field === null) {
+    // A metadata key normally passes through untouched, but the usage provenance and cost
+    // keys can carry a credential. They take their own window, keyed by path, so a value
+    // split across frames still redacts without joining the reply.
+    if (IN_PLACE_METADATA_KEYS.has(key)) deps.redact(obj, key, childPath, parentKey, compositeKey);
+    return false;
+  }
+  const fieldName = answerFieldAlias(deps.root, key);
+  if (field === "toolArgs" || field === "partialJson") {
+    obj[key] = deps.processToolArgs
+      ? deps.processor(value, field, deps.isStopSignal, compositeKey, deps.isSnapshot, fieldName)
+      : value;
+    return true;
+  }
+  obj[key] = deps.processor(
+    value,
+    field,
+    deps.isStopSignal,
+    compositeKey,
+    deps.isSnapshot,
+    fieldName
+  );
+  return true;
+}
+
+/**
+ * An object field: metadata subtrees (usage, usage_evidence, provider bookkeeping) get their
+ * own window instead of borrowing the answer buffers. reasoning_details[].data is an opaque
+ * encrypted payload the client echoes back, so it is left alone.
+ */
+function descendAnswerChild(
+  deps: SanitizeDeps,
+  obj: any,
+  key: string,
+  parentKey: string,
+  childPath: string,
+  choiceIdx: number,
+  toolIdx: number,
+  isArray: boolean,
+  descend: SanitizeDescend
+): void {
+  const opaque = key === "data" && parentKey === "reasoning_details";
+  if (!opaque && IN_PLACE_METADATA_KEYS.has(key)) {
+    descend(obj[key], choiceIdx, toolIdx, key, true, childPath);
+    return;
+  }
+  descend(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key, false, childPath);
+}
+
 /**
  * Parse fragmented SSE and process provider payload fields without changing event framing.
  * Snapshots are processed independently; buffered tails drain before stop events or EOF.
@@ -463,80 +588,47 @@ export function createSseTextTransform(
 
             const compositeKey = `${choiceIdx}_${toolIdx}`;
             const isArray = Array.isArray(obj);
+            const deps: SanitizeDeps = {
+              root: json,
+              processor,
+              isStopSignal,
+              isSnapshot,
+              processToolArgs: opts?.processToolArgs === true,
+              redact: redactMetadataString,
+            };
 
             for (const key of Object.keys(obj)) {
               // Every ancestor joins the path, so `usage_evidence.x` and
               // `usage.usage_evidence.x` never share one window.
               const childPath = path ? `${path}/${key}` : key;
               if (inMetadata) {
-                const value = obj[key];
-                if (typeof value === "string")
-                  redactMetadataString(obj, key, childPath, parentKey, compositeKey);
-                else if (typeof value === "object")
-                  sanitizeObject(value, choiceIdx, toolIdx, key, true, childPath);
+                sanitizeMetadataChild(
+                  deps,
+                  obj,
+                  key,
+                  childPath,
+                  parentKey,
+                  compositeKey,
+                  choiceIdx,
+                  toolIdx,
+                  sanitizeObject
+                );
                 continue;
               }
               if (typeof obj[key] === "string") {
-                const val = obj[key];
-                // Keep wire aliases distinct in Chat and generic text envelopes. Native
-                // Responses/Gemini retain their format-specific buffer/flush routing.
-                const fieldName =
-                  Array.isArray(json.choices) ||
-                  (key === "reasoning_content" &&
-                    !Array.isArray(json.candidates) &&
-                    !String(json.type ?? "").startsWith("response."))
-                    ? key
-                    : undefined;
-                const field =
-                  key === "delta" && obj === json && isResponsesToolArgsDelta(json)
-                    ? "toolArgs"
-                    : classifyField(key, parentKey);
-                if (field === null) {
-                  // A metadata key normally passes through untouched, but the usage provenance
-                  // and cost keys can carry a credential. They take their own window, keyed by
-                  // path, so a value split across frames still redacts without joining the reply.
-                  if (IN_PLACE_METADATA_KEYS.has(key))
-                    redactMetadataString(obj, key, childPath, parentKey, compositeKey);
-                  continue;
-                }
-                if (field === "toolArgs" || field === "partialJson") {
-                  if (opts?.processToolArgs === true) {
-                    obj[key] = processor(
-                      val,
-                      field,
-                      isStopSignal,
-                      compositeKey,
-                      isSnapshot,
-                      fieldName
-                    );
-                  } else {
-                    obj[key] = val;
-                  }
+                if (sanitizeAnswerString(deps, obj, key, parentKey, childPath, compositeKey))
                   matched = true;
-                  continue;
-                }
-                obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot, fieldName);
-                matched = true;
               } else if (typeof obj[key] === "object") {
-                // A metadata subtree (usage, usage_evidence, provider bookkeeping) holds no
-                // answer text. Descending into it with the answer buffers classified its string
-                // fields as content and flushed them into the reply, so it gets its own window
-                // keyed by path: still masked, including across frames, but never joined to the
-                // answer.
-                // reasoning_details[].data is an opaque encrypted payload the client sends back
-                // verbatim, so null there means "leave it alone", not "redact it".
-                const opaque = key === "data" && parentKey === "reasoning_details";
-                if (!opaque && IN_PLACE_METADATA_KEYS.has(key)) {
-                  sanitizeObject(obj[key], choiceIdx, toolIdx, key, true, childPath);
-                  continue;
-                }
-                sanitizeObject(
-                  obj[key],
+                descendAnswerChild(
+                  deps,
+                  obj,
+                  key,
+                  parentKey,
+                  childPath,
                   choiceIdx,
                   toolIdx,
-                  isArray ? parentKey : key,
-                  false,
-                  childPath
+                  isArray,
+                  sanitizeObject
                 );
               }
             }
