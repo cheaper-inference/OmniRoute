@@ -23,6 +23,8 @@ const route = await import("../../src/app/api/cli-tools/codex-settings/route.ts"
 
 const OMNIROUTE_URL = "http://localhost:20128/v1";
 const USER_URL = "https://corp-proxy.example.com/openai/v1";
+// Escape regex metacharacters so the URL is matched literally.
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const authCookie = async (): Promise<string> => {
   process.env.JWT_SECRET = "codex-owned-root-url-test-secret";
@@ -75,7 +77,7 @@ test("Apply keeps a root openai_base_url that OmniRoute did not write", async ()
   assert.equal((await apply()).status, 200);
 
   const config = await readConfig();
-  assert.match(config, new RegExp(`^openai_base_url = "${USER_URL}"$`, "m"));
+  assert.match(config, new RegExp(`^openai_base_url = "${escapeRegExp(USER_URL)}"$`, "m"));
   assert.match(config, /^model_provider = "omniroute"$/m);
 });
 
@@ -117,7 +119,7 @@ test("Remove keeps a root openai_base_url that OmniRoute did not write", async (
   assert.equal((await remove()).status, 200);
 
   const config = await readConfig();
-  assert.match(config, new RegExp(`^openai_base_url = "${USER_URL}"$`, "m"));
+  assert.match(config, new RegExp(`^openai_base_url = "${escapeRegExp(USER_URL)}"$`, "m"));
   assert.doesNotMatch(config, /omniroute/);
 });
 
@@ -142,5 +144,8 @@ test("Remove keeps a root openai_base_url when OmniRoute has no provider section
   await writeConfig(`openai_base_url = "${USER_URL}"\n`);
   assert.equal((await remove()).status, 200);
 
-  assert.match(await readConfig(), new RegExp(`^openai_base_url = "${USER_URL}"$`, "m"));
+  assert.match(
+    await readConfig(),
+    new RegExp(`^openai_base_url = "${escapeRegExp(USER_URL)}"$`, "m")
+  );
 });
