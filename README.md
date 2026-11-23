@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://i.ibb.co/1GhHMXjS/rafa-martins-omniroute-showcase.gif" alt="OmniRoute Dashboard" width="820"/>
+<img src="./images/omniroute.gif" alt="OmniRoute Dashboard" width="820"/>
 
 <br/>
 <br/>
