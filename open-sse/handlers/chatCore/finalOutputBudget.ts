@@ -15,6 +15,20 @@ import { DEFAULT_MAX_TOKENS } from "../../config/constants.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { enforceOutputTokenBudget } from "./outputTokenBudget.ts";
 
+/** Headroom required by the final gate when the Claude translator supplies its default. */
+export function requiredOutputHeadroom(
+  body: Record<string, unknown>,
+  sourceFormat: string,
+  targetFormat: string
+): number {
+  if (targetFormat !== FORMATS.CLAUDE || sourceFormat === FORMATS.CLAUDE) return 0;
+  const hasExplicitLimit = ["max_tokens", "max_completion_tokens"].some((field) => {
+    const value = body[field];
+    return typeof value === "number" && Number.isFinite(value) && value > 0;
+  });
+  return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
+}
+
 type LoggerLike =
   { info?: (...args: unknown[]) => void; warn?: (...args: unknown[]) => void } | null | undefined;
 

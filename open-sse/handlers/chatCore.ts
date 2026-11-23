@@ -44,7 +44,10 @@ import {
   buildDefaultAllowClaudeMessage,
   applyClaudeClassifierReasoningDefault,
 } from "./chatCore/claudeClassifierCompat.ts";
-import { enforceFinalOutputTokenBudget } from "./chatCore/finalOutputBudget.ts";
+import {
+  enforceFinalOutputTokenBudget,
+  requiredOutputHeadroom,
+} from "./chatCore/finalOutputBudget.ts";
 import { withResilienceActionsContext } from "./chatCore/resilienceAttemptContext.ts";
 import { notePreviousResponseResumed } from "./chatCore/resumedResilienceNotes.ts";
 import { runStreamingResponse } from "./chatCore/streamingResponse.ts";
@@ -2165,15 +2168,25 @@ async function handleChatCoreInner({
 
   const effectiveCompactionCeiling = getEffectiveCompactionCeiling(finalContextLimit);
 
+  // For cacheable Claude translations, reserve the same default output headroom
+  // as the final budget gate before deciding whether last-resort is necessary.
+  const requiredHeadroom =
+    protectCachedPrefix && !contextWindowChecksDisabled && body
+      ? requiredOutputHeadroom(body as Record<string, unknown>, sourceFormat, targetFormat)
+      : 0;
+  const lastResortCeiling = Math.min(
+    effectiveCompactionCeiling,
+    finalContextLimit - requiredHeadroom
+  );
   // Last-resort compaction against the concrete input budget (not the 70% threshold).
   // Covers cases where the proactive pass was skipped or still left the request oversized (#8560).
   if (
     reactiveContextCompactionEnabled &&
     !skipNativeCodexReactiveCompaction &&
-    finalEstimatedInputTokens >= effectiveCompactionCeiling &&
+    finalEstimatedInputTokens >= lastResortCeiling &&
     body
   ) {
-    const lastResortTarget = Math.max(1, effectiveCompactionCeiling - toolsReserve - 1);
+    const lastResortTarget = Math.max(1, lastResortCeiling - toolsReserve - 1);
     const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
     const lastResortResult = protectCachedPrefix
       ? compactCachedContext(lastResortAdapter.body as Record<string, unknown>, {
@@ -2183,7 +2196,7 @@ async function handleChatCoreInner({
               ? lastResortAdapter.restore(candidate, { dropMissingMappedItems: true })
               : candidate;
             return estimateCalibratedFinalInputTokens(restored, provider, effectiveModel) <
-              effectiveCompactionCeiling;
+              lastResortCeiling;
           },
         })
       : compressContext(lastResortAdapter.body, {

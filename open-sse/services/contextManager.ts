@@ -613,6 +613,81 @@ export function resolveTokenLimit(
 export { resolveComboContextLimit } from "./comboContextLimit.ts";
 export type { ComboContextLimitSource } from "./comboContextLimit.ts";
 
+type CachedMessage = Record<string, unknown>;
+type CachedUnit = { start: number; end: number };
+
+function isCachedToolCall(message: CachedMessage): boolean {
+  return (
+    message.role === "assistant" &&
+    ((Array.isArray(message.tool_calls) && message.tool_calls.length > 0) ||
+      (Array.isArray(message.content) &&
+        message.content.some((block: CachedMessage) => block?.type === "tool_use")))
+  );
+}
+
+function isCachedToolResult(message: CachedMessage): boolean {
+  return (
+    message.role === "tool" ||
+    (message.role === "user" &&
+      Array.isArray(message.content) &&
+      message.content.some((block: CachedMessage) => block?.type === "tool_result"))
+  );
+}
+
+function cachedPrefixEnd(messages: CachedMessage[], maxTokens: number): number {
+  // Leading instructions are mandatory, not optional history. Keep them even
+  // when a single instruction exceeds the optional cache-prefix budget.
+  let end = 0;
+  while (end < messages.length && ["system", "developer"].includes(String(messages[end].role))) {
+    end++;
+  }
+  const prefixBudget = Math.min(8192, Math.floor(maxTokens * 0.15));
+  let tokens = 0;
+  while (end < messages.length) {
+    const next = estimateTokens(messages[end]);
+    if (tokens + next > prefixBudget) break;
+    tokens += next;
+    end++;
+  }
+  // Never divide a call from any of its consecutive results.
+  if (end < messages.length && isCachedToolResult(messages[end])) {
+    let start = end - 1;
+    while (start >= 0 && isCachedToolResult(messages[start])) start--;
+    if (start >= 0 && isCachedToolCall(messages[start])) end = start;
+  }
+  // A trailing assistant call may receive results on the next request.
+  if (end === messages.length && end > 0 && isCachedToolCall(messages[end - 1])) end--;
+  return end;
+}
+
+function cachedHistoryUnits(messages: CachedMessage[], start: number): CachedUnit[] {
+  const units: CachedUnit[] = [];
+  for (let i = start; i < messages.length;) {
+    let end = i + 1;
+    if (isCachedToolCall(messages[i])) {
+      while (end < messages.length && isCachedToolResult(messages[end])) end++;
+    }
+    units.push({ start: i, end });
+    i = end;
+  }
+  return units;
+}
+
+function latestCachedUserRequest(messages: CachedMessage[]): number {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.role !== "user") continue;
+    if (
+      Array.isArray(message.content) &&
+      !message.content.some((block: CachedMessage) => block?.type !== "tool_result")
+    ) {
+      continue;
+    }
+    return i;
+  }
+  return -1;
+}
+
 /**
  * Emergency compaction for cacheable requests. Unlike the general compressor,
  * this never edits a retained message (including tool IDs, thinking signatures,
@@ -637,90 +712,37 @@ export function compactCachedContext(
   };
   if (!messages.length || options.fits(body)) return unchanged;
 
-  // Select the prefix once from the beginning, using only fixed route capacity.
-  // Stop at the first item that does not fit rather than skipping to a later item.
-  const prefixBudget = Math.min(8192, Math.floor(options.maxTokens * 0.15));
-  let prefixEnd = 0;
-  let prefixTokens = 0;
-  while (prefixEnd < messages.length) {
-    const next = estimateTokens(messages[prefixEnd]);
-    if (prefixTokens + next > prefixBudget) break;
-    prefixTokens += next;
-    prefixEnd++;
-  }
-  const hasToolCall = (message: Record<string, unknown>) =>
-    message.role === "assistant" &&
-    ((Array.isArray(message.tool_calls) && message.tool_calls.length > 0) ||
-      (Array.isArray(message.content) &&
-        message.content.some((block: Record<string, unknown>) => block?.type === "tool_use")));
-  const hasToolResult = (message: Record<string, unknown>) =>
-    message.role === "tool" ||
-    (message.role === "user" &&
-      Array.isArray(message.content) &&
-      message.content.some((block: Record<string, unknown>) => block?.type === "tool_result"));
-  // Do not pin part of a tool cycle. Multiple OpenAI results are distinct
-  // messages, so look back past *all* adjacent results, not just one.
-  if (prefixEnd < messages.length && hasToolResult(messages[prefixEnd])) {
-    let start = prefixEnd - 1;
-    while (start >= 0 && hasToolResult(messages[start])) start--;
-    if (start >= 0 && hasToolCall(messages[start])) prefixEnd = start;
-  }
-  // A trailing assistant call may receive results on the next request.
-  if (prefixEnd === messages.length && prefixEnd > 0 && hasToolCall(messages[prefixEnd - 1])) {
-    prefixEnd--;
-  }
-
+  const prefixEnd = cachedPrefixEnd(messages, options.maxTokens);
   // A Claude user carrier can contain several parallel tool_result blocks, while
-  // OpenAI puts each result in a separate tool message. Group every consecutive
-  // result with its initiating assistant, never split that dependency on pruning.
-  const units: Array<{ start: number; end: number }> = [];
-  for (let i = prefixEnd; i < messages.length;) {
-    let end = i + 1;
-    const msg = messages[i];
-    if (hasToolCall(msg)) {
-      while (end < messages.length && hasToolResult(messages[end])) end++;
-    }
-    units.push({ start: i, end });
-    i = end;
-  }
-
-  // Keep the latest real user request and its following interaction as a unit.
-  // A tool-only carrier is not a new request; a mixed text+result carrier is.
-  let anchor = -1;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i];
-    if (message.role !== "user") continue;
-    if (
-      Array.isArray(message.content) &&
-      !message.content.some((block: Record<string, unknown>) => block?.type !== "tool_result")
-    ) {
-      continue;
-    }
-    anchor = i;
-    break;
-  }
+  // OpenAI puts each result in a separate tool message.
+  const units = cachedHistoryUnits(messages, prefixEnd);
+  const anchor = latestCachedUserRequest(messages);
+  // When the current request is already pinned, its entire subsequent interaction
+  // is mandatory. It cannot be reduced to the final assistant/tool unit. A prefix
+  // that covers every message leaves no unit to drop — fail closed.
+  if (!units.length) return unchanged;
   const mandatoryUnit =
-    anchor < prefixEnd
-      ? units.length - 1
-      : units.findIndex((unit) => unit.start <= anchor && anchor < unit.end);
+    anchor < prefixEnd ? 0 : units.findIndex((unit) => unit.start <= anchor && anchor < unit.end);
   if (mandatoryUnit < 0) return unchanged;
-  let keepFrom = mandatoryUnit;
   const candidate = (from: number): Record<string, unknown> => ({
     ...body,
-    messages: [
-      ...messages.slice(0, prefixEnd),
-      ...messages.slice(units[from]?.start ?? messages.length),
-    ],
+    messages: [...messages.slice(0, prefixEnd), ...messages.slice(units[from].start)],
   });
-  let compacted = candidate(keepFrom);
-  if (!options.fits(compacted)) return unchanged;
-  // Grow the recent suffix backwards until the next whole unit would not fit.
-  while (keepFrom > 0 && options.fits(candidate(keepFrom - 1))) {
-    keepFrom--;
-    compacted = candidate(keepFrom);
+  if (!options.fits(candidate(mandatoryUnit))) return unchanged;
+
+  // Retaining a longer suffix cannot reduce its token cost. Binary search avoids
+  // a synchronous full-payload scan for every old turn in a long conversation.
+  let low = 0;
+  let high = mandatoryUnit;
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (options.fits(candidate(mid))) high = mid;
+    else low = mid + 1;
   }
-  const omitted = (units[keepFrom]?.start ?? messages.length) - prefixEnd;
+  const keepFrom = low;
+  const omitted = units[keepFrom].start - prefixEnd;
   if (omitted <= 0) return unchanged;
+  const compacted = candidate(keepFrom);
   const final = estimateTokens(compacted.messages);
   return {
     body: compacted,

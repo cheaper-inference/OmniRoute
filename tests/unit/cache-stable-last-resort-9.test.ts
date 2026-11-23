@@ -132,6 +132,86 @@ test("#9: a prefix boundary inside parallel OpenAI results retains complete call
   assert.equal(retained.includes('"tool_call_id":"c1"'), retained.includes('"id":"c1"'));
 });
 
+test("#9: oversized leading system/developer instructions are mandatory", () => {
+  const system = { role: "system", content: "S".repeat(6_000) };
+  const developer = { role: "developer", content: "Follow policy" };
+  const body = {
+    messages: [
+      system,
+      developer,
+      { role: "user", content: "old ".repeat(9_000) },
+      { role: "assistant", content: "old answer" },
+      { role: "user", content: "current request" },
+    ],
+  };
+  const result = compactCachedContext(body, {
+    maxTokens: 8_000,
+    fits: (candidate) => estimateTokens(candidate.messages) <= 8_000,
+  });
+  assert.equal(result.compressed, true);
+  assert.deepEqual(result.body.messages.slice(0, 2), [system, developer]);
+  const impossible = compactCachedContext(body, {
+    maxTokens: 8_000,
+    fits: (candidate) => estimateTokens(candidate.messages) < 1_000,
+  });
+  assert.equal(impossible.compressed, false);
+  assert.strictEqual(impossible.body, body);
+});
+
+test("#9: a user request pinned in the prefix keeps its complete subsequent tool cycles", () => {
+  const body = {
+    messages: [
+      { role: "user", content: "current task" },
+      { role: "assistant", tool_calls: [{ id: "c1", function: { name: "inspect" } }] },
+      { role: "tool", tool_call_id: "c1", content: "first result ".repeat(1_000) },
+      { role: "assistant", tool_calls: [{ id: "c2", function: { name: "inspect" } }] },
+      { role: "tool", tool_call_id: "c2", content: "second result" },
+      { role: "assistant", content: "final reply" },
+    ],
+  };
+  const result = compactCachedContext(body, {
+    maxTokens: 300,
+    fits: (candidate) => estimateTokens(candidate.messages) < 2_000,
+  });
+  assert.equal(result.compressed, false);
+  assert.strictEqual(result.body, body);
+});
+
+test("#9: long cacheable histories need logarithmically many complete fit checks", () => {
+  const body = {
+    messages: [
+      { role: "system", content: "Keep instructions" },
+      ...Array.from({ length: 4_000 }, (_, i) => ({ role: "user", content: `turn ${i}` })),
+    ],
+  };
+  let checks = 0;
+  const result = compactCachedContext(body, {
+    maxTokens: 10_000,
+    fits: (candidate) => {
+      checks++;
+      return candidate.messages.length <= 500;
+    },
+  });
+  assert.equal(result.compressed, true);
+  assert.ok(checks < 30, `${checks} full-body scans for 4,000 messages`);
+  assert.deepEqual(result.body.messages[0], body.messages[0]);
+  assert.deepEqual(result.body.messages.at(-1), body.messages.at(-1));
+});
+
+test("#9: a prefix covering every message fails closed instead of throwing", () => {
+  const body = {
+    system: [{ type: "text", text: "S".repeat(40_000) }],
+    tools: [{ name: "inspect", description: "read-only tool" }],
+    messages: [{ role: "user", content: "only request" }],
+  };
+  const result = compactCachedContext(body, {
+    maxTokens: 4_000,
+    fits: () => false,
+  });
+  assert.equal(result.compressed, false);
+  assert.strictEqual(result.body, body);
+});
+
 test("#9: oversized mandatory user/tool tail fails closed rather than mutilating it", () => {
   const body = bodyWithTail([{ role: "user", content: "Z".repeat(100_000) }]);
   const result = compactCachedContext(body, opts);
