@@ -10,6 +10,7 @@ import {
 import {
   FREE_MODEL_BUDGETS,
   FREE_QUOTA_UNIT,
+  FREE_TIER_BOOSTS,
   RETIRED_FREE_ROWS,
   grantsFreeAccess,
   resolveFreeQuotaUnit,
@@ -415,4 +416,32 @@ test("every free row with a quota carries dated evidence that matches its econom
     const row = FREE_MODEL_BUDGETS.find((m) => key(m) === key(e));
     assert.equal(e.catalogHash, row && catalogFingerprint(row));
   }
+});
+
+// --- Card gates and the Telegram bonus ------------------------------------------------------
+
+test("card-gated offers keep their rows and leave every public figure", () => {
+  for (const p of ["vertex", "cerebras", "nebius", "aion"]) {
+    assert.ok(live(p).length > 0, `${p} stays in the catalog`);
+    for (const m of live(p)) assert.deepEqual(m.gates, ["card"], `${p}/${m.modelId}`);
+  }
+  const pub = computePublicFreeHeadline();
+  const ungated = computePublicFreeHeadline({
+    entries: FREE_MODEL_BUDGETS.map(({ gates: _gates, ...m }) => m),
+  });
+  // Vertex (300M) and Nebius (1M) signup credits sit behind a card: out of the first month.
+  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 301_000_000);
+  assert.ok(!pub.uncappedProviders.includes("aion"), "aion needs a verified card");
+  assert.equal(pub.steadyRecurringTokens, ungated.steadyRecurringTokens);
+});
+
+test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => {
+  assert.deepEqual(
+    { ...FREE_TIER_BOOSTS["xkiro-free"], note: undefined },
+    { provider: "xkiro", boostMonthlyTokens: 15_000_000, gate: "telegram", note: undefined }
+  );
+  assert.match(FREE_TIER_BOOSTS["xkiro-free"].note, /Telegram/);
+  const pub = computePublicFreeHeadline();
+  assert.equal(pub.boostMonthlyTokens, 24_000_000);
+  assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
 });

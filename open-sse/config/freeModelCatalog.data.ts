@@ -138,8 +138,10 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // gated on a payment method, 30-day expiry — not the old no-card 1M/day
   // trial. creditTokens stays 0 because Cerebras publishes dollars, not a
   // token grant. hardStopGuaranteed must stay unset: a stored card can bill.
-  { provider: "cerebras", modelId: "zai-glm-4.7", displayName: "GLM 4.7", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution" },
-  { provider: "cerebras", modelId: "gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution" },
+  // gates: ["card"] — https://www.cerebras.ai/pricing (2026-11-23): "Add a valid payment method to receive a one-time
+  // $5 promotional credit. The credit expires 30 days after activation."
+  { provider: "cerebras", modelId: "zai-glm-4.7", displayName: "GLM 4.7", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution", gates: ["card"] },
+  { provider: "cerebras", modelId: "gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution", gates: ["card"] },
   // evidence: public-page https://developers.cloudflare.com/workers-ai/platform/pricing/ (2026-11-23) — "Our free
   // allocation allows anyone to use a total of 10,000 Neurons per day at no charge." The allocation is shared, so it
   // sits on one row: @cf/zai-org/glm-4.7-flash at "5500 neurons per M input tokens 36400 neurons per M output
@@ -345,7 +347,10 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "muse-spark-web", modelId: "muse-spark", displayName: "Muse Spark", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "muse-spark-web", tos: "avoid" },
   { provider: "muse-spark-web", modelId: "muse-spark-thinking", displayName: "Muse Spark Thinking", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "muse-spark-web", tos: "avoid" },
   { provider: "muse-spark-web", modelId: "muse-spark-contemplating", displayName: "Muse Spark Contemplating", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "muse-spark-web", tos: "avoid" },
-  { provider: "nebius", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "Llama 3.3 70B Instruct", monthlyTokens: 0, creditTokens: 1000000, freeType: "one-time-initial", poolKey: "nebius", tos: "caution" },
+  // evidence: public-page https://docs.tokenfactory.nebius.com/other-capabilities/billing-new.md (2026-11-23) —
+  // "Setting up a billing account requires a bank card." ⇒ gates: ["card"]. The page does not restate the signup
+  // credit (only "A promo code provides free Nebius Token Factory credits"), so the 1M stays as last curated.
+  { provider: "nebius", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "Llama 3.3 70B Instruct", monthlyTokens: 0, creditTokens: 1000000, freeType: "one-time-initial", poolKey: "nebius", tos: "caution", gates: ["card"] },
   { provider: "nlpcloud", modelId: "llama-3-8b-instruct", displayName: "Llama 3 8B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-monthly", poolKey: "nlpcloud", tos: "avoid" },
   // evidence: public-page https://portal.nousresearch.com/ (2026-10-15): Free models only,
   // but no named Hermes-4 coverage; omit those unverified rows until evidence establishes access.
@@ -503,22 +508,26 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // previously catalogued id 404s on /v1/chat/completions (see the matching
   // comment in providers/registry/uncloseai/index.ts).
   { provider: "uncloseai", modelId: "turboderp/Qwen3.8-27B-exl3", displayName: "Qwen3.8 27B exl3 (🆓 Free)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "uncloseai", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3.1-pro-preview", displayName: "Gemini 3.1 Pro Preview (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3.1-flash-lite", displayName: "Gemini 3.1 Flash Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3-flash-preview", displayName: "Gemini 3 Flash Preview (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3.7-flash", displayName: "Gemini 3.7 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3.6-flash", displayName: "Gemini 3.6 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3.5-flash", displayName: "Gemini 3.5 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-3.5-flash-lite", displayName: "Gemini 3.5 Flash-Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-2.5-flash", displayName: "Gemini 2.5 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "gemini-2.5-flash-lite", displayName: "Gemini 2.5 Flash-Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "deepseek-ai/deepseek-v3.2-maas", displayName: "DeepSeek V3.2 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "deepseek-ai/deepseek-v3.1-maas", displayName: "DeepSeek V3.1 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "qwen/qwen3-next-80b-a3b-instruct-maas", displayName: "Qwen3 Next 80B Instruct (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "zai-org/glm-5-maas", displayName: "GLM 5 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "claude-opus-4-7", displayName: "Claude Opus 4.7 (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
-  { provider: "vertex", modelId: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6 (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution" },
+  // evidence: public-page https://cloud.google.com/free/docs/free-cloud-features (2026-11-23) — "The Free Trial gets
+  // you a $300 Welcome credit to spend over 90 days" · "During the sign up, you must provide a credit card or other
+  // payment method that is valid for the period of the Free Trial." ⇒ gates: ["card"]: the credit stays listed but
+  // never counts in the first-month figure.
+  { provider: "vertex", modelId: "gemini-3.1-pro-preview", displayName: "Gemini 3.1 Pro Preview (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-3.1-flash-lite", displayName: "Gemini 3.1 Flash Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-3-flash-preview", displayName: "Gemini 3 Flash Preview (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-3.7-flash", displayName: "Gemini 3.7 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-3.6-flash", displayName: "Gemini 3.6 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-3.5-flash", displayName: "Gemini 3.5 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-3.5-flash-lite", displayName: "Gemini 3.5 Flash-Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-2.5-flash", displayName: "Gemini 2.5 Flash (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "gemini-2.5-flash-lite", displayName: "Gemini 2.5 Flash-Lite (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "deepseek-ai/deepseek-v3.2-maas", displayName: "DeepSeek V3.2 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "deepseek-ai/deepseek-v3.1-maas", displayName: "DeepSeek V3.1 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "qwen/qwen3-next-80b-a3b-instruct-maas", displayName: "Qwen3 Next 80B Instruct (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "zai-org/glm-5-maas", displayName: "GLM 5 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "claude-opus-4-7", displayName: "Claude Opus 4.7 (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
+  { provider: "vertex", modelId: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6 (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
   // evidence: public-page https://docs.requesty.ai/features/free-models (2026-11-23) — openai/gpt-oss-120b is no
   // longer on the free list; leanstral-1-5 and nemotron-3-nano-30b-a3b still are.
   { provider: "requesty", modelId: "openai/gpt-oss-120b", displayName: "GPT-OSS 120B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "requesty-free", tos: "ok" },
@@ -567,11 +576,15 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "ainative", modelId: "gemini-flash", displayName: "Gemini Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
   // evidence: api-public https://api.aionlabs.ai/v1/models (2026-11-23) — aion-labs/aion-2.5 is no longer listed
   // ⇒ discontinued.
-  { provider: "aion", modelId: "aion-labs/aion-3.0", displayName: "Aion 3.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
-  { provider: "aion", modelId: "aion-labs/aion-3.0-mini", displayName: "Aion 3.0 Mini", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
+  // gates: ["card"] — public-page https://www.aionlabs.ai/docs/rate-limits/ (2026-11-23): "Free-tier API keys are
+  // activated by verifying a payment card on the Billing page of your dashboard. The card is verified through Stripe
+  // and never charged; one card can activate one free account." The free limit stays published as "Daily Token
+  // Limit Free 20,000"; the rows stay uncapped (0) as curated.
+  { provider: "aion", modelId: "aion-labs/aion-3.0", displayName: "Aion 3.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
+  { provider: "aion", modelId: "aion-labs/aion-3.0-mini", displayName: "Aion 3.0 Mini", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
   { provider: "aion", modelId: "aion-labs/aion-2.5", displayName: "Aion 2.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "aion-free", tos: "ok" },
-  { provider: "aion", modelId: "aion-labs/aion-2.0", displayName: "Aion 2.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
-  { provider: "aion", modelId: "aion-labs/aion-rp-llama-3.1-8b", displayName: "Aion RP Llama 3.1 8B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok" },
+  { provider: "aion", modelId: "aion-labs/aion-2.0", displayName: "Aion 2.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
+  { provider: "aion", modelId: "aion-labs/aion-rp-llama-3.1-8b", displayName: "Aion RP Llama 3.1 8B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
   { provider: "sealion", modelId: "aisingapore/Llama-SEA-LION-v3.5-70B-R", displayName: "Llama SEA-LION v3.5 70B R", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
   { provider: "sealion", modelId: "aisingapore/Llama-SEA-LION-v3-70B-IT", displayName: "Llama SEA-LION v3 70B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
   { provider: "sealion", modelId: "aisingapore/Gemma-SEA-LION-v4-27B-IT", displayName: "Gemma SEA-LION v4 27B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },

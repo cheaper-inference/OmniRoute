@@ -6,10 +6,6 @@
     "agnes-cn/agnes-2.5-flash",
     "agnes-cn/agnes-3.0-flash",
     "agnes/agnes-2.0-flash",
-    "aion/aion-labs/aion-2.0",
-    "aion/aion-labs/aion-3.0",
-    "aion/aion-labs/aion-3.0-mini",
-    "aion/aion-labs/aion-rp-llama-3.1-8b",
     "baidu/ernie-4.0-8k",
     "glm-cn/glm-4-flash",
     "kilo-gateway/kwaipilot/kat-coder-pro-v2.5:free",
@@ -906,6 +902,54 @@
       "verifiedBy": "maintainer public-source re-audit",
       "summary": "The Free plan gives 500K tokens a day across the free models, one allowance per account (500K × 30 = 15M/month, one pool). The id is listed with access_tier \"free\" on https://api.xkiro.com/v1/models (2026-11-23).",
       "limitations": "One shared daily allowance per account; the Telegram bonus is outside this quota. Model list and limits may change. Public-source review only; no authenticated inference was tested."
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-3.0",
+      "catalogHash": "d18d13eaf4aa5787e6f398dbaae6459f7bb21cce19536ff55396fa1fa9be2693",
+      "sourceType": "public-page",
+      "sourceUrl": "https://www.aionlabs.ai/docs/rate-limits/",
+      "checkedAt": "2026-11-23",
+      "claim": "recurring-free-access",
+      "verifiedBy": "maintainer public-source re-audit",
+      "summary": "The free tier has a published daily token limit (\"Daily Token Limit Free 20,000\"), and aion-3.0 is listed on https://api.aionlabs.ai/v1/models (2026-11-23).",
+      "limitations": "Free-tier API keys are activated by verifying a payment card (Stripe, never charged; one card per free account), so the row carries gates [\"card\"] and stays out of the real figure. Until the card is verified, calls return 403. Public-source review only."
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-3.0-mini",
+      "catalogHash": "d18d13eaf4aa5787e6f398dbaae6459f7bb21cce19536ff55396fa1fa9be2693",
+      "sourceType": "public-page",
+      "sourceUrl": "https://www.aionlabs.ai/docs/rate-limits/",
+      "checkedAt": "2026-11-23",
+      "claim": "recurring-free-access",
+      "verifiedBy": "maintainer public-source re-audit",
+      "summary": "The free tier has a published daily token limit (\"Daily Token Limit Free 20,000\"), and aion-3.0-mini is listed on https://api.aionlabs.ai/v1/models (2026-11-23).",
+      "limitations": "Free-tier API keys are activated by verifying a payment card (Stripe, never charged; one card per free account), so the row carries gates [\"card\"] and stays out of the real figure. Until the card is verified, calls return 403. Public-source review only."
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-2.0",
+      "catalogHash": "d18d13eaf4aa5787e6f398dbaae6459f7bb21cce19536ff55396fa1fa9be2693",
+      "sourceType": "public-page",
+      "sourceUrl": "https://www.aionlabs.ai/docs/rate-limits/",
+      "checkedAt": "2026-11-23",
+      "claim": "recurring-free-access",
+      "verifiedBy": "maintainer public-source re-audit",
+      "summary": "The free tier has a published daily token limit (\"Daily Token Limit Free 20,000\"), and aion-2.0 is listed on https://api.aionlabs.ai/v1/models (2026-11-23).",
+      "limitations": "Free-tier API keys are activated by verifying a payment card (Stripe, never charged; one card per free account), so the row carries gates [\"card\"] and stays out of the real figure. Until the card is verified, calls return 403. Public-source review only."
+    },
+    {
+      "provider": "aion",
+      "modelId": "aion-labs/aion-rp-llama-3.1-8b",
+      "catalogHash": "d18d13eaf4aa5787e6f398dbaae6459f7bb21cce19536ff55396fa1fa9be2693",
+      "sourceType": "public-page",
+      "sourceUrl": "https://www.aionlabs.ai/docs/rate-limits/",
+      "checkedAt": "2026-11-23",
+      "claim": "recurring-free-access",
+      "verifiedBy": "maintainer public-source re-audit",
+      "summary": "The free tier has a published daily token limit (\"Daily Token Limit Free 20,000\"), and aion-rp-llama-3.1-8b is listed on https://api.aionlabs.ai/v1/models (2026-11-23).",
+      "limitations": "Free-tier API keys are activated by verifying a payment card (Stripe, never charged; one card per free account), so the row carries gates [\"card\"] and stays out of the real figure. Until the card is verified, calls return 403. Public-source review only."
     }
   ]
 }
