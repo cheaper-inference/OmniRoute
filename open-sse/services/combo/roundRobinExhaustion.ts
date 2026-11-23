@@ -2,6 +2,7 @@
 // every target was filtered out. Kept out of roundRobinCombo.ts, which is frozen at its current
 // size and carries the loop itself.
 import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
+import { recordComboRequest } from "../comboMetrics.ts";
 import {
   collectQuotaWindowExclusions,
   formatQuotaSkipMessage,
@@ -48,4 +49,19 @@ export function roundRobinExhaustedResponse(
     }),
     { status: 503, headers: { "Content-Type": "application/json" } }
   );
+}
+
+/** The combo-level outcome for a round-robin request that never dispatched a model. */
+export function recordRoundRobinRequest(
+  comboName: string,
+  ok: boolean,
+  latencyMs: number,
+  fallbackCount: number
+): void {
+  recordComboRequest(comboName, null, {
+    success: ok,
+    latencyMs,
+    fallbackCount,
+    strategy: "round-robin",
+  });
 }

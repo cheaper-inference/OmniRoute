@@ -24,7 +24,7 @@ import {
 } from "./pinRecovery.ts";
 import { buildContextBudgetResponse } from "./budgetExhaustion.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
-import { roundRobinExhaustedResponse } from "./roundRobinExhaustion.ts";
+import { recordRoundRobinRequest, roundRobinExhaustedResponse } from "./roundRobinExhaustion.ts";
 import { recordComboRequest, recordPersistedSkipBypass } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -1484,44 +1484,42 @@ export async function handleRoundRobinCombo({
   // the compat pre-filter rejected — a compat-rejected-but-healthy provider is a
   // valid last-resort fallback tier, not a permanently dropped target.
   if (recordedAttempts === 0 && compatRejectedTargets.length > 0) {
-    const compatFallbackResult = await attemptCompatRejectedFallback(compatRejectedTargets, body, {
-      handleSingleModel,
-      isModelAvailable,
-      isProviderInCooldown: (target) =>
-        resilienceSettings.providerCooldown.enabled &&
-        Boolean(target.provider && target.provider !== "unknown") &&
-        isProviderInCooldown(
-          target.provider as string,
-          target.connectionId as string | undefined,
-          resilienceSettings
-        ),
-      log,
-      strategy: "round-robin",
-      onDispatch: (target, modelStr) => trace.dispatched(target, modelStr),
-    });
+    let compatFallbackResult: Response | null = null;
+    try {
+      compatFallbackResult = await attemptCompatRejectedFallback(compatRejectedTargets, body, {
+        handleSingleModel,
+        isModelAvailable,
+        isProviderInCooldown: (target) =>
+          resilienceSettings.providerCooldown.enabled &&
+          Boolean(target.provider && target.provider !== "unknown") &&
+          isProviderInCooldown(
+            target.provider as string,
+            target.connectionId as string | undefined,
+            resilienceSettings
+          ),
+        log,
+        strategy: "round-robin",
+        onDispatch: (target, modelStr) => trace.dispatched(target, modelStr),
+        onSkip: (target, modelStr, reason) => trace.skip(target, modelStr, reason),
+      });
+    } finally {
+      // A throw inside the fallback leaves the function without reaching the finalize calls
+      // below, and the trace would stay open.
+      finalizeTrace();
+    }
     if (compatFallbackResult) {
       if (!compatFallbackResult.ok) {
         finalizeTrace();
         return compatFallbackResult;
       }
-      recordComboRequest(combo.name, null, {
-        success: true,
-        latencyMs: Date.now() - startTime,
-        fallbackCount,
-        strategy: "round-robin",
-      });
+      recordRoundRobinRequest(combo.name, true, Date.now() - startTime, fallbackCount);
       finalizeTrace();
       return compatFallbackResult;
     }
   }
 
   if (recordedAttempts === 0) {
-    recordComboRequest(combo.name, null, {
-      success: false,
-      latencyMs,
-      fallbackCount,
-      strategy: "round-robin",
-    });
+    recordRoundRobinRequest(combo.name, false, latencyMs, fallbackCount);
   }
 
   if (!lastStatus) {

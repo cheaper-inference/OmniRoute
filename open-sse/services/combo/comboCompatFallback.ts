@@ -34,6 +34,12 @@ export interface CompatFallbackContext {
   strategy: string;
   /** Called with the target about to be dispatched, so the caller can record the decision. */
   onDispatch?: (target: ResolvedComboTarget, modelStr: string) => void;
+  /** Called when a target is dropped here, with the same reason vocabulary as the main loop. */
+  onSkip?: (
+    target: ResolvedComboTarget,
+    modelStr: string,
+    reason: "availability" | "provider_cooldown"
+  ) => void;
 }
 
 /**
@@ -55,6 +61,7 @@ export async function attemptCompatRejectedFallback(
     if (ctx.isModelAvailable) {
       const available = await ctx.isModelAvailable(target.modelStr, target);
       if (available !== true) {
+        ctx.onSkip?.(target, target.modelStr, "availability");
         ctx.log.debug(
           "COMBO",
           `Last-resort compat fallback: ${target.modelStr} still unavailable — skipping`
@@ -64,6 +71,7 @@ export async function attemptCompatRejectedFallback(
     }
 
     if (ctx.isProviderInCooldown?.(target)) {
+      ctx.onSkip?.(target, target.modelStr, "provider_cooldown");
       ctx.log.debug(
         "COMBO",
         `Last-resort compat fallback: ${target.modelStr} provider in cooldown — skipping`
