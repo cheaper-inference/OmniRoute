@@ -40,7 +40,7 @@ const COST_FIELDS = {
   costReasoningTokens: 0,
 };
 
-/** One day x provider x model slice, in the shapes of the cost and per-model queries. */
+/** One day x provider x model slice, in the shape of the daily cost rows. `byModel` is built from them too. */
 function slice(
   date: string,
   provider: string,
@@ -56,10 +56,10 @@ function slice(
     costCompletionTokens: completion,
   };
   return {
-    cost: { date, provider, model, serviceTier: "standard", ...COST_FIELDS, ...tokens },
-    model: {
-      model,
+    cost: {
+      date,
       provider,
+      model,
       serviceTier: "standard",
       requests,
       ...COST_FIELDS,
@@ -152,10 +152,6 @@ function deps(over: { empty?: boolean; seen?: Array<[string, Record<string, stri
       record("dailyCost", params);
       return over.empty ? [] : SLICES.map((s) => s.cost);
     },
-    models: (_source, params) => {
-      record("models", params);
-      return over.empty ? [] : SLICES.map((s) => s.model);
-    },
     providers: (_source, params) => {
       record("providers", params);
       return over.empty ? [] : PROVIDERS;
@@ -246,10 +242,10 @@ test("totals, daily series and breakdowns add up, with billed cost next to list 
 test("every query reads the same owned source, bounded by the window's start and now", async () => {
   const seen: Array<[string, Record<string, string>]> = [];
   await buildApiKeySelfServiceUsage(KEY, "7d", deps({ seen }));
+  // The grouped scan runs once: the cost series and the per-model table share its rows.
   assert.deepEqual(seen.map(([name]) => name).sort(), [
     "daily",
     "dailyCost",
-    "models",
     "providers",
     "summary",
   ]);
@@ -297,9 +293,9 @@ test("byModel keeps 50 pairs and says when more pairs existed", async () => {
     const base = deps();
     const rows = Array.from(
       { length: count },
-      (_, i) => slice("2026-05-27", "openai", `model-${i}`, count - i, 100, 50).model
+      (_, i) => slice("2026-05-27", "openai", `model-${i}`, count - i, 100, 50).cost
     );
-    return { ...base, queries: { ...base.queries, models: () => rows } };
+    return { ...base, queries: { ...base.queries, dailyCost: () => rows } };
   };
   const exact = await buildApiKeySelfServiceUsage(KEY, "7d", withPairs(50));
   assert.deepEqual([exact.byModel.length, exact.byModelTruncated], [50, false]);

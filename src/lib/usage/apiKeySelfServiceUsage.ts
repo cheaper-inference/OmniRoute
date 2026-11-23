@@ -28,12 +28,10 @@ import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import {
   getDailyCostRows,
   getDailyUsage,
-  getModelUsageRows,
   getProviderUsageRows,
   getUsageSummary,
   type DailyCostRow,
   type DailyUsageRow,
-  type ModelUsageRow,
   type ProviderUsageRow,
   type UsageSummaryRow,
 } from "@/lib/db/usageAnalytics";
@@ -66,8 +64,8 @@ export interface SelfServiceUsageDeps {
   queries?: {
     summary: typeof getUsageSummary;
     daily: typeof getDailyUsage;
+    /** One grouped scan per day, provider, model and tier: the cost series and `byModel` share it. */
     dailyCost: typeof getDailyCostRows;
-    models: typeof getModelUsageRows;
     providers: typeof getProviderUsageRows;
   };
   /** Cost of one query row; the default wraps computeUsageRowCost with the stored pricing. */
@@ -78,7 +76,6 @@ const DEFAULT_QUERIES: NonNullable<SelfServiceUsageDeps["queries"]> = {
   summary: getUsageSummary,
   daily: getDailyUsage,
   dailyCost: getDailyCostRows,
-  models: getModelUsageRows,
   providers: getProviderUsageRows,
 };
 
@@ -221,7 +218,7 @@ function buildDaily(rows: DailyUsageRow[], costByDate: Map<string, Money>) {
  * Merges the per-day model rows by provider and model name and keeps the 50 pairs with most
  * requests. `byModelTruncated` is true when more pairs existed than the list keeps.
  */
-function buildByModel(rows: ModelUsageRow[], priceRow: PriceRow) {
+function buildByModel(rows: DailyCostRow[], priceRow: PriceRow) {
   type Entry = Money & {
     model: string;
     provider: string;
@@ -317,8 +314,9 @@ export async function buildApiKeySelfServiceUsage(
   });
   const queries = deps.queries ?? DEFAULT_QUERIES;
   const priceRow = deps.priceRow ?? (await loadPricer());
-  const costs = priceCostRows(queries.dailyCost(unifiedSource, unifiedParams), priceRow);
-  const models = buildByModel(queries.models(unifiedSource, unifiedParams), priceRow);
+  const dailyCostRows = queries.dailyCost(unifiedSource, unifiedParams);
+  const costs = priceCostRows(dailyCostRows, priceRow);
+  const models = buildByModel(dailyCostRows, priceRow);
 
   return {
     range,
