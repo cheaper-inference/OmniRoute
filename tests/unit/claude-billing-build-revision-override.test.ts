@@ -57,8 +57,8 @@ test("a malformed override is ignored rather than put on the wire", async () => 
 });
 
 test("captured pin constants stay fixed so snapshot readers can detect drift", () => {
-  assert.equal(CLAUDE_CODE_CLIENT_VERSION, "2.1.280");
-  assert.equal(CLAUDE_CODE_CLIENT_BUILD_REVISION, "1e2");
+  assert.equal(CLAUDE_CODE_CLIENT_VERSION, "2.1.326");
+  assert.equal(CLAUDE_CODE_CLIENT_BUILD_REVISION, "518");
   assert.equal(
     CLAUDE_CODE_CLIENT_BILLING_VERSION,
     `${CLAUDE_CODE_CLIENT_VERSION}.${CLAUDE_CODE_CLIENT_BUILD_REVISION}`
@@ -84,7 +84,7 @@ test("overriding only the version still appends the pinned revision", async () =
 
 test("with no overrides the billing version is exactly the captured pin pair", async () => {
   await withEnv({ [ENV_VERSION]: undefined, [ENV_REVISION]: undefined }, () => {
-    assert.equal(getClaudeCodeClientBillingVersion(), "2.1.280.1e2");
-    assert.equal(getDefaultClaudeCodeBuildRevision(), "1e2");
+    assert.equal(getClaudeCodeClientBillingVersion(), "2.1.326.518");
+    assert.equal(getDefaultClaudeCodeBuildRevision(), "518");
   });
 });
