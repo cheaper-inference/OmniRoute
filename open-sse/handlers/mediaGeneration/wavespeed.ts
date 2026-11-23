@@ -2,9 +2,13 @@
 //
 // One API shape serves every model: POST /api/v3/<model id> with the model's own input as the
 // JSON body returns { code, message, data: { id, status } }; GET /api/v3/predictions/<id>/result
-// moves data.status through created -> processing -> completed | failed, with the result file
-// URLs in data.outputs or the reason in data.error. Model ids are slash-separated paths
-// (wavespeed-ai/z-image/turbo). https://wavespeed.ai/docs
+// moves data.status through created -> processing -> completed, or ends in failed, cancelled,
+// timeout or deleted, with the result file URLs in data.outputs or the reason in data.error.
+// Model ids are slash-separated paths (wavespeed-ai/z-image/turbo). https://wavespeed.ai/docs
+//
+// Retries follow https://wavespeed.ai/docs/errors-retries-timeouts: the submit POST is never
+// retried (each one is a new, billed prediction); result reads are retried on 408, 429, 5xx and
+// network errors with backoff, honoring Retry-After.
 
 export const WAVESPEED_BASE_URL = "https://api.wavespeed.ai";
 export const WAVESPEED_SUBMIT_PATH = "/api/v3/{model}";
@@ -22,13 +26,23 @@ const WAVESPEED_NON_INPUT_FIELDS = new Set([
   "max_polls",
 ]);
 
+/** Prediction statuses that end a prediction without a result. */
+export const WAVESPEED_FAILED_STATUSES = ["failed", "cancelled", "timeout", "deleted"];
+
 /** A model id as a URL path: every segment encoded, the slashes between them kept. */
 export function encodeWavespeedModelPath(model: string): string {
-  return model
-    .split("/")
-    .filter((segment) => segment.length > 0)
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const segments = model.split("/").filter((segment) => segment.length > 0);
+  // URL parsing resolves "." and ".." segments (encoded or not), which would move the
+  // authenticated request out of /api/v3/.
+  if (segments.some((segment) => /^(\.|%2e){1,2}$/i.test(segment))) {
+    throw new Error(`Invalid WaveSpeedAI model id: ${model}`);
+  }
+  return segments.map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+/** Whether a failed result read should be retried (the submit POST never is). */
+export function isRetryableWavespeedPollStatus(status: number): boolean {
+  return status === 408 || status === 429 || status >= 500;
 }
 
 export function buildWavespeedSubmitUrl(baseUrl: string, model: string): string {
@@ -63,34 +77,43 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+export type WavespeedFailure = {
+  status: number;
+  message: string;
+  /** An error envelope with a retryable code: a result read may be retried, a submit may not. */
+  transient: boolean;
+};
+
 /**
  * The failure a WaveSpeedAI response reports, or null when it reports none. Covers both forms:
  * an envelope whose `code` is not 200 (some are delivered with HTTP 200) and a prediction whose
- * status is "failed".
+ * status is terminal (failed, cancelled, timeout, deleted).
  */
-export function readWavespeedFailure(payload: unknown): { status: number; message: string } | null {
+export function readWavespeedFailure(payload: unknown): WavespeedFailure | null {
   const envelope = asRecord(payload);
   if (!envelope) return null;
 
   const code = envelope.code;
   if (typeof code === "number" && code !== 200) {
     const message = typeof envelope.message === "string" ? envelope.message.trim() : "";
+    const status = code >= 400 && code <= 599 ? code : 502;
     return {
-      status: code >= 400 && code <= 599 ? code : 502,
+      status,
       message: message || `WaveSpeedAI request failed (code ${code})`,
+      transient: isRetryableWavespeedPollStatus(code),
     };
   }
 
   const data = asRecord(envelope.data);
-  if (typeof data?.status === "string" && data.status.toLowerCase() === "failed") {
-    const reason = typeof data.error === "string" ? data.error.trim() : "";
-    return { status: 502, message: reason || "WaveSpeedAI generation failed" };
+  const status = typeof data?.status === "string" ? data.status.toLowerCase() : "";
+  if (WAVESPEED_FAILED_STATUSES.includes(status)) {
+    const reason = typeof data?.error === "string" ? data.error.trim() : "";
+    return {
+      status: 502,
+      message: reason || `WaveSpeedAI prediction ${status}`,
+      transient: false,
+    };
   }
 
   return null;
-}
-
-/** `readWavespeedFailure` reduced to its message, the form the video job preset reports. */
-export function readWavespeedFailureMessage(payload: unknown): string | null {
-  return readWavespeedFailure(payload)?.message ?? null;
 }

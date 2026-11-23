@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-wavespeed-"));
+const TEST_DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-wavespeed-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { handleImageGeneration } = await import("../../open-sse/handlers/imageGeneration.ts");
 const { buildWavespeedImageInput } =
@@ -26,6 +27,13 @@ const { IMAGE_ONLY_PROVIDER_IDS, VIDEO_PROVIDER_IDS } =
   await import("../../src/shared/constants/providers.ts");
 const { validateImageProviderApiKey } = await import("../../src/lib/providers/imageValidation.ts");
 const { setPinnedFetchTestOverride } = await import("../../src/shared/network/remoteImageFetch.ts");
+const dbCore = await import("../../src/lib/db/core.ts");
+
+// Image requests write call logs through the DB singleton; release it so the runner can exit.
+test.after(() => {
+  dbCore.closeDbInstance();
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 const API = "https://api.wavespeed.ai";
 const IMAGE_MODEL = "wavespeed-ai/z-image/turbo";
@@ -133,6 +141,28 @@ test("slash-separated model ids survive routing and become the submit path", () 
   assert.equal(buildWavespeedResultUrl(API, "pred/1"), `${API}/api/v3/predictions/pred%2F1/result`);
 });
 
+test("dot segments in a model id are rejected before any request", async () => {
+  for (const model of ["../../balance", "a/./b", "x/%2e%2E/balance", "x/.%2e"]) {
+    assert.throws(() => buildWavespeedSubmitUrl(API, model), /Invalid WaveSpeedAI model id/);
+  }
+  assert.equal(buildWavespeedSubmitUrl(API, "a/v1.5/b"), `${API}/api/v3/a/v1.5/b`);
+
+  const api = mockWavespeed(() => envelope({ id: "never" }));
+  try {
+    const video = await handleVideoJobGeneration({
+      model: "../../balance",
+      presetName: "wavespeed-video-job",
+      body: { prompt: "x" },
+      credentials: CREDENTIALS,
+      pollIntervalMs: 1,
+    });
+    assert.equal(video.success === false && video.status, 400);
+    assert.equal(api.calls.length, 0);
+  } finally {
+    api.restore();
+  }
+});
+
 test("image input: OpenAI size is translated per model, native fields pass through", () => {
   // z-image takes pixel dimensions joined by "*".
   assert.deepEqual(
@@ -180,12 +210,25 @@ test("readWavespeedFailure reads error envelopes and failed predictions", () => 
   assert.deepEqual(readWavespeedFailure({ code: 400, message: "Model not found." }), {
     status: 400,
     message: "Model not found.",
+    transient: false,
   });
   assert.equal(readWavespeedFailure({ code: 1001, message: "odd" })?.status, 502);
+  assert.deepEqual(readWavespeedFailure({ code: 429, message: "slow down" }), {
+    status: 429,
+    message: "slow down",
+    transient: true,
+  });
   assert.deepEqual(
     readWavespeedFailure({ code: 200, data: { status: "failed", error: "content flagged" } }),
-    { status: 502, message: "content flagged" }
+    { status: 502, message: "content flagged", transient: false }
   );
+  for (const status of ["cancelled", "timeout", "deleted"]) {
+    assert.deepEqual(readWavespeedFailure({ code: 200, data: { status, error: "" } }), {
+      status: 502,
+      message: `WaveSpeedAI prediction ${status}`,
+      transient: false,
+    });
+  }
 });
 
 test("image generation submits once, polls to completion and returns the output URL", async () => {
@@ -325,6 +368,97 @@ test("a throttled status read keeps polling the same prediction", async () => {
   }
 });
 
+test("5xx, network errors and retryable envelopes on a status read keep polling", async () => {
+  let polls = 0;
+  const api = mockWavespeed((call) => {
+    if (call.method === "POST") return envelope({ id: "pred-5", status: "created" });
+    polls += 1;
+    if (polls === 1) return json({ code: 502, message: "Bad gateway" }, 502);
+    if (polls === 2) throw new TypeError("fetch failed");
+    if (polls === 3) return json({ code: 503, message: "Service busy" });
+    if (polls === 4) return new Response("gateway timeout", { status: 504 });
+    return envelope({ status: "completed", outputs: ["https://cdn.example.com/5.jpeg"] });
+  });
+
+  try {
+    const result = await generateImage({ prompt: "a red kite" });
+    assert.equal(result.success, true);
+    assert.equal(api.posts().length, 1);
+    assert.equal(polls, 5);
+  } finally {
+    api.restore();
+  }
+});
+
+test("a status read honors Retry-After before polling again", async () => {
+  let throttledAt = 0;
+  let retriedAt = 0;
+  const api = mockWavespeed((call) => {
+    if (call.method === "POST") return envelope({ id: "pred-ra", status: "created" });
+    if (!throttledAt) {
+      throttledAt = Date.now();
+      return new Response(JSON.stringify({ code: 429, message: "Too many requests." }), {
+        status: 429,
+        headers: { "retry-after": "0.2" },
+      });
+    }
+    retriedAt = Date.now();
+    return envelope({ status: "completed", outputs: ["https://cdn.example.com/ra.jpeg"] });
+  });
+
+  try {
+    const result = await generateImage({ prompt: "a red kite" });
+    assert.equal(result.success, true);
+    assert.ok(retriedAt - throttledAt >= 180, `retried after ${retriedAt - throttledAt}ms`);
+  } finally {
+    api.restore();
+  }
+});
+
+test("a status read that keeps failing gives up after bounded retries", async () => {
+  let polls = 0;
+  const api = mockWavespeed((call) => {
+    if (call.method === "POST") return envelope({ id: "pred-x", status: "created" });
+    polls += 1;
+    return json({ code: 500, message: "Internal error" }, 500);
+  });
+
+  try {
+    const result = await generateImage({ prompt: "a red kite" });
+    assert.equal(result.success, false);
+    assert.equal(result.status, 500);
+    assert.equal(api.posts().length, 1);
+    assert.equal(polls, 6);
+  } finally {
+    api.restore();
+  }
+});
+
+test("a stalled status read is cut off at the deadline with 504", async () => {
+  const originalFetch = globalThis.fetch;
+  let posts = 0;
+  globalThis.fetch = (async (_input: unknown, init: RequestInit = {}) => {
+    if (init.method === "POST") {
+      posts += 1;
+      return envelope({ id: "pred-s", status: "created" });
+    }
+    return new Promise<Response>((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+    });
+  }) as typeof fetch;
+
+  try {
+    const started = Date.now();
+    const result = await generateImage({ prompt: "a red kite", timeout_ms: 1000 });
+    assert.equal(result.success, false);
+    assert.equal(result.status, 504);
+    assert.equal(posts, 1);
+    assert.ok(Date.now() - started < 3000);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("polling stops at the deadline with 504 and never resubmits", async () => {
   const api = mockWavespeed((call) =>
     call.method === "POST"
@@ -444,6 +578,54 @@ test("video preset treats an HTTP 200 error envelope as a failure and does not p
     });
     assert.equal(result.success, false);
     assert.match(String(result.success === false && result.error), /Insufficient credits/);
+    assert.equal(api.calls.length, 1);
+  } finally {
+    api.restore();
+  }
+});
+
+test("video preset retries a 502 status read and keeps the same prediction", async () => {
+  let polls = 0;
+  const api = mockWavespeed((call) => {
+    if (call.method === "POST") return envelope({ id: "vid-3", status: "created" });
+    polls += 1;
+    if (polls === 1) return json({ code: 502, message: "Bad gateway" }, 502);
+    if (polls === 2) return json({ code: 429, message: "Too many requests." });
+    return envelope({
+      id: "vid-3",
+      status: "completed",
+      outputs: ["https://cdn.example.com/3.mp4"],
+    });
+  });
+
+  try {
+    const result = await handleVideoJobGeneration({
+      model: VIDEO_MODEL,
+      presetName: "wavespeed-video-job",
+      body: { prompt: "a paper boat" },
+      credentials: CREDENTIALS,
+      pollIntervalMs: 1,
+    });
+    assert.equal(result.success, true);
+    assert.equal(api.posts().length, 1);
+    assert.equal(polls, 3);
+  } finally {
+    api.restore();
+  }
+});
+
+test("video preset keeps the envelope status of a rejected submit", async () => {
+  const api = mockWavespeed(() => json({ code: 401, message: "Invalid API key." }));
+
+  try {
+    const result = await handleVideoJobGeneration({
+      model: VIDEO_MODEL,
+      presetName: "wavespeed-video-job",
+      body: { prompt: "a paper boat" },
+      credentials: CREDENTIALS,
+      pollIntervalMs: 1,
+    });
+    assert.equal(result.success === false && result.status, 401);
     assert.equal(api.calls.length, 1);
   } finally {
     api.restore();

@@ -4,6 +4,7 @@
 // Async prediction API: POST /api/v3/<model id> -> { data: { id } }; GET
 // /api/v3/predictions/<id>/result until data.status is "completed", then data.outputs holds
 // the image URLs. The submit is sent exactly once: a second POST starts a second prediction.
+// Result reads are retried on 408/429/5xx and network errors with backoff (Retry-After honored).
 
 import { mapImageSize } from "../../../translator/image/sizeMapper.ts";
 import { sleep } from "../../../utils/sleep.ts";
@@ -16,12 +17,14 @@ import {
 } from "../../imageGeneration.ts";
 import {
   MAX_CONSECUTIVE_POLL_RETRIES,
-  isRetryablePollStatus,
+  computePollRetryDelayMs,
+  parseRetryAfterMs,
 } from "../../videoGeneration/pollRetry.ts";
 import {
   WAVESPEED_BASE_URL,
   buildWavespeedResultUrl,
   buildWavespeedSubmitUrl,
+  isRetryableWavespeedPollStatus,
   pickWavespeedModelInput,
   readWavespeedFailure,
 } from "../../mediaGeneration/wavespeed.ts";
@@ -120,37 +123,64 @@ async function pollWavespeedPrediction({ url, token, body, log, signal }): Promi
   const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
   const deadline = Date.now() + timeoutMs;
   let transientFailures = 0;
+  let delayMs = pollIntervalMs;
 
   while (Date.now() < deadline) {
-    await sleep(pollIntervalMs, signal);
+    await sleep(Math.min(delayMs, Math.max(0, deadline - Date.now())), signal);
     if (signal?.aborted) throw new WavespeedImageError(499, "Request aborted");
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) break;
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-      ...(signal ? { signal } : {}),
-    });
-    const payload = await readJson(response);
-
-    if (!response.ok) {
-      // The prediction is already running upstream: a throttled or briefly unavailable
-      // status read must not discard it.
-      if (
-        isRetryablePollStatus(response.status) &&
-        transientFailures < MAX_CONSECUTIVE_POLL_RETRIES
-      ) {
-        transientFailures += 1;
-        continue;
+    // Each read is bounded by what is left of the deadline as well as by the caller's signal.
+    const deadlineSignal = AbortSignal.timeout(remainingMs);
+    const readSignal = signal ? AbortSignal.any([signal, deadlineSignal]) : deadlineSignal;
+    // A failed read the docs ask to retry; the prediction is already running upstream.
+    let transient: { error: WavespeedImageError; retryAfterMs: number } | null = null;
+    let payload: unknown = null;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        signal: readSignal,
+      });
+      payload = await readJson(response);
+      if (!response.ok) {
+        const error = new WavespeedImageError(
+          response.status,
+          upstreamErrorText(payload, `WaveSpeedAI result request failed (${response.status})`)
+        );
+        if (!isRetryableWavespeedPollStatus(response.status)) throw error;
+        transient = { error, retryAfterMs: parseRetryAfterMs(response.headers.get("retry-after")) };
       }
-      throw new WavespeedImageError(
-        response.status,
-        upstreamErrorText(payload, `WaveSpeedAI result request failed (${response.status})`)
-      );
+    } catch (err) {
+      if (err instanceof WavespeedImageError) throw err;
+      if (signal?.aborted) throw new WavespeedImageError(499, "Request aborted");
+      if (deadlineSignal.aborted) break;
+      const message = sanitizeErrorMessage((err as Error)?.message || err);
+      transient = {
+        error: new WavespeedImageError(502, `WaveSpeedAI result request failed: ${message}`),
+        retryAfterMs: 0,
+      };
+    }
+
+    const failure = transient ? null : readWavespeedFailure(payload);
+    if (failure?.transient) {
+      transient = {
+        error: new WavespeedImageError(failure.status, failure.message),
+        retryAfterMs: 0,
+      };
+    } else if (failure) {
+      throw new WavespeedImageError(failure.status, failure.message);
+    }
+
+    if (transient) {
+      if (transientFailures >= MAX_CONSECUTIVE_POLL_RETRIES) throw transient.error;
+      transientFailures += 1;
+      delayMs = computePollRetryDelayMs(pollIntervalMs, transientFailures, transient.retryAfterMs);
+      continue;
     }
     transientFailures = 0;
-
-    const failure = readWavespeedFailure(payload);
-    if (failure) throw new WavespeedImageError(failure.status, failure.message);
+    delayMs = pollIntervalMs;
 
     const data = (payload as { data?: { status?: unknown; outputs?: unknown } } | null)?.data;
     if (data?.status === "completed") {
@@ -182,6 +212,12 @@ export async function handleWavespeedImageGeneration({
 
   const baseUrl = providerConfig?.baseUrl || WAVESPEED_BASE_URL;
   const input = buildWavespeedImageInput(model, body);
+  let submitUrl: string;
+  try {
+    submitUrl = buildWavespeedSubmitUrl(baseUrl, model);
+  } catch (err) {
+    return { success: false, status: 400, error: (err as Error).message };
+  }
 
   if (log) {
     const promptPreview = String(input.prompt).slice(0, 60);
@@ -190,7 +226,7 @@ export async function handleWavespeedImageGeneration({
 
   try {
     const predictionId = await submitWavespeedPrediction({
-      url: buildWavespeedSubmitUrl(baseUrl, model),
+      url: submitUrl,
       token,
       input,
       signal,
