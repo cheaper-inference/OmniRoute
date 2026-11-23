@@ -95,6 +95,10 @@ const FACTS = {
     entries: 120,
     freeFirst: 1.6e9,
     freeGated: 6e6,
+    // The free-tier headline checks judge the real figure (computePublicFreeHeadline), published
+    // as headlineSteady/headlineFirst; freeSteady/freeFirst keep feeding the other checks.
+    headlineSteady: 1.4e9,
+    headlineFirst: 1.6e9,
     freePools: 30,
     engines: 5,
     cliTotal: 33,

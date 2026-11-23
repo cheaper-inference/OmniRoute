@@ -55,6 +55,7 @@ import {
   SVG_CANONICAL_PATTERNS,
   locateCoverageFloorClaims,
   locateManagedCoverageFloorClaims,
+  locateFreeTokenClaims,
   locateGatedClaims,
   locateHeadlineClaims,
   locateNumberClaims,
@@ -74,6 +75,7 @@ import {
   resolvePrDiffBase,
 } from "./lib/gateMode.mjs";
 import * as factsLib from "../release/facts.mjs";
+import { formatTokenHeadline } from "../../open-sse/config/freeModelCatalog.ts";
 import {
   countFiles,
   parseProviderTotal,
@@ -196,13 +198,15 @@ function makeLiteralClaimValidator(expected, opts) {
         };
 }
 
-// The docs publish a rounded aggregate headline ("~1.4B"). Accept a claim that rounds to
-// the live value at one decimal place; reject a stale one. Tolerance is tight on purpose:
-// this gate exists so the headline cannot drift upward unnoticed.
+// The docs publish rounded free-token figures ("~93M", "~1.62B", "~11.4B"). Each claim is judged
+// against the live value of ITS kind only (lib/derivedClaims.mjs → locateFreeTokenClaims): a
+// first-month figure printed as the real one fails even when it matches the first month. The
+// tolerance follows the printed precision: half a unit of the last digit plus 0.5% of the live
+// value ("~2.22B" for 2.2127B passes; "~12.0B" for 11.35B fails, "~12B" would not — so the docs
+// always print through formatTokenHeadline). Figures outside the whitelist (the theoretical
+// ceiling, the historical "previous ~1.94B", per-provider and per-model rows) are never claims.
 //
-// Only the AGGREGATE headline is validated, via an explicit whitelist (see
-// lib/derivedClaims.mjs → locateHeadlineClaims): the theoretical ceiling, the historical
-// "previous ~1.94B" and per-model rows must never trip the gate.
+// `extractHeadlineClaims` keeps its historical shape (headline kinds only, value in tokens).
 export function extractHeadlineClaims(content) {
   return locateHeadlineClaims(content).map(({ value, text }) => ({ value, text }));
 }
@@ -213,23 +217,59 @@ export function extractGatedClaims(content) {
   return locateGatedClaims(content).map(({ tokens, unit, text }) => ({ tokens, unit, text }));
 }
 
+// Live value of each claim kind, from the totals passed to checkFreeTierHeadline. `r` is a share
+// (0..1); its claims are printed in percentage points.
+const FREE_TOKEN_TOTAL_OF = {
+  "headline:steady": (t) => t.s,
+  "headline:first": (t) => t.m,
+  "rowSum:live": (t) => t.l,
+  "rowSum:total": (t) => t.t,
+  retiredShare: (t) => (Number.isFinite(t.r) ? t.r * 100 : undefined),
+};
+const FREE_TOKEN_KIND_NAME = {
+  "headline:steady": "real",
+  "headline:first": "first month",
+  "rowSum:live": "live row sum",
+  "rowSum:total": "row sum with ended offers",
+  retiredShare: "share from ended offers",
+};
+
+function describeLive(key, live) {
+  return key === "retiredShare"
+    ? `${live.toFixed(2)}%`
+    : `${formatTokenHeadline(live)} (${live} tokens)`;
+}
+
+/**
+ * Judges every free-token claim of `content` against the live value of its kind.
+ * `totals`: s real, m first month, g regional-identity gated, l live row sum, t row sum with
+ * ended offers (tokens), r share from ended offers (0..1). A kind without a finite total is not
+ * judged; a token claim passes when |claim − live| ≤ halfStep + 0.5% of live, a share claim when
+ * |claim − live| ≤ half a printed unit + 0.1 point.
+ */
 export function checkFreeTierHeadline(content, totals) {
-  const claims = extractHeadlineClaims(content);
+  const claims = locateFreeTokenClaims(content);
   if (!claims.length) return { ok: true, detail: "no aggregate free-tier headline in this file" };
-  const steady = totals.s / 1e9;
-  const first = totals.m / 1e9;
-  // Claims are valued in tokens since the typed locator (lib/derivedClaims.mjs).
-  const stale = claims.filter(
-    (c) => Math.abs(c.value / 1e9 - steady) >= 0.05 && Math.abs(c.value / 1e9 - first) >= 0.05
-  );
   const problems = [];
+  const stale = [];
+  const judged = new Map();
+  for (const c of claims) {
+    const live = FREE_TOKEN_TOTAL_OF[c.key](totals);
+    if (!Number.isFinite(live)) continue;
+    judged.set(c.key, live);
+    const tolerance = c.key === "retiredShare" ? c.halfStep + 0.1 : c.halfStep + 0.005 * live;
+    if (Math.abs(c.value - live) > tolerance) stale.push(c);
+  }
   if (stale.length) {
+    const quoted = [...new Set(stale.map((c) => `${c.text} (${FREE_TOKEN_KIND_NAME[c.key]})`))];
+    const live = [...new Set(stale.map((c) => c.key))].map(
+      (key) => `${FREE_TOKEN_KIND_NAME[key]} ${describeLive(key, judged.get(key))}`
+    );
     problems.push(
-      `stale headline ${[...new Set(stale.map((c) => c.text))].join(", ")} — live catalog ` +
-        `computes ~${steady.toFixed(2)}B steady / ~${first.toFixed(2)}B first month`
+      `stale free-token figure(s) ${quoted.join(", ")} — live catalog computes ${live.join(", ")}`
     );
   }
-  if (totals.g != null && totals.g > 0) {
+  if (Number.isFinite(totals.g) && totals.g > 0) {
     const gated = extractGatedClaims(content);
     const tol = (c) => (c.unit === "B" ? 0.05e9 : 0.5e6);
     const gatedStale = gated.filter((c) => Math.abs(c.tokens - totals.g) >= tol(c));
@@ -244,8 +284,12 @@ export function checkFreeTierHeadline(content, totals) {
       );
     }
   }
-  if (!problems.length)
-    return { ok: true, detail: `${claims.length} headline claim(s) match the live catalog` };
+  if (!problems.length) {
+    return {
+      ok: true,
+      detail: `${claims.length} free-token claim(s) match the live catalog (${judged.size} kind(s) judged)`,
+    };
+  }
   return { ok: false, detail: problems.join("; ") };
 }
 
@@ -675,8 +719,9 @@ export function collectGateFacts({ root = ROOT, timeoutMs } = {}) {
 
 // PR mode builds the checks without facts: derived checks only need their locators, and the
 // invariants read content rules alone. `code: {}` keeps the code-derived block expanded (an
-// absent `code` collapses it into the ERR check) so its invariants still run.
-const PR_MODE_FACTS = Object.freeze({
+// absent `code` collapses it into the ERR check) so its invariants still run. Exported so tests
+// prove every check builds from it.
+export const PR_MODE_FACTS = Object.freeze({
   schemaVersion: 1,
   version: null,
   providers: null,
@@ -927,6 +972,62 @@ function assembleChecks(facts) {
   ];
 }
 
+const finiteOrUndefined = (value) => (Number.isFinite(value) ? value : undefined);
+
+// The three documents that print the free-token figures. The README must state the real figure
+// and the gated one; the reference page must state the gated one; the guide carries no gated
+// line. Facts missing (pr mode builds with `code: {}`; the committed snapshot gains the
+// headline/rowSum keys only at release) leave that kind unjudged instead of failing the build.
+function freeTierHeadlineChecks(f) {
+  const actual = Number.isFinite(f.headlineSteady) ? formatTokenHeadline(f.headlineSteady) : "n/a";
+  const entry = ({ file, gated, requiredKeys, requireSteady = false }) => {
+    const totals = {
+      s: finiteOrUndefined(f.headlineSteady),
+      m: finiteOrUndefined(f.headlineFirst),
+      g: gated ? finiteOrUndefined(f.freeGated) : undefined,
+      l: finiteOrUndefined(f.rowSumLive),
+      t: finiteOrUndefined(f.rowSumTotal),
+      r: finiteOrUndefined(f.rowSumRetiredShare),
+    };
+    const validate = (content) => {
+      const v = checkFreeTierHeadline(content, totals);
+      if (
+        !requireSteady ||
+        locateHeadlineClaims(content).some((c) => c.key === "headline:steady")
+      ) {
+        return v;
+      }
+      const missing = "no headline:steady claim — this file must state the real free-token figure";
+      return { ok: false, detail: v.ok ? missing : `${v.detail}; ${missing}` };
+    };
+    return {
+      label: "Free-tier headline (live catalog)",
+      actual,
+      docKey: "free-tier headline",
+      strict: true,
+      scope: "derived",
+      requiredKeys,
+      files: [file],
+      validate,
+      extract: (content) => [...locateFreeTokenClaims(content), ...locateGatedClaims(content)],
+      plan: (content) => {
+        const v = validate(content);
+        return { edits: [], manual: v.ok ? [] : [v.detail] };
+      },
+    };
+  };
+  return [
+    entry({
+      file: "README.md",
+      gated: true,
+      requiredKeys: ["gated", "headline:steady"],
+      requireSteady: true,
+    }),
+    entry({ file: "docs/reference/FREE_TIERS.md", gated: true, requiredKeys: ["gated"] }),
+    entry({ file: "docs/getting-started/FREE-TIERS-GUIDE.md", gated: false, requiredKeys: [] }),
+  ];
+}
+
 function buildCodeFactChecks(facts) {
   const f = facts.code;
   if (!f)
@@ -1063,28 +1164,9 @@ function buildCodeFactChecks(facts) {
         plan: svgPlan(expected),
       };
     })(),
-    {
-      // Derived, but the refresh does not rewrite it: the headline is a ROUNDED figure that
-      // may quote the steady or the first-month total, so a stale one goes to `manual`.
-      label: "Free-tier headline (live catalog)",
-      actual: `~${(f.freeSteady / 1e9).toFixed(2)}B steady / ${f.freePools} pools / ${Math.round(f.freeGated / 1e6)}M gated`,
-      docKey: "free-tier headline",
-      strict: true,
-      scope: "derived",
-      requiredKeys: ["gated"],
-      files: ["README.md", "docs/reference/FREE_TIERS.md"],
-      validate: (content) =>
-        checkFreeTierHeadline(content, { s: f.freeSteady, m: f.freeFirst, g: f.freeGated }),
-      extract: (content) => [...locateHeadlineClaims(content), ...locateGatedClaims(content)],
-      plan: (content) => {
-        const v = checkFreeTierHeadline(content, {
-          s: f.freeSteady,
-          m: f.freeFirst,
-          g: f.freeGated,
-        });
-        return { edits: [], manual: v.ok ? [] : [v.detail] };
-      },
-    },
+    // Derived, but the refresh does not rewrite them: the figures are ROUNDED, so a stale one goes
+    // to `manual`. One entry per file, all under the same label.
+    ...freeTierHeadlineChecks(f),
     claim(
       f.engines,
       "compression engines",
