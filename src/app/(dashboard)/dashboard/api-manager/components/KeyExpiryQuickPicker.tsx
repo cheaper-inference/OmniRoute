@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
 import { useTranslations } from "next-intl";
 import { KEY_EXPIRY_PRESET_DAYS, wholeDaysFromTtlSeconds } from "@/shared/utils/keyExpiry";
@@ -51,7 +52,7 @@ export default function KeyExpiryQuickPicker({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-3 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{t("keyValidity")}</p>
         <p className="text-xs text-text-muted">{t("keyValidityDesc")}</p>
@@ -93,6 +94,6 @@ export default function KeyExpiryQuickPicker({
           ariaLabel={t("keyExpiryEndOfDay")}
         />
       </div>
-    </div>
+    </Card.Section>
   );
 }
