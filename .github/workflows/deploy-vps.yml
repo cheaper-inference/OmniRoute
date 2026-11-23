@@ -46,6 +46,11 @@ jobs:
       - name: Deploy via SSH
         if: steps.reach.outputs.reachable == 'true'
         uses: appleboy/ssh-action@v1
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OMNIROUTE_NEON_PERSISTENCE: "1"
+          OMNIROUTE_NEON_SNAPSHOT_INTERVAL_MS: "300000"
+          OMNIROUTE_NEON_SNAPSHOT_RETENTION: "12"
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -53,8 +58,19 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 15m
+          envs: DATABASE_URL,OMNIROUTE_NEON_PERSISTENCE,OMNIROUTE_NEON_SNAPSHOT_INTERVAL_MS,OMNIROUTE_NEON_SNAPSHOT_RETENTION
           script: |
             set -euo pipefail
+
+            export DATABASE_URL
+            export OMNIROUTE_NEON_PERSISTENCE
+            export OMNIROUTE_NEON_SNAPSHOT_INTERVAL_MS
+            export OMNIROUTE_NEON_SNAPSHOT_RETENTION
+
+            if [ -z "${DATABASE_URL:-}" ]; then
+              echo "::error::DATABASE_URL is not configured in GitHub Actions."
+              exit 1
+            fi
 
             echo "=== Updating OmniRoute ==="
             npm install -g omniroute@latest
