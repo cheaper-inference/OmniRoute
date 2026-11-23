@@ -64,3 +64,29 @@ test("the metadata path ceiling names its own limit", () => {
   store.set("b", "2");
   assert.throws(() => store.set("c", "3"), /Credential metadata path limit exceeded/);
 });
+
+test("a tail that migrates to the next frame is charged once, not twice", () => {
+  const window = holdingWindow();
+  const first: Record<string, unknown> = { method: "GET" };
+  const second: Record<string, unknown> = { method: "POST" };
+  const renderFirst = () => JSON.stringify(first);
+  const renderSecond = () => JSON.stringify(second);
+  const trueTotal = renderFirst().length + renderSecond().length + TAIL.length;
+  const hold = createMetadataHold(window, trueTotal + 5);
+  const firstFrame = {};
+  const secondFrame = {};
+
+  hold.redact(first, "method", "usage_evidence.method", firstFrame, {
+    stop: false,
+    snapshot: false,
+  });
+  hold.writeFrame(firstFrame, renderFirst, () => undefined);
+
+  // The second value on the path takes the tail over: the first frame no longer owns it, so
+  // only one of the two queued frames may be charged for it.
+  hold.redact(second, "method", "usage_evidence.method", secondFrame, {
+    stop: false,
+    snapshot: false,
+  });
+  assert.doesNotThrow(() => hold.writeFrame(secondFrame, renderSecond, () => undefined));
+});
