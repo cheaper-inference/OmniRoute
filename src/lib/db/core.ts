@@ -24,7 +24,7 @@ import { createManagedDbBackup as writeManagedDbBackup } from "./managedBackup";
 import { DB_SECRET_DIR_MODE, hardenDbFilePermissions } from "./filePermissions";
 import { createDbHealthCoordinator, runDbHealthInChild } from "./healthCheckRunner";
 import { resetAllDbModuleState } from "./stateReset";
-import { parseStoredPayload } from "../logPayloads";
+import { parseStoredPayload } from "../usage/parseStoredPayload";
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
 import {
   applyDatabaseOptimizationSettingsForDb,
