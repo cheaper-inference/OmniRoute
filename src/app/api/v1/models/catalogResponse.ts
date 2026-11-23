@@ -193,6 +193,26 @@ function appendCcMirrorsWhenEnabled(
   );
 }
 
+/** Lean catalog flag, or the global disable-thinking-level-variants setting. */
+function isEffortVariantsDisabled(leanFlag: boolean | undefined): boolean {
+  return leanFlag === true || isDisableThinkingLevelVariantsEnabled();
+}
+
+const EFFORT_TIER_SUFFIX = /-(low|medium|high|xhigh)$/;
+
+/**
+ * Lean catalog: also drop effort-tier rows that already exist in the source catalog
+ * (static registry ids such as `<model>-high`), not just the ones the append passes
+ * would generate. Listing only; the suffixed ids stay routable. User combos are kept.
+ */
+export function dropEffortTierRows(
+  models: Array<Record<string, any>>,
+  enabled: boolean | undefined
+): Array<Record<string, any>> {
+  if (enabled !== true) return models;
+  return models.filter((m) => m.owned_by === "combo" || !EFFORT_TIER_SUFFIX.test(m.id));
+}
+
 /**
  * Post-filter chain applied AFTER the API-key filter, so variants and mirrors are
  * only derived from models the caller may actually see.
@@ -226,8 +246,7 @@ export async function applyCatalogPostFilters(
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
   let finalModels = models;
-  const effortVariantsDisabled =
-    ctx.disableEffortVariants === true || isDisableThinkingLevelVariantsEnabled();
+  const effortVariantsDisabled = isEffortVariantsDisabled(ctx.disableEffortVariants);
   const authorizeSyntheticModel =
     ctx.authorizeSyntheticModel ?? (await resolveCatalogVariantAuthorizer(request));
   const authorizeEffortVariant = composeEffortVariantAuthorizer(

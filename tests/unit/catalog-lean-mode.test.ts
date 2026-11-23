@@ -87,3 +87,58 @@ test("leanCatalog keeps user-made combos", async () => {
     "user combo must stay listed"
   );
 });
+
+test("leanCatalog keeps the alias rows of no-auth providers (they have no canonical row)", async () => {
+  await settingsDb.updateSettings({ leanCatalog: true });
+  const lean = await fetchCatalog();
+  // `ddgw` (duckduckgo-web) and `cfp` (cloudflare-playground) are no-auth: their canonical
+  // rows are never emitted, so dropping the alias row would remove them entirely.
+  assert.ok(
+    lean.some((m) => m.id.startsWith("ddgw/")),
+    "no-auth alias rows stay listed in lean mode"
+  );
+  assert.ok(lean.some((m) => m.id.startsWith("cfp/")));
+});
+
+test("leanCatalog drops effort-tier ids that already exist in the source catalog", async () => {
+  await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    name: "ag-main",
+    accessToken: "ag-token",
+    isActive: true,
+  });
+  await settingsDb.updateSettings({ leanCatalog: false });
+  const off = await fetchCatalog();
+  assert.ok(
+    off.some(isEffort),
+    "static registry ids with an effort suffix are listed while lean is off"
+  );
+  await settingsDb.updateSettings({ leanCatalog: true });
+  const lean = await fetchCatalog();
+  assert.deepEqual(lean.filter(isEffort), []);
+});
+
+test("leanCatalog applies a custom-model overlay to the canonical row instead of duplicating it", async () => {
+  const modelsDb = await import("../../src/lib/db/models.ts");
+  await modelsDb.addCustomModel(
+    "claude",
+    "claude-sonnet-4-5",
+    "Lean Overlay Name",
+    "manual",
+    "chat-completions",
+    ["chat"],
+    undefined,
+    {
+      inputTokenLimit: 123456,
+    }
+  );
+
+  await settingsDb.updateSettings({ leanCatalog: true });
+  const lean = (await fetchCatalog()) as Array<Row & { context_length?: number; custom?: boolean }>;
+  const rows = lean.filter((m) => m.id.endsWith("/claude-sonnet-4-5") && m.owned_by === "claude");
+  assert.equal(rows.length, 1, "one row, no duplicate custom entry");
+  assert.equal(rows[0].id, "claude/claude-sonnet-4-5", "canonical id kept");
+  assert.equal(rows[0].custom, true, "overlay flagged the canonical row");
+  assert.equal(rows[0].context_length, 123456, "overlay metadata applied");
+});
