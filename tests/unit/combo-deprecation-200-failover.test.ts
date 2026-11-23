@@ -1,7 +1,12 @@
-import test from "node:test";
+import test, { after } from "node:test";
 import assert from "node:assert/strict";
 import { validateResponseQuality } from "../../open-sse/services/combo/validateQuality.ts";
 import { handleComboChat } from "../../open-sse/services/combo.ts";
+import { shutdownDbInstance } from "../../src/lib/db/core.ts";
+
+after(async () => {
+  await shutdownDbInstance();
+});
 
 const enc = new TextEncoder();
 const noopLog = { warn: () => {}, info: () => {}, debug: () => {}, error: () => {} };
@@ -219,4 +224,132 @@ test("BDD-1/2 integration: handleComboChat fails over from HTTP 200 deprecation 
   const json = (await res.json()) as { choices: Array<{ message: { content: string } }> };
   assert.equal(json.choices[0].message.content, "Healthy reply");
   assert.deepEqual(tried, ["openai/deprecated-model", "openai/healthy-model"]);
+});
+
+test("Major #1: Responses API empty output_item.added / content_part.added stays in peek and catches deprecation deltas", async () => {
+  const res = makeSseResponse([
+    `event: response.output_item.added\ndata: ${JSON.stringify({
+      type: "response.output_item.added",
+      output_index: 0,
+      item: { id: "msg_1", type: "message", role: "assistant", content: [] },
+    })}\n\n`,
+    `event: response.content_part.added\ndata: ${JSON.stringify({
+      type: "response.content_part.added",
+      output_index: 0,
+      content_index: 0,
+      part: { type: "output_text", text: "" },
+    })}\n\n`,
+    `event: response.output_text.delta\ndata: ${JSON.stringify({
+      type: "response.output_text.delta",
+      delta: "Claude Opus 4.6 is no longer available. ",
+    })}\n\n`,
+    `event: response.output_text.delta\ndata: ${JSON.stringify({
+      type: "response.output_text.delta",
+      delta: "Please switch to Claude Opus 5.5.",
+    })}\n\n`,
+    `event: response.completed\ndata: ${JSON.stringify({
+      type: "response.completed",
+      response: { status: "completed" },
+    })}\n\n`,
+  ]);
+
+  const verdict = await validateResponseQuality(res, true, noopLog);
+  assert.equal(verdict.valid, false);
+  assert.equal(verdict.upstreamFailure?.status, 410);
+  assert.equal(verdict.upstreamFailure?.code, "model_deprecated");
+});
+
+test("Major #2: keep-alive Gemini stream with text and finishReason STOP releases immediately without waiting for EOF", async () => {
+  const frame = `data: ${JSON.stringify({
+    candidates: [
+      {
+        content: { parts: [{ text: "Hello from Gemini!" }] },
+        finishReason: "STOP",
+      },
+    ],
+  })}\n\n`;
+
+  let streamController: ReadableStreamDefaultController<Uint8Array> | null = null;
+  const keepAliveStream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      streamController = controller;
+      controller.enqueue(enc.encode(frame));
+      // Intentionally keep stream open (keep-alive) without calling controller.close()
+    },
+  });
+  const res = new Response(keepAliveStream, {
+    status: 200,
+    headers: { "content-type": "text/event-stream" },
+  });
+
+  const verdict = await Promise.race([
+    validateResponseQuality(res, true, noopLog),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("timed out waiting for keep-alive Gemini stream")), 500)
+    ),
+  ]);
+
+  assert.equal(verdict.valid, true);
+  assert.ok(verdict.clonedResponse);
+  const reader = verdict.clonedResponse.body!.getReader();
+  const firstRead = await reader.read();
+  assert.equal(firstRead.done, false);
+  assert.equal(new TextDecoder().decode(firstRead.value), frame);
+  streamController?.close();
+  await reader.cancel();
+});
+
+test("Minor #4: unrelated endpoint deprecation sentence passes as valid while model-specific notice fails over", async () => {
+  const endpointControl = makeJsonResponse({
+    id: "chatcmpl-ctrl",
+    object: "chat.completion",
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant",
+          content: "The old endpoint is no longer available. Please switch to /v2.",
+        },
+        finish_reason: "stop",
+      },
+    ],
+  });
+  const controlVerdict = await validateResponseQuality(endpointControl, false, noopLog);
+  assert.equal(controlVerdict.valid, true);
+
+  const modelNotice = makeJsonResponse({
+    id: "chatcmpl-model-dep",
+    object: "chat.completion",
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant",
+          content: "Claude Opus 4.6 is no longer available. Please switch to Claude Opus 5.5.",
+        },
+        finish_reason: "stop",
+      },
+    ],
+  });
+  const modelVerdict = await validateResponseQuality(modelNotice, false, noopLog);
+  assert.equal(modelVerdict.valid, false);
+  assert.equal(modelVerdict.upstreamFailure?.status, 410);
+  assert.equal(modelVerdict.upstreamFailure?.code, "model_deprecated");
+});
+
+test("Minor #5: empty Claude thinking_delta stays in peek and catches subsequent deprecation text_delta", async () => {
+  const res = makeSseResponse([
+    `event: message_start\ndata: ${JSON.stringify({ type: "message_start", message: { id: "msg_t2", role: "assistant" } })}\n\n`,
+    `event: content_block_start\ndata: ${JSON.stringify({ type: "content_block_start", index: 0, content_block: { type: "thinking", thinking: "" } })}\n\n`,
+    `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", index: 0, delta: { type: "thinking_delta", thinking: "" } })}\n\n`,
+    `event: content_block_start\ndata: ${JSON.stringify({ type: "content_block_start", index: 1, content_block: { type: "text", text: "" } })}\n\n`,
+    `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", index: 1, delta: { type: "text_delta", text: "This model is no longer available. Please switch to claude-opus-4-6." } })}\n\n`,
+    `event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "end_turn" } })}\n\n`,
+    `event: message_stop\ndata: ${JSON.stringify({ type: "message_stop" })}\n\n`,
+  ]);
+
+  const verdict = await validateResponseQuality(res, true, noopLog);
+  assert.equal(verdict.valid, false);
+  assert.equal(verdict.upstreamFailure?.status, 410);
+  assert.equal(verdict.upstreamFailure?.code, "model_deprecated");
 });

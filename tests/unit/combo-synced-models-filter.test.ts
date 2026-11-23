@@ -180,3 +180,42 @@ test("BDD-5b: fail-open when reader is unregistered or throws", async () => {
   );
   assert.ok(resThrows.expandedTargets.some((t) => t.connectionId === conn.id));
 });
+
+test("Minor #3: canonical antigravity target also reads agy synced inventory", async () => {
+  registerQuotaFetcher("antigravity", async () => ({ used: 0, total: 100, percentUsed: 0 }));
+
+  const connWithModel = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    name: "ag-agy-with-" + randomUUID(),
+    accessToken: "tok-8",
+    isActive: true,
+  });
+  const connWithoutModel = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    name: "ag-agy-without-" + randomUUID(),
+    accessToken: "tok-9",
+    isActive: true,
+  });
+
+  quotaStrategies.registerSyncedAvailableModelsReader(async (providerId: string) => {
+    if (providerId === "agy") {
+      return {
+        [connWithModel.id]: [{ id: "claude-opus-4-6-thinking" }],
+        [connWithoutModel.id]: [{ id: "claude-sonnet-4-6" }],
+      };
+    }
+    return {};
+  });
+
+  const { expandedTargets } = await quotaStrategies.expandTargetsByQuotaAwareConnections(
+    [makeTarget("antigravity", "antigravity/claude-opus-4-6-thinking")],
+    "test-antigravity-reads-agy",
+    noopLog
+  );
+
+  const ids = expandedTargets.map((t) => t.connectionId);
+  assert.ok(ids.includes(connWithModel.id), "connection in agy inventory advertising model must remain");
+  assert.ok(!ids.includes(connWithoutModel.id), "connection in agy inventory omitting model must be excluded");
+});

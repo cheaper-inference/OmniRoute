@@ -12,6 +12,7 @@ import {
   isKnownNonClaudeStreamPayload,
   isOpenAIChoicesPayload,
 } from "../../utils/streamHelpers.ts";
+import { hasAnyReasoningSignal } from "../../utils/reasoningFields.ts";
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { normalizeStreamFailurePayload } from "../../utils/streamErrorFormat.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
@@ -113,8 +114,32 @@ const CONTENT_EXHAUSTION_PATTERN =
 // Some upstreams (observed: Antigravity/Claude deprecation notices) return HTTP 200
 // with an assistant message telling the caller the model is no longer available.
 // Fail over with a non-retryable 410 model_unavailable failure so combos try siblings.
-const MODEL_UNAVAILABLE_CONTENT_PATTERN = /is no longer available\.\s*Please switch to/i;
+const MODEL_UNAVAILABLE_CONTENT_PATTERN =
+  /\b(?:(?:this\s+)?model|(?:claude|gpt|gemini|opus|sonnet|haiku|deepseek|qwen|llama|mistral|grok|glm|minimax|kimi|o[134])(?:-[a-z0-9._:/-]+)?)(?:\s+[a-z0-9._:/-]+){0,4}\s+is\s+no\s+longer\s+available\.\s*Please\s+switch\s+to\b/i;
 const MODEL_UNAVAILABLE_PEEK_CHAR_CAP = 512;
+
+interface StreamingAssistantSignal {
+  text: string;
+  nonTextSignal: boolean;
+  hasTerminalFinish?: boolean;
+}
+
+interface DeprecationPeekState {
+  textBuffer: string;
+  checkDone: boolean;
+  sawContentSignal: boolean;
+}
+
+interface SsePeekFrameContext {
+  sse: SseLifecycleFlags;
+  openAi: OpenAiLifecycleFlags;
+  deprecation: DeprecationPeekState;
+  preContentTransportRecovery: boolean;
+  onStructuredSse: () => void;
+  onTerminator: () => void;
+  onTransportReplayBoundary: () => void;
+  onUpstreamFailure: (failure: StreamingUpstreamFailure | null) => void;
+}
 
 function buildModelUnavailableFailure(text: string): StreamingUpstreamFailure {
   const message = sanitizeErrorMessage(text).slice(0, 300);
@@ -136,111 +161,297 @@ function extractTextFromParts(parts: unknown): string {
     .join(" ");
 }
 
-function extractNonStreamingAssistantText(json: Record<string, unknown>): string {
-  const choiceText = extractFirstChoiceText(json);
-  if (choiceText) return choiceText;
-
+function extractOpenAiDeltaText(json: Record<string, unknown>): string {
   const choices = json.choices;
-  if (Array.isArray(choices) && choices.length > 0 && isRecord(choices[0])) {
-    const delta = isRecord(choices[0].delta) ? choices[0].delta : null;
-    if (typeof delta?.content === "string") return delta.content;
-    const deltaParts = extractTextFromParts(delta?.content);
-    if (deltaParts) return deltaParts;
-  }
-
-  if (typeof json.content === "string") return json.content;
-  const claudeParts = extractTextFromParts(json.content);
-  if (claudeParts) return claudeParts;
-
-  if (Array.isArray(json.output)) {
-    const outputTexts = json.output
-      .map((item) => (isRecord(item) ? extractTextFromParts(item.content) : ""))
-      .filter(Boolean);
-    if (outputTexts.length > 0) return outputTexts.join(" ");
-  }
-
-  const candidates = Array.isArray(json.candidates)
-    ? json.candidates
-    : isRecord(json.response) && Array.isArray(json.response.candidates)
-      ? json.response.candidates
-      : null;
-  if (candidates && candidates.length > 0 && isRecord(candidates[0])) {
-    const content = isRecord(candidates[0].content) ? candidates[0].content : null;
-    const geminiParts = extractTextFromParts(content?.parts);
-    if (geminiParts) return geminiParts;
-  }
-
-  return "";
+  if (!Array.isArray(choices) || choices.length === 0 || !isRecord(choices[0])) return "";
+  const delta = isRecord(choices[0].delta) ? choices[0].delta : null;
+  if (!delta) return "";
+  if (typeof delta.content === "string") return delta.content;
+  return extractTextFromParts(delta.content);
 }
 
-function extractStreamingAssistantTextAndSignal(
+function extractClaudeContentText(json: Record<string, unknown>): string {
+  if (typeof json.content === "string") return json.content;
+  return extractTextFromParts(json.content);
+}
+
+function extractResponsesOutputText(output: unknown): string {
+  if (!Array.isArray(output)) return "";
+  return output
+    .map((item) => (isRecord(item) ? extractTextFromParts(item.content) : ""))
+    .filter(Boolean)
+    .join(" ");
+}
+
+function getGeminiCandidates(json: Record<string, unknown>): unknown[] | null {
+  if (Array.isArray(json.candidates)) return json.candidates;
+  if (isRecord(json.response) && Array.isArray(json.response.candidates)) {
+    return json.response.candidates;
+  }
+  return null;
+}
+
+function extractGeminiCandidatesText(json: Record<string, unknown>): string {
+  const candidates = getGeminiCandidates(json);
+  if (!candidates || candidates.length === 0 || !isRecord(candidates[0])) return "";
+  const content = isRecord(candidates[0].content) ? candidates[0].content : null;
+  return extractTextFromParts(content?.parts);
+}
+
+function extractNonStreamingAssistantText(json: Record<string, unknown>): string {
+  return (
+    extractFirstChoiceText(json) ||
+    extractOpenAiDeltaText(json) ||
+    extractClaudeContentText(json) ||
+    extractResponsesOutputText(json.output) ||
+    extractGeminiCandidatesText(json)
+  );
+}
+
+function checkNonStreamingModelUnavailable(
+  json: Record<string, unknown>
+): ResponseQualityResult | null {
+  const assistantText = extractNonStreamingAssistantText(json);
+  if (!assistantText || !MODEL_UNAVAILABLE_CONTENT_PATTERN.test(assistantText)) return null;
+  return {
+    valid: false,
+    reason: "upstream model unavailable in 200 body",
+    upstreamFailure: buildModelUnavailableFailure(assistantText),
+  };
+}
+
+function hasOpenAiDeltaNonTextSignal(delta: Record<string, unknown>): boolean {
+  if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) return true;
+  if (delta.function_call) return true;
+  if (hasAnyReasoningSignal(delta)) return true;
+  return typeof delta.refusal === "string" && delta.refusal.length > 0;
+}
+
+function extractOpenAiStreamSignal(
+  parsed: Record<string, unknown>
+): StreamingAssistantSignal | null {
+  const choices = parsed.choices;
+  if (!Array.isArray(choices) || choices.length === 0 || !isRecord(choices[0])) return null;
+  const delta = isRecord(choices[0].delta) ? choices[0].delta : null;
+  if (!delta) return null;
+  const text = typeof delta.content === "string" ? delta.content : "";
+  return { text, nonTextSignal: hasOpenAiDeltaNonTextSignal(delta) };
+}
+
+function extractClaudeStreamSignal(
   parsed: Record<string, unknown>,
   eventType: string
-): { text: string; nonTextSignal: boolean } {
-  if (Array.isArray(parsed.choices) && parsed.choices.length > 0 && isRecord(parsed.choices[0])) {
-    const delta = isRecord(parsed.choices[0].delta) ? parsed.choices[0].delta : null;
-    if (delta) {
-      const hasNonText =
-        (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) ||
-        Boolean(delta.function_call) ||
-        (typeof delta.reasoning_content === "string" && delta.reasoning_content.length > 0) ||
-        (typeof delta.reasoning === "string" && delta.reasoning.length > 0) ||
-        (typeof delta.refusal === "string" && delta.refusal.length > 0);
-      const text = typeof delta.content === "string" ? delta.content : "";
-      return { text, nonTextSignal: hasNonText };
-    }
-  }
-
+): StreamingAssistantSignal | null {
   if (eventType === "content_block_start") {
     return { text: "", nonTextSignal: contentBlockStartIsRealSignal(parsed) };
   }
-
-  if (eventType === "content_block_delta") {
-    const delta = asObject(parsed, "delta");
-    const deltaType = typeof delta?.type === "string" ? delta.type : "";
-    if (deltaType === "input_json_delta" || deltaType === "thinking_delta") {
-      return { text: "", nonTextSignal: true };
-    }
-    if (deltaType === "text_delta" && typeof delta?.text === "string") {
-      return { text: delta.text, nonTextSignal: false };
-    }
+  if (eventType !== "content_block_delta") return null;
+  const delta = asObject(parsed, "delta");
+  const deltaType = typeof delta?.type === "string" ? delta.type : "";
+  if (deltaType === "input_json_delta") return { text: "", nonTextSignal: true };
+  if (deltaType === "thinking_delta") {
+    const hasThinking = typeof delta?.thinking === "string" && delta.thinking.length > 0;
+    return { text: "", nonTextSignal: hasThinking };
   }
+  if (deltaType === "text_delta" && typeof delta?.text === "string") {
+    return { text: delta.text, nonTextSignal: false };
+  }
+  return null;
+}
 
+function extractResponsesItemSignal(item: unknown): StreamingAssistantSignal {
+  if (!isRecord(item)) return { text: "", nonTextSignal: false };
+  if (item.type !== "message") return { text: "", nonTextSignal: true };
+  return { text: extractTextFromParts(item.content), nonTextSignal: false };
+}
+
+function extractResponsesContentPartSignal(part: unknown): StreamingAssistantSignal {
+  if (!isRecord(part)) return { text: "", nonTextSignal: false };
+  if (typeof part.text === "string" && part.text.length > 0) {
+    return { text: part.text, nonTextSignal: false };
+  }
+  if (part.type === "refusal" && typeof part.refusal === "string" && part.refusal.length > 0) {
+    return { text: "", nonTextSignal: true };
+  }
+  const isTextOrRefusal =
+    part.type === "output_text" ||
+    part.type === "text" ||
+    part.type === "refusal" ||
+    part.type === undefined;
+  return { text: "", nonTextSignal: !isTextOrRefusal };
+}
+
+function extractResponsesCompletedSignal(parsed: Record<string, unknown>): StreamingAssistantSignal {
+  const resp = isRecord(parsed.response) ? parsed.response : null;
+  const output = Array.isArray(resp?.output) ? resp.output : [];
+  const hasNonMessage = output.some((item) => isRecord(item) && item.type !== "message");
+  return {
+    text: extractResponsesOutputText(output),
+    nonTextSignal: hasNonMessage,
+    hasTerminalFinish: true,
+  };
+}
+
+function extractResponsesStreamSignal(
+  parsed: Record<string, unknown>,
+  eventType: string
+): StreamingAssistantSignal | null {
   if (eventType === "response.output_text.delta" && typeof parsed.delta === "string") {
     return { text: parsed.delta, nonTextSignal: false };
   }
   if (
     eventType === "response.function_call_arguments.delta" ||
     eventType === "response.reasoning_summary_text.delta" ||
-    (eventType === "response.output_item.added" &&
-      isRecord(parsed.item) &&
-      parsed.item.type !== "message")
+    eventType === "response.reasoning_text.delta"
   ) {
     return { text: "", nonTextSignal: true };
   }
-
-  const candidates = Array.isArray(parsed.candidates)
-    ? parsed.candidates
-    : isRecord(parsed.response) && Array.isArray(parsed.response.candidates)
-      ? parsed.response.candidates
-      : null;
-  if (candidates && candidates.length > 0 && isRecord(candidates[0])) {
-    const content = isRecord(candidates[0].content) ? candidates[0].content : null;
-    const parts = Array.isArray(content?.parts) ? content.parts : [];
-    let text = "";
-    let nonTextSignal = false;
-    for (const part of parts) {
-      if (!isRecord(part)) continue;
-      if (part.functionCall || part.thought === true) {
-        nonTextSignal = true;
-      } else if (typeof part.text === "string" && part.text.length > 0) {
-        text += part.text;
-      }
-    }
-    return { text, nonTextSignal };
+  if (eventType === "response.output_item.added" || eventType === "response.output_item.done") {
+    return extractResponsesItemSignal(parsed.item);
   }
+  if (eventType === "response.content_part.added") {
+    return extractResponsesContentPartSignal(parsed.part);
+  }
+  if (eventType === "response.completed") {
+    return extractResponsesCompletedSignal(parsed);
+  }
+  return null;
+}
 
-  return { text: "", nonTextSignal: false };
+function isEmptyResponsesAnnouncement(parsed: Record<string, unknown>, eventType: string): boolean {
+  const type = typeof parsed.type === "string" ? parsed.type : eventType;
+  if (type === "response.output_item.added" || type === "response.output_item.done") {
+    return (
+      isRecord(parsed.item) &&
+      parsed.item.type === "message" &&
+      !extractTextFromParts(parsed.item.content)
+    );
+  }
+  if (type === "response.content_part.added") {
+    if (!isRecord(parsed.part)) return false;
+    const partType = parsed.part.type;
+    const isTextPart = partType === "output_text" || partType === "text" || partType === undefined;
+    return isTextPart && !(typeof parsed.part.text === "string" && parsed.part.text.length > 0);
+  }
+  return false;
+}
+
+function hasGeminiTerminalFinishReason(candidate: Record<string, unknown>): boolean {
+  const reason = candidate.finishReason;
+  return typeof reason === "string" && reason.length > 0 && reason !== "FINISH_REASON_UNSPECIFIED";
+}
+
+function extractGeminiPartsSignal(parts: unknown[]): { text: string; nonTextSignal: boolean } {
+  let text = "";
+  let nonTextSignal = false;
+  for (const part of parts) {
+    if (!isRecord(part)) continue;
+    if (part.functionCall || part.executableCode || part.thought === true) {
+      nonTextSignal = true;
+    } else if (typeof part.text === "string" && part.text.length > 0) {
+      text += part.text;
+    }
+  }
+  return { text, nonTextSignal };
+}
+
+function extractGeminiStreamSignal(
+  parsed: Record<string, unknown>
+): StreamingAssistantSignal | null {
+  const candidates = getGeminiCandidates(parsed);
+  if (!candidates || candidates.length === 0 || !isRecord(candidates[0])) return null;
+  const candidate = candidates[0];
+  const content = isRecord(candidate.content) ? candidate.content : null;
+  const parts = Array.isArray(content?.parts) ? content.parts : [];
+  const { text, nonTextSignal } = extractGeminiPartsSignal(parts);
+  return {
+    text,
+    nonTextSignal,
+    hasTerminalFinish: hasGeminiTerminalFinishReason(candidate),
+  };
+}
+
+function extractStreamingAssistantTextAndSignal(
+  parsed: Record<string, unknown>,
+  eventType: string
+): StreamingAssistantSignal {
+  return (
+    extractOpenAiStreamSignal(parsed) ||
+    extractClaudeStreamSignal(parsed, eventType) ||
+    extractResponsesStreamSignal(parsed, eventType) ||
+    extractGeminiStreamSignal(parsed) || { text: "", nonTextSignal: false }
+  );
+}
+
+function evaluateDeprecationTextChunk(
+  assistantText: string,
+  state: DeprecationPeekState
+): { outcome: StreamingPeekOutcome; failure: StreamingUpstreamFailure | null } {
+  state.sawContentSignal = true;
+  if (state.checkDone) return { outcome: "content", failure: null };
+  const remaining = MODEL_UNAVAILABLE_PEEK_CHAR_CAP - state.textBuffer.length;
+  if (remaining > 0) {
+    state.textBuffer += assistantText.slice(0, remaining);
+  }
+  if (MODEL_UNAVAILABLE_CONTENT_PATTERN.test(state.textBuffer)) {
+    return { outcome: "error", failure: buildModelUnavailableFailure(state.textBuffer) };
+  }
+  if (state.textBuffer.length >= MODEL_UNAVAILABLE_PEEK_CHAR_CAP) {
+    state.checkDone = true;
+    return { outcome: "content", failure: null };
+  }
+  return { outcome: null, failure: null };
+}
+
+function evaluateSseContentSignal(
+  parsed: Record<string, unknown>,
+  eventType: string,
+  ctx: SsePeekFrameContext
+): StreamingPeekOutcome {
+  const signal = extractStreamingAssistantTextAndSignal(parsed, eventType);
+  const claudeRealContent = applySseLifecycleEvent(eventType, parsed, ctx.sse);
+  if (ctx.sse.hasLifecycleEnd) ctx.onTerminator();
+
+  if (signal.nonTextSignal) {
+    ctx.deprecation.sawContentSignal = true;
+    ctx.deprecation.checkDone = true;
+    return "content";
+  }
+  if (signal.text) {
+    const res = evaluateDeprecationTextChunk(signal.text, ctx.deprecation);
+    if (res.failure) ctx.onUpstreamFailure(res.failure);
+    if (res.outcome) return res.outcome;
+  } else if (
+    claudeRealContent ||
+    (!isEmptyResponsesAnnouncement(parsed, eventType) &&
+      isKnownNonClaudeStreamPayload(parsed, eventType))
+  ) {
+    ctx.deprecation.sawContentSignal = true;
+    ctx.deprecation.checkDone = true;
+    return "content";
+  }
+  if (signal.hasTerminalFinish) ctx.onTerminator();
+  return null;
+}
+
+function evaluateSseFrameOutcome(
+  parsed: Record<string, unknown>,
+  eventType: string,
+  ctx: SsePeekFrameContext,
+  isTerminalUsageOnly: boolean
+): StreamingPeekOutcome {
+  ctx.onStructuredSse();
+  applyOpenAiLifecycleEvent(parsed, ctx.openAi);
+  if (ctx.openAi.hasTerminalMarker) ctx.onTerminator();
+  if (ctx.preContentTransportRecovery && hasTransportReplayBoundary(parsed, eventType)) {
+    ctx.onTransportReplayBoundary();
+  }
+  if (isStreamingUpstreamError(parsed, eventType)) {
+    ctx.onUpstreamFailure(classifyStreamingUpstreamFailure(parsed));
+    return "error";
+  }
+  if (isTerminalUsageOnly) ctx.onTerminator();
+  return evaluateSseContentSignal(parsed, eventType, ctx);
 }
 
 /**
@@ -610,9 +821,29 @@ export async function validateResponseQuality(
     let upstreamFailure: StreamingUpstreamFailure | null = null;
     let sawTerminator = false;
     let transportReplayBoundary = false;
-    let deprecationTextBuffer = "";
-    let deprecationCheckDone = false;
-    let sawContentSignal = false;
+    const deprecation: DeprecationPeekState = {
+      textBuffer: "",
+      checkDone: false,
+      sawContentSignal: false,
+    };
+    const sseFrameContext: SsePeekFrameContext = {
+      sse,
+      openAi,
+      deprecation,
+      preContentTransportRecovery,
+      onStructuredSse: () => {
+        sawStructuredSSE = true;
+      },
+      onTerminator: () => {
+        sawTerminator = true;
+      },
+      onTransportReplayBoundary: () => {
+        transportReplayBoundary = true;
+      },
+      onUpstreamFailure: (failure) => {
+        upstreamFailure = failure ?? upstreamFailure;
+      },
+    };
     // Set when the streaming peek loop hits an "outcome === content" verdict
     // (a content_block_* event observed). Guards the catch-block failover
     // check below so a stream that already produced content before an error
@@ -684,68 +915,20 @@ export async function validateResponseQuality(
         const parsed = consumeSseLine(line);
         if (!parsed) continue;
 
-        // A successfully parsed `data:` payload is structured SSE activity
-        // regardless of shape or content — tracked only for the generic
-        // done-branch gate below; the #1382/#7285 branches are unaffected.
-        sawStructuredSSE = true;
-
-        applyOpenAiLifecycleEvent(parsed, openAi);
-        if (openAi.hasTerminalMarker) sawTerminator = true;
-
         const eventType =
           (typeof parsed.type === "string" ? parsed.type : null) || pendingEventType || "";
         pendingEventType = "";
-        if (preContentTransportRecovery && hasTransportReplayBoundary(parsed, eventType))
-          transportReplayBoundary = true;
-
-        if (isStreamingUpstreamError(parsed, eventType)) {
-          upstreamFailure = classifyStreamingUpstreamFailure(parsed) ?? upstreamFailure;
-          return "error";
-        }
-
-        if (isTerminalUsageOnlyChunk(parsed, eventType)) sawTerminator = true;
-
-        const { text: assistantText, nonTextSignal } = extractStreamingAssistantTextAndSignal(
+        const outcome = evaluateSseFrameOutcome(
           parsed,
-          eventType
+          eventType,
+          sseFrameContext,
+          isTerminalUsageOnlyChunk(parsed, eventType)
         );
-        const knownNonClaude = isKnownNonClaudeStreamPayload(parsed, eventType);
-        const claudeRealContent = applySseLifecycleEvent(eventType, parsed, sse);
-        if (sse.hasLifecycleEnd) sawTerminator = true;
-
-        if (nonTextSignal) {
-          sawContentSignal = true;
-          deprecationCheckDone = true;
+        if (outcome) return outcome;
+        if (deprecation.sawContentSignal && sawTerminator) {
+          deprecation.checkDone = true;
           return "content";
         }
-
-        if (assistantText) {
-          sawContentSignal = true;
-          if (!deprecationCheckDone) {
-            const remaining = MODEL_UNAVAILABLE_PEEK_CHAR_CAP - deprecationTextBuffer.length;
-            if (remaining > 0) {
-              deprecationTextBuffer += assistantText.slice(0, remaining);
-            }
-            if (MODEL_UNAVAILABLE_CONTENT_PATTERN.test(deprecationTextBuffer)) {
-              upstreamFailure = buildModelUnavailableFailure(deprecationTextBuffer);
-              return "error";
-            }
-            if (deprecationTextBuffer.length >= MODEL_UNAVAILABLE_PEEK_CHAR_CAP) {
-              deprecationCheckDone = true;
-              return "content";
-            }
-          } else {
-            return "content";
-          }
-        } else if (knownNonClaude || claudeRealContent) {
-          sawContentSignal = true;
-          deprecationCheckDone = true;
-          return "content";
-        }
-      }
-      if (sawContentSignal && sawTerminator) {
-        deprecationCheckDone = true;
-        return "content";
       }
       return null;
     }
@@ -849,7 +1032,7 @@ export async function validateResponseQuality(
             };
           }
 
-          if (sawContentSignal) {
+          if (deprecation.sawContentSignal) {
             return { valid: true, clonedResponse: buildReplayResponse(reader) };
           }
 
@@ -1171,16 +1354,8 @@ export async function validateResponseQuality(
       };
     }
   }
-  {
-    const assistantText = extractNonStreamingAssistantText(json);
-    if (assistantText && MODEL_UNAVAILABLE_CONTENT_PATTERN.test(assistantText)) {
-      return {
-        valid: false,
-        reason: "upstream model unavailable in 200 body",
-        upstreamFailure: buildModelUnavailableFailure(assistantText),
-      };
-    }
-  }
+  const modelUnavailable = checkNonStreamingModelUnavailable(json);
+  if (modelUnavailable) return modelUnavailable;
 
   const choices = json?.choices;
   if (json?.object === "response") {
