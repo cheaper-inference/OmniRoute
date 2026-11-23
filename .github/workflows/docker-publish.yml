@@ -920,6 +920,7 @@ jobs:
     secrets:
       DOCKERHUB_ORG_USERNAME: ${{ secrets.DOCKERHUB_ORG_USERNAME }}
       DOCKERHUB_ORG_TOKEN: ${{ secrets.DOCKERHUB_ORG_TOKEN }}
+      GHCR_LEGACY_TOKEN: ${{ secrets.GHCR_LEGACY_TOKEN }}
 
   # #14560: alert when the only omni-build runner goes offline. Mirrors the
   # nightly-release-green issue loop: open a deduplicated tracking issue when
