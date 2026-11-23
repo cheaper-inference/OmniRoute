@@ -2,7 +2,34 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b26",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b26-1cdc2ab9bbea",
+    "candidateSha": "1cdc2ab9bbea4ccb55a95a15f36983b8ef2f2a63",
+    "baseSha": "e49d1e94fd65fef8b856a64a9532fd86f5c4e29a",
+    "treeSha": "840c58413f8f66a27156c16872fd55def346bb8c",
+    "prs": [
+      {
+        "n": 20967,
+        "head": "2e51ed76710ee5b12e9d1d22117eeed8e8c53e94",
+        "title": "fix(ci): run the merge queue's base-check unit suite in 4 parallel shards",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-23T21:41:55Z"
+      },
+      {
+        "n": 21079,
+        "head": "0eb6aa9f9e25c0e5c045677d8c4805d9ba9147a5",
+        "title": "fix(security): constant format string in the model-sync failure log (CodeQL #1407)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-23T23:11:43Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-23T23:12:55.774Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
@@ -81,8 +108,8 @@
     }
   },
   "counters": {
-    "batchSeq": 25,
-    "ciRuns": 29,
+    "batchSeq": 26,
+    "ciRuns": 30,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 8,
@@ -1840,8 +1867,24 @@
       "sha": "2f50b6c94f4038158df9de98986a27b2fb4f98f8",
       "detail": "shadow mode: would merge-ff onto 5ffa68e83544",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44954745810"
+    },
+    {
+      "at": "2026-11-23T23:12:59.348Z",
+      "type": "batch-started",
+      "batchId": "b26",
+      "prs": [
+        20967,
+        21079
+      ],
+      "sha": "1cdc2ab9bbea4ccb55a95a15f36983b8ef2f2a63",
+      "detail": "2 PR(s) on e49d1e94fd65; window 4",
+      "labeledAt": {
+        "20967": "2026-11-23T21:41:55Z",
+        "21079": "2026-11-23T23:11:43Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45286652380"
     }
   ],
-  "updatedAt": "2026-11-23T22:51:06.044Z",
+  "updatedAt": "2026-11-23T23:13:01.002Z",
   "batchWindow": 4
 }
