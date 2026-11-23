@@ -10,6 +10,7 @@ export const PROVIDER_ENDPOINTS = {
   qiniu: "https://api.qnaigc.com/v1/chat/completions",
   "zylo-api": "https://api.zyloai.net/v1/chat/completions",
   unorouter: "https://api.unorouter.com/v1/chat/completions",
+  crowllm: "https://crowllm.com/v1/chat/completions",
   poolside: "https://inference.poolside.ai/v1/chat/completions",
   fastrouter: "https://api.fastrouter.ai/api/v1/chat/completions",
   anyapi: "https://api.anyapi.ai/v1/chat/completions",
