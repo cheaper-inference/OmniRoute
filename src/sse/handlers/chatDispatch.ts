@@ -11,6 +11,7 @@
 
 import { executeChatWithBreaker } from "./chatHelpers";
 import { resolveDispatchClientRawRequest } from "./chat/clientRawRequest.ts";
+import type { ComboFirstOutputHook } from "@omniroute/open-sse/services/combo/nonStreamFirstOutput.ts";
 import {
   watchComboTargetStall,
   type ComboStalledConnections,
@@ -29,6 +30,8 @@ type DispatchArgs = {
 type DispatchRuntimeOptions = {
   sessionAffinityKey?: string | null;
   modelAbortSignal?: AbortSignal | null;
+  /** The per-target timer's first-output hook (nonStreamFirstOutput.ts). */
+  comboFirstOutput?: ComboFirstOutputHook | null;
   comboStalledConnections?: ComboStalledConnections | null;
 };
 
@@ -72,7 +75,8 @@ export async function dispatchChatWithAffinityEviction(
       ...args,
       clientRawRequest: resolveDispatchClientRawRequest(
         args.clientRawRequest,
-        runtimeOptions.modelAbortSignal
+        runtimeOptions.modelAbortSignal,
+        runtimeOptions.comboFirstOutput
       ),
     });
   } catch (dispatchErr) {

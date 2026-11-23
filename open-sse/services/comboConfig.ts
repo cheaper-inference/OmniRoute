@@ -23,7 +23,10 @@ export const PRE_SCREEN_CONCURRENCY = 5;
  * (escalated cmqlrhd7c). For STREAMING requests this bounds the time to the first output
  * frame, not the time to response headers: a target that opens the stream and then produces
  * nothing is abandoned at the same budget, while token generation that has started streams
- * to completion and is NOT cut short. A target that declares a longer budget of its own
+ * to completion and is NOT cut short. A NON-STREAMED target stops the same timer when its
+ * upstream stream shows first output (combo/nonStreamFirstOutput.ts); only a non-streamed
+ * target whose upstream answers with plain JSON must finish within this budget.
+ * A target that declares a longer budget of its own
  * (connection, per-model or provider-level `timeoutMs`) may wait longer for its first output,
  * up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS (see resolveDeclaredTargetBudgetMs in combo.ts).
  * An explicit `targetTimeoutMs` in the resolved combo config (the combo's own config or the

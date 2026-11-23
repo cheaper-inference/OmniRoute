@@ -83,6 +83,7 @@ import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
 import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
+import { observeUpstreamFirstOutput } from "../../services/combo/nonStreamFirstOutput.ts";
 
 export type ChatCoreExecutorResult = {
   upstreamHttpSelection?: HttpAttemptSelection | null;
@@ -170,6 +171,8 @@ export type ExecuteProviderRequestDeps = {
   trustedEffortContext: TrustedEffortContext;
   upstreamStream: boolean;
   userAgent: string | undefined;
+  /** Combo per-target timer hook: called once when a non-streamed answer starts arriving. */
+  onUpstreamFirstOutput?: (() => void) | null;
 };
 
 // Resolve early (the loop's own signal checks then end the request) when the client leaves.
@@ -233,6 +236,7 @@ export async function executeProviderRequest(
     toolDisclosure,
     upstreamStream,
     userAgent: _userAgent,
+    onUpstreamFirstOutput,
   } = deps;
   const body = rawBody;
   const recordResponseKeyHealth = (
@@ -759,7 +763,9 @@ export async function executeProviderRequest(
       let payload: string;
       try {
         payload = await readNonStreamingResponseBody(
-          rawResult.response,
+          onUpstreamFirstOutput
+            ? observeUpstreamFirstOutput(rawResult.response, onUpstreamFirstOutput)
+            : rawResult.response,
           contentType,
           upstreamStream
         );

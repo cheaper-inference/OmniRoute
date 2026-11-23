@@ -9,6 +9,7 @@
 import type { CompressionExclusions } from "../compression/exclusions.ts";
 import type { ProviderCandidate } from "../autoCombo/scoring.ts";
 import type { PerTargetAdmissionHook } from "../admission/types.ts";
+import type { ComboFirstOutputHook } from "./nonStreamFirstOutput.ts";
 
 export const RESET_WINDOW_NAMES = ["weekly", "session", "monthly"] as const;
 
@@ -68,8 +69,14 @@ export type SingleModelTarget =
       fallbackAttempts?: number;
       /** Prefer a sibling after a pre-content empty turn; never widens target pins. */
       emptyTurnConnectionId?: string | null;
+      /** Set by targetTimeoutRunner.ts; a non-streamed dispatch reports first output here. */
+      comboFirstOutput?: ComboFirstOutputHook | null;
     })
-  | { modelAbortSignal: AbortSignal; fallbackAttempts?: number };
+  | {
+      modelAbortSignal: AbortSignal;
+      fallbackAttempts?: number;
+      comboFirstOutput?: ComboFirstOutputHook | null;
+    };
 
 export type HandleSingleModel = (
   body: Record<string, unknown>,

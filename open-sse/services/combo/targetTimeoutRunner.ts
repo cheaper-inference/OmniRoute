@@ -15,6 +15,7 @@ import { requestMediaRequirements, nonImageMediaFailures } from "./mediaCompatib
 import { parseModel } from "../model.ts";
 import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
 import { awaitFirstOutput, isEventStreamResponse } from "./firstOutputStream.ts";
+import type { ComboFirstOutputHook } from "./nonStreamFirstOutput.ts";
 import type { HandleSingleModel, SingleModelTarget, ComboLogger } from "./types.ts";
 
 /** Stable internal classification for OmniRoute's own combo per-target timer. */
@@ -305,11 +306,29 @@ export function buildTargetTimeoutRunner(deps: {
     const targetSignal = parentHedgeSignal
       ? AbortSignal.any([timeoutController.signal, parentHedgeSignal])
       : timeoutController.signal;
+    // A non-streamed target only returns once its whole answer is assembled, so the budget
+    // below would cut any answer that takes longer to write. The dispatch reports the upstream's
+    // first output through this hook (nonStreamFirstOutput.ts); from then on the target is
+    // writing, not stalled, and the timer stops. A streamed target returns at its headers and
+    // is held by gateFirstOutput instead, so it never calls the hook.
+    let firstOutputAt = 0;
+    const comboFirstOutput: ComboFirstOutputHook = {
+      onFirstOutput: () => {
+        if (timedOut || firstOutputAt) return;
+        firstOutputAt = Date.now();
+        clearTimeout(timeoutId);
+        log.info(
+          "COMBO",
+          `Model ${modelStr} produced its first output after ${firstOutputAt - startedAt}ms — the ${effectiveTimeoutMs}ms target budget no longer applies to this non-streamed answer`
+        );
+      },
+    };
     const targetWithSignal = {
       ...(target ?? {}),
       // Keep the caller's abort linked after headers are returned: the attempt's
       // response-quality peek may still be consuming this target's stream.
       modelAbortSignal: targetSignal,
+      comboFirstOutput,
     };
     // Both branches of the race resolve (never reject): the inner handleSingleModel call has a
     // .catch() that converts rejections into responses, and timeoutPromise always resolves. The

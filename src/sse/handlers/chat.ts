@@ -1279,6 +1279,7 @@ async function handleChatImplementation(
           effectiveComboStrategy?: string | null;
           modelAbortSignal?: AbortSignal | null;
           fallbackAttempts?: number;
+          comboFirstOutput?: SingleModelTarget["comboFirstOutput"];
         }
       ) =>
         handleSingleModelChat(
@@ -1331,6 +1332,7 @@ async function handleChatImplementation(
             modelAbortSignal: target?.modelAbortSignal ?? null,
             comboStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
+            comboFirstOutput: target?.comboFirstOutput ?? null,
           },
           target?.effectiveComboStrategy ?? combo.strategy,
           true
@@ -1611,6 +1613,7 @@ async function handleSingleModelChat(
     /** Accounts an earlier target of this combo request stalled on (comboStalledConnections.ts). */
     comboStalledConnections?: ComboStalledConnections | null;
     fallbackAttempts?: number;
+    comboFirstOutput?: SingleModelTarget["comboFirstOutput"];
   } = {},
   comboStrategy: string | null = null,
   isCombo: boolean = false
@@ -1697,6 +1700,7 @@ async function handleSingleModelChat(
             modelAbortSignal: target?.modelAbortSignal ?? null,
             comboStalledConnections: sNetStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
+            comboFirstOutput: target?.comboFirstOutput ?? null,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
           false
