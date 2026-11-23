@@ -212,7 +212,7 @@ describe("acquireBrowserContext proxy lookup failure", () => {
 });
 
 describe("acquireBrowserContext proxy forwarding", () => {
-  it("hands the resolved account proxy to browser.newContext", async () => {
+  it("hands the resolved provider proxy to browser.newContext", async () => {
     const playwright = await import("playwright");
     const originalLaunch = playwright.chromium.launch;
     const originalPoolFlag = process.env.OMNIROUTE_BROWSER_POOL;
@@ -384,7 +384,7 @@ describe("resolvePlaywrightProxyForConnection", () => {
 
   it("treats a null connection id as absent without hitting the lookup", async () => {
     let connectionCalls = 0;
-    const proxy = await resolvePlaywrightProxyForConnection("gemini-web", null as never, {
+    const proxy = await resolvePlaywrightProxyForConnection("gemini-web", null, {
       resolveProxy: async () => ({ host: "provider.example.com", port: 8080 }),
       resolveConnectionProxy: async () => {
         connectionCalls += 1;
@@ -481,7 +481,7 @@ describe("resolveConnectionScopedProxy", () => {
   // behave the same as an unassigned connection: fall through to the provider proxy.
   it("treats an undefined lookup result as unassigned", async () => {
     const proxy = await resolveConnectionScopedProxy("conn-1", {
-      resolveProxyForConnection: async () => undefined as never,
+      resolveProxyForConnection: async () => undefined,
       hasBlockingProxyAssignment: () => false,
     });
     assert.strictEqual(proxy, null);

@@ -14,6 +14,8 @@ type ContextArg = { proxy?: unknown };
 
 async function installFakePlaywright(options: {
   onNewContext?: (arg: ContextArg) => void;
+  onClose?: () => void;
+  onLaunch?: () => void;
   newContext: () => Promise<unknown>;
   /** Holds the launch open so an abort can land before the context is created. */
   launchDelayMs?: number;
@@ -21,6 +23,7 @@ async function installFakePlaywright(options: {
   const mod = await import("playwright");
   const original = mod.chromium.launch;
   mod.chromium.launch = (async () => {
+    options.onLaunch?.();
     if (options.launchDelayMs) {
       await new Promise((done) => setTimeout(done, options.launchDelayMs));
     }
@@ -29,7 +32,9 @@ async function installFakePlaywright(options: {
         options.onNewContext?.(arg);
         return options.newContext();
       },
-      close: async () => {},
+      close: async () => {
+        options.onClose?.();
+      },
     };
   }) as unknown as typeof original;
   return () => {
@@ -47,7 +52,11 @@ function statusOf(result: unknown): number | null {
 
 test("an already-aborted signal never creates a browser context", async () => {
   let newContextCalls = 0;
+  let launches = 0;
   const restore = await installFakePlaywright({
+    onLaunch: () => {
+      launches += 1;
+    },
     newContext: async () => {
       newContextCalls += 1;
       return {};
@@ -66,6 +75,7 @@ test("an already-aborted signal never creates a browser context", async () => {
 
     assert.equal(statusOf(result), 499, "an aborted request must not report success");
     assert.equal(newContextCalls, 0, "no context may be created for an aborted request");
+    assert.equal(launches, 0, "an already-aborted request must not launch a browser at all");
   } finally {
     restore();
   }
