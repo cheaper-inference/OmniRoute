@@ -4,6 +4,9 @@
   "profiles": {
     "ci": {
       "checkName": "Gate / CI",
+      "independentAdvisories": {
+        "sonarqube": "Optional external scan governed by SONARQUBE_ENABLED and service credentials. Its result is reported in CI Dashboard."
+      },
       "jobs": {
         "changes": {
           "when": "always",
@@ -322,24 +325,6 @@
           "when": "full-code",
           "disposition": "advisory",
           "reason": "Existing protocol E2E advisory policy, issue #10049; not counted as required PASS.",
-          "domains": [
-            "build",
-            "catalog",
-            "cli",
-            "core",
-            "db",
-            "i18n",
-            "provider",
-            "routing",
-            "tests",
-            "ui",
-            "workflow"
-          ]
-        },
-        "sonarqube": {
-          "when": "code",
-          "disposition": "advisory",
-          "reason": "Optional external service, governed by SONARQUBE_ENABLED and service credentials.",
           "domains": [
             "build",
             "catalog",

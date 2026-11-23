@@ -1493,6 +1493,7 @@ jobs:
             coverage/lcov.info
           if-no-files-found: warn
 
+  # Reported by CI Dashboard independently of the admission verdict.
   sonarqube:
     name: SonarQube
     runs-on: ubuntu-latest
@@ -1890,7 +1891,6 @@ jobs:
       - test-security
       - test-ecosystem
       - test-protocols-e2e
-      - sonarqube
       - coverage-pr-comment
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
