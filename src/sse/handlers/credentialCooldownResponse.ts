@@ -31,16 +31,19 @@ export function credentialCooldownResponse(
       type: "invalid_request_error",
     });
   }
-  // A model-only cooldown answers with the lock's own upstream status and message: an earlier
-  // attempt's status (a 429 from another connection) would hide a 400 billing lock.
-  const modelScoped = credentials.cooldownScope === "model";
+  // A model-only lock that kept a non-429 upstream status (a 400 billing error) answers with that
+  // status and message, so an earlier attempt's 429 cannot hide it. A 429 lock, which is also the
+  // default when the lock kept no status, leaves the attempt's own status in front.
   const lockStatus = Number(credentials.lastErrorCode) || null;
+  const lockWins =
+    credentials.cooldownScope === "model" &&
+    lockStatus !== null &&
+    lockStatus !== HTTP_STATUS.RATE_LIMITED;
   const errorMsg =
-    (modelScoped ? credentials.lastError || lastError : lastError || credentials.lastError) ||
+    (lockWins ? credentials.lastError || lastError : lastError || credentials.lastError) ||
     "Unavailable";
   const status =
-    (modelScoped ? lockStatus || lastStatus : lastStatus || lockStatus) ||
-    HTTP_STATUS.SERVICE_UNAVAILABLE;
+    (lockWins ? lockStatus : lastStatus || lockStatus) || HTTP_STATUS.SERVICE_UNAVAILABLE;
   const cooldownModel =
     typeof credentials.cooldownModel === "string" && credentials.cooldownModel.trim().length > 0
       ? credentials.cooldownModel.trim()
