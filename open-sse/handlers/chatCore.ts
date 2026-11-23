@@ -23,7 +23,9 @@ import {
 import { buildRequestTranslationErrorResult } from "./chatCore/requestTranslationError.ts";
 import {
   estimateCalibratedFinalInputTokens,
+  estimateCompressedInputTokens,
   estimateFinalInputTokenBreakdown,
+  estimateUnmappedResponsesInputTokens,
 } from "./chatCore/contextEstimation.ts";
 import { buildClaudePassthroughBody } from "./chatCore/claudePassthroughBody.ts";
 export {
@@ -1338,7 +1340,10 @@ async function handleChatCoreInner({
   const compressionBody = body
     ? adaptBodyForCompression(body as Record<string, unknown>).body
     : null;
-  const allMessages = compressionBody?.messages || body?.contents || body?.request?.contents || [];
+  const allMessages =
+    Array.isArray(body?.input)
+      ? body.input
+      : compressionBody?.messages || body?.contents || body?.request?.contents || [];
   let cavemanOutputModeApplied = false;
   let cavemanOutputModeIntensity: string | null = null;
   let preCompressionBody: typeof body | null = null;
@@ -1855,7 +1860,10 @@ async function handleChatCoreInner({
           }
           if (result.compressed) {
             body = result.body as typeof body;
-            estimatedTokens = result.stats.compressedTokens;
+            estimatedTokens = estimateCompressedInputTokens(
+              body as Record<string, unknown>,
+              result.stats.compressedTokens
+            );
             tokensCompressed = Math.max(
               0,
               result.stats.originalTokens - result.stats.compressedTokens
@@ -2079,10 +2087,16 @@ async function handleChatCoreInner({
 
       // Adapt Responses `input[]` → messages so compressContext can run, then restore.
       const ctxAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+      // Compaction only shrinks the adapted messages: leave room for the input items the
+      // adapter cannot map, or the restored body still overflows the window.
+      const unmappedInputTokens = estimateUnmappedResponsesInputTokens(
+        body as Record<string, unknown>,
+        ctxAdapter
+      );
       const compressionResult = compressContext(ctxAdapter.body, {
         provider,
         model: effectiveModel,
-        maxTokens: threshold,
+        maxTokens: Math.max(1, threshold - unmappedInputTokens),
         reserveTokens: 0,
       });
 
@@ -2131,7 +2145,7 @@ async function handleChatCoreInner({
   // filtering is advisory and may preserve an all-incompatible pool; this is the
   // hard boundary that prevents a too-large prompt (or a negative token budget)
   // from reaching an OpenAI-compatible upstream such as NVIDIA NIM.
-  // One breakdown per measured body snapshot: the raw tools reserve, the
+  // One breakdown per measured body snapshot: the last-resort reserve, the
   // calibrated guard total, and the last-resort compaction log below all read
   // the same numbers, so the full-body scan runs once instead of three times.
   let finalInputBreakdown = estimateFinalInputTokenBreakdown(
@@ -2149,7 +2163,10 @@ async function handleChatCoreInner({
   // getTokenLimit(provider, effectiveModel) re-fetch, which would silently
   // discard that combo-aware override and re-widen the last-resort budget.
   const finalContextLimit = contextLimit;
-  const toolsReserve = finalInputBreakdown.tools;
+  // Compaction cannot shrink tool schemas or the top-level system and instructions, and the
+  // gate counts them, so the last-resort target leaves room for them.
+  const fixedInputReserve =
+    finalInputBreakdown.tools + finalInputBreakdown.system + finalInputBreakdown.instructions;
 
   const effectiveCompactionCeiling = getEffectiveCompactionCeiling(finalContextLimit);
 
@@ -2161,12 +2178,16 @@ async function handleChatCoreInner({
     finalEstimatedInputTokens >= effectiveCompactionCeiling &&
     body
   ) {
-    const lastResortTarget = Math.max(1, effectiveCompactionCeiling - toolsReserve - 1);
+    const lastResortTarget = Math.max(1, effectiveCompactionCeiling - fixedInputReserve - 1);
     const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+    const unmappedLastResortTokens = estimateUnmappedResponsesInputTokens(
+      body as Record<string, unknown>,
+      lastResortAdapter
+    );
     const lastResortResult = compressContext(lastResortAdapter.body, {
       provider,
       model: effectiveModel,
-      maxTokens: lastResortTarget,
+      maxTokens: Math.max(1, lastResortTarget - unmappedLastResortTokens),
       reserveTokens: 0,
     });
     if (lastResortResult.compressed && lastResortResult.body) {
