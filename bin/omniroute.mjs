@@ -449,6 +449,15 @@ try {
     pathToFileURL(join(ROOT, "bin", "cli", "program.mjs")).href
   );
   const program = createProgram();
+  if (!process.argv.slice(2).some((a) => a === "--version" || a === "-v")) {
+    const { loadPlugins } = await import(
+      pathToFileURL(join(ROOT, "bin", "cli", "plugins.mjs")).href
+    );
+    await loadPlugins(program, {
+      baseUrl: process.env.OMNIROUTE_BASE_URL,
+      apiKey: process.env.OMNIROUTE_API_KEY,
+    });
+  }
   await program.parseAsync(process.argv);
 } catch (err) {
   if (err?.exitCode !== undefined) process.exit(err.exitCode);
