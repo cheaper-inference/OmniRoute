@@ -1,4 +1,4 @@
-import type { FieldCategory } from "./sseTextTransform";
+import { escapePathSegment, type FieldCategory } from "./sseTextTransform";
 import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
 
 type JsonObject = Record<string, unknown>;
@@ -109,7 +109,7 @@ class ResponsesLaneRouter {
     // Item-scoped metadata keeps a window per item: the learned identity is stable whether a
     // later event names the item by item_id or by output_index.
     const identity = this.identities.get(this.identityKeys(event)[0] ?? "");
-    this.redactMetadata(event, identity === undefined ? "" : `item/${identity}`);
+    this.redactMetadata(event, identity === undefined ? "" : `item/${escapePathSegment(String(identity))}`);
     this.payload = [];
     return flushed;
   }
@@ -265,7 +265,7 @@ class ResponsesLaneRouter {
     for (const key of Object.keys(obj)) {
       if (RESPONSES_OPAQUE_KEYS.has(key) || this.isPayload(obj, key)) continue;
       const field = obj[key];
-      const childPath = path ? `${path}/${key}` : key;
+      const childPath = path ? `${path}/${escapePathSegment(key)}` : escapePathSegment(key);
       const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
       if (typeof field !== "string") this.redactMetadata(field, childPath, metadata);
       else if (metadata && this.options.metadata) this.options.metadata(obj, key, childPath);

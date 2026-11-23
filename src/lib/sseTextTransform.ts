@@ -121,7 +121,11 @@ function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
 // `redacted_thinking` block are opaque blobs the client sends back verbatim).
 // Paths are joined with "/", so a key that itself contains one would forge a different path
 // and share another field's redaction window. Escape with the JSON-pointer pair instead.
-function escapePathSegment(key: string): string {
+// The deferred-bytes ceiling has to fail closed even when the caller supplies a window but no
+// number: an unbounded queue is the failure this cap exists to prevent.
+const DEFAULT_MAX_DEFERRED_BYTES = 64 * 1024;
+
+export function escapePathSegment(key: string): string {
   return key.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 
@@ -436,7 +440,7 @@ export function createSseTextTransform(
   let lastEventLine = "";
   let pendingEventLine = "";
   const hold: MetadataHold | null = opts?.metadataWindow
-    ? createMetadataHold(opts.metadataWindow, opts.maxDeferredBytes ?? Number.POSITIVE_INFINITY)
+    ? createMetadataHold(opts.metadataWindow, opts.maxDeferredBytes ?? DEFAULT_MAX_DEFERRED_BYTES)
     : null;
   // The frame being transformed: the hold records it as the owner of any tail it leaves.
   let frame = { json: null as object | null, stop: false, snapshot: false };
