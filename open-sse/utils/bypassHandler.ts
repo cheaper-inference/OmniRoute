@@ -2,6 +2,13 @@ import { CORS_HEADERS } from "./cors.ts";
 import { detectFormat } from "../services/provider.ts";
 import { SKIP_PATTERNS } from "../config/constants.ts";
 import { createNonStreamingResponse, createStreamingResponse } from "./bypassResponse.ts";
+import {
+  CLAUDE_CODE_LOCAL_COMMAND_PREFIX_FLAG,
+  CLAUDE_CODE_LOCAL_FILEPATHS_FLAG,
+  CLAUDE_CODE_LOCAL_SUGGESTION_FLAG,
+  detectClaudeCodeMetaReply,
+} from "./claudeCodeMetaRequests.ts";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 
 /**
  * Check for bypass patterns — return fake response without calling provider.
@@ -11,6 +18,13 @@ import { createNonStreamingResponse, createStreamingResponse } from "./bypassRes
  *    Claude CLI's internal protocol — other clients don't send these patterns.
  * 2. False-positive bypasses would silently break real requests.
  * 3. The SKIP_PATTERNS config allows user-defined patterns for every client.
+ *
+ * When none of the five patterns above matches, three more Claude Code helper
+ * requests can be answered locally, each behind its own default-off feature flag
+ * (see detectClaudeCodeMetaReply in claudeCodeMetaRequests.ts for the strict shapes):
+ * - bash command-prefix classification (CLAUDE_CODE_LOCAL_COMMAND_PREFIX_ENABLED)
+ * - next-prompt suggestion mode, answered empty (CLAUDE_CODE_LOCAL_SUGGESTION_ENABLED)
+ * - file-path extraction for simple commands (CLAUDE_CODE_LOCAL_FILEPATHS_ENABLED)
  *
  * @param {object} body - Request body
  * @param {string} model - Model name
@@ -71,12 +85,21 @@ export function handleBypassRequest(body, model, userAgent = "") {
     shouldBypass = userText.includes("quota");
   }
 
-  if (!shouldBypass) return null;
+  let replyText: string | undefined;
+  if (!shouldBypass) {
+    const reply = detectClaudeCodeMetaReply(body, {
+      commandPrefix: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_COMMAND_PREFIX_FLAG),
+      suggestion: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_SUGGESTION_FLAG),
+      filepaths: isRegisteredFeatureFlagEnabled(CLAUDE_CODE_LOCAL_FILEPATHS_FLAG),
+    });
+    if (!reply) return null;
+    replyText = reply.text;
+  }
 
   const sourceFormat = detectFormat(body);
   const stream = body.stream !== false;
 
   return stream
-    ? createStreamingResponse(sourceFormat, model)
-    : createNonStreamingResponse(sourceFormat, model);
+    ? createStreamingResponse(sourceFormat, model, replyText)
+    : createNonStreamingResponse(sourceFormat, model, replyText);
 }

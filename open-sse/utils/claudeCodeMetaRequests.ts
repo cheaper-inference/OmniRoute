@@ -108,10 +108,16 @@ export function extractFilepathsFromCommand(command: string, _output = ""): stri
 // shape picks the detector; the toggle only decides whether it answers, so a
 // recognised shape with its toggle off returns null instead of falling through.
 
+// Named constants so the boundary scan (tests/unit/boundary-engine-feature-flags.test.ts)
+// can resolve each key read through isRegisteredFeatureFlagEnabled.
+export const CLAUDE_CODE_LOCAL_COMMAND_PREFIX_FLAG = "CLAUDE_CODE_LOCAL_COMMAND_PREFIX_ENABLED";
+export const CLAUDE_CODE_LOCAL_SUGGESTION_FLAG = "CLAUDE_CODE_LOCAL_SUGGESTION_ENABLED";
+export const CLAUDE_CODE_LOCAL_FILEPATHS_FLAG = "CLAUDE_CODE_LOCAL_FILEPATHS_ENABLED";
+
 export const CLAUDE_CODE_META_FLAGS = {
-  commandPrefix: "CLAUDE_CODE_LOCAL_COMMAND_PREFIX_ENABLED",
-  suggestion: "CLAUDE_CODE_LOCAL_SUGGESTION_ENABLED",
-  filepaths: "CLAUDE_CODE_LOCAL_FILEPATHS_ENABLED",
+  commandPrefix: CLAUDE_CODE_LOCAL_COMMAND_PREFIX_FLAG,
+  suggestion: CLAUDE_CODE_LOCAL_SUGGESTION_FLAG,
+  filepaths: CLAUDE_CODE_LOCAL_FILEPATHS_FLAG,
 } as const;
 
 export type ClaudeCodeMetaKind = "command-prefix" | "suggestion" | "filepaths";
