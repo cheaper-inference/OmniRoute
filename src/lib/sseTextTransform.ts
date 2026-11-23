@@ -373,7 +373,6 @@ function sanitizeAnswerString(
  * encrypted payload the client echoes back, so it is left alone.
  */
 function descendAnswerChild(
-  deps: SanitizeDeps,
   obj: any,
   key: string,
   parentKey: string,
@@ -620,7 +619,6 @@ export function createSseTextTransform(
                   matched = true;
               } else if (typeof obj[key] === "object") {
                 descendAnswerChild(
-                  deps,
                   obj,
                   key,
                   parentKey,
@@ -834,7 +832,7 @@ export function createSseTextTransform(
         controller.error(err);
       }
     },
-    cancel(reason: any) {
+    cancel(_reason: any) {
       hold?.clear();
       if (onCancel) {
         onCancel();
