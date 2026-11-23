@@ -72,7 +72,6 @@ import {
 } from "./geminiRateLimitTracker.ts";
 import { setConnectionRateLimitUntil } from "@/lib/db/providers";
 import {
-  parseRetryHintFromJsonBody,
   parseDetailedRetryHintFromJsonBody,
   parseDelayString,
   MAX_SHORT_RETRY_HINT_MS,
@@ -91,12 +90,17 @@ const RESETS_IN_RE = /resets? in (\d+h)?(\d+m)?(\d+s)?/i;
 const RETRY_IN_SEC_RE = /please retry in (\d+(?:\.\d+)?)\s*s/i;
 const COOLDOWN_NUMERIC_RE = /^\d+(\.\d+)?$/;
 
-export type RetryHintProvenance = "header" | "google_rpc_retry_info" | "body" | "body_structured";
+export type RetryHintProvenance =
+  "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_iso_reset";
 
 export function retryHintBypassesMaxCooldownMs(
   provenance: RetryHintProvenance | undefined
 ): boolean {
-  return provenance === "header" || provenance === "google_rpc_retry_info";
+  return (
+    provenance === "header" ||
+    provenance === "google_rpc_retry_info" ||
+    provenance === "body_iso_reset"
+  );
 }
 
 /** Structured provenances reflect the provider's own reset clock and may shorten an existing model lock (#CO-402). */
@@ -106,7 +110,8 @@ export function isAuthoritativeRetryHintSource(
   return (
     provenance === "header" ||
     provenance === "google_rpc_retry_info" ||
-    provenance === "body_structured"
+    provenance === "body_structured" ||
+    provenance === "body_iso_reset"
   );
 }
 import {
@@ -133,6 +138,10 @@ import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUp
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWalletCredits.ts";
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
+import {
+  isCreditsExhaustedForStatus,
+  quotaTextSignalCountsForStatus,
+} from "./accountFallback/creditsExhaustedForStatus.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
@@ -317,6 +326,13 @@ export const ACCOUNT_SUSPENDED_BILLING_PATTERNS = [
   /\bsuspended\b[\s\S]{0,120}?\b(?:spending limit|billing|invoice|payment)\b/i,
   /\b(?:spending limit|billing|invoice|payment)\b[\s\S]{0,120}?\bsuspended\b/i,
 ];
+
+// DashScope (Alibaba Model Studio) reports an unpaid account as 400/403 with code `Arrearage`
+// or `AccessDenied.Unpurchased`. Both stay true until the owner pays, so the key must park.
+// Anchored on the vendor code or its exact sentence, and only on 400/403: a 429 that quotes
+// "good standing" is a throttle, and generic AccessDenied / model_not_found never match.
+export const DASHSCOPE_DEAD_ACCOUNT_RE =
+  /\barrearage\b|please make sure your account is in good standing|accessdenied\.unpurchased|please make sure you are eligible for using the model/i;
 
 // Context overflow patterns — the prompt exceeds the model's maximum context length.
 // Different providers phrase this differently. Used to decide whether a 400 error
@@ -895,12 +911,12 @@ export function recordModelLockoutFailure(
     /** Explicit override; otherwise resolveLockoutScope(status) — 5xx lock the exact tuple. */
     scope?: "exact" | "quota_family";
     /**
-     * #6863 vs #7940: set true only when `exactCooldownMs` came from an actual
-     * authoritative upstream signal: Retry-After/X-RateLimit-Reset headers or
-     * google.rpc.RetryInfo. Generic JSON and prose-derived reset text are useful
-     * exact hints but remain bounded by maxCooldownMs. Leave false/omitted for
-     * those body hints and for synthetic estimates (the quota_exhausted
-     * until-midnight default below, plain exponential backoff).
+     * #6863 vs #7940 / #20281: set true only when `exactCooldownMs` came from an actual
+     * authoritative upstream signal: Retry-After/X-RateLimit-Reset headers,
+     * google.rpc.RetryInfo, or verified ISO-8601 calendar reset timestamps. Generic JSON
+     * and relative prose-derived reset text are useful exact hints but remain bounded
+     * by maxCooldownMs. Leave false/omitted for those body hints and for synthetic
+     * estimates (the quota_exhausted until-midnight default below, plain exponential backoff).
      */
     exactCooldownIsUpstreamReset?: boolean;
     /**
@@ -1458,6 +1474,8 @@ export function recordProviderSuccess(
  * Reset the shared provider breaker.
  */
 export function clearProviderFailure(provider: string | null | undefined): void {
+  // recordProviderFailure stores its dedupe keys under the canonical id, so resolve an alias first.
+  if (provider) provider = resolveProviderId(provider);
   if (provider) lastNetworkErrorByProvider.delete(provider); // #13887: fresh blip after reset counts
   for (const key of lastConnectionFailure.keys())
     if (provider && key.startsWith(`${provider}:`)) lastConnectionFailure.delete(key);
@@ -1567,55 +1585,90 @@ export function parseRetryAfterFromBody(responseBody: unknown): {
 // parseDelayString now lives in ./retryAfterJson.ts (shared with parseRetryHintFromJsonBody's
 // Gemini RetryInfo.retryDelay parsing, #7940) — see the import at the top of this file.
 
-// T07: parse retry time from error text body with combined "XhYmZs" format.
-export function parseRetryFromErrorText(
+type DetailedRetryHint = { retryAfterMs: number; provenance: RetryHintProvenance };
+
+/**
+ * Relative "XhYmZs" countdown prose ("reset after 1h2m", "will reset after 30m",
+ * Antigravity / Cloud Code "Resets in 164h27m24s"). Returns `undefined` when no phrase
+ * matched, so the caller keeps looking; a matched phrase returns its duration (or null).
+ */
+function parseRelativeCountdownProseMs(msg: string): number | null | undefined {
+  for (const re of [RESETS_AFTER_RE, WILL_RESET_AFTER_RE, RESETS_IN_RE]) {
+    const match = re.exec(msg);
+    if (match?.[1] || match?.[2] || match?.[3]) return computeDurationMs(match);
+  }
+  return undefined;
+}
+
+/** Gemini phrasing: "Please retry in 54.472178091s" (fractional seconds). */
+function parseRetryInSecondsMs(msg: string): number | null {
+  const retryInSecMatch = RETRY_IN_SEC_RE.exec(msg);
+  if (!retryInSecMatch?.[1]) return null;
+  const sec = Number.parseFloat(retryInSecMatch[1]);
+  if (!Number.isFinite(sec) || sec <= 0) return null;
+  return Math.min(Math.round(sec * 1000), MAX_PROVIDER_COOLDOWN_MS);
+}
+
+function bodyHint(retryAfterMs: number | null): DetailedRetryHint | null {
+  return retryAfterMs !== null ? { retryAfterMs, provenance: "body" } : null;
+}
+
+export function parseDetailedRetryFromErrorText(
   errorText: unknown,
   provider?: string | null,
   nowMs: number = Date.now()
-): number | null {
+): DetailedRetryHint | null {
   if (!errorText || typeof errorText !== "string") return null;
   const msg: string = String(errorText);
   // A Google PerDay quota violation outlives its seconds-scale RetryInfo.
-  if (hasGoogleDailyQuotaViolation(msg)) return googleDailyQuotaCooldownMs({ nowMs });
+  if (hasGoogleDailyQuotaViolation(msg)) {
+    return bodyHint(googleDailyQuotaCooldownMs({ nowMs }));
+  }
 
-  const bodyHintMs = parseRetryHintFromJsonBody(msg, MAX_PROVIDER_COOLDOWN_MS);
-  if (bodyHintMs !== null) return bodyHintMs;
+  const detailedJsonHint = parseDetailedRetryHintFromJsonBody(msg, MAX_PROVIDER_COOLDOWN_MS);
+  if (detailedJsonHint !== null) {
+    return {
+      retryAfterMs: detailedJsonHint.retryAfterMs,
+      provenance:
+        detailedJsonHint.provenance === "body"
+          ? ("body_structured" as const)
+          : detailedJsonHint.provenance,
+    };
+  }
 
   // Gemini free-tier text fallback (no parseable JSON details present):
   // "Please retry in 26.660853464s." Short throttle hint — capped independently of
   // MAX_PROVIDER_COOLDOWN_MS, mirroring the JSON RetryInfo.retryDelay cap (#7940).
   const pleaseRetryMs = parseDelayString(PLEASE_RETRY_RE.exec(msg)?.[1]);
   if (pleaseRetryMs !== null && pleaseRetryMs > 0) {
-    return Math.min(pleaseRetryMs, MAX_SHORT_RETRY_HINT_MS);
+    return bodyHint(Math.min(pleaseRetryMs, MAX_SHORT_RETRY_HINT_MS));
   }
 
-  // Issue #2321 / #14479: parse embedded absolute ISO retry timestamps.
+  // Issue #2321 / #14479 / #20281: parse embedded absolute ISO retry timestamps.
+  // Explicit calendar reset instant (e.g. Z.ai "Your limit will reset at <ISO 8601>").
   const isoMs = parseIsoDateTimeResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider);
-  if (isoMs !== null) return isoMs;
-
-  const match = RESETS_AFTER_RE.exec(msg);
-  if (match?.[1] || match?.[2] || match?.[3]) return computeDurationMs(match);
-
-  // Variant without "reset after": "will reset after XhYmZs"
-  const altMatch = WILL_RESET_AFTER_RE.exec(msg);
-  if (altMatch?.[1] || altMatch?.[2] || altMatch?.[3]) return computeDurationMs(altMatch);
-
-  // Antigravity / Cloud Code phrasing: "Resets in 164h27m24s".
-  const resetsInMatch = RESETS_IN_RE.exec(msg);
-  if (resetsInMatch?.[1] || resetsInMatch?.[2] || resetsInMatch?.[3]) {
-    return computeDurationMs(resetsInMatch);
+  if (isoMs !== null) {
+    return { retryAfterMs: isoMs, provenance: "body_iso_reset" };
   }
 
-  // Gemini phrasing: "Please retry in 54.472178091s" (fractional seconds).
-  const retryInSecMatch = RETRY_IN_SEC_RE.exec(msg);
-  if (retryInSecMatch?.[1]) {
-    const sec = Number.parseFloat(retryInSecMatch[1]);
-    if (Number.isFinite(sec) && sec > 0) {
-      return Math.min(Math.round(sec * 1000), MAX_PROVIDER_COOLDOWN_MS);
-    }
-  }
+  const countdownMs = parseRelativeCountdownProseMs(msg);
+  if (countdownMs !== undefined) return bodyHint(countdownMs);
 
-  return parseDayGranularityResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider);
+  const retryInSecMs = parseRetryInSecondsMs(msg);
+  if (retryInSecMs !== null) return bodyHint(retryInSecMs);
+
+  // The ISO branch above already returned for any absolute timestamp, so a day-granularity
+  // hint here is a relative countdown or a year-less date: capped `body` provenance.
+  return bodyHint(parseDayGranularityResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider));
+}
+
+// T07: parse retry time from error text body with combined "XhYmZs" format.
+export function parseRetryFromErrorText(
+  errorText: unknown,
+  provider?: string | null,
+  nowMs: number = Date.now()
+): number | null {
+  return parseDetailedRetryFromErrorText(errorText, provider, nowMs)?.retryAfterMs ?? null;
 }
 
 /**
@@ -1973,9 +2026,9 @@ export function checkFallbackError(
       };
     }
 
-    const retryFromErrorText = parseRetryFromErrorText(errorStr, provider);
-    if (retryFromErrorText && retryFromErrorText > 0) {
-      return { retryAfterMs: retryFromErrorText, provenance: "body" };
+    const detailedTextHint = parseDetailedRetryFromErrorText(errorStr, provider);
+    if (detailedTextHint && detailedTextHint.retryAfterMs > 0) {
+      return detailedTextHint;
     }
 
     return null;
@@ -2103,8 +2156,14 @@ export function checkFallbackError(
   }
 
   if (errorText) {
-    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure
-    if (isAccountDeactivated(errorStr)) {
+    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure.
+    // A 408/429/5xx body that merely quotes a ban phrase is a transient failure, not a ban.
+    if (
+      status !== HTTP_STATUS.REQUEST_TIMEOUT &&
+      status !== HTTP_STATUS.RATE_LIMITED &&
+      status < HTTP_STATUS.SERVER_ERROR &&
+      isAccountDeactivated(errorStr)
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: 365 * 24 * 60 * 60 * 1000, // 1 year = effectively permanent
@@ -2133,6 +2192,23 @@ export function checkFallbackError(
     // treat it like a credits-exhausted account so it stops being retried
     // every few minutes until billing is fixed (see ACCOUNT_SUSPENDED_BILLING_PATTERNS).
     if (isAccountSuspendedForBilling(errorStr)) {
+      return {
+        shouldFallback: true,
+        cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
+        reason: RateLimitReason.QUOTA_EXHAUSTED,
+        creditsExhausted: true,
+      };
+    }
+
+    // DashScope unpaid account (400 Arrearage / 403 AccessDenied.Unpurchased): park the key as
+    // credits_exhausted instead of retrying a dead key every few seconds.
+    if (
+      (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.FORBIDDEN) &&
+      (DASHSCOPE_DEAD_ACCOUNT_RE.test(errorStr) ||
+        DASHSCOPE_DEAD_ACCOUNT_RE.test(
+          `${structuredError?.code ?? ""} ${structuredError?.type ?? ""}`
+        ))
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
@@ -2197,7 +2273,10 @@ export function checkFallbackError(
 
     // T10 (sub2api #1169) + #8247: credits/quota exhausted; per-model-quota providers stay model-scoped
     // unless the body is an account-level Open Platform empty wallet.
-    if (shouldUseQuotaSignal && isCreditsExhausted(errorStr)) {
+    if (
+      shouldUseQuotaSignal &&
+      isCreditsExhaustedForStatus(status, provider, errorStr, structuredError?.code)
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
@@ -2262,24 +2341,40 @@ export function checkFallbackError(
     // UNCONDITIONALLY (not gated by shouldUseQuotaSignal) because it targets
     // apikey-category providers like ollama-cloud, which the oauth-only
     // shouldUseQuotaSignal gate deliberately excludes from the subscription
-    // check above.
-    if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
+    // check above. On 400 none of these quota TEXT signals counts without a structured
+    // code or an allow-listed provider: the message may quote the caller's own input.
+    const quotaTextCounts = quotaTextSignalCountsForStatus(
+      status,
+      provider,
+      errorStr,
+      structuredError?.code
+    );
+    if (
+      quotaTextCounts &&
+      shouldUseQuotaSignal &&
+      !isCreditsExhausted(errorStr) &&
+      !isDailyQuotaExhausted(errorStr)
+    ) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
         getUpstreamRetryHint,
         parseRetryFromErrorText,
-        provider
+        provider,
+        detectRetryHint
       );
       if (subResult) return subResult;
     }
-    const weeklyResult = buildWeeklyQuotaFallback(errorStr, undefined, provider);
+    const weeklyResult = quotaTextCounts
+      ? buildWeeklyQuotaFallback(errorStr, undefined, provider)
+      : null;
     if (weeklyResult) return weeklyResult;
     // Issue #7071 (session usage cap) is the same sibling gap as #3709 above —
     // runs UNCONDITIONALLY for the same reason: apikey-category providers
     // like ollama-cloud are excluded from the oauth-only shouldUseQuotaSignal
     // gate.
-    const sessionResult =
-      buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr);
+    const sessionResult = quotaTextCounts
+      ? (buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr))
+      : null;
     if (sessionResult) return sessionResult;
 
     const detectedRetryHint = detectRetryHint();
@@ -2291,6 +2386,7 @@ export function checkFallbackError(
         ? "body"
         : undefined;
     if (
+      quotaTextCounts &&
       shouldUseQuotaSignal &&
       quotaResetHintMs &&
       classifyErrorText(errorStr) === RateLimitReason.QUOTA_EXHAUSTED
@@ -2454,7 +2550,8 @@ export function checkFallbackError(
       errorStr,
       getUpstreamRetryHint,
       parseRetryFromErrorText,
-      provider
+      provider,
+      detectRetryHint
     );
     if (subResult) return subResult;
     const cooldownMs = getUpstreamRetryHint()?.retryAfterMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS;
@@ -2621,6 +2718,9 @@ export function filterAvailableAccounts<T extends AccountState>(
   const now = Date.now();
   return accounts.filter((acc) => {
     if (excludeId && acc.id === excludeId) return false;
+    if (acc.status === "banned" || acc.status === "expired" || acc.status === "credits_exhausted") {
+      return false;
+    }
     if (acc.rateLimitedUntil) {
       const until = cooldownUntilMs(acc.rateLimitedUntil);
       if (Number.isFinite(until) && until > now) return false;

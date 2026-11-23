@@ -156,41 +156,22 @@ egység következő újraindításakor lép életbe — egyszerre **csak egy fut
   történő feltöltése 2 percig.
 - A `.15` VPS kizárólag homologációs célú — soha nem futtat CI-runnereket.
 
-## Hosztolt sáv (GitHub által hosztolt futtatók)
+## Hosted lane (GitHub által hosztolt futók)
 
-A tároló a `cheaper-inference` szervezethez tartozik, amely **Team** csomagot használ: **60
-egyidejű hosztolt feladat**, amelyen a szervezet minden tárolója, minden PR-ellenőrzés,
-minden push által kiváltott munkafolyamat és a CodeQL alapértelmezett beállítása osztozik. Az alábbi
-számokat a **Pro** csomag idején mértük (40 egyidejű hosztolt feladat). A
-2026-10-18-án, egy összevonási kampány során (~10 összevonás/óra a `release/v3.8.52` ágon)
-végzett mérés szerint: **2 500 munkafolyamat-futtatás jött létre 24 óra alatt**, 6 óra alatt
-44 push érkezett az ágra, és **106 hosztolt feladat állt sorban**, miközben a PR-ellenőrzések
-órákig várakoztak, a PR-eket pedig nélkülük vonták össze. Az ágra történő minden push esetén
-kilenc munkafolyamat indult el:
+Az adattár a `cheaper-inference` szervezethez tartozik, a** Csapat** terv:** 60 párhuzamosan tárolt állás** , amelyet a szervezet minden tárolója megoszt, minden PR ellenőrzés, minden push-triggerelt munkafolyamat és CodeQL alapértelmezett beállítása. Az alábbi számadatokat a** Pro** terv (40 egyidejű hostolt állás). 2026-10-18-án mérve egy összevonási kampány során (~ 10 merges/hour a `release/v3.8.52`):** 2500 munkafolyamat fut 24 óra alatt** , 44 lökés az ágra 6 óra alatt,** 106 tárolt állás van sorban** míg PR csekkek órákat vártak, PRs pedig nélkülük egyesítették. Kilenc munkafolyamat indult el minden, az ágra történő nyomáskor:
 
-| pushonként a `release/v*` ágra               | hosztolt feladatok | eredmény a terhelési hullám alatt                                          | 2026-10-18 óta                                                                    |
-| -------------------------------------------- | -----------------: | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `ci.yml` (teljes mátrix)                     |      legfeljebb 30 | a következő push megszakította, egy nap alatt 24-ből 24-et                 | nem indul el `release/**` pushoknál (PR-futtatás + Release-Green)                 |
-| `quality.yml`                                |                 ~6 | megszakítva, 23-ból 23                                                     | nem indul el `release/**` pushoknál                                               |
-| `Release-Green` `--quick`                    |                  0 | az `omni-build` alatt futott, 100-ból 97 megszakítva                       | `omni-release` hely, soha nincs megszakítva, a függő futtatások összevonódnak     |
-| `Lock released branch`, `OpenSSF Scorecard`  |                  2 | pushonként egy sorban álló futtatás                                        | refenként egy futtatás (`tests/unit/build/hosted-lane-concurrency.test.ts`)       |
-| `Release acceptance` (árnyékjelentés)        |                  1 | pushonként egy hosztolt `npm ci`, soha nincs megszakítva                   | változatlan — alkalmas lehet egy `paths:` szűrőre                                 |
-| `Publish to Docker Hub` → `Deploy to VPS`    |                  2 | pushonként megszakítva; az amd64 ág az `omni-build` erőforrásaiért verseng | változatlan — a tulajdonos telepítési csatornája                                  |
-| CodeQL alapértelmezett beállítás (`dynamic`) |                  4 | pushonként `javascript-typescript`, `actions`, `c-cpp`, `python`           | változatlan — Settings → Code security; a `c-cpp`/`python` itt semmit sem vizsgál |
+| per push `release/v*`-ra                     | fogadott állások | végeredmény a vihar alatt                                            | 2026-10-18 óta                                                                |
+| -------------------------------------------- | ---------------: | -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ci.yml` (teljes mátrix)                     |            30-ig | törölve a következő lökéssel, 24/24 egy nap alatt                    | nem indult `release/**` push-okon (PR run + Release-Green)                    |
+| `quality.yml`                                |               ~6 | törölve, 23/23                                                       | nem indult `release/**` lökéseken                                             |
+| `Release-Green` `--quick`                    |                0 | `omni-build`-n futott, 100-ból 97 törölt                             | `omni-release` slot, soha nem törölték, függőben lévő futás összeomlik        |
+| `Lock released branch`, `OpenSSF Scorecard`  |                2 | lökésenként egy sorban állás                                         | egy futás refinként (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
+| `Release acceptance` (árnyékjelentés)        |                1 | egy `npm ci` hostolt lenyomásonként, soha nem törölték               | változatlan — jelölt a `paths:` szűrőhöz                                      |
+| `Publish to Docker Hub` → `Deploy to VPS`    |                2 | push-onként törölve; Az amd64 leg `omni-build`-n versenyez           | változatlan — tulajdonos telepítési csatornája                                |
+| CodeQL alapértelmezett beállítás (`dynamic`) |                4 | `javascript-typescript`, `actions`, `c-cpp`, `python` lenyomásonként | változatlan — Beállítások → Kódbiztonság; `c-cpp`/`python` nem vizsgál semmit |
 
-A `tests/unit/build/push-storm-diet.test.ts` rögzíti a `ci.yml` és a `quality.yml` kizárólag
-`main` ágra vonatkozó push-eseményindítóját. Mellékhatás: a Codecov többé nem kap alapfeltöltést
-minden release push után (a lépés csak tájékoztató jellegű, és `continue-on-error`); a
-repozitóriumon belüli lefedettségi kaput és a PR-megjegyzést ez nem érinti.
+`main` `tests/unit/build/push-storm-diet.test.ts` rögzíti a `ci.yml` és `quality.yml` -only nyomógombját. Mellékhatás: A Codecov már nem kap alapfeltöltést kiadásonként (a lépés tájékoztató jellegű és `continue-on-error`); az in-repo fedezeti kapura és PR megjegyzésre nincs hatással.
 
-**A nagyobb saját hosztolású kapacitás nem oldja meg a hosztolt várólista problémáját.** A devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) futtathatna egy futtatót, de az ügynökmunkamenetek már
-így is 20–26 között tartják a terhelését, az ügynökkonténerben nincs Docker-démon, és a
-telített sáv a hosztolt sáv. Ugyanebben a pillanatban a `.113` gépen 71 GB szabad hely volt,
-5–8-as terhelés mellett; annak korlátját a figyelőnkénti fenti memóriakeret jelenti
-(legfeljebb 6 figyelő), nem pedig a CPU. A fennmaradó lehetőségek folyamatszervezési jellegűek:
-a kampány PR-jeit a Mergify várólistáján keresztül kell integrálni (`label=queue`; a kötegek
-egyetlen `merge_group` CI-futtatáson osztoznak a PR-enkénti egy futtatás és a pushonkénti egy
-futtatás helyett), csökkenteni kell a CodeQL alapértelmezett beállításában szereplő nyelvek
-számát, valamint az általa olvasott fájlok alapján kell szűrni a `release-acceptance.yml`
-munkafolyamatot.
+**A több saját hosztolt kapacitás nem javítja ki a hosztolt sort.** A devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) fogadhat egy futót, de az ügynök munkamenetek már 20–26 között tartják a terhelést, az ügynöktárolóban nincs Docker démon, és a telített sáv a hosztolt. A `.113` dobozban 71 GB volt szabad és 5-8 terhelés ugyanabban a pillanatban; a megszorítása a fenti hallgatónkénti memóriaköltségvetés (a plafon 6 hallgató), nem pedig CPU. A fennmaradó kapcsolók folyamatok: a kampány PRs átadása a Mergify sorban (`label=queue`, a kötegek egy `merge_group` CI futást osztanak meg PR egy futás helyett plusz egy lenyomásonként), vágja le a CodeQL alapértelmezett beállítási nyelveit, és szűrje le `release-acceptance.yml` az olvasott fájlok alapján.
+
+> **2026-11-19: Az összevonási sor megszűnt** (tulajdonos döntése). `.mergify.yml` már nem definiál sort, és visszautasítja az összevonási parancsokat, amelyek összevonják vagy átírják a lekérést. PRs kiadásokat kézzel egyesítik a „Zöld kapuk megkövetelése az aktív kiadáson” (`Gate / CI` + `Gate / Quality`) lerakatszabályzat szerint, amíg az omni-queue élő módban nem fut, majd az omni-queue-n keresztül ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). A fenti Mergify kar már nem létezik.

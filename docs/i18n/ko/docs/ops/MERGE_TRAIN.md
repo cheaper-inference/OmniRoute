@@ -4,10 +4,9 @@
 
 ---
 
-v3.8.49(품질/속도 계획의 WS3.2/WS3.4)부터 검토된 PR을
-`release/vX.Y.Z`에 병합하는 기본 경로는 **Mergify 병합 큐**(`.mergify.yml`)입니다.
-아래에 설명된 **수동 병합 트레인**은 장애 발생 시, 릴리스 동결 기간 또는 Mergify
-Open Source 플랜이 변경되는 경우에 사용하는 대체 수단입니다.
+> **2026년 11월 19일: Mergify 병합 대기열이 만료됩니다.** (주인의 결정). `.mergify.yml` 더 이상 대기열을 정의하지 않으며 풀 요청을 병합하거나 다시 작성하는 Mergify 명령을 거부합니다. 릴리스 PRs omni-queue가 라이브 모드에서 실행될 때까지 "활성 릴리스에 녹색 게이트 필요" 저장소 규칙 세트(`Gate / CI` + `Gate / Quality`) 하에 수동으로 병합되고 그 이후에는 omni-queue를 통해( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 병합됩니다. 아래 Mergify 섹션에서는 대기열을 있는 그대로 설명합니다.
+
+v3.8.49( quality/velocity 계획의 WS3.2/WS3.4 )부터 검토된 PRs 의 `release/vX.Y.Z` 에 대한 기본 병합 경로는 다음과 같습니다.** 병합 대기열 병합** (`.mergify.yml`); 그만큼** 수동 병합 열차** 아래 문서에는 사고, 릴리스 중단 또는 Mergify 오픈 소스 계획이 변경되는 경우에 사용되는 FALLBACK — 나와 있습니다.
 
 ## 기본 경로: Mergify 큐
 

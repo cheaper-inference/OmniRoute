@@ -25,31 +25,26 @@ kuma suna aiwatar da lamba a cikin child processes, don haka ba za a iya isa ga 
 daga tushen da ba na loopback ba, ba tare da la’akari da auth ba. Duba
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Yadda Sassan Ke Haɗuwa
+## Yadda Ya Dace Together
 
 ```
 Dashboard (/dashboard/plugins)
-  ├─ Shafin "Installed"  → GET /api/plugins            (listPlugins)
-  │                        POST /api/plugins/scan      (pluginManager.scan)
-  │                        POST /api/plugins/{name}/activate|deactivate
-  │                        DELETE /api/plugins/{name}   (cirewa)
-  └─ Shafin "Marketplace" → GET /api/plugins/marketplace
-                             → listMarketplacePlugins()
-                               ├─ babu URL na musamman → SEED_REGISTRY da aka gina a ciki
-                               └─ URL na musamman → kariyar SSRF ta isSafeMarketplaceUrl()
-                                                  → safeOutboundFetch(guard:"public-only")
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Shimfiɗar rijista** — `src/lib/plugins/marketplace.ts`: tana jera / bincika
-  kundin, tana komawa ga rijistar farko idan wata matsala ta faru.
-- **Shimfiɗar zagayowar rayuwa** — `src/lib/plugins/manager.ts` (singleton na `pluginManager`):
-  girkawa, haɓakawa, kunnawa, kashewa, cirewa, dubawa, lodawar farawa.
-- **Shimfiɗar manifest** — `src/lib/plugins/manifest.ts`: tsarin Zod + tsoffin ƙimomi na
-  `plugin.json`.
-- **Na’urar dubawa** — `src/lib/plugins/scanner.ts`: tana gano plugins a kan faifai ƙarƙashin
-  kundin adireshin plugin.
-- **Mai lodawa** — `src/lib/plugins/loader.ts`: yana fara kowanne plugin a cikin
-  child process da aka ware, sannan yana shiga tsakani wajen kiran hooks ta IPC.
+- **Layer Registry** — `src/lib/plugins/marketplace.ts`: jeri/bincike kasidar, fadowa baya ga rijistar iri akan kowace gazawa.
+- **Layer na rayuwa** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): shigarwa, haɓakawa, kunnawa, kashewa, cirewa, duba, ɗaukar nauyi.
+- **Bayyanar Layer** — `src/lib/plugins/manifest.ts`: Zod schema + tsoho don `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: yana gano plugins akan faifai a ƙarƙashin jagorar plugin.
+- **Mai lodi** — `src/lib/plugins/loader.ts`: yana haifar da kowane plugin a cikin wani tsari na yara Node.js daban kuma dillalai suna yin kira akan IPC. Yaron ba akwatin yashi bane (duba "keɓancewar aiwatar da plugin" a ƙasa).
 
 ## Kundin Kasuwa
 
@@ -86,34 +81,31 @@ ga jerin farko.
 
 ## REST API
 
-Duk endpoints suna buƙatar tantancewar gudanarwa (`requireManagementAuth`) **kuma**
-ana iya isa gare su ne kawai ta loopback — `/api/plugins` da `/api/plugins/` suna cikin
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Duk wuraren ƙarewa suna buƙatar auth gudanarwa (`requireManagementAuth`)** kuma** An jera madogara-kawai — `/api/plugins` da `/api/plugins/` a cikin `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Hanya  | Bayani                                                       |
-| -------------------------------- | ------ | ------------------------------------------------------------ |
-| `/api/plugins`                   | GET    | Jera plugins da aka girka (tacewar `?status=` na zaɓi)       |
-| `/api/plugins`                   | POST   | Girka plugin daga cikakkiyar hanyar fayil ta gida            |
-| `/api/plugins/scan`              | POST   | Bincika kundin plugins sannan a yi rajistar sababbin plugins |
-| `/api/plugins/marketplace`       | GET    | Jera bayanan katalog na kasuwa                               |
-| `/api/plugins/[name]`            | GET    | Samu cikakkun bayanan plugin da aka girka                    |
-| `/api/plugins/[name]`            | DELETE | Cire plugin                                                  |
-| `/api/plugins/[name]/activate`   | POST   | Kunna (loda + yi rajistar hooks)                             |
-| `/api/plugins/[name]/deactivate` | POST   | Kashe (ƙaddamar da `onDeactivate`, cire rajistar hooks)      |
-| `/api/plugins/[name]/config`     | GET    | Samu saitin plugin + tsarin saitin                           |
-| `/api/plugins/[name]/config`     | PUT    | Sabunta saitin plugin (an tabbatar da shi bisa tsarin)       |
+| Ƙarshen Ƙarshe                   | Hanya  | Bayani                                                              |
+| -------------------------------- | ------ | ------------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Jerin abubuwan da aka shigar (fitar `?status=` na zaɓi)             |
+| `/api/plugins`                   | POST   | Shigar da plugin daga kundin tushen tushen plugin                   |
+| `/api/plugins/scan`              | POST   | Bincika kundin adireshin plugin ɗin kuma yi rajistar sabbin plugins |
+| `/api/plugins/marketplace`       | GET    | Lissafin shigarwar kasida ta kasuwa                                 |
+| `/api/plugins/[name]`            | GET    | Samun bayanan plugin ɗin da aka shigar                              |
+| `/api/plugins/[name]`            | DELETE | Cire plugin                                                         |
+| `/api/plugins/[name]/activate`   | POST   | Kunna (saukar da ƙugiya masu rijistar + )                           |
+| `/api/plugins/[name]/deactivate` | POST   | Kashe (wuta `onDeactivate`, unregister hooks)                       |
+| `/api/plugins/[name]/config`     | GET    | Samun plugin config + config schema                                 |
+| `/api/plugins/[name]/config`     | PUT    | Sabunta saitin plugin (an inganta shi da tsari)                     |
 
-Tacewar `status` ta `GET /api/plugins` tana karɓar ɗaya daga cikin
-`installed` / `active` / `inactive` / `error`. Ƙima marar inganci tana mayar da `400`.
+Tacewar `GET /api/plugins` `status` tana karɓar ɗayan `installed` / `active` / `inactive` / `error`. Ƙimar mara aiki tana mayar da `400`.
 
-### Jera plugins da aka girka
+### Jerin abubuwan da aka shigar
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Girka daga hanyar fayil ta gida
+### Shigar daga hanyar gida
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -122,12 +114,11 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-Dole ne `path` ta kasance **cikakkiya**, kuma ba za ta iya ƙunsar sassan kewayawar `..`
-ko null bytes ba (Zod ne ke tilasta wannan). Dole ne kundin tushe ya ƙunshi ingantaccen
-`plugin.json` (ko kuma ya zama kundin iyayensa). Idan an yi nasara, amsar ita ce `201`
-tare da layin plugin da aka girka.
+Dole ne `path` ta kasance** cikakke** hanyar zuwa directory** a cikin kundin tushen tushen plugin** : `plugin-sources` kusa da tushen plugin, don haka `~/.omniroute/plugin-sources/` ta tsohuwa, ko `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` lokacin da aka saita wannan canjin (`getPluginSourcesDir()` a `src/lib/plugins/installSource.ts`). Kwafi ko clone da plugin a can farko. Ana ƙi shigarwar tare da `400` lokacin da hanyar ta ƙunshi `..` ko babu byte, yana kwance a wajen waccan directory, yana warwarewa a wajensa ta hanyar alamar alama, yana ƙunshe da alamar alamar wanda manufarsa ke wajensa, ko lokacin da directory ɗin ba ya wanzu. Dole ne littafin tushen tushen ya ƙunshi ingantaccen `plugin.json` (ko kuma ya zama iyayen ɗaya). A cikin nasara amsar ita ce `201` tare da layin plugin ɗin da aka shigar.
 
-### Bincika kasuwa
+Ba kamar sauran hanyoyin plugin ɗin ba, wannan yana buƙatar takardar shaidar gudanarwa (zaman dashboard ko maɓallin API mai sarrafa-scoped) koda lokacin da aka kashe shiga (`requireLogin=false`): shigar da lambar ba wani aiki ne da ba a san shi ba.
+
+### Yi lilo a kasuwa
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
@@ -143,10 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` yana tabbatar da kowace ƙima da aka bayar bisa `configSchema`
-na plugin (wanda aka ayyana a manifest): filayen `number` suna bin `min`/`max`,
-kuma dole ne filayen `select` su dace da `enum` da aka ayyana. Ana barin keys
-waɗanda ba su cikin tsarin su wuce.
+`PUT .../config` yana inganta kowace ƙimar da aka bayar akan `configSchema` ɗin plugin (an bayyana a cikin bayyanuwa): filayen `number` suna girmama `min`/`max`, filayen `select` dole ne su dace da ayyana `enum`. Maɓallan da ba a cikin tsarin ana ba su izinin shiga.
 
 ## Saitawa
 
@@ -209,80 +197,58 @@ shi daga `GET /api/settings`).
 
 ## Tsaro
 
-### Matakin hanya — loopback kawai
+### Hanyar tier — loopback kawai
 
-Plugins suna aiwatar da lamba a cikin child processes da aka ƙaddamar, don haka an ware dukkan farfajiyar `/api/plugins`
-a matsayin `LOCAL_ONLY` (Mataki na 1). Ana aiwatar da tilasta loopback
-ba tare da wani sharadi ba **kafin** duk wani binciken auth, don haka ko da management token da ya zube ya isa
-na'urar ta hanyar tunnel, har yanzu ba zai iya shigarwa, kunnawa, ko cire plugin ba.
-Duba [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) da
-Dokoki Masu Tsauri #15 / #17.
+Plugins suna aiwatar da lamba a cikin tsarin yara da aka haifa, don haka gabaɗayan saman `/api/plugins` an rarraba `LOCAL_ONLY` (Tier 1). Aiwatar da Loopback yana gudana ba tare da sharadi ba** kafin** duk wani tambarin auth, don haka alamar gudanarwar leaked ta isa akwatin da ke kan rami har yanzu ba zai iya shigar, kunnawa, ko cire plugin ɗin ba. Duba [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) da Dokokin Hard #15 / #17.
 
-### Kariyar SSRF ta rajistar marketplace
+### Rajistar kasuwa SSRF guard
 
-URL na rajista na musamman saitin da maharin zai iya yin tasiri a kansa ne, don haka kafin
-ɗauko shi `listMarketplacePlugins()` yana bi da shi ta matakai biyu:
+Tsarin rajista na al'ada URL yana da tasiri mai tasiri, don haka kafin a ɗauko shi `listMarketplacePlugins()` yana tafiyar da shi ta hanyoyi biyu:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Yana ƙin duk abin da ba `http:` / `https:` ba.
-   - Yana ƙin hosts na zahiri waɗanda suke private/loopback/link-local/ULA (IPv4 **da** IPv6,
-     gami da IPv4-mapped) ta hanyar canonical `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Yana warware bayanan **duka** `A` da `AAAA`, sannan ya ƙi idan **kowane** adireshin
-     da aka warware private ne — yana toshe hanyar kaucewa ta public-hostname → private-IP.
-   - **Yana ƙin amincewa idan an gaza**: gazawar warware DNS tana sa a ƙi URL ɗin.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): yana sake amfani da kariyar URL ta public-only
-   a lokacin fetch kuma yana **toshe redirects** (babu karkatar public → private ta `30x`).
+   - Ya ƙi duk wani abu da ba `http:` / `https:` ba.
+   - Ya ƙi rundunonin private/loopback/link-local/ULA na zahiri (IPv4** kuma** IPv6, gami da IPv4-mapped) ta hanyar canonical `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Yana warwarewa** duka biyu** `A` da `AAAA` ya rubuta kuma ya ƙi idan** kowane** adireshin da aka warware — na sirri ne yana rufe sunan mai masaukin jama'a → keɓaɓɓen-IP wucewa.
+   - **Ya kasa rufe** : gazawar ƙudurin DNS ya ƙi URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): sake amfani da jama'a-kawai gadin URL a lokacin kawo da** toshe turawa** (babu → na jama'a mai zaman kansa `30x` pivot).
 
-URL da ya gaza a ɗaya daga cikin matakan ba ya dakatar da request ɗin — marketplace
-yana komawa ga ginanniyar seed registry cikin shiru, sannan ya rubuta gargadi a log.
+URL da ta gaza ko wanne Layer baya soke buƙatun — wurin kasuwa a shiru ya faɗi baya ga ginanniyar rajistar iri kuma ya yi rajistar gargaɗi.
 
-> An ƙarfafa wannan kariya a PR #3774 musamman don warware A + AAAA da kuma amfani da
-> canonical `isPrivateHost` maimakon binciken IPv4 kawai.
+> Wannan mai gadin ya taurare a cikin PR #3774 musamman don warware A + AAAA da kuma amfani da `isPrivateHost` na canonical maimakon cakin IPv4-only.
 
-### Keɓance aiwatar da plugin
+### Warewa aiwatar da plugin
 
-- **Keɓance process** — `loadPlugin()` (`src/lib/plugins/loader.ts`) yana ƙaddamar da
-  kowane plugin a cikin wani Node.js child process na daban kuma yana sadarwa ta IPC.
-  Kiran hook suna da timeout tare da haɓakar mataki daga `SIGTERM` → `SIGKILL`.
-- **Jerin env da aka yarda** — child ɗin yana karɓar saitin environment
-  variables da aka amince da su kawai; ana ba da saitin da ya fi faɗi ne kawai idan manifest ya nemi
-  izinin `env`.
-- **Tsare path a iyaka** — install/upgrade/uninstall suna tabbatar da cewa directory na plugin
-  da `manifest.main` suna warwarewa **a cikin** tushen plugin da ake sarrafawa
-  kafin duk wani copy ko recursive delete (yana karewa daga paths na DB da aka sauya da kuma
-  traversal na `../` a cikin `manifest.main`). Activation yana warware symlinks ta hanyar
-  `realpath` kuma yana ƙin loda entry point da ya fita daga directory na plugin.
-- **Pin na integrity na zaɓi** — manifest na iya ayyana filin `integrity`
-  (`sha256-<base64>`, tsarin SRI). Idan yana nan, loader yana tabbatar da hash na
-  entry file a lokacin lodawa kuma yana ƙin kunnawa idan ba su dace ba. Wannan gano kutsen sauyi ne na
-  zaɓi, **ba** iyakar tsaro ba — routing na loopback-only
-  da tsarin izini su ne ainihin iyakokin.
+> **Plugins ba a cikin akwatin yashi ba.** Yaro tsari ne Node.js na yau da kullun yana gudana azaman mai amfani OmniRoute, ba tare da mahallin VM ba kuma babu tutocin izini Node.js, don haka lambar plugin ɗin zata iya karantawa da rubuta kowane fayil ɗin da mai amfani zai iya, gudanar da shirye-shirye kuma isa hanyar sadarwa. `requires.permissions` kawai ya yanke shawarar waɗanne canjin yanayi ne yaron ya karɓa; sauran izini ba a tilasta su. Sanya plugins ɗin da kuka dogara kawai. Iyakar aikin da ke ƙasa ya ƙunshi hadarurruka da rataye; ba iyakar tsaro ba ce.
 
-## Manifest (`plugin.json`)
+- **Tsari warewa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) yana haifar da kowane plugins a cikin wani tsari na Node.js na daban kuma yana sadarwa akan IPC. Kiran ƙugiya yana da lokacin ƙarewa tare da haɓaka `SIGTERM` → `SIGKILL`.
+- **Jerin izini na Env** — yaron yana karɓar jeri kawai na masu canjin yanayi; Ana ba da mafi girman saiti ne kawai lokacin da bayyananniyar ta nemi izinin `env`.
+- **Shigar da tushen tushen** — `POST /api/plugins` kawai yana karantawa daga kundin adireshi na tushen plugin (duba "Shigar daga hanyar gida"): hanyar tana canonicalized tare da `realpath`, dole ne ta tsaya a cikin wannan kundin adireshin, kuma itacen tushen da ke ɗauke da alamar alamar da ke tserewa an ƙi kafin a kwafi komai.
+- **Tsarewar hanya** — install/upgrade/uninstall sun tabbatar da cewa plugin directory da `manifest.main` sun warware** ciki** Tushen plugin ɗin da aka sarrafa kafin kowane kwafi ko sharewa mai maimaitawa (masu kariya daga ɓarna hanyoyin DB da `../` traversal a `manifest.main`). Kunnawa yana warware alamomi ta hanyar `realpath` kuma ya ƙi ɗaukan wurin shigarwa wanda ya tsere wa kundin adireshi.
+- **fil ɗin mutunci na zaɓi** — bayyananne zai iya bayyana filin `integrity` (`sha256-<base64>`, tsarin SRI ). Lokacin da ake ciki, mai ɗaukar kaya yana tabbatar da hash ɗin fayil ɗin shigarwa a lokacin ɗauka kuma ya ƙi kunna rashin daidaituwa. Yana da ficewa-in-tamper-ganewa,** ba** iyakar tsaro: baya iyakance abin da kayan aikin da aka ɗora zai iya yi.
+- **Babu takardun shaidar abokin ciniki a cikin ƙugiya** — mahallin da aka wuce zuwa `onRequest`, `onResponse` da `onError` an cire maɓallan `authorization`, `x-api-key`, `proxy-authorization` da `cookie`, kuma rikodin maɓalli API ba shi da ƙima mai mahimmanci (`redactPluginContext()` a `src/lib/plugins/hooks.ts`).
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) ne yake inganta shi:
+## Bayyanawa (`plugin.json`)
 
-| Fili               | Nau'i     | Bayani                                                         |
-| ------------------ | --------- | -------------------------------------------------------------- |
-| `name`             | string    | Wajibi; kebab-case (`^[a-z0-9-]+$`), haruffa 1–100             |
-| `version`          | string    | Wajibi; semver (`MAJOR.MINOR.PATCH`)                           |
-| `description`      | string?   | Haruffa ≤ 500                                                  |
-| `author`           | string?   | Haruffa ≤ 200                                                  |
-| `license`          | string?   | Tsoho shi ne `MIT`                                             |
-| `main`             | string?   | Entry file; tsoho shi ne `index.js`                            |
-| `source`           | enum?     | `local` \| `marketplace` (tsoho shi ne `local`)                |
-| `tags`             | string[]? | Tags na bincike                                                |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                |
-| `hooks`            | object?   | Booleans masu bayyana hooks ɗin da plugin yake aiwatarwa       |
-| `skills`           | object[]? | Ma'anar skills na zaɓi                                         |
-| `enabledByDefault` | boolean?  | Kunna kai tsaye yayin shigarwa                                 |
-| `configSchema`     | object?   | Taswirar filayen config (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Pin na entry-file na `sha256-<base64>` na zaɓi                 |
+Ya inganta daga `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-Ana ɗauko izini daga enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+| Filin              | Nau'in   | Bayanan kula                                                       |
+| ------------------ | -------- | ------------------------------------------------------------------ |
+| `name`             | kirtani  | Da ake bukata; kebab-case (`^[a-z0-9-]+$`), 1-100 chars            |
+| `version`          | kirtani  | Da ake bukata; semver (`MAJOR.MINOR.PATCH`)                        |
+| `description`      | kirtani? | ≤ 500 char                                                         |
+| `author`           | kirtani? | ≤ 200 chars                                                        |
+| `license`          | kirtani? | Default to `MIT`                                                   |
+| `main`             | kirtani? | Fayil ɗin shigarwa; gazawa zuwa `index.js`                         |
+| `source`           | enum?    | `local` \| `marketplace` (tsoho zuwa `local`)                      |
+| `tags`             | zaren[]? | Bincika tags                                                       |
+| `requires`         | abu?     | `{ omniroute?, permissions[] }`                                    |
+| `hooks`            | abu?     | Booleans yana bayyana abin da ke haɗa plugin ɗin                   |
+| `skills`           | abu[]?   | Ma'anar fasaha na zaɓi                                             |
+| `enabledByDefault` | boolean? | Kunna ta atomatik akan shigarwa                                    |
+| `configSchema`     | abu?     | Taswirar filayen daidaitawa (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | kirtani? | Wurin shigar fayil `sha256-<base64>` na zaɓi                       |
+
+Ana samun izini daga enum `network` / `file-read` / `file-write` / `env` / `exec`. `env` ne kawai yana da tasirin lokacin aiki (wani ɗan ƙaramin yanayi mafi girma-jerin ba da izini ga yaro); sauran sanarwar ce kuma ba a aiwatar da su ba.
 
 ## Gudanarwar Zagayowar Rayuwa
 
@@ -343,17 +309,14 @@ Ana bibiyar ma'aunai/binciken plugin a cikin ƙarin tebura
 
 ## Dashboard
 
-Shafin dashboard da ke `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) yana samar da shafuka biyu:
+Shafin dashboard a `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) yana ba da shafuka biyu:
 
-- **Waɗanda aka girka** — yana jera plugins da aka girka tare da hooks da suka
-  ayyana, maɓallin activate/deactivate, maɓallin uninstall, da aikin "Bincika
-  plugins" (`POST /api/plugins/scan`).
-- **Kasuwa** — yana nuna kundin daga `GET /api/plugins/marketplace` tare da
-  fili don saita URL na registry na musamman.
+- **An shigar** — yana lissafin abubuwan da aka shigar tare da ƙugiya da aka ayyana, maɓallin activate/deactivate, maɓallin cirewa, da aikin "Scan for plugins" (`POST /api/plugins/scan`).
+- **Kasuwa** — yana nuna kas ɗin daga `GET /api/plugins/marketplace` tare da fili don saita URL rajista na al'ada.
 
-Shafin config na kowane plugin yana a `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Shafin koyaushe yana nuna gargaɗin da plugins ke gudana tare da cikakken gata na tsarin OmniRoute.
+
+Shafin saiti na kowane-plugin yana rayuwa a `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Duba Kuma
 

@@ -95,6 +95,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Xavfsizlik va transport
+
+WebDAV autentifikatsiyasi har bir IP nosozlikni kuzatish va blokirovka qilishni amalga oshiradi (60 soniya ichida 10 ta muvaffaqiyatsiz urinish `429 Too Many Requests` va `Retry-After` bilan 5 daqiqali blokirovkani ishga tushiradi). WebDAV asosiy autentifikatsiya hisob ma'lumotlarini uzatganligi sababli, WebDAV so'nggi nuqtasiga orqaga qaytishdan tashqari kirishda TLS tugatish (yoki Tailscale yoki Cloudflare Tunnel kabi xavfsiz tunnel orqali marshrutlash) tavsiya etiladi.
+
 ### Har bir API kaliti uchun kontekst manbasi (ixtiyoriy)
 
 Obsidian konfiguratsiyasining amal qilish doirasi `api_key_context_sources` jadvali

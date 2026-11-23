@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Bezpečnost a doprava
+
+Autentizace WebDAV vynucuje sledování a uzamčení selhání na IP (10 neúspěšných pokusů během 60sekundového okna spustí 5minutové uzamčení pomocí `429 Too Many Requests` a `Retry-After`). Protože WebDAV přenáší základní autentizační pověření, důrazně se doporučuje při přístupu ke koncovému bodu WebDAV mimo smyčku ukončit TLS (nebo směrování přes zabezpečený tunel, jako je Tailscale nebo Cloudflare Tunnel).
+
 ### Zdroj kontextu pro jednotlivé klíče API (volitelné)
 
 Konfiguraci Obsidian lze omezit **na jednotlivé klíče API** prostřednictvím tabulky

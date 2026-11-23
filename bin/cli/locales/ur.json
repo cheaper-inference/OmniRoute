@@ -12,7 +12,8 @@
     "dryRun": "[آزمائشی اجرا] {action} کیا جاتا",
     "cancelled": "منسوخ کر دیا گیا۔",
     "jsonOpt": "JSON کی صورت میں آؤٹ پٹ دیں",
-    "yesOpt": "تصدیقی پیغام کو چھوڑ دیں"
+    "yesOpt": "تصدیقی پیغام کو چھوڑ دیں",
+    "positiveIntegerRequired": "حد ایک مثبت صحیح عدد ہونی چاہیے۔"
   },
   "setup": {
     "title": "OmniRoute سیٹ اپ",

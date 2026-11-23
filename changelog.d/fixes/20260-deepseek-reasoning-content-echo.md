@@ -1,0 +1,1 @@
+- **fix(providers):** inject reasoning_content placeholder for DeepSeek thinking models on prior assistant turns ([#20260](https://github.com/cheaper-inference/OmniRoute/issues/20260)) — thanks @webxed

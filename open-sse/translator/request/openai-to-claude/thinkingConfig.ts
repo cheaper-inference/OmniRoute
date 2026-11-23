@@ -56,10 +56,16 @@ function explicitThinkingConfig(
       ADAPTIVE_DOWNGRADE_BUDGET;
     return { thinking: { type: "enabled", budget_tokens: safeBudget } };
   }
+  // Anthropic requires a positive budget_tokens for `enabled`; the DeepSeek/GLM-style shape
+  // `{ type: "enabled" }` (or a 0 budget) would be a 400, so give it the model's default.
+  const budgetTokens =
+    thinkingType === "enabled" && !(Number(thinking.budget_tokens) > 0)
+      ? getDefaultThinkingBudget(model) || ADAPTIVE_DOWNGRADE_BUDGET
+      : thinking.budget_tokens;
   return {
     thinking: {
       type: thinkingType,
-      ...(thinking.budget_tokens && { budget_tokens: thinking.budget_tokens }),
+      ...(budgetTokens && { budget_tokens: budgetTokens }),
       ...(thinking.max_tokens && { max_tokens: thinking.max_tokens }),
     },
   };

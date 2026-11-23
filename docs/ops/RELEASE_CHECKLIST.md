@@ -420,8 +420,8 @@ grafted parent, so cut from a full clone or `git fetch --unshallow origin` first
 tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open
 `Release branch not green` issue
 on an existing release branch — a branch that does not exist reports `?` unknown, never
-green — the Mergify `release` queue is configured (G11: `queue_rules`, `checks_timeout`,
-label `queue`), the `release/*` ruleset still blocks deletion and force-push, and
+green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its
+`bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and
 `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow
 triggers and `if:` conditions turn true (and which stay gated by a repository variable or
 pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and
