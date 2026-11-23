@@ -110,6 +110,139 @@ const EXHAUSTION_MARKER_PATTERN =
 const CONTENT_EXHAUSTION_PATTERN =
   /\b(enough\s+credits?|not\s+enough\s+credits?|please\s+top\s+up|top\s+up\s+to\s+continue|purchase\s+(more\s+)?credits?|add\s+credits?\s+to\s+continue|credit\s+balance\s+(is\s+)?(too\s+low|exhausted|empty)|recharge\s+(your|the)\s+account|out\s+of\s+funds)\b/i;
 
+// Some upstreams (observed: Antigravity/Claude deprecation notices) return HTTP 200
+// with an assistant message telling the caller the model is no longer available.
+// Fail over with a non-retryable 410 model_unavailable failure so combos try siblings.
+const MODEL_UNAVAILABLE_CONTENT_PATTERN = /is no longer available\.\s*Please switch to/i;
+const MODEL_UNAVAILABLE_PEEK_CHAR_CAP = 512;
+
+function buildModelUnavailableFailure(text: string): StreamingUpstreamFailure {
+  const message = sanitizeErrorMessage(text).slice(0, 300);
+  return {
+    status: 410,
+    type: "model_unavailable",
+    code: "model_deprecated",
+    ...(message ? { message } : {}),
+    requestScoped: false,
+    retryable: false,
+  };
+}
+
+function extractTextFromParts(parts: unknown): string {
+  if (!Array.isArray(parts)) return "";
+  return parts
+    .map((part) => (isRecord(part) && typeof part.text === "string" ? part.text : ""))
+    .filter(Boolean)
+    .join(" ");
+}
+
+function extractNonStreamingAssistantText(json: Record<string, unknown>): string {
+  const choiceText = extractFirstChoiceText(json);
+  if (choiceText) return choiceText;
+
+  const choices = json.choices;
+  if (Array.isArray(choices) && choices.length > 0 && isRecord(choices[0])) {
+    const delta = isRecord(choices[0].delta) ? choices[0].delta : null;
+    if (typeof delta?.content === "string") return delta.content;
+    const deltaParts = extractTextFromParts(delta?.content);
+    if (deltaParts) return deltaParts;
+  }
+
+  if (typeof json.content === "string") return json.content;
+  const claudeParts = extractTextFromParts(json.content);
+  if (claudeParts) return claudeParts;
+
+  if (Array.isArray(json.output)) {
+    const outputTexts = json.output
+      .map((item) => (isRecord(item) ? extractTextFromParts(item.content) : ""))
+      .filter(Boolean);
+    if (outputTexts.length > 0) return outputTexts.join(" ");
+  }
+
+  const candidates = Array.isArray(json.candidates)
+    ? json.candidates
+    : isRecord(json.response) && Array.isArray(json.response.candidates)
+      ? json.response.candidates
+      : null;
+  if (candidates && candidates.length > 0 && isRecord(candidates[0])) {
+    const content = isRecord(candidates[0].content) ? candidates[0].content : null;
+    const geminiParts = extractTextFromParts(content?.parts);
+    if (geminiParts) return geminiParts;
+  }
+
+  return "";
+}
+
+function extractStreamingAssistantTextAndSignal(
+  parsed: Record<string, unknown>,
+  eventType: string
+): { text: string; nonTextSignal: boolean } {
+  if (Array.isArray(parsed.choices) && parsed.choices.length > 0 && isRecord(parsed.choices[0])) {
+    const delta = isRecord(parsed.choices[0].delta) ? parsed.choices[0].delta : null;
+    if (delta) {
+      const hasNonText =
+        (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) ||
+        Boolean(delta.function_call) ||
+        (typeof delta.reasoning_content === "string" && delta.reasoning_content.length > 0) ||
+        (typeof delta.reasoning === "string" && delta.reasoning.length > 0) ||
+        (typeof delta.refusal === "string" && delta.refusal.length > 0);
+      const text = typeof delta.content === "string" ? delta.content : "";
+      return { text, nonTextSignal: hasNonText };
+    }
+  }
+
+  if (eventType === "content_block_start") {
+    return { text: "", nonTextSignal: contentBlockStartIsRealSignal(parsed) };
+  }
+
+  if (eventType === "content_block_delta") {
+    const delta = asObject(parsed, "delta");
+    const deltaType = typeof delta?.type === "string" ? delta.type : "";
+    if (deltaType === "input_json_delta" || deltaType === "thinking_delta") {
+      return { text: "", nonTextSignal: true };
+    }
+    if (deltaType === "text_delta" && typeof delta?.text === "string") {
+      return { text: delta.text, nonTextSignal: false };
+    }
+  }
+
+  if (eventType === "response.output_text.delta" && typeof parsed.delta === "string") {
+    return { text: parsed.delta, nonTextSignal: false };
+  }
+  if (
+    eventType === "response.function_call_arguments.delta" ||
+    eventType === "response.reasoning_summary_text.delta" ||
+    (eventType === "response.output_item.added" &&
+      isRecord(parsed.item) &&
+      parsed.item.type !== "message")
+  ) {
+    return { text: "", nonTextSignal: true };
+  }
+
+  const candidates = Array.isArray(parsed.candidates)
+    ? parsed.candidates
+    : isRecord(parsed.response) && Array.isArray(parsed.response.candidates)
+      ? parsed.response.candidates
+      : null;
+  if (candidates && candidates.length > 0 && isRecord(candidates[0])) {
+    const content = isRecord(candidates[0].content) ? candidates[0].content : null;
+    const parts = Array.isArray(content?.parts) ? content.parts : [];
+    let text = "";
+    let nonTextSignal = false;
+    for (const part of parts) {
+      if (!isRecord(part)) continue;
+      if (part.functionCall || part.thought === true) {
+        nonTextSignal = true;
+      } else if (typeof part.text === "string" && part.text.length > 0) {
+        text += part.text;
+      }
+    }
+    return { text, nonTextSignal };
+  }
+
+  return { text: "", nonTextSignal: false };
+}
+
 /**
  * Collect the small set of top-level "error envelope" strings a 200 response may
  * carry alongside (or instead of) a normal completion: the OpenAI-shape `error`
@@ -477,6 +610,9 @@ export async function validateResponseQuality(
     let upstreamFailure: StreamingUpstreamFailure | null = null;
     let sawTerminator = false;
     let transportReplayBoundary = false;
+    let deprecationTextBuffer = "";
+    let deprecationCheckDone = false;
+    let sawContentSignal = false;
     // Set when the streaming peek loop hits an "outcome === content" verdict
     // (a content_block_* event observed). Guards the catch-block failover
     // check below so a stream that already produced content before an error
@@ -569,14 +705,47 @@ export async function validateResponseQuality(
 
         if (isTerminalUsageOnlyChunk(parsed, eventType)) sawTerminator = true;
 
-        if (isKnownNonClaudeStreamPayload(parsed, eventType)) {
+        const { text: assistantText, nonTextSignal } = extractStreamingAssistantTextAndSignal(
+          parsed,
+          eventType
+        );
+        const knownNonClaude = isKnownNonClaudeStreamPayload(parsed, eventType);
+        const claudeRealContent = applySseLifecycleEvent(eventType, parsed, sse);
+        if (sse.hasLifecycleEnd) sawTerminator = true;
+
+        if (nonTextSignal) {
+          sawContentSignal = true;
+          deprecationCheckDone = true;
           return "content";
         }
 
-        if (applySseLifecycleEvent(eventType, parsed, sse)) {
+        if (assistantText) {
+          sawContentSignal = true;
+          if (!deprecationCheckDone) {
+            const remaining = MODEL_UNAVAILABLE_PEEK_CHAR_CAP - deprecationTextBuffer.length;
+            if (remaining > 0) {
+              deprecationTextBuffer += assistantText.slice(0, remaining);
+            }
+            if (MODEL_UNAVAILABLE_CONTENT_PATTERN.test(deprecationTextBuffer)) {
+              upstreamFailure = buildModelUnavailableFailure(deprecationTextBuffer);
+              return "error";
+            }
+            if (deprecationTextBuffer.length >= MODEL_UNAVAILABLE_PEEK_CHAR_CAP) {
+              deprecationCheckDone = true;
+              return "content";
+            }
+          } else {
+            return "content";
+          }
+        } else if (knownNonClaude || claudeRealContent) {
+          sawContentSignal = true;
+          deprecationCheckDone = true;
           return "content";
         }
-        if (sse.hasLifecycleEnd) sawTerminator = true;
+      }
+      if (sawContentSignal && sawTerminator) {
+        deprecationCheckDone = true;
+        return "content";
       }
       return null;
     }
@@ -678,6 +847,10 @@ export async function validateResponseQuality(
               reason,
               ...(upstreamFailure ? { upstreamFailure } : {}),
             };
+          }
+
+          if (sawContentSignal) {
+            return { valid: true, clonedResponse: buildReplayResponse(reader) };
           }
 
           if (sse.hasMessageStart && sse.hasLifecycleEnd && !sse.hasRealContent) {
@@ -995,6 +1168,16 @@ export async function validateResponseQuality(
       return {
         valid: false,
         reason: `upstream exhaustion marker in assistant content: ${snippet}`,
+      };
+    }
+  }
+  {
+    const assistantText = extractNonStreamingAssistantText(json);
+    if (assistantText && MODEL_UNAVAILABLE_CONTENT_PATTERN.test(assistantText)) {
+      return {
+        valid: false,
+        reason: "upstream model unavailable in 200 body",
+        upstreamFailure: buildModelUnavailableFailure(assistantText),
       };
     }
   }

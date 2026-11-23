@@ -66,6 +66,86 @@ import {
   isQuotaRefusalMarked,
 } from "../../../src/domain/quotaCache.ts";
 
+export type SyncedAvailableModelEntry =
+  | string
+  | { id?: unknown; name?: unknown; model?: unknown };
+
+export type SyncedAvailableModelsReader = (
+  providerId: string
+) => Promise<Record<string, SyncedAvailableModelEntry[]> | null | undefined>;
+
+let syncedAvailableModelsReader: SyncedAvailableModelsReader | null = null;
+
+export function registerSyncedAvailableModelsReader(
+  reader: SyncedAvailableModelsReader | null
+): void {
+  syncedAvailableModelsReader = reader;
+}
+
+function normalizeSyncedModelId(modelId: string): string {
+  let normalized = modelId.trim().toLowerCase();
+  if (!normalized) return "";
+  if (normalized.endsWith("[1m]")) {
+    normalized = normalized.slice(0, -4).trim();
+  }
+  const slashIdx = normalized.indexOf("/");
+  if (slashIdx !== -1) {
+    normalized = normalized.slice(slashIdx + 1).trim();
+  }
+  return normalized;
+}
+
+function extractSyncedModelSet(entries: unknown): Set<string> | null {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  const set = new Set<string>();
+  for (const entry of entries) {
+    const raw =
+      typeof entry === "string"
+        ? entry
+        : isRecord(entry)
+          ? typeof entry.id === "string"
+            ? entry.id
+            : typeof entry.name === "string"
+              ? entry.name
+              : typeof entry.model === "string"
+                ? entry.model
+                : ""
+          : "";
+    const normalized = normalizeSyncedModelId(raw);
+    if (normalized) set.add(normalized);
+  }
+  return set.size > 0 ? set : null;
+}
+
+async function loadSyncedModelsByConnectionForProvider(
+  provider: string,
+  cache: Map<string, Map<string, Set<string>>>
+): Promise<Map<string, Set<string>>> {
+  const cached = cache.get(provider);
+  if (cached) return cached;
+
+  const result = new Map<string, Set<string>>();
+  cache.set(provider, result);
+
+  if (!syncedAvailableModelsReader) return result;
+
+  const providerKeys = provider === "agy" ? ["agy", "antigravity"] : [provider];
+  for (const key of providerKeys) {
+    try {
+      const byConn = await syncedAvailableModelsReader(key);
+      if (!byConn || typeof byConn !== "object") continue;
+      for (const [connId, entries] of Object.entries(byConn)) {
+        if (result.has(connId)) continue;
+        const modelSet = extractSyncedModelSet(entries);
+        if (modelSet) result.set(connId, modelSet);
+      }
+    } catch {
+      // Fail open if synced model inventory cannot be read.
+    }
+  }
+  return result;
+}
+
 /**
  * How long a stored quota snapshot stays good enough to be counted as confident
  * headroom by the quota-weighted A pool.
@@ -199,6 +279,7 @@ export async function expandTargetsByQuotaAwareConnections(
 }> {
   const connectionCache = new Map<string, Array<Record<string, unknown>>>();
   const connectionLoadPromises = new Map<string, Promise<Array<Record<string, unknown>>>>();
+  const syncedModelsCache = new Map<string, Map<string, Set<string>>>();
   const connectionById = new Map<string, Record<string, unknown>>();
   const expandedTargets: ResolvedComboTarget[] = [];
   const exclusions: PreDispatchExclusion[] = [];
@@ -240,10 +321,38 @@ export async function expandTargetsByQuotaAwareConnections(
     }
 
     const poolIds = new Set(connections.map((connection) => connection.id));
+    const targetProvider = getResetAwareProvider(target);
+    const rawProvider = (target.providerId || target.provider || "").toLowerCase();
+    const syncedProviderKey =
+      rawProvider === "agy"
+        ? "agy"
+        : targetProvider === "antigravity" || targetProvider === "agy"
+          ? targetProvider
+          : rawProvider === "antigravity"
+            ? "antigravity"
+            : null;
+    const syncedByConn = syncedProviderKey
+      ? await loadSyncedModelsByConnectionForProvider(syncedProviderKey, syncedModelsCache)
+      : null;
+    const requestedModel = syncedByConn
+      ? normalizeSyncedModelId(parseModel(target.modelStr).model || target.modelStr || "")
+      : "";
+    const anyPoolConnectionAdvertisesModel = Boolean(
+      syncedByConn &&
+      requestedModel &&
+      connectionIds.some((id) => poolIds.has(id) && syncedByConn.get(id)?.has(requestedModel))
+    );
+
     for (const connectionId of connectionIds) {
       const provider = getResetAwareProvider(target);
       const connection = connectionById.get(connectionId);
       if (provider && getQuotaFetcher(provider) && !poolIds.has(connectionId)) continue;
+      if (anyPoolConnectionAdvertisesModel && syncedByConn && requestedModel) {
+        const advertised = syncedByConn.get(connectionId);
+        if (advertised && advertised.size > 0 && !advertised.has(requestedModel)) {
+          continue;
+        }
+      }
       const quotaExhausted = Boolean(
         provider &&
         isQuotaExhaustedForRequest(
