@@ -24,6 +24,7 @@
  */
 
 import { createLogger } from "@/shared/utils/logger";
+import { normalizeHeaders } from "@omniroute/open-sse/utils/headers";
 import { boundedMap } from "./boundedMap";
 import { updateAccountBuckets, type ClaudeUsageResult } from "./accountBuckets";
 import type { QuotaUnit, QuotaWindow } from "./dimensions";
@@ -176,18 +177,22 @@ function pickTokenTriple(
 
 /**
  * Store rate-limit headers from an upstream response for saturation signal use.
- * Called by the response handler after a successful request.
+ * Called by the response handler for every upstream response, including error
+ * responses such as a 429.
  *
  * Captures two independent signals, both keyed `${provider}:${connectionId}`:
  *   - REQUEST headers (per-minute RPM burst) — legacy, anthropic fallback.
  *   - TOKEN headers (per-window TPM) — universal proactive saturation; present
  *     on EVERY response, so we can throttle before the 429.
+ *
+ * Accepts the `Headers` of a `fetch` response or a plain object; names are compared in lower case.
  */
 export function storeRateLimitHeaders(
   connectionId: string,
   provider: string,
-  headers: Record<string, string>
+  rawHeaders: Headers | Record<string, string>
 ): void {
+  const headers = normalizeHeaders(rawHeaders);
   const key = `${provider}:${connectionId}`;
 
   // ── REQUEST headers (legacy path, unchanged) ──────────────────────────────
