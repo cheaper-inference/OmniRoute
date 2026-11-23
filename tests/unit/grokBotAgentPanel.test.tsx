@@ -2,7 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import GrokBotAgentPanel from "../GrokBotAgentPanel";
+import GrokBotAgentPanel from "@/app/(dashboard)/dashboard/providers/[id]/components/GrokBotAgentPanel";
 
 describe("Grok Bot durable agent panel", () => {
   let container: HTMLDivElement | null = null;
