@@ -77,7 +77,8 @@ export async function openGeminiContext(
   }
   if (bridge) {
     context.on("close", () => {
-      void bridge.close();
+      // Nobody awaits this: an unhandled rejection here would surface as a process-level error.
+      void bridge.close().catch(() => undefined);
     });
   }
   return { context, bridge };
