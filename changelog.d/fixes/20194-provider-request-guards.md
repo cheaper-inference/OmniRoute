@@ -1,0 +1,1 @@
+- **fix(sse):** stop probe key-health writes on non-streaming calls and cap ModelScope retry waits. ([#20194](https://github.com/cheaper-inference/OmniRoute/pull/20194))

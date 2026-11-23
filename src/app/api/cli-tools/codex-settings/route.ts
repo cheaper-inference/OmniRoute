@@ -58,6 +58,18 @@ const migrateFeatureFlags = (doc: TomlDoc) =>
     _sections: doc as Record<string, Record<string, unknown>>,
   });
 
+// A root openai_base_url is OmniRoute's only when it equals the base_url OmniRoute wrote into
+// [model_providers.omniroute] (or is about to write). Any other value is the user's own route.
+const trimUrl = (url: unknown) => (typeof url === "string" ? url.trim().replace(/\/+$/, "") : null);
+const deleteOwnedRootUrl = (doc: TomlDoc, ...ownedUrls: string[]) => {
+  const current = trimUrl(doc.openai_base_url);
+  const providers = asRecord(doc.model_providers);
+  const owned = [asRecord(providers.omniroute).base_url, ...ownedUrls];
+  if (current !== null && owned.some((url) => trimUrl(url) === current)) {
+    delete doc.openai_base_url;
+  }
+};
+
 // Read current config.toml
 const readConfig = async () => {
   try {
@@ -198,6 +210,9 @@ export async function POST(request: Request) {
     const effectiveWireApi = wireApi ?? "responses";
     const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
 
+    // Read the previous OmniRoute URL before the provider section is replaced below.
+    deleteOwnedRootUrl(doc, normalizedBaseUrl);
+
     // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
     doc.model_provider = "omniroute";
     doc.model_providers = {
@@ -209,7 +224,6 @@ export async function POST(request: Request) {
         env_key: "OPENAI_API_KEY",
       },
     };
-    delete doc.openai_base_url;
 
     // Process model aliases into notice.model_migrations
     const notice = asRecord(doc.notice);
@@ -296,7 +310,7 @@ export async function DELETE(request: Request) {
     migrateFeatureFlags(doc);
 
     // Remove OmniRoute related root fields
-    delete doc.openai_base_url;
+    deleteOwnedRootUrl(doc);
 
     if (doc.model_provider === "omniroute") {
       delete doc.model;

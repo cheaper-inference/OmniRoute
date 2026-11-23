@@ -16,6 +16,7 @@ import {
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { sleep } from "../../utils/sleep.ts";
+import { MAX_CALLER_POLL_TIMEOUT_MS } from "../../utils/pollBounds.ts";
 import {
   MAX_CONSECUTIVE_POLL_RETRIES,
   computePollRetryDelayMs,
@@ -511,8 +512,18 @@ async function runVideoJobGeneration({
   }
 
   // Poll loop.
-  const maxPolls = maxPollsOverride ?? preset.maxPolls;
   const pollInterval = pollIntervalOverride ?? preset.pollIntervalMs;
+  // A preset has no deadline: its window is maxPolls x interval. Caller overrides of either
+  // may not stretch it past the larger of the preset's own window and the caller ceiling
+  // (CodeQL #1389); with no override this leaves the preset's maxPolls unchanged.
+  const windowCeilingMs = Math.max(
+    preset.maxPolls * preset.pollIntervalMs,
+    MAX_CALLER_POLL_TIMEOUT_MS
+  );
+  const maxPolls = Math.min(
+    maxPollsOverride ?? preset.maxPolls,
+    Math.max(1, Math.floor(windowCeilingMs / pollInterval))
+  );
 
   let consecutiveRetries = 0;
   let nextDelay = pollInterval;

@@ -75,10 +75,11 @@ test("#15534: plaintext codex reasoning becomes an UNSIGNED thinking block (drop
     (e) => e?.type === "content_block_start" && e?.content_block?.type === "thinking"
   );
   assert.ok(thinkingStarts.length > 0, "plaintext reasoning opens a thinking block");
+  // The empty key keeps strict Claude clients parsing; it is not a signature.
   assert.equal(
     thinkingStarts[0].content_block.signature,
-    undefined,
-    "the thinking block must be unsigned — OmniRoute never mints a signature for codex reasoning"
+    "",
+    "the thinking block must carry an empty signature key — OmniRoute never mints a signature for codex reasoning"
   );
 });
 
