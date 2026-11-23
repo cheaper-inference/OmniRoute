@@ -362,23 +362,33 @@ RTK supports **3 intensity levels** that trade off between **compression aggress
 
 ### The 3 Levels
 
-| Level                | Truncation threshold | Token savings | Risk     | Best for                         |
-| -------------------- | -------------------- | ------------- | -------- | -------------------------------- |
-| `minimal`            | 24 lines per section | ~20-40%       | Very low | Production with critical context |
-| `standard` (default) | 24 lines per section | ~50-70%       | Low      | Daily coding sessions            |
-| `aggressive`         | 16 lines per section | ~70-90%       | Medium   | Long sessions, max savings       |
+| Level                | Line budget (`maxLinesPerResult` x) | Head / tail kept | Token savings | Risk     | Best for                         |
+| -------------------- | ----------------------------------- | ---------------- | ------------- | -------- | -------------------------------- |
+| `minimal`            | x1.5 (180 lines at the default 120) | 24 / 24          | ~20-40%       | Very low | Production with critical context |
+| `standard` (default) | x1 (120 lines)                      | 24 / 24          | ~50-70%       | Low      | Daily coding sessions            |
+| `aggressive`         | x0.5 (60 lines)                     | 16 / 16          | ~70-90%       | Medium   | Long sessions, max savings       |
+
+Intensity only scales the **line/char budget**. It is not a safety switch: every filter stage
+runs at every level, so `minimal` still drops the lines a filter's `dropPatterns` match and still
+applies its `includePatterns`.
 
 ### Where the Truncation Happens
 
-The truncation threshold affects `lineFilter.ts`:
+The budget is computed in `open-sse/services/compression/engines/rtk/index.ts:573`
+(`effectiveMaxLines`), scaled onto `maxLinesPerResult` / `maxCharsPerResult` at the call site
+(`index.ts:369-374`), and enforced by `smartTruncate()` (`engines/rtk/smartTruncate.ts`):
 
 ```ts
-// From open-sse/services/compression/engines/rtk/index.ts:329-330
-config.intensity === "aggressive" ? 16 : 24,
-config.intensity === "aggressive" ? 16 : 24,
+// index.ts:372-374
+maxLines: effectiveMaxLines(config.maxLinesPerResult, config.intensity),
+maxChars: config.maxCharsPerResult,
+preserveHead: config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Both the **head** and **tail** of each section are preserved; middle content is dropped when truncation kicks in.
+Both the **head** and **tail** of each section are preserved; middle content is dropped when
+truncation kicks in. Severity lines and lines matching a filter's `preserve.*Patterns` are kept
+outside those slices, and the `[rtk:truncated N lines]` marker is recounted after the char pass,
+so the number in the text always matches what is missing.
 
 ### What Stays vs. What Gets Cut
 
@@ -391,6 +401,31 @@ Both the **head** and **tail** of each section are preserved; middle content is 
 | Routine output (info logs) | 🟡 collapsed | 🟡 collapsed | ❌ dropped   |
 | Progress bars              | 🟡 collapsed | ❌ dropped   | ❌ dropped   |
 | Banner / ASCII art         | 🟡 collapsed | ❌ dropped   | ❌ dropped   |
+
+### Guarantees of the line stages
+
+- **Outcome lines survive.** An exit-status line (`exit code 0` / `exit code 1`), an uppercase
+  status token such as the ones scripts print on a passing check, and
+  the pipeline's own `[rtk:...]` / `[dedup:...]` / `[ccr:...]` / `[COMPRESSED:...]` markers are
+  exempt from `dropPatterns`, always kept by `includePatterns`, and never collapsed
+  (`severityVocabulary.ts:isOutcomeLine`, called from `lineFilter.ts`). Verbose per-test lines
+  (a per-test line ending in `ok`, or a `PASS` line naming a test file) are still droppable: that
+  is what the jest/cargo include
+  lists are for.
+- **A filter can only delete lines when its command is confirmed.** Filter selection also falls
+  back to the filter's own `match.patterns`, and one content hit is confidence `0.25`. The
+  line-deleting stages (`includePatterns` / `dropPatterns` / `collapsePatterns`) therefore require
+  detector confidence `>= 0.5` or the filter's own `commands` pattern matching the detected
+  command (`index.ts:258`, `filterLoader.ts:filterMatchesCommand`). On weaker evidence the filter
+  still contributes its preserve/priority patterns, it just cannot delete anything.
+- **Multi-file results are elided per file.** A tool result that concatenates several files
+  (`--- path ---`, `=== path ===`, `<file path=...>`) is split into segments and each one keeps
+  its own header plus a slice of its own content, each with its own drop count
+  (`smartTruncate.ts:splitFileSegments`). Fewer than two headers means no split, so a single-file
+  read is never reshaped.
+- **A non-shell read is not capped on one content-detector hit.** For `read`/`glob`/`grep` style
+  tools a classification needs two aligned content patterns before the generic line/char cap
+  applies (`index.ts:isDocumentLikeRead`).
 
 ### Choosing the Right Intensity
 
@@ -601,7 +636,7 @@ To validate all installed filters, call `runRtkFilterTests()` which is exported 
 1. **Always include `tests[]`** — they prove your filter works and prevent regressions
 2. **Use `matchOutput` for short-circuits** — if a single line tells the story, replace the whole block
 3. **Prefer `keep` over `strip`** — explicit "always preserve" rules are safer than "always remove"
-4. **Test at all 3 intensity levels** — `minimal` should be a no-op, `aggressive` should still preserve errors
+4. **Test at all 3 intensity levels** — `minimal` only widens the line budget, so a filter that deletes too much is equally visible there; `aggressive` should still preserve errors
 5. **Use the `unless` field** — guard short-circuits with "don't trigger if X is present"
 
 ---
@@ -695,11 +730,11 @@ if (!result.passed) {
 
 1. Every filter loads and passes schema validation
 2. Every `tests[]` entry produces expected output
-3. `minimal` intensity is a no-op (preserves original, only applies structural filters)
+3. `minimal` intensity widens the line budget (x1.5) but still applies every filter stage
 4. `aggressive` intensity preserves errors, test failures, and stack traces
 5. Compressed output is never larger than original input
 
-- Source: `open-sse/services/compression/engines/rtk/` (63 files, ~70KB)
+- Source: `open-sse/services/compression/engines/rtk/` (engine modules plus `filters/`)
 
 - **Before merging a filter change** — always ensure tests pass
 - **After upgrading RTK engine** — schema may have changed
@@ -713,4 +748,4 @@ if (!result.passed) {
 - [COMPRESSION_GUIDE.md](./COMPRESSION_GUIDE.md) — Full compression pipeline overview
 - [COMPRESSION_ENGINES.md](./COMPRESSION_ENGINES.md) — Engine registry and built-in engines
 - [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md) — Custom engines, language packs, stacked pipelines
-- Source: `open-sse/services/compression/engines/rtk/` (63 files, ~70KB)
+- Source: `open-sse/services/compression/engines/rtk/` (engine modules plus `filters/`)

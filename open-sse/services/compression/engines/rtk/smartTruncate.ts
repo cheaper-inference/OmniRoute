@@ -6,14 +6,44 @@ export interface SmartTruncateOptions {
   priorityPatterns?: RegExp[];
 }
 
+/**
+ * Per-file headers emitted when one tool result concatenates several files (Gemini CLI
+ * `read_many_files`, MCP `read_multiple_files`) or by our own concatenators: `--- path ---`,
+ * `=== path ===`, `<file path="…">`. A bare `---` (frontmatter, markdown rule) deliberately does
+ * NOT match, and a single header is never enough to split — a normal single-file read must never
+ * be reshaped by this path.
+ */
+const FILE_HEADER_RE =
+  /^(?:-{3}[ \t]+\S.*?[ \t]*-{3}|={3}[ \t]+\S.*?[ \t]*={3}|<file[ \t][^>]*>)[ \t]*$/;
+
+/** Split a concatenated multi-file result into segments; `null` when it is not one. */
+export function splitFileSegments(text: string): string[][] | null {
+  const lines = text.split(/\r?\n/);
+  const starts: number[] = [];
+  for (let index = 0; index < lines.length; index++) {
+    if (FILE_HEADER_RE.test(lines[index].trim())) starts.push(index);
+  }
+  if (starts.length < 2) return null;
+  const segments: string[][] = [];
+  if (starts[0] > 0) segments.push(lines.slice(0, starts[0]));
+  for (let index = 0; index < starts.length; index++) {
+    segments.push(lines.slice(starts[index], starts[index + 1] ?? lines.length));
+  }
+  return segments;
+}
+
 export function smartTruncate(
   text: string,
   options: SmartTruncateOptions = {}
-): {
-  text: string;
-  truncated: boolean;
-  droppedLines: number;
-} {
+): { text: string; truncated: boolean; droppedLines: number } {
+  return truncate(text, options, true);
+}
+
+function truncate(
+  text: string,
+  options: SmartTruncateOptions,
+  allowSplit: boolean
+): { text: string; truncated: boolean; droppedLines: number } {
   const maxChars = Math.max(0, Math.floor(options.maxChars ?? 0));
   const maxLines = Math.max(0, Math.floor(options.maxLines ?? 0));
   const lines = text.split(/\r?\n/);
@@ -32,29 +62,55 @@ export function smartTruncate(
     const hits = lines.filter((line) => pattern.test(line)).length;
     return hits > 0 && hits * 2 <= lines.length;
   });
-  const priorityLines = lines.filter((line) =>
-    priorityPatterns.some((pattern) => pattern.test(line))
-  );
-
-  const head = lines.slice(0, preserveHead);
-  const tail = preserveTail > 0 ? lines.slice(-preserveTail) : [];
-  const selected = [...head];
-  for (const line of priorityLines) {
-    if (!selected.includes(line)) selected.push(line);
-  }
-  const tailStart = lines.length - tail.length;
-  tail.forEach((line, offset) => {
-    const originalIndex = tailStart + offset;
-    if (originalIndex >= preserveHead && !selected.includes(line)) selected.push(line);
-  });
 
   const sourceLineCount = lines.length;
-  let droppedLines = Math.max(0, sourceLineCount - selected.length);
-  let result = [
-    ...selected.slice(0, head.length),
-    `[rtk:truncated ${droppedLines} lines]`,
-    ...selected.slice(head.length),
-  ].join("\n");
+  let droppedLines = 0;
+  let result: string;
+
+  // Multi-file results are elided PER FILE. Truncating the concatenation as one blob keeps the
+  // head and tail of the whole thing, which is the first file and the last file — every file in
+  // between disappears without even its header surviving, so the reader cannot tell it was there.
+  const segments = overLineLimit && allowSplit ? splitFileSegments(text) : null;
+  if (segments) {
+    const budget = Math.max(3, Math.floor(maxLines / segments.length));
+    const keep = Math.max(1, Math.floor(budget / 3));
+    const parts = segments.map((segment) =>
+      truncate(
+        segment.join("\n"),
+        {
+          maxLines: budget,
+          preserveHead: keep,
+          preserveTail: keep,
+          priorityPatterns: options.priorityPatterns,
+        },
+        false
+      )
+    );
+    result = parts.map((part) => part.text).join("\n");
+    droppedLines = parts.reduce((sum, part) => sum + part.droppedLines, 0);
+  } else {
+    const head = lines.slice(0, preserveHead);
+    const tail = preserveTail > 0 ? lines.slice(-preserveTail) : [];
+    const selected = [...head];
+    const priorityLines = lines.filter((line) =>
+      priorityPatterns.some((pattern) => pattern.test(line))
+    );
+    for (const line of priorityLines) {
+      if (!selected.includes(line)) selected.push(line);
+    }
+    const tailStart = lines.length - tail.length;
+    tail.forEach((line, offset) => {
+      const originalIndex = tailStart + offset;
+      if (originalIndex >= preserveHead && !selected.includes(line)) selected.push(line);
+    });
+
+    droppedLines = Math.max(0, sourceLineCount - selected.length);
+    result = [
+      ...selected.slice(0, head.length),
+      `[rtk:truncated ${droppedLines} lines]`,
+      ...selected.slice(head.length),
+    ].join("\n");
+  }
 
   if (maxChars > 0 && result.length > maxChars) {
     const marker = "\n[rtk:truncated by chars]\n";
@@ -117,6 +173,10 @@ export function smartTruncate(
     // Report what the caller actually lost, markers excluded.
     const kept = result.split(/\r?\n/).filter((line) => !line.startsWith("[rtk:")).length;
     droppedLines = Math.max(0, sourceLineCount - kept);
+    // The line-pass marker above was rendered BEFORE this pass ran, so it still states the
+    // pre-char count — `[rtk:truncated 0 lines]` next to a text that lost five. Rewrite it with
+    // the recount, so the number in the text always matches what is missing.
+    result = result.replace(/\[rtk:truncated \d+ lines\]/, `[rtk:truncated ${droppedLines} lines]`);
   }
 
   return { text: result, truncated: true, droppedLines };

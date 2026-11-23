@@ -102,3 +102,65 @@ export function severityWordPattern(): RegExp {
 export function severityPatternStrings(): string[] {
   return [...SEVERITY_WORDS];
 }
+
+/**
+ * Words that state an OUTCOME rather than a diagnostic. They are short, unique per run, and
+ * carry the only evidence that work SUCCEEDED — the same "is this run green?" question the
+ * severity vocabulary answers for failures.
+ *
+ * They were missing from every list, so the include-only keep stage deleted them the moment an
+ * unrelated line matched an include pattern (`VET_OK` / `TEST_EXIT=0` next to one `warning:` line
+ * came out as just the warning), and the strip/collapse stages deleted them outright. This list
+ * is ADDITIVE only: no stage drops more lines because it exists.
+ */
+export const STATUS_MARKER_WORDS = [
+  "success",
+  "succeeded",
+  "no errors",
+  "0 errors",
+  "0 failures",
+  "0 failed",
+] as const;
+
+/**
+ * Lines that carry a run's OUTCOME, or a marker this pipeline already emitted: the status
+ * vocabulary above, an explicit `exit code 0`, a bare ALL-CAPS status token (`VET_OK`, `PASS`,
+ * `SUCCESS`, `TEST_EXIT=0`), our own `[rtk:…]` / `[dedup:…]` / `[ccr:…]` / `[COMPRESSED:…]`
+ * markers, and the elision markers produced by the truncation stages.
+ *
+ * Deliberately NOT the words `pass` / `passed` / `ok` on their own: a verbose test log prints one
+ * of those per case (`test a ... ok`, `PASS src/a.test.ts`) and dropping those is exactly what the
+ * jest/cargo include lists are for (docs: "test passes (verbose) → collapsed"). The outcome a run
+ * must never lose is the standalone summary line, which the ALL-CAPS rule below catches.
+ *
+ * `\b` is wrong here: `_` is a word character, so `\bok\b` never matches `VET_OK`. Boundaries
+ * exclude letters and digits only, which still keeps `ok` out of `look`.
+ */
+function statusWordsPattern(): RegExp {
+  return new RegExp(
+    `(?<![A-Za-z0-9])(?:${STATUS_MARKER_WORDS.join("|")})(?![A-Za-z0-9])` +
+      `|(?<![A-Za-z0-9])exit(?:ed)?\\s*(?:code)?\\s*[:=]?\\s*0(?![A-Za-z0-9])` +
+      `|^\\s*\\[(?:rtk|dedup|ccr|compressed)(?![A-Za-z0-9])` +
+      `|(?<![A-Za-z0-9])(?:elided|omitted|truncated)(?![A-Za-z0-9])` +
+      `|\\[\\s*\\.\\.\\.`,
+    "i"
+  );
+}
+
+const STATUS_WORDS_RE = statusWordsPattern();
+/** `VET_OK`, `PASS`, `SUCCESS`, `TEST_EXIT=0`, `STATUS: ok` — a standalone status token line. */
+const OUTCOME_TOKEN_RE = /^[ \t]*[A-Z][A-Z0-9_]*[ \t]*(?:[=:][ \t]*\S+)?[ \t]*$/;
+
+/** Case-insensitive half of {@link isOutcomeLine}. */
+export function statusMarkerPattern(): RegExp {
+  return STATUS_WORDS_RE;
+}
+
+/**
+ * True when a line states an outcome or is a marker this pipeline emitted. Every line-dropping
+ * stage in `lineFilter.ts` consults it, so a green run cannot be emptied by its own filter.
+ * Additive by construction: no stage drops MORE lines because this returns true.
+ */
+export function isOutcomeLine(line: string): boolean {
+  return OUTCOME_TOKEN_RE.test(line) || STATUS_WORDS_RE.test(line);
+}

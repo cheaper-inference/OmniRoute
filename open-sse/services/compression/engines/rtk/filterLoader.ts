@@ -300,6 +300,20 @@ export function getRtkFilterCatalog(): Array<
   }));
 }
 
+/**
+ * True when the filter's own `commandPatterns` match the detected command. Used by the engine to
+ * decide whether a destructive stage is confirmed: some filters (e.g. `gh`) have no detector entry
+ * in `commandDetector.ts`, so their `detection.confidence` stays at the "command present" 0.35 even
+ * though their command pattern is an exact match.
+ */
+export function filterMatchesCommand(
+  filter: RtkFilterDefinition,
+  command: string | null | undefined
+): boolean {
+  if (!command) return false;
+  return filter.commandPatterns.some((pattern) => cachedMatchPattern(pattern, command));
+}
+
 export function matchRtkFilter(
   text: string,
   command?: string | null,
