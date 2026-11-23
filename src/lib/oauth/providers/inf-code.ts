@@ -13,10 +13,16 @@ import { INF_CODE_CONFIG } from "../constants/oauth";
  * body `{ code }` to {base}/acode/v1/login_by_authcode and receives
  * `{ access_token, refresh_token }` in response. Userinfo is
  * `GET {base}/acode/v1/userinfo` with the bearer token.
+ *
+ * No PKCE. The extension's own client (v2.8.0 and v2.9.1) builds the login URL
+ * with only loginType/type/redirect/scope/state/client_id and redeems the code
+ * with a bare `{ code }` JSON body — no code_challenge or code_verifier. The
+ * flow is a plain authorization_code grant; sending a challenge/verifier would
+ * assume upstream behavior the reference client does not use.
  */
 export const infCode = {
   config: INF_CODE_CONFIG,
-  flowType: "authorization_code_pkce" as const,
+  flowType: "authorization_code" as const,
   fixedPort: INF_CODE_CONFIG.loopbackPort,
   callbackPath: INF_CODE_CONFIG.callbackPath,
   callbackHost: INF_CODE_CONFIG.callbackHost,

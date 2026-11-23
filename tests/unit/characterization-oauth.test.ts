@@ -146,7 +146,7 @@ test("OAuth provider registry: ids and flow types", () => {
     "grok-cli": "device_code",
     "xai-oauth": "authorization_code_pkce",
     openference: "authorization_code_pkce",
-    "inf-code": "authorization_code_pkce",
+    "inf-code": "authorization_code",
     renderhour: "authorization_code_pkce",
     "codebuddy-cn": "device_code",
     freebuff: "device_code",

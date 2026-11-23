@@ -5,7 +5,9 @@ import { generateAuthData, getProvider } from "../../src/lib/oauth/providers.ts"
 test("inf-code is registered in the browser OAuth provider registry", () => {
   const provider = getProvider("inf-code");
   assert.ok(provider, "inf-code must be in the OAuth PROVIDERS map");
-  assert.equal(provider.flowType, "authorization_code_pkce");
+  // Upstream redeems the code with a bare JSON { code } body and its login URL
+  // carries no challenge, so this is a plain authorization_code grant (no PKCE).
+  assert.equal(provider.flowType, "authorization_code");
   assert.equal(provider.fixedPort, 56124);
   assert.equal(provider.callbackPath, "/callback");
 });
@@ -22,9 +24,13 @@ test("inf-code builds the Token Infinity authorize URL with verified params", ()
   assert.equal(url.searchParams.get("client_id"), "infcode");
   assert.equal(url.searchParams.get("redirect"), "http://localhost:56124/callback");
   assert.ok(url.searchParams.get("state"), "state param must be present");
+  // The reference client (Tokfinity.infcode v2.8.0/v2.9.1) sends no PKCE params;
+  // adding one would assume upstream behavior it does not exercise.
+  assert.equal(url.searchParams.get("code_challenge"), null);
+  assert.equal(url.searchParams.get("code_challenge_method"), null);
 });
 
-test("inf-code exchangeToken POSTs a JSON body { code }", async () => {
+test("inf-code exchangeToken POSTs a JSON body { code } and drops a PKCE verifier", async () => {
   let capturedBody: string | null = null;
   let capturedHeaders: Record<string, string> = {};
   const originalFetch = globalThis.fetch;
@@ -39,7 +45,14 @@ test("inf-code exchangeToken POSTs a JSON body { code }", async () => {
   }) as typeof fetch;
   try {
     const provider = getProvider("inf-code");
-    const tokens = await provider.exchangeToken(provider.config, "auth-code-abc");
+    // Callers may still pass a verifier (the modal always mints one); upstream
+    // has no such parameter, so it must not reach the token request.
+    const tokens = await provider.exchangeToken(
+      provider.config,
+      "auth-code-abc",
+      "http://localhost:56124/callback",
+      "verifier-must-be-ignored"
+    );
     assert.equal(tokens.access_token, "at-123");
     assert.equal(tokens.refresh_token, "rt-456");
     const body = JSON.parse(capturedBody as string);
