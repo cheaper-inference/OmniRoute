@@ -1006,8 +1006,8 @@ async function handleKieImageGeneration({
 }: KieImageOptions) {
   const startTime = Date.now();
   const token = credentials?.apiKey || credentials?.accessToken;
-  const timeoutMs = normalizePositiveNumber(body.timeout_ms, 300000);
-  const pollIntervalMs = normalizePositiveNumber(body.poll_interval_ms, 2500);
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
+  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 2500);
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
   const size = typeof body.size === "string" ? body.size : undefined;
 
